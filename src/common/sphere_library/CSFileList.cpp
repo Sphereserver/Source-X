@@ -12,7 +12,6 @@
 #include "CSFileList.h"
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../common.h"
 
 // Similar to the MFC CFileFind
 bool CSFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
@@ -31,7 +30,7 @@ bool CSFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword
 	if ( stat( pszFilePath, &fileStat) == -1 )
 #endif
 	{
-		DEBUG_ERR(( "Can't open input dir [%s]\n", pszFilePath ));
+		g_Log.EventError( "Can't open input directory for '%s' (error: '%s').\n", pszFilePath, strerror(errno) );
 		return false;
 	}
 
@@ -54,7 +53,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 	ADDTOCALLSTACK("CSFileList::ReadDir");
 	// NOTE: It seems NOT to like the trailing \ alone
 	tchar szFileDir[_MAX_PATH];
-	size_t len = strcpylen(szFileDir, pszFileDir);
+	size_t len = Str_CopyLen(szFileDir, pszFileDir);
 #ifdef _WIN32
 	if ( len > 0 )
 	{
@@ -72,7 +71,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 #else
 	char szFilename[_MAX_PATH];
 	// Need to strip out the *.scp part
-	for ( size_t i = len; i > 0; i-- )
+	for ( size_t i = len; i > 0; --i )
 	{
 		if ( szFileDir[i] == '/' )
 		{
@@ -89,7 +88,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 	{
 		if (bShowError == true)
 		{
-			DEBUG_ERR(("Unable to open directory %s\n", szFileDir));
+			g_Log.EventError("Unable to open directory '%s' (error: '%s').\n", szFileDir, strerror(errno));
 		}
 		return -1;
 	}
@@ -122,6 +121,6 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 
 	closedir(dirp);
 #endif
-	return (int)(GetCount());
+	return (int)(GetContentCount());
 }
 

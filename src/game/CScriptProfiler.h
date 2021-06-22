@@ -35,38 +35,15 @@ extern struct CScriptProfiler
     }		*TriggersHead, *TriggersTail;
 } g_profiler;
 
+
 //	Time measurement macros for the profiler (use them only for the profiler!)
-extern llong llTimeProfileFrequency;
+#define	TIME_PROFILE_INIT	    llong llTicksStart = 0, llTicksEnd = 0
 
-#define	TIME_PROFILE_INIT			llong llTicksStart = 0, llTicksEnd = 0
+#define	TIME_PROFILE_START	    llTicksStart = CSTime::GetPreciseSysTimeMilli();
+#define TIME_PROFILE_END	    llTicksEnd = CSTime::GetPreciseSysTimeMilli();
 
-#ifdef _WIN32
-	// From Windows documentation:
-	//	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
-	// Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
-	#define	TIME_PROFILE_START		\
-		LARGE_INTEGER liQPCStart;	\
-		if (!QueryPerformanceCounter(&liQPCStart))		{	\
-			llTicksStart = GetSupportedTickCount();		}	\
-		else											{	\
-			llTicksStart = liQPCStart.QuadPart;			}
-		
-	#define TIME_PROFILE_END		\
-		LARGE_INTEGER liQPCEnd;		\
-		if (!QueryPerformanceCounter(&liQPCEnd))		{	\
-			llTicksEnd = GetSupportedTickCount();		}	\
-		else											{	\
-			llTicksEnd = liQPCEnd.QuadPart;				}
-
-	#define TIME_PROFILE_GET_HI		((llTicksEnd - llTicksStart) / (llTimeProfileFrequency / 1000))
-	#define	TIME_PROFILE_GET_LO		((((llTicksEnd - llTicksStart) * 10000) / (llTimeProfileFrequency / 1000)) % 10000)
-#else
-	#define	TIME_PROFILE_START		llTicksStart = GetSupportedTickCount()
-	#define TIME_PROFILE_END		llTicksEnd = GetSupportedTickCount()
-
-	#define TIME_PROFILE_GET_HI		(llTicksEnd - llTicksStart)
-	#define	TIME_PROFILE_GET_LO		(((llTicksEnd - llTicksStart) * 10) % 10000)
-#endif
+#define TIME_PROFILE_GET_HI	    ((llTicksEnd - llTicksStart) / 1000)            // Get only the seconds
+#define	TIME_PROFILE_GET_LO	    (((llTicksEnd - llTicksStart) * 10) % 10000)    // Get milliseconds only, without the seconds part
 
 
 #endif //_INC_CSCRIPTPROFILER_H

@@ -443,6 +443,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_GARG_ENSLAVED			= 0x2F1,
 
 	CREID_LICH_PRIMEVAL			= 0x33e,
+	CREID_RISING_COLOSSUS		= 0x33d,
 	CREID_TURKEY_GIANT 			= 0x402,
 
 	// HS (High Seas) monsters

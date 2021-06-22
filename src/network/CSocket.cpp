@@ -1,8 +1,34 @@
 #include "CSocket.h"
-#include <cstring>
 #ifndef _WIN32
 	#include <errno.h>
 #endif
+#include "../common/sphere_library/sstring.h"
+#include "../common/CLog.h"
+
+void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
+{
+#ifdef _WIN32
+    UNREFERENCED_PARAMETER(count);
+    FD_SET(socket, &fds);
+#else
+    FD_SET(socket, &fds);
+    if (socket > count)
+        count = socket;
+#endif
+}
+
+void CheckReportNetAPIErr(int retval, lpctstr ptcOperation)
+{
+	if (retval == 0)
+		return;
+
+#if _DEBUG
+	g_Log.EventDebug("Socket operation: '%s' errored (code %d).\n", ptcOperation);
+	g_Log.EventDebug("Errno: %d. Error string: '%s'.\n", (int)errno, strerror(errno));
+#else
+	UNREFERENCED_PARAMETER(ptcOperation);
+#endif
+}
 
 
 //		***		***			***
@@ -70,7 +96,7 @@ bool CSocketAddressIP::IsMatchIP( const CSocketAddressIP & ip ) const
 	memcpy( ip1, (void*) &ip.s_addr,	4 );
 	memcpy( ip2, (void*) &s_addr,		4 );
 
-	for ( int i = 0; i < 4; i++ )
+	for ( int i = 0; i < 4; ++i )
 	{
 		if ( ip1[i] == 255 || ip2[i] == 255 || ip1[i] == ip2[i] )
 			continue;
@@ -174,7 +200,7 @@ void CSocketAddress::SetPort( word wPort )
 
 void CSocketAddress::SetPortStr( lpctstr pszPort )
 {
-	m_port = (word)(ATOI(pszPort));
+	m_port = (word)(atoi(pszPort));
 }
 
 bool CSocketAddress::SetPortExtStr( tchar * pszIP )
@@ -198,7 +224,7 @@ bool CSocketAddress::SetHostPortStr( lpctstr pszIP )
 {
 	// NOTE: This is a blocking call !!!!
 	tchar szIP[256];
-	strncpy( szIP, pszIP, sizeof(szIP));
+	Str_CopyLimitNull( szIP, pszIP, sizeof(szIP));
 	SetPortExtStr( szIP );
 	return SetHostStr( szIP );
 }
@@ -207,7 +233,7 @@ bool CSocketAddress::SetHostPortStr( lpctstr pszIP )
 
 struct sockaddr_in CSocketAddress::GetAddrPort() const
 {
-	struct sockaddr_in SockAddrIn;
+	struct sockaddr_in SockAddrIn {};
 	SockAddrIn.sin_family = AF_INET;
 	SockAddrIn.sin_addr.s_addr = s_addr;
 	SockAddrIn.sin_port = htons(m_port);
@@ -445,16 +471,16 @@ int CSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLev
 	}
 #endif
 
-void CSocket::SetNonBlocking(bool bEnable)
+int CSocket::SetNonBlocking(bool fEnable)
 {
 #ifdef _WIN32
-	DWORD lVal = bEnable? 1 : 0;	// 0 =  block
-	ioctlsocket(m_hSocket, FIONBIO, &lVal);
+	DWORD lVal = fEnable? 1 : 0;	// 0 =  block
+	return ioctlsocket(m_hSocket, FIONBIO, &lVal);
 #else
-	if (bEnable)
-		fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags()|O_NONBLOCK);
+	if (fEnable)
+		return fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags() |  O_NONBLOCK);
 	else
-		fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags()&~O_NONBLOCK);
+		return fcntl(m_hSocket, F_SETFL, GetIOCtlSocketFlags() & ~O_NONBLOCK);
 #endif
 }
 

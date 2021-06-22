@@ -6,9 +6,9 @@
 #ifndef _INC_CSECTOR_H
 #define _INC_CSECTOR_H
 
-#include "../common/CSectorTemplate.h"
 #include "../common/CScriptObj.h"
 #include "CSectorEnviron.h"
+#include "CSectorTemplate.h"
 #include "CTimedObject.h"
 
 
@@ -18,8 +18,6 @@ class CItemStone;
 class CSector : public CScriptObj, public CSectorBase, public CTimedObject	// square region of the world.
 {
 	// A square region of the world. ex: MAP0.MUL Dungeon Sectors are 256 by 256 meters
-#define SECTOR_TICK_PERIOD (TICKS_PER_SEC / 2) // after how much ticks do we start a pulse.
-
 public:
 	static const char *m_sClassName;
 	static lpctstr const sm_szVerbKeys[];
@@ -49,11 +47,14 @@ private:
 	CSector& operator=(const CSector& other);
 
 public:
-	virtual bool OnTick();
-    inline virtual bool IsDeleted() const override
-    {
-        return false;   // Sectors should never be deleted in runtime.
-    }
+	virtual void Init(int index, uchar map, short x, short y) override;
+
+
+protected:	virtual bool _OnTick() override;
+//public:	virtual bool  OnTick() override;    // The right virtual is called by CTimedObject::OnTick
+
+protected:	virtual bool _IsDeleted() const override;
+public:		virtual bool IsDeleted() const override;
 
 	// Time
 	int GetLocalTime() const;
@@ -82,8 +83,9 @@ public:
 
 	// Items in the sector
 	size_t GetItemComplexity() const;
+	void CheckItemComplexity() const noexcept;
 	bool IsItemInSector( const CItem * pItem ) const;
-	void MoveItemToSector( CItem * pItem, bool fActive );
+	void MoveItemToSector( CItem * pItem );
 
 	void AddListenItem();
 	void RemoveListenItem();
@@ -91,25 +93,31 @@ public:
 	void OnHearItem( CChar * pChar, lpctstr pszText );
 
 	// Chars in the sector.
+	size_t GetCharComplexity() const;
+
+	void CheckCharComplexity() const noexcept;
 	bool IsCharActiveIn( const CChar * pChar );
 	bool IsCharDisconnectedIn( const CChar * pChar );
-	size_t GetCharComplexity() const;
 	size_t GetInactiveChars() const;
 	size_t GetClientsNumber() const;
 	int64 GetLastClientTime() const;
-	bool CanSleep(bool fCheckAdjacents) const;
+	bool MoveCharToSector(CChar* pChar);
+
+	bool _CanSleep(bool fCheckAdjacents) const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
-	bool MoveCharToSector( CChar * pChar );
 
 	// CTimedObject
 private:
-    virtual void GoSleep() override;
-    virtual void GoAwake() override;
+    virtual void _GoSleep() override;
+	virtual void  GoSleep() override;
+
+    virtual void _GoAwake() override;
+	virtual void  GoAwake() override;
 
     // General.
 public:
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual void r_Write();
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 

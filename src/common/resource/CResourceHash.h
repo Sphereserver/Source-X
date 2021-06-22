@@ -12,46 +12,54 @@
 class CResourceDef;
 
 
-class CResourceHashArray : public CSObjSortArray< CResourceDef*, CResourceID >
+struct CResourceHashArraySorter
 {
+    bool operator()(const CResourceDef* pObjStored, const CResourceDef* pObj) const;
+};
+class CResourceHashArray : public CSSortedVector< CResourceDef*, CResourceHashArraySorter >
+{
+    static int _compare(const CResourceDef* pObjStored, CResourceID const& rid);
+
+public:
     // This list OWNS the CResourceDef and CResourceLink objects.
     // Sorted array of RESOURCE_ID
-public:
     static const char *m_sClassName;
-    CResourceHashArray() { }
-private:
-    CResourceHashArray(const CResourceHashArray& copy);
-    CResourceHashArray& operator=(const CResourceHashArray& other);
-public:
-    int CompareKey( CResourceID rid, CResourceDef * pBase, bool fNoSpaces ) const;
+    CResourceHashArray() = default;
+    CResourceHashArray(const CResourceHashArray&) = delete;
+    CResourceHashArray& operator=(const CResourceHashArray&) = delete;
+
+    inline size_t find_sorted(CResourceID const& rid) const { return this->find_predicate(rid, _compare);        }
+    //inline bool   Contains(CResourceID const& rid) const  { return (SCONT_BADINDEX != this->find_sorted(rid)); }
 };
 
-class CResourceHash
+struct CResourceHash
 {
-public:
     static const char *m_sClassName;
     CResourceHashArray m_Array[16];
-public:
-    CResourceHash()
-    {
-    }
+
+    CResourceHash() = default;
+    CResourceHash(const CResourceHash&) = delete;
+    CResourceHash& operator=(const CResourceHash&) = delete;
+
 private:
-    CResourceHash(const CResourceHash& copy);
-    CResourceHash& operator=(const CResourceHash& other);
-private:
-    int GetHashArray(const CResourceID& rid) const
+    inline int GetHashArray(const CResourceID& rid) const
     {
         return (rid.GetResIndex() & 0x0F);
     }
+
 public:
-    inline size_t BadIndex() const
+    inline size_t FindKey(const CResourceID& rid) const
     {
-        return m_Array[0].BadIndex();
+        return m_Array[GetHashArray(rid)].find_sorted(rid);
     }
-    size_t FindKey(const CResourceID& rid) const;
-    CResourceDef* GetAt(const CResourceID& rid, size_t index) const;
-    size_t AddSortKey(const CResourceID& rid, CResourceDef* pNew);
-    void SetAt(const CResourceID& rid, size_t index, CResourceDef* pNew);
+    inline CResourceDef* GetAt(const CResourceID& rid, size_t index) const
+    {
+        return m_Array[GetHashArray(rid)][index];
+    }
+
+    void AddSortKey(CResourceID const& rid, CResourceDef* pNew);
+    void SetAt(CResourceID const& rid, size_t index, CResourceDef* pNew);
+    //void ReplaceRid(CResourceID const& ridOld, CResourceDef* pNew);
 };
 
 

@@ -1,13 +1,12 @@
 
-#include "../../common/resource/blocks/CDialogDef.h"
+#include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/resource/CResourceLock.h"
-#include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../CException.h"
 #include "../CLog.h"
-#include "../CWorld.h"
+#include "../CServer.h"
 #include "CClient.h"
 
 
@@ -19,7 +18,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 
 	CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
 	CDialogDef *	pDlg	= dynamic_cast <CDialogDef*>(pRes);
-	if ( !pRes )
+	if ( !pRes || !pDlg )
 	{
 		DEBUG_ERR(("Invalid RES_DIALOG.\n"));
 		return false;
@@ -88,7 +87,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, uin
 	if ( pObj == nullptr )
 		pObj = m_pChar;
 
-	int	context_mode = mode;
+	uint context_mode = (uint)mode;
 	if ( mode == CLIMODE_DIALOG && dwRid != 0 )
 	{
 		context_mode = dwRid;
@@ -104,7 +103,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, uin
 	}
 }
 
-bool CClient::addGumpDialogProps( CUID uid )
+bool CClient::addGumpDialogProps( const CUID& uid )
 {
 	ADDTOCALLSTACK("CClient::addGumpDialogProps");
 	// put up a prop dialog for the object.
@@ -121,7 +120,7 @@ bool CClient::addGumpDialogProps( CUID uid )
 		addSkillWindow((SKILL_TYPE)(g_Cfg.m_iMaxSkill), true);
 
 	tchar *pszMsg = Str_GetTemp();
-	strcpy(pszMsg, pObj->IsItem() ? "d_ITEMPROP1" : "d_CHARPROP1" );
+	strcpy(pszMsg, pObj->IsItem() ? "D_ITEMPROP1" : "D_CHARPROP1" );
 
 	CResourceID rid = g_Cfg.ResourceGetIDType(RES_DIALOG, pszMsg);
 	if ( ! rid.IsValidUID())
@@ -171,11 +170,11 @@ TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID,
 				continue;
 		}
 
-		pArgs->m_iN1	 = dwButtonID;
+		pArgs->m_iN1 = dwButtonID;
 		return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, pArgs );
 	}
 
-	return( TRIGRET_ENDIF );
+	return TRIGRET_ENDIF;
 }
 
 bool CClient::Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID )
@@ -189,7 +188,7 @@ bool CClient::Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID )
 		CChar * pSrc = dynamic_cast<CChar*>( pObj );
 		if ( pSrc )
 		{
-			OpenedGumpsMap_t::iterator itGumpFound = m_mapOpenedGumps.find( (int)dwRid );
+			OpenedGumpsMap_t::const_iterator itGumpFound = m_mapOpenedGumps.find(dwRid);
 			if (( itGumpFound != m_mapOpenedGumps.end() ) && ( itGumpFound->second > 0 ))
 			{
 				PacketGumpDialogRet packet;
@@ -221,7 +220,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 	if ( ! g_Cfg.ResourceLock( s, rid ))
 	{
 		// Can't find the resource ?
-		return( TRIGRET_ENDIF );
+		return TRIGRET_ENDIF;
 	}
 
 	if ( pObj == nullptr )
@@ -233,10 +232,11 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 
 		while ( s.ReadKeyParse() )
 		{
-			if ( !s.IsKey( "ON" ) || ( *s.GetArgStr() != '@' ) )
+            lpctstr ptcStr = s.GetArgStr();
+			if ( !s.IsKey( "ON" ) || ( *ptcStr != '@' ) )
 				continue;
 
-			if (strnicmp( s.GetArgStr(), "@cancel", 7 ) )
+			if (strnicmp(ptcStr, "@CANCEL", 7 ) )
 				continue;
 
 			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr );
@@ -250,7 +250,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 			if ( !s.IsKey( "ON" ) || ( *s.GetArgStr() == '@' ) )
 				continue;
 
-			i++;
+			++i;
 			if ( i < iSelect )
 				continue;
 			if ( i > iSelect )
@@ -261,7 +261,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 	}
 
 	// No selection ?
-	return( TRIGRET_ENDIF );
+	return TRIGRET_ENDIF;
 }
 
 bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc )
@@ -276,12 +276,12 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 
 	tchar * pszArgStart = pszArgs;
 	while ( _ISCSYM( *pszArgs ))
-		pszArgs++;
+		++pszArgs;
 
 	if ( *pszArgs )
 	{
 		*pszArgs = '\0';
-		pszArgs++;
+        ++pszArgs;
 		GETNONWHITESPACE( pszArgs );
 	}
 
@@ -306,14 +306,14 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	}
 
 	if ( pObjBase != nullptr )
-		pObjBase->ParseText( pszArgs, pSrc );
+		pObjBase->ParseScriptText( pszArgs, pSrc );
 	else
-		g_Serv.ParseText( pszArgs, pSrc );
+		g_Serv.ParseScriptText( pszArgs, pSrc );
 
 	// Parsing @color
 	if ( *pszArgs == '@' )
 	{
-		pszArgs++;
+		++pszArgs;
 		HUE_TYPE wHue = (HUE_TYPE)(Exp_GetVal( pszArgs ));
 		if ( wHue != 0 )
 			wHue = (wHue == 1? 0x7FF: wHue-1);
@@ -337,7 +337,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		DEBUG_ERR(( "Bad MENU item text '%s'\n", pszArgStart ));
 	}
 
-	return( !m_sText.IsEmpty() );
+	return !m_sText.IsEmpty();
 }
 
 void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
@@ -358,8 +358,12 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		pObj = m_pChar;
 	}
 
-	s.ReadKey();	// get title for the menu.
-	pObj->ParseText( s.GetKeyBuffer(), m_pChar );
+	if (!s.ReadKey())	// get title for the menu.
+	{
+		DEBUG_ERR(("Error getting the menu title.\n"));
+		return;
+	}
+	pObj->ParseScriptText( s.GetKeyBuffer(), m_pChar );
 
 	CMenuItem item[MAX_MENU_ITEMS];
 	item[0].m_sText = s.GetKey();

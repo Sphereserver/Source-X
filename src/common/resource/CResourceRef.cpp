@@ -9,10 +9,59 @@
 #include "../CScript.h"
 #include "CResourceRef.h"
 
+CResourceRef::CResourceRef()
+{
+    m_pLink = nullptr;
+}
+
+CResourceRef::CResourceRef(CResourceLink* pLink) : m_pLink(pLink)
+{
+    ASSERT(pLink);
+    pLink->AddRefInstance();
+}
+
+CResourceRef::CResourceRef(const CResourceRef& copy)
+{
+    m_pLink = copy.m_pLink;
+    if (m_pLink != nullptr)
+        m_pLink->AddRefInstance();
+}
+
+CResourceRef::~CResourceRef()
+{
+    if (m_pLink != nullptr)
+        m_pLink->DelRefInstance();
+}
+
+
+CResourceRef& CResourceRef::operator=(const CResourceRef& other)
+{
+    if (this != &other)
+        SetRef(other.m_pLink);
+    return *this;
+}
+
+void CResourceRef::SetRef(CResourceLink* pLink)
+{
+    //ASSERT(pLink != m_pLink);
+
+    if (m_pLink != nullptr)
+        m_pLink->DelRefInstance();
+
+    m_pLink = pLink;
+
+    if (m_pLink != nullptr)
+        m_pLink->AddRefInstance();
+}
+
+
+//--
+
+
 lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
 {
     // look up the name of the fragment given it's index.
-    const CResourceLink * pResourceLink = (*this)[iIndex];
+    const CResourceLink * pResourceLink = operator[](iIndex).GetRef();
     ASSERT(pResourceLink);
     return pResourceLink->GetResourceName();
 }
@@ -21,20 +70,21 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 {
     ADDTOCALLSTACK("CResourceRefArray::r_LoadVal");
     EXC_TRY("LoadVal");
-    bool fRet = false;
     // A bunch of CResourceLink (CResourceDef) pointers.
     // Add or remove from the list.
     // RETURN: false = it failed.
 
     // ? "TOWN" and "REGION" are special !
 
-    tchar * pszCmd = s.GetArgStr();
+    bool fRet = true;
 
+    tchar * pszCmd = s.GetArgStr();
     tchar * ppBlocks[128];	// max is arbitrary
     int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, CountOf(ppBlocks));
-
     for ( int i = 0; i < iArgCount; ++i )
     {
+        CResourceLink* pResourceLink = nullptr;
+
         pszCmd = ppBlocks[i];
         if ( pszCmd[0] == '-' )
         {
@@ -47,14 +97,16 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
                 continue;
             }
 
-            CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
-            if ( pResourceLink == nullptr )
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
+            if (pResourceLink)
             {
-                fRet = false;
-                continue;
+                const iterator pos = std::find(begin(), end(), pResourceLink);
+                const bool fFound = (end() != pos);
+                if (fRet && !fFound)
+                    fRet = false;
+                if (fFound)
+                    erase(pos);
             }
-
-            fRet = RemovePtr(pResourceLink);
         }
         else
         {
@@ -62,44 +114,22 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
             if ( pszCmd[0] == '+' )
                 ++pszCmd;
 
-            CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
-            if ( pResourceLink == nullptr )
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
+            if ( pResourceLink )
             {
-                fRet = false;
-                DEBUG_ERR(( "Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd ));
-                continue;
+                // Check if it's already in the list, before adding it
+                if (cend() == find(cbegin(), cend(), pResourceLink))
+                    emplace_back(pResourceLink);
             }
+        }
 
-            // Is it already in the list ?
-            fRet = true;
-            if ( ContainsPtr(pResourceLink) )
-            {
-                continue;
-            }
-            if ( g_Cfg.m_pEventsPetLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-            else if ( g_Cfg.m_pEventsPlayerLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-            else if ( restype == RES_REGIONTYPE && g_Cfg.m_pEventsRegionLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-            else if ( g_Cfg.m_iEventsItemLink.ContainsPtr(pResourceLink) )
-            {
-                DEBUG_ERR(("'%s' already defined in sphere.ini - skipping\n", pResourceLink->GetName()));
-                continue;
-            }
-
-            emplace_back(pResourceLink);
+        if (pResourceLink == nullptr)
+        {
+            fRet = false;
+            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd));
         }
     }
+
     return fRet;
     EXC_CATCH;
 
@@ -113,29 +143,19 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::WriteResourceRefList");
     TemporaryString tsVal;
-    tchar * pszVal = static_cast<tchar *>(tsVal);
+    tchar * ptcVal = tsVal.buffer();
     size_t len = 0;
     for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
         if ( j > 0 )
-            pszVal[len++] = ',';
+            ptcVal[len++] = ',';
 
-        len += strcpylen( pszVal + len, GetResourceName(j) );
+        len += Str_CopyLimitNull(ptcVal + len, GetResourceName(j), tsVal.capacity() - len);
         if ( len >= SCRIPT_MAX_LINE_LEN-1 )
             break;
     }
-    pszVal[len] = '\0';
-    sVal = pszVal;
-}
-
-CResourceRefArray::CResourceRefArray(const CResourceRefArray& copy) : CSPtrTypeArray<CResourceRef>(static_cast<const CSPtrTypeArray<CResourceRef> &>(copy))
-{
-}
-
-CResourceRefArray& CResourceRefArray::operator=(const CResourceRefArray& other)
-{
-    static_cast<CSPtrTypeArray<CResourceRef> &>(*this) = static_cast<const CSPtrTypeArray<CResourceRef> &>(other);
-    return *this;
+    ptcVal[len] = '\0';
+    sVal.Copy(ptcVal);
 }
 
 size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
@@ -147,9 +167,9 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
     {
         const CResourceID& ridtest = (*this)[i].GetRef()->GetResourceID();
         if ( ridtest.GetResType() == restype )
-            return( i );
+            return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
@@ -163,24 +183,24 @@ size_t CResourceRefArray::FindResourceID( const CResourceID & rid ) const
         if ( ridtest == rid )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
-size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) const
+size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr ptcKey ) const
 {
     ADDTOCALLSTACK("CResourceRefArray::FindResourceName");
     // Is this resource already in the list ?
-    CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszKey ));
+    CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, ptcKey ));
     if ( pResourceLink == nullptr )
-        return BadIndex();
-    return FindPtr(pResourceLink);
+        return SCONT_BADINDEX;
+    return FindResourceID(pResourceLink->GetResourceID());
 }
 
-void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
+void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const
 {
     ADDTOCALLSTACK_INTENSIVE("CResourceRefArray::r_Write");
     for ( size_t j = 0, sz = size(); j < sz; ++j )
     {
-        s.WriteKey( pszKey, GetResourceName( j ));
+        s.WriteKeyStr( ptcKey, GetResourceName( j ));
     }
 }

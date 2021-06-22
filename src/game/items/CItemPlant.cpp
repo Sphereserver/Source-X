@@ -1,12 +1,12 @@
 
 #include "../chars/CChar.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "CItem.h"
 
 void CItem::Plant_SetTimer()
 {
 	ADDTOCALLSTACK("CItem::Plant_SetTimer");
-	SetTimeout(GetDecayTime());
+	_SetTimeout(GetDecayTime());
 }
 
 // Pick cotton/hay/etc...
@@ -84,7 +84,7 @@ bool CItem::Plant_OnTick()
 	{
 		// Some plants generate a fruit on the ground when ripe.
 		ITEMID_TYPE iFruitID = ITEMID_NOTHING;
-		if ( m_itCrop.m_ridFruitOverride )
+		if ( m_itCrop.m_ridFruitOverride.IsValidUID())
 			iFruitID = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
 		else
 			iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();

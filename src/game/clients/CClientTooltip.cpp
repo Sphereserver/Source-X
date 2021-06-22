@@ -15,7 +15,7 @@ CClientTooltip::CClientTooltip(dword dwClilocID, lpctstr ptcArgs)
 {
     ASSERT(ptcArgs);
     m_clilocid = dwClilocID;
-    strncpy(m_args, ptcArgs, MAX_TOOLTIP_LEN - 1);
+    Str_CopyLimitNull(m_args, ptcArgs, MAX_TOOLTIP_LEN);
 }
 
 CClientTooltip::CClientTooltip(dword dwClilocID, int64 iArgs)
@@ -30,7 +30,7 @@ void __cdecl CClientTooltip::FormatArgs(lpctstr format, ...)
     va_start( vargs, format );
 
     if ( ! vsnprintf( m_args, MAX_TOOLTIP_LEN - 1, format, vargs ) )
-        strncpy( m_args, format, MAX_TOOLTIP_LEN - 1 );
+        Str_CopyLimitNull( m_args, format, MAX_TOOLTIP_LEN );
 
     va_end( vargs );
 }

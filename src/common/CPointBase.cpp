@@ -1,9 +1,9 @@
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/CLog.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
-#include "../game/CWorld.h"
+#include "../game/CWorldMap.h"
+#include "resource/sections/CItemTypeDef.h"
+#include "CLog.h"
 #include "CRect.h"
 #include "CPointBase.h"
 
@@ -35,17 +35,17 @@ lpctstr CPointBase::sm_szDirs[DIR_QTY+1] =
 	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_8),
 };
 
-const int CPointBase::sm_Moves[DIR_QTY+1][2] =
+const short CPointBase::sm_Moves[DIR_QTY+1][2] =
 {
 	{  0, -1 }, // DIR_N
-{  1, -1 }, // DIR_NE
-{  1,  0 }, // DIR_E
-{  1,  1 }, // DIR_SE
-{  0,  1 }, // DIR_S
-{ -1,  1 }, // DIR_SW
-{ -1,  0 }, // DIR_W
-{ -1, -1 }, // DIR_NW
-{  0,  0 },	// DIR_QTY = here.
+    {  1, -1 }, // DIR_NE
+    {  1,  0 }, // DIR_E
+    {  1,  1 }, // DIR_SE
+    {  0,  1 }, // DIR_S
+    { -1,  1 }, // DIR_SW
+    { -1,  0 }, // DIR_W
+    { -1, -1 }, // DIR_NW
+    {  0,  0 },	// DIR_QTY = here.
 };
 
 
@@ -82,17 +82,28 @@ lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	nullptr
 };
 
-bool CPointBase::operator== ( const CPointBase & pt ) const
+CPointBase::CPointBase() noexcept :
+	m_x(-1), m_y(-1), m_z(0), m_map(0)	// Same thing as calling InitPoint(), but without this extra cuntion call
+{
+	//InitPoint();
+}
+
+CPointBase::CPointBase(short x, short y, char z, uchar map) noexcept :
+	m_x(x), m_y(y), m_z(z), m_map(map)
+{
+}
+
+bool CPointBase::operator== ( const CPointBase & pt ) const noexcept
 {
 	return( m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z && m_map == pt.m_map );
 }
 
-bool CPointBase::operator!= ( const CPointBase & pt ) const
+bool CPointBase::operator!= ( const CPointBase & pt ) const noexcept
 {
 	return ( ! ( *this == pt ));
 }
 
-const CPointBase CPointBase::operator+= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator+= ( const CPointBase & pt ) noexcept
 {
 	m_x += pt.m_x;
 	m_y += pt.m_y;
@@ -100,7 +111,7 @@ const CPointBase CPointBase::operator+= ( const CPointBase & pt )
 	return( * this );
 }
 
-const CPointBase CPointBase::operator-= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator-= ( const CPointBase & pt ) noexcept
 {
 	m_x -= pt.m_x;
 	m_y -= pt.m_y;
@@ -108,34 +119,32 @@ const CPointBase CPointBase::operator-= ( const CPointBase & pt )
 	return( * this );
 }
 
-void CPointBase::InitPoint()
+void CPointBase::InitPoint() noexcept
 {
-	m_x = -1;	// invalid location.
-	m_y = -1;
+	m_x = m_y = -1;	// invalid location.
 	m_z = 0;
 	m_map = 0;
 }
-void CPointBase::ZeroPoint()
+void CPointBase::ZeroPoint() noexcept
 {
-	m_x = 0;	// invalid location.
-	m_y = 0;
+	m_x = m_y = 0;	// invalid location.
 	m_z = 0;
 	m_map = 0;
 }
-int CPointBase::GetDistZ( const CPointBase & pt ) const
+
+int CPointBase::GetDistZ( const CPointBase & pt ) const noexcept
 {
-	return( abs(m_z-pt.m_z));
+	return SphereAbs(m_z - pt.m_z);
 }
-int CPointBase::GetDistZAdj( const CPointBase & pt ) const
+
+int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
 {
-	return( GetDistZ(pt) / (PLAYER_HEIGHT/2) );
-}
-int CPointBase::GetDistBase( const CPointBase & pt ) const // Distance between points
-{
-    ADDTOCALLSTACK("CPointBase::GetDistBase");
+    // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
+    //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
+
 	// Do not consider z or m_map.
-	int dx = abs(m_x - pt.m_x);
-	int dy = abs(m_y - pt.m_y);
+    const int dx = SphereAbs(m_x - pt.m_x);
+    const int dy = SphereAbs(m_y - pt.m_y);
 
 	return maximum(dx, dy);
 
@@ -146,9 +155,11 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const // Distance between p
 	// Return the real distance return((int) sqrt(dx*dx+dy*dy+dz*dz));
 }
 
-int CPointBase::GetDist( const CPointBase & pt ) const // Distance between points
+int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance between points
 {
-	ADDTOCALLSTACK("CPointBase::GetDist");
+    // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist");
+
 	// Get the basic 2d distance.
 	if ( !pt.IsValidPoint() )
 		return INT16_MAX;
@@ -158,34 +169,32 @@ int CPointBase::GetDist( const CPointBase & pt ) const // Distance between point
 	return GetDistBase(pt);
 }
 
-int CPointBase::GetDistSightBase( const CPointBase & pt ) const // Distance between points based on UO sight
+int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-    ADDTOCALLSTACK("CPointBase::GetDistSightBase");
-	int dx = abs(m_x - pt.m_x);
-	int dy = abs(m_y - pt.m_y);
+	const int dx = SphereAbs(m_x - pt.m_x);
+	const int dy = SphereAbs(m_y - pt.m_y);
 	return maximum(dx, dy);
 }
 
-int CPointBase::GetDistSight( const CPointBase & pt ) const // Distance between points based on UO sight
+int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	ADDTOCALLSTACK("CPointBase::GetDistSight");
 	if ( !pt.IsValidPoint() )
 		return INT16_MAX;
 	if ( pt.m_map != m_map )
 		return INT16_MAX;
 
-	return GetDistSightBase(pt);
+	const int dx = SphereAbs(m_x - pt.m_x);
+	const int dy = SphereAbs(m_y - pt.m_y);
+	return maximum(dx, dy);
 }
 
-int CPointBase::GetDist3D( const CPointBase & pt ) const // Distance between points
+int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
 {
-	ADDTOCALLSTACK("CPointBase::GetDist3D");
-	// OK, 1 unit of Z is not the same (real life) distance as 1
-	// unit of X (or Y)
-	int dist = GetDist(pt);
+	// OK, 1 unit of Z is not the same (real life) distance as 1 unit of X (or Y)
+	const int dist = GetDist(pt);
 
 	// Get the deltas and correct the Z for height first
-	int dz = GetDistZAdj(pt); // Take player height into consideration
+	const int dz = (GetDistZ(pt) / (PLAYER_HEIGHT / 2)); // Take player height into consideration
 
 	return maximum(dz, dist);
 	// What the heck?
@@ -194,55 +203,52 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const // Distance between poi
 	return (int)(( (realdist - floor(realdist)) > 0.5 ) ? (ceil(realdist)) : (floor(realdist)));*/
 }
 
-bool CPointBase::IsValidZ() const
+bool CPointBase::IsValidZ() const noexcept
 {
-	return( m_z > -UO_SIZE_Z && m_z < UO_SIZE_Z );
+	return ( (m_z > -UO_SIZE_Z) && (m_z < UO_SIZE_Z) );
 }
 
-bool CPointBase::IsValidXY() const
+bool CPointBase::IsValidXY() const noexcept
 {
-	if ( m_x < 0 || m_x >= g_MapList.GetX(m_map) )
+	if ( (m_x < 0) || (m_y < 0) )
 		return false;
-	if ( m_y < 0 || m_y >= g_MapList.GetY(m_map) )
+	if ( (m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)) )
 		return false;
 	return true;
 }
 
-bool CPointBase::IsValidPoint() const
+bool CPointBase::IsCharValid() const noexcept
 {
-	return( IsValidXY() && IsValidZ());
-}
-
-bool CPointBase::IsCharValid() const
-{
-	if ( m_z <= -UO_SIZE_Z || m_z >= UO_SIZE_Z )
+	if ( (m_z <= -UO_SIZE_Z) || (m_z >= UO_SIZE_Z) )
 		return false;
-	if (m_x <= 0 || m_x >= (short)(g_MapList.GetX(m_map)))
+	if ((m_x <= 0) || (m_y <= 0))
 		return false;
-	if (m_y <= 0 || m_y >= (short)(g_MapList.GetY(m_map)))
+	if ((m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)))
 		return false;
 	return true;
 }
 
-void CPointBase::ValidatePoint()
+void CPointBase::ValidatePoint() noexcept
 {
 	if ( m_x < 0 )
 		m_x = 0;
-	if (m_x >= (short)(g_MapList.GetX(m_map)))
-		m_x = (short)(g_MapList.GetX(m_map) - 1);
+    const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
+	if (m_x >= iMaxX)
+		m_x = iMaxX - 1;
 
 	if ( m_y < 0 )
 		m_y = 0;
-	if (m_y >= (short)(g_MapList.GetY(m_map)))
-		m_y = (short)(g_MapList.GetY(m_map) - 1);
+    const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
+	if (m_y >= iMaxY)
+		m_y = iMaxY - 1;
 }
 
-bool CPointBase::IsSame2D( const CPointBase & pt ) const
+bool CPointBase::IsSame2D( const CPointBase & pt ) const noexcept
 {
-	return( m_x == pt.m_x && m_y == pt.m_y );
+	return ( m_x == pt.m_x && m_y == pt.m_y );
 }
 
-void CPointBase::Set( const CPointBase & pt )
+void CPointBase::Set( const CPointBase & pt ) noexcept
 {
 	m_x = pt.m_x;
 	m_y = pt.m_y;
@@ -250,7 +256,7 @@ void CPointBase::Set( const CPointBase & pt )
 	m_map = pt.m_map;
 }
 
-void CPointBase::Set( word x, word y, char z, uchar map )
+void CPointBase::Set( short x, short y, char z, uchar map ) noexcept
 {
 	m_x = x;
 	m_y = y;
@@ -261,7 +267,7 @@ void CPointBase::Set( word x, word y, char z, uchar map )
 void CPointBase::Move( DIR_TYPE dir )
 {
 	// Move a point in a direction.
-	ASSERT( dir <= DIR_QTY );
+	ASSERT( (dir > DIR_INVALID) && (dir <= DIR_QTY) );
 	m_x += (short)(sm_Moves[dir][0]);
 	m_y += (short)(sm_Moves[dir][1]);
 }
@@ -274,22 +280,23 @@ void CPointBase::MoveN( DIR_TYPE dir, int amount )
 	m_y += (short)(sm_Moves[dir][1] * amount);
 }
 
-bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
+bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 {
 	ADDTOCALLSTACK("CPointBase::r_WriteVal");
-	if ( !strnicmp( pszKey, "STATICS", 7 ) )
+	if ( !strnicmp( ptcKey, "STATICS", 7 ) )
 	{
-		pszKey	+= 7;
-		const CServerMapBlock * pBlock = g_World.GetMapBlock( *(this) );
-		if ( !pBlock ) return false;
+		ptcKey	+= 7;
+		const CServerMapBlock * pBlock = CWorldMap::GetMapBlock( static_cast<CPointMap>(*this) );
+		if ( !pBlock )
+			return false;
 
-		if ( *pszKey == '\0' )
+		if ( *ptcKey == '\0' )
 		{
 			uint uiStaticQty = 0, uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
 			for ( uint i = 0; i < uiStaticMaxQty; ++i )
 			{
 				const CUOStaticItemRec * pStatic = pBlock->m_Statics.GetStatic( i );
-				CPointMap ptTest( pStatic->m_x + pBlock->m_x, pStatic->m_y + pBlock->m_y, pStatic->m_z, this->m_map );
+				const CPointMap ptTest( pStatic->m_x + pBlock->m_x, pStatic->m_y + pBlock->m_y, pStatic->m_z, this->m_map );
 				if ( this->GetDist( ptTest ) > 0 )
 					continue;
 				++uiStaticQty;
@@ -299,25 +306,25 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
+		SKIP_SEPARATORS( ptcKey );
 
 		const CUOStaticItemRec * pStatic = nullptr;
 		int iStatic = 0;
 		int type = 0;
 
-		if ( !strnicmp( pszKey, "FINDID", 6 ) )
+		if ( !strnicmp( ptcKey, "FINDID", 6 ) )
 		{
-			pszKey += 6;
-			SKIP_SEPARATORS( pszKey );
-			iStatic = Exp_GetVal( pszKey );
+			ptcKey += 6;
+			SKIP_SEPARATORS( ptcKey );
+			iStatic = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iStatic );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
-			SKIP_SEPARATORS( pszKey );
+			SKIP_SEPARATORS( ptcKey );
 		}
 		else
 		{
-			iStatic = Exp_GetVal( pszKey );
+			iStatic = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iStatic );
 		}
 
@@ -361,23 +368,23 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
-		if ( !*pszKey )
-			pszKey	= "ID";
+		SKIP_SEPARATORS( ptcKey );
+		if ( !*ptcKey )
+			ptcKey	= "ID";
 
 		ITEMID_TYPE idTile = pStatic->GetDispID();
 
-		if ( !strnicmp( pszKey, "COLOR", 5 ) )
+		if ( !strnicmp( ptcKey, "COLOR", 5 ) )
 		{
 			sVal.FormatHex( pStatic->m_wHue );
 			return true;
 		}
-		else if ( !strnicmp( pszKey, "ID", 2 ) )
+		else if ( !strnicmp( ptcKey, "ID", 2 ) )
 		{
 			sVal.FormatHex( idTile );
 			return true;
 		}
-		else if ( !strnicmp( pszKey, "Z", 1 ) )
+		else if ( !strnicmp( ptcKey, "Z", 1 ) )
 		{
 			sVal.FormatVal( pStatic->m_z );
 			return true;
@@ -391,20 +398,20 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return false;
 		}
 
-		return pItemDef->r_WriteVal( pszKey, sVal, &g_Serv );
+		return pItemDef->r_WriteVal( ptcKey, sVal, &g_Serv );
 	}
-	else if ( !strnicmp( pszKey, "COMPONENTS", 10) )
+	else if ( !strnicmp( ptcKey, "COMPONENTS", 10) )
 	{
-		pszKey += 10;
+		ptcKey += 10;
 
 		CRegionLinks rlinks;
 		const CRegion* pRegion = nullptr;
 		CItem* pItem = nullptr;
-		const CSphereMulti* pMulti = nullptr;
+		const CUOMulti* pMulti = nullptr;
 		const CUOMultiItemRec_HS* pMultiItem = nullptr;
 		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, &rlinks);
 
-		if ( *pszKey == '\0' )
+		if ( *ptcKey == '\0' )
 		{
 			int iComponentQty = 0;
 			for (size_t i = 0; i < iMultiQty; ++i)
@@ -417,7 +424,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 				if (pItem == nullptr)
 					continue;
 
-				const CPointMap ptMulti = pItem->GetTopPoint();
+				const CPointMap ptMulti(pItem->GetTopPoint());
 				pMulti = g_Cfg.GetMultiItemDefs(pItem);
 				if (pMulti == nullptr)
 					continue;
@@ -431,11 +438,11 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					const CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
-					iComponentQty++;
+					++iComponentQty;
 				}
 			}
 
@@ -443,24 +450,24 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
+		SKIP_SEPARATORS( ptcKey );
 
 		int iComponent = 0;
 		int type = 0;
 
-		if ( strnicmp( pszKey, "FINDID", 6 ) == 0 )
+		if ( strnicmp( ptcKey, "FINDID", 6 ) == 0 )
 		{
-			pszKey += 6;
-			SKIP_SEPARATORS( pszKey );
-			iComponent = Exp_GetVal( pszKey );
+			ptcKey += 6;
+			SKIP_SEPARATORS( ptcKey );
+			iComponent = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iComponent );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
-			SKIP_SEPARATORS( pszKey );
+			SKIP_SEPARATORS( ptcKey );
 		}
 		else
 		{
-			iComponent = Exp_GetVal( pszKey );
+			iComponent = Exp_GetVal( ptcKey );
 			type = RES_GET_TYPE( iComponent );
 		}
 
@@ -555,30 +562,30 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return true;
 		}
 
-		SKIP_SEPARATORS( pszKey );
-		if ( !*pszKey )
-			pszKey	= "ID";
+		SKIP_SEPARATORS( ptcKey );
+		if ( !*ptcKey )
+			ptcKey	= "ID";
 
 		ITEMID_TYPE idTile = pMultiItem->GetDispID();
 
-		if ( strnicmp( pszKey, "ID", 2 ) == 0 )
+		if ( strnicmp( ptcKey, "ID", 2 ) == 0 )
 		{
 			sVal.FormatHex( idTile );
 			return true;
 		}
-		else if ( strnicmp( pszKey, "MULTI", 5 ) == 0 )
+		else if ( strnicmp( ptcKey, "MULTI", 5 ) == 0 )
 		{
-			pszKey += 5;
-			if (*pszKey != '\0')
+			ptcKey += 5;
+			if (*ptcKey != '\0')
 			{
-				SKIP_SEPARATORS(pszKey);
-				return pItem->r_WriteVal( pszKey, sVal, &g_Serv );
+				SKIP_SEPARATORS(ptcKey);
+				return pItem->r_WriteVal( ptcKey, sVal, &g_Serv );
 			}
 
 			sVal.FormatHex( pItem->GetUID() );
 			return true;
 		}
-		else if ( strnicmp( pszKey, "Z", 1 ) == 0 )
+		else if ( strnicmp( ptcKey, "Z", 1 ) == 0 )
 		{
 			sVal.FormatVal( pItem->GetTopZ() + pMultiItem->m_dz );
 			return true;
@@ -592,10 +599,10 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			return false;
 		}
 
-		return pItemDef->r_WriteVal( pszKey, sVal, &g_Serv );
+		return pItemDef->r_WriteVal( ptcKey, sVal, &g_Serv );
 	}
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 		return false;
 
@@ -616,32 +623,32 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			break;
 		case PT_ISNEARTYPE:
 		{
-			pszKey += 10;
-			SKIP_SEPARATORS( pszKey );
-			SKIP_ARGSEP( pszKey );
+			ptcKey += 10;
+			SKIP_SEPARATORS( ptcKey );
+			SKIP_ARGSEP( ptcKey );
 
-			int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, pszKey );
+			int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 			int iDistance = 0;
 			bool bCheckMulti = false;
 
-			SKIP_IDENTIFIERSTRING( pszKey );
-			SKIP_SEPARATORS( pszKey );
-			SKIP_ARGSEP( pszKey );
+			SKIP_IDENTIFIERSTRING( ptcKey );
+			SKIP_SEPARATORS( ptcKey );
+			SKIP_ARGSEP( ptcKey );
 
-			if ( *pszKey ) iDistance = Exp_GetVal(pszKey);
-			if ( *pszKey ) bCheckMulti = Exp_GetVal(pszKey) != 0;
-			sVal.FormatVal( g_World.IsItemTypeNear(*this, static_cast<IT_TYPE>(iType), iDistance, bCheckMulti));
+			if ( *ptcKey ) iDistance = Exp_GetVal(ptcKey);
+			if ( *ptcKey ) bCheckMulti = Exp_GetVal(ptcKey) != 0;
+			sVal.FormatVal( CWorldMap::IsItemTypeNear(*this, IT_TYPE(iType), iDistance, bCheckMulti));
 			break;
 		}
 		case PT_REGION:
 		{
 			// Check that the syntax is correct.
-			if ( pszKey[6] && pszKey[6] != '.' )
+			if ( ptcKey[6] && ptcKey[6] != '.' )
 				return false;
 
 			CRegionWorld * pRegionTemp = dynamic_cast <CRegionWorld*>(this->GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI));
 
-			if ( !pszKey[6] )
+			if ( !ptcKey[6] )
 			{
 				// We're just checking if the reference is valid.
 				sVal.FormatVal( pRegionTemp? 1:0 );
@@ -649,52 +656,52 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			}
 
 			// We're trying to retrieve a property from the region.
-			pszKey += 7;
+			ptcKey += 7;
 			if ( pRegionTemp )
-				return pRegionTemp->r_WriteVal( pszKey, sVal, &g_Serv );
+				return pRegionTemp->r_WriteVal( ptcKey, sVal, &g_Serv );
 
 			return false;
 		}
 		case PT_ROOM:
 		{
-			if ( pszKey[4] && pszKey[4] != '.' )
+			if ( ptcKey[4] && ptcKey[4] != '.' )
 				return false;
 
 			CRegion * pRegionTemp = this->GetRegion( REGION_TYPE_ROOM );
 
-			if ( !pszKey[4] )
+			if ( !ptcKey[4] )
 			{
 				sVal.FormatVal( pRegionTemp? 1:0 );
 				return true;
 			}
 
-			pszKey += 5;
+			ptcKey += 5;
 			if ( pRegionTemp )
-				return pRegionTemp->r_WriteVal( pszKey, sVal, &g_Serv );
+				return pRegionTemp->r_WriteVal( ptcKey, sVal, &g_Serv );
 
 			return false;
 		}
 		case PT_SECTOR:
 		{
-			if ( pszKey[6] == '.' )
+			if ( ptcKey[6] == '.' )
 			{
-				pszKey += 7;
+				ptcKey += 7;
 				CSector * pSectorTemp = this->GetSector();
 				if (pSectorTemp)
-					return pSectorTemp->r_WriteVal(pszKey, sVal, &g_Serv);
+					return pSectorTemp->r_WriteVal(ptcKey, sVal, &g_Serv);
 			}
 			return false;
 		}
 		default:
 		{
-			const CUOMapMeter * pMeter = g_World.GetMapMeter(*this);
+			const CUOMapMeter * pMeter = CWorldMap::GetMapMeter(*this);
 			if ( pMeter )
 			{
 				switch( index )
 				{
 					case PT_TYPE:
 					{
-						CItemTypeDef * pTypeDef = g_World.GetTerrainItemTypeDef( pMeter->m_wTerrainIndex );
+						CItemTypeDef * pTypeDef = CWorldMap::GetTerrainItemTypeDef( pMeter->m_wTerrainIndex );
 						if ( pTypeDef != nullptr )
 							sVal = pTypeDef->GetResourceName();
 						else
@@ -702,11 +709,11 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					} return true;	
 					case PT_TERRAIN:
 					{
-						pszKey += 7;
-						if ( *pszKey == '.' )	// do we have an argument?
+						ptcKey += 7;
+						if ( *ptcKey == '.' )	// do we have an argument?
 						{
-							SKIP_SEPARATORS( pszKey );
-							if ( !strnicmp( pszKey, "Z", 1 ))
+							SKIP_SEPARATORS( ptcKey );
+							if ( !strnicmp( ptcKey, "Z", 1 ))
 							{
 								sVal.FormatVal( pMeter->m_z );
 								return true;
@@ -728,14 +735,13 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 	return true;
 }
 
-bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
+bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CPointBase::r_LoadVal");
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
-	if ( index <= 0 )
-	{
+	int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+	if ( index < 0 )
 		return false;
-	}
+
 	int iVal = Exp_GetVal(pszArgs);
 	switch (index)
 	{
@@ -750,13 +756,13 @@ bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 
 DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const // Direction to point pt
 {
-	ADDTOCALLSTACK("CPointBase::GetDir");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDir");
 	// Get the 2D direction between points.
-	int dx = (m_x-pt.m_x);
-	int dy = (m_y-pt.m_y);
+	const int dx = (m_x-pt.m_x);
+    const int dy = (m_y-pt.m_y);
 
-	int ax = abs(dx);
-	int ay = abs(dy);
+    const int ax = abs(dx);
+    const int ay = abs(dy);
 
 	if ( ay > ax )
 	{
@@ -807,24 +813,24 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	return iDist2D;
 }
 
-tchar * CPointBase::WriteUsed( tchar * pszBuffer ) const
+tchar * CPointBase::WriteUsed( tchar * ptcBuffer, uint uiBufferLen) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
-		sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
+		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
 	else if ( m_z )
-		sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8, m_x, m_y, m_z);
+		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16 ",%" PRId8, m_x, m_y, m_z);
 	else
-		sprintf(pszBuffer, "%" PRId16 ",%" PRId16, m_x, m_y);
-	return pszBuffer;
+		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16, m_x, m_y);
+	return ptcBuffer;
 }
 
 lpctstr CPointBase::WriteUsed() const
 {
-	return WriteUsed( Str_GetTemp() );
+	return WriteUsed( Str_GetTemp(), STR_TEMPLENGTH );
 }
 
-size_t CPointBase::Read( tchar * pszVal )
+int CPointBase::Read( tchar * pszVal )
 {
 	ADDTOCALLSTACK("CPointBase::Read");
 	// parse reading the point
@@ -834,29 +840,39 @@ size_t CPointBase::Read( tchar * pszVal )
     ptTest.m_map = 0;
 
 	tchar * ppVal[4];
-	size_t iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
+	int iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
 	switch ( iArgs )
 	{
 		default:
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-                ptTest.m_map = (uchar)(ATOI(ppVal[3]));
-				if ( !g_MapList.m_maps[ptTest.m_map] )
+                ptTest.m_map = (uchar)(Str_ToUI(ppVal[3]));
+				if ( !g_MapList.IsMapSupported(ptTest.m_map) )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", ptTest.m_map);
                     ptTest.m_map = 0;
 				}
 			}
+			FALLTHROUGH;
 		case 3: // m_z
-			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-                ptTest.m_z = (char)(ATOI(ppVal[2]));
+			if (IsDigit(ppVal[2][0]) || ppVal[2][0] == '-')
+			{
+				ptTest.m_z = (char)(Str_ToI(ppVal[2]));
+			}
+			FALLTHROUGH;
 		case 2:
 			if (IsDigit(ppVal[1][0]))
-                ptTest.m_y = (short)(ATOI(ppVal[1]));
+			{
+				ptTest.m_y = (short)(Str_ToI(ppVal[1]));
+			}
+			FALLTHROUGH;
 		case 1:
 			if (IsDigit(ppVal[0][0]))
-                ptTest.m_x = (short)(ATOI(ppVal[0]));
+			{
+				ptTest.m_x = (short)(Str_ToI(ppVal[0]));
+			}
+			FALLTHROUGH;
 		case 0:
 			break;
 	}
@@ -873,20 +889,21 @@ size_t CPointBase::Read( tchar * pszVal )
 
 CSector * CPointBase::GetSector() const
 {
-	ADDTOCALLSTACK("CPointBase::GetSector");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
 	if ( !IsValidXY() )
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
-			m_x, m_y, m_map, g_MapList.GetX(m_map), g_MapList.GetY(m_map));
-		return g_World.GetSector(m_map, 0);
+			m_x, m_y, m_map, g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
+		return CWorldMap::GetSector(m_map, 0);
 	}
+
 	// Get the world Sector we are in.
-	return g_World.GetSector(m_map, ((m_y / g_MapList.GetSectorSize(m_map) * g_MapList.GetSectorCols(m_map)) + ( m_x / g_MapList.GetSectorSize(m_map) )));
+	return CWorldMap::GetSector(m_map, m_x, m_y);
 }
 
 CRegion * CPointBase::GetRegion( dword dwType ) const
 {
-	ADDTOCALLSTACK("CPointBase::GetRegion");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegion");
 	// What region in the current CSector am i in ?
 	// We only need to update this every 8 or so steps ?
 	// REGION_TYPE_AREA
@@ -902,7 +919,7 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
-	ADDTOCALLSTACK("CPointBase::GetRegions");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
 	if ( !IsValidPoint() )
 		return 0;
 
@@ -913,30 +930,21 @@ size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 	return 0;
 }
 
-int CPointBase::GetPointSortIndex() const
+int CPointBase::GetPointSortIndex() const noexcept
 {
 	return (int)MAKEDWORD( m_x, m_y );
 }
 
 
 //*************************************************************************
-// -CPointMap
-
-CPointMap::CPointMap( short x, short y, char z, uchar map )
-{
-    m_x = x;
-    m_y = y;
-    m_z = z;
-    m_map = map;
-}
-
-//*************************************************************************
 // -CPointSort
 
-CPointSort::CPointSort( word x, word y, char z, uchar map )
+CPointSort::CPointSort(short x, short y, char z, uchar map ) noexcept :
+    CPointMap(x, y, z, map)
 {
-    m_x = x;
-    m_y = y;
-    m_z = z;
-    m_map = map;
+}
+
+CPointSort::CPointSort(const CPointBase& pt) noexcept :
+	CPointMap(pt.m_x, pt.m_y, pt.m_z, pt.m_map)
+{
 }

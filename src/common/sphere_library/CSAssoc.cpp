@@ -49,7 +49,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 		case ELEM_VOID:
 			return false;
 		case ELEM_STRING:
-			strncpynull(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
+			Str_CopyLimitNull(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
 			return true;
 		case ELEM_CSTRING:
 			*static_cast<CSString *>(pValPtr) = pszVal;

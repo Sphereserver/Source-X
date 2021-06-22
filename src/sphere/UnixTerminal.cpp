@@ -11,11 +11,12 @@
 	#include <sys/time.h>
 #endif
 
-UnixTerminal g_UnixTerminal;
 
 UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", IThread::Highest),
 #ifdef _USECURSES
 	m_window(nullptr),
+#else
+	m_original{},
 #endif
  m_nextChar('\0'), m_isColorEnabled(true), m_prepared(false)
 {
@@ -252,7 +253,9 @@ void UnixTerminal::restore()
 #else
 	// restore original terminal state
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &m_original) < 0)
-		throw CSError(LOGL_WARN, 0, "failed to restore terminal attributes");
+	{
+		fprintf(stderr, "SYSWARN: failed to restore terminal attributes.");
+	}
 #endif
 
 	m_prepared = false;
@@ -274,27 +277,23 @@ void UnixTerminal::tick()
 {
     while (!shouldExit())
     {
-        std::unique_lock<std::mutex> lock(ConsoleInterface::_ciQueueMutex);
-        while (_qOutput.empty())
-        {
-            ConsoleInterface::_ciQueueCV.wait(lock);
-        }
+		std::deque<std::unique_ptr<ConsoleOutput>> outMessages;
+		{
+			// Better keep the mutex locked for the least time possible.
+			std::unique_lock<std::mutex> lock(this->ConsoleInterface::_ciQueueMutex);
+			while (_qOutput.empty())
+			{
+				this->ConsoleInterface::_ciQueueCV.wait(lock);
+			}
 
-        std::vector<ConsoleOutput*> outMessages;
-        outMessages.reserve(_qOutput.size());
-        while (!_qOutput.empty())
-        {
-            outMessages.emplace_back(_qOutput.front());
-            _qOutput.pop();
-        }
-        lock.unlock();   // Better keep the mutex locked for the least time possible.
+			outMessages.swap(this->ConsoleInterface::_qOutput);
+		}
 
-        for (ConsoleOutput* co : outMessages)
+		for (std::unique_ptr<ConsoleOutput> const& co : outMessages)
         {
             setColor(co->GetTextColor());
-            print(co->GetTextString().GetPtr());
+            print(co->GetTextString().GetBuffer());
             setColor(CTCOL_DEFAULT);
-            delete co;
         }
     }
 }

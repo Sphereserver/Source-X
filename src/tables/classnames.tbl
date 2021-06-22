@@ -3,21 +3,37 @@
 //	Set:	class  names
 //
 
-#include "../common/resource/blocks/CDialogDef.h"
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
-#include "../common/resource/blocks/CSkillClassDef.h"
-#include "../game/CPathFinder.h"
+#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
+#include "../common/resource/sections/CSkillClassDef.h"
+#include "../common/sphere_library/CSObjCont.h"
+#include "../common/sphere_library/CSObjList.h"
+#include "../common/sqlite/SQLite.h"
+#include "../common/CSFileObjContainer.h"
+
+#include "../game/CEntity.h"
 #include "../game/chars/CCharBase.h"
 #include "../game/chars/CCharPlayer.h"
 #include "../game/chars/CCharNPC.h"
 #include "../game/clients/CClient.h"
 #include "../game/components/CCSpawn.h"
 #include "../game/components/CCChampion.h"
+#include "../game/items/CItemCommCrystal.h"
+#include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
-#include "../common/sqlite/SQLite.h"
-#include "../common/CSFileObjContainer.h"
+#include "../game/CSectorList.h"
+#include "../game/CPathFinder.h"
+#include "../game/CWorldComm.h"
+#include "../game/CWorldGameTime.h"
+#include "../game/CWorldMap.h"
+#include "../game/CWorldTickingList.h"
+
+#include "../network/CNetworkInput.h"
+#include "../network/CNetworkOutput.h"
+#include "../network/CNetworkThread.h"
+
 
 #define ADD(a,b) const char * a::m_sClassName = b
 
@@ -32,7 +48,7 @@ ADD(CCharPlayer,			"CCharPlayer");
 ADD(CClient,				"CClient");
 ADD(CDialogDef,				"CDialogDef");
 ADD(CDialogResponseArgs,	"CDialogResponseArgs");
-ADD(CSectorBase,			"CSectorBase");
+ADD(CEntity,				"CEntity");
 ADD(CSFileObj,				"CSFileObj");
 ADD(CSFileObjContainer,		"CSFileObjContainer");
 ADD(CScriptObj,				"CScriptObj");
@@ -42,11 +58,19 @@ ADD(CResourceRefArray,		"CResourceRefArray");
 ADD(CRegionWorld,			"CRegionWorld");
 ADD(CRegion,				"CRegion");
 ADD(CWorld,					"CWorld");
+ADD(CWorldCache,			"CWorldCache");
+ADD(CWorldComm,				"CWorldComm");
+ADD(CWorldGameTime,			"CWorldGameTime");
+ADD(CWorldMap,				"CWorldMap");
+ADD(CWorldTicker,			"CWorldTicker");
+ADD(CWorldTickingList,		"CWorldTickingList");
 ADD(CWorldThread,			"CWorldThread");
 ADD(CWebPageDef,			"CWebPageDef");
 ADD(CServerDef,				"CServerDef");
 ADD(CServer,				"CServer");
 ADD(CSector,				"CSector");
+ADD(CSectorBase,			"CSectorBase");
+ADD(CSectorList,			"CSectorList");
 ADD(CRegionResourceDef,		"CRegionResourceDef");
 ADD(CRandGroupDef,			"CRandGroupDef");
 ADD(CSpellDef,				"CSpellDef");
@@ -59,6 +83,8 @@ ADD(CItemContainer,			"CItemContainer");
 ADD(CGMPage,				"CGMPage");
 ADD(CItemBase,				"CItemBase");
 ADD(CItem,					"CItem");
+ADD(CItemCommCrystal,		"CItemCommCrystal");
+ADD(CItemCorpse,			"CItemCorpse");
 ADD(CItemMulti,				"CItemMulti");
 ADD(CItemMultiCustom,		"CItemMultiCustom");
 ADD(CItemMap,				"CItemMap");
@@ -71,22 +97,19 @@ ADD(CDataBase,				"CDataBase");
 ADD(CItemBaseMulti,			"CItemBaseMulti");
 ADD(CPathFinder,			"CPathFinder");
 ADD(CPartyDef,				"CPartyDef");
+ADD(CSObjCont,              "CSObjCont");
+ADD(CSObjList,              "CSObjList");
 ADD(CSQLite,                "CSQLite");
 ADD(CStoneMember,			"CStoneMember");
+ADD(CTimedObject,			"CTimedObject");
 ADD(CVarDefCont,			"CVarDefCont");
 ADD(CVarDefContNum,			"CVarDefContNum");
 ADD(CVarDefContStr,			"CVarDefContStr");
 ADD(CVarDefMap,				"CVarDefMap");
-ADD(CVarDefMap::CVarDefContTest, "CVarDefContTest");
-#ifndef _MTNETWORK
-	ADD(NetworkIn,				"NetworkIn");
-	ADD(NetworkOut,				"NetworkOut");
-#else
-	ADD(NetworkInput,			"NetworkInput");
-	ADD(NetworkOutput,			"NetworkOutput");
-	ADD(NetworkThread,			"NetworkThread");
-	ADD(NetworkManager,			"NetworkManager");
-#endif
+ADD(CNetworkInput,			"CNetworkInput");
+ADD(CNetworkOutput,			"CNetworkOutput");
+ADD(CNetworkThread,			"CNetworkThread");
+ADD(CNetworkManager,		"CNetworkManager");
 #ifdef _WIN32
 	ADD(CNTWindow,              "CNTWindow");
 #endif

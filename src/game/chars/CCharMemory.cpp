@@ -3,7 +3,7 @@
 
 #include "../../network/send.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
@@ -96,7 +96,7 @@ lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 	if ( pszAbbrev == nullptr )
 		return nullptr;
 	tchar * pszTemp = Str_GetTemp();
-	sprintf( pszTemp, " [%s]", pszAbbrev );
+	snprintf( pszTemp, STR_TEMPLENGTH, " [%s]", pszAbbrev );
 	return pszTemp;
 }
 
@@ -148,8 +148,8 @@ bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes )
 	ADDTOCALLSTACK("CChar::Memory_UpdateClearTypes");
 	ASSERT(pMemory);
 
-	word wPrvMemTypes = pMemory->GetMemoryTypes();
-	bool fMore = ( pMemory->SetMemoryTypes( wPrvMemTypes &~ MemTypes ) != 0);
+	const word wPrvMemTypes = pMemory->GetMemoryTypes();
+	const bool fMore = ( pMemory->SetMemoryTypes( wPrvMemTypes &~ MemTypes ) != 0);
 
 	MemTypes &= wPrvMemTypes;	// Which actually got turned off ?
 
@@ -173,7 +173,7 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 	{
 		pMemory->SetMemoryTypes( pMemory->GetMemoryTypes() | MemTypes );
 		pMemory->m_itEqMemory.m_pt = GetTopPoint();	// Where did the fight start ?
-		pMemory->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());
+		pMemory->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		Memory_UpdateFlags( pMemory );
 	}
 }
@@ -194,7 +194,7 @@ bool CChar::Memory_ClearTypes( CItemMemory * pMemory, word MemTypes )
 // Create a memory about this object.
 // NOTE: Does not check if object already has a memory.!!!
 //  Assume it does not !
-CItemMemory * CChar::Memory_CreateObj( CUID uid, word MemTypes )
+CItemMemory * CChar::Memory_CreateObj(const CUID& uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_CreateObj");
 
@@ -221,11 +221,10 @@ CItemMemory * CChar::Memory_CreateObj( const CObjBase * pObj, word MemTypes )
 // Remove all the memories of this type.
 void CChar::Memory_ClearTypes( word MemTypes )
 {
-	ADDTOCALLSTACK("CChar::Memory_ClearTypes");
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	ADDTOCALLSTACK("CChar::Memory_ClearTypes(type)");
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsMemoryTypes(MemTypes) )
 			continue;
 		CItemMemory * pMemory = dynamic_cast <CItemMemory *>(pItem);
@@ -236,11 +235,12 @@ void CChar::Memory_ClearTypes( word MemTypes )
 }
 
 // Do I have a memory / link for this object ?
-CItemMemory * CChar::Memory_FindObj( CUID uid ) const
+CItemMemory * CChar::Memory_FindObj( const CUID& uid ) const
 {
-	ADDTOCALLSTACK("CChar::Memory_FindObj");
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	ADDTOCALLSTACK("CChar::Memory_FindObj(UID)");
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			continue;
 		if ( pItem->m_uidLink != uid )
@@ -252,6 +252,7 @@ CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 
 CItemMemory * CChar::Memory_FindObj( const CObjBase * pObj ) const
 {
+    ADDTOCALLSTACK("CChar::Memory_FindObj");
 	if ( pObj == nullptr )
 		return nullptr;
 	return Memory_FindObj( pObj->GetUID());
@@ -265,8 +266,9 @@ CItemMemory * CChar::Memory_FindTypes( word MemTypes ) const
 	if ( !MemTypes )
 		return nullptr;
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsMemoryTypes(MemTypes) )
 			continue;
 		return dynamic_cast<CItemMemory *>(pItem);
@@ -276,6 +278,7 @@ CItemMemory * CChar::Memory_FindTypes( word MemTypes ) const
 
 CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const
 {
+    ADDTOCALLSTACK("CChar::Memory_FindObjTypes");
 	CItemMemory * pMemory = Memory_FindObj(pObj);
 	if ( pMemory == nullptr )
 		return nullptr;
@@ -284,7 +287,7 @@ CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes )
 	return pMemory;
 }
 
-CItemMemory * CChar::Memory_AddObj( CUID uid, word MemTypes )
+CItemMemory * CChar::Memory_AddObj(const CUID& uid, word MemTypes )
 {
 	return Memory_CreateObj( uid, MemTypes );
 }
@@ -298,13 +301,14 @@ CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, word MemTypes )
 TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, word wMemType )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForMemTypeLoop");
-	CScriptLineContext StartContext = s.GetContext();
+	const CScriptLineContext StartContext = s.GetContext();
 	CScriptLineContext EndContext = StartContext;
 
 	if ( wMemType )
 	{
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (CSObjContRec* pObjRec : GetIterationSafeCont())
 		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsMemoryTypes(wMemType) )
 				continue;
 			TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
@@ -327,7 +331,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 		if ( iRet != TRIGRET_ENDIF )
-			return( iRet );
+			return iRet;
 	}
 	else
 		s.SeekContext( EndContext );
@@ -335,20 +339,21 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 }
 
 // Adding a new value for this memory, updating notoriety
-CItemMemory * CChar::Memory_AddObjTypes( CUID uid, word MemTypes )
+CItemMemory * CChar::Memory_AddObjTypes(const CUID& uid, word MemTypes )
 {
-	ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
+	ADDTOCALLSTACK("CChar::Memory_AddObjTypes(UID)");
 	CItemMemory * pMemory = Memory_FindObj( uid );
 	if ( pMemory == nullptr )
 		return Memory_CreateObj( uid, MemTypes );
 
 	Memory_AddTypes( pMemory, MemTypes );
 	NotoSave_Delete( uid.CharFind() );
-	return pMemory ;
+	return pMemory;
 }
 
 CItemMemory * CChar::Memory_AddObjTypes( const CObjBase * pObj, word MemTypes )
 {
+    ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
 	ASSERT(pObj);
 	return Memory_AddObjTypes( pObj->GetUID(), MemTypes );
 }
@@ -427,7 +432,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		return true;
 	}
 
-	int64 iTimeDiff = - g_World.GetTimeDiff( pMemory->GetTimeStamp() );
+	const int64 iTimeDiff = CWorldGameTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStamp() );
 
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*MSECS_PER_SEC )
@@ -478,7 +483,7 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 	}
 	else
 	{
-		if (Attacker_GetID(pTarg->GetUID()))	// I'm already in fight against pTarg, no need of more code
+		if (Attacker_GetID(pTarg->GetUID()) >= 0)	// I'm already in fight against pTarg, no need of more code
 			return;
 		if ( pMemory->IsMemoryTypes(MEMORY_HARMEDBY|MEMORY_SAWCRIME|MEMORY_AGGREIVED))
 			MemTypes = 0;	// I am defending myself rightly.
@@ -488,11 +493,11 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 		Memory_AddTypes(pMemory, MEMORY_FIGHT | MemTypes); // Update the fight status.
 	}
 
-	if ( IsClient() && (m_Fight_Targ_UID == pTarg->GetUID()) && !IsSetCombatFlags(COMBAT_NODIRCHANGE))
+	if ( IsClientActive() && (m_Fight_Targ_UID == pTarg->GetUID()) && !IsSetCombatFlags(COMBAT_NODIRCHANGE))
 	{
 		// This may be a useless command. How do i say the fight is over ?
 		// This causes the funny turn to the target during combat !
-		new PacketSwing(GetClient(), pTarg);
+		new PacketSwing(GetClientActive(), pTarg);
 	}
 	else
 	{

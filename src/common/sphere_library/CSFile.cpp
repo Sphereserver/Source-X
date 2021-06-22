@@ -1,13 +1,13 @@
-
-#ifndef _WIN32
+#include "../../sphere/threads.h"
+#include "../CLog.h"
+#include "CSFile.h"
+#ifdef _WIN32
+    #include <io.h> 	// findfirst
+#else
 	#include <errno.h>	// errno
 	#include <sys/types.h>
 	#include <sys/stat.h>
 #endif
-#include "../../sphere/threads.h"
-#include "../CLog.h"
-#include "CSFile.h"
-
 
 // CSFile:: Constructors, Destructor, Asign operator.
 
@@ -40,7 +40,7 @@ int CSFile::GetLastError()
 void CSFile::_NotifyIOError( lpctstr szMessage ) const
 {
     ADDTOCALLSTACK("CSFile::_NotifyIOError");
-    int iErrorCode = GetLastError();
+    const int iErrorCode = GetLastError();
 #ifdef _WIN32
     lpctstr pMsg;
     LPVOID lpMsgBuf;
@@ -51,11 +51,11 @@ void CSFile::_NotifyIOError( lpctstr szMessage ) const
         pMsg = "No System Error";
     else
         pMsg = static_cast<lptstr>(lpMsgBuf);
-    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg );
+    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg );
     if (lpMsgBuf != nullptr)
         LocalFree( lpMsgBuf );
 #else
-    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) );
+    g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) );
 #endif
 }
 
@@ -99,7 +99,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
     }
 
     if ( !ptcFilename )
-        ptcFilename = _strFileName.GetPtr();
+        ptcFilename = _strFileName.GetBuffer();
     else
         _strFileName = ptcFilename;
 
@@ -160,11 +160,11 @@ bool CSFile::IsFileOpen() const
 
 lpctstr CSFile::_GetFilePath() const
 {
-    return _strFileName.GetPtr();
+    return _strFileName.GetBuffer();
 }
 lpctstr CSFile::GetFilePath() const
 {
-    THREAD_SHARED_LOCK_RETURN(_strFileName.GetPtr());
+    THREAD_SHARED_LOCK_RETURN(_strFileName.GetBuffer());
 }
 
 bool CSFile::_SetFilePath( lpctstr pszName )
@@ -227,20 +227,20 @@ int CSFile::_GetPosition() const
     DWORD ret = SetFilePointer( _fileDescriptor, 0, nullptr, FILE_CURRENT );
     if (ret == INVALID_SET_FILE_POINTER)
     {
-        _NotifyIOError("CFile::GetPosition");
+        _NotifyIOError("CSFile::GetPosition");
         return 0;
     }
 #else
 	off_t ret = lseek( _fileDescriptor, 0, SEEK_CUR );
     if (ret == (off_t)-1)
     {
-        _NotifyIOError("CFile::GetPosition");
+        _NotifyIOError("CSFile::GetPosition");
         return 0;
     }
 #endif
     if (ret > INT_MAX)
     {
-        _NotifyIOError("CFile::GetPosition (length)");
+        _NotifyIOError("CSFile::GetPosition (length)");
         return 0;
     }
     return (int)ret;
@@ -311,29 +311,28 @@ int CSFile::Seek( int iOffset, int iOrigin )
 void CSFile::_SeekToBegin()
 {
     ADDTOCALLSTACK("CSFile::_SeekToBegin");
-    _Seek( 0, SEEK_SET );
+    CSFile::_Seek( 0, SEEK_SET );
 }
 void CSFile::SeekToBegin()
 {
     ADDTOCALLSTACK("CSFile::SeekToBegin");
-	Seek( 0, SEEK_SET );
+    CSFile::Seek( 0, SEEK_SET );
 }
 
 int CSFile::_SeekToEnd()
 {
     ADDTOCALLSTACK("CSFile::_SeekToEnd");
-    return _Seek( 0, SEEK_END );
+    return CSFile::_Seek( 0, SEEK_END );
 }
 int CSFile::SeekToEnd()
 {
     ADDTOCALLSTACK("CSFile::SeekToEnd");
-	return Seek( 0, SEEK_END );
+	return CSFile::Seek( 0, SEEK_END );
 }
 
-bool CSFile::Write( const void * pData, int iLength )
+bool CSFile::_Write( const void * pData, int iLength )
 {
-    ADDTOCALLSTACK("CSFile::Write");
-    THREAD_UNIQUE_LOCK_SET;
+    ADDTOCALLSTACK("CSFile::_Write");
 
 #ifdef _WIN32
 	DWORD dwWritten;
@@ -353,6 +352,12 @@ bool CSFile::Write( const void * pData, int iLength )
     }
 	return true;
 #endif
+}
+
+bool CSFile::Write(const void* pData, int iLength)
+{
+    ADDTOCALLSTACK("CSFile::Write");
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Write(pData, iLength));
 }
 
 // CSFile:: File name operations.
@@ -377,7 +382,7 @@ lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 lpctstr CSFile::_GetFileTitle() const
 {
     ADDTOCALLSTACK("CFile::_GetFileTitle");
-    return CSFile::GetFilesTitle(_strFileName.GetPtr());
+    return CSFile::GetFilesTitle(_strFileName.GetBuffer());
 }
 lpctstr CSFile::GetFileTitle() const
 {
@@ -420,8 +425,7 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
     size_t len = 0;
 	if ( pszBase && pszBase[0] )
 	{
-		strncpy( ptcFilePath, pszBase, sizeof(ptcFilePath) );
-		len = strlen(ptcFilePath);
+        len = Str_CopyLimitNull( ptcFilePath, pszBase, sizeof(ptcFilePath) - 1); // eventually, leave space for the (back)slash
 		if (len && ptcFilePath[len - 1] != '\\' && ptcFilePath[len - 1] != '/')
 		{
 #ifdef _WIN32
@@ -437,7 +441,7 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	}
 	if ( pszName )
 	{
-		strncat(ptcFilePath, pszName, sizeof(ptcFilePath)-len);
+        Str_ConcatLimitNull(ptcFilePath, pszName, sizeof(ptcFilePath)-len);
 	}
 	return CSString(ptcFilePath);
 }
@@ -469,4 +473,23 @@ bool CSFile::_IsWriteMode() const
 bool CSFile::IsWriteMode() const
 {
     THREAD_SHARED_LOCK_RETURN(_uiMode & OF_WRITE);
+}
+
+
+// static methods
+
+bool CSFile::FileExists(lpctstr ptcFilePath) // static
+{
+#ifdef _WIN32
+    // WINDOWS
+    struct _finddata_t fileinfo;
+    fileinfo.attrib = _A_NORMAL;
+    intptr_t lFind = _findfirst( ptcFilePath, &fileinfo );
+
+    return ( lFind != -1 );
+#else
+    // LINUX
+    struct stat fileStat;
+    return ( stat( ptcFilePath, &fileStat) != -1 );
+#endif
 }

@@ -6,11 +6,14 @@
 #ifndef _INC_CITEMMULTI_H
 #define _INC_CITEMMULTI_H
 
-#include "CItem.h"
 #include "../components/CCMultiMovable.h"
+#include "CItem.h"
+#include <map>
+
 
 #define MAX_MULTI_LIST_OBJS 128
 #define MAX_MULTI_CONTENT 1024
+
 
 enum HOUSE_TYPE
 {
@@ -32,6 +35,7 @@ class CChar;
 class CItemStone;
 class CItemContainer;
 class CItemShip;
+
 class CItemMulti : public CItem, public CCMultiMovable
 {
     friend class CCMultiMovable;
@@ -48,27 +52,27 @@ private:
     std::vector<CUID> _lCoowners;   // List of Coowners.
     std::vector<CUID> _lFriends;    // List of Friends.
     std::vector<CUID> _lVendors;    // List of Vendors.
-    std::vector<CUID> _lBans;        // List of Banned chars.
-    std::vector<CUID> _lAccesses;    // List of Accesses chars.
+    std::vector<CUID> _lBans;       // List of Banned chars.
+    std::vector<CUID> _lAccesses;   // List of Accesses chars.
 protected:
     std::vector<CUID> _lLockDowns;  // List of Locked Down items.
     std::vector<CUID> _lSecureContainers; // List of Secured containers.
-    std::vector<CUID> _lAddons;  // List of AddOns.
+    std::vector<CUID> _lAddons;     // List of AddOns.
 private:
-    std::vector<CUID> _lComps; // List of Components.
+    std::vector<CUID> _lComps;      // List of Components.
 
     // house general
-    CUID  _pMovingCrate;   // Moving Crate's container.
-    bool _fIsAddon;         // House AddOns are also multis
+    CUID  _uidMovingCrate;      // Moving Crate's container.
+    bool _fIsAddon;             // House AddOns are also multis
     HOUSE_TYPE _iHouseType;
     uint8 _iMultiCount;         // Does this counts towars the char's house limit
 
     // house storage
-    uint16 _iBaseStorage;       // Base limit for secure storage (Max = 65535).
-    uint8 _iBaseVendors;        // Base limit for player vendors (Max = 255).
-    uint16 _iIncreasedStorage;  // % of increasd storage. Note: uint8 should be enough since the default max is 60%, but someone may want 300%, 1000% or even more.
+    uint16 _uiBaseStorage;       // Base limit for secure storage (Max = 65535).
+    uint8  _uiBaseVendors;       // Base limit for player vendors (Max = 255).
+    uint16 _uiIncreasedStorage;  // % of increasd storage. Note: uint8 should be enough since the default max is 60%, but someone may want 300%, 1000% or even more.
     // Total Storage = _iBaseStorage + ( _iBaseStorage * _iIncreasedStorage )
-    uint8 _iLockdownsPercent;   // % of Total Storage reserved for locked down items. (Default = 50%)
+    uint8 _uiLockdownsPercent;   // % of Total Storage reserved for locked down items. (Default = 50%)
 
 protected:
     CRegionWorld * m_pRegion;		// we own this region.
@@ -132,7 +136,7 @@ public:
     * @brief Calculates the largest part of the multi.
     * @return the value.
     */
-    int Multi_GetMaxDist() const;
+    int Multi_GetDistanceMax() const;
 
     /**
     * @brief Checks if a the multi can be created and create it if so.
@@ -146,6 +150,7 @@ public:
     */
     static CItem *Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed);
 
+
     /** House Permissions
     */
     ///@{
@@ -154,19 +159,19 @@ public:
     * @brief Revokes any privileges from this house.
     * @param pSrc the object whom privileges to revoke.
     */
-    void RevokePrivs(CUID uidSrc);
+    void RevokePrivs(const CUID& uidSrc);
     //Owner
     /**
     * @brief Set's the owner.
     * @param pOwner the new owner.
     */
-    void SetOwner(CUID uidOwner);
+    void SetOwner(const CUID& uidOwner);
     /**
     * @brief Checks if the given CChar in the param is the owner.
     * @param pTarget the char to check.
     * @return true if true.
     */
-    bool IsOwner(const CUID uidTarget) const;
+    bool IsOwner(const CUID& uidTarget) const;
     /**
     * @brief Returns the owner.
     * @return the Owner's CChar.
@@ -178,30 +183,30 @@ public:
     * @brief Links this multi to a guild.
     * @param pGuild the guild on which to link.
     */
-    void SetGuild(CUID uidGuild);
+    void SetGuild(const CUID& uidGuild);
     /**
     * @brief Checks if the given guild is the one linked to this multi.
     * @param pGuild the guild to check on.
     * @return true if match.
     */
-    bool IsGuild(const CUID uidGuild) const;
+    bool IsGuild(const CUID& uidGuild) const;
     /**
     * @brief Returns the guild linked.
     * @return the guild
     */
-    CUID GetGuild() const;
+    CUID GetGuildStone() const;
 
     // Coowner
     /**
     * @brief Adds a coowner to the _lCoowners list.
     * @param pCoowner the coowner
     */
-    void AddCoowner(CUID uidCoowner);
+    void AddCoowner(const CUID& uidCoowner);
     /**
     * @brief Deletes a coowner to the _lCoowners list.
     * @param pCoowner the coowner
     */
-    void DelCoowner(CUID uidCoowner);
+    void DeleteCoowner(const CUID& uidCoowner, bool fRemoveFromList);
     /**
     * @brief Returns the total count of coowners on the list.
     * @return the count.
@@ -212,19 +217,19 @@ public:
     * @param pTarget the coowner.
     * @return the position.
     */
-    int GetCoownerPos(const CUID uidTarget) const;
+    int GetCoownerIndex(const CUID& uidTarget) const;
 
     // Friend
     /**
     * @brief Adds a friend to the _lFriends list.
     * @param pFriend the friend
     */
-    void AddFriend(CUID uidFriend);
+    void AddFriend(const CUID& uidFriend);
     /**
     * @brief Deletes a friend to the _lFriends list.
     * @param pFriend the friend
     */
-    void DelFriend(CUID uidFriend);
+    void DeleteFriend(const CUID& uidFriend, bool fRemoveFromList);
     /**
     * @brief Returns the total count of friends on the list.
     * @return the count.
@@ -235,18 +240,19 @@ public:
     * @param pTarget the friend.
     * @return the position.
     */
-    int GetFriendPos(const CUID uidTarget) const;
+    int GetFriendIndex(const CUID& uidTarget) const;
+
     // Ban
     /**
     * @brief Adds a char to the _lBans list.
     * @param pBan the char to ban.
     */
-    void AddBan(CUID uidBan);
+    void AddBan(const CUID& uidBan);
     /**
     * @brief Deletes a char from the _lBans list.
     * @param pBan the char.
     */
-    void DelBan(CUID uidBan);
+    void DeleteBan(const CUID& uidBan, bool fRemoveFromList);
     /**
     * @brief Returns the total count of banned chars.
     * @return the count
@@ -257,20 +263,21 @@ public:
     * @param pBan the char.
     * @return the pos.
     */
-    int GetBanPos(const CUID uidBan) const;
+    int GetBanIndex(const CUID& uidBan) const;
+
     // Access
     /**
     * @brief Adds access to this house to the given char.
     * @param pAccess the char.
     */
-    void AddAccess(CUID uidAccess);
+    void AddAccess(const CUID& uidAccess);
     /**
     * @brief Revokes the access to this house to the given char.
     *
     * Note: This removes the char from the list, but won't prevent it from enter like a Ban.
     * @param pAccess the char.
     */
-    void DelAccess(CUID uidAccess);
+    void DeleteAccess(const CUID& uidAccess, bool fRemoveFromList);
     /**
     * @brief Returns the count of chars with access.
     * @return the count.
@@ -281,22 +288,24 @@ public:
     * @param pAccess the char.
     * @return the position.
     */
-    int GetAccessPos(const CUID uidAccess) const;
+    int GetAccessIndex(const CUID& uidAccess) const;
     /**
     * @brief Ejects a char from inside the house to the House Sign.
     * @param pChar the char.
     */
-    void Eject(CUID uidChar);
+    void Eject(const CUID& uidChar);
     /**
     * @brief Ejects all chars from this house
     * @param pChar this char will not be ejected (eg: the owner kicking all people)
     */
-    void EjectAll(CUID uidChar = UID_UNUSED);
+    void EjectAll(CUID uidChar = CUID());
     ///@}
+
 
     /** House general:
     */
     ///@{
+
     // Keys:
     /**
     * @brief Creates a key for the given character.
@@ -304,12 +313,17 @@ public:
     * @param  fDupeOnBank creates a copy on the bank if true.
     * @return the Key.
     */
-    CItem *GenerateKey(CUID uidTarget, bool fDupeOnBank = false);
+    CItem *GenerateKey(const CUID& uidTarget, bool fDupeOnBank = false);
     /**
     * @brief Removes all the keys of this house from the given char.
     * @param pTarget the char.
     */
-    void RemoveKeys(CUID uidTarget);
+    void RemoveKeys(const CUID& uidTarget);
+    /**
+    * @brief Calls RemoveKeys(player_uid) on all players with access to this house.
+    */
+    void RemoveAllKeys();
+
     // Misc
     /**
     * @brief Returns the multi count.
@@ -319,6 +333,7 @@ public:
     * @return the count.
     */
     int16 GetMultiCount() const;
+
     // Redeed
     /**
     * @brief Redeeds this multi
@@ -326,19 +341,20 @@ public:
     * @param fMoveToBank Places the deed on the bank.
     * @param pChar the char doing the redeed (if any).
     */
-    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true, CUID uidChar = UID_UNUSED);
+    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true, CUID uidChar = CUID());
+
     //Moving Crate
     /**
     * @brief Sets the Moving Crate to the target.
     * @param pCrate the new Moving Crate.
     */
-    void SetMovingCrate(CUID uidCrate);
+    void SetMovingCrate(const CUID& uidCrate);
     /**
     * @brief Returns the Moving Crate if any.
     * @param fCreate creates a new crate if there is no one already.
     * @return the Moving Crate.
     */
-    CUID  GetMovingCrate(bool fCreate);
+    CUID GetMovingCrate(bool fCreate);
     /**
     * @brief Transfer all the items to the Moving Crate.
     * @param iType the types of items to transfer.
@@ -362,18 +378,18 @@ public:
     * @brief Adds an Addon to the addons list.
     * @param pAddon the Addon
     */
-    void AddAddon(CUID uidAddon);
+    void AddAddon(const CUID& uidAddon);
     /**
     * @brief Removes an Addon from the addons list.
     * @param pAddon the Addon
     */
-    void DelAddon(CUID uidAddon);
+    void DeleteAddon(const CUID& uidAddon);
     /**
     * @brief Returns the position of a given Addon.
     * @param pAddon the Addon
     * @return the position
     */
-    int GetAddonPos(const CUID uidAddon) const;
+    int GetAddonIndex(const CUID& uidAddon) const;
     /**
     * @brief Returns the total count of Addons.
     * @return the count.
@@ -386,36 +402,36 @@ public:
 
     // Components
     /**
-    * @brief Adds a Component to the components list.
+    * @brief Adds a CMultiComponent to the components list.
     * @param pComponent the component.
     */
-    void AddComp(CUID uidComponent);
+    void AddComponent(const CUID& uidComponent);
     /**
-    * @brief Removes a Component from the components list.
+    * @brief Removes a CMultiComponent from the components list.
     * @param pComponent the component.
     */
-    virtual void DelComp(CUID uidComponent);
+    virtual void DeleteComponent(const CUID& uidComponent, bool fRemoveFromList);
     /**
-    * @brief Returns the position of a given Component.
+    * @brief Returns the position of a given CMultiComponent.
     * @param pComponent the component
     * @return the position
     */
-    int GetCompPos(const CUID uidComponent) const;
+    int GetComponentIndex(const CUID& uidComponent) const;
     /**
     * @brief Returns the total count of Components.
     * @return the count.
     */
-    size_t GetCompCount() const;
+    size_t GetComponentCount() const;
     /**
-    * @brief Removes all Components.
+    * @brief Destroys all Components.
     */
-    void RemoveAllComps();
+    void RemoveAllComponents();
     /**
     * @brief Generates the base components of the multi.
     * @param fNeedKey wether a key is required or not.
     * @param dwKeyCode the code hash for keys.
     */
-    void GenerateBaseComponents(bool &fNeedKey, dword &dwKeyCode);
+    void GenerateBaseComponents(bool *pfNeedKey, dword dwKeyCode);
     ///@}
 
     // House storage:
@@ -435,7 +451,7 @@ public:
     * @brief Sets the modifier of Base Storage.
     * @param iIncrease the modifier.
     */
-    void SetIncreasedStorage(uint16 iIncrease);
+    void SetIncreasedStorage(uint16 uiIncrease);
     /**
     * @brief Returns the modifier for Base Storage.
     * @return the modifier.
@@ -489,17 +505,18 @@ public:
     * @brief Locks an item and add it to the Lockdowns list.
     * @param pItem the item.
     */
-    void LockItem(CUID uidItem);
+    void LockItem(const CUID& uidItem);
     /**
     * @brief Unlocks an item and remove it from the Lockdowns list.
     * @param pItem the item.
     */
-    void UnlockItem(CUID uidItem);
+    void UnlockItem(const CUID& uidItem, bool fRemoveFromList);
+    void UnlockAllItems();
     /**
     * @brief Returns the position of the given item.
     * @param pItem the item.
     */
-    int GetLockedItemPos(CUID pItem) const;
+    int GetLockedItemIndex(const CUID& pItem) const;
     /**
     * @brief Returns the total locked down items.
     * @return the count.
@@ -510,18 +527,18 @@ public:
     * @brief Secures a container and adds it to the containers list.
     * @param pContainer the container.
     */
-    void Secure(CUID uidContainer);
+    void Secure(const CUID& uidContainer);
     /**
     * @brief Releases a container and removes it from the containers list.
     * @param pContainer the container.
     */
-    void Release(CUID uidContainer);
+    void Release(const CUID& uidContainer, bool fRemoveFromList);
     /**
     * @brief Returns the position of the given container
     * @param pContainer the container
     * @return the pos.
     */
-    int GetSecuredContainerPos(const CUID uidContainer) const;
+    int GetSecuredContainerIndex(const CUID& uidContainer) const;
     /**
     * @brief Returns the total items secured on containers.
     * @return the count
@@ -537,18 +554,18 @@ public:
     * @brief Adds a char to the vendors list.
     * @param pVendor the vendor.
     */
-    void AddVendor(CUID uidVendor);
+    void AddVendor(const CUID& uidVendor);
     /**
     * @brief Removes a char from the vendors list.
     * @param pVendor the vendor
     */
-    void DelVendor(CUID uidVendor);
+    void DeleteVendor(const CUID& uidVendor, bool fRemoveFromList);
     /**
     * @brief Returns the position of the given char.
     * @param pVendor the char
     * @return the pos.
     */
-    int GetHouseVendorPos(const CUID uidVendor) const;
+    int GetVendorIndex(const CUID& uidVendor) const;
     /**
     * @brief Returns the total vendors.
     * @return the count.
@@ -561,7 +578,7 @@ protected:
     * @param pComponent the component
     * @param fIsAddon true if the component is an addon.
     */
-    virtual void OnComponentCreate(CItem * pComponent, bool fIsAddon = false);
+    void OnComponentCreate(CItem * pComponent, bool fIsAddon);
 
 
 public:
@@ -578,7 +595,7 @@ public:
     * @brief Tick override.
     * @return true
     */
-    virtual bool OnTick();
+    virtual bool _OnTick();
     /**
     * @brief Place the multi.
     * @param pt Position.
@@ -589,7 +606,7 @@ public:
     /**
     * @brief Moving from current location.
     */
-    virtual void OnMoveFrom();
+    virtual void OnMoveFrom() override;
     /**
     * @brief Speech commands on the multi.
     * @param pszCmd the speech.
@@ -617,20 +634,20 @@ public:
 
     // Scripts virtuals.
 
-    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
 
     virtual void r_Write(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual void DupeCopy(const CItem * pItem) override;  // overriding CItem::DupeCopy
-    virtual void Delete(bool fForce = false) override;
+    virtual bool Delete(bool fForce = false) override;
 };
 
 /*
 * Privileges/Access type for multis, mutually exclusive.
 */
-enum HOUSE_PRIV
+enum HOUSE_PRIV : uchar
 {
     HP_NONE,
     HP_OWNER,
@@ -651,53 +668,56 @@ enum HOUSE_PRIV
 class CMultiStorage
 {
 private:
-    std::map<CUID, HOUSE_PRIV> _lHouses;  // List of stored houses.
-    std::map<CUID, HOUSE_PRIV> _lShips;    // List of stored ships.
+    using MultiOwnedCont = std::map<CUID, HOUSE_PRIV>;
+    MultiOwnedCont _lHouses;  // List of stored houses.
+    MultiOwnedCont _lShips;   // List of stored ships.
+
     int16 _iHousesTotal;    // Max of houses.
     int16 _iShipsTotal;     // Max of ships.
     CUID _uidSrc;
+
 public:
-    CMultiStorage(CUID uidSrc);
+    CMultiStorage(const CUID& uidSrc);
     virtual ~CMultiStorage();
 
     /**
     * @brief Adds a multi
     * @param pMulti the multi
     */
-    void AddMulti(CUID uidMulti, HOUSE_PRIV ePriv);
+    void AddMulti(const CUID& uidMulti, HOUSE_PRIV ePriv);
     /**
     * @brief Removes a multi
     * @param pMulti the multi
     */
-    void DelMulti(CUID uidMulti);
+    void DelMulti(const CUID& uidMulti);
     /**
     * @brief Gets the priv
     * @param pMulti the multi to retrieve my privs.
     */
-    HOUSE_PRIV GetPriv(CUID  pMulti);
+    HOUSE_PRIV GetPriv(const CUID& pMulti);
 
     /**
     * @brief Adds a house multi.
     * @param pHouse the house.
     */
-    void AddHouse(CUID uidHouse, HOUSE_PRIV ePriv);
+    void AddHouse(const CUID& uidHouse, HOUSE_PRIV ePriv);
     /**
     * @brief Removes a house multi.
     * @param pHouse the house.
     */
-    void DelHouse(CUID uidHouse);
+    void DelHouse(const CUID& uidHouse);
     /**
     * @brief Checks if the char can place a house.
     * @param pChar the char.
     * @param iHouseCount the MultiCount of the house.
     * @return true if the char has space for the house.
     */
-    bool CanAddHouse(CUID uidChar, int16 iHouseCount) const;
+    bool CanAddHouse(const CUID& uidChar, int16 iHouseCount) const;
     /**
     * @brief Returns the position of the given house.
     * @return the position.
     */
-    int16 GetHousePos(const CUID uidHouse) const;
+    int16 GetHousePos(const CUID& uidHouse) const;
     /**
     * @brief Returns the total count of houses.
     *
@@ -727,25 +747,25 @@ public:
     * @brief Adds a ship.
     * @param pShip the ship.
     */
-    void AddShip(CUID uidShip, HOUSE_PRIV ePriv);
+    void AddShip(const CUID& uidShip, HOUSE_PRIV ePriv);
     /**
     * @brief Removes a ship.
     * @param pShip the ship.
     */
-    void DelShip(CUID uidShip);
+    void DelShip(const CUID& uidShip);
     /**
     * @brief Checks if the char can place a ship.
     * @param pChar the char.
     * @param iHouseCount the MultiCount of the ship.
     * @return true if the char has space for the ship.
     */
-    bool CanAddShip(CUID uidChar, int16 iShipCount);
+    bool CanAddShip(const CUID& uidChar, int16 iShipCount);
     /**
     * @brief Returns the position of the given ship.
     * @param pShip the ship.
     * @return the position.
     */
-    int16 GetShipPos(CUID uidShip);
+    int16 GetShipPos(const CUID& uidShip);
     /**
     * @brief Returns the total count of ships.
     *
@@ -774,6 +794,6 @@ public:
     * @brief Writes the houses/ships on the worldsave.
     * @param s The datastream.
     */
-    virtual void r_Write(CScript & s);
+    void r_Write(CScript & s) const;
 };
 #endif // _INC_CITEMMULTI_H

@@ -8,7 +8,7 @@
 
 #include "../common/common.h"
 
-enum PROFILE_TYPE
+enum PROFILE_TYPE : uchar
 {
 	PROFILE_IDLE,		// Wait for stuff.
 	PROFILE_OVERHEAD,	// In between stuff.
@@ -58,32 +58,30 @@ protected:
 
 	// Store the last time start time.
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
-	llong m_CurrentTime;			// QueryPerformanceCount()
+	llong m_CurrentTime;			// in milliseconds
 
 public:
-	ProfileData();
+	ProfileData() noexcept;
 
 private:
 	ProfileData(const ProfileData& copy);
 	ProfileData& operator=(const ProfileData& other);
 
 public:
-	bool IsActive() const {
+	bool IsActive() const noexcept {
 		return ( m_iActiveWindowSeconds > 0 ? true : false );
 	}
-	int GetActiveWindow() const {
-		return m_iActiveWindowSeconds;
-	}
+    int GetActiveWindow() const noexcept;
 
 	void SetActive(int iSampleSec);
 	void Start(PROFILE_TYPE id);
 	void Count(PROFILE_TYPE id, dword dwVal);
-	void EnableProfile(PROFILE_TYPE id);
+	void EnableProfile(PROFILE_TYPE id) noexcept;
 
-	PROFILE_TYPE GetCurrentTask() const;
-	lpctstr GetName(PROFILE_TYPE id) const;
+	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const noexcept;
+	PROFILE_TYPE GetCurrentTask() const noexcept;
+	lpctstr GetName(PROFILE_TYPE id) const noexcept;
 	lpctstr GetDescription(PROFILE_TYPE id) const;
-	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const;
 };
 
 #endif // _INC_PROFILEDATA_H

@@ -1,6 +1,6 @@
 //
 //	CPathFinder
-//		pathfinding algorytm based on AStar (A*) algorithm
+//		pathfinding algorithm based on AStar (A*) algorithm
 //		based on A* Pathfinder (Version 1.71a) by Patrick Lester, pwlester@policyalmanac.org
 //
 
@@ -8,116 +8,89 @@
 #define _INC_PATHFINDER_H
 
 #include <deque>
-#include <list>
-#include "../common/CRect.h"
+#include "../common/sphere_library/CSSortedVector.h"
+#include "../common/CPointBase.h"
 #include "uo_files/uofiles_macros.h"
 
+//	number of steps to remember for pathfinding, default to 28 steps (one screen, both sides), will have 28*4 extra bytes per char
+#define MAX_NPC_PATH_STORAGE_SIZE	(UO_MAP_VIEW_SIGHT*2)
 
-#define PATH_SIZE (UO_MAP_VIEW_SIGHT*2)	// limit NPC view by one screen (both sides)
 
 class CChar;
-class CPathFinderPointRef;
 
 class CPathFinderPoint : public CPointMap
 {
-protected:
-	CPathFinderPoint* m_Parent;
 public:
-	bool m_Walkable;
-	int FValue;
-	int GValue;
-	int HValue;
+	CPathFinderPoint* _Parent;
+	bool _Walkable;
+	int _FValue;
+	int _GValue;
+	int _HValue;
 
 public:
 	CPathFinderPoint();
-	explicit CPathFinderPoint(const CPointMap& pt);
+
+    // We shouldn't be using these
+	explicit CPathFinderPoint(const CPointMap& pt) = delete;
+    void operator = (const CPointMap& copy) = delete;
 
 private:
 	CPathFinderPoint(const CPathFinderPoint& copy);
 	CPathFinderPoint& operator=(const CPathFinderPoint& other);
 
 public:
-	const CPathFinderPoint* GetParent() const;
-	void SetParent(CPathFinderPointRef& pt);
-
-	bool operator < (const CPathFinderPoint& pt) const;
+    inline bool operator < (const CPathFinderPoint& pt) const noexcept
+    {
+        return (_FValue < pt._FValue);
+    }
 };
 
-class CPathFinderPointRef
-{
-public:
-	CPathFinderPoint* m_Point;
-
-public:
-	CPathFinderPointRef() : m_Point(0)
-	{
-	}
-
-	explicit CPathFinderPointRef(CPathFinderPoint& Pt)
-	{
-		m_Point = &Pt;
-	}
-
-public:
-	CPathFinderPointRef& operator = ( const CPathFinderPointRef& Pt )
-	{
-		m_Point = Pt.m_Point;
-		return *this;
-	}
-
-	bool operator < (const CPathFinderPointRef& Pt) const
-	{
-		return m_Point->FValue < Pt.m_Point->FValue;
-	}
-
-	bool operator == ( const CPathFinderPointRef& Pt )
-	{
-		return Pt.m_Point == m_Point;
-	}
-};
 
 class CPathFinder
 {
 public:
 	static const char *m_sClassName;
 
-	#define PATH_NONEXISTENT 0
-	#define PATH_FOUND 1
-
-
-	#define PATH_WALKABLE 1
-	#define PATH_UNWALKABLE 0
-
-	CPathFinder(CChar *pChar, CPointMap ptTarget);
-	~CPathFinder();
+	CPathFinder(CChar *pChar, const CPointMap& ptTarget);
+	~CPathFinder() = default;
 
 private:
 	CPathFinder(const CPathFinder& copy);
 	CPathFinder& operator=(const CPathFinder& other);
 
 public:
-	int FindPath();
-	CPointMap ReadStep(size_t Step = 0);
-	size_t LastPathSize();
-	void ClearLastPath();
+    bool FindPath();
+    size_t LastPathSize() const noexcept
+    {
+        return m_LastPath.size();
+    }
+    void ClearLastPath() noexcept
+    {
+        m_LastPath.clear();
+    }
+    inline const CPointMap& ReadStep(size_t Step = 0) const
+    {
+        return m_LastPath[Step];
+    }
 
 protected:
-	CPathFinderPoint m_Points[PATH_SIZE][PATH_SIZE];
-	std::deque<CPathFinderPointRef> m_Opened;
-	std::deque<CPathFinderPointRef> m_Closed;
+	CPathFinderPoint m_Points[MAX_NPC_PATH_STORAGE_SIZE][MAX_NPC_PATH_STORAGE_SIZE];
+	std::deque <CPathFinderPoint*>    m_Opened; // push/pop front/back
+	CSSortedVector<CPathFinderPoint*> m_Closed; // i'm only searching (a lot) and pushing_back here
 
 	std::deque<CPointMap> m_LastPath;
 
-	int m_RealX;
-	int m_RealY;
+	short m_RealX;
+	short m_RealY;
 
 	CChar *m_pChar;
 	CPointMap m_Target;
 
 protected:
+    static int Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept;
+
 	void Clear();
-	uint Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2);
-	void GetChildren(CPathFinderPointRef& Point, std::list<CPathFinderPointRef>& ChildrenRefList );
+	void GetAdjacentCells(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& ChildrenRefList );
 	void FillMap();	// prepares map with walkable statuses
 };
 

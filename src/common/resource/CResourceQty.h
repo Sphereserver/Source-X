@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEQTY_H
 #define _INC_CRESOURCEQTY_H
 
-#include "../sphere_library/CSTypedArray.h"
+#include "../sphere_library/CSTypedArray.h" // Needed for constants
 #include "CResourceID.h"
 
 
@@ -37,9 +37,9 @@ public:
     {
         return m_iQty;
     }
-    inline void SetResQty(int64 wQty)
+    inline void SetResQty(int64 iQuantity)
     {
-        m_iQty = wQty;
+        m_iQty = iQuantity;
     }
     inline bool Load( lptstr & arg )
     {
@@ -48,11 +48,12 @@ public:
     bool Load( lpctstr & pszCmds );
     size_t WriteKey( tchar * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
     size_t WriteNameSingle( tchar * pszArgs, int iQty = 0 ) const;
+
 public:
     CResourceQty() : m_iQty(0) { };
 };
 
-class CResourceQtyArray : public CSTypedArray<CResourceQty>
+class CResourceQtyArray : public std::vector<CResourceQty>
 {
     // Define a list of index id's (not references) to resource objects. (Not owned by the list)
 public:
@@ -60,10 +61,9 @@ public:
     CResourceQtyArray();
     explicit CResourceQtyArray(lpctstr pszCmds);
     bool operator == ( const CResourceQtyArray & array ) const;
-    //CResourceQtyArray& operator=(const CResourceQtyArray& other);
 
-private:
-    CResourceQtyArray(const CResourceQtyArray& copy);
+    CResourceQtyArray& operator=(const CResourceQtyArray& other) = default;
+    CResourceQtyArray(const CResourceQtyArray& copy) = default;
 
 public:
     size_t Load( lpctstr pszCmds );
@@ -77,15 +77,15 @@ public:
 
     inline bool ContainsResourceID( const CResourceID & rid ) const
     {
-        return FindResourceID(rid) != BadIndex();
+        return FindResourceID(rid) != SCONT_BADINDEX;
     }
     inline bool ContainsResourceType( RES_TYPE type ) const
     {
-        return FindResourceType(type) != BadIndex();
+        return FindResourceType(type) != SCONT_BADINDEX;
     }
     inline bool ContainsResourceMatch( CObjBase * pObj ) const
     {
-        return FindResourceMatch(pObj) != BadIndex();
+        return FindResourceMatch(pObj) != SCONT_BADINDEX;
     }
 
     void setNoMergeOnLoad();

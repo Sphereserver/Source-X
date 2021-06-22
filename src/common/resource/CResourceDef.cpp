@@ -3,6 +3,8 @@
 *
 */
 
+#include "../../sphere/threads.h"
+#include "../CVarDefMap.h"
 #include "../CExpression.h"
 #include "../CLog.h"
 #include "CResourceDef.h"
@@ -28,29 +30,31 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
         }
     }
 
-    const CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
+    const CVarDefCont * pExistingVarKey = g_Exp.m_VarResDefs.GetKey( pszName );
+    const dword dwResPrivateUID = GetResourceID().GetPrivateUID();
+    const int iResIndex = GetResourceID().GetResIndex();
 	CVarDefContNum* pVarKeyNum = nullptr;
-    if ( pVarKey )
+    if ( pExistingVarKey )
     {
-        dword keyVal = (dword)pVarKey->GetValNum();
-        if ( keyVal == GetResourceID().GetPrivateUID() )
+        const dword dwKeyVal = (dword)pExistingVarKey->GetValNum();
+        if ( dwKeyVal == dwResPrivateUID )
         {
             // DEBUG_WARN(("DEFNAME=%s: redefinition (new value same as previous)\n", pszName));
-            // It happens tipically for types pre-defined in sphere_defs.scp and other things. Wanted behaviour.
+            // It happens tipically for types pre-defined in sphere_defs.scp and other things. We want this behaviour.
             return true;
         }
 
-
-        if ( RES_GET_INDEX(keyVal) == (dword)GetResourceID().GetResIndex())
-            DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, keyVal, GetResourceID().GetPrivateUID() ));
+        const int iKeyIndex = (int)RES_GET_INDEX(dwKeyVal);
+        if ( iKeyIndex == iResIndex)
+            DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, dwKeyVal, dwResPrivateUID ));
         else
-            DEBUG_WARN(( "DEFNAME=%s: redefinition (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, RES_GET_INDEX(keyVal), GetResourceID().GetResIndex() ));
+            DEBUG_WARN(( "DEFNAME=%s: redefinition (0%x!=0%x)\n", pszName, iKeyIndex, iResIndex ));
 
-        pVarKeyNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, dwResPrivateUID );
     }
     else
     {
-        pVarKeyNum = g_Exp.m_VarDefs.SetNumNew( pszName, GetResourceID().GetPrivateUID() );
+        pVarKeyNum = g_Exp.m_VarResDefs.SetNumNew( pszName, dwResPrivateUID );
     }
 
     if ( pVarKeyNum == nullptr )
@@ -63,13 +67,14 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 lpctstr CResourceDef::GetResourceName() const
 {
     ADDTOCALLSTACK("CResourceDef::GetResourceName");
-    if ( m_pDefName )
+    if (m_pDefName)
+    {
         return m_pDefName->GetKey();
+    }
 
-    TemporaryString tsTemp;
-    tchar* pszTemp = static_cast<tchar *>(tsTemp);
-    sprintf(pszTemp, "0%x", GetResourceID().GetResIndex());
-    return pszTemp;
+    tchar * ptcTemp = Str_GetTemp();
+    snprintf(ptcTemp, STR_TEMPLENGTH, "0%x", GetResourceID().GetResIndex());
+    return ptcTemp;
 }
 
 bool CResourceDef::HasResourceName()
@@ -80,6 +85,8 @@ bool CResourceDef::HasResourceName()
     return false;
 }
 
+// Unused
+/*
 bool CResourceDef::MakeResourceName()
 {
     ADDTOCALLSTACK("CResourceDef::MakeResourceName");
@@ -92,9 +99,9 @@ bool CResourceDef::MakeResourceName()
     tchar ch;
     tchar * pszDef;
 
-    strcpy(pbuf, "a_");
+    strcpy(pbuf, "auto_");
 
-    lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
+    lpctstr ptcKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
     pszDef = pbuf + 2;
 
     for ( ; *pszName; ++pszName )
@@ -102,7 +109,7 @@ bool CResourceDef::MakeResourceName()
         ch	= *pszName;
         if ( ch == ' ' || ch == '\t' || ch == '-' )
             ch	= '_';
-        else if ( !iswalnum( ch ) )
+        else if ( !IsAlnum( ch ) )
             continue;
         // collapse multiple spaces together
         if ( ch == '_' && *(pszDef-1) == '_' )
@@ -114,37 +121,36 @@ bool CResourceDef::MakeResourceName()
     *(++pszDef)	= '\0';
 
 
-    size_t iMax = g_Exp.m_VarDefs.GetCount();
-    int iVar = 1;
-    size_t iLen = strlen( pbuf );
+    size_t uiVar = 1;
+    size_t uiLen = strlen( pbuf );
 
-    for ( size_t i = 0; i < iMax; i++ )
+    for ( const CVarDefCont *pVarDef : g_Exp.m_VarResDefs )
     {
         // Is this a similar key?
-        pszKey	= g_Exp.m_VarDefs.GetAt(i)->GetKey();
-        if ( strnicmp( pbuf, pszKey, iLen ) != 0 )
+        ptcKey	= pVarDef->GetKey();
+        if ( strnicmp( pbuf, ptcKey, uiLen ) != 0 )
             continue;
 
         // skip underscores
-        pszKey = pszKey + iLen;
-        while ( *pszKey	== '_' )
-            pszKey++;
+        ptcKey = ptcKey + uiLen;
+        while ( *ptcKey	== '_' )
+            ++ptcKey;
 
         // Is this is subsequent key with a number? Get the highest (plus one)
-        if ( IsStrNumericDec( pszKey ) )
+        if ( IsStrNumericDec( ptcKey ) )
         {
-            int iVarThis = ATOI( pszKey );
-            if ( iVarThis >= iVar )
-                iVar = iVarThis + 1;
+            size_t uiVarThis = Str_ToUI( ptcKey );
+            if ( uiVarThis >= uiVar )
+                uiVar = uiVarThis + 1;
         }
         else
-            iVar++;
+            ++uiVar;
     }
 
     // add an extra _, hopefully won't conflict with named areas
-    sprintf( pszDef, "_%i", iVar );
+    sprintf( pszDef, "_%" PRIuSIZE_T, uiVar );
     SetResourceName( pbuf );
     // Assign name
     return true;
 }
-
+*/

@@ -1,5 +1,6 @@
 #include "CSObjList.h"
 #include "../assertion.h"
+#include "../CException.h"
 
 
 // CSObjListRec:: Capacity.
@@ -17,14 +18,19 @@ void CSObjListRec::RemoveSelf()
 CSObjList::CSObjList()
 {
 	m_pHead = m_pTail = nullptr;
-	m_iCount = 0;
+	m_uiCount = 0;
+}
+
+CSObjList::~CSObjList()
+{
+	ClearContainer();
 }
 
 // CSObjList:: Element access.
 
-CSObjListRec * CSObjList::GetAt( size_t index ) const
+CSObjListRec * CSObjList::GetContentAt( size_t index ) const
 {
-	CSObjListRec * pRec = GetHead();
+	CSObjListRec * pRec = GetContainerHead();
 	while ( index > 0 && pRec != nullptr )
 	{
 		pRec = pRec->GetNext();
@@ -35,23 +41,26 @@ CSObjListRec * CSObjList::GetAt( size_t index ) const
 
 // CSObjList:: Modifiers.
 
-void CSObjList::Clear()
+void CSObjList::ClearContainer()
 {
 	// delete all entries.
+	EXC_TRY("Deleting objects scheduled for deletion");
 	for (;;)	// iterate the list.
 	{
-		CSObjListRec * pRec = GetHead();
+		CSObjListRec * pRec = GetContainerHead();
 		if ( pRec == nullptr )
 			break;
 		ASSERT( pRec->GetParent() == this );
 		delete pRec;
 	}
-	m_iCount = 0;
+	EXC_CATCH;
+
+	m_uiCount = 0;
 	m_pHead = nullptr;
 	m_pTail = nullptr;
 }
 
-void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
+void CSObjList::InsertContentAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 {
 	// Add after pPrev.
 	// pPrev = nullptr == add to the start.
@@ -71,7 +80,7 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 	}
 	else
 	{
-		pNext = GetHead();
+		pNext = GetContainerHead();
 		m_pHead = pNewRec;
 	}
 
@@ -88,7 +97,7 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 	}
 
 	pNewRec->m_pNext = pNext;
-	++m_iCount;
+	++m_uiCount;
 }
 
 void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
@@ -113,6 +122,6 @@ void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called wh
 	pObRec->m_pNext = nullptr;	// this should not really be necessary.
 	pObRec->m_pPrev = nullptr;
 	pObRec->m_pParent = nullptr;	// We are now unlinked.
-	--m_iCount;
+	--m_uiCount;
 }
 

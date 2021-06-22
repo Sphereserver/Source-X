@@ -1,0 +1,185 @@
+#include "../game/CServerConfig.h"
+#include "CNetState.h"
+#include "CNetworkManager.h"
+#include "CNetworkInput.h"
+#include "CNetworkOutput.h"
+#include "CNetworkThread.h"
+
+
+static const char* GenerateNetworkThreadName(size_t id)
+{
+    char* name = new char[IThread::m_nameMaxLength];
+    snprintf(name, IThread::m_nameMaxLength, "T_Net #%" PRIuSIZE_T, id);
+    return name;
+}
+
+
+CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
+    : AbstractSphereThread(GenerateNetworkThreadName(id), IThread::Disabled),
+    m_manager(manager), m_id(id)
+{
+}
+
+CNetworkThread::~CNetworkThread(void)
+{
+    // thread name was allocated by GenerateNetworkThreadName, so should be delete[]'d
+    delete[] getName();
+}
+
+void CNetworkThread::assignNetworkState(CNetState* state)
+{
+    ADDTOCALLSTACK("CNetworkThread::assignNetworkState");
+    m_assignQueue.push(state);
+    if (getPriority() == IThread::Disabled)
+        awaken();
+}
+
+void CNetworkThread::queuePacket(PacketSend* packet, bool appendTransaction)
+{
+    // queue a packet for sending
+    CNetworkOutput::QueuePacket(packet, appendTransaction);
+}
+
+void CNetworkThread::queuePacketTransaction(PacketTransaction* transaction)
+{
+    // queue a packet transaction for sending
+    CNetworkOutput::QueuePacketTransaction(transaction);
+}
+
+void CNetworkThread::checkNewStates(void)
+{
+    // check for states that have been assigned but not moved to our list
+    ADDTOCALLSTACK("CNetworkThread::checkNewStates");
+    ASSERT(!isActive() || isCurrentThread());
+
+    while (m_assignQueue.empty() == false)
+    {
+        CNetState* state = m_assignQueue.front();
+        m_assignQueue.pop();
+
+        ASSERT(state != nullptr);
+        state->setParentThread(this);
+        m_states.emplace_back(state);
+    }
+}
+
+void CNetworkThread::dropInvalidStates(void)
+{
+    // check for states in our list that don't belong to us
+    ADDTOCALLSTACK("CNetworkThread::dropInvalidStates");
+    ASSERT(!isActive() || isCurrentThread());
+
+    for (NetworkStateList::iterator it = m_states.begin(); it != m_states.end(); )
+    {
+        CNetState* state = *it;
+        if (state->getParentThread() != this)
+        {
+            // state has been unassigned or reassigned elsewhere
+            it = m_states.erase(it);
+        }
+        else if (state->isInUse() == false)
+        {
+            // state is invalid
+            state->setParentThread(nullptr);
+            it = m_states.erase(it);
+        }
+        else
+        {
+            // state is good
+            ++it;
+        }
+    }
+}
+
+void CNetworkThread::onStart(void)
+{
+    AbstractSphereThread::onStart();
+    m_input.setOwner(this);
+    m_output.setOwner(this);
+    m_profile.EnableProfile(PROFILE_NETWORK_RX);
+    m_profile.EnableProfile(PROFILE_DATA_RX);
+    m_profile.EnableProfile(PROFILE_NETWORK_TX);
+    m_profile.EnableProfile(PROFILE_DATA_TX);
+}
+
+void CNetworkThread::tick(void)
+{
+    // process periodic actions
+    ADDTOCALLSTACK("CNetworkThread::tick");
+    checkNewStates();
+    dropInvalidStates();
+
+    if (m_states.empty())
+    {
+        // we haven't been assigned any clients, so go idle for now
+        if (getPriority() != IThread::Disabled)
+            setPriority(IThread::Low);
+        return;
+    }
+
+    processInput();
+    processOutput();
+
+    // we're active, take priority
+    setPriority(static_cast<IThread::Priority>(g_Cfg.m_iNetworkThreadPriority));
+}
+
+void CNetworkThread::flushAllClients(void)
+{
+    ADDTOCALLSTACK("CNetworkThread::flushAllClients");
+    NetworkThreadStateIterator states(this);
+    while (CNetState* state = states.next())
+        m_output.flush(state);
+}
+
+
+/***************************************************************************
+*
+*	class NetworkThreadStateIterator		Works as network state iterator getting the states
+*											for a thread, safely.
+*
+***************************************************************************/
+NetworkThreadStateIterator::NetworkThreadStateIterator(const CNetworkThread* thread)
+{
+    ASSERT(thread != nullptr);
+    m_thread = thread;
+    m_nextIndex = 0;
+    m_safeAccess = m_thread->isActive() && !m_thread->isCurrentThread();
+}
+
+NetworkThreadStateIterator::~NetworkThreadStateIterator(void)
+{
+    m_thread = nullptr;
+}
+
+CNetState* NetworkThreadStateIterator::next(void)
+{
+    if (m_safeAccess == false)
+    {
+        // current thread, we can use the thread's state list directly
+        // find next non-null state
+        const int sz = int(m_thread->m_states.size());
+        while (m_nextIndex < sz)
+        {
+            CNetState* state = m_thread->m_states[m_nextIndex];
+            ++m_nextIndex;
+
+            if (state != nullptr)
+                return state;
+        }
+    }
+    else
+    {
+        // different thread, we have to use the manager's states
+        while (m_nextIndex < m_thread->m_manager->m_stateCount)
+        {
+            CNetState* state = m_thread->m_manager->m_states[m_nextIndex];
+            ++m_nextIndex;
+
+            if (state != nullptr && state->getParentThread() == m_thread)
+                return state;
+        }
+    }
+
+    return nullptr;
+}

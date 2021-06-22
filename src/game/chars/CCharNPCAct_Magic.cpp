@@ -1,6 +1,6 @@
 // Actions specific to an NPC.
 
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "CCharNPC.h"
 
 // Retrieves all the spells this character has to spells[x] list
@@ -97,8 +97,9 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
     ASSERT(m_pNPC);
 
     //	search for suitable book in hands first
-    for (CItem *pBook = GetContentHead(); pBook != nullptr; pBook = pBook->GetNext())
+    for (CSObjContRec* pObjRec : *this)
     {
+        CItem* pBook = static_cast<CItem*>(pObjRec);
         if (pBook->IsTypeSpellbook())
             NPC_AddSpellsFromBook(pBook);
     }
@@ -107,8 +108,9 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
     CItemContainer *pPack = GetPack();
     if (pPack)
     {
-        for (CItem *pBook = pPack->GetContentHead(); pBook != nullptr; pBook = pBook->GetNext())
+        for (CSObjContRec* pObjRec : *pPack)
         {
+            CItem* pBook = static_cast<CItem*>(pObjRec);
             if (pBook->IsTypeSpellbook())
                 NPC_AddSpellsFromBook(pBook);
         }
@@ -124,8 +126,8 @@ void CChar::NPC_AddSpellsFromBook(CItem * pBook)
     if (!pBookDef)
         return;
 
-    uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
-    uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
+    const uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
+    const uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
 
     for (uint i = min; i <= max; ++i)
     {
@@ -154,7 +156,8 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     CObjBase * pTarg = pChar;
     if (pWand)
     {
-        if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+        // If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+        if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)
             pWand = nullptr;
     }
     if ((iSpellCount < 1) && !pWand)
@@ -196,6 +199,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
     if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
     {
+        ASSERT(pWand);
         SPELL_TYPE spell = (SPELL_TYPE)(pWand->m_itWeapon.m_spell);
         const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
         if (!pSpellDef)	// wand check failed ... we go on melee, next cast try might select another type of spell :)
@@ -254,6 +258,9 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
     ASSERT(m_pNPC);
 
     const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
+    if (!pSpellDef)
+        return false;
+
     if (skill == SKILL_NONE)
     {
         int iSkillTest = 0;
@@ -372,7 +379,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                 if (bSpellSuits)
                 {
                     pTarg = pTarget;
-                    m_atMagery.m_Spell = spell;
+                    m_atMagery.m_iSpell = spell;
                     return true;
                 }
                 return false;
@@ -392,7 +399,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
             }
             if (pSpellDef->IsSpellType(SPELLFLAG_HEAL)) //Good spells that cannot be targeted
             {
-                bool bSpellSuits = true;
                 switch (spell)
                 {
                     //No spells added ATM until they are created, good example spell to here = SPELL_Healing_Stone
@@ -401,7 +407,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         CItem * pStone = GetBackpackItem(ITEMID_HEALING_STONE);
                         if (!pStone)
                             break;
-                        if ((pStone->m_itNormal.m_morep.m_z == 0) && (Stat_GetVal(STAT_STR) < (int)(pStone->m_itNormal.m_more2)) && (pStone->m_itNormal.m_more1 >= pStone->m_itNormal.m_more2))
+                        if ((pStone->m_itNormal.m_morep.m_z == 0) && (Stat_GetVal(STAT_STR) < pStone->m_itNormal.m_more2) && (pStone->m_itNormal.m_more1 >= pStone->m_itNormal.m_more2))
                         {
                             Use_Obj(pStone, false);
                             return true; // we are not casting any spell but suceeded at using the stone created by this one, we are done now.
@@ -412,17 +418,14 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         break;
                 }
 
-                if (!bSpellSuits)
-                    return false;
-
                 pTarg = this;
-                m_atMagery.m_Spell = spell;
+                m_atMagery.m_iSpell = spell;
                 return true;
             }
         }
         else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
         {
-            m_atMagery.m_Spell = spell;
+            m_atMagery.m_iSpell = spell;
             return true;	// if flag is present ... we leave the rest to the incoming code
         }
     }
@@ -441,6 +444,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
         if (pSpellDef->IsSpellType(SPELLFLAG_FIELD) && Calc_GetRandVal(4))
         return false;*/
     }
-    m_atMagery.m_Spell = spell;
+    m_atMagery.m_iSpell = spell;
     return true;
 }

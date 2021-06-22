@@ -8,19 +8,21 @@
 
 #include "../common/resource/CResourceBase.h"
 #include "../common/resource/CResourceRef.h"
-#include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
 #include "clients/CClientTooltip.h"
+#include "CObjBaseTemplate.h"
 #include "CTimedObject.h"
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
 
 
-class CBaseBase;
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
+
+class CSector;
+class CWorldTicker;
 
 class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
 {
@@ -28,22 +30,27 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
 
+    friend class CSector;
+    friend class CWorldTicker;
+
 private:
 	int64 m_timestamp;          // TimeStamp
-	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
+    bool _fDeleting;
 
-    int _iRunningTriggerId;     // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
-    CSString _sRunningTrigger;
-    int _iCallingObjTriggerId;  // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
+    std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
+    short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
+    short _iCallingObjTriggerId;    // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
 public:
     static const char *m_sClassName;
+    static dword sm_iCount;    // how many total objects in the world ?
 
-    size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
-    int m_iCreatedResScriptLine;	// line in the script file where this obj was created
+    
+    int _iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
+    int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
     CVarDefMap m_TagDefs;		// attach extra tags here.
     CVarDefMap m_BaseDefs;		// New Variable storage system
@@ -55,29 +62,61 @@ public:
     word	m_defenseBase;	    // Armor for IsArmor items
     word	m_defenseRange;     // variable range of defense.
     int 	m_ModMaxWeight;		// ModMaxWeight prop.
+    HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
-    static dword sm_iCount;    // how many total objects in the world ?
+    
+public:
+    explicit CObjBase(bool fItem);
+    virtual ~CObjBase();
+private:
+    CObjBase(const CObjBase& copy);
+    CObjBase& operator=(const CObjBase& other);
 
+protected:
+    /**
+     * @brief   Prepares to delete.
+     */
+    virtual void DeletePrepare();
+
+    void DeleteCleanup(bool fForce);    // not virtual!
+
+public:
+    inline bool IsBeingDeleted() const noexcept
+    {
+        return _fDeleting;
+    }
+
+protected:  virtual bool _IsDeleted() const override;
+public:     virtual bool  IsDeleted() const override;
+
+    /**
+     * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
+     * @param   bForce  Force deletion.
+     * @return  Was deleted.
+     */
+    virtual bool Delete(bool fForce = false);
+
+    /**
+     * @brief   Dupe copy.
+     * @param   pObj    The object.
+     */
+    virtual void DupeCopy(const CObjBase* pObj); // overridden by CItem
+
+public:
 	/**
-	* @fn  CBaseBaseDef * CObjBase::Base_GetDef() const;
-	*
 	* @brief   Base get definition.
-	*
 	* @return  null if it fails, else a pointer to a CBaseBaseDef.
 	*/
-	CBaseBaseDef * Base_GetDef() const
-	{
-		return ( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
-	}
+    CBaseBaseDef* Base_GetDef() const noexcept;
 
-	dword GetCanFlagsBase() const
+	inline dword GetCanFlagsBase() const noexcept
 	{
 		return Base_GetDef()->m_Can;
 	}
 
-	dword GetCanFlags() const
+    inline dword GetCanFlags() const noexcept
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
@@ -86,79 +125,67 @@ public:
 		return (GetCanFlagsBase() ^ m_CanMask);
 	}	
 
-	bool Can(dword dwCan) const
+	bool Can(dword dwCan) const noexcept
 	{
-		return (GetCanFlags() & dwCan);
+        return (GetCanFlags() & dwCan);
 	}
 
+    inline bool Can(dword dwCan, dword dwObjCanFlags) const noexcept
+    {
+        return (dwObjCanFlags & dwCan);
+    }
+
+    bool IsRunningTrigger() const;
+
 	/**
-	* @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
-	*
 	* @brief   Call personal trigger (from scripts).
 	*
 	* @param [in,out]  pArgs       If non-null, the arguments.
 	* @param [in,out]  pSrc        If non-null, source for the.
 	* @param [in,out]  trResult    The tr result.
-	* @param   bFull               true to full.
 	*
 	* @return  true if it succeeds, false if it fails.
 	*/
-	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
+	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult);
 
-    /**
-     * @fn  virtual void CObjBase::DeletePrepare();
-     *
-     * @brief   Prepares to delete.
-     */
-	virtual void DeletePrepare();
 
 public:
 
     /**
-    * @fn  CCSpawn *CObjBase::GetSpawn();
-    *
     * @brief   Returns Spawn item.
-    *
     * @return  The CItem.
     */
     CCSpawn *GetSpawn();
 
     /**
-    * @fn  CCSpawn *CObjBase::SetSpawn(CCSpawn *spawn);
-    *
     * @brief   sets the Spawn item.
-    *
     * @param  The CCSpawn.
     */
     void SetSpawn(CCSpawn *spawn);
 
     /**
-    * @fn  CCSpawn *CObjBase::GetFaction();
-    *
     * @brief   Returns Faction CComponent.
-    *
     * @return  The CCFaction.
     */
     CCFaction *GetFaction();
 
 
     /**
-     * @fn  int64 CObjBase::GetTimeStamp() const;
-     *
-     * @brief   Gets time stamp.
-     *
-     * @return  The time stamp.
+     * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
+     * @return  The timestamp.
      */
 	int64 GetTimeStamp() const;
 
     /**
-     * @fn  void CObjBase::SetTimeStamp(int64 t_time);
-     *
      * @brief   Sets time stamp.
-     *
      * @param   t_time  The time.
      */
 	void SetTimeStamp(int64 t_time);
+
+    /*
+    * @brief    Add iDelta to this object's timer (if active) and its child objects.
+    */
+    void TimeoutRecursiveResync(int64 iDelta);
 
     /**
     *@brief Returns the value of the string-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to retrieve multiple props from the same CComponentProps
@@ -167,7 +194,7 @@ public:
     *@param fZero If the prop val is an empty string, return "0" instead.
     *@param pBaseCompProps If nullptr and the prop doesn't exist, stop. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef. So, check if the Base Property exists
     */
-    CSString GetPropStr( const CComponentProps* pCompProps, int iPropIndex, bool fZero, const CComponentProps* pBaseCompProps = nullptr ) const;
+    CSString GetPropStr( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, const CComponentProps* pBaseCompProps = nullptr ) const;
 
     /**
     *@brief Returns the value of the string-type prop from the CComponentProps
@@ -176,7 +203,7 @@ public:
     *@param fZero If the prop val is an empty string, return "0" instead
     *@param fDef If true, if the prop wasn't found, check the Base Prop (in my CBaseBaseDef).
     */
-    CSString GetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fZero, bool fDef = false ) const;
+    CSString GetPropStr( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, bool fDef = false ) const;
 
     /**
     *@brief Returns the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to retrieve multiple props from the same CComponentProps
@@ -184,7 +211,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param pBaseCompProps If nullptr and the prop doesn't exist, stop. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef. So, check if the Base Property exists
     */
-    CComponentProps::PropertyValNum_t GetPropNum( const CComponentProps* pCompProps, int iPropIndex, const CComponentProps* pBaseCompProps = nullptr ) const;
+    CComponentProps::PropertyValNum_t GetPropNum( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, const CComponentProps* pBaseCompProps = nullptr ) const;
 
     /**
     *@brief Returns the value of the numerical-type prop from the CComponentProps.
@@ -192,7 +219,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param fDef If true, if the prop wasn't found, check the Base Prop (in my CBaseBaseDef).
     */
-    CComponentProps::PropertyValNum_t GetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, bool fDef = false ) const;
+    CComponentProps::PropertyValNum_t GetPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, bool fDef = false ) const;
 
     /**
     *@brief Sets the value of the string-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -201,7 +228,7 @@ public:
     *@param ptcVal The property value
     *@param fDeleteZero If the prop val is an empty string, delete the prop
     */
-    void SetPropStr( CComponentProps* pCompProps, int iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
+    void SetPropStr( CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
 
     /**
     *@brief Sets the value of the string-type prop from the CComponentProps.
@@ -210,7 +237,7 @@ public:
     *@param ptcVal The property value
     *@param fDeleteZero If the prop val is an empty string, delete the prop
     */
-    void SetPropStr( COMPPROPS_TYPE iCompPropsType, int iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
+    void SetPropStr( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, lpctstr ptcVal, bool fDeleteZero = true);
 
     /**
     *@brief Sets the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -218,7 +245,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param iVal The property value
     */
-    void SetPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iVal );
+    void SetPropNum( CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iVal );
 
     /*
     *@brief Sets the value of the numerical-type prop from the CComponentProps.
@@ -226,7 +253,7 @@ public:
     *@param iPropIndex The index (enum) of the property for that CComponentProps
     *@param iVal The property value
     */
-    void SetPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iVal );
+    void SetPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iVal );
 
     /**
     *@brief Sums a number to the value of the numerical-type prop from the CComponentProps. Faster than the variant accepting a COMPPROPS_TYPE if you need to set multiple props from the same CComponentProps
@@ -236,7 +263,7 @@ public:
     *@param pBaseCompProps If nullptr and the prop doesn't exist, consider 0 as the previous value. Otherwise, this should point to the same type of CComponentProps, but in the object's CBaseBaseDef.
     *       So, check if the Base Property exists and use its value as the previous value. If it doesn't exists, use 0.
     */
-    void ModPropNum( CComponentProps* pCompProps, int iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps = nullptr);
+    void ModPropNum( CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iMod, const CComponentProps* pBaseCompProps = nullptr);
 
     /**
     *@brief Sums a number to the value of the numerical-type prop from the CComponentProps.
@@ -245,203 +272,192 @@ public:
     *@param iMod The signed number to sum to the prop value
     *@param fBaseDef If false and the prop doesn't exist, consider 0 as the previous value. Otherwise, check if the Base Property exists and use its value as the previous value. If it doesn't exists, use 0.
     */
-    void ModPropNum( COMPPROPS_TYPE iCompPropsType, int iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef = false);
+    void ModPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::PropertyIndex_t iPropIndex, CComponentProps::PropertyValNum_t iMod, bool fBaseDef = false);
 
     /**
-     * @fn  lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  lpctstr CObjBase::GetDefStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets definition string from m_BaseDefs.
      *
-     * @param   pszKey      The key.
+     * @param   ptcKey      The key.
      * @param   fZero       true to zero.
      * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition string.
      */
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fBaseDef = false ) const;
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false, bool fBaseDef = false ) const;
 
     /**
-     * @fn  int64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  int64 CObjBase::GetDefNum( lpctstr ptcKey, bool fDef = false, int64 iDefault = 0 ) const;
      *
      * @brief   Gets definition number from m_BaseDefs.
      *
-     * @param   pszKey      The key.
-     * @param   fZero       true to zero.
+     * @param   ptcKey      The key.
+     * @param   iDefault    Default value to return if not existant.
      * @param   fBaseDef    if the def doesn't exist, then check for a base def.
      *
      * @return  The definition number.
      */
 
-	int64 GetDefNum( lpctstr pszKey, bool fBaseDef = false ) const;
+	int64 GetDefNum( lpctstr ptcKey, bool fBaseDef = false, int64 iDefault = 0) const;
 
     /**
-     * @fn  void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
+     * @fn  void CObjBase::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);
      *
      * @brief   Sets definition number from m_BaseDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   iVal    Value.
      * @param   fZero   If iVal == 0, delete the def.
      */
 
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);
 
     /**
-    * @fn  void CObjBase::ModDefNum(lpctstr pszKey, int64 iMod, bool fZero = true);
+    * @fn  void CObjBase::ModDefNum(lpctstr ptcKey, int64 iMod, bool fZero = true);
     *
     * @brief   Add iVal to the numeric definition from m_BaseDefs.
     *
-    * @param   pszKey   The key.
+    * @param   ptcKey   The key.
     * @param   iMod     Value to sum to the current value of the def.
     * @param   fBaseDef if the def doesn't exist, then check for a base def and use that value to create a new def.
     * @param   fZero    If new def value == 0, delete the def.
     */
 
-    void ModDefNum(lpctstr pszKey, int64 iMod, bool fBaseDef = false, bool fZero = false);
+    void ModDefNum(lpctstr ptcKey, int64 iMod, bool fBaseDef = false, bool fZero = false);
 
     /**
-     * @fn  void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+     * @fn  void CObjBase::SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
      *
      * @brief   Sets definition string to m_BaseDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   pszVal  The value.
      * @param   fQuoted true if quoted.
      * @param   fZero   true to zero.
      */
 
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
 
     /**
-     * @fn  void CObjBase::DeleteDef(lpctstr pszKey);
+     * @fn  void CObjBase::DeleteDef(lpctstr ptcKey);
      *
      * @brief   Deletes the definition from m_BaseDefs.
      *
-     * @param   pszKey  The key to delete.
+     * @param   ptcKey  The key to delete.
      */
-	void DeleteDef(lpctstr pszKey);
+	void DeleteDef(lpctstr ptcKey);
 
     /**
-     * @fn  CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const;
+     * @fn  CVarDefCont * CObjBase::GetDefKey( lpctstr ptcKey, bool fDef ) const;
      *
      * @brief   Gets definition key from m_BaseDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fDef    true to definition.
      *
      * @return  nullptr if it fails to find the def, else the pointer to the def.
      */
-	CVarDefCont * GetDefKey( lpctstr pszKey, bool fDef ) const;
+	CVarDefCont * GetDefKey( lpctstr ptcKey, bool fDef ) const;
 
     /**
-    * @fn  CVarDefContNum * CObjBase::GetDefKeyNum( lpctstr pszKey, bool fDef ) const;
+    * @fn  CVarDefContNum * CObjBase::GetDefKeyNum( lpctstr ptcKey, bool fDef ) const;
     *
     * @brief   Gets definition key from m_BaseDefs.
     *
-    * @param   pszKey  The key.
+    * @param   ptcKey  The key.
     * @param   fDef    true to definition.
     *
     * @return  nullptr if it doesn't find a numeric def, else the pointer to the def.
     */
-    inline CVarDefContNum * GetDefKeyNum(lpctstr pszKey, bool fDef) const
+    inline CVarDefContNum * GetDefKeyNum(lpctstr ptcKey, bool fDef) const
     {
-        return dynamic_cast<CVarDefContNum*>(GetDefKey(pszKey, fDef));
+        return dynamic_cast<CVarDefContNum*>(GetDefKey(ptcKey, fDef));
     }
 
     /**
-    * @fn  CVarDefContStr * CObjBase::GetDefKeyStr( lpctstr pszKey, bool fDef ) const;
+    * @fn  CVarDefContStr * CObjBase::GetDefKeyStr( lpctstr ptcKey, bool fDef ) const;
     *
     * @brief   Gets definition key from m_BaseDefs.
     *
-    * @param   pszKey  The key.
+    * @param   ptcKey  The key.
     * @param   fDef    true to definition.
     *
     * @return  nullptr if it doesn't find a string def, else the pointer to the def.
     */
-    inline CVarDefContStr * GetDefKeyStr(lpctstr pszKey, bool fDef) const
+    inline CVarDefContStr * GetDefKeyStr(lpctstr ptcKey, bool fDef) const
     {
-        return dynamic_cast<CVarDefContStr*>(GetDefKey(pszKey, fDef));
+        return dynamic_cast<CVarDefContStr*>(GetDefKey(ptcKey, fDef));
     }
 
     /**
-     * @fn  lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  lpctstr CObjBase::GetKeyStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets key string from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fZero   true to zero.
      * @param   fDef    true to definition.
      *
      * @return  The key string.
      */
-	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	lpctstr GetKeyStr( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
 
     /**
-     * @fn  int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+     * @fn  int64 CObjBase::GetKeyNum( lpctstr ptcKey, bool fZero = false, bool fDef = false ) const;
      *
      * @brief   Gets key number from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fDef    true to definition.
      *
      * @return  The key number.
      */
-	int64 GetKeyNum( lpctstr pszKey, bool fDef = false ) const;
+	int64 GetKeyNum( lpctstr ptcKey, bool fDef = false ) const;
 
     /**
-     * @fn  CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const;
+     * @fn  CVarDefCont * CObjBase::GetKey( lpctstr ptcKey, bool fDef ) const;
      *
      * @brief   Gets a key from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   fDef    Check also for base TagDefs (CHARDEF, ITEMDEF, etc).
      *
      * @return  null if it fails, else the key.
      */
-	CVarDefCont * GetKey( lpctstr pszKey, bool fDef ) const;
+	CVarDefCont * GetKey( lpctstr ptcKey, bool fDef ) const;
 
     /**
-     * @fn  void CObjBase::SetKeyNum(lpctstr pszKey, int64 iVal);
+     * @fn  void CObjBase::SetKeyNum(lpctstr ptcKey, int64 iVal);
      *
      * @brief   Sets key number from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   iVal    Zero-based index of the value.
      */
-	void SetKeyNum(lpctstr pszKey, int64 iVal);
+	void SetKeyNum(lpctstr ptcKey, int64 iVal);
 
     /**
-     * @fn  void CObjBase::SetKeyStr(lpctstr pszKey, lpctstr pszVal);
+     * @fn  void CObjBase::SetKeyStr(lpctstr ptcKey, lpctstr pszVal);
      *
      * @brief   Sets key string from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      * @param   pszVal  The value.
      */
-	void SetKeyStr(lpctstr pszKey, lpctstr pszVal);
+	void SetKeyStr(lpctstr ptcKey, lpctstr pszVal);
 
     /**
-     * @fn  void CObjBase::DeleteKey( lpctstr pszKey );
+     * @fn  void CObjBase::DeleteKey( lpctstr ptcKey );
      *
-     * @brief   Deletes the key described by pszKey from m_TagDefs.
+     * @brief   Deletes the key described by ptcKey from m_TagDefs.
      *
-     * @param   pszKey  The key.
+     * @param   ptcKey  The key.
      */
-	void DeleteKey( lpctstr pszKey );
+	void DeleteKey( lpctstr ptcKey );
 
-protected:
-
-    /**
-     * @fn  virtual void CObjBase::DupeCopy( const CObjBase * pObj );
-     *
-     * @brief   Dupe copy.
-     *
-     * @param   pObj    The object.
-     */
-	void DupeCopy( const CObjBase * pObj );
 
 public:
-
     /**
      * @fn  virtual int CObjBase::FixWeirdness() = 0;
      *
@@ -483,16 +499,6 @@ public:
      */
 	virtual int IsWeird() const;
 
-    /**
-     * @fn  virtual void CObjBase::Delete(bool bforce = false);
-     *
-     * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
-     *
-     * @param   bforce  Force deletion.
-     */
-	virtual void Delete(bool fforce = false);
-
-
 	// Accessors
 
     /**
@@ -516,24 +522,6 @@ public:
 	void SetUID( dword dwVal, bool fItem );
 
     /**
-     * @fn  CObjBase* CObjBase::GetNext() const;
-     *
-     * @brief   Gets the next item.
-     *
-     * @return  null if it fails, else the next.
-     */
-	CObjBase* GetNext() const;
-
-    /**
-     * @fn  CObjBase* CObjBase::GetPrev() const;
-     *
-     * @brief   Gets the previous item.
-     *
-     * @return  null if it fails, else the previous.
-     */
-	CObjBase* GetPrev() const;
-
-    /**
      * @fn  virtual lpctstr CObjBase::GetName() const;
      *
      * @brief   Gets the name. Resolves ambiguity w/CScriptObj.
@@ -551,20 +539,26 @@ public:
      */
 	lpctstr GetResourceName() const;
 
-public:
+protected:
+     /**
+     * @brief   Sets hue without calling triggers or additional checks (internally used by memory objects).
+     * @param   wHue    The hue.
+     */
+     void SetHueQuick(HUE_TYPE wHue);
 
+public:
     /**
      * @fn  void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
      *
      * @brief   Sets Hue given.
      *
      * @param   wHue                The hue.
-     * @param   bAvoidTrigger       true to avoid trigger.
+     * @param   fAvoidTrigger       true to avoid trigger.
      * @param [in,out]  pSrc        (Optional) If non-null, source for the.
      * @param [in,out]  SourceObj   (Optional) If non-null, source object.
      * @param   sound               The sound.
      */
-	void SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase *SourceObj = nullptr, llong sound = 0 );
+	void SetHue( HUE_TYPE wHue, bool fAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase * pSourceObj = nullptr, llong iSound = 0 );
 
     /**
      * @fn  HUE_TYPE CObjBase::GetHue() const;
@@ -575,28 +569,6 @@ public:
      */
 	HUE_TYPE GetHue() const;
 
-protected:
-
-    /**
-     * @fn  word CObjBase::GetHueAlt() const;
-     *
-     * @brief   Gets hue alternate (OColor).
-     *
-     * @return  The hue alternate.
-     */
-
-	word GetHueAlt() const;
-
-    /**
-     * @fn  void CObjBase::SetHueAlt( HUE_TYPE wHue );
-     *
-     * @brief   Sets hue alternate (OColor).
-     *
-     * @param   wHue    The hue.
-     */
-	void SetHueAlt( HUE_TYPE wHue );
-
-public:
 
 public:
 
@@ -643,7 +615,7 @@ public:
      *
      * @param [in,out]  ppTitles    If non-null, the titles.
      */
-	void inline SetNamePool_Fail( tchar * ppTitles );
+	void SetNamePool_Fail( tchar * ppTitles );
 
     /**
      * @fn  bool CObjBase::SetNamePool( lpctstr pszName );
@@ -712,15 +684,11 @@ public:
 
 	void r_WriteSafe( CScript & s );
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s );
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
-    inline virtual bool IsDeleted() const override
-    {
-        return CObjBaseTemplate::IsDeleted();
-    }
 
     /**
      * @fn  void CObjBase::Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
@@ -732,6 +700,7 @@ public:
      * @param   fPossessive             true to possessive.
      */
 	void Emote(lpctstr pText, CClient * pClientExclude = nullptr, bool fPossessive = false);
+	void EmoteObj(lpctstr pText);
 
     /**
      * @fn  void CObjBase::Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = nullptr, bool fPossessive = false);
@@ -869,16 +838,14 @@ public:
      *
      * @param   pClientExclude  Do not send to this CClient.
      */
-	virtual void Update(const CClient * pClientExclude = nullptr)
-		= 0;
+	virtual void Update(const CClient * pClientExclude = nullptr) = 0;
 
     /**
      * @fn  virtual void CObjBase::Flip() = 0;
      *
      * @brief   Flips this object.
      */
-	virtual void Flip()
-		= 0;
+	virtual void Flip()	= 0;
 
     /**
      * @fn  virtual bool CObjBase::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false ) = 0;
@@ -911,13 +878,6 @@ public:
 	virtual TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
 
 public:
-	explicit CObjBase( bool fItem );
-	virtual ~CObjBase();
-private:
-	CObjBase(const CObjBase& copy);
-	CObjBase& operator=(const CObjBase& other);
-
-public:
 	//	Some global object variables
 	int m_ModAr;
 
@@ -926,12 +886,19 @@ public:
 #define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
 	uchar m_fStatusUpdate;  // update flags for next tick
 
+ 
+protected:
+    virtual void _GoAwake() override;
+    virtual void _GoSleep() override;
+
+protected:
     /**
-     * @fn  virtual void CObjBase::OnTickStatusUpdate();
-     *
      * @brief   Update Status window if any flag requires it on m_fStatusUpdate.
      */
-	virtual void OnTickStatusUpdate();
+    virtual void OnTickStatusUpdate();
+
+    virtual bool _CanTick() const override;
+    //virtual bool  _CanTick() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
 
 public:
     std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
@@ -1024,10 +991,6 @@ enum MEMORY_TYPE
 	MEMORY_UNUSED3          = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
 };
 
-
-//	number of steps to remember for pathfinding, default to 24 steps, will have 24*4 extra bytes per char
-#define MAX_NPC_PATH_STORAGE_SIZE	UO_MAP_VIEW_SIGHT*2
-
 enum NPC_MEM_ACT_TYPE	// A simgle primary memory about the object.
 {
 	NPC_MEM_ACT_NONE = 0,       // we spoke about something non-specific,
@@ -1048,10 +1011,14 @@ enum STONEALIGN_TYPE // Types of Guild/Town stones
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-	ITRIG_AfterClick=1,
+    ITRIG_ADDREDCANDLE = 1,
+    ITRIG_ADDWHITECANDLE,
+	ITRIG_AfterClick,
 	ITRIG_Buy,
+    ITRIG_CarveCorpse,                //I am a corpse and i am going to be carved.
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item
+	ITRIG_CLIENTTOOLTIP_AFTERDEFAULT,
 	ITRIG_ContextMenuRequest,   // A context menu was requested over me.
 	ITRIG_ContextMenuSelect,    // A context menu option was selected, perform actions.
 	ITRIG_Create,               // Item is being created.
@@ -1063,7 +1030,7 @@ enum ITRIG_TYPE
 	ITRIG_DROPON_ITEM,          // An item has been.
 	ITRIG_DROPON_SELF,          // An item has been dropped upon me.
 	ITRIG_DROPON_TRADE,         // Droping an item in a trade window.
-	//ITRIG_DYE,
+	ITRIG_DYE,
 	ITRIG_EQUIP,                // I have been equipped.
 	ITRIG_EQUIPTEST,            // I'm not yet equiped, but checking if I can.
 	ITRIG_MemoryEquip,          // I'm a memory and I'm being equiped.
@@ -1071,12 +1038,16 @@ enum ITRIG_TYPE
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
 	ITRIG_PICKUP_SELF,          // picked up from this container
 	ITRIG_PICKUP_STACK,         // picked up from a stack (ARGO)
+    ITRIG_PreSpawn,             // Called before something is spawned, pre-check it's id and validity.
     ITRIG_Redeed,               // Redeeding a multi.
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
+    ITRIG_Smelt,                // I'm going to be smelt.
+    ITRIG_Spawn,                // This spawn is going to generate something.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
+    ITRIG_Start,                // Start trigger, right now used only on Champions.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.
 	ITRIG_TARGON_CHAR,          // I'm targeting a char.
@@ -1098,7 +1069,7 @@ enum WAR_SWING_TYPE	// m_Act_War_Swing_State
     WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
 };
 
-enum CTRIG_TYPE
+enum CTRIG_TYPE : short
 {
 	CTRIG_AAAUNUSED		= 0,
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.
@@ -1108,6 +1079,7 @@ enum CTRIG_TYPE
 	CTRIG_charAttack,           // Calling this trigger over other char.
 	CTRIG_charClick,            // Calling this trigger over other char.
 	CTRIG_charClientTooltip,    // Calling this trigger over other char.
+	CTRIG_charClientTooltip_AfterDefault,
 	CTRIG_charContextMenuRequest,// Calling this trigger over other char.
 	CTRIG_charContextMenuSelect,// Calling this trigger over other char.
 	CTRIG_charDClick,           // Calling this trigger over other char.
@@ -1115,6 +1087,7 @@ enum CTRIG_TYPE
 
 	CTRIG_Click,            // I got clicked on by someone.
 	CTRIG_ClientTooltip,    // Sending tooltips for me to someone.
+	CTRIG_ClientTooltip_AfterDefault,
 	CTRIG_CombatAdd,        // I add someone to my attacker list.
 	CTRIG_CombatDelete,     // delete someone from my list.
 	CTRIG_CombatEnd,        // I finished fighting.
@@ -1129,10 +1102,8 @@ enum CTRIG_TYPE
 	CTRIG_DeathCorpse,      // A Corpse is being created from my body.
 	CTRIG_Destroy,          // I am nearly destroyed.
 	CTRIG_Dismount,         // I'm dismounting.
-	//CTRIG_DYE,
+	CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
-	CTRIG_EffectAdd,        // A spell effected me, i'm getting bonus/penalties from it.
-	CTRIG_EffectRemove,		// Removing spell item from character.
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change
@@ -1154,8 +1125,10 @@ enum CTRIG_TYPE
     // ITRIG_QTY
 	CTRIG_itemAfterClick,       // I'm going to click one item.
 	CTRIG_itemBuy,              // I'm going to buy one item.
+    CTRIG_itemCarveCorpse,            // I am carving a corpse.
 	CTRIG_itemClick,            // I clicked one item
 	CTRIG_itemClientTooltip,    // Requesting ToolTip for one item.
+	CTRIG_itemClientTooltip_AfterDefault,
 	CTRIG_itemContextMenuRequest,// Requesting Context Menu.
 	CTRIG_itemContextMenuSelect,// Selected one option from Context Menu.
 	CTRIG_itemCreate,           // Created one item.
@@ -1177,7 +1150,8 @@ enum CTRIG_TYPE
     CTRIG_itemRedeed,           // was redeeded (multis)
     CTRIG_itemRegionEnter,      // enter a region (ships)
     CTRIG_itemRegionLeave,      // leave a region (ships)
-	CTRIG_itemSell,             // I'l selling an item.
+	CTRIG_itemSell,             // I am selling an item.
+    CTRIG_itemSmelt,            // I am smelting an item.
 	CTRIG_itemSPELL,            // cast some spell on the item.
 	CTRIG_itemSTEP,             // stepped on an item
 	CTRIG_itemTARGON_CANCEL,    // Canceled a target made from the item.
@@ -1256,6 +1230,9 @@ enum CTRIG_TYPE
 	CTRIG_SpellBook,        // Opening a spellbook
 	CTRIG_SpellCast,        // Char is casting a spell.
 	CTRIG_SpellEffect,      // A spell just hit me.
+    CTRIG_SpellEffectAdd,        // A spell effected me, i'm getting bonus/penalties from it.
+    CTRIG_SpellEffectRemove,		// Removing spell item from character.
+    CTRIG_SpellEffectTick,  // A spell with SPELLFLAG_TICK just ticked.
 	CTRIG_SpellFail,        // The spell failed.
 	CTRIG_SpellSelect,      // selected a spell.
 	CTRIG_SpellSuccess,     // The spell succeeded.
@@ -1292,27 +1269,11 @@ enum CTRIG_TYPE
 
 
 /**
- * @fn  DIR_TYPE GetDirStr( lpctstr pszDir );
- *
  * @brief   Gets dir string.
- *
  * @param   pszDir  The dir.
- *
  * @return  The dir string.
  */
 DIR_TYPE GetDirStr( lpctstr pszDir );
 
-
-/* Inline Methods Definitions */
-
-inline CObjBase* CObjBase::GetPrev() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetPrev());
-}
-
-inline CObjBase* CObjBase::GetNext() const
-{
-	return static_cast <CObjBase*>(CSObjListRec::GetNext());
-}
 
 #endif // _INC_COBJBASE_H

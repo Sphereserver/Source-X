@@ -6,48 +6,57 @@
 #ifndef _INC_CCONTAINER_H
 #define _INC_CCONTAINER_H
 
-#include "../common/sphere_library/CSObjList.h"
+#include "../common/sphere_library/CSObjCont.h"
 #include "../common/resource/CResourceBase.h"
 #include "../common/CUID.h"
 #include "../common/CRect.h"
 
 
 class CItemContainer;
+class CObjBase;
 
-class CContainer : public CSObjList	// This class contains a list of items but may or may not be an item itself.
+class CContainer : public CSObjCont	// This class contains a list of items but may or may not be an item itself.
 {
-public:
-	int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
-
-    /**
-     * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );
-     * @brief   Override this = called when removed from list.
-     * @param [in,out]  pObRec  If non-null, the ob record.
-     */
-	virtual void OnRemoveObj( CSObjListRec* pObRec );
-
-    /**
-     * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
-     * @brief  Adds an item to this CContainer.
-     * @param [in,out]  pItem   If non-null, the item.
-     */
-	void ContentAddPrivate( CItem * pItem );
-
-	void r_WriteContent( CScript & s ) const;
-
-	bool r_WriteValContainer(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc);
-	bool r_GetRefContainer( lpctstr & pszKey, CScriptObj * & pRef );
-
 public:
 	static const char *m_sClassName;
 	CContainer();
-	virtual ~CContainer();
+	virtual ~CContainer() = default;
 
 private:
 	CContainer(const CContainer& copy);
 	CContainer& operator=(const CContainer& other);
 
 public:
+    int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
+
+protected:
+    friend class CObjBase;
+    // Not virtuals!
+    void _GoAwake();
+    void _GoSleep();
+
+public:
+    void ContentDelete(bool fForce);
+
+    /**
+     * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );
+     * @brief   Override this = called when removed from list.
+     * @param [in,out]  pObRec  If non-null, the ob record.
+     */
+    virtual void OnRemoveObj(CSObjContRec* pObRec) override;
+
+    /**
+     * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
+     * @brief  Adds an item to this CContainer.
+     * @param [in,out]  pItem   If non-null, the item.
+     */
+    void ContentAddPrivate(CItem* pItem);
+
+    void r_WriteContent(CScript& s) const;
+
+    bool r_WriteValContainer(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc);
+    bool r_GetRefContainer(lpctstr& ptcKey, CScriptObj*& pRef);
+
 
     /**
      * @fn  int CContainer::GetTotalWeight() const;
@@ -55,20 +64,6 @@ public:
      * @return  The total weight.
      */
 	int	GetTotalWeight() const;
-
-    /**
-     * @fn  CItem* CContainer::GetContentHead() const;
-     * @brief   Gets content head.
-     * @return  null if it fails, else the content head.
-     */
-	CItem* GetContentHead() const;
-
-    /**
-     * @fn  CItem* CContainer::GetContentTail() const;
-     * @brief   Gets content tail.
-     * @return  null if it fails, else the content tail.
-     */
-	CItem* GetContentTail() const;
 
     /**
      * @fn  int CContainer::FixWeight();
@@ -99,7 +94,7 @@ public:
      * @param   pt      The point.
      * @param   dwAttr  The attribute.
      */
-	void ContentsDump( const CPointMap & pt, uint64 iAttr = 0 );
+	void ContentsDump( const CPointMap & pt, uint64 uiAttr = 0 );
 
     /**
      * @fn  void CContainer::ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
@@ -115,7 +110,7 @@ public:
      * @param   dwAttr  The attribute.
      * @param   fSet    true to set.
      */
-	void ContentAttrMod( uint64 iAttr, bool fSet );
+	void ContentAttrMod( uint64 uiAttr, bool fSet );
 
     /**
      * @fn  void CContainer::ContentNotifyDelete();
@@ -211,11 +206,10 @@ public:
      * @param   pResources      The resources.
      * @param   iReplicationQty Zero-based index of the replication qty.
      * @param   fTest           true to test.
-     * @param   dwArg           The argument.
      *
      * @return  An int.
      */
-	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );
+	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false );
 
     /**
      * @fn  size_t CContainer::ResourceConsumePart( const CResourceQtyArray * pResources, int iReplicationQty, int iFailPercent, bool fTest = false, dword dwArg = 0 );

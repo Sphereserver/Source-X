@@ -1,10 +1,14 @@
 
+#include "../common/CLog.h"
 #include "../game/clients/CClient.h"
-#include "network.h"
+#include "CNetState.h"
+#include "CNetworkThread.h"
+#include "net_datatypes.h"
 #include "packet.h"
 
-extern int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
-extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, int iSizeInChars );
+
+#define PACKET_BUFFERDEFAULT 4
+#define PACKET_BUFFERGROWTH 4
 
 // on windows we can use the win32 api for converting between unicode<->ascii,
 // otherwise we need to convert with our own functions (gcc uses utf32 instead
@@ -16,6 +20,69 @@ extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * p
 #else
 #undef USE_UNICODE_LIB
 #endif
+
+//
+// Packet logging
+//
+#if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
+
+void xRecordPacketData(const CClient* client, const byte* data, uint length, lpctstr heading)
+{
+#ifdef _DUMPSUPPORT
+    if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr)g_Cfg.m_sDumpAccPackets, strlen(client->GetAccount()->GetName())))
+        return;
+#else
+    if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
+        return;
+#endif
+
+    Packet packet(data, length);
+    xRecordPacket(client, &packet, heading);
+}
+
+void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
+{
+#ifdef _DUMPSUPPORT
+    if (client->GetAccount() != nullptr && strnicmp(client->GetAccount()->GetName(), (lpctstr)g_Cfg.m_sDumpAccPackets, strlen(client->GetAccount()->GetName())))
+        return;
+#else
+    if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
+        return;
+#endif
+
+    TemporaryString tsDump;
+    packet->dump(tsDump);
+
+#ifdef _DEBUG
+    // write to console
+    g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), heading, (lpctstr)tsDump);
+#endif
+
+    // build file name
+    tchar fname[64];
+	if (client->GetAccount())
+	{
+		snprintf(fname, sizeof(fname), "packets_%s.log", client->GetAccount()->GetName());
+	}
+    else
+    {
+		snprintf(fname, sizeof(fname), "packets_(%s).log", client->GetPeerStr());
+    }
+
+    CSString sFullFileName = CSFile::GetMergedFileName(g_Log.GetLogDir(), fname);
+
+    // write to file
+    CSFileText out;
+    if (out.Open(sFullFileName, OF_READWRITE | OF_TEXT))
+    {
+        out.Printf("%s %s\n\n", heading, (lpctstr)tsDump);
+        out.Close();
+    }
+}
+
+#endif	//defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
+
+
 
 Packet::Packet(uint size) : m_buffer(nullptr)
 {
@@ -35,6 +102,7 @@ Packet::Packet(const byte* data, uint size) : m_buffer(nullptr)
 	clear();
 	m_expectedLength = 0;
 	resize(size);
+    ASSERT(m_buffer);
 	memcpy(m_buffer, data, size);
 }
 
@@ -740,15 +808,20 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 
 #ifdef USE_UNICODE_LIB
 
-	char* bufferReal = new char[length + 1];
+	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-	mbstowcs(buffer, bufferReal, length + 1);
+#ifdef _MSC_VER
+    size_t aux;
+    mbstowcs_s(&aux, buffer, length + 1, bufferReal, length);
+#else
+    mbstowcs(buffer, bufferReal, length);
+#endif
 	delete[] bufferReal;
 #else
 	
-	char* bufferReal = new char[length + 1];
+	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(length), bufferReal, (int)(length) + 1);
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(length), bufferReal, (int)(length));
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NUNICODE to UNICODE
@@ -800,7 +873,7 @@ void Packet::readStringUNICODE(char* buffer, uint bufferSize, uint length, bool 
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[length + 1];
+	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringNUNICODE(bufferReal, length, includeNull);
 	CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(length) + 1);
 	delete[] bufferReal;
@@ -840,13 +913,13 @@ void Packet::readStringNUNICODE(char* buffer, uint bufferSize, uint length, bool
 
 #ifdef USE_UNICODE_LIB
 
-	wchar* bufferReal = new wchar[length + 1];
+	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringNUNICODE(bufferReal, length, includeNull);
 	wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[length + 1];
+	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringUNICODE(bufferReal, length, includeNull);
 	CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(length) + 1);
 	delete[] bufferReal;
@@ -876,13 +949,13 @@ uint Packet::readStringNullASCII(wchar* buffer, uint maxlength)
 
 #ifdef USE_UNICODE_LIB
 
-	char* bufferReal = new char[maxlength + 1];
+	char* bufferReal = new char[(size_t)maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
 	int length = mbstowcs(buffer, bufferReal, maxlength + 1);
 	delete[] bufferReal;
 #else
 
-	char* bufferReal = new char[maxlength + 1];
+	char* bufferReal = new char[(size_t)maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
 	int length = CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), (int)(maxlength), bufferReal, (int)(maxlength) + 1);
 	delete[] bufferReal;
@@ -924,13 +997,13 @@ uint Packet::readStringNullUNICODE(char* buffer, uint bufferSize, uint maxlength
 
 #ifdef USE_UNICODE_LIB
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
 	int length = wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
 	int length = CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(maxlength) + 1);
 	delete[] bufferReal;
@@ -964,13 +1037,13 @@ uint Packet::readStringNullNUNICODE(char* buffer, uint bufferSize, uint maxlengt
 
 #ifdef USE_UNICODE_LIB
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
 	int length = wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
-	wchar* bufferReal = new wchar[maxlength + 1];
+	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
 	int length = CvtNUNICODEToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(maxlength) + 1);
 	delete[] bufferReal;
@@ -991,11 +1064,10 @@ void Packet::dump(AbstractString& output) const
 #	define PROTECT_BYTE(_b_)
 #endif
 
-	TemporaryString tsZ;
-	tchar* z = static_cast<tchar *>(tsZ);
+	TemporaryString ts;
 
-	sprintf(z, "Packet len=%u id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(nullptr));
-	output.append(z);
+	snprintf(ts.buffer(), ts.capacity(), "Packet len=%u id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(nullptr));
+	output.append(ts);
 	output.append("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 	output.append("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
 
@@ -1017,22 +1089,22 @@ void Packet::dump(AbstractString& output) const
 			byte c = m_buffer[idx++];
 			PROTECT_BYTE(c);
 
-			sprintf(z, "%02x", (int)c);
-			strcat(bytes, z);
-			strcat(bytes, (j == 7) ? "  " : " ");
+			snprintf(ts.buffer(), ts.capacity(), "%02x", (int)c);
+			Str_ConcatLimitNull(bytes, ts, sizeof(bytes));
+			Str_ConcatLimitNull(bytes, (j == 7) ? "  " : " ", sizeof(bytes));
 
 			if ((c >= 0x20) && (c <= 0x80))
 			{
-				z[0] = c;
-				z[1] = '\0';
-				strcat(chars, z);
+				ts.buffer()[0] = c;
+				ts.buffer()[1] = '\0';
+				Str_ConcatLimitNull(chars, ts.buffer(), sizeof(chars));
 			}
 			else
-				strcat(chars, ".");
+				Str_ConcatLimitNull(chars, ".", sizeof(chars));
 		}
 
-		sprintf(z, "%04x   ", byteIndex);
-		output.append(z);
+		snprintf(ts.buffer(), ts.capacity(), "%04x   ", byteIndex);
+		output.append(ts);
 		output.append(bytes);
 		output.append("  ");
 		output.append(chars);
@@ -1051,25 +1123,25 @@ void Packet::dump(AbstractString& output) const
 				byte c = m_buffer[idx++];
 				PROTECT_BYTE(c);
 
-				sprintf(z, "%02x", (int)(c));
-				strcat(bytes, z);
-				strcat(bytes, (j == 7) ? "  " : " ");
+				snprintf(ts.buffer(), ts.capacity(), "%02x", (int)c);
+				Str_ConcatLimitNull(bytes, ts.buffer(), sizeof(bytes));
+				Str_ConcatLimitNull(bytes, (j == 7) ? "  " : " ", sizeof(bytes));
 
 				if ((c >= 0x20) && (c <= 0x80))
 				{
-					z[0] = c;
-					z[1] = 0;
-					strcat(chars, z);
+					ts.buffer()[0] = c;
+					ts.buffer()[1] = 0;
+					Str_ConcatLimitNull(chars, ts.buffer(), sizeof(chars));
 				}
 				else
-					strcat(chars, ".");
+					Str_ConcatLimitNull(chars, ".", sizeof(chars));
 			}
 			else
-				strcat(bytes, "   ");
+				Str_ConcatLimitNull(bytes, "   ", sizeof(bytes));
 		}
 
-		sprintf(z, "%04x   ", byteIndex);
-		output.append(z);
+		snprintf(ts.buffer(), ts.capacity(), "%04x   ", byteIndex);
+		output.append(ts);
 		output.append(bytes);
 		output.append("  ");
 		output.append(chars);
@@ -1078,7 +1150,7 @@ void Packet::dump(AbstractString& output) const
 #undef PROTECT_BYTE
 }
 
-uint Packet::checkLength(NetState* client, Packet* packet)
+uint Packet::checkLength(CNetState* client, Packet* packet)
 {
 	ASSERT(client != nullptr);
 	ASSERT(packet != nullptr);
@@ -1106,14 +1178,14 @@ uint Packet::checkLength(NetState* client, Packet* packet)
 	return packetLength;
 }
 
-uint Packet::getExpectedLength(NetState* client, Packet* packet)
+uint Packet::getExpectedLength(CNetState* client, Packet* packet)
 {
 	UNREFERENCED_PARAMETER(client);
 	UNREFERENCED_PARAMETER(packet);
 	return m_expectedLength;
 }
 
-bool Packet::onReceive(NetState* client)
+bool Packet::onReceive(CNetState* client)
 {
 	UNREFERENCED_PARAMETER(client);
 	return true;
@@ -1188,11 +1260,7 @@ void PacketSend::send(const CClient *client, bool appendTransaction)
 	if (sync() > NETWORK_MAXPACKETLEN)
 		return;
 
-#ifndef _MTNETWORK
-	g_NetworkOut.schedule(this, appendTransaction);
-#else
 	m_target->getParentThread()->queuePacket(this->clone(), appendTransaction);
-#endif
 }
 
 void PacketSend::push(const CClient *client, bool appendTransaction)
@@ -1219,11 +1287,7 @@ void PacketSend::push(const CClient *client, bool appendTransaction)
 		return;
 	}
 
-#ifndef _MTNETWORK
-	g_NetworkOut.scheduleOnce(this, appendTransaction);
-#else
 	m_target->getParentThread()->queuePacket(this, appendTransaction);
-#endif
 }
 
 void PacketSend::target(const CClient* client)
@@ -1248,7 +1312,7 @@ void PacketSend::onSent(CClient* client)
 	UNREFERENCED_PARAMETER(client);
 }
 
-bool PacketSend::canSendTo(const NetState* state) const
+bool PacketSend::canSendTo(const CNetState* state) const
 {
 	UNREFERENCED_PARAMETER(state);
 	return true;

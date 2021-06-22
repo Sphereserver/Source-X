@@ -2,7 +2,8 @@
 // But take no actions here.
 #include "../../common/CLog.h"
 #include "../items/CItemVendable.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -357,7 +358,7 @@ int CChar::NPC_GetVendorMarkup() const
 		return static_cast<int>(pVar->GetValNum());
 
 	// Use default value
-	return 15;
+	return g_Cfg.m_iVendorMarkup;
 }
 
 size_t CChar::NPC_OnHearName( lpctstr pszText ) const
@@ -423,9 +424,13 @@ bool CChar::NPC_FightMayCast(bool fCheckSkill) const
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMayCast");
 	ASSERT(m_pNPC);
-	// This NPC could cast spells if they wanted to ?
-	// check mana and anti-magic
-	// Dont check for skill if !fCheckSkill
+	// This NPC could cast spells if they wanted to?
+	// Check mana, anti-magic and tag.noCastTill.
+	// Don't check for skill if !fCheckSkill.
+	
+	//Don't cast the spell if tag.NPCNoCastTill is > than CurrentTime.
+	if (GetKeyNum("NPCNoCastTill") > (CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH))
+		return false;
 	if (fCheckSkill && !const_cast<CChar*>(this)->Skill_GetMagicRandom(300))
 		return false;
 	if ( m_pArea && m_pArea->IsFlag(REGION_ANTIMAGIC_DAMAGE|REGION_FLAG_SAFE) )
@@ -641,7 +646,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef != nullptr);
 	size_t iRet = pCharDef->m_Desires.FindResourceMatch(pItem);
-	if ( iRet != pCharDef->m_Desires.BadIndex() )
+	if ( iRet != SCONT_BADINDEX )
 		return (int)(pCharDef->m_Desires[iRet].GetResQty());
 
 	// I'm hungry and this is food ?
@@ -658,7 +663,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 		// Is it something I would buy?
 		CItemVendable * pItemSell = NPC_FindVendableItem(dynamic_cast<CItemVendable *>(pItem), const_cast<CChar *>(this)->GetBank(LAYER_VENDOR_BUYS), const_cast<CChar *>(this)->GetBank(LAYER_VENDOR_STOCK));
 		if ( pItemSell )
-			return pItemSell->GetVendorPrice(0);
+			return pItemSell->GetVendorPrice(0,1);
 	}
 
 	return 0;
@@ -769,7 +774,6 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	else
 	{
 		// base hostillity on karma diff.
-
 		int iKarmaTarg = pCharTarg->GetKarma();
 
 		if ( Noto_IsEvil())
@@ -791,7 +795,6 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	}
 
 	// Based on just creature type.
-
 	if ( ! fDoMemBase )
 	{
 		if ( pCharTarg->m_pNPC )
@@ -873,11 +876,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	iMotivation += ( Stat_GetAdjusted(STAT_STR) - pChar->Stat_GetAdjusted(STAT_STR));
 
 	// I'm healthy.
-	int iTmp = GetHealthPercent() - pChar->GetHealthPercent();
-	if ( iTmp < -50 )
-		iMotivation -= 50;
-	else if ( iTmp > 50 )
-		iMotivation += 50;
+	iMotivation += GetHealthPercent() - pChar->GetHealthPercent();
 
 	// I'm smart and therefore more cowardly. (if injured)
 	iMotivation -= Stat_GetAdjusted(STAT_INT) / 16;
@@ -905,11 +904,11 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	if ( pChar->m_pArea->IsFlag(REGION_FLAG_SAFE) )
 		return 0;
 
-    if (m_Fight_Targ_UID == pChar->GetUID())    // Am i attacking the same target as before?
+    if (Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))    // Am i attacking the same target as before?
     {
         // Was i told to attack by my master? This is the only hardcoded case in which we have such an high threat value.
         // In this case, i want that my pet attacks the target without doing any other consideration.
-        int iCharID = Attacker_GetID(pChar);
+        const int iCharID = Attacker_GetID(pChar);
         ASSERT(iCharID != -1);
         if (Attacker_GetThreat(iCharID) >= ATTACKER_THREAT_TOLDBYMASTER)
             return 100;

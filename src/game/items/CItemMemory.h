@@ -40,7 +40,7 @@ public:
 	lpctstr Guild_GetTitle() const;
 	CItemStone * Guild_GetLink();
 
-	virtual int FixWeirdness();
+	virtual int FixWeirdness() override;
 };
 
 

@@ -18,8 +18,8 @@ class CSObjSortArray : public CSObjArray<TYPE>
 	 */
 	///@{
 public:
-	CSObjSortArray() {}
-	virtual ~CSObjSortArray() {}
+    CSObjSortArray() = default;
+    virtual ~CSObjSortArray() = default;
 private:
 	/**
     * @brief No copy on construction allowed.
@@ -96,17 +96,7 @@ public:
 };
 
 
-
 /* Template methods (inlined or not) are defined here */
-
-// CSObjArray:: Modifiers.
-
-template<class TYPE>
-inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
-{
-	return this->RemovePtr(pData);
-}
-
 
 // CSObjSortArray:: Modifiers.
 
@@ -129,7 +119,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 	if ( iCompareRes == 0 )
 	{
 		// duplicate should not happen ?!?
-		this->assign(index, pNew);
+		this->operator[](index) = pNew;
 		return index;
 	}
 	return AddPresorted(index, iCompareRes, pNew);
@@ -146,7 +136,7 @@ inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline bool CSObjSortArray<TYPE,KEY_TYPE>::ContainsKey( KEY_TYPE key ) const
 {
-	return FindKey(key) != this->BadIndex();
+	return FindKey(key) != SCONT_BADINDEX;
 }
 
 template<class TYPE,class KEY_TYPE>
@@ -155,13 +145,12 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::FindKey( KEY_TYPE key ) const
 	// Find exact key
 	int iCompareRes;
 	size_t index = FindKeyNear(key, iCompareRes, false);
-	return (iCompareRes != 0 ? this->BadIndex() : index);
+	return (iCompareRes != 0 ? SCONT_BADINDEX : index);
 }
 
 template<class TYPE, class KEY_TYPE>
 size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompareRes, bool fNoSpaces ) const
 {
-
 	// Do a binary search for the key.
 	// RETURN: index
 	//  iCompareRes =
@@ -169,30 +158,71 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 	//		-1 = key should be less than index.
 	//		+1 = key should be greater than index
 	//
-	if (this->size() <= 0 )
+
+    size_t iHigh = this->size();
+    if (iHigh == 0)
+    {
+        iCompareRes = -1;
+        return 0;
+    }
+
+    --iHigh;
+    int iLocalCompareRes = -1;
+    //const TYPE *pData = this->data();
+    size_t iLow = 0;
+    size_t i = 0;
+    while ( iLow <= iHigh )
+    {
+        i = (iHigh + iLow) >> 1;
+        iLocalCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
+        //iLocalCompareRes = CompareKey( key, pData[i], fNoSpaces );
+        if ( iLocalCompareRes == 0 ) {
+            iCompareRes = iLocalCompareRes;
+            return i;
+        }
+        if ( iLocalCompareRes > 0 ) {
+            iLow = i + 1;
+        }
+        else if ( i == 0 ) {
+            iCompareRes = iLocalCompareRes;
+            return 0;
+        }
+        else {
+            iHigh = i - 1;
+        }
+    }
+    iCompareRes = iLocalCompareRes;
+    return i;
+
+    // This doesn't work... Requires further investigation. I wonder if it would even be more efficient then the algorithm above
+    /*
+    size_t iHigh = this->size();
+	if (iHigh <= 0 )
 	{
 		iCompareRes = -1;
 		return 0;
 	}
 
-	size_t iHigh = this->size() - 1;
+    int iLocalCompareRes;
 	size_t iLow = 0;
-	size_t i = 0;
-
-	while ( iLow <= iHigh )
+	while ( iLow < iHigh )
 	{
-		i = (iHigh + iLow) >> 1;
-		iCompareRes = CompareKey( key, this->at(i), fNoSpaces );
-		if ( iCompareRes == 0 )
-			break;
-		if ( iCompareRes > 0 )
-			iLow = i + 1;
-		else if ( i == 0 )
-			break;
+		const size_t i = iLow + ((iHigh - iLow) >> 1);
+		iLocalCompareRes = CompareKey( key, this->operator[](i), fNoSpaces );
+        //iLocalCompareRes = CompareKey( key, pData[i], fNoSpaces );
+		if ( iLocalCompareRes == 0 )
+        {
+            iCompareRes = iLocalCompareRes;
+            return i;
+        }
+		if ( iLocalCompareRes > 0 )
+            iHigh = i;
 		else
-			iHigh = i - 1;
+            iLow = i + 1;
 	}
-	return i;
+    iCompareRes = iLocalCompareRes;
+	return iHigh;
+    */
 }
 
 

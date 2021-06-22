@@ -6,12 +6,8 @@
 #ifndef _INC_CSTYPEDARRAY_H
 #define _INC_CSTYPEDARRAY_H
 
-#include <cstring>
-#include <cstdint>
-
-#include <vector>
-
 #include "../assertion.h"
+#include "CSSortedVector.h"
 
 /**
 * @brief Typed Array:
@@ -56,19 +52,13 @@ public:
     * @brief Removes the nth element and move the next elements one position left.
     * @param nIndex position of the element to remove.
     */
-    void erase(size_t nIndex);
-    /**
-    * @brief Insert a new element to the end of the array.
-    * @param newElement element to insert.
-    * @return the element count of the array.
-    */
-    size_t push_back(TYPE newElement);
+    void erase_at(size_t nIndex);
     /**
     * @brief Update element nth to a new value.
     * @param nIndex index of element to update.
     * @param newElement new value.
     */
-    void assign(size_t nIndex, TYPE newElement);
+    void assign_at(size_t nIndex, TYPE newElement);
     /**
     * @brief Update element nth to a new value.
     * @param nIndex index of element to update.
@@ -79,13 +69,12 @@ public:
     /** @name Index Validation:
     */
     ///@{
-    size_t BadIndex() const;
     /**
     * @brief Check if index is valid for this array.
     * @param i index to check.
     * @return true if index is valid, false otherwise.
     */
-    bool IsValidIndex( size_t i ) const;
+    inline bool IsValidIndex( size_t i ) const;
     ///@}
 };
 
@@ -105,27 +94,18 @@ CSTypedArray<TYPE> & CSTypedArray<TYPE>::operator=( const CSTypedArray<TYPE> & a
     return *this;
 }
 
-// CSTypedArray:: Element access.
-
 // CSTypedArray:: Modifiers.
-
-template<class TYPE>
-size_t CSTypedArray<TYPE>::push_back(TYPE newElement)
-{
-    std::vector<TYPE>::push_back(newElement);
-    return std::vector<TYPE>::size() - 1;
-}
 
 template<class TYPE>
 void CSTypedArray<TYPE>::insert(size_t nIndex, TYPE newElement)
 {	// Bump the existing entry here forward.
-    ASSERT(nIndex != this->BadIndex());
+    ASSERT(nIndex != SCONT_BADINDEX);
     std::vector<TYPE>::emplace(std::vector<TYPE>::begin() + nIndex, newElement);
 }
 
 
 template<class TYPE>
-void CSTypedArray<TYPE>::erase(size_t nIndex)
+void CSTypedArray<TYPE>::erase_at(size_t nIndex)
 {
     if ( !IsValidIndex(nIndex) )
         return;
@@ -133,7 +113,7 @@ void CSTypedArray<TYPE>::erase(size_t nIndex)
 }
 
 template<class TYPE>
-void CSTypedArray<TYPE>::assign(size_t nIndex, TYPE newElement)
+void CSTypedArray<TYPE>::assign_at(size_t nIndex, TYPE newElement)
 {
     ASSERT(IsValidIndex(nIndex));
 
@@ -144,22 +124,15 @@ void CSTypedArray<TYPE>::assign(size_t nIndex, TYPE newElement)
 template<class TYPE>
 void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 {
-    ASSERT(nIndex != this->BadIndex());
+    ASSERT(nIndex != SCONT_BADINDEX);
 
     if ( ! IsValidIndex(nIndex))
         std::vector<TYPE>::resize(nIndex + 1);
-    assign(nIndex, newElement);
+    assign_at(nIndex, newElement);
 }
 
 
 // CSTypedArray:: Operations.
-
-template<class TYPE>
-inline size_t CSTypedArray<TYPE>::BadIndex() const
-{
-    return INTPTR_MAX;
-}
-
 
 template<class TYPE>
 bool CSTypedArray<TYPE>::IsValidIndex( size_t i ) const

@@ -11,6 +11,7 @@
 #include "../game/uo_files/uofiles_enums.h"
 #include "../game/uo_files/uofiles_enums_itemid.h"
 #include "../game/uo_files/uofiles_types.h"
+#include "../sphere_library/CSTime.h"
 #include "packet.h"
 
 
@@ -25,7 +26,7 @@ class PacketUnknown : public Packet
 {
 public:
 	PacketUnknown(uint size = 0);
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -39,13 +40,13 @@ class PacketCreate : public Packet
 {
 public:
 	PacketCreate(uint size = 104);
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 
 protected:
-	bool doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt, PROFESSION_TYPE prProf,
+	bool doCreate(CNetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt, PROFESSION_TYPE prProf,
 		SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace,
-		int iStartLoc, int iFlags);
+		int iStartLoc, uint uiFlags);
 };
 
 /***************************************************************************
@@ -59,7 +60,7 @@ class PacketMovementReq : public Packet
 {
 public:
 	PacketMovementReq(uint size = 7);
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -73,7 +74,7 @@ class PacketSpeakReq : public Packet
 {
 public:
 	PacketSpeakReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -87,7 +88,7 @@ class PacketAttackReq : public Packet
 {
 public:
 	PacketAttackReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -101,7 +102,7 @@ class PacketDoubleClick : public Packet
 {
 public:
 	PacketDoubleClick();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -115,7 +116,7 @@ class PacketItemPickupReq : public Packet
 {
 public:
 	PacketItemPickupReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -129,8 +130,8 @@ class PacketItemDropReq : public Packet
 {
 public:
 	PacketItemDropReq();
-	virtual uint getExpectedLength(NetState* client, Packet* packet);
-	virtual bool onReceive(NetState* net);
+	virtual uint getExpectedLength(CNetState* client, Packet* packet);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -144,7 +145,7 @@ class PacketSingleClick : public Packet
 {
 public:
 	PacketSingleClick();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -158,7 +159,7 @@ class PacketTextCommand : public Packet
 {
 public:
 	PacketTextCommand();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -172,7 +173,7 @@ class PacketItemEquipReq : public Packet
 {
 public:
 	PacketItemEquipReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -186,7 +187,7 @@ class PacketResynchronize : public Packet
 {
 public:
 	PacketResynchronize();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -207,7 +208,7 @@ public:
 	};
 
 	PacketDeathStatus();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -221,7 +222,7 @@ class PacketObjStatusReq : public Packet
 {
 public:
 	PacketObjStatusReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -235,7 +236,7 @@ class PacketSkillLockChange : public Packet
 {
 public:
 	PacketSkillLockChange();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -248,7 +249,7 @@ public:
 struct VendorItem
 {
 	CUID m_serial;
-	word m_amount;
+	word m_vcAmount;
 	dword m_price;
 };
 
@@ -256,7 +257,7 @@ class PacketVendorBuyReq : public Packet
 {
 public:
 	PacketVendorBuyReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -271,7 +272,7 @@ class PacketStaticUpdate : public Packet
 {
 public:
 	PacketStaticUpdate();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -285,7 +286,7 @@ class PacketMapEdit : public Packet
 {
 public:
 	PacketMapEdit();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -299,7 +300,7 @@ class PacketCharPlay : public Packet
 {
 public:
 	PacketCharPlay();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -313,7 +314,7 @@ class PacketBookPageEdit : public Packet
 {
 public:
 	PacketBookPageEdit();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -327,7 +328,7 @@ class PacketTarget : public Packet
 {
 public:
 	PacketTarget();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -341,7 +342,7 @@ class PacketSecureTradeReq : public Packet
 {
 public:
 	PacketSecureTradeReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -355,7 +356,7 @@ class PacketBulletinBoardReq : public Packet
 {
 public:
 	PacketBulletinBoardReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -369,7 +370,7 @@ class PacketWarModeReq : public Packet
 {
 public:
 	PacketWarModeReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -383,7 +384,7 @@ class PacketPingReq : public Packet
 {
 public:
 	PacketPingReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -397,7 +398,7 @@ class PacketCharRename : public Packet
 {
 public:
 	PacketCharRename();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -411,7 +412,7 @@ class PacketMenuChoice : public Packet
 {
 public:
 	PacketMenuChoice();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -425,7 +426,7 @@ class PacketServersReq : public Packet
 {
 public:
 	PacketServersReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -439,7 +440,7 @@ class PacketCharDelete : public Packet
 {
 public:
 	PacketCharDelete();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -453,7 +454,7 @@ class PacketCreateNew : public PacketCreate
 {
 public:
 	PacketCreateNew();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -467,7 +468,7 @@ class PacketCharListReq : public Packet
 {
 public:
 	PacketCharListReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -481,7 +482,7 @@ class PacketBookHeaderEdit : public Packet
 {
 public:
 	PacketBookHeaderEdit();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -495,7 +496,7 @@ class PacketDyeObject : public Packet
 {
 public:
 	PacketDyeObject();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -509,7 +510,7 @@ class PacketAllNamesReq : public Packet
 {
 public:
 	PacketAllNamesReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -523,7 +524,7 @@ class PacketPromptResponse : public Packet
 {
 public:
 	PacketPromptResponse();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -537,7 +538,7 @@ class PacketHelpPageReq : public Packet
 {
 public:
 	PacketHelpPageReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -551,7 +552,7 @@ class PacketVendorSellReq : public Packet
 {
 public:
 	PacketVendorSellReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -565,7 +566,7 @@ class PacketServerSelect : public Packet
 {
 public:
 	PacketServerSelect();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -579,7 +580,7 @@ class PacketSystemInfo : public Packet
 {
 public:
 	PacketSystemInfo();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -593,7 +594,7 @@ class PacketTipReq : public Packet
 {
 public:
 	PacketTipReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -607,7 +608,7 @@ class PacketGumpValueInputResponse : public Packet
 {
 public:
 	PacketGumpValueInputResponse();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -621,7 +622,7 @@ class PacketSpeakReqUNICODE : public Packet
 {
 public:
 	PacketSpeakReqUNICODE();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -635,7 +636,7 @@ class PacketGumpDialogRet : public Packet
 {
 public:
 	PacketGumpDialogRet();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -649,7 +650,7 @@ class PacketChatCommand : public Packet
 {
 public:
 	PacketChatCommand();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -663,7 +664,7 @@ class PacketChatButton : public Packet
 {
 public:
 	PacketChatButton();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -677,7 +678,7 @@ class PacketToolTipReq : public Packet
 {
 public:
 	PacketToolTipReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -691,7 +692,7 @@ class PacketProfileReq : public Packet
 {
 public:
 	PacketProfileReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -705,7 +706,7 @@ class PacketMailMessage : public Packet
 {
 public:
 	PacketMailMessage();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -719,7 +720,7 @@ class PacketClientVersion : public Packet
 {
 public:
 	PacketClientVersion();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -733,7 +734,7 @@ class PacketExtendedCommand : public Packet
 {
 public:
 	PacketExtendedCommand();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -747,7 +748,7 @@ class PacketScreenSize : public Packet
 {
 public:
 	PacketScreenSize();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -761,7 +762,7 @@ class PacketPartyMessage : public Packet
 {
 public:
 	PacketPartyMessage();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -775,7 +776,7 @@ class PacketArrowClick : public Packet
 {
 public:
 	PacketArrowClick();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -789,7 +790,7 @@ class PacketWrestleDisarm : public Packet
 {
 public:
 	PacketWrestleDisarm();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -803,7 +804,7 @@ class PacketWrestleStun : public Packet
 {
 public:
 	PacketWrestleStun();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -817,7 +818,7 @@ class PacketLanguage : public Packet
 {
 public:
 	PacketLanguage();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -831,7 +832,7 @@ class PacketStatusClose : public Packet
 {
 public:
 	PacketStatusClose();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -845,7 +846,7 @@ class PacketAnimationReq : public Packet
 {
 public:
 	PacketAnimationReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -859,7 +860,7 @@ class PacketClientInfo : public Packet
 {
 public:
 	PacketClientInfo();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -873,7 +874,7 @@ class PacketAosTooltipInfo : public Packet
 {
 public:
 	PacketAosTooltipInfo();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -887,7 +888,7 @@ class PacketPopupReq : public Packet
 {
 public:
 	PacketPopupReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -901,7 +902,7 @@ class PacketPopupSelect : public Packet
 {
 public:
 	PacketPopupSelect();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -915,7 +916,7 @@ class PacketChangeStatLock : public Packet
 {
 public:
 	PacketChangeStatLock();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -929,7 +930,7 @@ class PacketSpellSelect : public Packet
 {
 public:
 	PacketSpellSelect();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -943,7 +944,7 @@ class PacketHouseDesignReq : public Packet
 {
 public:
 	PacketHouseDesignReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -957,7 +958,7 @@ class PacketAntiCheat : public Packet
 {
 public:
 	PacketAntiCheat();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -971,7 +972,7 @@ class PacketBandageMacro : public Packet
 {
 public:
 	PacketBandageMacro();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -985,7 +986,7 @@ class PacketTargetedSkill : public Packet
 {
 public:
     PacketTargetedSkill();
-    virtual bool onReceive(NetState* net);
+    virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -999,7 +1000,7 @@ class PacketGargoyleFly : public Packet
 {
 public:
 	PacketGargoyleFly();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1013,7 +1014,7 @@ class PacketWheelBoatMove : public Packet
 {
 public:
 	PacketWheelBoatMove();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1027,7 +1028,7 @@ class PacketPromptResponseUnicode : public Packet
 {
 public:
 	PacketPromptResponseUnicode();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1041,7 +1042,7 @@ class PacketViewRange : public Packet
 {
 public:
 	PacketViewRange();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1055,7 +1056,7 @@ class PacketLogout : public Packet
 {
 public:
 	PacketLogout();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1069,7 +1070,7 @@ class PacketBookHeaderEditNew : public Packet
 {
 public:
 	PacketBookHeaderEditNew();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1083,7 +1084,7 @@ class PacketAOSTooltipReq : public Packet
 {
 public:
 	PacketAOSTooltipReq();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1097,7 +1098,7 @@ class PacketEncodedCommand : public Packet
 {
 public:
 	PacketEncodedCommand();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1111,7 +1112,7 @@ class PacketHouseDesignBackup : public Packet
 {
 public:
 	PacketHouseDesignBackup();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1125,7 +1126,7 @@ class PacketHouseDesignRestore : public Packet
 {
 public:
 	PacketHouseDesignRestore();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1139,7 +1140,7 @@ class PacketHouseDesignCommit : public Packet
 {
 public:
 	PacketHouseDesignCommit();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1153,7 +1154,7 @@ class PacketHouseDesignDestroyItem : public Packet
 {
 public:
 	PacketHouseDesignDestroyItem();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1167,7 +1168,7 @@ class PacketHouseDesignPlaceItem : public Packet
 {
 public:
 	PacketHouseDesignPlaceItem();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1181,7 +1182,7 @@ class PacketHouseDesignExit : public Packet
 {
 public:
 	PacketHouseDesignExit();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1195,7 +1196,7 @@ class PacketHouseDesignPlaceStair : public Packet
 {
 public:
 	PacketHouseDesignPlaceStair();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1209,7 +1210,7 @@ class PacketHouseDesignSync : public Packet
 {
 public:
 	PacketHouseDesignSync();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1223,7 +1224,7 @@ class PacketHouseDesignClear : public Packet
 {
 public:
 	PacketHouseDesignClear();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1237,7 +1238,7 @@ class PacketHouseDesignSwitch : public Packet
 {
 public:
 	PacketHouseDesignSwitch();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1251,7 +1252,7 @@ class PacketHouseDesignPlaceRoof : public Packet
 {
 public:
 	PacketHouseDesignPlaceRoof();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1265,7 +1266,7 @@ class PacketHouseDesignDestroyRoof : public Packet
 {
 public:
 	PacketHouseDesignDestroyRoof();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1279,7 +1280,7 @@ class PacketSpecialMove : public Packet
 {
 public:
 	PacketSpecialMove();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1293,7 +1294,7 @@ class PacketHouseDesignRevert : public Packet
 {
 public:
 	PacketHouseDesignRevert();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1307,7 +1308,7 @@ class PacketEquipLastWeapon : public Packet
 {
 public:
 	PacketEquipLastWeapon();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1321,7 +1322,7 @@ class PacketGuildButton : public Packet
 {
 public:
 	PacketGuildButton();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1335,7 +1336,7 @@ class PacketQuestButton : public Packet
 {
 public:
 	PacketQuestButton();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1349,7 +1350,7 @@ class PacketHardwareInfo : public Packet
 {
 public:
 	PacketHardwareInfo();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1363,7 +1364,7 @@ class PacketBugReport : public Packet
 {
 public:
 	PacketBugReport();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1377,7 +1378,7 @@ class PacketClientType : public Packet
 {
 public:
 	PacketClientType();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1391,7 +1392,7 @@ class PacketRemoveUIHighlight : public Packet
 {
 public:
 	PacketRemoveUIHighlight();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1405,7 +1406,7 @@ class PacketUseHotbar : public Packet
 {
 public:
 	PacketUseHotbar();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1419,7 +1420,7 @@ class PacketEquipItemMacro : public Packet
 {
 public:
 	PacketEquipItemMacro();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1433,7 +1434,7 @@ class PacketUnEquipItemMacro : public Packet
 {
 public:
 	PacketUnEquipItemMacro();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1447,7 +1448,7 @@ class PacketMovementReqNew : public Packet
 {
 public:
 	PacketMovementReqNew();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1461,7 +1462,7 @@ class PacketTimeSyncRequest : public Packet
 {
 public:
 	PacketTimeSyncRequest();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1475,7 +1476,7 @@ class PacketCrashReport : public Packet
 {
 public:
 	PacketCrashReport();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 /***************************************************************************
@@ -1489,7 +1490,7 @@ class PacketCreateHS : public PacketCreate
 {
 public:
 	PacketCreateHS();
-	virtual bool onReceive(NetState* net);
+	virtual bool onReceive(CNetState* net);
 };
 
 
@@ -1504,7 +1505,22 @@ class PacketUltimaStoreButton : public Packet
 {
 public:
     PacketUltimaStoreButton();
-    virtual bool onReceive(NetState* net);
+    virtual bool onReceive(CNetState* net);
+};
+
+
+/***************************************************************************
+*
+*
+*	Packet 0xFB : PacketPublicHouseContent			show/hide public house content
+*
+*
+***************************************************************************/
+class PacketPublicHouseContent : public Packet
+{
+public:
+    PacketPublicHouseContent();
+    virtual bool onReceive(CNetState* net);
 };
 
 #endif // _INC_RECEIVE_H

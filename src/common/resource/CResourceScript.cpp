@@ -21,7 +21,7 @@ bool CResourceScript::_CheckForChange()
 
     if ( !CSFileList::ReadFileInfo(ptcFilePath, dateChange, dwSize) )
     {
-        DEBUG_ERR(( "Can't get stats info for file '%s'\n", ptcFilePath ));
+        g_Log.EventError( "Can't get stats info for file '%s'\n", ptcFilePath );
         return false;
     }
 
@@ -44,7 +44,7 @@ bool CResourceScript::_CheckForChange()
 bool CResourceScript::CheckForChange()
 {
     ADDTOCALLSTACK("CResourceScript::CheckForChange");
-    THREAD_UNIQUE_LOCK_RETURN(_CheckForChange());
+    THREAD_UNIQUE_LOCK_RETURN(CResourceScript::_CheckForChange());
 }
 
 void CResourceScript::ReSync()

@@ -1,12 +1,16 @@
 // Common for client and server.
 
-#include "../common/resource/blocks/CRandGroupDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
 #include "../common/CScript.h"
+#include "../network/CClientIterator.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
-#include "CWorld.h"
+#include "CSector.h"
+#include "CSectorList.h"
+#include "CServer.h"
+
 
 //************************************************************************
 // -CTeleport
@@ -21,20 +25,21 @@ CTeleport::CTeleport( tchar * pszArgs )
 	if ( iArgs < 2 )
 	{
 		DEBUG_ERR(( "Bad CTeleport Def\n" ));
+        _fNpc = false;
 		return;
 	}
 	Read( ppCmds[0] );
-	m_ptDst.Read( ppCmds[1] );
+	_ptDst.Read( ppCmds[1] );
 	if ( ppCmds[3] )
-		bNpc = (ATOI(ppCmds[3]) != 0);
+		_fNpc = (Str_ToI(ppCmds[3]) != 0);
 	else
-		bNpc = false;
+		_fNpc = false;
 }
 
 bool CTeleport::RealizeTeleport()
 {
 	ADDTOCALLSTACK("CTeleport::RealizeTeleport");
-	if ( ! IsCharValid() || ! m_ptDst.IsCharValid())
+	if ( ! IsCharValid() || ! _ptDst.IsCharValid())
 	{
 		DEBUG_ERR(( "CTeleport bad coords %s\n", WriteUsed() ));
 		return false;
@@ -106,9 +111,10 @@ bool CRegion::RealizeRegion()
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
-	for ( int i = 0, iMax = g_MapList.GetSectorQty(m_pt.m_map); i < iMax; ++i )
+	const CSectorList* pSectors = CSectorList::Get();
+	for ( int i = 0, iMax = pSectors->GetSectorQty(m_pt.m_map); i < iMax; ++i )
 	{
-		CSector *pSector = g_World.GetSector(m_pt.m_map, i);
+		CSector *pSector = pSectors->GetSector(m_pt.m_map, i);
 
 		if ( pSector && IsOverlapped(pSector->GetRect()) )
 		{
@@ -159,13 +165,14 @@ bool CRegion::MakeRegionDefname()
         return true;
 
     tchar ch;
-    lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
+    lpctstr ptcKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
     tchar * pbuf = Str_GetTemp();
     tchar * pszDef = pbuf + 2;
     strcpy(pbuf, "a_");
 
     lpctstr pszName = GetName();
     GETNONWHITESPACE( pszName );
+    g_Log.EventWarn("Missing DEFNAME for Region named '%s'. Auto-generating one.\n", pszName);
 
     if ( !strnicmp( "the ", pszName, 4 ) )
         pszName	+= 4;
@@ -186,7 +193,7 @@ bool CRegion::MakeRegionDefname()
         ch	= *pszName;
         if ( ch == ' ' || ch == '\t' || ch == '-' )
             ch	= '_';
-        else if ( !iswalnum( ch ) )
+        else if ( !IsAlnum( ch ) )
             continue;
         // collapse multiple spaces together
         if ( ch == '_' && *(pszDef-1) == '_' )
@@ -207,23 +214,23 @@ bool CRegion::MakeRegionDefname()
         CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
         if ( !pRegion )
             continue;
-        pszKey = pRegion->GetResourceName();
-        if ( !pszKey )
+        ptcKey = pRegion->GetResourceName();
+        if ( !ptcKey )
             continue;
 
         // Is this a similar key?
-        if ( strnicmp( pbuf, pszKey, iLen ) != 0 )
+        if ( strnicmp( pbuf, ptcKey, iLen ) != 0 )
             continue;
 
         // skip underscores
-        pszKey = pszKey + iLen;
-        while ( *pszKey	== '_' )
-            ++pszKey;
+        ptcKey = ptcKey + iLen;
+        while ( *ptcKey	== '_' )
+            ++ptcKey;
 
         // Is this is subsequent key with a number? Get the highest (plus one)
-        if ( IsStrNumericDec( pszKey ) )
+        if ( IsStrNumericDec( ptcKey ) )
         {
-            int iVarThis = ATOI( pszKey );
+            int iVarThis = Str_ToI( ptcKey );
             if ( iVarThis >= iVar )
                 iVar = iVarThis + 1;
         }
@@ -232,7 +239,7 @@ bool CRegion::MakeRegionDefname()
     }
 
     // Only one, no need for the extra "_"
-    sprintf( pszDef, "%i", iVar );
+    pszDef = Str_FromI_Fast(iVar, pszDef, STR_TEMPLENGTH, 10);
     SetResourceName( pbuf );
     // Assign name
     return true;
@@ -314,15 +321,16 @@ lpctstr const CRegion::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	nullptr
 };
 
-bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CRegion::r_WriteVal");
 	EXC_TRY("WriteVal");
 	bool fZero = false;
-	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
-		return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+		return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc ));
 	}
 
 	switch ( index )
@@ -356,10 +364,10 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			m_Events.WriteResourceRefList( sVal );
 			break;
 		case RC_ISEVENT:
-			if ( pszKey[7] != '.' )
+			if ( ptcKey[7] != '.' )
 				return false;
-			pszKey += 8;
-			sVal = m_Events.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
+			ptcKey += 8;
+			sVal = m_Events.ContainsResourceName(RES_EVENTS, ptcKey) ? "1" : "0";
             break;
 		case RC_FLAGS:
 			sVal.FormatHex( GetRegionFlags() );
@@ -406,14 +414,14 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case RC_RECT:
 			{
 				size_t iQty = m_Rects.size();
-				pszKey += 4;
-				if ( *pszKey == '\0' )
+				ptcKey += 4;
+				if ( *ptcKey == '\0' )
 				{
 					sVal.FormatVal( (int)(iQty));
 					return true;
 				}
-				SKIP_SEPARATORS( pszKey );
-				size_t iRect = Exp_GetVal( pszKey );
+				SKIP_SEPARATORS( ptcKey );
+				size_t iRect = Exp_GetVal( ptcKey );
 				if ( iRect <= 0 )
 				{
 					sVal = m_rectUnion.Write();
@@ -433,34 +441,34 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( IsFlag(REGION_FLAG_SAFE));
 			break;
 		case RC_TAGCOUNT:
-			sVal.FormatVal( (int)(m_TagDefs.GetCount()) );
+			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case RC_TAGAT:
 			{
-				pszKey += 5; // eat the 'TAGAT'
-				if ( *pszKey == '.' ) // do we have an argument?
+				ptcKey += 5; // eat the 'TAGAT'
+				if ( *ptcKey == '.' ) // do we have an argument?
 				{
-					SKIP_SEPARATORS( pszKey );
-					size_t iQty = Exp_GetSTVal( pszKey );
-					if ( iQty >= m_TagDefs.GetCount() )
+					SKIP_SEPARATORS( ptcKey );
+					size_t uiQty = Exp_GetSTVal( ptcKey );
+					if ( uiQty >= m_TagDefs.GetCount() )
 						return false; // trying to get non-existant tag
 
-					CVarDefCont * pTagAt = m_TagDefs.GetAt( iQty );
+					const CVarDefCont * pTagAt = m_TagDefs.GetAt(uiQty);
 					if ( !pTagAt )
 						return false; // trying to get non-existant tag
 
-					SKIP_SEPARATORS( pszKey );
-					if ( ! *pszKey )
+					SKIP_SEPARATORS( ptcKey );
+					if ( ! *ptcKey )
 					{
 						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
 						return true;
 					}
-					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
+					else if ( !strnicmp( ptcKey, "KEY", 3 )) // key?
 					{
 						sVal = pTagAt->GetKey();
 						return true;
 					}
-					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
+					else if ( !strnicmp( ptcKey, "VAL", 3 )) // val?
 					{
 						sVal = pTagAt->GetValStr();
 						return true;
@@ -472,13 +480,14 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case RC_TAG0:
 			fZero = true;
-			++pszKey;
+			++ptcKey;
+			FALLTHROUGH;
 		case RC_TAG:	// "TAG" = get/set a local tag.
 			{
-				if ( pszKey[3] != '.' )
+				if ( ptcKey[3] != '.' )
 					return false;
-				pszKey += 4;
-				sVal = m_TagDefs.GetKeyStr( pszKey, fZero );
+				ptcKey += 4;
+				sVal = m_TagDefs.GetKeyStr( ptcKey, fZero );
 				return true;
 			}
 		case RC_TYPEREGION:
@@ -495,8 +504,8 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			} break;
 		case RC_UID:
 			// Allow use of UID.x.KEY on the REGION object
-			if ( pszKey[3] == '.' )
-				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
+			if ( ptcKey[3] == '.' )
+				return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc );
 
 			sVal.FormatHex( GetResourceID() );
 			break;
@@ -510,7 +519,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<lpctstr>(sVal), static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", ptcKey, static_cast<lpctstr>(sVal), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }
@@ -520,24 +529,22 @@ bool CRegion::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CRegion::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	if ( s.IsKeyHead( "TAG.", 4 ))
-	{
-		SetModified( REGMOD_TAGS );
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, ptcArg, false );
-		return true;
-	}
-	if ( s.IsKeyHead( "TAG0.", 5 ))
-	{
-		SetModified( REGMOD_TAGS );
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, ptcArg, false );
-		return true;
-	}
+    lpctstr ptcKey = s.GetKey();
+    if (!strnicmp("TAG", ptcKey, 3))
+    {
+        if ((ptcKey[3] == '.') || (ptcKey[3] == '0'))
+        {
+            SetModified(REGMOD_TAGS);
+            const bool fZero = (ptcKey[3] == '0');
+            ptcKey = ptcKey + (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false); // don't change fZero to true! it would break some scripts!
+            return true;
+        }
+    }
 
-	RC_TYPE index = (RC_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	RC_TYPE index = (RC_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 		return false;
 
@@ -639,28 +646,27 @@ bool CRegion::r_LoadVal( CScript & s )
 void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteBody");
-	TemporaryString tsZ;
-	tchar* z = static_cast<tchar *>(tsZ);
+	TemporaryString tsTemp;
 	if ( GetRegionFlags())
 	{
-		sprintf(z, "%sFLAGS", pszPrefix);
-		s.WriteKeyHex(z, GetRegionFlags());
+		snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sFLAGS", pszPrefix);
+		s.WriteKeyHex(tsTemp.buffer(), GetRegionFlags());
 	}
 
 	if (!m_Events.empty())
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
-		sprintf(z, "%sEVENTS", pszPrefix);
-		s.WriteKey(z, sVal);
+		snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sEVENTS", pszPrefix);
+		s.WriteKeyStr(tsTemp.buffer(), sVal);
 	}
 
 	// Write New variables
 	m_BaseDefs.r_WritePrefix(s);
 
 	// Write out any extra TAGS here.
-	sprintf(z, "%sTAG", pszPrefix);
-	m_TagDefs.r_WritePrefix(s, z);
+	snprintf(tsTemp.buffer(), tsTemp.capacity(), "%sTAG", pszPrefix);
+	m_TagDefs.r_WritePrefix(s, tsTemp.buffer());
 }
 
 
@@ -668,10 +674,10 @@ void CRegion::r_WriteModified( CScript &s )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteModified");
 	if ( m_iModified & REGMOD_NAME )
-		s.WriteKey("NAME", GetName() );
+		s.WriteKeyStr("NAME", GetName() );
 
 	if ( m_iModified & REGMOD_GROUP )
-		s.WriteKey("GROUP", m_sGroup );
+		s.WriteKeyStr("GROUP", m_sGroup.GetBuffer() );
 
 	if ( m_iModified & REGMOD_FLAGS )
 	{
@@ -682,32 +688,32 @@ void CRegion::r_WriteModified( CScript &s )
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
-		s.WriteKey( "EVENTS", sVal );
+		s.WriteKeyStr( "EVENTS", sVal.GetBuffer() );
 	}
 }
-
 
 
 void CRegion::r_WriteBase( CScript &s )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteBase");
-	if ( GetName() && GetName()[0] )
-		s.WriteKey("NAME", GetName());
+    lpctstr ptcName = GetName();
+	if ( ptcName && ptcName[0] )
+		s.WriteKeyStr("NAME", ptcName);
 
 	if ( ! m_sGroup.IsEmpty() )
-		s.WriteKey("GROUP", static_cast<lpctstr>(m_sGroup));
+		s.WriteKeyStr("GROUP", m_sGroup.GetBuffer());
 
 	CRegion::r_WriteBody( s, "" );
 
 	if ( m_pt.IsValidPoint())
-		s.WriteKey("P", m_pt.WriteUsed());
+		s.WriteKeyStr("P", m_pt.WriteUsed());
 	else if ( m_pt.m_map )
 		s.WriteKeyVal("MAP", m_pt.m_map);
 
 	size_t iQty = GetRegionRectCount();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
-		s.WriteKey("RECT", GetRegionRect(i).Write() );
+		s.WriteKeyStr("RECT", GetRegionRect(i).Write() );
 	}
 }
 
@@ -799,17 +805,17 @@ bool CRegion::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 {
 	ADDTOCALLSTACK("CRegion::r_Verb");
 	EXC_TRY("Verb");
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
-	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
+	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		m_TagDefs.ClearKeys(pszKey);
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		m_TagDefs.ClearKeys(ptcKey);
 		return true;
 	}
 
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch (index)
 	{
 		case RV_ALLCLIENTS:
@@ -823,8 +829,7 @@ bool CRegion::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					continue;
 				
 				CScript script(s.GetArgRaw());
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				script.CopyParseState(s);
 				pChar->r_Verb(script, pSrc);
 			}
 			return true;
@@ -885,7 +890,7 @@ lpctstr const CRegion::sm_szTrigName[RTRIG_QTY+1] =	// static
 	"@EXIT",
 	"@REGPERIODIC",
 	"@STEP",
-	nullptr,
+	nullptr
 };
 
 TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
@@ -897,9 +902,10 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 
 	for ( size_t i = 0; i < m_Events.size(); ++i )
 	{
-		CResourceLink * pLink = m_Events[i];
+		CResourceLink * pLink = m_Events[i].GetRef();
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ) || !pLink->HasTrigger(iAction) )
 			continue;
+
 		CResourceLock s;
 		if ( pLink->ResourceLock(s) )
 		{
@@ -912,12 +918,14 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 	//	EVENTSREGION triggers (constant events of regions set from sphere.ini)
 	for ( size_t i = 0; i < g_Cfg.m_pEventsRegionLink.size(); ++i )
 	{
-		CResourceLink * pLink = g_Cfg.m_pEventsRegionLink[i];
+		CResourceLink * pLink = g_Cfg.m_pEventsRegionLink[i].GetRef();
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ) || !pLink->HasTrigger(iAction) )
 			continue;
+
 		CResourceLock s;
 		if ( !pLink->ResourceLock(s) )
 			continue;
+
 		iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], pSrc);
 		if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 			return iRet;
@@ -952,18 +960,19 @@ lpctstr const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
 	nullptr
 };
 
-bool CRegionWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CRegionWorld::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_GetRef");
-	return( CRegion::r_GetRef( pszKey, pRef ));
+	return( CRegion::r_GetRef( ptcKey, pRef ));
 }
 
-bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CRegionWorld::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CRegionWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
 	//bool	fZero	= false;
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RWC_RESOURCES:
 			m_Events.WriteResourceRefList( sVal );
@@ -971,12 +980,12 @@ bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case RWC_REGION:
 			{
 				// Check that the syntax is correct.
-				if ( pszKey[6] && pszKey[6] != '.' )
+				if ( ptcKey[6] && ptcKey[6] != '.' )
 					return false;
 
 				CRegionWorld * pRegionTemp = dynamic_cast <CRegionWorld*>(m_pt.GetRegion( REGION_TYPE_AREA ));
 
-				if ( !pszKey[6] )
+				if ( !ptcKey[6] )
 				{
 					// We're just checking if the reference is valid.
 					sVal.FormatVal( pRegionTemp? 1:0 );
@@ -984,20 +993,20 @@ bool CRegionWorld::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 				}
 
 				// ELSE - We're trying to retrieve a property from the region.
-				pszKey += 7;
+				ptcKey += 7;
 				if ( pRegionTemp && m_pt.GetRegion( REGION_TYPE_MULTI ) )
-					return pRegionTemp->r_WriteVal( pszKey, sVal, pSrc );
+					return pRegionTemp->r_WriteVal( ptcKey, sVal, pSrc );
 
-				return( this->r_WriteVal( pszKey, sVal, pSrc ));
+				return( this->r_WriteVal( ptcKey, sVal, pSrc ));
 			}
 		default:
-			return( CRegion::r_WriteVal( pszKey, sVal, pSrc ));
+			return (fNoCallParent ? false : CRegion::r_WriteVal( ptcKey, sVal, pSrc ));
 	}
 	return true;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<lpctstr>(sVal), static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", ptcKey, static_cast<lpctstr>(sVal), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }
@@ -1089,7 +1098,7 @@ const CRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 
 	for ( size_t i = 0; i < m_Events.size(); ++i )
 	{
-		CResourceLink * pLink = m_Events[i];
+		CResourceLink * pLink = m_Events[i].GetRef();
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ))
 			continue;
 

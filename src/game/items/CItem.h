@@ -8,7 +8,7 @@
 
 #include "../resource/CResourceBase.h"
 #include "../components/CCFaction.h"
-#include "../CTimedObject.h"
+#include "../CServerTime.h"
 #include "../CBase.h"
 #include "../CRect.h"
 #include "../CObjBase.h"
@@ -20,6 +20,9 @@
 #include "../CEntity.h"
 #include "CItemBase.h"
 
+
+class CWorldTicker;
+class CCSpawn;
 
 enum ITC_TYPE	// Item Template commands
 {
@@ -37,6 +40,10 @@ enum ITC_TYPE	// Item Template commands
 class CItem : public CObjBase
 {
 	// RES_WORLDITEM
+
+	friend class CWorldTicker;
+	friend class CCSpawn;
+
 public:
 	static const char *m_sClassName;
 	static lpctstr const sm_szLoadKeys[];
@@ -47,17 +54,18 @@ public:
 
 private:
 	ITEMID_TYPE m_dwDispIndex;		// The current display type. ITEMID_TYPE
-	word m_amount;		// Amount of items in pile. 64K max (or corpse type)
+	word m_wAmount;		// Amount of items in pile. 64K max (or corpse type)
 	IT_TYPE m_type;		// What does this item do when dclicked ? defines dynamic_cast type
 	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
-    CUID _uidMultiComponent;   ///< I'm a Component of a CMulti
-    CUID _uidMultiLockDown;    ///< I'm locked down in a CMulti
 public:
-    void SetComponentOfMulti(CUID uidMulti);
-    void SetLockDownOfMulti(CUID uidMulti);
+	CUID GetComponentOfMulti() const;
+	CUID GetLockDownOfMulti() const;
+    void SetComponentOfMulti(const CUID& uidMulti);
+    void SetLockDownOfMulti(const CUID& uidMulti);
+
 	byte	m_speed;
 
 // Attribute flags.
@@ -69,9 +77,11 @@ public:
 #define ATTR_MAGIC				0x0020				// DON'T SET THIS WHILE WORN! This item is magic as apposed to marked or markable.
 #define ATTR_OWNED				0x0040				// This is owned by the town. You need to steal it. NEVER DECAYS !
 #define ATTR_INVIS				0x0080				// Gray hidden item (to GM's or owners?)
-#define ATTR_CURSED				0x0100
+#define ATTR_CURSED				0x0100              // Can not be insured. Will always fall to the corpse, even if somehow blessed or insured.
+                                                    //  OSI: Cannot be blessed (with an Item Bless Deed, Personal Bless Deed, or Clothing Bless Deed and can't be sent to the bank with a Bag of Sending)
 #define ATTR_CURSED2			0x0200				// cursed damned unholy
-#define ATTR_BLESSED			0x0400
+#define ATTR_BLESSED			0x0400              // Stay in your backpack when you die, Be placed into character's backpack upon resurrection if equipped before death,
+                                                    //  Cannot be stolen by using the stealing skill, Cannot be insured
 #define ATTR_BLESSED2			0x0800				// blessed sacred holy
 #define ATTR_FORSALE			0x1000				// For sale on a vendor.
 #define ATTR_STOLEN				0x2000				// The item is hot. m_uidLink = previous owner.
@@ -94,11 +104,13 @@ public:
 #define ATTR_SHARDBOUND			0x10000000
 #define ATTR_ACCOUNTBOUND  		0x20000000
 #define ATTR_CHARACTERBOUND		0x40000000
+#define ATTR_CANUSE_PARALYZED   0x80000000          // Can able to be used while paralyzed.
 
 // TODO
 #define ATTR_CANNOTREPAIR		0x400000000000		// No repair, no fortify
 #define ATTR_FACTIONITEM		0x80000000000000	// ? Faction Item (Has cliloc)
-#define ATTR_VVVITEM			0x100000000000000	// ? VvV Item (Has CliLoc)
+#define ATTR_VVVITEM			0x100000000000000	// ? Vice vs Virtue Item (Has CliLoc)
+
 
 	uint64	m_Attr;
 
@@ -127,8 +139,8 @@ public:
 		// IT_SHIP_HOLD_LOCK
 		struct	// IsTypeLockable()
 		{
-			CUIDBase m_UIDLock;			// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
-			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
+			CUID m_UIDLock;			// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
+			dword m_dwLockComplexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 		} m_itContainer;
 
 		// IT_SHIP_TILLER
@@ -136,7 +148,7 @@ public:
 		// IT_SIGN_GUMP
 		struct
 		{
-			CUIDBase m_UIDLock;			// more1 = the lock code. Normally this is the UID, except if uidLink is set.
+			CUID m_UIDLock;			// more1 = the lock code. Normally this is the UID, except if uidLink is set.
 		} m_itKey;
 
 		// IT_EQ_BANK_BOX
@@ -158,16 +170,16 @@ public:
 		// IT_GAME_BOARD
 		struct
 		{
-			int m_GameType;				// more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
+			int32 m_GameType;           // more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
 		} m_itGameBoard;
 
 		// IT_WAND
 		// IT_WEAPON_*
 		struct
 		{
-			word m_Hits_Cur;		// more1l=eqiv to quality of the item (armor/weapon).
-			word m_Hits_Max;		// more1h=can only be repaired up to this level.
-			int  m_spellcharges;	// more2=for a wand etc.
+			word m_dwHitsCur;		// more1l=eqiv to quality of the item (armor/weapon).
+			word m_wHitsMax;		// more1h=can only be repaired up to this level.
+			int32 m_spellcharges;	// more2=for a wand etc.
 			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
 			byte m_poison_skill;	// morez=0-100 = Is the weapon poisoned ?
@@ -181,9 +193,9 @@ public:
 		// IT_JEWELRY
 		struct
 		{
-			word m_Hits_Cur;		// more1l= eqiv to quality of the item (armor/weapon).
-			word m_Hits_Max;		// more1h= can only be repaired up to this level.
-			int  m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
+			word m_dwHitsCur;		// more1l= eqiv to quality of the item (armor/weapon).
+			word m_wHitsMax;		// more1h= can only be repaired up to this level.
+			int32 m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
 			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;		// morey=level of the spell. (0-1000)
 		} m_itArmor;
@@ -196,9 +208,9 @@ public:
 		// IT_LAVA
 		struct
 		{
-			short m_PolyStr;	// more1l=polymorph effect (stat modifier) of this on strength.
-			short m_PolyDex;	// more1h=polymorph effect (stat modifier) of this on dex.
-			int  m_spellcharges;// more2=not sure how used here..
+			int16 m_PolyStr;	// more1l=polymorph effect (stat modifier) of this on strength.
+			int16 m_PolyDex;	// more1h=polymorph effect (stat modifier) of this on dex.
+			int32 m_spellcharges;// more2=not sure how used here..
 			word m_spell;		// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;	// morey=0-1000=level of the spell.
 			byte m_pattern;		// morez = light pattern - CAN_I_LIGHT LIGHT_QTY
@@ -223,7 +235,7 @@ public:
 		struct
 		{
 			SPELL_TYPE m_Type;		// more1 = potion effect type
-			dword m_skillquality;	// more2 = 0-1000 Strength of the resulting spell.
+			dword m_dwSkillQuality;	// more2 = 0-1000 Strength of the resulting spell.
 			word m_tick;			// morex = countdown to explode purple.
 			word m_junk4;
 			byte m_ignited;
@@ -271,10 +283,10 @@ public:
 		struct	// might just be a sleeping person as well
 		{
 			dword			m_carved;		// more1 = Corpse is already carved? (0=not carved, 1=carved)
-			CUIDBase		m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
+			CUID		m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
 			CREID_TYPE		m_BaseID;		// morex,morey = The true type of the creature who's corpse this is.
 			DIR_TYPE		m_facing_dir;	// morez = Corpse dir. 0x80 = on face.
-											// m_amount = the body type.
+											// m_vcAmount = the body type.
 											// m_uidLink = the creatures ghost.
 		} m_itCorpse;
 
@@ -327,7 +339,7 @@ public:
 		// IT_FOLIAGE - the leaves of a tree normally.
 		struct
 		{
-			int m_Respawn_Sec;					// more1 = plant respawn time in seconds. (for faster growth plants)
+			int32 m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
             CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
 		} m_itCrop;
 
@@ -345,13 +357,13 @@ public:
 		struct
 		{
 			CREID_TYPE m_ID;	// more1 = What sort of creature will this turn into.
-			CUIDBase m_UID;		// more2 = If stored by the stables. (offline creature)
+			CUID m_UID;		// more2 = If stored by the stables. (offline creature)
 		} m_itFigurine;
 
 		// IT_RUNE
 		struct
 		{
-			int m_Strength;			// more1 = How many uses til a rune will wear out ?
+			int32 m_Strength;			// more1 = How many uses til a rune will wear out ?
 			dword m_junk2;
             CPointBase m_ptMark;		// morep = rune marked to a location or a teleport ?
 		} m_itRune;
@@ -360,15 +372,15 @@ public:
 		// IT_MOONGATE
 		struct
 		{
-			int m_fPlayerOnly;		// more1 = The gate is player only. (no npcs, xcept pets)
-			int m_fQuiet;			// more2 = The gate/telepad makes no noise.
+			int32 m_fPlayerOnly;		// more1 = The gate is player only. (no npcs, xcept pets)
+			int32 m_fQuiet;			// more2 = The gate/telepad makes no noise.
             CPointBase m_ptMark;		// morep = marked to a location or a teleport ?
 		} m_itTelepad;
 
 		// IT_EQ_MEMORY_OBJ
 		struct
 		{
-			// m_amount = memory type mask.
+			// m_vcAmount = memory type mask.
 			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
 			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
 			dword m_junk2;		// more2 = It was the start time of the memory, now it's in TIMESTAMP (for int64 support)
@@ -382,49 +394,49 @@ public:
 		// IT_SHIP
 		struct
 		{
-			CUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
+			CUID m_UIDCreator;	// more1 = who created this house or ship ?
             ShipMovementType _eMovementType;	// more2 & 0x000000FF. From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
 			byte m_fAnchored;
 			byte m_DirMove;			// DIR_TYPE
 			byte m_DirFace;
 			// uidLink = my IT_SHIP_TILLER or IT_SIGN_GUMP,
-			CUIDBase m_Pilot;
+			CUID m_Pilot;
 		} m_itShip;
 
 		// IT_SHIP_PLANK
 		struct
 		{
-			CUIDBase m_UIDLock;			// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
-			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
-			word m_itSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
+			CUID m_UIDLock;			// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
+			dword m_dwLockComplexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
+			word m_wSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
 		} m_itShipPlank;
 
 		// IT_PORTCULIS
 		// IT_PORT_LOCKED
 		struct
 		{
-			int m_z1;			// more1 = The down z height.
-			int m_z2;			// more2 = The up z height.
+			int32 m_z1;			// more1 = The down z height.
+			int32 m_z2;			// more2 = The up z height.
 		} m_itPortculis;
 
 		// IT_BEE_HIVE
 		struct
 		{
-			int m_honeycount;		// more1 = How much honey has accumulated here.
+			int32 m_iHoneyCount;		// more1 = How much honey has accumulated here.
 		} m_itBeeHive;
 
 		// IT_LOOM
 		struct
 		{
             CResourceIDBase m_ridCloth;	// more1 = the cloth type currenctly loaded here.
-			int m_ClothQty;				// more2 = IS the loom loaded with cloth ?
+			int32 m_iClothQty;				// more2 = IS the loom loaded with cloth ?
 		} m_itLoom;
 
 		// IT_ARCHERY_BUTTE
 		struct
 		{
             CResourceIDBase m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
-			int m_AmmoCount;				// more2 = how many arrows or bolts ?
+			int32 m_iAmmoCount;				// more2 = how many arrows or bolts ?
 		} m_itArcheryButte;
 
 		// IT_CANNON_MUZZLE
@@ -437,14 +449,14 @@ public:
 		// IT_EQ_MURDER_COUNT
 		struct
 		{
-			dword m_Decay_Balance;	// more1 = For the murder flag, how much time is left ?
+			dword m_dwDecayBalance;	// more1 = For the murder flag, how much time is left ?
 		} m_itEqMurderCount;
 
 		// IT_ITEM_STONE
 		struct
 		{
-			ITEMID_TYPE m_ItemID;	// more1= generate this item or template.
-			int m_iPrice;			// more2= ??? gold to purchase / sellback. (vending machine)
+			ITEMID_TYPE m_iItemID;	// more1= generate this item or template.
+			int32 m_iPrice;			// more2= ??? gold to purchase / sellback. (vending machine)
 			word m_wRegenTime;		// morex=regen time in seconds. 0 = no regen required.
 			word m_wAmount;			// morey=Total amount to deliver. 0 = infinite, 0xFFFF=none left
 		} m_itItemStone;
@@ -458,7 +470,7 @@ public:
 		// IT_WEB
 		struct
 		{
-			dword m_Hits_Cur;	// more1 = how much damage the web can take.
+			dword m_dwHitsCur;	// more1 = how much damage the web can take.
 		} m_itWeb;
 
 		// IT_DREAM_GATE
@@ -473,10 +485,10 @@ public:
 		struct
 		{
 			ITEMID_TYPE m_AnimID;	// more1 = What does a trap do when triggered. 0=just use the next id.
-			int32 m_Damage;			// more2 = Base damage for a trap.
+			int32 m_iDamage;			// more2 = Base damage for a trap.
 			word  m_wAnimSec;		// morex = How long to animate as a dangerous trap.
 			word  m_wResetSec;		// morey = How long to sit idle til reset.
-			byte  m_fPeriodic;		// morez = Does the trap just cycle from active to inactive ?
+			byte  m_bPeriodic;		// morez = Does the trap just cycle from active to inactive ?
 		} m_itTrap;
 
 		// IT_ANIM_ACTIVE
@@ -492,7 +504,7 @@ public:
 		{
 			ITEMID_TYPE m_SwitchID;	// more1 = the next state of this switch.
 			dword		m_junk2;
-			word		m_fStep;	// morex = can we just step on this to activate ?
+			word		m_wStep;	// morex = can we just step on this to activate ?
 			word		m_wDelay;	// morey = delay this how long before activation.
 									// uidLink = the item to use when this item is thrown or used.
 		} m_itSwitch;
@@ -500,8 +512,8 @@ public:
 		// IT_SOUND
 		struct
 		{
-			dword	m_Sound;	// more1 = SOUND_TYPE
-			int		m_Repeat;	// more2 =
+			dword	m_dwSound;	// more1 = SOUND_TYPE
+			int32	m_iRepeat;	// more2 =
 		} m_itSound;
 
 		// IT_STONE_GUILD
@@ -529,19 +541,32 @@ public:
 
 protected:
 	CItem( ITEMID_TYPE id, CItemBase * pItemDef );	// only created via CreateBase()
+	bool SetBase(CItemBase* pItemDef);
 public:
 	virtual ~CItem();
+
 private:
 	CItem(const CItem& copy);
 	CItem& operator=(const CItem& other);
 
 protected:
-	bool SetBase( CItemBase * pItemDef );
-	virtual int FixWeirdness();
+	virtual int FixWeirdness() override;
+	void DeleteCleanup(bool fForce);
 
 public:
-    CCFaction *GetSlayer();
-	virtual bool OnTick();
+	virtual bool NotifyDelete(); // overridden CItemContainer:: method
+	virtual bool Delete(bool fForce = false) override;
+
+protected:
+	virtual void _GoAwake() override;
+	virtual void _GoSleep() override;
+
+	// On CItem, _OnTick is virtual also because we need to call the topmost superclass:
+	//	a CItem can be the base class for CItemShip, CItemMessage...
+public:
+	virtual bool _OnTick() override;
+
+public:
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
@@ -550,7 +575,7 @@ public:
     }
 	bool SetBaseID( ITEMID_TYPE id );
 	bool SetID( ITEMID_TYPE id );
-    inline ITEMID_TYPE GetDispID() const {
+    inline ITEMID_TYPE GetDispID() const noexcept {
         // This is what the item looks like.
         // May not be the same as the item that defines it's type.
         return m_dwDispIndex;
@@ -561,6 +586,7 @@ public:
 
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
+	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
 
     /**
@@ -577,34 +603,51 @@ public:
     */
     byte GetRangeH() const;
 
-	void SetAttr(uint64 iAttr)
+	/**
+  * @fn  HUE_TYPE GetHueVisible () const;
+  *
+  * @brief   Gets the "fake" hue before sending the packet to client. The real hue of the item do not change.
+  *
+  * @return  The hue that the client will see the item.
+  */
+	HUE_TYPE GetHueVisible() const;
+
+	void SetAttr(uint64 uiAttr)
 	{
-		m_Attr |= iAttr;
+		m_Attr |= uiAttr;
 	}
-	void ClrAttr(uint64 iAttr)
+	void ClrAttr(uint64 uiAttr)
 	{
-		m_Attr &= ~iAttr;
+		m_Attr &= ~uiAttr;
 	}
-	bool IsAttr(uint64 iAttr) const	// ATTR_DECAY
+	bool IsAttr(uint64 uiAttr) const	// ATTR_DECAY
 	{
-		return((m_Attr & iAttr) ? true : false);
+		return((m_Attr & uiAttr) ? true : false);
 	}
-	void SetCanUse(uint64 iCanUse)
+	void SetCanUse(uint64 uiCanUse)
 	{
-		m_CanUse |= iCanUse;
+		m_CanUse |= uiCanUse;
 	}
-	void ClrCanUse(uint64 iCanUse)
+	void ClrCanUse(uint64 uiCanUse)
 	{
-		m_CanUse &= ~iCanUse;
+		m_CanUse &= ~uiCanUse;
 	}
-	bool IsCanUse(uint64 iCanUse) const	// CanUse_None
+	bool IsCanUse(uint64 uiCanUse) const	// CanUse_None
 	{
-		return ((m_CanUse & iCanUse) ? true : false);
+		return ((m_CanUse & uiCanUse) ? true : false);
 	}
 
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
-	void SetDecayTime( int64 iMsecsTimeout = 0 );
+	void SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways = false);
+    void SetDecayTimeD(int64 iTenthsTimeout, bool fOverrideAlways = false)
+    {
+        SetDecayTime(iTenthsTimeout * MSECS_PER_TENTH, fOverrideAlways);
+    }
+    void SetDecayTimeS(int64 iSecondsTimeout, bool fOverrideAlways = false)
+    {
+        SetDecayTime(iSecondsTimeout * MSECS_PER_SEC, fOverrideAlways);
+    }
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
@@ -622,15 +665,15 @@ public:
 	bool Stack( CItem * pItem );
 	word ConsumeAmount( word iQty = 1 );
 
-	virtual void SetAmount( word amount );
+	void SetAmount( word amount );
 	word GetMaxAmount();
 	bool SetMaxAmount( word amount );
 	void SetAmountUpdate( word amount );
-	virtual word GetAmount() const
+	word GetAmount() const noexcept
 	{
-		return m_amount;
+		return m_wAmount;
 	}
-    bool CanSendAmount() const;
+    bool CanSendAmount() const noexcept;
 
     CREID_TYPE GetCorpseType() const;
     void  SetCorpseType( CREID_TYPE id );
@@ -641,70 +684,59 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-    virtual void SetTimeout(int64 iMsecs);
-    virtual void SetTimeoutS(int64 iSeconds);
-    virtual void SetTimeoutT(int64 iTicks);
-    virtual void SetTimeoutD(int64 iTenths);
+protected:	virtual void _SetTimeout(int64 iMsecs) override final;
 
-	virtual void OnMoveFrom();
-	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false); // Put item on the ground here.
-	bool MoveToUpdate(const CPointMap& pt, bool bForceFix = false);
-	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
+public:
+	virtual void OnMoveFrom() {};	// Moving from current location.
+	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false); // Put item on the ground here.
+	bool MoveToUpdate(const CPointMap& pt, bool fForceFix = false);
+	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix = false);
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
-	inline CItem* GetNext() const
-	{
-		return static_cast <CItem*>(CObjBase::GetNext());
-	}
-	inline CItem* GetPrev() const
-	{
-		return static_cast <CItem*>(CObjBase::GetPrev());
-	}
+	virtual CObjBaseTemplate* GetTopLevelObj() override;
+	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	CObjBase * GetContainer() const;
-	CObjBaseTemplate * GetTopLevelObj() const;
+	CItem * GetTopContainer();
+	const CItem* GetTopContainer() const;
+
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 
 	void Update( const CClient * pClientExclude = nullptr );		// send this new item to everyone.
 	void Flip();
-	bool LoadSetContainer( CUID uid, LAYER_TYPE layer );
+	bool LoadSetContainer( const CUID& uid, LAYER_TYPE layer );
 
 	void WriteUOX( CScript & s, int index );
 
 	void r_WriteMore1( CSString & sVal );
 	void r_WriteMore2( CSString & sVal );
+    void r_LoadMore1(dword dwVal);
+    void r_LoadMore2(dword dwVal);
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Load( CScript & s ) override; // Load an item from script
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 
-public:    /**
-    * @fn  bool CObjBase::IsTriggerActive(lpctstr trig);
-    *
+public:
+	/**
     * @brief   Queries if a trigger is active ( m_RunningTrigger ) .
-    *
     * @param   trig    The trig.
-    *
     * @return  true if the trigger is active, false if not.
     */
     bool IsTriggerActive(lpctstr trig) const;
 
     /**
-    * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
-    *
     * @brief   Sets trigger active ( m_RunningTrigger ).
-    *
     * @param   trig    The trig.
     */
     void SetTriggerActive(lpctstr trig = nullptr);
 
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
-	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 	// Item type specific stuff.
@@ -714,7 +746,7 @@ public:    /**
     inline IT_TYPE GetType() const {
         return m_type;
     }
-	CItem * SetType( IT_TYPE type );
+	bool SetType( IT_TYPE type, bool fPreCheck = true );
 	bool IsTypeLit() const;
 	bool IsTypeBook() const;
 	bool IsTypeSpellbook() const;
@@ -739,9 +771,9 @@ public:    /**
 	SKILL_TYPE GetSpellBookSkill();
 	SPELL_TYPE GetScrollSpell() const;
 	bool IsSpellInBook( SPELL_TYPE spell ) const;
-	int GetSpellcountInBook() const;
-	int AddSpellbookScroll( CItem * pItem );
-	int AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
+	uint GetSpellcountInBook() const;
+	uint AddSpellbookScroll( CItem * pItem );
+	uint AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate );
 
 	//Doors
 	bool IsDoorOpen() const;
@@ -776,7 +808,7 @@ public:    /**
 	SOUND_TYPE Weapon_GetSoundMiss() const;
 	void Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render);
 	CResourceID Weapon_GetRangedAmmoRes();
-	CItem *Weapon_FindRangedAmmo(CResourceID id);
+	CItem *Weapon_FindRangedAmmo(const CResourceID& id);
 
 	bool IsMemoryTypes( word wType ) const;
 
@@ -799,8 +831,6 @@ public:    /**
 
 	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
 
-	virtual void Delete(bool bforce = false) override;
-	virtual bool NotifyDelete();
 };
 
 #endif // _INC_CITEM_H

@@ -5,14 +5,14 @@
 #ifndef _INC_CSFILE_H
 #define _INC_CSFILE_H
 
-#include <cstdio>
 #include "CSString.h"
 
 #ifndef _WIN32
 	 #include <fcntl.h>
 #endif
 
-#ifndef OF_WRITE
+#ifndef OF_WRITE // happens on Linux?
+    // O_* macros are defined in fcntl.h
 	#define OF_READ             O_RDONLY
 	#define OF_WRITE            O_WRONLY
 	#define OF_READWRITE        O_RDWR
@@ -21,6 +21,7 @@
 	#define OF_CREATE			O_CREAT
 #endif //OF_WRITE
 
+// Custom flags
 #define OF_NONCRIT			0x40000000	// just a test.
 #define OF_TEXT				0x20000000
 #define OF_BINARY			0x10000000
@@ -156,7 +157,8 @@ public:     int SeekToEnd();
 	* @param dwLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-	virtual bool Write( const void * pData, int iLength );
+protected:  virtual bool _Write(const void* pData, int iLength);
+public:	    virtual bool Write (const void* pData, int iLength);
 	///@}
 
     /** @name File name operations:
@@ -236,6 +238,12 @@ protected:
 	uint _uiMode;                       // MMSYSTEM may use 32 bit flags.
 public:
     file_descriptor_t _fileDescriptor;  // File descriptor (POSIX, int) or HANDLE (Windows, size of a pointer).
+
+
+// static methods
+public:
+    static bool FileExists(lpctstr ptcFilePath);
+
 };
 
 

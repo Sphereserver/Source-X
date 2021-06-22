@@ -78,10 +78,10 @@ bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 	for (int i = 0; i < _iColumnCount; ++i)
 	{
 		_pszColumnTypes[i] = new tchar[128];
-		strcpy(_pszColumnTypes[i], ppColumnTypes[i]);
+		Str_CopyLimitNull(_pszColumnTypes[i], ppColumnTypes[i], 128);
 
 		_pszColumnNames[i] = new tchar[128];
-		strcpy(_pszColumnNames[i], ppColumnNames[i]);
+		Str_CopyLimitNull(_pszColumnNames[i], ppColumnNames[i], 128);
 	}
 
 	_pszColumnTypes[_iColumnCount] = nullptr;
@@ -142,6 +142,6 @@ bool CSVFile::_ReadNextRowContent(CSVRowData& target)
 bool CSVFile::ReadNextRowContent(CSVRowData& target)
 {
     ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadNextRowContent(target));
+    THREAD_UNIQUE_LOCK_RETURN(CSVFile::_ReadNextRowContent(target));
 }
 

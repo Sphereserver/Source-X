@@ -5,20 +5,28 @@
 
 lpctstr const CCPropsItemWeaponRanged::_ptcPropertyKeys[PROPIWEAPRNG_QTY + 1] =
 {
-    #define ADD(a,b) b,
+    #define ADDPROP(a,b,c) b,
     #include "../../tables/CCPropsItemWeaponRanged_props.tbl"
-    #undef ADD
+    #undef ADDPROP
     nullptr
 };
 KeyTableDesc_s CCPropsItemWeaponRanged::GetPropertyKeysData() const {
-    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+    return {_ptcPropertyKeys, (PropertyIndex_t)CountOf(_ptcPropertyKeys)};
 }
+
+RESDISPLAY_VERSION CCPropsItemWeaponRanged::_iPropertyExpansion[PROPIWEAPRNG_QTY + 1] =
+{
+#define ADDPROP(a,b,c) c,
+#include "../../tables/CCPropsItemWeaponRanged_props.tbl"
+#undef ADDPROP
+    RDS_QTY
+};
 
 CCPropsItemWeaponRanged::CCPropsItemWeaponRanged() : CComponentProps(COMP_PROPS_ITEMWEAPONRANGED)
 {
 }
 
-bool CanSubscribeTypeIWR(IT_TYPE type)
+static bool CanSubscribeTypeIWR(IT_TYPE type)
 {
     return (type == IT_WEAPON_BOW || type == IT_WEAPON_XBOW);
 }
@@ -34,13 +42,13 @@ bool CCPropsItemWeaponRanged::CanSubscribe(const CItem* pItem) // static
 }
 
 
-lpctstr CCPropsItemWeaponRanged::GetPropertyName(int iPropIndex) const
+lpctstr CCPropsItemWeaponRanged::GetPropertyName(PropertyIndex_t iPropIndex) const
 {
     ASSERT(iPropIndex < PROPIWEAPRNG_QTY);
     return _ptcPropertyKeys[iPropIndex];
 }
 
-bool CCPropsItemWeaponRanged::IsPropertyStr(int iPropIndex) const
+bool CCPropsItemWeaponRanged::IsPropertyStr(PropertyIndex_t iPropIndex) const
 {
     switch (iPropIndex)
     {
@@ -55,29 +63,36 @@ bool CCPropsItemWeaponRanged::IsPropertyStr(int iPropIndex) const
     }
 }
 
-bool CCPropsItemWeaponRanged::GetPropertyNumPtr(int iPropIndex, PropertyValNum_t* piOutVal) const
+bool CCPropsItemWeaponRanged::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
-bool CCPropsItemWeaponRanged::GetPropertyStrPtr(int iPropIndex, CSString* psOutVal, bool fZero) const
+bool CCPropsItemWeaponRanged::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* psOutVal, bool fZero) const
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::GetPropertyStrPtr");
     ASSERT(IsPropertyStr(iPropIndex));
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemWeaponRanged::SetPropertyNum(int iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItemWeaponRanged::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (iVal == 0))
-        _mPropsNum.erase(iPropIndex);
+    if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
+    {
         _mPropsNum[iPropIndex] = iVal;
+        //_mPropsNum.container.shrink_to_fit();
+    }
 
     if (!pLinkedObj)
         return;
@@ -86,16 +101,23 @@ void CCPropsItemWeaponRanged::SetPropertyNum(int iPropIndex, PropertyValNum_t iV
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemWeaponRanged::SetPropertyStr(int iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, bool fDeleteZero)
+void CCPropsItemWeaponRanged::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::SetPropertyStr");
     ASSERT(ptcVal);
     ASSERT(IsPropertyStr(iPropIndex));
+    ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));
 
-    if (fDeleteZero && (*ptcVal == '\0'))
-        _mPropsStr.erase(iPropIndex);
+    if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
+    {
+        if (0 == _mPropsNum.erase(iPropIndex))
+            return; // I didn't have this property, so avoid further processing.
+    }
     else
+    {
         _mPropsStr[iPropIndex] = ptcVal;
+        //_mPropsStr.container.shrink_to_fit();
+    }
 
     if (!pLinkedObj)
         return;
@@ -104,19 +126,19 @@ void CCPropsItemWeaponRanged::SetPropertyStr(int iPropIndex, lpctstr ptcVal, COb
     pLinkedObj->UpdatePropertyFlag();
 }
 
-void CCPropsItemWeaponRanged::DeletePropertyNum(int iPropIndex)
+void CCPropsItemWeaponRanged::DeletePropertyNum(PropertyIndex_t iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::DeletePropertyNum");
     _mPropsNum.erase(iPropIndex);
 }
 
-void CCPropsItemWeaponRanged::DeletePropertyStr(int iPropIndex)
+void CCPropsItemWeaponRanged::DeletePropertyStr(PropertyIndex_t iPropIndex)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::DeletePropertyStr");
     _mPropsStr.erase(iPropIndex);
 }
 
-bool CCPropsItemWeaponRanged::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, int iPropIndex, bool fPropStr)
+bool CCPropsItemWeaponRanged::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, PropertyIndex_t iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::FindLoadPropVal");
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
@@ -125,11 +147,11 @@ bool CCPropsItemWeaponRanged::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj,
         return true;
     }
 
-    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj);
+    BaseProp_LoadPropVal(iPropIndex, fPropStr, s, pLinkedObj, iLimitToExpansion);
     return true;
 }
 
-bool CCPropsItemWeaponRanged::FindWritePropVal(CSString & sVal, int iPropIndex, bool fPropStr) const
+bool CCPropsItemWeaponRanged::FindWritePropVal(CSString & sVal, PropertyIndex_t iPropIndex, bool fPropStr) const
 {
     ADDTOCALLSTACK("CCPropsItemWeaponRanged::FindWritePropVal");
 
@@ -169,7 +191,7 @@ void CCPropsItemWeaponRanged::AddPropsTooltipData(CObjBase* pLinkedObj)
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
-        int prop = propPair.first;
+        PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
 
         if (iVal == 0)
@@ -188,8 +210,8 @@ void CCPropsItemWeaponRanged::AddPropsTooltipData(CObjBase* pLinkedObj)
     // String properties
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {
-        int prop = propPair.first;
-        lpctstr ptcVal = propPair.second.GetPtr();
+        PropertyIndex_t prop = propPair.first;
+        lpctstr ptcVal = propPair.second.GetBuffer();
 
         switch (prop)
         {

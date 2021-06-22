@@ -16,18 +16,22 @@
 #include "../common/CTextConsole.h"
 #include "../common/CLog.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../network/network.h"
+#include "../network/CClientIterator.h"
+#include "../network/CIPHistoryManager.h"
+#include "../network/CNetworkManager.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "chars/CChar.h"
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
-#include "CWorld.h"
-#include "spheresvr.h"
-#include "triggers.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"
+#include "CWorld.h"
+#include "CWorldComm.h"
+#include "CWorldGameTime.h"
+#include "spheresvr.h"
+#include "triggers.h"
 #include <cstdio>
 
 
@@ -40,6 +44,10 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 	SetExitFlag(0);
 	m_fResyncPause = false;
 	m_fResyncRequested = nullptr;
+
+#ifdef _WIN32
+    _fCloseNTWindowOnTerminate = false;
+#endif
 
 	m_iAdminClients = 0;
 
@@ -65,8 +73,8 @@ void CServer::SetSignals( bool fMsg )
 	// set_terminate(  &Exception_Terminate );
 	// set_unexpected( &Exception_Unexpected );
 
-	SetUnixSignals(g_Cfg.m_fSecure);
 #ifndef _WIN32
+	SetUnixSignals(g_Cfg.m_fSecure);
 	if ( g_Cfg.m_fSecure )
 	{
 		g_Log.Event( (IsLoading() ? 0 : LOGL_EVENT) | LOGM_INIT, "Signal handlers installed.\n" );
@@ -79,9 +87,9 @@ void CServer::SetSignals( bool fMsg )
 
 	if ( fMsg && !IsLoading() )
 	{
-		g_World.Broadcast( g_Cfg.m_fSecure ?
-			"The world is now running in SECURE MODE" :
-			"WARNING: The world is NOT running in SECURE MODE" );
+		CWorldComm::Broadcast( g_Cfg.m_fSecure ?
+			"The world is now running in SECURE MODE." :
+			"WARNING: The world is NOT running in SECURE MODE." );
 	}
 }
 
@@ -180,25 +188,18 @@ bool CServer::IsResyncing() const
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 {
 	ADDTOCALLSTACK("CServer::Shutdown");
-	if ( iMinutes == 0 )
+	if ( iMinutes <= 0 )
 	{
-		if ( ! (m_timeShutdown > 0) )
+		if ( m_timeShutdown == 0 )
 			return;
+
 		m_timeShutdown = 0;
-		g_World.Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN_CANCEL ) );
+		CWorldComm::Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN_CANCEL ) );
 		return;
 	}
 
-	if ( iMinutes < 0 )
-	{
-		iMinutes = g_World.GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
-	}
-	else
-	{
-		m_timeShutdown = g_World.GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
-	}
-
-	g_World.Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
+	m_timeShutdown = CWorldGameTime::GetCurrentTime().GetTimeRaw() + ( iMinutes * 60 * MSECS_PER_SEC);
+	CWorldComm::Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
 }
 
 void CServer::SysMessage( lpctstr pszMsg ) const
@@ -208,22 +209,19 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 		return;
 
 #ifdef _WIN32
-    g_NTWindow.AddConsoleOutput(new ConsoleOutput(pszMsg));
+    g_NTWindow.AddConsoleOutput(std::make_unique<ConsoleOutput>(pszMsg));
 #else
-    g_UnixTerminal.AddConsoleOutput(new ConsoleOutput(pszMsg));
+    g_UnixTerminal.AddConsoleOutput(std::make_unique<ConsoleOutput>(pszMsg));
 #endif
 }
 
-void CServer::SysMessage(ConsoleOutput *pszMsg) const
+void CServer::SysMessage(std::unique_ptr<ConsoleOutput>&& pMsg) const
 {
     // Print just to the main console.
-    if ( !pszMsg )
-        return;
-
 #ifdef _WIN32
-    g_NTWindow.AddConsoleOutput(pszMsg);
+    g_NTWindow.AddConsoleOutput(std::move(pMsg));
 #else
-    g_UnixTerminal.AddConsoleOutput(pszMsg);
+    g_UnixTerminal.AddConsoleOutput(std::move(pMsg));
 #endif
 }
 
@@ -243,26 +241,27 @@ void CServer::PrintTelnet( lpctstr pszMsg ) const
 	}
 }
 
-void CServer::PrintStr( lpctstr pszMsg ) const
+void CServer::PrintStr(lpctstr ptcMsg) const
 {
 	// print to all consoles.
-	SysMessage( pszMsg );
-	PrintTelnet( pszMsg );
+	if (!ptcMsg)
+		return;
+
+	SysMessage(ptcMsg);
+	PrintTelnet(ptcMsg);
 }
 
-void CServer::PrintStr(ConsoleTextColor iColor, lpctstr pMsg) const
+void CServer::PrintStr(ConsoleTextColor iColor, lpctstr ptcMsg) const
 {
     // print to all consoles.
-    SysMessage(new ConsoleOutput(iColor, pMsg));
-    PrintTelnet(pMsg);
+	if (!ptcMsg)
+		return;
+
+    SysMessage(std::make_unique<ConsoleOutput>(iColor, ptcMsg));
+    PrintTelnet(ptcMsg);
 }
 
-void CServer::PrintOutput(ConsoleOutput * pOutput) const
-{
-    SysMessage(pOutput);
-}
-
-ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
+ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 {
 	ADDTOCALLSTACK("CServer::PrintPercent");
 	if ( iTotal <= 0 )
@@ -294,7 +293,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 
 #ifdef _WIN32
     g_NTWindow.SetWindowTitle(pszTemp);
-	g_NTService.OnTick();
+	g_NTService._OnTick();
 #endif
 	return iPercent;
 }
@@ -302,7 +301,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 int64 CServer::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServer::GetAgeHours");
-	return (g_World.GetCurrentTime().GetTimeRaw() / (60 * 60 * MSECS_PER_SEC));
+	return (CWorldGameTime::GetCurrentTime().GetTimeRaw() / (60 * 60 * MSECS_PER_SEC));
 }
 
 lpctstr CServer::GetStatusString( byte iIndex ) const
@@ -322,26 +321,26 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			// typical (first time) poll response.
 			{
 				char szVersion[128];
-				sprintf(pTemp, SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_VERSION ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
-					GetName(), m_ip.GetPort(), m_TimeZone, static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang),
-					m_ClientVersion.WriteClientVer(szVersion));
+				m_ClientVersion.WriteClientVer(szVersion, sizeof(szVersion));
+				snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_VERSION ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
+					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), szVersion);
 			}
 			break;
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			sprintf(pTemp, SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
+			snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
 		case 0x24: // '$'
 			// show at startup.
-			sprintf(pTemp, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
-				static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang), m_TimeZone);
+			snprintf(pTemp, STR_TEMPLENGTH, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
+				m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), m_TimeZone);
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			sprintf(pTemp, SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
+			snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
 				StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
@@ -360,34 +359,48 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 		return;
 
 	const CChar *pCharCmd = pConsole->GetChar();
-	const CChar *pChar = nullptr;
-	const CAccount *pAcc = nullptr;
-	tchar *pszMsg = Str_GetTemp();
-	tchar *tmpMsg = Str_GetTemp();
-	tchar chRank = 0;
-	lpcstr pszState = nullptr;
-	size_t numClients = 0;
+	tchar *ptcMsg = Str_GetTemp();
+
+    // Count clients
+    size_t numClients = 0;
+    {
+        ClientIterator it;
+        for (const CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
+            ++numClients;
+    }
+
+    if (numClients <= 0)
+        snprintf(ptcMsg, STR_TEMPLENGTH, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_NO_CLIENT));
+    else if (numClients == 1)
+        snprintf(ptcMsg, STR_TEMPLENGTH, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
+    else
+        snprintf(ptcMsg, STR_TEMPLENGTH, "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
+
+    pConsole->SysMessage(ptcMsg);
+
+
+	ptcMsg = Str_GetTemp();
 
 	ClientIterator it;
 	for ( const CClient *pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
-		numClients++;
-		pChar = pClient->GetChar();
-		pAcc = pClient->GetAccount();
-		chRank = (pAcc && pAcc->GetPrivLevel() > PLEVEL_Player) ? '+' : '=';
+        const CChar* pChar = pClient->GetChar();
+        const CAccount* pAcc = pClient->GetAccount();
+        const tchar chRank = (pAcc && pAcc->GetPrivLevel() > PLEVEL_Player) ? '+' : '=';
 
 		if ( pChar )
 		{
 			if ( pCharCmd && !pCharCmd->CanDisturb(pChar) )
 				continue;
 
-			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
+			snprintf(ptcMsg, STR_TEMPLENGTH, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
 		}
 		else
 		{
 			if ( pConsole->GetPrivLevel() < pClient->GetPrivLevel() )
 				continue;
 
+            lpcstr pszState;
 			switch ( pClient->GetConnectType() )
 			{
 				case CONNECT_HTTP:
@@ -401,28 +414,11 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 					break;
 			}
 
-			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
+			snprintf(ptcMsg, STR_TEMPLENGTH, "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
 		}
 
-		// If we have many clients, SCRIPT_MAX_LINE_LEN may be too short ;) (matex)
-		if ( strlen(pszMsg) + strlen(tmpMsg) >= SCRIPT_MAX_LINE_LEN )
-		{
-			pConsole->SysMessage(pszMsg);
-			pszMsg[0] = '\0';
-		}
-		ASSERT((strlen(pszMsg) + strlen(tmpMsg)) < SCRIPT_MAX_LINE_LEN);
-		strcat(pszMsg, tmpMsg);
+        pConsole->SysMessage(ptcMsg);
 	}
-
-	if ( numClients <= 0 )
-		sprintf(tmpMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_NO_CLIENT));
-	else if ( numClients == 1 )
-		sprintf(tmpMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
-	else
-		sprintf(tmpMsg, "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
-
-	pConsole->SysMessage(pszMsg);
-	pConsole->SysMessage(tmpMsg);
 }
 
 bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
@@ -487,7 +483,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			{
 				// Force periodic stuff
 				g_Accounts.Account_SaveAll();
-				g_Cfg.OnTick(true);
+				g_Cfg._OnTick(true);
 			} break;
 		case 'c':	// List all clients on line.
 			{
@@ -495,13 +491,13 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			} break;
 		case 'd': // dump
 			{
-				lpctstr pszKey = sText + 1;
-				GETNONWHITESPACE( pszKey );
-				switch ( tolower(*pszKey) )
+				lpctstr ptcKey = sText + 1;
+				GETNONWHITESPACE( ptcKey );
+				switch ( tolower(*ptcKey) )
 				{
 					case 'a': // areas
-						pszKey++;	GETNONWHITESPACE( pszKey );
-						if ( !g_World.DumpAreas( pSrc, pszKey ) )
+						ptcKey++;	GETNONWHITESPACE( ptcKey );
+						if ( !g_World.DumpAreas( pSrc, ptcKey ) )
 						{
                             if (pSrc != this)
                             {
@@ -527,14 +523,14 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						break;
 
 					case 'u': // unscripted
-						pszKey++;
+						ptcKey++;
 
-						switch ( tolower(*pszKey) )
+						switch ( tolower(*ptcKey) )
 						{
 							case 'i': // items
 							{
-								pszKey++;	GETNONWHITESPACE( pszKey );
-								if ( !g_Cfg.DumpUnscriptedItems( pSrc, pszKey ) )
+								ptcKey++;	GETNONWHITESPACE( ptcKey );
+								if ( !g_Cfg.DumpUnscriptedItems( pSrc, ptcKey ) )
 								{
                                     if (pSrc != this)
                                     {
@@ -680,9 +676,11 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
-					if ( thrCurrent != nullptr )
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", (iThreads + 1), thrCurrent->getId(),
-											thrCurrent->getPriority(), thrCurrent->getName() );
+					if (thrCurrent != nullptr)
+					{
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %lu, Priority: %d, Name: %s.\n",
+							(iThreads + 1), thrCurrent->getId(), thrCurrent->getPriority(), thrCurrent->getName());
+					}
 				}
 			} break;
 		case 'u':
@@ -722,7 +720,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 		case '$':	// call stack integrity
 			{
 	#ifdef _EXCEPTIONS_DEBUG
-				{ // test without PAUSECALLSTACK
+				{ // test without freezing the call stack
 					ADDTOCALLSTACK("CServer::TestException1");
 					EXC_TRY("Test1");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
@@ -736,17 +734,17 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 					}
 				}
 
-				{ // test with PAUSECALLSTACK
+				{ // test pausing the call stack
 					ADDTOCALLSTACK("CServer::TestException2");
 					EXC_TRY("Test2");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
 					}
 					catch (const CSError& e)
 					{
-						PAUSECALLSTACK;
-						// with pausecallstack, the following call won't be recorded
+                        StackDebugInformation::freezeCallStack(true);
+						// with freezeCallStack, the following call won't be recorded
 						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-						UNPAUSECALLSTACK;
+                        StackDebugInformation::freezeCallStack(false);
                         EXC_CATCH_EXCEPTION_SPHERE(&e);
 					}
 				}
@@ -812,8 +810,8 @@ longcommand:
 
 			if ( !strnicmp(pszText, "strip tng", 9) || !strnicmp(pszText, "tngstrip", 8))
 			{
-				strcpy(z, dirname);
-				strcat(z, "sphere_strip_tng" SPHERE_SCRIPT);
+				Str_CopyLimitNull(z, dirname, STR_TEMPLENGTH);
+				Str_ConcatLimitNull(z, "sphere_strip_tng" SPHERE_SCRIPT, STR_TEMPLENGTH);
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("StripFile is %s.\n", z);
@@ -840,7 +838,7 @@ longcommand:
 
 				while ( (script = g_Cfg.GetResourceFile(i++)) != nullptr )
 				{
-					strcpy(z, script->GetFilePath());
+					Str_CopyLimitNull(z, script->GetFilePath(), STR_TEMPLENGTH);
 					f = fopen(z, "r");
 					if ( !f )
 					{
@@ -863,7 +861,7 @@ longcommand:
 
 						x = y;
 						GETNONWHITESPACE(x);
-						strcpy(z,x);
+						Str_CopyLimitNull(z, x, STR_TEMPLENGTH);
 
 						_strlwr(z);
 
@@ -894,8 +892,8 @@ longcommand:
 			}
 			else if ( !strnicmp(pszText, "strip axis", 10) || !strnicmp(pszText, "strip", 5) )
 			{
-				strcpy(z, dirname);
-				strcat(z, "sphere_strip_axis" SPHERE_SCRIPT);
+				Str_CopyLimitNull(z, dirname, STR_TEMPLENGTH);
+				Str_ConcatLimitNull(z, "sphere_strip_axis" SPHERE_SCRIPT, STR_TEMPLENGTH);
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("StripFile is %s.\n", z);
@@ -922,7 +920,7 @@ longcommand:
 
 				while ( (script = g_Cfg.GetResourceFile(i++)) != nullptr )
 				{
-					strcpy(z, script->GetFilePath());
+					Str_CopyLimitNull(z, script->GetFilePath(), STR_TEMPLENGTH);
 					f = fopen(z, "r");
 					if ( !f )
 					{
@@ -945,7 +943,7 @@ longcommand:
 
 						x = y;
 						GETNONWHITESPACE(x);
-						strcpy(z,x);
+						Str_CopyLimitNull(z, x, STR_TEMPLENGTH);
 
 						_strlwr(z);
 
@@ -1019,8 +1017,8 @@ longcommand:
 	}
 
 endconsole:
-	sText.Empty();
-	return( fRet );
+	sText.Clear();
+	return fRet;
 }
 
 //************************************************
@@ -1074,30 +1072,35 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
         if (pSrc != this)
         {
-            pSrc->SysMessagef("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            pSrc->SysMessagef("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
         }
         else
         {
-            g_Log.Event(LOGL_EVENT, "Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            g_Log.Event(LOGL_EVENT, "Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
         }
 		if (ftDump != nullptr)
-			ftDump->Printf("Thread %u, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
-
-		for (int i = 0; i < PROFILE_QTY; i++)
 		{
-			if (profile.IsEnabled(static_cast<PROFILE_TYPE>(i)) == false)
+			ftDump->Printf("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+		}
+
+		for (int i = 0; i < PROFILE_QTY; ++i)
+		{
+            const PROFILE_TYPE iProfile = (PROFILE_TYPE)i;
+			if (profile.IsEnabled(iProfile) == false)
 				continue;
 
             if (pSrc != this)
             {
-                pSrc->SysMessagef("%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+                pSrc->SysMessagef("%-14s = %s\n", profile.GetName(iProfile), profile.GetDescription(iProfile));
             }
             else
             {
-                g_Log.Event(LOGL_EVENT, "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)));
+                g_Log.Event(LOGL_EVENT, "%-14s = %s\n", profile.GetName(iProfile), profile.GetDescription(iProfile));
             }
-			if (ftDump != nullptr)
-				ftDump->Printf( "%-10s = %s\n", profile.GetName(static_cast<PROFILE_TYPE>(i)), profile.GetDescription(static_cast<PROFILE_TYPE>(i)) );
+            if (ftDump != nullptr)
+            {
+                ftDump->Printf("%-14s = %s\n", profile.GetName(iProfile), profile.GetDescription(iProfile));
+            }
 		}
 	}
 
@@ -1127,18 +1130,16 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
         }
 		else
 		{
-			llong average = g_profiler.total / g_profiler.called;
 			CScriptProfiler::CScriptProfilerFunction * pFun;
 			CScriptProfiler::CScriptProfilerTrigger * pTrig;
-			llong divby = llTimeProfileFrequency / 1000;
+            const long double average = (long double)g_profiler.total / g_profiler.called;
 
             char tmpstring[255];
-            sprintf(tmpstring, "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
+            snprintf(tmpstring, sizeof(tmpstring),
+				"Scripts: called %u times and took a total of %.4f seconds (%.4Lfs average). Reporting with highest average.\n",
                 g_profiler.called,
-                (int)(g_profiler.total / divby),
-                (int)(((g_profiler.total * 10000) / (divby)) % 10000),
-                (int)(average / divby),
-                (int)(((average * 10000) / (divby)) % 10000));
+                (g_profiler.total   / 1000.0),
+                (average            / 1000.0));
             if (pSrc != this)
             {
                 pSrc->SysMessage(tmpstring);
@@ -1156,17 +1157,14 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pFun->average > average )
 				{
-                    sprintf(tmpstring, "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+                    snprintf(tmpstring, sizeof(tmpstring),
+						"FUNCTION '%s' called %u times, took %.4f seconds average (%.4f min, %.4f max), total: %.4f s.\n",
                         pFun->name,
                         pFun->called,
-                        (int)(pFun->average / divby),
-                        (int)(((pFun->average * 10000) / (divby)) % 10000),
-                        (int)(pFun->min / divby),
-                        (int)(((pFun->min * 10000) / (divby)) % 10000),
-                        (int)(pFun->max / divby),
-                        (int)(((pFun->max * 10000) / (divby)) % 10000),
-                        (int)(pFun->total / divby),
-                        (int)(((pFun->total * 10000) / (divby)) % 10000));
+                        (pFun->average / 1000.0),
+                        (pFun->min     / 1000.0),
+                        (pFun->max     / 1000.0),
+                        (pFun->total   / 1000.0));
 
                     if (pSrc != this)
                     {
@@ -1186,18 +1184,14 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pTrig->average > average )
 				{
-					sprintf(tmpstring, "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+					snprintf(tmpstring, sizeof(tmpstring),
+						"TRIGGER '%s' called %u times, took %.4f seconds average (%.4f min, %.4f max), total: %.4f s.\n",
 						pTrig->name,
 						pTrig->called,
-						(int)(pTrig->average / divby),
-						(int)(((pTrig->average * 10000) / (divby)) % 10000),
-						(int)(pTrig->min / divby),
-						(int)(((pTrig->min * 10000) / (divby)) % 10000),
-						(int)(pTrig->max / divby),
-						(int)(((pTrig->max * 10000) / (divby)) % 10000),
-						(int)(pTrig->total / divby),
-						(int)(((pTrig->total * 10000) / (divby)) % 10000)
-					);
+						(pTrig->average / 1000.0),
+						(pTrig->min     / 1000.0),
+						(pTrig->max     / 1000.0),
+						(pTrig->total   / 1000.0));
                     if (pSrc != this)
                     {
                         pSrc->SysMessage(tmpstring);
@@ -1244,32 +1238,32 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
 // ---------------------------------------------------------------------
 
-bool CServer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CServer::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServer::r_GetRef");
-	if ( IsDigit( pszKey[0] ))
+	if ( IsDigit( ptcKey[0] ))
 	{
 		size_t i = 1;
-		while ( IsDigit( pszKey[i] ))
+		while ( IsDigit( ptcKey[i] ))
 			i++;
 
-		if ( pszKey[i] == '.' )
+		if ( ptcKey[i] == '.' )
 		{
-			size_t index = ATOI( pszKey );	// must use this to stop at .
+			size_t index = atoi( ptcKey );	// must use this to stop at .
 			pRef = g_Cfg.Server_GetDef(index);
-			pszKey += i + 1;
+			ptcKey += i + 1;
 			return true;
 		}
 	}
-	if ( g_Cfg.r_GetRef( pszKey, pRef ))
+	if ( g_Cfg.r_GetRef( ptcKey, pRef ))
 	{
 		return true;
 	}
-	if ( g_World.r_GetRef( pszKey, pRef ))
+	if ( g_World.r_GetRef( ptcKey, pRef ))
 	{
 		return true;
 	}
-	return( CScriptObj::r_GetRef( pszKey, pRef ));
+	return( CScriptObj::r_GetRef( ptcKey, pRef ));
 }
 
 bool CServer::r_LoadVal( CScript &s )
@@ -1283,30 +1277,30 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CServer::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
-	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
+	if ( !strnicmp(ptcKey, "ACCOUNT.", 8) )
 	{
-		pszKey += 8;
+		ptcKey += 8;
 		CAccount * pAccount = nullptr;
 
 		// extract account name/index to a temporary buffer
 		tchar * pszTemp = Str_GetTemp();
 		tchar * pszTempStart = pszTemp;
 
-		strcpy(pszTemp, pszKey);
+		Str_CopyLimitNull(pszTemp, ptcKey, STR_TEMPLENGTH);
 		tchar * split = strchr(pszTemp, '.');
 		if ( split != nullptr )
 			*split = '\0';
 
-		// adjust pszKey to point to end of account name/index
-		pszKey += strlen(pszTemp);
+		// adjust ptcKey to point to end of account name/index
+		ptcKey += strlen(pszTemp);
 
 		//	try to fetch using indexes
 		if (( *pszTemp >= '0' ) && ( *pszTemp <= '9' ))
 		{
-			size_t num = Exp_GetVal(pszTemp);
+			uint num = Exp_GetUVal(pszTemp);
 			if (*pszTemp == '\0' && num < g_Accounts.Account_GetCount())
 				pAccount = g_Accounts.Account_Get(num);
 		}
@@ -1318,26 +1312,43 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			pAccount = g_Accounts.Account_Find(pszTemp);
 		}
 
-		if ( !*pszKey) // we're just checking if the account exists
+		if ( !*ptcKey) // we're just checking if the account exists
 		{
-			sVal.FormatVal( (pAccount? 1 : 0) );
+			sVal.FormatVal( (pAccount ? 1 : 0) );
 			return true;
 		}
 		else if ( pAccount ) // we're retrieving a property from the account
 		{
-			SKIP_SEPARATORS(pszKey);
-			return pAccount->r_WriteVal(pszKey, sVal, pSrc);
+			SKIP_SEPARATORS(ptcKey);
+			return pAccount->r_WriteVal(ptcKey, sVal, pSrc);
 		}
 		// we're trying to retrieve a property from an invalid account
 		return false;
 	}
+	else if (!strnicmp(ptcKey, "GMPAGE.", 7))
+	{
+		ptcKey += 7;
+		size_t iNum = Exp_GetVal(ptcKey);
+		if (iNum >= g_World.m_GMPages.GetContentCount())
+			return false;
+
+		CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContentAt(iNum));
+		if (!pGMPage)
+			return false;
+
+		SKIP_SEPARATORS(ptcKey);
+		return pGMPage->r_WriteVal(ptcKey, sVal, pSrc);
+	}
 
 	// Just do stats values for now.
-	if ( g_Cfg.r_WriteVal(pszKey, sVal, pSrc) )
-		return true;
-	if ( g_World.r_WriteVal(pszKey, sVal, pSrc) )
-		return true;
-	return CServerDef::r_WriteVal(pszKey, sVal, pSrc);
+    if (!fNoCallChildren)
+    {
+	    if ( g_Cfg.r_WriteVal(ptcKey, sVal, pSrc) )
+		    return true;
+	    if ( g_World.r_WriteVal(ptcKey, sVal, pSrc) )
+		    return true;
+    }
+	return (fNoCallParent ? false : CServerDef::r_WriteVal(ptcKey, sVal, pSrc));
 }
 
 enum SV_TYPE
@@ -1355,6 +1366,7 @@ enum SV_TYPE
 #endif
 	SV_EXPORT,
 	SV_GARBAGE,
+	SV_GMPAGES,
 	SV_HEARALL,
 	SV_IMPORT,
 	SV_INFORMATION,
@@ -1393,6 +1405,7 @@ lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
 #endif
 	"EXPORT",
 	"GARBAGE",
+	"GMPAGES",
 	"HEARALL",
 	"IMPORT",
 	"INFORMATION",
@@ -1423,51 +1436,69 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		return false;
 
 	EXC_TRY("Verb");
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 	tchar *pszMsg = nullptr;
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
 	if ( index < 0 )
 	{
-		CSString sVal;
-		CScriptTriggerArgs Args( s.GetArgRaw() );
-		if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
-			return true;
+        const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
+        if (r_CanCall(uiFunctionIndex))
+        {
+            // RES_FUNCTION call
+            CSString sVal;
+            CScriptTriggerArgs Args( s.GetArgRaw() );
+            if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+                return true;
+        }
 
-		if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
+		if ( !strnicmp(ptcKey, "ACCOUNT.", 8) )
 		{
 			index = SV_ACCOUNT;
-			pszKey += 8;
+			ptcKey += 8;
 
 			CAccount * pAccount = nullptr;
 			char *pszTemp = Str_GetTemp();
 
-			strcpy(pszTemp, pszKey);
+			Str_CopyLimitNull(pszTemp, ptcKey, STR_TEMPLENGTH);
 			char *split = strchr(pszTemp, '.');
 			if ( split )
 			{
 				*split = 0;
 				pAccount = g_Accounts.Account_Find(pszTemp);
-				pszKey += strlen(pszTemp);
+				ptcKey += strlen(pszTemp);
 			}
 
-			SKIP_SEPARATORS(pszKey);
-			if ( pAccount && *pszKey )
+			SKIP_SEPARATORS(ptcKey);
+			if ( pAccount && *ptcKey )
 			{
-				CScript script(pszKey, s.GetArgStr());
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+				CScript script(ptcKey, s.GetArgStr());
+				script.CopyParseState(s);
 				return pAccount->r_LoadVal(script);
 			}
 			return false;
 		}
-
-		if ( !strnicmp(pszKey, "CLEARVARS", 9) )
+		else if (!strnicmp(ptcKey, "GMPAGE.", 7))
 		{
-			pszKey = s.GetArgStr();
-			SKIP_SEPARATORS(pszKey);
-			g_Exp.m_VarGlobals.ClearKeys(pszKey);
+			ptcKey += 7;
+			size_t iNum = Exp_GetVal(ptcKey);
+			if (iNum >= g_World.m_GMPages.GetContentCount())
+				return false;
+
+			CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContentAt(iNum));
+			if (!pGMPage)
+				return false;
+
+			SKIP_SEPARATORS(ptcKey);
+			CScript script(ptcKey, s.GetArgStr());
+			return pGMPage->r_LoadVal(script);
+		}
+		else if (!strnicmp(ptcKey, "CLEARVARS", 9))
+		{
+			ptcKey = s.GetArgStr();
+			SKIP_SEPARATORS(ptcKey);
+			g_Exp.m_VarGlobals.ClearKeys(ptcKey);
 			return true;
 		}
 	}
@@ -1476,6 +1507,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 	{
 		case SV_ACCOUNTS:
 		case SV_CHARS:
+		case SV_GMPAGES:
 		case SV_ITEMS:
 		case SV_SAVECOUNT:
 		case SV_TIME:
@@ -1492,15 +1524,14 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					if ( pClient->GetChar() == nullptr )
 						continue;
 					CScript script(s.GetArgStr());
-					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+					script.CopyParseState(s);
 					pClient->GetChar()->r_Verb( script, pSrc );
 				}
 			}
 			break;
 
 		case SV_B: // "B"
-			g_World.Broadcast( s.GetArgStr());
+			CWorldComm::Broadcast( s.GetArgStr());
 			break;
 
 		case SV_BLOCKIP:
@@ -1515,11 +1546,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				if (ppArgs[1])
 					iTimeDecay = Exp_GetVal(ppArgs[1]);
 
-#ifndef _MTNETWORK
-				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(ppArgs[0]);
-#else
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ppArgs[0]);
-#endif
 
                 if (iTimeDecay >= 0)
                 {
@@ -1575,8 +1602,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					break;
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? (word)ATOI(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
-					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
+					(Arg_Qty >= 2) ? (word)atoi(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
+					(Arg_Qty >= 3)? atoi(Arg_ppCmd[2]) : INT16_MAX ))
 				{
                     if (pSrc != this)
                     {
@@ -1623,7 +1650,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			{
 				pszMsg = Str_GetTemp();
 				g_Log.SetLogMask( s.GetArgFlag( g_Log.GetLogMask(), LOGM_PLAYER_SPEAK ));
-				sprintf(pszMsg, "Hear All %s.\n", g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) ? "Enabled" : "Disabled" );
+				snprintf(pszMsg, STR_TEMPLENGTH, "Hear All %s.\n", g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) ? "Enabled" : "Disabled" );
 			}
 			break;
 
@@ -1655,8 +1682,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 				// IMPFLAGS_ITEMS
                 if (!g_World.Import(Arg_ppCmd[0], pSrc->GetChar(),
-                    (Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
-                    (Arg_Qty >= 3) ? ATOI(Arg_ppCmd[2]) : INT16_MAX))
+                    (Arg_Qty >= 2) ? (word)(atoi(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
+                    (Arg_Qty >= 3) ? atoi(Arg_ppCmd[2]) : INT16_MAX))
                 {
                     if (pSrc != this)
                     {
@@ -1803,11 +1830,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_UNBLOCKIP:	// "UNBLOCKIP"
 			if (pSrc->GetPrivLevel() >= PLEVEL_Admin)
 			{
-#ifndef _MTNETWORK
-				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(s.GetArgRaw());
-#else
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(s.GetArgRaw());
-#endif
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("IP%s unblocked\n", history.m_blocked ? "" : " already");
@@ -1872,31 +1895,33 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 	// RETURN:
 	//  true = keep running after this.
 
-	for ( int argn = 1; argn < argc; argn++ )
+	for ( int argn = 1; argn < argc; ++argn )
 	{
 		tchar * pArg = argv[argn];
 		if ( ! _IS_SWITCH(pArg[0]))
 			continue;
 
-		pArg++;
+		++pArg;
 
 		switch ( toupper(pArg[0]) )
 		{
+            case 'H':
 			case '?':
 				PrintStr( SPHERE_TITLE " \n"
 					"Command Line Switches:\n"
 #ifdef _WIN32
-					"-cClassName Setup custom window class name for sphere (default: " SPHERE_TITLE "Svr)\n"
+					"-Cclassname Setup custom window class name for sphere (default: " SPHERE_TITLE ").\n"
 #else
-					"-c do not use colored console output (default: on)\n"
+					"-C do not use colored console output (default: on).\n"
 #endif
-					"-D Dump global variable DEFNAMEs to defs.txt\n"
+					"-D Dump global variable DEFNAMEs to defs.txt.\n"
 #if defined(_WIN32) && !defined(_DEBUG)
-					"-E Enable the CrashDumper\n"
+					"-E Enable the CrashDumper.\n"
 #endif
-					"-Gpath/to/saves/ Defrags sphere saves\n"
+					"-Gpath/to/saves/ Defrags sphere saves.\n"
 #ifdef _WIN32
-					"-k install/remove Installs or removes NT Service\n"
+					"-K install/remove Installs or removes NT Service.\n"
+                    "-J automatically close the console window at server termination.\n"
 #endif
 					"-Nstring Set the sphere name.\n"
 					"-P# Set the port number.\n"
@@ -1909,13 +1934,16 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'K':
 				//	these are parsed in other places - nt service, nt window part, etc
 				continue;
+            case 'J':
+                g_Serv._fCloseNTWindowOnTerminate = true;
+                continue;
 #else
 			case 'C':
 				g_UnixTerminal.setColorEnabled(false);
 				continue;
 #endif
 			case 'P':
-				m_ip.SetPort((word)(ATOI(pArg + 1)));
+				m_ip.SetPort((word)(atoi(pArg + 1)));
 				continue;
 			case 'N':
 				// Set the system name.
@@ -1924,21 +1952,37 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'D':
 				// dump all the defines to a file.
 				{
-					CSFileText File;
-					if ( ! File.Open( "defs.txt", OF_WRITE|OF_TEXT ))
+					CSFileText FileDefs;
+					if ( ! FileDefs.Open( "defs.txt", OF_WRITE|OF_TEXT ))
 						return false;
 
-					for ( size_t i = 0; i < g_Exp.m_VarDefs.GetCount(); i++ )
+                    ssize_t count = ssize_t(g_Exp.m_VarDefs.GetCount());
+                    ssize_t i = 0;
+					for ( const CVarDefCont * pCont : g_Exp.m_VarDefs )
 					{
 						if ( ( i % 0x1ff ) == 0 )
-							PrintPercent( (ssize_t)i, (ssize_t)g_Exp.m_VarDefs.GetCount() );
+							PrintPercent( i, count );
 
-						CVarDefCont * pCont = g_Exp.m_VarDefs.GetAt(i);
 						if ( pCont != nullptr )
-						{
-							File.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
-						}
+                            FileDefs.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
+                        ++i;
 					}
+
+                    CSFileText FileResDefs;
+                    if ( ! FileResDefs.Open( "resdefs.txt", OF_WRITE|OF_TEXT ))
+                        return false;
+
+                    count = ssize_t(g_Exp.m_VarResDefs.GetCount());
+                    i = 0;
+                    for ( const CVarDefCont * pCont : g_Exp.m_VarResDefs )
+                    {
+                        if ( ( i % 0x1ff ) == 0 )
+                            PrintPercent( i, count );
+
+                        if ( pCont != nullptr )
+                            FileResDefs.Printf( "%s=%s\n", pCont->GetKey(), pCont->GetValStr());
+                        ++i;
+            }
 				}
 				continue;
 #if defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
@@ -1960,7 +2004,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'Q':
 				return false;
 			default:
-				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Don't recognize command line data '%s'\n", static_cast<lpctstr>(argv[argn]));
+				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Can't recognize command line data '%s'\n", static_cast<lpctstr>(argv[argn]));
 				break;
 		}
 	}
@@ -1968,7 +2012,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 	return true;
 }
 
-void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
+void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 {
 	ADDTOCALLSTACK("CServer::SetResyncPause");
 	if ( fPause )
@@ -1976,8 +2020,8 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		m_fResyncPause = true;
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
-		if ( bMessage )
-			g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+		if ( fMessage )
+			CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 		else if ( pSrc && pSrc->GetChar() )
 			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
@@ -1992,21 +2036,24 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 		if ( !g_Cfg.Load(true) )
 		{
             g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
-			if ( bMessage )
-				g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+			if ( fMessage )
+				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			else if ( pSrc && pSrc->GetChar() )
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 		}
 		else
 		{
             g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
-			if ( bMessage )
-				g_World.Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
+			if ( fMessage )
+				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			else if ( pSrc && pSrc->GetChar() )
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 		}
 
 		m_fResyncPause = false;
+
+		g_World.SyncGameTime();
+
 		SetServerMode(SERVMODE_Run);
 	}
 }
@@ -2026,8 +2073,12 @@ bool CServer::SocketsInit( CSocket & socket )
 	linger lval;
 	lval.l_onoff = 0;
 	lval.l_linger = 10;
-	socket.SetSockOpt(SO_LINGER, reinterpret_cast<const char *>(&lval), sizeof(lval));
-	socket.SetNonBlocking();
+	if ((0 != socket.SetSockOpt(SO_LINGER, reinterpret_cast<const char*>(&lval), sizeof(lval))) ||
+		(0 != socket.SetNonBlocking()))
+	{
+		g_Log.Event(LOGL_FATAL | LOGM_INIT, "Unable to initialize socket!\n");
+		return false;
+	}
 
 #ifndef _WIN32
 	int onNotOff = 1;
@@ -2072,12 +2123,12 @@ bool CServer::SocketsInit() // Initialize sockets
 
 	int iRet = gethostname(szName, sizeof(szName));
 	if ( iRet )
-		strcpy(szName, m_ip.GetAddrStr());
+		Str_CopyLimitNull(szName, m_ip.GetAddrStr(), sizeof(szName));
 	else
 	{
 		pHost = gethostbyname(szName);
 		if ( pHost && pHost->h_addr && pHost->h_name && pHost->h_name[0] )
-			strcpy(szName, pHost->h_name);
+			Str_CopyLimitNull(szName, pHost->h_name, _MAX_PATH);
 	}
 
 	g_Log.Event( LOGM_INIT, "Server started on hostname '%s'\n", szName);
@@ -2107,9 +2158,9 @@ void CServer::SocketsClose()
 	m_SocketMain.Close();
 }
 
-void CServer::OnTick()
+void CServer::_OnTick()
 {
-	ADDTOCALLSTACK("CServer::OnTick");
+	ADDTOCALLSTACK("CServer::_OnTick");
 	EXC_TRY("Tick");
 
 #ifndef _WIN32
@@ -2126,7 +2177,7 @@ void CServer::OnTick()
 	{
 		EXC_SET_BLOCK("console input");
 		CSString sText = m_sConsoleText;	// make a copy.
-		m_sConsoleText.Empty();				// done using this.
+		m_sConsoleText.Clear();				// done using this.
 		m_fConsoleTextReadyFlag = false;	// ready to use again
 		OnConsoleCmd( sText, this );
 	}
@@ -2139,25 +2190,26 @@ void CServer::OnTick()
 			SetResyncPause(true, m_fResyncRequested);
 			SetResyncPause(false, m_fResyncRequested);
 		}
-		else SetResyncPause(false, m_fResyncRequested, true);
+		else
+            SetResyncPause(false, m_fResyncRequested, true);
 		m_fResyncRequested = nullptr;
 	}
 
 	EXC_SET_BLOCK("SetTime");
 	SetValidTime();	// we are a valid game server.
 
-	ProfileTask overheadTask(PROFILE_OVERHEAD);
+	const ProfileTask overheadTask(PROFILE_OVERHEAD);
 
 	if ( m_timeShutdown > 0 )
 	{
 		EXC_SET_BLOCK("shutdown");
-		if ( g_World.GetTimeDiff(m_timeShutdown) <= 0 )
+		if ( CWorldGameTime::GetCurrentTime().GetTimeDiff(m_timeShutdown) > 0 )
 			SetExitFlag(2);
 	}
 
 	EXC_SET_BLOCK("generic");
-	g_Cfg.OnTick(false);
-	m_hdb.OnTick();
+	g_Cfg._OnTick(false);
+	_hDb._OnTick();
 	EXC_CATCH;
 }
 
@@ -2189,7 +2241,7 @@ bool CServer::Load()
 	tchar * wSockInfo = Str_GetTemp();
 	if ( !m_SocketMain.IsOpen() )
 	{
-		WSADATA wsaData;
+		WSADATA wsaData{};
 		int err = WSAStartup(MAKEWORD(2,2), &wsaData);
 		if ( err )
 		{
@@ -2230,14 +2282,17 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
 	{
 		EXC_SET_BLOCK( "Connecting to MySQL server" );
-		if (m_hdb.Connect())
-			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost.GetPtr() );
+		if (_hDb.Connect())
+			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost.GetBuffer() );
 		else
 		{
 			g_Log.EventError( "Can't connect to MySQL DataBase. Check your ini settings or if the server is working.\n" );
 			return false;
 		}
 	}
+
+    EXC_SET_BLOCK( "Initializing in-memory SQLite database" );
+    _hMdb.Open(":memory:");
 
 	EXC_SET_BLOCK("setting signals");
 	SetSignals();
@@ -2249,6 +2304,9 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
         g_Log.Event(LOGM_INIT, "Setting process priority... %s.\n", fPrioritySuccess ? "Success" : "Failed");
     }
 
+	EXC_SET_BLOCK("init world cache");
+	g_World._Cache.Init();
+
 	EXC_SET_BLOCK("loading scripts");
 	TriglistInit();
 	if ( !g_Cfg.Load(false) )
@@ -2258,7 +2316,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	if ( m_ClientVersion.GetClientVer() )
 	{
 		char szVersion[128];
-		g_Log.Event(LOGM_INIT, "ClientVersion=%s\n", static_cast<lpctstr>(m_ClientVersion.WriteClientVer(szVersion)));
+		g_Log.Event(LOGM_INIT, "ClientVersion=%s\n", m_ClientVersion.WriteClientVer(szVersion, sizeof(szVersion)));
 		if ( !m_ClientVersion.IsValid() )
 		{
 			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Bad Client Version '%s'\n", szVersion);

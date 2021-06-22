@@ -55,8 +55,7 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 	// (client doesn't expect us to) but only in the world
 	if (pObj->IsItem())
 	{
-		const CItem * pItem = dynamic_cast<const CItem *>(pObj);
-
+		const CItem * pItem = static_cast<const CItem *>(pObj);
 		if (!pItem->GetContainer() && pItem->IsAttr(/*ATTR_MOVE_NEVER|*/ATTR_STATIC))
 		{
 			if ((!GetChar()->IsPriv(PRIV_GM)) && (!GetChar()->IsPriv(PRIV_ALLMOVE)))
@@ -81,10 +80,10 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false));
 
 			if (ClilocName)
-                PUSH_BACK_TOOLTIP(pObj, new CClientTooltip(ClilocName));
+                PUSH_FRONT_TOOLTIP(pObj, new CClientTooltip(ClilocName));
 			else
 			{
-                PUSH_BACK_TOOLTIP(pObj, t = new CClientTooltip(1042971)); // ~1_NOTHING~
+                PUSH_FRONT_TOOLTIP(pObj, t = new CClientTooltip(1042971)); // ~1_NOTHING~
 				t->FormatArgs("%s", pObj->GetName());
 			}
 		}
@@ -111,6 +110,13 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 					AOSTooltip_addDefaultItemData(pItem);
 
                 pObj->AddPropsTooltipData(pObj);
+			}
+			
+			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP_AFTERDEFAULT) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP_AFTERDEFAULT)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP_AFTERDEFAULT)))
+			{
+				CScriptTriggerArgs args(pObj);
+				args.m_iN1 = fRequested;
+				iRet = pObj->OnTrigger("@ClientTooltip_AfterDefault", this->GetChar(), &args); //Save to return on iRet to make sure return value doesn't stuck the boolean.
 			}
 		}
 
@@ -168,7 +174,7 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
             // If a full tooltip was requested (fRequested), or this object is in a shop window (fNameOnly), we need to
             // send the full tooltip and not the version. In the fRequested case, we may have been asked for the full tooltip via scripts,
             // or forcing in the source the full tooltip or because the client asked it because we sent him a newer tooltip version.
-            // In the shop window case, if we send the property version instead of the list, sometimes the wrong names are shown. This
+            // In the shop window case, if we send the property version instead of the list, sometimes wrong names are shown. This
             // happens especially when using a client localization other than english.
 			if (!fRequested && !fNameOnly)
 			{
@@ -182,9 +188,11 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 			}
 
 			// fall through to send full list
+			FALLTHROUGH;
 
-		case TOOLTIPMODE_SENDFULL:
 		default:
+			FALLTHROUGH;
+		case TOOLTIPMODE_SENDFULL:
 			// send full property list
 			new PacketPropertyList(this, propertyList);
 			break;
@@ -211,16 +219,16 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 	{
 		if ( dwClilocName )
 		{
-            PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(dwClilocName));
+            PUSH_FRONT_TOOLTIP(pItem, new CClientTooltip(dwClilocName));
 		}
 		else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
 		{
-            PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
+            PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
 			t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
 		}
 		else
 		{
-            PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
+            PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
             t->FormatArgs("%s", pObj->GetName());
 		}
 	}
@@ -236,7 +244,7 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 			lpPrefix = " ";
 
 		tchar * lpSuffix = Str_GetTemp();
-		strcpy(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"));
+        Str_CopyLimitNull(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"), STR_TEMPLENGTH);
 
 		const CStoneMember * pGuildMember = pChar->Guild_FindMember(MEMORY_GUILD);
 		if (pGuildMember && (!pChar->IsStatFlag(STATF_INCOGNITO) || GetPrivLevel() > pChar->GetPrivLevel()))
@@ -244,16 +252,20 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 			const CItemStone * pParentStone = pGuildMember->GetParentStone();
 			ASSERT(pParentStone != nullptr);
 
-			if (pGuildMember->IsAbbrevOn() && pParentStone->GetAbbrev()[0])
+			if (pGuildMember->IsAbbrevOn())
 			{
-				strcat(lpSuffix, " [");
-				strcat(lpSuffix, pParentStone->GetAbbrev());
-				strcat(lpSuffix, "]");
+				lpctstr ptcAbbrev = pParentStone->GetAbbrev();
+				if (ptcAbbrev[0])
+				{
+					Str_ConcatLimitNull(lpSuffix, " [", STR_TEMPLENGTH);
+					Str_ConcatLimitNull(lpSuffix, ptcAbbrev, STR_TEMPLENGTH);
+					Str_ConcatLimitNull(lpSuffix, "]", STR_TEMPLENGTH);
+				}
 			}
 		}
 
 		if (*lpSuffix == '\0')
-			strcpy(lpSuffix, " ");
+            Str_CopyLimitNull(lpSuffix, " ", STR_TEMPLENGTH);
 
 		// The name
         PUSH_FRONT_TOOLTIP(pChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
@@ -321,8 +333,9 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 {
 	// TODO: add check to ATTR_IDENTIFIED, then add tooltips: stolen, BonusSkill1/2/3/4/5, minlevel/maxlevel, shurikencount
 
-    //const CCPropsItemChar *pCCPItemChar = pItem->GetCCPropsItemChar(), *pBaseCCPItemChar = pItem->Base_GetDef()->GetCCPropsItemChar();
-    const CCPropsItemEquippable *pCCPItemEquip = pItem->GetCCPropsItemEquippable(), *pBaseCCPItemEquip = pItem->Base_GetDef()->GetCCPropsItemEquippable();
+    //const CCPropsItemChar *pCCPItemChar = pItem->GetCCPropsItemChar(), *pBaseCCPItemChar = pItem->Base_GetDef()->GetCCPropsItemChar
+	const auto pCCPItemEquip = pItem->GetComponentProps<CCPropsItemEquippable>();
+	const auto pBaseCCPItemEquip = pItem->Base_GetDef()->GetComponentProps<CCPropsItemEquippable>();
 	CClientTooltip* t = nullptr;
 
 	if (pItem->IsAttr(ATTR_LOCKEDDOWN))
@@ -346,6 +359,17 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
     if (pItem->IsAttr(ATTR_NOTRADE))
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1076255)); // NO-TRADE
 
+    if (pItem->IsCanUse(CAN_U_ELF) && !pItem->IsCanUse(CAN_U_HUMAN|CAN_U_GARGOYLE))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1154650)); // Elves Only
+    else if (pItem->IsCanUse(CAN_U_GARGOYLE) && !pItem->IsCanUse(CAN_U_HUMAN|CAN_U_ELF))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1111709)); // Gargoyles Only
+    /* // Not used by OSI?
+    else if (pItem->IsCanUse(CAN_U_HUMAN) && pItem->IsCanUse(CAN_U_GARGOYLE) && !pItem->IsCanUse(CAN_U_ELF))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1154651)); // Exclude Elves Only
+    else if (pItem->IsCanUse(CAN_U_HUMAN) && pItem->IsCanUse(CAN_U_ELF) && !pItem->IsCanUse(CAN_U_GARGOYLE))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1154649)); // Exclude Gargoyles Only
+    */
+
 	if (g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE)
 	{
 		if (pItem->IsMovable())
@@ -356,8 +380,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		}
 	}
 
-	CUID uidCraftsman((dword)(pItem->GetDefNum("CRAFTEDBY")));
-	const CChar *pCraftsman = uidCraftsman.CharFind();
+	const CChar *pCraftsman = CUID::CharFindFromUID(dword(pItem->GetDefNum("CRAFTEDBY")));
 	if (pCraftsman)
 	{
         PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050043)); // crafted by ~1_NAME~
@@ -398,28 +421,30 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	{
 	case IT_CONTAINER_LOCKED:
 		PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(3005142)); // Locked
+		break;
 	case IT_CONTAINER:
 	case IT_TRASH_CAN:
 		if (pItem->IsContainer())
 		{
 			const CContainer * pContainer = dynamic_cast <const CContainer *> (pItem);
+			ASSERT(pContainer);
 			if ( g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE )
 			{
 				if ( pItem->m_ModMaxWeight )
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1072241)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~/~4_MAXWEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetContentCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
 				}
 				else
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1073841)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetContentCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
 				}
 			}
 			else
 			{
                 PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1050044));
-				t->FormatArgs("%" PRIuSIZE_T "\t%d", pContainer->GetCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS); // ~1_COUNT~ items, ~2_WEIGHT~ stones
+				t->FormatArgs("%" PRIuSIZE_T "\t%d", pContainer->GetContentCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS); // ~1_COUNT~ items, ~2_WEIGHT~ stones
 			}
 		}
 		break;
@@ -429,14 +454,23 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	case IT_CLOTHING:
 	case IT_SHIELD:
 	{
-		int ArmorRating = pItem->Armor_GetDefense();
-		if (ArmorRating != 0)
-		{
-			// Obsolete AR was replaced by physical/fire/cold/poison/energy resist since AOS
-			// and doesn't even have proper tooltips. It's just there for backward compatibility
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
-			t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
-		}
+        if (!IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+        {
+            int iArmorRating = pItem->Armor_GetDefense();
+			int iPercentArmorRating = 0;
+			if (g_Cfg.m_fDisplayPercentAr)
+			{
+				iPercentArmorRating = CChar::CalcPercentArmorDefense(pItem->Item_GetDef()->GetEquipLayer());
+				iArmorRating = IMulDivDown(iArmorRating, iPercentArmorRating, 100);
+			}
+            if (iArmorRating != 0)
+            {
+                // Obsolete AR was replaced by physical/fire/cold/poison/energy resist since AOS
+                // and doesn't even have proper tooltips. It's just there for backward compatibility
+                PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
+				t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), iArmorRating);
+            }
+        }
 
 		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq;
         if (pCCPItemEquip || pBaseCCPItemEquip)
@@ -447,10 +481,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			t->FormatArgs("%" PRId64, StrengthRequirement);
 		}
 
-        if ( pItem->m_itArmor.m_Hits_Max > 0 )
+        if ( pItem->m_itArmor.m_wHitsMax > 0 )
         {
 		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_Hits_Cur, pItem->m_itArmor.m_Hits_Max);
+		    t->FormatArgs("%hu\t%hu", pItem->m_itArmor.m_dwHitsCur, pItem->m_itArmor.m_wHitsMax);
         }
 	}
 	break;
@@ -477,18 +511,16 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061167)); // weapon speed ~1_val~
 		t->FormatArgs("%hhu", pItem->GetSpeed());
 
-		int Range = pItem->GetRangeH();
+		uchar Range = pItem->GetRangeH();
 		if (Range > 1)
 		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-			t->FormatArgs("%d", Range);
+			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169, Range)); // range ~1_val~
 		}
 
-		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);
+		int64 StrengthRequirement = (int64)(pItem->Item_GetDef()->m_ttEquippable.m_iStrReq) - pItem->GetPropNum(pCCPItemEquip, PROPIEQUIP_LOWERREQ, pBaseCCPItemEquip);
 		if (StrengthRequirement > 0)
 		{
-			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061170)); // strength requirement ~1_val~
-			t->FormatArgs("%" PRId64, StrengthRequirement);
+			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061170, StrengthRequirement)); // strength requirement ~1_val~
 		}
 
 		if (pItem->Item_GetDef()->GetEquipLayer() == LAYER_HAND2)
@@ -509,10 +541,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			}
 		}
 
-        if ( pItem->m_itWeapon.m_Hits_Max > 0 )
+        if ( pItem->m_itWeapon.m_wHitsMax > 0 )
         {
 		    PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060639)); // durability ~1_val~ / ~2_val~
-		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_Hits_Cur, pItem->m_itWeapon.m_Hits_Max);
+		    t->FormatArgs("%hu\t%hu", pItem->m_itWeapon.m_dwHitsCur, pItem->m_itWeapon.m_wHitsMax);
         }
 	}
 	break;
@@ -580,8 +612,9 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 	case IT_SPAWN_CHAR:
 	{
-        CCSpawn *pSpawn = pItem->GetSpawn();
-        if (!pSpawn)
+
+		CCSpawn* pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
+		if (!pSpawn)
             break;
         CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
 		lpctstr pszName = nullptr;
@@ -600,18 +633,19 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Character\t%s", pszName ? pszName : "none");
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-		t->FormatArgs("%hhu", pSpawn->GetMaxDist());
+		t->FormatArgs("%hhu", pSpawn->GetDistanceMax());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
 		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerSAdjusted());
+		
 	} break;
 
 	case IT_SPAWN_ITEM:
 	{
-        CCSpawn *pSpawn = pItem->GetSpawn();
+		CCSpawn* pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
         if (!pSpawn)
             break;
 		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
@@ -619,7 +653,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Item\t%u %s", pSpawn->GetPile(), pSpawnItemDef ? pSpawnItemDef->GetName() : "none");
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
-		t->FormatArgs("%hhu", pSpawn->GetMaxDist());
+		t->FormatArgs("%hhu", pSpawn->GetDistanceMax());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
 		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~

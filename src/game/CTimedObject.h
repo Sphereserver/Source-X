@@ -8,14 +8,22 @@
 
 #include "../sphere/ProfileData.h"
 
+class CComponent;
+class CWorldTicker;
 
 class CTimedObject
 {
-    friend class CWorld;
+    friend class CComponent;
+    friend class CWorldTicker;
+
+public:
+    static const char* m_sClassName;
+
+protected:
+    THREAD_CMUTEX_DEF;
 
 private:
-    THREAD_CMUTEX_DEF;
-    int64 _timeout;
+    int64 _iTimeout;
     PROFILE_TYPE _profileType;
     bool _fIsSleeping;
 
@@ -23,128 +31,163 @@ private:
     * @brief clears the timeout.
     * Should not be used outside the tick's loop, use SetTimeout(0) instead.
     */
-    virtual void ClearTimeout();
+protected:  inline  void _ClearTimeout() noexcept;
+public:             void  ClearTimeout() noexcept;
 
 public:
     CTimedObject(PROFILE_TYPE profile);
     virtual ~CTimedObject();
-    void Delete();
-    inline bool IsSleeping() const;
-    inline virtual void GoSleep();
-    virtual void GoAwake();
+
+protected:  inline  bool _IsSleeping() const noexcept;
+public:             bool IsSleeping() const noexcept;
+
+protected:  inline  virtual void _GoSleep();
+public:             virtual void GoSleep();
+
+protected:  virtual void _GoAwake();
+public:     virtual void  GoAwake();
+
     /**
-    * @brief returns the profiler type.
+    * @brief returns the type of ticking object.
     * @return the type.
     */
-    inline PROFILE_TYPE GetProfileType() const;
+protected:  inline PROFILE_TYPE _GetProfileType() const noexcept;
+public:     PROFILE_TYPE GetProfileType() const noexcept;
+
+    /**
+     * @brief   Determine if the object is in a "tickable" state.
+    */
+protected:  virtual bool _CanTick() const;  // TODO: locks need to be extended to derived classes
+public:     virtual bool  CanTick() const;
 
     /**
      * @brief   Executes the tick action.
      * @return  true if it succeeds, false if it fails.
-     */
-    virtual bool OnTick();
+    */
+protected:  virtual bool _OnTick() = 0;
+public:     virtual bool  OnTick(); // = 0;
 
     /*
     * @brief Check if IsDeleted();
     * @return true if it's deleted.
     */
-    virtual bool IsDeleted() const = 0;
+protected:  virtual bool _IsDeleted() const = 0;
+public:     virtual bool  IsDeleted() const = 0;
 
+protected:
     /**
-     * @brief   &lt; Raw timer.
-     * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
+     * @brief   &lt; Gets raw Timeout.
+     * @return  Delay in milliseconds.
      */
-    void SetTimer(int64 iDelayInMsecs);
+    inline  int64 _GetTimeoutRaw() const noexcept;
 
+private:
     /**
-     * @brief   &lt; Timer.
-     * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
+     * @brief   &lt; Set raw Timeout.
+     * @param   iDelayInMsecs   Delay in milliseconds.
      */
-    virtual void SetTimeout(int64 iDelayInMsecs);
+    inline  void _SetTimeoutRaw(int64 iDelayInMsecs) noexcept;
+
+protected:  virtual void _SetTimeout(int64 iDelayInMsecs);
+public:     virtual void  SetTimeout(int64 iDelayInMsecs);
 
     /**
     * @brief   &lt; Timer.
-    * @param   iDelayInSecs   Zero-based index of the delay in seconds.
+    * @param   iDelayInSecs   Delay in seconds.
     */
-    void SetTimeoutS(int64 iSeconds);
+protected:  void _SetTimeoutS(int64 iSeconds);
+public:     void  SetTimeoutS(int64 iSeconds);
 
     /**
     * @brief   &lt; Timer.
-    * @param   iDelayInTenths   Zero-based index of the delay in tenths of second.
+    * @param   iDelayInTenths   Delay in tenths of second.
     */
-    void SetTimeoutD(int64 iTenths);
+protected:  void _SetTimeoutD(int64 iTenths);
+public:     void  SetTimeoutD(int64 iTenths);
 
     /**
      * @brief   Query if this object is timer set.
      * @return  true if timer set, false if not.
      */
-    inline bool IsTimerSet() const;
+protected:  inline  bool _IsTimerSet() const noexcept;
+public:             bool IsTimerSet() const noexcept;
 
     /**
-     * @fn  int64 CObjBase::GetTimerDiff() const;
-     *
      * @brief   Gets timer difference between current time and stored time.
-     *
      * @return  The timer difference.
      */
-    int64 GetTimerDiff() const;
+private:
+    int64 _GetTimerDiff() const noexcept;
 
     /**
      * @brief   Query if this object is timer expired.
      * @return  true if timer expired, false if not.
      */
-    inline bool IsTimerExpired() const;
+protected:  inline  bool _IsTimerExpired() const noexcept;
+public:             bool IsTimerExpired() const noexcept;
 
     /**
-     * @brief   Gets timer.
-     * @return  The timer adjusted.
-     */
-    int64 GetTimerAdjusted() const;
-
-    /**
-     * @fn  int64 CObjBase::GetTimerTAdjusted() const;
-     *
-     * @brief   Gets timer in ticks.
-     *
-     * @return  The timer t adjusted.
-     */
-    int64 GetTimerTAdjusted() const;
-
-    /**
-    * @brief    Gets timer in tenths of seconds.
-    * @return  The timer d adjusted.
+     * @brief   Gets timer (in milliseconds).
+     * @return  The adjusted timer.
+    
     */
-    int64 GetTimerDAdjusted() const;
+protected:  int64 _GetTimerAdjusted() const noexcept;
+public:     int64  GetTimerAdjusted() const noexcept;
+
+    /**
+    * @brief   Gets timer in tenths of seconds.
+    * @return  The adjusted timer.
+    */
+protected:  int64 _GetTimerDAdjusted() const noexcept;
+public:     int64  GetTimerDAdjusted() const noexcept;
 
     /**
     * @brief    Gets timer in seconds.
-    * @return   The timer s adjusted.
+    * @return   The adjusted timer.
     */
-    int64 GetTimerSAdjusted() const;
+protected:  int64 _GetTimerSAdjusted() const noexcept;
+public:     int64  GetTimerSAdjusted() const noexcept;
 };
 
 
-bool CTimedObject::IsSleeping() const
+/* Inlined methods are defined here */
+
+int64 CTimedObject::_GetTimeoutRaw() const noexcept
+{
+    return _iTimeout;
+}
+
+void CTimedObject::_SetTimeoutRaw(int64 iDelayInMsecs) noexcept
+{
+    _iTimeout = iDelayInMsecs;
+}
+
+void CTimedObject::_ClearTimeout() noexcept
+{
+    _iTimeout = 0;
+}
+
+bool CTimedObject::_IsSleeping() const noexcept
 {
     return _fIsSleeping;
 }
 
-void CTimedObject::GoSleep()
+void CTimedObject::_GoSleep()
 {
     _fIsSleeping = true;
 }
 
-bool CTimedObject::IsTimerSet() const
+bool CTimedObject::_IsTimerSet() const noexcept
 {
-    return _timeout > 0;
+    return (_iTimeout > 0);
 }
 
-bool CTimedObject::IsTimerExpired() const
+bool CTimedObject::_IsTimerExpired() const noexcept
 {
-    return (GetTimerDiff() <= 0);
+    return (_GetTimerDiff() <= 0);
 }
 
-PROFILE_TYPE CTimedObject::GetProfileType() const
+PROFILE_TYPE CTimedObject::_GetProfileType() const noexcept
 {
     return _profileType;
 }

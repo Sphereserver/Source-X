@@ -3,44 +3,20 @@
 
 // ConsoleOutput
 
-ConsoleOutput::ConsoleOutput(ConsoleTextColor iLogColor, CSString sLogString)
-{
-    _iTextColor = iLogColor;
-    _sTextString = sLogString;
-}
-
-ConsoleOutput::ConsoleOutput(CSString sLogString)
-{
-    _iTextColor = CTCOL_DEFAULT;
-    _sTextString = sLogString;
-}
-
-ConsoleOutput::~ConsoleOutput()
+ConsoleOutput::ConsoleOutput(ConsoleTextColor iLogColor, lpctstr ptcLogString) noexcept :
+    _iTextColor(iLogColor), _sTextString(ptcLogString)
 {
 }
 
-ConsoleTextColor ConsoleOutput::GetTextColor() const
+ConsoleOutput::ConsoleOutput(lpctstr ptcLogString) noexcept :
+    _iTextColor(CTCOL_DEFAULT), _sTextString(ptcLogString)
 {
-    return _iTextColor;
-}
-
-const CSString& ConsoleOutput::GetTextString() const
-{
-    return _sTextString;
 }
 
 
 // ConsoleInterface
 
-ConsoleInterface::ConsoleInterface()
-{
-}
-
-ConsoleInterface::~ConsoleInterface()
-{
-}
-
-uint ConsoleInterface::CTColToRGB(ConsoleTextColor color) // static
+uint ConsoleInterface::CTColToRGB(ConsoleTextColor color) noexcept // static
 {
     auto MakeRGB = [](uchar r, uchar g, uchar b) -> uint
     {
@@ -67,10 +43,10 @@ uint ConsoleInterface::CTColToRGB(ConsoleTextColor color) // static
     }
 }
 
-void ConsoleInterface::AddConsoleOutput(ConsoleOutput * output)
+void ConsoleInterface::AddConsoleOutput(std::unique_ptr<ConsoleOutput>&& output) noexcept
 {
     std::unique_lock<std::mutex> lock(_ciQueueMutex);
-    _qOutput.push(output);
+    _qOutput.emplace_back(std::move(output));
 #ifndef _WIN32
     _ciQueueCV.notify_one();
 #endif

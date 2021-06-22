@@ -3,9 +3,10 @@
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
-#include "../../network/network.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../items/CItemMulti.h"
+#include "../CServer.h"
+#include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -175,8 +176,9 @@ CItem *CChar::GetBackpackItem(ITEMID_TYPE id)
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( pItem->GetID() == id )
 				return pItem;
 		}
@@ -189,8 +191,9 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 	ADDTOCALLSTACK("CChar::LayerFind");
 	// Find an item i have equipped.
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->GetEquipLayer() == layer )
 			return pItem;
 	}
@@ -200,11 +203,12 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CSString *pResult, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForLayerLoop");
-	CScriptLineContext StartContext = s.GetContext();
+	const CScriptLineContext StartContext = s.GetContext();
 	CScriptLineContext EndContext = StartContext;
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (CSObjContRec* pObjRec : GetIterationSafeCont())
 	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->GetEquipLayer() == layer )
 		{
 			TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
@@ -261,16 +265,19 @@ bool CChar::CanCarry( const CItem *pItem ) const
         if (this != pObjTop)    // Aren't we already carrying it ?
             iItemWeight = pItem->GetWeight();
     }
-	else if ( pItem->GetEquipLayer() != LAYER_DRAGGING )		// if we're dragging the item, its weight is already added on char so don't count it again
-		iItemWeight = pItem->GetWeight();
+    else if (pItem->GetEquipLayer() != LAYER_DRAGGING)
+    {
+        // if we're dragging the item, its weight is already added on char so don't count it again
+        iItemWeight = pItem->GetWeight();
+    }
 
     return (GetTotalWeight() + iItemWeight <= g_Cfg.Calc_MaxCarryWeight(this));
 }
 
-void CChar::ContentAdd( CItem * pItem, bool bForceNoStack )
+void CChar::ContentAdd( CItem * pItem, bool fForceNoStack )
 {
 	ADDTOCALLSTACK("CChar::ContentAdd");
-	UNREFERENCED_PARAMETER(bForceNoStack);
+	UNREFERENCED_PARAMETER(fForceNoStack);
 	ItemEquip(pItem);
 	//LayerAdd( pItem, LAYER_QTY );
 }
@@ -379,14 +386,14 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			if ( layer == LAYER_HAND2 )
 			{
 				// If it's a 2 handed weapon, unequip the other hand
-				if ( pItem->IsTypeWeapon() || pItem->IsType(IT_FISH_POLE) )
+				if ( CCPropsItemWeapon::CanSubscribe(pItem) )
 					pItemPrev = LayerFind(LAYER_HAND1);
 			}
 			else
 			{
 				// Unequip 2 handed weapons if we must use the other hand
 				pItemPrev = LayerFind(LAYER_HAND2);
-				if ( pItemPrev && !pItemPrev->IsTypeWeapon() && !pItemPrev->IsType(IT_FISH_POLE) )
+				if ( pItemPrev && !CCPropsItemWeapon::CanSubscribe(pItemPrev) ) //If the item in Layer 2 is not a weapon, don't unequip it.
 					pItemPrev = nullptr;
 			}
 			break;
@@ -456,15 +463,16 @@ int CChar::GetHealthPercent() const
 	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);
 }
 
-CChar* CChar::GetNext() const
-{
-	return( static_cast <CChar*>( CObjBase::GetNext()) );
-}
-
-CObjBaseTemplate * CChar::GetTopLevelObj() const
+const CObjBaseTemplate* CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
-	return const_cast<CChar*>(this);
+	return this;
+}
+
+CObjBaseTemplate* CChar::GetTopLevelObj()
+{
+	// Get the object that has a location in the world. (Ground level)
+	return this;
 }
 
 bool CChar::IsSwimming() const
@@ -475,7 +483,7 @@ bool CChar::IsSwimming() const
 
 	const CPointMap& ptTop = GetTopPoint();
 
-	const CPointMap pt = g_World.FindItemTypeNearby(ptTop, IT_WATER);
+	const CPointMap pt = CWorldMap::FindItemTypeNearby(ptTop, IT_WATER);
 	if ( !pt.IsValidPoint() )
 		return false;
 
@@ -484,8 +492,8 @@ bool CChar::IsSwimming() const
 		return false;
 
 	// Is there a solid surface under us?
-	dword dwBlockFlags = GetMoveBlockFlags();
-	char iSurfaceZ = g_World.GetHeightPoint2(ptTop, dwBlockFlags, true);
+	dword dwBlockFlags = GetCanMoveFlags(GetCanFlags());
+	char iSurfaceZ = CWorldMap::GetHeightPoint2(ptTop, dwBlockFlags, true);
 	if ( (iSurfaceZ == pt.m_z) && (dwBlockFlags & CAN_I_WATER) )
 		return true;
 
@@ -494,13 +502,11 @@ bool CChar::IsSwimming() const
 
 bool CChar::IsNPC() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::IsNPC");
     return (m_pNPC != nullptr);
 }
 
 NPCBRAIN_TYPE CChar::GetNPCBrain() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::GetNPCBrain");
     ASSERT(m_pNPC);
     return m_pNPC->m_Brain;
 }
@@ -532,32 +538,23 @@ NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const
 	ADDTOCALLSTACK("CChar::GetNPCBrainAuto");
 	// Auto-detect the brain
 	const CREID_TYPE id = GetDispID();
-	if ( id >= CREID_IRON_GOLEM )
+	
+	switch (id)
 	{
-		switch ( id )
-		{
-			//TODO: add other dragons
-			case CREID_DRAGON_SERPENTINE:
-			case CREID_DRAGON_SKELETAL:
-			case CREID_REPTILE_LORD:
-			case CREID_WYRM_ANCIENT:
-			case CREID_SWAMP_DRAGON:
-			case CREID_SWAMP_DRAGON_AR:
-				return NPCBRAIN_DRAGON;
-			default:
-				break;
-		}
-		return NPCBRAIN_MONSTER;
+		//TODO: add other dragons
+		case CREID_DRAGON_SERPENTINE:
+		case CREID_DRAGON_SKELETAL:
+		case CREID_REPTILE_LORD:
+		case CREID_WYRM_ANCIENT:
+		case CREID_SWAMP_DRAGON:
+		case CREID_SWAMP_DRAGON_AR:
+			return NPCBRAIN_DRAGON;
+		default:
+			break;
 	}
 
-	if ( (id == CREID_ENERGY_VORTEX) || (id == CREID_BLADE_SPIRIT) )
+	if ((id == CREID_ENERGY_VORTEX) || (id == CREID_BLADE_SPIRIT))
 		return NPCBRAIN_BERSERK;
-
-	if ( id >= CREID_MAN )
-		return NPCBRAIN_HUMAN;
-
-	if ( id >= CREID_HORSE_TAN )
-		return NPCBRAIN_ANIMAL;
 
 	switch ( id )
 	{
@@ -568,9 +565,18 @@ NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const
 		case CREID_BULL_FROG:
 		case CREID_DOLPHIN:
 			return NPCBRAIN_ANIMAL;
-		default:
-			return NPCBRAIN_MONSTER;
 	}
+
+	if (id >= CREID_IRON_GOLEM)
+		return NPCBRAIN_MONSTER;
+
+	if ( id >= CREID_MAN )
+		return NPCBRAIN_HUMAN;
+
+	if ( id >= CREID_HORSE_TAN )
+		return NPCBRAIN_ANIMAL;
+
+	return NPCBRAIN_MONSTER;
 }
 
 lpctstr CChar::GetPronoun() const
@@ -651,14 +657,18 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 		mode |= CHARMODE_WAR;
 
 	uint64 iFlags = STATF_SLEEPING;
-	if ( !g_Cfg.m_iColorInvis )	//This is needed for Serv.ColorInvis to work, proper flags must be set
+	
+	//When you want change the color of character anim, you must evitate to send CHARMODE_INVIS because the anim will automaticly be grey
+	//Here we check if it's define on the ini that you need override the color
+	if ( !g_Cfg.m_iColorInvis )			//Serv.ColorInvis
         iFlags |= STATF_INSUBSTANTIAL;
-	if ( !g_Cfg.m_iColorHidden )	//serv.ColorHidden
+	if ( !g_Cfg.m_iColorHidden )		//serv.ColorHidden
         iFlags |= STATF_HIDDEN;
 	if ( !g_Cfg.m_iColorInvisSpell )	//serv.ColorInvisSpell
         iFlags |= STATF_INVISIBLE;
+	
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
-		mode |= CHARMODE_INVIS;
+	mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
 
 	return mode;
 }
@@ -691,48 +701,52 @@ byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 	return dir;
 }
 
-dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
+dword CChar::GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM) const
 {
-	// What things block us ?
-	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !bIgnoreGM )	// nothing blocks us.
-		return 0xFFFFFFFF;
+	// What things do not block us ?
+	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !fIgnoreGM )
+		return 0xFFFFFFFF;	// nothing blocks us: we are able to move onto everything.
 
-	dword dwCan = GetCanFlags();
-	if ( Can(CAN_C_GHOST) )
-		dwCan |= CAN_C_GHOST;
+	if ( IsStatFlag(STATF_DEAD) )
+		dwCanFlags |= CAN_C_GHOST;
 
 	if ( IsStatFlag(STATF_HOVERING) )
-		dwCan |= CAN_C_HOVER;
+		dwCanFlags |= CAN_C_HOVER;
 
-	return ( dwCan & CAN_C_MOVEMASK );
+	return ( dwCanFlags & CAN_C_MOVEMASK );
 }
 
 byte CChar::GetLightLevel() const
 {
 	ADDTOCALLSTACK("CChar::GetLightLevel");
-	// Get personal light level.
+	// Get personal default light level.
 
 	if ( IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_NIGHTSIGHT) || IsPriv(PRIV_DEBUG) )
 		return LIGHT_BRIGHT;
 	if ( (g_Cfg.m_iRacialFlags & RACIALF_ELF_NIGHTSIGHT) && IsElf() )		// elves always have nightsight enabled (Night Sight racial trait)
 		return LIGHT_BRIGHT;
-	return GetTopSector()->GetLight();
+	const CSector* pSector = GetTopSector();
+	ASSERT(pSector);
+	return pSector->GetLight();
 }
 
 CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook from the magic school given in iSpell
 {
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	// Search for suitable book in hands first
-	CItem *pReturn = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
-	if (pReturn && pReturn->IsTypeSpellbook() )
+	CItem* pReturn = nullptr;
+	CItem* pItem = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
+	if (pItem && pItem->IsTypeSpellbook() )
     {
-	    CItemBase *pItemDef = pReturn->Item_GetDef();
-	    SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
-	    SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
-	    if ( (iSpell > min) && (iSpell < max) )
+		const CItemBase *pItemDef = pItem->Item_GetDef();
+		const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+		const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+	    if ( (iSpell > min) && (iSpell <= max) ) //Had to replace < with <= otherwise the spell would not be considered a valid one.
 	    {
-		    if (pReturn->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-			    return pReturn;
+		    if (pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
+			    return pItem;
+			else // I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+		    	pReturn = pItem;
 		}
     }
 
@@ -740,20 +754,21 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pItem = pPack->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsTypeSpellbook() )
 				continue;
             // Found a book, let's find each magic school's offsets to search for the desired spell.
-			CItemBase *pItemDef = pItem->Item_GetDef();
-			SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
-			SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
-			if ( (iSpell > min) && (iSpell < max) ) // and check now the spell is within the spells that this book can hold.
+			const CItemBase *pItemDef = pItem->Item_GetDef();
+			const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+			const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+			if ( (iSpell > min) && (iSpell <= max) ) // and check now the spell is within the spells that this book can hold. Had to replace < with <= otherwise the spell would not be considered a valid one.
 			{
 				if ( pItem->IsSpellInBook(iSpell) )	//I found a book with this spell, nothing more to do.
 					return pItem;
-				else
-					pReturn = pItem;	// I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+				else // I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+					pReturn = pItem;
 			}
 		}
 	}
@@ -843,7 +858,7 @@ ushort CChar::Food_CanEat( CObjBase *pObj ) const
 	ASSERT(pCharDef);
 
 	size_t iRet = pCharDef->m_FoodType.FindResourceMatch(pObj);
-	if ( iRet != pCharDef->m_FoodType.BadIndex() )
+	if ( iRet != SCONT_BADINDEX )
 		return (ushort)(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
 
 	return 0;
@@ -884,7 +899,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 {
 	ADDTOCALLSTACK("CChar::GetTradeTitle");
 	if ( !m_sTitle.IsEmpty() )
-		return m_sTitle;
+		return m_sTitle.GetBuffer();
 
 	tchar *pTemp = Str_GetTemp();
     const CCharBase *pCharDef = Char_GetDef();
@@ -896,7 +911,8 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.
-		snprintf(pTemp, STR_TEMPLENGTH, "%s %s", pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE), pCharDef->GetTradeName());
+		lpctstr ptcArticle = pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE);
+		snprintf(pTemp, STR_TEMPLENGTH, "%s %s", ptcArticle, pCharDef->GetTradeName());
 		return pTemp;
 	}
 
@@ -964,7 +980,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 
-	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetPtr());
+	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetBuffer());
 	return pTemp;
 }
 
@@ -1013,7 +1029,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 	// Not normally searchable.
 	// Make some special cases for searchable.
 
-    const CChar *pChar = static_cast<CChar*>(pContItem->GetTopLevelObj());
+    const CChar *pChar = static_cast<const CChar*>(pContItem->GetTopLevelObj());
 	if ( !pChar )
 		return false;
 
@@ -1025,7 +1041,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
         const CItem *pItemTrade = pContItem->m_uidLink.ItemFind();
 		if ( pItemTrade )
 		{
-            const CChar *pCharTrade = static_cast<CChar*>(pItemTrade->GetTopLevelObj());
+            const CChar *pCharTrade = static_cast<const CChar*>(pItemTrade->GetTopLevelObj());
 			if ( pCharTrade == this )
 				return true;
 		}
@@ -1046,6 +1062,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 }
 
 bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
+//true = client can see the invisble target
 {
 	ADDTOCALLSTACK("CChar::CanSee");
 	// Can I see this object (char or item)?
@@ -1058,6 +1075,21 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 
     const CPointMap& ptTop = GetTopPoint();
     int iDistSight = GetVisualRange();
+
+    /*
+    const CRegion* pRegionHouse = ptTop.GetRegion(REGION_TYPE_HOUSE);
+    if (pRegionHouse)
+    {
+        const CItemMulti* pMultiRegion = static_cast<const CItemMulti*>(pRegionHouse->GetResourceID().ItemFindFromResource());
+        // If it's a public house
+        {
+            const bool fShowPublicHouseContent = IsClientActive() ? GetClientActive()->_fShowPublicHouseContent : false;
+            if (!fShowPublicHouseContent)
+                return false;
+        }
+    }
+    */
+
 	if ( pObj->IsItem() )
 	{
 		const CItem *pItem = static_cast<const CItem*>(pObj);
@@ -1086,7 +1118,9 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
                     {
                         // Both of the chars in a trade can see the items being traded
                         if (this == dynamic_cast<const CChar*>(pItemContainer->GetContainer()))
+                        {
                             fSkip = true;
+                        }
                         else
                         {
                             if (const CItem* pLinkedTradeWindow = pItemContainer->m_uidLink.ItemFind())
@@ -1098,9 +1132,9 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
                 }
 
 				// A client cannot see the contents of someone else's container, unless they have opened it first
-				if (!fSkip && IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
+				if (!fSkip && IsClientActive() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
 				{
-					const CClient *pClient = GetClient();
+					const CClient *pClient = GetClientActive();
 					if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
 					{
 					/*
@@ -1127,8 +1161,6 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	else
 	{
 		const CChar *pChar = static_cast<const CChar*>(pObj);
-		if ( !pChar )
-			return false;
 		if ( pChar == this )
 			return true;
 		if ( ptTop.GetDistSight(pChar->GetTopPoint()) > iDistSight )
@@ -1147,7 +1179,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 		else if ( pChar->IsStatFlag(STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN) )
 		{
 			// Characters can be invisible, but not to GM's (true sight ?)
-			// equal level can see each other if they are staff members or they return 1 in @SeeHidden
+			// equal plevel can see each other if they are staff members or they return 1 in @SeeHidden
 			if ( pChar->GetPrivLevel() <= PLEVEL_Player )
 			{
 				if ( IsTrigUsed( TRIGGER_SEEHIDDEN ) )
@@ -1160,8 +1192,40 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 					return ( Args.m_iN1 != 1 );
 				}
 			}
-			if ( plevelMe <= plevelChar )
+			//Here we analyse how GM can see other player/GM when they are hide.
+			if (plevelMe < 2) //only Plevel over 2 have the possibility to see other
+			{
 				return false;
+			}
+			else
+			{
+				switch (g_Cfg.m_iCanSeeSamePLevel) //Evaluate the .ini setting
+				{
+				case 0: //GM see all
+					if (plevelMe < plevelChar)
+					{
+						return false;
+					}
+					break;
+				case 1: //Gm dont see same plevel
+					if (plevelMe <= plevelChar)
+					{
+						return false;
+					}
+					break;
+				case 2: //Plevel x and more see all
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+					if (plevelMe < g_Cfg.m_iCanSeeSamePLevel)
+					{
+						return false;
+					}
+					break;
+				}
+			}
 		}
 
 		if ( IsStatFlag(STATF_DEAD) && !CanSeeAsDead(pChar) )
@@ -1207,7 +1271,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 
 bool CChar::CanTouch( const CPointMap &pt ) const
 {
-	ADDTOCALLSTACK("CChar::CanTouch");
+	ADDTOCALLSTACK("CChar::CanTouch(pt)");
 	// Can I reach this from where i am.
 	// swords, spears, arms length = x units.
 	// Use or Grab.
@@ -1235,6 +1299,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
         pItem = static_cast<const CItem *>(pObj);
 		bool fDeathImmune = IsPriv(PRIV_GM);
+		bool fFreezeImmune = false;
 		switch ( pItem->GetType() )
 		{
 		case IT_SIGN_GUMP:	// can be seen from a distance.
@@ -1244,6 +1309,13 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		case IT_TELESCOPE:
             fDeathImmune = true;
 			break;
+        case IT_CONTAINER:
+        case IT_CONTAINER_LOCKED:
+        {
+            if ( pObjTop && pObjTop == this ) //This is default OSI behaviour, you can look through your backpack while frozen.
+                fFreezeImmune = true;
+            break;
+        }
 
         case IT_ARCHERY_BUTTE:
         {
@@ -1254,6 +1326,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
                 if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
                     return (iDist <= pWeapon->GetRangeH());
             }
+            break;
         }
 
 		case IT_SHIP_PLANK:
@@ -1267,8 +1340,14 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		default:
 			break;
 		}
+        
+        if ( !fDeathImmune && IsStatFlag(STATF_FREEZE) )
+        {
+            if ( !fFreezeImmune && !pItem->IsAttr(ATTR_CANUSE_PARALYZED) )
+                return false;
+        }
 
-		if ( !fDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+		if ( !fDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE) )
 			return false;
 	}
 
@@ -1283,7 +1362,10 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return true;
 			if ( IsPriv(PRIV_GM) )
 				return (GetPrivLevel() >= pChar->GetPrivLevel());
-			if ( pChar->IsStatFlag(STATF_DEAD|STATF_STONE) )
+			//The check below is needed otherwise, you cannot resurrect a player ghost by using bandages (unless you are a GM), maybe there is a better way?
+			if (pChar->IsStatFlag(STATF_DEAD) && (Skill_GetActive() == SKILL_HEALING || Skill_GetActive() == SKILL_VETERINARY))
+				return true;
+			if ( pChar->IsStatFlag(STATF_DEAD|STATF_STONE) || Can(CAN_C_STATUE) )
 				return false;
 		}
 
@@ -1309,27 +1391,24 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	if ( IsPriv(PRIV_GM) )
 		return true;
 
+    bool fCanTouch = true;
 	if ( !CanSeeLOS(pObjTop) )
 	{
-		if ( Can(CAN_C_DCIGNORELOS) )
-			return true;
-		else if ( pChar && pChar->Can(CAN_C_DCIGNORELOS) )
-			return true;
-		else if ( pItem && pItem->Can(CAN_I_DCIGNORELOS) )
-			return true;
-		return false;
+        fCanTouch = false;
+        if ((Can(CAN_C_DCIGNORELOS)) || (pChar && pChar->Can(CAN_C_DCIGNORELOS)) || (pItem && pItem->Can(CAN_I_DCIGNORELOS)))
+        {
+            fCanTouch = true;
+        }
 	}
-	if ( iDist > 2 )
+	if (( iDist > 2 ) && fCanTouch)
 	{
-		if ( Can(CAN_C_DCIGNOREDIST) )
-			return true;
-		else if ( pChar && pChar->Can(CAN_C_DCIGNOREDIST) )
-			return true;
-		else if ( pItem && pItem->Can(CAN_I_DCIGNOREDIST) )
-			return true;
-		return false;
+        fCanTouch = false;
+        if ((Can(CAN_C_DCIGNOREDIST)) || (pChar && pChar->Can(CAN_C_DCIGNOREDIST)) || (pItem && pItem->Can(CAN_I_DCIGNOREDIST)))
+        {
+            fCanTouch = true;
+        }
 	}
-	return true;
+	return fCanTouch;
 }
 
 IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem ) const
@@ -1356,7 +1435,7 @@ IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pIte
 		return IT_JUNK;
 
 	// Is this static really here ?
-	const CServerMapBlock *pMapBlock = g_World.GetMapBlock(*pPt);
+	const CServerMapBlock *pMapBlock = CWorldMap::GetMapBlock(*pPt);
 	if ( !pMapBlock )
 		return IT_JUNK;
 
@@ -1500,7 +1579,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 	if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_LOCKEDDOWN) && !pItem->IsAttr(ATTR_MOVE_ALWAYS) )
 		return false;
 
-	if ( IsStatFlag(STATF_STONE|STATF_FREEZE|STATF_INSUBSTANTIAL|STATF_DEAD|STATF_SLEEPING) )
+	if ( IsStatFlag(STATF_STONE|STATF_FREEZE|STATF_INSUBSTANTIAL|STATF_DEAD|STATF_SLEEPING) || Can(CAN_C_STATUE) )
 	{
 		if ( fMsg )
 			SysMessageDefault(DEFMSG_CANTMOVE_DEAD);
@@ -1558,7 +1637,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 			{
 				if (( pItem->IsAttr(ATTR_NEWBIE) ) && g_Cfg.m_bAllowNewbTransfer )
 				{
-                    const CChar *pPet = dynamic_cast<CChar*>( pItem->GetTopLevelObj() );
+                    const CChar *pPet = dynamic_cast<const CChar*>( pItem->GetTopLevelObj() );
 					if (pPet && (pPet->GetOwner() == this) )
 						return true;
 				}
@@ -1597,7 +1676,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) )
 		return false;
 
-	CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
+	CObjBaseTemplate *pObjTop = const_cast<CObjBaseTemplate*>(pItem->GetTopLevelObj());
 	CChar *pCharMark = dynamic_cast<CChar*>(pObjTop);
 	if ( ppCharMark != nullptr )
 		*ppCharMark = pCharMark;
@@ -1634,7 +1713,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 	return true;
 }
 
-bool CChar::CanUse( CItem *pItem, bool fMoveOrConsume ) const
+bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume ) const
 {
 	ADDTOCALLSTACK("CChar::CanUse");
 	// Can the Char use ( CONSUME )  the item where it is ?
@@ -1689,13 +1768,13 @@ bool CChar::IsVerticalSpace( const CPointMap& ptDest, bool fForceMount ) const
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) || !ptDest.IsValidPoint() )
 		return true;
 
-	dword dwBlockFlags = GetMoveBlockFlags();
+	dword dwBlockFlags = GetCanMoveFlags(GetCanFlags());
 	if ( dwBlockFlags & CAN_C_WALK )
 		dwBlockFlags |= CAN_I_CLIMB;
 
     const height_t iHeightMount = GetHeightMount();
 	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, iHeightMount);
-	g_World.GetHeightPoint(ptDest, block, true);
+	CWorldMap::GetHeightPoint(ptDest, block, true);
 
 	if ( iHeightMount + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
 		return false;
@@ -1713,7 +1792,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 	//  pdwBlockFlags = what is blocking me. (can be null = don't care)
 
 	//	test diagonal dirs by two others *only* when already having a normal location
-    const CPointMap ptOld = GetTopPoint();
+    const CPointMap ptOld(GetTopPoint());
 	if ( ptOld.IsValidPoint() && !fPathFinding && (dir % 2) )
 	{
 		DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1); // get 1st ortogonal
@@ -1721,8 +1800,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 		if ( dirTest2 == DIR_QTY )		// roll over
 			dirTest2 = DIR_N;
 
-        CPointMap ptTest;
-		ptTest = ptOld;
+        CPointMap ptTest(ptOld);
 		ptTest.Move(dirTest1);
 		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
 			return nullptr;
@@ -1749,41 +1827,43 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 		return nullptr;
 	}
 
-	dword dwCan = GetMoveBlockFlags();  // actions i can perform to step on a tile (some tiles require a specific ability, like to swim for the water)
+	const dword dwCanFlags = GetCanFlags();
+	const dword dwMovementCan = GetCanMoveFlags(dwCanFlags);  // actions i can perform to step on a tile (some tiles require a specific ability, like to swim for the water)
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_Log.EventWarn("GetMoveBlockFlags() (0x%" PRIx32 ").\n", dwCan);
-	if ( !(dwCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
+		g_Log.EventWarn("GetCanMoveFlags() (0x%" PRIx32 ").\n", dwMovementCan);
+	if ( !(dwMovementCan & CAN_C_MOVEMENTCAPABLEMASK) )
 		return nullptr;	// cannot move at all, so WTF?
 
-	dword dwBlockFlags = dwCan;
-	if ( dwCan & CAN_C_WALK )
+	dword dwMapMoveFlags = dwMovementCan;
+	if (dwMovementCan & CAN_C_WALK )
 	{
-		dwBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
-		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-			g_Log.EventWarn("dwBlockFlags (0%x) dwCan(0%x)\n", dwBlockFlags, dwCan);
+		dwMapMoveFlags |= CAN_C_FLY;	// if we can walk than we can CLIMB. The char flag for doing that is FLY.
 	}
 
-    const height_t iHeightMount = GetHeightMount();
-	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 3, iHeightMount);
+    const height_t iHeight = IsSetEF(EF_WalkCheckHeightMounted) ? GetHeightMount() : GetHeight();
+	CServerMapBlockState block(dwMapMoveFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 3, iHeight);
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_Log.EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d).\n",
-					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
+	{
+		g_Log.EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d ); ptDest.m_z(%d) m_zClimbHeight(%d).\n",
+			dwMapMoveFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
+	}
 
-	g_World.GetHeightPoint(ptDest, block, true);
+	CWorldMap::GetHeightPoint(ptDest, block, true);
 
 	// Pass along my results.
-	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
+	dwMapMoveFlags = block.m_Bottom.m_dwBlockFlags;
 
     uint uiBlockedBy = 0;
     // need to check also for UFLAG1_FLOOR?
 	if ( block.m_Top.m_dwBlockFlags )
 	{
         const bool fTopLandTile = (block.m_Top.m_dwTile <= TERRAIN_QTY);
-        if (!fTopLandTile && ((dwBlockFlags & CAN_I_ROOF) || (dwBlockFlags & CAN_I_PLATFORM) || (dwBlockFlags & CAN_I_BLOCK)) && Can(CAN_C_NOINDOORS))
+        if (!fTopLandTile && (block.m_Top.m_dwBlockFlags & (CAN_I_ROOF|CAN_I_PLATFORM|CAN_I_BLOCK)) && Can(CAN_C_NOINDOORS))
             return nullptr;
 
         const short iHeightDiff = (block.m_Top.m_z - block.m_Bottom.m_z);
-        const height_t uiHeightReq = (!fTopLandTile ? iHeightMount : iHeightMount / 2);
+        const height_t uiHeightReq = fTopLandTile ? (iHeight / 2) : iHeight;
+        
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
         {
 			g_Log.EventWarn("block.m_Top.m_z (%hhd) - block.m_Bottom.m_z (%hhd) < m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )(%hhu).\n",
@@ -1794,57 +1874,68 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
             // Two cases possible:
             // 1) On the dest P we would be covered by something and we wouldn't fit under this!
             // 2) On the dest P there's an item but we can pass through it (this special case will be handled with fPassTrough late
-            dwBlockFlags |= CAN_I_BLOCK;
+			dwMapMoveFlags |= CAN_I_BLOCK;
             uiBlockedBy |= CAN_I_ROOF;
         }
         else if (iHeightDiff < (m_zClimbHeight + uiHeightReq) )
         {
             // i'm trying to walk on a point over my head, it's possible to climb it but there isn't enough room for me to fit between Top and Bottom tile
             // (i'd bang my head against the ceiling!)
-            dwBlockFlags |= CAN_I_BLOCK;    
+			dwMapMoveFlags |= CAN_I_BLOCK;
             uiBlockedBy |= CAN_I_CLIMB;
         }
 	}
 
     const bool fLandTile = (block.m_Bottom.m_dwTile <= TERRAIN_QTY);
     bool fPassTrough = false;
-	if ( (dwCan != 0xFFFFFFFF) && (dwBlockFlags != 0x0) )
+	if ( (dwMovementCan != 0xFFFFFFFF) && (dwMapMoveFlags != 0x0) )
 	{
-        // it IS in my way and HAS a flag set, check further
+        // It IS in my way and HAS a flag set, check further
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_Log.EventWarn("BOTTOMitemID (0%" PRIx32 ") TOPitemID (0%" PRIx32 ").\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
         
-        if ( (dwBlockFlags & CAN_I_PLATFORM) && !Can(CAN_C_WALK) )
+        if (dwMapMoveFlags & CAN_I_WATER)
         {
-            dwBlockFlags |= CAN_I_BLOCK;    // item is walkable (land, not water) and i can't walk
+            if (Can(CAN_C_SWIM, dwCanFlags))
+            {
+                // I can swim, and water tiles have the impassable flag, so let's remove it
+				dwMapMoveFlags &= ~CAN_I_BLOCK;
+            }
+            else
+            {
+                // Item is water and i can't swim
+				dwMapMoveFlags |= CAN_I_BLOCK; // it should be already added in the tiledata, but we better make that sure
+                uiBlockedBy |= CAN_I_WATER;
+            }
+        }
+        if ( (dwMapMoveFlags & CAN_I_PLATFORM) && !Can(CAN_C_WALK, dwCanFlags) )
+        {
+            // Item is walkable (land, not water) and i can't walk
+			dwMapMoveFlags |= CAN_I_BLOCK;
             uiBlockedBy |= CAN_I_PLATFORM;
         }
-		if ( (dwBlockFlags & CAN_I_DOOR) )
+		if ( (dwMapMoveFlags & CAN_I_DOOR) )
         {
-            if (Can(CAN_C_GHOST))
+            if (Can(CAN_C_GHOST, dwCanFlags))
             {
                 fPassTrough = true;
             }
             else
             {
-                dwBlockFlags |= CAN_I_BLOCK;    // item is a door and i'm not a ghost
+                // Item is a door and i'm not a ghost
+				dwMapMoveFlags |= CAN_I_BLOCK;
                 uiBlockedBy |= CAN_I_DOOR;
             }
         }
-		if ( (dwBlockFlags & CAN_I_WATER) && !Can(CAN_C_SWIM) )
+		if ( (dwMapMoveFlags & CAN_I_HOVER) )
         {
-			dwBlockFlags |= CAN_I_BLOCK;    // item is water and i can't swim
-            uiBlockedBy |= CAN_I_WATER;
-        }
-		if ( (dwBlockFlags & CAN_I_HOVER) )
-        {
-            if (Can(CAN_C_HOVER) || IsStatFlag(STATF_HOVERING))
+            if (Can(CAN_C_HOVER, dwCanFlags) || IsStatFlag(STATF_HOVERING))
             {
                 ; //fPassTrough = true;
             }
             else
             {
-                dwBlockFlags |= CAN_I_BLOCK;
+				dwMapMoveFlags |= CAN_I_BLOCK;
                 uiBlockedBy |= CAN_I_HOVER;
             }
         }
@@ -1858,23 +1949,39 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
         if (fLandTile)
         {
             // It's a land tile
-            if ((dwBlockFlags & CAN_I_BLOCK) && !(uiBlockedBy & CAN_I_CLIMB))
+            if ((dwMapMoveFlags & CAN_I_BLOCK) && !(uiBlockedBy & CAN_I_CLIMB))
                 return nullptr;
-            if (block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + iHeightMount + 3)
+            if (block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + iHeight + 3)
                 return nullptr;
         }
         else
         {
             // It's an item
-            if (!fPassTrough && (dwBlockFlags & CAN_I_BLOCK))
+            if (!fPassTrough && (dwMapMoveFlags & CAN_I_BLOCK))
             {
+                // It's a blocking item. I should need special capabilities to pass through (or over) it.
                 if (!(uiBlockedBy & CAN_I_CLIMB))
                     return nullptr;
-                if (!Can(CAN_C_PASSWALLS))
+                if (!Can(CAN_C_PASSWALLS, dwCanFlags))
                 {
                     // I can't pass through it, but can i climb or fly on it?
-                    if (!(dwBlockFlags & CAN_I_CLIMB) && !Can(CAN_C_FLY)) // if dwBlockFlags & CAN_I_CLIMB, then it's a "climbable" item
+                    if (Can(CAN_C_FLY, dwCanFlags))
                     {
+                        if (block.m_Top.m_dwBlockFlags & CAN_I_ROOF)
+                        {
+                            // Roof tiles usually don't have the impassable/block tiledata flag, but i don't want flying chars to pass over the wall (bottom tile)
+                            //  and through roof (top tile) and enter a building in this way
+                            return nullptr;
+                        }
+                    }
+                    else if (dwMapMoveFlags & CAN_I_CLIMB)
+                    {
+                        // If dwBlockFlags & CAN_I_CLIMB, then it's a "climbable" item (and i can climb it, 
+                        //  since i don't have CAN_I_CLIMB in uiBlockedBy)
+                    }
+                    else
+                    {
+                        // Standard check
                         // Keep in mind that m_z, when an item is encountered in the mapblockstate, is equal to the item z + its height
                         if (block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + 2) // Too high to climb.
                             return nullptr;
@@ -1885,16 +1992,16 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
     }
 
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", iHeightMount, block.m_Top.m_z, ptDest.m_z);
-	if ( (iHeightMount + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
+		g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", iHeight, block.m_Top.m_z, ptDest.m_z);
+	if ( (iHeight + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
 	{
 		SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
 		return nullptr;
 	}
 
 	if ( pdwBlockFlags )
-		*pdwBlockFlags = dwBlockFlags;
-	if ( pClimbHeight && (dwBlockFlags & CAN_I_CLIMB) )
+		*pdwBlockFlags = dwMapMoveFlags;
+	if ( pClimbHeight && (dwMapMoveFlags & CAN_I_CLIMB) )
 		*pClimbHeight = block.m_zClimbHeight;
 
     // Be wary that now block.m_Bottom isn't just the "tile with lowest (p.z + height)", because if you are stepping on an item with height != 0,
@@ -1916,7 +2023,7 @@ void CChar::FixClimbHeight()
 	const CPointMap& pt = GetTopPoint();
     const height_t iHeightMount = GetHeightMount();
 	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + iHeightMount + 3, pt.m_z + 2, iHeightMount);
-	g_World.GetHeightPoint(pt, block, true);
+	CWorldMap::GetHeightPoint(pt, block, true);
 
 	if ( (block.m_Bottom.m_z == pt.m_z) && (block.m_dwBlockFlags & CAN_I_CLIMB) )	// we are standing on stairs
 		m_zClimbHeight = block.m_zClimbHeight;

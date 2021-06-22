@@ -1,12 +1,13 @@
 // An item is targetted.
 
 #include "../../network/send.h"
-#include "../resource/blocks/CItemTypeDef.h"
+#include "../resource/sections/CItemTypeDef.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
 #include "../CLog.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -34,12 +35,12 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	{
 		const CItem * pItem = static_cast <CItem*> (pObj);
 		if ( pItem->GetAmount() > 1 )
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
+			snprintf(pszLogMsg, STR_TEMPLENGTH, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
 		else
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+			snprintf(pszLogMsg, STR_TEMPLENGTH, "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 	}
 	else
-		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+		snprintf(pszLogMsg, STR_TEMPLENGTH, "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 
 	// Check priv level for the new verb.
 	if ( ! g_Cfg.CanUsePrivVerb( pObj, m_Targ_Text, this ))
@@ -108,32 +109,32 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 		size_t len = 0;
 		if ( id )
 		{
-			len = sprintf( pszTemp, "[Static z=%d, 0%x=", pt.m_z, id );
+			len = snprintf( pszTemp, STR_TEMPLENGTH, "[Static z=%d, 0%x=", pt.m_z, id );
 
 			// static items have no uid's but we can still use them.
 			CItemBase * pItemDef = CItemBase::FindItemBase(id);
 			if ( pItemDef )
 			{
-				len += sprintf( pszTemp+len, "%s->%s], ", pItemDef->GetResourceName(),
+				len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, "%s->%s], ", pItemDef->GetResourceName(),
 					g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, pItemDef->GetType() )));
 			}
 			else
 			{
-				len += sprintf( pszTemp+len, "NON scripted], " );
+				len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, "NON scripted], " );
 			}
 		}
 		else
 		{
 			// tile info for location.
-			len = strcpylen( pszTemp, "[No static tile], " );
+			len = Str_CopyLimitNull( pszTemp, "[No static tile], ", STR_TEMPLENGTH);
 		}
 
-		const CUOMapMeter * pMeter = g_World.GetMapMeter( pt );
+		const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( pt );
 		if ( pMeter )
 		{
-			len += sprintf( pszTemp+len, "TERRAIN=0%x   TYPE=%s",
+			len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, "TERRAIN=0%x   TYPE=%s",
 				pMeter->m_wTerrainIndex,
-				g_World.GetTerrainItemTypeDef( pMeter->m_wTerrainIndex )->GetResourceName() );
+				CWorldMap::GetTerrainItemTypeDef( pMeter->m_wTerrainIndex )->GetResourceName() );
 		}
 
 		SysMessage(pszTemp);
@@ -159,11 +160,15 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	ASSERT(m_pChar);
 	CChar * pChar1 = m_pChar;
 
+	//Switch their home position to avoid the pChar1 corpse teleport to his home(far away)
+	CPointMap homeP1 = pChar1->m_ptHome;
+	pChar1->m_ptHome.Set(pChar2->m_ptHome);
+	pChar2->m_ptHome.Set(homeP1);
+
 	// Put my newbie equipped items on it.
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = pChar1->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : pChar1->GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( !pItem->IsAttr(ATTR_MOVE_NEVER) )
 			continue; // keep GM stuff.
 		if ( !CItemBase::IsVisibleLayer(pItem->GetEquipLayer()) )
@@ -186,9 +191,9 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 	CItemContainer *pPack2 = pChar2->GetPackSafe();
 	if ( pPack1 && pPack2 )
 	{
-		for ( CItem *pItem = pPack1->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+		for (CSObjContRec* pObjRec : pPack1->GetIterationSafeContReverse())
 		{
-			pItemNext = pItem->GetNext();
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsAttr(ATTR_MOVE_NEVER) )	// keep newbie stuff.
 				continue;
 			pPack2->ContentAdd(pItem);	// add content
@@ -197,7 +202,7 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 
 	pChar1->ClientDetach();
 	m_pChar = nullptr;
-	CClient * pClient2 = pChar2->GetClient();
+	CClient * pClient2 = pChar2->GetClientActive();
 	if ( pClient2 )	// controled char is a player/client.
 	{
 		pChar2->ClientDetach();
@@ -283,7 +288,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 	if ( ! s.ReadKeyParse())
 		return false; // this has the item count
 
-	int iItemCount = ATOI(s.GetKey()); // item count
+	int iItemCount = atoi(s.GetKey()); // item count
 	while (iItemCount > 0)
 	{
 		if ( ! s.ReadKeyParse())
@@ -292,7 +297,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		int64 piCmd[4];		// Maximum parameters in one line
 		Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 
-		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(s.GetKey())), nullptr, m_pChar);
+		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(atoi(s.GetKey())), nullptr, m_pChar);
 		if ( pItem == nullptr )
 			return false;
 
@@ -355,7 +360,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 		return pMulti ? true : false;
 	}
 	else
-		pItem->SetAmount(m_tmAdd.m_amount);
+		pItem->SetAmount(m_tmAdd.m_vcAmount);
 
 	pItem->MoveToCheck(pt, m_pChar);
 	m_pChar->m_Act_UID = pItem->GetUID();		// for last target stuff (trigger stuff) and to make AxisII able to initialize placed spawn items.
@@ -406,19 +411,20 @@ bool CClient::OnTarg_Item_Link( CObjBase * pObj2 )
 			pItem1 = pItem2;
 			pItem2 = pTmp;
 		}
+
 		// pItem1 = the IT_KEY
-		if ( pItem2->m_itContainer.m_UIDLock )
-
+		if (pItem2->m_itContainer.m_UIDLock.IsValidUID())
+		{
 			pItem1->m_itKey.m_UIDLock = pItem2->m_itContainer.m_UIDLock;
-
-		else if ( pItem1->m_itKey.m_UIDLock )
-
+		}
+		else if (pItem1->m_itKey.m_UIDLock.IsValidUID())
+		{
 			pItem2->m_itContainer.m_UIDLock = pItem1->m_itKey.m_UIDLock;
-
+		}
 		else
-
+		{
 			pItem1->m_itKey.m_UIDLock = pItem2->m_itContainer.m_UIDLock = pItem2->GetUID();
-
+		}
 	}
 	else
 	{
@@ -445,7 +451,7 @@ int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest
 		for ( int my = rect.m_top; my <= rect.m_bottom; my++)
 		{
 			CPointMap ptCur((word)(mx), (word)(my), 0, (uchar)(rect.m_map));
-			const CServerMapBlock * pBlock = g_World.GetMapBlock( ptCur );
+			const CServerMapBlock * pBlock = CWorldMap::GetMapBlock( ptCur );
 			if ( pBlock == nullptr )
 				continue;
 			size_t iQty = pBlock->m_Statics.GetStaticQty();
@@ -588,7 +594,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_NUDGE:
 		{
 			tchar szTmp[512];
-			strncpynull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
@@ -608,7 +614,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				CPointMap ptMove = pItem->GetTopPoint();
 				ptMove += ptNudge;
 				pItem->MoveToCheck( ptMove );
-				iCount++;
+				++iCount;
 			}
 
 			CWorldSearch AreaChar( ptCtr, iRadius );
@@ -693,7 +699,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_TILE:
 		{
 			tchar szTmp[256];
-			strncpynull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[16];		// Maximum parameters in one line
 			int iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
@@ -707,11 +713,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 					if ( ++iArg >= iArgQty )
 						iArg = 1;
 					CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(RES_GET_INDEX(piArgs[iArg])), nullptr, m_pChar);
-					ASSERT(pItem);
+                    if (!pItem)
+                        continue;
 					pItem->SetAttr( ATTR_MOVE_NEVER );
 					CPointMap ptCur((word)mx, (word)my, z, pt.m_map);
 					pItem->MoveToUpdate( ptCur );
-					iCount++;
+					++iCount;
 				}
 			}
 
@@ -770,7 +777,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	// What kind of animal.
 	if ( pChar->IsIndividualName())
 	{
-		sprintf(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_RESULT ), pChar->GetName(), pChar->Char_GetDef()->GetTradeName());
+		snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_RESULT), pChar->GetName(), pChar->Char_GetDef()->GetTradeName());
 		addObjMessage(pszTemp, pChar);
 	}
 
@@ -778,11 +785,11 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	CChar * pCharOwner = pChar->NPC_PetGetOwner();
 	if ( pCharOwner == nullptr )
 	{
-		sprintf(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_FREE ), pszHe, pszHis);
+		snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_FREE ), pszHe, pszHis);
 	}
 	else
 	{
-		sprintf(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER ), pszHe, ( pCharOwner == m_pChar ) ? g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER_YOU ) : pCharOwner->GetName());
+		snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER ), pszHe, ( pCharOwner == m_pChar ) ? g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER_YOU ) : pCharOwner->GetName());
 		// How loyal to master ?
 	}
 	addObjMessage(pszTemp, pChar );
@@ -793,7 +800,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 						g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_CONJURED) :
 						pChar->Food_GetLevelMessage(pCharOwner ? true : false, true);
 
-	sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_FOOD), pszHe, pszText);
+	snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_FOOD), pszHe, pszText);
 	addObjMessage(pszTemp, pChar);
 
 	return 0;
@@ -848,7 +855,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 	else
 	{
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_GOLD ),
-			(pItemVend->GetVendorPrice(-15) * pItem->GetAmount()), static_cast<lpctstr>(pItemVend->GetNameFull(true)));
+			(pItemVend->GetVendorPrice(-15,0) * pItem->GetAmount()), pItemVend->GetNameFull(true));
 	}
 
 	// Whats it made of ?
@@ -856,10 +863,10 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 	CItemBase * pItemDef = pItem->Item_GetDef();
 	ASSERT(pItemDef);
 
-	if ( iSkillLevel > 40 && pItemDef->m_BaseResources.size() > 0)
+	if ( (iSkillLevel > 40) && !pItemDef->m_BaseResources.empty())
 	{
 		tchar *pszTemp = Str_GetTemp();
-		strcpy(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_MADEOF ));
+		Str_CopyLimitNull(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_MADEOF ), STR_TEMPLENGTH);
 
 		pItemDef->m_BaseResources.WriteNames( pszTemp + strlen(pszTemp) );
 		SysMessage( pszTemp );
@@ -1003,9 +1010,9 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_CLOTHING:
 		case IT_JEWELRY:
 			fWeapon = false;
-			iHitsCur = pItem->m_itArmor.m_Hits_Cur;
-			iHitsMax = pItem->m_itArmor.m_Hits_Max;
-			len += sprintf( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DEF ), pItem->Armor_GetDefense());
+			iHitsCur = pItem->m_itArmor.m_dwHitsCur;
+			iHitsMax = pItem->m_itArmor.m_wHitsMax;
+			len += snprintf( pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DEF ), pItem->Armor_GetDefense());
 			break;
 		case IT_WEAPON_MACE_CROOK:
 		case IT_WEAPON_MACE_PICK:
@@ -1019,36 +1026,36 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_WEAPON_XBOW:
 		case IT_WEAPON_THROWING:
 			fWeapon = true;
-			iHitsCur = pItem->m_itWeapon.m_Hits_Cur;
-			iHitsMax = pItem->m_itWeapon.m_Hits_Max;
-			len += sprintf( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DAM ), pItem->Weapon_GetAttack());
+			iHitsCur = pItem->m_itWeapon.m_dwHitsCur;
+			iHitsMax = pItem->m_itWeapon.m_wHitsMax;
+			len += snprintf( pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DAM ), pItem->Weapon_GetAttack());
 			break;
 		default:
 			SysMessageDefault( DEFMSG_ARMSLORE_UNABLE );
 			return -SKTRIG_QTY;
 	}
 
-	len += sprintf( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_REP ), pItem->Armor_GetRepairDesc());
+	len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_REP ), pItem->Armor_GetRepairDesc());
 
 	if ( iHitsCur <= 3 || iHitsMax <= 3 )
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_REP_0 ) );
+		len += Str_CopyLimitNull( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_REP_0 ), STR_TEMPLENGTH - len);
 	}
 
 	// Magical effects ?
 	if ( pItem->IsAttr(ATTR_MAGIC))
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_MAGIC ) );
+		len += Str_CopyLimitNull( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_MAGIC ), STR_TEMPLENGTH - len);
 	}
 	else if ( pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER))
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_NEWBIE ) );
+		len += Str_CopyLimitNull( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_NEWBIE ), STR_TEMPLENGTH - len);
 	}
 
 	// Repairable ?
 	if ( ! pItem->Armor_IsRepairable())
 	{
-		len += strcpylen( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_REPAIR ) );
+		len += Str_CopyLimitNull( pszTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEM_REPAIR ), STR_TEMPLENGTH - len);
 	}
 
 	// Poisoned ?
@@ -1057,7 +1064,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		uint iLevel = (uint)IMulDiv( pItem->m_itWeapon.m_poison_skill, CountOf(sm_szPoisonMessages), 100 );
 		if ( iLevel >= CountOf(sm_szPoisonMessages))
 			iLevel = CountOf(sm_szPoisonMessages) - 1;
-		len += sprintf( pszTemp+len, " %s", sm_szPoisonMessages[iLevel] );
+		len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
 	SysMessage(pszTemp);
@@ -1127,7 +1134,7 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 		iDexEntry = CountOf( sm_szDexEval )-1;
 
 	tchar * pszTemp = Str_GetTemp();
-	sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_RESULT), pChar->GetName(), sm_szStrEval[iStrEntry], sm_szDexEval[iDexEntry]);
+	snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_RESULT), pChar->GetName(), sm_szStrEval[iStrEntry], sm_szDexEval[iDexEntry]);
 	addObjMessage(pszTemp, pChar);
 
 	if ( pChar->IsStatFlag(STATF_CONJURED) )
@@ -1170,20 +1177,20 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	tchar * pszTemp = Str_GetTemp();
 	if ( pCorpse->m_itCorpse.m_carved )
 	{
-		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_CARVE_1), pCorpse->GetName() );
+		int len = snprintf( pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_CARVE_1), pCorpse->GetName() );
 		if ( pName )
-			sprintf( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_CARVE_2), pName );
+			snprintf( pszTemp + len, STR_TEMPLENGTH - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_CARVE_2), pName );
 		else
-			strcpy( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME) );
+			Str_CopyLimitNull( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME), STR_TEMPLENGTH - len);
 
 	}
 	else if ( pCorpse->GetTimeStamp() > 0 )
 	{
-		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -g_World.GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
+		int len = snprintf( pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
 		if ( pName )
-			sprintf( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
+			snprintf( pszTemp + len, STR_TEMPLENGTH - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
-			strcpy( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME) );
+			Str_CopyLimitNull( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME), STR_TEMPLENGTH - len );
 	}
 	SysMessage( pszTemp );
 	return iSkillLevel;
@@ -1223,7 +1230,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 		case IT_POTION:
 			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Poison )
 			{
-				iPoisonLevel = pItem->m_itPotion.m_skillquality;
+				iPoisonLevel = pItem->m_itPotion.m_dwSkillQuality;
 			}
 			break;
 		case IT_FRUIT:
@@ -1236,7 +1243,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 		case IT_WEAPON_SWORD:		// 13 =
 		case IT_WEAPON_FENCE:		// 14 = can't be used to chop trees. (make kindling)
 		case IT_WEAPON_AXE:
-			// pItem->m_itWeapon.m_poison_skill = pPoison->m_itPotion.m_skillquality / 10;
+			// pItem->m_itWeapon.m_poison_skill = pPoison->m_itPotion.m_SkillQuality / 10;
 			iPoisonLevel = pItem->m_itWeapon.m_poison_skill * 10;
 			break;
 		default:
@@ -1299,14 +1306,14 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	m_Targ_UID = pObj->GetUID();	// keep for 'last target' info.
 
 	// did we target a scripted skill ?
-	if ( g_Cfg.IsSkillFlag( m_tmSkillTarg.m_Skill, SKF_SCRIPTED ) )
+	if ( g_Cfg.IsSkillFlag( m_tmSkillTarg.m_iSkill, SKF_SCRIPTED ) )
 	{
 		// is this scripted skill a targeted skill ?
-		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(m_tmSkillTarg.m_Skill);
-		if (pSkillDef != nullptr && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
+		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(m_tmSkillTarg.m_iSkill);
+		if (pSkillDef && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
 			m_pChar->m_Act_UID = m_Targ_UID;
-			return m_pChar->Skill_Start( m_tmSkillTarg.m_Skill );
+			return m_pChar->Skill_Start( m_tmSkillTarg.m_iSkill );
 		}
 		else
 		{
@@ -1315,7 +1322,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	}
 
 	// targetting what skill ?
-	switch ( m_tmSkillTarg.m_Skill )
+	switch ( m_tmSkillTarg.m_iSkill )
 	{
 		// Delayed response type skills.
 	case SKILL_BEGGING:
@@ -1334,7 +1341,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	case SKILL_FORENSICS:
 	case SKILL_TASTEID:
 		m_pChar->m_Act_UID = m_Targ_UID;
-		return( m_pChar->Skill_Start( m_tmSkillTarg.m_Skill ));
+		return( m_pChar->Skill_Start( m_tmSkillTarg.m_iSkill ));
 
 	case SKILL_PROVOCATION:
 		if ( !pObj->IsChar() )
@@ -1380,7 +1387,7 @@ bool CClient::OnTarg_Skill_Poison( CObjBase * pObj )
 		return false;
 	m_pChar->m_Act_Prv_UID = m_Targ_UID;	// poison this
 	m_pChar->m_Act_UID = pObj->GetUID();				// with this poison
-	return( m_pChar->Skill_Start( SKILL_POISONING ));
+	return m_pChar->Skill_Start( SKILL_POISONING );
 }
 
 bool CClient::OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt )
@@ -1393,7 +1400,7 @@ bool CClient::OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt )
 	m_pChar->m_Act_UID = m_Targ_UID;	// Who to herd?
 	m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID; // crook ?
 
-	return( m_pChar->Skill_Start( SKILL_HERDING ));
+	return m_pChar->Skill_Start( SKILL_HERDING );
 }
 
 bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
@@ -1402,7 +1409,11 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	// The client player has targeted a spell.
 	// CLIMODE_TARG_SKILL_MAGERY
 
-	const CSpellDef * pSpell	= g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
+    const CChar *pTargChar = dynamic_cast<CChar*>(pObj);
+    if (pTargChar && pTargChar->Can(CAN_C_NONSELECTABLE))
+        return false;
+
+	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_iSpell );
 	if ( ! pSpell )	
 		return false;
 
@@ -1427,7 +1438,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 				SysMessageDefault( DEFMSG_MAGERY_2 );
 				return true;
 			}
-			CChar * pChar = dynamic_cast<CChar*>(pObj);
+			CChar * pChar = static_cast<CChar*>(pObj);
 			if ( pSpell->IsSpellType( SPELLFLAG_TARG_NO_PLAYER ) && pChar->m_pPlayer )
 			{
 				SysMessageDefault( DEFMSG_MAGERY_7 );
@@ -1447,15 +1458,15 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 		}
 	}
 
-	m_pChar->m_atMagery.m_Spell			= m_tmSkillMagery.m_Spell;
-	m_pChar->m_atMagery.m_SummonID		= m_tmSkillMagery.m_SummonID;
+	m_pChar->m_atMagery.m_iSpell			= m_tmSkillMagery.m_iSpell;
+	m_pChar->m_atMagery.m_iSummonID		= m_tmSkillMagery.m_iSummonID;
 
 	m_pChar->m_Act_Prv_UID				= m_Targ_Prv_UID;	// Source (wand or you?)
-	m_pChar->m_Act_UID					= pObj ? (dword) pObj->GetUID() : UID_CLEAR ;
+	m_pChar->m_Act_UID					= pObj ? pObj->GetUID() : CUID(UID_CLEAR);
 	m_pChar->m_Act_p					= pt;
 	m_Targ_p							= pt;
 
-	if ( IsSetMagicFlags( MAGICF_PRECAST ) && !pSpell->IsSpellType( SPELLFLAG_NOPRECAST ) && m_pChar->IsClient() )
+	if ( IsSetMagicFlags( MAGICF_PRECAST ) && !pSpell->IsSpellType( SPELLFLAG_NOPRECAST ) && m_pChar->IsClientActive() )
 	{
 		if ( g_Cfg.IsSkillFlag(m_pChar->m_Act_SkillCurrent, SKF_MAGIC) )
 		{
@@ -1463,14 +1474,14 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 			return false;
 		}
 
-		return( m_pChar->Spell_CastDone() );
+		return m_pChar->Spell_CastDone();
 	}
 
 	int skill;
 	if (!pSpell->GetPrimarySkill(&skill, nullptr))
 		return false;
 
-	return( m_pChar->Skill_Start((SKILL_TYPE)skill));
+	return m_pChar->Skill_Start((SKILL_TYPE)skill);
 }
 
 bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
@@ -1552,7 +1563,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	CItemContainer * pPack = pCharPet->GetPack();
 	if ( pPack )
 	{
-		if ( ! pPack->IsEmpty() )
+		if ( ! pPack->IsContainerEmpty() )
 		{
 			pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG_UNLOAD ) );
 			return false;
@@ -1570,7 +1581,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	if ( IsSetOF(OF_PetSlots) )
 	{
 		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true);
-		m_pChar->FollowersUpdate(pCharPet,(-maximum(1, iFollowerSlots)));
+		m_pChar->FollowersUpdate(pCharPet,(-maximum(0, iFollowerSlots)));
 	}
 
 	pCharMaster->GetBank()->ContentAdd( pPetItem );
@@ -1600,7 +1611,7 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
         return false;
     }
 
-	pDeed->Delete();	// consume the deed.
+	pDeed->ConsumeAmount(1);	// consume the deed.
 	return true;
 }
 
@@ -1660,7 +1671,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
     else
     {
         trigtype = ITRIG_TARGON_GROUND;
-        m_Targ_UID.ClearUID();
+        m_Targ_UID.InitUID();
         if ( !IsSetOF(OF_NoTargTurn) && pt.IsValidPoint() )
             m_pChar->UpdateDir(pt);
     }
@@ -1698,7 +1709,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				return false;
 
 			// Check if we have clear LOS to target location and also if it's not over a wall (to prevent hit chars on the other side of the wall)
-			if ( m_pChar->CanSeeLOS(pt, nullptr, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS) && !g_World.IsItemTypeNear(pt, IT_WALL, 0, true) )
+			if ( m_pChar->CanSeeLOS(pt, nullptr, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS) && !CWorldMap::IsItemTypeNear(pt, IT_WALL, 0, true) )
 			{
 				pItemUse->SetAttr(ATTR_MOVE_NEVER);
 				pItemUse->MoveToUpdate(pt);
@@ -1833,6 +1844,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_JUNK:
 			SysMessageDefault( DEFMSG_ITEMUSE_JUNK_REACH );
 			return false;
+
 		case IT_FOLIAGE:
 		case IT_TREE:
 			// Just targetted a tree type
@@ -1843,7 +1855,6 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return( m_pChar->Skill_Start( SKILL_LUMBERJACKING ));
 
 		case IT_LOG:
-
 			if ( ! m_pChar->CanUse( pItemTarg, true ))
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_LOG_UNABLE );
@@ -1854,7 +1865,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
 				{
 					CScriptTriggerArgs args("sm_carpentry");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+					if ( m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &args) == TRIGRET_RET_TRUE )
 						return true;
 				}
 				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_carpentry" ));
@@ -1862,11 +1873,15 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			if ( pItemUse->IsSameDispID( ITEMID_DAGGER ))
 			{
 				// set the target item
-				m_Targ_UID = pItemTarg->GetUID();
+                if (pItemTarg)
+                    m_Targ_UID = pItemTarg->GetUID();
+                else
+                    m_Targ_UID.InitUID();
+
 				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
 				{
 					CScriptTriggerArgs args("sm_bowcraft");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+					if ( m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &args) == TRIGRET_RET_TRUE )
 						return true;
 				}
 				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_bowcraft" ) );
@@ -1875,7 +1890,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return false;
 
 		case IT_FISH:
-			if ( ! m_pChar->CanUse( pItemTarg, true ))
+			if ( !pItemTarg || !m_pChar->CanUse(pItemTarg, true) )
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_FISH_UNABLE );
 				return false;
@@ -1891,7 +1906,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_CORPSE:
 			if ( ! m_pChar->CanUse( pItemTarg, false ))
 				return false;
-			m_pChar->Use_CarveCorpse( dynamic_cast <CItemCorpse*>( pItemTarg ));
+			m_pChar->Use_CarveCorpse( dynamic_cast <CItemCorpse*>( pItemTarg ), pItemUse);
 			return true;
 
 		case IT_FRUIT:
@@ -1900,13 +1915,13 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			if ( ! m_pChar->CanUse( pItemTarg, true ))
 				return false;
 			{
-			CResourceID defaultseed = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTSEED" );
-			pItemTarg->SetDispID((ITEMID_TYPE)(defaultseed.GetResIndex()));
-			pItemTarg->SetType(IT_SEED);
-			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, "%s seed", pItemTarg->GetName());
-			pItemTarg->SetName(pszTemp);
-			pItemTarg->Update();
+				CResourceID defaultseed = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTSEED" );
+				pItemTarg->SetDispID((ITEMID_TYPE)(defaultseed.GetResIndex()));
+				pItemTarg->SetType(IT_SEED);
+				tchar *pszTemp = Str_GetTemp();
+				snprintf(pszTemp, STR_TEMPLENGTH, "%s seed", pItemTarg->GetName());
+				pItemTarg->SetName(pszTemp);
+				pItemTarg->Update();
 			}
 			return true;
 
@@ -1939,12 +1954,44 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		break;
 
 	case IT_BANDAGE:	// SKILL_HEALING, or SKILL_VETERINARY
-		// Use bandages on some creature.
-		if ( pCharTarg == nullptr )
+		// Use bandages on some creatures or on a corpse item.
+		if ( pCharTarg == nullptr && pItemTarg == nullptr )
 			return false;
-		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
-		m_pChar->m_Act_UID = m_Targ_UID;
-		return m_pChar->Skill_Start( (pCharTarg->m_pNPC && (pCharTarg->GetNPCBrain() == NPCBRAIN_ANIMAL)) ? SKILL_VETERINARY : SKILL_HEALING );
+
+		if (pItemTarg)
+		{
+			if (pItemTarg->GetType() == IT_CORPSE)
+			{
+				CItemCorpse* pCorpse = static_cast<CItemCorpse*>(pItemTarg);
+				pCharTarg = pCorpse->m_uidLink.CharFind();
+				if (pCharTarg == nullptr || pCharTarg->IsNPC())
+					return false;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID; //The bandage item
+		m_pChar->m_Act_UID = m_Targ_UID;  //The target.
+
+		/*An NPC will be healed by the Veterinary skill if the following conditions are satisfied:
+		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)	
+		*/
+		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0 && 
+			!pCharTarg->IsPlayableCharacter() )
+		{
+			switch (pCharTarg->GetNPCBrain())
+			{
+			case NPCBRAIN_ANIMAL:
+			case NPCBRAIN_DRAGON:
+			case NPCBRAIN_MONSTER:
+				return m_pChar->Skill_Start(SKILL_VETERINARY);
+			default:
+				return m_pChar->Skill_Start(SKILL_HEALING);
+			}
+		}
+		return m_pChar->Skill_Start(SKILL_HEALING);
 
 	case IT_SEED:
 		return m_pChar->Use_Seed( pItemUse, &pt );
@@ -2006,7 +2053,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		CItem * pKey = nullptr;
 		bool fLockable = pItemTarg->IsTypeLockable();
 
-		if ( fLockable && pItemTarg->m_itContainer.m_UIDLock )
+		if ( fLockable && pItemTarg->m_itContainer.m_UIDLock.IsValidUID())
 		{
 			// try all the keys on the object.
 			pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_UIDLock );
@@ -2024,7 +2071,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				}
 			}
 
-			if ( ! fLockable || ! pItemTarg->m_itContainer.m_UIDLock )
+			if ( ! fLockable || ! pItemTarg->m_itContainer.m_UIDLock.IsValidUID())
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOLOCK );
 			else
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOKEY );
@@ -2116,8 +2163,10 @@ static lpctstr const sm_Txt_LoomUse[] =
 			// throw away what was on here before
 			SysMessageDefault( DEFMSG_ITEMUSE_LOOM_REMOVE );
 			CItem * pItemCloth = CItem::CreateTemplate( ClothID, nullptr, m_pChar );
-			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
-			pItemTarg->m_itLoom.m_ClothQty = 0;
+            if (!pItemCloth)
+                return false;
+			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_iClothQty );
+			pItemTarg->m_itLoom.m_iClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.Clear();
 			m_pChar->ItemBounce( pItemCloth );
 			return true;
@@ -2126,23 +2175,23 @@ static lpctstr const sm_Txt_LoomUse[] =
 		pItemTarg->m_itLoom.m_ridCloth = CResourceIDBase(RES_ITEMDEF, pItemUse->GetDispID());
 
 		int iUsed = 0;
-		int iNeed = CountOf( sm_Txt_LoomUse ) - 1;
-		int iHave = pItemTarg->m_itLoom.m_ClothQty;
+		int iNeed = int(CountOf( sm_Txt_LoomUse ) - 1);
+		int iHave = pItemTarg->m_itLoom.m_iClothQty;
 		if ( iHave < iNeed )
 		{
 			iNeed -= iHave;
 			iUsed = pItemUse->ConsumeAmount( (word)iNeed );
 		}
 
-		if ( (uint)(iHave  + iUsed) < (CountOf( sm_Txt_LoomUse ) - 1) )
+		if ( (iHave + iUsed) < int(CountOf( sm_Txt_LoomUse ) - 1) )
 		{
-			pItemTarg->m_itLoom.m_ClothQty += iUsed;
-			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );
+			pItemTarg->m_itLoom.m_iClothQty += iUsed;
+			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_iClothQty ] );
 		}
 		else
 		{
 			SysMessage( sm_Txt_LoomUse[ CountOf( sm_Txt_LoomUse ) - 1 ] );
-			pItemTarg->m_itLoom.m_ClothQty = 0;
+			pItemTarg->m_itLoom.m_iClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.Clear();
 
 /*
@@ -2352,7 +2401,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		return false;
 	}
 
-	if ( !pChar->IsClient() )
+	if ( !pChar->IsClientActive() )
 	{
 		SysMessageDefault( DEFMSG_PARTY_NONPCADD );
 		return false;
@@ -2373,7 +2422,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		}
 	}
 
-	if (IsPriv(PRIV_GM) && (pChar->GetClient()->GetPrivLevel() < GetPrivLevel()))
+	if (IsPriv(PRIV_GM) && (pChar->GetClientActive()->GetPrivLevel() < GetPrivLevel()))
 	{
 		CPartyDef::AcceptEvent(pChar, m_pChar->GetUID(), true);
 		return true;
@@ -2398,7 +2447,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	}
 
 	CVarDefCont * pTagInvitetime = m_pChar->m_TagDefs.GetKey("PARTY_LASTINVITETIME");
-	if ( pTagInvitetime && (g_World.GetTimeDiff(pTagInvitetime->GetValNum()) > 0) )
+	if ( pTagInvitetime && (CWorldGameTime::GetCurrentTime().GetTimeDiff(pTagInvitetime->GetValNum()) <= 0) )
 	{
 		SysMessageDefault( DEFMSG_PARTY_ADD_TOO_FAST );
 		return false;
@@ -2412,16 +2461,16 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	}
 
 	tchar * sTemp = Str_GetTemp();
-	sprintf(sTemp, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE ), pChar->GetName());
+	snprintf(sTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE ), pChar->GetName());
 	m_pChar->SysMessage( sTemp );
 	sTemp = Str_GetTemp();
-	sprintf(sTemp, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE_TARG ), m_pChar->GetName());
+	snprintf(sTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE_TARG ), m_pChar->GetName());
 	pChar->SysMessage( sTemp );
 
 	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
-	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
+	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", CWorldGameTime::GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
 
-	new PacketPartyInvite(pChar->GetClient(), m_pChar);
+	new PacketPartyInvite(pChar->GetClientActive(), m_pChar);
 
 	// Now up to them to decide to accept.
 	return true;

@@ -1,18 +1,22 @@
 /*
-* @file CEncrypt.h
+* @file CCrypto.h
 * @brief Support for login encryption and MD5 hashing.
 */
 
 #ifndef _INC_CCRYPT_H
 #define _INC_CCRYPT_H
 
-#include "../CScript.h"
+#include "../common.h"
+#include <vector>
 
 #define CLIENT_END 0x00000001
+
 
 typedef struct keyInstance*		tf_keyInstance;
 typedef struct cipherInstance*	tf_cipherInstance;
 class CMD5;
+class CScript;
+
 
 enum CONNECT_TYPE	// What type of client connection is this ?
 {
@@ -47,15 +51,15 @@ enum ENCRYPTION_TYPE
 
 class CHuffman
 {
-private:
-	static const word sm_xCompress_Base[COMPRESS_TREE_SIZE];
 public:
-	static const char *m_sClassName;
-	
-	static uint Compress( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
+    static const char* m_sClassName;
+    CHuffman() = default;
 
-public:
-	CHuffman() { };
+    static uint Compress(byte* pOutput, const byte* pInput, uint outLen, uint inLen);
+
+private:
+	static const word sm_xCompress_Base[COMPRESS_TREE_SIZE];	
+
 private:
 	CHuffman(const CHuffman& copy);
 	CHuffman& operator=(const CHuffman& other);
@@ -106,8 +110,9 @@ protected:
 	//static const word packet_size[0xde];
 
 public:
-	static void LoadKeyTable(CScript & s);
 	static std::vector<CCryptoClientKey> client_keys;
+
+	static void LoadKeyTable(CScript & s);
 	static void addNoCryptKey(void);
 
 	// --------------- Generic -----------------------------------
@@ -158,9 +163,9 @@ private:
 protected:
 	// -------------------- MD5 ------------------------------
 	#define MD5_RESET 0x0F
-	CMD5 * md5_engine;
-	uint md5_position;
-	byte md5_digest[16];
+	CMD5 * m_md5_engine;
+	uint m_md5_position;
+	byte m_md5_digest[16];
 protected:
 	bool EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	void InitMD5(byte * ucInitialize);
@@ -182,14 +187,14 @@ private:
 	bool SetEncryptionType( ENCRYPTION_TYPE etWho );
 
 public:
-	char* WriteClientVer( char * pStr ) const;
-	bool SetClientVerEnum( dword iVer, bool bSetEncrypt = true );
-	bool SetClientVerIndex( size_t iVer, bool bSetEncrypt = true );
+	char* WriteClientVer( char * pcStr, uint uiBufLen) const;
+	bool SetClientVerEnum( dword iVer, bool fSetEncrypt = true );
+	bool SetClientVerIndex( size_t iVer, bool fSetEncrypt = true );
 	void SetClientVer( const CCrypto & crypt );
-	bool SetClientVer( lpctstr pszVersion );
-	static int GetVerFromString( lpctstr pszVersion );
+	bool SetClientVer( lpctstr ptcVersion );
+	static int GetVerFromString( lpctstr ptcVersion );
 	static int GetVerFromNumber( dword maj, dword min, dword rev, dword pat );
-	static char* WriteClientVerString( dword iClientVersion, char * pStr );
+	static char* WriteClientVerString( dword iClientVersion, char * pcStr, uint uiBufLen );
 
 public:
 	dword GetClientVer() const;
@@ -207,13 +212,13 @@ private:
 	CCrypto& operator=(const CCrypto& other);
 
 public:
-	bool Init( dword dwIP, byte * pEvent, uint inLen, bool isclientKr = false );
+	bool Init( dword dwIP, const byte * pEvent, uint inLen, bool isClientKR = false );
 	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
 	bool Decrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 	bool Encrypt( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
 protected:
-	bool LoginCryptStart( dword dwIP, byte * pEvent, uint inLen );
-	bool GameCryptStart( dword dwIP, byte * pEvent, uint inLen );
+	bool LoginCryptStart( dword dwIP, const  byte * pEvent, uint inLen );
+	bool GameCryptStart( dword dwIP, const byte * pEvent, uint inLen );
 	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, uint outLen, uint inLen );
    
 };

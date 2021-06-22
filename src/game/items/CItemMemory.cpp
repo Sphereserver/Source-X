@@ -5,25 +5,25 @@
 #include "CItemStone.h"
 
 CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItem( ITEMID_MEMORY, pItemDef )
+    CTimedObject(PROFILE_ITEMS),
+	CItem( ITEMID_MEMORY, pItemDef )
 {
 	UNREFERENCED_PARAMETER(id);
 }
 
 CItemMemory::~CItemMemory()
 {
-	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
 word CItemMemory::SetMemoryTypes( word wType )	// For memory type objects.
 {
-	SetHueAlt( wType );
+	SetHueQuick( wType );
 	return( wType );
 }
 
 word CItemMemory::GetMemoryTypes() const
 {
-	return( GetHueAlt());	// MEMORY_FIGHT
+	return GetHue();	// MEMORY_FIGHT
 }
 
 CItemStone *CItemMemory::Guild_GetLink()
@@ -137,7 +137,7 @@ int CItemMemory::FixWeirdness()
 	if ( IsMemoryTypes(MEMORY_GUARD) && !m_uidLink.ObjFind() )
 	{
 		SetAttr(ATTR_DECAY);
-		SetTimeout(0);
+		_SetTimeout(0);
 	}
 
 	return 0;

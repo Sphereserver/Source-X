@@ -46,11 +46,11 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	const char *port = nullptr;
 	if ( (port = strchr(host, ':')) != nullptr )
 	{
-		char *pszTemp = Str_GetTemp();
-		strcpy(pszTemp, host);
-		*(strchr(pszTemp, ':')) = 0;
-		portnum = ATOI(port+1);
-		host = pszTemp;
+		char *pcTemp = Str_GetTemp();
+		Str_CopyLimitNull(pcTemp, host, STR_TEMPLENGTH);
+		*(strchr(pcTemp, ':')) = 0;
+		portnum = atoi(port+1);
+		host = pcTemp;
 	}
 
 	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
@@ -89,94 +89,94 @@ void CDataBase::Close()
 
 bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 {
-	ADDTOCALLSTACK("CDataBase::query");
-	mapQueryResult.Empty();
-	mapQueryResult.SetNumNew("NUMROWS", 0);
+    ADDTOCALLSTACK("CDataBase::query");
+    mapQueryResult.Clear();
+    mapQueryResult.SetNumNew("NUMROWS", 0);
+    
+    if ( !isConnected() )
+        return false;
+        
+    int result;
+    MYSQL_RES * m_res = nullptr;
+    const char * myErr = nullptr;
 
-	if ( !isConnected() )
-		return false;
-
-	int result;
-	MYSQL_RES * m_res = nullptr;
-	const char * myErr = nullptr;
-
-	{
-		// connection can only handle one query at a time, so we need to lock until we
-		// finish the query -and- retrieve the results
-		SimpleThreadLock lock(m_connectionMutex);
-		result = mysql_query(_myData, query);
-
-		if ( result == 0 )
-		{
-			m_res = mysql_store_result(_myData);
-			if ( m_res == nullptr )
-				return false;
-		}
-		else
-		{
-			myErr = mysql_error(_myData);
-		}
-	}
-
-	if ( m_res != nullptr )
-	{
-		MYSQL_FIELD * fields = mysql_fetch_fields(m_res);
-		int num_fields = mysql_num_fields(m_res);
-
-		mapQueryResult.SetNum("NUMROWS", mysql_num_rows(m_res));
-		mapQueryResult.SetNum("NUMCOLS", num_fields);
-
-		char	key[12];
-		char	**trow = nullptr;
-		int		rownum = 0;
-		char	*zStore = Str_GetTemp();
-		while ( (trow = mysql_fetch_row(m_res)) != nullptr )
-		{
-			for ( int i = 0; i < num_fields; ++i )
-			{
-				char *z = trow[i];
-				if ( !rownum )
-				{
-					mapQueryResult.SetStr(ITOA(i, key, 10), true, z);
-					mapQueryResult.SetStr(fields[i].name, true, z);
-				}
-
-				sprintf(zStore, "%d.%d", rownum, i);
-				mapQueryResult.SetStr(zStore, true, z);
-				sprintf(zStore, "%d.%s", rownum, fields[i].name);
-				mapQueryResult.SetStr(zStore, true, z);
-			}
-			++rownum;
-		}
-
-		mysql_free_result(m_res);
-		return true;
-	}
-	else
-	{
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR,
-			"MySQL query \"%s\" failed due to \"%s\"\n",
-			query, ( *myErr ? myErr : "unknown reason"));
-	}
-
-	if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
-		Close();
-
-	return false;
+    {
+        /*
+         * connection can only handle one query at a time, so we need to lock until we
+         * finish the query -and- retrieve the results
+         */
+        SimpleThreadLock lock(m_connectionMutex);
+        result = mysql_query(_myData, query);
+        
+        if ( result == 0 )
+        {
+            m_res = mysql_store_result(_myData);
+            if ( m_res == nullptr )
+                return false;
+        }
+        else
+        {
+            myErr = mysql_error(_myData);
+        }
+    }
+    
+    if ( m_res != nullptr )
+    {
+        MYSQL_FIELD * fields = mysql_fetch_fields(m_res);
+        int num_fields = mysql_num_fields(m_res);
+        
+        mapQueryResult.SetNum("NUMROWS", mysql_num_rows(m_res));
+        mapQueryResult.SetNum("NUMCOLS", num_fields);
+        
+        char key[12];
+        char **trow = nullptr;
+        int rownum = 0;
+        char *zStore = Str_GetTemp();
+        char empty = (char)0;
+        while ( (trow = mysql_fetch_row(m_res)) != nullptr )
+        {
+            for ( int i = 0; i < num_fields; ++i )
+            {
+                char *z = trow[i];
+                if (z == nullptr) //We need to check if the row empty, and return char 0 as return, because SetStr clean up \0 chars from vardef and causes the Sphere crash.
+                    z = &empty;
+                    
+                if ( !rownum )
+                {
+                    mapQueryResult.SetStr(Str_FromI_Fast(i, key, sizeof(key), 10), true, z);
+                    mapQueryResult.SetStr(fields[i].name, true, z);
+                }
+            
+                snprintf(zStore, STR_TEMPLENGTH, "%d.%d", rownum, i);
+                mapQueryResult.SetStr(zStore, true, z);
+                snprintf(zStore, STR_TEMPLENGTH, "%d.%s", rownum, fields[i].name);
+                mapQueryResult.SetStr(zStore, true, z);
+            }
+            ++rownum;
+        }
+        mysql_free_result(m_res);
+        return true;
+    }
+    else
+    {
+        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
+    }
+    
+    if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
+        Close();
+        
+    return false;
 }
 
 bool __cdecl CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::queryf");
 	TemporaryString tsBuf;
-	tchar* pszBuf = static_cast<tchar *>(tsBuf);
 	va_list	marker;
-
 	va_start(marker, fmt);
-	vsnprintf(pszBuf, tsBuf.realLength(), fmt, marker);
+	vsnprintf(tsBuf.buffer(), tsBuf.capacity(), fmt, marker);
 	va_end(marker);
-
-	return this->query(pszBuf, mapQueryResult);
+	return this->query(tsBuf, mapQueryResult);
 }
 
 bool CDataBase::exec(const char *query)
@@ -219,14 +219,13 @@ bool __cdecl CDataBase::execf(char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::execf");
 	TemporaryString tsBuf;
-	tchar* pszBuf = static_cast<tchar *>(tsBuf);
 	va_list	marker;
 
 	va_start(marker, fmt);
-	vsnprintf(pszBuf, tsBuf.realLength(), fmt, marker);
+	vsnprintf(tsBuf.buffer(), tsBuf.capacity(), fmt, marker);
 	va_end(marker);
 
-	return this->exec(pszBuf);
+	return this->exec(tsBuf);
 }
 
 bool CDataBase::addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery)
@@ -253,9 +252,9 @@ void CDataBase::addQueryResult(CSString & theFunction, CScriptTriggerArgs * theR
 	m_QueryArgs.push(FunctionArgsPair_t(theFunction, theResult));
 }
 
-bool CDataBase::OnTick()
+bool CDataBase::_OnTick()
 {
-	ADDTOCALLSTACK("CDataBase::OnTick");
+	ADDTOCALLSTACK("CDataBase::_OnTick");
 	static int tickcnt = 0;
 	EXC_TRY("Tick");
 
@@ -347,10 +346,10 @@ lpctstr const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 	nullptr
 };
 
-bool CDataBase::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CDataBase::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CDataBase::r_GetRef");
-	UNREFERENCED_PARAMETER(pszKey);
+	UNREFERENCED_PARAMETER(ptcKey);
 	UNREFERENCED_PARAMETER(pRef);
 	return false;
 }
@@ -361,10 +360,10 @@ bool CDataBase::r_LoadVal(CScript & s)
 	UNREFERENCED_PARAMETER(s);
 	return false;
 /*
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 	EXC_TRY("LoadVal");
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 
 	switch ( index )
 	{
@@ -382,8 +381,10 @@ bool CDataBase::r_LoadVal(CScript & s)
 */
 }
 
-bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
@@ -394,20 +395,20 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 		return true;
 	}
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case DBO_AEXECUTE:
 		case DBO_AQUERY:
 			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE(pszKey);
+				ptcKey += strlen(sm_szLoadKeys[index]);
+				GETNONWHITESPACE(ptcKey);
 				sVal.FormatVal(0);
 
-				if ( pszKey[0] != '\0' )
+				if ( ptcKey[0] != '\0' )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs )) != 2)
+					if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs )) != 2)
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -428,16 +429,16 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 
 		case DBO_ESCAPEDATA:
 		{
-			pszKey += strlen(sm_szLoadKeys[index]);
-			GETNONWHITESPACE(pszKey);
+			ptcKey += strlen(sm_szLoadKeys[index]);
+			GETNONWHITESPACE(ptcKey);
 			sVal = "";
 
-			if ( pszKey[0] != '\0' )
+			if ( ptcKey[0] != '\0' )
 			{
 				tchar * escapedString = Str_GetTemp();
 
 				SimpleThreadLock lock(m_connectionMutex);
-				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, pszKey, (uint)(strlen(pszKey))) )
+				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, ptcKey, (uint)(strlen(ptcKey))) )
 				{
 					sVal = escapedString;
 				}
@@ -446,9 +447,9 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 
 		case DBO_ROW:
 		{
-			pszKey += strlen(sm_szLoadKeys[index]);
-			SKIP_SEPARATORS(pszKey);
-			sVal = m_QueryResult.GetKeyStr(pszKey);
+			ptcKey += strlen(sm_szLoadKeys[index]);
+			SKIP_SEPARATORS(ptcKey);
+			sVal = m_QueryResult.GetKeyStr(ptcKey, true);
 		} break;
 
 		default:
@@ -459,7 +460,7 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' [%p]\n", pszKey, static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' [%p]\n", ptcKey, static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }

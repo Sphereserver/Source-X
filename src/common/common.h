@@ -8,10 +8,13 @@
 
 
 #define SPHERE_DEF_PORT			2593
+
 #define SPHERE_FILE				"sphere"	// file name prefix
-#define SPHERE_TITLE			"SphereServer-eXperimental"
+#define SPHERE_TITLE			"SphereServer"
 #define SPHERE_SCRIPT			".scp"
+
 #define SCRIPT_MAX_LINE_LEN		4096		// default size.
+#define SCRIPT_MAX_SECTION_LEN	128
 
 
 #include <memory>   // for smart pointers
@@ -28,13 +31,19 @@
 #endif
 
 
-#define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
+#define _STRINGIFY_AUX(x)	#x
+#define STRINGIFY(x)		_STRINGIFY_AUX(x)
+
+#define CountOf(a)		(sizeof(a)/sizeof((a)[0]))
+
 
 #if __cplusplus >= 201703L  // is C++17 enabled?
     #define FALLTHROUGH [[fallthrough]]
+	#define NODISCARD	[[nodiscard]]
 #else
     #define FALLTHROUGH // fall through
     /* yep, the comment appears to silence the warning with GCC, dunno for clang */
+	#define NODISCARD
 #endif
 
 
@@ -43,41 +52,41 @@
 // MAKEWORD:  defined in minwindef.h (loaded my windows.h), so it's missing only on Linux.
 // MAKEDWORD: undefined even on Windows, it isn't in windows.h.
 // MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
-#define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
+#define MAKEDWORD(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
 
-#define IsNegative(c)		(((c) < 0)?1:0)
+#define IsNegative(c)			(((c) < 0) ? 1 : 0)
 
 //#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
-inline int IMulDiv(int a, int b, int c)
+inline int IMulDiv(int a, int b, int c) noexcept
 {
-	int ab = a*b;
+	const int ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 
 //#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
-inline llong IMulDivLL(llong a, llong b, llong c)
+inline llong IMulDivLL(llong a, llong b, llong c) noexcept
 {
-	llong ab = a*b;
+	const llong ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
-inline realtype IMulDivRT(realtype a, realtype b, realtype c)
+inline realtype IMulDivRT(realtype a, realtype b, realtype c) noexcept
 {
-	realtype ab = a*b;
+	const realtype ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 
 //#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
-inline int IMulDivDown(int a, int b, int c)
+inline int IMulDivDown(int a, int b, int c) noexcept
 {
 	return (a*b)/c;
 }
-inline llong IMulDivDownLL(llong a, llong b, llong c)
+inline llong IMulDivDownLL(llong a, llong b, llong c) noexcept
 {
 	return (a*b)/c;
 }
 
 //#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
-template<typename T> inline T sign(T n)
+template<typename T> inline T sign(T n) noexcept
 {
     static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
 	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
@@ -107,16 +116,5 @@ template<typename T> inline T sign(T n)
 	#endif
 #endif
 
-#ifdef UNICODE
-	#define IsDigit(c)			iswdigit((wint_t)c)
-	#define IsSpace(c)			iswspace((wint_t)c)
-	#define IsAlpha(c)			iswalpha((wint_t)c)
-	#define IsAlnum(c)			iswalnum((wint_t)c)
-#else
-	#define IsDigit(c)			isdigit((int)(c & 0xFF))
-	#define IsSpace(c)			isspace((int)(c & 0xFF))
-	#define IsAlpha(c)			isalpha((int)(c & 0xFF))
-	#define IsAlnum(c)			isalnum((int)(c & 0xFF))
-#endif
 
 #endif	// _INC_COMMON_H

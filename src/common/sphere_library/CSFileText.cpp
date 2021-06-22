@@ -39,7 +39,7 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
     // Open a text file.
     
 	if ( !ptcFilename )
-        ptcFilename = _strFileName.GetPtr();
+        ptcFilename = _strFileName.GetBuffer();
     else
         _strFileName = ptcFilename;
 
@@ -142,7 +142,7 @@ void CSFileText::Flush() const
 
 bool CSFileText::_IsEOF() const
 {
-    ADDTOCALLSTACK("CSFileText::_IsEOF");
+    //ADDTOCALLSTACK("CSFileText::_IsEOF");
 
     if ( !_IsFileOpen() )
         return true;
@@ -151,19 +151,35 @@ bool CSFileText::_IsEOF() const
 }
 bool CSFileText::IsEOF() const
 {
-    ADDTOCALLSTACK("CSFileText::IsEOF");
+    //ADDTOCALLSTACK("CSFileText::IsEOF");
     THREAD_SHARED_LOCK_RETURN(CSFileText::_IsEOF());
 }
 
+
+int _cdecl CSFileText::_Printf(lpctstr pFormat, ...)
+{
+    ADDTOCALLSTACK("CSFileText::_Printf");
+    ASSERT(pFormat);
+
+    va_list vargs;
+    va_start(vargs, pFormat);
+    int iRet = _VPrintf(pFormat, vargs);
+    va_end(vargs);
+
+    return iRet;
+}
 int _cdecl CSFileText::Printf( lpctstr pFormat, ... )
 {
     ADDTOCALLSTACK("CSFileText::Printf");
     ASSERT(pFormat);
 
+    THREAD_UNIQUE_LOCK_SET;
+
     va_list vargs;
     va_start( vargs, pFormat );
-    int iRet = VPrintf( pFormat, vargs );
+    int iRet = _VPrintf( pFormat, vargs );
     va_end( vargs );
+
     return iRet;
 }
 
@@ -202,27 +218,34 @@ tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
 tchar * CSFileText::ReadString( tchar * pBuffer, int sizemax )
 {
     ADDTOCALLSTACK("CSFileText::ReadString");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_ReadString(pBuffer, sizemax));
 }
 
-int CSFileText::VPrintf( lpctstr pFormat, va_list args )
+int CSFileText::_VPrintf( lpctstr pFormat, va_list args )
+{
+    ADDTOCALLSTACK("CSFileText::_VPrintf");
+    ASSERT(pFormat);
+
+    if ( !_IsFileOpen() )
+        return -1;
+
+    return vfprintf( _pStream, pFormat, args );
+}
+
+int CSFileText::VPrintf(lpctstr pFormat, va_list args)
 {
     ADDTOCALLSTACK("CSFileText::VPrintf");
     ASSERT(pFormat);
 
-    if ( !IsFileOpen() )
-        return -1;
-
-    THREAD_UNIQUE_LOCK_RETURN(vfprintf( _pStream, pFormat, args ));
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_VPrintf(pFormat, args));
 }
 
-bool CSFileText::Write( const void * pData, int iLen )
+bool CSFileText::_Write( const void * pData, int iLen )
 {
     // RETURN: 1 = success else fail.
-    ADDTOCALLSTACK("CSFileText::Write");
+    ADDTOCALLSTACK("CSFileText::_Write");
     ASSERT(pData);
 
-    THREAD_UNIQUE_LOCK_SET;
     if ( !_IsFileOpen() )
         return false;
 
@@ -240,20 +263,33 @@ bool CSFileText::Write( const void * pData, int iLen )
     return ( uiStatus == 1 );
 }
 
-bool CSFileText::WriteString( lpctstr pStr )
+bool CSFileText::Write(const void* pData, int iLen)
+{
+    // RETURN: 1 = success else fail.
+    ADDTOCALLSTACK("CSFileText::Write");
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Write(pData, iLen));
+}
+
+bool CSFileText::_WriteString( lpctstr pStr )
 {
     // RETURN: < 0 = failed.
-    ADDTOCALLSTACK("CSFileText::WriteString");
+    ADDTOCALLSTACK("CSFileText::_WriteString");
     ASSERT(pStr);
 
-    return Write( pStr, (int)strlen( pStr ) );
+    return _Write( pStr, (int)strlen( pStr ) );
+}
+
+bool CSFileText::WriteString(lpctstr pStr)
+{
+    ADDTOCALLSTACK("CSFileText::WriteString");
+    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_WriteString(pStr));
 }
 
 // CSFileText:: Mode operations.
 
 lpctstr CSFileText::_GetModeStr() const
 {
-    ADDTOCALLSTACK("CSFileText::GetModeStr");
+    ADDTOCALLSTACK("CSFileText::_GetModeStr");
     // end of line translation is crap. ftell and fseek don't work correctly when you use it.
     // fopen() args
     if ( IsBinaryMode())

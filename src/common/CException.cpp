@@ -1,16 +1,16 @@
 
-#include <stack>
-#include "../common/CLog.h"
-#include "../game/CObjBase.h"
-#include "../game/CServer.h"
-#include "../game/CWorld.h"
 #include "CException.h"
 
-
-#if !defined(_WIN32) && defined(_DEBUG)
-#include <sys/stat.h>
-#include <fcntl.h>
+#ifndef _WIN32
+#include <sys/wait.h>
+#include <csignal>
 #include <cstring>
+
+#include "../game/CServer.h"
+#include "../game/CWorld.h"
+
+#ifdef _DEBUG
+#include <fcntl.h>
 int IsDebuggerPresent(void)
 {
 	char buf[1024];
@@ -35,37 +35,61 @@ int IsDebuggerPresent(void)
 
 	return debugger_present;
 }
-#endif
+#endif // _DEBUG
+
+#endif // !_WIN32
+
+
+#ifdef _DEBUG
+void NotifyDebugger()
+{
+    if (IsDebuggerPresent())
+    {
 
 #ifdef _WIN32
-	int CSError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
-	{
-		//	PURPOSE:  copies error message text to a string
-		//
-		//	PARAMETERS:
-		//		lpszBuf - destination buffer
-		//		dwSize - size of buffer
-		//
-		//	RETURN VALUE:
-		//		destination buffer
+    #ifdef _MSC_VER
+        __debugbreak();
+    #else
+        std::abort();
+    #endif
+#else
+        std::raise(SIGINT);
+#endif
 
-		LPCVOID lpSource = nullptr;
-		va_list* Arguments = nullptr;
-		DWORD nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			lpSource,
-			dwError, LANG_NEUTRAL,
-			lpszError, nMaxError, Arguments );
+    }
+}
+#endif // _DEBUG
 
-		if (nChars > (DWORD)0)
-		{     // successful translation -- trim any trailing junk
-			DWORD index = nChars - 1;      // index of last character
-			while ( (lpszError[index] == '\n') || (lpszError[index] == '\r') )
-				lpszError[index--] = '\0';
-			nChars = index + 1;
-		}
 
-		return nChars;
-	}
+#ifdef _WIN32
+int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, uint nMaxError) // static
+{
+    //	PURPOSE:  copies error message text to a string
+    //
+    //	PARAMETERS:
+    //		lpszBuf - destination buffer
+    //		dwSize - size of buffer
+    //
+    //	RETURN VALUE:
+    //		destination buffer
+
+    LPCVOID lpSource = nullptr;
+    va_list* Arguments = nullptr;
+    DWORD nChars = ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        lpSource,
+        dwError, LANG_NEUTRAL,
+        lpszError, nMaxError, Arguments);
+
+    if (nChars > (DWORD)0)
+    {     // successful translation -- trim any trailing junk
+        DWORD index = nChars - 1;      // index of last character
+        while ((lpszError[index] == '\n') || (lpszError[index] == '\r'))
+            lpszError[index--] = '\0';
+        nChars = index + 1;
+    }
+
+    return nChars;
+}
 #endif
 
 bool CSError::GetErrorMessage( lptstr lpszError, uint uiMaxError ) const
@@ -127,20 +151,17 @@ bool CAssert::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 
 #ifdef _WIN32
 
-CException::CException(uint uCode, size_t pAddress) :
+CWinException::CWinException(uint uCode, size_t pAddress) :
 	CSError(LOGL_CRIT, uCode, "Exception"), m_pAddress(pAddress)
 {
 }
 
-CException::~CException()
+CWinException::~CWinException()
 {
 }
 
-bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
+bool CWinException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 {
-	UNREFERENCED_PARAMETER(nMaxError);
-	UNREFERENCED_PARAMETER(pnHelpContext);
-
 	lpctstr zMsg;
 	switch ( m_hError )
 	{
@@ -150,11 +171,11 @@ bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelp
 		case STATUS_INTEGER_DIVIDE_BY_ZERO:	zMsg = "Integer: Divide by Zero";	break;
 		case STATUS_STACK_OVERFLOW:			zMsg = "Stack Overflow";			break;
 		default:
-			sprintf(lpszError, "code=0x%x, (0x%" PRIxSIZE_T ")", m_hError, m_pAddress);
+			snprintf(lpszError, uiMaxError, "code=0x%x, (0x%" PRIxSIZE_T ")", m_hError, m_pAddress);
 			return true;
 	}
 
-	sprintf(lpszError, "\"%s\" (0x%" PRIxSIZE_T ")", zMsg, m_pAddress);
+	snprintf(lpszError, uiMaxError, "\"%s\" (0x%" PRIxSIZE_T ")", zMsg, m_pAddress);
 	return true;
 }
 
@@ -205,118 +226,116 @@ void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTER
 	size_t pAddr = (size_t)pData->ExceptionRecord->ExceptionAddress;
 	pAddr -= pCodeStart;
 
-	throw CException(id, pAddr);
+	throw CWinException(id, pAddr);
 }
 
 #endif // _WIN32 && !_DEBUG
 
 void SetExceptionTranslator()
 {
-#if defined(_WIN32) && !defined(_DEBUG)
+#if defined(_MSC_VER) && !defined(_DEBUG)
 	_set_se_translator( Sphere_Exception_Windows );
 #endif
 }
 
 #ifndef _WIN32
-	void _cdecl Signal_Hangup( int sig = 0 ) // If shutdown is initialized
-	{
-		UNREFERENCED_PARAMETER(sig);
-		
-		#ifdef THREAD_TRACK_CALLSTACK
-			static bool _Signal_Hangup_stack_printed = false;
-			if (!_Signal_Hangup_stack_printed)
-			{
-				StackDebugInformation::printStackTrace();
-				_Signal_Hangup_stack_printed = true;
-			}
-		#endif
-		
-		if ( !g_Serv.m_fResyncPause )
-			g_World.Save(true);
+void _cdecl Signal_Hangup(int sig = 0) // If shutdown is initialized
+{
+    UNREFERENCED_PARAMETER(sig);
 
-		g_Serv.SetExitFlag(SIGHUP);
-	}
-
-	void _cdecl Signal_Terminate( int sig = 0 ) // If shutdown is initialized
-	{
-		sigset_t set;
-
-		g_Log.Event( LOGL_FATAL, "Server Unstable: %s\n", strsignal(sig) );
-		#ifdef THREAD_TRACK_CALLSTACK
-			static bool _Signal_Terminate_stack_printed = false;
-			if (!_Signal_Terminate_stack_printed)
-			{
-				StackDebugInformation::printStackTrace();
-				_Signal_Terminate_stack_printed = true;
-			}
-		#endif
-
-		if ( sig )
-		{
-			signal( sig, &Signal_Terminate);
-			sigemptyset(&set);
-			sigaddset(&set, sig);
-			sigprocmask(SIG_UNBLOCK, &set, nullptr);
-		}
-
-		g_Serv.SetExitFlag(SIGABRT);
-		for (size_t i = 0; i < ThreadHolder::getActiveThreads(); ++i)
-			ThreadHolder::getThreadAt(i)->terminate(false);
-		//exit(EXIT_FAILURE);
-	}
-
-	void _cdecl Signal_Break( int sig = 0 )		// signal handler attached when using secure mode
-	{
-// Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
-//#ifdef _DEBUG
-//		if (IsDebuggerPresent())
-//			return;		// do not block this signal, so that the debugger can catch it
-//#endif
-
-		g_Log.Event( LOGL_FATAL, "Secure Mode prevents CTRL+C\n" );
-
-		sigset_t set;
-		if ( sig )
-		{
-			signal( sig, &Signal_Break );
-			sigemptyset(&set);
-			sigaddset(&set, sig);
-			sigprocmask(SIG_UNBLOCK, &set, nullptr);
-		}
-	}
-
-	void _cdecl Signal_Illegal_Instruction( int sig = 0 )
-	{
-		PAUSECALLSTACK;
-		sigset_t set;
-
-		g_Log.Event( LOGL_FATAL, "%s\n", strsignal(sig) );
 #ifdef THREAD_TRACK_CALLSTACK
-		StackDebugInformation::printStackTrace();
+    static bool _Signal_Hangup_stack_printed = false;
+    if (!_Signal_Hangup_stack_printed)
+    {
+        StackDebugInformation::printStackTrace();
+        _Signal_Hangup_stack_printed = true;
+    }
 #endif
 
-		if ( sig )
-		{
-			signal( sig, &Signal_Illegal_Instruction );
-			sigemptyset(&set);
-			sigaddset(&set, sig);
-			sigprocmask(SIG_UNBLOCK, &set, nullptr);
-		}
+    if (!g_Serv.m_fResyncPause)
+        g_World.Save(true);
 
-		UNPAUSECALLSTACK;
-		throw CSError( LOGL_FATAL, sig, strsignal(sig) );
-	}
+    g_Serv.SetExitFlag(SIGHUP);
+}
 
-	void _cdecl Signal_Children(int sig = 0)
-	{
-		UNREFERENCED_PARAMETER(sig);
-		while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
-	}
+void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
+{
+    sigset_t set;
+
+    g_Log.Event(LOGL_FATAL, "Server Unstable: %s\n", strsignal(sig));
+#ifdef THREAD_TRACK_CALLSTACK
+    static bool _Signal_Terminate_stack_printed = false;
+    if (!_Signal_Terminate_stack_printed)
+    {
+        StackDebugInformation::printStackTrace();
+        _Signal_Terminate_stack_printed = true;
+    }
 #endif
 
+    if (sig)
+    {
+        signal(sig, &Signal_Terminate);
+        sigemptyset(&set);
+        sigaddset(&set, sig);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+    }
+
+    g_Serv.SetExitFlag(SIGABRT);
+    for (size_t i = 0; i < ThreadHolder::getActiveThreads(); ++i)
+        ThreadHolder::getThreadAt(i)->terminate(false);
+    //exit(EXIT_FAILURE);
+}
+
+void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using secure mode
+{
+    // Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
+    //#ifdef _DEBUG
+    //		if (IsDebuggerPresent())
+    //			return;		// do not block this signal, so that the debugger can catch it
+    //#endif
+
+    g_Log.Event(LOGL_FATAL, "Secure Mode prevents CTRL+C\n");
+
+    sigset_t set;
+    if (sig)
+    {
+        signal(sig, &Signal_Break);
+        sigemptyset(&set);
+        sigaddset(&set, sig);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+    }
+}
+
+void _cdecl Signal_Illegal_Instruction(int sig = 0)
+{
+    StackDebugInformation::freezeCallStack(true);
+    sigset_t set;
+
+    g_Log.Event(LOGL_FATAL, "%s\n", strsignal(sig));
+    StackDebugInformation::printStackTrace();
+
+    if (sig)
+    {
+        signal(sig, &Signal_Illegal_Instruction);
+        sigemptyset(&set);
+        sigaddset(&set, sig);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+    }
+
+    StackDebugInformation::freezeCallStack(false);
+    throw CSError(LOGL_FATAL, sig, strsignal(sig));
+}
+
+void _cdecl Signal_Children(int sig = 0)
+{
+    UNREFERENCED_PARAMETER(sig);
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+}
+#endif
+
+#ifndef _WIN32
 void SetUnixSignals( bool bSet )    // Signal handlers are installed only in secure mode
 {
-#ifndef _WIN32
 	signal( SIGHUP,		bSet ? &Signal_Hangup : SIG_DFL );
 	signal( SIGTERM,	bSet ? &Signal_Terminate : SIG_DFL );
 	signal( SIGQUIT,	bSet ? &Signal_Terminate : SIG_DFL );
@@ -327,7 +346,5 @@ void SetUnixSignals( bool bSet )    // Signal handlers are installed only in sec
 	signal( SIGFPE,		bSet ? &Signal_Illegal_Instruction : SIG_DFL );
 	signal( SIGPIPE,	bSet ? SIG_IGN : SIG_DFL );
 	signal( SIGCHLD,	bSet ? &Signal_Children : SIG_DFL );
-#else
-	UNREFERENCED_PARAMETER(bSet);
-#endif
 }
+#endif

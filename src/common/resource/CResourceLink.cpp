@@ -6,21 +6,20 @@
 #include "../../game/chars/CChar.h"
 #include "../../game/items/CItem.h"
 #include "../../game/triggers.h"
-#include "blocks/CSkillDef.h"
-#include "blocks/CSpellDef.h"
-#include "blocks/CRegionResourceDef.h"
-#include "blocks/CWebPageDef.h"
 #include "../CLog.h"
+#include "sections/CSkillDef.h"
+#include "sections/CSpellDef.h"
+#include "sections/CRegionResourceDef.h"
+#include "sections/CWebPageDef.h"
 #include "CResourceLock.h"
 #include "CResourceLink.h"
 
 
-CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
+CResourceLink::CResourceLink(const CResourceID& rid, const CVarDefContNum * pDef) :
     CResourceDef( rid, pDef )
 {
     m_pScript = nullptr;
-    m_Context.Init(); // not yet tested.
-    m_lRefInstances = 0;
+    _dwRefInstances = 0;
     ClearTriggers();
 }
 
@@ -34,6 +33,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 
     switch (restype)
     {
+        case RES_CHAMPION:
         case RES_TYPEDEF:
         case RES_ITEMDEF:
             ppTable = CItem::sm_szTrigName;
@@ -100,13 +100,22 @@ void CResourceLink::ScanSection( RES_TYPE restype )
                 }
             }
             else
+            {
                 iTrigger = XTRIG_UNKNOWN;
+            }
 
             SetTrigger(iTrigger);
         }
     }
 }
 
+void CResourceLink::DelRefInstance()
+{
+#ifdef _DEBUG
+    ASSERT(_dwRefInstances != (dword)-1);    // catching underflows
+#endif
+    --_dwRefInstances;
+}
 
 bool CResourceLink::IsLinked() const
 {
@@ -143,13 +152,12 @@ void CResourceLink::CopyTransfer(CResourceLink *pLink)
     m_pScript = pLink->m_pScript;
     m_Context = pLink->m_Context;
     memcpy(m_dwOnTriggers, pLink->m_dwOnTriggers, sizeof(m_dwOnTriggers));
-    m_lRefInstances = pLink->m_lRefInstances;
-    pLink->m_lRefInstances = 0;	// instance has been transfered.
+    _dwRefInstances = pLink->_dwRefInstances;
+    pLink->_dwRefInstances = 0;	// instance has been transfered.
 }
 
 void CResourceLink::ClearTriggers()
 {
-    ADDTOCALLSTACK("CResourceLink::ClearTriggers");
     memset(m_dwOnTriggers, 0, sizeof(m_dwOnTriggers));
 }
 
@@ -162,7 +170,7 @@ void CResourceLink::SetTrigger(int i)
         {
             if ( i < 32 )
             {
-                dword flag = 1 << i;
+                const dword flag = 1 << i;
                 m_dwOnTriggers[j] |= flag;
                 return;
             }

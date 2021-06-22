@@ -22,12 +22,15 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_defenseRange = 0;
 	m_Anims = 0xFFFFFF;
   	m_MaxFood = 0;			// Default value
-	m_wBloodHue = 0;
+	_wBloodHue = 0;
 	m_wColor = 0;
 	m_Str = 0;
 	m_Dex = 0;
 	m_Int = 0;
-    _iRange = 0;
+    _uiRange = 0;
+
+	_iEraLimitGear = g_Cfg._iEraLimitGear;		// Always latest by default
+	_iEraLimitLoot = g_Cfg._iEraLimitLoot;		// Always latest by default
 
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
@@ -39,14 +42,10 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	SetResDispDnId(CREID_MAN);
 
     // SubscribeComponent Prop Components
-    SubscribeComponentProps(new CCPropsChar());
-    SubscribeComponentProps(new CCPropsItemChar());
+    TrySubscribeComponentProps<CCPropsChar>();
+    TrySubscribeComponentProps<CCPropsItemChar>();
 }
 
-CCharBase::~CCharBase()
-{
-    ADDTOCALLSTACK("CCharBase::~CCharBase");
-}
 
 // From "Bill the carpenter" or "#HUMANMALE the Carpenter",
 // Get "Carpenter"
@@ -79,14 +78,14 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 	m_soundGetHit = pCharDef->m_soundGetHit;
 	m_soundDie = pCharDef->m_soundDie;
 
-	m_wBloodHue = pCharDef->m_wBloodHue;
+	_wBloodHue = pCharDef->_wBloodHue;
 	m_MaxFood = pCharDef->m_MaxFood;
 	m_FoodType = pCharDef->m_FoodType;
 	m_Desires = pCharDef->m_Desires;
 
 	m_defense = pCharDef->m_defense;
 	m_Anims = pCharDef->m_Anims;
-    _iRange = pCharDef->_iRange;
+    _uiRange = pCharDef->_uiRange;
 
 	m_BaseResources = pCharDef->m_BaseResources;
     _pFaction = pCharDef->_pFaction;
@@ -160,37 +159,37 @@ lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	nullptr
 };
 
-bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
     EXC_TRY("WriteVal");
 
     // Checking Props CComponents first
     EXC_SET_BLOCK("EntityProps");
-    if (CEntityProps::r_WritePropVal(pszKey, sVal, nullptr, this))
+    if (!fNoCallChildren && CEntityProps::r_WritePropVal(ptcKey, sVal, nullptr, this))
     {
         return true;
     }
 
     EXC_SET_BLOCK("Keyword");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case CBC_THROWDAM:
+		case CBC_THROWDAMTYPE:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:
-			sVal = GetDefStr(pszKey, false);
+			sVal = GetDefStr(ptcKey, false);
 			break;
 		//return as decimal number or 0 if not set
 		case CBC_FOLLOWERSLOTS:
 		case CBC_MAXFOLLOWER:
 		case CBC_BONDED:
 		case CBC_TITHING:
-			sVal.FormatLLVal(GetDefNum(pszKey));
+			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 		case CBC_ANIM:
-			sVal.FormatHex( m_Anims );
+			sVal.FormatLLHex( m_Anims );
 			break;
 		case CBC_AVERSIONS:
 			{
@@ -200,7 +199,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			}
 			break;
 		case CBC_BLOODCOLOR:
-			sVal.FormatHex( m_wBloodHue );
+			sVal.FormatHex( _wBloodHue );
 			break;
 		case CBC_ARMOR:
 			sVal.FormatVal( m_defense );
@@ -220,6 +219,15 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		case CBC_DISPID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()));
+			break;
+		case CBC_ERALIMITGEAR:
+			sVal.FormatVal(_iEraLimitGear);
+			break;
+		case CBC_ERALIMITLOOT:
+			sVal.FormatVal(_iEraLimitLoot);
+			break;
+		case CBC_ERALIMITPROPS:
+			sVal.FormatVal(_iEraLimitProps);
 			break;
 		case CBC_ID:
 			sVal.FormatHex( GetDispID() );
@@ -251,18 +259,18 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
         case CBC_RANGE:
         {
-            const int iRangeH = GetRangeH(), iRangeL = GetRangeL();
-            if ( iRangeH == 0 )
-                sVal.Format( "%d", iRangeL );
+            const uchar iRangeH = GetRangeH(), iRangeL = GetRangeL();
+            if ( iRangeL == 0 )
+                sVal.Format( "%hhd", iRangeH );
             else
-                sVal.Format( "%d,%d", iRangeH, iRangeL );
+                sVal.Format( "%hhd,%hhd", iRangeH, iRangeL );
             break;
         }
         case CBC_RANGEH:
-            sVal.FormatVal(GetRangeH());
+            sVal.FormatBVal(GetRangeH());
             break;
         case CBC_RANGEL:
-            sVal.FormatVal(GetRangeL());
+            sVal.FormatBVal(GetRangeL());
             break;
 		case CBC_RESDISPDNID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, (int)GetResDispDnId()) );
@@ -293,7 +301,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+            return (fNoCallParent ? false : CBaseBaseDef::r_WriteVal(ptcKey, sVal, pSrc, false));
         }
 	}
 	return true;
@@ -324,6 +332,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 	{
 		//Set as Strings
 		case CBC_THROWDAM:
+		case CBC_THROWDAMTYPE:
 		case CBC_THROWOBJ:
 		case CBC_THROWRANGE:
 			{
@@ -346,7 +355,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Aversions.Load( s.GetArgStr() );
 			break;
 		case CBC_BLOODCOLOR:
-			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
+			_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CBC_ARMOR:
 			m_defense = s.GetArgWVal();
@@ -362,6 +371,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
 		case CBC_DISPID:
 			return false;
+		case CBC_ERALIMITGEAR:
+			_iEraLimitGear = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
+		case CBC_ERALIMITLOOT:
+			_iEraLimitLoot = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
+		case CBC_ERALIMITPROPS:
+			_iEraLimitProps = (RESDISPLAY_VERSION)s.GetArgVal();
+			break;
 		case CBC_FOODTYPE:
 			SetFoodType( s.GetArgStr());
 			break;
@@ -389,21 +407,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
         case CBC_RANGE:
         {
-            int64 piVal[2];
-            tchar *ptcTmp = Str_GetTemp();
-            strncpy(ptcTmp, s.GetArgStr(), STR_TEMPLENGTH);
-            int iQty = Str_ParseCmds( ptcTmp, piVal, CountOf(piVal));
-            int iRange;
-            if ( iQty > 1 )
-            {
-                iRange = (int)((piVal[1] & 0xff) << 8); // highest byte contains the lowest value
-                iRange |= (int)(piVal[0] & 0xff);            // lowest byte contains the highest value
-            }
-            else
-            {
-                iRange = (int)(piVal[0] << 8);
-            }
-            _iRange = iRange;
+            _uiRange = ConvertRangeStr(s.GetArgStr());
             break;
         }
         case CBC_RANGEH:
@@ -473,15 +477,16 @@ bool CCharBase::r_Load( CScript & s )
 }
 
 
-byte CCharBase::GetRangeL() const
+byte CCharBase::GetRangeL() const noexcept
 {
-    return (byte)(_iRange & 0xff);
+    return (byte)(RANGE_GET_LO(_uiRange));
 }
 
-byte CCharBase::GetRangeH() const
+byte CCharBase::GetRangeH() const noexcept
 {
-    return (byte)((_iRange >> 8) & 0xff);
+    return (byte)(RANGE_GET_HI(_uiRange));
 }
+
 
 ////////////////////////////////////////////
 
@@ -492,9 +497,9 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
     if (baseID <= CREID_INVALID)
         return nullptr;
 
-	CResourceID rid = CResourceID( RES_CHARDEF, baseID );
+	const CResourceID rid( RES_CHARDEF, baseID );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == g_Cfg.m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
 	CResourceLink * pBaseLink = static_cast <CResourceLink *> ( g_Cfg.m_ResHash.GetAt(rid,index));
@@ -521,17 +526,17 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 	return pBase;
 }
 
-bool CCharBase::IsValidDispID( CREID_TYPE id ) //  static
+bool CCharBase::IsValidDispID( CREID_TYPE id ) noexcept //  static
 {
     return( id > 0 && id < CREID_QTY );
 }
 
-bool CCharBase::IsPlayableID( CREID_TYPE id, bool bCheckGhost)
+bool CCharBase::IsPlayableID( CREID_TYPE id, bool bCheckGhost) noexcept
 {
     return ( CCharBase::IsHumanID( id, bCheckGhost) || CCharBase::IsElfID( id, bCheckGhost) || CCharBase::IsGargoyleID( id, bCheckGhost));
 }
 
-bool CCharBase::IsHumanID( CREID_TYPE id, bool bCheckGhost ) // static
+bool CCharBase::IsHumanID( CREID_TYPE id, bool bCheckGhost ) noexcept // static
 {
     if ( bCheckGhost == true)
         return( id == CREID_MAN || id == CREID_WOMAN || id == CREID_EQUIP_GM_ROBE  || id == CREID_GHOSTMAN || id == CREID_GHOSTWOMAN);
@@ -539,7 +544,7 @@ bool CCharBase::IsHumanID( CREID_TYPE id, bool bCheckGhost ) // static
         return( id == CREID_MAN || id == CREID_WOMAN || id == CREID_EQUIP_GM_ROBE);
 }
 
-bool CCharBase::IsElfID( CREID_TYPE id, bool bCheckGhost ) // static
+bool CCharBase::IsElfID( CREID_TYPE id, bool bCheckGhost ) noexcept // static
 {
     if ( bCheckGhost == true)
         return( id == CREID_ELFMAN || id == CREID_ELFWOMAN || id == CREID_ELFGHOSTMAN || id == CREID_ELFGHOSTWOMAN);
@@ -547,7 +552,7 @@ bool CCharBase::IsElfID( CREID_TYPE id, bool bCheckGhost ) // static
         return( id == CREID_ELFMAN || id == CREID_ELFWOMAN );
 }
 
-bool CCharBase::IsGargoyleID( CREID_TYPE id, bool bCheckGhost ) // static
+bool CCharBase::IsGargoyleID( CREID_TYPE id, bool bCheckGhost ) noexcept // static
 {
     if ( bCheckGhost == true)
         return( id == CREID_GARGMAN || id == CREID_GARGWOMAN || id == CREID_GARGGHOSTMAN || id == CREID_GARGGHOSTWOMAN );

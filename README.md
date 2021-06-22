@@ -1,27 +1,37 @@
-# SphereServer-eXperimental
+# SphereServer X version
 Game server for Ultima Online.
 <br>
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin/branch/master?svg=true)](https://ci.appveyor.com/project/cbnolok/source2/branch/master)
-[![Linux Build Status](https://travis-ci.org/Sphereserver/Source-experimental.svg?branch=master)](https://travis-ci.org/Sphereserver/Source-experimental)
+[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
 <br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
 
 
-## Join SphereServer Discord channel!
+### Join SphereServer Discord channel!
 https://discord.gg/ZrMTXrs
 
 
-## Why a fork?
+### Use the specific script pack!
+The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
+of the new ones.<br>
+Beware, it's still not 100% complete!<br>
+https://github.com/cbnolok/SphereX-Scriptpack
 
-This is an experimental branch of SphereServer. Since we are doing so many (and sometimes radical) changes, it is impossible to work on the main branch.<br>
-This branch will preserve scripts compatibility with the main one.<br>
+
+### Coming from a different SphereServer version?
+* From 0.56d? <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">Here</a> a list of major scripting changes!
+* From an older 0.56 version? <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
+
+
+## Why a fork?
+This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.<br>
+Though, something has changed script-wise, so we suggest to take a look <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
 * Support for 64 bits architecture and MinGW compiler for Windows;
-* Experimental support for multi-threaded and async networking;
-* Support for CMake, which is now the standard way to generate updated build and project files;
+* CMake is now the standard way to generate updated build and project files;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
-* Refactoring of the code, updating to most recent programming standards and to the conventions described below.
+* Code refactoring, updating to most recent programming standards and to the conventions described below.
 
 
 ## Running
@@ -131,7 +141,7 @@ Since ASan redirects the error output to stderr, you can retrieve its output by 
 * Rebasing instead of pulling the project is a better practice to avoid unnecessary "merge branch master" commits.
 * Removing/Changing/Adding anything that was working in one way for years should be followed by an ini setting if the changes
   cannot be replicated from script to keep some backwards compatibility.
-* Comment your code, add informations about its logic. It's very important since it helps the other to understand your work.
+* Comment your code, add informations about its logic. It's very important since it helps others to understand your work.
 * Be sure to use Sphere's custom datatypes and the string formatting macros described in src/common/datatypes.h.
 * When casting numeric data types, always prefer C-style casts, like (int), to C++ static_cast&lt;int&gt;().
 * Be wary that in SphereScript unsigned values does not exist, all numbers are considered signed, and that 64 bits integers meant
@@ -190,7 +200,7 @@ if (fTrue)<br>
 
 ## Licensing
 
-Copyright 2018 SphereServer development team.<br>
+Copyright 2021 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>

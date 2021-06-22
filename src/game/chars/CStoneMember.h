@@ -67,7 +67,7 @@ private:
 
 public:
 	static const char *m_sClassName;
-	CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CUID loyaluidLink = 0, bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
+	CStoneMember(CItemStone* pStone, CUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CUID loyaluidLink = CUID(UID_CLEAR), bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
 	virtual ~CStoneMember();
 
 private:
@@ -116,8 +116,8 @@ public:
 	static lpctstr const sm_szVerbKeys[];
 
 	lpctstr GetName() const { return m_sClassName; }
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
-	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 	virtual bool r_LoadVal( CScript & s ) override;
 };

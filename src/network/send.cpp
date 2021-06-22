@@ -6,7 +6,6 @@
 #include "../common/resource/CResourceLock.h"
 #include "../common/CLog.h"
 #include "../common/CUOInstall.h"
-#include "../common/CObjBaseTemplate.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/clients/CClientTooltip.h"
@@ -19,10 +18,9 @@
 #include "../game/items/CItemVendable.h"
 #include "../game/components/CCItemDamageable.h"
 #include "../game/components/CCPropsChar.h"
-#include "../game/CObjBase.h"
-#include "../game/CWorld.h"
-#include "network.h"
-#include "packet.h"
+#include "../game/CServer.h"
+#include "../game/CWorldGameTime.h"
+#include "CNetworkManager.h"
 #include "send.h"
 #include "../common/zlib/zlib.h"
 
@@ -51,7 +49,7 @@ PacketGeneric::PacketGeneric(const CClient* target, byte *data, uint length) : P
  *
  *
  ***************************************************************************/
-PacketTelnet::PacketTelnet(const CClient* target, lpctstr message, bool bNullTerminated) : PacketSend(0, 0, PRI_HIGHEST)
+PacketTelnet::PacketTelnet(const CClient* target, lpctstr message, bool fNullTerminated) : PacketSend(0, 0, PRI_HIGHEST)
 {
 	ADDTOCALLSTACK("PacketTelnet::PacketTelnet");
 
@@ -64,7 +62,7 @@ PacketTelnet::PacketTelnet(const CClient* target, lpctstr message, bool bNullTer
 
 		writeCharASCII(message[i]);
 	}
-	if (bNullTerminated)
+	if (fNullTerminated)
 		writeCharASCII('\0');
 
 	trim();
@@ -128,11 +126,12 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID 
 PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
+    ASSERT(object);
 
-	const NetState * state = target->GetNetState();
+	const CNetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();
 	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
-	bool canRename = false;
+	bool fCanRename = false;
 
 	byte version = 0;
 
@@ -159,7 +158,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		// Send real (not percentual) hitpoints if these infos regard myself
 		writeInt16((word)(objectChar->Stat_GetVal(STAT_STR)));
 		writeInt16((word)(objectChar->Stat_GetMaxAdjusted(STAT_STR)));
-		writeBool(canRename);
+		writeBool(fCanRename);
 		writeByte(version);
 		WriteVersionSpecific(target, objectChar, version);
 	}
@@ -169,7 +168,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
         word iHitsMax = 100;
 		if ( objectChar )
 		{
-			canRename = objectChar->IsOwnedBy(character);
+            fCanRename = objectChar->IsOwnedBy(character);
 			iHitsCurrent = (word)objectChar->Stat_GetVal(STAT_STR);
             iHitsMax = (word)objectChar->Stat_GetMaxAdjusted(STAT_STR);
 		}
@@ -194,11 +193,13 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		// Send percentual hitpoints
         writeInt16(iHitsCurrent);		// Max hit points
 		writeInt16(iHitsMax);		// Max hit points
-		writeBool(canRename);
+		writeBool(fCanRename);
 		writeByte(version);
-		if (target->GetNetState()->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
+		if (state->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
+		{
 			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
 			WriteVersionSpecific(target, objectChar, version);
+		}
 	}
 
 	push(target);
@@ -208,7 +209,8 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 {
     bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	const CCharBase * otherDefinition = other->Char_GetDef();
-    const CCPropsChar* pCCPChar = other->GetCCPropsChar(), *pBaseCCPChar = otherDefinition->GetCCPropsChar();
+	const CCPropsChar* pCCPChar = other->GetComponentProps<CCPropsChar>();
+	const CCPropsChar* pBaseCCPChar = otherDefinition->GetComponentProps<CCPropsChar>();
 
 	writeBool(otherDefinition->IsFemale());
 	writeInt16((word)(other->Stat_GetAdjusted(STAT_STR)));
@@ -394,11 +396,7 @@ PacketHealthBarUpdateNew::PacketHealthBarUpdateNew(const CClient* target, const 
 bool PacketHealthBarUpdateNew::onSend(const CClient* client)
 {
     ADDTOCALLSTACK("PacketHealthBarUpdateNew::onSend");
-#ifndef _MTNETWORK
-    if (g_NetworkOut.isActive())
-#else
     if (g_NetworkManager.isOutputThreaded())
-#endif
         return true;
 
     return client->CanSee(m_character.CharFind());
@@ -431,11 +429,7 @@ PacketHealthBarUpdate::PacketHealthBarUpdate(const CClient* target, const CChar*
 bool PacketHealthBarUpdate::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketHealthBarUpdate::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_character.CharFind());
@@ -449,7 +443,7 @@ bool PacketHealthBarUpdate::onSend(const CClient* client)
  *
  *
  ***************************************************************************/
-PacketItemWorld::PacketItemWorld(byte id, uint size, CUID uid) : PacketSend(id, size, PRI_NORMAL), m_item(uid)
+PacketItemWorld::PacketItemWorld(byte id, uint size, const CUID& uid) : PacketSend(id, size, PRI_NORMAL), m_item(uid)
 {
 }
 
@@ -461,7 +455,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	word amount = 0;
     if (item->GetType() == IT_CORPSE)
     {
-        amount =item->GetAmount();  // char id of the corpse
+        amount = item->GetAmount();  // char id of the corpse
     }
     else if (item->CanSendAmount())
     {
@@ -520,7 +514,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, const CItem *item) : Pac
 	push(target);
 }
 
-void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte& light)
+void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte& light)  // static
 {
 	ADDTOCALLSTACK("PacketItemWorld::adjustItemData");
 	const CChar* character = target->GetChar();
@@ -592,11 +586,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, I
 bool PacketItemWorld::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketItemWorld::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_item.ItemFind());
@@ -628,8 +618,8 @@ PacketPlayerStart::PacketPlayerStart(const CClient* target) : PacketSend(XCMD_St
 	writeInt32(0xffffffff);
 	writeInt16(0);
 	writeInt16(0);
-	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetX(pt.m_map)) : 0x1800);
-	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetY(pt.m_map)) : 0x1000);
+	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetMapSizeX(pt.m_map)) : 0x1800);
+	writeInt16(pt.m_map > 0 ? (word)(g_MapList.GetMapSizeY(pt.m_map)) : 0x1000);
 	writeInt16(0);
 	writeInt32(0);
 
@@ -837,7 +827,7 @@ PacketDragAnimation::PacketDragAnimation(const CChar* source, const CItem* item,
 	}
 }
 
-bool PacketDragAnimation::canSendTo(const NetState* state) const
+bool PacketDragAnimation::canSendTo(const CNetState* state) const
 {
 	// don't send to SA clients
 	if (state->isClientEnhanced() || state->isClientVersion(MINCLIVER_SA))
@@ -875,11 +865,7 @@ PacketContainerOpen::PacketContainerOpen(const CClient* target, const CObjBase* 
 bool PacketContainerOpen::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketContainerOpen::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_container.ObjFind());
@@ -902,7 +888,7 @@ PacketItemContainer::PacketItemContainer(const CClient* target, const CItem* ite
 
 	const CItemBase* itemDefinition = item->Item_GetDef();
 	ITEMID_TYPE id = item->GetDispID();
-	HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
+	HUE_TYPE hue = item->GetHueVisible() & HUE_MASK_HI;
 
 	if (itemDefinition && target->GetResDisp() < itemDefinition->GetResLevel())
 	{
@@ -971,11 +957,7 @@ void PacketItemContainer::completeForTarget(const CClient* target, const CItem* 
 bool PacketItemContainer::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketItemContainer::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_item.ItemFind());
@@ -1189,7 +1171,7 @@ PacketCloseVendor::PacketCloseVendor(const CClient* target, const CChar* vendor)
 *
 *
 ***************************************************************************/
-PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool boIsShop, bool boFilterLayers) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
+PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool fIsShop, bool fFilterLayers) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
 	m_container(container->GetUID()), m_count(0)
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents");
@@ -1197,26 +1179,43 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	initLength();
 	skip(2);
 
-	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
-	bool fIsLayerSent[LAYER_HORSE];
-	memset( fIsLayerSent, 0, sizeof(fIsLayerSent) );
+    const CNetState* ns = target->GetNetState();
+    ASSERT(ns);
+    const bool fClientEnhanced = ns->isClientEnhanced();
+	const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || fClientEnhanced);
+    bool fIsLayerSent[LAYER_HORSE] = {};
 
 	const CChar* viewer = target->GetChar();
 	std::vector<CItem*> items;
-	items.reserve(container->GetCount());
+	items.reserve(container->GetContentCount());
 
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
-	for ( CItem* item = ( target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead() );
-		item != nullptr && m_count < g_Cfg.m_iContainerMaxItems;
-		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
+	auto it		= container->begin(), itEnd = container->end();
+	auto itRev	= container->rbegin(), itRevEnd = container->rend();
+	for ( ; m_count < g_Cfg.m_iContainerMaxItems ; ++it, ++itRev )
 	{
+		CItem* item;
+		if (fClientEnhanced)
+		{
+			if (itRev == itRevEnd)
+				break;
+			item = static_cast<CItem *>(*itRev);
+		}
+		else
+		{
+			if (it == itEnd)
+				break;
+			item = static_cast<CItem*>(*it);
+		}
+		ASSERT (item != nullptr);
+
 		word wAmount = item->GetAmount();
 		CPointMap pos = item->GetContainedPoint();
 
-		if ( boIsShop )
+		if ( fIsShop )
 		{
-			const CItemVendable* vendorItem = static_cast<const CItemVendable *>(item);
+			const CItemVendable* vendorItem = dynamic_cast<const CItemVendable *>(item);
 			if ( vendorItem == nullptr || vendorItem->GetAmount() == 0 || vendorItem->IsType(IT_GOLD) )
 				continue;
 
@@ -1232,28 +1231,30 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 		const CItemBase* itemDefinition = item->Item_GetDef();
 		ITEMID_TYPE id = item->GetDispID();
-		HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
+		HUE_TYPE hue = item->GetHueVisible() & HUE_MASK_HI;
 
-		if ( boFilterLayers )
+		if ( fFilterLayers )
 		{
-			LAYER_TYPE layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
-			ASSERT(layer < LAYER_HORSE);
-			switch ( layer )	// don't put these on a corpse.
+			const LAYER_TYPE layer = (LAYER_TYPE)(item->GetContainedLayer());
+			if ((layer > LAYER_NONE) && (layer < LAYER_HORSE))
 			{
-				case LAYER_NONE:
+				switch (layer)	// don't put these on a corpse.
+				{
 				case LAYER_PACK: // these display strange.
 					continue;
 
 				default:
 					// Make sure that no more than one of each layer goes out to client....crashes otherwise!!
-					if ( fIsLayerSent[layer] )
+					if (fIsLayerSent[layer])
 						continue;
+
 					fIsLayerSent[layer] = true;
 					break;
+				}
 			}
 		}
 
-		if ( itemDefinition != nullptr && target->GetResDisp() < itemDefinition->GetResLevel() )
+		if ( (itemDefinition != nullptr) && (target->GetResDisp() < itemDefinition->GetResLevel()) )
 		{
 			id = (ITEMID_TYPE)(itemDefinition->GetResDispDnId());
 
@@ -1288,14 +1289,14 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	writeInt16(m_count);
 	seek(l);
 
-	push(target);
-
 	if (m_count > 0)
 	{
 		// send tooltips
-		for (auto it = items.begin(), end = items.end(); it != end; ++it)
-			target->addAOSTooltip(*it, false, boIsShop);
-	}	
+        for (CItem *pItem : items)
+			target->addAOSTooltip(pItem, false, fIsShop);
+	}
+
+	push(target);
 }
 
 PacketItemContents::PacketItemContents(const CClient* target, const CItem* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
@@ -1303,7 +1304,9 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(2)");
 
-	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced()) ;
+    const CNetState* ns = target->GetNetState();
+    ASSERT(ns);
+    const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 
 	initLength();
 	skip(2);
@@ -1341,14 +1344,17 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(3)");
 
-	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
+    const CNetState* ns = target->GetNetState();
+    ASSERT(ns);
+    const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 	const CSpellDef* spellDefinition;
 
 	initLength();
 	skip(2);
 
-	for (CItem* item = spellbook->GetContentHead(); item != nullptr; item = item->GetNext())
+	for (const CSObjContRec* pObjRec : *spellbook)
 	{
+		const CItem* item = static_cast<const CItem*>(pObjRec);
 		if (item->IsType(IT_SCROLL) == false)
 			continue;
 
@@ -1383,11 +1389,7 @@ bool PacketItemContents::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketItemContents::onSend");
 
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_container.ItemFind());
@@ -1424,18 +1426,19 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeByte(0x01);
 			writeByte(0);
 
-			for (int i = 0; i < 2; ++i)
+			for (uchar i = 0; i < 2; ++i)
 			{
 				writeByte((byte)i);
-				writeInt16((word)(g_MapList.GetX(i)));
-				writeInt16((word)(g_MapList.GetY(i)));
-				writeInt16((word)(g_MapList.GetX(i)));
-				writeInt16((word)(g_MapList.GetY(i)));
+				writeInt16((word)(g_MapList.GetMapSizeX(i)));
+				writeInt16((word)(g_MapList.GetMapSizeY(i)));
+				writeInt16((word)(g_MapList.GetMapSizeX(i)));
+				writeInt16((word)(g_MapList.GetMapSizeY(i)));
             }
 
             for (int i = 0; i < padding; ++i)
                 writeByte(0);
 
+			break;
 		}
 		case 0x02:
 		{
@@ -1446,6 +1449,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeByte(0x02);
 			writeByte(0);
 			writeStringFixedASCII(g_Serv.GetName(),28);
+			break;
 		}
 		case 0x03:
 		{
@@ -1455,18 +1459,21 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeInt16(0);
 			writeByte(0x03);
 			writeByte(0);
+			break;
 		}
 		case 0xFF:
 		{
 			//Query Client Command
-			byte bMap = target->GetChar()->GetTopMap();
-			CPointMap pt = target->GetChar()->GetTopPoint();
-			dword dwBlockId = (pt.m_x * (g_MapList.GetY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
+            const CChar* pChar = target->GetChar();
+			byte bMap = pChar->GetTopMap();
+			CPointMap pt = pChar->GetTopPoint();
+			dword dwBlockId = (pt.m_x * (g_MapList.GetMapSizeY( bMap ) / UO_BLOCK_SIZE)) + pt.m_y;
 			writeInt32(dwBlockId);
 			writeInt32(0);
 			writeInt16(0);
 			writeByte(0xFF);
-			writeByte(target->GetChar()->GetTopMap());
+			writeByte(bMap);
+			break;
 		}
 	}
 
@@ -1744,11 +1751,14 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	if ( !pItemDef )
 		return;
 
-	word y = 0;
+	word x = 0, y = 0, z = 0;
 	CItemBaseMulti *pMultiDef = static_cast<CItemBaseMulti *>(pItemDef);
-	//if ( pMultiDef && pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-	if ( pMultiDef && CItemBase::IsID_Multi(id) )
-		y = (word)(pMultiDef->m_rect.m_bottom - 1);
+	if (pMultiDef && CItemBase::IsID_Multi(id))
+	{
+		x = (word)(pMultiDef->m_Offset.m_dx != 0 ? (pMultiDef->m_rect.m_left + pMultiDef->m_Offset.m_dx) : 0);
+		y = (word)(pMultiDef->m_rect.m_bottom + pMultiDef->m_Offset.m_dy);
+		z = (word)(pMultiDef->m_Offset.m_dz);
+	}
 
 	writeByte((byte)type);
 	writeInt32(context);
@@ -1761,9 +1771,9 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 
 	writeInt16((word)(id - ITEMID_MULTI));
 
-	writeInt16(0);	// x
+	writeInt16(x);	// x
 	writeInt16(y);	// y
-	writeInt16(0);	// z
+	writeInt16(z);	// z
 
 	if ( target->GetNetState()->isClientVersion(MINCLIVER_HS) )
 		writeInt32((dword)color);	// hue
@@ -2156,7 +2166,8 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), (uint)lenstr);
 
 	// message time
-	sprintf(tempstr, "Day %lld", (g_World.GetGameWorldTime(message->GetTimeStamp()) / (MSECS_PER_SEC * 24 * 60)) % 365);
+	CSTime datetime(message->GetTimeStamp());
+	snprintf(tempstr, STR_TEMPLENGTH, "%s", datetime.Format("%b %d, %Y"));
 	lenstr = strlen(tempstr) + 1;
 
 	writeByte((byte)lenstr);
@@ -2251,17 +2262,18 @@ uint PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iConv
 
 	// Classic Client wants the container items sent (in PacketItemContents) with order a->z, Enhanced Client with order z->a;
 	// Classic Client wants the prices sent with order a->z, Enhanced Client with order a->z.
-	for (CItem* item = container->GetContentHead(); item != nullptr; item = item->GetNext())
+	for (CSObjContRec* pObjRec : *container)
 	{
-		CItemVendable* vendorItem = static_cast<CItemVendable *>(item);
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		CItemVendable* vendorItem = static_cast<CItemVendable *>(pItem);
 		if (vendorItem == nullptr || vendorItem->GetAmount() == 0)
 			continue;
 
-		dword price = vendorItem->GetVendorPrice(iConvertFactor);
+		dword price = vendorItem->GetVendorPrice(iConvertFactor,0);
 		if (price == 0)
 		{
 			vendorItem->Item_GetDef()->ResetMakeValue();
-			price = vendorItem->GetVendorPrice(iConvertFactor);
+			price = vendorItem->GetVendorPrice(iConvertFactor,0);
 
 			if (price == 0 && vendorItem->IsValidNPCSaleItem())
 				price = vendorItem->GetBasePrice();
@@ -2320,8 +2332,8 @@ PacketZoneChange::PacketZoneChange(const CClient* target, const CPointMap& pos) 
 	writeByte(0);
 	writeInt16(0);
 	writeInt16(0);
-	writeInt16((word)(g_MapList.GetX(pos.m_map)));
-	writeInt16((word)(g_MapList.GetY(pos.m_map)));
+	writeInt16((word)(g_MapList.GetMapSizeX(pos.m_map)));
+	writeInt16((word)(g_MapList.GetMapSizeY(pos.m_map)));
 
 	push(target);
 }
@@ -2377,6 +2389,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	HUE_TYPE hue;
 	target->GetAdjustedCharID(character, id, hue);
 	const CPointMap &pos = character->GetTopPoint();
+    const CNetState *ns = target->GetNetState();
 
 	initLength();
 	writeInt32(character->GetUID());
@@ -2387,25 +2400,24 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	writeByte(character->GetDirFlag());
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));
-	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, ns->isClientVersion(MINCLIVER_NOTOINVUL), true)));
 
-	bool isNewMobilePacket = target->GetNetState()->isClientVersion(MINCLIVER_NEWMOBINCOMING);
+	bool isNewMobilePacket = ns->isClientVersion(MINCLIVER_NEWMOBINCOMING);
 
 	if (character->IsStatFlag(STATF_SLEEPING) == false)
 	{
-		bool isLayerSent[LAYER_HORSE + 1];
-		memset(isLayerSent, 0, sizeof(isLayerSent));
+        bool isLayerSent[LAYER_HORSE + 1] = {false};
 
-		for (CItem* item = character->GetContentHead(); item != nullptr; item = item->GetNext())
+		for (CSObjContRec* pObjRec : *character)
 		{
+			CItem* item = static_cast<CItem*>(pObjRec);
 			LAYER_TYPE layer = item->GetEquipLayer();
-			if (CItemBase::IsVisibleLayer(layer) == false)
+			if (CItemBase::IsVisibleLayer(layer) == false)	// sanity check for layer value, ensure we don't get out of bounds in isLayerSent array
 				continue;
 			if (viewer->CanSeeItem(item) == false && viewer != character)
 				continue;
 
 			// prevent same layer being sent twice
-			ASSERT(layer <= LAYER_HORSE);
 			if (isLayerSent[layer])
 				continue;
 
@@ -2446,11 +2458,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 bool PacketCharacter::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketCharacter::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_character.CharFind());
@@ -2615,7 +2623,8 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 		const CStoneMember* guildMember = character->Guild_FindMember(MEMORY_GUILD);
 		if (guildMember != nullptr && guildMember->IsAbbrevOn() && guildMember->GetParentStone()->GetAbbrev()[0])
 		{
-			len = sprintf(text, "%s [%s], %s", character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
+			len = snprintf(text, STR_TEMPLENGTH, "%s [%s], %s",
+				character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
 							( guildMember->GetTitle()[0] ? guildMember->GetTitle() : (IsSetOF(OF_NoPaperdollTradeTitle) ? "" : character->GetTradeTitle()) ) );
 		}
 
@@ -2625,9 +2634,9 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 			if (!IsSetOF(OF_NoPaperdollTradeTitle))
 				title = character->GetTradeTitle();
 			if ( title && title[0] )
-				sprintf(text, "%s, %s", character->Noto_GetTitle(), title);
+				snprintf(text, STR_TEMPLENGTH, "%s, %s", character->Noto_GetTitle(), title);
 			else
-				sprintf(text, "%s", character->Noto_GetTitle());
+				snprintf(text, STR_TEMPLENGTH, "%s", character->Noto_GetTitle());
 		}
 
 		writeStringFixedASCII(text, 60);
@@ -2660,8 +2669,9 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 	LAYER_TYPE layer;
 	uint count = 0;
 
-	for (CItem* item = corpse->GetContentHead(); item != nullptr; item = item->GetNext())
+	for (CSObjContRec* pObjRec : *corpse)
 	{
+		CItem* item = static_cast<CItem*>(pObjRec);
 		if (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false)
 			continue;
 
@@ -2701,11 +2711,7 @@ bool PacketCorpseEquipment::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketCorpseEquipment::onSend");
 
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	return client->CanSee(m_corpse.ItemFind());
@@ -2996,19 +3002,20 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 	uint countpos = getPosition();
 	skip(2);
 
-	CItem* item = container->GetContentHead();
-	if (item == nullptr)
-		return 0;
-
 	uint count = 0;
-	std::deque<const CItemContainer*> otherBoxes;
 
-	for (;;)
+	std::deque<const CItemContainer*> otherBoxes;
+	while (true)
 	{
-		if (item != nullptr)
+		if (container == nullptr)
+			break;
+
+		for (CSObjContRec* pObjRec : *container)
 		{
+			CItem* item = static_cast<CItem*>(pObjRec);
+
 			container = dynamic_cast<CItemContainer*>(item);
-			if (container != nullptr && container->GetCount() > 0)
+			if (container != nullptr && !container->IsContainerEmpty())
 			{
 				if (container->IsSearchable())
 					otherBoxes.push_back(container);
@@ -3034,8 +3041,23 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 						writeInt16((word)vendItem->GetDispID());
 						writeInt16((word)hue);
 						writeInt16(vendItem->GetAmount());
-                        uint price = vendItem->GetVendorPrice(iConvertFactor);
-						writeInt16((word)( (price > UINT16_MAX) ? UINT16_MAX : price ));
+
+						uint price = 0;
+
+						// If OVERRIDE.VALUE is define on the script and this NPC buy this item at a specific price, we use this price in priority
+						// Else, we calculate the value of the item in the player's backpack
+						if (vendSell->GetKey("OVERRIDE.VALUE", true))
+						{
+							//Get the price on NPC template
+							price = vendSell->GetVendorPrice(iConvertFactor,1); 
+						}
+						else	
+						{
+							//Get the price/Value of the real item in the backpack
+							price = vendItem->GetVendorPrice(iConvertFactor,1); 
+						}
+
+						writeInt16((word)((price > UINT16_MAX) ? UINT16_MAX : price));
 						writeInt16((word)len);
 						writeStringFixedASCII(name, len);
 
@@ -3044,19 +3066,13 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 					}
 				}
 			}
-
-			item = item->GetNext();
 		}
 
-		else
-		{
-			if (otherBoxes.empty())
-				break;
+        if (otherBoxes.empty())
+            break;
 
-			container = otherBoxes.front();
-			otherBoxes.pop_front();
-			item = container->GetContentHead();
-		}
+        container = otherBoxes.front();
+        otherBoxes.pop_front();
 	}
 
 	// seek back to write count
@@ -3238,7 +3254,7 @@ PacketServerList::PacketServerList(const CClient* target) : PacketSend(XCMD_Serv
 
 	//	too many servers in list can crash the client
 #define	MAX_SERVERS_LIST	32
-	for (uint i = 0; count < MAX_SERVERS_LIST; i++)
+	for (uint i = 0; count < MAX_SERVERS_LIST; ++i)
 	{
 		CServerRef server = g_Cfg.Server_GetDef(i);
 		if (server == nullptr)
@@ -3306,6 +3322,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 {
 	ADDTOCALLSTACK("PacketCharacterList::PacketCharacterList");
 
+	ASSERT(target != nullptr);
 	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 
@@ -3320,8 +3337,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	writeByte((byte)count);
 	skip(count * 60);
 
-	uint startCount = (uint)g_Cfg.m_StartDefs.size();
-	writeByte((byte)startCount);
+	size_t startCount = g_Cfg.m_StartDefs.size();
+	writeByte( byte((startCount > UINT8_MAX) ? UINT8_MAX : startCount) );
 
 	// since 7.0.13.0, start locations have extra information
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
@@ -3329,10 +3346,11 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	if ( tmVer >= MINCLIVER_EXTRASTARTINFO || tmVerReported >= MINCLIVER_EXTRASTARTINFO )
 	{
 		// newer clients receive additional start info
-		for ( uint i = 0; i < startCount; ++i )
+		for (size_t i = 0; i < startCount; ++i )
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
-			writeByte((byte)(i));
+			ASSERT(start);
+			writeByte((byte)i);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sArea), MAX_NAME_SIZE + 2);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sName), MAX_NAME_SIZE + 2);
 			writeInt32(start->m_pt.m_x);
@@ -3345,24 +3363,26 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	}
 	else
 	{
-		for ( uint i = 0; i < startCount; ++i )
+		for (size_t i = 0; i < startCount; ++i )
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
-			writeByte((byte)(i));
+			ASSERT(start);
+			writeByte((byte)i);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sArea), MAX_NAME_SIZE + 1);
 			writeStringFixedASCII(static_cast<lpctstr>(start->m_sName), MAX_NAME_SIZE + 1);
 		}
 	}
 
-    if (tmVer > 1260000)
+    if (tmVerReported > 1260000)
     {
+		const CNetState* ns = target->GetNetState();
         dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
             maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
-        if ( !target->GetNetState()->getClientType() )
+        if (ns->getClientType() == CLIENTTYPE_2D)
             flags |= 0x400;
         writeInt32(flags);
 
-        if ( target->GetNetState()->isClientEnhanced() )
+        if (ns->isClientEnhanced() )
         {
             word iLastCharSlot = 0;
             for ( ushort i = 0; i < count; ++i )
@@ -3394,6 +3414,7 @@ PacketAttack::PacketAttack(const CClient* target, CUID serial) : PacketSend(XCMD
 {
 	ADDTOCALLSTACK("PacketAttack::PacketAttack");
 
+    // UID = 00 00 00 00 means attack request refused
 	writeInt32(serial);
 
 	push(target);
@@ -3416,7 +3437,8 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 	writeInt16(CLIMODE_INPVAL);
 
 	int len = (int)strlen(text) + 1;
-	if (len > 255) len = 255;
+	if (len > 255)
+		len = 255;
 
 	writeInt16((word)(len));
 	writeStringFixedASCII(text, len);
@@ -3425,7 +3447,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 	writeByte((byte)(style));
 	writeInt32(maxLength);
 
-	tchar* z(nullptr);
+	tchar* z = nullptr;
 	switch (style)
 	{
 		case INPVAL_STYLE_NOEDIT: // None
@@ -3435,16 +3457,17 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 
 		case INPVAL_STYLE_TEXTEDIT: // Text
 			z = Str_GetTemp();
-			len = sprintf(z, "%s (%u chars max)", caption, maxLength) + 1;
+			len = snprintf(z, STR_TEMPLENGTH, "%s (%u chars max)", caption, maxLength) + 1;
 			break;
 
 		case INPVAL_STYLE_NUMEDIT: // Numeric
 			z = Str_GetTemp();
-			len = sprintf(z, "%s (0 - %u)", caption, maxLength) + 1;
+			len = snprintf(z, STR_TEMPLENGTH, "%s (0 - %u)", caption, maxLength) + 1;
 			break;
 	}
 
-	if (len > 255) len = 255;
+	if (len > 255)
+		len = 255;
 	writeInt16((word)(len));
 	writeStringFixedASCII(z, len);
 
@@ -3504,12 +3527,13 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
  *
  *
  ***************************************************************************/
-PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
+PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
+	UNREFERENCED_PARAMETER(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
-	writeInt32(corpse == nullptr? 0 : (dword)corpse->GetUID());
+	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
 	writeInt32(0);
 }
 
@@ -3538,7 +3562,7 @@ void PacketGumpDialog::writeControls(const CClient* target, const CSString* cont
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
-	const NetState* net = target->GetNetState();
+	const CNetState* net = target->GetNetState();
 	if (net->isClientVersion(MINCLIVER_COMPRESSDIALOG) || net->isClientKR() || net->isClientEnhanced())
 		writeCompressedControls(controls, controlCount, texts, textCount);
 	else
@@ -3557,15 +3581,15 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 	{
 		// compress and write controls
 		int controlLength = 1;
-		for (uint i = 0; i < controlCount; i++)
+		for (uint i = 0; i < controlCount; ++i)
 			controlLength += (int)controls[i].GetLength() + 2;
 
 		char* toCompress = new char[controlLength];
 
 		int controlLengthActual = 0;
-		for (uint i = 0; i < controlCount; i++)
-			controlLengthActual += sprintf(&toCompress[controlLengthActual], "{%s}", static_cast<lpctstr>(controls[i]));
-		controlLengthActual++;
+		for (uint i = 0; i < controlCount; ++i)
+			controlLengthActual += snprintf(&toCompress[controlLengthActual], (size_t(controlLength) - controlLengthActual), "{%s}", controls[i].GetBuffer());
+		++ controlLengthActual;
 
 		ASSERT(controlLengthActual == controlLength);
 
@@ -4003,11 +4027,7 @@ PacketPropertyListVersionOld::PacketPropertyListVersionOld(const CClient* target
 bool PacketPropertyListVersionOld::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketPropertyListVersionOld::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	const CChar* character = client->GetChar();
@@ -4161,9 +4181,9 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 	int map;
 
 	// find map count
-	for (map = 255; map >= 0; map--)
+	for (map = MAP_SUPPORTED_QTY - 1; map >= 0; --map)
 	{
-		if (g_MapList.m_maps[map] == false)
+		if (g_MapList.IsMapSupported(map) == false)
 			continue;
 
 		mapCount = map;
@@ -4174,7 +4194,7 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 
 	for (map = 0; map < mapCount; map++)
 	{
-		if (g_Cfg.m_fUseMapDiffs && g_MapList.m_maps[map])
+		if (g_Cfg.m_fUseMapDiffs && g_MapList.IsMapSupported(map))
 		{
 			if (g_Install.m_Mapdifl[map].IsFileOpen())
 				writeInt32((dword)g_Install.m_Mapdifl[map].GetLength() / 4);
@@ -4201,40 +4221,12 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 /***************************************************************************
 *
 *
-*	Packet 0xBF.0x19.0x02 : PacketStatLocks		update lock status of stats (NORMAL)
-*
-*
-***************************************************************************/
-PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) : PacketExtended(EXTDATA_Stats_Enable, 12, PRI_NORMAL)
-{
-	ADDTOCALLSTACK("PacketStatLocks::PacketStatLocks");
-
-	byte status(0);
-	if (character->m_pPlayer != nullptr)
-	{
-		status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_INT);
-		status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_DEX) << 2;
-		status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_STR) << 4;
-	}
-
-	writeByte(0x02);
-	writeInt32(character->GetUID());
-	writeByte(0);
-	writeByte(status);
-
-	push(target);
-}
-
-
-/***************************************************************************
-*
-*
-*	Packet 0xBF.0x19 : BondedStatuss			set bonded status (NORMAL)
+*	Packet 0xBF.0x19.0x00 : BondedStatus			    set bonded status (NORMAL)
 *
 *
 ***************************************************************************/
 
-PacketBondedStatus::PacketBondedStatus(const CClient * target, const CChar * pChar, bool IsGhost) : PacketExtended(EXTDATA_Stats_Enable, 11, PRI_NORMAL)
+PacketBondedStatus::PacketBondedStatus(const CClient * target, const CChar * pChar, bool IsGhost) : PacketExtended(EXTDATA_BondedStatus, 11, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketBondedStatus::PacketBondedStatus");
 
@@ -4245,6 +4237,63 @@ PacketBondedStatus::PacketBondedStatus(const CClient * target, const CChar * pCh
 	push(target);
 }
 
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x19.0x02 : PacketStatLocks		update lock status of stats (NORMAL)
+*
+*
+***************************************************************************/
+PacketStatLocks::PacketStatLocks(const CClient* target, const CChar* character) : PacketExtended(EXTDATA_Stats_Enable, 12, PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketStatLocks::PacketStatLocks");
+
+    byte status = 0;
+    if (character->m_pPlayer != nullptr)
+    {
+        status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_INT);
+        status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_DEX) << 2;
+        status |= (byte)character->m_pPlayer->Stat_GetLock(STAT_STR) << 4;
+    }
+
+    /*
+    // Packet guides report this difference, but it would be better to test this before uncommenting
+    const CNetState* ns = target->GetNetState();
+    if (ns->isClient3D() || ns->isClientKR())
+        writeByte(0x05);
+    else
+    */
+        writeByte(0x02);
+    writeInt32(character->GetUID());
+    writeByte(0);
+    writeByte(status);
+
+    push(target);
+}
+
+
+/***************************************************************************
+*
+*
+*	Packet 0xBF.0x19.0x05 : PacketStatueAnimation	update character animation frame (NORMAL)
+*
+*
+***************************************************************************/
+PacketStatueAnimation::PacketStatueAnimation(const CClient * target, const CChar * pChar, int iAnimation, int iFrame) : PacketExtended(EXTDATA_StatueAnimation, 17, PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketStatue::PacketStatue");
+
+    writeByte(0x05);
+    writeInt32(pChar->GetUID());
+    writeByte(0x00);
+    writeByte(0xFF);
+    writeByte(0x01);
+    writeInt16(word(iAnimation));
+    writeInt16(word(iFrame));
+
+    push(target);
+}
 
 /***************************************************************************
  *
@@ -4559,9 +4608,9 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 	writeBool(isWritable);
 	writeInt16((word)(pages));
 	writeInt16((word)(title.GetLength() + 1));
-	writeStringFixedASCII(title.GetPtr(), title.GetLength() + 1);
+	writeStringFixedASCII(title.GetBuffer(), title.GetLength() + 1);
 	writeInt16((word)(author.GetLength() + 1));
-	writeStringFixedASCII(author.GetPtr(), author.GetLength() + 1);
+	writeStringFixedASCII(author.GetBuffer(), author.GetLength() + 1);
 
 	push(target);
 }
@@ -4578,7 +4627,7 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList");
 
-	m_time = g_World.GetCurrentTime().GetTimeRaw();
+	m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	m_object = object->GetUID();
 	m_version = version;
 	m_entryCount = (int)data.size();
@@ -4606,7 +4655,7 @@ PacketPropertyList::PacketPropertyList(const CClient* target, const PacketProper
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList2");
 
-	m_time = g_World.GetCurrentTime().GetTimeRaw();
+	m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	m_object = other->getObject();
 	m_version = other->getVersion();
 	m_entryCount = other->getEntryCount();
@@ -4617,11 +4666,7 @@ PacketPropertyList::PacketPropertyList(const CClient* target, const PacketProper
 bool PacketPropertyList::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketPropertyList::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	const CChar* character = client->GetChar();
@@ -4630,7 +4675,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT) && !character->IsPriv(PRIV_ALLSHOW))
 		return false;
 
 	if (hasExpired(30 * MSECS_PER_SEC))
@@ -4642,7 +4687,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 bool PacketPropertyList::hasExpired(int64 iTimeout) const
 {
 	ADDTOCALLSTACK("PacketPropertyList::hasExpired");
-	return (m_time + iTimeout) < g_World.GetCurrentTime().GetTimeRaw();
+	return (m_time + iTimeout) < CWorldGameTime::GetCurrentTime().GetTimeRaw();
 }
 
 
@@ -4841,11 +4886,7 @@ PacketPropertyListVersion::PacketPropertyListVersion(const CClient* target, cons
 bool PacketPropertyListVersion::onSend(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketPropertyList::onSend");
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive())
-#else
 	if (g_NetworkManager.isOutputThreaded())
-#endif
 		return true;
 
 	const CChar* character = client->GetChar();
@@ -4983,7 +5024,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
         return;
 
     CPointMap pt = object->GetTopPoint();
-    dword cliloc = (type == Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
+    dword cliloc = (type == MAPWAYPOINT_Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
 
     initLength();
     writeInt32(object->GetUID());
@@ -5048,7 +5089,7 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
 {
 	ADDTOCALLSTACK("PacketTimeSyncResponse::PacketTimeSyncResponse");
 
-	int64 llTime = g_World.GetCurrentTime().GetTimeRaw();
+	int64 llTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	writeInt64(llTime);
 	writeInt64(llTime+100);
 	writeInt64(llTime+100);	//No idea if different values make a difference. I didn't notice anything different when all values were the same.
@@ -5064,14 +5105,15 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
  *
  *
  ***************************************************************************/
-PacketItemWorldNew::PacketItemWorldNew(byte id, uint size, CUID uid) : PacketItemWorld(id, size, uid)
+PacketItemWorldNew::PacketItemWorldNew(byte id, uint size, const CUID& uid) : PacketItemWorld(id, size, uid)
 {
 }
 
 PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item) : PacketItemWorld(XCMD_PutNew, 26, item->GetUID())
 {
 	ADDTOCALLSTACK("PacketItemWorldNew::PacketItemWorldNew");
-
+    
+    const CNetState *ns = target->GetNetState();
 	DataSource source;		// 0=Tiledata, 1=Character, 2=Multi
 	dword uid = item->GetUID();
 	ITEMID_TYPE id = item->GetDispID();
@@ -5079,7 +5121,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
     word amount = 0;
     if (item->GetType() == IT_CORPSE)
     {
-        amount =item->GetAmount();  // char id of the corpse
+        amount = item->GetAmount();  // char id of the corpse
     }
     else if (item->CanSendAmount())
     {
@@ -5088,7 +5130,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
             amount = itemAmount;
     }
 	CPointMap pt = item->GetTopPoint();
-	HUE_TYPE hue = item->GetHue();
+	HUE_TYPE hue = item->GetHueVisible();
 	byte light = 0;
 	byte flags = 0;
 
@@ -5101,7 +5143,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	}
 	else
 	{
-		source = (item->Can(CAN_I_DAMAGEABLE) && (target->GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))) ? Damageable : TileData;
+		source = (item->Can(CAN_I_DAMAGEABLE) && ns->isClientVersion(MINCLIVER_STATUS_V6)) ? Damageable : TileData;
 		id = (ITEMID_TYPE)(id & 0xFFFF);
 	}
 
@@ -5119,7 +5161,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	writeInt16(hue);
 	writeByte(flags);
 
-	if ( target->GetNetState()->isClientVersion(MINCLIVER_HS) )
+	if ( ns->isClientVersion(MINCLIVER_HS) )
 		writeInt16(0);		// 0 = World Item, 1 = Player Item (why should a item on the ground be defined as player item? and what is the difference?)
 
 	trim();
@@ -5234,10 +5276,12 @@ PacketMoveShip::PacketMoveShip(const CClient* target, const CObjBase* movingObj,
  *
  *
  ***************************************************************************/
-PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint objectCount) : PacketItemWorldNew(XCMD_PacketCont, 5, PRI_NORMAL)
+PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint objectCount) : PacketSend(XCMD_PacketCont, 5, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketContainer::PacketContainer");
 	ASSERT(objectCount > 0);
+
+	using ds = PacketItemWorldNew::DataSource;
 
 	initLength();
 	writeInt16((word)(objectCount));
@@ -5247,8 +5291,8 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		CObjBase* object = objects[i];
 		if (object->IsItem())
 		{
-			CItem* item = dynamic_cast<CItem*>(object);
-			DataSource source = TileData;
+			CItem* item = static_cast<CItem*>(object);
+			ds source = ds::TileData;
 			dword uid = item->GetUID();
 			word amount = item->GetAmount();
 			ITEMID_TYPE id = item->GetDispID();
@@ -5258,13 +5302,13 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 			byte flags = 0;
 			byte light = 0;
 
-			adjustItemData(target, item, id, hue, amount, dir, flags, light);
+			PacketItemWorld::adjustItemData(target, item, id, hue, amount, dir, flags, light);
 
 			if (id >= ITEMID_MULTI)
 				id = (ITEMID_TYPE)(id - ITEMID_MULTI);
 
 			if (item->IsTypeMulti())
-				source = Multi;
+				source = ds::Multi;
 
 			writeByte(0xF3);
 			writeInt16(1);
@@ -5284,8 +5328,8 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		}
 		else
 		{
-			CChar* mobile = dynamic_cast<CChar*>(object);
-			DataSource source = Character;
+			CChar* mobile = static_cast<CChar*>(object);
+			ds source = ds::Character;
 			dword uid = mobile->GetUID();
 			CREID_TYPE id = mobile->GetDispID();
 			CPointMap p = mobile->GetTopPoint();

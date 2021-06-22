@@ -1,5 +1,4 @@
 
-#include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "CException.h"
@@ -9,48 +8,20 @@
 #include "CVarDefMap.h"
 
 
-static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
+inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey)
 {
-	// Copy the identifier (valid char set) out to this buffer.
-	size_t i = 0;
-	for ( ;pszArgs[i]; ++i )
+    return strcmpi(pVar->GetKey(), ptcKey);
+}
+
+lpctstr CVarDefCont::GetValStrZeroed(const CVarDefCont* pVar, bool fZero) // static
+{
+	ADDTOCALLSTACK_INTENSIVE("CVarDefCont::GetValStrZeroed");
+	if (pVar)
 	{
-		if ( ! _ISCSYM(pszArgs[i]))
-			break;
-		if ( i >= EXPRESSION_MAX_KEY_LEN )
-			return 0;
-		szTag[i] = pszArgs[i];
+        lpctstr ptcValStr = pVar->GetValStr();
+		return ptcValStr;
 	}
-
-	szTag[i] = '\0';
-	return i;
-}
-
-/***************************************************************************
-*
-*
-*	class CVarDefCont		Interface for variables
-*
-*
-***************************************************************************/
-CVarDefCont::CVarDefCont( lpctstr pszKey ) : m_Key( pszKey ) 
-{ 
-	m_Key.MakeLower(); 
-}
-
-CVarDefCont::~CVarDefCont()
-{
-}
-
-lpctstr CVarDefCont::GetKey() const 
-{ 
-	return( m_Key.GetPtr() ); 
-}
-
-void CVarDefCont::SetKey( lpctstr pszKey )
-{ 
-	m_Key = pszKey;
-	m_Key.MakeLower(); 
+	return (fZero ? "0" : "");
 }
 
 /***************************************************************************
@@ -61,33 +32,30 @@ void CVarDefCont::SetKey( lpctstr pszKey )
 *
 ***************************************************************************/
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey, int64 iVal ) : CVarDefCont( pszKey ), m_iVal( iVal )
+CVarDefContNum::CVarDefContNum( lpctstr ptcKey, int64 iVal ) : m_sKey( ptcKey ), m_iVal( iVal )
 {
 }
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : CVarDefCont( pszKey ), m_iVal( 0 )
+CVarDefContNum::CVarDefContNum( lpctstr ptcKey ) : m_sKey( ptcKey ), m_iVal( 0 )
 {
 }
 
 lpctstr CVarDefContNum::GetValStr() const
 {
-	TemporaryString tsTemp;
-	tchar* pszTemp = static_cast<tchar *>(tsTemp);
-	sprintf(pszTemp, "0%" PRIx64 , m_iVal);
-	return pszTemp;
+    return Str_FromLL_Fast(m_iVal, Str_GetTemp(), STR_TEMPLENGTH, 10);
 }
 
 bool CVarDefContNum::r_LoadVal( CScript & s )
 {
-	SetValNum( s.GetArgVal());
+	SetValNum( s.GetArg64Val() );
 	return true;
 }
 
-bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
+bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
-	sVal.FormatLLVal( GetValNum() );
+	sVal.Format64Val( GetValNum() );
 	return true;
 }
 
@@ -104,29 +72,28 @@ CVarDefCont * CVarDefContNum::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefContStr::CVarDefContStr( lpctstr pszKey, lpctstr pszVal ) : CVarDefCont( pszKey ), m_sVal( pszVal ) 
+CVarDefContStr::CVarDefContStr( lpctstr ptcKey, lpctstr pszVal ) : m_sKey( ptcKey ), m_sVal( pszVal ) 
 {
 }
 
-CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
+CVarDefContStr::CVarDefContStr( lpctstr ptcKey ) : m_sKey( ptcKey )
 {
 }
 
-inline int64 CVarDefContStr::GetValNum() const
+int64 CVarDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
-	return( Exp_GetVal(pszStr) );
+	return( Exp_Get64Val(pszStr) );
 }
 
 void CVarDefContStr::SetValStr( lpctstr pszVal ) 
 {
-    size_t uiLen = strlen(pszVal);
+    const size_t uiLen = strlen(pszVal);
 	if (uiLen <= SCRIPT_MAX_LINE_LEN/2)
 		m_sVal.CopyLen( pszVal, (int)uiLen );
 	else
 		g_Log.EventWarn("Setting max length of %d was exceeded on (VAR,TAG,LOCAL).%s \r", SCRIPT_MAX_LINE_LEN/2, GetKey() );
 }
-
 
 bool CVarDefContStr::r_LoadVal( CScript & s )
 {
@@ -134,7 +101,7 @@ bool CVarDefContStr::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = nullptr )
+bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -147,46 +114,6 @@ CVarDefCont * CVarDefContStr::CopySelf() const
 	return new CVarDefContStr( GetKey(), m_sVal ); 
 }
 
-/***************************************************************************
-*
-*
-*	class CVarDefMap::CVarDefContTest	Variable implementation (search-only internal useage)
-*
-*
-***************************************************************************/
-
-lpctstr CVarDefMap::CVarDefContTest::GetValStr() const 
-{ 
-	return nullptr; 
-}
-	
-int64 CVarDefMap::CVarDefContTest::GetValNum() const 
-{ 
-	return -1; 
-}
-
-CVarDefCont * CVarDefMap::CVarDefContTest::CopySelf() const 
-{ 
-	return new CVarDefContTest( GetKey() ); 
-}
-
-/***************************************************************************
-*
-*
-*	class CVarDefMap::ltstr			KEY part sorting wrapper over std::set
-*
-*
-***************************************************************************/
-
-bool CVarDefMap::ltstr::operator()(const CVarDefCont * s1, const CVarDefCont * s2) const
-{
-	//ADDTOCALLSTACK_INTENSIVE("CVarDefMap::ltstr::operator()");
-	if (!s1)
-		throw CSError(LOGL_ERROR, 0, "s1 empty!");
-	else if (!s2)
-		throw CSError(LOGL_ERROR, 0, "s2 empty!");
-	return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
-}
 
 /***************************************************************************
 *
@@ -204,15 +131,14 @@ CVarDefMap & CVarDefMap::operator = ( const CVarDefMap & array )
 
 CVarDefMap::~CVarDefMap()
 {
-	Empty();
+	Clear();
 }
 
 lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::FindValStr");
-	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
+	for ( const CVarDefCont * pVarBase : m_Container )
 	{
-		const CVarDefCont * pVarBase = (*i);
 		ASSERT( pVarBase );
 		
 		const CVarDefContStr * pVarStr = dynamic_cast <const CVarDefContStr *>( pVarBase );
@@ -220,7 +146,7 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 			continue;
 		
 		if ( ! strcmpi( pVal, pVarStr->GetValStr()))
-			return( pVarBase->GetKey() );
+			return pVarBase->GetKey();
 	}
 
 	return nullptr;
@@ -237,7 +163,7 @@ lpctstr CVarDefMap::FindValNum( int64 iVal ) const
 			continue;
 
 		if ( pVarNum->GetValNum() == iVal )
-			return( pVarBase->GetKey() );
+			return pVarBase->GetKey();
 	}
 
 	return nullptr;
@@ -248,24 +174,17 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAt");
 	if ( at > m_Container.size() )
 		return nullptr;
-
-	DefSet::const_iterator i = std::next(m_Container.begin(), at);
-	if ( i != m_Container.end() )
-		return (*i);
-	else
-		return nullptr;
+    return m_Container[at];
 }
 
-CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
+CVarDefCont * CVarDefMap::GetAtKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAtKey");
-	CVarDefContTest pVarBase(at);
-	DefSet::const_iterator i = m_Container.find(&pVarBase);
+    const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
 
-	if ( i != m_Container.end() )
-		return (*i);
-	else
-		return nullptr;
+	if ( idx != SCONT_BADINDEX )
+		return m_Container[idx];
+	return nullptr;
 }
 
 void CVarDefMap::DeleteAt( size_t at )
@@ -274,43 +193,31 @@ void CVarDefMap::DeleteAt( size_t at )
 	if ( at > m_Container.size() )
 		return;
 
-	DeleteAtIterator(std::next(m_Container.begin(), at));
+    CVarDefCont *pVarBase = m_Container[at];
+    m_Container.erase(m_Container.begin() + at);
+
+    if ( pVarBase )
+    {
+        CVarDefContNum *pVarNum = dynamic_cast<CVarDefContNum *>(pVarBase);
+        if ( pVarNum )
+        {
+            delete pVarNum;
+        }
+        else
+        {
+            CVarDefContStr *pVarStr = dynamic_cast<CVarDefContStr *>(pVarBase);
+            if ( pVarStr )
+                delete pVarStr;
+        }
+    }
 }
 
-void CVarDefMap::DeleteAtKey( lpctstr at )
+void CVarDefMap::DeleteAtKey( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtKey");
-	CVarDefContStr pVarBased(at);
-	DefSet::iterator i = m_Container.find(&pVarBased);
-
-	DeleteAtIterator(i);
-}
-
-void CVarDefMap::DeleteAtIterator( DefSet::iterator it )
-{
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtIterator");
-	if ( it != m_Container.end() )
-	{
-		CVarDefCont *pVarBase = (*it);
-		m_Container.erase(it);
-
-		if ( pVarBase )
-		{
-			CVarDefContNum *pVarNum = dynamic_cast<CVarDefContNum *>(pVarBase);
-			if ( pVarNum )
-			{
-				delete pVarNum;
-			}
-			else
-			{
-				CVarDefContStr *pVarStr = dynamic_cast<CVarDefContStr *>(pVarBase);
-				if ( pVarStr )
-					delete pVarStr;
-			}
-		}
-		else
-			delete *it;
-	}
+    const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
+    if (idx != SCONT_BADINDEX)
+        DeleteAt(idx);
 }
 
 void CVarDefMap::DeleteKey( lpctstr key )
@@ -320,16 +227,15 @@ void CVarDefMap::DeleteKey( lpctstr key )
 		DeleteAtKey(key);
 }
 
-void CVarDefMap::Empty()
+void CVarDefMap::Clear()
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Empty");
-	DefSet::iterator i = m_Container.begin();
-
-	while ( i != m_Container.end() )
+	iterator it = m_Container.begin();
+	while ( it != m_Container.end() )
 	{
-		delete (*i);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
-		m_Container.erase(i);
-		i = m_Container.begin();
+		delete (*it);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
+		m_Container.erase(it);
+		it = m_Container.begin();
 	}
 
 	m_Container.clear();
@@ -341,7 +247,7 @@ void CVarDefMap::Copy( const CVarDefMap * pArray )
 	if ( !pArray || pArray == this )
 		return;
 
-	Empty();
+	Clear();
 	if ( pArray->GetCount() <= 0 )
 		return;
 
@@ -420,8 +326,8 @@ CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 	if ( !pVarNum )
 		return nullptr;
 
-	DefPairResult res = m_Container.insert(static_cast<CVarDefCont*>(pVarNum));
-	if ( res.second )
+	iterator res = m_Container.emplace(static_cast<CVarDefCont*>(pVarNum));
+	if ( res != m_Container.end() )
 		return pVarNum;
 	else
     {
@@ -430,17 +336,17 @@ CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
     }
 }
 
-CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
+CVarDefContNum* CVarDefMap::SetNumOverride( lpctstr ptcKey, int64 iVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetNumOverride");
-    CVarDefContNum* pKeyNum = dynamic_cast<CVarDefContNum*>(GetKey(pszKey));
+    CVarDefContNum* pKeyNum = dynamic_cast<CVarDefContNum*>(GetKey(ptcKey));
     if (pKeyNum)
     {
         pKeyNum->SetValNum(iVal);
         return pKeyNum;
     }
-	DeleteAtKey(pszKey);
-	return SetNumNew(pszKey,iVal);
+	DeleteAtKey(ptcKey);
+	return SetNumNew(ptcKey,iVal);
 }
 
 CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero)
@@ -456,9 +362,9 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero
             const int64 iNewVal = pVarDefNum->GetValNum() + iMod;
             if ((iNewVal == 0) && fDeleteZero)
             {
-                DefSet::iterator it = m_Container.find(pVarDef);
-                ASSERT (it != m_Container.end());
-                DeleteAtIterator(it);
+                const size_t idx = m_Container.find(pVarDef);
+                ASSERT (idx != SCONT_BADINDEX);
+                DeleteAt(idx);
                 return nullptr;
             }
             pVarDefNum->SetValNum(iNewVal);
@@ -482,12 +388,11 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 		return nullptr;
 	}
 
-	CVarDefContTest pVarSearch(pszName);
-	DefSet::iterator iResult = m_Container.find(&pVarSearch);
+    const size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
 
 	CVarDefCont * pVarBase = nullptr;
-	if ( iResult != m_Container.end() )
-		pVarBase = (*iResult);
+	if ( idx != SCONT_BADINDEX )
+		pVarBase = m_Container[idx];
 
 	if ( !pVarBase )
 		return SetNumNew( pszName, iVal );
@@ -516,8 +421,8 @@ CVarDefContStr* CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 	if ( !pVarStr )
 		return nullptr;
 
-	DefPairResult res = m_Container.insert(pVarStr);
-	if ( res.second )
+    iterator res = m_Container.emplace(static_cast<CVarDefCont*>(pVarStr));
+    if ( res != m_Container.end() )
 		return pVarStr;
 	else
     {
@@ -526,17 +431,17 @@ CVarDefContStr* CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
     }
 }
 
-CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
+CVarDefContStr* CVarDefMap::SetStrOverride( lpctstr ptcKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::SetStrOverride");
-    CVarDefContStr* pKeyStr = dynamic_cast<CVarDefContStr*>(GetKey(pszKey));
+    CVarDefContStr* pKeyStr = dynamic_cast<CVarDefContStr*>(GetKey(ptcKey));
     if (pKeyStr)
     {
         pKeyStr->SetValStr(pszVal);
         return pKeyStr;
     }
-	DeleteAtKey(pszKey);
-	return SetStrNew(pszKey,pszVal);
+	DeleteAtKey(ptcKey);
+	return SetStrNew(ptcKey,pszVal);
 }
 
 CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fDeleteZero, bool fWarnOverwrite )
@@ -548,24 +453,27 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 		return nullptr;
 
     ASSERT(pszVal);
-	if ( pszVal[0] == '\0' )	// if Val is an empty string, remove any previous def (and do not add a new def)
+	if (!fQuoted)
 	{
-		DeleteAtKey(pszName);
-		return nullptr;
+		if (pszVal[0] == '\0')
+		{
+			// If Val is an empty string, remove any previous def (and do not add a new def)
+			DeleteAtKey(pszName);
+			return nullptr;
+		}
+
+		if (IsSimpleNumberString(pszVal))
+		{
+			// Just store the number and not the string.
+			return SetNum(pszName, Exp_Get64Val(pszVal), fDeleteZero, fWarnOverwrite);
+		}
 	}
 
-	if ( !fQuoted && IsSimpleNumberString(pszVal))
-	{
-		// Just store the number and not the string.
-		return SetNum( pszName, Exp_GetLLVal( pszVal ), fDeleteZero);
-	}
-
-	CVarDefContTest pVarSearch(pszName);
-	DefSet::iterator iResult = m_Container.find(&pVarSearch);
+    const size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
 
 	CVarDefCont * pVarBase = nullptr;
-	if ( iResult != m_Container.end() )
-		pVarBase = (*iResult);
+	if ( idx != SCONT_BADINDEX )
+		pVarBase = m_Container[idx];
 
 	if ( !pVarBase )
 		return SetStrNew( pszName, pszVal );
@@ -586,42 +494,39 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	return pVarStr;
 }
 
-CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
+CVarDefCont * CVarDefMap::GetKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKey");
 	CVarDefCont * pReturn = nullptr;
 
-	if ( pszKey )
+	if ( ptcKey )
 	{
-		CVarDefContTest pVarBase(pszKey);
-		DefSet::const_iterator i = m_Container.find(&pVarBase);
+        const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
 		
-		if ( i != m_Container.end() )
-			pReturn = (*i);
+		if ( idx != SCONT_BADINDEX )
+			pReturn = m_Container[idx];
 	}
 
 	return pReturn;
 }
 
-int64 CVarDefMap::GetKeyNum( lpctstr pszKey ) const
+int64 CVarDefMap::GetKeyNum( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKeyNum");
-	const CVarDefCont * pVar = GetKey(pszKey);
+	const CVarDefCont * pVar = GetKey(ptcKey);
 	if ( pVar == nullptr )
 		return 0;
 	return pVar->GetValNum();
 }
 
-lpctstr CVarDefMap::GetKeyStr( lpctstr pszKey, bool fZero ) const
+lpctstr CVarDefMap::GetKeyStr( lpctstr ptcKey, bool fZero ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetKeyStr");
-	const CVarDefCont * pVar = GetKey(pszKey);
-	if ( pVar == nullptr )
-		return (fZero ? "0" : "");
-	return pVar->GetValStr();
+	const CVarDefCont * pVar = GetKey(ptcKey);
+	return CVarDefCont::GetValStrZeroed(pVar, fZero);
 }
 
-CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
+CVarDefCont * CVarDefMap::CheckParseKey( lpctstr pszArgs ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::CheckParseKey");
 	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
@@ -633,31 +538,29 @@ CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
 	return nullptr;
 }
 
-CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
+CVarDefCont * CVarDefMap::GetParseKey_Advance( lpctstr & pszArgs ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseKey");
+	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseKey_Advance");
 	// Skip to the end of the expression name.
 	// The name can only be valid.
 
 	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
-	size_t i = GetIdentifierString( szTag, pszArgs );
+    const uint i = GetIdentifierString( szTag, pszArgs );
+    pszArgs += i;
+
 	CVarDefCont * pVar = GetKey(szTag);
 	if ( pVar )
-	{
-		pszArgs += i;
 		return pVar;
-	}
-
 	return nullptr;
 }
 
-bool CVarDefMap::GetParseVal( lpctstr & pszArgs, long long * plVal ) const
+bool CVarDefMap::GetParseVal_Advance( lpctstr & pszArgs, llong * pllVal ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseVal");
-	CVarDefCont * pVarBase = GetParseKey( pszArgs );
+	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetParseVal_Advance");
+	CVarDefCont * pVarBase = GetParseKey_Advance( pszArgs );
 	if ( pVarBase == nullptr )
 		return false;
-	*plVal = pVarBase->GetValNum();
+	*pllVal = pVarBase->GetValNum();
 	return true;
 }
 
@@ -669,7 +572,7 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 	if ( pszPrefix == nullptr )
 		pszPrefix = "";
 
-    bool fIsClient = pSrc->GetChar();
+    const bool fIsClient = pSrc->GetChar();
     for (const CVarDefCont* pVar : m_Container)
 	{
         if (fIsClient)
@@ -694,52 +597,63 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		CSString sMask(mask);
 		sMask.MakeLower();
 
-		DefSet::iterator i = m_Container.begin();
-		CVarDefCont * pVarBase = nullptr;
-
-		while ( i != m_Container.end() )
+        size_t i = 0;
+		iterator it = m_Container.begin();
+		while ( it != m_Container.end() )
 		{
-			pVarBase = (*i);
+            CVarDefCont *pVarBase = (*it);
+			if (!pVarBase)
+				goto skip_cur;
 
-			if ( pVarBase && ( strstr(pVarBase->GetKey(), sMask.GetPtr()) ) )
 			{
-				DeleteAtIterator(i);
-				i = m_Container.begin();
+				CSString sKey(pVarBase->GetKey());
+				sKey.MakeLower();
+				if (strstr(sKey.GetBuffer(), sMask.GetBuffer()))
+				{
+					DeleteAt(i);
+					it = m_Container.begin();
+					i = 0;
+					continue;
+				}
 			}
-			else
-			{
-				++i;
-			}
+        skip_cur:
+            ++it;
+            ++i;
 		}
 	}
 	else
 	{
-		Empty();
+		Clear();
 	}
 }
 
+/*
 bool CVarDefMap::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_LoadVal");
 	bool fQuoted = false;
-	return ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) ? true : false );
+    lpctstr ptcVal = s.GetArgStr( &fQuoted );
+	return ( SetStr( s.GetKey(), fQuoted, ptcVal) ? true : false );
 }
+*/
 
-void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
+void CVarDefMap::r_WritePrefix( CScript & s, lpctstr ptcPrefix, lpctstr ptcKeyExclude ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
-	TemporaryString tsZ;
-	tchar* z = static_cast<tchar *>(tsZ);
-	lpctstr	pszVal;
-	bool fHasPrefix = (pszPrefix && *pszPrefix);
-	bool fHasExclude = (pszKeyExclude && *pszKeyExclude);
+    if (m_Container.empty())
+        return;
 
-    auto _WritePrefix = [&z, fHasPrefix, pszPrefix](lpctstr ptcKey) -> void
+    const bool fHasPrefix = (ptcPrefix && *ptcPrefix);
+    const bool fHasExclude = (ptcKeyExclude && *ptcKeyExclude);
+	TemporaryString ts;
+
+	// Prefix is usually TAG, VAR, etc...
+    auto _WritePrefix = [&ts, fHasPrefix, ptcPrefix](lpctstr ptcKey) -> void
     {
-        if ( fHasPrefix )
-            sprintf(z, "%s.%s", pszPrefix, ptcKey);
-        else
-            sprintf(z, "%s", ptcKey);
+		if (fHasPrefix)
+			snprintf(ts.buffer(), ts.capacity(), "%s.%s", ptcPrefix, ptcKey);
+		else
+			Str_CopyLimitNull(ts.buffer(), ptcKey, ts.capacity());
     };
 
 	// Write with any prefix.
@@ -748,26 +662,20 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 		if ( !pVar )
 			continue;	// This should not happen, a warning maybe?
 
-        lpctstr ptcKey = pVar->GetKey();
-		if ( fHasExclude && !strcmpi(pszKeyExclude, ptcKey))
+        const lpctstr ptcKey = pVar->GetKey();
+		if ( fHasExclude && !strcmpi(ptcKeyExclude, ptcKey))
 			continue;
 		
         const CVarDefContNum * pVarNum = dynamic_cast<const CVarDefContNum*>(pVar);
+        _WritePrefix(ptcKey);
+        lpctstr ptcVal = pVar->GetValStr();
         if (pVarNum)
         {
-            // Save VarNums only if they are != 0, otherwise it's a waste of space in the save file
-            if (pVarNum->GetValNum() != 0)
-            {
-                _WritePrefix(ptcKey);
-                pszVal = pVar->GetValStr();
-                s.WriteKey(z, pszVal);
-            }
+            s.WriteKeyStr(ts.buffer(), ptcVal);
         }
         else
         {
-            _WritePrefix(ptcKey);
-            pszVal = pVar->GetValStr();
-            s.WriteKeyFormat(z, "\"%s\"", pszVal);
+            s.WriteKeyFormat(ts.buffer(), "\"%s\"", ptcVal);
         }
 	}
 }

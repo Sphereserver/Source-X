@@ -17,8 +17,8 @@ public:
     /** @name Constructors, Destructor, Asign operator:
     */
     ///@{
-    CSPtrTypeArray() {}
-    virtual ~CSPtrTypeArray() {}
+    CSPtrTypeArray() = default;
+    virtual ~CSPtrTypeArray() = default;
     /**
     * @brief Copy constructor.
     */
@@ -45,7 +45,7 @@ public:
     /**
     * @brief check if data is in this array.
     * @param pData data to find in the array.
-    * @return true if pData is in the array, BadIndex() otherwise.
+    * @return true if pData is in the array, SCONT_BADINDEX otherwise.
     */
     bool ContainsPtr( TYPE pData ) const;
     /**
@@ -83,11 +83,11 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
 {
     size_t nIndex = FindPtr( pData );
-    if ( nIndex == this->BadIndex() )
+    if ( nIndex == SCONT_BADINDEX )
         return false;
 
     ASSERT( IsValidIndex(nIndex) );
-    this->erase(nIndex);
+    this->erase_at(nIndex);
     return true;
 }
 
@@ -95,15 +95,15 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::ContainsPtr( TYPE pData ) const
 {
     size_t nIndex = FindPtr(pData);
-    ASSERT((nIndex == this->BadIndex()) || IsValidIndex(nIndex));
-    return nIndex != this->BadIndex();
+    ASSERT((nIndex == SCONT_BADINDEX) || IsValidIndex(nIndex));
+    return nIndex != SCONT_BADINDEX;
 }
 
 template<class TYPE>
 size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 {
     if ( !pData )
-        return this->BadIndex();
+        return SCONT_BADINDEX;
 
     for ( size_t nIndex = 0, nSize = this->size(); nIndex < nSize; ++nIndex )
     {
@@ -111,7 +111,7 @@ size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
             return nIndex;
     }
 
-    return this->BadIndex();
+    return SCONT_BADINDEX;
 }
 
 template<class TYPE>

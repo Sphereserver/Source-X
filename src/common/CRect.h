@@ -10,7 +10,6 @@
 #include "CPointBase.h"
 
 class CRegion;
-class CRegionLinks;
 class CSector;
 
 
@@ -22,20 +21,27 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	int m_bottom;	// South ( NON INCLUSIVE !)
 	int m_map;
 
-    CRect() = default;
-    virtual ~CRect() = default;
+    void SetRectEmpty() noexcept;
 
-    inline int GetWidth() const
+	CRect() noexcept;
+	CRect(int left, int top, int right, int bottom, int map) noexcept;
+	CRect(const CRect&) noexcept = default;
+	CRect(CRect&&) noexcept = default;
+    virtual ~CRect() noexcept = default;
+
+	CRect& operator = (const CRect&) = default;
+	const CRect& operator += (const CRect& rect);
+
+    inline int GetWidth() const noexcept
     {
         return( m_right - m_left );
     }
-    inline int GetHeight() const
+    inline int GetHeight() const noexcept
     {
         return( m_bottom - m_top );
     }
 
-	void SetRectEmpty();
-    inline bool IsRectEmpty() const
+    inline bool IsRectEmpty() const noexcept
     {
         return( m_left >= m_right || m_top >= m_bottom );
     }
@@ -63,11 +69,13 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	}
 
 	void UnionRect( const CRect & rect );
-	bool IsInside( const CRect & rect ) const;
-	bool IsOverlapped( const CRect & rect ) const;
-	bool IsEqual( const CRect & rect ) const;
+	bool IsInside( const CRect & rect ) const noexcept;
+	bool IsOverlapped( const CRect & rect ) const noexcept;
+	bool IsEqual( const CRect & rect ) const noexcept;
+
 	virtual void NormalizeRect();
-    virtual void NormalizeRectMax( int cx, int cy );
+    void NormalizeRectMax( int cx, int cy );
+
     CPointBase GetCenter() const;
     CPointBase GetRectCorner( DIR_TYPE dir ) const;
     CSector * GetSector( int i ) const;	// ge all the sectors that make up this rect.
@@ -75,20 +83,33 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	void SetRect( int left, int top, int right, int bottom, int map );
 
 	size_t Read( lpctstr pVal );
-	tchar * Write( tchar * pBuffer ) const;
+	tchar * Write( tchar * ptcBuffer, uint uiBufferLen ) const;
 	lpctstr Write() const;
 };
 
 struct CRectMap : public CRect
 {
-    CRectMap() = default;
-    virtual ~CRectMap() = default;
-    CRectMap(const CRect& rect) : CRect(rect) {} // special copy constructor, valid because CRectMap hasn't additional members compared to CRect, it only has more methods
+    CRectMap() noexcept = default;
+	CRectMap(int left, int top, int right, int bottom, int map) noexcept;
+	CRectMap(const CRectMap&) noexcept = default;
+	CRectMap(CRectMap&&) noexcept = default;
 
-	bool IsValid() const;
+	// special copy constructors, valid because CRectMap hasn't additional members compared to CRect, it only has more methods
+	CRectMap(const CRect& rect) noexcept : CRectMap(static_cast<const CRectMap&>(rect)) {}
+	CRectMap(CRect&& rect) noexcept : CRectMap(static_cast<CRectMap&&>(rect)) {}
 
-	virtual void NormalizeRect();
-	virtual void NormalizeRectMax();
+	CRectMap& operator=(const CRectMap&) noexcept = default;
+	CRectMap& operator=(const CRect& rect) noexcept
+	{
+		return CRectMap::operator=(static_cast<const CRectMap&>(rect));
+	}
+
+    virtual ~CRectMap() noexcept = default;
+
+	bool IsValid() const noexcept;
+
+	virtual void NormalizeRect() override;
+	void NormalizeRectMax();
 };
 
 

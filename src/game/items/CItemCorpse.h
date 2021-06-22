@@ -26,6 +26,7 @@ private:
 	CItemCorpse& operator=(const CItemCorpse& other);
 
 public:
+	bool IsCorpseResurrectable(CChar* pCharHealer, CChar* pCharGhost) const;
 	CChar * IsCorpseSleeping() const;
 	int GetWeight(word amount = 0) const;
 };

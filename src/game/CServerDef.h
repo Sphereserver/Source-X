@@ -45,9 +45,9 @@ class CServerDef : public CScriptObj
 private:
 	CSString m_sName;	// What the name should be. Fill in from ping.
 	int64  m_timeLastValid;	// Last valid poll time
-	CSTime	m_dateLastValid;
+	CSTime m_dateLastValid;
 
-	int64  m_timeCreate;	// When added to the list ? 0 = at start up.
+	int64  _iTimeCreate;	// When added to the list ? 0 = at start up.
 
 	// Status read from returned string.
 	CSString m_sStatus;	// last returned status string.
@@ -62,11 +62,11 @@ public:
 	CCrypto m_ClientVersion;
 
 	// Breakdown the string. or filled in locally.
-	char m_TimeZone;	// Hours from GMT. +5=EST
-	CSString m_sEMail;		// Admin email address.
-	CSString m_sURL;			// URL for the server.
+	char m_TimeZone;    // Hours from GMT. +5=EST
+	CSString m_sEMail;  // Admin email address.
+	CSString m_sURL;    // URL for the server.
 	CSString m_sLang;
-	ACCAPP_TYPE m_eAccApp;	// types of new account applications.
+	ACCAPP_TYPE m_eAccApp;  // types of new account applications.
 
 public:
 	CServerDef( lpctstr pszName, CSocketAddressIP dwIP );
@@ -107,24 +107,18 @@ public:
 
 	virtual int64 GetAgeHours() const;
 
-	bool IsSame( const CServerDef * pServNew ) const
-	{
-		UNREFERENCED_PARAMETER(pServNew);
-		return true;
-	}
-
 	void SetValidTime();
 	int64 GetTimeSinceLastValid() const;
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 	bool IsConnected() const {
 		return m_timeLastValid > 0;
 	}
 
-	void SetCryptVersion(void) {
-		m_ClientVersion.SetClientVer(m_sClientVersion.GetPtr());
+	void SetCryptVersion() {
+		m_ClientVersion.SetClientVer(m_sClientVersion.GetBuffer());
 	}
 };
 

@@ -16,16 +16,15 @@ class CItemContainer : public CItemVendable, public CContainer
 	static lpctstr const sm_szVerbKeys[];
     CUID _uidMultiSecured;
     CUID _uidMultiCrate;
+
 public:
 	static const char *m_sClassName;
 
-	// bool m_fTinkerTrapped;	// magic trap is diff.
-
-	virtual bool NotifyDelete() override;
+	virtual bool NotifyDelete() override;	// overrides CItem:: method
 	virtual void DeletePrepare() override;
 
-    void SetSecuredOfMulti(CUID uidMulti);
-    void SetCrateOfMulti(CUID uidMulti);
+    void SetSecuredOfMulti(const CUID& uidMulti);
+    void SetCrateOfMulti(const CUID& uidMulti);
 
 public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );
@@ -42,29 +41,36 @@ public:
 	bool IsItemInside(const CItem * pItem) const;
 	bool CanContainerHold(const CItem * pItem, const CChar * pCharMsg );
 
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual void r_Write( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
 	virtual int GetWeight(word amount = 0) const;
 	void OnWeightChange( int iChange );
 
-	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
-	void ContentAdd( CItem * pItem, CPointMap pt, bool bForceNoStack = false, uchar gridIndex = 0 );
+	// Contents/Carry stuff. ---------------------------------
+public:
+	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
+	void ContentAdd( CItem * pItem, CPointMap pt, bool fForceNoStack = false, uchar gridIndex = 0 );
 protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
+
+protected:
+	virtual void _GoAwake() override final;
+	virtual void _GoSleep() override final;
+
 public:
 	bool IsItemInTrade() const;
 	void Trade_Status( bool bCheck );
 	void Trade_UpdateGold( dword platinum, dword gold );
-	void Trade_Delete();
+	bool Trade_Delete();
 
 	void MakeKey();
 	void SetKeyRing();
 	void Game_Create();
 	void Restock();
-	bool OnTick();
+	bool _OnTick();
 
 	virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 

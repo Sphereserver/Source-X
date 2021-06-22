@@ -1,9 +1,13 @@
 
 #include "CCItemDamageable.h"
+#include "../CServer.h"
 #include "../CObjBase.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
+#include "../CWorldTickingList.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
+
 
 CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEABLE)
 {
@@ -11,12 +15,11 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _iCurHits = 0;
     _iMaxHits = 0;
     _iTimeLastUpdate = 0;
-    g_World.m_ObjStatusUpdates.emplace(pLink);
+    _fNeedUpdate = true;
 }
 
 CCItemDamageable::~CCItemDamageable()
 {
-    g_World.m_ObjStatusUpdates.erase(GetLink());
 }
 
 CItem * CCItemDamageable::GetLink() const
@@ -64,14 +67,14 @@ void CCItemDamageable::OnTickStatsUpdate()
     {
         return;
     }
-    const int64 iCurtime = g_World.GetCurrentTime().GetTimeRaw();
+    const int64 iCurtime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
     if (_iTimeLastUpdate + g_Cfg._iItemHitpointsUpdate < iCurtime)
     {
         _iTimeLastUpdate = iCurtime;
 
         CItem *pItem = static_cast<CItem*>(GetLink());
-        CWorldSearch AreaChars(GetLink()->GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
+        CWorldSearch AreaChars(pItem->GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
         AreaChars.SetSearchSquare(true);
         CChar *pChar = nullptr;
         for (;;)
@@ -81,7 +84,7 @@ void CCItemDamageable::OnTickStatsUpdate()
             {
                 break;
             }
-            CClient *pClient = pChar->GetClient();
+            CClient *pClient = pChar->GetClientActive();
             if (!pClient)
             {
                 continue;
@@ -118,7 +121,7 @@ lpctstr const CCItemDamageable::sm_szLoadKeys[CIDMGL_QTY + 1] =
 bool CCItemDamageable::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCItemDamageable::r_LoadVal");
-    int iKeyNum = FindTableHead(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iKeyNum = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iKeyNum < 0)
     {
         return false;
@@ -141,11 +144,11 @@ bool CCItemDamageable::r_LoadVal(CScript & s)
     return false;
 }
 
-bool CCItemDamageable::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
+bool CCItemDamageable::r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCItemDamageable::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-    int iKeyNum = FindTableHead(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iKeyNum = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iKeyNum < 0)
     {
         return false;
@@ -183,9 +186,9 @@ void CCItemDamageable::r_Write(CScript & s)
     }
 }
 
-bool CCItemDamageable::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
+bool CCItemDamageable::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
-    UNREFERENCED_PARAMETER(pszKey);
+    UNREFERENCED_PARAMETER(ptcKey);
     UNREFERENCED_PARAMETER(pRef);
     return false;
 }
@@ -211,6 +214,6 @@ void CCItemDamageable::Copy(const CComponent * target)
 
 CCRET_TYPE CCItemDamageable::OnTickComponent()
 {
-    ADDTOCALLSTACK("CCItemDamageable::OnTick");
-    return CCRET_CONTINUE;  // Skip code here, OnTick is done separately from OnTickStatsUpdate
+    ADDTOCALLSTACK("CCItemDamageable::_OnTick");
+    return CCRET_CONTINUE;  // Skip code here, _OnTick is done separately from OnTickStatsUpdate
 }

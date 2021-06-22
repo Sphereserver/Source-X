@@ -4,9 +4,11 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../components/CCPropsItemChar.h"
+#include "../CServer.h"
 #include "../triggers.h"
 #include "CItem.h"
+#include "CItemMulti.h"
 #include "CItemContainer.h"
 
 //----------------------------------------------------
@@ -15,22 +17,20 @@
 CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
     CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
-	// m_fTinkerTrapped = false;
-    _uidMultiSecured.InitUID();
-    _uidMultiCrate.InitUID();
 }
 
 CItemContainer::~CItemContainer()
 {
-    Clear();		// get rid of my contents first to protect against weight calc errors.
-    DeletePrepare();
+	CItemContainer::DeletePrepare();
+	CContainer::ClearContainer();		// get rid of my contents first to protect against weight calc errors.
+
     CItemMulti *pMulti = nullptr;
     if (_uidMultiSecured.IsValidUID())
     {
         pMulti = static_cast<CItemMulti*>(_uidMultiSecured.ItemFind());
         if (pMulti)
         {
-            pMulti->Release(GetUID());
+            pMulti->Release(GetUID(), true);
         }
     }
     if (_uidMultiCrate.IsValidUID())
@@ -38,7 +38,7 @@ CItemContainer::~CItemContainer()
         pMulti = static_cast<CItemMulti*>(_uidMultiCrate.ItemFind());
         if (pMulti)
         {
-            pMulti->SetMovingCrate(UID_UNUSED);
+			pMulti->SetMovingCrate({});
         }
     }
 }
@@ -59,17 +59,20 @@ bool CItemContainer::NotifyDelete()
 
 void CItemContainer::DeletePrepare()
 {
+	ADDTOCALLSTACK("CItemContainer::DeletePrepare");
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
 		Trade_Delete();
+	
+	CContainer::ContentDelete(false);	// This object and its contents need to be deleted on the same tick
 	CItem::DeletePrepare();
 }
 
-void CItemContainer::SetSecuredOfMulti(CUID uidMulti)
+void CItemContainer::SetSecuredOfMulti(const CUID& uidMulti)
 {
     _uidMultiSecured = uidMulti;
 }
 
-void CItemContainer::SetCrateOfMulti(CUID uidMulti)
+void CItemContainer::SetCrateOfMulti(const CUID& uidMulti)
 {
     _uidMultiCrate = uidMulti;
 }
@@ -81,22 +84,26 @@ void CItemContainer::r_Write( CScript &s )
 	r_WriteContent(s);
 }
 
-bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
+bool CItemContainer::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CItemContainer::r_GetRef");
-	if ( r_GetRefContainer(pszKey, pRef) )
+	if ( r_GetRefContainer(ptcKey, pRef) )
 		return true;
 
-	return CItemVendable::r_GetRef(pszKey, pRef);
+	return CItemVendable::r_GetRef(ptcKey, pRef);
 }
 
-bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
+bool CItemContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
+
 	EXC_TRY("WriteVal");
-	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
+
+	if ( r_WriteValContainer(ptcKey, sVal, pSrc) )
 		return true;
-	return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+	return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
+
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -125,10 +132,10 @@ void CItemContainer::Trade_Status( bool bCheck )
 		return;
 
 	CChar *pChar1 = dynamic_cast<CChar *>(GetParent());
-	if ( !pChar1 || !pChar1->IsClient() )
+	if ( !pChar1 || !pChar1->IsClientActive() )
 		return;
 	CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-	if ( !pChar2 || !pChar2->IsClient() )
+	if ( !pChar2 || !pChar2->IsClientActive() )
 		return;
 
 	m_itEqTradeWindow.m_bCheck = bCheck ? 1 : 0;
@@ -137,10 +144,10 @@ void CItemContainer::Trade_Status( bool bCheck )
 
 	PacketTradeAction cmd(SECURE_TRADE_CHANGE);
 	cmd.prepareReadyChange(this, pPartner);
-	cmd.send(pChar1->GetClient());
+	cmd.send(pChar1->GetClientActive());
 
 	cmd.prepareReadyChange(pPartner, this);
-	cmd.send(pChar2->GetClient());
+	cmd.send(pChar2->GetClientActive());
 
 	// Check if both clients had pressed the 'accept' buttom
 	if ( pPartner->m_itEqTradeWindow.m_bCheck == 0 || m_itEqTradeWindow.m_bCheck == 0 )
@@ -150,33 +157,40 @@ void CItemContainer::Trade_Status( bool bCheck )
 	{
 		CScriptTriggerArgs Args1(pChar1);
 		ushort i = 1;
-		for ( CItem *pItem = pPartner->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext(), ++i )
+		for (CSObjContRec* pObjRec : *pPartner)
+		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			Args1.m_VarObjs.Insert(i, pItem, true);
+			++i;
+		}
 		Args1.m_iN1 = --i;
 
 		CScriptTriggerArgs Args2(pChar2);
 		i = 1;
-		for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext(), ++i )
+		for (CSObjContRec * pObjRec : *this)
+		{
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			Args2.m_VarObjs.Insert(i, pItem, true);
-		Args2.m_iN2 = --i;
+			++i;
+		}
+		Args2.m_iN1 = --i;
 
-		Args1.m_iN2 = Args2.m_iN2;
-		Args2.m_iN1 = Args1.m_iN1;
+		Args1.m_iN2 = Args2.m_iN1;
+		Args2.m_iN2 = Args1.m_iN1;
 		if ( (pChar1->OnTrigger(CTRIG_TradeAccepted, pChar2, &Args1) == TRIGRET_RET_TRUE) || (pChar2->OnTrigger(CTRIG_TradeAccepted, pChar1, &Args2) == TRIGRET_RET_TRUE) )
 			return;
 	}
 
 	// Transfer items
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = pPartner->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : pPartner->GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pChar1->ItemBounce(pItem, false);
 	}
 
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pChar2->ItemBounce(pItem, false);
 	}
 
@@ -215,8 +229,8 @@ void CItemContainer::Trade_Status( bool bCheck )
 			pChar1->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_TRADE_RECEIVED_GOLD), pPartner->m_itEqTradeWindow.m_iGold, pChar2->GetName());
 		}
 
-		int64 iGold1 = m_itEqTradeWindow.m_iGold + (m_itEqTradeWindow.m_iPlatinum * 1000000000);
-		int64 iGold2 = pPartner->m_itEqTradeWindow.m_iGold + (pPartner->m_itEqTradeWindow.m_iPlatinum * 1000000000);
+		const int64 iGold1 = m_itEqTradeWindow.m_iGold           + (          m_itEqTradeWindow.m_iPlatinum * 1000000000LL);
+		const int64 iGold2 = pPartner->m_itEqTradeWindow.m_iGold + (pPartner->m_itEqTradeWindow.m_iPlatinum * 1000000000LL);
 		pChar1->m_virtualGold += iGold2 - iGold1;
 		pChar2->m_virtualGold += iGold1 - iGold2;
 		pChar1->UpdateStatsFlag();
@@ -235,18 +249,18 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	if ( !pPartner )
 		return;
 	CChar *pChar1 = dynamic_cast<CChar *>(GetParent());
-	if ( !pChar1 || !pChar1->IsClient() )
+	if ( !pChar1 || !pChar1->IsClientActive() )
 		return;
 	CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-	if ( !pChar2 || !pChar2->IsClient() )
+	if ( !pChar2 || !pChar2->IsClientActive() )
 		return;
 
 	bool bUpdateChar1 = false;
-	bool bUpdateChar2 = pChar2->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
+	bool bUpdateChar2 = pChar2->GetClientActive()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
 
 	// To prevent cheating, check if the char really have these gold/platinum values
-	int64 iMaxValue = pChar1->m_virtualGold;
-	if ( gold + (platinum * 1000000000) > iMaxValue )
+	const int64 iMaxValue = pChar1->m_virtualGold;
+	if ( gold + (platinum * 1000000000LL) > iMaxValue )
 	{
 		gold = (dword)(iMaxValue % 1000000000);
 		platinum = (dword)(iMaxValue / 1000000000);
@@ -259,12 +273,12 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	PacketTradeAction cmd(SECURE_TRADE_UPDATEGOLD);
 	cmd.prepareUpdateGold(this, gold, platinum);
 	if ( bUpdateChar1 )
-		cmd.send(pChar1->GetClient());
+		cmd.send(pChar1->GetClientActive());
 	if ( bUpdateChar2 )
-		cmd.send(pChar2->GetClient());
+		cmd.send(pChar2->GetClientActive());
 }
 
-void CItemContainer::Trade_Delete()
+bool CItemContainer::Trade_Delete()
 {
 	ADDTOCALLSTACK("CItemContainer::Trade_Delete");
 	// Called when object deleted.
@@ -274,28 +288,27 @@ void CItemContainer::Trade_Delete()
 
 	CChar *pChar = dynamic_cast<CChar *>(GetParent());
 	if ( !pChar )
-		return;
+		return false;
 
-	if ( pChar->IsClient() )
+	if ( pChar->IsClientActive() )
 	{
 		// Send the cancel trade message.
 		PacketTradeAction cmd(SECURE_TRADE_CLOSE);
 		cmd.prepareClose(this);
-		cmd.send(pChar->GetClient());
+		cmd.send(pChar->GetClientActive());
 	}
 
 	// Drop items back in my pack.
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
-		pItemNext = pItem->GetNext();
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		pChar->ItemBounce(pItem, false);
 	}
 
 	// Kill my trading partner.
 	CItemContainer *pPartner = dynamic_cast<CItemContainer *>(m_uidLink.ItemFind());
 	if ( !pPartner )
-		return;
+		return false;
 
 	if ( IsTrigUsed(TRIGGER_TRADECLOSE) )
 	{
@@ -308,7 +321,7 @@ void CItemContainer::Trade_Delete()
 
 	m_uidLink.InitUID();	// unlink.
 	pPartner->m_uidLink.InitUID();
-	pPartner->Delete();
+	return pPartner->Delete();
 }
 
 int CItemContainer::GetWeight(word amount) const
@@ -319,16 +332,21 @@ int CItemContainer::GetWeight(word amount) const
 void CItemContainer::OnWeightChange( int iChange )
 {
 	ADDTOCALLSTACK("CItemContainer::OnWeightChange");
+	if ( iChange == 0 )
+		return;
+
+	// Use WeightReduction property
+	if (GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true))
+		iChange = iChange * (100 - (GetPropNum(COMP_PROPS_ITEMCHAR, PROPITCH_WEIGHTREDUCTION, true))) / 100;
+
+	// Apply the weight change on the container
 	CContainer::OnWeightChange(iChange);
 	UpdatePropertyFlag();
 
-	if ( iChange == 0 )
-		return;	// no change
-
-				// some containers do not add weight to you.
+	// Some containers do not add weight to you.
 	if ( !IsWeighed() )
 		return;
-
+	
 	// Propagate the weight change up the stack if there is one.
 	CContainer *pCont = dynamic_cast<CContainer *>(GetParent());
 	if ( !pCont )
@@ -348,8 +366,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		word m_miny;
 		word m_maxx;
 		word m_maxy;
-	}
-	sm_ContSize[] =
+	} sm_ContSize[] =
 	{
         { GUMP_SCROLL, 30, 30, 270, 170 },
         { GUMP_CORPSE, 20, 85, 124, 196 },
@@ -386,36 +403,47 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         { GUMP_TALL_CABINET, 10, 10, 170, 115 },
         { GUMP_CHEST_WOOD_FINISH, 10, 10, 170, 115 },
         { GUMP_DRAWER_RED, 10, 10, 170, 115 },
-        //{ GUMP_BLESSED_STATUE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-        //{ GUMP_MAILBOX, 0, 0, 0, 0 },			// TO-DO: confirm gump size
+        { GUMP_BLESSED_STATUE, 44, 29, 128, 103 },
+        { GUMP_MAILBOX, 19, 61, 119, 155 },
         { GUMP_GIFT_BOX_CUBE, 23, 51, 163, 151 },
         { GUMP_GIFT_BOX_CYLINDER, 16, 51, 156, 166 },
         { GUMP_GIFT_BOX_OCTOGON, 25, 51, 165, 166 },
         { GUMP_GIFT_BOX_RECTANGLE, 16, 51, 156, 151 },
         { GUMP_GIFT_BOX_ANGEL, 21, 51, 161, 151 },
         { GUMP_GIFT_BOX_HEART_SHAPED, 56, 30, 158, 104 },
-        //{ GUMP_GIFT_BOX_TALL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_GIFT_BOX_TALL, 77, 44, 161, 105 },
         { GUMP_GIFT_BOX_CHRISTMAS, 16, 51, 156, 166 },
-        //{ GUMP_WALL_SAFE, 0, 0, 0, 0 },			// TO-DO: confirm gump size
-        { GUMP_CHEST_PIRATE, 0, 0, 0, 0 },		    // TO-DO: confirm gump size
-        //{ GUMP_FOUNTAIN_LIFE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_SECRET_CHEST, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_DOLPHIN, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_SQUIRREL, 0, 0, 0, 0 },	// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_BARREL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
-		//{ GUMP_MAILBOX_LANTERN, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_WALL_SAFE, 35, 13, 112, 165 },
+        { GUMP_CHEST_HUGE, 61, 86, 574, 382 },
+        { GUMP_CHEST_PIRATE, 49, 76, 141, 114 },
+        { GUMP_FOUNTAIN_LIFE, 4, 42, 162, 110 },
+		{ GUMP_COMBINATION_CHEST_OPEN, 49, 121, 349, 236 },
+		{ GUMP_MAILBOX_DOLPHIN, 16, 84, 119, 153 },
+		{ GUMP_MAILBOX_SQUIRREL, 16, 66, 116, 149 },
+		{ GUMP_MAILBOX_BARREL, 13, 71, 122, 147 },
+		{ GUMP_MAILBOX_LANTERN, 17, 63, 117, 152 },
+		{ GUMP_WARDROBE_YELLOW, 66, 73, 308, 542 },
+		{ GUMP_WARDROBE_BROWN, 66, 73, 308, 542 },
+		{ GUMP_DRAWER_YELLOW, 57, 54, 545, 300 },
+		{ GUMP_DRAWER_BROWN, 57, 54, 545, 300 },
+		{ GUMP_BARREL_SHORT, 48, 78, 363, 316 },
+		{ GUMP_BOOKCASE_BROWN, 93, 32, 567, 344 },
         { GUMP_SECURE_TRADE, 20, 30, 380, 180 },
+        { GUMP_SEED_BOX, 16, 29, 283, 338 },
+        { GUMP_SECURE_TRADE_TOL, 19, 108, 154, 183 },
         { GUMP_BOARD_CHECKER, 0, 0, 282, 230 },
         { GUMP_BOARD_BACKGAMMON, 0, 0, 282, 210 },
         { GUMP_CHEST_WEDDING, 16, 51, 184, 124 },
         { GUMP_STONE_BASE, 16, 51, 184, 124 },
         { GUMP_PLAGUE_BEAST, 60, 33, 460, 348 },
-        //{ GUMP_KING_COLLECTION_BOX, 0, 0, 0, 0 },	// TO-DO: confirm gump size
+        { GUMP_REGAL_CASE, 32, 72, 226, 150 },
         { GUMP_BACKPACK_SUEDE, 44, 65, 186, 159 },
         { GUMP_BACKPACK_POLAR_BEAR, 44, 65, 186, 159 },
         { GUMP_BACKPACK_GHOUL_SKIN, 44, 65, 186, 159 },
-        //{ GUMP_GIFT_BOX_SQUARE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+        { GUMP_GIFT_BOX_CHRISTMAS_2, 25, 36, 194, 120 },
+        { GUMP_WALL_SAFE_COMBINATION, 9, 13, 117, 176 },
         { GUMP_CRATE_FLETCHING, 24, 96, 196, 152 },
+        { GUMP_DRAWER_ROYAL, 50, 90, 552, 343 },
         { GUMP_CHEST_WOODEN, 10, 10, 170, 115 },
         //{ GUMP_PILLOW_HEART, 0, 0, 0, 0 },		// TO-DO: confirm gump size
         { GUMP_CHEST_METAL_LARGE, 50, 60, 500, 300 },
@@ -424,20 +452,24 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		{ GUMP_CHEST_CRATE_LARGE, 50, 60, 500, 300 },
 		{ GUMP_MINERS_SATCHEL, 44, 65, 186, 159 },
 		{ GUMP_LUMBERJACKS_SATCHEL, 44, 65, 186, 159 },
+		{ GUMP_MAILBOX_WOOD, 17, 63, 116, 153 },
+		{ GUMP_MAILBOX_BIRD, 18, 68, 117, 154 },
+		{ GUMP_MAULBOX_IRON, 19, 81, 117, 152 },
+		{ GUMP_MAILBOX_GOLDEN, 23, 65, 112, 155 },
         { GUMP_CHEST_METAL2, 18, 105, 162, 178 }
 	};
 
 	// Get a random location in the container.
 
-	CItemBase *pItemDef = Item_GetDef();
+	const CItemBase *pItemDef = Item_GetDef();
 	GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
 
 	// check for custom values in TDATA3/TDATA4
 	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
 	{
-		int tmp_MinX = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16;
+		int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
 		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
-		int tmp_MaxX = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16;
+		int tmp_MaxX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
@@ -449,22 +481,27 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	// No TDATA3 or no TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2
 
 	uint i = 0;
-	for ( ; ; ++i )
+	// We may want a keyring with no gump, so no need to show the warning.
+	if (!IsType(IT_KEYRING))
 	{
-		if ( i >= CountOf(sm_ContSize) )
+		for (; ; ++i)
 		{
-			i = 0;	// set to default
-			g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
-			break;
+			if (i >= CountOf(sm_ContSize))
+			{
+				i = 0;	// set to default
+				g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
+				break;
+			}
+			if (sm_ContSize[i].m_gump == gump)
+				break;
 		}
-		if ( sm_ContSize[i].m_gump == gump )
-			break;
 	}
 
-	return CPointMap(
-		(word)(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
-		(word)(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
-		0);
+	const int iRandOnce = (int)Calc_GetRandVal(UINT16_MAX);
+	return {
+		(short)(sm_ContSize[i].m_minx + (iRandOnce % (sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx))),
+		(short)(sm_ContSize[i].m_miny + (iRandOnce % (sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny))),
+		0 };
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack, uchar gridIndex )
@@ -484,10 +521,6 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
                 Trade_Status(false);
                 break;
 
-            case IT_CONTAINER:
-            case IT_CONTAINER_LOCKED:
-                pItem->GoSleep();
-                break;
             default:
                 break;
         }
@@ -504,7 +537,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				// delete all it's pieces.
 				CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
 				ASSERT(pCont);
-				pCont->Clear();
+				pCont->ClearContainer();
 				break;
 			}
             default:
@@ -516,9 +549,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	CItemBase *pContDef = Item_GetDef();
 	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
 	{
-		const short tmp_MinX = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16 );
+		const short tmp_MinX = (short)( pContDef->m_ttContainer.m_dwMinXY >> 16 );
         const short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
-        const short tmp_MaxX = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16 );
+        const short tmp_MaxX = (short)( pContDef->m_ttContainer.m_dwMaxXY >> 16 );
         const short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
 		if (pt.m_x < tmp_MinX)
 			pt.m_x = tmp_MinX;
@@ -530,55 +563,60 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 			pt.m_y = tmp_MaxY;
 	}
 
+    bool fStackInsert = false;
 	if ( pt.m_x <= 0 || pt.m_y <= 0 || pt.m_x > 512 || pt.m_y > 512 )	// invalid container location ?
 	{
-		bool fInsert = false;
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
-			for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
+			for (CSObjContRec* pObjRec : *this)
 			{
+				CItem* pTry = static_cast<CItem*>(pObjRec);
 				pt = pTry->GetContainedPoint();
 				if ( pItem->Stack(pTry) )
 				{
-					fInsert = true;
+                    fStackInsert = true;
 					break;
 				}
 			}
 		}
-		if ( !fInsert )
+		if ( !fStackInsert)
 			pt = GetRandContainerLoc();
 	}
 
     // Try drop it on given container grid index (if not available, drop it on next free index)
-    bool fGridAvailable;
-    for ( uint i = 0; i < UCHAR_MAX; ++i )
-    {
-        fGridAvailable = true;
-        for ( CItem *pTry = GetContentHead(); pTry != nullptr; pTry = pTry->GetNext() )
-        {
-            if ( pTry->GetContainedGridIndex() == gridIndex )
-            {
-                fGridAvailable = false;
-                break;
-            }
-        }
-        if ( fGridAvailable )
-            break;
+	{
+		bool fGridCellUsed[UCHAR_MAX] {false};
+		for (const CSObjContRec* pObjRec : *this)
+		{
+			const CItem* pTry = static_cast<const CItem*>(pObjRec);
+			const auto idxGridTest = pTry->GetContainedGridIndex();
 
-        if ( ++gridIndex >= g_Cfg.m_iContainerMaxItems )
-            gridIndex = 0;
+			static_assert(sizeof(idxGridTest) == sizeof(uchar));
+			fGridCellUsed[idxGridTest] = true;
+		}
+
+		static_assert(sizeof(gridIndex) == sizeof(uchar));
+		if (fGridCellUsed[gridIndex])
+		{
+			gridIndex = 0;
+			for (uint i = 0; i < UCHAR_MAX; ++i)
+			{
+				if (!fGridCellUsed[i])
+					break;
+
+				if (++gridIndex >= g_Cfg.m_iContainerMaxItems)
+				{
+					gridIndex = 0;
+					break;
+				}
+			}
+		}
 	}
 
 	CContainer::ContentAddPrivate(pItem);
 	pItem->SetContainedPoint(pt);
 	pItem->SetContainedGridIndex(gridIndex);
-
-	// if an item needs OnTickStatusUpdate called on the next tick, it needs
-	// to be added to a separate list since it won't receive ticks whilst in
-	// this container
-	if ( pItem->m_fStatusUpdate != 0 )
-        g_World.m_ObjStatusUpdates.emplace(pItem);
 
 	switch ( GetType() )
 	{
@@ -628,7 +666,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	}
 
 	pItem->Update();
-    UpdatePropertyFlag();
+    if (!fStackInsert)
+        pItem->UpdatePropertyFlag();
+    // UpdatePropertyFlag for this item is called by CContainer::ContentAddPrivate -> CItemContainer::OnWeightChange
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
@@ -638,6 +678,7 @@ void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
 		return;
 	if ( pItem->GetParent() == this )
 		return;	// already here.
+
 	CPointMap pt;	// invalid point.
 	if ( g_Serv.IsLoading() )
 		pt = pItem->GetUnkPoint();
@@ -685,11 +726,11 @@ bool CItemContainer::IsItemInside( const CItem *pItem ) const
 	}
 }
 
-void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called when removed from list.
+void CItemContainer::OnRemoveObj( CSObjContRec *pObjRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CItemContainer::OnRemoveObj");
 	// remove this object from the container list.
-	CItem *pItem = static_cast<CItem *>(pObRec);
+	CItem *pItem = static_cast<CItem *>(pObjRec);
 	ASSERT(pItem);
 	if ( IsType(IT_EQ_TRADE_WINDOW) )
 	{
@@ -702,12 +743,28 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 		if ( pItemVend )
 			pItemVend->SetPlayerVendorPrice(0);
 	}
-	CContainer::OnRemoveObj(pObRec);
+	CContainer::OnRemoveObj(pObjRec);
     UpdatePropertyFlag();
 
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();
     pItem->GoAwake();
+}
+
+void CItemContainer::_GoAwake()
+{
+	ADDTOCALLSTACK("CItemContainer::_GoAwake");
+
+	CItem::_GoAwake();
+	CContainer::_GoAwake();	// This method isn't virtual
+}
+
+void CItemContainer::_GoSleep()
+{
+	ADDTOCALLSTACK("CItemContainer::_GoSleep");
+
+	CContainer::_GoSleep(); // This method isn't virtual
+	CItem::_GoSleep();
 }
 
 void CItemContainer::DupeCopy( const CItem *pItem )
@@ -721,8 +778,11 @@ void CItemContainer::DupeCopy( const CItem *pItem )
 	if ( !pContItem )
 		return;
 
-	for ( CItem *pContent = pContItem->GetContentHead(); pContent != nullptr; pContent = pContent->GetNext() )
+	for (const CSObjContRec* pObjRec : *pContItem)
+	{
+		const CItem* pContent = static_cast<const CItem*>(pObjRec);
 		ContentAdd(CreateDupeItem(pContent), pContent->GetContainedPoint());
+	}
 }
 
 void CItemContainer::MakeKey()
@@ -730,7 +790,7 @@ void CItemContainer::MakeKey()
 	ADDTOCALLSTACK("CItemContainer::MakeKey");
 	SetType(IT_CONTAINER);
 	m_itContainer.m_UIDLock = GetUID();
-	m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal(600);
+	m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
 
 	CItem *pKey = CreateScript(ITEMID_KEY_COPPER);
 	ASSERT(pKey);
@@ -752,7 +812,7 @@ void CItemContainer::SetKeyRing()
 		ITEMID_KEY_RING5
 	};
 
-	size_t iQty = GetCount();
+	size_t iQty = GetContentCount();
 	if ( iQty >= CountOf(sm_Item_Keyrings) )
 		iQty = CountOf(sm_Item_Keyrings) - 1;
 
@@ -781,7 +841,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 	size_t pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXITEMS"));
 	size_t tMaxItemsCont = pTagTmp ? pTagTmp : g_Cfg.m_iContainerMaxItems;
-	if ( GetCount() >= tMaxItemsCont )
+	if ( GetContentCount() >= tMaxItemsCont )
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
 		return false;
@@ -869,7 +929,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 				pCharMsg->SysMessageDefault(DEFMSG_MSG_ERR_NOTKEY);
 				return false;
 			}
-			if ( !pItem->m_itKey.m_UIDLock )
+			if ( !pItem->m_itKey.m_UIDLock.IsValidUID())
 			{
 				pCharMsg->SysMessageDefault(DEFMSG_MSG_ERR_NOBLANKRING);
 				return false;
@@ -891,7 +951,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			}
 
 			// Check that this vendor box hasn't already reached its content limit
-			if ( GetCount() >= g_Cfg.m_iContainerMaxItems )
+			if ( GetContentCount() >= g_Cfg.m_iContainerMaxItems )
 			{
 				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
 				return false;
@@ -901,7 +961,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		case IT_TRASH_CAN:
 			Sound(0x235); // a little sound so we know it "ate" it.
 			pCharMsg->SysMessageDefault(DEFMSG_ITEMUSE_TRASHCAN);
-			SetTimeoutS(15);
+			_SetTimeoutS(15);
 			break;
 
 		default:
@@ -927,8 +987,9 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_STOCK:
 					// Magic restock the vendors container.
 				{
-					for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+					for (CSObjContRec* pObjRec : *this)
 					{
+						CItem* pItem = static_cast<CItem*>(pObjRec);
 						CItemVendable *pVendItem = dynamic_cast<CItemVendable *>(pItem);
 						if ( pVendItem )
 							pVendItem->Restock(true);
@@ -939,14 +1000,15 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_EXTRA:
 					// clear all this junk periodically.
 					// sell it back for cash value ?
-					Clear();
+					ClearContainer();
 					break;
 
 				case LAYER_VENDOR_BUYS:
 				{
 					// Reset what we will buy from players.
-					for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+					for (CSObjContRec* pObjRec : *this)
 					{
+						CItem* pItem = static_cast<CItem*>(pObjRec);
 						CItemVendable *pVendItem = dynamic_cast<CItemVendable *>(pItem);
 						if ( pVendItem )
 							pVendItem->Restock(false);
@@ -986,9 +1048,9 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 		int iStones = GetWeight() / WEIGHT_UNITS;
 		tchar *pszMsg = Str_GetTemp();
 		if ( pCharTop == pCharOpener )
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
 		else
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
+			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
 
 		pCharOpener->SysMessage(pszMsg);
 
@@ -1003,7 +1065,7 @@ void CItemContainer::Game_Create()
 	ADDTOCALLSTACK("CItemContainer::Game_Create");
 	ASSERT(IsType(IT_GAME_BOARD));
 
-	if ( GetCount() > 0 )
+	if ( !IsContainerEmpty() )
 		return;	// already here.
 
 	static const ITEMID_TYPE sm_Item_ChessPieces[] =
@@ -1220,16 +1282,18 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			{
 				// 1 based pages.
 				size_t index = s.GetArgVal();
-				if ( index > 0 && index <= GetCount() )
+				if ( index > 0 && index <= GetContentCount() )
 				{
-					delete GetAt(index - 1);
+					CItem *pItem = static_cast<CItem*>(GetContentIndex(index - 1));
+					ASSERT(pItem);
+					pItem->Delete();
 					return true;
 				}
 			}
 			return false;
 		case ICV_EMPTY:
 		{
-			Clear();
+			ClearContainer();
 			return true;
 		}
 		case ICV_FIXWEIGHT:
@@ -1239,9 +1303,9 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( pSrc->GetChar() )
 			{
 				CChar *pChar = pSrc->GetChar();
-				if ( pChar->IsClient() )
+				if ( pChar->IsClientActive() )
 				{
-					CClient *pClient = pChar->GetClient();
+					CClient *pClient = pChar->GetClientActive();
 					ASSERT(pClient);
 
 					if ( s.HasArgs() )
@@ -1260,9 +1324,9 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( pSrc->GetChar() )
 			{
 				CChar *pChar = pSrc->GetChar();
-				if ( pChar->IsClient() )
+				if ( pChar->IsClientActive() )
 				{
-					CClient *pClient = pChar->GetClient();
+					CClient *pClient = pChar->GetClientActive();
 					ASSERT(pClient);
 					pClient->closeContainer(this);
 				}
@@ -1278,15 +1342,15 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 	return false;
 }
 
-bool CItemContainer::OnTick()
+bool CItemContainer::_OnTick()
 {
-	ADDTOCALLSTACK("CItemContainer::OnTick");
+	ADDTOCALLSTACK("CItemContainer::_OnTick");
 	// equipped or not.
 	switch ( GetType() )
 	{
 		case IT_TRASH_CAN:
 			// Empty it !
-			Clear();
+			ClearContainer();
 			return true;
 		case IT_CONTAINER:
 			if ( IsAttr(ATTR_MAGIC) )
@@ -1301,10 +1365,10 @@ bool CItemContainer::OnTick()
 			// Restock this box.
 			// Magic restocking container.
 			Restock();
-			SetTimeout(-1);
+			_SetTimeout(-1);
 			return true;
 		default:
 			break;
 	}
-	return CItemVendable::OnTick();
+	return CItemVendable::_OnTick();
 }

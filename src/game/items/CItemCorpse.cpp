@@ -2,22 +2,88 @@
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
-#include "../CWorld.h"
+#include "../CException.h"
+#include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
 #include "CItem.h"
 #include "CItemCorpse.h"
 
 
 CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItemContainer( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS),
+	CItemContainer( id, pItemDef )
 {
-	ADDTOCALLSTACK("CItemCorpse::CItemCorpse");
 }
 
 CItemCorpse::~CItemCorpse()
 {
-	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+	EXC_TRY("Cleanup in destructor");
+
+	// Must remove early because virtuals will fail in child destructor.
+	DeletePrepare();
+
+	EXC_CATCH;
 }
 
+bool CItemCorpse::IsCorpseResurrectable(CChar * pCharHealer, CChar * pCharGhost) const
+{
+	if (!IsType(IT_CORPSE))
+	{
+		DEBUG_ERR(("Corpse (0%x) doesn't have type T_CORPSE! (it has %d)\n", (dword)GetUID(), GetType()));
+		return false;
+	}
+
+	//Check when the corpse is targetted, that the ghost player is still dead.
+	if (!pCharGhost->IsStatFlag(STATF_DEAD))
+	{
+		return false;
+	}
+	
+	//Check if the ghost is visible when targetting the corpse.
+	if (pCharGhost->IsStatFlag(STATF_INSUBSTANTIAL))
+	{
+		pCharHealer->SysMessageDefault(DEFMSG_HEALING_RES_MANIFEST);
+		return false;
+	}
+	//Check if the ghost is in line of sight of its corpse.
+	if (!pCharGhost->CanSeeLOS(this))
+	{
+		pCharHealer->SysMessageDefault(DEFMSG_HEALING_RES_LOS);
+		return false;
+	}
+
+	//Check if the is ghost is within 2 tiles from its corpse.
+	if (pCharGhost->GetDist(this) > 2)
+	{
+		pCharHealer->SysMessageDefault(DEFMSG_HEALING_RES_TOOFAR);
+		return false;
+	}
+
+	//Check if the corpse is not inside a container.
+	if (!IsTopLevel())
+	{
+		pCharHealer->SysMessageDefault(DEFMSG_HEALING_CORPSEG);
+		return false;
+	}
+
+	CRegion* pRegion = GetTopPoint().GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI);
+	if (pRegion == nullptr)
+	{
+		return false;
+	}
+
+	//Antimagic check.
+	if (pRegion->IsFlag(REGION_ANTIMAGIC_ALL | REGION_ANTIMAGIC_RECALL_IN | REGION_ANTIMAGIC_TELEPORT))
+	{
+		pCharHealer->SysMessageDefault(DEFMSG_HEALING_AM);
+		if (pCharGhost != pCharHealer)
+			pCharGhost->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_ATTEMPT), pCharHealer->GetName(), GetName());
+
+		return false;
+	}
+
+	return true;
+}
 CChar *CItemCorpse::IsCorpseSleeping() const
 {
 	ADDTOCALLSTACK("CItemCorpse::IsCorpseSleeping");
@@ -86,7 +152,7 @@ CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
 		CItemCorpse *pCorpse = dynamic_cast<CItemCorpse*>(pItem);
 		if ( !pCorpse || (pCorpse->m_uidLink != GetUID()) )
 			continue;
-		if ( pCorpse->m_itCorpse.m_BaseID != m_prev_id )	// not morphed type
+		if ( pCorpse->m_itCorpse.m_BaseID != _iPrev_id )	// not morphed type
 			continue;
 		if ( !ignoreLOS && !CanSeeLOS(pCorpse) )
 			continue;
@@ -120,12 +186,10 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	pCorpse->SetHue(GetHue());
 	pCorpse->SetCorpseType(GetDispID());
 	pCorpse->SetAttr(ATTR_MOVE_NEVER);
-	pCorpse->m_itCorpse.m_BaseID = m_prev_id;	// id the corpse type here !
+	pCorpse->m_itCorpse.m_BaseID = _iPrev_id;	// id the corpse type here !
 	pCorpse->m_itCorpse.m_facing_dir = m_dirFace;
 	pCorpse->m_uidLink = GetUID();
-    pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this);		// set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
-
-	// TO-DO: Fix corpses always turning to the same dir (DIR_N) after resend it to clients
+    pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this); // set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
 
 	if (fFrontFall)
 		pCorpse->m_itCorpse.m_facing_dir = (DIR_TYPE)(m_dirFace|0x80);
@@ -134,7 +198,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (IsStatFlag(STATF_DEAD))
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;
-		pCorpse->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());	// death time
+		pCorpse->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());	// death time
 		if (Attacker_GetLast())
 			pCorpse->m_itCorpse.m_uidKiller = Attacker_GetLast()->GetUID();
 		else
@@ -172,23 +236,30 @@ bool CChar::RaiseCorpse( CItemCorpse * pCorpse )
 	if ( !pCorpse )
 		return false;
 
-	if ( pCorpse->GetCount() > 0 )
+	if ( !pCorpse->IsContainerEmpty() )
 	{
 		CItemContainer *pPack = GetPackSafe();
-		CItem *pItemNext = nullptr;
-		for ( CItem *pItem = pCorpse->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+        //Looping 2x to equip items first then send rest to pack
+		for ( CSObjContRec *pObjRec : pCorpse->GetIterationSafeContReverse() )
 		{
-			pItemNext = pItem->GetNext();
+			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( pItem->IsType(IT_HAIR) || pItem->IsType(IT_BEARD) )	// hair on corpse was copied!
 				continue;
 
 			if ( pItem->GetContainedLayer() )
 				ItemEquip(pItem);
-			else if ( pPack )
-				pPack->ContentAdd(pItem);
 		}
+        for (CSObjContRec* pObjRec : pCorpse->GetIterationSafeContReverse())
+        {
+            CItem* pItem = static_cast<CItem*>(pObjRec);
+            if (pItem->IsType(IT_HAIR) || pItem->IsType(IT_BEARD))	// hair on corpse was copied!
+                continue;
 
-		pCorpse->ContentsDump( GetTopPoint());		// drop left items on ground
+            if (pPack)
+                pPack->ContentAdd(pItem);
+        }
+
+		pCorpse->ContentsDump( GetTopPoint() );		// drop left items on ground
 	}
 
 	UpdateAnimate((pCorpse->m_itCorpse.m_facing_dir & 0x80) ? ANIM_DIE_FORWARD : ANIM_DIE_BACK, true, true);

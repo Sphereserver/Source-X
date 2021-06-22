@@ -6,7 +6,8 @@
 // -CItemMap
 
 CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS),
+    CItemVendable( id, pItemDef )
 {
     m_fPlotMode = false;
 }
@@ -59,30 +60,31 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
     return false;
 }
 
-bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
+bool CItemMap::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemMap::r_WriteVal");
     EXC_TRY("WriteVal");
-        if ( !strnicmp(pszKey, "PINS", 4) )
+        if ( !strnicmp(ptcKey, "PINS", 4) )
         {
             sVal.FormatSTVal(m_Pins.size());
             return true;
         }
-        if ( !strnicmp(pszKey, "PIN.", 4) )
+        if ( !strnicmp(ptcKey, "PIN.", 4) )
         {
-            pszKey += 4;
-            size_t i = Exp_GetVal(pszKey) - 1;
+            ptcKey += 4;
+            uint i = Exp_GetUVal(ptcKey) - 1;
             if ( m_Pins.IsValidIndex(i) )
             {
                 sVal.Format("%i,%i", m_Pins[i].m_x, m_Pins[i].m_y);
                 return true;
             }
         }
-        return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+        return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
     EXC_CATCH;
 
     EXC_DEBUG_START;
-            EXC_ADD_KEYRET(pSrc);
+    EXC_ADD_KEYRET(pSrc);
     EXC_DEBUG_END;
     return false;
 }

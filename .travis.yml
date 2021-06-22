@@ -1,95 +1,45 @@
 language: cpp
 compiler: gcc
-dist: trusty
-sudo: required
+git:
+  depth: false
+notifications:
+  email: false
+branches:
+  only:
+    - coverity_scan
+
+env:
+  - CMAKE_GEN="Unix Makefiles"
+    CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
+
+before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+install:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7 
+  - sudo update-alternatives --config gcc
+
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
       - gcc-7
-      - gcc-7-multilib
       - g++-7
-      - g++-7-multilib
-branches:
-  only:
-    - master
-git:
-  depth: false
-notifications:
-  email: false
-
-env:
-  CMAKE_GEN="Unix Makefiles"
-  CMAKE_TCH_32="../src/cmake/toolchains/Linux-GNU-32.cmake"
-  CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
-  BUILD_DIR_32="build-32"
-  BUILD_DIR_64="build-64"
-
+      - libmysql++-dev
+      
+  coverity_scan:
+    project:
+      name: "Sphereserver/Source-X"
+      description: "Game server for Ultima Online"
+    notification_email: null@null
+    branch_pattern: coverity_scan
+    build_command_prepend: cmake -G '$CMAKE_GEN' -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE='$CMAKE_TCH_64' ./src
+    build_command: make -j4
+      
 script:
-  - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
+  - if [ $COVERITY_SCAN_BRANCH != 1 ]; then travis_terminate 0; fi
 
-  - echo && echo "** Setting up MySQL development packages for 64 bits" && echo
-  - sudo apt install -qq --no-install-recommends curl libmysql++3 libmysqlclient-dev
-  - export CC="gcc-7" && export CXX="g++-7"
-
-  - cd "$BUILD_DIR_64"
-  
-  - |
-    if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
-      echo && echo "** Starting to build 64 bits Nightly version to test the Pull Request" && echo
-    else
-      echo && echo "** Starting to build 64 bits Nightly version" && echo
-    fi
-  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ../src
-  - make -j4 || travis_terminate 1  # if the build fails, stop here
-  - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
-
-  # if we are testing a pull request, building only a version will be sufficient, so stop this script
-  - |
-    if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
-      travis_terminate 0
-    fi
-
-  - echo && echo "** Starting to build 64 bits Debug version" && echo
-  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ../src
-  - make -j4 || travis_terminate 1  # if the build fails, stop here
-  - echo && echo "** End of the compilation of the 64 bits Debug version" && echo
-
-  - cd ..
-
-  - echo && echo "** Setting up MySQL development packages for 32 bits" && echo
-  - sudo apt-mark hold oracle-java8-installer oracle-java9-installer
-  - sudo apt remove -qq libmysql++3 libmysqlclient-dev
-  - sudo apt install -qq --no-install-recommends libmysql++3:i386 libmysqlclient-dev:i386
-  - export CC="gcc-7" && export CXX="g++-7"
-
-  - cd "$BUILD_DIR_32"
-
-  - echo && echo "** Starting to build 32 bits Nightly version" && echo
-  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" ../src
-  - make -j4 || travis_terminate 1  # if the build fails, stop here
-  - echo && echo "** End of the compilation of the 32 bits Nightly version" && echo
-
-  - echo && echo "** Starting to build 32 bits Debug version" && echo
-  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" ../src
-  - make -j4 || travis_terminate 1  # if the build fails, stop here
-  - echo && echo "** End of the compilation of the 32 bits Debug version" && echo
-
-  - cd ..
-
-after_success:
-  # if we are testing a pull request, we don't want to upload the build to the host
-  - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
-      travis_terminate 0
-    fi
-  - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo
-  - mkdir accounts logs save scripts
-  - tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czf SphereSvrX-linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czf SphereSvrX-linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
-  - curl -m 25 --retry 10 --retry-max-time 260 -sST SphereSvrX-linux64-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-  - curl -m 25 --retry 10 --retry-max-time 260 -sST SphereSvrX-linux64-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-  - curl -m 25 --retry 10 --retry-max-time 260 -sST SphereSvrX-linux32-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-  - curl -m 25 --retry 10 --retry-max-time 260 -sST SphereSvrX-linux32-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+after_script:
+  - echo "Printing Coverity log..."
+  - cat cov-int/scm_log.txt

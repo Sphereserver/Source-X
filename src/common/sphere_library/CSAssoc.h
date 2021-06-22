@@ -9,12 +9,7 @@
 #include "CSObjList.h"
 #include "CSFile.h"
 
-#ifndef PT_REG_STRMAX
-	#define PT_REG_STRMAX		128
-#endif
-#ifndef PT_REG_ROOTKEY
-	#define PT_REG_ROOTKEY		HKEY_LOCAL_MACHINE
-#endif
+
 #ifndef OFFSETOF			// stddef.h ?
 	#define OFFSETOF(s,m)   	(int)( (byte *)&(((s *)0)->m) - (byte *)0 )
 #endif
@@ -27,16 +22,16 @@ struct CValStr
 {
 	// Associate a val with a string.
 	// Assume sorted values from min to max.
-public:
 	lpctstr m_pszName;
 	int m_iVal;
+
 public:
+	lpctstr FindName(int iVal) const;
 	void SetValues( int iVal, lpctstr pszName )
 	{
 		m_iVal = iVal;
 		m_pszName = pszName;
 	}
-	lpctstr FindName( int iVal ) const;
 	void SetValue( int iVal )
 	{
 		m_iVal = iVal;
@@ -71,10 +66,11 @@ struct CElementDef
 	// ELEM_MASK_WORD etc. = Extra masking info if needed. 
 	dword   m_extra;
 
-private:
-	CElementDef& operator=(const CElementDef& other);
+	CElementDef() = default;
+	~CElementDef() = default;
+	CElementDef(const CElementDef&) = delete;
+	CElementDef& operator=(const CElementDef& other) = delete;
 
-public:
 	// get structure value.
 	void * GetValPtr( const void * pBaseInst ) const;
 	int GetValLength() const;
@@ -87,21 +83,26 @@ class CAssocReg	// associate members of some class/structure with entries in the
 {
 	// LAST = { nullptr, 0, ELEM_VOID }
 public:
+	static const char* m_sClassName;
+
 	lpctstr m_pszKey;	// A single key identifier to be cat to a base key. nullptr=last
 	CElementDef m_elem;
+
 public:
-	static const char *m_sClassName;
-private:
-	CAssocReg& operator=(const CAssocReg& other);
-public:
+	CAssocReg() = default;
+	~CAssocReg() = default;
+	CAssocReg(const CAssocReg&) = delete;
+	CAssocReg& operator=(const CAssocReg& other) = delete;
+
 	operator lpctstr() const
 	{
-		return( m_pszKey );
+		return m_pszKey;
 	}
+
 	// get structure value.
 	void * GetValPtr( const void * pBaseInst ) const
 	{
-		return( m_elem.GetValPtr( pBaseInst ));
+		return m_elem.GetValPtr( pBaseInst );
 	}
 };
 
@@ -110,15 +111,16 @@ public:
 class CSStringListRec : public CSObjListRec, public CSString
 {
 	friend class CSStringList;
+
 public:
 	static const char *m_sClassName;
 	explicit CSStringListRec( lpctstr pszVal ) : CSString( pszVal )
 	{
 	}
-private:
-	CSStringListRec(const CSStringListRec& copy);
-	CSStringListRec& operator=(const CSStringListRec& other);
-public:
+
+	CSStringListRec(const CSStringListRec& copy) = delete;
+	CSStringListRec& operator=(const CSStringListRec& other) = delete;
+
 	CSStringListRec * GetNext() const
 	{
 		return static_cast<CSStringListRec *>( CSObjListRec::GetNext() );
@@ -129,23 +131,23 @@ class CSStringList : public CSObjList 	// obviously a list of strings.
 {
 public:
 	static const char *m_sClassName;
-	CSStringList() { };
-	virtual ~CSStringList() { };
-private:
-	CSStringList(const CSStringList& copy);
-	CSStringList& operator=(const CSStringList& other);
-public:
+	CSStringList() = default;
+	virtual ~CSStringList() = default;
+
+	CSStringList(const CSStringList& copy) = delete;
+	CSStringList& operator=(const CSStringList& other) = delete;
+
 	CSStringListRec * GetHead() const
 	{
-		return static_cast<CSStringListRec *>( CSObjList::GetHead() );
+		return static_cast<CSStringListRec *>( CSObjList::GetContainerHead() );
 	}
 	void AddHead( lpctstr pszVal )
 	{
-		InsertHead( new CSStringListRec( pszVal ));
+		InsertContentHead( new CSStringListRec( pszVal ));
 	}
 	void AddTail( lpctstr pszVal )
 	{
-		InsertTail( new CSStringListRec( pszVal ));
+		InsertContentTail( new CSStringListRec( pszVal ));
 	}
 };
 

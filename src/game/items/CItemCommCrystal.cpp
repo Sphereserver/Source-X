@@ -1,16 +1,23 @@
 #include "../resource/CResourceLock.h"
-#include "../CWorld.h"
+#include "../CException.h"
+#include "../CSector.h"
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"
 
 CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+    CTimedObject(PROFILE_ITEMS),
+    CItemVendable( id, pItemDef )
 {
 }
 
 CItemCommCrystal::~CItemCommCrystal()
 {
-    DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+    EXC_TRY("Cleanup in destructor");
+
+    // / Must remove early because virtuals will fail in child destructor.
+    DeletePrepare();
+
+    EXC_CATCH;
 }
 
 lpctstr const CItemCommCrystal::sm_szLoadKeys[] =
@@ -29,13 +36,13 @@ void CItemCommCrystal::OnMoveFrom()
 }
 
 // Move this item to it's point in the world. (ground/top level)
-bool CItemCommCrystal::MoveTo(CPointMap pt, bool bForceFix)
+bool CItemCommCrystal::MoveTo(const CPointMap& pt, bool fForceFix)
 {
     ADDTOCALLSTACK("CItemCommCrystal::MoveTo");
     CSector *pSector = pt.GetSector();
     ASSERT(pSector);
     pSector->AddListenItem();
-    return CItem::MoveTo(pt, bForceFix);
+    return CItem::MoveTo(pt, fForceFix);
 }
 
 void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
@@ -44,9 +51,9 @@ void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
     // IT_COMM_CRYSTAL
     // STATF_COMM_CRYSTAL = if i am on a person.
     TALKMODE_TYPE mode = TALKMODE_SAY;
-    for ( size_t i = 0; i < m_Speech.size(); i++ )
+    for ( size_t i = 0; i < m_Speech.size(); ++i )
     {
-        CResourceLink *pLink = m_Speech[i];
+        CResourceLink *pLink = m_Speech[i].GetRef();
         ASSERT(pLink);
         CResourceLock s;
         if ( !pLink->ResourceLock(s) )
@@ -80,16 +87,17 @@ void CItemCommCrystal::r_Write(CScript & s)
     m_Speech.r_Write(s, "SPEECH");
 }
 
-bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
+bool CItemCommCrystal::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemCommCrystal::r_WriteVal");
-    switch ( FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+    switch ( FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
     {
         case 0:
             m_Speech.WriteResourceRefList(sVal);
             break;
         default:
-            return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+            return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
     }
     return true;
 }

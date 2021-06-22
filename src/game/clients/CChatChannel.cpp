@@ -1,6 +1,6 @@
 
 #include "../chars/CChar.h"
-#include "../CWorld.h"
+#include "../CServer.h"
 #include "CChatChannel.h"
 #include "CChatChanMember.h"
 #include "CClient.h"
@@ -50,7 +50,7 @@ void CChatChannel::WhoIs(lpctstr pszBy, lpctstr pszMember)
     ADDTOCALLSTACK("CChatChannel::WhoIs");
     CChatChanMember * pBy = FindMember(pszBy);
     CChatChanMember * pMember = FindMember(pszMember);
-    CChar * pChar = pMember? pMember->GetClient()->GetChar() : nullptr;
+    CChar * pChar = pMember? pMember->GetClientActive()->GetChar() : nullptr;
     if (!pMember||!pChar)
     {
         pBy->SendChatMsg(CHATMSG_NoPlayer, pszMember);
@@ -184,19 +184,19 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
     for ( size_t i = 0; i < m_Members.size(); )
     {
         // Tell the other clients in this channel (if any) you are leaving (including yourself)
-        CClient * pClient = m_Members[i]->GetClient();
+        CClient * pClient = m_Members[i]->GetClientActive();
 
         if ( pClient == nullptr )		//	auto-remove offline clients
         {
             m_Members[i]->SetChannel(nullptr);
-            m_Members.erase(i);
+            m_Members.erase_at(i);
             continue;
         }
 
         pClient->addChatSystemMessage(CHATMSG_RemoveMember, pMember->GetChatName());
         if (m_Members[i] == pMember)	// disjoin
         {
-            m_Members.erase(i);
+            m_Members.erase_at(i);
             break;
         }
 
@@ -210,7 +210,7 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
 CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
 {
     size_t i = FindMemberIndex( pszName );
-    if ( i == m_Members.BadIndex() )
+    if ( i == SCONT_BADINDEX )
         return nullptr;
     return m_Members[i];
 }
@@ -261,7 +261,7 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
         if (m_Moderators[i]->Compare(pszMember) == 0)
         {
             if (fFlag == false)
-                m_Moderators.erase(i);
+                m_Moderators.erase_at(i);
             return;
         }
     }
@@ -344,7 +344,7 @@ void CChatChannel::SendThisMember(CChatChanMember * pMember, CChatChanMember * p
 {
     ADDTOCALLSTACK("CChatChannel::SendThisMember");
     tchar buffer[2048];
-    sprintf(buffer, "%s%s",
+    snprintf(buffer, sizeof(buffer), "%s%s",
             (IsModerator(pMember->GetChatName()) == true) ? "1" :
             (HasVoice(pMember->GetChatName()) == true) ? "0" : "2", pMember->GetChatName());
     // If no particular member is specified in pToMember, then send it out to all members
@@ -374,7 +374,7 @@ void CChatChannel::SetVoice(lpctstr pszName, bool fFlag)
         if (m_NoVoices[i]->Compare(pszName) == 0)
         {
             if (fFlag == true)
-                m_NoVoices.erase(i);
+                m_NoVoices.erase_at(i);
             return;
         }
     }
@@ -402,7 +402,7 @@ void CChatChannel::ChangePassword(CChatChanMember * pByMember, lpctstr pszPasswo
     ADDTOCALLSTACK("CChatChannel::ChangePassword");
     if (!IsModerator(pByMember->GetChatName()))
     {
-        pByMember->GetClient()->addChatSystemMessage(CHATMSG_MustHaveOps);
+        pByMember->GetClientActive()->addChatSystemMessage(CHATMSG_MustHaveOps);
     }
     else
     {
@@ -501,7 +501,7 @@ size_t CChatChannel::FindMemberIndex(lpctstr pszName) const
         if ( strcmp( m_Members[i]->GetChatName(), pszName) == 0)
             return i;
     }
-    return m_Members.BadIndex();
+    return SCONT_BADINDEX;
 }
 
 void CChatChannel::GrantModerator(CChatChanMember * pByMember, lpctstr pszName)

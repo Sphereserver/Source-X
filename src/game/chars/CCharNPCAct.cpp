@@ -5,8 +5,8 @@
 #include "../../common/CException.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CPathFinder.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 
@@ -109,6 +109,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	ASSERT(m_pNPC);
 	// Stuff that only NPC's do.
 
+	EXC_TRY("OnVerb");
 	CChar * pCharSrc = pSrc->GetChar();
 
 	switch ( FindTableSorted( s.GetKey(), CCharNPC::sm_szVerbKeys, CountOf(CCharNPC::sm_szVerbKeys)-1 ))
@@ -116,15 +117,15 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_BUY:
 	{
 		// Open up the buy dialog.
-		if ( pCharSrc == nullptr || !pCharSrc->IsClient())
+		if ( pCharSrc == nullptr || !pCharSrc->IsClientActive())
 			return false;
 
-		CClient * pClientSrc = pCharSrc->GetClient();
+		CClient * pClientSrc = pCharSrc->GetClientActive();
 		ASSERT(pClientSrc != nullptr);
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_BYE:
@@ -152,10 +153,8 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_PETSTABLE:
 		return( NPC_StablePetSelect( pCharSrc ));
 	case NV_RELEASE:
-		Skill_Start( SKILL_NONE );
-		NPC_PetClearOwners();
-		SoundChar( CRESND_RAND );
-		return true;
+		NPC_PetRelease();
+		break;
 	case NV_RESTOCK:	// individual restock command.
 		return NPC_Vendor_Restock(true, s.GetArgVal() != 0);
 	case NV_RUN:
@@ -170,15 +169,15 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_SELL:
 	{
 		// Open up the sell dialog.
-		if ( pCharSrc == nullptr || !pCharSrc->IsClient() )
+		if ( pCharSrc == nullptr || !pCharSrc->IsClientActive() )
 			return false;
 
-		CClient * pClientSrc = pCharSrc->GetClient();
+		CClient * pClientSrc = pCharSrc->GetClientActive();
 		ASSERT(pClientSrc != nullptr);
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_SHRINK:
@@ -206,6 +205,8 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		//if ( FindTableSorted(s.GetKey(), CClient::sm_szVerbKeys, CountOf(sm_szVerbKeys)-1) < 0 )
 		return false;
 	}
+
+	EXC_CATCH;
 	return true;
 }
 
@@ -216,11 +217,11 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	// My new action is that i am speaking to this person.
 	// Or just update the amount of time i will wait for this person.
 	m_Act_UID = pSrc->GetUID();
-	m_atTalk.m_WaitCount = 20;
-	m_atTalk.m_HearUnknown = 0;
+	m_atTalk.m_dwWaitCount = 20;
+	m_atTalk.m_dwHearUnknown = 0;
 
 	Skill_Start( ( pSrc->GetFame() > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
-	SetTimeoutS(3);
+	_SetTimeoutS(3);
 	UpdateDir(pSrc);
 }
 
@@ -256,7 +257,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 					if (pCharOld != nullptr)
 					{
 						tchar * z = Str_GetTemp();
-						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_INTERRUPT), pCharOld->GetName(), pSrc->GetName());
+						snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_INTERRUPT), pCharOld->GetName(), pSrc->GetName());
 						Speak(z);
 					}
 				}
@@ -287,9 +288,9 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	SKILL_TYPE skill = m_Act_SkillCurrent;
 
 	TALKMODE_TYPE mode = TALKMODE_SAY;
-	for ( size_t i = 0; i < m_pNPC->m_Speech.size(); i++ )
+	for ( size_t i = 0; i < m_pNPC->m_Speech.size(); ++i )
 	{
-		CResourceLink * pLink = m_pNPC->m_Speech[i];
+		CResourceLink * pLink = m_pNPC->m_Speech[i].GetRef();
 		if ( !pLink )
 			continue;
 		CResourceLock s;
@@ -308,9 +309,9 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef != nullptr);
-	for ( size_t i = 0; i < pCharDef->m_Speech.size(); i++ )
+	for ( size_t i = 0; i < pCharDef->m_Speech.size(); ++i )
 	{
-		CResourceLink * pLink = pCharDef->m_Speech[i];
+		CResourceLink * pLink = pCharDef->m_Speech[i].GetRef();
 		if ( !pLink )
 			continue;
 		CResourceLock s;
@@ -343,11 +344,11 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 
 	if ( (Skill_GetActive() == NPCACT_TALK) || (Skill_GetActive() == NPCACT_TALK_FOLLOW) )
 	{
-		++ m_atTalk.m_HearUnknown;
+		++ m_atTalk.m_dwHearUnknown;
 		uint iMaxUnk = 4;
 		if ( GetDist( pSrc ) > 4 )
 			iMaxUnk = 1;
-		if ( m_atTalk.m_HearUnknown > iMaxUnk )
+		if ( m_atTalk.m_dwHearUnknown > iMaxUnk )
 		{
 			Skill_Start( SKILL_NONE ); // say good by
 		}
@@ -471,7 +472,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			// whilst pathfinding we should keep trying to find new ways to our destination
 			if ( fUsePathfinding == true )
 			{
-				SetTimeoutD( 5 ); // wait a moment before finding a new route
+				_SetTimeoutD( 5 ); // wait a moment before finding a new route
 				return 1;
 			}
 			return 2;
@@ -489,7 +490,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		{
 			bool fClearedWay = false;
 			// Some object in my way that i could move ? Try to move it.
-			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
+			if ( !Can(CAN_C_USEHANDS) || Can(CAN_C_STATUE) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
                 ;   // i cannot use hands or i am frozen, so cannot move objects
 			else if ( (NPC_GetAiFlags() & NPC_AI_MOVEOBSTACLES) && (iInt > iRand) )
 			{
@@ -543,7 +544,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 				// whilst pathfinding we should keep trying to find new ways to our destination
 				if ( fUsePathfinding )
 				{
-					SetTimeoutD( 5 ); // wait a moment before finding a new route
+					_SetTimeoutD( 5 ); // wait a moment before finding a new route
 					return 1;
 				}
 				return 2;
@@ -631,7 +632,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
 		iTickNext = 5 * MSECS_PER_SEC;
 
-	SetTimeout(iTickNext);
+	_SetTimeout(iTickNext);
 	EXC_CATCH;
 	return 1;
 }
@@ -643,7 +644,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 
 	// Does the guard hate the target ?
 	//	do not waste time on invul+dead, non-criminal and jailed chars
-	if ( ((pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED)) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
+	if ( ((pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->Can(CAN_C_STATUE) || pChar->IsPriv(PRIV_JAILED)) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
 		return false;
 
 	if ( ! pChar->m_pArea->IsGuarded())
@@ -662,7 +663,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 			return false;
 
 		tchar *pszMsg = Str_GetTemp();
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(sm_szSpeakGuardJeer[ Calc_GetRandVal( CountOf( sm_szSpeakGuardJeer )) ]), pChar->GetName());
+		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(sm_szSpeakGuardJeer[ Calc_GetRandVal( CountOf( sm_szSpeakGuardJeer )) ]), pChar->GetName());
 		Speak(pszMsg);
 		UpdateDir(pChar);
 		return false;
@@ -715,13 +716,10 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	if ( ! Noto_IsCriminal() && (iFoodLevel > 40) )	// Am I not evil ?
 		return NPC_LookAtCharHuman( pChar );
 
-	// Attack if i am stronger.
-	// or i'm just stupid.
-	int iActMotivation = NPC_GetAttackMotivation( pChar );
-	if ( iActMotivation <= 0 )
-		return false;
-	if ( Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))	// same targ.
-		return false;
+    // Attack if i am stronger, if it's the same target i was attacking, or i'm just stupid.
+    int iActMotivation = NPC_GetAttackMotivation(pChar);
+    if (iActMotivation <= 0)
+        return false;
 	if ( iActMotivation < m_pNPC->m_Act_Motivation )
 		return false;
 
@@ -741,7 +739,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHuman");
 	ASSERT(m_pNPC);
 
-	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
+	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) || pChar->Can(CAN_C_STATUE) )
 		return false;
 
 	if ( Noto_IsEvil())		// I am evil.
@@ -790,7 +788,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHealer");
 	ASSERT(m_pNPC);
 
-	if ( !pChar->IsStatFlag(STATF_DEAD) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
+	if ( !pChar->IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_STONE) || pChar->Can(CAN_C_STATUE) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
 		return false;
 
 	static lpctstr const sm_szHealerRefuseEvils[] =
@@ -1078,11 +1076,17 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
-	int iRange = GetVisualRange();
+    // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
+    const int iRand = Calc_GetRandVal(UO_MAP_VIEW_RADAR);
+    const CPointMap& ptTop = GetTopPoint();
+	
+    int iRange = GetVisualRange();
+    if (iRange > UO_MAP_VIEW_RADAR)
+        iRange = UO_MAP_VIEW_RADAR;
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
-	if ( !Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
+	if ( Can(CAN_C_NONMOVER) || !Can(CAN_C_MOVEMENTCAPABLEMASK) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 	{
 		if ( !NPC_FightMayCast() )	// And i have no distance attack.
 			iRange = iRangeBlur = 2;
@@ -1090,11 +1094,11 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	else
 	{
 		// I'm mobile. do basic check if i would move here first.
-		if ( !NPC_CheckWalkHere(GetTopPoint(), m_pArea) )
+		if ( !NPC_CheckWalkHere(ptTop, m_pArea) )
 		{
 			// I should move. Someone lit a fire under me.
-			m_Act_p = GetTopPoint();
-			m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+			m_Act_p = ptTop;
+			m_Act_p.Move((DIR_TYPE)(iRand % DIR_QTY));
 			NPC_WalkToPoint(true);
 			SoundChar(CRESND_NOTICE);
 			return true;
@@ -1111,7 +1115,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	// Any interesting chars here ?
 	int iDist = 0;
 	CChar *pChar = nullptr;
-	CWorldSearch AreaChars(GetTopPoint(), iRange);
+	CWorldSearch AreaChars(ptTop, iRange);
 	for (;;)
 	{
 		pChar = AreaChars.GetChar();
@@ -1123,7 +1127,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		iDist = GetTopDist3D(pChar);
 		if ( iDist > iRangeBlur )
 		{
-			if ( Calc_GetRandVal(iDist) )
+			if (iRand % iDist )
 				continue;	// can't see them.
 		}
 		if ( NPC_LookAtChar(pChar, iDist) )		// expensive function call
@@ -1134,13 +1138,13 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	}
 
 	// Check the ground for good stuff.
-	if ( !fForceCheckItems && (Stat_GetAdjusted(STAT_INT) > 10) && !IsSkillBase(Skill_GetActive()) && !Calc_GetRandVal(3) )
+	if ( !fForceCheckItems && (Stat_GetAdjusted(STAT_INT) > 10) && !IsSkillBase(Skill_GetActive()) && !(iRand % 3) )
 		fForceCheckItems = true;
 
 	if ( fForceCheckItems )
 	{
 		CItem *pItem = nullptr;
-		CWorldSearch AreaItems(GetTopPoint(), iRange);
+		CWorldSearch AreaItems(ptTop, iRange);
 		for (;;)
 		{
 			pItem = AreaItems.GetItem();
@@ -1150,7 +1154,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 			iDist = GetTopDist3D(pItem);
 			if ( iDist > iRangeBlur )
 			{
-				if ( Calc_GetRandVal(iDist) )
+				if ( iRand % iDist )
 					continue;	// can't see them.
 			}
 			if ( NPC_LookAtItem(pItem, iDist) )
@@ -1162,7 +1166,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		}
 	}
 
-	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !Calc_GetRandVal(6) ) )
+	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !(iRand % 6) ) )
 		SoundChar(CRESND_IDLE);
 
 	// Move stuff that is in our way ? (chests etc.)
@@ -1180,12 +1184,14 @@ void CChar::NPC_Act_Wander()
 	if ( Can(CAN_C_NONMOVER) )
 		return;
 
+    // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
+    const int iRand = Calc_GetRandVal(UINT16_MAX);
 	int iStopWandering = 0;
 
-	if ( ! Calc_GetRandVal( 7 + (Stat_GetVal(STAT_DEX) / 30)) )
+	if ( !(iRand % (7 + (Stat_GetVal(STAT_DEX) / 30))) )
 		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
 
-	if ( !Calc_GetRandVal(2 + TICKS_PER_SEC/2) )
+	if ( !(iRand % (2 + TICKS_PER_SEC/2)) )
 	{
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
@@ -1195,7 +1201,7 @@ void CChar::NPC_Act_Wander()
 
 	// Staggering Walk around.
 	m_Act_p = GetTopPoint();
-	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - Calc_GetRandVal(3)) );
+	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - (iRand % 3)) );
 
 	int iReturnToHome = 0;
 
@@ -1208,7 +1214,7 @@ void CChar::NPC_Act_Wander()
 	if (IsTrigUsed(TRIGGER_NPCACTWANDER))
 	{
 		CScriptTriggerArgs Args(iStopWandering, iReturnToHome);
-		if (OnTrigger(CTRIG_NPCActWander, const_cast<CChar*>(this), &Args) == TRIGRET_RET_TRUE)
+		if (OnTrigger(CTRIG_NPCActWander, this, &Args) == TRIGRET_RET_TRUE)
 			return;
 
 		iStopWandering = (int)Args.m_iN1;
@@ -1257,8 +1263,22 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	if (Can(CAN_C_NONMOVER))
 		return false;
 
-	EXC_TRY("NPC_Act_Follow")
-	CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+	EXC_TRY("NPC_Act_Follow");
+
+	/*
+	* Replaced the Fight_IsActive() check with a check on m_fight_targ_UID.
+	* Red npcs usually never interact "in a peaceful way" with the players and thus m_act_UID is usually never set preventing the creature from fleeing and putting it in an immobile "state".
+	* Fight_IsActive returns true if the character is actively fighting (using a combat skill) in this case it's false because of the NPC'sFleeing
+	* Action and thus it will never pass the Fight_IsActive() check
+	*/
+	//CChar * pChar =  Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+
+	CChar* pChar = nullptr;
+	//If the NPC action is following somebody, directly assign the character from  the m_Act_UID value. 
+	if (Skill_GetActive() == NPCACT_FOLLOW_TARG)
+		pChar = m_Act_UID.CharFind();
+	else
+		pChar = m_Fight_Targ_UID.IsValidUID() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 	if (pChar == nullptr)
 	{
 		// free to do as i wish !
@@ -1308,7 +1328,8 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	}
 
 	EXC_SET_BLOCK("Distance checks");
-	int dist = GetTopPoint().GetDist(m_Act_p);
+	const CPointMap& ptMe = GetTopPoint();
+	int dist = ptMe.GetDist(m_Act_p);
     if (dist > UO_MAP_VIEW_RADAR)		// too far away ?
     {
         return false;
@@ -1340,7 +1361,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	if (fFlee)
 	{
 		CPointMap ptOld = m_Act_p;
-		m_Act_p = GetTopPoint();
+		m_Act_p = ptMe;
 		m_Act_p.Move(GetDirTurn(m_Act_p.GetDir(ptOld), 4 + 1 - Calc_GetRandVal(3)));
 		int iRet = NPC_WalkToPoint(dist > 3);
 		m_Act_p = ptOld;	// last known point of the enemy.
@@ -1384,7 +1405,7 @@ bool CChar::NPC_Act_Talk()
 			return false;
 	}
 
-	if ( m_atTalk.m_WaitCount <= 1 )
+	if ( m_atTalk.m_dwWaitCount <= 1 )
 	{
 		if ( NPC_CanSpeak() )
 		{
@@ -1394,13 +1415,13 @@ bool CChar::NPC_Act_Talk()
 				g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_GONE_2 )
 			};
 			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, sm_szText[ Calc_GetRandVal(CountOf(sm_szText)) ], pChar->GetName() );
+			snprintf(pszMsg, STR_TEMPLENGTH, sm_szText[ Calc_GetRandVal(CountOf(sm_szText)) ], pChar->GetName() );
 			Speak(pszMsg);
 		}
 		return false;
 	}
 
-	--m_atTalk.m_WaitCount;
+	--m_atTalk.m_dwWaitCount;
 	return true;	// just keep waiting.
 }
 
@@ -1457,7 +1478,7 @@ void CChar::NPC_Act_GoHome()
 
 	if ( g_Cfg.m_iLostNPCTeleport )
 	{
-		int	iDistance	= m_ptHome.GetDist( ptCurrent );
+		const int iDistance = m_ptHome.GetDist( ptCurrent );
 		if ( (iDistance > g_Cfg.m_iLostNPCTeleport) && (iDistance > m_pNPC->m_Home_Dist_Wander) )
 		{
 			if ( IsTrigUsed(TRIGGER_NPCLOSTTELEPORT) )
@@ -1492,8 +1513,12 @@ void CChar::NPC_LootMemory( CItem * pItem )
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_IGNORE;
 
 	// If the item is set to decay.
-	if ( pItem->IsTimerSet() && pItem->GetTimerDiff() > 0 )
-		pMemory->SetTimeout(pItem->GetTimerDiff());		// forget about this once the item is gone
+	if (pItem->IsTimerSet())
+	{
+		const int64 iTimerDiff = pItem->GetTimerAdjusted();
+		if (iTimerDiff > 0)
+			pMemory->SetTimeout(iTimerDiff);		// forget about this once the item is gone
+	}
 }
 
 void CChar::NPC_Act_Looting()
@@ -1505,11 +1530,11 @@ void CChar::NPC_Act_Looting()
 	//
 	// m_Act_UID = UID of the item/corpse that we trying to loot
 
-	if ( !(NPC_GetAiFlags() & NPC_AI_LOOTING) )
-		return;
-	if ( m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (GetKeyNum("DEATHFLAGS") & DEATH_NOCORPSE) )
-		return;
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
+		return;
+	if (!(NPC_GetAiFlags() & NPC_AI_LOOTING))
+		return;
+	if (m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED | STATF_PET) || (GetKeyNum("DEATHFLAGS") & DEATH_NOCORPSE))
 		return;
 
 	CItem * pItem = m_Act_UID.ItemFind();
@@ -1523,8 +1548,8 @@ void CChar::NPC_Act_Looting()
 	}
 
 	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pItem);
-	if ( pCorpse && pCorpse->GetCount() > 0 )
-		pItem = static_cast<CItem*>( pCorpse->GetAt(Calc_GetRandVal( (int)pCorpse->GetCount() )) );
+	if ( pCorpse && !pCorpse->IsContainerEmpty() )
+		pItem = static_cast<CItem*>( pCorpse->GetContentIndex(Calc_GetRandVal( (int)pCorpse->GetContentCount() )) );
 
 	if ( !CanTouch(pItem) || !CanMove(pItem) || !CanCarry(pItem) )
 	{
@@ -1583,12 +1608,18 @@ void CChar::NPC_Act_Runto(int iDist)
 		case 2:
 			// Give it up...
 			// Go directly there...
-			if ( NPC_GetAiFlags()&NPC_AI_PERSISTENTPATH )
+			if ( NPC_GetAiFlags() & NPC_AI_PERSISTENTPATH )
 			{
-				if (!GetTopPoint().IsValidPoint())
-					iDist --;
+				const CPointMap& ptMe = GetTopPoint();
+				if (!ptMe.IsValidPoint())
+				{
+					--iDist;
+				}
 				else
-					iDist = iDist > m_Act_p.GetDist(GetTopPoint()) ? m_Act_p.GetDist(GetTopPoint()) : iDist-1;
+				{
+					const int iPDist = m_Act_p.GetDist(ptMe);
+					iDist = iDist > iPDist ? iPDist : iDist - 1;
+				}
 
 				if (iDist)
 					NPC_Act_Runto(iDist);
@@ -1597,10 +1628,8 @@ void CChar::NPC_Act_Runto(int iDist)
 			}
 			else
 			{
-				if ( m_Act_p.IsValidPoint() &&
-					IsPlayableCharacter() &&
-					!IsStatFlag( STATF_FREEZE|STATF_STONE ))
-					Spell_Teleport( m_Act_p, true, false);
+				if (m_Act_p.IsValidPoint() && IsPlayableCharacter() && !IsStatFlag(STATF_FREEZE | STATF_STONE))
+					Spell_Teleport(m_Act_p, true, false);
 				else
 					NPC_Act_Idle();
 			}
@@ -1627,12 +1656,18 @@ void CChar::NPC_Act_Goto(int iDist)
 		case 2:
 			// Give it up...
 			// Go directly there...
-			if ( NPC_GetAiFlags()&NPC_AI_PERSISTENTPATH )
+			if ( NPC_GetAiFlags() & NPC_AI_PERSISTENTPATH )
 			{
-				if (!GetTopPoint().IsValidPoint())
-					iDist --;
+				const CPointMap& ptMe = GetTopPoint();
+				if (!ptMe.IsValidPoint())
+				{
+					--iDist;
+				}
 				else
-					iDist = iDist > m_Act_p.GetDist(GetTopPoint()) ? m_Act_p.GetDist(GetTopPoint()) : iDist-1;
+				{
+					const int iPDist = m_Act_p.GetDist(ptMe);
+					iDist = iDist > iPDist ? iPDist : iDist - 1;
+				}
 
 				if (iDist)
 					NPC_Act_Runto(iDist);
@@ -1641,10 +1676,8 @@ void CChar::NPC_Act_Goto(int iDist)
 			}
 			else
 			{
-				if ( m_Act_p.IsValidPoint() &&
-					IsPlayableCharacter() &&
-					!IsStatFlag( STATF_FREEZE|STATF_STONE ))
-					Spell_Teleport( m_Act_p, true, false);
+				if (m_Act_p.IsValidPoint() && IsPlayableCharacter() && !IsStatFlag(STATF_FREEZE | STATF_STONE))
+					Spell_Teleport(m_Act_p, true, false);
 				else
 					NPC_Act_Idle();	// look for something new to do.
 			}
@@ -1657,28 +1690,30 @@ bool CChar::NPC_Act_Food()
 	ADDTOCALLSTACK("CChar::NPC_Act_Food");
 	ASSERT(m_pNPC);
 
-	int		iFood = Stat_GetVal(STAT_FOOD);
-	int		iFoodLevel = Food_GetLevelPercent();
+	const int iFood = Stat_GetVal(STAT_FOOD);
+	const int iFoodLevel = Food_GetLevelPercent();
 	if ( iFood >= 10 )
 		return false;							//	search for food is starving or very hungry
 	if ( iFoodLevel > 40 )
 		return false;							// and it is at least 60% hungry
 
-	m_pNPC->m_Act_Motivation = (uchar)(50 - (iFoodLevel / 2));
+	m_pNPC->m_Act_Motivation = (byte)(50 - (iFoodLevel / 2));
 
-	ushort	uiEatAmount = 1;
-	int		iSearchDistance = 2;
-	CItem	*pClosestFood = nullptr;
-	int		iClosestFood = 100;
-	int		iMyZ = GetTopPoint().m_z;
-	bool	bSearchGrass = false;
-	CItem	* pCropItem = nullptr;
+    const int   iMyZ = GetTopPoint().m_z;
+	ushort  uiEatAmount = 1;
+	int     iSearchDistance = 2;
+	CItem   *pClosestFood = nullptr;
+	int     iClosestFood = 100;
+	
+	bool    fSearchGrass = false;
+	CItem   *pCropItem = nullptr;
 
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pFood = pPack->GetContentHead(); pFood != nullptr; pFood = pFood->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pFood = static_cast<CItem*>(pObjRec);
 			// I have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
 			{
@@ -1705,7 +1740,7 @@ bool CChar::NPC_Act_Food()
 		if ( pItem->IsType(IT_CROPS) || pItem->IsType(IT_FOLIAGE) )
 		{
 			// is it ripe?
-			CItemBase * checkItemBase = pItem->Item_GetDef();
+			const CItemBase * checkItemBase = pItem->Item_GetDef();
 			if ( checkItemBase->m_ttNormal.m_tData3 )
 			{
 				// remember this, just in case we do not find any suitable food
@@ -1714,14 +1749,15 @@ bool CChar::NPC_Act_Food()
 			}
 		}
 
-		if ( pItem->GetTopPoint().m_z > (iMyZ + 10) || pItem->GetTopPoint().m_z < (iMyZ - 1) )
+        const CPointMap& ptItem = pItem->GetTopPoint();
+		if (ptItem.m_z > (iMyZ + 10) || ptItem.m_z < (iMyZ - 1) )
 			continue;
 		if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )
 			continue;
 
 		if ( (uiEatAmount = Food_CanEat(pItem)) > 0 )
 		{
-			int iDist = GetDist(pItem);
+			const int iDist = GetDist(pItem);
 			if ( pClosestFood )
 			{
 				if ( iDist < iClosestFood )
@@ -1784,9 +1820,9 @@ bool CChar::NPC_Act_Food()
 
 		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
-			bSearchGrass = true;
+			fSearchGrass = true;
 		//else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly to death
-		//	bSearchGrass = true;
+		//	fSearchGrass = true;
 
 		// found any crops or foliage at least (nearby, of course)?
 		if ( pCropItem )
@@ -1794,18 +1830,18 @@ bool CChar::NPC_Act_Food()
 			if ( GetDist(pCropItem) < 5 )
 			{
 				Use_Item(pCropItem);
-				bSearchGrass = false;	// no need to eat grass if at next tick we can eat better stuff
+				fSearchGrass = false;	// no need to eat grass if at next tick we can eat better stuff
 			}
 		}
 	}
-	if ( bSearchGrass )
+	if ( fSearchGrass )
 	{
         const CCharBase *pCharDef = Char_GetDef();
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
-			CItem *pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = CWorldMap::CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				ushort uiEaten = pResBit->ConsumeAmount(10);
@@ -1816,12 +1852,12 @@ bool CChar::NPC_Act_Food()
 				pResBit->SetTimeoutS(60*10);
 				//DEBUG_ERR(("Starting skill food\n"));
 				Skill_Start( NPCACT_FOOD );
-				SetTimeoutS(5);
+				_SetTimeoutS(5);
 				return true;
 			}
 			else									//	search for grass nearby
 			{
-				CPointMap pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+				CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 				if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 				{
 					if (( pt.m_x != GetTopPoint().m_x ) && ( pt.m_y != GetTopPoint().m_y ) && ( pt.m_map == GetTopPoint().m_map ))
@@ -1882,7 +1918,7 @@ void CChar::NPC_Act_Idle()
 		switch ( GetDispID())
 		{
 			case CREID_FIRE_ELEM:
-				if ( !g_World.IsItemTypeNear(GetTopPoint(), IT_FIRE, 0, false) )
+				if ( !CWorldMap::IsItemTypeNear(GetTopPoint(), IT_FIRE, 0, false) )
 				{
 					Action_StartSpecial(CREID_FIRE_ELEM);
 					return;
@@ -1939,7 +1975,7 @@ void CChar::NPC_Act_Idle()
 
 	// just stand here for a bit.
 	Skill_Start(SKILL_NONE);
-	SetTimeoutS(1 + Calc_GetRandLLVal(2));
+	_SetTimeoutS(1 + Calc_GetRandLLVal(2));
 }
 
 bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
@@ -1983,12 +2019,12 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 		{
 			if ( pItem->IsType(IT_GOLD) )
 			{
-                int iWage = Char_GetDef()->GetHireDayWage();
-                iWage = pCharSrc->PayGold(this, iWage, nullptr, PAYGOLD_HIRE);
-                if (iWage > 0)
+                uint uiWage = Char_GetDef()->GetHireDayWage();
+                uiWage = (uint)pCharSrc->PayGold(this, uiWage, nullptr, PAYGOLD_HIRE);
+                if (uiWage > 0)
                 {
                     Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_MONEY));
-                    NPC_OnHirePayMore(pItem, iWage);
+                    NPC_OnHirePayMore(pItem, uiWage);
                     return true;
                 }
 			}
@@ -2046,7 +2082,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			if ( NPC_CanSpeak() )
 			{
 				tchar *pszMsg = Str_GetTemp();
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_BANKER_DEPOSIT), pItem->GetAmount());
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_BANKER_DEPOSIT), pItem->GetAmount());
 				Speak(pszMsg);
 			}
 
@@ -2059,12 +2095,12 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 	if ( NPC_IsVendor() && !IsStatFlag(STATF_PET) )
 	{
 		// Dropping item on vendor means quick sell
-		if ( pCharSrc->IsClient() )
+		if ( pCharSrc->IsClientActive() )
 		{
 			VendorItem item;
 			item.m_serial = pItem->GetUID();
-			item.m_amount = pItem->GetAmount();
-			pCharSrc->GetClient()->Event_VendorSell(this, &item, 1);
+			item.m_vcAmount = pItem->GetAmount();
+			pCharSrc->GetClientActive()->Event_VendorSell(this, &item, 1);
 		}
 		return false;
 	}
@@ -2105,17 +2141,25 @@ void CChar::NPC_OnTickAction()
 	// What action should we take now ?
 	EXC_TRY("NPC_TickAction");
 
+	const SKILL_TYPE iSkillActive = Skill_GetActive();
     if (!m_pArea)
     {
         const CPointMap& pt = GetUnkPoint();
-        if (pt.IsValidPoint())
-            DEBUG_WARN(("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0% " PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName()));
-        else
-            DEBUG_WARN(("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName()));
+		if (pt.IsValidPoint())
+		{
+			if (iSkillActive != NPCACT_RIDDEN)
+			{
+				g_Log.EventWarn("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0% " PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName());
+			}
+		}
+		else
+		{
+			g_Log.EventWarn("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName());
+		}
         return;
     }
 
-	const SKILL_TYPE iSkillActive = Skill_GetActive();
+	
     bool fSkillFight = false;
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )
 	{
@@ -2246,13 +2290,13 @@ void CChar::NPC_OnTickAction()
 	}
 
 	EXC_SET_BLOCK("timer expired (NPC)");
-	if ( IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
+	if ( _IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
 	{
 		int64 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
 		timeout = maximum(timeout, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
 		// default next brain/move tick
-		SetTimeoutD(1 + timeout);   // In Tenths of Second.
+		_SetTimeoutD(1 + timeout);   // In Tenths of Second.
 	}
 
 	//	vendors restock periodically
@@ -2270,73 +2314,77 @@ void CChar::NPC_Pathfinding()
 {
 	ADDTOCALLSTACK("CChar::NPC_Pathfinding");
 	ASSERT(m_pNPC);
-	CPointMap local = GetTopPoint();
+	const CPointMap ptLocal = GetTopPoint();
 
 	EXC_TRY("Pathfinding");
 	EXC_SET_BLOCK("pre-checking");
 
+    const CPointMap ptTarg = m_Act_p;
+    const int dist = ptLocal.GetDist(ptTarg);
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
-	int			iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
-	CPointMap	pTarg = m_Act_p;
-	int			dist = local.GetDist(pTarg);
-
+	const int iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
+	
 	//	do we really need to find the path?
-	if ( iInt < 75 ) return;					// too dumb
-	if ( m_pNPC->m_nextPt == pTarg ) return;			// we have path to that position already saved in m_NextX/Y
-	if ( !pTarg.IsValidPoint() ) return;		// invalid point
-	if (( pTarg.m_x == local.m_x ) && ( pTarg.m_y == local.m_y )) return; // same spot
-	if ( pTarg.m_map != local.m_map ) return;	// cannot just move to another map
-	if ( dist >= PATH_SIZE/2 ) return;			// skip too far locations which should be too slow
-	if ( dist < 2 ) return;						// skip too low distance (1 step) - good in default
-												// pathfinding is buggy near the edges of the map,
-												// so do not use it there
-	if (( local.m_x <= PATH_SIZE/2 ) || ( local.m_y <= PATH_SIZE/2 ) ||
-		( local.m_x >= ( g_MapList.GetX(local.m_map) - PATH_SIZE/2) ) ||
-		( local.m_y >= ( g_MapList.GetY(local.m_map) - PATH_SIZE/2) ))
+	if ( iInt < 30 ) // too dumb
+        return;					
+	if ( m_pNPC->m_nextPt == ptTarg ) // we have path to that position already saved in m_NextX/Y
+        return;			
+	if ( !ptTarg.IsValidPoint() ) // invalid point
+        return;
+	if (( ptTarg.m_x == ptLocal.m_x ) && ( ptTarg.m_y == ptLocal.m_y )) // same spot
+        return; 
+	if ( ptTarg.m_map != ptLocal.m_map ) // cannot just move to another map
+        return;
+	if ( dist >= MAX_NPC_PATH_STORAGE_SIZE/2 ) // skip too far locations which should be too slow
+        return;
+	if ( dist < 2 ) // skip too low distance (1 step) - good in default
+        return;
+
+	// pathfinding is buggy near the edges of the map,
+	// so do not use it there
+	if ((ptLocal.m_x <= MAX_NPC_PATH_STORAGE_SIZE / 2) || (ptLocal.m_y <= MAX_NPC_PATH_STORAGE_SIZE / 2) ||
+		(ptLocal.m_x >= (g_MapList.GetMapSizeX(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)) ||
+		(ptLocal.m_y >= (g_MapList.GetMapSizeY(ptLocal.m_map) - MAX_NPC_PATH_STORAGE_SIZE / 2)))
+	{
 		return;
-												// need 300 int at least to pathfind each step, but always
-												// search if this is a first step
-	if (( Calc_GetRandVal(300) > iInt ) && ( m_pNPC->m_nextX[0] )) return;
+	}
+
+	// need 300 int at least to pathfind each step, but always
+	// search if this is a first step
+	if (( Calc_GetRandVal(300) > iInt ) && ( m_pNPC->m_nextX[0] ))
+        return;
 
 	//	clear saved steps list
 	EXC_SET_BLOCK("clearing last steps");
-#ifndef _WIN32
-	for (int i_tmpN=0;i_tmpN < MAX_NPC_PATH_STORAGE_SIZE;i_tmpN++)
-	{
-		m_pNPC->m_nextX[i_tmpN] = 0;
-		m_pNPC->m_nextY[i_tmpN] = 0;
-	}
-#else
 	memset(m_pNPC->m_nextX, 0, sizeof(m_pNPC->m_nextX));
 	memset(m_pNPC->m_nextY, 0, sizeof(m_pNPC->m_nextY));
-#endif
 
 	//	proceed with the pathfinding
 	EXC_SET_BLOCK("filling the map");
-	CPathFinder	path(this, pTarg);
+    // The pathfinder class is big, it's better to store that on the heap, instead of on the stack.
+    std::unique_ptr<CPathFinder> path = std::make_unique<CPathFinder>(this, ptTarg);
 
 	EXC_SET_BLOCK("searching the path");
-	if ( path.FindPath() == PATH_NONEXISTENT )
+	if ( !path->FindPath() )
 		return;
 
 	//	save the found path
 	EXC_SET_BLOCK("saving found path");
 
-	CPointMap Next;
 	// Don't read the first step, it's the same as the current position, so i = 1
-	for ( size_t i = 1; (i != path.LastPathSize()) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
+	for ( size_t i = 1, sz = path->LastPathSize(); (i != sz) && (i < MAX_NPC_PATH_STORAGE_SIZE /* Don't overflow*/ ); ++i )
 	{
-		Next = path.ReadStep(i);
-		m_pNPC->m_nextX[i - 1] = Next.m_x;
-		m_pNPC->m_nextY[i - 1] = Next.m_y;
+        const CPointMap& ptNext = path->ReadStep(i);
+		m_pNPC->m_nextX[i - 1] = ptNext.m_x;
+		m_pNPC->m_nextY[i - 1] = ptNext.m_y;
 	}
-	m_pNPC->m_nextPt = pTarg;
-	path.ClearLastPath(); // !! Use explicitly when using one CPathFinder object for more NPCs
+	m_pNPC->m_nextPt = ptTarg;
+	path->ClearLastPath(); // !! Use explicitly when using one CPathFinder object for more NPCs
 
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("'%s' point '%d,%d,%d,%d' [0%x]\n", GetName(), local.m_x, local.m_y, local.m_z, local.m_map, (dword)GetUID());
+	g_Log.EventDebug("'%s' point '%d,%d,%d,%d' [0%x]\n", GetName(), ptLocal.m_x, ptLocal.m_y, ptLocal.m_z, ptLocal.m_map, (dword)GetUID());
 	EXC_DEBUG_END;
 }
 
@@ -2346,14 +2394,15 @@ void CChar::NPC_Food()
 	ASSERT(m_pNPC);
 	EXC_TRY("FoodAI");
 
+	const CPointMap& ptMe = GetTopPoint();
 	int		iFood = Stat_GetVal(STAT_FOOD);
 	int		iFoodLevel = Food_GetLevelPercent();
 	ushort	uiEatAmount = 1;
 	int		iSearchDistance = 2;
 	CItem	*pClosestFood = nullptr;
 	int		iClosestFood = 100;
-	int		iMyZ = GetTopPoint().m_z;
-	bool	bSearchGrass = false;
+	int		iMyZ = ptMe.m_z;
+	bool	fSearchGrass = false;
 
 	if ( iFood >= 10 )
         return;						//	search for food is starving or very hungry
@@ -2364,8 +2413,9 @@ void CChar::NPC_Food()
 	if ( pPack )
 	{
 		EXC_SET_BLOCK("searching in pack");
-		for ( CItem *pFood = pPack->GetContentHead(); pFood != nullptr; pFood = pFood->GetNext() )
+		for (CSObjContRec* pObjRec : *pPack)
 		{
+			CItem* pFood = static_cast<CItem*>(pObjRec);
 			// i have some food personaly, so no need to search for something
 			if ( pFood->IsType(IT_FOOD) )
 			{
@@ -2382,7 +2432,7 @@ void CChar::NPC_Food()
 	// Search for food nearby
 	EXC_SET_BLOCK("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+	CWorldSearch AreaItems(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
 		CItem *pItem = AreaItems.GetItem();
@@ -2456,14 +2506,14 @@ void CChar::NPC_Food()
 					// no food around, but maybe i am ok with grass?
 	else
 	{
-		NPCBRAIN_TYPE brain = GetNPCBrainGroup();
+		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
-			bSearchGrass = true;
+			fSearchGrass = true;
 		else if (( brain == NPCBRAIN_HUMAN ) && !iFood )	// human eat grass if starving nearly dead
-			bSearchGrass = true;
+			fSearchGrass = true;
 	}
 
-	if ( bSearchGrass )
+	if ( fSearchGrass )
 	{
 		const CCharBase *pCharDef = Char_GetDef();
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
@@ -2471,11 +2521,11 @@ void CChar::NPC_Food()
 		EXC_SET_BLOCK("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
 		{
-			CItem *pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
+			CItem *pResBit = CWorldMap::CheckNaturalResource(ptMe, IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				EXC_SET_BLOCK("eating grass");
-				ushort uiEaten = pResBit->ConsumeAmount(15);
+				const ushort uiEaten = pResBit->ConsumeAmount(15);
 				EatAnim("grass", uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
@@ -2496,11 +2546,11 @@ void CChar::NPC_Food()
 					case NPCACT_FLEE:
 						{
 							EXC_SET_BLOCK("searching grass nearby");
-							CPointMap pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+							CPointMap pt = CWorldMap::FindTypeNear_Top(ptMe, IT_GRASS, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 							if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 							{
 								// we found grass nearby, but has it already been consumed?
-								pResBit = g_World.CheckNaturalResource(pt, IT_GRASS, false, this);
+								pResBit = CWorldMap::CheckNaturalResource(pt, IT_GRASS, false, this);
 								if ( pResBit != nullptr && pResBit->GetAmount() && CanMoveWalkTo(pt) )
 								{
 									EXC_SET_BLOCK("walking to grass");
@@ -2540,6 +2590,13 @@ void CChar::NPC_ExtraAI()
 			return;
 	}
 
+    if (!Can(CAN_C_EQUIP) && !Can(CAN_C_USEHANDS))
+    {
+        // These are checked when trying to equip the item, so avoid further processing if we know from the start
+        //  that we won't be able to use those items.
+        return;
+    }
+
 	// Equip weapons if possible
 	EXC_SET_BLOCK("weapon/shield");
 	if ( IsStatFlag(STATF_WAR) )
@@ -2551,7 +2608,7 @@ void CChar::NPC_ExtraAI()
 		CItem *pShield = LayerFind(LAYER_HAND2);
 		if ( !pShield || !pShield->IsTypeArmor() )
 		{
-			CItemContainer * pPack = GetPack();
+			const CItemContainer * pPack = GetPack();
 			if (pPack)
 			{
 				pShield = pPack->ContentFind(CResourceID(RES_TYPEDEF, IT_SHIELD));
@@ -2564,11 +2621,11 @@ void CChar::NPC_ExtraAI()
 
 	// Equip lightsource at night time
 	EXC_SET_BLOCK("light source");
-	CPointMap pt = GetTopPoint();
-	CSector *pSector = pt.GetSector();
+	const CPointMap& pt = GetTopPoint();
+	const CSector *pSector = pt.GetSector();
 	if ( pSector && pSector->IsDark() )
 	{
-		CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
+		const CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
 		if ( !(pLightSourceCheck && (pLightSourceCheck->IsType(IT_LIGHT_OUT) || pLightSourceCheck->IsType(IT_LIGHT_LIT))) )
 		{
 			CItem *pLightSource = ContentFind(CResourceID(RES_TYPEDEF, IT_LIGHT_OUT));

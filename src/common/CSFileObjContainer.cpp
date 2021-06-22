@@ -1,9 +1,10 @@
+#include "../game/CServerTime.h"
+#include "../sphere/threads.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CSFileObj.h"
 #include "CSFileObjContainer.h"
-#include "../game/CServerTime.h"
 
 
 enum CFO_TYPE
@@ -107,9 +108,9 @@ void CSFileObjContainer::SetFilenumber( int iHowMuch )
     iFilenumber = iHowMuch;
 }
 
-bool CSFileObjContainer::OnTick()
+bool CSFileObjContainer::_OnTick()
 {
-    ADDTOCALLSTACK("CSFileObjContainer::OnTick");
+    ADDTOCALLSTACK("CSFileObjContainer::_OnTick");
     EXC_TRY("Tick");
 
     if ( !iGlobalTimeout )
@@ -121,7 +122,7 @@ bool CSFileObjContainer::OnTick()
 
         for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
         {
-            if ( !(*i)->OnTick() )
+            if ( !(*i)->_OnTick() )
             {
                 // Error and fixweirdness
             }
@@ -142,12 +143,12 @@ int CSFileObjContainer::FixWeirdness()
     return 0;
 }
 
-bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CSFileObjContainer::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
     ADDTOCALLSTACK("CSFileObjContainer::r_GetRef");
-    if ( !strnicmp("FIRSTUSED.",pszKey,10) )
+    if ( !strnicmp("FIRSTUSED.",ptcKey,10) )
     {
-        pszKey += 10;
+        ptcKey += 10;
 
         CSFileObj * pFirstUsed = nullptr;
         for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
@@ -167,8 +168,8 @@ bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
     }
     else
     {
-        size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
-        SKIP_SEPARATORS(pszKey);
+        size_t nNumber = (size_t)( Exp_GetVal(ptcKey) );
+        SKIP_SEPARATORS(ptcKey);
 
         if ( nNumber >= sFileList.size() )
             return false;
@@ -189,9 +190,9 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
 {
     ADDTOCALLSTACK("CSFileObjContainer::r_LoadVal");
     EXC_TRY("LoadVal");
-    lpctstr pszKey = s.GetKey();
+    lpctstr ptcKey = s.GetKey();
 
-    int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
     switch ( index )
     {
@@ -216,14 +217,15 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
     return false;
 }
 
-bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CSFileObjContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CSFileObjContainer::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    if ( !strnicmp("FIRSTUSED.",pszKey,10) )
+    if ( !strnicmp("FIRSTUSED.",ptcKey,10) )
     {
-        pszKey += 10;
+        ptcKey += 10;
 
         CSFileObj * pFirstUsed = nullptr;
         for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
@@ -237,31 +239,33 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
         if ( pFirstUsed != nullptr )
         {
-            return static_cast<CScriptObj *>(pFirstUsed)->r_WriteVal(pszKey, sVal, pSrc);
+            return static_cast<CScriptObj *>(pFirstUsed)->r_WriteVal(ptcKey, sVal, pSrc);
         }
 
         return false;
     }
 
-    int iIndex = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int iIndex = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
     if ( iIndex < 0 )
     {
-        size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
-        SKIP_SEPARATORS(pszKey);
-
-        if ( nNumber >= sFileList.size() )
-            return false;
-
-        CSFileObj * pFile = sFileList.at(nNumber);
-
-        if ( pFile != nullptr )
+        if (!fNoCallParent)
         {
-            CScriptObj * pObj = dynamic_cast<CScriptObj*>( pFile );
-            if (pObj != nullptr)
-                return pObj->r_WriteVal(pszKey, sVal, pSrc);
-        }
+            uint nNumber = Exp_GetUVal(ptcKey);
+            SKIP_SEPARATORS(ptcKey);
 
+            if ( nNumber >= sFileList.size() )
+                return false;
+
+            CSFileObj * pFile = sFileList[nNumber];
+            if ( pFile != nullptr )
+            {
+                CScriptObj * pObj = dynamic_cast<CScriptObj*>( pFile );
+                if (pObj != nullptr)
+                    return pObj->r_WriteVal(ptcKey, sVal, pSrc);
+            }
+        }
+        
         return false;
     }
 
@@ -294,11 +298,11 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
     EXC_TRY("Verb");
     ASSERT(pSrc);
 
-    lpctstr pszKey = s.GetKey();
+    lpctstr ptcKey = s.GetKey();
 
-    if ( !strnicmp("FIRSTUSED.",pszKey,10) )
+    if ( !strnicmp("FIRSTUSED.",ptcKey,10) )
     {
-        pszKey += 10;
+        ptcKey += 10;
 
         CSFileObj * pFirstUsed = nullptr;
         for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
@@ -316,13 +320,13 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
         return false;
     }
 
-    int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
     if ( index < 0 )
     {
-        if ( strchr( pszKey, '.') ) // 0.blah format
+        if ( strchr( ptcKey, '.') ) // 0.blah format
         {
-            size_t nNumber = Exp_GetSTVal(pszKey);
+            size_t nNumber = Exp_GetSTVal(ptcKey);
             if ( nNumber < sFileList.size() )
             {
                 CSFileObj * pFile = sFileList.at(nNumber);
@@ -331,10 +335,9 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
                     CScriptObj* pObj = dynamic_cast<CScriptObj*>(pFile);
                     if (pObj != nullptr)
                     {
-                        SKIP_SEPARATORS(pszKey);
-                        CScript script(pszKey, s.GetArgStr());
-                        script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-                        script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+                        SKIP_SEPARATORS(ptcKey);
+                        CScript script(ptcKey, s.GetArgStr());
+                        script.CopyParseState(s);
                         return pObj->r_Verb(script, pSrc);
                     }
                 }

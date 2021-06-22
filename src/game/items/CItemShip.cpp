@@ -4,8 +4,9 @@
 
 #include "../../common/CException.h"
 #include "../chars/CChar.h"
+#include "../CServer.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
-#include "../CWorld.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
 #include "CItem.h"
@@ -51,47 +52,47 @@ bool CItem::Ship_Plank(bool fOpen)
     if (IsType(IT_SHIP_PLANK) && (oldType == IT_SHIP_SIDE || oldType == IT_SHIP_SIDE_LOCKED))
     {
         // Save the original Type of the plank if it used to be a ship side
-        m_itShipPlank.m_itSideType = (word)oldType;
+        m_itShipPlank.m_wSideType = (word)oldType;
     }
     else if (oldType == IT_SHIP_PLANK)
     {
         // Restore the type of the ship side
-        if (m_itShipPlank.m_itSideType == IT_SHIP_SIDE || m_itShipPlank.m_itSideType == IT_SHIP_SIDE_LOCKED)
-            SetType((IT_TYPE)(m_itShipPlank.m_itSideType));
+        if (m_itShipPlank.m_wSideType == IT_SHIP_SIDE || m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED)
+            SetType((IT_TYPE)(m_itShipPlank.m_wSideType));
 
-        m_itShipPlank.m_itSideType = IT_NORMAL;
+        m_itShipPlank.m_wSideType = IT_NORMAL;
     }
 
     Update();
     return true;
 }
 
-bool CItemShip::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
+bool CItemShip::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemShip::r_GetRef");
 
-    if (!strnicmp(pszKey, "HATCH.", 6))
+    if (!strnicmp(ptcKey, "HATCH.", 6))
     {
-        pszKey += 6;
+        ptcKey += 6;
         pRef = GetShipHold();
         return true;
     }
-    else if (!strnicmp(pszKey, "TILLER.", 7))
+    else if (!strnicmp(ptcKey, "TILLER.", 7))
     {
-        pszKey += 7;
+        ptcKey += 7;
         pRef = Multi_GetSign();
         return true;
     }
-    else if (!strnicmp(pszKey, "PLANK.", 6))
+    else if (!strnicmp(ptcKey, "PLANK.", 6))
     {
-        pszKey += 6;
-        int i = Exp_GetVal(pszKey);
-        SKIP_SEPARATORS(pszKey);
+        ptcKey += 6;
+        size_t i = Exp_GetSTVal(ptcKey);
+        SKIP_SEPARATORS(ptcKey);
         pRef = GetShipPlank(i);
         return true;
     }
 
-    return(CItemMulti::r_GetRef(pszKey, pRef));
+    return CItemMulti::r_GetRef(ptcKey, pRef);
 }
 
 bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script
@@ -104,12 +105,14 @@ void CItemShip::r_Write(CScript & s)
 {
     ADDTOCALLSTACK_INTENSIVE("CItemShip::r_Write");
     CItemMulti::r_Write(s);
-    if (m_uidHold)
-        s.WriteKeyHex("HATCH", m_uidHold);
-    if (GetShipPlankCount() > 0)
+    if (m_uidHold.IsValidUID())
+        s.WriteKeyHex("HATCH", m_uidHold.GetObjUID());
+
+    const size_t uiCount = GetShipPlankCount();
+    if (uiCount > 0)
     {
-        for (size_t i = 0; i < m_uidPlanks.size(); i++)
-            s.WriteKeyHex("PLANK", m_uidPlanks.at(i));
+        for (size_t i = 0; i < uiCount; ++i)
+            s.WriteKeyHex("PLANK", m_uidPlanks[i].GetObjUID());
     }
 }
 
@@ -129,18 +132,19 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
     nullptr
 };
 
-bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CItemShip::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    int index = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 
     switch (index)
     {
         case IMCS_HATCH:
         {
-            pszKey += 5;
+            ptcKey += 5;
             CItem * pItemHold = GetShipHold();
             if (pItemHold)
                 sVal.FormatHex(pItemHold->GetUID());
@@ -150,14 +154,14 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 
         case IMCS_PLANK:
         {
-            pszKey += 6;
+            ptcKey += 6;
             sVal.FormatSTVal(GetShipPlankCount());
         } break;
 
         case IMCS_TILLER:
         {
-            pszKey += 6;
-            CItem * pTiller = Multi_GetSign();
+            ptcKey += 6;
+            const CItem * pTiller = Multi_GetSign();
             if (pTiller)
                 sVal.FormatHex(pTiller->GetUID());
             else
@@ -165,7 +169,7 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         } break;
 
         default:
-            return(CItemMulti::r_WriteVal(pszKey, sVal, pSrc));
+            return (fNoCallParent ? false : CItemMulti::r_WriteVal(ptcKey, sVal, pSrc));
     }
 
     return true;
@@ -181,20 +185,20 @@ bool CItemShip::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
     EXC_TRY("LoadVal");
-    lpctstr	pszKey = s.GetKey();
-    IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    lpctstr	ptcKey = s.GetKey();
+    IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (g_Serv.IsLoading())
     {
         switch (index)
         {
             case IMCS_HATCH:
             {
-                m_uidHold = s.GetArgDWVal();
+                m_uidHold.SetObjUID(s.GetArgDWVal());
                 return true;
             }
             case IMCS_TILLER:
             {
-                m_uidLink = s.GetArgDWVal();
+                m_uidLink.SetObjUID(s.GetArgDWVal());
                 return true;
             }
             case IMCS_PLANK:
@@ -235,9 +239,9 @@ int CItemShip::FixWeirdness()
     return iResultCode;
 }
 
-bool CItemShip::OnTick()
+bool CItemShip::_OnTick()
 {
-    CCMultiMovable::OnTick();
+    CCMultiMovable::_OnTick();
     return true;    // Ships always return true, can't 'decay'
 }
 
@@ -292,7 +296,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
     // Find plank(s) if the list is empty
     if (m_uidPlanks.empty())
     {
-        CWorldSearch Area(GetTopPoint(), Multi_GetMaxDist());
+        CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
         for (;;)
         {
             const CItem * pItem = Area.GetItem();
@@ -338,7 +342,7 @@ void CItemShip::OnComponentCreate(CItem * pComponent)
             break;
     }
 
-    CItemMulti::OnComponentCreate(pComponent);
+    CItemMulti::OnComponentCreate(pComponent, false);
     return;
 }
 

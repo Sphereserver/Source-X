@@ -1,13 +1,14 @@
 /**
-* @file CSRand.h
+* @file SQLite.h
 * @brief Sphere wrapper for SQLite functions.
 */
 
 #ifndef _INC_SQLITE_H
 #define _INC_SQLITE_H
 
-#include "sqlite3.h"
+#include "../sphere_library/CSString.h"
 #include "../CScriptObj.h"
+#include "../CVarDefMap.h"
 #include <vector>
 
 
@@ -15,17 +16,20 @@
 // Typedefs
 //////////////////////////////////////////////////////////////////////////
 
-typedef std::basic_string<tchar> stdstring;
 typedef std::vector<tchar> stdvstring;
 typedef std::vector<stdvstring> vstrlist;
 typedef vstrlist row;
+
 
 //////////////////////////////////////////////////////////////////////////
 // Classes
 //////////////////////////////////////////////////////////////////////////
 
-class Table; // Forward declaration
-class TablePtr; // Forward declaration
+// Forward declarations
+struct sqlite3;
+class Table; 
+class TablePtr;
+
 
 // Main wrapper
 class CSQLite : public CScriptObj
@@ -41,9 +45,9 @@ public:
 	bool IsOpen();
 
 
-	sqlite3 * GetPtr(){ return m_sqlite3; };
-	int GetLastError(){ return m_iLastError; };
-	void ClearError() { m_iLastError=SQLITE_OK; };
+	sqlite3 * GetPtr() const    { return m_sqlite3; };
+	int GetLastError() const    { return m_iLastError; };
+	void ClearError()           { m_iLastError=0; };  // SQLITE_OK = 0
 
 	TablePtr QuerySQLPtr( lpctstr strSQL );
 	Table QuerySQL( lpctstr strSQL );
@@ -51,8 +55,11 @@ public:
 	int ExecuteSQL( lpctstr strSQL );
 	int IsSQLComplete( lpctstr strSQL );
 
+    int ImportDB(lpctstr strInFileName);
+    int ExportDB(lpctstr strOutFileName);
+
 	int GetLastChangesCount();
-	sqlite_int64 GetLastInsertRowID();
+    llong GetLastInsertRowID();
 
 
 	bool BeginTransaction();
@@ -60,9 +67,9 @@ public:
 	bool RollbackTransaction();
 
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
 	lpctstr GetName() const
@@ -78,7 +85,10 @@ private:
 	sqlite3 * m_sqlite3;
 	int m_iLastError;
 
-	void ConvertUTF8ToString( char * strInUTF8MB, stdvstring & strOut );
+    CSString _sFileName;
+    bool _fInMemory;
+
+	static void ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut );
 };
 
 // Table class...
@@ -202,29 +212,6 @@ public:
 	// Pointer to the table.
 	// I do not see any reason for encapsulating in Get/Set functions.
 	Table * m_pTable;
-};
-
-// Class for converting tchar to Multi-Byte UTF-8
-//   and vice versa
-class UTF8MBSTR
-{
-public:
-	UTF8MBSTR(void);
-	UTF8MBSTR(lpctstr lpStr);
-	UTF8MBSTR(UTF8MBSTR& lpStr);
-	virtual ~UTF8MBSTR();
-
-	void operator =(lpctstr lpStr);
-	void operator =(UTF8MBSTR& lpStr);
-	operator char* ();
-	operator stdstring ();
-
-private:
-	char * m_strUTF8_MultiByte;
-	size_t ConvertStringToUTF8(lpctstr strIn, char *& strOutUTF8MB);
-	static void ConvertUTF8ToString(char * strInUTF8MB, size_t len, lptstr & strOut);
-
-	size_t m_iLen;
 };
 
 

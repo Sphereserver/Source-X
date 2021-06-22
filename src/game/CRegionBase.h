@@ -36,21 +36,21 @@ public:
     CPointMap GetRegionCorner( DIR_TYPE dir = DIR_QTY ) const;
 	bool IsInside2d( const CPointMap & pt ) const;
 
-	bool IsOverlapped( const CRectMap & rect ) const;
+	bool IsOverlapped( const CRectMap & rect ) const noexcept;
 	bool IsInside( const CRectMap & rect ) const;
 
 	bool IsInside( const CRegionBase * pRegionIsSmaller ) const;
 	bool IsOverlapped( const CRegionBase * pRegionTest ) const;
 	bool IsEqualRegion( const CRegionBase * pRegionTest ) const;
 
-	CSector * GetSector( int i ) const	// get all the sectors that make up this rect.
+	inline CSector * GetSector( int i ) const // get all the sectors that make up this rect.
 	{
 		return m_rectUnion.GetSector(i);
 	}
 
 public:
 	CRegionBase();
-	virtual ~CRegionBase() { };
+	virtual ~CRegionBase() = default;
 
 private:
 	CRegionBase(const CRegionBase& copy);

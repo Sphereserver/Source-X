@@ -20,8 +20,10 @@
 #include "CCharPlayer.h"
 
 
+class CWorldTicker;
+
 class CCharNPC;
-class CMultiStorage;
+
 
 enum NPCBRAIN_TYPE	// General AI type.
 {
@@ -42,7 +44,10 @@ enum NPCBRAIN_TYPE	// General AI type.
 class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR
-    THREAD_CMUTEX_DEF;
+
+	friend class CWorldTicker;
+
+    // THREAD_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
 
 private:
 	// Spell type effects.
@@ -79,20 +84,17 @@ private:
 #define STATF_RIDDEN		0x40000000	// This is the horse. (don't display me) I am being ridden
 #define STATF_ONHORSE		0x80000000	// Mounted on horseback.
 
-	uint64 m_iStatFlag;		// Flags above
+	uint64 _uiStatFlag;		// Flags above
 
-#define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
-	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
-
-	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
+	CClient * m_pClient;	// is the char a currently logged in m_pPlayer ?
 
 public:
 	struct LastAttackers
 	{
 		int64	elapsed;
 		dword	charUID;
-		int64	amountDone;
-		int64	threat;
+		int		amountDone;
+		int		threat;
 		bool	ignore;
 	};
 	std::vector<LastAttackers> m_lastAttackers;
@@ -100,13 +102,14 @@ public:
 	struct NotoSaves
 	{
 		dword		charUID;	// Character viewing me
-		NOTO_TYPE	color;		// Color sent on movement packets
 		int64		time;		// Update timer
+		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
 	};
 	std::vector<NotoSaves> m_notoSaves;
 
 	static const char *m_sClassName;
+
 	CCharPlayer * m_pPlayer;	// May even be an off-line player !
 	CCharNPC * m_pNPC;			// we can be both a player and an NPC if "controlled" ?
 	CPartyDef * m_pParty;		// What party am i in ?
@@ -122,7 +125,7 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
-    int _iRange;
+    ushort _uiRange;
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
@@ -144,23 +147,17 @@ public:
 	// Speech
 	FONT_TYPE m_fonttype;			// speech font to use (client send this to server, but it's not used)
 	HUE_TYPE m_SpeechHueOverride;	// speech hue to use (ignore the one sent by the client, if a player, and from the defname and use this)
+	HUE_TYPE m_EmoteHueOverride;	// emote hue to use
 
 	// In order to revert to original Hue and body.
-	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
-	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
-	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
+	CREID_TYPE _iPrev_id;		// Backup of body type for ghosts and poly
+	HUE_TYPE _wPrev_Hue;		// Backup of skin color. in case of polymorph etc.
+	HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
 
-	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
-	byte m_LocalLight;
-
-    // Multis
-    uint8 _iMaxHouses;              // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
-    uint8 _iMaxShips;               // Max ships this player (Client?) can have (Overriding CAccount::_iMaxShips)
-    CMultiStorage *_pMultiStorage;	// List of houses.
-
-	// When events happen to the char. check here for reaction scripts.
 
 	// Skills, Stats and health
+	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
+
 	struct
 	{
 		ushort  m_base;      // Base stat: STR, INT, DEX
@@ -172,15 +169,17 @@ public:
         int64   m_regenLast; // Time of the last regen.
         ushort  m_regenVal;  // Amount of Stat to gain at each regen
 	} m_Stat[STAT_QTY];
+
     short m_iKarma;
     ushort m_uiFame;
 
-	int64 _timeNextRegen;	// When did i get my last regen tick ?
-    int16 _iRegenTickCount; // ticks until next regen.
-	int64 m_timeCreate;		// When was i created ?
+	int64  _iTimeCreate;	    // When was i created ?
+	int64  _iTimePeriodicTick;
+	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
+    ushort _iRegenTickCount;    // ticks until next regen.
 
-	int64 m_timeLastHitsUpdate;
-	int64 m_timeLastCallGuards;
+	int64 _iTimeLastHitsUpdate;
+	int64 _iTimeLastCallGuards;
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
@@ -198,9 +197,9 @@ public:
 
 		struct
 		{
-			dword m_Arg1;	// "ACTARG1"
-			dword m_Arg2;	// "ACTARG2"
-			dword m_Arg3;	// "ACTARG3"
+			dword m_dwArg1;	// "ACTARG1"
+			dword m_dwArg2;	// "ACTARG2"
+			dword m_dwArg3;	// "ACTARG3"
 		} m_atUnk;
 
 		// SKILL_MAGERY
@@ -211,8 +210,8 @@ public:
 		// SKILL_SPELLWEAVING
 		struct
 		{
-			SPELL_TYPE m_Spell;			// ACTARG1 = Currently casting spell.
-			CREID_TYPE m_SummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
+			SPELL_TYPE m_iSpell;			// ACTARG1 = Currently casting spell.
+			CREID_TYPE m_iSummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
 		} m_atMagery;
 
 		// SKILL_ALCHEMY
@@ -225,9 +224,9 @@ public:
 		// SKILL_TINKERING
 		struct
 		{
-			dword m_Stroke_Count;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
-			ITEMID_TYPE m_ItemID;		// ACTARG2 = Making this item.
-			dword m_Amount;				// ACTARG3 = How many of this item are we making?
+			dword m_dwStrokeCount;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
+			ITEMID_TYPE m_iItemID;		// ACTARG2 = Making this item.
+			dword m_dwAmount;				// ACTARG3 = How many of this item are we making?
 		} m_atCreate;
 
 		// SKILL_LUMBERJACKING
@@ -236,15 +235,15 @@ public:
 		struct
 		{
 			CResourceIDBase m_ridType;	// ACTARG1 = Type of item we're harvesting
-			dword m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
-            dword m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
+			dword m_dwBounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
+            dword m_dwStrokeCount;		// ACTARG3 = All requiring multi strokes.
 		} m_atResource;
 
 		// SKILL_TAMING
 		// SKILL_MEDITATION
 		struct
 		{
-			dword m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
+			dword m_dwStrokeCount;		// ACTARG1 = All requiring multi strokes.
 		} m_atTaming;
 
 		// SKILL_ARCHERY
@@ -255,7 +254,7 @@ public:
 		// SKILL_THROWING
 		struct
 		{
-			WAR_SWING_TYPE m_War_Swing_State;   // ACTARG1 = We are in the war mode swing.
+			WAR_SWING_TYPE m_iWarSwingState;    // ACTARG1 = We are in the war mode swing.
 			int16 m_iRecoilDelay;		        // ACTARG2 & 0x0000FFFF = Duration (in tenth of secs) of the previous swing recoil time.
             int16 m_iSwingAnimationDelay;       // ACTARG2 & 0xFFFF0000 = Duration (in tenth of secs) of the previous swing animation duration.
             int16 m_iSwingAnimation;            // ACTARG3 & 0x0000FFFF = hit animation id.
@@ -267,36 +266,36 @@ public:
 		// SKILL_PEACEMAKING
 		struct
 		{
-			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
+			dword m_dwInstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
 		} m_atBard;
 
 		// SKILL_PROVOCATION
 		struct
 		{
-			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
+			dword m_dwInstrumentUID;    // ACTARG1 = UID of the instrument we are playing.
 			dword m_Unused2;
-			dword m_IsAlly;				// ACTARG3 = Is the provoked considered an ally of the target? 0/1
+			dword m_dwIsAlly;			// ACTARG3 = Is the provoked considered an ally of the target? 0/1
 		} m_atProvocation;				//	If so, abort the skill. To allow always, override it to 0 in @Success via scripts.
 
 		// SKILL_TRACKING
 		struct
 		{
-			DIR_TYPE m_PrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
-			dword m_DistMax;			// ACTARG2 = Maximum distance when starting and continuing to use the Tracking skill.
+			DIR_TYPE m_iPrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
+			dword m_dwDistMax;			// ACTARG2 = Maximum distance when starting and continuing to use the Tracking skill.
 		} m_atTracking;
 
 		// NPCACT_RIDDEN
 		struct
 		{
-			mutable dword m_FigurineUID;// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
+			CUID m_uidFigurine;     // ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
 		} m_atRidden;
 
 		// NPCACT_TALK
 		// NPCACT_TALK_FOLLOW
 		struct
 		{
-			dword m_HearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
-			dword m_WaitCount;			// ACTARG2 = How long have i been waiting (xN sec)
+			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
+			dword m_dwWaitCount;		// ACTARG2 = How long have i been waiting (xN sec)
 										// m_Act_UID = who am i talking to ?
 		} m_atTalk;
 
@@ -312,25 +311,35 @@ public:
 public:
 	CChar( CREID_TYPE id );
 	virtual ~CChar(); // Delete character
-	bool DupeFrom( CChar * pChar, bool fNewbieItems);
+	bool DupeFrom(const CChar * pChar, bool fNewbieItems);
 
 private:
 	CChar(const CChar& copy);
 	CChar& operator=(const CChar& other);
 
+protected:
+	void DeleteCleanup(bool fForce);	// Not virtual!
+	virtual void DeletePrepare() override;
 public:
-    CMultiStorage *GetMultiStorage();
-    virtual void GoSleep();
-    virtual void GoAwake();
+	bool NotifyDelete();
+	virtual bool Delete(bool fForce = false) override;
+
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
-	char GetFixZ( const CPointMap& pt, dword dwBlockFlags = 0);
-	virtual void Delete(bool bforce = false) override;
-	bool NotifyDelete();
-	bool IsStatFlag( uint64 iStatFlag ) const;
-	void StatFlag_Set(uint64 iStatFlag);
-	void StatFlag_Clear(uint64 iStatFlag);
-	void StatFlag_Mod(uint64 iStatFlagStatFlag, bool fMod );
+
+//protected:	bool _IsStatFlag(uint64 uiStatFlag) const noexcept;
+public:		bool  IsStatFlag(uint64 uiStatFlag) const noexcept;
+
+//protected:	void _StatFlag_Set(uint64 uiStatFlag) noexcept;
+public:		void  StatFlag_Set(uint64 uiStatFlag) noexcept;
+
+//protected:	void _StatFlag_Clear(uint64 uiStatFlag) noexcept;
+public:		void  StatFlag_Clear(uint64 uiStatFlag) noexcept;
+
+//protected:	void _StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
+public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
+
+	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
 	bool IsPriv( word flag ) const;
 	PLEVEL_TYPE GetPrivLevel() const;
 
@@ -396,7 +405,7 @@ public:
 	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
 	bool CanMove( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
-	bool CanUse( CItem * pItem, bool fMoveOrConsume ) const;
+	bool CanUse( const CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
 
 	ushort  Food_CanEat( CObjBase * pObj ) const;
@@ -437,6 +446,8 @@ public:
     ushort GetFame() const;
     void SetFame(ushort uiNewFame);
 
+	void Stat_StrCheckEquip();
+
 	// Location and movement ------------------------------------
 private:
 	bool TeleportToCli( int iType, int iArgs );
@@ -449,17 +460,18 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	CChar* GetNext() const;
-	CObjBaseTemplate * GetTopLevelObj() const;
+	virtual CObjBaseTemplate* GetTopLevelObj() override;
+	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	bool IsSwimming() const;
 
 	bool MoveToRegionReTest( dword dwType );
 	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
 	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
-	virtual void SetTopZ( char z );
+	virtual void SetTopZ( char z ) override;
+	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
-	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 );
+	bool MoveToNearestShore(bool fNoMsg = false);
 
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
@@ -467,23 +479,29 @@ public:
 
 public:
 	// Client Player specific stuff. -------------------------
+	bool IsPlayer() const noexcept			{ return nullptr != m_pPlayer; }
+	bool IsClientActive() const noexcept	{ return nullptr != m_pClient; }
+	bool IsClientType() const noexcept;
+	CClient* GetClientActive() const noexcept { return m_pClient; }
+
 	void ClientAttach( CClient * pClient );
 	void ClientDetach();
-	bool IsClient() const;
-	CClient * GetClient() const;
 
 	bool SetPrivLevel( CTextConsole * pSrc, lpctstr pszFlags );
 	bool CanDisturb( const CChar * pChar ) const;
-	void SetDisconnected();
+	void SetDisconnected( CSector *pNewSector = nullptr );
 	bool SetPlayerAccount( CAccount * pAccount );
 	bool SetPlayerAccount( lpctstr pszAccount );
+
+	void ClearPlayer();
+
     bool IsNPC() const;
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain() const;
-    NPCBRAIN_TYPE GetNPCBrainGroup() const;     // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
-    NPCBRAIN_TYPE GetNPCBrainAuto() const;    // Guess default NPC brain
+    NPCBRAIN_TYPE GetNPCBrainGroup() const;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	NPCBRAIN_TYPE GetNPCBrainAuto() const;	// Guess default NPC brain
 	void ClearNPC();
-	void ClearPlayer();
+	
 
 public:
 	void ObjMessage( lpctstr pMsg, const CObjBase * pSrc ) const;
@@ -513,16 +531,17 @@ public:
 	lpctstr GetPossessPronoun() const;	// his
 	byte GetModeFlag( const CClient *pViewer = nullptr ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
-	dword GetMoveBlockFlags(bool bIgnoreGM = false) const;
+	dword GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM = false) const;
 
 	int FixWeirdness();
 	void CreateNewCharCheck();
 
-private:
 	// Contents/Carry stuff. ---------------------------------
-	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
+private:
+	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
 protected:
-	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
+
 public:
 	bool CanCarry( const CItem * pItem ) const;
 	bool CanEquipStr( CItem * pItem ) const;
@@ -546,21 +565,14 @@ public:
 
 public:
     /**
-    * @fn  bool CObjBase::IsTriggerActive(lpctstr trig);
-    *
     * @brief   Queries if a trigger is active ( m_RunningTrigger ) .
-    *
     * @param   trig    The trig.
-    *
     * @return  true if the trigger is active, false if not.
     */
     bool IsTriggerActive(lpctstr trig) const;
 
     /**
-    * @fn  void CObjBase::SetTriggerActive(lpctstr trig = nullptr);
-    *
     * @brief   Sets trigger active ( m_RunningTrigger ).
-    *
     * @param   trig    The trig.
     */
     void SetTriggerActive(lpctstr trig = nullptr);
@@ -571,11 +583,11 @@ public:
 public:
 	// Load/Save----------------------------------
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_Load( CScript & s ) override;  // Load a character from Script
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = nullptr ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual void r_Write( CScript & s ) override;
 
 	void r_WriteParity( CScript & s );
@@ -738,13 +750,6 @@ public:
 	void Noto_Murder();
 
 	/**
-	* @brief How much notoriety values do I have stored?
-	*
-	* @return amount of characters stored.
-	*/
-	int NotoSave();
-
-	/**
 	* @brief Adding someone to my notoriety list.
 	*
 	* @param pChar is retrieving my notoriety, I'm going to store what I have to send him on my list.
@@ -783,9 +788,9 @@ public:
 	/**
 	* @brief Deleting myself and sending data again for given char.
 	*
-	* @param id, entry of the viewer.
+	* @param pChar, the CChar* of the char of which we want to resend the noto.
 	*/
-	void NotoSave_Resend( int id );
+	void NotoSave_Resend( CChar *pChar );
 
 	/**
 	* @brief Gets the entry list of the given CChar.
@@ -793,7 +798,7 @@ public:
 	* @param pChar, CChar to retrieve the entry number for.
 	* @return the entry number.
 	*/
-	int NotoSave_GetID( CChar * pChar );
+	int NotoSave_GetID( CChar * pChar ) const;
 
 	/**
 	* @brief Removing stored data for pChar.
@@ -830,11 +835,11 @@ public:
 	uint GetSkillTotal(int what = 0, bool how = true);
 
 	// skills and actions. -------------------------------------------
-	static bool IsSkillBase( SKILL_TYPE skill );
-	static bool IsSkillNPC( SKILL_TYPE skill );
+	static bool IsSkillBase( SKILL_TYPE skill ) noexcept;
+	static bool IsSkillNPC( SKILL_TYPE skill ) noexcept;
 
 	SKILL_TYPE Skill_GetBest( uint iRank = 0 ) const; // Which skill is the highest for character p
-	SKILL_TYPE Skill_GetActive() const
+	SKILL_TYPE Skill_GetActive() const noexcept
 	{
 		return m_Act_SkillCurrent;
 	}
@@ -858,7 +863,7 @@ public:
 
 	void Skill_SetBase( SKILL_TYPE skill, ushort uiValue );
     void Skill_AddBase( SKILL_TYPE skill, int iChange );
-	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true );
+	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true, bool bForceCheck = false);
 
 	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );
@@ -938,7 +943,7 @@ private:
 	int Skill_Act_Training( SKTRIG_TYPE stage );
 
 	void Spell_Dispel( int iskilllevel );
-	CChar * Spell_Summon( CREID_TYPE id, CPointMap ptTarg );
+	CChar * Spell_Summon_Place( CChar * pChar, CPointMap ptTarg );
 	bool Spell_Recall(CItem * pRune, bool fGate);
     CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
@@ -954,7 +959,7 @@ private:
 	bool Spell_Unequip( LAYER_TYPE layer );
 
 	int  Spell_CastStart();
-	void Spell_CastFail();
+	void Spell_CastFail( bool fAbort = false );
 
 public:
     bool Spell_Resurrection(CItemCorpse * pCorpse = nullptr, CChar * pCharSrc = nullptr, bool fNoFail = false);
@@ -965,28 +970,29 @@ public:
 	bool Spell_CastDone();
 	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false );
 	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
+	CChar * Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1);
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------
 	bool Memory_OnTick( CItemMemory * pMemory );
 	bool Memory_UpdateFlags( CItemMemory * pMemory );
-	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes );
-	void Memory_AddTypes( CItemMemory * pMemory, word MemTypes );
-	bool Memory_ClearTypes( CItemMemory * pMemory, word MemTypes );
-	CItemMemory * Memory_CreateObj( CUID uid, word MemTypes );
-	CItemMemory * Memory_CreateObj( const CObjBase * pObj, word MemTypes );
+	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word wMemTypes );
+	void Memory_AddTypes( CItemMemory * pMemory, word wMemTypes );
+	bool Memory_ClearTypes( CItemMemory * pMemory, word wMemTypes );
+	CItemMemory * Memory_CreateObj( const CUID& uid, word wMemTypes );
+	CItemMemory * Memory_CreateObj( const CObjBase * pObj, word wMemTypes );
 
 public:
-	void Memory_ClearTypes( word MemTypes );
-	CItemMemory * Memory_FindObj( CUID uid ) const;
+	void Memory_ClearTypes( word wMemTypes );
+	CItemMemory * Memory_FindObj(const CUID& uid ) const;
 	CItemMemory * Memory_FindObj( const CObjBase * pObj ) const;
-	CItemMemory * Memory_AddObjTypes( CUID uid, word MemTypes );
-	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, word MemTypes );
-	CItemMemory * Memory_FindTypes( word MemTypes ) const;
-	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const;
+	CItemMemory * Memory_AddObjTypes(const CUID& uid, word wMemTypes );
+	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, word wMemTypes );
+	CItemMemory * Memory_FindTypes( word wMemTypes ) const;
+	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, word wMemTypes ) const;
 	// -------- Public alias for MemoryCreateObj ------------------
-	CItemMemory * Memory_AddObj( CUID uid, word MemTypes );
-	CItemMemory * Memory_AddObj( const CObjBase * pObj, word MemTypes );
+	CItemMemory * Memory_AddObj( const CUID& uid, word wMemTypes );
+	CItemMemory * Memory_AddObj( const CObjBase * pObj, word wMemTypes );
 	// ------------------------------------------------------------
 
 public:
@@ -1021,7 +1027,7 @@ private:
 	bool Fight_IsActive() const;
 public:
 	int CalcArmorDefense() const;
-	
+	static int CalcPercentArmorDefense(LAYER_TYPE layer);
 	void Memory_Fight_Retreat( CChar * pTarg, CItemMemory * pFight );
 	void Memory_Fight_Start( const CChar * pTarg );
 	bool Memory_Fight_OnTick( CItemMemory * pMemory );
@@ -1031,7 +1037,6 @@ public:
 	void Fight_ClearAll();
 	void Fight_HitTry();
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
-	bool Fight_Parry(CItem * &pItemParry);
 	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg, bool fSwingNoRange = false);
 	SKILL_TYPE Fight_GetWeaponSkill() const;
     DAMAGE_TYPE Fight_GetWeaponDamType(const CItem* pWeapon = nullptr) const;
@@ -1053,54 +1058,58 @@ public:
 	inline int GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
-	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
+	bool	Attacker_Add(CChar * pChar, int threat = 0);
 	CChar * Attacker_GetLast() const;
-	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(size_t attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(const CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(int attackerIndex, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(const CChar * pChar, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void	Attacker_RemoveChar();
 	void	Attacker_Clear();
 	void	Attacker_CheckTimeout();
-	int64	Attacker_GetDam(size_t attackerIndex) const;
-	void	Attacker_SetDam(const CChar * pChar, int64 value);
-	void	Attacker_SetDam(size_t attackerIndex, int64 value);
-	CChar * Attacker_GetUID(size_t attackerIndex) const;
-	int64	Attacker_GetElapsed(size_t attackerIndex) const;
+	int		Attacker_GetDam(int attackerIndex) const;
+	void	Attacker_SetDam(const CChar * pChar, int value);
+	void	Attacker_SetDam(int attackerIndex, int value);
+	CChar * Attacker_GetUID(int attackerIndex) const;
+	int64	Attacker_GetElapsed(int attackerIndex) const;
 	void	Attacker_SetElapsed(const CChar * pChar, int64 value);
-	void	Attacker_SetElapsed(size_t attackerIndex, int64 value);
-	int64	Attacker_GetThreat(size_t attackerIndex) const;
-	void	Attacker_SetThreat(const CChar * pChar, int64 value);
-	void	Attacker_SetThreat(size_t attackerIndex, int64 value);
-	bool	Attacker_GetIgnore(size_t pChar) const;
+	void	Attacker_SetElapsed(int attackerIndex, int64 value);
+	int		Attacker_GetThreat(int attackerIndex) const;
+	void	Attacker_SetThreat(const CChar * pChar, int value);
+	void	Attacker_SetThreat(int attackerIndex, int value);
+	bool	Attacker_GetIgnore(int iChar) const;
 	bool	Attacker_GetIgnore(const CChar * pChar) const;
-	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
+	void	Attacker_SetIgnore(int iChar, bool fIgnore);
 	void	Attacker_SetIgnore(const CChar * pChar, bool fIgnore);
-	int64	Attacker_GetHighestThreat() const;
+	int		Attacker_GetHighestThreat() const;
 	int		Attacker_GetID(const CChar * pChar) const;
-	int		Attacker_GetID(CUID pChar) const;
+	int		Attacker_GetID(const CUID& pChar) const;
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );
 	void InitPlayer( CClient * pClient, const char * pszCharname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt,
 		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc );
-	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor = false);
-	bool ReadScript(CResourceLock &s, bool bVendor = false);
+	bool ReadScriptReducedTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool fVendor = false);
+	bool ReadScriptReduced(CResourceLock &s, bool fVendor = false);
 	void NPC_LoadScript( bool fRestock );
 	void NPC_CreateTrigger();
 
 	// Mounting and figurines
+	ITEMID_TYPE Horse_GetMountItemID() const;
 	bool Horse_Mount( CChar * pHorse ); // Remove horse char and give player a horse item
 	bool Horse_UnMount(); // Remove horse char and give player a horse item
 
 private:
-	CItem * Horse_GetMountItem() const;
-	CChar * Horse_GetMountChar() const;
+	CItem* Horse_GetMountItem() const;
+    CChar* Horse_GetMountChar() const;
+    CItem* Horse_GetValidMountItem();
+    CChar* Horse_GetValidMountChar();
+
 public:
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
-	CChar * Use_Figurine( CItem * pItem, bool bCheckFollowerSlots = true );
-	CItem * Make_Figurine( CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
+	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
+	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
 	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
 
@@ -1108,14 +1117,14 @@ public:
 	bool ItemEquip( CItem * pItem, CChar * pCharMsg = nullptr, bool fFromDClick = false );
 	bool ItemEquipWeapon( bool fForce );
 	bool ItemEquipArmor( bool fForce );
-	bool ItemBounce( CItem * pItem, bool bDisplayMsg = true );
+	bool ItemBounce( CItem * pItem, bool fDisplayMsg = true );
 	bool ItemDrop( CItem * pItem, const CPointMap & pt );
 
 	void Flip();
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
-	bool SetPoisonCure( int iLevel, bool fExtra );
+	bool SetPoisonCure( bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
-	CItemCorpse * FindMyCorpse( bool ignoreLOS = false, int iRadius = 2) const;
+	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
 	bool RaiseCorpse( CItemCorpse * pCorpse );
 	bool Death();
@@ -1143,15 +1152,16 @@ public:
 #define DEATH_NOCONJUREDEFFECT 0x08
 #define DEATH_HASCORPSE 0x010
 
-	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
-	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font= FONT_NORMAL, CLanguageID lang = 0 );
-	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+    void Speak_RevealCheck(TALKMODE_TYPE mode);
+	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL ) override;
+	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 ) override;
+	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) override;
 
 	bool OnFreezeCheck() const;
     bool IsStuck(bool fFreezeCheck);
 
 	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
-	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool bLeaveHands = false );
+	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool fLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );
 
@@ -1164,7 +1174,7 @@ public:
 	void Use_EatQty( CItem * pFood, ushort uiQty = 1 );
 	bool Use_Eat( CItem * pItem, ushort uiQty = 1 );
 	bool Use_MultiLockDown( CItem * pItemTarg );
-	void Use_CarveCorpse( CItemCorpse * pCorpse );
+	void Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving );
 	bool Use_Repair( CItem * pItem );
 	int  Use_PlayMusic( CItem * pInstrument, int iDifficultyToPlay );
 	void Use_Drink(CItem *pItem);
@@ -1207,7 +1217,7 @@ private:
 	ushort NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const;
 
 	bool NPC_OnVerb( CScript &s, CTextConsole * pSrc = nullptr );
-	void NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire = false );
+	void NPC_OnHirePayMore( CItem * pGold, uint uiWage, bool fHire = false );
 public:
 	bool NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnHireHear( CChar * pCharSrc );
@@ -1215,7 +1225,7 @@ public:
 	bool NPC_OnTrainPay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnTrainHear( CChar * pCharSrc, lpctstr pCmd );
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountToTrain );
-    int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
+    int64 PayGold(CChar * pCharSrc, int64 iGold, CItem * pGold, ePayGold iReason);
 private:
 	bool NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) const;
 	void NPC_OnNoticeSnoop( const CChar * pCharThief, const CChar * pCharMark );
@@ -1259,6 +1269,7 @@ public:
 	void NPC_ExtraAI();			//	NPC thread AI - some general extra operations
 	void NPC_AddSpellsFromBook(CItem * pBook);
 
+	void NPC_PetRelease();
 	void NPC_PetDesert();
 	void NPC_PetClearOwners();
 	bool NPC_PetSetOwner( CChar * pChar );
@@ -1288,24 +1299,36 @@ public:
 	void OnHarmedBy( CChar * pCharSrc );
 	bool OnAttackedBy( CChar * pCharSrc, bool fPetsCommand = false, bool fShouldReveal = true );
 
+protected:
+	virtual void _GoAwake() override final;
+	virtual void _GoSleep() override final;
+
+	virtual bool _CanTick() const override final;
+
+protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc
+//public:	virtual bool  _OnTick() override final;
+
+public:
 	bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
-	void OnTickStatusUpdate();
-	bool OnTick();  // OnTick timeout for skills, AI, etc
-    void OnTickSkill(); // OnTick timeout specific for the skill behavior
-    bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
+
+	virtual void OnTickStatusUpdate() override;
+	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
+    
+	void OnTickSkill(); // _OnTick timeout specific for the skill behavior
 
 	static CChar * CreateBasic( CREID_TYPE baseID );
 	static CChar * CreateNPC( CREID_TYPE id );
 };
 
-inline bool CChar::IsSkillBase( SKILL_TYPE skill ) // static
+
+inline bool CChar::IsSkillBase( SKILL_TYPE skill ) noexcept // static
 {
 	// Is this in the base set of skills.
 	return (skill > SKILL_NONE && skill < (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
 }
 
-inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
+inline bool CChar::IsSkillNPC( SKILL_TYPE skill ) noexcept  // static
 {
 	// Is this in the NPC set of skills.
 	return (skill >= NPCACT_FOLLOW_TARG && skill < NPCACT_QTY);

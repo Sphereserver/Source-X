@@ -6,16 +6,19 @@
 #ifndef _INC_CENTITY_H
 #define _INC_CENTITY_H
 
-//#include "../common/sphere_library/smap.h"
+#include "../common/flat_containers/flat_map.hpp"
 #include "CComponent.h"
 #include <map>
 
 class CEntity
 {
-    //tsdynamicmap<COMP_TYPE, CComponent*> _List;
-    std::map<COMP_TYPE, CComponent*> _List;
+    fc::vector_map<COMP_TYPE, CComponent*> _lComponents;
+    using iterator          = decltype(_lComponents)::iterator;
+    using const_iterator    = decltype(_lComponents)::const_iterator;
 
 public:
+    static const char* m_sClassName;
+
     CEntity();
     ~CEntity();
     /**
@@ -38,14 +41,6 @@ public:
     void SubscribeComponent(CComponent *pComponent);
 
     /**
-    * @brief Unsuscribes a CComponent. Use this if looping through the components with an iterator!
-    *
-    * @param it Iterator to the component to unsubscribe.
-    * @param fEraseFromMap Should i erase this component from the internal map? Use false if you're going to erase it manually later
-    */
-    void UnsubscribeComponent(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap = true);
-
-    /**
     * @brief Unsuscribes a CComponent.
     *
     * @param pComponent the CComponent to unsuscribe.
@@ -66,7 +61,7 @@ public:
     * @param type the type of the CComponent to retrieve.
     * @return a pointer to the CComponent, if it is suscribed.
     */
-    CComponent *GetComponent(COMP_TYPE type);
+    CComponent *GetComponent(COMP_TYPE type) const;
 
     /**
     * @brief Wrapper of base method.
@@ -75,10 +70,10 @@ public:
     * (eg: uid.04001.name, will set the game object with uid '04001' as
     * reference, the rest of the code will be executed on it.
     *
-    * @param pszKey the key applied on the search.
+    * @param ptcKey the key applied on the search.
     * @param pRef a pointer to the object found.
     */
-    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
+    bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef);
 
     /**
     * @brief Wrapper of base method.
@@ -94,13 +89,13 @@ public:
     *
     * Returns a value to a script '<name>' or ingame '.show/.xshow name'
     *
-    * @param pszKey the key to search for (eg: name, ResCold, etc).
+    * @param ptcKey the key to search for (eg: name, ResCold, etc).
     * @param sVal the storage that will return the value.
     * @param pSrc is this requested by someone?.
     *
     * @return true if there was a key to retrieve.
     */
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc);
     /**
     * @brief Wrapper of base method.
     *
@@ -126,19 +121,19 @@ public:
     void Copy(const CEntity *base);
 
     /**
-    * @brief Calls OnTick on all components.
+    * @brief Calls _OnTick on all components.
     *
     * This should commonly return CCRET_CONTINUE to allow other CComponents
     * and default behaviour to control another basic aspects, but on some cases
     * CCRET_TRUE can be used to skip the rest of the code or CCRET_FALSE to stop
-    * the ticking and remove the object on the main OnTick().
+    * the ticking and remove the object on the main _OnTick().
     *
     * @return The return type:
     * -CCRET_TRUE,     // True: code done, stop the loop.
     * -CCRET_FALSE,    // False: code done, stop the loop.
     * -CCRET_CONTINUE  // Continue: just continue the loop.
     */
-    CCRET_TYPE OnTick();
+    CCRET_TYPE _OnTick();
 
 };
 

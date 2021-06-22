@@ -6,6 +6,7 @@
 #define _INC_CSFILETEXT_H
 
 #include "CSFile.h"
+#include <cstdio>
 
 /**
 * @brief Text files. Try to be compatible with MFC CFile class.
@@ -84,7 +85,8 @@ public:     virtual bool IsEOF() const;
     * @param ... argument list.
     * @return total chars of the output.
     */
-    int _cdecl Printf( lpctstr pFormat, ... ) __printfargs(2,3);
+protected:  int _cdecl _Printf( lpctstr pFormat, ... ) __printfargs(2,3);
+public:     int _cdecl Printf(lpctstr pFormat, ...) __printfargs(2, 3);
     /**
     * @brief Reads data from the file.
     * @param pBuffer buffer where store the readed data.
@@ -106,19 +108,22 @@ public:     virtual tchar * ReadString( tchar * pBuffer, int sizemax );
     * @param args argument list.
     * @return total chars of the output.
     */
-    int VPrintf( lpctstr pFormat, va_list args );
+protected:  int _VPrintf( lpctstr pFormat, va_list args );
+public:     int VPrintf(lpctstr pFormat, va_list args);
     /**
     * @brief writes supplied data into file.
     * @param pData data to write.
     * @param iLen lenght of the data to write.
     * @return true is success, false otherwise.
     */
-    virtual bool Write( const void * pData, int iLen ) override;
+protected:  virtual bool _Write( const void * pData, int iLen ) override;
+public:     virtual bool Write(const void* pData, int iLen) override;
     /**
     * @brief write string into file.
     * @return true is success, false otherwise.
     */
-    virtual bool WriteString( lpctstr pStr );
+protected:  bool _WriteString(lpctstr pStr);
+public:     bool WriteString(lpctstr pStr);
     ///@}
     /** @name Mode operations:
     */

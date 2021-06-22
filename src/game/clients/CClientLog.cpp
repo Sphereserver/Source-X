@@ -4,7 +4,8 @@
 #include "../../common/sphere_library/CSFileList.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
-#include "../../network/network.h"
+#include "../../network/CIPHistoryManager.h"
+#include "../../network/CNetworkManager.h"
 #include "../../network/send.h"
 #include "../CServer.h"
 #include "CClient.h"
@@ -64,12 +65,8 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 	m_iConnectType = iType;
 	if ( iType == CONNECT_GAME )
 	{
-#ifndef _MTNETWORK
-		HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(GetPeer());
-#else
 		HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-#endif
-		history.m_connecting--;
+		-- history.m_connecting;
 	}
 }
 
@@ -90,7 +87,7 @@ bool CClient::addLoginErr(byte code)
 		return true;
 
 	// console message to display for each login error code
-	static lpctstr const sm_Login_ErrMsg[] =
+	static lpctstr constexpr sm_Login_ErrMsg[] =
 	{
 		"Account does not exist",
 		"The account entered is already being used",
@@ -171,11 +168,10 @@ void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left cor
 
 	if ( IsSetOF(OF_Flood_Protection) && ( GetPrivLevel() <= PLEVEL_Player )  )
 	{
-		if ( !strcmpi(pszMsg, m_zLastMessage) )
+		if ( !strnicmp(pszMsg, m_zLastMessage, SCRIPT_MAX_LINE_LEN) )
 			return;
 
-		if ( strlen(pszMsg) < SCRIPT_MAX_LINE_LEN )
-			strcpy(m_zLastMessage, pszMsg);
+		Str_CopyLimitNull(m_zLastMessage, pszMsg, SCRIPT_MAX_LINE_LEN);
 	}
 
 	addBarkParse(pszMsg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
@@ -208,7 +204,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 
 	if ( ipAddr.IsLocalAddr())	// local server address not yet filled in.
 	{
-		ipAddr = m_net->m_socket.GetSockName();
+		ipAddr.SetAddrIP(m_net->m_socket.GetSockName().GetAddrIP());
 		DEBUG_MSG(( "%x:Login_Relay to %s\n", GetSocketID(), ipAddr.GetAddrStr() ));
 	}
 
@@ -227,7 +223,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 		sCustomerID.Add(GetAccount()->GetName());
 
 		dwCustomerId = z_crc32(0L, Z_NULL, 0);
-		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetPtr()), (z_uInt)sCustomerID.GetLength());
+		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetBuffer()), (z_uInt)sCustomerID.GetLength());
 
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}
@@ -365,31 +361,31 @@ bool CClient::OnRxConsole( const byte * pData, uint iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( (uint)(m_Targ_Text.GetLength()) > (CountOf(m_zLogin) - 1) )
+					if ( (uint)(m_Targ_Text.GetLength()) > (sizeof(m_zLogin) - 1) )
 					{
 						SysMessage("Login:\n");
 					}
 					else
 					{
-						strcpy(m_zLogin, m_Targ_Text);
+						Str_CopyLimitNull(m_zLogin, m_Targ_Text, sizeof(m_zLogin));
 						SysMessage("Password:\n");
 					}
-					m_Targ_Text.Empty();
+					m_Targ_Text.Clear();
 				}
 				else
 				{
-					CSString sMsg;
-
 					CAccount * pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
 					{
 						SysMessagef("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_CONSOLE_NOT_PRIV));
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						return false;
 					}
+
+					CSString sMsg;
 					if ( LogIn(m_zLogin, m_Targ_Text, sMsg ) == PacketLoginError::Success )
 					{
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						return OnRxConsoleLoginComplete();
 					}
 					else if ( ! sMsg.IsEmpty())
@@ -397,7 +393,7 @@ bool CClient::OnRxConsole( const byte * pData, uint iLen )
 						SysMessage( sMsg );
 						return false;
 					}
-					m_Targ_Text.Empty();
+					m_Targ_Text.Clear();
 				}
 				return true;
 			}
@@ -430,24 +426,26 @@ bool CClient::OnRxAxis( const byte * pData, uint iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( (uint)(m_Targ_Text.GetLength()) <= (CountOf(m_zLogin) - 1) )
-						strcpy(m_zLogin, m_Targ_Text);
-					m_Targ_Text.Empty();
+					if ((uint)(m_Targ_Text.GetLength()) <= (sizeof(m_zLogin) - 1))
+					{
+						Str_CopyLimitNull(m_zLogin, m_Targ_Text, sizeof(m_zLogin));
+					}
+					m_Targ_Text.Clear();
 				}
 				else
 				{
-					CSString sMsg;
-
 					CAccount * pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == nullptr ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
 					{
 						SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_NOT_PRIV));
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						return false;
 					}
+
+					CSString sMsg;
 					if ( LogIn(m_zLogin, m_Targ_Text, sMsg ) == PacketLoginError::Success )
 					{
-						m_Targ_Text.Empty();
+						m_Targ_Text.Clear();
 						if ( GetPrivLevel() < PLEVEL_Counsel )
 						{
 							SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_NOT_PRIV));
@@ -505,7 +503,7 @@ bool CClient::OnRxAxis( const byte * pData, uint iLen )
 						SysMessagef("\"MSG:%s\"", (lpctstr)sMsg);
 						return false;
 					}
-					m_Targ_Text.Empty();
+					m_Targ_Text.Clear();
 				}
 				return true;
 			}
@@ -653,24 +651,33 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 		}
 	}
 
-	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %" PRIuSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
+	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %u)\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
 	return false;
 }
 
-bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
+bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxWebPageRequest");
-	// Seems to be a web browser pointing at us ? typical stuff :
+	
+    // Seems to be a web browser pointing at us ? typical stuff :
 	if ( GetConnectType() != CONNECT_HTTP )
 		return false;
 
+    if (uiLen > HTTPREQ_MAX_SIZE)    // request too long
+        goto httpreq_err_long;
+
 	// ensure request is null-terminated (if the request is well-formed, we are overwriting a trailing \n here)
-	pRequest[iLen - 1] = '\0';
+	pRequest[uiLen - 1] = '\0';
 
-	if ( strlen(reinterpret_cast<char *>(pRequest)) > 1024 )			// too long request
-		return false;
+    uiLen = strlen(reinterpret_cast<const char*>(pRequest));
+    if (uiLen > HTTPREQ_MAX_SIZE)     // too long request
+    {
+    httpreq_err_long:
+        g_Log.EventWarn("%x:Client sent HTTP request of length %" PRIuSIZE_T" exceeding max length limit of %d, ignoring.\n", GetNetState()->id(), uiLen, HTTPREQ_MAX_SIZE);
+        return false;
+    }
 
-	if ( !strpbrk( reinterpret_cast<char *>(pRequest), " \t\012\015" ) )	// malformed request
+	if ( !strpbrk( reinterpret_cast<const char *>(pRequest), " \t\012\015" ) )    // malformed request
 		return false;
 
 	tchar * ppLines[16];
@@ -682,10 +689,10 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 	bool fKeepAlive = false;
 	CSTime dateIfModifiedSince;
 	tchar * pszReferer = nullptr;
-	unsigned long stContentLength = 0;
+	uint uiContentLength = 0;
 	for ( int j = 1; j < iQtyLines; ++j )
 	{
-		tchar	*pszArgs = Str_TrimWhitespace(ppLines[j]);
+		tchar *pszArgs = Str_TrimWhitespace(ppLines[j]);
 		if ( !strnicmp(pszArgs, "Connection:", 11 ) )
 		{
 			pszArgs += 11;
@@ -701,7 +708,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 		{
 			pszArgs += 15;
 			GETNONWHITESPACE(pszArgs);
-			stContentLength = strtoul(pszArgs, nullptr, 10);
+            uiContentLength = Str_ToUI(pszArgs, 10);
 		}
 		else if ( ! strnicmp( pszArgs, "If-Modified-Since:", 18 ))
 		{
@@ -719,6 +726,8 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 	if ( strchr(ppRequest[1], '\r') || strchr(ppRequest[1], 0x0c) )
 		return false;
 
+	int iSocketRet = 0;
+
 	// if the client hasn't requested a keep alive, we must act as if they had
 	// when async networking is used, otherwise data may not be completely sent
 	if ( fKeepAlive == false )
@@ -728,24 +737,38 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 		// must switch to a blocking socket when the connection is not being kept
 		// alive, or else pending data will be lost when the socket shuts down
 
-		if ( fKeepAlive == false )
-			m_net->m_socket.SetNonBlocking(false);
+		if (fKeepAlive == false)
+		{
+			iSocketRet = m_net->m_socket.SetNonBlocking(false);
+			if (iSocketRet)
+				return false;
+		}
 	}
 
-	linger llinger;
+	linger llinger{};
 	llinger.l_onoff = 1;
 	llinger.l_linger = 500;	// in mSec
-	m_net->m_socket.SetSockOpt(SO_LINGER, reinterpret_cast<char *>(&llinger), sizeof(linger));
-	char nbool = true;
-	m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &nbool, sizeof(char));
+	iSocketRet = m_net->m_socket.SetSockOpt(SO_LINGER, reinterpret_cast<char *>(&llinger), sizeof(linger));
+	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.SO_LINGER");
+	if (iSocketRet)
+		return false;
+
+	int iSockFlag = 1;
+	iSocketRet = m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &iSockFlag, sizeof(iSockFlag));
+	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.SO_KEEPALIVE");
+	if (iSocketRet)
+		return false;
 
 	// disable NAGLE algorythm for data compression
-	nbool = true;
-	m_net->m_socket.SetSockOpt( TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
+	iSockFlag = 1;
+	iSocketRet = m_net->m_socket.SetSockOpt(TCP_NODELAY, &iSockFlag, sizeof(iSockFlag), IPPROTO_TCP);
+	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.TCP_NODELAY");
+	if (iSocketRet)
+		return false;
 	
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{
-		if ( stContentLength > strlen(ppLines[iQtyLines-1]) )
+		if (uiContentLength > strlen(ppLines[iQtyLines-1]) )
 			return false;
 
 		// POST /--WEBBOT-SELF-- HTTP/1.1
@@ -762,7 +785,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 			pWebPage = g_Cfg.FindWebPage(pszReferer);
 		if ( pWebPage )
 		{
-			if ( pWebPage->ServPagePost(this, ppRequest[1], ppLines[iQtyLines-1], stContentLength) )
+			if ( pWebPage->ServPagePost(this, ppRequest[1], ppLines[iQtyLines-1], uiContentLength) )
 			{
 				if ( fKeepAlive )
 					return true;
@@ -782,13 +805,14 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, uint iLen )
 		if ( !Str_GetBare( szPageName, Str_TrimWhitespace(ppRequest[1]), sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" ) )
 			return false;
 
-		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<lpctstr>(szPageName), fKeepAlive);
-		if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
+		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), szPageName, fKeepAlive);
+        CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince);
+		/*if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
 		{
 			if ( fKeepAlive )
 				return true;
 			return false;
-		}
+		}*/
 	}
 
 
@@ -808,15 +832,11 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 	ASSERT( uiLen > 0 );
 
 	// Try all client versions on the msg.
-	CEvent bincopy;		// in buffer. (from client)
-	ASSERT( uiLen <= sizeof(bincopy));
-	memcpy( bincopy.m_Raw, pEvent->m_Raw, uiLen );
-
-	if ( !m_Crypt.Init( m_net->m_seed, bincopy.m_Raw, uiLen, GetNetState()->isClientKR() ) )
+	if ( !m_Crypt.Init( m_net->m_seed, pEvent->m_Raw, uiLen, GetNetState()->isClientKR() ) )
 	{
 		DEBUG_MSG(( "%x:Odd login message length %" PRIuSIZE_T "?\n", GetSocketID(), uiLen ));
 #ifdef _DEBUG
-		xRecordPacketData(this, (const byte *)pEvent, uiLen, "client->server");
+		xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 #endif
 		addLoginErr( PacketLoginError::BadEncLength );
 		return false;
@@ -836,14 +856,16 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		return false;
 	}
 	
-	byte lErr = PacketLoginError::EncUnknown;
-	
-	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, uiLen ))
+    ASSERT(uiLen <= sizeof(CEvent));
+    std::unique_ptr<CEvent> bincopy = std::make_unique<CEvent>();		// in buffer. (from client)
+    memcpy(bincopy->m_Raw, pEvent->m_Raw, uiLen);
+	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy->m_Raw, MAX_BUFFER, uiLen ))
     {
         g_Log.EventError("NET-IN: xProcessClientSetup failed (Decrypt).\n");
         return false;
     }
 	
+    byte lErr = PacketLoginError::EncUnknown;
 	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 
 	switch ( pEvent->Default.m_Cmd )
@@ -860,8 +882,12 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 				CAccount * pAcc = g_Accounts.Account_Find( szAccount );
 				if (pAcc)
 				{
-					pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVer());
-					pAcc->m_TagDefs.SetNum("reportedcliver", GetNetState()->getReportedVersion());
+                    if (m_Crypt.GetClientVer())
+                        pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVer());
+					if (GetNetState()->getReportedVersion())
+                        pAcc->m_TagDefs.SetNum("reportedcliver", GetNetState()->getReportedVersion());
+                    else
+                        new PacketClientVersionReq(this); // client version 0 ? ask for it.
 				}
 				else
 				{
@@ -946,7 +972,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 #endif
 	}
 	
-	xRecordPacketData(this, (const byte *)pEvent, uiLen, "client->server");
+	xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 
 	if ( lErr != PacketLoginError::Success )	// it never matched any crypt format.
 	{
@@ -972,7 +998,7 @@ bool CClient::xCanEncLogin(bool bCheckCliver)
 			return true;
 		
 		if ( m_Crypt.GetEncryptionType() != ENC_NONE )
-			return( m_Crypt.GetClientVer() == g_Serv.m_ClientVersion.GetClientVer() );
+			return ( m_Crypt.GetClientVer() == g_Serv.m_ClientVersion.GetClientVer() );
 		else
 			return true;	// if unencrypted we check that later
 	}

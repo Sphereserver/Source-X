@@ -18,7 +18,7 @@ function (toolchain_exe_stuff)
 		-Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
 		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
-		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-invalid-offsetof -Wno-unused-result")
+		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
@@ -76,13 +76,12 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_32BITS;_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG")
+	SET (COMMON_DEFS "_32BITS;_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_EXCEPTIONS_DEBUG")
 		# _32BITS: 32 bits architecture.
 		# _LINUX: linux OS.
 		# _LIBEV: use libev
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
-		# _MTNETWORK: multi-threaded networking support.
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 	FOREACH (DEF ${COMMON_DEFS})

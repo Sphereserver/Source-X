@@ -17,24 +17,27 @@ CItemScript::~CItemScript()
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-lpctstr const CItemScript::sm_szLoadKeys[] = {
-    nullptr,
+lpctstr const CItemScript::sm_szLoadKeys[] =
+{
+    nullptr
 };
 
-lpctstr const CItemScript::sm_szVerbKeys[] = {
-    nullptr,
+lpctstr const CItemScript::sm_szVerbKeys[] =
+{
+    nullptr
 };
 
 void CItemScript::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemScript::r_Write");
+    ADDTOCALLSTACK("CItemScript::r_Write");
     CItemVendable::r_Write(s);
 }
 
-bool CItemScript::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
+bool CItemScript::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
     ADDTOCALLSTACK("CItemScript::r_WriteVal");
-    return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+    return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
 }
 
 bool CItemScript::r_LoadVal(CScript & s)

@@ -11,12 +11,12 @@ function (toolchain_after_project)
 
 	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
 	SET (C_FLAGS_COMMON		"${C_FLAGS_EXTRA} /W4 /MP /GR /fp:fast\
-					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
+					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812"		)
 	 #				# Disable warnings caused by external c libraries.
 	 # For zlib: C4244, C4245
 
 	SET (CXX_FLAGS_COMMON		"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++17\
-					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
+					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812"		)
 
 	 # Setting the exe to be a GUI application and not a console one.
 	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"		)
@@ -83,10 +83,8 @@ function (toolchain_exe_stuff)
 	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
 	  # _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		_WIN32
-      # Use the "z_" prefix for the zlib functions
+	  # Use the "z_" prefix for the zlib functions
 		Z_PREFIX
-	  # Multi-threaded networking support.
-		_MTNETWORK
 	  # GIT defs.
 		_GITVERSION
 	  # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam
@@ -122,5 +120,6 @@ function (toolchain_exe_stuff)
 
 	#-- Custom .vcxproj settings (for now, it only affects the debugger working directory).
 
+	SET(SRCDIR ${CMAKE_SOURCE_DIR}) # for the sake of shortness
 	CONFIGURE_FILE("cmake/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
 endfunction()

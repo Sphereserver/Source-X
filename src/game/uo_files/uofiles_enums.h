@@ -57,6 +57,7 @@ enum HUE_CODE
 
     HUE_TEXT_DEF		= 0x03b2,	// NPC speech default: light gray color.
 	HUE_SAY_DEF			= 0x0034,	// Player speech default: yellow
+	HUE_EMOTE_DEF		= 0x0022,	// Default emote color.
 
     HUE_DYE_HIGH		= 0x03e9,	// highest dyeable color = 1001
 
@@ -228,7 +229,8 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
 
     ANIM_QTY_ANI	= 13,
 
-    ANIM_QTY		= 0x32
+    ANIM_QTY		= 0x32,
+    ANIM_MASK_MAX   = 64    // CCharBase::m_Anims bitmask can hold a maximum of 64 values (1 << 63)
 };
 
 
@@ -291,7 +293,7 @@ enum CRESND_TYPE	// Placeholders (not real sound IDs): the SoundChar method choo
 };
 
 
-enum FONT_TYPE
+enum FONT_TYPE : unsigned short
 {
     FONT_BOLD,		// 0 - Bold Text = Large plain filled block letters.
     FONT_SHAD,		// 1 - Text with shadow = small gray
@@ -543,6 +545,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_SPELL_Essence_Of_Wind,
 
     //Mysticism
+    LAYER_SPELL_Enchant,
     LAYER_SPELL_Sleep,
     LAYER_SPELL_Bombard,
     LAYER_SPELL_Spell_Plague,
@@ -698,6 +701,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     // Mysticism (SA)
     SPELL_Nether_Bolt = 678,
     SPELL_Healing_Stone,
+    SPELL_Purge_Magic,
     SPELL_Enchant_Weapon,
     SPELL_Sleep,
     SPELL_Eagle_Strike,
@@ -863,22 +867,28 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
     GUMP_GIFT_BOX_CHRISTMAS		        = 0x122,
     GUMP_WALL_SAFE				        = 0x123,
 	GUMP_MAP_BRITANNIA_1				= 0x12B,
+	GUMP_CHEST_HUGE                     = 0x3E8,
     GUMP_CHEST_PIRATE			        = 0x423,
     GUMP_FOUNTAIN_LIFE			        = 0x484,
 	GUMP_COMBINATION_CHEST				= 0x58D,
 	GUMP_COMBINATION_CHEST_OPEN			= 0x58E,
-    GUMP_MAILBOX_DOLPHIN		        = 0x6d3,
-    GUMP_MAILBOX_SQUIRREL		        = 0x6d4,
-    GUMP_MAILBOX_BARREL			        = 0x6d5,
-    GUMP_MAILBOX_LANTERN		        = 0x6d6,
+    GUMP_MAILBOX_DOLPHIN		        = 0x6D3,
+    GUMP_MAILBOX_SQUIRREL		        = 0x6D4,
+    GUMP_MAILBOX_BARREL			        = 0x6D5,
+    GUMP_MAILBOX_LANTERN		        = 0x6D6,
+    GUMP_WARDROBE_YELLOW                = 0x6E5,
+    GUMP_WARDROBE_BROWN                 = 0x6E6,
+    GUMP_DRAWER_YELLOW                  = 0x6E7,
+    GUMP_DRAWER_BROWN                   = 0x6E8,
+    GUMP_BARREL_SHORT                   = 0x6E9,
+    GUMP_BOOKCASE_BROWN                 = 0x6EA,
     GUMP_SECURE_TRADE			        = 0x866,
-    GUMP_SECURE_TRADE_TOL		        = 0x88a,
     GUMP_VENDOR_1						= 0x870,
 	GUMP_VENDOR_BILL					= 0x871,
 	GUMP_VENDOR_INVENTORY				= 0x872,
 	GUMP_VENDOR_OFFER					= 0x873,
 	GUMP_SEED_BOX						= 0x87C,
-	GUMP_SECURE_TRADE_NEW				= 0x88A,
+    GUMP_SECURE_TRADE_TOL		        = 0x88A,
     GUMP_BOARD_CHECKER					= 0x91A,	// Chess or checker board.
     GUMP_BOARD_BACKGAMMON				= 0x92E,	// backgammon board.
     GUMP_MAP_2_NORTH					= 0x139D,
@@ -957,6 +967,7 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_RUNIC_ATLAS					= 0x9BF3,
 	GUMP_SEMIDAR_CARD_BACK				= 0x9BF4,
 	GUMP_CRATE_FLETCHING				= 0x9BFe,
+	GUMP_DRAWER_ROYAL                   = 0x9CCA,
 	GUMP_CHEST_WOODEN					= 0x9CD9,
 	GUMP_PILLOW_HEART					= 0x9CDA,
     GUMP_CHEST_METAL_LARGE		        = 0x9cdb,
@@ -965,6 +976,10 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
     GUMP_CHEST_CRATE_LARGE		        = 0x9ce3,
     GUMP_MINERS_SATCHEL			        = 0x9ce4,
     GUMP_LUMBERJACKS_SATCHEL	        = 0x9ce5,
+    GUMP_MAILBOX_WOOD                   = 0x9D37,
+    GUMP_MAILBOX_BIRD                   = 0x9D38,
+    GUMP_MAULBOX_IRON                   = 0x9D39,
+    GUMP_MAILBOX_GOLDEN                 = 0x9D3A,
 	GUMP_CHEST_METAL2					= 0xEFE7,
 	GUMP_MAP_EODON						= 0xC34F,
     GUMP_QTY							= 0xFFFE,

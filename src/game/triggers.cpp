@@ -1,9 +1,5 @@
-//
-// Created by rot on 11/03/2016.
-//
 
 #include <vector>
-#include "../common/sphereproto.h"
 #include "../common/CLog.h"
 #include "CServer.h"
 #include "triggers.h"
@@ -12,10 +8,9 @@
 
 struct T_TRIGGERS
 {
-    char	m_name[48];
+    char	m_name[TRIGGER_NAME_MAX_LEN];
     int		m_used;
 };
-
 std::vector<T_TRIGGERS> g_triggers;
 
 bool IsTrigUsed(E_TRIGGERS id)
@@ -29,7 +24,7 @@ bool IsTrigUsed(const char *name)
 {
     if ( g_Serv.IsLoading() == true)
         return false;
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
     {
         if ( !strcmpi(it->m_name, name) )
             return (it->m_used != 0); // Returns true or false for known triggers
@@ -42,7 +37,7 @@ void TriglistInit()
     T_TRIGGERS	trig;
     g_triggers.clear();
 
-#define ADD(_a_)	strcpy(trig.m_name, "@"); strcat(trig.m_name, #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
+#define ADD(_a_)	snprintf(trig.m_name, TRIGGER_NAME_MAX_LEN, "@%s", #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
 #include "../tables/triggers.tbl"
 #undef ADD
 }
@@ -76,7 +71,7 @@ void TriglistAdd(const char *name)
 void Triglist(int &total, int &used)
 {
     total = used = 0;
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
     {
         ++total;
         if ( it->m_used )
@@ -86,7 +81,7 @@ void Triglist(int &total, int &used)
 
 void TriglistPrint()
 {
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
     {
         if (it->m_used)
         {

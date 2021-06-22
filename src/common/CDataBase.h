@@ -6,17 +6,21 @@
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 
-#include "common.h"
+#include "sphere_library/CSString.h"
 #include "sphere_library/smutex.h"
 #include "CScriptObj.h"
+#include "CVarDefMap.h"
 #include <vector>
 #include <queue>
+
 #include "mysql/errmsg.h"	// mysql standard include
 #include "mysql/mysql.h"	// this needs to be defined AFTER common.h
 
 
 #define	MIN_MYSQL_VERSION_ALLOW	40115
 
+
+class CVarDefMap;
 
 class CDataBase : public CScriptObj
 {
@@ -44,11 +48,11 @@ public:
 
 	//	set / get / info methods
 	bool isConnected();
-	bool OnTick();
+	bool _OnTick();
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
 	lpctstr GetName() const

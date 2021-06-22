@@ -1,14 +1,16 @@
 
 // Actions specific to a Player.
 
-#include "../../common/resource/blocks/CSkillClassDef.h"
+#include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
+#include "../items/CItemMulti.h"
+#include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CCharPlayer.h"
 
 
 lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
@@ -20,23 +22,33 @@ lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 };
 
 
-CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount)
+CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) :
+	m_SkillLock{}, m_StatLock{},
+	m_pAccount(pAccount)
 {
-    m_SpeechHue = 0;
+	_iTimeLastUsed = _iTimeLastDisconnected = 0;
+
+    m_SpeechHue = m_EmoteHue = 0;
 	m_wDeaths = m_wMurders = 0;
 	m_speedMode = 0;
 	m_pflag = 0;
-	m_bKrToolbarEnabled = false;
-	m_timeLastUsed = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_fKrToolbarEnabled = false;
+	m_LocalLight = 0;
 
-	memset(m_SkillLock, 0, sizeof(m_SkillLock));
-	memset(m_StatLock, 0, sizeof(m_StatLock));
+	_iMaxHouses = g_Cfg._iMaxHousesPlayer;
+	_iMaxShips = g_Cfg._iMaxShipsPlayer;
+	_pMultiStorage = new CMultiStorage(pChar->GetUID());
+
 	SetSkillClass(pChar, CResourceID(RES_SKILLCLASS));
 }
 
 CCharPlayer::~CCharPlayer()
 {
 	m_Speech.clear();
+
+	CMultiStorage* pOldStorage = _pMultiStorage;
+	_pMultiStorage = nullptr;
+	delete pOldStorage;			// I need _pMultiStorage to be nullptr before CMultiStorage destructor is called
 }
 
 CAccount * CCharPlayer::GetAccount() const
@@ -45,9 +57,14 @@ CAccount * CCharPlayer::GetAccount() const
 	return m_pAccount;
 }
 
-bool CCharPlayer::getKrToolbarStatus()
+bool CCharPlayer::getKrToolbarStatus() const noexcept
 {
-	return m_bKrToolbarEnabled;
+	return m_fKrToolbarEnabled;
+}
+
+CMultiStorage* CCharPlayer::GetMultiStorage()
+{
+	return _pMultiStorage;
 }
 
 bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
@@ -58,15 +75,13 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 		return false;
 
 	CSkillClassDef* pLink = static_cast <CSkillClassDef*>(pDef);
-	if ( !pLink )
-		return false;
 	if ( pLink == GetSkillClass() )
 		return true;
 
 	// Remove any previous skillclass from the Events block.
 	size_t i = pChar->m_OEvents.FindResourceType(RES_SKILLCLASS);
-	if ( i != pChar->m_OEvents.BadIndex() )
-		pChar->m_OEvents.erase(i);
+	if ( i != SCONT_BADINDEX )
+		pChar->m_OEvents.erase(pChar->m_OEvents.begin() + i);
 
 	m_SkillClass.SetRef(pLink);
 
@@ -87,12 +102,12 @@ CSkillClassDef * CCharPlayer::GetSkillClass() const
 }
 
 // only players can have skill locks.
-SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
+SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK("CCharPlayer::Skill_GetLockType");
 
 	tchar szTmpKey[128];
-    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
+    Str_CopyLimitNull( szTmpKey, ptcKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -100,10 +115,10 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 		return SKILL_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-		i = ATOI( ppArgs[1] );
+		i = atoi( ppArgs[1] );
 	else
 		i = g_Cfg.FindSkillKey( ppArgs[1] );
-	
+
 	if ( i >= g_Cfg.m_iMaxSkill )
 		return SKILL_NONE;
 	return (SKILL_TYPE)i;
@@ -117,17 +132,17 @@ SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
 
 void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 {
-	ASSERT( (skill >= 0) && ((size_t)skill < CountOf(m_SkillLock)));
+	ASSERT( (skill >= 0) && ((uint)skill < CountOf(m_SkillLock)));
 	m_SkillLock[skill] = (uchar)(state);
 }
 
 // only players can have stat locks.
-STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
+STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK("CCharPlayer::Stat_GetLockType");
 
 	tchar szTmpKey[128];
-    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
+    Str_CopyLimitNull( szTmpKey, ptcKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -135,9 +150,9 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 		return STAT_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-		i = ATOI( ppArgs[1] );
+		i = atoi( ppArgs[1] );
 	else
-		i = g_Cfg.FindStatKey( ppArgs[1] );
+		i = g_Cfg.GetStatKey( ppArgs[1] );
 
 	if ( i >= STAT_BASE_QTY )
 		return STAT_NONE;
@@ -146,17 +161,17 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 {
-	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
+	ASSERT( (stat >= 0) && ((uint)stat < CountOf(m_StatLock)));
 	return (SKILLLOCK_TYPE)m_StatLock[stat];
 }
 
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
-	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
+	ASSERT( (stat >= 0) && ((uint)stat < CountOf(m_StatLock)));
 	m_StatLock[stat] = (uchar)state;
 }
 
-bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
+bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 {
 	ADDTOCALLSTACK("CCharPlayer::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -164,31 +179,36 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 	if ( !pChar || !GetAccount() )
 		return false;
 
-	if ( !strnicmp(pszKey, "SKILLCLASS.", 11) )
+	if ( !strnicmp(ptcKey, "SKILLCLASS.", 11) )
 	{
-		return GetSkillClass()->r_WriteVal(pszKey + 11, sVal, pChar);
+		CSkillClassDef* pSkillClass = GetSkillClass();
+		ASSERT(pSkillClass);
+		return pSkillClass->r_WriteVal(ptcKey + 11, sVal, pChar);
 	}
-	else if ( ( !strnicmp(pszKey, "GUILD", 5) ) || ( !strnicmp(pszKey, "TOWN", 4) ) )
+	else if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 	{
-		bool bIsGuild = !strnicmp(pszKey, "GUILD", 5);
-		pszKey += bIsGuild ? 5 : 4;
-		if ( *pszKey == 0 )
+		const bool fIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+		ptcKey += fIsGuild ? 5 : 4;
+		if ( *ptcKey == 0 )
 		{
-			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) sVal.FormatHex((dword)pMyGuild->GetUID());
-			else sVal.FormatVal(0);
+			CItemStone *pMyGuild = pChar->Guild_Find(fIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
+			if ( pMyGuild )
+                sVal.FormatHex((dword)pMyGuild->GetUID());
+			else
+                sVal.FormatVal(0);
 			return true;
 		}
-		else if ( *pszKey == '.' )
+		else if ( *ptcKey == '.' )
 		{
-			pszKey += 1;
-			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) return pMyGuild->r_WriteVal(pszKey, sVal, pChar);
+			ptcKey += 1;
+			CItemStone *pMyGuild = pChar->Guild_Find(fIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
+			if ( pMyGuild )
+                return pMyGuild->r_WriteVal(ptcKey, sVal, pChar);
 		}
 		return false;
 	}
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CPC_QTY ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CPC_QTY ))
 	{
 		case CPC_ACCOUNT:
 			sVal = GetAccount()->GetName();
@@ -196,6 +216,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
         case CPC_SPEECHCOLOR:
             sVal.FormatWVal( m_SpeechHue );
             return true;
+        case CPC_EMOTECOLOR:
+        	sVal.FormatWVal( m_EmoteHue );
+        	return true;
 		case CPC_DEATHS:
 			sVal.FormatVal( m_wDeaths );
 			return true;
@@ -206,16 +229,22 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			sVal.FormatVal( m_wMurders );
 			return true;
 		case CPC_KRTOOLBARSTATUS:
-			sVal.FormatVal( m_bKrToolbarEnabled );
+			sVal.FormatVal( m_fKrToolbarEnabled );
 			return true;
 		case CPC_ISDSPEECH:
-			if ( pszKey[9] != '.' )
+			if ( ptcKey[9] != '.' )
 				return false;
-			pszKey += 10;
-			sVal = m_Speech.ContainsResourceName(RES_SPEECH, pszKey) ? "1" : "0";
+			ptcKey += 10;
+			sVal = m_Speech.ContainsResourceName(RES_SPEECH, ptcKey) ? "1" : "0";
+			return true;
+		case CPC_LASTDISCONNECTED:
+			sVal.FormatLLVal(CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeLastDisconnected) / MSECS_PER_SEC);  //seconds
 			return true;
 		case CPC_LASTUSED:
-			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC);  //seconds
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( _iTimeLastUsed ) / MSECS_PER_SEC );  //seconds
+			return true;
+		case CPC_LIGHT:
+			sVal.FormatHex(m_LocalLight);
 			return true;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);
@@ -229,17 +258,21 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			return true;
 		case CPC_REFUSETRADES:
 			{
-				CVarDefCont * pVar = pChar->GetDefKey(pszKey, true);
+				CVarDefCont * pVar = pChar->GetDefKey(ptcKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}
 			return true;
 		case CPC_SKILLCLASS:
-			sVal = GetSkillClass()->GetResourceName();
+			{
+				CSkillClassDef* pSkillClass = GetSkillClass();
+				ASSERT(pSkillClass);
+				sVal = pSkillClass->GetResourceName();
+			}
 			return true;
 		case CPC_SKILLLOCK:
 			{
 				// "SkillLock[alchemy]"
-				SKILL_TYPE skill = Skill_GetLockType( pszKey );
+				SKILL_TYPE skill = Skill_GetLockType( ptcKey );
 				if ( skill <= SKILL_NONE )
 					return false;
 				sVal.FormatVal( Skill_GetLock( skill ));
@@ -250,13 +283,43 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 		case CPC_STATLOCK:
 			{
 				// "StatLock[str]"
-				STAT_TYPE stat = Stat_GetLockType( pszKey );
+				STAT_TYPE stat = Stat_GetLockType( ptcKey );
 				if (( stat <= STAT_NONE ) || ( stat >= STAT_BASE_QTY ))
 					return false;
 				sVal.FormatVal( Stat_GetLock( stat ));
 			} return true;
+
+		case CPC_MAXHOUSES:
+			sVal.FormatU8Val(_iMaxHouses);
+			return true;
+		case CPC_HOUSES:
+			sVal.Format16Val(GetMultiStorage()->GetHouseCountReal());
+			return true;
+		case CPC_GETHOUSEPOS:
+		{
+			ptcKey += 11;
+			sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(ptcKey)));
+			return true;
+		}
+		case CPC_MAXSHIPS:
+		{
+			sVal.FormatU8Val(_iMaxShips);
+			return true;
+		}
+		case CPC_SHIPS:
+		{
+			sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
+			return true;
+		}
+		case CPC_GETSHIPPOS:
+		{
+			ptcKey += 11;
+			sVal.Format16Val(GetMultiStorage()->GetShipPos((CUID)Exp_GetDWVal(ptcKey)));
+			return true;
+		}
+
 		default:
-			if ( FindTableSorted( pszKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
+			if ( FindTableSorted( ptcKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
 			{
 				sVal = "0";
 				return true;
@@ -276,77 +339,103 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 	ADDTOCALLSTACK("CCharPlayer::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
-	if ( !strnicmp(pszKey, "GMPAGE", 6) )		//	GM pages
+	if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 	{
-		pszKey += 6;
-		if ( *pszKey == '.' )						//	GMPAGE.*
+		bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+		ptcKey += bIsGuild ? 5 : 4;
+		if ( *ptcKey == '.' )
 		{
-			SKIP_SEPARATORS(pszKey);
-			size_t index = Exp_GetVal(pszKey);
-			if ( index >= g_World.m_GMPages.GetCount() )
-				return false;
-
-			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetAt(index));
-			if ( pPage == nullptr )
-				return false;
-
-			SKIP_SEPARATORS(pszKey);
-			if ( !strnicmp(pszKey, "HANDLE", 6) )
-			{
-				CChar *ppChar = pChar;
-				lpctstr pszArgs = s.GetArgStr(); //Moved here because of error with quoted strings!?!?
-				if ( *pszArgs )
-					ppChar = dynamic_cast<CChar*>(g_World.FindUID(s.GetArgVal()));
-
-				if ( ppChar == nullptr )
-					return false;
-
-				CClient *pClient = ppChar->GetClient();
-				if ( pClient == nullptr )
-					return false;
-
-				pPage->SetGMHandler(pClient);
-			}
-			else if ( !strnicmp(pszKey, "DELETE", 6) )
-			{
-				delete pPage;
-			}
-			else if ( pPage->FindGMHandler() )
-			{
-				CClient* pClient = pChar->GetClient();
-				if ( pClient != nullptr && pClient->GetChar() != nullptr )
-					pClient->Cmd_GM_PageCmd(pszKey);
-			}
-			else
-			{
-				return false;
-			}
-
-			return true;
-		}
-		return false;
-	}
-	else if ( ( !strnicmp(pszKey, "GUILD", 5) ) || ( !strnicmp(pszKey, "TOWN", 4) ) )
-	{
-		bool bIsGuild = !strnicmp(pszKey, "GUILD", 5);
-		pszKey += bIsGuild ? 5 : 4;
-		if ( *pszKey == '.' )
-		{
-			pszKey += 1;
+			ptcKey += 1;
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
 			if ( pMyGuild )
-                return pMyGuild->r_SetVal(pszKey, s.GetArgRaw());
+                return pMyGuild->r_SetVal(ptcKey, s.GetArgRaw());
 		}
 		return false;
 	}
 
 	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CPC_QTY ))
 	{
+
+		case CPC_ADDHOUSE:
+		{
+			if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+			{
+				break;
+			}
+			int64 piCmd[2];
+			Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+			HOUSE_PRIV ePriv = HP_OWNER;
+			if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
+			{
+				ePriv = (HOUSE_PRIV)piCmd[1];
+			}
+			GetMultiStorage()->AddHouse(CUID((dword)piCmd[0]), ePriv);
+			return true;
+		}
+		case CPC_DELHOUSE:
+		{
+			dword dwUID = s.GetArgDWVal();
+			if (dwUID == UID_UNUSED)
+			{
+				GetMultiStorage()->ClearHouses();
+			}
+			else
+			{
+				GetMultiStorage()->DelHouse(CUID(dwUID));
+			}
+			return true;
+		}
+		case CPC_ADDSHIP:
+		{
+			if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+			{
+				break;
+			}
+			int64 piCmd[2];
+			Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+			HOUSE_PRIV ePriv = HP_OWNER;
+			if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
+			{
+				ePriv = (HOUSE_PRIV)piCmd[1];
+			}
+			GetMultiStorage()->AddShip(CUID((dword)piCmd[0]), ePriv);
+			return true;
+		}
+		case CPC_DELSHIP:
+		{
+			dword dwUID = s.GetArgDWVal();
+			if (dwUID == UINT_MAX)
+			{
+				GetMultiStorage()->ClearShips();
+			}
+			else
+			{
+				GetMultiStorage()->DelShip(CUID(dwUID));
+			}
+			return true;
+		}
+
+		case CPC_MAXHOUSES:
+			_iMaxHouses = s.GetArgU8Val();
+			return true;
+		case CPC_MAXSHIPS:
+			_iMaxShips = s.GetArgU8Val();
+			return true;
+
+		case CPC_LIGHT:
+			m_LocalLight = s.GetArgBVal();
+			if (pChar->IsClientActive())
+				pChar->GetClientActive()->addLight();
+			return true;
+
         case CPC_SPEECHCOLOR:
             m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
             return true;
+        case CPC_EMOTECOLOR:
+        	m_EmoteHue = (HUE_TYPE)s.GetArgWVal();
+        	return true;
 		case CPC_DEATHS:
 			m_wDeaths = (word)(s.GetArgVal());
 			return true;
@@ -357,12 +446,15 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			pChar->NotoSave_Update();
 			return true;
 		case CPC_KRTOOLBARSTATUS:
-			m_bKrToolbarEnabled = ( s.GetArgVal() != 0 );
-			if ( pChar->IsClient() )
-				pChar->GetClient()->addKRToolbar( m_bKrToolbarEnabled );
+			m_fKrToolbarEnabled = ( s.GetArgVal() != 0 );
+			if ( pChar->IsClientActive() )
+				pChar->GetClientActive()->addKRToolbar( m_fKrToolbarEnabled );
+			return true;
+		case CPC_LASTDISCONNECTED:
+			_iTimeLastDisconnected = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_LASTUSED:
-			m_timeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
+			_iTimeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_PFLAG:
 			{
@@ -385,8 +477,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
 				Skill_SetLock(skill, (SKILLLOCK_TYPE)bState);
-				if ( pChar->IsClient() )
-					pChar->GetClient()->addSkillWindow(skill);
+				if ( pChar->IsClientActive() )
+					pChar->GetClientActive()->addSkillWindow(skill);
 			} return true;
 		case CPC_SPEEDMODE:
 			{
@@ -402,8 +494,8 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
 				Stat_SetLock(stat, (SKILLLOCK_TYPE)bState );
-				if ( pChar->IsClient() )
-					pChar->GetClient()->addStatusWindow(pChar);
+				if ( pChar->IsClientActive() )
+					pChar->GetClientActive()->addStatusWindow(pChar);
 			} return true;
 
 		default:
@@ -426,59 +518,88 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	UNREFERENCED_PARAMETER(pChar);
 	EXC_TRY("r_WriteChar");
 
-	s.WriteKey("ACCOUNT", GetAccount()->GetName());
+	const CAccount* pAccount = GetAccount();
+	ASSERT (pAccount);
+
+	s.WriteKeyStr("ACCOUNT", pAccount->GetName());
+
+	if (_iTimeLastUsed > 0)
+		s.WriteKeyVal("LASTUSED", _iTimeLastUsed);
+	if (_iTimeLastDisconnected > 0)
+		s.WriteKeyVal("LASTDISCONNECTED", _iTimeLastDisconnected);
 
 	if ( m_wDeaths )
 		s.WriteKeyVal( "DEATHS", m_wDeaths );
 	if ( m_wMurders )
 		s.WriteKeyVal( "KILLS", m_wMurders );
-	if ( GetSkillClass()->GetResourceID().GetResIndex() )
-		s.WriteKey( "SKILLCLASS", GetSkillClass()->GetResourceName());
+	if (CSkillClassDef* pSkillClass = GetSkillClass())
+	{
+		if (pSkillClass->GetResourceID().GetResIndex())
+			s.WriteKeyStr("SKILLCLASS", pSkillClass->GetResourceName());
+	}
 	if ( m_pflag )
 		s.WriteKeyVal( "PFLAG", m_pflag );
 	if ( m_speedMode )
 		s.WriteKeyVal("SPEEDMODE", m_speedMode);
-	if (( GetAccount()->GetResDisp() >= RDS_KR ) && m_bKrToolbarEnabled )
-		s.WriteKeyVal("KRTOOLBARSTATUS", m_bKrToolbarEnabled);
+	if (m_fKrToolbarEnabled && (pAccount->GetResDisp() >= RDS_KR))
+		s.WriteKeyVal("KRTOOLBARSTATUS", m_fKrToolbarEnabled);
+	if (m_LocalLight)
+		s.WriteKeyHex("LIGHT", m_LocalLight);
     if ( m_SpeechHue )
         s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
+    if ( m_EmoteHue )
+    	s.WriteKeyVal("EMOTECOLOR", m_EmoteHue);
 
 	EXC_SET_BLOCK("saving dynamic speech");
 	if (!m_Speech.empty())
 	{
 		CSString sVal;
 		m_Speech.WriteResourceRefList( sVal );
-		s.WriteKey("DSPEECH", sVal);
+		s.WriteKeyStr("DSPEECH", sVal.GetBuffer());
 	}
 
 	EXC_SET_BLOCK("saving profile");
 	if ( ! m_sProfile.IsEmpty())
 	{
-		tchar szLine[SCRIPT_MAX_LINE_LEN-16];
+		tchar szLine[SCRIPT_MAX_LINE_LEN - 16];
 		Str_MakeUnFiltered( szLine, m_sProfile, sizeof(szLine));
-		s.WriteKey( "PROFILE", szLine );
+		s.WriteKeyStr( "PROFILE", szLine );
 	}
 
+	tchar szTemp[64];
+
 	EXC_SET_BLOCK("saving stats locks");
-	for ( int x = 0; x < STAT_BASE_QTY; x++)	// Don't write all lock states!
+	for ( int x = 0; x < STAT_BASE_QTY; ++x)	// Don't write all lock states!
 	{
 		if ( ! m_StatLock[x] )
 			continue;
-		tchar szTemp[128];
 		sprintf( szTemp, "StatLock[%d]", x );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_StatLock[x] );
 	}
 
 	EXC_SET_BLOCK("saving skill locks");
-	for ( size_t j = 0; j < g_Cfg.m_iMaxSkill; j++ )	// Don't write all lock states!
+	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )	// Don't write all lock states!
 	{
 		ASSERT(j < CountOf(m_SkillLock));
 		if ( ! m_SkillLock[j] )
 			continue;
-		tchar szTemp[128];
-		sprintf( szTemp, "SkillLock[%" PRIuSIZE_T "]", j );	// smaller storage space.
+		sprintf( szTemp, "SkillLock[%d]", j );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_SkillLock[j] );
 	}
+
+	if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
+	{
+		s.WriteKeyVal("MaxHouses", _iMaxHouses);
+	}
+	if (_iMaxShips != g_Cfg._iMaxShipsPlayer)
+	{
+		s.WriteKeyVal("MaxShips", _iMaxShips);
+	}
+
+	const CMultiStorage* pMultiStorage = GetMultiStorage();
+	ASSERT(pMultiStorage);
+	pMultiStorage->r_Write(s);
+
 	EXC_CATCH;
 }
 
@@ -505,24 +626,23 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	if ( !m_pPlayer || !pSrc )
 		return false;
 
-	lpctstr pszKey = s.GetKey();
-	int cpVerb = FindTableSorted( pszKey, CCharPlayer::sm_szVerbKeys, CountOf(CCharPlayer::sm_szVerbKeys)-1 );
+	lpctstr ptcKey = s.GetKey();
+	int cpVerb = FindTableSorted( ptcKey, CCharPlayer::sm_szVerbKeys, CountOf(CCharPlayer::sm_szVerbKeys)-1 );
 
 	if ( cpVerb <= -1 )
 	{
-		if ( ( !strnicmp(pszKey, "GUILD", 5) ) || ( !strnicmp(pszKey, "TOWN", 4) ) )
+		if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 		{
-			bool bIsGuild = !strnicmp(pszKey, "GUILD", 5);
-			pszKey += bIsGuild ? 5 : 4;
-			if ( *pszKey == '.' )
+			bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+			ptcKey += bIsGuild ? 5 : 4;
+			if ( *ptcKey == '.' )
 			{
-				pszKey += 1;
+				ptcKey += 1;
 				CItemStone *pMyGuild = Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
                 if ( pMyGuild )
                 {
-					CScript script(pszKey, s.GetArgRaw());
-					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+					CScript script(ptcKey, s.GetArgRaw());
+					script.CopyParseState(s);
                    	return pMyGuild->r_Verb(script, pSrc);
                 }
 			}
@@ -533,7 +653,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	switch ( cpVerb )
 	{
 		case CPV_KICK: // "KICK" = kick and block the account
-			return (IsClient() && GetClient()->addKick(pSrc));
+			return (IsClientActive() && GetClientActive()->addKick(pSrc));
 
 		case CPV_PASSWORD:	// "PASSWORD"
 		{

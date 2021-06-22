@@ -1,15 +1,16 @@
-﻿#include "../common/resource/blocks/CDialogDef.h"
-#include "../common/resource/blocks/CItemTypeDef.h"
-#include "../common/resource/blocks/CSkillClassDef.h"
-#include "../common/resource/blocks/CRandGroupDef.h"
-#include "../common/resource/blocks/CRegionResourceDef.h"
-#include "../common/resource/blocks/CResourceNamedDef.h"
+﻿#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CItemTypeDef.h"
+#include "../common/resource/sections/CSkillClassDef.h"
+#include "../common/resource/sections/CRandGroupDef.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
+#include "../common/resource/sections/CResourceNamedDef.h"
 #include "../common/sphere_library/CSFileList.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
+#include "../network/CClientIterator.h"
+#include "../network/CNetworkManager.h"
 #include "../network/CSocket.h"
-#include "../network/network.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
@@ -18,11 +19,16 @@
 #include "chars/CCharBase.h"
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
+#include "items/CItemMultiCustom.h"
 #include "components/CCChampion.h"
 #include "uo_files/CUOItemInfo.h"
 #include "uo_files/CUOTerrainInfo.h"
+#include "CServer.h"
 #include "CServerTime.h"
+#include "CWorldTimedFunctions.h"
 #include "CWorld.h"
+#include "CWorldGameTime.h"
+#include "CWorldMap.h"
 #include "spheresvr.h"
 #include "triggers.h"
 
@@ -34,8 +40,8 @@ CServerConfig::CServerConfig()
 	m_fUseNTService		= false;
 	m_fUseHTTP			= 2;
 	m_fUseAuthID		= true;
-	m_iMapCacheTime		= 2*60 * MSECS_PER_SEC;
-	_iSectorSleepDelay	= (1 << 10) - 1;
+	_iMapCacheTime		= 2  * 60 * MSECS_PER_SEC;
+	_iSectorSleepDelay  = 10 * 60 * MSECS_PER_SEC;
 	m_fUseMapDiffs		= false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
@@ -46,6 +52,7 @@ CServerConfig::CServerConfig()
 
 	//Magic
     m_fManaLossFail		    = false;
+	m_fNPCCanFizzleOnHit	= false;
 	m_fReagentLossFail		= false;
     m_fReagentsRequired		= false;
 	m_iWordsOfPowerColor	= HUE_TEXT_DEF;
@@ -122,6 +129,7 @@ CServerConfig::CServerConfig()
 	m_fCharTags				= false;
 	m_fVendorTradeTitle		= true;
 	m_iVendorMaxSell		= 255;
+	m_iVendorMarkup			= 15;
 	m_iGameMinuteLength		= 20 * MSECS_PER_SEC; // 20 seconds
 	m_fNoWeather			= true;
 	m_fFlipDroppedItems		= true;
@@ -165,7 +173,8 @@ CServerConfig::CServerConfig()
 	m_iMaxPolyStats			= 150;
 	m_iRacialFlags			= 0;
 	m_iRevealFlags			= (REVEALF_DETECTINGHIDDEN|REVEALF_LOOTINGSELF|REVEALF_LOOTINGOTHERS|REVEALF_SPEAK|REVEALF_SPELLCAST);
-
+	m_iEmoteFlags			= 0;
+	m_fDisplayPercentAr = false;
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
     m_iAutoProcessPriority = 0;
@@ -173,10 +182,11 @@ CServerConfig::CServerConfig()
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
 	m_iDistanceWhisper	= 3;
 	m_iDistanceTalk		= UO_MAP_VIEW_SIZE_DEFAULT;
+    m_iNPCDistanceHear  = 4;
 	m_iOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
 
 	m_iMaxSkill			= SKILL_QTY;
-	m_iWalkBuffer		= 75;
+	m_iWalkBuffer		= 15;
 	m_iWalkRegen		= 25;
 	m_iWoolGrowthTime	= 30*60 * MSECS_PER_SEC;
 	m_iAttackerTimeout	= 30;
@@ -189,6 +199,7 @@ CServerConfig::CServerConfig()
 	m_fPayFromPackOnly	= false;	// pay vendors from packs only
 
 	m_iOverSkillMultiply	= 2;
+	m_iCanSeeSamePLevel		= 0;
 	m_fSuppressCapitals		= false;
 
 	m_iAdvancedLos		= 0;
@@ -204,13 +215,10 @@ CServerConfig::CServerConfig()
 	m_iFeatureTOL		= 0;
 	m_iFeatureExtra		= 0;
 
-	m_iStatFlag			= 0;
+	_uiStatFlag			= 0;
 
 	m_iNpcAi			= 0;
 	m_iMaxLoopTimes		= 100000;
-
-	m_bAutoResDisp		= true;
-	m_iAutoPrivFlags	= 0;
 
 	// Third Party Tools
 	m_fCUOStatus		= true;
@@ -230,6 +238,11 @@ CServerConfig::CServerConfig()
 	m_bMySqlTicks			= false;
 
     m_bAutoResDisp          = true;
+	m_iAutoPrivFlags = 0;
+
+	_iEraLimitGear = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
+	_iEraLimitLoot = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
+	_iEraLimitProps = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
 
 	m_cCommandPrefix		= '.';
 
@@ -245,7 +258,7 @@ CServerConfig::CServerConfig()
 	m_bAllowLightOverride	= true;
 	m_bAllowNewbTransfer	= false;
 	m_sZeroPoint			= "1323,1624,0";
-	m_bAllowBuySellAgent	= false;
+	m_fAllowBuySellAgent	= false;
 
 	m_iColorNotoGood			= 0x59;		// blue
 	m_iColorNotoGuildSame		= 0x3f;		// green
@@ -257,6 +270,7 @@ CServerConfig::CServerConfig()
 	m_iColorNotoInvulGameMaster = 0x0b;		// purple
 	m_iColorNotoDefault			= 0x3b2;	// grey (if not any other)
 
+	m_iColorInvisItem   = 1000;
 	m_iColorInvis		= 0;
 	m_iColorInvisSpell	= 0;
 	m_iColorHidden		= 0;
@@ -265,10 +279,8 @@ CServerConfig::CServerConfig()
 
 	m_iPetsInheritNotoriety = 0;
 
-#ifdef _MTNETWORK
-	m_iNetworkThreads			= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
-	m_iNetworkThreadPriority	= IThread::Disabled;
-#endif
+	m_iNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
+	m_iNetworkThreadPriority= IThread::Disabled;
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
 	m_iNetHistoryTTL		= 300;
@@ -306,13 +318,13 @@ CServerConfig::~CServerConfig()
 
 
 // SKILL ITEMDEF, etc
-bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServerConfig::r_GetRef");
-	tchar * pszSep = const_cast<tchar*>(strchr( pszKey, '(' ));	// acts like const_cast
+	tchar * pszSep = const_cast<tchar*>(strchr( ptcKey, '(' ));
 	if ( pszSep == nullptr )
 	{
-		pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
+		pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
 		if ( pszSep == nullptr )
 			return false;
 	}
@@ -320,12 +332,12 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	tchar oldChar = *pszSep;
 	*pszSep = '\0';
 
-	int iResType = FindTableSorted( pszKey, sm_szResourceBlocks, RES_QTY );
+	int iResType = FindTableSorted( ptcKey, sm_szResourceBlocks, RES_QTY );
 	bool fNewStyleDef = false;
 
 	if ( iResType < 0 )
 	{
-		if ( !strnicmp(pszKey, "MULTIDEF", 8) )
+		if ( !strnicmp(ptcKey, "MULTIDEF", 8) )
 		{
 			iResType = RES_ITEMDEF;
 			fNewStyleDef = true;
@@ -340,11 +352,14 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	*pszSep = '.';
 
 	// Now get the index.
-	pszKey = pszSep + 1;
-	if ( pszKey[0] == '\0' )
+	ptcKey = pszSep + 1;
+	if (ptcKey[0] == '\0')
+	{
+		*pszSep = oldChar;
 		return false;
+	}
 
-	pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
+	pszSep = const_cast<tchar*>(strchr( ptcKey, '.' ));
 	if ( pszSep != nullptr )
 		*pszSep = '\0';
 
@@ -354,28 +369,28 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else if ( iResType == RES_CHARDEF )
 	{
-		//pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(Exp_GetVal(pszKey)));
-		pRef = CCharBase::FindCharBase((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, pszKey)));
+		//pRef = CCharBase::FindCharBase(static_cast<CREID_TYPE>(Exp_GetVal(ptcKey)));
+		pRef = CCharBase::FindCharBase((CREID_TYPE)(ResourceGetIndexType(RES_CHARDEF, ptcKey)));
 	}
 	else if ( iResType == RES_ITEMDEF )
 	{
-		if (fNewStyleDef && IsDigit(pszKey[0]))
-			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(Exp_GetVal(pszKey) + ITEMID_MULTI));
+		if (fNewStyleDef && IsDigit(ptcKey[0]))
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(Exp_GetVal(ptcKey) + ITEMID_MULTI));
 		else
-			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, pszKey)));
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(ResourceGetIndexType(RES_ITEMDEF, ptcKey)));
 	}
-	else if ( iResType == RES_SPELL && *pszKey == '-' )
+	else if ( iResType == RES_SPELL && *ptcKey == '-' )
 	{
-		++pszKey;
-		size_t iOrder = Exp_GetVal( pszKey );
-		if ( !m_SpellDefs_Sorted.IsValidIndex( iOrder ) )
+		++ptcKey;
+		size_t uiOrder = Exp_GetSTVal( ptcKey );
+		if ( !m_SpellDefs_Sorted.IsValidIndex( uiOrder ) )
 			pRef = nullptr;
 		else
-			pRef = m_SpellDefs_Sorted[iOrder];
+			pRef = m_SpellDefs_Sorted[uiOrder];
 	}
 	else
 	{
-		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, pszKey, RES_PAGE_ANY);
+		CResourceID	rid	= ResourceGetID((RES_TYPE)iResType, ptcKey, RES_PAGE_ANY);
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )
@@ -385,13 +400,14 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	if ( pszSep != nullptr )
 	{
 		*pszSep = oldChar; //*pszSep = '.';
-		pszKey = pszSep + 1;
+		ptcKey = pszSep + 1;
 	}
 	else
 	{
-		pszKey += strlen(pszKey);
+		ptcKey += strlen(ptcKey);
 	}
-	return true;
+
+	return (pRef != nullptr);
 }
 
 
@@ -400,7 +416,7 @@ enum RC_TYPE
 	RC_ACCTFILES,				// m_sAcctBaseDir
 	RC_ADVANCEDLOS,				// m_iAdvancedLos
 	RC_AGREE,
-	RC_ALLOWBUYSELLAGENT,		// m_bAllowBuySellAgent
+	RC_ALLOWBUYSELLAGENT,		// m_fAllowBuySellAgent
 	RC_ALLOWLIGHTOVERRIDE,		// m_bAllowLightOverride
 	RC_ALLOWNEWBTRANSFER,		// m_bAllowNewbTransfer
 	RC_ARCHERYMAXDIST,			// m_iArcheryMaxDist
@@ -418,6 +434,7 @@ enum RC_TYPE
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
 	RC_BUILD,
+	RC_CANSEESAMEPLEVEL,		// m_iCanSeeSamePLevel
 	RC_CANUNDRESSPETS,			// m_fCanUndressPets
 	RC_CHARTAGS,				// m_fCharTags
 	RC_CLIENTLINGER,
@@ -428,6 +445,7 @@ enum RC_TYPE
 	RC_CLIENTS,
 	RC_COLORHIDDEN,
 	RC_COLORINVIS,
+	RC_COLORINVISITEM,
 	RC_COLORINVISSPELL,
 	RC_COLORNOTOCRIMINAL,		// m_iColorNotoCriminal
 	RC_COLORNOTODEFAULT,		// m_iColorNotoDefault
@@ -460,6 +478,7 @@ enum RC_TYPE
 	RC_DEBUGFLAGS,
 	RC_DECAYTIMER,
 	RC_DEFAULTCOMMANDLEVEL,		//m_iDefaultCommandLevel
+	RC_DISPLAYPERCENTAR,	    //m_fDisplayPercentAr
 	RC_DISTANCETALK,
 	RC_DISTANCEWHISPER,
 	RC_DISTANCEYELL,
@@ -467,7 +486,11 @@ enum RC_TYPE
 	RC_DUMPPACKETSFORACC,
 #endif
 	RC_DUNGEONLIGHT,
+	RC_EMOTEFLAGS,				// m_iEmoteFlags
 	RC_EQUIPPEDCAST,			// m_fEquippedCast
+    RC_ERALIMITGEAR,			// _iEraLimitGear
+    RC_ERALIMITLOOT,			// _iEraLimitLoot
+    RC_ERALIMITPROPS,			// _iEraLimitProps
 	RC_EVENTSITEM,				// m_sEventsItem
 	RC_EVENTSPET,				// m_sEventsPet
 	RC_EVENTSPLAYER,			// m_sEventsPlayer
@@ -555,14 +578,14 @@ enum RC_TYPE
 	RC_MYSQLTICKS,				// m_bMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
-#ifdef _MTNETWORK
 	RC_NETWORKTHREADPRIORITY,	// m_iNetworkThreadPriority
 	RC_NETWORKTHREADS,			// m_iNetworkThreads
-#endif
 	RC_NORESROBE,
 	RC_NOTOTIMEOUT,
 	RC_NOWEATHER,				// m_fNoWeather
 	RC_NPCAI,					// m_iNpcAi
+	RC_NPCCANFIZZLEONHIT,		// m_fNPCCanFizzle
+    RC_NPCDISTANCEHEAR,         // m_iNPCDistanceHear
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
@@ -599,7 +622,7 @@ enum RC_TYPE
 	RC_SPEEDSCALEFACTOR,
 	RC_SPELLTIMEOUT,
 	RC_STAMINALOSSATWEIGHT,		// m_iStaminaLossAtWeight
-	RC_STATSFLAGS,				// m_iStatFlag
+	RC_STATSFLAGS,				// _uiStatFlag
 	RC_STRIPPATH,				// for TNG
 	RC_SUPPRESSCAPITALS,
 	RC_TELEPORTEFFECTNPC,		// m_iSpell_Teleport_Effect_NPC
@@ -624,6 +647,7 @@ enum RC_TYPE
 	RC_USEMAPDIFFS,				// m_fUseMapDiffs
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
+	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
 	RC_VERSION,
@@ -644,7 +668,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sAcctBaseDir),			0 }},
 	{ "ADVANCEDLOS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAdvancedLos),			0 }},
 	{ "AGREE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAgree),				0 }},
-	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowBuySellAgent),	0 }},
+	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAllowBuySellAgent),	0 }},
 	{ "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowLightOverride),	0 }},
 	{ "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowNewbTransfer),	0 }},
 	{ "ARCHERYMAXDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMaxDist),		0 }},
@@ -662,6 +686,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax),			0 }},
 	{ "BUILD",					{ ELEM_VOID,	0,											    0 }},
+	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCanSeeSamePLevel),	0 }},
 	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCanUndressPets),		0 }},
 	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCharTags),			0 }},
 	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLingerTime),	0 }},
@@ -672,6 +697,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "CLIENTS",				{ ELEM_VOID,	0,											    0 }},	// duplicate
 	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorHidden),			0 }},
 	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvis),			0 }},
+	{ "COLORINVISITEM",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisItem),		0 }},
 	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisSpell),		0 }},
 	{ "COLORNOTOCRIMINAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoCriminal),	0 }},
 	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoDefault),	0 }},
@@ -704,6 +730,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "DEBUGFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iDebugFlags),			0 }},
 	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item),			0 }},
 	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel),	0 }},
+	{ "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    OFFSETOF(CServerConfig,m_fDisplayPercentAr),    0 }},
 	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk ),		0 }},
 	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper ),	0 }},
 	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell ),		0 }},
@@ -711,7 +738,11 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sDumpAccPackets),		0 }},
 #endif
 	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDungeon),		0 }},
+	{ "EMOTEFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iEmoteFlags),			0 }},
 	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fEquippedCast),		0 }},
+	{ "ERALIMITGEAR",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitGear),			0 }},
+	{ "ERALIMITLOOT",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitLoot),			0 }},
+	{ "ERALIMITPROPS",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitProps),		0 }},
 	{ "EVENTSITEM",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sEventsItem),			0 }},
 	{ "EVENTSPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPet),			0 }},
 	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPlayer),		0 }},
@@ -760,7 +791,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
 	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor),		0 }},
     { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail),		0 }},
-	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMapCacheTime),		0 }},
+	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iMapCacheTime),		0 }},
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},
 	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity),	0 }},
@@ -799,14 +830,14 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySqlTicks),			0 }},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlUser),			0 }},
 	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetHistoryTTL),		0 }},
-#ifdef _MTNETWORK
 	{ "NETWORKTHREADPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreadPriority),	0 }},
 	{ "NETWORKTHREADS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreads),		0 }},
-#endif
 	{ "NORESROBE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoResRobe),			0 }},
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout),			0 }},
 	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather),			0 }},
 	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi),				0 }},
+	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit),	0 }},
+    { "NPCDISTANCEHEAR",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCDistanceHear),     0 }},
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle),		0 }},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills),		0 }},
 	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost),		0 }},
@@ -843,7 +874,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor),	0 }},
 	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout),		0 }},
 	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight),	0 }},
-	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStatFlag),			0 }},
+	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag),			0 }},
 	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath),			0 }},
 	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals),	0 }},
 	{ "TELEPORTEFFECTNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_NPC),		0 }},
@@ -868,6 +899,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseMapDiffs),			0 }},
 	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsenocrypt),			0 }},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsePacketPriorities),	0 }},
+	{ "VENDORMARKUP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMarkup),		0 }},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMaxSell),		0 }},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fVendorTradeTitle),	0 }},
 	{ "VERSION",				{ ELEM_VOID,	0,											0 }},
@@ -889,17 +921,18 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 
 #define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_MSG(x)
-#define DEBUG_ERR_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_ERR(x)
+#define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
+#define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
 
-	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
+	int i = FindCAssocRegTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
 		{
-			int index = ATOI(s.GetKey()+5);
+			int index = atoi(s.GetKey()+5);
 			if (index < 0 || index > STAT_FOOD)
 				return false;
-			g_Cfg.m_iRegenRate[index] = (s.GetArgVal() * MSECS_PER_SEC);
+			m_iRegenRate[index] = (s.GetArgLLVal() * MSECS_PER_SEC);
 			return true;
 		}
 		else if ( s.IsKeyHead("MAP", 3) )		//	MAPx=settings
@@ -915,7 +948,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				break;
 			}
 			if ( ok && str.size() > 0 )
-				return g_MapList.Load(ATOI(str.c_str()), s.GetArgRaw());
+				return g_MapList.Load(atoi(str.c_str()), s.GetArgRaw());
 
 			size_t length = str.size();
 
@@ -926,56 +959,53 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 				if ( g_MapList.IsMapSupported(nMapNumber) )
 				{
-					SKIP_SEPARATORS(pszStr);
-
 					if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 					{
-						int nSectors = g_MapList.GetSectorQty(nMapNumber);
+						const int nSectors = CSectorList::Get()->GetSectorQty(nMapNumber);
 						pszStr = s.GetArgRaw();
 
 						if ( pszStr && *pszStr )
 						{
 							CScript script(pszStr);
-							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-							script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-							for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-								g_World.GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
+							script.CopyParseState(s);
+							for (int nIndex = 0; nIndex < nSectors; ++nIndex)
+							{
+								CSector* pSector = CWorldMap::GetSector(nMapNumber, nIndex);
+								ASSERT(pSector);
+								pSector->r_Verb(script, &g_Serv);
+							}
+
+							return true;
 						}
 
-						return true;
+						return false;
 					}
 					else if ( !strnicmp( pszStr, "SECTOR.",7 ) )
 					{
-						pszStr = pszStr + 7;
-						int iSecNumber = Exp_GetVal(pszStr);
-						int nSectors = g_MapList.GetSectorQty(nMapNumber);
-						SKIP_SEPARATORS(pszStr);
+                        pszStr = pszStr + 7;
+                        const int iSecNumber = Exp_GetVal(pszStr);
+                        pszStr = s.GetArgRaw();
+                        if (pszStr && *pszStr)
+                        {
+                            CSector* pSector = CWorldMap::GetSector(nMapNumber, iSecNumber);
+                            if (pSector)
+                            {
+                                CScript script(pszStr);
+								script.CopyParseState(s);
+                                return pSector->r_Verb(script, &g_Serv);
+                            }
 
-						if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						{
-							pszStr = s.GetArgRaw();
-
-							if ( pszStr && *pszStr )
-							{
-								CScript script(pszStr);
-								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-								g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
-							}
-						}
-						else
-							g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, nMapNumber);
-
-						return true;
+                        }
+                        return false;
 					}
 				}
 			}
-			DEBUG_ERR_NOINIT(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
+			LOG_ERR_NOINIT(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
 			return false;
 		}
 		else if ( s.IsKeyHead("PACKET", 6) )	//	PACKETx=<function name to execute upon packet>
 		{
-			int index = ATOI(s.GetKey() + 6);
+			int index = atoi(s.GetKey() + 6);
 			if (( index >= 0 ) && ( index < 255 )) // why XCMD_QTY? let them hook every possible custom packet
 			{
 				char *args = s.GetArgRaw();
@@ -983,7 +1013,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					g_Log.EventError("Invalid function name for packet filtering (limit is 30 chars).\n");
 				else
 				{
-					strcpy(g_Serv.m_PacketFilter[index], args);
+					Str_CopyLimitNull(g_Serv.m_PacketFilter[index], args, sizeof(g_Serv.m_PacketFilter[0]));
 					DEBUG_MSG_NOINIT(("PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
 					return true;
 				}
@@ -993,7 +1023,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		}
 		else if ( s.IsKeyHead("OUTPACKET", 9) )	//	OUTPACKETx=<function name to execute upon packet>
 		{
-			int index = ATOI(s.GetKey() + 9);
+			int index = atoi(s.GetKey() + 9);
 			if (( index >= 0 ) && ( index < 255 ))
 			{
 				char *args = s.GetArgRaw();
@@ -1001,7 +1031,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					g_Log.EventError("Invalid function name for outgoing packet filtering (limit is 30 chars).\n");
 				else
 				{
-					strcpy(g_Serv.m_OutPacketFilter[index], args);
+					Str_CopyLimitNull(g_Serv.m_OutPacketFilter[index], args, sizeof(g_Serv.m_OutPacketFilter[0]));
 					DEBUG_MSG_NOINIT(("OUTGOING PACKET FILTER: Hooked packet 0x%x with function %s.\n", index, args));
 					return true;
 				}
@@ -1028,7 +1058,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
 			break;
 		case RC_CLIENTLINGER:
-			m_iClientLingerTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iClientLingerTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_CLIENTLOGINMAXTRIES:
 			{
@@ -1037,21 +1067,24 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					m_iClientLoginMaxTries = 0;
 			} break;
 		case RC_CLIENTLOGINTEMPBAN:
-			m_iClientLoginTempBan = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iClientLoginTempBan = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_CLIENTMAX:
 		case RC_CLIENTS:
 			m_iClientsMax = s.GetArgVal();
-			if ( m_iClientsMax > FD_SETSIZE-1 )	// Max number we can deal with. compile time thing.
-			{
+			if (m_iClientsMax > FD_SETSIZE-1)	// Max number we can deal with. compile time thing.
 				m_iClientsMax = FD_SETSIZE-1;
-			}
+            else if (m_iClientsMax < 0)
+                m_iClientsMax = 0;
 			break;
 		case RC_COLORHIDDEN:
 			m_iColorHidden = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case RC_COLORINVIS:
 			m_iColorInvis = (HUE_TYPE)(s.GetArgVal());
+			break;
+		case RC_COLORINVISITEM:
+			m_iColorInvisItem = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case RC_COLORINVISSPELL:
 			m_iColorInvisSpell = (HUE_TYPE)(s.GetArgVal());
@@ -1062,44 +1095,56 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iCombatArcheryMovementDelay = maximum(iVal, 0);
             break;
 		}
-        case RC_CONTAINERMAXITEMS:
+        case RC_COMBATFLAGS:
         {
             uint uiVal = s.GetArgUVal();
+            if ((uiVal & (COMBAT_PREHIT|COMBAT_SWING_NORANGE)) == (COMBAT_PREHIT|COMBAT_SWING_NORANGE))
+            {
+                uiVal ^= COMBAT_SWING_NORANGE;
+                LOG_WARN_NOINIT("CombatFlags COMBAT_PREHIT and COMBAT_SWING_NORANGE cannot coexist. Turning off COMBAT_SWING_NORANGE.\n");
+            }
+            m_iCombatFlags = uiVal;
+        }
+		break;
+        case RC_CONTAINERMAXITEMS:
+        {
+            const uint uiVal = s.GetArgUVal();
             if ((uiVal > 0) && (uiVal < MAX_ITEMS_CONT))
                 m_iContainerMaxItems = uiVal;
         }
+		break;
 		case RC_CORPSENPCDECAY:
-			m_iDecay_CorpseNPC = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iDecay_CorpseNPC = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_CORPSEPLAYERDECAY:
-			m_iDecay_CorpsePlayer = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iDecay_CorpsePlayer = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_CRIMINALTIMER:
-			m_iCriminalTimer = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iCriminalTimer = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_STRIPPATH:	// Put TNG or Axis stripped files here.
 			m_sStripPath = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_DEADSOCKETTIME:
-			m_iDeadSocketTime = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iDeadSocketTime = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 		case RC_DECAYTIMER:
-			m_iDecay_Item = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iDecay_Item = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_FREEZERESTARTTIME:
-			m_iFreezeRestartTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iFreezeRestartTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_GAMEMINUTELENGTH:
-			m_iGameMinuteLength = s.GetArgVal() * MSECS_PER_SEC;
+			m_iGameMinuteLength = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_GUARDLINGER:
-			m_iGuardLingerTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iGuardLingerTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 		case RC_HEARALL:
 			g_Log.SetLogMask( s.GetArgFlag( g_Log.GetLogMask(), LOGM_PLAYER_SPEAK ));
 			break;
 		case RC_HITSUPDATERATE:
-			m_iHitsUpdateRate = s.GetArgVal() * MSECS_PER_SEC;
+			m_iHitsUpdateRate = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_ITEMSMAXAMOUNT:
 		{
@@ -1117,7 +1162,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			g_Install.SetPreferPath( CSFile::GetMergedFileName( s.GetArgStr(), "" ));
 			break;
 		case RC_MAPCACHETIME:
-			m_iMapCacheTime = s.GetArgVal() * MSECS_PER_SEC;
+			_iMapCacheTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_MAXCHARSPERACCOUNT:
 			m_iMaxCharsPerAccount = (uchar)(s.GetArgVal());
@@ -1147,7 +1192,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
             break;
         }
 		case RC_MINCHARDELETETIME:
-			m_iMinCharDeleteTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iMinCharDeleteTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_MINKARMA:
 			m_iMinKarma = s.GetArgVal();
@@ -1155,16 +1200,16 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				m_iMinKarma = m_iMaxKarma;
 			break;
 		case RC_MURDERDECAYTIME:
-			m_iMurderDecayTime = s.GetArgVal() * MSECS_PER_SEC;
+			m_iMurderDecayTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 		case RC_NOTOTIMEOUT:
-			m_iNotoTimeout = s.GetArgVal() * MSECS_PER_SEC;
+			m_iNotoTimeout = s.GetArgVal();
 			break;
 		case RC_WOOLGROWTHTIME:
-			m_iWoolGrowthTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iWoolGrowthTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
         case RC_ITEMHITPOINTSUPDATE:
-            _iItemHitpointsUpdate = s.GetArgVal() * MSECS_PER_SEC;
+            _iItemHitpointsUpdate = s.GetArgLLVal() * MSECS_PER_SEC;
             break;
 		case RC_PROFILE:
 			{
@@ -1222,31 +1267,29 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SAVEPERIOD:
-			m_iSavePeriod = s.GetArgVal()*60*MSECS_PER_SEC;
+			m_iSavePeriod = s.GetArgLLVal()*60*MSECS_PER_SEC;
 			break;
 
 		case RC_SPELLTIMEOUT:
-			m_iSpellTimeout = s.GetArgVal() * MSECS_PER_SEC;
+			m_iSpellTimeout = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
 		case RC_SECTORSLEEP:
-			{
-				_iSectorSleepDelay = s.GetArgVal() * MSECS_PER_SEC;
-			}
+			_iSectorSleepDelay = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
 		case RC_SAVEBACKGROUND:
-			m_iSaveBackgroundTime = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			m_iSaveBackgroundTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
         case RC_SAVESECTORSPERTICK:
-            m_iSaveSectorsPerTick = s.GetArgVal();
+            m_iSaveSectorsPerTick = s.GetArgUVal();
             if( m_iSaveSectorsPerTick <= 0 )
                 m_iSaveSectorsPerTick = 1;
             break;
 
         case RC_SAVESTEPMAXCOMPLEXITY:
-            m_iSaveStepMaxComplexity = s.GetArgVal();
+            m_iSaveStepMaxComplexity = s.GetArgUVal();
             break;
 
 		case RC_WORLDSAVE: // Put save files here.
@@ -1258,24 +1301,23 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_EXPERIMENTAL:
-			g_Cfg.m_iExperimentalFlags = s.GetArgUVal();
+			m_iExperimentalFlags = s.GetArgUVal();
 			//PrintEFOFFlags(true, false);
 			break;
 
 		case RC_OPTIONFLAGS:
-			g_Cfg.m_iOptionFlags = s.GetArgUVal();
+			m_iOptionFlags = s.GetArgUVal();
 			//PrintEFOFFlags(false, true);
 			break;
 
 		case RC_TIMERCALL:
-			_iTimerCall = s.GetArgVal() * 60 * MSECS_PER_SEC;
+			_iTimerCall = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
 		case RC_TOOLTIPCACHE:
-			g_Cfg.m_iTooltipCache = s.GetArgVal() * MSECS_PER_SEC;
+			m_iTooltipCache = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
-#ifdef _MTNETWORK
 		case RC_NETWORKTHREADS:
 			if (g_Serv.IsLoading())
 			{
@@ -1284,7 +1326,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				//	iNetThreads = 0;
 				//else if (iNetThreads > 10)
 				//	iNetThreads = 10;
-				g_Cfg.m_iNetworkThreads = (uint)iNetThreads;
+				m_iNetworkThreads = (uint)iNetThreads;
 			}
 			else
 				g_Log.EventError("The value of NetworkThreads cannot be modified after the server has started\n");
@@ -1303,7 +1345,6 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				m_iNetworkThreadPriority = priority;
 			}
 			break;
-#endif
 		case RC_WALKBUFFER:
 			m_iWalkBuffer = s.GetArgVal() * MSECS_PER_TENTH;
 			break;
@@ -1321,7 +1362,8 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	return false;
 
 #undef DEBUG_MSG_NOINIT
-#undef DEBUG_ERR_NOINIT
+#undef LOG_ERR_NOINIT
+#undef LOG_WARN_NOINIT
 }
 
 const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
@@ -1329,7 +1371,7 @@ const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
     // future: underlying type for SPELL_TYPE to avoid casts
     if (index <= SPELL_NONE)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SpellDefs.IsValidIndex(uiIndex))
         return nullptr;
     return m_SpellDefs[uiIndex];
@@ -1340,7 +1382,7 @@ CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index )
     // future: underlying type for SPELL_TYPE to avoid casts
     if (index <= SPELL_NONE)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+    const size_t uiIndex = (size_t)index;
     if (!m_SpellDefs.IsValidIndex(uiIndex))
         return nullptr;
     return m_SpellDefs[uiIndex];
@@ -1351,7 +1393,7 @@ lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
     // future: underlying type for SPELL_TYPE to avoid casts
     if (index < 0)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SkillIndexDefs.IsValidIndex(uiIndex))
         return nullptr;
     return m_SkillIndexDefs[uiIndex]->GetKey();
@@ -1361,7 +1403,7 @@ const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
 {
     if (index < 0)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SkillIndexDefs.IsValidIndex(uiIndex) )
         return nullptr;
     return m_SkillIndexDefs[uiIndex];
@@ -1371,64 +1413,65 @@ CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index )
 {
     if (index < 0)
         return nullptr;
-    size_t uiIndex = (size_t)index;
+	const size_t uiIndex = (size_t)index;
     if (!m_SkillIndexDefs.IsValidIndex(uiIndex) )
         return nullptr;
     return m_SkillIndexDefs[uiIndex];
 }
 
-const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
+const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
 {
     // Find the skill name in the alpha sorted list.
     // RETURN: SKILL_NONE = error.
-    size_t i = m_SkillNameDefs.FindKey( pszKey );
-    if ( i == m_SkillNameDefs.BadIndex() )
+	const size_t i = m_SkillNameDefs.find_sorted(ptcKey);
+    if ( i == SCONT_BADINDEX )
         return nullptr;
     return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
 }
 
-const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
+const CSkillDef * CServerConfig::SkillLookup( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK("CServerConfig::SkillLookup");
 
-	size_t iLen = strlen( pszKey );
+	const size_t iLen = strlen( ptcKey );
     const CSkillDef * pDef;
 	for ( size_t i = 0; i < m_SkillIndexDefs.size(); ++i )
 	{
 		pDef = static_cast<const CSkillDef *>(m_SkillIndexDefs[i]);
-		if ( pDef->m_sName.IsEmpty() ?
-				!strnicmp( pszKey, pDef->GetKey(), iLen )
-			:	!strnicmp( pszKey, pDef->m_sName, iLen ) )
+		ASSERT(pDef);
+		if ( !strnicmp(ptcKey, (pDef->m_sName.IsEmpty() ? pDef->GetKey() : pDef->m_sName.GetBuffer()), iLen) )
 			return pDef;
 	}
 	return nullptr;
 }
 
 
-bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( pszKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindCAssocRegTableHeadSorted( ptcKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
-		if ( !strnicmp( pszKey, "REGEN", 5 ))
+		if ( !strnicmp( ptcKey, "REGEN", 5 ))
 		{
-			index = ATOI(pszKey+5);
+			index = atoi(ptcKey+5);
 			if (( index < 0 ) || ( index >= STAT_QTY ))
 				return false;
-			sVal.FormatLLVal(g_Cfg.m_iRegenRate[index] / MSECS_PER_SEC);
+			sVal.FormatLLVal(m_iRegenRate[index] / MSECS_PER_SEC);
 			return true;
 		}
 
-		if ( !strnicmp( pszKey, "LOOKUPSKILL", 11 ) )
+		if ( !strnicmp( ptcKey, "LOOKUPSKILL", 11 ) )
 		{
-			pszKey	+= 12;
-			SKIP_SEPARATORS( pszKey );
-			GETNONWHITESPACE( pszKey );
+			ptcKey	+= 12;
+			SKIP_SEPARATORS( ptcKey );
+			GETNONWHITESPACE( ptcKey );
 
-			const CSkillDef * pSkillDef = SkillLookup( pszKey );
+			const CSkillDef * pSkillDef = SkillLookup( ptcKey );
 			if ( !pSkillDef )
 				sVal.FormatVal( -1 );
 			else
@@ -1436,17 +1479,17 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			return true;
 		}
 
-		if ( !strnicmp(pszKey, "MAP(", 4) )
+		if ( !strnicmp(ptcKey, "MAP(", 4) )
 		{
-			pszKey += 4;
+			ptcKey += 4;
 			sVal.FormatVal(0);
 
 			// Parse the arguments after the round brackets
 			tchar * pszArgsNext;
-			Str_Parse( const_cast<tchar*>(pszKey), &pszArgsNext, ")" );
+			Str_Parse( const_cast<tchar*>(ptcKey), &pszArgsNext, ")" );
 
 			CPointMap pt;
-			if ( IsDigit( pszKey[0] ) || pszKey[0] == '-' )
+			if ( IsDigit( ptcKey[0] ) || ptcKey[0] == '-' )
 			{
 				// Set the default values
 				pt.m_map = 0;
@@ -1454,106 +1497,117 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 				// Parse the arguments inside the round brackets
 				tchar * ppVal[4];
-				int iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, CountOf( ppVal ), "," );
+				int iArgs = Str_ParseCmds( const_cast<tchar*>(ptcKey), ppVal, CountOf( ppVal ), "," );
 
 				switch ( iArgs )
 				{
 					default:
 					case 4:
-						if ( IsDigit(ppVal[3][0]) )
-							pt.m_map = (byte)(ATOI(ppVal[3]));
+						if (IsDigit(ppVal[3][0]))
+						{
+							pt.m_map = (byte)(atoi(ppVal[3]));
+						}
+						FALLTHROUGH;
+
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
 						{
-							pt.m_z = (char)(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
+							pt.m_z = (char)(( iArgs == 4 ) ? atoi(ppVal[2]) : 0);
 							if ( iArgs == 3 )
-								pt.m_map = (byte)(ATOI(ppVal[2]));
+								pt.m_map = (byte)(atoi(ppVal[2]));
 						}
+						FALLTHROUGH;
+
 					case 2:
-						pt.m_y = (short)(ATOI(ppVal[1]));
+						pt.m_y = (short)(atoi(ppVal[1]));
+						FALLTHROUGH;
+
 					case 1:
-						pt.m_x = (short)(ATOI(ppVal[0]));
+						pt.m_x = (short)(atoi(ppVal[0]));
+						FALLTHROUGH;
+
 					case 0:
 						break;
 				}
 			}
 
-			pszKey = pszArgsNext;
-			SKIP_SEPARATORS(pszKey);
-			return pt.r_WriteVal(pszKey, sVal);
+			ptcKey = pszArgsNext;
+			SKIP_SEPARATORS(ptcKey);
+			return pt.r_WriteVal(ptcKey, sVal);
 		}
 
-		if ( !strnicmp( pszKey, "MAPLIST.", 8) )
+		if ( !strnicmp( ptcKey, "MAPLIST.", 8) )
 		{
-			lpctstr pszCmd = pszKey + 8;
+			lpctstr pszCmd = ptcKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			if ( !*pszCmd )
-				sVal.FormatVal( g_MapList.IsMapSupported(iNumber) );
+			if (!*pszCmd)
+			{
+				sVal.FormatVal(g_MapList.IsMapSupported(iNumber));
+			}
 			else
 			{
-				if ( g_MapList.IsMapSupported(iNumber) )
+				if (g_MapList.IsMapSupported(iNumber))
 				{
-					if (!strnicmp(pszCmd,"BOUND.X", 7))
-						sVal.FormatVal( g_MapList.GetX(iNumber) );
-					else if (!strnicmp(pszCmd,"BOUND.Y", 7))
-						sVal.FormatVal( g_MapList.GetY(iNumber) );
-					else if (!strnicmp(pszCmd,"CENTER.X", 8))
-						sVal.FormatVal( g_MapList.GetCenterX(iNumber) );
-					else if (!strnicmp(pszCmd,"CENTER.Y", 8))
-						sVal.FormatVal( g_MapList.GetCenterY(iNumber) );
+					if (!strnicmp(pszCmd, "BOUND.X", 7))
+						sVal.FormatVal(g_MapList.GetMapSizeX(iNumber));
+					else if (!strnicmp(pszCmd, "BOUND.Y", 7))
+						sVal.FormatVal(g_MapList.GetMapSizeY(iNumber));
+					else if (!strnicmp(pszCmd, "CENTER.X", 8))
+						sVal.FormatVal(g_MapList.GetMapCenterX(iNumber));
+					else if (!strnicmp(pszCmd, "CENTER.Y", 8))
+						sVal.FormatVal(g_MapList.GetMapCenterY(iNumber));
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;
+						const CSectorList* pSectors = CSectorList::Get();
+
 						if (!strnicmp(pszCmd, "SIZE", 4))
-							sVal.FormatVal(g_MapList.GetSectorSize(iNumber));
+							sVal.FormatVal(pSectors->GetSectorSize(iNumber));
 						else if (!strnicmp(pszCmd, "ROWS", 4))
-							sVal.FormatVal(g_MapList.GetSectorRows(iNumber));
+							sVal.FormatVal(pSectors->GetSectorRows(iNumber));
 						else if (!strnicmp(pszCmd, "COLS", 4))
-							sVal.FormatVal(g_MapList.GetSectorCols(iNumber));
+							sVal.FormatVal(pSectors->GetSectorCols(iNumber));
 						else if (!strnicmp(pszCmd, "QTY", 3))
-							sVal.FormatVal(g_MapList.GetSectorQty(iNumber));
+							sVal.FormatVal(pSectors->GetSectorQty(iNumber));
+						else
+							return false;
 					}
 				}
+				else
+					return false;
 			}
 
 			return true;
 		}
 
-		if ( !strnicmp( pszKey, "MAP", 3 ))
+		if ( !strnicmp( ptcKey, "MAP", 3 ))
 		{
-			pszKey = pszKey + 3;
-			int iMapNumber = Exp_GetVal(pszKey);
-			SKIP_SEPARATORS(pszKey);
+			ptcKey = ptcKey + 3;
+			int iMapNumber = Exp_GetVal(ptcKey);
+			SKIP_SEPARATORS(ptcKey);
 			sVal.FormatVal(0);
 
 			if ( g_MapList.IsMapSupported(iMapNumber) )
 			{
-				if ( !strnicmp( pszKey, "SECTOR", 6 ))
+				if ( !strnicmp( ptcKey, "SECTOR", 6 ))
 				{
-					pszKey = pszKey + 6;
-					int iSecNumber = Exp_GetVal(pszKey);
-					SKIP_SEPARATORS(pszKey);
-					int nSectors = g_MapList.GetSectorQty(iMapNumber);
-
-					if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-						return( g_World.GetSector(iMapNumber, iSecNumber-1)->r_WriteVal(pszKey, sVal, pSrc) );
-					else
-					{
-						g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, iMapNumber);
-						return false;
-					}
+					ptcKey = ptcKey + 6;
+					int iSecNumber = Exp_GetVal(ptcKey);
+					SKIP_SEPARATORS(ptcKey);
+					CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
+					return !pSector ? false : pSector->r_WriteVal(ptcKey, sVal, pSrc);
 				}
 			}
 			g_Log.EventError("Unsupported Map %d\n", iMapNumber);
 			return false;
 		}
 
-		if (!strnicmp( pszKey, "FUNCTIONS.", 10))
+		if (!strnicmp( ptcKey, "FUNCTIONS.", 10))
 		{
-			lpctstr pszCmd = pszKey + 10;
+			lpctstr pszCmd = ptcKey + 10;
 
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
@@ -1578,20 +1632,20 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			if ( *pszCmd == '\0')
 			{
-				sVal = m_Functions.at(iNumber)->GetName();
+				sVal = m_Functions[iNumber]->GetName();
 				return true;
 			}
 			else if ( !strnicmp( pszCmd, "PLEVEL", 5 ))
 			{
-				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions.at(iNumber)->GetName())));
+				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions[iNumber]->GetName())));
 				return true;
 			}
 		}
 
-		if ( ( !strnicmp( pszKey, "GUILDSTONES.", 12) ) || ( !strnicmp( pszKey, "TOWNSTONES.", 11) ) )
+		if ( ( !strnicmp( ptcKey, "GUILDSTONES.", 12) ) || ( !strnicmp( ptcKey, "TOWNSTONES.", 11) ) )
 		{
-			bool bGuild = !strnicmp( pszKey, "GUILDSTONES.",12);
-			lpctstr pszCmd = pszKey + 11 + ( (bGuild) ? 1 : 0 );
+			bool bGuild = !strnicmp( ptcKey, "GUILDSTONES.",12);
+			lpctstr pszCmd = ptcKey + 11 + ( (bGuild) ? 1 : 0 );
 			CItemStone * pStone = nullptr;
 			size_t x = 0;
 
@@ -1640,12 +1694,12 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			return true;
 		}
 
-		if ( !strnicmp( pszKey, "CLIENT.",7))
+		if ( !strnicmp( ptcKey, "CLIENT.",7))
 		{
-			pszKey += 7;
-			uint cli_num = (Exp_GetUVal(pszKey));
+			ptcKey += 7;
+			uint cli_num = (Exp_GetUVal(ptcKey));
 			uint i = 0;
-			SKIP_SEPARATORS(pszKey);
+			SKIP_SEPARATORS(ptcKey);
 
 			if (cli_num >= g_Serv.StatGet( SERV_STAT_CLIENTS ))
 				return false;
@@ -1658,64 +1712,63 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				{
 					CChar * pChar = pClient->GetChar();
 
-					if ( *pszKey == '\0' ) // checking reference
-						sVal.FormatVal( pChar != nullptr? 1 : 0 );
+					if ( *ptcKey == '\0' ) // checking reference
+						sVal.FormatVal( pChar != nullptr ? 1 : 0 );
 					else if ( pChar != nullptr )
-						return pChar->r_WriteVal(pszKey, sVal, pSrc);
+						return pChar->r_WriteVal(ptcKey, sVal, pSrc, false); // it calls also CClient::r_WriteVal
 					else
-						return pClient->r_WriteVal(pszKey, sVal, pSrc);
+						return pClient->r_WriteVal(ptcKey, sVal, pSrc, false);
 				}
 				++i;
 			}
 			return true;
 		}
 
-		if ( !strnicmp(pszKey, "TILEDATA.", 9) )
+		if ( !strnicmp(ptcKey, "TILEDATA.", 9) )
 		{
-			pszKey += 9;
+			ptcKey += 9;
 
-			bool bTerrain = false;
-			if (!strnicmp(pszKey, "TERRAIN(", 8))
+			bool fTerrain = false;
+			if (!strnicmp(ptcKey, "TERRAIN(", 8))
 			{
-				pszKey += 8;
-				bTerrain = true;
+				ptcKey += 8;
+				fTerrain = true;
 			}
-			else if (!strnicmp(pszKey, "ITEM(", 5))
+			else if (!strnicmp(ptcKey, "ITEM(", 5))
 			{
-				pszKey += 5;
-				//SKIP_SEPARATORS(pszKey); // già fatto da str_parse?
+				ptcKey += 5;
 			}
 			else
 				return false;
 
 			// Get the position of the arguments after the round brackets
 			tchar * pszArgsNext;
-			if (! Str_Parse(const_cast<tchar*>(pszKey), &pszArgsNext, ")") )
+			if (! Str_Parse(const_cast<tchar*>(ptcKey), &pszArgsNext, ")") )
 				return false;
 			// Get the argument inside the round brackets
 			tchar * pVal;
-			if ( !Str_ParseCmds(const_cast<tchar*>(pszKey), &pVal, 1, ")") )
+			if ( !Str_ParseCmds(const_cast<tchar*>(ptcKey), &pVal, 1, ")") )
 				return false;
 
-			int id = Exp_GetVal(pVal);
-			if ( bTerrain && (id >= TERRAIN_QTY) )
+			uint id = Exp_GetUVal(pVal);
+			if ( fTerrain && (id >= TERRAIN_QTY) )
 			{
 				// Invalid id
 				return false;
 			}
 
-			pszKey = pszArgsNext;
-			if (pszKey[0] != '.')
+			ptcKey = pszArgsNext;
+			if (ptcKey[0] != '.')
 				return false;
-			SKIP_SEPARATORS(pszKey);
-			if (bTerrain)
+			SKIP_SEPARATORS(ptcKey);
+			if (fTerrain)
 			{
 				enum {ITATTR_FLAGS, ITATTR_UNK, ITATTR_IDX, ITATTR_NAME};
 				int iAttr = 0;
-				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = ITATTR_FLAGS;
-				else if (!strnicmp(pszKey, "UNK", 7))		iAttr = ITATTR_UNK;
-				else if (!strnicmp(pszKey, "INDEX", 5))		iAttr = ITATTR_IDX;
-				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = ITATTR_NAME;
+				if (!strnicmp(ptcKey, "FLAGS", 5))			iAttr = ITATTR_FLAGS;
+				else if (!strnicmp(ptcKey, "UNK", 7))		iAttr = ITATTR_UNK;
+				else if (!strnicmp(ptcKey, "INDEX", 5))		iAttr = ITATTR_IDX;
+				else if (!strnicmp(ptcKey, "NAME", 4))		iAttr = ITATTR_NAME;
 				else
 				{
 					// Invalid attr
@@ -1733,17 +1786,17 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			}
 			else
 			{
-				enum {TTATTR_FLAGS, TTATTR_UNK5, TTATTR_WEIGHT, TTATTR_LAYER, TTATTR_UNK11, TTATTR_ANIM, TTATTR_UNK19, TTATTR_HEIGHT, TTATTR_NAME};
+				enum {TTATTR_FLAGS, TTATTR_WEIGHT, TTATTR_LAYER, TTATTR_UNK11, TTATTR_ANIM, TTATTR_HUE, TTATTR_LIGHT, TTATTR_HEIGHT, TTATTR_NAME};
 				int iAttr = 0;
-				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = TTATTR_FLAGS;
-				else if (!strnicmp(pszKey, "UNK5", 4))		iAttr = TTATTR_UNK5;
-				else if (!strnicmp(pszKey, "WEIGHT", 6))	iAttr = TTATTR_WEIGHT;
-				else if (!strnicmp(pszKey, "LAYER", 5))		iAttr = TTATTR_LAYER;
-				else if (!strnicmp(pszKey, "UNK11", 5))		iAttr = TTATTR_UNK11;
-				else if (!strnicmp(pszKey, "ANIM", 4))		iAttr = TTATTR_ANIM;
-				else if (!strnicmp(pszKey, "UNK19", 5))		iAttr = TTATTR_UNK19;
-				else if (!strnicmp(pszKey, "HEIGHT", 6))	iAttr = TTATTR_HEIGHT;
-				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = TTATTR_NAME;
+				if (!strnicmp(ptcKey, "FLAGS", 5))			iAttr = TTATTR_FLAGS;
+				else if (!strnicmp(ptcKey, "WEIGHT", 6))	iAttr = TTATTR_WEIGHT;
+				else if (!strnicmp(ptcKey, "LAYER", 5))		iAttr = TTATTR_LAYER;
+				else if (!strnicmp(ptcKey, "UNK11", 5))		iAttr = TTATTR_UNK11;
+				else if (!strnicmp(ptcKey, "ANIM", 4))		iAttr = TTATTR_ANIM;
+				else if (!strnicmp(ptcKey, "HUE", 5))		iAttr = TTATTR_HUE;
+                else if (!strnicmp(ptcKey, "LIGHT", 5))		iAttr = TTATTR_LIGHT;
+				else if (!strnicmp(ptcKey, "HEIGHT", 6))	iAttr = TTATTR_HEIGHT;
+				else if (!strnicmp(ptcKey, "NAME", 4))		iAttr = TTATTR_NAME;
 				else
 				{
 					// Invalid attr
@@ -1752,15 +1805,15 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				CUOItemInfo itemInfo((ITEMID_TYPE)id);
 				switch (iAttr)
 				{
-					case TTATTR_FLAGS:	sVal.FormatDWVal(itemInfo.m_flags);		break;
-					case TTATTR_UNK5:	sVal.FormatDWVal(itemInfo.m_dwUnk5);	break;
-					case TTATTR_WEIGHT:	sVal.FormatBVal(itemInfo.m_weight);		break;
-					case TTATTR_LAYER:	sVal.FormatBVal(itemInfo.m_layer);		break;
-					case TTATTR_UNK11:	sVal.FormatDWVal(itemInfo.m_dwUnk11);	break;
-					case TTATTR_ANIM:	sVal.FormatDWVal(itemInfo.m_dwAnim);	break;
-					case TTATTR_UNK19:	sVal.FormatWVal(itemInfo.m_wUnk19);		break;
-					case TTATTR_HEIGHT:	sVal.FormatBVal(itemInfo.m_height);		break;
-					case TTATTR_NAME:	sVal = itemInfo.m_name;					break;
+					case TTATTR_FLAGS:	sVal.FormatU64Val(itemInfo.m_flags);    break;
+					case TTATTR_WEIGHT:	sVal.FormatBVal(itemInfo.m_weight);	    break;
+					case TTATTR_LAYER:	sVal.FormatBVal(itemInfo.m_layer);	    break;
+					case TTATTR_UNK11:	sVal.FormatDWVal(itemInfo.m_dwUnk11);   break;
+					case TTATTR_ANIM:	sVal.FormatWVal(itemInfo.m_wAnim);	    break;
+					case TTATTR_HUE:	sVal.FormatWVal(itemInfo.m_wHue);	    break;
+                    case TTATTR_LIGHT:	sVal.FormatWVal(itemInfo.m_wLightIndex);break;
+					case TTATTR_HEIGHT:	sVal.FormatBVal(itemInfo.m_height);	    break;
+					case TTATTR_NAME:	sVal = itemInfo.m_name;				    break;
 					default: return false;
 				}
 			}
@@ -1793,6 +1846,9 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_COLORINVIS:
 			sVal.FormatHex( m_iColorInvis );
+			break;
+		case RC_COLORINVISITEM:
+			sVal.FormatHex( m_iColorInvisItem );
 			break;
 		case RC_COLORINVISSPELL:
 			sVal.FormatHex( m_iColorInvisSpell );
@@ -1837,10 +1893,10 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal = g_Install.GetPreferPath(nullptr);
 			break;
 		case RC_MAPCACHETIME:
-			sVal.FormatLLVal( m_iMapCacheTime / MSECS_PER_SEC );
+			sVal.FormatLLVal( _iMapCacheTime / MSECS_PER_SEC );
 			break;
 		case RC_NOTOTIMEOUT:
-			sVal.FormatLLVal(m_iNotoTimeout / MSECS_PER_SEC);
+			sVal.FormatVal(m_iNotoTimeout);
 			break;
         case RC_MAXHOUSESACCOUNT:
             sVal.FormatUCVal(_iMaxHousesAccount);
@@ -1874,20 +1930,20 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_RTICKS:
 			{
-				if ( pszKey[6] != '.' )
+				if ( ptcKey[6] != '.' )
 					sVal.FormatLLVal((llong)(CSTime::GetCurrentTime().GetTime()));
 				else
 				{
-					pszKey += 6;
-					SKIP_SEPARATORS(pszKey);
-					if ( !strnicmp("FROMTIME", pszKey, 8) )
+					ptcKey += 6;
+					SKIP_SEPARATORS(ptcKey);
+					if ( !strnicmp("FROMTIME", ptcKey, 8) )
 					{
-						pszKey += 8;
-						GETNONWHITESPACE(pszKey);
+						ptcKey += 8;
+						GETNONWHITESPACE(ptcKey);
 						int64 piVal[6];
 
 						// year, month, day, hour, minute, second
-						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), piVal, CountOf(piVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), piVal, CountOf(piVal));
 						if ( iQty != 6 )
 							return false;
 
@@ -1897,14 +1953,14 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 						else
 							sVal.FormatLLVal((llong)(datetime.GetTime()));
 					}
-					else if ( !strnicmp("FORMAT", pszKey, 6) )
+					else if ( !strnicmp("FORMAT", ptcKey, 6) )
 					{
-						pszKey += 6;
-						GETNONWHITESPACE( pszKey );
+						ptcKey += 6;
+						GETNONWHITESPACE( ptcKey );
 						tchar *ppVal[2];
 
 						// timestamp, formatstr
-						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppVal, CountOf(ppVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppVal, CountOf(ppVal));
 						if ( iQty < 1 )
 							return false;
 
@@ -1918,31 +1974,31 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_RTIME:
 			{
-				if ( pszKey[5] != '.' )
+				if ( ptcKey[5] != '.' )
 					sVal = CSTime::GetCurrentTime().Format(nullptr);
 				else
 				{
-					pszKey += 5;
-					SKIP_SEPARATORS(pszKey);
-					if (!strnicmp("GMTFORMAT",pszKey,9))
+					ptcKey += 5;
+					SKIP_SEPARATORS(ptcKey);
+					if (!strnicmp("GMTFORMAT",ptcKey,9))
 					{
-						pszKey += 9;
-						GETNONWHITESPACE( pszKey );
-						sVal = CSTime::GetCurrentTime().FormatGmt(pszKey);
+						ptcKey += 9;
+						GETNONWHITESPACE( ptcKey );
+						sVal = CSTime::GetCurrentTime().FormatGmt(ptcKey);
 					}
-					if (!strnicmp("FORMAT",pszKey,6))
+					if (!strnicmp("FORMAT",ptcKey,6))
 					{
-						pszKey += 6;
-						GETNONWHITESPACE( pszKey );
-						sVal = CSTime::GetCurrentTime().Format(pszKey);
+						ptcKey += 6;
+						GETNONWHITESPACE( ptcKey );
+						sVal = CSTime::GetCurrentTime().Format(ptcKey);
 					}
 				}
 			} break;
 		case RC_SAVEPERIOD:
-			sVal.FormatLLVal( m_iSavePeriod / (60*MSECS_PER_SEC));
+			sVal.FormatLLVal( m_iSavePeriod / (60 * MSECS_PER_SEC));
 			break;
 		case RC_SECTORSLEEP:
-			sVal.FormatVal(_iSectorSleepDelay / MSECS_PER_SEC);
+			sVal.FormatLLVal(_iSectorSleepDelay / (60 * MSECS_PER_SEC));
 			break;
 		case RC_SAVEBACKGROUND:
 			sVal.FormatLLVal( m_iSaveBackgroundTime / (60 * MSECS_PER_SEC));
@@ -1963,7 +2019,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
             sVal.FormatVal( TICKS_PER_SEC );
             break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / MSECS_PER_SEC );
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup ) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
@@ -1972,11 +2028,11 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal = g_szServerDescription;
 			break;
 		case RC_EXPERIMENTAL:
-			sVal.FormatHex( g_Cfg.m_iExperimentalFlags );
+			sVal.FormatHex( m_iExperimentalFlags );
 			//PrintEFOFFlags(true, false, pSrc);
 			break;
 		case RC_OPTIONFLAGS:
-			sVal.FormatHex( g_Cfg.m_iOptionFlags );
+			sVal.FormatHex( m_iOptionFlags );
 			//PrintEFOFFlags(false, true, pSrc);
 			break;
 		case RC_CLIENTS:		// this is handled by CServerDef as SV_CLIENTS
@@ -1991,13 +2047,13 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( m_iTooltipCache / MSECS_PER_SEC );
 			break;
 		case RC_GUARDSINSTANTKILL:
-			sVal.FormatVal(g_Cfg.m_fGuardsInstantKill);
+			sVal.FormatVal(m_fGuardsInstantKill);
 			break;
 		case RC_GUARDSONMURDERERS:
-			sVal.FormatVal(g_Cfg.m_fGuardsOnMurderers);
+			sVal.FormatVal(m_fGuardsOnMurderers);
 			break;
 		case RC_CONTEXTMENULIMIT:
-			sVal.FormatVal(g_Cfg.m_iContextMenuLimit);
+			sVal.FormatVal(m_iContextMenuLimit);
 			break;
 		case RC_WALKBUFFER:
 			sVal.FormatLLVal(m_iWalkBuffer);
@@ -2023,31 +2079,48 @@ bool CServerConfig::IsConsoleCmd( tchar ch ) const
 	return (ch == '.' || ch == '/' );
 }
 
-SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const
+SKILL_TYPE CServerConfig::FindSkillKey( lpctstr ptcKey ) const
 {
 	ADDTOCALLSTACK("CServerConfig::FindSkillKey");
 	// Find the skill name in the alpha sorted list.
 	// RETURN: SKILL_NONE = error.
 
-	if ( IsDigit( pszKey[0] ) )
+	if ( IsDigit( ptcKey[0] ) )
 	{
-		SKILL_TYPE skill = (SKILL_TYPE)(Exp_GetVal(pszKey));
-		if ( ( !CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
+		SKILL_TYPE skill = (SKILL_TYPE)(Exp_GetVal(ptcKey));
+		if ( ( !CChar::IsSkillBase(skill) || !m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
 			return SKILL_NONE;
 		return skill;
 	}
 
-	const CSkillDef * pSkillDef = FindSkillDef( pszKey );
+	const CSkillDef * pSkillDef = FindSkillDef( ptcKey );
 	if ( pSkillDef == nullptr )
 		return SKILL_NONE;
 	return (SKILL_TYPE)(pSkillDef->GetResourceID().GetResIndex());
 }
 
-STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey ) // static
+
+static constexpr lpctstr _ptcStatName[STAT_QTY] = // not alphabetically sorted obviously.
 {
-	ADDTOCALLSTACK("CServerConfig::FindStatKey");
-	return (STAT_TYPE) FindTable( pszKey, g_Stat_Name, CountOf( g_Stat_Name ));
+    "STR",
+    "INT",
+    "DEX",
+    "FOOD"
+};
+
+STAT_TYPE CServerConfig::GetStatKey( lpctstr ptcKey ) // static
+{
+	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatKey");
+	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, CountOf(_ptcStatName));
 }
+
+lpctstr CServerConfig::GetStatName(STAT_TYPE iKey) // static
+{
+    //ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatName");
+    ASSERT(iKey >= STAT_STR && iKey < STAT_QTY);
+    return _ptcStatName[iKey];
+}
+
 
 int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 {
@@ -2056,10 +2129,18 @@ int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	// iSkillVal = 0-1000
 	if ( !spell )
 		return 0;
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
+	const CSpellDef * pSpellDef = GetSpellDef( spell );
 	if ( pSpellDef == nullptr )
 		return 0;
-	return pSpellDef->m_Effect.GetLinear( iSkillVal );
+	return pSpellDef->m_vcEffect.GetLinear( iSkillVal );
+}
+
+lpctstr CServerConfig::GetRune( tchar ch ) const
+{
+    uint index = (uint)(toupper(ch) - 'A');
+    if ( ! m_Runes.IsValidIndex(index))
+        return "?";
+    return m_Runes[index]->GetBuffer();
 }
 
 lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
@@ -2074,17 +2155,17 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 	else
 	{
 		// check if a female title is present
-		lpctstr pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetPtr(), ',');
+		lpctstr pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetBuffer(), ',');
 		if (pFemaleTitle == nullptr)
-			return m_NotoTitles[iLevel]->GetPtr();
+			return m_NotoTitles[iLevel]->GetBuffer();
 
-		pFemaleTitle++;
+		++pFemaleTitle;
 		if (bFemale)
 			return pFemaleTitle;
 
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
 		tchar* pTitle = Str_GetTemp();
-        strncpynull(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
+        Str_CopyLimitNull(pTitle, m_NotoTitles[iLevel]->GetBuffer(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
 		return pTitle;
 	}
 }
@@ -2100,13 +2181,11 @@ bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 		return false;
 
 	tchar szEmailStrip[256];
-	size_t len2 = Str_GetBare( szEmailStrip, pszEmail,
-		sizeof(szEmailStrip),
-		" !\"#%&()*,/:;<=>?[\\]^{|}'`+" );
+	size_t len2 = Str_GetBare( szEmailStrip, pszEmail, sizeof(szEmailStrip), " !\"#%&()*,/:;<=>?[\\]^{|}'`+" );
 	if ( len2 != len1 )
 		return false;
 
-	tchar * pszAt = const_cast<tchar*>(strchr( pszEmail, '@' ));
+	lpctstr pszAt =strchr( pszEmail, '@' );
 	if ( ! pszAt )
 		return false;
 	if ( pszAt == pszEmail )
@@ -2130,7 +2209,7 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 	ADDTOCALLSTACK("CServerConfig::FindWebPage");
 	if ( pszPath == nullptr )
 	{
-		if (m_WebPages.size() <= 0 )
+		if (m_WebPages.empty())
 			return nullptr;
 		// Take this as the default page.
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
@@ -2147,10 +2226,11 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
-	for ( size_t i = 0; i < m_WebPages.size(); i++ )
+	for ( size_t i = 0; i < m_WebPages.size(); ++i )
 	{
 		if ( m_WebPages[i] == nullptr )	// not sure why this would happen
 			continue;
+
 		CWebPageDef * pWeb = static_cast <CWebPageDef*>(m_WebPages[i] );
 		ASSERT(pWeb);
 		if ( pWeb->IsMatch(pszTitle))
@@ -2166,12 +2246,13 @@ bool CServerConfig::IsObscene( lpctstr pszText ) const
 	// does this text contain obscene content?
 	// NOTE: allow partial match syntax *fuck* or ass (alone)
 
-	for ( size_t i = 0; i < m_Obscene.size(); i++ )
+	CSString match;
+	for ( size_t i = 0; i < m_Obscene.size(); ++i )
 	{
-		tchar* match = new tchar[ strlen(m_Obscene[i])+3 ];
-		sprintf(match,"%s%s%s","*",m_Obscene[i],"*");
-		MATCH_TYPE ematch = Str_Match( match , pszText );
-		delete[] match;
+		match.Resize(int(2 * strlen(m_Obscene[i])));
+        lptstr ptcMatch = const_cast<lptstr>(match.GetBuffer()); // Do that just because we know that the buffer has the right size and we won't write past the buffer's end.
+		snprintf(ptcMatch, match.GetCapacity(), "%s%s%s", "*", m_Obscene[i], "*");
+		MATCH_TYPE ematch = Str_Match( ptcMatch , pszText );
 
 		if ( ematch == MATCH_VALID )
 			return true;
@@ -2184,7 +2265,7 @@ bool CServerConfig::SetKRDialogMap(dword rid, dword idKRDialog)
 	ADDTOCALLSTACK("CServerConfig::SetKRDialogMap");
 	// Defines a link between the given ResourceID and KR DialogID, so that
 	// the dialogs of KR clients can be handled in scripts.
-	KRGumpsMap::iterator it;
+	KRGumpsMap::const_iterator it;
 
 	// prevent double mapping of same dialog
 	it = m_mapKRGumps.find(rid);
@@ -2197,7 +2278,7 @@ bool CServerConfig::SetKRDialogMap(dword rid, dword idKRDialog)
 	}
 
 	// prevent double mapping of KR dialog
-	KRGumpsMap::iterator end = m_mapKRGumps.end();
+	KRGumpsMap::const_iterator end = m_mapKRGumps.end();
 	for (it = m_mapKRGumps.begin(); it != end; ++it)
 	{
 		if (it->second != idKRDialog)
@@ -2216,7 +2297,7 @@ dword CServerConfig::GetKRDialogMap(dword idKRDialog)
 	ADDTOCALLSTACK("CServerConfig::GetKRDialogMap");
 	// Translates the given KR DialogID into the ResourceID of its scripted dialog.
 	// Returns 0 on failure
-	for (KRGumpsMap::iterator it = m_mapKRGumps.begin(); it != m_mapKRGumps.end(); ++it)
+	for (KRGumpsMap::const_iterator it = m_mapKRGumps.begin(); it != m_mapKRGumps.end(); ++it)
 	{
 		if (it->second != idKRDialog)
 			continue;
@@ -2232,14 +2313,14 @@ dword CServerConfig::GetKRDialog(dword rid)
 	ADDTOCALLSTACK("CServerConfig::GetKRDialog");
 	// Translates the given ResourceID into it's equivalent KR DialogID.
 	// Returns 0 on failure
-	KRGumpsMap::iterator it = m_mapKRGumps.find(rid);
+	KRGumpsMap::const_iterator it = m_mapKRGumps.find(rid);
 	if (it != m_mapKRGumps.end())
 		return it->second;
 
 	return 0;
 }
 
-const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
+const CUOMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(CItem*)");
 	if ( !pItem )
@@ -2252,7 +2333,7 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 	return GetMultiItemDefs(pItem->GetDispID());		// multi.mul multi
 }
 
-const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
+const CUOMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 {
 	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(ITEMID_TYPE)");
 	if ( !CItemBase::IsID_Multi(itemid) )
@@ -2260,12 +2341,12 @@ const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 
 	MULTI_TYPE id = (MULTI_TYPE)(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
-	if ( index == m_MultiDefs.BadIndex() )
-		index = m_MultiDefs.AddSortKey(new CSphereMulti(id), id);
+	if ( index == SCONT_BADINDEX )
+		index = m_MultiDefs.AddSortKey(new CUOMulti(id), id);
 	else
 		m_MultiDefs[index]->HitCacheTime();
 
-	const CSphereMulti *pMulti = m_MultiDefs[index];
+	const CUOMulti *pMulti = m_MultiDefs[index];
 	return pMulti;
 }
 
@@ -2281,14 +2362,14 @@ PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const
 	{
 		--ilevel;
 		lpctstr const * pszTable = m_PrivCommands[ilevel].data();
-		size_t iCount = m_PrivCommands[ilevel].size();
-		if ( FindTableHeadSorted( pszCmd, pszTable, (int)iCount ) >= 0 )
-			return( static_cast<PLEVEL_TYPE>(ilevel) );
+		int iCount = (int)m_PrivCommands[ilevel].size();
+		if ( FindTableHeadSorted( pszCmd, pszTable, iCount ) >= 0 )
+			return (PLEVEL_TYPE)ilevel;
 	}
 
 	// A GM will default to use all commands.
 	// xcept those that are specifically named that i can't use.
-	return ( static_cast<PLEVEL_TYPE>(m_iDefaultCommandLevel) ); // default level.
+	return (PLEVEL_TYPE)m_iDefaultCommandLevel; // default level.
 }
 
 bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const
@@ -2347,7 +2428,7 @@ bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd,
 	tchar *myCmd = Str_GetTemp();
 
 	size_t pOs = strcspn(pszCmd," "); //position of space :)
-	strncpy ( myCmd, pszCmd, pOs );
+	Str_CopyLimit( myCmd, pszCmd, pOs );
 	myCmd[pOs] = '\0';
 
 	tchar * pOd; //position of dot :)
@@ -2379,14 +2460,19 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	GETNONWHITESPACE( pCmd );
 	if ( pCmd[0] == '-' && !strchr( pCmd, ',' ) )	// Get location from start list.
 	{
-		size_t i = ( - ATOI(pCmd)) - 1;
-		if ( ! m_StartDefs.IsValidIndex( i ))
-		{
-			if (m_StartDefs.empty())
-				return CPointMap();
+        if (m_StartDefs.empty())
+            return CPointMap();
 
-			i = 0;
-		}
+        SKIP_NONNUM(pCmd);
+		size_t i = Str_ToUI(pCmd);
+        if (i > 0)
+        {
+            i -= 1;
+            if ( ! m_StartDefs.IsValidIndex(i) )
+            {
+                i = 0;
+            }
+        }
 		return m_StartDefs[i]->m_pt;
 	}
 
@@ -2394,15 +2480,15 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	if ( IsDigit( pCmd[0] ) || pCmd[0] == '-' )
 	{
 		tchar *pszTemp = Str_GetTemp();
-		strcpy( pszTemp, pCmd );
-		size_t iCount = pt.Read( pszTemp );
-		if ( iCount >= 2 )
+		Str_CopyLimitNull( pszTemp, pCmd, STR_TEMPLENGTH );
+		const size_t uiCount = pt.Read( pszTemp );
+		if ( uiCount >= 2 )
 			return pt;
 	}
 	else
 	{
 		// Match the region name with global regions.
-		CRegion * pRegion = GetRegion(pCmd);
+		const CRegion * pRegion = GetRegion(pCmd);
 		if ( pRegion != nullptr )
 		{
 			return pRegion->m_pt;
@@ -2436,7 +2522,7 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
         uchar minMap = 255;
         for (CRegion* pRegion : regions)
         {
-            uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
+			const uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
             if (m <= minMap)
             {
                 minMap = m;
@@ -2459,10 +2545,10 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
         }
 
         ptcColonPos += 1; // skip the , (which now is \0)
-        uchar uiMapIdx = Exp_GetUCVal(ptcColonPos);
+		const uchar uiMapIdx = Exp_GetUCVal(ptcColonPos);
         for (CRegion* pRegion : regions)
         {
-            uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
+			const uchar m = pRegion->GetRegionCorner(DIR_N).m_map;
             if (uiMapIdx == m)
             {
                 return pRegion;
@@ -2489,16 +2575,19 @@ void CServerConfig::LoadSortSpells()
 			continue;
 
 		int	iVal = 0;
-		m_SpellDefs[i]->GetPrimarySkill( nullptr, &iVal );
+		if (!m_SpellDefs[i]->GetPrimarySkill(nullptr, &iVal))
+			continue;
 
-		size_t iQty = m_SpellDefs_Sorted.size();
+		const size_t iQty = m_SpellDefs_Sorted.size();
 		size_t k = 1;
 		while ( k < iQty )
 		{
 			int	iVal2 = 0;
-			m_SpellDefs_Sorted[k]->GetPrimarySkill( nullptr, &iVal2 );
-			if ( iVal2 > iVal )
-				break;
+			if (m_SpellDefs_Sorted[k]->GetPrimarySkill(nullptr, &iVal2))
+			{
+				if (iVal2 > iVal)
+					break;
+			}
 			++k;
 		}
 		m_SpellDefs_Sorted.insert(k, m_SpellDefs[i]);
@@ -2511,7 +2600,7 @@ void CServerConfig::LoadSortSpells()
 uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
 	// This is needed by the packet 0xB9, which is sent to the client very early, before we can know if this is a 2D, KR, EC, 3D client.
-	// Using the NetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
+	// Using the CNetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
 
 	uint retValue = 0;
 
@@ -2656,16 +2745,17 @@ uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar
 bool CServerConfig::LoadResourceSection( CScript * pScript )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadResourceSection");
-	bool fNewStyleDef = false;
+	// Index or read any resource sections we know how to handle.
 
-	// Index or read any resource blocks we know how to handle.
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
+    const CSString sSection(pScript->GetSection());
+    lpctstr pszSection = sSection.GetBuffer();
+
 	CVarDefContNum * pVarNum = nullptr;
 	CResourceID rid;
-    CSString sSection = pScript->GetSection();
-    lpctstr pszSection = sSection.GetPtr();
-
+    
+    bool fNewStyleDef = false;
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
 	{
@@ -2695,14 +2785,16 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		restype			= RES_ITEMDEF;
 		fNewStyleDef	= true;
 	}
-	else
-		restype	= (RES_TYPE) FindTableSorted( pszSection, sm_szResourceBlocks, CountOf( sm_szResourceBlocks ));
+    else
+    {
+        restype = (RES_TYPE)FindTableSorted(pszSection, sm_szResourceBlocks, CountOf(sm_szResourceBlocks));
+    }
 
 
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
 	{
-		lpctstr	pszDef = pScript->GetArgStr();
-		CVarDefCont * pVarBase = g_Exp.m_VarDefs.GetKey( pszDef );
+		const lpctstr pszDef = pScript->GetArgStr();
+		CVarDefCont * pVarBase = g_Exp.m_VarResDefs.GetKey( pszDef );
 		pVarNum = nullptr;
 		if ( pVarBase )
 			pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
@@ -2717,7 +2809,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );
-		if ( index != m_ResHash.BadIndex() )
+		if ( index != SCONT_BADINDEX )
 			pRes = dynamic_cast <CResourceDef*> (m_ResHash.GetAt( rid, index ) );
 
 		if ( pRes == nullptr )
@@ -2745,7 +2837,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( !rid.IsValidUID() )
 	{
-		DEBUG_ERR(( "Invalid %s block, index '%s'\n", pszSection, pScript->GetArgStr()));
+		DEBUG_ERR(( "Invalid %s section, index '%s'\n", pszSection, pScript->GetArgStr()));
 		return false;
 	}
 
@@ -2759,6 +2851,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	if ( m_ResourceList.ContainsKey( const_cast<tchar *>(pszSection) ))
 	{
+        // Add to DEFLIST
 		CListDefCont* pListBase = g_Exp.m_ListInternals.GetKey(pszSection);
 		if ( !pListBase )
 			pListBase = g_Exp.m_ListInternals.AddList(pszSection);
@@ -2786,9 +2879,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		// Stat advance rates.
 		while ( pScript->ReadKeyParse())
 		{
-			int i = FindStatKey( pScript->GetKey());
-			if ( i >= STAT_BASE_QTY )
+			lpctstr ptcKey = pScript->GetKey();
+			STAT_TYPE i = GetStatKey(ptcKey);
+			if ((i <= STAT_NONE) || (i >= STAT_BASE_QTY))
+			{
+				g_Log.EventError("Invalid keyword '%s'.\n", ptcKey);
 				continue;
+			}
 			m_StatAdv[i].Load( pScript->GetArgStr());
 		}
 		return true;
@@ -2798,12 +2895,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			tchar* ipBuffer = Str_GetTemp();
 			while ( pScript->ReadKeyParse())
 			{
-				strcpy(ipBuffer, pScript->GetKey());
-#ifndef _MTNETWORK
-				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(ipBuffer);
-#else
+				Str_CopyLimitNull(ipBuffer, pScript->GetKey(), STR_TEMPLENGTH);
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ipBuffer);
-#endif
 				history.setBlocked(true);
 			}
 		}
@@ -2817,34 +2910,44 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		// just get a block of defs.
 		while ( pScript->ReadKeyParse() )
 		{
-			lpctstr	pszKey = pScript->GetKey();
+			const lpctstr ptcKey = pScript->GetKey();
 			if ( fNewStyleDef )
 			{
 				//	search for this.
 				size_t l;
 				for ( l = 0; l < DEFMSG_QTY; ++l )
 				{
-					if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[l]) )
+					if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
 					{
-						strcpy(g_Exp.sm_szMessages[l], pScript->GetArgStr());
+						Str_CopyLimitNull(g_Exp.sm_szMessages[l], pScript->GetArgStr(), sizeof(g_Exp.sm_szMessages[l]));
 						break;
 					}
 				}
 				if ( l == DEFMSG_QTY )
-					g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", pszKey);
+					g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", ptcKey);
 				continue;
 			}
 			else
 			{
-				g_Exp.m_VarDefs.SetStr(pszKey, false, pScript->GetArgStr());
+				g_Exp.m_VarDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
 			}
 		}
 		return true;
+
+	case RES_RESDEFNAME:
+		// just get a block of resource aliases (like a classic DEF).
+		while (pScript->ReadKeyParse())
+		{
+			const lpctstr ptcKey = pScript->GetKey();
+			g_Exp.m_VarResDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
+		}
+		return true;
+
 	case RES_RESOURCELIST:
 		{
 			while ( pScript->ReadKey() )
 			{
-				lpctstr pName = pScript->GetKeyBuffer();
+				const lpctstr pName = pScript->GetKeyBuffer();
 				m_ResourceList.AddSortString( pName );
 			}
 		}
@@ -2890,7 +2993,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// read karma levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
-			for (i = 0; i < iQty; i++)
+			for (i = 0; i < iQty; ++i)
 				m_NotoKarmaLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
 			m_NotoKarmaLevels.resize(i);
@@ -2903,7 +3006,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 			// read fame levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
-			for (i = 0; i < iQty; i++)
+			for (i = 0; i < iQty; ++i)
 				m_NotoFameLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
 			m_NotoFameLevels.resize(i);
@@ -2920,9 +3023,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				++i;
 			}
 
-			if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
-				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n", (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
-							m_NotoTitles.size());
+            if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
+            {
+                g_Log.Event(LOGM_INIT | LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n",
+                    (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
+                    m_NotoTitles.size());
+            }
 		}
 		return true;
 	case RES_OBSCENE:
@@ -2938,7 +3044,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				return false;
 			while ( pScript->ReadKey() )
 			{
-				lpctstr	key = pScript->GetKey();
+                // It's mandatory to convert to UPPERCASE the function name, because we perform a case-sensitive search
+				tchar* key = const_cast<tchar*>(pScript->GetKey());
+                _strupr(key);
 				m_PrivCommands[index].AddSortString(key);
 			}
 		}
@@ -2960,8 +3068,11 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_SECTOR: // saved in world file.
 		{
-			CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
-			return pt.GetSector()->r_Load(*pScript);
+			const CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
+            CSector* pSector = pt.GetSector();
+            if (!pSector)
+                return false;
+			return pSector->r_Load(*pScript);
 		}
 	case RES_SPELL:
 		{
@@ -2993,8 +3104,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			}
 			else
 			{
-				if ( rid.GetResIndex() >= (int)(g_Cfg.m_iMaxSkill) )
-					g_Cfg.m_iMaxSkill = rid.GetResIndex() + 1;
+				if ( rid.GetResIndex() >= (int)(m_iMaxSkill) )
+					m_iMaxSkill = rid.GetResIndex() + 1;
 
 				// Just replace any previous CSkillDef
 				pSkill = new CSkillDef((SKILL_TYPE)(rid.GetResIndex()));
@@ -3010,7 +3121,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if ( !pPrvDef )
 			{
 				// build a name sorted list.
-				m_SkillNameDefs.AddSortKey( pSkill, pSkill->GetKey());
+				m_SkillNameDefs.emplace(pSkill);
 				// Hard coded value for skill index.
 				m_SkillIndexDefs.assign_at_grow(rid.GetResIndex(), pSkill);
 			}
@@ -3029,11 +3140,11 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			ASSERT(pNewLink);
 
 			// clear old tile links to this type
-			size_t iQty = g_World.m_TileTypes.size();
+			const size_t iQty = g_World.m_TileTypes.size();
 			for ( size_t i = 0; i < iQty; ++i )
 			{
 				if (g_World.m_TileTypes[i] == pTypeDef )
-					g_World.m_TileTypes.assign(i, nullptr);
+					g_World.m_TileTypes.assign_at(i, nullptr);
 			}
 
 		}
@@ -3139,13 +3250,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		else
 		{
 			CRegionWorld * pRegion = new CRegionWorld( rid, pScript->GetArgStr());
-			pNewDef = pRegion;
-			ASSERT(pNewDef);
 			pRegion->r_Load( *pScript );
 			if ( ! pRegion->RealizeRegion() )
 				delete pRegion; // might be a dupe ?
 			else
 			{
+				pNewDef = pRegion;
+				ASSERT(pNewDef);
 				m_ResHash.AddSortKey( rid, pRegion );
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
@@ -3306,7 +3417,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CWebPageDef( rid );
 			ASSERT(pNewLink);
-			m_WebPages.AddSortKey( pNewLink, rid );
+			m_WebPages.emplace(pNewLink);
 		}
 		{
 			CScriptLineContext LineContext = pScript->GetContext();
@@ -3316,18 +3427,28 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		break;
 
 	case RES_FUNCTION:
-		{
-			// Define a char macro. (Name is NOT DEFNAME)
-			pNewLink = new CResourceNamedDef(rid, pScript->GetArgStr());
+	{
+        lpctstr ptcFunctionName = pScript->GetArgStr();
+        const size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
+        if (uiFunctionIndex == SCONT_BADINDEX)
+        {
+            // Define a char macro. (Name is NOT DEFNAME)
+            pNewLink = new CResourceNamedDef(rid, ptcFunctionName);
 
-			// Link the CResourceLink to the CResourceScript it was read and created,
-			//	so later we can retrieve the file and the line for debugging purposes.
-			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-			if (pLinkResScript != nullptr)
-				pNewLink->SetLink(pLinkResScript);
+            // Link the CResourceLink to the CResourceScript it was read and created,
+            //	so later we can retrieve the file and the line for debugging purposes.
+            CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+            if (pLinkResScript != nullptr)
+                pNewLink->SetLink(pLinkResScript);
 
-			m_Functions.AddSortKey(pNewLink, pNewLink->GetName());
-		}
+            m_Functions.emplace(pNewLink);
+        }
+        else
+        {
+            pNewLink = dynamic_cast<CResourceNamedDef*>(m_Functions[uiFunctionIndex]);
+            ASSERT(pNewLink);
+        }
+	}
 		break;
 
 	case RES_SERVERS:	// Old way to define a block of servers.
@@ -3339,8 +3460,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// Does the name already exist ?
 				bool fAddNew = false;
 				CServerRef pServ;
-				size_t i = m_Servers.FindKey( pScript->GetKey());
-				if ( i == m_Servers.BadIndex() )
+				const size_t i = m_Servers.FindKey( pScript->GetKey());
+				if ( i == SCONT_BADINDEX )
 				{
 					pServ = new CServerDef( pScript->GetKey(), CSocketAddressIP( SOCKET_LOCAL_ADDRESS ));
 					fAddNew = true;
@@ -3398,7 +3519,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	case RES_STARTS:
 		{
-			int iStartVersion = pScript->GetArgVal();
+			const int iStartVersion = pScript->GetArgVal();
 			m_StartDefs.clear();
 			while ( pScript->ReadKey())
 			{
@@ -3412,10 +3533,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 					if (iStartVersion == 2)
 					{
 						if ( pScript->ReadKey())
-							pStart->iClilocDescription = ATOI(pScript->GetKey());
+							pStart->iClilocDescription = Str_ToI(pScript->GetKey());
 					}
 				}
-				m_StartDefs.push_back(pStart);
+				m_StartDefs.emplace_back(pStart);
 			}
 
 			return true;
@@ -3432,11 +3553,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse() )
 		{
 			bool fQuoted = false;
-			lpctstr pszKey = pScript->GetKey();
-			if ( strstr(pszKey, "VAR.") )  // This is for backward compatibility from Rcs
-				pszKey = pszKey + 4;
+			lpctstr ptcKey = pScript->GetKey();
+			if ( strstr(ptcKey, "VAR.") )  // This is for backward compatibility from Rcs
+				ptcKey = ptcKey + 4;
 
-			g_Exp.m_VarGlobals.SetStr( pszKey, fQuoted, pScript->GetArgStr( &fQuoted ) );
+            lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
+			g_Exp.m_VarGlobals.SetStr( ptcKey, fQuoted, ptcArg );
 		}
 		return true;
 	case RES_WORLDLISTS:
@@ -3461,7 +3583,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse() )
 		{
 			bool fQuoted = false;
-			g_World.m_TimedFunctions.Load( pScript->GetKey(), fQuoted, pScript->GetArgStr( &fQuoted ) );
+            lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
+			CWorldTimedFunctions::Load( pScript->GetKey(), fQuoted, ptcArg );
 		}
 		return true;
 	case RES_TELEPORTERS:
@@ -3478,9 +3601,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_KRDIALOGLIST:
 		while ( pScript->ReadKeyParse() )
 		{
-			CDialogDef *pDef = dynamic_cast<CDialogDef *>( g_Cfg.ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
+			CDialogDef *pDef = dynamic_cast<CDialogDef *>( ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
 			if ( pDef != nullptr )
-				g_Cfg.SetKRDialogMap( pDef->GetResourceID().GetPrivateUID(), pScript->GetArgVal());
+				SetKRDialogMap( pDef->GetResourceID().GetPrivateUID(), pScript->GetArgVal());
 			else
 				DEBUG_ERR(("Dialog '%s' not found...\n", pScript->GetKey()));
 		}
@@ -3497,18 +3620,18 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_WORLDCHAR:	// saved in world file.
 		if ( ! rid.IsValidUID())
 		{
-			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
+			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()))->r_Load(*pScript);
+		return CChar::CreateBasic( CREID_TYPE(rid.GetResIndex()) )->r_Load(*pScript);
 	case RES_WI:
 	case RES_WORLDITEM:	// saved in world file.
 		if ( ! rid.IsValidUID())
 		{
-			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
+			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", pScript->GetArgStr());
 			return false;
 		}
-		return CItem::CreateBase((ITEMID_TYPE)(rid.GetResIndex()))->r_Load(*pScript);
+		return CItem::CreateBase( ITEMID_TYPE(rid.GetResIndex()) )->r_Load(*pScript);
 
 	default:
 		break;
@@ -3575,6 +3698,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	case RES_MOONGATES:
 	case RES_NOTOTITLES:
 	case RES_OBSCENE:
+	case RES_RESDEFNAME:
 	case RES_RESOURCES:
 	case RES_RUNES:
 	case RES_SERVERS:
@@ -3605,7 +3729,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return ridInvalid;
 
 			tchar * pArg1 = Str_GetTemp();
-			strcpy( pArg1, pszName );
+			Str_CopyLimitNull( pArg1, pszName, STR_TEMPLENGTH );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
@@ -3632,7 +3756,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			if ( pszName[0] == '\0' )
 				return ridInvalid;
 			tchar * pArg1 = Str_GetTemp();
-			strcpy( pArg1, pszName );
+			Str_CopyLimitNull( pArg1, pszName, STR_TEMPLENGTH );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
@@ -3735,7 +3859,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
-				if ( duplicateIndex != m_ResHash.BadIndex() )	// i found it. So i have to find something else.
+				if ( duplicateIndex != SCONT_BADINDEX )	// i found it. So i have to find something else.
 					ASSERT(m_ResHash.GetAt(rid, duplicateIndex));
 			}
 #endif
@@ -3743,7 +3867,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		}
 
 
-		CVarDefCont * pVarBase = g_Exp.m_VarDefs.GetKey( pszName );
+		CVarDefCont * pVarBase = g_Exp.m_VarResDefs.GetKey( pszName );
 		if ( pVarBase )
 		{
 			// An existing VarDef with the same name ?
@@ -3766,6 +3890,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 						if ( pVarStr != nullptr )
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
+					break;
 					default:
 						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", pszName ));
 						return ridInvalid;
@@ -3860,9 +3985,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		break;
 
 	case RES_BOOK:			// A book or a page from a book.
-	case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
+	case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 		if ( wPage )	// We MUST define the main section FIRST !
 			return ridInvalid;
+		FALLTHROUGH;
 
 	case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
 		iHashRange = 100;
@@ -3911,16 +4037,16 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
         int iRandIndex = iIndex + Calc_GetRandVal(iHashRange);
         rid = CResourceID(restype, iRandIndex, wPage);
         
-        bool fCheckPage = (pszName && (g_Exp.m_VarDefs.GetKeyNum(pszName) != 0));
+        const bool fCheckPage = (pszName && (g_Exp.m_VarResDefs.GetKeyNum(pszName) != 0));
 		while (true)
 		{
             if (fCheckPage)
             {
                 // Same defname but different page? 
-                if (m_ResHash.FindKey(rid) == m_ResHash.BadIndex())
+                if (m_ResHash.FindKey(rid) == SCONT_BADINDEX)
                     break;
             }
-            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == m_ResHash.BadIndex())
+            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == SCONT_BADINDEX)
                 break;
 
             ++iRandIndex;
@@ -3931,12 +4057,12 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	{
 		// find a new FREE entry starting here
         rid = CResourceID(restype, iIndex ? iIndex : 1, wPage);
-        ASSERT(m_ResHash.FindKey(rid) == m_ResHash.BadIndex());
+        ASSERT(m_ResHash.FindKey(rid) == SCONT_BADINDEX);
 	}
 
 	if ( pszName )
 	{
-		CVarDefContNum* pVarTemp = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
+		CVarDefContNum* pVarTemp = g_Exp.m_VarResDefs.SetNum( pszName, rid.GetPrivateUID() );
         ASSERT(pVarTemp);
 		*ppVarNum = pVarTemp;
 	}
@@ -3954,14 +4080,16 @@ CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 	if ( ! rid.IsValidResource() )
 		return nullptr;
 
-	size_t index = rid.GetResIndex();
+	int index = rid.GetResIndex();
 	switch ( rid.GetResType() )
 	{
 		case RES_WEBPAGE:
-			index = m_WebPages.FindKey( rid );
-			if ( ! m_WebPages.IsValidIndex(index) )
+        {
+			size_t i = m_WebPages.find_sorted( rid );
+			if ( i == SCONT_BADINDEX )
 				return nullptr;
-			return m_WebPages.at(index);
+            return m_WebPages[i];
+        }
 
 		case RES_SKILL:
 			if ( ! m_SkillIndexDefs.IsValidIndex(index) )
@@ -4008,11 +4136,11 @@ CResourceDef * CServerConfig::ResourceGetDef( const CResourceID& rid ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CServerConfig::OnTick( bool fNow )
+void CServerConfig::_OnTick( bool fNow )
 {
-	ADDTOCALLSTACK("CServerConfig::OnTick");
+	ADDTOCALLSTACK("CServerConfig::_OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > g_World.GetCurrentTime().GetTimeRaw()) ) )
+	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -4040,7 +4168,7 @@ void CServerConfig::OnTick( bool fNow )
 		}
 	}
 
-	m_timePeriodic = g_World.GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
+	m_timePeriodic = CWorldGameTime::GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
 }
 
 void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
@@ -4078,6 +4206,9 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetOF(OF_DrinkIsFood) )				catresname(zOptionFlags, "DrinkIsFood");
 		if ( IsSetOF(OF_NoDClickTurn) )				catresname(zOptionFlags, "NoDClickTurn");
         if ( IsSetOF(OF_NoTargTurn) )				catresname(zOptionFlags, "NoTargTurn");
+        if ( IsSetOF(OF_StatAllowValOverMax) )		catresname(zOptionFlags, "StatAllowValOverMax");
+        if ( IsSetOF(OF_GuardOutsideGuardedArea) )	catresname(zOptionFlags, "GuardOutsideGuardedArea");
+        if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
@@ -4102,9 +4233,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetEF(EF_DamageTools) )				catresname(zExperimentalFlags, "DamageTools");
 		if ( IsSetEF(EF_UsePingServer) )			catresname(zExperimentalFlags, "UsePingServer");
 		if ( IsSetEF(EF_FixCanSeeInClosedConts) )	catresname(zExperimentalFlags, "FixCanSeeInClosedConts");
-#ifndef _MTNETWORK
-		if ( IsSetEF(EF_NetworkOutThread) ) catresname(zExperimentalFlags, "NetworkOutThread");
-#endif
+        if ( IsSetEF(EF_WalkCheckHeightMounted) )	catresname(zExperimentalFlags, "WalkCheckHeightMounted");
 
 		if ( zExperimentalFlags[0] != '\0' )
 		{
@@ -4319,7 +4448,7 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( ! g_Cfg.ResourceGetDef( CResourceID( RES_SKILLCLASS, 0 )))
+	if ( ! ResourceGetDef( CResourceID( RES_SKILLCLASS, 0 )))
 	{
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));
@@ -4343,10 +4472,10 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// Make region DEFNAMEs
-    size_t iRegionMax = g_Cfg.m_RegionDefs.size();
+    size_t iRegionMax = m_RegionDefs.size();
     for (size_t k = 0; k < iRegionMax; ++k)
     {
-        CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[k]);
+        CRegion * pRegion = dynamic_cast <CRegion*> (m_RegionDefs[k]);
         if (!pRegion)
             continue;
         pRegion->MakeRegionDefname();
@@ -4416,28 +4545,29 @@ lpctstr CServerConfig::GetDefaultMsg(int lKeyNum)
 	return g_Exp.sm_szMessages[lKeyNum];
 }
 
-lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey)
+lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey)
 {
 	ADDTOCALLSTACK("CServerConfig::GetDefaultMsg");
 	for (int i = 0; i < DEFMSG_QTY; ++i )
 	{
-		if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[i]) )
+		if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[i]) )
 			return g_Exp.sm_szMessages[i];
 
 	}
-	g_Log.EventError("Defmessage \"%s\" non existent\n", pszKey);
+	g_Log.EventError("Defmessage \"%s\" non existent\n", ptcKey);
 	return "";
 }
 
-bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
+bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, TemporaryString *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
 {
 	ADDTOCALLSTACK("CServerConfig::GenerateDefname");
 	if ( !pOutput )
 		return false;
 
+	tchar* buf = const_cast<tchar*>(pOutput->buffer());
 	if ( !pObjectName || !pObjectName[0] )
 	{
-		pOutput[0] = '\0';
+		buf[0] = '\0';
 		return false;
 	}
 
@@ -4446,33 +4576,33 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 	if (pPrefix)
 	{
 		// write prefix
-		for (size_t i = 0; pPrefix[i] != '\0'; i++)
-			pOutput[iOut++] = pPrefix[i];
+		for (size_t i = 0; pPrefix[i] != '\0'; ++i)
+			buf[iOut++] = pPrefix[i];
 	}
 
 	// write object name
-	for (size_t i = 0; i < iInputLength; i++)
+	for (size_t i = 0; i < iInputLength; ++i)
 	{
 		if (pObjectName[i] == '\0')
 			break;
 
 		if ( ISWHITESPACE(pObjectName[i]) )
 		{
-			if (iOut > 0 && pOutput[iOut - 1] != '_') // avoid double '_'
-				pOutput[iOut++] = '_';
+			if (iOut > 0 && buf[iOut - 1] != '_') // avoid double '_'
+				buf[iOut++] = '_';
 		}
 		else if ( _ISCSYMF(pObjectName[i]) )
 		{
-			if (pObjectName[i] != '_' || (iOut > 0 && pOutput[iOut - 1] != '_')) // avoid double '_'
-				pOutput[iOut++] = static_cast<tchar>(tolower(pObjectName[i]));
+			if (pObjectName[i] != '_' || (iOut > 0 && buf[iOut - 1] != '_')) // avoid double '_'
+				buf[iOut++] = static_cast<tchar>(tolower(pObjectName[i]));
 		}
 	}
 
 	// remove trailing _
-	while (iOut > 0 && pOutput[iOut - 1] == '_')
-		iOut--;
+	while (iOut > 0 && buf[iOut - 1] == '_')
+		--iOut;
 
-	pOutput[iOut] = '\0';
+	buf[iOut] = '\0';
 	if (iOut == 0)
 		return false;
 
@@ -4485,12 +4615,12 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 		for (;;)
 		{
 			bool isValid = true;
-			if (g_Exp.m_VarDefs.GetKey(pOutput) != nullptr)
+			if (g_Exp.m_VarResDefs.GetKey(buf) != nullptr)
 			{
 				// check loaded defnames
 				isValid = false;
 			}
-			else if (vDefnames && vDefnames->GetKey(pOutput) != nullptr)
+			else if (vDefnames && vDefnames->GetKey(buf) != nullptr)
 			{
 				isValid = false;
 			}
@@ -4500,14 +4630,14 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 
 			// attach suffix
 			iOut = iEnd;
-			pOutput[iOut++] = '_';
-			ITOA(++iAttempts, &pOutput[iOut], 10);
+			buf[iOut++] = '_';
+            Str_FromI(++iAttempts, &buf[iOut], pOutput->capacity(), 10);
 		}
 	}
 
 	// record defname
 	if (vDefnames != nullptr)
-		vDefnames->SetNum(pOutput, 1);
+		vDefnames->SetNum(buf, 1);
 
 	return true;
 }
@@ -4528,53 +4658,52 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 		return false;
 
-	tchar sItemName[21];
+	tchar ptcItemName[21];
 	TemporaryString tsDefnameBuffer;
-	tchar * pDefnameBuffer = static_cast<tchar *>(tsDefnameBuffer);
 	CVarDefMap defnames;
 
 	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CSTime::GetCurrentTime().Format(nullptr));
 
-	ITEMID_TYPE idMaxItem = CUOTiledata::GetMaxTileDataItem();
+	ITEMID_TYPE idMaxItem = ITEMID_TYPE(g_Install.m_tiledata.GetItemMaxIndex());
 	if (idMaxItem > ITEMID_MULTI)
 		idMaxItem = ITEMID_MULTI;
 
-	for (int i = 0; i < idMaxItem; i++)
+	for (int i = 0; i < idMaxItem; ++i)
 	{
 		if ( !( i % 0xff ))
 			g_Serv.PrintPercent(i, idMaxItem);
 
 		CResourceID rid = CResourceID(RES_ITEMDEF, i);
-		if (g_Cfg.m_ResHash.FindKey(rid) != g_Cfg.m_ResHash.BadIndex())
+		if (m_ResHash.FindKey(rid) != SCONT_BADINDEX)
 			continue;
 
 		// check item in tiledata
 		CUOItemTypeRec_HS tiledata;
-		if (CItemBase::GetItemData((ITEMID_TYPE)(i), &tiledata) == false)
+		if (CItemBase::GetItemData((ITEMID_TYPE)i, &tiledata) == false)
 			continue;
 
 		// ensure there is actually some data here, treat "MissingName" as blank since some tiledata.muls
 		// have this name set in blank slots
 		if ( !tiledata.m_flags && !tiledata.m_weight && !tiledata.m_layer &&
-			 !tiledata.m_dwUnk11 && !tiledata.m_dwAnim && !tiledata.m_wUnk19 && !tiledata.m_height &&
+			 !tiledata.m_dwUnk11 && !tiledata.m_wAnim && !tiledata.m_wHue && !tiledata.m_wLightIndex && !tiledata.m_height &&
 			 (!tiledata.m_name[0] || strcmp(tiledata.m_name, "MissingName") == 0))
 			 continue;
 
 		s.WriteSection("ITEMDEF 0%04x", i);
-        strncpynull(sItemName, tiledata.m_name, CountOf(sItemName));
+        Str_CopyLimitNull(ptcItemName, tiledata.m_name, CountOf(ptcItemName));
 
 		// generate a suitable defname
-		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", pDefnameBuffer, true, &defnames))
+		if (GenerateDefname(ptcItemName, CountOf(ptcItemName), "i_", &tsDefnameBuffer, true, &defnames))
 		{
-			s.Printf("// %s\n", sItemName);
-			s.WriteKey("DEFNAME", pDefnameBuffer);
+			s.Printf("// %s\n", ptcItemName);
+			s.WriteKeyStr("DEFNAME", tsDefnameBuffer.buffer());
 		}
 		else
 		{
 			s.Printf("// (unnamed object)\n");
 		}
 
-		s.WriteKey("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase((ITEMID_TYPE)i, tiledata))));
+		s.WriteKeyStr("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase((ITEMID_TYPE)i, tiledata))));
 	}
 
 	s.WriteSection("EOF");

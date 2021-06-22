@@ -1,6 +1,7 @@
-
-#ifdef _LIBEV
-	#include "../sphere/linuxev.h"
+#ifdef _WIN32
+	#include "../sphere/ntservice.h"	// g_Service
+	#include <process.h>	// getpid()
+#else
 	#include "../sphere/UnixTerminal.h"
 #endif
 
@@ -8,15 +9,15 @@
 	#define pid_t int
 #endif
 
-#ifdef _WIN32
-	#include "../sphere/ntservice.h"	// g_Service
-	#include <process.h>	// getpid()
+#ifdef _LIBEV
+	#include "../network/linuxev.h"
 #endif
 
+#include "../common/CLog.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../network/network.h" // network thread
+#include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
 #include "../sphere/ntwindow.h"
@@ -24,67 +25,70 @@
 #include "items/CItemMap.h"
 #include "items/CItemMessage.h"
 #include "components/CCChampion.h"
-#include "../common/CLog.h"
 #include "CScriptProfiler.h"
+#include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 
+// Dynamic initialization of some extern global stuff
+lpctstr g_szServerDescription = SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
 
-bool WritePidFile(int iMode = 0)
+// Dynamic initialization of some static members of other classes, which are used very soon after the server starts
+dword CObjBase::sm_iCount = 0;				// UID table.
+#ifdef _WIN32
+llong CSTime::_kllTimeProfileFrequency = 1; // Default value.
+#endif
+
+
+// This method MUST be the first code running when the application starts!
+GlobalInitializer::GlobalInitializer()
 {
-	lpctstr	file = SPHERE_FILE ".pid";
-	FILE *pidFile;
+	// The order of the instructions is important!
 
-	if ( iMode == 1 )		// delete
+#ifdef _WIN32
+	// Needed to get precise system time.
+	LARGE_INTEGER liProfFreq;
+	if (QueryPerformanceFrequency(&liProfFreq))
 	{
-		return ( STDFUNC_UNLINK(file) == 0 );
+		CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
 	}
-	else if ( iMode == 2 )	// check for .pid file
-	{
-		pidFile = fopen(file, "r");
-		if ( pidFile )
-		{
-			g_Log.Event(LOGM_INIT, SPHERE_FILE ".pid already exists. Secondary launch or unclean shutdown?\n");
-			fclose(pidFile);
-		}
-		return true;
-	}
-	else
-	{
-		pidFile = fopen(file, "w");
-		if ( pidFile )
-		{
-			pid_t spherepid = STDFUNC_GETPID();
+#endif // _WIN32
 
-			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
-			#if defined(_WIN32) && !defined(_MSC_VER)
-				fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
-			#else
-				fprintf(pidFile, "%d\n", spherepid);
-			#endif
-			fclose(pidFile);
-			return true;
-		}
-		g_Log.Event(LOGM_INIT, "Cannot create pid file!\n");
-		return false;
-	}
+	DummySphereThread::createInstance();
+
+// Set exception catcher?
+#if defined(_WIN32) && defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
+    // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
+    // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
+    //	compiler flag, which slows down code a bit.
+    SetExceptionTranslator();
+#endif
+
+// Set purecall handler?
+#ifndef _DEBUG
+    // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+    SetPurecallHandler();
+#endif
+
+	constexpr const char* m_sClassName = "GlobalInitializer";
+	EXC_TRY("Pre-startup Init");
+
+	ASSERT(MAX_BUFFER >= sizeof(CCommand));
+	ASSERT(MAX_BUFFER >= sizeof(CEvent));
+	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
+	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
+	ASSERT(sizeof(word) == 2);
+	ASSERT(sizeof(dword) == 4);
+	ASSERT(sizeof(nword) == 2);
+	ASSERT(sizeof(ndword) == 4);
+	ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
+
+    EXC_CATCH;
 }
 
-lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
-{
-	"STR",
-	"INT",
-	"DEX",
-	"FOOD"
-};
+GlobalInitializer g_GlobalInitializer;
 
-lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
-
-int g_szServerBuild = 0;
-
-dword CObjBase::sm_iCount = 0;			// UID table.
-llong llTimeProfileFrequency = 1000;	// time profiler
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -94,16 +98,18 @@ CWorld			g_World;			// the world. (we save this stuff)
 #ifdef _LIBEV
 	extern LinuxEv g_NetworkEvent;
 #endif
-#ifndef _MTNETWORK
-	NetworkIn g_NetworkIn;
-	NetworkOut g_NetworkOut;
-#else
-	NetworkManager g_NetworkManager;
-#endif
+	CNetworkManager g_NetworkManager;
 
 // Again, game servers stuff.
 CServerConfig	g_Cfg;
 CServer			g_Serv;				// current state, stuff not saved.
+
+#ifdef _WIN32
+	CNTWindow g_NTWindow;
+#else
+	UnixTerminal g_UnixTerminal;
+#endif
+
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
 CExpression		g_Exp;				// Global script variables.
@@ -113,90 +119,10 @@ CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
 
+MainThread g_Main;
+extern PingServer g_PingServer;
+extern CDataBaseAsyncHelper g_asyncHdb;
 
-lpctstr GetTimeMinDesc( int minutes )
-{
-	tchar *pTime = Str_GetTemp();
-
-	int minute = minutes % 60;
-	int hour = ( minutes / 60 ) % 24;
-
-	lpctstr pMinDif;
-	if ( minute <= 14 )
-//		pMinDif = "";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FIRST);
-	else if ( ( minute >= 15 ) && ( minute <= 30 ) )
-//		pMinDif = "a quarter past";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_SECOND);
-	else if ( ( minute >= 30 ) && ( minute <= 45 ) )
-		//pMinDif = "half past";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_THIRD);
-	else
-	{
-//		pMinDif = "a quarter till";
-		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FOURTH);
-		hour = ( hour + 1 ) % 24;
-	}
-/*
-	static lpctstr const sm_ClockHour[] =
-	{
-		"midnight",
-		"one",
-		"two",
-		"three",
-		"four",
-		"five",
-		"six",
-		"seven",
-		"eight",
-		"nine",
-		"ten",
-		"eleven",
-		"noon"
-	};
-*/
-	lpctstr sm_ClockHour[] =
-	{
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ZERO),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ONE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWO),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_THREE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_FOUR),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_FIVE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_SIX),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_SEVEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_EIGHT),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_NINE),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ELEVEN),
- 		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWELVE),
-	};
-
-	lpctstr pTail;
-	if ( hour == 0 || hour==12 )
-		pTail = "";
-	else if ( hour > 12 )
-	{
-		hour -= 12;
-		if ((hour>=1)&&(hour<6))
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_13_TO_18);
-//			pTail = " o'clock in the afternoon";
-		else if ((hour>=6)&&(hour<9))
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_18_TO_21);
-//			pTail = " o'clock in the evening.";
-		else
-			pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_21_TO_24);
-//			pTail = " o'clock at night";
-	}
-	else
-	{
-		pTail = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_24_TO_12);
-//		pTail = " o'clock in the morning";
-	}
-
-	sprintf( pTime, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail );
-	return pTime;
-}
 
 
 //*******************************************************************
@@ -217,17 +143,6 @@ MainThread::MainThread()
     m_profile.EnableProfile(PROFILE_SHIPS);
     m_profile.EnableProfile(PROFILE_TIMEDFUNCTIONS);
     m_profile.EnableProfile(PROFILE_TIMERS);
-#ifndef _MTNETWORK
-	//m_profile.EnableProfile(PROFILE_DATA_TX);
-	m_profile.EnableProfile(PROFILE_DATA_RX);
-#else
-#ifndef MTNETWORK_INPUT
-	m_profile.EnableProfile(PROFILE_DATA_RX);
-#endif
-#ifndef MTNETWORK_OUTPUT
-	m_profile.EnableProfile(PROFILE_DATA_TX);
-#endif
-#endif
 }
 
 void MainThread::onStart()
@@ -248,46 +163,54 @@ bool MainThread::shouldExit()
 	return AbstractSphereThread::shouldExit();
 }
 
-MainThread g_Main;
-extern PingServer g_PingServer;
-extern CDataBaseAsyncHelper g_asyncHdb;
-
 
 //*******************************************************************
 
+static bool WritePidFile(int iMode = 0)
+{
+	lpctstr	file = SPHERE_FILE ".pid";
+	FILE* pidFile;
+
+	if (iMode == 1)		// delete
+	{
+		return (STDFUNC_UNLINK(file) == 0);
+	}
+	else if (iMode == 2)	// check for .pid file
+	{
+		pidFile = fopen(file, "r");
+		if (pidFile)
+		{
+			g_Log.Event(LOGM_INIT, SPHERE_FILE ".pid already exists. Secondary launch or unclean shutdown?\n");
+			fclose(pidFile);
+		}
+		return true;
+	}
+	else
+	{
+		pidFile = fopen(file, "w");
+		if (pidFile)
+		{
+			pid_t spherepid = STDFUNC_GETPID();
+
+			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
+#if defined(_WIN32) && !defined(_MSC_VER)
+			fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
+#else
+			fprintf(pidFile, "%d\n", spherepid);
+#endif
+			fclose(pidFile);
+			return true;
+		}
+		g_Log.Event(LOGM_INIT, "Cannot create pid file!\n");
+		return false;
+	}
+}
+
+
 int Sphere_InitServer( int argc, char *argv[] )
 {
-	const char *m_sClassName = "Sphere";
-	EXC_TRY("Init");
-	ASSERT(MAX_BUFFER >= sizeof(CCommand));
-	ASSERT(MAX_BUFFER >= sizeof(CEvent));
-	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
-	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
-	ASSERT(sizeof(word) == 2 );
-	ASSERT(sizeof(dword) == 4 );
-	ASSERT(sizeof(nword) == 2 );
-	ASSERT(sizeof(ndword) == 4 );
-	ASSERT(sizeof(CUOItemTypeRec) == 37 );	// is byte packing working ?
-
-#ifdef _WIN32
-	if ( ! QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&llTimeProfileFrequency)) )
-		llTimeProfileFrequency = 1000;
-
-#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
-	// We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
-	// We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
-	//	compiler flag, which slows down code a bit.
-	EXC_SET_BLOCK("setting exception catcher");
-	SetExceptionTranslator();
-#endif
-#endif // _WIN32
-
-#ifndef _DEBUG
-	// Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
-	EXC_SET_BLOCK("setting purecall handler");
-	SetPurecallHandler();
-#endif
-
+	constexpr const char *m_sClassName = "SphereInit";
+	EXC_TRY("Init Server");
 	EXC_SET_BLOCK("loading");
 	if ( !g_Serv.Load() )
 		return -3;
@@ -311,7 +234,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	//	load auto-complete dictionary
 	EXC_SET_BLOCK("auto-complete");
 	{
-		CSFileText	dict;
+		CSFileText dict;
 		if ( dict.Open(SPHERE_FILE ".dic", OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
 			tchar * pszTemp = Str_GetTemp();
@@ -331,7 +254,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 					if ( *pszTemp != '\0' )
 					{
-						count++;
+						++count;
 						g_AutoComplete.AddTail(pszTemp);
 					}
 				}
@@ -366,6 +289,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	return -10;
 }
 
+
 void Sphere_ExitServer()
 {
 	// Trigger server quit
@@ -373,11 +297,7 @@ void Sphere_ExitServer()
 
 	g_Serv.SetServerMode(SERVMODE_Exiting);
 
-#ifndef _MTNETWORK
-	g_NetworkOut.waitForClose();
-#else
 	g_NetworkManager.stop();
-#endif
 	g_Main.waitForClose();
 	g_PingServer.waitForClose();
 	g_asyncHdb.waitForClose();
@@ -412,66 +332,55 @@ void Sphere_ExitServer()
 
 	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", ptcReason, iExitFlag);
 #ifdef _WIN32
-    g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "You can now close this window.\n");
+    if (!g_Serv._fCloseNTWindowOnTerminate)
+        g_Log.Event(LOGM_INIT | LOGF_CONSOLE_ONLY, "You can now close this window.\n");
 #endif
-	g_Log.Close();
-
+    g_Log.Close();
 #ifdef _WIN32
     if (iExitFlag != 5)
         g_NTWindow.NTWindow_ExitServer();
 #endif
 }
 
+
 int Sphere_OnTick()
 {
 	// Give the world (CMainTask) a single tick. RETURN: 0 = everything is fine.
-	const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereTick";
 	EXC_TRY("Tick");
 #ifdef _WIN32
 	EXC_SET_BLOCK("service");
-    g_NTService.OnTick();
+    g_NTService._OnTick();
 #endif
 
 	EXC_SET_BLOCK("world");
-	g_World.OnTick();
+	g_World._OnTick();
 
 	// process incoming data
 	EXC_SET_BLOCK("network-in");
-#ifndef _MTNETWORK
-	g_NetworkIn.tick();
-#else
 	g_NetworkManager.processAllInput();
-#endif
 
 	EXC_SET_BLOCK("server");
-	g_Serv.OnTick();
+	g_Serv._OnTick();
 
 	// push outgoing data
-#ifndef _MTNETWORK
-	if (g_NetworkOut.isActive() == false)
-	{
-		EXC_SET_BLOCK("network-out");
-		g_NetworkOut.tick();
-	}
-#else
 	EXC_SET_BLOCK("network-out");
 	g_NetworkManager.processAllOutput();
-#endif
 
-#ifdef _MTNETWORK
 	// don't put the network-tick between in.tick and out.tick, otherwise it will clean the out queue!
 	EXC_SET_BLOCK("network-tick");
 	g_NetworkManager.tick();	// then this thread has to call the network tick
-#endif
 
 	EXC_CATCH;
 	return g_Serv.GetExitFlag();
 }
+
+
 //*****************************************************
 
 static void Sphere_MainMonitorLoop()
 {
-	const char *m_sClassName = "Sphere";
+	constexpr const char *m_sClassName = "SphereMonitor";
 	// Just make sure the main loop is alive every so often.
 	// This should be the parent thread. try to restart it if it is not.
 	while ( !g_Serv.GetExitFlag() )
@@ -510,10 +419,12 @@ static void Sphere_MainMonitorLoop()
 
 }
 
+
 //******************************************************
-void dword_q_sort(dword numbers[], dword left, dword right)
+
+static void dword_q_sort(dword *numbers, dword left, dword right)
 {
-	dword	pivot, l_hold, r_hold;
+	dword pivot, l_hold, r_hold;
 
 	l_hold = left;
 	r_hold = right;
@@ -547,34 +458,26 @@ void defragSphere(char *path)
 
 	CSFileText inf;
 	CSFile ouf;
-	char z[256], z1[256], buf[1024];
+	char z[_MAX_PATH], z1[_MAX_PATH], buf[1024];
 	size_t i;
-	dword uid = 0;
 	char *p = nullptr, *p1 = nullptr;
 	size_t dBytesRead;
 	size_t dTotalMb;
 	const size_t mb10 = 10*1024*1024;
 	const size_t mb5 = 5*1024*1024;
 	bool bSpecial;
-	dword dTotalUIDs;
-
-	char	c,c1,c2;
-	dword	d;
-
-	//	NOTE: Sure I could use CVarDefArray, but it is extremely slow with memory allocation, takes hours
-	//		to read and save the data. Moreover, it takes less memory in this case and does less convertations.
-#define	MAX_UID	5000000L	// limit to 5mln of objects, takes 5mln*4 = 20mb
-	dword	*uids;
 
 	g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " SPHERE_TITLE " saves.\n"
 		"Use it on your risk and if you know what you are doing since it can possibly harm your server.\n"
 		"The process can take up to several hours depending on the CPU you have.\n"
 		"After finished, you will have your '" SPHERE_FILE "*.scp' files converted and saved as '" SPHERE_FILE "*.scp.new'.\n");
 
-	uids = (dword*)calloc(MAX_UID, sizeof(dword));
+	constexpr dword MAX_UID = 40'000'000U; // limit to 100mln of objects, takes 100mln*4 ~= 400mb
+	dword dwIdxUID = 0;
+	dword* puids = (dword*)calloc(MAX_UID, sizeof(dword));
 	for ( i = 0; i < 3; ++i )
 	{
-		strcpy(z, path);
+		Str_CopyLimitNull(z, path, sizeof(z));
 		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
 		else if ( i == 1 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
 		else				strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
@@ -586,7 +489,7 @@ void defragSphere(char *path)
 			continue;
 		}
 		dBytesRead = dTotalMb = 0;
-		while ( !feof(inf._pStream) )
+		while ((dwIdxUID < MAX_UID) && !feof(inf._pStream))
 		{
 			fgets(buf, sizeof(buf), inf._pStream);
 			dBytesRead += strlen(buf);
@@ -600,28 +503,30 @@ void defragSphere(char *path)
 			{
 				p = buf + 7;
 				p1 = p;
-				while ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' ) )
+				while (*p1 && (*p1 != '\r') && (*p1 != '\n'))
+				{
 					++p1;
+				}
 				*p1 = 0;
 
 				//	prepare new uid
 				*(p-1) = '0';
 				*p = 'x';
 				--p;
-				uids[uid++] = strtoul(p, &p1, 16);
+				puids[dwIdxUID++] = strtoul(p, &p1, 16);
 			}
 		}
 		inf.Close();
 	}
-	dTotalUIDs = uid;
-	g_Log.Event(LOGM_INIT, "Totally having %u unique objects (UIDs), latest: 0%x\n", uid, uids[uid-1]);
+	const dword dwTotalUIDs = dwIdxUID;
+	g_Log.Event(LOGM_INIT, "Totally having %" PRIuSIZE_T " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
-	dword_q_sort(uids, 0, dTotalUIDs-1);
+	dword_q_sort(puids, 0, dwTotalUIDs -1);
 
 	for ( i = 0; i < 5; ++i )
 	{
-		strcpy(z, path);
+		Str_CopyLimitNull(z, path, sizeof(z));
 		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
 		else if ( i == 1 )	strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
 		else if ( i == 2 )	strcat(z, SPHERE_FILE "data" SPHERE_SCRIPT);
@@ -633,23 +538,24 @@ void defragSphere(char *path)
 			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
 			continue;
 		}
-		strcat(z, ".new");
+		Str_ConcatLimitNull(z, ".new", sizeof(z));
 		if ( !ouf.Open(z, OF_WRITE|OF_CREATE|OF_DEFAULTMODE) )
 		{
 			g_Log.Event(LOGM_INIT, "Cannot open file for writing. Skipped!\n");
 			continue;
 		}
+
 		dBytesRead = dTotalMb = 0;
 		while ( inf.ReadString(buf, sizeof(buf)) )
 		{
-			uid = (dword)strlen(buf);
-			if (uid > (CountOf(buf) - 3))
-				uid = CountOf(buf) - 3;
+			dwIdxUID = (dword)strlen(buf);
+			if (dwIdxUID > (CountOf(buf) - 3))
+				dwIdxUID = CountOf(buf) - 3;
 
-			buf[uid] = buf[uid+1] = buf[uid+2] = 0;	// just to be sure to be in line always
+			buf[dwIdxUID] = buf[dwIdxUID +1] = buf[dwIdxUID +2] = 0;	// just to be sure to be in line always
 							// NOTE: it is much faster than to use memcpy to clear before reading
 			bSpecial = false;
-			dBytesRead += uid;
+			dBytesRead += dwIdxUID;
 			if ( dBytesRead > mb5 )
 			{
 				dBytesRead -= mb5;
@@ -722,6 +628,7 @@ void defragSphere(char *path)
 			//	here we definitely know that this is very uid-like
 			if ( p )
 			{
+				char c, c1, c2;
 				c = *p1;
 
 				*p1 = 0;
@@ -734,7 +641,7 @@ void defragSphere(char *path)
 				*(p-1) = '0';
 				*p = 'x';
 				--p;
-				uid = strtoul(p, &p1, 16);
+				dwIdxUID = strtoul(p, &p1, 16);
 				++p;
 				*(p-1) = c1;
 				*p = c2;
@@ -743,25 +650,28 @@ void defragSphere(char *path)
 				//	since has amount/2 tryes at worst chance to get the item and never scans the whole array
 				//	It should improve speed since defragmenting 150Mb saves takes ~2:30 on 2.0Mhz CPU
 				{
-					dword dStep = dTotalUIDs/2;
-					d = dStep;
+					dword dStep = dwTotalUIDs /2;
+					dword d = dStep;
 					for (;;)
 					{
 						dStep /= 2;
 
-						if ( uids[d] == uid )
+						if ( puids[d] == dwIdxUID)
 						{
-							uid = d | (uids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
+							dwIdxUID = d | (puids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
 							break;
 						}
 						else
-                            if ( uids[d] < uid ) d += dStep;
-						else
-                            d -= dStep;
+						{
+							if (puids[d] < dwIdxUID)
+								d += dStep;
+							else
+								d -= dStep;
+						}
 
 						if ( dStep == 1 )
 						{
-							uid = 0xFFFFFFFFL;
+							dwIdxUID = 0xFFFFFFFFL;
 							break; // did not find the UID
 						}
 					}
@@ -784,11 +694,11 @@ void defragSphere(char *path)
 
 				//	replace UID by the new one since it has been found
 				*p1 = c;
-				if ( uid != 0xFFFFFFFFL )
+				if (dwIdxUID != 0xFFFFFFFFL )
 				{
 					*p = 0;
 					strcpy(z, p1);
-					sprintf(z1, "0%x", uid);
+					sprintf(z1, "0%" PRIx32, dwIdxUID);
 					strcat(buf, z1);
 					strcat(buf, z);
 				}
@@ -799,9 +709,10 @@ void defragSphere(char *path)
 		inf.Close();
 		ouf.Close();
 	}
-	free(uids);
+	free(puids);
 	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
 }
+
 
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
@@ -809,12 +720,16 @@ int Sphere_MainEntryPoint( int argc, char *argv[] )
 int _cdecl main( int argc, char * argv[] )
 #endif
 {
+	static constexpr lpctstr m_sClassName = "main";
+	EXC_TRY("MAIN");
+
 #ifndef _WIN32
     IThread::setThreadName("T_SphereStartup");
     g_UnixTerminal.start();
-    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function.
+    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
     g_Cfg.LoadIni(false);
 #endif
+
 
     g_Serv.SetServerMode(SERVMODE_Loading);
 	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
@@ -831,16 +746,11 @@ int _cdecl main( int argc, char * argv[] )
 			g_NetworkEvent.start();
 #endif
 
-#ifndef _MTNETWORK
-		g_NetworkIn.onStart();					// A class to process network input, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
-		if (IsSetEF( EF_NetworkOutThread ))
-			g_NetworkOut.start();				// A class to process network output, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
-#else
-		g_NetworkManager.start();	// NetworkManager creates a number of NetworkThread classes, which may run on new threads or on the calling thread. Every NetworkThread has
-									//  an instance of NetworkInput nad NetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
-#endif
+        // CNetworkManager creates a number of CNetworkThread classes, which may run on new threads or on the calling thread. Every CNetworkThread has
+        //  an instance of CNetworkInput nad CNetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
+		g_NetworkManager.start();
 
-		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
+		const bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
 		if (shouldRunInThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
@@ -858,13 +768,22 @@ int _cdecl main( int argc, char * argv[] )
 
 	Sphere_ExitServer();
 	WritePidFile(1);
+
 #ifdef _WIN32
-    while (g_NTWindow.isActive())
+    if (!g_Serv._fCloseNTWindowOnTerminate)
     {
-        Sleep (100);
+        while (g_NTWindow.isActive())
+        {
+            Sleep (100);
+        }
     }
 #endif
-	return( g_Serv.GetExitFlag() );
+
+	return g_Serv.GetExitFlag();
+	EXC_CATCH;
+
+	return -1;
 }
+
 
 #include "../tables/classnames.tbl"

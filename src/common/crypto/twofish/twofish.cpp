@@ -80,12 +80,12 @@ dword f32(dword x, CONST dword* k32, int keyLen)
 
 	/* Run each byte thru 8x8 S-boxes, xoring with key byte at each stage. */
 	/* Note that each byte goes through a different combination of S-boxes.*/
-#ifndef _MSC_VER
+#ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wstrict-aliasing"	// disabling the warning for the type punning
 #endif
 	*((dword *)b) = Bswap(x);	/* make b[0] = LSB, b[3] = MSB */
-#ifndef _MSC_VER
+#ifdef __GNUC__
 	#pragma GCC diagnostic pop
 #endif
 

@@ -2,7 +2,7 @@
 
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "../CPathFinder.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -41,9 +41,9 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		return false;
 
 	bool bRestockNow = false;
-    int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
-
-	if ( !bForce && (g_World.GetTimeDiff(m_pNPC->m_timeRestock) < 0))
+        int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
+    
+	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) >= 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();
@@ -51,14 +51,14 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		{
 			CVarDefCont *vardef = region->m_TagDefs.GetKey("RestockVendors");
 			if( vardef != nullptr )
-                iRestockDelay = vardef->GetValNum() * MSECS_PER_TENTH;  // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
+				iRestockDelay = vardef->GetValNum() * MSECS_PER_TENTH;  // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
 			if ( region->m_TagDefs.GetKey("NoRestock") != nullptr )
 				bRestockNow = false;
 		}
 		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
 	}
-    int64 iNextRestock = g_World.GetCurrentTime().GetTimeRaw() + iRestockDelay;
+        int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
     
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
@@ -69,7 +69,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			if ( !pCont )
 				return false;
 
-			pCont->Clear();
+			pCont->ClearContainer();
 		}
         bFillStock = true;  // force the vendor to restock.
 	}
@@ -81,7 +81,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		if ( IsTrigUsed(TRIGGER_NPCRESTOCK) )
 		{
 			CCharBase *pCharDef = Char_GetDef();
-			ReadScriptTrig(pCharDef, CTRIG_NPCRestock, true);
+			ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock, true);
 		}
 
 		//	we need restock vendor money as well
@@ -102,13 +102,13 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 
 	if ( pCharPlayer == nullptr )
 		return false;
-	if ( ! pCharPlayer->IsClient())
+	if ( ! pCharPlayer->IsClientActive())
 		return false;
 
 	// Might have too many pets already ?
 	int iCount = 0;
 	CItemContainer * pBank = GetBank();
-	if ( pBank->GetCount() >= g_Cfg.m_iContainerMaxItems )
+	if ( pBank->GetContentCount() >= g_Cfg.m_iContainerMaxItems )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
 		return false;
@@ -121,30 +121,49 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	double iSkillSum = iSkillTaming + iSkillAnimalLore + iSkillVeterinary;
 
 	int iPetMax;
-	if ( iSkillSum >= 240.0 )
-		iPetMax = 5;
-	else if ( iSkillSum >= 200.0 )
-		iPetMax = 4;
-	else if ( iSkillSum >= 160.0 )
-		iPetMax = 3;
-	else
-		iPetMax = 2;
-
-	if ( iSkillTaming >= 100.0 )
-		iPetMax += (int)((iSkillTaming - 90.0) / 10);
-
-	if ( iSkillAnimalLore >= 100.0 )
-		iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
-
-	if ( iSkillVeterinary >= 100.0 )
-		iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
-
 	int iMaxPlayerPets = (int)m_TagDefs.GetKeyNum("MAXPLAYERPETS");
-	if ( iMaxPlayerPets )
-		iPetMax = iMaxPlayerPets;
-
-	for ( CItem *pItem = pBank->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	if (iMaxPlayerPets)
 	{
+		iPetMax = iMaxPlayerPets;
+	}
+	else
+	{
+		if (iSkillSum >= 240.0)
+		{
+			iPetMax = 5;
+		}
+		else if (iSkillSum >= 200.0)
+		{
+			iPetMax = 4;
+		}
+		else if (iSkillSum >= 160.0)
+		{
+			iPetMax = 3;
+		}
+		else
+		{
+			iPetMax = 2;
+		}
+
+		if (iSkillTaming >= 100.0)
+		{
+			iPetMax += (int)((iSkillTaming - 90.0) / 10);
+		}
+
+		if (iSkillAnimalLore >= 100.0)
+		{
+			iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
+		}
+
+		if (iSkillVeterinary >= 100.0)
+		{
+			iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
+		}
+	}
+
+	for (CSObjContRec* pObjRec : *pBank)
+	{
+		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
 			++iCount;
 	}
@@ -169,17 +188,19 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 	if ( m_pNPC->m_Brain != NPCBRAIN_STABLE )
 		return false;
 
+	CItemContainer* pBank = GetBank();
+	ASSERT(pBank);
+
 	int iCount = 0;
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetBank()->GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (CSObjContRec* pObjRec : pBank->GetIterationSafeCont())
 	{
-		pItemNext = pItem->GetNext();
-		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
+		CItem* pItem = static_cast<CItem*>(pObjRec);
+		if ( pItem->IsType(IT_FIGURINE) && (pItem->m_uidLink == pCharPlayer->GetUID()) )
 		{
 			if ( !pCharPlayer->Use_Figurine(pItem) )
 			{
 				tchar *pszTemp = Str_GetTemp();
-				sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
+				snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
 				Speak(pszTemp);
 				return true;
 			}
@@ -206,29 +227,37 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 		return 0;
 	}
 
-	ushort uiSkillSrcVal = pCharSrc->Skill_GetBase(Skill);
-	ushort uiSkillVal = Skill_GetBase(Skill);
-	ushort uiTrainVal = NPC_GetTrainMax(pCharSrc, Skill) - uiSkillSrcVal;
+	const ushort uiSkillSrcVal = pCharSrc->Skill_GetBase(Skill);
+	int iTrainVal = (int)NPC_GetTrainMax(pCharSrc, Skill) - uiSkillSrcVal;
+    if (iTrainVal < 0)
+        iTrainVal = 0;
+    else if (iTrainVal > USHRT_MAX)
+        iTrainVal = USHRT_MAX;
+    const ushort uiTrainVal = (ushort)iTrainVal;
 
 	// Train npc skill cap
-	ushort uiMaxDecrease = 0;
-	if ( (pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax() )
-	{	
-		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
-		{
-			if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
-				continue;
+	uint uiMaxDecrease = 0; // using uint instead of ushort to avoid overflows in the for loop
+    if (uiTrainVal != 0)
+    {
+        if ((pCharSrc->Skill_GetSum() + uiTrainVal) > pCharSrc->Skill_GetSumMax())
+        {
+            for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
+            {
+                if (!g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i))
+                    continue;
 
-			if ( pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN )
-				uiMaxDecrease += pCharSrc->Skill_GetBase((SKILL_TYPE)i);
-		}
-		uiMaxDecrease = minimum(uiTrainVal, uiMaxDecrease);
-	}
-	else
-	{
-		uiMaxDecrease = uiTrainVal;
-	}
+                if (pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN)
+                    uiMaxDecrease += pCharSrc->Skill_GetBase((SKILL_TYPE)i);
+            }
+            uiMaxDecrease = minimum(uiTrainVal, uiMaxDecrease);
+        }
+        else
+        {
+            uiMaxDecrease = uiTrainVal;
+        }
+    }
 
+    const ushort uiSkillVal = Skill_GetBase(Skill);
 	lpctstr pszMsg;
 	if ( uiSkillVal <= 0 )
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_2 );
@@ -237,10 +266,10 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 	else if ( uiMaxDecrease <= 0 )
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_4 );
 	else
-		return uiMaxDecrease;
+		return (ushort)uiMaxDecrease;
 
-	char *z = Str_GetTemp();
-	sprintf(z, pszMsg, g_Cfg.GetSkillKey(Skill));
+	tchar *z = Str_GetTemp();
+	snprintf(z, STR_TEMPLENGTH, pszMsg, g_Cfg.GetSkillKey(Skill));
 	Speak(z);
 	return 0;
 }
@@ -272,13 +301,14 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	// Can't ask for more gold than the maximum amount of the gold stack i am giving to the npc
 
 	// Consume as much money as we can train for.
-	if ( pGold->GetAmount() < wTrainCost )
+    const word wGoldAmount = pGold->GetAmount();
+	if (wGoldAmount < wTrainCost )
 	{
 		int iDiffPercent = IMulDiv(wTrainCost, 100, pGold->GetAmount());
 		uiTrainVal = (ushort)IMulDiv(uiTrainVal,100,iDiffPercent);
         wTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, uiTrainVal * uiTrainMult), pGold, PAYGOLD_TRAIN);
 	}
-	else if ( pGold->GetAmount() == wTrainCost)
+	else if (wGoldAmount == wTrainCost)
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_1 ) );
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
@@ -361,8 +391,6 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 
 	// Did they mention a skill name i recognize ?
 	TemporaryString tsMsg;
-	tchar* pszMsg = static_cast<tchar *>(tsMsg);
-
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
@@ -377,8 +405,8 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		if ( iTrainCost <= 0 )
 			return true;
 
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, pSkillKey);
-		Speak(pszMsg);
+		snprintf(tsMsg.buffer(), tsMsg.capacity(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, pSkillKey);
+		Speak(tsMsg);
 		CItemMemory * pMemory = Memory_AddObjTypes( pCharSrc, MEMORY_SPEAK );
 		if ( pMemory )
 		{
@@ -390,17 +418,16 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 
 	// What can he teach me about ?
 	// Just tell them what we can teach them or set up a memory to train.
-	strcpy( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ) );
+	Str_CopyLimitNull(tsMsg.buffer(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ), tsMsg.capacity());
 
 	lpctstr pPrvSkill = nullptr;
-
-	size_t iCount = 0;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	uint iCount = 0;
+	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 			continue;
 
-		int iDiff = NPC_GetTrainMax(pCharSrc, (SKILL_TYPE)i) - pCharSrc->Skill_GetBase((SKILL_TYPE)i);
+		const int iDiff = NPC_GetTrainMax(pCharSrc, (SKILL_TYPE)i) - pCharSrc->Skill_GetBase((SKILL_TYPE)i);
 		if ( iDiff <= 0 )
 			continue;
 
@@ -411,15 +438,15 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		}
 		if ( iCount > 1 )
 		{
-			strcat( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_3 ) );
+			Str_ConcatLimitNull(tsMsg.buffer(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_3 ), tsMsg.capacity());
 		}
 		if ( pPrvSkill )
 		{
-			strcat( pszMsg, pPrvSkill );
+			Str_ConcatLimitNull(tsMsg.buffer(), pPrvSkill, tsMsg.capacity() );
 		}
 
 		pPrvSkill = g_Cfg.GetSkillKey((SKILL_TYPE)i);
-		iCount++;
+		++iCount;
 	}
 
 	if ( iCount == 0 )
@@ -429,11 +456,14 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	}
 	if ( iCount > 1 )
 	{
-		strcat( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_4 ) );
+		Str_ConcatLimitNull(tsMsg.buffer(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_4 ), tsMsg.capacity());
 	}
 
-	strcat( pszMsg, pPrvSkill );
-	strcat( pszMsg, "." );
-	Speak( pszMsg );
+	if (pPrvSkill)
+	{
+		Str_ConcatLimitNull(tsMsg.buffer(), pPrvSkill, tsMsg.capacity());
+	}
+	Str_ConcatLimitNull(tsMsg.buffer(), ".", tsMsg.capacity());
+	Speak(tsMsg);
 	return true;
 }

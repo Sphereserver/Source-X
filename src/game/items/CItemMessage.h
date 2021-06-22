@@ -19,8 +19,9 @@ enum CIC_TYPE
 	CIC_QTY
 };
 
-class CItemMessage : public CItemVendable	// A message for a bboard or book text.
+class CItemMessage : public CItemVendable
 {
+    // A message for a bboard or book text.
     // IT_BOOK, IT_MESSAGE = can be written into.
     // the name is the title for the message. (ITEMID_BBOARD_MSG)
 protected:
@@ -42,7 +43,7 @@ private:
 
 public:
     virtual void r_Write( CScript & s ) override;
-    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+    virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script
 

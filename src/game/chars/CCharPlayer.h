@@ -12,6 +12,7 @@
 #include "../CServerConfig.h"
 
 class CSkillClassDef;
+class CMultiStorage;
 
 
 enum CPC_TYPE	// Player char.
@@ -29,17 +30,21 @@ private:
 	byte m_SkillLock[SKILL_QTY];	// SKILLLOCK_TYPE List of skill lock states for this player character
 	byte m_StatLock[STAT_BASE_QTY]; // SKILLLOCK_TYPE Applied to stats
 	CResourceRef m_SkillClass;		// RES_SKILLCLASS CSkillClassDef What skill class group have we selected.
-	bool m_bKrToolbarEnabled;
+	bool m_fKrToolbarEnabled;
+
+	// Multis
+	CMultiStorage* _pMultiStorage;	// List of houses.
 
 public:
 	static const char *m_sClassName;
 	CAccount * m_pAccount;		// The account index. (for idle players mostly)
-	static lpctstr const sm_szVerbKeys[];
 
-	int64 m_timeLastUsed;	// Time the player char was last used.
+	int64 _iTimeLastUsed;			// Time the player char was last used (connected).
+	int64 _iTimeLastDisconnected;
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
     HUE_TYPE m_SpeechHue;	// speech hue used (sent by client)
+    HUE_TYPE m_EmoteHue;	// emote hue used (sent by client)
     CUID m_uidWeaponLast;   // last equipped weapon (only used by 'EquipLastWeapon' client macro)
 
 	word m_wMurders;		// Murder count.
@@ -47,29 +52,39 @@ public:
 	byte m_speedMode;		// speed mode (0x0 = Normal movement, 0x1 = Fast movement, 0x2 = Slow movement, 0x3 and above = Hybrid movement)
 	dword m_pflag;			// PFLAG
 
+	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
+	byte m_LocalLight;
+
+	// Multis
+	uint8 _iMaxHouses;              // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
+	uint8 _iMaxShips;               // Max ships this player (Client?) can have (Overriding CAccount::_iMaxShips)
+
+	static lpctstr const sm_szVerbKeys[];
 	static lpctstr const sm_szLoadKeys[];
 
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 
 public:
-	SKILL_TYPE Skill_GetLockType( lpctstr pszKey ) const;
+	CAccount* GetAccount() const;
+
+	SKILL_TYPE Skill_GetLockType( lpctstr ptcKey ) const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
 	void Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state );
 
-	STAT_TYPE Stat_GetLockType( lpctstr pszKey ) const;
+	STAT_TYPE Stat_GetLockType( lpctstr ptcKey ) const;
 	SKILLLOCK_TYPE Stat_GetLock( STAT_TYPE stat ) const;
 	void Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state );
 
+	bool getKrToolbarStatus() const noexcept;
+	CMultiStorage* GetMultiStorage();
+
+	bool SetSkillClass(CChar* pChar, CResourceID rid);
+	CSkillClassDef* GetSkillClass() const;
+
 	void r_WriteChar( CChar * pChar, CScript & s );
-	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & s );
+	bool r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
-
-	bool SetSkillClass( CChar * pChar, CResourceID rid );
-	CSkillClassDef * GetSkillClass() const;
-
-	bool getKrToolbarStatus();
-
-	CAccount * GetAccount() const;
+	
 
 public:
 	CCharPlayer( CChar * pChar, CAccount * pAccount );

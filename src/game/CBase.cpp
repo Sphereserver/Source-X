@@ -5,6 +5,7 @@
 #include "components/CCPropsItemWeapon.h"
 #include "CServerConfig.h"
 #include "CBase.h"
+#include <algorithm>
 
 enum OBC_TYPE
 {
@@ -23,14 +24,11 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 };
 
 
-CFactionDef CBaseBaseDef::GetFaction()
-{
-    return _pFaction;
-}
-
 CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
-	CResourceLink( id )
+	CResourceLink( id ),
+	m_sName(false)
 {
+	_dwInstances = 0;
 	m_dwDispIndex			= 0;	// Assume nothing til told differently.
 	m_attackBase			= 0;
 	m_attackRange			= 0;
@@ -38,7 +36,9 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_defenseRange			= 0;
 	m_Height				= 0;
 	m_Can					= 0;
+    m_Expansion             = RDS_T2A;
 	m_ResLevel				= RDS_T2A;
+    _iEraLimitProps         = g_Cfg._iEraLimitProps;
 	m_ResDispDnHue			= HUE_DEFAULT;
 	m_ResDispDnId			= 0;
 	m_BaseResources.setNoMergeOnLoad();
@@ -48,19 +48,32 @@ CBaseBaseDef::~CBaseBaseDef()
 {
 }
 
+void CBaseBaseDef::DelInstance()
+{
+#ifdef _DEBUG
+	ASSERT(_dwInstances != (dword)-1);    // catching underflows
+#endif
+	--_dwInstances;
+}
+
+CFactionDef CBaseBaseDef::GetFaction()
+{
+	return _pFaction;
+}
+
 lpctstr CBaseBaseDef::GetTypeName() const
 {
-	return( m_sName );
+	return m_sName.GetBuffer();
 }
 
 lpctstr CBaseBaseDef::GetName() const
 {
-	return( GetTypeName());
+	return GetTypeName();
 }
 
 bool CBaseBaseDef::HasTypeName() const	// some CItem may not.
 {
-	return( ! m_sName.IsEmpty());	// default type name.
+	return (! m_sName.IsEmpty());	// default type name.
 }
 
 void CBaseBaseDef::SetTypeName( lpctstr pszName )
@@ -81,14 +94,36 @@ void CBaseBaseDef::UnLink()
 	CResourceLink::UnLink();
 }
 
-bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+/*
+bool CBaseBaseDef::r_Verb(CScript &s, CTextConsole * pSrc) // Execute command from script
+{
+    ADDTOCALLSTACK("CBaseBaseDef::r_Verb");
+    EXC_TRY("Verb");
+    lpctstr	ptcKey = s.GetKey();
+    ASSERT(pSrc);
+
+    //
+
+    return false;
+    EXC_CATCH;
+
+	EXC_DEBUG_START;
+	EXC_ADD_SCRIPTSRC;
+	EXC_DEBUG_END;
+	return false;
+}
+*/
+
+bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	UNREFERENCED_PARAMETER(pSrc);
+    UNREFERENCED_PARAMETER(fNoCallParent);
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 
 	bool fZero = false;
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	switch ( index )
 	{
 		//return as string or hex number or nullptr if not set
@@ -97,34 +132,36 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_SUBSECTION:
 		case OBC_ABILITYPRIMARY:
 		case OBC_ABILITYSECONDARY:
-			sVal = GetDefStr(pszKey, false);
+			sVal = GetDefStr(ptcKey, false);
 			break;
 		//return as decimal number or 0 if not set
 		case OBC_EXPANSION:
 		case OBC_VELOCITY:
 		case OBC_NAMELOC:
-			sVal.FormatLLVal(GetDefNum(pszKey));
+			sVal.FormatLLVal(GetDefNum(ptcKey));
 			break;
 
 		case OBC_DEFNAME:
 			sVal = GetResourceName();
 			break;
+
         case OBC_FACTION:
         case OBC_SLAYER:
             sVal.FormatHex((dword)GetFaction().GetFactionID());
             break;
+
 		case OBC_ARMOR:
 			{
-				pszKey += strlen(sm_szLoadKeys[index]); // 9;
-				if ( *pszKey == '.' )
+				ptcKey += strlen(sm_szLoadKeys[index]); // 9;
+				if ( *ptcKey == '.' )
 				{
-					SKIP_SEPARATORS( pszKey );
+					SKIP_SEPARATORS( ptcKey );
 
-					if ( !strnicmp( pszKey, "LO", 2 ) )
+					if ( !strnicmp( ptcKey, "LO", 2 ) )
 					{
 						sVal.Format( "%d", m_defenseBase );
 					}
-					else if ( !strnicmp( pszKey, "HI", 2 ) )
+					else if ( !strnicmp( ptcKey, "HI", 2 ) )
 					{
 						sVal.Format( "%d", m_defenseBase+m_defenseRange );
 					}
@@ -136,16 +173,16 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 			} break;
 		case OBC_DAM:
 			{
-				pszKey += strlen(sm_szLoadKeys[index]); // 9;
-				if ( *pszKey == '.' )
+				ptcKey += strlen(sm_szLoadKeys[index]); // 9;
+				if ( *ptcKey == '.' )
 				{
-					SKIP_SEPARATORS( pszKey );
+					SKIP_SEPARATORS( ptcKey );
 
-					if ( !strnicmp( pszKey, "LO", 2 ) )
+					if ( !strnicmp( ptcKey, "LO", 2 ) )
 					{
 						sVal.Format( "%d", m_attackBase );
 					}
-					else if ( !strnicmp( pszKey, "HI", 2 ) )
+					else if ( !strnicmp( ptcKey, "HI", 2 ) )
 					{
 						sVal.Format( "%d", m_attackBase+m_attackRange );
 					}
@@ -161,18 +198,25 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
         case OBC_CAN:
             sVal.FormatHex(m_Can);
             break;
-        case OBC_CANUSE:
-            sVal.FormatHex(m_CanUse);
+
+        case OBC_HASCOMPONENTPROPS:
+        {
+            ptcKey += 17;
+            SKIP_SEPARATORS(ptcKey);
+            GETNONWHITESPACE(ptcKey);
+
+            COMPPROPS_TYPE id = (COMPPROPS_TYPE)Exp_GetVal(ptcKey);
+            bool fRes = (id < COMP_PROPS_QTY) && (nullptr != CEntityProps::GetComponentProps(id));
+            sVal.FormatVal(int(fRes));
             break;
+        }
+
 		case OBC_HEIGHT:
-			{
-				//CBaseBaseDef * pBaseBaseDef = dynamic_cast<CBaseBaseDef*>(this);
-				//DEBUG_ERR(("OBC_HEIGHT  -  m_dwDispIndex %d  GetHeight() %d  pBaseBaseDef->GetHeight() %d  pBaseBaseDef 0x%x\n",m_wDispIndex,GetHeight(),pBaseBaseDef->GetHeight(),pBaseBaseDef));
-				sVal.FormatVal( GetHeight() );
-			}
+			sVal.FormatVal( GetHeight() );
 			break;
+
 		case OBC_INSTANCES:
-			sVal.FormatVal( GetRefInstances());
+			sVal.FormatVal( GetInstances() );
 			break;
 		case OBC_NAME:
 			sVal = GetName();
@@ -180,12 +224,12 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 
 		case OBC_RESOURCES:		// Print the resources
 			{
-				pszKey += strlen(sm_szLoadKeys[index]); // 9;
-				if ( *pszKey == '.' )
+				ptcKey += strlen(sm_szLoadKeys[index]); // 9;
+				if ( *ptcKey == '.' )
 				{
-					SKIP_SEPARATORS( pszKey );
+					SKIP_SEPARATORS( ptcKey );
 
-					if ( !strnicmp( pszKey, "COUNT", 5 ))
+					if ( !strnicmp( ptcKey, "COUNT", 5 ))
 					{
 						sVal.FormatSTVal(m_BaseResources.size());
 					}
@@ -193,12 +237,12 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 					{
 						bool fQtyOnly = false;
 						bool fKeyOnly = false;
-						index = Exp_GetVal( pszKey );
-						SKIP_SEPARATORS( pszKey );
+						index = Exp_GetVal( ptcKey );
+						SKIP_SEPARATORS( ptcKey );
 
-						if ( !strnicmp( pszKey, "KEY", 3 ))
+						if ( !strnicmp( ptcKey, "KEY", 3 ))
 							fKeyOnly	= true;
-						else if ( !strnicmp( pszKey, "VAL", 3 ))
+						else if ( !strnicmp( ptcKey, "VAL", 3 ))
 							fQtyOnly	= true;
 
 						tchar *pszTmp = Str_GetTemp();
@@ -225,16 +269,23 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 			break;
 		case OBC_TAG0:
 			fZero = true;
-			++pszKey;
+			++ptcKey;
+			FALLTHROUGH;
 		case OBC_TAG:			// "TAG" = get/set a local tag.
-			if ( pszKey[3] != '.' )
+			if ( ptcKey[3] != '.' )
 				return false;
-			pszKey += 4;
-			sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
+			ptcKey += 4;
+			sVal = m_TagDefs.GetKeyStr(ptcKey, fZero );
 			break;
 		case OBC_TEVENTS:
 			m_TEvents.WriteResourceRefList( sVal );
 			break;
+        case OBC_ISTEVENT:
+            if ( ptcKey[8] != '.' )
+                return false;
+            ptcKey += 9;
+            sVal = m_TEvents.ContainsResourceName(RES_EVENTS, ptcKey) ? "1" : "0";
+            break;
 		default:
 			return false;
 	}
@@ -251,22 +302,21 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CBaseBaseDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	if ( s.IsKeyHead( "TAG.", 4 ))
-	{
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr( s.GetKey()+4, fQuoted, ptcArg, false );
-		return true;
-	}
-	if ( s.IsKeyHead( "TAG0.", 5 ))
-	{
-		bool fQuoted = false;
-        tchar* ptcArg = s.GetArgStr( &fQuoted );
-		m_TagDefs.SetStr( s.GetKey()+5, fQuoted, ptcArg, true );
-		return true;
-	}
+    lpctstr ptcKey = s.GetKey();
+    if (!strnicmp("TAG", ptcKey, 3))
+    {
+        if ((ptcKey[3] == '.') || (ptcKey[3] == '0'))
+        {
+            const bool fZero = (ptcKey[3] == '0');
+            ptcKey = ptcKey + (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false); // don't change fZero to true! it would break some scripts!
+            return true;
+        }
+    }
 
-    int i = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int i = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	switch (i)
 	{
 		//Set as Strings
@@ -302,7 +352,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_ARMOR:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
+                int iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_defenseBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 					m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
@@ -313,7 +363,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_DAM:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
+				int iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_attackBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 					m_attackRange = (uchar)(piVal[1]) - m_attackBase;
@@ -325,9 +375,6 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			return false;
         case OBC_CAN:
             m_Can = s.GetArgDWVal(); // | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
-            return true;
-        case OBC_CANUSE:
-            m_CanUse = s.GetArgDWVal();
             return true;
 
 		case OBC_DEFNAME:
@@ -373,6 +420,7 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 
 	m_Height = pBase->m_Height;
 	// -------------- ResLevel -------------
+    m_Expansion = pBase->m_Expansion;
 	m_ResLevel = pBase->m_ResLevel;
 	m_ResDispDnHue = pBase->m_ResDispDnHue;
 	m_ResDispDnId = pBase->m_ResDispDnId;
@@ -447,4 +495,27 @@ word CBaseBaseDef::GetResDispDnId() const
 void CBaseBaseDef::SetResDispDnId( word ResDispDnId )
 {
 	m_ResDispDnId = ResDispDnId;
+}
+
+ushort CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
+{
+	int64 piVal[2];
+	tchar* ptcTmp = Str_GetTemp();
+	Str_CopyLimitNull(ptcTmp, ptcRange, STR_TEMPLENGTH);
+	const int iQty = Str_ParseCmds(ptcTmp, piVal, CountOf(piVal));
+	ushort iHi = 0, iLo = 0;
+	if (iQty > 1)	// args: "min, max"
+	{
+		iHi = (ushort)piVal[1];
+		iLo = (ushort)piVal[0];
+		if (iLo > iHi)
+		{
+			std::swap(iHi, iLo);
+		}
+	}
+	else			// arg: "max"
+	{
+		iHi = (ushort)piVal[0];
+	}
+	return RANGE_MAKE(iHi, iLo);
 }

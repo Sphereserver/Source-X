@@ -1,36 +1,37 @@
 
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
-#include "../../network/network.h"
+#include "../../network/CClientIterator.h"
+#include "../../network/CNetworkManager.h"
+#include "../../network/CIPHistoryManager.h"
 #include "../../network/send.h"
 #include "../../network/packet.h"
-#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
+#include "../items/CItemMultiCustom.h"
+#include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
-#include "CClient.h"
 #include "CParty.h"
+#include "CClient.h"
 
 
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-CClient::CClient(NetState* state)
+CClient::CClient(CNetState* state)
 {
 	// This may be a web connection or Telnet ?
 	m_net = state;
 	SetConnectType( CONNECT_UNK );	// don't know what sort of connect this is yet.
 
 	// update ip history
-#ifndef _MTNETWORK
-	HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(GetPeer());
-#else
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-#endif
-	history.m_connecting++;
-	history.m_connected++;
+	++ history.m_connecting;
+	++ history.m_connected;
 
 	m_Crypt.SetClientVer( g_Serv.m_ClientVersion );
 	m_pAccount = nullptr;
@@ -38,13 +39,16 @@ CClient::CClient(NetState* state)
 	m_pGMPage = nullptr;
 
 	m_timeLogin = 0;
-	m_timeLastEvent = g_World.GetCurrentTime().GetTimeRaw();
-	m_timeLastEventWalk = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeLastEvent = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_timeLastEventWalk = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	m_timeNextEventWalk = 0;
 
 	m_iWalkStepCount = 0;
-	m_iWalkTimeAvg	= 100;
-	m_timeWalkStep = GetSupportedTickCount();
+	m_iWalkTimeAvg	= 500;
+	m_timeWalkStep = CSTime::GetPreciseSysTimeMilli();
+	m_lastDir = 0;
+
+    _fShowPublicHouseContent = true;
 
 	m_Targ_Timeout = 0;
 	m_Targ_Mode = CLIMODE_SETUP_CONNECTING;
@@ -63,42 +67,46 @@ CClient::CClient(NetState* state)
 	m_zLastObjMessage[0] = 0;
 	m_tNextPickup = 0;
 
-	m_BfAntiCheat.lastvalue = m_BfAntiCheat.count = 0x0;
-	m_ScreenSize.x = m_ScreenSize.y = 0x0;
+    m_BfAntiCheat = {};
+    m_ScreenSize = {};
 	m_pPopupPacket = nullptr;
 	m_pHouseDesign = nullptr;
 	m_fUpdateStats = 0;
 
     m_timeLastSkillThrowing = 0;
     m_pSkillThrowingTarg = nullptr;
+	m_SkillThrowingAnimID = ITEMID_NOTHING;
+	m_SkillThrowingAnimHue = 0;
+	m_SkillThrowingAnimRender = 0;
 }
 
 
 CClient::~CClient()
 {
-	bool bWasChar;
+	EXC_TRY("Cleanup in destructor");
+
+	ADDTOCALLSTACK("CClient::~CClient");
 
 	// update ip history
-#ifndef _MTNETWORK
-	HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(GetPeer());
-#else
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-#endif
 	if ( GetConnectType() != CONNECT_GAME )
 		--history.m_connecting;
 	--history.m_connected;
 
-	bWasChar = ( m_pChar != nullptr );
+	const bool fWasChar = ( m_pChar != nullptr );
+
 	CharDisconnect();	// am i a char in game ?
-	Cmd_GM_PageClear();
+
+	if (m_pGMPage)
+		m_pGMPage->ClearHandler();
 
 	// Clear containers (CTAG and TOOLTIP)
-	m_TagDefs.Empty();
+	m_TagDefs.Clear();
 
 	CAccount * pAccount = GetAccount();
 	if ( pAccount )
 	{
-		pAccount->OnLogout(this, bWasChar);
+		pAccount->OnLogout(this, fWasChar);
 		m_pAccount = nullptr;
 	}
 
@@ -110,6 +118,8 @@ CClient::~CClient()
 
 	if (m_net->isClosed() == false)
 		g_Log.EventError("Client being deleted without being safely removed from the network system\n");
+
+	EXC_CATCH;
 }
 
 bool CClient::CanInstantLogOut() const
@@ -257,12 +267,12 @@ void CClient::Announce( bool fArrive ) const
 	if ( (g_Cfg.m_iArriveDepartMsg == 2) && (GetPrivLevel() > PLEVEL_Player) )		// notify of GMs
 	{
 		lpctstr zTitle = m_pChar->Noto_GetFameTitle();
-		sprintf(pszMsg, "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
+		snprintf(pszMsg, STR_TEMPLENGTH, "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
 	}
 	else if ( g_Cfg.m_iArriveDepartMsg == 1 )		// notify of players
 	{
 		const CRegion *pRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_AREA);
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
+		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
 			m_pChar->GetName(),
 			fArrive ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_2) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_3),
 			pRegion != nullptr ? pRegion->GetName() : g_Serv.GetName());
@@ -284,10 +294,10 @@ void CClient::Announce( bool fArrive ) const
 	if ( pMurders )
 	{
 		if ( fArrive )	// on client login, set active timer on murder memory
-			pMurders->SetTimeoutS(pMurders->m_itEqMurderCount.m_Decay_Balance);
+			pMurders->SetTimeoutS(pMurders->m_itEqMurderCount.m_dwDecayBalance);
 		else			// or make it inactive on logout
 		{
-			pMurders->m_itEqMurderCount.m_Decay_Balance = (dword)(pMurders->GetTimerSAdjusted());
+			pMurders->m_itEqMurderCount.m_dwDecayBalance = (dword)(pMurders->GetTimerSAdjusted());
 			pMurders->SetTimeout(-1);
 		}
 	}
@@ -304,11 +314,17 @@ bool CClient::CanSee( const CObjBaseTemplate * pObj ) const
 	if ( !m_pChar || !pObj )
 		return false;
 
-	if (!IsPriv(PRIV_ALLSHOW) && pObj->IsChar())
+	if ( pObj->IsChar() )
 	{
 		const CChar *pChar = static_cast<const CChar*>(pObj);
-		if (pChar->IsDisconnected())
-			return false;
+		if ( pChar->IsDisconnected() )
+        {
+            if( !IsPriv(PRIV_ALLSHOW) )
+                return false;
+            //dont show pet when is ridden (cause double)
+            else if ( pChar->IsStatFlag(STATF_PET) && pChar->IsStatFlag(STATF_RIDDEN) )
+                return false;
+        }
 	}
 	return m_pChar->CanSee( pObj );
 }
@@ -331,7 +347,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 	{
 		const CChar * pCharSrc = dynamic_cast <const CChar*> ( pSrc );
 		ASSERT(pCharSrc);
-		if ( pCharSrc->IsClient() && (pCharSrc->GetPrivLevel() <= GetPrivLevel()) )
+		if ( pCharSrc->IsClientActive() && (pCharSrc->GetPrivLevel() <= GetPrivLevel()) )
 			return true;
 	}
 
@@ -341,7 +357,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 ////////////////////////////////////////////////////
 
 
-void CClient::addTargetVerb( lpctstr pszCmd, lpctstr pszArg )
+void CClient::addTargetVerb( lpctstr pszCmd, lpctstr ptcArg )
 {
 	ADDTOCALLSTACK("CClient::addTargetVerb");
 	// Target a verb at some object .
@@ -351,13 +367,13 @@ void CClient::addTargetVerb( lpctstr pszCmd, lpctstr pszArg )
 	SKIP_SEPARATORS(pszCmd);
 
 	if ( !strlen(pszCmd) )
-		pszCmd = pszArg;
+		pszCmd = ptcArg;
 
-	if ( pszCmd == pszArg )
+	if ( pszCmd == ptcArg )
 	{
 		GETNONWHITESPACE(pszCmd);
 		SKIP_SEPARATORS(pszCmd);
-		pszArg = "";
+		ptcArg = "";
 	}
 
 	// priv here
@@ -365,9 +381,9 @@ void CClient::addTargetVerb( lpctstr pszCmd, lpctstr pszArg )
 	if ( ilevel > GetPrivLevel() )
 		return;
 
-	m_Targ_Text.Format( "%s%s%s", pszCmd, ( pszArg[0] && pszCmd[0] ) ? " " : "", pszArg );
+	m_Targ_Text.Format( "%s%s%s", pszCmd, ( ptcArg[0] && pszCmd[0] ) ? " " : "", ptcArg );
 	tchar * pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), static_cast<lpctstr>(m_Targ_Text));
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), m_Targ_Text.GetBuffer());
 	addTarget(CLIMODE_TARG_OBJ_SET, pszMsg);
 }
 
@@ -407,7 +423,7 @@ void CClient::addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessa
 	// Target a verb at some object .
 	ASSERT(pszFunction);
 	m_Prompt_Text = pszFunction;
-	addPromptConsole( CLIMODE_PROMPT_SCRIPT_VERB, pszSysmessage, 0, 0, bUnicode );
+	addPromptConsole( CLIMODE_PROMPT_SCRIPT_VERB, pszSysmessage, CUID(), CUID(), bUnicode );
 }
 
 
@@ -435,18 +451,18 @@ lpctstr const CClient::sm_szRefKeys[CLIR_QTY+1] =
 	nullptr
 };
 
-bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CClient::r_GetRef");
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
-		pszKey += strlen( sm_szRefKeys[i] );
-		SKIP_SEPARATORS(pszKey);
+		ptcKey += strlen( sm_szRefKeys[i] );
+		SKIP_SEPARATORS(ptcKey);
 		switch (i)
 		{
 			case CLIR_ACCOUNT:
-				if ( pszKey[-1] != '.' )	// only used as a ref !
+				if ( ptcKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = GetAccount();
 				return true;
@@ -457,38 +473,41 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = m_pHouseDesign;
 				return true;
 			case CLIR_PARTY:
-				if (!strnicmp(pszKey, "CREATE", 7))
+				if (CChar* pCharThis = GetChar())
 				{
-					if (this->m_pChar->m_pParty)
-						return false;
-
-					lpctstr oldKey = pszKey;
-					pszKey += 7;
-
-					// Do i want to send the "joined" message to the party members?
-					int iSendMsgs = Exp_GetSingle(pszKey);
-					bool bSendMsgs = (iSendMsgs != 0) ? true : false;
-
-					// Add all the UIDs to the party
-					for (int ip = 0; ip < 10; ip++)
+					if (!strnicmp(ptcKey, "CREATE", 7))
 					{
-						SKIP_ARGSEP(pszKey);
-						CChar * pChar = (static_cast<CUID>(Exp_GetSingle(pszKey))).CharFind();
-						if (!pChar)
-							continue;
-						if (!pChar->IsClient())
-							continue;
-						CPartyDef::AcceptEvent(pChar, this->GetChar()->GetUID(), true, bSendMsgs);
+						if (pCharThis->m_pParty)
+							return false;
 
-						if (*pszKey == '\0')
-							break;
+						lpctstr oldKey = ptcKey;
+						ptcKey += 7;
+
+						// Do i want to send the "joined" message to the party members?
+						bool fSendMsgs = (Exp_GetSingle(ptcKey) != 0) ? true : false;
+
+						// Add all the UIDs to the party
+						for (int ip = 0; ip < 10; ++ip)
+						{
+							SKIP_ARGSEP(ptcKey);
+							CChar* pChar = CUID::CharFindFromUID(Exp_GetDWSingle(ptcKey));
+							if (!pChar)
+								continue;
+							if (!pChar->IsClientActive())
+								continue;
+							CPartyDef::AcceptEvent(pChar, pChar->GetUID(), true, fSendMsgs);
+
+							if (*ptcKey == '\0')
+								break;
+						}
+						ptcKey = oldKey;	// Restoring back to real ptcKey, so we don't get errors for giving an uid instead of PDV_CREATE.
 					}
-					pszKey = oldKey;	// Restoring back to real pszKey, so we don't get errors for giving an uid instead of PDV_CREATE.
+					if (!pCharThis->m_pParty)
+						return false;
+					pRef = pCharThis->m_pParty;
+					return true;
 				}
-				if (!this->m_pChar->m_pParty)
-					return false;
-				pRef = this->m_pChar->m_pParty;
-				return true;
+				return false;
 			case CLIR_TARG:
 				pRef = m_Targ_UID.ObjFind();
 				return true;
@@ -500,7 +519,8 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				return true;
 		}
 	}
-	return( CScriptObj::r_GetRef( pszKey, pRef ));
+
+	return CScriptObj::r_GetRef( ptcKey, pRef );
 }
 
 lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static
@@ -508,7 +528,7 @@ lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static
 	#define ADD(a,b) b,
 	#include "../../tables/CClient_props.tbl"
 	#undef ADD
-	nullptr,
+	nullptr
 };
 
 lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
@@ -516,43 +536,46 @@ lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 	#define ADD(a,b) b,
 	#include "../../tables/CClient_functions.tbl"
 	#undef ADD
-	nullptr,
+	nullptr
 };
 
-bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
-	int index;
-
-	if ( !strnicmp("CTAG.", pszKey, 5) )		//	CTAG.xxx - client tag
+	
+	if ( !strnicmp("CTAG", ptcKey, 4) )
 	{
-		if ( pszKey[4] != '.' )
-			return false;
-		pszKey += 5;
-		CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
-		sVal = vardef ? vardef->GetValStr() : "";
-		return true;
+        bool fCtag = false;
+        bool fZero = false;
+        if (ptcKey[4] == '.')   //	CTAG.xxx - client tag
+        {
+            fCtag = true;
+            ptcKey += 5;
+        }
+        else if ((ptcKey[4] == '0') && (ptcKey[5] == '.'))  //	CTAG0.xxx - client tag
+        {
+            fCtag = true;
+            fZero = true;
+            ptcKey += 6;
+        }
+        if (fCtag)
+        {
+            sVal = m_TagDefs.GetKeyStr(ptcKey, fZero);
+            return true;
+        }
 	}
 
-	if ( !strnicmp("CTAG0.", pszKey, 6) )		//	CTAG0.xxx - client tag
-	{
-		if ( pszKey[5] != '.' )
-			return false;
-		pszKey += 6;
-		CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
-		sVal = vardef ? vardef->GetValStr() : "0";
-		return true;
-	}
-
-	if ( !strnicmp( "TARGP", pszKey, 5 ) && ( pszKey[5] == '\0' || pszKey[5] == '.' ) )
+    int index;
+	if ( !strnicmp( "TARGP", ptcKey, 5 ) && ( ptcKey[5] == '\0' || ptcKey[5] == '.' ) )
 		index = CC_TARGP;
-	else if ( !strnicmp( "SCREENSIZE", pszKey, 10 ) && ( pszKey[10] == '\0' || pszKey[10] == '.' ) )
+	else if ( !strnicmp( "SCREENSIZE", ptcKey, 10 ) && ( ptcKey[10] == '\0' || ptcKey[10] == '.' ) )
 		index = CC_SCREENSIZE;
-	else if ( !strnicmp( "REPORTEDCLIVER", pszKey, 14 ) && ( pszKey[14] == '\0' || pszKey[14] == '.' ) )
+	else if ( !strnicmp( "REPORTEDCLIVER", ptcKey, 14 ) && ( ptcKey[14] == '\0' || ptcKey[14] == '.' ) )
 		index = CC_REPORTEDCLIVER;
 	else
-		index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+		index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 
 	switch (index)
 	{
@@ -574,7 +597,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case CC_CLIENTVERSION:
 			{
 				char szVersion[ 128 ];
-				sVal = m_Crypt.WriteClientVer( szVersion );
+				sVal = m_Crypt.WriteClientVer( szVersion, sizeof(szVersion) );
 			}
 			break;
 		case CC_DEBUG:
@@ -601,15 +624,15 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case CC_REPORTEDCLIVER:
 			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE(pszKey);
+				ptcKey += strlen(sm_szLoadKeys[index]);
+				GETNONWHITESPACE(ptcKey);
 
 				dword iCliVer = GetNetState()->getReportedVersion();
-				if ( pszKey[0] == '\0' )
+				if ( ptcKey[0] == '\0' )
 				{
 					// Return full version string (eg: 5.0.2d)
-					tchar szVersion[128];
-					sVal = CCrypto::WriteClientVerString(iCliVer, szVersion);
+					tchar ptcVersion[128];
+					sVal = CCrypto::WriteClientVerString(iCliVer, ptcVersion, sizeof(ptcVersion));
 				}
 				else
 				{
@@ -620,14 +643,14 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case CC_SCREENSIZE:
 			{
-				if ( pszKey[10] == '.' )
+				if ( ptcKey[10] == '.' )
 				{
-					pszKey += strlen(sm_szLoadKeys[index]);
-					SKIP_SEPARATORS(pszKey);
+					ptcKey += strlen(sm_szLoadKeys[index]);
+					SKIP_SEPARATORS(ptcKey);
 
-					if ( !strnicmp("X", pszKey, 1) )
+					if ( !strnicmp("X", ptcKey, 1) )
 						sVal.Format( "%u", m_ScreenSize.x );
-					else if ( !strnicmp("Y", pszKey, 1) )
+					else if ( !strnicmp("Y", ptcKey, 1) )
 						sVal.Format( "%u", m_ScreenSize.y );
 					else
 						return false;
@@ -639,9 +662,9 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatHex(m_Targ_UID);
 			break;
 		case CC_TARGP:
-			if ( pszKey[5] == '.' )
+			if ( ptcKey[5] == '.' )
 			{
-				return m_Targ_p.r_WriteVal( pszKey+6, sVal );
+				return m_Targ_p.r_WriteVal( ptcKey+6, sVal );
 			}
 			sVal = m_Targ_p.WriteUsed();
 			break;
@@ -655,7 +678,8 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal = m_Targ_Text;
 			break;
 		default:
-			return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+            //Special case: if fNoCallParent = true, call CScriptObj::r_WriteVal with fNoCallChildren = true, to check only for the ref
+			return CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false, fNoCallParent );
 	}
 	return true;
 	EXC_CATCH;
@@ -673,19 +697,21 @@ bool CClient::r_LoadVal( CScript & s )
 	if ( GetAccount() == nullptr )
 		return false;
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
+    if (!strnicmp("CTAG", ptcKey, 4))
+    {
+        if ((ptcKey[4] == '.') || (ptcKey[4] == '0'))
+        {
+            const bool fZero = ptcKey[4] == '0';
+            ptcKey = ptcKey + (fZero ? 6 : 5);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, fZero);
+            return true;
+        }
+    }
 
-	if ( s.IsKeyHead( "CTAG.", 5 ) || s.IsKeyHead( "CTAG0.", 6 ) )
-	{
-		bool fZero = s.IsKeyHead( "CTAG0.", 6 );
-		bool fQuoted = false;
-
-		pszKey = pszKey + (fZero ? 6 : 5);
-		m_TagDefs.SetStr( pszKey, fQuoted, s.GetArgStr( &fQuoted ), fZero );
-		return true;
-	}
-
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 		case CC_ALLMOVE:
 			addRemoveAll(true, false);
@@ -745,7 +771,7 @@ bool CClient::r_LoadVal( CScript & s )
 			break;
 
 		case CC_TARG:
-			m_Targ_UID = s.GetArgVal();
+			m_Targ_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CC_TARGP:
 			m_Targ_p.Read( s.GetArgRaw());
@@ -756,10 +782,10 @@ bool CClient::r_LoadVal( CScript & s )
 			}
 			break;
 		case CC_TARGPROP:
-			m_Prop_UID = s.GetArgVal();
+			m_Prop_UID.SetObjUID(s.GetArgVal());
 			break;
 		case CC_TARGPRV:
-			m_Targ_Prv_UID = s.GetArgVal();
+			m_Targ_Prv_UID.SetObjUID(s.GetArgVal());
 			break;
 		default:
 			return false;
@@ -776,28 +802,29 @@ bool CClient::r_LoadVal( CScript & s )
 bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CClient::r_Verb");
-	EXC_TRY("Verb");
+	ASSERT(pSrc);
+
 	// NOTE: This can be called directly from a RES_WEBPAGE script.
 	//  So do not assume we are a game client !
 	// NOTE: Mostly called from CChar::r_Verb
 	// NOTE: Little security here so watch out for dangerous scripts !
 
-	ASSERT(pSrc);
-	lpctstr pszKey = s.GetKey();
+	EXC_TRY("Verb-Special");
+	lpctstr ptcKey = s.GetKey();
 
 	// Old ver
-	if ( s.IsKeyHead( "SET", 3 ) && ( g_Cfg.m_Functions.ContainsKey( pszKey ) == false ) )
+	if ( s.IsKeyHead( "SET", 3 ) && ( g_Cfg.m_Functions.ContainsKey( ptcKey ) == false ) )
 	{
 		PLEVEL_TYPE ilevel = g_Cfg.GetPrivCommandLevel( "SET" );
 		if ( ilevel > GetPrivLevel() )
 			return false;
 
 		ASSERT( m_pChar );
-		addTargetVerb( pszKey+3, s.GetArgRaw());
+		addTargetVerb( ptcKey+3, s.GetArgRaw());
 		return true;
 	}
 
-	if ( toupper( pszKey[0] ) == 'X' && ( g_Cfg.m_Functions.ContainsKey( pszKey ) == false ) )
+	if ( toupper( ptcKey[0] ) == 'X' && ( g_Cfg.m_Functions.ContainsKey( ptcKey ) == false ) )
 	{
 		PLEVEL_TYPE ilevel = g_Cfg.GetPrivCommandLevel( "SET" );
 		if ( ilevel > GetPrivLevel() )
@@ -805,10 +832,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 		// Target this command verb on some other object.
 		ASSERT( m_pChar );
-		addTargetVerb( pszKey+1, s.GetArgRaw());
+		addTargetVerb( ptcKey+1, s.GetArgRaw());
 		return true;
 	}
 
+	EXC_SET_BLOCK("Verb-Statement");
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	switch (index)
 	{
@@ -818,7 +846,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				tchar *ppszArgs[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, CountOf(ppszArgs));
 
-				if ( !IsValidGameObjDef(static_cast<lpctstr>(ppszArgs[0])) )
+				if ( !IsValidGameObjDef(ppszArgs[0]) )
 				{
 					//g_Log.EventWarn("Invalid ADD argument '%s'\n", pszArgs);
 					SysMessageDefault( DEFMSG_CMD_INVALID );
@@ -829,11 +857,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				m_tmAdd.m_id = rid.GetResIndex();
 				if (iQty > 1)
 				{
-					m_tmAdd.m_amount = (word)ATOI(ppszArgs[1]);
-					m_tmAdd.m_amount = maximum(m_tmAdd.m_amount, 1);
+					m_tmAdd.m_vcAmount = (word)atoi(ppszArgs[1]);
+					m_tmAdd.m_vcAmount = maximum(m_tmAdd.m_vcAmount, 1);
 				}
 				else
-					m_tmAdd.m_amount = 1;
+					m_tmAdd.m_vcAmount = 1;
 				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
@@ -846,8 +874,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			else
 			{
-				if ( IsValidDef( "d_add" ) )
-					Dialog_Setup( CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "d_add"), 0, this->GetChar() );
+				if ( IsValidResourceDef( "D_ADD" ) )
+					Dialog_Setup( CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "D_ADD"), 0, this->GetChar() );
 				else
 					Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, "MENU_ADDITEM"));
 			}
@@ -955,46 +983,23 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_BADSPAWN:
 			{
 				//	Loop the world searching for bad spawns
-				bool fFound = false;
-				for ( int m = 0; m < 256 && !fFound; ++m )
-				{
-					if ( !g_MapList.m_maps[m] )
-						continue;
-
-					for ( int d = 0; d < g_MapList.GetSectorQty(m) && !fFound; ++d )
-					{
-						CSector	*pSector = g_World.GetSector(m, d);
-						if ( !pSector )
-							continue;
-
-						CItem *pNext;
-						CItem *pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
-						for ( ; pItem != nullptr && !fFound; pItem = pNext )
-						{
-							pNext = pItem->GetNext();
-
-							if ( pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) )
-							{
-                                CCSpawn *pSpawn = pItem->GetSpawn();
-                                if (pSpawn)
-                                {
-                                    const CResourceDef *pDef = pSpawn->FixDef();
-                                    if (!pDef)
-                                    {
-                                        const CResourceID& rid = pSpawn->GetSpawnID();
-                                        const CPointMap&   pt  = pItem->GetTopPoint();
-                                        m_pChar->Spell_Teleport(pt, true, false);
-                                        m_pChar->m_Act_UID = pItem->GetUID();
-                                        SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
-                                        fFound = true;
-                                    }
-                                }
-							}
-						}
-					}
-				}
-				if ( ! fFound )
-					SysMessage(g_Cfg.GetDefaultMsg( DEFMSG_NO_BAD_SPAWNS ));
+                int iPos = s.GetArgVal();
+                CCSpawn *pSpawn = CCSpawn::GetBadSpawn(iPos ? iPos : -1);
+                if (pSpawn != nullptr)
+                {
+                    CItem* pSpawnItem = pSpawn->GetLink();
+                    const CResourceID& rid = pSpawn->GetSpawnID();
+                    const CPointMap& pt = pSpawnItem->GetTopPoint();
+                    CUID spawnUID = pSpawnItem->GetUID();
+                    m_pChar->Spell_Teleport(pt, true, false);
+                    m_pChar->Update();
+                    m_pChar->m_Act_UID = spawnUID;
+                    SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)spawnUID, g_Cfg.ResourceGetName(rid));
+                }
+                else
+                {
+                    SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NO_BAD_SPAWNS));
+                }
 			}
 			break;
 		case CV_BANKSELF: // open my own bank
@@ -1015,8 +1020,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if (!pSpellDef->GetPrimarySkill(&skill, nullptr))
 						return true;
 
-					m_tmSkillMagery.m_Spell = spell;	// m_atMagery.m_Spell
-					m_pChar->m_atMagery.m_Spell = spell;
+					m_tmSkillMagery.m_iSpell = spell;	// m_atMagery.m_iSpell
+					m_pChar->m_atMagery.m_iSpell = spell;
 					if (pObjSrc != nullptr)
 					{
 						m_Targ_UID = pObjSrc->GetUID();	// default target.
@@ -1024,8 +1029,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					}
 					else
 					{
-						m_Targ_UID.ClearUID();
-						m_Targ_Prv_UID.ClearUID();
+						m_Targ_UID.InitUID();
+						m_Targ_Prv_UID.InitUID();
 					}
 					m_pChar->Skill_Start((SKILL_TYPE)skill);
 					break;
@@ -1191,7 +1196,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			m_Targ_Text = s.GetArgStr();
 			if ( !m_Targ_Text.IsEmpty() && !strnicmp( m_Targ_Text, "ADD ", 4 ) )
 			{
-				Cmd_GM_Page( m_Targ_Text + 4 );
+				Event_PromptResp_GMPage(m_Targ_Text + 4);
 				break;
 			}
 			addPromptConsole( CLIMODE_PROMPT_GM_PAGE_TEXT, g_Cfg.GetDefaultMsg( DEFMSG_GMPAGE_PROMPT ) );
@@ -1202,11 +1207,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				CObjBase * pObj = m_Targ_UID.ObjFind();
 				if ( pObj != nullptr )
 				{
-					CPointMap po = pObj->GetTopLevelObj()->GetTopPoint();
+					const CPointMap po(pObj->GetTopLevelObj()->GetTopPoint());
 					CPointMap pnt = po;
 					pnt.MoveN( DIR_W, 3 );
-					dword dwBlockFlags = m_pChar->GetMoveBlockFlags();
-					pnt.m_z = g_World.GetHeightPoint2( pnt, dwBlockFlags );	// ??? Get Area
+					dword dwBlockFlags = m_pChar->GetCanMoveFlags(m_pChar->GetCanFlags());
+					pnt.m_z = CWorldMap::GetHeightPoint2( pnt, dwBlockFlags );	// ??? Get Area
 					m_pChar->m_dirFace = pnt.GetDir( po, m_pChar->m_dirFace ); // Face the player
 					m_pChar->Spell_Teleport( pnt, true, false );
 				}
@@ -1296,10 +1301,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		{
 			CChar *pChar = m_pChar;
 			if ( s.HasArgs() )
-			{
-				CUID uid = s.GetArgVal();
-				pChar = uid.CharFind();
-			}
+				pChar = CUID::CharFindFromUID(s.GetArgVal());
+			
 			if ( pChar )
 				addCharPaperdoll(pChar);
 			break;
@@ -1314,31 +1317,24 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			CItem *pItem = nullptr;
 			if ( ppArgs[0] )
 			{
-				CUID uidChar = static_cast<CUID>(Exp_GetVal(ppArgs[0]));
-				pChar = uidChar.CharFind();
+				pChar = CUID::CharFindFromUID(Exp_GetDWVal(ppArgs[0]));
 			}
 			if ( ppArgs[1] )
 			{
-				CUID uidItem = static_cast<CUID>(Exp_GetVal(ppArgs[1]));
-				pItem = uidItem.ItemFind();
+				pItem = CUID::ItemFindFromUID(Exp_GetDWVal(ppArgs[1]));
 			}
-			if ( pChar )
+			if (pChar)
+			{
 				Cmd_SecureTrade(pChar, pItem);
+			}
 			break;
 		}
 
-		case CV_PAGE:
-			Cmd_GM_PageCmd( s.GetArgStr());
-			break;
 		case CV_REPAIR:
 			addTarget( CLIMODE_TARG_REPAIR, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_ITEM_REPAIR ) );
 			break;
 		case CV_FLUSH:
-#ifndef _MTNETWORK
-			g_NetworkOut.flush(this);
-#else
 			g_NetworkManager.flush(GetNetState());
-#endif
 			break;
 		case CV_RESEND:
 			addReSync();
@@ -1384,8 +1380,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 			if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
 			{
-				m_tmSkillMagery.m_Spell = SPELL_Summon;
-				m_tmSkillMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+				m_tmSkillMagery.m_iSpell = SPELL_Summon;
+				m_tmSkillMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
 				lpctstr pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
 				if ( !pSpellDef->m_sTargetPrompt.IsEmpty() )
@@ -1400,8 +1396,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			else
 			{
-				m_pChar->m_atMagery.m_Spell = SPELL_Summon;
-				m_pChar->m_atMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+				m_pChar->m_atMagery.m_iSpell = SPELL_Summon;
+				m_pChar->m_atMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
 				if ( IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 				{
@@ -1414,7 +1410,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 						return false;
 
-					m_pChar->Skill_Start((SKILL_TYPE)(skill));
+					m_pChar->Skill_Start((SKILL_TYPE)skill);
 				}
 			}
 			break;
@@ -1449,20 +1445,20 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					}
 				}
 				SysMessagef( pszArgs[0], pszArgs[1], pszArgs[2] ? pszArgs[2] : 0, pszArgs[3] ? pszArgs[3] : 0);
-			}break;
+			}
+			break;
 		case CV_SMSGU:
 		case CV_SYSMESSAGEUA:
 			{
 				tchar * pszArgs[5];
 				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
-				if ( iArgQty > 4 )
-				{
-					// Font and mode are actually ignored here, but they never made a difference
-					// anyway.. I'd like to keep the syntax similar to SAYUA
-			 		nchar szBuffer[ MAX_TALK_BUFFER ];
-					CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pszArgs[4], -1 );
-					addBarkUNICODE( szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3] );
-				}
+                if (iArgQty < 5)
+                    return false;
+				// Font and mode are actually ignored here, but they never made a difference
+				// anyway.. I'd like to keep the syntax similar to SAYUA
+                nchar szBuffer[MAX_TALK_BUFFER];
+                CvtSystemToNUNICODE(szBuffer, CountOf(szBuffer), pszArgs[4], -1);
+                addBarkUNICODE(szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3]);
 			}
 			break;
 		case CV_SMSGL:
@@ -1473,7 +1469,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				if ( iArgQty > 1 )
 				{
 					int hue = -1;
-					if ( ATOI(ppArgs[0]) > 0 )
+					if ( atoi(ppArgs[0]) > 0 )
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 
@@ -1481,14 +1477,14 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						hue = HUE_TEXT_DEF;
 
 					CSString CArgs;
-					for (int i = 2; i < iArgQty; i++ )
+					for (int i = 2; i < iArgQty; ++i )
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
-						CArgs += ( !strncmp(ppArgs[i], "nullptr", 4) ? " " : ppArgs[i] );
+						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, CArgs.GetPtr());
+					addBarkLocalized(iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, CArgs.GetBuffer());
 				}
 			}
 			break;
@@ -1501,7 +1497,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				{
 					int hue = -1;
 					int affix = 0;
-					if ( ATOI(ppArgs[0]) > 0 )
+					if ( atoi(ppArgs[0]) > 0 )
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 					if ( ppArgs[2] )
@@ -1515,10 +1511,10 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
-						CArgs += ( !strncmp(ppArgs[i], "nullptr", 4) ? " " : ppArgs[i] );
+						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetPtr() );
+					addBarkLocalizedEx( iClilocId, nullptr, (HUE_TYPE)(hue), TALKMODE_SAY, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetBuffer() );
 				}
 			}
 			break;
@@ -1556,6 +1552,9 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 			}
+
+			if (GetChar())
+				return false;	// In this case, we were called by CChar::r_Verb, which calls also the other r_Verb virtual (or not) methods.
 
 			return CScriptObj::r_Verb( s, pSrc );	// used in the case of web pages to access server level things..
 	}

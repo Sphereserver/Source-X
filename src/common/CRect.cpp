@@ -1,20 +1,32 @@
 #include "../game/uo_files/CUOMapList.h"
-#include "../game/CSector.h"
+#include "../game/CSectorList.h"
 #include "../game/CServer.h"
-#include "../game/CWorld.h"
-#include "../common/CLog.h"
+#include "../game/CWorldMap.h"
+#include "CLog.h"
 #include "CRect.h"
 
 
 //*************************************************************************
 // -CRect
 
-
-void CRect::SetRectEmpty()
+CRect::CRect() noexcept :
+	m_left(0), m_top(0), m_right(0), m_bottom(0), m_map(0)
 {
+}
+
+CRect::CRect(int left, int top, int right, int bottom, int map) noexcept :
+	m_left(left), m_top(top), m_right(right), m_bottom(bottom), m_map(map)
+{
+}
+
+void CRect::SetRectEmpty() noexcept
+{
+	/*
     m_left = m_top = 0;	// 0x7ffe
     m_right = m_bottom = 0;
     m_map = 0;
+	*/
+	m_left = m_top = m_right = m_bottom = m_map = 0;
 }
 
 void CRect::OffsetRect( int x, int y )
@@ -24,6 +36,7 @@ void CRect::OffsetRect( int x, int y )
     m_right += x;
     m_bottom += y;
 }
+
 void CRect::UnionPoint( int x, int y )
 {
     // Inflate this rect to include this point.
@@ -54,7 +67,7 @@ void CRect::UnionRect( const CRect & rect )
         DEBUG_ERR(("Uniting regions from different maps!\n"));
     }
 }
-bool CRect::IsInside( const CRect & rect ) const
+bool CRect::IsInside( const CRect & rect ) const noexcept
 {
     // Is &rect inside me ?
     // ASSUME: Normalized rect
@@ -70,7 +83,8 @@ bool CRect::IsInside( const CRect & rect ) const
         return false;
     return true;
 }
-bool CRect::IsOverlapped( const CRect & rect ) const
+
+bool CRect::IsOverlapped( const CRect & rect ) const noexcept
 {
     // are the 2 rects overlapped at all ?
     // NON inclusive rect.
@@ -87,7 +101,7 @@ bool CRect::IsOverlapped( const CRect & rect ) const
     return true;
 }
 
-bool CRect::IsEqual( const CRect & rect ) const
+bool CRect::IsEqual( const CRect & rect ) const noexcept
 {
     return m_left == rect.m_left &&
         m_top == rect.m_top &&
@@ -100,18 +114,18 @@ void CRect::NormalizeRect()
 {
     if ( m_bottom < m_top )
     {
-        int wtmp = m_bottom;
+        const int wtmp = m_bottom;
         m_bottom = m_top;
         m_top = wtmp;
     }
     if ( m_right < m_left )
     {
-        int wtmp = m_right;
+        const int wtmp = m_right;
         m_right = m_left;
         m_left = wtmp;
     }
-    if (( m_map < 0 ) || ( m_map >= 256 )) m_map = 0;
-    if ( !g_MapList.m_maps[m_map] ) m_map = 0;
+    if ( !g_MapList.IsMapSupported(m_map) )
+        m_map = 0;
 }
 
 void CRect::SetRect( int left, int top, int right, int bottom, int map )
@@ -140,67 +154,67 @@ size_t CRect::Read( lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CRect::Read");
 	// parse reading the rectangle
-	tchar *pszTemp = Str_GetTemp();
-	strcpy( pszTemp, pszVal );
+	tchar *ptcTemp = Str_GetTemp();
+	Str_CopyLimitNull(ptcTemp, pszVal, STR_TEMPLENGTH);
 	tchar * ppVal[5];
-	size_t i = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t");
+	size_t i = Str_ParseCmds(ptcTemp, ppVal, CountOf( ppVal ), " ,\t");
 	switch (i)
 	{
 		case 5:
-			m_map = ATOI(ppVal[4]);
-			if (( m_map < 0 ) || ( m_map >= 256 ) || !g_MapList.m_maps[m_map] )
+			m_map = atoi(ppVal[4]);
+			if (( m_map < 0 ) || ( m_map >= MAP_SUPPORTED_QTY) || !g_MapList.IsMapSupported(m_map) )
 			{
 				g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
 				m_map = 0;
 			}
-			m_bottom = ATOI(ppVal[3]);
-			m_right = ATOI(ppVal[2]);
-			m_top =	ATOI(ppVal[1]);
-			m_left = ATOI(ppVal[0]);
+			m_bottom = atoi(ppVal[3]);
+			m_right = atoi(ppVal[2]);
+			m_top =	atoi(ppVal[1]);
+			m_left = atoi(ppVal[0]);
 			break;
 		case 4:
 			m_map = 0;
-			m_bottom = ATOI(ppVal[3]);
-			m_right = ATOI(ppVal[2]);
-			m_top =	ATOI(ppVal[1]);
-			m_left = ATOI(ppVal[0]);
+			m_bottom = atoi(ppVal[3]);
+			m_right = atoi(ppVal[2]);
+			m_top =	atoi(ppVal[1]);
+			m_left = atoi(ppVal[0]);
 			break;
 		case 3:
 			m_map = 0;
 			m_bottom = 0;
-			m_right = ATOI(ppVal[2]);
-			m_top =	ATOI(ppVal[1]);
-			m_left = ATOI(ppVal[0]);
+			m_right = atoi(ppVal[2]);
+			m_top =	atoi(ppVal[1]);
+			m_left = atoi(ppVal[0]);
 			break;
 		case 2:
 			m_map = 0;
 			m_bottom = 0;
 			m_right = 0;
-			m_top =	ATOI(ppVal[1]);
-			m_left = ATOI(ppVal[0]);
+			m_top =	atoi(ppVal[1]);
+			m_left = atoi(ppVal[0]);
 			break;
 		case 1:
 			m_map = 0;
 			m_bottom = 0;
 			m_right = 0;
 			m_top = 0;
-			m_left = ATOI(ppVal[0]);
+			m_left = atoi(ppVal[0]);
 			break;
 	}
 	NormalizeRect();
 	return i;
 }
 
-tchar * CRect::Write( tchar * pBuffer ) const
+tchar * CRect::Write( tchar * pBuffer, uint uiBufferLen) const
 {
-    sprintf(pBuffer, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
+    snprintf(pBuffer, uiBufferLen, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
     return pBuffer;
 }
 
 lpctstr CRect::Write() const
 {
 	ADDTOCALLSTACK("CRect::Write");
-	return Write( Str_GetTemp() );
+	return Write( Str_GetTemp(), STR_TEMPLENGTH );
 }
 
 CPointBase CRect::GetCenter() const
@@ -216,7 +230,9 @@ CPointBase CRect::GetCenter() const
 CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 {
 	ADDTOCALLSTACK("CRect::GetRectCorner");
+	ASSERT(dir <= DIR_QTY);
 	// Get the point if a directional corner of the CRectMap.
+
 	CPointBase pt;
 	pt.m_z = 0;	// NOTE: remember this is a nonsense value.
 	pt.m_map = (uchar)m_map;
@@ -265,64 +281,82 @@ CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 
 CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up this rect.
 {
-	ADDTOCALLSTACK("CRect::GetSector");
+	ADDTOCALLSTACK_INTENSIVE("CRect::GetSector");
 	// get all the CSector(s) that overlap this rect.
 	// RETURN: nullptr = no more
 
 	// Align new rect.
-    const int iSectorSize = g_MapList.GetSectorSize(m_map);
+	const CSectorList* pSectors = CSectorList::Get();
+
+    const int iSectorSize = pSectors->GetSectorSize(m_map);
 	CRectMap rect;
-	rect.m_left = m_left &~ (iSectorSize-1);
+	rect.m_left = m_left & ~(iSectorSize-1);
 	rect.m_right = ( m_right | (iSectorSize-1)) + 1;
-	rect.m_top = m_top &~ (iSectorSize-1);
+	rect.m_top = m_top & ~(iSectorSize-1);
 	rect.m_bottom = ( m_bottom | (iSectorSize-1)) + 1;
 	rect.m_map = m_map;
 	rect.NormalizeRectMax();
 
-    const int iSectorCols = g_MapList.GetSectorCols(m_map);
-    const int iSectorRows = g_MapList.GetSectorRows(m_map);
-	int width = (rect.GetWidth()) / iSectorSize;
+    const int iSectorCols = pSectors->GetSectorCols(m_map);
+	const int width = (rect.GetWidth()) / iSectorSize;
+	const int height = (rect.GetHeight()) / iSectorSize;
+#ifdef _DEBUG
 	ASSERT(width <= iSectorCols);
-	int height = (rect.GetHeight()) / iSectorSize;
+	const int iSectorRows = pSectors->GetSectorRows(m_map);
 	ASSERT(height <= iSectorRows);
+#endif
 
-	int iBase = (( rect.m_top / iSectorSize) * iSectorCols) + ( rect.m_left / iSectorSize );
+	const int iBase = (( rect.m_top / iSectorSize) * iSectorCols) + ( rect.m_left / iSectorSize );
 
 	if ( i >= ( height * width ))
 	{
 		if ( ! i )
-			return g_World.GetSector(m_map, iBase);
+			return pSectors->GetSector(m_map, iBase);
 		return nullptr;
 	}
 
-	int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
+	const int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
+	return pSectors->GetSector(m_map, iBase + indexoffset);
+}
 
-	return g_World.GetSector(m_map, iBase+indexoffset);
+
+const CRect& CRect::operator += (const CRect& rect)
+{
+    m_top += rect.m_top;
+    m_bottom += rect.m_bottom;
+    m_right += rect.m_right;
+    m_left += rect.m_left;
+    return *this;
 }
 
 //*************************************************************************
 // -CRectMap
 
-bool CRectMap::IsValid() const
+CRectMap::CRectMap(int left, int top, int right, int bottom, int map) noexcept :
+	CRect(left, top, right, bottom, map)
 {
-    int iSizeX = GetWidth();
-    if ( iSizeX < 0 || iSizeX > g_MapList.GetX(m_map) )
+}
+
+bool CRectMap::IsValid() const noexcept
+{
+    const int iSizeX = GetWidth();
+    if ( (iSizeX < 0) || (iSizeX > g_MapList.GetMapSizeX(m_map)) )
         return false;
-    int iSizeY = GetHeight();
-    if ( iSizeY < 0 || iSizeY > g_MapList.GetY(m_map) )
+    const int iSizeY = GetHeight();
+    if ( (iSizeY < 0) || (iSizeY > g_MapList.GetMapSizeY(m_map)) )
         return false;
     return true;
 }
 
 void CRectMap::NormalizeRect()
 {
-	ADDTOCALLSTACK("CRectMap::NormalizeRect");
+	//ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRect");
 	CRect::NormalizeRect();
 	NormalizeRectMax();
 }
 
 void CRectMap::NormalizeRectMax()
 {
-	ADDTOCALLSTACK("CRectMap::NormalizeRectMax");
-	CRect::NormalizeRectMax( g_MapList.GetX(m_map), g_MapList.GetY(m_map));
+    //ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRectMax");
+	CRect::NormalizeRectMax( g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
 }

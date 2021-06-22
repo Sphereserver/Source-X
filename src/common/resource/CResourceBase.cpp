@@ -2,10 +2,10 @@
 #include "../../game/chars/CChar.h"
 #include "../../game/items/CItem.h"
 #include "../../game/triggers.h"
-#include "../../game/CWorld.h"
 #include "../../game/game_enums.h"
 #include "../../game/game_macros.h"
 #include "../sphere_library/CSFileList.h"
+#include "../CException.h"
 #include "../CLog.h"
 #include "CResourceBase.h"
 #include "CResourceHash.h"
@@ -28,55 +28,56 @@ lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 	"CHARDEF",		// Define a char type.
 	"COMMENT",		// A commented out block type.
 	"DEFNAME",		// (SL) Just add a bunch of new defs and equivs str/values.
-	"DIALOG",			// A scriptable gump dialog", text or handler block.
-	"EVENTS",			// (SL) Preload these Event files.
+	"DIALOG",		// A scriptable gump dialog", text or handler block.
+	"EVENTS",		// (SL) Preload these Event files.
 	"FAME",
 	"FUNCTION",		// Define a new command verb script that applies to a char.
-	"GMPAGE",			// A GM page. (SAVED in World)
+	"GMPAGE",		// A GM page. (SAVED in World)
 	"ITEMDEF",		// Define an item type
 	"KARMA",
 	"KRDIALOGLIST",	// mapping of dialog<->kr ids
 	"MENU",			// General scriptable menus.
-	"MOONGATES",		// (SL) Define where the moongates are.
+	"MOONGATES",	// (SL) Define where the moongates are.
 	"NAMES",		// A block of possible names for a NPC type. (read as needed)
-	"NEWBIE",			// Triggers to execute on Player creation (based on skills selected)
-	"NOTOTITLES",		// (SI) Define the noto titles used.
+	"NEWBIE",		// Triggers to execute on Player creation (based on skills selected)
+	"NOTOTITLES",	// (SI) Define the noto titles used.
 	"OBSCENE",		// (SL) A list of obscene words.
-	"PLEVEL",			// Define the list of commands that a PLEVEL can access. (or not access)
-	"REGIONRESOURCE",	// Define Ore types.
-	"REGIONTYPE",			// Triggers etc. that can be assinged to a "AREA
+	"PLEVEL",		// Define the list of commands that a PLEVEL can access. (or not access)
+	"REGIONRESOURCE",// Define natural resources (like ore types) to be found in a region.
+	"REGIONTYPE",	// Triggers etc. that can be assinged to a "AREA
+	"RESDEFNAME",	// (SL) Working like RES_DEFNAME, define aliases (e.g. a second DEFNAME) for existing resources.
 	"RESOURCELIST",
-	"RESOURCES",		// (SL) list of all the resource files we should index !
+	"RESOURCES",	// (SL) list of all the resource files we should index !
 	"ROOM",			// Non-complex region. (no extra tags)
-	"RUNES",			// (SI) Define list of the magic runes.
-	"SCROLL",			// SCROLL_GUEST=message scroll sent to player at guest login. SCROLL_MOTD", SCROLL_NEWBIE
-	"SECTOR",			// Make changes to a sector. (SAVED in World)
+	"RUNES",		// (SI) Define list of the magic runes.
+	"SCROLL",		// SCROLL_GUEST=message scroll sent to player at guest login. SCROLL_MOTD", SCROLL_NEWBIE
+	"SECTOR",		// Make changes to a sector. (SAVED in World)
 	"SERVERS",		// List a number of servers in 3 line format.
-	"SKILL",			// Define attributes for a skill (how fast it raises etc)
-	"SKILLCLASS",		// Define class specifics for a char with this skill class.
-	"SKILLMENU",		// A menu that is attached to a skill. special arguments over other menus.
-	"SPAWN",			// Define a list of NPC's and how often they may spawn.
-	"SPEECH",			// (SL) Preload these speech files.
-	"SPELL",			// Define a magic spell. (0-64 are reserved)
-	"SPHERE",			// Main Server INI block
-	"SPHERECRYPT", // Encryption keys
-	"STARTS",			// (SI) List of starting locations for newbies.
+	"SKILL",		// Define attributes for a skill (how fast it raises etc)
+	"SKILLCLASS",	// Define class specifics for a char with this skill class.
+	"SKILLMENU",	// A menu that is attached to a skill. special arguments over other menus.
+	"SPAWN",		// Define a list of NPC's and how often they may spawn.
+	"SPEECH",		// (SL) Preload these speech files.
+	"SPELL",		// Define a magic spell. (0-64 are reserved)
+	"SPHERE",		// Main Server INI block
+	"SPHERECRYPT",	// Encryption keys
+	"STARTS",		// (SI) List of starting locations for newbies.
 	"STAT",			// Stats elements like KARMA,STR,DEX,FOOD,FAME,CRIMINAL etc. Used for resource and desire scripts.
 	"TELEPORTERS",	// (SL) Where are the teleporteres in the world ?
 	"TEMPLATE",		// Define a list of items. (for filling loot etc)
 	"TIMERF",
 	"TIP",			// Tips that can come up at startup.
-	"TYPEDEF",			// Define a trigger block for a "WORLDITEM m_type.
+	"TYPEDEF",		// Define a trigger block for a "WORLDITEM m_type.
 	"TYPEDEFS",
-	"WC",				// =WORLDCHAR
+	"WC",			// =WORLDCHAR
 	"WEBPAGE",		// Define a web page template.
-	"WI",				// =WORLDITEM
-	"WORLDCHAR",		// Define instance of char in the world. (SAVED in World)
-	"WORLDITEM",		// Define instance of item in the world. (SAVED in World)
-	"WORLDLISTS",		// Define instance of list in the world. (SAVED in World)
-	"WORLDSCRIPT",		// Define instance of resource in the world. (SAVED in World)
-	"WORLDVARS",		// block of global variables
-	"WS",				// =WORLDSCRIPT
+	"WI",			// =WORLDITEM
+	"WORLDCHAR",	// Define instance of char in the world. (SAVED in World)
+	"WORLDITEM",	// Define instance of item in the world. (SAVED in World)
+	"WORLDLISTS",	// Define instance of list in the world. (SAVED in World)
+	"WORLDSCRIPT",	// Define instance of resource in the world. (SAVED in World)
+	"WORLDVARS",	// block of global variables
+	"WS"			// =WORLDSCRIPT
 };
 
 
@@ -108,12 +109,16 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	ASSERT(pszName != nullptr);
 	// Is this really just a dir name ?
 
+	if (strlen(pszName) >= _MAX_PATH)
+		throw CSError(LOGL_ERROR, 0, "Filename too long!");
+
 	tchar szName[_MAX_PATH];
-	ASSERT(strlen(pszName) < CountOf(szName));
 	strcpy(szName, pszName);
 
 	tchar szTitle[_MAX_PATH];
-	strcpy(szTitle, CScript::GetFilesTitle( szName ));
+	lpctstr ptcTitle = CScript::GetFilesTitle(szName);
+	PERSISTANT_ASSERT(strlen(ptcTitle) < sizeof(szTitle));
+	Str_CopyLimitNull(szTitle, ptcTitle, sizeof(szTitle));
 
 	if ( szTitle[0] == '\0' )
 	{
@@ -125,8 +130,8 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	if ( pszExt == nullptr )
 	{
 		// No file extension provided, so append .scp to the filename
-		strcat( szName, SPHERE_SCRIPT );
-		strcat( szTitle, SPHERE_SCRIPT );
+		Str_ConcatLimitNull( szName,  SPHERE_SCRIPT, sizeof(szName) );
+		Str_ConcatLimitNull( szTitle, SPHERE_SCRIPT, sizeof(szTitle) );
 	}
 
 	if ( ! strnicmp( szTitle, SPHERE_FILE "tables", strlen(SPHERE_FILE "tables")))
@@ -148,7 +153,8 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
         return nullptr;
     }
 
-    pNewRes->m_iResourceFileIndex = (int)m_ResourceFiles.push_back(pNewRes);
+    m_ResourceFiles.emplace_back(pNewRes);
+    pNewRes->m_iResourceFileIndex = int(m_ResourceFiles.size() -1);
     return pNewRes;
 }
 
@@ -165,7 +171,7 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	if ( iRet < 0 )
 	{
 		// also check script file path
-		sFilePath = CSFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetPtr());
+		sFilePath = CSFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetBuffer());
 
 		iRet = filelist.ReadDir( sFilePath, true );
 		if ( iRet < 0 )
@@ -239,7 +245,7 @@ CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
 	return pScript;
 }
 
-bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical )
+bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical )
 {
 	ADDTOCALLSTACK("CResourceBase::OpenResourceFind");
 	// Open a single resource script file.
@@ -251,7 +257,7 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 	// search the local dir or full path first.
 	if ( s.Open(pszFilename, OF_READ | OF_NONCRIT ))
 		return true;
-	if ( !bCritical )
+	if ( !fCritical )
 		return false;
 
 	// next, check the script file path
@@ -274,7 +280,7 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 }
 
 //*********************************************************
-// Resource Block Definitions
+// Resource Section Definitions
 
 lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
 {
@@ -306,9 +312,9 @@ CResourceScript * CResourceBase::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName, word wPage)
+CResourceID CResourceBase::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetIDParse");
+    ADDTOCALLSTACK("CResourceBase::ResourceGetID_Advance");
     // Find the Resource ID given this name.
     // We are NOT creating a new resource. just looking up an existing one
     // NOTE: Do not enforce the restype.
@@ -352,7 +358,7 @@ CResourceID CResourceBase::ResourceGetIDParse(RES_TYPE restype, lpctstr &ptcName
 CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
-	return ResourceGetIDParse(restype, ptcName, wPage);
+	return ResourceGetID_Advance(restype, ptcName, wPage);
 }
 
 CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
@@ -383,7 +389,7 @@ CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
 	if ( ! rid.IsValidResource() )
 		return nullptr;
 	size_t index = m_ResHash.FindKey( rid );
-	if ( index == m_ResHash.BadIndex() )
+	if ( index == SCONT_BADINDEX )
 		return nullptr;
 	return m_ResHash.GetAt( rid, index );
 }
@@ -398,7 +404,7 @@ CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, lpctstr pszN
 }
 
 //*******************************************************
-// Open resource blocks.
+// Open resource section.
 
 bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 {

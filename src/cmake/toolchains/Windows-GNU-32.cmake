@@ -20,7 +20,7 @@ function (toolchain_exe_stuff)
 		-Wno-implicit-function-declaration -Wno-type-limits -Wno-incompatible-pointer-types -Wno-array-bounds")
 		# last 2 lines are for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
-		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-invalid-offsetof -Wno-implicit-fallthrough")
+		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-misleading-indentation -Wno-implicit-fallthrough")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
@@ -76,11 +76,10 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_WIN32;_32BITS;Z_PREFIX;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
+	SET (COMMON_DEFS "_WIN32;_32BITS;Z_PREFIX;_GITVERSION;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		# _32BITS: 32 bits architecture.
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions
-		# _MTNETWORK: multi-threaded networking support.
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 		# _CRT_SECURE_NO_WARNINGS: Temporary setting to do not spam so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.

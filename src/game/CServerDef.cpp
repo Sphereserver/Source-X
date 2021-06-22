@@ -6,8 +6,10 @@
 #include "../common/CScriptTriggerArgs.h"
 #include "../sphere/threads.h"
 #include "CObjBase.h"
+#include "CServer.h"
 #include "CServerConfig.h"
 #include "CServerDef.h"
+#include "CWorldGameTime.h"
 #include "CWorld.h"
 
 //	Memory profiling
@@ -16,8 +18,8 @@
 
 //	grabbed from platform SDK, psapi.h
 	typedef struct _PROCESS_MEMORY_COUNTERS {
-		dword cb;
-		dword PageFaultCount;
+		DWORD cb;
+		DWORD PageFaultCount;
 		SIZE_T PeakWorkingSetSize;
 		SIZE_T WorkingSetSize;
 		SIZE_T QuotaPeakPagedPoolUsage;
@@ -29,9 +31,9 @@
 	} PROCESS_MEMORY_COUNTERS, *PPROCESS_MEMORY_COUNTERS;
 
 	//	PSAPI external definitions
-	typedef	BOOL (WINAPI *pGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, dword);
+	typedef	BOOL (WINAPI *pfnGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
 	HMODULE	m_hmPsapiDll = nullptr;
-	pGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
+	pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
 	PROCESS_MEMORY_COUNTERS	pcnt;
 #else			// (Unix)
 	#include <sys/resource.h>
@@ -49,7 +51,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 
 	SetName( pszName );
 	m_timeLastValid = 0;
-	m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
+	_iTimeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	// Set default time zone from UTC
 	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
@@ -59,7 +61,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 {
 	ADDTOCALLSTACK("CServerDef::StatGet");
-	ASSERT( i >= 0 && i <= SERV_STAT_QTY );
+	ASSERT( i >= 0 && i < SERV_STAT_QTY );
 	size_t	d = m_stStat[i];
 	EXC_TRY("StatGet");
 	if ( i == SERV_STAT_MEM )	// memory information
@@ -78,7 +80,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
-					m_GetProcessMemoryInfo = reinterpret_cast<pGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
+					m_GetProcessMemoryInfo = reinterpret_cast<pfnGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
 			}
 
 			if ( m_GetProcessMemoryInfo )
@@ -94,7 +96,10 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 						EXC_SET_BLOCK("read memory info");
 						d = pcnt.WorkingSetSize;
 					}
-					CloseHandle(hProcess);
+                    if (hProcess != nullptr)
+                    {
+                        CloseHandle(hProcess);
+                    }
 				}
 			}
 #else
@@ -120,7 +125,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 						{
 							head += 7;
 							GETNONWHITESPACE(head)
-							d = ATOI(head) * 1000;
+							d = atoi(head) * 1000;
 							break;
 						}
 					}
@@ -173,13 +178,13 @@ void CServerDef::SetName( lpctstr pszName )
 void CServerDef::SetValidTime()
 {
 	ADDTOCALLSTACK("CServerDef::SetValidTime");
-	m_timeLastValid = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeLastValid = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 }
 
 int64 CServerDef::GetTimeSinceLastValid() const
 {
 	ADDTOCALLSTACK("CServerDef::GetTimeSinceLastValid");
-	return ( - g_World.GetTimeDiff( m_timeLastValid ) );
+	return CWorldGameTime::GetCurrentTime().GetTimeDiff( m_timeLastValid );
 }
 
 enum SC_TYPE
@@ -193,6 +198,7 @@ enum SC_TYPE
 	SC_CLIENTS,
 	SC_CLIENTVERSION,
 	SC_CREATE,
+	SC_GMPAGES,
 	SC_ITEMS,
 	SC_LANG,
 	SC_LASTVALIDDATE,
@@ -220,6 +226,7 @@ lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 	"CLIENTS",
 	"CLIENTVERSION",
 	"CREATE",
+	"GMPAGES",
 	"ITEMS",
 	"LANG",
 	"LASTVALIDDATE",
@@ -236,17 +243,17 @@ lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 	nullptr
 };
 
-static lpctstr const sm_AccAppTable[ ACCAPP_QTY ] =
+static lpctstr constexpr sm_AccAppTable[ ACCAPP_QTY ] =
 {
-	"Closed",		// Closed. Not accepting more.
-	"Unused",
-	"Free",			// Anyone can just log in and create a full account.
-	"GuestAuto",	// You get to be a guest and are automatically sent email with u're new password.
-	"GuestTrial",	// You get to be a guest til u're accepted for full by an Admin.
-	"Unused",
-	"Unspecified",	// Not specified.
-	"Unused",
-	"Unused"
+	"CLOSED",		// Closed. Not accepting more.
+	"UNUSED",
+	"FREE",			// Anyone can just log in and create a full account.
+	"GUESTAUTO",	// You get to be a guest and are automatically sent email with u're new password.
+	"GUESTTRIAL",	// You get to be a guest til u're accepted for full by an Admin.
+	"UNUSED",
+	"UNSPECIFIED",	// Not specified.
+	"UNUSED",
+	"UNUSED"
 };
 
 bool CServerDef::r_LoadVal( CScript & s )
@@ -257,16 +264,21 @@ bool CServerDef::r_LoadVal( CScript & s )
 	{
 		case SC_ACCAPP:
 		case SC_ACCAPPS:
+        {
+            lpctstr ptcArg = s.GetArgStr();
 			// Treat it as a value or a string.
-			if ( IsDigit( s.GetArgStr()[0] ))
-				m_eAccApp = static_cast<ACCAPP_TYPE>(s.GetArgVal() );
+			if ( IsDigit( ptcArg[0] ))
+            {
+				m_eAccApp = ACCAPP_TYPE(s.GetArgVal() );
+            }
 			else
 			{
 				// Treat it as a string. "Manual","Automatic","Guest"
-				m_eAccApp = static_cast<ACCAPP_TYPE>(FindTable(s.GetArgStr(), sm_AccAppTable, CountOf(sm_AccAppTable)));
+				m_eAccApp = ACCAPP_TYPE(FindTable(ptcArg, sm_AccAppTable, CountOf(sm_AccAppTable)));
 			}
 			if ( m_eAccApp < 0 || m_eAccApp >= ACCAPP_QTY )
 				m_eAccApp = ACCAPP_Unspecified;
+        }
 			break;
 		case SC_AGE:
 			break;
@@ -275,13 +287,16 @@ bool CServerDef::r_LoadVal( CScript & s )
 			// m_ClientVersion.SetClientVer( s.GetArgRaw());
 			break;
 		case SC_ADMINEMAIL:
-			if ( this != &g_Serv && !g_Serv.m_sEMail.IsEmpty() && strstr(s.GetArgStr(), g_Serv.m_sEMail) )
+        {
+            lpctstr ptcArg = s.GetArgStr();
+			if ( this != &g_Serv && !g_Serv.m_sEMail.IsEmpty() && strstr(ptcArg, g_Serv.m_sEMail) )
 				return false;
-			if ( !g_Cfg.IsValidEmailAddressFormat(s.GetArgStr()) )
+			if ( !g_Cfg.IsValidEmailAddressFormat(ptcArg) )
 				return false;
-			if ( g_Cfg.IsObscene(s.GetArgStr()) )
+			if ( g_Cfg.IsObscene(ptcArg) )
 				return false;
-			m_sEMail = s.GetArgStr();
+			m_sEMail = ptcArg;
+        }
 			break;
 		case SC_LANG:
 			{
@@ -353,11 +368,11 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 	case SC_ACCAPP:
 		sVal.FormatVal( m_eAccApp );
@@ -376,12 +391,12 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		break;
 	case SC_CLIENTVERSION:
 		{
-			char szVersion[ 128 ];
-			sVal = m_ClientVersion.WriteClientVer( szVersion );
+			char pcVersion[ 128 ];
+			sVal = m_ClientVersion.WriteClientVer(pcVersion, sizeof(pcVersion));
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( (- g_World.GetTimeDiff(m_timeCreate))/MSECS_PER_TENTH );
+		sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -422,6 +437,9 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 	case SC_CHARS:
 		sVal.FormatSTVal( StatGet( SERV_STAT_CHARS ) );
 		break;
+	case SC_GMPAGES:
+		sVal.FormatSTVal( g_World.m_GMPages.GetContentCount() );
+		break;
 	case SC_TIMEZONE:
 		sVal.FormatVal( m_TimeZone );
 		break;
@@ -441,17 +459,22 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		sVal = SPHERE_VERSION;
 		break;
 	default:
-		{
-			lpctstr pszArgs = strchr(pszKey, ' ');
-			if (pszArgs != nullptr)
-				GETNONWHITESPACE(pszArgs);
+        if (!fNoCallChildren)
+	    {
+            const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
+            if (r_CanCall(uiFunctionIndex))
+            {
+                // RES_FUNCTION call
+			    lpctstr pszArgs = strchr(ptcKey, ' ');
+			    if (pszArgs != nullptr)
+				    GETNONWHITESPACE(pszArgs);
 
-			CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );
-			if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
-				return true;
-
-			return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
-		}
+			    CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );
+			    if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+				    return true;
+		    }
+            return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ));
+        }
 	}
 	return true;
 	EXC_CATCH;
@@ -466,5 +489,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return ( (- g_World.GetTimeDiff(m_timeCreate)) / ( MSECS_PER_SEC * 60 * 60 ));
+	return ( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / ( MSECS_PER_SEC * 60 * 60 ));
 }

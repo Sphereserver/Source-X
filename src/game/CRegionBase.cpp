@@ -15,48 +15,48 @@ size_t CRegionBase::GetRegionRectCount() const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRectCount");
 	// How many rectangles in this region ?
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 	{
 		if ( ! IsRegionEmpty())
 			return 1;
 	}
-	return( iQty );
+	return iQty;
 }
 
 CRectMap & CRegionBase::GetRegionRect(size_t i)
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
 	// Get a particular rectangle.
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
-	return(m_Rects.at(i));
+	return m_Rects[i];
 }
 
 const CRectMap & CRegionBase::GetRegionRect(size_t i) const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
-	return(m_Rects.at(i));
+	return m_Rects[i];
 }
 
 CPointMap CRegionBase::GetRegionCorner( DIR_TYPE dir ) const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionCorner");
 	// NOTE: DIR_QTY = center.
-	return( m_rectUnion.GetRectCorner(dir));
+	return m_rectUnion.GetRectCorner(dir);
 }
 
 bool CRegionBase::IsInside2d( const CPointMap & pt ) const
 {
-	ADDTOCALLSTACK("CRegionBase::IsInside2d");
+	ADDTOCALLSTACK_INTENSIVE("CRegionBase::IsInside2d");
 	if ( ! m_rectUnion.IsInside2d( pt ))
 		return false;
 
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty > 0 )
 	{
 		for ( size_t i = 0; i < iQty; ++i )
@@ -75,7 +75,7 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 	if ( rect.IsRectEmpty() )
 		return false;
 
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 && IsRegionEmpty())
 	{
 		m_rectUnion = rect;
@@ -108,14 +108,14 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 	return true;
 }
 
-bool CRegionBase::IsOverlapped( const CRectMap & rect ) const
+bool CRegionBase::IsOverlapped( const CRectMap & rect ) const noexcept
 {
-	ADDTOCALLSTACK("CRegionBase::IsOverlapped");
+	// ADDTOCALLSTACK("CRegionBase::IsOverlapped"); // It's called very frequently on server startup, so avoid this call
 	// Does the region overlap this rectangle.
 	if ( !m_rectUnion.IsOverlapped(rect) )
 		return false;
 
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return true;
 	for ( size_t i = 0; i < iQty; ++i )
@@ -134,7 +134,7 @@ bool CRegionBase::IsInside( const CRectMap & rect ) const
 	if ( ! m_rectUnion.IsInside( rect ))
 		return false;
 
-	size_t iQty = m_Rects.size();
+	const size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return true;
 
@@ -156,7 +156,7 @@ bool CRegionBase::IsInside( const CRegionBase * pRegionTest ) const
 	if ( ! m_rectUnion.IsInside( pRegionTest->m_rectUnion ))
 		return false;
 
-	size_t iQtyTest = pRegionTest->m_Rects.size();
+	const size_t iQtyTest = pRegionTest->m_Rects.size();
 	for ( size_t j = 0; j < iQtyTest; ++j )
 	{
 		if ( ! IsInside( pRegionTest->m_Rects[j] ))
@@ -178,15 +178,15 @@ bool CRegionBase::IsOverlapped( const CRegionBase * pRegionTest ) const
 	{
 		if ( iQtyTest == 0 )
 			return true;
-		return( pRegionTest->IsOverlapped(m_rectUnion));
+		return pRegionTest->IsOverlapped(m_rectUnion);
 	}
 	if ( iQtyTest == 0 )
 	{
-		return( IsOverlapped(pRegionTest->m_rectUnion));
+		return IsOverlapped(pRegionTest->m_rectUnion);
 	}
-	for ( size_t j = 0; j < iQty; j++ )
+	for ( size_t j = 0; j < iQty; ++j )
 	{
-		for ( size_t i = 0; i < iQtyTest; i++ )
+		for ( size_t i = 0; i < iQtyTest; ++i )
 		{
 			if ( m_Rects[j].IsOverlapped( pRegionTest->m_Rects[i] ))
 				return true;
@@ -202,8 +202,8 @@ bool CRegionBase::IsEqualRegion( const CRegionBase * pRegionTest ) const
 	if ( ! m_rectUnion.IsEqual( pRegionTest->m_rectUnion ))
 		return false;
 
-	size_t iQty = m_Rects.size();
-	size_t iQtyTest = pRegionTest->m_Rects.size();
+	const size_t iQty = m_Rects.size();
+	const size_t iQtyTest = pRegionTest->m_Rects.size();
 	if ( iQty != iQtyTest )
 		return false;
 

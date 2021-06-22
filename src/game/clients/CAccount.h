@@ -54,7 +54,7 @@ private:
 	byte m_ResDisp; // current CAccount resdisp.
 	byte m_MaxChars; // Max chars allowed for this CAccount.
 
-	typedef struct { llong m_First; llong m_Last; llong m_Delay; } TimeTriesStruct_t;
+	typedef struct { llong m_First; llong m_Last; llong m_vcDelay; } TimeTriesStruct_t;
 	typedef std::pair<TimeTriesStruct_t, int> BlockLocalTimePair_t;
 	typedef std::map<dword,BlockLocalTimePair_t> BlockLocalTime_t;
 	BlockLocalTime_t m_BlockIP; // Password tries.
@@ -65,16 +65,16 @@ public:
 	CLanguageID m_lang;			// UNICODE language preference (ENU=english).
 	CSString m_sChatName;		// Chat System Name
 
-	int64 m_Total_Connect_Time;	// Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
-
+	CSocketAddressIP m_First_IP;// First ip logged in from.
 	CSocketAddressIP m_Last_IP;	// last ip logged in from.
-	CSTime m_dateLastConnect;	// Last logged in date (use localtime()).
-	int64  m_Last_Connect_Time;	// Amount of time spent online last time (in minutes).
 
-	CSocketAddressIP m_First_IP;	// First ip logged in from.
-	CSTime m_dateFirstConnect;	// First date logged in (use localtime()).
+	int64 _iTimeConnectedTotal;	// Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
 
-	CUID m_uidLastChar;		// Last CChar logged with this CAccount.
+	CSTime _dateConnectedFirst;	// First date logged in (use localtime()).
+	CSTime _dateConnectedLast;	// Last logged in date (use localtime()).
+	int64  _iTimeConnectedLast;	// Amount of time spent online last time (in minutes).
+
+	CUID m_uidLastChar;			// Last CChar logged with this CAccount.
 	CCharRefArray m_Chars;		// CChars attached to this CAccount.
 	CVarDefMap m_TagDefs;		// Tags storage system.
 	CVarDefMap m_BaseDefs;		// New Variable storage system.
@@ -93,25 +93,25 @@ public:
 private:
 	CAccount(const CAccount& copy);
 	CAccount& operator=(const CAccount& other);
-public:
 
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+public:
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
     {
-        return m_BaseDefs.GetKeyStr( pszKey, fZero );
+        return m_BaseDefs.GetKeyStr( ptcKey, fZero );
     }
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
     {
-        return m_BaseDefs.GetKeyNum( pszKey );
+        return m_BaseDefs.GetKeyNum( ptcKey );
     }
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
+		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 	}
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 	}
-	void DeleteDef(lpctstr pszKey) { m_BaseDefs.DeleteKey(pszKey); }
+	void DeleteDef(lpctstr ptcKey) { m_BaseDefs.DeleteKey(ptcKey); }
 
 
 	/**
@@ -126,9 +126,9 @@ public:
 	************************************************************************/
 
 	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript &s, CTextConsole * pSrc ) override;
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef ) override;
+	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	void r_Write(CScript & s);
 
 	/************************************************************************
@@ -164,7 +164,7 @@ public:
 	* @brief Removes the current password.
 	* The password can be set on next login.
 	*/
-	void ClearPassword() { m_sCurPassword.Empty(); }
+	void ClearPassword() { m_sCurPassword.Clear(); }
 	/**
 	* @brief Check password agains CAccount password.
 	* If CAccount has no password and password length is 0, check fails.
@@ -204,15 +204,7 @@ public:
 	* @param what resdisp to set.
 	* @return true on success, false otherwise.
 	*/
-	bool SetResDisp(byte what)
-	{
-		if (what >= RDS_T2A && what < RDS_QTY)
-		{
-			m_ResDisp = what;
-			return true;
-		}
-		return false;
-	}
+	bool SetResDisp(byte what);
 	/**
 	* @brief Gets the current resdisp on this CAccount.
 	* @return The current resdisp.
@@ -223,12 +215,7 @@ public:
 	* @param what the resdisp to update.
 	* @return true if success, false otherwise.
 	*/
-	bool SetGreaterResDisp(byte what)
-	{
-		if ( what > m_ResDisp )
-			return SetResDisp( what );
-		return false;
-	}
+	bool SetGreaterResDisp(byte what);
 	/**
 	* @brief Sets the resdisp on this CAccount based on pClient version.
 	* @return true if success, false otherwise.
@@ -301,9 +288,9 @@ public:
 	* @brief Updates context information on logout.
 	* Updates total time connected.
 	* @param pClient client logging out from this CAccount.
-	* @param bWasChar true if is logged with a CChar.
+	* @param fWasChar true if is logged with a CChar.
 	*/
-	void OnLogout(CClient *pClient, bool bWasChar = false);
+	void OnLogout(CClient *pClient, bool fWasChar = false);
 	/**
 	* @brief Kick / Ban a player.
 	* Only if plevel of CAccount is higher than SRC plevel, do not kick or ban.
@@ -320,16 +307,13 @@ public:
 	* @brief Get the max chars count for this CAccount.
 	* @return the max chars for this CAccount.
 	*/
-	byte GetMaxChars() const
-	{
-		return minimum(m_MaxChars > 0? m_MaxChars : g_Cfg.m_iMaxCharsPerAccount, MAX_CHARS_PER_ACCT);
-	}
+	byte GetMaxChars() const;
 	/**
 	* @brief Set the max chars for this acc.
 	* The max is set only if the current number of chars is lesser than the new value.
 	* @param chars New value for max chars.
 	*/
-	void SetMaxChars(byte chars) { m_MaxChars = minimum(chars, MAX_CHARS_PER_ACCT); }
+	void SetMaxChars(byte chars);
 	/**
 	* @brief Check if a CChar is owned by this CAccount.
 	* @param pChar CChar to check.
@@ -390,11 +374,11 @@ private:
 	* Check if extist a CAccount with the same name, and validate the name. If not exists and name is valid, create the CAccount.
 	* @param pSrc command shell interface.
 	* @param pszName new CAccount name.
-	* @param pszArg new CAccount password.
+	* @param ptcArg new CAccount password.
 	* @param md5 true if we need md5 to store the password.
 	* @return true if CAccount creation is success, false otherwise.
 	*/
-	bool Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5=false );
+	bool Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg, bool md5=false );
 	/**
 	* @brief Do something to all the unused accounts.
 	* First check for accounts with an inactivity of greater or equal to pszDays. Then perform the action to that accounts.

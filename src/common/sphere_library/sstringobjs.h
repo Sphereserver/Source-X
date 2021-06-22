@@ -15,12 +15,12 @@
 
 
 // Base abstract class for strings, provides basic information of what should be available
-// NOTE: The destructor is NOT virtual for a reason. Children should override destroy() instead
+// NOTE: Children should override destroy()
 class AbstractString
 {
 public:
 	AbstractString();
-	virtual ~AbstractString();
+	virtual ~AbstractString() = default;
 
 private:
 	AbstractString(const AbstractString& copy);
@@ -28,56 +28,58 @@ private:
 
 public:
 	// information
-    inline size_t length() {
+    inline size_t size() const noexcept {
         return m_length;
     }
-    inline size_t realLength() {
+    inline size_t capacity() const noexcept {
         return m_realLength;
     }
-    inline bool isEmpty() {
+    inline bool empty() const noexcept {
         return m_length != 0;
     }
-    inline const char *toBuffer() {
+    inline char *buffer() noexcept {
         return m_buf;
     }
+	inline const char* buffer() const noexcept {
+		return m_buf;
+	}
 
 	// character operations
-	char charAt(size_t index);
-	void setAt(size_t index, char c);
+	char charAt(size_t index) const noexcept;
+	void setAt(size_t index, char c) noexcept;
 
 	// modification
-	void append(const char *s);
-	void replace(char what, char toWhat);
+	void append(const char *s) noexcept;
+	void replace(char what, char toWhat) noexcept;
 
 	// comparison
-	int compareTo(const char *s);			// compare with
-	int compareToIgnoreCase(const char *s);	// compare with [case ignored]
-	bool equals(const char *s);				// equals?
-	bool equalsIgnoreCase(const char *s);	// equals? [case ignored]
-	bool startsWith(const char *s);			// starts with this? [case ignored]
-	bool startsWithHead(const char *s);		// starts with this and separator [case ignored]
+	int compareTo(const char *s) const noexcept;				// compare with
+	int compareToIgnoreCase(const char *s) const noexcept;	// compare with [case ignored]
+	bool equals(const char *s) const noexcept;				// equals?
+	bool equalsIgnoreCase(const char *s) const noexcept;		// equals? [case ignored]
+	bool startsWith(const char *s) const noexcept;			// starts with this? [case ignored]
+	bool startsWithHead(const char *s) const noexcept;		// starts with this and separator [case ignored]
 
 	// search
-	size_t indexOf(char c);
-	size_t indexOf(const char *s);
-	size_t lastIndexOf(char c);
+	size_t indexOf(char c) const noexcept;
+	size_t indexOf(const char *s) const noexcept;
+	size_t lastIndexOf(char c) const noexcept;
 
 	// operator
-	operator lpctstr() const {      // as a C string
+	inline operator lpctstr() const noexcept {      // as a C string
         return m_buf;
     }
-	operator char*() {              // as a C string
-        return m_buf;
-    }
-	operator const char*&() const { // as a C string
-        return const_cast<const char *&>(m_buf);
-    }
+	/* // Those dangerous casts need to be explicit!
+	inline operator const char*&() noexcept {		// as a C string
+        return const_cast<const char*&>(m_buf);
+    } */
 
 protected:
 	// not implemented, should take care that newLength should fit in the buffer
-	virtual void ensureLength(size_t newLength);
-	// not implemented, should free up occupied resources
-	virtual void destroy();
+	virtual void resize(size_t newLength) = 0;
+
+	void ensureLengthHeap(size_t newLength);
+	void destroyHeap() noexcept;
 
 protected:
 	char	*m_buf;
@@ -85,21 +87,24 @@ protected:
 	size_t	m_realLength;   // length of the buffer
 };
 
+
 // Common string implementation, implementing AbstractString and working on heap
-class String : public AbstractString
+//	It's redundant, since we have a more feature-complete CSString
+/*
+class HeapString : public AbstractString
 {
 public:
-	String();
-	virtual ~String() { };
+	HeapString();
+	virtual ~HeapString();
 
-private:
-	String(const String& copy);
-	String& operator=(const String& other);
+	HeapString(const HeapString& copy) = delete;
+	HeapString& operator=(const HeapString& other) = delete;
 
 protected:
-	void ensureLength(size_t newLength);
-	void destroy();
+	virtual void resize(size_t newLength) override;
 };
+*/
+
 
 #define MAX_TEMP_LINES_NO_CONTEXT	512
 
@@ -107,24 +112,22 @@ protected:
 // To create such string:
 // TemporaryString str;
 // it could be also created via new TemporaryString but whats the point if we still use memory allocation? :)
-class TemporaryString : public String
+class TemporaryString : public AbstractString
 {
 public:
 	TemporaryString();
 	TemporaryString(char *buffer, char *state);
 	~TemporaryString();
 
-private:
-	TemporaryString(const TemporaryString& copy);
-	TemporaryString& operator=(const TemporaryString& other);
-
-public:
-	// should not really be used, made for use of AbstractSphereThread *only*
-	void init(char *buffer, char *state);
+	TemporaryString(const TemporaryString& copy) = delete;
+	TemporaryString& operator=(const TemporaryString& other) = delete;
 
 protected:
-	void ensureLength(size_t newLength);
-	void destroy();
+	virtual void resize(size_t newLength) override;
+
+	// should not really be used, made for use of AbstractSphereThread *only*
+	friend class AbstractSphereThread;
+	void init(char* buffer, char* state) noexcept;
 
 private:
 	bool m_useHeap;					// a mark whatever we are in heap (String) or stack (ThreadLocal) mode

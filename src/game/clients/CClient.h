@@ -9,12 +9,10 @@
 #include "../../common/crypto/CCrypto.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CTextConsole.h"
-#include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../items/CItemBase.h"
 #include "../items/CItemContainer.h"
-#include "../items/CItemMultiCustom.h"
 #include "../CSectorEnviron.h"
 #include "../game_enums.h"
 #include "CAccount.h"
@@ -25,6 +23,7 @@
 
 
 class CItemMap;
+class CItemMultiCustom;
 
 enum CV_TYPE
 {
@@ -64,17 +63,15 @@ public:
 		TResponseString& operator=( const TResponseString& other );
 	};
 
-	CSTypedArray<dword>		m_CheckArray;
+	CSTypedArray<dword>				m_CheckArray;
 	CSObjArray<TResponseString *>	m_TextArray;
+
 public:
 	void AddText( word id, lpctstr pszText );
 	lpctstr GetName() const;
-	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 
-public:
-	CDialogResponseArgs()
-	{
-	};
+	CDialogResponseArgs() = default;
 
 private:
 	CDialogResponseArgs( const CDialogResponseArgs& copy );
@@ -104,19 +101,20 @@ public:
 	static lpctstr const sm_szRefKeys[];
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
+
 private:
-	CChar * m_pChar;		// What char are we playing ?
-	NetState* m_net;		// network state
-
-	// Client last know state stuff.
-	CSectorEnviron m_Env;	// Last Environment Info Sent. so i don't have to keep resending if it's the same.
-
-	uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
+    CChar* m_pChar;		// What char are we playing ?
+	CNetState* m_net;		// network state
 
 	// Walk limiting code
 	int m_iWalkStepCount;	// Count the actual steps. Turning does not count.
-    llong m_iWalkTimeAvg;
-	int64 m_timeWalkStep;	// the last %8 walk step time.
+    llong m_iWalkTimeAvg;	// Average time betwwen 2 running step
+	int64 m_timeWalkStep;	// the last walk step time.
+	byte m_lastDir;
+
+    // Client last know state stuff.
+    CSectorEnviron m_Env;	// Last Environment Info Sent. so i don't have to keep resending if it's the same.
+    uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
 
 	// Screensize
 	struct __screensize
@@ -146,12 +144,17 @@ public:
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
+    // Client-sent flags
+    bool _fShowPublicHouseContent;
+
 	// GM only stuff.
-	CGMPage * m_pGMPage;	// Current GM page we are connected to.
+	CGMPage * m_pGMPage;	// Current GM page being handled by this client
 	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
 
 	// Gump stuff
-	typedef std::map<int,int> OpenedGumpsMap_t;
+    //  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
+    //  second int: count (how much of that dialogs are currently open)
+	typedef std::map<uint,int> OpenedGumpsMap_t;
 	OpenedGumpsMap_t m_mapOpenedGumps;
 
 	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
@@ -172,7 +175,7 @@ public:
 	CPointMap  m_Targ_p;		// For script targeting,
 	int64 m_Targ_Timeout;       // timeout time for targeting
 
-								// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
+	// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
 	{
 		// CLIMODE_SETUP_CONNECTING
@@ -184,21 +187,20 @@ public:
 		} m_tmSetup;
 
 		// CLIMODE_SETUP_CHARLIST
-		CUIDBase m_tmSetupCharList[MAX_CHARS_PER_ACCT];
+		CUID m_tmSetupCharList[MAX_CHARS_PER_ACCT];
 
 		// CLIMODE_INPVAL
 		struct
 		{
-			CUIDBase m_UID;
+			CUID m_UID;
 			CResourceID m_PrvGumpID;	// the gump that was up before this
 		} m_tmInpVal;
 
 		// CLIMODE_MENU_*
 		// CLIMODE_MENU_SKILL
-		// CLIMODE_MENU_GM_PAGES
 		struct
 		{
-			CUIDBase m_UID;
+			CUID m_UID;
 			CResourceID m_ResourceID;		// What menu is this ?
 			dword m_Item[MAX_MENU_ITEMS];	// It's a buffer to save the in-range tracking targets or other data
 		} m_tmMenu;	// the menu that is up.
@@ -230,26 +232,26 @@ public:
 		struct
 		{
 			int m_id;
-			word m_amount;
+			word m_vcAmount;
 		} m_tmAdd;
 
 		// CLIMODE_TARG_SKILL
 		struct
 		{
-			SKILL_TYPE m_Skill;			// targetting what spell ?
+			SKILL_TYPE m_iSkill;			// targetting what spell ?
 		} m_tmSkillTarg;
 
 		// CLIMODE_TARG_SKILL_MAGERY
 		struct
 		{
-			SPELL_TYPE m_Spell;			// targetting what spell ?
-			CREID_TYPE m_SummonID;
+			SPELL_TYPE m_iSpell;			// targetting what spell ?
+			CREID_TYPE m_iSummonID;
 		} m_tmSkillMagery;
 
 		// CLIMODE_TARG_USE_ITEM
 		struct
 		{
-			CSObjList * m_pParent;	// the parent of the item being targetted .
+			CSObjCont * m_pParent;	// the parent of the item being targetted .
 		} m_tmUseItem;
 	};
 
@@ -259,19 +261,16 @@ private:
 	static CHuffman m_Comp;
 
 private:
-	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-
 	bool OnRxConsoleLoginComplete();
 	bool OnRxConsole( const byte * pData, uint len );
 	bool OnRxAxis( const byte * pData, uint len );
 	bool OnRxPing( const byte * pData, uint len );
-	bool OnRxWebPageRequest( byte * pRequest, uint len );
+	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
 	byte LogIn( CAccount * pAccount, CSString & sMsg );
 	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
 
 	bool CanInstantLogOut() const;
-	void Cmd_GM_PageClear();
 
 	void Announce( bool fArrive ) const;
 
@@ -335,7 +334,8 @@ public:
 	void Event_MailMsg( CUID uid1, CUID uid2 );
 	void Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen );
 	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool fNoStrip = false );
-	void Event_SetName( CUID uid, const char * pszCharName );
+	void Event_PromptResp_GMPage( lpctstr pszReason );
+	bool Event_SetName( CUID uid, const char * pszCharName );
 	void Event_SingleClick( CUID uid );
 	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip = false ); // PC speech
 	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
@@ -349,7 +349,7 @@ public:
 	void Event_VendorSell_Cheater( int iCode = 0 );
     void Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg);
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
-	bool Event_CheckWalkBuffer();
+	bool Event_CheckWalkBuffer(byte rawdir);
 
 	TRIGRET_TYPE Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj );
 	TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
@@ -364,17 +364,11 @@ public:
 	byte Setup_Start( CChar * pChar ); // Send character startup stuff to player
 
 
-									   // translated commands.
+    // translated commands.
 private:
-	void Cmd_GM_PageInfo();
 	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
 	int Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuItem* item, int iMaxSize, bool *fShowMenu, bool *fLimitReached );
 public:
-	void Cmd_GM_PageMenu( uint uiEntryStart = 0 );
-	void Cmd_GM_PageCmd( lpctstr pCmd );
-	void Cmd_GM_PageSelect( uint iSelect );
-	void Cmd_GM_Page(lpctstr pszreason); // Help button (Calls GM Call Menus up)
-
 	bool Cmd_Skill_Menu( const CResourceID& rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
 	bool Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase * pSrc );
@@ -389,7 +383,7 @@ public:
 	int GetSocketID() const;								// get socket id
 
 public:
-	explicit CClient(NetState* state);
+	explicit CClient(CNetState* state);
 	~CClient();
 
 private:
@@ -404,8 +398,9 @@ public:
 		return ( static_cast <CClient*>( CSObjListRec::GetNext()));
 	}
 
+	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_LoadVal( CScript & s ) override;
 
 	// Low level message traffic.
@@ -454,7 +449,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = 0, uint uiArgCount = 0) const;
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = nullptr, uint uiArgCount = 0) const;
 	void removeBuff(const BUFF_ICONS IconId) const;
 	void resendBuffs() const;
 
@@ -469,9 +464,9 @@ public:
 
 	void addCharMove( const CChar * pChar ) const;
 	void addCharMove( const CChar * pChar, byte iCharDirFlag ) const;
-	void addChar( CChar * pChar );
+	void addChar( CChar * pChar, bool fFull = true );
 	void addCharName( const CChar * pChar ); // Singleclick text for a character
-	void addItemName( const CItem * pItem );
+	void addItemName( CItem * pItem );
 
 	bool addKick( CTextConsole * pSrc, bool fBlock = true );
 	void addMusic( MIDI_TYPE id ) const;
@@ -503,7 +498,7 @@ public:
 	void addDyeOption( const CObjBase * pBase );
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 
-	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = UID_CLEAR, CUID context2 = UID_CLEAR, bool fUnicode = false );
+	void addPromptConsole(CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = {}, CUID context2 = {}, bool fUnicode = false);
 	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int64 iTicksTimeout = 0 ); // Send targetting cursor to client
 	void addTargetDeed( const CItem * pDeed );
 	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE color = HUE_DEFAULT, bool fAllowGround = true );
@@ -534,7 +529,7 @@ public:
 	void addBondedStatus( const CChar * pChar, bool fIsDead ) const;
 	void addSkillWindow(SKILL_TYPE skill, bool fFromInfo = false) const; // Opens the skills list
 	void addBulletinBoard( const CItemContainer * pBoard );
-	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg );
+	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, const CUID& uidMsg );
 
 	void addToolTip( const CObjBase * pObj, lpctstr psztext ) const;
 	void addDrawMap( CItemMap * pItem );
@@ -547,7 +542,7 @@ public:
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
 	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, uint iControls, const CSString * psText, uint iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
-	bool addGumpDialogProps( CUID uid );
+	bool addGumpDialogProps( const CUID& uid );
 
 	void addLoginComplete();
 	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = nullptr, lpctstr pszName2 = nullptr, CLanguageID lang = 0 );
@@ -561,34 +556,86 @@ private:
 	void AOSTooltip_addDefaultItemData(CItem * pItem);
 
 private:
+// Number in comment are the old number working before we use the correct contextmenu ID
 #define MAX_POPUPS 15
 #define POPUPFLAG_LOCKED 0x01
 #define POPUPFLAG_ARROW 0x02
 #define POPUPFLAG_COLOR 0x20
 #define POPUP_REQUEST 0
-#define POPUP_PAPERDOLL 11
-#define POPUP_BACKPACK 12
-#define POPUP_PARTY_ADD 13
-#define POPUP_PARTY_REMOVE 14
-#define POPUP_TRADE_ALLOW 15
-#define POPUP_TRADE_REFUSE 16
-#define POPUP_TRADE_OPEN 17
-#define POPUP_BANKBOX 21
-#define POPUP_VENDORBUY 31
-#define POPUP_VENDORSELL 32
-#define POPUP_PETGUARD 41
-#define POPUP_PETFOLLOW 42
+#define POPUP_PAPERDOLL 520		//11
+#define POPUP_BACKPACK 302		//12
+#define POPUP_PARTY_ADD 810		//13
+#define POPUP_PARTY_REMOVE 811	//14
+#define POPUP_TRADE_ALLOW 1013	//15
+#define POPUP_TRADE_REFUSE 1014	//16
+#define POPUP_TRADE_OPEN 819	//17
+#define POPUP_BANKBOX 120		//21
+#define POPUP_VENDORBUY 110		//31
+#define POPUP_VENDORSELL 111	//32
+#define POPUP_PETGUARD 130		//41
+#define POPUP_PETFOLLOW 131		//42
 #define POPUP_PETDROP 43
-#define POPUP_PETKILL 44
-#define POPUP_PETSTOP 45
-#define POPUP_PETSTAY 46
-#define POPUP_PETFRIEND_ADD 47
-#define POPUP_PETFRIEND_REMOVE 48
-#define POPUP_PETTRANSFER 49
-#define POPUP_PETRELEASE 50
-#define POPUP_STABLESTABLE 51
-#define POPUP_STABLERETRIEVE 52
-#define POPUP_TRAINSKILL 100
+#define POPUP_PETKILL 134		//44
+#define POPUP_PETSTOP 135		//45
+#define POPUP_PETSTAY 137		//46
+#define POPUP_PETFRIEND_ADD 133	//47
+#define POPUP_PETFRIEND_REMOVE 140//48
+#define POPUP_PETTRANSFER 136	//49
+#define POPUP_PETRELEASE 138	//50
+#define POPUP_STABLESTABLE 400	//51
+#define POPUP_STABLERETRIEVE 401//52
+#define POPUP_TAME 301			//53
+#define POPUP_PETRENAME 919		//54
+#define POPUP_TRAINSKILL 200	//100
+
+/* This is a list of other context menu ID sphere do not use for now.
+OpenMap = 10
+TeleportVendor = 1015
+OpenVendorContainer = 1018
+NPCTalk = 303
+DigForTreasure = 305
+CancelProtection = 308
+EnablePVPWarning = 320
+ClaimBodRewards = 348
+BodRequest = 403
+ViewQuestLog = 404
+CancelQuest = 405
+QuestConversation = 406
+InsuranceMenu = 416
+ToggleItemInsurance = 418
+Bribe = 419
+OpenBackpackPet = 508
+SetSecurity = 600
+ReleaseCoOwnership = 602
+LeaveHouse = 604
+UnpackTransferCrate = 622
+LoadShuriken = 701
+QuestItem = 801
+SiegeBless = 820
+LoyaltyRating = 915
+TitlesMenu = 918
+EmergencyRepairs = 930
+PermanentRepairs = 931
+ShipSecurity = 934
+ResetShipSecurity = 935
+RenameShip = 936
+DryDockShip = 937
+MoveTillerman = 938
+MannequinCompareSlotItem = 956
+MannequinViewSuitStatsWithItems = 957
+MannequinViewStats = 958
+MannequinUseTransparentGump = 959
+MannequinCustomizeBody = 1003
+MannequinRotate = 1004
+MannequinRedeed = 1006
+VoidPool = 1010
+Retrieve = 1012
+SwitchMastery = 953
+VendorSearch = 1016
+AcceptFriendRequests = 1020
+RefuseFriendRequests = 1021
+RelocateContainer = 1022
+*/
 
 	PacketDisplayPopup* m_pPopupPacket;
 
@@ -723,7 +770,7 @@ public:
 
 	bool IsConnecting() const;
 
-	NetState* GetNetState(void) const { return m_net; };
+	CNetState* GetNetState(void) const { return m_net; };
 
 public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage
@@ -738,38 +785,33 @@ public:
 	CItemMultiCustom * m_pHouseDesign; // The building this client is designing
 
 public:
-	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
 	{
-		return m_BaseDefs.GetKeyStr( pszKey, fZero );
+		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
 	}
 
-	int64 GetDefNum( lpctstr pszKey ) const
+	int64 GetDefNum( lpctstr ptcKey ) const
 	{
-		return m_BaseDefs.GetKeyNum( pszKey );
+		return m_BaseDefs.GetKeyNum( ptcKey );
 	}
 
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
 	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
+		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
 	}
 
-	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
 	}
 
-	void DeleteDef(lpctstr pszKey)
+	void DeleteDef(lpctstr ptcKey)
 	{
-		m_BaseDefs.DeleteKey(pszKey);
+		m_BaseDefs.DeleteKey(ptcKey);
 	}
 
-#ifndef _MTNETWORK
-	friend class NetworkIn;
-	friend class NetworkOut;
-#else
-	friend class NetworkInput;
-	friend class NetworkOutput;
-#endif
+	friend class CNetworkInput;
+	friend class CNetworkOutput;
 	friend class PacketCreate;
 	friend class PacketServerRelay;
 };

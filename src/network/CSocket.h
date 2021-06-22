@@ -29,7 +29,18 @@
 #endif	// _WIN32
 
 
-struct CSocketAddressIP : public in_addr
+#ifdef _WIN32
+#	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); closesocket(_x_); }
+#else
+#	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); close(_x_); }
+#endif
+
+void AddSocketToSet(fd_set& fds, SOCKET socket, int& count);
+
+void CheckReportNetAPIErr(int retval, lpctstr ptcOperation);
+
+
+struct CSocketAddressIP : protected in_addr
 {
 	// Just the ip address. Not the port.
 #define SOCKET_LOCAL_ADDRESS 0x0100007f
@@ -55,8 +66,8 @@ public:
 	bool IsMatchIP( const CSocketAddressIP & ip ) const;
 
 	bool SetHostStruct( const struct hostent * pHost );
-
 	bool SetHostStr( lpctstr pszHostName );
+
 	bool operator==( const CSocketAddressIP & ip ) const;
 };
 
@@ -72,11 +83,14 @@ public:
 	CSocketAddress( in_addr dwIP, word uPort );
 	CSocketAddress( CSocketAddressIP ip, word uPort );
 	CSocketAddress( dword dwIP, word uPort );
-	explicit CSocketAddress( const sockaddr_in & SockAddrIn );
+	explicit CSocketAddress(const sockaddr_in & SockAddrIn);
+	explicit CSocketAddress(const CSocketAddressIP&) = delete;
+	explicit CSocketAddress(CSocketAddressIP&) = delete;
 	
 	bool operator==( const CSocketAddress & SockAddr ) const;
-	CSocketAddress & operator = ( const struct sockaddr_in & SockAddrIn );
 	bool operator==( const struct sockaddr_in & SockAddrIn ) const;
+	CSocketAddress& operator = (const struct sockaddr_in& SockAddrIn);
+	CSocketAddress& operator = (const CSocketAddressIP&) = delete;
 
 	// compare to sockaddr_in
 	struct sockaddr_in GetAddrPort() const;
@@ -137,6 +151,7 @@ public:
 
 	int SetSockOpt( int nOptionName, const void* optval, int optlen, int nLevel = SOL_SOCKET ) const;
 	int GetSockOpt( int nOptionName, void* optval, int * poptlen, int nLevel = SOL_SOCKET ) const;
+
 #ifdef _WIN32
 	int IOCtlSocket(int icmd, DWORD * pdwArgs );
 	int SendAsync( LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;
@@ -146,7 +161,7 @@ public:
 	int GetIOCtlSocketFlags( void );
 #endif
 
-	void SetNonBlocking(bool bEnable = true);
+	int SetNonBlocking(bool bEnable = true);
 	void Close();
 
 	static void CloseSocket( SOCKET hClose );

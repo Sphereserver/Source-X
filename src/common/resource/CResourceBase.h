@@ -11,6 +11,7 @@
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 #include "CResourceLink.h"
+#include "CResourceScript.h"
 #include "CResourceQty.h"
 
 
@@ -39,7 +40,7 @@ public:
 	lpctstr GetName() const;
     lpctstr ResourceGetName( const CResourceID& rid ) const;
 	CResourceScript * GetResourceFile( size_t i );
-    CResourceID ResourceGetIDParse( RES_TYPE restype, lpctstr &pszName, word wPage = 0 );
+    CResourceID ResourceGetID_Advance( RES_TYPE restype, lpctstr &pszName, word wPage = 0 );    // this moves forward (changes!) the ptcName pointer!
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage = 0 );
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
@@ -54,7 +55,7 @@ public:
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 
 	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
-	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical = true );
+	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
 public:

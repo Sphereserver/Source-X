@@ -1,29 +1,70 @@
 //
-// CSime.cpp
+// CSTime.cpp
 //
 // Replace the MFC CTime function. Must be usable with file system.
 //
 
+#include <cmath>
 #include "CSTime.h"
 #include "CSString.h"
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../common.h"
 
-#ifndef _WIN32
-#include <sys/time.h>
 
-llong GetSupportedTickCount()	// 64 bits tick count
-{
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (llong)(((ts.tv_sec * 10000) + (ts.tv_nsec / 100000)) / 10);
-}
+#ifdef _WIN32
+    #if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
+	    // We don't have GetSupportedTickCount on Windows versions previous to Vista. We need to check for overflows
+	    //  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
+	    //	with GetSupportedTickCount) manually every time we compare two values.
+
+        // Precision is in the order of 10-16 ms.
+	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount(); }
+    #else
+	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount64(); }
+    #endif
 #endif
 
 
 //**************************************************************
 // -CSTime - absolute time
+
+llong CSTime::GetPreciseSysTimeMicro() noexcept // static
+{
+#ifdef _WIN32
+	// From Windows documentation:
+	//	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
+	// Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
+	LARGE_INTEGER liQPCStart;
+	if (!QueryPerformanceCounter(&liQPCStart))
+		return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
+	return (llong)((liQPCStart.QuadPart * 1.0e6) / _kllTimeProfileFrequency);
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e3)); // microseconds
+#endif
+}
+
+llong CSTime::GetPreciseSysTimeMilli() noexcept // static
+{
+#ifdef _WIN32
+	LARGE_INTEGER liQPCStart;
+	if (!QueryPerformanceCounter(&liQPCStart))
+		return GetSupportedTickCount();
+	return (llong)((liQPCStart.QuadPart * 1.0e3) / _kllTimeProfileFrequency);
+#else
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (llong)((ts.tv_sec * (llong)1.0e3) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
+#endif
+}
+
+CSTime CSTime::GetCurrentTime()	// static
+{
+	// return the current system time
+	return CSTime(::time(nullptr));
+}
+
 
 CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 			   int nDST)
@@ -39,18 +80,12 @@ CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 	m_time = mktime(&atm);
 }
 
-CSTime::CSTime( struct tm atm )
+CSTime::CSTime( struct tm atm ) noexcept
 {
 	m_time = mktime(&atm);
 }
 
-CSTime CSTime::GetCurrentTime()	// static
-{
-	// return the current system time
-	return CSTime(::time(nullptr));
-}
-
-struct tm* CSTime::GetLocalTm(struct tm* ptm) const
+struct tm* CSTime::GetLocalTm(struct tm* ptm) const noexcept
 {
 	if (ptm != nullptr)
 	{
@@ -72,8 +107,8 @@ struct tm* CSTime::GetLocalTm(struct tm* ptm) const
 	#define maxTimeBufferSize 128
 #endif
 
-#ifdef _WIN32
-void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
+#if defined(_WIN32) && defined (_MSC_VER)
+static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
 	UNREFERENCED_PARAMETER(expression);
@@ -85,7 +120,7 @@ void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* f
 }
 #endif
 
-void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTemp)
+static void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTemp)
 {
 	ASSERT(pszTemp != nullptr);
 	ASSERT(pszFormat != nullptr);
@@ -174,100 +209,100 @@ bool CSTime::Read(tchar *pszVal)
 	atm.tm_isdst = 0;   // daylight savings time flag
 
 	// Saves: "1999/8/1 14:30:18"
-	atm.tm_year = ATOI(ppCmds[0]) - 1900;
-	atm.tm_mon = ATOI(ppCmds[1]) - 1;
-	atm.tm_mday = ATOI(ppCmds[2]);
-	atm.tm_hour = ATOI(ppCmds[3]);
-	atm.tm_min = ATOI(ppCmds[4]);
-	atm.tm_sec = ATOI(ppCmds[5]);
+	atm.tm_year = atoi(ppCmds[0]) - 1900;
+	atm.tm_mon = atoi(ppCmds[1]) - 1;
+	atm.tm_mday = atoi(ppCmds[2]);
+	atm.tm_hour = atoi(ppCmds[3]);
+	atm.tm_min = atoi(ppCmds[4]);
+	atm.tm_sec = atoi(ppCmds[5]);
 	m_time = mktime(&atm);
 
 	return true;
 }
 
-CSTime::CSTime()
+CSTime::CSTime() noexcept
 {
 	m_time = 0;
 }
 
-CSTime::CSTime(time_t time)
+CSTime::CSTime(time_t time) noexcept
 {
 	m_time = time;
 }
 
-CSTime::CSTime(const CSTime& timeSrc)
+CSTime::CSTime(const CSTime& timeSrc) noexcept
 {
 	m_time = timeSrc.m_time;
 }
 
-const CSTime& CSTime::operator=(const CSTime& timeSrc)
+const CSTime& CSTime::operator=(const CSTime& timeSrc) noexcept
 {
 	m_time = timeSrc.m_time;
 	return *this;
 }
 
-const CSTime& CSTime::operator=(time_t t)
+const CSTime& CSTime::operator=(time_t t) noexcept
 {
 	m_time = t;
 	return *this;
 }
 
-bool CSTime::operator<=( time_t t ) const
+bool CSTime::operator<=( time_t t ) const noexcept
 {
 	return( m_time <= t );
 }
 
-bool CSTime::operator==( time_t t ) const
+bool CSTime::operator==( time_t t ) const noexcept
 {
 	return( m_time == t );
 }
 
-bool CSTime::operator!=( time_t t ) const
+bool CSTime::operator!=( time_t t ) const noexcept
 {
 	return( m_time != t );
 }
 
-time_t CSTime::GetTime() const
+time_t CSTime::GetTime() const noexcept
 {
 	return m_time;
 }
 
-int CSTime::GetYear() const
+int CSTime::GetYear() const noexcept
 {
 	return (GetLocalTm(nullptr)->tm_year) + 1900;
 }
 
-int CSTime::GetMonth() const       // month of year (1 = Jan)
+int CSTime::GetMonth() const noexcept       // month of year (1 = Jan)
 {
 	return GetLocalTm(nullptr)->tm_mon + 1;
 }
 
-int CSTime::GetDay() const         // day of month
+int CSTime::GetDay() const noexcept         // day of month
 {
 	return GetLocalTm(nullptr)->tm_mday;
 }
 
-int CSTime::GetHour() const
+int CSTime::GetHour() const noexcept
 {
 	return GetLocalTm(nullptr)->tm_hour;
 }
 
-int CSTime::GetMinute() const
+int CSTime::GetMinute() const noexcept
 {
 	return GetLocalTm(nullptr)->tm_min;
 }
 
-void CSTime::Init()
+void CSTime::Init() noexcept
 {
 	m_time = -1;
 }
 
-bool CSTime::IsTimeValid() const
+bool CSTime::IsTimeValid() const noexcept
 {
 	return (( m_time && m_time != -1 ) ? true : false );
 }
 
-int CSTime::GetDaysTotal() const
+int CSTime::GetDaysTotal() const noexcept
 {
 	// Needs to be more consistant than accurate. just for compares.
 	return (( GetYear() * 366) + (GetMonth()*31) + GetDay() );

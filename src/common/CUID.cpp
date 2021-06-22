@@ -1,120 +1,107 @@
-
 #include "../game/chars/CChar.h"
 #include "../game/CWorld.h"
 #include "CUID.h"
 
 
-// -----------------------------
-//	CUIDBase
-// -----------------------------
-
-CObjBase * CUIDBase::ObjFind(dword dwPrivateUID)   // static
+CObjBase * CUID::ObjFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted) noexcept    // static
 {
     if ( IsResource(dwPrivateUID) || !IsValidUID(dwPrivateUID) )
         return nullptr;
-    return g_World.FindUID( dwPrivateUID & UID_O_INDEX_MASK );
+
+	CObjBase *pObj = g_World.FindUID(dwPrivateUID & UID_O_INDEX_MASK);
+
+	if (fInvalidateBeingDeleted && (!pObj || pObj->IsBeingDeleted()))
+		return nullptr;
+	return pObj;
 }
 
-CItem * CUIDBase::ItemFind(dword dwPrivateUID)    // static
+CItem * CUID::ItemFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted) noexcept     // static
 {
     // Does item still exist or has it been deleted?
     // IsItem() may be faster ?
-    return dynamic_cast<CItem *>(ObjFind(dwPrivateUID));
+    return dynamic_cast<CItem *>(ObjFindFromUID(dwPrivateUID, fInvalidateBeingDeleted));
 }
-CChar * CUIDBase::CharFind(dword dwPrivateUID)    // static
+CChar * CUID::CharFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted) noexcept    // static
 {
     // Does character still exists?
-    return dynamic_cast<CChar *>(ObjFind(dwPrivateUID));
-}
-
-CObjBase * CUIDBase::ObjFind() const
-{
-    return ObjFind(m_dwInternalVal);
-}
-CItem * CUIDBase::ItemFind() const 
-{
-    return ItemFind(m_dwInternalVal);
-}
-CChar * CUIDBase::CharFind() const
-{
-    return CharFind(m_dwInternalVal);
+    return dynamic_cast<CChar *>(ObjFindFromUID(dwPrivateUID, fInvalidateBeingDeleted));
 }
 
 
-bool CUIDBase::IsValidUID(dword dwPrivateUID) // static
+bool CUID::IsValidUID(dword dwPrivateUID) noexcept // static
 {
 	return ( dwPrivateUID && ( dwPrivateUID & UID_O_INDEX_MASK ) != UID_O_INDEX_MASK );
 }
 
-bool CUIDBase::IsResource(dword dwPrivateUID) // static
+bool CUID::IsResource(dword dwPrivateUID) noexcept  // static
 {
     return (dwPrivateUID & UID_F_RESOURCE);
 }
 
-bool CUIDBase::IsValidResource(dword dwPrivateUID) // static
+bool CUID::IsValidResource(dword dwPrivateUID) noexcept  // static
 {
     return (IsResource(dwPrivateUID) && IsValidUID(dwPrivateUID));
 }
 
-bool CUIDBase::IsItem(dword dwPrivateUID) 	// static
+bool CUID::IsItem(dword dwPrivateUID) noexcept 	// static
 {
-	if ( (dwPrivateUID & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )    // It's NOT a resource, and it's an item
-		return true;	// might be static in client ?
-	return false;
+	// It's NOT a resource, and it's an item
+	// might be static in client ?
+	return ((dwPrivateUID & (UID_F_RESOURCE | UID_F_ITEM)) == UID_F_ITEM);
 }
 
-bool CUIDBase::IsChar(dword dwPrivateUID) // static
+bool CUID::IsChar(dword dwPrivateUID) noexcept // static
 {
-	if ( ( dwPrivateUID & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )    // It's NOT a resource, and it's not an item
+	// It's NOT a resource, and it's not an item
+	if ( ( dwPrivateUID & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )
 		return IsValidUID(dwPrivateUID);
 	return false;
 }
 
 
-bool CUIDBase::IsObjDisconnected() const	// Not in the game world for some reason.
+bool CUID::IsObjDisconnected() const noexcept
 {
-	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_O_DISCONNECT)) == UID_O_DISCONNECT )
-		return true;
-	return false;
+	// Not in the game world for some reason.
+	return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == UID_O_DISCONNECT);
 }
 
-bool CUIDBase::IsObjTopLevel() const	// on the ground in the world.
+bool CUID::IsObjTopLevel() const noexcept
 {
-	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_O_DISCONNECT)) == 0 )
-		return true;	// might be static in client ?
-	return false;
+	// on the ground in the world.
+	// might be static in client ?
+	return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == 0);
 }
 
-bool CUIDBase::IsItemEquipped() const
+bool CUID::IsItemEquipped() const noexcept
 {
 	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM|UID_O_DISCONNECT)) == (UID_F_ITEM|UID_O_EQUIPPED))
 		return IsValidUID();
-	return false ;
+	return false;
 }
 
-bool CUIDBase::IsItemInContainer() const
+bool CUID::IsItemInContainer() const noexcept
 {
 	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM|UID_O_DISCONNECT)) == (UID_F_ITEM|UID_O_CONTAINED) )
 		return IsValidUID();
 	return false;
 }
 
-void CUIDBase::SetObjContainerFlags( dword dwFlags )
+void CUID::SetObjContainerFlags( dword dwFlags ) noexcept
 {
-	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | dwFlags;
+	m_dwInternalVal = (m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM)) | dwFlags;
 }
 
-void CUIDBase::RemoveObjFlags( dword dwFlags )
+void CUID::RemoveObjFlags( dword dwFlags ) noexcept
 {
     m_dwInternalVal &= ~dwFlags;
 }
 
-dword CUIDBase::GetObjUID() const
+dword CUID::GetObjUID() const noexcept
 {
 	return ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) );
 }
 
-void CUIDBase::SetObjUID( dword dwVal )
+void CUID::SetObjUID( dword dwVal ) noexcept
 {
 	// can be set to -1 by the client.
 	m_dwInternalVal = ( dwVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | UID_O_DISCONNECT;

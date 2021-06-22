@@ -157,9 +157,9 @@ void CStoneMember::SetAccountGold( int iGold )
 	m_Member.m_iAccountGold = iGold;
 }
 
-bool CStoneMember::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CStoneMember::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
-	UNREFERENCED_PARAMETER(pszKey);
+	UNREFERENCED_PARAMETER(ptcKey);
 	UNREFERENCED_PARAMETER(pRef);
 	return false;
 }
@@ -171,8 +171,8 @@ bool CStoneMember::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 
 	ASSERT(pSrc);
 
-	lpctstr pszKey = s.GetKey();
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+	lpctstr ptcKey = s.GetKey();
+	int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 	{
 		if ( r_LoadVal(s) ) // if it's successful all ok, else go on verb.
@@ -271,12 +271,13 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 }
 
 
-bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CStoneMember::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	if ( GetLinkUID().IsChar() )
 	{
@@ -310,10 +311,11 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 				sVal.FormatVal(IsAbbrevOn());
 				break;
 			default:
-			{
-				CScriptObj *pRef = GetLinkUID().CharFind();
-				return pRef->r_WriteVal(pszKey,sVal,pSrc);
-			}
+                if (!fNoCallParent)
+			    {
+				    CScriptObj *pRef = GetLinkUID().CharFind();
+				    return pRef->r_WriteVal(ptcKey,sVal,pSrc);
+			    }
 		}
 	}
 	else if ( GetLinkUID().IsItem() )
@@ -339,10 +341,11 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 				sVal.FormatVal(GetWeDeclaredWar());
 				break;
 			default:
-			{
-				CScriptObj *pRef = GetLinkUID().ItemFind();
-				return pRef->r_WriteVal(pszKey,sVal,pSrc);
-			}
+                if (!fNoCallParent)
+			    {
+				    CScriptObj *pRef = GetLinkUID().ItemFind();
+				    return pRef->r_WriteVal(ptcKey,sVal,pSrc);
+			    }
 		}
 	}
 
@@ -389,7 +392,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType,
 		}
 	}
 
-	pStone->InsertTail( this );
+	pStone->InsertContentTail( this );
 }
 
 CStoneMember::~CStoneMember()
@@ -434,10 +437,9 @@ lpctstr CStoneMember::GetPrivName() const
 	STONEPRIV_TYPE iPriv = GetPriv();
 
 	TemporaryString tsDefname;
-	tchar* pszDefname = static_cast<tchar *>(tsDefname);
-	sprintf(pszDefname, "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
+	snprintf(tsDefname.buffer(), tsDefname.capacity(), "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
 
-	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(pszDefname);
+	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(tsDefname);
 	if (pResult)
 		return pResult->GetValStr();
 	else

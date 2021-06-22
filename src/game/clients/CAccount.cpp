@@ -1,11 +1,14 @@
-
 #include "../../common/crypto/CMD5.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../network/CClientIterator.h"
 #include "../chars/CChar.h"
+#include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldGameTime.h"
 #include "CAccount.h"
 #include "CClient.h"
+#include <algorithm>
 
 
 //**********************************************************************
@@ -70,8 +73,8 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
 	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT) : (SPHERE_FILE "accu" SPHERE_SCRIPT);
 
-	strcpy(z, pszBaseDir);
-	strcat(z, pszBaseName);
+	Str_CopyLimitNull(z, pszBaseDir, STR_TEMPLENGTH);
+	Str_ConcatLimitNull(z, pszBaseName, STR_TEMPLENGTH);
 
 	CScript s;
 	if ( ! s.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE| ( fChanges ? OF_NONCRIT : 0) ))
@@ -83,7 +86,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 
 											//	auto-creating account files
 			if ( !Account_SaveAll() )
-				g_Log.Event(LOGL_FATAL|LOGM_INIT, "Can't open account file '%s'\n", static_cast<lpctstr>(s.GetFilePath()));
+				g_Log.Event(LOGL_FATAL|LOGM_INIT, "Can't open account file '%s'\n", s.GetFilePath());
 			else
 				return true;
 		}
@@ -94,8 +97,11 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	{
 		ASSERT( fChanges );
 		// empty the changes file.
+
 		s.Close();
-		s.Open(nullptr, OF_WRITE|OF_TEXT|OF_DEFAULTMODE);
+		if (!s.Open(nullptr, OF_WRITE | OF_TEXT | OF_DEFAULTMODE))
+			return false;
+
 		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT " file.\n"
 			"// All account changes should be made here.\n"
 			"// Use the /ACCOUNT UPDATE command to force accounts to update.\n"
@@ -171,7 +177,7 @@ CAccount * CAccounts::Account_Find( lpctstr pszName )
 		return nullptr;
 
 	size_t i = m_Accounts.FindKey(szName);
-	if ( i != m_Accounts.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 		return Account_Get(i);
 
 	return nullptr;
@@ -214,7 +220,7 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 		return false;
 	}
 
-	m_Accounts.DeleteObj( pAccount );
+	m_Accounts.RemovePtr( pAccount );
 	return true;
 }
 
@@ -247,7 +253,7 @@ CAccount * CAccounts::Account_Get( size_t index )
 	return static_cast <CAccount *>( m_Accounts[index] );
 }
 
-bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5 )
+bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg, bool md5 )
 {
 	ADDTOCALLSTACK("CAccounts::Cmd_AddNew");
 	if (pszName == nullptr || pszName[0] == '\0')
@@ -273,9 +279,9 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 
 	pAccount = new CAccount(szName);
 	ASSERT(pAccount);
-	pAccount->m_dateFirstConnect = pAccount->m_dateLastConnect = CSTime::GetCurrentTime();
+	pAccount->_dateConnectedFirst = pAccount->_dateConnectedLast = CSTime::GetCurrentTime();
 
-	pAccount->SetPassword(pszArg, md5);
+	pAccount->SetPassword(ptcArg, md5);
 	return true;
 }
 
@@ -304,7 +310,7 @@ lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs
 	"JAILED",
 	"UNUSED",
 	"UPDATE",
-	nullptr,
+	nullptr
 };
 
 bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr pszVerb, lpctstr pszArgs, dword dwMask)
@@ -329,11 +335,11 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 		if ( pAccount == nullptr )
 			break;
 
-		int iDaysAcc = pAccount->m_dateLastConnect.GetDaysTotal();
+		int iDaysAcc = pAccount->_dateConnectedLast.GetDaysTotal();
 		if ( ! iDaysAcc )
 		{
 			// account has never been used ? (get create date instead)
-			iDaysAcc = pAccount->m_dateFirstConnect.GetDaysTotal();
+			iDaysAcc = pAccount->_dateConnectedFirst.GetDaysTotal();
 		}
 
 		if ( (iDaysCur - iDaysAcc) < iDaysTest ) continue;
@@ -463,10 +469,12 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		CClient	*pClient = pAccount->FindClient();
 
 		char	*z = Str_GetTemp();
-		sprintf(z, "Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
+		snprintf(z, STR_TEMPLENGTH, 
+			"Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
-			pAccount->m_Last_IP.GetAddrStr(), pAccount->m_dateLastConnect.Format(nullptr),
-			( pClient ? ( pClient->GetChar() ? pClient->GetChar()->GetName() : "<not logged>" ) : "no" ));
+			pAccount->m_Last_IP.GetAddrStr(), pAccount->_dateConnectedLast.Format(nullptr),
+			( pClient ? ( pClient->GetChar() ? pClient->GetChar()->GetName() : "<not logged>" ) : "no" )
+		);
 		pSrc->SysMessage(z);
 		return true;
 	}
@@ -480,7 +488,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		else if (ppCmd[2] && ppCmd[2][0])
 			cmdArgs.Format("%s", ppCmd[2]);
 
-		CScript script( ppCmd[1], cmdArgs.GetPtr() );
+		CScript script( ppCmd[1], cmdArgs.GetBuffer() );
 
 		return pAccount->r_Verb( script, pSrc );
 	}
@@ -512,7 +520,7 @@ bool CAccount::NameStrip( tchar * pszNameOut, lpctstr pszNameInp )
 	return true;
 }
 
-static lpctstr const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
+static lpctstr constexpr sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 {
 	"Guest",		// 0 = This is just a guest account. (cannot PK)
 	"Player",		// 1 = Player or NPC.
@@ -561,8 +569,8 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
     _iMaxHouses = g_Cfg._iMaxHousesAccount;
     _iMaxShips = g_Cfg._iMaxShipsAccount;
 
-	m_Total_Connect_Time = 0;
-	m_Last_Connect_Time = 0;
+	_iTimeConnectedTotal = 0;
+	_iTimeConnectedLast = 0;
 	// Add myself to the list.
 	g_Accounts.Account_Add( this );
 }
@@ -625,6 +633,16 @@ CClient * CAccount::FindClient( const CClient * pExclude ) const
 	return( pClient );
 }
 
+byte CAccount::GetMaxChars() const
+{
+	return std::min((m_MaxChars > 0 ? m_MaxChars : g_Cfg.m_iMaxCharsPerAccount), MAX_CHARS_PER_ACCT);
+}
+
+void CAccount::SetMaxChars(byte chars)
+{
+	m_MaxChars = minimum(chars, MAX_CHARS_PER_ACCT);
+}
+
 bool CAccount::IsMyAccountChar( const CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CAccount::IsMyAccountChar");
@@ -657,7 +675,7 @@ size_t CAccount::AttachChar( CChar * pChar )
 
 	// is it already linked ?
 	size_t i = m_Chars.AttachChar( pChar );
-	if ( i != m_Chars.BadIndex() )
+	if ( i != SCONT_BADINDEX )
 	{
 		size_t iQty = m_Chars.GetCharCount();
 		if ( iQty > MAX_CHARS_PER_ACCT )
@@ -692,7 +710,7 @@ void CAccount::OnLogin( CClient * pClient )
 	ADDTOCALLSTACK("CAccount::OnLogin");
 
 	ASSERT(pClient);
-	pClient->m_timeLogin = g_World.GetCurrentTime().GetTimeRaw();	// g_World clock of login time. "LASTCONNECTTIME"
+	pClient->m_timeLogin = CWorldGameTime::GetCurrentTime().GetTimeRaw();	// g_World clock of login time. "LASTCONNECTTIME"
 
 	if ( GetPrivLevel() >= PLEVEL_Counsel )	// ON by default.
 	{
@@ -702,10 +720,10 @@ void CAccount::OnLogin( CClient * pClient )
 	// Get the real world time/date.
 	CSTime datetime = CSTime::GetCurrentTime();
 
-	if ( !m_Total_Connect_Time )	// first time - save first ip and timestamp
+	if ( !_iTimeConnectedTotal )	// first time - save first ip and timestamp
 	{
-		m_First_IP = pClient->GetPeer();
-		m_dateFirstConnect = datetime;
+		m_First_IP.SetAddrIP(pClient->GetPeer().GetAddrIP());
+		_dateConnectedFirst = datetime;
 	}
 
 	if ( pClient->GetConnectType() == CONNECT_TELNET )
@@ -717,29 +735,29 @@ void CAccount::OnLogin( CClient * pClient )
 	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Login for account '%s'. IP='%s'. ConnectionType: %s.\n",
 		pClient->GetSocketID(), GetName(), pClient->GetPeerStr(), pClient->GetConnectTypeStr(pClient->GetConnectType()) );
 
-	m_Last_IP = pClient->GetPeer();
-	//m_TagDefs.SetStr("LastLogged", false, m_dateLastConnect.Format(nullptr));
-	//m_dateLastConnect = datetime;
+	m_Last_IP.SetAddrIP(pClient->GetPeer().GetAddrIP());
+	//m_TagDefs.SetStr("LastLogged", false, _dateConnectedLast.Format(nullptr));
+	//_dateConnectedLast = datetime;
 }
 
-void CAccount::OnLogout(CClient *pClient, bool bWasChar)
+void CAccount::OnLogout(CClient *pClient, bool fWasChar)
 {
 	ADDTOCALLSTACK("CAccount::OnLogout");
 	ASSERT(pClient);
 
 	if ( pClient->GetConnectType() == CONNECT_TELNET ) // unlink the admin client.
-		g_Serv.m_iAdminClients --;
+		-- g_Serv.m_iAdminClients;
 
 	// calculate total game time. skip this calculation in
 	// case if it was login type packet. it has the same type,
 	// so we should check whatever player is attached to a char
-	if ( pClient->IsConnectTypePacket() && bWasChar )
+	if ( pClient->IsConnectTypePacket() && fWasChar )
 	{
-		m_Last_Connect_Time = ( -g_World.GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
-		if ( m_Last_Connect_Time < 0 )
-			m_Last_Connect_Time = 0;
+		_iTimeConnectedLast = (CWorldGameTime::GetCurrentTime().GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
+		if ( _iTimeConnectedLast < 0 )
+			_iTimeConnectedLast = 0;
 
-		m_Total_Connect_Time += m_Last_Connect_Time;
+		_iTimeConnectedTotal += _iTimeConnectedLast;
 	}
 }
 
@@ -761,12 +779,11 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 	lpctstr pszAction = fBlock ? "KICK" : "DISCONNECT";
 
 	tchar * z = Str_GetTemp();
-	sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
+	snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
 	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s.\n", z);
 
 	return true;
 }
-
 
 bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 {
@@ -778,7 +795,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 	int iAccountMaxTries = g_Cfg.m_iClientLoginMaxTries;
 	bool bReturn = true;
 	dword dwCurrentIP = csaPeerName.GetAddrIP();
-	int64 timeCurrent = g_World.GetCurrentTime().GetTimeRaw();
+	int64 timeCurrent = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	BlockLocalTime_t::iterator itData = m_BlockIP.find(dwCurrentIP);
 	if ( itData != m_BlockIP.end() )
@@ -787,7 +804,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 		TimeTriesStruct_t & ttsData = itResult.first;
 		ttsData.m_Last = timeCurrent;
 
-		if ( ttsData.m_Delay > timeCurrent )
+		if ( ttsData.m_vcDelay > timeCurrent )
 		{
 			bReturn = false;
 		}
@@ -796,7 +813,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 			if ((( ttsData.m_Last - ttsData.m_First ) > 15* MSECS_PER_SEC) && (itResult.second < iAccountMaxTries))
 			{
 				ttsData.m_First = timeCurrent;
-				ttsData.m_Delay = 0;
+				ttsData.m_vcDelay = 0;
 				itResult.second = 0;
 			}
 			else
@@ -805,13 +822,13 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 
 				if ( itResult.second > iAccountMaxTries )
 				{
-					ttsData.m_First = ttsData.m_Delay;
-					ttsData.m_Delay = 0;
+					ttsData.m_First = ttsData.m_vcDelay;
+					ttsData.m_vcDelay = 0;
 					itResult.second = 0;
 				}
 				else if ( itResult.second == iAccountMaxTries )
 				{
-					ttsData.m_Delay = ttsData.m_Last + (llong)(g_Cfg.m_iClientLoginTempBan);
+					ttsData.m_vcDelay = ttsData.m_Last + (llong)(g_Cfg.m_iClientLoginTempBan);
 					bReturn = false;
 				}
 			}
@@ -824,7 +841,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 		TimeTriesStruct_t ttsData;
 		ttsData.m_First = timeCurrent;
 		ttsData.m_Last = timeCurrent;
-		ttsData.m_Delay = 0;
+		ttsData.m_vcDelay = 0;
 
 		m_BlockIP[dwCurrentIP] = std::make_pair(ttsData, 0);
 	}
@@ -846,7 +863,7 @@ void CAccount::ClearPasswordTries(bool bAll)
 		return;
 	}
 
-	llong timeCurrent = g_World.GetCurrentTime().GetTimeRaw();
+	llong timeCurrent = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	for ( BlockLocalTime_t::iterator itData = m_BlockIP.begin(), end = m_BlockIP.end(); itData != end; )
 	{
 		BlockLocalTimePair_t itResult = (*itData).second;
@@ -903,7 +920,7 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 		// using the new password.
 		// kill the old password.
 		SetPassword( m_sNewPassword );
-		m_sNewPassword.Empty();
+		m_sNewPassword.Clear();
 		return true;
 	}
 
@@ -925,7 +942,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		CScriptTriggerArgs Args;
 		Args.Init(GetName());
 		Args.m_VarsLocal.SetStrNew("password",pszPassword);
-        Args.m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetPtr());
+        Args.m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetBuffer());
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
 		g_Serv.r_Call("f_onaccount_pwchange", &g_Serv, &Args, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )
@@ -944,7 +961,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 
 	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
-	strncpynull(actualPassword, pszPassword, actualPasswordBufferSize);
+	Str_CopyLimitNull(actualPassword, pszPassword, actualPasswordBufferSize);
 
 	if ( useMD5 )
 	{
@@ -1007,7 +1024,24 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 
 	m_sNewPassword = pszPassword;
 	if ( m_sNewPassword.GetLength() > MAX_ACCOUNT_PASSWORD_ENTER )
-		m_sNewPassword.SetLength(MAX_ACCOUNT_PASSWORD_ENTER);
+		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_ENTER);
+}
+
+bool CAccount::SetResDisp(byte what)
+{
+	if (what >= RDS_T2A && what < RDS_QTY)
+	{
+		m_ResDisp = what;
+		return true;
+	}
+	return false;
+}
+
+bool CAccount::SetGreaterResDisp(byte what)
+{
+	if (what > m_ResDisp)
+		return SetResDisp(what);
+	return false;
 }
 
 // Set account RESDISP automatically based on player client version
@@ -1017,19 +1051,20 @@ bool CAccount::SetAutoResDisp(CClient *pClient)
 	if ( !pClient )
 		return false;
 
-	if ( pClient->GetNetState()->isClientVersion(MINCLIVER_TOL) )
+	const CNetState* pNS = pClient->GetNetState();
+	if (pNS->isClientVersion(MINCLIVER_TOL))
 		return SetResDisp(RDS_TOL);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_HS) )
+	else if (pNS->isClientVersion(MINCLIVER_HS))
 		return SetResDisp(RDS_HS);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_SA) )
+	else if (pNS->isClientVersion(MINCLIVER_SA))
 		return SetResDisp(RDS_SA);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_ML) )
+	else if (pNS->isClientVersion(MINCLIVER_ML))
 		return SetResDisp(RDS_ML);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_SE) )
+	else if (pNS->isClientVersion(MINCLIVER_SE))
 		return SetResDisp(RDS_SE);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_AOS) )
+	else if (pNS->isClientVersion(MINCLIVER_AOS))
 		return SetResDisp(RDS_AOS);
-	else if ( pClient->GetNetState()->isClientVersion(MINCLIVER_LBR) )
+	else if (pNS->isClientVersion(MINCLIVER_LBR))
 		return SetResDisp(RDS_LBR);
 	else
 		return SetResDisp(RDS_T2A);
@@ -1053,6 +1088,7 @@ enum AC_TYPE
 	AC_LASTIP,
 	AC_MAXCHARS,
     AC_MAXHOUSES,
+	AC_MAXSHIPS,
 	AC_MD5PASSWORD,
 	AC_NAME,
 	AC_NEWPASSWORD,
@@ -1062,6 +1098,7 @@ enum AC_TYPE
 	AC_RESDISP,
 	AC_TAG,
 	AC_TAG0,
+	AC_TAGAT,
 	AC_TAGCOUNT,
 	AC_TOTALCONNECTTIME,
 	AC_QTY
@@ -1085,6 +1122,7 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"LASTIP",
 	"MAXCHARS",
     "MAXHOUSES",
+	"MAXSHIPS",
 	"MD5PASSWORD",
 	"NAME",
 	"NEWPASSWORD",
@@ -1094,39 +1132,41 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"RESDISP",
 	"TAG",
 	"TAG0",
+	"TAGAT",
 	"TAGCOUNT",
 	"TOTALCONNECTTIME",
-	nullptr,
+	nullptr
 };
 
-bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CAccount::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CAccount::r_GetRef");
-	if ( ! strnicmp( pszKey, "CHAR.", 5 ))
+	if ( ! strnicmp( ptcKey, "CHAR.", 5 ))
 	{
 		// How many chars.
-		pszKey += 5;
-		size_t i = Exp_GetVal(pszKey);
+		ptcKey += 5;
+		size_t i = Exp_GetSTVal(ptcKey);
 		if ( m_Chars.IsValidIndex(i) )
 		{
 			pRef = m_Chars.GetChar(i).CharFind();
 		}
-		SKIP_SEPARATORS(pszKey);
+		SKIP_SEPARATORS(ptcKey);
 		return true;
 	}
-	return( CScriptObj::r_GetRef( pszKey, pRef ));
+	return CScriptObj::r_GetRef( ptcKey, pRef );
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
+bool CAccount::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
+    UNREFERENCED_PARAMETER(fNoCallChildren);
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( !pSrc )
 		return false;
 
-	bool	fZero	= false;
+	bool fZero = false;
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case AC_NAME:
 		case AC_ACCOUNT:
@@ -1141,11 +1181,47 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case AC_CHATNAME:
 			sVal = m_sChatName;
 			break;
+		case AC_TAGAT:
+			{
+				ptcKey += 5;	// eat the 'TAGAT'
+ 				if ( *ptcKey == '.' )	// do we have an argument?
+ 				{
+ 					SKIP_SEPARATORS( ptcKey );
+ 					size_t iQty = Exp_GetSTVal( ptcKey );
+					if ( iQty >= m_TagDefs.GetCount() )
+ 						return false; // trying to get non-existant tag
+
+ 					const CVarDefCont * pTagAt = m_TagDefs.GetAt( iQty );
+ 					if ( !pTagAt )
+ 						return false; // trying to get non-existant tag
+
+ 					SKIP_SEPARATORS( ptcKey );
+ 					if ( ! *ptcKey )
+ 					{
+ 						sVal.Format("%s=%s", pTagAt->GetKey(), pTagAt->GetValStr());
+ 					}
+ 					else if ( !strnicmp( ptcKey, "KEY", 3 )) // key?
+ 					{
+ 						sVal = pTagAt->GetKey();
+ 					}
+ 					else if ( !strnicmp( ptcKey, "VAL", 3 )) // val?
+ 					{
+ 						sVal = pTagAt->GetValStr();
+ 					}
+                    else
+                    {
+                        return false;
+                    }
+                    break;
+ 				}
+			return false;
+			}
+			break;
 		case AC_TAGCOUNT:
 			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case AC_FIRSTCONNECTDATE:
-			sVal = m_dateFirstConnect.Format(nullptr);
+			sVal = _dateConnectedFirst.Format(nullptr);
 			break;
 		case AC_FIRSTIP:
 			sVal = m_First_IP.GetAddrStr();
@@ -1163,10 +1239,10 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatHex( m_uidLastChar );
 			break;
 		case AC_LASTCONNECTDATE:
-			sVal = m_dateLastConnect.Format(nullptr);
+			sVal = _dateConnectedLast.Format(nullptr);
 			break;
 		case AC_LASTCONNECTTIME:
-			sVal.FormatLLVal( m_Last_Connect_Time );
+			sVal.FormatLLVal( _iTimeConnectedLast );
 			break;
 		case AC_LASTIP:
 			sVal = m_Last_IP.GetAddrStr();
@@ -1175,8 +1251,11 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( GetMaxChars() );
 			break;
         case AC_MAXHOUSES:
-            sVal.FormatUCVal(_iMaxHouses);
+            sVal.FormatU8Val(_iMaxHouses);
             break;
+		case AC_MAXSHIPS:
+			sVal.FormatU8Val(_iMaxShips);
+			break;
 		case AC_PLEVEL:
 			sVal.FormatVal( m_PrivLevel );
 			break;
@@ -1204,22 +1283,23 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( m_ResDisp );
 			break;
 		case AC_TAG0:
-			fZero	= true;
-			pszKey++;
+			fZero = true;
+			++ptcKey;
+			FALLTHROUGH;
 		case AC_TAG:			// "TAG" = get/set a local tag.
 			{
-				if ( pszKey[3] != '.' )
+				if ( ptcKey[3] != '.' )
 					return false;
-				pszKey += 4;
-				sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
-				return true;
+				ptcKey += 4;
+				sVal = m_TagDefs.GetKeyStr(ptcKey, fZero );
+				break;
 			}
 		case AC_TOTALCONNECTTIME:
-			sVal.FormatLLVal( m_Total_Connect_Time );
+			sVal.FormatLLVal( _iTimeConnectedTotal );
 			break;
 
 		default:
-			return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+			return ( fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ) );
 	}
 	return true;
 	EXC_CATCH;
@@ -1257,7 +1337,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			// just ignore this ? chars are loaded later !
 			if ( ! g_Serv.IsLoading())
 			{
-				CUID uid( s.GetArgVal());
+				const CUID uid( s.GetArgVal());
 				CChar * pChar = uid.CharFind();
 				if (pChar == nullptr)
 				{
@@ -1276,7 +1356,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			m_sChatName = s.GetArgStr();
 			break;
 		case AC_FIRSTCONNECTDATE:
-			m_dateFirstConnect.Read( s.GetArgStr());
+			_dateConnectedFirst.Read( s.GetArgStr());
 			break;
 		case AC_FIRSTIP:
 			m_First_IP.SetAddrStr( s.GetArgStr());
@@ -1306,24 +1386,27 @@ bool CAccount::r_LoadVal( CScript & s )
 			m_lang.Set( s.GetArgStr());
 			break;
 		case AC_LASTCHARUID:
-			m_uidLastChar = s.GetArgVal();
+			m_uidLastChar.SetObjUID(s.GetArgDWVal());
 			break;
 		case AC_LASTCONNECTDATE:
-			m_dateLastConnect.Read( s.GetArgStr());
+			_dateConnectedLast.Read( s.GetArgStr());
 			break;
 		case AC_LASTCONNECTTIME:
 			// Previous total amount of time in game
-			m_Last_Connect_Time = s.GetArgVal();
+			_iTimeConnectedLast = s.GetArgLLVal();
 			break;
 		case AC_LASTIP:
 			m_Last_IP.SetAddrStr( s.GetArgStr());
 			break;
 		case AC_MAXCHARS:
-			SetMaxChars( (uchar)(s.GetArgVal()) );
+			SetMaxChars( s.GetArgUCVal() );
 			break;
         case AC_MAXHOUSES:
             _iMaxHouses = s.GetArgUCVal();
             break;
+		case AC_MAXSHIPS:
+			_iMaxHouses = s.GetArgUCVal();
+			break;
 		case AC_MD5PASSWORD:
 			SetPassword( s.GetArgStr(), true);
 			break;
@@ -1347,22 +1430,22 @@ bool CAccount::r_LoadVal( CScript & s )
 		case AC_RESDISP:
 			SetResDisp(s.GetArgBVal());
 			break;
+
 		case AC_TAG0:
-			{
-				bool fQuoted = false;
-				m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), true );
-			}
-			return true;
-		case AC_TAG:
-			{
-				bool fQuoted = false;
-				m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ));
-			}
-			return true;
+        case AC_TAG:
+        {
+            const bool fZero = (i == AC_TAG0);
+            lpctstr ptcKey = s.GetKey();
+            ptcKey += (fZero ? 5 : 4);
+            bool fQuoted = false;
+            lpctstr ptcArg = s.GetArgStr(&fQuoted);
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, fZero);
+        }
+        break;
 
 		case AC_TOTALCONNECTTIME:
 			// Previous total amount of time in game
-			m_Total_Connect_Time = s.GetArgVal();
+			_iTimeConnectedTotal = s.GetArgLLVal();
 			break;
 
 		default:
@@ -1383,11 +1466,11 @@ void CAccount::r_Write(CScript &s)
 	if ( GetPrivLevel() >= PLEVEL_QTY )
 		return;
 
-	s.WriteSection("%s", static_cast<lpctstr>(m_sName));
+	s.WriteSection("%s", m_sName.GetBuffer());
 
 	if ( GetPrivLevel() != PLEVEL_Player )
 	{
-		s.WriteKey( "PLEVEL", sm_szPrivLevels[ GetPrivLevel() ] );
+		s.WriteKeyStr( "PLEVEL", sm_szPrivLevels[ GetPrivLevel() ] );
 	}
 	if ( m_PrivFlags != PRIV_DETAIL )
 	{
@@ -1411,23 +1494,23 @@ void CAccount::r_Write(CScript &s)
 	}
 	if ( ! m_sCurPassword.IsEmpty())
 	{
-		s.WriteKey( "PASSWORD", GetPassword() );
+		s.WriteKeyStr( "PASSWORD", GetPassword() );
 	}
 	if ( ! m_sNewPassword.IsEmpty())
 	{
-		s.WriteKey( "NEWPASSWORD", GetNewPassword() );
+		s.WriteKeyStr( "NEWPASSWORD", GetNewPassword() );
 	}
-	if ( m_Total_Connect_Time )
+	if ( _iTimeConnectedTotal )
 	{
-		s.WriteKeyVal( "TOTALCONNECTTIME", m_Total_Connect_Time );
+		s.WriteKeyVal( "TOTALCONNECTTIME", _iTimeConnectedTotal );
 	}
-	if ( m_Last_Connect_Time )
+	if ( _iTimeConnectedLast )
 	{
-		s.WriteKeyVal( "LASTCONNECTTIME", m_Last_Connect_Time );
+		s.WriteKeyVal( "LASTCONNECTTIME", _iTimeConnectedLast );
 	}
 	if ( m_uidLastChar.IsValidUID())
 	{
-		s.WriteKeyHex( "LASTCHARUID", m_uidLastChar );
+		s.WriteKeyHex( "LASTCHARUID", m_uidLastChar.GetObjUID() );
 	}
     if (_iMaxHouses != g_Cfg._iMaxHousesAccount)
     {
@@ -1440,30 +1523,30 @@ void CAccount::r_Write(CScript &s)
 
 	m_Chars.WritePartyChars(s);
 
-	if ( m_dateFirstConnect.IsTimeValid())
+	if ( _dateConnectedFirst.IsTimeValid())
 	{
-		s.WriteKey( "FIRSTCONNECTDATE", m_dateFirstConnect.Format(nullptr));
+		s.WriteKeyStr( "FIRSTCONNECTDATE", _dateConnectedFirst.Format(nullptr));
 	}
 	if ( m_First_IP.IsValidAddr() )
 	{
-		s.WriteKey( "FIRSTIP", m_First_IP.GetAddrStr());
+		s.WriteKeyStr( "FIRSTIP", m_First_IP.GetAddrStr());
 	}
 
-	if ( m_dateLastConnect.IsTimeValid())
+	if ( _dateConnectedLast.IsTimeValid())
 	{
-		s.WriteKey( "LASTCONNECTDATE", m_dateLastConnect.Format(nullptr));
+		s.WriteKeyStr( "LASTCONNECTDATE", _dateConnectedLast.Format(nullptr));
 	}
 	if ( m_Last_IP.IsValidAddr() )
 	{
-		s.WriteKey( "LASTIP", m_Last_IP.GetAddrStr());
+		s.WriteKeyStr( "LASTIP", m_Last_IP.GetAddrStr());
 	}
 	if ( ! m_sChatName.IsEmpty())
 	{
-		s.WriteKey( "CHATNAME", static_cast<lpctstr>(m_sChatName));
+		s.WriteKeyStr( "CHATNAME", m_sChatName.GetBuffer());
 	}
 	if ( m_lang.IsDef())
 	{
-		s.WriteKey( "LANG", m_lang.GetStr());
+		s.WriteKeyStr( "LANG", m_lang.GetStr());
 	}
 
 	// Write New variables
@@ -1495,31 +1578,32 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	lpctstr pszKey = s.GetKey();
+	lpctstr ptcKey = s.GetKey();
 
 	// can't change accounts higher than you in any way
 	if (( pSrc->GetPrivLevel() < GetPrivLevel() ) &&  ( pSrc->GetPrivLevel() < PLEVEL_Admin ))
 		return false;
 
-	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
+	if ( !strnicmp(ptcKey, "CLEARTAGS", 9) )
 	{
-		pszKey = s.GetArgStr();
-		SKIP_SEPARATORS(pszKey);
-		m_TagDefs.ClearKeys(pszKey);
+		ptcKey = s.GetArgStr();
+		SKIP_SEPARATORS(ptcKey);
+		m_TagDefs.ClearKeys(ptcKey);
 		return true;
 	}
 
 	int i = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( i < 0 )
 	{
-		bool bLoad = CScriptObj::r_Verb( s, pSrc );
-		if ( !bLoad ) //try calling custom functions
+		bool fLoad = CScriptObj::r_Verb( s, pSrc );
+		if ( !fLoad ) //try calling custom functions
 		{
+            // RES_FUNCTION call
 			CSString sVal;
 			CScriptTriggerArgs Args( s.GetArgRaw() );
-			bLoad = r_Call( pszKey, pSrc, &Args, &sVal );
+			fLoad = r_Call( ptcKey, pSrc, &Args, &sVal );
 		}
-		return bLoad;
+		return fLoad;
 	}
 
 	switch ( i )
@@ -1536,15 +1620,17 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 
 				char *z = Str_GetTemp();
-				sprintf(z, "Account %s deleted.\n", sCurrentName);
-
-				if ( !g_Accounts.Account_Delete(this) )
+				if (g_Accounts.Account_Delete(this))
 				{
-					sprintf(z, "Cannot delete account %s.\n", sCurrentName);
+					snprintf(z, STR_TEMPLENGTH, "Account %s deleted.\n", sCurrentName);
+				}
+				else
+				{
+					snprintf(z, STR_TEMPLENGTH, "Cannot delete account %s.\n", sCurrentName);
 				}
 
 				g_Log.EventStr(0, z);
-				if ( pSrc != &g_Serv )
+				if (pSrc && (pSrc != &g_Serv))
 					pSrc->SysMessage(z);
 
 				return true;

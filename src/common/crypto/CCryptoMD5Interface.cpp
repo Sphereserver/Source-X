@@ -6,11 +6,11 @@
 void CCrypto::InitMD5(byte * ucInitialize)
 {
 	ADDTOCALLSTACK("CCrypto::InitMD5");
-	md5_position = 0;
+	m_md5_position = 0;
 
-	md5_engine->update( ucInitialize, TFISH_RESET );
-	md5_engine->finalize();
-	md5_engine->numericDigest( &md5_digest[0] );
+	m_md5_engine->update( ucInitialize, TFISH_RESET );
+	m_md5_engine->finalize();
+	m_md5_engine->numericDigest( &m_md5_digest[0] );
 }
 
 bool CCrypto::EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
@@ -21,8 +21,8 @@ bool CCrypto::EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, si
 	{
         if (i >= outLen)
             return false; // error: i'm trying to write more bytes than the output buffer length
-		pOutput[i] = pInput[i] ^ md5_digest[md5_position++];
-		md5_position &= MD5_RESET;
+		pOutput[i] = pInput[i] ^ m_md5_digest[m_md5_position++];
+		m_md5_position &= MD5_RESET;
 	}
     return true;
 }

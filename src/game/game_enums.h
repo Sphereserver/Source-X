@@ -15,7 +15,8 @@ enum ePayGold
 
 enum RESDISPLAY_VERSION
 {
-	RDS_T2A = 1,
+	RDS_PRET2A,
+	RDS_T2A,
 	RDS_LBR,
 	RDS_AOS,
 	RDS_SE,
@@ -27,27 +28,6 @@ enum RESDISPLAY_VERSION
 	RDS_QTY
 };
 
-
-enum TOOLTIPMODE_TYPE
-{
-	TOOLTIPMODE_SENDFULL = 0x00,	// always send full tooltip packet
-	TOOLTIPMODE_SENDVERSION = 0x01	// send version packet and wait for client to request full tooltip
-};
-
-enum RACIALFLAGS_TYPE
-{
-	RACIALF_HUMAN_STRONGBACK = 0x0001,		// Increase carrying capacity (+60 stones of weight)
-	RACIALF_HUMAN_TOUGH = 0x0002,		// Regenerate hitpoints faster (+2 Hit Point Regeneration)
-	RACIALF_HUMAN_WORKHORSE = 0x0004,		// Find more resources while gathering hides, ore and lumber
-	RACIALF_HUMAN_JACKOFTRADES = 0x0008,		// Skill calculations always consider 20.0 minimum ability on untrained skills
-	RACIALF_ELF_NIGHTSIGHT = 0x0010,		// Permanent night sight effect
-	RACIALF_ELF_DIFFTRACK = 0x0020,		// Increase difficulty to be tracked while hidden/invisible
-	RACIALF_ELF_WISDOM = 0x0040,		// Permanent max mana bonus (+20 Mana Increase)
-	RACIALF_GARG_FLY = 0x0080,		// Enable gargoyle fly ability (FEATURE_AOS_UPDATE_B is required to enable gargoyle ability book)
-	RACIALF_GARG_BERSERK = 0x0100,		// Increase ferocity in situations of danger (15% Damage Increase + 3% Spell Damage Increase for each 20hp lost)
-	RACIALF_GARG_DEADLYAIM = 0x0200,		// Throwing calculations always consider 20.0 minimum ability when untrained
-	RACIALF_GARG_MYSTICINSIGHT = 0x0400		// Mysticism calculations always consider 30.0 minimum ability when untrained
-};
 
 //////////////////////////////////////////////////////////////////////////
 // Combat
@@ -80,66 +60,6 @@ enum BODYPART_TYPE
 
     BODYPART_QTY
 };
-
-enum COMBATFLAGS_TYPE
-{
-    COMBAT_NODIRCHANGE          = 0x1,	    // not rotate player when fighting
-    COMBAT_FACECOMBAT           = 0x2,	    // allow faced combat only
-    COMBAT_PREHIT               = 0x4,	    // allow prehit for close combat. first hit is instant (delay 0.1sec)
-    COMBAT_ELEMENTAL_ENGINE     = 0x8,	    // use DAM*/RES* to split damage/resist into Physical/Fire/Cold/Poison/Energy (AOS) instead use old AR (pre-AOS)
-    COMBAT_DCLICKSELF_UNMOUNTS  = 0x20,	    // unmount horse when dclicking self while in warmode
-    COMBAT_ALLOWHITFROMSHIP     = 0x40,     // allow attacking opponents from ships
-    COMBAT_ARCHERYCANMOVE       = 0x100,    // allow firing bow while moving
-    COMBAT_STAYINRANGE          = 0x200,    // must be in range at the end of the swing or the hit will miss
-    COMBAT_STACKARMOR           = 0x1000,   // if a region is covered by more than one armor part, all AR will count
-    COMBAT_NOPOISONHIT          = 0x2000,   // Disables old (55i like) poisoning style: Poisoning > 30.0 && (RAND(100.0)> Poisoning) for monsters OR weapon.morez && (RAND(100) < weapon.morez ) for poisoned weapons.
-    COMBAT_SLAYER               = 0x4000,    // Enables Slayer damage on PVM combat.
-    COMBAT_SWING_NORANGE        = 0x8000,
-    COMBAT_ANIM_HIT_SMOOTH      = 0x10000
-};
-
-//////////////////////////////////////////////////////////////////////////
-//Parrying behaviour
-enum PARRYFLAGS_TYPE
-{
-	PARRYERA_PRESEFORMULA = 0x1,	// pre - SE parrying chance formula(not using the Bushido skill).Mutually exclusive with 02 flag.
-	PARRYERA_SEFORMULA = 0x2,		// SE parrying chance formula (using also the Bushido skill). Mutually exclusive with 01 flag.
-	PARRYERA_SHIELDBLOCK = 0x10,	// can parry with a shield
-	PARRYERA_ONEHANDBLOCK = 0x20,	// can parry with a one-handed weapon without a shield
-	PARRYERA_TWOHANDBLOCK = 0x40,	// can parry with two handed weapons
-	PARRYERA_ARSCALING = 0x80 // Shields AR scales with Parrying skill, not compatible with Combat Elemental Engine.
-};
-//////////////////////////////////////////////////////////////////////////
-//Magic
-
-enum MAGICFLAGS_TYPE
-{
-    MAGICF_NODIRCHANGE          = 0x0000001,    // not rotate player when casting/targeting
-    MAGICF_PRECAST              = 0x0000002,    // use precasting (cast spell before targeting)
-    MAGICF_IGNOREAR             = 0x0000004,    // magic ignore ar
-    MAGICF_CANHARMSELF          = 0x0000008,    // i can do damage on self
-    MAGICF_STACKSTATS           = 0x0000010,    // allow multiple stat spells at once
-    MAGICF_FREEZEONCAST         = 0x0000020,    // disallow movement whilst casting
-    MAGICF_SUMMONWALKCHECK      = 0x0000040,    // disallow summoning creatures to places they can't normally step
-    MAGICF_NOFIELDSOVERWALLS    = 0x0000080,    // prevent fields from being formed over blocking objects.
-    MAGICF_NOANIM               = 0x0000100,    // auto spellflag_no_anim on all spells
-    MAGICF_OSIFORMULAS          = 0x0000200,    // calculated damage and duration based on OSI formulas
-    MAGICF_NOCASTFROZENHANDS    = 0x0000400,    // can't cast spells if got paralyzed holding something on hands
-    MAGICF_POLYMORPHSTATS       = 0x0000800,    // Polymorph spells give out stats based on base chars (old behaviour backwards).
-    MAGICF_OVERRIDEFIELDS       = 0x0001000,    // Prevent cast multiple field spells on the same tile, making the new field tile remove the previous field
-    MAGICF_CASTPARALYZED        = 0x0002000     // Can cast even if paralyzed
-};
-
-enum REVEALFLAGS_TYPE
-{
-    REVEALF_DETECTINGHIDDEN      = 0x001,    ///* Reveal Spell with Detecting Hidden Skill.
-    REVEALF_LOOTINGSELF          = 0x002,    ///* Reveal when looting self bodies.
-    REVEALF_LOOTINGOTHERS        = 0x004,    ///* Reveal when looting bodies of other Players or NPCs.
-    REVEALF_SPEAK                = 0x008,    ///* Reveal when speaking.
-    REVEALF_SPELLCAST            = 0x010,    ///* Reveal when starting to cast a Spell.
-    REVEALF_OSILIKEPERSONALSPACE = 0x020     ///* Do not reveal when a character enters on personal space.
-};
-
 
 //////////////////////////////////////////////////////////////////////////
 // Climodes
@@ -174,14 +94,15 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
 	CLIMODE_MENU_SKILL,             // result of some skill (tracking, tinkering, blacksmith, etc)
     CLIMODE_MENU_SKILL_TRACK_SETUP,
     CLIMODE_MENU_SKILL_TRACK,
-    CLIMODE_MENU_GM_PAGES,          // open gm pages list
     CLIMODE_MENU_EDIT,              // edit the contents of a container
 
     // Prompting for text input ------------------------------------------------------
-	CLIMODE_PROMPT_NAME_RUNE,
     CLIMODE_PROMPT_NAME_KEY,        // naming a key
-    CLIMODE_PROMPT_NAME_SIGN,       // naming a house sign
+    CLIMODE_PROMPT_NAME_PET,        // naming a pet
+    CLIMODE_PROMPT_NAME_RUNE,
     CLIMODE_PROMPT_NAME_SHIP,
+    CLIMODE_PROMPT_NAME_SIGN,       // naming a house sign
+ 
     CLIMODE_PROMPT_GM_PAGE_TEXT,    // allowed to enter text for GM page
     CLIMODE_PROMPT_VENDOR_PRICE,    // what would you like the price to be?
     CLIMODE_PROMPT_TARG_VERB,       // send message to another player

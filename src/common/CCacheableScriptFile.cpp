@@ -35,8 +35,7 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
     if ( !ptcFilename )
     {
-        if ( _IsFileOpen() )
-            return true;
+        return _IsFileOpen();
     }
     else
     {
@@ -60,36 +59,42 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
     if (_fileContent)
     {
         delete _fileContent;
+        _fileContent = nullptr;
     }
+
     if ((uiModeFlags & OF_WRITE) || (uiModeFlags & OF_READWRITE))
     {
-        _fileContent = nullptr;
+        ;
     }
     else
     {
-        TemporaryString buf;
+        TemporaryString tsBuf;
+        tchar* ptcBuf = tsBuf.buffer();
         size_t uiStrLen;
         bool fUTF = false, fFirstLine = true;
-        int iFileLength = _GetLength();
+        const int iFileLength = _GetLength();
         _fileContent = new std::vector<std::string>();
-        _fileContent->reserve(iFileLength);
+        _fileContent->reserve(iFileLength / 10);
 
         while ( !feof(_pStream) ) 
         {
-            buf.setAt(0, '\0');
-            fgets(buf, SCRIPT_MAX_LINE_LEN, _pStream);
-            uiStrLen = strlen(buf);
-            if (uiStrLen > INT_MAX)
-                uiStrLen = INT_MAX;
+            tsBuf.setAt(0, '\0');
+            fgets(ptcBuf, SCRIPT_MAX_LINE_LEN, _pStream);
+            uiStrLen = strlen(ptcBuf);
+            ASSERT(SCRIPT_MAX_LINE_LEN < INT_MAX);
+            if (uiStrLen > SCRIPT_MAX_LINE_LEN)
+                uiStrLen = SCRIPT_MAX_LINE_LEN;
 
-            // first line may contain utf marker
-            if ( fFirstLine && uiStrLen >= 3 &&
-                (uchar)(buf[0]) == 0xEF &&
-                (uchar)(buf[1]) == 0xBB &&
-                (uchar)(buf[2]) == 0xBF )
+            // first line may contain utf marker (byte order mark)
+            if (fFirstLine && uiStrLen >= 3 &&
+                (uchar)(ptcBuf[0]) == 0xEF &&
+                (uchar)(ptcBuf[1]) == 0xBB &&
+                (uchar)(ptcBuf[2]) == 0xBF)
+            {
                 fUTF = true;
+            }
 
-            _fileContent->emplace_back( (fUTF ? &buf[3]:buf), uiStrLen - (fUTF ? 3:0) );
+            _fileContent->emplace_back( (fUTF ? &ptcBuf[3] : ptcBuf), uiStrLen - (fUTF ? 3 : 0) );
             fFirstLine = false;
             fUTF = false;
         }
@@ -99,6 +104,7 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
         _fileDescriptor = _kInvalidFD;
         _uiMode = 0;
         _iCurrentLine = 0;
+        _fileContent->shrink_to_fit();
     }
 
     return true;
@@ -151,7 +157,7 @@ bool CCacheableScriptFile::IsFileOpen() const
 
 bool CCacheableScriptFile::_IsEOF() const 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::_IsEOF");
+    //ADDTOCALLSTACK("CCacheableScriptFile::_IsEOF");
     if ( _useDefaultFile() ) 
         return CSFileText::_IsEOF();
 
@@ -159,13 +165,15 @@ bool CCacheableScriptFile::_IsEOF() const
 }
 bool CCacheableScriptFile::IsEOF() const 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::IsEOF");
+    //ADDTOCALLSTACK("CCacheableScriptFile::IsEOF");
     THREAD_SHARED_LOCK_RETURN(_IsEOF());
 }
 
 tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::_ReadString");
+    // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
+    // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
+    //ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::_ReadString");
 
     if ( _useDefaultFile() ) 
         return CSFileText::_ReadString(pBuffer, sizemax);
@@ -174,7 +182,8 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 
     if ( !_fileContent->empty() && ((uint)_iCurrentLine < _fileContent->size()) )
     {
-        strcpy(pBuffer, (*_fileContent)[_iCurrentLine].c_str() );
+        //strcpy(pBuffer, (*_fileContent)[_iCurrentLine].c_str() );
+        Str_CopyLimitNull(pBuffer, _fileContent->data()[_iCurrentLine].c_str(), sizemax); // may be faster with MS compiler
         ++_iCurrentLine;
     }
     else
@@ -187,8 +196,8 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
 
 tchar * CCacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK("CCacheableScriptFile::ReadString");
-    THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
+    //ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::ReadString");
+    THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_ReadString(pBuffer, sizemax));
 }
 
 void CCacheableScriptFile::_dupeFrom(CCacheableScriptFile *other) 
@@ -258,12 +267,12 @@ int CCacheableScriptFile::_GetPosition() const
 {
     ADDTOCALLSTACK("CCacheableScriptFile::_GetPosition");
     if (_useDefaultFile())
-        return CSFileText::_GetPosition();  // this requires a unique lock
+        return CSFile::_GetPosition();  // this requires a unique lock
 
     return _iCurrentLine;
 }
 int CCacheableScriptFile::GetPosition() const
 {
     ADDTOCALLSTACK("CCacheableScriptFile::GetPosition");
-    THREAD_UNIQUE_LOCK_RETURN(_GetPosition());
+    THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_GetPosition());
 }

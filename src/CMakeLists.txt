@@ -1,6 +1,6 @@
 #	Main config	#
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.10)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
 
 
 MESSAGE (STATUS "Scanning system for compilers...")
@@ -69,7 +69,7 @@ IF (SINGLE_TARGET)
 	MESSAGE (STATUS "Single-target build system (Makefile) detected: generating multiple projects!")
 	IF (NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
 		IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
-			MESSAGE (STATUS "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Release.")
+			MESSAGE (WARNING "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Release.")
 			# -> needed only for MAKEFILE-STYLE generators, which can't switch between different configs
 			set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 		ELSE ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
@@ -101,107 +101,59 @@ ENDIF (SINGLE_TARGET)
 # Include the list of our source files
 INCLUDE ("cmake/CMakeSources.cmake")
 
+SET(ALL_SRCS 
+	${game_SRCS}
+	${items_SRCS}
+	${chars_SRCS}
+	${clients_SRCS}
+	${components_SRCS}
+	${uofiles_SRCS}
+	${common_SRCS}
+	${resource_SRCS}
+	${resourcesections_SRCS}
+	${network_SRCS}
+	${crypto_SRCS}
+	${sphere_SRCS}
+	${crashdump_SRCS}
+	${libev_SRCS}
+	${spherelibrary_SRCS}
+	${sqlite_SRCS}
+	${zlib_SRCS}
+	${tables_SRCS}
+)
 
 IF (SINGLE_TARGET)
 
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		SET(TARGETS ${TARGETS} spheresvr_release)
 		ADD_EXECUTABLE (spheresvr_release
-					${game_SRCS}
-					${items_SRCS}
-					${chars_SRCS}
-					${clients_SRCS}
-					${components_SRCS}
-					${uofiles_SRCS}
-					${common_SRCS}
-					${resource_SRCS}
-					${resourceblocks_SRCS}
-					${network_SRCS}
-					${crypto_SRCS}
-					${sphere_SRCS}
-					${crashdump_SRCS}
-					${libev_SRCS}
-					${spherelibrary_SRCS}
-					${sqlite_SRCS}
-					${zlib_SRCS}
-					${tables_SRCS}
+					${ALL_SRCS}
 		#			${docs_TEXT}
 			)
-        SET_TARGET_PROPERTIES(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
-	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
+        	SET_TARGET_PROPERTIES(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
+	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		SET(TARGETS ${TARGETS} spheresvr_nightly)
 		ADD_EXECUTABLE (spheresvr_nightly
-					${game_SRCS}
-					${items_SRCS}
-					${chars_SRCS}
-					${clients_SRCS}
-					${components_SRCS}
-					${uofiles_SRCS}
-					${common_SRCS}
-					${resource_SRCS}
-					${resourceblocks_SRCS}
-					${network_SRCS}
-					${crypto_SRCS}
-					${sphere_SRCS}
-					${crashdump_SRCS}
-					${libev_SRCS}
-					${spherelibrary_SRCS}
-					${sqlite_SRCS}
-					${zlib_SRCS}
-					${tables_SRCS}
+					${ALL_SRCS}
 		#			${docs_TEXT}
 			)
-        SET_TARGET_PROPERTIES(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
-	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
+        	SET_TARGET_PROPERTIES(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
+	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		SET(TARGETS ${TARGETS} spheresvr_debug)
 		ADD_EXECUTABLE (spheresvr_debug
-					${game_SRCS}
-					${items_SRCS}
-					${chars_SRCS}
-					${clients_SRCS}
-					${components_SRCS}
-					${uofiles_SRCS}
-					${common_SRCS}
-					${resource_SRCS}
-					${resourceblocks_SRCS}
-					${network_SRCS}
-					${crypto_SRCS}
-					${sphere_SRCS}
-					${crashdump_SRCS}
-					${libev_SRCS}
-					${spherelibrary_SRCS}
-					${sqlite_SRCS}
-					${zlib_SRCS}
-					${tables_SRCS}
+					${ALL_SRCS}
 		#			${docs_TEXT}
 			)
-        SET_TARGET_PROPERTIES(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
-	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
+        	SET_TARGET_PROPERTIES(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
+	ENDIF ()
 
 ELSE (SINGLE_TARGET)
 
 	SET(TARGETS ${TARGETS} spheresvr)
-    ADD_EXECUTABLE (spheresvr
-            ${game_SRCS}
-            ${items_SRCS}
-            ${chars_SRCS}
-            ${clients_SRCS}
-	    ${components_SRCS}
-            ${uofiles_SRCS}
-            ${common_SRCS}
-            ${resource_SRCS}
-            ${resourceblocks_SRCS}
-            ${network_SRCS}
-            ${crypto_SRCS}
-            ${sphere_SRCS}
-            ${crashdump_SRCS}
-            ${libev_SRCS}
-            ${spherelibrary_SRCS}
-            ${sqlite_SRCS}
-            ${zlib_SRCS}
-            ${tables_SRCS}
+    	ADD_EXECUTABLE (spheresvr
+            ${ALL_SRCS}
             ${docs_TEXT}
 		)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)

@@ -1,5 +1,5 @@
 
-#include "../common/resource/blocks/CDialogDef.h"
+#include "../common/resource/sections/CDialogDef.h"
 #include "../common/CLog.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
@@ -9,9 +9,13 @@
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
-#include "../game/CWorld.h"
+#include "../game/CServer.h"
+#include "../game/CWorldGameTime.h"
+#include "../game/CWorldMap.h"
 #include "../game/triggers.h"
-#include "network.h"
+#include "CClientIterator.h"
+#include "CNetState.h"
+#include "CNetworkManager.h"
 #include "receive.h"
 #include "send.h"
 
@@ -27,7 +31,7 @@ PacketUnknown::PacketUnknown(uint size) : Packet(size)
 {
 }
 
-bool PacketUnknown::onReceive(NetState* net)
+bool PacketUnknown::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUnknown::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -47,7 +51,7 @@ PacketCreate::PacketCreate(uint size) : Packet(size)
 {
 }
 
-bool PacketCreate::onReceive(NetState* net)
+bool PacketCreate::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreate::onReceive");
 	tchar charname[MAX_NAME_SIZE];
@@ -99,8 +103,6 @@ bool PacketCreate::onReceive(NetState* net)
 		*/
 		switch (race_sex_flag)
 		{
-			default:
-				g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT,"PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 			case 0x2: case 0x3:
 				rtRace = RACETYPE_HUMAN;
 				break;
@@ -110,6 +112,8 @@ bool PacketCreate::onReceive(NetState* net)
 			case 0x6: case 0x7:
 				rtRace = RACETYPE_GARGOYLE;
 				break;
+			default:
+				g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 		}
 	}
 	else
@@ -144,9 +148,9 @@ bool PacketCreate::onReceive(NetState* net)
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 
-bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
-	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
-	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, int iFlags)
+bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE_TYPE rtRace, ushort wStr, ushort wDex, ushort wInt, PROFESSION_TYPE prProf,
+	SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
+	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, uint uiFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
 
@@ -159,7 +163,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	{
 		// logging in as a new player whilst already online !
 		client->addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ALREADYONLINE));
-		g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%lx:Account '%s' already in use\n", net->id(), account->GetName());
+		g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%x:Account '%s' already in use\n", net->id(), account->GetName());
 		return false;
 	}
 
@@ -189,30 +193,43 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	CChar* pChar = CChar::CreateBasic(CREID_MAN);
 	ASSERT(pChar != nullptr);
 
-	TRIGRET_TYPE tr;
+	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	CScriptTriggerArgs createArgs;
-	createArgs.m_iN1 = iFlags;
+    // RW
+	createArgs.m_iN1 = uiFlags;
 	createArgs.m_iN2 = prProf;
 	createArgs.m_iN3 = rtRace;
+    // R
 	createArgs.m_s1 = account->GetName();
 	createArgs.m_pO1 = client;
 
-	//Creating the pChar
-	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
+    client->r_Call("f_onchar_create_init", nullptr, &createArgs, nullptr, &tr);
+    if (tr == TRIGRET_RET_TRUE)
+        goto block_creation;
+
+    //uiFlags = (uint)createArgs.m_iN1;  // unused at this point
+    prProf = (PROFESSION_TYPE)createArgs.m_iN2;
+    rtRace = (RACE_TYPE)createArgs.m_iN3;
+
+	// Creating the pChar
+	pChar->InitPlayer(client, charname, fFemale, rtRace, wStr, wDex, wInt,
 		prProf, skSkill1, uiSkillVal1, skSkill2, uiSkillVal2, skSkill3, uiSkillVal3, skSkill4, uiSkillVal4,
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
-	//Calling the function after the char creation, it can't be done before or the function won't have SRC
+	// Calling the function after the char creation, it can't be done before or the function won't have SRC.
+    // The createArgs are Read-Only for this function.
+    tr = TRIGRET_RET_DEFAULT;
 	client->r_Call("f_onchar_create", pChar, &createArgs, nullptr, &tr);
 
 	if ( tr == TRIGRET_RET_TRUE )
 	{
+block_creation:
 		client->addLoginErr(PacketLoginError::CreationBlocked);
 		pChar->Delete();	//Delete it if function is returning 1 or the char will remain created
 		return false;
 	}
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%lx:Account '%s' created new char '%s' [0%lx]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%x:Account '%s' created new char '%s' [0%" PRIx32 "]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
 	client->Setup_Start(pChar);
 	return true;
 }
@@ -229,7 +246,7 @@ PacketMovementReq::PacketMovementReq(uint size) : Packet(size)
 {
 }
 
-bool PacketMovementReq::onReceive(NetState* net)
+bool PacketMovementReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMovementReq::onReceive");
 
@@ -268,7 +285,7 @@ PacketSpeakReq::PacketSpeakReq() : Packet(0)
 {
 }
 
-bool PacketSpeakReq::onReceive(NetState* net)
+bool PacketSpeakReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpeakReq::onReceive");
 
@@ -308,7 +325,7 @@ PacketAttackReq::PacketAttackReq() : Packet(5)
 {
 }
 
-bool PacketAttackReq::onReceive(NetState* net)
+bool PacketAttackReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAttackReq::onReceive");
 
@@ -332,7 +349,7 @@ PacketDoubleClick::PacketDoubleClick() : Packet(5)
 {
 }
 
-bool PacketDoubleClick::onReceive(NetState* net)
+bool PacketDoubleClick::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketDoubleClick::onReceive");
 
@@ -359,7 +376,7 @@ PacketItemPickupReq::PacketItemPickupReq() : Packet(7)
 {
 }
 
-bool PacketItemPickupReq::onReceive(NetState* net)
+bool PacketItemPickupReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketItemPickupReq::onReceive");
 
@@ -384,7 +401,7 @@ PacketItemDropReq::PacketItemDropReq() : Packet(14)
 {
 }
 
-uint PacketItemDropReq::getExpectedLength(NetState* net, Packet* packet)
+uint PacketItemDropReq::getExpectedLength(CNetState* net, Packet* packet)
 {
 	ADDTOCALLSTACK("PacketItemDropReq::getExpectedLength");
 	UNREFERENCED_PARAMETER(packet);
@@ -396,7 +413,7 @@ uint PacketItemDropReq::getExpectedLength(NetState* net, Packet* packet)
 	return 14;
 }
 
-bool PacketItemDropReq::onReceive(NetState* net)
+bool PacketItemDropReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketItemDropReq::onReceive");
 
@@ -406,7 +423,7 @@ bool PacketItemDropReq::onReceive(NetState* net)
 	if ( !character )
 		return false;
 
-	CUID serial = readInt32();
+	CUID serial(readInt32());
 	word x = readInt16();
 	word y = readInt16();
 	byte z = readByte();
@@ -422,7 +439,7 @@ bool PacketItemDropReq::onReceive(NetState* net)
 			grid = 0;
 	}
 
-	CUID container = readInt32();
+	CUID container(readInt32());
 	CPointMap pt(x, y, z, character->GetTopMap());
 
 	client->Event_Item_Drop(serial, pt, container, grid);
@@ -441,7 +458,7 @@ PacketSingleClick::PacketSingleClick() : Packet(5)
 {
 }
 
-bool PacketSingleClick::onReceive(NetState* net)
+bool PacketSingleClick::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSingleClick::onReceive");
 
@@ -465,7 +482,7 @@ PacketTextCommand::PacketTextCommand() : Packet(0)
 {
 }
 
-bool PacketTextCommand::onReceive(NetState* net)
+bool PacketTextCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTextCommand::onReceive");
 
@@ -476,7 +493,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 	if ((packetLength < 5) || (packetLength > MAX_EXTCMD_ARG_LEN + 4))
 		return false;
 
-	EXTCMD_TYPE type = static_cast<EXTCMD_TYPE>(readByte());
+	EXTCMD_TYPE type = EXTCMD_TYPE(readByte());
 	tchar name[MAX_TALK_BUFFER];
 	readStringNullASCII(name, MAX_TALK_BUFFER-1);
 
@@ -496,7 +513,7 @@ PacketItemEquipReq::PacketItemEquipReq() : Packet(10)
 {
 }
 
-bool PacketItemEquipReq::onReceive(NetState* net)
+bool PacketItemEquipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketItemEquipReq::onReceive");
 
@@ -522,13 +539,17 @@ bool PacketItemEquipReq::onReceive(NetState* net)
 	client->ClearTargMode(); // done dragging.
 
 	CChar* target = targetSerial.CharFind();
-	bool bCanCarry = target->CanCarry(item);
-	if ( (target == nullptr) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !bCanCarry || !target->ItemEquip(item, source) )
-	{
-		client->Event_Item_Drop_Fail(item);		//cannot equip
-		if ( !bCanCarry )
-			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
+    bool fSuccess = false;
+    if (target && (itemLayer < LAYER_HORSE) && target->IsOwnedBy(source) && target->CanTouch(item))
+    {
+        if (target->CanCarry(item))
+            fSuccess = target->ItemEquip(item, source);
+        else
+            client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
+
+    if (!fSuccess)
+        client->Event_Item_Drop_Fail(item);		//cannot equip
 
 	return true;
 }
@@ -545,7 +566,7 @@ PacketResynchronize::PacketResynchronize() : Packet(3)
 {
 }
 
-bool PacketResynchronize::onReceive(NetState* net)
+bool PacketResynchronize::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketResynchronize::onReceive");
 
@@ -556,7 +577,7 @@ bool PacketResynchronize::onReceive(NetState* net)
 	if ( !pChar )
 		return false;
 
-	new PacketCharacter(client, pChar);
+	client->addChar(pChar);
 	client->addPlayerUpdate();
 	client->addPlayerSee(CPointMap());
 	net->m_sequence = 0;
@@ -575,7 +596,7 @@ PacketDeathStatus::PacketDeathStatus() : Packet(2)
 {
 }
 
-bool PacketDeathStatus::onReceive(NetState* net)
+bool PacketDeathStatus::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketDeathStatus::onReceive");
 
@@ -609,7 +630,7 @@ PacketObjStatusReq::PacketObjStatusReq() : Packet(10)
 {
 }
 
-bool PacketObjStatusReq::onReceive(NetState* net)
+bool PacketObjStatusReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketObjStatusReq::onReceive");
 
@@ -619,7 +640,7 @@ bool PacketObjStatusReq::onReceive(NetState* net)
 		return false;
 	skip(4);	// 0xedededed
 	byte requestType = readByte();
-	CUID targetSerial = static_cast<CUID>(readInt32());
+	CUID targetSerial(readInt32());
 
 	if ( requestType == 4 )
 		client->addStatusWindow(targetSerial.ObjFind(), true);
@@ -640,7 +661,7 @@ PacketSkillLockChange::PacketSkillLockChange() : Packet(0)
 {
 }
 
-bool PacketSkillLockChange::onReceive(NetState* net)
+bool PacketSkillLockChange::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSkillLockChange::onReceive");
 
@@ -684,7 +705,7 @@ PacketVendorBuyReq::PacketVendorBuyReq() : Packet(0)
 {
 }
 
-bool PacketVendorBuyReq::onReceive(NetState* net)
+bool PacketVendorBuyReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketVendorBuyReq::onReceive");
 
@@ -713,18 +734,16 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 	}
 
-	int iConvertFactor = vendor->NPC_GetVendorMarkup();
-
-	VendorItem items[MAX_ITEMS_CONT];
-	memset(items, 0, sizeof(items));
-	uint itemCount = minimum((packetLength - 8u) / 7u, g_Cfg.m_iContainerMaxItems);
+    VendorItem items[MAX_ITEMS_CONT] = {};
+    const uint uiCountFromPacket = (packetLength - 8u) / 7u;
+	uint itemCount = minimum(uiCountFromPacket, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
-	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
+	const CVarDefCont* vardef = g_Cfg.m_fAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		int64 allowsell = vardef->GetValNum() + (itemCount * 3);
-		if (g_World.GetCurrentTime().GetTimeRaw() < allowsell)
+		const int64 allowsell = vardef->GetValNum() + (itemCount * 3LL);
+		if (CWorldGameTime::GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
 			return true;
@@ -732,12 +751,13 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	}
 
 	// combine goods into one list
+    const int iConvertFactor = vendor->NPC_GetVendorMarkup();
 	CItemVendable *item = nullptr;
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		skip(1); // layer
-		CUID serial(readInt32());
-		word amount = readInt16();
+        const CUID serial(readInt32());
+        const word amount = readInt16();
 
 		item = dynamic_cast<CItemVendable*>(serial.ItemFind());
 		if (item == nullptr || item->IsValidSaleItem(true) == false)
@@ -750,17 +770,17 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		uint index;
 		for (index = 0; index < itemCount; ++index)
 		{
-			if (serial == items[index].m_serial)
+			if (serial == items[index].m_serial) //If the serials are the same, that means the items come from the same stack.
 				break;
-			else if (items[index].m_serial.GetPrivateUID() == 0)
+			else if (!items[index].m_serial.IsValidUID())
 			{
 				items[index].m_serial = serial;
-				items[index].m_price = item->GetVendorPrice(iConvertFactor);
+				items[index].m_price = item->GetVendorPrice(iConvertFactor,0);
 				break;
 			}
 		}
 
-		items[index].m_amount += amount;
+		items[index].m_vcAmount += amount;
 		if (items[index].m_price <= 0)
 		{
 			vendor->Speak("Alas, I don't have these goods currently stocked. Let me know if there is something else thou wouldst buy.");
@@ -784,14 +804,14 @@ PacketStaticUpdate::PacketStaticUpdate() : Packet(0)
 {
 }
 
-bool PacketStaticUpdate::onReceive(NetState* net)
+bool PacketStaticUpdate::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketStaticUpdate::onReceive");
 	/*skip(12);
     byte UlCmd = readByte();*/
 	TemporaryString tsDump;
 	this->dump(tsDump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.toBuffer());
+	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.buffer());
 	return true;
 }
 
@@ -807,7 +827,7 @@ PacketMapEdit::PacketMapEdit() : Packet(11)
 {
 }
 
-bool PacketMapEdit::onReceive(NetState* net)
+bool PacketMapEdit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMapEdit::onReceive");
 
@@ -876,7 +896,7 @@ bool PacketMapEdit::onReceive(NetState* net)
 				client->SysMessage("That's strange... (bad pin)");
 				return true;
 			}
-			map->m_Pins.erase(pin);
+			map->m_Pins.erase_at(pin);
 			break;
 
 		case MAP_CLEAR: // clear all pins
@@ -906,7 +926,7 @@ PacketCharPlay::PacketCharPlay() : Packet(73)
 {
 }
 
-bool PacketCharPlay::onReceive(NetState* net)
+bool PacketCharPlay::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharPlay::onReceive");
 
@@ -939,7 +959,7 @@ PacketBookPageEdit::PacketBookPageEdit() : Packet(0)
 {
 }
 
-bool PacketBookPageEdit::onReceive(NetState* net)
+bool PacketBookPageEdit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBookPageEdit::onReceive");
 
@@ -978,15 +998,19 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 	uint len = 0;
 	tchar* content = Str_GetTemp();
 
-	for (int i = 0; i < pageCount; i++)
+	for (ushort i = 0; i < pageCount; ++i)
 	{
 		// read next page to change with line count
 		page = readInt16();
 		lineCount = readInt16();
-		if (page < 1 || page > MAX_BOOK_PAGES || lineCount <= 0)
+
+		if (lineCount > 100)	// hard and arbitrary limit, to limit the effectmalicious packets
+			break;
+
+		if (page < 1 || page > MAX_BOOK_PAGES || lineCount == 0u)
 			continue;
 
-		page--;
+		-- page;
 		len = 0;
 
 		// read each line of the page
@@ -1000,7 +1024,7 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 			}
 
 			content[len++] = '\t';
-			lineCount--;
+			--lineCount;
 		}
 
 		ASSERT(len > 0);
@@ -1026,7 +1050,7 @@ PacketTarget::PacketTarget() : Packet(19)
 {
 }
 
-bool PacketTarget::onReceive(NetState* net)
+bool PacketTarget::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTarget::onReceive");
 
@@ -1062,7 +1086,7 @@ PacketSecureTradeReq::PacketSecureTradeReq() : Packet(0)
 {
 }
 
-bool PacketSecureTradeReq::onReceive(NetState* net)
+bool PacketSecureTradeReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSecureTradeReq::onReceive");
 
@@ -1123,7 +1147,7 @@ PacketBulletinBoardReq::PacketBulletinBoardReq() : Packet(0)
 {
 }
 
-bool PacketBulletinBoardReq::onReceive(NetState* net)
+bool PacketBulletinBoardReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBulletinBoardReq::onReceive");
 
@@ -1180,10 +1204,13 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 				return true;
 			}
 
-			if (board->GetCount() > 32)
+			size_t uiContCount = board->GetContentCount();
+			if (uiContCount > 32)
 			{
 				// roll a message off
-				delete board->GetAt(board->GetCount() - 1);
+				CItem *pMsg = static_cast<CItem*>(board->GetContentIndex(uiContCount - 1));
+				ASSERT(pMsg);
+				pMsg->Delete();
 			}
 
 			uint lenstr = readByte();
@@ -1199,15 +1226,16 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 				DEBUG_ERR(("%x:BBoard can't create message item\n", net->id()));
 				return true;
 			}
-
+			CSTime datetime = CSTime::GetCurrentTime();
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());
+			newMessage->SetTimeStamp(datetime.GetTime());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
 			int lines = readByte();
-			if (lines > 32) lines = 32;
+			if (lines > 32)
+                lines = 32;
 
 			while (lines--)
 			{
@@ -1261,7 +1289,7 @@ PacketWarModeReq::PacketWarModeReq() : Packet(5)
 {
 }
 
-bool PacketWarModeReq::onReceive(NetState* net)
+bool PacketWarModeReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWarModeReq::onReceive");
 
@@ -1283,7 +1311,7 @@ PacketPingReq::PacketPingReq() : Packet(2)
 {
 }
 
-bool PacketPingReq::onReceive(NetState* net)
+bool PacketPingReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPingReq::onReceive");
 
@@ -1304,7 +1332,7 @@ PacketCharRename::PacketCharRename() : Packet(35)
 {
 }
 
-bool PacketCharRename::onReceive(NetState* net)
+bool PacketCharRename::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharRename::onReceive");
 
@@ -1328,7 +1356,7 @@ PacketMenuChoice::PacketMenuChoice() : Packet(13)
 {
 }
 
-bool PacketMenuChoice::onReceive(NetState* net)
+bool PacketMenuChoice::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMenuChoice::onReceive");
 
@@ -1375,11 +1403,6 @@ bool PacketMenuChoice::onReceive(NetState* net)
 			client->Cmd_Skill_Tracking(select, true);
 			return true;
 
-		case CLIMODE_MENU_GM_PAGES:
-			// select a gm page from the menu
-			client->Cmd_GM_PageSelect(select);
-			return true;
-
 		case CLIMODE_MENU_EDIT:
 			// m_Targ_Text = what are we doing to it
 			client->Cmd_EditItem(serial.ObjFind(), select);
@@ -1403,7 +1426,7 @@ PacketServersReq::PacketServersReq() : Packet(62)
 {
 }
 
-bool PacketServersReq::onReceive(NetState* net)
+bool PacketServersReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketServersReq::onReceive");
 
@@ -1432,7 +1455,7 @@ PacketCharDelete::PacketCharDelete() : Packet(39)
 {
 }
 
-bool PacketCharDelete::onReceive(NetState* net)
+bool PacketCharDelete::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharDelete::onReceive");
 
@@ -1460,7 +1483,7 @@ PacketCreateNew::PacketCreateNew() : PacketCreate(146)
 {
 }
 
-bool PacketCreateNew::onReceive(NetState* net)
+bool PacketCreateNew::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreateNew::onReceive");
 
@@ -1606,7 +1629,7 @@ bool PacketCreateNew::onReceive(NetState* net)
 	bool success = doCreate(net, charname, sex > 0, race,
 		strength, dexterity, intelligence, profession,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
-		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, -1);
+		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, UINT32_MAX);
 	if (!success)
 		return false;
 
@@ -1637,7 +1660,7 @@ PacketCharListReq::PacketCharListReq() : Packet(65)
 {
 }
 
-bool PacketCharListReq::onReceive(NetState* net)
+bool PacketCharListReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharListReq::onReceive");
 
@@ -1663,7 +1686,7 @@ PacketBookHeaderEdit::PacketBookHeaderEdit() : Packet(99)
 {
 }
 
-bool PacketBookHeaderEdit::onReceive(NetState* net)
+bool PacketBookHeaderEdit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBookHeaderEdit::onReceive");
 
@@ -1694,7 +1717,7 @@ PacketDyeObject::PacketDyeObject() : Packet(9)
 {
 }
 
-bool PacketDyeObject::onReceive(NetState* net)
+bool PacketDyeObject::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketDyeObject::onReceive");
 
@@ -1718,7 +1741,7 @@ PacketAllNamesReq::PacketAllNamesReq() : Packet(0)
 {
 }
 
-bool PacketAllNamesReq::onReceive(NetState* net)
+bool PacketAllNamesReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAllNamesReq::onReceive");
 
@@ -1728,11 +1751,9 @@ bool PacketAllNamesReq::onReceive(NetState* net)
 	if (character == nullptr)
 		return false;
 
-	const CObjBase* object;
-
-	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
+	for (int length = readInt16(); length > (int)sizeof(dword); length -= sizeof(dword))
 	{
-		object = CUID(readInt32()).ObjFind();
+		const CObjBase* object = CUID::ObjFindFromUID(readInt32());
 		if (object == nullptr)
 			continue;
 		else if (character->CanSee(object) == false)
@@ -1756,7 +1777,7 @@ PacketPromptResponse::PacketPromptResponse() : Packet(0)
 {
 }
 
-bool PacketPromptResponse::onReceive(NetState* net)
+bool PacketPromptResponse::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPromptResponse::onReceive");
 
@@ -1791,7 +1812,7 @@ PacketHelpPageReq::PacketHelpPageReq() : Packet(258)
 {
 }
 
-bool PacketHelpPageReq::onReceive(NetState* net)
+bool PacketHelpPageReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHelpPageReq::onReceive");
 
@@ -1818,7 +1839,7 @@ PacketVendorSellReq::PacketVendorSellReq() : Packet(0)
 {
 }
 
-bool PacketVendorSellReq::onReceive(NetState* net)
+bool PacketVendorSellReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketVendorSellReq::onReceive");
 
@@ -1829,13 +1850,13 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		return false;
 
 	skip(2); // length
-	CUID vendorSerial(readInt32());
-	uint itemCount = readInt16();
+	const CUID vendorSerial(readInt32());
+	const uint itemCount = readInt16();
 
 	CChar* vendor = vendorSerial.CharFind();
 	if (vendor == nullptr || vendor->m_pNPC == nullptr || !vendor->NPC_IsVendor())
 	{
-		client->Event_VendorBuy_Cheater(0x1);
+		client->Event_VendorSell_Cheater(0x1); //Both gives same message, but we have to use correct event while we already have.
 		return true;
 	}
 
@@ -1857,24 +1878,22 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	}
 
 	// check selling speed
-	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
+	const CVarDefCont* vardef = g_Cfg.m_fAllowBuySellAgent ? nullptr : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != nullptr)
 	{
-		int64 allowsell = vardef->GetValNum() + ((itemCount * 3) * MSECS_PER_TENTH);
-		if (g_World.GetCurrentTime() < allowsell)
+		int64 allowsell = vardef->GetValNum() + ((itemCount * 3LL) * MSECS_PER_TENTH);
+		if (CWorldGameTime::GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));
 			return true;
 		}
 	}
 
-	VendorItem items[MAX_ITEMS_CONT];
-	memset(items, 0, sizeof(items));
-
+    VendorItem items[MAX_ITEMS_CONT] = {};
 	for (uint i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());
-		items[i].m_amount = readInt16();
+		items[i].m_vcAmount = readInt16();
 	}
 
 	client->Event_VendorSell(vendor, items, itemCount);
@@ -1893,7 +1912,7 @@ PacketServerSelect::PacketServerSelect() : Packet(3)
 {
 }
 
-bool PacketServerSelect::onReceive(NetState* net)
+bool PacketServerSelect::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketServerSelect::onReceive");
 
@@ -1915,7 +1934,7 @@ PacketSystemInfo::PacketSystemInfo() : Packet(149)
 {
 }
 
-bool PacketSystemInfo::onReceive(NetState* net)
+bool PacketSystemInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSystemInfo::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -1936,7 +1955,7 @@ PacketTipReq::PacketTipReq() : Packet(4)
 {
 }
 
-bool PacketTipReq::onReceive(NetState* net)
+bool PacketTipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTipReq::onReceive");
 
@@ -1966,7 +1985,7 @@ PacketGumpValueInputResponse::PacketGumpValueInputResponse() : Packet(0)
 {
 }
 
-bool PacketGumpValueInputResponse::onReceive(NetState* net)
+bool PacketGumpValueInputResponse::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGumpValueInputResponse::onReceive");
 
@@ -2043,7 +2062,7 @@ PacketSpeakReqUNICODE::PacketSpeakReqUNICODE() : Packet(0)
 {
 }
 
-bool PacketSpeakReqUNICODE::onReceive(NetState* net)
+bool PacketSpeakReqUNICODE::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpeakReqUNICODE::onReceive");
 
@@ -2110,7 +2129,7 @@ PacketGumpDialogRet::PacketGumpDialogRet() : Packet(0)
 {
 }
 
-bool PacketGumpDialogRet::onReceive(NetState* net)
+bool PacketGumpDialogRet::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGumpDialogRet::onReceive");
 
@@ -2144,7 +2163,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 			CChar *viewed = character;
 			if ((button == 1) && (checkCount > 0))
 			{
-				viewed = CUID(readInt32()).CharFind();
+				viewed = CUID::CharFindFromUID(readInt32());
 				if (!viewed)
 					viewed = character;
 			}
@@ -2177,23 +2196,24 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	}
 
 #ifdef _DEBUG
+    if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, RES_GET_INDEX(context)));
 		if (resource == nullptr)
-			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
+			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == nullptr)
-				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined dialog", (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined dialog", (dword)serial, button);
 			else
-				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif
 
 	// sanity check
-	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)context);
+	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find(context);
 	if ((itGumpFound == client->m_mapOpenedGumps.end()) || (itGumpFound->second <= 0))
 		return true;
 
@@ -2211,23 +2231,17 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 
 
 	dword textCount = readInt32();
-    if (checkCount > MAX_DIALOG_CONTROLTYPE_QTY)
-    {
-        g_Log.EventError("%x:PacketGumpDialogRet textentry count too high.\n", net->id());
-        return false;
-    }
-
+	textCount = minimum(textCount, THREAD_STRING_LENGTH);
 	tchar* text = Str_GetTemp();
 	for (uint i = 0; i < textCount; ++i)
 	{
 		word id = readInt16();
 		word length = readInt16();
+		length = minimum(length, THREAD_STRING_LENGTH);
 		readStringNUNICODE(text, THREAD_STRING_LENGTH, length, false);
 
 		tchar* fix;
-		if ((fix = strchr(text, '\n')) != nullptr)
-			*fix = '\0';
-		if ((fix = strchr(text, '\r')) != nullptr)
+		if ((fix = strpbrk(text, "\n\r")) != nullptr)
 			*fix = '\0';
 		if ((fix = strchr(text, '\t')) != nullptr)
 			*fix = ' ';
@@ -2272,7 +2286,7 @@ PacketChatCommand::PacketChatCommand() : Packet(0)
 {
 }
 
-bool PacketChatCommand::onReceive(NetState* net)
+bool PacketChatCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChatCommand::onReceive");
 
@@ -2309,7 +2323,7 @@ PacketChatButton::PacketChatButton() : Packet(64)
 {
 }
 
-bool PacketChatButton::onReceive(NetState* net)
+bool PacketChatButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChatButton::onReceive");
 
@@ -2336,7 +2350,7 @@ PacketToolTipReq::PacketToolTipReq() : Packet(9)
 {
 }
 
-bool PacketToolTipReq::onReceive(NetState* net)
+bool PacketToolTipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketToolTipReq::onReceive");
 
@@ -2360,7 +2374,7 @@ PacketProfileReq::PacketProfileReq() : Packet(0)
 {
 }
 
-bool PacketProfileReq::onReceive(NetState* net)
+bool PacketProfileReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketProfileReq::onReceive");
 
@@ -2399,7 +2413,7 @@ PacketMailMessage::PacketMailMessage() : Packet(9)
 {
 }
 
-bool PacketMailMessage::onReceive(NetState* net)
+bool PacketMailMessage::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMailMessage::onReceive");
 
@@ -2425,7 +2439,7 @@ PacketClientVersion::PacketClientVersion() : Packet(0)
 {
 }
 
-bool PacketClientVersion::onReceive(NetState* net)
+bool PacketClientVersion::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientVersion::onReceive");
 
@@ -2463,6 +2477,9 @@ bool PacketClientVersion::onReceive(NetState* net)
 
 		if ((g_Serv.m_ClientVersion.GetClientVer() != 0) && (g_Serv.m_ClientVersion.GetClientVer() != version))
 			client->addLoginErr(PacketLoginError::BadVersion);
+        //we have asked client version in serverlist to configure character list and game feature.
+        if ( client->m_pAccount )
+                    client->m_pAccount->m_TagDefs.SetNum("ReportedCliVer", version);
 	}
 
 	return true;
@@ -2480,7 +2497,7 @@ PacketExtendedCommand::PacketExtendedCommand() : Packet(0)
 {
 }
 
-bool PacketExtendedCommand::onReceive(NetState* net)
+bool PacketExtendedCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketExtendedCommand::onReceive");
 
@@ -2492,19 +2509,16 @@ bool PacketExtendedCommand::onReceive(NetState* net)
 	word packetLength = readInt16();
     if (packetLength > 1000)
         return false;
+
 	EXTDATA_TYPE type = static_cast<EXTDATA_TYPE>(readInt16());
 	seek();
 
-#ifndef _MTNETWORK
-	Packet* handler = g_NetworkIn.getPacketManager().getExtendedHandler(type);
-#else
 	Packet* handler = g_NetworkManager.getPacketManager().getExtendedHandler(type);
-#endif
 	if (handler == nullptr)
 		return false;
 
 	handler->seek();
-	for (int i = 0; i < packetLength; i++)
+	for (int i = 0; i < packetLength; ++i)
 	{
 		byte next = readByte();
 		handler->writeByte(next);
@@ -2527,7 +2541,7 @@ PacketScreenSize::PacketScreenSize() : Packet(0)
 {
 }
 
-bool PacketScreenSize::onReceive(NetState* net)
+bool PacketScreenSize::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketScreenSize::onReceive");
 
@@ -2557,7 +2571,7 @@ PacketPartyMessage::PacketPartyMessage() : Packet(0)
 {
 }
 
-bool PacketPartyMessage::onReceive(NetState* net)
+bool PacketPartyMessage::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPartyMessage::onReceive");
 
@@ -2658,7 +2672,7 @@ PacketArrowClick::PacketArrowClick() : Packet(0)
 {
 }
 
-bool PacketArrowClick::onReceive(NetState* net)
+bool PacketArrowClick::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketArrowClick::onReceive");
 
@@ -2697,7 +2711,7 @@ PacketWrestleDisarm::PacketWrestleDisarm() : Packet(0)
 {
 }
 
-bool PacketWrestleDisarm::onReceive(NetState* net)
+bool PacketWrestleDisarm::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleDisarm::onReceive");
 
@@ -2717,7 +2731,7 @@ PacketWrestleStun::PacketWrestleStun() : Packet(0)
 {
 }
 
-bool PacketWrestleStun::onReceive(NetState* net)
+bool PacketWrestleStun::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleStun::onReceive");
 
@@ -2737,7 +2751,7 @@ PacketLanguage::PacketLanguage() : Packet(0)
 {
 }
 
-bool PacketLanguage::onReceive(NetState* net)
+bool PacketLanguage::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketLanguage::onReceive");
 
@@ -2763,7 +2777,7 @@ PacketStatusClose::PacketStatusClose() : Packet(0)
 {
 }
 
-bool PacketStatusClose::onReceive(NetState* net)
+bool PacketStatusClose::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketStatusClose::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -2783,7 +2797,7 @@ PacketAnimationReq::PacketAnimationReq() : Packet(0)
 {
 }
 
-bool PacketAnimationReq::onReceive(NetState* net)
+bool PacketAnimationReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAnimationReq::onReceive");
 
@@ -2832,7 +2846,7 @@ PacketClientInfo::PacketClientInfo() : Packet(0)
 {
 }
 
-bool PacketClientInfo::onReceive(NetState* net)
+bool PacketClientInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientInfo::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -2854,7 +2868,7 @@ PacketAosTooltipInfo::PacketAosTooltipInfo() : Packet(0)
 {
 }
 
-bool PacketAosTooltipInfo::onReceive(NetState* net)
+bool PacketAosTooltipInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAosTooltipInfo::onReceive");
 
@@ -2888,7 +2902,7 @@ PacketPopupReq::PacketPopupReq() : Packet(0)
 {
 }
 
-bool PacketPopupReq::onReceive(NetState* net)
+bool PacketPopupReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPopupReq::onReceive");
 
@@ -2916,7 +2930,7 @@ PacketPopupSelect::PacketPopupSelect() : Packet(0)
 {
 }
 
-bool PacketPopupSelect::onReceive(NetState* net)
+bool PacketPopupSelect::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPopupSelect::onReceive");
 
@@ -2946,7 +2960,7 @@ PacketChangeStatLock::PacketChangeStatLock() : Packet(0)
 {
 }
 
-bool PacketChangeStatLock::onReceive(NetState* net)
+bool PacketChangeStatLock::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChangeStatLock::onReceive");
 
@@ -3000,7 +3014,7 @@ PacketSpellSelect::PacketSpellSelect() : Packet(0)
 {
 }
 
-bool PacketSpellSelect::onReceive(NetState* net)
+bool PacketSpellSelect::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpellSelect::onReceive");
 
@@ -3029,8 +3043,8 @@ bool PacketSpellSelect::onReceive(NetState* net)
 	{
 		if (spellDef->IsSpellType(SPELLFLAG_NOPRECAST) == false)
 		{
-			client->m_tmSkillMagery.m_Spell = spell;
-			character->m_atMagery.m_Spell = spell;
+			client->m_tmSkillMagery.m_iSpell = spell;
+			character->m_atMagery.m_iSpell = spell;
 			client->m_Targ_UID = character->GetUID();
 			client->m_Targ_Prv_UID = character->GetUID();
 			character->Skill_Start((SKILL_TYPE)skill);
@@ -3054,7 +3068,7 @@ PacketHouseDesignReq::PacketHouseDesignReq() : Packet(0)
 {
 }
 
-bool PacketHouseDesignReq::onReceive(NetState* net)
+bool PacketHouseDesignReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignReq::onReceive");
 
@@ -3085,7 +3099,7 @@ PacketAntiCheat::PacketAntiCheat() : Packet(0)
 {
 }
 
-bool PacketAntiCheat::onReceive(NetState* net)
+bool PacketAntiCheat::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAntiCheat::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -3105,57 +3119,71 @@ PacketBandageMacro::PacketBandageMacro() : Packet(0)
 {
 }
 
-bool PacketBandageMacro::onReceive(NetState* net)
+bool PacketBandageMacro::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBandageMacro::onReceive");
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CChar* character = client->GetChar();
+	CChar* character = client->GetChar();
 	if (character == nullptr)
+	{
 		return false;
+	}
 
-	CItem* bandage = CUID(readInt32()).ItemFind();
-	CObjBase* target = CUID(readInt32()).ObjFind();
+    CUID uidBandage(readInt32());
+    CUID uidTarget(readInt32());
+	CItem* bandage = uidBandage.ItemFind();
+	CObjBase* target = uidTarget.ObjFind();
 	if (bandage == nullptr || target == nullptr)
+	{
 		return true;
+	}
 
 	// check the client can see the bandage they're trying to use
 	if (character->CanSee(bandage) == false)
 	{
-		client->addObjectRemoveCantSee(bandage->GetUID(), "the target");
+		client->addObjectRemoveCantSee(uidBandage, "the target");
 		return true;
 	}
 
 	// check the client is capable of using the bandage
 	if (character->CanUse(bandage, false) == false)
+	{
 		return true;
+	}
 
 	// check the bandage is in the possession of the client
 	if (bandage->GetTopLevelObj() != character)
+	{
 		return true;
+	}
 
 	// make sure the macro isn't used for other types of items
 	if (bandage->IsType(IT_BANDAGE) == false)
+	{
 		return true;
+	}
 
 	// clear previous target
 	client->SetTargMode();
 
-	// Should we simulate the dclick?
-	// client->m_Targ_UID = bandage->GetUID();
-	// CScriptTriggerArgs extArgs(1); // Signal we're from the macro
-	// if (bandage->OnTrigger( ITRIG_DCLICK, m_pChar, &extArgs ) == TRIGRET_RET_TRUE)
-	// 		return true;
-	//
-	// client->SetTargMode();
+	//Should we simulate the dclick?
+	client->m_Targ_UID = bandage->GetUID();
+	CScriptTriggerArgs extArgs(1); // Signal we're from the macro
+	if (bandage->OnTrigger( ITRIG_DCLICK, character, &extArgs ) == TRIGRET_RET_TRUE)
+	{
+		return true;
+	}
+
+	client->SetTargMode();
 
 	// prepare targeting information
-	client->m_Targ_UID = bandage->GetUID();
+	client->m_Targ_UID = uidBandage;
 	client->m_tmUseItem.m_pParent = bandage->GetParent();
 	client->SetTargMode(CLIMODE_TARG_USE_ITEM);
 
-	client->Event_Target(CLIMODE_TARG_USE_ITEM, target->GetUID(), target->GetUnkPoint());
+	client->Event_Target(CLIMODE_TARG_USE_ITEM, uidTarget, target->GetUnkPoint());
 	return true;
 }
 
@@ -3170,10 +3198,10 @@ PacketTargetedSkill::PacketTargetedSkill() : Packet(0)
 {
 }
 
-bool PacketTargetedSkill::onReceive(NetState* net)
+bool PacketTargetedSkill::onReceive(CNetState* net)
 {
     ADDTOCALLSTACK("PacketTargetedSkill::onReceive");
-    
+
     word  wSkillID    = readInt16();    // if SkillID = 0, it means that is lastskill
     dword dwTargetUID = readInt32();
 
@@ -3215,7 +3243,7 @@ PacketGargoyleFly::PacketGargoyleFly() : Packet(0)
 {
 }
 
-bool PacketGargoyleFly::onReceive(NetState* net)
+bool PacketGargoyleFly::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGargoyleFly::onReceive");
 
@@ -3251,7 +3279,7 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 		client->addBuff(BI_GARGOYLEFLY, 1112193, 1112567);
 
 		// float player up to the hover Z
-		CPointMap ptHover = g_World.FindItemTypeNearby(character->GetTopPoint(), IT_HOVEROVER, 0);
+		CPointMap ptHover = CWorldMap::FindItemTypeNearby(character->GetTopPoint(), IT_HOVEROVER, 0);
 		if ( ptHover.IsValidPoint() )
 			character->MoveTo(ptHover);
 	}
@@ -3285,7 +3313,7 @@ PacketWheelBoatMove::PacketWheelBoatMove() : Packet(0)
 {
 }
 
-bool PacketWheelBoatMove::onReceive(NetState* net)
+bool PacketWheelBoatMove::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWheelBoatMove::onReceive");
 
@@ -3300,7 +3328,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 
 	skip(4);
 	//dword serial = readInt32(); //player serial
-	//CUID from(serial &~ UID_F_RESOURCE); //do we need this? NetState provides the player character
+	//CUID from(serial &~ UID_F_RESOURCE); //do we need this? CNetState provides the player character
 
 	DIR_TYPE facing = static_cast<DIR_TYPE>(readByte()); //new boat facing, yes client send it
 	DIR_TYPE moving = static_cast<DIR_TYPE>(readByte()); //the boat movement
@@ -3318,7 +3346,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 			//	ship_face = pShipItem->Ship_Face()
 
 			//Ship_* need to be private? there is another way to ask the ship to move?
-			//pShipItem->Ship_Move(static_cast<DIR_TYPE>((moving - pShipItem->m_itShip.m_DirFace)), pShipItem->m_shipSpeed.tiles);
+			//pShipItem->Ship_Move(static_cast<DIR_TYPE>((moving - pShipItem->m_itShip.m_DirFace)), pShipItem->_shipSpeed.tiles);
 
 			if ((facing == DIR_N || facing == DIR_E || facing == DIR_S || facing == DIR_W) && pShipItem->m_itShip.m_DirFace != facing) //boat cannot face intermediate directions
 				pShipItem->Face(moving);
@@ -3345,7 +3373,7 @@ PacketPromptResponseUnicode::PacketPromptResponseUnicode() : Packet(0)
 {
 }
 
-bool PacketPromptResponseUnicode::onReceive(NetState* net)
+bool PacketPromptResponseUnicode::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketPromptResponseUnicode::onReceive");
 
@@ -3379,7 +3407,7 @@ PacketViewRange::PacketViewRange() : Packet(2)
 {
 }
 
-bool PacketViewRange::onReceive(NetState* net)
+bool PacketViewRange::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketViewRange::onReceive");
 
@@ -3404,7 +3432,7 @@ PacketLogout::PacketLogout() : Packet(1)
 {
 }
 
-bool PacketLogout::onReceive(NetState* net)
+bool PacketLogout::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketLogout::onReceive");
 
@@ -3424,7 +3452,7 @@ PacketBookHeaderEditNew::PacketBookHeaderEditNew() : Packet(0)
 {
 }
 
-bool PacketBookHeaderEditNew::onReceive(NetState* net)
+bool PacketBookHeaderEditNew::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBookHeaderEditNew::onReceive");
 
@@ -3459,7 +3487,7 @@ PacketAOSTooltipReq::PacketAOSTooltipReq() : Packet(0)
 {
 }
 
-bool PacketAOSTooltipReq::onReceive(NetState* net)
+bool PacketAOSTooltipReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAOSTooltipReq::onReceive");
 
@@ -3482,7 +3510,7 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 		CObjBase* object = CUID(readInt32()).ObjFind();
 		if (object == nullptr)
 			continue;
-		
+
         bool bShop = false;
         const CItem* pSearchObjItem = dynamic_cast<const CItem*>(object);
         if (pSearchObjItem)
@@ -3495,7 +3523,7 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
                 pSearchObjItem = dynamic_cast<const CItem*>(pSearchObj);
                 if (!pSearchObjItem)
                     break;
-                
+
                 LAYER_TYPE objContItemLayer = pSearchObjItem->GetEquipLayer();
                 if (objContItemLayer >= 26 && objContItemLayer <= 28)
                 {
@@ -3504,11 +3532,11 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
                     break;
                 }
             }
-        }	
+        }
 
 		if (bShop)	// shop item
 			client->addAOSTooltip(object, true, true);
-		else		// char or regular items		
+		else		// char or regular items
 		{
 			if (character->CanSee(object) == false)
 				continue;
@@ -3531,7 +3559,7 @@ PacketEncodedCommand::PacketEncodedCommand() : Packet(0)
 {
 }
 
-bool PacketEncodedCommand::onReceive(NetState* net)
+bool PacketEncodedCommand::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketEncodedCommand::onReceive");
 
@@ -3543,6 +3571,8 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 		return false;
 
 	word packetLength = readInt16();
+	if (packetLength > 1000)
+		return false;
 	CUID serial(readInt32());
 	if (character->GetUID() != serial)
 		return false;
@@ -3551,11 +3581,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 	seek();
 
 
-#ifndef _MTNETWORK
-	Packet* handler = g_NetworkIn.getPacketManager().getEncodedHandler(type);
-#else
 	Packet* handler = g_NetworkManager.getPacketManager().getEncodedHandler(type);
-#endif
 	if (handler == nullptr)
 		return false;
 
@@ -3583,7 +3609,7 @@ PacketHouseDesignBackup::PacketHouseDesignBackup() : Packet(0)
 {
 }
 
-bool PacketHouseDesignBackup::onReceive(NetState* net)
+bool PacketHouseDesignBackup::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignBackup::onReceive");
 
@@ -3610,7 +3636,7 @@ PacketHouseDesignRestore::PacketHouseDesignRestore() : Packet(0)
 {
 }
 
-bool PacketHouseDesignRestore::onReceive(NetState* net)
+bool PacketHouseDesignRestore::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignRestore::onReceive");
 
@@ -3637,7 +3663,7 @@ PacketHouseDesignCommit::PacketHouseDesignCommit() : Packet(0)
 {
 }
 
-bool PacketHouseDesignCommit::onReceive(NetState* net)
+bool PacketHouseDesignCommit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignCommit::onReceive");
 
@@ -3656,7 +3682,7 @@ bool PacketHouseDesignCommit::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0xD7.0x05 : PacketHouseDesignDestroyItem	destroy house design item
+ *	Packet 0xD7.0x05 : PacketHouseDesignDestroyItem	    destroy house design item
  *
  *
  ***************************************************************************/
@@ -3664,7 +3690,7 @@ PacketHouseDesignDestroyItem::PacketHouseDesignDestroyItem() : Packet(0)
 {
 }
 
-bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
+bool PacketHouseDesignDestroyItem::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignDestroyItem::onReceive");
 
@@ -3684,7 +3710,7 @@ bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	word z = (word)(readInt32());
 
-	house->RemoveItem(client, id, x, y, (char)(z));
+	house->RemoveItem(client, id, x, y, (char)z);
 	return true;
 }
 
@@ -3700,7 +3726,7 @@ PacketHouseDesignPlaceItem::PacketHouseDesignPlaceItem() : Packet(0)
 {
 }
 
-bool PacketHouseDesignPlaceItem::onReceive(NetState* net)
+bool PacketHouseDesignPlaceItem::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignPlaceItem::onReceive");
 
@@ -3734,7 +3760,7 @@ PacketHouseDesignExit::PacketHouseDesignExit() : Packet(0)
 {
 }
 
-bool PacketHouseDesignExit::onReceive(NetState* net)
+bool PacketHouseDesignExit::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignExit::onReceive");
 
@@ -3761,7 +3787,7 @@ PacketHouseDesignPlaceStair::PacketHouseDesignPlaceStair() : Packet(0)
 {
 }
 
-bool PacketHouseDesignPlaceStair::onReceive(NetState* net)
+bool PacketHouseDesignPlaceStair::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignPlaceStair::onReceive");
 
@@ -3795,7 +3821,7 @@ PacketHouseDesignSync::PacketHouseDesignSync() : Packet(0)
 {
 }
 
-bool PacketHouseDesignSync::onReceive(NetState* net)
+bool PacketHouseDesignSync::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignSync::onReceive");
 
@@ -3822,7 +3848,7 @@ PacketHouseDesignClear::PacketHouseDesignClear() : Packet(0)
 {
 }
 
-bool PacketHouseDesignClear::onReceive(NetState* net)
+bool PacketHouseDesignClear::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignClear::onReceive");
 
@@ -3849,7 +3875,7 @@ PacketHouseDesignSwitch::PacketHouseDesignSwitch() : Packet(0)
 {
 }
 
-bool PacketHouseDesignSwitch::onReceive(NetState* net)
+bool PacketHouseDesignSwitch::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignSwitch::onReceive");
 
@@ -3879,7 +3905,7 @@ PacketHouseDesignPlaceRoof::PacketHouseDesignPlaceRoof() : Packet(0)
 {
 }
 
-bool PacketHouseDesignPlaceRoof::onReceive(NetState* net)
+bool PacketHouseDesignPlaceRoof::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignPlaceRoof::onReceive");
 
@@ -3915,7 +3941,7 @@ PacketHouseDesignDestroyRoof::PacketHouseDesignDestroyRoof() : Packet(0)
 {
 }
 
-bool PacketHouseDesignDestroyRoof::onReceive(NetState* net)
+bool PacketHouseDesignDestroyRoof::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignDestroyRoof::onReceive");
 
@@ -3951,7 +3977,7 @@ PacketSpecialMove::PacketSpecialMove() : Packet(0)
 {
 }
 
-bool PacketSpecialMove::onReceive(NetState* net)
+bool PacketSpecialMove::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSpecialMove::onReceive");
 
@@ -3985,7 +4011,7 @@ PacketHouseDesignRevert::PacketHouseDesignRevert() : Packet(0)
 {
 }
 
-bool PacketHouseDesignRevert::onReceive(NetState* net)
+bool PacketHouseDesignRevert::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHouseDesignRevert::onReceive");
 
@@ -4012,7 +4038,7 @@ PacketEquipLastWeapon::PacketEquipLastWeapon() : Packet(0)
 {
 }
 
-bool PacketEquipLastWeapon::onReceive(NetState* net)
+bool PacketEquipLastWeapon::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketEquipLastWeapon::onReceive");
 
@@ -4026,12 +4052,14 @@ bool PacketEquipLastWeapon::onReceive(NetState* net)
         return false;
 
     if (!pCharPlayer->m_uidWeaponLast.IsValidUID())
-        return true;
+        return false;
     if ( pCharPlayer->m_uidWeaponLast == pChar->m_uidWeapon )
         return true;
 
     CItem *pWeapon = pCharPlayer->m_uidWeaponLast.ItemFind();
-    if ( pWeapon && pChar->ItemPickup(pWeapon, 1) == -1 )
+    if (!pWeapon)
+        return false;
+    if (pChar->ItemPickup(pWeapon, 1) == -1)
         return true;
 
     pChar->ItemEquip(pWeapon);
@@ -4051,7 +4079,7 @@ PacketGuildButton::PacketGuildButton() : Packet(0)
 {
 }
 
-bool PacketGuildButton::onReceive(NetState* net)
+bool PacketGuildButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketGuildButton::onReceive");
 
@@ -4078,7 +4106,7 @@ PacketQuestButton::PacketQuestButton() : Packet(0)
 {
 }
 
-bool PacketQuestButton::onReceive(NetState* net)
+bool PacketQuestButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketQuestButton::onReceive");
 
@@ -4105,7 +4133,7 @@ PacketHardwareInfo::PacketHardwareInfo() : Packet(268)
 {
 }
 
-bool PacketHardwareInfo::onReceive(NetState* net)
+bool PacketHardwareInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHardwareInfo::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -4151,7 +4179,7 @@ PacketBugReport::PacketBugReport() : Packet(0)
 {
 }
 
-bool PacketBugReport::onReceive(NetState* net)
+bool PacketBugReport::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketBugReport::onReceive");
 
@@ -4183,7 +4211,7 @@ PacketClientType::PacketClientType() : Packet(0)
 {
 }
 
-bool PacketClientType::onReceive(NetState* net)
+bool PacketClientType::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientType::onReceive");
 
@@ -4210,7 +4238,7 @@ PacketRemoveUIHighlight::PacketRemoveUIHighlight() : Packet(13)
 {
 }
 
-bool PacketRemoveUIHighlight::onReceive(NetState* net)
+bool PacketRemoveUIHighlight::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketRemoveUIHighlight::onReceive");
 	UNREFERENCED_PARAMETER(net);
@@ -4235,7 +4263,7 @@ PacketUseHotbar::PacketUseHotbar() : Packet(11)
 {
 }
 
-bool PacketUseHotbar::onReceive(NetState* net)
+bool PacketUseHotbar::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUseHotbar::onReceive");
 
@@ -4267,7 +4295,7 @@ PacketEquipItemMacro::PacketEquipItemMacro() : Packet(0)
 {
 }
 
-bool PacketEquipItemMacro::onReceive(NetState* net)
+bool PacketEquipItemMacro::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketEquipItemMacro::onReceive");
 
@@ -4313,7 +4341,7 @@ PacketUnEquipItemMacro::PacketUnEquipItemMacro() : Packet(0)
 {
 }
 
-bool PacketUnEquipItemMacro::onReceive(NetState* net)
+bool PacketUnEquipItemMacro::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUnEquipItemMacro::onReceive");
 
@@ -4359,7 +4387,7 @@ PacketMovementReqNew::PacketMovementReqNew() : Packet(0)
 {
 }
 
-bool PacketMovementReqNew::onReceive(NetState* net)
+bool PacketMovementReqNew::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketMovementReqNew::onReceive");
 	// New walk packet used on newest clients (still incomplete)
@@ -4424,7 +4452,7 @@ PacketTimeSyncRequest::PacketTimeSyncRequest() : Packet(9)
 {
 }
 
-bool PacketTimeSyncRequest::onReceive(NetState* net)
+bool PacketTimeSyncRequest::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketTimeSyncRequest::onReceive");
 
@@ -4448,7 +4476,7 @@ PacketCrashReport::PacketCrashReport() : Packet(0)
 {
 }
 
-bool PacketCrashReport::onReceive(NetState* net)
+bool PacketCrashReport::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCrashReport::onReceive");
 
@@ -4473,10 +4501,25 @@ bool PacketCrashReport::onReceive(NetState* net)
 	skip(1); // zero
 	dword errorOffset = readInt32();
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed at %d,%d,%d,%d: 0x%08X %s @ 0x%08X (%s, %d.%d.%d.%d)\n", net->id(),
-					x, y, z, map,
-					errorCode, description, errorOffset, executable,
-					versionMaj, versionMin, versionRev, versionPat);
+    lpctstr ptcAcctName = "none";
+    const CClient *pClient = net->getClient();
+    if (pClient)
+    {
+        if (const CAccount * pAccount = pClient->GetAccount())
+            ptcAcctName = pAccount->GetName();
+    }
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed. Account: '%s'. Data from Crash Report packet:\n", net->id(), ptcAcctName);
+    g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "P=%d,%d,%d,%d, ErrorCode=0x%08X, Description='%s', Offset=0x%08X, ClientExe='%s', ClientVer=%d.%d.%d.%d\n",
+        x, y, z, map, errorCode, description, errorOffset, executable, versionMaj, versionMin, versionRev, versionPat);
+    if (pClient)
+    {
+        if (const CChar *pChar = pClient->GetChar())
+        {
+            CPointMap const& ptChar = pChar->GetTopPoint();
+            g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "Char attached. Last server P=%d,%d,%d,%d\n", ptChar.m_x, ptChar.m_y, ptChar.m_z, ptChar.m_map);
+        }
+    }
+
 	return true;
 }
 
@@ -4491,11 +4534,11 @@ PacketCreateHS::PacketCreateHS() : PacketCreate(106)
 {
 }
 
-bool PacketCreateHS::onReceive(NetState* net)
+bool PacketCreateHS::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCreateHS::onReceive");
 	// standard character creation packet, but with 4 skills and different handling of race and sex.
-	
+
 	tchar charname[MAX_NAME_SIZE];
 	SKILL_TYPE skill1 = SKILL_NONE, skill2 = SKILL_NONE, skill3 = SKILL_NONE, skill4 = SKILL_NONE;
 	byte skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
@@ -4532,7 +4575,7 @@ bool PacketCreateHS::onReceive(NetState* net)
 
 	// convert race_sex_flag: determine which race and sex the client has selected
 	bool isFemale = (race_sex_flag % 2) != 0;	// Even=Male, Odd=Female (rule applies to all clients)
-	RACE_TYPE rtRace = RACETYPE_HUMAN;			// Human								   
+	RACE_TYPE rtRace = RACETYPE_HUMAN;			// Human
 	/*
 	race_sex_flag values since Classic Client 7.0.16.0
 	0x2 = Human (male)
@@ -4544,8 +4587,6 @@ bool PacketCreateHS::onReceive(NetState* net)
 	*/
 	switch (race_sex_flag)
 	{
-	default:
-		g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	case 0x2: case 0x3:
 		rtRace = RACETYPE_HUMAN;
 		break;
@@ -4555,6 +4596,8 @@ bool PacketCreateHS::onReceive(NetState* net)
 	case 0x6: case 0x7:
 		rtRace = RACETYPE_GARGOYLE;
 		break;
+	default:
+		g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	}
 
 	return doCreate(net, charname, isFemale, rtRace,
@@ -4574,7 +4617,7 @@ PacketUltimaStoreButton::PacketUltimaStoreButton() : Packet(1)
 {
 }
 
-bool PacketUltimaStoreButton::onReceive(NetState *net)
+bool PacketUltimaStoreButton::onReceive(CNetState *net)
 {
     ADDTOCALLSTACK("PacketUltimaStoreButton::onReceive");
 
@@ -4586,5 +4629,30 @@ bool PacketUltimaStoreButton::onReceive(NetState *net)
 
     if (IsTrigUsed(TRIGGER_USERULTIMASTOREBUTTON))
         character->OnTrigger(CTRIG_UserUltimaStoreButton, character, nullptr);
+    return true;
+}
+
+
+
+/***************************************************************************
+*
+*
+*	Packet 0xFB : PacketPublicHouseContent			show/hide public house content (SA)
+*
+*
+***************************************************************************/
+PacketPublicHouseContent::PacketPublicHouseContent() : Packet(2)
+{
+}
+
+bool PacketPublicHouseContent::onReceive(CNetState* net)
+{
+    ADDTOCALLSTACK("PacketPublicHouseContent::onReceive");
+
+    CClient* client = net->getClient();
+    ASSERT(client);
+
+    client->_fShowPublicHouseContent = readBool();
+
     return true;
 }

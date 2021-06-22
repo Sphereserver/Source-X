@@ -5,8 +5,6 @@ sphere/asyncdb.h
 sphere/containers.h
 sphere/ConsoleInterface.cpp
 sphere/ConsoleInterface.h
-sphere/linuxev.cpp
-sphere/linuxev.h
 sphere/ProfileData.cpp
 sphere/ProfileData.h
 sphere/ProfileTask.cpp
@@ -25,12 +23,28 @@ SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 
 # Network management files
 SET (network_SRCS
+network/CClientIterator.cpp
+network/CClientIterator.h
+network/CIPHistoryManager.cpp
+network/CIPHistoryManager.h
+network/CNetState.cpp
+network/CNetState.h
+network/CNetworkInput.cpp
+network/CNetworkInput.h
+network/CNetworkManager.cpp
+network/CNetworkManager.h
+network/CNetworkOutput.cpp
+network/CNetworkOutput.h
+network/CNetworkThread.cpp
+network/CNetworkThread.h
+network/CPacketManager.cpp
+network/CPacketManager.h
 network/CSocket.cpp
 network/CSocket.h
-network/network_common.cpp
-network/network_singlethreaded.cpp
-network/network_multithreaded.cpp
-network/network.h
+network/linuxev.cpp
+network/linuxev.h
+network/net_datatypes.h
+network/net_datatypes.cpp
 network/packet.cpp
 network/packet.h
 network/receive.cpp
@@ -112,14 +126,16 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
+common/CFloatMath.cpp
+common/CFloatMath.h
+common/CLocalVarsExtra.cpp
+common/CLocalVarsExtra.h
 common/CLog.cpp
 common/CLog.h
 common/CServerMap.cpp
 common/CServerMap.h
 common/CUID.cpp
 common/CUID.h
-common/CObjBaseTemplate.cpp
-common/CObjBaseTemplate.h
 common/common.cpp
 common/common.h
 common/CPointBase.cpp
@@ -134,8 +150,6 @@ common/CScriptObj.cpp
 common/CScriptObj.h
 common/CScriptTriggerArgs.cpp
 common/CScriptTriggerArgs.h
-common/CSectorTemplate.cpp
-common/CSectorTemplate.h
 common/CSFileObj.cpp
 common/CSFileObj.h
 common/CSFileObjContainer.cpp
@@ -148,8 +162,6 @@ common/CUOInstall.cpp
 common/CUOInstall.h
 common/CVarDefMap.cpp
 common/CVarDefMap.h
-common/CVarFloat.cpp
-common/CVarFloat.h
 common/datatypes.h
 common/sphereproto.h
 common/sphereversion.h
@@ -166,6 +178,7 @@ common/resource/CResourceBase.cpp
 common/resource/CResourceBase.h
 common/resource/CResourceDef.cpp
 common/resource/CResourceDef.h
+common/resource/CResourceID.cpp
 common/resource/CResourceID.h
 common/resource/CResourceHash.cpp
 common/resource/CResourceHash.h
@@ -186,26 +199,27 @@ common/resource/CValueDefs.h
 )
 SOURCE_GROUP (common\\resource FILES ${resource_SRCS})
 
-SET (resourceblocks_SRCS
-common/resource/blocks/CDialogDef.cpp
-common/resource/blocks/CDialogDef.h
-common/resource/blocks/CItemTypeDef.cpp
-common/resource/blocks/CItemTypeDef.h
-common/resource/blocks/CRandGroupDef.cpp
-common/resource/blocks/CRandGroupDef.h
-common/resource/blocks/CRegionResourceDef.cpp
-common/resource/blocks/CRegionResourceDef.h
-common/resource/blocks/CResourceNamedDef.h
-common/resource/blocks/CSkillClassDef.cpp
-common/resource/blocks/CSkillClassDef.h
-common/resource/blocks/CSkillDef.cpp
-common/resource/blocks/CSkillDef.h
-common/resource/blocks/CSpellDef.cpp
-common/resource/blocks/CSpellDef.h
-common/resource/blocks/CWebPageDef.cpp
-common/resource/blocks/CWebPageDef.h
+SET (resourcesections_SRCS
+common/resource/sections/CDialogDef.cpp
+common/resource/sections/CDialogDef.h
+common/resource/sections/CItemTypeDef.cpp
+common/resource/sections/CItemTypeDef.h
+common/resource/sections/CRandGroupDef.cpp
+common/resource/sections/CRandGroupDef.h
+common/resource/sections/CRegionResourceDef.cpp
+common/resource/sections/CRegionResourceDef.h
+common/resource/sections/CResourceNamedDef.cpp
+common/resource/sections/CResourceNamedDef.h
+common/resource/sections/CSkillClassDef.cpp
+common/resource/sections/CSkillClassDef.h
+common/resource/sections/CSkillDef.cpp
+common/resource/sections/CSkillDef.h
+common/resource/sections/CSpellDef.cpp
+common/resource/sections/CSpellDef.h
+common/resource/sections/CWebPageDef.cpp
+common/resource/sections/CWebPageDef.h
 )
-SOURCE_GROUP (common\\resource\\blocks FILES ${resourceblocks_SRCS})
+SOURCE_GROUP (common\\resource\\sections FILES ${resourcesections_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
@@ -220,11 +234,15 @@ common/sphere_library/CSFileText.h
 common/sphere_library/CSMemBlock.cpp
 common/sphere_library/CSMemBlock.h
 common/sphere_library/CSObjArray.h
+common/sphere_library/CSObjCont.cpp
+common/sphere_library/CSObjCont.h
+common/sphere_library/CSObjContRec.h
 common/sphere_library/CSObjList.cpp
 common/sphere_library/CSObjList.h
 common/sphere_library/CSObjListRec.h
 common/sphere_library/CSObjSortArray.h
 common/sphere_library/CSPtrTypeArray.h
+common/sphere_library/CSSortedVector.h
 common/sphere_library/CSTypedArray.h
 common/sphere_library/CSQueue.cpp
 common/sphere_library/CSQueue.h
@@ -266,6 +284,8 @@ game/CEntityProps.cpp
 game/CEntityProps.h
 game/CObjBase.cpp
 game/CObjBase.h
+game/CObjBaseTemplate.cpp
+game/CObjBaseTemplate.h
 game/CPathFinder.cpp
 game/CPathFinder.h
 game/CRegion.cpp
@@ -278,6 +298,10 @@ game/CSector.cpp
 game/CSector.h
 game/CSectorEnviron.h
 game/CSectorEnviron.cpp
+game/CSectorTemplate.cpp
+game/CSectorTemplate.h
+game/CSectorList.cpp
+game/CSectorList.h
 game/CServer.cpp
 game/CServer.h
 game/CServerConfig.cpp
@@ -288,12 +312,29 @@ game/CServerTime.cpp
 game/CServerTime.h
 game/CTimedFunction.cpp
 game/CTimedFunction.h
+game/CTimedFunctionHandler.cpp
+game/CTimedFunctionHandler.h
 game/CTimedObject.cpp
 game/CTimedObject.h
 game/CWorld.cpp
 game/CWorld.h
+game/CWorldCache.cpp
+game/CWorldCache.h
+game/CWorldClock.cpp
+game/CWorldClock.h
+game/CWorldComm.cpp
+game/CWorldComm.h
+game/CWorldGameTime.cpp
+game/CWorldGameTime.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
+game/CWorldMap.h
+game/CWorldTicker.cpp
+game/CWorldTicker.h
+game/CWorldTickingList.cpp
+game/CWorldTickingList.h
+game/CWorldTimedFunctions.cpp
+game/CWorldTimedFunctions.h
 game/game_enums.h
 game/game_macros.h
 game/spheresvr.cpp
@@ -335,6 +376,7 @@ game/items/CItemStone.cpp
 game/items/CItemStone.h
 game/items/CItemVendable.cpp
 game/items/CItemVendable.h
+game/items/item_types.h
 )
 SOURCE_GROUP (game\\items FILES ${items_SRCS})
 
@@ -383,7 +425,6 @@ game/clients/CChatChanMember.h
 game/clients/CClient.cpp
 game/clients/CClientDialog.cpp
 game/clients/CClientEvent.cpp
-game/clients/CClientGMPage.cpp
 game/clients/CClient.h
 game/clients/CClientLog.cpp
 game/clients/CClientMsg.cpp
@@ -528,4 +569,6 @@ sphereCrypt.ini
 
 INCLUDE_DIRECTORIES (
 common/mysql/
+common/flat_containers/
+common/parallel_hashmap/
 )

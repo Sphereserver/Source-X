@@ -1,12 +1,16 @@
-
+#include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../clients/CClient.h"
+#include "../CSector.h"
+#include "../CServer.h"
 #include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 
 SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell for the given skill
 {
@@ -73,14 +77,23 @@ void CChar::Spell_Dispel(int iLevel)
 	// remove all the spells. NOT if caused by objects worn !!!
 	// ATTR_MAGIC && ! ATTR_MOVE_NEVER
 
-	CItem *pItemNext = nullptr;
-	for ( CItem *pItem = GetContentHead(); pItem != nullptr; pItem = pItemNext )
+	for (size_t i = 0; i < GetContentCount();)
 	{
-		pItemNext = pItem->GetNext();
-		if ( iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER) )	// we don't lose this.
-			continue;
-		if ( (pItem->GetEquipLayer() == LAYER_FACE) || ((pItem->GetEquipLayer() >= LAYER_SPELL_STATS) && (pItem->GetEquipLayer() <= LAYER_SPELL_Summon)) )
-			pItem->Delete();
+		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));
+		bool fIncrease = true;
+		if (iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER))
+		{
+			// we don't lose this.
+		}
+		else
+		{
+			const LAYER_TYPE itLayer = pItem->GetEquipLayer();
+			if ( ((itLayer == LAYER_FACE) && pItem->IsType(IT_LIGHT_LIT)) || ((itLayer >= LAYER_SPELL_STATS) && (itLayer <= LAYER_SPELL_Summon)) )
+				fIncrease = !pItem->Delete();
+		}
+
+		if (fIncrease)
+			++i;
 	}
 }
 
@@ -203,7 +216,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 
 	MoveToChar(ptNew, true, true); 	// move character
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	CClient *pClientIgnore = nullptr;
 	if ( pClient && (ptNew.m_map != ptOld.m_map) )
 	{
@@ -234,7 +247,8 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     // Create moongate between current pt and destination pt
     // RETURN: true = it worked.
 
-    if ( !m_pArea || !ptDest.IsValidPoint() )
+    CRegion *pArea = GetRegion();
+    if ( !pArea || !ptDest.IsValidPoint() )
         return false;
 
     CRegion *pAreaDest = ptDest.GetRegion(REGION_TYPE_AREA|REGION_TYPE_ROOM|REGION_TYPE_MULTI);
@@ -271,7 +285,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
             }
         }
 
-        if ( g_World.IsItemTypeNear(ptMe, IT_TELEPAD, 0, false) || g_World.IsItemTypeNear(ptDest, IT_TELEPAD, 0, false) )
+        if ( CWorldMap::IsItemTypeNear(ptMe, IT_TELEPAD, 0, false) || CWorldMap::IsItemTypeNear(ptDest, IT_TELEPAD, 0, false) )
         {
             SysMessageDefault(DEFMSG_SPELL_GATE_ALREADYTHERE);
             return false;
@@ -280,90 +294,55 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
 
     const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
     ASSERT(pSpellDef);
+    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
 
     ptDest.m_z = GetFixZ(ptDest);
-    ITEMID_TYPE id = pSpellDef->m_idEffect;
-    if (id == ITEMID_NOTHING)
-        id = pAreaDest->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED|REGION_FLAG_NO_PVP) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
-    int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
+    ITEMID_TYPE idOrig, idDest;
+    idOrig = idDest = pSpellDef->m_idEffect;
+    if (idOrig == ITEMID_NOTHING)
+    {
+        const dword dwSafeFlags = REGION_FLAG_SAFE | REGION_FLAG_GUARDED | REGION_FLAG_NO_PVP;
+        idOrig = pAreaDest->IsFlag(dwSafeFlags) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
+        idDest = pArea->IsFlag    (dwSafeFlags) ? ITEMID_MOONGATE_BLUE : ITEMID_MOONGATE_RED;
+    }
 
-    CItem *pGateOrig = CItem::CreateBase(id);
+    CItem *pGateOrig = CItem::CreateBase(idOrig);
     ASSERT(pGateOrig);
     pGateOrig->SetType(IT_TELEPAD);
     pGateOrig->SetAttr(ATTR_MOVE_NEVER);
     pGateOrig->m_itNormal.m_more1 = (dword)GetUID();
     pGateOrig->m_itTelepad.m_ptMark = ptDest;
-    pGateOrig->MoveToDecay(ptMe, iDuration, true);
-    pGateOrig->Sound(pSpellDef->m_sound);
-
-    CItem *pGateDest = CItem::CreateBase(id);
+   
+    CItem *pGateDest = CItem::CreateBase(idDest);
     ASSERT(pGateDest);
     pGateDest->SetType(IT_TELEPAD);
     pGateDest->SetAttr(ATTR_MOVE_NEVER);
     pGateDest->m_itNormal.m_more1 = (dword)GetUID();
     pGateDest->m_itTelepad.m_ptMark = ptMe;
-    pGateDest->MoveToDecay(ptDest, iDuration, true);
-    pGateDest->Sound(pSpellDef->m_sound);
 
     pGateOrig->m_uidLink = pGateDest->GetUID();
     pGateDest->m_uidLink = pGateOrig->GetUID();
+
+    pGateOrig->MoveToDecay(ptMe, iDuration, true);
+    pGateOrig->Sound(pSpellDef->m_sound);
+    pGateDest->MoveToDecay(ptDest, iDuration, true);
+    pGateDest->Sound(pSpellDef->m_sound);
 
     SysMessageDefault(DEFMSG_SPELL_GATE_OPEN);
     return true;
 }
 
-CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
+CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg )
 {
-	ADDTOCALLSTACK("CChar::Spell_Summon");
-	// Summon an NPC using summon spells.
+	ADDTOCALLSTACK("CChar::Spell_Summon_Place");
+	// Finally place the NPC in the world.
+	int iSkill;
+	CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 
-	int skill;
-	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
-	if ( !pSpellDef || !pSpellDef->GetPrimarySkill(&skill, nullptr) )
-		return nullptr;
-
-	if ( !pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
-        ptTarg = GetTopPoint();
-
-	CChar *pChar = CChar::CreateBasic(id);
-	if ( pChar == nullptr )
-		return nullptr;
-
-	if ( !IsPriv(PRIV_GM) )
+	if (!pSpellDef || !pSpellDef->GetPrimarySkill(&iSkill, nullptr) || !pChar)
 	{
-		if ( IsSetMagicFlags(MAGICF_SUMMONWALKCHECK) )	// check if the target location is valid
-		{
-			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
-			dword dwBlockFlags = 0;
-			g_World.GetHeightPoint2(ptTarg, dwBlockFlags, true);
-
-			if ( dwBlockFlags & ~dwCan )
-			{
-				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
-				pChar->Delete();
-				return nullptr;
-			}
-		}
-
-		if ( IsSetOF(OF_PetSlots) )
-		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true);
-			if ( !FollowersUpdate(pChar, maximum(1, iFollowerSlots), true) )
-			{
-				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
-				pChar->Delete();
-				return nullptr;
-			}
-		}
-
-		if ( g_Cfg.m_iMountHeight && !pChar->IsVerticalSpace(GetTopPoint(), false) )
-		{
-			SysMessageDefault(DEFMSG_MSG_SUMMON_CEILING);
-			pChar->Delete();
-			return nullptr;
-		}
+		return nullptr;
 	}
-
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
 	pChar->MoveToChar(ptTarg);
@@ -371,8 +350,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap ptTarg )
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->NPC_PetSetOwner(this);
-	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)skill), nullptr);
-
+	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr);
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
 	pChar->SoundChar(CRESND_GETHIT);
@@ -465,8 +443,8 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 		hits = (ushort)(Args.m_iN1);
 	}
 
-	SetID(m_prev_id);
-	SetHue(m_prev_Hue);
+	SetID(_iPrev_id);
+	SetHue(_wPrev_Hue);
 	StatFlag_Clear(STATF_DEAD|STATF_INSUBSTANTIAL);
 	Stat_SetVal(STAT_STR, maximum(hits, 1));
 
@@ -513,12 +491,17 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 
 	}
 
-	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Resurrection);
-	Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
-	Sound(pSpellDef->m_sound);
-    if (IsClient())
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Resurrection);
+	if (pSpellDef)
+	{
+		if (pSpellDef->m_idEffect)
+			Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
+		Sound(pSpellDef->m_sound);
+	}
+	
+    if (IsClientActive())
     {
-        CClient *pClient = GetClient();
+        CClient *pClient = GetClientActive();
         pClient->addSeason(GetTopSector()->GetSeason());
     }
 	return true;
@@ -549,17 +532,26 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	if ( !spell || !pSpellDef )
 		return;
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	ushort uiStatEffect = (ushort)(pSpell->m_itSpell.m_spelllevel);
 
+	if (IsTrigUsed(TRIGGER_SPELLEFFECTREMOVE))
+	{
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = pSpell;
+		Args.m_iN1 = spell;
+		TRIGRET_TYPE iRet = OnTrigger(CTRIG_SpellEffectRemove, pCaster, &Args);
+		if (iRet == TRIGRET_RET_FALSE)	// Return 0: remove the spell memory item but don't execute the default spell behaviour.
+			return;
+	}
 	if (IsTrigUsed(TRIGGER_EFFECTREMOVE))
 	{
 		CScriptTriggerArgs Args;
 		Args.m_pO1 = pSpell;
 		Args.m_iN1 = spell;
-		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectRemove, pCaster, &Args);
-		if (iRet == TRIGRET_RET_FALSE)	// Return 0: remove the spell memory item but don't execute the default spell behaviour.
+		TRIGRET_TYPE iRet = Spell_OnTrigger(spell, SPTRIG_EFFECTREMOVE, pCaster, &Args);
+		if (iRet == TRIGRET_RET_FALSE)		// Return 0: remove the spell memory item but don't execute the default spell behaviour.
 			return;
 	}
 
@@ -601,7 +593,8 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
             };
 
 			BUFF_ICONS iBuffIcon = BI_START;
-            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+			CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+			CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
 			switch (spell)
 			{
 				case SPELL_Polymorph:
@@ -644,7 +637,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 					break;
 			}
 
-			SetID(m_prev_id);
+			SetID(_iPrev_id);
 			if ( IsSetMagicFlags(MAGICF_POLYMORPHSTATS) && spell == SPELL_Polymorph )
 			{
 				Stat_AddMod(STAT_STR, -pSpell->m_itSpell.m_PolyStr);
@@ -676,7 +669,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			SetName(pSpell->GetName());		// restore your name
 
 			if (!IsStatFlag(STATF_POLYMORPH) && IsPlayableCharacter())	// polymorph doesn't change the hue of the character, only the id
-				SetHue(m_prev_Hue);
+				SetHue(_wPrev_Hue);
 
 			CItem *pHair = LayerFind(LAYER_HAIR);
 			if (pHair)
@@ -755,13 +748,14 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			if (pClient)
 				pClient->removeBuff(BI_BLOODOATHCURSE);
 			CChar * pSrc = pSpell->m_uidLink.CharFind();
-			if (pSrc && pSrc->IsClient())
-				pSrc->GetClient()->removeBuff(BI_BLOODOATHCASTER);
+			if (pSrc && pSrc->IsClientActive())
+				pSrc->GetClientActive()->removeBuff(BI_BLOODOATHCASTER);
 			return;
 		}
 		case LAYER_SPELL_Corpse_Skin:
         {
-            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+			CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+			CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
             ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, - pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
             ModPropNum(pCCPChar, PROPCH_RESFIRE,   + pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
             ModPropNum(pCCPChar, PROPCH_RESCOLD,   - pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
@@ -811,10 +805,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				pClient->removeBuff(BI_WEAKEN);
 			return;
 		case SPELL_Curse:
+		case SPELL_Mass_Curse:
 		{
 			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
 			{
-                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                 ModPropNum(pCCPChar, PROPCH_RESFIREMAX,   + 10, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESCOLDMAX,   + 10, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESPOISONMAX, + 10, pBaseCCPChar);
@@ -823,7 +819,12 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			for (int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 				Stat_AddMod((STAT_TYPE)i, uiStatEffect);
 			if (pClient)
-				pClient->removeBuff(BI_CURSE);
+			{
+				if (spell == SPELL_Mass_Curse)
+					pClient->removeBuff(BI_MASSCURSE);
+				else
+					pClient->removeBuff(BI_CURSE);
+			}
 			return;
 		}
 		case SPELL_Agility:
@@ -855,7 +856,8 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Reactive_Armor:
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
-                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                 ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, - pSpell->m_itSpell.m_spelllevel, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESFIRE,   +5, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESCOLD,   +5, pBaseCCPChar);
@@ -873,7 +875,8 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			StatFlag_Clear(STATF_REFLECTION);
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
-                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                 ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_spelllevel, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESFIRE,   -10, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESCOLD,   -10, pBaseCCPChar);
@@ -889,7 +892,8 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Arch_Prot:
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
-                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                 ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_FASTERCASTING, +2, pBaseCCPChar);
                 _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
@@ -948,18 +952,33 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	if ( !spell || !pSpellDef )
 		return;
 
-	CClient *pClient = GetClient();
+	CClient *pClient = GetClientActive();
 	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	word& wStatEffectRef = pSpell->m_itSpell.m_spelllevel;
     int64 iTimerEffectSigned = pSpell->GetTimerSAdjusted();
 	word wTimerEffect = (word)maximum(iTimerEffectSigned, 0);
+
+	if (IsTrigUsed(TRIGGER_SPELLEFFECTADD))
+	{
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = pSpell;
+		Args.m_iN1 = spell;
+		TRIGRET_TYPE iRet = OnTrigger(CTRIG_SpellEffectAdd, pCaster, &Args);
+		if (iRet == TRIGRET_RET_TRUE)	// Return 1: We don't want nothing to happen, removing memory also.
+		{
+			pSpell->Delete(true);
+			return;
+		}
+		else if (iRet == TRIGRET_RET_FALSE)		// return 0: we want the memory to be equipped but we want custom things to happen: don't remove memory but stop here,
+			return;
+	}
 
 	if (IsTrigUsed(TRIGGER_EFFECTADD))
 	{
 		CScriptTriggerArgs Args;
 		Args.m_pO1 = pSpell;
 		Args.m_iN1 = spell;
-		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectAdd, pCaster, &Args);
+		TRIGRET_TYPE iRet = Spell_OnTrigger(spell,SPTRIG_EFFECTADD, pCaster, &Args);
 		if (iRet == TRIGRET_RET_TRUE)	// Return 1: We don't want nothing to happen, removing memory also.
 		{
 			pSpell->Delete(true);
@@ -970,7 +989,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	}
 
 	// Buffs related variables
-	tchar NumBuff[7][8];
+	static constexpr uint uiBuffElemSize = MAX_NAME_SIZE;
+	tchar NumBuff[7][uiBuffElemSize];
 	lpctstr pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
 	switch (pSpellDef->m_idLayer)
@@ -980,7 +1000,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Polymorph:
 		{
 			BUFF_ICONS iBuffIcon = BI_START;
-            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+			CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+			CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
 
 			switch (spell)
 			{
@@ -990,16 +1011,16 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_POLYMORPH;
 					break;
 				case SPELL_Lich_Form:
-					m_atMagery.m_SummonID = CREID_LICH;
+					m_atMagery.m_iSummonID = CREID_LICH;
 					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
                     Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
-                    ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
-                    ModPropNum(pCCPChar, PROPCH_RESPOISON, + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESFIRE,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
+                    ModPropNum(pCCPChar, PROPCH_RESPOISON,  + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
                     ModPropNum(pCCPChar, PROPCH_RESCOLD,    + pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					iBuffIcon = BI_LICHFORM;
 					break;
 				case SPELL_Wraith_Form:
-					m_atMagery.m_SummonID = CREID_SPECTRE;
+					m_atMagery.m_iSummonID = CREID_SPECTRE;
 					iBuffIcon = BI_WRAITHFORM;
                     pSpell->m_itSpell.m_PolyStr = 15;
                     pSpell->m_itSpell.m_PolyDex = 5;
@@ -1009,12 +1030,12 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
                     ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					break;
 				case SPELL_Horrific_Beast:
-					m_atMagery.m_SummonID = CREID_HORRIFIC_BEAST;
+					m_atMagery.m_iSummonID = CREID_HORRIFIC_BEAST;
                     Stats_AddRegenVal(STAT_STR, + pSpell->m_itSpell.m_spellcharges);
 					iBuffIcon = BI_HORRIFICBEAST;
 					break;
 				case SPELL_Vampiric_Embrace:
-					m_atMagery.m_SummonID = CREID_VAMPIRE_BAT;
+					m_atMagery.m_iSummonID = CREID_VAMPIRE_BAT;
                     ModPropNum(pCCPChar, PROPCH_HITLEECHLIFE, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);	// +Hit Leech Life
                     Stats_AddRegenVal(STAT_DEX, + pSpell->m_itSpell.m_PolyDex);		    // +RegenStamVal
                     Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_spellcharges);	// RegenManaVal
@@ -1022,11 +1043,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_VAMPIRICEMBRACE;
 					break;
 				case SPELL_Stone_Form:
-					m_atMagery.m_SummonID = CREID_STONE_FORM;
+					m_atMagery.m_iSummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_STONEFORM;
 					break;
 				case SPELL_Reaper_Form:
-					m_atMagery.m_SummonID = CREID_STONE_FORM;
+					m_atMagery.m_iSummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_REAPERFORM;
 					break;
 				default:
@@ -1034,7 +1055,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 
 			const ushort SPELL_MAX_POLY_STAT = (ushort)(g_Cfg.m_iMaxPolyStats);
-			SetID(m_atMagery.m_SummonID);
+			SetID(m_atMagery.m_iSummonID);
 
 			const CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
@@ -1085,7 +1106,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		}
-		case LAYER_FLAG_Poison:
+		case LAYER_FLAG_Poison:  //Charges are set in SetPoison method.
 			StatFlag_Set(STATF_POISONED);
 			UpdateModeFlag();
 			if (pClient && IsSetOF(OF_Buffs))
@@ -1152,6 +1173,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			StatFlag_Set(STATF_INVISIBLE);
 			Reveal(STATF_HIDDEN);	// clear previous Hiding skill effect (this will not reveal the char because STATF_Invisibility still set)
 			UpdateModeFlag();
+			UpdateMode(nullptr, true);
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_INVISIBILITY);
@@ -1186,7 +1208,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Gift_Of_Renewal:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel,NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], sizeof(NumBuff[0]), 10);
 				pClient->removeBuff(BI_GIFTOFRENEWAL);
 				pClient->addBuff(BI_GIFTOFRENEWAL, 1075796, 1075797, wTimerEffect, pNumBuff, 1);
 			}
@@ -1194,7 +1216,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Attunement:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], sizeof(NumBuff[0]), 10);
 				pClient->removeBuff(BI_ATTUNEWEAPON);
 				pClient->addBuff(BI_ATTUNEWEAPON, 1075798, 1075799, wTimerEffect, pNumBuff, 1);
 			}
@@ -1202,7 +1224,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Thunderstorm:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], sizeof(NumBuff[0]), 10);
 				pClient->removeBuff(BI_THUNDERSTORM);
 				pClient->addBuff(BI_THUNDERSTORM, 1075800, 1075801, wTimerEffect, pNumBuff, 1);
 			}
@@ -1210,7 +1232,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Essence_Of_Wind:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], sizeof(NumBuff[0]), 10);
 				pClient->removeBuff(BI_ESSENCEOFWIND);
 				pClient->addBuff(BI_ESSENCEOFWIND, 1075802, 1075803, wTimerEffect, pNumBuff, 1);
 			}
@@ -1232,8 +1254,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case LAYER_SPELL_Arcane_Empowerment:
 			if (pClient && IsSetOF(OF_Buffs))
 			{
-				ITOA(pSpell->m_itSpell.m_spelllevel, NumBuff[0], 10);
-				ITOA(pSpell->m_itSpell.m_spellcharges,NumBuff[1], 10);
+				Str_FromI(pSpell->m_itSpell.m_spelllevel, NumBuff[0], sizeof(NumBuff[0]), 10);
+				Str_FromI(pSpell->m_itSpell.m_spellcharges,NumBuff[1], sizeof(NumBuff[0]), 10);
 				pClient->removeBuff(BI_ARCANEEMPOWERMENT);
 				pClient->addBuff(BI_ARCANEEMPOWERMENT, 1075805, 1075804, wTimerEffect, pNumBuff, 1);
 			}
@@ -1268,15 +1290,15 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if (pClient)
 				{
-					strcpy(NumBuff[0], pCaster->GetName());
-					strcpy(NumBuff[1], pCaster->GetName());
+					Str_CopyLimitNull(NumBuff[0], pCaster->GetName(), uiBuffElemSize);
+					Str_CopyLimitNull(NumBuff[1], pCaster->GetName(), uiBuffElemSize);
 					pClient->removeBuff(BI_BLOODOATHCURSE);
 					pClient->addBuff(BI_BLOODOATHCURSE, 1075659, 1075660, wTimerEffect, pNumBuff, 2);
 				}
-				CClient *pCasterClient = pCaster->GetClient();
+				CClient *pCasterClient = pCaster->GetClientActive();
 				if (pCasterClient)
 				{
-					strcpy(NumBuff[0], GetName());
+					Str_CopyLimitNull(NumBuff[0], GetName(), uiBuffElemSize);
 					pCasterClient->removeBuff(BI_BLOODOATHCASTER);
 					pCasterClient->addBuff(BI_BLOODOATHCASTER, 1075661, 1075662, wTimerEffect, pNumBuff, 1);
 				}
@@ -1292,7 +1314,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			pSpell->m_itSpell.m_PolyDex = 15;
 			pSpell->m_itSpell.m_PolyStr = 10;
 
-            CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+			CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+			CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
             
             ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
             ModPropNum(pCCPChar, PROPCH_RESPOISON, - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
@@ -1346,7 +1369,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
                 wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
-                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                 ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + wStatEffectRef, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESFIRE,   -5, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESCOLD,   -5, pBaseCCPChar);
@@ -1356,15 +1380,19 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			else
 			{
 				StatFlag_Set( STATF_REACTIVE );
+				int iSkill = -1;
+				const bool fValidSkill = pSpellDef->GetPrimarySkill(&iSkill, nullptr);
+				PERSISTANT_ASSERT(fValidSkill);
+				pSpell->m_itSpell.m_PolyStr = (int16)pSpellDef->m_vcEffect.GetLinear(pCaster->Skill_GetBase((SKILL_TYPE)iSkill)) / 10;	// % of damage reflected.
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_REACTIVEARMOR);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						ITOA(5, NumBuff[idx], 10);
+						Str_FromI(5, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 					pClient->addBuff(BI_REACTIVEARMOR, 1075812, 1075813, wTimerEffect, pNumBuff, 5);
 				}
@@ -1385,7 +1413,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_DEX, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					pClient->removeBuff(BI_CLUMSY);
 					pClient->addBuff(BI_CLUMSY, 1075831, 1075832, wTimerEffect, pNumBuff, 1);
 				}
@@ -1416,7 +1444,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_INT, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					pClient->removeBuff(BI_FEEBLEMIND);
 					pClient->addBuff(BI_FEEBLEMIND, 1075833, 1075834, wTimerEffect, pNumBuff, 1);
 				}
@@ -1433,13 +1461,14 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_STR, -wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					pClient->removeBuff(BI_WEAKEN);
 					pClient->addBuff(BI_WEAKEN, 1075837, 1075838, wTimerEffect, pNumBuff, 1);
 				}
 			}
 			return;
 		case SPELL_Curse:
+		case SPELL_Mass_Curse:
 			{
 				if ( pCaster != nullptr && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 				{
@@ -1447,7 +1476,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				}
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )		// Curse also decrease max resistances on players
 				{
-                    CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+					CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+					CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                     ModPropNum(pCCPChar, PROPCH_RESFIREMAX,   - 10, pBaseCCPChar);
                     ModPropNum(pCCPChar, PROPCH_RESCOLDMAX,   - 10, pBaseCCPChar);
                     ModPropNum(pCCPChar, PROPCH_RESPOISONMAX, - 10, pBaseCCPChar);
@@ -1464,19 +1494,29 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					pClient->removeBuff(BI_CURSE);
+					if (spell == SPELL_Mass_Curse)
+						pClient->removeBuff(BI_MASSCURSE);
+					else
+						pClient->removeBuff(BI_CURSE);
+
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
-						ITOA(wStatEffectRef, NumBuff[idx], 10);
+						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
 						for ( int idx = 3; idx < 7; ++idx )
-							ITOA(10, NumBuff[idx], 10);
+							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
-						pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
+						if (spell == SPELL_Mass_Curse)
+							pClient->addBuff(BI_MASSCURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
+						else
+							pClient->addBuff(BI_CURSE, 1075835, 1075836, wTimerEffect, pNumBuff, 7);
 					}
 					else
 					{
-						pClient->addBuff(BI_CURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
+						if (spell == SPELL_Mass_Curse)
+							pClient->addBuff(BI_MASSCURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
+						else
+							pClient->addBuff(BI_CURSE, 1075835, 1075840, wTimerEffect, pNumBuff, 3);
 					}
 				}
 			}
@@ -1492,7 +1532,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					pClient->removeBuff(BI_AGILITY);
 					pClient->addBuff(BI_AGILITY, 1075841, 1075842, wTimerEffect, pNumBuff, 1);
 				}
@@ -1507,7 +1547,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_INT, +wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					pClient->removeBuff(BI_CUNNING);
 					pClient->addBuff(BI_CUNNING, 1075843, 1075844, wTimerEffect, pNumBuff, 1);
 				}
@@ -1522,7 +1562,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				Stat_AddMod( STAT_STR, +wStatEffectRef );
 				if (pClient && IsSetOF(OF_Buffs))
 				{
-					ITOA(wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					pClient->removeBuff(BI_STRENGTH);
 					pClient->addBuff(BI_STRENGTH, 1075845, 1075846, wTimerEffect, pNumBuff, 1);
 				}
@@ -1540,7 +1580,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				if (pClient && IsSetOF(OF_Buffs))
 				{
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx)
-						ITOA(wStatEffectRef, NumBuff[idx], 10);
+						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 					pClient->removeBuff(BI_BLESS);
 					pClient->addBuff(BI_BLESS, 1075847, 1075848, wTimerEffect, pNumBuff, STAT_BASE_QTY);
@@ -1564,7 +1604,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
                 wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
-                CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
+				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
                 ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, - wStatEffectRef, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESFIRE,   +10, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_RESCOLD,   +10, pBaseCCPChar);
@@ -1576,9 +1617,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				pClient->removeBuff(BI_MAGICREFLECTION);
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					ITOA(-wStatEffectRef, NumBuff[0], 10);
+					Str_FromI(-wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
-						ITOA(10, NumBuff[idx], 10);
+						Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
 
 					pClient->addBuff(BI_MAGICREFLECTION, 1075817, 1075818, wTimerEffect, pNumBuff, 5);
 				}
@@ -1593,8 +1634,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
 			{
-				ushort uiPhysicalResist = 0;
-				ushort uiMagicResist = 0;
+				int iPhysicalResist = 0;
+				int iMagicResist = 0;
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
 					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
@@ -1602,14 +1643,15 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE), uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
                     wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
                     wStatEffectRef = minimum(75, wStatEffectRef);
-					uiPhysicalResist = 15 - (uiCasterInscription / 200);
-					uiMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
+					
+					iPhysicalResist = 15 - (uiCasterInscription / 200);
+					iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
 
-					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, minimum(INT16_MAX,uiPhysicalResist)));
-					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, minimum(INT16_MAX,uiMagicResist)));
+					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, minimum(INT16_MAX, iPhysicalResist)));
+					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, minimum(INT16_MAX, iMagicResist)));
                     _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
 
-                    ModPropNum(COMP_PROPS_CHAR, PROPCH_RESPHYSICAL, -uiPhysicalResist, true);
+                    ModPropNum(COMP_PROPS_CHAR, PROPCH_RESPHYSICAL, -iPhysicalResist, true);
                     ModPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, -2, true);
 					Skill_AddBase(SKILL_MAGICRESISTANCE, - pSpell->m_itSpell.m_PolyDex);
 				}
@@ -1630,8 +1672,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BuffIcon);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
-						ITOA(-uiPhysicalResist, NumBuff[0], 10);
-						ITOA(-uiMagicResist/10, NumBuff[1], 10);
+						Str_FromI(-iPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
+						Str_FromI(-iMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);
 						pClient->addBuff(BuffIcon, BuffCliloc, 1075815, wTimerEffect, pNumBuff, 2);
 					}
 					else
@@ -1669,9 +1711,15 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	ASSERT(pItem);
 
 	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+	const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
+	if (!pSpellDef)
+		return false;
 	int iCharges = pItem->m_itSpell.m_spellcharges;
 	int iLevel = pItem->m_itSpell.m_spelllevel;
-
+	int iEffect = 0;
+	DAMAGE_TYPE iDmgType = 0;
+	int64 iSecondsDelay = 5; //default value for custom spells, can be overriden by Sphere spells below.
+	
 	switch ( spell )
 	{
 		case SPELL_Ale:		// 90 = drunkeness ?
@@ -1679,8 +1727,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		case SPELL_Liquor:	// 92 = extreme drunkeness ?
 		{
 			// Chance to get sober quickly
-			if ( 10 > Calc_GetRandVal(100) )
-				--pItem->m_itSpell.m_spellcharges;
+			if (10 > Calc_GetRandVal(100))
+				--iCharges;
 
 			Stat_AddVal(STAT_INT, -1);
 			Stat_AddVal(STAT_DEX, -1);
@@ -1694,35 +1742,30 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					UpdateAnimate(ANIM_BOW);
 				}
 			}
-
-			// We will have this effect again
-			pItem->SetTimeoutS(5);
 		}
 		break;
 
 		case SPELL_Regenerate:
 		{
-			if (iCharges <= 0 || iLevel <= 0)
+			if (iCharges <=0 || iLevel <= 0)
 				return false;
-
-			// Gain HP.
-			UpdateStatVal(STAT_STR, (ushort)(g_Cfg.GetSpellEffect(spell, iLevel)));
-			pItem->SetTimeoutS(2);
+			iSecondsDelay = 2;
+			iEffect = g_Cfg.GetSpellEffect(spell, iLevel);
 		}	break;
 
 		case SPELL_Hallucination:
 		{
-			if (iCharges <= 0 || iLevel <= 0)
+			if (iCharges <=0 || iLevel <= 0)
 				return false;
-
-			if (IsClient())
+			iSecondsDelay = Calc_GetRandLLVal2(15, 30);
+		
+			if (IsClientActive())
 			{
 				static const SOUND_TYPE sm_sounds[] = { 0x243, 0x244 };
 				m_pClient->addSound(sm_sounds[Calc_GetRandVal(CountOf(sm_sounds))]);
 				m_pClient->addChar(this);
 				m_pClient->addPlayerSee(CPointMap());
 			}
-			pItem->SetTimeoutS(Calc_GetRandLLVal2(15, 30));
 		}
 		break;
 
@@ -1730,40 +1773,35 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		{
 			// Both potions and poison spells use this.
 			// The poison in your body is having an effect.
-
 			if (iCharges <= 0)
 				return false;
-
-			int iDmg = 0;
 			if (IsSetMagicFlags(MAGICF_OSIFORMULAS))
 			{
 				// m_itSpell.m_spelllevel = level of the poison ! 0-4
-                int64 iSecondsDelay = 5;
-				switch (pItem->m_itSpell.m_spelllevel)
+				switch (iLevel)
 				{
 					case 4:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(16, 33), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(16, 33), 100);
                         iSecondsDelay = 5;
 						break;
 					case 3:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(15, 30), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(15, 30), 100);
                         iSecondsDelay = 5;
 						break;
 					case 2:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(7, 15), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(7, 15), 100);
                         iSecondsDelay = 4;
 						break;
 					case 1:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
                         iSecondsDelay = 3;
 						break;
 					default:
 					case 0:
-						iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(4, 7), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(4, 7), 100);
                         iSecondsDelay = 2;
 						break;
 				}
-                SetTimeoutS(iSecondsDelay);
 
 				static lpctstr const sm_Poison_MessageOSI[] =
 				{
@@ -1783,7 +1821,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_OSIPOISON_LETHAL1)
 
 				};
-				Emote2(sm_Poison_MessageOSI[iLevel], sm_Poison_MessageOSI_Other[iLevel], GetClient());
+				Emote2(sm_Poison_MessageOSI[iLevel], sm_Poison_MessageOSI_Other[iLevel], GetClientActive());
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_MessageOSI[iLevel]);
 			}
 			else
@@ -1801,9 +1839,9 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 3;
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
-				iDmg = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
-				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * MSECS_PER_SEC);
-
+				iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
+				iSecondsDelay = (5 + Calc_GetRandLLVal(4));
+				
 				static lpctstr const sm_Poison_Message[] =
 				{
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1),
@@ -1813,45 +1851,31 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				};
 
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
-				Emote(pszMsg, GetClient());
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
+				if ( g_Cfg.m_iEmoteFlags & EMOTEF_POISON )
+					EmoteObj(pszMsg);
+				else
+					Emote(pszMsg, GetClientActive());
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_Message[iLevel]);
 			}
-
+			
 			static const int sm_iPoisonMax[] = { 2, 4, 6, 8, 10 };
-			OnTakeDamage(maximum(sm_iPoisonMax[iLevel], iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC|DAMAGE_POISON|DAMAGE_NODISTURB|DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
-
+			iEffect = maximum(sm_iPoisonMax[iLevel], iEffect);
+			iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NODISTURB | DAMAGE_NOREVEAL;
+	
 			// We will have this effect again.
-			if (IsSetOF(OF_Buffs) && IsClient())
+			if (IsSetOF(OF_Buffs) && IsClientActive())
 			{
-				GetClient()->removeBuff(BI_POISON);
-				GetClient()->addBuff(BI_POISON, 1017383, 1070722, (word)(pItem->GetTimerSAdjusted()));
+				GetClientActive()->removeBuff(BI_POISON);
+				GetClientActive()->addBuff(BI_POISON, 1017383, 1070722, (word)(pItem->GetTimerSAdjusted()));
 			}
 			break;
 		}
+
 		case SPELL_Strangle:
 		{
-			int iDiff = pItem->m_itSpell.m_spelllevel - pItem->m_itSpell.m_spellcharges;	// Retrieves the total amount of ticks done substracting spellcharges from spelllevel.
-
-			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
-			{
-				case 0:
-					pItem->SetTimeoutS(4);
-					break;
-				case 1:
-					pItem->SetTimeoutS(3);
-					break;
-				case 2:
-					pItem->SetTimeoutS(2);
-					break;
-				default:
-					pItem->SetTimeoutS(1);
-					break;
-			}
-
-			int iSpellPower = (int)(Calc_GetRandLLVal2(pItem->m_itSpell.m_spelllevel - 2, pItem->m_itSpell.m_spelllevel + 1));
-			int iDmg = iSpellPower * ( 3 - ( (Stat_GetBase(STAT_DEX) / Stat_GetAdjusted(STAT_DEX) ) * 2));
-			/*Chokes an enemy with poison, doing more damage as their Stamina drops.The power of the effect is equal to the Caster's Spirit Speak skill divided by 10.
+			/*
+			Chokes an enemy with poison, doing more damage as their Stamina drops.The power of the effect is equal to the Caster's Spirit Speak skill divided by 10.
 			The minimum power is 4. The power number determines the duration and base damage of the Strangle effect.
 			Each point of power causes the Strangle effect to damage the target one time.The first round of damage is done after five seconds.
 			Four seconds later, the second round hits.Each round after that comes one second more quickly than the last, until there is only 1 second between hits.
@@ -1859,21 +1883,96 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			Then the damage is multiplied based on the victim's current and maximum Stamina values.
 			The more the victim is fatigued, the more damage this spell deals.
 			The damage is multiplied by the result of this formula: 3 - (Cur Stamina ÷ Max Stamina x 2.
-			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.*/
-			OnTakeDamage(maximum(1, iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
+			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.
+			*/
+
+			int iDiff = iLevel - iCharges;	// Retrieves the total amount of ticks done substracting spellcharges from spelllevel.
+			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
+			{
+				case 0:
+					iSecondsDelay = 4;
+					break;
+				case 1:
+					iSecondsDelay = 3;
+					break;
+				case 2:
+					iSecondsDelay = 2;
+					break;
+				default:
+					iSecondsDelay = 1;
+					break;
+			}
+
+			int iSpellPower = (int)(Calc_GetRandLLVal2((int64)iLevel - 2, (int64)iLevel + 1));
+			iEffect = iSpellPower * ( 3 - ( (Stat_GetBase(STAT_DEX) / Stat_GetAdjusted(STAT_DEX) ) * 2));
+			iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL;
 		}
+		break;
+
 		case SPELL_Pain_Spike:
 		{
 			// Receives x amount (stored in pItem->m_itSpell.m_spelllevel) of damage in 10 seconds, so damage each second is equal to total / 10
-			OnTakeDamage(pItem->m_itSpell.m_spelllevel / 10, pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_GOD);	// DIRECT? damage
-			pItem->SetTimeoutS(1);
+			iEffect = iLevel / 10;
+			iDmgType = DAMAGE_MAGIC | DAMAGE_GOD;	// DIRECT? damage
+			iSecondsDelay = 1;
 		}
 		break;
 
 		default:
-			return false;
+		{
+			if (!pSpellDef->IsSpellType(SPELLFLAG_TICK))
+				return false;
+		}
+		break;
+	}
+	CScriptTriggerArgs Args((int)(spell), iLevel, pItem);
+	Args.m_VarsLocal.SetNum("Charges", iCharges);
+	Args.m_VarsLocal.SetNum("Delay", iSecondsDelay);
+	Args.m_VarsLocal.SetNum("DamageType", iDmgType);
+	Args.m_VarsLocal.SetNum("Effect", iEffect);
+	
+	if (IsTrigUsed(TRIGGER_SPELLEFFECTTICK))
+	{
+		switch (OnTrigger(CTRIG_SpellEffectTick, this, &Args))
+		{
+		case TRIGRET_RET_TRUE:	pItem->Delete(true); return false;
+		case TRIGRET_RET_FALSE:	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED)) return true;
+		default:				break;
+		}
 	}
 
+	if (IsTrigUsed(TRIGGER_EFFECTTICK))
+	{
+		switch (Spell_OnTrigger(spell, SPTRIG_EFFECTTICK, this, &Args))
+		{
+		case TRIGRET_RET_TRUE:	pItem->Delete(true); return false;
+		case TRIGRET_RET_FALSE:	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED)) return true;
+		default:				break;
+		}
+	}
+	iLevel = (int)(Args.m_iN2); //This is probably not necessary.
+	iSecondsDelay = (int64)(Args.m_VarsLocal.GetKeyNum("Delay"));
+	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect"));
+	iCharges = (int)(Args.m_VarsLocal.GetKeyNum("Charges"));
+
+	if (pSpellDef->IsSpellType(SPELLFLAG_HARM))
+	{
+		iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
+		if (iDmgType > 0 && iEffect > 0) // This is necessary if we have a spell that is harmful but does no damage periodically.
+		{
+			OnTakeDamage(iEffect, pItem->m_uidLink.CharFind(), iDmgType,
+				(iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH)) ? 100 : 0,
+				(iDmgType & DAMAGE_FIRE) ? 100 : 0,
+				(iDmgType & DAMAGE_COLD) ? 100 : 0,
+				(iDmgType & DAMAGE_POISON) ? 100 : 0,
+				(iDmgType & DAMAGE_ENERGY) ? 100 : 0);
+		}
+	}
+	else if (pSpellDef->IsSpellType(SPELLFLAG_HEAL))
+		UpdateStatVal(STAT_STR, (ushort)iEffect); // Gain HP.
+
+	pItem->SetTimeoutS(iSecondsDelay);
+	pItem->m_itSpell.m_spellcharges = iCharges;
 	// Total number of ticks to come back here.
 	if ( --pItem->m_itSpell.m_spellcharges > 0 )
 		return true;
@@ -1897,8 +1996,9 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 
 
 	// Check if there's any previous effect to clear before apply the new effect
-	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != nullptr; pSpellPrev = pSpellPrev->GetNext() )
+	for (CSObjContRec* pObjRec : *this)
 	{
+		CItem* pSpellPrev = static_cast<CItem*>(pObjRec);
 		if ( layer != pSpellPrev->GetEquipLayer() )
 			continue;
 
@@ -1957,7 +2057,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 	// iSkillLevel = 0-1000
 	//
 
-	SPELL_TYPE spelltype = m_atMagery.m_Spell;
+	SPELL_TYPE spelltype = m_atMagery.m_iSpell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spelltype);
 	if ( pSpellDef == nullptr )
 		return;
@@ -2002,7 +2102,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 	// iSkillLevel = 0-1000
 	// idnewEW and idnewNS are the overriders created in @Success trigger, passed as another arguments because checks are made using default items
 
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	ASSERT(pSpellDef);
 
 	if ( m_pArea && m_pArea->IsGuarded() && pSpellDef->IsSpellType(SPELLFLAG_HARM) )
@@ -2049,7 +2149,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				}
 
 				dword dwBlockFlags = 0;
-				g_World.GetHeightPoint2(ptg, dwBlockFlags, true);
+				CWorldMap::GetHeightPoint2(ptg, dwBlockFlags, true);
 				if ( dwBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
 				{
 					if (ix < 0)	// field cannot extend fully to the left
@@ -2111,6 +2211,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 
 				if (( idEW == ITEMID_STONE_WALL ) || ( idEW == ITEMID_FX_ENERGY_F_EW ) || ( idEW == ITEMID_FX_ENERGY_F_NS ))	// don't place stone wall over characters
 				{
+				    pChar->OnSpellEffect(m_atMagery.m_iSpell, this, iSkillLevel, nullptr);
 					fGoodLoc = false;
 					break;
 				}
@@ -2131,15 +2232,15 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					pItem->Delete();
 					continue;
 				}
-				pItem->OnSpellEffect( m_atMagery.m_Spell, this, iSkillLevel, nullptr );
+				pItem->OnSpellEffect( m_atMagery.m_iSpell, this, iSkillLevel, nullptr );
 			}
 
             if (iDuration <= 0)
-                iDuration = GetSpellDuration( m_atMagery.m_Spell, iSkillLevel, pCharSrc );
+                iDuration = GetSpellDuration( m_atMagery.m_iSpell, iSkillLevel, pCharSrc );
 
 			CItem * pSpell = CItem::CreateBase( id );
 			ASSERT(pSpell);
-			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_Spell);
+			pSpell->m_itSpell.m_spell = (word)(m_atMagery.m_iSpell);
 			pSpell->m_itSpell.m_spelllevel = (word)(iSkillLevel);
 			pSpell->m_itSpell.m_spellcharges = 1;
 			pSpell->m_uidLink = GetUID();	// link it back to you
@@ -2168,7 +2269,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
     if ( m_pPlayer && !IsPriv(PRIV_GM) )
     {
-        if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE))
+        if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_STONE) || Can(CAN_C_STATUE))
         {
             if ( fFailMsg )
                 SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
@@ -2191,30 +2292,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if ( !Skill_CanUse(skill) )
 		return false;
 
-    const CCPropsChar *pCCPChar = GetCCPropsChar(), *pBaseCCPChar = Base_GetDef()->GetCCPropsChar();
-	const int iLowerManaCost = (int)GetPropNum(pCCPChar, PROPCH_LOWERMANACOST, pBaseCCPChar);
-	const int iLowerReagentCost = (int)GetPropNum(pCCPChar, PROPCH_LOWERREAGENTCOST, pBaseCCPChar);
-	ushort iManaUse = (ushort)(pSpellDef->m_wManaUse * (100 - minimum(iLowerManaCost, 40)) / 100);
-	ushort iTithingUse = (ushort)(pSpellDef->m_wTithingUse * (100 - minimum(iLowerReagentCost, 40)) / 100);
-
-	if (pSrc != this)
-	{
-		CItem * pItem = dynamic_cast <CItem*> (pSrc);
-		if (pItem)
-		{
-			if (pItem->GetType() == IT_WAND)
-			{
-				iManaUse = 0;
-				iTithingUse = 0;
-			}
-			else if (pItem->GetType() == IT_SCROLL)
-			{
-				iManaUse /= 2;
-				iTithingUse /= 2;
-			}
-		}
-	}
-
+	ushort iManaUse = g_Cfg.Calc_SpellManaCost(this, pSpellDef, pSrc);
+	ushort iTithingUse = g_Cfg.Calc_SpellTithingCost(this, pSpellDef, pSrc);
 
 	CScriptTriggerArgs Args( spellRef, iManaUse, pSrc );
 	if ( fTest )
@@ -2335,24 +2414,29 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			}
 
 			// check for reagents
-			if ( g_Cfg.m_fReagentsRequired && ! m_pNPC && (pSrc == this) )
+			const size_t iMissingReagents = g_Cfg.Calc_SpellReagentsConsume(this, pSpellDef, pSrc, fTest);
+			if ( iMissingReagents != SCONT_BADINDEX )
 			{
-				if ( iLowerReagentCost <= Calc_GetRandVal(100))
+				if ( fFailMsg )
 				{
-					const CResourceQtyArray * pRegs = &(pSpellDef->m_Reags);
-					CItemContainer * pPack = GetPack();
-					size_t iMissing = pPack->ResourceConsumePart( pRegs, 1, 100, fTest );
-					if ( iMissing != pRegs->BadIndex() )
-					{
-						if ( fFailMsg )
-						{
-							const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((*pRegs)[iMissing].GetResourceID() );
-							SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
-						}
-						return false;
-					}
+					const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((pSpellDef->m_Reags)[iMissingReagents].GetResourceID() );
+					SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 				}
+				return false;
+			}	
+
+			// Check for Tithing
+			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+			int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
+			if (iValTithing < iTithingUse)
+			{
+				if (fFailMsg)
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), iTithingUse);
+				return false;
 			}
+			// Consume tithing points if casting is successfull.
+			if (!fTest && iTithingUse)
+				pVarTithing->SetValNum(iValTithing - iTithingUse);
 		}
 	}
 
@@ -2374,43 +2458,150 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			SysMessageDefault(DEFMSG_SPELL_TRY_NOMANA);
 		return false;
 	}
+	// Consume mana if casting is successfull
 	if (!fTest && iManaUse)
-	{
-		// Consume mana.
-        bool fConsumeMana = true;
-		if (m_Act_Difficulty < 0)	// use diff amount of mana if we fail.
-		{
-            if (g_Cfg.m_fManaLossFail)
-			    iManaUse = iManaUse / 2 + (ushort)(Calc_GetRandVal(iManaUse / 2 + iManaUse / 4));
-            else
-                fConsumeMana = false;
-		}
-        if (fConsumeMana)
-		    UpdateStatVal(STAT_INT, -iManaUse);
-	}
-
-	// Check for Tithing
-    CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
-    int iValTithing = pVarTithing ? (int)pVarTithing->GetValNum() : 0;
-	if (iValTithing < iTithingUse)
-	{
-		if (fFailMsg)
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), iTithingUse);
-		return false;
-	}
-	if (!fTest && iTithingUse)
-	{
-		// Consume points
-		if (m_Act_Difficulty < 0)	// use diff amount of points if we fail.
-		{
-			iTithingUse = iTithingUse / 2 + (ushort)(Calc_GetRandVal(iTithingUse / 2 + iTithingUse / 4));
-		}
-        pVarTithing->SetValNum(iValTithing - iTithingUse);
-	}
+		UpdateStatVal(STAT_INT, -iManaUse);
 
 	return true;
 }
+CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1)
+{
+	ADDTOCALLSTACK("CChar::Spell_CanSummon");
+	//Create the NPC and check if we can actually place it in the world, but do not place it yet.
 
+	int iSkill;
+	CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+	if (!pSpellDef || !pSpellDef->GetPrimarySkill(&iSkill, nullptr))
+		return nullptr;
+
+	if (iC1)//if iC1 is set that means we are overriding the default summoned creature.
+	{
+		m_atMagery.m_iSummonID = iC1;
+	}
+	else
+	{
+		switch (spell)
+		{
+		/*The creature ID for the Summon Spell is already stored in m_atMagery.m_iSummonID when the creature 
+		is chosen from the summoning menu.*/
+		case SPELL_Summon:						
+			break; 
+		case SPELL_Blade_Spirit:
+			m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;	
+			break;
+		case SPELL_Vortex:			
+			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX; 
+			break;
+		case SPELL_Air_Elem:		
+			m_atMagery.m_iSummonID = CREID_AIR_ELEM;		
+			break;
+		case SPELL_Daemon:			
+			m_atMagery.m_iSummonID = CREID_DEMON;			
+			break;
+		case SPELL_Earth_Elem:		
+			m_atMagery.m_iSummonID = CREID_EARTH_ELEM;	
+			break;
+		case SPELL_Fire_Elem:		
+			m_atMagery.m_iSummonID = CREID_FIRE_ELEM;	
+			break;
+		case SPELL_Water_Elem:		
+			m_atMagery.m_iSummonID = CREID_WATER_ELEM;	
+			break;
+		case SPELL_Vengeful_Spirit:	
+			m_atMagery.m_iSummonID = CREID_REVENANT;		
+			break;
+		case SPELL_Rising_Colossus:
+			m_atMagery.m_iSummonID = CREID_RISING_COLOSSUS;	
+			break;
+		case SPELL_Summon_Undead: //Sphere custom spell.
+			switch (Calc_GetRandVal(15))
+			{
+			case 1:				
+				m_atMagery.m_iSummonID = CREID_LICH;			
+				break;
+			case 3:
+			case 5:
+			case 7:
+			case 9:				
+				m_atMagery.m_iSummonID = CREID_SKELETON;		
+				break;
+			default:			
+				m_atMagery.m_iSummonID = CREID_ZOMBIE;			
+				break;
+			}
+			break;
+		case SPELL_Animate_Dead:	//This is the Sphere custom spell, not the necromancy one.
+		{
+			CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (m_Act_UID.ObjFind());
+			if (pCorpse == nullptr)
+			{
+				SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
+				return nullptr;
+			}
+			if (IsPriv(PRIV_GM))
+			{
+				m_atMagery.m_iSummonID = pCorpse->m_itCorpse.m_BaseID;
+			}
+			else if (CCharBase::IsPlayableID(pCorpse->GetCorpseType())) 	// Must be a human corpse ?
+			{
+				m_atMagery.m_iSummonID = CREID_ZOMBIE;
+			}
+			else
+			{
+				m_atMagery.m_iSummonID = pCorpse->GetCorpseType();
+			}
+			if (!pCorpse->IsTopLevel())
+			{
+				return nullptr;
+			}
+			break;
+		}
+		default: 
+			m_atMagery.m_iSummonID = CREID_INVALID;
+			break;
+		}
+	}
+
+	CChar* pChar = CChar::CreateBasic(m_atMagery.m_iSummonID);
+	if (pChar == nullptr)
+		return nullptr;
+
+	if (!IsPriv(PRIV_GM))
+	{
+		if (IsSetMagicFlags(MAGICF_SUMMONWALKCHECK))	// check if the target location is valid
+		{
+			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
+			dword dwBlockFlags = 0;
+			CWorldMap::GetHeightPoint2(ptTarg, dwBlockFlags, true);
+
+			if (dwBlockFlags & ~dwCan)
+			{
+				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
+				pChar->Delete();
+				return nullptr;
+			}
+		}
+
+		if (IsSetOF(OF_PetSlots))
+		{
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, 1);
+			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
+			{
+				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
+				pChar->Delete();
+				return nullptr;
+			}
+		}
+
+		if (g_Cfg.m_iMountHeight && !pChar->IsVerticalSpace(GetTopPoint(), false))
+		{
+			SysMessageDefault(DEFMSG_MSG_SUMMON_CEILING);
+			pChar->Delete();
+			return nullptr;
+		}
+	}
+	return pChar;
+}
 bool CChar::Spell_TargCheck_Face()
 {
 	ADDTOCALLSTACK("CChar::Spell_TargCheck_Face");
@@ -2419,7 +2610,7 @@ bool CChar::Spell_TargCheck_Face()
 
 	// Check if target in on anti-magic region
 	CRegion *pArea = m_Act_p.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
-	if ( !IsPriv(PRIV_GM) && pArea && pArea->CheckAntiMagic(m_atMagery.m_Spell) )
+	if ( !IsPriv(PRIV_GM) && pArea && pArea->CheckAntiMagic(m_atMagery.m_iSpell) )
 	{
 		SysMessageDefault( DEFMSG_SPELL_TRY_AM );
 		m_Act_Difficulty = -1;	// Give very little credit for failure !
@@ -2433,10 +2624,10 @@ bool CChar::Spell_TargCheck()
 	ADDTOCALLSTACK("CChar::Spell_TargCheck");
 	// Is the spells target or target pos valid ?
 
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( pSpellDef == nullptr )
 	{
-		DEBUG_ERR(( "Bad Spell %d, uid 0%0x\n", m_atMagery.m_Spell, (dword)GetUID()));
+		DEBUG_ERR(( "Bad Spell %d, uid 0%0x\n", m_atMagery.m_iSpell, (dword)GetUID()));
 		return false;
 	}
 
@@ -2515,7 +2706,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 		{
 			return false;
 		}
-		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_CHAR, PROPCH_SPELLCHANNELING, true))
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true))
 		{
 			ItemBounce( pItemPrev );
 		}
@@ -2548,6 +2739,8 @@ bool CChar::Spell_CastDone()
 
 	CObjBase * pObj = m_Act_UID.ObjFind();	// dont always need a target.
 	CObjBase * pObjSrc = m_Act_Prv_UID.ObjFind();
+	CChar* pSummon = nullptr;
+
 	ITEMID_TYPE iT1 = ITEMID_NOTHING;
 	ITEMID_TYPE iT2 = ITEMID_NOTHING;
 	CREID_TYPE iC1 = CREID_INVALID;
@@ -2557,12 +2750,12 @@ bool CChar::Spell_CastDone()
 	uint fieldGauge = 0;
 	uint areaRadius = 0;
 
-	SPELL_TYPE spell = m_atMagery.m_Spell;
+	SPELL_TYPE spell = m_atMagery.m_iSpell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (pSpellDef == nullptr)
 		return false;
 
-	bool bIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
+	const bool fIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
 
 	int iSkill, iDifficulty;
 	if (!pSpellDef->GetPrimarySkill(&iSkill, &iDifficulty))
@@ -2594,7 +2787,7 @@ bool CChar::Spell_CastDone()
 	Args.m_VarsLocal.SetNum("areaRadius", 0);
 	Args.m_VarsLocal.SetNum("duration", GetSpellDuration(spell, iSkillLevel, this), true);  // tenths of second
 
-	if (bIsSpellField)
+	if (fIsSpellField)
 	{
 		switch (spell)	// Only setting ids and locals for field spells
 		{
@@ -2627,7 +2820,7 @@ bool CChar::Spell_CastDone()
 	ITEMID_TYPE it1test = ITEMID_NOTHING;
 	ITEMID_TYPE it2test = ITEMID_NOTHING;
 
-	if (bIsSpellField)
+	if (fIsSpellField)
 	{
 		//Setting new IDs as another variables to pass as different arguments to the field function.
 		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
@@ -2642,6 +2835,17 @@ bool CChar::Spell_CastDone()
 	iDuration = maximum(0, iDuration);
 	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 
+	if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
+	{
+		if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
+			m_Act_p = GetTopPoint();
+
+		pSummon = Spell_Summon_Try(spell, m_Act_p, iC1);
+		if (!pSummon)
+		{
+			return false;
+		}
+	}
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
 		return false;
@@ -2650,13 +2854,9 @@ bool CChar::Spell_CastDone()
 	{
 		if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 		{
-			if (iC1)
-			{
-				m_atMagery.m_SummonID = iC1;
-				Spell_Summon(m_atMagery.m_SummonID, m_Act_p);
-			}
+			Spell_Summon_Place(pSummon, m_Act_p);
 		}
-		else if (bIsSpellField)
+		else if (fIsSpellField)
 		{
 			if (iT1 && iT2)
 			{
@@ -2686,7 +2886,7 @@ bool CChar::Spell_CastDone()
 				pObj->OnSpellEffect(spell, this, iSkillLevel, dynamic_cast <CItem*>(pObjSrc));
 		}
 	}
-	else if (bIsSpellField)
+	else if (fIsSpellField)
 	{
 		if (!fieldWidth)
 			fieldWidth = 3;
@@ -2722,44 +2922,7 @@ bool CChar::Spell_CastDone()
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 	{
-		if (spell == SPELL_Summon)
-		{
-			if (iC1)
-				m_atMagery.m_SummonID = iC1;
-			Spell_Summon(m_atMagery.m_SummonID, m_Act_p);
-		}
-		else
-		{
-			if (!iC1)
-			{
-				switch (spell)
-				{
-					case SPELL_Blade_Spirit:	m_atMagery.m_SummonID = CREID_BLADE_SPIRIT;	break;
-					case SPELL_Vortex:			m_atMagery.m_SummonID = CREID_ENERGY_VORTEX;break;
-					case SPELL_Air_Elem:		m_atMagery.m_SummonID = CREID_AIR_ELEM;		break;
-					case SPELL_Daemon:			m_atMagery.m_SummonID = CREID_DEMON;		break;
-					case SPELL_Earth_Elem:		m_atMagery.m_SummonID = CREID_EARTH_ELEM;	break;
-					case SPELL_Fire_Elem:		m_atMagery.m_SummonID = CREID_FIRE_ELEM;	break;
-					case SPELL_Water_Elem:		m_atMagery.m_SummonID = CREID_WATER_ELEM;	break;
-					case SPELL_Summon_Undead:
-						switch (Calc_GetRandVal(15))
-						{
-							case 1:				m_atMagery.m_SummonID = CREID_LICH;			break;
-							case 3:
-							case 5:
-							case 7:
-							case 9:				m_atMagery.m_SummonID = CREID_SKELETON;		break;
-							default:			m_atMagery.m_SummonID = CREID_ZOMBIE;		break;
-						}
-					case SPELL_Vengeful_Spirit:	m_atMagery.m_SummonID = CREID_REVENANT;		break;
-					default: break;
-				}
-			}
-			else
-				m_atMagery.m_SummonID = iC1;
-
-			Spell_Summon(m_atMagery.m_SummonID, m_Act_p);
-		}
+		Spell_Summon_Place(pSummon, m_Act_p);
 	}
 	else
 	{
@@ -2771,8 +2934,9 @@ bool CChar::Spell_CastDone()
 			// Magery
 			case SPELL_Create_Food:
 			{
-				CResourceID food = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
-				CItem *pItem = CItem::CreateScript((iT1 ? iT1 : (ITEMID_TYPE)(food.GetResIndex())), this);
+				const CResourceID ridFoodDefault = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
+				const ITEMID_TYPE idFood = ((iT1 > ITEMID_NOTHING) ? iT1 : (ITEMID_TYPE)(ridFoodDefault.GetResIndex()));
+				CItem *pItem = CItem::CreateScript(idFood, this);
 				ASSERT(pItem);
 				if (pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ))
 				{
@@ -2787,9 +2951,12 @@ bool CChar::Spell_CastDone()
 			break;
 
 			case SPELL_Magic_Trap:
-			case SPELL_Magic_Untrap:
 				/* Create the trap object and link it to the target.
 				   A container is diff from door or stationary object */
+				pObj->OnSpellEffect(SPELL_Magic_Trap, this, iSkillLevel, nullptr);
+				break;
+			case SPELL_Magic_Untrap:
+				pObj->OnSpellEffect(SPELL_Magic_Untrap, this, iSkillLevel, nullptr);
 				break;
 
 			case SPELL_Telekin:	// Act as DClick on the object.
@@ -2886,30 +3053,8 @@ bool CChar::Spell_CastDone()
 
 			case SPELL_Animate_Dead:
 			{
-				CItemCorpse * pCorpse = dynamic_cast <CItemCorpse*> (pObj);
-				if (pCorpse == nullptr)
-				{
-					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
-					return false;
-				}
-				if (IsPriv(PRIV_GM))
-				{
-					m_atMagery.m_SummonID = pCorpse->m_itCorpse.m_BaseID;
-				}
-				else if (CCharBase::IsPlayableID(pCorpse->GetCorpseType())) 	// Must be a human corpse ?
-				{
-					m_atMagery.m_SummonID = CREID_ZOMBIE;
-				}
-				else
-				{
-					m_atMagery.m_SummonID = pCorpse->GetCorpseType();
-				}
-
-				if (!pCorpse->IsTopLevel())
-				{
-					return false;
-				}
-				CChar *pChar = Spell_Summon(m_atMagery.m_SummonID, pCorpse->GetTopPoint());
+				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
+				CChar *pChar = Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
 				ASSERT(pChar);
 				if (!pChar->RaiseCorpse(pCorpse))
 				{
@@ -2953,7 +3098,7 @@ bool CChar::Spell_CastDone()
 						break;
 					CItem *pItem = CItem::CreateScript(sm_Item_Bone[i], this);
 					pItem->MoveToCheck(m_Act_p, this);
-					iGet++;
+					++ iGet;
 				}
 				if (!iGet)
 				{
@@ -2992,7 +3137,7 @@ bool CChar::Spell_CastDone()
 		Sound( pSpellDef->m_sound );
 
 	// At this point we should gain skill if precasting is enabled
-	if ( IsClient() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
+	if ( IsClientActive() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{
 		iDifficulty /= 10;
 		Skill_Experience((SKILL_TYPE)(iSkill), iDifficulty);
@@ -3000,12 +3145,27 @@ bool CChar::Spell_CastDone()
 	return true;
 }
 
-void CChar::Spell_CastFail()
+void CChar::Spell_CastFail(bool fAbort)
 {
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
-	CScriptTriggerArgs	Args( m_atMagery.m_Spell, 0, m_Act_Prv_UID.ObjFind() );
+
+	ushort iManaLoss = 0, iTithingLoss = 0;
+	CSpellDef *pSpell = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+ 	if (!pSpell)
+		return;
+
+	if (g_Cfg.m_fManaLossFail && !fAbort)
+		iManaLoss = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+
+	if (g_Cfg.m_fReagentLossFail && !fAbort)
+		iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+
+	CScriptTriggerArgs	Args( m_atMagery.m_iSpell, iManaLoss, m_Act_Prv_UID.ObjFind() );
+
 	Args.m_VarsLocal.SetNum("CreateObject1",iT1);
+	Args.m_VarsLocal.SetNum("TithingLoss", iTithingLoss);
+
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
 	{
 		if ( OnTrigger( CTRIG_SpellFail, this, &Args ) == TRIGRET_RET_TRUE )
@@ -3014,26 +3174,41 @@ void CChar::Spell_CastFail()
 
 	if ( IsTrigUsed(TRIGGER_FAIL) )
 	{
-		if ( Spell_OnTrigger( m_atMagery.m_Spell, SPTRIG_FAIL, this, &Args ) == TRIGRET_RET_TRUE )
+		if ( Spell_OnTrigger( m_atMagery.m_iSpell, SPTRIG_FAIL, this, &Args ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
+	iManaLoss = (ushort)Args.m_iN2;
+	iTithingLoss = (ushort)Args.m_VarsLocal.GetKeyNum("TithingLoss");
+
 	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
-
+	
 	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
 	Sound( SOUND_SPELL_FIZZLE );
 
-	if ( IsClient() )
-		GetClient()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
+	if ( IsClientActive() )
+		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
 
-	if ( g_Cfg.m_fReagentLossFail )
+	//consume the reagents and tithing points (if any).
+	if (g_Cfg.m_fReagentLossFail && !fAbort)
 	{
-		// consume the regs.
-		Spell_CanCast( m_atMagery.m_Spell, false, m_Act_Prv_UID.ObjFind(), false );
+		//Spell_CanCast(m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false);
+		g_Cfg.Calc_SpellReagentsConsume(this, pSpell, m_Act_Prv_UID.ObjFind());
+		if ( iTithingLoss > 0)
+		{
+			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+			int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
+			pVarTithing->SetValNum(iValTithing - iTithingLoss);
+		}
 	}
+
+	//consume mana.
+	if (g_Cfg.m_fManaLossFail && !fAbort)
+		UpdateStatVal(STAT_INT, -iManaLoss);
+
 }
 
 int CChar::Spell_CastStart()
@@ -3043,23 +3218,23 @@ int CChar::Spell_CastStart()
 	// but down with skill, int and dex
 	// ARGS:
 	//  m_Act_p = location to cast to.
-	//  m_atMagery.m_Spell = the spell.
+	//  m_atMagery.m_iSpell = the spell.
 	//  m_Act_Prv_UID = the source of the spell.
 	//  m_Act_UID = target for the spell.
 	// RETURN:
 	//  0-100
 	//  -1 = instant failure.
-	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( !pSpellDef )
 		return -1;
 
-	if ( IsClient() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
+	if ( IsClientActive() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{
 		m_Act_p = GetTopPoint();
-		m_Act_UID = GetClient()->m_Targ_UID;
-		m_Act_Prv_UID = GetClient()->m_Targ_Prv_UID;
+		m_Act_UID = GetClientActive()->m_Targ_UID;
+		m_Act_Prv_UID = GetClientActive()->m_Targ_Prv_UID;
 
-		if ( !Spell_CanCast(m_atMagery.m_Spell, true, m_Act_Prv_UID.ObjFind(), true) )
+		if ( !Spell_CanCast(m_atMagery.m_iSpell, true, m_Act_Prv_UID.ObjFind(), true) )
 			return -1;
 	}
 	else
@@ -3099,12 +3274,12 @@ int CChar::Spell_CastStart()
     int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)); // in tenths of second
 
     // For every point in faster casting, the casting time is shortened by 0.25 or 1/4 of a second. (Keeping 0,2 and not 0,25 for backwards compatibility).
-	iWaitTime -= 2 * GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
+	iWaitTime -= 2 * (int64)GetPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, true);
 
 	if ( iWaitTime < 1 )
 		iWaitTime = 1;
 
-	CScriptTriggerArgs Args((int)m_atMagery.m_Spell, iDifficulty, pItem);
+	CScriptTriggerArgs Args((int)m_atMagery.m_iSpell, iDifficulty, pItem);
 	Args.m_iN3 = iWaitTime;
 	Args.m_VarsLocal.SetNum("WOP", fWOP);
 	int64 WOPFont = g_Cfg.m_iWordsOfPowerFont;
@@ -3141,11 +3316,11 @@ int CChar::Spell_CastStart()
 			return -1;
 	}
 
-	m_atMagery.m_Spell = (SPELL_TYPE)Args.m_iN1;
+	m_atMagery.m_iSpell = (SPELL_TYPE)Args.m_iN1;
 	iDifficulty = (int)Args.m_iN2;
 	iWaitTime = Args.m_iN3;
 
-	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 	if ( !pSpellDef )
 		return -1;
 
@@ -3168,7 +3343,7 @@ int CChar::Spell_CastStart()
 		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
+			Speak((pSpellDef->m_sRunes.GetBuffer()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
 		}
 		else
 		{
@@ -3179,7 +3354,7 @@ int CChar::Spell_CastStart()
 				tchar ch = pSpellDef->m_sRunes[i];
 				if ( !ch )
 					break;
-				len += strcpylen(pszTemp + len, g_Cfg.GetRune(ch));
+				len += Str_CopyLen(pszTemp + len, g_Cfg.GetRune(ch));
 				if ( pSpellDef->m_sRunes[i + 1] )
 					pszTemp[len++] = ' ';
 			}
@@ -3191,7 +3366,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-	SetTimeoutD(iWaitTime);
+	_SetTimeoutD(iWaitTime);
 	return iDifficulty;
 }
 
@@ -3209,7 +3384,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !pSpellDef )
 		return false;
-	if ( iSkillLevel <= 0 )		// spell died or fizzled
+	if ( iSkillLevel < 0 )		// spell died or fizzled
 		return false;
 	if ( IsStatFlag(STATF_DEAD) && !pSpellDef->IsSpellType(SPELLFLAG_TARG_DEAD) )
 		return false;
@@ -3218,7 +3393,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_POISONED) )
 		return false;
 
-	iSkillLevel = iSkillLevel / 2 + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
+	iSkillLevel = (iSkillLevel / 2) + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
 	int64 iDuration = pSpellDef->m_idLayer ? GetSpellDuration(spell, iSkillLevel, pCharSrc) : 0;    // tenths of second
 	SOUND_TYPE iSound = pSpellDef->m_sound;
@@ -3244,7 +3419,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 		{
 			CItem *pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
-			if ( pEvilOmen )
+			if ( pEvilOmen && !g_Cfg.GetSpellDef(SPELL_Evil_Omen)->IsSpellType(SPELLFLAG_SCRIPTED))
 				uiResist /= 2;	// Effect 3: Only 50% of magic resistance used in next resistable spell.
 		}
 	}
@@ -3329,8 +3504,17 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) )
 	{
-		if ( pCharSrc == this && !IsSetMagicFlags(MAGICF_CANHARMSELF) && !fReflecting )
-			return false;
+		if ( pCharSrc == this )
+		{
+			if (fReflecting)
+			{
+				iDmgType |= DAMAGE_NODISTURB;	// Preventing myself to fail my own cast by receiving damage from it.
+			}
+			else if (!IsSetMagicFlags(MAGICF_CANHARMSELF))
+			{
+				return false;
+			}
+		}
 
 		if ( IsStatFlag(STATF_INVUL) )
 		{
@@ -3339,7 +3523,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 		else if ( GetPrivLevel() == PLEVEL_Guest )
 		{
-			pCharSrc->SysMessageDefault( DEFMSG_MSG_ACC_GUESTHIT );
+			if (pCharSrc)
+			{
+				pCharSrc->SysMessageDefault(DEFMSG_MSG_ACC_GUESTHIT);
+			}
 			Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);
 			return false;
 		}
@@ -3348,7 +3535,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 
 		// Check if the spell can be reflected
-		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
+		if (pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{
@@ -3357,7 +3544,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				if ( pMagicReflect )
 					pMagicReflect->Delete();
 
-				if ( pCharSrc->IsStatFlag(STATF_REFLECTION) )		// caster is under reflection effect too, so the spell will reflect back to default target
+				if ((pCharSrc->IsStatFlag(STATF_REFLECTION)) && (!IsSetMagicFlags(MAGICF_NOREFLECTOWN))) // caster is under reflection effect too, so the spell will reflect back to default target
 				{
 					pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
 					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
@@ -3366,7 +3553,15 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 				else
 				{
-					pCharSrc->OnSpellEffect( spell, pCharSrc, iSkillLevel, pSourceItem );
+					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
+					if (pMagicReflect && (IsSetMagicFlags(MAGICF_DELREFLECTOWN)))
+					{
+						pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
+						pMagicReflect->Delete();
+					}
+					else {
+						pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true);
+					}
 					return true;
 				}
 			}
@@ -3474,12 +3669,21 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			break;
 
 		case SPELL_Cure:
-			SetPoisonCure( iSkillLevel, iSkillLevel > 900 );
-			break;
-
 		case SPELL_Arch_Cure:
-			SetPoisonCure( iSkillLevel, true );
+			if (g_Cfg.Calc_CurePoisonChance(LayerFind(LAYER_FLAG_Poison), iSkillLevel, pCharSrc->IsPriv(PRIV_GM)))
+			{
+				SetPoisonCure((spell == SPELL_Arch_Cure || iSkillLevel > 900) ? true : false);
+				pCharSrc->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pCharSrc == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (GetName()));
+				if (pCharSrc != this)
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), pCharSrc->GetName());
+			}
+			else
+			{
+				pCharSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
+				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
+			}
 			break;
+	
 
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
@@ -3499,7 +3703,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Reveal:
 			if ( !Reveal() )
             {
-                iEffectID = ITEMID_NOTHING;
+				iEffectID = ITEMID_NOTHING;
                 iSound = SOUND_NONE;
             }
 			break;
@@ -3554,6 +3758,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return Spell_Resurrection(nullptr, pCharSrc, (pSourceItem && pSourceItem->IsType(IT_SHRINE)));
 
 		case SPELL_Light:
+			if (iEffectID)
+				Effect(EFFECT_OBJ, iEffectID, this, 9, 6, fExplode, iColor, dwRender);
 			Spell_Effect_Create( spell, LAYER_FLAG_Potion, iEffect, iDuration, pCharSrc );
 			break;
 
@@ -3591,11 +3797,11 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			UpdateStatVal( STAT_STR, iEffect );
 			break;
 
-		case SPELL_Sustenance:		// 105 // serves to fill you up. (Remember, healing rate depends on how well fed you are!)
-			Stat_SetVal( STAT_FOOD, Stat_GetAdjusted(STAT_FOOD) );
+		case SPELL_Sustenance:		// serves to fill you up. (Remember, healing rate depends on how well fed you are!)
+			Stat_SetVal( STAT_FOOD, Stat_GetMaxAdjusted(STAT_FOOD) );
 			break;
 
-		case SPELL_Gender_Swap:		// 110 // permanently changes your gender.
+		case SPELL_Gender_Swap:	// permanently changes your gender.
 			if ( IsPlayableCharacter())
 			{
 				CCharBase * pCharDef = Char_GetDef();
@@ -3607,7 +3813,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 					SetID( pCharDef->IsFemale() ? CREID_ELFMAN : CREID_ELFWOMAN );
 				else if ( IsGargoyle() )
 					SetID( pCharDef->IsFemale() ? CREID_GARGMAN : CREID_GARGWOMAN );
-				m_prev_id = GetID();
+				_iPrev_id = GetID();
 			}
 			break;
 
@@ -3623,19 +3829,19 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 		break;
 
-		case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
-		case SPELL_BeastForm:		// 107 // polymorphs you into an animal for a while.
-		case SPELL_Monster_Form:	// 108 // polymorphs you into a monster for a while.
+		case SPELL_Chameleon:		// makes your skin match the colors of whatever is behind you.
+		case SPELL_BeastForm:		// polymorphs you into an animal for a while.
+		case SPELL_Monster_Form:	// polymorphs you into a monster for a while.
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Polymorph, iEffect, iDuration, pCharSrc );
 			break;
 
-		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
+		case SPELL_Trance:			// temporarily increases your meditation skill.
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
 			break;
 
-		case SPELL_Shield:			// 113 // erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
-		case SPELL_Steelskin:		// 114 // turns your skin into steel, giving a boost to your AR.
-		case SPELL_Stoneskin:		// 115 // turns your skin into stone, giving a boost to your AR.
+		case SPELL_Shield:			// erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
+		case SPELL_Steelskin:		// turns your skin into steel, giving a boost to your AR.
+		case SPELL_Stoneskin:		// turns your skin into stone, giving a boost to your AR.
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Protection, iEffect, iDuration, pCharSrc );
 			break;
 
@@ -3725,17 +3931,15 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 			case SPELL_Strength:
 			case SPELL_Bless:
 			case SPELL_Curse:
-				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_EVALINT)) / 50);
+				iDuration = 1 + (((int64)pCharSrc->Skill_GetBase(SKILL_EVALINT) * 6) / 50);
 				break;
 
 			case SPELL_Protection:
-				{
-					iDuration = (2 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 10;
-					if ( iDuration < 15 )
-						iDuration = 15;
-					else if ( iDuration > 240 )
-						iDuration = 240;
-				}
+				iDuration = ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 2) / 10;
+				if ( iDuration < 15 )
+					iDuration = 15;
+				else if ( iDuration > 240 )
+					iDuration = 240;
 				break;
 
 			case SPELL_Wall_of_Stone:
@@ -3743,11 +3947,9 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 				break;
 
 			case SPELL_Arch_Prot:
-				{
-					iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
-					if ( iDuration > 144 )
-						iDuration = 144;
-				}
+				iDuration = (int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
+				if ( iDuration > 144 )
+					iDuration = 144;
 				break;
 
 			case SPELL_Fire_Field:
@@ -3763,13 +3965,13 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 				break;
 
 			case SPELL_Incognito:
-				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 50);
+				iDuration = 1 + (((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 6) / 50);
 				if (iDuration > 144)
 					iDuration = 144;
 				break;
 
 			case SPELL_Paralyze:
-				iDuration = 7 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
+				iDuration = 7 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
 				break;
 
 				// AOS formula (it only works well on servers with skillcap)
@@ -3780,15 +3982,15 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 					iDuration = 0;*/
 
 			case SPELL_Poison_Field:
-				iDuration = 3 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 25);
+				iDuration = 3 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 25);
 				break;
 
 			case SPELL_Invis:
-				iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
+				iDuration = (int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 12 / 100;
 				break;
 
 			case SPELL_Paralyze_Field:
-				iDuration = 3 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 30);
+				iDuration = 3 + ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) / 30);
 				break;
 
 			case SPELL_Energy_Field:
@@ -3817,20 +4019,20 @@ int64 CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharS
 			case SPELL_Earth_Elem:
 			case SPELL_Fire_Elem:
 			case SPELL_Water_Elem:
-				iDuration = (2 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 5;
+				iDuration = ((int64)pCharSrc->Skill_GetBase(SKILL_MAGERY) * 2) / 5;
 				break;
 
 			case SPELL_Blood_Oath:
-				iDuration = 8 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 80);
+				iDuration = 8 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 80);
 				break;
 			case SPELL_Corpse_Skin:
-				iDuration = 40 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 25);
+				iDuration = 40 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 25);
 				break;
 			case SPELL_Curse_Weapon:
-				iDuration = 1 + (pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) / 34);
+				iDuration = 1 + ((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) / 34);
 				break;
 			case SPELL_Mind_Rot:
-				iDuration = 20 + ((pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 50);
+				iDuration = 20 + (((int64)pCharSrc->Skill_GetBase(SKILL_SPIRITSPEAK) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 50);
 				break;
 			case SPELL_Pain_Spike:
 				iDuration = 1;		// timer is 1, but using 10 charges

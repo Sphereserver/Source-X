@@ -49,7 +49,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-const dword MS_VC_EXCEPTION = 0x406D1388;
+constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
 #endif
 
 void IThread::setThreadName(const char* name)
@@ -59,10 +59,10 @@ void IThread::setThreadName(const char* name)
 	// Unix uses prctl to set thread name
 	// thread name must be 16 bytes, zero-padded if shorter
 	char name_trimmed[m_nameMaxLength] = { '\0' };	// m_nameMaxLength = 16
-    strncpynull(name_trimmed, name, m_nameMaxLength);
+    Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
 
 #if defined(_WIN32)
-#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
+#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft's
 	// Windows uses THREADNAME_INFO structure to set thread name
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -99,24 +99,31 @@ bool ThreadHolder::m_inited = false;
 SimpleMutex ThreadHolder::m_mutex;
 TlsValue<IThread *> ThreadHolder::m_currentThread;
 
-extern CLog g_Log;
-
-IThread *ThreadHolder::current()
+IThread *ThreadHolder::current() noexcept
 {
-	init();
+	if (!m_inited)
+	{
+		EXC_TRY("Uninitialized");
+
+		init();
+
+		EXC_CATCH;
+	}
 
 	IThread * thread = m_currentThread;
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	ASSERT( thread->isSameThread(thread->getId()) );
+    // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
+	//ASSERT( thread->isSameThread(thread->getId()) );
 
 	return thread;
 }
 
 void ThreadHolder::push(IThread *thread)
 {
-	init();
+    if (!m_inited)
+        init();
 
 	SimpleThreadLock lock(m_mutex);
 	m_threads.push_back(thread);
@@ -125,20 +132,16 @@ void ThreadHolder::push(IThread *thread)
 
 void ThreadHolder::pop(IThread *thread)
 {
-	init();
-	if( m_threadCount <= 0 )
-		throw CSError(LOGL_ERROR, 0, "Trying to dequeue thread while no threads are active");
+    if (!m_inited)
+        init();
 
-	SimpleThreadLock lock(m_mutex);
-	spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
-	if (it != m_threads.end())
-	{
-		--m_threadCount;
-		m_threads.erase(it);
-		return;
-	}
+    ASSERT(m_threadCount > 0);	// Trying to dequeue thread while no threads are active?
 
-	throw CSError(LOGL_ERROR, 0, "Unable to dequeue a thread (not registered)");
+    SimpleThreadLock lock(m_mutex);
+    spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
+    ASSERT(it != m_threads.end());	// Ensure that the thread to dequeue is registered
+    --m_threadCount;
+    m_threads.erase(it);
 }
 
 IThread * ThreadHolder::getThreadAt(size_t at)
@@ -160,13 +163,11 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 
 void ThreadHolder::init()
 {
-	if( !m_inited )
-	{
-		memset(g_tmpStrings, 0, sizeof(g_tmpStrings));
-		memset(g_tmpTemporaryStringStorage, 0, sizeof(g_tmpTemporaryStringStorage));
+	ASSERT(!m_inited);
+    memset(g_tmpStrings, 0, sizeof(g_tmpStrings));
+    memset(g_tmpTemporaryStringStorage, 0, sizeof(g_tmpTemporaryStringStorage));
 
-		m_inited = true;
-	}
+    m_inited = true;
 }
 
 /*
@@ -185,7 +186,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 			throw CSError(LOGL_FATAL, 0, "OLE is not available, threading model unimplementable");
 		}
 #endif
-		AbstractThread::m_threadsAvailable++;
+		++AbstractThread::m_threadsAvailable;
 	}
 	m_id = 0;
 	m_name = name;
@@ -476,6 +477,7 @@ void AbstractThread::onStart()
 
 void AbstractThread::setPriority(IThread::Priority pri)
 {
+	ASSERT(((pri >= IThread::Idle) && (pri <= IThread::RealTime)) || (pri == IThread::Disabled));
 	m_priority = pri;
 
 	// detect a sleep period for thread depending on priority
@@ -500,10 +502,8 @@ void AbstractThread::setPriority(IThread::Priority pri)
 			m_tickPeriod = 0;
 			break;
 		case IThread::Disabled:
-			m_tickPeriod = AutoResetEvent::_infinite;
+			m_tickPeriod = AutoResetEvent::_kiInfinite;
 			break;
-		default:
-			throw CSError(LOGL_FATAL, 0, "Unable to determine thread priority");
 	}
 }
 
@@ -522,6 +522,7 @@ AbstractSphereThread::AbstractSphereThread(const char *name, Priority priority)
 	m_stackPos = 0;
 	memset(m_stackInfo, 0, sizeof(m_stackInfo));
 	m_freezeCallStack = false;
+    m_exceptionStackUnwinding = false;
 #endif
 
 	// profiles that apply to every thread
@@ -537,7 +538,7 @@ char *AbstractSphereThread::allocateBuffer()
 	SimpleThreadLock stlBuffer(g_tmpStringMutex);
 
 	char * buffer = nullptr;
-	g_tmpStringIndex++;
+	++g_tmpStringIndex;
 
 	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
 	{
@@ -599,31 +600,63 @@ bool AbstractSphereThread::shouldExit()
 	return AbstractThread::shouldExit();
 }
 
+void AbstractSphereThread::exceptionCaught()
+{
 #ifdef THREAD_TRACK_CALLSTACK
+    if (m_exceptionStackUnwinding == false)
+        printStackTrace();
+    else
+        m_exceptionStackUnwinding = false;
+#endif
+}
+
+#ifdef THREAD_TRACK_CALLSTACK
+void AbstractSphereThread::pushStackCall(const char *name) noexcept
+{
+    if (m_freezeCallStack == false)
+    {
+        m_stackInfo[m_stackPos].functionName = name;
+        ++m_stackPos;
+    }
+}
+
+void AbstractSphereThread::exceptionNotifyStackUnwinding(void)
+{
+    //ASSERT(isCurrentThread());
+    if (m_exceptionStackUnwinding == false)
+    {
+        m_exceptionStackUnwinding = true;
+        printStackTrace();
+    }
+}
+
 void AbstractSphereThread::printStackTrace()
 {
 	// don't allow call stack to be modified whilst we're printing it
 	freezeCallStack(true);
+    
+    const uint threadId = getId();
+    const lpctstr threadName = getName();
 
-	llong startTime = m_stackInfo[0].startTime;
-	int timedelta;
-	uint threadId = getId();
-    lpctstr threadName = getName();
-
-	g_Log.EventDebug("Printing STACK TRACE for debugging.\n");
-	g_Log.EventDebug(" ___ thread (id) name __ |  # | _____________ function _____________ | ticks passed from previous function start\n");
-	for ( size_t i = 0; i < 0x1000; ++i )
+	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
+	g_Log.EventDebug(" __ thread (id) name __ |  # | _____________ function _____________ |\n");
+	for ( size_t i = 0; i < CountOf(m_stackInfo); ++i )
 	{
-		if( m_stackInfo[i].startTime == 0 )
+		if( m_stackInfo[i].functionName == nullptr )
 			break;
 
-		timedelta = (int)(m_stackInfo[i].startTime - startTime);
-		g_Log.EventDebug("(%0.5u)%16.16s | %2d | %36.36s | +%d %s\n",
-			threadId, threadName, i, m_stackInfo[i].functionName, timedelta,
-				( i == (m_stackPos - 1) ) ?
-				"<-- exception catch point (below is guessed and could be incorrect!)" :
-				"");
-		startTime = m_stackInfo[i].startTime;
+        const bool origin = (i == (m_stackPos - 1));
+        lpctstr extra = " ";
+        if (origin)
+        {
+            if (m_exceptionStackUnwinding)
+                extra = "<-- last function call (stack unwinding began here)";
+            else
+                extra = "<-- exception catch point (below is guessed and could be incorrect!)";
+        }
+
+		g_Log.EventDebug("(%0.5u)%16.16s | %2u | %36.36s | %s\n",
+			threadId, threadName, (uint)i, m_stackInfo[i].functionName, extra);
 	}
 
 	freezeCallStack(false);
@@ -633,22 +666,62 @@ void AbstractSphereThread::printStackTrace()
 /*
  * DummySphereThread
 */
-DummySphereThread *DummySphereThread::instance = nullptr;
+DummySphereThread *DummySphereThread::_instance = nullptr;
 
 DummySphereThread::DummySphereThread()
 	: AbstractSphereThread("dummy", IThread::Normal)
 {
 }
 
-DummySphereThread *DummySphereThread::getInstance()
+void DummySphereThread::createInstance() // static
 {
-	if( instance == nullptr )
-	{
-		instance = new DummySphereThread();
-	}
-	return instance;
+	// This dummy thread is created at the very beginning of the application startup.
+	//  Before the server becomes operational, this won't be used anymore, since fully functional threads will be created.
+
+	// Create this only once, it has to be one of the first operations to be done when the application starts.
+	ASSERT(_instance == nullptr);
+	_instance = new DummySphereThread();
+}
+
+DummySphereThread *DummySphereThread::getInstance() noexcept // static
+{
+	return _instance;
 }
 
 void DummySphereThread::tick()
 {
 }
+
+
+/*
+* StackDebugInformation
+*/
+
+#ifdef THREAD_TRACK_CALLSTACK
+
+StackDebugInformation::StackDebugInformation(const char *name) noexcept
+{
+    m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
+	if (m_context != nullptr)
+	{
+		m_context->pushStackCall(name);
+	}
+}
+
+StackDebugInformation::~StackDebugInformation()
+{
+    ASSERT(m_context != nullptr);
+
+#if __cplusplus >= __cpp_lib_uncaught_exceptions
+    if (std::uncaught_exceptions() != 0)
+#else
+    if (std::uncaught_exception()) // deprecated in C++17
+#endif
+    {
+        // Exception was thrown and stack unwinding is in progress.
+        m_context->exceptionNotifyStackUnwinding();
+    }
+    m_context->popStackCall();
+}
+
+#endif // THREAD_TRACK_CALLSTACK

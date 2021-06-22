@@ -23,7 +23,7 @@ size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) c
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
         i = sprintf( pszArgs, "%" PRId64 " ", GetResQty());
     if ( !fQtyOnly )
-        i += strcpylen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
+        i += Str_CopyLen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
     return i;
 }
 
@@ -35,13 +35,13 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
         const CItemBase * pItemBase = CItemBase::FindItemBase((ITEMID_TYPE)(m_rid.GetResIndex()));
         //DEBUG_ERR(("pItemBase 0x%x  m_rid 0%x  m_rid.GetResIndex() 0%x\n",pItemBase,m_rid,m_rid.GetResIndex()));
         if ( pItemBase )
-            return( strcpylen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
+            return( Str_CopyLen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
     }
     const CScriptObj * pResourceDef = g_Cfg.ResourceGetDef( m_rid );
     if ( pResourceDef != nullptr )
-        return( strcpylen( pszArgs, pResourceDef->GetName()) );
+        return( Str_CopyLen( pszArgs, pResourceDef->GetName()) );
     else
-        return( strcpylen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
+        return( Str_CopyLen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
 }
 
 bool CResourceQty::Load(lpctstr &pszCmds)
@@ -66,7 +66,7 @@ bool CResourceQty::Load(lpctstr &pszCmds)
         return false;
     }
 
-    m_rid = g_Cfg.ResourceGetIDParse(RES_UNKNOWN, pszCmds);
+    m_rid = g_Cfg.ResourceGetID_Advance(RES_UNKNOWN, pszCmds);
     if ( m_rid.GetResType() == RES_UNKNOWN )
     {
         m_rid.Init();
@@ -103,16 +103,6 @@ CResourceQtyArray::CResourceQtyArray(lpctstr pszCmds)
     m_mergeOnLoad = true;
     Load(pszCmds);
 }
-//
-//CResourceQtyArray& CResourceQtyArray::operator=(const CResourceQtyArray& other)
-//{
-//	if (this != &other)
-//	{
-//		m_mergeOnLoad = other.m_mergeOnLoad;
-//		Copy(&other);
-//	}
-//	return *this;
-//}
 
 void CResourceQtyArray::setNoMergeOnLoad()
 {
@@ -131,7 +121,7 @@ size_t CResourceQtyArray::FindResourceType( RES_TYPE type ) const
         if ( type == ridtest.GetResType() )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceQtyArray::FindResourceID( const CResourceID& rid ) const
@@ -145,7 +135,7 @@ size_t CResourceQtyArray::FindResourceID( const CResourceID& rid ) const
         if ( rid == ridtest )
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 size_t CResourceQtyArray::FindResourceMatch( const CObjBase * pObj ) const
@@ -159,7 +149,7 @@ size_t CResourceQtyArray::FindResourceMatch( const CObjBase * pObj ) const
         if ( pObj->IsResourceMatch( ridtest, 0 ))
             return i;
     }
-    return BadIndex();
+    return SCONT_BADINDEX;
 }
 
 bool CResourceQtyArray::IsResourceMatchAll( const CChar * pChar ) const
@@ -211,9 +201,9 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
             {
                 // Replace any previous refs to this same entry ?
                 size_t i = FindResourceID( res.GetResourceID() );
-                if ( i != BadIndex() )
+                if ( i != SCONT_BADINDEX )
                 {
-                    assign(i, res);
+                    operator[](i) = std::move(res);
                 }
                 else
                 {

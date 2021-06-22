@@ -6,48 +6,40 @@
 #ifndef _INC_CTIMEDFUNCTION_H
 #define _INC_CTIMEDFUNCTION_H
 
-#include "../CUID.h"
-#include "../../common/CScript.h"
-#include "../../common/CScriptObj.h"
-#include "CServerTime.h"
+#include "../common/CUID.h"
+#include "CTimedObject.h"
 
-class CTimedFunctionHandler
+
+class CTimedFunctionHandler;
+
+class CTimedFunction : public CTimedObject
 {
 public:
-    struct TimedFunction
-    {
-        int		elapsed;
-        char	funcname[1024];
-        CUID 	uid;
-    };
+    static constexpr uint kuiCommandSize = 1024;
 
 private:
-    std::vector<TimedFunction *> m_timedFunctions[TICKS_PER_SEC];
-    int m_curTick;
-    int m_processedFunctionsPerTick;
-    std::vector<TimedFunction *> m_tfRecycled;
-    std::vector<TimedFunction *> m_tfQueuedToBeAdded;
-    bool m_isBeingProcessed;
+    friend class CTimedFunctionHandler;
+
+    CTimedFunctionHandler* _pHandler;
+    CUID  _uidAttached;
+    tchar _ptcCommand[kuiCommandSize];
 
 public:
-    static const char *m_sClassName;
-    CTimedFunctionHandler();
+    CTimedFunction(CTimedFunctionHandler* pHandler, const CUID& uidAttached, const char * pcCommand);
+    ~CTimedFunction() = default; // Removal from ticking list is already managed by CTimedObject destructor
 
-private:
-    CTimedFunctionHandler(const CTimedFunctionHandler& copy);
-    CTimedFunctionHandler& operator=(const CTimedFunctionHandler& other);
+    const CUID& GetUID() const {
+        return _uidAttached;
+    }
+    lpctstr GetCommand() const noexcept {
+        return _ptcCommand;
+    }
 
-public:
-    void OnTick();
-    void r_Write(CScript & s);
+protected:	virtual bool _OnTick() override;
+public:		virtual bool  OnTick() override;
 
-    int Load(const char *pszName, bool fQuoted, const char *pszVal);
-    void Add(CUID uid, int numSeconds, lpctstr funcname);
-    void Erase(CUID uid);
-    void Stop(CUID uid, lpctstr funcname);
-    void Clear();
-    TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
-        CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
-    int IsTimer(CUID uid, lpctstr funcname);
+protected:  virtual bool _IsDeleted() const override;
+public:     virtual bool IsDeleted() const override; // abstract
 };
+
 #endif // _INC_CTIMEDFUNCTION_H

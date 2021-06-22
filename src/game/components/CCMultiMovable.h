@@ -4,14 +4,6 @@
 #include "../CRegion.h"
 
 
-static const DIR_TYPE sm_FaceDir[] =
-{
-    DIR_N,
-    DIR_E,
-    DIR_S,
-    DIR_W
-};
-
 struct ShipSpeed // speed of a ship
 {
     ushort period;	// time between movement in tenths of second
@@ -27,20 +19,21 @@ class CCMultiMovable
     CTextConsole *_pCaptain;
     bool _fCanTurn;
 
+protected:
+    ShipSpeed _shipSpeed;          // Speed of ships (IT_SHIP)
+    ShipMovementSpeed _eSpeedMode;  // (0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast)
+
 public:
     CCMultiMovable(bool fCanTurn);
     virtual ~CCMultiMovable() = default;
     //CItem *GetLink() const;
 
-    bool OnTick();
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    bool _OnTick();
+    bool r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc);
     bool r_LoadVal(CScript & s);
     bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
 
 protected:
-    ShipSpeed m_shipSpeed;  // Speed of ships (IT_SHIP)
-    ShipMovementSpeed _eSpeedMode;       // (0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast)
-
     void SetNextMove();
     uint ListObjs(CObjBase ** ppObjList);
     bool CanMoveTo(const CPointMap & pt) const;
@@ -50,6 +43,7 @@ protected:
 
     void SetCaptain(CTextConsole *pSrc);
     CTextConsole* GetCaptain();
+
 public:
     int GetFaceOffset() const;
     bool SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType = SMT_STOP, bool fWheelMove = false);

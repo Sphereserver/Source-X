@@ -7,22 +7,9 @@
 #define _INC_CSCRIPT_H
 
 #include "sphere_library/CSMemBlock.h"
+#include "CScriptContexts.h"
 #include "CCacheableScriptFile.h"
 
-#define SPHERE_SCRIPT		".scp"
-#define SCRIPT_MAX_SECTION_LEN 128
-
-
-struct CScriptLineContext
-{
-public:
-	int m_iOffset;
-	int m_iLineNum;		// for debug purposes if there is an error.
-public:
-	void Init();
-	bool IsValid() const;
-	CScriptLineContext();
-};
 
 class CScriptKey
 {
@@ -77,8 +64,8 @@ public:
 
 public:
 	CScriptKey();
-	CScriptKey( tchar * pszKey, tchar * pszArg );
-	virtual ~CScriptKey();
+	CScriptKey( tchar * ptcKey, tchar * ptcArg );
+	virtual ~CScriptKey() = default;
 private:
 	CScriptKey(const CScriptKey& copy);
 	CScriptKey& operator=(const CScriptKey& other);
@@ -98,13 +85,13 @@ protected:
 public:
 	static const char *m_sClassName;
 	tchar * GetKeyBuffer();
-	bool ParseKey(lpctstr pszKey, lpctstr pszArgs);
-	bool ParseKey(lpctstr pszKey);
+	bool ParseKey(lpctstr ptcKey, lpctstr pszArgs);
+	bool ParseKey(lpctstr ptcKey);
 	void ParseKeyLate();
 
 public:
-	CScriptKeyAlloc() { }
-	virtual ~CScriptKeyAlloc() { }
+	CScriptKeyAlloc() = default;
+	virtual ~CScriptKeyAlloc() = default;
 
 private:
 	CScriptKeyAlloc(const CScriptKeyAlloc& copy);
@@ -117,13 +104,24 @@ class CResourceLock;
 class CScript : public CCacheableScriptFile, public CScriptKeyAlloc
 {
 private:
+	std::string	_sWriteBuffer_num;
+	std::string _sWriteBuffer_keyVal;
 	bool m_fSectionHead;	// Does the File Offset point to current section header? [HEADER]
 	int  m_iSectionData;	// File Offset to current section data, under section header.
 
 public:
 	static const char *m_sClassName;
-	int m_iLineNum;					// for debug purposes if there is an error.
+
+	enum class ParseFlags
+	{
+		None,
+		IgnoreInvalidRef
+	} _eParseFlags;
+
+	int m_iLineNum;				// for debug purposes if there is an error.
 	int	m_iResourceFileIndex;	// index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+
+protected:
     bool _fCacheToBeUpdated;
 
 protected:
@@ -160,17 +158,20 @@ public:
 	bool ReadKeyParse();
 
 	// Write stuff out to a script file.
-	bool _cdecl WriteSection( lpctstr pszSection, ... ) __printfargs(2,3);
-	bool WriteKey( lpctstr pszKey, lpctstr pszVal );
-	void _cdecl WriteKeyFormat( lpctstr pszKey, lpctstr pszFormat, ... ) __printfargs(3,4);
+	bool _cdecl WriteSection(lpctstr pszSection, ...) __printfargs(2,3);
+	void _cdecl WriteKeyFormat(lpctstr ptcKey, lpctstr pszFormat, ...) __printfargs(3,4);
+	bool WriteKeySingle(lptstr ptcKey);
+	bool WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal);
 
-	void WriteKeyVal( lpctstr pszKey, int64 dwVal );
-	void WriteKeyHex( lpctstr pszKey, int64 dwVal );
+	void WriteKeyVal(lpctstr ptcKey, int64 iVal);
+	void WriteKeyHex(lpctstr ptcKey, int64 iVal);
 
 	CScript();
-	CScript( lpctstr pszKey );
-	CScript( lpctstr pszKey, lpctstr pszVal );
-	virtual ~CScript();
+	CScript( lpctstr ptcKey );
+	CScript( lpctstr ptcKey, lpctstr pszVal );
+	virtual ~CScript() = default;
+
+	void CopyParseState(const CScript& other) noexcept;
 };
 
 #endif // CSCRIPT_H

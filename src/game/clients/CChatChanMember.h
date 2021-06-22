@@ -47,8 +47,8 @@ private:
     CChatChanMember& operator=(const CChatChanMember& other);
 
 public:
-    CClient * GetClient();
-    const CClient * GetClient() const;
+    CClient * GetClientActive();
+    const CClient * GetClientActive() const;
     bool IsChatActive() const;
     void SetReceiving(bool fOnOff);
     void ToggleReceiving();

@@ -22,9 +22,8 @@
 #define IDC_M_INPUT 11
 #define IDT_ONTICK	1
 
-CNTApp theApp;
-CNTWindow g_NTWindow;
 
+CNTApp theApp;
 
 //************************************
 // -CAboutDlg
@@ -43,7 +42,7 @@ bool CNTWindow::CAboutDlg::OnInitDialog()
 	return false;
 }
 
-bool CNTWindow::CAboutDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::CAboutDlg::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	UNREFERENCED_PARAMETER(wNotifyCode);
 	UNREFERENCED_PARAMETER(hwndCtl);
@@ -85,7 +84,7 @@ void CNTWindow::CStatusDlg::FillClients()
 	CNTWindow::CListTextConsole capture( m_wndListClients.m_hWnd );
 	g_Serv.ListClients( &capture );
 	int iCount = m_wndListClients.GetCount();
-	iCount++;
+	++iCount;
 }
 
 void CNTWindow::CStatusDlg::FillStats()
@@ -108,14 +107,14 @@ void CNTWindow::CStatusDlg::FillStats()
 		if (profile.IsEnabled() == false)
 			continue;
 
-		capture.SysMessagef("Thread %u - '%s'\n", thrCurrent->getId(), thrCurrent->getName());
+		capture.SysMessagef("Thread %lu - '%s'\n", thrCurrent->getId(), thrCurrent->getName());
 
 		for (int i = 0; i < PROFILE_QTY; ++i)
 		{
 			if (profile.IsEnabled( (PROFILE_TYPE)i ) == false)
 				continue;
 
-			capture.SysMessagef("'%-10s' = %s\n", profile.GetName((PROFILE_TYPE)i), profile.GetDescription((PROFILE_TYPE)i));
+			capture.SysMessagef("'%-14s' = %s\n", profile.GetName((PROFILE_TYPE)i), profile.GetDescription((PROFILE_TYPE)i));
 		}
 	}
 }
@@ -207,33 +206,17 @@ bool CNTWindow::shouldExit()
 
 void CNTWindow::tick()
 {
-    ConsoleInterface::_ciQueueMutex.lock();
     if (!_qOutput.empty())
     {
-        std::vector<ConsoleOutput*> outMessages;
-        outMessages.reserve(_qOutput.size());
-        while (!_qOutput.empty())
-        {
-            outMessages.emplace_back(_qOutput.front());
-            _qOutput.pop();
-        }
-        ConsoleInterface::_ciQueueMutex.unlock();
+		std::deque<std::unique_ptr<ConsoleOutput>> outMessages;
+		{
+			// No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
+			//  In any case, it's best to keep the mutex locked for the least time possible.
+			std::unique_lock<std::mutex> lock(this->ConsoleInterface::_ciQueueMutex);
+			outMessages.swap(this->ConsoleInterface::_qOutput);
+		}
 
-        // No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
-        //  In any case, it's best to keep the mutex locked for the least time possible.
-        for (ConsoleOutput* co : outMessages)
-        {
-            theApp.m_wndMain.List_Add((COLORREF)CTColToRGB(co->GetTextColor()), co->GetTextString().GetPtr());
-            delete co;
-        }
-
-        // Just scroll once, after we have printed all the output
-        if (NTWindow_CanScroll())
-            theApp.m_wndMain.m_wndLog.ScrollBottomRight();
-    }
-    else
-    {
-        ConsoleInterface::_ciQueueMutex.unlock();
+		theApp.m_wndMain.List_AddGroup(std::move(outMessages));
     }
 
     NTWindow_CheckUpdateWindowTitle();
@@ -247,7 +230,7 @@ void CNTWindow::tick()
 bool CNTWindow::NTWindow_CanScroll()
 {
     // If the select is on screen then keep scrolling.
-    if ( ! m_fLogScrollLock && ! GetCapture() )
+    if ( ! m_fLogScrollLock /*&& (GetActiveWindow() == m_hWnd)*/ && ! GetCapture() )
     {
         if ( Sphere_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
         {
@@ -264,31 +247,38 @@ void CNTWindow::List_Clear()
 	m_iLogTextLen = 0;
 }
 
-void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
+void CNTWindow::List_AddSingle(COLORREF color, LPCTSTR ptcText)
 {
-	const int iMaxTextLen = (64 * 1024);	// It was: (32*1024)
-	int iTextLen = (int)strlen( pszText );
-	int iNewLen = m_iLogTextLen + iTextLen;
+	const int iMaxTextLen = (64 * 1024);
+
+	const int iTextLen = (int)strlen(ptcText);
+	const int iNewLen = m_iLogTextLen + iTextLen;
 
 	if ( iNewLen > iMaxTextLen )
 	{
-		int iCut = iNewLen - iMaxTextLen;
-		m_wndLog.SetSel( 0, iCut );
-		m_wndLog.ReplaceSel( "" );
-		m_iLogTextLen = iMaxTextLen;
-	}
+		const int iCut = iNewLen - iMaxTextLen; 
 
-	m_wndLog.SetSel( m_iLogTextLen, m_iLogTextLen );
+		m_wndLog.SetSel( 0, iCut );
+
+		// These SetRedraw FALSE/TRUE calls will make the log panel scroll much faster when spamming text, but
+		//  it will generate some drawing artifact
+		//m_wndLog.SetRedraw(FALSE);
+		m_wndLog.ReplaceSel( "" );	
+	}
+    else if (NTWindow_CanScroll())
+        theApp.m_wndMain.m_wndLog.ScrollLine();
+
+	m_wndLog.SetSel(m_iLogTextLen, m_iLogTextLen + iTextLen);
 
 	// set the blocks color.
-	CHARFORMAT cf;
-	memset( &cf, 0, sizeof(cf));
+	CHARFORMAT cf{};
 	cf.cbSize = sizeof(cf);
 	cf.dwMask = CFM_COLOR;
 	cf.crTextColor = color;
 	m_wndLog.SetSelectionCharFormat( cf );
 
-	m_wndLog.ReplaceSel( pszText );
+    //m_wndLog.SetRedraw(TRUE);
+	m_wndLog.ReplaceSel(ptcText);
 
 	m_iLogTextLen += iTextLen;
 	m_wndLog.SetSel( m_iLogTextLen, m_iLogTextLen );
@@ -297,12 +287,60 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	int iSelEnd;
 	m_wndLog.GetSel( iSelBegin, iSelEnd );
 	m_iLogTextLen = iSelBegin;	// make sure it's correct.
+}
 
-    /*
-    // Scroll down a line each time we print a message
-    if (NTWindow_CanScroll())
-        theApp.m_wndMain.m_wndLog.ScrollLine();
-    */
+void CNTWindow::List_AddGroup(std::deque<std::unique_ptr<ConsoleOutput>>&& msgs)
+{
+	const int iMaxTextLen = (64 * 1024);
+
+	// Erase the old text to make space for all the message queue at once
+	int iTotalTextLen = 0;
+	for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+	{
+		iTotalTextLen += co->GetTextString().GetLength();
+	}
+	
+	const int iNewLen = m_iLogTextLen + iTotalTextLen;
+
+	if (iNewLen > iMaxTextLen)
+	{
+		int iCut = iNewLen - iMaxTextLen;
+		iCut = minimum(iCut, iMaxTextLen);
+
+		m_wndLog.SetSel(0, iCut);
+		m_wndLog.ReplaceSel("");
+	}
+
+	// Append all the messages at once
+	for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+	{
+		const COLORREF color = (COLORREF)CTColToRGB(co->GetTextColor());
+		const lpctstr ptcText = co->GetTextString().GetBuffer();
+		const int iTextLen = co->GetTextString().GetLength();
+
+		m_wndLog.SetSel(m_iLogTextLen, m_iLogTextLen + iTextLen);
+
+		// set the blocks color.
+		CHARFORMAT cf{};
+		cf.cbSize = sizeof(cf);
+		cf.dwMask = CFM_COLOR;
+		cf.crTextColor = color;
+		m_wndLog.SetSelectionCharFormat(cf);
+
+		m_wndLog.ReplaceSel(ptcText);
+
+		m_iLogTextLen += iTextLen;
+		m_wndLog.SetSel(m_iLogTextLen, m_iLogTextLen);
+
+		int iSelBegin;
+		int iSelEnd;
+		m_wndLog.GetSel(iSelBegin, iSelEnd);
+		m_iLogTextLen = iSelBegin;	// make sure it's correct.
+	}
+
+	// Scroll just one time, after all the new messages are added
+	if (NTWindow_CanScroll())
+		theApp.m_wndMain.m_wndLog.ScrollBottomRight();
 }
 
 void CNTWindow::SetWindowTitle(LPCTSTR pText)
@@ -345,7 +383,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 	CSWindow::OnCreate(hWnd);
 
 	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, nullptr,
-		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | /* ES_OEMCONVERT | */
+		ES_LEFT | ES_MULTILINE | ES_READONLY | /* ES_OEMCONVERT | */
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL,
 		0, 0, 10, 10,
 		m_hWnd,
@@ -377,14 +415,14 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
-		memset(&pnid,0,sizeof(pnid));
-		pnid.cbSize = sizeof(NOTIFYICONDATA);
-		pnid.hWnd   = m_hWnd;
-		pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
-		pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
-		pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
-        strncpynull(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
-		Shell_NotifyIcon(NIM_ADD, &pnid);
+		memset(&m_pnid,0,sizeof(m_pnid));
+        m_pnid.cbSize = sizeof(NOTIFYICONDATA);
+        m_pnid.hWnd   = m_hWnd;
+        m_pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
+        m_pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
+        m_pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
+        Str_CopyLimitNull(m_pnid.szTip, theApp.m_pszAppName, CountOf(m_pnid.szTip)-1);
+		Shell_NotifyIcon(NIM_ADD, &m_pnid);
 	}
 
 	SetWindowTitle();
@@ -451,8 +489,12 @@ void CNTWindow::OnUserPostMessage( COLORREF color, CSString * psMsg )
 	// WM_USER_POST_MSG
 	if ( psMsg )
 	{
-		List_Add(color, *psMsg);
+		List_AddSingle(color, *psMsg);
 		delete psMsg;
+
+        // Scroll down a line each time we print a message
+        if (NTWindow_CanScroll())
+            theApp.m_wndMain.m_wndLog.ScrollLine();
 	}
 }
 
@@ -835,13 +877,13 @@ bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdSho
 	theApp.InitInstance(SPHERE_WINDOW_TITLE_BASE, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments
-	char	className[32] = SPHERE_TITLE "Svr";
+	char	className[32] = SPHERE_TITLE;
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
-		if ( argv[1][1] == 'c' )
+		if ( toupper(argv[1][1]) == 'C' )
 		{
 			if ( argv[1][2] )
 				strcpy(className, &argv[1][2]);
@@ -871,8 +913,8 @@ void CNTWindow::NTWindow_DeleteIcon()
 {
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
-		theApp.m_wndMain.pnid.uFlags = 0;
-		Shell_NotifyIcon(NIM_DELETE, &theApp.m_wndMain.pnid);
+		theApp.m_wndMain.m_pnid.uFlags = 0;
+		Shell_NotifyIcon(NIM_DELETE, &theApp.m_wndMain.m_pnid);
 	}
 }
 
@@ -947,9 +989,9 @@ void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
-		theApp.m_wndMain.pnid.uFlags = NIF_TIP;
-        strncpynull(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
-		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.pnid);
+		theApp.m_wndMain.m_pnid.uFlags = NIF_TIP;
+        Str_CopyLimitNull(theApp.m_wndMain.m_pnid.szTip, psTitle, CountOf(theApp.m_wndMain.m_pnid.szTip)-1);
+		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.m_pnid);
 	}
 }
 
@@ -1039,8 +1081,11 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 						// there IS a selection, so extract it
 						if ( selStart != selEnd )
 						{
-							strncpy(pszCurSel, pszTemp + selStart, selEnd - selStart);
-							pszCurSel[selEnd - selStart] = '\0';
+                            size_t iSizeSel = selEnd - selStart + 1; // +1 for the terminator
+                            if (iSizeSel > STR_TEMPLENGTH)
+                                iSizeSel = STR_TEMPLENGTH;
+							Str_CopyLimit(pszCurSel, pszTemp + selStart, iSizeSel);
+							pszCurSel[iSizeSel] = '\0';
 						}
 						else
 						{
@@ -1066,7 +1111,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 
 						for ( curmatch = g_AutoComplete.GetHead(); curmatch != nullptr; curmatch = curmatch->GetNext() )
 						{
-							if ( !strnicmp(curmatch->GetPtr(), p, inputLen) )	// matched
+							if ( !strnicmp(curmatch->GetBuffer(), p, inputLen) )	// matched
 							{
 								if ( firstmatch == nullptr )
 								{
@@ -1101,7 +1146,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 								for ( curmatch = firstmatch; curmatch != lastmatch->GetNext(); curmatch = curmatch->GetNext() )
 								{
 									// found the first next one
-									if ( strnicmp(curmatch->GetPtr() + inputLen, pszCurSel, curselLen) > 0 )
+									if ( strnicmp(curmatch->GetBuffer() + inputLen, pszCurSel, curselLen) > 0 )
 									{
 										break;
 									}
@@ -1112,7 +1157,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 								}
 							}
 
-							LPCTSTR	tmp = curmatch->GetPtr() + inputLen;
+							LPCTSTR	tmp = curmatch->GetBuffer() + inputLen;
 							inp->ReplaceSel(tmp);
 							if ( !bOnly )
 							{

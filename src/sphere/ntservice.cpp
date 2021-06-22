@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 
-#include <direct.h>
+//#include <direct.h>
 #include "../common/CException.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
@@ -16,8 +16,10 @@ CNTService g_NTService;
 
 CNTService::CNTService()
 {
-	m_hStatusHandle = nullptr;
+    m_hStatusHandle = nullptr;
+    m_hServerStopEvent = nullptr;
 	m_fIsNTService = false;
+    m_sStatus = {};
 }
 
 // Try to create the registry key containing the working directory for the application
@@ -55,7 +57,7 @@ void CNTService::ReportEvent( WORD wType, DWORD dwEventID, LPCTSTR lpszMsg, LPCT
 }
 
 // RETURN: false = exit app.
-bool CNTService::OnTick()
+bool CNTService::_OnTick()
 {
 	if (( !m_fIsNTService ) || ( m_sStatus.dwCurrentState != SERVICE_STOP_PENDING ) )
 		return true;
@@ -454,7 +456,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	int argc = (int)Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 
 	// We need to find out what the server name is and the log files folder... look it up in the .ini file
     g_Cfg.LoadIni(false);
@@ -477,11 +479,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// process the command line arguments...
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
-		if ( argv[1][1] == 'k' )		// service control
+		if ( toupper(argv[1][1]) == 'K' )		// service control
 		{
 			if ( argc < 3 )
 			{
-				printf("Use \"-k command\" with operation to proceed (install/remove)\n");
+				printf("Use \"-K command\" with operation to proceed (install/remove)\n");
 			}
 			else if ( !strcmp(argv[2], "install") )
 			{

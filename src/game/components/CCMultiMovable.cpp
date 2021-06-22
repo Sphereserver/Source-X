@@ -1,3 +1,4 @@
+#include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../chars/CChar.h"
@@ -5,9 +6,19 @@
 #include "../items/CItemMulti.h"
 #include "../items/CItemShip.h"
 #include "../CObjBase.h"
-#include "../CWorld.h"
+#include "../CServer.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CCMultiMovable.h"
+
+
+static constexpr DIR_TYPE sm_FaceDir[] =
+{
+    DIR_N,
+    DIR_E,
+    DIR_S,
+    DIR_W
+};
 
 enum ShipDelay
 {
@@ -15,9 +26,13 @@ enum ShipDelay
     ShipDelay_Fast = 250
 };
 
-CCMultiMovable::CCMultiMovable(bool fCanTurn)
+
+CCMultiMovable::CCMultiMovable(bool fCanTurn) :
+    _shipSpeed{}
 {
     _fCanTurn = fCanTurn;
+    _eSpeedMode = SMS_NORMAL;
+    _pCaptain = nullptr;
 }
 
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)
@@ -77,7 +92,9 @@ bool CCMultiMovable::SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType, bo
 
     // SpeedMode, as supported by the 0xF6 packet (sent from server): 0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast
     // TODO RowBoat's checks.
-    _eSpeedMode = (eMovementType == SMT_SLOW) ? SMS_SLOW : SMS_FAST;
+    if (fWheelMove)
+        _eSpeedMode = (eMovementType == SMT_SLOW) ? SMS_SLOW : SMS_FAST;
+	
     SetNextMove();
     return true;
 }
@@ -91,14 +108,16 @@ void CCMultiMovable::SetNextMove()
         return;
     }
     int64 iDelay;
+    /*
     if (IsSetOF(OF_NoSmoothSailing))
     {
-        iDelay = (_eSpeedMode == SMS_SLOW) ? (m_shipSpeed.period * MSECS_PER_TENTH) : ((m_shipSpeed.period * MSECS_PER_TENTH) / 2);
+        iDelay = (_eSpeedMode == SMS_SLOW) ? (_shipSpeed.period * MSECS_PER_TENTH) : ((_shipSpeed.period * MSECS_PER_TENTH) / 2);
     }
     else
     {
-        iDelay = (_eSpeedMode == SMS_SLOW) ? (m_shipSpeed.period * MSECS_PER_TENTH) : ((m_shipSpeed.period * MSECS_PER_TENTH) / 2);
-    }
+    */
+        iDelay = (_eSpeedMode == SMS_SLOW) ? (_shipSpeed.period * MSECS_PER_TENTH) : ((_shipSpeed.period * MSECS_PER_TENTH) / 2);
+    //}
     pItemThis->SetTimeout(iDelay);
 }
 
@@ -114,7 +133,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     if (!pItemThis->IsTopLevel())
         return 0;
 
-    int iMaxDist = pMulti->Multi_GetMaxDist();
+    int iMaxDist = pMulti->Multi_GetDistanceMax();
     int iShipHeight = pItemThis->GetTopZ() + maximum(3, pItemThis->GetHeight());
 
     // always list myself first. All other items must see my new region !
@@ -196,7 +215,7 @@ void CCMultiMovable::SetPilot(CChar *pChar)
 	// Create memory on new pilot
 	if (pChar)
 	{
-		if (pChar->GetRegion()->GetResourceID().GetObjUID() != pItemThis->GetUID())
+		if (pChar->GetRegion()->GetResourceID().GetObjUID() != pItemThis->GetUID().GetObjUID())
 		{
 			pChar->SysMessageDefault(DEFMSG_SHIP_PILOT_CANTABOARD);
 			return;
@@ -247,7 +266,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
     if ( (ptDelta.m_z < 0) && (zNew <= (UO_SIZE_MIN_Z + 3)) )
         return false;
 
-    CPointMap ptMultiOld = pItemThis->GetTopPoint();
+    const CPointMap& ptMultiOld = pItemThis->GetTopPoint();
     CPointMap ptMultiNew(ptMultiOld);
     ptMultiNew += ptDelta;
     CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptMultiOld.GetRegion(REGION_TYPE_AREA));
@@ -285,7 +304,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
         if (pCharClient == nullptr)
             continue;
 
-        const NetState* pNetState = pClient->GetNetState();
+        const CNetState* pNetState = pClient->GetNetState();
         const bool fClientUsesSmoothSailing = !IsSetOF(OF_NoSmoothSailing) && (pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced());
 
         const CPointMap& ptMe = pCharClient->GetTopPoint();
@@ -324,7 +343,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                 else
                 {
                     CChar *pChar = static_cast<CChar *>(pObj);
-                    if (pClient == pChar->GetClient())
+                    if (pClient == pChar->GetClientActive())
                     {
                         if (!fClientUsesSmoothSailing)
                             pClient->addPlayerUpdate();     // update my (client) position
@@ -356,7 +375,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                     }
 
                     // If client is on Ship
-                    if (pCharClient->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID())
+                    if (pCharClient->GetRegion()->GetResourceID().GetObjUID() == pItemThis->GetUID().GetObjUID())
                     {
                         // Is there any new object (outside of the ship) that i can see?
                         if (fClientUsesSmoothSailing && !fUpdateViewFull)
@@ -447,7 +466,7 @@ bool CCMultiMovable::CanMoveTo(const CPointMap & pt) const
 
     dword dwBlockFlags = CAN_I_WATER;
 
-    g_World.GetHeightPoint2(pt, dwBlockFlags, true);
+    CWorldMap::GetHeightPoint2(pt, dwBlockFlags, true);
     if (dwBlockFlags & CAN_I_WATER)
         return true;
 
@@ -565,7 +584,9 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
                     if ((xdiff == component.m_dx) && (ydiff == component.m_dy) && ((pItem->GetTopZ() - pMultiThis->GetTopZ()) == component.m_dz))
                     {
                         const CItemBaseMulti::CMultiComponentItem & componentnew = pMultiNew->m_Components[j];
+                        IT_TYPE oldType = pItem->GetType();
                         pItem->SetID(componentnew.m_id);
+                        pItem->SetType(oldType);
                         pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
                         pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
                     }
@@ -600,18 +621,19 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
 bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 {
     ADDTOCALLSTACK("CCMultiMovable::Move");
-    CItem *pItemThis = dynamic_cast<CItem*>(this);
-    ASSERT(pItemThis);
-    CItemMulti *pMulti = static_cast<CItemMulti*>(pItemThis);
-    if (dir >= DIR_QTY)
+    if ((dir >= DIR_QTY) || (dir <= DIR_INVALID))
         return false;
 
+    CItemMulti *pMulti = static_cast<CItemMulti*>(this);
     const CRegion* pMultiRegion = pMulti->GetRegion();
     if (pMultiRegion == nullptr)
     {
         DEBUG_ERR(("Ship bad region\n"));
         return false;
     }
+
+    CItem* pItemThis = dynamic_cast<CItem*>(this);
+    ASSERT(pItemThis);
 
     CPointMap ptDelta;
     ptDelta.ZeroPoint();
@@ -622,8 +644,8 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
     CPointMap ptRight(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 1 + (dir % 2))));
     CPointMap ptTest(ptLeft.m_x, ptLeft.m_y, pItemThis->GetTopZ(), pItemThis->GetTopMap());
 
-	short iMapBoundX = (short)(g_MapList.GetX(ptBack.m_map));
-	short iMapBoundY = (short)(g_MapList.GetY(ptBack.m_map));
+	short iMapBoundX = (short)(g_MapList.GetMapSizeX(ptBack.m_map));
+	short iMapBoundY = (short)(g_MapList.GetMapSizeY(ptBack.m_map));
 	bool fStopped = false, fTurbulent = false, fMapBoundary = false;
 
     for (int i = 0; i < distance; ++i)
@@ -815,12 +837,12 @@ bool CCMultiMovable::OnMoveTick()
     return true;
 }
 
-bool CCMultiMovable::OnTick()
+bool CCMultiMovable::_OnTick()
 {
-    ADDTOCALLSTACK("CCMultiMovable::OnTick");
+    ADDTOCALLSTACK("CCMultiMovable::_OnTick");
     // Ships move on their tick.
 
-    if (m_shipSpeed.period == 0 && m_shipSpeed.tiles)    // Multis without movement values can decay as normal items.
+    if (_shipSpeed.period == 0 && _shipSpeed.tiles == 0)    // Multis without movement values can decay as normal items.
     {
         return false;
     }
@@ -832,7 +854,7 @@ bool CCMultiMovable::OnTick()
     // Calculate the leading point.
     DIR_TYPE dir = (DIR_TYPE)(pItemThis->m_itShip.m_DirMove);
 
-    if (!Move(dir, m_shipSpeed.tiles))
+    if (!Move(dir, _shipSpeed.tiles))
     {
         Stop();
         return true;
@@ -963,7 +985,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
                 return false;
             pItemThis->m_itShip.m_DirMove = (byte)(GetDirStr(s.GetArgStr()));
             SetCaptain(pSrc);
-            return Move((DIR_TYPE)(pItemThis->m_itShip.m_DirMove), m_shipSpeed.tiles);
+            return Move((DIR_TYPE)(pItemThis->m_itShip.m_DirMove), _shipSpeed.tiles);
         }
 
         case CMV_SHIPGATE:
@@ -1153,7 +1175,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             pt.m_z = zold;
             pItemThis->SetTopZ(-UO_SIZE_Z);	// bottom of the world where i won't get in the way.
             dword dwBlockFlags = CAN_I_WATER;
-            char z = g_World.GetHeightPoint2(pt, dwBlockFlags);
+            char z = CWorldMap::GetHeightPoint2(pt, dwBlockFlags);
             pItemThis->SetTopZ(zold);	// restore z for now.
             pt.InitPoint();
             pt.m_z = z - zold;
@@ -1194,8 +1216,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
         }
 
         tchar szText[MAX_TALK_BUFFER];
-        strncpy(szText, pszSpeak, MAX_TALK_BUFFER);
-        pChar->ParseText(szText, &g_Serv);
+        Str_CopyLimitNull(szText, pszSpeak, MAX_TALK_BUFFER);
+        pChar->ParseScriptText(szText, &g_Serv);
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }
     return true;
@@ -1203,7 +1225,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
 enum CML_TYPE
 {
-
+    CML_ANCHOR,
+    CML_DIRFACE,
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
@@ -1212,6 +1235,8 @@ enum CML_TYPE
 
 lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
+    "ANCHOR",
+    "DIRFACE",
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
@@ -1219,23 +1244,29 @@ lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 };
 
 
-bool CCMultiMovable::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
+bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-    int index = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (index == -1)
     {
-        if (!strnicmp(pszKey, "SHIPSPEED.", 10))
+        if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
             index = CML_SHIPSPEED;
     }
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
     switch (index)
     {
+        case CML_ANCHOR:
+            sVal.FormatBVal(pItemThis->m_itShip.m_fAnchored);
+            break;
+        case CML_DIRFACE:
+            sVal.FormatBVal(pItemThis->m_itShip.m_DirFace);
+            break;
         case CML_PILOT:
         {
-            if (pItemThis->m_itShip.m_Pilot)
+            if (pItemThis->m_itShip.m_Pilot.IsValidUID())
                 sVal.FormatHex(pItemThis->m_itShip.m_Pilot);
             else
                 sVal.FormatVal(0);
@@ -1261,25 +1292,25 @@ bool CCMultiMovable::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             *
             * 'walking' in piloting mode has a 1s interval, speed 0x2
             */
-            pszKey += 9;
+            ptcKey += 9;
 
-            if (*pszKey == '.')
+            if (*ptcKey == '.')
             {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
+                ++ptcKey;
+                if (!strnicmp(ptcKey, "TILES", 5))
                 {
-                    sVal.FormatVal(m_shipSpeed.tiles);
+                    sVal.FormatVal(_shipSpeed.tiles);
                     break;
                 }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
+                else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
-                    sVal.FormatVal(m_shipSpeed.period);
+                    sVal.FormatVal(_shipSpeed.period);
                     break;
                 }
                 return false;
             }
 
-            sVal.Format("%d,%d", m_shipSpeed.period, m_shipSpeed.tiles);
+            sVal.Format("%d,%d", _shipSpeed.period, _shipSpeed.tiles);
         } break;
 
         case CML_SPEEDMODE:
@@ -1298,10 +1329,15 @@ bool CCMultiMovable::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
 bool CCMultiMovable::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
-    lpctstr	pszKey = s.GetKey();
-    CML_TYPE index = (CML_TYPE)FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    lpctstr	ptcKey = s.GetKey();
+    CML_TYPE index = (CML_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     // CItem *pItemThis = dynamic_cast<CItem*>(this);
     // ASSERT(pItemThis);
+    if (index == -1)
+    {
+        if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
+            index = CML_SHIPSPEED;
+    }
 
     switch (index)
     {
@@ -1318,26 +1354,26 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
 
         case CML_SHIPSPEED:
         {
-            pszKey += 9;
-            if (*pszKey == '.')
+            ptcKey += 9;
+            if (*ptcKey == '.')
             {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
+                ++ptcKey;
+                if (!strnicmp(ptcKey, "TILES", 5))
                 {
-                    m_shipSpeed.tiles = s.GetArgUCVal();
+                    _shipSpeed.tiles = s.GetArgUCVal();
                     return true;
                 }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
+                else if (!strnicmp(ptcKey, "PERIOD", 6))
                 {
-                    m_shipSpeed.period = (s.GetArgUSVal() * (IsSetOF(OF_NoSmoothSailing) ? MSECS_PER_TENTH : 1)); // get tenths from script, convert to msecs.
+                    _shipSpeed.period = (s.GetArgUSVal() * (IsSetOF(OF_NoSmoothSailing) ? MSECS_PER_TENTH : 1)); // get tenths from script, convert to msecs.
                     return true;
                 }
                 int64 piVal[2];
                 size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
                 if (iQty == 2)
                 {
-                    m_shipSpeed.period = (ushort)(piVal[0] * (IsSetOF(OF_NoSmoothSailing) ? MSECS_PER_TENTH : 1));
-                    m_shipSpeed.tiles = (uchar)(piVal[1]);
+                    _shipSpeed.period = (ushort)(piVal[0] * (IsSetOF(OF_NoSmoothSailing) ? MSECS_PER_TENTH : 1));
+                    _shipSpeed.tiles = (uchar)(piVal[1]);
                     return true;
                 }
                 else
@@ -1349,7 +1385,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
         break;
         case CML_PILOT:
         {
-			SetPilot(static_cast<CUID>(s.GetArgVal()).CharFind());
+			SetPilot(CUID::CharFindFromUID(s.GetArgVal()));
 			return true;
         } 
         break;

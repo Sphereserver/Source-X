@@ -5,7 +5,7 @@
 #include "../items/CItemMap.h"
 #include "../components/CCSpawn.h"
 #include "../CLog.h"
-#include "../CWorld.h"
+#include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -31,13 +31,21 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			if ( pContainer )
 			{
 				// protect from ,snoop - disallow picking from not opened containers
+				CItemContainer* pTopContainer = dynamic_cast<CItemContainer*>(pItem->GetTopContainer());
 				bool isInOpenedContainer = false;
-				if ( pContainer->GetType() == IT_EQ_TRADE_WINDOW )
+				if ( pContainer->IsType(IT_EQ_TRADE_WINDOW) )
+				{
 					isInOpenedContainer = true;
+				}
+				else if (pTopContainer && (pTopContainer->IsType(IT_EQ_VENDOR_BOX) || pTopContainer->IsType(IT_EQ_BANK_BOX)))
+				{
+					if ( pTopContainer->m_itEqBankBox.m_pntOpen == GetChar()->GetTopPoint() )
+						isInOpenedContainer = true;
+				}
 				else
 				{
-					CClient::OpenedContainerMap_t::iterator itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());
-					if ( itContainerFound != m_openedContainers.end() )
+					auto itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());
+					if ( itContainerFound != m_openedContainers.cend() )
 					{
 						dword dwTopContainerUID = ((itContainerFound->second).first).first;
 						dword dwTopMostContainerUID = ((itContainerFound->second).first).second;
@@ -98,13 +106,13 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 	bool bIsEquipped = pItem->IsItemEquipped();
 	if ( pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer() )
 	{
-		bool bMustEquip = true;
+		bool fMustEquip = true;
 		if ( pItem->IsTypeSpellbook() )
-			bMustEquip = false;
+			fMustEquip = false;
 		else if ( (pItem->IsType(IT_LIGHT_OUT) || pItem->IsType(IT_LIGHT_LIT)) && !pItem->IsItemInContainer() )
-			bMustEquip = false;
+			fMustEquip = false;
 
-		if ( bMustEquip )
+		if ( fMustEquip )
 		{
 			if ( !m_pChar->CanMove(pItem) )
 				return false;
@@ -178,6 +186,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( !IsPriv(PRIV_GM) )
 					return false;
 			}
+			break;
 
 		case IT_CORPSE:
 		case IT_SHIP_HOLD:
@@ -185,8 +194,6 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_TRASH_CAN:
 		{
 			CItemContainer *pPack = static_cast<CItemContainer *>(pItem);
-			if ( !pPack )
-				return false;
 
 			if ( !m_pChar->Skill_Snoop_Check(pPack) )
 			{
@@ -263,7 +270,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( m_pChar->ItemPickup(pItem, 1) == -1 )	// put the potion in our hand
 					return false;
 
-				pItem->m_itPotion.m_tick = 4;		// countdown to explode
+				if (pItem->m_itPotion.m_tick <= 0) //Set default countdown for explosion if morex is not  set.
+					pItem->m_itPotion.m_tick = 4;
 				pItem->m_itPotion.m_ignited = 1;	// ignite it
 				pItem->m_uidLink = m_pChar->GetUID();
 				pItem->SetTimeoutS(1);
@@ -318,8 +326,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_WAND:
 		case IT_SCROLL:
 		{
-			SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
-			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
+			const SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
+			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return false;
 
@@ -329,8 +337,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 					return false;
 
-				m_tmSkillMagery.m_Spell = spell;	// m_atMagery.m_Spell
-				m_pChar->m_atMagery.m_Spell = spell;
+				m_tmSkillMagery.m_iSpell = spell;	// m_atMagery.m_iSpell
+				m_pChar->m_atMagery.m_iSpell = spell;
 				m_pChar->Skill_Start((SKILL_TYPE)skill);
 				return true;
 			}
@@ -403,10 +411,10 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			{
 				// Mine at the location
 				tchar *pszTemp = Str_GetTemp();
-				sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
+				snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
 				addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true, true);
-				return true;
 			}
+			return true;
 
 		case IT_WEAPON_SWORD:
 		case IT_WEAPON_FENCE:
@@ -440,7 +448,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_CANNON_BALL:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
+			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
 		}
@@ -473,7 +481,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_PITCHER_EMPTY:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
+			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true);
 			return true;
 		}
@@ -558,7 +566,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SEWING_KIT:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
+			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
 		}
@@ -607,9 +615,9 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 			return;
 
 		if ( m_Targ_Text.IsEmpty() )
-			addGumpDialogProps(m_tmMenu.m_Item[iSelect]);
+			addGumpDialogProps(CUID(m_tmMenu.m_Item[iSelect]));
 		else
-			OnTarg_Obj_Set( CUID::ObjFind(m_tmMenu.m_Item[iSelect]) );
+			OnTarg_Obj_Set( CUID::ObjFindFromUID(m_tmMenu.m_Item[iSelect]) );
 		return;
 	}
 
@@ -617,8 +625,9 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	item[0].m_sText.Format("Contents of %s", pObj->GetName());
 
 	uint count = 0;
-	for ( CItem *pItem = pContainer->GetContentHead(); pItem != nullptr; pItem = pItem->GetNext() )
+	for (const CSObjContRec* pObjRec : *pContainer)
 	{
+		const CItem* pItem = static_cast<const CItem*>(pObjRec);
 		++count;
 		m_tmMenu.m_Item[count] = pItem->GetUID();
 		item[count].m_sText = pItem->GetName();
@@ -709,7 +718,7 @@ bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 		}
 
 		if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-			g_Log.EventDebug("SCRIPT: Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
+			g_Log.EventDebug("[DEBUG_SCRIPTS] Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 	}
 
 	ASSERT(iShowCount < (int)CountOf(item));
@@ -780,12 +789,25 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
     }
 
     bool fSkip = false;		// skip this if we lack resources or skill.
+    bool fSkipNeedCleanup = false;
 	int iOnCount = 0;
 	int iShowCount = 0;
 	CScriptTriggerArgs Args;
 
-	while ( s.ReadKeyParse())
+	while ( s.ReadKeyParse() )
 	{
+        if (fSkipNeedCleanup)
+        {
+            fSkip = true;
+            fSkipNeedCleanup = false;
+            if (iSelect != -2)
+            {
+                ASSERT(item != nullptr);
+                item[iShowCount] = {};
+                m_tmMenu.m_Item[iShowCount] = 0;
+            }
+            --iShowCount;
+        }
 		if ( s.IsKeyHead("ON", 2) )
 		{
 			if ( *s.GetArgStr() == '@' )
@@ -812,6 +834,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 					continue;
 				}
                 ++iShowCount;
+                // I have increased iShowCount, now i need fSkipNeedCleanup
 
 				if ( iSelect == -1 )
                 {
@@ -833,38 +856,29 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			continue;
 		}
 
-        if ( fSkip )	// we have decided we cant do the option indicated by the previous conditional (ON, TEST, TESTIF...) line.
-        {
-            if (iSelect != -2)
-            {
-                ASSERT(item != nullptr);
-                item[iShowCount] = {};
-                m_tmMenu.m_Item[iShowCount] = 0;
-            }
-            --iShowCount;
+        if ( fSkip )	// we have decided we cant do the option indicated by the previous (ON, TEST, TESTIF, MAKEITEM, SKILLMENU...) line.
             continue;
-        }
 		if ( (iSelect > 0) && (iOnCount != iSelect) )	// only interested in the selected option
 			continue;
 
 		// Check for a skill / non-consumables required.
 		if ( s.IsKey("TEST") )
 		{
-			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
+			m_pChar->ParseScriptText(s.GetArgRaw(), m_pChar);
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
-                fSkip = true;
+                fSkipNeedCleanup = true;
 			}
 			continue;
 		}
 
 		if ( s.IsKey("TESTIF") )
 		{
-			m_pChar->ParseText(s.GetArgRaw(), m_pChar);
+			m_pChar->ParseScriptText(s.GetArgRaw(), m_pChar);
 			if ( !s.GetArgVal() )
 			{
-                fSkip = true;
+                fSkipNeedCleanup = true;
 			}
 			continue;
 		}
@@ -888,7 +902,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 				if ( sm_iReentrant > 1024 )
 				{
 					if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-						g_Log.EventDebug("SCRIPT: Too many skill menus (circular menus?) to continue searching in menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
+						g_Log.EventDebug("[DEBUG_SCRIPTS] Too many skill menus (circular menus?) to continue searching in menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 
 					*fLimitReached = true;
 				}
@@ -898,7 +912,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 					++sm_iReentrant;
 					if ( !Cmd_Skill_Menu_Build(g_Cfg.ResourceGetIDType(RES_SKILLMENU, s.GetArgStr()), -2, nullptr, iMaxSize, fShowMenu, fLimitReached) )
 					{
-                        fSkip = true;
+                        fSkipNeedCleanup = true;
 					}
 					else
                     {
@@ -915,12 +929,22 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 				// There should ALWAYS be a valid id here.
 				if ( !m_pChar->Skill_MakeItem((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())), m_Targ_UID, SKTRIG_SELECT) )
 				{
-                    fSkip = true;
+                    fSkipNeedCleanup = true;
 				}
 				continue;
 			}
 		}
 	}
+    if (fSkipNeedCleanup)
+    {
+        if (iSelect != -2)
+        {
+            ASSERT(item != nullptr);
+            item[iShowCount] = {};
+            m_tmMenu.m_Item[iShowCount] = 0;
+        }
+        --iShowCount;
+    }
 	return iShowCount;
 }
 
@@ -935,11 +959,11 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	ASSERT(m_pChar);
 
 	const CSpellDef *pSpellDef;
-	if ( IsSetMagicFlags(MAGICF_PRECAST) && iSpell == m_tmSkillMagery.m_Spell )
+	if ( IsSetMagicFlags(MAGICF_PRECAST) && iSpell == m_tmSkillMagery.m_iSpell )
 	{
-		pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_Spell);
+		pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
 		if ( pSpellDef != nullptr && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
-			iSpell = m_tmSkillMagery.m_Spell;
+			iSpell = m_tmSkillMagery.m_iSpell;
 	}
 	else
 		pSpellDef = g_Cfg.GetSpellDef(iSpell);
@@ -952,7 +976,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		return false;
 
 	SetTargMode();
-	m_tmSkillMagery.m_Spell = iSpell;	// m_atMagery.m_Spell
+	m_tmSkillMagery.m_iSpell = iSpell;	// m_atMagery.m_iSpell
 	m_Targ_UID = m_pChar->GetUID();		// Default target.
 	m_Targ_Prv_UID = pSrc->GetUID();		// Source of the spell.
 
@@ -1014,7 +1038,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	m_pChar->m_Act_p = m_pChar->GetTopPoint();
 	m_pChar->m_Act_UID = m_Targ_UID;
 	m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
-	m_pChar->m_atMagery.m_Spell = iSpell;
+	m_pChar->m_atMagery.m_iSpell = iSpell;
 	m_Targ_p = m_pChar->GetTopPoint();
 
 	if ( IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
@@ -1040,7 +1064,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 	ASSERT(m_pChar);
 	if ( track_sel == UINT32_MAX )
 	{
-		// Tacking (unlike other skills) is used during menu setup.
+		// Tracking (unlike other skills) is used during menu setup.
 		m_pChar->Skill_Cleanup();	// clean up current skill.
 
 		CMenuItem item[6];
@@ -1071,7 +1095,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		{
 			// Tracking menu got us here. Start tracking the selected creature.
 			m_pChar->SetTimeoutS(1);
-			m_pChar->m_Act_UID = m_tmMenu.m_Item[track_sel];	// selected UID
+			m_pChar->m_Act_UID.SetObjUID(m_tmMenu.m_Item[track_sel]);	// selected UID
 			m_pChar->Skill_Start(SKILL_TRACKING);
 			return true;
 		}
@@ -1103,12 +1127,12 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		int iSkillLevel = m_pChar->Skill_GetAdjusted(SKILL_TRACKING);
 		if ((g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && m_pChar->IsHuman())
 			iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
-		m_pChar->m_atTracking.m_DistMax = iSkillLevel / 10 + 10;
+		m_pChar->m_atTracking.m_dwDistMax = iSkillLevel / 10 + 10;
 		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_TRACKING);
-		if (!pSkillDef->m_Effect.m_aiValues.empty())
-			m_pChar->m_atTracking.m_DistMax = pSkillDef->m_Effect.GetLinear(iSkillLevel);
+		if (!pSkillDef->m_vcEffect.m_aiValues.empty())
+			m_pChar->m_atTracking.m_dwDistMax = pSkillDef->m_vcEffect.GetLinear(iSkillLevel);
 
-		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_DistMax);
+		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
 		for (;;)
 		{
 			CChar *pChar = AreaChars.GetChar();
@@ -1120,7 +1144,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			if ( GetPrivLevel() < pChar->GetPrivLevel() && pChar->IsStatFlag(STATF_INSUBSTANTIAL) )
 				continue;
 
-			CCharBase *pCharDef = pChar->Char_GetDef();
+			const CCharBase *pCharDef = pChar->Char_GetDef();
 			NPCBRAIN_TYPE basic_type = pChar->GetNPCBrainGroup();
 			if ( basic_type == NPCBRAIN_DRAGON || basic_type == NPCBRAIN_BERSERK )
 				basic_type = NPCBRAIN_MONSTER;
@@ -1154,7 +1178,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 					continue;
 			}
 
-			count++;
+			++count;
 			item[count].m_id = (word)(pCharDef->m_trackID);
 			item[count].m_color = 0;
 			item[count].m_sText = pChar->GetName();
@@ -1222,7 +1246,7 @@ bool CClient::Cmd_Skill_Smith( CItem *pIngots )
 
 	// Select the blacksmith item type.
 	// repair items or make type of items.
-	if ( !g_World.IsItemTypeNear(m_pChar->GetTopPoint(), IT_FORGE, 3, false) )
+	if ( !CWorldMap::IsItemTypeNear(m_pChar->GetTopPoint(), IT_FORGE, 3, false) )
 	{
 		SysMessageDefault(DEFMSG_SMITHING_FORGE);
 		return false;
@@ -1287,7 +1311,7 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 
 	if ( pChar->m_pNPC )		// NPC's can't use trade windows
 		return pItem ? pChar->NPC_OnItemGive(m_pChar, pItem) : false;
-	if ( !pChar->IsClient() )	// and also offline players
+	if ( !pChar->IsClientActive() )	// and also offline players
 		return false;
 
 	if ( pChar->GetDefNum("REFUSETRADES", true) )
@@ -1297,8 +1321,9 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	}
 
 	// Check if the trade window is already open
-	for ( CItem *pItemCont = m_pChar->GetContentHead(); pItemCont != nullptr; pItemCont = pItemCont->GetNext() )
+	for (CSObjContRec* pObjRec : m_pChar->GetIterationSafeContReverse())
 	{
+		CItem* pItemCont = static_cast<CItem*>(pObjRec);
 		if ( !pItemCont->IsType(IT_EQ_TRADE_WINDOW) )
 			continue;
 
@@ -1371,7 +1396,7 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	cmd.prepareContainerOpen(pChar, pCont1, pCont2);
 	cmd.send(this);
 	cmd.prepareContainerOpen(m_pChar, pCont2, pCont1);
-	cmd.send(pChar->GetClient());
+	cmd.send(pChar->GetClientActive());
 
 	if ( g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD )
 	{
@@ -1381,15 +1406,15 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 			cmd2.prepareUpdateLedger(pCont1, (dword)(m_pChar->m_virtualGold % 1000000000), (dword)(m_pChar->m_virtualGold / 1000000000));
 			cmd2.send(this);
 		}
-		if ( pChar->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
+		if ( pChar->GetClientActive()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
 		{
 			cmd2.prepareUpdateLedger(pCont2, (dword)(pChar->m_virtualGold % 1000000000), (dword)(pChar->m_virtualGold / 1000000000));
-			cmd2.send(pChar->GetClient());
+			cmd2.send(pChar->GetClientActive());
 		}
 	}
 
 	LogOpenedContainer(pCont2);
-	pChar->GetClient()->LogOpenedContainer(pCont1);
+	pChar->GetClientActive()->LogOpenedContainer(pCont1);
 
 	if ( pItem )
 	{
