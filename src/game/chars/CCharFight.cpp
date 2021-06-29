@@ -825,7 +825,7 @@ effect_bounce:
             iDmg *= iDmgBonus;
         }
     }
-
+	
 	// Disturb magic spells (only players can be disturbed if NpCCanFizzleOnHit is false in sphere.ini)
 	if ( (m_pPlayer || g_Cfg.m_fNPCCanFizzleOnHit) && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
 	{
@@ -1844,8 +1844,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( IsTrigUsed(TRIGGER_HITMISS) )
 		{
 			CScriptTriggerArgs Args(0, 0, pWeapon);
-			if ( pAmmo )
-				Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID().IsValidUID());
+			if ( pAmmo && pAmmo->GetUID().IsValidUID())
+				Args.m_VarsLocal.SetNum("Arrow", (dword)pAmmo->GetUID());
 			if ( OnTrigger(CTRIG_HitMiss, pCharTarg, &Args) == TRIGRET_RET_TRUE )
 				return WAR_SWING_EQUIPPING_NOWAIT;
 
@@ -1960,8 +1960,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
-	if ( pAmmo )
-		Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID().IsValidUID());
+	if ( pAmmo && pAmmo->GetUID().IsValidUID() )
+		Args.m_VarsLocal.SetNum("Arrow",(dword)pAmmo->GetUID());
 
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
