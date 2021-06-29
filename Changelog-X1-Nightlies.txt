@@ -2736,3 +2736,6 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		
 10-06-2021, Drk84
 -Fixed: Damage was always reduced by parry even if the character failed the parry action.
+
+29-06-2021, Drk84
+-Fixed: local.arrow in @Hit and @HitMiss not storing the arrow uid.
