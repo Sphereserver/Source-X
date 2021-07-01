@@ -856,7 +856,8 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		}
 	}
 
-	if ( !IsItemEquipped() &&	// does not apply to my pack.
+	if ( !IsSetOF(OF_AllowContainerInsideContainer) &&
+		!IsItemEquipped() &&	// does not apply to my pack.
 		pItem->IsContainer() &&
 		(pItem->Item_GetDef()->GetVolume() >= Item_GetDef()->GetVolume()) )
 	{

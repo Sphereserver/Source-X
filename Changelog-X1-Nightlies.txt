@@ -2735,7 +2735,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Return 1: Completely blocks the damage as if the parry damage reduction was set to 100.
 		
 10-06-2021, Drk84
--Fixed: Damage was always reduced by parry even if the character failed the parry action.
+- Fixed: Damage was always reduced by parry even if the character failed the parry action.
 
 29-06-2021, Drk84
--Fixed: local.arrow in @Hit and @HitMiss not storing the arrow uid.
+- Fixed: local.arrow in @Hit and @HitMiss not storing the arrow uid.
+
+01-07-2021, Drk84
+- Added: New Optional Flag in the sphere.ini, OF_AllowContainerInsideContainer:
+		 By default you cannot add a container that is heavier than the container being inserted into, enabling this flag allow the player to add any type of container inside any other container, no matter the weight.
