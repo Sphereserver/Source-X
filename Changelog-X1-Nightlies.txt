@@ -2742,4 +2742,4 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 01-07-2021, Drk84
 - Added: New Optional Flag in the sphere.ini, OF_AllowContainerInsideContainer:
-		 By default you cannot add a container that is heavier than the container being inserted into, enabling this flag allow the player to add any type of container inside any other container, no matter the weight.
+		 By default you cannot add a container that is heavier than the container being inserted into, enabling this flag allow the player to add any type of container inside any other container, no matter the weight (Issue #723).
