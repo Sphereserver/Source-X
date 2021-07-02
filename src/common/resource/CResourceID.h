@@ -133,7 +133,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
     CResourceIDBase(const CResourceIDBase& rid);                // copy constructor
     CResourceIDBase& operator = (const CResourceIDBase& rid);   // assignment operator
 
-    operator CUID() const noexcept = delete;    // 
+    // operator CUID() const noexcept = delete;    // Such a call will never happen, this "conversion" is done via the constructor
 
     //---
 
