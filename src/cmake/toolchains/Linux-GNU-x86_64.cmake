@@ -1,0 +1,25 @@
+SET (TOOLCHAIN 1)
+
+function (toolchain_after_project)
+	MESSAGE (STATUS "Toolchain: Linux-GNU-x86_64.cmake.")
+	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
+	SET(ARCH_BITS		64		PARENT_SCOPE)
+
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
+endfunction()
+
+
+function (toolchain_exe_stuff)
+	INCLUDE("cmake/toolchains/common_Linux-GNU.cmake")
+
+	SET (C_ARCH_OPTS	"-march=x86_64 -m64")
+	SET (CXX_ARCH_OPTS	"-march=x86_64 -m64")
+	
+	SET (CMAKE_EXE_LINKER_FLAGS_EXTRA 
+		"-L/usr/lib64/mysql -L/usr/lib/x86_64-linux-gnu/mysql\
+		-Wl,-rpath=/usr/lib64/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
+		PARENT_SCOPE)
+
+	toolchain_exe_stuff_common()
+
+endfunction()

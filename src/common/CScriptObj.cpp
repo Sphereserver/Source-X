@@ -303,10 +303,22 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
     return true;
 }
 
-bool CScriptObj::r_SetVal( lpctstr ptcKey, lpctstr pszVal )
+bool CScriptObj::r_ExecSingle(lpctstr ptcLine)
+{
+	ADDTOCALLSTACK("CScriptObj::r_ExecSingle");
+	ASSERT(ptcLine);
+
+	CScript scriptLine(ptcLine);
+	return r_Verb(scriptLine, &g_Serv);
+}
+
+bool CScriptObj::r_SetVal( lpctstr ptcKey, lpctstr ptcVal )
 {
     ADDTOCALLSTACK("CScriptObj::r_SetVal");
-	CScript s( ptcKey, pszVal );
+	ASSERT(ptcKey);
+	ASSERT(ptcVal);
+
+	CScript s( ptcKey, ptcVal );
 	return r_LoadVal( s );
 }
 

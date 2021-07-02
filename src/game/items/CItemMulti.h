@@ -106,7 +106,7 @@ protected:
     * @brief Searchs for the CItemBase of this multi.
     * @return the CItemBaseMulti.
     */
-    const CItemBaseMulti * Multi_GetDef() const;
+    const CItemBaseMulti * Multi_GetDef() const noexcept;
     /**
     * @brief Components creation.
     * @param id The id of the item
@@ -124,7 +124,7 @@ public:
     * @brief Retrieves the CRegion*
     * @return the region.
     */
-    CRegion* GetRegion() const;
+    CRegion* GetRegion() const noexcept;
 
     /**
     * @brief Retrieves the distance of a corner/side from the center of the multi
@@ -630,7 +630,7 @@ public:
     * @param id the id.
     * @return the CItemBaseMulti
     */
-    static const CItemBaseMulti * Multi_GetDef(ITEMID_TYPE id);
+    static const CItemBaseMulti * Multi_GetDefByID(ITEMID_TYPE id);
 
     // Scripts virtuals.
 

@@ -2742,4 +2742,10 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 01-07-2021, Drk84
 - Added: New Optional Flag in the sphere.ini, OF_AllowContainerInsideContainer:
-		 By default you cannot add a container that is heavier than the container being inserted into, enabling this flag allow the player to add any type of container inside any other container, no matter the weight (Issue #723).
+  By default you cannot add a container that is heavier than the container being inserted into, enabling this flag allow the player to add any type of container inside any other container,
+  no matter the weight (Issue #723).
+
+02-07-2021, Nolok
+- Fixed: Windows console temporarily freezing when it had to show a big number of lines at once.
+- Added: CMake toolchain to compile on Linux using the native architecture, instead of forcing one (Issue #709).
+- Changed: Renamed 32 and 64 bits Linux toolchains to x86 and x86_64, respectively.

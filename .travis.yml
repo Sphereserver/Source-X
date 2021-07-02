@@ -10,7 +10,7 @@ branches:
 
 env:
   - CMAKE_GEN="Unix Makefiles"
-    CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
+    CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-x86_64.cmake"
 
 before_install:
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-

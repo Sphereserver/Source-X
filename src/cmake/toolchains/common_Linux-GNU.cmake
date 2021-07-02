@@ -1,15 +1,4 @@
-SET (TOOLCHAIN 1)
-
-function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: Linux-GNU-32.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Linux"      PARENT_SCOPE)
-	SET(ARCH_BITS		32		PARENT_SCOPE)
-
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin"	PARENT_SCOPE)
-endfunction()
-
-
-function (toolchain_exe_stuff)
+function (toolchain_exe_stuff_common)
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
@@ -19,8 +8,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_WARNING_OPTS
 		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
 		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result")
-	SET (C_ARCH_OPTS	"-march=i686 -m32")
-	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
+	#SET (C_ARCH_OPTS	) # inherit from parent toolchain
+	#SET (CXX_ARCH_OPTS	) # inherit from parent toolchain
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
@@ -33,10 +22,7 @@ function (toolchain_exe_stuff)
 	#-- Setting common linker flags
 
 	 # -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic\
-					-L/usr/lib/mysql -L/usr/lib/i386-linux-gnu/mysql\
-					-Wl,-rpath=/usr/lib/mysql -Wl,-rpath=/usr/lib/i386-linux-gnu/mysql"
-					PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
 
 
 	#-- Adding compiler flags per build.
@@ -49,7 +35,7 @@ function (toolchain_exe_stuff)
 		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 	)
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3    )
+		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3    )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
 		IF (${ENABLE_SANITIZERS})
@@ -57,7 +43,7 @@ function (toolchain_exe_stuff)
 		ENDIF (${ENABLE_SANITIZERS})
 		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer ${SANITIZERS} )
 	ENDIF (TARGET spheresvr_debug)
-	
+
 
 	#-- Setting per-build linker flags.
 
@@ -76,8 +62,8 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_32BITS;_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_EXCEPTIONS_DEBUG")
-		# _32BITS: 32 bits architecture.
+	SET (COMMON_DEFS "_64BITS;_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_EXCEPTIONS_DEBUG")
+		# _64BITS: 64 bits architecture.
 		# _LINUX: linux OS.
 		# _LIBEV: use libev
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions

@@ -208,15 +208,32 @@ void CNTWindow::tick()
 {
     if (!_qOutput.empty())
     {
-		std::deque<std::unique_ptr<ConsoleOutput>> outMessages;
+		std::deque<std::unique_ptr<ConsoleOutput>> display_queue;
 		{
 			// No idea of the reason, but it seems that if we have some mutex locked while doing List_Add, sometimes we'll have a deadlock.
 			//  In any case, it's best to keep the mutex locked for the least time possible.
 			std::unique_lock<std::mutex> lock(this->ConsoleInterface::_ciQueueMutex);
-			outMessages.swap(this->ConsoleInterface::_qOutput);
+			#define msg_queue	this->ConsoleInterface::_qOutput
+
+			// Limit the maximum lines to be displayed per tick, to prevent the console from freezing
+			static constexpr size_t kuiMaxLinesAtOnce = 100;
+			if (msg_queue.size() < kuiMaxLinesAtOnce)
+			{
+				display_queue.swap(msg_queue);
+			}
+			else
+			{
+				display_queue.insert(display_queue.begin(),
+					std::make_move_iterator(msg_queue.begin()),
+					std::make_move_iterator(msg_queue.begin() + kuiMaxLinesAtOnce));
+
+				msg_queue.erase(msg_queue.begin(), msg_queue.begin() + kuiMaxLinesAtOnce);
+			}
+
+		#undef msg_queue
 		}
 
-		theApp.m_wndMain.List_AddGroup(std::move(outMessages));
+		theApp.m_wndMain.List_AddGroup(std::move(display_queue));
     }
 
     NTWindow_CheckUpdateWindowTitle();

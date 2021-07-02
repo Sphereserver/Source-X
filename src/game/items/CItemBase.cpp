@@ -2227,8 +2227,8 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 		return pBase;	// already loaded all base info.
 
 	const CItemBaseDupe * pBaseDupe = dynamic_cast <const CItemBaseDupe *>(pBaseStub);
-	if ( pBaseDupe )
-		return( pBaseDupe->GetItemDef() );	// this is just a dupeitem
+	if (pBaseDupe)
+		return pBaseDupe->GetItemDef();	// this is just a dupeitem
 
     // The rid was added to the ResourceHash, but it's not linked yet to a CItemBase (we do it on the first request).
 	CResourceLink * pBaseLink = dynamic_cast <CResourceLink *>(pBaseStub);

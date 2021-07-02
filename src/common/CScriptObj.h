@@ -100,21 +100,25 @@ public:
 	* @brief Execute a script command.
 	* Called when parsing a script section with OnTriggerRun or if issued by a CClient.
 	* It does check if we are requesting another ref.
-	* It evaluates simple commands, which typically do NOT require a script argument.
+	* It evaluates simple commands ("VERB"), which typically do NOT require a script argument.
+	* If it doesn't find a VERB, call r_LoadVal to do a second-level, deeper parsing.
 	*/
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 	/*
 	* @brief Internally sets the corresponding value of a script keyword.
+	* WARNING: it's a second-level parsing function, call this if you are sure that calling r_Verb is superfluous.
 	* "LoadVal" means: Load the value from the script and store it in our internal structures/data.
 	* It does NOT check if we are requesting another ref, since it's already done by r_Verb.
 	* Here we evaluate more complex commands, which typically requires also a script argument.
 	*/
 	virtual bool r_LoadVal(CScript& s);
 
-	virtual bool r_Load(CScript& s);	// Loads the keyword/values of a script section
+	virtual bool r_Load(CScript& s);	// Loads the keyword/values of a whole script section
 
-	bool r_SetVal(lpctstr ptcKey, lpctstr pszVal); // Quick way to try to set a value for a script keyword
+// Hardcoded shortcuts to trigger specific script parsing.
+	bool r_ExecSingle(lpctstr ptcLine);
+	bool r_SetVal(lpctstr ptcKey, lpctstr ptcVal); // Quick way to try to set a value for a script keyword
 
 
 // FUNCTION methods

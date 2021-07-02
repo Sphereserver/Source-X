@@ -97,8 +97,8 @@ for:
 
     environment:
       CMAKE_GEN: Unix Makefiles
-      CMAKE_TCH_32: ../src/cmake/toolchains/Linux-GNU-32.cmake
-      CMAKE_TCH_64: ../src/cmake/toolchains/Linux-GNU-64.cmake
+      CMAKE_TCH_32: ../src/cmake/toolchains/Linux-GNU-x86.cmake
+      CMAKE_TCH_64: ../src/cmake/toolchains/Linux-GNU-x86_64.cmake
 
     install:
       - echo && echo "** Setting up GCC compiler" && echo

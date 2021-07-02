@@ -496,7 +496,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
 
     int iFaceOffset = GetFaceOffset();
     ITEMID_TYPE idnew = (ITEMID_TYPE)(pMultiThis->GetID() - iFaceOffset + iDirection);
-    const CItemBaseMulti * pMultiNew = pMultiThis->Multi_GetDef(idnew);
+    const CItemBaseMulti * pMultiNew = pMultiThis->Multi_GetDefByID(idnew);
     if (pMultiNew == nullptr)
     {
         return false;
@@ -534,7 +534,8 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
         }
     }
 
-    const CItemBaseMulti * pMultiOld = pMultiThis->Multi_GetDef(pMultiThis->GetID());
+    const CItemBaseMulti * pMultiOld = pMultiThis->Multi_GetDefByID(pMultiThis->GetID());
+    // why not const CItemBaseMulti * pMultiOld = pMultiThis->Multi_GetDef(); ?
 
     // Reorient everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];

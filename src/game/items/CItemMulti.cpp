@@ -136,12 +136,12 @@ bool CItemMulti::Delete(bool fForce)
     return CObjBase::Delete(fForce);
 }
 
-const CItemBaseMulti * CItemMulti::Multi_GetDef() const
+const CItemBaseMulti * CItemMulti::Multi_GetDef() const noexcept
 {
     return static_cast <const CItemBaseMulti *>(Base_GetDef());
 }
 
-CRegion * CItemMulti::GetRegion() const
+CRegion * CItemMulti::GetRegion() const noexcept
 {
     return m_pRegion;
 }
@@ -162,10 +162,11 @@ int CItemMulti::Multi_GetDistanceMax() const
     return pMultiDef->GetDistanceMax();
 }
 
-const CItemBaseMulti * CItemMulti::Multi_GetDef(ITEMID_TYPE id) // static
+const CItemBaseMulti * CItemMulti::Multi_GetDefByID(ITEMID_TYPE id) // static
 {
-    ADDTOCALLSTACK("CItemMulti::Multi_GetDef");
-    return (dynamic_cast <const CItemBaseMulti *> (CItemBase::FindItemBase(id)));
+    ADDTOCALLSTACK("CItemMulti::Multi_GetDefByID");
+    const CItemBase * pItemBase = CItemBase::FindItemBase(id);
+    return dynamic_cast <const CItemBaseMulti *>(pItemBase);
 }
 
 bool CItemMulti::MultiRealizeRegion()
@@ -298,8 +299,7 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
         pItem->m_itContainer.m_dwLockComplexity = 10000;    // never pickable.
     }
 
-    CScript event("events +ei_house_component");
-    pItem->r_LoadVal(event);
+    pItem->r_ExecSingle("EVENTS +ei_house_component");
     pItem->MoveToUpdate(pt);
     OnComponentCreate(pItem, false);    // TODO: how do i know if that's an addon?
     AddComponent(pItem->GetUID());
@@ -1251,8 +1251,7 @@ void CItemMulti::SetMovingCrate(const CUID& uidCrate)
     }
     _uidMovingCrate = uidCrate;
     pNewCrate->m_uidLink = GetUID();
-    CScript event("events +ei_moving_crate");
-    pNewCrate->r_LoadVal(event);
+    pNewCrate->r_ExecSingle("EVENTS +ei_moving_crate");
     pNewCrate->SetCrateOfMulti(GetUID());
 }
 
@@ -1388,8 +1387,7 @@ void CItemMulti::TransferLockdownsToMovingCrate()
         CItem *pItem = _lLockDowns[i].ItemFind();
         if (pItem)  // Move all valid items.
         {
-            CScript event("events -ei_house_lockdown");
-            pItem->r_LoadVal(event);
+            pItem->r_ExecSingle("EVENTS -ei_house_lockdown");
             pCrate->ContentAdd(pItem);
             pItem->ClrAttr(ATTR_LOCKEDDOWN);
             pItem->m_uidLink.InitUID();
@@ -1415,8 +1413,7 @@ void CItemMulti::TransferSecuredToMovingCrate()
         CItemContainer *pItem = static_cast<CItemContainer*>(_lSecureContainers[i].ItemFind());
         if (pItem)  // Move all valid items.
         {
-            CScript event("events -ei_house_secure");
-            pItem->r_LoadVal(event);
+            pItem->r_ExecSingle("EVENTS -ei_house_secure");
             pCrate->ContentAdd(pItem);
             pItem->ClrAttr(ATTR_SECURE);
             pItem->m_uidLink.InitUID();
@@ -1707,8 +1704,7 @@ void CItemMulti::LockItem(const CUID& uidItem)
         }
         pItem->SetAttr(ATTR_LOCKEDDOWN);
         pItem->m_uidLink = GetUID();
-        CScript event("events +ei_house_lockdown");
-        pItem->r_LoadVal(event);
+        pItem->r_ExecSingle("EVENTS +ei_house_lockdown");
     }
     pItem->SetLockDownOfMulti(uidItem);
     _lLockDowns.emplace_back(uidItem);
@@ -1729,8 +1725,7 @@ void CItemMulti::UnlockItem(const CUID& uidItem, bool fRemoveFromList)
     }
     pItem->ClrAttr(ATTR_LOCKEDDOWN);
     pItem->m_uidLink.InitUID();
-    CScript event("events -ei_house_lockdown");
-    pItem->r_LoadVal(event);
+    pItem->r_ExecSingle("EVENTS -ei_house_lockdown");
     pItem->SetLockDownOfMulti(CUID());
 }
 
@@ -1786,8 +1781,7 @@ void CItemMulti::Secure(const CUID& uidContainer)
         }
         pContainer->SetAttr(ATTR_SECURE);
         pContainer->m_uidLink = GetUID();
-        CScript event("events +ei_house_secure");
-        pContainer->r_LoadVal(event);
+        pContainer->r_ExecSingle("EVENTS +ei_house_secure");
 
     }
     pContainer->SetSecuredOfMulti(GetUID());
@@ -1799,11 +1793,7 @@ void CItemMulti::Release(const CUID& uidContainer, bool fRemoveFromList)
     ADDTOCALLSTACK("CItemMulti::Release");
     if (fRemoveFromList)
     {
-        auto it = std::find(_lSecureContainers.begin(), _lSecureContainers.end(), uidContainer);
-        if (it != _lSecureContainers.end())
-        {
-            _lSecureContainers.erase(it);
-        }
+        _lLockDowns.erase(std::remove(_lLockDowns.begin(), _lLockDowns.end(), uidContainer));
     }
 
     CItemContainer *pContainer = static_cast<CItemContainer*>(uidContainer.ItemFind());
@@ -1813,8 +1803,7 @@ void CItemMulti::Release(const CUID& uidContainer, bool fRemoveFromList)
     }
     pContainer->ClrAttr(ATTR_SECURE);
     pContainer->m_uidLink.InitUID();
-    CScript event("events -ei_house_secure");
-    pContainer->r_LoadVal(event);
+    pContainer->r_ExecSingle("EVENTS -ei_house_secure");
     pContainer->SetSecuredOfMulti(CUID());
 }
 
@@ -3368,15 +3357,13 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
     {
         case IT_DOOR:
         {
-            CScript event("events +ei_house_door");
-            pComponent->r_LoadVal(event);
+            pComponent->r_ExecSingle("EVENTS +ei_house_door");
             pComponent->SetType(IT_DOOR_LOCKED);
             break;
         }
         case IT_CONTAINER:
         {
-            CScript event("events +ei_house_container");
-            pComponent->r_LoadVal(event);
+            pComponent->r_ExecSingle("EVENTS  +ei_house_container");
             pComponent->SetType(IT_CONTAINER_LOCKED);
             break;
         }
@@ -3392,8 +3379,7 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
         }
         case IT_TELEPAD:
         {
-            CScript event("events +ei_house_telepad");
-            pComponent->r_LoadVal(event);
+            pComponent->r_ExecSingle("EVENTS +ei_house_telepad");
             break;
         }
         default:
@@ -3469,8 +3455,7 @@ void CMultiStorage::AddMulti(const CUID& uidMulti, HOUSE_PRIV ePriv)
     {
         if (_lShips.empty() && isChar)
         {
-            CScript event("events +e_ship_priv");
-            pSrc->r_LoadVal(event);
+            pSrc->r_ExecSingle("EVENTS +e_ship_priv");
         }
         AddShip(uidMulti, ePriv);
     }
@@ -3478,8 +3463,7 @@ void CMultiStorage::AddMulti(const CUID& uidMulti, HOUSE_PRIV ePriv)
     {
         if (_lHouses.empty() && isChar)
         {
-            CScript event("events +e_house_priv");
-            pSrc->r_LoadVal(event);
+            pSrc->r_ExecSingle("EVENTS +e_house_priv");
         }
         AddHouse(uidMulti, ePriv);
     }
@@ -3494,8 +3478,7 @@ void CMultiStorage::DelMulti(const CUID& uidMulti)
         DelShip(uidMulti);
         if (_lShips.empty() && pSrc)
         {
-            CScript event("events -e_ship_priv");
-            pSrc->r_LoadVal(event);
+            pSrc->r_ExecSingle("EVENTS -e_ship_priv");
         }
     }
     else
@@ -3503,8 +3486,7 @@ void CMultiStorage::DelMulti(const CUID& uidMulti)
         DelHouse(uidMulti);
         if (_lHouses.empty() && pSrc)
         {
-            CScript event("events -e_house_priv");
-            pSrc->r_LoadVal(event);
+            pSrc->r_ExecSingle("EVENTS -e_house_priv");
         }
     }
     pMulti->RevokePrivs(_uidSrc);
