@@ -1,17 +1,4 @@
-SET (TOOLCHAIN 1)
-
-function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: Windows-GNU-64.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
-	SET(ARCH_BITS		64		PARENT_SCOPE)
-	ENABLE_LANGUAGE(RC)
-
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
-endfunction()
-
-
-function (toolchain_exe_stuff)
+function (toolchain_exe_stuff_common)
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
@@ -21,8 +8,8 @@ function (toolchain_exe_stuff)
 		# last 2 lines are for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
 		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-misleading-indentation -Wno-implicit-fallthrough")
-	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
-	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
+	#SET (C_ARCH_OPTS	) # set in parent toolchain
+	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing;
@@ -30,9 +17,9 @@ function (toolchain_exe_stuff)
 	SET (C_SPECIAL		"-pipe -mwindows -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -mwindows -ffast-math")
 
-	SET (CMAKE_RC_FLAGS	"--target=pe-x86-64"							PARENT_SCOPE)
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	SET (CMAKE_RC_FLAGS	"--target=pe-i386"							PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
@@ -76,10 +63,8 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_WIN32;_WIN64;_64BITS;Z_PREFIX;_GITVERSION;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
+	SET (COMMON_DEFS "_WIN32;Z_PREFIX;_GITVERSION;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
-		# _WIN64: 64 bits windows application. Keeping it for compatibility with external code and libraries.
-		# _64BITS: 64 bits architecture.
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.

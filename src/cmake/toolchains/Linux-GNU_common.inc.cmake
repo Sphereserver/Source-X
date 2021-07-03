@@ -8,15 +8,15 @@ function (toolchain_exe_stuff_common)
 	SET (CXX_WARNING_OPTS
 		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
 		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result")
-	#SET (C_ARCH_OPTS	) # inherit from parent toolchain
-	#SET (CXX_ARCH_OPTS	) # inherit from parent toolchain
+	#SET (C_ARCH_OPTS	) # set in parent toolchain
+	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
@@ -62,8 +62,7 @@ function (toolchain_exe_stuff_common)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_64BITS;_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_EXCEPTIONS_DEBUG")
-		# _64BITS: 64 bits architecture.
+	SET (COMMON_DEFS "_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_EXCEPTIONS_DEBUG")
 		# _LINUX: linux OS.
 		# _LIBEV: use libev
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions

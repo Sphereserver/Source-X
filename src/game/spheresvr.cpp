@@ -30,9 +30,11 @@
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
+#include <sstream>
 
-// Dynamic initialization of some extern global stuff
-lpctstr g_szServerDescription = SPHERE_TITLE " Version " SPHERE_VERSION " " SPHERE_VER_FILEOS_STR	" by www.spherecommunity.net";
+
+// Dynamic allocation of some global stuff
+std::string g_sServerDescription;
 
 // Dynamic initialization of some static members of other classes, which are used very soon after the server starts
 dword CObjBase::sm_iCount = 0;				// UID table.
@@ -45,6 +47,12 @@ llong CSTime::_kllTimeProfileFrequency = 1; // Default value.
 GlobalInitializer::GlobalInitializer()
 {
 	// The order of the instructions is important!
+
+	std::stringstream ssServerDescription;
+	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_VERSION;
+	ssServerDescription << " [" << SPHERE_VER_FILEOS_STR << '-' << g_ptcArchBits << "]";
+	ssServerDescription << " by www.spherecommunity.net";
+	g_sServerDescription = ssServerDescription.str();
 
 #ifdef _WIN32
 	// Needed to get precise system time.

@@ -2218,7 +2218,7 @@ bool CServer::Load()
 	EXC_TRY("Load");
 
 	EXC_SET_BLOCK("print sphere infos");
-	g_Log.Event(LOGM_INIT, "%s.\n", g_szServerDescription);
+	g_Log.Event(LOGM_INIT, "%s.\n", g_sServerDescription.c_str());
 #ifdef __GITREVISION__
 	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
 #else

@@ -1,4 +1,4 @@
 # Ignore all files, except those already included on git repository
-*
+/*
 /src/common/version/GitRevision.h
 /src/common/libev/config.h

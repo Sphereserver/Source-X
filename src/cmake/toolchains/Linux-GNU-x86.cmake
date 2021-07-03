@@ -10,7 +10,7 @@ endfunction()
 
 
 function (toolchain_exe_stuff)
-    INCLUDE("cmake/toolchains/common_Linux-GNU.cmake")
+    INCLUDE("cmake/toolchains/Linux-GNU_common.inc.cmake")
     
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
@@ -23,7 +23,7 @@ function (toolchain_exe_stuff)
 	toolchain_exe_stuff_common()
 	
 	# Propagate variables set in toolchain_exe_stuff_common to the upper scope
-	SET (CMAKE_C_FLAGS             "${CMAKE_C_FLAGS}"          PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS}"        PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}" PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS			"${CMAKE_C_FLAGS} ${C_ARCH_OPTS}"       PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} ${CXX_ARCH_OPTS}"	PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" 			PARENT_SCOPE)
 endfunction()

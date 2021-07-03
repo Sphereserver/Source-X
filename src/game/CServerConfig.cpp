@@ -2025,7 +2025,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
 			break;
 		case RC_VERSION:
-			sVal = g_szServerDescription;
+			sVal = g_sServerDescription.c_str();
 			break;
 		case RC_EXPERIMENTAL:
 			sVal.FormatHex( m_iExperimentalFlags );

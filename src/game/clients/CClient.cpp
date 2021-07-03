@@ -1535,7 +1535,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			break;
 		case CV_VERSION:	// "SHOW VERSION"
-			SysMessage(g_szServerDescription);
+			SysMessage(g_sServerDescription.c_str());
 			break;
 		case CV_WEBLINK:
 			addWebLaunch( s.GetArgStr() );

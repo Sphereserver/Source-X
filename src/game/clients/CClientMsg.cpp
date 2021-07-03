@@ -2696,7 +2696,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	{
 		if ( !fNoMessages )
 		{
-			addBark(g_szServerDescription, nullptr, HUE_YELLOW, TALKMODE_SAY, FONT_NORMAL);
+			addBark(g_sServerDescription.c_str(), nullptr, HUE_YELLOW, TALKMODE_SAY, FONT_NORMAL);
 
 			snprintf(z, STR_TEMPLENGTH, (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
 				g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYER ) : g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYERS ),

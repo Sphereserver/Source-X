@@ -41,7 +41,7 @@ protected:
 
 //////////////////////////////////////////////////////////////
 
-extern lpctstr g_szServerDescription;
+extern std::string g_sServerDescription;
 extern CSStringList g_AutoComplete;
 
 extern int Sphere_InitServer( int argc, char *argv[] );

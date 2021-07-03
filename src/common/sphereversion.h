@@ -32,27 +32,26 @@
 	#define SPHERE_VER_FILEFLAGS			0x0L
 #endif
 
+static constexpr const char* g_ptcArchBits = (sizeof(void*) == 8) ? "64" : "32";
+
 #if defined(_WIN32)
-	#define SPHERE_VER_FILEOS				0x4L	// VOS__WINDOWS32
-	#if defined(_64BITS)
-		#define SPHERE_VER_FILEOS_STR		"[WIN64]"
-	#else
-		#define SPHERE_VER_FILEOS_STR		"[WIN32]"
-	#endif
+	#define SPHERE_VER_FILEOS			0x4L	// VOS__WINDOWS32
+	#define SPHERE_VER_FILEOS_STR		"Windows"
 #elif defined(_BSD)
-	#define SPHERE_VER_FILEOS				0x0L	// VOS_UNKNOWN
-	#if defined(_64BITS)
-		#define SPHERE_VER_FILEOS_STR		"[FreeBSD-64]"
-	#else
-		#define SPHERE_VER_FILEOS_STR		"[FreeBSD-32]"
-	#endif
+	#define SPHERE_VER_FILEOS			0x0L	// VOS_UNKNOWN
+	#define SPHERE_VER_FILEOS_STR		"FreeBSD"
+#elif defined(__linux__)
+	#define SPHERE_VER_FILEOS			0x0L	// VOS_UNKNOWN
+	#define SPHERE_VER_FILEOS_STR		"Linux"
+#elif defined(__APPLE__)
+	#define SPHERE_VER_FILEOS			0x0L	// VOS_UNKNOWN
+	#define SPHERE_VER_FILEOS_STR		"Mac"
+#elif defined(__arm__)
+	#define SPHERE_VER_FILEOS			0x0L	// VOS_UNKNOWN
+	#define SPHERE_VER_FILEOS_STR		"ARMv" __ARM_ARCH
 #else
-	#define SPHERE_VER_FILEOS				0x0L	// VOS_UNKNOWN
-	#if defined(_64BITS)
-		#define SPHERE_VER_FILEOS_STR		"[Linux-64]"
-	#else
-		#define SPHERE_VER_FILEOS_STR		"[Linux-32]"
-	#endif
+	#define SPHERE_VER_FILEOS			0x0L	// VOS_UNKNOWN
+	#define SPHERE_VER_FILEOS_STR		"Unknown"
 #endif
 
 
