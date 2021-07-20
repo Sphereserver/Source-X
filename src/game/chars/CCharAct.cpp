@@ -3438,7 +3438,8 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				else 
 				{
 					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
-					pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
+					if (!fPathFinding) // When NPC use pathfinding(NPC_AI_PATH) to calculate their destination, char should not be reveal
+						pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
 				}
 			}
 
