@@ -1232,6 +1232,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
     }
     
     //	Move the items bought into your pack.
+	uint uiItemBlocked = 0;
     for (uint i = 0; i < uiItemCount; ++i)
     {
         if (items[i].m_serial.IsValidUID() == false)
@@ -1245,10 +1246,15 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             
         if ((IsTrigUsed(TRIGGER_BUY)) || (IsTrigUsed(TRIGGER_ITEMBUY)))
         {
-            CScriptTriggerArgs Args( amount, int64(amount) * items[i].m_price, pVendor );
+			int64 iItemCost = int64(amount) * items[i].m_price;
+            CScriptTriggerArgs Args( amount, iItemCost, pVendor );
             Args.m_VarsLocal.SetNum( "TOTALCOST", iCostTotal);
-            if ( pItem->OnTrigger( ITRIG_Buy, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
-                continue;
+			if (pItem->OnTrigger(ITRIG_Buy, this->GetChar(), &Args) == TRIGRET_RET_TRUE)
+			{
+				iCostTotal -= iItemCost; //If we are blocking the transaction we should not pay for it!.
+				uiItemBlocked++;
+				continue;
+			}
         }
         
         if (!fPlayerVendor) //NPC vendors
@@ -1333,15 +1339,18 @@ do_consume:
         pItem->Update();
     }
     
-    //Say the message about the bought goods
-    tchar *sMsg = Str_GetTemp();
-    tchar *pszTemp1 = Str_GetTemp();
-    tchar *pszTemp2 = Str_GetTemp();
-    snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
-    snprintf(pszTemp2, STR_TEMPLENGTH, (fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1)),
-		iCostTotal, ((iCostTotal ==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA)) );
-    snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
-    pVendor->Speak(sMsg);
+	if (uiItemBlocked < uiItemCount)
+	{
+		//Say the message about the bought goods
+		tchar* sMsg = Str_GetTemp();
+		tchar* pszTemp1 = Str_GetTemp();
+		tchar* pszTemp2 = Str_GetTemp();
+		snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
+		snprintf(pszTemp2, STR_TEMPLENGTH, (fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1)),
+			iCostTotal, ((iCostTotal == 1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA)));
+		snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
+		pVendor->Speak(sMsg);
+	}
     
     //Take the gold and add it to the vendor
     if ( !fBoss )
@@ -1362,7 +1371,7 @@ do_consume:
     
     //Close vendor gump
     addVendorClose(pVendor);
-    if (iCostTotal > 0) //if anything was sold, sound this
+    if (iCostTotal > 0 && uiItemBlocked < uiItemCount) //if anything was sold, sound this
         addSound(SOUND_DROP_GOLD1); //Gold sound is better than cloth one, 0x57 is SOUND_USE_CLOTH
 }
 
