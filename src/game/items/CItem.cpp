@@ -4807,22 +4807,34 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 SOUND_TYPE CItem::Weapon_GetSoundHit() const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundHit");
-	// Get ranged weapon ammo hit sound if present.
-
-	int iAmmoSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDHIT, true);
-	if (iAmmoSoundHit > 0)
-		return (SOUND_TYPE)iAmmoSoundHit;
+	
+	int iWeaponSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_WEAPONSOUNDHIT, true);
+	if (IsType(IT_WEAPON_BOW) || IsType(IT_WEAPON_XBOW))
+	{
+		// Get ranged weapon ammo hit sound if present.
+		int iAmmoSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDHIT, true);
+		if (iAmmoSoundHit > 0)
+			return (SOUND_TYPE)iAmmoSoundHit;
+	}
+	if (iWeaponSoundHit > 0)
+		return (SOUND_TYPE)iWeaponSoundHit;
 	return SOUND_NONE;
 }
 
 SOUND_TYPE CItem::Weapon_GetSoundMiss() const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundMiss");
-	// Get ranged weapon ammo miss sound if present.
-
-	int iAmmoSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDMISS, true);
-	if ( iAmmoSoundMiss > 0 )
-		return (SOUND_TYPE)iAmmoSoundMiss;
+	
+	int iWeaponSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_WEAPONSOUNDMISS, true);
+	if (IsType(IT_WEAPON_BOW) || IsType(IT_WEAPON_XBOW))
+	{
+		// Get ranged weapon ammo miss sound if present.
+		int iAmmoSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOSOUNDMISS, true);
+		if (iAmmoSoundMiss > 0)
+			return (SOUND_TYPE)iAmmoSoundMiss;
+	}
+	if (iWeaponSoundMiss > 0)
+		return (SOUND_TYPE)iWeaponSoundMiss;
 	return SOUND_NONE;
 }
 
