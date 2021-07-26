@@ -897,7 +897,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
                 ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_FASTERCASTING, +2, pBaseCCPChar);
                 _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
-				Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex);
+				Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
 			}
 			else
 			{
@@ -1645,11 +1645,18 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
                     wStatEffectRef = minimum(75, wStatEffectRef);
 					
 					iPhysicalResist = 15 - (uiCasterInscription / 200);
-					iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
+					int iPhysicalResistMin = minimum(INT16_MAX, iPhysicalResist);
+					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, iPhysicalResistMin ));
 
-					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, minimum(INT16_MAX, iPhysicalResist)));
-					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, minimum(INT16_MAX, iMagicResist)));
-                    _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
+					iMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
+					int iMagicResistMin = minimum(INT16_MAX, iMagicResist);
+					pSpell->m_itSpell.m_PolyDex = (short)(maximum(-INT16_MAX, iMagicResistMin));
+
+					/*
+					* The method _CheckLimitEffectSkill checks if the skill will go above the current skill cap value, but because
+					* we are subtracting a value from a skill we don't need to use it.
+					*/
+                  //  _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
 
                     ModPropNum(COMP_PROPS_CHAR, PROPCH_RESPHYSICAL, -iPhysicalResist, true);
                     ModPropNum(COMP_PROPS_CHAR, PROPCH_FASTERCASTING, -2, true);
@@ -2702,14 +2709,13 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 			SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );
 			return false;
 		}
-		else if ( !CanMove( pItemPrev ))
-		{
+		//Allow  to cast a spell when wielding a spellbook or wand (but not an item with the spellchanneling property) when MAGICF_CASTPARALYZED is enabled.
+		else if (IsSetMagicFlags(MAGICF_CASTPARALYZED) && ( pItemPrev->IsTypeSpellbook() || pItemPrev->IsType(IT_WAND) ))
+			return true;
+		else if ( !CanMove( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
 			return false;
-		}
 		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true))
-		{
 			ItemBounce( pItemPrev );
-		}
 	}
 	return true;
 }
