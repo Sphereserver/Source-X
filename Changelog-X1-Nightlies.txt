@@ -2749,3 +2749,16 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Windows console temporarily freezing when it had to show a big number of lines at once.
 - Added: CMake toolchain to compile on Linux using the native architecture, instead of forcing one (Issue #709).
 - Changed: Renamed 32 and 64 bits Linux toolchains to x86 and x86_64, respectively.
+
+25-07-2021, Drk84
+- Fixed: Melee weapons cannot use the AMMOSOUNDHIT and AMMOSOUNDMISS properties because they are ranged weapon propeties.
+	     Now all types of weapons can use the WEAPONSOUNDHIT and WEAPONSOUNDMISS properties, ranged weapons can  also still use AMMOSOUNDHIT and AMMOSOUNDMISS (Issue #731).
+- Fixed: When using RETURN 1 inside the @BUY or @ITEMBUY trigger the vendor will not say the selling messages ("Here you are that will be etc..") if and only if all the items in the transaction are blocked by
+		 the RETURN 1, in addition the "coin drop" will not be played  and the money from the blocked item will not be taken from the player (Issue #738).
+- Fixed: When MAGICF_CASTPARALYZED flag is enabled you cannot spell when wielding a spellbook or wand (Issue #691).
+- Fixed: Protection spell miscalculating the magic resistance value when COMBAT_ELEMENTAL_ENGINE flag is enabled.
+
+25-07-2021, Jhobean
+- Fixed: OSILIKEPERSONALSPACE flag was reveal hidden char when walking on them. Now invisible OR hidden char will not be reveal and sysmessage will appear (Issue #732).
+- Fixed: NPC_AI_PATH no more reveal player when server evaluate if the NPC can walk on the char (Issue #343-734).
+
