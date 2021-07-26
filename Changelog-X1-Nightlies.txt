@@ -2757,3 +2757,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		 the RETURN 1, in addition the "coin drop" will not be played  and the money from the blocked item will not be taken from the player (Issue #738).
 - Fixed: When MAGICF_CASTPARALYZED flag is enabled you cannot spell when wielding a spellbook or wand (Issue #691).
 - Fixed: Protection spell miscalculating the magic resistance value when COMBAT_ELEMENTAL_ENGINE flag is enabled.
+
+25-07-2021, Jhobean
+- Fixed: OSILIKEPERSONALSPACE flag was reveal hidden char when walking on them. Now invisible OR hidden char will not be reveal and sysmessage will appear (Issue #732).
+- Fixed: NPC_AI_PATH no more reveal player when server evaluate if the NPC can walk on the char (Issue #343-734).
+
