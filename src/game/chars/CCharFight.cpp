@@ -629,8 +629,8 @@ effect_bounce:
 		if ( (uType & DAMAGE_FIRE) && Can(CAN_C_FIRE_IMMUNE) )
 			goto effect_bounce;
 		// I can't take damage from my pets, the only exception is for BRAIN_BERSERK pets
-		if ( pSrc->m_pNPC && (pSrc->NPC_PetGetOwner() == this) && (pSrc->m_pNPC->m_Brain != NPCBRAIN_BERSERK) )
-			goto effect_bounce;
+		//if ( pSrc->m_pNPC && (pSrc->NPC_PetGetOwner() == this) && (pSrc->m_pNPC->m_Brain != NPCBRAIN_BERSERK) )
+			//goto effect_bounce;
 		if ( m_pArea )
 		{
 			if ( m_pArea->IsFlag(REGION_FLAG_SAFE) )
@@ -924,8 +924,8 @@ effect_bounce:
 			pSrc->m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
 		else
 		{
-			CChar * pSrcOwner = pSrc->GetOwner();
-			if ( pSrcOwner != nullptr )
+			CChar * pSrcOwner = pSrc->GetOwner(); 
+			if ( pSrcOwner != nullptr && pSrcOwner != this ) //If my pet damages somebody display the pop-up damage unless it's damaging me because i already received the pop-up damage on before.
 			{
 				if ( pSrcOwner->IsClientActive() )
 					pSrcOwner->m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
