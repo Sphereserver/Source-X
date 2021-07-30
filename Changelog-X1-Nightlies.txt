@@ -2765,3 +2765,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 26-07-2021, Alex
 - Added: CONTINUECUSTOMIZE, for CustomHouses resumen lastdesign if player close dialog.
 
+30-07-2021, Drk84
+- Added:  New TAG.OVERRIDE.SHOVE for NPCs only, if set to 1 it allows a NPC to pass through another NPC without being blocked (Issue #715).
+- Fixed: Pets are now able again to damage their own owner, this wasn't noticeable unless the COMBAT_NOPETDESERT flag was enabled (Issue #724).
+
