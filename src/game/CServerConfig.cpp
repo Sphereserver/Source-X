@@ -3739,6 +3739,8 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				wPage = RES_DIALOG_TEXT;
 			else if ( !strnicmp( pArg2, "BUTTON", 6 ) )
 				wPage = RES_DIALOG_BUTTON;
+			else if (!strnicmp(pArg2, "INPUT", 5))
+				wPage = RES_DIALOG_INPUT;
 			else
 			{
 				// For a book the page is... the page number
