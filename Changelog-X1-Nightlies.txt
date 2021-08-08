@@ -2774,7 +2774,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 Example:
 	[dialog d_test]
 	...
-	[dialog d_test input]
+	[dialog d_test prebutton]
 	if (<distance> > 10)
 		return 1
 	endif
