@@ -2770,7 +2770,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Pets are now able again to damage their own owner, this wasn't noticeable unless the COMBAT_NOPETDESERT flag was enabled (Issue #724).
 
 01-08-2021, jkachhad
-- Implemented a new dialog section "input" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger. 	
+- Implemented a new dialog section "prebutton" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger. 	
 Example:
 	[dialog d_test]
 	...

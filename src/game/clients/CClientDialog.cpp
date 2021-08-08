@@ -172,13 +172,13 @@ TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID,
 
 		pArgs->m_iN1 = dwButtonID;
 
-		auto stopInput = TRIGRET_RET_FALSE;
+		auto stopPrebutton = TRIGRET_RET_FALSE;
 
-		CResourceLock input;
-		if (g_Cfg.ResourceLock(input, CResourceID(RES_DIALOG, rid.GetResIndex(), RES_DIALOG_INPUT)))
-		stopInput = pObj->OnTriggerRun(input, TRIGRUN_SECTION_TRUE, m_pChar, pArgs, NULL);
+		CResourceLock prebutton;
+		if (g_Cfg.ResourceLock(prebutton, CResourceID(RES_DIALOG, rid.GetResIndex(), RES_DIALOG_PREBUTTON)))
+		stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, m_pChar, pArgs, NULL);
 
-		if (stopInput != TRIGRET_RET_TRUE)
+		if (stopPrebutton != TRIGRET_RET_TRUE)
 		return pObj->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, m_pChar, pArgs);
 	}
 
