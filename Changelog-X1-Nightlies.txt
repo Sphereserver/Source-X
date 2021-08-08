@@ -2769,3 +2769,18 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added:  New TAG.OVERRIDE.SHOVE for NPCs only, if set to 1 it allows a NPC to pass through another NPC without being blocked (Issue #715).
 - Fixed: Pets are now able again to damage their own owner, this wasn't noticeable unless the COMBAT_NOPETDESERT flag was enabled (Issue #724).
 
+01-08-2021, jkachhad
+- Implemented a new dialog section "prebutton" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger. 	
+Example:
+	[dialog d_test]
+	...
+	[dialog d_test input]
+	if (<distance> > 10)
+		return 1
+	endif
+	[dialog d_test button]
+	on=1
+	src.str=100
+	on=2
+	src.dex=100
+It will check if distance is > 10, so you don't need to write the distance check on every button
