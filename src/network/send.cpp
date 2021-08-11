@@ -5214,6 +5214,14 @@ PacketDisplayMapNew::PacketDisplayMapNew(const CClient* target, const CItemMap* 
 
 	word width	= (word)(itemDef->m_ttMap.m_iGumpWidth 	> 0 ? itemDef->m_ttMap.m_iGumpWidth		:	(word)CItemMap::DEFAULT_SIZE);
 	word height = (word)(itemDef->m_ttMap.m_iGumpHeight	> 0 ? itemDef->m_ttMap.m_iGumpHeight	:	(word)CItemMap::DEFAULT_SIZE);
+	
+	word overrideWidth = (word)map->GetKeyNum("OVERRIDE.MAPWIDTH", true);
+	if (overrideWidth > 0)
+		width = overrideWidth;
+
+	word overrideHeight = (word)map->GetKeyNum("OVERRIDE.MAPHEIGHT", true);
+	if (overrideHeight > 0)
+		height = overrideHeight;
 
 	writeInt32(map->GetUID());
 	writeInt16(GUMP_MAP_2_NORTH);
@@ -5221,8 +5229,8 @@ PacketDisplayMapNew::PacketDisplayMapNew(const CClient* target, const CItemMap* 
 	writeInt16((word)(rect.m_top));
 	writeInt16((word)(rect.m_right));
 	writeInt16((word)(rect.m_bottom));
+	writeInt16(height); //the packet guide lists the width as the value sent before heigth, but in game the values are actually inverted.
 	writeInt16(width);
-	writeInt16(height);
 	writeInt16((word)(rect.m_map));
 
 	push(target);

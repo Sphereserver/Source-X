@@ -3400,7 +3400,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
                 return nullptr; // can't walk over a statue
 			if ( (pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_INSUBSTANTIAL)) )
 				continue;
-			if ( m_pNPC && pChar->m_pNPC && !GetKeyNum("OVERRIDE.SHOVE", true) )	// NPCs can't walk over another NPC unless they have the TAG.OVERRIDE.SHOVE set.
+			if ( m_pNPC && pChar->m_pNPC && !g_Cfg.m_NPCShoveNPC && !GetKeyNum("OVERRIDE.SHOVE", true) )	// NPCs can't walk over another NPC unless they have the TAG.OVERRIDE.SHOVE set or the NPCCanShoveNPC ini flag is enabled.
 				return nullptr;
 
 			uiStamReq = 10;		// Stam consume for push the char. OSI seem to be 10% and not a fix 10

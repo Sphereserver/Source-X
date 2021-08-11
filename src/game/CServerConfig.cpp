@@ -119,6 +119,7 @@ CServerConfig::CServerConfig()
 	m_fGuardsOnMurderers	= true;
 	m_iSnoopCriminal		= 100;
 	m_iTradeWindowSnooping	= true;
+	m_NPCShoveNPC			= false;
 	m_iTrainSkillCost		= 1;
 	m_iTrainSkillMax		= 420;
 	m_iTrainSkillPercent	= 30;
@@ -587,6 +588,7 @@ enum RC_TYPE
 	RC_NPCCANFIZZLEONHIT,		// m_fNPCCanFizzle
     RC_NPCDISTANCEHEAR,         // m_iNPCDistanceHear
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
+	RC_NPCSHOVENPC,				// m_NPCShoveNPC
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
@@ -839,6 +841,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit),	0 }},
     { "NPCDISTANCEHEAR",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCDistanceHear),     0 }},
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle),		0 }},
+	{ "NPCSHOVENPC",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCShoveNPC),			0 }},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills),		0 }},
 	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost),		0 }},
 	{ "NPCTRAINMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillMax),		0 }},
