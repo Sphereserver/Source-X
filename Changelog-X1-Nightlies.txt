@@ -2766,11 +2766,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added: CONTINUECUSTOMIZE, for CustomHouses resumen lastdesign if player close dialog.
 
 30-07-2021, Drk84
-- Added:  New TAG.OVERRIDE.SHOVE for NPCs only, if set to 1 it allows a NPC to pass through another NPC without being blocked (Issue #715).
+- Added: New TAG.OVERRIDE.SHOVE for NPCs only, if set to 1 it allows a NPC to pass through another NPC without being blocked (Issue #715).
 - Fixed: Pets are now able again to damage their own owner, this wasn't noticeable unless the COMBAT_NOPETDESERT flag was enabled (Issue #724).
 
 01-08-2021, jkachhad
-- Implemented a new dialog section "prebutton" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger. 	
+- Added: New dialog section "prebutton" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger. 	
 Example:
 	[dialog d_test]
 	...
@@ -2784,3 +2784,10 @@ Example:
 	on=2
 	src.dex=100
 It will check if distance is > 10, so you don't need to write the distance check on every button
+
+11-08-2021, Drk84
+- Added: New Ini flag NPCShoveNPC for allowing NPCs to walkt through other NPCs, default value is 0 (still Issue #715).
+- Fixed: Cartography TDATA values were inverted, TDATA1 is actually the height while TDATA2 is the width.
+- Added: Two new override tags for cartography map items: TAG.OVERRIDE.MAPWIDTH and TAG.OVERRIDE.MAPHEIGHT
+		 You can change the size by setting a value in the TDATA1 (WIDTH) and/or TDATA2(HEIGHT) value in the map itemdef or dynamically by using TAG.OVERRIDE.MAPWIDTH and/or TAG.OVERRIDE.MAPHEIGHT.
+		 By default Sphere the default value for cartography map is 200x200 (Issue #676).
