@@ -4,6 +4,7 @@
 #include "CObjBase.h"
 #include "CServerConfig.h"
 #include "CServerTime.h"
+#include "CWorld.h"
 #include "CTimedFunctionHandler.h"
 
 
@@ -16,27 +17,16 @@ CTimedFunctionHandler::CTimedFunctionHandler() :
 {
 }
 
-void CTimedFunctionHandler::OnChildDestruct(CTimedFunction* tf)
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::OnChildDestruct");
-	for (auto it = _timedFunctions.begin(), itEnd = _timedFunctions.end(); it != itEnd; ++it)
-	{
-		if (it->get() == tf)
-		{
-			_timedFunctions.erase(it);
-			return;
-		}
-	}
-	ASSERT(false);
-}
-
 int64 CTimedFunctionHandler::IsTimer(const CUID& uid, lpctstr ptcCommand) const
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::IsTimer");
-	for (std::unique_ptr<CTimedFunction> const& tf : _timedFunctions)	// the end iterator changes at each stl container erase call
+	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())	// the end iterator changes at each stl container erase call
 	{
-		if ((tf->GetUID() == uid) && (Str_Match(ptcCommand, tf->GetCommand()) == MATCH_VALID))
-			return tf->GetTimerAdjusted();
+		auto tfObj = static_cast<CTimedFunction*>(obj);
+		if ((tfObj->GetUID() == uid) && (Str_Match(ptcCommand, tfObj->GetCommand()) == MATCH_VALID))
+		{
+			return tfObj->GetTimerAdjusted();
+		}
 	}
 	return 0;
 }
@@ -44,28 +34,26 @@ int64 CTimedFunctionHandler::IsTimer(const CUID& uid, lpctstr ptcCommand) const
 void CTimedFunctionHandler::ClearUID( const CUID& uid )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Erase");
-	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
+	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())	// the end iterator changes at each stl container erase call
 	{
-		std::unique_ptr<CTimedFunction>& tf = *it;
-		if (tf->GetUID() == uid)
-			it =_timedFunctions.erase(it);
-		else
-			++it;
+		auto tfObj = static_cast<CTimedFunction*>(obj);
+		if (tfObj->GetUID() == uid)
+		{
+			g_World.ScheduleObjDeletion(tfObj);
+		}
 	}
 }
 
 void CTimedFunctionHandler::Stop(const CUID& uid, lpctstr ptcCommand)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Stop");
-	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
+	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())
 	{
-		std::unique_ptr<CTimedFunction>& tf = *it;
-		if ((tf->GetUID() == uid) && (Str_Match(ptcCommand, tf->GetCommand()) == MATCH_VALID))
+		auto tfObj = static_cast<CTimedFunction*>(obj);
+		if ((tfObj->GetUID() == uid) && (Str_Match(ptcCommand, tfObj->GetCommand()) == MATCH_VALID))
 		{
-			it = _timedFunctions.erase(it);
+			g_World.ScheduleObjDeletion(tfObj);
 		}
-		else
-			++it;
 	}
 }
 
@@ -73,14 +61,14 @@ void CTimedFunctionHandler::Clear()
 {
     ADDTOCALLSTACK("CTimedFunctionHandler::Clear");
 
-    _timedFunctions.clear();
+    _timedFunctions.ClearContainer();
 }
 
 TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CScriptLineContext StartContext,
     CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
-	for (auto it = _timedFunctions.begin(); it != _timedFunctions.end(); )	// the end iterator changes at each stl container erase call
+	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())
 	{
 		++iLoopsMade;
 		if (g_Cfg.m_iMaxLoopTimes && (iLoopsMade >= g_Cfg.m_iMaxLoopTimes))
@@ -89,10 +77,10 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CSc
 			return TRIGRET_ENDIF;
 		}
 
-		std::unique_ptr<CTimedFunction>& tf = *it;
-		if (!strcmpi(tf->GetCommand(), ptcCommand))
+		auto tfObj = static_cast<CTimedFunction*>(obj);
+		if (!strcmpi(tfObj->GetCommand(), ptcCommand))
 		{
-			CObjBase* pObj = tf->GetUID().ObjFind();
+			CObjBase* pObj = tfObj->GetUID().ObjFind();
 			if (!pObj)
 			{
 			LoopStop:
@@ -109,8 +97,6 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CSc
 				return iRet;
 			s.SeekContext(StartContext);
 		}
-
-		++it;
 	}
 
 	return TRIGRET_ENDIF;
@@ -122,7 +108,8 @@ void CTimedFunctionHandler::Add(const CUID& uid, int64 iTimeout, const char* pcC
 	ASSERT(pcCommand != nullptr);
 	ASSERT(strlen(pcCommand) < CTimedFunction::kuiCommandSize);
 
-	auto& tf = _timedFunctions.emplace_back(std::make_unique<CTimedFunction>(this, uid, pcCommand));
+	auto* tf = new CTimedFunction(uid, pcCommand);
+	_timedFunctions.InsertContentTail(tf);
 	tf->SetTimeout(iTimeout);
 }
 
@@ -212,13 +199,14 @@ int CTimedFunctionHandler::Load(lpctstr ptcKeyword, bool fQuoted, lpctstr ptcArg
 void CTimedFunctionHandler::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
-	for (std::unique_ptr<CTimedFunction> const& tf : _timedFunctions)
+	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())
 	{
-		const CUID& uid = tf->GetUID();
+		auto tfObj = static_cast<CTimedFunction*>(obj);
+		const CUID& uid = tfObj->GetUID();
 		if (uid.IsValidUID())
 		{
-			s.WriteKeyFormat("TimerFCall", "%s", tf->GetCommand());
-			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%" PRIu32 ",%" PRId64, uid.GetObjUID(), tf->GetTimerAdjusted());
+			s.WriteKeyFormat("TimerFCall", "%s", tfObj->GetCommand());
+			s.WriteKeyFormat("TimerFNumbers", STRINGIFY(TF_TICK_MAGIC_NUMBER) ",%" PRIu32 ",%" PRId64, uid.GetObjUID(), tfObj->GetTimerAdjusted());
 		}
 	}
 }

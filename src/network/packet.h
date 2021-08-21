@@ -9,8 +9,8 @@
 #include "../common/common.h"
 
 
-#define NETWORK_MAXPACKETS		g_Cfg.m_iNetMaxPacketsPerTick	// max packets to send per tick (per queue)
-#define NETWORK_MAXPACKETLEN	g_Cfg.m_iNetMaxLengthPerTick	// max packet length to send per tick (per queue)
+#define NETWORK_MAXPACKETS		g_Cfg._uiNetMaxPacketsPerTick	// max packets to send per tick (per queue)
+#define NETWORK_MAXPACKETLEN	g_Cfg._uiNetMaxLengthPerTick	// max packet length to send per tick (per queue)
 
 
 class CClient;

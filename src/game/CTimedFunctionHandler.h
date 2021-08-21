@@ -6,9 +6,9 @@
 #ifndef _INC_CTIMEDFUNCTIONHANDLER_H
 #define _INC_CTIMEDFUNCTIONHANDLER_H
 
+#include "../common/sphere_library/CSObjCont.h"
 #include "../common/CScriptContexts.h"
 #include "CTimedFunction.h"
-#include <vector>
 
 
 class CScript;
@@ -17,7 +17,7 @@ class CUID;
 class CTimedFunctionHandler
 {
 private:
-    std::vector<std::unique_ptr<CTimedFunction>> _timedFunctions;
+    CSObjCont _timedFunctions;
 
     std::string _strLoadBufferCommand;
     std::string _strLoadBufferNumbers;
@@ -29,10 +29,6 @@ public:
 private:
     CTimedFunctionHandler(const CTimedFunctionHandler& copy);
     CTimedFunctionHandler& operator=(const CTimedFunctionHandler& other);
-
-private:
-    friend CTimedFunction;
-    void OnChildDestruct(CTimedFunction* tf);
 
 public:
     void r_Write(CScript & s);

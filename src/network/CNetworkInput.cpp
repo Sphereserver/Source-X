@@ -39,7 +39,7 @@ bool CNetworkInput::processInput()
     ADDTOCALLSTACK("CNetworkInput::processInput");
     ASSERT(m_thread != nullptr);
 
-    // when called from within the thread's context, we just receive data
+    // when called from within the thread's context...
     if ((m_thread->isActive() && m_thread->isCurrentThread()) ||	// check for multi-threaded network
         !m_thread->isActive())										// check for single-threaded network
     {
@@ -47,7 +47,7 @@ bool CNetworkInput::processInput()
         processData();
     }
 
-    // when called from outside the thread's context, we process data
+    // when called from outside the thread's context...
     else if (!m_thread->isActive() || !m_thread->isCurrentThread())
     {
         // if the thread does not receive ticks, we must perform a quick select to see if we should
@@ -96,6 +96,7 @@ void CNetworkInput::receiveData()
         // receive data
         EXC_SET_BLOCK("messages - receive");
         int received = state->m_socket.Receive(m_receiveBuffer, NETWORK_BUFFERSIZE, 0);
+        state->_uiInByteCounter += SphereAbs(received);
         if (received <= 0 || received > NETWORK_BUFFERSIZE)
         {
             state->markReadClosed();

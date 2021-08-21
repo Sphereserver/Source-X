@@ -49,7 +49,7 @@ protected:
 	dword*		_pdwFreeUIDs;		// list of free uids available
 	dword		_dwFreeUIDOffset;		// offset of the first free element
 
-public:
+protected:
 	static const char *m_sClassName;
 	//int m_iThreadNum;	// Thread number to id what range of UID's i own.
 	//CRectMap m_ThreadRect;	// the World area that this thread owns.
@@ -61,6 +61,7 @@ public:
 	CSObjCont m_ObjDelete;		// Objects to be deleted.
 	CSObjList m_ObjSpecialDelete;
 
+public:
 	// Background save. Does this belong here ?
 	CScript m_FileData;			// Save or Load file.
 	CScript m_FileWorld;		// Save or Load file.
@@ -78,6 +79,12 @@ public:
 	CObjBase * FindUID(dword dwIndex) const;
 	void FreeUID(dword dwIndex);
 	dword AllocUID( dword dwIndex, CObjBase * pObj );
+
+	void AddIdleObj(CSObjContRec* obj);
+	void ScheduleObjDeletion(CSObjContRec* obj);
+	void ScheduleSpecialObjDeletion(CSObjListRec* obj);
+	NODISCARD bool IsScheduledObjDeletion(const CSObjContRec* obj) const noexcept;
+	NODISCARD bool IsScheduledSpecialObjDeletion(const CSObjListRec* obj) const noexcept;
 
 	int FixObjTry( CObjBase * pObj, dword dwUID = 0 );
 	int FixObj( CObjBase * pObj, dword dwUID = 0 );

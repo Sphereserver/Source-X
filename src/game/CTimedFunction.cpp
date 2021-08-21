@@ -8,9 +8,9 @@
 #include "CTimedFunction.h"
 
 
-CTimedFunction::CTimedFunction(CTimedFunctionHandler* pHandler, const CUID& uidAttached, const char* pcCommand) :
+CTimedFunction::CTimedFunction(const CUID& uidAttached, const char* pcCommand) :
 	CTimedObject(PROFILE_TIMEDFUNCTIONS),
-	_pHandler(pHandler), _uidAttached(uidAttached)
+	_uidAttached(uidAttached)
 {
 	Str_CopyLimitNull(_ptcCommand, pcCommand, kuiCommandSize);
 }
@@ -63,7 +63,7 @@ bool CTimedFunction::_OnTick() // virtual
 	CUID uid(_uidAttached);
 	CScript s(_ptcCommand);
 	
-	_pHandler->OnChildDestruct(this); // This has to be the last function call to ever access this object!
+	delete this; // This has to be the last function call to ever access this object!
 
 	// From now on, this object does NOT exist anymore!
 	return _ExecTimedFunction(std::move(uid), std::move(s));	
@@ -81,7 +81,7 @@ bool CTimedFunction::OnTick() // virtual
 		s.ParseKey(_ptcCommand);
 	}
 
-	_pHandler->OnChildDestruct(this); // This has to be the last function call to ever access this object!
+	delete this; // This has to be the last function call to ever access this object!
 
 	// From now on, this object does NOT exist anymore!
 	return _ExecTimedFunction(std::move(uid), std::move(s));

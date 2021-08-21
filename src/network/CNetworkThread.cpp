@@ -1,3 +1,6 @@
+#include "../common/sphere_library/CSTime.h"
+#include "../common/CLog.h"
+#include "../game/clients/CClient.h"
 #include "../game/CServerConfig.h"
 #include "CNetState.h"
 #include "CNetworkManager.h"
@@ -16,7 +19,7 @@ static const char* GenerateNetworkThreadName(size_t id)
 
 CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
     : AbstractSphereThread(GenerateNetworkThreadName(id), IThread::Disabled),
-    m_manager(manager), m_id(id)
+    m_manager(manager), m_id(id), _iTimeLastStateDataCheck(0)
 {
 }
 
@@ -121,7 +124,49 @@ void CNetworkThread::tick(void)
     processOutput();
 
     // we're active, take priority
-    setPriority(static_cast<IThread::Priority>(g_Cfg.m_iNetworkThreadPriority));
+    setPriority(static_cast<IThread::Priority>(g_Cfg._uiNetworkThreadPriority));
+
+    static constexpr int64 kiStateDataCheckPeriod = 10 * 1000; // 10 seconds, expressed in milliseconds
+    const int64 iTimeCur = CSTime::GetPreciseSysTimeMilli();
+    if (iTimeCur - _iTimeLastStateDataCheck > kiStateDataCheckPeriod)
+    {
+        _iTimeLastStateDataCheck = iTimeCur;
+
+        for (CNetState* pCurState : m_states)
+        {
+            uchar fKick = 0;
+            if (pCurState->_uiInByteCounter > g_Cfg._uiMaxSizeClientIn)
+                fKick = 1;
+            else if (pCurState->_uiOutByteCounter > g_Cfg._uiMaxSizeClientOut)
+                fKick = 2;
+
+			if (fKick)
+			{
+				CClient* pCurClient = pCurState->getClient();
+                if (pCurClient)
+                {
+                    pCurClient->addKick(nullptr);
+                }
+                else
+                {
+                    pCurState->markReadClosed();
+                    pCurState->markWriteClosed();
+                }
+
+                const CAccount* pAccount = (pCurClient ? pCurClient->GetAccount() : nullptr);
+                g_Log.EventWarn(
+                    "NetState id %d (IP: %s, Account: %s) KICKED because it exceeded its %s quota (%" PRIuSIZE_T "/%u).\n",
+                    pCurState->id(),
+                    pCurState->m_socket.GetPeerName().GetAddrStr(), (pAccount ? pAccount->GetName() : "N/A"),
+                    ((fKick == 1) ? "input" : "output"),
+                    ((fKick == 1) ? pCurState->_uiInByteCounter : pCurState->_uiOutByteCounter),
+                    ((fKick == 1) ? g_Cfg._uiMaxSizeClientIn : g_Cfg._uiMaxSizeClientOut)
+                    );
+			}
+
+            pCurState->_uiInByteCounter = pCurState->_uiOutByteCounter = 0;
+        }
+    }
 }
 
 void CNetworkThread::flushAllClients(void)
@@ -129,7 +174,9 @@ void CNetworkThread::flushAllClients(void)
     ADDTOCALLSTACK("CNetworkThread::flushAllClients");
     NetworkThreadStateIterator states(this);
     while (CNetState* state = states.next())
+    {
         m_output.flush(state);
+    }
 }
 
 

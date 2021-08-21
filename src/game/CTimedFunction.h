@@ -7,12 +7,13 @@
 #define _INC_CTIMEDFUNCTION_H
 
 #include "../common/CUID.h"
+#include "../common/sphere_library/CSObjContRec.h"
 #include "CTimedObject.h"
 
 
 class CTimedFunctionHandler;
 
-class CTimedFunction : public CTimedObject
+class CTimedFunction : public CTimedObject, CSObjContRec
 {
 public:
     static constexpr uint kuiCommandSize = 1024;
@@ -20,12 +21,11 @@ public:
 private:
     friend class CTimedFunctionHandler;
 
-    CTimedFunctionHandler* _pHandler;
     CUID  _uidAttached;
     tchar _ptcCommand[kuiCommandSize];
 
 public:
-    CTimedFunction(CTimedFunctionHandler* pHandler, const CUID& uidAttached, const char * pcCommand);
+    CTimedFunction(const CUID& uidAttached, const char * pcCommand);
     ~CTimedFunction() = default; // Removal from ticking list is already managed by CTimedObject destructor
 
     const CUID& GetUID() const {

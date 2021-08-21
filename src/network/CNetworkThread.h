@@ -21,6 +21,7 @@ class CNetworkThread : public AbstractSphereThread
 private:
     CNetworkManager* m_manager;					// parent network manager
     size_t m_id;								// network thread #
+    int64 _iTimeLastStateDataCheck;
 
     typedef std::deque<CNetState*> NetworkStateList;
     NetworkStateList m_states;					// states controlled by this thread

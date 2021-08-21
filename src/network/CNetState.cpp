@@ -27,6 +27,7 @@ CNetState::CNetState(int id)
     m_incoming.buffer = nullptr;
     m_incoming.rawBuffer = nullptr;
     m_packetExceptions = 0;
+    _uiInByteCounter = _uiOutByteCounter = 0;
     m_clientType = CLIENTTYPE_2D;
     m_clientVersion = 0;
     m_reportedVersion = 0;
@@ -89,8 +90,8 @@ void CNetState::clear(void)
             g_NetworkEvent.unregisterClient(this);
 #endif
 
-        //	record the client reference to the garbage collection to be deleted on it's time
-        g_World.m_ObjSpecialDelete.InsertContentHead(m_client);
+        //	record the client reference to the garbage collection to be deleted on its time
+        g_World.ScheduleSpecialObjDeletion(m_client);
     }
 
 #ifdef _WIN32

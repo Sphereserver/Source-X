@@ -42,7 +42,6 @@ enum ELEM_TYPE	// define types of structure/record elements.
 {
 	ELEM_VOID = 0,	// unknown what this might be. (or just 'other') (must be handled manually)
 	ELEM_CSTRING,	// Size prefix.
-	ELEM_STRING,	// Assume max size of REG_SIZE. nullptr TERM string.
 	ELEM_BOOL,		// bool = just 1 byte i guess.
 	ELEM_BYTE,		// 1 byte.
 	ELEM_MASK_BYTE,	// bits in a byte
@@ -62,9 +61,6 @@ struct CElementDef
 	static const int sm_Lengths[ELEM_QTY];
 	ELEM_TYPE m_type;
 	uint	m_offset;	// The offset into the class instance for this item.
-	// ELEM_STRING = max size.
-	// ELEM_MASK_WORD etc. = Extra masking info if needed. 
-	dword   m_extra;
 
 	CElementDef() = default;
 	~CElementDef() = default;

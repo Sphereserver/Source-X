@@ -6,11 +6,9 @@
 #include "CTimedObject.h"
 
 
-CTimedObject::CTimedObject(PROFILE_TYPE profile)
+CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
+    _profileType(profile), _fIsSleeping(true), _iTimeout(0)
 {
-    _profileType = profile;
-    _fIsSleeping = true;
-    _iTimeout = 0;
 }
 
 CTimedObject::~CTimedObject()
@@ -31,7 +29,7 @@ void CTimedObject::_GoAwake()
 {
     ADDTOCALLSTACK("CTimedObject::_GoAwake");
     /*
-    * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,
+    * if the timeout did expire then it got ignored on its tick and removed from the tick's map so we add it again,
     * otherwise it's not needed since the timer is already there.
     */
     if ((_iTimeout > 0) && (_iTimeout < CWorldGameTime::GetCurrentTime().GetTimeRaw()))

@@ -350,7 +350,10 @@ bool CNetworkOutput::processByteQueue(CNetState* state)
 	}
 
 	if (result > 0)
+	{
+		state->_uiOutByteCounter += result;
 		state->m_outgoing.bytes.RemoveDataAmount(result);
+	}
 
 	return true;
 }
@@ -632,7 +635,7 @@ void CNetworkOutput::QueuePacketTransaction(PacketTransaction* transaction)
 	size_t maxQueueSize = NETWORK_MAXQUEUESIZE;
 	if (maxQueueSize > 0)
 	{
-		while (priority > PacketSend::PRI_IDLE && state->m_outgoing.queue[priority].size() >= maxQueueSize)
+		while ((priority > PacketSend::PRI_IDLE) && (state->m_outgoing.queue[priority].size() >= maxQueueSize))
 		{
 			--priority;
 			transaction->setPriority(priority);

@@ -2791,3 +2791,19 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Added: Two new override tags for cartography map items: TAG.OVERRIDE.MAPWIDTH and TAG.OVERRIDE.MAPHEIGHT
 		 You can change the size by setting a value in the TDATA1 (WIDTH) and/or TDATA2(HEIGHT) value in the map itemdef or dynamically by using TAG.OVERRIDE.MAPWIDTH and/or TAG.OVERRIDE.MAPHEIGHT.
 		 By default Sphere the default value for cartography map is 200x200 (Issue #676).
+
+21-08-2021, Nolok
+- Fixed: Deleting TIMERFs inside a function called with TIMERF randomly caused exceptions.
+- Added: New AREAFLAGS ini setting, used to change the default behavior of regions, areas and rooms:
+	// AREAF_RoomInheritsEvents			00000001 // ROOMDEFs inherit EVENTs from the parent AREADEF (if any)
+	// AREAF_RoomInheritsFlags			00000002 // ROOMDEFs inherit REGION FLAGS from the parent AREADEF (if any)
+	// AREAF_RoomInheritsTAGs			00000004 // ROOMDEFs inherit TAGs from the parent AREADEF (if any)
+- Added: New REGION FLAGS to mimic AREAFLAGS on a per-region basis:
+	region_flag_inherit_parent_events 0100000 // This region (areadef/roomdef) inherits EVENTS from the region it's contained in
+	region_flag_inherit_parent_flags  0200000 // This region (areadef/roomdef) inherits FLAGS from the region it's contained in
+	region_flag_inherit_parent_tags   0400000 // This region (areadef/roomdef) inherits TAGs from the region it's contained in
+- Added: New ini networking flags to detect and block clients sending/receiving too much data for it to be legit:
+	// Maximum number of bytes a client can send to the server in 10 seconds before being disconnected
+	MaxSizeClientOut=50000
+	// Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected
+	MaxSizeClientIn=10000

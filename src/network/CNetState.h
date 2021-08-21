@@ -77,7 +77,9 @@ protected:
         Packet* rawBuffer;		// received data
     } m_incoming; // incoming data
 
-    int m_packetExceptions; // number of packet exceptions
+    int m_packetExceptions;     // number of packet exceptions
+    size_t _uiInByteCounter;    // number of bytes received by this client since the last legitimacy check
+    size_t _uiOutByteCounter;   // number of bytes sent     by this client since the last legitimacy check
 
 public:
     GAMECLIENT_TYPE m_clientType;	// type of client

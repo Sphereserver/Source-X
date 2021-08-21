@@ -58,6 +58,7 @@ bool CTeleport::RealizeTeleport()
 CRegion::CRegion( CResourceID rid, lpctstr pszName ) :
 	CResourceDef( rid )
 {
+	ADDTOCALLSTACK("CRegion::CRegion()");
 	m_dwFlags	= 0;
 	m_iModified	= 0;
 	m_iLinkedSectors = 0;
@@ -68,13 +69,13 @@ CRegion::CRegion( CResourceID rid, lpctstr pszName ) :
 
 CRegion::~CRegion()
 {
+	ADDTOCALLSTACK("CRegion::~CRegion");
 	// RemoveSelf();
 	UnRealizeRegion();
 }
 
-void CRegion::SetModified( int iModFlag )
+void CRegion::SetModified( int iModFlag ) noexcept
 {
-	ADDTOCALLSTACK("CRegion::SetModified");
 	if ( !m_iLinkedSectors )
         return;
 	m_iModified	= m_iModified | iModFlag;

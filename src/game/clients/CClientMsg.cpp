@@ -581,7 +581,11 @@ bool CClient::addKick( CTextConsole * pSrc, bool fBlock )
 {
 	ADDTOCALLSTACK("CClient::addKick");
 	// Kick me out.
-	ASSERT( pSrc );
+	if (!pSrc)
+	{
+		pSrc = &g_Serv;
+	}
+
 	if ( GetAccount() == nullptr )
 	{
 		GetNetState()->markReadClosed();

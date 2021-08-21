@@ -219,7 +219,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 {
 	constexpr const char *m_sClassName = "SphereInit";
 	EXC_TRY("Init Server");
-	EXC_SET_BLOCK("loading");
+	EXC_SET_BLOCK("loading ini and scripts");
 	if ( !g_Serv.Load() )
 		return -3;
 
@@ -456,8 +456,10 @@ static void dword_q_sort(dword *numbers, dword left, dword right)
 	pivot = left;
 	left = l_hold;
 	right = r_hold;
-	if (left < pivot) dword_q_sort(numbers, left, pivot-1);
-	if (right > pivot) dword_q_sort(numbers, pivot+1, right);
+	if (left < pivot)
+		dword_q_sort(numbers, left, pivot-1);
+	if (right > pivot)
+		dword_q_sort(numbers, pivot+1, right);
 }
 
 void defragSphere(char *path)

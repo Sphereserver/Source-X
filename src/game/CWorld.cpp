@@ -378,6 +378,31 @@ void CWorldThread::SaveThreadClose()
 	m_FileMultis.Close();
 }
 
+void CWorldThread::AddIdleObj(CSObjContRec* obj)
+{
+	m_ObjNew.InsertContentTail(obj);
+}
+
+void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
+{
+	m_ObjDelete.InsertContentTail(obj);
+}
+
+void CWorldThread::ScheduleSpecialObjDeletion(CSObjListRec* obj)
+{
+	m_ObjSpecialDelete.InsertContentTail(obj);
+}
+
+bool CWorldThread::IsScheduledObjDeletion(const CSObjContRec* obj) const noexcept
+{
+	return (obj->GetParent() == &m_ObjDelete);
+}
+
+bool CWorldThread::IsScheduledSpecialObjDeletion(const CSObjListRec* obj) const noexcept
+{
+	return (obj->GetParent() == &m_ObjSpecialDelete);
+}
+
 int CWorldThread::FixObjTry( CObjBase * pObj, dword dwUID )
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorldThread::FixObjTry");
@@ -1364,7 +1389,7 @@ bool CWorld::LoadAll() // Load world from script
 		return false;
 
 	_iTimeStartup = _GameClock.GetCurrentTime().GetTimeRaw();
-	_iTimeLastWorldSave = _GameClock.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
+	_iTimeLastWorldSave = _iTimeStartup + g_Cfg.m_iSavePeriod;	// next save time.
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)

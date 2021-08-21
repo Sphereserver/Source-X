@@ -236,9 +236,9 @@ void CNetworkManager::start(void)
     DEBUGNETWORK(("Created %d network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
 
     // create network threads
-    createNetworkThreads(g_Cfg.m_iNetworkThreads);
+    createNetworkThreads(g_Cfg._uiNetworkThreads);
 
-    m_isThreaded = g_Cfg.m_iNetworkThreads > 0;
+    m_isThreaded = g_Cfg._uiNetworkThreads > 0;
     if (isThreaded())
     {
         // start network threads
@@ -251,7 +251,7 @@ void CNetworkManager::start(void)
     }
     else
     {
-        // initialise network threads (if g_Cfg.m_iNetworkThreads is == 0 then we'll have only 1 CNetworkThread)
+        // initialise network threads (if g_Cfg._uiNetworkThreads is == 0 then we'll have only 1 CNetworkThread)
         size_t ntCount = m_threads.size();
         UNREFERENCED_PARAMETER(ntCount);
         for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)

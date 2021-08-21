@@ -98,7 +98,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	}
 
 	// Put in the idle list by default. (til placed in the world)
-	g_World.m_ObjNew.InsertContentTail( this );
+	g_World.AddIdleObj(this);
 }
 
 CObjBase::~CObjBase()
@@ -143,7 +143,7 @@ CObjBase::~CObjBase()
 
 bool CObjBase::_IsDeleted() const
 {
-	return (!GetUID().IsValidUID() || (GetParent() == &g_World.m_ObjDelete));
+	return (!GetUID().IsValidUID() || g_World.IsScheduledObjDeletion(this));
 }
 
 bool CObjBase::IsDeleted() const
@@ -178,7 +178,7 @@ bool CObjBase::Delete(bool fForce)
 	DeletePrepare();		// virtual!
 	DeleteCleanup(fForce);	// not virtual!
 
-	g_World.m_ObjDelete.InsertContentTail(this);
+	g_World.ScheduleObjDeletion(this);
 	
 	return true;
 }

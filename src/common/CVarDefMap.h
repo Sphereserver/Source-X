@@ -138,11 +138,11 @@ private:
     CVarDefContStr* SetStrOverride( lpctstr ptcKey, lpctstr pszVal );
 
 public:
-	void Copy( const CVarDefMap * pArray );
+	void Copy( const CVarDefMap * pArray, bool fClearThis = true );
 	bool Compare( const CVarDefMap * pArray );
 	bool CompareAll( const CVarDefMap * pArray );
 	void Clear();
-	size_t GetCount() const;
+	size_t GetCount() const noexcept;
 
 public:
 	CVarDefMap() = default;

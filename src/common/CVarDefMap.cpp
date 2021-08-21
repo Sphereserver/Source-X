@@ -8,7 +8,7 @@
 #include "CVarDefMap.h"
 
 
-inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey)
+inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey) noexcept
 {
     return strcmpi(pVar->GetKey(), ptcKey);
 }
@@ -241,13 +241,15 @@ void CVarDefMap::Clear()
 	m_Container.clear();
 }
 
-void CVarDefMap::Copy( const CVarDefMap * pArray )
+void CVarDefMap::Copy( const CVarDefMap * pArray, bool fClearThis )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Copy");
 	if ( !pArray || pArray == this )
 		return;
 
-	Clear();
+	if (fClearThis)
+		Clear();
+
 	if ( pArray->GetCount() <= 0 )
 		return;
 
@@ -313,9 +315,8 @@ bool CVarDefMap::CompareAll( const CVarDefMap * pArray )
 	return true;
 }
 
-size_t CVarDefMap::GetCount() const
+size_t CVarDefMap::GetCount() const noexcept
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetCount");
 	return m_Container.size();
 }
 

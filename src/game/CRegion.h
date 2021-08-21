@@ -56,6 +56,10 @@ private:
 #define REGION_FLAG_NOMINING            0x020000// Can't use mining in this region.
 #define REGION_FLAG_WALK_NOBLOCKHEIGHT  0x040000// Ignore char height for walkchecks inside this area.
 
+#define REGION_FLAG_INHERIT_PARENT_EVENTS	0x0100000
+#define REGION_FLAG_INHERIT_PARENT_FLAGS	0x0200000
+#define REGION_FLAG_INHERIT_PARENT_TAGS		0x0400000
+
 	dword m_dwFlags;
 
 public:
@@ -113,13 +117,13 @@ public:
 #define REGMOD_NAME		0x0008
 #define REGMOD_GROUP	0x0010
 
-	void SetModified( int iModFlag );
+	void SetModified( int iModFlag ) noexcept;
 	void SetName( lpctstr pszName );
 	virtual lpctstr GetName() const override
 	{
 		return m_sName.GetBuffer();
 	}
-	const CSString & GetNameStr() const
+	const CSString & GetNameStr() const noexcept
 	{
 		return m_sName;
 	}
@@ -139,20 +143,20 @@ public:
 		EmptyRegion();
 		return AddRegionRect( rect );
 	}
-	dword GetRegionFlags() const
+	inline dword GetRegionFlags() const noexcept
 	{
 		return m_dwFlags;
 	}
-	bool IsFlag( dword dwFlags ) const
+	bool IsFlag( dword dwFlags ) const noexcept
 	{
 		return (( m_dwFlags & dwFlags ) ? true : false );
 	}
 	bool IsGuarded() const;
-	void SetRegionFlags( dword dwFlags )
+	void SetRegionFlags( dword dwFlags ) noexcept
 	{
 		m_dwFlags |= dwFlags;
 	}
-	void TogRegionFlags( dword dwFlags, bool fSet )
+	void TogRegionFlags( dword dwFlags, bool fSet ) noexcept
 	{
 		if ( fSet )
 			m_dwFlags |= dwFlags;
@@ -162,7 +166,7 @@ public:
 	}
 
 	bool CheckAntiMagic( SPELL_TYPE spell ) const;
-	virtual bool IsValid() const
+	virtual bool IsValid() const noexcept
 	{
 		return m_sName.IsValid();
 	}
@@ -228,9 +232,7 @@ public:
 
 	explicit CTeleport( tchar * pszArgs );
 
-	virtual ~CTeleport()
-	{
-	}
+	virtual ~CTeleport() = default;
 
 private:
 	CTeleport(const CTeleport& copy);

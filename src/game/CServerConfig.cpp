@@ -178,13 +178,14 @@ CServerConfig::CServerConfig()
 	m_fDisplayPercentAr = false;
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
-    m_iAutoProcessPriority = 0;
-	m_iExperimentalFlags= 0;
+	m_iAutoProcessPriority = 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
 	m_iDistanceWhisper	= 3;
 	m_iDistanceTalk		= UO_MAP_VIEW_SIZE_DEFAULT;
     m_iNPCDistanceHear  = 4;
-	m_iOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
+	_uiExperimentalFlags= 0;
+	_uiOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
+	_uiAreaFlags		= AREAF_RoomInheritsFlags;
 
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 15;
@@ -280,14 +281,17 @@ CServerConfig::CServerConfig()
 
 	m_iPetsInheritNotoriety = 0;
 
-	m_iNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
-	m_iNetworkThreadPriority= IThread::Disabled;
+	// Networking
+	_uiNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
+	_uiNetworkThreadPriority= IThread::Disabled;
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
 	m_iNetHistoryTTL		= 300;
-	m_iNetMaxPacketsPerTick = 50;
-	m_iNetMaxLengthPerTick	= 18000;
+	_uiNetMaxPacketsPerTick = 50;
+	_uiNetMaxLengthPerTick	= 18'000;
 	m_iNetMaxQueueSize		= 75;
+	_uiMaxSizeClientOut		= 50'000;
+	_uiMaxSizeClientIn		= 10'000;
 	m_fUsePacketPriorities	= false;
 	m_fUseExtraBuffer		= true;
 
@@ -422,6 +426,7 @@ enum RC_TYPE
 	RC_ALLOWNEWBTRANSFER,		// m_bAllowNewbTransfer
 	RC_ARCHERYMAXDIST,			// m_iArcheryMaxDist
 	RC_ARCHERYMINDIST,			// m_iArcheryMinDist
+	RC_AREAFLAGS,				// _uiAreaFlags
 	RC_ARRIVEDEPARTMSG,
 	RC_ATTACKERTIMEOUT,			// m_iAttackerTimeout
 	RC_ATTACKINGISACRIME,		// m_fAttackingIsACrime
@@ -500,7 +505,7 @@ enum RC_TYPE
 	RC_EXPERIENCEKOEFPVP,		// m_iExperienceKoefPVP
 	RC_EXPERIENCEMODE,			// m_iExperienceMode
 	RC_EXPERIENCESYSTEM,		// m_bExperienceSystem
-	RC_EXPERIMENTAL,			// m_iExperimentalFlags
+	RC_EXPERIMENTAL,			// _uiExperimentalFlags
 	RC_FEATURESAOS,
 	RC_FEATURESEXTRA,
 	RC_FEATURESKR,
@@ -551,7 +556,7 @@ enum RC_TYPE
 	RC_MAXITEMCOMPLEXITY,		// m_iMaxItemComplexity
 	RC_MAXKARMA,				// m_iMaxKarma
 	RC_MAXLOOPTIMES,			// m_iMaxLoopTimes
-	RC_MAXPACKETSPERTICK,		// m_iNetMaxPacketsPerTick
+	RC_MAXPACKETSPERTICK,		// _uiNetMaxPacketsPerTick
 	RC_MAXPINGS,				// m_iNetMaxPings
 	RC_MAXPOLYSTATS,			// m_iMaxPolyStats
 	RC_MAXQUEUESIZE,			// m_iNetMaxQueueSize
@@ -560,7 +565,9 @@ enum RC_TYPE
     RC_MAXSHIPSACCOUNT,         // _iMaxShipsAccount
     RC_MAXSHIPSGUILD,           // _iMaxShipsGuild
     RC_MAXSHIPSPLAYER,          // _iMaxShipsPlayer
-	RC_MAXSIZEPERTICK,			// m_iNetMaxLengthPerTick
+	RC_MAXSIZECLIENTIN,			// _uiMaxSizeClientIn
+	RC_MAXSIZECLIENTOUT,		// _uiMaxSizeClientOut
+	RC_MAXSIZEPERTICK,			// _uiNetMaxLengthPerTick
 	RC_MD5PASSWORDS,			// m_fMd5Passwords
 	RC_MEDIUMCANHEARGHOSTS,		// m_iMediumCanHearGhosts
 	RC_MINCHARDELETETIME,
@@ -579,8 +586,8 @@ enum RC_TYPE
 	RC_MYSQLTICKS,				// m_bMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
-	RC_NETWORKTHREADPRIORITY,	// m_iNetworkThreadPriority
-	RC_NETWORKTHREADS,			// m_iNetworkThreads
+	RC_NETWORKTHREADPRIORITY,	// _uiNetworkThreadPriority
+	RC_NETWORKTHREADS,			// _uiNetworkThreads
 	RC_NORESROBE,
 	RC_NOTOTIMEOUT,
 	RC_NOWEATHER,				// m_fNoWeather
@@ -594,7 +601,7 @@ enum RC_TYPE
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
 	RC_NPCTRAINPERCENT,			// m_iTrainSkillPercent
 	RC_NTSERVICE,				// m_fUseNTService
-	RC_OPTIONFLAGS,				// m_iOptionFlags
+	RC_OPTIONFLAGS,				// _uiOptionFlags
 	RC_OVERSKILLMULTIPLY,		// m_iOverSkillMultiply
 	RC_PACKETDEATHANIMATION,	// m_iPacketDeathAnimation
 	RC_PAYFROMPACKONLY,			// m_fPayFromPackOnly
@@ -667,255 +674,258 @@ enum RC_TYPE
 
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 {
-	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sAcctBaseDir),			0 }},
-	{ "ADVANCEDLOS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAdvancedLos),			0 }},
-	{ "AGREE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAgree),				0 }},
-	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAllowBuySellAgent),	0 }},
-	{ "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowLightOverride),	0 }},
-	{ "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowNewbTransfer),	0 }},
-	{ "ARCHERYMAXDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMaxDist),		0 }},
-	{ "ARCHERYMINDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMinDist),		0 }},
-	{ "ARRIVEDEPARTMSG",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArriveDepartMsg),		0 }},
-	{ "ATTACKERTIMEOUT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAttackerTimeout),		0 }},
-	{ "ATTACKINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAttackingIsACrime),	0 }},
-    { "AUTOHOUSEKEYS",          { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoHouseKeys),		0 }},
-	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAutoNewbieKeys),		0 }},
-	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoPrivFlags),		0 }},
-    { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoProcessPriority),	0 }},
-	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp),			0 }},
-    { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys),		    0 }},
-	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels),	0 }},
-	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
-	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax),			0 }},
-	{ "BUILD",					{ ELEM_VOID,	0,											    0 }},
-	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCanSeeSamePLevel),	0 }},
-	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCanUndressPets),		0 }},
-	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCharTags),			0 }},
-	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLingerTime),	0 }},
-	{ "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginMaxTries),	0 }},
-	{ "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginTempBan),	0 }},
-	{ "CLIENTMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMax),			0 }},
-	{ "CLIENTMAXIP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMaxIP),		0 }},
-	{ "CLIENTS",				{ ELEM_VOID,	0,											    0 }},	// duplicate
-	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorHidden),			0 }},
-	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvis),			0 }},
-	{ "COLORINVISITEM",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisItem),		0 }},
-	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisSpell),		0 }},
-	{ "COLORNOTOCRIMINAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoCriminal),	0 }},
-	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoDefault),	0 }},
-	{ "COLORNOTOEVIL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoEvil),		0 }},
-	{ "COLORNOTOGOOD",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGood),		0 }},
-	{ "COLORNOTOGUILDSAME",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildSame),	0 }},
-	{ "COLORNOTOGUILDWAR",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildWar),	0 }},
-	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvul),		0 }},
-	{ "COLORNOTOINVULGAMEMASTER",{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvulGameMaster),	0 }},
-	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoNeutral),	0 }},
-	{ "COMBATARCHERYMOVEMENTDELAY",{ ELEM_INT,	OFFSETOF(CServerConfig,m_iCombatArcheryMovementDelay),	0 }},
-	{ "COMBATDAMAGEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatDamageEra),		0 }},
-	{ "COMBATFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatFlags),			0 }},
-	{ "COMBATHITCHANCEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatHitChanceEra),	0 }},
-    { "COMBATPARRYINGERA",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatParryingEra),	0 }},
-	{ "COMBATSPEEDERA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatSpeedEra),		0 }},
-	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCommandLog),			0 }},
-	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_cCommandPrefix),		0 }},
-	{ "COMMANDTRIGGER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sCommandTrigger),		0 }},
-	{ "CONNECTINGMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMax),		0 }},
-	{ "CONNECTINGMAXIP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMaxIP),		0 }},
-    { "CONTAINERMAXITEMS",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContainerMaxItems),	0 }},
-	{ "CONTEXTMENULIMIT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContextMenuLimit),	0 }},
-	{ "CORPSENPCDECAY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpseNPC),		0 }},
-	{ "CORPSEPLAYERDECAY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpsePlayer),	0 }},
-	{ "CRIMINALTIMER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCriminalTimer),		0 }},
-	{ "CUOSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCUOStatus),			0 }},
-	{ "DEADCANNOTSEELIVING",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_fDeadCannotSeeLiving),	0 }},
-	{ "DEADSOCKETTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDeadSocketTime),		0 }},
-	{ "DEBUGFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iDebugFlags),			0 }},
-	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item),			0 }},
-	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel),	0 }},
-	{ "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    OFFSETOF(CServerConfig,m_fDisplayPercentAr),    0 }},
-	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk ),		0 }},
-	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper ),	0 }},
-	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell ),		0 }},
+	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
+	{ "ADVANCEDLOS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
+	{ "AGREE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAgree)				}},
+	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAllowBuySellAgent)	}},
+	{ "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowLightOverride)	}},
+	{ "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowNewbTransfer)	}},
+	{ "ARCHERYMAXDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMaxDist)		}},
+	{ "ARCHERYMINDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMinDist)		}},
+	{ "AREAFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiAreaFlags)			}},
+	{ "ARRIVEDEPARTMSG",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArriveDepartMsg)		}},
+	{ "ATTACKERTIMEOUT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAttackerTimeout)		}},
+	{ "ATTACKINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAttackingIsACrime)	}},
+    { "AUTOHOUSEKEYS",          { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoHouseKeys)			}},
+	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAutoNewbieKeys)		}},
+	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoPrivFlags)		}},
+    { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoProcessPriority)	}},
+	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp)			}},
+    { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys)		    }},
+	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels)		}},
+	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax)				}},
+	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax)				}},
+	{ "BUILD",					{ ELEM_VOID,	0											    }},
+	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCanSeeSamePLevel)		}},
+	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCanUndressPets)		}},
+	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCharTags)				}},
+	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLingerTime)		}},
+	{ "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginMaxTries)	}},
+	{ "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginTempBan)	}},
+	{ "CLIENTMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMax)			}},
+	{ "CLIENTMAXIP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMaxIP)			}},
+	{ "CLIENTS",				{ ELEM_VOID,	0											    }},	// duplicate
+	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorHidden)			}},
+	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvis)			}},
+	{ "COLORINVISITEM",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisItem)		}},
+	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisSpell)		}},
+	{ "COLORNOTOCRIMINAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoCriminal)	}},
+	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoDefault)		}},
+	{ "COLORNOTOEVIL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoEvil)		}},
+	{ "COLORNOTOGOOD",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGood)		}},
+	{ "COLORNOTOGUILDSAME",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildSame)	}},
+	{ "COLORNOTOGUILDWAR",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildWar)	}},
+	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvul)		}},
+	{ "COLORNOTOINVULGAMEMASTER",{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvulGameMaster)	}},
+	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoNeutral)	}},
+	{ "COMBATARCHERYMOVEMENTDELAY",{ ELEM_INT,	OFFSETOF(CServerConfig,m_iCombatArcheryMovementDelay)	}},
+	{ "COMBATDAMAGEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatDamageEra)		}},
+	{ "COMBATFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatFlags)			}},
+	{ "COMBATHITCHANCEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatHitChanceEra)	}},
+    { "COMBATPARRYINGERA",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatParryingEra)	}},
+	{ "COMBATSPEEDERA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatSpeedEra)		}},
+	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCommandLog)			}},
+	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_cCommandPrefix)		}},
+	{ "COMMANDTRIGGER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sCommandTrigger)		}},
+	{ "CONNECTINGMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMax)		}},
+	{ "CONNECTINGMAXIP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMaxIP)		}},
+    { "CONTAINERMAXITEMS",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContainerMaxItems)	}},
+	{ "CONTEXTMENULIMIT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContextMenuLimit)		}},
+	{ "CORPSENPCDECAY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpseNPC)		}},
+	{ "CORPSEPLAYERDECAY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpsePlayer)	}},
+	{ "CRIMINALTIMER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCriminalTimer)		}},
+	{ "CUOSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCUOStatus)			}},
+	{ "DEADCANNOTSEELIVING",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_fDeadCannotSeeLiving)	}},
+	{ "DEADSOCKETTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDeadSocketTime)		}},
+	{ "DEBUGFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iDebugFlags)			}},
+	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item)			}},
+	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel)	}},
+	{ "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    OFFSETOF(CServerConfig,m_fDisplayPercentAr)		}},
+	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk )		}},
+	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper )		}},
+	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell )		}},
 #ifdef _DUMPSUPPORT
-	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sDumpAccPackets),		0 }},
+	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sDumpAccPackets)		}},
 #endif
-	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDungeon),		0 }},
-	{ "EMOTEFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iEmoteFlags),			0 }},
-	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fEquippedCast),		0 }},
-	{ "ERALIMITGEAR",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitGear),			0 }},
-	{ "ERALIMITLOOT",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitLoot),			0 }},
-	{ "ERALIMITPROPS",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitProps),		0 }},
-	{ "EVENTSITEM",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sEventsItem),			0 }},
-	{ "EVENTSPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPet),			0 }},
-	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPlayer),		0 }},
-	{ "EVENTSREGION",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsRegion),		0 }},
-	{ "EXPERIENCEKOEFPVM",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVM),	0 }},
-	{ "EXPERIENCEKOEFPVP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVP),	0 }},
-	{ "EXPERIENCEMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceMode),		0 }},
-	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bExperienceSystem),	0 }},
-	{ "EXPERIMENTAL",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iExperimentalFlags),		0 }},
-	{ "FEATUREAOS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureAOS),			0 }},
-	{ "FEATUREEXTRA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureExtra),		0 }},
-	{ "FEATUREKR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureKR),			0 }},
-	{ "FEATURELBR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureLBR),			0 }},
-	{ "FEATUREML",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureML),			0 }},
-	{ "FEATURESA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSA),			0 }},
-	{ "FEATURESE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSE),			0 }},
-	{ "FEATURET2A",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureT2A),			0 }},
-	{ "FEATURETOL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureTOL),			0 }},
-	{ "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fFlipDroppedItems),	0 }},
-	{ "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSaveGarbageCollect),	0 }},
-	{ "FREEZERESTARTTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFreezeRestartTime),	0 }},
-	{ "GAMEMINUTELENGTH",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGameMinuteLength),	0 }},
-	{ "GENERICSOUNDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGenericSounds),		0 }},
-	{ "GUARDLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuardLingerTime),		0 }},
-	{ "GUARDSINSTANTKILL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsInstantKill),	0 }},
-	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsOnMurderers),	0 }},
-	{ "GUESTSMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuestsMax),			0 }},
-	{ "GUILDS",					{ ELEM_VOID,	0,											0 }},
-	{ "HEARALL",				{ ELEM_VOID,	0,											0 }},
-	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime),	0 }},
-	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitpointPercentOnRez),0 }},
-	{ "HITSHUNGERLOSS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitsHungerLoss),		0 }},
-	{ "HITSUPDATERATE",			{ ELEM_VOID,	0,											0 }},
-    { "ITEMHITPOINTSUPDATE",    { ELEM_MASK_INT,OFFSETOF(CServerConfig,_iItemHitpointsUpdate),  0 }},
-	{ "ITEMSMAXAMOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iItemsMaxAmount),		0 }},
-	{ "LEVELMODE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelMode),			0 }},
-	{ "LEVELNEXTAT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelNextAt),			0 }},
-	{ "LEVELSYSTEM",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bLevelSystem),			0 }},
-	{ "LIGHTDAY",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDay),			0 }},
-	{ "LIGHTNIGHT",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightNight),			0 }},
-	{ "LOCALIPADMIN",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLocalIPAdmin),		0 }}, // The local ip is assumed to be the admin.
-	{ "LOG",					{ ELEM_VOID,	0,											0 }},
-	{ "LOGMASK",				{ ELEM_VOID,	0,											0 }}, // GetLogMask
-	{ "LOOTINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLootingIsACrime),		0 }},
-	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLostNPCTeleport),		0 }},
-	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
-	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor),		0 }},
-    { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail),		0 }},
-	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iMapCacheTime),		0 }},
-	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
-	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},
-	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity),	0 }},
-    { "MAXFAME",                { ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxFame),				0 }},
-    { "MAXHOUSESACCOUNT",       { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesAccount),     0 }},
-    { "MAXHOUSESGUILD",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesGuild),       0 }},
-    { "MAXHOUSESPLAYER",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesPlayer),      0 }},
-	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxItemComplexity),   0 }},
-	{ "MAXKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxKarma),			0 }},
-	{ "MAXLOOPTIMES",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxLoopTimes),		0 }},
-	{ "MAXPACKETSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxPacketsPerTick),0 }},
-	{ "MAXPINGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxPings),			0 }},
-	{ "MAXPOLYSTATS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxPolyStats),		0 }},
-	{ "MAXQUEUESIZE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxQueueSize),		0 }},
-	{ "MAXSECTORCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxSectorComplexity),	0 }},
-	{ "MAXSHIPPLANKTELEPORT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxShipPlankTeleport),0 }},
-    { "MAXSHIPSACCOUNT",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsAccount),      0 }},
-    { "MAXSHIPSGUILD",          { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsGuild),        0 }},
-    { "MAXSHIPSPLAYER",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsPlayer),       0 }},
-	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxLengthPerTick),	0 }},
-	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMd5Passwords),		0 }},
-	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMediumCanHearGhosts),	0 }},
-	{ "MINCHARDELETETIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMinCharDeleteTime),	0 }},
-	{ "MINKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMinKarma),			0 }},
-	{ "MONSTERFEAR",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMonsterFear),			0 }},
-	{ "MONSTERFIGHT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMonsterFight),		0 }},
-	{ "MOUNTHEIGHT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iMountHeight),			0 }},
-	{ "MOVERATE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMoveRate),			0 }},
-	{ "MULFILES",				{ ELEM_VOID,	0,											0 }},
-	{ "MURDERDECAYTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMurderDecayTime),		0 }},
-	{ "MURDERMINCOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMurderMinCount),		0 }}, // amount of murders before we get title.
-	{ "MYSQL",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySql),				0 }},
-	{ "MYSQLDATABASE",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlDB),				0 }},
-	{ "MYSQLHOST",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sMySqlHost),			0 }},
-	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlPass),			0 }},
-	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySqlTicks),			0 }},
-	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlUser),			0 }},
-	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetHistoryTTL),		0 }},
-	{ "NETWORKTHREADPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreadPriority),	0 }},
-	{ "NETWORKTHREADS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreads),		0 }},
-	{ "NORESROBE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoResRobe),			0 }},
-	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout),			0 }},
-	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather),			0 }},
-	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi),				0 }},
-	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit),	0 }},
-    { "NPCDISTANCEHEAR",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCDistanceHear),     0 }},
-	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle),		0 }},
-	{ "NPCSHOVENPC",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCShoveNPC),			0 }},
-	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills),		0 }},
-	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost),		0 }},
-	{ "NPCTRAINMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillMax),		0 }},
-	{ "NPCTRAINPERCENT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillPercent),	0 }},
-	{ "NTSERVICE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseNTService),		0 }},
-	{ "OPTIONFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iOptionFlags),			0 }},
-	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOverSkillMultiply),	0 }},
-	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iPacketDeathAnimation),0 }},
-	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fPayFromPackOnly),		0 }},
-	{ "PETSINHERITNOTORIETY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPetsInheritNotoriety),0 }},
-	{ "PLAYEREVIL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaEvil),		0 }},
-	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral),	0 }},
-	{ "PROFILE",				{ ELEM_VOID,	0,											0 }},
-	{ "RACIALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRacialFlags),			0 }},
-	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail),		0 }},
-	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired),	0 }},
-	{ "REVEALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRevealFlags),			0 }},
-	{ "RTICKS",					{ ELEM_VOID,	0,											0 }},
-	{ "RTIME",					{ ELEM_VOID,	0,											0 }},
-	{ "RUNNINGPENALTY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStamRunningPenalty),	0 }},
-	{ "SAVEBACKGROUND",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackgroundTime),	0 }},
-	{ "SAVEPERIOD",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSavePeriod),			0 }},
-	{ "SAVESECTORSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveSectorsPerTick),	0 }},
-	{ "SAVESTEPMAXCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveStepMaxComplexity),	0 }},
-	{ "SCPFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSCPBaseDir),			0 }},
-	{ "SECTORSLEEP",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iSectorSleepDelay),		0 }},
-	{ "SECURE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSecure),				0 }},
-	{ "SKILLPRACTICEMAX",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSkillPracticeMax),	0 }},
-	{ "SNOOPCRIMINAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSnoopCriminal),		0 }},
-	{ "SPEECHOTHER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechOther),			0 }},
-	{ "SPEECHPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechPet),			0 }},
-	{ "SPEECHSELF",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechSelf),			0 }},
-	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor),	0 }},
-	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout),		0 }},
-	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight),	0 }},
-	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag),			0 }},
-	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath),			0 }},
-	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals),	0 }},
-	{ "TELEPORTEFFECTNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_NPC),		0 }},
-	{ "TELEPORTEFFECTPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_Players),	0 }},
-	{ "TELEPORTEFFECTSTAFF",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_Staff),		0 }},
-	{ "TELEPORTSOUNDNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_NPC),		0 }},
-	{ "TELEPORTSOUNDPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Players),	0 }},
-	{ "TELEPORTSOUNDSTAFF",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Staff),		0 }},
-	{ "TELNETLOG",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fTelnetLog),			0 }},
-    { "TICKPERIOD",				{ ELEM_INT,	    0,			                                    0 }},
-	{ "TIMERCALL",				{ ELEM_INT,		OFFSETOF(CServerConfig,_iTimerCall),			0 }},
-	{ "TIMEUP",					{ ELEM_VOID,	0,											0 }},
-	{ "TOOLTIPCACHE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipCache),		0 }},
-	{ "TOOLTIPMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipMode),			0 }},
-	{ "TRADEWINDOWSNOOPING",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iTradeWindowSnooping),	0 }},
-	{ "UOGSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUOGStatus),			0 }},
-	{ "USEASYNCNETWORK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_fUseAsyncNetwork),		0 }},
-	{ "USEAUTHID",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseAuthID),			0 }},	// we use authid like osi
-	{ "USECRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsecrypt),			0 }},	// we don't want crypt clients
-	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseExtraBuffer),		0 }},
-	{ "USEHTTP",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_fUseHTTP),				0 }},
-	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseMapDiffs),			0 }},
-	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsenocrypt),			0 }},	// we don't want no-crypt clients
-	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsePacketPriorities),	0 }},
-	{ "VENDORMARKUP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMarkup),		0 }},
-	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMaxSell),		0 }},
-	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fVendorTradeTitle),	0 }},
-	{ "VERSION",				{ ELEM_VOID,	0,											0 }},
-	{ "WALKBUFFER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWalkBuffer),			0 }},
-	{ "WALKREGEN",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWalkRegen),			0 }},
-	{ "WOOLGROWTHTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWoolGrowthTime),		0 }},
-	{ "WOPCOLOR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWordsOfPowerColor),	0 }},
-	{ "WOPFONT",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWordsOfPowerFont),	0 }},
-	{ "WOPPLAYER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer),	0 }},
-	{ "WOPSTAFF",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerStaff),	0 }},
-	{ "WORLDSAVE",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sWorldBaseDir),		0 }},
-	{ "ZEROPOINT",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sZeroPoint),			0 }},
-	{ nullptr,						{ ELEM_VOID,	0,											0 }}
+	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDungeon)			}},
+	{ "EMOTEFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iEmoteFlags)			}},
+	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fEquippedCast)			}},
+	{ "ERALIMITGEAR",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitGear)			}},
+	{ "ERALIMITLOOT",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
+	{ "ERALIMITPROPS",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iEraLimitProps)			}},
+	{ "EVENTSITEM",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sEventsItem)			}},
+	{ "EVENTSPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPet)			}},
+	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPlayer)			}},
+	{ "EVENTSREGION",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsRegion)			}},
+	{ "EXPERIENCEKOEFPVM",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVM)	}},
+	{ "EXPERIENCEKOEFPVP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVP)	}},
+	{ "EXPERIENCEMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceMode)		}},
+	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bExperienceSystem)		}},
+	{ "EXPERIMENTAL",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiExperimentalFlags)	}},
+	{ "FEATUREAOS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureAOS)			}},
+	{ "FEATUREEXTRA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureExtra)			}},
+	{ "FEATUREKR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureKR)			}},
+	{ "FEATURELBR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureLBR)			}},
+	{ "FEATUREML",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureML)			}},
+	{ "FEATURESA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSA)			}},
+	{ "FEATURESE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSE)			}},
+	{ "FEATURET2A",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureT2A)			}},
+	{ "FEATURETOL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureTOL)			}},
+	{ "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fFlipDroppedItems)		}},
+	{ "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSaveGarbageCollect)	}},
+	{ "FREEZERESTARTTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFreezeRestartTime)	}},
+	{ "GAMEMINUTELENGTH",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGameMinuteLength)		}},
+	{ "GENERICSOUNDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGenericSounds)		}},
+	{ "GUARDLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuardLingerTime)		}},
+	{ "GUARDSINSTANTKILL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsInstantKill)	}},
+	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsOnMurderers)	}},
+	{ "GUESTSMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuestsMax)			}},
+	{ "GUILDS",					{ ELEM_VOID,	0												}},
+	{ "HEARALL",				{ ELEM_VOID,	0												}},
+	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime)	}},
+	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitpointPercentOnRez) }},
+	{ "HITSHUNGERLOSS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitsHungerLoss)		}},
+	{ "HITSUPDATERATE",			{ ELEM_VOID,	0												}},
+    { "ITEMHITPOINTSUPDATE",    { ELEM_MASK_INT,OFFSETOF(CServerConfig,_iItemHitpointsUpdate),  }},
+	{ "ITEMSMAXAMOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iItemsMaxAmount),		}},
+	{ "LEVELMODE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelMode),			}},
+	{ "LEVELNEXTAT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelNextAt),			}},
+	{ "LEVELSYSTEM",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bLevelSystem),			}},
+	{ "LIGHTDAY",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDay),			}},
+	{ "LIGHTNIGHT",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightNight),			}},
+	{ "LOCALIPADMIN",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLocalIPAdmin),		}}, // The local ip is assumed to be the admin.
+	{ "LOG",					{ ELEM_VOID,	0												}},
+	{ "LOGMASK",				{ ELEM_VOID,	0												}}, // GetLogMask
+	{ "LOOTINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLootingIsACrime)		}},
+	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLostNPCTeleport)		}},
+	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags)			}},
+	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor)		}},
+    { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail)			}},
+	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iMapCacheTime)			}},
+	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill)			}},
+	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount)	}},
+	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity)	}},
+    { "MAXFAME",                { ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxFame)				}},
+    { "MAXHOUSESACCOUNT",       { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesAccount)		}},
+    { "MAXHOUSESGUILD",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesGuild)		}},
+    { "MAXHOUSESPLAYER",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesPlayer)		}},
+	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxItemComplexity)	}},
+	{ "MAXKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxKarma)				}},
+	{ "MAXLOOPTIMES",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxLoopTimes)			}},
+	{ "MAXPACKETSPERTICK",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiNetMaxPacketsPerTick)	}},
+	{ "MAXPINGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxPings)			}},
+	{ "MAXPOLYSTATS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxPolyStats)			}},
+	{ "MAXQUEUESIZE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxQueueSize)		}},
+	{ "MAXSECTORCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxSectorComplexity)	}},
+	{ "MAXSHIPPLANKTELEPORT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxShipPlankTeleport)	}},
+    { "MAXSHIPSACCOUNT",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsAccount)		}},
+    { "MAXSHIPSGUILD",          { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsGuild)			}},
+    { "MAXSHIPSPLAYER",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsPlayer)		}},
+	{ "MAXSIZECLIENTIN",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiMaxSizeClientIn)		}},
+	{ "MAXSIZECLIENTOUT",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiMaxSizeClientOut)		}},
+	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CServerConfig,_uiNetMaxLengthPerTick)	}},
+	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMd5Passwords) 		}},
+	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMediumCanHearGhosts)	}},
+	{ "MINCHARDELETETIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMinCharDeleteTime)	}},
+	{ "MINKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMinKarma)				}},
+	{ "MONSTERFEAR",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMonsterFear)			}},
+	{ "MONSTERFIGHT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMonsterFight)			}},
+	{ "MOUNTHEIGHT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iMountHeight)			}},
+	{ "MOVERATE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMoveRate)				}},
+	{ "MULFILES",				{ ELEM_VOID,	0												}},
+	{ "MURDERDECAYTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMurderDecayTime)		}},
+	{ "MURDERMINCOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMurderMinCount)		}}, // amount of murders before we get title.
+	{ "MYSQL",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySql)				}},
+	{ "MYSQLDATABASE",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlDB)				}},
+	{ "MYSQLHOST",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sMySqlHost)			}},
+	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlPass)			}},
+	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySqlTicks)			}},
+	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlUser)			}},
+	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetHistoryTTL)		}},
+	{ "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiNetworkThreadPriority)}},
+	{ "NETWORKTHREADS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiNetworkThreads)		}},
+	{ "NORESROBE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoResRobe)			}},
+	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout)			}},
+	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather)			}},
+	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi)				}},
+	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit)	}},
+    { "NPCDISTANCEHEAR",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCDistanceHear)		}},
+	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle)		}},
+	{ "NPCSHOVENPC",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCShoveNPC)			}},
+	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills)		}},
+	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost)		}},
+	{ "NPCTRAINMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillMax)		}},
+	{ "NPCTRAINPERCENT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillPercent)	}},
+	{ "NTSERVICE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseNTService)			}},
+	{ "OPTIONFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiOptionFlags)			}},
+	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOverSkillMultiply)	}},
+	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iPacketDeathAnimation)	}},
+	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fPayFromPackOnly)		}},
+	{ "PETSINHERITNOTORIETY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPetsInheritNotoriety)	}},
+	{ "PLAYEREVIL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaEvil)		}},
+	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral)	}},
+	{ "PROFILE",				{ ELEM_VOID,	0												}},
+	{ "RACIALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRacialFlags)			}},
+	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail)		}},
+	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired)		}},
+	{ "REVEALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRevealFlags)			}},
+	{ "RTICKS",					{ ELEM_VOID,	0												}},
+	{ "RTIME",					{ ELEM_VOID,	0												}},
+	{ "RUNNINGPENALTY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStamRunningPenalty)	}},
+	{ "SAVEBACKGROUND",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackgroundTime)	}},
+	{ "SAVEPERIOD",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSavePeriod)			}},
+	{ "SAVESECTORSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveSectorsPerTick)	}},
+	{ "SAVESTEPMAXCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveStepMaxComplexity)}},
+	{ "SCPFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSCPBaseDir)			}},
+	{ "SECTORSLEEP",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iSectorSleepDelay)		}},
+	{ "SECURE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSecure)				}},
+	{ "SKILLPRACTICEMAX",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSkillPracticeMax)		}},
+	{ "SNOOPCRIMINAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSnoopCriminal)		}},
+	{ "SPEECHOTHER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechOther)			}},
+	{ "SPEECHPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechPet)			}},
+	{ "SPEECHSELF",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechSelf)			}},
+	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor)		}},
+	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout)			}},
+	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight)	}},
+	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag)				}},
+	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath)			}},
+	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals)		}},
+	{ "TELEPORTEFFECTNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_NPC)	}},
+	{ "TELEPORTEFFECTPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_Players)}},
+	{ "TELEPORTEFFECTSTAFF",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_Staff)	}},
+	{ "TELEPORTSOUNDNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_NPC)		}},
+	{ "TELEPORTSOUNDPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Players)	}},
+	{ "TELEPORTSOUNDSTAFF",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Staff)	}},
+	{ "TELNETLOG",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fTelnetLog)			}},
+    { "TICKPERIOD",				{ ELEM_INT,	    0			                                    }},
+	{ "TIMERCALL",				{ ELEM_INT,		OFFSETOF(CServerConfig,_iTimerCall)				}},
+	{ "TIMEUP",					{ ELEM_VOID,	0												}},
+	{ "TOOLTIPCACHE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipCache)			}},
+	{ "TOOLTIPMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipMode)			}},
+	{ "TRADEWINDOWSNOOPING",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iTradeWindowSnooping)	}},
+	{ "UOGSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUOGStatus)			}},
+	{ "USEASYNCNETWORK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_fUseAsyncNetwork)		}},
+	{ "USEAUTHID",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseAuthID)			}},	// we use authid like osi
+	{ "USECRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsecrypt)				}},	// we don't want crypt clients
+	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseExtraBuffer)		}},
+	{ "USEHTTP",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_fUseHTTP)				}},
+	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseMapDiffs)			}},
+	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsenocrypt)			}},	// we don't want no-crypt clients
+	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsePacketPriorities)	}},
+	{ "VENDORMARKUP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
+	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMaxSell)		}},
+	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fVendorTradeTitle)		}},
+	{ "VERSION",				{ ELEM_VOID,	0												}},
+	{ "WALKBUFFER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWalkBuffer)			}},
+	{ "WALKREGEN",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWalkRegen)			}},
+	{ "WOOLGROWTHTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWoolGrowthTime)		}},
+	{ "WOPCOLOR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWordsOfPowerColor)	}},
+	{ "WOPFONT",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWordsOfPowerFont)		}},
+	{ "WOPPLAYER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer)	}},
+	{ "WOPSTAFF",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerStaff)	}},
+	{ "WORLDSAVE",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sWorldBaseDir)			}},
+	{ "ZEROPOINT",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sZeroPoint)			}},
+	{ nullptr,					{ ELEM_VOID,	0,												}}
 };
 
 bool CServerConfig::r_LoadVal( CScript &s )
@@ -1304,12 +1314,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_EXPERIMENTAL:
-			m_iExperimentalFlags = s.GetArgUVal();
+			_uiExperimentalFlags = s.GetArgUVal();
 			//PrintEFOFFlags(true, false);
 			break;
 
 		case RC_OPTIONFLAGS:
-			m_iOptionFlags = s.GetArgUVal();
+			_uiOptionFlags = s.GetArgUVal();
 			//PrintEFOFFlags(false, true);
 			break;
 
@@ -1329,7 +1339,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				//	iNetThreads = 0;
 				//else if (iNetThreads > 10)
 				//	iNetThreads = 10;
-				m_iNetworkThreads = (uint)iNetThreads;
+				_uiNetworkThreads = (uint)iNetThreads;
 			}
 			else
 				g_Log.EventError("The value of NetworkThreads cannot be modified after the server has started\n");
@@ -1345,7 +1355,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				else
 					priority = IThread::Low + (IThread::Priority)priority;
 
-				m_iNetworkThreadPriority = priority;
+				_uiNetworkThreadPriority = priority;
 			}
 			break;
 		case RC_WALKBUFFER:
@@ -2031,11 +2041,11 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal = g_sServerDescription.c_str();
 			break;
 		case RC_EXPERIMENTAL:
-			sVal.FormatHex( m_iExperimentalFlags );
+			sVal.FormatHex( _uiExperimentalFlags );
 			//PrintEFOFFlags(true, false, pSrc);
 			break;
 		case RC_OPTIONFLAGS:
-			sVal.FormatHex( m_iOptionFlags );
+			sVal.FormatHex( _uiOptionFlags );
 			//PrintEFOFFlags(false, true, pSrc);
 			break;
 		case RC_CLIENTS:		// this is handled by CServerDef as SV_CLIENTS
@@ -3254,8 +3264,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		{
 			CRegionWorld * pRegion = new CRegionWorld( rid, pScript->GetArgStr());
 			pRegion->r_Load( *pScript );
-			if ( ! pRegion->RealizeRegion() )
+			if (!pRegion->RealizeRegion())
+			{
 				delete pRegion; // might be a dupe ?
+			}
 			else
 			{
 				pNewDef = pRegion;
@@ -3286,8 +3298,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pNewDef = pRegion;
 			ASSERT(pNewDef);
 			pRegion->r_Load(*pScript);
-			if ( !pRegion->RealizeRegion() )
+			if (!pRegion->RealizeRegion())
+			{
 				delete pRegion; // might be a dupe ?
+			}
 			else
 			{
 				m_ResHash.AddSortKey( rid, pRegion );
@@ -3809,9 +3823,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			break;
 		}
 		// otherwise, passthrough to default
+		FALLTHROUGH;
 	default:
 		// The name is a DEFNAME or id number
-		ASSERT( restype < RES_QTY );
+		ASSERT( restype > RES_UNKNOWN && restype < RES_QTY );
 		break;
 	}
 
@@ -4444,6 +4459,45 @@ bool CServerConfig::Load( bool fResync )
 			pResFile->ReSync();
 
 		g_Serv.PrintPercent( (size_t)(j + 1), count);
+	}
+
+	// Now that we have parsed every script, we can end the configuration of some resources...
+		// ROOMs have to inherit stuff from the parent AREADEF
+	for (CRegion* pCurRegion : m_RegionDefs)
+	{
+		const RES_TYPE resType = pCurRegion->GetResourceID().GetResType();
+		if (resType != RES_ROOM)
+			continue;
+
+		const CPointBase ptRoomCenter = pCurRegion->m_rectUnion.GetCenter();
+		CRegionLinks vTopRegions;
+		ptRoomCenter.GetRegions(REGION_TYPE_AREA, &vTopRegions);
+		if (vTopRegions.empty())
+			continue;
+
+		CSString sEventsList;
+		for (CRegion* pTopRegion : vTopRegions)
+		{
+			const auto curRegionFlags = pCurRegion->GetRegionFlags();
+			if ((g_Cfg._uiAreaFlags & AREAF_RoomInheritsEvents) || (curRegionFlags & REGION_FLAG_INHERIT_PARENT_EVENTS))
+			{
+				pTopRegion->m_Events.WriteResourceRefList(sEventsList);
+
+				pCurRegion->SetModified(REGMOD_EVENTS);
+				CScript scriptEvent("EVENTS", sEventsList.GetBuffer());
+				pCurRegion->m_Events.r_LoadVal(scriptEvent, RES_REGIONTYPE);
+			}
+
+			if ((g_Cfg._uiAreaFlags & AREAF_RoomInheritsTAGs) || (curRegionFlags & REGION_FLAG_INHERIT_PARENT_TAGS))
+			{
+				pCurRegion->m_TagDefs.Copy(&pTopRegion->m_TagDefs, false);
+			}
+
+			if ((g_Cfg._uiAreaFlags & AREAF_RoomInheritsFlags) || (curRegionFlags & REGION_FLAG_INHERIT_PARENT_FLAGS))
+			{
+				pCurRegion->SetRegionFlags(curRegionFlags | pTopRegion->GetRegionFlags());
+			}
+		}
 	}
 
 	// Make sure we have the basics.

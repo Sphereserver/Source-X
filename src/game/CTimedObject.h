@@ -35,7 +35,7 @@ protected:  inline  void _ClearTimeout() noexcept;
 public:             void  ClearTimeout() noexcept;
 
 public:
-    CTimedObject(PROFILE_TYPE profile);
+    CTimedObject(PROFILE_TYPE profile) noexcept;
     virtual ~CTimedObject();
 
 protected:  inline  bool _IsSleeping() const noexcept;

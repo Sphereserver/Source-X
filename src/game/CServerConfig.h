@@ -31,6 +31,27 @@ using CServerRef = CServerDef*;
 
 
 /**
+ * @enum    EF_TYPE
+ * @brief   ExperimentalFlags (sphere.ini)
+ */
+enum EF_TYPE
+{
+    EF_NoDiagonalCheckLOS = 0x0000001,    // Disable LOS checks on diagonal directions.
+    EF_Dynamic_Backsave = 0x0000002,    // This will enable, if necessary, if a backgroundsave tick is triggered to save more than only one Sector.
+    EF_ItemStacking = 0x0000004,    // Enable item stacking feature when drop items on ground.
+    EF_ItemStackDrop = 0x0000008,    // The item stack will drop when an item got removed from the stack.
+    EF_FastWalkPrevention = 0x0000010,    // Enable client fastwalk prevention (INCOMPLETE YET).
+    EF_Intrinsic_Locals = 0x0000020,    // Disables the needing of 'local.', 'tag.', etc. Be aware of not creating variables with the same name of already-existing functions.
+    EF_Item_Strict_Comparison = 0x0000040,    // Don't consider log/board and leather/hide as the same resource type.
+    EF_AllowTelnetPacketFilter = 0x0000200,    // Enable packet filtering for telnet connections as well.
+    EF_Script_Profiler = 0x0000400,    // Record all functions/triggers execution time statistics (it can be viewed pressing P on console).
+    EF_DamageTools = 0x0002000,    // Damage tools (and fire @damage on them) while mining or lumberjacking
+    EF_UsePingServer = 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
+    EF_FixCanSeeInClosedConts = 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
+    EF_WalkCheckHeightMounted = 0x0040000,    // Unlike the client does, assume an height increased by 4 in walkchecks if the char is mounted. Enabling this may prevent mounted characters to walk under places they could before.
+};
+
+/**
  * @enum    OF_TYPE
  * @brief   OptionFlags (sphere.ini)
  */
@@ -63,24 +84,14 @@ enum OF_TYPE
 };
 
 /**
- * @enum    EF_TYPE
- * @brief   ExperimentalFlags (sphere.ini)
+ * @enum    AREAF_TYPE
+ * @brief   AreaFlags (sphere.ini)
  */
-enum EF_TYPE
+enum AREAF_TYPE
 {
-	EF_NoDiagonalCheckLOS			= 0x0000001,    // Disable LOS checks on diagonal directions.
-	EF_Dynamic_Backsave				= 0x0000002,    // This will enable, if necessary, if a backgroundsave tick is triggered to save more than only one Sector.
-	EF_ItemStacking					= 0x0000004,    // Enable item stacking feature when drop items on ground.
-	EF_ItemStackDrop				= 0x0000008,    // The item stack will drop when an item got removed from the stack.
-	EF_FastWalkPrevention			= 0x0000010,    // Enable client fastwalk prevention (INCOMPLETE YET).
-	EF_Intrinsic_Locals				= 0x0000020,    // Disables the needing of 'local.', 'tag.', etc. Be aware of not creating variables with the same name of already-existing functions.
-	EF_Item_Strict_Comparison		= 0x0000040,    // Don't consider log/board and leather/hide as the same resource type.
-	EF_AllowTelnetPacketFilter		= 0x0000200,    // Enable packet filtering for telnet connections as well.
-	EF_Script_Profiler				= 0x0000400,    // Record all functions/triggers execution time statistics (it can be viewed pressing P on console).
-	EF_DamageTools					= 0x0002000,    // Damage tools (and fire @damage on them) while mining or lumberjacking
-	EF_UsePingServer				= 0x0008000,    // Enable the experimental Ping Server (for showing pings on the server list, uses UDP port 12000)
-	EF_FixCanSeeInClosedConts		= 0x0020000,    // Change CANSEE to return 0 for items inside containers that a client hasn't opened
-    EF_WalkCheckHeightMounted       = 0x0040000,    // Unlike the client does, assume an height increased by 4 in walkchecks if the char is mounted. Enabling this may prevent mounted characters to walk under places they could before.
+    AREAF_RoomInheritsEvents    = 0x0000001,
+    AREAF_RoomInheritsFlags     = 0x0000002,
+    AREAF_RoomInheritsTAGs      = 0x0000004
 };
 
 /**
@@ -358,8 +369,9 @@ public:
 	// other
 	
     int  m_iAutoProcessPriority;
-	uint m_iExperimentalFlags;	// Experimental Flags.
-	uint m_iOptionFlags;		// Option Flags.
+	uint _uiExperimentalFlags;	// Experimental Flags.
+	uint _uiOptionFlags;		// Option Flags.
+    uint _uiAreaFlags;		    // Area Flags.
     bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
     int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
 	int64 m_iWoolGrowthTime;    // how long till wool grows back on sheared sheep, in minutes (stored as milliseconds).
@@ -507,13 +519,15 @@ public:
 	CSString m_sMySqlDB;    // MySQL DB.
 
 	// network settings
-	uint m_iNetworkThreads;         // number of network threads to create
-	uint m_iNetworkThreadPriority;  // priority of network threads
+	uint _uiNetworkThreads;         // number of network threads to create
+	uint _uiNetworkThreadPriority;  // priority of network threads
 	int	 m_fUseAsyncNetwork;        // 0=normal send, 1=async send, 2=async send for 4.0.0+ only
 	int	 m_iNetMaxPings;            // max pings before blocking an ip
 	int	 m_iNetHistoryTTL;          // time to remember an ip
-	int	 m_iNetMaxPacketsPerTick;   // max packets to send per tick (per queue)
-	uint m_iNetMaxLengthPerTick;    // max packet length to send per tick (per queue) (also max length of individual packets)
+	int	 _uiNetMaxPacketsPerTick;   // max packets to send per tick (per queue)
+	uint _uiNetMaxLengthPerTick;    // max packet length to send per tick (per queue) (also max length of individual packets)
+    uint _uiMaxSizeClientOut;       // Maximum number of bytes a client can send to the server in 10 seconds before being disconnected
+    uint _uiMaxSizeClientIn;        // Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected
 	int	 m_iNetMaxQueueSize;        // max packets to hold per queue (comment out for unlimited)
 	bool m_fUsePacketPriorities;    // true to prioritise sending packets
 	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer
@@ -613,7 +627,7 @@ public:
 	bool LoadCryptIni( void );
 
     /**
-     * @brief   Loads or resync scripts..
+     * @brief   Loads or resync client files and scripts.
      *
      * @param   fResync Resync or normal load?.
      *
@@ -1041,8 +1055,8 @@ typedef std::map<dword,dword> KRGumpsMap;
 
 
 
-#define IsSetEF(ef)				((g_Cfg.m_iExperimentalFlags & ef) != 0)
-#define IsSetOF(of)				((g_Cfg.m_iOptionFlags & of) != 0)
+#define IsSetEF(ef)				((g_Cfg._uiExperimentalFlags & ef) != 0)
+#define IsSetOF(of)				((g_Cfg._uiOptionFlags & of) != 0)
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
 
