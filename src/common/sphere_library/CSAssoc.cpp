@@ -39,7 +39,7 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 	sizeof(dword), // ELEM_MASK_DWORD,	// bits in a dword
 };
 
-bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
+bool CElementDef::SetValStr( void * pBase, lpctstr ptcVal ) const
 {
 	// Set the element value as a string.
 	uint64 qwVal = 0;
@@ -50,12 +50,12 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 		case ELEM_VOID:
 			return false;
 		case ELEM_CSTRING:
-			*static_cast<CSString *>(pValPtr) = pszVal;
+			*static_cast<CSString *>(pValPtr) = ptcVal;
 			return true;
 		case ELEM_BOOL:
 		case ELEM_INT:
 		case ELEM_INT64:
-			qwVal = Exp_GetVal( pszVal );
+			qwVal = Exp_Get64Val(ptcVal);
 			memcpy( pValPtr, &qwVal, GetValLength() );
 			return true;
 		case ELEM_BYTE:
@@ -66,7 +66,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 		case ELEM_MASK_DWORD:	// bits in a dword
 		case ELEM_MASK_INT:		// bits in an (unsigned) int
 		case ELEM_MASK_INT64:	// bits in an (unsigned) int64
-			qwVal = Exp_GetUVal( pszVal );
+			qwVal = Exp_GetU64Val(ptcVal);
 			memcpy( pValPtr, &qwVal, GetValLength());
 			return true;
 		default:
