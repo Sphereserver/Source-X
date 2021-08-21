@@ -49,6 +49,8 @@ enum ELEM_TYPE	// define types of structure/record elements.
 	ELEM_MASK_WORD,	// bits in a word
 	ELEM_INT,		// Whatever the int size is. 4 i assume
 	ELEM_MASK_INT,
+	ELEM_INT64,		// 8 bytes
+	ELEM_MASK_INT64,// 8 bytes, hex
 	ELEM_DWORD,		// 4 bytes.
 	ELEM_MASK_DWORD,	// bits in a dword
 

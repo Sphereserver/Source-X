@@ -33,6 +33,8 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 	sizeof(word), // ELEM_MASK_WORD,	// bits in a word
 	sizeof(int),  // ELEM_INT,			// Whatever the int size is. 4 i assume
 	sizeof(uint), // ELEM_MASK_INT,		// bits in a int
+	sizeof(int64),  // ELEM_INT64,		// 8 bytes
+	sizeof(uint64), // ELEM_MASK_INT64,	// 8 bytes.
 	sizeof(dword), // ELEM_DWORD,		// 4 bytes.
 	sizeof(dword), // ELEM_MASK_DWORD,	// bits in a dword
 };
@@ -40,7 +42,7 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 {
 	// Set the element value as a string.
-	dword dwVal = 0;
+	uint64 qwVal = 0;
 	//ASSERT(m_offset>=0);
 	void * pValPtr = GetValPtr(pBase);
 	switch ( m_type )
@@ -52,8 +54,9 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 			return true;
 		case ELEM_BOOL:
 		case ELEM_INT:
-			dwVal = Exp_GetVal( pszVal );
-			memcpy( pValPtr, &dwVal, GetValLength() );
+		case ELEM_INT64:
+			qwVal = Exp_GetVal( pszVal );
+			memcpy( pValPtr, &qwVal, GetValLength() );
 			return true;
 		case ELEM_BYTE:
 		case ELEM_WORD:
@@ -62,8 +65,9 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 		case ELEM_MASK_WORD:	// bits in a word
 		case ELEM_MASK_DWORD:	// bits in a dword
 		case ELEM_MASK_INT:		// bits in an (unsigned) int
-			dwVal = Exp_GetUVal( pszVal );
-			memcpy( pValPtr, &dwVal, GetValLength());
+		case ELEM_MASK_INT64:	// bits in an (unsigned) int64
+			qwVal = Exp_GetUVal( pszVal );
+			memcpy( pValPtr, &qwVal, GetValLength());
 			return true;
 		default:
 			break;

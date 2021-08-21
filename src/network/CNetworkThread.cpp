@@ -132,39 +132,53 @@ void CNetworkThread::tick(void)
     {
         _iTimeLastStateDataCheck = iTimeCur;
 
-        for (CNetState* pCurState : m_states)
+        if ((g_Cfg._iMaxSizeClientOut != 0) || (g_Cfg._iMaxSizeClientIn != 0))
         {
-            uchar fKick = 0;
-            if (pCurState->_uiInByteCounter > g_Cfg._uiMaxSizeClientIn)
-                fKick = 1;
-            else if (pCurState->_uiOutByteCounter > g_Cfg._uiMaxSizeClientOut)
-                fKick = 2;
-
-			if (fKick)
-			{
-				CClient* pCurClient = pCurState->getClient();
-                if (pCurClient)
+            for (CNetState* pCurState : m_states)
+            {
+                uchar uiKick = 0;
+                int64 iBytes, iQuota;
+                if ((g_Cfg._iMaxSizeClientOut != 0) && (pCurState->_iOutByteCounter > g_Cfg._iMaxSizeClientOut))
                 {
-                    pCurClient->addKick(nullptr);
+                    uiKick = 1;
+                    iBytes = pCurState->_iOutByteCounter, iQuota = g_Cfg._iMaxSizeClientOut;
                 }
-                else
+                else if ((g_Cfg._iMaxSizeClientIn != 0) && (pCurState->_iInByteCounter > g_Cfg._iMaxSizeClientIn))
                 {
-                    pCurState->markReadClosed();
-                    pCurState->markWriteClosed();
+                    uiKick = 2;
+                    iBytes = pCurState->_iInByteCounter, iQuota = g_Cfg._iMaxSizeClientIn;
                 }
 
-                const CAccount* pAccount = (pCurClient ? pCurClient->GetAccount() : nullptr);
-                g_Log.EventWarn(
-                    "NetState id %d (IP: %s, Account: %s) KICKED because it exceeded its %s quota (%" PRIuSIZE_T "/%u).\n",
-                    pCurState->id(),
-                    pCurState->m_socket.GetPeerName().GetAddrStr(), (pAccount ? pAccount->GetName() : "N/A"),
-                    ((fKick == 1) ? "input" : "output"),
-                    ((fKick == 1) ? pCurState->_uiInByteCounter : pCurState->_uiOutByteCounter),
-                    ((fKick == 1) ? g_Cfg._uiMaxSizeClientIn : g_Cfg._uiMaxSizeClientOut)
-                    );
-			}
+                if (uiKick)
+                {
+                    bool fLog = true;
+                    CClient* pCurClient = pCurState->getClient();
+                    if (pCurClient)
+                    {
+                        fLog = pCurClient->Event_ExceededNetworkQuota(uiKick, iBytes, iQuota);
+                    }
+                    else
+                    {
+                        pCurState->markReadClosed();
+                        pCurState->markWriteClosed();
+                    }
 
-            pCurState->_uiInByteCounter = pCurState->_uiOutByteCounter = 0;
+                    if (fLog)
+                    {
+                        const CAccount* pAccount = (pCurClient ? pCurClient->GetAccount() : nullptr);
+                        g_Log.EventWarn(
+                            "NetState id %d (IP: %s, Account: %s) exceeded its %s quota (%" PRId64 "/% " PRId64 ").\n",
+                            pCurState->id(),
+                            pCurState->m_socket.GetPeerName().GetAddrStr(), (pAccount ? pAccount->GetName() : "NA"),
+                            ((uiKick == 2) ? "input" : "output"),
+                            ((uiKick == 2) ? pCurState->_iInByteCounter : pCurState->_iOutByteCounter),
+                            ((uiKick == 2) ? g_Cfg._iMaxSizeClientIn : g_Cfg._iMaxSizeClientOut)
+                        );
+                    }
+                }
+
+                pCurState->_iInByteCounter = pCurState->_iOutByteCounter = 0;
+            }
         }
     }
 }

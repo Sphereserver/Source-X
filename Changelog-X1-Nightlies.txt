@@ -2802,8 +2802,20 @@ It will check if distance is > 10, so you don't need to write the distance check
 	region_flag_inherit_parent_events 0100000 // This region (areadef/roomdef) inherits EVENTS from the region it's contained in
 	region_flag_inherit_parent_flags  0200000 // This region (areadef/roomdef) inherits FLAGS from the region it's contained in
 	region_flag_inherit_parent_tags   0400000 // This region (areadef/roomdef) inherits TAGs from the region it's contained in
-- Added: New ini networking flags to detect and block clients sending/receiving too much data for it to be legit:
-	// Maximum number of bytes a client can send to the server in 10 seconds before being disconnected
-	MaxSizeClientOut=50000
-	// Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected
-	MaxSizeClientIn=10000
+- Added: New ini networking flags to detect clients sending/receiving too much data for it to be legit:
+		// Maximum number of bytes a client can send to the server in 10 seconds before being disconnected. 0 = disabled
+		MaxSizeClientOut=50000
+		// Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected. 0 = disabled
+		MaxSizeClientIn=10000
+	When a quota is exceeded, FUNCTION f_onclient_exceed_network_quota is called. By default, the client is disconnected.
+		// Variables:
+		//	LOCAL.Account --> Account name connecting ("NA" if no account attached)
+		//	LOCAL.IP      --> IP address connecting
+		//      SRC --> Client Object
+		//      ARGN1 --> (1: output quota; 2: input quota)
+		//      ARGN2 --> bytes sent/received
+		//      ARGN3 --> maximum bytes allowed to be sent/received (quota)
+		// Return:
+		//    0 --> Ignore this, stop hardcoded behavior but generate a log message
+		//    1 --> Ignore this, stop hardcoded behavior and do not generate a log message
+		//    2 --> Disconnect client and generate log message (default behavior)

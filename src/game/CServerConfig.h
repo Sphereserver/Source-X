@@ -526,8 +526,8 @@ public:
 	int	 m_iNetHistoryTTL;          // time to remember an ip
 	int	 _uiNetMaxPacketsPerTick;   // max packets to send per tick (per queue)
 	uint _uiNetMaxLengthPerTick;    // max packet length to send per tick (per queue) (also max length of individual packets)
-    uint _uiMaxSizeClientOut;       // Maximum number of bytes a client can send to the server in 10 seconds before being disconnected
-    uint _uiMaxSizeClientIn;        // Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected
+    int64 _iMaxSizeClientOut;       // Maximum number of bytes a client can send to the server in 10 seconds before being disconnected
+    int64 _iMaxSizeClientIn;        // Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected
 	int	 m_iNetMaxQueueSize;        // max packets to hold per queue (comment out for unlimited)
 	bool m_fUsePacketPriorities;    // true to prioritise sending packets
 	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer

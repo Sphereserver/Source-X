@@ -350,6 +350,7 @@ public:
     void Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg);
 	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
 	bool Event_CheckWalkBuffer(byte rawdir);
+	bool Event_ExceededNetworkQuota(uchar uiType, int64 iBytes, int64 iQuota);
 
 	TRIGRET_TYPE Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj );
 	TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );

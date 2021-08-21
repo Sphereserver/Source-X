@@ -290,8 +290,8 @@ CServerConfig::CServerConfig()
 	_uiNetMaxPacketsPerTick = 50;
 	_uiNetMaxLengthPerTick	= 18'000;
 	m_iNetMaxQueueSize		= 75;
-	_uiMaxSizeClientOut		= 50'000;
-	_uiMaxSizeClientIn		= 10'000;
+	_iMaxSizeClientOut		= 50'000;
+	_iMaxSizeClientIn		= 10'000;
 	m_fUsePacketPriorities	= false;
 	m_fUseExtraBuffer		= true;
 
@@ -821,8 +821,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
     { "MAXSHIPSACCOUNT",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsAccount)		}},
     { "MAXSHIPSGUILD",          { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsGuild)			}},
     { "MAXSHIPSPLAYER",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsPlayer)		}},
-	{ "MAXSIZECLIENTIN",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiMaxSizeClientIn)		}},
-	{ "MAXSIZECLIENTOUT",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,_uiMaxSizeClientOut)		}},
+	{ "MAXSIZECLIENTIN",		{ ELEM_INT64,	OFFSETOF(CServerConfig,_iMaxSizeClientIn)		}},
+	{ "MAXSIZECLIENTOUT",		{ ELEM_INT64,	OFFSETOF(CServerConfig,_iMaxSizeClientOut)		}},
 	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CServerConfig,_uiNetMaxLengthPerTick)	}},
 	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMd5Passwords) 		}},
 	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMediumCanHearGhosts)	}},

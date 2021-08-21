@@ -804,6 +804,29 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	return true;
 }
 
+bool CClient::Event_ExceededNetworkQuota(uchar uiType, int64 iBytes, int64 iQuota)
+{
+	ADDTOCALLSTACK("CClient::Event_ExceededNetworkQuota");
+
+	CScriptTriggerArgs Args(uiType, iBytes, iQuota);
+	Args.m_VarsLocal.SetStrNew("Account", GetName());
+	Args.m_VarsLocal.SetStrNew("IP", GetPeer().GetAddrStr());
+
+	TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+	r_Call("f_onclient_exceed_network_quota", this, &Args, nullptr, &tRet);
+
+	if (tRet == TRIGRET_RET_FALSE)
+	{
+		return true;	// print log message
+	}
+	if (tRet == TRIGRET_RET_TRUE)
+	{
+		return false;	// no log message
+	}
+
+	addKick(&g_Serv, false);
+	return true;
+}
 
 
 bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves

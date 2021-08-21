@@ -27,7 +27,7 @@ CNetState::CNetState(int id)
     m_incoming.buffer = nullptr;
     m_incoming.rawBuffer = nullptr;
     m_packetExceptions = 0;
-    _uiInByteCounter = _uiOutByteCounter = 0;
+    _iInByteCounter = _iOutByteCounter = 0;
     m_clientType = CLIENTTYPE_2D;
     m_clientVersion = 0;
     m_reportedVersion = 0;

@@ -96,7 +96,7 @@ void CNetworkInput::receiveData()
         // receive data
         EXC_SET_BLOCK("messages - receive");
         int received = state->m_socket.Receive(m_receiveBuffer, NETWORK_BUFFERSIZE, 0);
-        state->_uiInByteCounter += SphereAbs(received);
+        state->_iInByteCounter += SphereAbs(received);
         if (received <= 0 || received > NETWORK_BUFFERSIZE)
         {
             state->markReadClosed();
