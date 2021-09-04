@@ -813,7 +813,7 @@ bool CClient::Event_ExceededNetworkQuota(uchar uiType, int64 iBytes, int64 iQuot
 	Args.m_VarsLocal.SetStrNew("IP", GetPeer().GetAddrStr());
 
 	TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
-	r_Call("f_onclient_exceed_network_quota", this, &Args, nullptr, &tRet);
+	g_Serv.r_Call("f_onclient_exceed_network_quota", this, &Args, nullptr, &tRet);
 
 	if (tRet == TRIGRET_RET_FALSE)
 	{
