@@ -2819,3 +2819,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 		//    0 --> Ignore this, stop hardcoded behavior but generate a log message
 		//    1 --> Ignore this, stop hardcoded behavior and do not generate a log message
 		//    2 --> Disconnect client and generate log message (default behavior)
+		
+		
+13-09-2021, Drk84
+-Fixed: Failing the smelting consumed the whole ore/item stack instead of random amount (a value between 1 and half the stack size).

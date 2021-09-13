@@ -1191,7 +1191,9 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		if (iMiningSkill < pBaseDef->m_ttIngot.m_iSkillMin)
 		{
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MINING_SKILL), pBaseDef->GetName());
-				continue;
+				if (iResourceTotalQty > 1) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfull get the other type of lingots.
+					continue;
+				return false;
 		}
 		
 		const int iSkillRange = pBaseDef->m_ttIngot.m_iSkillMax - pBaseDef->m_ttIngot.m_iSkillMin;
@@ -1204,7 +1206,9 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			word iAmountLost = (word)(Calc_GetRandVal(pItemOre->GetAmount() / 2) + 1);
 			pItemOre->ConsumeAmount(iAmountLost);	// lose up to half the resources.
 			iOreQty -= iAmountLost;
-			continue;
+			if ( iResourceTotalQty > 1 ) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfull get the other type of lingots.
+				continue;
+			return false;
 		}
 		// Payoff - Amount of ingots i get.
 		CItem * pIngots = CItem::CreateScript(pBaseDef->GetID(), this );
@@ -1216,6 +1220,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		pIngots->SetAmount(iResourceQty);
 		ItemBounce( pIngots );
 	}
+
 	pItemOre->ConsumeAmount(pItemOre->GetAmount());
 	return true;
 }
