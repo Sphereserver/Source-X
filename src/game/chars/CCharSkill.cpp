@@ -1096,6 +1096,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	Emote(pszMsg);
 
 	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
+	bool fSkipMiningSmeltReq = false;	//Skip the minimum requirement in Mining skill for attempting the smelt action, this will be stored in ARGN3.
 	word iOreQty = pItemOre->GetAmount();
 	word iResourceQty = 0;
 	size_t iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.		
@@ -1152,6 +1153,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	}
 
 	iMiningSkill = (ushort)Args.m_iN1;
+	fSkipMiningSmeltReq = (bool)Args.m_iN3;
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		tchar* pszTmp = Str_GetTemp();
@@ -1188,7 +1190,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		}
 
 		// Try to make ingots
-		if (iMiningSkill < pBaseDef->m_ttIngot.m_iSkillMin)
+		if (iMiningSkill < pBaseDef->m_ttIngot.m_iSkillMin && !fSkipMiningSmeltReq)
 		{
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MINING_SKILL), pBaseDef->GetName());
 				if (iResourceTotalQty > 1) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfull get the other type of lingots.

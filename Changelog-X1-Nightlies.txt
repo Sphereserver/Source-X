@@ -2822,4 +2822,6 @@ It will check if distance is > 10, so you don't need to write the distance check
 		
 		
 13-09-2021, Drk84
--Fixed: Failing the smelting consumed the whole ore/item stack instead of random amount (a value between 1 and half the stack size).
+-Fixed: Failing the smelting action consumed the whole ore/item stack instead of a random amount (a value between 1 and half the stack size).
+-Added: ARGN3 in the @ItemSmelt/@Smelt trigger, setting it to 1 will skip the minimum requirement for smelting ore to ingots.
+		By default the minimum requirement for smelting is stored in the TDATA1 property of the ingot itemdef.
