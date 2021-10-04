@@ -3156,16 +3156,33 @@ void CChar::Spell_CastFail(bool fAbort)
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
 
-	ushort iManaLoss = 0, iTithingLoss = 0;
+	ushort iManaLoss = 0, iTithingLoss = 0, iManaReq = 0;
 	CSpellDef *pSpell = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
  	if (!pSpell)
 		return;
 
-	if (g_Cfg.m_fManaLossFail && !fAbort)
-		iManaLoss = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+	if (fAbort)
+	{
+		if (g_Cfg.m_fManaLossAbort)
+		{
+			iManaReq = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+			iManaLoss = iManaReq / 2 + Calc_GetRandVal(iManaReq / 2 + iManaReq / 4); //Formula take from 56b. Sometime the mana consume is > of the mana require for the spell
+		}
 
-	if (g_Cfg.m_fReagentLossFail && !fAbort)
-		iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+		if (g_Cfg.m_fReagentLossAbort)
+			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+	}
+	else //Spell fail without abort
+	{
+		if (g_Cfg.m_fManaLossFail)
+		{
+			iManaReq = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+			iManaLoss = iManaReq / 2 + Calc_GetRandVal(iManaReq / 2 + iManaReq / 4); //Formula take from 56b. Sometime the mana consume is > of the mana require for the spell
+		}
+
+		if (g_Cfg.m_fReagentLossFail)
+			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
+	}
 
 	CScriptTriggerArgs	Args( m_atMagery.m_iSpell, iManaLoss, m_Act_Prv_UID.ObjFind() );
 
@@ -3199,21 +3216,44 @@ void CChar::Spell_CastFail(bool fAbort)
 		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
 
 	//consume the reagents and tithing points (if any).
-	if (g_Cfg.m_fReagentLossFail && !fAbort)
+	if (fAbort)
 	{
-		//Spell_CanCast(m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false);
-		g_Cfg.Calc_SpellReagentsConsume(this, pSpell, m_Act_Prv_UID.ObjFind());
-		if ( iTithingLoss > 0)
+		if (g_Cfg.m_fReagentLossAbort)
 		{
-			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
-			int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
-			pVarTithing->SetValNum(iValTithing - iTithingLoss);
+			//Spell_CanCast(m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false);
+			g_Cfg.Calc_SpellReagentsConsume(this, pSpell, m_Act_Prv_UID.ObjFind());
+			if (iTithingLoss > 0)
+			{
+				CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+				int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
+				pVarTithing->SetValNum(iValTithing - iTithingLoss);
+			}
 		}
+
+		//consume mana.
+		if (g_Cfg.m_fManaLossAbort)
+			UpdateStatVal(STAT_INT, -iManaLoss);
+	}
+	else //Spell fail without abort
+	{
+		if (g_Cfg.m_fReagentLossFail)
+		{
+			//Spell_CanCast(m_atMagery.m_iSpell, false, m_Act_Prv_UID.ObjFind(), false);
+			g_Cfg.Calc_SpellReagentsConsume(this, pSpell, m_Act_Prv_UID.ObjFind());
+			if (iTithingLoss > 0)
+			{
+				CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
+				int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
+				pVarTithing->SetValNum(iValTithing - iTithingLoss);
+			}
+		}
+
+		//consume mana.
+		if (g_Cfg.m_fManaLossFail)
+			UpdateStatVal(STAT_INT, -iManaLoss);
 	}
 
-	//consume mana.
-	if (g_Cfg.m_fManaLossFail && !fAbort)
-		UpdateStatVal(STAT_INT, -iManaLoss);
+
 
 }
 
