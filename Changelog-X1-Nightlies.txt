@@ -2826,7 +2826,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 -Added: ARGN3 in the @ItemSmelt/@Smelt trigger, setting it to 1 will skip the minimum requirement for smelting ore to ingots.
 		By default the minimum requirement for smelting is stored in the TDATA1 property of the ingot itemdef.
 
-03-10-2021, Jhobean
+05-10-2021, Jhobean
 - Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort. 
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
-- Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the skill. The old 56b formula is now use to determine the correct amount of mana to consume.
+- Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.

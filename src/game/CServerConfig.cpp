@@ -53,6 +53,7 @@ CServerConfig::CServerConfig()
 	//Magic
 	m_fManaLossAbort		= false;
     m_fManaLossFail		    = false;
+	m_fManaLossPercent		= 50;
 	m_fNPCCanFizzleOnHit	= false;
 	m_fReagentLossAbort		= false;
 	m_fReagentLossFail		= false;
@@ -548,6 +549,7 @@ enum RC_TYPE
 	RC_MAGICUNLOCKDOOR,			// m_iMagicUnlockDoor
 	RC_MANALOSSABORT,			// m_fManaLossAbort
     RC_MANALOSSFAIL,			// m_fManaLossFail
+	RC_MANALOSSPERCENT,			// m_fManaLossPercent
 	RC_MAPCACHETIME,
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
 	RC_MAXCHARSPERACCOUNT,		//  
@@ -806,6 +808,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor)		}},
 	{ "MANALOSSABORT",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossAbort)		}},
     { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail)			}},
+	{ "MANALOSSPERCENT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_fManaLossPercent)		}},
 	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iMapCacheTime)			}},
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill)			}},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount)	}},

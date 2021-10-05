@@ -3156,7 +3156,7 @@ void CChar::Spell_CastFail(bool fAbort)
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
 
-	ushort iManaLoss = 0, iTithingLoss = 0, iManaReq = 0;
+	ushort iManaLoss = 0, iTithingLoss = 0;
 	CSpellDef *pSpell = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
  	if (!pSpell)
 		return;
@@ -3164,10 +3164,7 @@ void CChar::Spell_CastFail(bool fAbort)
 	if (fAbort)
 	{
 		if (g_Cfg.m_fManaLossAbort)
-		{
-			iManaReq = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
-			iManaLoss = iManaReq / 2 + Calc_GetRandVal(iManaReq / 2 + iManaReq / 4); //Formula take from 56b. Sometime the mana consume is > of the mana require for the spell
-		}
+			iManaLoss = (g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind()) * g_Cfg.m_fManaLossPercent/100);
 
 		if (g_Cfg.m_fReagentLossAbort)
 			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
@@ -3175,10 +3172,7 @@ void CChar::Spell_CastFail(bool fAbort)
 	else //Spell fail without abort
 	{
 		if (g_Cfg.m_fManaLossFail)
-		{
-			iManaReq = g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind());
-			iManaLoss = iManaReq / 2 + Calc_GetRandVal(iManaReq / 2 + iManaReq / 4); //Formula take from 56b. Sometime the mana consume is > of the mana require for the spell
-		}
+			iManaLoss = (g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind()) * g_Cfg.m_fManaLossPercent / 100);
 
 		if (g_Cfg.m_fReagentLossFail)
 			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
