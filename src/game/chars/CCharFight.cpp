@@ -717,6 +717,8 @@ effect_bounce:
 				iDef /= 2;
 
 			iDmg -= iDef;
+			if (iDmg <= 0)
+				iDmg = 0;
 		}
 	}
 

@@ -2830,3 +2830,4 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort. 
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
 - Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
+- Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
