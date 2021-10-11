@@ -406,11 +406,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 24-02-2018, Drk84
 - Fixed: Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.
 
-03-03-2018, Drk84
-
-05-03-2018, Drk84
-- [Port from 0.56d, 30-06-2016, Coruja] Fixed: WOP flood when casting spells using extremely short delays.
-
 07-03-2018, Nolok
 - Fixed: light sources didn't change their light type according to their MOREZ.
 	Remember: a light source needs the CAN_I_LIGHT CAN flag and the LightSource Tiledata flag.
@@ -2831,3 +2826,4 @@ It will check if distance is > 10, so you don't need to write the distance check
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
 - Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
+- Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior (Issue #776)
