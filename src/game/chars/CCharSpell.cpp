@@ -3676,17 +3676,22 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Cure:
 		case SPELL_Arch_Cure:
-			if (g_Cfg.Calc_CurePoisonChance(LayerFind(LAYER_FLAG_Poison), iSkillLevel, pCharSrc->IsPriv(PRIV_GM)))
+			if (IsStatFlag(STATF_POISONED))
 			{
-				SetPoisonCure((spell == SPELL_Arch_Cure || iSkillLevel > 900) ? true : false);
-				pCharSrc->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pCharSrc == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (GetName()));
-				if (pCharSrc != this)
-					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), pCharSrc->GetName());
-			}
-			else
-			{
-				pCharSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
-				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
+				if (g_Cfg.Calc_CurePoisonChance(LayerFind(LAYER_FLAG_Poison), iSkillLevel, pCharSrc->IsPriv(PRIV_GM)))
+				{
+					SetPoisonCure((spell == SPELL_Arch_Cure || iSkillLevel > 900) ? true : false);
+					pCharSrc->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_1), (pCharSrc == this) ? g_Cfg.GetDefaultMsg(DEFMSG_HEALING_YOURSELF) : (GetName()));
+					if (pCharSrc != this)
+						SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), pCharSrc->GetName());
+				}
+				else
+				{
+					if (pCharSrc != this)
+						pCharSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
+
+					SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
+				}
 			}
 			break;
 	

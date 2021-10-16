@@ -184,7 +184,7 @@ void CClient::addWebLaunch( lpctstr pPage )
 	// Direct client to a web page
 	if ( !pPage || !pPage[0] )
 		return;
-
+	SysMessageDefault(DEFMSG_WEB_BROWSER_START);
 	new PacketWebPage(this, pPage);
 }
 
