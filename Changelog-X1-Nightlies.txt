@@ -406,11 +406,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 24-02-2018, Drk84
 - Fixed: Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.
 
-03-03-2018, Drk84
-
-05-03-2018, Drk84
-- [Port from 0.56d, 30-06-2016, Coruja] Fixed: WOP flood when casting spells using extremely short delays.
-
 07-03-2018, Nolok
 - Fixed: light sources didn't change their light type according to their MOREZ.
 	Remember: a light source needs the CAN_I_LIGHT CAN flag and the LightSource Tiledata flag.
@@ -2825,3 +2820,11 @@ It will check if distance is > 10, so you don't need to write the distance check
 -Fixed: Failing the smelting action consumed the whole ore/item stack instead of a random amount (a value between 1 and half the stack size).
 -Added: ARGN3 in the @ItemSmelt/@Smelt trigger, setting it to 1 will skip the minimum requirement for smelting ore to ingots.
 		By default the minimum requirement for smelting is stored in the TDATA1 property of the ingot itemdef.
+
+05-10-2021, Jhobean
+- Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort. 
+	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
+- Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
+- Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
+- Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior (Issue #776)
+

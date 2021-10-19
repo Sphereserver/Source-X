@@ -51,8 +51,11 @@ CServerConfig::CServerConfig()
 	m_fMd5Passwords			= false;
 
 	//Magic
+	m_fManaLossAbort		= false;
     m_fManaLossFail		    = false;
+	m_fManaLossPercent		= 50;
 	m_fNPCCanFizzleOnHit	= false;
+	m_fReagentLossAbort		= false;
 	m_fReagentLossFail		= false;
     m_fReagentsRequired		= false;
 	m_iWordsOfPowerColor	= HUE_TEXT_DEF;
@@ -544,7 +547,9 @@ enum RC_TYPE
 	RC_LOSTNPCTELEPORT,			// m_fLostNPCTeleport
 	RC_MAGICFLAGS,
 	RC_MAGICUNLOCKDOOR,			// m_iMagicUnlockDoor
+	RC_MANALOSSABORT,			// m_fManaLossAbort
     RC_MANALOSSFAIL,			// m_fManaLossFail
+	RC_MANALOSSPERCENT,			// m_fManaLossPercent
 	RC_MAPCACHETIME,
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
 	RC_MAXCHARSPERACCOUNT,		//  
@@ -610,6 +615,7 @@ enum RC_TYPE
 	RC_PLAYERNEUTRAL,			// m_iPlayerKarmaNeutral
 	RC_PROFILE,
 	RC_RACIALFLAGS,				// m_iRacialFlags
+	RC_REAGENTLOSSABORT,		// m_fReagentLossAbort
 	RC_REAGENTLOSSFAIL,			// m_fReagentLossFail
 	RC_REAGENTSREQUIRED,
 	RC_REVEALFLAGS,				// m_iRevealFlags
@@ -800,7 +806,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLostNPCTeleport)		}},
 	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags)			}},
 	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor)		}},
+	{ "MANALOSSABORT",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossAbort)		}},
     { "MANALOSSFAIL",		    { ELEM_BOOL,	OFFSETOF(CServerConfig,m_fManaLossFail)			}},
+	{ "MANALOSSPERCENT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_fManaLossPercent)		}},
 	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,_iMapCacheTime)			}},
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill)			}},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount)	}},
@@ -866,6 +874,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral)	}},
 	{ "PROFILE",				{ ELEM_VOID,	0												}},
 	{ "RACIALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRacialFlags)			}},
+	{ "REAGENTLOSSABORT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossAbort)		}},
 	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail)		}},
 	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired)		}},
 	{ "REVEALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRevealFlags)			}},
