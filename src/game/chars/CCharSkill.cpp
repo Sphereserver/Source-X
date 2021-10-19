@@ -2715,7 +2715,9 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		}
 		else 
 		{
-			SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
+			if (pChar != this)
+				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
+
 			pChar->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_4));
 			return -SKTRIG_ABORT;
 		}

@@ -2827,3 +2827,4 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
 - Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior (Issue #776)
+
