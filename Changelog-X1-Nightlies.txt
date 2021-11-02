@@ -2841,3 +2841,8 @@ It will check if distance is > 10, so you don't need to write the distance check
 			 
 			 ON=@EffectRemove
 			 return 0	//Return 0 will prevent the recover mana  behaviour of the Mana Spell but the Mana Drain spell item will still be destroyed.
+			Remember to update your scripts by changing 
+			In spells_magery.scp file: 
+			LAYER = LAYER_SPELL_STATS to LAYER = LAYER_SPELL_MANA_DRAIN 
+			In your defs.scp file:
+			LAYER_SPELL_Mana_Drain			79
