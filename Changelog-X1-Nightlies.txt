@@ -2828,3 +2828,21 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
 - Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior (Issue #776)
 
+02-11-2021, Drk84
+- Changed: In old clients (starting from 2.0.0 ) the "You are frozen and can not move."  will appear again when a player is paralyzed and attempting to move, thanks for a1exp for the solution.(Issue #789)
+		   Recent clients (i think from 6.0.0+) seems to block the movement request when the statf_frozen flag is applied, while clients 5.0.0+ will get the "You are frozen and can not move." 
+		   message if attempting to use the pathfinding. 
+- Changed: Mana Drain behaviour slightly changed: (Issue #781)
+		   1)It will use its own layer (LAYER_SPELL_MANA_DRAIN, layer number 79) instead of LAYER_SPELL_STATS, in this way casting Mana Drain will not remove stat spells on the affected characters.
+		   2)The Mana Drain effect value depends if you have enabled MAGICF_OSIFORMULAS or not.
+			 If enabled the effect value is calculated from this formula: (400 + Caster Eval Int - Target Magic Resistance ) / 10. 
+			 If disabled the effect value is by default 10,30, only in this case you can overwrite the effect of Mana Drain by changing the value in the SPELLDEF  or by changing local.effect in the @SpellEffect/@Effect triggers, same for duration (default duration is 5 seconds).
+		   3)In both cases the mana lost is temporary! If you want to get a permanent drain effect just use the following script under the Mana Drain SPELLDEF
+			 
+			 ON=@EffectRemove
+			 return 0	//Return 0 will prevent the recover mana  behaviour of the Mana Spell but the Mana Drain spell item will still be destroyed.
+			Remember to update your scripts by changing 
+			In spells_magery.scp file: 
+			LAYER = LAYER_SPELL_STATS to LAYER = LAYER_SPELL_MANA_DRAIN 
+			In your defs.scp file:
+			LAYER_SPELL_Mana_Drain			79

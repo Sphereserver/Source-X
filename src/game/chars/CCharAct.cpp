@@ -3329,7 +3329,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
-	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
+	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) ) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
 		return nullptr;
 
 	int iWeightLoadPercent = GetWeightLoadPercent(GetTotalWeight());

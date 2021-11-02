@@ -1591,7 +1591,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				if ( pCaster != nullptr )
 				{
-                    wStatEffectRef = (400 + pCaster->Skill_GetBase(SKILL_EVALINT) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10;
+					if ( IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+						 wStatEffectRef = (400 + pCaster->Skill_GetBase(SKILL_EVALINT) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10;
+
 					if ( wStatEffectRef > Stat_GetVal(STAT_INT) )
                         wStatEffectRef = (word)(Stat_GetVal(STAT_INT));
 				}
@@ -3676,7 +3678,6 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Cunning:
 		case SPELL_Strength:
 		case SPELL_Bless:
-		case SPELL_Mana_Drain:
 		case SPELL_Mass_Curse:
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
 			break;
@@ -3693,7 +3694,9 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Reactive_Armor:
 			Spell_Effect_Create( spell, LAYER_SPELL_Reactive, iEffect, iDuration, pCharSrc );
 			break;
-
+		case SPELL_Mana_Drain:
+			Spell_Effect_Create(spell, LAYER_SPELL_Mana_Drain, iEffect, iDuration, pCharSrc);
+			break;
 		case SPELL_Magic_Reflect:
 			Spell_Effect_Create( spell, LAYER_SPELL_Magic_Reflect, iEffect, iDuration, pCharSrc );
 			break;

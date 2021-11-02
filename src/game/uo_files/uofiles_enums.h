@@ -551,6 +551,8 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_SPELL_Spell_Plague,
     LAYER_SPELL_Nether_Cyclone,
 
+    //Individual Spell Layers
+    LAYER_SPELL_Mana_Drain,
     LAYER_QTY
 };
 
