@@ -2832,7 +2832,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Changed: In old clients (starting from 2.0.0 ) the "You are frozen and can not move."  will appear again when a player is paralyzed and attempting to move, thanks for a1exp for the solution.(Issue #789)
 		   Recent clients (i think from 6.0.0+) seems to block the movement request when the statf_frozen flag is applied, while clients 5.0.0+ will get the "You are frozen and can not move." 
 		   message if attempting to use the pathfinding. 
-- Changed: Mana Drain behaviour slightly changed:
+- Changed: Mana Drain behaviour slightly changed: (Issue #781)
 		   1)It will use its own layer (LAYER_SPELL_MANA_DRAIN, layer number 79) instead of LAYER_SPELL_STATS, in this way casting Mana Drain will not remove stat spells on the affected characters.
 		   2)The Mana Drain effect value depends if you have enabled MAGICF_OSIFORMULAS or not.
 			 If enabled the effect value is calculated from this formula: (400 + Caster Eval Int - Target Magic Resistance ) / 10. 
