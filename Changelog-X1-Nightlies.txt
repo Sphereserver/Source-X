@@ -2826,7 +2826,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
 - Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
-- Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior (Issue #776)
+- Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior. (Issue #776)
 
 02-11-2021, Drk84
 - Changed: In old clients (starting from 2.0.0 ) the "You are frozen and can not move."  will appear again when a player is paralyzed and attempting to move, thanks for a1exp for the solution.(Issue #789)
@@ -2846,3 +2846,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 			LAYER = LAYER_SPELL_STATS to LAYER = LAYER_SPELL_MANA_DRAIN 
 			In your defs.scp file:
 			LAYER_SPELL_Mana_Drain			79
+			
+03-11-2021, Drk84
+- Fixed: MT_NONMOVER flag makes the NPCs spam attacks. (Issue #767)
+- Updated SphereCrypt.ini.
