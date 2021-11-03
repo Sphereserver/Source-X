@@ -1261,7 +1261,16 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	// false = can't follow any more, give up.
 
 	if (Can(CAN_C_NONMOVER))
-		return false;
+	{
+		/*
+		  If the NPC has the MT_NONMOVER flag we need to check if it is actually in combat, otherwise it  will spam the attack because it
+		  constantly "forget" the character is attacking (See NPCAct_Fight method).
+		*/ 
+		if (!Fight_IsActive())
+			return false;
+		else
+			return true;
+	}
 
 	EXC_TRY("NPC_Act_Follow");
 
