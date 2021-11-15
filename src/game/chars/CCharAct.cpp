@@ -386,6 +386,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		}
 	}
 
+	pItem->RemoveFromView(nullptr, true);
 	pItem->Update();
 }
 

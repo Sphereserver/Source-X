@@ -665,6 +665,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 			break;
 	}
 
+	pItem->RemoveFromView(nullptr, true);
 	pItem->Update();
     if (!fStackInsert)
         pItem->UpdatePropertyFlag();

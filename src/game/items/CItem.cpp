@@ -3112,10 +3112,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))
 						Delete();	//	since the item is no longer in container, it should be deleted
 				}
-				else
-				{
-					RemoveFromView(nullptr, true);
-				}
 				return normcont;
 			}
 		case IC_CONTGRID:
