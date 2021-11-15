@@ -3166,7 +3166,7 @@ void CChar::Spell_CastFail(bool fAbort)
 	if (fAbort)
 	{
 		if (g_Cfg.m_fManaLossAbort)
-			iManaLoss = (g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind()) * g_Cfg.m_fManaLossPercent/100);
+			iManaLoss = (g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind()) * ushort(g_Cfg.m_fManaLossPercent / 100));
 
 		if (g_Cfg.m_fReagentLossAbort)
 			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
@@ -3174,14 +3174,13 @@ void CChar::Spell_CastFail(bool fAbort)
 	else //Spell fail without abort
 	{
 		if (g_Cfg.m_fManaLossFail)
-			iManaLoss = (g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind()) * g_Cfg.m_fManaLossPercent / 100);
+			iManaLoss = (g_Cfg.Calc_SpellManaCost(this, pSpell, m_Act_Prv_UID.ObjFind()) * ushort(g_Cfg.m_fManaLossPercent / 100));
 
 		if (g_Cfg.m_fReagentLossFail)
 			iTithingLoss = g_Cfg.Calc_SpellTithingCost(this, pSpell, m_Act_Prv_UID.ObjFind());
 	}
 
-	CScriptTriggerArgs	Args( m_atMagery.m_iSpell, iManaLoss, m_Act_Prv_UID.ObjFind() );
-
+	CScriptTriggerArgs Args( m_atMagery.m_iSpell, iManaLoss, m_Act_Prv_UID.ObjFind() );
 	Args.m_VarsLocal.SetNum("CreateObject1",iT1);
 	Args.m_VarsLocal.SetNum("TithingLoss", iTithingLoss);
 

@@ -293,7 +293,7 @@ CServerConfig::CServerConfig()
 	_uiNetMaxPacketsPerTick = 50;
 	_uiNetMaxLengthPerTick	= 18'000;
 	m_iNetMaxQueueSize		= 75;
-	_iMaxSizeClientOut		= 50'000;
+	_iMaxSizeClientOut		= 80'000;
 	_iMaxSizeClientIn		= 10'000;
 	m_fUsePacketPriorities	= false;
 	m_fUseExtraBuffer		= true;

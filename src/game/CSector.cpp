@@ -1027,7 +1027,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
 bool CSector::_CanSleep(bool fCheckAdjacents) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CSector::CanSleep");
+	ADDTOCALLSTACK_INTENSIVE("CSector::_CanSleep");
 	if ( (g_Cfg._iSectorSleepDelay == 0) || IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
     if (m_Chars_Active.GetClientsNumber() > 0)

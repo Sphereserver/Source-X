@@ -42,7 +42,7 @@ void CTimedObject::_GoAwake()
 bool CTimedObject::_CanTick() const
 {
     //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
-    return _IsSleeping();
+    return !_IsSleeping();
 }
 
 bool CTimedObject::CanTick() const
