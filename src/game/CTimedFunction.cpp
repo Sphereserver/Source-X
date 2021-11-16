@@ -27,6 +27,16 @@ bool CTimedFunction::IsDeleted() const // virtual
 }
 
 
+bool CTimedFunction::_CanTick() const // virtual
+{
+	return true;
+}
+
+bool CTimedFunction::CanTick() const // virtual
+{
+	return true;
+}
+
 static bool _ExecTimedFunction(CUID&& uid, CScript&& s)
 {
 	CObjBase* obj = uid.ObjFind();
