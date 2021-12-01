@@ -3457,7 +3457,21 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	}
 
 	if ( !fCheckOnly )
-	{
+	{		
+		// Falling trigger
+		if (GetTopZ() - 10 >= ptDst.m_z)
+		{
+			//char is falling
+			g_Log.EventWarn("a Char is falling");
+			CScriptTriggerArgs Args(ptDst.m_x, ptDst.m_y, ptDst.m_z);
+
+			if ( IsTrigUsed(TRIGGER_FALLING) )
+			{
+				OnTrigger(CTRIG_Falling, this, &Args);
+				g_Log.EventWarn("trigger pass");
+			}
+		}
+		//
 		EXC_SET_BLOCK("Stamina penalty");
 		// Chance to drop more stamina if running or overloaded
 		CVarDefCont *pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
@@ -3475,7 +3489,6 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
 		m_zClimbHeight = (dwBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
 	}
-
 	EXC_CATCH;
 	return pArea;
 }
