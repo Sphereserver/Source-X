@@ -3459,16 +3459,15 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	if ( !fCheckOnly )
 	{		
 		// Falling trigger
+		//lack config feature for sphere.ini if wanted.
 		if (GetTopZ() - 10 >= ptDst.m_z)
 		{
 			//char is falling
-			g_Log.EventWarn("a Char is falling");
 			CScriptTriggerArgs Args(ptDst.m_x, ptDst.m_y, ptDst.m_z);
 
 			if ( IsTrigUsed(TRIGGER_FALLING) )
 			{
 				OnTrigger(CTRIG_Falling, this, &Args);
-				g_Log.EventWarn("trigger pass");
 			}
 		}
 		//
