@@ -934,9 +934,9 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			break;
 
 		case '-':
-			++pExpr;
 			llValSecond = GetVal(pExpr);
-			llVal -= llValSecond;
+			++pExpr; // by moving the expression after getting the second value we avoid losing the negative sign.
+			llVal += llValSecond; // a subtraction is an addiction with a negative number.
 			break;
 
 		case '*':

@@ -2855,3 +2855,6 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Fixed: Sector not going to sleep and @RegPeriodic and @CliPeriodic not firing (Issues #801 and #765).
 - Fixed: CONT not always updating the item in the new position (Issue #680).
 - Changed: Increased default MaxSizeClientOut default value to 80.000.
+
+01-12-2021, Drk84
+- Fixed: Incorrect EVAL parsing in case of multiple subtraction (Issue #804).
