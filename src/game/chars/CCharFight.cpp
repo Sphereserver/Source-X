@@ -2139,7 +2139,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 
 		// Check for passive skill gain
-		if ( m_pPlayer && !pCharTarg->m_pArea->IsFlag(REGION_FLAG_NO_PVP) )
+		if ( m_pPlayer &&  (!pCharTarg->m_pArea->IsFlag(REGION_FLAG_NO_PVP) || !pCharTarg->IsPlayer()) )
 		{
 			Skill_Experience(skill, m_Act_Difficulty);
 			Skill_Experience(SKILL_TACTICS, m_Act_Difficulty);
