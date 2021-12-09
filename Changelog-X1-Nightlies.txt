@@ -2858,3 +2858,6 @@ It will check if distance is > 10, so you don't need to write the distance check
 
 01-12-2021, Drk84
 - Fixed: Incorrect EVAL parsing in case of multiple subtraction (Issue #804).
+
+09-12-2021, Drk84
+- Fixed: Players cannot increase combat skills in REGION_FLAG_NOPVP areas.
