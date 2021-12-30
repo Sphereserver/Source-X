@@ -564,12 +564,13 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
 				    return false;
             }
 		}
-
-		if ( Noto_IsCriminal() )
+		/*
+		if ( Noto_IsCriminal() )		//This can be exploited by many skills like taming, magic resist, provo, peacemaking, discord, etc
 		{
 			if ( !m_pArea->IsGuarded() && pArea->IsGuarded() )
 				return false;
 		}
+		*/
 	}
 
 	// Is there a nasty object here that will hurt us ?
