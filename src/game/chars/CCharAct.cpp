@@ -3344,6 +3344,11 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 
 		if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
 		{
+			if ( iWeightLoadPercent > 100 )
+			{
+				SysMessageDefault(DEFMSG_MSG_FATIGUE_WEIGHT);
+				return nullptr;
+			}
 			SysMessageDefault(DEFMSG_MSG_FATIGUE);
 			return nullptr;
 		}
