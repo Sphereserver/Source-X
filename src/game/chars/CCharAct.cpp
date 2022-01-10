@@ -1742,8 +1742,10 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	//int iItemWeight = ( amount == iAmountMax ) ? pItem->GetWeight() : pItem->Item_GetDef()->GetWeight() * amount;
 	int iItemWeight = pItem->GetWeight(amount);
 
+
 	// Is it too heavy to even drag ?
 	bool fDrop = false;
+	/*		//you should always be able to drag items despite the weight
 	if ( GetWeightLoadPercent(GetTotalWeight() + iItemWeight) > 300 )
 	{
 		SysMessageDefault(DEFMSG_MSG_HEAVY);
@@ -1752,6 +1754,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
         else
             return -1;
 	}
+	*/
 
 	ITRIG_TYPE trigger;
 	if (pCharTop != nullptr )

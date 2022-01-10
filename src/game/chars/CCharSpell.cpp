@@ -1844,9 +1844,11 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 1;
 				else if (iLevel < 800)	// Greater
 					iLevel = 2;
-				else					// Deadly.
+				else if (iLevel < 1000)		// Deadly.
 					iLevel = 3;
-
+				else					//Lethal
+					iLevel = 4;
+				
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
 				iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
 				iSecondsDelay = (5 + Calc_GetRandLLVal(4));
@@ -1856,7 +1858,16 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_2),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_3),
-					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_4)
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_4),
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_5)
+				};
+				static lpctstr const sm_Poison_Message2[] =
+				{
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1_2),
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_2_2),
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_3_2),
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_4_2),
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_5_2)
 				};
 
 				tchar * pszMsg = Str_GetTemp();
@@ -1865,7 +1876,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					EmoteObj(pszMsg);
 				else
 					Emote(pszMsg, GetClientActive());
-				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_Message[iLevel]);
+				EmoteObj(sm_Poison_Message2[iLevel]);	
+				//SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_Message[iLevel]);	//emote the poison over the players head
 			}
 			
 			static const int sm_iPoisonMax[] = { 2, 4, 6, 8, 10 };
