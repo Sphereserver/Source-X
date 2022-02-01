@@ -2861,3 +2861,8 @@ It will check if distance is > 10, so you don't need to write the distance check
 
 09-12-2021, Drk84
 - Fixed: Players cannot increase combat skills in REGION_FLAG_NOPVP areas.
+
+01-02-2022, Drk84
+- Changed: Added blank space between skill value and skill name when reading the SKILLMAKE property (Issue #832).
+- Changed: You will not be able to cast a spell on a ghost if the spell does not have SPELLFLAG_TARG_DEAD.
+		   You will not be able to cast a spell on an alive character if the spell has the SPELLFLAG_TARG_DEAD flag (Issue #827).

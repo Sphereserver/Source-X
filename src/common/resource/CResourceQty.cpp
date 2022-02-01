@@ -261,7 +261,7 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
         {
             if (resQty.GetResType() == RES_SKILL )
             {
-                pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 , iQty / 10, iQty % 10 );
+                pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 " ", iQty / 10, iQty % 10);
             }
             else
                 pszArgs += sprintf( pszArgs, "%" PRId64 " ", iQty);
