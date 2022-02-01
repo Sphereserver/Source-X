@@ -2665,9 +2665,26 @@ bool CChar::Spell_TargCheck()
 			SysMessageDefault( DEFMSG_SPELL_TARG_OBJ );
 			return false;
 		}
+
+		if (pObj->IsChar())
+		{
+			CChar* pChar = static_cast<CChar *>(pObj);
+			bool fIsTargetDead = pChar->IsStatFlag(STATF_DEAD);
+			bool fCanSpellTargetDead = pSpellDef->IsSpellType(SPELLFLAG_TARG_DEAD);
+			if (fIsTargetDead && !fCanSpellTargetDead) // If target is dead and the spell cannot target a ghost, abort the spell.
+			{
+				SysMessageDefault(DEFMSG_SPELL_TARG_DEAD);
+				return false;
+			}
+			if (!fIsTargetDead && fCanSpellTargetDead) // If target is not dead and the spell target has the SPELLFLAG_TARG_DEAD flag, abort the spell.
+			{
+				SysMessageDefault( DEFMSG_SPELL_TARG_NOTDEAD );
+				return false;
+			}
+		}
 		if ( !CanSeeLOS(pObj, LOS_NB_WINDOWS) ) //we should be able to cast through a window
 		{
-			SysMessageDefault(DEFMSG_SPELL_TARG_LOS);
+			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );
 			return false;
 		}
 		if ( !IsPriv(PRIV_GM) && (pObjTop != this) && (pObjTop != pObj) && pObjTop->IsChar() )
