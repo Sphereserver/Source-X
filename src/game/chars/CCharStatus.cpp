@@ -238,20 +238,6 @@ TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScr
 	return TRIGRET_ENDIF;
 }
 
-int CChar::GetWeightLoadPercent( int iWeight ) const
-{
-	ADDTOCALLSTACK("CChar::GetWeightLoadPercent");
-	// Get a percent of load.
-	if ( IsPriv(PRIV_GM) )
-		return 1;
-
-	int	MaxCarry = g_Cfg.Calc_MaxCarryWeight(this);
-	if ( !MaxCarry )
-		return 1000;	// suppose self extra-overloaded
-
-	return (int)IMulDivLL( iWeight, 100, MaxCarry );
-}
-
 bool CChar::CanCarry( const CItem *pItem ) const
 {
 	ADDTOCALLSTACK("CChar::CanCarry");

@@ -554,7 +554,6 @@ public:
 
 	void OnWeightChange( int iChange );
 	int GetWeight(word amount = 0) const;
-	int GetWeightLoadPercent( int iWeight ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
 	CItemContainer * GetPack() const;

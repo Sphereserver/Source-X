@@ -2866,3 +2866,21 @@ It will check if distance is > 10, so you don't need to write the distance check
 - Changed: Added blank space between skill value and skill name when reading the SKILLMAKE property (Issue #832).
 - Changed: You will not be able to cast a spell on a ghost if the spell does not have SPELLFLAG_TARG_DEAD.
 		   You will not be able to cast a spell on an alive character if the spell has the SPELLFLAG_TARG_DEAD flag (Issue #827).
+
+03-02-2022, XuN
+Merge of commits made by Coruja on 56d, related to Weight (see issue https://github.com/Sphereserver/Source-X/issues/822)
+
+List of changes:
+-Commit https://github.com/Sphereserver/Source/commit/c9c0af71ba1fc54ddbab8f9bdae70739e24b0254:
+    Changed: Large containers now can be placed inside small containers.
+    [sphere.ini]: Added new BackpackMaxWeight setting to set default max weight limit for chars main backpack.
+
+- Commit https://github.com/Sphereserver/Source/commit/937fd287975830c76a0cebfcd7e8e8e251b04ef4:
+    Changed: Chars now can exceed MAXWEIGHT limit, but not backpack max weight limit (which is a bit higher)
+        -Walking while overweight will drop stamina faster (as it was on old Sphere versions)
+        -Stamina penalty can be customized using StaminaLossAtWeight and RunningPenalty settings on sphere.ini
+        -Backpack max weight can be customized using BackpackMaxWeight setting on sphere.ini and MODMAXWEIGHT item property
+    [sphere_msgs.scp]: Updated message list with the following changes
+        -Added: cont_full_items, msg_fatigue_weight
+        -Removed: cont_full, cont_magic, cont_toosmall, msg_heavy, msg_overload
+        -Updated: cont_full_weight

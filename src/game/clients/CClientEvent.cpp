@@ -374,12 +374,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 					return;
 				}
 			}
-			else if ( ! pChar->CanCarry( pItem ))
-			{
-				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
-				Event_Item_Drop_Fail( pItem );
-				return;
-			}
 		}
 
 		if (pObjTop->IsItem())

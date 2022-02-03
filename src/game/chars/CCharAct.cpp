@@ -1731,27 +1731,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 	const word iAmountMax = pItem->GetAmount();
-	if ( iAmountMax <= 0 )
-		return -1;
-
-	if ( !pItem->Item_GetDef()->IsStackableType() )
-		amount = iAmountMax;	// it's not stackable, so we must pick up the entire amount
-	else
-		amount = maximum(1, minimum(amount, iAmountMax));
-
-	//int iItemWeight = ( amount == iAmountMax ) ? pItem->GetWeight() : pItem->Item_GetDef()->GetWeight() * amount;
-	int iItemWeight = pItem->GetWeight(amount);
-
-	// Is it too heavy to even drag ?
-	bool fDrop = false;
-	if ( GetWeightLoadPercent(GetTotalWeight() + iItemWeight) > 300 )
-	{
-		SysMessageDefault(DEFMSG_MSG_HEAVY);
-        if ((pCharTop == this) && (pItem->GetParent() == GetPack()))
-            fDrop = true;	// we can always drop it out of own pack !
-        else
-            return -1;
-	}
+	if ( amount <= 0 || amount > iAmountMax ||
+			!pItem->Item_GetDef()->IsStackableType())	// it's not stackable, so we must pick up the entire amount
+		amount = iAmountMax;
 
 	ITRIG_TYPE trigger;
 	if (pCharTop != nullptr )
@@ -1811,24 +1793,19 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 
-	if ( amount && pItem->Item_GetDef()->IsStackableType() && pItem->CanSendAmount() )
+	if ( amount < iAmountMax && pItem->Item_GetDef()->IsStackableType() && pItem->CanSendAmount() )
 	{
-		// Did we only pick up part of it ?
-		// part or all of a pile. Only if pilable !
-		if ( amount < iAmountMax )
-		{
-			// create left over item.
-			CItem * pItemNew = pItem->UnStackSplit(amount, this);
+        // Create an leftover item when pick up only part of the stack
+        CItem* pItemNew = pItem->UnStackSplit(amount, this);
+        pItemNew->SetTimeout(pItem->GetTimerDAdjusted());
 
-			if (( IsTrigUsed(TRIGGER_PICKUP_STACK) ) || ( IsTrigUsed(TRIGGER_ITEMPICKUP_STACK) ))
-			{
-				CScriptTriggerArgs Args2(pItemNew);
-				if ( pItem->OnTrigger(ITRIG_PICKUP_STACK, this, &Args2) == TRIGRET_RET_TRUE )
-					return -1;
-			}
-
-		}
-	}
+        if (IsTrigUsed(TRIGGER_PICKUP_STACK) || IsTrigUsed(TRIGGER_ITEMPICKUP_STACK))
+        {
+            CScriptTriggerArgs Args2(pItemNew);
+            if (pItem->OnTrigger(ITRIG_PICKUP_STACK, this, &Args2) == TRIGRET_RET_TRUE)
+                return false;
+        }
+    }
 
 	// Do stack dropping if items are stacked
 	if (( trigger == ITRIG_PICKUP_GROUND ) && IsSetEF( EF_ItemStackDrop ))
@@ -1853,12 +1830,6 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 			ptNewPlace.m_z -= iItemHeight;
 			pStack->MoveToUpdate(ptNewPlace);
 		}
-	}
-
-	if ( fDrop )
-	{
-		ItemDrop(pItem, GetTopPoint());
-		return -1;
 	}
 
 	// do the dragging anim for everyone else to see.
@@ -3333,7 +3304,14 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) ) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
 		return nullptr;
 
-	int iWeightLoadPercent = GetWeightLoadPercent(GetTotalWeight());
+    int iWeightLoadPercent = 0;
+    if (!IsPriv(PRIV_GM))
+    {
+        const int iWeight = GetTotalWeight();
+        const int iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this);
+        iWeightLoadPercent = iMaxWeight ? (iWeight * 100) / iMaxWeight : 0;
+    }
+
 	if ( !fCheckOnly )
 	{
 		if ( OnFreezeCheck() )
@@ -3342,15 +3320,9 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			return nullptr;
 		}
 
-		if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
+		else if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
 		{
-			SysMessageDefault(DEFMSG_MSG_FATIGUE);
-			return nullptr;
-		}
-
-		if ( iWeightLoadPercent > 200 )
-		{
-			SysMessageDefault(DEFMSG_MSG_OVERLOAD);
+			SysMessageDefault((iWeightLoadPercent > 100) ? DEFMSG_MSG_FATIGUE_WEIGHT : DEFMSG_MSG_FATIGUE);
 			return nullptr;
 		}
 	}
