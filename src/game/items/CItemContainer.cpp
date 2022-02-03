@@ -842,7 +842,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 	}
 
 	int iMaxWeight = ((GetContainedLayer() == LAYER_PACK) ? g_Cfg._iBackpackMaxWeight : 0) + m_ModMaxWeight;
-	if (iMaxWeight && (GetTotalWeight() + pItem->GetWeight() > iMaxWeight))
+	if (iMaxWeight > 0 && (GetTotalWeight() + pItem->GetWeight() > iMaxWeight))
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
 		return false;
