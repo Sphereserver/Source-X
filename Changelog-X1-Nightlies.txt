@@ -2884,3 +2884,15 @@ List of changes:
         -Added: cont_full_items, msg_fatigue_weight
         -Removed: cont_full, cont_magic, cont_toosmall, msg_heavy, msg_overload
         -Updated: cont_full_weight
+
+ -Commit https://github.com/Sphereserver/Source/commit/f29e8592ad154c4dd55ed4b5d8900b094793e62a:
+    Fixed: BackpackMaxWeight setting on sphere.ini not allowing unlimited weight when set to -1.
+
+ -Commit https://github.com/Sphereserver/Source/commit/191a13e7bc91a709db79d1270c467a5561038541
+    Fixed: Char stamina not decreasing correctly when walk/run while overweight.
+    [sphere.ini]: Updated default value of StaminaLossAtWeight and RunningPenalty settings
+    	-IMPORTANT: It's HIGHLY recommended update these values to make stamina decrease correctly.
+
+*These commits are meant to reenable old stamina and weight behaviour, allowing chars to move while overweight and applying penalties on stam.
+TAG.OVERRIDE.RUNNINGPENALTY and TAG.OVERRIDE.STAMINALOSSATWEIGHT were removed (at least temporary) with the integration of these commits.
+Also excluded GMs from most checks inside this code.

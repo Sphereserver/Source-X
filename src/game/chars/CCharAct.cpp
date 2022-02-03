@@ -3301,42 +3301,41 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
-	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) ) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
-		return nullptr;
-
-    int iWeightLoadPercent = 0;
+    int iWeight = 0;
+    int iMaxWeight = 0;
     if (!IsPriv(PRIV_GM))
     {
-        const int iWeight = GetTotalWeight();
-        const int iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this);
-        iWeightLoadPercent = iMaxWeight ? (iWeight * 100) / iMaxWeight : 0;
+        if (Can(CAN_C_NONMOVER | CAN_C_STATUE)) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
+            return nullptr;
+
+        iWeight = GetTotalWeight() / WEIGHT_UNITS;
+        iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this) / WEIGHT_UNITS;
+	    if ( !fCheckOnly )
+	    {
+		    if ( OnFreezeCheck() )
+		    {
+			    SysMessageDefault(DEFMSG_MSG_FROZEN);
+			    return nullptr;
+		    }
+
+		    else if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
+		    {
+			    SysMessageDefault((iWeight > iMaxWeight) ? DEFMSG_MSG_FATIGUE_WEIGHT : DEFMSG_MSG_FATIGUE);
+			    return nullptr;
+		    }
+	    }
+
+	    CClient *pClient = GetClientActive();
+	    if ( pClient && pClient->m_pHouseDesign )
+	    {
+		    if ( pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst) )
+		    {
+			    ptDst.m_z = GetTopZ();
+			    return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+		    }
+		    return nullptr;
+	    }
     }
-
-	if ( !fCheckOnly )
-	{
-		if ( OnFreezeCheck() )
-		{
-			SysMessageDefault(DEFMSG_MSG_FROZEN);
-			return nullptr;
-		}
-
-		else if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
-		{
-			SysMessageDefault((iWeightLoadPercent > 100) ? DEFMSG_MSG_FATIGUE_WEIGHT : DEFMSG_MSG_FATIGUE);
-			return nullptr;
-		}
-	}
-
-	CClient *pClient = GetClientActive();
-	if ( pClient && pClient->m_pHouseDesign )
-	{
-		if ( pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst) )
-		{
-			ptDst.m_z = GetTopZ();
-			return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
-		}
-		return nullptr;
-	}
 
 	// ok to go here ? physical blocking objects ?
 	dword dwBlockFlags = 0;
@@ -3346,13 +3345,18 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	EXC_TRY("CanMoveWalkTo");
 
 	EXC_SET_BLOCK("Check Valid Move");
-	pArea = CheckValidMove(ptDst, &dwBlockFlags, dir, &ClimbHeight, fPathFinding);
+	pArea = CheckValidMove(ptDst, &dwBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
             g_Log.EventWarn("CheckValidMove failed\n");
 		return nullptr;
 	}
+
+    if (IsPriv(PRIV_GM))
+    {
+        return pArea;
+    }
 
 	EXC_SET_BLOCK("NPC's will");
 	if ( !fCheckOnly && m_pNPC && !NPC_CheckWalkHere(ptDst, pArea) )	// does the NPC want to walk here?
@@ -3431,17 +3435,20 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	if ( !fCheckOnly )
 	{
 		EXC_SET_BLOCK("Stamina penalty");
-		// Chance to drop more stamina if running or overloaded
-		CVarDefCont *pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
-		if ( IsStatFlag(STATF_FLY|STATF_HOVERING) )
-			iWeightLoadPercent += pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty;
+        if (iWeight > iMaxWeight)
+        {
+            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossAtWeight + ((iWeight - iMaxWeight) / 25));
 
-		pVal = GetKey("OVERRIDE.STAMINALOSSATWEIGHT", true);
-		int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
-		if ( iChanceForStamLoss > Calc_GetRandVal(1000) )
-			uiStamReq += 1;
+            if (IsStatFlag(STATF_ONHORSE))
+                iWeightPenalty /= 3;
 
-		if ( uiStamReq )
+            if (dir & DIR_MASK_RUNNING)
+                iWeightPenalty += ushort((iWeightPenalty * g_Cfg.m_iStamRunningPenalty) / 100);
+
+            uiStamReq += iWeightPenalty;
+        }
+
+		if ( uiStamReq > 0 )
 			UpdateStatVal(STAT_DEX, -uiStamReq);
 
 		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));

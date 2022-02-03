@@ -160,8 +160,8 @@ CServerConfig::CServerConfig()
     _fAutoHouseKeys         = true;
     _fAutoShipKeys          = true;
 	m_iMaxBaseSkill			= 200;
-	m_iStamRunningPenalty 	= 50;
-	m_iStaminaLossAtWeight 	= 150;
+	m_iStamRunningPenalty 	= 100;
+	m_iStaminaLossAtWeight 	= 5;
 	m_iMountHeight			= false;
 	m_iMoveRate				= 100;
 	m_iArcheryMinDist		= 2;
