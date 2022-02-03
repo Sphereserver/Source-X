@@ -115,6 +115,7 @@ CServerConfig::CServerConfig()
 	m_iLightNight			= 25;	// dark before t2a.
 	m_iLightDay				= LIGHT_BRIGHT;
     m_iContainerMaxItems    = MAX_ITEMS_CONT;
+	_iBackpackMaxWeight	    = 550 * WEIGHT_UNITS;
 	m_iBankIMax				= 1000;
 	m_iBankWMax				= 1000 * WEIGHT_UNITS;
 	m_fAttackingIsACrime	= true;
@@ -439,6 +440,7 @@ enum RC_TYPE
     RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
 	RC_AUTORESDISP,				// m_bAutoResDisp
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
+	RC_BACKPACKMAXWEIGHT,       // _iBackpackMaxWeight
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
@@ -698,6 +700,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
     { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoProcessPriority)	}},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp)			}},
     { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys)		    }},
+	{ "BACKPACKMAXWEIGHT",      { ELEM_INT,     OFFSETOF(CServerConfig,_iBackpackMaxWeight),    }},
 	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels)		}},
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax)				}},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax)				}},
@@ -1076,6 +1079,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_ATTACKERTIMEOUT:
 			m_iAttackerTimeout = s.GetArgVal();
 			break;
+        case RC_BACKPACKMAXWEIGHT:
+            _iBackpackMaxWeight = s.GetArgVal() * WEIGHT_UNITS;
+            break;
 		case RC_BANKMAXWEIGHT:
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
 			break;
@@ -1849,6 +1855,9 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 	{
 		case RC_ATTACKERTIMEOUT:
 			sVal.FormatVal(m_iAttackerTimeout);
+			break;
+		case RC_BACKPACKMAXWEIGHT:
+			sVal.FormatVal( _iBackpackMaxWeight / WEIGHT_UNITS );
 			break;
 		case RC_BANKMAXWEIGHT:
 			sVal.FormatVal( m_iBankWMax / WEIGHT_UNITS );

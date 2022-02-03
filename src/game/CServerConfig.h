@@ -308,6 +308,7 @@ public:
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
+    int _iBackpackMaxWeight;        // Maximum weight in stones allowed in main backpack.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
 	int  m_iBankWMax;				// Maximum weight in WEIGHT_UNITS stones allowed in bank.
     int m_iVendorMarkup;            // Default markup value, used if no other kind of tag is providen.
