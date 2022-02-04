@@ -946,7 +946,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			// Check that this vendor box hasn't already reached its content limit
 			if ( GetContentCount() >= g_Cfg.m_iContainerMaxItems )
 			{
-				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
+				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_ITEMS);
 				return false;
 			}
 			break;

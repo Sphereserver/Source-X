@@ -2871,8 +2871,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 Merge of commits made by Coruja on 56d, related to Weight (see issue https://github.com/Sphereserver/Source-X/issues/822)
 
 List of changes:
--Commit https://github.com/Sphereserver/Source/commit/c9c0af71ba1fc54ddbab8f9bdae70739e24b0254:
-    Changed: Large containers now can be placed inside small containers.
+- Partial Commit https://github.com/Sphereserver/Source/commit/c9c0af71ba1fc54ddbab8f9bdae70739e24b0254:
     [sphere.ini]: Added new BackpackMaxWeight setting to set default max weight limit for chars main backpack.
 
 - Commit https://github.com/Sphereserver/Source/commit/937fd287975830c76a0cebfcd7e8e8e251b04ef4:
@@ -2882,7 +2881,7 @@ List of changes:
         -Backpack max weight can be customized using BackpackMaxWeight setting on sphere.ini and MODMAXWEIGHT item property
     [sphere_msgs.scp]: Updated message list with the following changes
         -Added: cont_full_items, msg_fatigue_weight
-        -Removed: cont_full, cont_magic, cont_toosmall, msg_heavy, msg_overload
+        -Removed: cont_full, cont_magic, msg_heavy, msg_overload
         -Updated: cont_full_weight
 
  -Commit https://github.com/Sphereserver/Source/commit/f29e8592ad154c4dd55ed4b5d8900b094793e62a:
