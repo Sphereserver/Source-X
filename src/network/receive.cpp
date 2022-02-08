@@ -542,10 +542,10 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
     bool fSuccess = false;
     if (target && (itemLayer < LAYER_HORSE) && target->IsOwnedBy(source) && target->CanTouch(item))
     {
-        if (target->CanCarry(item))
+       //if (target->CanCarry(item)) //Since Weight behavior rework, we want avoid don't be able to equip an item if overweight
             fSuccess = target->ItemEquip(item, source);
-        else
-            client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
+       // else
+       //     client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
 
     if (!fSuccess)
