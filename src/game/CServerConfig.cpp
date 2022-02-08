@@ -115,7 +115,7 @@ CServerConfig::CServerConfig()
 	m_iLightNight			= 25;	// dark before t2a.
 	m_iLightDay				= LIGHT_BRIGHT;
     m_iContainerMaxItems    = MAX_ITEMS_CONT;
-	_iBackpackMaxWeight	    = 550 * WEIGHT_UNITS;
+	m_iBackpackOverload		= 40 * WEIGHT_UNITS;
 	m_iBankIMax				= 1000;
 	m_iBankWMax				= 1000 * WEIGHT_UNITS;
 	m_fAttackingIsACrime	= true;
@@ -160,8 +160,10 @@ CServerConfig::CServerConfig()
     _fAutoHouseKeys         = true;
     _fAutoShipKeys          = true;
 	m_iMaxBaseSkill			= 200;
-	m_iStamRunningPenalty 	= 100;
-	m_iStaminaLossAtWeight 	= 5;
+	m_iStamRunningPenalty 	= 50;
+	m_iStamRunningPenaltyOverweight = 100;
+	m_iStaminaLossAtWeight 	= 150;
+	m_iStaminaLossOverweightMultiplier = 5;
 	m_iMountHeight			= false;
 	m_iMoveRate				= 100;
 	m_iArcheryMinDist		= 2;
@@ -186,6 +188,7 @@ CServerConfig::CServerConfig()
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
 	m_iDistanceWhisper	= 3;
 	m_iDistanceTalk		= UO_MAP_VIEW_SIZE_DEFAULT;
+	m_iDragWeightMax = 300;
     m_iNPCDistanceHear  = 4;
 	_uiExperimentalFlags= 0;
 	_uiOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
@@ -440,7 +443,7 @@ enum RC_TYPE
     RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
 	RC_AUTORESDISP,				// m_bAutoResDisp
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
-	RC_BACKPACKMAXWEIGHT,       // _iBackpackMaxWeight
+	RC_BACKPACKOVERLOAD,       // m_iBackpackOverload
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
@@ -493,6 +496,7 @@ enum RC_TYPE
 	RC_DISTANCETALK,
 	RC_DISTANCEWHISPER,
 	RC_DISTANCEYELL,
+	RC_DRAGWEIGHTMAX,
 #ifdef _DUMPSUPPORT
 	RC_DUMPPACKETSFORACC,
 #endif
@@ -624,6 +628,7 @@ enum RC_TYPE
 	RC_RTICKS,
 	RC_RTIME,
 	RC_RUNNINGPENALTY,			// m_iStamRunningPenalty
+	RC_RUNNINGPENALTYOVERWEIGHT,// m_iStamRunningPenaltyOverweight
 	RC_SAVEBACKGROUND,			// m_iSaveBackgroundTime
 	RC_SAVEPERIOD,
 	RC_SAVESECTORSPERTICK,		// m_iSaveSectorsPerTick
@@ -639,6 +644,7 @@ enum RC_TYPE
 	RC_SPEEDSCALEFACTOR,
 	RC_SPELLTIMEOUT,
 	RC_STAMINALOSSATWEIGHT,		// m_iStaminaLossAtWeight
+	RC_STAMINALOSSOVERWEIGHTMULTIPLIER,	// m_iStaminaLossOverweightMultiplier 
 	RC_STATSFLAGS,				// _uiStatFlag
 	RC_STRIPPATH,				// for TNG
 	RC_SUPPRESSCAPITALS,
@@ -700,7 +706,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
     { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoProcessPriority)	}},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp)			}},
     { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys)		    }},
-	{ "BACKPACKMAXWEIGHT",      { ELEM_INT,     OFFSETOF(CServerConfig,_iBackpackMaxWeight),    }},
+	{ "BACKPACKOVERLOAD",		{ ELEM_INT,     OFFSETOF(CServerConfig,m_iBackpackOverload),    }},
 	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels)		}},
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax)				}},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax)				}},
@@ -753,6 +759,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk )		}},
 	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper )		}},
 	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell )		}},
+	{ "DRAGWEIGHTMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDragWeightMax)		}},
 #ifdef _DUMPSUPPORT
 	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sDumpAccPackets)		}},
 #endif
@@ -884,6 +891,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "RTICKS",					{ ELEM_VOID,	0												}},
 	{ "RTIME",					{ ELEM_VOID,	0												}},
 	{ "RUNNINGPENALTY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStamRunningPenalty)	}},
+	{ "RUNNINGPENALTYOVERWEIGHT",{ ELEM_INT,	OFFSETOF(CServerConfig,m_iStamRunningPenalty)	} },
 	{ "SAVEBACKGROUND",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackgroundTime)	}},
 	{ "SAVEPERIOD",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSavePeriod)			}},
 	{ "SAVESECTORSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveSectorsPerTick)	}},
@@ -899,6 +907,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor)		}},
 	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout)			}},
 	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight)	}},
+	{ "STAMINALOSSOVERWEIGHTMULTIPLIER ",{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossOverweightMultiplier)	}},
 	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag)				}},
 	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath)			}},
 	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals)		}},
@@ -1079,8 +1088,8 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_ATTACKERTIMEOUT:
 			m_iAttackerTimeout = s.GetArgVal();
 			break;
-        case RC_BACKPACKMAXWEIGHT:
-            _iBackpackMaxWeight = s.GetArgVal() * WEIGHT_UNITS;
+        case RC_BACKPACKOVERLOAD:
+            m_iBackpackOverload = s.GetArgVal() * WEIGHT_UNITS;
             break;
 		case RC_BANKMAXWEIGHT:
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
@@ -1856,8 +1865,8 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 		case RC_ATTACKERTIMEOUT:
 			sVal.FormatVal(m_iAttackerTimeout);
 			break;
-		case RC_BACKPACKMAXWEIGHT:
-			sVal.FormatVal( _iBackpackMaxWeight / WEIGHT_UNITS );
+		case RC_BACKPACKOVERLOAD:
+			sVal.FormatVal( m_iBackpackOverload / WEIGHT_UNITS );
 			break;
 		case RC_BANKMAXWEIGHT:
 			sVal.FormatVal( m_iBankWMax / WEIGHT_UNITS );

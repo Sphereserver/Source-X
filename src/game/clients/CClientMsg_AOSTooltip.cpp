@@ -430,7 +430,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			ASSERT(pContainer);
 			if ( g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE )
 			{
-				int iMaxWeight = (pItem->GetContainedLayer() == LAYER_PACK) ? g_Cfg._iBackpackMaxWeight + pItem->m_ModMaxWeight : pItem->m_ModMaxWeight;
+				int iMaxWeight = (pItem->GetContainedLayer() == LAYER_PACK) ? g_Cfg.m_iBackpackOverload + pItem->m_ModMaxWeight : pItem->m_ModMaxWeight;
 				if (iMaxWeight > 0)
 				{
                     PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1072241)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~/~4_MAXWEIGHT~ stones
