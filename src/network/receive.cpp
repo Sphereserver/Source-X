@@ -521,6 +521,7 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
 	ASSERT(client);
 
 	CUID itemSerial(readInt32());
+	LAYER_TYPE itemLayer = static_cast<LAYER_TYPE>(readByte());
 	CUID targetSerial(readInt32());
 
 	CChar* source = client->GetChar();
@@ -538,11 +539,17 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
 	client->ClearTargMode(); // done dragging.
 
 	CChar* target = targetSerial.CharFind();
-	if (!target || !target->NPC_IsOwnedBy(source) || !source->ItemPickup(item, 0)) // 0 = pick all
-		return true;
+    bool fSuccess = false;
+    if (target && (itemLayer < LAYER_HORSE) && target->IsOwnedBy(source) && target->CanTouch(item))
+    {
+        if (target->CanCarry(item))
+            fSuccess = target->ItemEquip(item, source);
+        else
+            client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
+	}
 
-	if (!target->ItemEquip(item, source))
-		client->Event_Item_Drop_Fail(item);
+    if (!fSuccess)
+        client->Event_Item_Drop_Fail(item);		//cannot equip
 
 	return true;
 }
