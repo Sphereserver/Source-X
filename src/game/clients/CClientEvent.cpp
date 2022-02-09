@@ -385,6 +385,22 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				return;
 			}
 		}
+        else // pObjTop may not be an item, it may be a character (eg: drop in the backpack or the bankbox)
+        {
+            if (pObjOn->IsItem())
+            {
+                CItemContainer *pAboveContainer = static_cast<CItemContainer*>(pObjOn);
+                while (pAboveContainer) // do a recursive check.
+                {
+                    if (!pAboveContainer->CanContainerHold(pItem, m_pChar))
+                    {
+                        Event_Item_Drop_Fail(pItem);
+                        return;
+                    }
+                    pAboveContainer = static_cast<CItemContainer*>(static_cast<CItem*>(pObjOn)->GetTopContainer());
+                }
+            }
+        }
 
 		if ( pContItem != nullptr )
 		{
