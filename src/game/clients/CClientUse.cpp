@@ -113,6 +113,12 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			fMustEquip = false;
 
 		if ( fMustEquip && !m_pChar->CanMove(pItem) && !m_pChar->ItemEquip(pItem, nullptr, true) )
+			/*Before weight behavior rework we had this check too :
+			if ( (pObjTop != m_pChar) && !m_pChar->CanCarry(pItem) )
+			{
+				SysMessageDefault(DEFMSG_MSG_HEAVY);
+				return false;
+			}*/
 			return false;
 	}
 

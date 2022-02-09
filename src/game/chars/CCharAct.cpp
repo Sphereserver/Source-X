@@ -1731,9 +1731,24 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 	const word iAmountMax = pItem->GetAmount();
-	if ( amount <= 0 || amount > iAmountMax ||
-			!pItem->Item_GetDef()->IsStackableType())	// it's not stackable, so we must pick up the entire amount
+	if ( amount <= 0 || amount > iAmountMax || !pItem->Item_GetDef()->IsStackableType())	// it's not stackable, so we must pick up the entire amount
 		amount = iAmountMax;
+
+	// Is it too heavy to even drag ?
+	bool fDrop = false;
+
+	if (g_Cfg.m_iDragWeightMax > 0)
+	{
+		int iItemWeight = pItem->GetWeight(amount);
+		if ((GetWeightLoadPercent(GetTotalWeight() + iItemWeight)) > g_Cfg.m_iDragWeightMax)
+		{
+			SysMessageDefault(DEFMSG_MSG_HEAVY);
+			if ((pCharTop == this) && (pItem->GetParent() == GetPack()))
+				fDrop = true;	// we can always drop it out of own pack !
+			else
+				return -1;
+		}
+	}
 
 	ITRIG_TYPE trigger;
 	if (pCharTop != nullptr )
@@ -1830,6 +1845,12 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 			ptNewPlace.m_z -= iItemHeight;
 			pStack->MoveToUpdate(ptNewPlace);
 		}
+	}
+
+	if (fDrop)
+	{
+		ItemDrop(pItem, GetTopPoint());
+		return -1;
 	}
 
 	// do the dragging anim for everyone else to see.
@@ -3435,15 +3456,38 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	if ( !fCheckOnly )
 	{
 		EXC_SET_BLOCK("Stamina penalty");
-        if (iWeight > iMaxWeight)
+        if (iWeight < iMaxWeight) //Normal situation
+		{
+			ushort iWeightLoadPercent = (iWeight * 100) / iMaxWeight;
+			ushort uiStamPenalty = 0;
+
+			CVarDefCont* pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
+
+			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
+			{
+				//FIXME: Running penality should be a percentage... For now, it adding a flat value take on the ini.
+				iWeightLoadPercent += (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty) ;
+			}
+			int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
+			if (iChanceForStamLoss > Calc_GetRandVal(1000))
+			{
+
+				pVal = GetKey("OVERRIDE.STAMINAWALKINGPENALTY", true);
+				uiStamPenalty = ushort(pVal ? pVal->GetValNum() : 1);
+				
+			}
+			uiStamReq += uiStamPenalty;
+		}
+		
+		else //Overweight and lost more stamina each step
         {
-            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossAtWeight + ((iWeight - iMaxWeight) / 25));
+            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweightMultiplier + ((iWeight - iMaxWeight) / 25));
 
             if (IsStatFlag(STATF_ONHORSE))
                 iWeightPenalty /= 3;
 
-            if (dir & DIR_MASK_RUNNING)
-                iWeightPenalty += ushort((iWeightPenalty * g_Cfg.m_iStamRunningPenalty) / 100);
+			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
+                iWeightPenalty += ushort((iWeightPenalty * g_Cfg.m_iStamRunningPenaltyOverweight) / 100);
 
             uiStamReq += iWeightPenalty;
         }

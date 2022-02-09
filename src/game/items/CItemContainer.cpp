@@ -840,8 +840,12 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_ITEMS);
 		return false;
 	}
+	// The player backpack should be check differently because an ini setting can limit the weight player can have on it.
+	// If setting = -1:illimited other value should be add to char maxweight
+	int iMaxWeight = m_ModMaxWeight;
+	if ((GetContainedLayer() == LAYER_PACK) && !(g_Cfg.m_iBackpackOverload <= -1))
+		iMaxWeight += (g_Cfg.Calc_MaxCarryWeight(pCharMsg) + g_Cfg.m_iBackpackOverload);
 
-	int iMaxWeight = ((GetContainedLayer() == LAYER_PACK) ? g_Cfg._iBackpackMaxWeight : 0) + m_ModMaxWeight;
 	if (iMaxWeight > 0 && (GetTotalWeight() + pItem->GetWeight() > iMaxWeight))
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
