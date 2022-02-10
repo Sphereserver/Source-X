@@ -907,7 +907,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor)		}},
 	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout)			}},
 	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight)	}},
-	{ "STAMINALOSSOVERWEIGHTMULTIPLIER ",{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossOverweightMultiplier)	}},
+	{ "STAMINALOSSOVERWEIGHTMULTIPLIER",{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossOverweightMultiplier)	}},
 	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag)				}},
 	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath)			}},
 	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals)		}},
