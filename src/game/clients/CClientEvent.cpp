@@ -397,7 +397,8 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
                         Event_Item_Drop_Fail(pItem);
                         return;
                     }
-                    pAboveContainer = static_cast<CItemContainer*>(static_cast<CItem*>(pObjOn)->GetTopContainer());
+                    CItemContainer * pNextContainer = static_cast<CItemContainer*>(static_cast<CItem*>(pObjOn)->GetTopContainer());
+                    pAboveContainer = pNextContainer == pAboveContainer ? nullptr : pNextContainer;
                 }
             }
         }
