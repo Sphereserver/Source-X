@@ -2901,3 +2901,20 @@ Also excluded GMs from most checks inside this code.
 	StaminaLossOverweightMultiplier and RunningPenaltyOverweight are 2 new ini setting for ajustment how stam is drained when overloaded.
 	Drag and drop item was limited to 300% maxweight. Now DRAGWEIGHTMAX define % of maxweight you can move.
 - Fixed: On some situation when splitting a stack on the ground, the leftover had no timer and never decay.
+
+07-02-2022, Soulless
+- Fixed: Evil NPCs not being able to spawn in a guarded region. If you do not desire evil NPCs spawning in guarded regions just remove the spawn item.
+- Fixed: Healers not seeing ghosts that are not manifested in war mode, NPC healers should always see ghosts. You can make them not see player ghosts by
+  adding this to them if you desire this behavior :
+    ON=@NpcLookAtChar
+      if (<src.flags>&statf_dead) && !(<flags>&statf_war)
+        return 1
+      endif
+- Fixed: Evil NPCs not being able to enter a guarded region, to accomplish this behavior in the scripts add this on a generic NPC event.
+    ON=@Enter
+    if (<src.npc.brain> >= 8) && (<region.flags>&region_flag_guarded)
+      return 1
+    endif
+- Added: Support for lethal poison messages for the non-OSI poison spell, you can customize this in the sphere messages .scp
+- Fixed: region_antimagic_recallin preventing players from teleporting in these areas.
+

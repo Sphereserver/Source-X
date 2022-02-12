@@ -823,14 +823,6 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	lpctstr pszRefuseMsg;
 
 	int iDist = GetDist( pChar );
-	if ( pChar->IsStatFlag( STATF_INSUBSTANTIAL ))
-	{
-		pszRefuseMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_MANIFEST );
-		if ( Calc_GetRandVal(5) || iDist > 3 )
-			return false;
-		Speak( pszRefuseMsg );
-		return true;
-	}
 
 	if ( iDist > 3 )
 	{
@@ -1908,11 +1900,14 @@ void CChar::NPC_Act_Idle()
 
 	// ---------- If we found nothing else to do. do this. -----------
 
-	// If guards are found outside guarded territories, do the following.
-	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD && !m_pArea->IsGuarded() && m_ptHome.IsValidPoint())
+	// If guards are found outside guarded territories and not allowed, do the following.
+	if (!IsSetOF(OF_GuardOutsideGuardedArea))
 	{
-		Skill_Start(NPCACT_GO_HOME);
-		return;
+		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD && !m_pArea->IsGuarded() && m_ptHome.IsValidPoint())
+		{
+			Skill_Start(NPCACT_GO_HOME);
+			return;
+		}
 	}
 
 	// Specific creature random actions.

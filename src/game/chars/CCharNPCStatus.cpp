@@ -564,12 +564,6 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
 				    return false;
             }
 		}
-
-		if ( Noto_IsCriminal() )
-		{
-			if ( !m_pArea->IsGuarded() && pArea->IsGuarded() )
-				return false;
-		}
 	}
 
 	// Is there a nasty object here that will hurt us ?
