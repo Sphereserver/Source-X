@@ -163,7 +163,7 @@ CServerConfig::CServerConfig()
 	m_iStamRunningPenalty 	= 50;
 	m_iStamRunningPenaltyOverweight = 100;
 	m_iStaminaLossAtWeight 	= 150;
-	m_iStaminaLossOverweightMultiplier = 5;
+	m_iStaminaLossOverweight = 5;
 	m_iMountHeight			= false;
 	m_iMoveRate				= 100;
 	m_iArcheryMinDist		= 2;
@@ -644,7 +644,7 @@ enum RC_TYPE
 	RC_SPEEDSCALEFACTOR,
 	RC_SPELLTIMEOUT,
 	RC_STAMINALOSSATWEIGHT,		// m_iStaminaLossAtWeight
-	RC_STAMINALOSSOVERWEIGHTMULTIPLIER,	// m_iStaminaLossOverweightMultiplier 
+	RC_STAMINALOSSOVERWEIGHT,	// m_iStaminaLossOverweight
 	RC_STATSFLAGS,				// _uiStatFlag
 	RC_STRIPPATH,				// for TNG
 	RC_SUPPRESSCAPITALS,
@@ -907,7 +907,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor)		}},
 	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout)			}},
 	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight)	}},
-	{ "STAMINALOSSOVERWEIGHTMULTIPLIER",{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossOverweightMultiplier)	}},
+	{ "STAMINALOSSOVERWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossOverweight)	}},
 	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,_uiStatFlag)				}},
 	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath)			}},
 	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals)		}},

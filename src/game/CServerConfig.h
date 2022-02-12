@@ -324,7 +324,7 @@ public:
 	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
     int  m_iStamRunningPenaltyOverweight;// Weight penalty for running (+N% of max carry weight) when overweight
 	int  m_iStaminaLossAtWeight;	// %Weight at which characters begin to lose stamina.
-    int  m_iStaminaLossOverweightMultiplier;  // %Weight at which characters begin to lose stamina when overweight.
+    int  m_iStaminaLossOverweight;  // %Weight at which characters begin to lose stamina when overweight.
 	int  m_iHitpointPercentOnRez;	// How many hitpoints do they get when they are rez'd?
 	int  m_iHitsHungerLoss;			// How many % of HP will loose char on starving.
 	int  m_iMaxBaseSkill;			// Maximum value for base skills at char creation.

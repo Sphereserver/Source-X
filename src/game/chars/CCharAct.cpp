@@ -3481,7 +3481,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		
 		else //Overweight and lost more stamina each step
         {
-            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweightMultiplier + ((iWeight - iMaxWeight) / 25));
+            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
 
             if (IsStatFlag(STATF_ONHORSE))
                 iWeightPenalty /= 3;
