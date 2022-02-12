@@ -1812,7 +1812,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	{
         // Create an leftover item when pick up only part of the stack
         CItem* pItemNew = pItem->UnStackSplit(amount, this);
-        pItemNew->SetTimeout(pItem->GetTimerDAdjusted());
+		pItemNew->SetTimeout(pItem->GetDecayTime());    // Set it's timer to the real decay, in case it gets forced to be drop on ground.
 
         if (IsTrigUsed(TRIGGER_PICKUP_STACK) || IsTrigUsed(TRIGGER_ITEMPICKUP_STACK))
         {

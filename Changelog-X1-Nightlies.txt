@@ -2894,12 +2894,13 @@ List of changes:
 *These commits are meant to reenable old stamina and weight behaviour, allowing chars to move while overweight and applying penalties on stam.
 Also excluded GMs from most checks inside this code.
 
-07-02-2022, Jhobean
+07-02-2022, 11-02-2022 Jhobean
 - Changed: Make a better integrations of lasts commits about weight modification to avoid changing behavior on all shard.
 	BackpackMaxWeight in the .ini is now called BackpackOverload and define how many extra weight a character can place in his backpack.
 	StaminaLossAtWeight and RunningPenalty now work like before and affect stam only when not overloaded.
 	StaminaLossOverweightMultiplier and RunningPenaltyOverweight are 2 new ini setting for ajustment how stam is drained when overloaded.
 	Drag and drop item was limited to 300% maxweight. Now DRAGWEIGHTMAX define % of maxweight you can move.
+- Fixed: On some situation when splitting a stack on the ground, the leftover had no timer and never decay.
 
 07-02-2022, Soulless
 - Fixed: Evil NPCs not being able to spawn in a guarded region. If you do not desire evil NPCs spawning in guarded regions just remove the spawn item.
@@ -2916,3 +2917,4 @@ Also excluded GMs from most checks inside this code.
     endif
 - Added: Support for lethal poison messages for the non-OSI poison spell, you can customize this in the sphere messages .scp
 - Fixed: region_antimagic_recallin preventing players from teleporting in these areas.
+
