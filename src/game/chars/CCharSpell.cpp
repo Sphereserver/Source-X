@@ -2685,6 +2685,18 @@ bool CChar::Spell_TargCheck()
 				return false;
 			}
 		}
+        else if (pObj->IsItem())
+        {
+            if (pObjTop == this)
+            {
+                // Check if the item is in my bankbox, and i'm not in the same position from which I opened it the last time.
+                const CPointMap& ptTop = GetTopPoint();
+                CItemContainer* pBank = GetBank();
+                bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
+                if (fItemContIsInsideBankBox && (pBank->m_itEqBankBox.m_pntOpen != ptTop))
+                    return false;
+            }
+        }
 		if ( !CanSeeLOS(pObj, LOS_NB_WINDOWS) ) //we should be able to cast through a window
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );

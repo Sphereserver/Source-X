@@ -2918,3 +2918,8 @@ Also excluded GMs from most checks inside this code.
 - Added: Support for lethal poison messages for the non-OSI poison spell, you can customize this in the sphere messages .scp
 - Fixed: region_antimagic_recallin preventing players from teleporting in these areas.
 
+13-02-2022, XuN
+- Fixed players being able to cast spells on items inside their bankbox when they are not supossed to reach it.
+Note: The only way the server has to know if the bankself is closed is to store the position of the player when the bankbox opens,
+    then compare the current position against the one stored. So even if the player closed the bankbox,
+    while the position hasn't changed, the items inside the bankbox are reachable.
