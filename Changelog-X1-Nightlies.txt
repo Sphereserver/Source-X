@@ -2902,7 +2902,7 @@ Also excluded GMs from most checks inside this code.
 	Drag and drop item was limited to 300% maxweight. Now DRAGWEIGHTMAX define % of maxweight you can move.
 - Fixed: On some situation when splitting a stack on the ground, the leftover had no timer and never decay.
 
-07-02-2022, Soulless
+12-02-2022, Soulless
 - Fixed: Evil NPCs not being able to spawn in a guarded region. If you do not desire evil NPCs spawning in guarded regions just remove the spawn item.
 - Fixed: Healers not seeing ghosts that are not manifested in war mode, NPC healers should always see ghosts. You can make them not see player ghosts by
   adding this to them if you desire this behavior :
@@ -2917,6 +2917,11 @@ Also excluded GMs from most checks inside this code.
     endif
 - Added: Support for lethal poison messages for the non-OSI poison spell, you can customize this in the sphere messages .scp
 - Fixed: region_antimagic_recallin preventing players from teleporting in these areas.
+- Fixed: Guards endlessly cycling through idling/going home when OF_GuardOutsideGuardedArea is enabled and a guard is outside of a guarded region.
+
+12-02-2022, Soulless
+- Changed: 'StaminaLossOverweightMultiplier' to 'StaminaLossOverweight', and changed the value for additional increase of stamina loss from every
+  25 stones to every 5 stones. 
 
 13-02-2022, XuN
 - Fixed players being able to cast spells on items inside their bankbox when they are not supossed to reach it.
