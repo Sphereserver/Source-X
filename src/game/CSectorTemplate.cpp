@@ -134,6 +134,7 @@ void CSectorBase::SetAdjacentSectors()
     ASSERT(iMaxX > 0);
     const int iMaxY = pSectors->GetSectorRows(m_map);
     ASSERT(iMaxY > 0);
+    const int iMaxSectors = pSectors->GetSectorQty(m_map);
 
     // Sectors are layed out in the array horizontally: when the row is complete (X), the subsequent sector is placed in
     //  the column below (Y).
@@ -169,15 +170,14 @@ void CSectorBase::SetAdjacentSectors()
     {
         // out of bounds checks
 		const int iAdjX = _x + _xyDir[i].x;
-        if ((iAdjX < 0) || (iAdjX >= iMaxX))
-            continue;
-
 		const int iAdjY = _y + _xyDir[i].y;
-        if ((iAdjY < 0) || (iAdjY >= iMaxY))
-            continue;
 
-		const int index = (iAdjY * iMaxX) + iAdjX;
-        ASSERT((index >= 0) && (index <= pSectors->GetSectorQty(m_map)));
+		int index = m_index;
+        index  += ((iAdjY * iMaxX) + iAdjX);
+        if (index < 0 || (index > iMaxSectors))
+        {
+            continue;
+        }
         _ppAdjacentSectors[(DIR_TYPE)i] = pSectors->GetSector(m_map, index);
     }
 }
@@ -195,6 +195,7 @@ CSectorBase::CSectorBase() :
 	m_index = 0;
 	m_dwFlags = 0;
 	_x = _y = -1;
+    memset(_ppAdjacentSectors, 0, DIR_QTY);
 }
 
 void CSectorBase::Init(int index, uchar map, short x, short y)
