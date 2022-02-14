@@ -1107,6 +1107,7 @@ enum CTRIG_TYPE : short
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change
+    CTRIG_Falling,          // CHAR IS FALLING
 	CTRIG_FameChange,       // Fame chaged
 	CTRIG_FollowersUpdate,  // Adding or removing CurFollowers.
 

@@ -2859,6 +2859,15 @@ It will check if distance is > 10, so you don't need to write the distance check
 01-12-2021, Drk84
 - Fixed: Incorrect EVAL parsing in case of multiple subtraction (Issue #804).
 
+05-12-2021, Tolokio (Rastrero)
+-Added: Trigger @falling. Fires when characters is about to fall from height >= 10
+@falling
+src: Character falling
+Default: Character falling
+argn1: X coord of new location where characters is going to fall.
+argn2: Y coord of new location where characters is going to fall.
+argn3: Z coord of new location where characters is going to fall.
+
 09-12-2021, Drk84
 - Fixed: Players cannot increase combat skills in REGION_FLAG_NOPVP areas.
 
@@ -2928,3 +2937,4 @@ Also excluded GMs from most checks inside this code.
 Note: The only way the server has to know if the bankself is closed is to store the position of the player when the bankbox opens,
     then compare the current position against the one stored. So even if the player closed the bankbox,
     while the position hasn't changed, the items inside the bankbox are reachable.
+

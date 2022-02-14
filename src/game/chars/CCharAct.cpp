@@ -3454,7 +3454,20 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	}
 
 	if ( !fCheckOnly )
-	{
+	{		
+		// Falling trigger
+		//lack config feature for sphere.ini if wanted.
+		if (GetTopZ() - 10 >= ptDst.m_z)
+		{
+			//char is falling
+			CScriptTriggerArgs Args(ptDst.m_x, ptDst.m_y, ptDst.m_z);
+
+			if ( IsTrigUsed(TRIGGER_FALLING) )
+			{
+				OnTrigger(CTRIG_Falling, this, &Args);
+			}
+		}
+		//
 		EXC_SET_BLOCK("Stamina penalty");
         if (iWeight < iMaxWeight) //Normal situation
 		{
@@ -3498,7 +3511,6 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
 		m_zClimbHeight = (dwBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
 	}
-
 	EXC_CATCH;
 	return pArea;
 }
