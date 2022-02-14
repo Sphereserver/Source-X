@@ -2928,3 +2928,7 @@ Also excluded GMs from most checks inside this code.
 Note: The only way the server has to know if the bankself is closed is to store the position of the player when the bankbox opens,
     then compare the current position against the one stored. So even if the player closed the bankbox,
     while the position hasn't changed, the items inside the bankbox are reachable.
+
+14-02-2022, Jhobean
+- Fixed: With a Macro/assistant it's no more possible to target an object on your bank if your bank is close.
+    EX: If your bank have a water through on it, it's now impossible to wash you bandage without bank open.

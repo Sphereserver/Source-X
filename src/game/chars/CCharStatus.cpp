@@ -1387,6 +1387,16 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return false;
 		}
 	}
+	else if (pObjTop == this) //Top container is the player (bank or backpack)
+	{
+		// Check if the item is in my bankbox, and i'm not in the same position from which I opened it the last time.
+		const CPointMap& ptTop = GetTopPoint();
+		CItemContainer* pBank = GetChar()->GetBank();
+		bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
+		if (fItemContIsInsideBankBox && (pBank->m_itEqBankBox.m_pntOpen != ptTop))
+			return false;
+	}
+
 
 	if ( IsPriv(PRIV_GM) )
 		return true;
