@@ -308,6 +308,8 @@ public:
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
+    int m_iDragWeightMax;            // Capacity of maxweight in % character can move with drag and drop
+    int m_iBackpackOverload;        // Maximum weight in stones extra allowed in main backpack.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
 	int  m_iBankWMax;				// Maximum weight in WEIGHT_UNITS stones allowed in bank.
     int m_iVendorMarkup;            // Default markup value, used if no other kind of tag is providen.
@@ -320,7 +322,9 @@ public:
     bool _fAutoHouseKeys;			// Do houses create keys automatically?
     bool _fAutoShipKeys;			// Do ships create keys automatically?
 	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
+    int  m_iStamRunningPenaltyOverweight;// Weight penalty for running (+N% of max carry weight) when overweight
 	int  m_iStaminaLossAtWeight;	// %Weight at which characters begin to lose stamina.
+    int  m_iStaminaLossOverweight;  // %Weight at which characters begin to lose stamina when overweight.
 	int  m_iHitpointPercentOnRez;	// How many hitpoints do they get when they are rez'd?
 	int  m_iHitsHungerLoss;			// How many % of HP will loose char on starving.
 	int  m_iMaxBaseSkill;			// Maximum value for base skills at char creation.

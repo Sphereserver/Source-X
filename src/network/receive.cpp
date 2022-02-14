@@ -542,10 +542,10 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
     bool fSuccess = false;
     if (target && (itemLayer < LAYER_HORSE) && target->IsOwnedBy(source) && target->CanTouch(item))
     {
-        if (target->CanCarry(item))
+       //if (target->CanCarry(item)) //Since Weight behavior rework, we want avoid don't be able to equip an item if overweight
             fSuccess = target->ItemEquip(item, source);
-        else
-            client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
+       // else
+       //     client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
 	}
 
     if (!fSuccess)
@@ -4422,7 +4422,7 @@ bool PacketMovementReqNew::onReceive(CNetState* net)
 		byte direction = readByte();
 		dword mode = readInt32();	// 1 = walk, 2 = run
 		if ( mode == 2 )
-			direction |= 0x80;
+			direction |= DIR_MASK_RUNNING;
 
 		// The client send these values, but they're not really needed
 		//dword x = readInt32();

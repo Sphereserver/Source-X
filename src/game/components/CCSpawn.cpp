@@ -439,12 +439,6 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
 
     // Check if the NPC can spawn in this region
     const CRegion *pRegion = pt.GetRegion(REGION_TYPE_AREA);
-    if (!pRegion || (pRegion->IsGuarded() && pChar->Noto_IsEvil()))
-    {
-        g_Log.EventWarn("Spawner UID=0%" PRIx32 " is trying to spawn an evil NPC into a guarded area. Deleting the NPC.\n", (dword)pSpawnItem->GetUID());
-        pChar->Delete();
-        return nullptr;
-    }
 
     AddObj(pChar->GetUID());
     pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement and attachment to the spawnitem
@@ -454,6 +448,7 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
 
     return pChar;
 }
+
 
 CResourceIDBase CCSpawn::GetCharRid()
 {

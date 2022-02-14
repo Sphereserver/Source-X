@@ -104,26 +104,25 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 	CItemBase *pItemDef = pItem->Item_GetDef();
 	bool bIsEquipped = pItem->IsItemEquipped();
-	if ( pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer() )
+	if (pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer())
 	{
 		bool fMustEquip = true;
-		if ( pItem->IsTypeSpellbook() )
+		if (pItem->IsTypeSpellbook())
 			fMustEquip = false;
-		else if ( (pItem->IsType(IT_LIGHT_OUT) || pItem->IsType(IT_LIGHT_LIT)) && !pItem->IsItemInContainer() )
+		else if ((pItem->IsType(IT_LIGHT_OUT) || pItem->IsType(IT_LIGHT_LIT)) && !pItem->IsItemInContainer())
 			fMustEquip = false;
 
-		if ( fMustEquip )
+		if (fMustEquip)
 		{
-			if ( !m_pChar->CanMove(pItem) )
+			if (!m_pChar->CanMove(pItem))
 				return false;
-
+			/*Before weight behavior rework we had this check too :
 			if ( (pObjTop != m_pChar) && !m_pChar->CanCarry(pItem) )
 			{
 				SysMessageDefault(DEFMSG_MSG_HEAVY);
 				return false;
-			}
-
-			if ( !m_pChar->ItemEquip(pItem, nullptr, true) )
+			}*/
+			if (!m_pChar->ItemEquip(pItem, nullptr, true))
 				return false;
 		}
 	}

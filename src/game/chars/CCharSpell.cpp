@@ -130,7 +130,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
                 SysMessageDefault(DEFMSG_SPELL_TELE_CANT);
                 return false;
             }
-            if ( pArea->IsFlag(REGION_ANTIMAGIC_RECALL_IN|REGION_ANTIMAGIC_TELEPORT) )
+			if ( pArea->IsFlag(REGION_ANTIMAGIC_TELEPORT) )
             {
                 SysMessageDefault(DEFMSG_SPELL_TELE_AM);
                 return false;
@@ -1844,8 +1844,10 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 1;
 				else if (iLevel < 800)	// Greater
 					iLevel = 2;
-				else					// Deadly.
+				else if (iLevel < 1000)	// Deadly.
 					iLevel = 3;
+				else					// Lethal
+					iLevel = 4;
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
 				iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
@@ -1856,7 +1858,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_2),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_3),
-					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_4)
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_4),
+					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_5)
 				};
 
 				tchar * pszMsg = Str_GetTemp();
@@ -2665,9 +2668,38 @@ bool CChar::Spell_TargCheck()
 			SysMessageDefault( DEFMSG_SPELL_TARG_OBJ );
 			return false;
 		}
+
+		if (pObj->IsChar())
+		{
+			CChar* pChar = static_cast<CChar *>(pObj);
+			bool fIsTargetDead = pChar->IsStatFlag(STATF_DEAD);
+			bool fCanSpellTargetDead = pSpellDef->IsSpellType(SPELLFLAG_TARG_DEAD);
+			if (fIsTargetDead && !fCanSpellTargetDead) // If target is dead and the spell cannot target a ghost, abort the spell.
+			{
+				SysMessageDefault(DEFMSG_SPELL_TARG_DEAD);
+				return false;
+			}
+			if (!fIsTargetDead && fCanSpellTargetDead) // If target is not dead and the spell target has the SPELLFLAG_TARG_DEAD flag, abort the spell.
+			{
+				SysMessageDefault( DEFMSG_SPELL_TARG_NOTDEAD );
+				return false;
+			}
+		}
+        else if (pObj->IsItem())
+        {
+            if (pObjTop == this)
+            {
+                // Check if the item is in my bankbox, and i'm not in the same position from which I opened it the last time.
+                const CPointMap& ptTop = GetTopPoint();
+                CItemContainer* pBank = GetBank();
+                bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
+                if (fItemContIsInsideBankBox && (pBank->m_itEqBankBox.m_pntOpen != ptTop))
+                    return false;
+            }
+        }
 		if ( !CanSeeLOS(pObj, LOS_NB_WINDOWS) ) //we should be able to cast through a window
 		{
-			SysMessageDefault(DEFMSG_SPELL_TARG_LOS);
+			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );
 			return false;
 		}
 		if ( !IsPriv(PRIV_GM) && (pObjTop != this) && (pObjTop != pObj) && pObjTop->IsChar() )

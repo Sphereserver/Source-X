@@ -331,7 +331,8 @@ enum DIR_TYPE	// Walking directions. m_dir
     DIR_NW,
     DIR_QTY,		// Also means "Center"
 
-    DIR_ANIM_QTY = 5	// Seems we only need 5 pics for an anim, assume ALL bi-symetrical creatures
+    DIR_ANIM_QTY = 5,	// Seems we only need 5 pics for an anim, assume ALL bi-symetrical creatures
+    DIR_MASK_RUNNING = 0x80
 };
 
 

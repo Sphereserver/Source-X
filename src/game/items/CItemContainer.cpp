@@ -833,28 +833,23 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 	if ( pCharMsg->IsPriv(PRIV_GM) )	// a gm can doing anything.
 		return true;
 
-	if ( IsAttr(ATTR_MAGIC) )
-	{
-		// Put stuff in a magic box
-		pCharMsg->SysMessageDefault(DEFMSG_CONT_MAGIC);
-		return false;
-	}
-
 	size_t pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXITEMS"));
-	size_t tMaxItemsCont = pTagTmp ? pTagTmp : g_Cfg.m_iContainerMaxItems;
-	if ( GetContentCount() >= tMaxItemsCont )
+	size_t iMaxItemsCont = pTagTmp ? pTagTmp : g_Cfg.m_iContainerMaxItems;
+	if ( GetContentCount() >= iMaxItemsCont )
 	{
-		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
+		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_ITEMS);
 		return false;
 	}
+	// The player backpack should be check differently because an ini setting can limit the weight player can have on it.
+	// If setting = -1:illimited other value should be add to char maxweight
+	int iMaxWeight = m_ModMaxWeight;
+	if ((GetContainedLayer() == LAYER_PACK) && !(g_Cfg.m_iBackpackOverload <= -1))
+		iMaxWeight += (g_Cfg.Calc_MaxCarryWeight(pCharMsg) + g_Cfg.m_iBackpackOverload);
 
-	if (m_ModMaxWeight)
+	if (iMaxWeight > 0 && (GetTotalWeight() + pItem->GetWeight() > iMaxWeight))
 	{
-		if ( (GetTotalWeight() + pItem->GetWeight()) > m_ModMaxWeight )
-		{
-			pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
-			return false;
-		}
+		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
+		return false;
 	}
 
 	if ( !IsSetOF(OF_AllowContainerInsideContainer) &&
@@ -955,7 +950,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			// Check that this vendor box hasn't already reached its content limit
 			if ( GetContentCount() >= g_Cfg.m_iContainerMaxItems )
 			{
-				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
+				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_ITEMS);
 				return false;
 			}
 			break;

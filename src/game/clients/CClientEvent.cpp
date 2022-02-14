@@ -374,12 +374,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 					return;
 				}
 			}
-			else if ( ! pChar->CanCarry( pItem ))
-			{
-				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HEAVY));
-				Event_Item_Drop_Fail( pItem );
-				return;
-			}
 		}
 
 		if (pObjTop->IsItem())
@@ -391,6 +385,23 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				return;
 			}
 		}
+        else // pObjTop may not be an item, it may be a character (eg: drop in the backpack or the bankbox)
+        {
+            if (pObjOn->IsItem() && pObjOn->IsContainer())
+            {
+                CItemContainer* pAboveContainer = static_cast<CItemContainer*>(pObjOn);
+                while (pAboveContainer) // do a recursive check.
+                {
+                    if (!pAboveContainer->CanContainerHold(pItem, m_pChar))
+                    {
+                        Event_Item_Drop_Fail(pItem);
+                        return;
+                    }
+                    CItemContainer* pNextContainer = static_cast<CItemContainer*>(static_cast<CItem*>(pObjOn)->GetTopContainer());
+                    pAboveContainer = pNextContainer == pAboveContainer ? nullptr : pNextContainer;
+                }
+            }
+        }
 
 		if ( pContItem != nullptr )
 		{
@@ -846,7 +857,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 	if ( !m_pChar )
 		return false;
 
-	DIR_TYPE dir = DIR_TYPE(rawdir & 0x0F);
+	DIR_TYPE dir = DIR_TYPE(rawdir & 0xF);
 	if ( dir >= DIR_QTY )
 	{
 		new PacketMovementRej(this, sequence);
@@ -888,7 +899,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		// Set running flag if I'm running
-		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & 0x80) ? true : false);
+		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & DIR_MASK_RUNNING) ? true : false);
 
 		if (IsSetEF(EF_FastWalkPrevention) && !m_pChar->IsPriv(PRIV_GM))
 		{
@@ -902,9 +913,9 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
 			int64 iDelay = 0;
 			if (m_pChar->IsStatFlag(STATF_ONHORSE | STATF_HOVERING) || (m_pChar->m_pPlayer->m_speedMode & 0x01))
-				iDelay = (rawdir & 0x80) ? 100 : 200;	// 100ms : 200ms 
+				iDelay = (rawdir & DIR_MASK_RUNNING) ? 100 : 200;	// 100ms : 200ms 
 			else
-				iDelay = (rawdir & 0x80) ? 200 : 400;	// 200ms : 400ms
+				iDelay = (rawdir & DIR_MASK_RUNNING) ? 200 : 400;	// 200ms : 400ms
 
 			iDelay -= 30; //Delay offset is set to be more permisif when player have lag or processor lack precision 
 			// This system do not work because the offset must be fine tune for each server and for EACH player and it's ping

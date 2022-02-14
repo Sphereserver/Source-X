@@ -1731,26 +1731,23 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 	const word iAmountMax = pItem->GetAmount();
-	if ( iAmountMax <= 0 )
-		return -1;
-
-	if ( !pItem->Item_GetDef()->IsStackableType() )
-		amount = iAmountMax;	// it's not stackable, so we must pick up the entire amount
-	else
-		amount = maximum(1, minimum(amount, iAmountMax));
-
-	//int iItemWeight = ( amount == iAmountMax ) ? pItem->GetWeight() : pItem->Item_GetDef()->GetWeight() * amount;
-	int iItemWeight = pItem->GetWeight(amount);
+	if ( amount <= 0 || amount > iAmountMax || !pItem->Item_GetDef()->IsStackableType())	// it's not stackable, so we must pick up the entire amount
+		amount = iAmountMax;
 
 	// Is it too heavy to even drag ?
 	bool fDrop = false;
-	if ( GetWeightLoadPercent(GetTotalWeight() + iItemWeight) > 300 )
+
+	if (g_Cfg.m_iDragWeightMax > 0)
 	{
-		SysMessageDefault(DEFMSG_MSG_HEAVY);
-        if ((pCharTop == this) && (pItem->GetParent() == GetPack()))
-            fDrop = true;	// we can always drop it out of own pack !
-        else
-            return -1;
+		int iItemWeight = pItem->GetWeight(amount);
+		if ((GetWeightLoadPercent(GetTotalWeight() + iItemWeight)) > g_Cfg.m_iDragWeightMax)
+		{
+			SysMessageDefault(DEFMSG_MSG_HEAVY);
+			if ((pCharTop == this) && (pItem->GetParent() == GetPack()))
+				fDrop = true;	// we can always drop it out of own pack !
+			else
+				return -1;
+		}
 	}
 
 	ITRIG_TYPE trigger;
@@ -1811,24 +1808,19 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	}
 
 
-	if ( amount && pItem->Item_GetDef()->IsStackableType() && pItem->CanSendAmount() )
+	if ( amount < iAmountMax && pItem->Item_GetDef()->IsStackableType() && pItem->CanSendAmount() )
 	{
-		// Did we only pick up part of it ?
-		// part or all of a pile. Only if pilable !
-		if ( amount < iAmountMax )
-		{
-			// create left over item.
-			CItem * pItemNew = pItem->UnStackSplit(amount, this);
+        // Create an leftover item when pick up only part of the stack
+        CItem* pItemNew = pItem->UnStackSplit(amount, this);
+		pItemNew->SetTimeout(pItem->GetDecayTime());    // Set it's timer to the real decay, in case it gets forced to be drop on ground.
 
-			if (( IsTrigUsed(TRIGGER_PICKUP_STACK) ) || ( IsTrigUsed(TRIGGER_ITEMPICKUP_STACK) ))
-			{
-				CScriptTriggerArgs Args2(pItemNew);
-				if ( pItem->OnTrigger(ITRIG_PICKUP_STACK, this, &Args2) == TRIGRET_RET_TRUE )
-					return -1;
-			}
-
-		}
-	}
+        if (IsTrigUsed(TRIGGER_PICKUP_STACK) || IsTrigUsed(TRIGGER_ITEMPICKUP_STACK))
+        {
+            CScriptTriggerArgs Args2(pItemNew);
+            if (pItem->OnTrigger(ITRIG_PICKUP_STACK, this, &Args2) == TRIGRET_RET_TRUE)
+                return false;
+        }
+    }
 
 	// Do stack dropping if items are stacked
 	if (( trigger == ITRIG_PICKUP_GROUND ) && IsSetEF( EF_ItemStackDrop ))
@@ -1855,7 +1847,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		}
 	}
 
-	if ( fDrop )
+	if (fDrop)
 	{
 		ItemDrop(pItem, GetTopPoint());
 		return -1;
@@ -3330,41 +3322,41 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
-	if ( Can(CAN_C_NONMOVER|CAN_C_STATUE) ) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
-		return nullptr;
+    int iWeight = 0;
+    int iMaxWeight = 0;
+    if (!IsPriv(PRIV_GM))
+    {
+        if (Can(CAN_C_NONMOVER | CAN_C_STATUE)) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
+            return nullptr;
 
-	int iWeightLoadPercent = GetWeightLoadPercent(GetTotalWeight());
-	if ( !fCheckOnly )
-	{
-		if ( OnFreezeCheck() )
-		{
-			SysMessageDefault(DEFMSG_MSG_FROZEN);
-			return nullptr;
-		}
+        iWeight = GetTotalWeight() / WEIGHT_UNITS;
+        iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this) / WEIGHT_UNITS;
+	    if ( !fCheckOnly )
+	    {
+		    if ( OnFreezeCheck() )
+		    {
+			    SysMessageDefault(DEFMSG_MSG_FROZEN);
+			    return nullptr;
+		    }
 
-		if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
-		{
-			SysMessageDefault(DEFMSG_MSG_FATIGUE);
-			return nullptr;
-		}
+		    else if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
+		    {
+			    SysMessageDefault((iWeight > iMaxWeight) ? DEFMSG_MSG_FATIGUE_WEIGHT : DEFMSG_MSG_FATIGUE);
+			    return nullptr;
+		    }
+	    }
 
-		if ( iWeightLoadPercent > 200 )
-		{
-			SysMessageDefault(DEFMSG_MSG_OVERLOAD);
-			return nullptr;
-		}
-	}
-
-	CClient *pClient = GetClientActive();
-	if ( pClient && pClient->m_pHouseDesign )
-	{
-		if ( pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst) )
-		{
-			ptDst.m_z = GetTopZ();
-			return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
-		}
-		return nullptr;
-	}
+	    CClient *pClient = GetClientActive();
+	    if ( pClient && pClient->m_pHouseDesign )
+	    {
+		    if ( pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst) )
+		    {
+			    ptDst.m_z = GetTopZ();
+			    return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+		    }
+		    return nullptr;
+	    }
+    }
 
 	// ok to go here ? physical blocking objects ?
 	dword dwBlockFlags = 0;
@@ -3374,13 +3366,18 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	EXC_TRY("CanMoveWalkTo");
 
 	EXC_SET_BLOCK("Check Valid Move");
-	pArea = CheckValidMove(ptDst, &dwBlockFlags, dir, &ClimbHeight, fPathFinding);
+	pArea = CheckValidMove(ptDst, &dwBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
             g_Log.EventWarn("CheckValidMove failed\n");
 		return nullptr;
 	}
+
+    if (IsPriv(PRIV_GM))
+    {
+        return pArea;
+    }
 
 	EXC_SET_BLOCK("NPC's will");
 	if ( !fCheckOnly && m_pNPC && !NPC_CheckWalkHere(ptDst, pArea) )	// does the NPC want to walk here?
@@ -3411,7 +3408,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				uiStamReq = 0;
 
 			TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-			if ( IsTrigUsed(TRIGGER_PERSONALSPACE) )
+			if ( IsTrigUsed(TRIGGER_PERSONALSPACE) && (!fPathFinding)) //You want avoid to trig the trigger if it's only a pathfinding evaluation
 			{
 				CScriptTriggerArgs Args(uiStamReq);
 				iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
@@ -3472,17 +3469,43 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		}
 		//
 		EXC_SET_BLOCK("Stamina penalty");
-		// Chance to drop more stamina if running or overloaded
-		CVarDefCont *pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
-		if ( IsStatFlag(STATF_FLY|STATF_HOVERING) )
-			iWeightLoadPercent += pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty;
+        if (iWeight < iMaxWeight) //Normal situation
+		{
+			ushort iWeightLoadPercent = (iWeight * 100) / iMaxWeight;
+			ushort uiStamPenalty = 0;
 
-		pVal = GetKey("OVERRIDE.STAMINALOSSATWEIGHT", true);
-		int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
-		if ( iChanceForStamLoss > Calc_GetRandVal(1000) )
-			uiStamReq += 1;
+			CVarDefCont* pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
 
-		if ( uiStamReq )
+			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
+			{
+				//FIXME: Running penality should be a percentage... For now, it adding a flat value take on the ini.
+				iWeightLoadPercent += (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty) ;
+			}
+			int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
+			if (iChanceForStamLoss > Calc_GetRandVal(1000))
+			{
+
+				pVal = GetKey("OVERRIDE.STAMINAWALKINGPENALTY", true);
+				uiStamPenalty = ushort(pVal ? pVal->GetValNum() : 1);
+				
+			}
+			uiStamReq += uiStamPenalty;
+		}
+		
+		else //Overweight and lost more stamina each step
+        {
+            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
+
+            if (IsStatFlag(STATF_ONHORSE))
+                iWeightPenalty /= 3;
+
+			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
+                iWeightPenalty += ushort((iWeightPenalty * g_Cfg.m_iStamRunningPenaltyOverweight) / 100);
+
+            uiStamReq += iWeightPenalty;
+        }
+
+		if ( uiStamReq > 0 )
 			UpdateStatVal(STAT_DEX, -uiStamReq);
 
 		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));

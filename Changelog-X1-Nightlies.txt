@@ -2868,3 +2868,73 @@ argn1: X coord of new location where characters is going to fall.
 argn2: Y coord of new location where characters is going to fall.
 argn3: Z coord of new location where characters is going to fall.
 
+09-12-2021, Drk84
+- Fixed: Players cannot increase combat skills in REGION_FLAG_NOPVP areas.
+
+01-02-2022, Drk84
+- Changed: Added blank space between skill value and skill name when reading the SKILLMAKE property (Issue #832).
+- Changed: You will not be able to cast a spell on a ghost if the spell does not have SPELLFLAG_TARG_DEAD.
+		   You will not be able to cast a spell on an alive character if the spell has the SPELLFLAG_TARG_DEAD flag (Issue #827).
+
+03-02-2022, XuN
+Merge of commits made by Coruja on 56d, related to Weight (see issue https://github.com/Sphereserver/Source-X/issues/822)
+List of changes:
+- Partial Commit https://github.com/Sphereserver/Source/commit/c9c0af71ba1fc54ddbab8f9bdae70739e24b0254:
+    [sphere.ini]: Added new BackpackMaxWeight setting to set default max weight limit for chars main backpack.
+
+- Commit https://github.com/Sphereserver/Source/commit/937fd287975830c76a0cebfcd7e8e8e251b04ef4:
+    Changed: Chars now can exceed MAXWEIGHT limit, but not backpack max weight limit (which is a bit higher)
+        -Walking while overweight will drop stamina faster (as it was on old Sphere versions)
+        -Stamina penalty can be customized using StaminaLossAtWeight and RunningPenalty settings on sphere.ini
+        -Backpack max weight can be customized using BackpackMaxWeight setting on sphere.ini and MODMAXWEIGHT item property
+    [sphere_msgs.scp]: Updated message list with the following changes
+        -Added: cont_full_items, msg_fatigue_weight
+        -Removed: cont_full, cont_magic, msg_overload
+        -Updated: cont_full_weight
+
+ -Commit https://github.com/Sphereserver/Source/commit/f29e8592ad154c4dd55ed4b5d8900b094793e62a:
+    Fixed: BackpackMaxWeight setting on sphere.ini not allowing unlimited weight when set to -1.
+
+ -Commit https://github.com/Sphereserver/Source/commit/191a13e7bc91a709db79d1270c467a5561038541
+    Fixed: Char stamina not decreasing correctly when walk/run while overweight.
+    [sphere.ini]: Updated default value of StaminaLossAtWeight and RunningPenalty settings
+    	-IMPORTANT: It's HIGHLY recommended update these values to make stamina decrease correctly.
+
+*These commits are meant to reenable old stamina and weight behaviour, allowing chars to move while overweight and applying penalties on stam.
+Also excluded GMs from most checks inside this code.
+
+07-02-2022, 11-02-2022 Jhobean
+- Changed: Make a better integrations of lasts commits about weight modification to avoid changing behavior on all shard.
+	BackpackMaxWeight in the .ini is now called BackpackOverload and define how many extra weight a character can place in his backpack.
+	StaminaLossAtWeight and RunningPenalty now work like before and affect stam only when not overloaded.
+	StaminaLossOverweightMultiplier and RunningPenaltyOverweight are 2 new ini setting for ajustment how stam is drained when overloaded.
+	Drag and drop item was limited to 300% maxweight. Now DRAGWEIGHTMAX define % of maxweight you can move.
+- Fixed: On some situation when splitting a stack on the ground, the leftover had no timer and never decay.
+
+12-02-2022, Soulless
+- Fixed: Evil NPCs not being able to spawn in a guarded region. If you do not desire evil NPCs spawning in guarded regions just remove the spawn item.
+- Fixed: Healers not seeing ghosts that are not manifested in war mode, NPC healers should always see ghosts. You can make them not see player ghosts by
+  adding this to them if you desire this behavior :
+    ON=@NpcLookAtChar
+      if (<src.flags>&statf_dead) && !(<flags>&statf_war)
+        return 1
+      endif
+- Fixed: Evil NPCs not being able to enter a guarded region, to accomplish this behavior in the scripts add this on a generic NPC event.
+    ON=@Enter
+    if (<src.npc.brain> >= 8) && (<region.flags>&region_flag_guarded)
+      return 1
+    endif
+- Added: Support for lethal poison messages for the non-OSI poison spell, you can customize this in the sphere messages .scp
+- Fixed: region_antimagic_recallin preventing players from teleporting in these areas.
+- Fixed: Guards endlessly cycling through idling/going home when OF_GuardOutsideGuardedArea is enabled and a guard is outside of a guarded region.
+
+12-02-2022, Soulless
+- Changed: 'StaminaLossOverweightMultiplier' to 'StaminaLossOverweight', and changed the value for additional increase of stamina loss from every
+  25 stones to every 5 stones. 
+
+13-02-2022, XuN
+- Fixed players being able to cast spells on items inside their bankbox when they are not supossed to reach it.
+Note: The only way the server has to know if the bankself is closed is to store the position of the player when the bankbox opens,
+    then compare the current position against the one stored. So even if the player closed the bankbox,
+    while the position hasn't changed, the items inside the bankbox are reachable.
+
