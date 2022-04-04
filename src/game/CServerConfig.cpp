@@ -1,4 +1,4 @@
-﻿#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CDialogDef.h"
 #include "../common/resource/sections/CItemTypeDef.h"
 #include "../common/resource/sections/CSkillClassDef.h"
 #include "../common/resource/sections/CRandGroupDef.h"
