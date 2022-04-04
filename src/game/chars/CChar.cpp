@@ -244,7 +244,6 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 CChar::CChar( CREID_TYPE baseID ) :
 	CTimedObject(PROFILE_CHARS),
 	CObjBase( false ),
-	m_sTitle(false),
     m_Skill{}, m_Stat{}
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
@@ -1687,7 +1686,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	m_fonttype				= FONT_NORMAL;		// Set speech font type
 	m_SpeechHueOverride		= 0;				// Set no server-side speech color override
 	m_EmoteHueOverride		= 0;				// Set no server-side emote color override
-	m_sTitle.Clear();							// Set title
+	m_sTitle.clear();							// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
 	GetPackSafe();					// Create backpack
@@ -3099,7 +3098,7 @@ do_default:
 		case CHC_TITLE:
 			{
 				if (strlen(ptcKey) == 5)
-					sVal = m_sTitle; //GetTradeTitle
+					sVal = m_sTitle.c_str(); //GetTradeTitle
 				else
 					sVal = GetTradeTitle();
 			}
@@ -3721,8 +3720,8 @@ void CChar::r_Write( CScript & s )
 	if (pt.IsValidPoint())
 		s.WriteKeyStr("P", pt.WriteUsed());
 
-	if ( !m_sTitle.IsEmpty() )
-		s.WriteKeyStr("TITLE", m_sTitle);
+	if ( !m_sTitle.empty() )
+		s.WriteKeyStr("TITLE", m_sTitle.c_str());
 	if ( m_fonttype != FONT_NORMAL )
 		s.WriteKeyVal("FONT", m_fonttype);
 	if (m_SpeechHueOverride)

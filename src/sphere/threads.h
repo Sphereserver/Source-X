@@ -207,6 +207,7 @@ private:
 	struct STACK_INFO_REC
 	{
 		const char *functionName;
+		llong startTime;
 	};
 
 	STACK_INFO_REC m_stackInfo[0x1000];
