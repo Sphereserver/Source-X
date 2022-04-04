@@ -135,7 +135,7 @@ for:
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
       - |-
-        if [ "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
+        if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
           exit 0
         fi
       - cd ..
