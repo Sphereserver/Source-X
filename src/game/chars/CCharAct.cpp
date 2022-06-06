@@ -1903,15 +1903,15 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 
 		if (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF))
 		{
-            const CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
+			const CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
 			CScriptTriggerArgs Args(pItem);
-            const TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
-            if ( pItem->IsDeleted() )	// the trigger had deleted the item
-                return false;
+			const TRIGRET_TYPE ret = pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args);
+			if (pItem->IsDeleted())	// the trigger had deleted the item
+				return false;
 			if (ret == TRIGRET_RET_TRUE)
-            {
+			{
 				fCanAddToPack = false;
-                const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
+				const CItem* pCont = dynamic_cast<const CItem*>(pItem->GetContainer());
 				if (pPrevCont == pCont) //In the same cont, but unable to go there
 					fDropOnGround = true;
 				else //we changed the cont in the script
@@ -1920,13 +1920,16 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
 					pszWhere = pszMsg;
 				}
-            }
+			}
 		}
 	}
-    else
-    {
-        fDropOnGround = true;
-    }
+	else if (pItem->GetEquipLayer() <= LAYER_LEGS) //If we are overweight, we don't want our equipped items to fall on the ground. They will remain equipped.
+	{
+		SysMessageDefault(DEFMSG_MSG_HEAVY);
+		return false;
+	}
+	else
+		fDropOnGround = true;
 
 	if (fCanAddToPack)
 	{

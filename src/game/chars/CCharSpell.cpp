@@ -2748,8 +2748,11 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 			return true;
 		else if ( !CanMove( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
 			return false;
-		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true))
-			ItemBounce( pItemPrev );
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true) && !ItemBounce( pItemPrev ))
+		{
+			SysMessageDefault(DEFMSG_SPELL_TRY_BUSYHANDS);
+			return false;
+		}
 	}
 	return true;
 }

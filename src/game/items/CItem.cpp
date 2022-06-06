@@ -3467,7 +3467,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		case CIV_UNEQUIP:
 			if ( ! pCharSrc )
 				return false;
-			RemoveSelf();
+			//RemoveSelf(); // It seems it's not needed here, as it's already called inside ItemBounce method.
 			pCharSrc->ItemBounce(this);
 			break;
 		case CIV_USE:
