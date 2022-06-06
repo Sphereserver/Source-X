@@ -265,9 +265,12 @@ bool CChar::CanCarry( const CItem *pItem ) const
         if (this != pObjTop)    // Aren't we already carrying it ?
             iItemWeight = pItem->GetWeight();
     }
-    else if (pItem->GetEquipLayer() != LAYER_DRAGGING)
+    else if (pItem->GetEquipLayer() != LAYER_DRAGGING && !pItem->IsItemEquipped())
     {
-        // if we're dragging the item, its weight is already added on char so don't count it again
+        /*
+		If we're dragging the item, its weight is already added on char so don't count it again.
+		Same if we are already carrying the item, don't count the item again.
+		*/
         iItemWeight = pItem->GetWeight();
     }
 
@@ -444,8 +447,8 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			{
 				if ( !CanMove(pItemPrev) )
 					return LAYER_NONE;
-				if ( !fTest )
-					ItemBounce(pItemPrev);
+				if (!fTest && !ItemBounce(pItemPrev) )
+					return LAYER_NONE;
 				break;
 			}
 		}
