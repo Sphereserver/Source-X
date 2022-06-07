@@ -2945,3 +2945,8 @@ Note: The only way the server has to know if the bankself is closed is to store 
 06-06-2022, Drk84
 - Changed: Equipped items falling on the ground when overweight, now they will remain equipped until you lose some weight on the backpack (Issue #861).
 - Updated SphereCrypt.ini.
+
+07-06-2022, Drk84
+- Fixed:  Items falling on the floor even if you are not overweight, only for ores right now. (Issue #810).
+- Fixed:  Bug related to the previous commits.
+	
