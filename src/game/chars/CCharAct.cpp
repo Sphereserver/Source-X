@@ -1923,7 +1923,7 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 			}
 		}
 	}
-	else if (pItem->GetEquipLayer() <= LAYER_LEGS) //If we are overweight, we don't want our equipped items to fall on the ground. They will remain equipped.
+	else if ( pItem->GetEquipLayer() > LAYER_NONE && pItem->GetEquipLayer() <= LAYER_LEGS) //If we are overweight, we don't want our equipped items to fall on the ground. They will remain equipped.
 	{
 		SysMessageDefault(DEFMSG_MSG_HEAVY);
 		return false;

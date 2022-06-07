@@ -269,7 +269,7 @@ bool CChar::CanCarry( const CItem *pItem ) const
     {
         /*
 		If we're dragging the item, its weight is already added on char so don't count it again.
-		Same if we are already carrying the item, don't count the item again.
+		Same if we are already wearing the item, don't count the item weight again.
 		*/
         iItemWeight = pItem->GetWeight();
     }

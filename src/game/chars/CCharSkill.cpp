@@ -1154,6 +1154,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 
 	iMiningSkill = (ushort)Args.m_iN1;
 	fSkipMiningSmeltReq = (bool)Args.m_iN3;
+	std::vector<CItem*> ingots;
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		tchar* pszTmp = Str_GetTemp();
@@ -1213,17 +1214,34 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			return false;
 		}
 		// Payoff - Amount of ingots i get.
-		CItem * pIngots = CItem::CreateScript(pBaseDef->GetID(), this );
+		ingots.emplace_back(CItem::CreateScript(pBaseDef->GetID(), this));
+		if (ingots.at(i) == nullptr)
+		{
+			SysMessageDefault(DEFMSG_MINING_NOTHING);
+			continue;
+		}
+		ingots.at(i)->SetAmount(iResourceQty);
+		/* 
+		CItem* pIngots = CItem::CreateScript(pBaseDef->GetID(), this);
 		if ( pIngots == nullptr )
 		{
 			SysMessageDefault( DEFMSG_MINING_NOTHING );
 			continue;
 		}
 		pIngots->SetAmount(iResourceQty);
-		ItemBounce( pIngots );
-	}
 
+		ItemBounce( pIngots );
+		*/
+
+		
+	}
+	//We want to consume the ore before the ingots are created.
 	pItemOre->ConsumeAmount(pItemOre->GetAmount());
+
+	//Now we finally create the resources obtained from the smelting process.
+	for (std::vector<CItem*>::iterator ingot = ingots.begin(); ingot != ingots.end(); ++ingot)
+		ItemBounce((*ingot));
+
 	return true;
 }
 
