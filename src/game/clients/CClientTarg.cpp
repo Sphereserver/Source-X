@@ -2120,11 +2120,12 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			{
 				CItem * pItemNew = CItem::CreateBase( iOutID );
 				ASSERT(pItemNew);
-				pItemNew->SetHue( pItemTarg->GetHue());
+				HUE_TYPE hue = pItemTarg->GetHue();
+				pItemTarg->Delete();
+				pItemNew->SetHue( hue ) ;
 				pItemNew->SetAmount( iOutQty );
 				m_pChar->ItemBounce( pItemNew );
 				m_pChar->Sound( SOUND_SNIP );	// snip noise.
-				pItemTarg->Delete();
 				return true;
 			}
 		}
