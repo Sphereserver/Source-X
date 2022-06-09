@@ -1914,11 +1914,20 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
         {
             continue;
         }
-        //Skip Vendors that are too far when buying or selling
+        /*
+		Skip Vendors that are too far when buying or selling
+		No need to use this check anymore, NPCs should be able to hear up to the value of NPCDistanceHear setting in the .ini (default 4 tiles).
         if (pChar->NPC_IsVendor() && (m_pChar->CanTouch(pChar) == false) && (FindStrWord(pszText, "buy,sell") > 0))
         {
             continue;
         }
+		*/
+
+		int iDist = m_pChar->GetTopDist3D(pChar);
+
+		//Can't see or too far, Can't hear!
+		if (((!m_pChar->CanSeeLOS(pChar)) && (!fIgnoreLOS)) || (iDist > iFullDist))
+			continue;
 
 		bool bNamed = false;
 		i = 0;
@@ -1928,9 +1937,10 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
         }
 		else
 		{
-			// Named the char specifically ?
+			// Named the char specifically?
+			//If i is 0 that means we have used a KEYWORD without a name or that we did not find any NPCs with that name.
 			i = pChar->NPC_OnHearName(pszText);
-			bNamed = true;
+			bNamed = (bool)i;
 		}
 		if ( i > 0 )
 		{
@@ -1953,24 +1963,20 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 				break;
 		}
 
-        int iDist = m_pChar->GetTopDist3D(pChar);
-
-        //Can't see or too far, Can't hear!
-        if (((!m_pChar->CanSeeLOS(pChar)) && (!fIgnoreLOS)) || (iDist > iFullDist))
-            continue;
-
-        // already talking to him
-		if ( (pChar->Skill_GetActive() == NPCACT_TALK) && (pChar->m_Act_UID == m_pChar->GetUID()) )
-		{
-			pCharAlt = pChar;
-            break;
-		}
-        // Pick closest NPC?
-		else if ( iDist < iAltDist )
+		// Pick closest NPC?
+		if (iDist <= iAltDist)
 		{
 			pCharAlt = pChar;
 			iAltDist = iDist;
 		}
+        // already talking to him
+		/* No need of this check too, it creates problem when multiple NPCs are nearby.
+		else if ((pChar->Skill_GetActive() == NPCACT_TALK) && (pChar->m_Act_UID == m_pChar->GetUID()))
+		{
+			pCharAlt = pChar;
+            break;
+		}
+       */
 	}
 
 	if ( !pChar )
