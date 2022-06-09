@@ -1019,7 +1019,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             if (!Face((DIR_TYPE)(pItemThis->m_itShip.m_DirMove)))
             {
                 pItemThis->m_itShip.m_DirMove = (uchar)(DirMove);
-                return false;
+                return true; //No need to return false, we just can't turn the ship. The command is valid and by returning false we will a console warning.
             }
             break;
         }
@@ -1041,7 +1041,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             if (pItemThis->m_itShip.m_fAnchored != 0)
                 goto anchored;
             if (!SetMoveDir(GetDirTurn(DirFace, DirMoveChange), SMT_NORMAL))
-                return false;
+                return false; //No need to return false, we just can't move the ship. The command is valid and by returning false we will a console warning.
             break;
         }
 

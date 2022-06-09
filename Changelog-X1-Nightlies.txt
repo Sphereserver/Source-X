@@ -2952,3 +2952,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 08-06-2022, Drk84
 - Fixed: Bandage and leather strips created before the item was deleted. (Always Issue #810, this should be fixed now).
+
+09-06-2022, Drk84
+- Fixed: NPCs canceling other npcs from hearing player speech (Issue #859).
+- Fixed: Undefined keyword 'shipturnleft'  (Issue #860). 
