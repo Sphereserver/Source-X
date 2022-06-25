@@ -2554,7 +2554,27 @@ bool PacketScreenSize::onReceive(CNetState* net)
     skip(2);
 
 	//DEBUG_MSG(("PacketScreenSize::onReceive 0x%hx - 0x%hx (%hu-%hu)\n", x, y, x, y));
-
+	if (net->isClientVersion(MINCLIVER_NEWBOOK))
+	{
+		switch (x)
+		{
+		case 800:
+			y = 600;
+			break;
+		case 1024:
+			y = 768;
+			break;
+		case 1152:
+			y = 864;
+			break;
+		case 1280:
+			y = 720;
+			break;
+		default:
+			y = 480;
+			break;
+		}
+	}
 	client->SetScreenSize(x, y);
 	return true;
 }
