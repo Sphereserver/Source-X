@@ -2956,3 +2956,9 @@ Note: The only way the server has to know if the bankself is closed is to store 
 09-06-2022, Drk84
 - Fixed: NPCs canceling other npcs from hearing player speech (Issue #859).
 - Fixed: Undefined keyword 'shipturnleft'  (Issue #860). 
+
+25-06-2022, Drk84
+- Fixed: Screensize.Y returning wrong value with clients > 5.00.00 (Issue #630).
+		 The following resolution are supported: 640 x 480 (default) - 800x600 - 1024x768 - 1152x864 - 1280x720
+		 More can be added if needed, remember that if the user changes the resolution in game he will get the changed resolution values only when he restarts the client.
+			
