@@ -838,7 +838,7 @@ effect_bounce:
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
-		if ( iDisturbChance && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+		if ( iDisturbChance && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) //If Protection spell has SPELLFLAG_SCRIPTED don't make this check.
 		{
 			// Protection spell can cancel the disturb
 			CItem *pProtectionSpell = LayerFind(LAYER_SPELL_Protection);

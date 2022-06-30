@@ -2961,4 +2961,8 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Screensize.Y returning wrong value with clients > 5.00.00 (Issue #630).
 		 The following resolution are supported: 640 x 480 (default) - 800x600 - 1024x768 - 1152x864 - 1280x720
 		 More can be added if needed, remember that if the user changes the resolution in game he will get the changed resolution values only when he restarts the client.
-			
+
+
+30-06-2022, Drk84
+- Fixed: Summoned ridden creatures did not disappear when the Summon Spell timer expired until they were dismounted (Issue #582).
+- Fixed: When using Elemental Resistance setting Protection spell with the SPELLFLAG_SCRIPT still called the default Protection behaviour when resisting a spell. 
