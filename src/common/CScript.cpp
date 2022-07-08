@@ -23,7 +23,9 @@ bool CScriptKey::IsKey( lpctstr pszName ) const
 bool CScriptKey::IsKeyHead( lpctstr pszName, size_t len ) const
 {
 	ASSERT(m_pszKey);
-	return ( ! strnicmp( m_pszKey, pszName, len ));
+	if (!strnicmp(m_pszKey, "ONAME", 5))
+		return false; //Ugly workaround for the ONAME property problem.
+	return ( ! strnicmp( m_pszKey, pszName, len ) );
 }
 
 void CScriptKey::InitKey()
