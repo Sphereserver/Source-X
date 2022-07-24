@@ -365,6 +365,7 @@ bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer) noexcept // sta
         case IT_LIGHT_LIT:
         case IT_LIGHT_OUT:	// Torches and lanterns.
         case IT_FISH_POLE:
+		case IT_MUSICAL:
         case IT_HAIR:
         case IT_BEARD:
         case IT_JEWELRY:

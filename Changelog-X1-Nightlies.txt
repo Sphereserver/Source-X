@@ -2968,3 +2968,6 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 08-07-2022, Drk84
 - Fixed: Ugly workaround for the ONAME property bug (Issue #825).
+
+24-07-2022, Jhobean
+- Added: In the case you force some T_musical item equipable in the tiledata, you were not able to equip it because server fixed T_musical item not equipable.
