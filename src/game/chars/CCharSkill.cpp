@@ -588,6 +588,7 @@ void CChar::Skill_Cleanup()
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
 	m_Act_SkillCurrent = SKILL_NONE;
+	m_Act_Effect = -1;
 	_SetTimeoutD( m_pPlayer ? -1 : 1 );	// we should get a brain tick next time
 }
 
@@ -911,9 +912,14 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
 		if ( i != SCONT_BADINDEX )
 		{
-			CSkillDef *pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(pItemDef->m_SkillMake[i].GetResIndex()));
-			if ( pSkillDef && !pSkillDef->m_vcEffect.m_aiValues.empty() )
-				iConsumePercent = pSkillDef->m_vcEffect.GetRandom();
+			if (m_Act_Effect >= 0)
+				iConsumePercent = m_Act_Effect;
+			else 
+			{
+				CSkillDef* pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(pItemDef->m_SkillMake[i].GetResIndex()));
+				if (pSkillDef && !pSkillDef->m_vcEffect.m_aiValues.empty())
+					iConsumePercent = pSkillDef->m_vcEffect.GetRandom();
+			}
 		}
 
 		if ( iConsumePercent < 0 )
@@ -1665,12 +1671,14 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 		return 0;
 
 	int iSkill = Skill_GetAdjusted(SKILL_DETECTINGHIDDEN);
-	int iRadius = iSkill / 100;
+	int iRadius = 0;
 
 	//If Effect property is defined on the Detect Hidden skill use it instead of the hardcoded radius value.
-	CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_DETECTINGHIDDEN);
-	if (!pSkillDef->m_vcEffect.m_aiValues.empty())
-		iRadius = pSkillDef->m_vcEffect.GetLinear(iSkill);
+
+	if (m_Act_Effect >= 0)
+		iRadius = m_Act_Effect;
+	else
+		iRadius = iSkill / 100; //Default Sphere Detecting Hidden Radius.
 
 	CWorldSearch Area(GetTopPoint(), iRadius);
 	bool bFound = false;
@@ -2571,12 +2579,11 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 		}
 		++m_atTaming.m_dwStrokeCount;
 
-		//If Effect property is defined on the Meditation skill use it instead of the hardcoded  value.
-		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_MEDITATION);
-		if (!pSkillDef->m_vcEffect.m_aiValues.empty())
-			UpdateStatVal(STAT_INT, (ushort)pSkillDef->m_vcEffect.GetLinear(Skill_GetAdjusted(SKILL_MEDITATION)));
-		else
-			UpdateStatVal( STAT_INT, 1 );
+		ushort uManaValue = 1;
+		if (m_Act_Effect >= 0)
+			uManaValue =(ushort)m_Act_Effect;
+
+		UpdateStatVal(STAT_INT, uManaValue);
 		Skill_SetTimeout();		// next update (depends on skill)
 
 		// Set a new possibility for failure ?
@@ -2743,7 +2750,10 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	}
 
 	// LAYER_FLAG_Bandage
-	pChar->UpdateStatVal( STAT_STR, (ushort)(pSkillDef->m_vcEffect.GetLinear(iSkillLevel)) );
+	ushort uHealValue = 1;
+	if (m_Act_Effect >= 0)
+		uHealValue = (ushort)m_Act_Effect;
+	pChar->UpdateStatVal( STAT_STR, uHealValue );
 	return 0;
 }
 
@@ -4214,7 +4224,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		// Skill_Cleanup();
 		CScriptTriggerArgs pArgs;
 		pArgs.m_iN1 = skill;
-
+		
 		// Some skill can start right away. Need no targetting.
 		// 0-100 scale of Difficulty
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
@@ -4240,9 +4250,29 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if (m_Act_Difficulty >= 0)	// If m_Act_Difficulty == -1 then the skill stage has failed, so preserve this result for later.
 			m_Act_Difficulty += iDifficultyIncrease;
 
-		// Execute the @START trigger and pass various craft parameters there
+		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(skill);
+		int iWaitTime = 1;
+		
+		m_Act_Effect = -1;
+
 		const bool fCraftSkill = g_Cfg.IsSkillFlag(skill, SKF_CRAFT);
 		const bool fGatherSkill = g_Cfg.IsSkillFlag(skill, SKF_GATHER);
+
+		if ( IsSkillBase(skill) && pSkillDef )
+		{
+			iWaitTime = pSkillDef->m_vcDelay.GetLinear(Skill_GetBase(skill));
+			
+			if (!pSkillDef->m_vcEffect.m_aiValues.empty())
+			{
+				if (!fCraftSkill)
+					m_Act_Effect = pSkillDef->m_vcEffect.GetLinear(Skill_GetAdjusted(skill));
+				else
+					m_Act_Effect = pSkillDef->m_vcEffect.GetRandom();
+			}
+		}
+		pArgs.m_iN2 = iWaitTime;
+		// Execute the @START trigger and pass various craft parameters there
+
 		CResourceID pResBase(RES_ITEMDEF, fCraftSkill ? m_atCreate.m_iItemID : 0, 0);
 
 		if ( fCraftSkill )
@@ -4279,6 +4309,14 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 				return false;
 			}
 		}
+		iWaitTime = (int)pArgs.m_iN2;
+		if (IsSkillBase(skill) && iWaitTime > 0)
+			SetTimeoutD(iWaitTime);		// How long before complete skill.
+
+		if (_IsTimerExpired())
+		{
+			_SetTimeoutD(1);		// the skill should have set it's own delay!?
+		}
 
 		if ( fCraftSkill )
 		{
@@ -4304,23 +4342,6 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 				UpdateAnimate(Skill_GetAnim(skActive));
 		}
 
-		if ( IsSkillBase(skill) )
-		{
-			const CSkillDef *pSkillDef = g_Cfg.GetSkillDef(skill);
-			if ( pSkillDef )
-			{
-				int iWaitTime = pSkillDef->m_vcDelay.GetLinear(Skill_GetBase(skill));
-                if (iWaitTime > 0)
-                {
-                    SetTimeoutD(iWaitTime);		// How long before complete skill.
-                }
-			}
-		}
-
-        if (_IsTimerExpired())
-        {
-            _SetTimeoutD(1);		// the skill should have set it's own delay!?
-        }
 		
 		//When combat starts, the first @HitTry trigger will be called after the @SkillStart/@Start (as it was before).
 		const bool fFightSkill = g_Cfg.IsSkillFlag(skill, SKF_FIGHT);

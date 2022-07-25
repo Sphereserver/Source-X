@@ -590,7 +590,7 @@ Fixed some Spell's related stuff not returning correctly the spell required for 
 
 (Scripts)
 SPAWNS:
-	-Added Keywords SpawnID, TimeLo, TimeHi and MaxDist, explained bellow.
+	-Added Keywords SpawnID, TimeLo, TimeHi and MaxDist, explained below.
 	-Changed AT* to r_GetRef so it finds out the object on the n position and works over it.
 
 *There were no major changes on Spawns however i'll leave here a brief explanation of how they work along the new keywords and the updated AT* behaviour.
@@ -1200,7 +1200,7 @@ if ((<flags> & STATF_pet) && (<local.dex> < 75))    // for pets ...
     local.dex = 75  // ... set the lowest movement delay to this dex value.
 endif
 local.newdelay = (10 + <r(100-iDex)/3>) * 100   // * 100 because the old formula worked in tenths of second, this tag works in msecs (100 msecs = 1 tenth = 0.1s)
-//If you want enable support for tag.override.moverate in this formula uncomment the bellow lines:
+//If you want enable support for tag.override.moverate in this formula uncomment the below lines:
 
 //local.mod = <tag0.override.moverate>
 //if (<local.mod> < 1)
@@ -1718,7 +1718,7 @@ WARNING: Important change!
 - Changed: Now all multis call RemoveAllKeys when being removed if AutoHouseKeys is enabled in the .ini
 - Fixed: Redeed crashing sphere when no real char was given as src (for example via @Timer).
 - Added: f_multi_onplacement_check function called from CItemMulti::Multi_Create (where the multis do their checks to be placed) with this params:
-	return 0 // Use default checks (wich values may be modified with the bellow locals)
+	return 0 // Use default checks (wich values may be modified with the below locals)
 	return 1 // Prevents the multi from being placed.
 	return 6 // Allows the multi to be placed without default placement checks.
 
@@ -2048,7 +2048,7 @@ R/W Keywords available for the t_champion_spawn item:
 Verbs available for the t_champion_spawn item:	
     "ADDOBJ": Inserts an already created npc into the champion spawn (be sure you add them when the champion is activated, or they will be removed when it start).
     "DELOBJ": Removes one character from the champion counting towards the progression of itself, this does not remove the character.
-    "ADDREDCANDLE": Advances the champion by adding one red candle (red candles and levels explained bellow).
+    "ADDREDCANDLE": Advances the champion by adding one red candle (red candles and levels explained below).
     "ADDWHITECANDLE": Advances the champion by adding one white candle.
     "DELREDCANDLE": Regress one red candle (if any).
     "DELWHITECANDLE": Regress one white candle (if any) (If there are no white candles, then calls DELREDCANDLE).
@@ -2971,3 +2971,17 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 24-07-2022, Jhobean
 - Added: In the case you force some T_musical item equipable in the tiledata, you were not able to equip it because server fixed T_musical item not equipable.
+
+25-07-2022, Drk84
+- Added: ACTIONEFFECT keyword, to be used in the @Start/@SkillStart triggers, this allow to override/read the EFFECT value from the skill definition (like how many hitpoints we heal with healing skill).
+		 Currently the EFFECT field is used in the following skills:
+			DetectinHidden: The "reveal" radius, default value is skill/10 if EFFECT field or ACTIONEFFECT are not defined.
+			Healing: How many hitpoints we heal, default value is 1 if EFFECT field or ACTIONEFFECT are not defined.
+			Meditation: How much mana we recover, default value is 1 if EFFECT field or ACTIONEFFECT are not defined.
+			Tracking: Maximum tracking range, default value is skill/10 if EFFECT field or ACTIONEFFECT are not defined.
+			Crafting Skills: The amount in % of how many resources are lost if we fail to craft the item.
+		 If the EFFECT field is not defined in the SKILL block, Sphere will use the default value (but you can still override it with ACTIONEFFECT).
+		 Notes: Only positive numbers are accepted, if ACTIONEFFECT is set to a value less than 0 Sphere will use the default value of the skill.
+				ACTIONEFFECT has, by default, no effect in @UseQuick/@SkillUseQuick triggers
+- Added: ARGN2 in trigger @Start/@SkillStart, this allow to override/read the DELAY  value from the skill definition (how much time it takes for the skill to be completed).
+		

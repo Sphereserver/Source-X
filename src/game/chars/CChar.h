@@ -187,6 +187,7 @@ public:
 	CUID		m_Fight_Targ_UID;	// Current combat target
 	CUID		m_Act_Prv_UID;		// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
+	int			m_Act_Effect;
 	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
 

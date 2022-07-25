@@ -1123,14 +1123,16 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		When the Tracking skill starts and the Effect property is defined on the Tracking skill use it
 		instead of the hardcoded formula for the maximum distance.
 		*/
-		int iSkillLevel = m_pChar->Skill_GetAdjusted(SKILL_TRACKING);
-		if ((g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && m_pChar->IsHuman())
-			iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
-		m_pChar->m_atTracking.m_dwDistMax = iSkillLevel / 10 + 10;
-		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_TRACKING);
-		if (!pSkillDef->m_vcEffect.m_aiValues.empty())
-			m_pChar->m_atTracking.m_dwDistMax = pSkillDef->m_vcEffect.GetLinear(iSkillLevel);
-
+		
+		if (m_pChar->m_Act_Effect >= 0)
+			m_pChar->m_atTracking.m_dwDistMax = (dword)m_pChar->m_Act_Effect;
+		else //This is default Sphere maximum tracking distance.
+		{
+			int iSkillLevel = m_pChar->Skill_GetAdjusted(SKILL_TRACKING);
+			if ((g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && m_pChar->IsHuman())
+				iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
+			m_pChar->m_atTracking.m_dwDistMax = (dword)(iSkillLevel / 10 + 10);
+		}
 		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
 		for (;;)
 		{
