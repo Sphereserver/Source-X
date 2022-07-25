@@ -2896,6 +2896,9 @@ do_default:
 			}
 		}
 			break;
+		case CHC_ACTIONEFFECT:
+			sVal.FormatVal(m_Act_Effect);
+			break;
 		case CHC_BODY:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
@@ -3335,6 +3338,11 @@ bool CChar::r_LoadVal( CScript & s )
 				g_Log.EventError("Invalid skill key: %s\n", argStr);
 			return Skill_Start(skillKey);
 		}
+		case CHC_ACTIONEFFECT:
+			m_Act_Effect = s.GetArgVal();
+			if (m_Act_Effect < 0)
+				m_Act_Effect = -1;
+			break;
 		case CHC_ATTACKER:
 		{
 			if ( strlen(ptcKey) > 8 )
