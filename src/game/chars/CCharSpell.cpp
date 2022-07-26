@@ -3485,10 +3485,14 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	ushort uiResist = 0;
 	if ( pSpellDef->IsSpellType(SPELLFLAG_RESIST) && pCharSrc && !fPotion )
 	{
-		uiResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
-		ushort uiFirst = uiResist / 50;
-		ushort uiSecond = uiResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
-		uchar uiResistChance = (uchar)(maximum(uiFirst, uiSecond) / 30);
+		uiResist = Skill_GetBase(SKILL_MAGICRESISTANCE) / 10;
+		ushort uiFirst = uiResist / 5;
+		ushort uiSecond = (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
+		if (uiResist >= uiSecond)
+			uiSecond = uiResist  - uiSecond;
+		else
+			uiSecond = 0;
+		uchar uiResistChance = (uchar)(maximum(uiFirst, uiSecond));
 		uiResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, uiResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
 
 		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
