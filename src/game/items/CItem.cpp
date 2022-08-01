@@ -4678,6 +4678,9 @@ bool CItem::Armor_IsRepairable() const
 	// SKILL_TAILORING (leather)
 	//
 
+	if ( IsAttr(ATTR_CANNOTREPAIR) )
+		return false;
+
 	if ( Can( CAN_I_REPAIR ) )
 		return true;
 
@@ -4687,7 +4690,9 @@ bool CItem::Armor_IsRepairable() const
 		case IT_ARMOR_LEATHER:
 			return false;	// Not this way anyhow.
 		case IT_SHIELD:
-		case IT_ARMOR:				// some type of armor. (no real action)
+		case IT_ARMOR:			// generic type of armor or plate armor. (no real action)
+		case IT_ARMOR_CHAIN:	// chainmail armor
+		case IT_ARMOR_RING:		// ringmail armor
 			// ??? Bone armor etc is not !
 			break;
 		case IT_WEAPON_MACE_CROOK:

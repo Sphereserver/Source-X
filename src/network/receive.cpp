@@ -2704,8 +2704,6 @@ bool PacketArrowClick::onReceive(CNetState* net)
 
 	bool rightClick = readBool();
 
-	client->SysMessageDefault(DEFMSG_MSG_FOLLOW_ARROW);
-
 	if ( IsTrigUsed(TRIGGER_USERQUESTARROWCLICK) )
 	{
 		CScriptTriggerArgs Args;
@@ -2715,8 +2713,11 @@ bool PacketArrowClick::onReceive(CNetState* net)
 		Args.m_iN3 = character->GetKeyNum("ARROWQUEST_Y", true);
 #endif
 
-		character->OnTrigger(CTRIG_UserQuestArrowClick, character, &Args);
+		if (character->OnTrigger(CTRIG_UserQuestArrowClick, character, &Args) == TRIGRET_RET_TRUE)
+			return true;
 	}
+
+	client->SysMessageDefault(DEFMSG_MSG_FOLLOW_ARROW);
 	return true;
 }
 

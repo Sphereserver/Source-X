@@ -267,7 +267,9 @@ bool CItemBase::IsTypeArmor( IT_TYPE type ) noexcept // static
 	{
 		case IT_CLOTHING:
 		case IT_ARMOR:
+		case IT_ARMOR_CHAIN:
 		case IT_ARMOR_LEATHER:
+		case IT_ARMOR_RING:
 		case IT_SHIELD:
 			return true;
 	}
@@ -370,6 +372,7 @@ bool CItemBase::IsTypeEquippable(IT_TYPE type, LAYER_TYPE layer) noexcept // sta
         case IT_BEARD:
         case IT_JEWELRY:
         case IT_EQ_HORSE:
+		case IT_TALISMAN:
             return true;
         default:
             break;

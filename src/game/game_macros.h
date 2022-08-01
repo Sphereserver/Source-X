@@ -104,6 +104,7 @@ typedef dword DAMAGE_TYPE;		// describe a type of damage.
 #define SPELLFLAG_CURSE				0x20000000	// Curses just like Weaken,Purge Magic,Curse,etc.
 #define SPELLFLAG_HEAL				0x40000000	// Healing spell
 #define SPELLFLAG_TICK				0x80000000	// A ticking spell like Poison.
+#define SPELLFLAG_FREEZEONCAST		0x100000000	// freezes the char on cast for this spell.
 
 
 #endif // _INC_GAME_MACROS_H

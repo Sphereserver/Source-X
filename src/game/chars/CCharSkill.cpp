@@ -162,7 +162,11 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 		uiAdjSkill = (ushort)IMulDiv( pSkillDef->m_StatPercent, uiPureBonus, 10000 );
 	}
 
-	return ( Skill_GetBase(skill) + uiAdjSkill );
+	tchar* z = Str_GetTemp();
+	sprintf(z, "SkillMod%d", skill);
+	ushort uiBonSkill = (ushort)GetKeyNum(z);
+
+	return ( Skill_GetBase(skill) + uiAdjSkill + uiBonSkill );
 }
 
 void CChar::Skill_AddBase( SKILL_TYPE skill, int iChange )
@@ -690,7 +694,7 @@ bool CChar::Skill_MakeItem_Success()
 			for ( uint n = 1; n < m_atCreate.m_dwAmount; ++n )
 			{
 				CItem *ptItem = CItem::CreateTemplate(m_atCreate.m_iItemID, nullptr, this);
-				ItemBounce(ptItem);
+				ItemBounce(ptItem, false);
 			}
 		}
 	}
@@ -1351,6 +1355,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Mining");
 	// SKILL_MINING
 	// m_Act_p = the point we want to mine at.
+	// m_Act_UID = the worldgem bit we are mining at.
 	// m_Act_Prv_UID = Pickaxe/Shovel
 	//
 	// Test the chance of precious ore.
@@ -1425,6 +1430,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atResource.m_dwStrokeCount = (word)(Calc_GetRandVal(5) + 2);
+		m_Act_UID = pResBit->GetUID();
 		return Skill_NaturalResource_Setup(pResBit);	// How difficult? 1-1000
 	}
 

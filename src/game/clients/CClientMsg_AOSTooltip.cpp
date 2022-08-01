@@ -450,8 +450,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		}
 		break;
 
-	case IT_ARMOR_LEATHER:
 	case IT_ARMOR:
+	case IT_ARMOR_CHAIN:
+	case IT_ARMOR_LEATHER:
+	case IT_ARMOR_RING:
 	case IT_CLOTHING:
 	case IT_SHIELD:
 	{

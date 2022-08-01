@@ -197,6 +197,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@SpellEffectRemove",   // A spell memory item is going to be removed from me.
     "@SpellEffectTick",		// A spell is going to tick and have an effect on me.
 	"@SpellFail",			// The spell failed
+	"@SpellInterrupt",		// The spell was interrupted
 	"@SpellSelect",			// Selected a spell
 	"@SpellSuccess",		// The spell succeeded
 	"@SpellTargetCancel",	// cancelled spell target
