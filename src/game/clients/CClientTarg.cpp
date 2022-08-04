@@ -1006,7 +1006,9 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	{
 		case IT_ARMOR:				// some type of armor. (no real action)
 		case IT_SHIELD:
+		case IT_ARMOR_CHAIN:
 		case IT_ARMOR_LEATHER:
+		case IT_ARMOR_RING:
 		case IT_CLOTHING:
 		case IT_JEWELRY:
 			fWeapon = false;

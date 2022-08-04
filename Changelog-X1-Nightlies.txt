@@ -2987,3 +2987,29 @@ Note: The only way the server has to know if the bankself is closed is to store 
 		
 26-07-2022, Drk84
 - Fixed: Wrong calculation in Magic Resistance check.
+
+01-08-2022, Julian
+- Added: t_talisman for talismans. These items should be equipped on layer_talisman. Remember to set the layer and add some cool functionality in the scripts :)
+- Added: t_armor_chain and t_armor_ring typedefs. You can still use t_armor for every piece of armor, but also allows you to use these new types to use specific behavior for each type of armor.
+		 *IMPORTANT* If you want to use these types, you need to add the following definitions under [TYPEDEFS] in your scripts:
+			t_armor_chain			302
+			t_armor_ring			303
+			t_talisman				304
+- Added: SPELLFLAG_FREEZEONCAST, when a player casts this spell it gets frozen, opposite to SPELLFLAG_NOFREEZEONCAST 
+		 Example use: freeze while opening a gate or recall). MAGICF_FREEZEONCAST must be disabled.
+		 *IMPORTANTE* You need to add the following definition under [DEFNAME spell_flags] in your scripts:
+			spellflag_freezeoncast	   0100000000 
+- Added: Chars TAG, TAG.SkillMod%d being %d the SKILL ID. This allows you to increase the bonus for certaing skill instead of modifying the raw base value (just like stats affect skill bonus).
+		 Example: TAG.SkillMod10 = 100 will bonus you 10.0% in Camping (SKILL 10). If you click on "show real" in the skill menu, you won't see this bonus but the real value.
+		 Note that most of the internal calculations are used taking in account stats + tag bonus.
+- Added: @SpellInterrupt, fired when a char interrupts someone's casting. Default is the interrupter, SRC is the person casting.
+		  ARGN1 = Spell being casted.
+		  ARGN2 = The disturb chance calculated: 0-1000. (Internally, this number is compared against a random of 1000)
+		  RETURN 1 cancels the interruption and allows the target (SRC) to cast.
+- Added: SKILLUPDATE %d, argument is the skill to update. Use this function with the tag described previously.
+- Added: [sphere.ini] ColorNotoGoodNPC, you can now set a custom color for good npcs (this should not affect tamed creatures).
+- Changed: ATTR_QUESTITEM to have internal functionality. These items can't be dropped, traded or looted (as described in script definition).
+- Changed: ATTR_CANNOTREPAIR to have internal functionality. These items can not be repaired.
+- Changed: Mining @Start/@SkillStart, now ACT is the Worldgem Bit we're mining from. You can modify it easily instead of using workarounds to get the UID.
+- Changed: @UserQuestArrowClick, using return 1 now prevents from showing default message when (left/right)clicking arrow.
+- Changed: Crafting skills now won't display the bounce message when successfully crafting an item, with the skill message is enough.

@@ -52,7 +52,9 @@ public:
 		// IT_WAND
 		// IT_WEAPON_*
 		// IT_ARMOR
+		// IT_ARMOR_CHAIN
 		// IT_ARMOR_LEATHER
+		// IT_ARMOR_RING
 		// IT_SHIELD
 		// IT_CLOTHING
 		// IT_SPELLBOOK

@@ -1235,6 +1235,7 @@ enum CTRIG_TYPE : short
     CTRIG_SpellEffectRemove,		// Removing spell item from character.
     CTRIG_SpellEffectTick,  // A spell with SPELLFLAG_TICK just ticked.
 	CTRIG_SpellFail,        // The spell failed.
+    CTRIG_SpellInterrupt,   // The spell has been interrupted.
 	CTRIG_SpellSelect,      // selected a spell.
 	CTRIG_SpellSuccess,     // The spell succeeded.
 	CTRIG_SpellTargetCancel,// Cancelled spell target.

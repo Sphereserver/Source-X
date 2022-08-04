@@ -270,7 +270,7 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 		pChar = this;
 	switch (color)
 	{
-	case NOTO_GOOD:			return (HUE_TYPE)(g_Cfg.m_iColorNotoGood);		// Blue
+	case NOTO_GOOD:			return pChar->IsNPC() ? (HUE_TYPE)(g_Cfg.m_iColorNotoGoodNPC) : (HUE_TYPE)(g_Cfg.m_iColorNotoGood);		// Blue
 	case NOTO_GUILD_SAME:	return (HUE_TYPE)(g_Cfg.m_iColorNotoGuildSame);	// Green (same guild)
 	case NOTO_NEUTRAL:		return (HUE_TYPE)(g_Cfg.m_iColorNotoNeutral);	// Grey (someone that can be attacked)
 	case NOTO_CRIMINAL:		return (HUE_TYPE)(g_Cfg.m_iColorNotoCriminal);	// Grey (criminal)

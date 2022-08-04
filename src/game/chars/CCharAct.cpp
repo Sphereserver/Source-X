@@ -645,7 +645,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool fLeaveHands )
 				break;
 		}
 
-		if ( pDest && !pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_BLESSED|ATTR_INSURED|ATTR_NODROP|ATTR_NOTRADE) )
+		if ( pDest && !pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_BLESSED|ATTR_INSURED|ATTR_NODROP|ATTR_NOTRADE|ATTR_QUESTITEM) )
 		{
 			// Move item to dest (corpse usually)
 			pDest->ContentAdd(pItem);
@@ -3290,11 +3290,17 @@ bool CChar::OnFreezeCheck() const
 		if ( m_pPlayer->m_speedMode & 0x04 )	// speed mode '4' prevents movement
 			return true;
 
-		if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
+		if ( g_Cfg.IsSkillFlag(m_Act_SkillCurrent, SKF_MAGIC) )		// casting magic spells
 		{
 			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
-			if ( pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
-				return true;
+			if ( pSpellDef )
+			{
+				if ( IsSetMagicFlags(MAGICF_FREEZEONCAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOFREEZEONCAST) )
+					return true;
+
+				if ( !IsSetMagicFlags(MAGICF_FREEZEONCAST) && pSpellDef->IsSpellType(SPELLFLAG_FREEZEONCAST) )
+					return true;
+			}
 		}
 	}
 
@@ -3678,7 +3684,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				return TRIGRET_RET_DEFAULT;
 			case IT_SHIP_PLANK:
 			case IT_ROPE:
-				if ( !fStanding && !IsStatFlag(STATF_HOVERING) )
+				if ( !fStanding && !IsStatFlag(STATF_HOVERING) && !pItem->IsAttr(ATTR_STATIC) )
 				{
 					// Check if we can go out of the ship (in the same direction of plank)
                     //bool fFromShip = (nullptr != GetTopSector()->GetRegion(GetTopPoint(), REGION_TYPE_SHIP)); // always true

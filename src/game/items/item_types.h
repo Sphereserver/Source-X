@@ -217,6 +217,9 @@ enum IT_TYPE		// double click type action.
     // New SphereX hardcoded types starting from 300
     IT_SPAWN_CHAMPION = 300,// 300 = t_spawn_champion
     IT_MULTI_ADDON,         // 301 = t_multi_addon
+	IT_ARMOR_CHAIN,			// 302 = t_armor_chain
+	IT_ARMOR_RING,			// 303 = t_armor_ring
+	IT_TALISMAN,			// 304 = t_talisman
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here
