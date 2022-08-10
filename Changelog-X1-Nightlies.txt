@@ -1132,7 +1132,7 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - Fixed Custom Multis crashing the server on loading.
 
 24-08-2018, XuN
-- Added missing VirtualGold currency on status when FEATURE_TOL_VIRTUALGOLD is enabled.
+- Added missing 7Gold currency on status when FEATURE_TOL_VIRTUALGOLD is enabled.
 - GOLD and <GOLD> will work as VirtualGold and <VirtualGold> when FEATURE_TOL_VIRTUALGOLD is enabled (but the real money chars had before, if any, will not be removed).
 - Fixed wrong char sent on PacketObjectStatus when opening a new shop menu, hence not correctly showing the player's gold until a new packet updated the status.
 - Added region change support for ships, @Enter and @Exit will be fired on the regions they enter and leave (only them not characters inside, as always they will get it when landing from the ship)
@@ -3013,3 +3013,13 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Changed: Mining @Start/@SkillStart, now ACT is the Worldgem Bit we're mining from. You can modify it easily instead of using workarounds to get the UID.
 - Changed: @UserQuestArrowClick, using return 1 now prevents from showing default message when (left/right)clicking arrow.
 - Changed: Crafting skills now won't display the bounce message when successfully crafting an item, with the skill message is enough.
+
+
+10-08-2022, Drk84
+- Added: PROMPT_CLILOC for Skill Definition. This allow you to set a cliloc number in the aforementioned property and it will be used instead of the PROMPT_MSG text.
+		 Example:
+		 [SKILL 1]
+		DEFNAME=Skill_Anatomy
+		KEY=Anatomy
+		PROMPT_MSG=Whom shall I examine?
+		PROMPT_CLILOC = 500000

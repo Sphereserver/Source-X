@@ -63,6 +63,7 @@ public:
     CSString m_sTitle;      // title one gets if it's your specialty.
     CSString m_sName;       // fancy skill name
     CSString m_sTargetPrompt;// targetting prompt. (if needed)
+    CSString m_sTargetPromptCliloc; //targetting prompt with cliloc support. (if needed)
 
     CValueCurveDef m_vcDelay; // Delay before skill complete (tenth of seconds).
     CValueCurveDef m_vcEffect;// Effectiveness of the skill, depends on skill.
