@@ -500,7 +500,7 @@ public:
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 
 	void addPromptConsole(CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = {}, CUID context2 = {}, bool fUnicode = false);
-	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int64 iTicksTimeout = 0 ); // Send targetting cursor to client
+	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int64 iTicksTimeout = 0, int iCliloc = 0 ); // Send targetting cursor to client
 	void addTargetDeed( const CItem * pDeed );
 	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE color = HUE_DEFAULT, bool fAllowGround = true );
 	bool addTargetChars( CLIMODE_TYPE mode, CREID_TYPE id, bool fNoto, int64 iTicksTimeout = 0 );
@@ -761,7 +761,7 @@ public:
 	{
 		return m_Targ_Mode ;
 	}
-	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int64 iTickTimeout = 0 );
+	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int64 iTickTimeout = 0, int iCliloc = 0 );
 	void ClearTargMode()
 	{
 		// done with the last mode.

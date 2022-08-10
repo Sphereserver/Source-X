@@ -35,6 +35,7 @@ enum SKC_TYPE
     SKC_GROUP,
     SKC_KEY,
     SKC_NAME,
+    SKC_PROMPT_CLILOC,
     SKC_PROMPT_MSG,
     SKC_RANGE,
     SKC_STAT_DEX,
@@ -60,6 +61,7 @@ lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
     "GROUP",
     "KEY",
     "NAME",
+    "PROMPT_CLILOC",
     "PROMPT_MSG",
     "RANGE",
     "STAT_DEX",
@@ -120,6 +122,9 @@ bool CSkillDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             break;
         case SKC_NAME: // "NAME"
             sVal = m_sName.IsEmpty() ? m_sKey : m_sName;
+            break;
+        case SKC_PROMPT_CLILOC: // "PROMPT_CLILOC"
+            sVal = m_sTargetPromptCliloc;
             break;
         case SKC_PROMPT_MSG: // "PROMPT_MSG"
             sVal = m_sTargetPrompt;
@@ -197,6 +202,9 @@ bool CSkillDef::r_LoadVal( CScript &s )
             return SetResourceName( m_sKey );
         case SKC_NAME: // "KEY"
             m_sName = s.GetArgStr();
+            break;
+        case SKC_PROMPT_CLILOC: // "PROMPT_CLILOC"
+            m_sTargetPromptCliloc = s.GetArgStr();
             break;
         case SKC_PROMPT_MSG: // "PROMPT_MSG"
             m_sTargetPrompt = s.GetArgStr();
