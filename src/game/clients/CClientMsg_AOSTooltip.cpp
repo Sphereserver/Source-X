@@ -214,6 +214,7 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 	CClientTooltip* t = nullptr;
 
 	dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true));
+	lpctstr lpHue = pObj->GetKeyStr("NAMELOC.HUE");
 
 	if (pItem)
 	{
@@ -224,18 +225,23 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 		else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
 		{
             PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
-			t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
+			if (lpHue)
+				t->FormatArgs("<basefont color=\"%s\">%" PRIu16 "\t%s</basefont>", lpHue, pItem->GetAmount(), pObj->GetName());
+			else
+				t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
 		}
 		else
 		{
             PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
-            t->FormatArgs("%s", pObj->GetName());
+			if (lpHue)
+				t->FormatArgs("<basefont color=\"%s\">%s</basefont>", lpHue, pObj->GetName());
+			else
+				t->FormatArgs("%s", pObj->GetName());
 		}
 	}
 	else if (pChar)
 	{
 		lpctstr lpPrefix = pChar->GetKeyStr("NAME.PREFIX");
-		// HUE_TYPE wHue = m_pChar->Noto_GetHue( pChar, true );
 
 		if (!*lpPrefix)
 			lpPrefix = pChar->Noto_GetFameTitle();
@@ -269,10 +275,19 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 
 		// The name
         PUSH_FRONT_TOOLTIP(pChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
-		if (dwClilocName)
-			t->FormatArgs("%s\t%u\t%s", lpPrefix, dwClilocName, lpSuffix);
-		else
-			t->FormatArgs("%s\t%s\t%s", lpPrefix, pObj->GetName(), lpSuffix);
+		if (lpHue) {
+			if (dwClilocName) {
+				t->FormatArgs("<basefont color=\"%s\">%s\t%u\t%s</basefont>", lpHue, lpPrefix, dwClilocName, lpSuffix);
+			} else {
+				t->FormatArgs("<basefont color=\"%s\">%s\t%s\t%s</basefont>", lpPrefix, pObj->GetName(), lpSuffix);
+			}
+		} else {
+			if (dwClilocName) {
+				t->FormatArgs("%s\t%u\t%s", lpPrefix, dwClilocName, lpSuffix);
+			} else {
+				t->FormatArgs("%s\t%s\t%s", lpPrefix, pObj->GetName(), lpSuffix);
+			}
+		}
 
 		// Need to find a way to get the ushort inside hues.mul for index wHue to get this working.
 		// t->FormatArgs("<basefont color=\"#%02x%02x%02x\">%s\t%s\t%s</basefont>",

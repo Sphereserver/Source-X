@@ -4291,6 +4291,10 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		}
 		if ( fGatherSkill )
 		{
+			CItem* pResBit = CWorldMap::CheckNaturalResource(m_Act_p, (IT_TYPE)(m_atResource.m_ridType.GetResIndex()), true, this);
+			if (pResBit)
+				m_Act_UID = pResBit->GetUID();
+
 			m_atResource.m_dwBounceItem = 1;
 			pArgs.m_VarsLocal.SetNum("GatherStrokeCnt", m_atResource.m_dwStrokeCount);
 		}

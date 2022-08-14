@@ -1120,13 +1120,16 @@ void CClient::addChar( CChar * pChar, bool fFull )
 	ADDTOCALLSTACK("CClient::addChar");
 	// Full update about a char.
 	EXC_TRY("addChar");
+	const bool fStatue = pChar->Can(CAN_C_STATUE);
 
-    if (fFull)
-	    new PacketCharacter(this, pChar);
-    else
-        addCharMove(pChar);
+	if (fFull) {
+		new PacketCharacter(this, pChar);
+	} else {
+		if (!fStatue) {
+			addCharMove(pChar);
+		}
+	}
 
-    const bool fStatue = pChar->Can(CAN_C_STATUE);
     if (fStatue)
     {
         const int iAnim = (int)pChar->GetKeyNum("STATUE_ANIM", true);
@@ -2843,7 +2846,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 	}
 
 	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
-	pChar->Delete();
+	pChar->Delete(true);
 
 	// refill the list.
 	new PacketCharacterListUpdate(this, GetAccount()->m_uidLastChar.CharFind());

@@ -140,6 +140,19 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     uint uiCount = 0;
     ppObjList[uiCount++] = pItemThis;
 
+    // second add the components of the multi.
+    for (size_t i = 0; i < pMulti->_lComps.size(); ++i)
+    {
+        CItem* pItemComp = pMulti->_lComps[i].ItemFind();
+        if (!pItemComp)
+            continue;
+        if (!pMulti->Multi_IsPartOf(pItemComp))
+            continue;
+
+        ppObjList[uiCount++] = pItemComp;
+    }
+
+    // add chars to the list
     CWorldSearch AreaChar(pItemThis->GetTopPoint(), iMaxDist);
     AreaChar.SetAllShow(true);
     AreaChar.SetSearchSquare(true);
@@ -160,6 +173,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
         ppObjList[uiCount++] = pChar;
     }
 
+    // last, add the rest of the items
     CWorldSearch AreaItem(pItemThis->GetTopPoint(), iMaxDist);
     AreaItem.SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)

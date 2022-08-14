@@ -439,6 +439,9 @@ bool CChar::Delete(bool fForce)
 	
 	DeleteCleanup(fForce);	// not virtual
 
+	if (m_pPlayer && fForce)
+		ClearPlayer();
+
 	return CObjBase::Delete();
 }
 
