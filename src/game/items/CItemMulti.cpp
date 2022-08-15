@@ -1791,16 +1791,33 @@ void CItemMulti::Secure(const CUID& uidContainer)
 void CItemMulti::Release(const CUID& uidContainer, bool fRemoveFromList)
 {
     ADDTOCALLSTACK("CItemMulti::Release");
+
+    // remove from lockdown list
     if (fRemoveFromList)
     {
-        _lLockDowns.erase(std::remove(_lLockDowns.begin(), _lLockDowns.end(), uidContainer));
+        for (size_t i = 0; i < _lLockDowns.size(); ++i)
+        {
+            if (_lLockDowns[i] == uidContainer)
+            {
+                g_Log.EventWarn("Removing %s from list at id %d", uidContainer, i);
+                _lLockDowns.erase(_lLockDowns.begin() + i);
+                break;
+            }
+        }
     }
 
+    // remove container from secure
     CItemContainer *pContainer = static_cast<CItemContainer*>(uidContainer.ItemFind());
     if (!pContainer)
     {
         return;
     }
+
+    // clear from secured item list
+    int iContainerIndex = GetSecuredContainerIndex(uidContainer);
+    if ( iContainerIndex >= 0 ) 
+        _lSecureContainers.erase(_lSecureContainers.begin() + iContainerIndex);
+
     pContainer->ClrAttr(ATTR_SECURE);
     pContainer->m_uidLink.InitUID();
     pContainer->r_ExecSingle("EVENTS -ei_house_secure");
@@ -2334,13 +2351,13 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         }
         case SHV_RELEASE:
         {
-            const CUID uidRelease(s.GetArgDWVal());
-            if (!uidRelease.IsValidUID())
+            if (!s.HasArgs())
             {
                 _lAccesses.clear();
             }
             else
             {
+                const CUID uidRelease = (CUID)s.GetArgDWVal();
                 Release(uidRelease, true);
             }
             break;

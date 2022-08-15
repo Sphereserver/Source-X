@@ -2276,7 +2276,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET_BLOCK("MESSAGE or MSG");
 				lpctstr ptcArg = s.GetArgStr();
 				if ( pCharSrc == nullptr )
-					UpdateObjMessage(ptcArg, ptcArg, nullptr, HUE_TEXT_DEF, TALKMODE_SAY);
+					UpdateObjMessage(ptcArg, ptcArg, nullptr, HUE_TEXT_DEF, TALKMODE_ITEM);
 				else
 					pCharSrc->ObjMessage(ptcArg, this);
 			}

@@ -1,5 +1,6 @@
 
 #include <cmath>
+#include <complex>
 #include <limits>
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
@@ -390,8 +391,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 						}
 						else
 						{
-							DEBUG_ERR(( "Float_MakeFloatMath: Sqrt of negative number (%f) is impossible\n", dTosquare ));
-							rResult = 0;
+							++iCount;
+							std::complex<double> number(dTosquare, 0);
+							std::complex<double> result = sqrt(number);
+							rResult = result.real();
 						}
 					}
 					else

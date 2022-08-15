@@ -3,6 +3,7 @@
 #include "CException.h"
 #include "CExpression.h"
 #include <algorithm>
+#include <complex>
 #include <cmath>
 
 tchar CExpression::sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN] =
@@ -623,7 +624,10 @@ try_dec:
 							}
 							else
 							{
-								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%lld) is impossible\n", iTosquare ));
+								++iCount;
+								std::complex<double> number((double)iTosquare, 0);
+								std::complex<double> result = sqrt(number);
+								iResult = (llong)result.real();
 							}
 						}
 
@@ -1063,7 +1067,14 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 		case '@':
 			++pExpr;
 			llValSecond = GetVal(pExpr);
-			if ((llVal == 0) && (llValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
+			if (llVal < 0)
+			{
+				std::complex<llong> number(llValSecond, 0);
+				std::complex<llong> result = power(llVal, llValSecond);
+				llVal = result.real();
+				break;
+			}
+			else if ((llVal == 0) && (llValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
 			{
 				g_Log.EventError("Power of zero with zero or negative exponent is undefined.\n");
 				break;
