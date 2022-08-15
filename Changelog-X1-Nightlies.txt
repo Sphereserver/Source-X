@@ -3028,7 +3028,8 @@ Note: The only way the server has to know if the bankself is closed is to store 
 [sphereCrypt.ini]: Added crypt key for classic client 7.0.96 and enhanced client 4.0.95, 4.0.96
 - Added: Complex maths to be able to use negative values with SQRT or POW.
 - Added: TAG.NAMELOC.HUE to use HTML colored names for items/chars with tooltips. (Issue #390)
-		 Example: TAG.NAMELOC.HUE = #FFFF00
+		 Example: TAG.NAMELOC.HUE = FF00FF // Color of the name: violet
+		 This will be internally expanded to: <basefont color=#FF00FF><name></basefont>
 - Fixed: Statues getting all wrong when updating the char, possibly don't need to be updated with addCharMove. (Issue #716)
 - Fixed: Character list was filling faster than the actual removal of the character. (Issue #753)
 - Fixed: Removing a secured container from a multi didn't work. (Issue #685)
