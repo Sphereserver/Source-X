@@ -1698,7 +1698,7 @@ void CItemMulti::LockItem(const CUID& uidItem)
     ASSERT(pItem);
     if (!g_Serv.IsLoading())
     {
-        if (GetLockedItemIndex(uidItem) >= 0)
+        if (GetLockedItemIndex(uidItem) >= 0 || GetSecuredContainerIndex(uidItem) >= 0)
         {
             return;
         }
@@ -1792,18 +1792,10 @@ void CItemMulti::Release(const CUID& uidContainer, bool fRemoveFromList)
 {
     ADDTOCALLSTACK("CItemMulti::Release");
 
-    // remove from lockdown list
+    // remove from secured list
     if (fRemoveFromList)
     {
-        for (size_t i = 0; i < _lLockDowns.size(); ++i)
-        {
-            if (_lLockDowns[i] == uidContainer)
-            {
-                g_Log.EventWarn("Removing %s from list at id %d", uidContainer, i);
-                _lLockDowns.erase(_lLockDowns.begin() + i);
-                break;
-            }
-        }
+        _lSecureContainers.erase(std::find(_lSecureContainers.begin(), _lSecureContainers.end(), uidContainer));
     }
 
     // remove container from secure
@@ -1813,11 +1805,7 @@ void CItemMulti::Release(const CUID& uidContainer, bool fRemoveFromList)
         return;
     }
 
-    // clear from secured item list
-    int iContainerIndex = GetSecuredContainerIndex(uidContainer);
-    if ( iContainerIndex >= 0 ) 
-        _lSecureContainers.erase(_lSecureContainers.begin() + iContainerIndex);
-
+    // clear secured item
     pContainer->ClrAttr(ATTR_SECURE);
     pContainer->m_uidLink.InitUID();
     pContainer->r_ExecSingle("EVENTS -ei_house_secure");
@@ -3092,9 +3080,14 @@ bool CItemMulti::r_LoadVal(CScript & s)
             CUID uidLock(s.GetArgDWVal());
             if (uidLock.IsValidUID())
             {
-                LockItem(uidLock);
+                CItem* pItem = uidLock.ItemFind();
+                if (pItem && (!pItem->IsType(IT_CONTAINER) && !pItem->IsType(IT_CONTAINER_LOCKED)))
+                {
+                    LockItem(uidLock);
+                    break;
+                }
             }
-            break;
+            return false;
         }
         case SHL_SECURE:
         {
