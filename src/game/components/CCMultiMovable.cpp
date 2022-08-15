@@ -143,7 +143,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     // second add the components of the multi.
     for (size_t i = 0; i < pMulti->_lComps.size(); ++i)
     {
-        CItem* pItemComp = pMulti->_lComps[i].ItemFind();
+        CItem *pItemComp = pMulti->_lComps[i].ItemFind();
         if (!pItemComp)
             continue;
         if (!pMulti->Multi_IsPartOf(pItemComp))
@@ -158,7 +158,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     AreaChar.SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)
     {
-        CChar * pChar = AreaChar.GetChar();
+        CChar *pChar = AreaChar.GetChar();
         if (pChar == nullptr)
             break;
         if (!pMulti->GetRegion()->IsInside2d(pChar->GetTopPoint()))
@@ -178,25 +178,26 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     AreaItem.SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)
     {
-        CItem * pItem = AreaItem.GetItem();
+        CItem *pItem = AreaItem.GetItem();
         if (pItem == nullptr)
             break;
         if (pItem == pItemThis)	// already listed.
             continue;
-        if (!pMulti->Multi_IsPartOf(pItem))
-        {
-            if (!pMulti->GetRegion()->IsInside2d(pItem->GetTopPoint()))
-                continue;
+        if (pMulti->Multi_IsPartOf(pItem)) // already listed.
+            continue;
+        
+        if (!pMulti->GetRegion()->IsInside2d(pItem->GetTopPoint()))
+            continue;
 
-            //I guess we can allow items to be locked on the ships and still move... but disallow attr_static from moving
-            //if ( ! pItem->IsMovable() && !pItem->IsType(IT_CORPSE))
-            if (pItem->IsAttr(ATTR_STATIC))
-                continue;
+        //I guess we can allow items to be locked on the ships and still move... but disallow attr_static from moving
+        //if ( ! pItem->IsMovable() && !pItem->IsType(IT_CORPSE))
+        if (pItem->IsAttr(ATTR_STATIC))
+            continue;
 
-            int zdiff = pItem->GetTopZ() - iShipHeight;
-            if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
-                continue;
-        }
+        int zdiff = pItem->GetTopZ() - iShipHeight;
+        if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
+            continue;
+
         ppObjList[uiCount++] = pItem;
     }
     return uiCount;
