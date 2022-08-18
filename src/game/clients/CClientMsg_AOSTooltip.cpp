@@ -225,28 +225,17 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 		else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
 		{
             PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
-<<<<<<< HEAD
 			if ( *lpHue ) {
 				t->FormatArgs("<basefont color=\"#%s\">%" PRIu16 "\t%s", lpHue, pItem->GetAmount(), pObj->GetName());
-=======
-			if ( lpHue ) {
-				t->FormatArgs("<basefont color=\"#%s\"> %" PRIu16 "\t%s </basefont>", lpHue, pItem->GetAmount(), pObj->GetName());
->>>>>>> 934f03c58486f7500eb160704253b40a1fe81c0e
 			} else {
 				t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
 			}
 		}
 		else
 		{
-<<<<<<< HEAD
 			PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
 			if ( *lpHue ) {
 				t->FormatArgs("<basefont color=\"#%s\"> %s ", lpHue, pObj->GetName());
-=======
-            PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1042971)); // ~1_NOTHING~
-			if ( lpHue ) {
-				t->FormatArgs("<basefont color=\"#%s\"> %s </basefont>", lpHue, pObj->GetName());
->>>>>>> 934f03c58486f7500eb160704253b40a1fe81c0e
 			} else {
 				t->FormatArgs("%s", pObj->GetName());
 			}
@@ -290,15 +279,9 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
         PUSH_FRONT_TOOLTIP(pChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
 		if (*lpHue) {
 			if (dwClilocName) {
-<<<<<<< HEAD
 				t->FormatArgs("<basefont color=\"#%s\"> %s\t%u\t%s ", lpHue, lpPrefix, dwClilocName, lpSuffix);
 			} else {
 				t->FormatArgs("<basefont color=\"#%s\"> %s\t%s\t%s ", lpHue, lpPrefix, pObj->GetName(), lpSuffix);
-=======
-				t->FormatArgs("<basefont color=\"#%s\"> %s\t%u\t%s </basefont>", lpHue, lpPrefix, dwClilocName, lpSuffix);
-			} else {
-				t->FormatArgs("<basefont color=\"#%s\"> %s\t%s\t%s </basefont>", lpHue, lpPrefix, pObj->GetName(), lpSuffix);
->>>>>>> 934f03c58486f7500eb160704253b40a1fe81c0e
 			}
 		} else {
 			if (dwClilocName) {
