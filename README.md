@@ -14,7 +14,7 @@ https://discord.gg/ZrMTXrs
 The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
 of the new ones.<br>
 Beware, it's still not 100% complete!<br>
-https://github.com/cbnolok/SphereX-Scriptpack
+https://github.com/Sphereserver/Scripts-X
 
 
 ### Coming from a different SphereServer version?
