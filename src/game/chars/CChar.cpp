@@ -173,6 +173,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@SeeCrime",			// I saw a crime
 	"@SeeHidden",			// Can I see hidden chars?
 	"@SeeSnoop",
+	"@SendPaperdoll",		//Server send paperdollpacket
 
 	// SKTRIG_QTY
 	"@SkillAbort",

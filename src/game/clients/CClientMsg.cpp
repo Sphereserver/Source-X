@@ -2561,6 +2561,11 @@ void CClient::addCharPaperdoll( CChar * pChar )
 	if ( !pChar )
 		return;
 
+	if (IsTrigUsed(TRIGGER_SENDPAPERDOLL))
+	{
+		pChar->OnTrigger(CTRIG_SendPaperdoll, m_pChar);
+	}
+
 	new PacketPaperdoll(this, pChar);
 }
 
