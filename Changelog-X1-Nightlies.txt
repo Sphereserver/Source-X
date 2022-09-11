@@ -3035,3 +3035,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Removing a secured container from a multi didn't work. (Issue #685)
 - Fixed: Moving multis now will add components as first priority to avoid dropping them. (Issue #821)
 - Changed: Skills with SKF_GATHER, @Start/@SkillStart, now ACT is the Worldgem Bit we're gathering from.
+
+
+11/09/2022 Tolokio
+-Removed check that denied vendor to use layer_special to keep bought items. Only pets vendors were allow. (should be the opposite maybe?)
