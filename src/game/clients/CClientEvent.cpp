@@ -1532,14 +1532,14 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		if ( amount >= pItem->GetAmount())
 		{
 			pItem->RemoveFromView();
-			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
+			if ( pContExtra )
 				pContExtra->ContentAdd(pItem);
 			else
 				pItem->Delete();
 		}
 		else
 		{
-			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
+			if ( pContExtra )
 			{
 				CItem * pItemNew = CItem::CreateDupeItem(pItem);
 				pItemNew->SetAmount(amount);
