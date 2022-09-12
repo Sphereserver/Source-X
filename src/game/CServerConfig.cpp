@@ -41,7 +41,7 @@ CServerConfig::CServerConfig()
 	m_fUseHTTP			= 2;
 	m_fUseAuthID		= true;
 	_iMapCacheTime		= 2  * 60 * MSECS_PER_SEC;
-	_iSectorSleepDelay  = 30 * 60 * MSECS_PER_SEC;	//To avoid visual decay glitch we should avoid to be lower than iDecay_Item delay
+	_iSectorSleepDelay  = 10 * 60 * MSECS_PER_SEC;
 	m_fUseMapDiffs		= false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE

@@ -3037,6 +3037,10 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Changed: Skills with SKF_GATHER, @Start/@SkillStart, now ACT is the Worldgem Bit we're gathering from.
 
 09-09-2022, Jhobean
-- Added: @SendPaperdoll. This will trigg on character when requesting the paperdoll packet (0x88) from server. 
+- Added: @SendPaperdoll There 3 ways (Dclick a player, use client macro or use the context menu) to open a paperdoll and requesting the paperdoll packet (0x88). 
+		 All 3 method will initiate the trigger on the player doing the action. This trigger could be use to modify some aspect of paperdoll on custom client or 
+		 to detect someone looking your paperdoll.
 			SRC = The player asking to open the paperdoll
 			i = The player concerned in the information packet 
+- Changed: All item with attr_decay flag will no more sleep on sleeping sector. This will avoid to have useless item stuck at TIMER=0 on sleeping sector.
+		   Item was awake when player entering the sector and sometime player had time to see it before it dissapear. (issue #846)
