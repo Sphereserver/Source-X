@@ -3049,7 +3049,10 @@ void CChar::Wake()
 void CChar::SleepStart( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::SleepStart");
-	if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_POLYMORPH))
+	if (IsStatFlag(STATF_DEAD|STATF_POLYMORPH))
+		return;
+	if (IsStatFlag(STATF_SLEEPING))
+		wake()
 		return;
 
 	CItemCorpse *pCorpse = MakeCorpse(fFrontFall);
