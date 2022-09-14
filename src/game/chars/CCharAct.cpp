@@ -3052,7 +3052,7 @@ void CChar::SleepStart( bool fFrontFall )
 	if (IsStatFlag(STATF_DEAD|STATF_POLYMORPH))
 		return;
 	if (IsStatFlag(STATF_SLEEPING))
-		wake()
+		wake();
 		return;
 
 	CItemCorpse *pCorpse = MakeCorpse(fFrontFall);
