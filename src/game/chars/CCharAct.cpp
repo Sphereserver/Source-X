@@ -2766,6 +2766,8 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	LayerAdd(pMountItem, LAYER_HORSE);	// equip the horse item
 	pHorse->StatFlag_Set(STATF_RIDDEN);
 	pHorse->Skill_Start(NPCACT_RIDDEN);
+	pHorse->SetTopZ(-127);
+	//pHorse->SetDisconnected();
 	return true;
 }
 
