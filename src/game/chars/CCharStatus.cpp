@@ -1319,15 +1319,12 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
                 fFreezeImmune = true;
             break;
         }
-
-        case IT_ARCHERY_BUTTE:
+	case IT_ARCHERY_BUTTE:
         {
             const CItem * pWeapon = m_uidWeapon.ItemFind();
-            if (pWeapon)
+            if (pWeapon) //only a weapons is required, butte do the rest.
             {
-                IT_TYPE iType = pWeapon->GetType();
-                if ((iType == IT_WEAPON_BOW) || (iType == IT_WEAPON_XBOW))
-                    return (iDist <= pWeapon->GetRangeH());
+                    return iDist <= 16; //can be set by script at @dclick, butte also checks distance later. 5-6 min-max
             }
             break;
         }
