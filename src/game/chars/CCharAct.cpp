@@ -3093,6 +3093,17 @@ bool CChar::Death()
 			return true;
 	}
 
+	if (IsStatFlag(STATF_RIDDEN))
+	{
+		CItem* pMountItem = m_atRidden.m_uidFigurine.ItemFind();
+		if (pMountItem)
+		{
+			CChar* const pRider = Horse_GetMountChar();
+			if (pRider)
+				pRider->Horse_UnMount();
+		}
+	}
+
 	// Look through memories of who I was fighting (make sure they knew they where fighting me)
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
