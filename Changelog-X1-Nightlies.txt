@@ -3037,3 +3037,4 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Changed: Skills with SKF_GATHER, @Start/@SkillStart, now ACT is the Worldgem Bit we're gathering from.
 
 20-09-2022
+Fixed: normal vendors not being able to keep bought items.
