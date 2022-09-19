@@ -201,8 +201,7 @@ void CSector::_GoSleep()
 		const bool fSleeping = pItem->IsSleeping();
         if (!fSleeping)
         {
-            if (!pItem->IsAttr(ATTR_DECAY)) //Item having a decay flag should not go sleep to avoid keeping them on world until next awake
-                pItem->GoSleep();
+            pItem->GoSleep();
         }	
     }
 }
