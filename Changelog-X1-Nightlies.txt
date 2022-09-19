@@ -3038,3 +3038,6 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake"
+
+19-09-2022, Tolokio
+-Fix: Layer 27 can be used now by normal vendors. Removed check that allow only player vendors. I supposse it had to be the opposite. As there is no issue with players vendors using it, I just remove it.
