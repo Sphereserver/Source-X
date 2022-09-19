@@ -1539,7 +1539,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		}
 		else
 		{
-			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
+			if ( pContExtra )
 			{
 				CItem * pItemNew = CItem::CreateDupeItem(pItem);
 				pItemNew->SetAmount(amount);
