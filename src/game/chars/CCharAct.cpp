@@ -3088,6 +3088,15 @@ bool CChar::Death()
 			return true;
 	}
 
+	if ( IsStatFlag(STATF_RIDDEN) )
+	{
+		CChar* pRider = Horse_GetMountChar();
+		if (pRider)
+		{
+			pRider->Horse_UnMount();
+		}
+	}
+
 	// Look through memories of who I was fighting (make sure they knew they where fighting me)
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
