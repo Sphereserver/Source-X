@@ -322,6 +322,8 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;	// self induced
 	if (IsStatFlag(STATF_DEAD|STATF_STONE))
 		return false;
+	if (IsStatFlag(STATF_RIDDEN))
+		return true;
 
 	if (fShouldReveal)
 		pCharSrc->Reveal();	// fix invis exploit
