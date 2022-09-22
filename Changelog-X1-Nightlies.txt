@@ -3038,3 +3038,5 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake"
+
+-Fix: Mounts were not passing _CanTick check correctly if were damaged by anyone. Doing the mount inmortal until dismount.
