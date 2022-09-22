@@ -3038,3 +3038,6 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake"
+
+23-09-2022, Tolokio
+-Added: Chars now are dismounted if mount dies while being ridden.
