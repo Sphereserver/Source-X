@@ -3149,7 +3149,8 @@ bool CChar::Death()
 	StatFlag_Set(STATF_DEAD);
 	StatFlag_Clear(STATF_STONE|STATF_FREEZE|STATF_HIDDEN|STATF_SLEEPING|STATF_HOVERING);
 	SetPoisonCure(true);
-	Skill_Cleanup();
+	if (Skill_GetActive() != NPCACT_RIDDEN)
+		Skill_Cleanup();
 	Spell_Dispel(100);		// get rid of all spell effects (moved here to prevent double @Destroy trigger)
 
 	if ( m_pPlayer )		// if I'm NPC then my mount goes with me
