@@ -284,7 +284,8 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 
 	bool fFightActive = Fight_IsActive();
 	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY);
-
+	if (Skill_GetActive() == NPCACT_RIDDEN)
+		return;
 	if (fFightActive && m_Fight_Targ_UID.CharFind())
 	{
 		// In war mode already
@@ -322,8 +323,6 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 		return true;	// self induced
 	if (IsStatFlag(STATF_DEAD|STATF_STONE))
 		return false;
-	if (IsStatFlag(STATF_RIDDEN))
-		return true;
 
 	if (fShouldReveal)
 		pCharSrc->Reveal();	// fix invis exploit
