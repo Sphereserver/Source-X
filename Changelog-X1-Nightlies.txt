@@ -3040,5 +3040,5 @@ Note: The only way the server has to know if the bankself is closed is to store 
 -Added: Wake() is now avaible to be used by script using command: "wake"
 
 23-09-2022, Tolokio
--Fix: death and dessert of ridden npcs now dismount npcs.
+-Fix: death and dessert of ridden npcs now dismount rider.
 
