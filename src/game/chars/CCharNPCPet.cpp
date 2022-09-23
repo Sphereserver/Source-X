@@ -859,8 +859,9 @@ void CChar::NPC_PetRelease()
 		return;
 	}
 
-	SoundChar(CRESND_NOTICE);
-	Skill_Start(SKILL_NONE);
+	SoundChar(CRESND_NOTICE); 
+	if (Skill_GetActive() != NPCACT_RIDDEN)
+		Skill_Start(SKILL_NONE);
 	NPC_PetClearOwners();
 	UpdatePropertyFlag();
 }
