@@ -3038,3 +3038,9 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake"
+
+
+23-09-2022, Tolokio
+-Fix: Mounts losing action 111 when harmed by anyone.
+Now they dont try to fight back or desert if is hardmed by own master while being ridden.
+Mounts where unable to die or tick if action 111 were changed. Now seems ok.
