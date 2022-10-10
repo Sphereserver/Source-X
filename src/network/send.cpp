@@ -3002,6 +3002,7 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 	uint countpos = getPosition();
 	skip(2);
 
+	bool bLimitStock = IsSetOF(OF_VendorStockLimit) ? true : false;
 	uint count = 0;
 
 	std::deque<const CItemContainer*> otherBoxes;
@@ -3040,7 +3041,16 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 						writeInt32(vendItem->GetUID());
 						writeInt16((word)vendItem->GetDispID());
 						writeInt16((word)hue);
-						writeInt16(vendItem->GetAmount());
+
+						if (bLimitStock) {
+							if (vendSell->GetAmount() <= vendItem->GetAmount())
+								writeInt16(vendSell->GetAmount());
+							else
+								writeInt16(vendItem->GetAmount());
+						}
+						else {
+							writeInt16(vendItem->GetAmount());
+						}
 
 						uint price = 0;
 
