@@ -3088,11 +3088,14 @@ bool CChar::Death()
 			return true;
 	}
 	//Dismount now. Later is too late. death will remove npc and the body will appear where it was mounted for last time.
-	if (Skill_GetActive() == NPCACT_RIDDEN) 
+	if ( m_pNPC )
 	{
-		CChar* pCRider = Horse_GetMountChar();
-		if (pCRider)
-			pCRider->Horse_UnMount();
+		if (Skill_GetActive() == NPCACT_RIDDEN) 
+		{
+			CChar* pCRider = Horse_GetMountChar();
+			if (pCRider)
+				pCRider->Horse_UnMount();
+		}
 	}
 	// Look through memories of who I was fighting (make sure they knew they where fighting me)
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
