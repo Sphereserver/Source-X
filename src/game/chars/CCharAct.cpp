@@ -3087,7 +3087,16 @@ bool CChar::Death()
 		if ( OnTrigger(CTRIG_Death, this) == TRIGRET_RET_TRUE )
 			return true;
 	}
-
+	//Dismount now. Later is may be too late and cause problems
+	if ( m_pNPC )
+	{
+		if (Skill_GetActive() == NPCACT_RIDDEN) 
+		{
+			CChar* pCRider = Horse_GetMountChar();
+			if (pCRider)
+				pCRider->Horse_UnMount();
+		}
+	}
 	// Look through memories of who I was fighting (make sure they knew they where fighting me)
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
