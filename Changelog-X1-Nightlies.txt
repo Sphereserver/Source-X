@@ -3047,3 +3047,15 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Spell interrupt not working if trigger @SpellInterrupt was not used.
 - Fixed: Spell flag SPELLFLAG_FREEZEONCAST no working because of high values. Update your defs. (Issue #897)
 - Fixed: Mounts not dismounting when they died. (Issue #906)
+
+
+11-10-2022, Tolokio
+-Fix: Mounts stopping ticks if harmed by any char while being ridden (because lost of statf_ridden)
+-Fix: Mounts creating corpse at wrong place if killed while being mounted.
+-Fix: Mount losing statf_ridden while being ridden if mount get released.
+-Fix: Mount being duplicated after corpse is created. (Leather farm exploit)
+Notes:
+-Fixes also denies mount trying to fight back while mounted and denies pet desserting if owner harms it while being ridden.
+-There is a known issue where deathanimation is not played on mount when it dies while being ridden. It just appear dead on the floor.
+-Now riders will be dismounted if mount gets released or pet dies. (can be denied by script using proper triggers.)
+-There can be issues related to attackers listing but none found yet.
