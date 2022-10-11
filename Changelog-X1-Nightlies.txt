@@ -2998,7 +2998,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Added: SPELLFLAG_FREEZEONCAST, when a player casts this spell it gets frozen, opposite to SPELLFLAG_NOFREEZEONCAST 
 		 Example use: freeze while opening a gate or recall). MAGICF_FREEZEONCAST must be disabled.
 		 *IMPORTANTE* You need to add the following definition under [DEFNAME spell_flags] in your scripts:
-			spellflag_freezeoncast	   0100000000 
+			spellflag_freezeoncast	   00001000 
 - Added: Chars TAG, TAG.SkillMod%d being %d the SKILL ID. This allows you to increase the bonus for certaing skill instead of modifying the raw base value (just like stats affect skill bonus).
 		 Example: TAG.SkillMod10 = 100 will bonus you 10.0% in Camping (SKILL 10). If you click on "show real" in the skill menu, you won't see this bonus but the real value.
 		 Note that most of the internal calculations are used taking in account stats + tag bonus.
@@ -3038,3 +3038,12 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake"
+
+09-10-2022, Julian
+[sphereCrypt.ini]: Added crypt key for classic client 7.0.97 and enhanced client 4.0.97
+- Added [sphere.ini]: OF_VendorStockLimit to limit how many a vendor can buy from a player.
+	The value should be set in the [TEMPLATE] using the key BUY=
+	Example: BUY=i_bandage,10 (will limit the NPC to buy 10 bandages each restock).
+- Fixed: Spell interrupt not working if trigger @SpellInterrupt was not used.
+- Fixed: Spell flag SPELLFLAG_FREEZEONCAST no working because of high values. Update your defs. (Issue #897)
+- Fixed: Mounts not dismounting when they died. (Issue #906)
