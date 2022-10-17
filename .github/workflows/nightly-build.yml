@@ -87,8 +87,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Update
-      run: sudo apt-get install libmysql++-dev:i386 libmysqld-dev:i386 libmysqlclient-dev:i386
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
