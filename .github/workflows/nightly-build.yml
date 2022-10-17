@@ -2,9 +2,9 @@ name: Nightly build
 
 on:
   push:
-    branches: [ * ]
+    branches: *
   pull_request:
-    branches: [ * ]
+    branches: *
 
 jobs:
   linux-build:
