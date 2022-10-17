@@ -11,15 +11,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
-    - name: Build 
+    - name: CMake 
       run: cmake -G "Visual Studio 17 2022" src/
-    - name: Make build
+    - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
-    - name: Create spheresvr folders
-      run: mkdir accounts logs save scripts
-    - name: Zip file
+    - name: Create folders
+      run: mkdir accounts, logs, save, scripts
+    - name: Zip files
       run: 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "bin64\Nightly\SphereSvrX64_nightly.exe" "src\sphere.ini" "src\sphereCrypt.ini" "dlls\64\libmysql.dll"
-    - name: Create Release
+    - name: Create Nightly
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
@@ -37,13 +37,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -DCMAKE_BUILD_TYPE="Nightly" src/
-    - name: Compile spheresvr
+    - name: Make
       run: make -j4
-    - name: Create spheresvr folders
+    - name: Create folder
       run: mkdir accounts logs save scripts
-    - name: Zip file
+    - name: Zip files
       run: tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
-    - name: Create Release
+    - name: Create Nightly
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
