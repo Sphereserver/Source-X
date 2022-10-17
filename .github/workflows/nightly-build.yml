@@ -61,8 +61,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Update
-      run: sudo apt-get -qq update
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
     - name: Make
@@ -87,6 +85,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Create build folder
+      run: mkdir build
+    - name: CD build folder
+      run: cd build
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
