@@ -12,7 +12,7 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: Build 
-      run: cmake -G "Visual Studio 15 2017 Win64" .
+      run: cmake -G "Visual Studio 15 2017 Win64"
     - name: Make build
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
     - name: Create Release
