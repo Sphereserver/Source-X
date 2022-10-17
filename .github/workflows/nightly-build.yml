@@ -3,8 +3,6 @@ name: Nightly build
 on: [push, pull_request]
 
 jobs:
-  linux-build:
-
   windows-build:
 
     runs-on: windows-latest
@@ -27,6 +25,7 @@ jobs:
           tag_name: Nightly
           files: bin64/SphereSvrX64_nightly.exe
 
+  linux-build:
 
     runs-on: ubuntu-latest
 
