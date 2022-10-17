@@ -94,7 +94,7 @@ jobs:
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
-      run: make -j4
+      run: make
     - name: Create folder
       run: mkdir accounts logs save scripts
     - name: Zip files
