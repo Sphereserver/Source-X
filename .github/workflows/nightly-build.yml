@@ -88,13 +88,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt remove -yqq libmysql++-dev && sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
+      run: sudo apt remove -yqq libmysql++-dev && sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib libmysql++-dev:i386 
     - name: Export gcc
       run: export CC="gcc-7" && export CXX="g++-7"
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
-      run: make
+      run: make -j4
     - name: Create folder
       run: mkdir accounts logs save scripts
     - name: Zip files
