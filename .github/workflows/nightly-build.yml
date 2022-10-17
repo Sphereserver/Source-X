@@ -85,8 +85,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install 32 dependencies
-      run: sudo apt install -yqq --no-install-recommends libmysql++-dev:i386 > /dev/null
     - name: Export gcc
       run: export CC="gcc-7" && export CXX="g++-7"
     - name: CMake
