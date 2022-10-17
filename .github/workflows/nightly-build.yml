@@ -25,8 +25,8 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly
-          tag_name: Nightly
+          name: Nightly-${{ github.sha }}
+          tag_name: Nightly-${{ github.sha }}
           files: SphereSvrX-win64-nightly.zip
 
   windows-32:
@@ -51,8 +51,8 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly
-          tag_name: Nightly
+          name: Nightly-${{ github.sha }}
+          tag_name: Nightly-${{ github.sha }}
           files: SphereSvrX-win32-nightly.zip
 
   linux-64:
@@ -75,8 +75,8 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly
-          tag_name: Nightly
+          name: Nightly-${{ github.sha }}
+          tag_name: Nightly-${{ github.sha }}
           files: SphereSvrX-linux64-nightly.tar.gz
 
   linux-32:
@@ -101,6 +101,6 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly
-          tag_name: Nightly
+          name: Nightly-${{ github.sha }}
+          tag_name: Nightly-${{ github.sha }}
           files: SphereSvrX-linux32-nightly.tar.gz
