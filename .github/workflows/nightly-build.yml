@@ -1,6 +1,10 @@
 name: Nightly build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   windows-64:
@@ -25,8 +29,8 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly-${{ github.head_ref }}
-          tag_name: Nightly-${{ github.head_ref }}
+          name: Nightly-${{ github.ref_name }}
+          tag_name: Nightly-${{ github.ref_name }}
           files: SphereSvrX-win64-nightly.zip
 
   windows-32:
@@ -51,8 +55,8 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly-${{ github.head_ref }}
-          tag_name: Nightly-${{ github.head_ref }}
+          name: Nightly-${{ github.ref_name }}
+          tag_name: Nightly-${{ github.ref_name }}
           files: SphereSvrX-win32-nightly.zip
 
   linux-64:
@@ -75,8 +79,8 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly-${{ github.head_ref }}
-          tag_name: Nightly-${{ github.head_ref }}
+          name: Nightly-${{ github.ref_name }}
+          tag_name: Nightly-${{ github.ref_name }}
           files: SphereSvrX-linux64-nightly.tar.gz
 
   linux-32:
@@ -101,6 +105,6 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: Nightly-${{ github.head_ref }}
-          tag_name: Nightly-${{ github.head_ref }}
+          name: Nightly-${{ github.ref_name }}
+          tag_name: Nightly-${{ github.ref_name }}
           files: SphereSvrX-linux32-nightly.tar.gz
