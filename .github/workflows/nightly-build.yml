@@ -81,12 +81,14 @@ jobs:
 
   linux-32:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt install -yqq --no-install-recommends gcc-4.8 gcc-4.8-multilib g++-4.8 g++-4.8-multilib
+      run: sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
+    - name: Export CC
+      run: export CC="gcc-7" && export CXX="g++-7
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
