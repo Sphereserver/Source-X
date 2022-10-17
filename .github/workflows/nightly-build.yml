@@ -38,7 +38,7 @@ jobs:
     - name: Create spheresvr folders
       run: mkdir accounts logs save scripts
     - name: Zip file
-      run: tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+      run: tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C src/ sphere.ini sphereCrypt.ini
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
