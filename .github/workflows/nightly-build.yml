@@ -1,0 +1,30 @@
+name: Nightly build
+
+on:
+  push:
+    branches: [ * ]
+  pull_request:
+    branches: [ * ]
+
+jobs:
+  linux-build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create build folder
+      run: mkdir build && cd build
+    - name: CMake
+      run: cmake -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" --build ./ ../src
+    - name: Compile spheresvr
+      run: make
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+          name: Nightly
+          tag_name: Nightly
+          files: bin64/SphereSvrX64_nightly
