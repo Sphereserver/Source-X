@@ -81,12 +81,12 @@ jobs:
 
   linux-32:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib libmysql++-dev
+      run: sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib
     - name: Export
       run: export CC="gcc-7" && export CXX="g++-7"
     - name: CMake
