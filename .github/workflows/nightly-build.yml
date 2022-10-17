@@ -19,7 +19,7 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
           name: Nightly
           tag_name: Nightly
@@ -31,8 +31,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: sudo apt install -yqq --no-install-recommends curl libmysql++-dev
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -DCMAKE_BUILD_TYPE="Nightly" src/
     - name: Compile spheresvr
@@ -41,7 +39,7 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
           name: Nightly
           tag_name: Nightly
