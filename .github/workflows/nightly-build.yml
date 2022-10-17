@@ -64,7 +64,7 @@ jobs:
     - name: Update
       run: sudo apt-get -qq update
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
     - name: Make
       run: make -j4
     - name: Create folder
@@ -91,12 +91,8 @@ jobs:
       run: sudo apt remove -yqq libmysql++-dev && sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
     - name: Export gcc
       run: export CC="gcc-7" && export CXX="g++-7"
-    - name: Create build folder
-      run: mkdir build32
-    - name: CD build folder
-      run: cd build32
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86.cmake ../src/
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
       run: make
     - name: Create folder
