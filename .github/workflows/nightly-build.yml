@@ -85,12 +85,12 @@ jobs:
 
   linux-32:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib libmysql++
+      run: sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
