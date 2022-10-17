@@ -86,7 +86,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib libmysql++-dev:i386
+      run: sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib libmysql++-dev
     - name: Export
       run: export CC="gcc-7" && export CXX="g++-7"
     - name: CMake
