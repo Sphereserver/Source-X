@@ -88,9 +88,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib
-    - name: Export gcc
-      run: export CC="gcc-7" && export CXX="g++-7"
+      run: sudo apt-get install libmysql++-dev:i386 libmysqld-dev:i386 libmysqlclient-dev:i386
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
