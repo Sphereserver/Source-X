@@ -64,7 +64,7 @@ jobs:
     - name: Update
       run: sudo apt-get -qq update
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -DCMAKE_BUILD_TYPE="Nightly" src/
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
     - name: Make
       run: make -j4
     - name: Create folder
@@ -88,11 +88,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Update
-      run: sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
+      run: sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
     - name: Export gcc
       run: export CC="gcc-7" && export CXX="g++-7"
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86.cmake -DCMAKE_BUILD_TYPE="Nightly" src/
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
       run: make -j4
     - name: Create folder
