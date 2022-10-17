@@ -12,8 +12,7 @@ jobs:
     - name: Create build folder
       run: mkdir build && cd build
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -DCMAKE_BUILD_TYPE="Nightly" ../src/
-      #run: cmake -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" --build ./ ../src
+      run: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -DCMAKE_BUILD_TYPE="Nightly" --build ./ --target ../src
     - name: Compile spheresvr
       run: make
     - name: Create Release
