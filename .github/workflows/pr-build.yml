@@ -93,7 +93,7 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
-            sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib default-libmysqlclient-dev libmysqlclient-dev
+            sudo sudo dpkg --add-architecture i386 && sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib default-libmysqlclient-dev:i386 libmysqlclient-dev:i386
             gcc --version
             cmake --version
     - name: CMake
