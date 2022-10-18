@@ -1,4 +1,4 @@
-name: Nightly build
+name: Pull request build
 
 on: [push, pull_request]
 
@@ -86,7 +86,7 @@ jobs:
 
   linux-32:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -96,11 +96,6 @@ jobs:
             lsb_release -d
             gcc --version
             cmake --version
-    - name: Install mysql for x86
-      run:  |
-            wget https://download.nus.edu.sg/mirror/ubuntu/pool/main/m/mysql-8.0/libmysqlclient21_8.0.30-0ubuntu0.20.04.2_i386.deb
-            sudo dpkg -i libmysqlclient21_8.0.30-0ubuntu0.20.04.2_i386.deb
-            sudo apt -yqq --fix-broken install
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
