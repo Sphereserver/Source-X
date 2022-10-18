@@ -92,10 +92,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install prerequisites
       run:  |
-            sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib libmysqlclient21
+            sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib
             lsb_release -d
             gcc --version
             cmake --version
+    - name: Install mysql for x86
+      run:  |
+            wget https://download.nus.edu.sg/mirror/ubuntu/pool/main/m/mysql-8.0/libmysqlclient21_8.0.30-0ubuntu0.20.04.2_i386.deb
+            sudo dpkg -i libmysqlclient21_8.0.30-0ubuntu0.20.04.2_i386.deb
+            sudo apt -yqq --fix-broken install
     - name: CMake
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
