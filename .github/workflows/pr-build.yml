@@ -73,7 +73,7 @@ jobs:
     - name: Create folder
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C src/ sphere.ini sphereCrypt.ini
     - name: Create pull request tag and upload files
       id: create_release
       uses: softprops/action-gh-release@v1
@@ -103,7 +103,7 @@ jobs:
     - name: Zip files to upload
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
+            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C src/ sphere.ini sphereCrypt.ini
     - name: Create pull request tag and upload files
       id: create_release
       uses: softprops/action-gh-release@v1
