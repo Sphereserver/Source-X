@@ -16,10 +16,10 @@ jobs:
     - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
     - name: Create folders
-      run: mkdir accounts, logs, save, scripts
-    - name: Zip files
-      run: 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "bin64\Nightly\SphereSvrX64_nightly.exe" "src\sphere.ini" "src\sphereCrypt.ini" "dlls\64\libmysql.dll"
-    - name: Create Nightly
+      run: |
+            mkdir accounts, logs, save, scripts
+            7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "bin64\Nightly\SphereSvrX64_nightly.exe" "src\sphere.ini" "src\sphereCrypt.ini" "dlls\64\libmysql.dll"
+    - name: Create pull request tag and upload files
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
@@ -42,10 +42,10 @@ jobs:
     - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
     - name: Create folders
-      run: mkdir accounts, logs, save, scripts
-    - name: Zip files
-      run: 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "bin\Nightly\SphereSvrX32_nightly.exe" "src\sphere.ini" "src\sphereCrypt.ini" "dlls\32\libmysql.dll"
-    - name: Create Nightly
+      run:  |
+            mkdir accounts, logs, save, scripts
+            7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "bin\Nightly\SphereSvrX32_nightly.exe" "src\sphere.ini" "src\sphereCrypt.ini" "dlls\32\libmysql.dll"
+    - name: Create pull request tag and upload files
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
@@ -71,10 +71,10 @@ jobs:
     - name: Make
       run: make -j4
     - name: Create folder
-      run: mkdir accounts logs save scripts
-    - name: Zip files
-      run: tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
-    - name: Create Nightly
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+    - name: Create pull request tag and upload files
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
@@ -100,11 +100,11 @@ jobs:
       run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
     - name: Make
       run: make -j4
-    - name: Create folder
-      run: mkdir accounts logs save scripts
-    - name: Zip files
-      run: tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
-    - name: Create Nightly
+    - name: Zip files to upload
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
+    - name: Create pull request tag and upload files
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
