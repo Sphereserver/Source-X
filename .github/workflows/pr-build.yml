@@ -90,13 +90,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: MySql
-      run:  |
-            wget https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
-            sudo dpkg -i mysql-apt-config_0.8.23-1_all.deb
     - name: Install prerequisites
       run:  |
-            sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-7-multilib g++-7-multilib libmysqlclient-dev default-libmysqlclient-dev:i386 libmysqlclient-dev:i386
+            sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-7-multilib g++-7-multilib libmysqlclient-dev
             lsb_release -d
             gcc --version
             cmake --version
