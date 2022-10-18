@@ -3049,5 +3049,5 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Mounts not dismounting when they died. (Issue #906)
 
 18-10-2022, Raylde
-[sphereCrypt.ini]: Changed TimerCall description to use seconds instead of minutes
+[sphere.ini]: Changed TimerCall description to use seconds instead of minutes
 - Changed: Change _iTimerCall (TimerCall) from minutes to seconds
