@@ -1,0 +1,62 @@
+name: Nightly build
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  windows-64:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: CMake 
+      run: cmake -G "Visual Studio 17 2022" src/
+    - name: MSBuild
+      run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
+    - name: Create folders
+      run: |
+            mkdir accounts, logs, save, scripts
+            7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\64\libmysql.dll
+    - name: Create pull request tag and upload files
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          name: Nightly
+          tag_name: Nightly
+          files: SphereSvrX-win64-nightly.zip
+
+  linux-64:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install prerequisites
+      run:  |
+            lsb_release -d
+            gcc --version
+            cmake --version
+    - name: CMake
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
+    - name: Make
+      run: make -j4
+    - name: Create folder
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C ../src/ sphere.ini sphereCrypt.ini
+    - name: Create pull request tag and upload files
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          name: Nightly
+          tag_name: Nightly
+          files: SphereSvrX-linux64-nightly.tar.gz
