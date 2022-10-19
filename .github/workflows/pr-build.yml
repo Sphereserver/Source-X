@@ -24,7 +24,7 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: PR-${{ github.ref_name }}
+        name: PR
         path: SphereSvrX-win64-nightly.zip
 
   windows-32:
@@ -48,7 +48,7 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: PR-${{ github.ref_name }}
+        name: PR
         path: SphereSvrX-win32-nightly.zip
 
   linux-64:
@@ -75,7 +75,7 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: PR-${{ github.ref_name }}
+        name: PR
         path: SphereSvrX-linux64-nightly.tar.gz
 
   linux-32:
@@ -103,5 +103,5 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: PR-${{ github.ref_name }}
+        name: PR
         path: SphereSvrX-linux32-nightly.tar.gz
