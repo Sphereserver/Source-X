@@ -25,12 +25,13 @@ jobs:
         path: bin64\Nightly\SphereSvrX64_nightly.exe
 
     # only if the branch is main
-    - if: ${{ github.ref_name == 'main' }}
     - name: Create folders
+      if: ${{ github.ref_name == 'main' }}
       run: |
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\64\libmysql.dll
     - name: Create pull request tag and upload files
+      if: ${{ github.ref_name == 'main' }}
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,12 +61,13 @@ jobs:
         path: bin\Nightly\SphereSvrX32_nightly.exe
 
     # only if the branch is main
-    - if: ${{ github.ref_name == 'main' }}
     - name: Create folders
+      if: ${{ github.ref_name == 'main' }}
       run:  |
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ .\bin\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\32\libmysql.dll
     - name: Create pull request tag and upload files
+      if: ${{ github.ref_name == 'main' }}
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,12 +99,13 @@ jobs:
         path: bin64/SphereSvrX64_nightly
 
     # only if the branch is main
-    - if: ${{ github.ref_name == 'main' }}
     - name: Create folder
+      if: ${{ github.ref_name == 'main' }}
       run:  |
             mkdir accounts logs save scripts
             tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C ../src/ sphere.ini sphereCrypt.ini
     - name: Create pull request tag and upload files
+      if: ${{ github.ref_name == 'main' }}
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -136,12 +139,13 @@ jobs:
         path: bin/SphereSvrX32_nightly
     
     # only if the branch is main
-    - if: ${{ github.ref_name == 'main' }}
     - name: Zip files to upload
+      if: ${{ github.ref_name == 'main' }}
       run:  |
             mkdir accounts logs save scripts
             tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C ../src/ sphere.ini sphereCrypt.ini
     - name: Create pull request tag and upload files
+      if: ${{ github.ref_name == 'main' }}
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
