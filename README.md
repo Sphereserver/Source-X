@@ -1,9 +1,17 @@
-# SphereServer X version
-Game server for Ultima Online.
+# SphereServer X
+Ultima Online game server developed in C/C++
+<br>
+[![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
 <br>
 [![Build](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
+<br>
+[![GitHub issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
+[![GitHub repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
+[![GitHub stars](https://img.shields.io/github/stars/Sphereserver/Source-X?logo=github)](https://github.com/Sphereserver/Source-X/stargazers)
+
 
 ### Download automated builds
 <a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
