@@ -2,15 +2,14 @@ name: deploy
 
 on:
   workflow_run:
-    workflows: ["build"]
+    workflows: ["build", "windows-64"]
     types: [requested]
     branches: 
       - 'feature/**'
 
 jobs:
-  windows-64:
+  upload-windows-64:
     runs-on: windows-latest
-
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v3
@@ -29,7 +28,7 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-win64-nightly.zip
 
-  windows-32:
+  upload-windows-32:
     runs-on: windows-latest
 
     steps:
@@ -50,7 +49,7 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-win32-nightly.zip
 
-  linux-64:
+  upload-linux-64:
     runs-on: ubuntu-latest
 
     steps:
@@ -71,7 +70,7 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-linux64-nightly.tar.gz
 
-  linux-32:
+  upload-linux-32:
     runs-on: ubuntu-latest
 
     steps:
