@@ -1351,7 +1351,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_TIMERCALL:
-			_iTimerCall = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
+			_iTimerCall = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
 
 		case RC_TOOLTIPCACHE:
@@ -2065,7 +2065,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup ) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
-			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
+			sVal.FormatLLVal(_iTimerCall / MSECS_PER_SEC);
 			break;
 		case RC_VERSION:
 			sVal = g_sServerDescription.c_str();
