@@ -13,6 +13,7 @@ jobs:
   upload-windows-builds:
     runs-on: windows-latest
     steps:
+    - uses: actions/checkout@v2
     - name: Download win64 build
       uses: actions/download-artifact@v3
       env:
@@ -49,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
     - name: Download linux64 build
       uses: actions/download-artifact@v3
       env:
