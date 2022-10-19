@@ -37,7 +37,7 @@ Most notable changes (right now) are:
 ## Running
 
 ### Required libraries (Windows):
-* `libmysql.dll`: Placed on /DLLs/32/libmysql.dll for 32 bits builds or in /DLLs/64/libmysql.dll for 64 bits builds.
+* `libmysql.dll`: Placed on /dlls/32/libmysql.dll for 32 bits builds or in /dlls/64/libmysql.dll for 64 bits builds.
 * `dbghelp.dll`: Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
  so there is an old one (32 bits) in /dlls/dbghelp.dll.
 

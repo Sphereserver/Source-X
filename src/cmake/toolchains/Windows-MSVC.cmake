@@ -56,9 +56,9 @@ function (toolchain_after_project)
 	#-- Set mysql .lib directory for the linker.
 
 	IF (CMAKE_CL_64)
-		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
+		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/64/")
 	ELSE (CMAKE_CL_64)
-		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/32/")
+		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/32/")
 	ENDIF (CMAKE_CL_64)
 	
 endfunction()

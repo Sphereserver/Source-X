@@ -17,7 +17,7 @@ function (toolchain_after_project)
 	
 	ENABLE_LANGUAGE(RC)
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
+	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/64/")
 endfunction()
 
 
