@@ -1,6 +1,6 @@
 name: Pull request build
 
-on: [pull_request]
+on: [psuh, pull_request]
 
 jobs:
   windows-64:
@@ -19,15 +19,13 @@ jobs:
       run: |
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\64\libmysql.dll
-    - name: Create pull request tag and upload files
-      id: create_release
-      uses: softprops/action-gh-release@v1
+    - name: Upload artifact
+    - uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: PR-${{ github.ref_name }}
-          tag_name: PR-${{ github.ref_name }}
-          files: SphereSvrX-win64-nightly.zip
+        name: PR-${{ github.ref_name }}
+        path: SphereSvrX-win64-nightly.zip
 
   windows-32:
 
@@ -45,15 +43,13 @@ jobs:
       run:  |
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ .\bin\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\32\libmysql.dll
-    - name: Create pull request tag and upload files
-      id: create_release
-      uses: softprops/action-gh-release@v1
+    - name: Upload artifact
+    - uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: PR-${{ github.ref_name }}
-          tag_name: PR-${{ github.ref_name }}
-          files: SphereSvrX-win32-nightly.zip
+        name: PR-${{ github.ref_name }}
+        path: SphereSvrX-win32-nightly.zip
 
   linux-64:
 
@@ -74,15 +70,13 @@ jobs:
       run:  |
             mkdir accounts logs save scripts
             tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C ../src/ sphere.ini sphereCrypt.ini
-    - name: Create pull request tag and upload files
-      id: create_release
-      uses: softprops/action-gh-release@v1
+    - name: Upload artifact
+    - uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: PR-${{ github.ref_name }}
-          tag_name: PR-${{ github.ref_name }}
-          files: SphereSvrX-linux64-nightly.tar.gz
+        name: PR-${{ github.ref_name }}
+        path: SphereSvrX-linux64-nightly.tar.gz
 
   linux-32:
 
@@ -104,12 +98,10 @@ jobs:
       run:  |
             mkdir accounts logs save scripts
             tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C ../src/ sphere.ini sphereCrypt.ini
-    - name: Create pull request tag and upload files
-      id: create_release
-      uses: softprops/action-gh-release@v1
+    - name: Upload artifact
+    - uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-          name: PR-${{ github.ref_name }}
-          tag_name: PR-${{ github.ref_name }}
-          files: SphereSvrX-linux32-nightly.tar.gz
+        name: PR-${{ github.ref_name }}
+        path: SphereSvrX-linux32-nightly.tar.gz
