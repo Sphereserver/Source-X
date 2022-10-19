@@ -2,9 +2,10 @@ name: deploy
 
 on:
   workflow_run:
-    workflows: ["build"]
-    branches: ["*"]
-    types: [completed]
+    workflows: [build]
+    types: [requested]
+    branches: 
+      - 'feature/**'
 
 jobs:
   windows-64:
