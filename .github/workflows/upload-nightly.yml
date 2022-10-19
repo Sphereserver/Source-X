@@ -13,14 +13,11 @@ jobs:
   upload-windows-builds:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
     - name: Download win64 build
       uses: actions/download-artifact@v3
-      env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: ${{ github.sha }}
-        path: SphereSvrX-win64-nightly.zip
+
     - name: Create pull request tag and upload files
       uses: softprops/action-gh-release@v1
       env:
@@ -30,13 +27,6 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-win64-nightly.zip
 
-    - name: Download win32 build
-      uses: actions/download-artifact@v3
-      env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        name: ${{ github.sha }}
-        path: SphereSvrX-win32-nightly.zip
     - name: Create pull request tag and upload files
       uses: softprops/action-gh-release@v1
       env:
@@ -50,14 +40,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
     - name: Download linux64 build
       uses: actions/download-artifact@v3
-      env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: ${{ github.sha }}
-        path: SphereSvrX-linux64-nightly.tar.gz
+
     - name: Create pull request tag and upload files
       uses: softprops/action-gh-release@v1
       env:
@@ -67,13 +54,6 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-linux64-nightly.tar.gz
 
-    - name: Download linux32 build
-      uses: actions/download-artifact@v3
-      env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        name: ${{ github.sha }}
-        path: SphereSvrX-linux32-nightly.tar.gz
     - name: Create pull request tag and upload files
       uses: softprops/action-gh-release@v1
       env:
