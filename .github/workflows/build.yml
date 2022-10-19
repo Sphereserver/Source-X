@@ -2,6 +2,7 @@ name: Build
 
 on:
   - push
+  - pull_request
 
 jobs:
   windows-64:
@@ -27,12 +28,12 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: ${{ github.sha }}
+        name: Builds
         path: SphereSvrX-win64-nightly.zip
 
     # only create nightly release if the branch is main
     - name: Create pull request tag and upload files
-      if: ${{ github.ref_name == 'main' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name)
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,12 +65,12 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: ${{ github.sha }}
+        name: Builds
         path: SphereSvrX-win32-nightly.zip
 
     # only create nightly release if the branch is main
     - name: Create pull request tag and upload files
-      if: ${{ github.ref_name == 'main' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name)
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -104,12 +105,12 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: ${{ github.sha }}
+        name: Builds
         path: SphereSvrX-linux64-nightly.tar.gz
 
     # only create nightly release if the branch is main
     - name: Create pull request tag and upload files
-      if: ${{ github.ref_name == 'main' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name)
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -145,12 +146,12 @@ jobs:
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: ${{ github.sha }}
+        name: Builds
         path: SphereSvrX-linux32-nightly.tar.gz
     
     # only create nightly release if the branch is main
     - name: Create pull request tag and upload files
-      if: ${{ github.ref_name == 'main' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name)
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
