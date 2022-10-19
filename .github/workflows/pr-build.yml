@@ -20,7 +20,7 @@ jobs:
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\64\libmysql.dll
     - name: Upload artifact
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -44,7 +44,7 @@ jobs:
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ .\bin\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\32\libmysql.dll
     - name: Upload artifact
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -71,7 +71,7 @@ jobs:
             mkdir accounts logs save scripts
             tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C ../src/ sphere.ini sphereCrypt.ini
     - name: Upload artifact
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -99,7 +99,7 @@ jobs:
             mkdir accounts logs save scripts
             tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C ../src/ sphere.ini sphereCrypt.ini
     - name: Upload artifact
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
