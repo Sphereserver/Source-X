@@ -10,10 +10,10 @@ on:
       - main
 
 jobs:
-  upload-windows-64:
+  upload-windows-builds:
     runs-on: windows-latest
     steps:
-    - name: Download artifact
+    - name: Download win64 build
       uses: actions/download-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -30,11 +30,7 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-win64-nightly.zip
 
-  upload-windows-32:
-    runs-on: windows-latest
-
-    steps:
-    - name: Download artifact
+    - name: Download win32 build
       uses: actions/download-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,11 +47,11 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-win32-nightly.zip
 
-  upload-linux-64:
+  upload-linux-build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download artifact
+    - name: Download linux64 build
       uses: actions/download-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,11 +68,7 @@ jobs:
           tag_name: Nightly
           files: SphereSvrX-linux64-nightly.tar.gz
 
-  upload-linux-32:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Download artifact
+    - name: Download linux32 build
       uses: actions/download-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
