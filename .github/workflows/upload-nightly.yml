@@ -21,7 +21,6 @@ jobs:
         name: ${{ github.sha }}
         path: SphereSvrX-win64-nightly.zip
     - name: Create pull request tag and upload files
-      id: create_release
       uses: softprops/action-gh-release@v1
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +37,6 @@ jobs:
         name: ${{ github.sha }}
         path: SphereSvrX-win32-nightly.zip
     - name: Create pull request tag and upload files
-      id: create_release
       uses: softprops/action-gh-release@v1
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,7 +57,6 @@ jobs:
         name: ${{ github.sha }}
         path: SphereSvrX-linux64-nightly.tar.gz
     - name: Create pull request tag and upload files
-      id: create_release
       uses: softprops/action-gh-release@v1
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +73,6 @@ jobs:
         name: ${{ github.sha }}
         path: SphereSvrX-linux32-nightly.tar.gz
     - name: Create pull request tag and upload files
-      id: create_release
       uses: softprops/action-gh-release@v1
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
