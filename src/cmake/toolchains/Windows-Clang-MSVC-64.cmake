@@ -67,7 +67,7 @@ function (toolchain_after_project)
 	
 	#-- Set .lib directory for the linker.
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
+	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/64/")
 	
 endfunction()
 
