@@ -1,9 +1,8 @@
-name: pr
+name: Upload pull request build
 
 on:
-  # the 1st condition
   workflow_run:
-    workflows: ["Build"]
+    workflows: [Build]
     types:
       - completed
 
