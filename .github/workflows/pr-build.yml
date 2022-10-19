@@ -1,8 +1,9 @@
-name: Upload pull request build
+name: deploy
 
 on:
   workflow_run:
-    workflows: [Build]
+    workflows: ["build"]
+    branches: ["*"]
     types: [completed]
 
 jobs:
