@@ -2,7 +2,7 @@ name: deploy
 
 on:
   workflow_run:
-    workflows: [build]
+    workflows: ["build"]
     types: [requested]
     branches: 
       - 'feature/**'
