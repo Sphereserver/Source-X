@@ -3,8 +3,7 @@ name: Upload pull request build
 on:
   workflow_run:
     workflows: [Build]
-    types:
-      - completed
+    types: [completed]
 
 jobs:
   windows-64:
