@@ -16,6 +16,9 @@
 /logs/
 /save/
 /web/
+/CMakeFiles/
+/spheresvr.dir/
+
 
 *.vs
 *.pid
@@ -29,6 +32,13 @@
 *.obj
 *.exe
 *.vcxproj.*
+
+# Ignore some files in the parent folder
+/*.cmake
+/*.vcx*
+/*.sln
+/*.sln
+CMakeCache.txt
 
 # Ignore git versioning file
 /src/common/version/GitRevision.h
