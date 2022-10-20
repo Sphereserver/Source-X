@@ -3047,3 +3047,8 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Spell interrupt not working if trigger @SpellInterrupt was not used.
 - Fixed: Spell flag SPELLFLAG_FREEZEONCAST no working because of high values. Update your defs. (Issue #897)
 - Fixed: Mounts not dismounting when they died. (Issue #906)
+
+
+20-10-2022, Tolokio
+-Fixed returning animation not being played when using throwing weapons.
+-Fixed butte to works with any sfk_ranged weapon. not only crossbow or bows.
