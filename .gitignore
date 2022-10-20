@@ -1,4 +1,45 @@
-# Ignore all files, except those already included on git repository
-/*
+# Ignore folder and files
+/bin
+/bin64
+/Debug
+/Release
+/Nightly
+/backup/
+/.git/
+/.vscode/
+/x64/
+/x86/
+/obj/
+/build/
+/mul
+/accounts/
+/logs/
+/save/
+/web/
+/CMakeFiles/
+/spheresvr.dir/
+
+
+*.vs
+*.pid
+
+# Ignore files
+*.bak
+*.log
+*.old
+*.tmp
+*.o
+*.obj
+*.exe
+*.vcxproj.*
+
+# Ignore some files in the parent folder
+/*.cmake
+/*.vcx*
+/*.sln
+/*.sln
+CMakeCache.txt
+
+# Ignore git versioning file
 /src/common/version/GitRevision.h
 /src/common/libev/config.h

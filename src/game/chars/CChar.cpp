@@ -4509,6 +4509,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_UNEQUIP:	// uid
 			return ItemBounce( CUID::ItemFindFromUID(s.GetArgVal()) );
+		case CHV_WAKE:
+			Wake();
+			break;
 		case CHV_WHERE:
 			if ( pCharSrc )
 			{

@@ -852,13 +852,16 @@ effect_bounce:
 
 		if ( iDisturbChance > Calc_GetRandVal(1000) )
 		{
+			bool bInterrupt = true;
 			if (IsTrigUsed(TRIGGER_SPELLINTERRUPT))
 			{
 				CScriptTriggerArgs ArgsInterrupt(m_atMagery.m_iSpell, iDisturbChance);
-				if (pSrc->OnTrigger(CTRIG_SpellInterrupt, this, &ArgsInterrupt) != TRIGRET_RET_TRUE)
-					Skill_Fail();
+				if (pSrc->OnTrigger(CTRIG_SpellInterrupt, this, &ArgsInterrupt) == TRIGRET_RET_TRUE)
+					bInterrupt = false;
 			}
 
+			if (bInterrupt)
+				Skill_Fail();
 		}
 	}
 

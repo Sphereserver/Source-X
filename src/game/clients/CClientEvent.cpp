@@ -1536,6 +1536,9 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 				pContExtra->ContentAdd(pItem);
 			else
 				pItem->Delete();
+			
+			if ( IsSetOF(OF_VendorStockLimit) )
+				pItemSell->ConsumeAmount(pItem->GetAmount());
 		}
 		else
 		{
@@ -1546,6 +1549,9 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 				pContExtra->ContentAdd(pItemNew);
 			}
 			pItem->SetAmountUpdate( pItem->GetAmount() - amount );
+
+			if (IsSetOF(OF_VendorStockLimit))
+				pItemSell->ConsumeAmount(amount);
 		}
 	}
 
