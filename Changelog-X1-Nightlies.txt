@@ -2983,7 +2983,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 		 If the EFFECT field is not defined in the SKILL block, Sphere will use the default value (but you can still override it with ACTIONEFFECT).
 		 Notes: Only positive numbers are accepted, if ACTIONEFFECT is set to a value less than 0 Sphere will use the default value of the skill.
 				ACTIONEFFECT has, by default, no effect in @UseQuick/@SkillUseQuick triggers
-- Added: ARGN2 in trigger @Start/@SkillStart, this allow to override/read the DELAY  value from the skill definition (how much time it takes for the skill to be completed).
+- Added: ARGN2 in trigger @PreStart/@SkillPreStart, this allow to override/read the DELAY  value from the skill definition (how much time it takes for the skill to be completed).
 		
 26-07-2022, Drk84
 - Fixed: Wrong calculation in Magic Resistance check.
