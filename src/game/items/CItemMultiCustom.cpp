@@ -713,7 +713,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
             case 0:
                 // at ground level, clients can only remove components along the bottom edge (stairs)
                 if (pt.m_y != rectDesign.m_bottom)
-                    fAllowRemove = false;
+                    //fAllowRemove = false;
         }
 
         if (fAllowRemove == false)
