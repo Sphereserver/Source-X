@@ -9,7 +9,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: CMake 
@@ -23,7 +24,7 @@ jobs:
 
     # only upload artifact is pull request
     - name: Upload artifact
-      if: ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -31,22 +32,12 @@ jobs:
         name: Builds
         path: SphereSvrX-win64-nightly.zip
 
-    # only create nightly release if the branch is main
-    - name: Create pull request tag and upload files
-      if: contains(fromJson('["master", "main"]'), github.ref_name)
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          name: Nightly
-          tag_name: Nightly
-          files: SphereSvrX-win64-nightly.zip
-
   windows-32:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: CMake 
@@ -60,7 +51,7 @@ jobs:
 
     # only upload artifact is pull request
     - name: Upload artifact
-      if: ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,22 +59,12 @@ jobs:
         name: Builds
         path: SphereSvrX-win32-nightly.zip
 
-    # only create nightly release if the branch is main
-    - name: Create pull request tag and upload files
-      if: contains(fromJson('["master", "main"]'), github.ref_name)
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          name: Nightly
-          tag_name: Nightly
-          files: SphereSvrX-win32-nightly.zip
-
   linux-64:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
     - name: Install prerequisites
       run:  |
             lsb_release -d
@@ -100,7 +81,7 @@ jobs:
 
     # only upload artifact is pull request
     - name: Upload artifact
-      if: ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -108,22 +89,12 @@ jobs:
         name: Builds
         path: SphereSvrX-linux64-nightly.tar.gz
 
-    # only create nightly release if the branch is main
-    - name: Create pull request tag and upload files
-      if: contains(fromJson('["master", "main"]'), github.ref_name)
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          name: Nightly
-          tag_name: Nightly
-          files: SphereSvrX-linux64-nightly.tar.gz
-
   linux-32:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
     - name: Install prerequisites
       run:  |
             lsb_release -d
@@ -141,21 +112,40 @@ jobs:
 
     # only upload artifact is pull request
     - name: Upload artifact
-      if: ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
         path: SphereSvrX-linux32-nightly.tar.gz
-    
-    # only create nightly release if the branch is main
-    - name: Create pull request tag and upload files
-      if: contains(fromJson('["master", "main"]'), github.ref_name)
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
+
+  upload:
+    needs: [windows-64, windows-32, linux-32, linux-64]
+    if: contains(fromJson('["master", "main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download builds
+        uses: actions/download-artifact@v3
+        with:
+          name: Builds
+      - name: Generate changelog
+        run: git log --pretty=format:"%ad %an %s" --date=short > Changelog.txt
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
           name: Nightly
           tag_name: Nightly
-          files: SphereSvrX-linux32-nightly.tar.gz
+          prerelease: true
+          files: | 
+                  Changelog.txt
+                  SphereSvrX-win64-nightly.zip
+                  SphereSvrX-win32-nightly.zip
+                  SphereSvrX-linux32-nightly.tar.gz
+                  SphereSvrX-linux64-nightly.tar.gz
