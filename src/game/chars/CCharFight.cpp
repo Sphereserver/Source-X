@@ -1263,8 +1263,8 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 	}
 	else if ( m_pNPC && !CanSee(pCharTarg) )
 	{
-		Attacker_Delete(pCharTarg, true, ATTACKER_CLEAR_DISTANCE);
-		Skill_Start(SKILL_NONE);
+		Fight_Clear(pCharTarg);
+		//Skill_Start(SKILL_NONE);
 		return false;
 	}	
 
