@@ -5940,50 +5940,54 @@ void CItem::_GoAwake()
 
 void CItem::_GoSleep()
 {
-	ADDTOCALLSTACK("CItem::_GoSleep");
-	CObjBase::_GoSleep();
+    ADDTOCALLSTACK("CItem::_GoSleep");
+    CObjBase::_GoSleep();
 
-	// Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
-	if (IsTopLevel())
-	{
-		CWorldTickingList::DelObjStatusUpdate(this, false);
-	}
+    // Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
+    if (IsTopLevel())
+    {
+        CWorldTickingList::DelObjStatusUpdate(this, false);
+    }
 }
 
 bool CItem::_OnTick()
 {
-	ADDTOCALLSTACK("CItem::_OnTick");
-	// Timer expired. Time to do something.
-	// RETURN: false = delete it.
+    ADDTOCALLSTACK("CItem::_OnTick");
+    // Timer expired. Time to do something.
+    // RETURN: false = delete it.
 
-	EXC_TRY("Tick");
+    EXC_TRY("Tick");
 
     EXC_SET_BLOCK("sleep check");
 
-	const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
+    const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
     if (pSector && pSector->IsSleeping())
     {
-		//Make it tick after sector's awakening.
-		if (!_IsSleeping())
-		{
-			_GoSleep();
-		}
-		_SetTimeout(1);
+        if (IsAttr(ATTR_DECAY))
+        {
+            return false; //Item on ground with attr Decay don't fall asleep and decay in sleeping sector
+        }
+        //Make it tick after sector's awakening.
+        if (!_IsSleeping())
+        {
+            _GoSleep();
+        }
+        _SetTimeout(1);
         return true;
     }
 
 
     EXC_SET_BLOCK("timer trigger");
-	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
-	if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))
-	{
-		iRet = OnTrigger( ITRIG_TIMER, &g_Serv );
+    if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))
+    {
+        iRet = OnTrigger( ITRIG_TIMER, &g_Serv );
         if (iRet == TRIGRET_RET_TRUE)
         {
             return true;
         }
-	}
+    }
 
     EXC_SET_BLOCK("components ticking");
 

@@ -1211,6 +1211,7 @@ enum CTRIG_TYPE : short
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.
+    CTRIG_SendPaperdoll,// Server send my paperdoll info to someone
 
 	// SKTRIG_QTY
 	CTRIG_SkillAbort,       // SKTRIG_ABORT

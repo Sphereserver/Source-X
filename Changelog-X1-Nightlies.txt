@@ -2676,7 +2676,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		
 		Example:
 		[TYPEDEF t_corpse]
-		ON=@CorpseCarve
+		ON=@CarveCorpse
 		FOR 0 <eval <argn1> - 1>
 			serv.log resource obtained <serv.itemdef.<local.resource.<dlocal._for>.ID>.name> - Amount: <local.resource.<dlocal._for>.amount>
 			if (<src.forensics> >= 900) && (<argo.baseid> == i_dagger)
@@ -3036,6 +3036,15 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Moving multis now will add components as first priority to avoid dropping them. (Issue #821)
 - Changed: Skills with SKF_GATHER, @Start/@SkillStart, now ACT is the Worldgem Bit we're gathering from.
 
+09-09-2022, Jhobean
+- Added: @SendPaperdoll There 3 ways (Dclick a player, use client macro or use the context menu) to open a paperdoll and requesting the paperdoll packet (0x88). 
+		 All 3 method will initiate the trigger on the player doing the action. This trigger could be use to modify some aspect of paperdoll on custom client or 
+		 to detect someone looking your paperdoll.
+			SRC = The player asking to open the paperdoll
+			i = The player concerned in the information packet 
+- Changed: All item with attr_decay flag will be able to tick on sleeping sector. This will avoid to have useless item stuck at TIMER=0 on sleeping sector.
+		   Item was awake when player entering the sector and sometime player had time to see it before it dissapear. (issue #846)
+
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake"
 
@@ -3052,6 +3061,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 20-10-2022, Tolokio
 -Fixed returning animation not being played when using throwing weapons.
 -Fixed butte to works with any sfk_ranged weapon. not only crossbow or bows.
+
 
 
 21-10-2022, Tolokio
