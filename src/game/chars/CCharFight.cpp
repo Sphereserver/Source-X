@@ -284,7 +284,11 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 
 	bool fFightActive = Fight_IsActive();
 	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY);
-
+	if ( m_pNPC)
+	{
+		if (Skill_GetActive() == NPCACT_RIDDEN) //prevent action 111 to be changed.
+			return;
+	}
 	if (fFightActive && m_Fight_Targ_UID.CharFind())
 	{
 		// In war mode already
