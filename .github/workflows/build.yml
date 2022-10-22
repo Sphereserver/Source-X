@@ -1,0 +1,151 @@
+name: Build
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  windows-64:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: CMake 
+      run: cmake -G "Visual Studio 17 2022" src/
+    - name: MSBuild
+      run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
+    - name: Create folders
+      run: |
+            mkdir accounts, logs, save, scripts
+            7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\64\libmysql.dll
+
+    # only upload artifact in pull request or if is main/master branch
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v3
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Builds
+        path: SphereSvrX-win64-nightly.zip
+
+  windows-32:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: CMake 
+      run: cmake -G "Visual Studio 17 2022" -A Win32 src/
+    - name: MSBuild
+      run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
+    - name: Create folders
+      run:  |
+            mkdir accounts, logs, save, scripts
+            7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ .\bin\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\32\libmysql.dll
+
+    # only upload artifact in pull request or if is main/master branch
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v3
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Builds
+        path: SphereSvrX-win32-nightly.zip
+
+  linux-64:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Install prerequisites
+      run:  |
+            lsb_release -d
+            gcc --version
+            cmake --version
+    - name: CMake
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
+    - name: Make
+      run: make -j4
+    - name: Create folder
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C ../src/ sphere.ini sphereCrypt.ini
+
+    # only upload artifact in pull request or if is main/master branch
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v3
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Builds
+        path: SphereSvrX-linux64-nightly.tar.gz
+
+  linux-32:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Install prerequisites
+      run:  |
+            lsb_release -d
+            sudo sudo dpkg --add-architecture i386 && sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib default-libmysqlclient-dev:i386 libmysqlclient-dev:i386
+            gcc --version
+            cmake --version
+    - name: CMake
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
+    - name: Make
+      run: make -j4
+    - name: Zip files to upload
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C ../src/ sphere.ini sphereCrypt.ini
+
+    # only upload artifact in pull request or if is main/master branch
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v3
+      env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Builds
+        path: SphereSvrX-linux32-nightly.tar.gz
+
+  upload:
+    needs: [windows-64, windows-32, linux-32, linux-64]
+    if: contains(fromJson('["master", "main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download builds
+        uses: actions/download-artifact@v3
+        with:
+          name: Builds
+      - name: Generate changelog
+        run: git log --pretty=format:"%ad %an %s" --date=short > Changelog.txt
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Nightly
+          tag_name: Nightly
+          prerelease: true
+          files: | 
+                  Changelog.txt
+                  SphereSvrX-win64-nightly.zip
+                  SphereSvrX-win32-nightly.zip
+                  SphereSvrX-linux32-nightly.tar.gz
+                  SphereSvrX-linux64-nightly.tar.gz

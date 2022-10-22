@@ -4611,7 +4611,13 @@ bool CChar::OnTickPeriodic()
         {
             StatFlag_Clear(STATF_FLY);
         }
-
+	// Show returning anim for thowing weapons after throw it
+	if ((pClient->m_timeLastSkillThrowing > 0) && ((iTimeCur - pClient->m_timeLastSkillThrowing) > (2 * MSECS_PER_TENTH)))
+	{
+		pClient->m_timeLastSkillThrowing = 0;
+		if (pClient->m_pSkillThrowingTarg->IsValidUID())
+			Effect(EFFECT_BOLT, pClient->m_SkillThrowingAnimID, pClient->m_pSkillThrowingTarg, 18, 1, false, pClient->m_SkillThrowingAnimHue, pClient->m_SkillThrowingAnimRender);
+	}
         // Check targeting timeout, if set
         if ((pClient->m_Targ_Timeout > 0) && ((iTimeCur - pClient->m_Targ_Timeout) > 0) )
         {
