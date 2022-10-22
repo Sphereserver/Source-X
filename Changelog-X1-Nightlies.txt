@@ -3055,3 +3055,6 @@ Note: The only way the server has to know if the bankself is closed is to store 
 20-10-2022, Tolokio
 -Fixed returning animation not being played when using throwing weapons.
 -Fixed butte to works with any sfk_ranged weapon. not only crossbow or bows.
+
+18-10-2022, Raylde/Jhobean
+[sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall
