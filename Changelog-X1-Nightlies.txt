@@ -3049,7 +3049,11 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Mounts not dismounting when they died. (Issue #906)
 
 
-11-10-2022, Tolokio
+20-10-2022, Tolokio
+-Fixed returning animation not being played when using throwing weapons.
+-Fixed butte to works with any sfk_ranged weapon. not only crossbow or bows.
+
+21-10-2022, Tolokio
 -Fix: Mounts stopping ticks if harmed by any char while being ridden (because lost of statf_ridden)
 -Fix: Mounts creating corpse at wrong place if killed while being mounted.
 -Fix: Mount losing statf_ridden while being ridden if mount get released.
