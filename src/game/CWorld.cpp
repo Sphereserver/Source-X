@@ -1756,7 +1756,7 @@ void CWorld::_OnTick()
 		{
 			EXC_SET_BLOCK("f_onserver_timer");
 			_iTimeLastCallUserFunc = iCurTime + g_Cfg._iTimerCall;
-			CScriptTriggerArgs args(g_Cfg._iTimerCall / (60 * MSECS_PER_SEC));
+			CScriptTriggerArgs args(g_Cfg._iTimerCallUnit ? g_Cfg._iTimerCall / (MSECS_PER_SEC) : g_Cfg._iTimerCall / (60 * MSECS_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
 	}

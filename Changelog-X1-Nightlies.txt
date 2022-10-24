@@ -3078,4 +3078,5 @@ Notes:
 		Where msg is 0/1 sending default sysmessages or not, the following args (up to 9 more) is/are the players to add to this party.
 		Note that by using PARTY.CREATE the player will be forced to enter the party, so you need to add your own "acceptance system".
 		
-		
+24-10-2022, Raylde/Jhobean
+[sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall
