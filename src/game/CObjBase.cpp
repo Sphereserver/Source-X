@@ -3119,33 +3119,34 @@ void CObjBase::_GoSleep()
 
 bool CObjBase::_CanTick() const
 {
-	EXC_TRY("Can tick?");
+    EXC_TRY("Can tick?");
 
-	// Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
-	bool fCanTick = !CTimedObject::_IsSleeping();
+    // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
+    bool fCanTick = !CTimedObject::_IsSleeping();
 
-	if (fCanTick)
-	{
-		if (const CSObjCont* pParent = GetParent())
-		{
-			const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
-			// The parent can be another CObjBase or even a Sector -> Do not use CTimedObject* ?
-			if (pObjParent && !pObjParent->CanTick())	// It calls the virtuals obviously
-				fCanTick = false;
-		}
-	}
+    if (fCanTick)
+    {
+        if (const CSObjCont* pParent = GetParent())
+        {
+            const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
+            // The parent can be another CObjBase or even a Sector -> Do not use CTimedObject* ?
+            if (pObjParent && !pObjParent->CanTick())	// It calls the virtuals obviously
+                fCanTick = false;
+        }
+    }
 
-	if (!fCanTick)
-	{
-		// Try to call the Can method the less often possible.
-		fCanTick = Can(CAN_O_NOSLEEP);
-	}
+    if (!fCanTick)
+    {
+        // Try to call the Can method the less often possible.
+        // Item having a decay flag should be able to tick even in a sleeping sector
+        fCanTick = Can(CAN_O_NOSLEEP) || ATTR_DECAY;
+    }
 
-	return fCanTick;
+    return fCanTick;
 
-	EXC_CATCH;
+    EXC_CATCH;
 
-	return false;
+    return false;
 }
 
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)

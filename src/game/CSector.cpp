@@ -200,7 +200,9 @@ void CSector::_GoSleep()
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		const bool fSleeping = pItem->IsSleeping();
         if (!fSleeping)
-			pItem->GoSleep();
+        {
+            pItem->GoSleep();
+        }	
     }
 }
 
