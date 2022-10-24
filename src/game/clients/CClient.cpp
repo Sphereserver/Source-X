@@ -495,7 +495,7 @@ bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 								continue;
 							if (!pChar->IsClientActive())
 								continue;
-							CPartyDef::AcceptEvent(pChar, pChar->GetUID(), true, fSendMsgs);
+							CPartyDef::AcceptEvent(pChar, pCharThis->GetUID(), true, fSendMsgs);
 
 							if (*ptcKey == '\0')
 								break;
