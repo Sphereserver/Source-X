@@ -3042,11 +3042,9 @@ Note: The only way the server has to know if the bankself is closed is to store 
 		 to detect someone looking your paperdoll.
 			SRC = The player asking to open the paperdoll
 			i = The player concerned in the information packet 
-- Changed: All item with attr_decay flag will be able to tick on sleeping sector. This will avoid to have useless item stuck at TIMER=0 on sleeping sector.
-		   Item was awake when player entering the sector and sometime player had time to see it before it dissapear. (issue #846)
 
 19-09-2022, Tolokio
--Added: Wake() is now avaible to be used by script using command: "wake"
+-Added: Wake() is now avaible to be used by script using command: "wake". Wake function require to wake a sleeping NPC (death corpse and invisible body)
 
 09-10-2022, Julian
 [sphereCrypt.ini]: Added crypt key for classic client 7.0.97 and enhanced client 4.0.97
@@ -3058,7 +3056,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Mounts not dismounting when they died. (Issue #906)
 
 20-10-2022, Tolokio
-- Fixed returning animation not being played when using throwing weapons.
+- Fixed returning animation not being played when using throwing weapons. (Issue #461)
 - Fixed butte to works now with throwing plus bows and xbows. (Raylde)
 
 21-10-2022, Tolokio
@@ -3078,4 +3076,5 @@ Notes:
 		Where msg is 0/1 sending default sysmessages or not, the following args (up to 9 more) is/are the players to add to this party.
 		Note that by using PARTY.CREATE the player will be forced to enter the party, so you need to add your own "acceptance system".
 		
-		
+24-10-2022, Raylde/Jhobean
+[sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall

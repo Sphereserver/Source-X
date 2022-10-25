@@ -264,6 +264,7 @@ CServerConfig::CServerConfig()
     _iItemHitpointsUpdate   = 10 * MSECS_PER_SEC;       // Delay to send hitpoints update packet for items.
 
 	_iTimerCall			= 0;
+	_iTimerCallUnit		= 0;
 	m_bAllowLightOverride	= true;
 	m_bAllowNewbTransfer	= false;
 	m_sZeroPoint			= "1323,1624,0";
@@ -658,7 +659,8 @@ enum RC_TYPE
 	RC_TELEPORTSOUNDSTAFF,		// m_iSpell_Teleport_Sound_Staff
 	RC_TELNETLOG,				// m_fTelnetLog
     RC_TICKPERIOD,
-	RC_TIMERCALL,				// m_iTimerCall
+	RC_TIMERCALL,				// _iTimerCall
+	RC_TIMERCALLUNIT,			// _iTimerCallUnit
 	RC_TIMEUP,
 	RC_TOOLTIPCACHE,			// m_iTooltipCache
 	RC_TOOLTIPMODE,				// m_iTooltipMode
@@ -923,6 +925,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "TELNETLOG",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fTelnetLog)			}},
     { "TICKPERIOD",				{ ELEM_INT,	    0			                                    }},
 	{ "TIMERCALL",				{ ELEM_INT,		OFFSETOF(CServerConfig,_iTimerCall)				}},
+	{ "TIMERCALLUNIT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,_iTimerCallUnit)			}},
 	{ "TIMEUP",					{ ELEM_VOID,	0												}},
 	{ "TOOLTIPCACHE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipCache)			}},
 	{ "TOOLTIPMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipMode)			}},
@@ -1350,8 +1353,15 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			//PrintEFOFFlags(false, true);
 			break;
 
+		case RC_TIMERCALLUNIT:
+			_iTimerCallUnit = s.GetArgVal();
+			break;
+
 		case RC_TIMERCALL:
-			_iTimerCall = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
+			if (_iTimerCallUnit)
+				_iTimerCall = s.GetArgLLVal() *  MSECS_PER_SEC;
+			else  
+				_iTimerCall = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
 		case RC_TOOLTIPCACHE:
@@ -2065,7 +2075,10 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( g_World._iTimeStartup ) / MSECS_PER_SEC );
 			break;
 		case RC_TIMERCALL:
-			sVal.FormatLLVal(_iTimerCall / (60*MSECS_PER_SEC));
+			if (_iTimerCallUnit)
+				sVal.FormatLLVal(_iTimerCall / MSECS_PER_SEC);
+			else
+				sVal.FormatLLVal(_iTimerCall / 60 * MSECS_PER_SEC);
 			break;
 		case RC_VERSION:
 			sVal = g_sServerDescription.c_str();
