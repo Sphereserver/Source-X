@@ -3138,8 +3138,7 @@ bool CObjBase::_CanTick() const
     if (!fCanTick)
     {
         // Try to call the Can method the less often possible.
-        // Item having a decay flag should be able to tick even in a sleeping sector
-        fCanTick = Can(CAN_O_NOSLEEP) || ATTR_DECAY;
+	    fCanTick = Can(CAN_O_NOSLEEP) ;
     }
 
     return fCanTick;
