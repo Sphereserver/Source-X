@@ -7,7 +7,7 @@
 
 
 CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
-    _profileType(profile), _fIsSleeping(true), _iTimeout(0)
+    _iTimeout(0), _profileType(profile), _fIsSleeping(true)
 {
 }
 
