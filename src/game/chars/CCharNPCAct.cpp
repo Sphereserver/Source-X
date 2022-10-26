@@ -1283,7 +1283,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	if (pChar == nullptr)
 	{
 		// free to do as i wish !
-		Skill_Start(SKILL_NONE);
+		//Skill_Start(SKILL_NONE);
 		return false;
 	}
 
