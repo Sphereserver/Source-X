@@ -739,8 +739,11 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	// Search for suitable book in hands first
 	CItem* pReturn = nullptr;
 	CItem* pItem = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
-	if (pItem && pItem->IsTypeSpellbook() )
+    CItem* pItem2 = LayerFind(LAYER_HAND2);
+    if (pItem && pItem->IsTypeSpellbook() || (pItem2 && pItem2->IsTypeSpellbook()) )
     {
+        if (pItem2 && pItem2->IsTypeSpellbook())
+            pItem = pItem2;
 		const CItemBase *pItemDef = pItem->Item_GetDef();
 		const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 		const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
