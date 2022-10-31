@@ -652,6 +652,17 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 				if ( m_Targ_Text.IsEmpty())
 				{
+					if (pItem->IsTypeMulti())
+					{
+						CItemMulti* pMulti = static_cast<CItemMulti*>(pItem);
+						CChar* pOwner = pMulti->GetOwner().CharFind();
+						if (pOwner)
+						{
+							CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+							if (pMultiStorage)
+								pMultiStorage->DelMulti(pMulti->GetUID());
+						}
+					}
 					pItem->Delete();
 				}
 				else
