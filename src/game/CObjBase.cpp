@@ -2395,6 +2395,21 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			return pClientSrc->addGumpDialogProps( GetUID() );
 		case OV_REMOVE:	//remove this object now.
 			EXC_SET_BLOCK("REMOVE");
+			if (IsItem())
+			{
+				CItem* pItem = static_cast <CItem*>(this);
+				if (pItem->IsTypeMulti())
+				{
+					CItemMulti* pMulti = static_cast<CItemMulti*>(this);
+					CChar* pOwner = pMulti->GetOwner().CharFind();
+					if (pOwner)
+					{
+						CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+						if (pMultiStorage)
+							pMultiStorage->DelMulti(pMulti->GetUID());
+					}
+				}
+			}
 			Delete();
             break;
 		case OV_REMOVEFROMVIEW:
