@@ -3078,3 +3078,6 @@ Notes:
 		
 24-10-2022, Raylde/Jhobean
 [sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall
+
+24-10-2022, Tolokio
+Fix: "remove" and "nuke" not working well on multis
