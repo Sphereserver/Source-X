@@ -3080,5 +3080,5 @@ Notes:
 [sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall
 
 30-10-2022, Tolokio/Jhobean
-- Added:  On Some freeshard it's possible to wear a spellbook in left hand (layer2). Now the book can be use in the hand instead of backpack only.
+- Fixed:  On Some freeshard it's possible to wear a spellbook in left hand (layer2). Now the book can be use in the hand instead of backpack only. (Issue #951)
 

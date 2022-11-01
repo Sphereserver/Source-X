@@ -738,13 +738,9 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	// Search for suitable book in hands first
 	CItem* pReturn = nullptr;
-	CItem* pItem = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
-	CItem* pItem2 = LayerFind(LAYER_HAND2);
-	if (pItem && pItem->IsTypeSpellbook() || (pItem2 && pItem2->IsTypeSpellbook()) )
+	CItem* pItem = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hand layer 1.
+	if (pItem && pItem->IsTypeSpellbook())
 	{
-		if (pItem2 && pItem2->IsTypeSpellbook())
-			pItem = pItem2;
-
 		const CItemBase *pItemDef = pItem->Item_GetDef();
 		const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 		const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
@@ -756,6 +752,21 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 		    	pReturn = pItem;
 		}
     }
+
+	pItem = LayerFind(LAYER_HAND2); // on custom freeshard, it's possible to have book on layer 2
+	if ((pItem && pItem->IsTypeSpellbook()))
+	{
+		const CItemBase* pItemDef = pItem->Item_GetDef();
+		const SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+		const SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+		if ((iSpell > min) && (iSpell <= max)) //Had to replace < with <= otherwise the spell would not be considered a valid one.
+		{
+			if (pItem->IsSpellInBook(iSpell))	//We found a book with this same spell, nothing more to do.
+				return pItem;
+			else // I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
+				pReturn = pItem;
+		}
+	}
 
 	// No book found or found one which doesn't have the spell I am going to cast, then let's search in the top level of the backpack.
 	CItemContainer *pPack = GetPack();
