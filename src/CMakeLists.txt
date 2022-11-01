@@ -6,6 +6,8 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
 MESSAGE (STATUS "Scanning system for compilers...")
 PROJECT (SphereServer)	# does a scan for C++ and C compilers
 
+# Supress the ZERO_CHECK generation
+set(CMAKE_SUPPRESS_REGENERATION true)
 
 # If we have not specified a toolchain, let's detect which one we should use
 IF (NOT TOOLCHAIN)

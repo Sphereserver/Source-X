@@ -1,10 +1,21 @@
-# SphereServer X version
-Game server for Ultima Online.
+# SphereServer X
+Ultima Online game server developed in C/C++
 <br>
+[![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
+<br>
+[![Build](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
-<br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
+<br>
+[![GitHub issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
+[![GitHub repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
+[![GitHub stars](https://img.shields.io/github/stars/Sphereserver/Source-X?logo=github)](https://github.com/Sphereserver/Source-X/stargazers)
 
+
+### Download automated builds
+<a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
+<br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Sphereserver Web</a>
 
 ### Join SphereServer Discord channel!
 https://discord.gg/ZrMTXrs
@@ -18,13 +29,13 @@ https://github.com/Sphereserver/Scripts-X
 
 
 ### Coming from a different SphereServer version?
-* From 0.56d? <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">Here</a> a list of major scripting changes!
-* From an older 0.56 version? <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
+* From 0.56d? <a href="docs/Porting%20from%200.56%20to%20X.txt">Here</a> a list of major scripting changes!
+* From an older 0.56 version? <a href="docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
 
 
 ## Why a fork?
 This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.<br>
-Though, something has changed script-wise, so we suggest to take a look <a href="https://github.com/Sphereserver/Source-X/blob/master/docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
+Though, something has changed script-wise, so we suggest to take a look <a href="docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
 * Support for 64 bits architecture and MinGW compiler for Windows;
@@ -37,7 +48,7 @@ Most notable changes (right now) are:
 ## Running
 
 ### Required libraries (Windows):
-* `libmysql.dll`: Placed on /DLLs/32/libmysql.dll for 32 bits builds or in /DLLs/64/libmysql.dll for 64 bits builds.
+* `libmysql.dll`: Placed on /dlls/32/libmysql.dll for 32 bits builds or in /dlls/64/libmysql.dll for 64 bits builds.
 * `dbghelp.dll`: Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
  so there is an old one (32 bits) in /dlls/dbghelp.dll.
 
