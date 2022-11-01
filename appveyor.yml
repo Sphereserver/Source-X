@@ -80,7 +80,11 @@ for:
       - IF DEFINED APPVEYOR_PULL_REQUEST_NUMBER (appveyor exit)
 
       - ECHO ** Compilation done. Packing the files and uploading to SphereCommunity
-      - mkdir accounts logs save scripts
+      - mkdir accounts logs save
+      - echo && echo "** Geting Sphere X scripts pack." && echo
+      - curl https://github.com/Sphereserver/Scripts-X/archive/refs/heads/main.zip -L -o scriptspack.zip
+      - 7z x scriptspack.zip
+      - rename Scripts-X-main scripts
       - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\libmysql.dll"
       - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\libmysql.dll"
       - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win32-nightly.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
@@ -159,6 +163,10 @@ for:
         fi
       - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo
       - mkdir accounts logs save scripts
+      - echo && echo "** Geting Sphere X scripts pack." && echo
+      - curl https://github.com/Sphereserver/Scripts-X/archive/refs/heads/main.zip -L -o scriptspack.zip
+      - unzip scriptspack.zip
+      - mv ./Scripts-X-main ./scripts
       - tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
       - tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
       - curl -sST "{SphereSvrX-linux64-nightly.tar.gz,SphereSvrX-linux32-nightly.tar.gz}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
