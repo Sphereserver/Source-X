@@ -562,7 +562,7 @@ SOURCE_GROUP (tables FILES ${tables_SRCS})
 
 # Misc doc and *.ini files
 SET (docs_TEXT
-../Changelog-X1-Nightlies.txt
+../Changelog.txt
 sphere.ini
 sphereCrypt.ini
 )
