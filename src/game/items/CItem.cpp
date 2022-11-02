@@ -189,6 +189,19 @@ void CItem::DeleteCleanup(bool fForce)
 		}
 	}
 
+	//check if it is multi and clear player's list.
+	if (IsTypeMulti())
+	{
+		CItemMulti* pMulti = static_cast<CItemMulti*>(this);
+		CChar* pOwner = pMulti->GetOwner().CharFind();
+		if (pOwner)
+		{
+			CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+			if (pMultiStorage)
+				pMultiStorage->DelMulti(pMulti->GetUID());
+		}
+	}
+
 	switch ( m_type )
 	{
 		case IT_FIGURINE:
