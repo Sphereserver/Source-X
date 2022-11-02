@@ -3056,14 +3056,14 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Fixed: Mounts not dismounting when they died. (Issue #906)
 
 20-10-2022, Tolokio
-- Fixed returning animation not being played when using throwing weapons. (Issue #461)
-- Fixed butte to works now with throwing plus bows and xbows. (Raylde)
+- Fixed: returning animation not being played when using throwing weapons. (Issue #461)
+- Fixed: butte to works now with throwing plus bows and xbows. (Raylde)
 
 21-10-2022, Tolokio
-- Fix: Mounts stopping ticks if harmed by any char while being ridden (because lost of statf_ridden)
-- Fix: Mounts creating corpse at wrong place if killed while being mounted.
-- Fix: Mount losing statf_ridden while being ridden if mount get released.
-- Fix: Mount being duplicated after corpse is created. (Leather farm exploit)
+- Fixed: Mounts stopping ticks if harmed by any char while being ridden (because lost of statf_ridden)
+- Fixed: Mounts creating corpse at wrong place if killed while being mounted.
+- Fixed: Mount losing statf_ridden while being ridden if mount get released.
+- Fixed: Mount being duplicated after corpse is created. (Leather farm exploit)
 Notes:
  Fixes also denies mount trying to fight back while mounted and denies pet desserting if owner harms it while being ridden.
  There is a known issue where deathanimation is not played on mount when it dies while being ridden. It just appear dead on the floor.
@@ -3071,10 +3071,14 @@ Notes:
  There can be issues related to attackers listing but none found yet.
 
 22-10-2022, Drk84
--Fixed: PARTY.CREATE would make the invited player inviting himself..
+- Fixed: PARTY.CREATE would make the invited player inviting himself..
 		The command syntaxis: PARTY.CREATE msg,uid(s).
 		Where msg is 0/1 sending default sysmessages or not, the following args (up to 9 more) is/are the players to add to this party.
 		Note that by using PARTY.CREATE the player will be forced to enter the party, so you need to add your own "acceptance system".
 		
 24-10-2022, Raylde/Jhobean
 [sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall
+
+30-10-2022, Tolokio/Jhobean
+- Fixed:  On Some freeshard it's possible to wear a spellbook in left hand (layer2). Now the book can be use in the hand instead of backpack only. (Issue #951)
+
