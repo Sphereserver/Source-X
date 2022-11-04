@@ -3082,3 +3082,5 @@ Notes:
 30-10-2022, Tolokio/Jhobean
 - Fixed:  On Some freeshard it's possible to wear a spellbook in left hand (layer2). Now the book can be use in the hand instead of backpack only. (Issue #951)
 
+04-11-2022, Drk84
+- Fixed: LowerManaCost property didn't work properly. (Issue #949)
