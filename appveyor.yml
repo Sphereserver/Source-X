@@ -200,3 +200,4 @@ for:
       - curl -sST "{SphereSvrX-osx64-nightly.zip}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
     artifacts:
       - path: SphereSvrX-osx64-nightly.zip
+      
