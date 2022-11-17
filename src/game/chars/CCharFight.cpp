@@ -768,13 +768,15 @@ effect_bounce:
     if (IsSetCombatFlags(COMBAT_SLAYER))
     {
 		CItem *pWeapon = nullptr;
-		if (uType & DAMAGE_MAGIC)	// If the damage is magic
+		if (uType & DAMAGE_MAGIC)	// If the damage is magic, we are probably using a spell or a weapon that causes also magical damage.
 		{
-			pWeapon = pSrc->LayerFind(LAYER_HAND1);	// Search for an equipped spellbook
-			if ((pWeapon) && (!pWeapon->IsTypeSpellbook()))	// If there is nothing on the hand, or the item is not a spellbook.
-			{
+			pWeapon = pSrc->GetSpellbookLayer();	// Search for an equipped spellbook
+			if ( !pWeapon ) //No spellbook, so it's a weapon causing magical damage.
 				pWeapon = pSrc->m_uidWeapon.ItemFind();	// then force a weapon find.
-			}
+		}
+		else //Other types of damage.
+		{
+			pWeapon = pSrc->m_uidWeapon.ItemFind();	//  force a weapon find.
 		}
         int iDmgBonus = 1;
         const CCFaction *pSlayer = nullptr;

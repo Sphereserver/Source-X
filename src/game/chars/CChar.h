@@ -558,6 +558,7 @@ public:
 	int GetWeightLoadPercent( int iWeight ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
+	CItem * GetSpellbookLayer() const; //Search for a Spellbook in layer 1 or 2.
 	CItemContainer * GetPack() const;
 	CItemContainer * GetBank( LAYER_TYPE layer = LAYER_BANKBOX );
 	CItemContainer * GetPackSafe();

@@ -3084,3 +3084,8 @@ Notes:
 
 04-11-2022, Drk84
 - Fixed: LowerManaCost property didn't work properly. (Issue #949)
+
+17-11-2022, Drk84
+- Fixed: Faction & Slayer system -> bonus damage looks like not working. (Issue #964)
+- Fixed: The SLAYER property will also be looked upon in a Spellbook on LAYER 2. (Issue #965)
+- Added: In the source added method GetSpellbookLayer for retrieving a Spellbook in LAYER 1 or LAYER 2.
