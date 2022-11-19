@@ -4687,6 +4687,7 @@ bool CItem::Armor_IsRepairable() const
 	switch ( m_type )
 	{
 		case IT_CLOTHING:
+		case IT_ARMOR_BONE:
 		case IT_ARMOR_LEATHER:
 			return false;	// Not this way anyhow.
 		case IT_SHIELD:

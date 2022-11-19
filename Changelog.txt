@@ -3089,3 +3089,9 @@ Notes:
 - Fixed: Faction & Slayer system -> bonus damage looks like not working. (Issue #964)
 - Fixed: The SLAYER property will also be looked upon in a Spellbook on LAYER 2. (Issue #965)
 - Added: In the source added method GetSpellbookLayer for retrieving a Spellbook in LAYER 1 or LAYER 2.
+
+19-11-2022, Drk84
+- Changed: AR (the old armour value) property can be displayed up to 65k. (Issue #968)
+- Changed: The DAM property (for both characters and weapons) can be displayed up to 65k. (Issue #967)
+- Added: t_armor_bone typedef (value 305). If you want to use it you need to add it in the core/defs_types_hardcoded.scp file under the typedef section. (Issue #890)
+		
