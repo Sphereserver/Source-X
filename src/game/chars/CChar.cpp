@@ -342,8 +342,8 @@ CChar::~CChar()
         m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
-    Guild_Resign(MEMORY_GUILD);
-    Guild_Resign(MEMORY_TOWN);
+    //Guild_Resign(MEMORY_GUILD); Moved to the ClearPlayer method otherwise it will cause a server crash because the deleted player will still be found in the guild list.
+    //Guild_Resign(MEMORY_TOWN);  Moved to the ClearPlayer method otherwise it will cause a server crash because the deleted player will still be found in the guild list.
     Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
     if (m_pNPC)
         NPC_PetClearOwners();	// Clear follower slots on pet owner
@@ -563,7 +563,8 @@ void CChar::ClearPlayer()
 
 		pAccount->DetachChar(this);	// unlink me from my account.
 	}
-    
+	Guild_Resign(MEMORY_GUILD);
+	Guild_Resign(MEMORY_TOWN);
     delete m_pPlayer;
     m_pPlayer = nullptr;
 }

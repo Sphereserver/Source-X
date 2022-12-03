@@ -3095,3 +3095,6 @@ Notes:
 - Changed: The DAM property (for both characters and weapons) can be displayed up to 65k. (Issue #967)
 - Added: t_armor_bone typedef (value 305). If you want to use it you need to add it in the core/defs_types_hardcoded.scp file under the typedef section. (Issue #890)
 		
+03-12-2022, Drk84
+03-12-2022, Drk84
+- Fix: Deleting a player while it's in a guild cause the server to crash. (Issue #971).
