@@ -292,7 +292,7 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 4) // AOS attributes
 	{
-        if (fElemental)
+        if (fElemental || g_Cfg.m_fDisplayElementalResistance)
         {
             writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIRE, pBaseCCPChar));
             writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESCOLD, pBaseCCPChar));
@@ -314,7 +314,7 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 
 	if (version >= 6)	// SA attributes
 	{
-        if (fElemental)
+        if (fElemental || g_Cfg.m_fDisplayElementalResistance)
         {
             writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESPHYSICALMAX, pBaseCCPChar));
             writeInt16((word)other->GetPropNum(pCCPChar,     PROPCH_RESFIREMAX, pBaseCCPChar));

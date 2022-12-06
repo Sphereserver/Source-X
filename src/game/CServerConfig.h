@@ -348,8 +348,9 @@ public:
 	int  m_iSkillPracticeMax;		// max skill level a player can practice on dummies/targets upto.
 	bool m_iPacketDeathAnimation;	// packet 02c
     bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the % 
-
-	// Flags for controlling pvp/pvm behaviour of players
+    bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.
+	
+    // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
 	uint m_iRacialFlags;   // racial traits flags
