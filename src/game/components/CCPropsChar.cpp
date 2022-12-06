@@ -145,7 +145,7 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
         {
             // This should be used in case items with these properties updates the character in the moment without any script to make status reflect the update.
             // Maybe too a cliver check to not send update if not needed.
-            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) || g_Cfg.m_fDisplayElementalResistance)
             {
                 CChar * pChar = static_cast <CChar*>(pLinkedObj);
                 pChar->UpdateStatsFlag();
