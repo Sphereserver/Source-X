@@ -3105,3 +3105,4 @@ Notes:
 
 07-12-2022, Tolokio/Jhobean/Drk84
 - Fixed: Possible fix for houses | ships removing keeps them stuck in totalcount without UID. (Issue #895)
+- Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948) 
