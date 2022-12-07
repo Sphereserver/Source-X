@@ -3938,7 +3938,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 		return false;
 
 	CClient *pClient = GetClientActive();
-	if ( m_pPlayer && !pClient )	// moving a logged out client !
+	if ( m_pPlayer && !pClient )	// moving a logged out client ! This happens on startup and when moving on a ship and when summoning disconnected characters.
 	{
 		CSector *pSector = pt.GetSector();
 		if ( !pSector )
@@ -3946,8 +3946,9 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 
 		// We cannot put this char in non-disconnect state.
 		//SetDisconnected(pSector); //I think it's not necessary anymore here.
+
         SetTopPoint(pt); // This will clear the disconnected flag.
-		pSector->m_Chars_Active.AddCharActive(this); //We add back the character to the sector, otherwise it seems it starts to get crazy.
+		pSector->m_Chars_Active.AddCharActive(this); //After the disconnectted flag is removed we need to add back the character to the sector, otherwise things starts to get crazy.
 		SetDisconnected(pSector); //We remove it from the sector and add set the flag UID_O_DISCONNECT
 		return true;
 	}
