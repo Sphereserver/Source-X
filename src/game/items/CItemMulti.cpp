@@ -132,7 +132,17 @@ CItemMulti::~CItemMulti()
 
 bool CItemMulti::Delete(bool fForce)
 {
+  
     RemoveAllComponents();
+    
+    const CChar* pOwner = GetOwner().CharFind();
+    if (pOwner && pOwner->m_pPlayer) // If pOwner is null it means we are redeeming the multi or we manually added a multi. In the first case DelMulti is already called in the Redeed multi method.
+    {
+        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
+        if (pMultiStorage)
+            pMultiStorage->DelMulti(GetUID());
+    }
+   
     return CObjBase::Delete(fForce);
 }
 
@@ -3525,7 +3535,7 @@ void CMultiStorage::DelHouse(const CUID& uidHouse)
     {
         return;
     }
-
+   
     if (_lHouses.find(uidHouse) != _lHouses.end())
     {
         const CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
