@@ -1211,11 +1211,6 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         {
             TransferMovingCrateToBank();
         }
-        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
-        if (pMultiStorage)
-        {
-            pMultiStorage->DelMulti(GetUID());
-        }
     }
     if (tRet == TRIGRET_RET_TRUE)
     {
