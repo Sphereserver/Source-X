@@ -3945,8 +3945,10 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 			return false;
 
 		// We cannot put this char in non-disconnect state.
-		SetDisconnected(pSector);
-        SetTopPoint(pt);
+		//SetDisconnected(pSector); //I think it's not necessary anymore here.
+        SetTopPoint(pt); // This will clear the disconnected flag.
+		pSector->m_Chars_Active.AddCharActive(this); //We add back the character to the sector, otherwise it seems it starts to get crazy.
+		SetDisconnected(pSector); //We remove it from the sector and add set the flag UID_O_DISCONNECT
 		return true;
 	}
 
