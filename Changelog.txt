@@ -3106,4 +3106,5 @@ Notes:
 07-12-2022, Tolokio/Jhobean/Drk84
 - Fixed: Possible fix for houses | ships removing keeps them stuck in totalcount without UID. (Issue #895)
 - Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948)
-- Fix: Removed no longer needed code.
+- Fix: Removed no longer needed / duplicated code.
+- Fix: At @redeed, return 1 no longer avoid house deletion. (Redeed can be prevented by script at house dialog, so there is no need of this feature. Also wiki says return 1 just prevent deed creation, not house deletion.)
