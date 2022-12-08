@@ -1215,7 +1215,6 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     if (tRet == TRIGRET_RET_TRUE)
     {
         pDeed->Delete();
-        return;
     }
 
 	pDeed->SetHue(GetHue());
