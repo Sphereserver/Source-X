@@ -1216,7 +1216,8 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     {
         pDeed->Delete();
     }
-
+    if (pDeed)
+    {
 	pDeed->SetHue(GetHue());
 	pDeed->m_itDeed.m_Type = GetID();
 	if (m_Attr & ATTR_MAGIC)
@@ -1231,7 +1232,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
 	{
 		pOwner->ItemBounce(pDeed, fDisplayMsg);
 	}
-
+    }
     SetKeyNum("REMOVED", 1);
     Delete();
 }
