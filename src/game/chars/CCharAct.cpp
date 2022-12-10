@@ -3440,7 +3440,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				if ( IsTrigUsed(TRIGGER_PERSONALSPACE2) )
 				{
 					CScriptTriggerArgs Args(uiStamReq);
-					iRet = this->OnTrigger(CTRIG_PersonalSpace, pChar, &Args);
+					iRet = this->OnTrigger(CTRIG_PersonalSpace2, pChar, &Args);
 					if ( iRet == TRIGRET_RET_TRUE )
 						return nullptr;
                 			uiStamReq = (ushort)(Args.m_iN1);
