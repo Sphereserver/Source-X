@@ -3427,13 +3427,24 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				uiStamReq = 0;
 
 			TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-			if ( IsTrigUsed(TRIGGER_PERSONALSPACE) && (!fPathFinding)) //You want avoid to trig the trigger if it's only a pathfinding evaluation
+			if (!fPathFinding)  //You want avoid to trig the triggers if it's only a pathfinding evaluation
 			{
-				CScriptTriggerArgs Args(uiStamReq);
-				iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
-				if ( iRet == TRIGRET_RET_TRUE )
-					return nullptr;
-                uiStamReq = (ushort)(Args.m_iN1);
+				if ( IsTrigUsed(TRIGGER_PERSONALSPACE) ) 
+				{
+					CScriptTriggerArgs Args(uiStamReq);
+					iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
+					if ( iRet == TRIGRET_RET_TRUE )
+						return nullptr;
+                			uiStamReq = (ushort)(Args.m_iN1);
+				}
+				if ( IsTrigUsed(TRIGGER_PERSONALSPACE2) )
+				{
+					CScriptTriggerArgs Args(uiStamReq);
+					iRet = this->OnTrigger(CTRIG_PersonalSpace, pChar, &Args);
+					if ( iRet == TRIGRET_RET_TRUE )
+						return nullptr;
+                			uiStamReq = (ushort)(Args.m_iN1);
+				}
 			}
 
 
