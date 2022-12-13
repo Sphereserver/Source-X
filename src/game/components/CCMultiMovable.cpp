@@ -555,6 +555,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
     // Reorient everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
     size_t iCount = ListObjs(ppObjs);
+  
     for (size_t i = 0; i < iCount; ++i)
     {
         CObjBase *pObj = ppObjs[i];
@@ -609,7 +610,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
                 }
             }
 
-            if (IsTrigUsed(TRIGGER_SHIPTURN))
+            if (IsTrigUsed(TRIGGER_SHIP_TURN))
             {
                 CScriptTriggerArgs Args(dir, sm_FaceDir[iFaceOffset]);
                 pItem->OnTrigger(ITRIG_Ship_Turn, &g_Serv, &Args);
