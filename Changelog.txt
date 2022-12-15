@@ -3109,3 +3109,6 @@ Notes:
 
 13-12-2022, Drk84
 Fixed: @Ship_Turn not firing, this trigger will fire on a T_SHIP item and for every item on the deck. (Issue #981)
+
+15-12-2022, Drk84
+Fixed(Maybe): Fix for Attack speed exploit with COMBAT_FIRSTHIT_INSTANT. (Issue #790)
