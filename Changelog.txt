@@ -3112,3 +3112,6 @@ Fixed: @Ship_Turn not firing, this trigger will fire on a T_SHIP item and for ev
 
 15-12-2022, Drk84
 Fixed(Maybe): Fix for Attack speed exploit with COMBAT_FIRSTHIT_INSTANT. (Issue #790)
+
+24-12-2022, Drk84
+Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Issue #988)
