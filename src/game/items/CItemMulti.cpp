@@ -143,7 +143,8 @@ bool CItemMulti::Delete(bool fForce)
             pMultiStorage->DelMulti(GetUID());
     }
    
-    return CObjBase::Delete(fForce);
+    //return CObjBase::Delete(fForce);
+    return CItem::Delete(fForce);
 }
 
 const CItemBaseMulti * CItemMulti::Multi_GetDef() const noexcept

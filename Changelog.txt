@@ -3106,3 +3106,12 @@ Notes:
 07-12-2022, Tolokio/Jhobean/Drk84
 - Fixed: Possible fix for houses | ships removing keeps them stuck in totalcount without UID. (Issue #895)
 - Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948) 
+
+13-12-2022, Drk84
+Fixed: @Ship_Turn not firing, this trigger will fire on a T_SHIP item and for every item on the deck. (Issue #981)
+
+15-12-2022, Drk84
+Fixed(Maybe): Fix for Attack speed exploit with COMBAT_FIRSTHIT_INSTANT. (Issue #790)
+
+24-12-2022, Drk84
+Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Issue #988)
