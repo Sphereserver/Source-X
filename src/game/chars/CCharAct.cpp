@@ -3437,10 +3437,10 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 						return nullptr;
                 			uiStamReq = (ushort)(Args.m_iN1);
 				}
-				if ( IsTrigUsed(TRIGGER_PERSONALSPACE2) )
+				if ( IsTrigUsed(TRIGGER_SHOVE) )
 				{
 					CScriptTriggerArgs Args(uiStamReq);
-					iRet = this->OnTrigger(CTRIG_PersonalSpace2, pChar, &Args);
+					iRet = this->OnTrigger(CTRIG_Shove, pChar, &Args);
 					if ( iRet == TRIGRET_RET_TRUE )
 						return nullptr;
                 			uiStamReq = (ushort)(Args.m_iN1);
