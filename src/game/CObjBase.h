@@ -1196,7 +1196,6 @@ enum CTRIG_TYPE : short
 
     CTRIG_PayGold,          // I'm going to give out money for a service (Skill Training, hiring...).
 	CTRIG_PersonalSpace,	// i just got stepped on by other char.
-	CTRIG_PersonalSpace2,	// i just stepped on other char.
 	CTRIG_PetDesert,        // I'm deserting from my owner ( starving, being hit by him ...).
 	CTRIG_Profile,			// someone hit the profile button for me.
 	CTRIG_ReceiveItem,		// I was just handed an item (Not yet checked if i want it).
@@ -1212,7 +1211,8 @@ enum CTRIG_TYPE : short
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.
-    CTRIG_SendPaperdoll,// Server send my paperdoll info to someone
+	CTRIG_SendPaperdoll,// Server send my paperdoll info to someone
+	CTRIG_Shove,        // i just stepped on a char.
 
 	// SKTRIG_QTY
 	CTRIG_SkillAbort,       // SKTRIG_ABORT
