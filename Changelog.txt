@@ -3115,3 +3115,17 @@ Fixed(Maybe): Fix for Attack speed exploit with COMBAT_FIRSTHIT_INSTANT. (Issue 
 
 24-12-2022, Drk84
 Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Issue #988)
+
+29-12-2022, canerksk
+- Added: Added @SHIP_STOP and @SHIP_MOVE trigger:
+		Under ship multidef or under multidef defined event/type @Ship_Stop trigger will be triggered when you stop your ship. So you can check whether the ship is going or not.
+		Example script;
+		on=@Ship_Stop (UID/I = Ship)
+		TAG0.SHIPMOVE=
+		
+		Accordingly, the ship is still under multidef.
+		on=@Ship_Move (UID/I = Ship, ARGN1 = Move Direction)
+		TAG0.SHIPMOVE=1 // or <ARGN1>
+		
+		You can check whether the ship is in motion or not. In addition, in @Ship_Move trigger, the direction of the ship is sent to the trigger as <ARGN1>.
+		@Ship_Move trigger is only triggered on successful ship movements. It will not trigger if the ship is stuck somewhere.
