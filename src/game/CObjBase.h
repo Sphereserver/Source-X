@@ -1043,6 +1043,8 @@ enum ITRIG_TYPE
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
 	ITRIG_Sell,                 // I'm being sold.
+	ITRIG_Ship_Move,            // I'm a ship and i'm move around.
+    ITRIG_Ship_Stop,            // I'm a ship and i'm stop around.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
     ITRIG_Smelt,                // I'm going to be smelt.
     ITRIG_Spawn,                // This spawn is going to generate something.
