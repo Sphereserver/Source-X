@@ -539,6 +539,7 @@ enum RC_TYPE
 	RC_GUARDSONMURDERERS,
 	RC_GUESTSMAX,
 	RC_GUILDS,
+	RC_MULTIS,
 	RC_HEARALL,
 	RC_HELPINGCRIMINALSISACRIME,// m_fHelpingCriminalsIsACrime
 	RC_HITPOINTPERCENTONREZ,	// m_iHitpointPercentOnRez
@@ -805,6 +806,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsOnMurderers)	}},
 	{ "GUESTSMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuestsMax)			}},
 	{ "GUILDS",					{ ELEM_VOID,	0												}},
+	{ "MULTIS",					{ ELEM_VOID,	0												}},
 	{ "HEARALL",				{ ELEM_VOID,	0												}},
 	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime)	}},
 	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitpointPercentOnRez) }},
@@ -1658,6 +1660,67 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			return false;
 		}
 
+		if (!strnicmp(ptcKey, "MULTIS.", 7))
+		{
+			bool bMulti = !strnicmp(ptcKey, "MULTIS.", 7);
+			lpctstr pszCmd = ptcKey + 7;
+			CItemMulti* pMulti = nullptr;
+			size_t x = 0;
+
+			if (!strnicmp(pszCmd, "COUNT", 5))
+			{
+				for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
+				{
+					pMulti = g_World.m_Multis[i];
+					if (pMulti == nullptr)
+						continue;
+
+					if ((pMulti->GetType() == IT_MULTI) && bMulti)
+						++x;
+					else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && !bMulti)
+						++x;
+					else if ((pMulti->GetType() == IT_SHIP) && !bMulti)
+						++x;
+				}
+
+				sVal.FormatSTVal(x);
+				return true;
+			}
+
+			size_t iNumber = Exp_GetVal(pszCmd);
+			SKIP_SEPARATORS(pszCmd);
+			sVal.FormatVal(0);
+
+			for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
+			{
+				pMulti = g_World.m_Multis[i];
+				if (pMulti == nullptr)
+					continue;
+
+				if ((pMulti->GetType() == IT_MULTI) && bMulti)
+				{
+					if (iNumber == x)
+						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
+					++x;
+				}
+				else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && !bMulti)
+				{
+					if (iNumber == x)
+						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
+					++x;
+				}
+				else if ((pMulti->GetType() == IT_SHIP) && !bMulti)
+				{
+					if (iNumber == x)
+						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
+					++x;
+				}
+			}
+
+			return true;
+		}
+
+
 		if (!strnicmp( ptcKey, "FUNCTIONS.", 10))
 		{
 			lpctstr pszCmd = ptcKey + 10;
@@ -2070,6 +2133,9 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_GUILDS:
 			sVal.FormatSTVal(g_World.m_Stones.size());
+			break;
+		case RC_MULTIS:
+			sVal.FormatSTVal(g_World.m_Multis.size());
 			break;
         case RC_TICKPERIOD:
             sVal.FormatVal( TICKS_PER_SEC );

@@ -4,6 +4,7 @@
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CServer.h"
+#include "../CWorld.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItemMulti.h"
@@ -26,6 +27,7 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :  
     m_pRegion = nullptr;
 
     _iHouseType = HOUSE_PRIVATE;
+    g_World.m_Multis.emplace_back(this);
     _iMultiCount = pItemBase->_iMultiCount;
 
     _uiBaseStorage = pItemBase->_iBaseStorage;
@@ -54,7 +56,7 @@ CItemMulti::~CItemMulti()
     {
         SetOwner(CUID());
     }
-
+    g_World.m_Multis.RemovePtr(this);
     RemoveAllKeys();
     if (!_lCoowners.empty())
     {
