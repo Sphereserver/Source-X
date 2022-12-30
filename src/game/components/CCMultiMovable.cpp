@@ -842,6 +842,12 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_STOPPED), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
         return false;
     }
+	
+	if (IsTrigUsed(TRIGGER_SHIP_MOVE))
+    {
+        CScriptTriggerArgs Args(dir, fStopped);
+        pItemThis->OnTrigger(ITRIG_Ship_Move, &g_Serv, &Args);
+    }
 
     return true;
 }
@@ -888,6 +894,13 @@ void CCMultiMovable::Stop()
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
     pItemThis->m_itShip._eMovementType = SMT_STOP;
+	
+	if (IsTrigUsed(TRIGGER_SHIP_STOP))
+    {
+        CScriptTriggerArgs Args(pItemThis);
+        pItemThis->OnTrigger(ITRIG_Ship_Stop, &g_Serv, &Args);
+    }
+	
     _pCaptain = nullptr;
 }
 
