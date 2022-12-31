@@ -3136,5 +3136,5 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		 It pratically returns the damage range shown in the character status panel.
 		 Example:
 		 ON=@Hit
-		 argn1 = <R<damadjusted>> //This recalculates the full damage includind the various bonus if any.
+		 argn1 = <R<damadjusted>> //This recalculates the full damage including the various bonus if any.
 		  
