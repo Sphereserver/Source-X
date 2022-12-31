@@ -3129,3 +3129,12 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		
 		You can check whether the ship is in motion or not. In addition, in @Ship_Move trigger, the direction of the ship is sent to the trigger as <ARGN1>.
 		@Ship_Move trigger is only triggered on successful ship movements. It will not trigger if the ship is stuck somewhere.
+		
+31-12-2022, Drk84
+- Added: New command DIRMOVE for ships, read only, returns the direction (0..8) where the ship is going. (Issue #993)
+- Added: New command DAMADJUSTED, read only, return the damage range including the various modifier (like CombatBonusStat, tactics bonus if enabled etc). 
+		 It pratically returns the damage range shown in the character status panel.
+		 Example:
+		 ON=@Hit
+		 argn1 = <R<damadjusted>> //This recalculates the full damage including the various bonus if any.
+		  

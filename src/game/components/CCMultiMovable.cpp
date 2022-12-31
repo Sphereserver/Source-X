@@ -1257,6 +1257,7 @@ enum CML_TYPE
 {
     CML_ANCHOR,
     CML_DIRFACE,
+    CML_DIRMOVE,
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
@@ -1267,6 +1268,7 @@ lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
     "ANCHOR",
     "DIRFACE",
+    "DIRMOVE",
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
@@ -1293,6 +1295,9 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             break;
         case CML_DIRFACE:
             sVal.FormatBVal(pItemThis->m_itShip.m_DirFace);
+            break;
+        case CML_DIRMOVE:
+            sVal.FormatBVal(pItemThis->m_itShip.m_DirMove);
             break;
         case CML_PILOT:
         {

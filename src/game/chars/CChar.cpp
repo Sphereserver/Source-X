@@ -2911,6 +2911,12 @@ do_default:
 		case CHC_CREATE:
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );  // Displayed in Tenths of Second.
 			break;
+		case CHC_DAMADJUSTED:
+		{
+			CItem *pWeapon = m_uidWeapon.ItemFind();
+			sVal.Format("%d,%d", Fight_CalcDamage(pWeapon, true, false), Fight_CalcDamage(pWeapon, true, true));
+		}
+			break;
 		case CHC_DIR:
 			{
 				ptcKey +=3;
