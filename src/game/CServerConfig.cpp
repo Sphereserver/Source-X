@@ -1677,9 +1677,9 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 					if ((pMulti->GetType() == IT_MULTI) && bMulti)
 						++x;
-					else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && !bMulti)
+					else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && bMulti)
 						++x;
-					else if ((pMulti->GetType() == IT_SHIP) && !bMulti)
+					else if ((pMulti->GetType() == IT_SHIP) && bMulti)
 						++x;
 				}
 
