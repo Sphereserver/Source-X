@@ -3129,3 +3129,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		
 		You can check whether the ship is in motion or not. In addition, in @Ship_Move trigger, the direction of the ship is sent to the trigger as <ARGN1>.
 		@Ship_Move trigger is only triggered on successful ship movements. It will not trigger if the ship is stuck somewhere.
+		
+31-12-2022, canerksk
+-Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
