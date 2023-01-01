@@ -1206,13 +1206,14 @@ void CChar::Fight_ClearAll()
 		m_Fight_Targ_UID.InitUID();
 	}
 	
-    	Attacker_Clear();
+    Attacker_Clear();
 	m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
 	m_atFight.m_iRecoilDelay = 0;
 	m_atFight.m_iSwingAnimationDelay = 0;
 	m_atFight.m_iSwingAnimation = 0;
 	m_atFight.m_iSwingIgnoreLastHitTag = 0;
 
+	SetKeyStr("LastHit", "");
 	StatFlag_Clear(STATF_WAR);
 	UpdateModeFlag();
 }
@@ -1393,7 +1394,7 @@ void CChar::Fight_HitTry()
             if (iIH_LastHitTag_InstaHit > iIH_LastHitTag_FullHit_Prev)
             {
                 fIH_LastHitTag_Newer = true;
-                if (fIH_ShouldInstaHit)
+                if (fIH_ShouldInstaHit && !iIH_LastHitTag_FullHit_Prev)
                 {
                     // First hit with FirstHit_Instant -> no recoil, only the minimum swing animation delay
                     m_atFight.m_iSwingIgnoreLastHitTag = 1;

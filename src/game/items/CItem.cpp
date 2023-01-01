@@ -76,6 +76,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@RegionEnter",
     "@RegionLeave",
 	"@SELL",
+	"@Ship_Move",
+	"@Ship_Stop",
 	"@Ship_Turn",
 	"@Smelt",			// I am going to be smelted.
 	"@Spawn",

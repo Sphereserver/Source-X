@@ -60,7 +60,7 @@ jobs:
         path: SphereSvrX-win32-nightly.zip
 
   linux-64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout repository
@@ -90,7 +90,7 @@ jobs:
         path: SphereSvrX-linux64-nightly.tar.gz
 
   linux-32:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout repository
