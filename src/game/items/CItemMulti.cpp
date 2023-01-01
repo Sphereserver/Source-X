@@ -1212,18 +1212,13 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         {
             TransferMovingCrateToBank();
         }
-        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
-        if (pMultiStorage)
-        {
-            pMultiStorage->DelMulti(GetUID());
-        }
     }
     if (tRet == TRIGRET_RET_TRUE)
     {
         pDeed->Delete();
-        return;
     }
-
+    if (pDeed)
+    {
 	pDeed->SetHue(GetHue());
 	pDeed->m_itDeed.m_Type = GetID();
 	if (m_Attr & ATTR_MAGIC)
@@ -1238,7 +1233,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
 	{
 		pOwner->ItemBounce(pDeed, fDisplayMsg);
 	}
-
+    }
     SetKeyNum("REMOVED", 1);
     Delete();
 }
