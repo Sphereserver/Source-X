@@ -197,7 +197,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
     // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
     uchar iRandSpell = (uchar)(Calc_GetRandVal2(0, iSpellCount - 1)); //Spells are being stored using a vector, so it's assumed to be zero-based.
-    bool bSpellSuccess = false, bWandUse = false;
+    bool bSpellSuccess = false, bWandUse = false, bIgnoreAITargetChoice = false;
+    int iHealTreshold = g_Cfg.m_iNPCHealtreshold;
+
     if (pWand && Calc_GetRandVal(100) < 50)
     {
         bWandUse = true;
@@ -206,7 +208,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     while( iRandSpell < iSpellCount || bWandUse )
     {
         SPELL_TYPE spell = SPELL_NONE;
-
+       
         if (!bWandUse)
             spell = m_pNPC->Spells_GetAt(iRandSpell);
         else
@@ -217,18 +219,24 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         if (IsTrigUsed(TRIGGER_NPCACTCAST))
         {
             CScriptTriggerArgs Args((int)spell, (int)bWandUse, pTarg);
+            Args.m_VarsLocal.SetNum("HealTreshold", iHealTreshold);
+
             switch (OnTrigger(CTRIG_NPCActCast, this, &Args))
             {
             case TRIGRET_RET_TRUE: return false;
             default: break;
             }
             spell = (SPELL_TYPE)Args.m_iN1;
+            iHealTreshold = (int)Args.m_VarsLocal.GetKeyNum("HealTreshold");
             CObjBase* pNewTarg = Args.m_VarObjs.Get(1); //We switch to a new targ if REF1 is set in the trigger.
             if (pNewTarg)
+            {
                 pTarg = pNewTarg;
+                bIgnoreAITargetChoice = true;
+            }
         }
 
-        if (NPC_FightCast(pTarg, this, spell, skill))
+        if (NPC_FightCast(pTarg, this, spell, skill, iHealTreshold ,bIgnoreAITargetChoice))
         {
             bSpellSuccess = true;
             break;
@@ -260,7 +268,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 // I'm able to use magery
 // test if I can cast this spell
 // Specific behaviours for each spell and spellflag
-bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, int &skill)
+bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, int &skill, int iHealTreshold, bool bIgnoreAITargetChoice)
 {
     ADDTOCALLSTACK("CChar::NPC_FightCast");
     ASSERT(m_pNPC);
@@ -336,7 +344,8 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                 }
                 for (iFriendIndex = 0; iFriendIndex < 4; iFriendIndex++)
                 {
-                    pTarget = pFriend[iFriendIndex];
+                    if ( !bIgnoreAITargetChoice )
+                          pTarget = pFriend[iFriendIndex];
                     if (!pTarget)
                         break;
                     //	check if the target need that
@@ -345,11 +354,11 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         // Healing has the top priority?
                         case SPELL_Heal:
                         case SPELL_Great_Heal:
-                            if (pTarget->Stat_GetVal(STAT_STR) < pTarget->Stat_GetAdjusted(STAT_STR) / 3)
+                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealtreshold )
                                 bSpellSuits = true;
                             break;
                         case SPELL_Gift_of_Renewal:
-                            if (pTarget->Stat_GetVal(STAT_STR) < pTarget->Stat_GetAdjusted(STAT_STR) / 2)
+                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealtreshold)
                                 bSpellSuits = true;
                             break;
                             // Then curing poison.

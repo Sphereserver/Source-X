@@ -3099,7 +3099,7 @@ Notes:
 - Fix: Deleting a player while it's in a guild cause the server to crash. (Issue #971)
 
 06-12-2022, Drk84
-- [Sphere.ini] Added: New Sphere.ini settings "DisplayElementalResistance". (Issue #742) 
+- Added [Sphere.ini] : New Sphere.ini settings "DisplayElementalResistance". (Issue #742) 
 			   This setting allows to display the elemental resistances (Fire, Cold, Energy, Poison but not Physical) on status bar and tooltips, even if combat flag ELEMENTAL_ENGINE is disabled.
 			   Remember that the old AC(and MODAR) system will be used if ELEMENTAL_ENGINE flag is disabled.
 
@@ -3141,7 +3141,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		 ON=@Hit
 		 argn1 = <R<damadjusted>> //This recalculates the full damage including the various bonus if any.
 		
-01-12-2022, Drk84
+01-12-2023, Drk84
 - Added: New trigger @NpcActCast, this trigger is fired when an NPC is going to select which spell is going to cast.
 		 This triggers can fires multiple time if the NPC cannot cast the selected spell (for example because the spell has the SPELLFLAG_PLAYERONLY flag).
 		 So always make sure your casting NPCs has a proper spell selection, so try to avoid giving them full spellbooks because more than half spells in there has the SPELLFLAG_PLAYERONLY flag.
@@ -3157,3 +3157,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 			 Return 1: Interrupt spell selection.
 - Changed: If the NPC is wielding a wand, it has a 50% to use the wand instead of the a spell from the spellbook11. Remember that the wand must have the ATTR_MAGIC set.
 - Fixed: Bonus from CombatBonusStat, when the stat was above 100, was not properly applied when COMBAT_DAMAGEERA was set to 2 (AOS)    
+
+02-01-2023, Drk84
+- Added [Sphere.ini]: New Sphere.ini settings "NPCHealTreshold", this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
+- Added: New local "local.healtreshold" in the @NpcActCast trigger, this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
