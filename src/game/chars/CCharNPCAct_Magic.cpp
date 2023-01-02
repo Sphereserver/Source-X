@@ -227,7 +227,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
             default: break;
             }
             spell = (SPELL_TYPE)Args.m_iN1;
-            iHealThreshold = (int)Args.m_VarsLocal.GetKeyNum("HealTreshold");
+            iHealThreshold = (int)Args.m_VarsLocal.GetKeyNum("HealThreshold");
             CObjBase* pNewTarg = Args.m_VarObjs.Get(1); //We switch to a new targ if REF1 is set in the trigger.
             if (pNewTarg)
             {
@@ -268,7 +268,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 // I'm able to use magery
 // test if I can cast this spell
 // Specific behaviours for each spell and spellflag
-bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, int &skill, int iHealTreshold, bool bIgnoreAITargetChoice)
+bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, int &skill, int iHealThreshold, bool bIgnoreAITargetChoice)
 {
     ADDTOCALLSTACK("CChar::NPC_FightCast");
     ASSERT(m_pNPC);
@@ -354,11 +354,11 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         // Healing has the top priority?
                         case SPELL_Heal:
                         case SPELL_Great_Heal:
-                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealthreshold )
+                            if (pTarget->GetHealthPercent() < iHealThreshold )
                                 bSpellSuits = true;
                             break;
                         case SPELL_Gift_of_Renewal:
-                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealthreshold)
+                            if (pTarget->GetHealthPercent() < iHealThreshold)
                                 bSpellSuits = true;
                             break;
                             // Then curing poison.
