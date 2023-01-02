@@ -460,10 +460,11 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 int CChar::GetHealthPercent() const
 {
 	ADDTOCALLSTACK("CChar::GetHealthPercent");
-	ushort str = Stat_GetAdjusted(STAT_STR);
-	if ( !str )
+	ushort maxhits = Stat_GetMaxAdjusted(STAT_STR);
+	 
+	if ( !maxhits)
 		return 0;
-	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);
+	return IMulDiv(Stat_GetVal(STAT_STR), 100, maxhits);
 }
 
 const CObjBaseTemplate* CChar::GetTopLevelObj() const

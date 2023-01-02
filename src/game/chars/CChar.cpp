@@ -2936,6 +2936,9 @@ do_default:
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
 			break;
+		case CHC_HEALTHPERCENT:
+			sVal.FormatU16Val(GetHealthPercent());
+			break;
 		case CHC_SPEECHCOLOROVERRIDE:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
