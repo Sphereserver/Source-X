@@ -198,7 +198,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
     uchar iRandSpell = (uchar)(Calc_GetRandVal2(0, iSpellCount - 1)); //Spells are being stored using a vector, so it's assumed to be zero-based.
     bool bSpellSuccess = false, bWandUse = false, bIgnoreAITargetChoice = false;
-    int iHealTreshold = g_Cfg.m_iNPCHealtreshold;
+    int iHealThreshold = g_Cfg.m_iNPCHealthreshold;
 
     if (pWand && Calc_GetRandVal(100) < 50)
     {
@@ -219,7 +219,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         if (IsTrigUsed(TRIGGER_NPCACTCAST))
         {
             CScriptTriggerArgs Args((int)spell, (int)bWandUse, pTarg);
-            Args.m_VarsLocal.SetNum("HealTreshold", iHealTreshold);
+            Args.m_VarsLocal.SetNum("HealThreshold", iHealThreshold);
 
             switch (OnTrigger(CTRIG_NPCActCast, this, &Args))
             {
@@ -227,7 +227,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
             default: break;
             }
             spell = (SPELL_TYPE)Args.m_iN1;
-            iHealTreshold = (int)Args.m_VarsLocal.GetKeyNum("HealTreshold");
+            iHealThreshold = (int)Args.m_VarsLocal.GetKeyNum("HealTreshold");
             CObjBase* pNewTarg = Args.m_VarObjs.Get(1); //We switch to a new targ if REF1 is set in the trigger.
             if (pNewTarg)
             {
@@ -236,7 +236,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
             }
         }
 
-        if (NPC_FightCast(pTarg, this, spell, skill, iHealTreshold ,bIgnoreAITargetChoice))
+        if (NPC_FightCast(pTarg, this, spell, skill, iHealThreshold ,bIgnoreAITargetChoice))
         {
             bSpellSuccess = true;
             break;
@@ -354,11 +354,11 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         // Healing has the top priority?
                         case SPELL_Heal:
                         case SPELL_Great_Heal:
-                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealtreshold )
+                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealthreshold )
                                 bSpellSuits = true;
                             break;
                         case SPELL_Gift_of_Renewal:
-                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealtreshold)
+                            if (pTarget->GetHealthPercent() < g_Cfg.m_iNPCHealthreshold)
                                 bSpellSuits = true;
                             break;
                             // Then curing poison.
