@@ -3159,5 +3159,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Fixed: Bonus from CombatBonusStat, when the stat was above 100, was not properly applied when COMBAT_DAMAGEERA was set to 2 (AOS)    
 
 02-01-2023, Drk84
-- Added [Sphere.ini]: New Sphere.ini settings "NPCHealTreshold", this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
-- Added: New local "local.healtreshold" in the @NpcActCast trigger, this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
+- Added [Sphere.ini]: New Sphere.ini settings "NPCHealThreshold", this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
+- Added: New local "local.healthreshold" in the @NpcActCast trigger, this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
+- Added: New command HEALTHPERCENT to show the hitpoints  of a character in a percent value (the ratio between current hitpoints and maximum hitpoints).
+- Fixed: GetHealPercent() method didn't consider maxhits.
