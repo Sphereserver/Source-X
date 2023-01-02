@@ -1243,7 +1243,7 @@ private:
 	int  NPC_WalkToPoint(bool fRun = false);
 	CChar * NPC_FightFindBestTarget();
 	bool NPC_FightMagery(CChar * pChar);
-	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, SKILL_TYPE skill = SKILL_NONE);
+	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, int &skill);
 	bool NPC_FightArchery( CChar * pChar );
 	bool NPC_FightMayCast(bool fCheckSkill = true) const;
 	void NPC_GetAllSpellbookSpells();

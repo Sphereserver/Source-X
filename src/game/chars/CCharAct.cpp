@@ -3945,7 +3945,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 			return false;
 
 		// We cannot put this char in non-disconnect state.
-		//SetDisconnected(pSector); //I think it's not necessary anymore here.
+		SetDisconnected(pSector); //I'll put it back, as i noticed an increase of crash when a player logins.
 
         SetTopPoint(pt); // This will clear the disconnected flag.
 		pSector->m_Chars_Active.AddCharActive(this); //After the disconnectted flag is removed we need to add back the character to the sector, otherwise things starts to get crazy.
