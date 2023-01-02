@@ -55,6 +55,7 @@ CServerConfig::CServerConfig()
     m_fManaLossFail		    = false;
 	m_fManaLossPercent		= 50;
 	m_fNPCCanFizzleOnHit	= false;
+	m_iNPCHealtreshold = 30;
 	m_fReagentLossAbort		= false;
 	m_fReagentLossFail		= false;
     m_fReagentsRequired		= false;
@@ -610,6 +611,7 @@ enum RC_TYPE
 	RC_NPCAI,					// m_iNpcAi
 	RC_NPCCANFIZZLEONHIT,		// m_fNPCCanFizzle
     RC_NPCDISTANCEHEAR,         // m_iNPCDistanceHear
+	RC_NPCHEALTRESHOLD,			// m_iNPCHealtreshold
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSHOVENPC,				// m_NPCShoveNPC
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
@@ -876,6 +878,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi)				}},
 	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit)	}},
     { "NPCDISTANCEHEAR",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCDistanceHear)		}},
+	{ "NPCHEALTRESHOLD",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCHealtreshold)      }},
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle)		}},
 	{ "NPCSHOVENPC",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCShoveNPC)			}},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills)		}},
