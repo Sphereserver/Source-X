@@ -3140,4 +3140,20 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		 Example:
 		 ON=@Hit
 		 argn1 = <R<damadjusted>> //This recalculates the full damage including the various bonus if any.
-     
+		
+01-12-2022, Drk84
+- Added: New trigger @NpcActCast, this trigger is fired when an NPC is going to select which spell is going to cast.
+		 This triggers can fires multiple time if the NPC cannot cast the selected spell (for example because the spell has the SPELLFLAG_PLAYERONLY flag).
+		 So always make sure your casting NPCs has a proper spell selection, so try to avoid giving them full spellbooks because more than half spells in there has the SPELLFLAG_PLAYERONLY flag.
+		 If NPC_AI_COMBAT is enabled, NPCs can cast a beneficial spell on other NPCs in a 14 tiles radius, the condition for this to happen are that these "other NPCs" must be in combat with the same target of the caster npc.
+		 A NPC will properly cast an healing spell if their hitpoints are less than one third of the maximum hit points ( for example 29/100 hit points).
+		 @NpcActCast:
+			 Default Object: the caster.
+			 SRC: the caster.
+			 ARGO: the current target.
+			 REF1: the new target that will replace the current target (argo) if it's set.
+			 ARGN1: the spell being selected, can be replaced, and can be set to a spell not found in their spellbook.
+			 ARGN2: It's 1 if the spell is being cast by a wand, 0 otherwise, read only.
+			 Return 1: Interrupt spell selection.
+- Changed: If the NPC is wielding a wand, it has a 50% to use the wand instead of the a spell from the spellbook11. Remember that the wand must have the ATTR_MAGIC set.
+- Fixed: Bonus from CombatBonusStat, when the stat was above 100, was not properly applied when COMBAT_DAMAGEERA was set to 2 (AOS)    

@@ -136,7 +136,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NotoSend",			// Sending notoriety
 
 	"@NPCAcceptItem",		// (NPC only) i've been given an item i like (according to DESIRES)
-	"@NPCActFight",
+	"@NPCActCast",			// (NPC only) I decided to cast a spell.
+	"@NPCActFight",			// (NPC only) I have to fight against my target.
 	"@NPCActFollow",		// (NPC only) following someone right now
 	"@NPCAction",
 	"@NPCActWander",		// (NPC only) i'm wandering aimlessly

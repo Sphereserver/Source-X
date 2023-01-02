@@ -1176,6 +1176,7 @@ enum CTRIG_TYPE : short
 	CTRIG_NotoSend,     // sending notoriety.
 
 	CTRIG_NPCAcceptItem,    // (NPC only) i've been given an item i like (according to DESIRES).
+    CTRIG_NPCActCast,       // (NPC only) I decided to cast a spell.
 	CTRIG_NPCActFight,      // (NPC only) I have to fight against my target.
 	CTRIG_NPCActFollow,     // (NPC only) decided to follow someone.
 	CTRIG_NPCAction,        // (NPC only) doing some action.

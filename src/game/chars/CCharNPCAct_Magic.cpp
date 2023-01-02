@@ -2,6 +2,8 @@
 
 #include "../CWorldMap.h"
 #include "CCharNPC.h"
+#include "../../common/CScriptTriggerArgs.h"
+#include "../triggers.h"
 
 // Retrieves all the spells this character has to spells[x] list
 int CCharNPC::Spells_GetCount()
@@ -157,7 +159,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     if (pWand)
     {
         // If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
-        if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)
+        if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0 || !pWand->IsAttr(ATTR_MAGIC))
             pWand = nullptr;
     }
     if ((iSpellCount < 1) && !pWand)
@@ -194,43 +196,49 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     }
 
     // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
-    uchar iRandSpell = pWand ? 1 : 0;	// Having wand adding +1 spell to the total count
-    iRandSpell += (uchar)(Calc_GetRandVal2(0, iSpellCount - 1));	// spells are being stored using a vector, so it's assumed to be zero-based.
-
-    if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
+    uchar iRandSpell = (uchar)(Calc_GetRandVal2(0, iSpellCount - 1)); //Spells are being stored using a vector, so it's assumed to be zero-based.
+    bool bSpellSuccess = false, bWandUse = false;
+    if (pWand && Calc_GetRandVal(100) < 50)
     {
-        ASSERT(pWand);
-        SPELL_TYPE spell = (SPELL_TYPE)(pWand->m_itWeapon.m_spell);
-        const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-        if (!pSpellDef)	// wand check failed ... we go on melee, next cast try might select another type of spell :)
-            return false;
+        bWandUse = true;
+        pSrc = pWand;
+    }
+    while( iRandSpell < iSpellCount || bWandUse )
+    {
+        SPELL_TYPE spell = SPELL_NONE;
+
+        if (!bWandUse)
+            spell = m_pNPC->Spells_GetAt(iRandSpell);
+        else
+        {
+            spell = (SPELL_TYPE)pWand->m_itWeapon.m_spell;
+            bWandUse = false;
+        }
+        if (IsTrigUsed(TRIGGER_NPCACTCAST))
+        {
+            CScriptTriggerArgs Args((int)spell, (int)bWandUse, pTarg);
+            switch (OnTrigger(CTRIG_NPCActCast, this, &Args))
+            {
+            case TRIGRET_RET_TRUE: return false;
+            default: break;
+            }
+            spell = (SPELL_TYPE)Args.m_iN1;
+            CObjBase* pNewTarg = Args.m_VarObjs.Get(1); //We switch to a new targ if REF1 is set in the trigger.
+            if (pNewTarg)
+                pTarg = pNewTarg;
+        }
+
+        if (NPC_FightCast(pTarg, this, spell, skill))
+        {
+            bSpellSuccess = true;
+            break;
+        }
+        iRandSpell++;
         
-        pSrc = pWand;	// Seting pWand as SRC, this will force @SpellCast to have the wand as ARGO.
-        if (NPC_FightCast(pTarg, pWand, spell))
-            goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
     }
+    if (!bSpellSuccess)
+        return false;
 
-    for (; iRandSpell < iSpellCount; ++iRandSpell)
-    {
-        SPELL_TYPE spell = m_pNPC->Spells_GetAt(iRandSpell);
-        const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-        if (!pSpellDef)	//If it reached here it should exist, checking anyway.
-            continue;
-
-        int iSkillReq = 0;
-        if (!pSpellDef->GetPrimarySkill(&skill, &iSkillReq))
-            skill = SKILL_MAGERY;
-
-        if (Skill_GetBase((SKILL_TYPE)skill) < iSkillReq)
-            continue;
-        if (NPC_FightCast(pTarg, this, spell, (SKILL_TYPE)skill))
-            goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
-    }
-    return false;	// No castable spell found, go back on melee.
-
-BeginCast:	//Start casting
-            // KRJ - give us some distance
-            // if the opponent is close, get away from him
     if ((uiMana > uiStatInt / 3) && Calc_GetRandVal(uiStatInt << 1))
     {
         if (iDist < 4 || iDist > 8)	// Here is fine?
@@ -252,7 +260,7 @@ BeginCast:	//Start casting
 // I'm able to use magery
 // test if I can cast this spell
 // Specific behaviours for each spell and spellflag
-bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, SKILL_TYPE skill)
+bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, int &skill)
 {
     ADDTOCALLSTACK("CChar::NPC_FightCast");
     ASSERT(m_pNPC);
@@ -261,6 +269,11 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
     if (!pSpellDef)
         return false;
 
+    int iSkillReq = 0;
+  
+    if (!pSpellDef->GetPrimarySkill(&skill, &iSkillReq))
+        skill = SKILL_MAGERY;
+
     if (skill == SKILL_NONE)
     {
         int iSkillTest = 0;
@@ -268,6 +281,10 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
             iSkillTest = SKILL_MAGERY;
         skill = (SKILL_TYPE)iSkillTest;
     }
+
+    if (Skill_GetBase((SKILL_TYPE)skill) < iSkillReq)
+        return false;
+
     if (!Spell_CanCast(spell, true, pSrc, false))
         return false;
     if (pSpellDef->IsSpellType(SPELLFLAG_PLAYERONLY))
@@ -341,8 +358,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                             break;
 
                             // Buffs are coming now.
-
-                        case SPELL_Reactive_Armor:	// Deffensive ones first
+                        case SPELL_Reactive_Armor:	// Defensive ones first
                             if (!pTarget->LayerFind(LAYER_SPELL_Reactive))
                                 bSpellSuits = true;
                             break;
@@ -354,7 +370,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                             if (!pTarget->LayerFind(LAYER_SPELL_Magic_Reflect))
                                 bSpellSuits = true;
                             break;
-
                         case SPELL_Bless:		// time for the others ...
                             if (!pTarget->LayerFind(LAYER_SPELL_STATS))
                                 bSpellSuits = true;
