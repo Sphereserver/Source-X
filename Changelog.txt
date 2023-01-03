@@ -3168,8 +3168,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Replaced: HEALTHPERCENT command is replaced by STATPERCENT.stat_key command where stat_key is STR for hits, dex for stamina and int for mana.
 			Example: if we have 25 mana and 50 int and we do .show statpercent.int we will get 50%.
 - Added: CURE command, for curing poison and hallucination effect.
-		 Example: .
+		 Example: 
 		 CURE remove the poison memory item and clear the poison flag.
 		 CURE 1 remove the poison memory item, the hallucination memory item, clear the poison and hallucination flags.			
 			
-		
