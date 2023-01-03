@@ -360,7 +360,7 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool IsElf() const;
 	bool IsGargoyle() const;
 
-	int	 GetHealthPercent() const;
+	int GetStatPercent(STAT_TYPE i) const;
 	lpctstr GetTradeTitle() const; // Paperdoll title for character p (2)
 
 	// Information about us.
