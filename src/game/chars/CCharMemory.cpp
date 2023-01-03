@@ -437,7 +437,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*MSECS_PER_SEC )
 		goto clearit;
-	if ( (pTarg->GetHealthPercent() >= 100) && (iTimeDiff > 2*60*MSECS_PER_SEC) )
+	if ( (pTarg->GetStatPercent(STAT_STR) >= 100) && (iTimeDiff > 2*60*MSECS_PER_SEC) )
 		goto clearit;
 
 	pMemory->SetTimeoutD(20);

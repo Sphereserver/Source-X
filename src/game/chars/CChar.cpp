@@ -2936,9 +2936,6 @@ do_default:
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
 			break;
-		case CHC_HEALTHPERCENT:
-			sVal.FormatU16Val(GetHealthPercent());
-			break;
 		case CHC_SPEECHCOLOROVERRIDE:
 			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
@@ -3061,6 +3058,16 @@ do_default:
         case CHC_REGENVALMANA:
             sVal.FormatUSVal( Stats_GetRegenVal(STAT_INT) );
             break;
+		case CHC_STATPERCENT:
+		{
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
+			STAT_TYPE stat = g_Cfg.GetStatKey(ptcKey);
+			if ((stat <= STAT_NONE) || (stat >= STAT_BASE_QTY))
+				return false;
+			sVal.FormatUVal(GetStatPercent(stat));
+		}
+			break;
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
 			break;
@@ -4108,6 +4115,14 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else
 				Noto_Criminal();
+			break;
+		case CHV_CURE:
+			{
+				bool bCureHallucination = false;
+				if (s.HasArgs())
+					bCureHallucination = (bool)s.GetArgVal();
+				SetPoisonCure(bCureHallucination);
+			}
 			break;
 		case CHV_DISCONNECT:
 			// Push a player char off line. CLIENTLINGER thing

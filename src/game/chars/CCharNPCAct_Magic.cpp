@@ -314,7 +314,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                 pFriend[1] = pFriend[2] = pFriend[3] = nullptr;
                 iFriendIndex = 1;
 
-                if (NPC_GetAiFlags()&NPC_AI_COMBAT)
+                if (NPC_GetAiFlags()&NPC_AI_COMBAT && !bIgnoreAITargetChoice)
                 {
                     //	search for the neariest friend in combat
                     CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIGHT);
@@ -348,57 +348,31 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                           pTarget = pFriend[iFriendIndex];
                     if (!pTarget)
                         break;
-                    //	check if the target need that
-                    switch (spell)
-                    {
-                        // Healing has the top priority?
-                        case SPELL_Heal:
-                        case SPELL_Great_Heal:
-                            if (pTarget->GetHealthPercent() < iHealThreshold )
-                                bSpellSuits = true;
-                            break;
-                        case SPELL_Gift_of_Renewal:
-                            if (pTarget->GetHealthPercent() < iHealThreshold)
-                                bSpellSuits = true;
-                            break;
-                            // Then curing poison.
-                        case SPELL_Cure:
-                            if (pTarget->LayerFind(LAYER_FLAG_Poison)) bSpellSuits = true;
-                            break;
 
-                            // Buffs are coming now.
-                        case SPELL_Reactive_Armor:	// Defensive ones first
-                            if (!pTarget->LayerFind(LAYER_SPELL_Reactive))
-                                bSpellSuits = true;
-                            break;
-                        case SPELL_Protection:
-                            if (!pTarget->LayerFind(LAYER_SPELL_Protection))
-                                bSpellSuits = true;
-                            break;
-                        case SPELL_Magic_Reflect:
-                            if (!pTarget->LayerFind(LAYER_SPELL_Magic_Reflect))
-                                bSpellSuits = true;
-                            break;
-                        case SPELL_Bless:		// time for the others ...
-                            if (!pTarget->LayerFind(LAYER_SPELL_STATS))
-                                bSpellSuits = true;
-                            break;
-                        default:
-                            break;
-                    }
-                    if (bSpellSuits)
+                    if (pSpellDef->IsSpellType(SPELLFLAG_HEAL) && pTarget->GetStatPercent(STAT_STR) <= iHealThreshold)
+                    {
+                        bSpellSuits = true;
                         break;
-
-                    LAYER_TYPE layer = pSpellDef->m_idLayer;
-                    if (layer != LAYER_NONE)	// If the spell applies an effect.
+                    }
+                    //Cure Poison Check
+                    if ((spell == SPELL_Cure || spell == SPELL_Arch_Cure || spell == SPELL_Cleanse_by_Fire || spell == SPELL_Cleansing_Winds)
+                        && !pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) && pTarget->LayerFind(LAYER_FLAG_Poison))
                     {
-                        if (!pTarget->LayerFind(layer))	// and target doesn't have this effect already...
+                        bSpellSuits = true;
+                        break;
+                    }
+                    if (pSpellDef->IsSpellType(SPELLFLAG_BLESS))
+                    {
+                        LAYER_TYPE layer = pSpellDef->m_idLayer;
+                        if (layer != LAYER_NONE)	// If the spell applies an effect.
                         {
-                            bSpellSuits = true;	//then it may need it
-                            break;
+                            if (!pTarget->LayerFind(layer))	// and target doesn't have this effect already...
+                            {
+                                bSpellSuits = true;	//then it may need it
+                                break;
+                            }
                         }
                     }
-
                 }
                 if (bSpellSuits)
                 {
