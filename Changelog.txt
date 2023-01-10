@@ -3171,3 +3171,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		 Example: 
 		 CURE remove the poison memory item and clear the poison flag.
 		 CURE 1 remove the poison memory item, the hallucination memory item, clear the poison and hallucination flags.			
+		 
+10-01-2023, Jhobean/Drk84/Luxion
+- Fixed: Sectors clients going negative and disconnected clients being displayed on ships.

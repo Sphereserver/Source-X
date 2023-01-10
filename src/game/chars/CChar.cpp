@@ -535,12 +535,20 @@ void CChar::SetDisconnected(CSector* pNewSector)
 	CSector* pCurSector = GetTopPoint().GetSector();
 	if (pNewSector && (pNewSector != pCurSector))
 	{
-		pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		if (!pNewSector->IsCharDisconnectedIn(this))
+			pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		else
+			SetUIDContainerFlags(UID_O_DISCONNECT);
 	}
 	else
 	{
 		ASSERT(pCurSector);
-		pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		if (!pCurSector->IsCharDisconnectedIn(this)) //This is necessary otherwise the character will be added another time and causing an error
+			pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		else
+			SetUIDContainerFlags(UID_O_DISCONNECT); 
+
+		IsDisconnected();
 	}
 }
 
