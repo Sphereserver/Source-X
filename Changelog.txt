@@ -3177,8 +3177,11 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 11-01-2023, canerksk
 -Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
-
-11-01-2023, canerksk
 -Fixed: Trigger @FameChange/@KarmaChange not trigger if set value (issue #598)
 	Trigger location has changed and new trigger definitions have been added.
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
+
+10-01-2023, Jhobean/Drk84/Luxion
+- Fixed: CAN_O_NOSLEEP flag now work correctly (issue #956)
+- Changed: All item with attr_decay flag will be able to tick on sleeping sector. This will avoid to have useless item stuck at TIMER=0 on sleeping sector.
+		   Item was awake when player entering the sector and sometime player had time to see it before it dissapear. (issue #846)
