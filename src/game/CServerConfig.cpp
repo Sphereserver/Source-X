@@ -539,7 +539,6 @@ enum RC_TYPE
 	RC_GUARDSONMURDERERS,
 	RC_GUESTSMAX,
 	RC_GUILDS,
-	RC_MULTIS,
 	RC_HEARALL,
 	RC_HELPINGCRIMINALSISACRIME,// m_fHelpingCriminalsIsACrime
 	RC_HITPOINTPERCENTONREZ,	// m_iHitpointPercentOnRez
@@ -806,7 +805,6 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsOnMurderers)	}},
 	{ "GUESTSMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuestsMax)			}},
 	{ "GUILDS",					{ ELEM_VOID,	0												}},
-	{ "MULTIS",					{ ELEM_VOID,	0												}},
 	{ "HEARALL",				{ ELEM_VOID,	0												}},
 	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime)	}},
 	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitpointPercentOnRez) }},
@@ -1703,13 +1701,13 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
 					++x;
 				}
-				else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && !bMulti)
+				else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && bMulti)
 				{
 					if (iNumber == x)
 						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
 					++x;
 				}
-				else if ((pMulti->GetType() == IT_SHIP) && !bMulti)
+				else if ((pMulti->GetType() == IT_SHIP) && bMulti)
 				{
 					if (iNumber == x)
 						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
