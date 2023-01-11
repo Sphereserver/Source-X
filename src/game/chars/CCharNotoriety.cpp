@@ -475,18 +475,19 @@ void CChar::Noto_Fame( int iFameChange )
 			iFameChange = -iFame;
 	}
 
-	if ( IsTrigUsed(TRIGGER_FAMECHANGE) )
-	{
-		CScriptTriggerArgs Args(iFameChange);	// ARGN1 - Fame change modifier
-		TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
+	// SetFame moved under the function.
+	//if ( IsTrigUsed(TRIGGER_FAMECHANGE) )
+	//{
+	//	CScriptTriggerArgs Args(iFameChange);	// ARGN1 - Fame change modifier
+	//	TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
 
-		if ( retType == TRIGRET_RET_TRUE )
-			return;
-		iFameChange = (int)(Args.m_iN1);
-	}
+	//	if ( retType == TRIGRET_RET_TRUE )
+	//		return;
+	//	iFameChange = (int)(Args.m_iN1);
+	//}
 
-	if ( ! iFameChange )
-		return;
+	//if ( ! iFameChange )
+	//	return;
 
 	SetFame((ushort)(iFame + iFameChange));
     Noto_ChangeDeltaMsg( (int)GetFame() - iFame, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
@@ -512,18 +513,19 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
 			iKarmaChange = iBottom - iKarma;
 	}
 
-	if ( IsTrigUsed(TRIGGER_KARMACHANGE) )
-	{
-		CScriptTriggerArgs Args(iKarmaChange);	// ARGN1 - Karma change modifier
-		TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
+	// SetKarma moved under the function.
+	//if ( IsTrigUsed(TRIGGER_KARMACHANGE) )
+	//{
+	//	CScriptTriggerArgs Args(iKarmaChange);	// ARGN1 - Karma change modifier
+	//	TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
 
-		if ( retType == TRIGRET_RET_TRUE )
-			return;
-		iKarmaChange = (int)(Args.m_iN1);
-	}
+	//	if ( retType == TRIGRET_RET_TRUE )
+	//		return;
+	//	iKarmaChange = (int)(Args.m_iN1);
+	//}
 
-	if ( ! iKarmaChange )
-		return;
+	//if ( ! iKarmaChange )
+	//	return;
 
     SetKarma((short)(iKarma + iKarmaChange));
     Noto_ChangeDeltaMsg( (int)GetKarma() - iKarma, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
