@@ -191,7 +191,7 @@ void CSector::_GoSleep()
 		CChar* pChar = static_cast<CChar*>(pObjRec);
 		const bool fSleeping = pChar->IsSleeping();
 		ASSERT(pChar->IsDisconnected());
-		if (!fSleeping)
+		if (!fSleeping && !pChar->Can(CAN_O_NOSLEEP))
 			pChar->GoSleep();
 	}
 
@@ -199,7 +199,7 @@ void CSector::_GoSleep()
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		const bool fSleeping = pItem->IsSleeping();
-        if (!fSleeping)
+        if (!fSleeping && !pItem->Can(CAN_O_NOSLEEP) && !pItem->IsAttr(ATTR_DECAY))
         {
             pItem->GoSleep();
         }	

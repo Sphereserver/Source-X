@@ -5964,8 +5964,13 @@ bool CItem::_OnTick()
     EXC_SET_BLOCK("sleep check");
 
     const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
-    if (pSector && pSector->IsSleeping())
+    if (pSector && pSector->IsSleeping() && !Can(CAN_O_NOSLEEP))
     {
+		if (IsAttr(ATTR_DECAY))
+		{
+			return false; //Item on ground with attr Decay don't fall asleep and decay in sleeping sector
+		}
+
         //Make it tick after sector's awakening.
         if (!_IsSleeping())
         {
