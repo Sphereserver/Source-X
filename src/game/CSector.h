@@ -14,6 +14,7 @@
 
 class CChar;
 class CItemStone;
+class CItemMulti;
 
 class CSector : public CScriptObj, public CSectorBase, public CTimedObject	// square region of the world.
 {

@@ -1334,6 +1334,7 @@ bool CWorld::LoadWorld() // Load world from script
 		CWorldTickingList::ClearTickingLists();
 
 		m_Stones.clear();
+		m_Multis.clear();
 		m_Parties.ClearContainer();
 		m_GMPages.ClearContainer();
 
@@ -1650,6 +1651,7 @@ void CWorld::Close()
 		Save(true);
 
 	m_Stones.clear();
+	m_Multis.clear();
 
     {
         std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.THREAD_CMUTEX);
