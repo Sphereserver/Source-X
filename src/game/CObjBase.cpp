@@ -3135,11 +3135,11 @@ bool CObjBase::_CanTick() const
         }
     }
 
-    if (!fCanTick)
-    {
-        // Try to call the Can method the less often possible.
-	    fCanTick = Can(CAN_O_NOSLEEP) ;
-    }
+    //if (!fCanTick)
+    //{
+    //    // Try to call the Can method the less often possible.
+	//    fCanTick = Can(CAN_O_NOSLEEP) ;
+    //}
 
     return fCanTick;
 
