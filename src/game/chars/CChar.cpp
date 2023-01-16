@@ -45,6 +45,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@charContextMenuRequest",
 	"@charContextMenuSelect",
 	"@charDClick",
+	"@charShove",
 	"@charTradeAccepted",
 
 	"@Click",				// I got clicked on by someone.
@@ -174,7 +175,6 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@SeeHidden",			// Can I see hidden chars?
 	"@SeeSnoop",
 	"@SendPaperdoll",		//Server send paperdollpacket
-	"@Shove",		// +i am stepping on other char.
 
 	// SKTRIG_QTY
 	"@SkillAbort",
