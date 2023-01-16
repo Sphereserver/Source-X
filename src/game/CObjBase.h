@@ -1085,6 +1085,7 @@ enum CTRIG_TYPE : short
 	CTRIG_charContextMenuRequest,// Calling this trigger over other char.
 	CTRIG_charContextMenuSelect,// Calling this trigger over other char.
 	CTRIG_charDClick,           // Calling this trigger over other char.
+	CTRIG_charShove,           // i just stepped on another char.
 	CTRIG_charTradeAccepted,    // Calling this trigger over other char.
 
 	CTRIG_Click,            // I got clicked on by someone.
@@ -1198,7 +1199,7 @@ enum CTRIG_TYPE : short
 	CTRIG_PartyRemove,  // I have ben removed from the party by SRC.
 
     CTRIG_PayGold,          // I'm going to give out money for a service (Skill Training, hiring...).
-	CTRIG_PersonalSpace,	// i just got stepped on.
+	CTRIG_PersonalSpace,	// i just got stepped on by other char.
 	CTRIG_PetDesert,        // I'm deserting from my owner ( starving, being hit by him ...).
 	CTRIG_Profile,			// someone hit the profile button for me.
 	CTRIG_ReceiveItem,		// I was just handed an item (Not yet checked if i want it).
@@ -1214,7 +1215,7 @@ enum CTRIG_TYPE : short
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.
-    CTRIG_SendPaperdoll,// Server send my paperdoll info to someone
+	CTRIG_SendPaperdoll,// Server send my paperdoll info to someone
 
 	// SKTRIG_QTY
 	CTRIG_SkillAbort,       // SKTRIG_ABORT

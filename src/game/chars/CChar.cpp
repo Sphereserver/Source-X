@@ -45,6 +45,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@charContextMenuRequest",
 	"@charContextMenuSelect",
 	"@charDClick",
+	"@charShove",
 	"@charTradeAccepted",
 
 	"@Click",				// I got clicked on by someone.
@@ -157,8 +158,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@PartyLeave",
 	"@PartyRemove",			//I have ben removed from the party by SRC
 
-    "@PayGold",             // I'm going to give out money for a service (Skill Training, hiring...).
-	"@PersonalSpace",		// +i just got stepped on.
+	"@PayGold",             // I'm going to give out money for a service (Skill Training, hiring...).
+	"@PersonalSpace",		// +i just got stepped on by other char.
 	"@PetDesert",			// I just went wild again
 	"@Profile",				// someone hit the profile button for me.
 	"@ReceiveItem",			// I was just handed an item (Not yet checked if i want it)

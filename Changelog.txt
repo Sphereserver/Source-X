@@ -3182,3 +3182,9 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 -Fixed: Trigger @FameChange/@KarmaChange not trigger if set value (issue #598)
 	Trigger location has changed and new trigger definitions have been added.
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
+
+16-01-2023, tolokio
+-Added @charShove trigger. 
+Fires when a char is going to step another char.
+src->The char being stepped
+|->the one who step on the other.
