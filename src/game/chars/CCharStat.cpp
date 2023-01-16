@@ -610,7 +610,25 @@ short CChar::GetKarma() const
 
 void CChar::SetKarma(short iNewKarma)
 {
+
+	if (IsTrigUsed(TRIGGER_KARMACHANGE))
+	{
+		const int iOldKarma = GetKarma();
+
+		CScriptTriggerArgs Args;
+		Args.m_iN1 = iNewKarma;
+		Args.m_VarsLocal.SetNum("Old", iOldKarma);
+		Args.m_VarsLocal.SetNum("New", iNewKarma + iOldKarma);
+		TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
+
+		if (retType == TRIGRET_RET_TRUE)
+			return;
+
+		iNewKarma = (ushort)(minimum(g_Cfg.m_iMaxKarma, Args.m_iN1));
+	}
+
     m_iKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iNewKarma)));
+
     if ( !g_Serv.IsLoading() )
         NotoSave_Update();
 }
@@ -622,6 +640,23 @@ ushort CChar::GetFame() const
 
 void CChar::SetFame(ushort uiNewFame)
 {
+
+	if (IsTrigUsed(TRIGGER_FAMECHANGE))
+	{
+		const int iOldFame = GetFame();
+
+		CScriptTriggerArgs Args;
+		Args.m_iN1 = uiNewFame;
+		Args.m_VarsLocal.SetNum("Old", iOldFame);
+		Args.m_VarsLocal.SetNum("New", uiNewFame + iOldFame);
+		TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
+
+		if ( retType == TRIGRET_RET_TRUE )
+			return;
+
+		uiNewFame = (ushort)(minimum(g_Cfg.m_iMaxFame, Args.m_iN1));
+	}
+
     m_uiFame = (ushort)(minimum(g_Cfg.m_iMaxFame, uiNewFame));
 }
 

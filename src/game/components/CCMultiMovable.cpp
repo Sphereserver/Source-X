@@ -842,6 +842,12 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_STOPPED), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
         return false;
     }
+	
+	if (IsTrigUsed(TRIGGER_SHIP_MOVE))
+    {
+        CScriptTriggerArgs Args(dir, fStopped);
+        pItemThis->OnTrigger(ITRIG_Ship_Move, &g_Serv, &Args);
+    }
 
     return true;
 }
@@ -888,6 +894,13 @@ void CCMultiMovable::Stop()
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
     pItemThis->m_itShip._eMovementType = SMT_STOP;
+	
+	if (IsTrigUsed(TRIGGER_SHIP_STOP))
+    {
+        CScriptTriggerArgs Args(pItemThis);
+        pItemThis->OnTrigger(ITRIG_Ship_Stop, &g_Serv, &Args);
+    }
+	
     _pCaptain = nullptr;
 }
 
@@ -1244,6 +1257,7 @@ enum CML_TYPE
 {
     CML_ANCHOR,
     CML_DIRFACE,
+    CML_DIRMOVE,
     CML_PILOT,
     CML_SHIPSPEED,
     CML_SPEEDMODE,
@@ -1254,6 +1268,7 @@ lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 {
     "ANCHOR",
     "DIRFACE",
+    "DIRMOVE",
     "PILOT",
     "SHIPSPEED",
     "SPEEDMODE",
@@ -1280,6 +1295,9 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             break;
         case CML_DIRFACE:
             sVal.FormatBVal(pItemThis->m_itShip.m_DirFace);
+            break;
+        case CML_DIRMOVE:
+            sVal.FormatBVal(pItemThis->m_itShip.m_DirMove);
             break;
         case CML_PILOT:
         {

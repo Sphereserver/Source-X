@@ -4,6 +4,7 @@
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CServer.h"
+#include "../CWorld.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CItemMulti.h"
@@ -26,6 +27,7 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :  
     m_pRegion = nullptr;
 
     _iHouseType = HOUSE_PRIVATE;
+    g_World.m_Multis.emplace_back(this);
     _iMultiCount = pItemBase->_iMultiCount;
 
     _uiBaseStorage = pItemBase->_iBaseStorage;
@@ -120,7 +122,7 @@ CItemMulti::~CItemMulti()
     }
 
     MultiUnRealizeRegion();    // unrealize before removed from ground.
-
+    g_World.m_Multis.RemovePtr(this);
     // Must remove early because virtuals will fail in child destructor.
     // Attempt to remove all the accessory junk.
     // NOTE: assume we have already been removed from Top Level
@@ -1212,18 +1214,13 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         {
             TransferMovingCrateToBank();
         }
-        CMultiStorage* pMultiStorage = pOwner->m_pPlayer->GetMultiStorage();
-        if (pMultiStorage)
-        {
-            pMultiStorage->DelMulti(GetUID());
-        }
     }
     if (tRet == TRIGRET_RET_TRUE)
     {
         pDeed->Delete();
-        return;
     }
-
+    if (pDeed)
+    {
 	pDeed->SetHue(GetHue());
 	pDeed->m_itDeed.m_Type = GetID();
 	if (m_Attr & ATTR_MAGIC)
@@ -1238,7 +1235,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
 	{
 		pOwner->ItemBounce(pDeed, fDisplayMsg);
 	}
-
+    }
     SetKeyNum("REMOVED", 1);
     Delete();
 }

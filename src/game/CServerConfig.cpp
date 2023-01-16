@@ -19,6 +19,7 @@
 #include "chars/CCharBase.h"
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
+#include "items/CItemMulti.h"
 #include "items/CItemMultiCustom.h"
 #include "components/CCChampion.h"
 #include "uo_files/CUOItemInfo.h"
@@ -55,6 +56,7 @@ CServerConfig::CServerConfig()
     m_fManaLossFail		    = false;
 	m_fManaLossPercent		= 50;
 	m_fNPCCanFizzleOnHit	= false;
+	m_iNPCHealthreshold		= 30;
 	m_fReagentLossAbort		= false;
 	m_fReagentLossFail		= false;
     m_fReagentsRequired		= false;
@@ -610,6 +612,7 @@ enum RC_TYPE
 	RC_NPCAI,					// m_iNpcAi
 	RC_NPCCANFIZZLEONHIT,		// m_fNPCCanFizzle
     RC_NPCDISTANCEHEAR,         // m_iNPCDistanceHear
+	RC_NPCHEALTHRESHOLD,		// m_iNPCHealtreshold
 	RC_NPCNOFAMETITLE,			// m_NPCNoFameTitle
 	RC_NPCSHOVENPC,				// m_NPCShoveNPC
 	RC_NPCSKILLSAVE,			// m_iSaveNPCSkills
@@ -876,6 +879,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi)				}},
 	{ "NPCCANFIZZLEONHIT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNPCCanFizzleOnHit)	}},
     { "NPCDISTANCEHEAR",        { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCDistanceHear)		}},
+	{ "NPCHEALTHRESHOLD",       { ELEM_INT,     OFFSETOF(CServerConfig,m_iNPCHealthreshold)     }},
 	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle)		}},
 	{ "NPCSHOVENPC",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCShoveNPC)			}},
 	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills)		}},
@@ -1656,6 +1660,66 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			}
 			g_Log.EventError("Unsupported Map %d\n", iMapNumber);
 			return false;
+		}
+
+		if (!strnicmp(ptcKey, "MULTIS.", 7))
+		{
+			bool bMulti = !strnicmp(ptcKey, "MULTIS.", 7);
+			lpctstr pszCmd = ptcKey + 7;
+			CItemMulti* pMulti = nullptr;
+			size_t x = 0;
+
+			if (!strnicmp(pszCmd, "COUNT", 5))
+			{
+				for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
+				{
+					pMulti = g_World.m_Multis[i];
+					if (pMulti == nullptr)
+						continue;
+
+					if ((pMulti->GetType() == IT_MULTI) && bMulti)
+						++x;
+					else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && bMulti)
+						++x;
+					else if ((pMulti->GetType() == IT_SHIP) && bMulti)
+						++x;
+				}
+
+				sVal.FormatSTVal(x);
+				return true;
+			}
+
+			size_t iNumber = Exp_GetVal(pszCmd);
+			SKIP_SEPARATORS(pszCmd);
+			sVal.FormatVal(0);
+
+			for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
+			{
+				pMulti = g_World.m_Multis[i];
+				if (pMulti == nullptr)
+					continue;
+
+				if ((pMulti->GetType() == IT_MULTI) && bMulti)
+				{
+					if (iNumber == x)
+						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
+					++x;
+				}
+				else if ((pMulti->GetType() == IT_MULTI_CUSTOM) && bMulti)
+				{
+					if (iNumber == x)
+						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
+					++x;
+				}
+				else if ((pMulti->GetType() == IT_SHIP) && bMulti)
+				{
+					if (iNumber == x)
+						return pMulti->r_WriteVal(pszCmd, sVal, pSrc);
+					++x;
+				}
+			}
+
+			return true;
 		}
 
 		if (!strnicmp( ptcKey, "FUNCTIONS.", 10))

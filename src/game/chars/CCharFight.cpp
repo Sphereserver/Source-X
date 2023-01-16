@@ -1168,13 +1168,13 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 						iDmgBonus += 10;
 				}
 
-				if ( Stat_GetAdjusted(STAT_STR) >= 100 )
-					iDmgBonus += 5;
-
 				if ( !iStatBonus )
 					iStatBonus = STAT_STR;
 				if ( !iStatBonusPercent )
 					iStatBonusPercent = 30;
+				if (Stat_GetAdjusted(iStatBonus) >= 100)
+					iDmgBonus += 5;
+
 				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
 				break;
 			}

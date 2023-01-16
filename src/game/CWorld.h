@@ -20,6 +20,7 @@ class CSector;
 class CObjBaseTemplate;
 class CObjBase;
 class CItemStone;
+class CItemMulti;
 
 
 enum IMPFLAGS_TYPE	// IMPORT and EXPORT flags.
@@ -164,6 +165,7 @@ public:
 	static lpctstr const sm_szLoadKeys[];
 	CSPtrTypeArray <CItemTypeDef *> m_TileTypes;
 
+	CSPtrTypeArray<CItemMulti*> m_Multis;	//
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );

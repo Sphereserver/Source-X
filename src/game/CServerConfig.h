@@ -284,6 +284,7 @@ public:
     bool m_fManaLossFail;       // Lose mana when spell casting failed.
     int  m_fManaLossPercent;    // Percent of mana loss when missing a cast
     bool m_fNPCCanFizzleOnHit;  // NPCs can fizzle the spell when hit in combat.
+    int m_iNPCHealthreshold;    // Minimum value in percent at which the NPCs will start to heal themselves with a spell.
     bool m_fReagentLossAbort;   // Lose reagents when spell casting abort.
 	bool m_fReagentLossFail;    // Lose reagents when spell casting failed.
 	int  m_iMagicUnlockDoor;    // 1 in N chance of magic unlock working on doors -- 0 means never.

@@ -3099,12 +3099,15 @@ Notes:
 - Fix: Deleting a player while it's in a guild cause the server to crash. (Issue #971)
 
 06-12-2022, Drk84
-- [Sphere.ini] Added: New Sphere.ini settings "DisplayElementalResistance". (Issue #742) 
+- Added [Sphere.ini] : New Sphere.ini settings "DisplayElementalResistance". (Issue #742) 
 			   This setting allows to display the elemental resistances (Fire, Cold, Energy, Poison but not Physical) on status bar and tooltips, even if combat flag ELEMENTAL_ENGINE is disabled.
 			   Remember that the old AC(and MODAR) system will be used if ELEMENTAL_ENGINE flag is disabled.
 
 07-12-2022, Tolokio/Jhobean/Drk84
 - Fixed: Possible fix for houses | ships removing keeps them stuck in totalcount without UID. (Issue #895)
+- Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948)
+- Fix: Removed no longer needed / duplicated code.
+- Fix: At @redeed, return 1 no longer avoid house deletion. (Redeed can be prevented by script at house dialog, so there is no need of this feature. Also wiki says return 1 just prevent deed creation, not house deletion.)
 - Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948) 
 
 13-12-2022, Drk84

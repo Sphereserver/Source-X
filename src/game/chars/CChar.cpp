@@ -137,7 +137,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NotoSend",			// Sending notoriety
 
 	"@NPCAcceptItem",		// (NPC only) i've been given an item i like (according to DESIRES)
-	"@NPCActFight",
+	"@NPCActCast",			// (NPC only) I decided to cast a spell.
+	"@NPCActFight",			// (NPC only) I have to fight against my target.
 	"@NPCActFollow",		// (NPC only) following someone right now
 	"@NPCAction",
 	"@NPCActWander",		// (NPC only) i'm wandering aimlessly
@@ -535,12 +536,20 @@ void CChar::SetDisconnected(CSector* pNewSector)
 	CSector* pCurSector = GetTopPoint().GetSector();
 	if (pNewSector && (pNewSector != pCurSector))
 	{
-		pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		if (!pNewSector->IsCharDisconnectedIn(this))
+			pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		else
+			SetUIDContainerFlags(UID_O_DISCONNECT);
 	}
 	else
 	{
 		ASSERT(pCurSector);
-		pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		if (!pCurSector->IsCharDisconnectedIn(this)) //This is necessary otherwise the character will be added another time and causing an error
+			pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		else
+			SetUIDContainerFlags(UID_O_DISCONNECT); 
+
+		IsDisconnected();
 	}
 }
 
@@ -2912,6 +2921,12 @@ do_default:
 		case CHC_CREATE:
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );  // Displayed in Tenths of Second.
 			break;
+		case CHC_DAMADJUSTED:
+		{
+			CItem *pWeapon = m_uidWeapon.ItemFind();
+			sVal.Format("%d,%d", Fight_CalcDamage(pWeapon, true, false), Fight_CalcDamage(pWeapon, true, true));
+		}
+			break;
 		case CHC_DIR:
 			{
 				ptcKey +=3;
@@ -3052,6 +3067,16 @@ do_default:
         case CHC_REGENVALMANA:
             sVal.FormatUSVal( Stats_GetRegenVal(STAT_INT) );
             break;
+		case CHC_STATPERCENT:
+		{
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
+			STAT_TYPE stat = g_Cfg.GetStatKey(ptcKey);
+			if ((stat <= STAT_NONE) || (stat >= STAT_BASE_QTY))
+				return false;
+			sVal.FormatUVal(GetStatPercent(stat));
+		}
+			break;
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
 			break;
@@ -4099,6 +4124,14 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else
 				Noto_Criminal();
+			break;
+		case CHV_CURE:
+			{
+				bool bCureHallucination = false;
+				if (s.HasArgs())
+					bCureHallucination = (bool)s.GetArgVal();
+				SetPoisonCure(bCureHallucination);
+			}
 			break;
 		case CHV_DISCONNECT:
 			// Push a player char off line. CLIENTLINGER thing
