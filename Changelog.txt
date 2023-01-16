@@ -3115,3 +3115,73 @@ Fixed(Maybe): Fix for Attack speed exploit with COMBAT_FIRSTHIT_INSTANT. (Issue 
 
 24-12-2022, Drk84
 Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Issue #988)
+
+29-12-2022, canerksk
+- Added: Added @SHIP_STOP and @SHIP_MOVE trigger:
+		Under ship multidef or under multidef defined event/type @Ship_Stop trigger will be triggered when you stop your ship. So you can check whether the ship is going or not.
+		Example script;
+		on=@Ship_Stop (UID/I = Ship)
+		TAG0.SHIPMOVE=
+		
+		Accordingly, the ship is still under multidef.
+		on=@Ship_Move (UID/I = Ship, ARGN1 = Move Direction)
+		TAG0.SHIPMOVE=1 // or <ARGN1>
+		
+		You can check whether the ship is in motion or not. In addition, in @Ship_Move trigger, the direction of the ship is sent to the trigger as <ARGN1>.
+		@Ship_Move trigger is only triggered on successful ship movements. It will not trigger if the ship is stuck somewhere.
+		
+31-12-2022, Drk84
+- Added: New command DIRMOVE for ships, read only, returns the direction (0..8) where the ship is going. (Issue #993)
+- Added: New command DAMADJUSTED, read only, return the damage range including the various modifier (like CombatBonusStat, tactics bonus if enabled etc). 
+		 It pratically returns the damage range shown in the character status panel.
+		 Example:
+		 ON=@Hit
+		 argn1 = <R<damadjusted>> //This recalculates the full damage including the various bonus if any.
+		
+01-12-2023, Drk84
+- Added: New trigger @NpcActCast, this trigger is fired when an NPC is going to select which spell is going to cast.
+		 This triggers can fires multiple time if the NPC cannot cast the selected spell (for example because the spell has the SPELLFLAG_PLAYERONLY flag).
+		 So always make sure your casting NPCs has a proper spell selection, so try to avoid giving them full spellbooks because more than half spells in there has the SPELLFLAG_PLAYERONLY flag.
+		 If NPC_AI_COMBAT is enabled, NPCs can cast a beneficial spell on other NPCs in a 14 tiles radius, the condition for this to happen are that these "other NPCs" must be in combat with the same target of the caster npc.
+		 A NPC will properly cast an healing spell if their hitpoints are less than one third of the maximum hit points ( for example 29/100 hit points).
+		 @NpcActCast:
+			 Default Object: the caster.
+			 SRC: the caster.
+			 ARGO: the current target.
+			 REF1: the new target that will replace the current target (argo) if it's set.
+			 ARGN1: the spell being selected, can be replaced, and can be set to a spell not found in their spellbook.
+			 ARGN2: It's 1 if the spell is being cast by a wand, 0 otherwise, read only.
+			 Return 1: Interrupt spell selection.
+- Changed: If the NPC is wielding a wand, it has a 50% to use the wand instead of the a spell from the spellbook11. Remember that the wand must have the ATTR_MAGIC set.
+- Fixed: Bonus from CombatBonusStat, when the stat was above 100, was not properly applied when COMBAT_DAMAGEERA was set to 2 (AOS)    
+
+02-01-2023, Drk84
+- Added [Sphere.ini]: New Sphere.ini settings "NPCHealThreshold", this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
+- Added: New local "local.healthreshold" in the @NpcActCast trigger, this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
+- Added: New command HEALTHPERCENT to show the hitpoints  of a character in a percent value (the ratio between current hitpoints and maximum hitpoints).
+- Fixed: GetHealPercent() method didn't consider maxhits.
+
+03-01-2023, Drk84
+- Replaced: HEALTHPERCENT command is replaced by STATPERCENT.stat_key command where stat_key is STR for hits, dex for stamina and int for mana.
+			Example: if we have 25 mana and 50 int and we do .show statpercent.int we will get 50%.
+- Added: CURE command, for curing poison and hallucination effect.
+		 Example: 
+		 CURE remove the poison memory item and clear the poison flag.
+		 CURE 1 remove the poison memory item, the hallucination memory item, clear the poison and hallucination flags.			
+		 
+10-01-2023, Jhobean/Drk84/Luxion
+- Fixed: Sectors clients going negative and disconnected clients being displayed on ships.
+
+11-01-2023, canerksk
+-Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
+
+11-01-2023, canerksk
+-Fixed: Trigger @FameChange/@KarmaChange not trigger if set value (issue #598)
+	Trigger location has changed and new trigger definitions have been added.
+	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
+
+16-01-2023, tolokio
+-Added @charShove trigger. 
+Fires when a char is going to step another char.
+src->The char being stepped
+|->the one who step on the other.
