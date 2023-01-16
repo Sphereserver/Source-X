@@ -1083,6 +1083,7 @@ enum CTRIG_TYPE : short
 	CTRIG_charContextMenuRequest,// Calling this trigger over other char.
 	CTRIG_charContextMenuSelect,// Calling this trigger over other char.
 	CTRIG_charDClick,           // Calling this trigger over other char.
+	CTRIG_charShove,           // i just stepped on another char.
 	CTRIG_charTradeAccepted,    // Calling this trigger over other char.
 
 	CTRIG_Click,            // I got clicked on by someone.
@@ -1212,7 +1213,6 @@ enum CTRIG_TYPE : short
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.
 	CTRIG_SendPaperdoll,// Server send my paperdoll info to someone
-	CTRIG_Shove,        // i just stepped on a char.
 
 	// SKTRIG_QTY
 	CTRIG_SkillAbort,       // SKTRIG_ABORT
