@@ -76,6 +76,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@RegionEnter",
     "@RegionLeave",
 	"@SELL",
+	"@Ship_Move",
+	"@Ship_Stop",
 	"@Ship_Turn",
 	"@Smelt",			// I am going to be smelted.
 	"@Spawn",
@@ -4687,6 +4689,7 @@ bool CItem::Armor_IsRepairable() const
 	switch ( m_type )
 	{
 		case IT_CLOTHING:
+		case IT_ARMOR_BONE:
 		case IT_ARMOR_LEATHER:
 			return false;	// Not this way anyhow.
 		case IT_SHIELD:

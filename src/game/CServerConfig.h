@@ -284,6 +284,7 @@ public:
     bool m_fManaLossFail;       // Lose mana when spell casting failed.
     int  m_fManaLossPercent;    // Percent of mana loss when missing a cast
     bool m_fNPCCanFizzleOnHit;  // NPCs can fizzle the spell when hit in combat.
+    int m_iNPCHealthreshold;    // Minimum value in percent at which the NPCs will start to heal themselves with a spell.
     bool m_fReagentLossAbort;   // Lose reagents when spell casting abort.
 	bool m_fReagentLossFail;    // Lose reagents when spell casting failed.
 	int  m_iMagicUnlockDoor;    // 1 in N chance of magic unlock working on doors -- 0 means never.
@@ -348,8 +349,9 @@ public:
 	int  m_iSkillPracticeMax;		// max skill level a player can practice on dummies/targets upto.
 	bool m_iPacketDeathAnimation;	// packet 02c
     bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the % 
-
-	// Flags for controlling pvp/pvm behaviour of players
+    bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.
+	
+    // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
 	uint m_iRacialFlags;   // racial traits flags

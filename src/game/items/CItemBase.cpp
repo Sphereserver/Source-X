@@ -267,6 +267,7 @@ bool CItemBase::IsTypeArmor( IT_TYPE type ) noexcept // static
 	{
 		case IT_CLOTHING:
 		case IT_ARMOR:
+		case IT_ARMOR_BONE:
 		case IT_ARMOR_CHAIN:
 		case IT_ARMOR_LEATHER:
 		case IT_ARMOR_RING:

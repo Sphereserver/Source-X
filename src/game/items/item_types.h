@@ -220,6 +220,7 @@ enum IT_TYPE		// double click type action.
 	IT_ARMOR_CHAIN,			// 302 = t_armor_chain
 	IT_ARMOR_RING,			// 303 = t_armor_ring
 	IT_TALISMAN,			// 304 = t_talisman
+	IT_ARMOR_BONE,			// 305 = t_armor_bone
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here

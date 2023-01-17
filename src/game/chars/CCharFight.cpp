@@ -768,13 +768,15 @@ effect_bounce:
     if (IsSetCombatFlags(COMBAT_SLAYER))
     {
 		CItem *pWeapon = nullptr;
-		if (uType & DAMAGE_MAGIC)	// If the damage is magic
+		if (uType & DAMAGE_MAGIC)	// If the damage is magic, we are probably using a spell or a weapon that causes also magical damage.
 		{
-			pWeapon = pSrc->LayerFind(LAYER_HAND1);	// Search for an equipped spellbook
-			if ((pWeapon) && (!pWeapon->IsTypeSpellbook()))	// If there is nothing on the hand, or the item is not a spellbook.
-			{
+			pWeapon = pSrc->GetSpellbookLayer();	// Search for an equipped spellbook
+			if ( !pWeapon ) //No spellbook, so it's a weapon causing magical damage.
 				pWeapon = pSrc->m_uidWeapon.ItemFind();	// then force a weapon find.
-			}
+		}
+		else //Other types of damage.
+		{
+			pWeapon = pSrc->m_uidWeapon.ItemFind();	//  force a weapon find.
 		}
         int iDmgBonus = 1;
         const CCFaction *pSlayer = nullptr;
@@ -1166,13 +1168,13 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 						iDmgBonus += 10;
 				}
 
-				if ( Stat_GetAdjusted(STAT_STR) >= 100 )
-					iDmgBonus += 5;
-
 				if ( !iStatBonus )
 					iStatBonus = STAT_STR;
 				if ( !iStatBonusPercent )
 					iStatBonusPercent = 30;
+				if (Stat_GetAdjusted(iStatBonus) >= 100)
+					iDmgBonus += 5;
+
 				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
 				break;
 			}
@@ -1204,13 +1206,14 @@ void CChar::Fight_ClearAll()
 		m_Fight_Targ_UID.InitUID();
 	}
 	
-    	Attacker_Clear();
+    Attacker_Clear();
 	m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
 	m_atFight.m_iRecoilDelay = 0;
 	m_atFight.m_iSwingAnimationDelay = 0;
 	m_atFight.m_iSwingAnimation = 0;
 	m_atFight.m_iSwingIgnoreLastHitTag = 0;
 
+	SetKeyStr("LastHit", "");
 	StatFlag_Clear(STATF_WAR);
 	UpdateModeFlag();
 }
@@ -1391,7 +1394,7 @@ void CChar::Fight_HitTry()
             if (iIH_LastHitTag_InstaHit > iIH_LastHitTag_FullHit_Prev)
             {
                 fIH_LastHitTag_Newer = true;
-                if (fIH_ShouldInstaHit)
+                if (fIH_ShouldInstaHit && !iIH_LastHitTag_FullHit_Prev)
                 {
                     // First hit with FirstHit_Instant -> no recoil, only the minimum swing animation delay
                     m_atFight.m_iSwingIgnoreLastHitTag = 1;

@@ -360,7 +360,7 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool IsElf() const;
 	bool IsGargoyle() const;
 
-	int	 GetHealthPercent() const;
+	int GetStatPercent(STAT_TYPE i) const;
 	lpctstr GetTradeTitle() const; // Paperdoll title for character p (2)
 
 	// Information about us.
@@ -558,6 +558,7 @@ public:
 	int GetWeightLoadPercent( int iWeight ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
+	CItem * GetSpellbookLayer() const; //Search for a Spellbook in layer 1 or 2.
 	CItemContainer * GetPack() const;
 	CItemContainer * GetBank( LAYER_TYPE layer = LAYER_BANKBOX );
 	CItemContainer * GetPackSafe();
@@ -1242,7 +1243,7 @@ private:
 	int  NPC_WalkToPoint(bool fRun = false);
 	CChar * NPC_FightFindBestTarget();
 	bool NPC_FightMagery(CChar * pChar);
-	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, SKILL_TYPE skill = SKILL_NONE);
+	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, int &skill, int iHealThreshold, bool bIgnoreAITargetChoice = false);
 	bool NPC_FightArchery( CChar * pChar );
 	bool NPC_FightMayCast(bool fCheckSkill = true) const;
 	void NPC_GetAllSpellbookSpells();

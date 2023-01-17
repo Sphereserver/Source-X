@@ -3427,13 +3427,24 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				uiStamReq = 0;
 
 			TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-			if ( IsTrigUsed(TRIGGER_PERSONALSPACE) && (!fPathFinding)) //You want avoid to trig the trigger if it's only a pathfinding evaluation
+			if (!fPathFinding)  //You want avoid to trig the triggers if it's only a pathfinding evaluation
 			{
-				CScriptTriggerArgs Args(uiStamReq);
-				iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
-				if ( iRet == TRIGRET_RET_TRUE )
-					return nullptr;
-                uiStamReq = (ushort)(Args.m_iN1);
+				if ( IsTrigUsed(TRIGGER_PERSONALSPACE) ) 
+				{
+					CScriptTriggerArgs Args(uiStamReq);
+					iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
+					if ( iRet == TRIGRET_RET_TRUE )
+						return nullptr;
+                			uiStamReq = (ushort)(Args.m_iN1);
+				}
+				if ( IsTrigUsed(TRIGGER_CHARSHOVE) )
+				{
+					CScriptTriggerArgs Args(uiStamReq);
+					iRet = this->OnTrigger(CTRIG_charShove, pChar, &Args);
+					if ( iRet == TRIGRET_RET_TRUE )
+						return nullptr;
+                			uiStamReq = (ushort)(Args.m_iN1);
+				}
 			}
 
 
@@ -3938,15 +3949,17 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 		return false;
 
 	CClient *pClient = GetClientActive();
-	if ( m_pPlayer && !pClient )	// moving a logged out client !
+	if ( m_pPlayer && !pClient )	// moving a logged out client ! This happens on startup and when moving on a ship and when moving around disconnected characters by other means.
 	{
 		CSector *pSector = pt.GetSector();
 		if ( !pSector )
 			return false;
 
-		// We cannot put this char in non-disconnect state.
-		SetDisconnected(pSector);
-        SetTopPoint(pt);
+		// We cannot put this char in non-disconnect state
+		
+		SetDisconnected(pSector); 
+        SetTopPoint(pt); // This will clear the disconnected UID flag and the set the character position in the world.
+		SetDisconnected(); //Before entering here the player is not considered disconnected anymore, so we need to disconnect it again.
 		return true;
 	}
 

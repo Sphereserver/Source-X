@@ -45,6 +45,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@charContextMenuRequest",
 	"@charContextMenuSelect",
 	"@charDClick",
+	"@charShove",
 	"@charTradeAccepted",
 
 	"@Click",				// I got clicked on by someone.
@@ -136,7 +137,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NotoSend",			// Sending notoriety
 
 	"@NPCAcceptItem",		// (NPC only) i've been given an item i like (according to DESIRES)
-	"@NPCActFight",
+	"@NPCActCast",			// (NPC only) I decided to cast a spell.
+	"@NPCActFight",			// (NPC only) I have to fight against my target.
 	"@NPCActFollow",		// (NPC only) following someone right now
 	"@NPCAction",
 	"@NPCActWander",		// (NPC only) i'm wandering aimlessly
@@ -156,8 +158,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@PartyLeave",
 	"@PartyRemove",			//I have ben removed from the party by SRC
 
-    "@PayGold",             // I'm going to give out money for a service (Skill Training, hiring...).
-	"@PersonalSpace",		// +i just got stepped on.
+	"@PayGold",             // I'm going to give out money for a service (Skill Training, hiring...).
+	"@PersonalSpace",		// +i just got stepped on by other char.
 	"@PetDesert",			// I just went wild again
 	"@Profile",				// someone hit the profile button for me.
 	"@ReceiveItem",			// I was just handed an item (Not yet checked if i want it)
@@ -342,8 +344,8 @@ CChar::~CChar()
         m_pParty->RemoveMember( GetUID(), GetUID() );
         m_pParty = nullptr;
     }
-    Guild_Resign(MEMORY_GUILD);
-    Guild_Resign(MEMORY_TOWN);
+    //Guild_Resign(MEMORY_GUILD); Moved to the ClearPlayer method otherwise it will cause a server crash because the deleted player will still be found in the guild list.
+    //Guild_Resign(MEMORY_TOWN);  Moved to the ClearPlayer method otherwise it will cause a server crash because the deleted player will still be found in the guild list.
     Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
     if (m_pNPC)
         NPC_PetClearOwners();	// Clear follower slots on pet owner
@@ -534,12 +536,20 @@ void CChar::SetDisconnected(CSector* pNewSector)
 	CSector* pCurSector = GetTopPoint().GetSector();
 	if (pNewSector && (pNewSector != pCurSector))
 	{
-		pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		if (!pNewSector->IsCharDisconnectedIn(this))
+			pNewSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		else
+			SetUIDContainerFlags(UID_O_DISCONNECT);
 	}
 	else
 	{
 		ASSERT(pCurSector);
-		pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		if (!pCurSector->IsCharDisconnectedIn(this)) //This is necessary otherwise the character will be added another time and causing an error
+			pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
+		else
+			SetUIDContainerFlags(UID_O_DISCONNECT); 
+
+		IsDisconnected();
 	}
 }
 
@@ -563,7 +573,8 @@ void CChar::ClearPlayer()
 
 		pAccount->DetachChar(this);	// unlink me from my account.
 	}
-    
+	Guild_Resign(MEMORY_GUILD);
+	Guild_Resign(MEMORY_TOWN);
     delete m_pPlayer;
     m_pPlayer = nullptr;
 }
@@ -2910,6 +2921,12 @@ do_default:
 		case CHC_CREATE:
 			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeCreate) / MSECS_PER_TENTH );  // Displayed in Tenths of Second.
 			break;
+		case CHC_DAMADJUSTED:
+		{
+			CItem *pWeapon = m_uidWeapon.ItemFind();
+			sVal.Format("%d,%d", Fight_CalcDamage(pWeapon, true, false), Fight_CalcDamage(pWeapon, true, true));
+		}
+			break;
 		case CHC_DIR:
 			{
 				ptcKey +=3;
@@ -3050,6 +3067,16 @@ do_default:
         case CHC_REGENVALMANA:
             sVal.FormatUSVal( Stats_GetRegenVal(STAT_INT) );
             break;
+		case CHC_STATPERCENT:
+		{
+			ptcKey += 11;
+			SKIP_SEPARATORS(ptcKey);
+			STAT_TYPE stat = g_Cfg.GetStatKey(ptcKey);
+			if ((stat <= STAT_NONE) || (stat >= STAT_BASE_QTY))
+				return false;
+			sVal.FormatUVal(GetStatPercent(stat));
+		}
+			break;
 		case CHC_HOME:
 			sVal = m_ptHome.WriteUsed();
 			break;
@@ -4097,6 +4124,14 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			else
 				Noto_Criminal();
+			break;
+		case CHV_CURE:
+			{
+				bool bCureHallucination = false;
+				if (s.HasArgs())
+					bCureHallucination = (bool)s.GetArgVal();
+				SetPoisonCure(bCureHallucination);
+			}
 			break;
 		case CHV_DISCONNECT:
 			// Push a player char off line. CLIENTLINGER thing

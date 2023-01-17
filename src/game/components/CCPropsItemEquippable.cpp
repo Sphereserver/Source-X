@@ -487,7 +487,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                 // Missing cliloc id? (doesn't exist)
                 break;
             case PROPIEQUIP_RESCOLD:
-                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) || g_Cfg.m_fDisplayElementalResistance)
                     ADDTNUM(1060445); // cold resist ~1_val~%
                 break;
             case PROPIEQUIP_RESCOLDMAX: // Unimplemented
@@ -495,7 +495,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                     //Missing cliloc id
                 break;
             case PROPIEQUIP_RESENERGY:
-                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) || g_Cfg.m_fDisplayElementalResistance)
                     ADDTNUM(1060446); // energy resist ~1_val~%
                 break;
             case PROPIEQUIP_RESENERGYMAX: // Unimplemented
@@ -503,7 +503,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                     //Missing cliloc id
                 break;
             case PROPIEQUIP_RESFIRE:
-                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) || g_Cfg.m_fDisplayElementalResistance)
                     ADDTNUM(1060447); // fire resist ~1_val~%
                 break;
             case PROPIEQUIP_RESFIREMAX: // Unimplemented
@@ -539,7 +539,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                     //Missing cliloc id
                 break;
             case PROPIEQUIP_RESPOISON:
-                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) || g_Cfg.m_fDisplayElementalResistance)
                     ADDTNUM(1060449); // poison resist ~1_val~%
                 break;
             case PROPIEQUIP_RESPOISONMAX: // Unimplemented

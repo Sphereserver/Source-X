@@ -870,7 +870,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	iMotivation += ( Stat_GetAdjusted(STAT_STR) - pChar->Stat_GetAdjusted(STAT_STR));
 
 	// I'm healthy.
-	iMotivation += GetHealthPercent() - pChar->GetHealthPercent();
+	iMotivation += GetStatPercent(STAT_STR) - pChar->GetStatPercent(STAT_STR);
 
 	// I'm smart and therefore more cowardly. (if injured)
 	iMotivation -= Stat_GetAdjusted(STAT_INT) / 16;

@@ -542,7 +542,9 @@ ushort CServerConfig::Calc_SpellManaCost(CChar* pCharCaster, const CSpellDef* pS
 	const CCPropsChar* pCCPChar = pCharCaster->GetComponentProps<CCPropsChar>();
 	const CCPropsChar* pBaseCCPChar = pCharCaster->Base_GetDef()->GetComponentProps<CCPropsChar>();
 	const int iLowerManaCost = (int)pCharCaster->GetPropNum(pCCPChar, PROPCH_LOWERMANACOST, pBaseCCPChar);
-	ushort iCost = (ushort)(pSpell->m_wManaUse * ((100 - iLowerManaCost) / 100));
+	ushort iCost = (ushort)pSpell->m_wManaUse;
+	if (iLowerManaCost != 0) //LowerManaCost can be negative, and thus increasing the mana cost!
+		iCost = (ushort)(iCost - ((iCost * iLowerManaCost) / 100));
 	
 	if ( fScroll )
 		return iCost / 2; //spells cast from scrolls consume half of the mana.
