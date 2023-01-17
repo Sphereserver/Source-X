@@ -3179,12 +3179,15 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 -Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
 
 11-01-2023, canerksk
--Fixed: Trigger @FameChange/@KarmaChange not trigger if set value (issue #598)
+-Fixed: Trigger @FameChange/@KarmaChange not trigger if set value. (Issue #598)
 	Trigger location has changed and new trigger definitions have been added.
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
 
 16-01-2023, tolokio
--Added @charShove trigger. 
-Fires when a char is going to step another char.
-src->The char being stepped
-|->the one who step on the other.
+-Added: @charShove trigger. 
+		Fires when a char is going to step another char.
+		src->The char being stepped
+		Default Object->the one who step on the other.
+
+17-01-2023, Drk84
+-Fixed: Combat damage displayed with a delay when COMBAT_ANIM_HIT_SMOOTH was enabled. (Issue #1011)

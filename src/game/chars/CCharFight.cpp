@@ -1833,7 +1833,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, iSwingAnimationDelayInSeconds );
 
         // Now that i have waited the recoil time, start the hit animation and wait for it to end
-        _SetTimeoutD(m_atFight.m_iSwingAnimationDelay);
+		/*
+		// If COMBAT_ANIM_SMOOTH is set we can't set m_iSwingAnimationDelay as the timeout value because otherwise 
+		there will be a delay between the end of the animation and the damage display. This is very noticeable when
+		the m_iSwingAnimationDelay property is near the next digit. (If m_iSwingAnimationDelay is 3.8 the iSwingAnimationDelayInSeconds will be 3 and the damage will be displayed around a 0.8 second later!
+		*/
+		if (!IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH))
+			_SetTimeoutD(m_atFight.m_iSwingAnimationDelay);
+		else 
+			_SetTimeoutD(iSwingAnimationDelayInSeconds * TENTHS_PER_SEC);
 		return WAR_SWING_SWINGING;
 	}
 
