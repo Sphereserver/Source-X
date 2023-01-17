@@ -3181,7 +3181,14 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	Trigger location has changed and new trigger definitions have been added.
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
 
-10-01-2023, Jhobean/Drk84/Luxion
+16-01-2023, tolokio
+- Added: @charShove trigger. 
+Fires when a char is going to step another char.
+SRC = The char being stepped
+i = the one who step on the other.
+
+17-01-2023, Jhobean/Drk84/Luxion
 - Fixed: CAN_O_NOSLEEP flag now work correctly (issue #956)
 - Changed: All item with attr_decay flag will be able to tick on sleeping sector. This will avoid to have useless item stuck at TIMER=0 on sleeping sector.
 		   Item was awake when player entering the sector and sometime player had time to see it before it dissapear. (issue #846)
+
