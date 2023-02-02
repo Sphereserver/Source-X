@@ -2923,8 +2923,18 @@ do_default:
 			break;
 		case CHC_DAMADJUSTED:
 		{
-			CItem *pWeapon = m_uidWeapon.ItemFind();
-			sVal.Format("%d,%d", Fight_CalcDamage(pWeapon, true, false), Fight_CalcDamage(pWeapon, true, true));
+			ptcKey += 11;
+			CItem* pWeapon = m_uidWeapon.ItemFind();
+			if (*ptcKey == '.')
+			{
+				SKIP_SEPARATORS(ptcKey);
+				if (!strnicmp(ptcKey, "LO", 2))
+					sVal.Format("%d", Fight_CalcDamage(pWeapon, true, false));
+				else if (!strnicmp(ptcKey, "HI", 2))
+					sVal.Format("%d", Fight_CalcDamage(pWeapon, true, true));
+			}
+			else
+				sVal.Format("%d,%d", Fight_CalcDamage(pWeapon, true, false), Fight_CalcDamage(pWeapon, true, true));
 		}
 			break;
 		case CHC_DIR:

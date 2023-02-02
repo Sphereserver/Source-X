@@ -3191,3 +3191,8 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 17-01-2023, Drk84
 -Fixed: Combat damage displayed with a delay when COMBAT_ANIM_HIT_SMOOTH was enabled. (Issue #1011)
+
+02-02-2023, Drk84
+-Added: New keyword for DAMADJUSTED command:
+		DAMADJUSTED.LO: returns the lowest value of the adjusted damage.
+		DAMADJUSTED.HI: returns the highest value of the adjusted damage.
