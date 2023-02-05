@@ -1,3 +1,5 @@
+Dates are in DD/MM/YYYY format.
+
 ---- 0.56d (former eXperimental branch, now simply Sphere-X, forked from 0.56d) --------------------------------------------------------------
 ---- 11/04/2016
 
@@ -3196,3 +3198,9 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 -Added: New keyword for DAMADJUSTED command:
 		DAMADJUSTED.LO: returns the lowest value of the adjusted damage.
 		DAMADJUSTED.HI: returns the highest value of the adjusted damage.
+
+05-02-2023, Nolok
+- Changed: Fully implemented CAN_O_NOSLEEP, making both items and NPCs never going to sleep (stopping their TIMER and current action).
+	If an NPC can't sleep (because it has the CAN flag), its items won't go to sleep (even if they don't have the flag).
+	Items with this CAN flag won't go to sleep even if the parent container (a char or a sector) starts to sleep.
+- Changed: Added more checks to avoid TIMER being set on objects which shouldn't tick/have a timer.

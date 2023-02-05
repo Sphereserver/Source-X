@@ -897,8 +897,8 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _CanTick() const override;
-    //virtual bool  _CanTick() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+    virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
+    //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
 
 public:
     std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger

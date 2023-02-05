@@ -3501,7 +3501,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		EXC_SET_BLOCK("Stamina penalty");
         if (iWeight < iMaxWeight) //Normal situation
 		{
-			ushort iWeightLoadPercent = (iWeight * 100) / iMaxWeight;
+			int iWeightLoadPercent = (iWeight * 100) / iMaxWeight;
 			ushort uiStamPenalty = 0;
 
 			CVarDefCont* pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
@@ -3509,14 +3509,14 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
 			{
 				//FIXME: Running penality should be a percentage... For now, it adding a flat value take on the ini.
-				iWeightLoadPercent += (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty) ;
+				iWeightLoadPercent += (pVal ? (int)pVal->GetValNum() : g_Cfg.m_iStamRunningPenalty);
 			}
-			int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
+			const int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
 			if (iChanceForStamLoss > Calc_GetRandVal(1000))
 			{
 
 				pVal = GetKey("OVERRIDE.STAMINAWALKINGPENALTY", true);
-				uiStamPenalty = ushort(pVal ? pVal->GetValNum() : 1);
+				uiStamPenalty = (ushort)std::min(USHRT_MAX, int(pVal ? pVal->GetValNum() : 1));
 				
 			}
 			uiStamReq += uiStamPenalty;
@@ -3524,15 +3524,15 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		
 		else //Overweight and lost more stamina each step
         {
-            ushort iWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
+            ushort uiWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
 
             if (IsStatFlag(STATF_ONHORSE))
-                iWeightPenalty /= 3;
+				uiWeightPenalty /= 3;
 
 			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
-                iWeightPenalty += ushort((iWeightPenalty * g_Cfg.m_iStamRunningPenaltyOverweight) / 100);
+				uiWeightPenalty += ushort((uiWeightPenalty * g_Cfg.m_iStamRunningPenaltyOverweight) / 100);
 
-            uiStamReq += iWeightPenalty;
+            uiStamReq += uiWeightPenalty;
         }
 
 		if ( uiStamReq > 0 )
@@ -4456,8 +4456,9 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_CanTick() const
+bool CChar::_CanTick(bool fParentGoingToSleep) const
 {
+	ADDTOCALLSTACK("CChar::_CanTick");
 	EXC_TRY("Can tick?");
 
 	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))
@@ -4466,7 +4467,7 @@ bool CChar::_CanTick() const
 		return false;
 	}
 
-	return CObjBase::_CanTick();
+	return CObjBase::_CanTick(fParentGoingToSleep);
 
 	EXC_CATCH;
 
@@ -4512,13 +4513,17 @@ bool CChar::_OnTick()
 		// mounted horses can still get a tick.
 		return true;
 	}
-    if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
-    {
-        _SetTimeout(1);      //Make it tick after sector's awakening.
-        _GoSleep();
-        return true;
-    }
-
+	if (!_CanTick())
+	{
+		ASSERT(!_IsSleeping());
+		if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
+		{
+			_SetTimeout(1);      //Make it tick after sector's awakening.
+			_GoSleep();
+			return true;
+		}
+	}
+    
 	EXC_SET_BLOCK("Components Tick");
 	/*
 	* CComponent's ticking:

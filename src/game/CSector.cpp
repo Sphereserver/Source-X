@@ -180,29 +180,27 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fSleeping = pChar->IsSleeping();
+		const bool fCanTick = pChar->CanTick(true);
 		ASSERT(!pChar->IsDisconnected());
-        if (!fSleeping)
+        if (!fCanTick)
             pChar->GoSleep();
     }
 
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fSleeping = pChar->IsSleeping();
+		const bool fCanTick = pChar->CanTick(true);
 		ASSERT(pChar->IsDisconnected());
-		if (!fSleeping)
+		if (!fCanTick)
 			pChar->GoSleep();
 	}
 
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		const bool fSleeping = pItem->IsSleeping();
-        if (!fSleeping)
-        {
+		const bool fCanTick = pItem->CanTick(true);
+        if (!fCanTick)
             pItem->GoSleep();
-        }	
     }
 }
 
@@ -1313,7 +1311,7 @@ bool CSector::_OnTick()
 
 	EXC_CATCH;
 
-    _SetTimeoutS(30);  // Sector is Awake, make it tick after 30 seconds.
+    _SetTimeout(SECTOR_TICKING_PERIOD);  // Sector is Awake, make it tick after 30 seconds.
 
 	EXC_DEBUG_START;
 	const CPointMap pt = GetBasePoint();

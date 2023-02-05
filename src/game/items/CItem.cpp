@@ -1386,6 +1386,16 @@ void CItem::_SetTimeout( int64 iMsecs )
 	// NOTE:
 	//  It may be a decay timer or it might be a trigger timer
 
+	if (iMsecs >= 0)
+	{
+		if (!_CanHoldTimer())
+		{
+			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one?\n");
+			return;
+		}
+	// Negative numbers deletes the timeout. Do not block those kind of cleanup operations.
+	}
+
 	CTimedObject::_SetTimeout(iMsecs);
 }
 
@@ -4019,16 +4029,6 @@ CObjBaseTemplate* CItem::GetTopLevelObj()
 	return pObj->GetTopLevelObj();
 }
 
-uchar CItem::GetContainedGridIndex() const
-{
-	return m_containedGridIndex;
-}
-
-void CItem::SetContainedGridIndex(uchar index)
-{
-	m_containedGridIndex = index;
-}
-
 void CItem::Update(const CClient * pClientExclude)
 {
 	ADDTOCALLSTACK("CItem::Update");
@@ -5953,6 +5953,50 @@ void CItem::_GoSleep()
     }
 }
 
+bool CItem::_CanHoldTimer() const
+{
+	ADDTOCALLSTACK("CItem::_CanHoldTimer");
+	EXC_TRY("Can have a TIMER?");
+
+	const CObjBase* pCont = GetContainer();
+	// Is it top level or equipped on a Char?
+	if (pCont != nullptr)
+	{
+		return pCont->IsChar();
+	}
+
+	EXC_CATCH;
+
+	return true;
+}
+
+bool CItem::_CanTick(bool fParentGoingToSleep) const
+{
+	ADDTOCALLSTACK("CItem::_CanTick");
+	EXC_TRY("Can tick?");
+
+	const CObjBase* pCont = GetContainer();
+	// ATTR_DECAY ignores/overrides fParentGoingToSleep
+	if (IsAttr(ATTR_DECAY) && (pCont == nullptr))
+	{
+		return CObjBase::_CanTick(false);
+	}
+
+	// Is it top level or equipped on a Char?
+	if (pCont != nullptr)
+	{
+		if (!pCont->IsChar())
+			return false;
+	}
+
+	return CObjBase::_CanTick(fParentGoingToSleep);
+
+	EXC_CATCH;
+
+	return false;
+}
+
+
 bool CItem::_OnTick()
 {
     ADDTOCALLSTACK("CItem::_OnTick");
@@ -5963,18 +6007,20 @@ bool CItem::_OnTick()
 
     EXC_SET_BLOCK("sleep check");
 
-    const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
-    if (pSector && pSector->IsSleeping())
-    {
-        //Make it tick after sector's awakening.
-        if (!_IsSleeping())
-        {
-            _GoSleep();
-        }
-        _SetTimeout(1);
-        return true;
-    }
-
+	if (!_IsSleeping())
+	{
+		if (!_CanTick())
+		{
+			const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
+			if (pSector && pSector->IsSleeping())
+			{
+				//Make it tick after sector's awakening.
+				_GoSleep();
+				_SetTimeout(1);
+				return true;
+			}
+		}
+	}
 
     EXC_SET_BLOCK("timer trigger");
     TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;

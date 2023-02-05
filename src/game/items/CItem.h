@@ -569,26 +569,35 @@ protected:
 public:
 	virtual bool _OnTick() override;
 
+	virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
+	//virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+	bool _CanHoldTimer() const;
+
 public:
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
+
 	CItemBase * Item_GetDef() const;
+
 	ITEMID_TYPE GetID() const;
     inline word GetBaseID() const {
         return (word)GetID();
     }
+	inline ITEMID_TYPE GetDispID() const noexcept {
+		// This is what the item looks like.
+		// May not be the same as the item that defines it's type.
+		return m_dwDispIndex;
+	}
+
 	bool SetBaseID( ITEMID_TYPE id );
 	bool SetID( ITEMID_TYPE id );
-    inline ITEMID_TYPE GetDispID() const noexcept {
-        // This is what the item looks like.
-        // May not be the same as the item that defines it's type.
-        return m_dwDispIndex;
-    }
+
 	bool IsSameDispID( ITEMID_TYPE id ) const;	// account for flipped types ?
 	bool SetDispID( ITEMID_TYPE id );
 	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks
 
 	int IsWeird() const;
-	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
+	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0);
+
 	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
 
@@ -641,6 +650,7 @@ public:
 	}
 
 	height_t GetHeight() const;
+
 	int64  GetDecayTime() const;
 	void SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways = false);
     void SetDecayTimeD(int64 iTenthsTimeout, bool fOverrideAlways = false)
@@ -651,6 +661,7 @@ public:
     {
         SetDecayTime(iSecondsTimeout * MSECS_PER_SEC, fOverrideAlways);
     }
+
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
@@ -704,8 +715,12 @@ public:
 	CItem * GetTopContainer();
 	const CItem* GetTopContainer() const;
 
-	uchar GetContainedGridIndex() const;
-	void SetContainedGridIndex(uchar index);
+	uchar GetContainedGridIndex() const {
+		return m_containedGridIndex;
+	}
+	void SetContainedGridIndex(uchar index) {
+		m_containedGridIndex = index;
+	}
 
 	void Update( const CClient * pClientExclude = nullptr );		// send this new item to everyone.
 	void Flip();

@@ -36,8 +36,10 @@ void CContainer::_GoSleep()
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		//std::unique_lock<std::shared_mutex> lock(pItem->THREAD_CMUTEX);
-		if (!pItem->IsSleeping())
+		if (!pItem->CanTick(true))
+		{
 			pItem->GoSleep();
+		}
 	}
 }
 

@@ -27,13 +27,15 @@ bool CTimedFunction::IsDeleted() const // virtual
 }
 
 
-bool CTimedFunction::_CanTick() const // virtual
+bool CTimedFunction::_CanTick(bool fParentGoingToSleep) const // virtual
 {
+	UNREFERENCED_PARAMETER(fParentGoingToSleep);
 	return true;
 }
 
-bool CTimedFunction::CanTick() const // virtual
+bool CTimedFunction::CanTick(bool fParentGoingToSleep) const // virtual
 {
+	UNREFERENCED_PARAMETER(fParentGoingToSleep);
 	return true;
 }
 

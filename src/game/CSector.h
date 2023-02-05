@@ -11,6 +11,8 @@
 #include "CSectorTemplate.h"
 #include "CTimedObject.h"
 
+#define SECTOR_TICKING_PERIOD	30 * 1000	// Every 30 seconds.
+
 
 class CChar;
 class CItemStone;

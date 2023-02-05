@@ -3117,28 +3117,39 @@ void CObjBase::_GoSleep()
 	CWorldTickingList::DelObjStatusUpdate(this, false);
 }
 
-bool CObjBase::_CanTick() const
+bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
+	ADDTOCALLSTACK("CObjBase::_CanTick");
+	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
-    bool fCanTick = !CTimedObject::_IsSleeping();
+    bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
 
     if (fCanTick)
     {
         if (const CSObjCont* pParent = GetParent())
         {
             const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
-            // The parent can be another CObjBase or even a Sector -> Do not use CTimedObject* ?
-            if (pObjParent && !pObjParent->CanTick())	// It calls the virtuals obviously
-                fCanTick = false;
+            // The parent can be another CObjBase (or a Sector, but we are not interested in that case)
+			if (pObjParent)
+			{
+				if (fParentGoingToSleep)
+					fCanTick = false;
+				else
+					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
+			}
+                
         }
     }
 
     if (!fCanTick)
     {
         // Try to call the Can method the less often possible.
-	    fCanTick = Can(CAN_O_NOSLEEP) ;
+		// 
+		// This should happen only if the item was manually put to sleep.
+		// CAN_O_NOSLEEP items should not be put to sleep by the source.
+	    fCanTick = Can(CAN_O_NOSLEEP);
     }
 
     return fCanTick;

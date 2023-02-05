@@ -39,16 +39,17 @@ void CTimedObject::_GoAwake()
     _fIsSleeping = false;
 }
 
-bool CTimedObject::_CanTick() const
+bool CTimedObject::_CanTick(bool fParentGoingToSleep) const
 {
     //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
+    UNREFERENCED_PARAMETER(fParentGoingToSleep);
     return !_IsSleeping();
 }
 
-bool CTimedObject::CanTick() const
+bool CTimedObject::CanTick(bool fParentGoingToSleep) const
 {
     //ADDTOCALLSTACK_INTENSIVE("CTimedObject::CanTick");
-    THREAD_SHARED_LOCK_RETURN(_CanTick());
+    THREAD_SHARED_LOCK_RETURN(_CanTick(fParentGoingToSleep));
 }
 
 bool CTimedObject::OnTick()
