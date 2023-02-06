@@ -3206,6 +3206,4 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 06-02-2023, Jhobean
 - Changed: Spawn now continu to generate Item/NPC on sleeping sector. If sector is sleeping when they reach the max amount of spawned Item/NPC, spawn point will fall asleep. 
 	This change will avoid to enter a dungeon/region partially spawned because the sector was sleeping too fast.
-- Changed: When a spawn point reach the max amount of spawned Item/NPC his timer will go to -1. This change have 2 advantages 
-	1- Avoid to waste server ressource on awake sector
-	2- Sometime when you kill a monster, the timer had few time left and monster was spawning too fast.
+
