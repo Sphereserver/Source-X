@@ -1963,7 +1963,7 @@ WARNING: Important change!
 - Fixed: Item equip macro not checking distance and line of sight (Issue #344).
 
 30-12-2019, XuN
-Spanws:
+Spawns:
 Added triggers:
 	@PreSpawn:	Called before any npc or item is created
 			-argn1: Id of the object to create, can be changed.
@@ -3179,8 +3179,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 11-01-2023, canerksk
 -Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
-
-11-01-2023, canerksk
 -Fixed: Trigger @FameChange/@KarmaChange not trigger if set value. (Issue #598)
 	Trigger location has changed and new trigger definitions have been added.
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
@@ -3204,3 +3202,10 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	If an NPC can't sleep (because it has the CAN flag), its items won't go to sleep (even if they don't have the flag).
 	Items with this CAN flag won't go to sleep even if the parent container (a char or a sector) starts to sleep.
 - Changed: Added more checks to avoid TIMER being set on objects which shouldn't tick/have a timer.
+
+06-02-2023, Jhobean
+- Changed: Spawn now continu to generate Item/NPC on sleeping sector. If sector is sleeping when they reach the max amount of spawned Item/NPC, spawn point will fall asleep. 
+	This change will avoid to enter a dungeon/region partially spawned because the sector was sleeping too fast.
+- Changed: When a spawn point reach the max amount of spawned Item/NPC his timer will go to -1. This change have 2 advantages 
+	1- Avoid to waste server ressource on awake sector
+	2- Sometime when you kill a monster, the timer had few time left and monster was spawning too fast.

@@ -528,9 +528,30 @@ void CCSpawn::DelObj(const CUID& uid)
                     pSpawnedChar->StatFlag_Clear(STATF_SPAWNED);
             }
         }
+        pSpawnItem->m_CanMask |= CAN_O_NOSLEEP; //Avoid the spawn point to sleep until job is finish
+        
+        if (pSpawnItem->GetTimerAdjusted() == -1)
+        {
+            int64 iMinutes;
+            if (_iTimeHi <= 0)
+            {
+                iMinutes = Calc_GetRandLLVal(30) + 1;
+            }
+            else
+            {
+                iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
+            }
+
+            if (iMinutes <= 0)
+            {
+                iMinutes = 1;
+            }
+            pSpawnItem->_SetTimeoutS(iMinutes * 60);	// set time to check again.
+        }
         _uidList.erase(itObj);
     }
     pSpawnItem->UpdatePropertyFlag();
+    pSpawnItem->Update();
 }
 
 void CCSpawn::AddObj(const CUID& uid)
@@ -620,6 +641,14 @@ CCRET_TYPE CCSpawn::OnTickComponent()
 
     if (GetCurrentSpawned() >= GetAmount())
     {
+        if (pSpawnItem->m_CanMask == CAN_O_NOSLEEP)
+        {
+            pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
+
+            if (pSpawnItem->GetTopSector()->IsSleeping())
+                pSpawnItem->GoSleep();
+        }
+        pSpawnItem->_SetTimeoutS(-1);
         return CCRET_TRUE;
     }
 
