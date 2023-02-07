@@ -1012,6 +1012,7 @@ enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
     ITRIG_ADDREDCANDLE = 1,
+    ITRIG_ADDOBJ,				// For t_spawn when obj is add to list
     ITRIG_ADDWHITECANDLE,
 	ITRIG_AfterClick,
 	ITRIG_Buy,
@@ -1024,6 +1025,7 @@ enum ITRIG_TYPE
 	ITRIG_Create,               // Item is being created.
 	ITRIG_DAMAGE,               // I have been damaged in some way.
 	ITRIG_DCLICK,               // I have been dclicked.
+    ITRIG_DELOBJ,				// For t_spawn when obj is remove from list
 	ITRIG_DESTROY,              //+I am nearly destroyed.
 	ITRIG_DROPON_CHAR,          // I have been dropped on this char.
 	ITRIG_DROPON_GROUND,        // I have been dropped on the ground here.

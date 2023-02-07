@@ -3206,4 +3206,10 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 06-02-2023, Jhobean
 - Changed: Spawn now continu to generate Item/NPC on sleeping sector. If sector is sleeping when they reach the max amount of spawned Item/NPC, spawn point will fall asleep. 
 	This change will avoid to enter a dungeon/region partially spawned because the sector was sleeping too fast.
-
+- Added triggers for Spawn:
+	@DelObj: Called when a object is remove from the list of type t_spawn
+			src / i / ARGO -> the uid of the spawn
+	@AddObj: Called when a object is added to the list of type t_spawn
+			src / i -> the uid of the spawn
+			ARGO -> the uid of char/item add
+- [Scriptpack]: With these new triggers, we are able to control the timer on spawn and optimize server ressource.Search for [TYPEDEF t_spawn_char]/[TYPEDEF t_spawn_item] on scriptpack

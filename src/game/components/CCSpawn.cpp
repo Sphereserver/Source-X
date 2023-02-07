@@ -531,6 +531,14 @@ void CCSpawn::DelObj(const CUID& uid)
         pSpawnItem->m_CanMask |= CAN_O_NOSLEEP; //Avoid the spawn point to sleep until job is finish
         _uidList.erase(itObj);
     }
+
+    if (IsTrigUsed(TRIGGER_DELOBJ))
+    {
+        CScriptTriggerArgs args;
+        args.m_pO1 = pSpawnItem;
+        pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
+    }
+
     pSpawnItem->UpdatePropertyFlag();
     pSpawnItem->Update(); //Update tooltip for GM
 }
@@ -594,10 +602,29 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
         pSpawnItem->UpdatePropertyFlag();
+
+        if (IsTrigUsed(TRIGGER_ADDOBJ))
+        {
+            CScriptTriggerArgs args;
+            args.m_pO1 = pSpawnedObj;
+            pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
+        }
     }
 
     // Done with checks, let's add this.
     _uidList.emplace_back(uid); 
+
+    if (GetCurrentSpawned() >= GetAmount())
+    {
+        if (pSpawnItem->m_CanMask == CAN_O_NOSLEEP)
+        {
+            pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
+
+            if (pSpawnItem->GetTopSector()->IsSleeping())
+                pSpawnItem->GoSleep();
+        }
+    }
+    pSpawnItem->Update(); //Update tooltip for GM
 }
 
 CCRET_TYPE CCSpawn::OnTickComponent()
@@ -622,14 +649,6 @@ CCRET_TYPE CCSpawn::OnTickComponent()
 
     if (GetCurrentSpawned() >= GetAmount())
     {
-        if (pSpawnItem->m_CanMask == CAN_O_NOSLEEP)
-        {
-            pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
-
-            if (pSpawnItem->GetTopSector()->IsSleeping())
-                pSpawnItem->GoSleep();
-        }
-        pSpawnItem->Update(); //Update tooltip for GM
         return CCRET_TRUE;
     }
 
@@ -651,6 +670,11 @@ CCRET_TYPE CCSpawn::OnTickComponent()
 void CCSpawn::KillChildren()
 {
     ADDTOCALLSTACK("CCSpawn::KillChildren");
+
+    CItem* pSpawnItem = static_cast<CItem*>(GetLink());
+    if (pSpawnItem->IsValidUID())
+        pSpawnItem->m_CanMask |= CAN_O_NOSLEEP;
+
     if (_uidList.empty())
     {
         return;
