@@ -529,6 +529,25 @@ void CCSpawn::DelObj(const CUID& uid)
             }
         }
         pSpawnItem->m_CanMask |= CAN_O_NOSLEEP; //Avoid the spawn point to sleep until job is finish
+
+        if (pSpawnItem->GetTimerAdjusted() == -1)
+        {
+            int64 iMinutes;
+            if (_iTimeHi <= 0)
+            {
+                iMinutes = Calc_GetRandLLVal(30) + 1;
+            }
+            else
+            {
+                iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
+            }
+
+            if (iMinutes <= 0)
+            {
+                iMinutes = 1;
+            }
+            pSpawnItem->_SetTimeoutS(iMinutes * 60);	// set time to check again.
+        }
         _uidList.erase(itObj);
     }
 
@@ -536,7 +555,9 @@ void CCSpawn::DelObj(const CUID& uid)
     {
         CScriptTriggerArgs args;
         args.m_pO1 = pSpawnItem;
+        args.m_iN1 = pSpawnItem->GetTimerAdjusted() / 1000;   
         pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
+        pSpawnItem->_SetTimeoutS(args.m_iN1);
     }
 
     pSpawnItem->UpdatePropertyFlag();
@@ -601,14 +622,27 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_ptHome = pSpawnItem->GetTopPoint();
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
-        pSpawnItem->UpdatePropertyFlag();
+        
+        bool SpawnComplete = false;
+        if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
+        {
+            SpawnComplete = true;
+        }
 
         if (IsTrigUsed(TRIGGER_ADDOBJ))
         {
             CScriptTriggerArgs args;
             args.m_pO1 = pSpawnedObj;
+            if (SpawnComplete)
+                args.m_iN1 = -1;
+            else
+                args.m_iN1 = pSpawnItem->GetTimerAdjusted()/1000;
+
             pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
+            pSpawnItem->_SetTimeoutS(args.m_iN1);
         }
+        pSpawnItem->UpdatePropertyFlag();
+        pSpawnItem->Update(); //Update tooltip for GM
     }
 
     // Done with checks, let's add this.
@@ -624,7 +658,6 @@ void CCSpawn::AddObj(const CUID& uid)
                 pSpawnItem->GoSleep();
         }
     }
-    pSpawnItem->Update(); //Update tooltip for GM
 }
 
 CCRET_TYPE CCSpawn::OnTickComponent()

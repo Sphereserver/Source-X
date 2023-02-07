@@ -1785,6 +1785,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		if ( IsPriv(PRIV_ALLMOVE|PRIV_GM) ) ;
 		else if ( pItem->IsAttr(ATTR_STATIC|ATTR_MOVE_NEVER) || pItem->IsType(IT_SPELL) )
 			return -1;
+		CCSpawn* pSpawn = pItem->GetSpawn();
+		if (pSpawn)
+			pSpawn->DelObj(pItem->GetUID());
 	}
 
 	if ( trigger != ITRIG_UNEQUIP )	// unequip is done later.
