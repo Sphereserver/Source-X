@@ -2,7 +2,7 @@ SET (TOOLCHAIN 1)
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-GNU-x86.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
+	SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
 	SET(ARCH_BITS		32		PARENT_SCOPE)
 
 	ENABLE_LANGUAGE(RC)
