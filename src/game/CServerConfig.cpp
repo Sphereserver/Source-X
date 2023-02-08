@@ -4322,24 +4322,27 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetOF(OF_NoSmoothSailing) )			catresname(zOptionFlags, "NoSmoothSailing");
 		if ( IsSetOF(OF_ScaleDamageByDurability) )	catresname(zOptionFlags, "ScaleDamageByDurability");
 		if ( IsSetOF(OF_Command_Sysmsgs) )			catresname(zOptionFlags, "CommandSysmessages");
-		if ( IsSetEF(OF_PetSlots) )					catresname(zOptionFlags, "PetSlots");
+		if ( IsSetOF(OF_PetSlots) )					catresname(zOptionFlags, "PetSlots");
 		if ( IsSetOF(OF_OSIMultiSight) )			catresname(zOptionFlags, "OSIMultiSight");
 		if ( IsSetOF(OF_Items_AutoName) )			catresname(zOptionFlags, "ItemsAutoName");
 		if ( IsSetOF(OF_FileCommands) )				catresname(zOptionFlags, "FileCommands");
 		if ( IsSetOF(OF_NoItemNaming) )				catresname(zOptionFlags, "NoItemNaming");
 		if ( IsSetOF(OF_NoHouseMuteSpeech) )		catresname(zOptionFlags, "NoHouseMuteSpeech");
 		if ( IsSetOF(OF_NoContextMenuLOS) )			catresname(zOptionFlags, "NoContextMenuLOS");
+        if ( IsSetOF(OF_MapBoundarySailing) )		catresname(zOptionFlags, "MapBoundarySailing");
 		if ( IsSetOF(OF_Flood_Protection) )			catresname(zOptionFlags, "FloodProtection");
 		if ( IsSetOF(OF_Buffs) )					catresname(zOptionFlags, "Buffs");
 		if ( IsSetOF(OF_NoPrefix) )					catresname(zOptionFlags, "NoPrefix");
 		if ( IsSetOF(OF_DyeType) )					catresname(zOptionFlags, "DyeType");
 		if ( IsSetOF(OF_DrinkIsFood) )				catresname(zOptionFlags, "DrinkIsFood");
 		if ( IsSetOF(OF_NoDClickTurn) )				catresname(zOptionFlags, "NoDClickTurn");
+        if ( IsSetOF(OF_NoPaperdollTradeTitle) )	catresname(zOptionFlags, "NoPaperdollTradeTitle");
         if ( IsSetOF(OF_NoTargTurn) )				catresname(zOptionFlags, "NoTargTurn");
         if ( IsSetOF(OF_StatAllowValOverMax) )		catresname(zOptionFlags, "StatAllowValOverMax");
         if ( IsSetOF(OF_GuardOutsideGuardedArea) )	catresname(zOptionFlags, "GuardOutsideGuardedArea");
         if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
-		if (IsSetOF(OF_AllowContainerInsideContainer)) catresname(zOptionFlags, "AllowContainerInsideContainer");
+		if ( IsSetOF(OF_AllowContainerInsideContainer)) catresname(zOptionFlags, "AllowContainerInsideContainer");
+        if ( IsSetOF(OF_VendorStockLimit) )		    catresname(zOptionFlags, "VendorStockLimit");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
@@ -4355,8 +4358,10 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		zExperimentalFlags[0] = '\0';
 
 		if ( IsSetEF(EF_NoDiagonalCheckLOS) )		catresname(zExperimentalFlags, "NoDiagonalCheckLOS");
+        if ( IsSetEF(EF_Dynamic_Backsave) )			catresname(zExperimentalFlags, "DynamicBacksave");
 		if ( IsSetEF(EF_ItemStacking) )				catresname(zExperimentalFlags, "ItemStacking");
 		if ( IsSetEF(EF_ItemStackDrop) )			catresname(zExperimentalFlags, "ItemStackDrop");
+        if ( IsSetEF(EF_FastWalkPrevention) )		catresname(zExperimentalFlags, "FastWalkPrevention");
 		if ( IsSetEF(EF_Intrinsic_Locals) )			catresname(zExperimentalFlags, "IntrinsicLocals");
 		if ( IsSetEF(EF_Item_Strict_Comparison) )	catresname(zExperimentalFlags, "ItemStrictComparison");
 		if ( IsSetEF(EF_AllowTelnetPacketFilter) )	catresname(zExperimentalFlags, "TelnetPacketFilter");
