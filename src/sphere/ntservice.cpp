@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 
-//#include <direct.h>
+#include <direct.h>
 #include "../common/CException.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
@@ -459,7 +459,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 
 	// We need to find out what the server name is and the log files folder... look it up in the .ini file
-    g_Cfg.LoadIni(false);
+    if (!g_Cfg.LoadIni(false))
+    {
+        // Sphere.ini couldn't be loaded. We might be running Sphere as service and have different working directory.
+        TCHAR szPath[MAX_PATH];
+        GetModuleFileName(nullptr, szPath, sizeof(szPath));
+        // Extract and change directory from this application.
+        ExtractPath(szPath);
+        _chdir(szPath);
+        // Try opening it again and continue as before.
+        g_Cfg.LoadIni(false);
+    }
 
     if (!g_Cfg.m_fUseNTService ||	// since there is no way to detect how did we start, use config for that
         Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT) // We are running Win9x - So we are not an NT service.
