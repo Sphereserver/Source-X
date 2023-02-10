@@ -528,9 +528,40 @@ void CCSpawn::DelObj(const CUID& uid)
                     pSpawnedChar->StatFlag_Clear(STATF_SPAWNED);
             }
         }
+        pSpawnItem->m_CanMask |= CAN_O_NOSLEEP; //Avoid the spawn point to sleep until job is finish
+
+        if (pSpawnItem->GetTimerAdjusted() == -1)
+        {
+            int64 iMinutes;
+            if (_iTimeHi <= 0)
+            {
+                iMinutes = Calc_GetRandLLVal(30) + 1;
+            }
+            else
+            {
+                iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
+            }
+
+            if (iMinutes <= 0)
+            {
+                iMinutes = 1;
+            }
+            pSpawnItem->_SetTimeoutS(iMinutes * 60);	// set time to check again.
+        }
         _uidList.erase(itObj);
     }
+
+    if (IsTrigUsed(TRIGGER_DELOBJ))
+    {
+        CScriptTriggerArgs args;
+        args.m_pO1 = pSpawnItem;
+        args.m_iN1 = pSpawnItem->GetTimerAdjusted() / 1000;   
+        pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
+        pSpawnItem->_SetTimeoutS(args.m_iN1);
+    }
+
     pSpawnItem->UpdatePropertyFlag();
+    pSpawnItem->Update(); //Update tooltip for GM
 }
 
 void CCSpawn::AddObj(const CUID& uid)
@@ -591,11 +622,42 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_ptHome = pSpawnItem->GetTopPoint();
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
+        
+        bool SpawnComplete = false;
+        if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
+        {
+            SpawnComplete = true;
+        }
+
+        if (IsTrigUsed(TRIGGER_ADDOBJ))
+        {
+            CScriptTriggerArgs args;
+            args.m_pO1 = pSpawnedObj;
+            if (SpawnComplete)
+                args.m_iN1 = -1;
+            else
+                args.m_iN1 = pSpawnItem->GetTimerAdjusted()/1000;
+
+            pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
+            pSpawnItem->_SetTimeoutS(args.m_iN1);
+        }
         pSpawnItem->UpdatePropertyFlag();
+        pSpawnItem->Update(); //Update tooltip for GM
     }
 
     // Done with checks, let's add this.
     _uidList.emplace_back(uid); 
+
+    if (GetCurrentSpawned() >= GetAmount())
+    {
+        if (pSpawnItem->m_CanMask == CAN_O_NOSLEEP)
+        {
+            pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
+
+            if (pSpawnItem->GetTopSector()->IsSleeping())
+                pSpawnItem->GoSleep();
+        }
+    }
 }
 
 CCRET_TYPE CCSpawn::OnTickComponent()
@@ -641,6 +703,11 @@ CCRET_TYPE CCSpawn::OnTickComponent()
 void CCSpawn::KillChildren()
 {
     ADDTOCALLSTACK("CCSpawn::KillChildren");
+
+    CItem* pSpawnItem = static_cast<CItem*>(GetLink());
+    if (pSpawnItem->IsValidUID())
+        pSpawnItem->m_CanMask |= CAN_O_NOSLEEP;
+
     if (_uidList.empty())
     {
         return;

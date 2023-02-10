@@ -45,6 +45,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AddRedCandle",
+	"@AddObj",				// For t_spawn when obj is add to list
 	"@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
@@ -57,6 +58,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Create",
 	"@DAMAGE",				// I have been damaged in some way
 	"@DCLICK",				// I have been dclicked.
+	"@DelObj",				// For t_spawn when obj is remove from list
 	"@Destroy",				//+I am nearly destroyed
 	"@DropOn_Char",			// I have been dropped on this char
 	"@DropOn_Ground",		// I have been dropped on the ground here

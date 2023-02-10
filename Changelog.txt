@@ -1963,7 +1963,7 @@ WARNING: Important change!
 - Fixed: Item equip macro not checking distance and line of sight (Issue #344).
 
 30-12-2019, XuN
-Spanws:
+Spawns:
 Added triggers:
 	@PreSpawn:	Called before any npc or item is created
 			-argn1: Id of the object to create, can be changed.
@@ -3178,24 +3178,22 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Fixed: Sectors clients going negative and disconnected clients being displayed on ships.
 
 11-01-2023, canerksk
--Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
-
-11-01-2023, canerksk
--Fixed: Trigger @FameChange/@KarmaChange not trigger if set value. (Issue #598)
+- Added: Added Multis.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items of type t_multi, t_multi_custom and t_ship on the server. It can be used with multis.count as multis.0.name/p/uid/.
+- Fixed: Trigger @FameChange/@KarmaChange not trigger if set value. (Issue #598)
 	Trigger location has changed and new trigger definitions have been added.
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
 
 16-01-2023, tolokio
--Added: @charShove trigger. 
+- Added: @charShove trigger. 
 		Fires when a char is going to step another char.
 		src->The char being stepped
 		Default Object->the one who step on the other.
 
 17-01-2023, Drk84
--Fixed: Combat damage displayed with a delay when COMBAT_ANIM_HIT_SMOOTH was enabled. (Issue #1011)
+- Fixed: Combat damage displayed with a delay when COMBAT_ANIM_HIT_SMOOTH was enabled. (Issue #1011)
 
 02-02-2023, Drk84
--Added: New keyword for DAMADJUSTED command:
+- Added: New keyword for DAMADJUSTED command:
 		DAMADJUSTED.LO: returns the lowest value of the adjusted damage.
 		DAMADJUSTED.HI: returns the highest value of the adjusted damage.
 
@@ -3204,3 +3202,19 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	If an NPC can't sleep (because it has the CAN flag), its items won't go to sleep (even if they don't have the flag).
 	Items with this CAN flag won't go to sleep even if the parent container (a char or a sector) starts to sleep.
 - Changed: Added more checks to avoid TIMER being set on objects which shouldn't tick/have a timer.
+
+07-02-2023, Jhobean
+- Changed: Spawn now continu to generate Item/NPC on sleeping sector. If sector is sleeping when they reach the max amount of spawned Item/NPC, spawn point will fall asleep. 
+	This change will avoid to enter a dungeon/region partially spawned because the sector was sleeping too fast.
+- Fixed: Dragging an item link to a spawn gem now unlink them. This will avoid to have item dissapear on player packpack when spawn point are reset and authorise the spawn to continu spawning new item.  
+- Added: 2 news triggers for Spawn
+	@DelObj: Called when a object is remove from the list of type t_spawn
+			src / i / ARGO -> the uid of the spawn
+			ARGN (R/W) -> Time in second for next spawn.
+	@AddObj: Called when a object is added to the list of type t_spawn
+			src / i -> the uid of the spawn
+			ARGO -> the uid of char/item add
+			ARGN (R/W) -> Time in second for next spawn. Server will set to -1 if spawn is complete, you can manualy force a delay if you want.(old buggy behavior)
+			note: 	Force item to -1 have 2 advantages
+					1- Avoid waste server's ressource on awake sector
+					2- Sometime when you kill a monster, the timer had few time left and monster was spawning too fast.
