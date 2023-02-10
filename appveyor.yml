@@ -197,6 +197,7 @@ for:
       - zip ../SphereSvrX-osx64-nightly.zip sphere.ini sphereCrypt.ini
       - cd "../${BUILD_DIR_64}/bin64"
       - zip -r ../../SphereSvrX-osx64-nightly.zip *
+      - cd ../../
       - curl -sST "{SphereSvrX-osx64-nightly.zip}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
     artifacts:
       - path: SphereSvrX-osx64-nightly.zip

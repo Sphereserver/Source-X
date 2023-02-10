@@ -512,56 +512,60 @@ void CCSpawn::DelObj(const CUID& uid)
         return;
     }
 
-    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
     auto itObj = std::find(_uidList.begin(), _uidList.end(), uid);
-    if (itObj != _uidList.end())
+
+    if (itObj == _uidList.end())
     {
-        CObjBase *pSpawnedObj = uid.ObjFind();
-        if (pSpawnedObj && !pSpawnedObj->IsDeleted())
-        {
-            pSpawnedObj->SetSpawn(nullptr);
-            const IT_TYPE iSpawnType = pSpawnItem->GetType();
-            if ((iSpawnType == IT_SPAWN_CHAR) || (iSpawnType == IT_SPAWN_CHAMPION))
-            {
-                CChar *pSpawnedChar = dynamic_cast<CChar*>(pSpawnedObj);
-                if (pSpawnedChar)
-                    pSpawnedChar->StatFlag_Clear(STATF_SPAWNED);
-            }
-        }
-        pSpawnItem->m_CanMask |= CAN_O_NOSLEEP; //Avoid the spawn point to sleep until job is finish
-
-        if (pSpawnItem->GetTimerAdjusted() == -1)
-        {
-            int64 iMinutes;
-            if (_iTimeHi <= 0)
-            {
-                iMinutes = Calc_GetRandLLVal(30) + 1;
-            }
-            else
-            {
-                iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
-            }
-
-            if (iMinutes <= 0)
-            {
-                iMinutes = 1;
-            }
-            pSpawnItem->_SetTimeoutS(iMinutes * 60);	// set time to check again.
-        }
-        _uidList.erase(itObj);
+        return;
     }
+
+    CItem *pSpawnItem = static_cast<CItem*>(GetLink());
+    pSpawnItem->m_CanMask |= CAN_O_NOSLEEP; //Avoid the spawn point to sleep until job is finish
+
+
+	CObjBase* pSpawnedObj = uid.ObjFind();
+	if (pSpawnedObj && !pSpawnedObj->IsDeleted())
+	{
+		pSpawnedObj->SetSpawn(nullptr);
+		const IT_TYPE iSpawnType = pSpawnItem->GetType();
+		if ((iSpawnType == IT_SPAWN_CHAR) || (iSpawnType == IT_SPAWN_CHAMPION))
+		{
+			CChar* pSpawnedChar = dynamic_cast<CChar*>(pSpawnedObj);
+			if (pSpawnedChar)
+				pSpawnedChar->StatFlag_Clear(STATF_SPAWNED);
+		}
+	}
+
+	if (pSpawnItem->_GetTimerAdjusted() == -1)
+	{
+        int64 iMinutes;
+		if (_iTimeHi <= 0)
+		{
+			iMinutes = Calc_GetRandLLVal(30) + 1;
+		}
+		else
+		{
+			iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
+		}
+
+		if (iMinutes <= 0)
+		{
+			iMinutes = 1;
+		}
+		pSpawnItem->_SetTimeoutS(iMinutes * 60);	// set time to check again.
+	}
+	_uidList.erase(itObj);
 
     if (IsTrigUsed(TRIGGER_DELOBJ))
     {
         CScriptTriggerArgs args;
         args.m_pO1 = pSpawnItem;
-        args.m_iN1 = pSpawnItem->GetTimerAdjusted() / 1000;   
+        args.m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;   
         pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
         pSpawnItem->_SetTimeoutS(args.m_iN1);
     }
 
     pSpawnItem->UpdatePropertyFlag();
-    pSpawnItem->Update(); //Update tooltip for GM
 }
 
 void CCSpawn::AddObj(const CUID& uid)
@@ -623,26 +627,25 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
         
-        bool SpawnComplete = false;
+        bool fSpawnComplete = false;
         if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
         {
-            SpawnComplete = true;
+            fSpawnComplete = true;
         }
 
         if (IsTrigUsed(TRIGGER_ADDOBJ))
         {
             CScriptTriggerArgs args;
             args.m_pO1 = pSpawnedObj;
-            if (SpawnComplete)
+            if (fSpawnComplete)
                 args.m_iN1 = -1;
             else
-                args.m_iN1 = pSpawnItem->GetTimerAdjusted()/1000;
+                args.m_iN1 = pSpawnItem->_GetTimerAdjusted()/MSECS_PER_SEC;
 
             pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
             pSpawnItem->_SetTimeoutS(args.m_iN1);
         }
         pSpawnItem->UpdatePropertyFlag();
-        pSpawnItem->Update(); //Update tooltip for GM
     }
 
     // Done with checks, let's add this.
@@ -650,13 +653,10 @@ void CCSpawn::AddObj(const CUID& uid)
 
     if (GetCurrentSpawned() >= GetAmount())
     {
-        if (pSpawnItem->m_CanMask == CAN_O_NOSLEEP)
-        {
-            pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
+        pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
 
-            if (pSpawnItem->GetTopSector()->IsSleeping())
-                pSpawnItem->GoSleep();
-        }
+        if (pSpawnItem->GetTopSector()->IsSleeping())
+            pSpawnItem->_GoSleep();
     }
 }
 

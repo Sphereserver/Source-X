@@ -84,6 +84,7 @@ public:
 	void AddIdleObj(CSObjContRec* obj);
 	void ScheduleObjDeletion(CSObjContRec* obj);
 	void ScheduleSpecialObjDeletion(CSObjListRec* obj);
+	NODISCARD bool IsObjIdle(const CSObjContRec* obj) const noexcept;
 	NODISCARD bool IsScheduledObjDeletion(const CSObjContRec* obj) const noexcept;
 	NODISCARD bool IsScheduledSpecialObjDeletion(const CSObjListRec* obj) const noexcept;
 

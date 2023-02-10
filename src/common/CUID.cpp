@@ -10,7 +10,7 @@ CObjBase * CUID::ObjFindFromUID(dword dwPrivateUID, bool fInvalidateBeingDeleted
 
 	CObjBase *pObj = g_World.FindUID(dwPrivateUID & UID_O_INDEX_MASK);
 
-	if (fInvalidateBeingDeleted && (!pObj || pObj->IsBeingDeleted()))
+	if (fInvalidateBeingDeleted && (!pObj || pObj->_IsBeingDeleted()))
 		return nullptr;
 	return pObj;
 }

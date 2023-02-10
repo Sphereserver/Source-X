@@ -83,10 +83,13 @@ protected:
     void DeleteCleanup(bool fForce);    // not virtual!
 
 public:
-    inline bool IsBeingDeleted() const noexcept
+    inline bool _IsBeingDeleted() const noexcept
     {
         return _fDeleting;
     }
+
+protected:  virtual bool _IsIdle() const;
+public:     virtual bool  IsIdle() const;
 
 protected:  virtual bool _IsDeleted() const override;
 public:     virtual bool  IsDeleted() const override;

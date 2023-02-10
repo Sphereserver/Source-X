@@ -1180,7 +1180,7 @@ int CItem::FixWeirdness()
         // unreasonably long for a top level item ?
         if (_GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
-            g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", (uint)GetUID());
+            g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID());
             _SetTimeoutS(60 * 60);
         }
     }
@@ -1392,7 +1392,7 @@ void CItem::_SetTimeout( int64 iMsecs )
 	{
 		if (!_CanHoldTimer())
 		{
-			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one?\n");
+			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x)\n", GetUID().GetObjUID());
 			return;
 		}
 	// Negative numbers deletes the timeout. Do not block those kind of cleanup operations.
@@ -2043,7 +2043,7 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 	CItemBase * pItemDef = CItemBase::FindItemBase( id );
 	if ( pItemDef == nullptr )
 	{
-		DEBUG_ERR(( "SetBaseID 0%x invalid item uid=0%x\n",	id, (dword) GetUID()));
+		DEBUG_ERR(( "SetBaseID 0%x invalid item uid=0%x\n",	id, GetUID().GetObjUID()));
 		return false;
 	}
 	// SetBase sets the type, but only SetType does the components check
@@ -2057,6 +2057,7 @@ void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
 	UNREFERENCED_PARAMETER(pszCmd);
 	UNREFERENCED_PARAMETER(pSrc);
+	ASSERT(false);
 }
 
 CItemBase * CItem::Item_GetDef() const
@@ -5960,6 +5961,11 @@ bool CItem::_CanHoldTimer() const
 	ADDTOCALLSTACK("CItem::_CanHoldTimer");
 	EXC_TRY("Can have a TIMER?");
 
+	if (_IsIdle())
+	{
+		return true;
+	}
+
 	const CObjBase* pCont = GetContainer();
 	// Is it top level or equipped on a Char?
 	if (pCont != nullptr)
@@ -6228,12 +6234,12 @@ bool CItem::_OnTick()
 		return false;
 
 	EXC_SET_BLOCK("default behaviour4");
-	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (dword)GetUID()));
+	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), GetUID().GetObjUID()));
 
     EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("CItem::_OnTick: '%s' item [0%x]\n", GetName(), (dword)GetUID());
+	g_Log.EventDebug("CItem::_OnTick: '%s' item [0%x]\n", GetName(), GetUID().GetObjUID());
 	//g_Log.EventError("'%s' item [0%x]\n", GetName(), GetUID());
 	EXC_DEBUG_END;
 

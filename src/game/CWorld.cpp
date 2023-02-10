@@ -393,6 +393,11 @@ void CWorldThread::ScheduleSpecialObjDeletion(CSObjListRec* obj)
 	m_ObjSpecialDelete.InsertContentTail(obj);
 }
 
+bool CWorldThread::IsObjIdle(const CSObjContRec* obj) const noexcept
+{
+	return (obj->GetParent() == &m_ObjNew);
+}
+
 bool CWorldThread::IsScheduledObjDeletion(const CSObjContRec* obj) const noexcept
 {
 	return (obj->GetParent() == &m_ObjDelete);
@@ -559,7 +564,7 @@ void CWorldThread::GarbageCollection_UIDs()
 			if ( iResultCode )
 			{
 				// FixObj directly calls Delete method
-				//if (pObj->IsBeingDeleted() || pObj->IsDeleted())
+				//if (pObj->_IsBeingDeleted() || pObj->IsDeleted())
 				//{
 					// Do an immediate delete here instead of Delete()
 					delete pObj;

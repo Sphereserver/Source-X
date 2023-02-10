@@ -3204,14 +3204,14 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Changed: Added more checks to avoid TIMER being set on objects which shouldn't tick/have a timer.
 
 07-02-2023, Jhobean
-- Changed: Spawn now continu to generate Item/NPC on sleeping sector. If sector is sleeping when they reach the max amount of spawned Item/NPC, spawn point will fall asleep. 
-	This change will avoid to enter a dungeon/region partially spawned because the sector was sleeping too fast.
-- Fixed: Dragging an item link to a spawn gem now unlink them. This will avoid to have item dissapear on player packpack when spawn point are reset and authorise the spawn to continu spawning new item.  
-- Added: 2 news triggers for Spawn
-	@DelObj: Called when a object is remove from the list of type t_spawn
+- Changed: Spawn now continues to generate Items/NPC even on sleeping sectors. If the sector is sleeping when the spawn point reaches the max amount of objects, it will finally go in the sleeping state. 
+	This change will avoid the scenario in which a player enters a dungeon/region which partially spawned, even if a sufficient amount of time elapsed, because the sector went sleeping too soon.
+- Fixed: Dragging an item linked to a spawn point now unlinks them. This will avoid to have item dissapearing on player packpack when the spawn point is resetted and sets the spawn to continue spawning new items.
+- Added: 2 news triggers for Spawn objects:
+	@DelObj: Called when a object is removed/unlinked from the spawn point.
 			src / i / ARGO -> the uid of the spawn
 			ARGN (R/W) -> Time in second for next spawn.
-	@AddObj: Called when a object is added to the list of type t_spawn
+	@AddObj: Called when a object is added/linked to the spawn point.
 			src / i -> the uid of the spawn
 			ARGO -> the uid of char/item add
 			ARGN (R/W) -> Time in second for next spawn. Server will set to -1 if spawn is complete, you can manualy force a delay if you want.(old buggy behavior)

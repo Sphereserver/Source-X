@@ -141,6 +141,17 @@ CObjBase::~CObjBase()
 	EXC_CATCH;
 }
 
+
+bool CObjBase::_IsIdle() const
+{
+	return (GetUID().IsValidUID() && g_World.IsObjIdle(this));
+}
+
+bool CObjBase::IsIdle() const
+{
+	THREAD_SHARED_LOCK_RETURN(_IsIdle());
+}
+
 bool CObjBase::_IsDeleted() const
 {
 	return (!GetUID().IsValidUID() || g_World.IsScheduledObjDeletion(this));
