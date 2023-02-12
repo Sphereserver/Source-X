@@ -279,11 +279,17 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "Startup complete. items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T "\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
+	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = % " PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
 
 #ifdef _WIN32
-	g_Log.Event(LOGM_INIT, "Press '?' for console commands.\n");
+	g_Log.Event(LOGM_INIT, "Use '?' to view available console commands\n\n");
+#else
+	g_Log.Event(LOGL_EVENT, "Use '?' to view available console commands or Ctrl+C to exit\n\n");
 #endif
+
+	if (!g_Accounts.Account_GetCount())
+		g_Log.Event(LOGL_WARN, "The server has no accounts. To create admin account use:\n  ACCOUNT ADD [login] [password]\n  ACCOUNT [login] PLEVEL 7\n\n");
+
 
 	// Trigger server start
 	g_Serv.r_Call("f_onserver_start", &g_Serv, nullptr);

@@ -1626,7 +1626,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 				else
 				{
-					snprintf(z, STR_TEMPLENGTH, "Cannot delete account %s.\n", sCurrentName);
+					snprintf(z, STR_TEMPLENGTH, "Account '%s' deletion blocked by script.\n", sCurrentName);
 				}
 
 				g_Log.EventStr(0, z);
