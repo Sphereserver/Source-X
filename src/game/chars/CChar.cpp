@@ -385,7 +385,7 @@ void CChar::DeleteCleanup(bool fForce)
 
 // Called before Delete()
 // @Destroy or f_onchar_delete can prevent the deletion
-bool CChar::NotifyDelete()
+bool CChar::NotifyDelete(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::NotifyDelete");
 	if (IsDeleted())
@@ -395,18 +395,18 @@ bool CChar::NotifyDelete()
 	if (IsTrigUsed(TRIGGER_DESTROY))
 	{
 		//We can forbid the deletion in here with no pain
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE)
+		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce) //If NotifyDelete is forced, it's imposible to reverse the deletion
 			return false;
 	}
 
 	// If this is a player, check for f_onchar_delete
-	if (m_pClient)
+	if (m_pClient || fForce)
 	{
 		TRIGRET_TYPE trigReturn;
 		CScriptTriggerArgs Args;
 		Args.m_pO1 = m_pClient;
-		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
-		if (trigReturn == TRIGRET_RET_TRUE)
+		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn); //If NotifyDelete is forced, it's imposible to reverse the deletion
+		if (trigReturn == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
 	
@@ -429,7 +429,7 @@ bool CChar::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::Delete");
 
-	if ((NotifyDelete() == false) && !fForce)
+	if ((NotifyDelete(0) == false) && !fForce)
 		return false;
 
 	// Character has been deleted
