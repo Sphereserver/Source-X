@@ -3218,3 +3218,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 			note: 	Force item to -1 have 2 advantages
 					1- Avoid waste server's ressource on awake sector
 					2- Sometime when you kill a monster, the timer had few time left and monster was spawning too fast.
+
+19-02-2023, Drk84
+-Fixed: Rideable summoned creatures did not disappear when  mounted. ( Again Issue #582)
