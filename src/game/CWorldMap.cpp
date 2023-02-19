@@ -613,6 +613,8 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 	// This does not mean that i can touch it.
 	// ARGS:
 	//   iDistance = 2d distance to search.
+	//   fCheckMulti = check also the basecomponents of a MULTI
+	//   fLimitZ = the search is limited to the Z of the selected point.
 
 	CPointMap ptFound;
 	int iTestDistance;
@@ -765,6 +767,7 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 							continue;
 
                         const CPointMap& ptTop = pRegionItem->GetTopPoint();
+						//Differences between the coordinates we are checking and the MULTI gembit coordinates.
                         const short x2 = ptTest.m_x - ptTop.m_x;
                         const short y2 = ptTest.m_y - ptTop.m_y;
                         const short z2 = ptTest.m_z - ptTop.m_z;
@@ -792,11 +795,17 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
                                 if (pItemDef == nullptr || !pItemDef->IsType(iType))
                                     continue;
 
-                                if (fLimitZ)
+                                if (fLimitZ) //This checks if the item is on the floor
                                 {
+									if ((pMultiItem->m_dz != z2))
+										continue;
+									/*
+									* The following code would only work if the item of the type we want to find has an height 0.
+									* Because most of MULTI components has an height value it was impossible to find a t_wall/t_window/t_chair and so on
                                     const height_t uiItemHeight = pItemDef->GetHeight();
-                                    if ((pMultiItem->m_dz + uiItemHeight) != z2)
+								   if ((pMultiItem->m_dz + uiItemHeight) != z2)
                                         continue;
+									*/
                                 }
 
                                 ptFound = ptTest;
@@ -831,13 +840,20 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
                                 if (pItemDef == nullptr || !pItemDef->IsType(iType))
                                     continue;
 
-                                if (fLimitZ)
+                                if (fLimitZ) //Checking if we are in the same floor.
                                 {
-                                    const height_t uiItemHeight = pItemDef->GetHeight();
+                                   
+									if (pMultiItem->m_dz != z2)
+										continue;
+									/*
+									* The following code would only work if the item of the type we want to find has an height 0.
+									* Because most of MULTI components has an height value it was impossible to find a t_wall/t_window/t_chair and so on
+									const height_t uiItemHeight = pItemDef->GetHeight();
                                     if ((pMultiItem->m_dz + uiItemHeight) != z2)
                                         continue;
                                     else if (pItemDef->IsType(IT_WALL))
                                         continue;
+									*/
                                     // A valid building will have a floor on the top of a wall, so i can technically put an item
                                     //  at the height == top of the wall, which is the height of the floor of the upper level, since
                                     //  the floor has 0 height.
