@@ -3221,3 +3221,5 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 19-02-2023, Drk84
 -Fixed: Rideable summoned creatures did not disappear when  mounted. ( Again Issue #582)
+-Fixed: Dropping items into wall tiles in multis. (Issue #1024)
+-Fixed: When using ISNEARBYTPE command the last argument "CheckZ" on FindItemTypeNearby method was never used.
