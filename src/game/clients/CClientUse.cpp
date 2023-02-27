@@ -178,12 +178,34 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			return false;
 
 		case IT_CONTAINER_LOCKED:
-		case IT_SHIP_HOLD_LOCK:
-			if ( !m_pChar->GetPackSafe()->ContentFindKeyFor(pItem) )
+			SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
+			if (!m_pChar->GetPackSafe()->ContentFindKeyFor(pItem)) // I don't have the container key
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
+				SysMessageDefault(DEFMSG_LOCK_CONT_NO_KEY);
+				if (!IsPriv(PRIV_GM))
+					return false;
+			}
+			else // I have the key but i need to use it to unlock the container.
+			{
+				SysMessageDefault(DEFMSG_LOCK_HAS_KEY); 
+				return false;
+			}
+			break;
+
+		case IT_SHIP_HOLD_LOCK:
+			SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
+			if ( !m_pChar->GetPackSafe()->ContentFindKeyFor(pItem) ) // I don't have the hold key
+			{
+				
+				SysMessageDefault(DEFMSG_LOCK_HOLD_NO_KEY);
 				if ( !IsPriv(PRIV_GM) )
 					return false;
+			}
+			else // I have the key but i need to use it to unlock the container.
+			{
+				SysMessageDefault(DEFMSG_LOCK_HAS_KEY);
+				return false;
 			}
 			break;
 

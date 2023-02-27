@@ -612,7 +612,7 @@ int CChar::CalcArmorDefense() const
 //  -1		= already dead / invalid target.
 //  0		= no damage.
 //  INT32_MAX	= killed.
-int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy )
+int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, SPELL_TYPE spell)
 {
 	ADDTOCALLSTACK("CChar::OnTakeDamage");
 
@@ -678,7 +678,7 @@ effect_bounce:
 		if ( pBloodOath && pBloodOath->m_uidLink == pSrc->GetUID() && !(uType & DAMAGE_FIXED) && !g_Cfg.GetSpellDef(SPELL_Blood_Oath)->IsSpellType(SPELLFLAG_SCRIPTED))	// if DAMAGE_FIXED is set we are already receiving a reflected damage, so we must stop here to avoid an infinite loop.
 		{
 			iDmg += iDmg / 10;
-			pSrc->OnTakeDamage(iDmg * (100 - pBloodOath->m_itSpell.m_spelllevel) / 100, this, DAMAGE_MAGIC|DAMAGE_FIXED);
+			pSrc->OnTakeDamage(iDmg * (100 - pBloodOath->m_itSpell.m_spelllevel) / 100, this, DAMAGE_MAGIC|DAMAGE_FIXED,0,0,0,0,0,SPELL_Blood_Oath);
 		}
 	}
 
@@ -729,6 +729,7 @@ effect_bounce:
 	CScriptTriggerArgs Args( iDmg, uType, (int64)(0) );
 	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(CountOf(sm_ArmorDamageLayers))]);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
+	Args.m_VarsLocal.SetNum("Spell", (int)spell);
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
@@ -908,6 +909,7 @@ effect_bounce:
 				if ( GetTopDist3D(pSrc) < 2 )
 				{
 					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
+					
 					if (pReactive)
 					{
 						int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
@@ -917,7 +919,7 @@ effect_bounce:
 						}
 
 						iDmg -= iReactiveDamage;
-						pSrc->OnTakeDamage(iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+						pSrc->OnTakeDamage(iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy,(SPELL_TYPE)pReactive->m_itSpell.m_spell);
 						pSrc->Sound(0x1F1);
 						pSrc->Effect(EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16);
 					}
