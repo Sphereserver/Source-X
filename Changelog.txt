@@ -3226,3 +3226,9 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 20-02-2023, Drk84
 -(Cheap) Fixed: Spawn Keyword AT.n.xx not working properly. (Issue #1033) 
+
+27-02-2023, Drk84
+- Fixed: Wrong duration for Gate Travel Spell. (Issue #1043)
+- Fixed: More accurate messages when a container/hold is locked and you have/don't have the key. (Issue #1044)
+- Added: New local in the @GetHit trigger: 
+		 LOCAL.SPELL: Read Only, display  the spell number that damaged the character. 

@@ -294,7 +294,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
 
     const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
     ASSERT(pSpellDef);
-    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
+    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_TENTH;
 
     ptDest.m_z = GetFixZ(ptDest);
     ITEMID_TYPE idOrig, idDest;
@@ -1977,7 +1977,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				(iDmgType & DAMAGE_FIRE) ? 100 : 0,
 				(iDmgType & DAMAGE_COLD) ? 100 : 0,
 				(iDmgType & DAMAGE_POISON) ? 100 : 0,
-				(iDmgType & DAMAGE_ENERGY) ? 100 : 0);
+				(iDmgType & DAMAGE_ENERGY) ? 100 : 0,
+				spell);
 		}
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_HEAL))
@@ -3703,7 +3704,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		else
 			iDmgPhysical = 100;
 
-		OnTakeDamage(iEffect, pCharSrc, iDmgType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+		OnTakeDamage(iEffect, pCharSrc, iDmgType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy,spell);
 	}
 
 	switch ( spell )
