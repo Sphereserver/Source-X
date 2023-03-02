@@ -863,7 +863,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false )
+	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false, int64 iDuration = 0 )
 		= 0;
 
     /**
