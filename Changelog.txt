@@ -3232,3 +3232,8 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Fixed: More accurate messages when a container/hold is locked and you have/don't have the key. (Issue #1044)
 - Added: New local in the @GetHit trigger: 
 		 LOCAL.SPELL: Read Only, display  the spell number that damaged the character. 
+		 
+02-03-2023, Drk84
+- Fixed: Animation was played while out of range when COMBAT_SWING_NORANGE flag is enabled. (Issue #819)
+- Fixed: Spell duration was calculated two times when a spell was cast.
+- Added: REPAIRPERCENT command used to display the current health of the item in %.

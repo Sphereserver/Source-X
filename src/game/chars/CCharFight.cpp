@@ -1810,6 +1810,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// I have waited for the recoil time, then i can start the swing
 	if ( m_atFight.m_iWarSwingState == WAR_SWING_READY )
 	{
+		if (fSwingNoRange) // We don't want the animation to display if we are outside of range.
+		{
+			int	iMinDist = pWeapon ? pWeapon->GetRangeL() : 0;
+			int	iMaxDist = Fight_CalcRange(pWeapon);
+			if (dist <  iMinDist || dist > iMaxDist)
+				return WAR_SWING_READY;
+		}
 		m_atFight.m_iWarSwingState = WAR_SWING_SWINGING;
 		Reveal();
 
