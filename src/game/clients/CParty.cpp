@@ -641,7 +641,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 			break;
 
 		case PDC_SPEECHFILTER:
-			sVal = this->m_pSpeechFunction.IsEmpty() ? (CSString) "" : this->m_pSpeechFunction;
+			sVal = this->m_pSpeechFunction.IsEmpty() ? static_cast<CSString>("") : this->m_pSpeechFunction;
 			break;
 
 		case PDC_TAG0:
