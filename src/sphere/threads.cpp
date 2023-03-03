@@ -715,11 +715,7 @@ StackDebugInformation::~StackDebugInformation()
 {
     ASSERT(m_context != nullptr);
 
-#if __cplusplus >= __cpp_lib_uncaught_exceptions
     if (std::uncaught_exceptions() != 0)
-#else
-    if (std::uncaught_exception()) // deprecated in C++17
-#endif
     {
         // Exception was thrown and stack unwinding is in progress.
         m_context->exceptionNotifyStackUnwinding();
