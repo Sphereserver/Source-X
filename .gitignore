@@ -6,7 +6,6 @@
 /Nightly
 /backup/
 /.git/
-/.vscode/
 /x64/
 /x86/
 /obj/
@@ -19,6 +18,9 @@
 /CMakeFiles/
 /spheresvr.dir/
 
+# Ignore IDE.
+/.idea/
+/.vscode/
 
 *.vs
 *.pid
