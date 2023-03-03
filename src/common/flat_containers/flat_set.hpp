@@ -23,6 +23,7 @@ public:
     using value_compare = Compare;
     value_compare value_comp() const { return value_compare(B::key_comp()); }
 
+    using B::B;
     using B::insert;
     using B::erase;
 
@@ -85,6 +86,7 @@ class flat_set_base<D, Key, Container, Compare,
     D const* self() const { return static_cast<D const*>(this); }
     D* self() { return static_cast<D*>(this); }
 public:
+    using B::B;
     using B::count;
 
     // Lookup
@@ -103,6 +105,8 @@ class flat_set
 : public impl::flat_set_base<flat_set<Container, Compare>,
     typename Container::value_type, Container, Compare>
 {
+    using B = impl::flat_set_base<flat_set<Container, Compare>,
+        typename Container::value_type, Container, Compare>;
 #define FLATNAME flat_set
 #define FLATKEY typename Container::value_type
 #include "impl/class_def.hpp"
