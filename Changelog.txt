@@ -3237,3 +3237,10 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Fixed: Animation was played while out of range when COMBAT_SWING_NORANGE flag is enabled. (Issue #819)
 - Fixed: Spell duration was calculated two times when a spell was cast.
 - Added: REPAIRPERCENT command used to display the current health of the item in %.
+
+09-03-2023, Drk84
+- (Partially) Fixed: Localized messages throwing errors in console when the speaker is not visibile. Partially because i can't still display the speaker name in the journal (Issue #1049)
+- Added: New locals (READ ONLY) in @GetHit trigger: local.damagePercentPhysical, local.damagePercentFire, local.damagePercentCold, local.damagePercentPoison, local.damagePercentEnergy
+         These locals contains the amount in % of the elemental damage inflicted, and thus they are available only with Elemental Engine enabled.
+		
+		
