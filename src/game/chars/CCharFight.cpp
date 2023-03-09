@@ -690,11 +690,12 @@ effect_bounce:
 	// MAGICF_IGNOREAR bypasses defense completely
 	if ( (uType & DAMAGE_MAGIC) && IsSetMagicFlags(MAGICF_IGNOREAR) )
 		uType |= DAMAGE_FIXED;
-
+	
+	bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	// Apply armor calculation
 	if ( !(uType & (DAMAGE_GOD|DAMAGE_FIXED)) )
 	{
-		if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+		if ( fElemental )
 		{
 			// AOS elemental combat
 			if ( iDmgPhysical == 0 )		// if physical damage is not set, let's assume it as the remaining value
@@ -730,6 +731,15 @@ effect_bounce:
 	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(CountOf(sm_ArmorDamageLayers))]);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
 	Args.m_VarsLocal.SetNum("Spell", (int)spell);
+
+	if ( fElemental )
+	{
+		Args.m_VarsLocal.SetNum("DamagePercentPhysical", iDmgPhysical);
+		Args.m_VarsLocal.SetNum("DamagePercentFire", iDmgFire);
+		Args.m_VarsLocal.SetNum("DamagePercentCold", iDmgCold);
+		Args.m_VarsLocal.SetNum("DamagePercentPoison", iDmgPoison);
+		Args.m_VarsLocal.SetNum("DamagePercentEnergy", iDmgEnergy);
+	}
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
@@ -845,7 +855,7 @@ effect_bounce:
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
-		if ( iDisturbChance && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) //If Protection spell has SPELLFLAG_SCRIPTED don't make this check.
+		if ( iDisturbChance && fElemental && !pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) //If Protection spell has SPELLFLAG_SCRIPTED don't make this check.
 		{
 			// Protection spell can cancel the disturb
 			CItem *pProtectionSpell = LayerFind(LAYER_SPELL_Protection);
