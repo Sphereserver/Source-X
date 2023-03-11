@@ -3218,3 +3218,29 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 			note: 	Force item to -1 have 2 advantages
 					1- Avoid waste server's ressource on awake sector
 					2- Sometime when you kill a monster, the timer had few time left and monster was spawning too fast.
+
+19-02-2023, Drk84
+-Fixed: Rideable summoned creatures did not disappear when  mounted. ( Again Issue #582)
+-Fixed: Dropping items into wall tiles in multis. (Issue #1024)
+-Fixed: When using ISNEARBYTPE command the last argument "CheckZ" on FindItemTypeNearby method was never used.
+
+20-02-2023, Drk84
+-(Cheap) Fixed: Spawn Keyword AT.n.xx not working properly. (Issue #1033) 
+
+27-02-2023, Drk84
+- Fixed: Wrong duration for Gate Travel Spell. (Issue #1043)
+- Fixed: More accurate messages when a container/hold is locked and you have/don't have the key. (Issue #1044)
+- Added: New local in the @GetHit trigger: 
+		 LOCAL.SPELL: Read Only, display  the spell number that damaged the character. 
+		 
+02-03-2023, Drk84
+- Fixed: Animation was played while out of range when COMBAT_SWING_NORANGE flag is enabled. (Issue #819)
+- Fixed: Spell duration was calculated two times when a spell was cast.
+- Added: REPAIRPERCENT command used to display the current health of the item in %.
+
+09-03-2023, Drk84
+- (Partially) Fixed: Localized messages throwing errors in console when the speaker is not visibile. Partially because i can't still display the speaker name in the journal (Issue #1049)
+- Added: New locals (READ ONLY) in @GetHit trigger: local.damagePercentPhysical, local.damagePercentFire, local.damagePercentCold, local.damagePercentPoison, local.damagePercentEnergy
+         These locals contains the amount in % of the elemental damage inflicted, and thus they are available only with Elemental Engine enabled.
+		
+		

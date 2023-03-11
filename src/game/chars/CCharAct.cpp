@@ -2471,7 +2471,7 @@ CItem* CChar::Horse_GetMountItem() const
 			const CChar* pRider = dynamic_cast<const CChar*>(pMountItem->GetTopLevelObj());
 			if (pRider)
 			{
-				if (!IsStatFlag(STATF_PET) && !pRider->IsPriv(PRIV_GM) && (pRider->GetPrivLevel() <= PLEVEL_Player))
+				if (!IsStatFlag(STATF_CONJURED) && !IsStatFlag(STATF_PET) && !pRider->IsPriv(PRIV_GM) && (pRider->GetPrivLevel() <= PLEVEL_Player))
 					return nullptr;
 
 				const CItem* pOwnerMountItem = pRider->LayerFind(LAYER_HORSE);
