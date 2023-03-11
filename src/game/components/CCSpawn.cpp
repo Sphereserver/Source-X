@@ -636,9 +636,8 @@ void CCSpawn::AddObj(const CUID& uid)
         {
             CScriptTriggerArgs args;
             args.m_pO1 = pSpawnedObj;
-
-            args.m_iN1 = pSpawnItem->_GetTimerAdjusted()/MSECS_PER_SEC;
-
+            int64 timer= pSpawnItem->_GetTimerAdjusted();
+            args.m_iN1 = (timer < 0) ? -1 : timer/MSECS_PER_SEC;
             pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
             pSpawnItem->_SetTimeoutS(args.m_iN1);
         }
