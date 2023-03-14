@@ -16,7 +16,7 @@ jobs:
     - name: CMake 
       run: cmake -G "Visual Studio 17 2022" src/
     - name: MSBuild
-      run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
+      run: msbuild SphereServer.sln %MSBUILD_FLAGS% /verbosity:minimal /maxcpucount /p:Configuration=Nightly
     - name: Create folders
       run: |
             mkdir accounts, logs, save, scripts
