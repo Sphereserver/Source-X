@@ -5978,6 +5978,7 @@ bool CItem::_OnTick()
 
 	if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))
 	{
+        const ProfileTask timersTask(PROFILE_TICKS); // profile the OnTick proccess.
 		iRet = OnTrigger( ITRIG_TIMER, &g_Serv );
         if (iRet == TRIGRET_RET_TRUE)
         {

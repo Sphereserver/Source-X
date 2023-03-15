@@ -48,7 +48,7 @@ public:
 		return _iTickCur;
 	}
 
-private:
+public:
 	// To update the internal system clock after a WorldSave or Resync
 	friend class CWorld;
 

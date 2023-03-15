@@ -894,6 +894,18 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
                 return true;
             }
         }
+#ifdef _DEBUG_TICKS
+        if (!strcmpi( ptcKey, "totaltickcount" ))
+        {
+            sVal.Format64Val( TotalTickCount() );
+            return true;
+        }
+        else if (!strcmpi(ptcKey, "totalticktime"))
+        {
+            sVal.Format64Val(TotalTickTime());
+            return true;
+        }
+#endif
 
         // Just try to default to something reasonable ?
         // Even though we have not really specified it correctly !

@@ -219,6 +219,11 @@ public:
 
 	lpctstr GetName() const { return "World"; }
 
+    CWorldClock& GameClock()
+    {
+        return _GameClock;
+    }
+
 } g_World;
 
 

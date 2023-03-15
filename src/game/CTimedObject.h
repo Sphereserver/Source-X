@@ -8,6 +8,10 @@
 
 #include "../sphere/ProfileData.h"
 
+#ifdef _DEBUG_TICKS
+#include "CWorldGameTime.h"
+#endif
+
 class CComponent;
 class CWorldTicker;
 
@@ -22,6 +26,28 @@ public:
 protected:
     THREAD_CMUTEX_DEF;
 
+
+#ifdef _DEBUG_TICKS
+private:
+    int64 _iTotalTickCount = 0;
+    int64 _iTotalTickTime = 0;
+
+public:
+    int64 TotalTickCount() const
+    {
+        return _iTotalTickCount;
+    }
+
+    int64 TotalTickTime() const
+    {
+        return _iTotalTickTime;
+    }
+
+    int64 AverageTickTime() const
+    {
+        return _iTotalTickTime / _iTotalTickCount;
+    }
+#endif
 private:
     int64 _iTimeout;
     PROFILE_TYPE _profileType;

@@ -63,25 +63,25 @@ void ProfileData::Start(PROFILE_TYPE id)
 	// Stop prev task.
 	if ( m_TimeTotal >= m_iActiveWindowSeconds )
 	{
-		for ( int i = 0; i < PROFILE_DATA_QTY; ++i )
-		{
-			if ( m_iAverageCount < 4 )
-			{
-				m_AverageTimes[i].m_Time = m_CurrentTimes[i].m_Time;
-				m_AverageTimes[i].m_iCount = m_CurrentTimes[i].m_iCount;
-			}
-			else
-			{
-				m_AverageTimes[i].m_Time	= (((m_AverageTimes[i].m_Time * 90) + (m_PreviousTimes[i].m_Time * 10)) / 100);
-				m_AverageTimes[i].m_iCount	= (((m_AverageTimes[i].m_iCount * 95) + (m_PreviousTimes[i].m_iCount * 10)) / 100);
-			}
-		}
+        for (int i = 0; i < PROFILE_DATA_QTY; ++i)
+        {
+            if (m_iAverageCount < 4)
+            {
+                m_AverageTimes[i].m_Time = m_CurrentTimes[i].m_Time;
+                m_AverageTimes[i].m_iCount = m_CurrentTimes[i].m_iCount;
+            }
+            else
+            {
+                m_AverageTimes[i].m_Time = (((m_AverageTimes[i].m_Time * 90) + (m_PreviousTimes[i].m_Time * 10)) / 100);
+                m_AverageTimes[i].m_iCount = (((m_AverageTimes[i].m_iCount * 95) + (m_PreviousTimes[i].m_iCount * 10)) / 100);
+            }
+        }
 
-		for ( int i = PROFILE_DATA_QTY; i < PROFILE_QTY; ++i )
-		{
-			m_AverageTimes[i].m_Time	+= m_CurrentTimes[i].m_Time;
-			m_AverageTimes[i].m_iCount	+= m_CurrentTimes[i].m_iCount;
-		}
+        for (int i = PROFILE_DATA_QTY; i < PROFILE_QTY; ++i)
+        {
+            m_AverageTimes[i].m_Time += m_CurrentTimes[i].m_Time;
+            m_AverageTimes[i].m_iCount += m_CurrentTimes[i].m_iCount;
+        }
 
 		++m_iAverageCount;
 
@@ -101,6 +101,11 @@ void ProfileData::Start(PROFILE_TYPE id)
     ASSERT(m_TimeTotal >= 0);
 	m_CurrentTimes[m_CurrentTask].m_Time += llDiff;
 	++ m_CurrentTimes[m_CurrentTask].m_iCount;
+
+#ifdef _DEBUG_TICKS
+    _TotalTimes[m_CurrentTask].m_iCount += 1;
+    _TotalTimes[m_CurrentTask].m_Time += llDiff;
+#endif
 
 	// We are now on to the new task.
 	m_CurrentTime = llTicksStart;
@@ -166,6 +171,7 @@ lpctstr ProfileData::GetName(PROFILE_TYPE id) const noexcept
         "SHIPS",
         "TIMEDFUNCTIONS",
         "TIMERS",
+        "TICKS",
 		"DATA_TX",
 		"DATA_RX",
 		"FAULTS"
@@ -178,7 +184,6 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 {
 	ADDTOCALLSTACK("ProfileData::GetDesc");
 	ASSERT(id < PROFILE_QTY);
-	const int iCount = m_PreviousTimes[id].m_iCount;
 	tchar* ptcTmp = Str_GetTemp();
 
 	if ( id >= PROFILE_DATA_QTY )
@@ -191,12 +196,24 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 	}
 	else
 	{
+#ifdef _DEBUG_TICKS
+        llong iTotalSamples = _TotalTimes[id].m_iCount;
+        float iTotalTime = static_cast<float>( _TotalTimes[id].m_Time / 1000.0 );
+        float iAverageTime = static_cast<float>( iTotalSamples > 1 ? iTotalTime / iTotalSamples : 0.0 );
+        //llong iAverage =
+        snprintf(ptcTmp, STR_TEMPLENGTH, "%.4fs  avg: %.4fs  [samples:%lli]",
+            iTotalTime,
+            iAverageTime,
+            iTotalSamples);
+#else
+        const int iCount = m_PreviousTimes[id].m_iCount;
 		snprintf(ptcTmp, STR_TEMPLENGTH, "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
 			(m_PreviousTimes[id].m_Time    / 1000.0),
 			(m_AverageTimes[id].m_Time     / 1000.0),
 			iCount,
 			m_AverageTimes[id].m_iCount,
 			m_iAverageCount );
+#endif
 	}
 
 	return ptcTmp;

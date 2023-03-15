@@ -4,6 +4,8 @@
 #include "CWorldGameTime.h"
 #include "CWorldTickingList.h"
 #include "CTimedObject.h"
+#include "CWorld.h"
+#include "CWorldClock.h"
 
 
 CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
@@ -54,7 +56,17 @@ bool CTimedObject::CanTick() const
 bool CTimedObject::OnTick()
 {
     ADDTOCALLSTACK("CTimedObject::OnTick");
-    THREAD_UNIQUE_LOCK_RETURN(_OnTick());
+#ifdef _DEBUG_TICKS
+    CServerTime tickStartTime;
+    int64 iTickStartTime = g_World.GameClock().GetSystemClock();
+#endif 
+    //THREAD_UNIQUE_LOCK_RETURN(_OnTick());
+    bool fTickResult = _OnTick();
+#ifdef _DEBUG_TICKS
+    _iTotalTickTime += g_World.GameClock().GetSystemClock() - iTickStartTime;
+    ++_iTotalTickCount;
+#endif
+    return fTickResult;
 }
 
 void CTimedObject::_SetTimeout(int64 iDelayInMsecs)

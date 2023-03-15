@@ -151,6 +151,7 @@ MainThread::MainThread()
     m_profile.EnableProfile(PROFILE_SHIPS);
     m_profile.EnableProfile(PROFILE_TIMEDFUNCTIONS);
     m_profile.EnableProfile(PROFILE_TIMERS);
+    m_profile.EnableProfile(PROFILE_TICKS);
 }
 
 void MainThread::onStart()

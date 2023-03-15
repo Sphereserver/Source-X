@@ -446,7 +446,7 @@ void CWorldTicker::Tick()
                     {
                         ptcSubDesc = "Item";
                     }
-                    fDelete = (pItem->_OnTick() == false);
+                    fDelete = (pItem->OnTick() == false);
                     break;
                 }
                 break;
@@ -456,7 +456,7 @@ void CWorldTicker::Tick()
                     ptcSubDesc = "Char";
                     CChar* pChar = dynamic_cast<CChar*>(pTimedObj);
                     ASSERT(pChar);
-                    fDelete = !pChar->_OnTick();
+                    fDelete = !pChar->OnTick();
                     if (!fDelete && pChar->m_pNPC && !pTimedObj->_IsTimerSet())
                     {
                         pTimedObj->_SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'

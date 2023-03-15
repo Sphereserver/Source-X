@@ -24,7 +24,8 @@ enum PROFILE_TYPE : uchar
     PROFILE_SECTORS,    // sector stuff
     PROFILE_SHIPS,      // sips moving
     PROFILE_TIMEDFUNCTIONS, // TimerF
-    PROFILE_TIMERS,
+    PROFILE_TIMERS,     // Timer system (add timer, remove timer, sector sleep
+    PROFILE_TICKS,      // Timeout of objects (CTimedObject::onTick)
 	PROFILE_TIME_QTY,
 
 	// Qty of bytes. Not Time.
@@ -49,6 +50,10 @@ protected:
 	ProfileDataRec m_AverageTimes[PROFILE_QTY];
 	ProfileDataRec m_PreviousTimes[PROFILE_QTY];
 	ProfileDataRec m_CurrentTimes[PROFILE_QTY];
+    #ifdef _DEBUG_TICKS
+    ProfileDataRec _TotalTimes[PROFILE_QTY];
+    #endif
+
 	bool m_EnabledProfiles[PROFILE_QTY];
 
 	int m_iActiveWindowSeconds;	// The sample window size in seconds. 0=off
