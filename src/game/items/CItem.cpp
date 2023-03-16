@@ -1392,7 +1392,7 @@ void CItem::_SetTimeout( int64 iMsecs )
 	{
 		if (!_CanHoldTimer())
 		{
-			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x)\n", GetUID().GetObjUID());
+			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x [%s])\n", GetUID().GetObjUID(), GetName());
 			return;
 		}
 	// Negative numbers deletes the timeout. Do not block those kind of cleanup operations.
