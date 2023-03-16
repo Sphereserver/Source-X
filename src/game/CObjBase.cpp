@@ -1301,6 +1301,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					int iType = g_Cfg.ResourceGetIndexType( RES_TYPEDEF, ptcKey );
 					int iDistance;
 					bool fCheckMulti;
+					bool fCheckMultiZ = false;
 
 					SKIP_IDENTIFIERSTRING( ptcKey );
 					SKIP_SEPARATORS( ptcKey );
@@ -1316,9 +1317,12 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					else
 						fCheckMulti = Exp_GetVal( ptcKey ) != 0;
 
+					if (fCheckMulti && *ptcKey)
+						fCheckMultiZ = Exp_GetVal(ptcKey) != 0;
+
 					if ( fP )
 					{
-						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti ) );
+						CPointMap pt = ( index == OC_ISNEARTYPETOP ) ? ( CWorldMap::FindTypeNear_Top(GetTopPoint(), (IT_TYPE)iType, iDistance ) ) : ( CWorldMap::FindItemTypeNearby(GetTopPoint(), (IT_TYPE)iType, iDistance, fCheckMulti, fCheckMultiZ) );
 
 						if ( !pt.IsValidPoint() )
 							sVal.FormatVal( 0 );

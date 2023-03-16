@@ -294,7 +294,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
 
     const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
     ASSERT(pSpellDef);
-    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_SEC;
+    const int64 iDuration = pSpellDef->m_Duration.GetLinear(0) * MSECS_PER_TENTH;
 
     ptDest.m_z = GetFixZ(ptDest);
     ITEMID_TYPE idOrig, idDest;
@@ -332,7 +332,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     return true;
 }
 
-CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg )
+CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDuration)
 {
 	ADDTOCALLSTACK("CChar::Spell_Summon_Place");
 	// Finally place the NPC in the world.
@@ -350,7 +350,7 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg )
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->NPC_PetSetOwner(this);
-	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr);
+	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr, false, iDuration);
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
 	pChar->SoundChar(CRESND_GETHIT);
@@ -1977,7 +1977,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				(iDmgType & DAMAGE_FIRE) ? 100 : 0,
 				(iDmgType & DAMAGE_COLD) ? 100 : 0,
 				(iDmgType & DAMAGE_POISON) ? 100 : 0,
-				(iDmgType & DAMAGE_ENERGY) ? 100 : 0);
+				(iDmgType & DAMAGE_ENERGY) ? 100 : 0,
+				spell);
 		}
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_HEAL))
@@ -2061,7 +2062,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	return pSpell;
 }
 
-void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
+void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel, int64 iDuration)
 {
 	ADDTOCALLSTACK("CChar::Spell_Area");
 	// Effects all creatures in the area. (but not us)
@@ -2085,7 +2086,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 			if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF) )
 				continue;
 		}
-		pChar->OnSpellEffect( spelltype, this, iSkillLevel, nullptr );
+		pChar->OnSpellEffect( spelltype, this, iSkillLevel, nullptr, iDuration);
 	}
 
 	if ( !pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ))	// prevent damage nearby items on ground
@@ -2757,12 +2758,12 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 	return true;
 }
 
-bool CChar::Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel )
+bool CChar::Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel, int64 iDuration)
 {
 	ADDTOCALLSTACK("CChar::Spell_SimpleEffect");
 	if ( pObj == nullptr )
 		return false;
-	pObj->OnSpellEffect( spell, this, iSkillLevel, dynamic_cast <CItem*>( pObjSrc ));
+	pObj->OnSpellEffect( spell, this, iSkillLevel, dynamic_cast <CItem*>( pObjSrc ),false,iDuration);
 	return true;
 }
 
@@ -2897,7 +2898,7 @@ bool CChar::Spell_CastDone()
 	{
 		if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 		{
-			Spell_Summon_Place(pSummon, m_Act_p);
+			Spell_Summon_Place(pSummon, m_Act_p, iDuration);
 		}
 		else if (fIsSpellField)
 		{
@@ -2917,16 +2918,16 @@ bool CChar::Spell_CastDone()
 				areaRadius = 4;
 
 			if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
-				Spell_Area(GetTopPoint(), areaRadius, iSkillLevel);
+				Spell_Area(GetTopPoint(), areaRadius, iSkillLevel, iDuration);
 			else
-				Spell_Area(m_Act_p, areaRadius, iSkillLevel);
+				Spell_Area(m_Act_p, areaRadius, iSkillLevel, iDuration);
 		}
 		else if (pSpellDef->IsSpellType(SPELLFLAG_POLY))
 			return false;
 		else
 		{
 			if (pObj)
-				pObj->OnSpellEffect(spell, this, iSkillLevel, dynamic_cast <CItem*>(pObjSrc));
+				pObj->OnSpellEffect(spell, this, iSkillLevel, dynamic_cast <CItem*>(pObjSrc), false, iDuration);
 		}
 	}
 	else if (fIsSpellField)
@@ -2959,13 +2960,13 @@ bool CChar::Spell_CastDone()
 		}
 
 		if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
-			Spell_Area(GetTopPoint(), areaRadius, iSkillLevel);
+			Spell_Area(GetTopPoint(), areaRadius, iSkillLevel, iDuration);
 		else
-			Spell_Area(m_Act_p, areaRadius, iSkillLevel);
+			Spell_Area(m_Act_p, areaRadius, iSkillLevel, iDuration);
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
 	{
-		Spell_Summon_Place(pSummon, m_Act_p);
+		Spell_Summon_Place(pSummon, m_Act_p, iDuration);
 	}
 	else
 	{
@@ -3048,7 +3049,7 @@ bool CChar::Spell_CastDone()
 						iDiff = -iDiff;
 					}
 					int iMax = pChar->Stat_GetMaxAdjusted(STAT_STR) / 2;
-					pChar->OnSpellEffect(spell, this, minimum(iDiff, iMax), nullptr);
+					pChar->OnSpellEffect(spell, this, minimum(iDiff, iMax), nullptr, false, iDuration);
 				}
 				break;
 
@@ -3066,7 +3067,7 @@ bool CChar::Spell_CastDone()
 				{
 					// Burn person at location.
 					//pObj->Effect(EFFECT_OBJ, iT1, pObj, 10, 30, false, iColor, dwRender);
-					if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
+					if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel, iDuration))
 						return false;
 				}
 				break;
@@ -3090,7 +3091,7 @@ bool CChar::Spell_CastDone()
 					if (pObj != this)
 						return false;
 				}
-				if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
+				if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel, iDuration))
 					return false;
 				break;
 
@@ -3152,7 +3153,7 @@ bool CChar::Spell_CastDone()
 			break;
 
 			default:
-				if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
+				if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel, iDuration))
 					return false;
 				break;
 		}
@@ -3445,7 +3446,7 @@ int CChar::Spell_CastStart()
 	return iDifficulty;
 }
 
-bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting )
+bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting, int64 iDuration )
 {
 	ADDTOCALLSTACK("CChar::OnSpellEffect");
 	// Spell has a direct effect on this char.
@@ -3470,7 +3471,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	iSkillLevel = (iSkillLevel / 2) + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
-	int64 iDuration = pSpellDef->m_idLayer ? GetSpellDuration(spell, iSkillLevel, pCharSrc) : 0;    // tenths of second
+
+	if (pSpellDef->m_idLayer && !iDuration) //By using SPELLEFFECT command (and the spell has a layer where to store properties)  we need to calculate the duration. 
+		iDuration = GetSpellDuration(spell, iSkillLevel, pCharSrc);    // tenths of second
+
 	SOUND_TYPE iSound = pSpellDef->m_sound;
 	bool fExplode = (pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) && !pSpellDef->IsSpellType(SPELLFLAG_GOOD));		// bolt (chasing) spells have explode = 1 by default (if not good spell)
 	bool fPotion = (pSourceItem && pSourceItem->IsType(IT_POTION));
@@ -3639,7 +3643,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 						pMagicReflect->Delete();
 					}
 					else {
-						pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true);
+						pCharSrc->OnSpellEffect(spell, pCharSrc, iSkillLevel, pSourceItem, true, iDuration);
 					}
 					return true;
 				}
@@ -3703,7 +3707,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		else
 			iDmgPhysical = 100;
 
-		OnTakeDamage(iEffect, pCharSrc, iDmgType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+		OnTakeDamage(iEffect, pCharSrc, iDmgType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy,spell);
 	}
 
 	switch ( spell )

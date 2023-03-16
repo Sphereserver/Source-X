@@ -1129,12 +1129,17 @@ lpctstr const CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
 bool CCSpawn::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
     ADDTOCALLSTACK("CCSpawn::r_GetRef");
-    int iCmd = FindTableSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = -1;
+    if (!strnicmp(ptcKey, "at.", 3))
+        iCmd = FindTableSorted("at", sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    else
+        iCmd = FindTableSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
 
     if (iCmd < 0)
     {
         return false;
     }
+    
 
     CItem *pItem = static_cast<CItem*>(GetLink());
 

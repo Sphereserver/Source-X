@@ -829,7 +829,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
             tchar * ppArgs[256];
 			int iQty = Str_ParseCmds(ptcBarkBuffer, ppArgs, CountOf(ppArgs), "," );
-			int iClilocId = Exp_GetVal( ppArgs[0] );
+			int iClilocId = Exp_GetVal( pszText ); //pszText holds the cliloc number, we can't use ppArgs[0] because if the string name exists it will contain the speaker name along with the cliloc number.
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
 			for (int i = 3; i < iQty; ++i )
@@ -847,7 +847,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
             tchar * ppArgs[256];
 			int iQty = Str_ParseCmds(ptcBarkBuffer, ppArgs, CountOf(ppArgs), "," );
-			int iClilocId = Exp_GetVal( ppArgs[0] );
+			int iClilocId = Exp_GetVal(pszText ); //pszText holds the cliloc number, we can't use ppArgs[0] because if the string name exists it will contain the speaker name along with the cliloc number.
 			CSString CArgs;
 			for ( int i = 1; i < iQty; ++i )
 			{

@@ -612,7 +612,7 @@ int CChar::CalcArmorDefense() const
 //  -1		= already dead / invalid target.
 //  0		= no damage.
 //  INT32_MAX	= killed.
-int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy )
+int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, SPELL_TYPE spell)
 {
 	ADDTOCALLSTACK("CChar::OnTakeDamage");
 
@@ -678,7 +678,7 @@ effect_bounce:
 		if ( pBloodOath && pBloodOath->m_uidLink == pSrc->GetUID() && !(uType & DAMAGE_FIXED) && !g_Cfg.GetSpellDef(SPELL_Blood_Oath)->IsSpellType(SPELLFLAG_SCRIPTED))	// if DAMAGE_FIXED is set we are already receiving a reflected damage, so we must stop here to avoid an infinite loop.
 		{
 			iDmg += iDmg / 10;
-			pSrc->OnTakeDamage(iDmg * (100 - pBloodOath->m_itSpell.m_spelllevel) / 100, this, DAMAGE_MAGIC|DAMAGE_FIXED);
+			pSrc->OnTakeDamage(iDmg * (100 - pBloodOath->m_itSpell.m_spelllevel) / 100, this, DAMAGE_MAGIC|DAMAGE_FIXED,0,0,0,0,0,SPELL_Blood_Oath);
 		}
 	}
 
@@ -690,11 +690,12 @@ effect_bounce:
 	// MAGICF_IGNOREAR bypasses defense completely
 	if ( (uType & DAMAGE_MAGIC) && IsSetMagicFlags(MAGICF_IGNOREAR) )
 		uType |= DAMAGE_FIXED;
-
+	
+	bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	// Apply armor calculation
 	if ( !(uType & (DAMAGE_GOD|DAMAGE_FIXED)) )
 	{
-		if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+		if ( fElemental )
 		{
 			// AOS elemental combat
 			if ( iDmgPhysical == 0 )		// if physical damage is not set, let's assume it as the remaining value
@@ -729,6 +730,16 @@ effect_bounce:
 	CScriptTriggerArgs Args( iDmg, uType, (int64)(0) );
 	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(CountOf(sm_ArmorDamageLayers))]);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
+	Args.m_VarsLocal.SetNum("Spell", (int)spell);
+
+	if ( fElemental )
+	{
+		Args.m_VarsLocal.SetNum("DamagePercentPhysical", iDmgPhysical);
+		Args.m_VarsLocal.SetNum("DamagePercentFire", iDmgFire);
+		Args.m_VarsLocal.SetNum("DamagePercentCold", iDmgCold);
+		Args.m_VarsLocal.SetNum("DamagePercentPoison", iDmgPoison);
+		Args.m_VarsLocal.SetNum("DamagePercentEnergy", iDmgEnergy);
+	}
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
@@ -844,7 +855,7 @@ effect_bounce:
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
-		if ( iDisturbChance && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) //If Protection spell has SPELLFLAG_SCRIPTED don't make this check.
+		if ( iDisturbChance && fElemental && !pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) //If Protection spell has SPELLFLAG_SCRIPTED don't make this check.
 		{
 			// Protection spell can cancel the disturb
 			CItem *pProtectionSpell = LayerFind(LAYER_SPELL_Protection);
@@ -908,6 +919,7 @@ effect_bounce:
 				if ( GetTopDist3D(pSrc) < 2 )
 				{
 					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
+					
 					if (pReactive)
 					{
 						int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
@@ -917,7 +929,7 @@ effect_bounce:
 						}
 
 						iDmg -= iReactiveDamage;
-						pSrc->OnTakeDamage(iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+						pSrc->OnTakeDamage(iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy,(SPELL_TYPE)pReactive->m_itSpell.m_spell);
 						pSrc->Sound(0x1F1);
 						pSrc->Effect(EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16);
 					}
@@ -1808,6 +1820,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// I have waited for the recoil time, then i can start the swing
 	if ( m_atFight.m_iWarSwingState == WAR_SWING_READY )
 	{
+		if (fSwingNoRange) // We don't want the animation to display if we are outside of range.
+		{
+			int	iMinDist = pWeapon ? pWeapon->GetRangeL() : 0;
+			int	iMaxDist = Fight_CalcRange(pWeapon);
+			if (dist <  iMinDist || dist > iMaxDist)
+				return WAR_SWING_READY;
+		}
 		m_atFight.m_iWarSwingState = WAR_SWING_SWINGING;
 		Reveal();
 
