@@ -1180,7 +1180,7 @@ int CItem::FixWeirdness()
         // unreasonably long for a top level item ?
         if (_GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
-            g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID());
+			g_Log.EventWarn("FixWeirdness on Item (UID=0%x [%s]): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID(), GetName());
             _SetTimeoutS(60 * 60);
         }
     }
@@ -1392,7 +1392,7 @@ void CItem::_SetTimeout( int64 iMsecs )
 	{
 		if (!_CanHoldTimer())
 		{
-			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x)\n", GetUID().GetObjUID());
+			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x [%s])\n", GetUID().GetObjUID(), GetName());
 			return;
 		}
 	// Negative numbers deletes the timeout. Do not block those kind of cleanup operations.
