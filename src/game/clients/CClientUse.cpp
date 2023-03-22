@@ -831,7 +831,12 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
         }
 		if ( s.IsKeyHead("ON", 2) )
 		{
-			if ( *s.GetArgStr() == '@' )
+			if ( !strcmpi(s.GetArgStr(), "@Cancel") )
+			{
+				fSkip = true;
+				continue;
+			}
+			else if ( *s.GetArgStr() == '@' )
             {
                 ++iShowCount;
                 fSkip = true;
