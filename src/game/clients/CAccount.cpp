@@ -279,6 +279,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr ptcArg
 
 	pAccount = new CAccount(szName);
 	ASSERT(pAccount);
+	pSrc->SysMessagef("Account '%s' created\n", pszName);
 	pAccount->_dateConnectedFirst = pAccount->_dateConnectedLast = CSTime::GetCurrentTime();
 
 	pAccount->SetPassword(ptcArg, md5);
