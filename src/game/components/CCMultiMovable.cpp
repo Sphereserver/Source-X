@@ -1015,7 +1015,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
                 return false;
             pItemThis->m_itShip.m_DirMove = (byte)(GetDirStr(s.GetArgStr()));
             SetCaptain(pSrc);
-            return Move((DIR_TYPE)(pItemThis->m_itShip.m_DirMove), _shipSpeed.tiles);
+            Move((DIR_TYPE)(pItemThis->m_itShip.m_DirMove), _shipSpeed.tiles); //No need to return false, we just can't move the ship. The command is valid and by returning false we will get a console warning.
+            return true;
         }
 
         case CMV_SHIPGATE:
@@ -1048,7 +1049,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             if (!Face((DIR_TYPE)(pItemThis->m_itShip.m_DirMove)))
             {
                 pItemThis->m_itShip.m_DirMove = (uchar)(DirMove);
-                return true; //No need to return false, we just can't turn the ship. The command is valid and by returning false we will a console warning.
+                return true; //No need to return false, we just can't turn the ship. The command is valid and by returning false we will get a console warning.
             }
             break;
         }
