@@ -844,8 +844,10 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 	// If setting = -1:illimited other value should be add to char maxweight
 	int iMaxWeight = m_ModMaxWeight;
 	if ((GetContainedLayer() == LAYER_PACK) && !(g_Cfg.m_iBackpackOverload <= -1))
-		iMaxWeight += (g_Cfg.Calc_MaxCarryWeight(pCharMsg) + g_Cfg.m_iBackpackOverload);
-
+	{
+		CChar* pCharContainerOwner = static_cast<CChar*>(GetContainer()); // Owner of the container
+		iMaxWeight += (g_Cfg.Calc_MaxCarryWeight(pCharContainerOwner) + g_Cfg.m_iBackpackOverload);
+	}
 	if (iMaxWeight > 0 && (GetTotalWeight() + pItem->GetWeight() > iMaxWeight))
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
