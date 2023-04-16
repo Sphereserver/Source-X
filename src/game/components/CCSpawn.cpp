@@ -627,21 +627,17 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
         
-        bool fSpawnComplete = false;
         if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
         {
-            fSpawnComplete = true;
+            pSpawnItem->_SetTimeoutS(-1);
         }
 
         if (IsTrigUsed(TRIGGER_ADDOBJ))
         {
             CScriptTriggerArgs args;
             args.m_pO1 = pSpawnedObj;
-            if (fSpawnComplete)
-                args.m_iN1 = -1;
-            else
-                args.m_iN1 = pSpawnItem->_GetTimerAdjusted()/MSECS_PER_SEC;
-
+            const int64 iTimer= pSpawnItem->_GetTimerAdjusted();
+            args.m_iN1 = (iTimer < 0) ? -1 : iTimer/MSECS_PER_SEC;
             pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
             pSpawnItem->_SetTimeoutS(args.m_iN1);
         }
