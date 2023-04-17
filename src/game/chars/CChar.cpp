@@ -34,6 +34,7 @@
 lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
+    "@AddMulti",            // Adding a multi to the MultiStorage,
 	"@AfterClick",
 	"@Attack",				// I am attacking someone (SRC)
 	"@CallGuards",
@@ -63,6 +64,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@DClick",				// Someone has dclicked on me.
 	"@Death",				//+I just got killed.
 	"@DeathCorpse",
+    "@DelMulti",            // Removing a multi to the MultiStorage,
 	"@Destroy",				//+I am nearly destroyed
 	"@Dismount",			// I am trying to get rid of my ride right now
 	"@Dye",					// My color has been changed

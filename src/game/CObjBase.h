@@ -1079,6 +1079,7 @@ enum WAR_SWING_TYPE	// m_Act_War_Swing_State
 enum CTRIG_TYPE : short
 {
 	CTRIG_AAAUNUSED		= 0,
+    CTRIG_AddMulti,         // Adds the given multi to the CMultiStorage of this char (player).
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.
 	CTRIG_Attack,           // I am attacking someone (SRC).
 	CTRIG_CallGuards,       // I'm calling guards.
@@ -1108,6 +1109,7 @@ enum CTRIG_TYPE : short
 	CTRIG_DClick,           // Someone has dclicked on me.
 	CTRIG_Death,            // I just got killed.
 	CTRIG_DeathCorpse,      // A Corpse is being created from my body.
+    CTRIG_DelMulti,         // Delete the given multi to the CMultiStorage of this char (player).
 	CTRIG_Destroy,          // I am nearly destroyed.
 	CTRIG_Dismount,         // I'm dismounting.
 	CTRIG_DYE,

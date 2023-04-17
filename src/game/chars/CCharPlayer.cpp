@@ -292,6 +292,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		case CPC_MAXHOUSES:
 			sVal.FormatU8Val(_iMaxHouses);
 			return true;
+        case CPC_HOUSEMULTICOUNT:
+            sVal.Format16Val(GetMultiStorage()->GetHouseCountTotal());
+            return true;
 		case CPC_HOUSES:
 			sVal.Format16Val(GetMultiStorage()->GetHouseCountReal());
 			return true;
@@ -306,6 +309,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			sVal.FormatU8Val(_iMaxShips);
 			return true;
 		}
+        case CPC_SHIPMULTICOUNT:
+            sVal.Format16Val(GetMultiStorage()->GetShipCountTotal());
+            return true;
 		case CPC_SHIPS:
 		{
 			sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
