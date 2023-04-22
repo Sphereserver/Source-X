@@ -248,7 +248,7 @@ void CChar::Attacker_Clear()
     ADDTOCALLSTACK("CChar::Attacker_Clear");
     if (IsTrigUsed(TRIGGER_COMBATEND))
     {
-        if (!Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
+        if (m_lastAttackers.empty() || !Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
         {
             OnTrigger(CTRIG_CombatEnd, this, 0);
         }

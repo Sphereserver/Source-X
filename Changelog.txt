@@ -3249,3 +3249,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 07-04-2023, Drk84
 - Fixed: ModMaxWeight not working on NPCs. (Issue #1061)
 - Fixed: SHIPMOVE command displaying an "invalid command" warning on the console if the ship can't move. (Issue #860)
+
+22-04-2023, Drk84
+- Fixed: NPC double hit. (Issue #1065)
+- Fixed: @CombatEnd not fired and Combat memories not removed when the fight is ended. (Issue #1055)
