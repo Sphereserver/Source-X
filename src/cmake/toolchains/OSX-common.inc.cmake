@@ -1,23 +1,12 @@
 SET (TOOLCHAIN 1)
 
-function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: OSX-64.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"OSX"		PARENT_SCOPE)
-	SET(ARCH_BITS		64		PARENT_SCOPE)
-
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
-endfunction()
-
-
-function (toolchain_exe_stuff)
+function (toolchain_exe_stuff_common)
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
 		"-w") # this line is for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
 		"-w")
-	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
-	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
@@ -32,7 +21,8 @@ function (toolchain_exe_stuff)
 	 # -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic\
 					-I/usr/local/opt/mysql-client/include\
-					-L/usr/local/opt/mysql-client/lib -lmysqlclient"
+					-L/usr/local/opt/mysql-client/lib -lmysqlclient\
+					${CMAKE_EXE_LINKER_FLAGS_EXTRA}"
 					PARENT_SCOPE)
 
 
@@ -91,4 +81,5 @@ function (toolchain_exe_stuff)
 	IF (TARGET spheresvr_debug)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
 	ENDIF (TARGET spheresvr_debug)
+
 endfunction()

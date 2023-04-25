@@ -1835,10 +1835,13 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 			return nullptr;
 	}
 
-    if ( !ptDest.IsValidPoint() )
+    if (!ptDest.IsValidPoint())
     {
-        DEBUG_ERR(("Character with uid=0%x on %d,%d,%d,%d wants to move into an invalid location %d,%d,%d,%d.\n",
-            GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map));
+		if (!ptOld.IsValidPoint())
+		{
+			DEBUG_WARN(("Character with UID=0%x on invalid location %d,%d,%d,%d wants to move into another invalid location %d,%d,%d,%d.\n",
+				GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map));
+		}
         return nullptr;
     }
 

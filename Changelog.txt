@@ -3253,3 +3253,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 22-04-2023, Drk84
 - Fixed: NPC double hit. (Issue #1065)
 - Fixed: @CombatEnd not fired and Combat memories not removed when the fight is ended. (Issue #1055)
+
+25-04-2023, Nolok
+- Fixed: Enabled "Character wants to move into an invalid location" error log to be shown only if the character also starts the movement from an invalid location (Issue #990).
