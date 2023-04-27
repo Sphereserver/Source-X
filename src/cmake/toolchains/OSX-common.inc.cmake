@@ -51,13 +51,13 @@ function (toolchain_exe_stuff_common)
 	 # Linking Unix libs.
 	 # same here, do not use " " to delimitate these flags!
 	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	mysqlclient rt dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	mysqlclient dl )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysqlclient rt dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysqlclient dl )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		mysqlclient rt dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		mysqlclient dl )
 	ENDIF (TARGET spheresvr_debug)
 
 	#-- Set common define macros.

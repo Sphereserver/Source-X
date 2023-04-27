@@ -83,7 +83,7 @@ for:
       - ECHO ** Compilation done. Packing the files and uploading to SphereCommunity
       - mkdir accounts logs save scripts
       - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" 
-          "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86_64\mariadb\libmysql.dll"
+          "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86_64\mariadb\libmariadb.dll"
       - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" 
           "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86\mariadb\libmysql.dll"
       - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win32-nightly.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
@@ -130,7 +130,7 @@ for:
           echo && echo "** Starting to build 64 bits Nightly version" && echo
         fi
       - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
-      - ninja --verbose || exit 1  # if the build fails, stop here
+      - ninja || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
@@ -149,7 +149,7 @@ for:
 
       - echo && echo "** Starting to build 32 bits Nightly version" && echo
       - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" -S ../ -B .
-      - ninja --verbose || exit 1  # if the build fails, stop here
+      - ninja || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 32 bits Nightly version" && echo
 
       - cd ..
@@ -192,7 +192,7 @@ for:
       - mkdir -p "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
       - cmake -G $CMAKE_GEN -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
-      - ninja --verbose || exit 1 # if the build fails, stop here
+      - ninja || exit 1 # if the build fails, stop here
       - cd ..
 
     after_build:
@@ -203,14 +203,14 @@ for:
         fi
       - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo      
       - mkdir accounts logs save scripts
-      - zip -r SphereSvrX-osx64-nightly.zip accounts/ logs/ save/ scripts/
+      - zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
       - cd src/
-      - zip ../SphereSvrX-osx64-nightly.zip sphere.ini sphereCrypt.ini
+      - zip ../SphereSvrX-osx-x86_64-nightly.zip sphere.ini sphereCrypt.ini
       - cd "../${BUILD_DIR_64}/bin64"
-      - zip -r ../../SphereSvrX-osx64-nightly.zip *
+      - zip -r ../../SphereSvrX-osx-x86_64-nightly.zip *
       - cd ../../
-      - curl -sST "{SphereSvrX-osx64-nightly.zip}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+      - curl -sST "{SphereSvrX-osx-x86_64-nightly.zip}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
 
     artifacts:
-      - path: SphereSvrX-osx64-nightly.zip
+      - path: SphereSvrX-osx-x86_64-nightly.zip
       
