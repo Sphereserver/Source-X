@@ -93,6 +93,10 @@ GlobalInitializer::GlobalInitializer()
 	ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
 
     EXC_CATCH;
+
+	//--------
+
+	CPointBase::InitRuntimeStaticMembers();
 }
 
 GlobalInitializer g_GlobalInitializer;

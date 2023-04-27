@@ -1,8 +1,7 @@
-
+#include "../common/CException.h"
+#include "../common/CLog.h"
 #include "CEntity.h"
 #include "CComponent.h"
-#include "../CException.h"
-#include "../CLog.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "CObjBase.h"

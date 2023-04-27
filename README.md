@@ -1,5 +1,5 @@
 # SphereServer X
-Ultima Online game server developed in C/C++
+Ultima Online game server developed in C++
 <br>
 [![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
 <br>
@@ -38,7 +38,7 @@ This branch started in 2016 from a slow and radical rework of SphereServer 0.56d
 Though, something has changed script-wise, so we suggest to take a look <a href="docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
-* Support for 64 bits architecture and MinGW compiler for Windows;
+* Support for x86_64 (64 bits) architecture and MinGW compiler for Windows;
 * CMake is now the standard way to generate updated build and project files;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
@@ -48,9 +48,9 @@ Most notable changes (right now) are:
 ## Running
 
 ### Required libraries (Windows):
-* `libmysql.dll`: Placed on /dlls/32/libmysql.dll for 32 bits builds or in /dlls/64/libmysql.dll for 64 bits builds.
-* `dbghelp.dll`: Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
- so there is an old one (32 bits) in /dlls/dbghelp.dll.
+* `libmysql.dll` (MariaDB Client v5.5.*, x86 library): Needed for x86 (32 bits) builds, found in lib/bin/x86/mariadb/libmysql.dll
+* `libmariadb.dll` (MariaDB Client v10.11.* package, x86_64 library): Needed for x86_64 (64 bits) builds, found in lib/bin/x86_64/mariadb/libmariadb.dll
+
 
 ### Required libraries (Linux):
 
@@ -105,10 +105,10 @@ Example of CMake CLI additional parameters:<br>
 ```
 (Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
-Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder, not inside "src"):<br>
+Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder):<br>
 ```
-mkdir build && cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" --build ./ ../src
+mkdir build
+cmake -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -B ./build -S ./
 ```
 
 ### Compiling

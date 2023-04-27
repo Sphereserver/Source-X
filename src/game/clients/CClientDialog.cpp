@@ -1,11 +1,11 @@
 
 #include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/CException.h"
+#include "../../common/CLog.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
-#include "../CException.h"
-#include "../CLog.h"
 #include "../CServer.h"
 #include "CClient.h"
 

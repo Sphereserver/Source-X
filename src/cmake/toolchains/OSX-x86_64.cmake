@@ -12,7 +12,7 @@ endfunction()
 
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
-	INCLUDE("cmake/toolchains/OSX_common.inc.cmake")
+	INCLUDE("src/cmake/toolchains/OSX-common.inc.cmake")
 
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")

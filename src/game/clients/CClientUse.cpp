@@ -1,10 +1,10 @@
 
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
 #include "../components/CCSpawn.h"
-#include "../CLog.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CClient.h"

@@ -10,7 +10,7 @@ endfunction()
 
 
 function (toolchain_exe_stuff)
-    INCLUDE("cmake/toolchains/Linux-GNU_common.inc.cmake")
+    INCLUDE("src/cmake/toolchains/Linux-GNU_common.inc.cmake")
     
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")

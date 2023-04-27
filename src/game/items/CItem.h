@@ -6,14 +6,14 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../resource/CResourceBase.h"
+#include "../../common/resource/CResourceBase.h"
+#include "../../common/CServerMap.h"
+#include "../../common/CRect.h"
 #include "../components/CCFaction.h"
 #include "../CServerTime.h"
 #include "../CBase.h"
-#include "../CRect.h"
 #include "../CObjBase.h"
 #include "../CObjBaseTemplate.h"
-#include "../CServerMap.h"
 #include "../game_enums.h"
 #include "../game_macros.h"
 #include "../CServerConfig.h"

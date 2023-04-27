@@ -10,8 +10,8 @@
 #include "../common/sphere_library/smutex.h"
 #include "../common/sphere_library/sresetevents.h"
 #include "../common/sphere_library/sstringobjs.h"
+#include "../common/sphere_library/CSTime.h"
 #include "../sphere/ProfileData.h"
-#include "../sphere_library/CSTime.h"
 #include <exception>
 #include <list>
 

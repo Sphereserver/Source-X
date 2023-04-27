@@ -19,7 +19,7 @@ endfunction()
 
 
 function (toolchain_exe_stuff)
-	INCLUDE("cmake/toolchains/OSX_common.inc.cmake")
+	INCLUDE("src/cmake/toolchains/OSX-common.inc.cmake")
 
 	SET (C_ARCH_OPTS	"-march=native")
 	SET (CXX_ARCH_OPTS	"-march=native")

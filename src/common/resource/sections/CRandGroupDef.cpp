@@ -1,8 +1,8 @@
 #include "../../../sphere/threads.h"
-#include "../../game/chars/CChar.h"
-#include "../../game/CServerConfig.h"
-#include "../../game/triggers.h"
-#include "../CException.h"
+#include "../../../game/chars/CChar.h"
+#include "../../../game/CServerConfig.h"
+#include "../../../game/triggers.h"
+#include "../../CException.h"
 #include "CRegionResourceDef.h"
 #include "CRandGroupDef.h"
 

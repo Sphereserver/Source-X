@@ -67,7 +67,7 @@ function (toolchain_after_project)
 	
 	#-- Set .lib directory for the linker.
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/64/")
+	LINK_DIRECTORIES ("lib/bin/x86_64/mariadb/")
 	
 endfunction()
 
@@ -78,7 +78,7 @@ function (toolchain_exe_stuff)
 	IF (${ENABLE_SANITIZERS})
 		SET (SANITIZERS_LNK clang_rt.asan_dynamic_runtime_thunk-x86_64 clang_rt.asan_dynamic-x86_64 clang_rt.asan-preinit-x86_64 clang_rt.builtins-x86_64)
 	ENDIF (${ENABLE_SANITIZERS})
-	TARGET_LINK_LIBRARIES ( spheresvr	libmysql ws2_32 ${SANITIZERS_LNK})
+	TARGET_LINK_LIBRARIES ( spheresvr	ws2_32 libmariadb ${SANITIZERS_LNK})
 
 
 	#-- Set define macros.

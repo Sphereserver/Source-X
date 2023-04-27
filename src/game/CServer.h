@@ -6,11 +6,11 @@
 #ifndef _INC_CSERVER_H
 #define _INC_CSERVER_H
 
+#include "../common/sqlite/SQLite.h"
 #include "../network/CSocket.h"
 #include "../common/CSFileObj.h"
 #include "../common/CTextConsole.h"
 #include "../common/CDataBase.h"
-#include "../common/sqlite/SQLite.h"
 #include "../sphere/ConsoleInterface.h"
 #include "clients/CChat.h"
 #include "CServerDef.h"

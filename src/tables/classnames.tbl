@@ -3,6 +3,8 @@
 //	Set:	class  names
 //
 
+#include "../common/sqlite/SQLite.h"
+
 #include "../common/resource/sections/CDialogDef.h"
 #include "../common/resource/sections/CItemTypeDef.h"
 #include "../common/resource/sections/CRandGroupDef.h"
@@ -10,7 +12,6 @@
 #include "../common/resource/sections/CSkillClassDef.h"
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjList.h"
-#include "../common/sqlite/SQLite.h"
 #include "../common/CSFileObjContainer.h"
 
 #include "../game/CEntity.h"

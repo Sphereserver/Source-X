@@ -1,6 +1,6 @@
 // Actions specific to an NPC.
 
-#include "../../common/flat_containers/flat_set.hpp"
+#include "../../../lib/flat_containers/flat_set.hpp"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"

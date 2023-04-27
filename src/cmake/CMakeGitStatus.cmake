@@ -40,6 +40,6 @@ ELSE()
 ENDIF()
 
 CONFIGURE_FILE (
- "${PROJECT_SOURCE_DIR}/common/version/GitRevision.h.in"
- "${PROJECT_SOURCE_DIR}/common/version/GitRevision.h"
+ "${CMAKE_SOURCE_DIR}/src/common/version/GitRevision.h.in"
+ "${CMAKE_SOURCE_DIR}/src/common/version/GitRevision.h"
 )

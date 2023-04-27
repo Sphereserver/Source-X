@@ -1,17 +1,16 @@
-
 // define the base types of an item (rather than the instance)
 
+#include "../../common/CUOInstall.h"
+#include "../../common/CLog.h"
+#include "../../common/CException.h"
 #include "../../sphere/ProfileTask.h"
 #include "../components/CCPropsItem.h"
 #include "../components/CCPropsItemChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../components/CCPropsItemWeaponRanged.h"
-#include "../resource/CResourceLock.h"
+#include "../../common/resource/CResourceLock.h"
 #include "../uo_files/CUOItemInfo.h"
-#include "../CUOInstall.h"
-#include "../CLog.h"
-#include "../CException.h"
 #include "CItemBase.h"
 
 

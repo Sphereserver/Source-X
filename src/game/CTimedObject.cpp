@@ -1,6 +1,6 @@
+#include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/threads.h"
-#include "../CException.h"
 #include "CWorldGameTime.h"
 #include "CWorldTickingList.h"
 #include "CTimedObject.h"

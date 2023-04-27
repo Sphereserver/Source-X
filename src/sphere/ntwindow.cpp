@@ -11,8 +11,8 @@
 #include "../game/CServerConfig.h"
 #include "../game/CServer.h"
 #include "../game/spheresvr.h"
+#include "../resources/win_resource.h"
 #include "ProfileTask.h"
-#include "resource.h"
 #include "ntwindow.h"
 #include <commctrl.h>	// NM_RCLICK
 

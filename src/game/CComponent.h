@@ -6,7 +6,7 @@
 #ifndef _INC_CCOMPONENT_H
 #define _INC_CCOMPONENT_H
 
-#include "../common.h"
+#include "../common/common.h"
 
 class CSString;
 class CScript;

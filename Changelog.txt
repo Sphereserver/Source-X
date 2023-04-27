@@ -3256,3 +3256,9 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 25-04-2023, Nolok
 - Fixed: Enabled "Character wants to move into an invalid location" error log to be shown only if the character also starts the movement from an invalid location (Issue #990).
+
+27-04-2023, Nolok
+- Source: Moved CMakeLists.txt from /src/ to the project root dir.
+	WARNING: you will need to change the source directory in CMake!
+- Changed: On Windows, abandoned MySQL libmysql.dll. Now using MariaDB libmysql.dll (compatible with MySQL until 5.x) for x86 builds and libmariadb.dll for x86_64 builds, which supports MariaDB and MySQL versions above.
+	WARNING: you WILL need to update those libraries!

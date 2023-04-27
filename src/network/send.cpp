@@ -22,7 +22,8 @@
 #include "../game/CWorldGameTime.h"
 #include "CNetworkManager.h"
 #include "send.h"
-#include "../common/zlib/zlib.h"
+
+#include "../../lib/zlib/zlib.h"
 
 
 /***************************************************************************

@@ -6,8 +6,8 @@
 #ifndef _INC_CSPELLDEF_H
 #define _INC_CSPELLDEF_H
 
-#include "../../game/uo_files/uofiles_enums_itemid.h"
-#include "../../game/uo_files/uofiles_types.h"
+#include "../../../game/uo_files/uofiles_enums_itemid.h"
+#include "../../../game/uo_files/uofiles_types.h"
 #include "../CResourceQty.h"
 #include "../CResourceLink.h"
 

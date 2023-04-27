@@ -68,7 +68,7 @@ function (toolchain_after_project)
 
 	#-- Set .lib directory for the linker.
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/32/")
+	LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
 	
 endfunction()
 

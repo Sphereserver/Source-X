@@ -1,0 +1,2 @@
+from mariadb client v5.5.68 package
+https://mariadb.com/kb/en/mariadb-server-5-5-68/

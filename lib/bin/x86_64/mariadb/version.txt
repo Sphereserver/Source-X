@@ -1,0 +1,2 @@
+from mariadb client v10.11.2 package (x86_64 official builds only)
+https://mariadb.com/downloads/

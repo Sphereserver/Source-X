@@ -10,7 +10,7 @@
 #include "../CServer.h"
 #include "CClient.h"
 
-#include "../../common/zlib/zlib.h"
+#include "../../../lib/zlib/zlib.h"
 
 
 CHuffman CClient::m_Comp;

@@ -60,7 +60,7 @@ for:
         ) ELSE (
           ECHO. $$ECHO ** Starting to build 64 bits Nightly version && ECHO.
         )
-      - cmake -G "%CMAKE_GEN_64%" ..\src
+      - cmake -G "%CMAKE_GEN_64%" -S ../ -B .
       - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 64 bits Nightly version && ECHO.
 
@@ -70,7 +70,7 @@ for:
       - cd "..\%BUILD_DIR_32%"
 
       - ECHO. && ECHO ** Starting to build 32 bits Nightly version && ECHO.
-      - cmake -G "%CMAKE_GEN_32%" ..\src
+      - cmake -G "%CMAKE_GEN_32%" -S ../ -B .
       - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 32 bits Nightly version && ECHO.
 
@@ -82,8 +82,10 @@ for:
 
       - ECHO ** Compilation done. Packing the files and uploading to SphereCommunity
       - mkdir accounts logs save scripts
-      - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\libmysql.dll"
-      - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\libmysql.dll"
+      - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" 
+          "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86_64\mariadb\libmysql.dll"
+      - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" 
+          "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86\mariadb\libmysql.dll"
       - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win32-nightly.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
 
     artifacts:
@@ -97,9 +99,9 @@ for:
         - image: Ubuntu
 
     environment:
-      CMAKE_GEN: Unix Makefiles
-      CMAKE_TCH_32: ../src/cmake/toolchains/Linux-GNU-x86.cmake
-      CMAKE_TCH_64: ../src/cmake/toolchains/Linux-GNU-x86_64.cmake
+      CMAKE_GEN: Ninja
+      CMAKE_TCH_32: src/cmake/toolchains/Linux-GNU-x86.cmake
+      CMAKE_TCH_64: src/cmake/toolchains/Linux-GNU-x86_64.cmake
 
     install:
       - echo && echo "** Setting up GCC compiler" && echo
@@ -111,10 +113,11 @@ for:
       - lsb_release -d
       - gcc --version
       - cmake --version
+      - ninja --version
 
     # Use our custom script
     build_script:
-      - echo && echo "** Setting up MySQL development packages for 64 bits" && echo
+      - echo && echo "** Setting up MySQL development packages for x86_64 arch (64 bits)" && echo
       - sudo apt install -yqq --no-install-recommends curl libmysql++-dev > /dev/null
 
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
@@ -126,8 +129,8 @@ for:
         else
           echo && echo "** Starting to build 64 bits Nightly version" && echo
         fi
-      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ../src
-      - make -j4 || exit 1  # if the build fails, stop here
+      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
+      - ninja || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
@@ -137,7 +140,7 @@ for:
         fi
       - cd ..
 
-      - echo && echo "** Setting up MySQL development packages for 32 bits" && echo
+      - echo && echo "** Setting up MySQL development packages for x86 arch (32 bits)" && echo
       - sudo apt remove -yqq libmysql++-dev > /dev/null
       - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386 > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
@@ -145,8 +148,8 @@ for:
       - cd "$BUILD_DIR_32"
 
       - echo && echo "** Starting to build 32 bits Nightly version" && echo
-      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" ../src
-      - make -j4 || exit 1  # if the build fails, stop here
+      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" -S ../ -B .
+      - ninja || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 32 bits Nightly version" && echo
 
       - cd ..
@@ -167,23 +170,31 @@ for:
       - path: SphereSvrX-linux64-nightly.tar.gz
       - path: SphereSvrX-linux32-nightly.tar.gz
       
+
   - # OSX build
     matrix:
       only:
         - image: macos
+
+    environment:
+      CMAKE_GEN: Ninja
+      CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
     
     install:
       - echo && echo "** Setting up compiler" && echo
       - export HOMEBREW_NO_AUTO_UPDATE=1
       - brew install ninja mysql-client
       - gcc -v && g++ -v && cmake --version
+
     # Use our custom script
     build_script:
       - echo && echo "** Starting to build 64 bits Nightly version" && echo
       - mkdir -p "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
-      - cmake -G Ninja ../src -DCMAKE_BUILD_TYPE="Nightly" && cmake --build . || exit 1
+      - cmake -G $CMAKE_GEN -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
+      - ninja || exit 1 # if the build fails, stop here
       - cd ..
+
     after_build:
       # if we are testing a pull request, we don't want to upload the build to the host
       - |-
@@ -199,6 +210,7 @@ for:
       - zip -r ../../SphereSvrX-osx64-nightly.zip *
       - cd ../../
       - curl -sST "{SphereSvrX-osx64-nightly.zip}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+
     artifacts:
       - path: SphereSvrX-osx64-nightly.zip
       

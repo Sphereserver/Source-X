@@ -1,11 +1,11 @@
 // An item is targetted.
 
 #include "../../network/send.h"
-#include "../resource/sections/CItemTypeDef.h"
+#include "../../common/resource/sections/CItemTypeDef.h"
+#include "../../common/CLog.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
-#include "../CLog.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
@@ -966,6 +966,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 
 	return iSkillLevel;
 }
+
 static lpctstr const sm_szPoisonMessages[] =
 {
 	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_1 ),

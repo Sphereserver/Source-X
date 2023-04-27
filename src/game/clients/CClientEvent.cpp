@@ -1,4 +1,5 @@
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/CException.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -7,7 +8,6 @@
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
-#include "../CException.h"
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"

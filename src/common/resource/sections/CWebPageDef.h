@@ -6,8 +6,8 @@
 #ifndef _INC_CWEBPAGEDEF_H
 #define _INC_CWEBPAGEDEF_H
 
+#include "../../CTextConsole.h"
 #include "../CResourceLink.h"
-#include "../CTextConsole.h"
 #include "../CValueDefs.h"
 
 class CSTime;

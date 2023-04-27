@@ -7,10 +7,10 @@
 
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/resource/CResourceBase.h"
+#include "../../common/CScriptTriggerArgs.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../items/CItemMulti.h"
 #include "../chars/CChar.h"
-#include "../CScriptTriggerArgs.h"
 #include "../triggers.h"
 #include "CCSpawn.h"
 

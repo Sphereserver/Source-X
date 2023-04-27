@@ -11,54 +11,55 @@ function (toolchain_after_project)
 
 	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
 	SET (C_FLAGS_COMMON		"${C_FLAGS_EXTRA} /W4 /MP /GR /fp:fast\
-					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812"		)
-	 #				# Disable warnings caused by external c libraries.
+							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812")
+	 #						# Disable warnings caused by external c libraries.
 	 # For zlib: C4244, C4245
 
-	SET (CXX_FLAGS_COMMON		"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++17\
-					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812"		)
+	SET (CXX_FLAGS_COMMON	"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++17\
+							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812")
 
 	 # Setting the exe to be a GUI application and not a console one.
-	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"		)
+	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"	)
 
 	 # These linker flags shouldn't be applied to Debug release.
 	IF (CMAKE_CL_64)	# 64 bits
-		SET(ARCH_BITS		64			PARENT_SCOPE)
+		SET(ARCH_BITS	64	PARENT_SCOPE)
 		SET(LINKER_FLAGS_NODEBUG "/OPT:REF,ICF"			)
 	ELSE (CMAKE_CL_64)	# 32 bits
-		SET(ARCH_BITS		32			PARENT_SCOPE)
+		SET(ARCH_BITS	32	PARENT_SCOPE)
 		SET(LINKER_FLAGS_NODEBUG "/OPT:REF,ICF"			)
 	ENDIF (CMAKE_CL_64)
 
 
 	#-- Release compiler and linker flags.
 	
-	SET (CMAKE_C_FLAGS_RELEASE		"${C_FLAGS_COMMON}   /O2 /EHsc /GL /GA /Gw"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS_RELEASE			"${C_FLAGS_COMMON}   /O2 /EHsc /GL /GA /Gw"			PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /O2 /EHsc /GL /GA /Gw /Gy"		PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_COMMON} ${LINKER_FLAGS_NODEBUG} /LTCG"	PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_COMMON} ${LINKER_FLAGS_NODEBUG}\
+										/LTCG" PARENT_SCOPE)
 
 
 	#-- Debug compiler and linker flags.
 
-	SET (CMAKE_C_FLAGS_DEBUG		"${C_FLAGS_COMMON}   /Od /EHsc /Oy-"			PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS_DEBUG		"${CXX_FLAGS_COMMON} /Od /EHsc /Oy- /MDd /ZI /ob0"	PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"${LINKER_FLAGS_COMMON} /DEBUG /SAFESEH:NO"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS_DEBUG			"${C_FLAGS_COMMON}   /Od /EHsc /Oy-"				PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /Od /EHsc /Oy- /MDd /ZI /ob0"	PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"${LINKER_FLAGS_COMMON} /DEBUG /SAFESEH:NO"			PARENT_SCOPE)
 
 
 	#-- Nightly compiler and linker flags.
 
-	SET (CMAKE_C_FLAGS_NIGHTLY		"${C_FLAGS_COMMON}   /O2 /EHa /GL /GA /Gw"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS_NIGHTLY			"${C_FLAGS_COMMON}   /O2 /EHa /GL /GA /Gw"			PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${LINKER_FLAGS_COMMON} ${LINKER_FLAGS_NODEBUG}\
-						/LTCG"							PARENT_SCOPE)
+										/LTCG" PARENT_SCOPE)
 
 
 	#-- Set mysql .lib directory for the linker.
 
 	IF (CMAKE_CL_64)
-		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/64/")
+		LINK_DIRECTORIES ("lib/bin/x86_64/mariadb/")
 	ELSE (CMAKE_CL_64)
-		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls/32/")
+		LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
 	ENDIF (CMAKE_CL_64)
 	
 endfunction()
@@ -66,9 +67,7 @@ endfunction()
 
 function (toolchain_exe_stuff)
 	#-- Windows libraries to link against.
-
-	TARGET_LINK_LIBRARIES ( spheresvr	libmysql ws2_32 )
-
+	TARGET_LINK_LIBRARIES ( spheresvr	ws2_32 $<IF:${ARCH_HAS_x86_64}, libmariadb, libmysql>)
 
 	#-- Set define macros.
 
@@ -120,6 +119,6 @@ function (toolchain_exe_stuff)
 
 	#-- Custom .vcxproj settings (for now, it only affects the debugger working directory).
 
-	SET(SRCDIR ${CMAKE_SOURCE_DIR}) # for the sake of shortness
-	CONFIGURE_FILE("cmake/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
+	SET (SRCDIR ${CMAKE_SOURCE_DIR}) # for the sake of shortness
+	CONFIGURE_FILE("src/cmake/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
 endfunction()
