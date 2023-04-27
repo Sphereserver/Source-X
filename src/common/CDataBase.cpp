@@ -30,6 +30,9 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 
 	m_bConnected = false;
 
+	// Starting with MariaDB 10.6.2+ the format for mysql_get_client_version* changed to report the version of the client library instead of the server version, so this check is not reliable
+	//	for now, at least until we officially move to MariaDB instead of MySQL for all platforms. Then, we could use mariadb_get_infov(NULL, MARIADB_CLIENT_VERSION_ID, &version).
+	/*
 	unsigned long ver = mysql_get_client_version();
 	if ( ver < MIN_MYSQL_VERSION_ALLOW )
 	{
@@ -37,8 +40,9 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		g_Cfg.m_bMySql = false;
 		return false;
 	}
+	*/
 
-	_myData = mysql_init(nullptr);
+	_myData = mysql_init(_myData ? _myData : nullptr);
 	if ( !_myData )
 		return false;
 
@@ -269,9 +273,10 @@ bool CDataBase::_OnTick()
 		if ( isConnected() )	//	currently connected - just check that the link is alive
 		{
 			SimpleThreadLock lock(m_connectionMutex);
-			if ( mysql_ping(_myData) )
+			const int iPingRet = mysql_ping(_myData);
+			if ( iPingRet )
 			{
-				g_Log.EventError("MySQL server link has been lost. Trying to reattach to it.\n");
+				g_Log.EventError("MySQL server link has been lost (error code: %d). Trying to reattach to it.\n", iPingRet);
 				Close();
 
 				if ( !Connect() )

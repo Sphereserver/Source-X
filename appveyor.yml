@@ -60,8 +60,8 @@ for:
         ) ELSE (
           ECHO. $$ECHO ** Starting to build 64 bits Nightly version && ECHO.
         )
-      - cmake -G "%CMAKE_GEN_64%" -S ../ -B .
-      - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
+      - cmake -G "%CMAKE_GEN_64%" -S ..\ -B .
+      - msbuild SphereServer.sln %MSBUILD_FLAGS% /maxcpucount /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 64 bits Nightly version && ECHO.
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
@@ -70,8 +70,8 @@ for:
       - cd "..\%BUILD_DIR_32%"
 
       - ECHO. && ECHO ** Starting to build 32 bits Nightly version && ECHO.
-      - cmake -G "%CMAKE_GEN_32%" -S ../ -B .
-      - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
+      - cmake -G "%CMAKE_GEN_32%" -S ..\ -B .
+      - msbuild SphereServer.sln %MSBUILD_FLAGS% /maxcpucount /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 32 bits Nightly version && ECHO.
 
       - cd ..
@@ -130,7 +130,7 @@ for:
           echo && echo "** Starting to build 64 bits Nightly version" && echo
         fi
       - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
-      - ninja || exit 1  # if the build fails, stop here
+      - ninja --verbose || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
@@ -149,7 +149,7 @@ for:
 
       - echo && echo "** Starting to build 32 bits Nightly version" && echo
       - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" -S ../ -B .
-      - ninja || exit 1  # if the build fails, stop here
+      - ninja --verbose || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 32 bits Nightly version" && echo
 
       - cd ..
@@ -192,7 +192,7 @@ for:
       - mkdir -p "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
       - cmake -G $CMAKE_GEN -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
-      - ninja || exit 1 # if the build fails, stop here
+      - ninja --verbose || exit 1 # if the build fails, stop here
       - cd ..
 
     after_build:
