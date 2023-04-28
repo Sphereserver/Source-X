@@ -118,7 +118,7 @@ for:
     # Use our custom script
     build_script:
       - echo && echo "** Setting up MariaDB packages for x86_64 arch (64 bits)" && echo
-      - sudo apt install -yqq --no-install-recommends libmariadb3 libmariadb-dev > /dev/null
+      - sudo apt install -yqq --no-install-recommends libmariadb3 > /dev/null
 
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
@@ -141,8 +141,8 @@ for:
       - cd ..
 
       - echo && echo "** Setting up MariaDB packages for x86 arch (32 bits)" && echo
-      - sudo apt remove -yqq libmariadb3 libmariadb-dev > /dev/null
-      - sudo apt install -yqq --no-install-recommends libmariadb3:i386 libmariadb-dev:i386 > /dev/null
+      - sudo apt remove -yqq libmariadb3 > /dev/null
+      - sudo apt install -yqq --no-install-recommends libmariadb3:i386 > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
 
       - cd "$BUILD_DIR_32"

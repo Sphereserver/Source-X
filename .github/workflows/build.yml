@@ -75,7 +75,7 @@ jobs:
       run:  |
             lsb_release -d
             sudo add-apt-repository universe && sudo sudo apt-get -qq update
-            sudo apt install -yqq --no-install-recommends gcc-7 g++-7 libmariadb3:i386 libmariadb-dev:i386 > /dev/null
+            sudo apt install -yqq --no-install-recommends gcc-7 g++-7 mariadb-client > /dev/null
             export CC="gcc-7" && export CXX="g++-7"
             gcc --version
             cmake --version
@@ -113,7 +113,7 @@ jobs:
             sudo sudo dpkg --add-architecture i386
             sudo add-apt-repository universe && sudo apt-get -qq update
             sudo apt install -yqq --no-install-recommends linux-libc-dev:i386 gcc-7 gcc-7-multilib g++-7 g++-7-multilib
-            sudo apt install -yqq --no-install-recommends libmariadb3 libmariadb-dev libmariadb3:i386 libmariadb-dev:i386
+            sudo apt install -yqq --no-install-recommends mariadb-client:i386
             gcc --version
             cmake --version
             ninja --version

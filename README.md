@@ -54,11 +54,14 @@ Most notable changes (right now) are:
 
 ### Required libraries (Linux):
 
-#### Ubuntu and Debian
-Ubuntu: Enable "universe" repository: `sudo add-apt-repository universe`<br>
-Install MariaDB client: `sudo apt-get install libmariadb3`
+#### From MariaDB website
+See https://mariadb.com/docs/skysql/connect/clients/mariadb-client/
 
-#### CentOS - Red Hat Enterprise Linux - Fedora
+#### Ubuntu and Debian repositories
+Ubuntu: Enable "universe" repository: `sudo add-apt-repository universe`<br>
+Install MariaDB client: `sudo apt-get install mariadb-client` or `sudo apt-get install libmariadb3` (depends on the OS version)
+
+#### CentOS - Red Hat Enterprise Linux - Fedora repositories
 Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-connector-c`
 
 
