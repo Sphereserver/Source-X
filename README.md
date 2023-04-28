@@ -38,8 +38,9 @@ This branch started in 2016 from a slow and radical rework of SphereServer 0.56d
 Though, something has changed script-wise, so we suggest to take a look <a href="docs/Porting%20from%200.56%20to%20X.txt">here</a>.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
-* Support for x86_64 (64 bits) architecture and MinGW compiler for Windows;
+* Support for x86_64 (64 bits) architecture, Mac OSX and MinGW compiler for Windows;
 * CMake is now the standard way to generate updated build and project files;
+* Switched from MySQL 5.x to MariaDB client;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
 * Code refactoring, updating to most recent programming standards and to the conventions described below.
@@ -48,35 +49,18 @@ Most notable changes (right now) are:
 ## Running
 
 ### Required libraries (Windows):
-* `libmysql.dll` (MariaDB Client v5.5.*, x86 library): Needed for x86 (32 bits) builds, found in lib/bin/x86/mariadb/libmysql.dll
-* `libmariadb.dll` (MariaDB Client v10.11.* package, x86_64 library): Needed for x86_64 (64 bits) builds, found in lib/bin/x86_64/mariadb/libmariadb.dll
+* `libmariadb.dll` (MariaDB Client v10.* package),  found in lib/bin/*cpu_architecture*/mariadb/libmariadb.dll
 
 
 ### Required libraries (Linux):
 
-#### Ubuntu 14.x to 16.x
-Install MySQL client: `sudo apt-get install libmysql++`
+#### Ubuntu and Debian
+Ubuntu: Enable "universe" repository: `sudo add-apt-repository universe`<br>
+Install MariaDB client: `sudo apt-get install libmariadb3`
 
-#### Debian 9
-Install MySQL client (the default repository supports only the MariaDB client, so we need to install MySQL manually):<br>
-For 64 bits builds:<br>
-```
-wget http://security.debian.org/debian-security/pool/updates/main/m/mysql-5.5/libmysqlclient18_5.5.62-0+deb8u1_amd64.deb
-sudo dpkg -i libmysqlclient18_5.5.62-0+deb8u1_amd64.deb
-```
-For 32 bits builds:<br>
-```
-wget http://security.debian.org/debian-security/pool/updates/main/m/mysql-5.5/libmysqlclient18_5.5.62-0+deb8u1_i386.deb
-sudo dpkg -i libmysqlclient18_5.5.62-0+deb8u1_i386.deb
-```
+#### CentOS - Red Hat Enterprise Linux - Fedora
+Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-connector-c`
 
-#### CentOS 6 / 7 - Red Hat 6 / 7 - Fedora 26+
-If you're using CentOS, Red Hat or Fedora, nowadays the default package repository only supports MariaDB instead of MySQL, so we need to add the repo for MySQL:<br>
-* For CentOS 6 and Red Hat 6: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el6-9.noarch.rpm`<br>
-* For CentOS 7 and Red Hat 7: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm`<br>
-* For Fedora 26: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-fc26-10.noarch.rpm`<br>
-* For Fedora 27: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-fc27-10.noarch.rpm`<br>
-Then install MySQL client via yum (CentOS or RH) or dnf (Fedora): `mysql-community-libs`<br>
 
 ## Building
 
