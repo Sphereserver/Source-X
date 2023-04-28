@@ -27,18 +27,4 @@ function (toolchain_exe_stuff)
 	SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" 			PARENT_SCOPE)
 	SET (CMAKE_RC_FLAGS			"${RC_FLAGS}"							PARENT_SCOPE)
 
-	#-- Setting per-build linker flags.
-
-	 # Linking Unix (MinGW) libs.
-	 # same here, do not use " " to delimitate these flags!
-	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	mysql ws2_32 )
-	ENDIF (TARGET spheresvr_release)
-	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysql ws2_32 )
-	ENDIF (TARGET spheresvr_nightly)
-	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		mysql ws2_32 )
-	ENDIF (TARGET spheresvr_debug)
-
 endfunction()

@@ -79,7 +79,7 @@ function (toolchain_exe_stuff)
 	IF (${ENABLE_SANITIZERS})
 		SET (SANITIZERS_LNK clang_rt.asan_dynamic_runtime_thunk-x86_64 clang_rt.asan_dynamic-x86_64 clang_rt.asan-preinit-x86_64 clang_rt.builtins-x86_64)
 	ENDIF (${ENABLE_SANITIZERS})
-	TARGET_LINK_LIBRARIES ( spheresvr	libmysql ws2_32 ${SANITIZERS_LNK})
+	TARGET_LINK_LIBRARIES ( spheresvr	libmariadb ws2_32 ${SANITIZERS_LNK})
 
 
 	#-- Set define macros.

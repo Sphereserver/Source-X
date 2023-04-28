@@ -30,17 +30,14 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 
 	m_bConnected = false;
 
-	// Starting with MariaDB 10.6.2+ the format for mysql_get_client_version* changed to report the version of the client library instead of the server version, so this check is not reliable
-	//	for now, at least until we officially move to MariaDB instead of MySQL for all platforms. Then, we could use mariadb_get_infov(NULL, MARIADB_CLIENT_VERSION_ID, &version).
-	/*
+	// Starting with MariaDB 10.6.2+ the format for mysql_get_client_version* changed to report the version of the client library instead of the server version.
 	unsigned long ver = mysql_get_client_version();
-	if ( ver < MIN_MYSQL_VERSION_ALLOW )
+	if ( ver < MIN_MARIADB_VERSION_ALLOW )
 	{
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MySQL client library is too old (version %lu). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MYSQL_VERSION_ALLOW);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MariaDB client library is too old (version %lu). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MARIADB_VERSION_ALLOW);
 		g_Cfg.m_bMySql = false;
 		return false;
 	}
-	*/
 
 	_myData = mysql_init(_myData ? _myData : nullptr);
 	if ( !_myData )
@@ -60,8 +57,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
 	{
 		const char *error = mysql_error(_myData);
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL connect fail: %s\n", error);
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Visit this link for more information: http://dev.mysql.com/doc/mysql/search.php?q=%s\n", error);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB connect fail with error: %s\n", error);
 		mysql_close(_myData);
 		_myData = nullptr;
 		return false;
@@ -163,7 +159,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     }
     else
     {
-        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
+        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
     }
     
     if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
@@ -208,7 +204,7 @@ bool CDataBase::exec(const char *query)
 		else
 		{
 			const char *myErr = mysql_error(_myData);
-			g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL query \"%s\" failed due to \"%s\"\n",
+			g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n",
 				query, ( *myErr ? myErr : "unknown reason"));
 		}
 	}
@@ -262,7 +258,7 @@ bool CDataBase::_OnTick()
 	static int tickcnt = 0;
 	EXC_TRY("Tick");
 
-	if ( !g_Cfg.m_bMySql )	//	mySQL is not supported
+	if ( !g_Cfg.m_bMySql )	//	MariaDB is not supported
 		return true;
 
 	//	do not ping sql server too heavily
@@ -276,12 +272,12 @@ bool CDataBase::_OnTick()
 			const int iPingRet = mysql_ping(_myData);
 			if ( iPingRet )
 			{
-				g_Log.EventError("MySQL server link has been lost (error code: %d). Trying to reattach to it.\n", iPingRet);
+				g_Log.EventError("MariaDB server link has been lost (error code: %d). Trying to reattach to it.\n", iPingRet);
 				Close();
 
 				if ( !Connect() )
 				{
-					g_Log.EventError("MySQL reattach failed/timed out. SQL operations disabled.\n");
+					g_Log.EventError("MariaDB reattach failed/timed out. SQL operations disabled.\n");
 				}
 			}
 		}
@@ -393,7 +389,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	// Just return 0 if MySQL is disabled
+	// Just return 0 if MySQL/MariaDB is disabled
 	if (!g_Cfg.m_bMySql)
 	{
 		sVal.FormatVal( 0 );
@@ -475,7 +471,7 @@ bool CDataBase::r_Verb(CScript & s, CTextConsole * pSrc)
 	ADDTOCALLSTACK("CDataBase::r_Verb");
 	EXC_TRY("Verb");
 
-	// Just return true if MySQL is disabled
+	// Just return true if MySQL/MariaDB is disabled
 	if (!g_Cfg.m_bMySql)
 		return true;
 

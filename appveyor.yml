@@ -85,7 +85,7 @@ for:
       - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" 
           "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86_64\mariadb\libmariadb.dll"
       - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" 
-          "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86\mariadb\libmysql.dll"
+          "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86\mariadb\libmariadb.dll"
       - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win32-nightly.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
 
     artifacts:
@@ -106,7 +106,7 @@ for:
     install:
       - echo && echo "** Setting up GCC compiler" && echo
       - sudo apt-get -qq update
-      - sudo apt install -yqq --no-install-recommends gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
+      - sudo apt install -yqq --no-install-recommends curl gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
 
       # Report our building tools
@@ -117,8 +117,8 @@ for:
 
     # Use our custom script
     build_script:
-      - echo && echo "** Setting up MySQL development packages for x86_64 arch (64 bits)" && echo
-      - sudo apt install -yqq --no-install-recommends curl libmysql++-dev > /dev/null
+      - echo && echo "** Setting up MariaDB packages for x86_64 arch (64 bits)" && echo
+      - sudo apt install -yqq --no-install-recommends libmariadb3 libmariadb-dev > /dev/null
 
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
@@ -140,9 +140,9 @@ for:
         fi
       - cd ..
 
-      - echo && echo "** Setting up MySQL development packages for x86 arch (32 bits)" && echo
+      - echo && echo "** Setting up MariaDB packages for x86 arch (32 bits)" && echo
       - sudo apt remove -yqq libmysql++-dev > /dev/null
-      - sudo apt install -yqq --no-install-recommends libmysql++-dev:i386 > /dev/null
+      - sudo apt install -yqq --no-install-recommends libmariadb3:i386 libmariadb-dev:i386 > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
 
       - cd "$BUILD_DIR_32"
@@ -183,7 +183,7 @@ for:
     install:
       - echo && echo "** Setting up compiler" && echo
       - export HOMEBREW_NO_AUTO_UPDATE=1
-      - brew install ninja mysql-client
+      - brew install ninja mariadb-connector-c
       - gcc -v && g++ -v && cmake --version
 
     # Use our custom script

@@ -43,6 +43,20 @@ function (toolchain_exe_stuff_common)
 	IF (TARGET spheresvr_debug)
 		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer	)
 	ENDIF (TARGET spheresvr_debug)
+
+
+	#-- Setting per-build linker options.
+
+	 # Linking libs the MinGW way.
+	 IF (TARGET spheresvr_release)
+		TARGET_LINK_LIBRARIES ( spheresvr_release	mariadb ws2_32 )
+	ENDIF (TARGET spheresvr_release)
+	IF (TARGET spheresvr_nightly)
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mariadb ws2_32 )
+	ENDIF (TARGET spheresvr_nightly)
+	IF (TARGET spheresvr_debug)
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb ws2_32 )
+	ENDIF (TARGET spheresvr_debug)
 	
 
 	#-- Set common define macros.

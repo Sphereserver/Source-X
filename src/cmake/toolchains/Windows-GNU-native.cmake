@@ -37,13 +37,13 @@ function (toolchain_exe_stuff)
 
 	
 	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	ws2_32 $<IF:${ARCH_HAS_x86_64}, mariadb, mysql> )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	ws2_32 mariadb )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	ws2_32 $<IF:${ARCH_HAS_x86_64}, mariadb, mysql> )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	ws2_32 mariadb )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		ws2_32 $<IF:${ARCH_HAS_x86_64}, mariadb, mysql> )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		ws2_32 mariadb )
 	ENDIF (TARGET spheresvr_debug)
 
 endfunction()

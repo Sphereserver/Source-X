@@ -67,7 +67,7 @@ endfunction()
 
 function (toolchain_exe_stuff)
 	#-- Windows libraries to link against.
-	TARGET_LINK_LIBRARIES ( spheresvr	ws2_32 $<IF:$<BOOL:${ARCH_HAS_x86_64}>,libmariadb,libmysql> )
+	TARGET_LINK_LIBRARIES ( spheresvr	ws2_32 libmariadb )
 
 	#-- Set define macros.
 

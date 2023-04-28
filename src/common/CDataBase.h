@@ -17,7 +17,7 @@
 #include "../../lib/mariadb/mysql.h"	// this needs to be defined AFTER common.h
 
 
-#define	MIN_MYSQL_VERSION_ALLOW	40115
+#define	MIN_MARIADB_VERSION_ALLOW	30002
 
 
 class CVarDefMap;
