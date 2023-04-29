@@ -20,8 +20,9 @@ function (toolchain_exe_stuff_common)
 
 	 # -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic\
-					-I/usr/local/opt/mysql-client/include\
-					-L/usr/local/opt/mysql-client/lib -lmysqlclient\
+					-I/usr/local/opt/mariadb-connector-c/include\
+					-L/usr/local/opt/mariadb-connector-c/lib\
+					-lmariadb\
 					${CMAKE_EXE_LINKER_FLAGS_EXTRA}"
 					PARENT_SCOPE)
 

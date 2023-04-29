@@ -1,3 +1,8 @@
+# AppVeyor workflows for SphereServer-X.
+# Used to build and upload on the website only nightlies on a new commit.
+# We use Github workflows to build both nightlies and pull requests.
+
+
 # Do not build on tags (GitHub only)
 skip_tags: true
 
@@ -17,7 +22,7 @@ version: 1.1.0.{build}
 image:
   - Visual Studio 2017
   - Ubuntu
-  - macos 
+  - macos-monterey
 
 # Environmental variables
 environment:
@@ -104,21 +109,20 @@ for:
       CMAKE_TCH_64: src/cmake/toolchains/Linux-GNU-x86_64.cmake
 
     install:
+      - lsb_release -d
+
       - echo && echo "** Setting up GCC compiler" && echo
       - sudo add-apt-repository universe && sudo apt-get -qq update
-      - sudo apt install -yqq --no-install-recommends curl linux-libc-dev:i386 gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
+      - sudo apt install -yq --no-install-recommends curl linux-libc-dev:i386 gcc-7 gcc-7-multilib g++-7 g++-7-multilib > /dev/null
       - export CC="gcc-7" && export CXX="g++-7"
 
       # Report our building tools
-      - lsb_release -d
-      - gcc --version
-      - cmake --version
-      - ninja --version
+      - gcc -v && g++ -v && cmake --version && ninja --version
 
     # Use our custom script
     build_script:
       - echo && echo "** Setting up MariaDB packages for x86_64 arch (64 bits)" && echo
-      - sudo apt install -yqq --no-install-recommends libmariadb3 > /dev/null
+      - sudo apt install -yq --no-install-recommends libmariadb3 libmariadb-dev > /dev/null
 
       - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
@@ -141,9 +145,8 @@ for:
       - cd ..
 
       - echo && echo "** Setting up MariaDB packages for x86 arch (32 bits)" && echo
-      - sudo apt remove -yqq libmariadb3 > /dev/null
-      - sudo apt install -yqq --no-install-recommends libmariadb3:i386 > /dev/null
-      - export CC="gcc-7" && export CXX="g++-7"
+      #- sudo apt remove -yq libmariadb3 > /dev/null
+      - sudo apt install -yq --no-install-recommends libmariadb3:i386 libmariadb-dev:i386 > /dev/null
 
       - cd "$BUILD_DIR_32"
 
@@ -174,17 +177,19 @@ for:
   - # OSX build
     matrix:
       only:
-        - image: macos
+        - image: macos-monterey
 
     environment:
       CMAKE_GEN: Ninja
       CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
     
     install:
+      - sw_vers
       - echo && echo "** Setting up compiler" && echo
       - export HOMEBREW_NO_AUTO_UPDATE=1
+      - export HOMEBREW_NO_INSTALL_CLEANUP=1
       - brew install ninja mariadb-connector-c
-      - gcc -v && g++ -v && cmake --version
+      - gcc -v && g++ -v && cmake --version && ninja --version
 
     # Use our custom script
     build_script:
@@ -204,11 +209,7 @@ for:
       - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo      
       - mkdir accounts logs save scripts
       - zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
-      - cd src/
-      - zip ../SphereSvrX-osx-x86_64-nightly.zip sphere.ini sphereCrypt.ini
-      - cd "../${BUILD_DIR_64}/bin64"
-      - zip -r ../../SphereSvrX-osx-x86_64-nightly.zip *
-      - cd ../../
+      - zip -r SphereSvrX-osx-x86_64-nightly.zip src/sphere.ini src/sphereCrypt.ini "${BUILD_DIR_64}/bin64/*"
       - curl -sST "{SphereSvrX-osx-x86_64-nightly.zip}" -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
 
     artifacts:
