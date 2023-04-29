@@ -198,7 +198,7 @@ if (fTrue)<br>
 
 ## Licensing
 
-Copyright 2021 SphereServer development team.<br>
+Copyright 2023 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>
