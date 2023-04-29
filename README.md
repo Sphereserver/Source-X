@@ -53,6 +53,7 @@ Most notable changes (right now) are:
 
 
 ### Required libraries (Linux):
+* MariaDB Client library. Get it from the following sources.
 
 #### From MariaDB website
 See https://mariadb.com/docs/skysql/connect/clients/mariadb-client/
@@ -65,10 +66,14 @@ Install MariaDB client: `sudo apt-get install mariadb-client` or `sudo apt-get i
 Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-connector-c`
 
 
+### Required libraries (MacOS):
+* Install MariaDB Client library via `brew install mariadb-connector-c`
+
+
 ## Building
 
 ### Generating the project files
-The compilation of the code is possible only using recent compilers, since C++17 features are used: Visual Studio 2017 or 2015 Update 3, GCC 7.1 and later (even if GCC 6 can work, 7 is reccomended), MinGW distributions using GCC 7.1 and later (like nuwen's).<br>
+The compilation of the code is possible only using recent compilers, since C++17 features are used: Visual Studio 2017 or 2015 Update 3, GCC 7.1 and later (even if GCC 6 can work, 7 is reccomended), MinGW distributions using GCC 7.1 and later (like nuwen's), Clang version 6 or greater.<br>
 You need to build makefiles (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and MinGW).<br>
 Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
@@ -103,23 +108,22 @@ cmake -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -G "Uni
 #### Installing the required packages on Linux
 Building will require more packages than the ones needed to run Sphere.
  
-##### Ubuntu 14.x to 16.x and Debian 9
-Install these additional packages: `sudo apt-get install git libmysql++-dev libmysqld-dev libmysqlclient-dev`<br>
+##### Ubuntu and Debian
+Install these additional packages:
+* `sudo apt-get install git cmake`<br>
+* MariaDB client: `sudo apt-get install libmariadb-dev` and  `libmariadb3` or `mariadb-client` (depends on the OS version)
 If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to
- install the MySQL packages adding the postfix `:i386` to each package name.
+ install MariaDB packages adding the postfix `:i386` to each package name.
 
-##### CentOS 6 / 7 - Red Hat 6 / 7 - Fedora 26
-Then install these additional packages via yum (CentOS or RH) or dnf (Fedora): `git gcc-c++ glibc-devel mysql-community-devel`<br>
+##### CentOS - Red Hat Enterprise Linux - Fedora
+Then install these additional packages via yum (CentOS or RH) or dnf (Fedora): `git gcc-c++ glibc-devel mariadb-connector-c mariadb-connector-c-devel`<br>
 <br>If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to install the appropriate gcc package
  and to install the MySQL packages adding the postfix `.i686` to each package name.
 
 #### Compiling on Linux
 Just run the `make` command inside the `build` folder. You can pass the -jX argument (`make -jX`, where X is a number) to speed up the compilation and split the work between X threads.
  
-#### Extra: compiling with Clang (if you wish to try)
-At the moment, Clang was tested only on Windows and in combination with Visual Studio 2017.<br>
-
-##### On Windows
+#### Extra: compiling with Clang on Windows (not officially supported, try if you wish)
 1. Install Clang for LLVM 6.0 (<a href="http://releases.llvm.org/download.html">here</a>) and select the option to add the bin folder to the PATH environmental variable.
 2. Install via the Visual Studio installer the package "Clang/C2".
 3. Install the 3rd party Visual Studio 2017 toolset for Clang from <a href="https://github.com/arves100/llvm-vs2017-integration">here</a>.

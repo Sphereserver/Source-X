@@ -133,48 +133,48 @@ jobs:
             tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C ../src/ sphere.ini sphereCrypt.ini
 
 
-    macos-x86_64:
-      runs-on: macos-12
+  macos-x86_64:
+    runs-on: macos-12
+    env:
+      BUILD_DIR_64: build-64
+      CMAKE_GEN: Ninja
+      CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install prerequisites
+      run:  |
+            sw_vers
+            echo && echo "** Setting up compiler" && echo
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            export HOMEBREW_NO_INSTALL_CLEANUP=1
+            brew install ninja mariadb-connector-c
+            gcc -v && g++ -v && cmake --version && ninja --version
+    - name: CMake
+      run: |
+            mkdir -p build
+            cd build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/OSX-x86_64.cmake -S ../ -B .
+    - name: Ninja
+      run: ninja
+    - name: Create package
+      run:  |
+            mkdir accounts logs save scripts
+            zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
+            zip SphereSvrX-osx-x86_64-nightly.zip ../src/sphere.ini ../src/sphereCrypt.ini bin64/*
+
+    # only upload artifact in pull request or if is main/master branch
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v3
       env:
-        BUILD_DIR_64: build-64
-        CMAKE_GEN: Ninja
-        CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
-
-      steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install prerequisites
-        run:  |
-              sw_vers
-              echo && echo "** Setting up compiler" && echo
-              export HOMEBREW_NO_AUTO_UPDATE=1
-              export HOMEBREW_NO_INSTALL_CLEANUP=1
-              brew install ninja mariadb-connector-c
-              gcc -v && g++ -v && cmake --version && ninja --version
-      - name: CMake
-        run: |
-              mkdir -p build
-              cd build
-              cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/OSX-x86_64.cmake -S ../ -B .
-      - name: Ninja
-        run: ninja
-      - name: Create package
-        run:  |
-              mkdir accounts logs save scripts
-              zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
-              zip SphereSvrX-osx-x86_64-nightly.zip ../src/sphere.ini ../src/sphereCrypt.ini bin64/*
-
-      # only upload artifact in pull request or if is main/master branch
-      - name: Upload artifact
-        if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: Builds
-          path: build/SphereSvrX-osx-x86_64-nightly.zip
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Builds
+        path: build/SphereSvrX-osx-x86_64-nightly.zip
 
 
   upload:
