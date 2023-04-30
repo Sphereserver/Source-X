@@ -117,7 +117,7 @@ for:
       - export CC="gcc-7" && export CXX="g++-7"
 
       # Report our building tools
-      - gcc -v && g++ -v && cmake --version && ninja --version
+      - gcc -v && cmake --version && ninja --version
 
     # Use our custom script
     build_script:
@@ -189,7 +189,7 @@ for:
       - export HOMEBREW_NO_AUTO_UPDATE=1
       - export HOMEBREW_NO_INSTALL_CLEANUP=1
       - brew install ninja mariadb-connector-c
-      - gcc -v && g++ -v && cmake --version && ninja --version
+      - gcc -v && cmake --version && ninja --version
 
     # Use our custom script
     build_script:

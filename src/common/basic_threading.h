@@ -7,7 +7,9 @@
 
 //#ifdef _DEBUG
 
+#include <mutex>
 #include <shared_mutex>
+
 #define THREAD_CMUTEX           _classMutex     // Name of the Class Mutex
 #define THREAD_CMUTEX_DEF	    mutable std::shared_mutex THREAD_CMUTEX				            // Use this in the class definition to add the class mutex.
 #define THREAD_SHARED_LOCK_SET	std::shared_lock<std::shared_mutex> _shared_lock(THREAD_CMUTEX)	// Read-Only: multiple threads can read the same resource

@@ -322,7 +322,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			{
 				char szVersion[128];
 				m_ClientVersion.WriteClientVer(szVersion, sizeof(szVersion));
-				snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_VERSION ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
+				snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_NAME ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
 					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), szVersion);
 			}
 			break;

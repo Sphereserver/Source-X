@@ -3268,3 +3268,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	Windows: uses libmariadb.dll for both x86 and x86_64 builds.
 	Linux and OSX: moved to MariaDB.
 	WARNING: you WILL need to update those libraries!
+
+30-04-2023, Nolok
+- Fixed: Assertion failure and segmentation fault/invalid memory access caused by early use of Sphere methods requiring some data to be initialized first. Compilation and execution should now work with latest GCC versions.
+- Changed: Target architecture is precisely reported, instead of giving the number of "bits".

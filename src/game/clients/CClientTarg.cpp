@@ -11,6 +11,7 @@
 #include "../triggers.h"
 #include "CClient.h"
 
+
 ////////////////////////////////////////////////////////
 // Targetted GM functions.
 
@@ -967,23 +968,28 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 	return iSkillLevel;
 }
 
-static lpctstr const sm_szPoisonMessages[] =
+std::vector<lpctstr> CClient::sm_vsPoisonMessages;
+void CClient::InitRuntimeStaticMembers()
 {
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_1 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_2 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_3 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_4 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_5 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_6 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_7 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_8 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_9 ),
-	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_10 )
-};
+	sm_vsPoisonMessages =
+	{
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_1),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_2),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_3),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_4),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_5),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_6),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_7),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_8),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_9),
+			g_Cfg.GetDefaultMsg(DEFMSG_ARMSLORE_PSN_10)
+	};
+}
 
 int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_ArmsLore");
+
 	// SKILL_ARMSLORE
 	CItem * pItem = uid.ItemFind();
 	if ( pItem == nullptr || ! pItem->IsTypeArmorWeapon())
@@ -1065,10 +1071,13 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	// Poisoned ?
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
-		uint iLevel = (uint)IMulDiv( pItem->m_itWeapon.m_poison_skill, CountOf(sm_szPoisonMessages), 100 );
-		if ( iLevel >= CountOf(sm_szPoisonMessages))
-			iLevel = CountOf(sm_szPoisonMessages) - 1;
-		len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, " %s", sm_szPoisonMessages[iLevel] );
+		uint iLevel = (uint)IMulDiv( 
+			i_promote32(pItem->m_itWeapon.m_poison_skill),
+			i64_narrow32(sm_vsPoisonMessages.size()),
+			100);
+		if ( iLevel >= sm_vsPoisonMessages.size())
+			iLevel = i64_narrow32(sm_vsPoisonMessages.size()) - 1;
+		len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, " %s", sm_vsPoisonMessages[iLevel] );
 	}
 
 	SysMessage(pszTemp);
@@ -1263,10 +1272,10 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 
 	if ( iPoisonLevel )
 	{
-		uint iLevel = (uint)IMulDiv( iPoisonLevel, CountOf(sm_szPoisonMessages), 1000 );
-		if ( iLevel >= CountOf(sm_szPoisonMessages))
-			iLevel = CountOf(sm_szPoisonMessages) - 1;
-		SysMessage( sm_szPoisonMessages[iLevel] );
+		uint iLevel = (uint)IMulDiv( iPoisonLevel, sm_vsPoisonMessages.size(), 1000 );
+		if ( iLevel >= sm_vsPoisonMessages.size())
+			iLevel = i64_narrow32(sm_vsPoisonMessages.size() - 1);
+		SysMessage( sm_vsPoisonMessages[iLevel] );
 	}
 	else
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TASTEID_RESULT ), static_cast<lpctstr>(pItem->GetNameFull(false)));

@@ -1,6 +1,6 @@
 #ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service
-	#include <process.h>	// getpid()
+	#include <process.h>				// getpid()
 #else
 	#include "../sphere/UnixTerminal.h"
 #endif
@@ -22,15 +22,15 @@
 #include "../sphere/asyncdb.h"
 #include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
-#include "items/CItemMap.h"
-#include "items/CItemMessage.h"
-#include "components/CCChampion.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include <sstream>
+
+// Headers for InitRuntimeStaticMembers
+#include "clients/CClient.h"
 
 
 // Dynamic allocation of some global stuff
@@ -49,8 +49,8 @@ GlobalInitializer::GlobalInitializer()
 	// The order of the instructions is important!
 
 	std::stringstream ssServerDescription;
-	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_VERSION;
-	ssServerDescription << " [" << SPHERE_VER_FILEOS_STR << '-' << g_ptcArchBits << "]";
+	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_BUILD_NAME;
+	ssServerDescription << " [" << get_target_os_str() << '-' << get_target_arch_str() << "]";
 	ssServerDescription << " by www.spherecommunity.net";
 	g_sServerDescription = ssServerDescription.str();
 
@@ -96,7 +96,8 @@ GlobalInitializer::GlobalInitializer()
 
 	//--------
 
-	//CPointBase::InitRuntimeStaticMembers();
+	CPointBase::InitRuntimeStaticMembers();
+	CClient::InitRuntimeStaticMembers();
 }
 
 GlobalInitializer g_GlobalInitializer;
@@ -112,15 +113,18 @@ CWorld			g_World;			// the world. (we save this stuff)
 #endif
 	CNetworkManager g_NetworkManager;
 
-// Again, game servers stuff.
+// Config data from sphere.ini is needed from the beginning.
 CServerConfig	g_Cfg;
-CServer			g_Serv;				// current state, stuff not saved.
 
 #ifdef _WIN32
-	CNTWindow g_NTWindow;
+CNTWindow g_NTWindow;
 #else
-	UnixTerminal g_UnixTerminal;
+UnixTerminal g_UnixTerminal;
 #endif
+
+// Again, game servers stuff.
+CServer			g_Serv;				// current state, stuff not saved.
+
 
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;

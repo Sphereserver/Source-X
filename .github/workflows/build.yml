@@ -76,10 +76,10 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
-            sudo add-apt-repository universe && sudo sudo apt-get -qq update
+            sudo add-apt-repository ppa:jonathonf/gcc universe && sudo sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends gcc-7 g++-7 mariadb-client libmariadb-dev > /dev/null
             export CC="gcc-7" && export CXX="g++-7"
-            gcc -v && g++ -v && cmake --version && ninja --version
+            gcc -v && cmake --version && ninja --version
     - name: CMake
       run: |
             mkdir -p build
@@ -113,13 +113,14 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
-
+            echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
-            sudo add-apt-repository universe && sudo apt-get -qq update
+            sudo add-apt-repository ppa:jonathonf/gcc universe && sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends linux-libc-dev:i386 gcc-7 gcc-7-multilib g++-7 g++-7-multilib
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
             export CC="gcc-7" && export CXX="g++-7"
-            gcc -v && g++ -v && cmake --version && ninja --version
+            echo && echo "** Report building tools" && echo
+            gcc -v -v && cmake --version && ninja --version
     - name: CMake
       run: |
             mkdir -p build
@@ -136,7 +137,6 @@ jobs:
   macos-x86_64:
     runs-on: macos-12
     env:
-      BUILD_DIR_64: build-64
       CMAKE_GEN: Ninja
       CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
 
@@ -152,14 +152,15 @@ jobs:
             export HOMEBREW_NO_AUTO_UPDATE=1
             export HOMEBREW_NO_INSTALL_CLEANUP=1
             brew install ninja mariadb-connector-c
-            gcc -v && g++ -v && cmake --version && ninja --version
+            echo && echo "** Report building tools" && echo
+            gcc -v && cmake --version && ninja --version
     - name: CMake
       run: |
             mkdir -p build
             cd build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/OSX-x86_64.cmake -S ../ -B .
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
     - name: Ninja
-      run: ninja
+      run: pwd && ninja
     - name: Create package
       run:  |
             mkdir accounts logs save scripts

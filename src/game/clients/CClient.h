@@ -144,37 +144,6 @@ public:
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
-    // Client-sent flags
-    bool _fShowPublicHouseContent;
-
-	// GM only stuff.
-	CGMPage * m_pGMPage;	// Current GM page being handled by this client
-	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
-
-	// Gump stuff
-    //  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
-    //  second int: count (how much of that dialogs are currently open)
-	typedef std::map<uint,int> OpenedGumpsMap_t;
-	OpenedGumpsMap_t m_mapOpenedGumps;
-
-	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
-	int64 m_timeLastSkillThrowing;          // Last time we throw the weapon
-	CObjBase *m_pSkillThrowingTarg;			// Object from where the anim will return from
-	ITEMID_TYPE m_SkillThrowingAnimID;		// Weapon anim ID (AMMOANIM)
-	dword m_SkillThrowingAnimHue;			// Weapon anim hue (AMMOANIMHUE)
-	dword m_SkillThrowingAnimRender;		// Weapon anim render (AMMOANIMRENDER)
-
-	// Current operation context args for modal async operations..
-private:
-	CLIMODE_TYPE m_Targ_Mode;	// Type of async operation under way.
-public:
-	CUID m_Targ_Last;	// The last object targeted by the client
-	CUID m_Targ_UID;			// The object of interest to apply to the target.
-	CUID m_Targ_Prv_UID;		// The object of interest before this.
-	CSString m_Targ_Text;		// Text transfered up from client.
-	CPointMap  m_Targ_p;		// For script targeting,
-	int64 m_Targ_Timeout;       // timeout time for targeting
-
 	// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
 	{
@@ -259,6 +228,43 @@ private:
 	// encrypt/decrypt stuff.
 	CCrypto m_Crypt;			// Client source communications are always encrypted.
 	static CHuffman m_Comp;
+
+public:
+	// Gump stuff
+	//  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
+	//  second int: count (how much of that dialogs are currently open)
+	typedef std::map<uint, int> OpenedGumpsMap_t;
+	OpenedGumpsMap_t m_mapOpenedGumps;
+
+	// Client-sent flags
+	bool _fShowPublicHouseContent;
+
+	// GM only stuff.
+	CGMPage* m_pGMPage;	// Current GM page being handled by this client
+	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
+
+	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
+	int64 m_timeLastSkillThrowing;          // Last time we throw the weapon
+	CObjBase* m_pSkillThrowingTarg;			// Object from where the anim will return from
+	ITEMID_TYPE m_SkillThrowingAnimID;		// Weapon anim ID (AMMOANIM)
+	dword m_SkillThrowingAnimHue;			// Weapon anim hue (AMMOANIMHUE)
+	dword m_SkillThrowingAnimRender;		// Weapon anim render (AMMOANIMRENDER)
+
+	// Current operation context args for modal async operations..
+private:
+	CLIMODE_TYPE m_Targ_Mode;	// Type of async operation under way.
+public:
+	CUID m_Targ_Last;	// The last object targeted by the client
+	CUID m_Targ_UID;			// The object of interest to apply to the target.
+	CUID m_Targ_Prv_UID;		// The object of interest before this.
+	CSString m_Targ_Text;		// Text transfered up from client.
+	CPointMap  m_Targ_p;		// For script targeting,
+	int64 m_Targ_Timeout;       // timeout time for targeting
+
+private:
+	friend class GlobalInitializer;
+	static void InitRuntimeStaticMembers();
+	static std::vector<lpctstr> sm_vsPoisonMessages;
 
 private:
 	bool OnRxConsoleLoginComplete();

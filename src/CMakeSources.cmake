@@ -164,12 +164,13 @@ src/common/CUOInstall.h
 src/common/CVarDefMap.cpp
 src/common/CVarDefMap.h
 src/common/datatypes.h
-src/common/sphereproto.h
-src/common/sphereversion.h
 src/common/ListDefContMap.cpp
 src/common/ListDefContMap.h
 src/common/os_unix.h
 src/common/os_windows.h
+src/common/sphereproto.h
+src/common/sphereversion.h
+src/common/target_info.h
 )
 SOURCE_GROUP (common FILES ${common_SRCS})
 
@@ -254,6 +255,7 @@ src/common/sphere_library/CSTime.cpp
 src/common/sphere_library/CSTime.h
 src/common/sphere_library/CSWindow.cpp
 src/common/sphere_library/CSWindow.h
+src/common/sphere_library/container_ops.h
 src/common/sphere_library/smap.h
 src/common/sphere_library/smutex.h
 src/common/sphere_library/smutex.cpp

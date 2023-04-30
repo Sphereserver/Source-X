@@ -1,3 +1,4 @@
+#include "../common/sphere_library/container_ops.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
@@ -22,18 +23,23 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 //*************************************************************************
 // -CPointBase
 
-lpctstr CPointBase::sm_szDirs[DIR_QTY+1] =
+lpctstr CPointBase::sm_szDirs[];
+void CPointBase::InitRuntimeStaticMembers()
 {
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_0),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_1),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_2),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_3),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_4),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_5),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_6),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_7),
-	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_8),
-};
+	AssignInitlistToCSizedArray(
+		CPointBase::sm_szDirs, CountOf(CPointBase::sm_szDirs),
+		{
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_0),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_1),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_2),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_3),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_4),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_5),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_6),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_7),
+			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_8)
+		});
+}
 
 const short CPointBase::sm_Moves[DIR_QTY+1][2] =
 {

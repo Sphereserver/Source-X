@@ -117,7 +117,7 @@ void CNTService::ServiceStartMain(DWORD dwArgc, LPTSTR *lpszArgv)
 {
 	TCHAR *pszMsg = Str_GetTemp();
 
-	sprintf(pszMsg, SPHERE_TITLE " " SPHERE_VERSION_PREFIX SPHERE_VERSION " - %s", g_Serv.GetName());
+	sprintf(pszMsg, SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME " - %s", g_Serv.GetName());
 
 	m_hStatusHandle = RegisterServiceCtrlHandler(pszMsg, service_ctrl);
 	if ( !m_hStatusHandle )	// Not much we can do about this.

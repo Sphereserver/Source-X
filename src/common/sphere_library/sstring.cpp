@@ -14,7 +14,9 @@
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-#include "../regex/deelx.h"
+
+#include "../../../lib/regex/deelx.h"
+
 #ifdef _MSC_VER
     #pragma warning( pop )
 #elif defined(__GNUC__)
@@ -389,8 +391,6 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
 size_t Str_CopyLen(tchar * pDst, lpctstr pSrc)
 {
     strcpy(pDst, pSrc);
-    // Remember: strlen returns the number of bytes before the terminator (if the string contains utf-8 characters,
-    //  strlen will return a value != than the actual number of characters, because some of them are codified with more than a byte).
     return strlen(pDst);
 }
 

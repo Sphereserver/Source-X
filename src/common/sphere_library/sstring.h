@@ -392,4 +392,5 @@ private:
     char* m_strUTF8_MultiByte;
 };
 
+
 #endif // _INC_SSTRING_H
