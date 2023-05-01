@@ -117,12 +117,21 @@ static lpctstr constexpr sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 struct SubexprData
 {
 	lptstr ptcStart, ptcEnd;
-	enum Type : uchar
+	enum Type : ushort
 	{
-		Unknown = 0, None = 0x1, And = 0x2, Or = 0x4, MaybeNestedSubexpr = 0x8
+		Unknown = 0,
+		// Powers of two
+		MaybeNestedSubexpr = 0x1 << 1,
+		None	= 0x1 << 2,
+		And		= 0x1 << 3,
+		Or		= 0x1 << 4,
+		Less	= 0x1 << 5,
+		LessEq	= 0x1 << 6,
+		Great	= 0x1 << 7,
+		GreatEq	= 0x1 << 8
 	};
-	uchar uiType;
-	uchar uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
+	ushort uiType;
+	ushort uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
 };
 
 extern class CExpression

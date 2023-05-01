@@ -1576,23 +1576,12 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 			const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, pSrc, pArgs, pContext);
 			fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
 		}
+
 		
 		if (sCur.uiType & SType::None)
 		{
 			ASSERT(i == iQty - 1);	// It should be the last subexpression
-
-			const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, pSrc, pArgs, pContext);
-
-			if (sPrev.uiType & SType::Or)
-			{
-				fWholeExprVal = fWholeExprVal || fVal;
-			}
-			else
-			{
-				ASSERT(sPrev.uiType & SType::And);
-				ASSERT(iQty > 1);
-				fWholeExprVal = (fWholeExprVal && fVal);
-			}
+			ASSERT((sPrev.uiType & SType::Or) || (sPrev.uiType & SType::And));
 		}
 		
 	}

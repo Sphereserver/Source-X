@@ -27,6 +27,9 @@ function (toolchain_exe_stuff_common)
 	 # -pthread, -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic -static-libstdc++ -static-libgcc"			PARENT_SCOPE)
 
+	IF (${ENABLE_SANITIZERS})
+		SET (SANITIZER_OPTS "-fno-inline -fsanitize=address,undefined,leak -fsanitize-address-use-after-scope -fstack-protector-strong -fvtable-verify=preinit")
+	ENDIF ()
 
 	#-- Adding compiler flags per build.
 
@@ -35,13 +38,13 @@ function (toolchain_exe_stuff_common)
 	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
 	IF (TARGET spheresvr_release)
-		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 	)
+		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3    )
+		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 ${SANITIZER_OPTS} )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer	)
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer ${SANITIZER_OPTS} )
 	ENDIF (TARGET spheresvr_debug)
 
 

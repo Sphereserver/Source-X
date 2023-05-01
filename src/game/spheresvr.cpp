@@ -97,7 +97,6 @@ GlobalInitializer::GlobalInitializer()
 	//--------
 
 	CPointBase::InitRuntimeStaticMembers();
-	CClient::InitRuntimeStaticMembers();
 }
 
 GlobalInitializer g_GlobalInitializer;

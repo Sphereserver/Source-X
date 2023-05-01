@@ -157,10 +157,9 @@ jobs:
     - name: CMake
       run: |
             mkdir -p build
-            cd build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S . -B ./build
     - name: Ninja
-      run: pwd && ninja
+      run: pwd && cd build && ninja
     - name: Create package
       run:  |
             mkdir accounts logs save scripts

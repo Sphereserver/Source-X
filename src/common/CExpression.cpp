@@ -1243,10 +1243,10 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			if (fSpecialChar)
 			{
 				uint uiTempOffset = uint(pExpr + 1U - sCurSubexpr.ptcStart);
-				if (uiTempOffset > UCHAR_MAX)
+				if (uiTempOffset > USHRT_MAX)
 				{
-					g_Log.EventError("Too much non-associative operands before the expression. Trimming to %d.\n", UCHAR_MAX);
-					uiTempOffset = UCHAR_MAX;
+					g_Log.EventError("Too much non-associative operands before the expression. Trimming to %d.\n", USHRT_MAX);
+					uiTempOffset = USHRT_MAX;
 				}
 				sCurSubexpr.uiNonAssociativeOffset = uchar(uiTempOffset);
 				sCurSubexpr.ptcStart = pExpr;
@@ -1338,7 +1338,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			// ptcStart might have changed, so update uiNonAssociativeOffset accordingly (given that it's relative to ptcStart).
 			const int iDiff = int(ptcStart - sCurSubexpr.ptcStart);
 			ASSERT(iDiff >= 0);
-			const uint uiNewOff = std::min((uint)UCHAR_MAX, (uint)iDiff);
+			const uint uiNewOff = std::min((uint)USHRT_MAX, (uint)iDiff);
 			sCurSubexpr.uiNonAssociativeOffset += uchar(uiNewOff);
 		}
 		sCurSubexpr.ptcStart = ptcStart;
