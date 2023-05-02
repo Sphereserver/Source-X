@@ -76,7 +76,7 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
-            sudo add-apt-repository ppa:jonathonf/gcc universe && sudo sudo apt-get -qq update
+            sudo add-apt-repository ppa:jonathonf/gcc && sudo add-apt-repository universe && sudo sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends gcc-7 g++-7 mariadb-client libmariadb-dev > /dev/null
             export CC="gcc-7" && export CXX="g++-7"
             gcc -v && cmake --version && ninja --version
@@ -115,7 +115,7 @@ jobs:
             lsb_release -d
             echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
-            sudo add-apt-repository ppa:jonathonf/gcc universe && sudo apt-get -qq update
+            sudo add-apt-repository ppa:jonathonf/gcc && sudo add-apt-repository universe && sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends linux-libc-dev:i386 gcc-7 gcc-7-multilib g++-7 g++-7-multilib
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
             export CC="gcc-7" && export CXX="g++-7"
@@ -159,12 +159,13 @@ jobs:
             mkdir -p build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S . -B ./build
     - name: Ninja
-      run: pwd && cd build && ninja
+      run: cd build && ninja && cd ..
     - name: Create package
       run:  |
+            pwd
             mkdir accounts logs save scripts
             zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
-            zip SphereSvrX-osx-x86_64-nightly.zip ../src/sphere.ini ../src/sphereCrypt.ini bin64/*
+            zip SphereSvrX-osx-x86_64-nightly.zip src/sphere.ini src/sphereCrypt.ini build/bin64/*
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact

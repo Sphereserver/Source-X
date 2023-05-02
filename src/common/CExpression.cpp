@@ -249,7 +249,7 @@ bool IsValidGameObjDef( lpctstr ptcTest )
 		const tchar ch = *pVarBase->GetValStr();
 		if ( !ch || (ch == '<') )
 			return false;
-		
+
 		const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ptcTest);
         const RES_TYPE resType = rid.GetResType();
 		if (resType == RES_QTY)
@@ -1197,7 +1197,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 	//ASSERT(pSubexprPos);
 
 	//memset((void*)&pSubexprPos, 0, CountOf(pSubexprPos));
-	int iQty = 0;	// number of subexpressions 
+	int iQty = 0;	// number of subexpressions
 	using SType = SubexprData::Type;
 	while (pExpr[0] != '\0')
 	{
@@ -1207,6 +1207,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			return iQty;
 		}
 
+		bool fStartsWithBracket = false;
 		GETNONWHITESPACE(pExpr);
 		SubexprData& sCurSubexpr = psSubexprData[iQty - 1];
 		tchar ch = pExpr[0];
@@ -1252,8 +1253,9 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 				sCurSubexpr.ptcStart = pExpr;
 			}
 
+			fStartsWithBracket = true;
 			sCurSubexpr.ptcStart += 1;	// Eat the opening bracket
-			
+
 			ushort uiOpenedCurlyBrackets = 1;
 			while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
 			{
@@ -1272,7 +1274,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 			ASSERT(pExpr[0] == ')');
 			sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
-			
+
 			ch = *(++pExpr);
 			// Okay, i've eaten the expression in brackets, now fall through and look for the operators, if any
 		}
@@ -1307,6 +1309,42 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
+			else
+			{
+				// Look for an arithmetic two-way operator.
+				// The subexpression may not be really ended, thus we need to reset the end of the subexpr and find the real one.
+				if (ch == '<')
+				{
+					sCurSubexpr.ptcStart = sCurSubexpr.ptcStart - (fStartsWithBracket ? 1 : 0); // I want to include back the bracket in the subexpression
+					sCurSubexpr.ptcEnd   = nullptr;
+					if (pExpr[1] == '=')
+					{
+						sCurSubexpr.uiType = SType::LessEq;
+						pExpr += 2u;
+					}
+					else
+					{
+						sCurSubexpr.uiType = SType::Less;
+						pExpr += 1u;
+					}
+				}
+				else if (ch == '>')
+				{
+					sCurSubexpr.ptcStart = sCurSubexpr.ptcStart - (fStartsWithBracket ? 1 : 0); // I want to include back the bracket in the subexpression
+					sCurSubexpr.ptcEnd	 = nullptr;
+					if (pExpr[1] == '=')
+					{
+						sCurSubexpr.uiType = SType::GreatEq;
+						pExpr += 2u;
+					}
+					else
+					{
+						sCurSubexpr.uiType = SType::Great;
+						pExpr += 1u;
+					}
+				// End of arithmetic subexpression.
+				}
+			}
 
 			ch = *(++pExpr);
 		}
@@ -1322,7 +1360,12 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 		for (lptstr ptcTest = ptcStart; ptcTest != ptcEnd; ++ptcTest)
 		{
-			if (((ptcTest[0] == '|') && (ptcTest[1] == '|')) || ((ptcTest[0] == '&') && (ptcTest[1] == '&')))
+			if (
+				((ptcTest[0] == '|') && (ptcTest[1] == '|')) ||
+				((ptcTest[0] == '&') && (ptcTest[1] == '&'))
+				//((ptcTest[0] == '<') && (ptcTest[1] != '<')) ||
+				//((ptcTest[0] == '>') && (ptcTest[1] != '>'))
+			   )
 			{
 				// We have logical operators inside, so it's a nested subexpression.
 				sCurSubexpr.uiType |= SType::MaybeNestedSubexpr;
@@ -1517,7 +1560,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 		memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
-		
+
 		lptstr pToParseCasted = static_cast<lptstr>(pToParse);
 		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
@@ -1537,7 +1580,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		if ( llTotalWeight <= 0 )
 			break;
 	}
-	
+
 	ASSERT(i < iQty);
 	i -= 1;	// pick the value instead of the weight
 	const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
@@ -1546,7 +1589,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	ASSERT(nullptr != pElementsStart[i][0]);
 	memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 	pToParse[iToParseLen] = '\0';
-	
+
 	lptstr pToParseCasted = static_cast<lptstr>(pToParse);
 	return GetSingle(pToParseCasted);
 }

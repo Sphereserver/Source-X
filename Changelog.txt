@@ -3262,9 +3262,10 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	WARNING: you will need to change the source directory in CMake!
 - Changed: On Windows, abandoned MySQL libmysql.dll. Now using MariaDB libmysql.dll (compatible with MySQL until 5.x) for x86 builds and libmariadb.dll for x86_64 builds, which supports MariaDB and MySQL versions above.
 	WARNING: you WILL need to update those libraries!
+	WARNING: outdated, since Windows was moved to MariaDB as well; read the following changelog note.
 
 28-04-2023, Nolok
-- Changed: fully moved from MySQL client to MariaDB client library.
+- Changed: fully moved from MySQL client to MariaDB client library on every operating system.
 	Windows: uses libmariadb.dll for both x86 and x86_64 builds.
 	Linux and OSX: moved to MariaDB.
 	WARNING: you WILL need to update those libraries!
@@ -3275,3 +3276,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 01-05-2023, Nolok
 - Fixed: In an IF statement with multiple subexpressions, the last subexpression was evaluated twice (if a function, it was called twice) (Issue #1032).
+
+02-05-2023, Nolok
+- Fixed: IF parsing errors when using that construct without parentheses (Issue #766).
