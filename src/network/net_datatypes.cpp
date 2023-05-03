@@ -32,7 +32,7 @@ ndword& ndword::operator = (dword val)
 }
 
 
-static int CvtSystemToUNICODE(wchar& wChar, lpctstr pInp, int iSizeInBytes)
+static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes)
 {
     // Convert a UTF8 encoded string to a single unicode char.
     // RETURN: The length used from input string. < iSizeInBytes
@@ -86,7 +86,7 @@ static int CvtSystemToUNICODE(wchar& wChar, lpctstr pInp, int iSizeInBytes)
     return iBytes;
 }
 
-static int CvtUNICODEToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
+static int CvtUTF16ToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
 {
     // Convert a single unicode char to system string.
     // RETURN: The length < iSizeOutBytes
@@ -145,7 +145,7 @@ static int CvtUNICODEToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
     return iBytes;
 }
 
-int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes)
+int CvtSystemToNETUTF16(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes)
 {
     //
     // Convert the system default text format UTF8 to UNICODE
@@ -224,7 +224,7 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
             if (ch >= 0x80)	// special UTF8 encoded char.
             {
                 wchar wChar;
-                int iInpTmp = CvtSystemToUNICODE(wChar, pInp + iInp, iSizeInBytes - iInp);
+                int iInpTmp = CvtSystemToUTF16(wChar, pInp + iInp, iSizeInBytes - iInp);
                 if (iInpTmp <= 0)
                 {
                     break;
@@ -246,7 +246,7 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
     return iOut;
 }
 
-int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int iSizeInChars)
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int iSizeInChars)
 {
     // ARGS:
     //  iSizeInBytes = space we have (included null char)
@@ -314,7 +314,7 @@ int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int i
                 break;
             if (wChar >= 0x80)	// needs special UTF8 encoding.
             {
-                int iOutTmp = CvtUNICODEToSystem(pOut + iOut, iSizeOutBytes - iOut, wChar);
+                int iOutTmp = CvtUTF16ToSystem(pOut + iOut, iSizeOutBytes - iOut, wChar);
                 if (iOutTmp <= 0)
                     break;
                 iOut += iOutTmp;

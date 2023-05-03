@@ -82,7 +82,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 
 			// Make it non unicode
 			tchar szChatName[ MAX_NAME_SIZE * 2 + 2 ];
-			CvtNUNICODEToSystem( szChatName, sizeof(szChatName), pszName, 128 );
+			CvtNETUTF16ToSystem( szChatName, sizeof(szChatName), pszName, 128 );
 
 			if ( ! CChat::IsValidName(szChatName, true) ||
 				g_Accounts.Account_FindChat(szChatName)) // Check for legal name, duplicates, etc
@@ -2108,9 +2108,9 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 }
 
 // PC speech: response to Unicode speech request
-void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
+void CClient::Event_TalkUTF16( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
 {
-	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
+	ADDTOCALLSTACK("CClient::Event_TalkUTF16");
 	// Get the text in wide bytes.
 	// ENU = English
 	// FRC = French
@@ -2140,7 +2140,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	tchar szText[MAX_TALK_BUFFER];
 	const nword * puText = wszText;
 
-	int iLen = CvtNUNICODEToSystem( szText, sizeof(szText), wszText, iTextLen );
+	int iLen = CvtNETUTF16ToSystem( szText, sizeof(szText), wszText, iTextLen );
 	if ( iLen <= 0 )
 		return;
 
@@ -2179,7 +2179,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 					if (( szText[i] >= 'A' ) && ( szText[i] <= 'Z' ))
 						szText[i] += 0x20;
 
-				iLen = CvtSystemToNUNICODE(wszText, iTextLen, szText, (int)chars);
+				iLen = CvtSystemToNETUTF16(wszText, iTextLen, szText, (int)chars);
 			}
 		}
 

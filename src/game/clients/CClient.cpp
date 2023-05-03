@@ -1457,8 +1457,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				// Font and mode are actually ignored here, but they never made a difference
 				// anyway.. I'd like to keep the syntax similar to SAYUA
                 nchar szBuffer[MAX_TALK_BUFFER];
-                CvtSystemToNUNICODE(szBuffer, CountOf(szBuffer), pszArgs[4], -1);
-                addBarkUNICODE(szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3]);
+                CvtSystemToNETUTF16(szBuffer, CountOf(szBuffer), pszArgs[4], -1);
+                addBarkNETUTF16(szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3]);
 			}
 			break;
 		case CV_SMSGL:

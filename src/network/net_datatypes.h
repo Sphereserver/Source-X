@@ -38,6 +38,11 @@ struct nword
 
 } PACK_NEEDED;
 
+struct alignas(2) naword
+{
+    nword m_internal;
+} PACK_NEEDED;
+
 
 struct ndword
 {
@@ -50,6 +55,10 @@ struct ndword
 
 } PACK_NEEDED;
 
+struct alignas(2) nadword
+{
+    ndword m_internal;
+} PACK_NEEDED;
 
 // Turn off structure packing.
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -57,8 +66,8 @@ struct ndword
 #endif
 
 
-int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes);
-int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int iSizeInChars);
+int CvtSystemToNETUTF16(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes);
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int iSizeInChars);
 
 
 #endif // _INC_NET_DATATYPES_H

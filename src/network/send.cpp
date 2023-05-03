@@ -2968,7 +2968,7 @@ PacketAddPrompt::PacketAddPrompt(const CClient* target, CUID context1, CUID cont
 	if (useUnicode)
 	{
 		writeStringFixedASCII("", 4);
-		writeCharUNICODE('\0');
+		writeCharUTF16('\0');
 	}
 	else
 	{
@@ -3493,7 +3493,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
  *
  *
  ***************************************************************************/
-PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakUNICODE, 48, PRI_NORMAL)
+PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakNETUTF16, 48, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageUNICODE::PacketMessageUNICODE");
 
@@ -3525,7 +3525,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringUNICODE(reinterpret_cast<const wchar*>(pszText));
+	writeStringNETUTF16(reinterpret_cast<const wchar*>(pszText));
 
 	push(target);
 }
@@ -3633,7 +3633,7 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 		for (uint i = 0; i < textCount; i++)
 		{
 			writeInt16((word)(texts[i].GetLength()));
-			writeStringFixedNUNICODE(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
+			writeStringFixedNETUTF16(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
 		}
 
 		uint textsLength = getPosition() - textsPosition;
@@ -3694,7 +3694,7 @@ void PacketGumpDialog::writeStandardControls(const CSString* controls, uint cont
 	for (uint i = 0; i < textCount; i++)
 	{
 		writeInt16((word)(texts[i].GetLength()));
-		writeStringFixedNUNICODE(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
+		writeStringFixedNETUTF16(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
 	}
 }
 
@@ -3715,14 +3715,14 @@ PacketChatMessage::PacketChatMessage(const CClient* target, CHATMSG_TYPE type, l
 	writeStringFixedASCII(language.GetStr(), 4);
 
 	if (param1 != nullptr)
-		writeStringNUNICODE(param1);
+		writeStringNETUTF16(param1);
 	else
-		writeCharNUNICODE('\0');
+		writeCharNETUTF16('\0');
 
 	if (param2 != nullptr)
-		writeStringNUNICODE(param2);
+		writeStringNETUTF16(param2);
 	else
-		writeCharNUNICODE('\0');
+		writeCharNETUTF16('\0');
 
 	push(target);
 }
@@ -3741,7 +3741,7 @@ PacketTooltip::PacketTooltip(const CClient* target, const CObjBase* object, lpct
 
 	initLength();
 	writeInt32(object->GetUID());
-	writeStringNUNICODE(text);
+	writeStringNETUTF16(text);
 
 	push(target);
 }
@@ -3771,17 +3771,17 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 		CSString sConstText;
 		sConstText.Format("%s, %s", character->Noto_GetTitle(), character->GetTradeTitle());
 
-		writeStringNUNICODE(static_cast<lpctstr>(sConstText));
+		writeStringNETUTF16(static_cast<lpctstr>(sConstText));
 
 		if (character->m_pPlayer != nullptr)
-			writeStringNUNICODE(static_cast<lpctstr>(character->m_pPlayer->m_sProfile));
+			writeStringNETUTF16(static_cast<lpctstr>(character->m_pPlayer->m_sProfile));
 		else
-			writeCharNUNICODE('\0');
+			writeCharNETUTF16('\0');
 	}
 	else
 	{
-		writeStringNUNICODE(character->Noto_GetTitle());
-		writeCharNUNICODE('\0');
+		writeStringNETUTF16(character->Noto_GetTitle());
+		writeCharNETUTF16('\0');
 	}
 
 	push(target);
@@ -3977,7 +3977,7 @@ PacketPartyChat::PacketPartyChat(const CChar* source, const nchar* text) : Packe
 	ADDTOCALLSTACK("PacketPartyChat::PacketPartyChat");
 
 	writeInt32(source->GetUID());
-	writeStringUNICODE(reinterpret_cast<const wchar*>(text));
+	writeStringNETUTF16(reinterpret_cast<const wchar*>(text));
 }
 
 
@@ -4467,7 +4467,7 @@ PacketMessageLocalised::PacketMessageLocalised(const CClient* target, int cliloc
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringUNICODE(args);
+	writeStringNETUTF16(args);
 
 	push(target);
 }
@@ -4530,7 +4530,7 @@ PacketMessageLocalisedEx::PacketMessageLocalisedEx(const CClient* target, int cl
 		writeStringFixedASCII(source->GetName(), 30);
 
 	writeStringASCII(affix);
-	writeStringUNICODE(args);
+	writeStringNETUTF16(args);
 
 	push(target);
 }
@@ -4656,7 +4656,7 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 
 		writeInt32(tipEntry->m_clilocid);
 		writeInt16((word)(tipLength * sizeof(wchar)));
-		writeStringFixedUNICODE(tipEntry->m_args, (uint)tipLength);
+		writeStringFixedUTF16(tipEntry->m_args, (uint)tipLength);
 	}
 
 	writeInt32(0);
@@ -4954,11 +4954,11 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 
 		for (uint i = 0; i < argCount; ++i)
 		{
-			writeCharUNICODE('\t');
-			writeStringUNICODE(args[i], false);
+			writeCharUTF16('\t');
+			writeStringNETUTF16(args[i], false);
 		}
-		writeCharUNICODE('\t');
-		writeCharUNICODE('\0');
+		writeCharUTF16('\t');
+		writeCharUTF16('\0');
 
 		writeInt16(0x1);
 		writeInt16(0);
@@ -4976,7 +4976,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		writeInt16(0x1);
 		writeInt16(0);
 
-		writeStringUNICODE("\t ", true);
+		writeStringNETUTF16("\t ", true);
 	}
 	push(target);
 }
@@ -5049,7 +5049,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
     writeInt16(0);
 
     writeInt32(cliloc);
-    writeStringUNICODE(object->GetName());
+    writeStringNETUTF16(object->GetName());
 
     push(target);
 }

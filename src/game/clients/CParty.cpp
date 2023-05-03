@@ -246,7 +246,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 		pTo = uidDst.CharFind();
 
 	tchar *szText = Str_GetTemp();
-	CvtNUNICODEToSystem(szText, MAX_TALK_BUFFER, pText, MAX_TALK_BUFFER);
+	CvtNETUTF16ToSystem(szText, MAX_TALK_BUFFER, pText, MAX_TALK_BUFFER);
 
 	if ( !m_pSpeechFunction.IsEmpty() )
 	{

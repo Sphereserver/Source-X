@@ -33,7 +33,7 @@ void CChat::EventMsg( CClient * pClient, const nchar * pszText, int len, CLangua
 	CChatChannel * pChannel =  pMe->GetChannel();
 
 	tchar szText[MAX_TALK_BUFFER * 2];
-	CvtNUNICODEToSystem( szText, sizeof(szText), pszText, len );
+	CvtNETUTF16ToSystem( szText, sizeof(szText), pszText, len );
 
 	// The 1st character is a command byte, join channel, private message someone, etc etc
 	tchar * szMsg = szText+1;

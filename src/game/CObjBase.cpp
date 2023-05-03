@@ -669,10 +669,10 @@ void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYP
 void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
-	// convert UTF8 to UNICODE.
+	// convert UTF8 to UTF16 UNICODE.
 	nchar szBuffer[ MAX_TALK_BUFFER ];
-	CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pText, -1 );
-	CWorldComm::SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
+	CvtSystemToNETUTF16( szBuffer, CountOf(szBuffer), pText, -1 );
+	CWorldComm::SpeakNETUTF16( this, szBuffer, wHue, mode, font, lang );
 }
 
 // Speak to all clients in the area.
@@ -681,7 +681,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
-	CWorldComm::SpeakUNICODE( this, pText, wHue, mode, font, lang );
+	CWorldComm::SpeakNETUTF16( this, pText, wHue, mode, font, lang );
 }
 
 bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
@@ -2309,8 +2309,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 5 )
 					break;
 
-				CvtSystemToNUNICODE( ncBuffer, CountOf( ncBuffer ), pszArgs[4], -1 );
-				pClientSrc->addBarkUNICODE( ncBuffer, this,
+				CvtSystemToNETUTF16( ncBuffer, CountOf( ncBuffer ), pszArgs[4], -1 );
+				pClientSrc->addBarkNETUTF16( ncBuffer, this,
 					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
 					(TALKMODE_TYPE)( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
 					(FONT_TYPE)( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),

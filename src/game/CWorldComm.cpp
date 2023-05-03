@@ -103,9 +103,9 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 	}
 }
 
-void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) // static
+void CWorldComm::SpeakNETUTF16( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) // static
 {
-	ADDTOCALLSTACK("CWorldComm::SpeakUNICODE");
+	ADDTOCALLSTACK("CWorldComm::SpeakNETUTF16");
 	bool fSpeakAsGhost = false;
 	const CChar * pSrcChar = nullptr;
 
@@ -183,7 +183,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwTe
 				{
 					CSString sTextName;
 					sTextName.Format("<%s>", pSrc->GetName());
-					int iLen = CvtSystemToNUNICODE( wTextName, CountOf(wTextName), sTextName, -1 );
+					int iLen = CvtSystemToNETUTF16( wTextName, CountOf(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )
 					{
 						for ( int i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
@@ -206,7 +206,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwTe
 			{
 				tchar * pszMsg = Str_GetTemp();
 				snprintf(pszMsg, STR_TEMPLENGTH, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
-				int iLen = CvtSystemToNUNICODE( wTextUID, CountOf(wTextUID), pszMsg, -1 );
+				int iLen = CvtSystemToNETUTF16( wTextUID, CountOf(wTextUID), pszMsg, -1 );
 				for ( int i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 					wTextUID[iLen] = pwText[i];
 				wTextUID[iLen] = '\0';
@@ -214,7 +214,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwTe
 			pwSpeak = wTextUID;
 		}
 
-		pClient->addBarkUNICODE( pwSpeak, pSrc, wHue, mode, font, lang );
+		pClient->addBarkNETUTF16( pwSpeak, pSrc, wHue, mode, font, lang );
 	}
 }
 
