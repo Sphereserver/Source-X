@@ -42,7 +42,7 @@ find_library ( HAVE_LIBRT rt )
 # Tweaks
 set ( HAVE_CLOCK_SYSCALL ${HAVE_CLOCK_GETTIME} )
 
-CONFIGURE_FILE ("lib/libev/cmake/config.h.in" 
-                "lib/libev/src/config.h" )
+CONFIGURE_FILE ("${CMAKE_CURRENT_SOURCE_DIR}/lib/libev/cmake/config.h.in" 
+                "${CMAKE_CURRENT_SOURCE_DIR}/lib/libev/src/config.h" )
  
 message (STATUS "config.h for libev generated")

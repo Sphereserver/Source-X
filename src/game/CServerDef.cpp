@@ -81,10 +81,14 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 				}
 				else
                 {
+#ifndef _MSC_VER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
                     m_GetProcessMemoryInfo = reinterpret_cast<pfnGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
+#ifndef _MSC_VER
 #pragma GCC diagnostic pop
+#endif
                 }
 			}
 
