@@ -2111,7 +2111,7 @@ bool PacketSpeakReqUNICODE::onReceive(CNetState* net)
 	{
 		nchar text[MAX_TALK_BUFFER];
 		readStringUTF16(reinterpret_cast<wchar *>(text), packetLength, false);
-		client->Event_TalkUTF16(text, (int)(packetLength), hue, mode, font, language);
+		client->Event_TalkUNICODE(text, (int)(packetLength), hue, mode, font, language);
 	}
 
 	return true;

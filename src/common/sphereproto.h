@@ -158,7 +158,7 @@ enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 	XCMD_GumpInpVal		= 0xab,
 	XCMD_GumpInpValRet	= 0xac,
 	XCMD_TalkUNICODE	= 0xad,
-	XCMD_SpeakNETUTF16	= 0xae,
+	XCMD_SpeakUNICODE	= 0xae,
 	XCMD_CharDeath		= 0xaf,
 	//	0xB0
 	XCMD_GumpDialog		= 0xb0,

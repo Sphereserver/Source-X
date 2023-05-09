@@ -1197,18 +1197,19 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 	//ASSERT(pSubexprPos);
 
 	//memset((void*)&pSubexprPos, 0, CountOf(pSubexprPos));
-	int iQty = 0;	// number of subexpressions
+	int iSubexprQty = 0;	// number of subexpressions
 	using SType = SubexprData::Type;
 	while (pExpr[0] != '\0')
 	{
-		if (++iQty >= iMaxQty)
+		int iSubexprFragmentQty = 0;
+		if (++iSubexprQty >= iMaxQty)
 		{
 			g_Log.EventWarn("Exceeded maximum allowed number of subexpressions (%d). Parsing halted.\n", iMaxQty);
-			return iQty;
+			return iSubexprQty;
 		}
 
 		GETNONWHITESPACE(pExpr);
-		SubexprData& sCurSubexpr = psSubexprData[iQty - 1];
+		SubexprData& sCurSubexpr = psSubexprData[iSubexprQty - 1];
 		tchar ch = pExpr[0];
 
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
@@ -1287,7 +1288,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 					{
 						g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
 						sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
-						return iQty;
+						return iSubexprQty;
 					}
 				}
 				// Okay, i've eaten the expression in brackets, now fall through the chain of "else if" and continue
@@ -1316,46 +1317,46 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			else
 			{
 				// Look for an arithmetic two-way operator.
-				// The subexpression may not be really ended, thus we need to reset the end of the subexpr and find the real one.
+				// The subexpression may not be really ended.
 				if (ch == '<')
 				{
 					// This can be: <, <= or the start of a bracketed expression < >
-					sCurSubexpr.ptcEnd = nullptr;
-					Str_SkipEnclosedAngularBrackets(pExpr);
-					if (pExpr[0] == '<') // pExpr unchanged: i haven't found a < > expression.
+					if (pExpr[1] == '=')
 					{
-						if (pExpr[1] == '=')
+						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+						pExpr += 1u;
+					}
+					else
+					{
+						const auto prevSubexprType = ((iSubexprQty == 1) ? SType::None : psSubexprData[iSubexprQty - 1].uiType);
+						if ((iSubexprFragmentQty != 0) && (prevSubexprType & SType::None))
 						{
-							sCurSubexpr.uiType = SType::LessEq;
-							pExpr += 2u;
+							// This subexpr is not preceded by a two-way operator, so probably i'm an operator: skip me.
+							sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
 						}
 						else
 						{
-							sCurSubexpr.uiType = SType::Less;
-							pExpr += 1u;
+							// This subexpr is preceded by a two-way operator, so probably i'm not another operator, rather a < > expression.
+							Str_SkipEnclosedAngularBrackets(pExpr);
 						}
 					}
-					else
-					{
-						//sCurSubexpr.uiType |= SType::MaybeNestedSubexpr;
-						sCurSubexpr.ptcEnd = pExpr;
-					}
+					// This is not a whole logical subexpression but a single operand, or piece/fragment of the current arithmetic subexpr.
+					++iSubexprFragmentQty;
 				}
 				else if (ch == '>')
 				{
-					sCurSubexpr.ptcEnd = nullptr;
 					if (pExpr[1] == '=')
 					{
-						sCurSubexpr.uiType = SType::GreatEq;
-						pExpr += 2u;
+						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+						pExpr += 1u;
 					}
 					else
 					{
-						sCurSubexpr.uiType = SType::Great;
-						pExpr += 1u;
+						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
 					}
-				// End of arithmetic subexpression.
+					++iSubexprFragmentQty;
 				}
+				// End of arithmetic subexpression parsing.
 			}
 
 			ch = *(++pExpr);
@@ -1364,7 +1365,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 	// Now that we found the subexpressions, prepare them for their evaluation.
 	lptstr ptcStart, ptcEnd;
-	for (int i = 0; i < iQty; ++i)
+	for (int i = 0; i < iSubexprQty; ++i)
 	{
 		SubexprData& sCurSubexpr = psSubexprData[i];
 		ptcStart = sCurSubexpr.ptcStart;
@@ -1400,7 +1401,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		sCurSubexpr.ptcEnd   = ptcEnd;
 	}
 
-	return iQty;
+	return iSubexprQty;
 }
 
 

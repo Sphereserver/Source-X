@@ -103,9 +103,9 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 	}
 }
 
-void CWorldComm::SpeakNETUTF16( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) // static
+void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) // static
 {
-	ADDTOCALLSTACK("CWorldComm::SpeakNETUTF16");
+	ADDTOCALLSTACK("CWorldComm::SpeakUNICODE");
 	bool fSpeakAsGhost = false;
 	const CChar * pSrcChar = nullptr;
 
@@ -214,7 +214,7 @@ void CWorldComm::SpeakNETUTF16( const CObjBaseTemplate * pSrc, const nchar * pwT
 			pwSpeak = wTextUID;
 		}
 
-		pClient->addBarkNETUTF16( pwSpeak, pSrc, wHue, mode, font, lang );
+		pClient->addBarkUNICODE( pwSpeak, pSrc, wHue, mode, font, lang );
 	}
 }
 

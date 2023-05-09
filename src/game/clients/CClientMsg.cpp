@@ -628,9 +628,9 @@ void CClient::addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase, int iOnce
 	new PacketPlaySound(this, id, iOnce, 0, pt);
 }
 
-void CClient::addBarkNETUTF16( const nchar * pwText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
+void CClient::addBarkUNICODE( const nchar * pwText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
 {
-	ADDTOCALLSTACK("CClient::addBarkNETUTF16");
+	ADDTOCALLSTACK("CClient::addBarkUNICODE");
 	if ( pwText == nullptr )
 		return;
 
@@ -864,7 +864,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
 			CvtSystemToNETUTF16( szBuffer, CountOf(szBuffer), ptcBarkBuffer, -1 );
-			addBarkNETUTF16( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
+			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}
 

@@ -2108,9 +2108,9 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 }
 
 // PC speech: response to Unicode speech request
-void CClient::Event_TalkUTF16( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
+void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
 {
-	ADDTOCALLSTACK("CClient::Event_TalkUTF16");
+	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
 	// Get the text in wide bytes.
 	// ENU = English
 	// FRC = French

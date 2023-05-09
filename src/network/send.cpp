@@ -3493,7 +3493,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
  *
  *
  ***************************************************************************/
-PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakNETUTF16, 48, PRI_NORMAL)
+PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakUNICODE, 48, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageUNICODE::PacketMessageUNICODE");
 
@@ -3525,7 +3525,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringNETUTF16(reinterpret_cast<const wchar*>(pszText));
+	writeStringUTF16(reinterpret_cast<const wchar*>(pszText));
 
 	push(target);
 }
@@ -3977,7 +3977,7 @@ PacketPartyChat::PacketPartyChat(const CChar* source, const nchar* text) : Packe
 	ADDTOCALLSTACK("PacketPartyChat::PacketPartyChat");
 
 	writeInt32(source->GetUID());
-	writeStringNETUTF16(reinterpret_cast<const wchar*>(text));
+	writeStringUTF16(reinterpret_cast<const wchar*>(text));
 }
 
 
@@ -4467,7 +4467,7 @@ PacketMessageLocalised::PacketMessageLocalised(const CClient* target, int cliloc
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringNETUTF16(args);
+	writeStringUTF16(args);
 
 	push(target);
 }
@@ -4530,7 +4530,7 @@ PacketMessageLocalisedEx::PacketMessageLocalisedEx(const CClient* target, int cl
 		writeStringFixedASCII(source->GetName(), 30);
 
 	writeStringASCII(affix);
-	writeStringNETUTF16(args);
+	writeStringUTF16(args);
 
 	push(target);
 }
@@ -4955,7 +4955,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		for (uint i = 0; i < argCount; ++i)
 		{
 			writeCharUTF16('\t');
-			writeStringNETUTF16(args[i], false);
+			writeStringUTF16(args[i], false);
 		}
 		writeCharUTF16('\t');
 		writeCharUTF16('\0');
@@ -4976,7 +4976,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		writeInt16(0x1);
 		writeInt16(0);
 
-		writeStringNETUTF16("\t ", true);
+		writeStringUTF16("\t ", true);
 	}
 	push(target);
 }
@@ -5049,7 +5049,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
     writeInt16(0);
 
     writeInt32(cliloc);
-    writeStringNETUTF16(object->GetName());
+    writeStringUTF16(object->GetName());
 
     push(target);
 }

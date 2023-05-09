@@ -21,6 +21,17 @@ function (toolchain_after_project)
 	 # Setting the exe to be a GUI application and not a console one.
 	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"	)
 
+	# /Zc:__cplusplus is required to make __cplusplus accurate
+	# /Zc:__cplusplus is available starting with Visual Studio 2017 version 15.7
+	# (according to https://learn.microsoft.com/en-us/cpp/build/reference/zc-cplusplus)
+	# That version is equivalent to _MSC_VER==1914
+	# (according to https://learn.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019)
+	# CMake's ${MSVC_VERSION} is equivalent to _MSC_VER
+	# (according to https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html#variable:MSVC_VERSION)
+	if (MSVC_VERSION GREATER_EQUAL 1914)
+		SET(CXX_FLAGS_COMMON "${CXX_FLAGS_COMMON} /Zc:__cplusplus")
+	endif()
+
 	 # These linker flags shouldn't be applied to Debug release.
 	IF (CMAKE_CL_64)	# 64 bits
 		SET(ARCH_BITS	64	PARENT_SCOPE)

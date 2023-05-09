@@ -707,7 +707,7 @@ char Packet::readCharASCII(void)
 	return m_buffer[m_position++];
 }
 
-wchar Packet::readCharUNICODE(void)
+wchar Packet::readCharUTF16(void)
 {
 	if ((m_position + sizeof(wchar)) > m_length)
 		return '\0';
@@ -847,7 +847,7 @@ void Packet::readStringUTF16(wchar* buffer, uint length, bool includeNull)
 
 	uint i;
 	for (i = 0; i < length; ++i)
-		buffer[i] = readCharUNICODE();
+		buffer[i] = readCharUTF16();
 
 	// ensure text is null-terminated
 	if (includeNull)
@@ -982,7 +982,7 @@ uint Packet::readStringNullUTF16(wchar* buffer, uint maxlength)
 	uint i;
 	for (i = 0; i < maxlength; ++i)
 	{
-		buffer[i] = readCharUNICODE();
+		buffer[i] = readCharUTF16();
 		if (buffer[i] == '\0')
 			return i;
 	}

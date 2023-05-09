@@ -1539,7 +1539,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 	{
 		// We don't have subexpressions, but only a simple expression.
 		const SubexprData& sCur = psSubexprData[0];
-		ASSERT(sCur.uiType & SType::None);
+		ASSERT((sCur.uiType & SType::None) ||  (sCur.uiType & SType::BinaryNonLogical));
 
 		const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, pSrc, pArgs, pContext);
 		return fVal;

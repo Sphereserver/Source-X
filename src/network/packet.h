@@ -103,7 +103,7 @@ public:
 	// read
 	bool readBool(void); // read boolean (1 byte)
 	char readCharASCII(void); // read ASCII character (1 byte)
-	wchar readCharUNICODE(void); // read UNICODE character (2 bytes)
+	wchar readCharUTF16(void); // read UNICODE character (2 bytes)
 	wchar readCharNETUTF16(void); // read UNICODE character, network order (2 bytes)
 	byte readByte(void); // read 8-bit integer (1 byte)
 	word readInt16(void); // read 16-bit integer (2 bytes)
