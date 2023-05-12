@@ -951,7 +951,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
         const int iHeight = rectDesign.GetHeight();
 
         std::vector<const CMultiComponent*> vectorStairs;
-        nword wPlaneBuffer[PLANEDATA_BUFFER];
+        word wPlaneBuffer[PLANEDATA_BUFFER]{};
         for (int iCurrentPlane = 0; iCurrentPlane <= _iMaxPlane; ++iCurrentPlane)
         {
             // for each plane, generate a list of items
@@ -959,7 +959,6 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
             int iItemCount = 0;
             int iMaxIndex = 0;
 
-            memset(wPlaneBuffer, 0, sizeof(wPlaneBuffer));
             for (const CMultiComponent* pComp : pDesign->m_vectorComponents)
             {
                 const uchar uiCompPlane = GetPlane(pComp);
@@ -1009,7 +1008,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
             if (fFoundItems == false)
                 continue;
 
-            int iPlaneSize = (iMaxIndex + 1) * sizeof(nword);
+            const int iPlaneSize = (iMaxIndex + 1) * sizeof(word);
             cmd->writePlaneData(iCurrentPlane, iItemCount, (byte*)wPlaneBuffer, iPlaneSize);
         }
 

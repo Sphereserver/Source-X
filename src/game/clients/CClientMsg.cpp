@@ -863,7 +863,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 1:	// Unicode
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
-			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), ptcBarkBuffer, -1 );
+			CvtSystemToNETUTF16( szBuffer, CountOf(szBuffer), ptcBarkBuffer, -1 );
 			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}

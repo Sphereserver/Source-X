@@ -76,8 +76,8 @@ public:
 	// write
 	void writeBool(const bool value); // write boolean (1 byte)
 	void writeCharASCII(const char value); // write ASCII character (1 byte)
-	void writeCharUNICODE(const wchar value); // write UNICODE character (2 bytes)
-	void writeCharNUNICODE(const wchar value); // write UNICODE character, network order (2 bytes)
+	void writeCharUTF16(const wchar value); // write UNICODE character (2 bytes)
+	void writeCharNETUTF16(const wchar value); // write UNICODE character, network order (2 bytes)
 	void writeByte(const byte value); // write 8-bit integer (1 byte)
 	void writeInt16(const word value); // write 16-bit integer (2 bytes)
 	void writeInt32(const dword value); // write 32-bit integer (4 bytes)
@@ -87,14 +87,14 @@ public:
 	void writeStringASCII(const wchar* value, bool terminate = true); // write ascii string until null terminator found
 	void writeStringFixedASCII(const char* value, uint size, bool terminate = false); // write fixed-length ascii string
 	void writeStringFixedASCII(const wchar* value, uint size, bool terminate = false); // write fixed-length ascii string
-	void writeStringUNICODE(const char* value, bool terminate = true); // write unicode string until null terminator found
-	void writeStringUNICODE(const wchar* value, bool terminate = true); // write unicode string until null terminator found
-	void writeStringFixedUNICODE(const char* value, uint size, bool terminate = false); // write fixed-length unicode string
-	void writeStringFixedUNICODE(const wchar* value, uint size, bool terminate = false); // write fixed-length unicode string
-	void writeStringNUNICODE(const char* value, bool terminate = true); // write unicode string until null terminator found, network order
-	void writeStringNUNICODE(const wchar* value, bool terminate = true); // write unicode string until null terminator found, network order
-	void writeStringFixedNUNICODE(const char* value, uint size, bool terminate = false); // write fixed-length unicode string, network order
-	void writeStringFixedNUNICODE(const wchar* value, uint size, bool terminate = false); // write fixed-length unicode string, network order
+	void writeStringUTF16(const char* value, bool terminate = true); // write unicode string until null terminator found
+	void writeStringUTF16(const wchar* value, bool terminate = true); // write unicode string until null terminator found
+	void writeStringFixedUTF16(const char* value, uint size, bool terminate = false); // write fixed-length unicode string
+	void writeStringFixedUTF16(const wchar* value, uint size, bool terminate = false); // write fixed-length unicode string
+	void writeStringNETUTF16(const char* value, bool terminate = true); // write unicode string until null terminator found, network order
+	void writeStringNETUTF16(const wchar* value, bool terminate = true); // write unicode string until null terminator found, network order
+	void writeStringFixedNETUTF16(const char* value, uint size, bool terminate = false); // write fixed-length unicode string, network order
+	void writeStringFixedNETUTF16(const wchar* value, uint size, bool terminate = false); // write fixed-length unicode string, network order
 	void writeData(const byte* buffer, uint size); // write block of data
 	void fill(void); // zeroes remaining buffer
 	uint sync(void);
@@ -103,24 +103,24 @@ public:
 	// read
 	bool readBool(void); // read boolean (1 byte)
 	char readCharASCII(void); // read ASCII character (1 byte)
-	wchar readCharUNICODE(void); // read UNICODE character (2 bytes)
-	wchar readCharNUNICODE(void); // read UNICODE character, network order (2 bytes)
+	wchar readCharUTF16(void); // read UNICODE character (2 bytes)
+	wchar readCharNETUTF16(void); // read UNICODE character, network order (2 bytes)
 	byte readByte(void); // read 8-bit integer (1 byte)
 	word readInt16(void); // read 16-bit integer (2 bytes)
 	dword readInt32(void); // read 32-bit integer (4 bytes)
 	int64 readInt64(void); // read 64-bit integer (8 bytes)
 	void readStringASCII(char* buffer, uint length, bool includeNull = true); // read fixed-length ascii string
 	void readStringASCII(wchar* buffer, uint length, bool includeNull = true); // read fixed-length ascii string
-	void readStringUNICODE(char* buffer, uint bufferSize, uint length, bool includeNull = true); // read fixed length unicode string
-	void readStringUNICODE(wchar* buffer, uint length, bool includeNull = true); // read fixed length unicode string
-	void readStringNUNICODE(char* buffer, uint bufferSize, uint length, bool includeNull = true); // read fixed length unicode string, network order
-	void readStringNUNICODE(wchar* buffer, uint length, bool includeNull = true); // read fixed length unicode string, network order
+	void readStringUTF16(char* buffer, uint bufferSize, uint length, bool includeNull = true); // read fixed length unicode string
+	void readStringUTF16(wchar* buffer, uint length, bool includeNull = true); // read fixed length unicode string
+	void readStringNETUTF16(char* buffer, uint bufferSize, uint length, bool includeNull = true); // read fixed length unicode string, network order
+	void readStringNETUTF16(wchar* buffer, uint length, bool includeNull = true); // read fixed length unicode string, network order
 	uint readStringNullASCII(char* buffer, uint maxlength); // read ascii string until null terminator found
 	uint readStringNullASCII(wchar* buffer, uint maxlength); // read ascii string until null terminator found
-	uint readStringNullUNICODE(char* buffer, uint bufferSize, uint maxlength); // read unicode-string until null terminator found
-	uint readStringNullUNICODE(wchar* buffer, uint maxlength); // read unicode-string until null terminator found
-	uint readStringNullNUNICODE(char* buffer, uint bufferSize, uint maxlength); // read unicode-string until null terminator found, network order
-	uint readStringNullNUNICODE(wchar* buffer, uint maxlength); // read unicode-string until null terminator found, network order
+	uint readStringNullUTF16(char* buffer, uint bufferSize, uint maxlength); // read unicode-string until null terminator found
+	uint readStringNullUTF16(wchar* buffer, uint maxlength); // read unicode-string until null terminator found
+	uint readStringNullNETUTF16(char* buffer, uint bufferSize, uint maxlength); // read unicode-string until null terminator found, network order
+	uint readStringNullNETUTF16(wchar* buffer, uint maxlength); // read unicode-string until null terminator found, network order
 
 	uint checkLength(CNetState* client, Packet* packet);
 	virtual uint getExpectedLength(CNetState* client, Packet* packet);

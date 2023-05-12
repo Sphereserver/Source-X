@@ -1,4 +1,5 @@
 // Current libev version: 4.24
+; // Shuts off warning about empty source file.
 
 #ifdef _LIBEV
 

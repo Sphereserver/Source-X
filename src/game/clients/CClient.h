@@ -262,11 +262,6 @@ public:
 	int64 m_Targ_Timeout;       // timeout time for targeting
 
 private:
-	friend class GlobalInitializer;
-	static void InitRuntimeStaticMembers();
-	static std::vector<lpctstr> sm_vsPoisonMessages;
-
-private:
 	bool OnRxConsoleLoginComplete();
 	bool OnRxConsole( const byte * pData, uint len );
 	bool OnRxAxis( const byte * pData, uint len );

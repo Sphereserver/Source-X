@@ -2,6 +2,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
 SET (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
+SET (USE_SANITIZERS false CACHE BOOL "")
 
 FUNCTION (booleanize_str_find VAR)
 	IF (${VAR} EQUAL -1)
@@ -10,6 +11,7 @@ FUNCTION (booleanize_str_find VAR)
 		SET (${VAR} 1 PARENT_SCOPE)
 	ENDIF ()
 ENDFUNCTION ()
+
 
 MESSAGE (STATUS "Scanning system for compilers...")
 PROJECT (SphereServer)	# does a scan for C++ and C compilers

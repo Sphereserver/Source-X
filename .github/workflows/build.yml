@@ -76,9 +76,10 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
-            sudo add-apt-repository ppa:jonathonf/gcc universe && sudo sudo apt-get -qq update
-            sudo apt install -yq --no-install-recommends gcc-7 g++-7 mariadb-client libmariadb-dev > /dev/null
-            export CC="gcc-7" && export CXX="g++-7"
+            sudo add-apt-repository universe && sudo sudo apt-get -qq update
+            sudo apt install -yq --no-install-recommends gcc-12 g++-12 > /dev/null
+            sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
+            export CC="gcc-12" && export CXX="g++-12"
             gcc -v && cmake --version && ninja --version
     - name: CMake
       run: |
@@ -115,10 +116,10 @@ jobs:
             lsb_release -d
             echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
-            sudo add-apt-repository ppa:jonathonf/gcc universe && sudo apt-get -qq update
-            sudo apt install -yq --no-install-recommends linux-libc-dev:i386 gcc-7 gcc-7-multilib g++-7 g++-7-multilib
+            sudo add-apt-repository universe && sudo apt-get -qq update
+            sudo apt install -yq --no-install-recommends linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
-            export CC="gcc-7" && export CXX="g++-7"
+            export CC="gcc-12" && export CXX="g++-12"
             echo && echo "** Report building tools" && echo
             gcc -v -v && cmake --version && ninja --version
     - name: CMake
@@ -157,15 +158,15 @@ jobs:
     - name: CMake
       run: |
             mkdir -p build
-            cd build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S . -B ./build
     - name: Ninja
-      run: pwd && ninja
+      run: cd build && ninja && cd ..
     - name: Create package
       run:  |
+            pwd
             mkdir accounts logs save scripts
             zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
-            zip SphereSvrX-osx-x86_64-nightly.zip ../src/sphere.ini ../src/sphereCrypt.ini bin64/*
+            zip SphereSvrX-osx-x86_64-nightly.zip src/sphere.ini src/sphereCrypt.ini build/bin64/*
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
