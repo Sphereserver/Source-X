@@ -115,7 +115,13 @@ jobs:
             lsb_release -d
             echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
-            sudo add-apt-repository universe && sudo apt-get -qq update
+            sudo add-apt-repository universe
+            
+            # Workaround: there are no official packages built for i386 on this OS. Let's install from the previous Ubuntu LTS version repo.
+            curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+            sudo bash mariadb_repo_setup --os-type=ubuntu  --os-version=focal --mariadb-server-version=10.6
+
+            sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
             export CC="gcc-12" && export CXX="g++-12"
