@@ -3282,3 +3282,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 13-05-2023, Nolok
 - Fixed: Invalid MULTICOMPONENT and MULTILOCKDOWN tag on items throwing an exception.
+
+13-05-2023, Drk84
+- Fixed: Timer not set when an ammunition item was placed on the ground because the strike missed.  (Issue #1072) 
+- Fixed: Casting the SUMMON CREATURE spell while a fighting skill was active caused the spell creature ID to be resetted. (Issue #1070)

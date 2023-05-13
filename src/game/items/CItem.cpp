@@ -1410,8 +1410,10 @@ bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 
 bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix)
 {
+	if (!MoveToUpdate(pt, fForceFix))
+		return false;
 	SetDecayTime(iMsecsTimeout);
-	return MoveToUpdate(pt, fForceFix);
+	return true;
 }
 
 void CItem::SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways)
