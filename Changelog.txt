@@ -3279,3 +3279,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 02-05-2023, Nolok
 - Fixed: IF parsing errors when using that construct without parentheses (Issue #766).
+
+13-05-2023, Nolok
+- Fixed: Invalid MULTICOMPONENT and MULTILOCKDOWN tag on items throwing an exception.

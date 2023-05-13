@@ -38,7 +38,7 @@ lpctstr const CClient::sm_szCmd_Redirect[13] =
 	"SHRINK",
 };
 
-void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button was pressed
+void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button was pressed
 {
 	ADDTOCALLSTACK("CClient::Event_ChatButton");
 	// See if they've made a chatname yet
@@ -102,7 +102,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 	this->GetChar()->SetTriggerActive();
 }
 
-void CClient::Event_ChatText( const nchar * pszText, int len, CLanguageID lang ) // Text from a client
+void CClient::Event_ChatText( const nachar* pszText, int len, CLanguageID lang ) // Text from a client
 {
 	ADDTOCALLSTACK("CClient::Event_ChatText");
 	// Just send it all to the chat system
@@ -2108,7 +2108,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 }
 
 // PC speech: response to Unicode speech request
-void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
+void CClient::Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
 {
 	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
 	// Get the text in wide bytes.
@@ -2138,7 +2138,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 		m_pChar->m_pPlayer->m_EmoteHue = wHue;
 
 	tchar szText[MAX_TALK_BUFFER];
-	const nword * puText = wszText;
+	const nachar * puText = wszText;
 
 	int iLen = CvtNETUTF16ToSystem( szText, sizeof(szText), wszText, iTextLen );
 	if ( iLen <= 0 )

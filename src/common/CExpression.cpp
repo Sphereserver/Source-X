@@ -1328,7 +1328,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 					}
 					else
 					{
-						const auto prevSubexprType = ((iSubexprQty == 1) ? SType::None : psSubexprData[iSubexprQty - 1].uiType);
+						const ushort prevSubexprType = ((iSubexprQty == 1) ? (ushort)SType::None : psSubexprData[iSubexprQty - 1].uiType);
 						if ((iSubexprFragmentQty != 0) && (prevSubexprType & SType::None))
 						{
 							// This subexpr is not preceded by a two-way operator, so probably i'm an operator: skip me.

@@ -743,7 +743,7 @@ public:
 	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
 
     /**
-     * @fn  virtual void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+     * @fn  virtual void CObjBase::SpeakUTF8Ex( const nachar  * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
      *
      * @brief   Speak UTF 8 ex.
      *
@@ -753,7 +753,7 @@ public:
      * @param   font    The font.
      * @param   lang    The language.
      */
-	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+	virtual void SpeakUTF8Ex( const nachar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
     /**
      * @fn  void CObjBase::RemoveFromView( CClient * pClientExclude = nullptr , bool fHardcoded = true );
@@ -867,7 +867,7 @@ public:
 		= 0;
 
     /**
-     * @fn  virtual TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
+     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
      *
      * @brief   Spell's trigger (@Effect, @Start...).
      *
@@ -878,7 +878,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-	virtual TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
+	TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
 
 public:
 	//	Some global object variables

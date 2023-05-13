@@ -525,7 +525,6 @@ public:
 	void UpdateDir( const CPointMap & pt );
 	void UpdateDir( const CObjBaseTemplate * pObj );
 	void UpdateDrag( CItem * pItem, CObjBase * pCont = nullptr, CPointMap * pt = nullptr );
-	void Update(const CClient * pClientExclude = nullptr);
 
 public:
 	lpctstr GetPronoun() const;	// he
@@ -970,7 +969,7 @@ public:
     bool Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic = true);
 	bool Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel, int64 iDuration = 0);
 	bool Spell_CastDone();
-	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0);
+	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0) override;
 	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
 	CChar * Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1);
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
@@ -1122,7 +1121,8 @@ public:
 	bool ItemBounce( CItem * pItem, bool fDisplayMsg = true );
 	bool ItemDrop( CItem * pItem, const CPointMap & pt );
 
-	void Flip();
+	virtual void Update(const CClient* pClientExclude = nullptr) override;
+	virtual void Flip() override;
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
@@ -1157,7 +1157,7 @@ public:
     void Speak_RevealCheck(TALKMODE_TYPE mode);
 	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL ) override;
 	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 ) override;
-	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) override;
+	virtual void SpeakUTF8Ex( const nachar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) override;
 
 	bool OnFreezeCheck() const;
     bool IsStuck(bool fFreezeCheck);

@@ -322,8 +322,8 @@ public:
 	void Event_Attack(CUID uid);
 	void Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor );
 	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
-	void Event_ChatButton(const nchar * pszName); // Client's chat button was pressed
-	void Event_ChatText( const nchar * pszText, int len, CLanguageID lang = 0 ); // Text from a client
+	void Event_ChatButton(const nachar* pszName); // Client's chat button was pressed
+	void Event_ChatText( const nachar* pszText, int len, CLanguageID lang = 0 ); // Text from a client
     void Event_CombatAbilitySelect(dword dwAbility);
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
 	bool Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
@@ -339,7 +339,7 @@ public:
 	bool Event_SetName( CUID uid, const char * pszCharName );
 	void Event_SingleClick( CUID uid );
 	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip = false ); // PC speech
-	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
+	void Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
 	void Event_Target( dword context, CUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
 	void Event_Tips( word i ); // Tip of the day window
 	void Event_ToolTip( CUID uid );
@@ -489,7 +489,7 @@ public:
 	void addPlayerUpdate() const;
 
 	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD ) const;
-	void addBarkUNICODE( const nchar * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 ) const;
+	void addBarkUNICODE( const nachar* pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 ) const;
 	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, lpctstr pArgs = nullptr ) const;
 	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = nullptr, lpctstr pArgs = nullptr ) const;
 	void addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, lpctstr name = "" ) const;

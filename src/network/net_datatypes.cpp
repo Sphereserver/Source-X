@@ -145,7 +145,7 @@ static int CvtUTF16ToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
     return iBytes;
 }
 
-int CvtSystemToNETUTF16(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes)
+int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes)
 {
     //
     // Convert the system default text format UTF8 to UNICODE
@@ -168,7 +168,7 @@ int CvtSystemToNETUTF16(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
     }
     if (iSizeInBytes <= 0)
     {
-        pOut[0] = 0;
+        pOut[0] = '\0';
         return 0;
     }
 
@@ -192,12 +192,12 @@ int CvtSystemToNETUTF16(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
 
         if (iOutTmp <= 0)
         {
-            pOut[0] = 0;
+            pOut[0] = '\0';
             return 0;
         }
         if (iOutTmp > iSizeOutChars)	// this should never happen !
         {
-            pOut[0] = 0;
+            pOut[0] = '\0';
             return 0;
         }
 
@@ -242,11 +242,11 @@ int CvtSystemToNETUTF16(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
         }
     }
 
-    pOut[iOut] = 0;
+    pOut[iOut] = '\0';
     return iOut;
 }
 
-int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int iSizeInChars)
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars)
 {
     // ARGS:
     //  iSizeInBytes = space we have (included null char)

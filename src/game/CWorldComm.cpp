@@ -103,7 +103,7 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 	}
 }
 
-void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) // static
+void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nachar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) // static
 {
 	ADDTOCALLSTACK("CWorldComm::SpeakUNICODE");
 	bool fSpeakAsGhost = false;
@@ -133,11 +133,11 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwTe
 		}
 	}
 
-	nchar wTextUID[MAX_TALK_BUFFER];	// uid labelled text.
+	nachar wTextUID[MAX_TALK_BUFFER];	// uid labelled text.
 	wTextUID[0] = '\0';
-	nchar wTextName[MAX_TALK_BUFFER];	// name labelled text.
+	nachar wTextName[MAX_TALK_BUFFER];	// name labelled text.
 	wTextName[0] = '\0';
-	nchar wTextGhost[MAX_TALK_BUFFER];	// ghost speak.
+	nachar wTextGhost[MAX_TALK_BUFFER];	// ghost speak.
 	wTextGhost[0] = '\0';
 
 	// For things
@@ -150,7 +150,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwTe
 		if ( ! pClient->CanHear( pSrc, mode ) )
 			continue;
 
-		const nchar * pwSpeak = pwText;
+		const nachar * pwSpeak = pwText;
 		pChar = pClient->GetChar();
 
 		if ( pChar != nullptr )

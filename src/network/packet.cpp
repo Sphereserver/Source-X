@@ -390,11 +390,11 @@ void Packet::writeStringASCII(const wchar* value, bool terminate)
 	{
 		uint i;
 		for (i = 0; value[i]; ++i)
-			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nword *>(value)[i];
+			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nachar*>(value)[i];
 		reinterpret_cast<wchar *>(buffer)[i] = '\0';
 	}
 
-	CvtNETUTF16ToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH);
+	CvtNETUTF16ToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH);
 
 	writeStringASCII(buffer, terminate);
 #endif
@@ -433,11 +433,11 @@ void Packet::writeStringFixedASCII(const wchar* value, uint size, bool terminate
 	{
 		uint i;
 		for (i = 0; value[i] != '\0'; ++i)
-			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nword *>(value)[i];
+			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nachar*>(value)[i];
 		reinterpret_cast<wchar *>(buffer)[i] = '\0';
 	}
 	
-	CvtNETUTF16ToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH);
+	CvtNETUTF16ToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH);
 
 	writeStringFixedASCII(buffer, size, terminate);
 #endif
@@ -462,7 +462,7 @@ void Packet::writeStringUTF16(const char* value, bool terminate)
 	ASSERT(value != nullptr);
 
 	wchar * buffer = reinterpret_cast<wchar *>(Str_GetTemp());
-	CvtSystemToNETUTF16(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
+	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
 	
 	writeStringNETUTF16(buffer, terminate);
 #endif
@@ -494,7 +494,7 @@ void Packet::writeStringFixedUTF16(const char* value, uint size, bool terminate)
 	ASSERT(value != nullptr);
 
 	wchar * buffer = reinterpret_cast<wchar *>(Str_GetTemp());
-	CvtSystemToNETUTF16(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
+	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
 	
 	writeStringFixedNETUTF16(buffer, size, terminate);
 #endif
@@ -576,7 +576,7 @@ void Packet::writeStringNETUTF16(const char* value, bool terminate)
 	ASSERT(value != nullptr);
 
 	wchar* buffer = reinterpret_cast<wchar *>(Str_GetTemp());
-	CvtSystemToNETUTF16(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
+	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
 	
 	writeStringUTF16(buffer, terminate);
 #endif
@@ -608,7 +608,7 @@ void Packet::writeStringFixedNETUTF16(const char* value, uint size, bool termina
 	ASSERT(value != nullptr);
 	
 	wchar* buffer = reinterpret_cast<wchar *>(Str_GetTemp());
-	CvtSystemToNETUTF16(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
+	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
 	
 	writeStringFixedUTF16(buffer, size, terminate);
 #endif
@@ -822,14 +822,14 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 	
 	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-	CvtSystemToNETUTF16(reinterpret_cast<nword *>(buffer), (int)(length), bufferReal, (int)(length));
+	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), (int)(length), bufferReal, (int)(length));
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NETUTF16 to UTF16 UNICODE
 	{
 		uint i;
 		for (i = 0; buffer[i]; ++i)
-			buffer[i] = reinterpret_cast<nword *>(buffer)[i];
+			buffer[i] = reinterpret_cast<nachar*>(buffer)[i];
 		buffer[i] = '\0';
 	}
 #endif
@@ -876,7 +876,7 @@ void Packet::readStringUTF16(char* buffer, uint bufferSize, uint length, bool in
 
 	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringNETUTF16(bufferReal, length, includeNull);
-	CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(length) + 1);
+	CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nachar*>(bufferReal), (int)(length) + 1);
 	delete[] bufferReal;
 #endif
 }
@@ -922,7 +922,7 @@ void Packet::readStringNETUTF16(char* buffer, uint bufferSize, uint length, bool
 
 	wchar* bufferReal = new wchar[(size_t)length + 1];
 	readStringUTF16(bufferReal, length, includeNull);
-	CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(length) + 1);
+	CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nachar*>(bufferReal), (int)(length) + 1);
 	delete[] bufferReal;
 #endif
 }
@@ -958,14 +958,14 @@ uint Packet::readStringNullASCII(wchar* buffer, uint maxlength)
 
 	char* bufferReal = new char[(size_t)maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
-	int length = CvtSystemToNETUTF16(reinterpret_cast<nword *>(buffer), (int)(maxlength), bufferReal, (int)(maxlength) + 1);
+	int length = CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), (int)(maxlength), bufferReal, (int)(maxlength) + 1);
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NETUTF16 to UTF16 UNICODE
 	{
 		uint i;
 		for (i = 0; buffer[i]; ++i)
-			buffer[i] = reinterpret_cast<nword *>(buffer)[i];
+			buffer[i] = reinterpret_cast<nachar*>(buffer)[i];
 		buffer[i] = '\0';
 	}
 #endif
@@ -1006,7 +1006,7 @@ uint Packet::readStringNullUTF16(char* buffer, uint bufferSize, uint maxlength)
 
 	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullNETUTF16(bufferReal, maxlength);
-	int length = CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(maxlength) + 1);
+	int length = CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nachar*>(bufferReal), (int)(maxlength) + 1);
 	delete[] bufferReal;
 #endif
 
@@ -1046,7 +1046,7 @@ uint Packet::readStringNullNETUTF16(char* buffer, uint bufferSize, uint maxlengt
 
 	wchar* bufferReal = new wchar[(size_t)maxlength + 1];
 	readStringNullUTF16(bufferReal, maxlength);
-	int length = CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nword *>(bufferReal), (int)(maxlength) + 1);
+	int length = CvtNETUTF16ToSystem(buffer, (int)(bufferSize), reinterpret_cast<nachar*>(bufferReal), (int)(maxlength) + 1);
 	delete[] bufferReal;
 #endif
 

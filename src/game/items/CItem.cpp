@@ -213,7 +213,7 @@ void CItem::DeleteCleanup(bool fForce)
 	CUID uidTest(GetComponentOfMulti());
     if (uidTest.IsValidUID())
     {
-        if (auto* pMulti = static_cast<CItemMulti*>(uidTest.ItemFind(true)))
+        if (auto* pMulti = dynamic_cast<CItemMulti*>(uidTest.ItemFind(true)))
         {
             pMulti->DeleteComponent(GetUID(), true);
         }
@@ -221,7 +221,7 @@ void CItem::DeleteCleanup(bool fForce)
 	uidTest = GetLockDownOfMulti();
     if (uidTest.IsValidUID())
     {
-		if (auto* pMulti = static_cast<CItemMulti*>(uidTest.ItemFind(true)))
+		if (auto* pMulti = dynamic_cast<CItemMulti*>(uidTest.ItemFind(true)))
         {
             pMulti->UnlockItem(GetUID(), true);
         }
@@ -5425,6 +5425,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
 	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
+	UNREFERENCED_PARAMETER(iDuration);
     // A spell is cast on this item.
     // ARGS:
     //  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)

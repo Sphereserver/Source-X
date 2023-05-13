@@ -80,14 +80,14 @@ jobs:
             sudo apt install -yq --no-install-recommends gcc-12 g++-12 > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
             export CC="gcc-12" && export CXX="g++-12"
-            gcc -v && cmake --version && ninja --version
+            gcc -v && cmake --version && ninja-build --version
     - name: CMake
       run: |
             mkdir -p build
             cd build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -S ../ -B .
     - name: Ninja
-      run: ninja
+      run: ninja-build
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
@@ -121,14 +121,14 @@ jobs:
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
             export CC="gcc-12" && export CXX="g++-12"
             echo && echo "** Report building tools" && echo
-            gcc -v -v && cmake --version && ninja --version
+            gcc -v -v && cmake --version && ninja-build --version
     - name: CMake
       run: |
             mkdir -p build
             cd build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake -S ../ -B .
     - name: Ninja
-      run: ninja
+      run: ninja-build
     - name: Create package
       run:  |
             mkdir accounts logs save scripts

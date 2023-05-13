@@ -670,15 +670,15 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
 	// convert UTF8 to UTF16 UNICODE.
-	nchar szBuffer[ MAX_TALK_BUFFER ];
+	nachar szBuffer[ MAX_TALK_BUFFER ];
 	CvtSystemToNETUTF16( szBuffer, CountOf(szBuffer), pText, -1 );
 	CWorldComm::SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
 }
 
 // Speak to all clients in the area.
 // Unicode packet
-// Difference with SpeakUTF8: this method accepts as text input an nword, which is unicode if sphere is compiled with UNICODE macro)
-void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+// Difference with SpeakUTF8: this method accepts as text input an nachar, which is a network aligned utf16 unicode characters array
+void CObjBase::SpeakUTF8Ex( const nachar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
 	CWorldComm::SpeakUNICODE( this, pText, wHue, mode, font, lang );
@@ -2303,7 +2303,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					break;	// We show the message only to players
 
 				tchar * pszArgs[5];
-				nchar ncBuffer[ MAX_TALK_BUFFER ];
+				nachar ncBuffer[ MAX_TALK_BUFFER ];
 
 				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 5 )

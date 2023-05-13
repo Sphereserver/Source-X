@@ -6,7 +6,7 @@
 #include "CClient.h"
 
 
-void CChat::EventMsg( CClient * pClient, const nchar * pszText, int len, CLanguageID lang ) // Text from a client
+void CChat::EventMsg( CClient * pClient, const nachar * pszText, int len, CLanguageID lang ) // Text from a client
 {
 	ADDTOCALLSTACK("CChat::EventMsg");
 	// ARGS:

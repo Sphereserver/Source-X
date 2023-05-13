@@ -20,7 +20,7 @@ public:
 	static const char* m_sClassName;
 
 	static void Speak(const CObjBaseTemplate* pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD);
-	static void SpeakUNICODE(const CObjBaseTemplate* pSrc, const nchar* pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang);
+	static void SpeakUNICODE(const CObjBaseTemplate* pSrc, const nachar* pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang);
 
 	static void Broadcast(lpctstr pMsg);
 	static void __cdecl Broadcastf(lpctstr pMsg, ...) __printfargs(1, 2);

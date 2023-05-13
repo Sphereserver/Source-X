@@ -3060,12 +3060,12 @@ uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* c
 						if (vendSell->GetKey("OVERRIDE.VALUE", true))
 						{
 							//Get the price on NPC template
-							price = vendSell->GetVendorPrice(iConvertFactor,1); 
+							price = vendSell->GetVendorPrice(iConvertFactor,1);
 						}
-						else	
+						else
 						{
 							//Get the price/Value of the real item in the backpack
-							price = vendItem->GetVendorPrice(iConvertFactor,1); 
+							price = vendItem->GetVendorPrice(iConvertFactor,1);
 						}
 
 						writeInt16((word)((price > UINT16_MAX) ? UINT16_MAX : price));
@@ -3493,7 +3493,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
  *
  *
  ***************************************************************************/
-PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakUNICODE, 48, PRI_NORMAL)
+PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nachar * pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakUNICODE, 48, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageUNICODE::PacketMessageUNICODE");
 
@@ -3525,7 +3525,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringUTF16(reinterpret_cast<const wchar*>(pszText));
+	writeStringNETUTF16(reinterpret_cast<const wchar*>(pszText));
 
 	push(target);
 }
@@ -3798,7 +3798,7 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 PacketEnableFeatures::PacketEnableFeatures(const CClient* target, dword flags) : PacketSend(XCMD_Features, 5, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEnableFeatures::PacketEnableFeatures");
-	
+
 	const CAccount * account = target->GetAccount();
 	ASSERT(account != nullptr);
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
@@ -3972,12 +3972,12 @@ PacketPartyRemoveMember::PacketPartyRemoveMember(const CChar* member, const CCha
  *
  *
  ***************************************************************************/
-PacketPartyChat::PacketPartyChat(const CChar* source, const nchar* text) : PacketParty(PARTYMSG_Msg, 11, PRI_NORMAL)
+PacketPartyChat::PacketPartyChat(const CChar* source, const nachar* text) : PacketParty(PARTYMSG_Msg, 11, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketPartyChat::PacketPartyChat");
 
 	writeInt32(source->GetUID());
-	writeStringUTF16(reinterpret_cast<const wchar*>(text));
+	writeStringNETUTF16(reinterpret_cast<const wchar*>(text));
 }
 
 
@@ -4467,7 +4467,7 @@ PacketMessageLocalised::PacketMessageLocalised(const CClient* target, int cliloc
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringUTF16(args);
+	writeStringNETUTF16(args);
 
 	push(target);
 }
@@ -4530,7 +4530,7 @@ PacketMessageLocalisedEx::PacketMessageLocalisedEx(const CClient* target, int cl
 		writeStringFixedASCII(source->GetName(), 30);
 
 	writeStringASCII(affix);
-	writeStringUTF16(args);
+	writeStringNETUTF16(args);
 
 	push(target);
 }
@@ -4955,7 +4955,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		for (uint i = 0; i < argCount; ++i)
 		{
 			writeCharUTF16('\t');
-			writeStringUTF16(args[i], false);
+			writeStringNETUTF16(args[i], false);
 		}
 		writeCharUTF16('\t');
 		writeCharUTF16('\0');
@@ -4976,7 +4976,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		writeInt16(0x1);
 		writeInt16(0);
 
-		writeStringUTF16("\t ", true);
+		writeStringNETUTF16("\t ", true);
 	}
 	push(target);
 }
@@ -5049,7 +5049,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
     writeInt16(0);
 
     writeInt32(cliloc);
-    writeStringUTF16(object->GetName());
+    writeStringNETUTF16(object->GetName());
 
     push(target);
 }
@@ -5123,7 +5123,7 @@ PacketItemWorldNew::PacketItemWorldNew(byte id, uint size, const CUID& uid) : Pa
 PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item) : PacketItemWorld(XCMD_PutNew, 26, item->GetUID())
 {
 	ADDTOCALLSTACK("PacketItemWorldNew::PacketItemWorldNew");
-    
+
     const CNetState *ns = target->GetNetState();
 	DataSource source;		// 0=Tiledata, 1=Character, 2=Multi
 	dword uid = item->GetUID();
@@ -5225,7 +5225,7 @@ PacketDisplayMapNew::PacketDisplayMapNew(const CClient* target, const CItemMap* 
 
 	word width	= (word)(itemDef->m_ttMap.m_iGumpWidth 	> 0 ? itemDef->m_ttMap.m_iGumpWidth		:	(word)CItemMap::DEFAULT_SIZE);
 	word height = (word)(itemDef->m_ttMap.m_iGumpHeight	> 0 ? itemDef->m_ttMap.m_iGumpHeight	:	(word)CItemMap::DEFAULT_SIZE);
-	
+
 	word overrideWidth = (word)map->GetKeyNum("OVERRIDE.MAPWIDTH", true);
 	if (overrideWidth > 0)
 		width = overrideWidth;
