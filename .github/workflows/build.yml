@@ -77,17 +77,17 @@ jobs:
       run:  |
             lsb_release -d
             sudo add-apt-repository universe && sudo sudo apt-get -qq update
-            sudo apt install -yq --no-install-recommends gcc-12 g++-12 > /dev/null
+            sudo apt install -yq --no-install-recommends ninja gcc-12 g++-12 > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
             export CC="gcc-12" && export CXX="g++-12"
-            gcc -v && cmake --version && ninja-build --version
+            gcc -v && cmake --version && ninja --version
     - name: CMake
       run: |
             mkdir -p build
             cd build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -S ../ -B .
     - name: Ninja
-      run: ninja-build
+      run: ninja
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
@@ -117,18 +117,18 @@ jobs:
             echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
             sudo add-apt-repository universe && sudo apt-get -qq update
-            sudo apt install -yq --no-install-recommends linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
+            sudo apt install -yq --no-install-recommends ninja linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
             export CC="gcc-12" && export CXX="g++-12"
             echo && echo "** Report building tools" && echo
-            gcc -v -v && cmake --version && ninja-build --version
+            gcc -v -v && cmake --version && ninja --version
     - name: CMake
       run: |
             mkdir -p build
             cd build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake -S ../ -B .
     - name: Ninja
-      run: ninja-build
+      run: ninja
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
