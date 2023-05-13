@@ -2150,7 +2150,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
                     return false;
 
                 SKIP_SEPARATORS(ptcKey);
-                const CMultiComponentItem& item = m_Components[iIndex];
+                const CMultiComponentItem& item = m_Components[(size_t)iIndex];
 
                 if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);

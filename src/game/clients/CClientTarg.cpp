@@ -1069,10 +1069,10 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	{
 		uint iLevel = (uint)IMulDiv( 
 			i_promote32(pItem->m_itWeapon.m_poison_skill),
-			i64_narrow32(CountOf(sm_szPoisonMessages)),
+			i_narrow32(CountOf(sm_szPoisonMessages)),
 			100);
 		if ( iLevel >= CountOf(sm_szPoisonMessages))
-			iLevel = i64_narrow32(CountOf(sm_szPoisonMessages)) - 1;
+			iLevel = i_narrow32(CountOf(sm_szPoisonMessages)) - 1;
 		len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
@@ -1285,7 +1285,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	{
 		uint iLevel = (uint)IMulDiv( iPoisonLevel, CountOf(sm_szPoisonMessages), 1000 );
 		if ( iLevel >= CountOf(sm_szPoisonMessages))
-			iLevel = i64_narrow32(CountOf(sm_szPoisonMessages) - 1);
+			iLevel = i_narrow32(CountOf(sm_szPoisonMessages) - 1);
 		SysMessage(sm_szPoisonMessages[iLevel] );
 	}
 	else
@@ -1936,7 +1936,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_FRUIT:
 		case IT_REAGENT_RAW:
 			// turn the fruit into a seed.
-			if ( ! m_pChar->CanUse( pItemTarg, true ))
+			if ( !pItemTarg || !m_pChar->CanUse( pItemTarg, true ))
 				return false;
 			{
 				CResourceID defaultseed = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTSEED" );

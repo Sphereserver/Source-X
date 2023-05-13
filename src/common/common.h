@@ -98,6 +98,44 @@ auto i_promote64(const T a) noexcept
 }
 
 template <typename T>
+auto i_narrow32(const T a) noexcept
+{
+	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
+	static_assert(sizeof(T) >= 4, "Input variable is smaller than a 32 bit number.");
+
+	// Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
+	constexpr uint64 umask = 0x0000'0000'FFFF'FFFF;
+	if constexpr (std::is_signed_v<T>)
+	{
+		if constexpr (std::is_floating_point_v<T>)
+			return static_cast<realtype32>(static_cast<uint64>(a) & umask);
+		return static_cast<int32>(static_cast<uint64>(a) & umask);
+	}
+	else
+		return static_cast<uint32>(static_cast<uint64>(a) & umask);
+}
+
+template <typename T>
+auto i_narrow16(const T a) noexcept
+{
+	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
+	static_assert(sizeof(T) >= 2, "Input variable is smaller than a 16 bit number.");
+
+	// Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
+	constexpr uint64 umask = 0x0000'0000'FFFF'FFFF;
+	if constexpr (std::is_signed_v<T>)
+	{
+		if constexpr (std::is_floating_point_v<T>)
+			return static_cast<realtype16>(static_cast<uint64>(a) & umask);
+		return static_cast<int16>(static_cast<uint64>(a) & umask);
+	}
+	else
+		return static_cast<uint16>(static_cast<uint64>(a) & umask);
+}
+
+template <typename T>
 auto i64_narrow32(const T a) noexcept
 {
 	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
