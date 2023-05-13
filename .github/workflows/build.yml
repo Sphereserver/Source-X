@@ -76,11 +76,17 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
+
             sudo add-apt-repository universe && sudo sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
             export CC="gcc-12" && export CXX="g++-12"
-            gcc -v && cmake --version && ninja --version
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
     - name: CMake
       run: |
             mkdir -p build
@@ -90,7 +96,7 @@ jobs:
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C build/bin64/ SphereSvrX64_nightly -C src/ sphere.ini sphereCrypt.ini
+            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin64/SphereSvrX64_nightly src/sphere.ini src/sphereCrypt.ini
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -113,20 +119,32 @@ jobs:
     - name: Install prerequisites
       run:  |
             lsb_release -d
+
             echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
-            sudo add-apt-repository universe
-            
-            # Workaround: there are no official packages built for i386 on this OS. Let's install from the previous Ubuntu LTS version repo.
-            curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-            sudo bash mariadb_repo_setup --os-type=ubuntu  --os-version=bionic --mariadb-server-version=10.2
-
-            sudo apt-get -qq update
+            sudo add-apt-repository universe && sudo apt-get -qq update
             sudo apt install -yq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
-            sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
+            
+            # MariaDB dependencies
+            sudo apt install -yq --no-install-recommends libc6:i386 zlib1g:i386
+            wget --quiet --output-document=dep1.deb http://launchpadlibrarian.net/367327733/libssl1.1_1.1.0g-2ubuntu4_i386.deb
+            sudo dpkg -r --force-all libssl1.1 2> /dev/null
+            sudo dpkg -i --force-all dep1.deb  2> /dev/null
+
+            # Workaround: there are no official packages built for i386 on this OS. Let's install from the previous Ubuntu LTS version repo.
+            wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/355877539/libmariadb3_3.0.3-1build1_i386.deb
+            wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
+            sudo dpkg -i temp1.deb temp2.deb
+
             export CC="gcc-12" && export CXX="g++-12"
-            echo && echo "** Report building tools" && echo
-            gcc -v -v && cmake --version && ninja --version
+            # For some reason, for the x86 build exporting CC and CXX is not enough to force using the version of gcc we want...
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
     - name: CMake
       run: |
             mkdir -p build
@@ -136,7 +154,7 @@ jobs:
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C build/bin/ SphereSvrX32_nightly -C src/ sphere.ini sphereCrypt.ini
+            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin/SphereSvrX32_nightly src/sphere.ini src/sphereCrypt.ini
 
 
   macos-x86_64:
@@ -153,12 +171,17 @@ jobs:
     - name: Install prerequisites
       run:  |
             sw_vers
+
             echo && echo "** Setting up compiler" && echo
             export HOMEBREW_NO_AUTO_UPDATE=1
             export HOMEBREW_NO_INSTALL_CLEANUP=1
             brew install ninja mariadb-connector-c
-            echo && echo "** Report building tools" && echo
-            gcc -v && cmake --version && ninja --version
+    - name: Report building tools
+      run:  |
+            echo "Apple Clang:" && clang --version
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
     - name: CMake
       run: |
             mkdir -p build
