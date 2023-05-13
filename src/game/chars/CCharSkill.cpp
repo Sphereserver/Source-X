@@ -2932,8 +2932,16 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 
     if ((stage == SKTRIG_FAIL) || (stage == SKTRIG_ABORT))
     {
-        m_atFight.m_iRecoilDelay = 0;
-        m_atFight.m_iSwingAnimationDelay = 0;
+		/*Super cheap fix :
+		When we are casting the SUMMON CREATURE spell while we are in an active combat (we have an active fighting skill going on)
+		resetting both the RecoilDelay and the SwingAnimationDelay will also cause the ID of the summoned creatured to be resetted.
+		This only happens when the creature to be summoned is chosen on the default "summon menu".
+		*/
+		if ( !m_atMagery.m_iSummonID ) 
+		{
+			m_atFight.m_iRecoilDelay = 0;
+			m_atFight.m_iSwingAnimationDelay = 0;
+		}
         m_atFight.m_iSwingAnimation = 0;
         m_atFight.m_iSwingIgnoreLastHitTag = 0;
         return 0;
