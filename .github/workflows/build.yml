@@ -77,7 +77,7 @@ jobs:
       run:  |
             lsb_release -d
             sudo add-apt-repository universe && sudo sudo apt-get -qq update
-            sudo apt install -yq --no-install-recommends ninja gcc-12 g++-12 > /dev/null
+            sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
             export CC="gcc-12" && export CXX="g++-12"
             gcc -v && cmake --version && ninja --version
@@ -117,7 +117,7 @@ jobs:
             echo && echo "** Setting up compiler" && echo
             sudo sudo dpkg --add-architecture i386
             sudo add-apt-repository universe && sudo apt-get -qq update
-            sudo apt install -yq --no-install-recommends ninja linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
+            sudo apt install -yq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
             sudo apt install -yq --no-install-recommends mariadb-client:i386 libmariadb-dev:i386
             export CC="gcc-12" && export CXX="g++-12"
             echo && echo "** Report building tools" && echo
