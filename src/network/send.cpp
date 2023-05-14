@@ -3525,7 +3525,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nachar *
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringNETUTF16(reinterpret_cast<const wchar*>(pszText));
+	writeStringUTF16(reinterpret_cast<const wchar*>(pszText));
 
 	push(target);
 }
@@ -3977,7 +3977,7 @@ PacketPartyChat::PacketPartyChat(const CChar* source, const nachar* text) : Pack
 	ADDTOCALLSTACK("PacketPartyChat::PacketPartyChat");
 
 	writeInt32(source->GetUID());
-	writeStringNETUTF16(reinterpret_cast<const wchar*>(text));
+	writeStringUTF16(reinterpret_cast<const wchar*>(text));
 }
 
 
@@ -4467,7 +4467,7 @@ PacketMessageLocalised::PacketMessageLocalised(const CClient* target, int cliloc
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringNETUTF16(args);
+	writeStringUTF16(args);
 
 	push(target);
 }
@@ -4530,7 +4530,7 @@ PacketMessageLocalisedEx::PacketMessageLocalisedEx(const CClient* target, int cl
 		writeStringFixedASCII(source->GetName(), 30);
 
 	writeStringASCII(affix);
-	writeStringNETUTF16(args);
+	writeStringUTF16(args);
 
 	push(target);
 }
@@ -4955,7 +4955,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		for (uint i = 0; i < argCount; ++i)
 		{
 			writeCharUTF16('\t');
-			writeStringNETUTF16(args[i], false);
+			writeStringUTF16(args[i], false);
 		}
 		writeCharUTF16('\t');
 		writeCharUTF16('\0');
@@ -4976,7 +4976,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		writeInt16(0x1);
 		writeInt16(0);
 
-		writeStringNETUTF16("\t ", true);
+		writeStringUTF16("\t ", true);
 	}
 	push(target);
 }
@@ -5049,7 +5049,7 @@ PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MA
     writeInt16(0);
 
     writeInt32(cliloc);
-    writeStringNETUTF16(object->GetName());
+    writeStringUTF16(object->GetName());
 
     push(target);
 }
@@ -5099,11 +5099,16 @@ PacketToggleHotbar::PacketToggleHotbar(const CClient* target, bool enable) : Pac
 PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSend(XCMD_TimeSyncResponse, 25, PRI_HIGH)
 {
 	ADDTOCALLSTACK("PacketTimeSyncResponse::PacketTimeSyncResponse");
+	// A single tick here represents one hundred nanoseconds (the "standard" Windows tick time) or one ten-millionth of a second. There are 10,000 ticks in a millisecond.
+	// From Wyatt packet guide: DateTime1, DateTime2 and DateTime3 - ticks from Unix time divided by 10,000 --> so, milliseconds
 
-	int64 llTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	//const int64 llTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	const int64 llTime = CSTime::GetCurrentTime().GetTime()	// Seconds from the UNIX epoch.
+						 * MSECS_PER_SEC;
+
 	writeInt64(llTime);
-	writeInt64(llTime+100);
-	writeInt64(llTime+100);	//No idea if different values make a difference. I didn't notice anything different when all values were the same.
+	writeInt64(llTime);
+	writeInt64(llTime);
 
 	push(target);
 }

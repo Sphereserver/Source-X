@@ -264,6 +264,8 @@ bool CSTime::operator!=( time_t t ) const noexcept
 
 time_t CSTime::GetTime() const noexcept
 {
+	// Although not defined by the C standard, this is almost always an integral value holding the number of seconds 
+	//  (not counting leap seconds) since 00:00, Jan 1 1970 UTC, corresponding to UNIX time.
 	return m_time;
 }
 
