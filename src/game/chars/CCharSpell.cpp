@@ -345,11 +345,12 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	}
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
+	pChar->NPC_PetSetOwner(this);
 	pChar->MoveToChar(ptTarg);
 	pChar->m_ptHome = ptTarg;
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
-	pChar->NPC_PetSetOwner(this);
+	//pChar->NPC_PetSetOwner(this);
 	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr, false, iDuration);
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);

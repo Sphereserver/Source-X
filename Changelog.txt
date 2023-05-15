@@ -3290,3 +3290,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 14-05-2023, Nolok
 - Removed: unused DEFMSG PARTY_MSG.
 - Fixed: 0xF2 packet (PacketTimeSyncResponse) now sending the correct time (milliseconds from the UNIX epoch) to the client. This avoids the Enhanced Client to continuously send 0xF1 packet to ask for the right server time.
+
+15-05-2023, Drk84
+- Fixed: @PetDesert trigger not fired when a conjured creature suffers damage from the OWNER just before being summoned. (Issue #1067)
