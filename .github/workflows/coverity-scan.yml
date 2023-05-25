@@ -2,7 +2,7 @@ name: coverity-scan
 
 on:
     push:
-        branches: [coverity_scan]
+        branches: ["static-analysis"]
         paths-ignore:
           - '.gitignore'
           - '.gitattributes'

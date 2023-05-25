@@ -13,14 +13,14 @@ Ultima Online game server developed in C++
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
 <br><br>
 Join SphereServer Discord channel!
-![Discord Shield](https://discordapp.com/api/guilds/ZrMTXrs/widget.png?style=shield)
+[![Discord Shield](https://discordapp.com/api/guilds/ZrMTXrs/widget.png?style=shield)](https://discord.gg/ZrMTXrs)
 
 ### Download automated SphereServer builds and ScriptPack releases
-#### SphereServer
-<a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
-<br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
-
-#### ScriptPack
+<b>SphereServer:</b>
+* <a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
+* <br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
+<br>
+<b>ScriptPack:</b>
 The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
 of the new ones.<br>
 It is currently being revamped to add original OSI features.<br>
