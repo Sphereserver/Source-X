@@ -33,7 +33,8 @@ public:
 	// Map blocks (for caching) and terrain
 
 	static const CServerMapBlock* GetMapBlock(const CPointMap& pt);
-	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates
+	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates (fixed heights)
+	static const CUOMapMeter* GetMapMeter2(const CPointMap& pt); // load bloq and Height of MAP0.MUL at given coordinates (unfixed heights)
 
 	static CItemTypeDef* GetTerrainItemTypeDef(dword dwIndex);
 	static IT_TYPE		 GetTerrainItemType(dword dwIndex);
