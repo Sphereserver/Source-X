@@ -3,34 +3,39 @@ Ultima Online game server developed in C++
 <br>
 [![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
 <br>
-[![Build](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml)
-[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
-<br>
 [![GitHub issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
 [![GitHub repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
 [![GitHub stars](https://img.shields.io/github/stars/Sphereserver/Source-X?logo=github)](https://github.com/Sphereserver/Source-X/stargazers)
+<br><br>
+[![Build](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml)
+[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
+<br><br>
+Join SphereServer Discord channel!
+![Discord Shield](https://discordapp.com/api/guilds/ZrMTXrs/widget.png?style=shield)
 
-
-### Download automated builds
+### Download automated SphereServer builds and ScriptPack releases
+#### SphereServer
 <a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
-<br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Sphereserver Web</a>
+<br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
 
-### Join SphereServer Discord channel!
-https://discord.gg/ZrMTXrs
-
-
-### Use the specific script pack!
+#### ScriptPack
 The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
 of the new ones.<br>
+It is currently being revamped to add original OSI features.<br>
 Beware, it's still not 100% complete!<br>
-https://github.com/Sphereserver/Scripts-X
+* <a href="https://github.com/Sphereserver/Scripts-X">Up to date</a>
+* <a href="https://github.com/Sphereserver/Scripts-X/releases">Official releases</a>
 
 
-### Coming from a different SphereServer version?
+### Resources
+* <a href="https://wiki.spherecommunity.net/">Scripting guide</a>
+* <a href="https://www.sphereserver.net/">Official website</a>
+
+#### Coming from a different SphereServer version?
 * From 0.56d? <a href="docs/Porting%20from%200.56%20to%20X.txt">Here</a> a list of major scripting changes!
-* From an older 0.56 version? <a href="docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
+* From an older 0.55 or 0.56 version? <a href="docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
 
 
 ## Why a fork?
