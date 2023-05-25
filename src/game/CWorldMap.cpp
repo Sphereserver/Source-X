@@ -279,6 +279,37 @@ const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 // Tile info fromMAP*.MUL at given coordinates
 const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 {
+	CPointMap pt2 = pt;
+	const CUOMapMeter* pMeter = GetMapMeter2(pt);
+
+	if (!pMeter)
+		return nullptr;
+	//FIX "screwed heights"
+	char z = pMeter->m_z;
+	// get HEIGHT from S, SE and E tiles
+	pt2.m_y++;
+	char zS = GetMapMeter2(pt2)->m_z;
+	pt2.m_x++;
+	char zSE = GetMapMeter2(pt2)->m_z;
+	pt2.m_y--;
+	char zE = GetMapMeter2(pt2)->m_z;
+	// get max and min z
+	char zBot = std::min(std::min(z, zSE), std::min(zE, zS));
+	char zTop = std::max(std::max(z, zSE), std::max(zE, zS));
+	char zAve = (zTop - zBot)/2;
+	if (zAve < 1)
+		return pMeter;
+	z = zTop - floor(zAve);
+	CUOMapMeter pMeterTemp(*pMeter);
+	pMeterTemp.m_z = z;
+	const CUOMapMeter* pMeterFixed(&pMeterTemp);
+	return pMeterFixed;
+}
+
+// Tile info fromMAP*.MUL at given coordinates
+//Getmapmeter2 is the old Getmapmeter just renamed into getmapmeter2.
+const CUOMapMeter* CWorldMap::GetMapMeter2(const CPointMap& pt) // static
+{
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
 		return nullptr;
