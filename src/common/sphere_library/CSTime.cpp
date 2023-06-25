@@ -59,7 +59,7 @@ llong CSTime::GetPreciseSysTimeMilli() noexcept // static
 #endif
 }
 
-CSTime CSTime::GetCurrentTime()	// static
+CSTime CSTime::GetCurrentTime()	noexcept // static
 {
 	// return the current system time
 	return CSTime(::time(nullptr));
@@ -67,7 +67,7 @@ CSTime CSTime::GetCurrentTime()	// static
 
 
 CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
-			   int nDST)
+			   int nDST) noexcept
 {
 	struct tm atm;
 	atm.tm_sec = nSec;

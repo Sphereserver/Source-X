@@ -339,7 +339,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
         return;
     }
 
-    if (dwKeyCode == UID_CLEAR)
+    if (dwKeyCode == UID_PLAIN_CLEAR)
     {
         dwKeyCode = GetUID();
     }
@@ -2372,7 +2372,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         case SHV_GENERATEBASECOMPONENTS:
         {
             bool fNeedKey = false;
-            GenerateBaseComponents(&fNeedKey, UID_CLEAR);
+            GenerateBaseComponents(&fNeedKey, UID_PLAIN_CLEAR);
             break;
         }
         default:
@@ -3344,7 +3344,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
     if (pMultiItem)
     {
-        pMultiItem->Multi_Setup(pChar, UID_CLEAR);
+        pMultiItem->Multi_Setup(pChar, UID_PLAIN_CLEAR);
     }
 
     if (pItemDef->IsType(IT_STONE_GUILD))

@@ -82,21 +82,20 @@ GlobalInitializer::GlobalInitializer()
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");
 
-	ASSERT(MAX_BUFFER >= sizeof(CCommand));
-	ASSERT(MAX_BUFFER >= sizeof(CEvent));
-	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
-	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
-	ASSERT(sizeof(word) == 2);
-	ASSERT(sizeof(dword) == 4);
-	ASSERT(sizeof(nword) == 2);
-	ASSERT(sizeof(ndword) == 4);
-	ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
-
-    EXC_CATCH;
-
-	//--------
+	static_assert(MAX_BUFFER >= sizeof(CCommand));
+	static_assert(MAX_BUFFER >= sizeof(CEvent));
+	static_assert(sizeof(int) == sizeof(dword));	// make this assumption often.
+	static_assert(sizeof(ITEMID_TYPE) == sizeof(dword));
+	static_assert(sizeof(word) == 2);
+	static_assert(sizeof(dword) == 4);
+	static_assert(sizeof(nword) == 2);
+	static_assert(sizeof(ndword) == 4);
+	static_assert(sizeof(wchar) == 2);	// 16 bits
+	static_assert(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
 
 	CPointBase::InitRuntimeStaticMembers();
+
+	EXC_CATCH;
 }
 
 GlobalInitializer g_GlobalInitializer;

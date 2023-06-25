@@ -248,7 +248,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
             rid = pOreDef->m_ReapItem;
             if (rid != 0)
             {
-                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), CUID(UID_CLEAR), SKTRIG_SELECT))
+                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), CUID(UID_PLAIN_CLEAR), SKTRIG_SELECT))
                     continue;
 
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))

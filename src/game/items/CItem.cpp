@@ -777,7 +777,7 @@ int CItem::FixWeirdness()
 
     if (IsType(IT_EQ_MEMORY_OBJ) && !IsValidUID())
     {
-        SetUID(UID_CLEAR, true);	// some cases we don't get our UID because we are created during load.
+        SetUID(UID_PLAIN_CLEAR, true);	// some cases we don't get our UID because we are created during load.
     }
 
     int iResultCode = CObjBase::IsWeird();

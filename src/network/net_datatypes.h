@@ -9,6 +9,13 @@
 #include "../common/common.h"
 
 
+#define PACKWORD(p,w)	(p)[0]=HIBYTE(w); (p)[1]=LOBYTE(w)
+#define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
+
+#define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF; (p)[1]=((d)>>16)&0xFF; (p)[2]=HIBYTE(d); (p)[3]=LOBYTE(d)
+#define UNPACKDWORD(p)	MAKEDWORD( MAKEWORD((p)[3],(p)[2]), MAKEWORD((p)[1],(p)[0]))
+
+
 // All these structures must be byte packed.
 
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -28,13 +35,9 @@ struct nword
     // Deal with the stupid Little Endian / Big Endian crap just once.
     // On little endian machines this code would do nothing.
     word m_val;
-    operator word () const;
+    operator word () const noexcept;
 
-    nword& operator = (word val);
-
-#define PACKWORD(p,w)	(p)[0]=HIBYTE(w); (p)[1]=LOBYTE(w)
-#define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
-
+    nword& operator = (word val) noexcept;
 } PACK_NEEDED;
 
 // Aligned network word.
@@ -43,23 +46,23 @@ struct alignas(alignof(wchar)) naword : public nword
     template <typename T>
     naword& operator = (T) = delete;
 
-    naword& operator = (word var) {
+    naword& operator = (word var) noexcept {
         nword::operator=(var);
         return *this;
     }
-    naword& operator = (wchar var) {
+    naword& operator = (wchar var) noexcept {
         nword::operator=(static_cast<word>(var));
         return *this;
     }
-    naword& operator = (nword var) {
+    naword& operator = (nword var) noexcept {
         m_val = var.m_val;
         return *this;
     }
-    naword& operator = (char var) {
+    naword& operator = (char var) noexcept {
         nword::operator=(static_cast<word>(var));
         return *this;
     }
-    naword& operator = (unsigned char var) {
+    naword& operator = (unsigned char var) noexcept {
         nword::operator=(static_cast<word>(var));
         return *this;
     }
@@ -72,12 +75,8 @@ using nachar = naword;
 struct ndword
 {
     dword m_val;
-    operator dword () const;
-    ndword& operator = (dword val);
-
-#define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF; (p)[1]=((d)>>16)&0xFF; (p)[2]=HIBYTE(d); (p)[3]=LOBYTE(d)
-#define UNPACKDWORD(p)	MAKEDWORD( MAKEWORD((p)[3],(p)[2]), MAKEWORD((p)[1],(p)[0]))
-
+    operator dword () const noexcept;
+    ndword& operator = (dword val) noexcept;
 } PACK_NEEDED;
 
 
@@ -87,8 +86,8 @@ struct ndword
 #endif
 
 
-int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes);
-int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars);
+int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes) noexcept;
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars) noexcept;
 
 
 #endif // _INC_NET_DATATYPES_H

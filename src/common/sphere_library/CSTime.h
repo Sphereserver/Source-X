@@ -53,7 +53,7 @@ public:
 	static llong GetPreciseSysTimeMicro() noexcept;
 	static llong GetPreciseSysTimeMilli() noexcept;
 
-	static CSTime GetCurrentTime();
+	static CSTime GetCurrentTime() noexcept;
 
 public:
 	static const char* m_sClassName;
@@ -64,7 +64,7 @@ public:
 	CSTime(const CSTime& timeSrc) noexcept;
 
 	CSTime(struct tm time) noexcept;
-	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1);
+	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1) noexcept;
 
 	const CSTime& operator=(const CSTime& timeSrc) noexcept;
 	const CSTime& operator=(time_t t) noexcept;

@@ -92,7 +92,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	else
 	{
 		// Find a free UID slot for this.
-		SetUID(UID_CLEAR, fItem);
+		SetUID(UID_PLAIN_CLEAR, fItem);
 		ASSERT(IsValidUID());
 		SetUIDContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}

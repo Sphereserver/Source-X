@@ -2632,14 +2632,14 @@ do_default:
 				// use m_Act_UID ?
 				ptcKey += 7;
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcKey ));
-				sVal.FormatVal( Skill_MakeItem( id,	CUID(UID_CLEAR), SKTRIG_SELECT ) );
+				sVal.FormatVal( Skill_MakeItem( id,	CUID(UID_PLAIN_CLEAR), SKTRIG_SELECT ) );
 			}
 			return true;
 		case CHC_CANMAKESKILL:
 			{
 				ptcKey += 12;
 				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ptcKey ));
-				sVal.FormatVal( Skill_MakeItem( id,	CUID(UID_CLEAR), SKTRIG_SELECT, true ) );
+				sVal.FormatVal( Skill_MakeItem( id,	CUID(UID_PLAIN_CLEAR), SKTRIG_SELECT, true ) );
 			}
 			return true;
 		case CHC_SKILLUSEQUICK:
@@ -4524,7 +4524,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				CPointMap pt = pCharSrc->GetTopPoint();
 				pt.MoveN( pCharSrc->m_dirFace, 3 );
 				pItem->MoveToDecay( pt, 10*60* MSECS_PER_SEC);	// make the cage vanish after 10 minutes.
-				pItem->Multi_Setup( nullptr, UID_CLEAR );
+				pItem->Multi_Setup( nullptr, UID_PLAIN_CLEAR );
 				Spell_Teleport( pt, true, false );
 				break;
 			}

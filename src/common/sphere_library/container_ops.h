@@ -5,7 +5,7 @@
 #include <initializer_list>
 
 template<typename inT, typename outT>
-void AssignInitlistToCSizedArray(outT* dest, const size_t dest_size, std::initializer_list<inT> initializer)
+void AssignInitlistToCSizedArray(outT* dest, const size_t dest_size, std::initializer_list<inT> initializer) noexcept
 {
     size_t i = 0;
     for (auto const& elem : initializer)

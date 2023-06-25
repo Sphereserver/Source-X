@@ -244,6 +244,8 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nachar *pText, int
 	CChar *pTo = nullptr;
 	if ( uidDst != (dword)0 )
 		pTo = uidDst.CharFind();
+    ASSERT(pFrom);
+    ASSERT(pTo);
 
 	tchar *szText = Str_GetTemp();
 	CvtNETUTF16ToSystem(szText, MAX_TALK_BUFFER, pText, MAX_TALK_BUFFER);
@@ -301,11 +303,11 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	if ( m_Chars.GetCharCount() <= 0 )
 		return false;
 
-	CUID uidMaster = GetMaster();
+	CUID uidMaster(GetMaster());
 	if ( (uidRemove != uidCommand) && (uidCommand != uidMaster) )
 		return false;
 
-	CChar *pCharRemove = uidRemove.CharFind();
+	CChar *pCharRemove(uidRemove.CharFind());
 	if ( !pCharRemove )
 		return false;
 	if ( !IsInParty(pCharRemove) )

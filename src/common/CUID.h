@@ -12,8 +12,9 @@ class CObjBase;
 class CItem;
 class CChar;
 
-#define UID_CLEAR			(dword)0
-#define UID_UNUSED			(dword)0xFFFFFFFF	// 0 = not used as well.
+#define UID_UNUSED			(dword)0xFFFFFFFF	// -1 casted to unsigned = This value is not used/not a valid UID.
+#define UID_PLAIN_CLEAR		(dword)0            // 0 = Unused as well; to be used only if the CUID is not used as a pure UID,
+                                                // but it can be assumed to have other kind of values, es: MORE (view CUID::ClearUID).
 
 #define UID_F_RESOURCE		0x80000000	// ALSO: pileable or special macro flag passed to client.
 #define UID_F_ITEM			0x40000000	// CItem as apposed to CChar based
@@ -39,7 +40,7 @@ public:
     // Use ClearUID only if the CUID is not used as a pure UID, but it can assume other kind of values.
     //  Example: m_itFigurine.m_UID, m_itKey.m_UIDLock -> a MORE1/MORE2 == 0 is considered legit, also for many many item types MORE* isn't a UID.
 	inline void ClearUID() noexcept {
-		m_dwInternalVal = UID_CLEAR;
+		m_dwInternalVal = UID_PLAIN_CLEAR;
 	}
 
 	inline CUID() noexcept
