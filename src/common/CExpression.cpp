@@ -1201,7 +1201,6 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 	using SType = SubexprData::Type;
 	while (pExpr[0] != '\0')
 	{
-		int iSubexprFragmentQty = 0;
 		if (++iSubexprQty >= iMaxQty)
 		{
 			g_Log.EventWarn("Exceeded maximum allowed number of subexpressions (%d). Parsing halted.\n", iMaxQty);
@@ -1216,31 +1215,24 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		sCurSubexpr = {pExpr, nullptr, SType::None, 0};
 
 		// Handle special characters: non associative operators (like !)
-		bool fSpecialChar = false;
+        lptstr ptcTopLevelNegation = nullptr;
         if (ch == '!')
         {
             // Actually i'm interested only in the special case of subexpressions preceded by '!'.
             //	If it's inside the subexpression, it will already be handled correctly.
-            fSpecialChar = true;
-        }
-		if (fSpecialChar)
-		{
+            ptcTopLevelNegation = pExpr;
 			++pExpr;
 			GETNONWHITESPACE(pExpr);
 			ch = *pExpr;
 		}
 
-		if (ch == '(')
+        const bool fStartingBracket = (ch == '(');
+		if (fStartingBracket)
 		{
 			// Start of a expression within curved brackets: Eat the opening bracket
-			sCurSubexpr.ptcStart += 1;
+			sCurSubexpr.ptcStart = pExpr + 1;
+            goto open_bracket;
 		}
-		/*
-		else if (ch == '<')
-		{
-			// Start of a expression within angle brackets: Keep the opening bracket
-		}
-		*/
 
 		while (true)
 		{
@@ -1253,6 +1245,13 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 				{
 					// If it's not nullptr, then it's the closing bracket of the subexpr, and we want to keep that as the end.
 					sCurSubexpr.ptcEnd = pExpr;
+                    if (fStartingBracket)
+                    {
+                        // The starting bracket encloses only a part of the expression, so i need to preserve it.
+                        sCurSubexpr.ptcStart -= 1;
+                        if (sCurSubexpr.uiNonAssociativeOffset != 0)
+                            sCurSubexpr.uiNonAssociativeOffset -= 1;
+                    }
 				}
 				break; // End of the current subexpr, go back to find another one
 			}
@@ -1263,20 +1262,20 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 				// Now i want only to see where's the matching closing bracket.
 				// This subexpression can contain other special characters, like non-associative operators, but we don't care at this stage.
 				// Those will be considered and eventually evaluated when fully parsing this subexpression.
-
-				if (fSpecialChar)
+             open_bracket:
+				if (ptcTopLevelNegation && (0 == sCurSubexpr.uiNonAssociativeOffset))
 				{
-					uint uiTempOffset = uint(pExpr + 1U - sCurSubexpr.ptcStart);
+                    //sCurSubexpr.ptcStart = pExpr;
+					uint uiTempOffset = uint(sCurSubexpr.ptcStart - ptcTopLevelNegation);
 					if (uiTempOffset > USHRT_MAX)
 					{
 						g_Log.EventError("Too much non-associative operands before the expression. Trimming to %d.\n", USHRT_MAX);
 						uiTempOffset = USHRT_MAX;
 					}
 					sCurSubexpr.uiNonAssociativeOffset = uchar(uiTempOffset);
-					sCurSubexpr.ptcStart = pExpr;
 				}
 
-				ushort uiOpenedCurlyBrackets = 1;
+				ushort uiOpenedCurlyBrackets = 0;
 				while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
 				{
 					ch = *(++pExpr);
@@ -1328,11 +1327,13 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 					}
 					else
 					{
-						const ushort prevSubexprType = ((iSubexprQty == 1) ? (ushort)SType::None : psSubexprData[iSubexprQty - 1].uiType);
-						if ((iSubexprFragmentQty != 0) && (prevSubexprType & SType::None))
+						const ushort prevSubexprType = ((iSubexprQty == 1) ? (ushort)SType::None : psSubexprData[iSubexprQty - 2].uiType);
+						if ((prevSubexprType & SType::None))
 						{
 							// This subexpr is not preceded by a two-way operator, so probably i'm an operator: skip me.
 							sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+
+                            // This is not a whole logical subexpression but a single operand, or piece/fragment of the current arithmetic subexpr.
 						}
 						else
 						{
@@ -1340,8 +1341,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 							Str_SkipEnclosedAngularBrackets(pExpr);
 						}
 					}
-					// This is not a whole logical subexpression but a single operand, or piece/fragment of the current arithmetic subexpr.
-					++iSubexprFragmentQty;
+					
 				}
 				else if (ch == '>')
 				{
@@ -1354,7 +1354,6 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 					{
 						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
 					}
-					++iSubexprFragmentQty;
 				}
 				// End of arithmetic subexpression parsing.
 			}

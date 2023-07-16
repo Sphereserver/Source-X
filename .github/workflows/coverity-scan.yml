@@ -1,14 +1,14 @@
 name: coverity-scan
 
 on:
-    push:
-        branches: ["static-analysis"]
-        paths-ignore:
-          - '.gitignore'
-          - '.gitattributes'
-          - '**.txt'
-          - '**.md'
-          - '**.rc'
+  push:
+      branches: ["static-analysis"]
+      paths-ignore:
+        - '.gitignore'
+        - '.gitattributes'
+        - '**.txt'
+        - '**.md'
+        - '**.rc'
 
 jobs:
   latest:

@@ -634,7 +634,7 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
         return;
 
     tchar* ptcPrev = pStrEnd - 1;
-    while ((ptcPrev != pStrBegin) && ISWHITESPACE(*pStrEnd))
+    while ((ptcPrev != pStrBegin) && ISWHITESPACE(*ptcPrev))
     {
         if (*ptcPrev == '\0')
             return;

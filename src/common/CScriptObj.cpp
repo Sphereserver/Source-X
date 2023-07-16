@@ -1492,10 +1492,12 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTex
 	const bool fNested = (sdata.uiType & SType::MaybeNestedSubexpr);
 	if (fNested)
 	{
+        g_Log.EventDebug("**EVAL SINGLE (cond) \"%s\"\n", ptcSubexpr);
 		fVal = Evaluate_Conditional(ptcSubexpr, pSrc, pArgs);
 	}
 	else
 	{
+        g_Log.EventDebug("**EVAL SINGLE (parsescripttext) \"%s\"\n", ptcSubexpr);
 		ParseScriptText(ptcSubexpr, pSrc, 0, pArgs);
 		fVal = bool(Exp_GetVal(ptcSubexpr));
 	}
@@ -1527,8 +1529,15 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 {
 	ADDTOCALLSTACK("CScriptObj::Evaluate_Conditional");
 
+    //g_Log.EventDebug("\nEvaluating conditional expression: \"%s\"\n", ptcExpr);
+
 	SubexprData psSubexprData[32]{};
 	const int iQty = CExpression::GetConditionalSubexpressions(ptcExpr, psSubexprData, CountOf(psSubexprData));	// number of arguments
+
+    /*g_Log.EventDebug("---Qty: %d\n", iQty);
+    for (int i = 0; i < iQty; ++i)
+        g_Log.EventDebug("---Subexpr %d: \"%.*s\"\n", i, (psSubexprData[i].ptcEnd - psSubexprData[i].ptcStart), psSubexprData[i].ptcStart);
+    */
 
 	if (iQty == 0)
 		return 0;
