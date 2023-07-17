@@ -260,7 +260,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 			{
 				s.SeekContext(StartContext);
 				TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
-				if ( iRet == TRIGRET_BREAK )
+				if (iRet == TRIGRET_BREAK || iRet == TRIGRET_RET_ABORTED)
 				{
 					EndContext = StartContext;
 					break;
@@ -316,7 +316,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		s.SeekContext(StartContext);
 		TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
-		if ( iRet == TRIGRET_BREAK )
+		if (iRet == TRIGRET_BREAK || iRet == TRIGRET_RET_ABORTED)
 		{
 			EndContext = StartContext;
 			break;

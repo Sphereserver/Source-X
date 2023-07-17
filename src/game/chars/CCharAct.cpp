@@ -4197,7 +4197,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
     const CTRIG_TYPE iAction = (CTRIG_TYPE)_iRunningTriggerId;
     // Attach some trigger to the cchar. (PC or NPC)
     // RETURN: true = block further action.
-    TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+    TRIGRET_TYPE iRet = TRIGRET_RET_ABORTED;
 
 	EXC_TRY("Trigger");
 

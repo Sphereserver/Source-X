@@ -67,9 +67,7 @@ public:
 		CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_llLine(llLine)
 	{
 	}
-	virtual ~CAssert()
-	{
-	}
+    virtual ~CAssert() = default;
 
 private:
 	CAssert& operator=(const CAssert& other);

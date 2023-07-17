@@ -3564,7 +3564,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	ADDTOCALLSTACK("CItem::OnTrigger");
 
 	if (IsTriggerActive(pszTrigName)) //This should protect any item trigger from infinite loop
-		return TRIGRET_RET_DEFAULT;
+		return TRIGRET_RET_ABORTED;
 
 	if ( !pSrc )
 		pSrc = &g_Serv;

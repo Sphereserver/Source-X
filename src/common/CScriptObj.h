@@ -32,6 +32,7 @@ enum TRIGRUN_TYPE
 
 enum TRIGRET_TYPE	// trigger script returns.
 {
+    TRIGRET_RET_ABORTED = INT32_MIN,
 	TRIGRET_RET_FALSE = 0,	// default return. (script might not have been handled)
 	TRIGRET_RET_TRUE = 1,
 	TRIGRET_RET_DEFAULT,	// we just came to the end of the script.

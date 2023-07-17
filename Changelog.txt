@@ -3296,3 +3296,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 16-07-2023, Nolok
 - Fixed: IF parsing troubles with nested < or > characters.
+
+17-07-2023, Nolok
+- Added: Protection against infinite recursions in scripts and consequent crashes. Script parsing will not go further if the recursion gets too deep, showing a error message.

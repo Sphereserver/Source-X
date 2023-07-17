@@ -298,6 +298,9 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
 
         if ( piRet )
             *piRet	= iRet;
+
+        if (iRet == TRIGRET_RET_ABORTED)
+            return false;
     }
 	EXC_CATCH;
     return true;
@@ -1492,12 +1495,10 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTex
 	const bool fNested = (sdata.uiType & SType::MaybeNestedSubexpr);
 	if (fNested)
 	{
-        g_Log.EventDebug("**EVAL SINGLE (cond) \"%s\"\n", ptcSubexpr);
 		fVal = Evaluate_Conditional(ptcSubexpr, pSrc, pArgs);
 	}
 	else
 	{
-        g_Log.EventDebug("**EVAL SINGLE (parsescripttext) \"%s\"\n", ptcSubexpr);
 		ParseScriptText(ptcSubexpr, pSrc, 0, pArgs);
 		fVal = bool(Exp_GetVal(ptcSubexpr));
 	}
@@ -2790,6 +2791,20 @@ TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextCo
 		pArgs = argsEmpty.get();
     }
 
+    static constexpr uint g_reentrant_OnTriggerRun_limit = 75;
+    static thread_local size_t g_reentrant_OnTriggerRun = 0;
+    auto clean_return = [](const TRIGRET_TYPE ret) -> TRIGRET_TYPE {
+        g_reentrant_OnTriggerRun -= 1;
+        return ret;
+    };
+
+    g_reentrant_OnTriggerRun += 1;
+    if (g_reentrant_OnTriggerRun >= g_reentrant_OnTriggerRun_limit)
+    {
+        g_Log.Event(LOGL_CRIT, "Parsing of the current script is HALTED. Some code is calling itself recursively.\n");
+        return clean_return(TRIGRET_RET_ABORTED);
+    }
+
 	//	Script execution is always not threaded action
 	EXC_TRY("TriggerRun");
 
@@ -2817,14 +2832,14 @@ jump_in:
 			case SK_ENDRAND:
 			case SK_ENDSWITCH:
 			case SK_ENDWHILE:
-				return( TRIGRET_ENDIF );
+				return clean_return(TRIGRET_ENDIF);
 
 			case SK_ELIF:
 			case SK_ELSEIF:
-				return( TRIGRET_ELSEIF );
+				return clean_return(TRIGRET_ELSEIF);
 
 			case SK_ELSE:
-				return( TRIGRET_ELSE );
+				return clean_return(TRIGRET_ELSE);
 
 			default:
 				break;
@@ -2866,7 +2881,7 @@ jump_in:
 					break;
 			}
 			if ( trigrun >= TRIGRUN_SINGLE_EXEC )
-				return( TRIGRET_RET_DEFAULT );
+				return clean_return(TRIGRET_RET_DEFAULT);
 			continue;	// just ignore it.
 		}
 
@@ -2875,10 +2890,10 @@ jump_in:
 		switch ( iCmd )
 		{
 			case SK_BREAK:
-				return TRIGRET_BREAK;
+				return clean_return(TRIGRET_BREAK);
 
 			case SK_CONTINUE:
-				return TRIGRET_CONTINUE;
+				return clean_return(TRIGRET_CONTINUE);
 
 			case SK_FORITEM:	EXC_SET_BLOCK("foritem");		iRet = OnTriggerLoopGeneric(s, 1,    pSrc, pArgs, pResult); break;
 			case SK_FORCHAR:	EXC_SET_BLOCK("forchar");		iRet = OnTriggerLoopGeneric(s, 2,    pSrc, pArgs, pResult);	break;
@@ -2938,6 +2953,10 @@ jump_in:
 				}
 		}
 
+        // Logical block ended. What should i do?
+        if (iRet == TRIGRET_RET_ABORTED)
+            return clean_return(iRet);
+
 		switch ( iCmd )
 		{
 			case SK_FORITEM:
@@ -2955,7 +2974,7 @@ jump_in:
 			case SK_FOR:
 			case SK_WHILE:
 				if ( iRet != TRIGRET_ENDIF )
-					return iRet;
+					return clean_return(iRet);
 				break;
 
 			case SK_DORAND:	// Do a random line in here.
@@ -2972,7 +2991,7 @@ jump_in:
 							continue;
 						if ( iRet == TRIGRET_ENDIF )
 							break;
-						return iRet;
+						return clean_return(iRet);
 					}
 				}
 				break;
@@ -2982,9 +3001,9 @@ jump_in:
 				if ( pResult )
 				{
 					pResult->Copy( s.GetArgStr() );
-					return TRIGRET_RET_TRUE;
+					return clean_return(TRIGRET_RET_TRUE);
 				}
-				return TRIGRET_TYPE(s.GetArgVal());
+				return clean_return(TRIGRET_TYPE(s.GetArgVal()));
 
 			case SK_IF:
 				{
@@ -2996,7 +3015,7 @@ jump_in:
 					{
 						iRet = OnTriggerRun( s, fTrigger ? TRIGRUN_SECTION_TRUE : TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						if (( iRet < TRIGRET_ENDIF ) || ( iRet >= TRIGRET_RET_HALFBAKED ))
-							return iRet;
+							return clean_return(iRet);
 						if ( iRet == TRIGRET_ENDIF )
 							break;
 
@@ -3006,9 +3025,7 @@ jump_in:
 						else if ( iRet == TRIGRET_ELSE )
 							fTrigger = true;
 						else if ( iRet == TRIGRET_ELSEIF )
-						{
 							fTrigger = Evaluate_Conditional(s.GetArgStr(), pSrc, pArgs);
-						}
 					}
 				}
 				break;
@@ -3019,7 +3036,7 @@ jump_in:
 					EXC_SET_BLOCK("begin/loop cycle");
 					iRet = OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
 					if ( iRet != TRIGRET_ENDIF )
-						return iRet;
+						return clean_return(iRet);
 				}
 				break;
 
@@ -3051,7 +3068,7 @@ jump_in:
 		}
 
 		if ( trigrun >= TRIGRUN_SINGLE_EXEC )
-			return TRIGRET_RET_DEFAULT;
+			return clean_return(TRIGRET_RET_DEFAULT);
 	}
 	EXC_CATCH;
 
@@ -3059,7 +3076,7 @@ jump_in:
 	g_Log.EventDebug("key '%s' runtype '%d' pargs '%p' ret '%s' [%p]\n",
 		s.GetKey(), trigrun, static_cast<void *>(pArgs), (pResult == nullptr ? "" : pResult->GetBuffer()), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
-	return TRIGRET_RET_DEFAULT;
+	return clean_return(TRIGRET_RET_DEFAULT);
 }
 
 TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )

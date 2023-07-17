@@ -1424,7 +1424,7 @@ static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[kiRangeMaxArgs][2
 
 		if (++iQty >= kiRangeMaxArgs)
 		{
-			g_Log.EventWarn("Exceeded maximum allowed number of arguments in a range (%d). Parsing halted.\n", kiRangeMaxArgs);
+			g_Log.EventWarn("Exceeded maximum allowed number of arguments in a range (%d). Parsing HALTED.\n", kiRangeMaxArgs);
 			return iQty;
 		}
 
