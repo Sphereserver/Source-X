@@ -284,9 +284,11 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		                // To use it on Poisoning skill, the skill will request to target the potion.
 		                // 
 		                //Let sphere find the empty "bottle"(maybe someone script a poison on a pitcher)
+				CItem * pPoison = m_pChar->LayerFind( LAYER_FLAG_Poison )
 		                const CItemBase* pItemDef = pItem->Item_GetDef();
 		                ITEMID_TYPE idbottle = (ITEMID_TYPE)pItemDef->m_ttDrink.m_ridEmpty.GetResIndex();
-		                m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itSpell.m_spelllevel, pItem, false, 10);
+				if ( !pPoison ) //dont poison if im already poisoned (instead Cooldown check to avoid MR macroing)
+		                	m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itSpell.m_spelllevel, nullptr);
 		                //
 		                m_pChar->UpdateAnimate(ANIM_EAT);
 		                pItem->ConsumeAmount();
