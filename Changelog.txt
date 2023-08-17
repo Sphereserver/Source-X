@@ -3299,3 +3299,12 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 17-07-2023, Nolok
 - Added: Protection against infinite recursions in scripts and consequent crashes. Script parsing will not go further if the recursion gets too deep, showing a error message.
+
+17-08-2023, Tolokio the Rastrero
+-FIXED: (Poison`s potions)
+	-Now it dosnt raise magic resistance if poison comes from a potion.
+	-Potion is consumed when dclick and the Empty bottle retrieved into backpack.
+	-Eating animation added.
+-Known Issues:
+	-Poison effect is the same always no matter poison strenght. And duration is short. 
+	-There is no cooldown for poison bottles (complex to implement and not really needed I think)
