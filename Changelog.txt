@@ -3305,6 +3305,9 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	-Now it dosnt raise magic resistance if poison comes from a potion.
 	-Potion is consumed when dclick and the Empty bottle retrieved into backpack.
 	-Eating animation added.
+	-Poison str and ticks fixed.
 -Known Issues:
-	-Poison effect is the same always no matter poison strenght. And duration is short. 
-	-There is no cooldown for poison bottles (complex to implement and not really needed I think)
+	-There is no cooldown for poison bottles.
+         (Should a player who drink a poison wait for cooldown until he can drink a cure potion?
+          or should a player be able to drink 1000 potion in one minute? Can`t have both unless we
+	  add a specific cooldown just for poison potions.) 
