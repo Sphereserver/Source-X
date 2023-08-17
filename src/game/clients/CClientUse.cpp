@@ -286,7 +286,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 					//Let sphere find the empty "bottle"(maybe someone script a poison on a pitcher)
 					const CItemBase* pItemDef = pItem->Item_GetDef();
 					ITEMID_TYPE idbottle = (ITEMID_TYPE)pItemDef->m_ttDrink.m_ridEmpty.GetResIndex();
-					m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itSpell.m_spelllevel, pItem );
+					m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itPotion.m_dwSkillQuality, pItem );
 					//Sound(sm_DrinkSounds[Calc_GetRandVal(CountOf(sm_DrinkSounds))]);
 					m_pChar->UpdateAnimate(ANIM_EAT);
 					pItem->ConsumeAmount();
