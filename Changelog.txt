@@ -3303,3 +3303,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 21-08-2023, Rastrero/Drk84
 -Fixed-> Removed exception for poison bottles at CClientUSe.cpp so now poison potions are handled as any other potion at CCharuse.cpp
          Thx Drk84 for the suggestion. I dont understand why there was that exception done. Are we missing something?
+
+23-08-2023, Luxion
+- Fixed: The issue with the Heuristic function in CPathFinder has been fixed. Now, the monsters correctly follow their targets without any problems. They are now able to effectively navigate around obstacles and move in a straight path. Additionally, the problem of zig-zag issue following in the South direction has been addressed.
