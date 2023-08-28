@@ -8,11 +8,12 @@
 
 int CPathFinder::Heuristic(const CPathFinderPoint* Pt1, const CPathFinderPoint* Pt2) noexcept // static
 {
-    // Hexagonal heuristic (thought for a hexagonal grid, but in our case, by using this, the movements are more natural and the rotation angles more wide)
-	//return 10*(abs(Pt1->m_x - Pt2->m_x) + abs(Pt1->m_y - Pt2->m_y));
+	if (g_Cfg.m_iNpcAi & NPC_AI_HEURISTIC)
+		// Hexagonal heuristic (thought for a hexagonal grid, but in our case, by using this, the movements are more natural and the rotation angles more wide)
+		return 10 * (abs(Pt1->m_x - Pt2->m_x) + abs(Pt1->m_y - Pt2->m_y));
 
-    // Diagonal heuristic, thought for a square grid which allows movement in 8 directions from a cell (our case)
-    return std::max(abs(Pt1->m_x - Pt2->m_x), abs(Pt1->m_y - Pt2->m_y));
+	// Diagonal heuristic, thought for a square grid which allows movement in 8 directions from a cell (our case)
+	return std::max(abs(Pt1->m_x - Pt2->m_x), abs(Pt1->m_y - Pt2->m_y));
 }
 
 void CPathFinder::GetAdjacentCells(const CPathFinderPoint* Point, std::deque<CPathFinderPoint*>& AdjacentCellsRefList )

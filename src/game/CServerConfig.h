@@ -468,6 +468,7 @@ public:
 #define	NPC_AI_MOVEOBSTACLES	0x00200     // If moveable items block my way, try to move them.
 #define NPC_AI_PERSISTENTPATH	0x00400     // NPC will try often to find a path with pathfinding.
 #define NPC_AI_THREAT			0x00800     // Enable the use of the threat variable when finding for target while fighting.
+#define NPC_AI_HEURISTIC        0x01000     // Activate hexagonal heuristic function, if disabled, diagonal will be used.
 	uint m_iNpcAi;      // NPCAI Flags.
 
 	//	Experience system
