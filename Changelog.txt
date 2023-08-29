@@ -3306,4 +3306,6 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 
 23-08-2023, Luxion
 - Fixed: The issue with the Heuristic function in CPathFinder has been fixed. Now, the monsters correctly follow their targets without any problems. They are now able to effectively navigate around obstacles and move in a straight path. Additionally, the problem of zig-zag issue following in the South direction has been addressed.
-- Added: Switch of heuristic function by activating a new flag on sphere.ini
+
+29-08-2023, Luxion
+- Added: OF_EnableGuildAlignNotoriety in sphere.ini, if enabled, guilds with the same align will see each other enemies or ally.
