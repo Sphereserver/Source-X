@@ -359,6 +359,9 @@ protected:
 	static lpctstr const sm_szVerbKeys[]; // ACCOUNT action list.
 	CObjNameSortArray m_Accounts; // Sorted CAccount list.
 public:
+    CAccounts() : m_fLoading(false) {
+
+    }
 	/**
 	* CAccount needs CAccounts methods.
 	* @see CAccount

@@ -67,15 +67,23 @@ ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
 
 // The _Fast variants write from the end of the given buffer and return a pointer to the new start of the string, which in most
 //  cases is different from the pointer passed as argument!
-NODISCARD tchar* Str_FromI_Fast   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD tchar* Str_FromUI_Fast  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD tchar* Str_FromLL_Fast  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD //NO_SANITIZE_ADDRESS
+tchar* Str_FromI_Fast   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD //NO_SANITIZE_ADDRESS
+tchar* Str_FromUI_Fast  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD //NO_SANITIZE_ADDRESS
+tchar* Str_FromLL_Fast  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD //NO_SANITIZE_ADDRESS
+tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 // These functions use the _Fast methods, but do move the string from the end of the buffer to the beginning, so that the input pointer is still valid.
+//NO_SANITIZE_ADDRESS
 void Str_FromI   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
+//NO_SANITIZE_ADDRESS
 void Str_FromUI  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
+//NO_SANITIZE_ADDRESS
 void Str_FromLL  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
+//NO_SANITIZE_ADDRESS
 void Str_FromULL (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 
@@ -126,6 +134,16 @@ size_t Str_LengthUTF8(const char* pStr);
 * @return Number of characters in the concatenated string, excluding the '\0' terminator.
 */
 size_t Str_ConcatLimitNull(tchar *pDst, const tchar *pSrc, size_t uiMaxSize);
+
+/*
+ * @brief Find the first occurrence of substring in string, where the search is limited to the first str_len characters of string.
+ * @param str haystack string
+ * @param substr needle string
+ * @param str_len haystack length
+ * @param substr_len needle length
+ */
+tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len);
+
 
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".
@@ -208,6 +226,7 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
 * @param ptcLine (Reference to) pointer to the string.
 */
 void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept;
+
 
 ///@}
 

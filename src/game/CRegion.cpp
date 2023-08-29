@@ -76,6 +76,9 @@ CRegion::~CRegion()
 
 void CRegion::SetModified( int iModFlag ) noexcept
 {
+#ifdef _MSC_VER
+    //_CrtCheckMemory();
+#endif
 	if ( !m_iLinkedSectors )
         return;
 	m_iModified	= m_iModified | iModFlag;

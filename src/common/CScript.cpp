@@ -366,7 +366,11 @@ bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey, lpctstr pszVal )
 
 	m_pszKey = _GetKeyBufferRaw( lenkey + lenval + 1 );
 
-	strcpy( m_pszKey, ptcKey );
+    if (ptcKey != m_pszKey)
+    {
+        // Invalid key, or not yet inited.
+        strcpy(m_pszKey, ptcKey);
+    }
 	m_pszArg = m_pszKey + lenkey;
 
 	if ( pszVal )
@@ -944,7 +948,7 @@ void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(_sWriteBuffer_num.data(), _sWriteBuffer_num.capacity(), pszVal, vargs);
+	vsnprintf(_sWriteBuffer_num.data(), _sWriteBuffer_num.size(), pszVal, vargs);
 	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
 	va_end( vargs );
 }
@@ -952,14 +956,14 @@ void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 void CScript::WriteKeyVal(lpctstr ptcKey, int64 iVal)
 {
 	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
-	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.capacity(), 10);
+	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.size(), 10);
 	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
 }
 
 void CScript::WriteKeyHex(lpctstr ptcKey, int64 iVal)
 {
 	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
-	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.capacity(), 16);
+	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.size(), 16);
 	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
 }
 

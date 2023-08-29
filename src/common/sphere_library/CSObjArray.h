@@ -13,7 +13,8 @@
 template<class TYPE>
 class CSObjArray : public CSPtrTypeArray<TYPE>
 {
-private:
+protected:
+    bool _fBaseDestructorShouldDeleteElements;
     virtual void DeleteElements();
 
 public:
@@ -23,7 +24,8 @@ public:
     */
     ///@{
 public:
-    CSObjArray() = default;
+    CSObjArray() : _fBaseDestructorShouldDeleteElements(false) {
+    }
     virtual ~CSObjArray() {
         DeleteElements();
     }
@@ -60,6 +62,8 @@ public:
 template<class TYPE>
 void CSObjArray<TYPE>::DeleteElements()
 {
+    if (!this->_fBaseDestructorShouldDeleteElements)
+        return;
     for (TYPE elem : *this)
         delete elem;
 }

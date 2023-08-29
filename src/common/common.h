@@ -48,6 +48,23 @@
 #endif
 
 
+/* Sanitizers utility */
+
+#ifndef _DEBUG
+    #define NO_SANITIZE_ADDRESS
+#else
+    #ifdef _MSC_VER
+        #ifdef __SANITIZE_ADDRESS__
+            #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
+        #else 
+            #define NO_SANITIZE_ADDRESS 
+        #endif
+    #else
+        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address"))) 
+    #endif
+#endif
+
+
 /* Start of arithmetic code */
 
 #define IsNegative(c)			(((c) < 0) ? 1 : 0)

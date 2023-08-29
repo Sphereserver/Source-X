@@ -1468,7 +1468,7 @@ bool CScriptObj::r_Load( CScript & s )
 }
 
 
-bool CScriptObj::_Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, std::shared_ptr<ScriptedExprContext> pContext)
+bool CScriptObj::_Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, std::shared_ptr<ScriptedExprContext> pContext)
 {
 	ADDTOCALLSTACK("CScriptObj::_Evaluate_Conditional_EvalSingle");
 	ASSERT(sdata.ptcStart);
@@ -1485,20 +1485,47 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTex
 	}
 	++ pContext->_iEvaluate_Conditional_Reentrant;
 
-	// Length to copy: +1 to include the last valid char (i'm not copying the subsequent char, which can be another char or '\0'
-	const size_t len = std::min(STR_TEMPLENGTH - 1U, size_t(sdata.ptcEnd - sdata.ptcStart + 1U));
+    // Is this conditional expression is fully enclosed by brackets ?
+    const bool fFullyEnclosed = (sdata.uiType & SType::TopParenthesizedExpr);
 
+	// Length to copy: include the last valid char (i'm not copying the subsequent char, which can be another char or '\0'
+    ASSERT(sdata.ptcEnd >= sdata.ptcStart);
+	size_t len = std::min(STR_TEMPLENGTH - 1U, size_t(sdata.ptcEnd - sdata.ptcStart));
+    if (len == 0)
+    {
+        g_Log.EventError("Empty subexpression. Defaulting its value to false.\n");
+        return false;
+    }
+
+    lptstr ptcParsingStart = sdata.ptcStart;
+    if (fFullyEnclosed)
+    {
+        -- len;     // Exclude the closing bracket ')'.
+        ASSERT(len > 0);
+
+        // In this case, we need to start parsing after the opening parenthesis '('; if we start before it and the subexpr is marked with MaybeNestedSubexpr,
+        //  Evaluate_Conditional will again return the same subexpression fully enclosed by parenthesis, and we'll have a deadlock.
+        // Remember that sdata.uiNonAssociativeOffset is the distance between the open bracket '(' and the non-associative operator (negation operator '!').
+        // The string might start with said non-associative operator.
+        ptcParsingStart += 1;
+        len -= 1;
+    }
+
+    ASSERT(len < STR_TEMPLENGTH);
 	ptcSubexpr = Str_GetTemp();
-	memcpy(ptcSubexpr, sdata.ptcStart, len);
+	memcpy(ptcSubexpr, ptcParsingStart, len);
 	ptcSubexpr[len] = '\0';
 
 	const bool fNested = (sdata.uiType & SType::MaybeNestedSubexpr);
 	if (fNested)
 	{
+        // Probably this subexpression has other conditional subexpressions inside.
 		fVal = Evaluate_Conditional(ptcSubexpr, pSrc, pArgs);
 	}
 	else
 	{
+        // If an expression is enclosed by parentheses, ParseScriptText needs to read both the open and the closed one, we cannot
+        //  pass the string starting with the character after the '('.
 		ParseScriptText(ptcSubexpr, pSrc, 0, pArgs);
 		fVal = bool(Exp_GetVal(ptcSubexpr));
 	}
@@ -1533,7 +1560,8 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
     //g_Log.EventDebug("\nEvaluating conditional expression: \"%s\"\n", ptcExpr);
 
 	SubexprData psSubexprData[32]{};
-	const int iQty = CExpression::GetConditionalSubexpressions(ptcExpr, psSubexprData, CountOf(psSubexprData));	// number of arguments
+	lptstr ptcExprDbg = ptcExpr;
+	const int iQty = CExpression::GetConditionalSubexpressions(ptcExprDbg, psSubexprData, CountOf(psSubexprData));	// number of arguments
 
     /*g_Log.EventDebug("---Qty: %d\n", iQty);
     for (int i = 0; i < iQty; ++i)
@@ -1548,7 +1576,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 	if (iQty == 1)
 	{
 		// We don't have subexpressions, but only a simple expression.
-		const SubexprData& sCur = psSubexprData[0];
+		SubexprData& sCur = psSubexprData[0];
 		ASSERT((sCur.uiType & SType::None) ||  (sCur.uiType & SType::BinaryNonLogical));
 
 		const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, pSrc, pArgs, pContext);
@@ -1560,7 +1588,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 	bool fWholeExprVal = false;
 	for (int i = 0; i < iQty; ++i)
 	{
-		const SubexprData& sCur = psSubexprData[i];
+		SubexprData& sCur = psSubexprData[i];
 		ASSERT(sCur.uiType != SType::Unknown);
 
 		if (i == 0)
@@ -1569,7 +1597,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 			continue;
 		}
 
-		const SubexprData& sPrev = psSubexprData[i - 1];
+		SubexprData& sPrev = psSubexprData[i - 1];
 		if (sPrev.uiType & SType::Or)
 		{
 			if (fWholeExprVal)
@@ -3009,7 +3037,8 @@ jump_in:
 				{
 					EXC_SET_BLOCK("if statement");
 					// At this point, we have to parse the conditional expression
-					bool fTrigger = Evaluate_Conditional(s.GetArgStr(), pSrc, pArgs);
+                    const lptstr ptcArg = s.GetArgStr();
+					bool fTrigger = Evaluate_Conditional(ptcArg, pSrc, pArgs);
 					bool fBeenTrue = false;
 					for (;;)
 					{

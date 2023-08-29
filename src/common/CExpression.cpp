@@ -1191,6 +1191,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 	ADDTOCALLSTACK("CExpression::GetConditionalSubexpressions");
 	// Get the start and end pointers for each logical subexpression (delimited by brackets or by logical operators || and &&) inside a conditional statement (IF/ELIF/ELSEIF and QVAL).
 	// Parse from left to start (like it was always done in Sphere).
+    // Start and end pointers are inclusive (pointed values are valid chars, the end pointer doesn't necessarily point to '\0').
 
 	if (pExpr == nullptr)
 		return 0;
@@ -1214,11 +1215,27 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
 		sCurSubexpr = {pExpr, nullptr, SType::None, 0};
 
-		// Handle special characters: non associative operators (like !)
+        //  -- What's an expression and what's a subexpression.
+        // An expression can contain a single statement, a single operation (enclosed, or not, by curly brackets), like: IF <EVAL 1> or IF <EVAL 1> == 1.
+        // An expression can also be made of multiple subexpressions, like:
+        //  IF 1 || 0               or: IF (1 || 0), where 1 is a subexpression and 0 another one.
+        // Other examples of expressions containing subexpressions:
+        //  IF 1 == 0 || 0 == 0     or: IF (1 == 0) || 0 == 0       or: IF 1 == 0 || (0 == 0)
+        //  IF (1 == 0 || 0 == 0)   or: IF (1 == 0) || (0 == 0)     or: IF ((1 == 0) || (0 == 0))
+        // Those are all valid expressions, with valid subexpressions.
+
+        // In the case of a fully bracketed expression like IF !(<eval 1>...), we want to return a SubExpr with 
+
+        // -- Handling negations.
+        // When we are parsing a whole expression, fully enclosed by curly brackets, we need to handle the possibility of having a negation before it,
+        //  and we check for it here, by storing the '!' character position, if found:
+
+		// Handle special characters: non associative operators (like !).
+        // The first character here is guaranteed not to be a space.
         lptstr ptcTopLevelNegation = nullptr;
         if (ch == '!')
         {
-            // Actually i'm interested only in the special case of subexpressions preceded by '!'.
+            // Remember that i'm interested only in the special case of subexpressions preceded by '!'.
             //	If it's inside the subexpression, it will already be handled correctly.
             ptcTopLevelNegation = pExpr;
 			++pExpr;
@@ -1226,31 +1243,97 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			ch = *pExpr;
 		}
 
-        const bool fStartingBracket = (ch == '(');
-		if (fStartingBracket)
-		{
-			// Start of a expression within curved brackets: Eat the opening bracket
-			sCurSubexpr.ptcStart = pExpr + 1;
-            goto open_bracket;
-		}
+        // Helper lambda functions for the next section.
+        auto findLastClosingBracket = [](lptstr pExpr) -> lptstr
+        {
+            ASSERT(*pExpr != '\0');
+            lptstr pExprFinder;
+            const size_t uiExprLength = strlen(pExpr);
+            const lptstr pComment = Str_FindSubstring(pExpr, "//", uiExprLength, 2);
+            if (nullptr == pComment) {
+                pExprFinder = pExpr + uiExprLength - 1;
+                // Now pExprFinder is at the end of the string
+            }
+            else {
+                pExprFinder = pComment;
+                // Now pExprFinder is at the start of the comment
+            }
 
+            // Search for open brackets
+            do {
+                const bool fWhite = ISWHITESPACE(*pExprFinder);
+                if (fWhite)
+                    --pExprFinder;
+                else
+                    break;
+            } while (pExprFinder > pExpr);
+            return (*pExprFinder == ')') ? pExprFinder : nullptr;
+        };
+
+        auto skipBracketedSubexpression = [](lptstr pExpr) -> lptstr
+        {
+            ASSERT(*pExpr == '(');
+            tchar ch;
+            uint uiOpenedCurlyBrackets = 1;
+            while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
+            {
+                ch = *(++pExpr);
+                if (ch == '(')
+                    ++uiOpenedCurlyBrackets;
+                else if (ch == ')')
+                    --uiOpenedCurlyBrackets;
+                else if (ch == '\0')
+                    return nullptr; // Error
+            }
+            if (uiOpenedCurlyBrackets != 0)
+                return nullptr; // Error
+            return pExpr;
+        };
+
+
+        // -- Search an opening curly bracket.
+        // Now i need to check if the expression is enclosed or not by curly brackets, knowing that have skipped all the 1whitespace characters at the beginning of the string.
+        // If we find a bracket, then we need to store this information, because after that we'll move the string pointer after the bracket itself.
+        // This ensures that we begin every parsing loop without any open curly bracket.
+
+        // Start of a expression within curved brackets?
+        lptstr ptcCurSubexprStart = pExpr;
+        lptstr ptcTopBracket = (ch == '(') ? pExpr : nullptr;
+
+        // -- Done with preliminar expression analysis. Now look for subexpressions.
+        lptstr ptcLastClosingBracket = nullptr; // Needs to be preserved in the subexpression parsing.
 		while (true)
 		{
-			// This loop parses a single subexpression.
+			// This loop parses a single subexpression. Remember that we checked for a negation prefix like !( ) in the block before.
 			// The outside loop stores the subexpressions number and setups the subexpression for parsing inside here.
 
 			if (ch == '\0')
 			{
+                // End of the subexpression.
+                // We could have encountered one of the situations below and already found the end of the subexpression, or we could need to find it here.
 				if (sCurSubexpr.ptcEnd == nullptr)
 				{
-					// If it's not nullptr, then it's the closing bracket of the subexpr, and we want to keep that as the end.
 					sCurSubexpr.ptcEnd = pExpr;
-                    if (fStartingBracket)
+                    if (ptcTopBracket && ptcLastClosingBracket)
                     {
-                        // The starting bracket encloses only a part of the expression, so i need to preserve it.
-                        sCurSubexpr.ptcStart -= 1;
-                        if (sCurSubexpr.uiNonAssociativeOffset != 0)
-                            sCurSubexpr.uiNonAssociativeOffset -= 1;
+                        lptstr ptcLineLastClosingBracket = findLastClosingBracket(ptcCurSubexprStart);
+                        // ptcLastClosingBracket: the last closing bracket found while parsing the subexpression (might not be at the end of the line).
+                        // ptcExprLastClosingBracket: the last closing bracket ')', if any, of the string. The function used does NOT check if that's a valid closing bracket
+                        //  (eg. if in the string for every opening bracket there is a closing bracket).
+						if (iSubexprQty == 1)
+						{
+							if (ptcLastClosingBracket == ptcLineLastClosingBracket)
+							{
+								// I'm here because the whole expression is enclosed by parentheses.
+							// 
+							// + 1 because i want to point to the character after the ')', even if it's the string terminator.
+								sCurSubexpr.ptcEnd = ptcLastClosingBracket + 1;
+								sCurSubexpr.uiType |= SubexprData::TopParenthesizedExpr;
+							}
+							else
+								sCurSubexpr.ptcEnd = ptcLastClosingBracket;
+						}
+						// else: // The starting bracket encloses only a part of the expression
                     }
 				}
 				break; // End of the current subexpr, go back to find another one
@@ -1258,46 +1341,43 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 			
 			else if (ch == '(')
 			{
-				// Start of a subexpression delimited by brackets (it can be preceded by an operator like '!').
+				// Start of a subexpression delimited by brackets (it can be preceded by an operator like '!', handled before).
 				// Now i want only to see where's the matching closing bracket.
 				// This subexpression can contain other special characters, like non-associative operators, but we don't care at this stage.
 				// Those will be considered and eventually evaluated when fully parsing this subexpression.
-             open_bracket:
-				if (ptcTopLevelNegation && (0 == sCurSubexpr.uiNonAssociativeOffset))
+
+				if ( ptcTopLevelNegation && // The whole expression is preceded by a '!' character.
+                    (0 == sCurSubexpr.uiNonAssociativeOffset) ) // I've not yet checked if its position is valid.
 				{
-                    //sCurSubexpr.ptcStart = pExpr;
+                    sCurSubexpr.ptcStart = pExpr;
 					uint uiTempOffset = uint(sCurSubexpr.ptcStart - ptcTopLevelNegation);
 					if (uiTempOffset > USHRT_MAX)
 					{
-						g_Log.EventError("Too much non-associative operands before the expression. Trimming to %d.\n", USHRT_MAX);
+						g_Log.EventError("Too much characters before the the expression negation. Trimming to %d.\n", USHRT_MAX);
 						uiTempOffset = USHRT_MAX;
 					}
 					sCurSubexpr.uiNonAssociativeOffset = uchar(uiTempOffset);
 				}
 
-				ushort uiOpenedCurlyBrackets = 0;
-				while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
-				{
-					ch = *(++pExpr);
-					if (ch == '(')
-						++uiOpenedCurlyBrackets;
-					else if (ch == ')')
-						--uiOpenedCurlyBrackets;
-					else if (ch == '\0')
-					{
-						g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
-						sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
-						return iSubexprQty;
-					}
-				}
-				// Okay, i've eaten the expression in brackets, now fall through the chain of "else if" and continue
+                // Just skip what's enclosed in the subexpression.
+                ptcLastClosingBracket = skipBracketedSubexpression(pExpr);
+                if (ptcLastClosingBracket != nullptr)
+                    pExpr = ptcLastClosingBracket;
+                else
+                {
+                    g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
+                    sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
+                    return iSubexprQty;
+                }
+                    
+				// Okay, i've eaten the expression in brackets, now fall through the rest of the loop and continue.
 			}
 
 			else if ((ch == '|') && (pExpr[1] == '|'))
 			{
-				// Logical OR operator: ||
+				// Logical two-way OR operator: ||
 				if (sCurSubexpr.ptcEnd == nullptr)
-					sCurSubexpr.ptcEnd = pExpr - 1;
+					sCurSubexpr.ptcEnd = pExpr;
 				sCurSubexpr.uiType = SType::Or  | (sCurSubexpr.uiType & ~SType::None);
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
@@ -1305,9 +1385,9 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 			else if ((ch == '&') && (pExpr[1] == '&'))
 			{
-				// Logical AND operator: &&
+				// Logical two-way AND operator: &&
 				if (sCurSubexpr.ptcEnd == nullptr)
-					sCurSubexpr.ptcEnd = pExpr - 1;
+					sCurSubexpr.ptcEnd = pExpr;
 				sCurSubexpr.uiType = SType::And | (sCurSubexpr.uiType & ~SType::None);
 				pExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
@@ -1338,7 +1418,16 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 						else
 						{
 							// This subexpr is preceded by a two-way operator, so probably i'm not another operator, rather a < > expression.
-							Str_SkipEnclosedAngularBrackets(pExpr);
+							lptstr pExprSkipped = pExpr;
+							Str_SkipEnclosedAngularBrackets(pExprSkipped);
+							if (pExpr != pExprSkipped)
+							{
+								// I actually have something enclosed in angular brackets.
+								// The function above moves the pointer after the last closing bracket '>', but we want to point here to it, not the character after.
+                                pExpr = pExprSkipped;
+								ch = *pExpr;
+                                continue;   // This allows us to skip the "ch = *(++pExpr);" below, we don't want to advance further the pointer.
+							}
 						}
 					}
 					

@@ -4461,7 +4461,7 @@ void CChar::OnTickSkill()
 
 bool CChar::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK("CChar::_CanTick");
+	ADDTOCALLSTACK_INTENSIVE("CChar::_CanTick");
 	EXC_TRY("Can tick?");
 
 	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))

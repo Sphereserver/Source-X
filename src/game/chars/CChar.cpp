@@ -2320,7 +2320,7 @@ do_default:
 						}
 						else
 						{
-							attackerIndex = Exp_GetVal(ptcKey);
+							attackerIndex = std::max((int)0, Exp_GetVal(ptcKey));
 						}
 
 						SKIP_SEPARATORS(ptcKey);

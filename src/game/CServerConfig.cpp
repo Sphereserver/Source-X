@@ -4447,7 +4447,7 @@ void CServerConfig::Unload( bool fResync )
 
 	// m_ResHash.Clear();
 
-	m_Obscene.clear();
+	m_Obscene.Clear();
 	m_Fame.clear();
 	m_Karma.clear();
 	m_NotoTitles.clear();
@@ -4463,7 +4463,7 @@ void CServerConfig::Unload( bool fResync )
 	// m_StatAdv
 	for ( int j=0; j<PLEVEL_QTY; ++j )
 	{
-		m_PrivCommands[j].clear();
+		m_PrivCommands[j].Clear();
 	}
 	m_MoonGates.clear();
 	// m_WebPages

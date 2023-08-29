@@ -3303,3 +3303,8 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 21-08-2023, Rastrero/Drk84
 -Fixed-> Removed exception for poison bottles at CClientUSe.cpp so now poison potions are handled as any other potion at CCharuse.cpp
          Thx Drk84 for the suggestion. I dont understand why there was that exception done. Are we missing something?
+
+29-08-2023, Nolok
+- Fixed: (hopefully) conditional expressions parsing.
+- Fixed: a couple of memory deallocation bugs (could cause crash on server close).
+- Fixed: GCC and Apple Clang toolchain not correctly applying sanitizers (if enabled via CMake).

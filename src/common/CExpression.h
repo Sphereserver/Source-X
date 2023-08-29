@@ -121,11 +121,12 @@ struct SubexprData
 	{
 		Unknown = 0,
 		// Powers of two
-		MaybeNestedSubexpr	= 0x1 << 0,
-		None				= 0x1 << 1,
-		BinaryNonLogical	= 0x1 << 2,
-		And					= 0x1 << 2,
-		Or					= 0x1 << 3
+		MaybeNestedSubexpr	        = 0x1 << 0, // 001
+        TopParenthesizedExpr     = 0x1 << 1, // 002
+		None				        = 0x1 << 2, // 004
+		BinaryNonLogical	        = 0x1 << 3, // 008
+		And					        = 0x1 << 4, // 010
+		Or					        = 0x1 << 5  // 020
 	};
 	ushort uiType;
 	ushort uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
