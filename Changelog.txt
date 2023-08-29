@@ -3250,6 +3250,21 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Fixed: ModMaxWeight not working on NPCs. (Issue #1061)
 - Fixed: SHIPMOVE command displaying an "invalid command" warning on the console if the ship can't move. (Issue #860)
 
+17-04-2023, Xun
+- Added @addmulti and @DelMulti triggers (Called only on characters, not guilds ATM, and for both Ships and Houses):
+
+    - argn1 = Multi Count (The total number of slots used for this multi, the same slots used for MaxHousesAccount, MaxHousesPlayer, etc)
+    - argn2 = The default priv for SRC on this multi (See defname house_privs).
+    - argn3 = Indicates wether the argn1 value should change the char's count of slots or not (It's 1 by default only if argn2 == hp_owner).
+    - return 1 (Only for @addmulti): Prevents this multi from being added to SRC's house storage (Which means having it in "houses.N.key", etc).
+- Added HouseMultiCount and ShipMultiCount functions, returning the total slots used for each type of multi.
+
+- Changes in the House System:
+    - By default, multi slots are only changed when SRC is the owner of the multi. This can be changed by modifying the argn3 value in @addmulti.
+    - CItemMulti::DelMulti is not properly calling DelHouse and DelShip to remove the multi from the player's CMultiStorage.
+- These changes should prevent characters having their multi slots used when being added as coowner, friend, accessonly, etc, to any house, thus not allowing them to have their own houses because their slots were already used.
+    It should also prevent some incorrect removal of multis from the player's multi storage, leading to some save problems.
+
 22-04-2023, Drk84
 - Fixed: NPC double hit. (Issue #1065)
 - Fixed: @CombatEnd not fired and Combat memories not removed when the fight is ended. (Issue #1055)
