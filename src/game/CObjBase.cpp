@@ -3134,7 +3134,7 @@ void CObjBase::_GoSleep()
 
 bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK("CObjBase::_CanTick");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");
 	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 

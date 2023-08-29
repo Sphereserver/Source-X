@@ -476,6 +476,30 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
     return (dlen + (s - src));	/* count does not include '\0' */
 }
 
+tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len)
+{
+    tchar c, sc;
+    if ((c = *substr++) != '\0')
+    {
+        do
+        {
+            do
+            {
+                if (str_len-- < 1 || (sc = *str++) == '\0')
+                {
+                    return nullptr;
+                }
+            } while (sc != c);
+            if (substr_len > str_len)
+            {
+                return nullptr;
+            }
+        } while (0 != strncmp(str, substr, substr_len));
+        --str;
+    }
+    return str;
+}
+
 lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 {
     // NOTE: This is wrong many times.

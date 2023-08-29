@@ -7,6 +7,7 @@
 #define _INC_OS_UNIX_H
 
 #include <unistd.h>			// usleep
+#include <cctype>           // toupper, tolower
 
 
 //#define SLASH_PATH	"/"

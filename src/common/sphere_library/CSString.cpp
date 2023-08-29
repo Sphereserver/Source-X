@@ -5,6 +5,10 @@
 #include "CSString.h"
 #include "sstringobjs.h"
 
+#ifndef _WIN32
+#include <cstdio>   // for vsnprintf
+#endif
+
 
 /**
 * @brief Default memory alloc size for CSString.

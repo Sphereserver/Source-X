@@ -5986,7 +5986,7 @@ bool CItem::_CanHoldTimer() const
 
 bool CItem::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK("CItem::_CanTick");
+	ADDTOCALLSTACK_INTENSIVE("CItem::_CanTick");
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
