@@ -212,7 +212,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 						{
 							if (IsSetOF(OF_EnableGuildAlignNotoriety))
 							{
-								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD)
+								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD && pMyGuild->GetAlignType() != STONEALIGN_STANDARD)		// Only if both are not standard.
 								{
 									if (pViewerGuild->GetAlignType() == pMyGuild->GetAlignType())
 									{
