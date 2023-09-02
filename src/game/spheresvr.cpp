@@ -33,6 +33,13 @@
 #include "clients/CClient.h"
 
 
+#ifdef _SANITIZERS
+const char* __asan_default_options() {
+    //return "verbosity=1:malloc_context_size=20";
+    return "sleep_before_dying=5";
+}
+#endif
+
 // Dynamic allocation of some global stuff
 std::string g_sServerDescription;
 

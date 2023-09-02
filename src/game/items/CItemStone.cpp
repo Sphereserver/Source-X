@@ -1507,7 +1507,7 @@ void CItemStone::SetTownName()
 		pArea->SetName( GetIndividualName());
 }
 
-bool CItemStone::MoveTo(CPointMap pt, bool bForceFix)
+bool CItemStone::MoveTo(const CPointMap& pt, bool bForceFix)
 {
 	ADDTOCALLSTACK("CItemStone::MoveTo");
 	// Put item on the ground here.

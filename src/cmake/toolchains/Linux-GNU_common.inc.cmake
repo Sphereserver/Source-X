@@ -1,4 +1,29 @@
 function (toolchain_exe_stuff_common)
+
+	SET (ENABLED_SANITIZER false)
+	IF (${USE_ASAN})
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_LSAN})
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_UBSAN})
+		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
+shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
+float-divide-by-zero,float-cast-overflow,pointer-overflow")
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${ENABLED_SANITIZER})
+		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
+	ENDIF ()
+
+
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
@@ -27,10 +52,6 @@ function (toolchain_exe_stuff_common)
 
 	#-- Adding compiler flags per build.
 
-	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS "-fno-inline -fsanitize=address,undefined,leak -fsanitize-address-use-after-scope -fstack-protector-strong -fvtable-verify=preinit")
-	ENDIF ()
-
 	 # (note: since cmake 3.3 the generator $<COMPILE_LANGUAGE> exists).
 	 # do not use " " to delimitate these flags!
 	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
@@ -40,11 +61,9 @@ function (toolchain_exe_stuff_common)
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
 		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 )
-		SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZERS_OPTS}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer )
-		SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZERS_OPTS}")
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline -fno-omit-frame-pointer )
 	ENDIF (TARGET spheresvr_debug)
 
 
@@ -65,27 +84,16 @@ function (toolchain_exe_stuff_common)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_EXCEPTIONS_DEBUG")
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _LINUX _LIBEV Z_PREFIX _POSIX_SOURCE _GITVERSION _EXCEPTIONS_DEBUG)
 		# _LINUX: linux OS.
 		# _LIBEV: use libev
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
-	FOREACH (DEF ${COMMON_DEFS})
-		IF (TARGET spheresvr_release)
-			TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC ${DEF} )
-		ENDIF (TARGET spheresvr_release)
-		IF (TARGET spheresvr_nightly)
-			TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC ${DEF} )
-		ENDIF (TARGET spheresvr_nightly)
-		IF (TARGET spheresvr_debug)
-			TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC ${DEF} )
-		ENDIF (TARGET spheresvr_debug)
-	ENDFOREACH (DEF)
 
 
-	#-- Set per-build define macros.
+	#-- Add per-build define macros.
 
 	IF (TARGET spheresvr_release)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG )

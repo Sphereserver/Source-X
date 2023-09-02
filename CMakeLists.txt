@@ -1,8 +1,14 @@
 #	Main config	#
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.13)
 SET (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
-SET (USE_SANITIZERS false CACHE BOOL "")
+
+SET (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
+
+SET (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
+SET (USE_ASAN			false CACHE BOOL "Enable AddressSanitizer.")
+SET (USE_LSAN			false CACHE BOOL "Enable LeakSanitizer.")
+SET (USE_UBSAN			false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
 
 FUNCTION (booleanize_str_find VAR)
 	IF (${VAR} EQUAL -1)

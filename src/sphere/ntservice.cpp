@@ -466,7 +466,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         GetModuleFileName(nullptr, szPath, sizeof(szPath));
         // Extract and change directory from this application.
         ExtractPath(szPath);
-        _chdir(szPath);
+        if (0 == _chdir(szPath))
+        {
+            printf("Can't change current directory.\n");
+            TerminateProcess(GetCurrentProcess(), 1);
+            return 1;
+        }
         // Try opening it again and continue as before.
         g_Cfg.LoadIni(false);
     }

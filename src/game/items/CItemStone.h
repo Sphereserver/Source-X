@@ -54,7 +54,7 @@ private:
 
 	void SetTownName();
 	bool SetName( lpctstr pszName );
-	virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
+	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false) override;
 
 	MEMORY_TYPE GetMemoryType() const;
 

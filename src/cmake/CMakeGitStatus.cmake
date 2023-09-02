@@ -2,41 +2,70 @@
 SET (GITHASH_VAL "N/A")
 SET (GITREV_VAL  0)
 
-find_package(Git)
-IF (GIT_FOUND)
-	SET (GIT_CMD git)
-	SET (GIT_ARGS rev-parse HEAD)
-	SET (GIT_REV_CMD git rev-list --count HEAD)
+IF (CMAKE_NO_GIT_REVISION)
+	MESSAGE (STATUS "As per CMAKE_NO_GIT_REVISION, Git revision number and hash will not be available.")
 
-	MESSAGE (STATUS "Checking git revision...")
-	EXECUTE_PROCESS (COMMAND ${GIT_REV_CMD}
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		OUTPUT_VARIABLE GITREV_CMD
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-	MATH (EXPR GITREV_CMD "${GITREV_CMD}")
-	
-	IF ("${GITREV_CMD}" STREQUAL "")
-		MESSAGE (WARNING "Git revision not available!")
+ELSE ()
+	find_package(Git)
+	IF (NOT GIT_FOUND)
+		MESSAGE (WARNING "Git not found! Revision number and hash will not be available.")
+
+	ELSE ()
+		SET (GIT_CMD git)
+		SET (GIT_ARGS_VALID_REPO rev-parse)
+		SET (GIT_ARGS_REV_HASH   rev-parse HEAD)
+		SET (GIT_ARGS_REV_COUNT  rev-list --count HEAD)
+
+		MESSAGE (STATUS "Checking if the folder is a valid git repo...")
 		
-	ELSE ("${GITREV_CMD}" STREQUAL "")
-		MESSAGE (STATUS "Git revision ${GITREV_CMD}")
-		SET (GITREV_VAL ${GITREV_CMD})
-		
-		MESSAGE (STATUS "Checking git revision hash...")
-		EXECUTE_PROCESS (COMMAND ${GIT_CMD} ${GIT_ARGS}
+		EXECUTE_PROCESS (COMMAND ${GIT_CMD} ${GIT_ARGS_VALID_REPO}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-			OUTPUT_VARIABLE GITHASH_CMD
+			RESULT_VARIABLE RES_VALID_REPO
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 		)
-		MESSAGE (STATUS "Git revision hash ${GITHASH_CMD}")
-		SET (GITHASH_VAL ${GITHASH_CMD})
+
+		IF (NOT "${RES_VALID_REPO}" STREQUAL "0")
+			MESSAGE (WARNING "Invalid Git repo! Revision number and hash will not be available.")
 		
-	ENDIF ("${GITREV_CMD}" STREQUAL "")
-	
-ELSE()
-	MESSAGE (WARNING "Git not found! Revision number and hash will not be available.")
-	
+		ELSE ()
+			MESSAGE (STATUS "Checking git revision...")
+
+			EXECUTE_PROCESS (COMMAND ${GIT_CMD} ${GIT_ARGS_REV_COUNT}
+				WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+				OUTPUT_VARIABLE OUT_REV_COUNT
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+			)
+
+			IF ("${OUT_REV_COUNT}" STREQUAL "")
+				MESSAGE (WARNING "Git repo has no commits (not a clone from remote?). Revision number and hash will not be available.")
+
+			ELSE ()
+				MATH (EXPR RET_REV_COUNT "${OUT_REV_COUNT}")
+
+				IF ("${OUT_REV_COUNT}" STREQUAL "")
+					MESSAGE (WARNING "Git revision not available!")
+					
+				ELSE ()
+					MESSAGE (STATUS "Git revision ${OUT_REV_COUNT}")
+					SET (GITREV_VAL ${OUT_REV_COUNT})
+					
+					MESSAGE (STATUS "Checking git revision hash...")
+					EXECUTE_PROCESS (COMMAND ${GIT_CMD} ${GIT_ARGS_REV_HASH}
+						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+						OUTPUT_VARIABLE OUT_REV_HASH
+						OUTPUT_STRIP_TRAILING_WHITESPACE
+					)
+					MESSAGE (STATUS "Git revision hash ${OUT_REV_HASH}")
+					SET (GITHASH_VAL ${OUT_REV_HASH})
+					
+					ENDIF ()
+
+				ENDIF ()
+
+		ENDIF ()
+			
+	ENDIF()
+
 ENDIF()
 
 CONFIGURE_FILE (

@@ -1,4 +1,39 @@
 function (toolchain_exe_stuff_common)
+	SET (EXE_LINKER_EXTRA "")
+	IF (${WIN32_SPAWN_CONSOLE} EQUAL TRUE)
+		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} -mconsole")
+		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
+	#ELSE ()
+	#	SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} -mwindows")
+	ENDIF ()
+
+	#SET (ENABLED_SANITIZER false)
+	IF (${USE_ASAN})
+		MESSAGE (FATAL_ERROR "GCC doesn't yet support ASAN")
+		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
+		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
+		#SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_LSAN})
+		MESSAGE (FATAL_ERROR "GCC doesn't yet support LSAN")
+		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
+		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
+		#SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_UBSAN})
+		MESSAGE (FATAL_ERROR "GCC doesn't yet support UBSAN")
+		#SET (UBSAN_FLAGS		"-fsanitize=undefined,\
+#shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
+#float-divide-by-zero,float-cast-overflow,pointer-overflow")
+		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
+		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
+		#SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	#IF (${ENABLED_SANITIZER})
+	#	SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
+	#ENDIF ()
+
+
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
@@ -25,11 +60,8 @@ function (toolchain_exe_stuff_common)
 
 	 # Force dynamic linking but include into exe libstdc++ and libgcc.
 	 # -pthread, -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic -static-libstdc++ -static-libgcc"			PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"-pthread -dynamic -static-libstdc++ -static-libgcc")
 
-	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZER_OPTS "-fno-inline -fsanitize=address,undefined,leak -fsanitize-address-use-after-scope -fstack-protector-strong -fvtable-verify=preinit")
-	ENDIF ()
 
 	#-- Adding compiler flags per build.
 
@@ -42,51 +74,41 @@ function (toolchain_exe_stuff_common)
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
 		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 )
-		SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZERS_OPTS}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer )
-		SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZERS_OPTS}")
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline -fno-omit-frame-pointer )
 	ENDIF (TARGET spheresvr_debug)
 
 
 	#-- Setting per-build linker options.
 
-	 # Linking libs the MinGW way.
+	 # Linking libs the MinGW way and setting linker flags.
 	 IF (TARGET spheresvr_release)
 		TARGET_LINK_LIBRARIES ( spheresvr_release	mariadb ws2_32 )
+		TARGET_LINK_OPTIONS ( spheresvr_release PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
 		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mariadb ws2_32 )
+		TARGET_LINK_OPTIONS ( spheresvr_nightly PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
 		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb ws2_32 )
+		TARGET_LINK_OPTIONS ( spheresvr_debug PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_debug)
 	
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_WIN32;Z_PREFIX;_GITVERSION;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _WIN32 Z_PREFIX _GITVERSION _EXCEPTIONS_DEBUG _CRT_SECURE_NO_WARNINGS _WINSOCK_DEPRECATED_NO_WARNINGS)
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 		# _CRT_SECURE_NO_WARNINGS: Temporary setting to do not spam so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.
 		# _WINSOCK_DEPRECATED_NO_WARNINGS: Removing warnings until the code gets updated or reviewed.
-	FOREACH (DEF ${COMMON_DEFS})
-		IF (TARGET spheresvr_release)
-			TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC ${DEF} )
-		ENDIF (TARGET spheresvr_release)
-		IF (TARGET spheresvr_nightly)
-			TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC ${DEF} )
-		ENDIF (TARGET spheresvr_nightly)
-		IF (TARGET spheresvr_debug)
-			TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC ${DEF} )
-		ENDIF (TARGET spheresvr_debug)
-	ENDFOREACH (DEF)
 
 
-	#-- Set per-build define macros.
+	#-- Add per-build define macros.
 
 	IF (TARGET spheresvr_release)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK )

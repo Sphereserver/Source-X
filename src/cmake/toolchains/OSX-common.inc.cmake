@@ -1,6 +1,30 @@
 SET (TOOLCHAIN 1)
 
 function (toolchain_exe_stuff_common)
+
+	SET (ENABLED_SANITIZER false)
+	IF (${USE_ASAN})
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_LSAN})
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_UBSAN})
+		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
+shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
+float-divide-by-zero,float-cast-overflow,pointer-overflow")
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${ENABLED_SANITIZER})
+		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
+	ENDIF ()
+
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
@@ -26,9 +50,6 @@ function (toolchain_exe_stuff_common)
 					${CMAKE_EXE_LINKER_FLAGS_EXTRA}"
 					PARENT_SCOPE)
 
-	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZER_OPTS "-fno-inline -fsanitize=address,undefined,leak -fsanitize-address-use-after-scope -fstack-protector-strong -fvtable-verify=preinit")
-	ENDIF ()
 
 	#-- Adding compiler flags per build.
 
@@ -41,11 +62,9 @@ function (toolchain_exe_stuff_common)
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
 		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3    )
-		SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZERS_OPTS}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
 		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer )
-		SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZERS_OPTS}")
 	ENDIF (TARGET spheresvr_debug)
 
 
@@ -63,17 +82,17 @@ function (toolchain_exe_stuff_common)
 		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb dl )
 	ENDIF (TARGET spheresvr_debug)
 
+
 	#-- Set common define macros.
 	
-	add_definitions(-D_64BITS)
-	add_definitions(-DZ_PREFIX)
-	add_definitions(-D_EXCEPTIONS_DEBUG)
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} Z_PREFIX _GITVERSION _EXCEPTIONS_DEBUG)
 	# _64BITS: 64 bits architecture.
 	# Z_PREFIX: Use the "z_" prefix for the zlib functions
 	# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 	#   on a running environment. Also it makes sphere more stable since exceptions are local.
 
-	#-- Set per-build define macros.
+
+	#-- Add per-build define macros.
 
 	IF (TARGET spheresvr_release)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG )
