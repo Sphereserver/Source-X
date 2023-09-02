@@ -1,11 +1,11 @@
 SET (TOOLCHAIN 1)
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/Linux-GNU_common.inc.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/OSX-AppleClang_common.inc.cmake")
+
 
 function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: Linux-GNU-native.cmake.")
-
-	SET(CMAKE_SYSTEM_NAME	"Linux"      PARENT_SCOPE)
-
+	MESSAGE (STATUS "Toolchain: OSX-AppleClang-native.cmake.")
+	SET(CMAKE_SYSTEM_NAME	"OSX"		PARENT_SCOPE)
+	
 	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
         	MESSAGE (STATUS "Detected 64 bits architecture")
 		SET(ARCH_BITS	64	PARENT_SCOPE)
@@ -15,26 +15,14 @@ function (toolchain_after_project)
 		SET(ARCH_BITS	32	PARENT_SCOPE)
 		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native32"	PARENT_SCOPE)
 	ENDIF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-	
+
 endfunction()
 
 
-function (toolchain_exe_stuff)   
+function (toolchain_exe_stuff)
 	SET (C_ARCH_OPTS	"-march=native")
 	SET (CXX_ARCH_OPTS	"-march=native")
-
-	IF (${ARCH_BITS} EQUAL 64)
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA
-			"-L/usr/lib64/mysql\
-			-Wl,-rpath=/usr/lib64/mysql"
-			PARENT_SCOPE)
-	ELSE ()
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA
-			"-L/usr/lib/mysql\
-			-Wl,-rpath=/usr/lib/mysql"
-			PARENT_SCOPE)
-	ENDIF ()
-
+	
 	toolchain_exe_stuff_common()
 	
 	# Propagate variables set in toolchain_exe_stuff_common to the upper scope

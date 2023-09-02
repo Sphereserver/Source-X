@@ -1,10 +1,12 @@
 SET (TOOLCHAIN 1)
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/Windows-GNU_common.inc.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/Windows-Clang_common.inc.cmake")
 
 function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: Windows-GNU-native.cmake.")
+	MESSAGE (STATUS "Toolchain: Windows-Clang-native.cmake.")
 
 	SET(CMAKE_SYSTEM_NAME	"Windows"      PARENT_SCOPE)
+
+	toolchain_after_project_common()
 
 	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
         MESSAGE (STATUS "Detected 64 bits architecture")
@@ -17,8 +19,7 @@ function (toolchain_after_project)
 		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native32"	PARENT_SCOPE)
 		LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
 	ENDIF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-	
-	ENABLE_LANGUAGE(RC)
+
 endfunction()
 
 

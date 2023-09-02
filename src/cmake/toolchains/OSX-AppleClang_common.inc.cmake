@@ -1,6 +1,6 @@
 function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
+	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
+	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
 endfunction ()
 
 
@@ -33,31 +33,30 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow")
 		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
 	ENDIF ()
 
-
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
-		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
-		-Wno-parentheses -Wno-misleading-indentation -Wno-strict-aliasing -Wno-unused-result\
-		-Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
+		"-w") # this line is for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
-		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
-		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result")
-	#SET (C_ARCH_OPTS	) # set in parent toolchain
-	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
-	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
+		"-w")
+	SET (C_OPTS			"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS		"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"				PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
 
 	 # -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic\
+					-I/usr/local/opt/mariadb-connector-c/include/mariadb\
+					-L/usr/local/opt/mariadb-connector-c/lib/mariadb\
+					-lmariadb\
+					${CMAKE_EXE_LINKER_FLAGS_EXTRA}"
+					PARENT_SCOPE)
 
 
 	#-- Adding compiler flags per build.
@@ -70,10 +69,10 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow")
 		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 	)
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 )
+		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3    )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline -fno-omit-frame-pointer )
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer )
 	ENDIF (TARGET spheresvr_debug)
 
 
@@ -93,14 +92,12 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow")
 
 
 	#-- Set common define macros.
-
-	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _LINUX _LIBEV Z_PREFIX _POSIX_SOURCE _GITVERSION _EXCEPTIONS_DEBUG)
-		# _LINUX: linux OS.
-		# _LIBEV: use libev
-		# Z_PREFIX: Use the "z_" prefix for the zlib functions
-		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
-		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
-		#   on a running environment. Also it makes sphere more stable since exceptions are local.
+	
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} Z_PREFIX _GITVERSION _EXCEPTIONS_DEBUG)
+	# _64BITS: 64 bits architecture.
+	# Z_PREFIX: Use the "z_" prefix for the zlib functions
+	# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
+	#   on a running environment. Also it makes sphere more stable since exceptions are local.
 
 
 	#-- Add per-build define macros.
