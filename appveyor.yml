@@ -105,8 +105,8 @@ for:
 
     environment:
       CMAKE_GEN: Ninja
-      CMAKE_TCH_32: src/cmake/toolchains/Linux-GNU-x86.cmake
-      CMAKE_TCH_64: src/cmake/toolchains/Linux-GNU-x86_64.cmake
+      CMAKE_TCH_32: cmake/toolchains/Linux-GNU-x86.cmake
+      CMAKE_TCH_64: cmake/toolchains/Linux-GNU-x86_64.cmake
 
     install:
       - lsb_release -d
@@ -181,7 +181,7 @@ for:
 
     environment:
       CMAKE_GEN: Ninja
-      CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
+      CMAKE_TCH_64: cmake/toolchains/OSX-AppleClang-x86_64.cmake
     
     install:
       - sw_vers

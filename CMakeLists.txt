@@ -29,7 +29,7 @@ PROJECT (SphereServer)	# does a scan for C++ and C compilers
 
 
 # Determine system arch
-INCLUDE ("src/cmake/CMakeDetectArch.cmake")
+INCLUDE ("cmake/CMakeDetectArch.cmake")
 determine_target_architecture(ARCH_DETECTED)
 STRING (FIND "${ARCH_DETECTED}" "x86_64" 	ARCH_HAS_x86_64)
 STRING (FIND "${ARCH_DETECTED}" "x86" 		ARCH_HAS_x86)
@@ -38,7 +38,7 @@ booleanize_str_find(ARCH_HAS_x86)
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 IF (NOT TOOLCHAIN)
-	INCLUDE ("src/cmake/CMakeDefaultToolchain.cmake")
+	INCLUDE ("cmake/CMakeDefaultToolchain.cmake")
 ENDIF ()
 
 
@@ -62,9 +62,9 @@ IF (SINGLE_TARGET)
 	MESSAGE (STATUS "Single-target build system (${CMAKE_GENERATOR}) detected: generating multiple projects!")
 	IF (NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
 		IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
-			MESSAGE (WARNING "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Release.")
+			MESSAGE (WARNING "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Nightly.")
 			# -> needed only for MAKEFILE-STYLE generators, which can't switch between different configs
-			SET (CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+			SET (CMAKE_BUILD_TYPE "Nightly" CACHE STRING "" FORCE)
 		ELSE ()
 			MESSAGE (STATUS "Generating only specified project: ${CMAKE_BUILD_TYPE}.")
 		ENDIF ()
@@ -170,10 +170,10 @@ toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
 
 
 # Get the Git revision number
-INCLUDE ("src/cmake/CMakeGitStatus.cmake")
+INCLUDE ("cmake/CMakeGitStatus.cmake")
 
 # Generate config.h file for libev (if we are using it)
-INCLUDE ("src/cmake/CMakeConditionalConfigureLibev.cmake")
+INCLUDE ("cmake/CMakeConditionalConfigureLibev.cmake")
 
 # Configure MariaDB C Connector source headers
 INCLUDE ("lib/mariadb/configure.cmake")

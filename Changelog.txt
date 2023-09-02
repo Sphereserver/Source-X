@@ -3316,7 +3316,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Added: Protection against infinite recursions in scripts and consequent crashes. Script parsing will not go further if the recursion gets too deep, showing a error message.
 
 21-08-2023, Rastrero/Drk84
--Fixed-> Removed exception for poison bottles at CClientUSe.cpp so now poison potions are handled as any other potion at CCharuse.cpp
+- Fixed: Removed exception for poison bottles at CClientUSe.cpp so now poison potions are handled as any other potion at CCharuse.cpp
          Thx Drk84 for the suggestion. I dont understand why there was that exception done. Are we missing something?
 
 29-08-2023, Luxion
@@ -3328,3 +3328,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: (hopefully) conditional expressions parsing.
 - Fixed: a couple of memory deallocation bugs (could cause crash on server close).
 - Fixed: GCC and Apple Clang toolchain not correctly applying sanitizers (if enabled via CMake).
+
+02-09-2023, Nolok
+- Changed: moved /src/cmake folder to /cmake, this WILL require deleting and rebuilding any existing CMake cache.
+- Changed: renamed the compilation output folder to better reflect the target architecture.
+- Added: CMake Clang compilation toolchains for Windows, Linux, MacOS.

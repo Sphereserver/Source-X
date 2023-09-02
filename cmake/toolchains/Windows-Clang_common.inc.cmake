@@ -1,6 +1,6 @@
 function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
+	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
+	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
 endfunction ()
 
 
@@ -20,29 +20,27 @@ function (toolchain_exe_stuff_common)
 
 	#SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
-		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support ASAN")
-		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
-		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
-		#SET (ENABLED_SANITIZER true)
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
-		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support LSAN")
+		MESSAGE (FATAL_ERROR "Windows Clang doesn't yet support LSAN")
 		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
 		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
-		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support UBSAN")
-		#SET (UBSAN_FLAGS		"-fsanitize=undefined,\
+		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
 #shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
 #float-divide-by-zero,float-cast-overflow,pointer-overflow")
-		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
-		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
-		#SET (ENABLED_SANITIZER true)
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
+		SET (ENABLED_SANITIZER true)
 	ENDIF ()
-	#IF (${ENABLED_SANITIZER})
-	#	SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
-	#ENDIF ()
+	IF (${ENABLED_SANITIZER})
+		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
+	ENDIF ()
 
 
 	#-- Setting compiler flags common to all builds.
@@ -132,9 +130,9 @@ function (toolchain_exe_stuff_common)
 
 
 	#-- Set different output folders for each build type
-	
-	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)
-	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"	)
-	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"	)
+	# (When we'll have support for multi-target builds...)
+	#SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)
+	#SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"	)
+	#SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"	)
 
 endfunction()
