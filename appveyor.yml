@@ -121,6 +121,7 @@ for:
 
     # Use our custom script
     build_script:
+      - echo "Current directory: " && pwd
       - echo && echo "** Setting up MariaDB packages for x86_64 arch (64 bits)" && echo
       - sudo apt install -yq --no-install-recommends libmariadb3 libmariadb-dev > /dev/null
 
@@ -133,7 +134,7 @@ for:
         else
           echo && echo "** Starting to build 64 bits Nightly version" && echo
         fi
-      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
+      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="${APPVEYOR_BUILD_FOLDER}/${CMAKE_TCH_64}" -S ../ -B .
       - ninja || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 64 bits Nightly version" && echo
 
@@ -151,7 +152,8 @@ for:
       - cd "$BUILD_DIR_32"
 
       - echo && echo "** Starting to build 32 bits Nightly version" && echo
-      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" -S ../ -B .
+      - echo "Current directory: " && pwd
+      - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="${APPVEYOR_BUILD_FOLDER}/${CMAKE_TCH_32}" -S ../ -B .
       - ninja || exit 1  # if the build fails, stop here
       - echo && echo "** End of the compilation of the 32 bits Nightly version" && echo
 
@@ -196,7 +198,7 @@ for:
       - echo && echo "** Starting to build 64 bits Nightly version" && echo
       - mkdir -p "$BUILD_DIR_64"
       - cd "$BUILD_DIR_64"
-      - cmake -G $CMAKE_GEN -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S ../ -B .
+      - cmake -G $CMAKE_GEN -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="${APPVEYOR_BUILD_FOLDER}/${CMAKE_TCH_64}" -S ../ -B .
       - ninja || exit 1 # if the build fails, stop here
       - cd ..
 
