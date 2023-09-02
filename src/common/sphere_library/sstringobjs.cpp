@@ -107,8 +107,8 @@ bool AbstractString::startsWithHead(const char *s) const noexcept
 {
 	for ( int i = 0; ; ++i )
 	{
-		char ch1 = (uchar)(tolower(m_buf[0]));
-		char ch2 = (uchar)(tolower(s[0]));
+		char ch1 = (uchar)(tolower(m_buf[i]));
+		char ch2 = (uchar)(tolower(s[i]));
 		if( ch2 == '\0' )
 		{
 			if( !isalnum(ch1) )

@@ -24,6 +24,12 @@ endfunction()
 
 
 function (toolchain_exe_stuff)    
+	# TODO: fix the target, maybe using CMAKE_HOST_SYSTEM_PROCESSOR ?
+	#SET (CLANG_TARGET 	"--target=x86_64-pc-windows-${CLANG_VENDOR}")
+	#SET (C_ARCH_OPTS	"-march=native ${CLANG_TARGET}")
+	#SET (CXX_ARCH_OPTS	"-march=native ${CLANG_TARGET}")
+	#SET (RC_FLAGS		"${CLANG_TARGET}")
+
 	SET (C_ARCH_OPTS	"-march=native")
 	SET (CXX_ARCH_OPTS	"-march=native")
 

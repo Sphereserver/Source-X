@@ -28,7 +28,7 @@ struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
     CSStringSortArray& operator=(const CSStringSortArray& other) = delete;
 
     // Sorted array of strings
-    int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const;
+    virtual int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const override;
     void AddSortString( lpctstr pszText );
 
 protected:

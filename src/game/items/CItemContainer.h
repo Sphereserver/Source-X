@@ -47,7 +47,7 @@ public:
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
 	virtual int GetWeight(word amount = 0) const;
-	void OnWeightChange( int iChange );
+	virtual void OnWeightChange( int iChange ) override;
 
 	// Contents/Carry stuff. ---------------------------------
 public:
@@ -70,7 +70,7 @@ public:
 	void SetKeyRing();
 	void Game_Create();
 	void Restock();
-	bool _OnTick();
+	virtual bool _OnTick() override;
 
 	virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
 

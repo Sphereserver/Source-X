@@ -15,9 +15,10 @@ endfunction()
 
 
 function (toolchain_exe_stuff)
-	SET (C_ARCH_OPTS	"-march=i686 -m32")
-	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
-	SET (RC_FLAGS		"--target=pe-i386")
+	SET (CLANG_TARGET 	"--target=i686-pc-windows-${CLANG_VENDOR}")
+	SET (C_ARCH_OPTS	"-march=i686 -m32 ${CLANG_TARGET}")
+	SET (CXX_ARCH_OPTS	"-march=i686 -m32 ${CLANG_TARGET}")
+	SET (RC_FLAGS		"${CLANG_TARGET}")
 
 	toolchain_exe_stuff_common()
 

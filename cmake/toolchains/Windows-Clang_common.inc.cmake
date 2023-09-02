@@ -1,6 +1,15 @@
+SET (CLANG_USE_GCC_LINKER	false CACHE BOOL "By default, Clang requires MSVC (Microsoft's) linker. With this flag, it can be asked to use MinGW-GCC's one.")
+
+
 function (toolchain_force_compiler)
 	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
 	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
+
+	IF (CLANG_USE_GCC_LINKER)
+		SET (CLANG_VENDOR "gnu" PARENT_SCOPE)
+	ELSE ()
+		SET (CLANG_VENDOR "msvc" PARENT_SCOPE)
+	ENDIF ()
 endfunction ()
 
 
@@ -92,15 +101,15 @@ function (toolchain_exe_stuff_common)
 
 	 # Linking libs the MinGW way and setting linker flags.
 	 IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	mariadb ws2_32 )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	libmariadb ws2_32 )
 		TARGET_LINK_OPTIONS ( spheresvr_release PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mariadb ws2_32 )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	libmariadb ws2_32 )
 		TARGET_LINK_OPTIONS ( spheresvr_nightly PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb ws2_32 )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		libmariadb ws2_32 )
 		TARGET_LINK_OPTIONS ( spheresvr_debug PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_debug)
 	

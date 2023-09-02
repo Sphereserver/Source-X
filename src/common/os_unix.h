@@ -59,7 +59,6 @@
 /*  */
 
 #define ERROR_SUCCESS	0
-#define UNREFERENCED_PARAMETER(P)	(void)(P)
 #define HKEY_LOCAL_MACHINE			(( HKEY ) 0x80000002 )
 
 

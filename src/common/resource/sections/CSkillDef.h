@@ -104,7 +104,7 @@ public:
         return m_sKey;
     }
 
-    lpctstr GetName() const
+    virtual lpctstr GetName() const override
     {
         return GetKey();
     }

@@ -78,7 +78,7 @@ public:
     *
     * @return  m_sSrcFilePath.
     */
-    lpctstr GetName() const
+    virtual lpctstr GetName() const override
     {
         return m_sSrcFilePath;
     }

@@ -663,7 +663,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	bool LoadResourceSection( CScript * pScript );
+	virtual bool LoadResourceSection( CScript * pScript ) override;
 
     /**
      * @brief   Sort all spells in order.
