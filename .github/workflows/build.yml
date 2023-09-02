@@ -32,7 +32,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-win64-nightly.zip
+        path: SphereSvrX-win-x86_64-nightly.zip
 
 
   windows-x86:
@@ -62,7 +62,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-win32-nightly.zip
+        path: SphereSvrX-win-x86-nightly.zip
 
 
   linux-x86_64:
@@ -90,7 +90,7 @@ jobs:
     - name: CMake
       run: |
             mkdir -p build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
     - name: Ninja
       run: cd build && ninja && cd ..
     - name: Create package
@@ -106,7 +106,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-linux64-nightly.tar.gz
+        path: SphereSvrX-linux-x86_64-nightly.tar.gz
 
   linux-x86:
     runs-on: ubuntu-22.04
@@ -158,7 +158,7 @@ jobs:
     - name: CMake
       run: |
             mkdir -p build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake -S ./ -B ./build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86.cmake -S ./ -B ./build
     - name: Ninja
       run: cd build && ninja && cd ..
     - name: Create package
@@ -174,14 +174,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-linux32-nightly.tar.gz
+        path: SphereSvrX-linux-x86-nightly.tar.gz
 
 
   macos-x86_64:
     runs-on: macos-12
     env:
       CMAKE_GEN: Ninja
-      CMAKE_TCH_64: src/cmake/toolchains/OSX-x86_64.cmake
+      CMAKE_TCH_64: cmake/toolchains/OSX-AppleClang-x86_64.cmake
 
     steps:
     - name: Checkout repository
@@ -251,8 +251,8 @@ jobs:
           prerelease: true
           files: | 
                   Git-Changelog.txt
-                  SphereSvrX-win64-nightly.zip
-                  SphereSvrX-win32-nightly.zip
-                  SphereSvrX-linux32-nightly.tar.gz
-                  SphereSvrX-linux64-nightly.tar.gz
+                  SphereSvrX-win-x86_64-nightly.zip
+                  SphereSvrX-win-x86-nightly.zip
+                  SphereSvrX-linux-x86_64-nightly.tar.gz
+                  SphereSvrX-linux-x86-nightly.tar.gz
                   SphereSvrX-osx-x86_64-nightly.zip
