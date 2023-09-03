@@ -14,8 +14,9 @@
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 
+#undef ISWHITESPACE
 template <typename T>
-bool ISWHITESPACE(const T ch) noexcept {
+bool IsWhitespace(const T ch) noexcept {
     if constexpr (std::is_same_v<T, char>) {
         if (static_cast<unsigned char>(ch) == 0xA0)
             return true;
@@ -25,15 +26,15 @@ bool ISWHITESPACE(const T ch) noexcept {
 
 #define _IS_SWITCH(ch)		((ch) == '-' || (ch) == '/')	// command line switch.
 #define _ISCSYMF(ch)        (IsAlpha(ch) || (ch)=='_')	    // __iscsymf
-#define _ISCSYM(ch)         (isalnum(IntCharacter(ch)) || (ch)=='_')    // __iscsym
+#define _ISCSYM(ch)         (isalnum(INT_CHARACTER(ch)) || (ch)=='_')    // __iscsym
 
-#define SKIP_SEPARATORS(pStr)		while (*(pStr)=='.') { ++(pStr); }	// || ISWHITESPACE(*(pStr))
+#define SKIP_SEPARATORS(pStr)		while (*(pStr)=='.') { ++(pStr); }	// || IsWhitespace(*(pStr))
 #define SKIP_ARGSEP(pStr)		    while ((*(pStr)==',' || IsSpace( *(pStr)) )) { ++(pStr); }
 #define SKIP_IDENTIFIERSTRING(pStr) while (_ISCSYM(*(pStr))) { ++(pStr); }
-#define SKIP_NONNUM(pStr)           while (*(pStr) && !isdigit( IntCharacter(*(pStr))) ) { ++(pStr); }
+#define SKIP_NONNUM(pStr)           while (*(pStr) && !isdigit( INT_CHARACTER(*(pStr))) ) { ++(pStr); }
 #define SKIP_NONALPHA(pStr)         while (*(pStr) && !IsAlpha( *(pStr)) ) { ++(pStr); }
 
-#define GETNONWHITESPACE(pStr)	    while (ISWHITESPACE(*(pStr))) { ++(pStr); }
+#define GETNONWHITESPACE(pStr)	    while (IsWhitespace(*(pStr))) { ++(pStr); }
 
 #define REMOVE_QUOTES(x)			\
 {									\

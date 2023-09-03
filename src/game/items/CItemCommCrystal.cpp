@@ -89,9 +89,9 @@ void CItemCommCrystal::r_Write(CScript & s)
 
 bool CItemCommCrystal::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemCommCrystal::r_WriteVal");
-    switch ( FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+    switch ( FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1) )
     {
         case 0:
             m_Speech.WriteResourceRefList(sVal);
@@ -105,7 +105,7 @@ bool CItemCommCrystal::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole 
 bool CItemCommCrystal::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemCommCrystal::r_LoadVal");
-    switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+    switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1) )
     {
         case 0:
             return m_Speech.r_LoadVal(s, RES_SPEECH);

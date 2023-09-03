@@ -1967,7 +1967,7 @@ lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemMulti::r_GetRef");
-    int iCmd = FindTableHeadSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = FindTableHeadSorted(ptcKey, sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys) - 1);
 
     if (iCmd >= 0)
     {
@@ -2197,7 +2197,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     {
         return true;
     }
-    const int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+    const int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
         case SHV_DELACCESS:
@@ -2324,7 +2324,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         case SHV_REDEED:
         {
             int64 piCmd[2];
-            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            Str_ParseCmds(s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd));
             const bool fShowMsg = piCmd[0] ? true : false;
             const bool fMoveToBank = piCmd[1] ? true : false;
             CUID charUID;
@@ -2613,13 +2613,13 @@ void CItemMulti::r_Write(CScript & s)
 
 bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
     if (CCMultiMovable::r_WriteVal(ptcKey, sVal, pSrc))
     {
         return true;
     }
-    int iCmd = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (iCmd >= 0)
     {
         ptcKey += strlen(sm_szLoadKeys[iCmd]);
@@ -2907,7 +2907,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
     {
         return true;
     }
-    int iCmd = FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 
     switch (iCmd)
     {
@@ -2952,7 +2952,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
         case SHL_ADDKEY:
         {
             int64 piCmd[2];
-            int iLen = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            int iLen = Str_ParseCmds(s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd));
             CUID uidOwner((dword)piCmd[0]);
             bool fDupeOnBank = false;
             if (iLen > 1)
@@ -3369,7 +3369,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
 
 void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
 {
-    UNREFERENCED_PARAMETER(fIsAddon);
+    UnreferencedParameter(fIsAddon);
     CScript eComponent("+t_house_component");
     pComponent->m_OEvents.r_LoadVal(eComponent, RES_EVENTS);
 
@@ -3688,7 +3688,7 @@ void CMultiStorage::ClearHouses()
 void CMultiStorage::r_Write(CScript & s) const
 {
     ADDTOCALLSTACK("CMultiStorage::r_Write");
-    UNREFERENCED_PARAMETER(s);
+    UnreferencedParameter(s);
 }
 
 void CMultiStorage::AddShip(const CUID& uidShip, HOUSE_PRIV ePriv)

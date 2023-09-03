@@ -280,7 +280,7 @@ bool CChar::CanCarry( const CItem *pItem ) const
 void CChar::ContentAdd( CItem * pItem, bool fForceNoStack )
 {
 	ADDTOCALLSTACK("CChar::ContentAdd");
-	UNREFERENCED_PARAMETER(fForceNoStack);
+	UnreferencedParameter(fForceNoStack);
 	ItemEquip(pItem);
 	//LayerAdd( pItem, LAYER_QTY );
 }
@@ -832,8 +832,8 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_FOOD_8)
 		};
 
-		if ( index >= (CountOf(sm_szPetHunger) - 1) )
-			index = CountOf(sm_szPetHunger) - 1;
+		if ( index >= (ARRAY_COUNT(sm_szPetHunger) - 1) )
+			index = ARRAY_COUNT(sm_szPetHunger) - 1;
 
 		return fHappy ? sm_szPetHappy[index] : sm_szPetHunger[index];
 	}
@@ -850,8 +850,8 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 		g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_8)
 	};
 
-	if ( index >= (CountOf(sm_szFoodLevel) - 1) )
-		index = CountOf(sm_szFoodLevel) - 1;
+	if ( index >= (ARRAY_COUNT(sm_szFoodLevel) - 1) )
+		index = ARRAY_COUNT(sm_szFoodLevel) - 1;
 
 	return sm_szFoodLevel[index];
 }

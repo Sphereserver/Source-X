@@ -85,8 +85,8 @@ lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 
 bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CSector::r_WriteVal");
 	EXC_TRY("WriteVal");
 
@@ -98,7 +98,7 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		{ nullptr, INT32_MAX }
 	};
 
-    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    SC_TYPE key = (SC_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 	switch ( key )
 	{
         case SC_CANSLEEP:
@@ -277,7 +277,7 @@ bool CSector::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CSector::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
 	{
 		case SC_COLDCHANCE:
 			SetWeatherChance( false, s.HasArgs() ? s.GetArgVal() : -1 );
@@ -330,7 +330,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CSector::r_Verb");
 	ASSERT(pSrc);
 	EXC_TRY("Verb-Statement");
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1 );
 	switch (index)
 	{
 		case SEV_ALLCHARS:		// "ALLCHARS"
@@ -721,7 +721,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 				TRAMMEL_FULL_BRIGHTNESS / 4		// Crescent Moon
 			};
 
-			ASSERT( iTrammelPhase < CountOf(sm_TrammelPhaseBrightness));
+			ASSERT( iTrammelPhase < ARRAY_COUNT(sm_TrammelPhaseBrightness));
 			iTargLight -= sm_TrammelPhaseBrightness[iTrammelPhase];
 		}
 
@@ -741,7 +741,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 				FELUCCA_FULL_BRIGHTNESS / 4		// Crescent Moon
 			};
 
-			ASSERT( iFeluccaPhase < CountOf(sm_FeluccaPhaseBrightness));
+			ASSERT( iFeluccaPhase < ARRAY_COUNT(sm_FeluccaPhaseBrightness));
 			iTargLight -= sm_FeluccaPhaseBrightness[iFeluccaPhase];
 		}
 	}
@@ -1236,7 +1236,7 @@ bool CSector::_OnTick()
 
 			case WEATHER_SNOW:
 				if ( ! Calc_GetRandVal(5) )
-					sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
+					sound = sm_SfxWind[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxWind )) ];
 				break;
 
 			case WEATHER_RAIN:
@@ -1246,12 +1246,12 @@ bool CSector::_OnTick()
 					{
 						// Mess up the light levels for a sec..
 						LightFlash();
-						sound = sm_SfxThunder[ Calc_GetRandVal( CountOf( sm_SfxThunder )) ];
+						sound = sm_SfxThunder[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxThunder )) ];
 					}
 					else if ( iVal < 10 )
-						sound = sm_SfxRain[ Calc_GetRandVal( CountOf( sm_SfxRain )) ];
+						sound = sm_SfxRain[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxRain )) ];
 					else if ( iVal < 15 )
-						sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
+						sound = sm_SfxWind[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxWind )) ];
 				}
 				break;
 

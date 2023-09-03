@@ -104,7 +104,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 
 int CItemCorpse::GetWeight(word amount) const
 {
-	UNREFERENCED_PARAMETER(amount);
+	UnreferencedParameter(amount);
 	// GetAmount is messed up.
 	// true weight == container item + contents.
 	return( 1 + CContainer::GetTotalWeight());

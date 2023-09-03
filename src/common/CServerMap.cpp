@@ -341,7 +341,7 @@ CServerMapDiffBlock::~CServerMapDiffBlock()
 
 int CServerMapDiffBlockArray::CompareKey( dword id, CServerMapDiffBlock* pBase, bool fNoSpaces ) const
 {
-	UNREFERENCED_PARAMETER(fNoSpaces);
+	UnreferencedParameter(fNoSpaces);
 	ASSERT( pBase );
 	return ( id - pBase->m_BlockId );
 }

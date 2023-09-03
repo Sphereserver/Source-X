@@ -112,7 +112,7 @@ bool CClient::addLoginErr(byte code)
 		"The maximum number of password tries has been reached"
 	};
 
-	if (code >= CountOf(sm_Login_ErrMsg))
+	if (code >= ARRAY_COUNT(sm_Login_ErrMsg))
 		code = PacketLoginError::Other;
 	
 	g_Log.EventWarn( "%x:Bad Login %d (%s)\n", GetSocketID(), code, sm_Login_ErrMsg[(size_t)(code)] );
@@ -681,7 +681,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		return false;
 
 	tchar * ppLines[16];
-	int iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, CountOf(ppLines), "\r\n");
+	int iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, ARRAY_COUNT(ppLines), "\r\n");
 	if (( iQtyLines < 1 ) || ( iQtyLines >= 15 ))	// too long request
 		return false;
 
@@ -719,7 +719,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 	}
 
 	tchar * ppRequest[4];
-	int iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, CountOf(ppRequest), " ");
+	int iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, ARRAY_COUNT(ppRequest), " ");
 	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= _MAX_PATH ))
 		return false;
 

@@ -398,7 +398,7 @@ dynamicmap<K,V>::dynamicmap() {
 }
 
 template<typename K, typename V>
-dynamicmap<K,V>::dynamicmap(size_t size) : dynamicmap<K,V>() { UNREFERENCED_PARAMETER(size); }
+dynamicmap<K,V>::dynamicmap(size_t size) : dynamicmap<K,V>() { UnreferencedParameter(size); }
 
 template<typename K, typename V>
 dynamicmap<K,V>::dynamicmap(const dynamicmap & o) {

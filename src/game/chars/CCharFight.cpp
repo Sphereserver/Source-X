@@ -728,7 +728,7 @@ effect_bounce:
 	}
 
 	CScriptTriggerArgs Args( iDmg, uType, (int64)(0) );
-	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(CountOf(sm_ArmorDamageLayers))]);
+	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(ARRAY_COUNT(sm_ArmorDamageLayers))]);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
 	Args.m_VarsLocal.SetNum("Spell", (int)spell);
 
@@ -1928,12 +1928,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 			{
 				static constexpr SOUND_TYPE sm_Snd_Miss_Ranged[] = { 0x233, 0x238 };
-				iSound = sm_Snd_Miss_Ranged[Calc_GetRandVal(CountOf(sm_Snd_Miss_Ranged))];
+				iSound = sm_Snd_Miss_Ranged[Calc_GetRandVal(ARRAY_COUNT(sm_Snd_Miss_Ranged))];
 			}
 			else
 			{
 				static constexpr SOUND_TYPE sm_Snd_Miss[] = { 0x238, 0x239, 0x23a };
-				iSound = sm_Snd_Miss[Calc_GetRandVal(CountOf(sm_Snd_Miss))];
+				iSound = sm_Snd_Miss[Calc_GetRandVal(ARRAY_COUNT(sm_Snd_Miss))];
 			}
 		}
 		Sound(iSound);
@@ -2168,7 +2168,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 			for ( int i = 0; i < iBloodQty; ++i )
 			{
-                const ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(CountOf(sm_Blood))];
+                const ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(ARRAY_COUNT(sm_Blood))];
 
                 CItem *pBlood = CItem::CreateBase(iBloodID);
                 ASSERT(pBlood);

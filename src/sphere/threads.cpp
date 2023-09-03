@@ -643,7 +643,7 @@ void AbstractSphereThread::printStackTrace()
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
 	g_Log.EventDebug(" _______ thread (id) name _______ |  # | _____________ function _____________ |\n");
-	for ( size_t i = 0; i < CountOf(m_stackInfo); ++i )
+	for ( size_t i = 0; i < ARRAY_COUNT(m_stackInfo); ++i )
 	{
 		if( m_stackInfo[i].functionName == nullptr )
 			break;

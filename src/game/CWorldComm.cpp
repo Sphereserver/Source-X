@@ -70,7 +70,7 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 					}
 				}
 				pszSpeak = sTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
+				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( ARRAY_COUNT( sm_Sounds_Ghost )) ], pSrc );
 			}
 
 			if ( !fCanSee && pSrc )
@@ -173,7 +173,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nachar * pwT
 					wTextGhost[i] = '\0';
 				}
 				pwSpeak = wTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
+				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( ARRAY_COUNT( sm_Sounds_Ghost )) ], pSrc );
 			}
 
 			// Must label the text.
@@ -183,7 +183,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nachar * pwT
 				{
 					CSString sTextName;
 					sTextName.Format("<%s>", pSrc->GetName());
-					int iLen = CvtSystemToNETUTF16( wTextName, CountOf(wTextName), sTextName, -1 );
+					int iLen = CvtSystemToNETUTF16( wTextName, ARRAY_COUNT(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )
 					{
 						for ( int i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
@@ -206,7 +206,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nachar * pwT
 			{
 				tchar * pszMsg = Str_GetTemp();
 				snprintf(pszMsg, STR_TEMPLENGTH, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
-				int iLen = CvtSystemToNETUTF16( wTextUID, CountOf(wTextUID), pszMsg, -1 );
+				int iLen = CvtSystemToNETUTF16( wTextUID, ARRAY_COUNT(wTextUID), pszMsg, -1 );
 				for ( int i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 					wTextUID[iLen] = pwText[i];
 				wTextUID[iLen] = '\0';

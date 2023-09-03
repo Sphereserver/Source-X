@@ -140,7 +140,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     // The first part of the key is GUMPCTL_TYPE
     lpctstr ptcKey = s.GetKey();
 
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
     if ( index < 0 )
     {
         const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
@@ -163,7 +163,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     {
         case GUMPCTL_PAGE:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
 
             GET_ABSOLUTE( page );
@@ -185,7 +185,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         case GUMPCTL_BUTTON:			// 7 = X,Y,Down gump,Up gump,pressable(1/0),page,id
         case GUMPCTL_BUTTONTILEART:		// 11 = X,Y,Down gump,Up gump,pressable(1/0),page,id,tileart,hue,X,Y
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -287,9 +287,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_DTEXT:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
-            if ( m_uiTexts >= (CountOf(m_sText) - 1) )
+            if ( m_uiTexts >= (ARRAY_COUNT(m_sText) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -305,9 +305,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_DCROPPEDTEXT:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
-            if ( m_uiTexts >= (CountOf(m_sText) - 1) )
+            if ( m_uiTexts >= (ARRAY_COUNT(m_sText) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -325,9 +325,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_DHTMLGUMP:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
-            if ( m_uiTexts >= (CountOf(m_sText) - 1) )
+            if ( m_uiTexts >= (ARRAY_COUNT(m_sText) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -345,9 +345,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_DTEXTENTRY:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
-            if ( m_uiTexts >= (CountOf(m_sText) - 1) )
+            if ( m_uiTexts >= (ARRAY_COUNT(m_sText) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -365,9 +365,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_DTEXTENTRYLIMITED:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
-            if ( m_uiTexts >= (CountOf(m_sText) - 1) )
+            if ( m_uiTexts >= (ARRAY_COUNT(m_sText) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -386,7 +386,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_CHECKBOX:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -403,7 +403,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_RADIO:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -420,7 +420,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         }
         case GUMPCTL_CHECKERTRANS:
         {
-            if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+            if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
                 return false;
 
             GET_RELATIVE( x, m_iOriginX );
@@ -501,7 +501,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             break;
     }
 
-    if ( m_uiControls >= (CountOf(m_sControls) - 1) )
+    if ( m_uiControls >= (ARRAY_COUNT(m_sControls) - 1) )
         return false;
 
     m_sControls[m_uiControls].Format("%s %s", ptcKey, pszArgs);
@@ -533,7 +533,7 @@ CDialogDef::CDialogDef( CResourceID rid ) :
 
 bool CDialogDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CDialogDef::r_WriteVal");
     if ( !m_pObj )
         return false;
@@ -572,7 +572,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     {
         while ( s.ReadKey())
         {
-            if ( m_uiTexts >= (CountOf(m_sText) - 1) )
+            if ( m_uiTexts >= (ARRAY_COUNT(m_sText) - 1) )
                 break;
             m_pObj->ParseScriptText( s.GetKeyBuffer(), pClient->GetChar() );
             m_sText[m_uiTexts] = s.GetKey();
@@ -595,7 +595,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     tchar * pszBuf = s.GetKeyBuffer();
     m_pObj->ParseScriptText( pszBuf, pClient->GetChar() );
 
-    Str_ParseCmds( pszBuf, iSizes, CountOf(iSizes) );
+    Str_ParseCmds( pszBuf, iSizes, ARRAY_COUNT(iSizes) );
     m_x		= (int)(iSizes[0]);
     m_y		= (int)(iSizes[1]);
 

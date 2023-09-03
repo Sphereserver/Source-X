@@ -9,7 +9,7 @@
 //const tchar * const TSTRING_NULL = "\0";
 //const char  * const STRING_NULL  = "\0";
 
-#define IntCharacter(c)     int((c) & 0xFF)
+#define INT_CHARACTER(c)     int((c) & 0xFF)
 
 #ifdef UNICODE
     #include <cwctype>  // for iswalnum
@@ -18,10 +18,10 @@
 	#define IsAlpha(c)		iswalpha((wint_t)c)
 	#define IsAlnum(c)		iswalnum((wint_t)c)
 #else
-	#define IsDigit(c)		isdigit(IntCharacter(c))
-	#define IsSpace(c)		isspace(IntCharacter(c))
-	#define IsAlpha(c)		isalpha(IntCharacter(c))
-	#define IsAlnum(c)		isalnum(IntCharacter(c))
+	#define IsDigit(c)		isdigit(INT_CHARACTER(c))
+	#define IsSpace(c)		isspace(INT_CHARACTER(c))
+	#define IsAlpha(c)		isalpha(INT_CHARACTER(c))
+	#define IsAlnum(c)		isalnum(INT_CHARACTER(c))
 #endif
 
 /*  cross-platform functions macros  */

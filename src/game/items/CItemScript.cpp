@@ -35,7 +35,7 @@ void CItemScript::r_Write(CScript & s)
 
 bool CItemScript::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemScript::r_WriteVal");
     return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
 }

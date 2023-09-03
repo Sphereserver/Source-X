@@ -1258,7 +1258,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 {
 	ADDTOCALLSTACK("CChar::Skill_Tracking");
 	// SKILL_TRACKING
-	UNREFERENCED_PARAMETER(dirPrv);
+	UnreferencedParameter(dirPrv);
 
 	if ( !IsClientActive() )		// abort action if the client get disconnected
 		return false;
@@ -1284,7 +1284,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	}
 
 	const DIR_TYPE dir = GetDir(pObjTop);
-	ASSERT(dir >= 0 && (uint)(dir) < CountOf(CPointBase::sm_szDirs));
+	ASSERT(dir >= 0 && (uint)(dir) < ARRAY_COUNT(CPointBase::sm_szDirs));
 
 	// Select tracking message based on distance
 	lpctstr pszDef;
@@ -2275,7 +2275,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			return 0;
 
 		tchar * pszMsg = Str_GetTemp();
-		snprintf(pszMsg, STR_TEMPLENGTH, sm_szTameSpeak[ Calc_GetRandVal( CountOf( sm_szTameSpeak )) ], pChar->GetName());
+		snprintf(pszMsg, STR_TEMPLENGTH, sm_szTameSpeak[ Calc_GetRandVal( ARRAY_COUNT( sm_szTameSpeak )) ], pChar->GetName());
 		Speak(pszMsg);
 
 		// Keep trying and updating the animation
@@ -3268,7 +3268,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	if ( pDam )
 	{
 		int64 DVal[2];
-		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, CountOf(DVal));
+		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, ARRAY_COUNT(DVal));
 		switch(iQty)
 		{
 			case 1:

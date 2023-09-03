@@ -257,7 +257,7 @@ void CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 {
     EXC_TRY("AddObjStatusUpdate");
 
-    UNREFERENCED_PARAMETER(fNeedsLock);
+    UnreferencedParameter(fNeedsLock);
     {
         std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.THREAD_CMUTEX);
         _ObjStatusUpdates.insert(pObj);
@@ -270,7 +270,7 @@ void CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 {
     EXC_TRY("DelObjStatusUpdate");
 
-    UNREFERENCED_PARAMETER(fNeedsLock);
+    UnreferencedParameter(fNeedsLock);
     {
         std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.THREAD_CMUTEX);
         _ObjStatusUpdates.erase(pObj);

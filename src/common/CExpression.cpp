@@ -491,7 +491,7 @@ try_dec:
 	{
 		// Symbol or intrinsinc function ?
 
-		INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pszArgs, sm_IntrinsicFunctions, CountOf(sm_IntrinsicFunctions)-1 );
+		INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pszArgs, sm_IntrinsicFunctions, ARRAY_COUNT(sm_IntrinsicFunctions)-1 );
 		if ( iIntrinsic >= 0 )
 		{
 			size_t iLen = strlen(sm_IntrinsicFunctions[iIntrinsic]);
@@ -1197,7 +1197,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		return 0;
 	//ASSERT(pSubexprPos);
 
-	//memset((void*)&pSubexprPos, 0, CountOf(pSubexprPos));
+	//memset((void*)&pSubexprPos, 0, ARRAY_COUNT(pSubexprPos));
 	int iSubexprQty = 0;	// number of subexpressions
 	using SType = SubexprData::Type;
 	while (pExpr[0] != '\0')
@@ -1265,7 +1265,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
             // Search for open brackets
             do {
-                const bool fWhite = ISWHITESPACE(*pExprFinder);
+                const bool fWhite = IsWhitespace(*pExprFinder);
                 if (fWhite)
                     --pExprFinder;
                 else
@@ -1568,7 +1568,7 @@ static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[kiRangeMaxArgs][2
 					    goto end_w_error;
 				}
 
-				if (ISWHITESPACE(pExpr[0]) || (pExpr[0] == ','))
+				if (IsWhitespace(pExpr[0]) || (pExpr[0] == ','))
 				{
 					pArgPos[iQty-1][1] = pExpr;		// Position of the char after the last character of the argument
 

@@ -62,7 +62,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
 
 bool CItemMap::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemMap::r_WriteVal");
     EXC_TRY("WriteVal");
         if ( !strnicmp(ptcKey, "PINS", 4) )

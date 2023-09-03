@@ -78,7 +78,7 @@ public:
                 return;
 
             TCHAR * ppMessages[255];
-            int iQty = Str_ParseCmds(const_cast<TCHAR*>(pszMessage), ppMessages, CountOf(ppMessages), "\n");
+            int iQty = Str_ParseCmds(const_cast<TCHAR*>(pszMessage), ppMessages, ARRAY_COUNT(ppMessages), "\n");
             for (int i = 0; i < iQty; ++i)
             {
                 if (*ppMessages[i])

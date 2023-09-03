@@ -11,8 +11,8 @@
 bool CResourceLock::_Open(lpctstr ptcUnused, uint uiUnused)
 {
     ADDTOCALLSTACK("CResourceLock::_Open");
-    UNREFERENCED_PARAMETER(ptcUnused);
-    UNREFERENCED_PARAMETER(uiUnused);
+    UnreferencedParameter(ptcUnused);
+    UnreferencedParameter(uiUnused);
     ASSERT(m_pLock);
 
     if ( m_pLock->_IsFileOpen() )

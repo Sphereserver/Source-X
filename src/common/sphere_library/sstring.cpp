@@ -270,7 +270,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
     {
         if ( pszKeyWord[j] == '\0' || pszKeyWord[j] == ',')
         {
-            if ( pTextSearch[i]== '\0' || ISWHITESPACE(pTextSearch[i]))
+            if ( pTextSearch[i]== '\0' || IsWhitespace(pTextSearch[i]))
                 return( i );
             j = 0;
         }
@@ -511,7 +511,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
     {
         static constexpr tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
         tchar chName = static_cast<tchar>(toupper(pszWord[0]));
-        for (uint x = 0; x < CountOf(sm_Vowels); ++x)
+        for (uint x = 0; x < ARRAY_COUNT(sm_Vowels); ++x)
         {
             if (chName == sm_Vowels[x])
                 return "an ";
@@ -634,7 +634,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
     while (len > 0)
     {
         --len;
-        if (pStr[len] < 0 || !ISWHITESPACE(pStr[len]))
+        if (pStr[len] < 0 || !IsWhitespace(pStr[len]))
         {
             ++len;
             break;
@@ -658,7 +658,7 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
         return;
 
     tchar* ptcPrev = pStrEnd - 1;
-    while ((ptcPrev != pStrBegin) && ISWHITESPACE(*ptcPrev))
+    while ((ptcPrev != pStrBegin) && IsWhitespace(*ptcPrev))
     {
         if (*ptcPrev == '\0')
             return;
@@ -676,7 +676,7 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
     tchar* ptcTest = ptcLine;
     while (const tchar ch = *ptcTest)
     {
-        if (ISWHITESPACE(ch))
+        if (IsWhitespace(ch))
             ;
         else if (ch == '(')
             ++iOpenCurly;
@@ -1270,8 +1270,8 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 {
     tchar * ppTmp[256];
-    if (iMax > (int)CountOf(ppTmp))
-        iMax = (int)CountOf(ppTmp);
+    if (iMax > (int)ARRAY_COUNT(ppTmp))
+        iMax = (int)ARRAY_COUNT(ppTmp);
 
     int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
     int i;

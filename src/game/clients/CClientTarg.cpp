@@ -267,7 +267,7 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_UnExtract");
-	UNREFERENCED_PARAMETER(pObj);
+	UnreferencedParameter(pObj);
 	// CLIMODE_TARG_UNEXTRACT
 	// ??? Get rid of this in favor of a more .SCP file type approach.
 	// result of the MULTI command.
@@ -296,7 +296,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 			return false; // this has the item count
 
 		int64 piCmd[4];		// Maximum parameters in one line
-		Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+		Str_ParseCmds( s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd));
 
 		CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(atoi(s.GetKey())), nullptr, m_pChar);
 		if ( pItem == nullptr )
@@ -595,10 +595,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_NUDGE:
 		{
 			tchar szTmp[512];
-			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, ARRAY_COUNT(szTmp));
 
 			int64 piArgs[3];		// Maximum parameters in one line
-			Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
+			Str_ParseCmds( szTmp, piArgs, ARRAY_COUNT( piArgs ));
 
 			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
@@ -700,10 +700,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_TILE:
 		{
 			tchar szTmp[256];
-			Str_CopyLimitNull( szTmp, m_Targ_Text, CountOf(szTmp));
+			Str_CopyLimitNull( szTmp, m_Targ_Text, ARRAY_COUNT(szTmp));
 
 			int64 piArgs[16];		// Maximum parameters in one line
-			int iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
+			int iArgQty = Str_ParseCmds( szTmp, piArgs, ARRAY_COUNT( piArgs ));
 
 			char z = (char)(piArgs[0]);	// z height is the first arg.
 			int iArg = 0;
@@ -737,7 +737,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_AnimalLore");
-	UNREFERENCED_PARAMETER(iSkillLevel);
+	UnreferencedParameter(iSkillLevel);
 	// SKILL_ANIMALLORE
 	// The creature is a "human" etc..
 	// How happy.
@@ -916,8 +916,8 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 	int iIntEntry = (iIntVal-1) / 10;
 	if ( iIntEntry < 0 )
 		iIntEntry = 0;
-	if ( (uint)iIntEntry >= CountOf( sm_szIntDesc ))
-		iIntEntry = CountOf( sm_szIntDesc )-1;
+	if ( (uint)iIntEntry >= ARRAY_COUNT( sm_szIntDesc ))
+		iIntEntry = ARRAY_COUNT( sm_szIntDesc )-1;
 
 	SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT ), pChar->GetName(), sm_szIntDesc[iIntEntry]);
 
@@ -950,17 +950,17 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 		int iMagicEntry = iMagicSkill / 200;
 		if ( iMagicEntry < 0 )
 			iMagicEntry = 0;
-		if ( (uint)iMagicEntry >= CountOf(sm_szMagicDesc))
-			iMagicEntry = CountOf(sm_szMagicDesc)-1;
+		if ( (uint)iMagicEntry >= ARRAY_COUNT(sm_szMagicDesc))
+			iMagicEntry = ARRAY_COUNT(sm_szMagicDesc)-1;
 
 		int iManaEntry = 0;
 		if ( iIntVal )
-			iManaEntry = IMulDiv( pChar->Stat_GetVal(STAT_INT), CountOf(sm_szManaDesc)-1, iIntVal );
+			iManaEntry = IMulDiv( pChar->Stat_GetVal(STAT_INT), ARRAY_COUNT(sm_szManaDesc)-1, iIntVal );
 
 		if ( iManaEntry < 0 )
 			iManaEntry = 0;
-		if ( (uint)iManaEntry >= CountOf(sm_szManaDesc))
-			iManaEntry = CountOf(sm_szManaDesc)-1;
+		if ( (uint)iManaEntry >= ARRAY_COUNT(sm_szManaDesc))
+			iManaEntry = ARRAY_COUNT(sm_szManaDesc)-1;
 
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<lpctstr>(sm_szMagicDesc[iMagicEntry]), static_cast<lpctstr>(sm_szManaDesc[iManaEntry]));
 	}
@@ -1069,10 +1069,10 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	{
 		uint iLevel = (uint)IMulDiv( 
 			i_promote32(pItem->m_itWeapon.m_poison_skill),
-			i_narrow32(CountOf(sm_szPoisonMessages)),
+			i_narrow32(ARRAY_COUNT(sm_szPoisonMessages)),
 			100);
-		if ( iLevel >= CountOf(sm_szPoisonMessages))
-			iLevel = i_narrow32(CountOf(sm_szPoisonMessages)) - 1;
+		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
+			iLevel = i_narrow32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
 		len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
@@ -1132,15 +1132,15 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 	int iStrEntry = (iStrVal-1)/10;
 	if ( iStrEntry < 0 )
 		iStrEntry = 0;
-	if ( (uint)iStrEntry >= CountOf( sm_szStrEval ))
-		iStrEntry = CountOf( sm_szStrEval )-1;
+	if ( (uint)iStrEntry >= ARRAY_COUNT( sm_szStrEval ))
+		iStrEntry = ARRAY_COUNT( sm_szStrEval )-1;
 
 	int iDexVal = pChar->Stat_GetAdjusted(STAT_DEX);
 	int iDexEntry = (iDexVal-1)/10;
 	if ( iDexEntry < 0 )
 		iDexEntry = 0;
-	if ( (uint)iDexEntry >= CountOf( sm_szDexEval ))
-		iDexEntry = CountOf( sm_szDexEval )-1;
+	if ( (uint)iDexEntry >= ARRAY_COUNT( sm_szDexEval ))
+		iDexEntry = ARRAY_COUNT( sm_szDexEval )-1;
 
 	tchar * pszTemp = Str_GetTemp();
 	snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_RESULT), pChar->GetName(), sm_szStrEval[iStrEntry], sm_szDexEval[iDexEntry]);
@@ -1283,9 +1283,9 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 
 	if ( iPoisonLevel )
 	{
-		uint iLevel = (uint)IMulDiv( iPoisonLevel, CountOf(sm_szPoisonMessages), 1000 );
-		if ( iLevel >= CountOf(sm_szPoisonMessages))
-			iLevel = i_narrow32(CountOf(sm_szPoisonMessages) - 1);
+		uint iLevel = (uint)IMulDiv( iPoisonLevel, ARRAY_COUNT(sm_szPoisonMessages), 1000 );
+		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
+			iLevel = i_narrow32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
 		SysMessage(sm_szPoisonMessages[iLevel] );
 	}
 	else
@@ -1417,7 +1417,7 @@ bool CClient::OnTarg_Skill_Poison( CObjBase * pObj )
 bool CClient::OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Skill_Herd_Dest");
-	UNREFERENCED_PARAMETER(pObj);
+	UnreferencedParameter(pObj);
 	// CLIMODE_TARG_SKILL_HERD_DEST
 
 	m_pChar->m_Act_p = pt;
@@ -2200,7 +2200,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		pItemTarg->m_itLoom.m_ridCloth = CResourceIDBase(RES_ITEMDEF, pItemUse->GetDispID());
 
 		int iUsed = 0;
-		int iNeed = int(CountOf( sm_Txt_LoomUse ) - 1);
+		int iNeed = int(ARRAY_COUNT( sm_Txt_LoomUse ) - 1);
 		int iHave = pItemTarg->m_itLoom.m_iClothQty;
 		if ( iHave < iNeed )
 		{
@@ -2208,14 +2208,14 @@ static lpctstr const sm_Txt_LoomUse[] =
 			iUsed = pItemUse->ConsumeAmount( (word)iNeed );
 		}
 
-		if ( (iHave + iUsed) < int(CountOf( sm_Txt_LoomUse ) - 1) )
+		if ( (iHave + iUsed) < int(ARRAY_COUNT( sm_Txt_LoomUse ) - 1) )
 		{
 			pItemTarg->m_itLoom.m_iClothQty += iUsed;
 			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_iClothQty ] );
 		}
 		else
 		{
-			SysMessage( sm_Txt_LoomUse[ CountOf( sm_Txt_LoomUse ) - 1 ] );
+			SysMessage( sm_Txt_LoomUse[ ARRAY_COUNT( sm_Txt_LoomUse ) - 1 ] );
 			pItemTarg->m_itLoom.m_iClothQty = 0;
 			pItemTarg->m_itLoom.m_ridCloth.Clear();
 

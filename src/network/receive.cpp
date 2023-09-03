@@ -34,7 +34,7 @@ PacketUnknown::PacketUnknown(uint size) : Packet(size)
 bool PacketUnknown::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketUnknown::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	return true;
 }
@@ -307,7 +307,7 @@ bool PacketSpeakReq::onReceive(CNetState* net)
 		packetLength = MAX_TALK_BUFFER;
 
 	tchar text[MAX_TALK_BUFFER];
-	readStringASCII(text, minimum(CountOf(text), packetLength));
+	readStringASCII(text, minimum(ARRAY_COUNT(text), packetLength));
 
 	client->Event_Talk(text, hue, mode, false);
 	return true;
@@ -404,7 +404,7 @@ PacketItemDropReq::PacketItemDropReq() : Packet(14)
 uint PacketItemDropReq::getExpectedLength(CNetState* net, Packet* packet)
 {
 	ADDTOCALLSTACK("PacketItemDropReq::getExpectedLength");
-	UNREFERENCED_PARAMETER(packet);
+	UnreferencedParameter(packet);
 
 	// different size depending on client
 	if (net != nullptr && (net->isClientVersion(MINCLIVER_ITEMGRID) || net->isClientKR() || net->isClientEnhanced()))
@@ -1387,7 +1387,7 @@ bool PacketMenuChoice::onReceive(CNetState* net)
 
 		case CLIMODE_MENU_SKILL:
 			// some skill menu got us here
-			if (select >= CountOf(client->m_tmMenu.m_Item))
+			if (select >= ARRAY_COUNT(client->m_tmMenu.m_Item))
 				return true;
 
 			client->Cmd_Skill_Menu(client->m_tmMenu.m_ResourceID, (select > 0) ? client->m_tmMenu.m_Item[select] : 0 );
@@ -1431,9 +1431,9 @@ bool PacketServersReq::onReceive(CNetState* net)
 	ADDTOCALLSTACK("PacketServersReq::onReceive");
 
 	tchar acctname[MAX_ACCOUNT_NAME_SIZE];
-	readStringASCII(acctname, CountOf(acctname));
+	readStringASCII(acctname, ARRAY_COUNT(acctname));
 	tchar acctpass[MAX_NAME_SIZE];
-	readStringASCII(acctpass, CountOf(acctpass));
+	readStringASCII(acctpass, ARRAY_COUNT(acctpass));
 	skip(1);
 
 	CClient* client = net->getClient();
@@ -1666,9 +1666,9 @@ bool PacketCharListReq::onReceive(CNetState* net)
 
 	skip(4);
 	tchar acctname[MAX_ACCOUNT_NAME_SIZE];
-	readStringASCII(acctname, CountOf(acctname));
+	readStringASCII(acctname, ARRAY_COUNT(acctname));
 	tchar acctpass[MAX_NAME_SIZE];
-	readStringASCII(acctpass, CountOf(acctpass));
+	readStringASCII(acctpass, ARRAY_COUNT(acctpass));
 
 	net->getClient()->Setup_ListReq(acctname, acctpass, false);
 	return true;
@@ -1696,10 +1696,10 @@ bool PacketBookHeaderEdit::onReceive(CNetState* net)
 	skip(2); // pages
 
 	tchar title[2 * MAX_NAME_SIZE];
-	readStringASCII(title, CountOf(title));
+	readStringASCII(title, ARRAY_COUNT(title));
 
 	tchar author[MAX_NAME_SIZE];
-	readStringASCII(author, CountOf(author));
+	readStringASCII(author, ARRAY_COUNT(author));
 
 	net->getClient()->Event_Book_Title(bookSerial, title, author);
 	return true;
@@ -1937,7 +1937,7 @@ PacketSystemInfo::PacketSystemInfo() : Packet(149)
 bool PacketSystemInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketSystemInfo::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	skip(148);
 	return true;
@@ -2076,7 +2076,7 @@ bool PacketSpeakReqUNICODE::onReceive(CNetState* net)
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	FONT_TYPE font = (FONT_TYPE)(readInt16());
 	tchar language[4];
-	readStringASCII(language, CountOf(language));
+	readStringASCII(language, ARRAY_COUNT(language));
 
 	if (packetLength < getPosition())
 		return false;
@@ -2104,7 +2104,7 @@ bool PacketSpeakReqUNICODE::onReceive(CNetState* net)
 
 		skip((int)(toskip));
 		tchar text[MAX_TALK_BUFFER];
-		readStringNullASCII(text, CountOf(text));
+		readStringNullASCII(text, ARRAY_COUNT(text));
 		client->Event_Talk(text, hue, mode, true);
 	}
 	else
@@ -2295,7 +2295,7 @@ bool PacketChatCommand::onReceive(CNetState* net)
 
 	uint packetLength = readInt16();
 	tchar language[4];
-	readStringASCII(language, CountOf(language));
+	readStringASCII(language, ARRAY_COUNT(language));
 
 	if (packetLength < getPosition())
 		return false;
@@ -2332,7 +2332,7 @@ bool PacketChatButton::onReceive(CNetState* net)
 
 	skip(1); // 0x00
 	nachar name[MAX_NAME_SIZE+1];
-	readStringUTF16(reinterpret_cast<wchar *>(name), CountOf(name));
+	readStringUTF16(reinterpret_cast<wchar *>(name), ARRAY_COUNT(name));
 
 	client->Event_ChatButton(name);
 	return true;
@@ -2780,7 +2780,7 @@ bool PacketLanguage::onReceive(CNetState* net)
 	ASSERT(client);
 
 	tchar language[4];
-	readStringNullASCII(language, CountOf(language));
+	readStringNullASCII(language, ARRAY_COUNT(language));
 
 	client->GetAccount()->m_lang.Set(language);
 	return true;
@@ -2801,7 +2801,7 @@ PacketStatusClose::PacketStatusClose() : Packet(0)
 bool PacketStatusClose::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketStatusClose::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	return true;
 }
@@ -2845,7 +2845,7 @@ bool PacketAnimationReq::onReceive(CNetState* net)
 
 	ANIM_TYPE anim = static_cast<ANIM_TYPE>(readInt32());
 	bool ok = false;
-	for (uint i = 0; ok == false && i < CountOf(validAnimations); i++)
+	for (uint i = 0; ok == false && i < ARRAY_COUNT(validAnimations); i++)
 		ok = (anim == validAnimations[i]);
 
 	if (ok == false)
@@ -2870,7 +2870,7 @@ PacketClientInfo::PacketClientInfo() : Packet(0)
 bool PacketClientInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientInfo::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	skip(1); // 0x0A
 	skip(4); // flags
@@ -3123,7 +3123,7 @@ PacketAntiCheat::PacketAntiCheat() : Packet(0)
 bool PacketAntiCheat::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketAntiCheat::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	return true;
 }
@@ -3403,7 +3403,7 @@ bool PacketPromptResponseUnicode::onReceive(CNetState* net)
 	dword context2 = readInt32();
 	dword type = readInt32();
 	char language[4];
-	readStringASCII(language, CountOf(language));
+	readStringASCII(language, ARRAY_COUNT(language));
 
 	if (length < getPosition())
 		return false;
@@ -3487,10 +3487,10 @@ bool PacketBookHeaderEditNew::onReceive(CNetState* net)
 	tchar author[MAX_NAME_SIZE];
 
 	uint titleLength = readInt16();
-	readStringASCII(title, minimum(titleLength, CountOf(title)));
+	readStringASCII(title, minimum(titleLength, ARRAY_COUNT(title)));
 
 	uint authorLength = readInt16();
-	readStringASCII(author, minimum(authorLength, CountOf(author)));
+	readStringASCII(author, minimum(authorLength, ARRAY_COUNT(author)));
 
 	net->getClient()->Event_Book_Title(bookSerial, title, author);
 	return true;
@@ -4157,7 +4157,7 @@ PacketHardwareInfo::PacketHardwareInfo() : Packet(268)
 bool PacketHardwareInfo::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketHardwareInfo::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	skip(1); // client type
 	skip(4); // instance id
@@ -4209,7 +4209,7 @@ bool PacketBugReport::onReceive(CNetState* net)
 		return false;
 
 	tchar language[4];
-	readStringASCII(language, CountOf(language));
+	readStringASCII(language, ARRAY_COUNT(language));
 
 	BUGREPORT_TYPE type = static_cast<BUGREPORT_TYPE>(readInt16());
 
@@ -4262,7 +4262,7 @@ PacketRemoveUIHighlight::PacketRemoveUIHighlight() : Packet(13)
 bool PacketRemoveUIHighlight::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketRemoveUIHighlight::onReceive");
-	UNREFERENCED_PARAMETER(net);
+	UnreferencedParameter(net);
 
 	skip(4); // serial
 	skip(2); // ui id
@@ -4516,9 +4516,9 @@ bool PacketCrashReport::onReceive(CNetState* net)
 	skip(4); // unknown
 	dword errorCode = readInt32();
 	tchar executable[100];
-	readStringASCII(executable, CountOf(executable));
+	readStringASCII(executable, ARRAY_COUNT(executable));
 	tchar description[100];
-	readStringASCII(description, CountOf(description));
+	readStringASCII(description, ARRAY_COUNT(description));
 	skip(1); // zero
 	dword errorOffset = readInt32();
 

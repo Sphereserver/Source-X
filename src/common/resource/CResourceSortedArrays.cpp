@@ -12,7 +12,7 @@
 // Sorted array of strings
 int CSStringSortArray::CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const
 {
-    UNREFERENCED_PARAMETER(fNoSpaces);
+    UnreferencedParameter(fNoSpaces);
     ASSERT( pszID2 );
     return strcmpi( pszID1, pszID2);
 }
@@ -70,7 +70,7 @@ int CObjNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpac
 
 int CSkillKeySortArray::CompareKey(lpctstr ptcKey, CValStr * pVal, bool fNoSpaces) const
 {
-    UNREFERENCED_PARAMETER(fNoSpaces);
+    UnreferencedParameter(fNoSpaces);
     ASSERT(ptcKey);
     ASSERT(pVal->m_pszName);
     return strcmpi(ptcKey, pVal->m_pszName);
@@ -78,7 +78,7 @@ int CSkillKeySortArray::CompareKey(lpctstr ptcKey, CValStr * pVal, bool fNoSpace
 
 int CMultiDefArray::CompareKey(MULTI_TYPE id, CUOMulti* pBase, bool fNoSpaces) const
 {
-    UNREFERENCED_PARAMETER(fNoSpaces);
+    UnreferencedParameter(fNoSpaces);
     ASSERT(pBase);
     return (id - pBase->GetMultiID());
 }

@@ -274,7 +274,7 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCri
 bool CResourceBase::LoadResourceSection( CScript * pScript )
 {
 	ADDTOCALLSTACK("CResourceBase::LoadResourceSection");
-	UNREFERENCED_PARAMETER(pScript);
+	UnreferencedParameter(pScript);
 	// Just stub this out for others for now.
 	return false;
 }

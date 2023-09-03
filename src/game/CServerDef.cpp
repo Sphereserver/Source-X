@@ -269,7 +269,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CServerDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ) )
 	{
 		case SC_ACCAPP:
 		case SC_ACCAPPS:
@@ -283,7 +283,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			else
 			{
 				// Treat it as a string. "Manual","Automatic","Guest"
-				m_eAccApp = ACCAPP_TYPE(FindTable(ptcArg, sm_AccAppTable, CountOf(sm_AccAppTable)));
+				m_eAccApp = ACCAPP_TYPE(FindTable(ptcArg, sm_AccAppTable, ARRAY_COUNT(sm_AccAppTable)));
 			}
 			if ( m_eAccApp < 0 || m_eAccApp >= ACCAPP_QTY )
 				m_eAccApp = ACCAPP_Unspecified;
@@ -381,7 +381,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ) )
 	{
 	case SC_ACCAPP:
 		sVal.FormatVal( m_eAccApp );

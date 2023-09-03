@@ -226,7 +226,7 @@ void UnixTerminal::prepareColor()
 				"xterm", "xterm-color", "xterm-256color"
 			};
 
-			for (size_t i = 0; i < CountOf(sz_Supported_Terminals); ++i)
+			for (size_t i = 0; i < ARRAY_COUNT(sz_Supported_Terminals); ++i)
 			{
 				if (strcmp(termtype, sz_Supported_Terminals[i]) == 0)
 				{

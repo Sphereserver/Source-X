@@ -1439,7 +1439,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 	lpctstr ptcKey = s.GetKey();
 	tchar *pszMsg = nullptr;
 
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, ARRAY_COUNT( sm_szVerbKeys )-1 );
 
 	if ( index < 0 )
 	{
@@ -1540,7 +1540,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				int iTimeDecay(-1);
 
 				tchar* ppArgs[2];
-				if (Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ", ") == false)
+				if (Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), ", ") == false)
 					return false;
 
 				if (ppArgs[1])
@@ -1597,7 +1597,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if ( s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
-				int Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ) );
+				int Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, ARRAY_COUNT( Arg_ppCmd ) );
 				if ( Arg_Qty <= 0 )
 					break;
 				// IMPFLAGS_ITEMS
@@ -1675,7 +1675,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
-				int Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
+				int Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, ARRAY_COUNT( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
 					break;
@@ -1743,7 +1743,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[4];
-				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
+				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, ARRAY_COUNT( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
 					break;

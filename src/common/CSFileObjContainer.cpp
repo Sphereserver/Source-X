@@ -192,7 +192,7 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
     EXC_TRY("LoadVal");
     lpctstr ptcKey = s.GetKey();
 
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
     switch ( index )
     {
@@ -219,7 +219,7 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
 
 bool CSFileObjContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CSFileObjContainer::r_WriteVal");
     EXC_TRY("WriteVal");
 
@@ -245,7 +245,7 @@ bool CSFileObjContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
         return false;
     }
 
-    int iIndex = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int iIndex = FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
     if ( iIndex < 0 )
     {
@@ -320,7 +320,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
         return false;
     }
 
-    int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szVerbKeys, ARRAY_COUNT( sm_szVerbKeys )-1 );
 
     if ( index < 0 )
     {

@@ -1181,14 +1181,14 @@ uint Packet::checkLength(CNetState* client, Packet* packet)
 
 uint Packet::getExpectedLength(CNetState* client, Packet* packet)
 {
-	UNREFERENCED_PARAMETER(client);
-	UNREFERENCED_PARAMETER(packet);
+	UnreferencedParameter(client);
+	UnreferencedParameter(packet);
 	return m_expectedLength;
 }
 
 bool Packet::onReceive(CNetState* client)
 {
-	UNREFERENCED_PARAMETER(client);
+	UnreferencedParameter(client);
 	return true;
 }
 
@@ -1304,18 +1304,18 @@ void PacketSend::target(const CClient* client)
 
 bool PacketSend::onSend(const CClient* client)
 {
-	UNREFERENCED_PARAMETER(client);
+	UnreferencedParameter(client);
 	return true;
 }
 
 void PacketSend::onSent(CClient* client)
 {
-	UNREFERENCED_PARAMETER(client);
+	UnreferencedParameter(client);
 }
 
 bool PacketSend::canSendTo(const CNetState* state) const
 {
-	UNREFERENCED_PARAMETER(state);
+	UnreferencedParameter(state);
 	return true;
 }
 

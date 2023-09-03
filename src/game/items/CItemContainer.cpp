@@ -95,7 +95,7 @@ bool CItemContainer::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 
 bool CItemContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
 
 	EXC_TRY("WriteVal");
@@ -486,7 +486,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	{
 		for (; ; ++i)
 		{
-			if (i >= CountOf(sm_ContSize))
+			if (i >= ARRAY_COUNT(sm_ContSize))
 			{
 				i = 0;	// set to default
 				g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
@@ -816,8 +816,8 @@ void CItemContainer::SetKeyRing()
 	};
 
 	size_t iQty = GetContentCount();
-	if ( iQty >= CountOf(sm_Item_Keyrings) )
-		iQty = CountOf(sm_Item_Keyrings) - 1;
+	if ( iQty >= ARRAY_COUNT(sm_Item_Keyrings) )
+		iQty = ARRAY_COUNT(sm_Item_Keyrings) - 1;
 
 	ITEMID_TYPE id = sm_Item_Keyrings[iQty];
 	if ( id != GetID() )
@@ -1178,7 +1178,7 @@ void CItemContainer::Game_Create()
 
 	if ( m_itGameBoard.m_GameType == 0 )	// Chess
 	{
-		for ( size_t i = 0; i < CountOf(sm_Item_ChessPieces); ++i )
+		for ( size_t i = 0; i < ARRAY_COUNT(sm_Item_ChessPieces); ++i )
 		{
 			// Add all it's pieces. (if not already added)
 			CItem *pPiece = CItem::CreateBase(sm_Item_ChessPieces[i]);
@@ -1276,7 +1276,7 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 	ADDTOCALLSTACK("CItemContainer::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
-	switch ( FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1) )
+	switch ( FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1) )
 	{
 		case ICV_DELETE:
 			if ( s.HasArgs() )

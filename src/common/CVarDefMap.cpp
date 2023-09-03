@@ -53,8 +53,8 @@ bool CVarDefContNum::r_LoadVal( CScript & s )
 
 bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
-	UNREFERENCED_PARAMETER(pKey);
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pKey);
+	UnreferencedParameter(pSrc);
 	sVal.Format64Val( GetValNum() );
 	return true;
 }
@@ -103,8 +103,8 @@ bool CVarDefContStr::r_LoadVal( CScript & s )
 
 bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
-	UNREFERENCED_PARAMETER(pKey);
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pKey);
+	UnreferencedParameter(pSrc);
 	sVal = GetValStr();
 	return true;
 }

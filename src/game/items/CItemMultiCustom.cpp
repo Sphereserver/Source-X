@@ -1529,7 +1529,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
     // Speaking in this multis region.
     // return: true = command for the multi.
 
-    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1);
     if (iCmd < 0)
     {
         return CItemMulti::r_Verb(s, pSrc);
@@ -1542,7 +1542,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_ADDITEM:
         {
             tchar * ppArgs[4];
-            int iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
+            int iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), ",");
             if (iQty != 4)
             {
                 return false;
@@ -1559,7 +1559,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_ADDMULTI:
         {
             tchar * ppArgs[4];
-            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
+            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), ",");
             if (iQty != 4)
                 return false;
 
@@ -1644,7 +1644,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         case IMCV_REMOVEITEM:
         {
             tchar * ppArgs[4];
-            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
+            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), ",");
             if (iQty != 4)
                 return false;
 
@@ -1735,11 +1735,11 @@ lpctstr const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY + 1] = // static
 
 bool CItemMultiCustom::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemMultiCustom::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (index == -1)
     {
         if (!strnicmp(ptcKey, "DESIGN.", 5))
@@ -1841,7 +1841,7 @@ bool CItemMultiCustom::r_LoadVal(CScript & s)
         if (s.IsKey("COMP"))
         {
             tchar * ppArgs[5];
-            int iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
+            int iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), ",");
             if (iQty != 5)
                 return false;
 

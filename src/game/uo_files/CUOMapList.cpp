@@ -70,7 +70,7 @@ bool CUOMapList::Load(int map, char *args)
     else if ( !m_mapsinitalized[map] )	// disable double intialization
     {
         tchar * ppCmd[5];	// maxx,maxy,sectorsize,mapnum[like 0 for map0/statics0/staidx0],mapid
-        size_t iCount = Str_ParseCmds(args, ppCmd, CountOf(ppCmd), ",");
+        size_t iCount = Str_ParseCmds(args, ppCmd, ARRAY_COUNT(ppCmd), ",");
 
         if ( iCount <= 0 )	// simple MAPX= same as disabling the map
         {

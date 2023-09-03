@@ -33,5 +33,5 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
     m_wHue = cachedEntry->m_wHue;
     m_wLightIndex = cachedEntry->m_wLightIndex;
     m_height = cachedEntry->m_height;
-    Str_CopyLimitNull(m_name, cachedEntry->m_name, CountOf(m_name));
+    Str_CopyLimitNull(m_name, cachedEntry->m_name, ARRAY_COUNT(m_name));
 }

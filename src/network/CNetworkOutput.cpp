@@ -18,7 +18,7 @@
 ***************************************************************************/
 void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
-	UNREFERENCED_PARAMETER(dwFlags);
+	UnreferencedParameter(dwFlags);
 	ADDTOCALLSTACK("SendCompleted_Winsock");
 
 	CNetState* state = reinterpret_cast<CNetState*>(lpOverlapped->hEvent);

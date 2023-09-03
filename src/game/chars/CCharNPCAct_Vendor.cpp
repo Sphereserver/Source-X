@@ -63,7 +63,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
 	{
-		for ( size_t i = 0; i < CountOf(sm_VendorLayers); ++i )
+		for ( size_t i = 0; i < ARRAY_COUNT(sm_VendorLayers); ++i )
 		{
 			CItemContainer *pCont = GetBank(sm_VendorLayers[i]);
 			if ( !pCont )

@@ -815,9 +815,9 @@ void CCChampion::r_Write(CScript & s)
 
 bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
-    UNREFERENCED_PARAMETER(pSrc);
+    UnreferencedParameter(pSrc);
     ADDTOCALLSTACK("CCChampion::r_WriteVal");
-    int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 
     if (iCmd < 0)
     {
@@ -942,7 +942,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 bool CCChampion::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCChampion::r_LoadVal");
-    int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, (int)ARRAY_COUNT(sm_szLoadKeys) - 1);
     lpctstr ptcKey = s.GetKey();
        
     if (iCmd < 0)
@@ -995,7 +995,7 @@ bool CCChampion::r_LoadVal(CScript & s)
         {
             uchar iGroup = Exp_GetUCVal(ptcKey);
             tchar* piCmd[UCHAR_MAX];
-            size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
+            size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)ARRAY_COUNT(piCmd), ",");
             _spawnGroupsId[iGroup].clear();
             for (uint i = 0; i < iArgQty; ++i)
             {
@@ -1067,7 +1067,7 @@ bool CCChampion::r_LoadVal(CScript & s)
 void CCChampion::Delete(bool fForce)
 {
     ADDTOCALLSTACK("CCChampion::Delete");
-    UNREFERENCED_PARAMETER(fForce);
+    UnreferencedParameter(fForce);
     // KillChildren is being called from CCSpawn, must not call it twice.
     ClearWhiteCandles();
     ClearRedCandles();
@@ -1119,8 +1119,8 @@ bool CCChampion::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCChampion::r_Verb");
-    UNREFERENCED_PARAMETER(pSrc);
-    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, (int)CountOf(sm_szVerbKeys) - 1);
+    UnreferencedParameter(pSrc);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, (int)ARRAY_COUNT(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
         case ICHMPV_ADDOBJ:
@@ -1169,7 +1169,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
 void CCChampion::Copy(const CComponent * target)
 {
     ADDTOCALLSTACK("CCChampion::Copy");
-    UNREFERENCED_PARAMETER(target);
+    UnreferencedParameter(target);
     /*I don't see the point of duping a Champion, its insane and makes no sense,
     * if someone wants to totally dupe a champion it can be done from scripts.
     */
@@ -1237,9 +1237,9 @@ CCChampionDef::~CCChampionDef()
 
 bool CCChampionDef::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(pSrc);
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(pSrc);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CCChampionDef::r_WriteVal");
     CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)(int)FindTableSorted(ptcKey, sm_szLoadKeys, CHAMPIONDEF_QTY);
 
@@ -1310,7 +1310,7 @@ bool CCChampionDef::r_LoadVal(CScript& s)
 {
     ADDTOCALLSTACK("CCChampionDef::r_LoadVal");
     lpctstr ptcKey = s.GetKey();
-    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
+    CHAMPIONDEF_TYPE iCmd = (CHAMPIONDEF_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, (int)ARRAY_COUNT(sm_szLoadKeys) - 1);
 
     if (iCmd < 0)
     {
@@ -1334,7 +1334,7 @@ bool CCChampionDef::r_LoadVal(CScript& s)
     {
         uchar iGroup = Exp_GetUCVal(ptcKey);
         tchar* piCmd[UCHAR_MAX];
-        size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
+        size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)ARRAY_COUNT(piCmd), ",");
         _idSpawn[iGroup].clear();
         for (uint i = 0; i < iArgQty; ++i)
         {

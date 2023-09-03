@@ -153,7 +153,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID,
 		if ( ! s.IsKeyHead( "ON", 2 ))
 			continue;
 
-		size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
+		size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd) );
 		if ( iArgs == 0 )
 			continue;
 
@@ -387,13 +387,13 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		if ( ! item[i].ParseLine( s.GetArgRaw(), pObj, m_pChar ))
 			--i;
 
-		if ( i >= (CountOf( item ) - 1))
+		if ( i >= (ARRAY_COUNT( item ) - 1))
 			break;
 	}
 
 	m_tmMenu.m_ResourceID = rid;
 
-	ASSERT(i < CountOf(item));
+	ASSERT(i < ARRAY_COUNT(item));
 	addItemMenu( CLIMODE_MENU, item, i, pObj );
 }
 

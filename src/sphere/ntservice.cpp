@@ -52,7 +52,7 @@ static LPTSTR GetLastErrorText(LPTSTR lpszBuf, DWORD dwSize)
 //	PURPOSE:  Allows any thread to log a message to the NT Event Log
 void CNTService::ReportEvent( WORD wType, DWORD dwEventID, LPCTSTR lpszMsg, LPCTSTR lpszArgs )
 {
-	UNREFERENCED_PARAMETER(dwEventID);
+	UnreferencedParameter(dwEventID);
 	g_Log.Event(LOGM_INIT|(( wType == EVENTLOG_INFORMATION_TYPE ) ? LOGL_EVENT : LOGL_ERROR), "%s %s\n", lpszMsg, lpszArgs);
 }
 
@@ -319,7 +319,7 @@ bailout1:
 	sfaFailure.dwResetPeriod = (1 * 60 * 60); // reset failure count after an hour passes with no fails
 	sfaFailure.lpRebootMsg = nullptr;	// no reboot message
 	sfaFailure.lpCommand = nullptr;	// no command executed
-	sfaFailure.cActions = CountOf(scAction);		// number of actions
+	sfaFailure.cActions = ARRAY_COUNT(scAction);		// number of actions
 	sfaFailure.lpsaActions = scAction;	//
 	if ( !ChangeServiceConfig2(schService, SERVICE_CONFIG_FAILURE_ACTIONS, &sfaFailure) )
 	{
@@ -451,12 +451,12 @@ void CNTService::CmdMainStart()
 /////////////////////////////////////////////////////////////////////////////////////
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
+	UnreferencedParameter(hPrevInstance);
     IThread::setThreadName("T_SphereStartup");
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " \t") + 1;
 
 	// We need to find out what the server name is and the log files folder... look it up in the .ini file
     if (!g_Cfg.LoadIni(false))

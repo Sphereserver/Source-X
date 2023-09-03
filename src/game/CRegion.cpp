@@ -21,7 +21,7 @@ CTeleport::CTeleport( tchar * pszArgs )
 	// Assume valid iArgs >= 5
 
 	tchar * ppCmds[4];
-	size_t iArgs = Str_ParseCmds( pszArgs, ppCmds, CountOf( ppCmds ), "=" );
+	size_t iArgs = Str_ParseCmds( pszArgs, ppCmds, ARRAY_COUNT( ppCmds ), "=" );
 	if ( iArgs < 2 )
 	{
 		DEBUG_ERR(( "Bad CTeleport Def\n" ));
@@ -327,11 +327,11 @@ lpctstr const CRegion::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 
 bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CRegion::r_WriteVal");
 	EXC_TRY("WriteVal");
 	bool fZero = false;
-	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc ));
@@ -548,7 +548,7 @@ bool CRegion::r_LoadVal( CScript & s )
         }
     }
 
-	RC_TYPE index = (RC_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	RC_TYPE index = (RC_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 		return false;
 
@@ -819,7 +819,7 @@ bool CRegion::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		return true;
 	}
 
-	int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( ptcKey, sm_szVerbKeys, ARRAY_COUNT( sm_szVerbKeys )-1 );
 	switch (index)
 	{
 		case RV_ALLCLIENTS:
@@ -972,11 +972,11 @@ bool CRegionWorld::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 
 bool CRegionWorld::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CRegionWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
 	//bool	fZero	= false;
-	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
 	{
 		case RWC_RESOURCES:
 			m_Events.WriteResourceRefList( sVal );
@@ -1021,7 +1021,7 @@ bool CRegionWorld::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 
 	// Load the values for the region from script.
-	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
 	{
 		case RWC_RESOURCES:
 			SetModified( REGMOD_EVENTS );

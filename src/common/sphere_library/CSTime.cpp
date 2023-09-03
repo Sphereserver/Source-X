@@ -111,11 +111,11 @@ struct tm* CSTime::GetLocalTm(struct tm* ptm) const noexcept
 static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
-	UNREFERENCED_PARAMETER(expression);
-	UNREFERENCED_PARAMETER(function);
-	UNREFERENCED_PARAMETER(file);
-	UNREFERENCED_PARAMETER(line);
-	UNREFERENCED_PARAMETER(pReserved);
+	UnreferencedParameter(expression);
+	UnreferencedParameter(function);
+	UnreferencedParameter(file);
+	UnreferencedParameter(line);
+	UnreferencedParameter(pReserved);
 	DEBUG_ERR(("Invalid time format specified.\n"));
 }
 #endif
@@ -199,7 +199,7 @@ bool CSTime::Read(tchar *pszVal)
 	// Read the full date format.
 
 	tchar *ppCmds[10];
-	size_t iQty = Str_ParseCmds( pszVal, ppCmds, CountOf(ppCmds), "/,: \t");
+	size_t iQty = Str_ParseCmds( pszVal, ppCmds, ARRAY_COUNT(ppCmds), "/,: \t");
 	if ( iQty < 6 )
 		return false;
 

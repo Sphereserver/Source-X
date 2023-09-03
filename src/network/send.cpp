@@ -2850,7 +2850,7 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 		{
 			while (s.ReadKeyParse())
 			{
-				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, CountOf(CItemMessage::sm_szLoadKeys )-1))
+				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, ARRAY_COUNT(CItemMessage::sm_szLoadKeys )-1))
 				{
 					case CIC_AUTHOR:
 						author = s.GetArgStr();
@@ -2997,7 +2997,7 @@ PacketVendorSellList::PacketVendorSellList(const CChar* vendor) : PacketSend(XCM
 uint PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor)
 {
 	ADDTOCALLSTACK("PacketVendorSellList::fillSellList");
-	UNREFERENCED_PARAMETER(target);
+	UnreferencedParameter(target);
 	seek(7); // just to be sure
 
 	uint countpos = getPosition();
@@ -3540,7 +3540,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nachar *
  ***************************************************************************/
 PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
-	UNREFERENCED_PARAMETER(fFrontFall);
+	UnreferencedParameter(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
@@ -4580,7 +4580,7 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 		{
 			while (s.ReadKeyParse())
 			{
-				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, CountOf(CItemMessage::sm_szLoadKeys )-1))
+				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, ARRAY_COUNT(CItemMessage::sm_szLoadKeys )-1))
 				{
 					case CIC_AUTHOR:
 						author = s.GetArgStr();

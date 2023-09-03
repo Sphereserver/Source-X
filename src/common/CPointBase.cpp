@@ -27,7 +27,7 @@ lpctstr CPointBase::sm_szDirs[];
 void CPointBase::InitRuntimeStaticMembers()
 {
 	AssignInitlistToCSizedArray(
-		CPointBase::sm_szDirs, CountOf(CPointBase::sm_szDirs),
+		CPointBase::sm_szDirs, ARRAY_COUNT(CPointBase::sm_szDirs),
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_0),
 			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_1),
@@ -608,7 +608,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		return pItemDef->r_WriteVal( ptcKey, sVal, &g_Serv );
 	}
 
-	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+	int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 		return false;
 
@@ -744,7 +744,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CPointBase::r_LoadVal");
-	int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+	int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 		return false;
 
@@ -846,7 +846,7 @@ int CPointBase::Read( tchar * pszVal )
     ptTest.m_map = 0;
 
 	tchar * ppVal[4];
-	int iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
+	int iArgs = Str_ParseCmds( pszVal, ppVal, ARRAY_COUNT( ppVal ), " ,\t" );
 	switch ( iArgs )
 	{
 		default:

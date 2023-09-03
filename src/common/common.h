@@ -35,7 +35,7 @@
 #define _STRINGIFY_AUX(x)	#x
 #define STRINGIFY(x)		_STRINGIFY_AUX(x)
 
-#define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
+#define ARRAY_COUNT(a)			(sizeof(a)/sizeof((a)[0]))
 
 
 #if __cplusplus >= 201703L  // is C++17 enabled?
@@ -47,11 +47,18 @@
 	#define NODISCARD
 #endif
 
+
+/*
+	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
+	operator= is on many clases private and the UnreferencedParameter macro from mingw is (P)=(P),
+	so we have a compilation error here.
+*/
 #undef UNREFERENCED_PARAMETER
 template <typename T>
-inline void UNREFERENCED_PARAMETER(T const&) noexcept {
+inline void UnreferencedParameter(T const&) noexcept {
     ;
 }
+
 
 /* Sanitizers utility */
 

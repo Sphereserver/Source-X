@@ -269,7 +269,7 @@ dynamicstack<T>::dynamicstack() {
 }
 
 template <typename T>
-dynamicstack<T>::dynamicstack(size_t _) : dynamicstack<T>() { UNREFERENCED_PARAMETER(_); }
+dynamicstack<T>::dynamicstack(size_t _) : dynamicstack<T>() { UnreferencedParameter(_); }
 
 template <typename T>
 dynamicstack<T>::dynamicstack(const dynamicstack<T> & o) {

@@ -449,26 +449,26 @@ lpctstr const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 bool CSQLite::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CSQLite::r_GetRef");
-	UNREFERENCED_PARAMETER(ptcKey);
-	UNREFERENCED_PARAMETER(pRef);
+	UnreferencedParameter(ptcKey);
+	UnreferencedParameter(pRef);
 	return false;
 }
 
 bool CSQLite::r_LoadVal(CScript & s)
 {
 	ADDTOCALLSTACK("CSQLite::r_LoadVal");
-	UNREFERENCED_PARAMETER(s);
+	UnreferencedParameter(s);
 	return false;
 }
 
 bool CSQLite::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CSQLite::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case LDBO_CONNECTED:
@@ -505,7 +505,7 @@ bool CSQLite::r_Verb(CScript & s, CTextConsole * pSrc)
 	ADDTOCALLSTACK("CSQLite::r_Verb");
 	EXC_TRY("Verb");
 
-	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1);
+	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1);
 	switch ( index )
 	{
 		case LDBOV_CLOSE:

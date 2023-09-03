@@ -234,7 +234,7 @@ bool CPartyDef::SendRemoveList( CChar *pCharRemove, bool bFor )
 bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nachar *pText, int ilenmsg )
 {
 	ADDTOCALLSTACK("CPartyDef::MessageEvent");
-	UNREFERENCED_PARAMETER(ilenmsg);
+	UnreferencedParameter(ilenmsg);
 	if ( pText == nullptr )
 		return false;
 	if ( uidDst.IsValidUID() && !IsInParty(uidDst.CharFind()) )
@@ -552,7 +552,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 	lpctstr ptcKey = s.GetKey();
 
-	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 	switch ( index )
 	{
 		case PDC_SPEECHFILTER:
@@ -596,8 +596,8 @@ bool CPartyDef::r_LoadVal( CScript &s )
 
 bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CPartyDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 
@@ -622,7 +622,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 	}
 
 	bool fZero = false;
-	switch ( FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+	switch ( FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1) )
 	{
 		case PDC_ISSAMEPARTYOF:
 		{
@@ -727,7 +727,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		}
 	}
 
-	int iIndex = FindTableSorted(ptcKey, sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+	int iIndex = FindTableSorted(ptcKey, sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1);
 	switch ( iIndex )
 	{
 		case PDV_ADDMEMBER:
@@ -876,7 +876,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 bool CPartyDef::r_Load( CScript &s )
 { 
 	ADDTOCALLSTACK("CPartyDef::r_Load");
-	UNREFERENCED_PARAMETER(s);
+	UnreferencedParameter(s);
 	return false; 
 }
 

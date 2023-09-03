@@ -16,15 +16,15 @@ PacketManager::PacketManager(void)
 PacketManager::~PacketManager(void)
 {
     // delete standard packet handlers
-    for (size_t i = 0; i < CountOf(m_handlers); ++i)
+    for (size_t i = 0; i < ARRAY_COUNT(m_handlers); ++i)
         unregisterPacket((uint)i);
 
     // delete extended packet handlers
-    for (size_t i = 0; i < CountOf(m_extended); ++i)
+    for (size_t i = 0; i < ARRAY_COUNT(m_extended); ++i)
         unregisterExtended((uint)i);
 
     // delete encoded packet handlers
-    for (size_t i = 0; i < CountOf(m_encoded); ++i)
+    for (size_t i = 0; i < ARRAY_COUNT(m_encoded); ++i)
         unregisterEncoded((uint)i);
 }
 
@@ -151,7 +151,7 @@ void PacketManager::registerPacket(uint id, Packet* handler)
 {
     // assign standard packet handler
     ADDTOCALLSTACK("PacketManager::registerPacket");
-    ASSERT(id < CountOf(m_handlers));
+    ASSERT(id < ARRAY_COUNT(m_handlers));
     unregisterPacket(id);
     m_handlers[id] = handler;
 }
@@ -160,7 +160,7 @@ void PacketManager::registerExtended(uint id, Packet* handler)
 {
     // assign extended packet handler
     ADDTOCALLSTACK("PacketManager::registerExtended");
-    ASSERT(id < CountOf(m_extended));
+    ASSERT(id < ARRAY_COUNT(m_extended));
     unregisterExtended(id);
     m_extended[id] = handler;
 }
@@ -169,7 +169,7 @@ void PacketManager::registerEncoded(uint id, Packet* handler)
 {
     // assign encoded packet handler
     ADDTOCALLSTACK("PacketManager::registerEncoded");
-    ASSERT(id < CountOf(m_encoded));
+    ASSERT(id < ARRAY_COUNT(m_encoded));
     unregisterEncoded(id);
     m_encoded[id] = handler;
 }
@@ -178,7 +178,7 @@ void PacketManager::unregisterPacket(uint id)
 {
     // delete standard packet handler
     ADDTOCALLSTACK("PacketManager::unregisterPacket");
-    ASSERT(id < CountOf(m_handlers));
+    ASSERT(id < ARRAY_COUNT(m_handlers));
     if (m_handlers[id] == nullptr)
         return;
 
@@ -190,7 +190,7 @@ void PacketManager::unregisterExtended(uint id)
 {
     // delete extended packet handler
     ADDTOCALLSTACK("PacketManager::unregisterExtended");
-    ASSERT(id < CountOf(m_extended));
+    ASSERT(id < ARRAY_COUNT(m_extended));
     if (m_extended[id] == nullptr)
         return;
 
@@ -202,7 +202,7 @@ void PacketManager::unregisterEncoded(uint id)
 {
     // delete encoded packet handler
     ADDTOCALLSTACK("PacketManager::unregisterEncoded");
-    ASSERT(id < CountOf(m_encoded));
+    ASSERT(id < ARRAY_COUNT(m_encoded));
     if (m_encoded[id] == nullptr)
         return;
 
@@ -213,7 +213,7 @@ void PacketManager::unregisterEncoded(uint id)
 Packet* PacketManager::getHandler(uint id) const
 {
     // get standard packet handler
-    if (id >= CountOf(m_handlers))
+    if (id >= ARRAY_COUNT(m_handlers))
         return nullptr;
 
     return m_handlers[id];
@@ -222,7 +222,7 @@ Packet* PacketManager::getHandler(uint id) const
 Packet* PacketManager::getExtendedHandler(uint id) const
 {
     // get extended packet handler
-    if (id >= CountOf(m_extended))
+    if (id >= ARRAY_COUNT(m_extended))
         return nullptr;
 
     return m_extended[id];
@@ -231,7 +231,7 @@ Packet* PacketManager::getExtendedHandler(uint id) const
 Packet* PacketManager::getEncodedHandler(uint id) const
 {
     // get encoded packet handler
-    if (id >= CountOf(m_encoded))
+    if (id >= ARRAY_COUNT(m_encoded))
         return nullptr;
 
     return m_encoded[id];

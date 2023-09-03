@@ -276,7 +276,7 @@ int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int 
 
         // Flip all from network order.
         wchar szBuffer[1024 * 6];
-        for (; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp)
+        for (; iInp < (int)ARRAY_COUNT(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp)
         {
             szBuffer[iInp] = pInp[iInp];
         }

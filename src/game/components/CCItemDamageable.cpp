@@ -101,7 +101,7 @@ void CCItemDamageable::OnTickStatsUpdate()
 
 void CCItemDamageable::Delete(bool fForced)
 {
-    UNREFERENCED_PARAMETER(fForced);
+    UnreferencedParameter(fForced);
 }
 
 enum CIDMGL_TYPE
@@ -121,7 +121,7 @@ lpctstr const CCItemDamageable::sm_szLoadKeys[CIDMGL_QTY + 1] =
 bool CCItemDamageable::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCItemDamageable::r_LoadVal");
-    int iKeyNum = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iKeyNum = FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (iKeyNum < 0)
     {
         return false;
@@ -147,8 +147,8 @@ bool CCItemDamageable::r_LoadVal(CScript & s)
 bool CCItemDamageable::r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCItemDamageable::r_WriteVal");
-    UNREFERENCED_PARAMETER(pSrc);
-    int iKeyNum = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    UnreferencedParameter(pSrc);
+    int iKeyNum = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (iKeyNum < 0)
     {
         return false;
@@ -188,15 +188,15 @@ void CCItemDamageable::r_Write(CScript & s)
 
 bool CCItemDamageable::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
-    UNREFERENCED_PARAMETER(ptcKey);
-    UNREFERENCED_PARAMETER(pRef);
+    UnreferencedParameter(ptcKey);
+    UnreferencedParameter(pRef);
     return false;
 }
 
 bool CCItemDamageable::r_Verb(CScript & s, CTextConsole * pSrc)
 {
-    UNREFERENCED_PARAMETER(s);
-    UNREFERENCED_PARAMETER(pSrc);
+    UnreferencedParameter(s);
+    UnreferencedParameter(pSrc);
     return false;
 }
 

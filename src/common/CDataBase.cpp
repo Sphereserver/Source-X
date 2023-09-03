@@ -350,21 +350,21 @@ lpctstr const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 bool CDataBase::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CDataBase::r_GetRef");
-	UNREFERENCED_PARAMETER(ptcKey);
-	UNREFERENCED_PARAMETER(pRef);
+	UnreferencedParameter(ptcKey);
+	UnreferencedParameter(pRef);
 	return false;
 }
 
 bool CDataBase::r_LoadVal(CScript & s)
 {
 	ADDTOCALLSTACK("CDataBase::r_LoadVal");
-	UNREFERENCED_PARAMETER(s);
+	UnreferencedParameter(s);
 	return false;
 /*
 	lpctstr ptcKey = s.GetKey();
 	EXC_TRY("LoadVal");
 
-	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1);
 
 	switch ( index )
 	{
@@ -384,8 +384,8 @@ bool CDataBase::r_LoadVal(CScript & s)
 
 bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
@@ -396,7 +396,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 		return true;
 	}
 
-	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case DBO_AEXECUTE:
@@ -409,7 +409,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 				if ( ptcKey[0] != '\0' )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs )) != 2)
+					if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT( ppArgs )) != 2)
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -475,7 +475,7 @@ bool CDataBase::r_Verb(CScript & s, CTextConsole * pSrc)
 	if (!g_Cfg.m_bMySql)
 		return true;
 
-	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1);
+	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1);
 	switch ( index )
 	{
 		case DBOV_CLOSE:

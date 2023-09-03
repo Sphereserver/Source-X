@@ -40,7 +40,7 @@ CChar * CChar::CreateNPC( CREID_TYPE baseID )	// static
 
 CCharNPC::CCharNPC( CChar * pChar, NPCBRAIN_TYPE NPCBrain )
 {
-	UNREFERENCED_PARAMETER(pChar);
+	UnreferencedParameter(pChar);
 	m_Brain = NPCBrain;
 	m_Home_Dist_Wander = INT16_MAX;	// as far as i want.
 	m_Act_Motivation = 0;
@@ -125,7 +125,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		case CNC_SPELLADD:
 		{
 			int64 ppCmd[255];
-			const int count = Str_ParseCmds(s.GetArgStr(), ppCmd, CountOf(ppCmd));
+			const int count = Str_ParseCmds(s.GetArgStr(), ppCmd, ARRAY_COUNT(ppCmd));
 			if (count < 1)
 				return false;
 			for (int i = 0; i < count; ++i)
@@ -234,7 +234,7 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 
 void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 {
-	UNREFERENCED_PARAMETER(pChar);
+	UnreferencedParameter(pChar);
 
 	// This says we are an NPC.
 	s.WriteKeyVal("NPC", m_Brain );
@@ -312,7 +312,7 @@ void CChar::NPC_CreateTrigger()
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 	lpctstr pszTrigName = "@Create";
-	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, CountOf(sm_szTrigName) - 1);	
+	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, ARRAY_COUNT(sm_szTrigName) - 1);	
 
 	// 2) TEVENTS
 	for (size_t i = 0; i < pCharDef->m_TEvents.size(); ++i)

@@ -407,7 +407,7 @@ void CChar::Attacker_CheckTimeout()
             {
                 const bool fCleanupSuccess = Attacker_Delete(count, true, ATTACKER_CLEAR_FORCED);
                 ASSERT(fCleanupSuccess);
-                UNREFERENCED_PARAMETER(fCleanupSuccess);
+                UnreferencedParameter(fCleanupSuccess);
                 //if (!fCleanupSuccess)
                 //    ++count;
             }

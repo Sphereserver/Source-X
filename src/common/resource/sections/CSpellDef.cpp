@@ -89,10 +89,10 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
 
 bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CSpellDef::r_WriteVal");
     EXC_TRY("WriteVal");
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
     if (index < 0)
     {
         if (!strnicmp( "RESOURCES.", ptcKey, 10 ))
@@ -211,7 +211,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
     ADDTOCALLSTACK("CSpellDef::r_LoadVal");
     EXC_TRY("LoadVal");
     // RES_SPELL
-    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case SPC_CAST_TIME:
             m_CastTime.Load( s.GetArgRaw());

@@ -44,8 +44,8 @@ bool CNTWindow::CAboutDlg::OnInitDialog()
 
 bool CNTWindow::CAboutDlg::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
-	UNREFERENCED_PARAMETER(wNotifyCode);
-	UNREFERENCED_PARAMETER(hwndCtl);
+	UnreferencedParameter(wNotifyCode);
+	UnreferencedParameter(hwndCtl);
 
 	// WM_COMMAND
 	switch ( wID )
@@ -130,8 +130,8 @@ bool CNTWindow::CStatusDlg::OnInitDialog()
 
 bool CNTWindow::CStatusDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
-	UNREFERENCED_PARAMETER(wNotifyCode);
-	UNREFERENCED_PARAMETER(hwndCtl);
+	UnreferencedParameter(wNotifyCode);
+	UnreferencedParameter(hwndCtl);
 
 	// WM_COMMAND
 	switch ( wID )
@@ -396,7 +396,7 @@ bool CNTWindow::RegisterClass(char *className)	// static
 
 int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 {
-	UNREFERENCED_PARAMETER(lParam);
+	UnreferencedParameter(lParam);
 	CSWindow::OnCreate(hWnd);
 
 	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, nullptr,
@@ -438,7 +438,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
         m_pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
         m_pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
         m_pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
-        Str_CopyLimitNull(m_pnid.szTip, theApp.m_pszAppName, CountOf(m_pnid.szTip)-1);
+        Str_CopyLimitNull(m_pnid.szTip, theApp.m_pszAppName, ARRAY_COUNT(m_pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_ADD, &m_pnid);
 	}
 
@@ -457,13 +457,13 @@ void CNTWindow::OnDestroy()
 
 void CNTWindow::OnSetFocus( HWND hWndLoss )
 {
-	UNREFERENCED_PARAMETER(hWndLoss);
+	UnreferencedParameter(hWndLoss);
 	m_wndInput.SetFocus();
 }
 
 LRESULT CNTWindow::OnUserTrayNotify( WPARAM wID, LPARAM lEvent )
 {
-	UNREFERENCED_PARAMETER(wID);
+	UnreferencedParameter(wID);
 
 	// WM_USER_TRAY_NOTIFY
 	switch ( lEvent )
@@ -529,7 +529,7 @@ void CNTWindow::OnSize( WPARAM nType, int cx, int cy )
 			LOGFONT logfont;
 			int iRet = ::GetObject(hFont, sizeof(logfont),&logfont );
 			ASSERT(iRet==sizeof(logfont));
-			UNREFERENCED_PARAMETER(iRet);
+			UnreferencedParameter(iRet);
 
 			m_iHeightInput = abs( logfont.lfHeight );
 			ASSERT(m_iHeightInput);
@@ -558,8 +558,8 @@ bool CNTWindow::OnClose()
 bool CNTWindow::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	// WM_COMMAND
-	UNREFERENCED_PARAMETER(wNotifyCode);
-	UNREFERENCED_PARAMETER(hwndCtl);
+	UnreferencedParameter(wNotifyCode);
+	UnreferencedParameter(hwndCtl);
 
 	switch ( wID )
 	{
@@ -643,8 +643,8 @@ bool CNTWindow::OnSysCommand( WPARAM uCmdType, int xPos, int yPos )
 {
 	// WM_SYSCOMMAND
 	// return : 1 = i processed this.
-	UNREFERENCED_PARAMETER(xPos);
-	UNREFERENCED_PARAMETER(yPos);
+	UnreferencedParameter(xPos);
+	UnreferencedParameter(yPos);
 
 	switch ( uCmdType )
 	{
@@ -897,7 +897,7 @@ bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdSho
 	char	className[32] = SPHERE_TITLE;
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	int argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " \t") + 1;
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
 		if ( toupper(argv[1][1]) == 'C' )
@@ -1007,7 +1007,7 @@ void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		theApp.m_wndMain.m_pnid.uFlags = NIF_TIP;
-        Str_CopyLimitNull(theApp.m_wndMain.m_pnid.szTip, psTitle, CountOf(theApp.m_wndMain.m_pnid.szTip)-1);
+        Str_CopyLimitNull(theApp.m_wndMain.m_pnid.szTip, psTitle, ARRAY_COUNT(theApp.m_wndMain.m_pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.m_pnid);
 	}
 }

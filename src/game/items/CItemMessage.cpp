@@ -51,7 +51,7 @@ bool CItemMessage::r_LoadVal(CScript &s)
             return true;
         }
 
-        switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+        switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1) )
         {
             case CIC_AUTHOR:
             {
@@ -79,7 +79,7 @@ bool CItemMessage::r_LoadVal(CScript &s)
 
 bool CItemMessage::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemMessage::r_WriteVal");
     EXC_TRY("WriteVal");
 
@@ -94,7 +94,7 @@ bool CItemMessage::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc
         return true;
     }
 
-    switch (FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    switch (FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1))
     {
         case CIC_AUTHOR:
             sVal = m_sAuthor;

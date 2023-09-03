@@ -173,7 +173,7 @@ int CCrypto::GetVerFromString( lpctstr pszVersion )
 	}
 
 	tchar *piVer[3];
-	Str_ParseCmds(const_cast<tchar *>(pszVersion), piVer, CountOf(piVer), ".");
+	Str_ParseCmds(const_cast<tchar *>(pszVersion), piVer, ARRAY_COUNT(piVer), ".");
 
 	// Don't rely on all values reported by client, because it can be easily faked. Injection users can report any
 	// client version they want, and some custom clients may also report client version as "Custom" instead X.X.Xy

@@ -382,7 +382,7 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 
 	pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * 1000);
 	static const SOUND_TYPE sm_TrainingDummySounds[] = { 0x3A4, 0x3A6, 0x3A9, 0x3AE, 0x3B4, 0x3B6 };
-	pItem->Sound(sm_TrainingDummySounds[Calc_GetRandVal(CountOf(sm_TrainingDummySounds))]);
+	pItem->Sound(sm_TrainingDummySounds[Calc_GetRandVal(ARRAY_COUNT(sm_TrainingDummySounds))]);
 	Skill_Experience(skill, Calc_GetRandVal(40));
 	return true;
 }
@@ -592,7 +592,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT3),
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT4)
 		};
-		Emote(sm_Txt_ArcheryButte_Success[Calc_GetRandVal(CountOf(sm_Txt_ArcheryButte_Success))]);
+		Emote(sm_Txt_ArcheryButte_Success[Calc_GetRandVal(ARRAY_COUNT(sm_Txt_ArcheryButte_Success))]);
 		Sound(pWeapon->Weapon_GetSoundHit());
 
 		if ( WeaponAmmoID )
@@ -1058,7 +1058,7 @@ void CChar::Use_Drink( CItem * pItem )
 			SetPoison(pItem->m_itFood.m_poison_skill * 10, 1 + (pItem->m_itFood.m_poison_skill / 50), this);
 	}
 
-	//Sound(sm_DrinkSounds[Calc_GetRandVal(CountOf(sm_DrinkSounds))]);
+	//Sound(sm_DrinkSounds[Calc_GetRandVal(ARRAY_COUNT(sm_DrinkSounds))]);
 	UpdateAnimate(ANIM_EAT);
 	pItem->ConsumeAmount();
 
@@ -1859,7 +1859,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 	if ( !fForce )
 	{
 		// Block those layers that are already used
-		for ( size_t i = 0; i < CountOf(iBestScore); ++i )
+		for ( size_t i = 0; i < ARRAY_COUNT(iBestScore); ++i )
 		{
 			pBestArmor[i] = LayerFind((LAYER_TYPE)i);
 			if ( pBestArmor[i] != nullptr )
@@ -1887,7 +1887,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 	}
 
 	// Equip all the stuff we found
-	for ( size_t i = 0; i < CountOf(iBestScore); ++i )
+	for ( size_t i = 0; i < ARRAY_COUNT(iBestScore); ++i )
 	{
 		if ( pBestArmor[i] )
 			ItemEquip(pBestArmor[i], this);

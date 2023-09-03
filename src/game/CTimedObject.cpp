@@ -42,7 +42,7 @@ void CTimedObject::_GoAwake()
 bool CTimedObject::_CanTick(bool fParentGoingToSleep) const
 {
     //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
-    UNREFERENCED_PARAMETER(fParentGoingToSleep);
+    UnreferencedParameter(fParentGoingToSleep);
     return !_IsSleeping();
 }
 

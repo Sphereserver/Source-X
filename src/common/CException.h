@@ -125,7 +125,7 @@ public:
 	lpctstr inLocalArgs = a; \
 	uint inLocalBlockCnt = 0; \
 	bool fCATCHExcept = false; \
-	UNREFERENCED_PARAMETER(fCATCHExcept); \
+	UnreferencedParameter(fCATCHExcept); \
 	try \
 	{
 
@@ -203,7 +203,7 @@ public:
 	lpctstr inLocalSubArgs = a; \
 	uint inLocalSubBlockCnt = 0; \
 	bool fCATCHExceptSub = false; \
-	UNREFERENCED_PARAMETER(fCATCHExceptSub); \
+	UnreferencedParameter(fCATCHExceptSub); \
 	try \
 	{
 
@@ -287,12 +287,12 @@ public:
 #else //!_EXCEPTIONS_DEBUG
 
 
-	#define EXC_TRY(a)          { UNREFERENCED_PARAMETER(a)
-	#define EXC_SET_BLOCK(a)      UNREFERENCED_PARAMETER(a)
-	#define EXC_SETSUB_BLOCK(a)   UNREFERENCED_PARAMETER(a)
+	#define EXC_TRY(a)          { UnreferencedParameter(a)
+	#define EXC_SET_BLOCK(a)      UnreferencedParameter(a)
+	#define EXC_SETSUB_BLOCK(a)   UnreferencedParameter(a)
 	#define EXC_CATCH           }
-	#define EXC_TRYSUB(a)       { UNREFERENCED_PARAMETER(a)
-	#define EXC_CATCHSUB(a)       UNREFERENCED_PARAMETER(a); }
+	#define EXC_TRYSUB(a)       { UnreferencedParameter(a)
+	#define EXC_CATCHSUB(a)       UnreferencedParameter(a); }
 
 	#define EXC_DEBUG_START     if (false) \
 	                            {
@@ -305,8 +305,8 @@ public:
     #define EXC_NOTIFY_DEBUGGER     (void)0
 	#define EXC_ADD_SCRIPT          (void)0
 	#define EXC_ADD_SCRIPTSRC       (void)0
-	#define EXC_ADD_KEYRET(a)       UNREFERENCED_PARAMETER(a)
-	#define EXC_CATCH_EXCEPTION(a)  UNREFERENCED_PARAMETER(a)
+	#define EXC_ADD_KEYRET(a)       UnreferencedParameter(a)
+	#define EXC_CATCH_EXCEPTION(a)  UnreferencedParameter(a)
 
 
 #endif //_EXCEPTIONS_DEBUG

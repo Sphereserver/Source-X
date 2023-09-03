@@ -108,10 +108,10 @@ lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 
 bool CWebPageDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
 	{
 		case WC_PLEVEL:
 			sVal.FormatVal( m_privlevel );
@@ -144,7 +144,7 @@ bool CWebPageDef::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CWebPageDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
 	{
 		case WC_PLEVEL:
 			m_privlevel = static_cast<PLEVEL_TYPE>(s.GetArgVal());
@@ -184,7 +184,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 	sm_iListIndex = 0;
 	tchar *pszTmp2 = Str_GetTemp();
 
-	WV_TYPE iHeadKey = (WV_TYPE) FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+	WV_TYPE iHeadKey = (WV_TYPE) FindTableSorted( s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1 );
 	switch ( iHeadKey )
 	{
 		case WV_WEBPAGE:
@@ -440,7 +440,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	if ( pszExt == nullptr || pszExt[0] == '\0' )
 		return false;
 
-	int iType = FindTableSorted( pszExt, sm_szPageExt, CountOf( sm_szPageExt ));
+	int iType = FindTableSorted( pszExt, sm_szPageExt, ARRAY_COUNT( sm_szPageExt ));
 	if ( iType < 0 )
 		return false;
 	m_type = sm_szPageExtType[iType];
@@ -516,7 +516,7 @@ lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateIfModifiedSince )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPageRequest");
-	UNREFERENCED_PARAMETER(pszURLArgs);
+	UnreferencedParameter(pszURLArgs);
 	// Got a web page request from the client.
 	// ARGS:
 	//  pszURLArgs = args on the URL line ex. http://www.hostname.com/dir?args
@@ -689,7 +689,7 @@ static int HtmlDeCode( tchar * pszDst, lpctstr pszSrc )
 bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pContentData, size_t uiContentLength )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPagePost");
-	UNREFERENCED_PARAMETER(pszURLArgs);
+	UnreferencedParameter(pszURLArgs);
 	// RETURN: true = this was the page of interest.
 
 	ASSERT(pClient);
@@ -702,7 +702,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	// Parse the data.
 	pContentData[uiContentLength] = 0;
 	tchar * ppArgs[64];
-	int iArgs = Str_ParseCmds(pContentData, ppArgs, CountOf(ppArgs), "&");
+	int iArgs = Str_ParseCmds(pContentData, ppArgs, ARRAY_COUNT(ppArgs), "&");
 	if (( iArgs <= 0 ) || ( iArgs >= 63 ))
 		return false;
 

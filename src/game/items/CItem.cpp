@@ -448,7 +448,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// ITEM=#id,#amount,R#chance
 
     tchar * pptcCmd[3];
-    int iQty = Str_ParseCmds(pArg, pptcCmd, CountOf(pptcCmd), ",");
+    int iQty = Str_ParseCmds(pArg, pptcCmd, ARRAY_COUNT(pptcCmd), ",");
     if (iQty < 1)
         return nullptr;
 
@@ -589,7 +589,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 		if ( s.IsKeyHead( "ON", 2 ))
 			break;
 
-		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, CountOf( sm_szTemplateTable )-1 );
+		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, ARRAY_COUNT( sm_szTemplateTable )-1 );
 		switch (index)
 		{
 			case ITC_BUY: // "BUY"
@@ -2057,8 +2057,8 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 {
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
-	UNREFERENCED_PARAMETER(pszCmd);
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pszCmd);
+	UnreferencedParameter(pSrc);
 	ASSERT(false);
 }
 
@@ -2137,7 +2137,7 @@ void CItem::SetAmount(word amount )
 			ITEMID_ORE_2,
 			ITEMID_ORE_3
 		};
-		SetDispID( ( GetAmount() >= CountOf(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
+		SetDispID( ( GetAmount() >= ARRAY_COUNT(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
 	}
 
 	CContainer * pParentCont = dynamic_cast <CContainer*> (GetParent());
@@ -2478,7 +2478,7 @@ bool CItem::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
         return true;
     }
 
-	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
 		ptcKey += strlen( sm_szRefKeys[i] );
@@ -2553,7 +2553,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], ptcKey, 8 ) )
 		index = IC_ADDSPELL;
 	else
-		index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+		index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
 	bool fDoDefault = false;
 
@@ -2969,7 +2969,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
     }
 
     EXC_SET_BLOCK("Keyword");
-    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 	switch (index)
 	{
 		//Set as Strings
@@ -3074,7 +3074,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				}
 
 				tchar *ppVal[2];
-				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, CountOf(ppVal), " ,\t");
+				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, ARRAY_COUNT(ppVal), " ,\t");
 				bool includeLower = 0;	// should i add also the lower circles?
 				int addCircle = 0;
 
@@ -3150,7 +3150,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				{
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[2];
-					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
+					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, ARRAY_COUNT( ppVal ), " ,\t" );
 					if ( iArgs < 2 )
 					{
 						DEBUG_ERR(( "Bad CONTP usage (not enough parameters)\n" ));
@@ -3284,7 +3284,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				{
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[4];
-					iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
+					iArgs = Str_ParseCmds( pszTemp, ppVal, ARRAY_COUNT( ppVal ), " ,\t" );
 					switch ( iArgs )
 					{
 						default:
@@ -3411,7 +3411,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
     }
 
 	EXC_SET_BLOCK("Verb-Statement");
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, ARRAY_COUNT( sm_szVerbKeys )-1 );
 	if ( index < 0 )
 	{
 		return CObjBase::r_Verb( s, pSrc );
@@ -3533,7 +3533,7 @@ bool CItem::IsTriggerActive(lpctstr trig) const
     if (_iRunningTriggerId != -1)
     {
         ASSERT(_iRunningTriggerId < ITRIG_QTY);
-        int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
+        int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
     ASSERT(!_sRunningTrigger.empty());
@@ -3548,7 +3548,7 @@ void CItem::SetTriggerActive(lpctstr trig)
         _sRunningTrigger.clear();
         return;
     }
-    int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
+    int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
     if (iAction != -1)
     {
         _iRunningTriggerId = (short)iAction;
@@ -3591,7 +3591,7 @@ standard_order:
     {
 		tchar ptcCharTrigName[TRIGGER_NAME_MAX_LEN] = "@ITEM";
 		Str_ConcatLimitNull(ptcCharTrigName + 5, pszTrigName + 1, TRIGGER_NAME_MAX_LEN - 5);
-        const CTRIG_TYPE iCharAction = (CTRIG_TYPE)FindTableSorted(ptcCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName) - 1);
+        const CTRIG_TYPE iCharAction = (CTRIG_TYPE)FindTableSorted(ptcCharTrigName, CChar::sm_szTrigName, ARRAY_COUNT(CChar::sm_szTrigName) - 1);
         if ((iCharAction > XTRIG_UNKNOWN) && IsTrigUsed(ptcCharTrigName))
         {
             CChar* pChar = pSrc->GetChar();
@@ -5349,7 +5349,7 @@ int CItem::Use_Trap()
 bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 {
 	ADDTOCALLSTACK("CItem::SetMagicLock");
-	UNREFERENCED_PARAMETER(iSkillLevel);
+	UnreferencedParameter(iSkillLevel);
 	if ( pCharSrc == nullptr )
 		return false;
 
@@ -5428,8 +5428,8 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting, int64 iDuration)
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
-	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
-	UNREFERENCED_PARAMETER(iDuration);
+	UnreferencedParameter(bReflecting);	// items are not affected by Magic Reflection
+	UnreferencedParameter(iDuration);
     // A spell is cast on this item.
     // ARGS:
     //  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)

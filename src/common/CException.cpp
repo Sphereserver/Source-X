@@ -241,7 +241,7 @@ void SetExceptionTranslator()
 #ifndef _WIN32
 void _cdecl Signal_Hangup(int sig = 0) // If shutdown is initialized
 {
-    UNREFERENCED_PARAMETER(sig);
+    UnreferencedParameter(sig);
 
 #ifdef THREAD_TRACK_CALLSTACK
     static bool _Signal_Hangup_stack_printed = false;
@@ -334,7 +334,7 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
 
 void _cdecl Signal_Children(int sig = 0)
 {
-    UNREFERENCED_PARAMETER(sig);
+    UnreferencedParameter(sig);
     while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
 }
 #endif

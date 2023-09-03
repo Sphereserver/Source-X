@@ -690,7 +690,7 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 
 bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc )
 {
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
 	EXC_TRY("WriteVal");
 
@@ -702,7 +702,7 @@ bool CContainer::r_WriteValContainer( lpctstr ptcKey, CSString &sVal, CTextConso
 		"RESTEST"
 	};
 
-	int i = FindTableHeadSorted(ptcKey, sm_szParams, CountOf(sm_szParams));
+	int i = FindTableHeadSorted(ptcKey, sm_szParams, ARRAY_COUNT(sm_szParams));
 	if ( i < 0 )
 		return false;
 
