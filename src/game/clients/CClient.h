@@ -50,17 +50,14 @@ public:
 	static const char *m_sClassName;
 	struct TResponseString
 	{
-	public:
 		const word m_ID;
 		CSString const m_sText;
 
 		TResponseString( word id, lpctstr pszText ) : m_ID( id ), m_sText( pszText )
 		{
 		}
-
-	private:
-		TResponseString( const TResponseString& copy );
-		TResponseString& operator=( const TResponseString& other );
+        TResponseString(const TResponseString& copy) = delete;
+        TResponseString& operator=(const TResponseString& other) = delete;
 	};
 
 	CSTypedArray<dword>				m_CheckArray;
@@ -72,10 +69,8 @@ public:
 	bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 
 	CDialogResponseArgs() = default;
-
-private:
-	CDialogResponseArgs( const CDialogResponseArgs& copy );
-	CDialogResponseArgs& operator=( const CDialogResponseArgs& other );
+    CDialogResponseArgs(const CDialogResponseArgs& copy) = delete;
+    CDialogResponseArgs& operator=(const CDialogResponseArgs& other) = delete;
 };
 
 //////////////////
@@ -658,75 +653,28 @@ public:
 	// Test what I can do
 	CAccount * GetAccount() const
 	{
-		return( m_pAccount );
+		return m_pAccount;
 	}
-	bool IsPriv( word flag ) const
-	{	// PRIV_GM
-		if ( GetAccount() == nullptr )
-			return false;
-		return( GetAccount()->IsPriv( flag ));
-	}
-	void SetPrivFlags( word wPrivFlags )
-	{
-		if ( GetAccount() == nullptr )
-			return;
-		GetAccount()->SetPrivFlags( wPrivFlags );
-	}
-	void ClearPrivFlags( word wPrivFlags )
-	{
-		if ( GetAccount() == nullptr )
-			return;
-		GetAccount()->ClearPrivFlags( wPrivFlags );
-	}
+    bool IsPriv(word flag) const;
+    void SetPrivFlags(word wPrivFlags);
+    void ClearPrivFlags(word wPrivFlags);
 
 	// ------------------------------------------------
-	bool IsResDisp( byte flag ) const
-	{
-		if ( GetAccount() == nullptr )
-			return false;
-		return( GetAccount()->IsResDisp( flag ) );
-	}
-	byte GetResDisp() const
-	{
-		if ( GetAccount() == nullptr )
-			return( UINT8_MAX );
-		return( GetAccount()->GetResDisp() );
-	}
-	bool SetResDisp( byte res )
-	{
-		if ( GetAccount() == nullptr )
-			return false;
-		return ( GetAccount()->SetResDisp( res ) );
-	}
-	bool SetGreaterResDisp( byte res )
-	{
-		if ( GetAccount() == nullptr )
-			return false;
-		return( GetAccount()->SetGreaterResDisp( res ) );
-	}
-	// ------------------------------------------------
-	void SetScreenSize(ushort x, ushort y)
-	{
-		m_ScreenSize.x = x;
-		m_ScreenSize.y = y;
-	}
 
-	PLEVEL_TYPE GetPrivLevel() const
+    bool IsResDisp(byte flag) const;
+    byte GetResDisp() const;
+    bool SetResDisp(byte res);
+    bool SetGreaterResDisp(byte res);
+
+	// ------------------------------------------------
+
+    void SetScreenSize(ushort x, ushort y);
+
+    PLEVEL_TYPE GetPrivLevel() const;
+    virtual lpctstr GetName() const override;
+	virtual CChar * GetChar() const override
 	{
-		// PLEVEL_Counsel
-		if ( GetAccount() == nullptr )
-			return( PLEVEL_Guest );
-		return( GetAccount()->GetPrivLevel());
-	}
-	lpctstr GetName() const
-	{
-		if ( GetAccount() == nullptr )
-			return( "NA" );
-		return( GetAccount()->GetName());
-	}
-	CChar * GetChar() const
-	{
-		return( m_pChar );
+		return m_pChar;
 	}
 
 	void SysMessage( lpctstr pMsg ) const; // System message (In lower left corner)
@@ -742,14 +690,14 @@ public:
 	bool Cmd_Use_Item( CItem * pItem, bool fTestTouch, bool fScript = false );
 	void Cmd_EditItem( CObjBase * pObj, int iSelect );
 
-	bool IsConnectTypePacket() const
+	bool IsConnectTypePacket() const noexcept
 	{
 		// This is a game or login server.
 		// m_Crypt.IsInit()
 		return ( (m_iConnectType == CONNECT_CRYPT) || (m_iConnectType == CONNECT_LOGIN) || (m_iConnectType == CONNECT_GAME) );
 	}
 
-	CONNECT_TYPE GetConnectType() const
+	CONNECT_TYPE GetConnectType() const noexcept
 	{
 		return m_iConnectType;
 	}
@@ -758,21 +706,18 @@ public:
 	void SetConnectType( CONNECT_TYPE iType );
 
 	// Stuff I am doing. Started by a command
-	CLIMODE_TYPE GetTargMode() const
+	CLIMODE_TYPE GetTargMode() const noexcept
 	{
-		return m_Targ_Mode ;
+		return m_Targ_Mode;
 	}
 	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int64 iTickTimeout = 0, int iCliloc = 0 );
-	void ClearTargMode()
-	{
-		// done with the last mode.
-		m_Targ_Mode = CLIMODE_NORMAL;
-		m_Targ_Timeout = 0;
-	}
+    void ClearTargMode() noexcept;
 
 	bool IsConnecting() const;
 
-	CNetState* GetNetState(void) const { return m_net; };
+	CNetState* GetNetState() const {
+        return m_net;
+    }
 
 public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage

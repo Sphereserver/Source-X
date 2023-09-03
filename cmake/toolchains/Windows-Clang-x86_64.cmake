@@ -20,6 +20,11 @@ function (toolchain_exe_stuff)
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64 ${CLANG_TARGET}")
 	SET (RC_FLAGS		"${CLANG_TARGET}")
 
+	# We can't override -fuse-ld=lld-link to use GNU ld, nor we can change --dependent-lib=msvcrtd
+	# Maybe changing CMAKE_${lang}_LINK_EXECUTABLE ?
+	# Check CMake code here: https://gitlab.kitware.com/cmake/cmake/-/blob/v3.25.1/Modules/Platform/Windows-Clang.cmake#L76-80
+	#SET (CMAKE_EXE_LINKER_FLAGS_COMMON "${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CLANG_TARGET}" PARENT_SCOPE) # -stdlib=libc++ -lc++abi
+
 	toolchain_exe_stuff_common()
 
 	# Propagate variables set in toolchain_exe_stuff_common to the upper scope

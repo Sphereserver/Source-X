@@ -3939,9 +3939,11 @@ bool CItem::IsTypeEquippable() const
     return CItemBase::IsTypeEquippable(GetType(), GetEquipLayer());
 }
 
-void CItem::DupeCopy( const CItem * pItem )
+void CItem::DupeCopy( const CObjBase* pItemObj )
 {
 	ADDTOCALLSTACK("CItem::DupeCopy");
+    auto pItem = dynamic_cast<const CItem *>(pItemObj);
+    ASSERT(pItem);
 	// Dupe this item.
 
 	CObjBase::DupeCopy( pItem );

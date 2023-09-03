@@ -147,7 +147,9 @@ public:
 	* @brief Get the CAccount name.
 	* @return the CAccount name.
 	*/
-	lpctstr GetName() const { return( m_sName ); }
+	virtual lpctstr GetName() const override {
+	    return m_sName;
+    }
 	/**
 	* @brief Get the CAccount password.
 	* @return the CAccount password.

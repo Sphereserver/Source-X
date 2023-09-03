@@ -38,7 +38,7 @@ public:
 	bool IsValidSaleItem( bool fBuyFromVendor ) const;
 	bool IsValidNPCSaleItem() const;
 
-	virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
+	virtual void DupeCopy( const CObjBase * pItem ) override;  // overriding CItem::DupeCopy
 
 	void Restock( bool fSellToPlayers );
 	virtual void r_Write( CScript & s ) override;

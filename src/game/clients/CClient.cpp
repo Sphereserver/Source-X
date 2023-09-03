@@ -215,6 +215,79 @@ void CClient::CharDisconnect()
 	m_pChar = nullptr;
 }
 
+bool CClient::IsPriv(word flag) const
+{	// PRIV_GM
+    if (GetAccount() == nullptr)
+        return false;
+    return(GetAccount()->IsPriv(flag));
+}
+
+void CClient::SetPrivFlags(word wPrivFlags)
+{
+    if (GetAccount() == nullptr)
+        return;
+    GetAccount()->SetPrivFlags(wPrivFlags);
+}
+
+void CClient::ClearPrivFlags(word wPrivFlags)
+{
+    if (GetAccount() == nullptr)
+        return;
+    GetAccount()->ClearPrivFlags(wPrivFlags);
+}
+
+// ------------------------------------------------
+
+bool CClient::IsResDisp(byte flag) const
+{
+    if (GetAccount() == nullptr)
+        return false;
+    return(GetAccount()->IsResDisp(flag));
+}
+
+byte CClient::GetResDisp() const
+{
+    if (GetAccount() == nullptr)
+        return UINT8_MAX;
+    return(GetAccount()->GetResDisp());
+}
+
+bool CClient::SetResDisp(byte res)
+{
+    if (GetAccount() == nullptr)
+        return false;
+    return (GetAccount()->SetResDisp(res));
+}
+
+bool CClient::SetGreaterResDisp(byte res)
+{
+    if (GetAccount() == nullptr)
+        return false;
+    return(GetAccount()->SetGreaterResDisp(res));
+}
+
+// ------------------------------------------------
+
+void CClient::SetScreenSize(ushort x, ushort y)
+{
+    m_ScreenSize.x = x;
+    m_ScreenSize.y = y;
+}
+
+PLEVEL_TYPE CClient::GetPrivLevel() const
+{
+    // PLEVEL_Counsel
+    if (GetAccount() == nullptr)
+        return(PLEVEL_Guest);
+    return(GetAccount()->GetPrivLevel());
+}
+lpctstr CClient::GetName() const
+{
+    if (GetAccount() == nullptr)
+        return("NA");
+    return(GetAccount()->GetName());
+}
+
 void CClient::SysMessage( lpctstr pszMsg ) const // System message (In lower left corner)
 {
 	ADDTOCALLSTACK("CClient::SysMessage");

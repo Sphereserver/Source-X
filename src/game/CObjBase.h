@@ -500,7 +500,7 @@ public:
      *
      * @return  An int.
      */
-	virtual int IsWeird() const;
+	virtual int IsWeird() const override;
 
 	// Accessors
 
@@ -531,7 +531,7 @@ public:
      *
      * @return  The name.
      */
-	virtual lpctstr GetName() const;
+	virtual lpctstr GetName() const override;
 
     /**
      * @fn  lpctstr CObjBase::GetResourceName() const;

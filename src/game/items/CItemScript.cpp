@@ -52,8 +52,10 @@ bool CItemScript::r_Verb(CScript & s, CTextConsole *pSrc)
     return CItemVendable::r_Verb(s, pSrc);
 }
 
-void CItemScript::DupeCopy(const CItem *pItem)
+void CItemScript::DupeCopy(const CObjBase *pItemObj)
 {
     ADDTOCALLSTACK("CItemScript::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
     CItemVendable::DupeCopy(pItem);
 }

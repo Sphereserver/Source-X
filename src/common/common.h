@@ -49,7 +49,7 @@
 
 #undef UNREFERENCED_PARAMETER
 template <typename T>
-inline void UNREFERENCED_PARAMETER(T const&) {
+inline void UNREFERENCED_PARAMETER(T const&) noexcept {
     ;
 }
 

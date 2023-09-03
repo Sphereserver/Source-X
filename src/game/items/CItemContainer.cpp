@@ -768,10 +768,12 @@ void CItemContainer::_GoSleep()
 	CItem::_GoSleep();
 }
 
-void CItemContainer::DupeCopy( const CItem *pItem )
+void CItemContainer::DupeCopy( const CObjBase *pItemObj )
 {
 	ADDTOCALLSTACK("CItemContainer::DupeCopy");
 	// Copy the contents of this item.
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
 
 	CItemVendable::DupeCopy(pItem);
 

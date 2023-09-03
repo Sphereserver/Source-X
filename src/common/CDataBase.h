@@ -55,7 +55,7 @@ public:
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
-	lpctstr GetName() const
+	virtual lpctstr GetName() const override
 	{
 		return "SQL_OBJ";
 	}

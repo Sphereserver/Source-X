@@ -162,9 +162,12 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
     return false;
 }
 
-void CItemMessage::DupeCopy(const CItem *pItem)
+void CItemMessage::DupeCopy(const CObjBase *pItemObj)
 {
     ADDTOCALLSTACK("CItemMessage::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
+
     CItemVendable::DupeCopy(pItem);
 
     const CItemMessage *pMsgItem = dynamic_cast<const CItemMessage *>(pItem);

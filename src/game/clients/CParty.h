@@ -87,7 +87,9 @@ public:
 
 	// -------------------------------
 
-	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
+	virtual lpctstr GetName() const override {
+	    return static_cast<lpctstr>(m_sName);
+	    }
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
     virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script

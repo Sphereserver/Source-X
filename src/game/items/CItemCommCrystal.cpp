@@ -114,9 +114,12 @@ bool CItemCommCrystal::r_LoadVal(CScript & s)
     }
 }
 
-void CItemCommCrystal::DupeCopy(const CItem *pItem)
+void CItemCommCrystal::DupeCopy(const CObjBase *pItemObj)
 {
     ADDTOCALLSTACK("CItemCommCrystal::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
+
     CItemVendable::DupeCopy(pItem);
 
     const CItemCommCrystal *pItemCrystal = dynamic_cast<const CItemCommCrystal *>(pItem);

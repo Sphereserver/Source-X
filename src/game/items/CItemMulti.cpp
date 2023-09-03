@@ -3123,9 +3123,11 @@ bool CItemMulti::r_LoadVal(CScript & s)
     return true;
 }
 
-void CItemMulti::DupeCopy(const CItem * pItem)
+void CItemMulti::DupeCopy(const CObjBase * pItemObj)
 {
     ADDTOCALLSTACK("CItemMulti::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
     CItem::DupeCopy(pItem);
 }
 

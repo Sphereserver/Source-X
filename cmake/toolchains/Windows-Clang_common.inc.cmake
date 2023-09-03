@@ -1,4 +1,4 @@
-SET (CLANG_USE_GCC_LINKER	false CACHE BOOL "By default, Clang requires MSVC (Microsoft's) linker. With this flag, it can be asked to use MinGW-GCC's one.")
+SET (CLANG_USE_GCC_LINKER	false CACHE BOOL "NOT CURRENTLY WORKING. By default, Clang requires MSVC (Microsoft's) linker. With this flag, it can be asked to use MinGW-GCC's one.")
 
 
 function (toolchain_force_compiler)
@@ -20,14 +20,21 @@ endfunction ()
 
 function (toolchain_exe_stuff_common)
 	SET (EXE_LINKER_EXTRA "")
+
+	IF (CLANG_USE_GCC_LINKER)
+		SET (CLANG_SUBSYSTEM_PREFIX "-m")
+	ELSE ()
+		SET (CLANG_SUBSYSTEM_PREFIX "-Xlinker /subsystem:")
+	ENDIF()	
+
 	IF (${WIN32_SPAWN_CONSOLE} EQUAL TRUE)
-		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} -mconsole")
+		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}console")
 		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
-	#ELSE ()
-	#	SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} -mwindows")
+	ELSE ()
+		SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}windows")
 	ENDIF ()
 
-	#SET (ENABLED_SANITIZER false)
+	SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
@@ -54,19 +61,21 @@ function (toolchain_exe_stuff_common)
 
 	#-- Setting compiler flags common to all builds.
 
+	# Flags supported by GCC but not by Clang: -fno-expensive-optimizations, -Wno-error=maybe-uninitialized
+
 	SET (C_WARNING_OPTS
 		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-implicit-fallthrough\
-		-Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-uninitialized -Wno-error=maybe-uninitialized -Wno-error=unused-but-set-variable\
+		-Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-uninitialized -Wno-error=unused-but-set-variable\
 		-Wno-implicit-function-declaration -Wno-type-limits -Wno-incompatible-pointer-types -Wno-array-bounds")
 		# last 2 lines are for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
 		"-Wall -Wextra -Wno-pragmas -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-misleading-indentation -Wno-implicit-fallthrough")
 	#SET (C_ARCH_OPTS	) # set in parent toolchain
 	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
-	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS	"-std=c++17 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
+	SET (C_OPTS		"-std=c11   -fexceptions -fnon-call-exceptions")
+	SET (CXX_OPTS	"-std=c++17 -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing;
-	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
+	SET (C_SPECIAL		"-pipe")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
 	SET (CMAKE_C_FLAGS		"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"			PARENT_SCOPE)
@@ -77,7 +86,14 @@ function (toolchain_exe_stuff_common)
 
 	 # Force dynamic linking but include into exe libstdc++ and libgcc.
 	 # -pthread, -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"-pthread -dynamic -static-libstdc++ -static-libgcc")
+	#SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"${CMAKE_EXE_LINKER_FLAGS_COMMON} -dynamic")
+
+	IF (CLANG_USE_GCC_LINKER)
+		SET (CMAKE_C_FLAGS 		"${CMAKE_C_FLAGS} -pthread" 	PARENT_SCOPE)
+		SET (CMAKE_CXX_FLAGS 	"${CMAKE_CXX_FLAGS} -pthread" 	PARENT_SCOPE)
+		SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"${CMAKE_EXE_LINKER_FLAGS_COMMON} -pthread -dynamic -static-libstdc++ -static-libgcc")
+	ENDIF ()
+	
 
 
 	#-- Adding compiler flags per build.
@@ -99,20 +115,24 @@ function (toolchain_exe_stuff_common)
 
 	#-- Setting per-build linker options.
 
-	 # Linking libs the MinGW way and setting linker flags.
-	 IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	libmariadb ws2_32 )
-		TARGET_LINK_OPTIONS ( spheresvr_release PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
+	 # Linking libs and setting linker flags.
+	SET (LIBS_PREFIX			$<$<NOT:$<BOOL:${CLANG_USE_GCC_LINKER}>>:lib>)
+	SET (LIBS_TO_LINK_AGAINST 	ws2_32 ${LIBS_PREFIX}mariadb)
+
+	
+	IF (TARGET spheresvr_release)
+		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIBS_TO_LINK_AGAINST})
+		TARGET_LINK_OPTIONS ( spheresvr_release		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	libmariadb ws2_32 )
-		TARGET_LINK_OPTIONS ( spheresvr_nightly PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	${LIBS_TO_LINK_AGAINST})
+		TARGET_LINK_OPTIONS ( spheresvr_nightly		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		libmariadb ws2_32 )
-		TARGET_LINK_OPTIONS ( spheresvr_debug PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		${LIBS_TO_LINK_AGAINST})
+		TARGET_LINK_OPTIONS ( spheresvr_debug		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
 	ENDIF (TARGET spheresvr_debug)
-	
+
 
 	#-- Set common define macros.
 

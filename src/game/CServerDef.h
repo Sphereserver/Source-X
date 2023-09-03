@@ -100,7 +100,7 @@ public:
 		m_stStat[i] = dwVal;
 	}
 
-	lpctstr GetName() const {
+	virtual lpctstr GetName() const override {
 		return m_sName;
 	}
 	void SetName( lpctstr pszName );

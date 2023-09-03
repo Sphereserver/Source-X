@@ -1715,6 +1715,13 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 		addSysMessage( pPrompt );
 }
 
+void CClient::ClearTargMode() noexcept
+{
+    // done with the last mode.
+    m_Targ_Mode = CLIMODE_NORMAL;
+    m_Targ_Timeout = 0;
+}
+
 void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context1, CUID context2, bool bUnicode )
 {
 	ADDTOCALLSTACK("CClient::addPromptConsole");

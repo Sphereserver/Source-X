@@ -221,7 +221,7 @@ public:
      * @brief   Gets the name.
      * @return  The name.
      */
-	virtual lpctstr GetName() const;
+	virtual lpctstr GetName() const override;
 
     /**
      * @brief   Query if this object has type name.

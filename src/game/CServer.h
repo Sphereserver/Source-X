@@ -44,7 +44,7 @@ public:
     std::atomic_int m_iExitFlag;			// identifies who caused the exit. <0 = error
     bool m_fResyncPause;		            // Server is temporarily halted so files can be updated.
     CTextConsole* m_fResyncRequested;		// A resync pause has been requested by this source.
-    
+
 #ifdef _WIN32
     bool _fCloseNTWindowOnTerminate;
 #endif
@@ -97,7 +97,7 @@ public:
 
 	bool Load();
 
-	void SysMessage( lpctstr pMsg ) const;
+	virtual void SysMessage( lpctstr pMsg ) const override;
     void SysMessage(std::unique_ptr<ConsoleOutput>&& pMsg) const;
 	void PrintTelnet( lpctstr pszMsg ) const;
     void PrintStr(lpctstr pMsg) const;
@@ -121,8 +121,10 @@ public:
 	void SetResyncPause( bool fPause, CTextConsole * pSrc, bool bMessage = false );
 	bool CommandLine( int argc, tchar * argv[] );
 
-	lpctstr GetName() const { return CServerDef::GetName(); }
-	PLEVEL_TYPE GetPrivLevel() const;
+	virtual lpctstr GetName() const override {
+	    return CServerDef::GetName();
+    }
+	virtual PLEVEL_TYPE GetPrivLevel() const override;
 } g_Serv;	// current state stuff not saved.
 
 

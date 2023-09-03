@@ -326,7 +326,7 @@ public:
 	virtual bool Delete(bool fForce = false) override;
 
 	// Status and attributes ------------------------------------
-	int IsWeird() const;
+	virtual int IsWeird() const override;
 
 //protected:	bool _IsStatFlag(uint64 uiStatFlag) const noexcept;
 public:		bool  IsStatFlag(uint64 uiStatFlag) const noexcept;
@@ -342,15 +342,15 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
 	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
 	bool IsPriv( word flag ) const;
-	PLEVEL_TYPE GetPrivLevel() const;
+	virtual PLEVEL_TYPE GetPrivLevel() const override;
 
 	CCharBase * Char_GetDef() const;
 	CRegionWorld * GetRegion() const;
 	CRegion * GetRoom() const;
-	int GetVisualRange() const;
+	virtual int GetVisualRange() const override;
 	void SetVisualRange(byte newSight);
 
-	bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const;
+	virtual bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const override;
 	bool IsResourceMatch( const CResourceID& rid, dword dwArg, dword dwArgResearch ) const;
 
 	bool IsSpeakAsGhost() const;
@@ -365,14 +365,14 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
 	// Information about us.
 	CREID_TYPE GetID() const;
-	word GetBaseID() const;
+	virtual word GetBaseID() const override;
 	CREID_TYPE GetDispID() const;
 	void SetID( CREID_TYPE id );
 
-	lpctstr GetName() const;
+	virtual lpctstr GetName() const override;
 	lpctstr GetNameWithoutIncognito() const;
 	lpctstr GetName( bool fAllowAlt ) const;
-	bool SetName( lpctstr pName );
+	virtual bool SetName( lpctstr pName ) override;
 
 	height_t GetHeightMount( bool fEyeSubstract = false ) const;
 	height_t GetHeight() const;
@@ -468,7 +468,7 @@ public:
 
 	bool MoveToRegionReTest( dword dwType );
 	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
-	bool MoveTo(const CPointMap& pt, bool fForceFix = false);
+	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) override;
 	virtual void SetTopZ( char z ) override;
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
@@ -502,11 +502,11 @@ public:
     NPCBRAIN_TYPE GetNPCBrainGroup() const;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
 	NPCBRAIN_TYPE GetNPCBrainAuto() const;	// Guess default NPC brain
 	void ClearNPC();
-	
+
 
 public:
 	void ObjMessage( lpctstr pMsg, const CObjBase * pSrc ) const;
-	void SysMessage( lpctstr pMsg ) const;
+	virtual void SysMessage( lpctstr pMsg ) const override;
 
 	void UpdateStatsFlag() const;
 	void UpdateStatVal( STAT_TYPE type, int iChange = 0, ushort uiLimit = 0 );
@@ -533,7 +533,7 @@ public:
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
 	dword GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM = false) const;
 
-	int FixWeirdness();
+	virtual int FixWeirdness() override;
 	void CreateNewCharCheck();
 
 	// Contents/Carry stuff. ---------------------------------
@@ -552,8 +552,8 @@ public:
 	TRIGRET_TYPE OnCharTrigForLayerLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, LAYER_TYPE layer );
 	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, word wMemType );
 
-	void OnWeightChange( int iChange );
-	int GetWeight(word amount = 0) const;
+	virtual void OnWeightChange( int iChange ) override;
+	virtual int GetWeight(word amount = 0) const override;
 	int GetWeightLoadPercent( int iWeight ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
@@ -577,8 +577,8 @@ public:
     * @param   trig    The trig.
     */
     void SetTriggerActive(lpctstr trig = nullptr);
- 
-	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
+
+	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs ) override;
 	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 public:
@@ -700,7 +700,7 @@ public:
 	* @return true if I am.
 	*/
 	bool Noto_IsCriminal() const;
-	
+
 
 	/**
 	* @brief Notoriety level for this character.
@@ -1024,7 +1024,7 @@ private:
 
 	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
     void Fight_SetDefaultSwingDelays();
-	
+
 	bool Fight_IsActive() const;
 public:
 	int CalcArmorDefense() const;
@@ -1316,7 +1316,7 @@ public:
 
 	virtual void OnTickStatusUpdate() override;
 	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
-    
+
 	void OnTickSkill(); // _OnTick timeout specific for the skill behavior
 
 	static CChar * CreateBasic( CREID_TYPE baseID );

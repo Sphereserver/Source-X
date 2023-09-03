@@ -17,9 +17,11 @@ CItemVendable::~CItemVendable()
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-void CItemVendable::DupeCopy( const CItem * pItem )
+void CItemVendable::DupeCopy( const CObjBase * pItemObj )
 {
 	ADDTOCALLSTACK("CItemVendable::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
 	CItem::DupeCopy( pItem );
 
 	const CItemVendable * pVendItem = dynamic_cast <const CItemVendable *>(pItem);

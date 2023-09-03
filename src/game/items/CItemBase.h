@@ -274,7 +274,7 @@ public:
 	}
     void SetType(IT_TYPE type);
 
-	void SetTypeName( lpctstr pszName );
+	virtual void SetTypeName( lpctstr pszName ) override;
 
 	LAYER_TYPE GetEquipLayer() const
 	{
@@ -282,7 +282,7 @@ public:
 		return (LAYER_TYPE)m_layer;
 	}
 
-	lpctstr GetName() const;
+	virtual lpctstr GetName() const override;
 	lpctstr GetArticleAndSpace() const;
 
 	ITEMID_TYPE GetID() const noexcept

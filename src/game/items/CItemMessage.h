@@ -52,7 +52,7 @@ public:
     void SetPageText( word wPage, lpctstr pszText );
     void AddPageText( lpctstr pszText );
 
-    virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
+    virtual void DupeCopy( const CObjBase * pItemObj ) override;  // overriding CItem::DupeCopy
     void UnLoadSystemPages();
 };
 

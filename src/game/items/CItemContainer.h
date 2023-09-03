@@ -46,7 +46,7 @@ public:
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 
-	virtual int GetWeight(word amount = 0) const;
+	virtual int GetWeight(word amount = 0) const override;
 	virtual void OnWeightChange( int iChange ) override;
 
 	// Contents/Carry stuff. ---------------------------------
@@ -72,7 +72,7 @@ public:
 	void Restock();
 	virtual bool _OnTick() override;
 
-	virtual void DupeCopy( const CItem * pItem ) override;  // overriding CItem::DupeCopy
+	virtual void DupeCopy( const CObjBase * pItem ) override;  // overriding CItem::DupeCopy
 
 	CPointMap GetRandContainerLoc() const;
 
