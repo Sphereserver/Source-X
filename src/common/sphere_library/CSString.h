@@ -85,6 +85,12 @@ public:
 	*/
 	inline CSString(CSString&& s) noexcept;
 
+    /**
+    * @brief Returns an empty string.
+    */
+    [[maybe_unused]]
+    inline static CSString Empty();
+
 	/**
 	* @brief Copy supplied string into the CSString.
 	* @param pStr string to copy.
@@ -576,6 +582,11 @@ CSString::CSString(CSString&& s) noexcept :
 	m_pchData(nullptr)
 {
 	*this = std::move(s); // Call the move assignment operator
+}
+
+CSString CSString::Empty()
+{
+    return CSString(false);
 }
 
 bool CSString::IsEmpty() const noexcept

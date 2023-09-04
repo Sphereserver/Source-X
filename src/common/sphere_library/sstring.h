@@ -67,23 +67,15 @@ ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
 
 // The _Fast variants write from the end of the given buffer and return a pointer to the new start of the string, which in most
 //  cases is different from the pointer passed as argument!
-NODISCARD //NO_SANITIZE_ADDRESS
-tchar* Str_FromI_Fast   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD //NO_SANITIZE_ADDRESS
-tchar* Str_FromUI_Fast  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD //NO_SANITIZE_ADDRESS
-tchar* Str_FromLL_Fast  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD //NO_SANITIZE_ADDRESS
-tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD tchar* Str_FromI_Fast   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD tchar* Str_FromUI_Fast  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD tchar* Str_FromLL_Fast  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
+NODISCARD tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 // These functions use the _Fast methods, but do move the string from the end of the buffer to the beginning, so that the input pointer is still valid.
-//NO_SANITIZE_ADDRESS
 void Str_FromI   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
-//NO_SANITIZE_ADDRESS
 void Str_FromUI  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
-//NO_SANITIZE_ADDRESS
 void Str_FromLL  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
-//NO_SANITIZE_ADDRESS
 void Str_FromULL (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 
