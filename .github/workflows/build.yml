@@ -22,7 +22,7 @@ jobs:
     - name: Create package
       run: |
             mkdir accounts, logs, save, scripts
-            7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86_64\mariadb\libmariadb.dll
+            7z a SphereSvrX-win-x86_64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86_64\mariadb\libmariadb.dll
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -52,7 +52,7 @@ jobs:
     - name: Create package
       run:  |
             mkdir accounts, logs, save, scripts
-            7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86\mariadb\libmariadb.dll
+            7z a SphereSvrX-win-x86-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86\mariadb\libmariadb.dll
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -96,7 +96,7 @@ jobs:
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86_64/SphereSvrX64_nightly src/sphere.ini src/sphereCrypt.ini
+            tar -czf SphereSvrX-linux-x86_64-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86_64/SphereSvrX64_nightly src/sphere.ini src/sphereCrypt.ini
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -164,7 +164,7 @@ jobs:
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86/SphereSvrX32_nightly src/sphere.ini src/sphereCrypt.ini
+            tar -czf SphereSvrX-linux-x86-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86/SphereSvrX32_nightly src/sphere.ini src/sphereCrypt.ini
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
