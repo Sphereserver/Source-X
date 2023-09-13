@@ -2826,7 +2826,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 05-10-2021, Jhobean
 - Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort. 
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
-- Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
+- Fixed: ManaLossAbort/ManaLossFail consume the exact amount of mana required for the spell. ManaLossPercent will now control the % of mana player lost.
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
 - Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior. (Issue #776)
 
@@ -3333,3 +3333,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Changed: moved /src/cmake folder to /cmake, this WILL require deleting and rebuilding any existing CMake cache.
 - Changed: renamed the compilation output folder to better reflect the target architecture.
 - Added: CMake Clang compilation toolchains for Windows, Linux, MacOS.
+
+13-09-2023, Drk84
+-Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
+		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
