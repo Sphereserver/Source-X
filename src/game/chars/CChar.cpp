@@ -2279,7 +2279,8 @@ do_default:
 					else if ( !strnicmp(ptcKey, "TARGET", 6 ) )
 					{
 						ptcKey += 6;
-						if (m_Act_UID.IsValidUID())
+						//Using both m_Act_UID and m_Fight_Targ_UID will take care of both spell and fighting targets.
+						if (m_Act_UID.IsValidUID()  || m_Fight_Targ_UID.IsValidUID())
 							sVal.FormatHex((dword)(m_Fight_Targ_UID));
 						else
 							sVal.FormatVal(-1);

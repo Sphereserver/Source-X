@@ -3337,3 +3337,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 13-09-2023, Drk84
 -Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
 		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
+		
+14-04-2023, Drk84
+-Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
+		
