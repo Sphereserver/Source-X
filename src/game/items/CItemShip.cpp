@@ -53,6 +53,9 @@ bool CItem::Ship_Plank(bool fOpen)
     {
         // Save the original Type of the plank if it used to be a ship side
         m_itShipPlank.m_wSideType = (word)oldType;
+       
+        SetTimeoutS(5); // autoclose the plank 
+        SetAttr(ATTR_DECAY); // For preventing Decay Warning on the console.
     }
     else if (oldType == IT_SHIP_PLANK)
     {
