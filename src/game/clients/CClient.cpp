@@ -161,12 +161,13 @@ void CClient::CharDisconnect()
 	Announce(false);
 	bool fCanInstaLogOut = CanInstantLogOut();
 
-	//	stoned chars cannot logout if they are not privileged of course
-	if ( m_pChar->IsStatFlag(STATF_STONE) )
+	/*	stoned chars cannot logout if they are not privileged of course
+	if (m_pChar->IsStatFlag(STATF_STONE))
 	{
 		iLingerTime = 60*60;	// 1 hour of linger time
 		fCanInstaLogOut = false;
 	}
+	*/
 
 	//	we are not a client anymore
 	if ( IsChatActive() )
