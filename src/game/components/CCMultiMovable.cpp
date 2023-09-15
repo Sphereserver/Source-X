@@ -604,6 +604,13 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
                         IT_TYPE oldType = pItem->GetType();
                         pItem->SetID(componentnew.m_id);
                         pItem->SetType(oldType);
+                        if ( oldType == IT_SHIP_PLANK && pItem->m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED)
+                        {
+                            pItem->SetID((ITEMID_TYPE)pItem->Item_GetDef()->m_ttShipPlank.m_ridState.GetResIndex());
+                            pItem->SetType(IT_SHIP_PLANK);
+
+                        }
+
                         pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
                         pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
                     }
