@@ -3339,9 +3339,13 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
 		
 14-09-2023, Drk84
--Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
+- Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
 		
 15-09-2023, Drk84
-Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
+- Fixed: Ship plank not remaining open when turning the ship around. (Issue #1089)
 	   The ship plank will now autoclose after 5 seconds.
-Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
+- Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
+
+20-09-2023, Nolok
+- Added: FUNC keyword to item templates triggers with special parsing (@CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
+	Default object: the item. SRC: the character holding it.

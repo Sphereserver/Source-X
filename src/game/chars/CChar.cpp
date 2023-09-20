@@ -1320,66 +1320,85 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 		}
 		else
 		{
-			switch ( iCmd )
-			{
+            switch (iCmd)
+            {
 				case ITC_FULLINTERP:
-					{
-						lpctstr	pszArgs	= s.GetArgStr();
-						GETNONWHITESPACE(pszArgs);
-						fFullInterp = ( *pszArgs == '\0' ) ? true : ( s.GetArgVal() != 0);
+				{
+					lpctstr	pszArgs = s.GetArgStr();
+					GETNONWHITESPACE(pszArgs);
+					fFullInterp = (*pszArgs == '\0') ? true : (s.GetArgVal() != 0);
+					continue;
+				}
+				case ITC_FUNC:
+				{
+					if (!pItem)
 						continue;
-					}
-				case ITC_NEWBIESWAP:
-					{
-						if ( !pItem )
-							continue;
 
-						if ( pItem->IsAttr( ATTR_NEWBIE ) )
-						{
-							if ( Calc_GetRandVal( s.GetArgVal() ) == 0 )
-								pItem->ClrAttr(ATTR_NEWBIE);
-						}
-						else
-						{
-							if ( Calc_GetRandVal( s.GetArgVal() ) == 0 )
-								pItem->SetAttr(ATTR_NEWBIE);
-						}
-						continue;
+					lptstr ptcFunctionName = s.GetArgRaw();
+					std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
+					// Locate arguments for the called function
+					tchar* ptcArgs = strchr(ptcFunctionName, ' ');
+					if (ptcArgs)
+					{
+						*ptcArgs = 0;
+						++ptcArgs;
+						GETNONWHITESPACE(ptcArgs);
+						pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
 					}
+					pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
+				}
+				continue;
+				case ITC_NEWBIESWAP:
+				{
+					if (!pItem)
+						continue;
+
+					if (pItem->IsAttr(ATTR_NEWBIE))
+					{
+						if (Calc_GetRandVal(s.GetArgVal()) == 0)
+							pItem->ClrAttr(ATTR_NEWBIE);
+					}
+					else
+					{
+						if (Calc_GetRandVal(s.GetArgVal()) == 0)
+							pItem->SetAttr(ATTR_NEWBIE);
+					}
+					continue;
+				}
 				case ITC_ITEM:
 				case ITC_CONTAINER:
 				case ITC_ITEMNEWBIE:
+				{
+					fItemCreation = true;
+
+					if (IsStatFlag(STATF_CONJURED) && iCmd != ITC_ITEMNEWBIE) // This check is not needed (sure?).
+						break; // conjured creates have no loot.
+
+					pItem = CItem::CreateHeader(s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE);
+					if (pItem == nullptr)
 					{
-						fItemCreation = true;
-
-						if ( IsStatFlag( STATF_CONJURED ) && iCmd != ITC_ITEMNEWBIE ) // This check is not needed.
-							break; // conjured creates have no loot.
-
-						pItem = CItem::CreateHeader( s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE );
-						if ( pItem == nullptr )
-						{
-							m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
-							continue;
-						}
-						m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
-
-						pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-						pItem->_iCreatedResScriptLine = s.m_iLineNum;
-
-						if ( iCmd == ITC_ITEMNEWBIE )
-							pItem->SetAttr(ATTR_NEWBIE);
-
-						if ( !pItem->IsItemInContainer() && !pItem->IsItemEquipped())
-							pItem = nullptr;
+						m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
 						continue;
 					}
+					m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
+
+					pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+					pItem->_iCreatedResScriptLine = s.m_iLineNum;
+
+					if (iCmd == ITC_ITEMNEWBIE)
+						pItem->SetAttr(ATTR_NEWBIE);
+
+					if (!pItem->IsItemInContainer() && !pItem->IsItemEquipped())
+						pItem = nullptr;
+					continue;
+				}
 
 				case ITC_BREAK:
 				case ITC_BUY:
 				case ITC_SELL:
 					pItem = nullptr;
 					continue;
-			}
+				}
 
 		}
 

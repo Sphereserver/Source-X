@@ -527,6 +527,7 @@ lpctstr const CItem::sm_szTemplateTable[ITC_QTY+1] =
 	"BUY",
 	"CONTAINER",
 	"FULLINTERP",
+	"FUNC",
 	"ITEM",
 	"ITEMNEWBIE",
 	"NEWBIESWAP",
