@@ -1285,7 +1285,25 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 
 		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, ARRAY_COUNT(CItem::sm_szTemplateTable)-1);
 		bool fItemCreation = false;
-		if ( fVendor )
+		if (iCmd == ITC_FUNC)
+		{
+			if (!pItem)
+				continue;
+
+			lptstr ptcFunctionName = s.GetArgRaw();
+			std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
+			// Locate arguments for the called function
+			tchar* ptcArgs = strchr(ptcFunctionName, ' ');
+			if (ptcArgs)
+			{
+				*ptcArgs = 0;
+				++ptcArgs;
+				GETNONWHITESPACE(ptcArgs);
+				pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
+			}
+			pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
+		}
+		else if ( fVendor )
 		{
 			if (iCmd != -1)
 			{
@@ -1329,25 +1347,6 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 					fFullInterp = (*pszArgs == '\0') ? true : (s.GetArgVal() != 0);
 					continue;
 				}
-				case ITC_FUNC:
-				{
-					if (!pItem)
-						continue;
-
-					lptstr ptcFunctionName = s.GetArgRaw();
-					std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
-					// Locate arguments for the called function
-					tchar* ptcArgs = strchr(ptcFunctionName, ' ');
-					if (ptcArgs)
-					{
-						*ptcArgs = 0;
-						++ptcArgs;
-						GETNONWHITESPACE(ptcArgs);
-						pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
-					}
-					pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
-				}
-				continue;
 				case ITC_NEWBIESWAP:
 				{
 					if (!pItem)

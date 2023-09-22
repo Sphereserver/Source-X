@@ -3347,5 +3347,5 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
 
 20-09-2023, Nolok
-- Added: FUNC keyword to item templates triggers with special parsing (@CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
+- Added: FUNC keyword to item templates and template-triggers with special parsing (@CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
 	Default object: the item. SRC: the character holding it.
