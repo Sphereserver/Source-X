@@ -804,10 +804,13 @@ bool CChar::Skill_MakeItem_Success()
 	CUID uidOldAct = m_Act_UID;
 	m_Act_UID = pItem->GetUID();
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+	bool notify = true;
 	if ( IsTrigUsed(TRIGGER_SKILLMAKEITEM) )
 	{
 		CScriptTriggerArgs Args(iSkillLevel, quality, uidOldAct.ObjFind());
+		Args.m_VarsLocal.SetNum("Notify", 1);
 		iRet = OnTrigger(CTRIG_SkillMakeItem, this, &Args);
+		notify = Args.m_VarsLocal.GetKeyNum("Notify") ? true : false;
 	}
 	m_Act_UID = uidOldAct;		// restore
 
@@ -841,7 +844,7 @@ bool CChar::Skill_MakeItem_Success()
 			ChangeExperience(exp);
 	}
 
-	ItemBounce(pItem);
+	ItemBounce(pItem, notify);
 	return true;
 }
 

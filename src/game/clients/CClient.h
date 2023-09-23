@@ -366,6 +366,7 @@ private:
 	int Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest );
 	int Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuItem* item, int iMaxSize, bool *fShowMenu, bool *fLimitReached );
 public:
+	bool Skill_Menu(SKILL_TYPE skill, lpctstr skillmenu, ITEMID_TYPE itemused = ITEMID_NOTHING);
 	bool Cmd_Skill_Menu( const CResourceID& rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
 	bool Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase * pSrc );
