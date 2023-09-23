@@ -637,7 +637,7 @@ bool CClient::Skill_Menu(SKILL_TYPE skill, lpctstr skillmenu, ITEMID_TYPE itemus
 		skillmenu = Args.m_VarsLocal.GetKeyStr("Skillmenu", false);
 	}
 
-	LPCTSTR SkillUsed = g_Cfg.GetSkillKey(skill);
+	lpctstr SkillUsed = g_Cfg.GetSkillKey(skill);
 	CResourceID ridDialog = g_Cfg.ResourceGetIDType(RES_DIALOG, skillmenu);
 	if (ridDialog.IsValidUID()) {
 		return Dialog_Setup(CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, skillmenu), 0, m_pChar, SkillUsed);
