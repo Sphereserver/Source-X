@@ -120,7 +120,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
     }
     inline void Clear() noexcept
     {
-        m_dwInternalVal = UID_CLEAR;
+        m_dwInternalVal = UID_PLAIN_CLEAR;
     }
 
     CResourceIDBase() noexcept
@@ -181,7 +181,7 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     }
     void Clear()
     {
-        m_dwInternalVal = UID_CLEAR;
+        m_dwInternalVal = UID_PLAIN_CLEAR;
         m_wPage = 0;
     }
 

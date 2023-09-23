@@ -35,7 +35,7 @@ void CItemScript::r_Write(CScript & s)
 
 bool CItemScript::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemScript::r_WriteVal");
     return (fNoCallParent ? false : CItemVendable::r_WriteVal(ptcKey, sVal, pSrc));
 }
@@ -52,8 +52,10 @@ bool CItemScript::r_Verb(CScript & s, CTextConsole *pSrc)
     return CItemVendable::r_Verb(s, pSrc);
 }
 
-void CItemScript::DupeCopy(const CItem *pItem)
+void CItemScript::DupeCopy(const CObjBase *pItemObj)
 {
     ADDTOCALLSTACK("CItemScript::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
     CItemVendable::DupeCopy(pItem);
 }

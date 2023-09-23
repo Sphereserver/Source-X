@@ -32,6 +32,7 @@ enum TRIGRUN_TYPE
 
 enum TRIGRET_TYPE	// trigger script returns.
 {
+    TRIGRET_RET_ABORTED = INT32_MIN,
 	TRIGRET_RET_FALSE = 0,	// default return. (script might not have been handled)
 	TRIGRET_RET_TRUE = 1,
 	TRIGRET_RET_DEFAULT,	// we just came to the end of the script.
@@ -145,7 +146,7 @@ private:
 	TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
 
 	// Special statements
-	bool _Evaluate_Conditional_EvalSingle(const SubexprData& sdata, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, std::shared_ptr<ScriptedExprContext> pContext);
+	bool _Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, std::shared_ptr<ScriptedExprContext> pContext);
 	bool Evaluate_Conditional(lptstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs,
 		std::shared_ptr<ScriptedExprContext> pContext = std::make_shared<ScriptedExprContext>()); // IF, ELIF, ELSEIF
 

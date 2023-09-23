@@ -1,6 +1,6 @@
 #ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service
-	#include <process.h>	// getpid()
+	#include <process.h>				// getpid()
 #else
 	#include "../sphere/UnixTerminal.h"
 #endif
@@ -22,9 +22,6 @@
 #include "../sphere/asyncdb.h"
 #include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
-#include "items/CItemMap.h"
-#include "items/CItemMessage.h"
-#include "components/CCChampion.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
 #include "CServer.h"
@@ -32,6 +29,16 @@
 #include "spheresvr.h"
 #include <sstream>
 
+// Headers for InitRuntimeStaticMembers
+#include "clients/CClient.h"
+
+
+#ifdef _SANITIZERS
+const char* __asan_default_options() {
+    //return "verbosity=1:malloc_context_size=20";
+    return "sleep_before_dying=5";
+}
+#endif
 
 // Dynamic allocation of some global stuff
 std::string g_sServerDescription;
@@ -49,8 +56,8 @@ GlobalInitializer::GlobalInitializer()
 	// The order of the instructions is important!
 
 	std::stringstream ssServerDescription;
-	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_VERSION;
-	ssServerDescription << " [" << SPHERE_VER_FILEOS_STR << '-' << g_ptcArchBits << "]";
+	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_BUILD_NAME;
+	ssServerDescription << " [" << get_target_os_str() << '-' << get_target_arch_str() << "]";
 	ssServerDescription << " by www.spherecommunity.net";
 	g_sServerDescription = ssServerDescription.str();
 
@@ -82,17 +89,20 @@ GlobalInitializer::GlobalInitializer()
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");
 
-	ASSERT(MAX_BUFFER >= sizeof(CCommand));
-	ASSERT(MAX_BUFFER >= sizeof(CEvent));
-	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
-	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
-	ASSERT(sizeof(word) == 2);
-	ASSERT(sizeof(dword) == 4);
-	ASSERT(sizeof(nword) == 2);
-	ASSERT(sizeof(ndword) == 4);
-	ASSERT(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
+	static_assert(MAX_BUFFER >= sizeof(CCommand));
+	static_assert(MAX_BUFFER >= sizeof(CEvent));
+	static_assert(sizeof(int) == sizeof(dword));	// make this assumption often.
+	static_assert(sizeof(ITEMID_TYPE) == sizeof(dword));
+	static_assert(sizeof(word) == 2);
+	static_assert(sizeof(dword) == 4);
+	static_assert(sizeof(nword) == 2);
+	static_assert(sizeof(ndword) == 4);
+	static_assert(sizeof(wchar) == 2);	// 16 bits
+	static_assert(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
 
-    EXC_CATCH;
+	CPointBase::InitRuntimeStaticMembers();
+
+	EXC_CATCH;
 }
 
 GlobalInitializer g_GlobalInitializer;
@@ -108,15 +118,18 @@ CWorld			g_World;			// the world. (we save this stuff)
 #endif
 	CNetworkManager g_NetworkManager;
 
-// Again, game servers stuff.
+// Config data from sphere.ini is needed from the beginning.
 CServerConfig	g_Cfg;
-CServer			g_Serv;				// current state, stuff not saved.
 
 #ifdef _WIN32
-	CNTWindow g_NTWindow;
+CNTWindow g_NTWindow;
 #else
-	UnixTerminal g_UnixTerminal;
+UnixTerminal g_UnixTerminal;
 #endif
+
+// Again, game servers stuff.
+CServer			g_Serv;				// current state, stuff not saved.
+
 
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
@@ -279,11 +292,17 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "Startup complete. items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T "\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
+	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = % " PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
 
 #ifdef _WIN32
-	g_Log.Event(LOGM_INIT, "Press '?' for console commands.\n");
+	g_Log.Event(LOGM_INIT, "Use '?' to view available console commands\n\n");
+#else
+	g_Log.Event(LOGL_EVENT, "Use '?' to view available console commands or Ctrl+C to exit\n\n");
 #endif
+
+	if (!g_Accounts.Account_GetCount())
+		g_Log.Event(LOGL_WARN, "The server has no accounts. To create admin account use:\n  ACCOUNT ADD [login] [password]\n  ACCOUNT [login] PLEVEL 7\n\n");
+
 
 	// Trigger server start
 	g_Serv.r_Call("f_onserver_start", &g_Serv, nullptr);
@@ -559,8 +578,8 @@ void defragSphere(char *path)
 		while ( inf.ReadString(buf, sizeof(buf)) )
 		{
 			dwIdxUID = (dword)strlen(buf);
-			if (dwIdxUID > (CountOf(buf) - 3))
-				dwIdxUID = CountOf(buf) - 3;
+			if (dwIdxUID > (ARRAY_COUNT(buf) - 3))
+				dwIdxUID = ARRAY_COUNT(buf) - 3;
 
 			buf[dwIdxUID] = buf[dwIdxUID +1] = buf[dwIdxUID +2] = 0;	// just to be sure to be in line always
 							// NOTE: it is much faster than to use memcpy to clear before reading

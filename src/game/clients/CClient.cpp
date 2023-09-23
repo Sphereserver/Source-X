@@ -161,12 +161,13 @@ void CClient::CharDisconnect()
 	Announce(false);
 	bool fCanInstaLogOut = CanInstantLogOut();
 
-	//	stoned chars cannot logout if they are not privileged of course
-	if ( m_pChar->IsStatFlag(STATF_STONE) )
+	/*	stoned chars cannot logout if they are not privileged of course
+	if (m_pChar->IsStatFlag(STATF_STONE))
 	{
 		iLingerTime = 60*60;	// 1 hour of linger time
 		fCanInstaLogOut = false;
 	}
+	*/
 
 	//	we are not a client anymore
 	if ( IsChatActive() )
@@ -213,6 +214,79 @@ void CClient::CharDisconnect()
         m_pChar->ItemBounce(pItemDragging);
 
 	m_pChar = nullptr;
+}
+
+bool CClient::IsPriv(word flag) const
+{	// PRIV_GM
+    if (GetAccount() == nullptr)
+        return false;
+    return(GetAccount()->IsPriv(flag));
+}
+
+void CClient::SetPrivFlags(word wPrivFlags)
+{
+    if (GetAccount() == nullptr)
+        return;
+    GetAccount()->SetPrivFlags(wPrivFlags);
+}
+
+void CClient::ClearPrivFlags(word wPrivFlags)
+{
+    if (GetAccount() == nullptr)
+        return;
+    GetAccount()->ClearPrivFlags(wPrivFlags);
+}
+
+// ------------------------------------------------
+
+bool CClient::IsResDisp(byte flag) const
+{
+    if (GetAccount() == nullptr)
+        return false;
+    return(GetAccount()->IsResDisp(flag));
+}
+
+byte CClient::GetResDisp() const
+{
+    if (GetAccount() == nullptr)
+        return UINT8_MAX;
+    return(GetAccount()->GetResDisp());
+}
+
+bool CClient::SetResDisp(byte res)
+{
+    if (GetAccount() == nullptr)
+        return false;
+    return (GetAccount()->SetResDisp(res));
+}
+
+bool CClient::SetGreaterResDisp(byte res)
+{
+    if (GetAccount() == nullptr)
+        return false;
+    return(GetAccount()->SetGreaterResDisp(res));
+}
+
+// ------------------------------------------------
+
+void CClient::SetScreenSize(ushort x, ushort y)
+{
+    m_ScreenSize.x = x;
+    m_ScreenSize.y = y;
+}
+
+PLEVEL_TYPE CClient::GetPrivLevel() const
+{
+    // PLEVEL_Counsel
+    if (GetAccount() == nullptr)
+        return(PLEVEL_Guest);
+    return(GetAccount()->GetPrivLevel());
+}
+lpctstr CClient::GetName() const
+{
+    if (GetAccount() == nullptr)
+        return("NA");
+    return(GetAccount()->GetName());
 }
 
 void CClient::SysMessage( lpctstr pszMsg ) const // System message (In lower left corner)
@@ -454,7 +528,7 @@ lpctstr const CClient::sm_szRefKeys[CLIR_QTY+1] =
 bool CClient::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CClient::r_GetRef");
-	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
 		ptcKey += strlen( sm_szRefKeys[i] );
@@ -541,7 +615,7 @@ lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 
 bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
 	
@@ -575,7 +649,7 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 	else if ( !strnicmp( "REPORTEDCLIVER", ptcKey, 14 ) && ( ptcKey[14] == '\0' || ptcKey[14] == '.' ) )
 		index = CC_REPORTEDCLIVER;
 	else
-		index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+		index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
 
 	switch (index)
 	{
@@ -711,7 +785,7 @@ bool CClient::r_LoadVal( CScript & s )
         }
     }
 
-	switch ( FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 ))
 	{
 		case CC_ALLMOVE:
 			addRemoveAll(true, false);
@@ -837,14 +911,14 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 	}
 
 	EXC_SET_BLOCK("Verb-Statement");
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1 );
 	switch (index)
 	{
 		case CV_ADD:
 			if ( s.HasArgs())
 			{
 				tchar *ppszArgs[2];
-				size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, CountOf(ppszArgs));
+				size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, ARRAY_COUNT(ppszArgs));
 
 				if ( !IsValidGameObjDef(ppszArgs[0]) )
 				{
@@ -883,7 +957,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_ADDBUFF:
 			{
 				tchar * ppArgs[11];
-				Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
+				Str_ParseCmds( s.GetArgStr(), ppArgs, ARRAY_COUNT(ppArgs));
 
 				int iArgs[4];
 				for ( int idx = 0; idx < 4; ++idx )
@@ -927,7 +1001,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_ADDCONTEXTENTRY:
 			{
 				tchar * ppLocArgs[20];
-				if ( Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",") > 4 )
+				if ( Str_ParseCmds(s.GetArgRaw(), ppLocArgs, ARRAY_COUNT(ppLocArgs), ",") > 4 )
 				{
 					DEBUG_ERR(("Bad AddContextEntry usage: Function takes maximum of 4 arguments!\n"));
 					return true;
@@ -963,7 +1037,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_ARROWQUEST:
 			{
 				int64 piVal[3];
-				Str_ParseCmds( s.GetArgRaw(), piVal, CountOf(piVal));
+				Str_ParseCmds( s.GetArgRaw(), piVal, ARRAY_COUNT(piVal));
 				addArrowQuest( (int)piVal[0], (int)piVal[1], (int)piVal[2] );
 #ifdef _ALPHASPHERE
 				// todo: should use a proper container for these, since the arrows are lost
@@ -1124,7 +1198,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
         case CV_CODEXOFWISDOM:
         {
             int64 piArgs[2];
-            size_t iArgQty = Str_ParseCmds(s.GetArgStr(), piArgs, CountOf(piArgs));
+            size_t iArgQty = Str_ParseCmds(s.GetArgStr(), piArgs, ARRAY_COUNT(piArgs));
             if ( iArgQty < 1 )
             {
                 SysMessage("Usage: CODEXOFWISDOM TopicID [ForceOpen]");
@@ -1161,7 +1235,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			else
 			{
 				tchar * ppArgs[2];
-				Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf( ppArgs ));
+				Str_ParseCmds( s.GetArgStr(), ppArgs, ARRAY_COUNT( ppArgs ));
 
 				m_Targ_Text = ppArgs[0]; // Point at the options, if any
 				m_tmTile.m_ptFirst.InitPoint(); // Clear this first
@@ -1181,7 +1255,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			else
 			{
 				tchar * ppArgs[2];
-				Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf( ppArgs ));
+				Str_ParseCmds( s.GetArgStr(), ppArgs, ARRAY_COUNT( ppArgs ));
 
 				m_Targ_Text = ppArgs[0]; // Point at the options, if any
 				m_tmTile.m_ptFirst.InitPoint(); // Clear this first
@@ -1247,7 +1321,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
         case CV_MAPWAYPOINT:
         {
             int64 piVal[2];
-            Str_ParseCmds(s.GetArgRaw(), piVal, CountOf(piVal));
+            Str_ParseCmds(s.GetArgRaw(), piVal, ARRAY_COUNT(piVal));
 
             CObjBase *pObj = static_cast<CUID>((dword)piVal[0]).ObjFind();
             if (pObj)
@@ -1263,7 +1337,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_MIDILIST:
 			{
 				int64 piMidi[64];
-				int64 iQty = Str_ParseCmds( s.GetArgStr(), piMidi, CountOf(piMidi) );
+				int64 iQty = Str_ParseCmds( s.GetArgStr(), piMidi, ARRAY_COUNT(piMidi) );
 				if ( iQty > 0 )
 				{
 					addMusic( static_cast<MIDI_TYPE>(piMidi[ Calc_GetRandLLVal( iQty ) ]) );
@@ -1311,7 +1385,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_OPENTRADEWINDOW:
 		{
 			tchar *ppArgs[2];
-			Str_ParseCmds(s.GetArgStr(), ppArgs, CountOf(ppArgs));
+			Str_ParseCmds(s.GetArgStr(), ppArgs, ARRAY_COUNT(ppArgs));
 
 			CChar *pChar = nullptr;
 			CItem *pItem = nullptr;
@@ -1422,7 +1496,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGEF: //There is still an issue with numbers not resolving properly when %i,%d,or other numeric format code is in use
 			{
 				tchar * pszArgs[4];
-				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, ARRAY_COUNT(pszArgs) );
 				if ( iArgQty < 2 )
 				{
 					g_Log.EventError("SysMessagef with less than 1 args for the given text\n");
@@ -1451,13 +1525,13 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGEUA:
 			{
 				tchar * pszArgs[5];
-				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, ARRAY_COUNT(pszArgs) );
                 if (iArgQty < 5)
                     return false;
 				// Font and mode are actually ignored here, but they never made a difference
 				// anyway.. I'd like to keep the syntax similar to SAYUA
-                nchar szBuffer[MAX_TALK_BUFFER];
-                CvtSystemToNUNICODE(szBuffer, CountOf(szBuffer), pszArgs[4], -1);
+                nachar szBuffer[MAX_TALK_BUFFER];
+                CvtSystemToNETUTF16(szBuffer, ARRAY_COUNT(szBuffer), pszArgs[4], -1);
                 addBarkUNICODE(szBuffer, nullptr, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SAY, FONT_NORMAL, pszArgs[3]);
 			}
 			break;
@@ -1465,7 +1539,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGELOC:
 			{
 				tchar * ppArgs[256];
-				int iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf(ppArgs), "," );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), "," );
 				if ( iArgQty > 1 )
 				{
 					int hue = -1;
@@ -1492,7 +1566,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGELOCEX:
 			{
 				tchar * ppArgs[256];
-				int iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf(ppArgs), "," );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), "," );
 				if ( iArgQty > 2 )
 				{
 					int hue = -1;

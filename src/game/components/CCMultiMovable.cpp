@@ -503,7 +503,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
     uint iDirection = 0;
     for (; ; ++iDirection)
     {
-        if (iDirection >= CountOf(sm_FaceDir))
+        if (iDirection >= ARRAY_COUNT(sm_FaceDir))
             return false;
         if (dir == sm_FaceDir[iDirection])
             break;
@@ -604,6 +604,13 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
                         IT_TYPE oldType = pItem->GetType();
                         pItem->SetID(componentnew.m_id);
                         pItem->SetType(oldType);
+                        if ( oldType == IT_SHIP_PLANK && pItem->m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED)
+                        {
+                            pItem->SetID((ITEMID_TYPE)pItem->Item_GetDef()->m_ttShipPlank.m_ridState.GetResIndex());
+                            pItem->SetType(IT_SHIP_PLANK);
+
+                        }
+
                         pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
                         pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
                     }
@@ -963,7 +970,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
     //"One (direction*)", " (Direction*), one" Moves ship one tile in desired direction and stops.
     //"Slow (direction*)" Moves ship slowly in desired direction (see below for possible directions).
 
-    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1);
     if (iCmd < 0)
         return false;
 
@@ -1015,7 +1022,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
                 return false;
             pItemThis->m_itShip.m_DirMove = (byte)(GetDirStr(s.GetArgStr()));
             SetCaptain(pSrc);
-            return Move((DIR_TYPE)(pItemThis->m_itShip.m_DirMove), _shipSpeed.tiles);
+            Move((DIR_TYPE)(pItemThis->m_itShip.m_DirMove), _shipSpeed.tiles); //No need to return false, we just can't move the ship. The command is valid and by returning false we will get a console warning.
+            return true;
         }
 
         case CMV_SHIPGATE:
@@ -1048,7 +1056,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             if (!Face((DIR_TYPE)(pItemThis->m_itShip.m_DirMove)))
             {
                 pItemThis->m_itShip.m_DirMove = (uchar)(DirMove);
-                return true; //No need to return false, we just can't turn the ship. The command is valid and by returning false we will a console warning.
+                return true; //No need to return false, we just can't turn the ship. The command is valid and by returning false we will get a console warning.
             }
             break;
         }
@@ -1279,8 +1287,8 @@ lpctstr const CCMultiMovable::sm_szLoadKeys[CML_QTY + 1] =
 bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
-    UNREFERENCED_PARAMETER(pSrc);
-    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    UnreferencedParameter(pSrc);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (index == -1)
     {
         if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
@@ -1365,7 +1373,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
     lpctstr	ptcKey = s.GetKey();
-    CML_TYPE index = (CML_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    CML_TYPE index = (CML_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     // CItem *pItemThis = dynamic_cast<CItem*>(this);
     // ASSERT(pItemThis);
     if (index == -1)
@@ -1404,7 +1412,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
                     return true;
                 }
                 int64 piVal[2];
-                size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
+                size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, ARRAY_COUNT(piVal));
                 if (iQty == 2)
                 {
                     _shipSpeed.period = (ushort)(piVal[0] * (IsSetOF(OF_NoSmoothSailing) ? MSECS_PER_TENTH : 1));

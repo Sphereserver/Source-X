@@ -84,11 +84,11 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY + 1] =
 
 bool CGMPage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
-    UNREFERENCED_PARAMETER(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
+    UnreferencedParameter(fNoCallParent);
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
+	switch ( FindTableSorted(pszKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1) )
 	{
 		case GC_ACCOUNT:
 			sVal = GetName();
@@ -125,7 +125,7 @@ bool CGMPage::r_LoadVal(CScript& s)
 {
 	ADDTOCALLSTACK("CGMPage::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch (FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+	switch (FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1))
 	{
 	case GC_CHARUID:
 		m_uidChar.SetObjUID(s.GetArgDWVal());

@@ -5,22 +5,24 @@ on:
   - pull_request
 
 jobs:
-  windows-64:
+  windows-x86_64:
     runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: CMake 
-      run: cmake -G "Visual Studio 17 2022" src/
+      run: cmake -G "Visual Studio 17 2022" .\
     - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
-    - name: Create folders
+    - name: Create package
       run: |
             mkdir accounts, logs, save, scripts
-            7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ .\bin64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\64\libmysql.dll
+            7z a SphereSvrX-win-x86_64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86_64\mariadb\libmariadb.dll
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -30,24 +32,27 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-win64-nightly.zip
+        path: SphereSvrX-win-x86_64-nightly.zip
 
-  windows-32:
+
+  windows-x86:
     runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: CMake 
-      run: cmake -G "Visual Studio 17 2022" -A Win32 src/
+      run: cmake -G "Visual Studio 17 2022" -A Win32 .\
     - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
-    - name: Create folders
+    - name: Create package
       run:  |
             mkdir accounts, logs, save, scripts
-            7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ .\bin\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\dlls\32\libmysql.dll
+            7z a SphereSvrX-win-x86-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86\mariadb\libmariadb.dll
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -57,27 +62,41 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-win32-nightly.zip
+        path: SphereSvrX-win-x86-nightly.zip
 
-  linux-64:
-    runs-on: ubuntu-20.04
+
+  linux-x86_64:
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Install prerequisites
       run:  |
             lsb_release -d
-            gcc --version
-            cmake --version
+
+            sudo add-apt-repository universe && sudo sudo apt-get -qq update
+            sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
+            sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake src/
-    - name: Make
-      run: make -j4
-    - name: Create folder
+      run: |
+            mkdir -p build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
+    - name: Ninja
+      run: cd build && ninja && cd ..
+    - name: Create package
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin64/ SphereSvrX64_nightly -C ../src/ sphere.ini sphereCrypt.ini
+            tar -czf SphereSvrX-linux-x86_64-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86_64/SphereSvrX64_nightly src/sphere.ini src/sphereCrypt.ini
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
@@ -87,41 +106,128 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-linux64-nightly.tar.gz
+        path: SphereSvrX-linux-x86_64-nightly.tar.gz
 
-  linux-32:
-    runs-on: ubuntu-20.04
+  linux-x86:
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Install prerequisites
       run:  |
             lsb_release -d
-            sudo sudo dpkg --add-architecture i386 && sudo apt-get -qq update && sudo apt install -yqq --no-install-recommends gcc-multilib g++-multilib default-libmysqlclient-dev:i386 libmysqlclient-dev:i386
-            gcc --version
-            cmake --version
+
+            echo && echo "** Setting up repos" && echo
+            sudo sudo dpkg --add-architecture i386
+            sudo add-apt-repository universe && sudo apt-get -qq update > /dev/null
+            echo "Done"
+
+            echo && echo "** Installing and setting up compiler and tools" && echo
+            sudo apt install -yqq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+            echo "Done"
+            
+            # MariaDB dependencies
+            echo && echo "Install MariaDB dependencies"
+            echo "Installing some deps with apt..."
+            sudo apt install -yqq --no-install-recommends libc6:i386 libgcc-s1:i386 zlib1g:i386
+            echo "Installing libssl1.1 manually from Bionic repo..."
+            wget --quiet --output-document=dep1.deb http://launchpadlibrarian.net/367327733/libssl1.1_1.1.0g-2ubuntu4_i386.deb
+            sudo dpkg -r --force-all libssl1.1 2> /dev/null
+            sudo dpkg -i --force-all dep1.deb  2> /dev/null
+            #sudo apt install --fix-broken ./dep1.deb
+            echo "Done"
+
+            # Workaround: there are no official packages built for i386 on this OS. Let's install from the previous Ubuntu LTS version repo (Bionic).
+            echo "Installing MariaDB i386 manually from Bionic repo..."
+            wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/355877539/libmariadb3_3.0.3-1build1_i386.deb
+            wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
+            sudo dpkg -i temp1.deb temp2.deb 2> /dev/null
+            echo "Done"
+
+            
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
     - name: CMake
-      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86.cmake src/
-    - name: Make
-      run: make -j4
-    - name: Zip files to upload
+      run: |
+            mkdir -p build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86.cmake -S ./ -B ./build
+    - name: Ninja
+      run: cd build && ninja && cd ..
+    - name: Create package
       run:  |
             mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ -C bin/ SphereSvrX32_nightly -C ../src/ sphere.ini sphereCrypt.ini
+            tar -czf SphereSvrX-linux-x86-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86/SphereSvrX32_nightly src/sphere.ini src/sphereCrypt.ini
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
       if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         name: Builds
-        path: SphereSvrX-linux32-nightly.tar.gz
+        path: SphereSvrX-linux-x86-nightly.tar.gz
+
+
+  macos-x86_64:
+    runs-on: macos-12
+    env:
+      CMAKE_GEN: Ninja
+      CMAKE_TCH_64: cmake/toolchains/OSX-AppleClang-x86_64.cmake
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install prerequisites
+      run:  |
+            sw_vers
+
+            echo && echo "** Setting up compiler" && echo
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            export HOMEBREW_NO_INSTALL_CLEANUP=1
+            brew install ninja mariadb-connector-c
+    - name: Report building tools
+      run:  |
+            echo "Apple Clang:" && clang --version
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
+    - name: CMake
+      run: |
+            mkdir -p build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S . -B ./build
+    - name: Ninja
+      run: cd build && ninja && cd ..
+    - name: Create package
+      run:  |
+            pwd
+            mkdir accounts logs save scripts
+            zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
+            zip SphereSvrX-osx-x86_64-nightly.zip src/sphere.ini src/sphereCrypt.ini build/bin-x86_64/*
+
+    # only upload artifact in pull request or if is main/master branch
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Builds
+        path: SphereSvrX-osx-x86_64-nightly.zip
+
 
   upload:
-    needs: [windows-64, windows-32, linux-32, linux-64]
+    needs: [windows-x86_64, windows-x86, linux-x86_64, linux-x86, macos-x86_64]
     if: contains(fromJson('["master", "main"]'), github.ref_name)
     runs-on: ubuntu-latest
     steps:
@@ -134,7 +240,7 @@ jobs:
         with:
           name: Builds
       - name: Generate changelog
-        run: git log --pretty=format:"%ad %an %s" --date=short > Changelog.txt
+        run: git log --pretty=format:"%ad %an %s" --date=short > Git-Changelog.txt
       - name: Create release
         uses: softprops/action-gh-release@v1
         env:
@@ -144,8 +250,9 @@ jobs:
           tag_name: Nightly
           prerelease: true
           files: | 
-                  Changelog.txt
-                  SphereSvrX-win64-nightly.zip
-                  SphereSvrX-win32-nightly.zip
-                  SphereSvrX-linux32-nightly.tar.gz
-                  SphereSvrX-linux64-nightly.tar.gz
+                  Git-Changelog.txt
+                  SphereSvrX-win-x86_64-nightly.zip
+                  SphereSvrX-win-x86-nightly.zip
+                  SphereSvrX-linux-x86_64-nightly.tar.gz
+                  SphereSvrX-linux-x86-nightly.tar.gz
+                  SphereSvrX-osx-x86_64-nightly.zip

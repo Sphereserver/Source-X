@@ -26,7 +26,7 @@ CSWindow::~CSWindow()
 // Standard message handlers.
 BOOL CSWindow::OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 {
-    UNREFERENCED_PARAMETER(lpCreateStruct);
+    UnreferencedParameter(lpCreateStruct);
     m_hWnd = hwnd;
     return true;
 }
@@ -38,7 +38,7 @@ void CSWindow::OnDestroy()
 
 void CSWindow::OnDestroy( HWND hwnd )
 {
-    UNREFERENCED_PARAMETER(hwnd);
+    UnreferencedParameter(hwnd);
     m_hWnd = nullptr;
 }
 
@@ -203,9 +203,9 @@ INT_PTR CALLBACK CDialogBase::DialogProc( HWND hWnd, UINT message, WPARAM wParam
 
 BOOL CDialogBase::DefDialogProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
-    UNREFERENCED_PARAMETER(message);
-    UNREFERENCED_PARAMETER(wParam);
-    UNREFERENCED_PARAMETER(lParam);
+    UnreferencedParameter(message);
+    UnreferencedParameter(wParam);
+    UnreferencedParameter(lParam);
     return FALSE;
 }
 
@@ -307,13 +307,13 @@ BOOL CScrollBar::GetScrollInfo(LPSCROLLINFO lpScrollInfo, UINT nMask)
 
 void CEdit::SetSel(DWORD dwSelection, BOOL bNoScroll)
 {
-    UNREFERENCED_PARAMETER(bNoScroll);
+    UnreferencedParameter(bNoScroll);
     ASSERT(IsWindow());
     SendMessage(EM_SETSEL, (WPARAM)dwSelection, (LPARAM)dwSelection);
 }
 void CEdit::SetSel(size_t nStartChar, size_t nEndChar, BOOL bNoScroll)
 {
-    UNREFERENCED_PARAMETER(bNoScroll);
+    UnreferencedParameter(bNoScroll);
     ASSERT(IsWindow());
     SendMessage(EM_SETSEL, (WPARAM)nStartChar, (LPARAM)nEndChar);
 }

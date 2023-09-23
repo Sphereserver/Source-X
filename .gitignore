@@ -19,7 +19,6 @@
 /CMakeFiles/
 /spheresvr.dir/
 
-
 *.vs
 *.pid
 
@@ -43,3 +42,8 @@ CMakeCache.txt
 # Ignore git versioning file
 /src/common/version/GitRevision.h
 /src/common/libev/config.h
+
+# Ignore other specific files
+/lib/mariadb/config.h
+/lib/mariadb/ma_config.h
+/lib/mariadb/mariadb_version.h

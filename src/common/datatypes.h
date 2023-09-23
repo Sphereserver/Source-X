@@ -42,7 +42,10 @@
 	all of the others
 */
 
-typedef double					realtype;
+typedef float					realtype16;
+typedef double					realtype32;
+typedef long double				realtype64;
+typedef realtype32				realtype;
 
 typedef unsigned char			uchar;
 typedef unsigned short			ushort;

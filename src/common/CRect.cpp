@@ -157,7 +157,7 @@ size_t CRect::Read( lpctstr pszVal )
 	tchar *ptcTemp = Str_GetTemp();
 	Str_CopyLimitNull(ptcTemp, pszVal, STR_TEMPLENGTH);
 	tchar * ppVal[5];
-	size_t i = Str_ParseCmds(ptcTemp, ppVal, CountOf( ppVal ), " ,\t");
+	size_t i = Str_ParseCmds(ptcTemp, ppVal, ARRAY_COUNT( ppVal ), " ,\t");
 	switch (i)
 	{
 		case 5:

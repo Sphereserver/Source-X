@@ -14,7 +14,9 @@
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-#include "../regex/deelx.h"
+
+#include "../../../lib/regex/deelx.h"
+
 #ifdef _MSC_VER
     #pragma warning( pop )
 #elif defined(__GNUC__)
@@ -268,7 +270,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
     {
         if ( pszKeyWord[j] == '\0' || pszKeyWord[j] == ',')
         {
-            if ( pTextSearch[i]== '\0' || ISWHITESPACE(pTextSearch[i]))
+            if ( pTextSearch[i]== '\0' || IsWhitespace(pTextSearch[i]))
                 return( i );
             j = 0;
         }
@@ -389,8 +391,6 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
 size_t Str_CopyLen(tchar * pDst, lpctstr pSrc)
 {
     strcpy(pDst, pSrc);
-    // Remember: strlen returns the number of bytes before the terminator (if the string contains utf-8 characters,
-    //  strlen will return a value != than the actual number of characters, because some of them are codified with more than a byte).
     return strlen(pDst);
 }
 
@@ -476,6 +476,30 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
     return (dlen + (s - src));	/* count does not include '\0' */
 }
 
+tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len)
+{
+    tchar c, sc;
+    if ((c = *substr++) != '\0')
+    {
+        do
+        {
+            do
+            {
+                if (str_len-- < 1 || (sc = *str++) == '\0')
+                {
+                    return nullptr;
+                }
+            } while (sc != c);
+            if (substr_len > str_len)
+            {
+                return nullptr;
+            }
+        } while (0 != strncmp(str, substr, substr_len));
+        --str;
+    }
+    return str;
+}
+
 lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 {
     // NOTE: This is wrong many times.
@@ -487,7 +511,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
     {
         static constexpr tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
         tchar chName = static_cast<tchar>(toupper(pszWord[0]));
-        for (uint x = 0; x < CountOf(sm_Vowels); ++x)
+        for (uint x = 0; x < ARRAY_COUNT(sm_Vowels); ++x)
         {
             if (chName == sm_Vowels[x])
                 return "an ";
@@ -610,7 +634,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
     while (len > 0)
     {
         --len;
-        if (pStr[len] < 0 || !ISWHITESPACE(pStr[len]))
+        if (pStr[len] < 0 || !IsWhitespace(pStr[len]))
         {
             ++len;
             break;
@@ -634,7 +658,7 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
         return;
 
     tchar* ptcPrev = pStrEnd - 1;
-    while ((ptcPrev != pStrBegin) && ISWHITESPACE(*pStrEnd))
+    while ((ptcPrev != pStrBegin) && IsWhitespace(*ptcPrev))
     {
         if (*ptcPrev == '\0')
             return;
@@ -652,7 +676,7 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
     tchar* ptcTest = ptcLine;
     while (const tchar ch = *ptcTest)
     {
-        if (ISWHITESPACE(ch))
+        if (IsWhitespace(ch))
             ;
         else if (ch == '(')
             ++iOpenCurly;
@@ -1246,8 +1270,8 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 {
     tchar * ppTmp[256];
-    if (iMax > (int)CountOf(ppTmp))
-        iMax = (int)CountOf(ppTmp);
+    if (iMax > (int)ARRAY_COUNT(ppTmp))
+        iMax = (int)ARRAY_COUNT(ppTmp);
 
     int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
     int i;

@@ -62,7 +62,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
 
 bool CItemMap::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemMap::r_WriteVal");
     EXC_TRY("WriteVal");
         if ( !strnicmp(ptcKey, "PINS", 4) )
@@ -97,9 +97,12 @@ void CItemMap::r_Write(CScript & s)
         s.WriteKeyFormat("PIN", "%i,%i", m_Pins[i].m_x, m_Pins[i].m_y);
 }
 
-void CItemMap::DupeCopy(const CItem *pItem)
+void CItemMap::DupeCopy(const CObjBase *pItemObj)
 {
     ADDTOCALLSTACK("CItemMap::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
+
     CItemVendable::DupeCopy(pItem);
 
     const CItemMap *pMapItem = dynamic_cast<const CItemMap *>(pItem);

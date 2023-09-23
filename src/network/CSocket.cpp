@@ -8,7 +8,7 @@
 void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 {
 #ifdef _WIN32
-    UNREFERENCED_PARAMETER(count);
+    UnreferencedParameter(count);
     FD_SET(socket, &fds);
 #else
     FD_SET(socket, &fds);
@@ -26,7 +26,7 @@ void CheckReportNetAPIErr(int retval, lpctstr ptcOperation)
 	g_Log.EventDebug("Socket operation: '%s' errored (code %d).\n", ptcOperation);
 	g_Log.EventDebug("Errno: %d. Error string: '%s'.\n", (int)errno, strerror(errno));
 #else
-	UNREFERENCED_PARAMETER(ptcOperation);
+	UnreferencedParameter(ptcOperation);
 #endif
 }
 
@@ -282,7 +282,7 @@ void CSocket::Clear()
 int CSocket::GetLastError(bool bUseErrno)
 {
 #ifdef _WIN32
-	UNREFERENCED_PARAMETER(bUseErrno);
+	UnreferencedParameter(bUseErrno);
 	return( WSAGetLastError() );
 #else
 	return( !bUseErrno ? h_errno : errno );	// WSAGetLastError()

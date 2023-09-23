@@ -1003,7 +1003,7 @@ enum
 
     TERRAIN_NULL	= 0x0244,	// impassible interdungeon
 
-    TERRAIN_QTY     = 0x4000	// Terrain tile qyt
+    TERRAIN_QTY     = 0x4000	// Terrain tile qty
 };
 
 

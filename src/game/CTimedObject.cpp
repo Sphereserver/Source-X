@@ -1,6 +1,6 @@
+#include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/threads.h"
-#include "../CException.h"
 #include "CWorldGameTime.h"
 #include "CWorldTickingList.h"
 #include "CTimedObject.h"
@@ -42,7 +42,7 @@ void CTimedObject::_GoAwake()
 bool CTimedObject::_CanTick(bool fParentGoingToSleep) const
 {
     //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
-    UNREFERENCED_PARAMETER(fParentGoingToSleep);
+    UnreferencedParameter(fParentGoingToSleep);
     return !_IsSleeping();
 }
 

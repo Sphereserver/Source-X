@@ -248,7 +248,7 @@ void CChar::Attacker_Clear()
     ADDTOCALLSTACK("CChar::Attacker_Clear");
     if (IsTrigUsed(TRIGGER_COMBATEND))
     {
-        if (!Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
+        if (m_lastAttackers.empty() || !Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
         {
             OnTrigger(CTRIG_CombatEnd, this, 0);
         }
@@ -407,7 +407,7 @@ void CChar::Attacker_CheckTimeout()
             {
                 const bool fCleanupSuccess = Attacker_Delete(count, true, ATTACKER_CLEAR_FORCED);
                 ASSERT(fCleanupSuccess);
-                UNREFERENCED_PARAMETER(fCleanupSuccess);
+                UnreferencedParameter(fCleanupSuccess);
                 //if (!fCleanupSuccess)
                 //    ++count;
             }

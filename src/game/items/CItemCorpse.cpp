@@ -1,8 +1,8 @@
+#include "../../common/CException.h"
 #include "../../common/CLog.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
-#include "../CException.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "CItem.h"
@@ -104,7 +104,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 
 int CItemCorpse::GetWeight(word amount) const
 {
-	UNREFERENCED_PARAMETER(amount);
+	UnreferencedParameter(amount);
 	// GetAmount is messed up.
 	// true weight == container item + contents.
 	return( 1 + CContainer::GetTotalWeight());

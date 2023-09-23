@@ -31,7 +31,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
     // it can be a range (with format {lo# hi#}) or a single value, even without brackets,
     //	so we don't need a warning if GetRangeVals doesn't find the brackets
     int64 piVal[2];
-    int iQty = g_Exp.GetRangeVals( pszDef, piVal, CountOf(piVal), true);
+    int iQty = g_Exp.GetRangeVals( pszDef, piVal, ARRAY_COUNT(piVal), true);
     if ( iQty <= 0 )
         return false;
 
@@ -74,7 +74,7 @@ bool CValueCurveDef::Load( tchar * pszDef )
     ADDTOCALLSTACK("CValueCurveDef::Load");
     // ADV_RATE = Chance at 0, to 100.0
     int64 Arg_piCmd[101];
-    size_t iQty = Str_ParseCmds( pszDef, Arg_piCmd, CountOf(Arg_piCmd));
+    size_t iQty = Str_ParseCmds( pszDef, Arg_piCmd, ARRAY_COUNT(Arg_piCmd));
     m_aiValues.resize(iQty);
     if ( iQty == 0 )
     {

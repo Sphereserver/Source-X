@@ -27,11 +27,11 @@ void CSkillClassDef::Init()
     m_SkillSumMax = 10*1000;
     m_StatSumMax = 300;
     size_t i;
-    for ( i = 0; i < CountOf(m_SkillLevelMax); ++i )
+    for ( i = 0; i < ARRAY_COUNT(m_SkillLevelMax); ++i )
     {
         m_SkillLevelMax[i] = 1000;
     }
-    for ( i = 0; i < CountOf(m_StatMax); ++i )
+    for ( i = 0; i < ARRAY_COUNT(m_StatMax); ++i )
     {
         m_StatMax[i] = 100;
     }
@@ -39,10 +39,10 @@ void CSkillClassDef::Init()
 
 bool CSkillClassDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CSkillClassDef::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case SCC_NAME: // "NAME"
             sVal = m_sName;
@@ -58,14 +58,14 @@ bool CSkillClassDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole *
             int i = g_Cfg.FindSkillKey(ptcKey);
             if ( i != SKILL_NONE )
             {
-                ASSERT( (i >= 0) && (uint(i) < CountOf(m_SkillLevelMax)) );
+                ASSERT( (i >= 0) && (uint(i) < ARRAY_COUNT(m_SkillLevelMax)) );
                 sVal.FormatUSVal( m_SkillLevelMax[i] );
                 break;
             }
             i = g_Cfg.GetStatKey( ptcKey);
             if ( i >= 0 )
             {
-                ASSERT( uint(i) < CountOf(m_StatMax));
+                ASSERT( uint(i) < ARRAY_COUNT(m_StatMax));
                 sVal.FormatUSVal( m_StatMax[i] );
                 break;
             }
@@ -86,7 +86,7 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 {
     ADDTOCALLSTACK("CSkillClassDef::r_LoadVal");
     EXC_TRY("LoadVal");
-    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case SCC_DEFNAME:
             return SetResourceName( s.GetArgStr());
@@ -105,14 +105,14 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
             int i = g_Cfg.FindSkillKey(ptcKey);
             if ( i != SKILL_NONE )
             {
-                ASSERT( (i >= 0) && (uint(i) < CountOf(m_SkillLevelMax)) );
+                ASSERT( (i >= 0) && (uint(i) < ARRAY_COUNT(m_SkillLevelMax)) );
                 m_SkillLevelMax[i] = s.GetArgUSVal();
                 break;
             }
             i = g_Cfg.GetStatKey(ptcKey);
             if ( i >= 0 )
             {
-                ASSERT( (uint)i < CountOf(m_StatMax));
+                ASSERT( (uint)i < ARRAY_COUNT(m_StatMax));
                 m_StatMax[i] = s.GetArgUSVal();
                 break;
             }

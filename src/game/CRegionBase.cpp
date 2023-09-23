@@ -1,6 +1,5 @@
-
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "../CLog.h"
 #include "CRegionBase.h"
 
 //*************************************************************************

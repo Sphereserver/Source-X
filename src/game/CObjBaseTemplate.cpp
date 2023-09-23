@@ -74,7 +74,7 @@ void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt ) noexcept
 
 void CObjBaseTemplate::SetTopPoint( const CPointMap & pt )
 {
-    SetUIDContainerFlags(UID_CLEAR);
+    SetUIDContainerFlags(UID_PLAIN_CLEAR);
 	ASSERT(pt.IsValidPoint());	// already checked before.
 	m_pt = pt;
 }

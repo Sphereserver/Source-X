@@ -107,8 +107,8 @@ void CSFileObj::FlushAndClose()
 
 bool CSFileObj::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
-    UNREFERENCED_PARAMETER(ptcKey);
-    UNREFERENCED_PARAMETER(pRef);
+    UnreferencedParameter(ptcKey);
+    UnreferencedParameter(pRef);
     return false;
 }
 
@@ -154,7 +154,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
         return false;
     }
 
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
     switch ( index )
     {
@@ -227,9 +227,9 @@ bool CSFileObj::r_LoadVal( CScript & s )
 
 bool CSFileObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(pSrc);
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(pSrc);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CSFileObj::r_WriteVal");
     EXC_TRY("WriteVal");
     ASSERT(ptcKey != nullptr);
@@ -251,7 +251,7 @@ bool CSFileObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc,
         return true;
     }
 
-    int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
     switch ( index )
     {
@@ -461,14 +461,14 @@ bool CSFileObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc,
 
 bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 {
-    UNREFERENCED_PARAMETER(pSrc);
+    UnreferencedParameter(pSrc);
     ADDTOCALLSTACK("CSFileObj::r_Verb");
     EXC_TRY("Verb");
     ASSERT(pSrc);
 
     lpctstr ptcKey = s.GetKey();
 
-    int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szVerbKeys, ARRAY_COUNT( sm_szVerbKeys )-1 );
 
     if ( index < 0 )
         return( this->r_LoadVal( s ) );

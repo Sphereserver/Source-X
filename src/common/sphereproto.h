@@ -33,7 +33,7 @@ public:
 	}
 	CLanguageID( int iDefault )
 	{
-		UNREFERENCED_PARAMETER(iDefault);
+		UnreferencedParameter(iDefault);
 		ASSERT(iDefault==0);
 		m_codes[0] = 0;
 	}

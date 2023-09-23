@@ -50,17 +50,14 @@ public:
 	static const char *m_sClassName;
 	struct TResponseString
 	{
-	public:
 		const word m_ID;
 		CSString const m_sText;
 
 		TResponseString( word id, lpctstr pszText ) : m_ID( id ), m_sText( pszText )
 		{
 		}
-
-	private:
-		TResponseString( const TResponseString& copy );
-		TResponseString& operator=( const TResponseString& other );
+        TResponseString(const TResponseString& copy) = delete;
+        TResponseString& operator=(const TResponseString& other) = delete;
 	};
 
 	CSTypedArray<dword>				m_CheckArray;
@@ -72,10 +69,8 @@ public:
 	bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
 
 	CDialogResponseArgs() = default;
-
-private:
-	CDialogResponseArgs( const CDialogResponseArgs& copy );
-	CDialogResponseArgs& operator=( const CDialogResponseArgs& other );
+    CDialogResponseArgs(const CDialogResponseArgs& copy) = delete;
+    CDialogResponseArgs& operator=(const CDialogResponseArgs& other) = delete;
 };
 
 //////////////////
@@ -143,37 +138,6 @@ public:
 	int64 m_timeLastEvent;		    // Last time we got event from client.
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
-
-    // Client-sent flags
-    bool _fShowPublicHouseContent;
-
-	// GM only stuff.
-	CGMPage * m_pGMPage;	// Current GM page being handled by this client
-	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
-
-	// Gump stuff
-    //  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
-    //  second int: count (how much of that dialogs are currently open)
-	typedef std::map<uint,int> OpenedGumpsMap_t;
-	OpenedGumpsMap_t m_mapOpenedGumps;
-
-	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
-	int64 m_timeLastSkillThrowing;          // Last time we throw the weapon
-	CObjBase *m_pSkillThrowingTarg;			// Object from where the anim will return from
-	ITEMID_TYPE m_SkillThrowingAnimID;		// Weapon anim ID (AMMOANIM)
-	dword m_SkillThrowingAnimHue;			// Weapon anim hue (AMMOANIMHUE)
-	dword m_SkillThrowingAnimRender;		// Weapon anim render (AMMOANIMRENDER)
-
-	// Current operation context args for modal async operations..
-private:
-	CLIMODE_TYPE m_Targ_Mode;	// Type of async operation under way.
-public:
-	CUID m_Targ_Last;	// The last object targeted by the client
-	CUID m_Targ_UID;			// The object of interest to apply to the target.
-	CUID m_Targ_Prv_UID;		// The object of interest before this.
-	CSString m_Targ_Text;		// Text transfered up from client.
-	CPointMap  m_Targ_p;		// For script targeting,
-	int64 m_Targ_Timeout;       // timeout time for targeting
 
 	// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
@@ -260,6 +224,38 @@ private:
 	CCrypto m_Crypt;			// Client source communications are always encrypted.
 	static CHuffman m_Comp;
 
+public:
+	// Gump stuff
+	//  first uint: dialog's CResourceID.GetPrivateUID(), or special dialog code
+	//  second int: count (how much of that dialogs are currently open)
+	typedef std::map<uint, int> OpenedGumpsMap_t;
+	OpenedGumpsMap_t m_mapOpenedGumps;
+
+	// Client-sent flags
+	bool _fShowPublicHouseContent;
+
+	// GM only stuff.
+	CGMPage* m_pGMPage;	// Current GM page being handled by this client
+	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
+
+	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
+	int64 m_timeLastSkillThrowing;          // Last time we throw the weapon
+	CObjBase* m_pSkillThrowingTarg;			// Object from where the anim will return from
+	ITEMID_TYPE m_SkillThrowingAnimID;		// Weapon anim ID (AMMOANIM)
+	dword m_SkillThrowingAnimHue;			// Weapon anim hue (AMMOANIMHUE)
+	dword m_SkillThrowingAnimRender;		// Weapon anim render (AMMOANIMRENDER)
+
+	// Current operation context args for modal async operations..
+private:
+	CLIMODE_TYPE m_Targ_Mode;	// Type of async operation under way.
+public:
+	CUID m_Targ_Last;	// The last object targeted by the client
+	CUID m_Targ_UID;			// The object of interest to apply to the target.
+	CUID m_Targ_Prv_UID;		// The object of interest before this.
+	CSString m_Targ_Text;		// Text transfered up from client.
+	CPointMap  m_Targ_p;		// For script targeting,
+	int64 m_Targ_Timeout;       // timeout time for targeting
+
 private:
 	bool OnRxConsoleLoginComplete();
 	bool OnRxConsole( const byte * pData, uint len );
@@ -321,8 +317,8 @@ public:
 	void Event_Attack(CUID uid);
 	void Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor );
 	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
-	void Event_ChatButton(const nchar * pszName); // Client's chat button was pressed
-	void Event_ChatText( const nchar * pszText, int len, CLanguageID lang = 0 ); // Text from a client
+	void Event_ChatButton(const nachar* pszName); // Client's chat button was pressed
+	void Event_ChatText( const nachar* pszText, int len, CLanguageID lang = 0 ); // Text from a client
     void Event_CombatAbilitySelect(dword dwAbility);
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
 	bool Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
@@ -338,7 +334,7 @@ public:
 	bool Event_SetName( CUID uid, const char * pszCharName );
 	void Event_SingleClick( CUID uid );
 	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool fNoStrip = false ); // PC speech
-	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
+	void Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
 	void Event_Target( dword context, CUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
 	void Event_Tips( word i ); // Tip of the day window
 	void Event_ToolTip( CUID uid );
@@ -488,7 +484,7 @@ public:
 	void addPlayerUpdate() const;
 
 	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD ) const;
-	void addBarkUNICODE( const nchar * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 ) const;
+	void addBarkUNICODE( const nachar* pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 ) const;
 	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, lpctstr pArgs = nullptr ) const;
 	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = nullptr, lpctstr pArgs = nullptr ) const;
 	void addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, lpctstr name = "" ) const;
@@ -657,75 +653,28 @@ public:
 	// Test what I can do
 	CAccount * GetAccount() const
 	{
-		return( m_pAccount );
+		return m_pAccount;
 	}
-	bool IsPriv( word flag ) const
-	{	// PRIV_GM
-		if ( GetAccount() == nullptr )
-			return false;
-		return( GetAccount()->IsPriv( flag ));
-	}
-	void SetPrivFlags( word wPrivFlags )
-	{
-		if ( GetAccount() == nullptr )
-			return;
-		GetAccount()->SetPrivFlags( wPrivFlags );
-	}
-	void ClearPrivFlags( word wPrivFlags )
-	{
-		if ( GetAccount() == nullptr )
-			return;
-		GetAccount()->ClearPrivFlags( wPrivFlags );
-	}
+    bool IsPriv(word flag) const;
+    void SetPrivFlags(word wPrivFlags);
+    void ClearPrivFlags(word wPrivFlags);
 
 	// ------------------------------------------------
-	bool IsResDisp( byte flag ) const
-	{
-		if ( GetAccount() == nullptr )
-			return false;
-		return( GetAccount()->IsResDisp( flag ) );
-	}
-	byte GetResDisp() const
-	{
-		if ( GetAccount() == nullptr )
-			return( UINT8_MAX );
-		return( GetAccount()->GetResDisp() );
-	}
-	bool SetResDisp( byte res )
-	{
-		if ( GetAccount() == nullptr )
-			return false;
-		return ( GetAccount()->SetResDisp( res ) );
-	}
-	bool SetGreaterResDisp( byte res )
-	{
-		if ( GetAccount() == nullptr )
-			return false;
-		return( GetAccount()->SetGreaterResDisp( res ) );
-	}
-	// ------------------------------------------------
-	void SetScreenSize(ushort x, ushort y)
-	{
-		m_ScreenSize.x = x;
-		m_ScreenSize.y = y;
-	}
 
-	PLEVEL_TYPE GetPrivLevel() const
+    bool IsResDisp(byte flag) const;
+    byte GetResDisp() const;
+    bool SetResDisp(byte res);
+    bool SetGreaterResDisp(byte res);
+
+	// ------------------------------------------------
+
+    void SetScreenSize(ushort x, ushort y);
+
+    PLEVEL_TYPE GetPrivLevel() const;
+    virtual lpctstr GetName() const override;
+	virtual CChar * GetChar() const override
 	{
-		// PLEVEL_Counsel
-		if ( GetAccount() == nullptr )
-			return( PLEVEL_Guest );
-		return( GetAccount()->GetPrivLevel());
-	}
-	lpctstr GetName() const
-	{
-		if ( GetAccount() == nullptr )
-			return( "NA" );
-		return( GetAccount()->GetName());
-	}
-	CChar * GetChar() const
-	{
-		return( m_pChar );
+		return m_pChar;
 	}
 
 	void SysMessage( lpctstr pMsg ) const; // System message (In lower left corner)
@@ -741,14 +690,14 @@ public:
 	bool Cmd_Use_Item( CItem * pItem, bool fTestTouch, bool fScript = false );
 	void Cmd_EditItem( CObjBase * pObj, int iSelect );
 
-	bool IsConnectTypePacket() const
+	bool IsConnectTypePacket() const noexcept
 	{
 		// This is a game or login server.
 		// m_Crypt.IsInit()
 		return ( (m_iConnectType == CONNECT_CRYPT) || (m_iConnectType == CONNECT_LOGIN) || (m_iConnectType == CONNECT_GAME) );
 	}
 
-	CONNECT_TYPE GetConnectType() const
+	CONNECT_TYPE GetConnectType() const noexcept
 	{
 		return m_iConnectType;
 	}
@@ -757,21 +706,18 @@ public:
 	void SetConnectType( CONNECT_TYPE iType );
 
 	// Stuff I am doing. Started by a command
-	CLIMODE_TYPE GetTargMode() const
+	CLIMODE_TYPE GetTargMode() const noexcept
 	{
-		return m_Targ_Mode ;
+		return m_Targ_Mode;
 	}
 	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int64 iTickTimeout = 0, int iCliloc = 0 );
-	void ClearTargMode()
-	{
-		// done with the last mode.
-		m_Targ_Mode = CLIMODE_NORMAL;
-		m_Targ_Timeout = 0;
-	}
+    void ClearTargMode() noexcept;
 
 	bool IsConnecting() const;
 
-	CNetState* GetNetState(void) const { return m_net; };
+	CNetState* GetNetState() const {
+        return m_net;
+    }
 
 public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage

@@ -1,10 +1,10 @@
 
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
 #include "../components/CCSpawn.h"
-#include "../CLog.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -178,12 +178,34 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			return false;
 
 		case IT_CONTAINER_LOCKED:
-		case IT_SHIP_HOLD_LOCK:
-			if ( !m_pChar->GetPackSafe()->ContentFindKeyFor(pItem) )
+			SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
+			if (!m_pChar->GetPackSafe()->ContentFindKeyFor(pItem)) // I don't have the container key
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
+				SysMessageDefault(DEFMSG_LOCK_CONT_NO_KEY);
+				if (!IsPriv(PRIV_GM))
+					return false;
+			}
+			else // I have the key but i need to use it to unlock the container.
+			{
+				SysMessageDefault(DEFMSG_LOCK_HAS_KEY); 
+				return false;
+			}
+			break;
+
+		case IT_SHIP_HOLD_LOCK:
+			SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
+			if ( !m_pChar->GetPackSafe()->ContentFindKeyFor(pItem) ) // I don't have the hold key
+			{
+				
+				SysMessageDefault(DEFMSG_LOCK_HOLD_NO_KEY);
 				if ( !IsPriv(PRIV_GM) )
 					return false;
+			}
+			else // I have the key but i need to use it to unlock the container.
+			{
+				SysMessageDefault(DEFMSG_LOCK_HAS_KEY);
+				return false;
 			}
 			break;
 
@@ -255,13 +277,6 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_POTION_FAIL);
 				return false;
-			}
-			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Poison )
-			{
-				// If we click directly on poison potion, we will drink poison and get ill.
-				// To use it on Poisoning skill, the skill will request to target the potion.
-				m_pChar->OnSpellEffect(SPELL_Poison, m_pChar, pItem->m_itSpell.m_spelllevel, nullptr);
-				return true;
 			}
 			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Explosion )
 			{
@@ -607,7 +622,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	if ( iSelect == 0 )		// cancelled
 		return;
 
-    ASSERT(CountOf(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
+    ASSERT(ARRAY_COUNT(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
 	if ( iSelect > 0 )		// we selected an item
 	{
 		if ( iSelect >= MAX_MENU_ITEMS )
@@ -644,11 +659,11 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 			}
 		}
 
-		if ( count >= (CountOf(item) - 1) )
+		if ( count >= (ARRAY_COUNT(item) - 1) )
 			break;
 	}
 
-	ASSERT(count < CountOf(item));
+	ASSERT(count < ARRAY_COUNT(item));
 	addItemMenu(CLIMODE_MENU_EDIT, item, count, pObj);
 }
 
@@ -682,7 +697,7 @@ bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 	if ( iSelect == 0 )		// menu cancelled
 		return (Cmd_Skill_Menu_Build(rid, iSelect, nullptr, 0, &fShowMenu, &fLimitReached) > 0);
 
-    ASSERT(CountOf(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
+    ASSERT(ARRAY_COUNT(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
 	CMenuItem item[MAX_MENU_ITEMS];
 	int iShowCount = Cmd_Skill_Menu_Build(rid, iSelect, item, MAX_MENU_ITEMS, &fShowMenu, &fLimitReached);
 
@@ -720,7 +735,7 @@ bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 			g_Log.EventDebug("[DEBUG_SCRIPTS] Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 	}
 
-	ASSERT(iShowCount < (int)CountOf(item));
+	ASSERT(iShowCount < (int)ARRAY_COUNT(item));
 	addItemMenu(CLIMODE_MENU_SKILL, item, iShowCount);
 	return true;
 }
@@ -809,7 +824,12 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
         }
 		if ( s.IsKeyHead("ON", 2) )
 		{
-			if ( *s.GetArgStr() == '@' )
+			if ( !strcmpi(s.GetArgStr(), "@Cancel") )
+			{
+				fSkip = true;
+				continue;
+			}
+			else if ( *s.GetArgStr() == '@' )
             {
                 ++iShowCount;
                 fSkip = true;
@@ -1089,7 +1109,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 
 	if ( track_sel > 0 ) // Not Cancelled
 	{
-		ASSERT(track_sel < CountOf(m_tmMenu.m_Item));
+		ASSERT(track_sel < ARRAY_COUNT(m_tmMenu.m_Item));
 		if ( fExec )
 		{
 			// Tracking menu got us here. Start tracking the selected creature.
@@ -1108,11 +1128,11 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			NPCBRAIN_NONE	// players
 		};
 
-		if ( track_sel >= CountOf(sm_Track_Brain) )
-			track_sel = CountOf(sm_Track_Brain) - 1;
+		if ( track_sel >= ARRAY_COUNT(sm_Track_Brain) )
+			track_sel = ARRAY_COUNT(sm_Track_Brain) - 1;
 
 		NPCBRAIN_TYPE track_type = sm_Track_Brain[track_sel];
-        ASSERT(CountOf(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
+        ASSERT(ARRAY_COUNT(m_tmMenu.m_Item) == MAX_MENU_ITEMS);
         CMenuItem item[MAX_MENU_ITEMS];
 		uint count = 0;
 
@@ -1185,7 +1205,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			item[count].m_sText = pChar->GetName();
 			m_tmMenu.m_Item[count] = pChar->GetUID();
 
-			if ( count >= (CountOf(item) - 1) )
+			if ( count >= (ARRAY_COUNT(item) - 1) )
 				break;
 		}
 
@@ -1193,7 +1213,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		if ( count > 0 )
 		{
 			m_pChar->Skill_UseQuick(SKILL_TRACKING, 20 + Calc_GetRandLLVal(30));
-			ASSERT(count < CountOf(item));
+			ASSERT(count < ARRAY_COUNT(item));
 			addItemMenu(CLIMODE_MENU_SKILL_TRACK, item, count);
 			return true;
 		}
@@ -1213,8 +1233,8 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		g_Cfg.GetDefaultMsg( DEFMSG_TRACKING_FAIL_HUMAN )
 	};
 
-	if ( track_sel >= CountOf(sm_Track_FailMsg) )
-		track_sel = CountOf(sm_Track_FailMsg) - 1;
+	if ( track_sel >= ARRAY_COUNT(sm_Track_FailMsg) )
+		track_sel = ARRAY_COUNT(sm_Track_FailMsg) - 1;
 
 	SysMessage(sm_Track_FailMsg[track_sel]);
 	return false;

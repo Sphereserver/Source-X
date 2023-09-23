@@ -9,7 +9,7 @@
 //const tchar * const TSTRING_NULL = "\0";
 //const char  * const STRING_NULL  = "\0";
 
-#define IntCharacter(c)     int((c) & 0xFF)
+#define INT_CHARACTER(c)     int((c) & 0xFF)
 
 #ifdef UNICODE
     #include <cwctype>  // for iswalnum
@@ -18,10 +18,10 @@
 	#define IsAlpha(c)		iswalpha((wint_t)c)
 	#define IsAlnum(c)		iswalnum((wint_t)c)
 #else
-	#define IsDigit(c)		isdigit(IntCharacter(c))
-	#define IsSpace(c)		isspace(IntCharacter(c))
-	#define IsAlpha(c)		isalpha(IntCharacter(c))
-	#define IsAlnum(c)		isalnum(IntCharacter(c))
+	#define IsDigit(c)		isdigit(INT_CHARACTER(c))
+	#define IsSpace(c)		isspace(INT_CHARACTER(c))
+	#define IsAlpha(c)		isalpha(INT_CHARACTER(c))
+	#define IsAlnum(c)		isalnum(INT_CHARACTER(c))
 #endif
 
 /*  cross-platform functions macros  */
@@ -127,6 +127,16 @@ size_t Str_LengthUTF8(const char* pStr);
 */
 size_t Str_ConcatLimitNull(tchar *pDst, const tchar *pSrc, size_t uiMaxSize);
 
+/*
+ * @brief Find the first occurrence of substring in string, where the search is limited to the first str_len characters of string.
+ * @param str haystack string
+ * @param substr needle string
+ * @param str_len haystack length
+ * @param substr_len needle length
+ */
+tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len);
+
+
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".
 * @param pszWords word to add the article.
@@ -208,6 +218,7 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
 * @param ptcLine (Reference to) pointer to the string.
 */
 void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept;
+
 
 ///@}
 
@@ -391,5 +402,6 @@ public:
 private:
     char* m_strUTF8_MultiByte;
 };
+
 
 #endif // _INC_SSTRING_H

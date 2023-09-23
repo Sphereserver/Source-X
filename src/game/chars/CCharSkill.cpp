@@ -1,19 +1,18 @@
-
 //  CChar is either an NPC or a Player.
 
-#include <cmath>
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/resource/sections/CRegionResourceDef.h"
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/CLog.h"
 #include "../clients/CClient.h"
 #include "../items/CItemVendable.h"
 #include "../triggers.h"
-#include "../CLog.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
+#include <cmath>
 
 //----------------------------------------------------------------------
 // Skills
@@ -1259,7 +1258,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 {
 	ADDTOCALLSTACK("CChar::Skill_Tracking");
 	// SKILL_TRACKING
-	UNREFERENCED_PARAMETER(dirPrv);
+	UnreferencedParameter(dirPrv);
 
 	if ( !IsClientActive() )		// abort action if the client get disconnected
 		return false;
@@ -1285,7 +1284,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	}
 
 	const DIR_TYPE dir = GetDir(pObjTop);
-	ASSERT(dir >= 0 && (uint)(dir) < CountOf(CPointBase::sm_szDirs));
+	ASSERT(dir >= 0 && (uint)(dir) < ARRAY_COUNT(CPointBase::sm_szDirs));
 
 	// Select tracking message based on distance
 	lpctstr pszDef;
@@ -2276,7 +2275,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			return 0;
 
 		tchar * pszMsg = Str_GetTemp();
-		snprintf(pszMsg, STR_TEMPLENGTH, sm_szTameSpeak[ Calc_GetRandVal( CountOf( sm_szTameSpeak )) ], pChar->GetName());
+		snprintf(pszMsg, STR_TEMPLENGTH, sm_szTameSpeak[ Calc_GetRandVal( ARRAY_COUNT( sm_szTameSpeak )) ], pChar->GetName());
 		Speak(pszMsg);
 
 		// Keep trying and updating the animation
@@ -2933,8 +2932,16 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 
     if ((stage == SKTRIG_FAIL) || (stage == SKTRIG_ABORT))
     {
-        m_atFight.m_iRecoilDelay = 0;
-        m_atFight.m_iSwingAnimationDelay = 0;
+		/*Super cheap fix :
+		When we are casting the SUMMON CREATURE spell while we are in an active combat (we have an active fighting skill going on)
+		resetting both the RecoilDelay and the SwingAnimationDelay will also cause the ID of the summoned creatured to be resetted.
+		This only happens when the creature to be summoned is chosen on the default "summon menu".
+		*/
+		if ( !m_atMagery.m_iSummonID ) 
+		{
+			m_atFight.m_iRecoilDelay = 0;
+			m_atFight.m_iSwingAnimationDelay = 0;
+		}
         m_atFight.m_iSwingAnimation = 0;
         m_atFight.m_iSwingIgnoreLastHitTag = 0;
         return 0;
@@ -3261,7 +3268,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	if ( pDam )
 	{
 		int64 DVal[2];
-		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, CountOf(DVal));
+		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, ARRAY_COUNT(DVal));
 		switch(iQty)
 		{
 			case 1:

@@ -1,0 +1,76 @@
+name: coverity-scan
+
+on:
+  push:
+      branches: ["static-analysis"]
+      paths-ignore:
+        - '.gitignore'
+        - '.gitattributes'
+        - '**.txt'
+        - '**.md'
+        - '**.rc'
+
+jobs:
+  latest:
+        runs-on: ubuntu-22.04
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+          with:
+            fetch-depth: 0
+
+        - name: Install prerequisites
+          run:  |
+                lsb_release -d
+    
+                sudo add-apt-repository universe && sudo sudo apt-get -qq update
+                sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
+                sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
+                sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+
+        - name: Report building tools
+          run:  |
+                echo "GCC:" && gcc -v
+                echo && echo "CMake:" && cmake --version
+                echo && echo "Ninja:" && ninja --version
+
+        - name: Download Coverity Build Tool
+#echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+          run:  |
+                wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=SphereServer-X" -O cov-analysis-linux64.tar.gz
+                mkdir cov-analysis-linux64
+                tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+                export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+                
+          env:
+            TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+    
+        - name: CMake
+          run: |
+                mkdir -p build
+                cmake -G "Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
+
+        - name: Compilation (cov-build)
+          run: |        
+                cd build
+                cov-build --dir cov-int make
+
+        - name: Coverity build log
+          run:  |
+                echo "Printing Coverity log..."
+                cat cov-int/scm_log.txt
+
+        - name: Submit the result to Coverity Scan
+          run: |
+                tar czvf build-data.tgz cov-int
+                curl \
+                    --form project=SphereServer-X \
+                    --form token=$TOKEN \
+                    --form email=$EMAIL \
+                    --form file=@build-data.tgz \
+                    --form version=trunk \
+                    --form description="${{github.sha}}" \
+                    https://scan.coverity.com/builds?project=SphereServer-X
+          env:
+            TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+            EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}

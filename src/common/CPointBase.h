@@ -22,10 +22,14 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset );
 
 struct CPointBase	// Non initialized 3d point.
 {
+private:
+	friend class GlobalInitializer;
+	static void InitRuntimeStaticMembers();
+
 public:
 	static lpctstr const sm_szLoadKeys[];
-	static const short sm_Moves[DIR_QTY+1][2];
-	static lpctstr sm_szDirs[DIR_QTY+1];
+	static lpctstr sm_szDirs[DIR_QTY + 1];
+	static const short sm_Moves[DIR_QTY + 1][2];
 
 public:
 	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.

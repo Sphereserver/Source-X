@@ -12,7 +12,7 @@ lpctstr const CCPropsItemChar::_ptcPropertyKeys[PROPITCH_QTY + 1] =
     nullptr
 };
 KeyTableDesc_s CCPropsItemChar::GetPropertyKeysData() const {
-    return {_ptcPropertyKeys, (int)CountOf(_ptcPropertyKeys)};
+    return {_ptcPropertyKeys, (int)ARRAY_COUNT(_ptcPropertyKeys)};
 }
 
 RESDISPLAY_VERSION CCPropsItemChar::_iPropertyExpansion[PROPITCH_QTY + 1] =
@@ -55,7 +55,7 @@ bool CCPropsItemChar::IsPropertyStr(PropertyIndex_t iPropIndex) const
             return false;
     }
     */
-    UNREFERENCED_PARAMETER(iPropIndex);
+    UnreferencedParameter(iPropIndex);
     return false;
 }
 

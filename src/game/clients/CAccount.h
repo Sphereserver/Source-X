@@ -147,7 +147,9 @@ public:
 	* @brief Get the CAccount name.
 	* @return the CAccount name.
 	*/
-	lpctstr GetName() const { return( m_sName ); }
+	virtual lpctstr GetName() const override {
+	    return m_sName;
+    }
 	/**
 	* @brief Get the CAccount password.
 	* @return the CAccount password.
@@ -359,6 +361,9 @@ protected:
 	static lpctstr const sm_szVerbKeys[]; // ACCOUNT action list.
 	CObjNameSortArray m_Accounts; // Sorted CAccount list.
 public:
+    CAccounts() : m_fLoading(false) {
+
+    }
 	/**
 	* CAccount needs CAccounts methods.
 	* @see CAccount

@@ -60,7 +60,7 @@ void CScriptTriggerArgs::Clear()
 
 void CScriptTriggerArgs::Init( lpctstr pszStr )
 {
-    //ASSERT(!ISWHITESPACE(*pszStr));   // Allowed
+    //ASSERT(!IsWhitespace(*pszStr));   // Allowed
 
     m_pO1 = nullptr;
 
@@ -110,7 +110,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
         lptstr ptcArgEnd = ptcParse;
         for (ptcParse = ptcArgEnd - 1; ptcParse != ptcArgStart; --ptcParse)
         {
-            if (ISWHITESPACE(*ptcParse))
+            if (IsWhitespace(*ptcParse))
                 continue;
 
             // If we have other characters after the quote symbol we can't really say that the whole argument is quoted
@@ -303,7 +303,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
     }
     else
     {
-        index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+        index = FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     }
 
     EXC_SET_BLOCK("Verb-Statement");
@@ -370,13 +370,13 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 bool CScriptTriggerArgs::r_LoadVal( CScript & s )
 {
     //ADDTOCALLSTACK("CScriptTriggerArgs::r_LoadVal");
-    UNREFERENCED_PARAMETER(s);
+    UnreferencedParameter(s);
     return false;
 }
 
 bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
     EXC_TRY("WriteVal");
     if ( IsSetEF( EF_Intrinsic_Locals ) )
@@ -524,7 +524,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
     }
 
     EXC_SET_BLOCK("generic");
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
     switch (index)
     {
         case AGC_N:

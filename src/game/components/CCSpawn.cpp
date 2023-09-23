@@ -274,7 +274,7 @@ uint CCSpawn::WriteName(tchar *ptcOut) const
 void CCSpawn::Delete(bool fForce)
 {
     ADDTOCALLSTACK("CCSpawn::Delete");
-    UNREFERENCED_PARAMETER(fForce);
+    UnreferencedParameter(fForce);
     KillChildren();
     if (_fIsBadSpawn == true)
     {
@@ -627,21 +627,17 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
         
-        bool fSpawnComplete = false;
         if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
         {
-            fSpawnComplete = true;
+            pSpawnItem->_SetTimeoutS(-1);
         }
 
         if (IsTrigUsed(TRIGGER_ADDOBJ))
         {
             CScriptTriggerArgs args;
             args.m_pO1 = pSpawnedObj;
-            if (fSpawnComplete)
-                args.m_iN1 = -1;
-            else
-                args.m_iN1 = pSpawnItem->_GetTimerAdjusted()/MSECS_PER_SEC;
-
+            const int64 iTimer= pSpawnItem->_GetTimerAdjusted();
+            args.m_iN1 = (iTimer < 0) ? -1 : iTimer/MSECS_PER_SEC;
             pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
             pSpawnItem->_SetTimeoutS(args.m_iN1);
         }
@@ -809,10 +805,10 @@ lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 bool CCSpawn::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CCSpawn::r_WriteVal");
-    UNREFERENCED_PARAMETER(pSrc);
+    UnreferencedParameter(pSrc);
     EXC_TRY("WriteVal");
 
-    int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (iCmd < 0)
     {
         return false;
@@ -892,7 +888,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CCSpawn::r_LoadVal");
     EXC_TRY("LoadVal");
 
-    int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (iCmd < 0)
     {
         return false;
@@ -1039,7 +1035,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
             if (IsDigit(pszTemp[0]) || pszTemp[0] == '-')
             {
                 tchar * ppVal[3];
-                iArgs = Str_ParseCmds(pszTemp, ppVal, CountOf(ppVal), " ,\t");
+                iArgs = Str_ParseCmds(pszTemp, ppVal, ARRAY_COUNT(ppVal), " ,\t");
                 switch (iArgs)
                 {
                     case 3: // m_z
@@ -1129,12 +1125,17 @@ lpctstr const CCSpawn::sm_szRefKeys[ISPR_QTY + 1]
 bool CCSpawn::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
 {
     ADDTOCALLSTACK("CCSpawn::r_GetRef");
-    int iCmd = FindTableSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = -1;
+    if (!strnicmp(ptcKey, "at.", 3))
+        iCmd = FindTableSorted("at", sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys) - 1);
+    else
+        iCmd = FindTableSorted(ptcKey, sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys) - 1);
 
     if (iCmd < 0)
     {
         return false;
     }
+    
 
     CItem *pItem = static_cast<CItem*>(GetLink());
 
@@ -1199,8 +1200,8 @@ lpctstr const CCSpawn::sm_szVerbKeys[ISPV_QTY + 1]
 bool CCSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCSpawn::r_Verb");
-    UNREFERENCED_PARAMETER(pSrc);
-    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+    UnreferencedParameter(pSrc);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1);
     if (iCmd < 0)
     {
         return false;

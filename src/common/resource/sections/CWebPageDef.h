@@ -6,8 +6,8 @@
 #ifndef _INC_CWEBPAGEDEF_H
 #define _INC_CWEBPAGEDEF_H
 
+#include "../../CTextConsole.h"
 #include "../CResourceLink.h"
-#include "../CTextConsole.h"
 #include "../CValueDefs.h"
 
 class CSTime;
@@ -78,7 +78,7 @@ public:
     *
     * @return  m_sSrcFilePath.
     */
-    lpctstr GetName() const
+    virtual lpctstr GetName() const override
     {
         return m_sSrcFilePath;
     }

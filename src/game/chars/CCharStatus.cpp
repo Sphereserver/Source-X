@@ -280,7 +280,7 @@ bool CChar::CanCarry( const CItem *pItem ) const
 void CChar::ContentAdd( CItem * pItem, bool fForceNoStack )
 {
 	ADDTOCALLSTACK("CChar::ContentAdd");
-	UNREFERENCED_PARAMETER(fForceNoStack);
+	UnreferencedParameter(fForceNoStack);
 	ItemEquip(pItem);
 	//LayerAdd( pItem, LAYER_QTY );
 }
@@ -832,8 +832,8 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_FOOD_8)
 		};
 
-		if ( index >= (CountOf(sm_szPetHunger) - 1) )
-			index = CountOf(sm_szPetHunger) - 1;
+		if ( index >= (ARRAY_COUNT(sm_szPetHunger) - 1) )
+			index = ARRAY_COUNT(sm_szPetHunger) - 1;
 
 		return fHappy ? sm_szPetHappy[index] : sm_szPetHunger[index];
 	}
@@ -850,8 +850,8 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 		g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_8)
 	};
 
-	if ( index >= (CountOf(sm_szFoodLevel) - 1) )
-		index = CountOf(sm_szFoodLevel) - 1;
+	if ( index >= (ARRAY_COUNT(sm_szFoodLevel) - 1) )
+		index = ARRAY_COUNT(sm_szFoodLevel) - 1;
 
 	return sm_szFoodLevel[index];
 }
@@ -1835,10 +1835,13 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, dword *pdwBlockFlags, DIR_TYP
 			return nullptr;
 	}
 
-    if ( !ptDest.IsValidPoint() )
+    if (!ptDest.IsValidPoint())
     {
-        DEBUG_ERR(("Character with uid=0%x on %d,%d,%d,%d wants to move into an invalid location %d,%d,%d,%d.\n",
-            GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map));
+		if (!ptOld.IsValidPoint())
+		{
+			DEBUG_WARN(("Character with UID=0%x on invalid location %d,%d,%d,%d wants to move into another invalid location %d,%d,%d,%d.\n",
+				GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map));
+		}
         return nullptr;
     }
 

@@ -6,7 +6,7 @@
 #ifndef _INC_SKILLCLASSDEF_H
 #define _INC_SKILLCLASSDEF_H
 
-#include "../../game/uo_files/uofiles_enums.h"
+#include "../../../game/uo_files/uofiles_enums.h"
 #include "../../sphere_library/CSString.h"
 #include "../CResourceLink.h"
 

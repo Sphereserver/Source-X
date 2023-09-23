@@ -1,17 +1,16 @@
-
 // define the base types of an item (rather than the instance)
 
+#include "../../common/CUOInstall.h"
+#include "../../common/CLog.h"
+#include "../../common/CException.h"
 #include "../../sphere/ProfileTask.h"
 #include "../components/CCPropsItem.h"
 #include "../components/CCPropsItemChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../components/CCPropsItemWeaponRanged.h"
-#include "../resource/CResourceLock.h"
+#include "../../common/resource/CResourceLock.h"
 #include "../uo_files/CUOItemInfo.h"
-#include "../CUOInstall.h"
-#include "../CLog.h"
-#include "../CException.h"
 #include "CItemBase.h"
 
 
@@ -79,7 +78,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	ushort j = 0;
 	for ( ushort i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; ++i )
 	{
-		if ( j == 0 && ISWHITESPACE(tiledata.m_name[i]))
+		if ( j == 0 && IsWhitespace(tiledata.m_name[i]))
 			continue;
 		szName[j++] = tiledata.m_name[i];
 	}
@@ -479,7 +478,7 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) noexcept // static
 		return 2;
 	}
 
-	for ( uint i = 0; i < CountOf(sm_Item_DoorBase); ++i)
+	for ( uint i = 0; i < ARRAY_COUNT(sm_Item_DoorBase); ++i)
 	{
 		const int did = id - sm_Item_DoorBase[i];
 		if ( did >= 0 && did <= 15 )
@@ -1069,7 +1068,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
     }
 
     EXC_SET_BLOCK("Keyword");
-	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or nullptr if not set
 		case IBC_ALTERITEM:
@@ -1397,7 +1396,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 
     EXC_SET_BLOCK("Keyword");
 	lpctstr	ptcKey = s.GetKey();
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ) )
 	{
 		//Set as Strings
 		case IBC_ALTERITEM:
@@ -1486,7 +1485,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 				}
 
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
+				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, ARRAY_COUNT(piVal));
 				if (iQty == 2)
 				{
 					pItemMulti->_shipSpeed.period = (uchar)(piVal[0]);
@@ -1521,7 +1520,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_DUPELIST:
 			{
 				tchar * ppArgs[512];
-				int iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, ARRAY_COUNT(ppArgs));
 				if ( iArgQty <= 0 )
 					return false;
 				m_flip_id.clear();
@@ -1918,7 +1917,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 	ADDTOCALLSTACK("CItemBaseMulti::SetMultiRegion");
 	// inclusive region.
 	int64 piArgs[5];
-	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
+	size_t iQty = Str_ParseCmds( pArgs, piArgs, ARRAY_COUNT(piArgs));
 	if ( iQty <= 1 )
 		return;
 	m_Components.clear();	// might be after a resync
@@ -1929,7 +1928,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::AddComponent");
 	int64 piArgs[4];
-	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
+	size_t iQty = Str_ParseCmds( pArgs, piArgs, ARRAY_COUNT(piArgs));
 	if ( iQty <= 1 )
 		return false;
 	return AddComponent((ITEMID_TYPE)(RES_GET_INDEX(piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
@@ -2023,7 +2022,7 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
 {
     ADDTOCALLSTACK("CItemBaseMulti::r_LoadVal");
     EXC_TRY("LoadVal");
-    switch (FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    switch (FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1))
     {
         case MLC_BASESTORAGE:
             _iBaseStorage = s.GetArgU16Val();
@@ -2039,7 +2038,7 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
 		case MLC_MULTIOFFSET:
 		{
 			int64 ppArgs[3];
-			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs));
+			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs));
 			if (iQty < 1)
 				return false;
 
@@ -2060,7 +2059,7 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
 
             // SHIPSPEED x[,y]
             int64 ppArgs[2];
-            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs));
+            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs));
             if (iQty < 1)
                 return false;
 
@@ -2086,10 +2085,10 @@ bool CItemBaseMulti::r_LoadVal(CScript &s)
 
 bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pChar, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch (FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    switch (FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1))
     {
         case MLC_BASESTORAGE:
             sVal.FormatU16Val(_iBaseStorage);
@@ -2151,7 +2150,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
                     return false;
 
                 SKIP_SEPARATORS(ptcKey);
-                const CMultiComponentItem& item = m_Components[iIndex];
+                const CMultiComponentItem& item = m_Components[(size_t)iIndex];
 
                 if (!strnicmp(ptcKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(ptcKey, "DX", 2)) sVal.FormatVal(item.m_dx);

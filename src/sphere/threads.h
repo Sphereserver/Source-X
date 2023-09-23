@@ -10,8 +10,8 @@
 #include "../common/sphere_library/smutex.h"
 #include "../common/sphere_library/sresetevents.h"
 #include "../common/sphere_library/sstringobjs.h"
+#include "../common/sphere_library/CSTime.h"
 #include "../sphere/ProfileData.h"
-#include "../sphere_library/CSTime.h"
 #include <exception>
 #include <list>
 
@@ -35,7 +35,12 @@
 	#define SPHERE_THREADENTRY_CALLTYPE __stdcall
 #else
 	typedef pthread_t spherethread_t;
+#ifdef __APPLE__
+	typedef uint64_t  threadid_t;
+#else
 	typedef pthread_t threadid_t;
+#endif
+
 	#define SPHERE_THREADENTRY_RETNTYPE void *
 	#define SPHERE_THREADENTRY_CALLTYPE
 #endif
@@ -71,15 +76,20 @@ public:
 
 	static inline threadid_t getCurrentThreadId() noexcept
 	{
-#ifdef _WIN32
+#if defined(_WIN32)
 		return ::GetCurrentThreadId();
+#elif defined(__APPLE__)
+		// On OSX, 'threadid_t' is not an integer but a '_opaque_pthread_t *'), so we need to resort to another method.
+		uint64_t threadid = 0;
+		pthread_threadid_np(pthread_self(), &threadid);
+		return threadid;
 #else
 		return pthread_self();
 #endif
 	}
 	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
 	{
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
 		return (firstId == secondId);
 #else
 		return pthread_equal(firstId,secondId);

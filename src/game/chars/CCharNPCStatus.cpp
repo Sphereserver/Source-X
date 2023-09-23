@@ -397,7 +397,7 @@ size_t CChar::NPC_OnHearName( lpctstr pszText ) const
 		if ( pszName[i] == '\0' )
 		{
 			// found name.
-			while ( ISWHITESPACE( pszText[i] ))
+			while ( IsWhitespace( pszText[i] ))
 				i++;
 			return( i );	// Char name found
 		}
@@ -598,7 +598,7 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
 CItemVendable * CChar::NPC_FindVendableItem( CItemVendable * pVendItem, CItemContainer * pContBuy, CItemContainer * pContStock ) // static
 {
 	ADDTOCALLSTACK("CChar::NPC_FindVendableItem");
-	UNREFERENCED_PARAMETER(pContStock);
+	UnreferencedParameter(pContStock);
 	// Does the NPC want to buy this item?
 	if ( !pVendItem || !pContBuy || !pVendItem->IsValidSaleItem(false) )
 		return nullptr;

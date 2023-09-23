@@ -7,6 +7,7 @@
 #define _INC_OS_UNIX_H
 
 #include <unistd.h>			// usleep
+#include <cctype>           // toupper, tolower
 
 
 //#define SLASH_PATH	"/"
@@ -58,7 +59,6 @@
 /*  */
 
 #define ERROR_SUCCESS	0
-#define UNREFERENCED_PARAMETER(P)	(void)(P)
 #define HKEY_LOCAL_MACHINE			(( HKEY ) 0x80000002 )
 
 

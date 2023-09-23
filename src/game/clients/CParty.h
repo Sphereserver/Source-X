@@ -70,7 +70,7 @@ public:
 	bool SendRemoveList( CChar * pCharRemove, bool bFor );
 	bool SendAddList( CChar * pCharDest );
 	// Party message sending wrappers
-	bool MessageEvent( CUID uidDst, CUID uidSrc, const nchar * pText, int ilenmsg );
+	bool MessageEvent( CUID uidDst, CUID uidSrc, const nachar* pText, int ilenmsg );
 	// void MessageAll( CUID uidSrc, const nchar * pText, int ilenmsg );
 	// bool MessageMember( CUID uidDst, CUID uidSrc, const nchar * pText, int ilenmsg );
 	// Sysmessage sending wrappers
@@ -87,7 +87,9 @@ public:
 
 	// -------------------------------
 
-	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
+	virtual lpctstr GetName() const override {
+	    return static_cast<lpctstr>(m_sName);
+	    }
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
     virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute command from script

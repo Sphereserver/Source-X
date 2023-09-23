@@ -29,11 +29,31 @@ private:
 	time_t m_time;
 
 public:
+/*
+	// Verify if correct
+	static constexpr struct tm m_sTmUnixEpoch
+	{
+	//	int tm_sec;   // seconds after the minute - [0, 60] including leap second
+	//	int tm_min;   // minutes after the hour - [0, 59]
+	//	int tm_hour;  // hours since midnight - [0, 23]
+	//	int tm_mday;  // day of the month - [1, 31]
+	//	int tm_mon;   // months since January - [0, 11]
+	//	int tm_year;  // years since 1900
+	//	int tm_wday;  // days since Sunday - [0, 6]
+	//	int tm_yday;  // days since January 1 - [0, 365]
+	//	int tm_isdst; // daylight savings time flag
+		0, 0, 0,
+		1, 0, 0, 
+		0, 0, -1
+	};
+*/
+
+public:
 	// Static methods
 	static llong GetPreciseSysTimeMicro() noexcept;
 	static llong GetPreciseSysTimeMilli() noexcept;
 
-	static CSTime GetCurrentTime();
+	static CSTime GetCurrentTime() noexcept;
 
 public:
 	static const char* m_sClassName;
@@ -44,7 +64,7 @@ public:
 	CSTime(const CSTime& timeSrc) noexcept;
 
 	CSTime(struct tm time) noexcept;
-	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1);
+	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1) noexcept;
 
 	const CSTime& operator=(const CSTime& timeSrc) noexcept;
 	const CSTime& operator=(time_t t) noexcept;

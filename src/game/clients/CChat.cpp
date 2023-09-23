@@ -6,7 +6,7 @@
 #include "CClient.h"
 
 
-void CChat::EventMsg( CClient * pClient, const nchar * pszText, int len, CLanguageID lang ) // Text from a client
+void CChat::EventMsg( CClient * pClient, const nachar * pszText, int len, CLanguageID lang ) // Text from a client
 {
 	ADDTOCALLSTACK("CChat::EventMsg");
 	// ARGS:
@@ -33,7 +33,7 @@ void CChat::EventMsg( CClient * pClient, const nchar * pszText, int len, CLangua
 	CChatChannel * pChannel =  pMe->GetChannel();
 
 	tchar szText[MAX_TALK_BUFFER * 2];
-	CvtNUNICODEToSystem( szText, sizeof(szText), pszText, len );
+	CvtNETUTF16ToSystem( szText, sizeof(szText), pszText, len );
 
 	// The 1st character is a command byte, join channel, private message someone, etc etc
 	tchar * szMsg = szText+1;
@@ -321,7 +321,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	size_t iCommandLength = strlen(pszCommand);
 	for (size_t i = 0; i < iCommandLength; i++)
 	{
-		ASSERT( i<CountOf(buffer));
+		ASSERT( i<ARRAY_COUNT(buffer));
 		if (pszCommand[i] == ' ')
 		{
 			pszCommand[i] = 0;
@@ -334,7 +334,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	CClient * pByClient = pBy->GetClientActive();
 	ASSERT(pByClient != nullptr);
 
-	switch ( FindTableSorted( pszCommand, sm_szCmd_Chat, CountOf(sm_szCmd_Chat)))
+	switch ( FindTableSorted( pszCommand, sm_szCmd_Chat, ARRAY_COUNT(sm_szCmd_Chat)))
 	{
 		case 0: // "ALLKICK"
 		{

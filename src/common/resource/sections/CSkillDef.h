@@ -6,7 +6,7 @@
 #ifndef _INC_CSKILLDEF_H
 #define _INC_CSKILLDEF_H
 
-#include "../../game/uo_files/uofiles_enums.h"
+#include "../../../game/uo_files/uofiles_enums.h"
 #include "../CResourceLink.h"
 #include "../CValueDefs.h"
 
@@ -104,7 +104,7 @@ public:
         return m_sKey;
     }
 
-    lpctstr GetName() const
+    virtual lpctstr GetName() const override
     {
         return GetKey();
     }

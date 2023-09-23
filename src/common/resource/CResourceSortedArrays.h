@@ -13,17 +13,25 @@ struct CValStr;
 
 struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
 {
-    CSStringSortArray() = default;
+    CSStringSortArray() {
+        _fBaseDestructorShouldDeleteElements = false;
+    }
     virtual ~CSStringSortArray() = default;
+
+    void clear() noexcept = delete;
+    void Clear() {
+        this->CSStringSortArray::DeleteElements();
+        this->std::vector<tchar*>::clear();
+    }
 
     CSStringSortArray(const CSStringSortArray& copy) = delete;
     CSStringSortArray& operator=(const CSStringSortArray& other) = delete;
 
     // Sorted array of strings
-    int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const;
+    virtual int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const override;
     void AddSortString( lpctstr pszText );
 
-private:
+protected:
     virtual void DeleteElements() override;
 };
 

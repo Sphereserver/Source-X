@@ -11,7 +11,7 @@ lpctstr const CCPropsItemWeaponRanged::_ptcPropertyKeys[PROPIWEAPRNG_QTY + 1] =
     nullptr
 };
 KeyTableDesc_s CCPropsItemWeaponRanged::GetPropertyKeysData() const {
-    return {_ptcPropertyKeys, (PropertyIndex_t)CountOf(_ptcPropertyKeys)};
+    return {_ptcPropertyKeys, (PropertyIndex_t)ARRAY_COUNT(_ptcPropertyKeys)};
 }
 
 RESDISPLAY_VERSION CCPropsItemWeaponRanged::_iPropertyExpansion[PROPIWEAPRNG_QTY + 1] =
@@ -185,7 +185,7 @@ void CCPropsItemWeaponRanged::AddPropsTooltipData(CObjBase* pLinkedObj)
 #define ADDTNUM(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, iVal))
 #define ADDTSTR(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, ptcVal))
 
-    UNREFERENCED_PARAMETER(pLinkedObj);
+    UnreferencedParameter(pLinkedObj);
     /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
 /*
     // Numeric properties

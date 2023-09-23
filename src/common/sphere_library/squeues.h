@@ -314,7 +314,7 @@ dynamicqueue<T>::dynamicqueue() {
 }
 
 template <typename T>
-dynamicqueue<T>::dynamicqueue(size_t _) : dynamicqueue<T>() { UNREFERENCED_PARAMETER(_); }
+dynamicqueue<T>::dynamicqueue(size_t _) : dynamicqueue<T>() { UnreferencedParameter(_); }
 
 template <typename T>
 dynamicqueue<T>::dynamicqueue(const dynamicqueue<T> & o) {

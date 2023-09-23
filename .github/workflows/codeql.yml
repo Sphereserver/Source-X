@@ -1,0 +1,85 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: ["static-analysis"]
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - '**.txt'
+      - '**.md'
+      - '**.rc'
+
+#  pull_request:
+    # The branches below must be a subset of the branches above
+#    branches: ["static-analysis"]
+
+  schedule:
+    - cron: '45 2 * * 0'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install prerequisites
+      run:  |
+            lsb_release -d
+
+            sudo add-apt-repository universe && sudo sudo apt-get -qq update
+            sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
+            sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        queries: +security-extended,security-and-quality
+        packs: +codeql/cpp-queries
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+        
+        # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+        # c++ queries: https://codeql.github.com/codeql-query-help/cpp-cwe/
+
+        # ℹ️ Command-line programs to run using the OS shell.
+        # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+
+    #   Build the code
+    - name: CMake
+      run: |
+          mkdir -p build
+          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
+
+    - name: Compilation
+      run: cd build && make -j$(nproc)
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"

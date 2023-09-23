@@ -30,15 +30,16 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 
 	m_bConnected = false;
 
+	// Starting with MariaDB 10.6.2+ the format for mysql_get_client_version* changed to report the version of the client library instead of the server version.
 	unsigned long ver = mysql_get_client_version();
-	if ( ver < MIN_MYSQL_VERSION_ALLOW )
+	if ( ver < MIN_MARIADB_VERSION_ALLOW )
 	{
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MySQL client library is too old (version %lu). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MYSQL_VERSION_ALLOW);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MariaDB client library is too old (version %lu). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MARIADB_VERSION_ALLOW);
 		g_Cfg.m_bMySql = false;
 		return false;
 	}
 
-	_myData = mysql_init(nullptr);
+	_myData = mysql_init(_myData ? _myData : nullptr);
 	if ( !_myData )
 		return false;
 
@@ -56,8 +57,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
 	{
 		const char *error = mysql_error(_myData);
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL connect fail: %s\n", error);
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Visit this link for more information: http://dev.mysql.com/doc/mysql/search.php?q=%s\n", error);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB connect fail with error: %s\n", error);
 		mysql_close(_myData);
 		_myData = nullptr;
 		return false;
@@ -159,7 +159,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     }
     else
     {
-        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
+        g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
     }
     
     if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
@@ -204,7 +204,7 @@ bool CDataBase::exec(const char *query)
 		else
 		{
 			const char *myErr = mysql_error(_myData);
-			g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MySQL query \"%s\" failed due to \"%s\"\n",
+			g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n",
 				query, ( *myErr ? myErr : "unknown reason"));
 		}
 	}
@@ -258,7 +258,7 @@ bool CDataBase::_OnTick()
 	static int tickcnt = 0;
 	EXC_TRY("Tick");
 
-	if ( !g_Cfg.m_bMySql )	//	mySQL is not supported
+	if ( !g_Cfg.m_bMySql )	//	MariaDB is not supported
 		return true;
 
 	//	do not ping sql server too heavily
@@ -269,14 +269,15 @@ bool CDataBase::_OnTick()
 		if ( isConnected() )	//	currently connected - just check that the link is alive
 		{
 			SimpleThreadLock lock(m_connectionMutex);
-			if ( mysql_ping(_myData) )
+			const int iPingRet = mysql_ping(_myData);
+			if ( iPingRet )
 			{
-				g_Log.EventError("MySQL server link has been lost. Trying to reattach to it.\n");
+				g_Log.EventError("MariaDB server link has been lost (error code: %d). Trying to reattach to it.\n", iPingRet);
 				Close();
 
 				if ( !Connect() )
 				{
-					g_Log.EventError("MySQL reattach failed/timed out. SQL operations disabled.\n");
+					g_Log.EventError("MariaDB reattach failed/timed out. SQL operations disabled.\n");
 				}
 			}
 		}
@@ -349,21 +350,21 @@ lpctstr const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 bool CDataBase::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CDataBase::r_GetRef");
-	UNREFERENCED_PARAMETER(ptcKey);
-	UNREFERENCED_PARAMETER(pRef);
+	UnreferencedParameter(ptcKey);
+	UnreferencedParameter(pRef);
 	return false;
 }
 
 bool CDataBase::r_LoadVal(CScript & s)
 {
 	ADDTOCALLSTACK("CDataBase::r_LoadVal");
-	UNREFERENCED_PARAMETER(s);
+	UnreferencedParameter(s);
 	return false;
 /*
 	lpctstr ptcKey = s.GetKey();
 	EXC_TRY("LoadVal");
 
-	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1);
 
 	switch ( index )
 	{
@@ -383,19 +384,19 @@ bool CDataBase::r_LoadVal(CScript & s)
 
 bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallParent);
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallParent);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	// Just return 0 if MySQL is disabled
+	// Just return 0 if MySQL/MariaDB is disabled
 	if (!g_Cfg.m_bMySql)
 	{
 		sVal.FormatVal( 0 );
 		return true;
 	}
 
-	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case DBO_AEXECUTE:
@@ -408,7 +409,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 				if ( ptcKey[0] != '\0' )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, CountOf( ppArgs )) != 2)
+					if ( Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT( ppArgs )) != 2)
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -470,11 +471,11 @@ bool CDataBase::r_Verb(CScript & s, CTextConsole * pSrc)
 	ADDTOCALLSTACK("CDataBase::r_Verb");
 	EXC_TRY("Verb");
 
-	// Just return true if MySQL is disabled
+	// Just return true if MySQL/MariaDB is disabled
 	if (!g_Cfg.m_bMySql)
 		return true;
 
-	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1);
+	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1);
 	switch ( index )
 	{
 		case DBOV_CLOSE:

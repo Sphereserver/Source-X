@@ -53,6 +53,9 @@ bool CItem::Ship_Plank(bool fOpen)
     {
         // Save the original Type of the plank if it used to be a ship side
         m_itShipPlank.m_wSideType = (word)oldType;
+       
+        SetTimeoutS(5); // autoclose the plank 
+        SetAttr(ATTR_DECAY); // For preventing Decay Warning on the console.
     }
     else if (oldType == IT_SHIP_PLANK)
     {
@@ -134,11 +137,11 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 
 bool CItemShip::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemShip::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    int index = FindTableSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 
     switch (index)
     {
@@ -186,7 +189,7 @@ bool CItemShip::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CItemShip::r_LoadVal");
     EXC_TRY("LoadVal");
     lpctstr	ptcKey = s.GetKey();
-    IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (g_Serv.IsLoading())
     {
         switch (index)

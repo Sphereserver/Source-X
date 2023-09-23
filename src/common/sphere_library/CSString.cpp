@@ -5,6 +5,10 @@
 #include "CSString.h"
 #include "sstringobjs.h"
 
+#ifndef _WIN32
+#include <cstdio>   // for vsnprintf
+#endif
+
 
 /**
 * @brief Default memory alloc size for CSString.
@@ -58,6 +62,7 @@ CSString::CSString(bool fDefaultInit)
 
 		// Suppress GCC warning by using the const_cast.
 		// I know that i shouldn't set the non-cast buffer to a string constant, but i make sure in every method that i can't modify it.
+        // Dirty, but this will not pass IsValid, so it will be reallocated.
 		m_pchData = const_cast<char*>("");
 	}
 }
@@ -79,6 +84,7 @@ CSString::CSString(const CSString& s)
 	Init();
 	Copy(s.GetBuffer());
 }
+
 
 // private
 void CSString::Init()

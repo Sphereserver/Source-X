@@ -1,8 +1,8 @@
 #include "../../../sphere/threads.h"
-#include "../../game/chars/CChar.h"
-#include "../../game/CServerConfig.h"
-#include "../../game/triggers.h"
-#include "../CException.h"
+#include "../../../game/chars/CChar.h"
+#include "../../../game/CServerConfig.h"
+#include "../../../game/triggers.h"
+#include "../../CException.h"
 #include "CRegionResourceDef.h"
 #include "CRandGroupDef.h"
 
@@ -51,7 +51,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
     ADDTOCALLSTACK("CRandGroupDef::r_LoadVal");
     EXC_TRY("LoadVal");
     // RES_SPAWN or RES_REGIONTYPE
-    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case RGC_CATEGORY:
             m_sCategory = s.GetArgStr();
@@ -72,7 +72,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
         case RGC_CONTAINER:
         {
             tchar	*ppCmd[2];
-            size_t iArgs = Str_ParseCmds(s.GetArgStr(), ppCmd, CountOf(ppCmd));
+            size_t iArgs = Str_ParseCmds(s.GetArgStr(), ppCmd, ARRAY_COUNT(ppCmd));
             CResourceQty rec;
 
             rec.SetResourceID(
@@ -112,11 +112,11 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 
 bool CRandGroupDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
     EXC_TRY("WriteVal");
 
-    switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case RGC_CATEGORY:
             sVal = m_sCategory;
@@ -248,7 +248,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
             rid = pOreDef->m_ReapItem;
             if (rid != 0)
             {
-                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), CUID(UID_CLEAR), SKTRIG_SELECT))
+                if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), CUID(UID_PLAIN_CLEAR), SKTRIG_SELECT))
                     continue;
 
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))

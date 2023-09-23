@@ -1,4 +1,5 @@
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/CException.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -7,7 +8,6 @@
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
-#include "../CException.h"
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
@@ -38,7 +38,7 @@ lpctstr const CClient::sm_szCmd_Redirect[13] =
 	"SHRINK",
 };
 
-void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button was pressed
+void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button was pressed
 {
 	ADDTOCALLSTACK("CClient::Event_ChatButton");
 	// See if they've made a chatname yet
@@ -82,7 +82,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 
 			// Make it non unicode
 			tchar szChatName[ MAX_NAME_SIZE * 2 + 2 ];
-			CvtNUNICODEToSystem( szChatName, sizeof(szChatName), pszName, 128 );
+			CvtNETUTF16ToSystem( szChatName, sizeof(szChatName), pszName, 128 );
 
 			if ( ! CChat::IsValidName(szChatName, true) ||
 				g_Accounts.Account_FindChat(szChatName)) // Check for legal name, duplicates, etc
@@ -102,7 +102,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 	this->GetChar()->SetTriggerActive();
 }
 
-void CClient::Event_ChatText( const nchar * pszText, int len, CLanguageID lang ) // Text from a client
+void CClient::Event_ChatText( const nachar* pszText, int len, CLanguageID lang ) // Text from a client
 {
 	ADDTOCALLSTACK("CClient::Event_ChatText");
 	// Just send it all to the chat system
@@ -1109,7 +1109,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		m_bAllowSay = false;
 
 		// Assume you don't mean yourself !
-		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect)) >= 0 )
+		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect)) >= 0 )
 		{
 			// targetted verbs are logged once the target is selected.
 			addTargetVerb(pszCommand, "");
@@ -1585,7 +1585,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen )
 {
 	ADDTOCALLSTACK("CClient::Event_Profile");
-	UNREFERENCED_PARAMETER(iProfileLen);
+	UnreferencedParameter(iProfileLen);
 	// mode = 0 = Get profile, 1 = Set profile
 	if ( m_pChar == nullptr )
 		return;
@@ -1625,7 +1625,7 @@ void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int 
 void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 {
 	ADDTOCALLSTACK("CClient::Event_MailMsg");
-	UNREFERENCED_PARAMETER(uid2);
+	UnreferencedParameter(uid2);
 	// NOTE: How do i protect this from spamming others !!!
 	// Drag the mail bag to this clients char.
 	if ( m_pChar == nullptr )
@@ -1699,11 +1699,11 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	else
 	{
 		if ( fNoStrip )	// Str_GetBare will eat unicode characters
-			len = Str_CopyLimitNull( szText, pszText, CountOf(szText) );
+			len = Str_CopyLimitNull( szText, pszText, ARRAY_COUNT(szText) );
 		else if ( promptMode == CLIMODE_PROMPT_SCRIPT_VERB )
-			len = Str_GetBare( szText, pszText, CountOf(szText), "|~=[]{|}~" );
+			len = Str_GetBare( szText, pszText, ARRAY_COUNT(szText), "|~=[]{|}~" );
 		else
-			len = Str_GetBare( szText, pszText, CountOf(szText), "|~,=[]{|}~" );
+			len = Str_GetBare( szText, pszText, ARRAY_COUNT(szText), "|~,=[]{|}~" );
 	}
 
 	lpctstr pszReName = nullptr;
@@ -1967,7 +1967,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 		}
 		if ( i > 0 )
 		{
-            while ( ISWHITESPACE(pszText[i]) )
+            while ( IsWhitespace(pszText[i]) )
             {
                 ++i;
             }
@@ -2108,7 +2108,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 }
 
 // PC speech: response to Unicode speech request
-void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
+void CClient::Event_TalkUNICODE(nachar* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
 {
 	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
 	// Get the text in wide bytes.
@@ -2138,9 +2138,9 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 		m_pChar->m_pPlayer->m_EmoteHue = wHue;
 
 	tchar szText[MAX_TALK_BUFFER];
-	const nword * puText = wszText;
+	const nachar * puText = wszText;
 
-	int iLen = CvtNUNICODEToSystem( szText, sizeof(szText), wszText, iTextLen );
+	int iLen = CvtNETUTF16ToSystem( szText, sizeof(szText), wszText, iTextLen );
 	if ( iLen <= 0 )
 		return;
 
@@ -2179,7 +2179,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 					if (( szText[i] >= 'A' ) && ( szText[i] <= 'Z' ))
 						szText[i] += 0x20;
 
-				iLen = CvtSystemToNUNICODE(wszText, iTextLen, szText, (int)chars);
+				iLen = CvtSystemToNETUTF16(wszText, iTextLen, szText, (int)chars);
 			}
 		}
 
@@ -2205,7 +2205,7 @@ bool CClient::Event_SetName( CUID uid, const char * pszCharName )
 	// Do we have the right to do this ?
 	if ( (m_pChar == pChar) || !pChar->IsOwnedBy( m_pChar, true ) )
 		return false;
-	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect) ) >= 0 )
+	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect) ) >= 0 )
 		return false;
 	if ( FindTableSorted( pszCharName, CCharNPC::sm_szVerbKeys, 14 ) >= 0 )
 		return false;
@@ -2239,7 +2239,7 @@ lpctstr CDialogResponseArgs::GetName() const
 
 bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( ! strnicmp( ptcKey, "ARGCHK", 6 ))
@@ -2892,7 +2892,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 void CClient::Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CClient::Event_BugReport");
-	UNREFERENCED_PARAMETER(len);
+	UnreferencedParameter(len);
 	if ( !m_pChar )
 		return;
 
@@ -2971,7 +2971,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 	tchar *ppArgs[2];
 	if (type != EXTCMD_DOOR_AUTO)
     {
-        if ((*pszName == '\0') || (0 == Str_ParseCmds(pszName, ppArgs, CountOf(ppArgs), " ")))
+        if ((*pszName == '\0') || (0 == Str_ParseCmds(pszName, ppArgs, ARRAY_COUNT(ppArgs), " ")))
         {
             g_Log.EventWarn("%0x:Event_ExtCmd received malformed data %d, '%s'\n", GetSocketID(), type, pszName);
             return;

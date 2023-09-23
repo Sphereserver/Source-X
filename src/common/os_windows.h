@@ -52,13 +52,7 @@
 
 #ifndef _MSC_VER	// No Microsoft compiler
 	#define _cdecl	__cdecl
-	/*
-	There is a problem with the UNREFERENCED_PARAMETER macro from mingw and sphereserver.
-	operator= is on many clases private and the UNREFERENCED_PARAMETER macro from mingw is (P)=(P),
-	so we have a compilation error here.
-	*/
-	#undef  UNREFERENCED_PARAMETER
-	#define UNREFERENCED_PARAMETER(P)	(void)(P)
+
 	// Not defined for mingw.
 	#define LSTATUS int
 	typedef void (__cdecl *_invalid_parameter_handler)(const wchar_t *,const wchar_t *,const wchar_t *,unsigned int,uintptr_t);

@@ -53,8 +53,8 @@ private:
 private:
 
 	void SetTownName();
-	bool SetName( lpctstr pszName );
-	virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
+	virtual bool SetName( lpctstr pszName ) override;
+	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false) override;
 
 	MEMORY_TYPE GetMemoryType() const;
 
@@ -79,7 +79,7 @@ public:
 	bool IsAlliedWith( const CItemStone * pStone ) const;
 
 	bool CheckValidMember(CStoneMember * pMember);
-	int FixWeirdness();
+	virtual int FixWeirdness() override;
 
 public:
 	CItemStone( ITEMID_TYPE id, CItemBase * pItemDef );

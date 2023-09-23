@@ -2826,7 +2826,7 @@ It will check if distance is > 10, so you don't need to write the distance check
 05-10-2021, Jhobean
 - Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort. 
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
-- Fixed: ManaLossAbort/ManaLossFail consumed the exact amount of man require for the spell. ManaLossPercent will now control the % of mana player loose.
+- Fixed: ManaLossAbort/ManaLossFail consume the exact amount of mana required for the spell. ManaLossPercent will now control the % of mana player lost.
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
 - Fixed: Revert 2018-03-05 Commit causing WOP no more customisable by ini and broke REVEALF_SPEAK behavior. (Issue #776)
 
@@ -3218,3 +3218,130 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 			note: 	Force item to -1 have 2 advantages
 					1- Avoid waste server's ressource on awake sector
 					2- Sometime when you kill a monster, the timer had few time left and monster was spawning too fast.
+
+19-02-2023, Drk84
+-Fixed: Rideable summoned creatures did not disappear when  mounted. ( Again Issue #582)
+-Fixed: Dropping items into wall tiles in multis. (Issue #1024)
+-Fixed: When using ISNEARBYTPE command the last argument "CheckZ" on FindItemTypeNearby method was never used.
+
+20-02-2023, Drk84
+-(Cheap) Fixed: Spawn Keyword AT.n.xx not working properly. (Issue #1033) 
+
+27-02-2023, Drk84
+- Fixed: Wrong duration for Gate Travel Spell. (Issue #1043)
+- Fixed: More accurate messages when a container/hold is locked and you have/don't have the key. (Issue #1044)
+- Added: New local in the @GetHit trigger: 
+		 LOCAL.SPELL: Read Only, display  the spell number that damaged the character. 
+		 
+02-03-2023, Drk84
+- Fixed: Animation was played while out of range when COMBAT_SWING_NORANGE flag is enabled. (Issue #819)
+- Fixed: Spell duration was calculated two times when a spell was cast.
+- Added: REPAIRPERCENT command used to display the current health of the item in %.
+
+09-03-2023, Drk84
+- (Partially) Fixed: Localized messages throwing errors in console when the speaker is not visibile. Partially because i can't still display the speaker name in the journal if the hearer is dead and DeadCannotSeeLiving is set to 2. (Issue #1049)
+- Added: New locals (READ ONLY) in @GetHit trigger: local.damagePercentPhysical, local.damagePercentFire, local.damagePercentCold, local.damagePercentPoison, local.damagePercentEnergy
+         These locals contains the amount in % of the elemental damage inflicted, and thus they are available only with Elemental Engine enabled.
+		
+22-03-2023, Drk84
+- Fixed: Undefined item ID (it's actually Item ID 00) when adding ON=@Cancel trigger in SKILLMENU. (Issue #1056)		
+
+07-04-2023, Drk84
+- Fixed: ModMaxWeight not working on NPCs. (Issue #1061)
+- Fixed: SHIPMOVE command displaying an "invalid command" warning on the console if the ship can't move. (Issue #860)
+
+17-04-2023, Xun
+- Added @addmulti and @DelMulti triggers (Called only on characters, not guilds ATM, and for both Ships and Houses):
+
+    - argn1 = Multi Count (The total number of slots used for this multi, the same slots used for MaxHousesAccount, MaxHousesPlayer, etc)
+    - argn2 = The default priv for SRC on this multi (See defname house_privs).
+    - argn3 = Indicates wether the argn1 value should change the char's count of slots or not (It's 1 by default only if argn2 == hp_owner).
+    - return 1 (Only for @addmulti): Prevents this multi from being added to SRC's house storage (Which means having it in "houses.N.key", etc).
+- Added HouseMultiCount and ShipMultiCount functions, returning the total slots used for each type of multi.
+
+- Changes in the House System:
+    - By default, multi slots are only changed when SRC is the owner of the multi. This can be changed by modifying the argn3 value in @addmulti.
+    - CItemMulti::DelMulti is not properly calling DelHouse and DelShip to remove the multi from the player's CMultiStorage.
+- These changes should prevent characters having their multi slots used when being added as coowner, friend, accessonly, etc, to any house, thus not allowing them to have their own houses because their slots were already used.
+    It should also prevent some incorrect removal of multis from the player's multi storage, leading to some save problems.
+
+22-04-2023, Drk84
+- Fixed: NPC double hit. (Issue #1065)
+- Fixed: @CombatEnd not fired and Combat memories not removed when the fight is ended. (Issue #1055)
+
+25-04-2023, Nolok
+- Fixed: Enabled "Character wants to move into an invalid location" error log to be shown only if the character also starts the movement from an invalid location (Issue #990).
+
+27-04-2023, Nolok
+- Source: Moved CMakeLists.txt from /src/ to the project root dir.
+	WARNING: you will need to change the source directory in CMake!
+- Changed: On Windows, abandoned MySQL libmysql.dll. Now using MariaDB libmysql.dll (compatible with MySQL until 5.x) for x86 builds and libmariadb.dll for x86_64 builds, which supports MariaDB and MySQL versions above.
+	WARNING: you WILL need to update those libraries!
+	WARNING: outdated, since Windows was moved to MariaDB as well; read the following changelog note.
+
+28-04-2023, Nolok
+- Changed: fully moved from MySQL client to MariaDB client library on every operating system.
+	Windows: uses libmariadb.dll for both x86 and x86_64 builds.
+	Linux and OSX: moved to MariaDB.
+	WARNING: you WILL need to update those libraries!
+
+30-04-2023, Nolok
+- Fixed: Assertion failure and segmentation fault/invalid memory access caused by early use of Sphere methods requiring some data to be initialized first. Compilation and execution should now work with latest GCC versions.
+- Changed: Target architecture is precisely reported, instead of giving the number of "bits".
+
+01-05-2023, Nolok
+- Fixed: In an IF statement with multiple subexpressions, the last subexpression was evaluated twice (if a function, it was called twice) (Issue #1032).
+
+02-05-2023, Nolok
+- Fixed: IF parsing errors when using that construct without parentheses (Issue #766).
+
+13-05-2023, Nolok
+- Fixed: Invalid MULTICOMPONENT and MULTILOCKDOWN tag on items throwing an exception.
+
+13-05-2023, Drk84
+- Fixed: Timer not set when an ammunition item was placed on the ground because the strike missed.  (Issue #1072) 
+- Fixed: Casting the SUMMON CREATURE spell while a fighting skill was active caused the spell creature ID to be resetted. (Issue #1070)
+
+14-05-2023, Nolok
+- Removed: unused DEFMSG PARTY_MSG.
+- Fixed: 0xF2 packet (PacketTimeSyncResponse) now sending the correct time (milliseconds from the UNIX epoch) to the client. This avoids the Enhanced Client to continuously send 0xF1 packet to ask for the right server time.
+
+15-05-2023, Drk84
+- Fixed: @PetDesert trigger not fired when a conjured creature suffers damage from the OWNER just before being summoned. (Issue #1067)
+
+16-07-2023, Nolok
+- Fixed: IF parsing troubles with nested < or > characters.
+
+17-07-2023, Nolok
+- Added: Protection against infinite recursions in scripts and consequent crashes. Script parsing will not go further if the recursion gets too deep, showing a error message.
+
+21-08-2023, Rastrero/Drk84
+- Fixed: Removed exception for poison bottles at CClientUSe.cpp so now poison potions are handled as any other potion at CCharuse.cpp
+         Thx Drk84 for the suggestion. I dont understand why there was that exception done. Are we missing something?
+
+29-08-2023, Luxion
+- Fixed: The issue with the Heuristic function in CPathFinder has been fixed. Now, the monsters correctly follow their targets without any problems. They are now able to effectively navigate around obstacles and move in a straight path.
+Additionally, the problem of zig-zag issue following in the South direction has been addressed.
+- Added: OF_EnableGuildAlignNotoriety in sphere.ini, if enabled, guilds with the same align will see each other enemies or ally.
+
+29-08-2023, Nolok
+- Fixed: (hopefully) conditional expressions parsing.
+- Fixed: a couple of memory deallocation bugs (could cause crash on server close).
+- Fixed: GCC and Apple Clang toolchain not correctly applying sanitizers (if enabled via CMake).
+
+02-09-2023, Nolok
+- Changed: moved /src/cmake folder to /cmake, this WILL require deleting and rebuilding any existing CMake cache.
+- Changed: renamed the compilation output folder to better reflect the target architecture.
+- Added: CMake Clang compilation toolchains for Windows, Linux, MacOS.
+
+13-09-2023, Drk84
+-Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
+		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
+		
+14-09-2023, Drk84
+-Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
+		
+15-09-2023, Drk84
+Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
+	   The ship plank will now autoclose after 5 seconds.
+Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 

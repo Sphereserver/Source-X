@@ -13,11 +13,11 @@
 #include <vector>
 #include <queue>
 
-#include "mysql/errmsg.h"	// mysql standard include
-#include "mysql/mysql.h"	// this needs to be defined AFTER common.h
+#include "../../lib/mariadb/errmsg.h"	// mysql standard include
+#include "../../lib/mariadb/mysql.h"	// this needs to be defined AFTER common.h
 
 
-#define	MIN_MYSQL_VERSION_ALLOW	40115
+#define	MIN_MARIADB_VERSION_ALLOW	30002
 
 
 class CVarDefMap;
@@ -55,7 +55,7 @@ public:
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
-	lpctstr GetName() const
+	virtual lpctstr GetName() const override
 	{
 		return "SQL_OBJ";
 	}

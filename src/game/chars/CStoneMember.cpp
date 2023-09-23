@@ -159,8 +159,8 @@ void CStoneMember::SetAccountGold( int iGold )
 
 bool CStoneMember::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 {
-	UNREFERENCED_PARAMETER(ptcKey);
-	UNREFERENCED_PARAMETER(pRef);
+	UnreferencedParameter(ptcKey);
+	UnreferencedParameter(pRef);
 	return false;
 }
 
@@ -172,7 +172,7 @@ bool CStoneMember::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 	ASSERT(pSrc);
 
 	lpctstr ptcKey = s.GetKey();
-	int index = FindTableSorted( ptcKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( ptcKey, sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 	{
 		if ( r_LoadVal(s) ) // if it's successful all ok, else go on verb.
@@ -205,7 +205,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 	ADDTOCALLSTACK("CStoneMember::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
 	if ( GetLinkUID().IsChar() )
 	{
@@ -273,11 +273,11 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 
 bool CStoneMember::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
 	if ( GetLinkUID().IsChar() )
 	{

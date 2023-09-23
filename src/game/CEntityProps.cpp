@@ -1,4 +1,4 @@
-#include "../CLog.h"
+#include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "components/CCPropsChar.h"
 #include "components/CCPropsItem.h"

@@ -43,7 +43,7 @@ bool CUOInstall::FindInstall()
 	
 	HKEY hKey = nullptr;
 	LSTATUS lRet = 0;
-	for ( size_t i = 0; i < CountOf(m_szKeys); ++i )
+	for ( size_t i = 0; i < ARRAY_COUNT(m_szKeys); ++i )
 	{
 		lRet = RegOpenKeyEx( HKEY_LOCAL_MACHINE,
 			m_szKeys[i], // address of name of subkey to query
@@ -97,7 +97,7 @@ void CUOInstall::DetectMulVersions()
 	ADDTOCALLSTACK("CUOInstall::DetectMulVersions");
 
 	// assume all formats are original to start with
-	for (size_t i = 0; i < CountOf(m_FileFormat); ++i)
+	for (size_t i = 0; i < ARRAY_COUNT(m_FileFormat); ++i)
 		m_FileFormat[i] = VERFORMAT_ORIGINAL;
 
 	// check for High Seas tiledata format

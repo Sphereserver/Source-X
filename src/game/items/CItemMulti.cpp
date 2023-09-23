@@ -339,7 +339,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
         return;
     }
 
-    if (dwKeyCode == UID_CLEAR)
+    if (dwKeyCode == UID_PLAIN_CLEAR)
     {
         dwKeyCode = GetUID();
     }
@@ -1967,7 +1967,7 @@ lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 bool CItemMulti::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemMulti::r_GetRef");
-    int iCmd = FindTableHeadSorted(ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
+    int iCmd = FindTableHeadSorted(ptcKey, sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys) - 1);
 
     if (iCmd >= 0)
     {
@@ -2197,7 +2197,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     {
         return true;
     }
-    const int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
+    const int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
         case SHV_DELACCESS:
@@ -2324,7 +2324,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         case SHV_REDEED:
         {
             int64 piCmd[2];
-            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            Str_ParseCmds(s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd));
             const bool fShowMsg = piCmd[0] ? true : false;
             const bool fMoveToBank = piCmd[1] ? true : false;
             CUID charUID;
@@ -2372,7 +2372,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         case SHV_GENERATEBASECOMPONENTS:
         {
             bool fNeedKey = false;
-            GenerateBaseComponents(&fNeedKey, UID_CLEAR);
+            GenerateBaseComponents(&fNeedKey, UID_PLAIN_CLEAR);
             break;
         }
         default:
@@ -2613,13 +2613,13 @@ void CItemMulti::r_Write(CScript & s)
 
 bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren)
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
     if (CCMultiMovable::r_WriteVal(ptcKey, sVal, pSrc))
     {
         return true;
     }
-    int iCmd = FindTableHeadSorted(ptcKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableHeadSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     if (iCmd >= 0)
     {
         ptcKey += strlen(sm_szLoadKeys[iCmd]);
@@ -2907,7 +2907,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
     {
         return true;
     }
-    int iCmd = FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 
     switch (iCmd)
     {
@@ -2952,7 +2952,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
         case SHL_ADDKEY:
         {
             int64 piCmd[2];
-            int iLen = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            int iLen = Str_ParseCmds(s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd));
             CUID uidOwner((dword)piCmd[0]);
             bool fDupeOnBank = false;
             if (iLen > 1)
@@ -3123,9 +3123,11 @@ bool CItemMulti::r_LoadVal(CScript & s)
     return true;
 }
 
-void CItemMulti::DupeCopy(const CItem * pItem)
+void CItemMulti::DupeCopy(const CObjBase * pItemObj)
 {
     ADDTOCALLSTACK("CItemMulti::DupeCopy");
+    auto pItem = dynamic_cast<const CItem*>(pItemObj);
+    ASSERT(pItem);
     CItem::DupeCopy(pItem);
 }
 
@@ -3344,7 +3346,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
     if (pMultiItem)
     {
-        pMultiItem->Multi_Setup(pChar, UID_CLEAR);
+        pMultiItem->Multi_Setup(pChar, UID_PLAIN_CLEAR);
     }
 
     if (pItemDef->IsType(IT_STONE_GUILD))
@@ -3367,7 +3369,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
 
 void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
 {
-    UNREFERENCED_PARAMETER(fIsAddon);
+    UnreferencedParameter(fIsAddon);
     CScript eComponent("+t_house_component");
     pComponent->m_OEvents.r_LoadVal(eComponent, RES_EVENTS);
 
@@ -3498,6 +3500,7 @@ void CMultiStorage::DelMulti(const CUID& uidMulti)
         {
             pSrc->r_ExecSingle("EVENTS -e_ship_priv");
         }
+        DelShip(uidMulti);
     }
     else
     {
@@ -3506,6 +3509,7 @@ void CMultiStorage::DelMulti(const CUID& uidMulti)
         {
             pSrc->r_ExecSingle("EVENTS -e_house_priv");
         }
+        DelHouse(uidMulti);
     }
     pMulti->RevokePrivs(_uidSrc);
 }
@@ -3522,8 +3526,31 @@ void CMultiStorage::AddHouse(const CUID& uidHouse, HOUSE_PRIV ePriv)
         return;
     }
     const CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
-    _iHousesTotal += pMulti->GetMultiCount();
-    _lHouses[uidHouse] = ePriv;
+    CScriptTriggerArgs args;
+    TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+    args.m_iN1 = pMulti->GetMultiCount();
+    args.m_iN2 = ePriv;    
+    if (ePriv == HOUSE_PRIV::HP_OWNER)
+    {
+        args.m_iN3 = 1;
+    }
+
+    if (IsTrigUsed(TRIGGER_ADDMULTI))
+    {
+        CChar *pChar = _uidSrc.CharFind();
+        if (pChar)
+        {
+            tRet = pChar->OnTrigger(CTRIG_AddMulti, pChar, &args);
+        }
+    }
+    if (tRet != TRIGRET_RET_TRUE)
+    {
+        if (args.m_iN3 == 1)
+        {
+            _iHousesTotal += static_cast<int16>(args.m_iN1);
+        }
+        _lHouses[uidHouse] = ePriv;
+    }
 }
 
 void CMultiStorage::DelHouse(const CUID& uidHouse)
@@ -3536,8 +3563,29 @@ void CMultiStorage::DelHouse(const CUID& uidHouse)
    
     if (_lHouses.find(uidHouse) != _lHouses.end())
     {
-        const CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
-        _iHousesTotal -= pMulti->GetMultiCount();
+        CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
+        HOUSE_PRIV ePriv = GetPriv( uidHouse );
+        CScriptTriggerArgs args;
+        args.m_iN1 = pMulti->GetMultiCount();
+        args.m_iN2 = ePriv;
+        args.m_pO1 = pMulti;
+        if (ePriv == HOUSE_PRIV::HP_OWNER)
+        {
+            args.m_iN3 = 1;
+        }
+
+        if (IsTrigUsed(TRIGGER_DELMULTI))
+        {
+            CChar* pChar = _uidSrc.CharFind();
+            if (pChar)
+            {
+                pChar->OnTrigger(CTRIG_DelMulti, pChar, &args);
+            }
+        }
+        if (args.m_iN3 == 1)
+        {
+            _iHousesTotal -= static_cast<int16>(args.m_iN1);
+        }
         _lHouses.erase(uidHouse);
         return;
     }
@@ -3640,7 +3688,7 @@ void CMultiStorage::ClearHouses()
 void CMultiStorage::r_Write(CScript & s) const
 {
     ADDTOCALLSTACK("CMultiStorage::r_Write");
-    UNREFERENCED_PARAMETER(s);
+    UnreferencedParameter(s);
 }
 
 void CMultiStorage::AddShip(const CUID& uidShip, HOUSE_PRIV ePriv)
@@ -3654,13 +3702,32 @@ void CMultiStorage::AddShip(const CUID& uidShip, HOUSE_PRIV ePriv)
     {
         return;
     }
-    const CItemShip *pShip = static_cast<CItemShip*>(uidShip.ItemFind());
-    if (!pShip)
+    const CItemShip* pShip = static_cast<CItemShip*>(uidShip.ItemFind());
+    CScriptTriggerArgs args;
+    TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+    args.m_iN1 = pShip->GetMultiCount();
+    args.m_iN2 = ePriv;
+    if (ePriv == HOUSE_PRIV::HP_OWNER)
     {
-        return;
+        args.m_iN3 = 1;
     }
-    _iShipsTotal += pShip->GetMultiCount();
-    _lShips[uidShip] = ePriv;
+
+    if (IsTrigUsed(TRIGGER_ADDMULTI))
+    {
+        CChar* pChar = _uidSrc.CharFind();
+        if (pChar)
+        {
+            tRet = pChar->OnTrigger(CTRIG_AddMulti, pChar, &args);
+        }
+    }
+    if (tRet != TRIGRET_RET_TRUE)
+    {
+        if (args.m_iN3 == 1)
+        {
+            _iShipsTotal += static_cast<int16>(args.m_iN1);
+        }
+        _lShips[uidShip] = ePriv;
+    }
 }
 
 void CMultiStorage::DelShip(const CUID& uidShip)
@@ -3673,10 +3740,28 @@ void CMultiStorage::DelShip(const CUID& uidShip)
 
     if (_lShips.find(uidShip) != _lShips.end())
     {
-        const CItemShip *pShip = static_cast<CItemShip*>(uidShip.ItemFind());
-        if (pShip)
+        CItemMulti* pMulti = static_cast<CItemMulti*>(uidShip.ItemFind());
+        HOUSE_PRIV ePriv = GetPriv(uidShip);
+        CScriptTriggerArgs args;
+        args.m_iN1 = pMulti->GetMultiCount();
+        args.m_iN2 = ePriv;
+        args.m_pO1 = pMulti;
+        if (ePriv == HOUSE_PRIV::HP_OWNER)
         {
-            _iShipsTotal -= pShip->GetMultiCount();
+            args.m_iN3 = 1;
+        }
+
+        if (IsTrigUsed(TRIGGER_DELMULTI))
+        {
+            CChar* pChar = _uidSrc.CharFind();
+            if (pChar)
+            {
+                pChar->OnTrigger(CTRIG_DelMulti, pChar, &args);
+            }
+        }
+        if (args.m_iN3 == 1)
+        {
+            _iShipsTotal -= static_cast<int16>(args.m_iN1);
         }
         _lShips.erase(uidShip);
         return;

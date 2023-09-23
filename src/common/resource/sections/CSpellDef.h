@@ -6,8 +6,8 @@
 #ifndef _INC_CSPELLDEF_H
 #define _INC_CSPELLDEF_H
 
-#include "../../game/uo_files/uofiles_enums_itemid.h"
-#include "../../game/uo_files/uofiles_types.h"
+#include "../../../game/uo_files/uofiles_enums_itemid.h"
+#include "../../../game/uo_files/uofiles_types.h"
 #include "../CResourceQty.h"
 #include "../CResourceLink.h"
 
@@ -93,7 +93,9 @@ private:
     CSpellDef& operator=(const CSpellDef& other);
 
 public:
-    lpctstr GetName() const { return( m_sName ); }
+    virtual lpctstr GetName() const override {
+        return m_sName;
+    }
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 

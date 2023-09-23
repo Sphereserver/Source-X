@@ -703,13 +703,13 @@ public:
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
 	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
-	
+
 	/*Effect at a Map Point instead of an Object*/
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode, dword hue, dword render);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
 	void writeBasicEffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptSrc, const CPointMap *ptDest, byte speed, byte loop, bool explode);
-	
+
 	void writeHuedEffect(dword hue, dword render);
 };
 
@@ -1193,7 +1193,7 @@ public:
 class PacketMessageUNICODE : public PacketSend
 {
 public:
-	PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language);
+	PacketMessageUNICODE(const CClient* target, const nachar* pszText, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language);
 };
 
 /***************************************************************************
@@ -1394,7 +1394,7 @@ public:
 class PacketPartyChat : public PacketParty
 {
 public:
-	PacketPartyChat(const CChar* source, const nchar* text);
+	PacketPartyChat(const CChar* source, const nachar* text);
 };
 
 /***************************************************************************
@@ -1790,7 +1790,7 @@ class PacketHouseDesign : public PacketSend
 private:
 	struct StairData
 	{
-		nword m_id;
+		naword m_id;
 		byte m_x;
 		byte m_y;
 		byte m_z;

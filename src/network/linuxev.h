@@ -8,7 +8,7 @@
 
 #ifdef _LIBEV
 
-	#include "../common/libev/ev.h"
+	#include "../../lib/libev/src/ev.h"
 	#include "../common/sphere_library/smutex.h"
 	#include "../sphere/threads.h"
 

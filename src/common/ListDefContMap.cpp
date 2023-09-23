@@ -37,8 +37,8 @@ bool CListDefContNum::r_LoadVal( CScript & s )
 
 bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
-	UNREFERENCED_PARAMETER(pKey);
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pKey);
+	UnreferencedParameter(pSrc);
 	sVal.Format64Val( GetValNum() );
 	return true;
 }
@@ -83,8 +83,8 @@ bool CListDefContStr::r_LoadVal( CScript & s )
 
 bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc )
 {
-	UNREFERENCED_PARAMETER(pKey);
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pKey);
+	UnreferencedParameter(pSrc);
 	sVal = GetValStr();
 	return true;
 }
@@ -955,7 +955,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal )
 {
     ADDTOCALLSTACK("CListDefMap::r_Write");
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pSrc);
 	tchar * ppCmds[3];
 	ppCmds[0] = const_cast<tchar*>(pszString);
 	Str_Parse(ppCmds[0], &(ppCmds[1]), "." );

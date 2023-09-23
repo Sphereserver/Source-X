@@ -6,7 +6,7 @@
 #ifndef _INC_CREGIONRESOURCEDEF_H
 #define _INC_CREGIONRESOURCEDEF_H
 
-#include "../../game/uo_files/uofiles_enums_itemid.h"
+#include "../../../game/uo_files/uofiles_enums_itemid.h"
 #include "../CValueDefs.h"
 #include "../CResourceLink.h"
 

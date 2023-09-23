@@ -138,7 +138,7 @@ void CNetworkThread::tick(void)
 			if ((g_Cfg._iMaxSizeClientOut != 0) || (g_Cfg._iMaxSizeClientIn != 0))
 			{
 				uchar uiKick = 0;
-				int64 iBytes, iQuota;
+				int64 iBytes = 0, iQuota = 0;
 				if ((g_Cfg._iMaxSizeClientOut != 0) && (pCurState->_iOutByteCounter > g_Cfg._iMaxSizeClientOut))
 				{
 					uiKick = 1;

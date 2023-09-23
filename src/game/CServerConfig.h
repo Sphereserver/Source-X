@@ -81,7 +81,8 @@ enum OF_TYPE
     OF_GuardOutsideGuardedArea      = 0x0200000,    // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
     OF_OWNoDropCarriedItem          = 0x0400000,     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
     OF_AllowContainerInsideContainer = 0x0800000,    //Allow containers inside other containers even if they are heavier than the container being inserted into.
-    OF_VendorStockLimit              = 0x01000000   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
+    OF_VendorStockLimit              = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
+    OF_EnableGuildAlignNotoriety     = 0x02000000    // If enabled, guilds with the same alignment will see each other as enemy or ally.
 };
 
 /**
@@ -348,9 +349,9 @@ public:
     uint m_iCombatParryingEra;      // Parrying behaviour flags
 	int  m_iSkillPracticeMax;		// max skill level a player can practice on dummies/targets upto.
 	bool m_iPacketDeathAnimation;	// packet 02c
-    bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the % 
+    bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the %
     bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.
-	
+
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
@@ -377,7 +378,7 @@ public:
 	int  m_iMaxFame;				// Maximum fame level
 
 	// other
-	
+
     int  m_iAutoProcessPriority;
 	uint _uiExperimentalFlags;	// Experimental Flags.
 	uint _uiOptionFlags;		// Option Flags.
@@ -561,7 +562,7 @@ public:
 
 	bool    m_bAgree;               // AGREE=n for nightly builds.
 	int     m_iMaxPolyStats;        // Max amount of each Stat gained through Polymorph spell. This affects separatelly to each stat.
-    
+
     bool    m_NPCShoveNPC;           //NPC can walk through other NPC, by default this is disabled.
 	// End INI file options.
 
@@ -662,7 +663,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	bool LoadResourceSection( CScript * pScript );
+	virtual bool LoadResourceSection( CScript * pScript ) override;
 
     /**
      * @brief   Sort all spells in order.
@@ -676,7 +677,7 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
+	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const override;
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );
@@ -993,11 +994,11 @@ public:
 
     /*
     *@brief Calculates mana cost of a spell, taking in consideration the LowerManaCost and and if is  being cast by a wand or scroll.
-    * 
+    *
     * @param pCharCaster: The caster casting the spell.
     * @param pSpell: The spell being cast.
     * @param pObj: The item (if any) from whom the spell is being cast.
-    * 
+    *
     * @return The mana cost of the spell if any.
     */
     ushort Calc_SpellManaCost(CChar * pCharCaster, const CSpellDef * pSpell, CObjBase * pObj);
@@ -1015,7 +1016,7 @@ public:
 
     /*
     *@brief Calculates tithing cost of a spell, taking in consideration the LowerReagentCost property and if is  being cast by a wand or scroll.
-    *        
+    *
     * @param pCharCaster: The caster casting the spell.
     * @param pSpell: The spell being cast.
     * @param pObj: The item (if any) from whom the spell is being cast.
@@ -1026,10 +1027,10 @@ public:
 
     /*
     * @brief Calculates the chance of curing a poison effect.
-    * 
+    *
     * @param pPoison: The poison item.
     * @param iCureLevel: The power level of the cure, this can be from a cure spell/potion or from healing/veterinary.
-    * 
+    *
     * @return True the check passed and the poison is removed, false the check failed and the poison is not removed.
     */
     bool Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, bool fIsGm = false );

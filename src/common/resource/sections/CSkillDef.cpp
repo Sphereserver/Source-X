@@ -87,10 +87,10 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
 
 bool CSkillDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bool fNoCallParent, bool fNoCallChildren )
 {
-    UNREFERENCED_PARAMETER(fNoCallChildren);
+    UnreferencedParameter(fNoCallChildren);
     ADDTOCALLSTACK("CSkillDef::r_WriteVal");
     EXC_TRY("WriteVal");
-    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case SKC_ADV_RATE:	// ADV_RATE=Chance at 100, Chance at 50, chance at 0
             sVal = m_AdvRate.Write();
@@ -169,7 +169,7 @@ bool CSkillDef::r_LoadVal( CScript &s )
 {
     ADDTOCALLSTACK("CSkillDef::r_LoadVal");
     EXC_TRY("LoadVal");
-    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+    switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 ))
     {
         case SKC_ADV_RATE:	// ADV_RATE=Chance at 100, Chance at 50, chance at 0
             m_AdvRate.Load( s.GetArgStr());

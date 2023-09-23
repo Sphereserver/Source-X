@@ -210,6 +210,20 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 					{
 						if (pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer))
 						{
+							if (IsSetOF(OF_EnableGuildAlignNotoriety))
+							{
+								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD)
+								{
+									if (pViewerGuild->GetAlignType() == pMyGuild->GetAlignType())
+									{
+										return NOTO_GUILD_SAME;
+									}
+										
+									return NOTO_GUILD_WAR;
+
+								}
+							}
+
 							if (pViewerGuild == pMyGuild) // Same guild?
 								return NOTO_GUILD_SAME; // return green
 							if (pMyGuild->IsAlliedWith(pViewerGuild))

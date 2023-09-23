@@ -8,31 +8,31 @@
 #endif
 
 
-nword::operator word () const
+nword::operator word () const noexcept
 {
     return ntohs(m_val);
 }
 
-nword& nword::operator = (word val)
+nword& nword::operator = (word val) noexcept
 {
     m_val = htons(val);
     return (*this);
 }
 
 
-ndword::operator dword () const
+ndword::operator dword () const noexcept
 {
     return ntohl(m_val);
 }
 
-ndword& ndword::operator = (dword val)
+ndword& ndword::operator = (dword val) noexcept
 {
     m_val = htonl(val);
     return (*this);
 }
 
 
-static int CvtSystemToUNICODE(wchar& wChar, lpctstr pInp, int iSizeInBytes)
+static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes) noexcept
 {
     // Convert a UTF8 encoded string to a single unicode char.
     // RETURN: The length used from input string. < iSizeInBytes
@@ -86,7 +86,7 @@ static int CvtSystemToUNICODE(wchar& wChar, lpctstr pInp, int iSizeInBytes)
     return iBytes;
 }
 
-static int CvtUNICODEToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
+static int CvtUTF16ToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar) noexcept
 {
     // Convert a single unicode char to system string.
     // RETURN: The length < iSizeOutBytes
@@ -145,7 +145,7 @@ static int CvtUNICODEToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
     return iBytes;
 }
 
-int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes)
+int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes) noexcept
 {
     //
     // Convert the system default text format UTF8 to UNICODE
@@ -168,7 +168,7 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
     }
     if (iSizeInBytes <= 0)
     {
-        pOut[0] = 0;
+        pOut[0] = '\0';
         return 0;
     }
 
@@ -192,12 +192,12 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
 
         if (iOutTmp <= 0)
         {
-            pOut[0] = 0;
+            pOut[0] = '\0';
             return 0;
         }
         if (iOutTmp > iSizeOutChars)	// this should never happen !
         {
-            pOut[0] = 0;
+            pOut[0] = '\0';
             return 0;
         }
 
@@ -224,7 +224,7 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
             if (ch >= 0x80)	// special UTF8 encoded char.
             {
                 wchar wChar;
-                int iInpTmp = CvtSystemToUNICODE(wChar, pInp + iInp, iSizeInBytes - iInp);
+                int iInpTmp = CvtSystemToUTF16(wChar, pInp + iInp, iSizeInBytes - iInp);
                 if (iInpTmp <= 0)
                 {
                     break;
@@ -242,11 +242,11 @@ int CvtSystemToNUNICODE(nchar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeI
         }
     }
 
-    pOut[iOut] = 0;
+    pOut[iOut] = '\0';
     return iOut;
 }
 
-int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int iSizeInChars)
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars) noexcept
 {
     // ARGS:
     //  iSizeInBytes = space we have (included null char)
@@ -276,7 +276,7 @@ int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int i
 
         // Flip all from network order.
         wchar szBuffer[1024 * 6];
-        for (; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp)
+        for (; iInp < (int)ARRAY_COUNT(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp)
         {
             szBuffer[iInp] = pInp[iInp];
         }
@@ -314,7 +314,7 @@ int CvtNUNICODEToSystem(tchar* pOut, int iSizeOutBytes, const nchar* pInp, int i
                 break;
             if (wChar >= 0x80)	// needs special UTF8 encoding.
             {
-                int iOutTmp = CvtUNICODEToSystem(pOut + iOut, iSizeOutBytes - iOut, wChar);
+                int iOutTmp = CvtUTF16ToSystem(pOut + iOut, iSizeOutBytes - iOut, wChar);
                 if (iOutTmp <= 0)
                     break;
                 iOut += iOutTmp;

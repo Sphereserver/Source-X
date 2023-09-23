@@ -32,7 +32,7 @@
 
 #define UO_SIZE_X_REAL		0x1400  // 640*UO_BLOCK_SIZE = 5120 = The actual world is only this big
 
-#define UOTILE_BLOCK_QTY	32      // Come in blocks of 32.
+#define UOTILE_BLOCK_QTY	32      // Each tiledata block has 32 items/terrain tiles.
 
 // This should depend on height of players char.
 #define PLAYER_HEIGHT		16  // We need x units of room to walk under something. (human) ??? this should vary based on creature type.

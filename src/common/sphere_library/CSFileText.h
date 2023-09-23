@@ -93,7 +93,7 @@ public:     int _cdecl Printf(lpctstr pFormat, ...) __printfargs(2, 3);
     * @param sizemax count of bytes to read.
     * @return count of bytes readed.
     */
-    virtual int Read( void * pBuffer, int sizemax ) const;
+    virtual int Read( void * pBuffer, int sizemax ) const override;
     /**
     * @brief Reads from a file a line (up to sizemax - 1 characters).
     * @param pBuffer buffer where store the readed data.
@@ -145,7 +145,7 @@ public:
     * @brief Check if file is open in binary mode.
     * @return false always.
     */
-    virtual bool IsBinaryMode() const { return false; };
+    virtual bool IsBinaryMode() const override { return false; };
     ///@}
 public:
     FILE * _pStream;		// The current open script type file.

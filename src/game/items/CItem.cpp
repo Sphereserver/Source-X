@@ -213,7 +213,7 @@ void CItem::DeleteCleanup(bool fForce)
 	CUID uidTest(GetComponentOfMulti());
     if (uidTest.IsValidUID())
     {
-        if (auto* pMulti = static_cast<CItemMulti*>(uidTest.ItemFind(true)))
+        if (auto* pMulti = dynamic_cast<CItemMulti*>(uidTest.ItemFind(true)))
         {
             pMulti->DeleteComponent(GetUID(), true);
         }
@@ -221,7 +221,7 @@ void CItem::DeleteCleanup(bool fForce)
 	uidTest = GetLockDownOfMulti();
     if (uidTest.IsValidUID())
     {
-		if (auto* pMulti = static_cast<CItemMulti*>(uidTest.ItemFind(true)))
+		if (auto* pMulti = dynamic_cast<CItemMulti*>(uidTest.ItemFind(true)))
         {
             pMulti->UnlockItem(GetUID(), true);
         }
@@ -448,7 +448,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// ITEM=#id,#amount,R#chance
 
     tchar * pptcCmd[3];
-    int iQty = Str_ParseCmds(pArg, pptcCmd, CountOf(pptcCmd), ",");
+    int iQty = Str_ParseCmds(pArg, pptcCmd, ARRAY_COUNT(pptcCmd), ",");
     if (iQty < 1)
         return nullptr;
 
@@ -589,7 +589,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 		if ( s.IsKeyHead( "ON", 2 ))
 			break;
 
-		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, CountOf( sm_szTemplateTable )-1 );
+		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, ARRAY_COUNT( sm_szTemplateTable )-1 );
 		switch (index)
 		{
 			case ITC_BUY: // "BUY"
@@ -777,7 +777,7 @@ int CItem::FixWeirdness()
 
     if (IsType(IT_EQ_MEMORY_OBJ) && !IsValidUID())
     {
-        SetUID(UID_CLEAR, true);	// some cases we don't get our UID because we are created during load.
+        SetUID(UID_PLAIN_CLEAR, true);	// some cases we don't get our UID because we are created during load.
     }
 
     int iResultCode = CObjBase::IsWeird();
@@ -1180,7 +1180,7 @@ int CItem::FixWeirdness()
         // unreasonably long for a top level item ?
         if (_GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
-            g_Log.EventWarn("FixWeirdness on Item (UID=0%x): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID());
+			g_Log.EventWarn("FixWeirdness on Item (UID=0%x [%s]): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID(), GetName());
             _SetTimeoutS(60 * 60);
         }
     }
@@ -1392,7 +1392,7 @@ void CItem::_SetTimeout( int64 iMsecs )
 	{
 		if (!_CanHoldTimer())
 		{
-			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x)\n", GetUID().GetObjUID());
+			g_Log.EventWarn("Trying to set a TIMER on an object not meant to have one? (UID=0%x [%s])\n", GetUID().GetObjUID(), GetName());
 			return;
 		}
 	// Negative numbers deletes the timeout. Do not block those kind of cleanup operations.
@@ -1410,8 +1410,10 @@ bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 
 bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix)
 {
+	if (!MoveToUpdate(pt, fForceFix))
+		return false;
 	SetDecayTime(iMsecsTimeout);
-	return MoveToUpdate(pt, fForceFix);
+	return true;
 }
 
 void CItem::SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways)
@@ -2055,8 +2057,8 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 {
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
-	UNREFERENCED_PARAMETER(pszCmd);
-	UNREFERENCED_PARAMETER(pSrc);
+	UnreferencedParameter(pszCmd);
+	UnreferencedParameter(pSrc);
 	ASSERT(false);
 }
 
@@ -2135,7 +2137,7 @@ void CItem::SetAmount(word amount )
 			ITEMID_ORE_2,
 			ITEMID_ORE_3
 		};
-		SetDispID( ( GetAmount() >= CountOf(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
+		SetDispID( ( GetAmount() >= ARRAY_COUNT(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
 	}
 
 	CContainer * pParentCont = dynamic_cast <CContainer*> (GetParent());
@@ -2476,7 +2478,7 @@ bool CItem::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
         return true;
     }
 
-	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( ptcKey, sm_szRefKeys, ARRAY_COUNT(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
 		ptcKey += strlen( sm_szRefKeys[i] );
@@ -2551,7 +2553,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], ptcKey, 8 ) )
 		index = IC_ADDSPELL;
 	else
-		index = FindTableSorted( ptcKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+		index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 
 	bool fDoDefault = false;
 
@@ -2822,6 +2824,9 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 		case IC_TYPE:
 			sVal = g_Cfg.ResourceGetName( CResourceID(RES_TYPEDEF, m_type) );
 			break;
+		case IC_REPAIRPERCENT:
+			sVal.FormatVal(Armor_GetRepairPercent());
+			break;
 		default:
             if (!fNoCallParent)
             {
@@ -2964,7 +2969,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
     }
 
     EXC_SET_BLOCK("Keyword");
-    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
 	switch (index)
 	{
 		//Set as Strings
@@ -3069,7 +3074,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				}
 
 				tchar *ppVal[2];
-				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, CountOf(ppVal), " ,\t");
+				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, ARRAY_COUNT(ppVal), " ,\t");
 				bool includeLower = 0;	// should i add also the lower circles?
 				int addCircle = 0;
 
@@ -3145,7 +3150,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				{
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[2];
-					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
+					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, ARRAY_COUNT( ppVal ), " ,\t" );
 					if ( iArgs < 2 )
 					{
 						DEBUG_ERR(( "Bad CONTP usage (not enough parameters)\n" ));
@@ -3279,7 +3284,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				{
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[4];
-					iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
+					iArgs = Str_ParseCmds( pszTemp, ppVal, ARRAY_COUNT( ppVal ), " ,\t" );
 					switch ( iArgs )
 					{
 						default:
@@ -3406,7 +3411,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
     }
 
 	EXC_SET_BLOCK("Verb-Statement");
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, ARRAY_COUNT( sm_szVerbKeys )-1 );
 	if ( index < 0 )
 	{
 		return CObjBase::r_Verb( s, pSrc );
@@ -3528,7 +3533,7 @@ bool CItem::IsTriggerActive(lpctstr trig) const
     if (_iRunningTriggerId != -1)
     {
         ASSERT(_iRunningTriggerId < ITRIG_QTY);
-        int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
+        int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
     ASSERT(!_sRunningTrigger.empty());
@@ -3543,7 +3548,7 @@ void CItem::SetTriggerActive(lpctstr trig)
         _sRunningTrigger.clear();
         return;
     }
-    int iAction = FindTableSorted( trig, CItem::sm_szTrigName, CountOf(CItem::sm_szTrigName)-1 );
+    int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
     if (iAction != -1)
     {
         _iRunningTriggerId = (short)iAction;
@@ -3559,7 +3564,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	ADDTOCALLSTACK("CItem::OnTrigger");
 
 	if (IsTriggerActive(pszTrigName)) //This should protect any item trigger from infinite loop
-		return TRIGRET_RET_DEFAULT;
+		return TRIGRET_RET_ABORTED;
 
 	if ( !pSrc )
 		pSrc = &g_Serv;
@@ -3586,7 +3591,7 @@ standard_order:
     {
 		tchar ptcCharTrigName[TRIGGER_NAME_MAX_LEN] = "@ITEM";
 		Str_ConcatLimitNull(ptcCharTrigName + 5, pszTrigName + 1, TRIGGER_NAME_MAX_LEN - 5);
-        const CTRIG_TYPE iCharAction = (CTRIG_TYPE)FindTableSorted(ptcCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName) - 1);
+        const CTRIG_TYPE iCharAction = (CTRIG_TYPE)FindTableSorted(ptcCharTrigName, CChar::sm_szTrigName, ARRAY_COUNT(CChar::sm_szTrigName) - 1);
         if ((iCharAction > XTRIG_UNKNOWN) && IsTrigUsed(ptcCharTrigName))
         {
             CChar* pChar = pSrc->GetChar();
@@ -3934,9 +3939,11 @@ bool CItem::IsTypeEquippable() const
     return CItemBase::IsTypeEquippable(GetType(), GetEquipLayer());
 }
 
-void CItem::DupeCopy( const CItem * pItem )
+void CItem::DupeCopy( const CObjBase* pItemObj )
 {
 	ADDTOCALLSTACK("CItem::DupeCopy");
+    auto pItem = dynamic_cast<const CItem *>(pItemObj);
+    ASSERT(pItem);
 	// Dupe this item.
 
 	CObjBase::DupeCopy( pItem );
@@ -5342,7 +5349,7 @@ int CItem::Use_Trap()
 bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 {
 	ADDTOCALLSTACK("CItem::SetMagicLock");
-	UNREFERENCED_PARAMETER(iSkillLevel);
+	UnreferencedParameter(iSkillLevel);
 	if ( pCharSrc == nullptr )
 		return false;
 
@@ -5418,10 +5425,11 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 	return true;
 }
 
-bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting )
+bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting, int64 iDuration)
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
-	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
+	UnreferencedParameter(bReflecting);	// items are not affected by Magic Reflection
+	UnreferencedParameter(iDuration);
     // A spell is cast on this item.
     // ARGS:
     //  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
@@ -5980,7 +5988,7 @@ bool CItem::_CanHoldTimer() const
 
 bool CItem::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK("CItem::_CanTick");
+	ADDTOCALLSTACK_INTENSIVE("CItem::_CanTick");
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
