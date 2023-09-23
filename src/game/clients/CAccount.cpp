@@ -595,8 +595,7 @@ void CAccount::DeleteChars()
 			CChar * pChar = m_Chars.GetChar(--i).CharFind();
 			if (pChar != nullptr)
 			{
-				pChar->NotifyDelete(1);
-				pChar->Delete();
+				pChar->Delete(true);
 				//pChar->ClearPlayer(); //Already include in ~CChar() when char is delete
 			}
 

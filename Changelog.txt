@@ -3345,3 +3345,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
 	   The ship plank will now autoclose after 5 seconds.
 Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
+
+23-09-2023, Jhobean
+Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot.  ( Issue #1029)
