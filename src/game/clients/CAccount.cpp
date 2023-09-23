@@ -219,7 +219,8 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 	{
 		return false;
 	}
-
+	
+	pAccount->DeleteChars();
 	m_Accounts.RemovePtr( pAccount );
 	return true;
 }
@@ -594,8 +595,8 @@ void CAccount::DeleteChars()
 			CChar * pChar = m_Chars.GetChar(--i).CharFind();
 			if (pChar != nullptr)
 			{
-				pChar->Delete();
-				pChar->ClearPlayer();
+				pChar->Delete(true);
+				//pChar->ClearPlayer(); //Already include in ~CChar() when char is delete
 			}
 
 			m_Chars.DetachChar(i);
