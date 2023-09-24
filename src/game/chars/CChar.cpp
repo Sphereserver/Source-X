@@ -1302,6 +1302,11 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 				pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
 			}
 			pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
+			if (pItem->IsDeleted())
+			{
+				fItemCreation = false;
+				g_Log.EventDebug("FUNC deleted the item.\n");
+			}
 		}
 		else if ( fVendor )
 		{
