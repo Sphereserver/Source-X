@@ -322,7 +322,7 @@ protected:
 	void DeleteCleanup(bool fForce);	// Not virtual!
 	virtual void DeletePrepare() override;
 public:
-	bool NotifyDelete();
+	bool NotifyDelete(bool fForce);
 	virtual bool Delete(bool fForce = false) override;
 
 	// Status and attributes ------------------------------------
