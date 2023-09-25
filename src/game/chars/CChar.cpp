@@ -1278,41 +1278,17 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 {
 	ADDTOCALLSTACK("CChar::ReadScriptReduced");
 	bool fFullInterp = false;
+	bool fBlockItemAttr = false; //Set a temporary boolean to block item attributes to set on Character.
 
-	bool fBlockItemAttr = false; // Set a temporary boolean to block item attributes to set on Character.
 	CItem * pItem = nullptr;
 	while ( s.ReadKeyParse() )
 	{
 		if ( s.IsKeyHead("ON", 2) )
 			break;
 
-		bool fItemCreated = false;	// With the current keyword, have i created an item?
 		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, ARRAY_COUNT(CItem::sm_szTemplateTable)-1);
-		if (iCmd == ITC_FUNC)
-		{
-			if (!pItem || fBlockItemAttr)
-				continue;
-
-			lptstr ptcFunctionName = s.GetArgRaw();
-			std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
-			// Locate arguments for the called function
-			tchar* ptcArgs = strchr(ptcFunctionName, ' ');
-			if (ptcArgs)
-			{
-				*ptcArgs = 0;
-				++ptcArgs;
-				GETNONWHITESPACE(ptcArgs);
-				pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
-			}
-			pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
-			if (pItem->IsDeleted())
-			{
-				pItem = nullptr;
-				//g_Log.EventDebug("FUNC deleted the item.\n");
-			}
-			continue;
-		}
-		else if ( fVendor )
+		bool fItemCreation = false;
+		if ( fVendor )
 		{
 			if (iCmd != -1)
 			{
@@ -1322,7 +1298,7 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 					case ITC_SELL:
 					{
 						fBlockItemAttr = false; //Make sure we reset the value, if the last input is not a ITEM(NEWBIE) or CONTAINER.
-						CItemContainer * pCont = GetBank((iCmd == ITC_SELL) ? LAYER_VENDOR_STOCK : LAYER_VENDOR_BUYS);
+						CItemContainer * pCont = GetBank((iCmd == ITC_SELL) ? LAYER_VENDOR_STOCK : LAYER_VENDOR_BUYS );
 						if ( pCont )
 						{
 							pItem = CItem::CreateHeader(s.GetArgRaw(), pCont, false);
@@ -1332,7 +1308,6 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 						pItem = nullptr;
 						continue;
 					}
-					//case ITC_BREAK:	// I don't find a use case for that...
 					case ITC_ITEM:
 					case ITC_CONTAINER:
 					case ITC_ITEMNEWBIE:					
@@ -1348,67 +1323,66 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 		}
 		else
 		{
-            switch (iCmd)
-            {
+			switch ( iCmd )
+			{
 				case ITC_FULLINTERP:
-				{
-					lpctstr	pszArgs = s.GetArgStr();
-					GETNONWHITESPACE(pszArgs);
-					fFullInterp = (*pszArgs == '\0') ? true : (s.GetArgVal() != 0);
-					continue;
-				}
-				case ITC_NEWBIESWAP:
-				{
-					if (!pItem)
+					{
+						lpctstr	pszArgs	= s.GetArgStr();
+						GETNONWHITESPACE(pszArgs);
+						fFullInterp = ( *pszArgs == '\0' ) ? true : ( s.GetArgVal() != 0);
 						continue;
+					}
+				case ITC_NEWBIESWAP:
+					{
+						if ( !pItem )
+							continue;
 
-					if (pItem->IsAttr(ATTR_NEWBIE))
-					{
-						if (Calc_GetRandVal(s.GetArgVal()) == 0)
-							pItem->ClrAttr(ATTR_NEWBIE);
+						if ( pItem->IsAttr( ATTR_NEWBIE ) )
+						{
+							if ( Calc_GetRandVal( s.GetArgVal() ) == 0 )
+								pItem->ClrAttr(ATTR_NEWBIE);
+						}
+						else
+						{
+							if ( Calc_GetRandVal( s.GetArgVal() ) == 0 )
+								pItem->SetAttr(ATTR_NEWBIE);
+						}
+						continue;
 					}
-					else
-					{
-						if (Calc_GetRandVal(s.GetArgVal()) == 0)
-							pItem->SetAttr(ATTR_NEWBIE);
-					}
-					continue;
-				}
 				case ITC_ITEM:
 				case ITC_CONTAINER:
 				case ITC_ITEMNEWBIE:
-				{
-					fBlockItemAttr = false;
-					fItemCreated = true;
-
-					if (IsStatFlag(STATF_CONJURED) && iCmd != ITC_ITEMNEWBIE) // This check is not needed (sure?).
-						break; // conjured creates have no loot.
-
-					pItem = CItem::CreateHeader(s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE);
-					if (pItem == nullptr)
 					{
-						m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
+						fItemCreation = true;
+
+						if ( IsStatFlag( STATF_CONJURED ) && iCmd != ITC_ITEMNEWBIE ) // This check is not needed.
+							break; // conjured creates have no loot.
+
+						pItem = CItem::CreateHeader( s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE );
+						if ( pItem == nullptr )
+						{
+							m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
+							continue;
+						}
+						m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
+
+						pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+						pItem->_iCreatedResScriptLine = s.m_iLineNum;
+
+						if ( iCmd == ITC_ITEMNEWBIE )
+							pItem->SetAttr(ATTR_NEWBIE);
+
+						if ( !pItem->IsItemInContainer() && !pItem->IsItemEquipped())
+							pItem = nullptr;
 						continue;
 					}
-					m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
-
-					pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-					pItem->_iCreatedResScriptLine = s.m_iLineNum;
-
-					if (iCmd == ITC_ITEMNEWBIE)
-						pItem->SetAttr(ATTR_NEWBIE);
-
-					if (!pItem->IsItemInContainer() && !pItem->IsItemEquipped())
-						pItem = nullptr;
-					continue;
-				}
 
 				case ITC_BREAK:
 				case ITC_BUY:
 				case ITC_SELL:
 					pItem = nullptr;
 					continue;
-				}
+			}
 
 		}
 
@@ -1424,11 +1398,10 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 			else
 				pItem->r_LoadVal( s );
 		}
-		else if (!fItemCreated)
+		else if (!fItemCreation)
 		{
-			// I'm setting an attribute to myself, not the item (e.g. @Create trigger). Run that script line.
 			TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, &g_Serv, nullptr, nullptr );
-			if ((tRet == TRIGRET_RET_FALSE) && fFullInterp)
+			if ( (tRet == TRIGRET_RET_FALSE) && fFullInterp )
 				;
 			else if ( tRet != TRIGRET_RET_DEFAULT )
 			{
