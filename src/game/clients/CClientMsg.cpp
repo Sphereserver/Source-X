@@ -2857,7 +2857,10 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		return PacketDeleteError::InvalidRequest;
 	}
 
-	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
+	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' (UID 0%x) on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
+	
+	//FIXME: on the next delete request , we will launch f_onchar_delete trigger again.(Causing double trigger launch back to back)
+	//Keep in mind that the on the second launch, since it's force delete, you cant cancel the delete on the char.
 	pChar->Delete(true);
 
 	// refill the list.

@@ -397,18 +397,19 @@ bool CChar::NotifyDelete(bool fForce)
 	if (IsTrigUsed(TRIGGER_DESTROY))
 	{
 		//We can forbid the deletion in here with no pain
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce) //If NotifyDelete is forced, it's imposible to reverse the deletion
+		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
+		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce) 
 			return false;
 	}
 
 	// If this is a player, check for f_onchar_delete
-	if (m_pClient || fForce)
+	if (m_pPlayer)
 	{
 		TRIGRET_TYPE trigReturn;
 		CScriptTriggerArgs Args;
-		Args.m_pO1 = m_pClient;
+		Args.m_pO1 = this;
 		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
-		//If NotifyDelete is forced, we must avoid the possibility to block deletion (will create infinite loop)
+		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
 		if (trigReturn == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
