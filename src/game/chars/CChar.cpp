@@ -407,7 +407,8 @@ bool CChar::NotifyDelete(bool fForce)
 	{
 		TRIGRET_TYPE trigReturn;
 		CScriptTriggerArgs Args;
-		Args.m_pO1 = this;
+		if (m_pClient)
+			Args.m_pO1 = m_pClient;
 		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
 		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
 		if (trigReturn == TRIGRET_RET_TRUE && !fForce)
@@ -445,7 +446,7 @@ bool CChar::Delete(bool fForce)
 	}
 	
 	DeleteCleanup(fForce);	// not virtual
-
+	
 	if (m_pPlayer && fForce)
 		ClearPlayer();
 
@@ -572,7 +573,7 @@ void CChar::ClearPlayer()
 	{
 		if (g_Serv.GetServerMode() != SERVMODE_Exiting)
 		{
-			g_Log.EventWarn("Player delete '%s' name from account '%s'.\n", GetName(), pAccount->GetName());
+			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' as been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
 		}
 
 		pAccount->DetachChar(this);	// unlink me from my account.

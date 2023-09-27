@@ -2851,7 +2851,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 
 	if (pChar->Delete()) //	Do the scripts allow to delete the char?
 	{
-		g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' (UID 0%x) on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
+		g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "Character delete request on client login screen.\n");
 
 		pChar->ClearPlayer();
 		// refill the list.
