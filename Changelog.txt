@@ -3016,7 +3016,6 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Changed: @UserQuestArrowClick, using return 1 now prevents from showing default message when (left/right)clicking arrow.
 - Changed: Crafting skills now won't display the bounce message when successfully crafting an item, with the skill message is enough.
 
-
 10-08-2022, Drk84
 - Added: PROMPT_CLILOC for Skill Definition. This allow you to set a cliloc number in the aforementioned property and it will be used instead of the PROMPT_MSG text.
 		 Example:
@@ -3335,19 +3334,20 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Added: CMake Clang compilation toolchains for Windows, Linux, MacOS.
 
 13-09-2023, Drk84
--Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
+- Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
 		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
 		
 14-09-2023, Drk84
--Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
+- Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
 		
 15-09-2023, Drk84
-Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
+- Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
 	   The ship plank will now autoclose after 5 seconds.
-Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
+- Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
 
-23-09-2023, Jhobean
-Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot.  ( Issue #1029)
+23-09-2023 / 27-09-27 (2 commits), Jhobean 
+- Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot. ( Issue #1029)
+- Changed: Optimisation how f_onchar_delete is launch and avoid dual launch when delete char on login screen.
 
 26-09-2023, Drk84
-Fixed: Ship plank disappearing when closed before its timer expires or after a save is performed.
+- Fixed: Ship plank disappearing when closed before its timer expires or after a save is performed.
