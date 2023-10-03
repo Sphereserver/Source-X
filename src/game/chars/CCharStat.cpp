@@ -608,27 +608,43 @@ short CChar::GetKarma() const
     return (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, m_iKarma)));
 }
 
-void CChar::SetKarma(short iNewKarma)
+void CChar::SetKarma(short iNewKarma, CChar* cNPC)
 {
 
+	/*
+    Issue: 1118
+	https://github.com/Sphereserver/Source-X/issues/1118
+	
+	Wrong calculations breaks all the variables while saving. But the issues of this trigger are LOCAL.OLD and LOCAL.NEW
+	As LOCAL.NEW updating after KarmaChange triggered because ARGN1 is writeable, it's impossible to update it inside the trigger.
+	Best way to track that values is adding another trigger, that triggers after Karma value Changed.
+	
+	xwerswoodx
+	*/
+    
+    const short iOldKarma = GetKarma();	
+	short iKarmaChange = iNewKarma - iOldKarma;
+		
 	if (IsTrigUsed(TRIGGER_KARMACHANGE))
 	{
-		const int iOldKarma = GetKarma();
-
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = iNewKarma;
-		Args.m_VarsLocal.SetNum("Old", iOldKarma);
-		Args.m_VarsLocal.SetNum("New", iNewKarma + iOldKarma);
-		TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
-
+	    CScriptTriggerArgs Args(iKarmaChange);
+	    Args.m_pO1 = cNPC;
+    	TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
 		if (retType == TRIGRET_RET_TRUE)
 			return;
-
-		iNewKarma = (ushort)(minimum(g_Cfg.m_iMaxKarma, Args.m_iN1));
+    	iKarmaChange = (short)Args.m_iN1;
+        iNewKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iOldKarma + iKarmaChange)));
 	}
 
     m_iKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iNewKarma)));
-
+    if (IsTrigUsed(TRIGGER_KARMACHANGED))
+    {
+        CScriptTriggerArgs Args(iKarmaChange);
+        Args.m_VarsLocal.SetNum("Old", iOldKarma);
+        Args.m_VarsLocal.SetNum("New", iNewKarma);
+        OnTrigger(CTRIG_KarmaChanged, this, &Args);
+    }
+    
     if ( !g_Serv.IsLoading() )
         NotoSave_Update();
 }
@@ -638,26 +654,41 @@ ushort CChar::GetFame() const
     return (ushort)(minimum(g_Cfg.m_iMaxFame, m_uiFame));
 }
 
-void CChar::SetFame(ushort uiNewFame)
+void CChar::SetFame(ushort uiNewFame, CChar* cNPC)
 {
-
+    /*
+    Issue: 1118
+	https://github.com/Sphereserver/Source-X/issues/1118
+	
+	Wrong calculations breaks all the variables while saving. But the issues of this trigger are LOCAL.OLD and LOCAL.NEW.
+	As LOCAL.NEW updating after FameChange triggered because of ARGN1 is writeable, it's impossible to update it inside the trigger.
+	Best way to track that values is adding another trigger, that triggers after Fame value Changed.
+	
+	xwerswoodx
+	*/
+    
+    const short iOldFame = GetFame();
+	short iFameChange = uiNewFame - iOldFame;
+		
 	if (IsTrigUsed(TRIGGER_FAMECHANGE))
 	{
-		const int iOldFame = GetFame();
-
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = uiNewFame;
-		Args.m_VarsLocal.SetNum("Old", iOldFame);
-		Args.m_VarsLocal.SetNum("New", uiNewFame + iOldFame);
-		TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
-
-		if ( retType == TRIGRET_RET_TRUE )
+	    CScriptTriggerArgs Args(iFameChange);
+	    Args.m_pO1 = cNPC;
+    	TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
+		if (retType == TRIGRET_RET_TRUE)
 			return;
-
-		uiNewFame = (ushort)(minimum(g_Cfg.m_iMaxFame, Args.m_iN1));
+    	iFameChange = (short)Args.m_iN1;
+        uiNewFame = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, iOldFame + iFameChange)));
 	}
 
-    m_uiFame = (ushort)(minimum(g_Cfg.m_iMaxFame, uiNewFame));
+    m_uiFame = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, uiNewFame)));
+    if (IsTrigUsed(TRIGGER_FAMECHANGED))
+    {
+        CScriptTriggerArgs Args(iFameChange);
+        Args.m_VarsLocal.SetNum("Old", iOldFame);
+        Args.m_VarsLocal.SetNum("New", uiNewFame);
+        OnTrigger(CTRIG_FameChanged, this, &Args);
+    }
 }
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)

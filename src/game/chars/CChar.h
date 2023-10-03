@@ -443,9 +443,9 @@ public:
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
     short GetKarma() const;
-    void SetKarma(short iNewKarma);
+    void SetKarma(short iNewKarma, CChar* cNPC = nullptr);
     ushort GetFame() const;
-    void SetFame(ushort uiNewFame);
+    void SetFame(ushort uiNewFame, CChar* cNPC = nullptr);
 
 	void Stat_StrCheckEquip();
 
@@ -606,7 +606,7 @@ private:
 	* @param iBottom is the lower value you can have for this execution.
 	* @param bMessage show message to the char or not.
 	*/
-	void Noto_Karma( int iKarmaChange, int iBottom = INT32_MIN, bool fMessage = false );
+	void Noto_Karma( int iKarmaChange, int iBottom = INT32_MIN, bool fMessage = false, CChar* cNPC = nullptr );
 
 	/**
 	* @brief Update Fame with the given value.
@@ -615,7 +615,7 @@ private:
 	* Can't never exceed g_Cfg.m_iMaxFame and can't never be lower than 0.
 	* @param iFameChange is the amount of fame to change over the current one.
 	*/
-	void Noto_Fame( int iFameChange );
+	void Noto_Fame( int iFameChange, CChar* cNPC = nullptr );
 
 	/**
 	* @brief I have a new notoriety Level? check it and show a message if so.

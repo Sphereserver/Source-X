@@ -453,6 +453,13 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 		else
 			return false;
 	}
+	
+	if (IsTrigUsed(TRIGGER_PARTYADD))
+	{
+		CScriptTriggerArgs Args;
+		if ( pCharAccept->OnTrigger(CTRIG_PartyAdd, pCharInviter, &Args) == TRIGRET_RET_TRUE )
+			return false;
+	}
 
 	tchar *pszMsg = Str_GetTemp();
 	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_JOINED), pCharAccept->GetName());

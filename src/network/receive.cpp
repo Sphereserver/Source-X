@@ -203,7 +203,7 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 	createArgs.m_s1 = account->GetName();
 	createArgs.m_pO1 = client;
 
-    client->r_Call("f_onchar_create_init", nullptr, &createArgs, nullptr, &tr);
+    client->r_Call("f_onchar_create_init", &g_Serv, &createArgs, nullptr, &tr);
     if (tr == TRIGRET_RET_TRUE)
         goto block_creation;
 

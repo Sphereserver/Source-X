@@ -1527,7 +1527,7 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConso
         // If an expression is enclosed by parentheses, ParseScriptText needs to read both the open and the closed one, we cannot
         //  pass the string starting with the character after the '('.
 		ParseScriptText(ptcSubexpr, pSrc, 0, pArgs);
-		fVal = bool(Exp_GetVal(ptcSubexpr));
+		fVal = bool(Exp_GetLLVal(ptcSubexpr));
 	}
 
 	-- pContext->_iEvaluate_Conditional_Reentrant;
@@ -1708,7 +1708,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 	tchar* ptcTemp = Str_GetTemp();
 	Str_CopyLimitNull(ptcTemp, ppCmds[0], STR_TEMPLENGTH);
 	ParseScriptText(ptcTemp, pSrc, 0, pArgs, pContext);
-	const bool fCondition = Exp_GetVal(ptcTemp);
+	const bool fCondition = Exp_GetLLVal(ptcTemp);
 
 	// Get the retval we want
 	//	(we might as well work on the transformed original string, since at this point we don't care if we corrupt other arguments)

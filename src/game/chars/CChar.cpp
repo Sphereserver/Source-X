@@ -73,7 +73,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@ExpChange",			// EXP is going to change
 	"@ExpLevelChange",		// Experience LEVEL is going to change
 	"@Falling",				//char is falling from height >= 10
-	"@FameChange",			// Fame changed
+	"@FameChange",			// Fame is changing
+	"@FameChanged",         // Fame changed
 	"@FollowersUpdate",
 
 	"@GetHit",				// I just got hit.
@@ -129,8 +130,9 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemUNEQUIP",			// i have unequipped (or try to unequip) an item
 
 	"@Jailed",
-	"@KarmaChange",				// Karma chaged
-	"@Kill",				//+I have just killed someone
+	"@KarmaChange",         // Karma is changing
+	"@KarmaChanged",        // Karma changed
+	"@Kill",				// +I have just killed someone
 	"@LogIn",				// Client logs in
 	"@LogOut",				// Client logs out (21)
 	"@Mount",				// I'm trying to mount my horse (or whatever)
@@ -155,6 +157,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NPCSeeWantItem",		// (NPC only) i see something good.
 	"@NPCSpecialAction",	// Idle
 
+    "@PartyAdd",            // Player joined the party.
 	"@PartyDisband",		//I just disbanded my party
 	"@PartyInvite",			//SRC invited me to join a party, so I may chose
 	"@PartyLeave",
