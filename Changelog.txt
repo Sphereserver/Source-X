@@ -3362,9 +3362,10 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	LOCAL.OLD returns the karma value before added anything.
 	LOCAL.NEW returns the current player karma.
 	This trigger has no RETURN value to block hardcoded events while it triggers after everything finished.
-- Fixed: f_onchar_create_init is not called. (Issue: #1116)
+- Fixed: f_onchar_create_init is not called. (Issue: #1117)
 - Fixed: IF and QVAL statements cannot evaluate correctly 32bit+ bitwise conditions. (Issue: #1078)
 - Added: @PartyAdd trigger. (Feature Request: #1054)
 	I: The player who is joining to the party.
 	SRC: The player who is inviting.
 	Return 1: Cancels the action.
+- Added: LOCAL.SOUND and LOCAL.ANIM under @Start (Skill) trigger to override sound and animations before start crafting or gathering.
