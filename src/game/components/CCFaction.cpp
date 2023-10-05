@@ -245,7 +245,7 @@ void CCFaction::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCFaction::r_Write");
     if (GetFactionID() != FACTION_NONE){
-        s.WriteKeyHex("FACTION", (llong)GetFactionID()); // Same value stored with different names for CChars and CItems.
+        s.WriteKeyHex("FACTION", GetFactionID()); // Same value stored with different names for CChars and CItems.
     }
 }
 

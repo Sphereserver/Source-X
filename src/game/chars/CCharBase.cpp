@@ -88,7 +88,6 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
     _uiRange = pCharDef->_uiRange;
 
 	m_BaseResources = pCharDef->m_BaseResources;
-    _pFaction = pCharDef->_pFaction;
 
 	CBaseBaseDef::CopyBasic( pCharDef );	// This will overwrite the CResourceLink!!
 }

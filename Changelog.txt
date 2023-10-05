@@ -3368,4 +3368,5 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	I: The player who is joining to the party.
 	SRC: The player who is inviting.
 	Return 1: Cancels the action.
-- Added: LOCAL.SOUND and LOCAL.ANIM under @Start (Skill) trigger to override sound and animations before start crafting or gathering.
+- Added: LOCAL.SOUND and LOCAL.ANIM under @Start (Skill) and @SkillStart triggers to override sound and animations before start crafting or gathering.
+- Fixed: FACTION property not saved and load correctly under [CHARDEF] definition. (Issue: #1059 and #1083)
