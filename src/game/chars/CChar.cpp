@@ -322,6 +322,7 @@ CChar::CChar( CREID_TYPE baseID ) :
     // SubscribeComponent Prop Components
 	TrySubscribeComponentProps<CCPropsChar>();
 	TrySubscribeComponentProps<CCPropsItemChar>();
+	SubscribeComponent(new CCFaction(pCharDef->GetFaction()));
 
 	ASSERT(IsDisconnected());
 }

@@ -55,11 +55,11 @@ public:
 	dword   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
     RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
 
-    CFactionDef _pFaction;
+    CCFaction _pFaction;
 
 
 public:
-    CFactionDef GetFaction();
+    CCFaction GetFaction();
 
     /**
      * @brief   Gets definition string.

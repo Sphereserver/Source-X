@@ -166,7 +166,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
     }
     if (CCFaction::CanSubscribe(this))
     {
-        SubscribeComponent(new CCFaction());  // Adding it only to equippable items
+        SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
     }
 
 	TrySubscribeComponentProps<CCPropsItem>();
