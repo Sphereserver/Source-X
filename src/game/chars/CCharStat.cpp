@@ -627,7 +627,7 @@ void CChar::SetKarma(short iNewKarma, CChar* cNPC)
 		
 	if (IsTrigUsed(TRIGGER_KARMACHANGE))
 	{
-	    CScriptTriggerArgs Args(iKarmaChange);
+	    CScriptTriggerArgs Args(iKarmaChange, iOldKarma);
 	    Args.m_pO1 = cNPC;
     	TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
 		if (retType == TRIGRET_RET_TRUE)
@@ -637,13 +637,6 @@ void CChar::SetKarma(short iNewKarma, CChar* cNPC)
 	}
 
     m_iKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iNewKarma)));
-    if (IsTrigUsed(TRIGGER_KARMACHANGED))
-    {
-        CScriptTriggerArgs Args(iKarmaChange);
-        Args.m_VarsLocal.SetNum("Old", iOldKarma);
-        Args.m_VarsLocal.SetNum("New", iNewKarma);
-        OnTrigger(CTRIG_KarmaChanged, this, &Args);
-    }
     
     if ( !g_Serv.IsLoading() )
         NotoSave_Update();
@@ -672,7 +665,7 @@ void CChar::SetFame(ushort uiNewFame, CChar* cNPC)
 		
 	if (IsTrigUsed(TRIGGER_FAMECHANGE))
 	{
-	    CScriptTriggerArgs Args(iFameChange);
+	    CScriptTriggerArgs Args(iFameChange, iOldFame);
 	    Args.m_pO1 = cNPC;
     	TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
 		if (retType == TRIGRET_RET_TRUE)
@@ -682,13 +675,6 @@ void CChar::SetFame(ushort uiNewFame, CChar* cNPC)
 	}
 
     m_uiFame = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, uiNewFame)));
-    if (IsTrigUsed(TRIGGER_FAMECHANGED))
-    {
-        CScriptTriggerArgs Args(iFameChange);
-        Args.m_VarsLocal.SetNum("Old", iOldFame);
-        Args.m_VarsLocal.SetNum("New", uiNewFame);
-        OnTrigger(CTRIG_FameChanged, this, &Args);
-    }
 }
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)

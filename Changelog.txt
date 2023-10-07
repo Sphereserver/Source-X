@@ -3355,13 +3355,9 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 02-10-2023, xwerswoodx
 - Fixed: Re-Coded @KarmaChange and @FameChange triggers not setting variables correctly. (Issue #1118)
 	ARGN1 now return as the amount of Karma/Fame being added.
-	LOCAL.OLD and LOCAL.NEW removed, while ARGN1 is writeable, it's impossible to track that values in the trigger.
+	ARGN2 is now return oldKarma. (ARGN2 + ARGN1 == New Karma)
+	LOCAL.NEW removed, while ARGN1 is writeable, it's impossible to track it inside the trigger.
 	ARGO now return the source of karma/fame income if exists.
-- Added: @KarmaChanged and @FameChanged triggers to track Karma/Fame changes after @KarmaChange/@FameChange triggered.
-	ARGN1 returns the amount of Karma/Fame being added.
-	LOCAL.OLD returns the karma value before added anything.
-	LOCAL.NEW returns the current player karma.
-	This trigger has no RETURN value to block hardcoded events while it triggers after everything finished.
 - Fixed: f_onchar_create_init is not called. (Issue: #1117)
 - Fixed: IF and QVAL statements cannot evaluate correctly 32bit+ bitwise conditions. (Issue: #1078)
 - Added: @PartyAdd trigger. (Feature Request: #1054)
@@ -3370,4 +3366,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	Return 1: Cancels the action.
 - Added: LOCAL.SOUND and LOCAL.ANIM under @Start (Skill) and @SkillStart triggers to override sound and animations before start crafting or gathering.
 - Fixed: FACTION property not saved and load correctly under [CHARDEF] definition. (Issue: #1059 and #1083)
-- Added: Added COMBAT_PARALYZE_CANSWING (080000) to combat flags to let characters continue attack while paralyzed like old behaviour.
+- Added: Added COMBAT_PARALYZE_CANSWING (080000) to combat flags to let characters continue attack while paralyzed like old behaviour. (Issue: #1124)
+- Fixed: ATTACK command causes the player getting criminal without checking AttackingIsACrime value in sphere.ini
+
+07-10-2023, Nolok
+- Added: FUNC keyword to item templates and template-triggers with special parsing (@Create, @CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.

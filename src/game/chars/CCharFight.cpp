@@ -345,14 +345,20 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
     Memory_AddObjTypes(pCharSrc, wMemTypes);
 	Attacker_Add(pCharSrc);
 
-	// Are they a criminal for it ? Is attacking me a crime ?
-	if ((Noto_GetFlag(pCharSrc) == NOTO_GOOD) && fAggreived)
+	if ((Noto_GetFlag(pCharSrc) == NOTO_GOOD) && fAggreived )
 	{
 		if (IsClientActive())	// I decide if this is a crime.
-			OnNoticeCrime(pCharSrc, this);
+		{
+			if (!fCommandPet || g_Cfg.m_fAttackingIsACrime)
+			{
+				OnNoticeCrime(pCharSrc, this);
+				CChar* pCharMark = pCharSrc->IsStatFlag(STATF_PET) ? pCharSrc->NPC_PetGetOwner() : pCharSrc;
+				if (pCharMark != pCharSrc)
+					OnNoticeCrime(pCharMark, this);
+			}
+		}
 		else
 		{
-			// If it is a pet then this a crime others can report.
 			CChar * pCharMark = IsStatFlag(STATF_PET) ? NPC_PetGetOwner() : this;
 			pCharSrc->CheckCrimeSeen(Skill_GetActive(), pCharMark, nullptr, nullptr);
 		}

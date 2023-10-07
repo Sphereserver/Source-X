@@ -1119,7 +1119,6 @@ enum CTRIG_TYPE : short
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change
     CTRIG_Falling,          // CHAR IS FALLING
 	CTRIG_FameChange,       // Fame is changing
-	CTRIG_FameChanged,      // Fame changed
 	CTRIG_FollowersUpdate,  // Adding or removing CurFollowers.
 
 	CTRIG_GetHit,           // I just got hit.
@@ -1176,7 +1175,6 @@ enum CTRIG_TYPE : short
 
 	CTRIG_Jailed,               // I'm up to be send to jail, or to be forgiven.
 	CTRIG_KarmaChange,          // Karma is changing
-	CTRIG_KarmaChanged,         // Karma changed
 	CTRIG_Kill,         // I have just killed someone.
 	CTRIG_LogIn,        // Client logs in.
 	CTRIG_LogOut,       // Client logs out (21).

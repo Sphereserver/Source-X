@@ -74,7 +74,6 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@ExpLevelChange",		// Experience LEVEL is going to change
 	"@Falling",				//char is falling from height >= 10
 	"@FameChange",			// Fame is changing
-	"@FameChanged",         // Fame changed
 	"@FollowersUpdate",
 
 	"@GetHit",				// I just got hit.
@@ -131,7 +130,6 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 
 	"@Jailed",
 	"@KarmaChange",         // Karma is changing
-	"@KarmaChanged",        // Karma changed
 	"@Kill",				// +I have just killed someone
 	"@LogIn",				// Client logs in
 	"@LogOut",				// Client logs out (21)
