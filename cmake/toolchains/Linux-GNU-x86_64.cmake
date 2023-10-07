@@ -15,8 +15,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
 	
 	SET (CMAKE_EXE_LINKER_FLAGS_EXTRA 
-		"-L/usr/lib64/mysql -L/usr/lib/x86_64-linux-gnu/mysql\
-		-Wl,-rpath=/usr/lib64/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
+		"-L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql\
+		-L/usr/lib/x86_64-linux-gnu/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
 		PARENT_SCOPE)
 
 	toolchain_exe_stuff_common()

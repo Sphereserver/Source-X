@@ -25,13 +25,13 @@ function (toolchain_exe_stuff)
 
 	IF (${ARCH_BITS} EQUAL 64)
 		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA
-			"-L/usr/lib64/mysql\
-			-Wl,-rpath=/usr/lib64/mysql"
+			"-L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql\
+			-L/usr/lib/x86_64-linux-gnu/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
 			PARENT_SCOPE)
 	ELSE ()
 		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA
-			"-L/usr/lib/mysql\
-			-Wl,-rpath=/usr/lib/mysql"
+			"-L/usr/lib/mysql -Wl,-rpath=/usr/lib/mysql\
+			-L/usr/lib/i386-linux-gnu/mysql -Wl,-rpath=/usr/lib/i386-linux-gnu/mysql"
 			PARENT_SCOPE)
 	ENDIF ()
 
