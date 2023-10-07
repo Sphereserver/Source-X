@@ -119,7 +119,8 @@ enum COMBATFLAGS_TYPE
     COMBAT_ANIM_HIT_SMOOTH      = 0x10000,  // The hit animation has the same duration as the swing delay, instead of having a fixed fast duration and being idle until the delay has expired.
                                             //   WARNING: doesn't work with Gargoyles due to the new animation packet not accepting a custom animation duration!
     COMBAT_FIRSTHIT_INSTANT     = 0x20000,  // The first hit in a fight doesn't wait for the recoil time (OSI like)
-	COMBAT_NPC_BONUSDAMAGE		= 0x40000	// NPC will get full bonus damage from various sources.
+	COMBAT_NPC_BONUSDAMAGE		= 0x40000,	// NPC will get full bonus damage from various sources.
+    COMBAT_PARALYZE_CANSWING    = 0x80000   // Characters can continue attacking while paralyzed. (Old sphere behaviour)
 };
 
 /**

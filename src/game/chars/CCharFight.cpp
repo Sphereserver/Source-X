@@ -1567,7 +1567,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 	// We can't hit them right now. Because we can't see them or reach them (invis/hidden).
 	// Why the target is freeze we are change the attack type to swinging? Player can still attack paralyzed or sleeping characters.
 	// We make sure that the target is freeze or sleeping must wait ready for attack!
-	else if ( (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING)) || (IsStatFlag(STATF_FREEZE | STATF_SLEEPING)) ) // STATF_FREEZE | STATF_SLEEPING
+	else if ( (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING)) || (IsStatFlag(STATF_FREEZE) && (!IsSetCombatFlags(COMBAT_PARALYZE_CANSWING))) || (IsStatFlag(STATF_SLEEPING)) ) // STATF_FREEZE | STATF_SLEEPING
 	{
 		return WAR_SWING_SWINGING;
 	}
