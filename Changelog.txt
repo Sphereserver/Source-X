@@ -3345,8 +3345,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	   The ship plank will now autoclose after 5 seconds.
 - Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
 
-23-09-2023 / 27-09-27 (2 commits), Jhobean 
-- Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot. ( Issue #1029)
+- Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot. (Issue #1029)
 - Changed: Optimisation how f_onchar_delete is launch and avoid dual launch when delete char on login screen.
 
 26-09-2023, Drk84
@@ -3368,6 +3367,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: FACTION property not saved and load correctly under [CHARDEF] definition. (Issue: #1059 and #1083)
 - Added: Added COMBAT_PARALYZE_CANSWING (080000) to combat flags to let characters continue attack while paralyzed like old behaviour. (Issue: #1124)
 - Fixed: ATTACK command causes the player getting criminal without checking AttackingIsACrime value in sphere.ini
+- Added: Added COMBAT_PARALYZE_CANSWING (080000) to combat flags to let characters continue attack while paralyzed like old behaviour.
 
 07-10-2023, Nolok
 - Added: FUNC keyword to item templates and template-triggers with special parsing (@Create, @CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
+	Default object: the item. SRC: the character holding it.

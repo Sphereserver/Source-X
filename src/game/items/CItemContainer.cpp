@@ -586,7 +586,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
     // Try drop it on given container grid index (if not available, drop it on next free index)
 	{
-		bool fGridCellUsed[UCHAR_MAX] {false};
+		bool fGridCellUsed[UCHAR_MAX + 1] {false};
 		for (const CSObjContRec* pObjRec : *this)
 		{
 			const CItem* pTry = static_cast<const CItem*>(pObjRec);
@@ -600,7 +600,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		if (fGridCellUsed[gridIndex])
 		{
 			gridIndex = 0;
-			for (uint i = 0; i < UCHAR_MAX; ++i)
+			for (uint i = 0; (i < UCHAR_MAX) && (gridIndex < UCHAR_MAX); ++i)
 			{
 				if (!fGridCellUsed[i])
 					break;

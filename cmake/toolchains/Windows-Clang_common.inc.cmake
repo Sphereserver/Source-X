@@ -22,13 +22,13 @@ function (toolchain_exe_stuff_common)
 	SET (EXE_LINKER_EXTRA "")
 
 	IF (CLANG_USE_GCC_LINKER)
-		SET (CLANG_SUBSYSTEM_PREFIX "-m")
+		SET (CLANG_SUBSYSTEM_PREFIX "-m --entry=WinMainCRTStartup")
 	ELSE ()
 		SET (CLANG_SUBSYSTEM_PREFIX "-Xlinker /subsystem:")
 	ENDIF()	
 
-	IF (${WIN32_SPAWN_CONSOLE} EQUAL TRUE)
-		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}console")
+	IF (${WIN32_SPAWN_CONSOLE})
+		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}console -Xlinker /ENTRY:WinMainCRTStartup")
 		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
 	ELSE ()
 		SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}windows")
@@ -48,14 +48,15 @@ function (toolchain_exe_stuff_common)
 	ENDIF ()
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
-#shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
-#float-divide-by-zero,float-cast-overflow,pointer-overflow")
+shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
+float-divide-by-zero,float-cast-overflow,pointer-overflow \
+-fno-sanitize=enum")
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
-		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${ENABLED_SANITIZER})
-		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
+		SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
 	ENDIF ()
 
 
