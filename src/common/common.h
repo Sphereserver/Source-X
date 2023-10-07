@@ -221,6 +221,23 @@ auto i32_narrow16(const T a) noexcept
 		return static_cast<uint16>(a & umask);
 }
 
+template <typename T>
+auto i16_narrow8(const T a) noexcept
+{
+	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+	static_assert(std::is_integral_v<T>, "Only integral types are supported by this function.");
+	static_assert(sizeof(T) == 2, "Input variable is not a 16 bit number.");
+
+	// Since the narrowing can be implementation specific, here we decide that we take only the lower 16 bytes and discard the upper ones.
+	constexpr uint16 umask = 0x00FF;
+	if constexpr (std::is_signed_v<T>)
+	{
+		return static_cast<int8>(a & umask);
+	}
+	else
+		return static_cast<uint8>(a & umask);
+}
+
 
 //#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
 inline int IMulDiv(const int a, const int b, const int c) noexcept

@@ -527,6 +527,7 @@ lpctstr const CItem::sm_szTemplateTable[ITC_QTY+1] =
 	"BUY",
 	"CONTAINER",
 	"FULLINTERP",
+	"FUNC",
 	"ITEM",
 	"ITEMNEWBIE",
 	"NEWBIESWAP",
@@ -581,7 +582,6 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 		}
 	}
 
-	bool fItemAttrib = false;
 	CItem * pNewTopCont = nullptr;
 	CItem * pItem = nullptr;
 	while ( s.ReadKeyParse())
@@ -589,27 +589,24 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 		if ( s.IsKeyHead( "ON", 2 ))
 			break;
 
-		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, ARRAY_COUNT( sm_szTemplateTable )-1 );
-		switch (index)
+		int iCmd = FindTableSorted( s.GetKey(), sm_szTemplateTable, ARRAY_COUNT( sm_szTemplateTable )-1 );
+		switch (iCmd)
 		{
 			case ITC_BUY: // "BUY"
 			case ITC_SELL: // "SELL"
-				fItemAttrib = false;
 				if (pVendorBuy != nullptr)
 				{
-					pItem = CItem::CreateHeader( s.GetArgRaw(), (index==ITC_SELL)?pVendorSell:pVendorBuy, false );
+					pItem = CItem::CreateHeader(s.GetArgRaw(), (iCmd == ITC_SELL) ? pVendorSell : pVendorBuy, false);
 					if ( pItem == nullptr )
 						continue;
 					if ( pItem->IsItemInContainer())
 					{
-						fItemAttrib = true;
-						pItem->SetContainedLayer( (char)(pItem->GetAmount()));	// set the Restock amount.
+						pItem->SetContainedLayer(i16_narrow8(pItem->GetAmount()));	// set the Restock amount.
 					}
 				}
 				continue;
 
 			case ITC_CONTAINER:
-				fItemAttrib = false;
 				{
 					pItem = CItem::CreateHeader( s.GetArgRaw(), pCont, false, pVendor );
 					if ( pItem == nullptr )
@@ -619,7 +616,6 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 						DEBUG_ERR(( "CreateTemplate: CContainer %s is not a container\n", pItem->GetResourceName() ));
 					else
 					{
-						fItemAttrib = true;
 						if ( ! pNewTopCont )
 							pNewTopCont = pItem;
 					}
@@ -628,16 +624,40 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 
 			case ITC_ITEM:
 			case ITC_ITEMNEWBIE:
-				fItemAttrib = false;
 				if ( pCont == nullptr && pItem != nullptr )
-					continue;	// Don't create anymore items til we have some place to put them !
+					continue;	// Don't create anymore items until we have some place to put them !
 				pItem = CItem::CreateHeader( s.GetArgRaw(), pCont, false, pVendor );
-				if ( pItem != nullptr )
-					fItemAttrib = true;
 				continue;
+
+			case ITC_FUNC:
+				if (!pItem)
+					continue;
+				{
+					lptstr ptcFunctionName = s.GetArgRaw();
+					std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
+					// Locate arguments for the called function
+					tchar* ptcArgs = strchr(ptcFunctionName, ' ');
+					if (ptcArgs)
+					{
+						*ptcArgs = 0;
+						++ptcArgs;
+						GETNONWHITESPACE(ptcArgs);
+						pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
+					}
+
+					CObjBaseTemplate* pContObjBaseT = pCont->GetTopLevelObj();
+					ASSERT(pContObjBaseT);
+					pItem->r_Call(ptcFunctionName, dynamic_cast<CTextConsole*>(pContObjBaseT), pScriptArgs.get());
+					if (pItem->IsDeleted())
+					{
+						pItem = nullptr;
+						//g_Log.EventDebug("FUNC deleted the template item.\n");
+					}
+					continue;
+				}
 		}
 
-		if ( pItem != nullptr && fItemAttrib )
+		if ( pItem != nullptr )
 			pItem->r_LoadVal( s );
 	}
 
