@@ -152,10 +152,10 @@ size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _hi, _ValTyp
 template <class _Type, class _Comp>
 size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const noexcept
 {
-    const size_t _mySize = this->size();
-    if (_mySize == 0) {
+    if (this->size() == 0) {
         return SCONT_BADINDEX;
     }
+    const size_t _mySize = this->size() - 1;
     const _Type* const _dataptr = this->data();
     const size_t _idx = this->lower_element(_mySize, _dataptr, value);
     return (!this->_comparatorObj(value, _dataptr[_idx])) ? _idx : SCONT_BADINDEX;
