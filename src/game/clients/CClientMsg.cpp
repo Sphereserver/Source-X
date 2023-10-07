@@ -290,14 +290,14 @@ void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow
 
 void CClient::addObjectRemove( const CUID& uid ) const
 {
-	ADDTOCALLSTACK("CClient::addObjectRemove");
+	ADDTOCALLSTACK("CClient::addObjectRemove (CUID)");
 	// Tell the client to remove the item or char
 	new PacketRemoveObject(this, uid);
 }
 
 void CClient::addObjectRemove( const CObjBase * pObj ) const
 {
-	ADDTOCALLSTACK("CClient::addObjectRemove");
+	ADDTOCALLSTACK("CClient::addObjectRemove (CObjBase)");
 	addObjectRemove( pObj->GetUID());
 }
 

@@ -24,7 +24,8 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
 shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
-float-divide-by-zero,float-cast-overflow,pointer-overflow")
+float-divide-by-zero,float-cast-overflow,pointer-overflow \
+-fno-sanitize=enum")
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
 		SET (ENABLED_SANITIZER true)

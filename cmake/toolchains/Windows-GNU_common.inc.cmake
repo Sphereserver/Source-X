@@ -11,7 +11,7 @@ endfunction ()
 
 function (toolchain_exe_stuff_common)
 	SET (EXE_LINKER_EXTRA "")
-	IF (${WIN32_SPAWN_CONSOLE} EQUAL TRUE)
+	IF (${WIN32_SPAWN_CONSOLE})
 		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} -mconsole")
 		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
 	#ELSE ()
@@ -35,7 +35,8 @@ function (toolchain_exe_stuff_common)
 		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support UBSAN")
 		#SET (UBSAN_FLAGS		"-fsanitize=undefined,\
 #shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
-#float-divide-by-zero,float-cast-overflow,pointer-overflow")
+#float-divide-by-zero,float-cast-overflow,pointer-overflow \
+#-fno-sanitize=enum")
 		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
 		#SET (ENABLED_SANITIZER true)
