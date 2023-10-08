@@ -255,6 +255,7 @@ void CChar::NPC_Act_Fight()
                 //We have to clean STATF_WAR if npc motivation below zero but can't see the target or flee target is invalid.
                 Skill_Start(SKILL_NONE);
                 StatFlag_Clear(STATF_WAR);
+                Attacker_Delete(pChar, true, ATTACKER_CLEAR_DISTANCE);
                 m_Fight_Targ_UID.InitUID();
             }
             return;

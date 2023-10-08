@@ -470,7 +470,7 @@ void CChar::Noto_ChangeNewMsg( int iPrvLevel )
 	}
 }
 
-void CChar::Noto_Fame( int iFameChange, CChar* cNPC )
+void CChar::Noto_Fame( int iFameChange, CChar* pNPC )
 {
 	ADDTOCALLSTACK("CChar::Noto_Fame");
 
@@ -503,11 +503,11 @@ void CChar::Noto_Fame( int iFameChange, CChar* cNPC )
 	//if ( ! iFameChange )
 	//	return;
 
-	SetFame((ushort)(iFame + iFameChange), cNPC);
+	SetFame((ushort)(iFame + iFameChange), pNPC);
     Noto_ChangeDeltaMsg( (int)GetFame() - iFame, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
 }
 
-void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage, CChar* cNPC )
+void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage, CChar* pNPC )
 {
 	ADDTOCALLSTACK("CChar::Noto_Karma");
 
@@ -541,7 +541,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage, CChar* cNP
 	//if ( ! iKarmaChange )
 	//	return;
 
-    SetKarma((short)(iKarma + iKarmaChange), cNPC);
+    SetKarma((short)(iKarma + iKarmaChange), pNPC);
     Noto_ChangeDeltaMsg( (int)GetKarma() - iKarma, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
 	NotoSave_Update();
 	if ( fMessage == true )

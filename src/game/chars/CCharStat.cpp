@@ -608,7 +608,7 @@ short CChar::GetKarma() const
     return (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, m_iKarma)));
 }
 
-void CChar::SetKarma(short iNewKarma, CChar* cNPC)
+void CChar::SetKarma(short iNewKarma, CChar* pNPC)
 {
 
 	/*
@@ -628,7 +628,7 @@ void CChar::SetKarma(short iNewKarma, CChar* cNPC)
 	if (IsTrigUsed(TRIGGER_KARMACHANGE))
 	{
 	    CScriptTriggerArgs Args(iKarmaChange, iOldKarma);
-	    Args.m_pO1 = cNPC;
+	    Args.m_pO1 = pNPC;
     	TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
 		if (retType == TRIGRET_RET_TRUE)
 			return;
@@ -647,7 +647,7 @@ ushort CChar::GetFame() const
     return (ushort)(minimum(g_Cfg.m_iMaxFame, m_uiFame));
 }
 
-void CChar::SetFame(ushort uiNewFame, CChar* cNPC)
+void CChar::SetFame(ushort uiNewFame, CChar* pNPC)
 {
     /*
     Issue: 1118
@@ -666,7 +666,7 @@ void CChar::SetFame(ushort uiNewFame, CChar* cNPC)
 	if (IsTrigUsed(TRIGGER_FAMECHANGE))
 	{
 	    CScriptTriggerArgs Args(iFameChange, iOldFame);
-	    Args.m_pO1 = cNPC;
+	    Args.m_pO1 = pNPC;
     	TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
 		if (retType == TRIGRET_RET_TRUE)
 			return;
