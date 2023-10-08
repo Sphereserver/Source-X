@@ -418,7 +418,7 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
     if (pChar->GetTopPoint().IsValidPoint() == false)// Try to place it only if the @Spawn trigger didn't set it a valid P.
     {
         ushort iPlacingTries = 0;
-        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false))
+        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false) || !pChar->CanSeeLOS(pt)) //Character shouldn't spawn where can't see it's spawn point.
         {
             ++iPlacingTries;
             if (iPlacingTries <= 3)
