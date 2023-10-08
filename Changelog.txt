@@ -3370,6 +3370,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: ATTACK command causes the player getting criminal without checking AttackingIsACrime value in sphere.ini (Issue: #1123)
 - Added: Added CAN_I_EQUIPONCAST (08000000) flag for items to let scripters customize allowed items while EquippedCast disabled.
 - Fixed: Spells can trigger @Success triggers and play animations if they paralyzed after selected skill.
+- Fixed: Motivation < 0 causes STATF_WAR flag stay infinitely on characters. (Issue: #517)
 
 07-10-2023, Nolok
 - Added: FUNC keyword to item templates and template-triggers with special parsing (@Create, @CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
