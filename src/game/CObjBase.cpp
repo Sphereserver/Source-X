@@ -70,7 +70,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 	m_timestamp = 0;
 	m_CanMask = 0;
-	
+
 	m_attackBase = m_attackRange = 0;
 	m_defenseBase = m_defenseRange = 0;
 	m_ModAr = 0;
@@ -118,7 +118,7 @@ CObjBase::~CObjBase()
             //pEntity->UnsubscribeComponent(pSpawn);    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
             pSpawn->DelObj(GetUID());  // Then I should be removed from it's list.
         }
-    }	
+    }
 
 	// As a safety net. If we are calling those methods via the class destructor, we know that calling virtual methods won't work,
 	//  since the superclasses were already destructed. At least, do minimal cleanup here with CObjBase methods.
@@ -158,8 +158,8 @@ bool CObjBase::_IsDeleted() const
 }
 
 bool CObjBase::IsDeleted() const
-{ 
-	THREAD_SHARED_LOCK_RETURN(_IsDeleted());	
+{
+	THREAD_SHARED_LOCK_RETURN(_IsDeleted());
 }
 
 void CObjBase::DeletePrepare()
@@ -190,7 +190,7 @@ bool CObjBase::Delete(bool fForce)
 	DeleteCleanup(fForce);	// not virtual!
 
 	g_World.ScheduleObjDeletion(this);
-	
+
 	return true;
 }
 
@@ -730,12 +730,12 @@ void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * 
 			continue;
 		if ( ! pClient->CanSee( this ))
 			continue;
-			
+
 		if (( pClient->GetChar() == this ) && pTextYou != nullptr )
 			pClient->addBarkParse(pTextYou, this, wHue, mode, font, bUnicode );
 		else if (( pClient->GetChar() != this ) && pTextThem != nullptr )
 			pClient->addBarkParse(pTextThem, this, wHue, mode, font, bUnicode );
-		
+
 		//pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
 	}
 }
@@ -1106,7 +1106,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				//strip quotes if any
 				if (*ptcArg[0] == '"')
 					++ptcArg[0];
-				byte count = 0;
+				//byte count = 0;
 				for (tchar * pEnd = ptcArg[0] + strlen(ptcArg[0]) - 1; pEnd >= ptcArg[0]; --pEnd)
 				{
 					if (*pEnd == '"')
@@ -1114,11 +1114,11 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 						*pEnd = '\0';
 						break;
 					}
-					++count;
+					//++count;
 				}
 				sVal.Format(ptcArg[0], ptcArg[1], ptcArg[2] ? ptcArg[2] : 0, ptcArg[3] ? ptcArg[3] : 0);
 				return true;
-			}break;
+			} break;
 		case OC_DIALOGLIST:
 			{
 				ptcKey += 10;
@@ -1620,11 +1620,11 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					size_t iQty = Exp_GetSTVal( ptcKey );
 					if ( iQty >= m_TooltipData.size() )
 						return false;
-					
+
 					CClientTooltip* ct = m_TooltipData[iQty].get();
 					if (!ct)
 						return false;
-						
+
 					SKIP_SEPARATORS( ptcKey );
 					if (! *ptcKey )
 						sVal.Format("%d=%s", ct->m_clilocid, ct->m_args);
@@ -2088,7 +2088,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				tchar * ppLocArgs[256];
 				const int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, ARRAY_COUNT(ppLocArgs), ",");
 				const dword clilocid = Exp_GetDWVal(ppLocArgs[0]);
-                
+
                 CSString sLocArgs;
                 for (int y = 1 ; y < qty; ++y )
                 {
@@ -2100,7 +2100,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
                     else
                         sLocArgs += ppLocArgs[y];
                 }
-                
+
                 for (size_t i = 0; i < m_TooltipData.size(); ++i)
                 {
                 	CClientTooltip* ct = m_TooltipData[i].get();
@@ -2376,7 +2376,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_P:
         {
 			EXC_SET_BLOCK("P or MOVETO");
-            CPointMap pt( g_Cfg.GetRegionPoint(s.GetArgStr()) );
+			// The "@Click" trigger str should be the same between items and chars...
+			if (0 == _sRunningTrigger.compare(CChar::sm_szTrigName[CTRIG_Click]))
+			{
+				g_Log.EventError("Can't set P in the current trigger. It would cause an infinite loop.\n");
+				return false;
+			}
+            const CPointMap pt( g_Cfg.GetRegionPoint(s.GetArgStr()) );
             if (pt.IsValidPoint())
             {
                 RemoveFromView();
@@ -2512,14 +2518,14 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         	EXC_SET_BLOCK("CLILOCLIST");
             if (! strcmpi(s.GetArgStr(), "log"))
                 pSrc = &g_Serv;
-                
+
             if (!pSrc)
             	break;
-				
+
             for (size_t i = 0; i < this->m_TooltipData.size(); i++)
             {
 				CClientTooltip* ct = this->m_TooltipData[i].get();
-				
+
 				/*
 				//Parse tchar into string.
                 tchar *ppLocArgs = ct->m_args;
@@ -2540,7 +2546,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					pSrc->SysMessagef("%d=%s", ct->m_clilocid, ct->m_args);
 				else
 					g_Log.Event(LOGL_EVENT, "%d=%s\n", ct->m_clilocid, ct->m_args);
-			}		
+			}
 		}break;
         case OV_BASETAGLIST:
         {
@@ -2638,7 +2644,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET_BLOCK("TIMERF(MS)");
 				const bool fSeconds = (index == OV_TIMERF);
 				lpctstr ptcArgStr = s.GetArgStr();
-				
+
 				if ( !strnicmp(ptcArgStr, "CLEAR", 5 ) )
 				{
 					CWorldTimedFunctions::ClearUID(GetUID());
@@ -3154,14 +3160,14 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 				else
 					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
 			}
-                
+
         }
     }
 
     if (!fCanTick)
     {
         // Try to call the Can method the less often possible.
-		// 
+		//
 		// This should happen only if the item was manually put to sleep.
 		// CAN_O_NOSLEEP items should not be put to sleep by the source.
 	    fCanTick = Can(CAN_O_NOSLEEP);

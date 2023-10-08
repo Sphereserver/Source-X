@@ -259,7 +259,7 @@ CItem::~CItem()
 
 	DeletePrepare();	// Using this in the destructor will fail to call virtuals, but it's better than nothing.
 	CItem::DeleteCleanup(true);
-	
+
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 
 	EXC_CATCH;
@@ -359,7 +359,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
     ASSERT(pItem);
     pItem->SetType(type, false);
 
-	if (idErrorMsg && idErrorMsg != -1)
+	if (idErrorMsg && idErrorMsg != (ITEMID_TYPE)-1)
 		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
 
 	return pItem;
@@ -1613,7 +1613,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 
 	if ( ttResult == TRIGRET_RET_TRUE )
 		return true;
-	
+
 	// Check if there's too many items on the same spot
 	uint iItemCount = 0;
 	const CItem * pItem = nullptr;
@@ -1632,7 +1632,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 			break;
 		}
 	}
-	 
+
 	/*  // From 56b
 		// Too many items on the same spot!
         if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
@@ -1647,10 +1647,10 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
             return false;
         }
     */
-	
+
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));
-	return true;	
+	return true;
 }
 
 bool CItem::MoveNearObj( const CObjBaseTemplate* pObj, ushort uiSteps )
@@ -1959,7 +1959,7 @@ HUE_TYPE CItem::GetHueVisible() const
 				return g_Cfg.m_iColorInvisItem;
 		}
 	}
-	
+
 	return CObjBase::GetHue();
 }
 
@@ -2973,7 +2973,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
     EXC_TRY("LoadVal");
-	
+
     // Checking Props CComponents first (first check CChar props, if not found then check CCharBase)
     EXC_SET_BLOCK("EntityProp");
     if (CEntityProps::r_LoadPropVal(s, this, Base_GetDef()))
@@ -3572,7 +3572,7 @@ void CItem::SetTriggerActive(lpctstr trig)
     if (iAction != -1)
     {
         _iRunningTriggerId = (short)iAction;
-        _sRunningTrigger.clear();
+		_sRunningTrigger = CItem::sm_szTrigName[iAction];
         return;
     }
     _sRunningTrigger = trig;
@@ -4177,7 +4177,7 @@ void CItem::ConvertBolttoCloth()
 			continue;
 
         int64 iTotalAmount = iOutAmount * pDefCloth->m_BaseResources[i].GetResQty();
-        
+
         CItem* pItemNew = nullptr;
         while (iTotalAmount > 0)
         {
@@ -4348,7 +4348,7 @@ uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 	if ( i < 32u ) // Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31 and are stored in more1.
 		m_itSpellbook.m_spells1 |= (1 << i);
 	else if ( i < 64u ) // Replaced the <= with < because of the formula above, the remaining 32 spells have an i value from 32 to 63 and are stored in more2.
-		m_itSpellbook.m_spells2 |= (1 << (i-32u)); 
+		m_itSpellbook.m_spells2 |= (1 << (i-32u));
 	//else if ( i <= 96 )
 	//	m_itSpellbook.m_spells3 |= (1 << (i-64));	//not used anymore?
 	else
@@ -4841,7 +4841,7 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 SOUND_TYPE CItem::Weapon_GetSoundHit() const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundHit");
-	
+
 	int iWeaponSoundHit = GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_WEAPONSOUNDHIT, true);
 	if (IsType(IT_WEAPON_BOW) || IsType(IT_WEAPON_XBOW))
 	{
@@ -4858,7 +4858,7 @@ SOUND_TYPE CItem::Weapon_GetSoundHit() const
 SOUND_TYPE CItem::Weapon_GetSoundMiss() const
 {
 	ADDTOCALLSTACK("CItem::Weapon_GetSoundMiss");
-	
+
 	int iWeaponSoundMiss = GetPropNum(COMP_PROPS_ITEMWEAPON, PROPIWEAP_WEAPONSOUNDMISS, true);
 	if (IsType(IT_WEAPON_BOW) || IsType(IT_WEAPON_XBOW))
 	{
@@ -4924,7 +4924,7 @@ CItem *CItem::Weapon_FindRangedAmmo(const CResourceID& id)
 
 	// Get the container to search
 	CContainer *pParent = dynamic_cast<CContainer *>(dynamic_cast<CObjBase *>(GetParent()));
-	
+
 	CSString sAmmoCont = GetPropStr(COMP_PROPS_ITEMWEAPONRANGED, PROPIWEAPRNG_AMMOCONT, true,true);
 	if ( !sAmmoCont.IsEmpty())
 	{
@@ -4942,7 +4942,7 @@ CItem *CItem::Weapon_FindRangedAmmo(const CResourceID& id)
             if (!pParent)
                 return nullptr;
 
-			//Reassigned the value from sAmmoCont.GetBuffer() because Exp_GetDWal clears it 
+			//Reassigned the value from sAmmoCont.GetBuffer() because Exp_GetDWal clears it
 			ptcAmmoCont = sAmmoCont.GetBuffer();
 			const CResourceID ridCont(g_Cfg.ResourceGetID(RES_ITEMDEF, ptcAmmoCont));
 			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
@@ -5964,7 +5964,7 @@ void CItem::_GoAwake()
 {
 	ADDTOCALLSTACK("CItem::_GoAwake");
 	CObjBase::_GoAwake();
-	
+
 	// Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
 	if (!IsTopLevel())
 	{

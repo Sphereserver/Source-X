@@ -47,7 +47,7 @@ public:
     virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
 
-    lpctstr GetName() const
+    virtual lpctstr GetName() const override
     {
         return "FILE_OBJCONTAINER";
     }

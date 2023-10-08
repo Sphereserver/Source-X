@@ -565,7 +565,7 @@ enum RC_TYPE
 	RC_MANALOSSPERCENT,			// m_fManaLossPercent
 	RC_MAPCACHETIME,
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
-	RC_MAXCHARSPERACCOUNT,		//  
+	RC_MAXCHARSPERACCOUNT,		//
 	RC_MAXCOMPLEXITY,			// m_iMaxCharComplexity
 	RC_MAXFAME,					// m_iMaxFame
     RC_MAXHOUSESACCOUNT,        // _iMaxHousesAccount
@@ -1367,7 +1367,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_TIMERCALL:
 			if (_iTimerCallUnit)
 				_iTimerCall = s.GetArgLLVal() *  MSECS_PER_SEC;
-			else  
+			else
 				_iTimerCall = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
 
@@ -2877,7 +2877,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	CVarDefContNum * pVarNum = nullptr;
 	CResourceID rid;
-    
+
     bool fNewStyleDef = false;
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
@@ -3459,7 +3459,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
         else
         {
             pNewLink = new CCChampionDef(rid);
-            if (pNewLink) 
+            if (pNewLink)
             {
                 CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
                 if (pLinkResScript != nullptr)
@@ -4160,19 +4160,19 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		return ridInvalid;
 	}
 
-	
+
 	if ( iHashRange )
 	{
 		// find a new FREE entry starting here
         int iRandIndex = iIndex + Calc_GetRandVal(iHashRange);
         rid = CResourceID(restype, iRandIndex, wPage);
-        
+
         const bool fCheckPage = (pszName && (g_Exp.m_VarResDefs.GetKeyNum(pszName) != 0));
 		while (true)
 		{
             if (fCheckPage)
             {
-                // Same defname but different page? 
+                // Same defname but different page?
                 if (m_ResHash.FindKey(rid) == SCONT_BADINDEX)
                     break;
             }
@@ -4843,7 +4843,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 	if (idMaxItem > ITEMID_MULTI)
 		idMaxItem = ITEMID_MULTI;
 
-	for (int i = 0; i < idMaxItem; ++i)
+	for (uint i = 0; i < idMaxItem; ++i)
 	{
 		if ( !( i % 0xff ))
 			g_Serv.PrintPercent(i, idMaxItem);

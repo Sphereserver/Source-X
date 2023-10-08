@@ -35,7 +35,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 	dword dwUID = m_Act_UID.GetObjUID() & ~UID_F_ITEM;
 	dword dwCount = dwTotal-1;
 
-	int iArg = 0;
+	uint iArg = 0;
 	if ( iType )
 	{
 		if ( pszArgs[0] && iType == 1 )
@@ -2812,7 +2812,7 @@ bool CChar::Horse_UnMount()
 		this actarg1 value is stored in the NPC not in the player.
 		The commented  line below cleared the actarg1 of the rider instead of the NPC mount.
 		*/
-        //m_atRidden.m_uidFigurine.InitUID(); 
+        //m_atRidden.m_uidFigurine.InitUID();
 		if (pPet && !pPet->IsDeleted())
 			pPet->m_atRidden.m_uidFigurine.InitUID(); //This clears the actarg1 of the NPC mount instead of the rider.
 	}
@@ -2960,7 +2960,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 	if ( !pPoison )
 		return false;
 	LayerAdd(pPoison, LAYER_FLAG_Poison);
-	
+
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
 		//pPoison->m_itSpell.m_spellcharges has already been set by Spell_Effect_Create (and it's equal to iSkill)
@@ -3012,7 +3012,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		}
 	}
 
-	
+
 
 	CClient *pClient = GetClientActive();
 	if ( pClient && IsSetOF(OF_Buffs) )
@@ -3093,7 +3093,7 @@ bool CChar::Death()
 	//Dismount now. Later is may be too late and cause problems
 	if ( m_pNPC )
 	{
-		if (Skill_GetActive() == NPCACT_RIDDEN) 
+		if (Skill_GetActive() == NPCACT_RIDDEN)
 		{
 			CChar* pCRider = Horse_GetMountChar();
 			if (pCRider)
@@ -3425,14 +3425,14 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 
 			uiStamReq = 10;		// Stam consume for push the char. OSI seem to be 10% and not a fix 10
 			if ( IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD) || (pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE)) )
-				uiStamReq = 0;	// On SPHERE, need 0 stam to reveal someone 
+				uiStamReq = 0;	// On SPHERE, need 0 stam to reveal someone
 			else if ( (pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0) )		// chars under Wraith Form effect can always walk through chars in Felucca
 				uiStamReq = 0;
 
 			TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 			if (!fPathFinding)  //You want avoid to trig the triggers if it's only a pathfinding evaluation
 			{
-				if ( IsTrigUsed(TRIGGER_PERSONALSPACE) ) 
+				if ( IsTrigUsed(TRIGGER_PERSONALSPACE) )
 				{
 					CScriptTriggerArgs Args(uiStamReq);
 					iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
@@ -3461,12 +3461,12 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				SysMessage(pszMsg);
 				return nullptr;
 			}
-			
+
 			else if (pChar->IsStatFlag(STATF_INVISIBLE | STATF_HIDDEN) ) {
 				if ((g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE))
-					// OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE 
+					// OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE
 					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE));
-				else 
+				else
 				{
 					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
 					if (!fPathFinding) // When NPC use pathfinding(NPC_AI_PATH) to calculate their destination, char should not be reveal
@@ -3478,7 +3478,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
 			else
 				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
-			
+
 			if ( iRet != TRIGRET_RET_FALSE )
 				SysMessage(pszMsg);
 
@@ -3487,7 +3487,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	}
 
 	if ( !fCheckOnly )
-	{		
+	{
 		// Falling trigger
 		//lack config feature for sphere.ini if wanted.
 		if (GetTopZ() - 10 >= ptDst.m_z)
@@ -3520,11 +3520,11 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 
 				pVal = GetKey("OVERRIDE.STAMINAWALKINGPENALTY", true);
 				uiStamPenalty = (ushort)std::min(USHRT_MAX, int(pVal ? pVal->GetValNum() : 1));
-				
+
 			}
 			uiStamReq += uiStamPenalty;
 		}
-		
+
 		else //Overweight and lost more stamina each step
         {
             ushort uiWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
@@ -3959,8 +3959,8 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 			return false;
 
 		// We cannot put this char in non-disconnect state
-		
-		SetDisconnected(pSector); 
+
+		SetDisconnected(pSector);
         SetTopPoint(pt); // This will clear the disconnected UID flag and the set the character position in the world.
 		SetDisconnected(); //Before entering here the player is not considered disconnected anymore, so we need to disconnect it again.
 		return true;
@@ -4165,7 +4165,7 @@ void CChar::SetTriggerActive(lpctstr trig)
     if (iAction != -1)
     {
         _iRunningTriggerId = (short)iAction;
-        _sRunningTrigger.clear();
+        _sRunningTrigger = CChar::sm_szTrigName[iAction];
         return;
     }
     _sRunningTrigger = trig;
@@ -4526,7 +4526,7 @@ bool CChar::_OnTick()
 			return true;
 		}
 	}
-    
+
 	EXC_SET_BLOCK("Components Tick");
 	/*
 	* CComponent's ticking:
