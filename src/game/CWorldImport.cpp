@@ -471,12 +471,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("MORE" ))
 			{
-				pItem->m_itNormal.m_more1 = atoi(pArg);
+				pItem->m_itNormal.m_more1 = (dword)atoi(pArg); //Need to read as dword not an int.
 				continue;
 			}
 			else if ( s.IsKey("MORE2" ))
 			{
-				pItem->m_itNormal.m_more2 = atoi(pArg);
+				pItem->m_itNormal.m_more2 = (dword)atoi(pArg); //Need to read as dword not an int.
 				continue;
 			}
 			else if ( s.IsKey("DYEABLE" ))

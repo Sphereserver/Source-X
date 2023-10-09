@@ -3372,6 +3372,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Spells can trigger @Success triggers and play animations if they paralyzed after selected skill.
 - Fixed: Motivation < 0 causes STATF_WAR flag stay infinitely on characters. (Issue: #517)
 - Fixed: The issue where characters can spawn out of the rooms. (Issue: #1084)
+- Fixed: More1 and More2 values readn as integer instead of dword (unsigned integer) (Issue: #784)
 
 07-10-2023, Nolok
 - Added: FUNC keyword to item templates and template-triggers with special parsing (@Create, @CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
