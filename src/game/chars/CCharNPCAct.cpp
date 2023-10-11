@@ -1571,7 +1571,7 @@ void CChar::NPC_Act_Looting()
 	ItemBounce(pItem, false);
 }
 
-void CChar::NPC_Act_Flee()
+bool CChar::NPC_Act_Flee()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Flee");
 	ASSERT(m_pNPC);
@@ -1581,13 +1581,14 @@ void CChar::NPC_Act_Flee()
 	if ( ++ m_atFlee.m_iStepsCurrent >= m_atFlee.m_iStepsMax )
 	{
 		Skill_Start( SKILL_NONE );
-		return;
+		return false;
 	}
 	if ( ! NPC_Act_Follow( true, m_atFlee.m_iStepsMax ))
 	{
 		Skill_Start( SKILL_NONE );
-		return;
+		return false;
 	}
+	return true;
 }
 
 void CChar::NPC_Act_Runto(int iDist)

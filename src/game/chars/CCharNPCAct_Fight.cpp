@@ -246,7 +246,18 @@ void CChar::NPC_Act_Fight()
         {
             m_atFlee.m_iStepsMax = 20;	// how long should it take to get there.
             m_atFlee.m_iStepsCurrent = 0;	// how long has it taken ?
-            Skill_Start(NPCACT_FLEE);	// Run away!
+            if (NPC_Act_Flee())
+            {
+                Skill_Start(NPCACT_FLEE);	// Run away!
+            }
+            else
+            {
+                //We have to clean STATF_WAR if npc motivation below zero but can't see the target or flee target is invalid.
+                Skill_Start(SKILL_NONE);
+                StatFlag_Clear(STATF_WAR);
+                Attacker_Delete(pChar, true, ATTACKER_CLEAR_DISTANCE);
+                m_Fight_Targ_UID.InitUID();
+            }
             return;
         }
     }

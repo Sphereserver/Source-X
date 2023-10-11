@@ -166,7 +166,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
     }
     if (CCFaction::CanSubscribe(this))
     {
-        SubscribeComponent(new CCFaction());  // Adding it only to equippable items
+        SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
     }
 
 	TrySubscribeComponentProps<CCPropsItem>();
@@ -2247,12 +2247,6 @@ void CItem::r_WriteMore1(CSString & sVal)
     ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
 
-	if (IsTypeSpellbook())
-	{
-		sVal.FormatHex(m_itNormal.m_more1);
-		return;
-	}
-
     switch (GetType())
     {
         case IT_TREE:
@@ -2303,12 +2297,6 @@ void CItem::r_WriteMore2( CSString & sVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore2");
 	// do special processing to represent this.
-
-	if (IsTypeSpellbook())
-	{
-		sVal.FormatHex(m_itNormal.m_more2);
-		return;
-	}
 
 	switch ( GetType())
 	{

@@ -56,7 +56,7 @@ void CBaseBaseDef::DelInstance()
 	--_dwInstances;
 }
 
-CFactionDef CBaseBaseDef::GetFaction()
+CCFaction CBaseBaseDef::GetFaction()
 {
 	return _pFaction;
 }
@@ -147,7 +147,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 
         case OBC_FACTION:
         case OBC_SLAYER:
-            sVal.FormatHex((dword)GetFaction().GetFactionID());
+            sVal.FormatULLHex(_pFaction.GetFactionID());
             break;
 
 		case OBC_ARMOR:
@@ -329,7 +329,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			break;
         case OBC_FACTION:
         case OBC_SLAYER:
-            GetFaction().SetFactionID( (NPC_FACTION)s.GetArgVal() );
+            _pFaction.SetFactionID( static_cast<NPC_FACTION>(s.GetArgULLVal()) );
             return true;
 		//Set as number only
 		case OBC_EXPANSION:

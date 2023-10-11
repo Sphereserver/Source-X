@@ -1118,7 +1118,7 @@ enum CTRIG_TYPE : short
 	CTRIG_ExpChange,        // EXP is going to change
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change
     CTRIG_Falling,          // CHAR IS FALLING
-	CTRIG_FameChange,       // Fame chaged
+	CTRIG_FameChange,       // Fame is changing
 	CTRIG_FollowersUpdate,  // Adding or removing CurFollowers.
 
 	CTRIG_GetHit,           // I just got hit.
@@ -1174,7 +1174,7 @@ enum CTRIG_TYPE : short
 	CTRIG_itemUNEQUIP,          // i have unequipped (or try to unequip) an item.
 
 	CTRIG_Jailed,               // I'm up to be send to jail, or to be forgiven.
-	CTRIG_KarmaChange,          // Karma chaged
+	CTRIG_KarmaChange,          // Karma is changing
 	CTRIG_Kill,         // I have just killed someone.
 	CTRIG_LogIn,        // Client logs in.
 	CTRIG_LogOut,       // Client logs out (21).
@@ -1200,6 +1200,7 @@ enum CTRIG_TYPE : short
 	CTRIG_NPCSeeWantItem,   // (NPC only) i see something good.
 	CTRIG_NPCSpecialAction, // (NPC only) performing some special actions (spyder's web, dragon's breath...).
 
+    CTRIG_PartyAdd,     // Player joined to the party.
 	CTRIG_PartyDisband, // I just disbanded my party.
 	CTRIG_PartyInvite,  // SRC invited me to join a party, so I may chose.
 	CTRIG_PartyLeave,   // I'm leaving this party.
