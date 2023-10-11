@@ -1438,14 +1438,6 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
 	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
 
-	g_Log.EventWarn("Top: %d - Bottom: %d - Left: %d - Right %d\n", pMapTop->m_z, pMapBottom->m_z, pMapLeft->m_z, pMapRight->m_z);
-	int x = abs(pMapTop->m_z - pMapBottom->m_z);
-	int y = abs(pMapBottom->m_z - pMapTop->m_z);
-	g_Log.EventWarn("Top - Bottom: %d & Bottom - Top: %d & %d\n", x, y, FloorAvarage(pMapBottom, pMapTop));
-	int a = abs(pMapLeft->m_z - pMapRight->m_z);
-	int b = abs(pMapRight->m_z - pMapLeft->m_z);
-	g_Log.EventWarn("Left - Right: %d & Right - Left: %d & %d\n", a, b, FloorAvarage(pMapLeft, pMapRight));
-
 	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
 		z = FloorAvarage(pMapLeft, pMapRight);
 	else
