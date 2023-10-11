@@ -17,7 +17,6 @@
 #include "CWorldCache.h"
 #include "CWorldMap.h"
 
-
 //************************
 // Natural resources.
 
@@ -1427,22 +1426,34 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 
 	dwBlockThis = 0;
 	// Terrain height is screwed. Since it is related to all the terrain around it.
-	const CUOMapMeter * pMeter = pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
-	if ( ! pMeter )
+	const CUOMapMeter* pMapTop = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	if (!pMapTop)
 		return;
+	z = pMapTop->m_z;
+	//Check Height for South, South East and East
+	//Thanks to @WarWeeD (@Tolokio) and @Jhobean for help and informations <3
+	//Used SERVUO avarage floor calculation formula.
+	//https://github.com/ServUO/ServUO/blob/05cdc8780ecd81a6abca0f5f14097c8e6bc4860f/Server/Map.cs#L550
+	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1);
+	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
+	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
+	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
+		z = FloorAvarage(pMapLeft, pMapRight);
+	else
+		z = FloorAvarage(pMapTop, pMapBottom);
 
     //DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
-    if (pMeter->m_wTerrainIndex == TERRAIN_HOLE)
+    if (pMapTop->m_wTerrainIndex == TERRAIN_HOLE)
     {
         dwBlockThis = 0;
     }
-    else if (CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))	// inter dungeon type.
+    else if (CUOMapMeter::IsTerrainNull(pMapTop->m_wTerrainIndex))	// inter dungeon type.
     {
         dwBlockThis = CAN_I_BLOCK;
     }
     else
     {
-        const CUOTerrainInfo land(pMeter->m_wTerrainIndex);
+        const CUOTerrainInfo land(pMapTop->m_wTerrainIndex);
         //DEBUG_ERR(("Terrain flags - land.m_flags 0%x dwBlockThis (0%x)\n",land.m_flags,dwBlockThis));
         if (land.m_flags & UFLAG1_WATER)
             dwBlockThis |= CAN_I_WATER;
@@ -1455,7 +1466,7 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
     }
     //DEBUG_ERR(("TERRAIN dwBlockThis (0%x)\n",dwBlockThis));
 
-    block.CheckTile_Terrain(dwBlockThis, pMeter->m_z, pMeter->m_wTerrainIndex);
+    block.CheckTile_Terrain(dwBlockThis, z, pMapTop->m_wTerrainIndex);
 
 	if ( block.m_Bottom.m_z == UO_SIZE_MIN_Z )
 	{
@@ -1467,6 +1478,36 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 			block.m_Top.m_z = UO_SIZE_Z;
 		}
 	}
+}
+
+const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2)
+{
+	char pTotal = pPoint1->m_z + pPoint2->m_z;
+	if (pTotal < 0)
+		pTotal--;
+	return pTotal / 2;
+}
+
+const CUOMapMeter* CWorldMap::CheckMapTerrain(const CUOMapMeter* pDefault, const short x, const short y)
+{
+	CPointMap pt = { x, y };
+	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
+	if (!pMapBlock)
+		return pDefault;
+
+	const CUOMapMeter* pMeter = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	if (!pMeter)
+		return pDefault;
+
+	if (CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))
+		return pDefault;
+	else
+	{
+		const CUOTerrainInfo land(pMeter->m_wTerrainIndex);
+		if ((land.m_flags & UFLAG1_WATER) || (land.m_flags & UFLAG1_BLOCK))
+			return pDefault;
+	}
+	return pMeter;
 }
 
 char CWorldMap::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // static
