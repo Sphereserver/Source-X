@@ -34,6 +34,8 @@ public:
 
 	static const CServerMapBlock* GetMapBlock(const CPointMap& pt);
 	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates
+	static const char FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2);
+	static const CUOMapMeter* CheckMapTerrain(const CUOMapMeter* pDefault, short x, short y);
 
 	static CItemTypeDef* GetTerrainItemTypeDef(dword dwIndex);
 	static IT_TYPE		 GetTerrainItemType(dword dwIndex);
