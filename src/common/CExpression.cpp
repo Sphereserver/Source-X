@@ -1069,9 +1069,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			llValSecond = GetVal(pExpr);
 			if (llVal < 0)
 			{
-				std::complex<llong> number(llValSecond, 0);
-				std::complex<llong> result = power(llVal, llValSecond);
-				llVal = result.real();
+				llVal = power(llVal, llValSecond);
 				break;
 			}
 			else if ((llVal == 0) && (llValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
@@ -1224,7 +1222,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
         //  IF (1 == 0 || 0 == 0)   or: IF (1 == 0) || (0 == 0)     or: IF ((1 == 0) || (0 == 0))
         // Those are all valid expressions, with valid subexpressions.
 
-        // In the case of a fully bracketed expression like IF !(<eval 1>...), we want to return a SubExpr with 
+        // In the case of a fully bracketed expression like IF !(<eval 1>...), we want to return a SubExpr with
 
         // -- Handling negations.
         // When we are parsing a whole expression, fully enclosed by curly brackets, we need to handle the possibility of having a negation before it,
@@ -1348,7 +1346,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 				}
 				break; // End of the current subexpr, go back to find another one
 			}
-			
+
 			else if (ch == '(')
 			{
                 if (ptcCurSubexprStart == pExpr)
@@ -1388,7 +1386,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
                     sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
                     return iSubexprQty;
                 }
-                    
+
 				// Okay, i've eaten the expression in brackets, now fall through the rest of the loop and continue.
 			}
 
@@ -1449,7 +1447,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 							}
 						}
 					}
-					
+
 				}
 				else if (ch == '>')
 				{

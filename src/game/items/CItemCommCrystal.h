@@ -29,10 +29,10 @@ public:
     virtual void OnMoveFrom() override;
     virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) override;
 
-    virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
-    virtual void  r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false );
-    virtual bool  r_LoadVal( CScript & s  );
+    virtual void OnHear( lpctstr pszCmd, CChar * pSrc ) override;
+    virtual void r_Write( CScript & s ) override;
+    virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+    virtual bool r_LoadVal( CScript & s ) override;
     virtual void DupeCopy( const CObjBase * pItemObj ) override;  // overriding CItem::DupeCopy
 };
 

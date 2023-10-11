@@ -397,7 +397,7 @@ bool CChar::NotifyDelete(bool fForce)
 	{
 		//We can forbid the deletion in here with no pain
 		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce) 
+		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
 
@@ -413,7 +413,7 @@ bool CChar::NotifyDelete(bool fForce)
 		if (trigReturn == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
-	
+
 	// Clear follower slots on pet owner
 	if (m_pNPC)
 		NPC_PetClearOwners();
@@ -443,9 +443,9 @@ bool CChar::Delete(bool fForce)
 		pClient->CharDisconnect();
 		pClient->GetNetState()->markReadClosed();
 	}
-	
+
 	DeleteCleanup(fForce);	// not virtual
-	
+
 	if (m_pPlayer && fForce)
 		ClearPlayer();
 
@@ -551,7 +551,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
 		if (!pCurSector->IsCharDisconnectedIn(this)) //This is necessary otherwise the character will be added another time and causing an error
 			pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
 		else
-			SetUIDContainerFlags(UID_O_DISCONNECT); 
+			SetUIDContainerFlags(UID_O_DISCONNECT);
 
 		IsDisconnected();
 	}
@@ -714,7 +714,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 
 	if ( !dwBlockFlags )
 		dwBlockFlags = dwCanMoveFlags;
-	
+
     if (dwCanMoveFlags == 0xFFFFFFFF)
         return pt.m_z;
 	if (dwCanMoveFlags & CAN_C_WALK )
@@ -830,7 +830,7 @@ void CChar::StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 }
 
 bool CChar::IsPriv( word flag ) const
-{	
+{
 	// PRIV_GM flags
 	if ( m_pPlayer == nullptr )
 		return false;	// NPC's have no privs.
@@ -1238,7 +1238,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 				const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
 				//If we have reached the maximum follower slots we remove the ownership of the pet by clearing the memory flag instead of using NPC_PetClearOwners().
 				if (!pTest3->FollowersUpdate(this, maximum(0, iFollowerSlots)))
-					Memory_ClearTypes(MEMORY_IPET); 
+					Memory_ClearTypes(MEMORY_IPET);
 			}
 		}
 	}
@@ -1334,7 +1334,7 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 					//case ITC_BREAK:	// I don't find a use case for that...
 					case ITC_ITEM:
 					case ITC_CONTAINER:
-					case ITC_ITEMNEWBIE:					
+					case ITC_ITEMNEWBIE:
 						fBlockItemAttr = true; //Set the value to block next Color or Attribute inputs for items.
 						pItem = nullptr;
 						continue;
@@ -1415,7 +1415,7 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 			continue;
 		if ( fBlockItemAttr ) //Did we force to cancel item attributes?
 			continue;
-			
+
 		if ( pItem != nullptr )
 		{
 			if ( fFullInterp )	// Modify the item.
@@ -1529,7 +1529,7 @@ void CChar::SetID( CREID_TYPE id )
 	CCharBase * pCharDef = CCharBase::FindCharBase(id);
 	if ( pCharDef == nullptr )
 	{
-		if ( (id != -1) && (id != CREID_INVALID) )
+		if ( (id != (CREID_TYPE)-1) && (id != CREID_INVALID) )
 			DEBUG_ERR(("Create Invalid Char 0%x\n", id));
 
 		id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
@@ -2755,8 +2755,11 @@ do_default:
 			return true;
 		case CHC_GUILDABBREV:
 			{
-				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_GUILD);
-				sVal = ( pszAbbrev ) ? pszAbbrev : "";
+				lpctstr ptcAbbrev = Guild_Abbrev(MEMORY_GUILD);
+				if (ptcAbbrev)
+					sVal = ptcAbbrev;
+				else
+					sVal.Clear();
 			}
 			return true;
 		case CHC_ID:
@@ -2866,8 +2869,11 @@ do_default:
 			break;
 		case CHC_TOWNABBREV:
 			{
-				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_TOWN);
-				sVal = ( pszAbbrev ) ? pszAbbrev : "";
+				lpctstr ptcAbbrev = Guild_Abbrev(MEMORY_TOWN);
+				if (ptcAbbrev)
+					sVal = ptcAbbrev;
+				else
+					sVal.Clear();
 			}
 			return true;
 		case CHC_MAXWEIGHT:

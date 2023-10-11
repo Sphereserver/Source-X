@@ -711,7 +711,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 						if ( pTypeDef != nullptr )
 							sVal = pTypeDef->GetResourceName();
 						else
-							sVal = "";
+							sVal.Clear();
 					} return true;	
 					case PT_TERRAIN:
 					{

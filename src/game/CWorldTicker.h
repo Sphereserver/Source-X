@@ -9,6 +9,7 @@
 #include "CTimedFunctionHandler.h"
 #include "CTimedObject.h"
 #include <map>
+//#include <unordered_set>
 
 
 class CObjBase;
@@ -36,6 +37,7 @@ private:
     };
 
     struct StatusUpdatesList : public phmap::parallel_flat_hash_set<CObjBase*>
+    //struct StatusUpdatesList : public std::unordered_set<CObjBase*>
     {
         THREAD_CMUTEX_DEF;
     };

@@ -3377,3 +3377,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 07-10-2023, Nolok
 - Added: FUNC keyword to item templates and template-triggers with special parsing (@Create, @CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
 	Default object: the item. SRC: the character holding it.
+
+08-10-2023, Nolok & xwerswoodx
+- Fixed: Setting P inside the @Click trigger made it being called endlessly.

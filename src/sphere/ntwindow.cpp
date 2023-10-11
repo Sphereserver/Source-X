@@ -83,8 +83,8 @@ void CNTWindow::CStatusDlg::FillClients()
 	m_wndListClients.ResetContent();
 	CNTWindow::CListTextConsole capture( m_wndListClients.m_hWnd );
 	g_Serv.ListClients( &capture );
-	int iCount = m_wndListClients.GetCount();
-	++iCount;
+	//int iCount = m_wndListClients.GetCount();
+	//++iCount;
 }
 
 void CNTWindow::CStatusDlg::FillStats()

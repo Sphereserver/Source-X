@@ -865,7 +865,7 @@ badcmd:
 				if ( *ptcKey )
 					sVal = Str_TrimWhitespace(const_cast<tchar*>(ptcKey));
 				else
-					sVal = "";
+					sVal.Clear();
 
 				return true;
 			}
@@ -988,7 +988,7 @@ badcmd:
                 *iSeperator = '\0';
             
             tchar *pArgs = Str_UnQuote(ppArgs[0]);
-            sVal = "";
+            sVal.Clear();
             tchar *ppCmd[255];
             int count = Str_ParseCmdsAdv(pArgs, ppCmd, ARRAY_COUNT(ppCmd), iSep); //Remove unnecessary chars from seperator to avoid issues.
             tchar *ppArrays[2];
@@ -1042,7 +1042,7 @@ badcmd:
 				}
 
 				const char *p = ptcKey + strlen(separators) + 1;
-				sVal = "";
+				sVal.Clear();
 				if (( p > ptcKey ) && *p )		//	we have list of accessible separators
 				{
 					tchar *ppCmd[255];
@@ -1717,7 +1717,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 
 	sVal = ptcTemp;
 	if (sVal.IsEmpty())
-		sVal = "";
+		sVal.Clear();
 	return true;
 }
 

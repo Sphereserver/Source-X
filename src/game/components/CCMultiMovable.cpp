@@ -94,7 +94,7 @@ bool CCMultiMovable::SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType, bo
     // TODO RowBoat's checks.
     if (fWheelMove)
         _eSpeedMode = (eMovementType == SMT_SLOW) ? SMS_SLOW : SMS_FAST;
-	
+
     SetNextMove();
     return true;
 }
@@ -185,7 +185,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
             continue;
         if (pMulti->Multi_IsPartOf(pItem)) // already listed.
             continue;
-        
+
         if (!pMulti->GetRegion()->IsInside2d(pItem->GetTopPoint()))
             continue;
 
@@ -324,7 +324,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
 
         const CPointMap& ptMe = pCharClient->GetTopPoint();
         const int iViewDist = pCharClient->GetVisualRange();
-        
+
         // No smooth sailing: update the view for each item inside the multi
         for (uint i = 0; i < iCount; ++i)
         {
@@ -342,9 +342,9 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                 pClient->addObjectRemove(pObj);
                 continue; //no need to keep going. skip!
             }
-            
+
             if (pClient->CanSee(pObj))
-            {                
+            {
                 // Check if me or other clients can see a object they couldn't see before
                 if (pObj->IsItem())
                 {
@@ -555,7 +555,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
     // Reorient everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
     size_t iCount = ListObjs(ppObjs);
-  
+
     for (size_t i = 0; i < iCount; ++i)
     {
         CObjBase *pObj = ppObjs[i];
@@ -849,7 +849,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
             pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_STOPPED), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
         return false;
     }
-	
+
 	if (IsTrigUsed(TRIGGER_SHIP_MOVE))
     {
         CScriptTriggerArgs Args(dir, fStopped);
@@ -901,13 +901,13 @@ void CCMultiMovable::Stop()
     CItem *pItemThis = dynamic_cast<CItem*>(this);
     ASSERT(pItemThis);
     pItemThis->m_itShip._eMovementType = SMT_STOP;
-	
+
 	if (IsTrigUsed(TRIGGER_SHIP_STOP))
     {
         CScriptTriggerArgs Args(pItemThis);
         pItemThis->OnTrigger(ITRIG_Ship_Stop, &g_Serv, &Args);
     }
-	
+
     _pCaptain = nullptr;
 }
 
@@ -1376,7 +1376,7 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
     CML_TYPE index = (CML_TYPE)FindTableSorted(ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys) - 1);
     // CItem *pItemThis = dynamic_cast<CItem*>(this);
     // ASSERT(pItemThis);
-    if (index == -1)
+    if (index == (CML_TYPE)-1)
     {
         if (!strnicmp(ptcKey, "SHIPSPEED.", 10))
             index = CML_SHIPSPEED;
@@ -1424,13 +1424,13 @@ bool CCMultiMovable::r_LoadVal(CScript & s)
                     return false;
                 }
             }
-        } 
+        }
         break;
         case CML_PILOT:
         {
 			SetPilot(CUID::CharFindFromUID(s.GetArgVal()));
 			return true;
-        } 
+        }
         break;
         default:
         {

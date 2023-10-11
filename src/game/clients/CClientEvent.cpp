@@ -2416,7 +2416,8 @@ void CClient::Event_SingleClick( CUID uid )
 	if ( IsTrigUsed(TRIGGER_CLICK) || (IsTrigUsed(TRIGGER_ITEMCLICK) && pObj->IsItem()) || (IsTrigUsed(TRIGGER_CHARCLICK) && pObj->IsChar()) )
 	{
 		CScriptTriggerArgs Args(this);
-		if ( pObj->OnTrigger("@Click", m_pChar, &Args) == TRIGRET_RET_TRUE )	// CTRIG_Click, ITRIG_Click
+		// The "@Click" trigger str should be the same between items and chars...
+		if ( pObj->OnTrigger(CChar::sm_szTrigName[CTRIG_Click], m_pChar, &Args) == TRIGRET_RET_TRUE )	// CTRIG_Click, ITRIG_Click
 			return;
 	}
 

@@ -670,14 +670,14 @@ public:
 
     void SetScreenSize(ushort x, ushort y);
 
-    PLEVEL_TYPE GetPrivLevel() const;
+    virtual PLEVEL_TYPE GetPrivLevel() const override;
     virtual lpctstr GetName() const override;
 	virtual CChar * GetChar() const override
 	{
 		return m_pChar;
 	}
 
-	void SysMessage( lpctstr pMsg ) const; // System message (In lower left corner)
+	virtual void SysMessage( lpctstr pMsg ) const override; // System message (In lower left corner)
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 

@@ -649,12 +649,16 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 			break;
 
 		case PDC_SPEECHFILTER:
-			sVal = this->m_pSpeechFunction.IsEmpty() ? "" : this->m_pSpeechFunction;
+			if (m_pSpeechFunction.IsEmpty())
+				sVal.Clear();
+			else
+				sVal = m_pSpeechFunction;
 			break;
 
 		case PDC_TAG0:
 			fZero = true;
 			++ptcKey;
+			FALLTHROUGH;
 		case PDC_TAG:
 		{
 			if ( ptcKey[3] != '.' )

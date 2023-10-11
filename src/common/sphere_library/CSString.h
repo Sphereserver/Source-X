@@ -88,8 +88,8 @@ public:
     /**
     * @brief Returns an empty string.
     */
-    [[maybe_unused]]
-    inline static CSString Empty();
+    [[maybe_unused, nodiscard]]
+    inline static CSString EmptyNew();
 
 	/**
 	* @brief Copy supplied string into the CSString.
@@ -129,12 +129,14 @@ public:
 	* @brief Check the length of the CSString.
 	* @return true if length is 0, false otherwise.
 	*/
+	NODISCARD
 	inline bool IsEmpty() const noexcept;
 
 	/**
 	* @brief Check if there is data allocated and if has zero length.
 	* @return false if no data or zero length, true otherwise.
 	*/
+	NODISCARD
 	bool IsValid() const noexcept;
 
 	/**
@@ -152,12 +154,14 @@ public:
 	* @brief Get the length of the held string.
 	* @return the length of the CSString.
 	*/
+	NODISCARD
 	inline int GetLength() const noexcept;
 
 	/**
 	* @brief Get the length of the internal buffer, which can be greater than the held string length.
 	* @return the length of the CSString.
 	*/
+	NODISCARD
 	inline int GetCapacity() const noexcept;
 
 	///@}
@@ -172,6 +176,7 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
+	NODISCARD
 	inline tchar operator[](int nIndex) const;
 
 	/**
@@ -180,6 +185,7 @@ public:
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
+	NODISCARD
 	inline tchar& operator[](int nIndex);
 
 	/**
@@ -187,6 +193,7 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
+	NODISCARD
 	inline tchar GetAt(int nIndex) const;
 
 	/**
@@ -194,6 +201,7 @@ public:
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
+	NODISCARD
 	inline tchar& ReferenceAt(int nIndex);
 
 	/**
@@ -469,6 +477,7 @@ public:
 	* @brief cast as const lpcstr.
 	* @return internal data pointer.
 	*/
+	NODISCARD
 	inline operator lpctstr() const noexcept;
 
 	/**
@@ -481,6 +490,7 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
+	NODISCARD
 	inline int Compare(lpctstr pStr) const noexcept;
 
 	/**
@@ -493,12 +503,14 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
+	NODISCARD
 	inline int CompareNoCase(lpctstr pStr) const noexcept;
 
 	/**
 	* @brief Gets the internal pointer.
 	* @return Pointer to internal data.
 	*/
+	NODISCARD
 	inline lpctstr GetBuffer() const noexcept;
 	
 	// Provide only a read-only buffer: if we modify it we'll break the internal length counter, other than possibly write past the end of the string (the buffer is small).
@@ -509,6 +521,7 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	inline int indexOf(tchar c) noexcept;
 
 	/**
@@ -517,6 +530,7 @@ public:
 	* @param offset position from start the search.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	int indexOf(tchar c, int offset) noexcept;
 
 	/**
@@ -524,6 +538,7 @@ public:
 	* @param str substring to look for.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	inline int indexOf(const CSString& str) noexcept;
 
 	/**
@@ -532,6 +547,7 @@ public:
 	* @param offset position from start the search.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	int indexOf(const CSString& str, int offset) noexcept;
 
 	/**
@@ -539,6 +555,7 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	inline int lastIndexOf(tchar c) noexcept;
 
 	/**
@@ -547,6 +564,7 @@ public:
 	* @param from position where stop the search.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	int lastIndexOf(tchar c, int from) noexcept;
 
 	/**
@@ -554,6 +572,7 @@ public:
 	* @param str substring to look for.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	inline int lastIndexOf(const CSString& str) noexcept;
 
 	/**
@@ -562,6 +581,7 @@ public:
 	* @param from position where stop the search.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
+	NODISCARD
 	int lastIndexOf(const CSString& str, int from) noexcept;
 
 	///@}
@@ -584,7 +604,7 @@ CSString::CSString(CSString&& s) noexcept :
 	*this = std::move(s); // Call the move assignment operator
 }
 
-CSString CSString::Empty()
+CSString CSString::EmptyNew()
 {
     return CSString(false);
 }

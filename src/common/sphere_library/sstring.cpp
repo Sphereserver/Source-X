@@ -724,7 +724,7 @@ int FindTableSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount
 
     if (iCount < 1)
         return -1;
-    int iHigh = iCount - 1;
+    int iHigh = iCount - 1; // Count starts from 1, array index from 0.
     int iLow = 0;
 
     while (iLow <= iHigh)
@@ -776,7 +776,7 @@ int FindTableHeadSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iC
 
     if (iCount < 1)
         return -1;
-    int iHigh = iCount - 1;
+    int iHigh = iCount - 1; // Count starts from 1, array index from 0.
     int iLow = 0;
 
     while (iLow <= iHigh)
@@ -817,7 +817,7 @@ int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable
     // RETURN: -1 = not found
     if (iCount < 1)
         return -1;
-    int iHigh = iCount - 1;
+    int iHigh = iCount - 1; // Count starts from 1, array index from 0.
     int iLow = 0;
 
     while (iLow <= iHigh)

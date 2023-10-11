@@ -67,15 +67,19 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	 # do not use " " to delimitate these flags!
 	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-	IF (TARGET spheresvr_release)
-		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 	)
-	ENDIF (TARGET spheresvr_release)
-	IF (TARGET spheresvr_nightly)
-		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 )
-	ENDIF (TARGET spheresvr_nightly)
-	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline -fno-omit-frame-pointer )
-	ENDIF (TARGET spheresvr_debug)
+	 SET (COMPILE_OPTIONS_EXTRA)
+	 IF (ENABLED_SANITIZER OR TARGET spheresvr_debug)
+		 SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer)
+	 ENDIF ()
+	 IF (TARGET spheresvr_release)
+		 TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 ${COMPILE_OPTIONS_EXTRA})
+	 ENDIF ()
+	 IF (TARGET spheresvr_nightly)
+		 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+	 ENDIF ()
+	 IF (TARGET spheresvr_debug)
+		 TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline ${COMPILE_OPTIONS_EXTRA})
+	 ENDIF ()
 
 
 	#-- Setting per-build linker flags.

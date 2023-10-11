@@ -135,7 +135,7 @@ public:
 	void RespawnDeadNPCs();
 
 	void Close();
-	lpctstr GetName() const { return "Sector"; }
+	virtual lpctstr GetName() const override { return "Sector"; }
 };
 
 

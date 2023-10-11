@@ -447,7 +447,7 @@ void CListDefCont::PrintElements(CSString& strElements) const
 	ADDTOCALLSTACK("CListDefCont::PrintElements");
 	if ( m_listElements.empty() )
 	{
-		strElements = "";
+		strElements.Clear();
 		return;
 	}
 

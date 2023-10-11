@@ -39,17 +39,6 @@ function (toolchain_exe_stuff)
 	SET (CMAKE_C_FLAGS			"${CMAKE_C_FLAGS} ${C_ARCH_OPTS}"       PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} ${CXX_ARCH_OPTS}"	PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" 			PARENT_SCOPE)
-	SET (CMAKE_RC_FLAGS			"${CMAKE_RC_FLAGS}"						PARENT_SCOPE)
-
-	
-	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	ws2_32 mariadb )
-	ENDIF (TARGET spheresvr_release)
-	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	ws2_32 mariadb )
-	ENDIF (TARGET spheresvr_nightly)
-	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		ws2_32 mariadb )
-	ENDIF (TARGET spheresvr_debug)
+	SET (CMAKE_RC_FLAGS			"${RC_FLAGS}"							PARENT_SCOPE)
 
 endfunction()

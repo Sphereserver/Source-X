@@ -285,7 +285,7 @@ void CCSpawn::Delete(bool fForce)
 void CCSpawn::GenerateItem()
 {
     ADDTOCALLSTACK("CCSpawn::GenerateItem");
-    
+
     CItem *pSpawnItem = GetLink();
     if (!pSpawnItem->IsTopLevel())
         return;
@@ -560,7 +560,7 @@ void CCSpawn::DelObj(const CUID& uid)
     {
         CScriptTriggerArgs args;
         args.m_pO1 = pSpawnItem;
-        args.m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;   
+        args.m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;
         pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
         pSpawnItem->_SetTimeoutS(args.m_iN1);
     }
@@ -626,7 +626,7 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_ptHome = pSpawnItem->GetTopPoint();
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
-        
+
         if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
         {
             pSpawnItem->_SetTimeoutS(-1);
@@ -645,7 +645,7 @@ void CCSpawn::AddObj(const CUID& uid)
     }
 
     // Done with checks, let's add this.
-    _uidList.emplace_back(uid); 
+    _uidList.emplace_back(uid);
 
     if (GetCurrentSpawned() >= GetAmount())
     {
@@ -917,8 +917,8 @@ bool CCSpawn::r_LoadVal(CScript & s)
                 return true;
             }
             CResourceIDBase ridArg(dwPrivateUID);    // Not using CResourceID because res_chardef, spawn, itemdef, template do not use the "page" arg
-            const int iRidIndex = ridArg.GetResIndex();
-            const int iRidType  = ridArg.GetResType();
+            const uint iRidIndex = ridArg.GetResIndex();
+            const uint iRidType  = ridArg.GetResType();
             switch (pSpawnItem->GetType())
             {
                 case IT_SPAWN_CHAR:
@@ -1135,7 +1135,7 @@ bool CCSpawn::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
     {
         return false;
     }
-    
+
 
     CItem *pItem = static_cast<CItem*>(GetLink());
 

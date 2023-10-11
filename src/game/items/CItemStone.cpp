@@ -630,7 +630,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		lpctstr pszCmd = ptcKey + 7;
 		uint i = atoi(pszCmd);
 		if ( i >= ARRAY_COUNT(m_sCharter))
-			sVal = "";
+			sVal.Clear();
 		else
 			sVal = m_sCharter[i];
 
@@ -723,7 +723,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 			{
 				CChar * pMaster = GetMaster();
 				if ( pMaster == nullptr )
-					sVal = ""; // If no master (vote pending)
+					sVal.Clear(); // If no master (vote pending)
 				else if ( pMaster->Char_GetDef()->IsFemale())
 					sVal = g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_MASTERGENDERFEMALE");
 				else
