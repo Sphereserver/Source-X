@@ -2756,8 +2756,11 @@ do_default:
 			return true;
 		case CHC_GUILDABBREV:
 			{
-				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_GUILD);
-				sVal = ( pszAbbrev ) ? pszAbbrev : "";
+				lpctstr ptcAbbrev = Guild_Abbrev(MEMORY_GUILD);
+				if (ptcAbbrev)
+					sVal = ptcAbbrev;
+				else
+					sVal.Clear();
 			}
 			return true;
 		case CHC_ID:
@@ -2867,8 +2870,11 @@ do_default:
 			break;
 		case CHC_TOWNABBREV:
 			{
-				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_TOWN);
-				sVal = ( pszAbbrev ) ? pszAbbrev : "";
+				lpctstr ptcAbbrev = Guild_Abbrev(MEMORY_TOWN);
+				if (ptcAbbrev)
+					sVal = ptcAbbrev;
+				else
+					sVal.Clear();
 			}
 			return true;
 		case CHC_MAXWEIGHT:

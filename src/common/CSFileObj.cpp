@@ -298,7 +298,10 @@ bool CSFileObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc,
         } break;
 
         case FO_FILEPATH:
-            sVal.Copy(_pFile->IsFileOpen() ? _pFile->GetFilePath() : "" );
+            if (_pFile->IsFileOpen())
+                sVal.Copy(_pFile->GetFilePath());
+            else
+                sVal.Clear();
             break;
 
         case FO_INUSE:

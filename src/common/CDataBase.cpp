@@ -432,7 +432,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 		{
 			ptcKey += strlen(sm_szLoadKeys[index]);
 			GETNONWHITESPACE(ptcKey);
-			sVal = "";
+			sVal.Clear();
 
 			if ( ptcKey[0] != '\0' )
 			{

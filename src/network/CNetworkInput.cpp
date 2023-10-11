@@ -419,7 +419,9 @@ bool CNetworkInput::processGameClientData(CNetState* state, Packet* buffer)
     state->m_packetExceptions++;
     if (state->m_packetExceptions > 10)
     {
-        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN, "%x:Disconnecting client from account '%s' since it is causing exceptions problems\n", state->id(), client != nullptr && client->GetAccount() ? client->GetAccount()->GetName() : "");
+        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN,
+            "%x:Disconnecting client from account '%s' since it is causing exceptions problems\n",
+            state->id(), client != nullptr && client->GetAccount() ? client->GetAccount()->GetName() : "");
         if (client != nullptr)
             client->addKick(&g_Serv, false);
         else

@@ -504,7 +504,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 				if (pBase != nullptr)
 					sVal = pBase->GetResourceName();
 				else
-					sVal = "";
+					sVal.Clear();
 			} break;
 		case RC_UID:
 			// Allow use of UID.x.KEY on the REGION object

@@ -2612,7 +2612,10 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 		case IC_SUMMONING:
 			{
 				const CVarDefCont * pVar = GetDefKey(ptcKey, true);
-				sVal = pVar ? pVar->GetValStr() : "";
+				if (pVar)
+					sVal = pVar->GetValStr();
+				else
+					sVal.Clear();
 			}
 			break;
 		//return as decimal number or 0 if not set

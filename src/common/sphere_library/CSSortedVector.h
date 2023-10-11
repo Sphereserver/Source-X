@@ -158,9 +158,9 @@ size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const noexcept
         return SCONT_BADINDEX;
     }
     const _Type* const _dataptr = this->data();
-    const size_t _idx = this->lower_element(_mySize, _dataptr, value);
+    size_t _idx = this->lower_element(_mySize, _dataptr, value);
     if (_idx == _mySize)
-        return _mySize - 1;
+        return SCONT_BADINDEX;
     return (!this->_comparatorObj(value, _dataptr[_idx])) ? _idx : SCONT_BADINDEX;
 }
 
