@@ -1483,10 +1483,11 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 
 const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2)
 {
-	char pTotal = pPoint1->m_z + pPoint2->m_z;
-	if (pTotal < 0)
-		pTotal--;
-	return pTotal / 2;
+	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
+	short pTotal = pPoint1->m_z + pPoint2->m_z;
+	if (pTotal % 2 != 0)
+		pTotal++;
+	return (char)(pTotal / 2);
 }
 
 const CUOMapMeter* CWorldMap::CheckMapTerrain(const CUOMapMeter* pDefault, const short x, const short y)
