@@ -34,7 +34,6 @@ public:
 
 	static const CServerMapBlock* GetMapBlock(const CPointMap& pt);
 	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates
-	static const char FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2);
 	static const CUOMapMeter* CheckMapTerrain(const CUOMapMeter* pDefault, short x, short y);
 
 	static CItemTypeDef* GetTerrainItemTypeDef(dword dwIndex);
@@ -48,6 +47,8 @@ public:
 
 	static void GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
 	static char GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false );
+	static const char FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iHighest);
+	static short GetHighest(const CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight);
 
 	static void GetFixPoint( const CPointMap & pt, CServerMapBlockState & block);
 
