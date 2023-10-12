@@ -1488,7 +1488,7 @@ const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter
 	short pTotal = pPoint1->m_z + pPoint2->m_z;
 	if (pTotal % 2 != 0)
 	{
-		if ((iHighest - pTotal) > 5) //If the player next to cliff, move player up.
+		if ((iHighest - (pTotal / 2)) > 5) //If the player next to cliff, move player up.
 			pTotal++;
 		else //Otherwise, move player down.
 			pTotal--;
