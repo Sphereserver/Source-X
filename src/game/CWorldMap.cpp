@@ -1438,11 +1438,11 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
 	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
 
-	short iHighest = GetHighest(pMapTop, pMapLeft, pMapBottom, pMapRight);
+	short iAverage = GetAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
 	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
-		z = FloorAvarage(pMapLeft, pMapRight, iHighest);
+		z = FloorAvarage(pMapLeft, pMapRight, iAverage);
 	else
-		z = FloorAvarage(pMapTop, pMapBottom, iHighest);
+		z = FloorAvarage(pMapTop, pMapBottom, iAverage);
 
     //DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
     if (pMapTop->m_wTerrainIndex == TERRAIN_HOLE)
@@ -1482,13 +1482,13 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 	}
 }
 
-const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iHighest)
+const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iAverage)
 {
 	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
 	short pTotal = pPoint1->m_z + pPoint2->m_z;
 	if (pTotal % 2 != 0)
 	{
-		if ((iHighest - (pTotal / 2)) > 5) //If the player next to cliff, move player up.
+		if ((iAverage - (pTotal / 2)) > 5) //If the player next to cliff, move player up.
 			pTotal++;
 		else //Otherwise, move player down.
 			pTotal--;
@@ -1496,11 +1496,14 @@ const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter
 	return (char)(pTotal / 2);
 }
 
-short CWorldMap::GetHighest(const CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight)
+short CWorldMap::GetAverage(const CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight)
 {
 	short iHighest1 = maximum(pPointTop->m_z, pPointBottom->m_z);
+	short iLowest1 = minimum(pPointTop->m_z, pPointBottom->m_z);
+
 	short iHighest2 = maximum(pPointLeft->m_z, pPointRight->m_z);
-	return maximum(iHighest1, iHighest2);
+	short iLowest2 = minimum(pPointLeft->m_z, pPointRight->m_z);
+	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
 }
 
 const CUOMapMeter* CWorldMap::CheckMapTerrain(const CUOMapMeter* pDefault, const short x, const short y)

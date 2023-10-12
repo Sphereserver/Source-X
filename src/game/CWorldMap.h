@@ -47,8 +47,8 @@ public:
 
 	static void GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
 	static char GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false );
-	static const char FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iHighest);
-	static short GetHighest(const CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight);
+	static const char FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iAverage);
+	static short GetAverage(const CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight);
 
 	static void GetFixPoint( const CPointMap & pt, CServerMapBlockState & block);
 
