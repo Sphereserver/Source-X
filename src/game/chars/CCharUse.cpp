@@ -1157,6 +1157,7 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
         }
 	}
 
+	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
 	if (iFollowerSlots > 0)
 	{
 		bool fExists = false;
@@ -1170,8 +1171,10 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 			++it;
 		}
 
-		if (!fExists)
+		if (!fExists && (m_followers.size() < iMaxFollower || IsPriv(PRIV_GM)))
 			m_followers.emplace_back(pChar->GetUID());
+		else
+			return false;
 	}
 	else
 	{
@@ -1184,17 +1187,8 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 		}
 	}
 
-	//short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
-	short iCurFollower = (short)m_followers.size();
-	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
-	short iSetFollower = iCurFollower + iFollowerSlots;
-
-	if ( (iSetFollower > iMaxFollower) && !IsPriv(PRIV_GM) )
-		return false;
-
 	if ( !fCheckOnly )
 	{
-        //SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
 		UpdateStatsFlag();
 	}
 	return true;
