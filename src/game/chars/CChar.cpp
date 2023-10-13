@@ -2277,28 +2277,34 @@ do_default:
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
 		{
-			//sVal.FormatLLVal(GetDefNum(ptcKey,false));
-			if (strlen(ptcKey) == 11)
+			if (!IsSetEF(EF_FollowerList)) //Using an old system?
 			{
-				sVal.FormatULLVal(m_followers.size());
-				return true;
+				sVal.FormatLLVal(GetDefNum(ptcKey,false));
 			}
-			sVal.FormatVal(0);
-			ptcKey += 11;
-			if (*ptcKey == '.')
+			else
 			{
-				++ptcKey;
-				if (!m_followers.empty())
+				if (strlen(ptcKey) == 11)
 				{
-					int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
-					SKIP_SEPARATORS(ptcKey);
-					if (iIndex < (int)m_followers.size())
+					sVal.FormatULLVal(m_followers.size());
+					return true;
+				}
+				sVal.FormatVal(0);
+				ptcKey += 11;
+				if (*ptcKey == '.')
+				{
+					++ptcKey;
+					if (!m_followers.empty())
 					{
-						if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
+						int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
+						SKIP_SEPARATORS(ptcKey);
+						if (iIndex < (int)m_followers.size())
 						{
-							CUID uid = m_followers[iIndex];
-							sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
-							return true;
+							if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
+							{
+								CUID uid = m_followers[iIndex];
+								sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
+								return true;
+							}
 						}
 					}
 				}
@@ -3338,8 +3344,68 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 
 		case CHC_CURFOLLOWER:
-			return false; //No writeable object anymore.
+			if (!IsSetEF(EF_FollowerList))
+			{
+				SetDefNum(s.GetKey(), s.GetArgLLVal(), false);
+				UpdateStatsFlag();
+				break;
+			}
+			else
+			{
+				if (strlen(ptcKey) > 11)
+				{
+					ptcKey += 11;
+					if (*ptcKey == '.')
+					{
+						++ptcKey;
+						if (!strnicmp(ptcKey, "CLEAR", 5))
+						{
+							if (!m_followers.empty())
+								m_followers.clear();
+							UpdateStatsFlag();
+							return true;
+						}
+						else if (!strnicmp(ptcKey, "DELETE", 6))
+						{
+							if (!m_followers.empty())
+							{
+								CUID uid = (CUID)s.GetArgDWVal();
+								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
+								{
+									if (uid == *it)
+										it = m_followers.erase(it);
+									else
+										++it;
+								}
+							}
+							return true;
+						}
+						else if (!strnicmp(ptcKey, "ADD", 3))
+						{
+							bool fExists = false;
+							CUID uid = (CUID)s.GetArgDWVal();
+							if (!m_followers.empty())
+							{
+								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
+								{
+									if (uid == *it)
+									{
+										fExists = true;
+										break;
+									}
+									else
+										++it;
+								}
+							}
 
+							if (!fExists)
+								m_followers.emplace_back(uid);
+							return true;
+						}
+					}
+				}
+			}
+			return false;
 		case CHC_MAXFOLLOWER:
 		case CHC_TITHING:
 			{

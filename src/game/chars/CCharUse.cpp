@@ -1158,33 +1158,43 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 	}
 
 	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
-	if (iFollowerSlots > 0)
+	if (IsSetEF(EF_FollowerList))
 	{
-		bool fExists = false;
-		for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+		if (iFollowerSlots > 0)
 		{
-			if (*it == pChar->GetUID())
+			bool fExists = false;
+			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
 			{
-				fExists = true;
-				break;
+				if (*it == pChar->GetUID())
+				{
+					fExists = true;
+					break;
+				}
+				++it;
 			}
-			++it;
-		}
 
-		if (!fExists && (m_followers.size() < iMaxFollower || IsPriv(PRIV_GM)))
-			m_followers.emplace_back(pChar->GetUID());
+			if (!fExists && (m_followers.size() < iMaxFollower || IsPriv(PRIV_GM)))
+				m_followers.emplace_back(pChar->GetUID());
+			else
+				return false;
+		}
 		else
-			return false;
+		{
+			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+			{
+				if (*it == pChar->GetUID())
+					it = m_followers.erase(it);
+				else
+					++it;
+			}
+		}
 	}
 	else
 	{
-		for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
-		{
-			if (*it == pChar->GetUID())
-				it = m_followers.erase(it);
-			else
-				++it;
-		}
+		short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
+		iCurFollower = iCurFollower + iFollowerSlots;
+		if (!fCheckOnly)
+			SetDefNum("CURFOLLOWER", maximum(iCurFollower, 0));
 	}
 
 	if ( !fCheckOnly )
