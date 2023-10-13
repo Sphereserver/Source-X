@@ -1157,7 +1157,35 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
         }
 	}
 
-	short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
+	if (iFollowerSlots > 0)
+	{
+		bool fExists = false;
+		for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+		{
+			if (*it == pChar->GetUID())
+			{
+				fExists = true;
+				break;
+			}
+			++it;
+		}
+
+		if (!fExists)
+			m_followers.emplace_back(pChar->GetUID());
+	}
+	else
+	{
+		for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+		{
+			if (*it == pChar->GetUID())
+				it = m_followers.erase(it);
+			else
+				++it;
+		}
+	}
+
+	//short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
+	short iCurFollower = (short)m_followers.size();
 	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
 	short iSetFollower = iCurFollower + iFollowerSlots;
 
@@ -1166,7 +1194,7 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 
 	if ( !fCheckOnly )
 	{
-        SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
+        //SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
 		UpdateStatsFlag();
 	}
 	return true;

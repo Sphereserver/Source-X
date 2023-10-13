@@ -3380,3 +3380,12 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 08-10-2023, Nolok & xwerswoodx
 - Fixed: Setting P inside the @Click trigger made it being called endlessly.
+
+13-10-2023, xwerswoodx
+- Experimental: Made some changes on Z Calculations for maps to make it more accurate.
+- Added: Followers now saved on characters after @FollowersUpdate trigger.
+	As this save system newly added, the npcs that already follows the character not saved so their CURFOLLOWER count will reset to 0.
+	You can return 1 or set ARGN1 <= 0 to block increasing of current follower, and these characters not adding to current follower list.
+	CURFOLLOWER returns the total follower.
+	CURFOLLOWER.n.UID/CURFOLLOWER.n returns the follower uid at the given index of the list. (Feature Request: #737)
+- Fixed: @Success/@SpellSucess triggers when player try to teleport unavailable spots. (Issue: #779)

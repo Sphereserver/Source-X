@@ -2276,8 +2276,35 @@ do_default:
 	{
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
-			sVal.FormatLLVal(GetDefNum(ptcKey,false));
-			break;
+		{
+			//sVal.FormatLLVal(GetDefNum(ptcKey,false));
+			if (strlen(ptcKey) == 11)
+			{
+				sVal.FormatULLVal(m_followers.size());
+				return true;
+			}
+			sVal.FormatVal(0);
+			ptcKey += 11;
+			if (*ptcKey == '.')
+			{
+				++ptcKey;
+				if (!m_followers.empty())
+				{
+					int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
+					SKIP_SEPARATORS(ptcKey);
+					if (iIndex < (int)m_followers.size())
+					{
+						if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
+						{
+							CUID uid = m_followers[iIndex];
+							sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
+							return true;
+						}
+					}
+				}
+			}
+			return true;
+		}
 		//On these ones, check BaseDef if not found on dynamic
 		case CHC_MAXFOLLOWER:
 		case CHC_SPELLTIMEOUT:
@@ -3311,6 +3338,8 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 
 		case CHC_CURFOLLOWER:
+			return false; //No writeable object anymore.
+
 		case CHC_MAXFOLLOWER:
 		case CHC_TITHING:
 			{
@@ -3539,16 +3568,17 @@ bool CChar::r_LoadVal( CScript & s )
 			Horse_UnMount();
 			break;
 		case CHC_EMOTEACT:
-			{
-				bool fSet = IsStatFlag(STATF_EMOTEACTION);
-				if ( s.HasArgs() )
-					fSet = s.GetArgVal() ? true : false;
-				else
-					fSet = ! fSet;
-				StatFlag_Mod(STATF_EMOTEACTION,fSet);
-			}
+		{
+			bool fSet = IsStatFlag(STATF_EMOTEACTION);
+			if ( s.HasArgs() )
+				fSet = s.GetArgVal() ? true : false;
+			else
+				fSet = ! fSet;
+			StatFlag_Mod(STATF_EMOTEACTION,fSet);
 			break;
+		}
 		case CHC_FLAGS:
+		{
 			if (g_Serv.IsLoading())
 			{
 				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
@@ -3559,11 +3589,14 @@ bool CChar::r_LoadVal( CScript & s )
 			_uiStatFlag = (_uiStatFlag & (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED)) | (s.GetArgLLVal() & ~(STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED));
 			NotoSave_Update();
 			break;
+		}
 		case CHC_FONT:
+		{
 			m_fonttype = (FONT_TYPE)s.GetArgVal();
 			if (m_fonttype >= FONT_QTY)
 				m_fonttype = FONT_NORMAL;
 			break;
+		}
 		case CHC_SPEECHCOLOROVERRIDE:
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
@@ -3603,21 +3636,20 @@ bool CChar::r_LoadVal( CScript & s )
 				m_ptHome.Read( s.GetArgStr() );
 			break;
 		case CHC_NAME:
+		{
+			if (IsTrigUsed(TRIGGER_RENAME))
 			{
-				if ( IsTrigUsed(TRIGGER_RENAME) )
-				{
-					CScriptTriggerArgs args;
-					args.m_s1 = s.GetArgStr();
-					args.m_pO1 = this;
-					if ( this->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
-						return false;
-
-					SetName( args.m_s1 );
-				}
-				else
-					SetName( s.GetArgStr() );
+				CScriptTriggerArgs args;
+				args.m_s1 = s.GetArgStr();
+				args.m_pO1 = this;
+				if (this->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE)
+					return false;
+				SetName(args.m_s1);
 			}
+			else
+				SetName(s.GetArgStr());
 			break;
+		}
         case CHC_OFAME:
 		case CHC_FAME:
             SetFame(s.GetArgUSVal());

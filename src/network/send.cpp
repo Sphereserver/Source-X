@@ -281,7 +281,8 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 	{
 		if (other->m_pPlayer != nullptr)
 		{
-			writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
+			//writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
+			writeByte((byte)(other->m_followers.size()));
 			writeByte((byte)(other->GetDefNum("MAXFOLLOWER", true)));
 		}
 		else
