@@ -281,7 +281,21 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
 		return nullptr;
-	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+
+	//We have to do these checks for SERV.MAP(X,Y).TERRAIN.Z returns correctly with new system.
+	CUOMapMeter* pMapTop = const_cast<CUOMapMeter*>(pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
+	if (!pMapTop)
+		return nullptr;
+	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1);
+	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
+	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
+
+	short iAverage = GetAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
+	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
+		pMapTop->m_z = FloorAvarage(pMapLeft, pMapRight, iAverage);
+	else
+		pMapTop->m_z = FloorAvarage(pMapTop, pMapBottom, iAverage);
+	return pMapTop;
 }
 
 bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
