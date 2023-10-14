@@ -1447,7 +1447,7 @@ IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pIte
 	{
 		if ( !CanTouch(pItem) )
 			return IT_JUNK;
-		*pPt = GetTopLevelObj()->GetTopPoint();
+		*pPt = pItem->GetTopLevelObj()->GetTopPoint(); //While item is available, set the target p as the item top point, not the player.
 		return pItem->GetType();
 	}
 
