@@ -2202,17 +2202,16 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         int iTargReflectPhysicalDam =pCharTarg->GetPropNum(pCCPCharTarg, PROPCH_REFLECTPHYSICALDAM, pBaseCCPCharTarg);
         if (iTargReflectPhysicalDam)
         {
-            // REFLECTPHYSICALDAM suppose to reflect only physical?  How we block other damage here?
-            OnTakeDamage(
-                iDmg * iTargReflectPhysicalDam / 100,
-                this,
-                iDmgType,
-                (int)GetPropNum(pCCPChar, PROPCH_DAMPHYSICAL, pBaseCCPChar),
-                (int)GetPropNum(pCCPChar, PROPCH_DAMFIRE, pBaseCCPChar),
-                (int)GetPropNum(pCCPChar, PROPCH_DAMCOLD, pBaseCCPChar),
-                (int)GetPropNum(pCCPChar, PROPCH_DAMPOISON, pBaseCCPChar),
-                (int)GetPropNum(pCCPChar, PROPCH_DAMENERGY, pBaseCCPChar)
-            );
+            // REFLECTPHYSICALDAM suppose to reflect only physical (A physical blow of some sort.)
+            if (iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH))
+            {
+                OnTakeDamage(
+                    iDmg * iTargReflectPhysicalDam / 100,
+                    this,
+                    iDmgType,
+                    100,0,0,0,0
+                );
+             }
         }
 
         if (pWeapon)

@@ -537,6 +537,22 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
         ModPropNum(pCCPChar, PROPCH_DAMPOISON,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_DAMENERGY,     - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
+        ModPropNum(pCCPChar, PROPCH_HITLEECHMANA, - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLEECHSTAM, - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+
+        ModPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAFIRE,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREACOLD,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAPOISON,      - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAENERGY,      - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+
+        ModPropNum(pCCPChar, PROPCH_HITFIREBALL,    - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITHARM,        - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLIGHTNING,   - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITMAGICARROW,  - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+
+        ModPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, - pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+
         if (pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_NIGHTSIGHT, pItemBaseCCPItemEquippable))
         {
             StatFlag_Mod(STATF_NIGHTSIGHT, 0);
@@ -2197,21 +2213,21 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
         ModPropNum(pCCPChar, PROPCH_DAMPOISON,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_DAMENERGY,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-        ModPropNum(pCCPChar, PROPCH_HITLEECHMANA, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITLEECHSTAM, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLEECHMANA, + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLEECHSTAM, + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-        ModPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITAREAFIRE,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITAREACOLD,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITAREAPOISON,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITAREAENERGY,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL,	+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAFIRE,		+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREACOLD,		+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAPOISON,		+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAENERGY,		+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-        ModPropNum(pCCPChar, PROPCH_HITFIREBALL,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITHARM,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITLIGHTNING,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-        ModPropNum(pCCPChar, PROPCH_HITMAGICARROW,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITFIREBALL,	+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITHARM,		+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLIGHTNING,	+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITMAGICARROW,	+ pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-        ModPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 		
 		
 
