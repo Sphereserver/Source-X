@@ -296,9 +296,9 @@ const std::unique_ptr<CUOMapMeter*> CWorldMap::GetMapMeterAdjusted(const CPointM
 	if (!pMapTop)
 		return nullptr;
 
-	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1, pt.m_z, pt.m_map);
-	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1, pt.m_z, pt.m_map);
-	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y, pt.m_z, pt.m_map);
+	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1, pt.m_map);
+	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1, pt.m_map);
+	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y, pt.m_map);
 
 	short iAverage = GetAreaAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
 	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
@@ -1519,7 +1519,7 @@ short CWorldMap::GetAreaAverage(CUOMapMeter* pPointTop, const CUOMapMeter* pPoin
 	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
 }
 
-const CUOMapMeter* CWorldMap::CheckMapTerrain(CUOMapMeter* pDefault, short x, short y, char z, uchar map)
+const CUOMapMeter* CWorldMap::CheckMapTerrain(CUOMapMeter* pDefault, short x, short y, uchar map)
 {
 	CPointMap pt = { x, y, 0, map };
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
