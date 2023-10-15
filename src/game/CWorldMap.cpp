@@ -282,19 +282,31 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	if (!pMapBlock)
 		return nullptr;
 
-	//We have to do these checks for SERV.MAP(X,Y).TERRAIN.Z returns correctly with new system.
-	CUOMapMeter* pMapTop = const_cast<CUOMapMeter*>(pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));
+	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+}
+
+const CUOMapMeter* CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
+{
+	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
+	if (!pMapBlock)
+		return nullptr;
+
+	const CUOMapMeter* pMeter = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	CUOMapMeter* pMapTop = new CUOMapMeter(*pMeter);
+
 	if (!pMapTop)
 		return nullptr;
+
 	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1);
 	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
 	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
 
-	short iAverage = GetAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
+	short iAverage = GetAreaAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
 	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
-		pMapTop->m_z = FloorAvarage(pMapLeft, pMapRight, iAverage);
+		pMapTop->m_z = GetFloorAvarage(pMapLeft, pMapRight, iAverage);
 	else
-		pMapTop->m_z = FloorAvarage(pMapTop, pMapBottom, iAverage);
+		pMapTop->m_z = GetFloorAvarage(pMapTop, pMapBottom, iAverage);
+
 	return pMapTop;
 }
 
@@ -1440,24 +1452,9 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 
 	dwBlockThis = 0;
 	// Terrain height is screwed. Since it is related to all the terrain around it.
-	const CUOMapMeter* pMapTop = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	const CUOMapMeter* pMapTop = GetMapMeterAdjusted(pt); //Get pMapTop Z Adjusted.
 	if (!pMapTop)
 		return;
-	z = pMapTop->m_z;
-	//Check Height for South, South East and East
-	//Thanks to @WarWeeD (@Tolokio) and @Jhobean for help and informations <3
-	//Used SERVUO avarage floor calculation formula.
-	//https://github.com/ServUO/ServUO/blob/05cdc8780ecd81a6abca0f5f14097c8e6bc4860f/Server/Map.cs#L550
-	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1);
-	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
-	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
-
-	short iAverage = GetAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
-	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
-		z = FloorAvarage(pMapLeft, pMapRight, iAverage);
-	else
-		z = FloorAvarage(pMapTop, pMapBottom, iAverage);
-
     //DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
     if (pMapTop->m_wTerrainIndex == TERRAIN_HOLE)
     {
@@ -1482,7 +1479,7 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
     }
     //DEBUG_ERR(("TERRAIN dwBlockThis (0%x)\n",dwBlockThis));
 
-    block.CheckTile_Terrain(dwBlockThis, z, pMapTop->m_wTerrainIndex);
+    block.CheckTile_Terrain(dwBlockThis, pMapTop->m_z, pMapTop->m_wTerrainIndex);
 
 	if ( block.m_Bottom.m_z == UO_SIZE_MIN_Z )
 	{
@@ -1496,7 +1493,7 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 	}
 }
 
-const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iAverage)
+const char CWorldMap::GetFloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iAverage)
 {
 	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
 	short pTotal = pPoint1->m_z + pPoint2->m_z;
@@ -1510,7 +1507,7 @@ const char CWorldMap::FloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter
 	return (char)(pTotal / 2);
 }
 
-short CWorldMap::GetAverage(const CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight)
+short CWorldMap::GetAreaAverage(CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight)
 {
 	short iHighest1 = maximum(pPointTop->m_z, pPointBottom->m_z);
 	short iLowest1 = minimum(pPointTop->m_z, pPointBottom->m_z);
@@ -1520,7 +1517,7 @@ short CWorldMap::GetAverage(const CUOMapMeter* pPointTop, const CUOMapMeter* pPo
 	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
 }
 
-const CUOMapMeter* CWorldMap::CheckMapTerrain(const CUOMapMeter* pDefault, const short x, const short y)
+const CUOMapMeter* CWorldMap::CheckMapTerrain(CUOMapMeter* pDefault, const short x, const short y)
 {
 	CPointMap pt = { x, y };
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);

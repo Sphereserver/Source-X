@@ -4999,7 +4999,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	int iVisibility = (int) (BASE_SIGHT + rWeatherSight + rLightSight);
 
 	// Check for the nearest land, only check every 4th square for speed
-	const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( ptCoords ); // Are we at sea?
+	const CUOMapMeter * pMeter = CWorldMap::GetMapMeterAdjusted( ptCoords ); // Are we at sea?
 	if ( pMeter == nullptr )
 		return pResult;
 
