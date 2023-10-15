@@ -2197,21 +2197,21 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
         ModPropNum(pCCPChar, PROPCH_DAMPOISON,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_DAMENERGY,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-		ModPropNum(pCCPChar, PROPCH_HITLEECHMANA, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITLEECHSTAM, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLEECHMANA, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLEECHSTAM, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-		ModPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITAREAFIRE,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITAREACOLD,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITAREAPOISON,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITAREAENERGY,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAFIRE,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREACOLD,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAPOISON,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITAREAENERGY,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-		ModPropNum(pCCPChar, PROPCH_HITFIREBALL,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITHARM,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITLIGHTNING,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-		ModPropNum(pCCPChar, PROPCH_HITMAGICARROW,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITFIREBALL,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITHARM,		+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITLIGHTNING,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_HITMAGICARROW,	+pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 
-		ModPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
+        ModPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, +pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
 		
 		
 
@@ -2224,7 +2224,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
         if (pItem->IsTypeWeapon())
         {
-			//Necromancy Curse weapon
+            //Necromancy Curse weapon
             CItem * pCursedMemory = LayerFind(LAYER_SPELL_Curse_Weapon);	// Remove the cursed state from SPELL_Curse_Weapon.
             if (pCursedMemory)
                 pItem->ModPropNum(pItemCCPItemEquippable, PROPIEQUIP_HITLEECHLIFE, + pCursedMemory->m_itSpell.m_spelllevel, pItemBaseCCPItemEquippable);

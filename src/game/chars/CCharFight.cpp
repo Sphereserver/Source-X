@@ -985,26 +985,32 @@ effect_bounce:
 
 void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, HUE_TYPE effectHue, SOUND_TYPE effectSound)
 {
-	ADDTOCALLSTACK("CChar::OnTakeDamageArea");
+    ADDTOCALLSTACK("CChar::OnTakeDamageArea");
 
-	bool fMakeSound = false;
-	// Damage perimeter should be ajust to more realist "nearby targets"
-	// Like this area damage touch everyone! Pet, NPC etc
-	CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIGHT);
-	for (;;)
-	{
-		CChar* pChar = AreaChars.GetChar();
-		if (!pChar)
-			break;
-		if ((pChar == this) || (pChar == pSrc))
-			continue;
+    bool fMakeSound = false;
+    // Like this area damage touch everyone! Pet, NPC etc We should ignore pet and Criminal action?
 
-		pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
-		pChar->Effect(EFFECT_OBJ, ITEMID_FX_SPARKLE_2, this, 1, 15, false, effectHue);
-		fMakeSound = true;
-	}
-	if (fMakeSound && (effectSound != SOUND_NONE))
-		Sound(effectSound);
+    int iDistance = 5;
+    if (IsAosFlagEnabled(FEATURE_AOS_DAMAGE))
+        iDistance=10; // 5 for ML and 10 for aos
+
+    CWorldSearch AreaChars(GetTopPoint(), iDistance);
+    for (;;)
+    {
+        CChar* pChar = AreaChars.GetChar();
+        if (!pChar)
+            break;
+        if (!pChar->CanSeeLOS(pSrc))
+            break;
+        if ((pChar == this) || (pChar == pSrc))
+            continue;
+
+        pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+        pChar->Effect(EFFECT_OBJ, ITEMID_FX_SPARKLE_2, this, 1, 15, false, effectHue);
+        fMakeSound = true;
+    }
+    if (fMakeSound && (effectSound != SOUND_NONE))
+        Sound(effectSound);
 }
 
 //*******************************************************************************
@@ -2189,61 +2195,64 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( fMakeLeechSound )
 			Sound(0x44d);
-		
-		//There a bug here... This line never read correctly the target REFLECTPHYSICALDAM value
-		if (pCharTarg->GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar))
-		{
-			// REFLECTPHYSICALDAM suppose to reflect only physical?  How we block other damage here?
-			OnTakeDamage(
-				iDmg * pCharTarg->GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar) / 100,
-				this,
-				iDmgType,
-				(int)GetPropNum(pCCPChar, PROPCH_DAMPHYSICAL, pBaseCCPChar),
-				(int)GetPropNum(pCCPChar, PROPCH_DAMFIRE, pBaseCCPChar),
-				(int)GetPropNum(pCCPChar, PROPCH_DAMCOLD, pBaseCCPChar),
-				(int)GetPropNum(pCCPChar, PROPCH_DAMPOISON, pBaseCCPChar),
-				(int)GetPropNum(pCCPChar, PROPCH_DAMENERGY, pBaseCCPChar)
-			);
-		}
 
-		if (pWeapon)
-		{
-			bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
+        // REFLECTPHYSICALDAM
+        const CCPropsChar* pCCPCharTarg = pCharTarg->GetComponentProps<CCPropsChar>();
+        const CCPropsChar* pBaseCCPCharTarg = pCharTarg->Base_GetDef()->GetComponentProps<CCPropsChar>();
+        int iTargReflectPhysicalDam =pCharTarg->GetPropNum(pCCPCharTarg, PROPCH_REFLECTPHYSICALDAM, pBaseCCPCharTarg);
+        if (iTargReflectPhysicalDam)
+        {
+            // REFLECTPHYSICALDAM suppose to reflect only physical?  How we block other damage here?
+            OnTakeDamage(
+                iDmg * iTargReflectPhysicalDam / 100,
+                this,
+                iDmgType,
+                (int)GetPropNum(pCCPChar, PROPCH_DAMPHYSICAL, pBaseCCPChar),
+                (int)GetPropNum(pCCPChar, PROPCH_DAMFIRE, pBaseCCPChar),
+                (int)GetPropNum(pCCPChar, PROPCH_DAMCOLD, pBaseCCPChar),
+                (int)GetPropNum(pCCPChar, PROPCH_DAMPOISON, pBaseCCPChar),
+                (int)GetPropNum(pCCPChar, PROPCH_DAMENERGY, pBaseCCPChar)
+            );
+        }
 
-			if (fElemental)
-			{
-				if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > Calc_GetRandLLVal(100))
-					pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
+        if (pWeapon)
+        {
+	        bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
+
+	        if (fElemental)
+	        {
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
 				
-				if (GetPropNum(pCCPChar, PROPCH_HITAREAFIRE, pBaseCCPChar) > Calc_GetRandLLVal(100))
-					pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAFIRE, pBaseCCPChar) > Calc_GetRandLLVal(100))
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
 
-				if (GetPropNum(pCCPChar, PROPCH_HITAREACOLD, pBaseCCPChar) > Calc_GetRandLLVal(100))
-					pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREACOLD, pBaseCCPChar) > Calc_GetRandLLVal(100))
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
 
-				if (GetPropNum(pCCPChar, PROPCH_HITAREAPOISON, pBaseCCPChar) > Calc_GetRandLLVal(100))
-					pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPOISON, pBaseCCPChar) > Calc_GetRandLLVal(100))
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
 
-				if (GetPropNum(pCCPChar, PROPCH_HITAREAENERGY, pBaseCCPChar) > Calc_GetRandLLVal(100))
-					pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAENERGY, pBaseCCPChar) > Calc_GetRandLLVal(100))
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
 			
-			}
+	        }
 
-			if (GetPropNum(pCCPChar, PROPCH_HITDISPEL, pBaseCCPChar) > Calc_GetRandLLVal(100))
-				pCharTarg->OnSpellEffect(SPELL_Dispel, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
+	        if (GetPropNum(pCCPChar, PROPCH_HITDISPEL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        pCharTarg->OnSpellEffect(SPELL_Dispel, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 						
-			if (GetPropNum(pCCPChar, PROPCH_HITFIREBALL, pBaseCCPChar) > Calc_GetRandLLVal(100))
-				pCharTarg->OnSpellEffect(SPELL_Fireball, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
+	        if (GetPropNum(pCCPChar, PROPCH_HITFIREBALL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        pCharTarg->OnSpellEffect(SPELL_Fireball, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 			
-			if (GetPropNum(pCCPChar, PROPCH_HITHARM, pBaseCCPChar) > Calc_GetRandLLVal(100))
-				pCharTarg->OnSpellEffect(SPELL_Harm, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
+	        if (GetPropNum(pCCPChar, PROPCH_HITHARM, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        pCharTarg->OnSpellEffect(SPELL_Harm, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 			
-			if (GetPropNum(pCCPChar, PROPCH_HITLIGHTNING, pBaseCCPChar) > Calc_GetRandLLVal(100))
-				pCharTarg->OnSpellEffect(SPELL_Lightning, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
+	        if (GetPropNum(pCCPChar, PROPCH_HITLIGHTNING, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        pCharTarg->OnSpellEffect(SPELL_Lightning, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 			
-			if (GetPropNum(pCCPChar, PROPCH_HITMAGICARROW, pBaseCCPChar) > Calc_GetRandLLVal(100))
-				pCharTarg->OnSpellEffect(SPELL_Magic_Arrow, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
-		}
+	        if (GetPropNum(pCCPChar, PROPCH_HITMAGICARROW, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        pCharTarg->OnSpellEffect(SPELL_Magic_Arrow, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
+        }
 
 		// Make blood effects
 		if ( pCharTarg->_wBloodHue != (HUE_TYPE)(-1) )
