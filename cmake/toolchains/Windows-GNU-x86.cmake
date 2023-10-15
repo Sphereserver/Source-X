@@ -8,8 +8,8 @@ function (toolchain_after_project)
 
 	toolchain_after_project_common()
 
-	LINK_DIRECTORIES ("lib/bin/x86_64/mariadb/")
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin"	PARENT_SCOPE)
+	LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin_x86"	PARENT_SCOPE)
 endfunction()
 
 

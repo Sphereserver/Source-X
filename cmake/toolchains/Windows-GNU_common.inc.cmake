@@ -10,32 +10,42 @@ endfunction ()
 
 
 function (toolchain_exe_stuff_common)
-	SET (EXE_LINKER_EXTRA "")
 	IF (${WIN32_SPAWN_CONSOLE})
-		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} -mconsole")
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA  "${CMAKE_EXE_LINKER_FLAGS_EXTRA} -mconsole")
 		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
 	#ELSE ()
-	#	SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} -mwindows")
+	#	SET (CMAKE_EXE_LINKER_FLAGS_EXTRA "${CMAKE_EXE_LINKER_FLAGS_EXTRA} -mwindows")
 	ENDIF ()
 
 	#SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
 		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support ASAN")
+		SET (USE_ASAN false)
 		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
 		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
+	IF (${USE_MSAN})
+		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support MSAN")
+		SET (USE_MSAN false)
+		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		#SET (ENABLED_SANITIZER true)
+	ENDIF ()
 	IF (${USE_LSAN})
 		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support LSAN")
+		SET (USE_LSAN false)
 		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
 		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
 		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support UBSAN")
-		#SET (UBSAN_FLAGS		"-fsanitize=undefined,\
-#shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
-#float-divide-by-zero,float-cast-overflow,pointer-overflow \
+		SET (USE_UBSAN false)
+#		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
+#shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
+#float-divide-by-zero,float-cast-overflow,pointer-overflow,\
+#unreachable,nonnull-attribute,returns-nonnull-attribute \
 #-fno-sanitize=enum")
 		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
@@ -59,7 +69,7 @@ function (toolchain_exe_stuff_common)
 	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS	"-std=c++17 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
-	 # -mno-ms-bitfields is needed to fix structure packing;
+	 # -mno-ms-bitfields is needed to fix structure packing
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
@@ -69,9 +79,13 @@ function (toolchain_exe_stuff_common)
 
 	#-- Setting common linker flags
 
+	IF (${USE_MSAN})
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+	ENDIF()
+
 	 # Force dynamic linking but include into exe libstdc++ and libgcc.
 	 # -pthread, -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"-pthread -dynamic -static-libstdc++ -static-libgcc")
+	SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"${CMAKE_EXE_LINKER_FLAGS_COMMON} -pthread -dynamic -static-libstdc++ -static-libgcc")
 
 
 	#-- Adding compiler flags per build.
@@ -80,36 +94,40 @@ function (toolchain_exe_stuff_common)
 	 # do not use " " to delimitate these flags!
 	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-	 SET (COMPILE_OPTIONS_EXTRA)
-	 IF (ENABLED_SANITIZER OR TARGET spheresvr_debug)
-		 SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer)
-	 ENDIF ()
-	 IF (TARGET spheresvr_release)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 ${COMPILE_OPTIONS_EXTRA})
-	 ENDIF ()
-	 IF (TARGET spheresvr_nightly)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
-	 ENDIF ()
-	 IF (TARGET spheresvr_debug)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline ${COMPILE_OPTIONS_EXTRA})
-	 ENDIF ()
+	SET (COMPILE_OPTIONS_EXTRA)
+	IF (ENABLED_SANITIZER OR TARGET spheresvr_debug)
+		SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
+	ENDIF ()
+	IF (TARGET spheresvr_release)
+		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 ${COMPILE_OPTIONS_EXTRA})
+	ENDIF ()
+	IF (TARGET spheresvr_nightly)
+		IF (ENABLED_SANITIZER)
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+		ELSE ()
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		ENDIF ()
+	ENDIF ()
+	IF (TARGET spheresvr_debug)
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
+	ENDIF ()
 
 
 	#-- Setting per-build linker options.
 
 	 # Linking libs the MinGW way and setting linker flags.
-	 IF (TARGET spheresvr_release)
+	IF (TARGET spheresvr_release)
 		TARGET_LINK_LIBRARIES ( spheresvr_release	mariadb ws2_32 )
-		TARGET_LINK_OPTIONS ( spheresvr_release PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
-	ENDIF (TARGET spheresvr_release)
+		TARGET_LINK_OPTIONS ( spheresvr_release PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
+	ENDIF ()
 	IF (TARGET spheresvr_nightly)
 		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mariadb ws2_32 )
-		TARGET_LINK_OPTIONS ( spheresvr_nightly PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
-	ENDIF (TARGET spheresvr_nightly)
+		TARGET_LINK_OPTIONS ( spheresvr_nightly PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
+	ENDIF ()
 	IF (TARGET spheresvr_debug)
 		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb ws2_32 )
-		TARGET_LINK_OPTIONS ( spheresvr_debug PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
-	ENDIF (TARGET spheresvr_debug)
+		TARGET_LINK_OPTIONS ( spheresvr_debug PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
+	ENDIF ()
 	
 
 	#-- Set common define macros.
@@ -127,13 +145,13 @@ function (toolchain_exe_stuff_common)
 
 	IF (TARGET spheresvr_release)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK )
-	ENDIF (TARGET spheresvr_release)
+	ENDIF ()
 	IF (TARGET spheresvr_nightly)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK _NIGHTLYBUILD )
-	ENDIF (TARGET spheresvr_nightly)
+	ENDIF ()
 	IF (TARGET spheresvr_debug)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
-	ENDIF (TARGET spheresvr_debug)
+	ENDIF ()
 
 
 	#-- Set different output folders for each build type
