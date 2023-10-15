@@ -3380,3 +3380,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 08-10-2023, Nolok & xwerswoodx
 - Fixed: Setting P inside the @Click trigger made it being called endlessly.
+
+14-10-2023, Jhobean
+- Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+- Fixed: Item properties functionnality:HITLEECHMANA,HITLEECHSTAM
