@@ -35,8 +35,8 @@ public:
 	static const CServerMapBlock* GetMapBlock(const CPointMap& pt);
 	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates
 
-	static const CUOMapMeter* GetMapMeterAdjusted(const CPointMap& pt);
-	static const CUOMapMeter* CheckMapTerrain(CUOMapMeter* pDefault, short x, short y);
+	static const std::unique_ptr<CUOMapMeter*> GetMapMeterAdjusted(const CPointMap& pt);
+	static const CUOMapMeter* CheckMapTerrain(CUOMapMeter* pDefault, short x, short y, char z, uchar map);
 	static const char GetFloorAvarage(const CUOMapMeter* pPoint1, const CUOMapMeter* pPoint2, short iAverage);
 	static short GetAreaAverage(CUOMapMeter* pPointTop, const CUOMapMeter* pPointLeft, const CUOMapMeter* pPointBottom, const CUOMapMeter* pPointRight);
 

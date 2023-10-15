@@ -700,7 +700,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		}
 		default:
 		{
-			const CUOMapMeter * pMeter = CWorldMap::GetMapMeterAdjusted(*this);
+			const CUOMapMeter * pMeter = *CWorldMap::GetMapMeterAdjusted(*this);
 			if ( pMeter )
 			{
 				switch( index )

@@ -285,7 +285,7 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
 }
 
-const CUOMapMeter* CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
+const std::unique_ptr<CUOMapMeter*> CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
 {
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
@@ -293,13 +293,12 @@ const CUOMapMeter* CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
 
 	const CUOMapMeter* pMeter = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
 	CUOMapMeter* pMapTop = new CUOMapMeter(*pMeter);
-
 	if (!pMapTop)
 		return nullptr;
 
-	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1);
-	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1);
-	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y);
+	const CUOMapMeter* pMapLeft = CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1, pt.m_z, pt.m_map);
+	const CUOMapMeter* pMapBottom = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1, pt.m_z, pt.m_map);
+	const CUOMapMeter* pMapRight = CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y, pt.m_z, pt.m_map);
 
 	short iAverage = GetAreaAverage(pMapTop, pMapLeft, pMapBottom, pMapRight);
 	if (abs(pMapTop->m_z - pMapBottom->m_z) > abs(pMapLeft->m_z - pMapRight->m_z))
@@ -307,7 +306,9 @@ const CUOMapMeter* CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
 	else
 		pMapTop->m_z = GetFloorAvarage(pMapTop, pMapBottom, iAverage);
 
-	return pMapTop;
+	std::unique_ptr<CUOMapMeter*> pResult = std::make_unique<CUOMapMeter*>(pMapTop);
+	delete(pMapTop);
+	return pResult;
 }
 
 bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
@@ -1452,10 +1453,11 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 
 	dwBlockThis = 0;
 	// Terrain height is screwed. Since it is related to all the terrain around it.
-	const CUOMapMeter* pMapTop = GetMapMeterAdjusted(pt); //Get pMapTop Z Adjusted.
+	const CUOMapMeter* pMapTop = *GetMapMeterAdjusted(pt); //Get pMapTop Z Adjusted.
+	//const CUOMapMeter* pMapTop = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)); 
 	if (!pMapTop)
 		return;
-    //DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
+	//DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
     if (pMapTop->m_wTerrainIndex == TERRAIN_HOLE)
     {
         dwBlockThis = 0;
@@ -1517,9 +1519,9 @@ short CWorldMap::GetAreaAverage(CUOMapMeter* pPointTop, const CUOMapMeter* pPoin
 	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
 }
 
-const CUOMapMeter* CWorldMap::CheckMapTerrain(CUOMapMeter* pDefault, const short x, const short y)
+const CUOMapMeter* CWorldMap::CheckMapTerrain(CUOMapMeter* pDefault, short x, short y, char z, uchar map)
 {
-	CPointMap pt = { x, y };
+	CPointMap pt = { x, y, 0, map };
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
 		return pDefault;
