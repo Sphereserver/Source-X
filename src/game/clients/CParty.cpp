@@ -569,7 +569,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 			else
 			{
 				lpctstr ptcArg = s.GetArgStr();
-				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.ResourceGetDefByName(RES_FUNCTION, ptcArg));
+				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.RegisteredResourceGetDefByName(RES_FUNCTION, ptcArg));
 
 				if ( !m_pTestEvent )
 					return false;

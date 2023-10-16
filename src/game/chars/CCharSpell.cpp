@@ -2433,7 +2433,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			{
 				if ( fFailMsg )
 				{
-					const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((pSpellDef->m_Reags)[iMissingReagents].GetResourceID() );
+					const CResourceDef * pReagDef = g_Cfg.RegisteredResourceGetDef((pSpellDef->m_Reags)[iMissingReagents].GetResourceID() );
 					SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 				}
 				return false;

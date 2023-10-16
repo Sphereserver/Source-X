@@ -170,11 +170,11 @@ void CChatChannel::RenameChannel(CChatChanMember * pBy, lpctstr pszName)
 void CChatChannel::KickAll(CChatChanMember * pMemberException)
 {
     ADDTOCALLSTACK("CChatChannel::KickAll");
-    for (size_t i = 0; i < m_Members.size(); i++)
+    for (size_t i = 0; i < m_Members.size(); ++i)
     {
-        if ( m_Members[i] == pMemberException) // If it's not me, then kick them
+        if ( m_Members[i].get() == pMemberException) // If it's not me, then kick them
             continue;
-        KickMember( pMemberException, m_Members[i] );
+        KickMember( pMemberException, m_Members[i].get() );
     }
 }
 
@@ -189,18 +189,18 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
         if ( pClient == nullptr )		//	auto-remove offline clients
         {
             m_Members[i]->SetChannel(nullptr);
-            m_Members.erase_at(i);
+            m_Members.remove(i);
             continue;
         }
 
         pClient->addChatSystemMessage(CHATMSG_RemoveMember, pMember->GetChatName());
-        if (m_Members[i] == pMember)	// disjoin
+        if (m_Members[i].get() == pMember)	// disjoin
         {
-            m_Members.erase_at(i);
+            m_Members.remove(i);
             break;
         }
 
-        i++;
+        ++i;
     }
 
     // Update our persona
@@ -212,7 +212,7 @@ CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
     size_t i = FindMemberIndex( pszName );
     if ( i == SCONT_BADINDEX )
         return nullptr;
-    return m_Members[i];
+    return m_Members[i].get();
 }
 
 bool CChatChannel::RemoveMember(lpctstr pszName)
@@ -261,13 +261,13 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
         if (m_Moderators[i]->Compare(pszMember) == 0)
         {
             if (fFlag == false)
-                m_Moderators.erase_at(i);
+                m_Moderators.remove(i);
             return;
         }
     }
     if (fFlag)
     {
-        m_Moderators.push_back(new CSString(pszMember));
+        m_Moderators.emplace_back(std::make_unique<CSString>(pszMember));
     }
 }
 
@@ -319,7 +319,7 @@ bool CChatChannel::AddMember(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::AddMember");
     pMember->SetChannel(this);
-    m_Members.push_back(pMember);
+    m_Members.emplace_back(pMember);
     // See if only moderators have a voice by default
     lpctstr pszName = pMember->GetChatName();
     if (!GetVoiceDefault() && !IsModerator(pszName))
@@ -332,10 +332,10 @@ bool CChatChannel::AddMember(CChatChanMember * pMember)
 void CChatChannel::SendMembers(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::SendMembers");
-    for (size_t i = 0; i < m_Members.size(); i++)
+    for (size_t i = 0; i < m_Members.size(); ++i)
     {
         CSString sName;
-        g_Serv.m_Chats.DecorateName(sName, m_Members[i]);
+        g_Serv.m_Chats.DecorateName(sName, m_Members[i].get());
         pMember->SendChatMsg(CHATMSG_SendPlayerName, sName);
     }
 }
@@ -374,13 +374,13 @@ void CChatChannel::SetVoice(lpctstr pszName, bool fFlag)
         if (m_NoVoices[i]->Compare(pszName) == 0)
         {
             if (fFlag == true)
-                m_NoVoices.erase_at(i);
+                m_NoVoices.remove(i);
             return;
         }
     }
     if (fFlag == false)
     {
-        m_NoVoices.push_back(new CSString(pszName));
+        m_NoVoices.emplace_back(std::make_unique<CSString>(pszName));
         return;
     }
 }

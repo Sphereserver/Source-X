@@ -8,6 +8,7 @@
 
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjList.h"
+#include "../common/sphere_library/sptr_containers.h"
 #include "../common/CScript.h"
 #include "../common/CUID.h"
 #include "CSectorList.h"
@@ -15,7 +16,7 @@
 #include "CWorldClock.h"
 #include "CWorldTicker.h"
 
-class CItemTypeDef;
+class CResourceDef;
 class CSector;
 class CObjBaseTemplate;
 class CObjBase;
@@ -160,13 +161,13 @@ public:
 
 	CSObjList m_GMPages;		// Current outstanding GM pages. (CGMPage)
 
-	CSPtrTypeArray<CItemStone*> m_Stones;	// links to leige/town stones. (not saved array)
+	CSUniquePtrVector<CItemStone> m_Stones;	// links to leige/town stones. (not saved array)
 	CSObjList m_Parties;	// links to all active parties. CPartyDef
 
 	static lpctstr const sm_szLoadKeys[];
-	CSPtrTypeArray <CItemTypeDef *> m_TileTypes;
+	CSWeakPtrVector<CResourceDef> m_TileTypes;	// CItemTypeDef
 
-	CSPtrTypeArray<CItemMulti*> m_Multis;	//
+	CSUniquePtrVector<CItemMulti> m_Multis;	//
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );

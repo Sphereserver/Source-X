@@ -1686,7 +1686,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	// randomize the skills first.
 	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
+		if ( g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			Skill_SetBase((SKILL_TYPE)i, (ushort)Calc_GetRandVal(g_Cfg.m_iMaxBaseSkill));
 	}
 
@@ -1719,15 +1719,15 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	Stat_SetBase(STAT_DEX, wDex);
 	Stat_SetBase(STAT_INT, wInt);
 
-	if ( IsSkillBase(skSkill1) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill1) )
+	if ( IsSkillBase(skSkill1) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill1) )
 		Skill_SetBase(skSkill1, uiSkillVal1 * 10);
-	if ( IsSkillBase(skSkill2) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill2) )
+	if ( IsSkillBase(skSkill2) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill2) )
 		Skill_SetBase(skSkill2, uiSkillVal2 * 10);
-	if ( IsSkillBase(skSkill3) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill3) )
+	if ( IsSkillBase(skSkill3) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill3) )
 		Skill_SetBase(skSkill3, uiSkillVal3 * 10);
 	if ( skSkill4 != SKILL_NONE )
 	{
-		if ( IsSkillBase(skSkill4) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill4) )
+		if ( IsSkillBase(skSkill4) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill4) )
 			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
@@ -3965,7 +3965,7 @@ void CChar::r_Write( CScript & s )
 
 	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) )
+		if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)j) )
 			continue;
         const ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
         if (uiSkillVal == 0)
@@ -4100,7 +4100,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				ushort uiVal = s.GetArgUSVal();
 				for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 				{
-					if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
+					if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) )
 						continue;
 
 					Skill_SetBase((SKILL_TYPE)i, uiVal );
@@ -4647,7 +4647,7 @@ bool CChar::OnTriggerSpeech( bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMOD
 		goto lbl_cchar_ontriggerspeech;
 
 	{
-		CScriptObj * pDef = g_Cfg.ResourceGetDefByName( RES_SPEECH, pszName );
+		CScriptObj * pDef = g_Cfg.RegisteredResourceGetDefByName( RES_SPEECH, pszName );
 		if ( pDef )
 		{
 			CResourceLink * pLink	= dynamic_cast <CResourceLink *>( pDef );

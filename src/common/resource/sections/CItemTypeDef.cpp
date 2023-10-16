@@ -1,3 +1,4 @@
+#include "../../../game/CServerConfig.h"
 #include "../../../game/CWorld.h"
 #include "../../../sphere/threads.h"
 #include "../../CException.h"
@@ -51,9 +52,12 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
             iLo	= iTmp;
         }
 
+        // Get the weak ptr from reshash
+        std::weak_ptr<CResourceDef> def_registered = g_Cfg.RegisteredResourceGetDefRef(GetResourceID());
+        ASSERT(!def_registered.expired());
         for (llong i = iLo; i <= iHi; ++i )
         {
-            g_World.m_TileTypes.assign_at_grow(size_t(i), this);
+            g_World.m_TileTypes.emplace_index_grow(i, def_registered);
         }
         return true;
     }

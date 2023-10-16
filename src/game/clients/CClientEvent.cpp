@@ -615,7 +615,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 	if ( m_pChar == nullptr )
 		return;
 
-	if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
+	if ( !g_Cfg.m_SkillIndexDefs.valid_index(skill) )
 	{
 		SysMessage( "There is no such skill. Please tell support you saw this message.");
 		return;
@@ -2616,7 +2616,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 
 				for (unsigned int i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 				{
-					if (!g_Cfg.m_SkillIndexDefs.IsValidIndex(i))
+					if (!g_Cfg.m_SkillIndexDefs.valid_index(i))
 						continue;
 					if (i == SKILL_SPELLWEAVING)
 						continue;

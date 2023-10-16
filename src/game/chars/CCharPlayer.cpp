@@ -70,7 +70,7 @@ CMultiStorage* CCharPlayer::GetMultiStorage()
 bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 {
 	ADDTOCALLSTACK("CCharPlayer::SetSkillClass");
-	CResourceDef * pDef = g_Cfg.ResourceGetDef(rid);
+	CResourceDef * pDef = g_Cfg.RegisteredResourceGetDef(rid);
 	if ( !pDef )
 		return false;
 

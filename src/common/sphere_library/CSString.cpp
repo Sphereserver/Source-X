@@ -47,7 +47,8 @@
 
 // CSString:: Constructors
 
-CSString::CSString(bool fDefaultInit)
+CSString::CSString(bool fDefaultInit) :
+	m_pchData(nullptr)
 {
 #ifdef DEBUG_STRINGS
 	++gAmount;
@@ -67,19 +68,22 @@ CSString::CSString(bool fDefaultInit)
 	}
 }
 
-CSString::CSString(lpctstr pStr)
+CSString::CSString(lpctstr pStr) :
+	m_pchData(nullptr)
 {
 	Init();
 	Copy(pStr);
 }
 
-CSString::CSString(lpctstr pStr, int iLen)
+CSString::CSString(lpctstr pStr, int iLen) :
+	m_pchData(nullptr)
 {
 	Init();
 	CopyLen(pStr, iLen);
 }
 
-CSString::CSString(const CSString& s)
+CSString::CSString(const CSString& s) :
+	m_pchData(nullptr)
 {
 	Init();
 	Copy(s.GetBuffer());
@@ -94,7 +98,8 @@ void CSString::Init()
 	gMemAmount += m_iMaxLength;
 #endif
 	m_iLength = 0;
-	m_pchData = new tchar[size_t(m_iMaxLength + 1)];
+	if (m_pchData == nullptr)
+		m_pchData = new tchar[size_t(m_iMaxLength + 1)];
 	m_pchData[m_iLength] = '\0';
 }
 

@@ -231,7 +231,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 
 				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
-					CItemStone * pStone = g_World.m_Stones[i];
+					CItemStone * pStone = g_World.m_Stones[i].get();
 					if ( !pStone || !pStone->IsType(needtype) )
 						continue;
 

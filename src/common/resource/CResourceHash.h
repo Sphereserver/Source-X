@@ -7,6 +7,7 @@
 #define _INC_CRESOURCEHASH_H
 
 #include "../sphere_library/CSObjSortArray.h"
+#include "../sphere_library/sptr_containers.h"
 #include "CResourceID.h"
 
 class CResourceDef;
@@ -14,11 +15,11 @@ class CResourceDef;
 
 struct CResourceHashArraySorter
 {
-    bool operator()(const CResourceDef* pObjStored, const CResourceDef* pObj) const;
+    bool operator()(std::shared_ptr<CResourceDef> const& pObjStored, std::shared_ptr<CResourceDef> const& pObj) const;
 };
-class CResourceHashArray : public CSSortedVector< CResourceDef*, CResourceHashArraySorter >
+class CResourceHashArray : public CSSharedPtrSortedVector<CResourceDef, CResourceHashArraySorter>
 {
-    static int _compare(const CResourceDef* pObjStored, CResourceID const& rid);
+    static int _compare(std::shared_ptr<CResourceDef> const& pObjStored, CResourceID const& rid);
 
 public:
     // This list OWNS the CResourceDef and CResourceLink objects.
@@ -42,7 +43,7 @@ struct CResourceHash
     CResourceHash& operator=(const CResourceHash&) = delete;
 
 private:
-    inline int GetHashArray(const CResourceID& rid) const
+    inline uint GetHashArray(const CResourceID& rid) const
     {
         return (rid.GetResIndex() & 0x0F);
     }
@@ -52,9 +53,13 @@ public:
     {
         return m_Array[GetHashArray(rid)].find_sorted(rid);
     }
-    inline CResourceDef* GetAt(const CResourceID& rid, size_t index) const
+    inline std::weak_ptr<CResourceDef> GetWeakPtrAt(const CResourceID& rid, size_t index) const
     {
-        return m_Array[GetHashArray(rid)][index];
+        return std::weak_ptr<CResourceDef>(m_Array[GetHashArray(rid)][index]);
+    }
+    inline CResourceDef* GetBarePtrAt(const CResourceID& rid, size_t index) const
+    {
+        return m_Array[GetHashArray(rid)][index].get();
     }
 
     void AddSortKey(CResourceID const& rid, CResourceDef* pNew);

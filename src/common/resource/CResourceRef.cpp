@@ -83,6 +83,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
     int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, ARRAY_COUNT(ppBlocks));
     for ( int i = 0; i < iArgCount; ++i )
     {
+        std::shared_ptr<CResourceDef> pResourceDefRef;
         CResourceLink* pResourceLink = nullptr;
 
         pszCmd = ppBlocks[i];
