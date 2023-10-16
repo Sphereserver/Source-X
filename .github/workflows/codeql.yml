@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: CodeQL
 # https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning
 
 on:
@@ -10,13 +10,14 @@ on:
       - '**.txt'
       - '**.md'
       - '**.rc'
+  workflow_dispatch:
 
 #  pull_request:
     # The branches below must be a subset of the branches above
 #    branches: ["static-analysis"]
 
-  schedule:
-    - cron: '45 2 * * 0'
+  #schedule:
+  #  - cron: '45 2 * * 0'
 
 jobs:
   analyze:

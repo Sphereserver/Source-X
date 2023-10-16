@@ -9,6 +9,7 @@ on:
         - '**.txt'
         - '**.md'
         - '**.rc'
+  workflow_dispatch:
 
 jobs:
   latest:
