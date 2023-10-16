@@ -4,10 +4,6 @@ function (toolchain_force_compiler)
 endfunction ()
 
 
-function (toolchain_after_project_common)
-endfunction ()
-
-
 function (toolchain_exe_stuff_common)
 
 	SET (ENABLED_SANITIZER false)

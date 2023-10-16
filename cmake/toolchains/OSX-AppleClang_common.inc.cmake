@@ -1,11 +1,7 @@
 function (toolchain_force_compiler)
 	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
 	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
-endfunction ()
-
-LINK_DIRECTORIES ("/usr/local/opt/mariadb-connector-c/lib/mariadb")
-
-function (toolchain_after_project_common)
+	LINK_DIRECTORIES ("/usr/local/opt/mariadb-connector-c/lib/mariadb")
 endfunction ()
 
 
@@ -30,7 +26,7 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
 shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
-float-divide-by-zero,float-cast-overflow,pointer-overflow,object-size,\
+float-divide-by-zero,float-cast-overflow,pointer-overflow,\
 unreachable,nonnull-attribute,returns-nonnull-attribute \
 -fno-sanitize=enum")
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")

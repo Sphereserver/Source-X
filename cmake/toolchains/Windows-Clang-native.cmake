@@ -6,7 +6,7 @@ function (toolchain_after_project)
 
 	SET(CMAKE_SYSTEM_NAME	"Windows"      PARENT_SCOPE)
 
-	toolchain_after_project_common()
+	toolchain_after_project_common()	# To enable RC language, to compile Windows Resource files
 
 	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
         MESSAGE (STATUS "Detected 64 bits architecture")
