@@ -8,6 +8,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
+#include "items/CItemMulti.h"
 #include "CServer.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
@@ -1618,7 +1619,7 @@ void CWorld::Restock()
 	{
 		for ( size_t j = 0; j < g_Cfg.m_ResHash.m_Array[i].size(); ++j )
 		{
-			CResourceDef * pResDef = g_Cfg.m_ResHash.m_Array[i][j];
+			CResourceDef * pResDef = g_Cfg.m_ResHash.m_Array[i][j].get();
 			if ( pResDef == nullptr || ( pResDef->GetResType() != RES_ITEMDEF ))
 				continue;
 

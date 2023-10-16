@@ -179,9 +179,9 @@ CItemTypeDef* CWorldMap::GetTerrainItemTypeDef(dword dwTerrainIndex) // static
 	ADDTOCALLSTACK("CWorldMap::GetTerrainItemTypeDef");
 	CResourceDef* pRes = nullptr;
 
-	if (g_World.m_TileTypes.IsValidIndex(dwTerrainIndex))
+	if (g_World.m_TileTypes.valid_index(dwTerrainIndex))
 	{
-		pRes = g_World.m_TileTypes[dwTerrainIndex];
+		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].lock().get());
 	}
 
 	if (!pRes)
@@ -202,9 +202,9 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 	ADDTOCALLSTACK("CWorldMap::GetTerrainItemType");
 	CResourceDef* pRes = nullptr;
 
-	if (g_World.m_TileTypes.IsValidIndex(dwTerrainIndex))
+	if (g_World.m_TileTypes.valid_index(dwTerrainIndex))
 	{
-		pRes = g_World.m_TileTypes[dwTerrainIndex];
+		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].lock().get());
 	}
 
 	if (!pRes)

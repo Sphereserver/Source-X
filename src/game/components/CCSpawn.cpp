@@ -138,7 +138,7 @@ const CResourceDef* CCSpawn::_FixDef()
     const CResourceDef* pResDef;
     if (resType != RES_UNKNOWN)
     {
-        pResDef = g_Cfg.ResourceGetDef(_idSpawn);
+        pResDef = g_Cfg.RegisteredResourceGetDef(_idSpawn);
         if (pResDef)
             return pResDef;     // valid spawn
     }
@@ -169,7 +169,7 @@ const CResourceDef* CCSpawn::_FixDef()
         {
             // try a spawn group.
             const CResourceIDBase rid(RES_SPAWN, iIndex);
-            pResDef = g_Cfg.ResourceGetDef(rid);
+            pResDef = g_Cfg.RegisteredResourceGetDef(rid);
             if (pResDef)
             {
                 g_Log.EventDebug("CCSpawn::FixDef fixed on spawner with UID=0%x a SPAWN type resource from Resource ID 0%" PRIx32 " to 0%" PRIx32 ".\n", uiItemUID, _idSpawn.GetPrivateUID(), rid.GetPrivateUID());
@@ -215,7 +215,7 @@ const CResourceDef* CCSpawn::_FixDef()
         {
             // try a template.
             const CResourceIDBase rid(RES_TEMPLATE, iIndex);
-            pResDef = g_Cfg.ResourceGetDef(rid);
+            pResDef = g_Cfg.RegisteredResourceGetDef(rid);
             if (pResDef)
             {
                 g_Log.EventDebug("CCSpawn::FixDef fixed on spawner with UID=0%x a TEMPLATE type resource from Resource ID 0%" PRIx32 " to 0%" PRIx32 ".\n", uiItemUID, _idSpawn.GetPrivateUID(), rid.GetPrivateUID());
@@ -262,7 +262,7 @@ uint CCSpawn::WriteName(tchar *ptcOut) const
 {
     ADDTOCALLSTACK("CCSpawn::GetName");
     lpctstr ptcName = nullptr;
-    const CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
+    const CResourceDef *pDef = g_Cfg.RegisteredResourceGetDef(_idSpawn);
     if (pDef != nullptr)
         ptcName = pDef->GetName();
     if (pDef == nullptr || ptcName == nullptr || ptcName[0] == '\0')
@@ -938,7 +938,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     {
                         // it should be a spawn group.
                         CResourceIDBase ridTemp(RES_SPAWN, iRidIndex);
-                        CResourceDef *pDef = g_Cfg.ResourceGetDef(ridTemp);
+                        CResourceDef *pDef = g_Cfg.RegisteredResourceGetDef(ridTemp);
                         if (pDef)
                         {
                             _idSpawn = ridTemp;
@@ -969,7 +969,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     {
                         // try a template
                         CResourceIDBase ridTemp(RES_TEMPLATE, iRidIndex);
-                        CResourceDef *pDef = g_Cfg.ResourceGetDef(ridTemp);
+                        CResourceDef *pDef = g_Cfg.RegisteredResourceGetDef(ridTemp);
                         if (pDef)
                         {
                             _idSpawn = ridTemp;

@@ -1247,7 +1247,7 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_ridRes);
+					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
 					if ( pResDef )
 						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
 				}
@@ -1866,7 +1866,7 @@ void CClient::addSkillWindow(SKILL_TYPE skill, bool fFromInfo) const // Opens th
 		pChar = m_pChar;
 
 	bool fAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
-	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
+	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.valid_index(skill) == false)
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERSKILLS) )

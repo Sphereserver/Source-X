@@ -1,4 +1,4 @@
-#include "../common/sphere_library/container_ops.h"
+#include "../common/sphere_library/scontainer_ops.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"

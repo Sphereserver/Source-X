@@ -48,7 +48,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 		}
 		else if ( !bHex && ( ch == '.' ) )
 		{
-			pszStr++;
+			++ pszStr;
 			continue;
 		}
 		else
@@ -56,7 +56,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 
 		val *= ( bHex ? 0x10 : 10 );
 		val += ch;
-		pszStr ++;
+		++ pszStr;
 	}
 	return val;
 }

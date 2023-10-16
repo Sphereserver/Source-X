@@ -18,11 +18,12 @@ CSMemBlock::~CSMemBlock()
 void CSMemBlock::Alloc( size_t uiSize )
 {
     Free();
+    ASSERT(m_pData == nullptr);
     if ( uiSize > 0 )
         m_pData = AllocBase(uiSize);
 }
 
-byte * CSMemBlock::AllocBase( size_t uiSize )
+byte * CSMemBlock::AllocBase( size_t uiSize )  // Static
 {
     ASSERT(uiSize > 0);
     byte * pData = new byte[ uiSize ];
