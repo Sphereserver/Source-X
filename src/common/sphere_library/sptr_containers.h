@@ -80,7 +80,7 @@ public:
 
     template <typename... _ArgPackType>
     inline void emplace_front(_ArgPackType&&... args) {
-        _base_type::emplace(_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+        this->_base_type::emplace(this->_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
     }
 
     // Explicitly create a unique_ptr, then add to this container.
@@ -144,7 +144,7 @@ public:
 
     template <typename... _ArgPackType>
     inline void emplace_front(_ArgPackType&&... args) {
-        _base_type::emplace(_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+        this->_base_type::emplace(this->_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
     }
 
     // Explicitly create a unique_ptr, then add to this container.
@@ -190,7 +190,7 @@ public:
 
     template <typename... _ArgPackType>
     inline void emplace_front(_ArgPackType&&... args) {
-        _base_type::emplace(_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+        this->_base_type::emplace(this->_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
     }
 };
 template <typename _Type, typename _Comp = std::less<_Type>>
