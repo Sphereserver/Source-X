@@ -229,7 +229,7 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
 	EXC_TRY("Call by index");
     ASSERT(r_CanCall(uiFunctionIndex));
 
-    CResourceNamedDef * pFunction = static_cast <CResourceNamedDef *>( g_Cfg.m_Functions[uiFunctionIndex] );
+    CResourceNamedDef * pFunction = g_Cfg.m_Functions[uiFunctionIndex].get();
     ASSERT(pFunction);
     CResourceLock sFunction;
     if ( pFunction->ResourceLock(sFunction) )

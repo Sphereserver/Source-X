@@ -14,15 +14,15 @@ public:
     using _base_type = std::vector<_PtrWrapperType>;
     using iterator = typename _base_type::iterator;
 
-    inline void remove(const size_t index) {
+    inline void erase_index(const size_t index) {
         _base_type::erase(_base_type::begin() + index);
     }
 
-    void remove(_Type* elem) {
+    void erase_element(_Type* elem) {
         size_t idx = 0;
         for (_PtrWrapperType const& ptr : *this) {
             if (ptr.get() == elem) {
-                remove(idx);
+                this->erase_index(idx);
                 return;
             }
             ++idx;
@@ -63,7 +63,7 @@ template <typename _Type>
 class CSUniquePtrVector : public _CSPtrVectorBase<_Type, std::unique_ptr<_Type>>
 {
 public:
-    template <typename _PtrType = std::unique_ptr<_Type>>  // Gets both bare pointer and shared_ptr
+    template <typename _PtrType = std::unique_ptr<_Type>>  // Gets both bare pointer and unique_ptr
     void emplace_index_grow(size_t index, _PtrType value) {
         if (index >= this->size()) {
             this->resize(index + 1); // The capacity will be even greater, since it calls vector::resize
@@ -74,13 +74,17 @@ public:
             this->operator[](index) = value;
     }
 
-    //template <typename _TypePtr = std::nullptr_t>
     inline void emplace_index_grow(size_t index, std::nullptr_t) {
         this->emplace_index_grow(index, std::unique_ptr<_Type>());
     }
 
-    //template <>
-    void emplace_index_grow(size_t, _Type*) = delete;
+    template <typename... _ArgPackType>
+    inline void emplace_front(_ArgPackType&&... args) {
+        _base_type::emplace(_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+    }
+
+    // Explicitly create a unique_ptr, then add to this container.
+    //void emplace_index_grow(size_t, _Type*) = delete;
 
     /*
     template <typename... _ArgType>
@@ -134,13 +138,17 @@ public:
             this->operator[](index) = value;
     }
 
-    //emplate <typename _PtrType = std::nullptr_t>
     inline void emplace_index_grow(size_t index, std::nullptr_t) {
         this->emplace_index_grow(index, std::shared_ptr<_Type>());
     }
 
-    //template <>
-    void emplace_index_grow(size_t, _Type*) = delete;
+    template <typename... _ArgPackType>
+    inline void emplace_front(_ArgPackType&&... args) {
+        _base_type::emplace(_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+    }
+
+    // Explicitly create a unique_ptr, then add to this container.
+    //void emplace_index_grow(size_t, _Type*) = delete;
 
     /*
     template <typename... _ArgType>
@@ -171,7 +179,6 @@ public:
         this->operator[](index) = std::forward<_ArgType>(value);
     }
 
-    //template <typename _PtrType = std::nullptr_t>
     void emplace_index_grow(size_t index, std::nullptr_t) {
         if (index >= this->size()) {
             this->resize(index); // The capacity will be even greater, since it calls vector::resize
@@ -179,6 +186,11 @@ public:
         else {
             this->operator[](index).reset();
         }
+    }
+
+    template <typename... _ArgPackType>
+    inline void emplace_front(_ArgPackType&&... args) {
+        _base_type::emplace(_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
     }
 };
 template <typename _Type, typename _Comp = std::less<_Type>>

@@ -16,12 +16,15 @@
 #include "CWorldClock.h"
 #include "CWorldTicker.h"
 
-class CResourceDef;
-class CSector;
+
+class CGMPage;
+class CPartyDef;
 class CObjBaseTemplate;
 class CObjBase;
 class CItemStone;
 class CItemMulti;
+class CResourceDef;
+class CSector;
 
 
 enum IMPFLAGS_TYPE	// IMPORT and EXPORT flags.
@@ -139,8 +142,8 @@ private:
 // World data.
 private:
 	// Special purpose timers.
-	int64	_iTimeLastWorldSave;		// when to auto do the worldsave ?
 	bool	_fSaveNotificationSent;		// has notification been sent?
+	int64	_iTimeLastWorldSave;		// when to auto do the worldsave ?
 	int64	_iTimeLastDeadRespawn;		// when to res dead NPC's ?
 	int64	_iTimeLastCallUserFunc;		// when to call next user func
 	ullong	m_ticksWithoutMySQL;		// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
@@ -149,25 +152,25 @@ private:
 	llong	_iSaveTimer;	// Time it takes to save
 
 public:
+	int64 _iTimeStartup;		// When did the system restore load/save ?
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__
-	int64 _iTimeStartup;		// When did the system restore load/save ?
 
 	CUID m_uidLastNewItem;	// for script access.
 	CUID m_uidLastNewChar;	// for script access.
 	CUID m_uidObj;			// for script access - auxiliary obj
 	CUID m_uidNew;			// for script access - auxiliary obj
 
-	CSObjList m_GMPages;		// Current outstanding GM pages. (CGMPage)
+	CSUniquePtrVector<CGMPage>    m_GMPages;	// Owns current outstanding GM pages. (CGMPage)
+	CSUniquePtrVector<CItemStone> m_Stones;		// Owns guild/town stones. (not saved array)
+	CSUniquePtrVector<CPartyDef>  m_Parties;	// Owns all active parties.
+	CSUniquePtrVector<CItemMulti> m_Multis;		//
+	CSWeakPtrVector<CResourceDef> m_TileTypes;	// Links to CItemTypeDef items owned by g_Cfg.m_ResHash
 
-	CSUniquePtrVector<CItemStone> m_Stones;	// links to leige/town stones. (not saved array)
-	CSObjList m_Parties;	// links to all active parties. CPartyDef
-
-	static lpctstr const sm_szLoadKeys[];
-	CSWeakPtrVector<CResourceDef> m_TileTypes;	// CItemTypeDef
-
-	CSUniquePtrVector<CItemMulti> m_Multis;	//
+public:
+	CWorld();
+	virtual ~CWorld();
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );
@@ -184,16 +187,13 @@ private:
 	friend class CServer;
 	void SyncGameTime() noexcept;
 
-
-public:
-	CWorld();
-	virtual ~CWorld();
-
 private:
 	CWorld(const CWorld& copy);
 	CWorld& operator=(const CWorld& other);
 
 public:
+	static lpctstr const sm_szLoadKeys[];
+
 	void Init();
 
 	void r_Write(CScript& s);

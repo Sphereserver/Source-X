@@ -1483,7 +1483,7 @@ const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
 	const size_t i = m_SkillNameDefs.find_sorted(ptcKey);
     if ( i == SCONT_BADINDEX )
         return nullptr;
-    return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
+    return m_SkillNameDefs[i].get();
 }
 
 const CSkillDef * CServerConfig::SkillLookup( lpctstr ptcKey )
@@ -3283,6 +3283,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 
+		ASSERT(pScript);
 		CScriptLineContext LineContext = pScript->GetContext();
 		pNewLink->r_Load(*pScript);
 		pScript->SeekContext( LineContext );
@@ -3570,12 +3571,11 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
             if (pLinkResScript != nullptr)
                 pNewLink->SetLink(pLinkResScript);
 
-            m_Functions.emplace(pNewLink);
+            m_Functions.emplace(static_cast<CResourceNamedDef*>(pNewLink));
         }
         else
         {
-            pNewLink = dynamic_cast<CResourceNamedDef*>(m_Functions[uiFunctionIndex]);
-            ASSERT(pNewLink);
+            pNewLink = m_Functions[uiFunctionIndex].get();
         }
 	}
 		break;
