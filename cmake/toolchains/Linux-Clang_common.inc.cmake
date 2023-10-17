@@ -4,16 +4,17 @@ function (toolchain_force_compiler)
 endfunction ()
 
 
-function (toolchain_after_project_common)
-endfunction ()
-
-
 function (toolchain_exe_stuff_common)
 
 	SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_MSAN})
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
@@ -23,8 +24,9 @@ function (toolchain_exe_stuff_common)
 	ENDIF ()
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
-shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
-float-divide-by-zero,float-cast-overflow,pointer-overflow \
+shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
+float-divide-by-zero,float-cast-overflow,pointer-overflow,\
+unreachable,nonnull-attribute,returns-nonnull-attribute \
 -fno-sanitize=enum")
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
@@ -38,27 +40,36 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
-		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+		"-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
 		-Wno-parentheses -Wno-misleading-indentation -Wno-strict-aliasing -Wno-unused-result\
-		-Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
+		-Wno-error=unused-but-set-variable -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
-		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+		"-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
 		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result")
 	#SET (C_ARCH_OPTS	) # set in parent toolchain
 	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS			"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
-	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
+	SET (C_SPECIAL		"-pipe")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
 	SET (CMAKE_C_FLAGS		"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	# GCC flags not supported by clang:
+	#	Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
+	#	Other: "-fno-expensive-optimizations"
 
 
 	#-- Setting common linker flags
 
+	IF (${USE_MSAN})
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+	ENDIF()
+
 	 # -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
+	# Use "-stdlib=libstdc++" to link against GCC c/c++ libs (this is done by default)
+	# To use LLVM libc++ use "-stdlib=libc++", but you need to install it separately
 
 
 	#-- Adding compiler flags per build.
@@ -69,16 +80,20 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
 	 SET (COMPILE_OPTIONS_EXTRA)
 	 IF (ENABLED_SANITIZER OR TARGET spheresvr_debug)
-		 SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer)
+		 SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
 	 ENDIF ()
 	 IF (TARGET spheresvr_release)
 		 TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 ${COMPILE_OPTIONS_EXTRA})
 	 ENDIF ()
 	 IF (TARGET spheresvr_nightly)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		 IF (ENABLED_SANITIZER)
+			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+		 ELSE ()
+			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		 ENDIF ()
 	 ENDIF ()
 	 IF (TARGET spheresvr_debug)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline ${COMPILE_OPTIONS_EXTRA})
+		 TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
 	 ENDIF ()
 
 

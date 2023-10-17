@@ -469,7 +469,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 		// Create the party now.
 		pParty = new CPartyDef(pCharInviter, pCharAccept);
 		ASSERT(pParty);
-		g_World.m_Parties.InsertContentHead(pParty);
+		g_World.m_Parties.emplace_front(std::unique_ptr<CPartyDef>(pParty));
 		if (bSendMessages)
 			pCharInviter->SysMessage(pszMsg);
 	}
@@ -569,7 +569,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 			else
 			{
 				lpctstr ptcArg = s.GetArgStr();
-				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.ResourceGetDefByName(RES_FUNCTION, ptcArg));
+				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.RegisteredResourceGetDefByName(RES_FUNCTION, ptcArg));
 
 				if ( !m_pTestEvent )
 					return false;

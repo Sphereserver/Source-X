@@ -255,13 +255,14 @@ src/common/sphere_library/CSTime.cpp
 src/common/sphere_library/CSTime.h
 src/common/sphere_library/CSWindow.cpp
 src/common/sphere_library/CSWindow.h
-src/common/sphere_library/container_ops.h
+src/common/sphere_library/scontainer_ops.h
 src/common/sphere_library/smap.h
 src/common/sphere_library/smutex.h
 src/common/sphere_library/smutex.cpp
 src/common/sphere_library/squeues.h
 src/common/sphere_library/sresetevents.cpp
 src/common/sphere_library/sresetevents.h
+src/common/sphere_library/sptr_containers.h
 src/common/sphere_library/sstacks.h
 src/common/sphere_library/sstring.cpp
 src/common/sphere_library/sstring.h

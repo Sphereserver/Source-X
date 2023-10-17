@@ -33,7 +33,7 @@ CItemStone::~CItemStone()
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
 	// Remove this stone from the links of guilds in the world
-	g_World.m_Stones.RemovePtr( this );
+	g_World.m_Stones.erase_element(this);
 
     delete _pMultiStorage;
 	// all members are deleted automatically.

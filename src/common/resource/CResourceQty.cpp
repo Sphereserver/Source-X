@@ -37,7 +37,7 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
         if ( pItemBase )
             return( Str_CopyLen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
     }
-    const CScriptObj * pResourceDef = g_Cfg.ResourceGetDef( m_rid );
+    auto pResourceDef = static_cast<const CScriptObj *>(g_Cfg.RegisteredResourceGetDef(m_rid));
     if ( pResourceDef != nullptr )
         return( Str_CopyLen( pszArgs, pResourceDef->GetName()) );
     else

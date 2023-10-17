@@ -1,8 +1,8 @@
-
 #include "../game/CServerConfig.h"
 #include "../game/CServer.h"
 #include "../game/CServerTime.h"
 #include "../sphere/asyncdb.h"
+#include "resource/sections/CResourceNamedDef.h"
 #include "CLog.h"
 #include "CException.h"
 #include "CScriptTriggerArgs.h"

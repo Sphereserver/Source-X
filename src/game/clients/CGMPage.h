@@ -9,11 +9,12 @@
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CRect.h"
+#include "../CServerTime.h"
 #include "CAccount.h"
 
 
 class CClient;
-class CGMPage : public CSObjListRec, public CScriptObj
+class CGMPage : public CScriptObj
 {
 	// RES_GMPAGE
 public:
@@ -38,9 +39,6 @@ public:
 
 	virtual lpctstr GetName() const override {
         return m_sAccount;
-    }
-	CGMPage* GetNext() const {
-        return static_cast<CGMPage*>(CSObjListRec::GetNext());
     }
 
 	void r_Write(CScript& s) const;

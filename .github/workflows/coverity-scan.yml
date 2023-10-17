@@ -9,6 +9,7 @@ on:
         - '**.txt'
         - '**.md'
         - '**.rc'
+  workflow_dispatch:
 
 jobs:
   latest:
@@ -19,10 +20,14 @@ jobs:
           with:
             fetch-depth: 0
 
-        - name: Install prerequisites
+        - name: Setup container
           run:  |
                 lsb_release -d
-    
+              #  sysctl vsyscall=emulate
+              # Needed by cov-scan binary?
+
+        - name: Install prerequisites
+          run:  |
                 sudo add-apt-repository universe && sudo sudo apt-get -qq update
                 sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
                 sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
@@ -35,15 +40,14 @@ jobs:
                 echo && echo "Ninja:" && ninja --version
 
         - name: Download Coverity Build Tool
+          env:
+            TOKEN: ${{ secrets.COVERITY_TOKEN }}
 #echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
           run:  |
-                wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=SphereServer-X" -O cov-analysis-linux64.tar.gz
+                wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=$COVERITY_TOKEN&project=SphereServer/Source-X" -O cov-analysis-linux64.tar.gz
                 mkdir cov-analysis-linux64
                 tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
                 export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
-                
-          env:
-            TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
     
         - name: CMake
           run: |
@@ -54,6 +58,7 @@ jobs:
           run: |        
                 cd build
                 cov-build --dir cov-int make
+                tail cov-int/build-log.txt
 
         - name: Coverity build log
           run:  |

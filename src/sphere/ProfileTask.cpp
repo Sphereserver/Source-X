@@ -3,7 +3,7 @@
 
 ProfileTask::ProfileTask(PROFILE_TYPE id) : m_context(nullptr), m_previousTask(PROFILE_OVERHEAD)
 {
-	m_context = static_cast<AbstractSphereThread *>(ThreadHolder::current());
+	m_context = static_cast<AbstractSphereThread *>(ThreadHolder::get()->current());
 	if (m_context != nullptr)
 	{
 		m_previousTask = m_context->m_profile.GetCurrentTask();

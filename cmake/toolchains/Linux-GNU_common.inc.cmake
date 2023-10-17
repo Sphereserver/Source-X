@@ -4,10 +4,6 @@ function (toolchain_force_compiler)
 endfunction ()
 
 
-function (toolchain_after_project_common)
-endfunction ()
-
-
 function (toolchain_exe_stuff_common)
 
 	SET (ENABLED_SANITIZER false)
@@ -15,6 +11,13 @@ function (toolchain_exe_stuff_common)
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (ENABLED_SANITIZER true)
+	ENDIF ()
+	IF (${USE_MSAN})
+		MESSAGE (FATAL_ERROR "Linux GCC doesn't yet support MSAN")
+		SET (USE_MSAN false)
+		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
@@ -24,7 +27,8 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
 shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict,\
-float-divide-by-zero,float-cast-overflow,pointer-overflow \
+float-divide-by-zero,float-cast-overflow,pointer-overflow,\
+unreachable,nonnull-attribute,returns-nonnull-attribute \
 -fno-sanitize=enum")
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
@@ -57,6 +61,10 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 
 	#-- Setting common linker flags
 
+	IF (${USE_MSAN})
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+	ENDIF()
+
 	 # -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
 
@@ -69,16 +77,20 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
 	 SET (COMPILE_OPTIONS_EXTRA)
 	 IF (ENABLED_SANITIZER OR TARGET spheresvr_debug)
-		 SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer)
+		 SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
 	 ENDIF ()
 	 IF (TARGET spheresvr_release)
 		 TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 ${COMPILE_OPTIONS_EXTRA})
 	 ENDIF ()
 	 IF (TARGET spheresvr_nightly)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		 IF (ENABLED_SANITIZER)
+			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+		 ELSE ()
+			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		 ENDIF ()
 	 ENDIF ()
 	 IF (TARGET spheresvr_debug)
-		 TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline ${COMPILE_OPTIONS_EXTRA})
+		 TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
 	 ENDIF ()
 
 

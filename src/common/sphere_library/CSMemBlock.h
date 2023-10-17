@@ -43,7 +43,7 @@ protected:
 	* @param dwSize size to alloc.
 	* @return pointer to the allocated data.
 	*/
-	byte * AllocBase( size_t uiSize );
+	static byte * AllocBase( size_t uiSize );
 public:
 	/**
 	* @brief Clear internal data pointer if it is not nullptr.

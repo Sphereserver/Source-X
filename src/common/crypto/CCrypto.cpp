@@ -20,7 +20,40 @@
 
 /*		Login keys from SphereCrypt.ini		*/
 
-std::vector<CCryptoClientKey> CCrypto::client_keys;
+CCryptoKeysHolder* CCryptoKeysHolder::get() noexcept
+{
+	static CCryptoKeysHolder instance;
+	return &instance;
+}
+
+void CCryptoKeysHolder::LoadKeyTable(CScript& s)
+{
+	ADDTOCALLSTACK("CCrypto::LoadKeyTable");
+	client_keys.clear();
+
+	// Always add nocrypt
+	addNoCryptKey();
+
+	while (s.ReadKeyParse())
+	{
+		CCryptoClientKey c;
+		c.m_client = ahextoi(s.GetKey());
+		c.m_key_1 = s.GetArgVal();
+		c.m_key_2 = s.GetArgVal();
+		c.m_EncType = (ENCRYPTION_TYPE)s.GetArgVal();
+		client_keys.emplace_back(std::move(c));
+	}
+}
+
+void CCryptoKeysHolder::addNoCryptKey(void)
+{
+	ADDTOCALLSTACK("CCrypto::addNoCryptKey");
+	CCryptoClientKey c{};
+	c.m_EncType = ENC_NONE;
+	client_keys.emplace_back(std::move(c));
+}
+
+// --
 
 void CCrypto::SetClientVersion( dword iVer )
 {
@@ -87,35 +120,6 @@ ENCRYPTION_TYPE CCrypto::GetEncryptionType() const
 	return m_GameEnc;
 }
 
-void CCrypto::LoadKeyTable(CScript & s)
-{
-	ADDTOCALLSTACK("CCrypto::LoadKeyTable");
-	client_keys.clear();
-
-	// Always add nocrypt
-	addNoCryptKey();
-
-	while ( s.ReadKeyParse() )
-	{
-		CCryptoClientKey c;
-		c.m_client = ahextoi( s.GetKey() );
-		c.m_key_1 = s.GetArgVal();
-		c.m_key_2 = s.GetArgVal();
-		c.m_EncType = (ENCRYPTION_TYPE)s.GetArgVal();
-		client_keys.emplace_back(c);
-	}
-}
-
-void CCrypto::addNoCryptKey(void)
-{
-	ADDTOCALLSTACK("CCrypto::addNoCryptKey");
-	CCryptoClientKey c;
-	c.m_client = 0;
-	c.m_key_1 = 0;
-	c.m_key_2 = 0;
-	c.m_EncType = ENC_NONE;
-	client_keys.emplace_back(c);
-}
 
 // ---------------------------------------------------------------------------------------------------------------
 // ===============================================================================================================
@@ -227,9 +231,10 @@ char* CCrypto::WriteClientVer( char * pcStr, uint uiBufLen) const
 bool CCrypto::SetClientVerEnum( dword iVer, bool bSetEncrypt )
 {
 	ADDTOCALLSTACK("CCrypto::SetClientVerEnum");
-	for (size_t i = 0; i < client_keys.size(); ++i )
+	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
+	for (size_t i = 0; i < keys_holder->client_keys.size(); ++i )
 	{
-		CCryptoClientKey & key = client_keys[i];
+		CCryptoClientKey & key = keys_holder->client_keys[i];
 
 		if ( iVer == key.m_client )
 		{
@@ -244,10 +249,12 @@ bool CCrypto::SetClientVerEnum( dword iVer, bool bSetEncrypt )
 bool CCrypto::SetClientVerIndex( size_t iVer, bool bSetEncrypt )
 {
 	ADDTOCALLSTACK("CCrypto::SetClientVerIndex");
-	if ( iVer >= client_keys.size() )
+	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
+
+	if ( iVer >= keys_holder->client_keys.size() )
 		return false;
 
-	CCryptoClientKey & key = client_keys[iVer];
+	CCryptoClientKey & key = keys_holder->client_keys[iVer];
 
 	SetClientVersion(key.m_client);
 	SetMasterKeys(key.m_key_1, key.m_key_2); // Hi - Lo
@@ -292,9 +299,11 @@ bool CCrypto::SetClientVer( lpctstr pszVersion )
 
 CCrypto::CCrypto()
 {
+	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
+
 	// Always at least one crypt code, for non encrypted clients!
-	if ( ! client_keys.size() )
-		addNoCryptKey();
+	if ( !keys_holder->client_keys.size() )
+		keys_holder->addNoCryptKey();
 
 	m_fInit = false;
 	m_fRelayPacket = false;
@@ -605,7 +614,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
     ASSERT(inLen <= MAX_BUFFER);
     std::unique_ptr<byte[]> pRaw = std::make_unique<byte[]>(MAX_BUFFER);
     memcpy(pRaw.get(), pEvent, inLen);
-	
+
 	m_seed = dwIP;
 	SetConnectType( CONNECT_LOGIN );
 
@@ -615,9 +624,11 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 	SetClientVerIndex(0);
 	SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 
+	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
+
 	for (uint i = 0, iAccountNameLen = 0;;)
 	{
-		if ( i >= client_keys.size() )
+		if ( i >= keys_holder->client_keys.size() )
 		{
 			// Unknown client !!! Set as unencrypted and let Sphere do the rest.
 #ifdef DEBUG_CRYPT_MSGS
@@ -746,9 +757,10 @@ bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
         const dword tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
         SetClientVerIndex(0);
 
+		CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
         for (size_t i = 0;;)
         {
-            if ( i >= client_keys.size() )
+            if ( i >= keys_holder->client_keys.size() )
             {
                 // Unknown client !!! Set as unencrypted and let Sphere do the rest.
 #ifdef DEBUG_CRYPT_MSGS
@@ -782,7 +794,7 @@ bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
                 if ( pRaw[34] == 0x00 && pRaw[64] == 0x00)
                 {
                     bOut = true;    // Ok the new detected encryption is ok (legit post-login packet: 0x91)
-                    SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); 
+                    SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
                     break;
                 }
             }

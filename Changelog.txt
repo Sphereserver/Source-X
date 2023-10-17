@@ -3381,6 +3381,11 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 08-10-2023, Nolok & xwerswoodx
 - Fixed: Setting P inside the @Click trigger made it being called endlessly.
 
-14-10-2023, Jhobean
+16-10-2023, Nolok
+- Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers. 
+- Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
+- Fixed: CSString instances becoming invalid after calling the Clear method.
+
+17-10-2023, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
 - Fixed: Item properties functionnality:HITLEECHMANA,HITLEECHSTAM
