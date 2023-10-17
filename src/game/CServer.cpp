@@ -1328,11 +1328,11 @@ bool CServer::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 	else if (!strnicmp(ptcKey, "GMPAGE.", 7))
 	{
 		ptcKey += 7;
-		size_t iNum = Exp_GetVal(ptcKey);
-		if (iNum >= g_World.m_GMPages.GetContentCount())
+		size_t iNum = Exp_GetULLVal(ptcKey);
+		if (iNum >= g_World.m_GMPages.size())
 			return false;
 
-		CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContentAt(iNum));
+		CGMPage* pGMPage = g_World.m_GMPages[iNum].get();
 		if (!pGMPage)
 			return false;
 
@@ -1483,10 +1483,10 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		{
 			ptcKey += 7;
 			size_t iNum = Exp_GetVal(ptcKey);
-			if (iNum >= g_World.m_GMPages.GetContentCount())
+			if (iNum >= g_World.m_GMPages.size())
 				return false;
 
-			CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContentAt(iNum));
+			CGMPage* pGMPage = g_World.m_GMPages[iNum].get();
 			if (!pGMPage)
 				return false;
 

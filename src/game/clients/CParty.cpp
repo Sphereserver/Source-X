@@ -469,7 +469,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 		// Create the party now.
 		pParty = new CPartyDef(pCharInviter, pCharAccept);
 		ASSERT(pParty);
-		g_World.m_Parties.InsertContentHead(pParty);
+		g_World.m_Parties.emplace_front(std::unique_ptr<CPartyDef>(pParty));
 		if (bSendMessages)
 			pCharInviter->SysMessage(pszMsg);
 	}

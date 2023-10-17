@@ -30,6 +30,7 @@ class CClient;
 class CServerDef;
 using CServerRef = CServerDef*;
 
+class CResourceNamedDef;
 
 /**
  * @enum    EF_TYPE
@@ -587,7 +588,7 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjNameSortVector           m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	CObjSharedPtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
 	CSSharedPtrVector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
     CSSharedPtrVector<CSpellDef> m_SpellDefs;			// Defined Spells.
     CSWeakPtrVector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
@@ -596,7 +597,7 @@ public:
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjNameSortVector m_Functions;	// Subroutines that can be used in scripts.
+    CObjSharedPtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
