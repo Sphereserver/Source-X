@@ -18,7 +18,7 @@ function (toolchain_after_project)
 		LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
 	ENDIF (CMAKE_SIZEOF_VOID_P EQUAL 8)
 	
-	ENABLE_LANGUAGE(RC)
+	toolchain_after_project_common()	# To enable RC language, to compile Windows Resource files
 endfunction()
 
 

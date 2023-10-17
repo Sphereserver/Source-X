@@ -11,9 +11,10 @@ template <class _Type, class _Comp = std::less<_Type>>
 class CSSortedVector : public std::vector<_Type>
 {
 public:
-    using iterator          = typename std::vector<_Type>::iterator;
-    using const_iterator    = typename std::vector<_Type>::const_iterator;
-    using size_type         = typename std::vector<_Type>::size_type;
+    using base_type         = typename std::vector<_Type>;
+    using iterator          = typename base_type::iterator;
+    using const_iterator    = typename base_type::const_iterator;
+    using size_type         = typename base_type::size_type;
 
 private:
     const _Comp _comparatorObj;
@@ -53,18 +54,27 @@ public:
     {
         //_Type * _obj = new _Type(std::forward<_ValType>(value)...);
         _Type _obj(std::forward<_ValType>(value)...);
-        const size_t _mySize = this->size();
-        const size_t _pos = (_mySize == 0) ? 0 : lower_element(_mySize, this->data(), _obj);
-        return std::vector<_Type>::emplace(this->begin() + _pos, std::move(_obj));
+        const size_t _mySize = base_type::size();
+        const size_t _pos = (_mySize == 0) ? 0 : this->lower_element(_mySize, base_type::data(), _obj);
+        return base_type::emplace(base_type::begin() + _pos, std::move(_obj));
     }
 
     inline iterator insert(_Type const& value) {
-        return emplace(value);
+        return this->emplace(value);
     }
-    inline iterator insert( _Type&& value) {
-        return emplace(std::move(value));
+    inline iterator insert(_Type&& value) {
+        return this->emplace(std::move(value));
     }
     //iterator insert(const size_Typepe _Count, const _Typepe& value) = delete;
+
+    inline void remove(const size_t index) {
+        base_type::erase(base_type::begin() + index);
+    }
+    void remove_ptr(_Type* elem) {
+        const size_t uiFoundIndex = this->find(elem);
+        if (uiFoundIndex != SCONT_BADINDEX)
+            this->remove(uiFoundIndex);
+    }
 
 
     size_t find(_Type const& value) const noexcept;
@@ -128,7 +138,7 @@ size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _size, _ValT
         return 0;
     */
 
-    const _Type* const _dataptr = this->data();
+    const _Type* const _dataptr = base_type::data();
     size_t _lo = 0;
     while (_lo < _size)
     {
@@ -153,11 +163,11 @@ size_t CSSortedVector<_Type, _Comp>::binary_search_predicate(size_t _size, _ValT
 template <class _Type, class _Comp>
 size_t CSSortedVector<_Type, _Comp>::find(_Type const& value) const noexcept
 {
-    const size_t _mySize = this->size();
+    const size_t _mySize = base_type::size();
     if (_mySize == 0) {
         return SCONT_BADINDEX;
     }
-    const _Type* const _dataptr = this->data();
+    const _Type* const _dataptr = base_type::data();
     size_t _idx = this->lower_element(_mySize, _dataptr, value);
     if (_idx == _mySize)
         return SCONT_BADINDEX;
@@ -168,7 +178,7 @@ template <class _Type, class _Comp>
 template <class _ValType, class _Pred>
 size_t CSSortedVector<_Type, _Comp>::find_predicate(_ValType const& value, _Pred&& predicate) const noexcept
 {
-    const size_t _mySize = this->size();
+    const size_t _mySize = base_type::size();
     if (_mySize == 0) {
         return SCONT_BADINDEX;
     }

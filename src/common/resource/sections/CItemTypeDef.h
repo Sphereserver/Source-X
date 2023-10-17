@@ -17,9 +17,9 @@ public:
     {
     }
 
-private:
-    CItemTypeDef(const CItemTypeDef& copy);
-    CItemTypeDef& operator=(const CItemTypeDef& other);
+    //CItemTypeDef(CItemTypeDef&&) = default;
+    CItemTypeDef(const CItemTypeDef& copy) = delete;
+    CItemTypeDef& operator=(const CItemTypeDef& other) = delete;
 
 public:
     virtual bool r_LoadVal( CScript & s ) override;

@@ -371,8 +371,8 @@ tchar * Str_UnQuote(tchar * pStr);
 //--
 
 // extern tchar * Str_GetTemporary(int amount = 1);
-#define Str_GetTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer
-#define Str_GetWTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateWBuffer
+#define Str_GetTemp static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->allocateBuffer
+#define Str_GetWTemp static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->allocateWBuffer
 #define STR_TEMPLENGTH (size_t)(THREAD_STRING_LENGTH)
 
 //--

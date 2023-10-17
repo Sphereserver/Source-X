@@ -1,7 +1,6 @@
 SET (TOOLCHAIN 1)
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/OSX-AppleClang_common.inc.cmake")
 
-
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: OSX-AppleClang-native.cmake.")
 	SET(CMAKE_SYSTEM_NAME	"OSX"		PARENT_SCOPE)
@@ -15,7 +14,6 @@ function (toolchain_after_project)
 		SET(ARCH_BITS	32	PARENT_SCOPE)
 		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native32"	PARENT_SCOPE)
 	ENDIF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-
 endfunction()
 
 

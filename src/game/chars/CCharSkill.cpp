@@ -31,7 +31,7 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	dword dwSkillTmp;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
+		if ( !g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			continue;
 
 		dwSkillTmp = MAKEDWORD(i, Skill_GetBase((SKILL_TYPE)i));
@@ -320,7 +320,7 @@ void CChar::Skill_Decay()
 	// Look for a skill to deduct from
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( g_Cfg.m_SkillIndexDefs.IsValidIndex(i) == false )
+		if ( g_Cfg.m_SkillIndexDefs.valid_index(i) == false )
 			continue;
 
 		// Check that the skill is set to decrease and that it is not already at 0
@@ -363,7 +363,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 	// ARGS:
 	//  difficulty = skill target from 0-100
 
-	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
+	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.valid_index(skill) )
 		return;
 	if ( m_pArea && m_pArea->IsFlag( REGION_FLAG_SAFE ))	// skills don't advance in safe areas.
 		return;
@@ -4299,7 +4299,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		pArgs.m_iN2 = iWaitTime;
 		// Execute the @START trigger and pass various craft parameters there
 
-		CResourceID pResBase(RES_ITEMDEF, fCraftSkill ? m_atCreate.m_iItemID : 0, 0);
+		CResourceID pResBase(RES_ITEMDEF, (fCraftSkill ? m_atCreate.m_iItemID : ITEMID_NOTHING), 0);
 
 		if ( fCraftSkill )
 		{

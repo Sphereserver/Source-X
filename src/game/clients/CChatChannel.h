@@ -7,8 +7,8 @@
 #define _INC_CCHATCHANNEL_H
 
 #include "../../common/sphere_library/CSObjListRec.h"
-#include "../../common/sphere_library/CSObjArray.h"
 #include "../../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/sptr_containers.h"
 #include "../../common/sphereproto.h"
 
 
@@ -25,9 +25,9 @@ private:
     bool m_fVoiceDefault;	// give others voice by default.
 public:
     static const char *m_sClassName;
-    CSObjArray< CSString * > m_NoVoices;// Current list of channel members with no voice
-    CSObjArray< CSString * > m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
-    CSPtrTypeArray< CChatChanMember* > m_Members;	// Current list of members in this channel
+    CSUniquePtrVector<CSString> m_NoVoices;// Current list of channel members with no voice
+    CSUniquePtrVector<CSString> m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
+    CSUniquePtrVector<CChatChanMember> m_Members;	// Current list of members in this channel
 private:
     void SetModerator(lpctstr pszName, bool fFlag = true);
     void SetVoice(lpctstr pszName, bool fFlag = true);

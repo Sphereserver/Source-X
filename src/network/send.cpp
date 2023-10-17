@@ -1116,7 +1116,7 @@ PacketSkills::PacketSkills(const CClient* target, const CChar* character, SKILL_
 
 		for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 		{
-			if (g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) == false)
+			if (g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) == false)
 				continue;
 
 			writeInt16((word)(i + 1));

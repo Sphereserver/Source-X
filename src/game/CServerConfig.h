@@ -7,6 +7,7 @@
 #define _INC_CSERVERCONFIG_H
 
 #include "../common/sphere_library/CSAssoc.h"
+#include "../common/sphere_library/sptr_containers.h"
 #include "../common/resource/sections/CSkillDef.h"
 #include "../common/resource/sections/CSpellDef.h"
 #include "../common/resource/sections/CWebPageDef.h"
@@ -29,6 +30,7 @@ class CClient;
 class CServerDef;
 using CServerRef = CServerDef*;
 
+class CResourceNamedDef;
 
 /**
  * @enum    EF_TYPE
@@ -587,16 +589,16 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjNameSortVector           m_SkillNameDefs;		// const CSkillDef* Name sorted.
-	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;		// Defined Skills indexed by number.
-	CSObjArray< CSpellDef* >     m_SpellDefs;			// Defined Spells.
-	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;	// Defined Spells, in skill order.
+	CObjSharedPtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	CSSharedPtrVector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
+    CSSharedPtrVector<CSpellDef> m_SpellDefs;			// Defined Spells.
+    CSWeakPtrVector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
 
 	CSStringSortArray m_PrivCommands[PLEVEL_QTY];		// what command are allowed for a priv level?
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjNameSortVector m_Functions;	// Subroutines that can be used in scripts.
+    CObjSharedPtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -672,6 +674,21 @@ public:
      */
 	void LoadSortSpells();
 
+
+    /**
+    * @brief   Get a CResourceDef from the RESOURCE_ID.
+    *
+    * @param   restype Resource Type.
+    *
+    * @param   ptcName Resource Name.
+    *
+    * @param   wPage Resource Page attribute.
+    *
+    * @return  null if it fails, else a pointer to the CScriptObj.
+    */
+    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+    CResourceDef* RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+
     /**
      * @brief   Get a CResourceDef from the RESOURCE_ID.
      *
@@ -679,7 +696,9 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const override;
+	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
+    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
+    CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );

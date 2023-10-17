@@ -790,7 +790,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	if ( iMissing != SCONT_BADINDEX )
 	{
 		// Need this to repair.
-		const CResourceDef *pCompDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
+		const CResourceDef *pCompDef = g_Cfg.RegisteredResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
 		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_1), pCompDef ? pCompDef->GetName() : g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_2));
 		return false;
 	}

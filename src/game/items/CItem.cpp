@@ -3684,7 +3684,7 @@ standard_order:
 		EXC_SET_BLOCK("typedef");
 		{
 			// It has an assigned trigger type.
-			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
+			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.RegisteredResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
 			if ( pResourceLink == nullptr )
 			{
                 const CChar* pChar = pSrc->GetChar();

@@ -1247,7 +1247,7 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_ridRes);
+					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
 					if ( pResDef )
 						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
 				}
@@ -1866,7 +1866,7 @@ void CClient::addSkillWindow(SKILL_TYPE skill, bool fFromInfo) const // Opens th
 		pChar = m_pChar;
 
 	bool fAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
-	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
+	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.valid_index(skill) == false)
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERSKILLS) )
@@ -2739,9 +2739,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		}
 	}
 
-	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
+	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.empty() )
 	{
-		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
+		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.size()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )

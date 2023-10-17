@@ -637,7 +637,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		CCSpawn* pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
 		if (!pSpawn)
             break;
-        CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
+        CResourceDef * pSpawnCharDef = g_Cfg.RegisteredResourceGetDef(pSpawn->GetSpawnID());
 		lpctstr pszName = nullptr;
 		if (pSpawnCharDef)
 		{
@@ -669,7 +669,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		CCSpawn* pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
         if (!pSpawn)
             break;
-		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
+		CResourceDef * pSpawnItemDef = g_Cfg.RegisteredResourceGetDef(pSpawn->GetSpawnID());
 
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Item\t%u %s", pSpawn->GetPile(), pSpawnItemDef ? pSpawnItemDef->GetName() : "none");

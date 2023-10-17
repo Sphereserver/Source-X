@@ -10,7 +10,7 @@
     #include <codeanalysis/warnings.h>
     #pragma warning( push )
     #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(__clang__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif

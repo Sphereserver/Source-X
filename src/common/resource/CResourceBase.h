@@ -44,7 +44,6 @@ public:
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage = 0 );
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
-	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
 	bool ResourceLock( CResourceLock & s, const CResourceID& rid );
 	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 	{
@@ -54,7 +53,10 @@ public:
 	CResourceScript * FindResourceFile( lpctstr pszTitle );
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 
-	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
+	std::weak_ptr<CResourceDef> ResourceGetDefRef(const CResourceID& rid) const;
+	CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
+	std::weak_ptr<CResourceDef> ResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+	CResourceDef* ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
 	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
