@@ -939,8 +939,20 @@ effect_bounce:
 						pSrc->Sound(0x1F1);
 						pSrc->Effect(EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16);
 					}
-				}
-			}
+                }
+            }
+            // Check if REFLECTPHYSICALDAM will reflect some damage back.
+            // Preventing recurrent reflection with DAMAGE_REACTIVE.
+            if (!(uType & DAMAGE_REACTIVE))
+            {
+                int iReflectPhysical = GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar);
+                if (iReflectPhysical)
+                {
+                    int iReflectPhysicalDam = (iDmg * iReflectPhysical) / 100;
+                    pSrc->OnTakeDamage(iReflectPhysicalDam, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
+                }
+            }
+			
 		}
 	}
 	
@@ -2195,24 +2207,6 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( fMakeLeechSound )
 			Sound(0x44d);
-
-        // REFLECTPHYSICALDAM
-        const CCPropsChar* pCCPCharTarg = pCharTarg->GetComponentProps<CCPropsChar>();
-        const CCPropsChar* pBaseCCPCharTarg = pCharTarg->Base_GetDef()->GetComponentProps<CCPropsChar>();
-        int iTargReflectPhysicalDam =pCharTarg->GetPropNum(pCCPCharTarg, PROPCH_REFLECTPHYSICALDAM, pBaseCCPCharTarg);
-        if (iTargReflectPhysicalDam)
-        {
-            // REFLECTPHYSICALDAM suppose to reflect only physical (A physical blow of some sort.)
-            if (iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH))
-            {
-                OnTakeDamage(
-                    iDmg * iTargReflectPhysicalDam / 100,
-                    this,
-                    iDmgType,
-                    100,0,0,0,0
-                );
-             }
-        }
 
         if (pWeapon)
         {
