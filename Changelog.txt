@@ -3388,4 +3388,3 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 17-10-2023, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
-- Fixed: Item properties functionnality:HITLEECHMANA,HITLEECHSTAM
