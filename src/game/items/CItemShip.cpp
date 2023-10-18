@@ -24,11 +24,6 @@ CItemShip::~CItemShip()
 {
 }
 
-void CItemShip::SetPilot(CChar* pChar)
-{
-    CCMultiMovable::SetPilot(pChar);
-}
-
 bool CItem::Ship_Plank(bool fOpen)
 {
     ADDTOCALLSTACK("CItem::Plank");

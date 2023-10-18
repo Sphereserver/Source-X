@@ -45,8 +45,6 @@ public:
     size_t GetShipPlankCount();
     CItem * GetShipPlank(size_t index);
     //CItemBaseMulti::ShipSpeed GetShipSpeed();
-    void SetPilot(CChar* pChar);
-
 };
 
 

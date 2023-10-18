@@ -342,7 +342,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				if (pShip)
 				{
 					if (m_pChar->ContentFindKeyFor(pItem))
-						pShip->SetPilot(m_pChar);
+						pShip->CCMultiMovable::SetPilot(m_pChar);
 					else
 						pItem->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_NOTYOURSHIP));
 					return true;
