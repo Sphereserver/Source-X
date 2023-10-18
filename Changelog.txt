@@ -3382,7 +3382,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Setting P inside the @Click trigger made it being called endlessly.
 
 13-10-2023, xwerswoodx
-- Experimental: Made some changes on Z Calculations for maps to make it more accurate.
+- Fixed: Made some changes on Z Calculations for maps to make it more accurate. (Issue: #♀983, #617, #877)
+	Thanks for, Jhobean, Tolokio and nolok.
 - Added: Followers now saved on characters after @FollowersUpdate trigger.
 	New system can be activated from sphere.ini by adding EF_FollowerList (080) flag to experimental flags.
 	As this save system newly added, the npcs that already follows the character not saved so their CURFOLLOWER count will reset to 0.
