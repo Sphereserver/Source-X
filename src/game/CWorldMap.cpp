@@ -1503,11 +1503,11 @@ const char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage
 
 const short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
 {
-	short iHighest1 = maximum(pTop, pBottom);
-	short iLowest1 = minimum(pTop, pBottom);
+	const short iHighest1 = maximum(pTop, pBottom);
+	const short iLowest1 = minimum(pTop, pBottom);
 
-	short iHighest2 = maximum(pLeft, pRight);
-	short iLowest2 = minimum(pLeft, pRight);
+	const short iHighest2 = maximum(pLeft, pRight);
+	const short iLowest2 = minimum(pLeft, pRight);
 	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
 }
 
