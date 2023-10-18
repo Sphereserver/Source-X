@@ -44,7 +44,7 @@ jobs:
             TOKEN: ${{ secrets.COVERITY_TOKEN }}
 #echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
           run:  |
-                wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=$COVERITY_TOKEN&project=SphereServer/Source-X" -O cov-analysis-linux64.tar.gz
+                wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=${COVERITY_TOKEN}&project=SphereServer/Source-X" -O cov-analysis-linux64.tar.gz
                 mkdir cov-analysis-linux64
                 tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
                 export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
