@@ -2,9 +2,9 @@
 #include "CComponent.h"
 #include "CObjBase.h"
 
-CComponent::CComponent(COMP_TYPE type)
+CComponent::CComponent(COMP_TYPE type) : 
+    _iType(type)
 {
-    _iType = type;
 }
 
 COMP_TYPE CComponent::GetType() const

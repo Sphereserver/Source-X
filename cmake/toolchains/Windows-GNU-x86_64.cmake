@@ -6,7 +6,7 @@ function (toolchain_after_project)
 	SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
 	SET(ARCH_BITS			64				PARENT_SCOPE)
 
-	toolchain_after_project_common()
+	toolchain_after_project_common()	# To enable RC language, to compile Windows Resource files
 
 	LINK_DIRECTORIES ("lib/bin/x86_64/mariadb/")
 	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86_64"	PARENT_SCOPE)

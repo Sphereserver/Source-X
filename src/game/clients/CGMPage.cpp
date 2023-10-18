@@ -16,7 +16,7 @@ CGMPage::CGMPage( lpctstr pszAccount )
 	m_sReason = nullptr;
 	m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
-	g_World.m_GMPages.InsertContentTail(this);		// put it at the end of the list
+	g_World.m_GMPages.emplace_back(this);		// put it at the end of the list
 }
 
 CGMPage::~CGMPage()

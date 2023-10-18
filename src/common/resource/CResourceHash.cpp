@@ -6,7 +6,7 @@
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 
-bool CResourceHashArraySorter::operator()(const CResourceDef* pObjStored, const CResourceDef* pObj) const
+bool CResourceHashArraySorter::operator()(std::shared_ptr<CResourceDef> const& pObjStored, std::shared_ptr<CResourceDef> const& pObj) const
 {
     // <  : true
     // >= : false
@@ -24,7 +24,7 @@ bool CResourceHashArraySorter::operator()(const CResourceDef* pObjStored, const 
     return true;
 }
 
-int CResourceHashArray::_compare(const CResourceDef* pObjStored, CResourceID const& rid) // static
+int CResourceHashArray::_compare(std::shared_ptr<CResourceDef> const& pObjStored, CResourceID const& rid) // static
 {
     ASSERT( pObjStored );
     CResourceID const& ridStored = pObjStored->GetResourceID();
@@ -56,7 +56,7 @@ void CResourceHash::AddSortKey(CResourceID const& rid, CResourceDef* pNew)
 void CResourceHash::SetAt(CResourceID const& rid, size_t index, CResourceDef* pNew)
 {
     ASSERT(rid.GetResPage() <= RES_PAGE_MAX); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
-    m_Array[GetHashArray(rid)][index] = pNew;
+    m_Array[GetHashArray(rid)][index].reset(pNew);
 }
 
 /*

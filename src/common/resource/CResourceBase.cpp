@@ -383,24 +383,38 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word
 	return rid.GetResIndex();
 }
 
-CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
+std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& rid) const
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
+	ADDTOCALLSTACK("CResourceBase::ResourceGetDefRef");
 	if ( ! rid.IsValidResource() )
-		return nullptr;
+		return {};
 	size_t index = m_ResHash.FindKey( rid );
 	if ( index == SCONT_BADINDEX )
-		return nullptr;
-	return m_ResHash.GetAt( rid, index );
+		return {};
+	return m_ResHash.GetWeakPtrAt( rid, index ).lock();
 }
 
-CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, lpctstr pszName, word wPage )
+std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRefByName( RES_TYPE restype, lpctstr pszName, word wPage )
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
+    ADDTOCALLSTACK("CResourceBase::ResourceGetDefRefByName");
     // resolve a name to the actual resource def.
-    CResourceID res = ResourceGetID(restype, pszName);
+    CResourceID res = ResourceGetID(restype, pszName, wPage);
     res.m_wPage = wPage ? wPage : RES_PAGE_ANY;   // Create a CResourceID with page == RES_PAGE_ANY: search independently from the page
-    return ResourceGetDef(res);
+    return ResourceGetDefRef(res);
+}
+
+CResourceDef* CResourceBase::ResourceGetDef(const CResourceID& rid) const
+{
+	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
+	std::shared_ptr<CResourceDef> ret = ResourceGetDefRef(rid).lock();
+	return ret ? ret.get() : nullptr;
+}
+
+CResourceDef* CResourceBase::ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage)
+{
+	ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
+	std::shared_ptr<CResourceDef> ret = ResourceGetDefRefByName(restype, pszName, wPage).lock();
+	return ret ? ret.get() : nullptr;
 }
 
 //*******************************************************
@@ -412,8 +426,13 @@ bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 	// Lock a referenced resource object.
 	if ( ! rid.IsValidUID() )
 		return false;
-	CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( ResourceGetDef( rid ));
-	if ( pResourceLink )
-		return pResourceLink->ResourceLock(s);
+	std::shared_ptr<CResourceDef> pResourceDefRef = ResourceGetDefRef(rid).lock();
+	if (pResourceDefRef)
+	{
+		CResourceLink* pResourceLink = dynamic_cast <CResourceLink*>(pResourceDefRef.get());
+		if (pResourceLink)
+			return pResourceLink->ResourceLock(s);
+	}
+	
 	return false;
 }

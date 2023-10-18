@@ -24,7 +24,7 @@ public:
     */
     ///@{
 public:
-    CSObjArray() : _fBaseDestructorShouldDeleteElements(false) {
+    CSObjArray() : _fBaseDestructorShouldDeleteElements(true) {
     }
     virtual ~CSObjArray() {
         DeleteElements();

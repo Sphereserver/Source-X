@@ -6,6 +6,7 @@ function (toolchain_force_compiler)
 	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
 
 	IF (CLANG_USE_GCC_LINKER)
+		# Not working, see above. Use MSVC.
 		SET (CLANG_VENDOR "gnu" PARENT_SCOPE)
 	ELSE ()
 		SET (CLANG_VENDOR "msvc" PARENT_SCOPE)
@@ -22,16 +23,15 @@ function (toolchain_exe_stuff_common)
 	SET (EXE_LINKER_EXTRA "")
 
 	IF (CLANG_USE_GCC_LINKER)
-		SET (CLANG_SUBSYSTEM_PREFIX "-m --entry=WinMainCRTStartup")
+		SET (CLANG_SUBSYSTEM_PREFIX "--entry=WinMainCRTStartup -m")	# --entry might not work
 	ELSE ()
-		SET (CLANG_SUBSYSTEM_PREFIX "-Xlinker /subsystem:")
+		SET (CLANG_SUBSYSTEM_PREFIX "-Xlinker /ENTRY:WinMainCRTStartup -Xlinker /subsystem:")
 	ENDIF()	
-
 	IF (${WIN32_SPAWN_CONSOLE})
-		SET (EXE_LINKER_EXTRA 			"${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}console -Xlinker /ENTRY:WinMainCRTStartup")
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA "${CMAKE_EXE_LINKER_FLAGS_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}console")
 		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
 	ELSE ()
-		SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}windows")
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA "${CMAKE_EXE_LINKER_FLAGS_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}windows")
 	ENDIF ()
 
 	SET (ENABLED_SANITIZER false)
@@ -40,8 +40,16 @@ function (toolchain_exe_stuff_common)
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
+	IF (${USE_MSAN})
+		MESSAGE (FATAL_ERROR "Windows Clang doesn't yet support MSAN")
+		SET (USE_MSAN false)
+		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		#SET (ENABLED_SANITIZER true)
+	ENDIF ()
 	IF (${USE_LSAN})
 		MESSAGE (FATAL_ERROR "Windows Clang doesn't yet support LSAN")
+		SET (USE_LSAN false)
 		#SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
 		#SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
 		#SET (ENABLED_SANITIZER true)
@@ -49,7 +57,8 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS		"-fsanitize=undefined,\
 shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
-float-divide-by-zero,float-cast-overflow,pointer-overflow \
+float-divide-by-zero,float-cast-overflow,pointer-overflow,\
+unreachable,nonnull-attribute,returns-nonnull-attribute \
 -fno-sanitize=enum")
 		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return")
@@ -76,6 +85,7 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	SET (C_OPTS		"-std=c11   -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS	"-std=c++17 -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing;
+	 # -pthread unused here? we only need to specify that to the linker?
 	SET (C_SPECIAL		"-pipe")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
@@ -85,13 +95,13 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 
 	#-- Setting common linker flags
 
+	IF (${USE_MSAN})
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+	ENDIF()
+
 	 # Force dynamic linking but include into exe libstdc++ and libgcc.
 	 # -pthread, -s and -g need to be added/removed also to/from linker flags!
-	#SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"${CMAKE_EXE_LINKER_FLAGS_COMMON} -dynamic")
-
 	IF (CLANG_USE_GCC_LINKER)
-		SET (CMAKE_C_FLAGS 		"${CMAKE_C_FLAGS} -pthread" 	PARENT_SCOPE)
-		SET (CMAKE_CXX_FLAGS 	"${CMAKE_CXX_FLAGS} -pthread" 	PARENT_SCOPE)
 		SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"${CMAKE_EXE_LINKER_FLAGS_COMMON} -pthread -dynamic -static-libstdc++ -static-libgcc")
 	ENDIF ()
 	
@@ -105,16 +115,20 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
 	SET (COMPILE_OPTIONS_EXTRA)
 	IF (ENABLED_SANITIZER OR TARGET spheresvr_debug)
-		SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer)
+		SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
 	ENDIF ()
 	IF (TARGET spheresvr_release)
 		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 ${COMPILE_OPTIONS_EXTRA})
 	ENDIF ()
 	IF (TARGET spheresvr_nightly)
-		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		IF (ENABLED_SANITIZER)
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+		ELSE ()
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		ENDIF ()
 	ENDIF ()
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-inline ${COMPILE_OPTIONS_EXTRA})
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
 	ENDIF ()
 
 
@@ -127,15 +141,15 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	
 	IF (TARGET spheresvr_release)
 		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIBS_TO_LINK_AGAINST})
-		TARGET_LINK_OPTIONS ( spheresvr_release		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
+		TARGET_LINK_OPTIONS ( spheresvr_release		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
 		TARGET_LINK_LIBRARIES ( spheresvr_nightly	${LIBS_TO_LINK_AGAINST})
-		TARGET_LINK_OPTIONS ( spheresvr_nightly		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
+		TARGET_LINK_OPTIONS ( spheresvr_nightly		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
 		TARGET_LINK_LIBRARIES ( spheresvr_debug		${LIBS_TO_LINK_AGAINST})
-		TARGET_LINK_OPTIONS ( spheresvr_debug		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${EXE_LINKER_EXTRA}")
+		TARGET_LINK_OPTIONS ( spheresvr_debug		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
 	ENDIF (TARGET spheresvr_debug)
 
 
@@ -160,6 +174,10 @@ float-divide-by-zero,float-cast-overflow,pointer-overflow \
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
+		IF (USE_ASAN AND NOT CLANG_USE_GCC_LINKER)
+			# Even with this, it appears that they are overridden to 1...
+			TARGET_COMPILE_DEFINITIONS ( spheresvr_debug PUBLIC _HAS_ITERATOR_DEBUGGING=0 _ITERATOR_DEBUG_LEVEL=0 )
+		ENDIF()
 	ENDIF (TARGET spheresvr_debug)
 
 

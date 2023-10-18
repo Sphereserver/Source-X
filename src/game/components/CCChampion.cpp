@@ -87,7 +87,7 @@ void CCChampion::Init()
     }
     const int resId = _idSpawn.GetResIndex();
     const CResourceIDBase rid(RES_CHAMPION, resId);
-    CResourceDef* pResDef = g_Cfg.ResourceGetDef(rid);
+    CResourceDef* pResDef = g_Cfg.RegisteredResourceGetDef(rid);
     const CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pResDef);
     if (pChampDef == nullptr)
     {
@@ -202,7 +202,7 @@ void CCChampion::SpawnNPC()
         }
         else
         {
-            CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+            CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(_idSpawn);
             CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
             if (pChampDef != nullptr)
             {
@@ -237,7 +237,7 @@ void CCChampion::SpawnNPC()
         return;
     }
     rid = CResourceIDBase(RES_CHARDEF, pNpc);
-    CResourceDef* pDef = g_Cfg.ResourceGetDef(rid);
+    CResourceDef* pDef = g_Cfg.RegisteredResourceGetDef(rid);
     if (!pDef)
     {
         return;
@@ -745,7 +745,7 @@ lpctstr const CCChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 void CCChampion::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCChampion::r_Write");
-    CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+    CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(_idSpawn);
     CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
     if (!pChampDef)
     {
@@ -873,7 +873,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             }
             else // If it doesnt have, then try to retrieve the group from [CHAMPION ]
             {
-                CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+                CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(_idSpawn);
                 CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
                 if (pChampDef != nullptr)
                 {
@@ -1179,7 +1179,7 @@ TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CTextConsole* pSrc, CScriptT
 {
     lpctstr pszTrigName = CItem::sm_szTrigName[trig];
 
-    CResourceDef* pRes = g_Cfg.ResourceGetDef(_idSpawn);
+    CResourceDef* pRes = g_Cfg.RegisteredResourceGetDef(_idSpawn);
     CCChampionDef* pChampDef = static_cast<CCChampionDef*>(pRes);
     CResourceLink* pResourceLink = static_cast <CResourceLink*>(pChampDef);
     ASSERT(pResourceLink);

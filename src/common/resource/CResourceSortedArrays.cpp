@@ -84,7 +84,7 @@ int CMultiDefArray::CompareKey(MULTI_TYPE id, CUOMulti* pBase, bool fNoSpaces) c
 }
 
 /*
-int CObjNameSortVector::_compare(const CScriptObj* pObj, lpctstr ptcKey) // static
+int CObjSharedPtrNameSortVector::_compare(const CScriptObj* pObj, lpctstr ptcKey) // static
 {
     ASSERT( pObj );
     ASSERT( ptcKey );

@@ -96,10 +96,10 @@ void CNTWindow::CStatusDlg::FillStats()
 
 	CNTWindow::CListTextConsole capture( m_wndListStats.m_hWnd );
 
-	size_t iThreadCount = ThreadHolder::getActiveThreads();
+	size_t iThreadCount = ThreadHolder::get()->getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
-		IThread* thrCurrent = ThreadHolder::getThreadAt(iThreads);
+		IThread* thrCurrent = ThreadHolder::get()->getThreadAt(iThreads);
 		if (thrCurrent == nullptr)
 			continue;
 

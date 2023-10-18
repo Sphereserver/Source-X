@@ -7,7 +7,7 @@ dword sm_dwCodingData[CRYPT_GAMEKEY_COUNT][18+1024];	// to be filled by InitTabl
 bool CCrypto::sm_fTablesReady = false;
 
 
-void CCrypto::PrepareKey( CCrypto::CCryptoKey & key, int iTable )	// static
+void CCrypto::PrepareKey(CCryptoKeysHolder::CCryptoKey & key, int iTable )	// static
 {
 	ADDTOCALLSTACK("CCrypto::PrepareKey");
 	const dword *pCodes = sm_dwCodingData[iTable];
@@ -42,7 +42,7 @@ void CCrypto::InitTables()		// static
 			sm_dwCodingData[i][j] ^= code[j%3];
 		}
 
-		CCrypto::CCryptoKey tmpKey;
+		CCryptoKeysHolder::CCryptoKey tmpKey;
 		tmpKey.u_iKey[0] = tmpKey.u_iKey[1] = 0;
 
 		for(j=0; j<0x412; j+=2)

@@ -6,6 +6,7 @@ function (toolchain_after_project)
 	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
 	SET(ARCH_BITS			64			PARENT_SCOPE)
 
+	LINK_DIRECTORIES ("/usr/lib64/mysql" "/usr/lib/x86_64-linux-gnu/mysql")
 	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86_64"	PARENT_SCOPE)
 endfunction()
 
@@ -14,10 +15,10 @@ function (toolchain_exe_stuff)
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
 	
-	SET (CMAKE_EXE_LINKER_FLAGS_EXTRA 
-		"-L/usr/lib64/mysql -Wl,-rpath=/usr/lib64/mysql\
-		-L/usr/lib/x86_64-linux-gnu/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
-		PARENT_SCOPE)
+	#SET (CMAKE_EXE_LINKER_FLAGS_EXTRA "${CMAKE_EXE_LINKER_FLAGS_EXTRA} \
+	#	-Wl,-rpath=/usr/lib64/mysql\
+	#	-Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
+	#	PARENT_SCOPE)
 
 	toolchain_exe_stuff_common()
 
