@@ -1490,8 +1490,8 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 const char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage)
 {
 	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
-	const short pTotal = pPoint1 + pPoint2, pHalf = pTotal / 2, pEven = pTotal % 2;
-	return static_cast<char>(pHalf + (pEven != 0 && iAverage - pHalf > 5));
+	const short pTotal = pPoint1 + pPoint2, pHalf = pTotal / 2, pEven = pTotal % 2, pAverage = iAverage - pHalf;
+	return static_cast<char>(pHalf + (pEven != 0 && pAverage > 5));
 }
 
 const short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
