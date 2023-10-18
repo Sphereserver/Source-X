@@ -1491,14 +1491,7 @@ const char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage
 {
 	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
 	short pTotal = pPoint1 + pPoint2;
-	if (pTotal % 2 != 0)
-	{
-		if ((iAverage - (pTotal / 2)) > 5) //If the player next to cliff, move player up.
-			++pTotal;
-		else //Otherwise, move player down.
-			--pTotal;
-	}
-	return static_cast<char>(pTotal / 2);
+	return static_cast<char>(pTotal / 2 + (pTotal % 2 != 0 && iAverage - (pTotal / 2) > 5));
 }
 
 const short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
