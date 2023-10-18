@@ -823,6 +823,9 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	Str_CopyLimitNull(	ptcBarkBuffer, name,	STR_TEMPLENGTH);
 	Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
 
+	if (mode == TALKMODE_SPELL) //Set TALKMODE_SPELL to TALKMODE_SAY after every color check completed to block spell flood.
+		mode = TALKMODE_SAY;
+
 	switch ( Args[2] )
 	{
 		case 3:	// Extended localized message (with affixed ASCII text)

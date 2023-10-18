@@ -3398,3 +3398,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers. 
 - Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
 - Fixed: CSString instances becoming invalid after calling the Clear method.
+
+18-10-2023, xwerswoodx
+- Added: Ported 56b TILLER DCLick auto pilot to X. (Request: #778)
+- Fixed: Possible fix for Osi Client spell flood. (Issue: #787)
