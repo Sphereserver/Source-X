@@ -130,7 +130,7 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 			len = Str_CopyLimitNull( pszTemp, "[No static tile], ", STR_TEMPLENGTH);
 		}
 
-		const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( pt );
+		std::optional<CUOMapMeter> pMeter = CWorldMap::GetMapMeterAdjusted( pt );
 		if ( pMeter )
 		{
 			len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, "TERRAIN=0%x   TYPE=%s",

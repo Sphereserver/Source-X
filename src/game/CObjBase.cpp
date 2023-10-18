@@ -1717,6 +1717,17 @@ bool CObjBase::r_LoadVal( CScript & s )
         }
     }
 
+	if (!strnicmp("FOLLOWER", ptcKey, 8))
+	{
+		if (ptcKey[8] == '.')
+		{
+			ptcKey = ptcKey + 4;
+			CUID ptcArg = (CUID)s.GetArgDWVal();
+			m_followers.emplace_back(ptcArg);
+			return true;
+		}
+	}
+
 	int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
@@ -1980,6 +1991,14 @@ void CObjBase::r_Write( CScript & s )
 
 	m_TagDefs.r_WritePrefix(s, "TAG");
 	m_OEvents.r_Write(s, "EVENTS");
+
+	for (CUID uid : m_followers)
+	{
+		dword dUID = (dword)uid;
+		char* pszTag = Str_GetTemp();
+		sprintf(pszTag, "FOLLOWER.%d", dUID);
+		s.WriteKeyHex(pszTag, dUID);
+	}
 }
 
 enum OV_TYPE

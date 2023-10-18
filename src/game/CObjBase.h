@@ -66,6 +66,7 @@ public:
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
+    std::vector<CUID> m_followers;
     
 public:
     explicit CObjBase(bool fItem);
