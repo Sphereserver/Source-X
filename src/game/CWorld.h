@@ -162,10 +162,10 @@ public:
 	CUID m_uidObj;			// for script access - auxiliary obj
 	CUID m_uidNew;			// for script access - auxiliary obj
 
-	CSUniquePtrVector<CGMPage>    m_GMPages;	// Owns current outstanding GM pages. (CGMPage)
-	CSUniquePtrVector<CItemStone> m_Stones;		// Owns guild/town stones. (not saved array)
+	CSSharedPtrVector<CGMPage>    m_GMPages;	// Owns current outstanding GM pages. (CGMPage)
+	CSSharedPtrVector<CItemStone> m_Stones;		// Owns guild/town stones. (not saved array)
 	CSUniquePtrVector<CPartyDef>  m_Parties;	// Owns all active parties.
-	CSUniquePtrVector<CItemMulti> m_Multis;		//
+	CSUniquePtrVector<CItemMulti> m_Multis;		// World multis?
 	CSWeakPtrVector<CResourceDef> m_TileTypes;	// Links to CItemTypeDef items owned by g_Cfg.m_ResHash
 
 public:
