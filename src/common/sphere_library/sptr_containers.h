@@ -11,11 +11,8 @@ template <typename _Type, typename _PtrWrapperType>
 class _CSPtrVectorBase : public std::vector<_PtrWrapperType>
 {
 public:
-    using _base_type = std::vector<_PtrWrapperType>;
-    using iterator = typename _base_type::iterator;
-
     inline void erase_index(const size_t index) {
-        _base_type::erase(_base_type::begin() + index);
+        this->erase(this->begin() + index);
     }
 
     void erase_element(_Type* elem) {
@@ -31,10 +28,10 @@ public:
 
     inline bool valid_index(size_t index) const noexcept {
         if constexpr (std::is_same_v<_PtrWrapperType, std::weak_ptr<_Type>>) {
-            return (index < _base_type::size()) && !(_base_type::operator[](index).expired());
+            return (index < this->size()) && !(this->operator[](index).expired());
         }
         else {
-            return (index < _base_type::size()) && static_cast<bool>(_base_type::operator[](index));
+            return (index < this->size()) && static_cast<bool>(this->operator[](index));
         }
     }
 };
@@ -43,15 +40,12 @@ template <typename _Type, typename _PtrWrapperType, typename _Comp = std::less<_
 class _CSPtrSortedVectorBase : public CSSortedVector<_PtrWrapperType, _Comp>
 {
 public:
-    using _base_type = CSSortedVector<_PtrWrapperType>;
-    using iterator = typename _base_type::iterator;
-
     inline bool valid_index(size_t index) const noexcept {
         if constexpr (std::is_same_v<_PtrWrapperType, std::weak_ptr<_Type>>) {
-            return (index < _base_type::size()) && !(_base_type::operator[](index).expired());
+            return (index < this->size()) && !(this->operator[](index).expired());
         }
         else {
-            return (index < _base_type::size()) && static_cast<bool>(_base_type::operator[](index));
+            return (index < this->size()) && static_cast<bool>(this->operator[](index));
         }
     }
 };
@@ -80,7 +74,7 @@ public:
 
     template <typename... _ArgPackType>
     inline void emplace_front(_ArgPackType&&... args) {
-        this->_base_type::emplace(this->_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+        this->emplace(this->cbegin(), std::forward<_ArgPackType>(args)...);
     }
 
     // Explicitly create a unique_ptr, then add to this container.
@@ -144,7 +138,7 @@ public:
 
     template <typename... _ArgPackType>
     inline void emplace_front(_ArgPackType&&... args) {
-        this->_base_type::emplace(this->_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+        this->emplace(this->cbegin(), std::forward<_ArgPackType>(args)...);
     }
 
     // Explicitly create a unique_ptr, then add to this container.
@@ -190,7 +184,7 @@ public:
 
     template <typename... _ArgPackType>
     inline void emplace_front(_ArgPackType&&... args) {
-        this->_base_type::emplace(this->_base_type::cbegin(), std::forward<_ArgPackType>(args)...);
+        this->emplace(this->cbegin(), std::forward<_ArgPackType>(args)...);
     }
 };
 template <typename _Type, typename _Comp = std::less<_Type>>

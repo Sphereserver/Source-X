@@ -3381,10 +3381,32 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 08-10-2023, Nolok & xwerswoodx
 - Fixed: Setting P inside the @Click trigger made it being called endlessly.
 
+13-10-2023, xwerswoodx
+- Fixed: Made some changes on Z Calculations for maps to make it more accurate. (Issue: #♀983, #617, #877)
+	Thanks for, Jhobean, Tolokio and nolok.
+- Added: Followers now saved on characters after @FollowersUpdate trigger.
+	New system can be activated from sphere.ini by adding EF_FollowerList (080) flag to experimental flags.
+	As this save system newly added, the npcs that already follows the character not saved so their CURFOLLOWER count will reset to 0.
+	You can return 1 or set ARGN1 <= 0 to block increasing of current follower, and these characters not adding to current follower list.
+	CURFOLLOWER returns the total follower.
+	CURFOLLOWER.n.UID/CURFOLLOWER.n returns the follower uid at the given index of the list. (Feature Request: #737)
+- Fixed: @Success/@SpellSucess triggers when player try to teleport unavailable spots. (Issue: #779)
+- Fixed: Non-static items distance check fails because of wrong reference. (Issue: #1112)
+- Fixed: Setting GuardsOnMurderers to 0 causes vendors to run away players and call guards. (Issue: #720)
+
 16-10-2023, Nolok
 - Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers. 
 - Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
 - Fixed: CSString instances becoming invalid after calling the Clear method.
 
-17-10-2023, Jhobean
+19-10-2023, Julian
+- Fixed: Missing SkillUpdate function, seems I never commited it.
+- Modified: @SkillMenu trigger to be able to open dialogs also, and added a few local variables.
+	LOCAL.ItemUsed (r) = The ID (not UID) of the item that triggered this action.
+	LOCAL.Skill (r) = The ID of the Skill used.
+	LOCAL.SkillMenu (rw) = The skill menu (sm_alchemy) or dialog (d_MyCraftingMenu) that is going to open.
+- Modified: @SkillMakeItem trigger to enable/disable notification message when bouncing the crafted item.
+	LOCAL.Notify (rw) = 1/0. Using 0 will not show any "You put your..." message, 1 will show it. Default = 1.
+
+19-10-2023, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM

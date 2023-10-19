@@ -45,6 +45,7 @@ enum EF_TYPE
     EF_FastWalkPrevention = 0x0000010,    // Enable client fastwalk prevention (INCOMPLETE YET).
     EF_Intrinsic_Locals = 0x0000020,    // Disables the needing of 'local.', 'tag.', etc. Be aware of not creating variables with the same name of already-existing functions.
     EF_Item_Strict_Comparison = 0x0000040,    // Don't consider log/board and leather/hide as the same resource type.
+    EF_FollowerList = 0x0000080, // Save the followers to the list and enable CURFOLLOWER.n.UID, CURFOLLOWER.ADD/DEL <UID> and CURFOLLOWER.CLEAR commands.
     EF_AllowTelnetPacketFilter = 0x0000200,    // Enable packet filtering for telnet connections as well.
     EF_Script_Profiler = 0x0000400,    // Record all functions/triggers execution time statistics (it can be viewed pressing P on console).
     EF_DamageTools = 0x0002000,    // Damage tools (and fire @damage on them) while mining or lumberjacking

@@ -2727,6 +2727,34 @@ bool CChar::Spell_TargCheck()
 			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );
 			return false;
 		}
+
+		//Check if the pos for tp is valid to make sure spellsuccess trigger not trigger unnecessarily.
+		SPELL_TYPE spell = m_atMagery.m_iSpell;
+		if (spell == SPELL_Teleport && !IsPriv(PRIV_GM))
+		{
+			if (g_Cfg.m_iMountHeight)
+			{
+				if (!IsVerticalSpace(m_Act_p, false))
+				{
+					SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
+					return false;
+				}
+			}
+			
+			// Is it a valid teleport location that allows this ?
+			CRegion* pArea = CheckValidMove(m_Act_p, nullptr, DIR_QTY, nullptr);
+			if (!pArea)
+			{
+				SysMessageDefault(DEFMSG_SPELL_TELE_CANT);
+				return false;
+			}
+			if (pArea->IsFlag(REGION_ANTIMAGIC_TELEPORT))
+			{
+				SysMessageDefault(DEFMSG_SPELL_TELE_AM);
+				return false;
+			}
+		}
+
 		if ( ! Spell_TargCheck_Face() )
 			return false;
 	}
