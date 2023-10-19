@@ -3742,7 +3742,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	case RES_GMPAGE:	// saved in world file. (Name is NOT DEFNAME)
 		{
-			CGMPage * pGMPage = new CGMPage( pScript->GetArgStr());
+			CGMPage * pGMPage = g_World.m_GMPages.emplace_back(std::make_shared<CGMPage>(pScript->GetArgStr())).get();
 			return pGMPage->r_Load( *pScript );
 		}
 	case RES_WC:

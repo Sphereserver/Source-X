@@ -1846,7 +1846,7 @@ void CClient::Event_PromptResp_GMPage(lpctstr pszReason)
 	}
 	else
 	{
-		pGMPage = new CGMPage(m_pAccount->GetName());
+		pGMPage = g_World.m_GMPages.emplace_back(std::make_shared<CGMPage>(m_pAccount->GetName())).get();
 		SysMessageDefault(DEFMSG_GMPAGE_SENT);
 	}
 	pGMPage->m_uidChar = m_pChar->GetUID();

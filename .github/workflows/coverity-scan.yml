@@ -37,14 +37,13 @@ jobs:
           run:  |
                 echo "GCC:" && gcc -v
                 echo && echo "CMake:" && cmake --version
-                echo && echo "Ninja:" && ninja --version
 
         - name: Download Coverity Build Tool
           env:
             TOKEN: ${{ secrets.COVERITY_TOKEN }}
 #echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
           run:  |
-                wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=${COVERITY_TOKEN}&project=SphereServer/Source-X" -O cov-analysis-linux64.tar.gz
+                wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=${TOKEN}&project=SphereServer/Source-X" -O cov-analysis-linux64.tar.gz
                 mkdir cov-analysis-linux64
                 tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
                 export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
@@ -69,7 +68,7 @@ jobs:
           run: |
                 tar czvf build-data.tgz cov-int
                 curl \
-                    --form project=SphereServer-X \
+                    --form project=SphereServer/Source-X \
                     --form token=$TOKEN \
                     --form email=$EMAIL \
                     --form file=@build-data.tgz \
@@ -77,5 +76,5 @@ jobs:
                     --form description="${{github.sha}}" \
                     https://scan.coverity.com/builds?project=SphereServer-X
           env:
-            TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
-            EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+            TOKEN: ${{ secrets.COVERITY_TOKEN }}
+            EMAIL: ${{ secrets.COVERITY_EMAIL }}
