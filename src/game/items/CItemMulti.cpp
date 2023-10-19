@@ -122,7 +122,7 @@ CItemMulti::~CItemMulti()
     }
 
     MultiUnRealizeRegion();    // unrealize before removed from ground.
-    g_World.m_Multis.RemovePtr(this);
+    g_World.m_Multis.erase_element(this);
     // Must remove early because virtuals will fail in child destructor.
     // Attempt to remove all the accessory junk.
     // NOTE: assume we have already been removed from Top Level

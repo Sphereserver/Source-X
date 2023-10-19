@@ -790,7 +790,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	if ( iMissing != SCONT_BADINDEX )
 	{
 		// Need this to repair.
-		const CResourceDef *pCompDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
+		const CResourceDef *pCompDef = g_Cfg.RegisteredResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
 		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_1), pCompDef ? pCompDef->GetName() : g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_2));
 		return false;
 	}
@@ -1157,16 +1157,48 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
         }
 	}
 
-	short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
 	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
-	short iSetFollower = iCurFollower + iFollowerSlots;
+	if (IsSetEF(EF_FollowerList))
+	{
+		if (iFollowerSlots > 0)
+		{
+			bool fExists = false;
+			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+			{
+				if (*it == pChar->GetUID())
+				{
+					fExists = true;
+					break;
+				}
+				++it;
+			}
 
-	if ( (iSetFollower > iMaxFollower) && !IsPriv(PRIV_GM) )
-		return false;
+			if (!fExists && (m_followers.size() < iMaxFollower || IsPriv(PRIV_GM)))
+				m_followers.emplace_back(pChar->GetUID());
+			else
+				return false;
+		}
+		else
+		{
+			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+			{
+				if (*it == pChar->GetUID())
+					it = m_followers.erase(it);
+				else
+					++it;
+			}
+		}
+	}
+	else
+	{
+		short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
+		iCurFollower = iCurFollower + iFollowerSlots;
+		if (!fCheckOnly)
+			SetDefNum("CURFOLLOWER", maximum(iCurFollower, 0));
+	}
 
 	if ( !fCheckOnly )
 	{
-        SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
 		UpdateStatsFlag();
 	}
 	return true;

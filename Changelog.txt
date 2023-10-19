@@ -3016,7 +3016,6 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Changed: @UserQuestArrowClick, using return 1 now prevents from showing default message when (left/right)clicking arrow.
 - Changed: Crafting skills now won't display the bounce message when successfully crafting an item, with the skill message is enough.
 
-
 10-08-2022, Drk84
 - Added: PROMPT_CLILOC for Skill Definition. This allow you to set a cliloc number in the aforementioned property and it will be used instead of the PROMPT_MSG text.
 		 Example:
@@ -3335,19 +3334,70 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Added: CMake Clang compilation toolchains for Windows, Linux, MacOS.
 
 13-09-2023, Drk84
--Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
+- Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
 		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
 		
 14-09-2023, Drk84
--Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
+- Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
 		
 15-09-2023, Drk84
-Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
+- Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
 	   The ship plank will now autoclose after 5 seconds.
-Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
+- Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
 
-23-09-2023, Jhobean
-Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot.  ( Issue #1029)
+23-09-2023 / 1-10-2023 (2 commits), Jhobean 
+- Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot. ( Issue #1029)
+- Changed: Optimisation how f_onchar_delete is launch and avoid dual launch when delete char on login screen.
+
+26-09-2023, Drk84
+- Fixed: Ship plank disappearing when closed before its timer expires or after a save is performed.
+
+02-10-2023, xwerswoodx
+- Fixed: Re-Coded @KarmaChange and @FameChange triggers not setting variables correctly. (Issue #1118)
+	ARGN1 now return as the amount of Karma/Fame being added.
+	ARGN2 is now return oldKarma. (ARGN2 + ARGN1 == New Karma)
+	LOCAL.NEW removed, while ARGN1 is writeable, it's impossible to track it inside the trigger.
+	ARGO now return the source of karma/fame income if exists.
+- Fixed: f_onchar_create_init is not called. (Issue: #1117)
+- Fixed: IF and QVAL statements cannot evaluate correctly 32bit+ bitwise conditions. (Issue: #1078)
+- Added: @PartyAdd trigger. (Feature Request: #1054)
+	I: The player who is joining to the party.
+	SRC: The player who is inviting.
+	Return 1: Cancels the action.
+- Added: LOCAL.SOUND and LOCAL.ANIM under @Start (Skill) and @SkillStart triggers to override sound and animations before start crafting or gathering.
+- Fixed: FACTION property not saved and load correctly under [CHARDEF] definition. (Issue: #1059 and #1083)
+- Added: Added COMBAT_PARALYZE_CANSWING (080000) to combat flags to let characters continue attack while paralyzed like old behaviour. (Issue: #1124)
+- Fixed: ATTACK command causes the player getting criminal without checking AttackingIsACrime value in sphere.ini (Issue: #1123)
+- Added: Added CAN_I_EQUIPONCAST (08000000) flag for items to let scripters customize allowed items while EquippedCast disabled.
+- Fixed: Spells can trigger @Success triggers and play animations if they paralyzed after selected skill.
+- Fixed: Motivation < 0 causes STATF_WAR flag stay infinitely on characters. (Issue: #517)
+- Fixed: The issue where characters can spawn out of the rooms. (Issue: #1084)
+- Fixed: More1 and More2 values readn as integer instead of dword (unsigned integer) (Issue: #784)
+
+07-10-2023, Nolok
+- Added: FUNC keyword to item templates and template-triggers with special parsing (@Create, @CreateLoot, @NPCRestock). It allows to call a function with arguments on the last created ITEM.
+	Default object: the item. SRC: the character holding it.
+
+08-10-2023, Nolok & xwerswoodx
+- Fixed: Setting P inside the @Click trigger made it being called endlessly.
+
+13-10-2023, xwerswoodx
+- Fixed: Made some changes on Z Calculations for maps to make it more accurate. (Issue: #♀983, #617, #877)
+	Thanks for, Jhobean, Tolokio and nolok.
+- Added: Followers now saved on characters after @FollowersUpdate trigger.
+	New system can be activated from sphere.ini by adding EF_FollowerList (080) flag to experimental flags.
+	As this save system newly added, the npcs that already follows the character not saved so their CURFOLLOWER count will reset to 0.
+	You can return 1 or set ARGN1 <= 0 to block increasing of current follower, and these characters not adding to current follower list.
+	CURFOLLOWER returns the total follower.
+	CURFOLLOWER.n.UID/CURFOLLOWER.n returns the follower uid at the given index of the list. (Feature Request: #737)
+- Fixed: @Success/@SpellSucess triggers when player try to teleport unavailable spots. (Issue: #779)
+- Fixed: Non-static items distance check fails because of wrong reference. (Issue: #1112)
+- Fixed: Setting GuardsOnMurderers to 0 causes vendors to run away players and call guards. (Issue: #720)
+
+16-10-2023, Nolok
+- Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers. 
+- Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
+- Fixed: CSString instances becoming invalid after calling the Clear method.
 
 19-10-2023, Julian
 - Fixed: Missing SkillUpdate function, seems I never commited it.

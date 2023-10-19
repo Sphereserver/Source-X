@@ -40,7 +40,7 @@ private:
     CItemShip& operator=(const CItemShip& other);
 
 public:
-    virtual bool _OnTick();
+    virtual bool _OnTick() override;
     CItemContainer * GetShipHold();
     size_t GetShipPlankCount();
     CItem * GetShipPlank(size_t index);

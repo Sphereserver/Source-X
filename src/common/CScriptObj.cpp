@@ -229,7 +229,7 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
 	EXC_TRY("Call by index");
     ASSERT(r_CanCall(uiFunctionIndex));
 
-    CResourceNamedDef * pFunction = static_cast <CResourceNamedDef *>( g_Cfg.m_Functions[uiFunctionIndex] );
+    CResourceNamedDef * pFunction = g_Cfg.m_Functions[uiFunctionIndex].get();
     ASSERT(pFunction);
     CResourceLock sFunction;
     if ( pFunction->ResourceLock(sFunction) )
@@ -865,7 +865,7 @@ badcmd:
 				if ( *ptcKey )
 					sVal = Str_TrimWhitespace(const_cast<tchar*>(ptcKey));
 				else
-					sVal = "";
+					sVal.Clear();
 
 				return true;
 			}
@@ -988,7 +988,7 @@ badcmd:
                 *iSeperator = '\0';
             
             tchar *pArgs = Str_UnQuote(ppArgs[0]);
-            sVal = "";
+            sVal.Clear();
             tchar *ppCmd[255];
             int count = Str_ParseCmdsAdv(pArgs, ppCmd, ARRAY_COUNT(ppCmd), iSep); //Remove unnecessary chars from seperator to avoid issues.
             tchar *ppArrays[2];
@@ -1042,7 +1042,7 @@ badcmd:
 				}
 
 				const char *p = ptcKey + strlen(separators) + 1;
-				sVal = "";
+				sVal.Clear();
 				if (( p > ptcKey ) && *p )		//	we have list of accessible separators
 				{
 					tchar *ppCmd[255];
@@ -1527,7 +1527,7 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConso
         // If an expression is enclosed by parentheses, ParseScriptText needs to read both the open and the closed one, we cannot
         //  pass the string starting with the character after the '('.
 		ParseScriptText(ptcSubexpr, pSrc, 0, pArgs);
-		fVal = bool(Exp_GetVal(ptcSubexpr));
+		fVal = bool(Exp_GetLLVal(ptcSubexpr));
 	}
 
 	-- pContext->_iEvaluate_Conditional_Reentrant;
@@ -1708,7 +1708,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 	tchar* ptcTemp = Str_GetTemp();
 	Str_CopyLimitNull(ptcTemp, ppCmds[0], STR_TEMPLENGTH);
 	ParseScriptText(ptcTemp, pSrc, 0, pArgs, pContext);
-	const bool fCondition = Exp_GetVal(ptcTemp);
+	const bool fCondition = Exp_GetLLVal(ptcTemp);
 
 	// Get the retval we want
 	//	(we might as well work on the transformed original string, since at this point we don't care if we corrupt other arguments)
@@ -1717,7 +1717,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 
 	sVal = ptcTemp;
 	if (sVal.IsEmpty())
-		sVal = "";
+		sVal.Clear();
 	return true;
 }
 

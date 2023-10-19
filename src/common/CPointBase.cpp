@@ -1,4 +1,4 @@
-#include "../common/sphere_library/container_ops.h"
+#include "../common/sphere_library/scontainer_ops.h"
 #include "../game/items/CItem.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
@@ -700,7 +700,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		}
 		default:
 		{
-			const CUOMapMeter * pMeter = CWorldMap::GetMapMeter(*this);
+			std::optional<CUOMapMeter> pMeter = CWorldMap::GetMapMeterAdjusted(*this);
 			if ( pMeter )
 			{
 				switch( index )
@@ -711,7 +711,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 						if ( pTypeDef != nullptr )
 							sVal = pTypeDef->GetResourceName();
 						else
-							sVal = "";
+							sVal.Clear();
 					} return true;	
 					case PT_TERRAIN:
 					{

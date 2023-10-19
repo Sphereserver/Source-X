@@ -170,7 +170,7 @@ char TemporaryString::m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LEN
 
 TemporaryString::TemporaryString()
 {
-	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::current());
+	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::get()->current());
 	if ( current != nullptr )
 	{
 		// allocate from thread context

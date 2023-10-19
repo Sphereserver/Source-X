@@ -83,8 +83,8 @@ void CNTWindow::CStatusDlg::FillClients()
 	m_wndListClients.ResetContent();
 	CNTWindow::CListTextConsole capture( m_wndListClients.m_hWnd );
 	g_Serv.ListClients( &capture );
-	int iCount = m_wndListClients.GetCount();
-	++iCount;
+	//int iCount = m_wndListClients.GetCount();
+	//++iCount;
 }
 
 void CNTWindow::CStatusDlg::FillStats()
@@ -96,10 +96,10 @@ void CNTWindow::CStatusDlg::FillStats()
 
 	CNTWindow::CListTextConsole capture( m_wndListStats.m_hWnd );
 
-	size_t iThreadCount = ThreadHolder::getActiveThreads();
+	size_t iThreadCount = ThreadHolder::get()->getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
-		IThread* thrCurrent = ThreadHolder::getThreadAt(iThreads);
+		IThread* thrCurrent = ThreadHolder::get()->getThreadAt(iThreads);
 		if (thrCurrent == nullptr)
 			continue;
 

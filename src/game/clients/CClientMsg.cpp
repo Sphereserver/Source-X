@@ -290,14 +290,14 @@ void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow
 
 void CClient::addObjectRemove( const CUID& uid ) const
 {
-	ADDTOCALLSTACK("CClient::addObjectRemove");
+	ADDTOCALLSTACK("CClient::addObjectRemove (CUID)");
 	// Tell the client to remove the item or char
 	new PacketRemoveObject(this, uid);
 }
 
 void CClient::addObjectRemove( const CObjBase * pObj ) const
 {
-	ADDTOCALLSTACK("CClient::addObjectRemove");
+	ADDTOCALLSTACK("CClient::addObjectRemove (CObjBase)");
 	addObjectRemove( pObj->GetUID());
 }
 
@@ -1247,7 +1247,7 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_ridRes);
+					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
 					if ( pResDef )
 						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
 				}
@@ -1866,7 +1866,7 @@ void CClient::addSkillWindow(SKILL_TYPE skill, bool fFromInfo) const // Opens th
 		pChar = m_pChar;
 
 	bool fAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
-	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
+	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.valid_index(skill) == false)
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERSKILLS) )
@@ -2739,9 +2739,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		}
 	}
 
-	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
+	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.empty() )
 	{
-		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
+		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.size()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
@@ -2847,23 +2847,22 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		}
 	}
 
-	//	Do the scripts allow to delete the char?
-	enum TRIGRET_TYPE tr;
-	CScriptTriggerArgs Args;
-	Args.m_pO1 = this;
-	pChar->r_Call("f_onchar_delete", pChar, &Args, nullptr, &tr);
-	if ( tr == TRIGRET_RET_TRUE )
+	
+
+	if (pChar->Delete()) //	Do the scripts allow to delete the char?
+	{
+		g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "Character delete request on client login screen.\n");
+
+		pChar->ClearPlayer();
+		// refill the list.
+		new PacketCharacterListUpdate(this, GetAccount()->m_uidLastChar.CharFind());
+		return PacketDeleteError::Success;
+	}
+	else
 	{
 		return PacketDeleteError::InvalidRequest;
 	}
-
-	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
-	pChar->Delete(true);
-
-	// refill the list.
-	new PacketCharacterListUpdate(this, GetAccount()->m_uidLastChar.CharFind());
-
-	return PacketDeleteError::Success;
+	
 }
 
 byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, bool fTest )

@@ -16,7 +16,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 	if ( pObj == nullptr )
 		return false;
 
-	CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
+	CResourceDef *	pRes	= g_Cfg.RegisteredResourceGetDef( rid );
 	CDialogDef *	pDlg	= dynamic_cast <CDialogDef*>(pRes);
 	if ( !pRes || !pDlg )
 	{

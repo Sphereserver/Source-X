@@ -6,10 +6,11 @@
 #ifndef _INC_UOFILES_ENUMS_ITEMID_H
 #define _INC_UOFILES_ENUMS_ITEMID_H
 
+#include <cinttypes>
 
 #define MULTI_QTY	0x2000	// total address space for multis.
 
-enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
+enum ITEMID_TYPE : uint32_t	// InsideUO or UoFiddler are great for this stuff.
 {
 	ITEMID_NOTHING = 0,	// Used for lightning.
 	ITEMID_NODRAW = 1,
@@ -1078,9 +1079,9 @@ enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_GARG_HORN_FEMALE_8 = 0x42B1,
 
 	ITEMID_DOOR_GARGISH_SET		= 0x436E,
-	ITEMID_DOOR_RUINED			= 0x46DD,		
-	ITEMID_DOOR_GARGISH_BLUE	= 0x4D1A,		
-	ITEMID_DOOR_GARGISH_RED		= 0x50C8,		
+	ITEMID_DOOR_RUINED			= 0x46DD,
+	ITEMID_DOOR_GARGISH_BLUE	= 0x4D1A,
+	ITEMID_DOOR_GARGISH_RED		= 0x50C8,
 	ITEMID_DOOR_GARGISH_PRISON	= 0x5142,
 
 	ITEMID_FACE_1_GARG			= 0x5679,
@@ -1098,7 +1099,7 @@ enum ITEMID_TYPE	// InsideUO or UoFiddler are great for this stuff.
 	ITEMID_MULTI_SA = 0x8000,       // ITEMID_MULTI for sa clients (<7.0.8.44) because their tiledata has 0x8000 entries
 	ITEMID_MULTI = 0x10000,         // Current ITEMID_MULTI value because now (starting from from HS clients maybe?) the tiledata has 0x10000 entries
     // Values from now on are used by Sphere as Multi IDs
-	
+
     ITEMID_SHIP_SMALL_N			= ITEMID_MULTI + 0x0,
 	ITEMID_SHIP_SMALL_DRAG_N	= ITEMID_MULTI + 0x4,
 	ITEMID_SHIP_MEDIUM_N		= ITEMID_MULTI + 0x8,

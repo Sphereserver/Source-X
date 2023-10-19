@@ -471,12 +471,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("MORE" ))
 			{
-				pItem->m_itNormal.m_more1 = atoi(pArg);
+				pItem->m_itNormal.m_more1 = Str_ToUI(pArg);
 				continue;
 			}
 			else if ( s.IsKey("MORE2" ))
 			{
-				pItem->m_itNormal.m_more2 = atoi(pArg);
+				pItem->m_itNormal.m_more2 = Str_ToUI(pArg);
 				continue;
 			}
 			else if ( s.IsKey("DYEABLE" ))
@@ -614,7 +614,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			else if ( s.IsKeyHead( "SKILL", 5 ))
 			{
 				SKILL_TYPE skill = (SKILL_TYPE)(atoi( &(s.GetKey()[5]) ));
-				if ( pChar->IsSkillBase(skill) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
+				if ( pChar->IsSkillBase(skill) && g_Cfg.m_SkillIndexDefs.valid_index(skill) )
 					pChar->Skill_SetBase( skill, (ushort)atoi(pArg));
 			}
 			else if ( s.IsKey("ACCOUNT" ))

@@ -243,7 +243,7 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
         {
             for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
             {
-                if (!g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i))
+                if (!g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i))
                     continue;
 
                 if (pCharSrc->Skill_GetLock((SKILL_TYPE)i) == SKILLLOCK_DOWN)
@@ -280,7 +280,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	ASSERT(m_pNPC);
 
 	SKILL_TYPE skill = (SKILL_TYPE)(pMemory->m_itEqMemory.m_Skill);
-	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
+	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.valid_index(skill) )
 	{
 		Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_FORGOT));
 		return false;
@@ -340,7 +340,7 @@ bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountT
 	{	
 		for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 		{
-			if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
+			if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) )
 				continue;
 
 			if ( uiAmountToTrain < 1 )
@@ -393,7 +393,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	TemporaryString tsMsg;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
+		if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) )
 			continue;
 
 		lpctstr pSkillKey = g_Cfg.GetSkillKey((SKILL_TYPE)i);
@@ -424,7 +424,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	uint iCount = 0;
 	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
+		if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) )
 			continue;
 
 		const int iDiff = NPC_GetTrainMax(pCharSrc, (SKILL_TYPE)i) - pCharSrc->Skill_GetBase((SKILL_TYPE)i);

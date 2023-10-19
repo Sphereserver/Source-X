@@ -470,7 +470,7 @@ void CChar::Noto_ChangeNewMsg( int iPrvLevel )
 	}
 }
 
-void CChar::Noto_Fame( int iFameChange )
+void CChar::Noto_Fame( int iFameChange, CChar* pNPC )
 {
 	ADDTOCALLSTACK("CChar::Noto_Fame");
 
@@ -503,11 +503,11 @@ void CChar::Noto_Fame( int iFameChange )
 	//if ( ! iFameChange )
 	//	return;
 
-	SetFame((ushort)(iFame + iFameChange));
+	SetFame((ushort)(iFame + iFameChange), pNPC);
     Noto_ChangeDeltaMsg( (int)GetFame() - iFame, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
 }
 
-void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
+void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage, CChar* pNPC )
 {
 	ADDTOCALLSTACK("CChar::Noto_Karma");
 
@@ -541,7 +541,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage )
 	//if ( ! iKarmaChange )
 	//	return;
 
-    SetKarma((short)(iKarma + iKarmaChange));
+    SetKarma((short)(iKarma + iKarmaChange), pNPC);
     Noto_ChangeDeltaMsg( (int)GetKarma() - iKarma, g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
 	NotoSave_Update();
 	if ( fMessage == true )
@@ -612,8 +612,9 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 		return;
 
 	int iPrvLevel = Noto_GetLevel();	// store title before fame/karma changes to check if it got changed
-	Noto_Fame(g_Cfg.Calc_FameKill(pKill) / iTotalKillers);
-	Noto_Karma(g_Cfg.Calc_KarmaKill(pKill, NotoThem) / iTotalKillers);
+	
+    Noto_Fame(g_Cfg.Calc_FameKill(pKill) / iTotalKillers, pKill);
+    Noto_Karma(g_Cfg.Calc_KarmaKill(pKill, NotoThem) / iTotalKillers, INT32_MIN, false, pKill);
 
 	if ( g_Cfg.m_bExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_COMBAT) )
 	{

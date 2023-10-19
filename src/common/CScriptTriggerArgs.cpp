@@ -516,7 +516,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
         uint uiNum = Exp_GetUSingle(ptcKey);
         if ( uiNum >= m_v.size() )
         {
-            sVal = "";
+            sVal.Clear();
             return true;
         }
         sVal = m_v[uiNum];

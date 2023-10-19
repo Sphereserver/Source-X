@@ -916,16 +916,13 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 	}
 
 	// Write: "KEY=VAL\n"
-	_sWriteBuffer_keyVal.resize(SCRIPT_MAX_LINE_LEN);
-	const size_t uiCapacity = _sWriteBuffer_keyVal.capacity();
-	lptstr ptcBuf = _sWriteBuffer_keyVal.data();
-
-	size_t uiStrLen = Str_CopyLimitNull(ptcBuf, ptcKey, uiCapacity);
+	static thread_local tchar ptcBuf[SCRIPT_MAX_LINE_LEN];
+	size_t uiStrLen = Str_CopyLimitNull(ptcBuf, ptcKey, SCRIPT_MAX_LINE_LEN);
 	ptcBuf[uiStrLen++] = '=';
 	ptcBuf[uiStrLen]   = '\0'; // Needed by Str_ConcatLimitNull
-	uiStrLen += Str_ConcatLimitNull(ptcBuf + uiStrLen, ptcVal, uiCapacity - uiStrLen);
+	uiStrLen += Str_ConcatLimitNull(ptcBuf + uiStrLen, ptcVal, SCRIPT_MAX_LINE_LEN - uiStrLen);
 	ptcBuf[uiStrLen++] = '\n';
-	// ptcBuf[uiStrLen] = '\0';		// Not needed, since the whole buffer is zero-filled.
+	ptcBuf[uiStrLen] = '\0';
 	Write(ptcBuf, int(uiStrLen));
 
 	return true;
@@ -942,28 +939,26 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 //	va_end( vargs );
 //}
 
+static thread_local tchar ptcWriteKeyBuf[SCRIPT_MAX_LINE_LEN];
 void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
-	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(_sWriteBuffer_num.data(), _sWriteBuffer_num.size(), pszVal, vargs);
-	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
+	vsnprintf(ptcWriteKeyBuf, sizeof(ptcWriteKeyBuf), pszVal, vargs);
+	WriteKeyStr(ptcKey, ptcWriteKeyBuf);
 	va_end( vargs );
 }
 
 void CScript::WriteKeyVal(lpctstr ptcKey, int64 iVal)
 {
-	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
-	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.size(), 10);
-	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
+	Str_FromLL(iVal, ptcWriteKeyBuf, sizeof(ptcWriteKeyBuf), 10);
+	WriteKeyStr(ptcKey, ptcWriteKeyBuf);
 }
 
 void CScript::WriteKeyHex(lpctstr ptcKey, int64 iVal)
 {
-	_sWriteBuffer_num.resize(SCRIPT_MAX_LINE_LEN);
-	Str_FromLL(iVal, _sWriteBuffer_num.data(), _sWriteBuffer_num.size(), 16);
-	WriteKeyStr(ptcKey, _sWriteBuffer_num.data());
+	Str_FromLL(iVal, ptcWriteKeyBuf, sizeof(ptcWriteKeyBuf), 16);
+	WriteKeyStr(ptcKey, ptcWriteKeyBuf);
 }
 

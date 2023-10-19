@@ -138,7 +138,7 @@ const CResourceDef* CCSpawn::_FixDef()
     const CResourceDef* pResDef;
     if (resType != RES_UNKNOWN)
     {
-        pResDef = g_Cfg.ResourceGetDef(_idSpawn);
+        pResDef = g_Cfg.RegisteredResourceGetDef(_idSpawn);
         if (pResDef)
             return pResDef;     // valid spawn
     }
@@ -169,7 +169,7 @@ const CResourceDef* CCSpawn::_FixDef()
         {
             // try a spawn group.
             const CResourceIDBase rid(RES_SPAWN, iIndex);
-            pResDef = g_Cfg.ResourceGetDef(rid);
+            pResDef = g_Cfg.RegisteredResourceGetDef(rid);
             if (pResDef)
             {
                 g_Log.EventDebug("CCSpawn::FixDef fixed on spawner with UID=0%x a SPAWN type resource from Resource ID 0%" PRIx32 " to 0%" PRIx32 ".\n", uiItemUID, _idSpawn.GetPrivateUID(), rid.GetPrivateUID());
@@ -215,7 +215,7 @@ const CResourceDef* CCSpawn::_FixDef()
         {
             // try a template.
             const CResourceIDBase rid(RES_TEMPLATE, iIndex);
-            pResDef = g_Cfg.ResourceGetDef(rid);
+            pResDef = g_Cfg.RegisteredResourceGetDef(rid);
             if (pResDef)
             {
                 g_Log.EventDebug("CCSpawn::FixDef fixed on spawner with UID=0%x a TEMPLATE type resource from Resource ID 0%" PRIx32 " to 0%" PRIx32 ".\n", uiItemUID, _idSpawn.GetPrivateUID(), rid.GetPrivateUID());
@@ -262,7 +262,7 @@ uint CCSpawn::WriteName(tchar *ptcOut) const
 {
     ADDTOCALLSTACK("CCSpawn::GetName");
     lpctstr ptcName = nullptr;
-    const CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
+    const CResourceDef *pDef = g_Cfg.RegisteredResourceGetDef(_idSpawn);
     if (pDef != nullptr)
         ptcName = pDef->GetName();
     if (pDef == nullptr || ptcName == nullptr || ptcName[0] == '\0')
@@ -285,7 +285,7 @@ void CCSpawn::Delete(bool fForce)
 void CCSpawn::GenerateItem()
 {
     ADDTOCALLSTACK("CCSpawn::GenerateItem");
-    
+
     CItem *pSpawnItem = GetLink();
     if (!pSpawnItem->IsTopLevel())
         return;
@@ -418,7 +418,7 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
     if (pChar->GetTopPoint().IsValidPoint() == false)// Try to place it only if the @Spawn trigger didn't set it a valid P.
     {
         ushort iPlacingTries = 0;
-        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false))
+        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false) || !pChar->CanSeeLOS(pt)) //Character shouldn't spawn where can't see it's spawn point.
         {
             ++iPlacingTries;
             if (iPlacingTries <= 3)
@@ -560,7 +560,7 @@ void CCSpawn::DelObj(const CUID& uid)
     {
         CScriptTriggerArgs args;
         args.m_pO1 = pSpawnItem;
-        args.m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;   
+        args.m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;
         pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
         pSpawnItem->_SetTimeoutS(args.m_iN1);
     }
@@ -626,7 +626,7 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_ptHome = pSpawnItem->GetTopPoint();
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
-        
+
         if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
         {
             pSpawnItem->_SetTimeoutS(-1);
@@ -645,7 +645,7 @@ void CCSpawn::AddObj(const CUID& uid)
     }
 
     // Done with checks, let's add this.
-    _uidList.emplace_back(uid); 
+    _uidList.emplace_back(uid);
 
     if (GetCurrentSpawned() >= GetAmount())
     {
@@ -917,8 +917,8 @@ bool CCSpawn::r_LoadVal(CScript & s)
                 return true;
             }
             CResourceIDBase ridArg(dwPrivateUID);    // Not using CResourceID because res_chardef, spawn, itemdef, template do not use the "page" arg
-            const int iRidIndex = ridArg.GetResIndex();
-            const int iRidType  = ridArg.GetResType();
+            const uint iRidIndex = ridArg.GetResIndex();
+            const uint iRidType  = ridArg.GetResType();
             switch (pSpawnItem->GetType())
             {
                 case IT_SPAWN_CHAR:
@@ -938,7 +938,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     {
                         // it should be a spawn group.
                         CResourceIDBase ridTemp(RES_SPAWN, iRidIndex);
-                        CResourceDef *pDef = g_Cfg.ResourceGetDef(ridTemp);
+                        CResourceDef *pDef = g_Cfg.RegisteredResourceGetDef(ridTemp);
                         if (pDef)
                         {
                             _idSpawn = ridTemp;
@@ -969,7 +969,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     {
                         // try a template
                         CResourceIDBase ridTemp(RES_TEMPLATE, iRidIndex);
-                        CResourceDef *pDef = g_Cfg.ResourceGetDef(ridTemp);
+                        CResourceDef *pDef = g_Cfg.RegisteredResourceGetDef(ridTemp);
                         if (pDef)
                         {
                             _idSpawn = ridTemp;
@@ -1135,7 +1135,7 @@ bool CCSpawn::r_GetRef(lpctstr & ptcKey, CScriptObj *& pRef)
     {
         return false;
     }
-    
+
 
     CItem *pItem = static_cast<CItem*>(GetLink());
 

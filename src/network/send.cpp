@@ -281,7 +281,10 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 	{
 		if (other->m_pPlayer != nullptr)
 		{
-			writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
+			if (!IsSetEF(EF_FollowerList))
+				writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
+			else
+				writeByte((byte)(other->m_followers.size()));
 			writeByte((byte)(other->GetDefNum("MAXFOLLOWER", true)));
 		}
 		else
@@ -1113,7 +1116,7 @@ PacketSkills::PacketSkills(const CClient* target, const CChar* character, SKILL_
 
 		for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 		{
-			if (g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) == false)
+			if (g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) == false)
 				continue;
 
 			writeInt16((word)(i + 1));
@@ -3540,12 +3543,12 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nachar *
  ***************************************************************************/
 PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
-	UnreferencedParameter(fFrontFall);
+	//UnreferencedParameter(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
 	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
-	writeInt32(0);
+	writeInt32(fFrontFall);
 }
 
 

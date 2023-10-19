@@ -81,15 +81,25 @@ struct CCryptoClientKey
 // ===============================================================================================================
 
 
-struct CCrypto
+struct CCryptoKeysHolder
 {
-public:
+	static CCryptoKeysHolder* get() noexcept;
+
 	union CCryptoKey		// For internal encryption calculations, it has nothing to do with SphereCrypt.ini
 	{
-		#define CRYPT_GAMESEED_LENGTH	8
+#define CRYPT_GAMESEED_LENGTH	8
 		byte  u_cKey[CRYPT_GAMESEED_LENGTH];
 		dword u_iKey[2];
 	};
+
+	std::vector<CCryptoClientKey> client_keys;
+
+	void LoadKeyTable(CScript& s);
+	void addNoCryptKey(void);
+};
+
+struct CCrypto
+{
 private:
 	bool m_fInit;
 	bool m_fRelayPacket;
@@ -108,12 +118,6 @@ protected:
 	CONNECT_TYPE m_ConnectType;
 	
 	//static const word packet_size[0xde];
-
-public:
-	static std::vector<CCryptoClientKey> client_keys;
-
-	static void LoadKeyTable(CScript & s);
-	static void addNoCryptKey(void);
 
 	// --------------- Generic -----------------------------------
 	//static int GetPacketSize(byte packet);
@@ -150,11 +154,11 @@ public:
 	int	m_gameBlockPos;		// 0-7
 	size_t	m_gameStreamPos;	// use this to track the 21K move to the new Blowfish m_gameTable.
 private:
-	CCrypto::CCryptoKey m_Key;
+	CCryptoKeysHolder::CCryptoKey m_Key;
 private:
 	void InitSeed( int iTable );
 	static void InitTables();
-	static void PrepareKey( CCrypto::CCryptoKey & key, int iTable );
+	static void PrepareKey(CCryptoKeysHolder::CCryptoKey & key, int iTable );
 	bool DecryptBlowFish( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	byte DecryptBFByte( byte bEnc );
 	void InitBlowFish();

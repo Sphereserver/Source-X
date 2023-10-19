@@ -88,7 +88,6 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
     _uiRange = pCharDef->_uiRange;
 
 	m_BaseResources = pCharDef->m_BaseResources;
-    _pFaction = pCharDef->_pFaction;
 
 	CBaseBaseDef::CopyBasic( pCharDef );	// This will overwrite the CResourceLink!!
 }
@@ -502,7 +501,7 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 	if ( index == SCONT_BADINDEX )
 		return nullptr;
 
-	CResourceLink * pBaseLink = static_cast <CResourceLink *> ( g_Cfg.m_ResHash.GetAt(rid,index));
+	CResourceLink * pBaseLink = static_cast <CResourceLink *> (g_Cfg.m_ResHash.GetBarePtrAt(rid,index));
 	ASSERT(pBaseLink);
 	CCharBase * pBase = dynamic_cast <CCharBase *> (pBaseLink);
 	if ( pBase )

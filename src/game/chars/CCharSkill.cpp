@@ -31,7 +31,7 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	dword dwSkillTmp;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
+		if ( !g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			continue;
 
 		dwSkillTmp = MAKEDWORD(i, Skill_GetBase((SKILL_TYPE)i));
@@ -320,7 +320,7 @@ void CChar::Skill_Decay()
 	// Look for a skill to deduct from
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( g_Cfg.m_SkillIndexDefs.IsValidIndex(i) == false )
+		if ( g_Cfg.m_SkillIndexDefs.valid_index(i) == false )
 			continue;
 
 		// Check that the skill is set to decrease and that it is not already at 0
@@ -363,7 +363,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 	// ARGS:
 	//  difficulty = skill target from 0-100
 
-	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
+	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.valid_index(skill) )
 		return;
 	if ( m_pArea && m_pArea->IsFlag( REGION_FLAG_SAFE ))	// skills don't advance in safe areas.
 		return;
@@ -4238,8 +4238,21 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		// (like ACTARG1/2 for magery, they are respectively m_atMagery.m_iSpell	and m_atMagery.m_iSummonID and are set in
 		// CClient::OnTarg_Skill_Magery, which then calls Skill_Start).
 		// Skill_Cleanup();
+        SOUND_TYPE sound = SOUND_NONE;
+        ANIM_TYPE anim = ANIM_WALK_UNARM;
+        if (!g_Cfg.IsSkillFlag(skill, SKF_NOSFX))
+        {
+			sound = Skill_GetSound(skill);
+        }
+		if (!g_Cfg.IsSkillFlag(skill, SKF_NOANIM))
+		{
+			anim = Skill_GetAnim(skill);
+        }
+		
 		CScriptTriggerArgs pArgs;
 		pArgs.m_iN1 = skill;
+		pArgs.m_VarsLocal.SetNumNew("Sound", sound);
+		pArgs.m_VarsLocal.SetNumNew("Anim", anim);
 		
 		// Some skill can start right away. Need no targetting.
 		// 0-100 scale of Difficulty
@@ -4289,7 +4302,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		pArgs.m_iN2 = iWaitTime;
 		// Execute the @START trigger and pass various craft parameters there
 
-		CResourceID pResBase(RES_ITEMDEF, fCraftSkill ? m_atCreate.m_iItemID : 0, 0);
+		CResourceID pResBase(RES_ITEMDEF, (fCraftSkill ? m_atCreate.m_iItemID : ITEMID_NOTHING), 0);
 
 		if ( fCraftSkill )
 		{
@@ -4309,7 +4322,6 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			pArgs.m_VarsLocal.SetNum("GatherStrokeCnt", m_atResource.m_dwStrokeCount);
 		}
 
-
 		if ( IsTrigUsed(TRIGGER_SKILLSTART) )
 		{
 			//If we are using a combat skill and m_Act_Difficult(actdiff) is < 0 combat will be blocked.
@@ -4318,6 +4330,8 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 				Skill_Cleanup();
 				return false;
 			}
+            sound = (SOUND_TYPE)(pArgs.m_VarsLocal.GetKeyNum("Sound"));
+            anim = static_cast<ANIM_TYPE>(pArgs.m_VarsLocal.GetKeyNum("Anim"));
 		}
 
 		if ( IsTrigUsed(TRIGGER_START) )
@@ -4328,6 +4342,8 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 				Skill_Cleanup();
 				return false;
 			}
+            sound = (SOUND_TYPE)(pArgs.m_VarsLocal.GetKeyNum("Sound"));
+            anim = static_cast<ANIM_TYPE>(pArgs.m_VarsLocal.GetKeyNum("Anim"));
 		}
 		iWaitTime = (int)pArgs.m_iN2;
 		if (IsSkillBase(skill) && iWaitTime > 0)
@@ -4356,10 +4372,10 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			skActive = Skill_GetActive();
 
 			if ( !g_Cfg.IsSkillFlag(skActive, SKF_NOSFX) )
-				Sound(Skill_GetSound(skActive));
+				Sound(sound);
 
 			if ( !g_Cfg.IsSkillFlag(skActive, SKF_NOANIM) )
-				UpdateAnimate(Skill_GetAnim(skActive));
+				UpdateAnimate(anim);
 		}
 
 		

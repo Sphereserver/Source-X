@@ -231,7 +231,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 
 				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
-					CItemStone * pStone = g_World.m_Stones[i];
+					CItemStone * pStone = g_World.m_Stones[i].get();
 					if ( !pStone || !pStone->IsType(needtype) )
 						continue;
 
@@ -248,9 +248,9 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 			{
 				if ( ! s.HasArgs())
 					return false;
-				CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetContainerHead());
-				for ( ; pPage!=nullptr; pPage = pPage->GetNext())
+				for (auto &sptrPage : g_World.m_GMPages)
 				{
+					CGMPage* pPage = sptrPage.get();
 					++sm_iListIndex;
 					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
 					pPage->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );

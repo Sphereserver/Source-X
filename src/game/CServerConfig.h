@@ -7,6 +7,7 @@
 #define _INC_CSERVERCONFIG_H
 
 #include "../common/sphere_library/CSAssoc.h"
+#include "../common/sphere_library/sptr_containers.h"
 #include "../common/resource/sections/CSkillDef.h"
 #include "../common/resource/sections/CSpellDef.h"
 #include "../common/resource/sections/CWebPageDef.h"
@@ -29,6 +30,7 @@ class CClient;
 class CServerDef;
 using CServerRef = CServerDef*;
 
+class CResourceNamedDef;
 
 /**
  * @enum    EF_TYPE
@@ -43,6 +45,7 @@ enum EF_TYPE
     EF_FastWalkPrevention = 0x0000010,    // Enable client fastwalk prevention (INCOMPLETE YET).
     EF_Intrinsic_Locals = 0x0000020,    // Disables the needing of 'local.', 'tag.', etc. Be aware of not creating variables with the same name of already-existing functions.
     EF_Item_Strict_Comparison = 0x0000040,    // Don't consider log/board and leather/hide as the same resource type.
+    EF_FollowerList = 0x0000080, // Save the followers to the list and enable CURFOLLOWER.n.UID, CURFOLLOWER.ADD/DEL <UID> and CURFOLLOWER.CLEAR commands.
     EF_AllowTelnetPacketFilter = 0x0000200,    // Enable packet filtering for telnet connections as well.
     EF_Script_Profiler = 0x0000400,    // Record all functions/triggers execution time statistics (it can be viewed pressing P on console).
     EF_DamageTools = 0x0002000,    // Damage tools (and fire @damage on them) while mining or lumberjacking
@@ -119,7 +122,8 @@ enum COMBATFLAGS_TYPE
     COMBAT_ANIM_HIT_SMOOTH      = 0x10000,  // The hit animation has the same duration as the swing delay, instead of having a fixed fast duration and being idle until the delay has expired.
                                             //   WARNING: doesn't work with Gargoyles due to the new animation packet not accepting a custom animation duration!
     COMBAT_FIRSTHIT_INSTANT     = 0x20000,  // The first hit in a fight doesn't wait for the recoil time (OSI like)
-	COMBAT_NPC_BONUSDAMAGE		= 0x40000	// NPC will get full bonus damage from various sources.
+	COMBAT_NPC_BONUSDAMAGE		= 0x40000,	// NPC will get full bonus damage from various sources.
+    COMBAT_PARALYZE_CANSWING    = 0x80000   // Characters can continue attacking while paralyzed. (Old sphere behaviour)
 };
 
 /**
@@ -585,16 +589,16 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjNameSortVector           m_SkillNameDefs;		// const CSkillDef* Name sorted.
-	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;		// Defined Skills indexed by number.
-	CSObjArray< CSpellDef* >     m_SpellDefs;			// Defined Spells.
-	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;	// Defined Spells, in skill order.
+	CObjSharedPtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	CSSharedPtrVector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
+    CSSharedPtrVector<CSpellDef> m_SpellDefs;			// Defined Spells.
+    CSWeakPtrVector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
 
 	CSStringSortArray m_PrivCommands[PLEVEL_QTY];		// what command are allowed for a priv level?
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjNameSortVector m_Functions;	// Subroutines that can be used in scripts.
+    CObjSharedPtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -670,6 +674,21 @@ public:
      */
 	void LoadSortSpells();
 
+
+    /**
+    * @brief   Get a CResourceDef from the RESOURCE_ID.
+    *
+    * @param   restype Resource Type.
+    *
+    * @param   ptcName Resource Name.
+    *
+    * @param   wPage Resource Page attribute.
+    *
+    * @return  null if it fails, else a pointer to the CScriptObj.
+    */
+    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+    CResourceDef* RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+
     /**
      * @brief   Get a CResourceDef from the RESOURCE_ID.
      *
@@ -677,7 +696,9 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const override;
+	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
+    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
+    CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );
