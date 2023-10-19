@@ -341,7 +341,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				CItemShip* pShip = dynamic_cast<CItemShip*>(pItem->m_uidLink.ItemFind());
 				if (pShip)
 				{
-					if (m_pChar->ContentFindKeyFor(pItem))
+					if (m_pChar->ContentFindKeyFor(pItem) || pShip->GetOwner() == m_pChar->GetUID())
 						pShip->CCMultiMovable::SetPilot(m_pChar);
 					else
 						pItem->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_NOTYOURSHIP));

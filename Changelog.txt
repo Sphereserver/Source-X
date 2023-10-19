@@ -3401,4 +3401,4 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 18-10-2023, xwerswoodx
 - Added: Ported 56b TILLER DCLick auto pilot to X. (Request: #778)
-- Fixed: Possible fix for Osi Client spell flood. (Issue: #787)
+- Fixed: Possible fix for Osi Client spell flood. (Issue: #787, #776)
