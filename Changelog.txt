@@ -3349,11 +3349,11 @@ Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081)
 23-09-2023, Jhobean
 Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot.  ( Issue #1029)
 
-23-09-2023, Julian
+19-10-2023, Julian
 - Fixed: Missing SkillUpdate function, seems I never commited it.
 - Modified: @SkillMenu trigger to be able to open dialogs also, and added a few local variables.
-			LOCAL.ItemUsed (r) = The ID (not UID) of the item that triggered this action.
-			LOCAL.Skill (r) = The ID of the Skill used.
-			LOCAL.SkillMenu (rw) = The skill menu (sm_alchemy) or dialog (d_MyCraftingMenu) that is going to open.
+	LOCAL.ItemUsed (r) = The ID (not UID) of the item that triggered this action.
+	LOCAL.Skill (r) = The ID of the Skill used.
+	LOCAL.SkillMenu (rw) = The skill menu (sm_alchemy) or dialog (d_MyCraftingMenu) that is going to open.
 - Modified: @SkillMakeItem trigger to enable/disable notification message when bouncing the crafted item.
-			LOCAL.Notify (rw) = 1/0. Using 0 will not show any "You put your..." message, 1 will show it. Default = 1.
+	LOCAL.Notify (rw) = 1/0. Using 0 will not show any "You put your..." message, 1 will show it. Default = 1.
