@@ -37,9 +37,9 @@ public:
 	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates
 
 	static std::optional<CUOMapMeter> GetMapMeterAdjusted(const CPointMap& pt);
-	static const CUOMapMeter CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map);
-	static const char GetFloorAvarage(char pPoint1, char pPoint2, short iAverage);
-	static const short GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight);
+	static CUOMapMeter CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map);
+	static char GetFloorAvarage(char pPoint1, char pPoint2, short iAverage);
+	static short GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight);
 
 	static CItemTypeDef* GetTerrainItemTypeDef(dword dwIndex);
 	static IT_TYPE		 GetTerrainItemType(dword dwIndex);

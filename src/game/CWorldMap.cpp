@@ -267,7 +267,7 @@ const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 		block->m_CacheTime.HitCacheTime();
 		return block.get();
 	}
-	
+
 	// else load and add it to the cache.
 	block = std::make_unique<CServerMapBlock>(iBx, iBy, pt.m_map);
 	ASSERT(block);
@@ -860,7 +860,7 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 
                                 if (fLimitZ) //Checking if we are in the same floor.
                                 {
-                                   
+
 									if (pMultiItem->m_dz != z2)
 										continue;
 									/*
@@ -1446,7 +1446,7 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 	dwBlockThis = 0;
 	// Terrain height is screwed. Since it is related to all the terrain around it.
 	std::optional<CUOMapMeter> pMapTop = GetMapMeterAdjusted(pt); //Get pMapTop Z Adjusted.
-	//const CUOMapMeter* pMapTop = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)); 
+	//const CUOMapMeter* pMapTop = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
 	if (!pMapTop)
 		return;
 	//DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
@@ -1487,14 +1487,14 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & bloc
 	}
 }
 
-const char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage)
+char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage)
 {
 	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
 	const short pTotal = pPoint1 + pPoint2, pHalf = pTotal / 2, pEven = pTotal % 2, pAverage = iAverage - pHalf;
 	return static_cast<char>(pHalf + (pEven != 0 && pAverage > 5));
 }
 
-const short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
+short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
 {
 	const short iHighest1 = maximum(pTop, pBottom);
 	const short iLowest1 = minimum(pTop, pBottom);
@@ -1504,7 +1504,7 @@ const short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char 
 	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
 }
 
-const CUOMapMeter CWorldMap::CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map)
+CUOMapMeter CWorldMap::CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map)
 {
 	CPointMap pt = { x, y, 0, map };
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
@@ -1790,7 +1790,7 @@ CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
 	_fInertToggle = false;
 	_pObj = nullptr;
 	_idxObj = _idxObjMax = 0;
-	
+
 	_pSectorBase = _pSector = pt.GetSector();
 
 	_rectSector.SetRect(
