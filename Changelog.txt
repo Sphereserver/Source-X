@@ -3398,3 +3398,12 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers. 
 - Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
 - Fixed: CSString instances becoming invalid after calling the Clear method.
+
+19-10-2023, Julian
+- Fixed: Missing SkillUpdate function, seems I never commited it.
+- Modified: @SkillMenu trigger to be able to open dialogs also, and added a few local variables.
+	LOCAL.ItemUsed (r) = The ID (not UID) of the item that triggered this action.
+	LOCAL.Skill (r) = The ID of the Skill used.
+	LOCAL.SkillMenu (rw) = The skill menu (sm_alchemy) or dialog (d_MyCraftingMenu) that is going to open.
+- Modified: @SkillMakeItem trigger to enable/disable notification message when bouncing the crafted item.
+	LOCAL.Notify (rw) = 1/0. Using 0 will not show any "You put your..." message, 1 will show it. Default = 1.
