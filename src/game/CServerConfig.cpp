@@ -4731,7 +4731,7 @@ bool CServerConfig::Load( bool fResync )
 
 	if (!m_sChatStaticChannels.IsEmpty())
 	{
-		TCHAR* ppArgs[32];
+		tchar* ppArgs[32];
 		size_t iChannels = Str_ParseCmds(const_cast<tchar *>(g_Cfg.m_sChatStaticChannels.GetBuffer()), ppArgs, ARRAY_COUNT(ppArgs), ",");
 		for (size_t i = 0; i < iChannels; i++)
 			g_Serv.m_Chats.CreateChannel(ppArgs[i]);
