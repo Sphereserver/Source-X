@@ -596,7 +596,6 @@ enum TALKMODE_TYPE	// Modes we can talk/bark in.
 	TALKMODE_GUILD      = 0xD,	// 13 = Used by guild chat (client shortcut: \)
 	TALKMODE_ALLIANCE   = 0xE,	// 14 = Used by alliance chat (client shortcut: shift+\)
     TALKMODE_COMMAND    = 0xF,  // 15 = GM command prompt
-	TALKMODE_ENCODED	= 0xC0,
     // Special talkmodes, used internally by Sphere
     TALKMODE_SOUND      = 0xFE, // Used to check if a char can hear a sound.
 	TALKMODE_BROADCAST  = 0xFF  // It will be converted to something else.
