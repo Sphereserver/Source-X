@@ -2586,7 +2586,7 @@ void CClient::addGlobalChatStatusToggle()
 		pszMsg = "Global Chat Online";
 	}
 
-	TCHAR* pszXML = Str_GetTemp();
+	tchar* pszXML = Str_GetTemp();
 	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10lu\" name=\"%.6s\" show=\"%d\" version=\"1\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
 
 	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));

@@ -5395,7 +5395,7 @@ PacketGlobalChat::PacketGlobalChat(const CClient* target, byte unknown, byte act
 {
 	ADDTOCALLSTACK("PacketGlobalChat::PacketGlobalChat");
 
-	TCHAR* xmlFull = Str_GetTemp();
+	tchar* xmlFull = Str_GetTemp();
 	sprintf(xmlFull, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><ultima_stanza>%s</ultima_stanza>", xml);
 	//DEBUG_ERR(("GlobalChat XML sent: %s\n", xmlFull));
 
