@@ -109,10 +109,10 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 	CChatChanMember* pMe = pClient;
 	CChatChannel* pChannel = pMe->GetChannel();
 
-	TCHAR szFullText[MAX_TALK_BUFFER];
+	tchar szFullText[MAX_TALK_BUFFER];
 	CvtNETUTF16ToSystem(szFullText, sizeof(szFullText), pszText, len);
 
-	TCHAR* szMsg = szFullText + 1;
+	tchar* szMsg = szFullText + 1;
 	switch (szFullText[0])	// the 1st character is a command byte (join channel, leave channel, etc)
 	{
 	case CHATACT_ChangeChannelPassword:		// client shortcut: /pw
@@ -158,7 +158,7 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 				break;
 		}
 		szMsg[i] = '\0';
-		TCHAR* pszPassword = szMsg + i + 1;
+		tchar* pszPassword = szMsg + i + 1;
 		if (pszPassword[0] == ' ')	// skip whitespaces
 			pszPassword++;
 		JoinChannel(szMsg + 1, pszPassword, pMe);
