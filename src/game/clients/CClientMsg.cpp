@@ -2574,7 +2574,7 @@ void CClient::addGlobalChatStatusToggle()
 		return;
 
 	int iShow;
-	LPCTSTR pszMsg;
+	lpctstr pszMsg;
 	if (CGlobalChatChanMember::IsVisible())
 	{
 		iShow = 0;
