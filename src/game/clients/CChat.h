@@ -17,22 +17,10 @@ class CChatChanMember;
 
 class CChat
 {
-	// All the chat channels.
-private:
-	bool m_fChatsOK;	// allowed to create new chats ?
-	CSObjList m_Channels;		// CChatChannel // List of chat channels.
-private:
-	void DoCommand(CChatChanMember * pBy, lpctstr szMsg);
-	void DeleteChannel(CChatChannel * pChannel);
-	void WhereIs(CChatChanMember * pBy, lpctstr pszName) const;
-	void KillChannels();
-	bool JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr pszPassword);
-	bool CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember * pMember);
-	void CreateJoinChannel(CChatChanMember * pByMember, lpctstr pszName, lpctstr pszPassword);
-	CChatChannel * FindChannel(lpctstr pszChannel) const;
 public:
 	static const char *m_sClassName;
 	CChat();
+	CSObjList m_Channels;		// CChatChannel // List of chat channels.
 
 private:
 	CChat(const CChat& copy);
@@ -41,19 +29,21 @@ private:
 public:
 	CChatChannel * GetFirstChannel() const;
 
-	void EventMsg( CClient * pClient, const nachar * pszText, int len, CLanguageID lang ); // Text from a client
+	void Action( CClient * pClient, const nachar * pszText, int len, CLanguageID lang ); // Text from a client
 
 	static bool IsValidName(lpctstr pszName, bool fPlayer);
 
-	void SendDeleteChannel(CChatChannel * pChannel);
-	void SendNewChannel(CChatChannel * pNewChannel);
-	bool IsDuplicateChannelName(const char * pszName) const;
-
 	void Broadcast(CChatChanMember * pFrom, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
+	void BroadcastAddChannel(CChatChannel* pChannel);
+	void BroadcastRemoveChannel(CChatChannel* pChannel);
 	void QuitChat(CChatChanMember * pClient);
 
-	static void DecorateName(CSString & sName, const CChatChanMember * pMember = nullptr, bool fSystem = false);
-	static void GenerateChatName(CSString & sName, const CClient * pClient);
+	void JoinChannel(lpctstr pszChannel, lpctstr pszPassword, CChatChanMember* pMember = nullptr);
+	void DeleteChannel(CChatChannel* pChannel);
+	void FormatName(CSString & sName, const CChatChanMember * pMember = nullptr, bool fSystem = false);
+
+	CChatChannel* FindChannel(lpctstr pszChannel) const;
+	bool CreateChannel(lpctstr pszName, lpctstr pszPassword = nullptr, CChatChanMember* pMember = nullptr);
 };
 
 

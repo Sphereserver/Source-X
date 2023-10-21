@@ -58,6 +58,7 @@ public:
 	// Multis
 	uint8 _iMaxHouses;              // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
 	uint8 _iMaxShips;               // Max ships this player (Client?) can have (Overriding CAccount::_iMaxShips)
+	bool m_fRefuseGlobalChatRequests;
 
 	static lpctstr const sm_szVerbKeys[];
 	static lpctstr const sm_szLoadKeys[];

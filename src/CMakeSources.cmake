@@ -436,6 +436,8 @@ src/game/clients/CClientTarg.cpp
 src/game/clients/CClientTooltip.h
 src/game/clients/CClientTooltip.cpp
 src/game/clients/CClientUse.cpp
+src/game/clients/CGlobalChatChanMember.cpp
+src/game/clients/CGlobalChatChanMember.h
 src/game/clients/CGMPage.cpp
 src/game/clients/CGMPage.h
 src/game/clients/CParty.cpp

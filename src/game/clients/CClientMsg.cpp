@@ -1457,6 +1457,12 @@ void CClient::addPlayerStart( CChar * pChar )
 
 	addKRToolbar(pChar->m_pPlayer->getKrToolbarStatus());
 	resendBuffs();
+
+	if (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT)
+	{
+		addGlobalChatConnect();
+		addGlobalChatStatusToggle();
+	}
 }
 
 void CClient::addPlayerWarMode() const
@@ -2537,6 +2543,57 @@ void CClient::addChatSystemMessage( CHATMSG_TYPE iType, lpctstr pszName1, lpctst
 	ADDTOCALLSTACK("CClient::addChatSystemMessage");
 
 	new PacketChatMessage(this, iType, pszName1, pszName2, lang);
+}
+
+void CClient::addGlobalChatConnect()
+{
+	ADDTOCALLSTACK("CClient::addGlobalChatConnect");
+	// Connect on Global Chat
+	if (!m_pChar || !PacketGlobalChat::CanSendTo(GetNetState()))
+		return;
+
+	// Set Jabber ID (syntax: CharName_CharUID@ServerID)
+	tchar* pszJID = Str_GetTemp();
+	sprintf(pszJID, "%.6s_%.7lu@%.2hhu", m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()), 0);
+	CGlobalChatChanMember::SetJID(pszJID);
+
+	// Send xml to client
+	tchar* pszXML = Str_GetTemp();
+	sprintf(pszXML, "<iq to=\"%s\" id=\"iq_%.10lu\" type=\"6\" version=\"1\" jid=\"%s\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), CGlobalChatChanMember::GetJID());
+
+	CGlobalChatChanMember::SetVisible(false);
+	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::InfoQuery, pszXML);
+	SysMessage("Global Chat is now connected.");
+}
+
+void CClient::addGlobalChatStatusToggle()
+{
+	ADDTOCALLSTACK("CClient::addGlobalChatStatusToggle");
+	// Toggle client visibility status (online/offline) on Global Chat
+	if (!m_pChar || !PacketGlobalChat::CanSendTo(GetNetState()))
+		return;
+
+	int iShow;
+	LPCTSTR pszMsg;
+	if (CGlobalChatChanMember::IsVisible())
+	{
+		iShow = 0;
+		pszMsg = "Global Chat Offline";
+	}
+	else
+	{
+		iShow = 1;
+		pszMsg = "Global Chat Online";
+	}
+
+	TCHAR* pszXML = Str_GetTemp();
+	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10lu\" name=\"%.6s\" show=\"%d\" version=\"1\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
+
+	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));
+	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::Presence, pszXML);
+	SysMessage(pszMsg);
+
+	// TO-DO: also send the status change to all clients on friend list
 }
 
 void CClient::addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText )
