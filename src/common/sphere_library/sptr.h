@@ -103,7 +103,7 @@ namespace sl
             typename Ptr,
             typename = std::enable_if_t <
             jss::object_ptr::detail::is_convertible_smart_pointer<Ptr, T>::value >>
-            constexpr object_ptr(Ptr const& other) noexcept : ptr(other.get()) = delete;
+            constexpr raw_ptr_view(Ptr const& other) noexcept : ptr(other.get()) = delete;
 
 
         /// Get the raw pointer value
@@ -144,34 +144,34 @@ namespace sl
 
         /// Check for equality
         friend constexpr bool
-            operator==(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            operator==(raw_ptr_view const& lhs, raw_ptr_view const& rhs) noexcept {
             return lhs.ptr == rhs.ptr;
         }
 
         /// Check for inequality
         friend constexpr bool
-            operator!=(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            operator!=(raw_ptr_view const& lhs, raw_ptr_view const& rhs) noexcept {
             return !(lhs == rhs);
         }
 
         /// a<b provides a total order
         friend constexpr bool
-            operator<(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            operator<(raw_ptr_view const& lhs, raw_ptr_view const& rhs) noexcept {
             return std::less<void>()(lhs.ptr, rhs.ptr);
         }
         /// a>b is b<a
         friend constexpr bool
-            operator>(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            operator>(raw_ptr_view const& lhs, raw_ptr_view const& rhs) noexcept {
             return rhs < lhs;
         }
         /// a<=b is !(b<a)
         friend constexpr bool
-            operator<=(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            operator<=(raw_ptr_view const& lhs, raw_ptr_view const& rhs) noexcept {
             return !(rhs < lhs);
         }
         /// a<=b is b<=a
         friend constexpr bool
-            operator>=(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            operator>=(raw_ptr_view const& lhs, raw_ptr_view const& rhs) noexcept {
             return rhs <= lhs;
         }
 

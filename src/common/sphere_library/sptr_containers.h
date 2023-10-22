@@ -2,8 +2,7 @@
 #define _INC_SPTR_CONTAINERS_H
 
 #include "sorted_vector.h"
-#include <algorithm>
-#include <memory>
+#include "sptr.h"
 
 
 // Sphere library
@@ -194,6 +193,65 @@ namespace sl
     class weak_ptr_sorted_vector : public _ptr_sorted_vector_base<_Type, std::weak_ptr<_Type>, _Comp>
     {};
 
+
+    // -- Vectors of pointers, wrapped in shared pointers
+    template <typename _Type>
+    class smart_ptr_view_vector : public _ptr_vector_base<_Type, sl::smart_ptr_view<_Type>>
+    {
+    public:
+        template <typename _PtrType = sl::smart_ptr_view<_Type>>  // Gets both bare pointer and shared_ptr
+        void emplace_index_grow(size_t index, _PtrType value) {
+            if (index >= this->size()) {
+                this->resize(index + 1); // The capacity will be even greater, since it calls vector::resize
+            }
+            if (!value || value.get() == nullptr)
+                this->operator[](index).reset();
+            else
+                this->operator[](index) = value;
+        }
+
+        inline void emplace_index_grow(size_t index, std::nullptr_t) {
+            this->emplace_index_grow(index, sl::smart_ptr_view<_Type>());
+        }
+
+        template <typename... _ArgPackType>
+        inline void emplace_front(_ArgPackType&&... args) {
+            this->emplace(this->cbegin(), std::forward<_ArgPackType>(args)...);
+        }
+    };
+    template <typename _Type, typename _Comp = std::less<_Type>>
+    class smart_ptr_view_sorted_vector : public _ptr_sorted_vector_base<_Type, sl::smart_ptr_view<_Type>, _Comp>
+    {};
+
+
+    // -- Vectors of pointers, wrapped in shared pointers
+    template <typename _Type>
+    class raw_ptr_view_vector : public _ptr_vector_base<_Type, sl::raw_ptr_view<_Type>>
+    {
+    public:
+        template <typename _PtrType = sl::raw_ptr_view<_Type>>  // Gets both bare pointer and shared_ptr
+        void emplace_index_grow(size_t index, _PtrType value) {
+            if (index >= this->size()) {
+                this->resize(index + 1); // The capacity will be even greater, since it calls vector::resize
+            }
+            if (!value || value.get() == nullptr)
+                this->operator[](index).reset();
+            else
+                this->operator[](index) = value;
+        }
+
+        inline void emplace_index_grow(size_t index, std::nullptr_t) {
+            this->emplace_index_grow(index, sl::raw_ptr_view<_Type>());
+        }
+
+        template <typename... _ArgPackType>
+        inline void emplace_front(_ArgPackType&&... args) {
+            this->emplace(this->cbegin(), std::forward<_ArgPackType>(args)...);
+        }
+    };
+    template <typename _Type, typename _Comp = std::less<_Type>>
+    class raw_ptr_view_sorted_vector : public _ptr_sorted_vector_base<_Type, sl::raw_ptr_view<_Type>, _Comp>
+    {};
 }
 
 #endif // !_INC_SPTR_CONTAINERS_H

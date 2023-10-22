@@ -74,7 +74,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
-		
+
 		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if (rid.GetResType() != RES_ITEMDEF)
 			continue;
@@ -116,7 +116,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
 		ITEMID_TYPE id = (ITEMID_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
-			break; 
+			break;
 
 		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
 		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
@@ -247,7 +247,7 @@ void CChar::Use_MoonGate( CItem * pItem )
                 if (!fToGuardedArea)
                     return;
             }
-			
+
 		}
 		if ( Noto_IsCriminal() )	// criminals won't enter on guarded regions
 		{
@@ -675,7 +675,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		ASSERT(pFlag);
 		pFlag->SetAttr(ATTR_DECAY);
 		pFlag->SetType(IT_EQ_STUCK);
-		pFlag->m_uidLink = pItemWeb->GetUID();		
+		pFlag->m_uidLink = pItemWeb->GetUID();
 
         int iStuckTimerSeconds = 2; // Mininum stuck timer value is 2 seconds.
         iCharStr = ((100 - minimum(100, iCharStr)) * (int)pItemWeb->m_itWeb.m_dwHitsCur) / 10;
@@ -1071,7 +1071,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 {
 	ADDTOCALLSTACK("CChar::Use_Figurine");
 	// NOTE: The figurine is NOT destroyed.
-	
+
 	if ( !pItem )
 		return nullptr;
 
@@ -1173,7 +1173,7 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 				++it;
 			}
 
-			if (!fExists && (m_followers.size() < iMaxFollower || IsPriv(PRIV_GM)))
+			if (!fExists && ( (short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
 				m_followers.emplace_back(pChar->GetUID());
 			else
 				return false;
@@ -1834,7 +1834,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			else
 			{
 				tchar *pszMsg = Str_GetTemp();
-				snprintf(pszMsg, STR_TEMPLENGTH, 
+				snprintf(pszMsg, STR_TEMPLENGTH,
 					g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT), m_pArea->GetName(), pItem->Use_Sextant(GetTopPoint()));
 				ObjMessage(pszMsg, this);
 			}
