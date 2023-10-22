@@ -3267,7 +3267,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			const size_t iQty = g_World.m_TileTypes.size();
 			for ( size_t i = 0; i < iQty; ++i )
 			{
-				auto pCurTypeDef = static_cast<CItemTypeDef*>(g_World.m_TileTypes[i].lock().get());
+				auto pCurTypeDef = static_cast<CItemTypeDef*>(g_World.m_TileTypes[i].get());
 				if (pCurTypeDef == pTypeDef)
 					g_World.m_TileTypes.emplace_index_grow(i, nullptr);
 			}
@@ -3742,7 +3742,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	case RES_GMPAGE:	// saved in world file. (Name is NOT DEFNAME)
 		{
-			CGMPage * pGMPage = g_World.m_GMPages.emplace_back(std::make_shared<CGMPage>(pScript->GetArgStr())).get();
+			CGMPage * pGMPage = g_World.m_GMPages.emplace_back(std::make_unique<CGMPage>(pScript->GetArgStr())).get();
 			return pGMPage->r_Load( *pScript );
 		}
 	case RES_WC:
@@ -4051,7 +4051,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME='%s' for another region!\n", pszName ));
 			}
-			else if (!RegisteredResourceGetDefRef(CResourceID(rid.GetResType(), rid.GetResIndex(), wPage)).expired() )
+			else if (RegisteredResourceGetDefRef(CResourceID(rid.GetResType(), rid.GetResIndex(), wPage)) )
 			{
 				// Books and dialogs have pages; if it's not a book or dialog, the if is 0 == 0, so execute it always
 
@@ -4202,13 +4202,13 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	return rid;
 }
 
-std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr ptcName, word wPage)
+sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr ptcName, word wPage)
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefRefByName");
 	return ResourceGetDefRefByName(restype, ptcName, wPage);
 }
 
-std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CResourceID& rid) const
+sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefRef");
 	// Get a CResourceDef from the RESOURCE_ID.
@@ -4275,15 +4275,13 @@ std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CRe
 CResourceDef * CServerConfig::RegisteredResourceGetDef( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDef");
-	std::shared_ptr<CResourceDef> ret = RegisteredResourceGetDefRef(rid).lock();
-	return ret ? ret.get() : nullptr;
+	return RegisteredResourceGetDefRef(rid).get();
 }
 
 CResourceDef* CServerConfig::RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr ptcName, word wPage)
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefByName");
-	std::shared_ptr<CResourceDef> ret = RegisteredResourceGetDefRefByName(restype, ptcName, wPage).lock();
-	return ret ? ret.get() : nullptr;
+	return RegisteredResourceGetDefRefByName(restype, ptcName, wPage).get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4646,7 +4644,7 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )).expired() )
+	if ( RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )) )
 	{
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));

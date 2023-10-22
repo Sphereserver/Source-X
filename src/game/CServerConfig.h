@@ -589,7 +589,7 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjSharedPtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	CObjUniquePtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
 	sl::shared_ptr_vector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
     sl::shared_ptr_vector<CSpellDef> m_SpellDefs;			// Defined Spells.
     sl::weak_ptr_vector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
@@ -598,7 +598,7 @@ public:
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjSharedPtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
+    CObjUniquePtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -686,7 +686,7 @@ public:
     *
     * @return  null if it fails, else a pointer to the CScriptObj.
     */
-    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
     CResourceDef* RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
 
     /**
@@ -697,7 +697,7 @@ public:
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
 	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
-    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
     CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
 
 	// Print EF/OF Flags

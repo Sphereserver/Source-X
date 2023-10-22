@@ -383,7 +383,7 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word
 	return rid.GetResIndex();
 }
 
-std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& rid) const
+sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDefRef");
 	if ( ! rid.IsValidResource() )
@@ -391,10 +391,10 @@ std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& 
 	size_t index = m_ResHash.FindKey( rid );
 	if ( index == sl::scont_bad_index() )
 		return {};
-	return m_ResHash.GetWeakPtrAt( rid, index ).lock();
+	return m_ResHash.GetSmartPtrViewAt( rid, index );
 }
 
-std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRefByName( RES_TYPE restype, lpctstr pszName, word wPage )
+sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRefByName( RES_TYPE restype, lpctstr pszName, word wPage )
 {
     ADDTOCALLSTACK("CResourceBase::ResourceGetDefRefByName");
     // resolve a name to the actual resource def.
@@ -406,15 +406,13 @@ std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRefByName( RES_TYPE res
 CResourceDef* CResourceBase::ResourceGetDef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
-	std::shared_ptr<CResourceDef> ret = ResourceGetDefRef(rid).lock();
-	return ret ? ret.get() : nullptr;
+	return ResourceGetDefRef(rid).get();
 }
 
 CResourceDef* CResourceBase::ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage)
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
-	std::shared_ptr<CResourceDef> ret = ResourceGetDefRefByName(restype, pszName, wPage).lock();
-	return ret ? ret.get() : nullptr;
+	return ResourceGetDefRefByName(restype, pszName, wPage).get();
 }
 
 //*******************************************************
@@ -426,13 +424,10 @@ bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 	// Lock a referenced resource object.
 	if ( ! rid.IsValidUID() )
 		return false;
-	std::shared_ptr<CResourceDef> pResourceDefRef = ResourceGetDefRef(rid).lock();
-	if (pResourceDefRef)
-	{
-		CResourceLink* pResourceLink = dynamic_cast <CResourceLink*>(pResourceDefRef.get());
-		if (pResourceLink)
-			return pResourceLink->ResourceLock(s);
-	}
+
+    CResourceLink* pResourceLink = dynamic_cast <CResourceLink*>(ResourceGetDefRef(rid).get());
+    if (pResourceLink)
+        return pResourceLink->ResourceLock(s);
 	
 	return false;
 }

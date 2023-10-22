@@ -23,20 +23,14 @@ private:
 	// 0 = english default.
 	char m_codes[4]; // UNICODE language pref. ('ENU'=english)
 public:
-	CLanguageID()
-	{
-		m_codes[0] = 0;
-	}
+	CLanguageID() :
+		m_codes{}
+	{}
 	CLanguageID( const char * pszInit )
 	{
 		Set( pszInit );
 	}
-	CLanguageID( int iDefault )
-	{
-		UnreferencedParameter(iDefault);
-		ASSERT(iDefault==0);
-		m_codes[0] = 0;
-	}
+	CLanguageID(int iDefault);
 	bool IsDef() const
 	{
 		return ( m_codes[0] != 0 );
