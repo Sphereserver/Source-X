@@ -64,11 +64,11 @@ public:
 
     inline bool ContainsResourceID( const CResourceID & rid ) const
     {
-        return FindResourceID(rid) != SCONT_BADINDEX;
+        return FindResourceID(rid) != sl::scont_bad_index();
     }
     inline bool ContainsResourceName( RES_TYPE restype, lpctstr & ptcKey ) const
     {
-        return FindResourceName(restype, ptcKey) != SCONT_BADINDEX;
+        return FindResourceName(restype, ptcKey) != sl::scont_bad_index();
     }
 };
 

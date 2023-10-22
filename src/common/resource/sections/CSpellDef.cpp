@@ -286,7 +286,7 @@ bool CSpellDef::GetPrimarySkill( int * piSkill, int * piQty ) const
 {
     ADDTOCALLSTACK("CSpellDef::GetPrimarySkill");
     size_t i = m_SkillReq.FindResourceType( RES_SKILL );
-    if ( i == SCONT_BADINDEX )
+    if ( i == sl::scont_bad_index() )
         return false;
 
     if ( piQty != nullptr )

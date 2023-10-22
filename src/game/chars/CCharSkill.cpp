@@ -916,7 +916,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		// If fail only consume part of them.
 		int iConsumePercent = -1;
 		size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-		if ( i != SCONT_BADINDEX )
+		if ( i != sl::scont_bad_index() )
 		{
 			if (m_Act_Effect >= 0)
 				iConsumePercent = m_Act_Effect;
@@ -940,7 +940,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		// Start the skill.
 		// Find the primary skill required.
 		size_t i = pItemDef->m_SkillMake.FindResourceType(RES_SKILL);
-		if ( i == SCONT_BADINDEX )
+		if ( i == sl::scont_bad_index() )
         {
             g_Log.EventError("Trying to make item=%s with invalid SKILLMAKE.\n", pItemDef->GetResourceName());
 			return false;

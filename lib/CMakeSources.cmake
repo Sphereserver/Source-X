@@ -1,9 +1,9 @@
 INCLUDE_DIRECTORIES (
 lib/mariadb/
 lib/flat_containers/
+lib/object_ptr/
 lib/parallel_hashmap/
 lib/regex/
-lib/variant_w_base/
 )
 
 # LibEv files

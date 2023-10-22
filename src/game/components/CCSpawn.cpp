@@ -480,7 +480,7 @@ CResourceIDBase CCSpawn::GetCharRid()
         const CRandGroupDef* pSpawnGroup = static_cast<const CRandGroupDef*>(pDef);
         ASSERT(pSpawnGroup);
         size_t i = pSpawnGroup->GetRandMemberIndex();
-        if (i != SCONT_BADINDEX)
+        if (i != sl::scont_bad_index())
         {
             rid = pSpawnGroup->GetMemberID(i);
         }

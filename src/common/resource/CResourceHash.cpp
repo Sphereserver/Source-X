@@ -64,7 +64,7 @@ void CResourceHash::ReplaceRid(CResourceID const& ridOld, CResourceDef* pNew)
 {
 CResourceHashArray & arrOld = m_Array[GetHashArray(ridOld)];
 size_t index = arrOld.find_sorted(ridOld);
-ASSERT (index != SCONT_BADINDEX);
+ASSERT (index != sl::scont_bad_index());
 arrOld.erase(arrOld.begin() + index);
 
 m_Array[GetHashArray(pNew->GetResourceID())].emplace(pNew);
