@@ -45,7 +45,7 @@ public:
     /**
     * @brief check if data is in this array.
     * @param pData data to find in the array.
-    * @return true if pData is in the array, SCONT_BADINDEX otherwise.
+    * @return true if pData is in the array, sl::scont_bad_index() otherwise.
     */
     bool ContainsPtr( TYPE pData ) const;
     /**
@@ -83,7 +83,7 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
 {
     size_t nIndex = FindPtr( pData );
-    if ( nIndex == SCONT_BADINDEX )
+    if ( nIndex == sl::scont_bad_index() )
         return false;
 
     ASSERT( IsValidIndex(nIndex) );
@@ -95,15 +95,15 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::ContainsPtr( TYPE pData ) const
 {
     size_t nIndex = FindPtr(pData);
-    ASSERT((nIndex == SCONT_BADINDEX) || IsValidIndex(nIndex));
-    return nIndex != SCONT_BADINDEX;
+    ASSERT((nIndex == sl::scont_bad_index()) || IsValidIndex(nIndex));
+    return nIndex != sl::scont_bad_index();
 }
 
 template<class TYPE>
 size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 {
     if ( !pData )
-        return SCONT_BADINDEX;
+        return sl::scont_bad_index();
 
     for ( size_t nIndex = 0, nSize = this->size(); nIndex < nSize; ++nIndex )
     {
@@ -111,7 +111,7 @@ size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
             return nIndex;
     }
 
-    return SCONT_BADINDEX;
+    return sl::scont_bad_index();
 }
 
 template<class TYPE>

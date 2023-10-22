@@ -206,7 +206,7 @@ size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
 bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
 {
     ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_CanCall");
-    if (uiFunctionIndex == SCONT_BADINDEX)
+    if (uiFunctionIndex == sl::scont_bad_index())
         return false;
     ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());
     return true;

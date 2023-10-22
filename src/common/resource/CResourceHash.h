@@ -17,7 +17,7 @@ struct CResourceHashArraySorter
 {
     bool operator()(std::shared_ptr<CResourceDef> const& pObjStored, std::shared_ptr<CResourceDef> const& pObj) const;
 };
-class CResourceHashArray : public CSSharedPtrSortedVector<CResourceDef, CResourceHashArraySorter>
+class CResourceHashArray : public sl::shared_ptr_sorted_vector<CResourceDef, CResourceHashArraySorter>
 {
     static int _compare(std::shared_ptr<CResourceDef> const& pObjStored, CResourceID const& rid);
 
@@ -30,7 +30,7 @@ public:
     CResourceHashArray& operator=(const CResourceHashArray&) = delete;
 
     inline size_t find_sorted(CResourceID const& rid) const { return this->find_predicate(rid, _compare);        }
-    //inline bool   Contains(CResourceID const& rid) const  { return (SCONT_BADINDEX != this->find_sorted(rid)); }
+    //inline bool   Contains(CResourceID const& rid) const  { return (sl::scont_bad_index() != this->find_sorted(rid)); }
 };
 
 struct CResourceHash

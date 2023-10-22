@@ -389,7 +389,7 @@ std::weak_ptr<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& 
 	if ( ! rid.IsValidResource() )
 		return {};
 	size_t index = m_ResHash.FindKey( rid );
-	if ( index == SCONT_BADINDEX )
+	if ( index == sl::scont_bad_index() )
 		return {};
 	return m_ResHash.GetWeakPtrAt( rid, index ).lock();
 }

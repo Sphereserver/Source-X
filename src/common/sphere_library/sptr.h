@@ -1,0 +1,214 @@
+#ifndef _INC_SPTR_H
+#define _INC_SPTR_H
+
+#include <object_ptr.hpp>
+
+
+// Sphere Library
+namespace sl
+{
+    /* smart_ptr_view */
+
+    // Implemented using a variant of the proposed observer_ptr, called object_ptr:
+    //  https://github.com/anthonywilliams/object_ptr
+    // Original proposal:
+    //  https://github.com/tvaneerd/isocpp/blob/main/observer_ptr.md
+    // Another good implementation:
+    //  https://github.com/martinmoene/observer-ptr-lite
+
+
+    // It's a NON-OWNING "smart" pointer. It holds a NON-OWNED pointer.
+    //  Somewhere in the program's code there's a smart pointer managing the object lifetime;
+    //  i just want to use it, knowing FOR SURE that until I (smart_ptr_view) exist, the pointed object shall exist as well
+    //  (it will outlive my lifetime).
+
+    // The usage of this wrapper class is very useful to clearly specify what it points to and what are my intents using it.
+    // If often happens that we don't know who owns a raw pointer, what's its lifetime, if it's deleted elsewhere,
+    //  if i should delete it...
+
+
+    //possible names: access_ptr, owned_ptr_view, nonowning_ptr
+    template <typename T>
+    class smart_ptr_view
+        : public jss::object_ptr<T>
+    {
+        // This can only be created from (or reset using) a smart pointer.
+        // It shall not be constructed from an unmanaged (naked/raw) pointer.
+
+
+        /* New methods */
+
+        // Reset from another smart pointer, not a raw pointer.
+        template <
+            typename Ptr,
+            typename = std::enable_if_t<
+            jss::detail::is_convertible_smart_pointer<Ptr, T>::value>>
+            void reset(Ptr& other) noexcept {
+            ptr = other.get();
+        }
+
+
+        /* Unimplemented methods, by design*/
+        /*
+            1) operator=
+            2) release
+            3) swap
+        */
+
+
+        /* Disable unwanted behavior of object_ptr */
+
+        // Construct an object_ptr from a raw pointer
+        constexpr object_ptr(T* ptr_) noexcept = delete;
+
+        // Construct an object_ptr from a raw pointer convertible to T*, such as BaseOfT*
+        template <
+            typename U,
+            typename = std::enable_if_t<std::is_convertible<U*, T*>::value>>
+            constexpr object_ptr(U* ptr_) noexcept = delete;
+
+        // Change the value
+        void reset(T* ptr_ = nullptr) noexcept = delete;
+
+        // Convert to a raw pointer
+        constexpr explicit operator T* () const noexcept = delete;
+    };
+
+
+
+    /* raw_ptr_view */
+
+    template <typename T>
+    class raw_ptr_view
+    {
+    public:
+        /// Construct a null pointer
+        constexpr raw_ptr_view() noexcept : ptr(nullptr) {}
+
+        /// Construct a null pointer
+        constexpr raw_ptr_view(std::nullptr_t) noexcept : ptr(nullptr) {}
+
+        /// Construct a raw_ptr_view from a raw pointer
+        constexpr raw_ptr_view(T* ptr_) noexcept : ptr(ptr_) {}
+
+        /// Construct a raw_ptr_view from a raw pointer convertible to T*, such as BaseOfT*
+        template <
+            typename U,
+            typename = std::enable_if_t<std::is_convertible<U*, T*>::value>>
+            constexpr object_ptr(U* ptr_) noexcept : ptr(ptr_) {}
+
+        /// Do NOT construct a raw_ptr_view from a smart pointer that holds a pointer convertible to T*,
+        /// such as shared_ptr<T> or unique_ptr<BaseOfT>
+        template <
+            typename Ptr,
+            typename = std::enable_if_t <
+            jss::object_ptr::detail::is_convertible_smart_pointer<Ptr, T>::value >>
+            constexpr object_ptr(Ptr const& other) noexcept : ptr(other.get()) = delete;
+
+
+        /// Get the raw pointer value
+        constexpr T* get() const noexcept {
+            return ptr;
+        }
+
+        /// Dereference the pointer
+        constexpr T& operator*() const noexcept {
+            return *ptr;
+        }
+
+        /// Dereference the pointer for ptr->m usage
+        constexpr T* operator->() const noexcept {
+            return ptr;
+        }
+
+        /// Allow if(ptr) to test for null
+        constexpr explicit operator bool() const noexcept {
+            return ptr != nullptr;
+        }
+
+
+        /// Do NOT convert to a raw pointer where necessary
+        //constexpr explicit operator T* () const noexcept {
+        //    return ptr;
+        //}
+
+        /// !ptr is true if ptr is null
+        constexpr bool operator!() const noexcept {
+            return !ptr;
+        }
+
+        /// Change the value
+        void reset(T* ptr_ = nullptr) noexcept {
+            ptr = ptr_;
+        }
+
+        /// Check for equality
+        friend constexpr bool
+            operator==(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            return lhs.ptr == rhs.ptr;
+        }
+
+        /// Check for inequality
+        friend constexpr bool
+            operator!=(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            return !(lhs == rhs);
+        }
+
+        /// a<b provides a total order
+        friend constexpr bool
+            operator<(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            return std::less<void>()(lhs.ptr, rhs.ptr);
+        }
+        /// a>b is b<a
+        friend constexpr bool
+            operator>(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            return rhs < lhs;
+        }
+        /// a<=b is !(b<a)
+        friend constexpr bool
+            operator<=(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            return !(rhs < lhs);
+        }
+        /// a<=b is b<=a
+        friend constexpr bool
+            operator>=(object_ptr const& lhs, object_ptr const& rhs) noexcept {
+            return rhs <= lhs;
+        }
+
+    private:
+        /// The stored pointer
+        T* ptr;
+    };
+}
+
+namespace std
+{
+    /// Allow hashing object_ptrs so they can be used as keys in unordered_map
+    template <typename T> struct hash<sl::raw_ptr_view<T>> {
+        constexpr size_t operator()(sl::raw_ptr_view<T> const& p) const
+            noexcept {
+            return hash<T*>()(p.get());
+        }
+    };
+
+    /// Do a static_cast with object_ptr
+    template <typename To, typename From>
+    typename std::enable_if<
+        sizeof(decltype(static_cast<To*>(std::declval<From*>()))) != 0,
+        sl::raw_ptr_view<To>>::type
+        static_pointer_cast(sl::raw_ptr_view<From> p) {
+        return static_cast<To*>(p.get());
+    }
+
+    /// Do a dynamic_cast with object_ptr
+    template <typename To, typename From>
+    typename std::enable_if<
+        sizeof(decltype(dynamic_cast<To*>(std::declval<From*>()))) != 0,
+        sl::raw_ptr_view<To>>::type
+        dynamic_pointer_cast(sl::raw_ptr_view<From> p) {
+        return dynamic_cast<To*>(p.get());
+    }
+
+}
+
+#endif // _INC_SPTR_H

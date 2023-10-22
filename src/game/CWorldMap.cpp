@@ -111,7 +111,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	EXC_SET_BLOCK("get random group element");
 	size_t id = pResGroup->GetRandMemberIndex(pCharSrc);
 	CRegionResourceDef * pOreDef;
-	if ( id == SCONT_BADINDEX )
+	if ( id == sl::scont_bad_index() )
 	{
 		pOreDef	= dynamic_cast <CRegionResourceDef *>(g_Cfg.ResourceGetDefByName(RES_REGIONRESOURCE, "mr_nothing"));
 	}

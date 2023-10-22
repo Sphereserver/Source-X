@@ -545,9 +545,9 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	// index of the item we did not have.
 
 	if ( iDamagePercent <= 0 )
-		return SCONT_BADINDEX;
+		return sl::scont_bad_index();
 
-	size_t iMissing = SCONT_BADINDEX;
+	size_t iMissing = sl::scont_bad_index();
 	size_t iQtyRes = pResources->size();
 	for ( size_t i = 0; i < iQtyRes; ++i )
 	{

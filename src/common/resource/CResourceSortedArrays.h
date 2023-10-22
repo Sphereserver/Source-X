@@ -82,12 +82,12 @@ struct CObjSharedPtrNameVectorSorter
     }
 };
 template <typename _ObjType>
-class CObjSharedPtrNameSortVector : public CSSharedPtrSortedVector<_ObjType, CObjSharedPtrNameVectorSorter<_ObjType>>
+class CObjSharedPtrNameSortVector : public sl::shared_ptr_sorted_vector<_ObjType, CObjSharedPtrNameVectorSorter<_ObjType>>
 {
 public:
     //static const char *m_sClassName;  
     inline size_t find_sorted(lpctstr ptcKey) const noexcept { return this->find_predicate(ptcKey, CObjSharedPtrNameVectorSorter<_ObjType>::_compare);        }
-    inline bool   ContainsKey(lpctstr ptcKey) const noexcept { return (SCONT_BADINDEX != this->find_sorted(ptcKey)); }
+    inline bool   ContainsKey(lpctstr ptcKey) const noexcept { return (sl::scont_bad_index() != this->find_sorted(ptcKey)); }
 };
 
 #endif // _INC_CRESOURCESORTEDARRAYS_H
