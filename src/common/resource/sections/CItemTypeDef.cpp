@@ -53,8 +53,7 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
         }
 
         // Get the weak ptr from reshash
-        std::weak_ptr<CResourceDef> def_registered = g_Cfg.RegisteredResourceGetDefRef(GetResourceID());
-        ASSERT(!def_registered.expired());
+        sl::smart_ptr_view<CResourceDef> def_registered = g_Cfg.RegisteredResourceGetDefRef(GetResourceID());
         for (llong i = iLo; i <= iHi; ++i )
         {
             g_World.m_TileTypes.emplace_index_grow(i, def_registered);

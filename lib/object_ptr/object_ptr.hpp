@@ -185,7 +185,7 @@ namespace jss {
             return rhs <= lhs;
         }
 
-    private:
+    protected:
         /// The stored pointer
         T *ptr;
     };

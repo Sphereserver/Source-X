@@ -25,9 +25,9 @@ private:
     bool m_fVoiceDefault;	// give others voice by default.
 public:
     static const char *m_sClassName;
-    sl::unique_ptr_vector<CSString> m_NoVoices;// Current list of channel members with no voice
-    sl::unique_ptr_vector<CSString> m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
-    sl::unique_ptr_vector<CChatChanMember> m_Members;	// Current list of members in this channel
+    sl::unique_ptr_vector<CSString>             m_NoVoices;     // Current list of channel members with no voice
+    sl::unique_ptr_vector<CSString>             m_Moderators;   // Current list of channel's moderators (may or may not be currently in the channel)
+    sl::raw_ptr_view_vector<CChatChanMember>    m_Members;	    // Current list of members in this channel
 private:
     void SetModerator(lpctstr pszName, bool fFlag = true);
     void SetVoice(lpctstr pszName, bool fFlag = true);

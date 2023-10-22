@@ -526,7 +526,7 @@ void CWorldThread::GarbageCollection_NewObjs()
 	// Clean up GM pages not linked to an valid char/account
 	for (auto it = g_World.m_GMPages.begin(); it != g_World.m_GMPages.end();)
 	{
-		std::shared_ptr<CGMPage>& pGMPage = *it;
+		std::unique_ptr<CGMPage>& pGMPage = *it;
 		if (!pGMPage->m_uidChar.CharFind())
 		{
 			DEBUG_ERR(("GC: Deleted GM Page linked to invalid char (UID=0%x)\n", (dword)(pGMPage->m_uidChar)));

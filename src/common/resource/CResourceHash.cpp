@@ -6,7 +6,7 @@
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 
-bool CResourceHashArraySorter::operator()(std::shared_ptr<CResourceDef> const& pObjStored, std::shared_ptr<CResourceDef> const& pObj) const
+bool CResourceHashArraySorter::operator()(std::unique_ptr<CResourceDef> const& pObjStored, std::unique_ptr<CResourceDef> const& pObj) const
 {
     // <  : true
     // >= : false
@@ -24,7 +24,7 @@ bool CResourceHashArraySorter::operator()(std::shared_ptr<CResourceDef> const& p
     return true;
 }
 
-int CResourceHashArray::_compare(std::shared_ptr<CResourceDef> const& pObjStored, CResourceID const& rid) // static
+int CResourceHashArray::_compare(std::unique_ptr<CResourceDef> const& pObjStored, CResourceID const& rid) // static
 {
     ASSERT( pObjStored );
     CResourceID const& ridStored = pObjStored->GetResourceID();

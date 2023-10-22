@@ -162,11 +162,11 @@ public:
 	CUID m_uidObj;			// for script access - auxiliary obj
 	CUID m_uidNew;			// for script access - auxiliary obj
 
-	sl::shared_ptr_vector<CGMPage>    m_GMPages;	// Owns current outstanding GM pages. (CGMPage)
-	sl::shared_ptr_vector<CItemStone> m_Stones;		// Owns guild/town stones. (not saved array)
-	sl::unique_ptr_vector<CPartyDef>  m_Parties;	// Owns all active parties.
-	sl::unique_ptr_vector<CItemMulti> m_Multis;		// World multis?
-	sl::weak_ptr_vector<CResourceDef> m_TileTypes;	// Links to CItemTypeDef items owned by g_Cfg.m_ResHash
+	sl::unique_ptr_vector<CGMPage>			m_GMPages;	// Owns current outstanding GM pages. (CGMPage)
+	sl::unique_ptr_vector<CItemStone>		m_Stones;		// Owns guild/town stones. (not saved array)
+	sl::unique_ptr_vector<CPartyDef>		m_Parties;	// Owns all active parties.
+	sl::raw_ptr_view_vector<CItemMulti>		m_Multis;		// World multis?
+	sl::smart_ptr_view_vector<CResourceDef> m_TileTypes;	// Links to CItemTypeDef items owned by g_Cfg.m_ResHash
 
 public:
 	CWorld();

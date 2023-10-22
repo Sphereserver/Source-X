@@ -17,9 +17,9 @@ namespace sl
     //  https://github.com/martinmoene/observer-ptr-lite
 
 
-    // It's a NON-OWNING "smart" pointer. It holds a NON-OWNED pointer.
+    // It's a NON-OWNING "smart" pointer. It stores a NON-OWNED pointer.
     //  Somewhere in the program's code there's a smart pointer managing the object lifetime;
-    //  i just want to use it, knowing FOR SURE that until I (smart_ptr_view) exist, the pointed object shall exist as well
+    //  i just want to use that pointer, knowing FOR SURE that until I (smart_ptr_view) exist, the pointed object shall exist as well
     //  (it will outlive my lifetime).
 
     // The usage of this wrapper class is very useful to clearly specify what it points to and what are my intents using it.
@@ -29,11 +29,22 @@ namespace sl
 
     //possible names: access_ptr, owned_ptr_view, nonowning_ptr
     template <typename T>
-    class smart_ptr_view
-        : public jss::object_ptr<T>
+    class smart_ptr_view : public jss::object_ptr<T>
     {
+    public:
         // This can only be created from (or reset using) a smart pointer.
         // It shall not be constructed from an unmanaged (naked/raw) pointer.
+
+        constexpr smart_ptr_view() noexcept
+            : jss::object_ptr<T>()
+        {}
+
+        template <typename _Arg>
+        constexpr smart_ptr_view(_Arg&& arg) noexcept
+            : jss::object_ptr<T>(arg)
+        {}
+
+        ~smart_ptr_view() noexcept = default;
 
 
         /* New methods */
@@ -43,8 +54,16 @@ namespace sl
             typename Ptr,
             typename = std::enable_if_t<
             jss::detail::is_convertible_smart_pointer<Ptr, T>::value>>
-            void reset(Ptr& other) noexcept {
-            ptr = other.get();
+        void reset(Ptr& other) noexcept {
+            this->ptr = other.get();
+        }
+
+        void reset(smart_ptr_view const& other) noexcept {
+            this->ptr = other.ptr;
+        }
+
+        void reset() noexcept {
+            this->ptr = nullptr;
         }
 
 
@@ -56,19 +75,46 @@ namespace sl
         */
 
 
+        /* Re-define operators */
+
+        /// Dereference the pointer
+        constexpr T& operator*() const noexcept {
+            return *this->ptr;
+        }
+
+        /// Dereference the pointer for ptr->m usage
+        constexpr T* operator->() const noexcept {
+            return this->ptr;
+        }
+
+        /// Allow if(ptr) to test for null
+        constexpr explicit operator bool() const noexcept {
+            return static_cast<bool>(this->ptr);
+        }
+
+        /// Convert to a raw pointer where necessary
+        // Disable this
+        //constexpr explicit operator T* () const noexcept {
+        //    return this->(operator *);
+        //}
+
+        /// !ptr is true iff ptr is null
+        constexpr bool operator!() const noexcept {
+            return !(this->ptr);
+        }
+
+
+
         /* Disable unwanted behavior of object_ptr */
 
         // Construct an object_ptr from a raw pointer
-        constexpr object_ptr(T* ptr_) noexcept = delete;
+        constexpr smart_ptr_view(T* ptr_) noexcept = delete;
 
         // Construct an object_ptr from a raw pointer convertible to T*, such as BaseOfT*
         template <
             typename U,
             typename = std::enable_if_t<std::is_convertible<U*, T*>::value>>
-            constexpr object_ptr(U* ptr_) noexcept = delete;
-
-        // Change the value
-        void reset(T* ptr_ = nullptr) noexcept = delete;
+            constexpr smart_ptr_view(U* ptr_) noexcept = delete;
 
         // Convert to a raw pointer
         constexpr explicit operator T* () const noexcept = delete;
@@ -77,6 +123,15 @@ namespace sl
 
 
     /* raw_ptr_view */
+
+    // It's a NON-OWNING "smart" pointer. It stores a NON-OWNED pointer.
+    //  Somewhere in the program's code there's some other code managing the object lifetime (deleting it when it's time);
+    //  i just want to use that pointer, knowing FOR SURE that until I (raw_ptr_view) exist, the pointed object shall exist as well
+    //  (it will outlive my lifetime).
+
+    // The usage of this wrapper class is very useful to clearly specify what it points to and what are my intents using it.
+    // If often happens that we don't know who owns a raw pointer, what's its lifetime, if it's deleted elsewhere,
+    //  if i should delete it...
 
     template <typename T>
     class raw_ptr_view
@@ -95,20 +150,19 @@ namespace sl
         template <
             typename U,
             typename = std::enable_if_t<std::is_convertible<U*, T*>::value>>
-            constexpr object_ptr(U* ptr_) noexcept : ptr(ptr_) {}
+            constexpr raw_ptr_view(U* ptr_) noexcept : ptr(ptr_) {}
 
         /// Do NOT construct a raw_ptr_view from a smart pointer that holds a pointer convertible to T*,
         /// such as shared_ptr<T> or unique_ptr<BaseOfT>
         template <
             typename Ptr,
-            typename = std::enable_if_t <
-            jss::object_ptr::detail::is_convertible_smart_pointer<Ptr, T>::value >>
-            constexpr raw_ptr_view(Ptr const& other) noexcept : ptr(other.get()) = delete;
+            typename = std::enable_if_t<jss::detail::is_convertible_smart_pointer<Ptr, T>::value> >
+            constexpr raw_ptr_view(Ptr const& other) noexcept = delete;
 
 
         /// Get the raw pointer value
         constexpr T* get() const noexcept {
-            return ptr;
+            return this->ptr;
         }
 
         /// Dereference the pointer

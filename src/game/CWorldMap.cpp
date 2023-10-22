@@ -180,7 +180,7 @@ CItemTypeDef* CWorldMap::GetTerrainItemTypeDef(dword dwTerrainIndex) // static
 
 	if (g_World.m_TileTypes.valid_index(dwTerrainIndex))
 	{
-		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].lock().get());
+		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].get());
 	}
 
 	if (!pRes)
@@ -203,7 +203,7 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 
 	if (g_World.m_TileTypes.valid_index(dwTerrainIndex))
 	{
-		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].lock().get());
+		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].get());
 	}
 
 	if (!pRes)
