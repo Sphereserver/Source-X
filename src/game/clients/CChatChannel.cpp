@@ -231,17 +231,17 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
     pMember->SetChannel(nullptr);
 }
 
-CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
+CChatChanMember* CChatChannel::FindMember(lpctstr pszName) const
 {
     size_t i = FindMemberIndex( pszName );
     if ( i == sl::scont_bad_index() )
         return nullptr;
-    return m_Members[i];
+    return m_Members[i].get();
 }
 
 bool CChatChannel::RemoveMember(lpctstr pszName)
 {
-    CChatChanMember * pMember = FindMember(pszName);
+    CChatChanMember* pMember = FindMember(pszName);
     if ( pMember == nullptr )
         return false;
     RemoveMember(pMember);
@@ -559,7 +559,7 @@ void CChatChannel::FillMembersList(CChatChanMember* pMember)
         if (pMember->IsIgnoring(m_Members[i]->GetChatName()))
             continue;
         CSString sName;
-        g_Serv.m_Chats.FormatName(sName, m_Members[i]);
+        g_Serv.m_Chats.FormatName(sName, m_Members[i].get());
         pMember->SendChatMsg(CHATCMD_AddMemberToChannel, sName);
     }
 }

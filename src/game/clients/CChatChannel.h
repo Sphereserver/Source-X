@@ -69,7 +69,7 @@ public:
     void KickMember( CChatChanMember *pByMember, CChatChanMember * pMember );
     void Broadcast(CHATMSG_TYPE iType, lpctstr pszName = nullptr, lpctstr pszText = nullptr, CLanguageID lang = 0, bool fOverride = false);
     void RemoveMember(CChatChanMember * pMember);
-    CChatChanMember * FindMember(lpctstr pszName) const;
+    CChatChanMember* FindMember(lpctstr pszName) const;
     bool RemoveMember(lpctstr pszName);
     void SetName(lpctstr pszName);
     bool IsModerator(lpctstr pszName) const;
