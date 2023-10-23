@@ -81,7 +81,7 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 
 	// Remove any previous skillclass from the Events block.
 	size_t i = pChar->m_OEvents.FindResourceType(RES_SKILLCLASS);
-	if ( i != SCONT_BADINDEX )
+	if ( i != sl::scont_bad_index() )
 		pChar->m_OEvents.erase(pChar->m_OEvents.begin() + i);
 
 	m_SkillClass.SetRef(pLink);
@@ -648,12 +648,12 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	{
 		if ( ( !strnicmp(ptcKey, "GUILD", 5) ) || ( !strnicmp(ptcKey, "TOWN", 4) ) )
 		{
-			bool bIsGuild = !strnicmp(ptcKey, "GUILD", 5);
-			ptcKey += bIsGuild ? 5 : 4;
+			bool fIsGuild = !strnicmp(ptcKey, "GUILD", 5);
+			ptcKey += fIsGuild ? 5 : 4;
 			if ( *ptcKey == '.' )
 			{
 				ptcKey += 1;
-				CItemStone *pMyGuild = Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
+				CItemStone *pMyGuild = Guild_Find(fIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
                 if ( pMyGuild )
                 {
 					CScript script(ptcKey, s.GetArgRaw());

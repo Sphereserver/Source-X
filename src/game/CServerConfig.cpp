@@ -699,7 +699,7 @@ enum RC_TYPE
 	RC_QTY
 };
 
-const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
+const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] 
 {
 	{ "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
 	{ "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
@@ -1493,7 +1493,7 @@ const CSkillDef* CServerConfig::FindSkillDef( lpctstr ptcKey ) const
     // Find the skill name in the alpha sorted list.
     // RETURN: SKILL_NONE = error.
 	const size_t i = m_SkillNameDefs.find_sorted(ptcKey);
-    if ( i == SCONT_BADINDEX )
+    if ( i == sl::scont_bad_index() )
         return nullptr;
     return m_SkillNameDefs[i].get();
 }
@@ -2482,7 +2482,7 @@ const CUOMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 
 	MULTI_TYPE id = (MULTI_TYPE)(itemid - ITEMID_MULTI);
 	size_t index = m_MultiDefs.FindKey(id);
-	if ( index == SCONT_BADINDEX )
+	if ( index == sl::scont_bad_index() )
 		index = m_MultiDefs.AddSortKey(new CUOMulti(id), id);
 	else
 		m_MultiDefs[index]->HitCacheTime();
@@ -2950,7 +2950,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );
-		if ( index != SCONT_BADINDEX )
+		if ( index != sl::scont_bad_index() )
 			pRes = dynamic_cast <CResourceDef*> (m_ResHash.GetBarePtrAt( rid, index ) );
 
 		if ( pRes == nullptr )
@@ -3285,7 +3285,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			const size_t iQty = g_World.m_TileTypes.size();
 			for ( size_t i = 0; i < iQty; ++i )
 			{
-				auto pCurTypeDef = static_cast<CItemTypeDef*>(g_World.m_TileTypes[i].lock().get());
+				auto pCurTypeDef = static_cast<CItemTypeDef*>(g_World.m_TileTypes[i].get());
 				if (pCurTypeDef == pTypeDef)
 					g_World.m_TileTypes.emplace_index_grow(i, nullptr);
 			}
@@ -3578,7 +3578,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	{
         lpctstr ptcFunctionName = pScript->GetArgStr();
         const size_t uiFunctionIndex = m_Functions.find_sorted(ptcFunctionName);
-        if (uiFunctionIndex == SCONT_BADINDEX)
+        if (uiFunctionIndex == sl::scont_bad_index())
         {
             // Define a char macro. (Name is NOT DEFNAME)
             pNewLink = new CResourceNamedDef(rid, ptcFunctionName);
@@ -3608,7 +3608,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				bool fAddNew = false;
 				CServerRef pServ;
 				const size_t i = m_Servers.FindKey( pScript->GetKey());
-				if ( i == SCONT_BADINDEX )
+				if ( i == sl::scont_bad_index() )
 				{
 					pServ = new CServerDef( pScript->GetKey(), CSocketAddressIP( SOCKET_LOCAL_ADDRESS ));
 					fAddNew = true;
@@ -3760,7 +3760,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 	case RES_GMPAGE:	// saved in world file. (Name is NOT DEFNAME)
 		{
-			CGMPage * pGMPage = g_World.m_GMPages.emplace_back(std::make_shared<CGMPage>(pScript->GetArgStr())).get();
+			CGMPage * pGMPage = g_World.m_GMPages.emplace_back(std::make_unique<CGMPage>(pScript->GetArgStr())).get();
 			return pGMPage->r_Load( *pScript );
 		}
 	case RES_WC:
@@ -4009,7 +4009,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
-				if ( duplicateIndex != SCONT_BADINDEX )	// i found it. So i have to find something else.
+				if ( duplicateIndex != sl::scont_bad_index() )	// i found it. So i have to find something else.
 					ASSERT(m_ResHash.GetBarePtrAt(rid, duplicateIndex));
 			}
 #endif
@@ -4069,7 +4069,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME='%s' for another region!\n", pszName ));
 			}
-			else if (!RegisteredResourceGetDefRef(CResourceID(rid.GetResType(), rid.GetResIndex(), wPage)).expired() )
+			else if (RegisteredResourceGetDefRef(CResourceID(rid.GetResType(), rid.GetResIndex(), wPage)) )
 			{
 				// Books and dialogs have pages; if it's not a book or dialog, the if is 0 == 0, so execute it always
 
@@ -4193,10 +4193,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
             if (fCheckPage)
             {
                 // Same defname but different page?
-                if (m_ResHash.FindKey(rid) == SCONT_BADINDEX)
+                if (m_ResHash.FindKey(rid) == sl::scont_bad_index())
                     break;
             }
-            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == SCONT_BADINDEX)
+            else if (m_ResHash.FindKey(CResourceID(restype, iRandIndex, RES_PAGE_ANY)) == sl::scont_bad_index())
                 break;
 
             ++iRandIndex;
@@ -4207,7 +4207,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	{
 		// find a new FREE entry starting here
         rid = CResourceID(restype, iIndex ? iIndex : 1, wPage);
-        ASSERT(m_ResHash.FindKey(rid) == SCONT_BADINDEX);
+        ASSERT(m_ResHash.FindKey(rid) == sl::scont_bad_index());
 	}
 
 	if ( pszName )
@@ -4220,13 +4220,13 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	return rid;
 }
 
-std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr ptcName, word wPage)
+sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr ptcName, word wPage)
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefRefByName");
 	return ResourceGetDefRefByName(restype, ptcName, wPage);
 }
 
-std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CResourceID& rid) const
+sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CResourceID& rid) const
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefRef");
 	// Get a CResourceDef from the RESOURCE_ID.
@@ -4242,7 +4242,7 @@ std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CRe
 	case RES_WEBPAGE:
 	{
 		const size_t i = m_WebPages.find_sorted(rid);
-		if (i == SCONT_BADINDEX)
+		if (i == sl::scont_bad_index())
 			return {};
 		return m_WebPages[i];
 	}
@@ -4293,15 +4293,13 @@ std::weak_ptr<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(const CRe
 CResourceDef * CServerConfig::RegisteredResourceGetDef( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDef");
-	std::shared_ptr<CResourceDef> ret = RegisteredResourceGetDefRef(rid).lock();
-	return ret ? ret.get() : nullptr;
+	return RegisteredResourceGetDefRef(rid).get();
 }
 
 CResourceDef* CServerConfig::RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr ptcName, word wPage)
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefByName");
-	std::shared_ptr<CResourceDef> ret = RegisteredResourceGetDefRefByName(restype, ptcName, wPage).lock();
-	return ret ? ret.get() : nullptr;
+	return RegisteredResourceGetDefRefByName(restype, ptcName, wPage).get();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4664,7 +4662,7 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )).expired() )
+	if ( RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )) )
 	{
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));
@@ -4898,7 +4896,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			g_Serv.PrintPercent(i, idMaxItem);
 
 		CResourceID rid = CResourceID(RES_ITEMDEF, i);
-		if (m_ResHash.FindKey(rid) != SCONT_BADINDEX)
+		if (m_ResHash.FindKey(rid) != sl::scont_bad_index())
 			continue;
 
 		// check item in tiledata

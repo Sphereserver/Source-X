@@ -243,7 +243,6 @@ src/common/sphere_library/CSObjList.h
 src/common/sphere_library/CSObjListRec.h
 src/common/sphere_library/CSObjSortArray.h
 src/common/sphere_library/CSPtrTypeArray.h
-src/common/sphere_library/CSSortedVector.h
 src/common/sphere_library/CSTypedArray.h
 src/common/sphere_library/CSQueue.cpp
 src/common/sphere_library/CSQueue.h
@@ -262,6 +261,8 @@ src/common/sphere_library/smutex.cpp
 src/common/sphere_library/squeues.h
 src/common/sphere_library/sresetevents.cpp
 src/common/sphere_library/sresetevents.h
+src/common/sphere_library/ssorted_vector.h
+src/common/sphere_library/sptr.h
 src/common/sphere_library/sptr_containers.h
 src/common/sphere_library/sstacks.h
 src/common/sphere_library/sstring.cpp

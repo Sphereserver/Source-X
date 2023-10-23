@@ -601,16 +601,16 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjSharedPtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
-	CSSharedPtrVector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
-    CSSharedPtrVector<CSpellDef> m_SpellDefs;			// Defined Spells.
-    CSWeakPtrVector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
+	CObjUniquePtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	sl::shared_ptr_vector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
+    sl::shared_ptr_vector<CSpellDef> m_SpellDefs;			// Defined Spells.
+    sl::weak_ptr_vector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
 
 	CSStringSortArray m_PrivCommands[PLEVEL_QTY];		// what command are allowed for a priv level?
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjSharedPtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
+    CObjUniquePtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -698,7 +698,7 @@ public:
     *
     * @return  null if it fails, else a pointer to the CScriptObj.
     */
-    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
     CResourceDef* RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
 
     /**
@@ -709,7 +709,7 @@ public:
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
 	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
-    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
     CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
 
 	// Print EF/OF Flags
@@ -1043,7 +1043,7 @@ public:
     * @param pSpell: The spell being cast.
     * @param pObj: The item (if any) from whom the spell is being cast.
     * @param fTest: Flag that determines when to consume the reagents.
-    * @return SCONT_BADINDEX if all the reagents are found, otherwise returns the first missing reagent.
+    * @return sl::scont_bad_index() if all the reagents are found, otherwise returns the first missing reagent.
     */
     size_t Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj, bool fTest = false);
 

@@ -640,7 +640,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef != nullptr);
 	size_t iRet = pCharDef->m_Desires.FindResourceMatch(pItem);
-	if ( iRet != SCONT_BADINDEX )
+	if ( iRet != sl::scont_bad_index() )
 		return (int)(pCharDef->m_Desires[iRet].GetResQty());
 
 	// I'm hungry and this is food ?

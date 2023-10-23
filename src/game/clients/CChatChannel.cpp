@@ -234,7 +234,7 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
 CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
 {
     size_t i = FindMemberIndex( pszName );
-    if ( i == SCONT_BADINDEX )
+    if ( i == sl::scont_bad_index() )
         return nullptr;
     return m_Members[i];
 }
@@ -485,7 +485,7 @@ size_t CChatChannel::FindMemberIndex(lpctstr pszName) const
         if ( strcmp( m_Members[i]->GetChatName(), pszName) == 0)
             return i;
     }
-    return SCONT_BADINDEX;
+    return sl::scont_bad_index();
 }
 
 void CChatChannel::GrantModerator(CChatChanMember * pByMember, lpctstr pszName)

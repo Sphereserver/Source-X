@@ -498,7 +498,7 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 
 	const CResourceID rid( RES_CHARDEF, baseID );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
-	if ( index == SCONT_BADINDEX )
+	if ( index == sl::scont_bad_index() )
 		return nullptr;
 
 	CResourceLink * pBaseLink = static_cast <CResourceLink *> (g_Cfg.m_ResHash.GetBarePtrAt(rid,index));
