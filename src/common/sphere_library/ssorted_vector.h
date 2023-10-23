@@ -8,7 +8,17 @@
 // Sphere library
 namespace sl
 {
+<<<<<<< HEAD
+#if __cplusplus >= 202002L
+    // C++20 (and later) code
+    consteval
+#else
+    constexpr
+#endif
+    size_t scont_bad_index() noexcept {
+=======
     inline constexpr size_t scont_bad_index() noexcept {
+>>>>>>> 0b845d3654874fde1e04f7eba69d5588a41cc19d
         return size_t(-1);
     }
 

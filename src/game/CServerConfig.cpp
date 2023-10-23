@@ -695,7 +695,7 @@ enum RC_TYPE
 	RC_QTY
 };
 
-const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
+const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] 
 {
 	{ "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
 	{ "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
