@@ -258,10 +258,10 @@ src/common/sphere_library/scontainer_ops.h
 src/common/sphere_library/smap.h
 src/common/sphere_library/smutex.h
 src/common/sphere_library/smutex.cpp
-src/common/sphere_library/sorted_vector.h
 src/common/sphere_library/squeues.h
 src/common/sphere_library/sresetevents.cpp
 src/common/sphere_library/sresetevents.h
+src/common/sphere_library/ssorted_vector.h
 src/common/sphere_library/sptr.h
 src/common/sphere_library/sptr_containers.h
 src/common/sphere_library/sstacks.h

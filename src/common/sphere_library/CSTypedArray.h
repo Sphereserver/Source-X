@@ -7,7 +7,7 @@
 #define _INC_CSTYPEDARRAY_H
 
 #include "../assertion.h"
-#include "sorted_vector.h"
+#include "ssorted_vector.h"
 
 /**
 * @brief Typed Array:
