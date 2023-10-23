@@ -456,7 +456,6 @@ private:
 private:
 	CRegion * CheckValidMove( CPointMap & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
-	bool MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject);
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
@@ -465,6 +464,7 @@ public:
 	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	bool IsSwimming() const;
+	bool MoveToRegion(CRegionWorld* pNewArea, bool fAllowReject);
 
 	bool MoveToRegionReTest( dword dwType );
 	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
