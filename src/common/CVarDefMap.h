@@ -7,7 +7,7 @@
 #define _INC_CVARDEFMAP_H
 
 #include "sphere_library/CSString.h"
-#include "sphere_library/sorted_vector.h"
+#include "sphere_library/ssorted_vector.h"
 
 
 class CTextConsole;

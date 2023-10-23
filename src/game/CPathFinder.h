@@ -8,7 +8,7 @@
 #define _INC_PATHFINDER_H
 
 #include <deque>
-#include "../common/sphere_library/sorted_vector.h"
+#include "../common/sphere_library/ssorted_vector.h"
 #include "../common/CPointBase.h"
 #include "uo_files/uofiles_macros.h"
 

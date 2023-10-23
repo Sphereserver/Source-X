@@ -1,7 +1,7 @@
 #ifndef _INC_SPTR_CONTAINERS_H
 #define _INC_SPTR_CONTAINERS_H
 
-#include "sorted_vector.h"
+#include "ssorted_vector.h"
 #include "sptr.h"
 
 
