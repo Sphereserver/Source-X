@@ -2326,15 +2326,24 @@ PacketChatButton::PacketChatButton() : Packet(64)
 bool PacketChatButton::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketChatButton::onReceive");
-
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	skip(1); // 0x00
-	nachar name[MAX_NAME_SIZE+1];
-	readStringUTF16(reinterpret_cast<wchar *>(name), ARRAY_COUNT(name));
+	if (!(g_Cfg.m_iFeatureT2A & FEATURE_T2A_CHAT))
+		return true;
 
-	client->Event_ChatButton(name);
+	if (client->m_fUseNewChatSystem)
+	{
+		client->Event_ChatButton();
+	}
+	else
+	{
+		// On old chat system, client will always send this packet when click on chat button
+		skip(1);	// 0x0
+		nachar name[MAX_NAME_SIZE * 2 + 2];
+		readStringUTF16(reinterpret_cast<wchar *>(name), ARRAY_COUNT(name));
+		client->Event_ChatButton(name);
+	}
 	return true;
 }
 
@@ -2442,9 +2451,10 @@ PacketClientVersion::PacketClientVersion() : Packet(0)
 bool PacketClientVersion::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketClientVersion::onReceive");
-
 	if (net->getReportedVersion())
+	{
 		return true;
+	}
 
 	word length = readInt16();
 	if (length < getPosition())
@@ -2474,7 +2484,6 @@ bool PacketClientVersion::onReceive(CNetState* net)
 		net->detectAsyncMode();
 
 		DEBUG_MSG(("Getting CliVersionReported %u\n", version));
-
 		if ((g_Serv.m_ClientVersion.GetClientVer() != 0) && (g_Serv.m_ClientVersion.GetClientVer() != version))
 			client->addLoginErr(PacketLoginError::BadVersion);
         //we have asked client version in serverlist to configure character list and game feature.
@@ -4625,6 +4634,58 @@ bool PacketCreateHS::onReceive(CNetState* net)
 		strength, dexterity, intelligence, prof,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
+}
+
+/***************************************************************************
+ *
+ *
+ *	Packet 0xF9 : PacketGlobalChatReq				global chat (INCOMPLETE)
+ *
+ *
+ ***************************************************************************/
+PacketGlobalChatReq::PacketGlobalChatReq() : Packet(0)
+{
+}
+
+bool PacketGlobalChatReq::onReceive(CNetState* net)
+{
+	ADDTOCALLSTACK("PacketGlobalChatReq::onReceive");
+
+	CClient* client = net->getClient();
+	ASSERT(client);
+
+	if (!(g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT))
+	{
+		client->SysMessage("Global Chat is currently unavailable.");
+		return true;
+	}
+
+	readByte();
+	byte action = readByte();
+	skip(1);
+
+	tchar xml[MAX_TALK_BUFFER * 2];
+	readStringASCII(xml, ARRAY_COUNT(xml));
+	//DEBUG_ERR(("GlobalChat XML received: %s\n", xml));
+
+	switch (action)
+	{
+	case PacketGlobalChat::MessageSend:
+		// TO-DO
+		return true;
+	case PacketGlobalChat::FriendRemove:
+		// TO-DO
+		return true;
+	case PacketGlobalChat::FriendAddTarg:
+		client->addTarget(CLIMODE_TARG_GLOBALCHAT_ADD, "Target player to request as Global Chat friend.");
+		return true;
+	case PacketGlobalChat::StatusToggle:
+		client->addGlobalChatStatusToggle();
+		return true;
+	default:
+		DEBUG_ERR(("%lx:Unknown global chat action 0%lx\n", net->id(), action));
+		return true;
+	}
 }
 
 /***************************************************************************

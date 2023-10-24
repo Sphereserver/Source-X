@@ -3399,6 +3399,10 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
 - Fixed: CSString instances becoming invalid after calling the Clear method.
 
+18-10-2023, xwerswoodx
+- [Port from 0.56d, Coruja] 56b TILLER DCLick auto pilot to X. (Request: #778)
+- Fixed: Possible fix for Osi Client spell flood. (Issue: #787, #776)
+
 19-10-2023, Julian
 - Fixed: Missing SkillUpdate function, seems I never commited it.
 - Modified: @SkillMenu trigger to be able to open dialogs also, and added a few local variables.
@@ -3408,5 +3412,16 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Modified: @SkillMakeItem trigger to enable/disable notification message when bouncing the crafted item.
 	LOCAL.Notify (rw) = 1/0. Using 0 will not show any "You put your..." message, 1 will show it. Default = 1.
 
-19-10-2023, Jhobean
+21-10-2023, xwerswoodx
+- [Port from 0.56d, Coruja] Implemented the new chat system from 56d. (Feature Request: #785)
+	https://github.com/Sphereserver/Source/commit/ead8e666810d63a58f133de26ebe69095d12c52c
+	https://github.com/Sphereserver/Source/commit/2ccf98dc3c4ae7e910ea87cd3d4b5f90e499fe92
+	https://github.com/Sphereserver/Source/commit/26039d2ef9a121d52b561ce02cdae6d1e4624ccc
+	https://github.com/Sphereserver/Source/commit/f26b39b9b40fba76660c36d57baa8387d3613272
+	https://github.com/Sphereserver/Source/commit/722606c54f17e3c9d8e6095fffcaa3b528c4783a
+- Fixed: Activated disabled DEFNAME variable for Skills (Issue: #1138)
+- Fixed: NPCs that is not walking in multis shown wrong region name after server reboot.
+
+24-10-2023, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+

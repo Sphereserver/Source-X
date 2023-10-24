@@ -78,6 +78,7 @@ CClient::CClient(CNetState* state)
 	m_SkillThrowingAnimID = ITEMID_NOTHING;
 	m_SkillThrowingAnimHue = 0;
 	m_SkillThrowingAnimRender = 0;
+	m_fUseNewChatSystem = false;
 }
 
 

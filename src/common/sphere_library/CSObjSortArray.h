@@ -136,7 +136,7 @@ inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline bool CSObjSortArray<TYPE,KEY_TYPE>::ContainsKey( KEY_TYPE key ) const
 {
-	return FindKey(key) != SCONT_BADINDEX;
+	return FindKey(key) != sl::scont_bad_index();
 }
 
 template<class TYPE,class KEY_TYPE>
@@ -145,7 +145,7 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::FindKey( KEY_TYPE key ) const
 	// Find exact key
 	int iCompareRes;
 	size_t index = FindKeyNear(key, iCompareRes, false);
-	return (iCompareRes != 0 ? SCONT_BADINDEX : index);
+	return (iCompareRes != 0 ? sl::scont_bad_index() : index);
 }
 
 template<class TYPE, class KEY_TYPE>

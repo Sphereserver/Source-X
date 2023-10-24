@@ -570,11 +570,11 @@ size_t CServerConfig::Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpell
 		{
 			CContainer* pCont = static_cast<CContainer*>(pCharCaster);
 			const size_t iMissing = pCont->ResourceConsumePart(pReagents, 1, 100, fTest);
-			if (iMissing != SCONT_BADINDEX)
+			if (iMissing != sl::scont_bad_index())
 				return iMissing;
 		}
 	}
-	return SCONT_BADINDEX;
+	return sl::scont_bad_index();
 }
 
 ushort CServerConfig::Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj)

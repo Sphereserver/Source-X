@@ -176,15 +176,15 @@ enum REVEALFLAGS_TYPE
 
 enum EMOTEFLAGS_TYPE
 {
-    EMOTEF_ATTACKER              = 0x01,     // Only show %s is attacking %s! emote to attacked character.
-    EMOTEF_POISON                = 0x02,     // Only show poison emote to affected character.
-    EMOTEF_DESTROY               = 0x04      // Only show item destroy emote to the owner of the item.
+    EMOTEF_ATTACKER              = 0x01,        // Only show %s is attacking %s! emote to attacked character.
+    EMOTEF_POISON                = 0x02,        // Only show poison emote to affected character.
+    EMOTEF_DESTROY               = 0x04         // Only show item destroy emote to the owner of the item.
 };
 
 enum TOOLTIPMODE_TYPE
 {
-    TOOLTIPMODE_SENDFULL = 0x00,	// always send full tooltip packet
-    TOOLTIPMODE_SENDVERSION = 0x01	// send version packet and wait for client to request full tooltip
+    TOOLTIPMODE_SENDFULL        = 0x00,     // always send full tooltip packet
+    TOOLTIPMODE_SENDVERSION     = 0x01      // send version packet and wait for client to request full tooltip
 };
 
 enum RACIALFLAGS_TYPE
@@ -200,6 +200,15 @@ enum RACIALFLAGS_TYPE
     RACIALF_GARG_BERSERK = 0x0100,		// Increase ferocity in situations of danger (15% Damage Increase + 3% Spell Damage Increase for each 20hp lost)
     RACIALF_GARG_DEADLYAIM = 0x0200,		// Throwing calculations always consider 20.0 minimum ability when untrained
     RACIALF_GARG_MYSTICINSIGHT = 0x0400		// Mysticism calculations always consider 30.0 minimum ability when untrained
+};
+
+enum CHATFLAGS_TYPE
+{
+    CHATF_AUTOJOIN              = 0x01,      // Auto join first static channel available (new chat system: join after client login / old chat system: join after open chat window)
+    CHATF_CHANNELCREATION       = 0x02,		// Enable channel creation
+    CHATF_CHANNELMODERATION     = 0x04,		// Enable channel moderation (old chat system only)
+    CHATF_CUSTOMNAMES           = 0x08,      // Enable custom name selection when open chat window for the first time (old chat system only)
+    CHATF_GLOBALCHAT            = 0x10      // Enable global chat system on clients >= 7.0.62.2 (INCOMPLETE)
 };
 
 ///////////////////////////////////////
@@ -526,6 +535,9 @@ public:
 	int64 m_iClientLoginTempBan;  // Duration (in minutes) of temporary ban to client IPs that reach max wrong password tries.
 	int m_iMaxShipPlankTeleport;// How far from land i can be to take off a ship.
 
+    CSString	m_sChatStaticChannels;
+    int			m_iChatFlags;
+
 	//	MySQL features
 	bool    m_bMySql;       // Enables MySQL.
 	bool    m_bMySqlTicks;  // Enables ticks from MySQL.
@@ -589,16 +601,16 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjSharedPtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
-	CSSharedPtrVector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
-    CSSharedPtrVector<CSpellDef> m_SpellDefs;			// Defined Spells.
-    CSWeakPtrVector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
+	CObjUniquePtrNameSortVector<CSkillDef>           m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	sl::shared_ptr_vector<CSkillDef> m_SkillIndexDefs;		// Defined Skills indexed by number.
+    sl::shared_ptr_vector<CSpellDef> m_SpellDefs;			// Defined Spells.
+    sl::weak_ptr_vector<CSpellDef>   m_SpellDefs_Sorted;	// Defined Spells, in skill order.
 
 	CSStringSortArray m_PrivCommands[PLEVEL_QTY];		// what command are allowed for a priv level?
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjSharedPtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
+    CObjUniquePtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -686,7 +698,7 @@ public:
     *
     * @return  null if it fails, else a pointer to the CScriptObj.
     */
-    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
     CResourceDef* RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
 
     /**
@@ -697,7 +709,7 @@ public:
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
 	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
-    std::weak_ptr<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
     CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
 
 	// Print EF/OF Flags
@@ -1031,7 +1043,7 @@ public:
     * @param pSpell: The spell being cast.
     * @param pObj: The item (if any) from whom the spell is being cast.
     * @param fTest: Flag that determines when to consume the reagents.
-    * @return SCONT_BADINDEX if all the reagents are found, otherwise returns the first missing reagent.
+    * @return sl::scont_bad_index() if all the reagents are found, otherwise returns the first missing reagent.
     */
     size_t Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj, bool fTest = false);
 

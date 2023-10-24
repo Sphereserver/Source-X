@@ -828,7 +828,7 @@ CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(dword dwBlockId, int 
 
 	// Locate the requested block
 	size_t index = m_pMapDiffBlocks[map].FindKey( dwBlockId );
-	if ( index == SCONT_BADINDEX )
+	if ( index == sl::scont_bad_index() )
 		return nullptr;
 
 	return m_pMapDiffBlocks[map].at(index);

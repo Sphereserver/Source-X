@@ -239,6 +239,24 @@ bool CItemMulti::MultiRealizeRegion()
     m_pRegion->SetName(pszTemp);
     m_pRegion->_pMultiLink = this;
 
+    //We have to update the Characters if not moving around like Player Vendors.
+    //Otherwise, when you reboot server, the region.name of the characters returns as Region name instead of multis.
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area.SetSearchSquare(true);
+    for (;;)
+    {
+        CChar* pChar = Area.GetChar();
+        if (pChar == nullptr) //Invalid char? Ignore.
+        {
+            break;
+        }
+        if (pChar->m_pArea == m_pRegion) //If it's already in house region, ignore him/her.
+        {
+            continue;
+        }
+        pChar->MoveToRegion(m_pRegion, false); //Move the character to house region.
+    }
+
     return m_pRegion->RealizeRegion();
 }
 

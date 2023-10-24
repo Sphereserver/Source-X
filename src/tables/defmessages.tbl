@@ -1112,6 +1112,7 @@ MSG(PETSLOTS_TRY_CONTROL,				"You have too many followers to control that creatu
 MSG(PETSLOTS_TRY_TAMING,				"You have too many followers to tame that creature.")
 MSG(PETSLOTS_TRY_SUMMON,				"You have too many followers to summon that creature.")
 MSG(PETSLOTS_TRY_TRANSFER,				"The designated new owner have too many followers to control that creature.")
+MSG(TILLER_NOTYOURSHIP,					"This is not your ship!")
 MSG(TILLER_TURB_WATER,					"Turbulent waters Cap'n")
 MSG(TILLER_STOPPED,						"We've stopped Cap'n")
 MSG(TILLER_CANT_TURN,					"We cannot turn that way Cap'n")

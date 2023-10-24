@@ -7,7 +7,7 @@
 #define _INC_CSTYPEDARRAY_H
 
 #include "../assertion.h"
-#include "CSSortedVector.h"
+#include "ssorted_vector.h"
 
 /**
 * @brief Typed Array:
@@ -99,7 +99,7 @@ CSTypedArray<TYPE> & CSTypedArray<TYPE>::operator=( const CSTypedArray<TYPE> & a
 template<class TYPE>
 void CSTypedArray<TYPE>::insert(size_t nIndex, TYPE newElement)
 {	// Bump the existing entry here forward.
-    ASSERT(nIndex != SCONT_BADINDEX);
+    ASSERT(nIndex != sl::scont_bad_index());
     std::vector<TYPE>::emplace(std::vector<TYPE>::begin() + nIndex, newElement);
 }
 
@@ -124,7 +124,7 @@ void CSTypedArray<TYPE>::assign_at(size_t nIndex, TYPE newElement)
 template<class TYPE>
 void CSTypedArray<TYPE>::assign_at_grow(size_t nIndex, TYPE newElement)
 {
-    ASSERT(nIndex != SCONT_BADINDEX);
+    ASSERT(nIndex != sl::scont_bad_index());
 
     if ( ! IsValidIndex(nIndex))
         std::vector<TYPE>::resize(nIndex + 1);

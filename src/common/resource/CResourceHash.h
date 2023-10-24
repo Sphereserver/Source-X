@@ -15,11 +15,11 @@ class CResourceDef;
 
 struct CResourceHashArraySorter
 {
-    bool operator()(std::shared_ptr<CResourceDef> const& pObjStored, std::shared_ptr<CResourceDef> const& pObj) const;
+    bool operator()(std::unique_ptr<CResourceDef> const& pObjStored, std::unique_ptr<CResourceDef> const& pObj) const;
 };
-class CResourceHashArray : public CSSharedPtrSortedVector<CResourceDef, CResourceHashArraySorter>
+class CResourceHashArray : public sl::unique_ptr_sorted_vector<CResourceDef, CResourceHashArraySorter>
 {
-    static int _compare(std::shared_ptr<CResourceDef> const& pObjStored, CResourceID const& rid);
+    static int _compare(std::unique_ptr<CResourceDef> const& pObjStored, CResourceID const& rid);
 
 public:
     // This list OWNS the CResourceDef and CResourceLink objects.
@@ -30,7 +30,7 @@ public:
     CResourceHashArray& operator=(const CResourceHashArray&) = delete;
 
     inline size_t find_sorted(CResourceID const& rid) const { return this->find_predicate(rid, _compare);        }
-    //inline bool   Contains(CResourceID const& rid) const  { return (SCONT_BADINDEX != this->find_sorted(rid)); }
+    //inline bool   Contains(CResourceID const& rid) const  { return (sl::scont_bad_index() != this->find_sorted(rid)); }
 };
 
 struct CResourceHash
@@ -53,9 +53,9 @@ public:
     {
         return m_Array[GetHashArray(rid)].find_sorted(rid);
     }
-    inline std::weak_ptr<CResourceDef> GetWeakPtrAt(const CResourceID& rid, size_t index) const
+    inline sl::smart_ptr_view<CResourceDef> GetSmartPtrViewAt(const CResourceID& rid, size_t index) const
     {
-        return std::weak_ptr<CResourceDef>(m_Array[GetHashArray(rid)][index]);
+        return sl::smart_ptr_view<CResourceDef>(m_Array[GetHashArray(rid)][index]);
     }
     inline CResourceDef* GetBarePtrAt(const CResourceID& rid, size_t index) const
     {

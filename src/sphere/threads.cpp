@@ -2,6 +2,7 @@
 #define _WIN32_DCOM
 
 #include <algorithm>
+#include <atomic>
 #include "../common/CException.h"
 #include "../common/common.h"
 #include "../common/CLog.h"
@@ -28,12 +29,12 @@
 
 // Normal Buffer
 SimpleMutex g_tmpStringMutex;
-volatile int g_tmpStringIndex = 0;
+std::atomic<int> g_tmpStringIndex = 0;
 char g_tmpStrings[THREAD_TSTRING_STORAGE][THREAD_STRING_LENGTH];
 
 // TemporaryString Buffer
 SimpleMutex g_tmpTemporaryStringMutex;
-volatile int g_tmpTemporaryStringIndex = 0;
+std::atomic<int> g_tmpTemporaryStringIndex = 0;
 
 struct TemporaryStringStorage
 {
@@ -395,7 +396,7 @@ bool AbstractThread::isActive() const
 
 void AbstractThread::waitForClose()
 {
-    // Another thread has requested us to close and it's waiting for us to complete the current tick, 
+    // Another thread has requested us to close and it's waiting for us to complete the current tick,
     //  or to forcefully be forcefully terminated after a THREADJOIN_TIMEOUT, which of the two happens first.
 
     // TODO? add a mutex here to protect at least the changes to m_terminateRequested?
@@ -546,7 +547,7 @@ char *AbstractSphereThread::allocateBuffer()
 
 	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
 	{
-		g_tmpStringIndex %= THREAD_TSTRING_STORAGE;
+		g_tmpStringIndex = g_tmpStringIndex % THREAD_TSTRING_STORAGE;
 	}
 
 	buffer = g_tmpStrings[g_tmpStringIndex];
@@ -564,7 +565,9 @@ TemporaryStringStorage *AbstractSphereThread::allocateStringBuffer()
 		index = ++g_tmpTemporaryStringIndex;
 		if( g_tmpTemporaryStringIndex >= THREAD_STRING_STORAGE )
 		{
-			index = g_tmpTemporaryStringIndex %= THREAD_STRING_STORAGE;
+			const int inc = g_tmpTemporaryStringIndex % THREAD_STRING_STORAGE;
+			g_tmpTemporaryStringIndex = inc;
+			index = inc;
 		}
 
 		if( g_tmpTemporaryStringStorage[index].m_state == 0 )
@@ -638,7 +641,7 @@ void AbstractSphereThread::printStackTrace()
 {
 	// don't allow call stack to be modified whilst we're printing it
 	freezeCallStack(true);
-    
+
     const uint64_t threadId = static_cast<uint64_t>(getId());
     const lpctstr threadName = getName();
 

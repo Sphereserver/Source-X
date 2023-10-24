@@ -18,6 +18,7 @@
 #include "CAccount.h"
 #include "CChat.h"
 #include "CChatChanMember.h"
+#include "CGlobalChatChanMember.h"
 #include "CClientTooltip.h"
 #include "CGMPage.h"
 
@@ -85,7 +86,7 @@ struct CMenuItem 	    // describe a menu item.
 };
 
 
-class CClient : public CSObjListRec, public CScriptObj, public CChatChanMember, public CTextConsole
+class CClient : public CSObjListRec, public CScriptObj, public CChatChanMember, public CGlobalChatChanMember, public CTextConsole
 {
 	// TCP/IP connection to the player or console.
 private:
@@ -134,6 +135,7 @@ public:
 	CONNECT_TYPE m_iConnectType;	// what sort of a connection is this ?
 	CAccount * m_pAccount;			// The account name. we logged in on
 
+	bool m_fUseNewChatSystem;		// is this client compatible with new SA+ chat system?
 	int64 m_timeLogin;			    // World clock of login time. "LASTCONNECTTIME"
 	int64 m_timeLastEvent;		    // Last time we got event from client.
 	int64 m_timeLastEventWalk;	    // Last time we got a walk event from client
@@ -286,6 +288,7 @@ private:
 	bool OnTarg_Use_Deed( CItem * pDeed, CPointMap &pt );
 	bool OnTarg_Use_Item( CObjBase * pObj, CPointMap & pt, ITEMID_TYPE id );
 	bool OnTarg_Party_Add( CChar * pChar );
+	bool OnTarg_GlobalChat_Add(CChar* pChar);
 	CItem* OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed );
 
 	int OnSkill_AnimalLore( CUID uid, int iTestLevel, bool fTest );
@@ -317,7 +320,7 @@ public:
 	void Event_Attack(CUID uid);
 	void Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor );
 	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
-	void Event_ChatButton(const nachar* pszName); // Client's chat button was pressed
+	void Event_ChatButton(const nachar* pszName = nullptr); // Client's chat button was pressed
 	void Event_ChatText( const nachar* pszText, int len, CLanguageID lang = 0 ); // Text from a client
     void Event_CombatAbilitySelect(dword dwAbility);
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
@@ -545,6 +548,9 @@ public:
 	void addLoginComplete();
 	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = nullptr, lpctstr pszName2 = nullptr, CLanguageID lang = 0 );
 
+	void addGlobalChatConnect();
+	void addGlobalChatStatusToggle();
+
 	void addCharPaperdoll( CChar * pChar );
 
 	bool addAOSTooltip( CObjBase * pObj, bool fRequested = false, bool fShop = false );
@@ -567,6 +573,8 @@ private:
 #define POPUP_TRADE_ALLOW 1013	//15
 #define POPUP_TRADE_REFUSE 1014	//16
 #define POPUP_TRADE_OPEN 819	//17
+#define POPUP_GLOBALCHAT_ALLOW 18
+#define POPUP_GLOBALCHAT_REFUSE 19
 #define POPUP_BANKBOX 120		//21
 #define POPUP_VENDORBUY 110		//31
 #define POPUP_VENDORSELL 111	//32

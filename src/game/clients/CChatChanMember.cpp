@@ -41,34 +41,28 @@ void CChatChanMember::SetReceiving(bool fOnOff)
         ToggleReceiving();
 }
 
-void CChatChanMember::SetChatActive()
+void CChatChanMember::addChatWindow()
 {
-    ADDTOCALLSTACK("CChatChanMember::SetChatActive");
-    // called from Event_ChatButton
-    if ( IsChatActive() )
+    ADDTOCALLSTACK("CChatMember::addChatWindow");
+    // Called from Event_ChatButton
+
+    CClient* pClient = GetClientActive();
+    if (!pClient || (!pClient->m_fUseNewChatSystem && IsChatActive()))
         return;
 
-    CClient * pClient = GetClientActive();
-    if ( pClient )
+    // Open chat window (old chat system only)
+    // On new chat system this is not needed because the chat button is hardcoded on client-side, and
+    // PacketChatButton packet is sent by client after login complete only to get initial channel list
+    if (!pClient->m_fUseNewChatSystem)
+        pClient->addChatSystemMessage(CHATCMD_OpenChatWindow, pClient->m_fUseNewChatSystem ? nullptr : GetChatName());
+
+    // Send channel names
+    for (CChatChannel* pChannel = static_cast<CChatChannel*>(g_Serv.m_Chats.m_Channels.GetContainerHead()); pChannel != nullptr; pChannel = pChannel->GetNext())
     {
-        m_fChatActive = true;
-
-        // Tell the client to open the chat window dialog
-        pClient->addChatSystemMessage( CHATMSG_OpenChatWindow, GetChatName() );
-
-        // Send all existing channel names to this client
-        const CChatChannel *pChannel = g_Serv.m_Chats.GetFirstChannel();
-        for ( ; pChannel != nullptr; pChannel = pChannel->GetNext() )
-        {
-            pClient->addChatSystemMessage(CHATMSG_SendChannelName, pChannel->GetName(), pChannel->GetModeString());
-        }
+        pClient->addChatSystemMessage(CHATCMD_AddChannel, pChannel->m_sName, pClient->m_fUseNewChatSystem ? nullptr : pChannel->GetPassword());
+        if ((g_Cfg.m_iChatFlags & CHATF_AUTOJOIN) && pChannel->m_fStatic && !GetChannel())
+            g_Serv.m_Chats.JoinChannel(pChannel->m_sName, nullptr, this);
     }
-}
-
-void CChatChanMember::SetChatInactive()
-{
-    ADDTOCALLSTACK("CChatChanMember::SetChatInactive");
-    m_fChatActive = false;
 }
 
 size_t CChatChanMember::FindIgnoringIndex(lpctstr pszName) const
@@ -79,7 +73,7 @@ size_t CChatChanMember::FindIgnoringIndex(lpctstr pszName) const
         if (m_IgnoredMembers[i]->Compare(pszName) == 0)
             return i;
     }
-    return SCONT_BADINDEX;
+    return sl::scont_bad_index();
 }
 
 void CChatChanMember::Ignore(lpctstr pszName)
@@ -104,7 +98,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChanMember::ToggleIgnore");
     size_t i = FindIgnoringIndex( pszName );
-    if ( i != SCONT_BADINDEX )
+    if ( i != sl::scont_bad_index() )
     {
         ASSERT( m_IgnoredMembers.IsValidIndex(i) );
         m_IgnoredMembers.erase_at(i);
@@ -116,7 +110,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
         {
             CChatChanMember * pMember = m_pChannel->FindMember(pszName);
             if (pMember)
-                m_pChannel->SendThisMember(pMember, this);
+                m_pChannel->SendMember(pMember, this);
         }
     }
     else
@@ -207,5 +201,50 @@ lpctstr CChatChanMember::GetChatName() const
 
 bool CChatChanMember::IsIgnoring(lpctstr pszName) const
 {
-    return( FindIgnoringIndex( pszName ) != SCONT_BADINDEX );
+    return( FindIgnoringIndex( pszName ) != sl::scont_bad_index() );
+}
+
+void CChatChanMember::HideCharacterName()
+{
+    ADDTOCALLSTACK("CChatMember::HideCharacterName");
+    if (!m_fAllowWhoIs)
+        return;
+
+    m_fAllowWhoIs = false;
+    SendChatMsg(CHATMSG_NotShowingName);
+}
+
+void CChatChanMember::ToggleCharacterName()
+{
+    ADDTOCALLSTACK("CChatMember::ToggleCharacterName");
+    m_fAllowWhoIs = !m_fAllowWhoIs;
+    SendChatMsg(m_fAllowWhoIs ? CHATMSG_ShowingName : CHATMSG_NotShowingName);
+}
+
+void CChatChanMember::ShowCharacterName()
+{
+    ADDTOCALLSTACK("CChatMember::ShowCharacterName");
+    if (m_fAllowWhoIs)
+        return;
+
+    m_fAllowWhoIs = true;
+    SendChatMsg(CHATMSG_ShowingName);
+}
+
+void CChatChanMember::AddIgnore(lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatMember::AddIgnore");
+    if (IsIgnoring(pszName))
+        SendChatMsg(CHATMSG_AlreadyIgnoringPlayer, pszName);
+    else
+        ToggleIgnore(pszName);
+}
+
+void CChatChanMember::RemoveIgnore(lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatMember::RemoveIgnore");
+    if (!IsIgnoring(pszName))
+        SendChatMsg(CHATMSG_NotIgnoring, pszName);
+    else
+        ToggleIgnore(pszName);
 }

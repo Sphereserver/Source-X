@@ -4,6 +4,7 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
+#include "../items/CItemShip.h"
 #include "../components/CCSpawn.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
@@ -326,9 +327,22 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		}
 
 		case IT_SHIP_TILLER:
+		{
+			if (m_net->isClientVersion(MINCLIVER_HS))
+			{
+				CItemShip* pShip = dynamic_cast<CItemShip*>(pItem->m_uidLink.ItemFind());
+				if (pShip)
+				{
+					if (m_pChar->ContentFindKeyFor(pItem) || pShip->GetOwner() == m_pChar->GetUID())
+						pShip->CCMultiMovable::SetPilot(m_pChar);
+					else
+						pItem->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_NOTYOURSHIP));
+					return true;
+				}
+			}
 			pItem->Speak(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_TILLERMAN), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
 			return true;
-
+		}
 		case IT_WAND:
 		case IT_SCROLL:
 		{

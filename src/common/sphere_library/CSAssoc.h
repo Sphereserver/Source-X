@@ -64,11 +64,6 @@ struct CElementDef
 	ELEM_TYPE m_type;
 	uint	m_offset;	// The offset into the class instance for this item.
 
-	CElementDef() = default;
-	~CElementDef() = default;
-	CElementDef(const CElementDef&) = delete;
-	CElementDef& operator=(const CElementDef& other) = delete;
-
 	// get structure value.
 	void * GetValPtr( const void * pBaseInst ) const;
 	int GetValLength() const;
@@ -77,20 +72,13 @@ struct CElementDef
 	bool SetValStr( void * pBase, lpctstr pszVal ) const;
 };
 
-class CAssocReg	// associate members of some class/structure with entries in the registry.
+struct CAssocReg	// associate members of some class/structure with entries in the registry.
 {
 	// LAST = { nullptr, 0, ELEM_VOID }
-public:
 	static const char* m_sClassName;
 
 	lpctstr m_pszKey;	// A single key identifier to be cat to a base key. nullptr=last
 	CElementDef m_elem;
-
-public:
-	CAssocReg() = default;
-	~CAssocReg() = default;
-	CAssocReg(const CAssocReg&) = delete;
-	CAssocReg& operator=(const CAssocReg& other) = delete;
 
 	operator lpctstr() const
 	{

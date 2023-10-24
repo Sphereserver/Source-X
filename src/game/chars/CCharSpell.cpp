@@ -2429,7 +2429,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 			// check for reagents
 			const size_t iMissingReagents = g_Cfg.Calc_SpellReagentsConsume(this, pSpellDef, pSrc, fTest);
-			if ( iMissingReagents != SCONT_BADINDEX )
+			if ( iMissingReagents != sl::scont_bad_index() )
 			{
 				if ( fFailMsg )
 				{

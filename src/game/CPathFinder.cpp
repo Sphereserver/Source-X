@@ -161,8 +161,8 @@ bool CPathFinder::FindPath() //A* algorithm
             if (InClosed != m_Closed.cend())
                 continue;
              */
-            // Binary (pre-sorted) search in our CSSortedVector
-            if (m_Closed.find(Cell) != SCONT_BADINDEX)
+            // Binary (pre-sorted) search in our sorted_vector
+            if (m_Closed.find(Cell) != sl::scont_bad_index())
                 continue;            
 
             ASSERT(Cell->_Walkable);

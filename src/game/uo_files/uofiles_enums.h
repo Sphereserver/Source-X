@@ -989,7 +989,7 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
     GUMP_OPEN_SPELLBOOK					= 0xFFFF
 };
 
-enum
+enum TERRAINID_TYPE
 {
     // Terrain samples
     TERRAIN_HOLE	= 0x0002,	// "NODRAW" we can pas thru this.
