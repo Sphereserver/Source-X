@@ -6,11 +6,12 @@
 #include "CClient.h"
 
 
-CChatChannel::CChatChannel(lpctstr pszName, lpctstr pszPassword)
+CChatChannel::CChatChannel(lpctstr pszName, lpctstr pszPassword, bool fStatic)
 {
     m_sName = pszName;
     m_sPassword = pszPassword;
     m_fVoiceDefault = true;
+    m_fStatic = fStatic;
 }
 
 CChatChannel* CChatChannel::GetNext() const
@@ -132,7 +133,7 @@ void CChatChannel::SendPrivateMessage(CChatChanMember * pFrom, lpctstr pszTo, lp
     }
 
     CSString sName;
-    g_Serv.m_Chats.DecorateName(sName, pFrom);
+    g_Serv.m_Chats.FormatName(sName, pFrom);
     // Echo to the sending client so they know the message went out
     pFrom->SendChatMsg(CHATMSG_PlayerPrivate, sName, pszMsg);
     // If the sending and receiving are different send it out to the receiver
@@ -140,41 +141,57 @@ void CChatChannel::SendPrivateMessage(CChatChanMember * pFrom, lpctstr pszTo, lp
         pTo->SendChatMsg(CHATMSG_PlayerPrivate, sName, pszMsg);
 }
 
-void CChatChannel::RenameChannel(CChatChanMember * pBy, lpctstr pszName)
+void CChatChannel::RenameChannel(CChatChanMember* pBy, lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChannel::RenameChannel");
-    // Ask the chat system if the new name is ok
-    if ( ! g_Serv.m_Chats.IsValidName( pszName, false ))
+
+    if (!g_Serv.m_Chats.IsValidName(pszName, false))
     {
         pBy->SendChatMsg(CHATMSG_InvalidConferenceName);
         return;
     }
-    // Ask the chat system if the new name is already taken
-    if ( g_Serv.m_Chats.IsDuplicateChannelName(pszName))
+    if (g_Serv.m_Chats.FindChannel(pszName))
     {
         pBy->SendChatMsg(CHATMSG_AlreadyAConference);
         return;
     }
-    // Tell the channel members our name changed
+
     Broadcast(CHATMSG_ConferenceRenamed, GetName(), pszName);
-    // Delete the old name from all chat clients
-    g_Serv.m_Chats.SendDeleteChannel(this);
-    // Do the actual renaming
-    SetName(pszName);
-    // Update all channel members' current channel bar
-    Broadcast(CHATMSG_UpdateChannelBar, pszName, "");
-    // Send out the new name to all chat clients so they can join
-    g_Serv.m_Chats.SendNewChannel(this);
+    g_Serv.m_Chats.BroadcastRemoveChannel(this);
+    m_sName = pszName;
+    Broadcast(CHATCMD_JoinedChannel, pszName);
+    g_Serv.m_Chats.BroadcastAddChannel(this);
 }
 
-void CChatChannel::KickAll(CChatChanMember * pMemberException)
+void CChatChannel::SendMember(CChatChanMember* pMember, CChatChanMember* pToMember)
 {
-    ADDTOCALLSTACK("CChatChannel::KickAll");
-    for (size_t i = 0; i < m_Members.size(); ++i)
+    ADDTOCALLSTACK("CChatChannel::SendMember");
+    CSString sName;
+    g_Serv.m_Chats.FormatName(sName, pMember);
+
+    CClient* pClient = nullptr;
+    if (pToMember)
     {
-        if ( m_Members[i].get() == pMemberException) // If it's not me, then kick them
-            continue;
-        KickMember( pMemberException, m_Members[i].get() );
+        // If pToMember is specified, send only to this member
+        pClient = pToMember->GetClientActive();
+        if (pClient && pClient->m_fUseNewChatSystem)
+            return;
+        if (pToMember->IsIgnoring(pMember->GetChatName()))
+            return;
+        pToMember->SendChatMsg(CHATCMD_AddMemberToChannel, sName);
+    }
+    else
+    {
+        // If no pToMember is specified, send to all members
+        for (size_t i = 0; i < m_Members.size(); i++)
+        {
+            pClient = m_Members[i]->GetClientActive();
+            if (pClient && pClient->m_fUseNewChatSystem)
+                continue;
+            if (m_Members[i]->IsIgnoring(pMember->GetChatName()))
+                continue;
+            m_Members[i]->SendChatMsg(CHATCMD_AddMemberToChannel, sName);
+        }
     }
 }
 
@@ -189,25 +206,32 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
         if ( pClient == nullptr )		//	auto-remove offline clients
         {
             m_Members[i]->SetChannel(nullptr);
-            m_Members.erase_index(i);
+            m_Members.erase(m_Members.begin() + i);
             continue;
         }
 
-        pClient->addChatSystemMessage(CHATMSG_RemoveMember, pMember->GetChatName());
-        if (m_Members[i].get() == pMember)	// disjoin
+        if (!pClient->m_fUseNewChatSystem)
+            pClient->addChatSystemMessage(CHATCMD_RemoveMemberFromChannel, pMember->GetChatName());
+
+        if (m_Members[i] == pMember)	// disjoin
         {
-            m_Members.erase_index(i);
+            pClient->addChatSystemMessage(pClient->m_fUseNewChatSystem ? CHATCMD_LeftChannel : CHATCMD_ClearMembers, static_cast<lpctstr>(m_sName));
+            m_Members.erase(m_Members.begin() + i);
             break;
         }
 
         ++i;
     }
 
+    // Delete the channel if there's no members left
+    if (m_Members.size() <= 0)
+        g_Serv.m_Chats.DeleteChannel(this);
+
     // Update our persona
     pMember->SetChannel(nullptr);
 }
 
-CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
+CChatChanMember* CChatChannel::FindMember(lpctstr pszName) const
 {
     size_t i = FindMemberIndex( pszName );
     if ( i == sl::scont_bad_index() )
@@ -217,7 +241,7 @@ CChatChanMember * CChatChannel::FindMember(lpctstr pszName) const
 
 bool CChatChannel::RemoveMember(lpctstr pszName)
 {
-    CChatChanMember * pMember = FindMember(pszName);
+    CChatChanMember* pMember = FindMember(pszName);
     if ( pMember == nullptr )
         return false;
     RemoveMember(pMember);
@@ -235,7 +259,7 @@ bool CChatChannel::IsModerator(lpctstr pszMember) const
     ADDTOCALLSTACK("CChatChannel::IsModerator");
     for (size_t i = 0; i < m_Moderators.size(); i++)
     {
-        if (m_Moderators[i]->Compare(pszMember) == 0)
+        if (m_Moderators[i]->CompareNoCase(pszMember) == 0)
             return true;
     }
     return false;
@@ -258,7 +282,7 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
     // See if they are already a moderator
     for (size_t i = 0; i < m_Moderators.size(); ++i)
     {
-        if (m_Moderators[i]->Compare(pszMember) == 0)
+        if (m_Moderators[i]->CompareNoCase(pszMember) == 0)
         {
             if (fFlag == false)
                 m_Moderators.erase_index(i);
@@ -271,12 +295,12 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
     }
 }
 
-void CChatChannel::KickMember(CChatChanMember *pByMember, CChatChanMember * pMember )
+void CChatChannel::KickMember(CChatChanMember* pByMember, CChatChanMember* pMember)
 {
     ADDTOCALLSTACK("CChatChannel::KickMember");
-    ASSERT( pMember );
+    ASSERT(pMember);
 
-    lpctstr pszByName;
+    lpctstr pszByName = "SYSTEM";
     if (pByMember) // If nullptr, then an ADMIN or a GM did it
     {
         pszByName = pByMember->GetChatName();
@@ -286,82 +310,42 @@ void CChatChannel::KickMember(CChatChanMember *pByMember, CChatChanMember * pMem
             return;
         }
     }
-    else
-    {
-        pszByName = "SYSTEM";
-    }
 
     lpctstr pszName = pMember->GetChatName();
-
     // Kicking this person...remove from list of moderators first
     if (IsModerator(pszName))
     {
         SetModerator(pszName, false);
-        SendThisMember(pMember);
+        SendMember(pMember);
         Broadcast(CHATMSG_PlayerNoLongerModerator, pszName, "");
         pMember->SendChatMsg(CHATMSG_RemovedListModerators, pszByName);
     }
 
-    // Now kick them
-    if (m_Members.size() == 1) // If kicking yourself, send out to all clients in a chat that the channel is gone
-        g_Serv.m_Chats.SendDeleteChannel(this);
     // Remove them from the channels list of members
     RemoveMember(pMember);
-    // Tell the remain members about this
-    Broadcast(CHATMSG_PlayerIsKicked, pszName, "");
-    // Now clear their channel member list
-    pMember->SendChatMsg(CHATMSG_ClearMemberList);
-    // And give them the bad news
+    if (!this) // The channel got removed because there's no members left
+        return;
     pMember->SendChatMsg(CHATMSG_ModeratorHasKicked, pszByName);
+    pMember->SendChatMsg(CHATCMD_ClearMembers);
+    Broadcast(CHATMSG_PlayerIsKicked, pszName);
 }
 
-bool CChatChannel::AddMember(CChatChanMember * pMember)
+void CChatChannel::AddMember(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::AddMember");
     pMember->SetChannel(this);
     m_Members.emplace_back(pMember);
     // See if only moderators have a voice by default
     lpctstr pszName = pMember->GetChatName();
-    if (!GetVoiceDefault() && !IsModerator(pszName))
-        // If only moderators have a voice by default, then add this member to the list of no voices
-        SetVoice(pszName, false);
-    // Set voice status
-    return true;
-}
+    if (!IsModerator(pszName))
+    {
+        if (!GetVoiceDefault())
+            SetVoice(pszName);
 
-void CChatChannel::SendMembers(CChatChanMember * pMember)
-{
-    ADDTOCALLSTACK("CChatChannel::SendMembers");
-    for (size_t i = 0; i < m_Members.size(); ++i)
-    {
-        CSString sName;
-        g_Serv.m_Chats.DecorateName(sName, m_Members[i].get());
-        pMember->SendChatMsg(CHATMSG_SendPlayerName, sName);
-    }
-}
-
-void CChatChannel::SendThisMember(CChatChanMember * pMember, CChatChanMember * pToMember)
-{
-    ADDTOCALLSTACK("CChatChannel::SendThisMember");
-    tchar buffer[2048];
-    snprintf(buffer, sizeof(buffer), "%s%s",
-            (IsModerator(pMember->GetChatName()) == true) ? "1" :
-            (HasVoice(pMember->GetChatName()) == true) ? "0" : "2", pMember->GetChatName());
-    // If no particular member is specified in pToMember, then send it out to all members
-    if (pToMember == nullptr)
-    {
-        for (size_t i = 0; i < m_Members.size(); i++)
-        {
-            // Don't send out members if they are ignored by someone
-            if (!m_Members[i]->IsIgnoring(pMember->GetChatName()))
-                m_Members[i]->SendChatMsg(CHATMSG_SendPlayerName, buffer);
-        }
-    }
-    else
-    {
-        // Don't send out members if they are ignored by someone
-        if (!pToMember->IsIgnoring(pMember->GetChatName()))
-            pToMember->SendChatMsg(CHATMSG_SendPlayerName, buffer);
+        // GMs always have moderation privs
+        CClient* pClient = pMember->GetClientActive();
+        if (pClient && pClient->IsPriv(PRIV_GM))
+            SetModerator(pszName);
     }
 }
 
@@ -407,7 +391,7 @@ void CChatChannel::ChangePassword(CChatChanMember * pByMember, lpctstr pszPasswo
     else
     {
         SetPassword(pszPassword);
-        g_Serv.m_Chats.SendNewChannel(pByMember->GetChannel());
+        g_Serv.m_Chats.BroadcastAddChannel(pByMember->GetChannel());
         Broadcast(CHATMSG_PasswordChanged, "","");
     }
 }
@@ -419,7 +403,7 @@ void CChatChannel::Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszTex
     CChatChanMember *pSendingMember = FindMember(pszName);
 
     if (iType >= CHATMSG_PlayerTalk && iType <= CHATMSG_PlayerPrivate) // Only chat, emote, and privates get a color status number
-        g_Serv.m_Chats.DecorateName(sName, pSendingMember, fOverride);
+        g_Serv.m_Chats.FormatName(sName, pSendingMember, fOverride);
     else
         sName = pszName;
 
@@ -457,7 +441,7 @@ void CChatChannel::GrantVoice(CChatChanMember * pByMember, lpctstr pszName)
     if (HasVoice(pszName))
         return;
     SetVoice(pszName, true);
-    SendThisMember(pMember); // Update the color
+    SendMember(pMember); // Update the color
     pMember->SendChatMsg(CHATMSG_ModeratorGrantSpeaking, pByMember->GetChatName());
     Broadcast(CHATMSG_PlayerNowSpeaking, pszName, "", "");
 }
@@ -479,7 +463,7 @@ void CChatChannel::RevokeVoice(CChatChanMember * pByMember, lpctstr pszName)
     if (!HasVoice(pszName))
         return;
     SetVoice(pszName, false);
-    SendThisMember(pMember); // Update the color
+    SendMember(pMember); // Update the color
     pMember->SendChatMsg(CHATMSG_ModeratorRemovedSpeaking, pByMember->GetChatName());
     Broadcast(CHATMSG_PlayerNoSpeaking, pszName, "", "");
 }
@@ -521,7 +505,7 @@ void CChatChannel::GrantModerator(CChatChanMember * pByMember, lpctstr pszName)
     if (IsModerator(pMember->GetChatName()))
         return;
     SetModerator(pszName, true);
-    SendThisMember(pMember); // Update the color
+    SendMember(pMember); // Update the color
     Broadcast(CHATMSG_PlayerIsAModerator, pMember->GetChatName(), "", "");
     pMember->SendChatMsg(CHATMSG_YouAreAModerator, pByMember->GetChatName());
 }
@@ -543,7 +527,7 @@ void CChatChannel::RevokeModerator(CChatChanMember * pByMember, lpctstr pszName)
     if (!IsModerator(pMember->GetChatName()))
         return;
     SetModerator(pszName, false);
-    SendThisMember(pMember); // Update the color
+    SendMember(pMember); // Update the color
     Broadcast(CHATMSG_PlayerNoLongerModerator, pMember->GetChatName(), "", "");
     pMember->SendChatMsg(CHATMSG_RemovedListModerators, pByMember->GetChatName());
 }
@@ -565,4 +549,132 @@ bool CChatChannel::GetVoiceDefault()  const
 void CChatChannel::SetVoiceDefault(bool fVoiceDefault)
 {
     m_fVoiceDefault = fVoiceDefault;
+}
+
+void CChatChannel::FillMembersList(CChatChanMember* pMember)
+{
+    ADDTOCALLSTACK("CChatChannel::FillMembersList");
+    for (size_t i = 0; i < m_Members.size(); i++)
+    {
+        if (pMember->IsIgnoring(m_Members[i]->GetChatName()))
+            continue;
+        CSString sName;
+        g_Serv.m_Chats.FormatName(sName, m_Members[i].get());
+        pMember->SendChatMsg(CHATCMD_AddMemberToChannel, sName);
+    }
+}
+
+void CChatChannel::PrivateMessage(CChatChanMember* pFrom, lpctstr pszTo, lpctstr pszMsg, CLanguageID lang)
+{
+    ADDTOCALLSTACK("CChatChannel::PrivateMessage");
+    CChatChanMember* pTo = FindMember(pszTo);
+    if (!pTo)
+    {
+        pFrom->SendChatMsg(CHATMSG_NoPlayer, pszTo);
+        return;
+    }
+    if (!pTo->IsReceivingAllowed())
+    {
+        pFrom->SendChatMsg(CHATMSG_PlayerNotReceivingPrivate, pszTo);
+        return;
+    }
+
+    // Members without voice can't send private messages on channel, but they still allowed to send private messages to moderators
+    if (!HasVoice(pFrom->GetChatName()) && !IsModerator(pszTo))
+    {
+        pFrom->SendChatMsg(CHATMSG_RevokedSpeaking);
+        return;
+    }
+
+    if (pTo->IsIgnoring(pFrom->GetChatName()))
+    {
+        pFrom->SendChatMsg(CHATMSG_PlayerIsIgnoring, pszTo);
+        return;
+    }
+
+    CSString sName;
+    g_Serv.m_Chats.FormatName(sName, pFrom);
+    pFrom->SendChatMsg(CHATMSG_PlayerPrivate, sName, pszMsg, lang);
+    if (pTo != pFrom)
+        pTo->SendChatMsg(CHATMSG_PlayerPrivate, sName, pszMsg, lang);
+}
+
+void CChatChannel::AddVoice(CChatChanMember* pByMember, lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatChannel::AddVoice");
+
+    lpctstr pszByName = pByMember->GetChatName();
+    if (!IsModerator(pszByName))
+    {
+        pByMember->SendChatMsg(CHATMSG_MustHaveOps);
+        return;
+    }
+
+    CChatChanMember* pMember = FindMember(pszName);
+    if (!pMember)
+    {
+        pByMember->SendChatMsg(CHATMSG_NoPlayer, pszName);
+        return;
+    }
+    pszName = pMember->GetChatName();	// fix case-sensitive mismatch
+    if (HasVoice(pszName))
+        return;
+
+    SetVoice(pszName);
+    SendMember(pMember);	// update name color
+    pMember->SendChatMsg(CHATMSG_ModeratorGrantSpeaking, pszByName);
+    Broadcast(CHATMSG_PlayerNowSpeaking, pszName);
+}
+
+void CChatChannel::RemoveVoice(CChatChanMember* pByMember, lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatChannel::RemoveVoice");
+
+    lpctstr pszByName = pByMember->GetChatName();
+    if (!IsModerator(pszByName))
+    {
+        pByMember->SendChatMsg(CHATMSG_MustHaveOps);
+        return;
+    }
+
+    CChatChanMember* pMember = FindMember(pszName);
+    if (!pMember)
+    {
+        pByMember->SendChatMsg(CHATMSG_NoPlayer, pszName);
+        return;
+    }
+    pszName = pMember->GetChatName();	// fix case-sensitive mismatch
+    if (!HasVoice(pszName))
+        return;
+
+    SetVoice(pszName, true);
+    SendMember(pMember);	// update name color
+    pMember->SendChatMsg(CHATMSG_ModeratorRemovedSpeaking, pszByName);
+    Broadcast(CHATMSG_PlayerNoSpeaking, pszName);
+}
+
+void CChatChannel::EnableDefaultVoice(lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatChannel::EnableDefaultVoice");
+    if (!GetVoiceDefault())
+        ToggleDefaultVoice(pszName);
+}
+
+void CChatChannel::DisableDefaultVoice(lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatChannel::DisableDefaultVoice");
+    if (GetVoiceDefault())
+        ToggleDefaultVoice(pszName);
+}
+
+void CChatChannel::ToggleDefaultVoice(lpctstr pszName)
+{
+    ADDTOCALLSTACK("CChatChannel::ToggleDefaultVoice");
+    if (!IsModerator(pszName))
+    {
+        FindMember(pszName)->SendChatMsg(CHATMSG_MustHaveOps);
+        return;
+    }
+    m_fVoiceDefault = !m_fVoiceDefault;
+    Broadcast(m_fVoiceDefault ? CHATMSG_SpeakingByDefault : CHATMSG_ModeratorsSpeakDefault);
 }

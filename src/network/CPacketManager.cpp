@@ -103,6 +103,7 @@ void PacketManager::registerStandardPackets(void)
     registerPacket(XCMD_CrashReport, new PacketCrashReport());					//
     registerPacket(XCMD_CreateHS, new PacketCreateHS());						// create character (HS)
     registerPacket(XCMD_UltimaStoreButton, new PacketUltimaStoreButton());		// ultima store button (SA)
+    registerPacket(XCMD_GlobalChat, new PacketGlobalChatReq());                 // global chat
     registerPacket(XCMD_PublicHouseContent, new PacketPublicHouseContent());    // show/hide public house content (SA)
 
     // extended packets (0xBF)

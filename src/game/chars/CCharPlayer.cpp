@@ -33,6 +33,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) :
 	m_speedMode = 0;
 	m_pflag = 0;
 	m_fKrToolbarEnabled = false;
+	m_fRefuseGlobalChatRequests = false;
 	m_LocalLight = 0;
 
 	_iMaxHouses = g_Cfg._iMaxHousesPlayer;
@@ -256,6 +257,9 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 				sVal = szLine;
 			}
 			return true;
+		case CPC_REFUSEGLOBALCHATREQUESTS:
+			sVal.FormatVal(m_fRefuseGlobalChatRequests);
+			return true;
 		case CPC_REFUSETRADES:
 			{
 				CVarDefCont * pVar = pChar->GetDefKey(ptcKey, true);
@@ -469,6 +473,9 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		case CPC_PROFILE:
 			m_sProfile = Str_MakeFiltered( s.GetArgStr());
 			return true;
+		case CPC_REFUSEGLOBALCHATREQUESTS:
+			m_fRefuseGlobalChatRequests = (s.GetArgVal() != 0);
+			return true;
 		case CPC_REFUSETRADES:
 			pChar->SetDefNum(s.GetKey(), s.GetArgVal() > 0 ? 1 : 0, false);
 			return true;
@@ -547,6 +554,8 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyVal( "PFLAG", m_pflag );
 	if ( m_speedMode )
 		s.WriteKeyVal("SPEEDMODE", m_speedMode);
+	if (m_fRefuseGlobalChatRequests)
+		s.WriteKeyVal("REFUSEGLOBALCHATREQUESTS", m_fRefuseGlobalChatRequests);
 	if (m_fKrToolbarEnabled && (pAccount->GetResDisp() >= RDS_KR))
 		s.WriteKeyVal("KRTOOLBARSTATUS", m_fKrToolbarEnabled);
 	if (m_LocalLight)

@@ -176,15 +176,15 @@ enum REVEALFLAGS_TYPE
 
 enum EMOTEFLAGS_TYPE
 {
-    EMOTEF_ATTACKER              = 0x01,     // Only show %s is attacking %s! emote to attacked character.
-    EMOTEF_POISON                = 0x02,     // Only show poison emote to affected character.
-    EMOTEF_DESTROY               = 0x04      // Only show item destroy emote to the owner of the item.
+    EMOTEF_ATTACKER              = 0x01,        // Only show %s is attacking %s! emote to attacked character.
+    EMOTEF_POISON                = 0x02,        // Only show poison emote to affected character.
+    EMOTEF_DESTROY               = 0x04         // Only show item destroy emote to the owner of the item.
 };
 
 enum TOOLTIPMODE_TYPE
 {
-    TOOLTIPMODE_SENDFULL = 0x00,	// always send full tooltip packet
-    TOOLTIPMODE_SENDVERSION = 0x01	// send version packet and wait for client to request full tooltip
+    TOOLTIPMODE_SENDFULL        = 0x00,     // always send full tooltip packet
+    TOOLTIPMODE_SENDVERSION     = 0x01      // send version packet and wait for client to request full tooltip
 };
 
 enum RACIALFLAGS_TYPE
@@ -200,6 +200,15 @@ enum RACIALFLAGS_TYPE
     RACIALF_GARG_BERSERK = 0x0100,		// Increase ferocity in situations of danger (15% Damage Increase + 3% Spell Damage Increase for each 20hp lost)
     RACIALF_GARG_DEADLYAIM = 0x0200,		// Throwing calculations always consider 20.0 minimum ability when untrained
     RACIALF_GARG_MYSTICINSIGHT = 0x0400		// Mysticism calculations always consider 30.0 minimum ability when untrained
+};
+
+enum CHATFLAGS_TYPE
+{
+    CHATF_AUTOJOIN              = 0x01,      // Auto join first static channel available (new chat system: join after client login / old chat system: join after open chat window)
+    CHATF_CHANNELCREATION       = 0x02,		// Enable channel creation
+    CHATF_CHANNELMODERATION     = 0x04,		// Enable channel moderation (old chat system only)
+    CHATF_CUSTOMNAMES           = 0x08,      // Enable custom name selection when open chat window for the first time (old chat system only)
+    CHATF_GLOBALCHAT            = 0x10      // Enable global chat system on clients >= 7.0.62.2 (INCOMPLETE)
 };
 
 ///////////////////////////////////////
@@ -525,6 +534,9 @@ public:
 	int m_iClientLoginMaxTries; // Max wrong password tries on client login screen before temporary ban client IP (0 is disabled).
 	int64 m_iClientLoginTempBan;  // Duration (in minutes) of temporary ban to client IPs that reach max wrong password tries.
 	int m_iMaxShipPlankTeleport;// How far from land i can be to take off a ship.
+
+    CSString	m_sChatStaticChannels;
+    int			m_iChatFlags;
 
 	//	MySQL features
 	bool    m_bMySql;       // Enables MySQL.

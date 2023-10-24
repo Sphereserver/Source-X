@@ -137,6 +137,7 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
     CLIMODE_TARG_STONE_RECRUIT,     // recruit members for a stone (mouse select)
     CLIMODE_TARG_STONE_RECRUITFULL, // recruit/make a member and set abbrev show
     CLIMODE_TARG_PARTY_ADD,
+    CLIMODE_TARG_GLOBALCHAT_ADD,
 
     CLIMODE_TARG_QTY
 };

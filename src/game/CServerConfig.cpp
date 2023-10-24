@@ -314,6 +314,8 @@ CServerConfig::CServerConfig()
 	m_iClientLoginMaxTries	= 0;		// maximum bad password tries before a temp ip ban
 	m_iClientLoginTempBan	= 3*60 * MSECS_PER_SEC;
 	m_iMaxShipPlankTeleport = UO_MAP_VIEW_SIZE_DEFAULT;
+	m_sChatStaticChannels = "General, Help, Trade, Looking For Group";
+	m_iChatFlags = (CHATF_AUTOJOIN | CHATF_CHANNELCREATION | CHATF_CHANNELMODERATION | CHATF_CUSTOMNAMES);
 
 	m_NPCNoFameTitle = false;
 }
@@ -456,6 +458,8 @@ enum RC_TYPE
 	RC_CANSEESAMEPLEVEL,		// m_iCanSeeSamePLevel
 	RC_CANUNDRESSPETS,			// m_fCanUndressPets
 	RC_CHARTAGS,				// m_fCharTags
+	RC_CHATFLAGS,				// m_iChatFlags
+	RC_CHATSTATICCHANNELS,		// m_sChatStaticChannels
 	RC_CLIENTLINGER,
 	RC_CLIENTLOGINMAXTRIES,		// m_iClientLoginMaxTries
 	RC_CLIENTLOGINTEMPBAN,		// m_iClientLoginTempBan
@@ -715,15 +719,17 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
     { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAutoProcessPriority)	}},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bAutoResDisp)			}},
     { "AUTOSHIPKEYS",           { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_fAutoShipKeys)		    }},
-	{ "BACKPACKOVERLOAD",		{ ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iBackpackOverload),    }},
-	{ "BACKUPLEVELS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSaveBackupLevels)		}},
-	{ "BANKMAXITEMS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankIMax)				}},
-	{ "BANKMAXWEIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankWMax)				}},
-	{ "BUILD",					{ ELEM_VOID,	0											    }},
-	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iCanSeeSamePLevel)		}},
+	{ "BACKPACKOVERLOAD",		{ ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iBackpackOverload)	}},
+	{ "BACKUPLEVELS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSaveBackupLevels)	}},
+	{ "BANKMAXITEMS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankIMax)			}},
+	{ "BANKMAXWEIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankWMax)			}},
+	{ "BUILD",					{ ELEM_VOID,	0																}},
+	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iCanSeeSamePLevel)	}},
 	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCanUndressPets)		}},
-	{ "CHARTAGS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCharTags)				}},
-	{ "CLIENTLINGER",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLingerTime)		}},
+	{ "CHARTAGS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCharTags)			}},
+	{ "CHATFLAGS",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iChatFlags)			}},
+	{ "CHATSTATICCHANNELS",		{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sChatStaticChannels)	}},
+	{ "CLIENTLINGER",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLingerTime)	}},
 	{ "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLoginMaxTries)	}},
 	{ "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLoginTempBan)	}},
 	{ "CLIENTMAX",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMax)			}},
@@ -1106,6 +1112,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
             break;
 		case RC_BANKMAXWEIGHT:
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
+			break;
+		case RC_CHATFLAGS:
+			m_iChatFlags = s.GetArgVal();
+			break;
+		case RC_CHATSTATICCHANNELS:
+			m_sChatStaticChannels = s.GetArgStr();
 			break;
 		case RC_CLIENTLINGER:
 			m_iClientLingerTime = s.GetArgLLVal() * MSECS_PER_SEC;
@@ -1957,6 +1969,12 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			#else
 			 sVal = __DATE__;
 			#endif
+			break;
+		case RC_CHATFLAGS:
+			sVal.FormatHex(m_iChatFlags);
+			break;
+		case RC_CHATSTATICCHANNELS:
+			sVal = m_sChatStaticChannels;
 			break;
 		case RC_CLIENTLINGER:
 			sVal.FormatLLVal( m_iClientLingerTime / MSECS_PER_SEC );
@@ -4707,6 +4725,14 @@ bool CServerConfig::Load( bool fResync )
 	{
 		CScript script("EVENTSREGION", m_sEventsRegion);
 		m_pEventsRegionLink.r_LoadVal(script, RES_REGIONTYPE);
+	}
+
+	if (!m_sChatStaticChannels.IsEmpty())
+	{
+		tchar* ppArgs[32];
+		size_t iChannels = Str_ParseCmds(const_cast<tchar *>(g_Cfg.m_sChatStaticChannels.GetBuffer()), ppArgs, ARRAY_COUNT(ppArgs), ",");
+		for (size_t i = 0; i < iChannels; i++)
+			g_Serv.m_Chats.CreateChannel(ppArgs[i]);
 	}
 
 	LoadSortSpells();
