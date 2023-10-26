@@ -945,7 +945,8 @@ effect_bounce:
             // Preventing recurrent reflection with DAMAGE_REACTIVE.
             if (!(uType & DAMAGE_REACTIVE))
             {
-                int iReflectPhysical = GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar);
+                int iReflectPhysical = minimum(GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar),250); //Capped to 250
+
                 if (iReflectPhysical)
                 {
                     int iReflectPhysicalDam = (iDmg * iReflectPhysical) / 100;
@@ -1000,8 +1001,7 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
     ADDTOCALLSTACK("CChar::OnTakeDamageArea");
 
     bool fMakeSound = false;
-    // Like this area damage touch everyone! Pet, NPC etc We should ignore pet and Criminal action?
-
+    
     int iDistance = 5;
     if (IsAosFlagEnabled(FEATURE_AOS_DAMAGE))
         iDistance=10; // 5 for ML and 10 for aos
@@ -1012,10 +1012,14 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
         CChar* pChar = AreaChars.GetChar();
         if (!pChar)
             break;
-        if (!pChar->CanSeeLOS(pSrc))
-            break;
         if ((pChar == this) || (pChar == pSrc))
             continue;
+        if (pChar->NPC_IsOwnedBy(pSrc,false))	// it's my pet?
+            continue;
+        
+        if (!pChar->CanSeeLOS(pSrc)) //Avoid hit someone in nearby house
+            continue;
+        // FIXME. On UO guide  damage occur to nearby targets the wielder can legally attack. How can add legaly check?
 
         pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
         pChar->Effect(EFFECT_OBJ, ITEMID_FX_SPARKLE_2, this, 1, 15, false, effectHue);
