@@ -2633,6 +2633,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 
 					bool bBackpack = (id == CREID_LLAMA_PACK || id == CREID_HORSE_PACK || id == CREID_GIANT_BEETLE);
 					if (bBackpack)
+                        //For information, PET drop do not exist on OSI anymore. Could be check if it work on dragon and horde minions
 						m_pPopupPacket->addOption(POPUP_PETDROP, 6109, iEnabled, 0xFFFF);
 
 					m_pPopupPacket->addOption(POPUP_PETKILL, 6111, iEnabled, 0xFFFF);
