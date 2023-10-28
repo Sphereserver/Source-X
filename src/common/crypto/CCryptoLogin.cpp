@@ -42,6 +42,9 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
+
+			// FIXME: are these formulas right? because shifting by a number that can be max 0xFF (255) can return a huge number...
+			//	and dword isn't obviously big enough, so it causes undefined behavior.
 			m_CryptMaskHi =
 				(m_MasterHi >> ((5 * MaskHi * MaskHi) & 0xff))
 				+ (MaskHi * m_MasterHi)

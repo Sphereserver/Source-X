@@ -72,8 +72,12 @@ public:
 	virtual int IsWeird() const;
 
 	// Parent objects
-	virtual const CObjBaseTemplate * GetTopLevelObj() const = 0;
-	virtual CObjBaseTemplate* GetTopLevelObj() = 0;
+	virtual const CObjBaseTemplate* GetTopLevelObj() const {
+		return this;
+	}
+	virtual CObjBaseTemplate* GetTopLevelObj() {
+		return this;
+	}
 
 
 	// Location

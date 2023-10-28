@@ -81,11 +81,8 @@ GlobalInitializer::GlobalInitializer()
     SetExceptionTranslator();
 #endif
 
-// Set purecall handler?
-#ifndef _DEBUG
-    // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+	// Set function to handle the invalid case where a pure virtual function is called.
     SetPurecallHandler();
-#endif
 
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");

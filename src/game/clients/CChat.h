@@ -7,7 +7,7 @@
 #define _INC_CCHAT_H
 
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/sphere_library/CSObjList.h"
+#include "../../common/sphere_library/sptr_containers.h"
 #include "../../common/sphereproto.h"
 
 
@@ -19,25 +19,23 @@ class CChat
 {
 public:
 	static const char *m_sClassName;
-	CChat();
-	CSObjList m_Channels;		// CChatChannel // List of chat channels.
+	sl::unique_ptr_vector<CChatChannel> m_Channels;		// CChatChannel // List of chat channels.
 
-private:
-	CChat(const CChat& copy);
-	CChat& operator=(const CChat& other);
+	CChat() = default;
+	~CChat() = default;
+	CChat(const CChat& copy) = delete;
+	CChat& operator=(const CChat& other) = delete;
 
-public:
-	CChatChannel * GetFirstChannel() const;
-
-	void Action( CClient * pClient, const nachar * pszText, int len, CLanguageID lang ); // Text from a client
 
 	static bool IsValidName(lpctstr pszName, bool fPlayer);
 
+	void Action( CClient * pClient, const nachar * pszText, int len, CLanguageID lang ); // Text from a client
 	void Broadcast(CChatChanMember * pFrom, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
 	void BroadcastAddChannel(CChatChannel* pChannel);
 	void BroadcastRemoveChannel(CChatChannel* pChannel);
 	void QuitChat(CChatChanMember * pClient);
 
+	bool IsChannel(const CChatChannel* pChannel) const;
 	void JoinChannel(lpctstr pszChannel, lpctstr pszPassword, CChatChanMember* pMember = nullptr);
 	void DeleteChannel(CChatChannel* pChannel);
 	void FormatName(CSString & sName, const CChatChanMember * pMember = nullptr, bool fSystem = false);

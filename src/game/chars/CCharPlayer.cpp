@@ -460,6 +460,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			if ( pChar->IsClientActive() )
 				pChar->GetClientActive()->addKRToolbar( m_fKrToolbarEnabled );
 			return true;
+		// FIXME !!! OVERFLOW!!! NO NEED TO MULTIPLY EACH TIME !!!
 		case CPC_LASTDISCONNECTED:
 			_iTimeLastDisconnected = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;

@@ -96,12 +96,13 @@ CClient::~CClient()
 
 	const bool fWasChar = ( m_pChar != nullptr );
 
-	CharDisconnect();	// am i a char in game ?
+	if (fWasChar)
+		CharDisconnect();	// am i a char in game ?
 
 	if (m_pGMPage)
 		m_pGMPage->ClearHandler();
 
-	// Clear containers (CTAG and TOOLTIP)
+	// Clear session-bound containers (CTAG and TOOLTIP)
 	m_TagDefs.Clear();
 
 	CAccount * pAccount = GetAccount();
@@ -110,6 +111,9 @@ CClient::~CClient()
 		pAccount->OnLogout(this, fWasChar);
 		m_pAccount = nullptr;
 	}
+
+	if (fWasChar)
+		g_Serv.m_Chats.QuitChat(this);
 
 	if (m_pPopupPacket != nullptr)
 	{

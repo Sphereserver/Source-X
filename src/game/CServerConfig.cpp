@@ -405,7 +405,7 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		if ( !m_SpellDefs_Sorted.valid_index( uiOrder ) )
 			pRef = nullptr;
 		else
-			pRef = m_SpellDefs_Sorted[uiOrder].lock().get();
+			pRef = m_SpellDefs_Sorted[uiOrder].get();
 	}
 	else
 	{
@@ -699,7 +699,7 @@ enum RC_TYPE
 	RC_QTY
 };
 
-const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] 
+const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
 {
 	{ "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
 	{ "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
@@ -2724,7 +2724,7 @@ void CServerConfig::LoadSortSpells()
 		while ( k < iQty )
 		{
 			int	iVal2 = 0;
-			if (m_SpellDefs_Sorted[k].lock()->GetPrimarySkill(nullptr, &iVal2))
+			if (m_SpellDefs_Sorted[k]->GetPrimarySkill(nullptr, &iVal2))
 			{
 				if (iVal2 > iVal)
 					break;
@@ -3231,7 +3231,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pScript->SeekContext( LineContext );
 
 			if ( !pPrvDef )
-				m_SpellDefs.emplace_index_grow(rid.GetResIndex(), std::shared_ptr<CSpellDef>(pSpell));
+				m_SpellDefs.emplace_index_grow(rid.GetResIndex(), std::unique_ptr<CSpellDef>(pSpell));
 		}
 		break;
 
@@ -3262,10 +3262,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if ( !pPrvDef )
 			{
 				// build a name sorted list.
-				m_SkillNameDefs.emplace(pSkill);
+				const auto array_pos_iter = m_SkillNameDefs.emplace(pSkill);
+				const size_t emplaced_idx = array_pos_iter - m_SkillNameDefs.begin();
+
 				// Hard coded value for skill index.
 				uint idx = rid.GetResIndex();
-				m_SkillIndexDefs.emplace_index_grow(idx, std::shared_ptr<CSkillDef>(pSkill));
+
+				m_SkillIndexDefs.emplace_index_grow(idx, m_SkillNameDefs[emplaced_idx]);
 			}
 		}
 		break;

@@ -32,9 +32,6 @@ CItemStone::~CItemStone()
 	SetAmount(0);	// Tell everyone we are deleting.
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
-	// Remove this stone from the links of guilds in the world
-	g_World.m_Stones.erase_element(this);
-
     delete _pMultiStorage;
 	// all members are deleted automatically.
 	ClearContainer();	// do this manually to preserve the parents type cast

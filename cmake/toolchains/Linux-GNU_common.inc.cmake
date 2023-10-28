@@ -84,7 +84,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	 ENDIF ()
 	 IF (TARGET spheresvr_nightly)
 		 IF (ENABLED_SANITIZER)
-			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
 		 ELSE ()
 			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
 		 ENDIF ()
