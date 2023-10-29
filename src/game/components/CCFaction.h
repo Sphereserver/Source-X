@@ -141,7 +141,7 @@ class CCFaction : public CFactionDef, public CComponent
 public:
     CCFaction();
     CCFaction(CCFaction *copy);
-	virtual ~CCFaction() = default;
+	virtual ~CCFaction() override = default;
     static bool CanSubscribe(const CItem* pItem);
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;

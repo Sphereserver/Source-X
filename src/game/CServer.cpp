@@ -23,6 +23,7 @@
 #include "../sphere/ntwindow.h"
 #include "chars/CChar.h"
 #include "clients/CAccount.h"
+#include "clients/CChatChannel.h"
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
 #include "CScriptProfiler.h"

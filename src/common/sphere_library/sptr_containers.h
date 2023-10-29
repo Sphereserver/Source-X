@@ -13,6 +13,11 @@ namespace sl
     class _ptr_vector_base : public std::vector<_PtrWrapperType>
     {
     public:
+        using base_type = typename std::vector<_PtrWrapperType>;
+        using iterator = typename base_type::iterator;
+        using const_iterator = typename base_type::const_iterator;
+        using size_type = typename base_type::size_type;
+
         inline void erase_index(const size_t index) {
             this->erase(this->begin() + index);
         }
@@ -26,6 +31,23 @@ namespace sl
                 }
                 ++idx;
             }
+        }
+
+        const_iterator find_ptr(_Type const * const elem) const {
+            return std::find_if(base_type::cbegin(), base_type::cend(),
+                [elem](auto const& stored) {
+                    return (stored.get() == elem);
+                });
+        }
+
+        inline bool has_ptr(_Type const* const elem) const {
+            return (base_type::cend() != this->find_ptr(elem));
+        }
+
+        void remove_ptr(_Type* elem) {
+            const size_t uiFoundIndex = this->find_ptr(elem);
+            if (uiFoundIndex != sl::scont_bad_index())
+                this->remove_index(uiFoundIndex);
         }
 
         inline bool valid_index(size_t index) const noexcept {
@@ -42,6 +64,28 @@ namespace sl
     class _ptr_sorted_vector_base : public sorted_vector<_PtrWrapperType, _Comp>
     {
     public:
+        using base_type = typename std::vector<_PtrWrapperType>;
+        using iterator = typename base_type::iterator;
+        using const_iterator = typename base_type::const_iterator;
+        using size_type = typename base_type::size_type;
+
+        const_iterator find_ptr(_Type const* const elem) const {
+            return this->cbegin() + this->find_predicate(elem,
+                [](auto const& stored, _Type const* const elem) {
+                    return (stored.get() == elem);
+                });
+        }
+
+        void remove_ptr(_Type* elem) {
+            const size_t uiFoundIndex = this->find(elem);
+            if (uiFoundIndex != sl::scont_bad_index())
+                this->remove_index(uiFoundIndex);
+        }
+
+        inline bool has_ptr(_Type const* const elem) const {
+            return (sl::scont_bad_index() != this->find_ptr(elem));
+        }
+
         inline bool valid_index(size_t index) const noexcept {
             if constexpr (std::is_same_v<_PtrWrapperType, std::weak_ptr<_Type>>) {
                 return (index < this->size()) && !(this->operator[](index).expired());
@@ -60,14 +104,14 @@ namespace sl
     {
     public:
         template <typename _PtrType = std::unique_ptr<_Type>>  // Gets both bare pointer and unique_ptr
-        void emplace_index_grow(size_t index, _PtrType value) {
+        void emplace_index_grow(size_t index, _PtrType&& value) {
             if (index >= this->size()) {
                 this->resize(index + 1); // The capacity will be even greater, since it calls vector::resize
             }
             if (!value || value.get() == nullptr)
                 this->operator[](index).reset();
             else
-                this->operator[](index) = value;
+                this->operator[](index) = std::move(value);
         }
 
         inline void emplace_index_grow(size_t index, std::nullptr_t) {
@@ -199,8 +243,8 @@ namespace sl
     class smart_ptr_view_vector : public _ptr_vector_base<_Type, sl::smart_ptr_view<_Type>>
     {
     public:
-        template <typename _PtrType = sl::smart_ptr_view<_Type>>  // Gets both bare pointer and shared_ptr
-        void emplace_index_grow(size_t index, _PtrType value) {
+        template <typename _PtrType = sl::smart_ptr_view<_Type>>  // Gets both unique and shared_ptr
+        void emplace_index_grow(size_t index, _PtrType const& value) {
             if (index >= this->size()) {
                 this->resize(index + 1); // The capacity will be even greater, since it calls vector::resize
             }
@@ -234,7 +278,7 @@ namespace sl
             if (index >= this->size()) {
                 this->resize(index + 1); // The capacity will be even greater, since it calls vector::resize
             }
-            if (!value || value.get() == nullptr)
+            if (!value)
                 this->operator[](index).reset();
             else
                 this->operator[](index) = value;

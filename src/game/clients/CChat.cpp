@@ -9,50 +9,60 @@
 bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember* pMember)
 {
 	ADDTOCALLSTACK("CChat::CreateChannel");
+
 	if (pMember)
 	{
 		CClient* pClient = pMember->GetClientActive();
-		if (pClient && !pClient->IsPriv(PRIV_GM) && !(g_Cfg.m_iChatFlags & CHATF_CHANNELCREATION))
+		ASSERT(pClient);
+		ASSERT(pClient->GetChar());
+		if (!pClient->IsPriv(PRIV_GM) && !(g_Cfg.m_iChatFlags & CHATF_CHANNELCREATION))
 		{
 			CSString sName;
 			FormatName(sName, nullptr, true);
 			pMember->SendChatMsg(CHATMSG_PlayerTalk, sName, " Channel creation is disabled.");
 			return false;
 		}
+
+		if (!IsValidName(pszName, false))
+		{
+			pMember->SendChatMsg(CHATMSG_InvalidConferenceName);
+			return false;
+		}
+		else if (g_Serv.m_Chats.FindChannel(pszName))
+		{
+			pMember->SendChatMsg(CHATMSG_AlreadyAConference);
+			return false;
+		}
 	}
 
-	if (!IsValidName(pszName, false))
-	{
-		pMember->SendChatMsg(CHATMSG_InvalidConferenceName);
-		return false;
-	}
-	else if (g_Serv.m_Chats.FindChannel(pszName))
-	{
-		pMember->SendChatMsg(CHATMSG_AlreadyAConference);
-		return false;
-	}
-
-	// Leave current channel
-	CChatChannel* pChannel = new CChatChannel(pszName, pszPassword, !pMember);
-	m_Channels.InsertContentTail(pChannel);
+	auto &pChannel = m_Channels.emplace_back(std::make_unique<CChatChannel>(pszName, pszPassword, !pMember));
 	if (pMember && (g_Cfg.m_iChatFlags & CHATF_CHANNELMODERATION))
 		pChannel->SetModerator(pMember->GetChatName());
-	BroadcastAddChannel(pChannel);
+	BroadcastAddChannel(pChannel.get());
 	return true;
+}
+
+bool CChat::IsChannel(const CChatChannel* pChannel) const
+{
+	ADDTOCALLSTACK("CChat::IsChannel");
+	return m_Channels.has_ptr(pChannel);
 }
 
 void CChat::DeleteChannel(CChatChannel* pChannel)
 {
 	ADDTOCALLSTACK("CChat::DeleteChannel");
+
 	if (pChannel->m_fStatic)
 		return;
+
 	BroadcastRemoveChannel(pChannel);
-	delete pChannel;
+	m_Channels.erase_element(pChannel);
 }
 
 void CChat::JoinChannel(lpctstr pszChannel, lpctstr pszPassword, CChatChanMember* pMember)
 {
 	ADDTOCALLSTACK("CChat::JoinChannel");
+
 	ASSERT(pMember);
 	CClient* pMemberClient = pMember->GetClientActive();
 	ASSERT(pMemberClient);
@@ -152,7 +162,7 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 	{
 		// Look for second double quote to separate channel from password
 		size_t i = 1;
-		for (; szMsg[i] != '\0'; i++)
+		for (; szMsg[i] != '\0'; ++i)
 		{
 			if (szMsg[i] == '"')
 				break;
@@ -160,7 +170,7 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 		szMsg[i] = '\0';
 		tchar* pszPassword = szMsg + i + 1;
 		if (pszPassword[0] == ' ')	// skip whitespaces
-			pszPassword++;
+			pszPassword += 1;
 		JoinChannel(szMsg + 1, pszPassword, pMe);
 		break;
 	}
@@ -168,14 +178,14 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 	{
 		tchar* pszPassword = nullptr;
 		size_t iMsgLength = strlen(szMsg);
-		for (size_t i = 0; i < iMsgLength; i++)
+		for (size_t i = 0; i < iMsgLength; ++i)
 		{
 			if (szMsg[i] == '{')	// there's a password here
 			{
 				szMsg[i] = 0;
 				pszPassword = szMsg + i + 1;
 				size_t iPasswordLength = strlen(pszPassword);
-				for (i = 0; i < iPasswordLength; i++)
+				for (i = 0; i < iPasswordLength; ++i)
 				{
 					if (pszPassword[i] == '}')
 					{
@@ -208,7 +218,7 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 		strcpy(buffer, szMsg);
 		size_t bufferLength = strlen(buffer);
 		size_t i = 0;
-		for (; i < bufferLength; i++)
+		for (; i < bufferLength; ++i)
 		{
 			if (buffer[i] == ' ')
 			{
@@ -412,6 +422,7 @@ void CChat::FormatName(CSString& sName, const CChatChanMember* pMember, bool fSy
 bool CChat::IsValidName( lpctstr pszName, bool fPlayer ) // static
 {
 	ADDTOCALLSTACK("CChat::IsValidName");
+
 	// Channels can have spaces, but not player names
 	if ((strlen(pszName) < 1) || g_Cfg.IsObscene(pszName) || (strcmpi(pszName, "SYSTEM") == 0))
 		return false;
@@ -434,8 +445,10 @@ bool CChat::IsValidName( lpctstr pszName, bool fPlayer ) // static
 void CChat::Broadcast(CChatChanMember *pFrom, lpctstr pszText, CLanguageID lang, bool fOverride)
 {
 	ADDTOCALLSTACK("CChat::Broadcast");
+
 	CSString sName;
 	FormatName(sName, pFrom, fOverride);
+
 	ClientIterator it;
 	for (CClient *pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
@@ -470,22 +483,12 @@ void CChat::BroadcastRemoveChannel(CChatChannel* pChannel)
 
 CChatChannel * CChat::FindChannel(lpctstr pszChannel) const
 {
-	CChatChannel * pChannel = GetFirstChannel();
-	for ( ; pChannel != nullptr; pChannel = pChannel->GetNext())
+	for (auto const& pChannel : m_Channels)
 	{
 		if (strcmp(pChannel->GetName(), pszChannel) == 0)
-			break;
+			return pChannel.get();
 	}
-	return pChannel;
-}
-
-CChat::CChat()
-{
-}
-
-CChatChannel * CChat::GetFirstChannel() const
-{
-	return static_cast <CChatChannel *>(m_Channels.GetContainerHead());
+	return nullptr;
 }
 
 

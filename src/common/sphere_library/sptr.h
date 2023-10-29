@@ -40,6 +40,11 @@ namespace sl
         {}
 
         template <typename _Arg>
+        constexpr smart_ptr_view(_Arg const& arg) noexcept
+            : jss::object_ptr<T>(arg)
+        {}
+
+        template <typename _Arg>
         constexpr smart_ptr_view(_Arg&& arg) noexcept
             : jss::object_ptr<T>(arg)
         {}

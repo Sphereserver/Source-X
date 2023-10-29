@@ -32,7 +32,7 @@ void CChatChanMember::SetChannel(CChatChannel * pChannel)
 
 bool CChatChanMember::IsChatActive() const
 {
-    return( m_fChatActive );
+    return m_fChatActive;
 }
 
 void CChatChanMember::SetReceiving(bool fOnOff)
@@ -57,7 +57,7 @@ void CChatChanMember::addChatWindow()
         pClient->addChatSystemMessage(CHATCMD_OpenChatWindow, pClient->m_fUseNewChatSystem ? nullptr : GetChatName());
 
     // Send channel names
-    for (CChatChannel* pChannel = static_cast<CChatChannel*>(g_Serv.m_Chats.m_Channels.GetContainerHead()); pChannel != nullptr; pChannel = pChannel->GetNext())
+    for (auto const& pChannel : g_Serv.m_Chats.m_Channels)
     {
         pClient->addChatSystemMessage(CHATCMD_AddChannel, pChannel->m_sName, pClient->m_fUseNewChatSystem ? nullptr : pChannel->GetPassword());
         if ((g_Cfg.m_iChatFlags & CHATF_AUTOJOIN) && pChannel->m_fStatic && !GetChannel())

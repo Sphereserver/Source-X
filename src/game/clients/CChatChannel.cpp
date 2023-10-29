@@ -14,36 +14,30 @@ CChatChannel::CChatChannel(lpctstr pszName, lpctstr pszPassword, bool fStatic)
     m_fStatic = fStatic;
 }
 
-CChatChannel* CChatChannel::GetNext() const
-{
-    return( static_cast <CChatChannel *>( CSObjListRec::GetNext()));
-}
-
 lpctstr CChatChannel::GetName() const
 {
-    return( m_sName );
+    return m_sName;
 }
 
 lpctstr CChatChannel::GetModeString() const
 {
     // (client needs this) "0" = not passworded, "1" = passworded
-    return(( IsPassworded()) ? "1" : "0" );
+    return (IsPassworded() ? "1" : "0");
 }
 
 lpctstr CChatChannel::GetPassword() const
 {
-    return( m_sPassword );
+    return m_sPassword;
 }
 
 void CChatChannel::SetPassword( lpctstr pszPassword)
 {
     m_sPassword = pszPassword;
-    return;
 }
 
 bool CChatChannel::IsPassworded() const
 {
-    return ( !m_sPassword.IsEmpty());
+    return !m_sPassword.IsEmpty();
 }
 
 void CChatChannel::WhoIs(lpctstr pszBy, lpctstr pszMember)
@@ -159,6 +153,7 @@ void CChatChannel::RenameChannel(CChatChanMember* pBy, lpctstr pszName)
     Broadcast(CHATMSG_ConferenceRenamed, GetName(), pszName);
     g_Serv.m_Chats.BroadcastRemoveChannel(this);
     m_sName = pszName;
+
     Broadcast(CHATCMD_JoinedChannel, pszName);
     g_Serv.m_Chats.BroadcastAddChannel(this);
 }
@@ -183,7 +178,7 @@ void CChatChannel::SendMember(CChatChanMember* pMember, CChatChanMember* pToMemb
     else
     {
         // If no pToMember is specified, send to all members
-        for (size_t i = 0; i < m_Members.size(); i++)
+        for (size_t i = 0; i < m_Members.size(); ++i)
         {
             pClient = m_Members[i]->GetClientActive();
             if (pClient && pClient->m_fUseNewChatSystem)
@@ -198,6 +193,7 @@ void CChatChannel::SendMember(CChatChanMember* pMember, CChatChanMember* pToMemb
 void CChatChannel::RemoveMember(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::RemoveMember");
+
     for ( size_t i = 0; i < m_Members.size(); )
     {
         // Tell the other clients in this channel (if any) you are leaving (including yourself)
@@ -233,17 +229,21 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
 
 CChatChanMember* CChatChannel::FindMember(lpctstr pszName) const
 {
+    ADDTOCALLSTACK("CChatChannel::FindMember");
     size_t i = FindMemberIndex( pszName );
     if ( i == sl::scont_bad_index() )
         return nullptr;
+
     return m_Members[i].get();
 }
 
-bool CChatChannel::RemoveMember(lpctstr pszName)
+bool CChatChannel::RemoveMemberByName(lpctstr pszName)
 {
+    ADDTOCALLSTACK("CChatChannel::RemoveMemberByName");
     CChatChanMember* pMember = FindMember(pszName);
     if ( pMember == nullptr )
         return false;
+
     RemoveMember(pMember);
     return true;
 }
@@ -257,7 +257,7 @@ void CChatChannel::SetName(lpctstr pszName)
 bool CChatChannel::IsModerator(lpctstr pszMember) const
 {
     ADDTOCALLSTACK("CChatChannel::IsModerator");
-    for (size_t i = 0; i < m_Moderators.size(); i++)
+    for (size_t i = 0; i < m_Moderators.size(); ++i)
     {
         if (m_Moderators[i]->CompareNoCase(pszMember) == 0)
             return true;
@@ -268,7 +268,7 @@ bool CChatChannel::IsModerator(lpctstr pszMember) const
 bool CChatChannel::HasVoice(lpctstr pszMember) const
 {
     ADDTOCALLSTACK("CChatChannel::HasVoice");
-    for (size_t i = 0; i < m_NoVoices.size(); i++)
+    for (size_t i = 0; i < m_NoVoices.size(); ++i)
     {
         if (m_NoVoices[i]->Compare(pszMember) == 0)
             return false;
@@ -323,8 +323,9 @@ void CChatChannel::KickMember(CChatChanMember* pByMember, CChatChanMember* pMemb
 
     // Remove them from the channels list of members
     RemoveMember(pMember);
-    if (!this) // The channel got removed because there's no members left
+    if (!g_Serv.m_Chats.IsChannel(this)) // The channel got removed because there's no members left
         return;
+
     pMember->SendChatMsg(CHATMSG_ModeratorHasKicked, pszByName);
     pMember->SendChatMsg(CHATCMD_ClearMembers);
     Broadcast(CHATMSG_PlayerIsKicked, pszName);
@@ -480,7 +481,7 @@ void CChatChannel::ToggleVoice(CChatChanMember * pByMember, lpctstr pszName)
 size_t CChatChannel::FindMemberIndex(lpctstr pszName) const
 {
     ADDTOCALLSTACK("CChatChannel::FindMemberIndex");
-    for (size_t i = 0; i < m_Members.size(); i++)
+    for (size_t i = 0; i < m_Members.size(); ++i)
     {
         if ( strcmp( m_Members[i]->GetChatName(), pszName) == 0)
             return i;
@@ -496,6 +497,7 @@ void CChatChannel::GrantModerator(CChatChanMember * pByMember, lpctstr pszName)
         pByMember->SendChatMsg(CHATMSG_MustHaveOps);
         return;
     }
+
     CChatChanMember * pMember = FindMember(pszName);
     if (!pMember)
     {
@@ -504,6 +506,7 @@ void CChatChannel::GrantModerator(CChatChanMember * pByMember, lpctstr pszName)
     }
     if (IsModerator(pMember->GetChatName()))
         return;
+
     SetModerator(pszName, true);
     SendMember(pMember); // Update the color
     Broadcast(CHATMSG_PlayerIsAModerator, pMember->GetChatName(), "", "");
@@ -518,6 +521,7 @@ void CChatChannel::RevokeModerator(CChatChanMember * pByMember, lpctstr pszName)
         pByMember->SendChatMsg(CHATMSG_MustHaveOps);
         return;
     }
+
     CChatChanMember * pMember = FindMember(pszName);
     if (!pMember)
     {
@@ -526,6 +530,7 @@ void CChatChannel::RevokeModerator(CChatChanMember * pByMember, lpctstr pszName)
     }
     if (!IsModerator(pMember->GetChatName()))
         return;
+
     SetModerator(pszName, false);
     SendMember(pMember); // Update the color
     Broadcast(CHATMSG_PlayerNoLongerModerator, pMember->GetChatName(), "", "");
@@ -554,10 +559,11 @@ void CChatChannel::SetVoiceDefault(bool fVoiceDefault)
 void CChatChannel::FillMembersList(CChatChanMember* pMember)
 {
     ADDTOCALLSTACK("CChatChannel::FillMembersList");
-    for (size_t i = 0; i < m_Members.size(); i++)
+    for (size_t i = 0; i < m_Members.size(); ++i)
     {
         if (pMember->IsIgnoring(m_Members[i]->GetChatName()))
             continue;
+
         CSString sName;
         g_Serv.m_Chats.FormatName(sName, m_Members[i].get());
         pMember->SendChatMsg(CHATCMD_AddMemberToChannel, sName);

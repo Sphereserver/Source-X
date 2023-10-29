@@ -3422,6 +3422,12 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Activated disabled DEFNAME variable for Skills (Issue: #1138)
 - Fixed: NPCs that is not walking in multis shown wrong region name after server reboot.
 
+28-10-2023, Nolok
+- Fixed: Removing from client's view an object while it's being deleted, in some corner cases made the server crash (Issue #1119).
+- Fixed: Guildstone removal caused an exception (Issue #1165).
+- Fixed: In-game chat not working correctly and generating exceptions since last update (Issue #1140).
+
 24-10-2023, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+
 

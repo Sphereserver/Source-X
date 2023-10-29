@@ -199,7 +199,7 @@ void _cdecl Sphere_Purecall_Handler()
 
 void SetPurecallHandler()
 {
-	// We don't want sphere to immediately exit if a pure call is done.
+	// We don't want sphere to immediately exit if something calls a pure virtual method.
 #ifdef _MSC_VER
 	_set_purecall_handler(Sphere_Purecall_Handler);
 #else
