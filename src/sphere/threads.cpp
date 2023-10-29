@@ -521,7 +521,7 @@ bool AbstractThread::shouldExit()
  * AbstractSphereThread
 */
 AbstractSphereThread::AbstractSphereThread(const char *name, Priority priority)
-	: AbstractThread(name, priority)
+	: AbstractThread(name, priority), _fIsClosing(false)
 {
 #ifdef THREAD_TRACK_CALLSTACK
 	m_stackPos = 0;
@@ -534,6 +534,11 @@ AbstractSphereThread::AbstractSphereThread(const char *name, Priority priority)
 	m_profile.EnableProfile(PROFILE_IDLE);
 	m_profile.EnableProfile(PROFILE_OVERHEAD);
 	m_profile.EnableProfile(PROFILE_STAT_FAULTS);
+}
+
+AbstractSphereThread::~AbstractSphereThread()
+{
+	_fIsClosing = true;
 }
 
 // IMHO we need a lock on allocateBuffer and allocateStringBuffer
@@ -709,7 +714,7 @@ void DummySphereThread::tick()
 StackDebugInformation::StackDebugInformation(const char *name) noexcept
 {
     m_context = static_cast<AbstractSphereThread *>(ThreadHolder::get()->current());
-	if (m_context != nullptr)
+	if (m_context != nullptr && !m_context->closing())
 	{
 		m_context->pushStackCall(name);
 	}

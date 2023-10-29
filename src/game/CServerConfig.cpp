@@ -4665,7 +4665,7 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )) )
+	if ( !RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )) )
 	{
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));

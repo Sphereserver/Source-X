@@ -298,7 +298,7 @@ struct TemporaryStringStorage;
 // Sphere thread. Have some sphere-specific
 class AbstractSphereThread : public AbstractThread
 {
-private:
+	bool _fIsClosing;
 #ifdef THREAD_TRACK_CALLSTACK
 	struct STACK_INFO_REC
 	{
@@ -313,11 +313,10 @@ private:
 
 public:
 	AbstractSphereThread(const char *name, Priority priority = IThread::Normal);
-	virtual ~AbstractSphereThread() = default;
+	virtual ~AbstractSphereThread();
 
-private:
-	AbstractSphereThread(const AbstractSphereThread& copy);
-	AbstractSphereThread& operator=(const AbstractSphereThread& other);
+	AbstractSphereThread(const AbstractSphereThread& copy) = delete;
+	AbstractSphereThread& operator=(const AbstractSphereThread& other) = delete;
 
 public:
 	// allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
@@ -328,6 +327,9 @@ public:
 	void allocateString(TemporaryString &string);
 
     void exceptionCaught();
+	bool closing() {
+		return _fIsClosing;
+	}
 
 #ifdef THREAD_TRACK_CALLSTACK
 	inline void freezeCallStack(bool freeze) noexcept
@@ -379,9 +381,8 @@ public:
 	StackDebugInformation(const char *name) noexcept;
 	~StackDebugInformation();
 
-private:
-	StackDebugInformation(const StackDebugInformation& copy);
-	StackDebugInformation& operator=(const StackDebugInformation& other);
+	StackDebugInformation(const StackDebugInformation& copy) = delete;
+	StackDebugInformation& operator=(const StackDebugInformation& other) = delete;
 
 public:
 	static void printStackTrace()

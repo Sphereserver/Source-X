@@ -10,6 +10,11 @@
 
 
 // Sorted array of strings
+CSStringSortArray::~CSStringSortArray() noexcept
+{
+    DeleteElements();
+}
+
 int CSStringSortArray::CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const
 {
     UnreferencedParameter(fNoSpaces);
@@ -26,7 +31,7 @@ void CSStringSortArray::AddSortString( lpctstr pszText )
     AddSortKey( pNew, pNew );
 }
 
-void CSStringSortArray::DeleteElements()
+void CSStringSortArray::DeleteElements() noexcept
 {
     for (tchar* elem : *this)
         delete[] elem;

@@ -15,7 +15,7 @@ class CSObjArray : public CSPtrTypeArray<TYPE>
 {
 protected:
     bool _fBaseDestructorShouldDeleteElements;
-    virtual void DeleteElements();
+    virtual void DeleteElements() noexcept;
 
 public:
     static const char *m_sClassName;
@@ -24,9 +24,10 @@ public:
     */
     ///@{
 public:
-    CSObjArray() : _fBaseDestructorShouldDeleteElements(true) {
-    }
-    virtual ~CSObjArray() {
+    CSObjArray() noexcept : 
+        _fBaseDestructorShouldDeleteElements(true)
+    {}
+    virtual ~CSObjArray() noexcept {
         DeleteElements();
     }
 private:
@@ -60,12 +61,13 @@ public:
 // CSObjArray:: Modifiers.
 
 template<class TYPE>
-void CSObjArray<TYPE>::DeleteElements()
+void CSObjArray<TYPE>::DeleteElements() noexcept
 {
     if (!this->_fBaseDestructorShouldDeleteElements)
         return;
     for (TYPE elem : *this)
         delete elem;
+    this->std::vector<TYPE>::clear();
 }
 
 template<class TYPE>

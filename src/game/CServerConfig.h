@@ -602,7 +602,7 @@ public:
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
 	CObjUniquePtrNameSortVector<CSkillDef>  m_SkillNameDefs;		// const CSkillDef* Name sorted.
-	sl::smart_ptr_view_vector<CSkillDef>      m_SkillIndexDefs;		// Defined Skills indexed by number.
+	sl::smart_ptr_view_vector<CSkillDef>    m_SkillIndexDefs;		// Defined Skills indexed by number.
     sl::unique_ptr_vector<CSpellDef>        m_SpellDefs;			// Defined Spells.
     sl::smart_ptr_view_vector<CSpellDef>    m_SpellDefs_Sorted;	    // Defined Spells, in skill order.
 

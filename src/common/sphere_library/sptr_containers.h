@@ -44,6 +44,12 @@ namespace sl
             return (base_type::cend() != this->find_ptr(elem));
         }
 
+        void remove_ptr(_Type* elem) {
+            const size_t uiFoundIndex = this->find_ptr(elem);
+            if (uiFoundIndex != sl::scont_bad_index())
+                this->remove_index(uiFoundIndex);
+        }
+
         inline bool valid_index(size_t index) const noexcept {
             if constexpr (std::is_same_v<_PtrWrapperType, std::weak_ptr<_Type>>) {
                 return (index < this->size()) && !(this->operator[](index).expired());
@@ -70,8 +76,14 @@ namespace sl
                 });
         }
 
+        void remove_ptr(_Type* elem) {
+            const size_t uiFoundIndex = this->find(elem);
+            if (uiFoundIndex != sl::scont_bad_index())
+                this->remove_index(uiFoundIndex);
+        }
+
         inline bool has_ptr(_Type const* const elem) const {
-            return (this->bad_index() != this->find_ptr(elem));
+            return (sl::scont_bad_index() != this->find_ptr(elem));
         }
 
         inline bool valid_index(size_t index) const noexcept {

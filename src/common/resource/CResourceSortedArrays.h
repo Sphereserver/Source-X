@@ -12,12 +12,12 @@
 struct CValStr;
 
 
-struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
+struct CSStringSortArray final : public CSObjSortArray< tchar*, tchar* >
 {
-    CSStringSortArray() {
+    CSStringSortArray() noexcept {
         _fBaseDestructorShouldDeleteElements = false;
     }
-    virtual ~CSStringSortArray() = default;
+    virtual ~CSStringSortArray() noexcept;
 
     void clear() noexcept = delete;
     void Clear() {
@@ -33,10 +33,10 @@ struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
     void AddSortString( lpctstr pszText );
 
 protected:
-    virtual void DeleteElements() override;
+    virtual void DeleteElements() noexcept override;
 };
 
-struct CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
+struct CObjNameSortArray final : public CSObjSortArray< CScriptObj*, lpctstr >
 {
     static const char *m_sClassName;
     CObjNameSortArray() = default;
@@ -49,7 +49,7 @@ struct CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
     int CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpaces ) const;
 };
 
-class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
+class CSkillKeySortArray final : public CSObjSortArray< CValStr*, lpctstr >
 {
     CSkillKeySortArray() = default;
 
@@ -59,7 +59,7 @@ class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
     int CompareKey( lpctstr ptcKey, CValStr * pVal, bool fNoSpaces ) const;
 };
 
-struct CMultiDefArray : public CSObjSortArray< CUOMulti*, MULTI_TYPE >
+struct CMultiDefArray final : public CSObjSortArray< CUOMulti*, MULTI_TYPE >
 {
     // store the static components of a IT_MULTI
     // Sorted array
@@ -82,7 +82,7 @@ struct CObjUniquePtrNameVectorSorter
     }
 };
 template <typename _ObjType>
-class CObjUniquePtrNameSortVector : public sl::unique_ptr_sorted_vector<_ObjType, CObjUniquePtrNameVectorSorter<_ObjType>>
+class CObjUniquePtrNameSortVector final : public sl::unique_ptr_sorted_vector<_ObjType, CObjUniquePtrNameVectorSorter<_ObjType>>
 {
 public:
     //static const char *m_sClassName;  

@@ -46,11 +46,6 @@ bool CChat::IsChannel(const CChatChannel* pChannel) const
 {
 	ADDTOCALLSTACK("CChat::IsChannel");
 	return m_Channels.has_ptr(pChannel);
-	/*return (m_Channels.cend() != std::find_if(m_Channels.cbegin(), m_Channels.cend(),
-		[pChannel](std::unique_ptr<CChatChannel> const& stored) {
-			return (stored.get() == pChannel);
-		}));
-	*/
 }
 
 void CChat::DeleteChannel(CChatChannel* pChannel)
