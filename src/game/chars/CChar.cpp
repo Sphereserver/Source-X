@@ -3945,7 +3945,7 @@ void CChar::r_Write( CScript & s )
 		if (pSkillDef != nullptr)
 			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
 		else
-			pszActionTemp = Str_FromI_Fast(action, Str_GetTemp(), STR_TEMPLENGTH, 10);
+			pszActionTemp = Str_FromI_Fast(action, Str_GetTemp(), Str_TempLength(), 10);
 		s.WriteKeyStr("ACTION", pszActionTemp);
 
 			/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
@@ -4395,9 +4395,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			{
 				tchar *z = Str_GetTemp();
 				if ( pCharSrc == this )
-					snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_SELF), Food_GetLevelMessage( false, false ));
+					snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_SELF), Food_GetLevelMessage( false, false ));
 				else
-					snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_OTHER), GetName(), Food_GetLevelMessage( false, false ));
+					snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_OTHER), GetName(), Food_GetLevelMessage( false, false ));
 				pCharSrc->ObjMessage(z, this);
 			}
 			break;
@@ -4445,7 +4445,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_MAKEITEM:
 		{
 			tchar *psTmp = Str_GetTemp();
-			Str_CopyLimitNull( psTmp, s.GetArgRaw(), STR_TEMPLENGTH );
+			Str_CopyLimitNull( psTmp, s.GetArgRaw(), Str_TempLength() );
 			GETNONWHITESPACE( psTmp );
 			tchar * ttVal[2];
 			int iTmp = 1;
@@ -4701,20 +4701,20 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				{
 					if (m_pArea->GetResourceID().IsUIDItem())  // Inside a multi region
 					{
-						snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
+						snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 					}
 					else
 					{
 						const CRegion * pRoom = GetTopPoint().GetRegion( REGION_TYPE_ROOM );
 						if ( ! pRoom )
-							snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
+							snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 						else
-							snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_ROOM), m_pArea->GetName(), pRoom->GetName(), GetTopPoint().WriteUsed());
+							snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_ROOM), m_pArea->GetName(), pRoom->GetName(), GetTopPoint().WriteUsed());
 					}
 				}
 				else
 				{
-					snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE), GetTopPoint().WriteUsed());
+					snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE), GetTopPoint().WriteUsed());
 				}
 				pCharSrc->ObjMessage(z, this);
 			}

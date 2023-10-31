@@ -73,8 +73,8 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
 	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT) : (SPHERE_FILE "accu" SPHERE_SCRIPT);
 
-	Str_CopyLimitNull(z, pszBaseDir, STR_TEMPLENGTH);
-	Str_ConcatLimitNull(z, pszBaseName, STR_TEMPLENGTH);
+	Str_CopyLimitNull(z, pszBaseDir, Str_TempLength());
+	Str_ConcatLimitNull(z, pszBaseName, Str_TempLength());
 
 	CScript s;
 	if ( ! s.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE| ( fChanges ? OF_NONCRIT : 0) ))
@@ -471,7 +471,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		CClient	*pClient = pAccount->FindClient();
 
 		char	*z = Str_GetTemp();
-		snprintf(z, STR_TEMPLENGTH, 
+		snprintf(z, Str_TempLength(), 
 			"Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
 			pAccount->m_Last_IP.GetAddrStr(), pAccount->_dateConnectedLast.Format(nullptr),
@@ -781,7 +781,7 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 	lpctstr pszAction = fBlock ? "KICK" : "DISCONNECT";
 
 	tchar * z = Str_GetTemp();
-	snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
+	snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
 	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s.\n", z);
 
 	return true;
@@ -1624,11 +1624,11 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 				char *z = Str_GetTemp();
 				if (g_Accounts.Account_Delete(this))
 				{
-					snprintf(z, STR_TEMPLENGTH, "Account %s deleted.\n", sCurrentName);
+					snprintf(z, Str_TempLength(), "Account %s deleted.\n", sCurrentName);
 				}
 				else
 				{
-					snprintf(z, STR_TEMPLENGTH, "Account '%s' deletion blocked by script.\n", sCurrentName);
+					snprintf(z, Str_TempLength(), "Account '%s' deletion blocked by script.\n", sCurrentName);
 				}
 
 				g_Log.EventStr(0, z);

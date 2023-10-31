@@ -257,7 +257,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 					if (pCharOld != nullptr)
 					{
 						tchar * z = Str_GetTemp();
-						snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_INTERRUPT), pCharOld->GetName(), pSrc->GetName());
+						snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_INTERRUPT), pCharOld->GetName(), pSrc->GetName());
 						Speak(z);
 					}
 				}
@@ -663,7 +663,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 			return false;
 
 		tchar *pszMsg = Str_GetTemp();
-		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(sm_szSpeakGuardJeer[ Calc_GetRandVal( ARRAY_COUNT( sm_szSpeakGuardJeer )) ]), pChar->GetName());
+		snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(sm_szSpeakGuardJeer[ Calc_GetRandVal( ARRAY_COUNT( sm_szSpeakGuardJeer )) ]), pChar->GetName());
 		Speak(pszMsg);
 		UpdateDir(pChar);
 		return false;
@@ -1416,7 +1416,7 @@ bool CChar::NPC_Act_Talk()
 				g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_GONE_2 )
 			};
 			tchar *pszMsg = Str_GetTemp();
-			snprintf(pszMsg, STR_TEMPLENGTH, sm_szText[ Calc_GetRandVal(ARRAY_COUNT(sm_szText)) ], pChar->GetName() );
+			snprintf(pszMsg, Str_TempLength(), sm_szText[ Calc_GetRandVal(ARRAY_COUNT(sm_szText)) ], pChar->GetName() );
 			Speak(pszMsg);
 		}
 		return false;
@@ -2087,7 +2087,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			if ( NPC_CanSpeak() )
 			{
 				tchar *pszMsg = Str_GetTemp();
-				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_BANKER_DEPOSIT), pItem->GetAmount());
+				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_BANKER_DEPOSIT), pItem->GetAmount());
 				Speak(pszMsg);
 			}
 

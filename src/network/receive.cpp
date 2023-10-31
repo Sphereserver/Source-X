@@ -2403,7 +2403,7 @@ bool PacketProfileReq::onReceive(CNetState* net)
 
 		textLength = readInt16();
 		text = Str_GetTemp();
-		readStringNETUTF16(text, STR_TEMPLENGTH, textLength+1, false);
+		readStringNETUTF16(text, (uint)Str_TempLength(), textLength+1, false);
 	}
 
 	client->Event_Profile(write, serial, text, textLength);

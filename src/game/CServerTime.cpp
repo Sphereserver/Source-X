@@ -120,6 +120,6 @@ lpctstr CServerTime::GetTimeMinDesc(int minutes) // static
     }
 
     tchar* pTime = Str_GetTemp();
-    snprintf(pTime, STR_TEMPLENGTH, "%s %s %s", pMinDif, sm_ClockHour[hour], pTail);
+    snprintf(pTime, Str_TempLength(), "%s %s %s", pMinDif, sm_ClockHour[hour], pTail);
     return pTime;
 }

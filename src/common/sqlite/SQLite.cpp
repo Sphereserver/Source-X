@@ -78,9 +78,9 @@ int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 			retTable.m_pTable->GoRow(iRow);
 			for (int iCol=0; iCol<iCols; ++iCol)
 			{
-                snprintf(pcStore, STR_TEMPLENGTH, "%d.%d", iRow, iCol);
+                snprintf(pcStore, Str_TempLength(), "%d.%d", iRow, iCol);
 				mapQueryResult.SetStr(pcStore, true, retTable.m_pTable->GetValue(iCol));
-                snprintf(pcStore, STR_TEMPLENGTH, "%d.%s", iRow, retTable.m_pTable->GetColName(iCol));
+                snprintf(pcStore, Str_TempLength(), "%d.%s", iRow, retTable.m_pTable->GetColName(iCol));
 				mapQueryResult.SetStr(pcStore, true, retTable.m_pTable->GetValue(iCol));
 			}
 		}

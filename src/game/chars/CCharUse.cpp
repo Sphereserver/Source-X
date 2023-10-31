@@ -84,11 +84,11 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 			break;
 
 		tchar* pszTmp = Str_GetTemp();
-		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
 		Args.m_VarsLocal.SetNum(pszTmp, (int64)id);
 
 		iResourceQty = (word)pCorpseDef->m_BaseResources[i].GetResQty();
-		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
 		Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
 	}
 	if (IsTrigUsed(TRIGGER_CARVECORPSE) || IsTrigUsed(TRIGGER_ITEMCARVECORPSE))
@@ -113,12 +113,12 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 			break;*/
 
 		tchar* pszTmp = Str_GetTemp();
-		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
 		ITEMID_TYPE id = (ITEMID_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
 			break;
 
-		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
 		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
 
 		++ iItems;
@@ -160,7 +160,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 		if ( pChar && pChar->m_pPlayer )
 		{
 			tchar *pszMsg = Str_GetTemp();
-			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_CORPSE_NAME), pPart->GetName(), pChar->GetName());
+			snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_CORPSE_NAME), pPart->GetName(), pChar->GetName());
 			pPart->SetName(pszMsg);
 			pPart->m_uidLink = pChar->GetUID();
 			pPart->MoveToDecay(pnt, pPart->GetDecayTime());
@@ -849,7 +849,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_5);
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
 	Emote(pszMsg);
 
 	if ( pItemArmor->m_itArmor.m_dwHitsCur <= 0 )
@@ -1834,7 +1834,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			else
 			{
 				tchar *pszMsg = Str_GetTemp();
-				snprintf(pszMsg, STR_TEMPLENGTH,
+				snprintf(pszMsg, Str_TempLength(),
 					g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT), m_pArea->GetName(), pItem->Use_Sextant(GetTopPoint()));
 				ObjMessage(pszMsg, this);
 			}

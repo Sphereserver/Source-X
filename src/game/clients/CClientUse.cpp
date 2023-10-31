@@ -423,7 +423,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			{
 				// Mine at the location
 				tchar *pszTemp = Str_GetTemp();
-				snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
+				snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
 				addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true, true);
 			}
 			return true;
@@ -460,7 +460,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_CANNON_BALL:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
+			snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
 		}
@@ -493,7 +493,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_PITCHER_EMPTY:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
+			snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true);
 			return true;
 		}
@@ -546,7 +546,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SEWING_KIT:
 		{
 			tchar *pszTemp = Str_GetTemp();
-			snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
+			snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
 		}

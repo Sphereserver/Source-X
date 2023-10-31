@@ -501,7 +501,7 @@ ushort CBaseBaseDef::ConvertRangeStr(lpctstr ptcRange) // static
 {
 	int64 piVal[2];
 	tchar* ptcTmp = Str_GetTemp();
-	Str_CopyLimitNull(ptcTmp, ptcRange, STR_TEMPLENGTH);
+	Str_CopyLimitNull(ptcTmp, ptcRange, Str_TempLength());
 	const int iQty = Str_ParseCmds(ptcTmp, piVal, ARRAY_COUNT(piVal));
 	ushort iHi = 0, iLo = 0;
 	if (iQty > 1)	// args: "min, max"

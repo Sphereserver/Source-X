@@ -332,7 +332,7 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 	//for ( iQty = 0; iQty < 4; ++iQty )
 	//	ptElem[iQty].m_z = UO_SIZE_MIN_Z;
 	ptElem[0].m_z = ptElem[1].m_z  = ptElem[2].m_z  = ptElem[3].m_z = UO_SIZE_MIN_Z;
-	ptElem[4] = CPointMap(UINT16_MAX, UINT16_MAX, UO_SIZE_MIN_Z);
+	ptElem[4] = CPointMap(INT16_MIN, INT16_MIN, UO_SIZE_MIN_Z);
 
 	bool fElem[4] = { false, false, false, false };
 

@@ -5,11 +5,6 @@
 #include "CNetworkThread.h"
 #include "linuxev.h"
 
-// libev is used by Linux to notify when our main socket is readable or writable, so when i can read and send data again (async I/O).
-// Windows supports async network I/O via WinSock.
-
-LinuxEv g_NetworkEvent;
-
 
 // Call this function (cb = callback) when the socket is readable -> there may be new received data to read
 static void socketmain_cb(struct ev_loop * /* loop */, struct ev_io * /* w */, int /* revents */)

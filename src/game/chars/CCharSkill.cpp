@@ -610,7 +610,7 @@ lpctstr CChar::Skill_GetName( bool fUse ) const
 			return g_Cfg.GetSkillKey(skill);
 
 		tchar * pszText = Str_GetTemp();
-		snprintf( pszText, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_USING), g_Cfg.GetSkillKey(skill));
+		snprintf( pszText, Str_TempLength(), "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_USING), g_Cfg.GetSkillKey(skill));
 		return( pszText );
 	}
 
@@ -747,17 +747,17 @@ bool CChar::Skill_MakeItem_Success()
 		{
 			case 0:
 				// Shoddy quality
-				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_1), STR_TEMPLENGTH);
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_1), Str_TempLength());
 				quality = Calc_GetRandVal(25) + 1;
 				break;
 			case 1:
 				// Poor quality
-				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_2), STR_TEMPLENGTH);
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_2), Str_TempLength());
 				quality = Calc_GetRandVal(25) + 26;
 				break;
 			case 2:
 				// Below average quality
-				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_3), STR_TEMPLENGTH);
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_3), Str_TempLength());
 				quality = Calc_GetRandVal(25) + 51;
 				break;
 			case 3:
@@ -766,17 +766,17 @@ bool CChar::Skill_MakeItem_Success()
 				break;
 			case 4:
 				// Above average quality
-				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_4), STR_TEMPLENGTH);
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_4), Str_TempLength());
 				quality = Calc_GetRandVal(25) + 126;
 				break;
 			case 5:
 				// Excellent quality
-				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_5), STR_TEMPLENGTH);
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_5), Str_TempLength());
 				quality = Calc_GetRandVal(25) + 151;
 				break;
 			case 6:
 				// Superior quality
-				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_6), STR_TEMPLENGTH);
+				Str_CopyLimitNull(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MAKESUCCESS_6), Str_TempLength());
 				quality = Calc_GetRandVal(25) + 176;
 				break;
 			default:
@@ -792,7 +792,7 @@ bool CChar::Skill_MakeItem_Success()
 		{
 			// A GM made this, and it is of high quality
 			tchar *szNewName = Str_GetTemp();
-			snprintf(szNewName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GRANDMASTER_MARK), pItem->GetName(), GetName());
+			snprintf(szNewName, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_GRANDMASTER_MARK), pItem->GetName(), GetName());
 			pItem->SetName(szNewName);
 
 			// TO-DO: before enable CRAFTEDBY we must find away to properly clear CRAFTEDBY value on all items when chars got deleted
@@ -1104,7 +1104,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	}
 
 	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
+	snprintf(pszMsg, Str_TempLength(), "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
 	Emote(pszMsg);
 
 	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
@@ -1145,11 +1145,11 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 				break;
 
 			tchar* pszTmp = Str_GetTemp();
-			snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+			snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
 			Args.m_VarsLocal.SetNum(pszTmp,(int64)id);
 
 			iResourceQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
-			snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+			snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
 			Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
 			
 		}
@@ -1170,7 +1170,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		tchar* pszTmp = Str_GetTemp();
-		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.ID", (int)i);
+		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
 		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp))));
 		
 		//We have finished the ore or the item being smelted.
@@ -1186,7 +1186,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			continue;
 		}
 
-		snprintf(pszTmp, STR_TEMPLENGTH, "resource.%u.amount", (int)i);
+		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
 		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
 		iResourceQty *= iOreQty;	// max amount
 
@@ -1305,7 +1305,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	if ( pszDef[0] )
 	{
 		tchar *pszMsg = Str_GetTemp();
-		snprintf(pszMsg, STR_TEMPLENGTH, 
+		snprintf(pszMsg, Str_TempLength(), 
 			pszDef, pObj->GetName(), (pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]) );
 		ObjMessage(pszMsg, this);
 	}
@@ -2278,7 +2278,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			return 0;
 
 		tchar * pszMsg = Str_GetTemp();
-		snprintf(pszMsg, STR_TEMPLENGTH, sm_szTameSpeak[ Calc_GetRandVal( ARRAY_COUNT( sm_szTameSpeak )) ], pChar->GetName());
+		snprintf(pszMsg, Str_TempLength(), sm_szTameSpeak[ Calc_GetRandVal( ARRAY_COUNT( sm_szTameSpeak )) ], pChar->GetName());
 		Speak(pszMsg);
 
 		// Keep trying and updating the animation
@@ -2298,7 +2298,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
         fTamedPrev = true;
 
 		tchar * pszMsg = Str_GetTemp();
-		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
+		snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
 		ObjMessage(pszMsg, pChar );
 	}
 
@@ -2705,7 +2705,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		if ( pChar != this )
 		{
 			tchar * pszMsg = Str_GetTemp();
-			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_HEALING_TO ), pChar->GetName());
+			snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_HEALING_TO ), pChar->GetName());
 			Emote(pszMsg);
 		}
 		else

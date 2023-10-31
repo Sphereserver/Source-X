@@ -183,15 +183,15 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 
 	if ( id >= PROFILE_DATA_QTY )
 	{
-		snprintf(ptcTmp, STR_TEMPLENGTH, "%lld (total: %lld) instances", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
+		snprintf(ptcTmp, Str_TempLength(), "%lld (total: %lld) instances", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
 	}
 	else if ( id >= PROFILE_TIME_QTY )
 	{
-		snprintf(ptcTmp, STR_TEMPLENGTH, "%lld (avg: %lld) bytes", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
+		snprintf(ptcTmp, Str_TempLength(), "%lld (avg: %lld) bytes", m_PreviousTimes[id].m_Time, m_AverageTimes[id].m_Time);
 	}
 	else
 	{
-		snprintf(ptcTmp, STR_TEMPLENGTH, "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
+		snprintf(ptcTmp, Str_TempLength(), "%.4fs  avg: %.4fs  [samples:%8i  avg:%7i]  adjusted runtime: %is",
 			(m_PreviousTimes[id].m_Time    / 1000.0),
 			(m_AverageTimes[id].m_Time     / 1000.0),
 			iCount,
