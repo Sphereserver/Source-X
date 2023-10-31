@@ -1864,7 +1864,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				};
 
 				tchar * pszMsg = Str_GetTemp();
-				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
+				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
 				if ( g_Cfg.m_iEmoteFlags & EMOTEF_POISON )
 					EmoteObj(pszMsg);
 				else

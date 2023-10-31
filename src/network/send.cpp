@@ -2171,7 +2171,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 
 	// message time
 	CSTime datetime(message->GetTimeStamp());
-	snprintf(tempstr, STR_TEMPLENGTH, "%s", datetime.Format("%b %d, %Y"));
+	snprintf(tempstr, Str_TempLength(), "%s", datetime.Format("%b %d, %Y"));
 	lenstr = strlen(tempstr) + 1;
 
 	writeByte((byte)lenstr);
@@ -2627,7 +2627,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 		const CStoneMember* guildMember = character->Guild_FindMember(MEMORY_GUILD);
 		if (guildMember != nullptr && guildMember->IsAbbrevOn() && guildMember->GetParentStone()->GetAbbrev()[0])
 		{
-			len = snprintf(text, STR_TEMPLENGTH, "%s [%s], %s",
+			len = snprintf(text, Str_TempLength(), "%s [%s], %s",
 				character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
 							( guildMember->GetTitle()[0] ? guildMember->GetTitle() : (IsSetOF(OF_NoPaperdollTradeTitle) ? "" : character->GetTradeTitle()) ) );
 		}
@@ -2638,9 +2638,9 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 			if (!IsSetOF(OF_NoPaperdollTradeTitle))
 				title = character->GetTradeTitle();
 			if ( title && title[0] )
-				snprintf(text, STR_TEMPLENGTH, "%s, %s", character->Noto_GetTitle(), title);
+				snprintf(text, Str_TempLength(), "%s, %s", character->Noto_GetTitle(), title);
 			else
-				snprintf(text, STR_TEMPLENGTH, "%s", character->Noto_GetTitle());
+				snprintf(text, Str_TempLength(), "%s", character->Noto_GetTitle());
 		}
 
 		writeStringFixedASCII(text, 60);
@@ -3471,12 +3471,12 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 
 		case INPVAL_STYLE_TEXTEDIT: // Text
 			z = Str_GetTemp();
-			len = snprintf(z, STR_TEMPLENGTH, "%s (%u chars max)", caption, maxLength) + 1;
+			len = snprintf(z, Str_TempLength(), "%s (%u chars max)", caption, maxLength) + 1;
 			break;
 
 		case INPVAL_STYLE_NUMEDIT: // Numeric
 			z = Str_GetTemp();
-			len = snprintf(z, STR_TEMPLENGTH, "%s (0 - %u)", caption, maxLength) + 1;
+			len = snprintf(z, Str_TempLength(), "%s (0 - %u)", caption, maxLength) + 1;
 			break;
 	}
 

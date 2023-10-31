@@ -1862,7 +1862,7 @@ ev_time (void) EV_THROW
 #if EV_USE_REALTIME
   if (expect_true (have_realtime))
     {
-      struct timespec ts;
+      struct timespec ts = { 0 };
       clock_gettime (CLOCK_REALTIME, &ts);
       return ts.tv_sec + ts.tv_nsec * 1e-9;
     }
@@ -1880,7 +1880,7 @@ get_clock (void)
 #if EV_USE_MONOTONIC
   if (expect_true (have_monotonic))
     {
-      struct timespec ts;
+      struct timespec ts = {0};
       clock_gettime (CLOCK_MONOTONIC, &ts);
       return ts.tv_sec + ts.tv_nsec * 1e-9;
     }

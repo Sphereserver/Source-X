@@ -363,7 +363,7 @@ lpctstr CChar::Noto_GetTitle() const
 		pFameTitle = Noto_GetFameTitle();
 
 	tchar * pTemp = Str_GetTemp();
-	snprintf( pTemp, STR_TEMPLENGTH, "%s%s%s%s%s%s",
+	snprintf( pTemp, Str_TempLength(), "%s%s%s%s%s%s",
 		(pTitle[0]) ? ( Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_FEMALE ) : g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_MALE ) )  : "",
 		pTitle,
 		(pTitle[0]) ? " " : "",
@@ -453,7 +453,7 @@ void CChar::Noto_ChangeDeltaMsg( int iDelta, lpctstr pszType )
 	int iDegree = minimum(abs(iDelta) / NOTO_FACTOR, 7);
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf( pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_0 ),
+	snprintf( pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_0 ),
 		( iDelta < 0 ) ? g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_LOST ) : g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_GAIN ),
 		g_Cfg.GetDefaultMsg(sm_DegreeTable[iDegree]), pszType );
 

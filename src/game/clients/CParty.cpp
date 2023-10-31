@@ -334,7 +334,7 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	pCharRemove->SysMessageDefault(DEFMSG_PARTY_LEAVE_2);
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_1), pCharRemove->GetName());
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_1), pCharRemove->GetName());
 	SysMessageAll(pszMsg);
 
 	if ( m_Chars.GetCharCount() <= 1 )
@@ -408,10 +408,10 @@ bool CPartyDef::DeclineEvent( CChar *pCharDecline, CUID uidInviter )	// static
 	pCharInviter->DeleteKey("PARTY_LASTINVITE");
 
 	tchar *sTemp = Str_GetTemp();
-	snprintf(sTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_2), pCharInviter->GetName());
+	snprintf(sTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_2), pCharInviter->GetName());
 	pCharDecline->SysMessage(sTemp);
 	sTemp = Str_GetTemp();
-	snprintf(sTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_1), pCharDecline->GetName());
+	snprintf(sTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_1), pCharDecline->GetName());
 	pCharInviter->SysMessage(sTemp);
 	return true;
 }
@@ -462,7 +462,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 	}
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_JOINED), pCharAccept->GetName());
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_PARTY_JOINED), pCharAccept->GetName());
 
 	if ( !pParty )
 	{

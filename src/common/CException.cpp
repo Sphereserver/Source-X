@@ -281,8 +281,8 @@ void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
     }
 
     g_Serv.SetExitFlag(SIGABRT);
-    for (size_t i = 0; i < ThreadHolder::get()->getActiveThreads(); ++i)
-        ThreadHolder::get()->getThreadAt(i)->terminate(false);
+    for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
+        ThreadHolder::get().getThreadAt(i)->terminate(false);
     //exit(EXIT_FAILURE);
 }
 

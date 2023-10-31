@@ -354,7 +354,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 	{
 		++pszName;
 		tchar *pszTmp = Str_GetTemp();
-		Str_CopyLimitNull( pszTmp, pszName, STR_TEMPLENGTH );
+		Str_CopyLimitNull( pszTmp, pszName, Str_TempLength() );
 
 		tchar * ppTitles[2];
 		Str_ParseCmds( pszTmp, ppTitles, ARRAY_COUNT(ppTitles));
@@ -564,25 +564,25 @@ void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossess
 
 		if ( pObjTop != this )
 		{
-			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText);
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+			snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
 		}
 		else if ( fForcePossessive )
 		{
 			// ex. "You see joes poor shot ruin an arrow"
-			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText);
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
+			snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
 		}
 		else
 		{
-			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText);
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+			snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
 		}
 	}
 	else
 	{
 		// Top level is an item. Article ?
-		snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText);
+		snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText);
 		strcpy(pszYou, pszThem);
 	}
 
@@ -603,9 +603,9 @@ void CObjBase::EmoteObj(lpctstr pText)
 	if ( pObjTop->IsChar() )
 	{
 		if ( pObjTop != this )
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
 		else
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
 		pObjTop->UpdateObjMessage(nullptr, pszYou, nullptr, HUE_TEXT_DEF, TALKMODE_EMOTE);
 	}
 }
@@ -630,25 +630,25 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 		// Someone has this equipped.
 		if ( pObjTop != this )
 		{
-			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText1);
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
+			snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_1), pObjTop->GetName(), GetName(), pText1);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_2), GetName(), pText);
 		}
 		else if ( fForcePossessive )
 		{
 			// ex. "You see joes poor shot ruin an arrow"
-			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText1);
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
+			snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_3), GetName(), pText1);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_4), pText);
 		}
 		else
 		{
-			snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText1);
-			snprintf(pszYou, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
+			snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_5), GetName(), pText1);
+			snprintf(pszYou, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_6), pText);
 		}
 	}
 	else
 	{
 		// Top level is an item. Article ?
-		snprintf(pszThem, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText1);
+		snprintf(pszThem, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EMOTE_7), GetName(), pText1);
 		strcpy(pszYou, pszThem);
 	}
 

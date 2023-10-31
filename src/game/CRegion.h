@@ -232,7 +232,7 @@ public:
 
 	explicit CTeleport( tchar * pszArgs );
 
-	virtual ~CTeleport() = default;
+	virtual ~CTeleport();
 
 private:
 	CTeleport(const CTeleport& copy);

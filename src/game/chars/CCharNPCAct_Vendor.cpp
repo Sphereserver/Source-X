@@ -200,7 +200,7 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 			if ( !pCharPlayer->Use_Figurine(pItem) )
 			{
 				tchar *pszTemp = Str_GetTemp();
-				snprintf(pszTemp, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
+				snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
 				Speak(pszTemp);
 				return true;
 			}
@@ -269,7 +269,7 @@ ushort CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 		return (ushort)uiMaxDecrease;
 
 	tchar *z = Str_GetTemp();
-	snprintf(z, STR_TEMPLENGTH, pszMsg, g_Cfg.GetSkillKey(Skill));
+	snprintf(z, Str_TempLength(), pszMsg, g_Cfg.GetSkillKey(Skill));
 	Speak(z);
 	return 0;
 }

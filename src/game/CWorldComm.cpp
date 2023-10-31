@@ -81,7 +81,7 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 				//}
 				//myName = sTextName;
 				if ( !*myName )
-					snprintf(myName, STR_TEMPLENGTH, "<%s>", pSrc->GetName());
+					snprintf(myName, Str_TempLength(), "<%s>", pSrc->GetName());
 			}
 		}
 
@@ -93,7 +93,7 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 			//}
 			//myName = sTextUID;
 			if ( !*myName )
-				snprintf(myName, STR_TEMPLENGTH, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
+				snprintf(myName, Str_TempLength(), "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 		}
 
 		if (*myName)
@@ -205,7 +205,7 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nachar * pwT
 			if ( wTextUID[0] == '\0' )
 			{
 				tchar * pszMsg = Str_GetTemp();
-				snprintf(pszMsg, STR_TEMPLENGTH, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
+				snprintf(pszMsg, Str_TempLength(), "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 				int iLen = CvtSystemToNETUTF16( wTextUID, ARRAY_COUNT(wTextUID), pszMsg, -1 );
 				for ( int i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 					wTextUID[iLen] = pwText[i];

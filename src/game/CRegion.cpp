@@ -51,6 +51,10 @@ bool CTeleport::RealizeTeleport()
 		return false;
 }
 
+CTeleport::~CTeleport()
+{
+	fprintf(stderr, "deleted %s.\n", _ptDst.WriteUsed());
+}
 
 //*************************************************************************
 // -CRegion
@@ -243,7 +247,7 @@ bool CRegion::MakeRegionDefname()
     }
 
     // Only one, no need for the extra "_"
-    pszDef = Str_FromI_Fast(iVar, pszDef, STR_TEMPLENGTH, 10);
+    pszDef = Str_FromI_Fast(iVar, pszDef, Str_TempLength(), 10);
     SetResourceName( pbuf );
     // Assign name
     return true;

@@ -24,7 +24,7 @@ struct CPointBase	// Non initialized 3d point.
 {
 private:
 	friend class GlobalInitializer;
-	static void InitRuntimeStaticMembers();
+	static void InitRuntimeDefaultValues();
 
 public:
 	static lpctstr const sm_szLoadKeys[];
@@ -78,7 +78,7 @@ public:
 	void Set( short x, short y, char z = 0, uchar map = 0 ) noexcept;
 	int Read( tchar * pVal );
 
-	tchar * WriteUsed( tchar * ptcBuffer, uint uiBufferLen ) const;
+	tchar * WriteUsed( tchar * ptcBuffer, size_t uiBufferLen ) const;
 	lpctstr WriteUsed() const;
 
 	void Move( DIR_TYPE dir );

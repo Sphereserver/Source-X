@@ -3,7 +3,43 @@
 #include "sstringobjs.h"
 
 
+#define MAX_TEMP_LINES_NO_CONTEXT	512
 #define	STRING_DEFAULT_SIZE	40
+
+
+struct TemporaryStringUnsafeStateHolder
+{
+	// NOT thread safe
+	size_t m_tempPosition;
+	char m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LENGTH];
+
+	static TemporaryStringUnsafeStateHolder& get() {
+		static TemporaryStringUnsafeStateHolder instance;
+		return instance;
+	}
+};
+
+
+static tchar* getUnsafeStringBuffer() noexcept
+{
+	auto& unsafe_state_holder = TemporaryStringUnsafeStateHolder::get();
+	tchar* unsafe_buffer = unsafe_state_holder.m_tempStrings[unsafe_state_holder.m_tempPosition++];
+	if (unsafe_state_holder.m_tempPosition >= MAX_TEMP_LINES_NO_CONTEXT)
+	{
+		unsafe_state_holder.m_tempPosition = 0;
+	}
+	return unsafe_buffer;
+}
+
+
+tchar* Str_GetTemp() noexcept
+{
+	IThread *pThreadState = ThreadHolder::get().current();
+	if (pThreadState)
+		return static_cast<AbstractSphereThread*>(pThreadState)->allocateBuffer();
+	return getUnsafeStringBuffer();
+}
+
 
 /*
  * AbstractString
@@ -165,25 +201,21 @@ void HeapString::resize(size_t newLength)
  * TemporaryString
 */
 
-size_t TemporaryString::m_tempPosition = 0;
-char TemporaryString::m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LENGTH];
 
-TemporaryString::TemporaryString()
+TemporaryString::TemporaryString() //:
+	//m_useHeap(false), m_state(nullptr)
 {
-	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::get()->current());
+	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::get().current());
 	if ( current != nullptr )
 	{
 		// allocate from thread context
-		current->allocateString(*this);
+		current->getStringBuffer(*this);
 	}
 	else
 	{
-		// allocate from static buffer when context is not available
-		init(&m_tempStrings[m_tempPosition++][0], nullptr);
-		if( m_tempPosition >= MAX_TEMP_LINES_NO_CONTEXT )
-		{
-			m_tempPosition = 0;
-		}
+		// allocate from global, thread-UNsafe buffer when context is not available.
+		tchar* unsafe_buffer = getUnsafeStringBuffer();
+		init(unsafe_buffer, nullptr);
 	}
 
 	// At this point, both m_useHeap and m_state should be initialized.
@@ -192,6 +224,16 @@ TemporaryString::TemporaryString()
 TemporaryString::TemporaryString(char *buffer, char *state)
 {
 	init(buffer, state);
+}
+
+TemporaryString::TemporaryString(lpctstr pStr) : TemporaryString()
+{
+	m_length = Str_CopyLimitNull(m_buf, pStr, m_realLength);
+}
+
+TemporaryString::TemporaryString(lpctstr pStr, size_t uiLen) : TemporaryString()
+{
+	m_length = Str_CopyLimitNull(m_buf, pStr, minimum(uiLen, m_realLength));
 }
 
 TemporaryString::~TemporaryString()
