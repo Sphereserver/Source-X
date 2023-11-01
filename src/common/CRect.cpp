@@ -214,7 +214,7 @@ tchar * CRect::Write( tchar * pBuffer, uint uiBufferLen) const
 lpctstr CRect::Write() const
 {
 	ADDTOCALLSTACK("CRect::Write");
-	return Write( Str_GetTemp(), Str_TempLength() );
+	return Write( Str_GetTemp(), (uint)Str_TempLength() );
 }
 
 CPointBase CRect::GetCenter() const

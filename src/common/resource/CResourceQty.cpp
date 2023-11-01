@@ -9,7 +9,7 @@
 #include "../../game/CObjBase.h"
 #include "../../sphere/threads.h"
 #include "../CLog.h"
-#include "CResourceBase.h"
+#include "CResourceHolder.h"
 #include "CResourceQty.h"
 
 

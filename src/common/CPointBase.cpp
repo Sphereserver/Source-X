@@ -819,7 +819,7 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	return iDist2D;
 }
 
-tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const
+tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const noexcept
 {
 	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
@@ -831,7 +831,7 @@ tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const
 	return ptcBuffer;
 }
 
-lpctstr CPointBase::WriteUsed() const
+lpctstr CPointBase::WriteUsed() const noexcept
 {
 	return WriteUsed( Str_GetTemp(), Str_TempLength() );
 }

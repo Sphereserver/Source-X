@@ -6,7 +6,7 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../../common/resource/CResourceBase.h"
+#include "../../common/resource/CResourceHolder.h"
 #include "../../common/CServerMap.h"
 #include "../../common/CRect.h"
 #include "../components/CCFaction.h"

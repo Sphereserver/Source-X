@@ -4293,7 +4293,7 @@ sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(cons
 		return {};
 	}
 
-	return CResourceBase::ResourceGetDefRef(rid);
+	return CResourceHolder::ResourceGetDefRef(rid);
 }
 
 CResourceDef * CServerConfig::RegisteredResourceGetDef( const CResourceID& rid ) const

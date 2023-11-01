@@ -1,10 +1,10 @@
 /**
-* @file CResourceBase.h
+* @file CResourceHolder.h
 *
 */
 
-#ifndef _INC_CRESOURCEBASE_H
-#define _INC_CRESOURCEBASE_H
+#ifndef _INC_CResourceHolder_H
+#define _INC_CResourceHolder_H
 
 #include "../sphere_library/CSTime.h"
 #include "../CScriptContexts.h"
@@ -15,12 +15,10 @@
 #include "CResourceQty.h"
 
 
-class CResourceBase : public CScriptObj
+class CResourceHolder : public CScriptObj
 {
 protected:
 	static lpctstr const sm_szResourceBlocks[RES_QTY];
-
-	CSObjArray< CResourceScript* > m_ResourceFiles;	// All resource files we need to get blocks from later.
 
 public:
 	static const char *m_sClassName;
@@ -28,6 +26,10 @@ public:
 
 	// INI File options.
 	CSString m_sSCPBaseDir;		// if we want to get *.SCP files from elsewhere.
+
+protected:
+	CSObjArray< CResourceScript* > m_ResourceFiles;	// All resource files we need to get blocks from later.
+
 
 protected:
 	CResourceScript * AddResourceFile( lpctstr pszName );
@@ -61,18 +63,18 @@ public:
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
 public:
-	CResourceBase() = default;
-	virtual ~CResourceBase() = default;
+	CResourceHolder() = default;
+	virtual ~CResourceHolder() = default;
 
-	CResourceBase(const CResourceBase& copy) = delete;
-	CResourceBase& operator=(const CResourceBase& other) = delete;
+	CResourceHolder(const CResourceHolder& copy) = delete;
+	CResourceHolder& operator=(const CResourceHolder& other) = delete;
 };
 
-inline lpctstr CResourceBase::GetResourceBlockName( RES_TYPE restype )	// static
+inline lpctstr CResourceHolder::GetResourceBlockName( RES_TYPE restype )	// static
 {
 	if ( restype < 0 || restype >= RES_QTY )
 		restype = RES_UNKNOWN;
 	return( sm_szResourceBlocks[restype] );
 }
 
-#endif // _INC_CRESOURCEBASE_H
+#endif // _INC_CResourceHolder_H

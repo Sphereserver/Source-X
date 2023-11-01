@@ -175,10 +175,10 @@ src/common/target_info.h
 SOURCE_GROUP (common FILES ${common_SRCS})
 
 SET (resource_SRCS
-src/common/resource/CResourceBase.cpp
-src/common/resource/CResourceBase.h
 src/common/resource/CResourceDef.cpp
 src/common/resource/CResourceDef.h
+src/common/resource/CResourceHolder.cpp
+src/common/resource/CResourceHolder.h
 src/common/resource/CResourceID.cpp
 src/common/resource/CResourceID.h
 src/common/resource/CResourceHash.cpp
@@ -314,6 +314,9 @@ src/game/CServerDef.cpp
 src/game/CServerDef.h
 src/game/CServerTime.cpp
 src/game/CServerTime.h
+src/game/CStartLoc.h
+src/game/CTeleport.cpp
+src/game/CTeleport.h
 src/game/CTimedFunction.cpp
 src/game/CTimedFunction.h
 src/game/CTimedFunctionHandler.cpp
