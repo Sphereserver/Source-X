@@ -9,7 +9,6 @@
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjSortArray.h"
 #include "../common/CRect.h"
-#include "CTeleport.h"
 
 
 class CItem;
@@ -19,10 +18,11 @@ class CTeleport;
 struct CCharsDisconnectList : public CSObjCont
 {
 	CCharsDisconnectList() = default;
-	CCharsDisconnectList(const CCharsDisconnectList& copy) = delete;
-	CCharsDisconnectList& operator=(const CCharsDisconnectList& other) = delete;
+    void AddCharDisconnected( CChar * pChar );
 
-	void AddCharDisconnected(CChar* pChar);
+private:
+	CCharsDisconnectList(const CCharsDisconnectList& copy);
+	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
 };
 
 struct CCharsActiveList : public CSObjCont
@@ -36,9 +36,6 @@ protected:
 
 public:
 	CCharsActiveList();
-	CCharsActiveList(const CCharsActiveList& copy) = delete;
-	CCharsActiveList& operator=(const CCharsActiveList& other) = delete;
-
 	void AddCharActive(CChar* pChar);
 	int GetClientsNumber() const noexcept {
 		return m_iClients;
@@ -49,6 +46,10 @@ public:
 	void SetTimeLastClient(int64 iTime) noexcept {
 		m_iTimeLastClient = iTime;
 	}
+
+private:
+	CCharsActiveList(const CCharsActiveList& copy);
+	CCharsActiveList& operator=(const CCharsActiveList& other);
 };
 
 struct CItemsList : public CSObjCont
@@ -57,57 +58,50 @@ struct CItemsList : public CSObjCont
 
 public:
 	CItemsList() = default;
-	CItemsList(const CItemsList& copy) = delete;
-	CItemsList& operator=(const CItemsList& other) = delete;
-
 	void AddItemToSector( CItem * pItem );
 
 protected:
 	void OnRemoveObj(CSObjContRec* pObRec);	// Override this = called when removed from list.
+
+private:
+	CItemsList(const CItemsList& copy);
+	CItemsList& operator=(const CItemsList& other);
 };
 
 
 class CSectorBase		// world sector
 {
-	template <typename T>
-    class CObjPointSortArray : public CSObjSortArray< T*, int >
+    class CObjPointSortArray : public CSObjSortArray< CPointSort*, int >
     {
-		static_assert(std::is_base_of_v<CPointSort, T>, "Type has to inherit from CPointSort");
-
     public:
         static const char *m_sClassName;
 
 		CObjPointSortArray() = default;
 		virtual ~CObjPointSortArray() override = default;
-
 		CObjPointSortArray(const CObjPointSortArray& copy) = delete;
 		CObjPointSortArray& operator=(const CObjPointSortArray& other) = delete;
 
         // Find a point fast.
-		virtual int CompareKey(int id, T* pBase, bool fNoSpaces) const override {
-			UnreferencedParameter(fNoSpaces);
-			return (id - pBase->GetPointSortIndex());
-		}
+        virtual int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const override;
     };
-
 
 protected:
 	uchar m_map;    // sector map
     short _x, _y;   // x and y (row and column) of the sector in the map
 	int	m_index;    // sector index
 
-private:
-	CSector* _ppAdjacentSectors[DIR_QTY];
-
 public:
 	static const char  *m_sClassName;
-	CObjPointSortArray<CTeleport>	m_Teleports;		//	CTeleport array
+	CObjPointSortArray	m_Teleports;		//	CTeleport array
 	CRegionLinks		m_RegionLinks;		//	CRegion(s) in this CSector
 	dword			    m_dwFlags;
 
 	CCharsActiveList		m_Chars_Active;		// CChar(s) activte in this CSector.
 	CCharsDisconnectList	m_Chars_Disconnect;	// dead NPCs, etc
 	CItemsList m_Items;				// CItem(s) in this CSector (not relevant if they have a timer set or not).
+
+private:
+    CSector* _ppAdjacentSectors[DIR_QTY];
 
 public:
     /*
@@ -122,8 +116,9 @@ public:
 	CSectorBase();
 	virtual ~CSectorBase() = default;
 
-	CSectorBase(const CSectorBase& copy) = delete;
-	CSectorBase& operator=(const CSectorBase& other) = delete;
+private:
+	CSectorBase(const CSectorBase& copy);
+	CSectorBase& operator=(const CSectorBase& other);
 
 public:
 	virtual void Init(int index, uchar map, short x, short y);

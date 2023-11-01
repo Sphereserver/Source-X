@@ -2332,7 +2332,7 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 
 void CItemBaseDupe::UnLink()
 {
-	m_MasterItem.SetRef({});
+	m_MasterItem.SetRef(nullptr);
 	CResourceDef::UnLink();
 }
 

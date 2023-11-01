@@ -439,7 +439,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			sVal.FormatHex( 0x00008 );
 		else if ( dynamic_cast<CResourceDef*>(pTmpRef) )
 			sVal.FormatHex( 0x00010 );
-		else if ( dynamic_cast<CResourceHolder*>(pTmpRef) )
+		else if ( dynamic_cast<CResourceBase*>(pTmpRef) )
 			sVal.FormatHex( 0x00020 );
 		else if ( dynamic_cast<CScriptTriggerArgs*>(pTmpRef) )
 			sVal.FormatHex( 0x00040 );
