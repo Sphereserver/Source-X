@@ -129,7 +129,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
         if (pResourceLink == nullptr)
         {
             fRet = false;
-            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd));
+            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd));
         }
     }
 
