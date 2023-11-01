@@ -19,7 +19,7 @@ class CSObjSortArray : public CSObjArray<TYPE>
 	///@{
 public:
     CSObjSortArray() = default;
-    virtual ~CSObjSortArray() override = default;
+    virtual ~CSObjSortArray() = default;
 private:
 	/**
     * @brief No copy on construction allowed.

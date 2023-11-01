@@ -96,10 +96,10 @@ void CNTWindow::CStatusDlg::FillStats()
 
 	CNTWindow::CListTextConsole capture( m_wndListStats.m_hWnd );
 
-	size_t iThreadCount = ThreadHolder::get().getActiveThreads();
+	size_t iThreadCount = ThreadHolder::get()->getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
-		IThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
+		IThread* thrCurrent = ThreadHolder::get()->getThreadAt(iThreads);
 		if (thrCurrent == nullptr)
 			continue;
 
@@ -1001,7 +1001,7 @@ void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 	// Number of connections ?
 
 	char *psTitle = Str_GetTemp();
-	snprintf(psTitle, Str_TempLength(), "%s - %s (%s) %s", theApp.m_pszAppName, g_Serv.GetName(), pszMode, strNewTitle.c_str() );
+	snprintf(psTitle, STR_TEMPLENGTH, "%s - %s (%s) %s", theApp.m_pszAppName, g_Serv.GetName(), pszMode, strNewTitle.c_str() );
 	theApp.m_wndMain.SetWindowText( psTitle );
 
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
@@ -1099,8 +1099,8 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 						if ( selStart != selEnd )
 						{
                             size_t iSizeSel = selEnd - selStart + 1; // +1 for the terminator
-                            if (iSizeSel > Str_TempLength())
-                                iSizeSel = Str_TempLength();
+                            if (iSizeSel > STR_TEMPLENGTH)
+                                iSizeSel = STR_TEMPLENGTH;
 							Str_CopyLimit(pszCurSel, pszTemp + selStart, iSizeSel);
 							pszCurSel[iSizeSel] = '\0';
 						}

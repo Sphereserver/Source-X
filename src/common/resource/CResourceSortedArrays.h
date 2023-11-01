@@ -20,7 +20,10 @@ struct CSStringSortArray final : public CSObjSortArray< tchar*, tchar* >
     virtual ~CSStringSortArray() noexcept;
 
     void clear() noexcept = delete;
-    virtual void ClearFree() override;
+    void Clear() {
+        this->CSStringSortArray::DeleteElements();
+        this->std::vector<tchar*>::clear();
+    }
 
     CSStringSortArray(const CSStringSortArray& copy) = delete;
     CSStringSortArray& operator=(const CSStringSortArray& other) = delete;
@@ -30,7 +33,7 @@ struct CSStringSortArray final : public CSObjSortArray< tchar*, tchar* >
     void AddSortString( lpctstr pszText );
 
 protected:
-    virtual void DestroyElements() noexcept override;
+    virtual void DeleteElements() noexcept override;
 };
 
 struct CObjNameSortArray final : public CSObjSortArray< CScriptObj*, lpctstr >

@@ -155,7 +155,7 @@ size_t CRect::Read( lpctstr pszVal )
 	ADDTOCALLSTACK("CRect::Read");
 	// parse reading the rectangle
 	tchar *ptcTemp = Str_GetTemp();
-	Str_CopyLimitNull(ptcTemp, pszVal, Str_TempLength());
+	Str_CopyLimitNull(ptcTemp, pszVal, STR_TEMPLENGTH);
 	tchar * ppVal[5];
 	size_t i = Str_ParseCmds(ptcTemp, ppVal, ARRAY_COUNT( ppVal ), " ,\t");
 	switch (i)
@@ -214,7 +214,7 @@ tchar * CRect::Write( tchar * pBuffer, uint uiBufferLen) const
 lpctstr CRect::Write() const
 {
 	ADDTOCALLSTACK("CRect::Write");
-	return Write( Str_GetTemp(), Str_TempLength() );
+	return Write( Str_GetTemp(), STR_TEMPLENGTH );
 }
 
 CPointBase CRect::GetCenter() const

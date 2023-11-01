@@ -1744,7 +1744,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 	else
 	{
 		pszTitle = "%u ";
-		len += snprintf(pTemp + len, Str_TempLength() - len, pszTitle, GetAmount());
+		len += snprintf(pTemp + len, STR_TEMPLENGTH - len, pszTitle, GetAmount());
 	}
 
 	if ( fIdentified && IsAttr(ATTR_CURSED|ATTR_CURSED2|ATTR_BLESSED|ATTR_BLESSED2|ATTR_MAGIC))
@@ -1780,8 +1780,8 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		if ( fTitleSet )
 		{
 			if ( fSingular && !IsSetOF(OF_NoPrefix) )
-				len = Str_CopyLimitNull( pTemp, Str_GetArticleAndSpace(pszTitle), Str_TempLength());
-			len += Str_CopyLimitNull( pTemp+len, pszTitle, Str_TempLength() - len);
+				len = Str_CopyLimitNull( pTemp, Str_GetArticleAndSpace(pszTitle), STR_TEMPLENGTH);
+			len += Str_CopyLimitNull( pTemp+len, pszTitle, STR_TEMPLENGTH - len);
 		}
 
 		if ( IsAttr(ATTR_MAGIC))
@@ -1789,11 +1789,11 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			if ( !pszTitle )
 			{
 				pszTitle = IsSetOF(OF_NoPrefix) ? "" : "a ";
-				len = Str_CopyLimitNull( pTemp, pszTitle, Str_TempLength());
+				len = Str_CopyLimitNull( pTemp, pszTitle, STR_TEMPLENGTH);
 			}
 
 			if ( !IsTypeArmorWeapon() && (strnicmp( pszName, "MAGIC", 5 ) != 0))		// don't put "magic" prefix on armor/weapons and names already starting with "magic"
-				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MAGIC ), Str_TempLength() - len);
+				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MAGIC ), STR_TEMPLENGTH - len);
 		}
 	}
 
@@ -1801,37 +1801,37 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 	switch ( m_type )
 	{
 		case IT_STONE_GUILD:
-			len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_GUILDSTONE_FOR ), Str_TempLength() - len);
+			len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_GUILDSTONE_FOR ), STR_TEMPLENGTH - len);
 			break;
 		case IT_STONE_TOWN:
-			len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_TOWN_OF ), Str_TempLength() - len);
+			len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_TOWN_OF ), STR_TEMPLENGTH - len);
 			break;
 		case IT_EQ_MEMORY_OBJ:
-			len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MEMORY_OF ), Str_TempLength() - len);
+			len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_MEMORY_OF ), STR_TEMPLENGTH - len);
 			break;
 		case IT_SPAWN_CHAR:
 			if ( ! IsIndividualName())
-				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_SPAWN ), Str_TempLength() - len);
+				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_SPAWN ), STR_TEMPLENGTH - len);
 			break;
 		case IT_KEY:
 			if ( ! m_itKey.m_UIDLock.IsValidUID())
-				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
+				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), STR_TEMPLENGTH - len);
 			break;
 		case IT_RUNE:
 			if ( ! m_itRune.m_ptMark.IsCharValid())
-				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
+				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), STR_TEMPLENGTH - len);
 			else if ( ! m_itRune.m_Strength )
-				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ), Str_TempLength() - len);
+				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ), STR_TEMPLENGTH - len);
 			break;
 		case IT_TELEPAD:
 			if ( ! m_itTelepad.m_ptMark.IsValidPoint())
-				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
+				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), STR_TEMPLENGTH - len);
 			break;
 		default:
 			break;
 	}
 
-	len += Str_CopyLimitNull( pTemp + len, pszName, Str_TempLength() - len);
+	len += Str_CopyLimitNull( pTemp + len, pszName, STR_TEMPLENGTH - len);
 
 	// Suffix the name.
 
@@ -1843,9 +1843,9 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
 			if ( pSpellDef )
 			{
-				len += snprintf(pTemp + len, Str_TempLength() - len, " of %s", pSpellDef->GetName());
+				len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " of %s", pSpellDef->GetName());
 				if (m_itWeapon.m_spellcharges)
-					len += snprintf(pTemp + len, Str_TempLength() - len, " (%d %s)", m_itWeapon.m_spellcharges, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_CHARGES ) );
+					len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (%d %s)", m_itWeapon.m_spellcharges, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_CHARGES ) );
 			}
 		}
 	}
@@ -1858,7 +1858,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 				ITEMID_TYPE AmmoID = (ITEMID_TYPE)m_itLoom.m_ridCloth.GetResIndex();
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
-					len += snprintf(pTemp + len, Str_TempLength() - len, " (%d %ss)", m_itLoom.m_iClothQty, pAmmoDef->GetName());
+					len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (%d %ss)", m_itLoom.m_iClothQty, pAmmoDef->GetName());
 			}
 			break;
 
@@ -1868,7 +1868,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(m_itArcheryButte.m_ridAmmoType.GetResIndex());
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
-					len += snprintf(pTemp + len, Str_TempLength() - len, " %d %ss", m_itArcheryButte.m_iAmmoCount, pAmmoDef->GetName());
+					len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " %d %ss", m_itArcheryButte.m_iAmmoCount, pAmmoDef->GetName());
 			}
 			break;
 
@@ -1876,7 +1876,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			{
 				const CItemStone * pStone = dynamic_cast <const CItemStone*>(this);
 				ASSERT(pStone);
-				len += snprintf(pTemp + len, Str_TempLength() - len, " (pop:%" PRIuSIZE_T ")", pStone->GetContentCount());
+				len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (pop:%" PRIuSIZE_T ")", pStone->GetContentCount());
 			}
 			break;
 
@@ -1896,7 +1896,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 					const CCharBase * pCharDef = CCharBase::FindCharBase( id );
 					if (pCharDef != nullptr)
 					{
-						len += snprintf(pTemp + len, Str_TempLength() - len, " (%s)", pCharDef->GetTradeName());
+						len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (%s)", pCharDef->GetTradeName());
 					}
 				}
 			}
@@ -1906,7 +1906,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		case IT_LIGHT_OUT:
 			// how many charges ?
 			if ( !IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC) )
-				len += snprintf(pTemp + len, Str_TempLength() - len, " (%d %s)", m_itLight.m_charges, g_Cfg.GetDefaultMsg(DEFMSG_ITEMTITLE_CHARGES));
+				len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (%d %s)", m_itLight.m_charges, g_Cfg.GetDefaultMsg(DEFMSG_ITEMTITLE_CHARGES));
 			break;
 
 		default:
@@ -1919,9 +1919,9 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		// Who is it stolen from ?
 		const CChar * pChar = m_uidLink.CharFind();
 		if ( pChar )
-			len += snprintf(pTemp + len, Str_TempLength() - len, " (%s %s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN_FROM ), pChar->GetName());
+			len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (%s %s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN_FROM ), pChar->GetName());
 		else
-			len += snprintf(pTemp + len, Str_TempLength() - len, " (%s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN ) );
+			len += snprintf(pTemp + len, STR_TEMPLENGTH - len, " (%s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN ) );
 	}
 
 	return pTemp;
@@ -3154,7 +3154,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			{
 				CPointMap pt;	// invalid point
 				tchar *pszTemp = Str_GetTemp();
-				Str_CopyLimitNull( pszTemp, s.GetArgStr(), Str_TempLength() );
+				Str_CopyLimitNull( pszTemp, s.GetArgStr(), STR_TEMPLENGTH );
 				GETNONWHITESPACE( pszTemp );
 
 				if ( IsDigit( pszTemp[0] ) || pszTemp[0] == '-' )
@@ -3288,7 +3288,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			{
 				CPointBase pt;	// invalid point
 				tchar *pszTemp = Str_GetTemp();
-				Str_CopyLimitNull( pszTemp, s.GetArgStr(), Str_TempLength() );
+				Str_CopyLimitNull( pszTemp, s.GetArgStr(), STR_TEMPLENGTH );
 				GETNONWHITESPACE( pszTemp );
 				int iArgs = 0;
 				if ( IsDigit( pszTemp[0] ) || pszTemp[0] == '-' )
@@ -5048,7 +5048,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_WEATHER);
 			else
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_NO_LAND);
-			Str_CopyLimitNull( pResult, sSearch, Str_TempLength() );
+			Str_CopyLimitNull( pResult, sSearch, STR_TEMPLENGTH );
 			break;
 		}
 
@@ -5803,9 +5803,9 @@ forcedamage:
 			{
 				// Tell hitter they scored !
 				if (pChar && pChar != pSrc)
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE1), pChar->GetName(), GetName());
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE1), pChar->GetName(), GetName());
 				else
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE2), GetName());
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE2), GetName());
 				pSrc->SysMessage(pszMsg);
 			}
 		}
@@ -5819,10 +5819,10 @@ forcedamage:
 				{
 					const int iPercent = Armor_GetRepairPercent();
 					if (pChar->Skill_GetAdjusted(SKILL_ARMSLORE) / 10 > iPercent)
-						snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE3), GetName(), Armor_GetRepairDesc());
+						snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE3), GetName(), Armor_GetRepairDesc());
 				}
 				if (!*pszMsg)
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE4), GetName());
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DAMAGE4), GetName());
 				pChar->SysMessage(pszMsg);
 			}
 		}
@@ -6196,7 +6196,7 @@ bool CItem::_OnTick()
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
 						tchar* pszMsg = Str_GetTemp();
-						pObj->Speak(Str_FromI_Fast(m_itPotion.m_tick, pszMsg, Str_TempLength(), 10), HUE_RED);
+						pObj->Speak(Str_FromI_Fast(m_itPotion.m_tick, pszMsg, STR_TEMPLENGTH, 10), HUE_RED);
 						_SetTimeoutS(1);
 					}
 					return true;

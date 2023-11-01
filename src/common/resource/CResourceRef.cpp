@@ -29,8 +29,6 @@ CResourceRef::CResourceRef(const CResourceRef& copy)
 
 CResourceRef::~CResourceRef()
 {
-    // TODO: Consider using not a bare pointer for m_pLink but a CResourceID, in order to safely check if the father
-    //  resource was deleted or not.
     if (m_pLink != nullptr)
         m_pLink->DelRefInstance();
 }

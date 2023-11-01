@@ -23,8 +23,8 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 //*************************************************************************
 // -CPointBase
 
-lpctstr CPointBase::sm_szDirs[] {"\0"};
-void CPointBase::InitRuntimeDefaultValues()
+lpctstr CPointBase::sm_szDirs[];
+void CPointBase::InitRuntimeStaticMembers()
 {
 	AssignInitlistToCSizedArray(
 		CPointBase::sm_szDirs, ARRAY_COUNT(CPointBase::sm_szDirs),
@@ -819,7 +819,7 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	return iDist2D;
 }
 
-tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const
+tchar * CPointBase::WriteUsed( tchar * ptcBuffer, uint uiBufferLen) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
@@ -833,7 +833,7 @@ tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const
 
 lpctstr CPointBase::WriteUsed() const
 {
-	return WriteUsed( Str_GetTemp(), Str_TempLength() );
+	return WriteUsed( Str_GetTemp(), STR_TEMPLENGTH );
 }
 
 int CPointBase::Read( tchar * pszVal )

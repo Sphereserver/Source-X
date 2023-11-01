@@ -27,33 +27,20 @@
 #define THREADJOIN_TIMEOUT	60000
 
 
-struct TemporaryStringThreadSafeStateHolder
+// Normal Buffer
+SimpleMutex g_tmpStringMutex;
+std::atomic<int> g_tmpStringIndex = 0;
+char g_tmpStrings[THREAD_TSTRING_STORAGE][THREAD_STRING_LENGTH];
+
+// TemporaryString Buffer
+SimpleMutex g_tmpTemporaryStringMutex;
+std::atomic<int> g_tmpTemporaryStringIndex = 0;
+
+struct TemporaryStringStorage
 {
-	// Normal Buffer
-	SimpleMutex g_tmpStringMutex;
-	std::atomic<int> g_tmpStringIndex = 0;
-	char g_tmpStrings[THREAD_TSTRING_STORAGE][THREAD_STRING_LENGTH];
-
-	// TemporaryString Buffer
-	SimpleMutex g_tmpTemporaryStringMutex;
-	std::atomic<int> g_tmpTemporaryStringIndex = 0;
-
-
-	struct TemporaryStringStorage
-	{
-		char m_buffer[THREAD_STRING_LENGTH];
-		char m_state;
-	} g_tmpTemporaryStringStorage[THREAD_STRING_STORAGE];
-
-
-public:
-	static TemporaryStringThreadSafeStateHolder* get() noexcept
-	{
-		static TemporaryStringThreadSafeStateHolder instance{};
-		return &instance;
-	}
-};
-
+	char m_buffer[THREAD_STRING_LENGTH];
+	char m_state;
+} g_tmpTemporaryStringStorage[THREAD_STRING_STORAGE];
 
 #ifdef _WIN32
 #pragma pack(push, 8)
@@ -111,13 +98,13 @@ void IThread::setThreadName(const char* name)
  * ThreadHolder
 **/
 
-ThreadHolder& ThreadHolder::get() noexcept
+ThreadHolder* ThreadHolder::get() noexcept
 {
 	static ThreadHolder instance;
-	return instance;
+	return &instance;
 }
 
-IThread* ThreadHolder::current() noexcept
+IThread *ThreadHolder::current() noexcept
 {
 	if (!m_inited)
 	{
@@ -132,10 +119,6 @@ IThread* ThreadHolder::current() noexcept
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	auto* tdata = findThreadData(thread);
-	if (!tdata || tdata->m_closed)
-		return nullptr;
-
     // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
 	//ASSERT( thread->isSameThread(thread->getId()) );
 
@@ -148,29 +131,11 @@ void ThreadHolder::push(IThread *thread)
         init();
 
 	SimpleThreadLock lock(m_mutex);
-	m_threads.emplace_back( SphereThreadData{ thread, false });
+	m_threads.push_back(thread);
 	++m_threadCount;
 }
 
-spherethreadlist_t::iterator ThreadHolder::findThreadDataIt(IThread* thread)
-{
-	// This should always run guarded by a MUTEX!
-	return std::find_if(m_threads.begin(), m_threads.end(),
-		[thread](SphereThreadData const& elem) {
-			return elem.m_ptr == thread;
-		});
-}
-
-SphereThreadData* ThreadHolder::findThreadData(IThread* thread)
-{
-	// This should always run guarded by a MUTEX!
-	auto it = findThreadDataIt(thread);
-	if (it == m_threads.end())
-		return nullptr;
-	return &(*it);
-}
-
-void ThreadHolder::remove(IThread *thread)
+void ThreadHolder::pop(IThread *thread)
 {
     if (!m_inited)
         init();
@@ -178,22 +143,10 @@ void ThreadHolder::remove(IThread *thread)
     ASSERT(m_threadCount > 0);	// Trying to dequeue thread while no threads are active?
 
     SimpleThreadLock lock(m_mutex);
-	auto it = findThreadDataIt(thread);
-    
+    spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
     ASSERT(it != m_threads.end());	// Ensure that the thread to dequeue is registered
-	--m_threadCount;
-	m_threads.erase(it);
-}
-
-void ThreadHolder::markThreadsClosing()
-{
-	for (auto& thread_data : m_threads)
-	{
-		auto sphere_thread = static_cast<AbstractSphereThread*>(thread_data.m_ptr);
-		sphere_thread->_fIsClosing = true;
-		thread_data.m_closed = true;
-	}
-	//printf("Marking threads as closing.\n");
+    --m_threadCount;
+    m_threads.erase(it);
 }
 
 IThread * ThreadHolder::getThreadAt(size_t at)
@@ -205,7 +158,7 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 	for ( spherethreadlist_t::const_iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it )
 	{
 		if ( at == 0 )
-			return it->m_ptr;
+			return *it;
 
 		--at;
 	}
@@ -216,6 +169,9 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 void ThreadHolder::init()
 {
 	ASSERT(!m_inited);
+    memset(g_tmpStrings, 0, sizeof(g_tmpStrings));
+    memset(g_tmpTemporaryStringStorage, 0, sizeof(g_tmpTemporaryStringStorage));
+
     m_inited = true;
 }
 
@@ -280,7 +236,7 @@ void AbstractThread::start()
 #endif
 
 	m_terminateEvent.reset();
-	ThreadHolder::get().push(this);
+	ThreadHolder::get()->push(this);
 }
 
 void AbstractThread::terminate(bool ended)
@@ -305,7 +261,7 @@ void AbstractThread::terminate(bool ended)
 		}
 
 		// Common things
-		ThreadHolder::get().remove(this);
+		ThreadHolder::get()->pop(this);
 		m_id = 0;
 		m_handle = 0;
 
@@ -518,7 +474,7 @@ void AbstractThread::onStart()
 	// a small delay when setting it from AbstractThread::start and it's possible for the id
 	// to not be set fast enough (particular when using pthreads)
 	m_id = getCurrentThreadId();
-	ThreadHolder::get().m_currentThread = this;
+	ThreadHolder::get()->m_currentThread = this;
 
 	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());
@@ -585,47 +541,43 @@ AbstractSphereThread::~AbstractSphereThread()
 	_fIsClosing = true;
 }
 
+// IMHO we need a lock on allocateBuffer and allocateStringBuffer
 
-char *AbstractSphereThread::allocateBuffer() noexcept
+char *AbstractSphereThread::allocateBuffer()
 {
-	auto* tsholder = TemporaryStringThreadSafeStateHolder::get();
-	SimpleThreadLock stlBuffer(tsholder->g_tmpStringMutex);
+	SimpleThreadLock stlBuffer(g_tmpStringMutex);
 
 	char * buffer = nullptr;
-	tsholder->g_tmpStringIndex += 1;
+	++g_tmpStringIndex;
 
-	if (tsholder->g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
+	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
 	{
-		tsholder->g_tmpStringIndex = tsholder->g_tmpStringIndex % THREAD_TSTRING_STORAGE;
+		g_tmpStringIndex = g_tmpStringIndex % THREAD_TSTRING_STORAGE;
 	}
 
-	buffer = tsholder->g_tmpStrings[tsholder->g_tmpStringIndex];
+	buffer = g_tmpStrings[g_tmpStringIndex];
 	*buffer = '\0';
 
 	return buffer;
 }
 
-TemporaryStringThreadSafeStateHolder::TemporaryStringStorage *
-getThreadRawStringBuffer()
+TemporaryStringStorage *AbstractSphereThread::allocateStringBuffer()
 {
-	auto* tsholder = TemporaryStringThreadSafeStateHolder::get();
-	SimpleThreadLock stlBuffer(tsholder->g_tmpStringMutex);
-
-	int initialPosition = tsholder->g_tmpTemporaryStringIndex;
+	int initialPosition = g_tmpTemporaryStringIndex;
 	int index;
 	for (;;)
 	{
-		index = tsholder->g_tmpTemporaryStringIndex += 1;
-		if(tsholder->g_tmpTemporaryStringIndex >= THREAD_STRING_STORAGE )
+		index = ++g_tmpTemporaryStringIndex;
+		if( g_tmpTemporaryStringIndex >= THREAD_STRING_STORAGE )
 		{
-			const int inc = tsholder->g_tmpTemporaryStringIndex % THREAD_STRING_STORAGE;
-			tsholder->g_tmpTemporaryStringIndex = inc;
+			const int inc = g_tmpTemporaryStringIndex % THREAD_STRING_STORAGE;
+			g_tmpTemporaryStringIndex = inc;
 			index = inc;
 		}
 
-		if(tsholder->g_tmpTemporaryStringStorage[index].m_state == 0 )
+		if( g_tmpTemporaryStringStorage[index].m_state == 0 )
 		{
-			auto* store = &tsholder->g_tmpTemporaryStringStorage[index];
+			TemporaryStringStorage * store = &g_tmpTemporaryStringStorage[index];
 			*store->m_buffer = '\0';
 			return store;
 		}
@@ -644,13 +596,11 @@ getThreadRawStringBuffer()
 	}
 }
 
-void AbstractSphereThread::getStringBuffer(TemporaryString &string) noexcept
+void AbstractSphereThread::allocateString(TemporaryString &string)
 {
-	ADDTOCALLSTACK("alloc");
-	auto* tsholder = TemporaryStringThreadSafeStateHolder::get();
-	SimpleThreadLock stlBuffer(tsholder->g_tmpTemporaryStringMutex);
+	SimpleThreadLock stlBuffer(g_tmpTemporaryStringMutex);
 
-	auto* store = getThreadRawStringBuffer();
+	TemporaryStringStorage * store = allocateStringBuffer();
 	string.init(store->m_buffer, &store->m_state);
 }
 
@@ -682,7 +632,7 @@ void AbstractSphereThread::pushStackCall(const char *name) noexcept
     }
 }
 
-void AbstractSphereThread::exceptionNotifyStackUnwinding() noexcept
+void AbstractSphereThread::exceptionNotifyStackUnwinding(void)
 {
     //ASSERT(isCurrentThread());
     if (m_exceptionStackUnwinding == false)
@@ -692,7 +642,7 @@ void AbstractSphereThread::exceptionNotifyStackUnwinding() noexcept
     }
 }
 
-void AbstractSphereThread::printStackTrace() noexcept
+void AbstractSphereThread::printStackTrace()
 {
 	// don't allow call stack to be modified whilst we're printing it
 	freezeCallStack(true);
@@ -762,16 +712,8 @@ void DummySphereThread::tick()
 #ifdef THREAD_TRACK_CALLSTACK
 
 StackDebugInformation::StackDebugInformation(const char *name) noexcept
-	: m_context(nullptr)
 {
-    IThread *icontext = ThreadHolder::get().current();
-	if (icontext == nullptr)
-	{
-		// Thread was deleted, manually or by app closing signal.
-		return;
-	}
-
-	m_context = static_cast<AbstractSphereThread*>(icontext);
+    m_context = static_cast<AbstractSphereThread *>(ThreadHolder::get()->current());
 	if (m_context != nullptr && !m_context->closing())
 	{
 		m_context->pushStackCall(name);
@@ -780,29 +722,18 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
 
 StackDebugInformation::~StackDebugInformation()
 {
-	if (!m_context || m_context->closing())
-		return;
+    ASSERT(m_context != nullptr);
 
+#if __cplusplus >= __cpp_lib_uncaught_exceptions
     if (std::uncaught_exceptions() != 0)
+#else
+    if (std::uncaught_exception()) // deprecated in C++17
+#endif
     {
         // Exception was thrown and stack unwinding is in progress.
         m_context->exceptionNotifyStackUnwinding();
     }
     m_context->popStackCall();
-}
-
-void StackDebugInformation::printStackTrace() noexcept // static
-{
-	IThread* pThreadState = ThreadHolder::get().current();
-	if (pThreadState)
-		static_cast<AbstractSphereThread*>(pThreadState)->printStackTrace();
-}
-
-void StackDebugInformation::freezeCallStack(bool freeze) noexcept // static
-{
-	IThread* pThreadState = ThreadHolder::get().current();
-	if (pThreadState)
-		static_cast<AbstractSphereThread*>(pThreadState)->freezeCallStack(freeze);
 }
 
 #endif // THREAD_TRACK_CALLSTACK

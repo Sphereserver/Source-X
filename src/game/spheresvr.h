@@ -14,7 +14,6 @@ class GlobalInitializer
 {
 public:
     GlobalInitializer();
-	static void InitRuntimeDefaultValues();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////

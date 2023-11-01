@@ -55,7 +55,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	#-- Setting common linker flags
 
 	IF (${USE_MSAN})
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie")
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
 	ENDIF()
 
 	 # -s and -g need to be added/removed also to/from linker flags!

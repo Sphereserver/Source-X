@@ -214,7 +214,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					lpctstr pszArgs = s.GetArgStr();
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
-					Str_CopyLimitNull( pszTmp2, pszArgs, Str_TempLength() );
+					Str_CopyLimitNull( pszTmp2, pszArgs, STR_TEMPLENGTH );
 					pChar->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
@@ -237,7 +237,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 
 					++sm_iListIndex;
 
-					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), Str_TempLength());
+					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
 					pStone->ParseScriptText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
 					pSrc->SysMessage(pszTmp2);
 				}
@@ -252,7 +252,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				{
 					CGMPage* pPage = sptrPage.get();
 					++sm_iListIndex;
-					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), Str_TempLength());
+					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), STR_TEMPLENGTH);
 					pPage->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
@@ -318,7 +318,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	while ( FileRead.ReadTextLine( false ))
 	{
 		tchar *pszTmp = Str_GetTemp();
-		Str_CopyLimitNull( pszTmp, FileRead.GetKey(), Str_TempLength());
+		Str_CopyLimitNull( pszTmp, FileRead.GetKey(), STR_TEMPLENGTH);
 
 		tchar * pszHead = strstr( pszTmp, "<script language=\"Sphere\">" );
 		if ( pszHead != nullptr )
@@ -393,7 +393,7 @@ void CWebPageDef::WebPageLog()
 	CSTime datetime = CSTime::GetCurrentTime();
 
 	tchar *pszTemp = Str_GetTemp();
-	snprintf(pszTemp, Str_TempLength(), "%s%d%02d%02d%s", szName, datetime.GetYear()%100, datetime.GetMonth(), datetime.GetDay(), pszExt);
+	snprintf(pszTemp, STR_TEMPLENGTH, "%s%d%02d%02d%s", szName, datetime.GetYear()%100, datetime.GetMonth(), datetime.GetDay(), pszExt);
 
 	CSFileText FileTest;
 	if ( FileTest.Open(pszTemp, OF_READ|OF_TEXT) )
@@ -583,7 +583,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	if ( pdateIfModifiedSince->IsTimeValid() && !fGenerate && (pdateIfModifiedSince->GetTime() <= dateChange) )
 	{
 		tchar *pszTemp = Str_GetTemp();
-		snprintf(pszTemp, Str_TempLength(),
+		snprintf(pszTemp, STR_TEMPLENGTH,
 			"HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME "\r\nContent-Length: 0\r\n\r\n", pcDate);
 		new PacketWeb(pClient, (byte*)pszTemp, (uint)strlen(pszTemp));
 		return 0;

@@ -2012,23 +2012,23 @@ bool CItemMultiCustom::LoadValidItems()
     int iErrCode = 0;
     for (CSVRowData::iterator itCsv = csvDataRow.begin(), end = csvDataRow.end(); itCsv != end; ++itCsv)
     {
-        if (Str_TempLength() < Str_ConcatLimitNull(pszHeaderFull, "\t", Str_TempLength()))
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszHeaderFull, "\t", STR_TEMPLENGTH))
         {
             iErrCode = 1;
             break;
         }
-        if (Str_TempLength() < Str_ConcatLimitNull(pszHeaderFull, itCsv->first.c_str(), Str_TempLength()))
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszHeaderFull, itCsv->first.c_str(), STR_TEMPLENGTH))
         {
             iErrCode = 2;
             break;
         }
 
-        if (Str_TempLength() < Str_ConcatLimitNull(pszRowFull, "\t", Str_TempLength()))
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszRowFull, "\t", STR_TEMPLENGTH))
         {
             iErrCode = 3;
             break;
         }
-        if (Str_TempLength() < Str_ConcatLimitNull(pszRowFull, itCsv->second.c_str(), Str_TempLength()))
+        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszRowFull, itCsv->second.c_str(), STR_TEMPLENGTH))
         {
             iErrCode = 4;
             break;

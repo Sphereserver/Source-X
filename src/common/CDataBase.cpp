@@ -48,7 +48,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	if ( (port = strchr(host, ':')) != nullptr )
 	{
 		char *pcTemp = Str_GetTemp();
-		Str_CopyLimitNull(pcTemp, host, Str_TempLength());
+		Str_CopyLimitNull(pcTemp, host, STR_TEMPLENGTH);
 		*(strchr(pcTemp, ':')) = 0;
 		portnum = atoi(port+1);
 		host = pcTemp;
@@ -147,9 +147,9 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
                     mapQueryResult.SetStr(fields[i].name, true, z);
                 }
             
-                snprintf(zStore, Str_TempLength(), "%d.%d", rownum, i);
+                snprintf(zStore, STR_TEMPLENGTH, "%d.%d", rownum, i);
                 mapQueryResult.SetStr(zStore, true, z);
-                snprintf(zStore, Str_TempLength(), "%d.%s", rownum, fields[i].name);
+                snprintf(zStore, STR_TEMPLENGTH, "%d.%s", rownum, fields[i].name);
                 mapQueryResult.SetStr(zStore, true, z);
             }
             ++rownum;

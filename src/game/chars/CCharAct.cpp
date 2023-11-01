@@ -1921,7 +1921,7 @@ bool CChar::ItemBounce( CItem * pItem, bool fDisplayMsg )
 				else //we changed the cont in the script
 				{
 					tchar* pszMsg = Str_GetTemp();
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_BOUNCE_CONT), pCont->GetName());
 					pszWhere = pszMsg;
 				}
 			}
@@ -2231,7 +2231,7 @@ void CChar::EatAnim( lpctstr pszName, ushort uiQty )
 		UpdateAnimate(ANIM_EAT);
 
 	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
 	Emote(pszMsg);
 
 	ushort uiHits = 0;
@@ -2695,7 +2695,7 @@ CChar * CChar::Horse_GetValidMountChar()
 ITEMID_TYPE CChar::Horse_GetMountItemID() const
 {
 	tchar* ptcMountID = Str_GetTemp();
-	snprintf(ptcMountID, Str_TempLength(), "mount_0x%x", GetDispID());
+	snprintf(ptcMountID, STR_TEMPLENGTH, "mount_0x%x", GetDispID());
 	lpctstr ptcMemoryID = g_Exp.m_VarDefs.GetKeyStr(ptcMountID);			// get the mount item defname from the mount_0x** defname
 
 	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, ptcMemoryID);
@@ -3123,7 +3123,7 @@ bool CChar::Death()
 	int iKillers = 0;
 	CChar * pKiller = nullptr;
 	tchar * pszKillStr = Str_GetTemp();
-	int iKillStrLen = snprintf( pszKillStr, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
+	int iKillStrLen = snprintf( pszKillStr, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
 	for ( size_t count = 0; count < m_lastAttackers.size(); ++count )
 	{
 		pKiller = CUID::CharFindFromUID(m_lastAttackers[count].charUID);
@@ -3140,7 +3140,7 @@ bool CChar::Death()
 			pKiller->Noto_Kill( this, GetAttackersCount() );
 
 			iKillStrLen += snprintf(
-				pszKillStr + iKillStrLen, Str_TempLength() - iKillStrLen,
+				pszKillStr + iKillStrLen, STR_TEMPLENGTH - iKillStrLen,
 				"%s%c'%s'.",
 				iKillers ? ", " : "", (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
 
@@ -3150,7 +3150,7 @@ bool CChar::Death()
 
 	// Record the kill event for posterity
 	if ( !iKillers )
-		iKillStrLen += snprintf( pszKillStr + iKillStrLen, Str_TempLength() - iKillStrLen, "accident." );
+		iKillStrLen += snprintf( pszKillStr + iKillStrLen, STR_TEMPLENGTH - iKillStrLen, "accident." );
 	if ( m_pPlayer )
 		g_Log.Event( LOGL_EVENT|LOGM_KILLS, "%s\n", pszKillStr );
 	if ( m_pParty )
@@ -3457,7 +3457,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			tchar *pszMsg = Str_GetTemp();
 			if ( Stat_GetVal(STAT_DEX) < uiStamReq )		// check if we have enough stamina to push the char
 			{
-				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
 				SysMessage(pszMsg);
 				return nullptr;
 			}
@@ -3465,19 +3465,19 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			else if (pChar->IsStatFlag(STATF_INVISIBLE | STATF_HIDDEN) ) {
 				if ((g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE))
 					// OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE));
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE));
 				else
 				{
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
+					snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
 					if (!fPathFinding) // When NPC use pathfinding(NPC_AI_PATH) to calculate their destination, char should not be reveal
 						pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
 				}
 			}
 
 			else if ( pChar->IsStatFlag(STATF_SLEEPING) )
-				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
 			else
-				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
+				snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
 
 			if ( iRet != TRIGRET_RET_FALSE )
 				SysMessage(pszMsg);
@@ -4418,7 +4418,7 @@ void CChar::OnTickFood(ushort uiVal, int HitsHungerLoss)
 	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HUNGER), pszMsgLevel);
 
 	char *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_LOOKS), pszMsgLevel);
+	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_LOOKS), pszMsgLevel);
 	CItem *pMountItem = Horse_GetValidMountItem();
 	if ( pMountItem )
 		pMountItem->Emote(pszMsg);

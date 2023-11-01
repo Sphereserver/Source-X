@@ -44,7 +44,7 @@ protected:
 protected:  bool _HasCache() const;
 public:     bool HasCache() const;
 
-public:
+private:
 	bool _fClosed;
 	bool _fRealFile;
 	int _iCurrentLine;

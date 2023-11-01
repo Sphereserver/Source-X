@@ -15,7 +15,7 @@ class CSObjArray : public CSPtrTypeArray<TYPE>
 {
 protected:
     bool _fBaseDestructorShouldDeleteElements;
-    virtual void DestroyElements() noexcept;
+    virtual void DeleteElements() noexcept;
 
 public:
     static const char *m_sClassName;
@@ -28,7 +28,7 @@ public:
         _fBaseDestructorShouldDeleteElements(true)
     {}
     virtual ~CSObjArray() noexcept {
-        ClearFree();
+        DeleteElements();
     }
 private:
     /**
@@ -51,9 +51,7 @@ public:
    */
     bool IsValidIndex(size_t i) const;
 
-    void clear() = delete;
-    virtual void ClearFree();
-
+    void clear();
     ///@}
 };
 
@@ -62,17 +60,14 @@ public:
 
 // CSObjArray:: Modifiers.
 
-#include "../../sphere/threads.h"
-
 template<class TYPE>
-void CSObjArray<TYPE>::DestroyElements() noexcept
+void CSObjArray<TYPE>::DeleteElements() noexcept
 {
     if (!this->_fBaseDestructorShouldDeleteElements)
         return;
-    for (TYPE& elem : *this) {
+    for (TYPE elem : *this)
         delete elem;
-        elem = nullptr;
-    }
+    this->std::vector<TYPE>::clear();
 }
 
 template<class TYPE>
@@ -82,10 +77,10 @@ bool CSObjArray<TYPE>::IsValidIndex(size_t i) const
 }
 
 template<class TYPE>
-void CSObjArray<TYPE>::ClearFree()
+void CSObjArray<TYPE>::clear()
 {
-    DestroyElements();
-    this->erase(this->begin(), this->end());
+    DeleteElements();
+    this->std::vector<TYPE>::clear();
 }
 
 #endif //_INC_CSOBJARRAY_H

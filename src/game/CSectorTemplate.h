@@ -75,14 +75,13 @@ class CSectorBase		// world sector
     {
     public:
         static const char *m_sClassName;
-
-		CObjPointSortArray() = default;
-		virtual ~CObjPointSortArray() override = default;
-		CObjPointSortArray(const CObjPointSortArray& copy) = delete;
-		CObjPointSortArray& operator=(const CObjPointSortArray& other) = delete;
-
         // Find a point fast.
-        virtual int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const override;
+        int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const;
+    public:
+        CObjPointSortArray() = default;
+    private:
+        CObjPointSortArray(const CObjPointSortArray& copy);
+        CObjPointSortArray& operator=(const CObjPointSortArray& other);
     };
 
 protected:
