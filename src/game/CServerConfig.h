@@ -11,7 +11,7 @@
 #include "../common/resource/sections/CSkillDef.h"
 #include "../common/resource/sections/CSpellDef.h"
 #include "../common/resource/sections/CWebPageDef.h"
-#include "../common/resource/CResourceBase.h"
+#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
 #include "../common/resource/CResourceScript.h"
 #include "../common/resource/CResourceSortedArrays.h"
@@ -21,14 +21,17 @@
 #include "../common/CTextConsole.h"
 #include "../common/sphereproto.h"
 #include "CRegion.h"
+#include "CStartLoc.h"
 #include "game_enums.h"
 #include <map>
 
 
 class CAccount;
 class CClient;
+
 class CServerDef;
 using CServerRef = CServerDef*;
+
 
 class CResourceNamedDef;
 
@@ -219,7 +222,7 @@ enum CHATFLAGS_TYPE
  *
  * @brief   Script defined resources (not saved in world file) (sphere.ini)
  */
-extern class CServerConfig : public CResourceBase
+extern class CServerConfig : public CResourceHolder
 {
 	//
 	static const CAssocReg sm_szLoadKeys[];
