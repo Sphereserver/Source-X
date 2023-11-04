@@ -1008,15 +1008,19 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
 
     CWorldSearch AreaChars(GetTopPoint(), iDistance);
     for (;;)
+        //pSrc = char make the attach
+        //pChar = char get scan on loop iteration
+        //this = Char get the initial hit
     {
         CChar* pChar = AreaChars.GetChar();
         if (!pChar)
             break;
         if ((pChar == this) || (pChar == pSrc))
             continue;
-        if (pChar->NPC_IsOwnedBy(pSrc,false))	// it's my pet?
+        if (pChar->Fight_CanHit(pSrc,true) == WAR_SWING_INVALID) //Check if target can be hit (IsDisconnected, stone,  safe zone etc)
             continue;
-        
+        if (!pChar->m_pClient && pChar->NPC_IsOwnedBy(pSrc,false))	// it's my pet?
+            continue;
         if (!pChar->CanSeeLOS(pSrc)) //Avoid hit someone in nearby house
             continue;
         // FIXME. On UO guide  damage occur to nearby targets the wielder can legally attack. How can add legaly check?
