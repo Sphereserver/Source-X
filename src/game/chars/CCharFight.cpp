@@ -1017,13 +1017,14 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
             break;
         if ((pChar == this) || (pChar == pSrc))
             continue;
-        if (pChar->Fight_CanHit(pSrc,true) == WAR_SWING_INVALID) //Check if target can be hit (IsDisconnected, stone,  safe zone etc)
+        if (pChar->Fight_CanHit(pSrc,true) == WAR_SWING_INVALID) //Check if target can be hit (I am invul, stone etc. Target is Disconnected,safe zone etc)
             continue;
         if (!pChar->m_pClient && pChar->NPC_IsOwnedBy(pSrc,false))	// it's my pet?
             continue;
         if (!pChar->CanSeeLOS(pSrc)) //Avoid hit someone in nearby house
             continue;
-        // FIXME. On UO guide  damage occur to nearby targets the wielder can legally attack. How can add legaly check?
+        if (pChar->Noto_CalcFlag(pSrc) == NOTO_GOOD) //Avoid to hit someone we can't legally attack (Same NOT , same guild, same party etc)
+            continue;
 
         pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
         pChar->Effect(EFFECT_OBJ, ITEMID_FX_SPARKLE_2, this, 1, 15, false, effectHue);
