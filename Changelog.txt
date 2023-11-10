@@ -3427,7 +3427,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Guildstone removal caused an exception (Issue #1165).
 - Fixed: In-game chat not working correctly and generating exceptions since last update (Issue #1140).
 
-24-10-2023, Jhobean
+10-11-2023, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
 
 

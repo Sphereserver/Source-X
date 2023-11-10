@@ -1008,22 +1008,22 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
 
     CWorldSearch AreaChars(GetTopPoint(), iDistance);
     for (;;)
-        //pSrc = char make the attach
-        //pChar = char get scan on loop iteration
+        //pSrc = Char make the attack
+        //pChar = Char scanned on the loop iteration
         //this = Char get the initial hit
     {
         CChar* pChar = AreaChars.GetChar();
         if (!pChar)
             break;
-        if ((pChar == this) || (pChar == pSrc))
+        if ((pChar == this) || (pChar == pSrc))                     //This char already receive the base hit. Damage already done
             continue;
-        if (pChar->Fight_CanHit(pSrc,true) == WAR_SWING_INVALID) //Check if target can be hit (I am invul, stone etc. Target is Disconnected,safe zone etc)
+        if (pChar->Fight_CanHit(pSrc,true) == WAR_SWING_INVALID)    //Check if target can be hit (I am invul, stone etc. Target is Disconnected,safe zone etc)
             continue;
         if (!pChar->m_pClient && pChar->NPC_IsOwnedBy(pSrc,false))	// it's my pet?
             continue;
-        if (!pChar->CanSeeLOS(pSrc)) //Avoid hit someone in nearby house
+        if (!pChar->CanSeeLOS(pSrc))                                //Avoid hit someone in nearby house
             continue;
-        if (pChar->Noto_CalcFlag(pSrc) == NOTO_GOOD) //Avoid to hit someone we can't legally attack (Same NOT , same guild, same party etc)
+        if (pChar->Noto_CalcFlag(pSrc) == NOTO_GOOD)                //Avoid to hit someone we can't legally attack (same guild, same party, Vendor etc)
             continue;
 
         pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
