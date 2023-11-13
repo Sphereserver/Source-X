@@ -7,7 +7,7 @@
 #define _INC_CVARDEFMAP_H
 
 #include "sphere_library/CSString.h"
-#include "sphere_library/CSSortedVector.h"
+#include "sphere_library/ssorted_vector.h"
 
 
 class CTextConsole;
@@ -120,7 +120,7 @@ class CVarDefMap
             return ( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
         }
 	};
-	using DefCont = CSSortedVector<CVarDefCont *, ltstr>;
+	using DefCont = sl::sorted_vector<CVarDefCont *, ltstr>;
 
 	DefCont m_Container;
 

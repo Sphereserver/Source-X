@@ -290,14 +290,14 @@ void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow
 
 void CClient::addObjectRemove( const CUID& uid ) const
 {
-	ADDTOCALLSTACK("CClient::addObjectRemove");
+	ADDTOCALLSTACK("CClient::addObjectRemove (CUID)");
 	// Tell the client to remove the item or char
 	new PacketRemoveObject(this, uid);
 }
 
 void CClient::addObjectRemove( const CObjBase * pObj ) const
 {
-	ADDTOCALLSTACK("CClient::addObjectRemove");
+	ADDTOCALLSTACK("CClient::addObjectRemove (CObjBase)");
 	addObjectRemove( pObj->GetUID());
 }
 
@@ -823,6 +823,9 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	Str_CopyLimitNull(	ptcBarkBuffer, name,	STR_TEMPLENGTH);
 	Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
 
+	if (mode == TALKMODE_SPELL) //Set TALKMODE_SPELL to TALKMODE_SAY after every color check completed to block spell flood.
+		mode = TALKMODE_SAY;
+
 	switch ( Args[2] )
 	{
 		case 3:	// Extended localized message (with affixed ASCII text)
@@ -1247,7 +1250,7 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_ridRes);
+					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
 					if ( pResDef )
 						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
 				}
@@ -1454,6 +1457,12 @@ void CClient::addPlayerStart( CChar * pChar )
 
 	addKRToolbar(pChar->m_pPlayer->getKrToolbarStatus());
 	resendBuffs();
+
+	if (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT)
+	{
+		addGlobalChatConnect();
+		addGlobalChatStatusToggle();
+	}
 }
 
 void CClient::addPlayerWarMode() const
@@ -1866,7 +1875,7 @@ void CClient::addSkillWindow(SKILL_TYPE skill, bool fFromInfo) const // Opens th
 		pChar = m_pChar;
 
 	bool fAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
-	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
+	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.valid_index(skill) == false)
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERSKILLS) )
@@ -2536,6 +2545,57 @@ void CClient::addChatSystemMessage( CHATMSG_TYPE iType, lpctstr pszName1, lpctst
 	new PacketChatMessage(this, iType, pszName1, pszName2, lang);
 }
 
+void CClient::addGlobalChatConnect()
+{
+	ADDTOCALLSTACK("CClient::addGlobalChatConnect");
+	// Connect on Global Chat
+	if (!m_pChar || !PacketGlobalChat::CanSendTo(GetNetState()))
+		return;
+
+	// Set Jabber ID (syntax: CharName_CharUID@ServerID)
+	tchar* pszJID = Str_GetTemp();
+	sprintf(pszJID, "%.6s_%.7lu@%.2hhu", m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()), 0);
+	CGlobalChatChanMember::SetJID(pszJID);
+
+	// Send xml to client
+	tchar* pszXML = Str_GetTemp();
+	sprintf(pszXML, "<iq to=\"%s\" id=\"iq_%.10lu\" type=\"6\" version=\"1\" jid=\"%s\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), CGlobalChatChanMember::GetJID());
+
+	CGlobalChatChanMember::SetVisible(false);
+	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::InfoQuery, pszXML);
+	SysMessage("Global Chat is now connected.");
+}
+
+void CClient::addGlobalChatStatusToggle()
+{
+	ADDTOCALLSTACK("CClient::addGlobalChatStatusToggle");
+	// Toggle client visibility status (online/offline) on Global Chat
+	if (!m_pChar || !PacketGlobalChat::CanSendTo(GetNetState()))
+		return;
+
+	int iShow;
+	lpctstr pszMsg;
+	if (CGlobalChatChanMember::IsVisible())
+	{
+		iShow = 0;
+		pszMsg = "Global Chat Offline";
+	}
+	else
+	{
+		iShow = 1;
+		pszMsg = "Global Chat Online";
+	}
+
+	tchar* pszXML = Str_GetTemp();
+	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10lu\" name=\"%.6s\" show=\"%d\" version=\"1\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
+
+	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));
+	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::Presence, pszXML);
+	SysMessage(pszMsg);
+
+	// TO-DO: also send the status change to all clients on friend list
+}
+
 void CClient::addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText )
 {
 	ADDTOCALLSTACK("CClient::addGumpTextDisp");
@@ -2739,9 +2799,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		}
 	}
 
-	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.IsContainerEmpty() )
+	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.empty() )
 	{
-		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.GetContentCount()), g_Cfg.m_cCommandPrefix);
+		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.size()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
@@ -2847,23 +2907,22 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		}
 	}
 
-	//	Do the scripts allow to delete the char?
-	enum TRIGRET_TYPE tr;
-	CScriptTriggerArgs Args;
-	Args.m_pO1 = this;
-	pChar->r_Call("f_onchar_delete", pChar, &Args, nullptr, &tr);
-	if ( tr == TRIGRET_RET_TRUE )
+	
+
+	if (pChar->Delete()) //	Do the scripts allow to delete the char?
+	{
+		g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "Character delete request on client login screen.\n");
+
+		pChar->ClearPlayer();
+		// refill the list.
+		new PacketCharacterListUpdate(this, GetAccount()->m_uidLastChar.CharFind());
+		return PacketDeleteError::Success;
+	}
+	else
 	{
 		return PacketDeleteError::InvalidRequest;
 	}
-
-	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
-	pChar->Delete(true);
-
-	// refill the list.
-	new PacketCharacterListUpdate(this, GetAccount()->m_uidLastChar.CharFind());
-
-	return PacketDeleteError::Success;
+	
 }
 
 byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, bool fTest )

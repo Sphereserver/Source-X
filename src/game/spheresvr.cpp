@@ -32,13 +32,14 @@
 // Headers for InitRuntimeStaticMembers
 #include "clients/CClient.h"
 
-
+/*
 #ifdef _SANITIZERS
 const char* __asan_default_options() {
     //return "verbosity=1:malloc_context_size=20";
     return "sleep_before_dying=5";
 }
 #endif
+*/
 
 // Dynamic allocation of some global stuff
 std::string g_sServerDescription;
@@ -80,11 +81,8 @@ GlobalInitializer::GlobalInitializer()
     SetExceptionTranslator();
 #endif
 
-// Set purecall handler?
-#ifndef _DEBUG
-    // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+	// Set function to handle the invalid case where a pure virtual function is called.
     SetPurecallHandler();
-#endif
 
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");

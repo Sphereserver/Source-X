@@ -1,8 +1,8 @@
-
 #include "../game/CServerConfig.h"
 #include "../game/CServer.h"
 #include "../game/CServerTime.h"
 #include "../sphere/asyncdb.h"
+#include "resource/sections/CResourceNamedDef.h"
 #include "CLog.h"
 #include "CException.h"
 #include "CScriptTriggerArgs.h"
@@ -432,7 +432,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 		{
 			ptcKey += strlen(sm_szLoadKeys[index]);
 			GETNONWHITESPACE(ptcKey);
-			sVal = "";
+			sVal.Clear();
 
 			if ( ptcKey[0] != '\0' )
 			{

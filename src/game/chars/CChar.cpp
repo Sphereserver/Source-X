@@ -73,7 +73,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@ExpChange",			// EXP is going to change
 	"@ExpLevelChange",		// Experience LEVEL is going to change
 	"@Falling",				//char is falling from height >= 10
-	"@FameChange",			// Fame changed
+	"@FameChange",			// Fame is changing
 	"@FollowersUpdate",
 
 	"@GetHit",				// I just got hit.
@@ -129,8 +129,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemUNEQUIP",			// i have unequipped (or try to unequip) an item
 
 	"@Jailed",
-	"@KarmaChange",				// Karma chaged
-	"@Kill",				//+I have just killed someone
+	"@KarmaChange",         // Karma is changing
+	"@Kill",				// +I have just killed someone
 	"@LogIn",				// Client logs in
 	"@LogOut",				// Client logs out (21)
 	"@Mount",				// I'm trying to mount my horse (or whatever)
@@ -155,6 +155,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NPCSeeWantItem",		// (NPC only) i see something good.
 	"@NPCSpecialAction",	// Idle
 
+    "@PartyAdd",            // Player joined the party.
 	"@PartyDisband",		//I just disbanded my party
 	"@PartyInvite",			//SRC invited me to join a party, so I may chose
 	"@PartyLeave",
@@ -319,9 +320,7 @@ CChar::CChar( CREID_TYPE baseID ) :
     // SubscribeComponent Prop Components
 	TrySubscribeComponentProps<CCPropsChar>();
 	TrySubscribeComponentProps<CCPropsItemChar>();
-
-    // SubscribeComponent regular Components
-    SubscribeComponent(new CCFaction());
+	SubscribeComponent(new CCFaction(pCharDef->GetFaction()));
 
 	ASSERT(IsDisconnected());
 }
@@ -397,22 +396,24 @@ bool CChar::NotifyDelete(bool fForce)
 	if (IsTrigUsed(TRIGGER_DESTROY))
 	{
 		//We can forbid the deletion in here with no pain
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce) //If NotifyDelete is forced, it's imposible to reverse the deletion
+		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
+		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
 
 	// If this is a player, check for f_onchar_delete
-	if (m_pClient || fForce)
+	if (m_pPlayer)
 	{
 		TRIGRET_TYPE trigReturn;
 		CScriptTriggerArgs Args;
-		Args.m_pO1 = m_pClient;
+		if (m_pClient)
+			Args.m_pO1 = m_pClient;
 		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
-		//If NotifyDelete is forced, we must avoid the possibility to block deletion (will create infinite loop)
+		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
 		if (trigReturn == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
-	
+
 	// Clear follower slots on pet owner
 	if (m_pNPC)
 		NPC_PetClearOwners();
@@ -442,7 +443,7 @@ bool CChar::Delete(bool fForce)
 		pClient->CharDisconnect();
 		pClient->GetNetState()->markReadClosed();
 	}
-	
+
 	DeleteCleanup(fForce);	// not virtual
 
 	if (m_pPlayer && fForce)
@@ -550,7 +551,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
 		if (!pCurSector->IsCharDisconnectedIn(this)) //This is necessary otherwise the character will be added another time and causing an error
 			pCurSector->m_Chars_Disconnect.AddCharDisconnected(this);
 		else
-			SetUIDContainerFlags(UID_O_DISCONNECT); 
+			SetUIDContainerFlags(UID_O_DISCONNECT);
 
 		IsDisconnected();
 	}
@@ -571,7 +572,7 @@ void CChar::ClearPlayer()
 	{
 		if (g_Serv.GetServerMode() != SERVMODE_Exiting)
 		{
-			g_Log.EventWarn("Player delete '%s' name from account '%s'.\n", GetName(), pAccount->GetName());
+			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' as been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
 		}
 
 		pAccount->DetachChar(this);	// unlink me from my account.
@@ -713,7 +714,7 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 
 	if ( !dwBlockFlags )
 		dwBlockFlags = dwCanMoveFlags;
-	
+
     if (dwCanMoveFlags == 0xFFFFFFFF)
         return pt.m_z;
 	if (dwCanMoveFlags & CAN_C_WALK )
@@ -829,7 +830,7 @@ void CChar::StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 }
 
 bool CChar::IsPriv( word flag ) const
-{	
+{
 	// PRIV_GM flags
 	if ( m_pPlayer == nullptr )
 		return false;	// NPC's have no privs.
@@ -1237,7 +1238,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 				const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
 				//If we have reached the maximum follower slots we remove the ownership of the pet by clearing the memory flag instead of using NPC_PetClearOwners().
 				if (!pTest3->FollowersUpdate(this, maximum(0, iFollowerSlots)))
-					Memory_ClearTypes(MEMORY_IPET); 
+					Memory_ClearTypes(MEMORY_IPET);
 			}
 		}
 	}
@@ -1276,17 +1277,41 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 {
 	ADDTOCALLSTACK("CChar::ReadScriptReduced");
 	bool fFullInterp = false;
-	bool fBlockItemAttr = false; //Set a temporary boolean to block item attributes to set on Character.
 
+	bool fBlockItemAttr = false; // Set a temporary boolean to block item attributes to set on Character.
 	CItem * pItem = nullptr;
 	while ( s.ReadKeyParse() )
 	{
 		if ( s.IsKeyHead("ON", 2) )
 			break;
 
+		bool fItemCreated = false;	// With the current keyword, have i created an item?
 		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, ARRAY_COUNT(CItem::sm_szTemplateTable)-1);
-		bool fItemCreation = false;
-		if ( fVendor )
+		if (iCmd == ITC_FUNC)
+		{
+			if (!pItem || fBlockItemAttr)
+				continue;
+
+			lptstr ptcFunctionName = s.GetArgRaw();
+			std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
+			// Locate arguments for the called function
+			tchar* ptcArgs = strchr(ptcFunctionName, ' ');
+			if (ptcArgs)
+			{
+				*ptcArgs = 0;
+				++ptcArgs;
+				GETNONWHITESPACE(ptcArgs);
+				pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
+			}
+			pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
+			if (pItem->IsDeleted())
+			{
+				pItem = nullptr;
+				//g_Log.EventDebug("FUNC deleted the item.\n");
+			}
+			continue;
+		}
+		else if ( fVendor )
 		{
 			if (iCmd != -1)
 			{
@@ -1296,7 +1321,7 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 					case ITC_SELL:
 					{
 						fBlockItemAttr = false; //Make sure we reset the value, if the last input is not a ITEM(NEWBIE) or CONTAINER.
-						CItemContainer * pCont = GetBank((iCmd == ITC_SELL) ? LAYER_VENDOR_STOCK : LAYER_VENDOR_BUYS );
+						CItemContainer * pCont = GetBank((iCmd == ITC_SELL) ? LAYER_VENDOR_STOCK : LAYER_VENDOR_BUYS);
 						if ( pCont )
 						{
 							pItem = CItem::CreateHeader(s.GetArgRaw(), pCont, false);
@@ -1306,9 +1331,10 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 						pItem = nullptr;
 						continue;
 					}
+					//case ITC_BREAK:	// I don't find a use case for that...
 					case ITC_ITEM:
 					case ITC_CONTAINER:
-					case ITC_ITEMNEWBIE:					
+					case ITC_ITEMNEWBIE:
 						fBlockItemAttr = true; //Set the value to block next Color or Attribute inputs for items.
 						pItem = nullptr;
 						continue;
@@ -1321,66 +1347,67 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 		}
 		else
 		{
-			switch ( iCmd )
-			{
+            switch (iCmd)
+            {
 				case ITC_FULLINTERP:
-					{
-						lpctstr	pszArgs	= s.GetArgStr();
-						GETNONWHITESPACE(pszArgs);
-						fFullInterp = ( *pszArgs == '\0' ) ? true : ( s.GetArgVal() != 0);
-						continue;
-					}
+				{
+					lpctstr	pszArgs = s.GetArgStr();
+					GETNONWHITESPACE(pszArgs);
+					fFullInterp = (*pszArgs == '\0') ? true : (s.GetArgVal() != 0);
+					continue;
+				}
 				case ITC_NEWBIESWAP:
-					{
-						if ( !pItem )
-							continue;
-
-						if ( pItem->IsAttr( ATTR_NEWBIE ) )
-						{
-							if ( Calc_GetRandVal( s.GetArgVal() ) == 0 )
-								pItem->ClrAttr(ATTR_NEWBIE);
-						}
-						else
-						{
-							if ( Calc_GetRandVal( s.GetArgVal() ) == 0 )
-								pItem->SetAttr(ATTR_NEWBIE);
-						}
+				{
+					if (!pItem)
 						continue;
+
+					if (pItem->IsAttr(ATTR_NEWBIE))
+					{
+						if (Calc_GetRandVal(s.GetArgVal()) == 0)
+							pItem->ClrAttr(ATTR_NEWBIE);
 					}
+					else
+					{
+						if (Calc_GetRandVal(s.GetArgVal()) == 0)
+							pItem->SetAttr(ATTR_NEWBIE);
+					}
+					continue;
+				}
 				case ITC_ITEM:
 				case ITC_CONTAINER:
 				case ITC_ITEMNEWBIE:
+				{
+					fBlockItemAttr = false;
+					fItemCreated = true;
+
+					if (IsStatFlag(STATF_CONJURED) && iCmd != ITC_ITEMNEWBIE) // This check is not needed (sure?).
+						break; // conjured creates have no loot.
+
+					pItem = CItem::CreateHeader(s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE);
+					if (pItem == nullptr)
 					{
-						fItemCreation = true;
-
-						if ( IsStatFlag( STATF_CONJURED ) && iCmd != ITC_ITEMNEWBIE ) // This check is not needed.
-							break; // conjured creates have no loot.
-
-						pItem = CItem::CreateHeader( s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE );
-						if ( pItem == nullptr )
-						{
-							m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
-							continue;
-						}
-						m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
-
-						pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
-						pItem->_iCreatedResScriptLine = s.m_iLineNum;
-
-						if ( iCmd == ITC_ITEMNEWBIE )
-							pItem->SetAttr(ATTR_NEWBIE);
-
-						if ( !pItem->IsItemInContainer() && !pItem->IsItemEquipped())
-							pItem = nullptr;
+						m_UIDLastNewItem = GetUID();	// Setting m_UIDLastNewItem to CChar's UID to prevent calling any following functions meant to be called on that item
 						continue;
 					}
+					m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
+
+					pItem->_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+					pItem->_iCreatedResScriptLine = s.m_iLineNum;
+
+					if (iCmd == ITC_ITEMNEWBIE)
+						pItem->SetAttr(ATTR_NEWBIE);
+
+					if (!pItem->IsItemInContainer() && !pItem->IsItemEquipped())
+						pItem = nullptr;
+					continue;
+				}
 
 				case ITC_BREAK:
 				case ITC_BUY:
 				case ITC_SELL:
 					pItem = nullptr;
 					continue;
-			}
+				}
 
 		}
 
@@ -1388,7 +1415,7 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 			continue;
 		if ( fBlockItemAttr ) //Did we force to cancel item attributes?
 			continue;
-			
+
 		if ( pItem != nullptr )
 		{
 			if ( fFullInterp )	// Modify the item.
@@ -1396,10 +1423,11 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 			else
 				pItem->r_LoadVal( s );
 		}
-		else if (!fItemCreation)
+		else if (!fItemCreated)
 		{
+			// I'm setting an attribute to myself, not the item (e.g. @Create trigger). Run that script line.
 			TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, &g_Serv, nullptr, nullptr );
-			if ( (tRet == TRIGRET_RET_FALSE) && fFullInterp )
+			if ((tRet == TRIGRET_RET_FALSE) && fFullInterp)
 				;
 			else if ( tRet != TRIGRET_RET_DEFAULT )
 			{
@@ -1501,7 +1529,7 @@ void CChar::SetID( CREID_TYPE id )
 	CCharBase * pCharDef = CCharBase::FindCharBase(id);
 	if ( pCharDef == nullptr )
 	{
-		if ( (id != -1) && (id != CREID_INVALID) )
+		if ( (id != (CREID_TYPE)-1) && (id != CREID_INVALID) )
 			DEBUG_ERR(("Create Invalid Char 0%x\n", id));
 
 		id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
@@ -1658,7 +1686,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	// randomize the skills first.
 	for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		if ( g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
+		if ( g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			Skill_SetBase((SKILL_TYPE)i, (ushort)Calc_GetRandVal(g_Cfg.m_iMaxBaseSkill));
 	}
 
@@ -1691,15 +1719,15 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	Stat_SetBase(STAT_DEX, wDex);
 	Stat_SetBase(STAT_INT, wInt);
 
-	if ( IsSkillBase(skSkill1) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill1) )
+	if ( IsSkillBase(skSkill1) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill1) )
 		Skill_SetBase(skSkill1, uiSkillVal1 * 10);
-	if ( IsSkillBase(skSkill2) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill2) )
+	if ( IsSkillBase(skSkill2) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill2) )
 		Skill_SetBase(skSkill2, uiSkillVal2 * 10);
-	if ( IsSkillBase(skSkill3) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill3) )
+	if ( IsSkillBase(skSkill3) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill3) )
 		Skill_SetBase(skSkill3, uiSkillVal3 * 10);
 	if ( skSkill4 != SKILL_NONE )
 	{
-		if ( IsSkillBase(skSkill4) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill4) )
+		if ( IsSkillBase(skSkill4) && g_Cfg.m_SkillIndexDefs.valid_index(skSkill4) )
 			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
@@ -2248,8 +2276,41 @@ do_default:
 	{
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
-			sVal.FormatLLVal(GetDefNum(ptcKey,false));
-			break;
+		{
+			if (!IsSetEF(EF_FollowerList)) //Using an old system?
+			{
+				sVal.FormatLLVal(GetDefNum(ptcKey,false));
+			}
+			else
+			{
+				if (strlen(ptcKey) == 11)
+				{
+					sVal.FormatULLVal(m_followers.size());
+					return true;
+				}
+				sVal.FormatVal(0);
+				ptcKey += 11;
+				if (*ptcKey == '.')
+				{
+					++ptcKey;
+					if (!m_followers.empty())
+					{
+						int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
+						SKIP_SEPARATORS(ptcKey);
+						if (iIndex < (int)m_followers.size())
+						{
+							if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
+							{
+								CUID uid = m_followers[iIndex];
+								sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
+								return true;
+							}
+						}
+					}
+				}
+			}
+			return true;
+		}
 		//On these ones, check BaseDef if not found on dynamic
 		case CHC_MAXFOLLOWER:
 		case CHC_SPELLTIMEOUT:
@@ -2727,8 +2788,11 @@ do_default:
 			return true;
 		case CHC_GUILDABBREV:
 			{
-				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_GUILD);
-				sVal = ( pszAbbrev ) ? pszAbbrev : "";
+				lpctstr ptcAbbrev = Guild_Abbrev(MEMORY_GUILD);
+				if (ptcAbbrev)
+					sVal = ptcAbbrev;
+				else
+					sVal.Clear();
 			}
 			return true;
 		case CHC_ID:
@@ -2838,8 +2902,11 @@ do_default:
 			break;
 		case CHC_TOWNABBREV:
 			{
-				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_TOWN);
-				sVal = ( pszAbbrev ) ? pszAbbrev : "";
+				lpctstr ptcAbbrev = Guild_Abbrev(MEMORY_TOWN);
+				if (ptcAbbrev)
+					sVal = ptcAbbrev;
+				else
+					sVal.Clear();
 			}
 			return true;
 		case CHC_MAXWEIGHT:
@@ -3277,6 +3344,68 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 
 		case CHC_CURFOLLOWER:
+			if (!IsSetEF(EF_FollowerList))
+			{
+				SetDefNum(s.GetKey(), s.GetArgLLVal(), false);
+				UpdateStatsFlag();
+				break;
+			}
+			else
+			{
+				if (strlen(ptcKey) > 11)
+				{
+					ptcKey += 11;
+					if (*ptcKey == '.')
+					{
+						++ptcKey;
+						if (!strnicmp(ptcKey, "CLEAR", 5))
+						{
+							if (!m_followers.empty())
+								m_followers.clear();
+							UpdateStatsFlag();
+							return true;
+						}
+						else if (!strnicmp(ptcKey, "DELETE", 6))
+						{
+							if (!m_followers.empty())
+							{
+								CUID uid = (CUID)s.GetArgDWVal();
+								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
+								{
+									if (uid == *it)
+										it = m_followers.erase(it);
+									else
+										++it;
+								}
+							}
+							return true;
+						}
+						else if (!strnicmp(ptcKey, "ADD", 3))
+						{
+							bool fExists = false;
+							CUID uid = (CUID)s.GetArgDWVal();
+							if (!m_followers.empty())
+							{
+								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
+								{
+									if (uid == *it)
+									{
+										fExists = true;
+										break;
+									}
+									else
+										++it;
+								}
+							}
+
+							if (!fExists)
+								m_followers.emplace_back(uid);
+							return true;
+						}
+					}
+				}
+			}
+			return false;
 		case CHC_MAXFOLLOWER:
 		case CHC_TITHING:
 			{
@@ -3505,16 +3634,17 @@ bool CChar::r_LoadVal( CScript & s )
 			Horse_UnMount();
 			break;
 		case CHC_EMOTEACT:
-			{
-				bool fSet = IsStatFlag(STATF_EMOTEACTION);
-				if ( s.HasArgs() )
-					fSet = s.GetArgVal() ? true : false;
-				else
-					fSet = ! fSet;
-				StatFlag_Mod(STATF_EMOTEACTION,fSet);
-			}
+		{
+			bool fSet = IsStatFlag(STATF_EMOTEACTION);
+			if ( s.HasArgs() )
+				fSet = s.GetArgVal() ? true : false;
+			else
+				fSet = ! fSet;
+			StatFlag_Mod(STATF_EMOTEACTION,fSet);
 			break;
+		}
 		case CHC_FLAGS:
+		{
 			if (g_Serv.IsLoading())
 			{
 				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
@@ -3525,11 +3655,14 @@ bool CChar::r_LoadVal( CScript & s )
 			_uiStatFlag = (_uiStatFlag & (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED)) | (s.GetArgLLVal() & ~(STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED));
 			NotoSave_Update();
 			break;
+		}
 		case CHC_FONT:
+		{
 			m_fonttype = (FONT_TYPE)s.GetArgVal();
 			if (m_fonttype >= FONT_QTY)
 				m_fonttype = FONT_NORMAL;
 			break;
+		}
 		case CHC_SPEECHCOLOROVERRIDE:
 			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
@@ -3569,21 +3702,20 @@ bool CChar::r_LoadVal( CScript & s )
 				m_ptHome.Read( s.GetArgStr() );
 			break;
 		case CHC_NAME:
+		{
+			if (IsTrigUsed(TRIGGER_RENAME))
 			{
-				if ( IsTrigUsed(TRIGGER_RENAME) )
-				{
-					CScriptTriggerArgs args;
-					args.m_s1 = s.GetArgStr();
-					args.m_pO1 = this;
-					if ( this->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
-						return false;
-
-					SetName( args.m_s1 );
-				}
-				else
-					SetName( s.GetArgStr() );
+				CScriptTriggerArgs args;
+				args.m_s1 = s.GetArgStr();
+				args.m_pO1 = this;
+				if (this->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE)
+					return false;
+				SetName(args.m_s1);
 			}
+			else
+				SetName(s.GetArgStr());
 			break;
+		}
         case CHC_OFAME:
 		case CHC_FAME:
             SetFame(s.GetArgUSVal());
@@ -3931,7 +4063,7 @@ void CChar::r_Write( CScript & s )
 
 	for ( uint j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) )
+		if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)j) )
 			continue;
         const ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)j);
         if (uiSkillVal == 0)
@@ -4066,7 +4198,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				ushort uiVal = s.GetArgUSVal();
 				for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 				{
-					if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
+					if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) )
 						continue;
 
 					Skill_SetBase((SKILL_TYPE)i, uiVal );
@@ -4613,7 +4745,7 @@ bool CChar::OnTriggerSpeech( bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMOD
 		goto lbl_cchar_ontriggerspeech;
 
 	{
-		CScriptObj * pDef = g_Cfg.ResourceGetDefByName( RES_SPEECH, pszName );
+		CScriptObj * pDef = g_Cfg.RegisteredResourceGetDefByName( RES_SPEECH, pszName );
 		if ( pDef )
 		{
 			CResourceLink * pLink	= dynamic_cast <CResourceLink *>( pDef );

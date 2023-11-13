@@ -18,10 +18,6 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _fNeedUpdate = true;
 }
 
-CCItemDamageable::~CCItemDamageable()
-{
-}
-
 CItem * CCItemDamageable::GetLink() const
 {
     return _pLink;

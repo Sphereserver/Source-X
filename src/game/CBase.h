@@ -55,11 +55,11 @@ public:
 	dword   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
     RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
 
-    CFactionDef _pFaction;
+    CCFaction _pFaction;
 
 
 public:
-    CFactionDef GetFaction();
+    CCFaction GetFaction();
 
     /**
      * @brief   Gets definition string.
@@ -153,6 +153,7 @@ public:
 #define CAN_I_FORCEDC           0x1000000   // Can force DClick skipping other checks (LOS,Distance, Cont...).
 #define CAN_I_DAMAGEABLE	    0x2000000	// Display item health bar on HS clients >= 7.0.30.0 (MORE1L = cur hitpoints / MORE1H = max hitpoints)
 #define CAN_I_BLOCKLOS_HEIGHT   0x4000000   // blocks LOS without blocking walkchecks, but only if the item is too high for the viewer.
+#define CAN_I_EQUIPONCAST       0x8000000   // Allow items to stay equipped while EquippedCast disabled in sphere.ini.
 
 // (CItemBase) CanEquip specific defs.
 #define CAN_U_ALL           0x000       // Can be used by everyone.

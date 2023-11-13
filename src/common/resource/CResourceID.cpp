@@ -11,13 +11,13 @@ static constexpr lpctstr _ptcWarnInvalidResource = "Expected a valid ResourceID,
 CResourceIDBase::CResourceIDBase(RES_TYPE restype) // explicit
 {
     // single instance type.
-    ASSERT(restype <= RES_TYPE_MASK);
+    ASSERT(restype < RES_QTY);
     m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
 }
 
 CResourceIDBase::CResourceIDBase(RES_TYPE restype, int iIndex) // explicit
 {
-    ASSERT(restype <= RES_TYPE_MASK);
+    ASSERT(restype < RES_QTY);
     m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iIndex & RES_INDEX_MASK);
 }
 

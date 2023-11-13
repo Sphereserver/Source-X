@@ -32,9 +32,6 @@ CItemStone::~CItemStone()
 	SetAmount(0);	// Tell everyone we are deleting.
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
-	// Remove this stone from the links of guilds in the world
-	g_World.m_Stones.RemovePtr( this );
-
     delete _pMultiStorage;
 	// all members are deleted automatically.
 	ClearContainer();	// do this manually to preserve the parents type cast
@@ -630,7 +627,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		lpctstr pszCmd = ptcKey + 7;
 		uint i = atoi(pszCmd);
 		if ( i >= ARRAY_COUNT(m_sCharter))
-			sVal = "";
+			sVal.Clear();
 		else
 			sVal = m_sCharter[i];
 
@@ -723,7 +720,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 			{
 				CChar * pMaster = GetMaster();
 				if ( pMaster == nullptr )
-					sVal = ""; // If no master (vote pending)
+					sVal.Clear(); // If no master (vote pending)
 				else if ( pMaster->Char_GetDef()->IsFemale())
 					sVal = g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_MASTERGENDERFEMALE");
 				else

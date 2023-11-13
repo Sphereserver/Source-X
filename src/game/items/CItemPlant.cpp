@@ -39,7 +39,7 @@ bool CItem::Plant_Use(CChar *pChar)
 		iFruitID = iFruitIDOverride;
 	else
 		iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
-	
+
 	if ( iFruitID == ITEMID_NOTHING )
 		pChar->SysMessageDefault(DEFMSG_CROPS_NO_FRUIT);
 	else
@@ -47,7 +47,7 @@ bool CItem::Plant_Use(CChar *pChar)
 		CItem *pItemFruit = CItem::CreateScript(iFruitID, pChar);
 		if ( pItemFruit )
 			pChar->ItemBounce(pItemFruit);
-	}	
+	}
 
 	Plant_CropReset();
 	pChar->UpdateAnimate(ANIM_BOW);
@@ -88,7 +88,7 @@ bool CItem::Plant_OnTick()
 			iFruitID = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
 		else
 			iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
-		
+
 		if (iFruitID != ITEMID_NOTHING)
 		{
 			// Put a fruit on the ground if not already here.

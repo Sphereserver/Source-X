@@ -10,7 +10,7 @@ size_t CCharRefArray::FindChar( const CChar *pChar ) const
 {
     ADDTOCALLSTACK("CCharRefArray::FindChar");
     if ( !pChar )
-        return SCONT_BADINDEX;
+        return sl::scont_bad_index();
 
     CUID uid(pChar->GetUID());
     size_t iQty = m_uidCharArray.size();
@@ -19,19 +19,19 @@ size_t CCharRefArray::FindChar( const CChar *pChar ) const
         if ( uid == m_uidCharArray[i] )
             return i;
     }
-    return SCONT_BADINDEX;
+    return sl::scont_bad_index();
 }
 
 bool CCharRefArray::IsCharIn( const CChar * pChar ) const
 {
-    return( FindChar( pChar ) != SCONT_BADINDEX );
+    return( FindChar( pChar ) != sl::scont_bad_index() );
 }
 
 size_t CCharRefArray::AttachChar( const CChar *pChar )
 {
     ADDTOCALLSTACK("CCharRefArray::AttachChar");
     size_t i = FindChar(pChar);
-    if ( i != SCONT_BADINDEX )
+    if ( i != sl::scont_bad_index() )
         return i;
     return m_uidCharArray.emplace_back(pChar->GetUID()).GetObjUID();
 }
@@ -40,7 +40,7 @@ size_t CCharRefArray::InsertChar( const CChar *pChar, size_t i )
 {
     ADDTOCALLSTACK("CCharRefArray::InsertChar");
     size_t currentIndex = FindChar(pChar);
-    if ( currentIndex != SCONT_BADINDEX )
+    if ( currentIndex != sl::scont_bad_index() )
     {
         if ( currentIndex == i )	// already there
             return i;
@@ -64,7 +64,7 @@ size_t CCharRefArray::DetachChar( const CChar *pChar )
 {
     ADDTOCALLSTACK("CCharRefArray::DetachChar");
     size_t i = FindChar(pChar);
-    if ( i != SCONT_BADINDEX )
+    if ( i != sl::scont_bad_index() )
         DetachChar(i);
     return i;
 }

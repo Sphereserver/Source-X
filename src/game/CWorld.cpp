@@ -8,6 +8,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
+#include "items/CItemMulti.h"
 #include "CServer.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
@@ -523,20 +524,22 @@ void CWorldThread::GarbageCollection_NewObjs()
 
 
 	// Clean up GM pages not linked to an valid char/account
-	CGMPage* pGMPageNext = nullptr;
-	for (CGMPage* pGMPage = static_cast<CGMPage*>(g_World.m_GMPages.GetContainerHead()); pGMPage != nullptr; pGMPage = pGMPageNext)
+	for (auto it = g_World.m_GMPages.begin(); it != g_World.m_GMPages.end();)
 	{
-		pGMPageNext = pGMPage->GetNext();
-		
+		std::unique_ptr<CGMPage>& pGMPage = *it;
 		if (!pGMPage->m_uidChar.CharFind())
 		{
 			DEBUG_ERR(("GC: Deleted GM Page linked to invalid char (UID=0%x)\n", (dword)(pGMPage->m_uidChar)));
-			delete pGMPage;
+			it = g_World.m_GMPages.erase(it);
 		}
 		else if (!g_Accounts.Account_Find(pGMPage->m_sAccount))
 		{
 			DEBUG_ERR(("GC: Deleted GM Page linked to invalid account '%s'\n", pGMPage->GetName()));
-			delete pGMPage;
+			it = g_World.m_GMPages.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 	EXC_CATCH;
@@ -809,9 +812,9 @@ bool CWorld::SaveStage() // Save world state in stages.
 		}
 
 		// GM_Pages.
-		for (CGMPage* pGMPage = static_cast<CGMPage*>(m_GMPages.GetContainerHead()); pGMPage != nullptr; pGMPage = pGMPage->GetNext())
+		for (auto& sptrGMPage : g_World.m_GMPages)
 		{
-			pGMPage->r_Write(m_FileData);
+			sptrGMPage->r_Write(m_FileData);
 		}
 	}
 	else if ( _iSaveStage == iSectorsQty +1 )
@@ -1340,8 +1343,8 @@ bool CWorld::LoadWorld() // Load world from script
 
 		m_Stones.clear();
 		m_Multis.clear();
-		m_Parties.ClearContainer();
-		m_GMPages.ClearContainer();
+		m_Parties.clear();
+		m_GMPages.clear();
 
 		_Sectors.Close();
 		CloseAllUIDs();
@@ -1618,7 +1621,7 @@ void CWorld::Restock()
 	{
 		for ( size_t j = 0; j < g_Cfg.m_ResHash.m_Array[i].size(); ++j )
 		{
-			CResourceDef * pResDef = g_Cfg.m_ResHash.m_Array[i][j];
+			CResourceDef * pResDef = g_Cfg.m_ResHash.m_Array[i][j].get();
 			if ( pResDef == nullptr || ( pResDef->GetResType() != RES_ITEMDEF ))
 				continue;
 
@@ -1663,8 +1666,8 @@ void CWorld::Close()
 		_Ticker._ObjStatusUpdates.clear();
     }
 
-	m_Parties.ClearContainer();
-	m_GMPages.ClearContainer();
+	m_Parties.clear();
+	m_GMPages.clear();
 
     // Disconnect the players, so that we have none of them in a sector
     ClientIterator it;

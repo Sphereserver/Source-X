@@ -383,24 +383,36 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word
 	return rid.GetResIndex();
 }
 
-CResourceDef * CResourceBase::ResourceGetDef(const CResourceID& rid) const
+sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& rid) const
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
+	ADDTOCALLSTACK("CResourceBase::ResourceGetDefRef");
 	if ( ! rid.IsValidResource() )
-		return nullptr;
+		return {};
 	size_t index = m_ResHash.FindKey( rid );
-	if ( index == SCONT_BADINDEX )
-		return nullptr;
-	return m_ResHash.GetAt( rid, index );
+	if ( index == sl::scont_bad_index() )
+		return {};
+	return m_ResHash.GetSmartPtrViewAt( rid, index );
 }
 
-CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, lpctstr pszName, word wPage )
+sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRefByName( RES_TYPE restype, lpctstr pszName, word wPage )
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
+    ADDTOCALLSTACK("CResourceBase::ResourceGetDefRefByName");
     // resolve a name to the actual resource def.
-    CResourceID res = ResourceGetID(restype, pszName);
+    CResourceID res = ResourceGetID(restype, pszName, wPage);
     res.m_wPage = wPage ? wPage : RES_PAGE_ANY;   // Create a CResourceID with page == RES_PAGE_ANY: search independently from the page
-    return ResourceGetDef(res);
+    return ResourceGetDefRef(res);
+}
+
+CResourceDef* CResourceBase::ResourceGetDef(const CResourceID& rid) const
+{
+	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
+	return ResourceGetDefRef(rid).get();
+}
+
+CResourceDef* CResourceBase::ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage)
+{
+	ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
+	return ResourceGetDefRefByName(restype, pszName, wPage).get();
 }
 
 //*******************************************************
@@ -412,8 +424,10 @@ bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
 	// Lock a referenced resource object.
 	if ( ! rid.IsValidUID() )
 		return false;
-	CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( ResourceGetDef( rid ));
-	if ( pResourceLink )
-		return pResourceLink->ResourceLock(s);
+
+    CResourceLink* pResourceLink = dynamic_cast <CResourceLink*>(ResourceGetDefRef(rid).get());
+    if (pResourceLink)
+        return pResourceLink->ResourceLock(s);
+	
 	return false;
 }

@@ -44,7 +44,6 @@ public:
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage = 0 );
 	CResourceID ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
-	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName, word wPage = 0 );
 	bool ResourceLock( CResourceLock & s, const CResourceID& rid );
 	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 	{
@@ -54,21 +53,19 @@ public:
 	CResourceScript * FindResourceFile( lpctstr pszTitle );
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 
-	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
+	sl::smart_ptr_view<CResourceDef> ResourceGetDefRef(const CResourceID& rid) const;
+	CResourceDef * ResourceGetDef( const CResourceID& rid ) const;
+	sl::smart_ptr_view<CResourceDef> ResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+	CResourceDef* ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
 	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
 public:
-	CResourceBase()
-	{
-	}
-	virtual ~CResourceBase()
-	{
-	}
+	CResourceBase() = default;
+	virtual ~CResourceBase() = default;
 
-private:
-	CResourceBase(const CResourceBase& copy);
-	CResourceBase& operator=(const CResourceBase& other);
+	CResourceBase(const CResourceBase& copy) = delete;
+	CResourceBase& operator=(const CResourceBase& other) = delete;
 };
 
 inline lpctstr CResourceBase::GetResourceBlockName( RES_TYPE restype )	// static

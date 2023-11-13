@@ -17,7 +17,6 @@
 #include "CWorldCache.h"
 #include "CWorldMap.h"
 
-
 //************************
 // Natural resources.
 
@@ -112,7 +111,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	EXC_SET_BLOCK("get random group element");
 	size_t id = pResGroup->GetRandMemberIndex(pCharSrc);
 	CRegionResourceDef * pOreDef;
-	if ( id == SCONT_BADINDEX )
+	if ( id == sl::scont_bad_index() )
 	{
 		pOreDef	= dynamic_cast <CRegionResourceDef *>(g_Cfg.ResourceGetDefByName(RES_REGIONRESOURCE, "mr_nothing"));
 	}
@@ -179,9 +178,9 @@ CItemTypeDef* CWorldMap::GetTerrainItemTypeDef(dword dwTerrainIndex) // static
 	ADDTOCALLSTACK("CWorldMap::GetTerrainItemTypeDef");
 	CResourceDef* pRes = nullptr;
 
-	if (g_World.m_TileTypes.IsValidIndex(dwTerrainIndex))
+	if (g_World.m_TileTypes.valid_index(dwTerrainIndex))
 	{
-		pRes = g_World.m_TileTypes[dwTerrainIndex];
+		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].get());
 	}
 
 	if (!pRes)
@@ -202,9 +201,9 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 	ADDTOCALLSTACK("CWorldMap::GetTerrainItemType");
 	CResourceDef* pRes = nullptr;
 
-	if (g_World.m_TileTypes.IsValidIndex(dwTerrainIndex))
+	if (g_World.m_TileTypes.valid_index(dwTerrainIndex))
 	{
-		pRes = g_World.m_TileTypes[dwTerrainIndex];
+		pRes = static_cast<CItemTypeDef*>(g_World.m_TileTypes[dwTerrainIndex].get());
 	}
 
 	if (!pRes)
@@ -268,7 +267,7 @@ const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 		block->m_CacheTime.HitCacheTime();
 		return block.get();
 	}
-	
+
 	// else load and add it to the cache.
 	block = std::make_unique<CServerMapBlock>(iBx, iBy, pt.m_map);
 	ASSERT(block);
@@ -282,7 +281,26 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
 	if (!pMapBlock)
 		return nullptr;
+
 	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+}
+
+std::optional<CUOMapMeter> CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
+{
+	const CUOMapMeter* pMeter = GetMapMeter(pt);
+	if (!pMeter)
+		return std::nullopt;
+	CUOMapMeter pMapTop(*pMeter);
+	const CUOMapMeter pMapLeft(CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1, pt.m_map));
+	const CUOMapMeter pMapBottom(CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1, pt.m_map));
+	const CUOMapMeter pMapRight(CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y, pt.m_map));
+
+	const short iAverage = GetAreaAverage(pMapTop.m_z, pMapLeft.m_z, pMapBottom.m_z, pMapRight.m_z);
+	if ((char)abs((short)pMapTop.m_z - (short)pMapBottom.m_z) > (char)abs((short)pMapLeft.m_z - (short)pMapRight.m_z))
+		pMapTop.m_z = GetFloorAvarage(pMapLeft.m_z, pMapRight.m_z, iAverage);
+	else
+		pMapTop.m_z = GetFloorAvarage(pMapTop.m_z, pMapBottom.m_z, iAverage);
+	return std::make_optional<CUOMapMeter>(pMapTop);
 }
 
 bool CWorldMap::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance ) // static
@@ -842,7 +860,7 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 
                                 if (fLimitZ) //Checking if we are in the same floor.
                                 {
-                                   
+
 									if (pMultiItem->m_dz != z2)
 										continue;
 									/*
@@ -951,14 +969,14 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 				if ((z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
-					block.m_Bottom.m_dwTile = iDispID + TERRAIN_QTY;
+					block.m_Bottom.m_dwTile = iDispID + (ITEMID_TYPE)TERRAIN_QTY;
 					block.m_Bottom.m_z = z;
                     // Leave block->...->m_height unchanged, since it already has the height of the char/item
 				}
 				else if (block.m_Top.m_z > z)
 				{
 					block.m_Top.m_dwBlockFlags = dwBlockThis;
-					block.m_Top.m_dwTile = iDispID + TERRAIN_QTY;
+					block.m_Top.m_dwTile = iDispID + (ITEMID_TYPE)TERRAIN_QTY;
 					block.m_Top.m_z = z;
                     // Leave block->...->m_height unchanged, since it already has the height of the char/item
 				}
@@ -1053,14 +1071,14 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 							if ((z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)))
 							{
 								block.m_Bottom.m_dwBlockFlags = dwBlockThis;
-								block.m_Bottom.m_dwTile = iDispID + TERRAIN_QTY;
+								block.m_Bottom.m_dwTile = iDispID + (ITEMID_TYPE)TERRAIN_QTY;
 								block.m_Bottom.m_z = z;
                                 // Leave block->...->m_height unchanged, since it already has the height of the char/item
 							}
 							else if (block.m_Top.m_z > z)
 							{
 								block.m_Top.m_dwBlockFlags = dwBlockThis;
-								block.m_Top.m_dwTile = iDispID + TERRAIN_QTY;
+								block.m_Top.m_dwTile = iDispID + (ITEMID_TYPE)TERRAIN_QTY;
 								block.m_Top.m_z = z;
                                 // Leave block->...->m_height unchanged, since it already has the height of the char/item
 							}
@@ -1123,14 +1141,14 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 				if ( (z < pt.m_z + PLAYER_HEIGHT) && (dwBlockThis & (CAN_I_PLATFORM|CAN_I_CLIMB|CAN_I_WATER)) )
 				{
 					block.m_Bottom.m_dwBlockFlags = dwBlockThis;
-					block.m_Bottom.m_dwTile = pItemDef->GetDispID() + TERRAIN_QTY;
+					block.m_Bottom.m_dwTile = pItemDef->GetDispID() + (ITEMID_TYPE)TERRAIN_QTY;
 					block.m_Bottom.m_z = z;
                     // Leave block->...->m_height unchanged, since it already has the height of the char/item
 				}
 				else if ( block.m_Top.m_z > z )
 				{
 					block.m_Top.m_dwBlockFlags = dwBlockThis;
-					block.m_Top.m_dwTile = pItemDef->GetDispID() + TERRAIN_QTY;
+					block.m_Top.m_dwTile = pItemDef->GetDispID() + (ITEMID_TYPE)TERRAIN_QTY;
 					block.m_Top.m_z = z;
                     // Leave block->...->m_height unchanged, since it already has the height of the char/item
 				}
@@ -1201,7 +1219,7 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	}
 }
 
-void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck ) // static
+void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck) // static
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
     const CItemBase * pItemDef = nullptr;
@@ -1270,7 +1288,7 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 
             // This static is at the coordinates in question.
             // enough room for me to stand here ?
-			block.CheckTile_Item( dwBlockThis, z, zHeight, iDispID + TERRAIN_QTY );
+			block.CheckTile_Item( dwBlockThis, z, zHeight, iDispID + (ITEMID_TYPE)TERRAIN_QTY );
 		}
 	}
 
@@ -1361,7 +1379,7 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 								CItemBase::GetItemTiledataFlags(&dwBlockThis, iDispID);
                             }
 
-							block.CheckTile_Item( dwBlockThis, z, zHeight, iDispID + TERRAIN_QTY );
+							block.CheckTile_Item( dwBlockThis, z, zHeight, iDispID + (ITEMID_TYPE)TERRAIN_QTY );
 						}
 					}
 				}
@@ -1422,27 +1440,27 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 			CItemBase::GetItemTiledataFlags(&dwBlockThis, iDispID);
         }
 
-        block.CheckTile_Item(dwBlockThis, z, zHeight, iDispID + TERRAIN_QTY);
+        block.CheckTile_Item(dwBlockThis, z, zHeight, iDispID + (ITEMID_TYPE)TERRAIN_QTY);
 	}
 
 	dwBlockThis = 0;
 	// Terrain height is screwed. Since it is related to all the terrain around it.
-	const CUOMapMeter * pMeter = pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
-	if ( ! pMeter )
+	std::optional<CUOMapMeter> pMapTop = GetMapMeterAdjusted(pt); //Get pMapTop Z Adjusted.
+	//const CUOMapMeter* pMapTop = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	if (!pMapTop)
 		return;
-
-    //DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
-    if (pMeter->m_wTerrainIndex == TERRAIN_HOLE)
+	//DEBUG_ERR(("pMeter->m_wTerrainIndex 0%x dwBlockThis (0%x)\n",pMeter->m_wTerrainIndex,dwBlockThis));
+    if (pMapTop->m_wTerrainIndex == TERRAIN_HOLE)
     {
         dwBlockThis = 0;
     }
-    else if (CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))	// inter dungeon type.
+    else if (CUOMapMeter::IsTerrainNull(pMapTop->m_wTerrainIndex))	// inter dungeon type.
     {
         dwBlockThis = CAN_I_BLOCK;
     }
     else
     {
-        const CUOTerrainInfo land(pMeter->m_wTerrainIndex);
+        const CUOTerrainInfo land(pMapTop->m_wTerrainIndex);
         //DEBUG_ERR(("Terrain flags - land.m_flags 0%x dwBlockThis (0%x)\n",land.m_flags,dwBlockThis));
         if (land.m_flags & UFLAG1_WATER)
             dwBlockThis |= CAN_I_WATER;
@@ -1455,7 +1473,7 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
     }
     //DEBUG_ERR(("TERRAIN dwBlockThis (0%x)\n",dwBlockThis));
 
-    block.CheckTile_Terrain(dwBlockThis, pMeter->m_z, pMeter->m_wTerrainIndex);
+    block.CheckTile_Terrain(dwBlockThis, pMapTop->m_z, pMapTop->m_wTerrainIndex);
 
 	if ( block.m_Bottom.m_z == UO_SIZE_MIN_Z )
 	{
@@ -1469,12 +1487,51 @@ void CWorldMap::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & blo
 	}
 }
 
-char CWorldMap::GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck ) // static
+char CWorldMap::GetFloorAvarage(char pPoint1, char pPoint2, short iAverage)
+{
+	//We can't use char here, because higher points like hills has 64+ heights and adding 64+65 each other exceed char limit and causes returns minus values.
+	const short pTotal = pPoint1 + pPoint2, pHalf = pTotal / 2, pEven = pTotal % 2, pAverage = iAverage - pHalf;
+	return static_cast<char>(pHalf + (pEven != 0 && pAverage > 5));
+}
+
+short CWorldMap::GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight)
+{
+	const short iHighest1 = maximum(pTop, pBottom);
+	const short iLowest1 = minimum(pTop, pBottom);
+
+	const short iHighest2 = maximum(pLeft, pRight);
+	const short iLowest2 = minimum(pLeft, pRight);
+	return maximum(iHighest1, iHighest2) - minimum(iLowest1, iLowest2);
+}
+
+CUOMapMeter CWorldMap::CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map)
+{
+	CPointMap pt = { x, y, 0, map };
+	const CServerMapBlock* pMapBlock = GetMapBlock(pt);
+	if (!pMapBlock)
+		return pDefault;
+
+	const CUOMapMeter* pMeter = pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	if (!pMeter)
+		return pDefault;
+
+	if (CUOMapMeter::IsTerrainNull(pMeter->m_wTerrainIndex))
+		return pDefault;
+	else
+	{
+		const CUOTerrainInfo land(pMeter->m_wTerrainIndex);
+		if ((land.m_flags & UFLAG1_WATER))
+			return pDefault;
+	}
+	return *pMeter;
+}
+
+char CWorldMap::GetHeightPoint(const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck) // static
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
 	const dword dwCan = dwBlockFlags;
 	CServerMapBlockState block( dwBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
-	GetHeightPoint( pt, block, fHouseCheck );
+	GetHeightPoint(pt, block, fHouseCheck);
 
 	// Pass along my results.
 	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
@@ -1534,7 +1591,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & bl
 
 			// This static is at the coordinates in question.
 			// enough room for me to stand here ?
-			block.CheckTile( dwBlockThis, z, zHeight, iDispID + TERRAIN_QTY );
+			block.CheckTile( dwBlockThis, z, zHeight, iDispID + (ITEMID_TYPE)TERRAIN_QTY );
 	    }
     }
 
@@ -1574,7 +1631,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & bl
                             const ITEMID_TYPE iDispID = pMultiItem->GetDispID();
                             height_t zHeight = CItemBase::GetItemHeight( iDispID, &dwBlockThis );
 
-							block.CheckTile( dwBlockThis, zitem, zHeight, iDispID + TERRAIN_QTY );
+							block.CheckTile( dwBlockThis, zitem, zHeight, iDispID + (ITEMID_TYPE)TERRAIN_QTY );
 						}
 					}
 				}
@@ -1610,7 +1667,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & bl
 		if (zHeight == 0)
 			zHeight = zStaticHeight;
 
-		if ( !block.CheckTile(dwBlockThis, zitem, zHeight, pItemDef->GetDispID() + TERRAIN_QTY ) )
+		if ( !block.CheckTile(dwBlockThis, zitem, zHeight, pItemDef->GetDispID() + (ITEMID_TYPE)TERRAIN_QTY ) )
 		{
 		}
 	}
@@ -1733,7 +1790,7 @@ CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
 	_fInertToggle = false;
 	_pObj = nullptr;
 	_idxObj = _idxObjMax = 0;
-	
+
 	_pSectorBase = _pSector = pt.GetSector();
 
 	_rectSector.SetRect(

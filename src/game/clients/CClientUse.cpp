@@ -4,6 +4,7 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
+#include "../items/CItemShip.h"
 #include "../components/CCSpawn.h"
 #include "../CWorldMap.h"
 #include "../triggers.h"
@@ -153,15 +154,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_SHAFT:
 		case IT_FEATHER:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_bolts");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_bolts"));
-		}
+			return Skill_Menu(SKILL_BOWCRAFT, "sm_bolts", pItem->GetID());
 
 		case IT_FISH_POLE:	// Just be near water ?
 			addTarget(CLIMODE_TARG_USE_ITEM, g_Cfg.GetDefaultMsg(DEFMSG_FISHING_PROMT), true);
@@ -334,9 +327,22 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		}
 
 		case IT_SHIP_TILLER:
+		{
+			if (m_net->isClientVersion(MINCLIVER_HS))
+			{
+				CItemShip* pShip = dynamic_cast<CItemShip*>(pItem->m_uidLink.ItemFind());
+				if (pShip)
+				{
+					if (m_pChar->ContentFindKeyFor(pItem) || pShip->GetOwner() == m_pChar->GetUID())
+						pShip->CCMultiMovable::SetPilot(m_pChar);
+					else
+						pItem->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_NOTYOURSHIP));
+					return true;
+				}
+			}
 			pItem->Speak(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_TILLERMAN), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
 			return true;
-
+		}
 		case IT_WAND:
 		case IT_SCROLL:
 		{
@@ -368,15 +374,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		}
 
 		case IT_CARPENTRY:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_carpentry");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_carpentry"));
-		}
+			return Skill_Menu(SKILL_CARPENTRY, "sm_carpentry", pItem->GetID());
 
 		case IT_FORGE:
 			// Solve for the combination of this item with another.
@@ -534,48 +532,16 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			return true;
 
 		case IT_MORTAR:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_alchemy");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_alchemy"));
-		}
+			return Skill_Menu(SKILL_ALCHEMY, "sm_alchemy", pItem->GetID());
 
 		case IT_CARTOGRAPHY:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_cartography");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_cartography"));
-		}
+			return Skill_Menu(SKILL_CARTOGRAPHY, "sm_cartography", pItem->GetID());
 
 		case IT_COOKING:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_cooking");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_cooking"));
-		}
+			return Skill_Menu(SKILL_COOKING, "sm_cooking", pItem->GetID());
 
 		case IT_TINKER_TOOLS:
-		{
-			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_tinker");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-					return true;
-			}
-			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_tinker"));
-		}
+			return Skill_Menu(SKILL_TINKERING, "sm_tinker", pItem->GetID());
 
 		case IT_SEWING_KIT:
 		{
@@ -667,6 +633,40 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 	addItemMenu(CLIMODE_MENU_EDIT, item, count, pObj);
 }
 
+
+bool CClient::Skill_Menu(SKILL_TYPE skill, lpctstr skillmenu, ITEMID_TYPE itemused)
+{
+	// Default menu is d_craft_menu
+	// Open in page 0, args is skill used.
+	// LPCTSTR dSkillMenu = "d_CraftingMenu";
+	CScriptTriggerArgs Args;
+	Args.m_VarsLocal.SetStrNew("SkillMenu", skillmenu);
+	Args.m_VarsLocal.SetNumNew("Skill", skill);
+	Args.m_VarsLocal.SetNumNew("ItemUsed", itemused);
+	if (IsTrigUsed(TRIGGER_SKILLMENU))
+	{
+		if (m_pChar->Skill_OnCharTrigger(skill, CTRIG_SkillMenu, &Args) == TRIGRET_RET_TRUE)
+			return true;
+
+		skillmenu = Args.m_VarsLocal.GetKeyStr("Skillmenu", false);
+	}
+
+	lpctstr SkillUsed = g_Cfg.GetSkillKey(skill);
+	CResourceID ridDialog = g_Cfg.ResourceGetIDType(RES_DIALOG, skillmenu);
+	if (ridDialog.IsValidUID()) {
+		return Dialog_Setup(CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, skillmenu), 0, m_pChar, SkillUsed);
+	} else {
+		CResourceID ridMenu = g_Cfg.ResourceGetIDType(RES_SKILLMENU, skillmenu);
+		if (ridMenu.IsValidUID()) {
+			return Cmd_Skill_Menu(ridMenu);
+		} else {
+			g_Log.EventError("CClient::Skill_Menu - Not valid dialog or skillmenu %s \n", skillmenu);
+		}
+	}
+
+	return false;
+}
+
 bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu");
@@ -732,7 +732,8 @@ bool CClient::Cmd_Skill_Menu( const CResourceID& rid, int iSelect )
 		}
 
 		if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-			g_Log.EventDebug("[DEBUG_SCRIPTS] Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
+			g_Log.EventDebug("[DEBUG_SCRIPTS] Too many empty skill menus to continue seeking through menu '%s'\n",
+				g_Cfg.RegisteredResourceGetDef(rid)->GetResourceName());
 	}
 
 	ASSERT(iShowCount < (int)ARRAY_COUNT(item));
@@ -921,8 +922,10 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 				if ( sm_iReentrant > 1024 )
 				{
 					if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-						g_Log.EventDebug("[DEBUG_SCRIPTS] Too many skill menus (circular menus?) to continue searching in menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
-
+					{
+						g_Log.EventDebug("[DEBUG_SCRIPTS] Too many skill menus (circular menus?) to continue searching in menu '%s'\n",
+							g_Cfg.RegisteredResourceGetDef(rid)->GetResourceName());
+					}
 					*fLimitReached = true;
 				}
 				else
@@ -1275,13 +1278,7 @@ bool CClient::Cmd_Skill_Smith( CItem *pIngots )
 
 	// Select the blacksmith item type.
 	// repair items or make type of items.
-	if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-	{
-		CScriptTriggerArgs args("sm_blacksmith");
-		if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-			return true;
-	}
-	return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_blacksmith"));
+	return Skill_Menu(SKILL_BLACKSMITHING, "sm_blacksmith", pIngots->GetID());
 }
 
 bool CClient::Cmd_Skill_Inscription()
@@ -1302,13 +1299,7 @@ bool CClient::Cmd_Skill_Inscription()
 		return false;
 	}
 
-	if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-	{
-		CScriptTriggerArgs args("sm_inscription");
-		if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-			return true;
-	}
-	return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_inscription"));
+	return Skill_Menu(SKILL_INSCRIPTION, "sm_inscription");
 }
 
 bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )

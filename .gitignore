@@ -1,23 +1,25 @@
 # Ignore folder and files
+/.git/
+/.vscode/
+/CMakeFiles/
+/spheresvr.dir/
+
 /bin
 /bin64
 /Debug
 /Release
 /Nightly
 /backup/
-/.git/
-/.vscode/
 /x64/
 /x86/
 /obj/
 /build/
+
 /mul
 /accounts/
 /logs/
 /save/
 /web/
-/CMakeFiles/
-/spheresvr.dir/
 
 *.vs
 *.pid
@@ -30,13 +32,10 @@
 *.o
 *.obj
 *.exe
-*.vcxproj.*
+*.vcx*
+*.sln
 
 # Ignore some files in the parent folder
-/*.cmake
-/*.vcx*
-/*.sln
-/*.sln
 CMakeCache.txt
 
 # Ignore git versioning file

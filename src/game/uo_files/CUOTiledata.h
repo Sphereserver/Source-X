@@ -19,9 +19,9 @@ class CUOTiledata
 
 public:
     void Load();
-    inline int GetItemMaxIndex() const {
+    inline uint GetItemMaxIndex() const {
         ASSERT(!_tiledataItemEntries.empty());
-        return int(_tiledataItemEntries.size() - 1);
+        return uint(_tiledataItemEntries.size() - 1);
     }
     inline const CUOItemTypeRec_HS* GetItemEntry(ITEMID_TYPE id) const {
         return &(_tiledataItemEntries[id]);

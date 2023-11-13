@@ -47,6 +47,12 @@ extern "C"
 #endif // !_WIN32
 
 
+CLanguageID::CLanguageID(int iDefault) :
+	m_codes{}
+{
+		UnreferencedParameter(iDefault);
+		ASSERT(iDefault == 0);
+}
 
 void CLanguageID::GetStrDef(tchar* pszLang)
 {

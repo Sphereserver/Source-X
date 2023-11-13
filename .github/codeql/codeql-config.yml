@@ -1,0 +1,16 @@
+query-filters:
+  - exclude:
+      id: cpp/non-constant-format
+  - exclude:
+      id: cpp/commented-out-code
+  - exclude:
+      id: cpp/trivial-switch
+  - exclude:
+      id: cpp/include-non-header
+  - exclude:
+      id: cpp/complex-block
+  - exclude:
+      id: cpp/long-switch
+  - exclude:
+      id: cpp/use-of-goto
+

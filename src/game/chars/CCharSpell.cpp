@@ -2429,11 +2429,11 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 			// check for reagents
 			const size_t iMissingReagents = g_Cfg.Calc_SpellReagentsConsume(this, pSpellDef, pSrc, fTest);
-			if ( iMissingReagents != SCONT_BADINDEX )
+			if ( iMissingReagents != sl::scont_bad_index() )
 			{
 				if ( fFailMsg )
 				{
-					const CResourceDef * pReagDef = g_Cfg.ResourceGetDef((pSpellDef->m_Reags)[iMissingReagents].GetResourceID() );
+					const CResourceDef * pReagDef = g_Cfg.RegisteredResourceGetDef((pSpellDef->m_Reags)[iMissingReagents].GetResourceID() );
 					SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 				}
 				return false;
@@ -2727,6 +2727,34 @@ bool CChar::Spell_TargCheck()
 			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );
 			return false;
 		}
+
+		//Check if the pos for tp is valid to make sure spellsuccess trigger not trigger unnecessarily.
+		SPELL_TYPE spell = m_atMagery.m_iSpell;
+		if (spell == SPELL_Teleport && !IsPriv(PRIV_GM))
+		{
+			if (g_Cfg.m_iMountHeight)
+			{
+				if (!IsVerticalSpace(m_Act_p, false))
+				{
+					SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
+					return false;
+				}
+			}
+			
+			// Is it a valid teleport location that allows this ?
+			CRegion* pArea = CheckValidMove(m_Act_p, nullptr, DIR_QTY, nullptr);
+			if (!pArea)
+			{
+				SysMessageDefault(DEFMSG_SPELL_TELE_CANT);
+				return false;
+			}
+			if (pArea->IsFlag(REGION_ANTIMAGIC_TELEPORT))
+			{
+				SysMessageDefault(DEFMSG_SPELL_TELE_AM);
+				return false;
+			}
+		}
+
 		if ( ! Spell_TargCheck_Face() )
 			return false;
 	}
@@ -2746,11 +2774,17 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 			return false;
 		}
 		//Allow  to cast a spell when wielding a spellbook or wand (but not an item with the spellchanneling property) when MAGICF_CASTPARALYZED is enabled.
-		else if (IsSetMagicFlags(MAGICF_CASTPARALYZED) && ( pItemPrev->IsTypeSpellbook() || pItemPrev->IsType(IT_WAND) ))
+		else if (IsSetMagicFlags(MAGICF_CASTPARALYZED) && (pItemPrev->IsTypeSpellbook() || pItemPrev->IsType(IT_WAND) || pItemPrev->Can(CAN_I_EQUIPONCAST)))
 			return true;
+		else if (IsSetMagicFlags(MAGICF_CASTPARALYZED) && IsStatFlag(STATF_FREEZE))
+		{
+			//We need to inform player that he couldn't cast spell because of his hands frozen.
+			SysMessageDefault(DEFMSG_SPELL_TRY_FROZENHANDS);
+			return false;
+		}
 		else if ( !CanMove( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
 			return false;
-		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true) && !ItemBounce( pItemPrev ))
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->Can(CAN_I_EQUIPONCAST) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true) && !ItemBounce(pItemPrev))
 		{
 			SysMessageDefault(DEFMSG_SPELL_TRY_BUSYHANDS);
 			return false;
@@ -3306,6 +3340,26 @@ int CChar::Spell_CastStart()
 	if ( !pSpellDef )
 		return -1;
 
+	//We have to check player status and flags again before casting the spells.
+	//Otherwise, player On=@SpellSuccess/@Success triggered even spell failed.
+	//Even if preCast active, still need to check if player can successfully use spell.
+	if (pSpellDef->IsSpellType(SPELLFLAG_DISABLED)) //This one should never happen
+		return -1;
+
+	if (m_pPlayer && !IsPriv(PRIV_GM))
+	{
+		if (IsStatFlag(STATF_DEAD | STATF_SLEEPING | STATF_STONE) || Can(CAN_C_STATUE))
+		{
+			SysMessageDefault(DEFMSG_SPELL_TRY_DEAD);
+			return -1;
+		}
+		else if (IsStatFlag(STATF_FREEZE) && !IsSetMagicFlags(MAGICF_CASTPARALYZED))
+		{
+			SysMessageDefault(DEFMSG_SPELL_TRY_FROZENHANDS);
+			return -1;
+		}
+	}
+
 	if ( IsClientActive() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{
 		m_Act_p = GetTopPoint();
@@ -3341,6 +3395,10 @@ int CChar::Spell_CastStart()
 			fAllowEquip = true;
 			fWOP = false;
 			iDifficulty = 1;
+		}
+		else if (pItem->Can(CAN_I_EQUIPONCAST)) //If the item has CAN_I_EQUIPONCAST flag don't need to unequip it.
+		{
+			fAllowEquip = true;
 		}
 		else
 		{

@@ -281,7 +281,10 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 	{
 		if (other->m_pPlayer != nullptr)
 		{
-			writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
+			if (!IsSetEF(EF_FollowerList))
+				writeByte((byte)(other->GetDefNum("CURFOLLOWER", true)));
+			else
+				writeByte((byte)(other->m_followers.size()));
 			writeByte((byte)(other->GetDefNum("MAXFOLLOWER", true)));
 		}
 		else
@@ -1113,7 +1116,7 @@ PacketSkills::PacketSkills(const CClient* target, const CChar* character, SKILL_
 
 		for (uint i = 0; i < g_Cfg.m_iMaxSkill; ++i)
 		{
-			if (g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) == false)
+			if (g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) == false)
 				continue;
 
 			writeInt16((word)(i + 1));
@@ -3540,12 +3543,12 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nachar *
  ***************************************************************************/
 PacketDeath::PacketDeath(CChar* dead, CItemCorpse* corpse, bool fFrontFall) : PacketSend(XCMD_CharDeath, 13, PRI_NORMAL)
 {
-	UnreferencedParameter(fFrontFall);
+	//UnreferencedParameter(fFrontFall);
 	ADDTOCALLSTACK("PacketDeath::PacketDeath");
 
 	writeInt32(dead->GetUID());
 	writeInt32(corpse == nullptr ? 0 : (dword)corpse->GetUID());
-	writeInt32(0);
+	writeInt32(fFrontFall);
 }
 
 
@@ -5378,5 +5381,29 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, uint
 		}
 	}
 
+	push(target);
+}
+
+/***************************************************************************
+ *
+ *
+ *	Packet 0xF9 : PacketGlobalChat			global chat (LOW) (INCOMPLETE)
+ *
+ *
+ ***************************************************************************/
+PacketGlobalChat::PacketGlobalChat(const CClient* target, byte unknown, byte action, byte stanza, lpctstr xml) : PacketSend(XCMD_GlobalChat, 4, g_Cfg.m_fUsePacketPriorities ? PRI_LOW : PRI_NORMAL)
+{
+	ADDTOCALLSTACK("PacketGlobalChat::PacketGlobalChat");
+
+	tchar* xmlFull = Str_GetTemp();
+	sprintf(xmlFull, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><ultima_stanza>%s</ultima_stanza>", xml);
+	//DEBUG_ERR(("GlobalChat XML sent: %s\n", xmlFull));
+
+	writeByte(unknown);
+	writeByte(action);
+	writeByte(stanza);
+	writeStringASCII(xmlFull);
+
+	trim();
 	push(target);
 }

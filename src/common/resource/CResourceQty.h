@@ -77,15 +77,15 @@ public:
 
     inline bool ContainsResourceID( const CResourceID & rid ) const
     {
-        return FindResourceID(rid) != SCONT_BADINDEX;
+        return FindResourceID(rid) != sl::scont_bad_index();
     }
     inline bool ContainsResourceType( RES_TYPE type ) const
     {
-        return FindResourceType(type) != SCONT_BADINDEX;
+        return FindResourceType(type) != sl::scont_bad_index();
     }
     inline bool ContainsResourceMatch( CObjBase * pObj ) const
     {
-        return FindResourceMatch(pObj) != SCONT_BADINDEX;
+        return FindResourceMatch(pObj) != sl::scont_bad_index();
     }
 
     void setNoMergeOnLoad();

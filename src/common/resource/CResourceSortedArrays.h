@@ -6,17 +6,18 @@
 #ifndef _INC_CRESOURCESORTEDARRAYS_H
 #define _INC_CRESOURCESORTEDARRAYS_H
 
+#include "../../common/sphere_library/sptr_containers.h"
 #include "../CServerMap.h"
 
 struct CValStr;
 
 
-struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
+struct CSStringSortArray final : public CSObjSortArray< tchar*, tchar* >
 {
-    CSStringSortArray() {
+    CSStringSortArray() noexcept {
         _fBaseDestructorShouldDeleteElements = false;
     }
-    virtual ~CSStringSortArray() = default;
+    virtual ~CSStringSortArray() noexcept;
 
     void clear() noexcept = delete;
     void Clear() {
@@ -32,10 +33,10 @@ struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
     void AddSortString( lpctstr pszText );
 
 protected:
-    virtual void DeleteElements() override;
+    virtual void DeleteElements() noexcept override;
 };
 
-struct CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
+struct CObjNameSortArray final : public CSObjSortArray< CScriptObj*, lpctstr >
 {
     static const char *m_sClassName;
     CObjNameSortArray() = default;
@@ -48,7 +49,7 @@ struct CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
     int CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpaces ) const;
 };
 
-class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
+class CSkillKeySortArray final : public CSObjSortArray< CValStr*, lpctstr >
 {
     CSkillKeySortArray() = default;
 
@@ -58,7 +59,7 @@ class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
     int CompareKey( lpctstr ptcKey, CValStr * pVal, bool fNoSpaces ) const;
 };
 
-struct CMultiDefArray : public CSObjSortArray< CUOMulti*, MULTI_TYPE >
+struct CMultiDefArray final : public CSObjSortArray< CUOMulti*, MULTI_TYPE >
 {
     // store the static components of a IT_MULTI
     // Sorted array
@@ -66,27 +67,27 @@ struct CMultiDefArray : public CSObjSortArray< CUOMulti*, MULTI_TYPE >
 };
 
 
-struct CObjNameSorter
+template <typename _ObjType>
+struct CObjUniquePtrNameVectorSorter
 {
-    inline bool operator()(const CScriptObj * s1, const CScriptObj * s2) const noexcept
+    inline bool operator()(std::unique_ptr<_ObjType> const& s1, std::unique_ptr<_ObjType> const& s2) const noexcept
     {
         //return (Str_CmpHeadI(s1->GetName(), s2->GetName()) < 0); // not needed, since the compared strings don't contain whitespaces (arguments or whatsoever)
         // Current strcmpi implementation internally converts to lowerCASE the strings, so this will work until Str_CmpHeadI checks with tolower, instead of toupper
         return (strcmpi(s1->GetName(), s2->GetName()) < 0);
     }
-};
-class CObjNameSortVector : public CSSortedVector< CScriptObj*, CObjNameSorter >
-{
-    inline static int _compare(const CScriptObj* pObj, lpctstr ptcKey)
+    inline static int _compare(std::unique_ptr<_ObjType> const& pObj, lpctstr ptcKey)
     {
         return -Str_CmpHeadI(ptcKey, pObj->GetName());  // We use Str_CmpHeadI to ignore '_' and whitespaces (args to the function or whatever) in ptcKey
     }
-
+};
+template <typename _ObjType>
+class CObjUniquePtrNameSortVector final : public sl::unique_ptr_sorted_vector<_ObjType, CObjUniquePtrNameVectorSorter<_ObjType>>
+{
 public:
     //static const char *m_sClassName;  
-
-    inline size_t find_sorted(lpctstr ptcKey) const noexcept { return this->find_predicate(ptcKey, _compare);        }
-    inline bool   ContainsKey(lpctstr ptcKey) const noexcept { return (SCONT_BADINDEX != this->find_sorted(ptcKey)); }
+    inline size_t find_sorted(lpctstr ptcKey) const noexcept { return this->find_predicate(ptcKey, CObjUniquePtrNameVectorSorter<_ObjType>::_compare);        }
+    inline bool   ContainsKey(lpctstr ptcKey) const noexcept { return (sl::scont_bad_index() != this->find_sorted(ptcKey)); }
 };
 
 #endif // _INC_CRESOURCESORTEDARRAYS_H

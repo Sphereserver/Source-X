@@ -35,9 +35,6 @@ private:
 
     size_t FindIgnoringIndex( lpctstr pszName) const;
 
-protected:
-    void SetChatActive();
-    void SetChatInactive();
 public:
     CChatChanMember();
     virtual ~CChatChanMember();
@@ -51,6 +48,7 @@ public:
     const CClient * GetClientActive() const;
     bool IsChatActive() const;
     void SetReceiving(bool fOnOff);
+    void addChatWindow();
     void ToggleReceiving();
 
     void PermitWhoIs();
@@ -67,6 +65,11 @@ public:
     void ToggleIgnore(lpctstr pszName);
     void ClearIgnoreList();
     bool IsIgnoring(lpctstr pszName) const;
+    void HideCharacterName();
+    void ToggleCharacterName();
+    void ShowCharacterName();
+    void AddIgnore(lpctstr pszName);
+    void RemoveIgnore(lpctstr pszName);
 };
 
 #endif // _INC_CCHATCHANMEMBER_H

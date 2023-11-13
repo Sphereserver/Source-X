@@ -6,7 +6,7 @@
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 
-bool CResourceHashArraySorter::operator()(const CResourceDef* pObjStored, const CResourceDef* pObj) const
+bool CResourceHashArraySorter::operator()(std::unique_ptr<CResourceDef> const& pObjStored, std::unique_ptr<CResourceDef> const& pObj) const
 {
     // <  : true
     // >= : false
@@ -24,7 +24,7 @@ bool CResourceHashArraySorter::operator()(const CResourceDef* pObjStored, const 
     return true;
 }
 
-int CResourceHashArray::_compare(const CResourceDef* pObjStored, CResourceID const& rid) // static
+int CResourceHashArray::_compare(std::unique_ptr<CResourceDef> const& pObjStored, CResourceID const& rid) // static
 {
     ASSERT( pObjStored );
     CResourceID const& ridStored = pObjStored->GetResourceID();
@@ -50,13 +50,17 @@ int CResourceHashArray::_compare(const CResourceDef* pObjStored, CResourceID con
 void CResourceHash::AddSortKey(CResourceID const& rid, CResourceDef* pNew)
 {
     ASSERT(rid.GetResPage() <= RES_PAGE_MAX); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
-    m_Array[GetHashArray(rid)].emplace(pNew);
+    
+    auto& destArray = m_Array[GetHashArray(rid)];
+
+    ASSERT(destArray.find_sorted(rid) == sl::scont_bad_index());
+    destArray.emplace(pNew);
 }
 
 void CResourceHash::SetAt(CResourceID const& rid, size_t index, CResourceDef* pNew)
 {
     ASSERT(rid.GetResPage() <= RES_PAGE_MAX); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
-    m_Array[GetHashArray(rid)][index] = pNew;
+    m_Array[GetHashArray(rid)][index].reset(pNew);
 }
 
 /*
@@ -64,7 +68,7 @@ void CResourceHash::ReplaceRid(CResourceID const& ridOld, CResourceDef* pNew)
 {
 CResourceHashArray & arrOld = m_Array[GetHashArray(ridOld)];
 size_t index = arrOld.find_sorted(ridOld);
-ASSERT (index != SCONT_BADINDEX);
+ASSERT (index != sl::scont_bad_index());
 arrOld.erase(arrOld.begin() + index);
 
 m_Array[GetHashArray(pNew->GetResourceID())].emplace(pNew);

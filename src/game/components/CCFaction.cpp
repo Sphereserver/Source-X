@@ -7,9 +7,9 @@
 #include "../items/CItem.h"
 
 
-CFactionDef::CFactionDef()
+CFactionDef::CFactionDef() :
+    _iFaction(FACTION_NONE)
 {
-    _iFaction = FACTION_NONE;
 }
 
 NPC_FACTION CFactionDef::GetFactionID() const
@@ -168,7 +168,6 @@ lpctstr const CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
 CCFaction::CCFaction() : CFactionDef(), CComponent(COMP_FACTION)
 {
     //ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(FACTION_TYPE)");
-    _iFaction = FACTION_NONE;
 }
 
 CCFaction::CCFaction(CCFaction *copy) : CFactionDef(), CComponent(COMP_FACTION)
@@ -245,7 +244,7 @@ void CCFaction::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCFaction::r_Write");
     if (GetFactionID() != FACTION_NONE){
-        s.WriteKeyHex("FACTION", (llong)GetFactionID()); // Same value stored with different names for CChars and CItems.
+        s.WriteKeyHex("FACTION", GetFactionID()); // Same value stored with different names for CChars and CItems.
     }
 }
 

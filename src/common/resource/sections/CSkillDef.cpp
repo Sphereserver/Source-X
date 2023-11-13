@@ -104,7 +104,9 @@ bool CSkillDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         case SKC_BONUS_STR: // "BONUS_STR"
             sVal.FormatVal( m_StatBonus[STAT_STR] );
             break;
-            // case SKC_DEFNAME: // "DEFNAME"
+        case SKC_DEFNAME: // "DEFNAME"
+            sVal = GetResourceName();
+            break;
         case SKC_DELAY:
             sVal = m_vcDelay.Write();
             break;

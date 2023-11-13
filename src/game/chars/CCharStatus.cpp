@@ -872,7 +872,7 @@ ushort CChar::Food_CanEat( CObjBase *pObj ) const
 	ASSERT(pCharDef);
 
 	size_t iRet = pCharDef->m_FoodType.FindResourceMatch(pObj);
-	if ( iRet != SCONT_BADINDEX )
+	if ( iRet != sl::scont_bad_index() )
 		return (ushort)(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
 
 	return 0;
@@ -1447,7 +1447,7 @@ IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pIte
 	{
 		if ( !CanTouch(pItem) )
 			return IT_JUNK;
-		*pPt = GetTopLevelObj()->GetTopPoint();
+		*pPt = pItem->GetTopLevelObj()->GetTopPoint(); //While item is available, set the target p as the item top point, not the player.
 		return pItem->GetType();
 	}
 

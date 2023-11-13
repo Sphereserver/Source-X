@@ -130,7 +130,7 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 			len = Str_CopyLimitNull( pszTemp, "[No static tile], ", STR_TEMPLENGTH);
 		}
 
-		const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( pt );
+		std::optional<CUOMapMeter> pMeter = CWorldMap::GetMapMeterAdjusted( pt );
 		if ( pMeter )
 		{
 			len += snprintf( pszTemp+len, STR_TEMPLENGTH - len, "TERRAIN=0%x   TYPE=%s",
@@ -1886,13 +1886,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			}
 			if ( pItemUse->IsType(IT_CARPENTRY_CHOP) )
 			{
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_carpentry");
-					if ( m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_carpentry" ));
+				return Skill_Menu(SKILL_CARPENTRY, "sm_carpentry", pItemUse->GetID());
 			}
 			if ( pItemUse->IsSameDispID( ITEMID_DAGGER ))
 			{
@@ -1902,13 +1896,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
                 else
                     m_Targ_UID.InitUID();
 
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_bowcraft");
-					if ( m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_bowcraft" ) );
+				return Skill_Menu(SKILL_BOWCRAFT, "sm_bowcraft", pItemUse->GetID());
 			}
 			SysMessageDefault( DEFMSG_ITEMUSE_LOG_USE );
 			return false;
@@ -2364,25 +2352,9 @@ static lpctstr const sm_Txt_LoomUse[] =
 		{
 			case IT_LEATHER:
 			case IT_HIDE:
-			{
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_tailor_leather");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_tailor_leather" ) );
-			}
+				return Skill_Menu(SKILL_TAILORING, "sm_tailor_leather", pItemTarg->GetID());
 			case IT_CLOTH:
-			{
-				if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-				{
-					CScriptTriggerArgs args("sm_tailor_cloth");
-					if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
-						return true;
-				}
-				return Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, "sm_tailor_cloth" ) );
-			}
+				return Skill_Menu(SKILL_TAILORING, "sm_tailor_cloth", pItemTarg->GetID());
 			default:
 				break;
 		}
@@ -2498,5 +2470,55 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	new PacketPartyInvite(pChar->GetClientActive(), m_pChar);
 
 	// Now up to them to decide to accept.
+	return true;
+}
+
+bool CClient::OnTarg_GlobalChat_Add(CChar* pChar)
+{
+	ADDTOCALLSTACK("CClient::OnTarg_GlobalChat_Add");
+	// CLIMODE_TARG_GLOBALCHAT_ADD
+	// Invite this person to join our global chat friend list
+
+	if (!CGlobalChatChanMember::IsVisible())
+	{
+		SysMessage("You must enable Global Chat to request a friend.");
+		return false;
+	}
+	if (!pChar || !pChar->m_pPlayer || (pChar == m_pChar))
+	{
+		SysMessage("Invalid target.");
+		return false;
+	}
+	if (!pChar->GetClientActive())
+	{
+		SysMessage("Player currently unavailable.");
+		return false;
+	}
+	if (pChar->m_pPlayer->m_fRefuseGlobalChatRequests)		// TO-DO: also check if pChar is online on global chat -> CGlobalChat::IsVisible()
+	{
+		SysMessage("This user is not accepting Global Chat friend requests at this time.");
+		return false;
+	}
+	/*if ( iFriendsCount >= 50 )		// TO-DO
+	{
+		SysMessage("You have reached your global chat friend limit.");
+		return false;
+	}*/
+
+	if (IsPriv(PRIV_GM) && (pChar->GetClientActive()->GetPrivLevel() < GetPrivLevel()))
+	{
+		// TO-DO: auto-accept the request without send 'friend request' dialog
+		return true;
+	}
+
+	CVarDefCont* pTagInviteTime = m_pChar->m_TagDefs.GetKey("GLOBALCHAT_LASTINVITETIME");
+	if (pTagInviteTime && (CWorldGameTime::GetCurrentTime().GetTimeRaw() < pTagInviteTime->GetValNum()))
+	{
+		SysMessage("You are unable to add new friends at this time. Please try again in a moment.");
+		return false;
+	}
+	m_pChar->SetKeyNum("GLOBALCHAT_LASTINVITETIME", CWorldGameTime::GetCurrentTime().GetTimeRaw() + (30 * TICKS_PER_SEC));
+
+	// TO-DO: send 'friend request' dialog
 	return true;
 }

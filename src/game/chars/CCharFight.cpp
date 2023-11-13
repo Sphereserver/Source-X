@@ -253,7 +253,7 @@ bool CChar::CallGuards( CChar * pCriminal )
 		if (OnTrigger(CTRIG_CallGuards, pCriminal, &Args) == TRIGRET_RET_TRUE)
 			return false;
 
-		if ( (int)Args.m_iN1 != rid.GetResIndex())
+		if ( (uint)Args.m_iN1 != rid.GetResIndex())
 			rid = CResourceID(RES_CHARDEF, (int)Args.m_iN1);
 		if (Args.m_iN2 > 0)	//ARGN2: If set to 1, a new guard will be spawned regardless of whether a nearby guard is available.
 			pGuard = nullptr;
@@ -345,14 +345,20 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
     Memory_AddObjTypes(pCharSrc, wMemTypes);
 	Attacker_Add(pCharSrc);
 
-	// Are they a criminal for it ? Is attacking me a crime ?
-	if ((Noto_GetFlag(pCharSrc) == NOTO_GOOD) && fAggreived)
+	if ((Noto_GetFlag(pCharSrc) == NOTO_GOOD) && fAggreived )
 	{
 		if (IsClientActive())	// I decide if this is a crime.
-			OnNoticeCrime(pCharSrc, this);
+		{
+			if (!fCommandPet || g_Cfg.m_fAttackingIsACrime)
+			{
+				OnNoticeCrime(pCharSrc, this);
+				CChar* pCharMark = pCharSrc->IsStatFlag(STATF_PET) ? pCharSrc->NPC_PetGetOwner() : pCharSrc;
+				if (pCharMark != pCharSrc)
+					OnNoticeCrime(pCharMark, this);
+			}
+		}
 		else
 		{
-			// If it is a pet then this a crime others can report.
 			CChar * pCharMark = IsStatFlag(STATF_PET) ? NPC_PetGetOwner() : this;
 			pCharSrc->CheckCrimeSeen(Skill_GetActive(), pCharMark, nullptr, nullptr);
 		}
@@ -1567,7 +1573,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fSwingNoRange)
 	// We can't hit them right now. Because we can't see them or reach them (invis/hidden).
 	// Why the target is freeze we are change the attack type to swinging? Player can still attack paralyzed or sleeping characters.
 	// We make sure that the target is freeze or sleeping must wait ready for attack!
-	else if ( (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING)) || (IsStatFlag(STATF_FREEZE | STATF_SLEEPING)) ) // STATF_FREEZE | STATF_SLEEPING
+	else if ( (pCharSrc->IsStatFlag(STATF_HIDDEN | STATF_INVISIBLE | STATF_SLEEPING)) || (IsStatFlag(STATF_FREEZE) && (!IsSetCombatFlags(COMBAT_PARALYZE_CANSWING))) || (IsStatFlag(STATF_SLEEPING)) ) // STATF_FREEZE | STATF_SLEEPING
 	{
 		return WAR_SWING_SWINGING;
 	}

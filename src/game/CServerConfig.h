@@ -7,6 +7,7 @@
 #define _INC_CSERVERCONFIG_H
 
 #include "../common/sphere_library/CSAssoc.h"
+#include "../common/sphere_library/sptr_containers.h"
 #include "../common/resource/sections/CSkillDef.h"
 #include "../common/resource/sections/CSpellDef.h"
 #include "../common/resource/sections/CWebPageDef.h"
@@ -29,6 +30,7 @@ class CClient;
 class CServerDef;
 using CServerRef = CServerDef*;
 
+class CResourceNamedDef;
 
 /**
  * @enum    EF_TYPE
@@ -43,6 +45,7 @@ enum EF_TYPE
     EF_FastWalkPrevention = 0x0000010,    // Enable client fastwalk prevention (INCOMPLETE YET).
     EF_Intrinsic_Locals = 0x0000020,    // Disables the needing of 'local.', 'tag.', etc. Be aware of not creating variables with the same name of already-existing functions.
     EF_Item_Strict_Comparison = 0x0000040,    // Don't consider log/board and leather/hide as the same resource type.
+    EF_FollowerList = 0x0000080, // Save the followers to the list and enable CURFOLLOWER.n.UID, CURFOLLOWER.ADD/DEL <UID> and CURFOLLOWER.CLEAR commands.
     EF_AllowTelnetPacketFilter = 0x0000200,    // Enable packet filtering for telnet connections as well.
     EF_Script_Profiler = 0x0000400,    // Record all functions/triggers execution time statistics (it can be viewed pressing P on console).
     EF_DamageTools = 0x0002000,    // Damage tools (and fire @damage on them) while mining or lumberjacking
@@ -119,7 +122,8 @@ enum COMBATFLAGS_TYPE
     COMBAT_ANIM_HIT_SMOOTH      = 0x10000,  // The hit animation has the same duration as the swing delay, instead of having a fixed fast duration and being idle until the delay has expired.
                                             //   WARNING: doesn't work with Gargoyles due to the new animation packet not accepting a custom animation duration!
     COMBAT_FIRSTHIT_INSTANT     = 0x20000,  // The first hit in a fight doesn't wait for the recoil time (OSI like)
-	COMBAT_NPC_BONUSDAMAGE		= 0x40000	// NPC will get full bonus damage from various sources.
+	COMBAT_NPC_BONUSDAMAGE		= 0x40000,	// NPC will get full bonus damage from various sources.
+    COMBAT_PARALYZE_CANSWING    = 0x80000   // Characters can continue attacking while paralyzed. (Old sphere behaviour)
 };
 
 /**
@@ -172,15 +176,15 @@ enum REVEALFLAGS_TYPE
 
 enum EMOTEFLAGS_TYPE
 {
-    EMOTEF_ATTACKER              = 0x01,     // Only show %s is attacking %s! emote to attacked character.
-    EMOTEF_POISON                = 0x02,     // Only show poison emote to affected character.
-    EMOTEF_DESTROY               = 0x04      // Only show item destroy emote to the owner of the item.
+    EMOTEF_ATTACKER              = 0x01,        // Only show %s is attacking %s! emote to attacked character.
+    EMOTEF_POISON                = 0x02,        // Only show poison emote to affected character.
+    EMOTEF_DESTROY               = 0x04         // Only show item destroy emote to the owner of the item.
 };
 
 enum TOOLTIPMODE_TYPE
 {
-    TOOLTIPMODE_SENDFULL = 0x00,	// always send full tooltip packet
-    TOOLTIPMODE_SENDVERSION = 0x01	// send version packet and wait for client to request full tooltip
+    TOOLTIPMODE_SENDFULL        = 0x00,     // always send full tooltip packet
+    TOOLTIPMODE_SENDVERSION     = 0x01      // send version packet and wait for client to request full tooltip
 };
 
 enum RACIALFLAGS_TYPE
@@ -196,6 +200,15 @@ enum RACIALFLAGS_TYPE
     RACIALF_GARG_BERSERK = 0x0100,		// Increase ferocity in situations of danger (15% Damage Increase + 3% Spell Damage Increase for each 20hp lost)
     RACIALF_GARG_DEADLYAIM = 0x0200,		// Throwing calculations always consider 20.0 minimum ability when untrained
     RACIALF_GARG_MYSTICINSIGHT = 0x0400		// Mysticism calculations always consider 30.0 minimum ability when untrained
+};
+
+enum CHATFLAGS_TYPE
+{
+    CHATF_AUTOJOIN              = 0x01,      // Auto join first static channel available (new chat system: join after client login / old chat system: join after open chat window)
+    CHATF_CHANNELCREATION       = 0x02,		// Enable channel creation
+    CHATF_CHANNELMODERATION     = 0x04,		// Enable channel moderation (old chat system only)
+    CHATF_CUSTOMNAMES           = 0x08,      // Enable custom name selection when open chat window for the first time (old chat system only)
+    CHATF_GLOBALCHAT            = 0x10      // Enable global chat system on clients >= 7.0.62.2 (INCOMPLETE)
 };
 
 ///////////////////////////////////////
@@ -522,6 +535,9 @@ public:
 	int64 m_iClientLoginTempBan;  // Duration (in minutes) of temporary ban to client IPs that reach max wrong password tries.
 	int m_iMaxShipPlankTeleport;// How far from land i can be to take off a ship.
 
+    CSString	m_sChatStaticChannels;
+    int			m_iChatFlags;
+
 	//	MySQL features
 	bool    m_bMySql;       // Enables MySQL.
 	bool    m_bMySqlTicks;  // Enables ticks from MySQL.
@@ -585,16 +601,16 @@ public:
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
 
-	CObjNameSortVector           m_SkillNameDefs;		// const CSkillDef* Name sorted.
-	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;		// Defined Skills indexed by number.
-	CSObjArray< CSpellDef* >     m_SpellDefs;			// Defined Spells.
-	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;	// Defined Spells, in skill order.
+	CObjUniquePtrNameSortVector<CSkillDef>  m_SkillNameDefs;		// const CSkillDef* Name sorted.
+	sl::smart_ptr_view_vector<CSkillDef>    m_SkillIndexDefs;		// Defined Skills indexed by number.
+    sl::unique_ptr_vector<CSpellDef>        m_SpellDefs;			// Defined Spells.
+    sl::smart_ptr_view_vector<CSpellDef>    m_SpellDefs_Sorted;	    // Defined Spells, in skill order.
 
 	CSStringSortArray m_PrivCommands[PLEVEL_QTY];		// what command are allowed for a priv level?
 
 public:
 	CObjNameSortArray m_Servers;	// Servers list. we act like the login server with this.
-    CObjNameSortVector m_Functions;	// Subroutines that can be used in scripts.
+    CObjUniquePtrNameSortVector<CResourceNamedDef> m_Functions;	// Subroutines that can be used in scripts.
 	CRegionLinks m_RegionDefs;		// All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
@@ -670,6 +686,21 @@ public:
      */
 	void LoadSortSpells();
 
+
+    /**
+    * @brief   Get a CResourceDef from the RESOURCE_ID.
+    *
+    * @param   restype Resource Type.
+    *
+    * @param   ptcName Resource Name.
+    *
+    * @param   wPage Resource Page attribute.
+    *
+    * @return  null if it fails, else a pointer to the CScriptObj.
+    */
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+    CResourceDef* RegisteredResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage = 0);
+
     /**
      * @brief   Get a CResourceDef from the RESOURCE_ID.
      *
@@ -677,7 +708,9 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	virtual CResourceDef * ResourceGetDef( const CResourceID& rid ) const override;
+	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
+    sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
+    CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );
@@ -1010,7 +1043,7 @@ public:
     * @param pSpell: The spell being cast.
     * @param pObj: The item (if any) from whom the spell is being cast.
     * @param fTest: Flag that determines when to consume the reagents.
-    * @return SCONT_BADINDEX if all the reagents are found, otherwise returns the first missing reagent.
+    * @return sl::scont_bad_index() if all the reagents are found, otherwise returns the first missing reagent.
     */
     size_t Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj, bool fTest = false);
 

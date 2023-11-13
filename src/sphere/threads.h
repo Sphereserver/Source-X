@@ -45,241 +45,9 @@
 	#define SPHERE_THREADENTRY_CALLTYPE
 #endif
 
+class IThread;
+typedef std::list<IThread*> spherethreadlist_t;
 
-// Interface for threads. Almost always should be used instead of any implementing classes
-class IThread
-{
-public:
-	enum Priority
-	{
-		Idle,			// tick 1000ms
-		Low,			// tick 200ms
-		Normal,			// tick 100ms
-		High,			// tick 50ms
-		Highest,		// tick 5ms
-		RealTime,		// tick almost instantly
-		Disabled = 0xFF	// tick never
-	};
-
-	virtual threadid_t getId() const = 0;
-	virtual const char *getName() const = 0;
-
-	virtual bool isActive() const = 0;
-	virtual bool checkStuck() = 0;
-
-	virtual void start() = 0;
-	virtual void terminate(bool ended) = 0;
-	virtual void waitForClose() = 0;
-
-	virtual void setPriority(Priority) = 0;
-	virtual Priority getPriority() const = 0;
-
-	static inline threadid_t getCurrentThreadId() noexcept
-	{
-#if defined(_WIN32)
-		return ::GetCurrentThreadId();
-#elif defined(__APPLE__)
-		// On OSX, 'threadid_t' is not an integer but a '_opaque_pthread_t *'), so we need to resort to another method.
-		uint64_t threadid = 0;
-		pthread_threadid_np(pthread_self(), &threadid);
-		return threadid;
-#else
-		return pthread_self();
-#endif
-	}
-	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
-	{
-#if defined(_WIN32) || defined(__APPLE__)
-		return (firstId == secondId);
-#else
-		return pthread_equal(firstId,secondId);
-#endif
-	}
-
-	inline bool isSameThread(threadid_t otherThreadId) const noexcept
-	{
-		return isSameThreadId(getCurrentThreadId(), otherThreadId);
-	}
-
-	static const uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
-	static void setThreadName(const char* name);
-
-protected:
-	virtual bool shouldExit() = 0;
-
-public:
-	virtual ~IThread() { };
-};
-
-typedef std::list<IThread *> spherethreadlist_t;
-template<class T>
-class TlsValue;
-
-// Singleton utility class for working with threads. Holds all running threads inside
-class ThreadHolder
-{
-public:
-	static constexpr lpctstr m_sClassName = "ThreadHolder";
-
-	// returns current working thread or DummySphereThread * if no IThread threads are running
-	static IThread *current() noexcept;
-	// records a thread to the list. Sould NOT be called, internal usage
-	static void push(IThread *thread);
-	// removes a thread from the list. Sould NOT be called, internal usage
-	static void pop(IThread *thread);
-	// returns thread at i pos
-	static IThread * getThreadAt(size_t at);
-
-	// returns number of running threads. Sould NOT be called, unit tests usage
-	static inline size_t getActiveThreads() { return m_threadCount; }
-
-private:
-	static void init();
-
-private:
-	static spherethreadlist_t m_threads;
-	static size_t m_threadCount;
-	static bool m_inited;
-	static SimpleMutex m_mutex;
-
-public:
-	static TlsValue<IThread *> m_currentThread;
-
-private:
-	ThreadHolder() = delete;
-};
-
-// Thread implementation. See IThread for list of available methods.
-class AbstractThread : public IThread
-{
-protected:
-    bool _thread_selfTerminateAfterThisTick;
-
-private:
-	threadid_t m_id;
-	const char *m_name;
-	static int m_threadsAvailable;
-	spherethread_t m_handle;
-	uint m_hangCheck;
-	Priority m_priority;
-	uint m_tickPeriod;
-	AutoResetEvent m_sleepEvent;
-
-	bool m_terminateRequested;
-	ManualResetEvent m_terminateEvent;
-
-public:
-	AbstractThread(const char *name, Priority priority = IThread::Normal);
-	virtual ~AbstractThread();
-
-private:
-	AbstractThread(const AbstractThread& copy);
-	AbstractThread& operator=(const AbstractThread& other);
-
-public:
-	threadid_t getId() const { return m_id; }
-	const char *getName() const { return m_name; }
-	void overwriteInternalThreadName(const char* name) {	// Use it only if you know what you are doing!
-		m_name = name;										//  This doesn't actually do the change of the thread name!
-	}
-
-	bool isActive() const;
-	bool isCurrentThread() const;
-	bool checkStuck();
-
-	virtual void start();
-	virtual void terminate(bool ended);
-	virtual void waitForClose();
-	virtual void awaken();
-
-	void setPriority(Priority pri);
-	Priority getPriority() const { return m_priority; }
-
-
-protected:
-	virtual void tick() = 0;
-	// NOTE: this should not be too long-lasted function, so no world loading, etc here!!!
-	virtual void onStart();
-	virtual bool shouldExit();
-
-private:
-	void run();
-	static SPHERE_THREADENTRY_RETNTYPE SPHERE_THREADENTRY_CALLTYPE runner(void *callerThread);
-};
-
-struct TemporaryStringStorage;
-
-// Sphere thread. Have some sphere-specific
-class AbstractSphereThread : public AbstractThread
-{
-private:
-#ifdef THREAD_TRACK_CALLSTACK
-	struct STACK_INFO_REC
-	{
-		const char *functionName;
-	};
-
-	STACK_INFO_REC m_stackInfo[0x1000];
-	size_t m_stackPos;
-	bool m_freezeCallStack;
-    bool m_exceptionStackUnwinding;
-#endif
-
-public:
-	AbstractSphereThread(const char *name, Priority priority = IThread::Normal);
-	virtual ~AbstractSphereThread() = default;
-
-private:
-	AbstractSphereThread(const AbstractSphereThread& copy);
-	AbstractSphereThread& operator=(const AbstractSphereThread& other);
-
-public:
-	// allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
-	char *allocateBuffer();
-	TemporaryStringStorage *allocateStringBuffer();
-
-	// allocates a manageable String from the thread local storage
-	void allocateString(TemporaryString &string);
-
-    void exceptionCaught();
-
-#ifdef THREAD_TRACK_CALLSTACK
-	inline void freezeCallStack(bool freeze) noexcept
-	{
-		m_freezeCallStack = freeze;
-	}
-
-	void pushStackCall(const char *name) noexcept;
-	inline void popStackCall(void) noexcept
-	{
-		if (m_freezeCallStack == false)
-			--m_stackPos;
-	}
-
-    void exceptionNotifyStackUnwinding(void);
-	void printStackTrace();
-#endif
-
-	ProfileData m_profile;	// the current active statistical profile.
-
-protected:
-	virtual bool shouldExit();
-};
-
-// Dummy thread for context when no thread really exists
-class DummySphereThread : public AbstractSphereThread
-{
-private:
-	static DummySphereThread *_instance;
-
-public:
-	static void createInstance();
-	static DummySphereThread *getInstance() noexcept;
-
-protected:
-	DummySphereThread();
-	virtual void tick();
-};
 
 // stores a value unique to each thread, intended to hold
 // a pointer (e.g. the current IThread instance)
@@ -368,6 +136,240 @@ T TlsValue<T>::get() const
 }
 
 
+// Interface for threads. Almost always should be used instead of any implementing classes
+class IThread
+{
+public:
+	enum Priority
+	{
+		Idle,			// tick 1000ms
+		Low,			// tick 200ms
+		Normal,			// tick 100ms
+		High,			// tick 50ms
+		Highest,		// tick 5ms
+		RealTime,		// tick almost instantly
+		Disabled = 0xFF	// tick never
+	};
+
+	virtual threadid_t getId() const = 0;
+	virtual const char *getName() const = 0;
+
+	virtual bool isActive() const = 0;
+	virtual bool checkStuck() = 0;
+
+	virtual void start() = 0;
+	virtual void terminate(bool ended) = 0;
+	virtual void waitForClose() = 0;
+
+	virtual void setPriority(Priority) = 0;
+	virtual Priority getPriority() const = 0;
+
+	static inline threadid_t getCurrentThreadId() noexcept
+	{
+#if defined(_WIN32)
+		return ::GetCurrentThreadId();
+#elif defined(__APPLE__)
+		// On OSX, 'threadid_t' is not an integer but a '_opaque_pthread_t *'), so we need to resort to another method.
+		uint64_t threadid = 0;
+		pthread_threadid_np(pthread_self(), &threadid);
+		return threadid;
+#else
+		return pthread_self();
+#endif
+	}
+	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
+	{
+#if defined(_WIN32) || defined(__APPLE__)
+		return (firstId == secondId);
+#else
+		return pthread_equal(firstId,secondId);
+#endif
+	}
+
+	inline bool isSameThread(threadid_t otherThreadId) const noexcept
+	{
+		return isSameThreadId(getCurrentThreadId(), otherThreadId);
+	}
+
+	static const uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+	static void setThreadName(const char* name);
+
+protected:
+	virtual bool shouldExit() = 0;
+
+public:
+	virtual ~IThread() { };
+};
+
+
+// Singleton utility class for working with threads. Holds all running threads inside.
+class ThreadHolder
+{
+	ThreadHolder() = default;
+	void init();
+
+public:
+	static constexpr lpctstr m_sClassName = "ThreadHolder";
+
+	static ThreadHolder* get() noexcept;
+
+	// returns current working thread or DummySphereThread * if no IThread threads are running
+	IThread *current() noexcept;
+	// records a thread to the list. Sould NOT be called, internal usage
+	void push(IThread *thread);
+	// removes a thread from the list. Sould NOT be called, internal usage
+	void pop(IThread *thread);
+	// returns thread at i pos
+	IThread * getThreadAt(size_t at);
+
+	// returns number of running threads. Sould NOT be called, unit tests usage
+	inline size_t getActiveThreads() noexcept { return m_threadCount; }
+
+private:
+	friend class AbstractThread;
+	TlsValue<IThread*> m_currentThread;
+
+	spherethreadlist_t m_threads;
+	size_t m_threadCount;
+	bool m_inited;
+	SimpleMutex m_mutex;
+};
+
+// Thread implementation. See IThread for list of available methods.
+class AbstractThread : public IThread
+{
+protected:
+    bool _thread_selfTerminateAfterThisTick;
+
+private:
+	threadid_t m_id;
+	const char *m_name;
+	static int m_threadsAvailable;
+	spherethread_t m_handle;
+	uint m_hangCheck;
+	Priority m_priority;
+	uint m_tickPeriod;
+	AutoResetEvent m_sleepEvent;
+
+	bool m_terminateRequested;
+	ManualResetEvent m_terminateEvent;
+
+public:
+	AbstractThread(const char *name, Priority priority = IThread::Normal);
+	virtual ~AbstractThread();
+
+private:
+	AbstractThread(const AbstractThread& copy);
+	AbstractThread& operator=(const AbstractThread& other);
+
+public:
+	threadid_t getId() const { return m_id; }
+	const char *getName() const { return m_name; }
+	void overwriteInternalThreadName(const char* name) {	// Use it only if you know what you are doing!
+		m_name = name;										//  This doesn't actually do the change of the thread name!
+	}
+
+	bool isActive() const;
+	bool isCurrentThread() const;
+	bool checkStuck();
+
+	virtual void start();
+	virtual void terminate(bool ended);
+	virtual void waitForClose();
+	virtual void awaken();
+
+	void setPriority(Priority pri);
+	Priority getPriority() const { return m_priority; }
+
+
+protected:
+	virtual void tick() = 0;
+	// NOTE: this should not be too long-lasted function, so no world loading, etc here!!!
+	virtual void onStart();
+	virtual bool shouldExit();
+
+private:
+	void run();
+	static SPHERE_THREADENTRY_RETNTYPE SPHERE_THREADENTRY_CALLTYPE runner(void *callerThread);
+};
+
+struct TemporaryStringStorage;
+
+// Sphere thread. Have some sphere-specific
+class AbstractSphereThread : public AbstractThread
+{
+	bool _fIsClosing;
+#ifdef THREAD_TRACK_CALLSTACK
+	struct STACK_INFO_REC
+	{
+		const char *functionName;
+	};
+
+	STACK_INFO_REC m_stackInfo[0x1000];
+	size_t m_stackPos;
+	bool m_freezeCallStack;
+    bool m_exceptionStackUnwinding;
+#endif
+
+public:
+	AbstractSphereThread(const char *name, Priority priority = IThread::Normal);
+	virtual ~AbstractSphereThread();
+
+	AbstractSphereThread(const AbstractSphereThread& copy) = delete;
+	AbstractSphereThread& operator=(const AbstractSphereThread& other) = delete;
+
+public:
+	// allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
+	char *allocateBuffer();
+	TemporaryStringStorage *allocateStringBuffer();
+
+	// allocates a manageable String from the thread local storage
+	void allocateString(TemporaryString &string);
+
+    void exceptionCaught();
+	bool closing() {
+		return _fIsClosing;
+	}
+
+#ifdef THREAD_TRACK_CALLSTACK
+	inline void freezeCallStack(bool freeze) noexcept
+	{
+		m_freezeCallStack = freeze;
+	}
+
+	void pushStackCall(const char *name) noexcept;
+	inline void popStackCall(void) noexcept
+	{
+		if (m_freezeCallStack == false)
+			--m_stackPos;
+	}
+
+    void exceptionNotifyStackUnwinding(void);
+	void printStackTrace();
+#endif
+
+	ProfileData m_profile;	// the current active statistical profile.
+
+protected:
+	virtual bool shouldExit();
+};
+
+// Dummy thread for context when no thread really exists
+class DummySphereThread : public AbstractSphereThread
+{
+private:
+	static DummySphereThread *_instance;
+
+public:
+	static void createInstance();
+	static DummySphereThread *getInstance() noexcept;
+
+protected:
+	DummySphereThread();
+	virtual void tick();
+};
+
+
 // used to hold debug information for stack
 #ifdef THREAD_TRACK_CALLSTACK
 class StackDebugInformation
@@ -379,18 +381,17 @@ public:
 	StackDebugInformation(const char *name) noexcept;
 	~StackDebugInformation();
 
-private:
-	StackDebugInformation(const StackDebugInformation& copy);
-	StackDebugInformation& operator=(const StackDebugInformation& other);
+	StackDebugInformation(const StackDebugInformation& copy) = delete;
+	StackDebugInformation& operator=(const StackDebugInformation& other) = delete;
 
 public:
 	static void printStackTrace()
 	{
-		static_cast<AbstractSphereThread *>(ThreadHolder::current())->printStackTrace();
+		static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->printStackTrace();
 	}
     static void freezeCallStack(bool freeze)
     {
-        static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(freeze);
+        static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->freezeCallStack(freeze);
     }
 };
 

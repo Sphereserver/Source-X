@@ -1493,6 +1493,19 @@ public:
 	virtual bool onReceive(CNetState* net);
 };
 
+/***************************************************************************
+ *
+ *
+ *	Packet 0xF9 : PacketGlobalChatReq				global chat (INCOMPLETE)
+ *
+ *
+ ***************************************************************************/
+class PacketGlobalChatReq : public Packet
+{
+public:
+	PacketGlobalChatReq();
+	virtual bool onReceive(CNetState* net);
+};
 
 /***************************************************************************
 *

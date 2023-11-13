@@ -182,7 +182,7 @@ CVarDefCont * CVarDefMap::GetAtKey( lpctstr ptcKey ) const
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::GetAtKey");
     const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
 
-	if ( idx != SCONT_BADINDEX )
+	if ( idx != sl::scont_bad_index() )
 		return m_Container[idx];
 	return nullptr;
 }
@@ -216,7 +216,7 @@ void CVarDefMap::DeleteAtKey( lpctstr ptcKey )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::DeleteAtKey");
     const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
-    if (idx != SCONT_BADINDEX)
+    if (idx != sl::scont_bad_index())
         DeleteAt(idx);
 }
 
@@ -364,7 +364,7 @@ CVarDefContNum* CVarDefMap::ModNum(lpctstr pszName, int64 iMod, bool fDeleteZero
             if ((iNewVal == 0) && fDeleteZero)
             {
                 const size_t idx = m_Container.find(pVarDef);
-                ASSERT (idx != SCONT_BADINDEX);
+                ASSERT (idx != sl::scont_bad_index());
                 DeleteAt(idx);
                 return nullptr;
             }
@@ -392,7 +392,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
     const size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
 
 	CVarDefCont * pVarBase = nullptr;
-	if ( idx != SCONT_BADINDEX )
+	if ( idx != sl::scont_bad_index() )
 		pVarBase = m_Container[idx];
 
 	if ( !pVarBase )
@@ -473,7 +473,7 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
     const size_t idx = m_Container.find_predicate(pszName, VarDefCompare);
 
 	CVarDefCont * pVarBase = nullptr;
-	if ( idx != SCONT_BADINDEX )
+	if ( idx != sl::scont_bad_index() )
 		pVarBase = m_Container[idx];
 
 	if ( !pVarBase )
@@ -504,7 +504,7 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr ptcKey ) const
 	{
         const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
 		
-		if ( idx != SCONT_BADINDEX )
+		if ( idx != sl::scont_bad_index() )
 			pReturn = m_Container[idx];
 	}
 

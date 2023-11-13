@@ -38,7 +38,7 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-			
+
 			iVal = (int)(args.m_iN3);
 		}
 	}
@@ -204,9 +204,10 @@ ushort CChar::Stat_GetVal( STAT_TYPE i ) const
 void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 {
 	ADDTOCALLSTACK("CChar::Stat_SetMax");
-	ASSERT((i >= 0) && (i < STAT_QTY)); // allow for food
+	ASSERT((i > STAT_NONE) && (i < STAT_QTY)); // allow for food
 
-	if ( g_Cfg._uiStatFlag && ((g_Cfg._uiStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && (g_Cfg._uiStatFlag & STAT_FLAG_DENYMAXP)) || (m_pNPC && (g_Cfg._uiStatFlag & STAT_FLAG_DENYMAXN))) )
+	if ( g_Cfg._uiStatFlag &&
+     ((g_Cfg._uiStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && (g_Cfg._uiStatFlag & STAT_FLAG_DENYMAXP)) || (m_pNPC && (g_Cfg._uiStatFlag & STAT_FLAG_DENYMAXN))) )
     {
 		m_Stat[i].m_max = 0;
     }
@@ -214,7 +215,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 	{
 		if ( IsTrigUsed(TRIGGER_STATCHANGE) && !IsTriggerActive("CREATE") )
 		{
-			if ( i >= STAT_STR && i < STAT_QTY )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
+			if ( i > STAT_NONE && i < STAT_QTY )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
 			{
 				CScriptTriggerArgs args;
 				args.m_iN1 = i + 4LL;		// shift by 4 to indicate MaxHits, etc..
@@ -313,7 +314,7 @@ void CChar::Stat_AddBase( STAT_TYPE i, int iVal )
 }
 
 void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
-{ 
+{
 	ADDTOCALLSTACK("CChar::Stat_SetBase");
 	ASSERT(i >= 0 && i < STAT_QTY);
 
@@ -473,8 +474,8 @@ bool CChar::Stats_Regen()
             if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
                 iMod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
-            if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B 
-				&& (i == STAT_DEX || i == STAT_INT) 
+            if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B
+				&& (i == STAT_DEX || i == STAT_INT)
 				&& uiStatVal < uiStatLimit)
             {
                 iFocusGain = Skill_Focus(i);
@@ -486,7 +487,7 @@ bool CChar::Stats_Regen()
         {
             iMod = -1;
         }
-		
+
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
 		{
 			CScriptTriggerArgs Args;
@@ -608,23 +609,32 @@ short CChar::GetKarma() const
     return (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, m_iKarma)));
 }
 
-void CChar::SetKarma(short iNewKarma)
+void CChar::SetKarma(short iNewKarma, CChar* pNPC)
 {
+
+	/*
+    Issue: 1118
+	https://github.com/Sphereserver/Source-X/issues/1118
+
+	Wrong calculations breaks all the variables while saving. But the issues of this trigger are LOCAL.OLD and LOCAL.NEW
+	As LOCAL.NEW updating after KarmaChange triggered because ARGN1 is writeable, it's impossible to update it inside the trigger.
+	Best way to track that values is adding another trigger, that triggers after Karma value Changed.
+
+	xwerswoodx
+	*/
+
+    const short iOldKarma = GetKarma();
+	short iKarmaChange = iNewKarma - iOldKarma;
 
 	if (IsTrigUsed(TRIGGER_KARMACHANGE))
 	{
-		const int iOldKarma = GetKarma();
-
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = iNewKarma;
-		Args.m_VarsLocal.SetNum("Old", iOldKarma);
-		Args.m_VarsLocal.SetNum("New", iNewKarma + iOldKarma);
-		TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
-
+	    CScriptTriggerArgs Args(iKarmaChange, iOldKarma);
+	    Args.m_pO1 = pNPC;
+    	TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
 		if (retType == TRIGRET_RET_TRUE)
 			return;
-
-		iNewKarma = (ushort)(minimum(g_Cfg.m_iMaxKarma, Args.m_iN1));
+    	iKarmaChange = (short)Args.m_iN1;
+        iNewKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iOldKarma + iKarmaChange)));
 	}
 
     m_iKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iNewKarma)));
@@ -638,26 +648,34 @@ ushort CChar::GetFame() const
     return (ushort)(minimum(g_Cfg.m_iMaxFame, m_uiFame));
 }
 
-void CChar::SetFame(ushort uiNewFame)
+void CChar::SetFame(ushort uiNewFame, CChar* pNPC)
 {
+    /*
+    Issue: 1118
+	https://github.com/Sphereserver/Source-X/issues/1118
+
+	Wrong calculations breaks all the variables while saving. But the issues of this trigger are LOCAL.OLD and LOCAL.NEW.
+	As LOCAL.NEW updating after FameChange triggered because of ARGN1 is writeable, it's impossible to update it inside the trigger.
+	Best way to track that values is adding another trigger, that triggers after Fame value Changed.
+
+	xwerswoodx
+	*/
+
+    const short iOldFame = GetFame();
+	short iFameChange = uiNewFame - iOldFame;
 
 	if (IsTrigUsed(TRIGGER_FAMECHANGE))
 	{
-		const int iOldFame = GetFame();
-
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = uiNewFame;
-		Args.m_VarsLocal.SetNum("Old", iOldFame);
-		Args.m_VarsLocal.SetNum("New", uiNewFame + iOldFame);
-		TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
-
-		if ( retType == TRIGRET_RET_TRUE )
+	    CScriptTriggerArgs Args(iFameChange, iOldFame);
+	    Args.m_pO1 = pNPC;
+    	TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
+		if (retType == TRIGRET_RET_TRUE)
 			return;
-
-		uiNewFame = (ushort)(minimum(g_Cfg.m_iMaxFame, Args.m_iN1));
+    	iFameChange = (short)Args.m_iN1;
+        uiNewFame = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, iOldFame + iFameChange)));
 	}
 
-    m_uiFame = (ushort)(minimum(g_Cfg.m_iMaxFame, uiNewFame));
+    m_uiFame = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, uiNewFame)));
 }
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
@@ -671,7 +689,7 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 	// Check for stats degrade.
 	const uint uiStatSumLimit = Stat_GetSumLimit();	// Maximum reachable statsum.
 	const uint uiStatSum = Stat_GetSum() + 1;		// Current statsum +1, assuming we are going to have +1 stat at some point thus we are calling this function
-	
+
 	/*Before there was iStatSum < iStatSumAvg:
 	In that case, if the sum of the player's Stats(iStatSum) was at StatCap - 1 (before adding the +1 above) the selected Stat will not increase
 	unless one of the other stats was set for decreasing (stat arrow down) */

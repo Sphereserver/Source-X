@@ -1,4 +1,5 @@
-name: "CodeQL"
+name: CodeQL
+# https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning
 
 on:
   push:
@@ -9,13 +10,14 @@ on:
       - '**.txt'
       - '**.md'
       - '**.rc'
+  workflow_dispatch:
 
 #  pull_request:
     # The branches below must be a subset of the branches above
 #    branches: ["static-analysis"]
 
-  schedule:
-    - cron: '45 2 * * 0'
+  #schedule:
+  #  - cron: '45 2 * * 0'
 
 jobs:
   analyze:
@@ -57,6 +59,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
+        config-file: ./.github/codeql/codeql-config.yml
         queries: +security-extended,security-and-quality
         packs: +codeql/cpp-queries
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -79,7 +82,25 @@ jobs:
     - name: Compilation
       run: cd build && make -j$(nproc)
 
+    # We need now to exclude from the analysis the 3rd party library code.
+    # https://josh-ops.com/posts/github-codeql-ignore-files/
+    # https://github.com/advanced-security/filter-sarif
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
         category: "/language:${{matrix.language}}"
+        upload: false # disable the upload here - we will upload in a different action
+        output: sarif-results
+
+    - name: filter-sarif
+      uses: advanced-security/filter-sarif@v1
+      with:
+        patterns: |
+          -lib/**
+        input: sarif-results/${{ matrix.language }}.sarif
+        output: sarif-results/${{ matrix.language }}.sarif
+
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: sarif-results/${{ matrix.language }}.sarif

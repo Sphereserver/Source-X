@@ -15,8 +15,6 @@ CGMPage::CGMPage( lpctstr pszAccount )
 	m_sAccount = pszAccount;
 	m_sReason = nullptr;
 	m_time = CWorldGameTime::GetCurrentTime().GetTimeRaw();
-
-	g_World.m_GMPages.InsertContentTail(this);		// put it at the end of the list
 }
 
 CGMPage::~CGMPage()
@@ -120,7 +118,6 @@ bool CGMPage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc, boo
 	return false;
 }
 
-
 bool CGMPage::r_LoadVal(CScript& s)
 {
 	ADDTOCALLSTACK("CGMPage::r_LoadVal");
@@ -131,7 +128,7 @@ bool CGMPage::r_LoadVal(CScript& s)
 		m_uidChar.SetObjUID(s.GetArgDWVal());
 		break;
 	case GC_DELETE:
-		delete this;
+		g_World.m_GMPages.erase_element(this);
 		break;
 	case GC_HANDLED:
 	{

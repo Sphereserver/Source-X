@@ -145,7 +145,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
     {
         return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
     }
-    int GetResIndex() const noexcept
+    uint GetResIndex() const noexcept
     {
         return RES_GET_INDEX(m_dwInternalVal);
     }
