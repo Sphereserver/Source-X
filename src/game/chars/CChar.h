@@ -367,6 +367,7 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	CREID_TYPE GetID() const;
 	virtual word GetBaseID() const override;
 	CREID_TYPE GetDispID() const;
+	bool SetDispID(CREID_TYPE id);
 	void SetID( CREID_TYPE id );
 
 	virtual lpctstr GetName() const override;

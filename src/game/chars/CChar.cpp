@@ -1520,6 +1520,17 @@ CREID_TYPE CChar::GetDispID() const
 	return pCharDef->GetDispID();
 }
 
+// Setting the visual "ID" for this.
+bool CChar::SetDispID(CREID_TYPE id)
+{
+	// Just change what this char looks like.
+	// do not change it's basic type.
+
+	CCharBase* pCharDef = Char_GetDef();
+	ASSERT(pCharDef);
+	return pCharDef->SetDispID(id);
+}
+
 // Just set the base id and not the actual display id.
 // NOTE: Never return nullptr
 void CChar::SetID( CREID_TYPE id )
@@ -2783,6 +2794,9 @@ do_default:
 				}
 			}
 			return true;
+		case CHC_DISPID:
+			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, GetDispID()));
+			break;
 		case CHC_DISPIDDEC:	// for properties dialog.
 			sVal.FormatVal( pCharDef->m_trackID );
 			return true;
@@ -3633,6 +3647,8 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_DISMOUNT:
 			Horse_UnMount();
 			break;
+		case CHC_DISPID:
+			return SetDispID((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 		case CHC_EMOTEACT:
 		{
 			bool fSet = IsStatFlag(STATF_EMOTEACTION);
