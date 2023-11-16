@@ -115,7 +115,7 @@ public:
 #endif
 
 // _EXC_CAUGHT
-#define _EXC_CAUGHT static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->exceptionCaught()
+#define _EXC_CAUGHT static_cast<AbstractSphereThread *>(ThreadHolder::get().current())->exceptionCaught()
 
 /*--- Main (non SUB) macros ---*/
 

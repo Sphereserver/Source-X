@@ -199,7 +199,7 @@ void _cdecl Sphere_Purecall_Handler()
 
 void SetPurecallHandler()
 {
-	// We don't want sphere to immediately exit if a pure call is done.
+	// We don't want sphere to immediately exit if something calls a pure virtual method.
 #ifdef _MSC_VER
 	_set_purecall_handler(Sphere_Purecall_Handler);
 #else
@@ -281,8 +281,8 @@ void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
     }
 
     g_Serv.SetExitFlag(SIGABRT);
-    for (size_t i = 0; i < ThreadHolder::get()->getActiveThreads(); ++i)
-        ThreadHolder::get()->getThreadAt(i)->terminate(false);
+    for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
+        ThreadHolder::get().getThreadAt(i)->terminate(false);
     //exit(EXIT_FAILURE);
 }
 

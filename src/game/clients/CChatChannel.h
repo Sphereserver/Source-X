@@ -6,7 +6,6 @@
 #ifndef _INC_CCHATCHANNEL_H
 #define _INC_CCHATCHANNEL_H
 
-#include "../../common/sphere_library/CSObjListRec.h"
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphere_library/sptr_containers.h"
 #include "../../common/sphereproto.h"
@@ -14,10 +13,9 @@
 
 class CChatChanMember;
 
-class CChatChannel : public CSObjListRec
+class CChatChannel
 {
     // a number of clients can be attached to this chat channel.
-private:
     friend class CChatChanMember;
     friend class CChat;
     CSString m_sName;
@@ -29,21 +27,19 @@ public:
     sl::unique_ptr_vector<CSString>             m_NoVoices;     // Current list of channel members with no voice
     sl::unique_ptr_vector<CSString>             m_Moderators;   // Current list of channel's moderators (may or may not be currently in the channel)
     sl::raw_ptr_view_vector<CChatChanMember>    m_Members;	    // Current list of members in this channel
-private:
-    void SetModerator(lpctstr pszName, bool fFlag = true);
-    void SetVoice(lpctstr pszName, bool fFlag = true);
-    void RenameChannel(CChatChanMember * pBy, lpctstr pszName);
-    size_t FindMemberIndex( lpctstr pszName ) const;
 
 public:
     explicit CChatChannel(lpctstr pszName, lpctstr pszPassword = nullptr, bool fStatic = false);
+    CChatChannel(const CChatChannel& copy) = delete;
+    CChatChannel& operator=(const CChatChannel& other) = delete;
 
 private:
-    CChatChannel(const CChatChannel& copy);
-    CChatChannel& operator=(const CChatChannel& other);
+    void SetModerator(lpctstr pszName, bool fFlag = true);
+    void SetVoice(lpctstr pszName, bool fFlag = true);
+    void RenameChannel(CChatChanMember* pBy, lpctstr pszName);
+    size_t FindMemberIndex(lpctstr pszName) const;
 
 public:
-    CChatChannel* GetNext() const;
     lpctstr GetName() const;
     lpctstr GetModeString() const;
     lpctstr GetPassword() const;
@@ -69,8 +65,8 @@ public:
     void KickMember( CChatChanMember *pByMember, CChatChanMember * pMember );
     void Broadcast(CHATMSG_TYPE iType, lpctstr pszName = nullptr, lpctstr pszText = nullptr, CLanguageID lang = 0, bool fOverride = false);
     void RemoveMember(CChatChanMember * pMember);
+    bool RemoveMemberByName(lpctstr pszName);
     CChatChanMember* FindMember(lpctstr pszName) const;
-    bool RemoveMember(lpctstr pszName);
     void SetName(lpctstr pszName);
     bool IsModerator(lpctstr pszName) const;
     bool HasVoice(lpctstr pszName) const;

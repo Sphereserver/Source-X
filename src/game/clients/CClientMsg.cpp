@@ -820,8 +820,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
 
-	Str_CopyLimitNull(	ptcBarkBuffer, name,	STR_TEMPLENGTH);
-	Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
+	Str_CopyLimitNull(	ptcBarkBuffer, name,	Str_TempLength());
+	Str_ConcatLimitNull(ptcBarkBuffer, pszText, Str_TempLength());
 
 	if (mode == TALKMODE_SPELL) //Set TALKMODE_SPELL to TALKMODE_SAY after every color check completed to block spell flood.
 		mode = TALKMODE_SAY;
@@ -877,8 +877,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 bark_default:
 			if (ptcBarkBuffer[0] == '\0')
 			{
-				Str_CopyLimitNull(ptcBarkBuffer, name, STR_TEMPLENGTH);
-				Str_ConcatLimitNull(ptcBarkBuffer, pszText, STR_TEMPLENGTH);
+				Str_CopyLimitNull(ptcBarkBuffer, name, Str_TempLength());
+				Str_ConcatLimitNull(ptcBarkBuffer, pszText, Str_TempLength());
 			}
 
 			addBark(ptcBarkBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
@@ -1298,9 +1298,9 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 	if ( ! *prefix )
 		prefix = pChar->Noto_GetFameTitle();
 
-    Str_CopyLimitNull( pszTemp, prefix, STR_TEMPLENGTH );
-    Str_ConcatLimitNull( pszTemp, pChar->GetName(), STR_TEMPLENGTH );
-    Str_ConcatLimitNull( pszTemp, pChar->GetKeyStr( "NAME.SUFFIX" ), STR_TEMPLENGTH );
+    Str_CopyLimitNull( pszTemp, prefix, Str_TempLength() );
+    Str_ConcatLimitNull( pszTemp, pChar->GetName(), Str_TempLength() );
+    Str_ConcatLimitNull( pszTemp, pChar->GetKeyStr( "NAME.SUFFIX" ), Str_TempLength() );
 
 	if ( !pChar->IsStatFlag(STATF_INCOGNITO) || ( GetPrivLevel() > pChar->GetPrivLevel() ))
 	{
@@ -1308,16 +1308,16 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		lpctstr pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_TOWN);
 		if ( pAbbrev )
 		{
-            Str_ConcatLimitNull( pszTemp, pAbbrev, STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, pAbbrev, Str_TempLength() );
 		}
 		pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_GUILD);
 		if ( pAbbrev )
 		{
-            Str_ConcatLimitNull( pszTemp, pAbbrev, STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, pAbbrev, Str_TempLength() );
 		}
 	}
 	else
-        Str_CopyLimitNull( pszTemp, pChar->GetName(), STR_TEMPLENGTH );
+        Str_CopyLimitNull( pszTemp, pChar->GetName(), Str_TempLength() );
 
 	if ( pChar->m_pNPC && g_Cfg.m_fVendorTradeTitle )
 	{
@@ -1326,8 +1326,8 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 			lpctstr title = pChar->GetTradeTitle();
 			if ( *title )
 			{
-                Str_ConcatLimitNull( pszTemp, " ", STR_TEMPLENGTH );
-                Str_ConcatLimitNull( pszTemp, title, STR_TEMPLENGTH );
+                Str_ConcatLimitNull( pszTemp, " ", Str_TempLength() );
+                Str_ConcatLimitNull( pszTemp, title, Str_TempLength() );
 			}
 		}
 	}
@@ -1339,52 +1339,52 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		if ( pChar->m_pNPC )
 		{
 			if ( pChar->IsPlayableCharacter())
-                Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_NPC), STR_TEMPLENGTH );
+                Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_NPC), Str_TempLength() );
 			if ( pChar->IsStatFlag( STATF_CONJURED ))
-                Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SUMMONED), STR_TEMPLENGTH );
+                Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SUMMONED), Str_TempLength() );
 			else if ( pChar->IsStatFlag( STATF_PET ))
-                Str_ConcatLimitNull( pszTemp, (pChar->m_pNPC->m_bonded) ? g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_BONDED) : g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_TAME), STR_TEMPLENGTH );
+                Str_ConcatLimitNull( pszTemp, (pChar->m_pNPC->m_bonded) ? g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_BONDED) : g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_TAME), Str_TempLength() );
 		}
 		if ( pChar->IsStatFlag( STATF_INVUL ) && ! pChar->IsStatFlag( STATF_INCOGNITO ) && ! pChar->IsPriv( PRIV_PRIV_NOSHOW ))
-            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_INVUL), STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_INVUL), Str_TempLength() );
 		if ( pChar->IsStatFlag( STATF_STONE ))
-            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_STONE), STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_STONE), Str_TempLength() );
 		if ( pChar->IsStatFlag( STATF_FREEZE ))
-            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_FROZEN), STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_FROZEN), Str_TempLength() );
 		if ( pChar->IsStatFlag( STATF_INSUBSTANTIAL | STATF_INVISIBLE | STATF_HIDDEN ))
-            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HIDDEN), STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HIDDEN), Str_TempLength() );
 		if ( pChar->IsStatFlag( STATF_SLEEPING ))
-            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SLEEPING), STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SLEEPING), Str_TempLength() );
 		if ( pChar->IsStatFlag( STATF_HALLUCINATING ))
-            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HALLU), STR_TEMPLENGTH );
+            Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HALLU), Str_TempLength() );
 
 		if ( fAllShow )
 		{
 			if ( pChar->IsStatFlag(STATF_SPAWNED) )
-				Str_ConcatLimitNull(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SPAWN), STR_TEMPLENGTH);
+				Str_ConcatLimitNull(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SPAWN), Str_TempLength());
 
 			if (IsPriv(PRIV_DEBUG))
 			{
 				const size_t uiSLen = strlen(pszTemp);
-				snprintf(pszTemp + uiSLen, STR_TEMPLENGTH - uiSLen, " [0%x]", (dword)pChar->GetUID());
+				snprintf(pszTemp + uiSLen, Str_TempLength() - uiSLen, " [0%x]", (dword)pChar->GetUID());
 			}
 		}
 	}
 	if ( ! fAllShow && pChar->Skill_GetActive() == NPCACT_NAPPING )
-        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_AFK), STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_AFK), Str_TempLength() );
 	if ( pChar->GetPrivLevel() <= PLEVEL_Guest )
-        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_GUEST), STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_GUEST), Str_TempLength() );
 	if ( pChar->IsPriv( PRIV_JAILED ))
-        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_JAILED), STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_JAILED), Str_TempLength() );
 	if ( pChar->IsDisconnected())
-        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_LOGOUT), STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_LOGOUT), Str_TempLength() );
 	if (( fAllShow || pChar == m_pChar ) && pChar->IsStatFlag( STATF_CRIMINAL ))
-        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_CRIMINAL), STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_CRIMINAL), Str_TempLength() );
 	if ( fAllShow || ( IsPriv(PRIV_GM) && ( g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE )))
 	{
-        Str_ConcatLimitNull( pszTemp, " [", STR_TEMPLENGTH );
-        Str_ConcatLimitNull( pszTemp, pChar->Skill_GetName(), STR_TEMPLENGTH);
-        Str_ConcatLimitNull( pszTemp, "]", STR_TEMPLENGTH );
+        Str_ConcatLimitNull( pszTemp, " [", Str_TempLength() );
+        Str_ConcatLimitNull( pszTemp, pChar->Skill_GetName(), Str_TempLength());
+        Str_ConcatLimitNull( pszTemp, "]", Str_TempLength() );
 	}
 
 	if ( IsTrigUsed(TRIGGER_AFTERCLICK) )
@@ -1401,7 +1401,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != nullptr )
-			Str_CopyLimitNull(pszTemp, pNewStr, STR_TEMPLENGTH);
+			Str_CopyLimitNull(pszTemp, pNewStr, Str_TempLength());
 
 		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
@@ -1778,7 +1778,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 		return false;
 
 	tchar * pszTemp = Str_GetTemp();
-	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
+	snprintf(pszTemp, Str_TempLength(), "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
 	addTarget(mode, pszTemp, true, fNotoCheck, iTimeout);
 	return true;
@@ -1819,7 +1819,7 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE co
 	}
 
 	tchar *pszTemp = Str_GetTemp();
-	snprintf(pszTemp, STR_TEMPLENGTH, "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
+	snprintf(pszTemp, Str_TempLength(), "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
 
 	if ( CItemBase::IsID_Multi( id ) )	// a multi we get from Multi.mul
 	{
@@ -2778,7 +2778,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		{
 			addBark(g_sServerDescription.c_str(), nullptr, HUE_YELLOW, TALKMODE_SAY, FONT_NORMAL);
 
-			snprintf(z, STR_TEMPLENGTH, (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
+			snprintf(z, Str_TempLength(), (g_Serv.StatGet(SERV_STAT_CLIENTS)==2) ?
 				g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYER ) : g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_PLAYERS ),
 				g_Serv.StatGet(SERV_STAT_CLIENTS)-1 );
 			addSysMessage(z);
@@ -2786,7 +2786,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
             const lpctstr ptcLastLogged = pAccount->m_TagDefs.GetKeyStr("LastLogged");
             if (!IsStrEmpty(ptcLastLogged))
             {
-                snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), ptcLastLogged);
+                snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_LOGIN_LASTLOGGED ), ptcLastLogged);
                 addSysMessage(z);
             }
 		}
@@ -2801,7 +2801,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	if ( IsPriv(PRIV_GM_PAGE) && !g_World.m_GMPages.empty() )
 	{
-		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.size()), g_Cfg.m_cCommandPrefix);
+		snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_PENDING), (int)(g_World.m_GMPages.size()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )

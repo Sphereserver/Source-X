@@ -80,7 +80,7 @@ function (toolchain_exe_stuff_common)
 	#-- Setting common linker flags
 
 	IF (${USE_MSAN})
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie")
 	ENDIF()
 
 	 # Force dynamic linking but include into exe libstdc++ and libgcc.
@@ -103,7 +103,7 @@ function (toolchain_exe_stuff_common)
 	ENDIF ()
 	IF (TARGET spheresvr_nightly)
 		IF (ENABLED_SANITIZER)
-			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
 		ELSE ()
 			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
 		ENDIF ()

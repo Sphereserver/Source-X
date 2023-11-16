@@ -61,14 +61,14 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
        			emoteHue = m_EmoteHueOverride;
             else
                 emoteHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
-	        snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
+	        snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
     	    UpdateObjMessage(z, nullptr, pClient, emoteHue, TALKMODE_EMOTE);
 		}
         //}
 
         if (pClient && pChar->CanSee(this))
         {
-            snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKS), GetName());
+            snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKS), GetName());
             pClient->addBarkParse(z, this, HUE_TEXT_DEF, TALKMODE_EMOTE);
         }
     }

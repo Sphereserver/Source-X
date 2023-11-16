@@ -96,12 +96,13 @@ CClient::~CClient()
 
 	const bool fWasChar = ( m_pChar != nullptr );
 
-	CharDisconnect();	// am i a char in game ?
+	if (fWasChar)
+		CharDisconnect();	// am i a char in game ?
 
 	if (m_pGMPage)
 		m_pGMPage->ClearHandler();
 
-	// Clear containers (CTAG and TOOLTIP)
+	// Clear session-bound containers (CTAG and TOOLTIP)
 	m_TagDefs.Clear();
 
 	CAccount * pAccount = GetAccount();
@@ -110,6 +111,9 @@ CClient::~CClient()
 		pAccount->OnLogout(this, fWasChar);
 		m_pAccount = nullptr;
 	}
+
+	if (fWasChar)
+		g_Serv.m_Chats.QuitChat(this);
 
 	if (m_pPopupPacket != nullptr)
 	{
@@ -342,12 +346,12 @@ void CClient::Announce( bool fArrive ) const
 	if ( (g_Cfg.m_iArriveDepartMsg == 2) && (GetPrivLevel() > PLEVEL_Player) )		// notify of GMs
 	{
 		lpctstr zTitle = m_pChar->Noto_GetFameTitle();
-		snprintf(pszMsg, STR_TEMPLENGTH, "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
+		snprintf(pszMsg, Str_TempLength(), "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
 	}
 	else if ( g_Cfg.m_iArriveDepartMsg == 1 )		// notify of players
 	{
 		const CRegion *pRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_AREA);
-		snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
+		snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
 			m_pChar->GetName(),
 			fArrive ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_2) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_3),
 			pRegion != nullptr ? pRegion->GetName() : g_Serv.GetName());
@@ -458,7 +462,7 @@ void CClient::addTargetVerb( lpctstr pszCmd, lpctstr ptcArg )
 
 	m_Targ_Text.Format( "%s%s%s", pszCmd, ( ptcArg[0] && pszCmd[0] ) ? " " : "", ptcArg );
 	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), m_Targ_Text.GetBuffer());
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), m_Targ_Text.GetBuffer());
 	addTarget(CLIMODE_TARG_OBJ_SET, pszMsg);
 }
 

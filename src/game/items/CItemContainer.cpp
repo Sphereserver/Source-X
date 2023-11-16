@@ -1049,9 +1049,9 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 		int iStones = GetWeight() / WEIGHT_UNITS;
 		tchar *pszMsg = Str_GetTemp();
 		if ( pCharTop == pCharOpener )
-			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
+			snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
 		else
-			snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
+			snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_OTHER), pCharTop->GetPronoun(), iStones, pCharTop->GetPossessPronoun(), GetName());
 
 		pCharOpener->SysMessage(pszMsg);
 

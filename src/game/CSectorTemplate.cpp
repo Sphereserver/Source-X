@@ -111,17 +111,6 @@ void CItemsList::AddItemToSector( CItem * pItem )
 }
 
 
-//////////////////////////////////////////////////////////////////
-// -CSectorBase::CObjPointSortArray
-
-
-int CSectorBase::CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
-{
-    UnreferencedParameter(fNoSpaces);
-    ASSERT( pBase );
-    return (id - pBase->GetPointSortIndex());
-}
-
 
 //////////////////////////////////////////////////////////////////
 // -CSectorBase

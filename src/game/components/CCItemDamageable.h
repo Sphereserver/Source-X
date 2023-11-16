@@ -23,10 +23,10 @@ class CCItemDamageable : public CComponent
     
 public:
     CCItemDamageable(CItem *pLink);
-    virtual ~CCItemDamageable();
-    CItem *GetLink() const;
-
+    virtual ~CCItemDamageable() override = default;
     static bool CanSubscribe(const CItem* pItem);
+
+    CItem *GetLink() const;
 
     void SetCurHits(word iCurHits);
     void SetMaxHits(word iMaxHits);

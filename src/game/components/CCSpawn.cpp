@@ -268,7 +268,7 @@ uint CCSpawn::WriteName(tchar *ptcOut) const
     if (pDef == nullptr || ptcName == nullptr || ptcName[0] == '\0')
         ptcName = g_Cfg.ResourceGetName(_idSpawn);
 
-    return snprintf(ptcOut, STR_TEMPLENGTH, " (%s)", ptcName);
+    return snprintf(ptcOut, Str_TempLength(), " (%s)", ptcName);
 }
 
 void CCSpawn::Delete(bool fForce)
@@ -1029,7 +1029,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
         case ISPW_MOREP:
         {
             tchar *pszTemp = Str_GetTemp();
-            Str_CopyLimitNull(pszTemp, s.GetArgStr(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(pszTemp, s.GetArgStr(), Str_TempLength());
             GETNONWHITESPACE(pszTemp);
             size_t iArgs = 0;
             if (IsDigit(pszTemp[0]) || pszTemp[0] == '-')

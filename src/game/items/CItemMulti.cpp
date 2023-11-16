@@ -1182,7 +1182,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
 
     tchar *pszName = Str_GetTemp();
     const CItemBaseMulti * pItemBase = static_cast<const CItemBaseMulti*>(Base_GetDef());
-    snprintf(pszName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME), pItemBase->GetName());
+    snprintf(pszName, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME), pItemBase->GetName());
     pDeed->SetName(pszName);
 
     bool fIsAddon = IsType(IT_MULTI_ADDON);

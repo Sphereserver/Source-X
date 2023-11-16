@@ -55,7 +55,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	#-- Setting common linker flags
 
 	IF (${USE_MSAN})
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie")
 	ENDIF()
 
 	 # -s and -g need to be added/removed also to/from linker flags!
@@ -78,7 +78,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	 ENDIF ()
 	 IF (TARGET spheresvr_nightly)
 		IF (ENABLED_SANITIZER)
-			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O2 ${COMPILE_OPTIONS_EXTRA})
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -1 ${COMPILE_OPTIONS_EXTRA})
 		ELSE ()
 			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
 		ENDIF ()

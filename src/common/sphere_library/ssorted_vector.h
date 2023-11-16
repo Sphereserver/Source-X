@@ -78,13 +78,8 @@ namespace sl
             }
             //iterator insert(const size_Typepe _Count, const _Typepe& value) = delete;
 
-            inline void remove(const size_t index) {
+            inline void remove_index(const size_t index) {
                 base_type::erase(base_type::begin() + index);
-            }
-            void remove_ptr(_Type* elem) {
-                const size_t uiFoundIndex = this->find(elem);
-                if (uiFoundIndex != sl::scont_bad_index())
-                    this->remove(uiFoundIndex);
             }
 
 

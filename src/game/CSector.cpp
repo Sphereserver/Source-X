@@ -1080,8 +1080,8 @@ void CSector::Close()
 	m_Chars_Disconnect.ClearContainer();
 
 	// These are resource type things.
-	// m_Teleports.RemoveAll();
-	// m_RegionLinks.Empty();	// clear the link list.
+	//m_Teleports.clear();
+	//m_RegionLinks.clear();
 }
 
 void CSector::RespawnDeadNPCs()

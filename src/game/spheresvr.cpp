@@ -28,6 +28,7 @@
 #include "CWorld.h"
 #include "spheresvr.h"
 #include <sstream>
+#include <cstdlib>
 
 // Headers for InitRuntimeStaticMembers
 #include "clients/CClient.h"
@@ -81,11 +82,8 @@ GlobalInitializer::GlobalInitializer()
     SetExceptionTranslator();
 #endif
 
-// Set purecall handler?
-#ifndef _DEBUG
-    // Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+	// Set function to handle the invalid case where a pure virtual function is called.
     SetPurecallHandler();
-#endif
 
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");
@@ -101,13 +99,31 @@ GlobalInitializer::GlobalInitializer()
 	static_assert(sizeof(wchar) == 2);	// 16 bits
 	static_assert(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
 
-	CPointBase::InitRuntimeStaticMembers();
-
 	EXC_CATCH;
 }
 
-GlobalInitializer g_GlobalInitializer;
+void GlobalInitializer::InitRuntimeDefaultValues()
+{
+	CPointBase::InitRuntimeDefaultValues();
+}
 
+
+static GlobalInitializer g_GlobalInitializer;
+
+#ifdef _WIN32
+CNTWindow g_NTWindow;
+#else
+UnixTerminal g_UnixTerminal;
+#endif
+
+#ifdef _LIBEV
+// libev is used by Linux to notify when our main socket is readable or writable, so when i can read and send data again (async I/O).
+// Windows supports async network I/O via WinSock.
+LinuxEv g_NetworkEvent;
+#endif
+
+// Config data from sphere.ini is needed from the beginning.
+CServerConfig	g_Cfg;
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -119,14 +135,6 @@ CWorld			g_World;			// the world. (we save this stuff)
 #endif
 	CNetworkManager g_NetworkManager;
 
-// Config data from sphere.ini is needed from the beginning.
-CServerConfig	g_Cfg;
-
-#ifdef _WIN32
-CNTWindow g_NTWindow;
-#else
-UnixTerminal g_UnixTerminal;
-#endif
 
 // Again, game servers stuff.
 CServer			g_Serv;				// current state, stuff not saved.
@@ -236,6 +244,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_SET_BLOCK("loading ini and scripts");
 	if ( !g_Serv.Load() )
 		return -3;
+	GlobalInitializer::InitRuntimeDefaultValues();
 
 	if ( argc > 1 )
 	{
@@ -316,7 +325,6 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_DEBUG_END;
 	return -10;
 }
-
 
 void Sphere_ExitServer()
 {
@@ -744,6 +752,12 @@ void defragSphere(char *path)
 }
 
 
+void atexit_handler()
+{
+	ThreadHolder::get().markThreadsClosing();
+}
+
+
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
 #else
@@ -759,6 +773,13 @@ int _cdecl main( int argc, char * argv[] )
     // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
     g_Cfg.LoadIni(false);
 #endif
+
+	const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
+	if (atexit_handler_result != 0)
+	{
+		g_Log.Event(LOGL_CRIT, "atexit handler registration failed.\n");
+		goto exit_server;
+	}
 
 
     g_Serv.SetServerMode(SERVMODE_Loading);
@@ -796,6 +817,7 @@ int _cdecl main( int argc, char * argv[] )
 		}
 	}
 
+exit_server:
 	Sphere_ExitServer();
 	WritePidFile(1);
 

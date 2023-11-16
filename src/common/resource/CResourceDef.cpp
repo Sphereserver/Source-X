@@ -73,7 +73,7 @@ lpctstr CResourceDef::GetResourceName() const
     }
 
     tchar * ptcTemp = Str_GetTemp();
-    snprintf(ptcTemp, STR_TEMPLENGTH, "0%x", GetResourceID().GetResIndex());
+    snprintf(ptcTemp, Str_TempLength(), "0%x", GetResourceID().GetResIndex());
     return ptcTemp;
 }
 

@@ -32,9 +32,6 @@ CItemStone::~CItemStone()
 	SetAmount(0);	// Tell everyone we are deleting.
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
-	// Remove this stone from the links of guilds in the world
-	g_World.m_Stones.erase_element(this);
-
     delete _pMultiStorage;
 	// all members are deleted automatically.
 	ClearContainer();	// do this manually to preserve the parents type cast
@@ -1403,17 +1400,17 @@ void CItemStone::AnnounceWar( const CItemStone * pEnemyStone, bool fWeDeclare, b
 	bool fAtWar = IsAtWarWith(pEnemyStone);
 
 	tchar *pszTemp = Str_GetTemp();
-	int len = snprintf( pszTemp, STR_TEMPLENGTH, (fWar) ? "%s %s declared war on %s." : "%s %s requested peace with %s.",
+	int len = snprintf( pszTemp, Str_TempLength(), (fWar) ? "%s %s declared war on %s." : "%s %s requested peace with %s.",
 		(fWeDeclare) ? "You" : pEnemyStone->GetName(),
 		(fWeDeclare) ? "have" : "has",
 		(fWeDeclare) ? pEnemyStone->GetName() : "You" );
 
 	if ( fAtWar )
-		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is ON!" );
+		snprintf( pszTemp+len, Str_TempLength() - len, " War is ON!" );
 	else if ( fWar )
-		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is NOT yet on." );
+		snprintf( pszTemp+len, Str_TempLength() - len, " War is NOT yet on." );
 	else
-		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is OFF." );
+		snprintf( pszTemp+len, Str_TempLength() - len, " War is OFF." );
 
 	CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
 	for ( ; pMember != nullptr; pMember = pMember->GetNext())

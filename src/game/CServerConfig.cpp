@@ -405,7 +405,7 @@ bool CServerConfig::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		if ( !m_SpellDefs_Sorted.valid_index( uiOrder ) )
 			pRef = nullptr;
 		else
-			pRef = m_SpellDefs_Sorted[uiOrder].lock().get();
+			pRef = m_SpellDefs_Sorted[uiOrder].get();
 	}
 	else
 	{
@@ -699,7 +699,7 @@ enum RC_TYPE
 	RC_QTY
 };
 
-const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] 
+const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
 {
 	{ "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
 	{ "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
@@ -991,23 +991,25 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		else if ( s.IsKeyHead("MAP", 3) )		//	MAPx=settings
 		{
 			bool ok = true;
-			std::string str = s.GetKey()+3;
-			for ( size_t j = 0; j < str.size(); ++j )
+			TemporaryString ts(s.GetKey() + 3);
+			lptstr ptcStr = ts.buffer();
+
+			for ( size_t j = 0; j < ts.size(); ++j )
 			{
-				if ( IsDigit(str[j]) )
+				if ( IsDigit(ptcStr[j]) )
 					continue;
 
 				ok = false;
 				break;
 			}
-			if ( ok && str.size() > 0 )
-				return g_MapList.Load(atoi(str.c_str()), s.GetArgRaw());
+			if ( ok && ts.size() > 0 )
+				return g_MapList.Load(atoi(ptcStr), s.GetArgRaw());
 
-			size_t length = str.size();
+			size_t length = ts.size();
 
-			if ( length >= 2 /*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
+			if ( length >= 2 /*at least .X*/ && ptcStr[0] == '.' && isdigit(ptcStr[1]) )
 			{
-				lpctstr pszStr = &(str[1]);
+				lpctstr pszStr = &(ptcStr[1]);
 				int nMapNumber = Exp_GetVal(pszStr);
 
 				if ( g_MapList.IsMapSupported(nMapNumber) )
@@ -1276,10 +1278,10 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_PROFILE:
 			{
 				int seconds = s.GetArgVal();
-				size_t threadCount = ThreadHolder::get()->getActiveThreads();
+				size_t threadCount = ThreadHolder::get().getActiveThreads();
 				for (size_t j = 0; j < threadCount; ++j)
 				{
-					AbstractSphereThread* thread = static_cast<AbstractSphereThread*>(ThreadHolder::get()->getThreadAt(j));
+					AbstractSphereThread* thread = static_cast<AbstractSphereThread*>(ThreadHolder::get().getThreadAt(j));
 					if (thread != nullptr)
 						thread->m_profile.SetActive(seconds);
 				}
@@ -2621,7 +2623,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	if ( IsDigit( pCmd[0] ) || pCmd[0] == '-' )
 	{
 		tchar *pszTemp = Str_GetTemp();
-		Str_CopyLimitNull( pszTemp, pCmd, STR_TEMPLENGTH );
+		Str_CopyLimitNull( pszTemp, pCmd, Str_TempLength() );
 		const size_t uiCount = pt.Read( pszTemp );
 		if ( uiCount >= 2 )
 			return pt;
@@ -2724,7 +2726,7 @@ void CServerConfig::LoadSortSpells()
 		while ( k < iQty )
 		{
 			int	iVal2 = 0;
-			if (m_SpellDefs_Sorted[k].lock()->GetPrimarySkill(nullptr, &iVal2))
+			if (m_SpellDefs_Sorted[k]->GetPrimarySkill(nullptr, &iVal2))
 			{
 				if (iVal2 > iVal)
 					break;
@@ -3036,7 +3038,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			tchar* ipBuffer = Str_GetTemp();
 			while ( pScript->ReadKeyParse())
 			{
-				Str_CopyLimitNull(ipBuffer, pScript->GetKey(), STR_TEMPLENGTH);
+				Str_CopyLimitNull(ipBuffer, pScript->GetKey(), Str_TempLength());
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(ipBuffer);
 				history.setBlocked(true);
 			}
@@ -3201,7 +3203,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_RUNES:
 		// The full names of the magic runes.
-		m_Runes.clear();
+		m_Runes.ClearFree();
 		while ( pScript->ReadKey() )
 		{
 			m_Runes.push_back(new CSString(pScript->GetKey()));
@@ -3231,7 +3233,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pScript->SeekContext( LineContext );
 
 			if ( !pPrvDef )
-				m_SpellDefs.emplace_index_grow(rid.GetResIndex(), std::shared_ptr<CSpellDef>(pSpell));
+				m_SpellDefs.emplace_index_grow(rid.GetResIndex(), std::unique_ptr<CSpellDef>(pSpell));
 		}
 		break;
 
@@ -3262,10 +3264,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if ( !pPrvDef )
 			{
 				// build a name sorted list.
-				m_SkillNameDefs.emplace(pSkill);
+				const auto array_pos_iter = m_SkillNameDefs.emplace(pSkill);
+				const size_t emplaced_idx = array_pos_iter - m_SkillNameDefs.begin();
+
 				// Hard coded value for skill index.
 				uint idx = rid.GetResIndex();
-				m_SkillIndexDefs.emplace_index_grow(idx, std::shared_ptr<CSkillDef>(pSkill));
+
+				m_SkillIndexDefs.emplace_index_grow(idx, m_SkillNameDefs[emplaced_idx]);
 			}
 		}
 		break;
@@ -3667,7 +3672,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_STARTS:
 		{
 			const int iStartVersion = pScript->GetArgVal();
-			m_StartDefs.clear();
+			m_StartDefs.ClearFree();
 			while ( pScript->ReadKey())
 			{
 				CStartLoc * pStart = new CStartLoc( pScript->GetKey());
@@ -3741,8 +3746,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CTeleport * pTeleport = new CTeleport( pScript->GetKeyBuffer());
 			ASSERT(pTeleport);
 			// make sure this is not a dupe.
-			if ( ! pTeleport->RealizeTeleport() )
+			if (!pTeleport->RealizeTeleport()) {
 				delete pTeleport;
+			}
 		}
 		return true;
 	case RES_KRDIALOGLIST:
@@ -3876,7 +3882,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return ridInvalid;
 
 			tchar * pArg1 = Str_GetTemp();
-			Str_CopyLimitNull( pArg1, pszName, STR_TEMPLENGTH );
+			Str_CopyLimitNull( pArg1, pszName, Str_TempLength() );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
@@ -3905,7 +3911,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			if ( pszName[0] == '\0' )
 				return ridInvalid;
 			tchar * pArg1 = Str_GetTemp();
-			Str_CopyLimitNull( pArg1, pszName, STR_TEMPLENGTH );
+			Str_CopyLimitNull( pArg1, pszName, Str_TempLength() );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
@@ -4287,7 +4293,7 @@ sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(cons
 		return {};
 	}
 
-	return CResourceBase::ResourceGetDefRef(rid);
+	return CResourceHolder::ResourceGetDefRef(rid);
 }
 
 CResourceDef * CServerConfig::RegisteredResourceGetDef( const CResourceID& rid ) const
@@ -4482,27 +4488,27 @@ void CServerConfig::Unload( bool fResync )
 		return;
 	}
 
-	m_ResourceFiles.clear();
+	m_ResourceFiles.ClearFree();
 
 	// m_ResHash.Clear();
 
-	m_Obscene.Clear();
-	m_Fame.clear();
-	m_Karma.clear();
-	m_NotoTitles.clear();
+	m_Obscene.ClearFree();
+	m_Fame.ClearFree();
+	m_Karma.ClearFree();
+	m_NotoTitles.ClearFree();
 	m_NotoKarmaLevels.clear();
 	m_NotoFameLevels.clear();
-	m_Runes.clear();	// Words of power. (A-Z)
+	m_Runes.ClearFree();	// Words of power. (A-Z)
 	// m_MultiDefs
 	m_SkillNameDefs.clear();	// Defined Skills
 	m_SkillIndexDefs.clear();
 	// m_Servers
 	m_Functions.clear();
-	m_StartDefs.clear(); // Start points list
+	m_StartDefs.ClearFree(); // Start points list
 	// m_StatAdv
 	for ( int j=0; j<PLEVEL_QTY; ++j )
 	{
-		m_PrivCommands[j].Clear();
+		m_PrivCommands[j].ClearFree();
 	}
 	m_MoonGates.clear();
 	// m_WebPages
@@ -4662,7 +4668,7 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )) )
+	if ( !RegisteredResourceGetDefRef( CResourceID( RES_SKILLCLASS, 0 )) )
 	{
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));

@@ -53,7 +53,7 @@ void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button wa
 		if (m_pChar && m_pChar->OnTrigger(CTRIG_UserChatButton, m_pChar) == TRIGRET_RET_TRUE)
 			return;
 	}
-	this->GetChar()->SetTriggerActive("UserChatButton");	// dirty fix for SA Classic clients with injection moving a lot when using chat button, we set 'active trigger' to this, so we check it back on the packet to limit the amount of steps to do.
+	GetChar()->SetTriggerActive("UserChatButton");	// dirty fix for SA Classic clients with injection moving a lot when using chat button, we set 'active trigger' to this, so we check it back on the packet to limit the amount of steps to do.
 
 	ASSERT(GetAccount());
 
@@ -79,7 +79,7 @@ void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button wa
 	// Ok, below here we have a chat system nickname
 	// Tell the chat system it has a new client using it
 	addChatWindow();
-	this->GetChar()->SetTriggerActive();
+	GetChar()->SetTriggerActive();
 }
 
 void CClient::Event_ChatText( const nachar* pszText, int len, CLanguageID lang ) // Text from a client
@@ -1376,10 +1376,10 @@ do_consume:
 		tchar* sMsg = Str_GetTemp();
 		tchar* pszTemp1 = Str_GetTemp();
 		tchar* pszTemp2 = Str_GetTemp();
-		snprintf(pszTemp1, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
-		snprintf(pszTemp2, STR_TEMPLENGTH, (fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1)),
+		snprintf(pszTemp1, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
+		snprintf(pszTemp2, Str_TempLength(), (fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1)),
 			iCostTotal, ((iCostTotal == 1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA)));
-		snprintf(sMsg, STR_TEMPLENGTH, "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
+		snprintf(sMsg, Str_TempLength(), "%s %s %s", pszTemp1, pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_TY));
 		pVendor->Speak(sMsg);
 	}
 
@@ -1538,7 +1538,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 	if ( iGold )
 	{
 		char *z = Str_GetTemp();
-		snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELL_TY),
+		snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELL_TY),
 			iGold, (iGold==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
 		pVendor->Speak(z);
 
@@ -1630,7 +1630,7 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 	}
 	// Might be an NPC ?
 	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg( DEFMSG_MSG_MAILBAG_DROP_2 ), m_pChar->GetName());
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_MSG_MAILBAG_DROP_2 ), m_pChar->GetName());
 	pChar->SysMessage(pszMsg);
 }
 
@@ -1650,7 +1650,7 @@ void CClient::Event_ToolTip( CUID uid )
 	}
 
 	char *z = Str_GetTemp();
-	snprintf(z, STR_TEMPLENGTH, "'%s'", pObj->GetName());
+	snprintf(z, Str_TempLength(), "'%s'", pObj->GetName());
 	addToolTip(uid.ObjFind(), z);
 }
 
@@ -1807,7 +1807,7 @@ void CClient::Event_PromptResp_GMPage(lpctstr pszReason)
 
 	const CPointMap& pt = m_pChar->GetTopPoint();
 	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), (dword)m_pChar->GetUID(), pt.WriteUsed(), pszReason);
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_GMPAGE_RECEIVED), m_pChar->GetName(), (dword)m_pChar->GetUID(), pt.WriteUsed(), pszReason);
 	g_Log.Event(LOGM_NOCONTEXT | LOGM_GM_PAGE, "%s\n", pszMsg);
 
 	CGMPage *pGMPage = nullptr;
@@ -2843,7 +2843,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 		{
 			tchar * pszMsg = Str_GetTemp();
 			SKILL_TYPE iSkill = (SKILL_TYPE)(EntryTag - POPUP_TRAINSKILL);
-			snprintf(pszMsg, STR_TEMPLENGTH, "train %s", g_Cfg.GetSkillKey(iSkill));
+			snprintf(pszMsg, Str_TempLength(), "train %s", g_Cfg.GetSkillKey(iSkill));
 			pChar->NPC_OnHear(pszMsg, m_pChar);
 			return;
 		}
