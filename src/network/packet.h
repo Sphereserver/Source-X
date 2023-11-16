@@ -7,7 +7,7 @@
 #define _INC_PACKET_H
 
 #include "../common/common.h"
-
+#include <list>
 
 #define NETWORK_MAXPACKETS		g_Cfg._uiNetMaxPacketsPerTick	// max packets to send per tick (per queue)
 #define NETWORK_MAXPACKETLEN	g_Cfg._uiNetMaxLengthPerTick	// max packet length to send per tick (per queue)

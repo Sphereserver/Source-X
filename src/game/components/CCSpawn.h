@@ -6,7 +6,7 @@
 #ifndef _INC_CCSPAWN_H
 #define _INC_CCSPAWN_H
 
-#include "../../common/resource/CResourceBase.h"
+#include "../../common/resource/CResourceHolder.h"
 #include "../items/CItemBase.h"
 #include "../uo_files/uofiles_enums_itemid.h"
 #include "../uo_files/uofiles_enums_creid.h"

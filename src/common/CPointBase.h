@@ -8,6 +8,7 @@
 
 #include "../game/uo_files/uofiles_enums.h"
 #include "../game/uo_files/CUOMapList.h"
+#include "../common/common.h"
 #include <vector>
 
 class CSString;
@@ -24,7 +25,7 @@ struct CPointBase	// Non initialized 3d point.
 {
 private:
 	friend class GlobalInitializer;
-	static void InitRuntimeStaticMembers();
+	static void InitRuntimeDefaultValues();
 
 public:
 	static lpctstr const sm_szLoadKeys[];
@@ -43,6 +44,14 @@ public:
 	void ZeroPoint() noexcept;
 
 	CPointBase() noexcept;
+
+	// This destructor (and the ones of the child classes) are willingly NOT virtual.
+	// If the class had any virtual method, its size will increase of at least 4-8 bytes (size of a pointer to the virtual table).
+	// It matters the most because CPointBase is used in the union inside CItem. Increasing the size of CPointBase will increase the size of the union.
+	// Moreover, it will disalign the addresses of the data inside the other structs of the union.
+	// Last but not least, remember that deleting an inheriting class without a virtual destructor will delete only a part of the class! It will not call the topmost destructor!
+	~CPointBase() noexcept = default;
+
 	CPointBase(short x, short y, char z = 0, uchar map = 0) noexcept;
 	CPointBase(const CPointBase&) noexcept = default;
 	CPointBase(CPointBase&&) noexcept = default;
@@ -78,8 +87,8 @@ public:
 	void Set( short x, short y, char z = 0, uchar map = 0 ) noexcept;
 	int Read( tchar * pVal );
 
-	tchar * WriteUsed( tchar * ptcBuffer, uint uiBufferLen ) const;
-	lpctstr WriteUsed() const;
+	tchar * WriteUsed( tchar * ptcBuffer, size_t uiBufferLen ) const noexcept;
+	lpctstr WriteUsed() const noexcept;
 
 	void Move( DIR_TYPE dir );
 	void MoveN( DIR_TYPE dir, int amount );

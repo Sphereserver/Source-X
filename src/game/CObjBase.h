@@ -6,7 +6,7 @@
 #ifndef _INC_COBJBASE_H
 #define _INC_COBJBASE_H
 
-#include "../common/resource/CResourceBase.h"
+#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
 #include "../common/CScriptObj.h"
 #include "clients/CClientTooltip.h"

@@ -252,7 +252,7 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 			lpPrefix = " ";
 
 		tchar * lpSuffix = Str_GetTemp();
-        Str_CopyLimitNull(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"), STR_TEMPLENGTH);
+        Str_CopyLimitNull(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"), Str_TempLength());
 
 		const CStoneMember * pGuildMember = pChar->Guild_FindMember(MEMORY_GUILD);
 		if (pGuildMember && (!pChar->IsStatFlag(STATF_INCOGNITO) || GetPrivLevel() > pChar->GetPrivLevel()))
@@ -265,15 +265,15 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 				lpctstr ptcAbbrev = pParentStone->GetAbbrev();
 				if (ptcAbbrev[0])
 				{
-					Str_ConcatLimitNull(lpSuffix, " [", STR_TEMPLENGTH);
-					Str_ConcatLimitNull(lpSuffix, ptcAbbrev, STR_TEMPLENGTH);
-					Str_ConcatLimitNull(lpSuffix, "]", STR_TEMPLENGTH);
+					Str_ConcatLimitNull(lpSuffix, " [", Str_TempLength());
+					Str_ConcatLimitNull(lpSuffix, ptcAbbrev, Str_TempLength());
+					Str_ConcatLimitNull(lpSuffix, "]", Str_TempLength());
 				}
 			}
 		}
 
 		if (*lpSuffix == '\0')
-            Str_CopyLimitNull(lpSuffix, " ", STR_TEMPLENGTH);
+            Str_CopyLimitNull(lpSuffix, " ", Str_TempLength());
 
 		// The name
         PUSH_FRONT_TOOLTIP(pChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~

@@ -73,8 +73,8 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
         size_t uiStrLen;
         bool fUTF = false, fFirstLine = true;
         const int iFileLength = _GetLength();
-        _fileContent = new std::vector<std::string>();
-        _fileContent->reserve(iFileLength / 10);
+        _fileContent = new std::vector<std::string>;
+        _fileContent->reserve(iFileLength / 20);
 
         while ( !feof(_pStream) ) 
         {
@@ -94,7 +94,20 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
                 fUTF = true;
             }
 
-            _fileContent->emplace_back( (fUTF ? &ptcBuf[3] : ptcBuf), uiStrLen - (fUTF ? 3 : 0) );
+            const lpctstr str_start = (fUTF ? &ptcBuf[3] : ptcBuf);
+            size_t len_to_copy = uiStrLen - (fUTF ? 3 : 0);
+            while (len_to_copy > 0)
+            {
+                const int ch = str_start[len_to_copy - 1];
+                if (ch == '\n' || ch == '\r')
+                    len_to_copy -= 1;
+                else
+                    break;
+            }
+            if (len_to_copy == 0)
+                _fileContent->emplace_back();
+            else
+                _fileContent->emplace_back(str_start, len_to_copy);
             fFirstLine = false;
             fUTF = false;
         }
@@ -174,21 +187,29 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
     // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
     // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
     //ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::_ReadString");
-
+    ASSERT(sizemax > 0);
     if ( _useDefaultFile() ) 
         return CSFileText::_ReadString(pBuffer, sizemax);
 
-    *pBuffer = '\0';
+    //*pBuffer = '\0';
+    ASSERT(_fileContent);
 
-    if ( !_fileContent->empty() && ((uint)_iCurrentLine < _fileContent->size()) )
-    {
-        //strcpy(pBuffer, (*_fileContent)[_iCurrentLine].c_str() );
-        Str_CopyLimitNull(pBuffer, _fileContent->data()[_iCurrentLine].c_str(), sizemax); // may be faster with MS compiler
-        ++_iCurrentLine;
-    }
-    else
-    {
+    if (_fileContent->empty() || ((uint)_iCurrentLine >= _fileContent->size()))
         return nullptr;
+    
+    std::string const& cur_line = (*_fileContent)[_iCurrentLine];
+    ++_iCurrentLine;
+    if (cur_line.empty())
+        return pBuffer;
+
+    size_t bytes_to_copy = cur_line.size();
+    if (bytes_to_copy >= size_t(sizemax))
+        bytes_to_copy = size_t(sizemax) - 1;
+    if (cur_line.size() != 0)
+    {
+        const lpctstr cur_line_cstr = cur_line.c_str();
+        size_t copied = Str_CopyLimit(pBuffer, cur_line_cstr, bytes_to_copy);
+        pBuffer[copied] = '\0';
     }
 
     return pBuffer;

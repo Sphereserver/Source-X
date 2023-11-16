@@ -245,7 +245,7 @@ bool CScriptObj::r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTri
             char *pSpace;
 
             //	lowercase for speed, and strip arguments
-            Str_CopyLimitNull(pName, pFunction->GetName(), STR_TEMPLENGTH);
+            Str_CopyLimitNull(pName, pFunction->GetName(), Str_TempLength());
             if ( (pSpace = strchr(pName, ' ')) != nullptr )
                 *pSpace = 0;
             _strlwr(pName);
@@ -439,7 +439,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			sVal.FormatHex( 0x00008 );
 		else if ( dynamic_cast<CResourceDef*>(pTmpRef) )
 			sVal.FormatHex( 0x00010 );
-		else if ( dynamic_cast<CResourceBase*>(pTmpRef) )
+		else if ( dynamic_cast<CResourceHolder*>(pTmpRef) )
 			sVal.FormatHex( 0x00020 );
 		else if ( dynamic_cast<CScriptTriggerArgs*>(pTmpRef) )
 			sVal.FormatHex( 0x00040 );
@@ -874,14 +874,14 @@ badcmd:
 				tchar	*buf = Str_GetTemp();
 				REMOVE_QUOTES( ptcKey );
 				sVal.FormatLLHex( *ptcKey );
-                Str_CopyLimitNull( buf, sVal, STR_TEMPLENGTH );
+                Str_CopyLimitNull( buf, sVal, Str_TempLength() );
 				while ( *(++ptcKey) )
 				{
 					if ( *ptcKey == '"' )
                         break;
 					sVal.FormatLLHex(*ptcKey);
-                    Str_ConcatLimitNull( buf, " ", STR_TEMPLENGTH );
-                    Str_ConcatLimitNull( buf, sVal, STR_TEMPLENGTH );
+                    Str_ConcatLimitNull( buf, " ", Str_TempLength() );
+                    Str_ConcatLimitNull( buf, sVal, Str_TempLength() );
 				}
 				sVal = buf;
 			}
@@ -899,7 +899,7 @@ badcmd:
 				tchar	*buf = Str_GetTemp();
 				REMOVE_QUOTES( ppArgs[1] );
 				sVal.FormatLLHex(*ppArgs[1]);
-                Str_CopyLimitNull( buf, sVal, STR_TEMPLENGTH );
+                Str_CopyLimitNull( buf, sVal, Str_TempLength() );
 				while ( --iPad )
 				{
 					if ( *ppArgs[1] == '"' )
@@ -912,8 +912,8 @@ badcmd:
 					else
 						sVal.FormatLLHex('\0');
 
-                    Str_ConcatLimitNull( buf, " ", STR_TEMPLENGTH );
-                    Str_ConcatLimitNull( buf, sVal, STR_TEMPLENGTH );
+                    Str_ConcatLimitNull( buf, " ", Str_TempLength() );
+                    Str_ConcatLimitNull( buf, sVal, Str_TempLength() );
 				}
 				sVal	= buf;
 			}
@@ -927,7 +927,7 @@ badcmd:
 				GETNONWHITESPACE(ptcKey);
 				tchar	*buf = Str_GetTemp();
 				tchar	*Arg_ppCmd[10];		// limit to 9 arguments
-				Str_CopyLimitNull(buf, ptcKey, STR_TEMPLENGTH);
+				Str_CopyLimitNull(buf, ptcKey, Str_TempLength());
 				int iQty = Str_ParseCmds(buf, Arg_ppCmd, ARRAY_COUNT(Arg_ppCmd));
 				if ( iQty < 1 )
 					return false;
@@ -1047,7 +1047,7 @@ badcmd:
 				{
 					tchar *ppCmd[255];
 					tchar * z = Str_GetTemp();
-					Str_CopyLimitNull(z, p, STR_TEMPLENGTH);
+					Str_CopyLimitNull(z, p, Str_TempLength());
 					const int count = Str_ParseCmds(z, ppCmd, ARRAY_COUNT(ppCmd), separators);
 					if (count > 0)
 					{
@@ -1439,7 +1439,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ) )
 					return false;
 				tchar * pszMsg = Str_GetTemp();
-				snprintf(pszMsg, STR_TEMPLENGTH, "'%s' for '%s' is '%s'\n", sOriginalArg.GetBuffer(), GetName(), sVal.GetBuffer());
+				snprintf(pszMsg, Str_TempLength(), "'%s' for '%s' is '%s'\n", sOriginalArg.GetBuffer(), GetName(), sVal.GetBuffer());
 				pSrc->SysMessage(pszMsg);
 				break;
 			}
@@ -1490,7 +1490,7 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConso
 
 	// Length to copy: include the last valid char (i'm not copying the subsequent char, which can be another char or '\0'
     ASSERT(sdata.ptcEnd >= sdata.ptcStart);
-	size_t len = std::min(STR_TEMPLENGTH - 1U, size_t(sdata.ptcEnd - sdata.ptcStart));
+	size_t len = std::min(Str_TempLength() - 1U, size_t(sdata.ptcEnd - sdata.ptcStart));
     if (len == 0)
     {
         g_Log.EventError("Empty subexpression. Defaulting its value to false.\n");
@@ -1511,7 +1511,7 @@ bool CScriptObj::_Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConso
         len -= 1;
     }
 
-    ASSERT(len < STR_TEMPLENGTH);
+    ASSERT(len < Str_TempLength());
 	ptcSubexpr = Str_GetTemp();
 	memcpy(ptcSubexpr, ptcParsingStart, len);
 	ptcSubexpr[len] = '\0';
@@ -1691,7 +1691,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 
 	// Do NOT work on the original arguments, it WILL fuck up the original string!
 	tchar* ptcArgs = Str_GetTemp();
-	Str_CopyLimitNull(ptcArgs, ptcKey, STR_TEMPLENGTH);
+	Str_CopyLimitNull(ptcArgs, ptcKey, Str_TempLength());
 
 	// We only partially evaluated the QVAL parameters (it's a special case), so we need to parse the expressions (still have angular brackets at this stage)
 	tchar* ppCmds[3];
@@ -1706,7 +1706,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 	// Complete evaluation of the condition
 	//  (do that in another string, since it may overwrite the arguments, which are written later in the same string).
 	tchar* ptcTemp = Str_GetTemp();
-	Str_CopyLimitNull(ptcTemp, ppCmds[0], STR_TEMPLENGTH);
+	Str_CopyLimitNull(ptcTemp, ppCmds[0], Str_TempLength());
 	ParseScriptText(ptcTemp, pSrc, 0, pArgs, pContext);
 	const bool fCondition = Exp_GetLLVal(ptcTemp);
 
@@ -2061,7 +2061,7 @@ bool CScriptObj::Execute_FullTrigger(CScript& s, CTextConsole* pSrc, CScriptTrig
 
 	tchar* piCmd[7];
 	tchar* ptcTmp = Str_GetTemp();
-	Str_CopyLimitNull(ptcTmp, s.GetArgRaw(), STR_TEMPLENGTH);
+	Str_CopyLimitNull(ptcTmp, s.GetArgRaw(), Str_TempLength());
 	int iArgQty = Str_ParseCmds(ptcTmp, piCmd, ARRAY_COUNT(piCmd), " ,\t");
 	CScriptObj* pRef = this;
 	if (iArgQty == 2)
@@ -2170,7 +2170,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		tchar * pName = Str_GetTemp();
 
 		//	lowercase for speed
-		Str_CopyLimitNull(pName, pszTrigName, STR_TEMPLENGTH);
+		Str_CopyLimitNull(pName, pszTrigName, Str_TempLength());
 		_strlwr(pName);
 
 		if ( g_profiler.initstate != 0xf1 )	// it is not initalised

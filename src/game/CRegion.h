@@ -6,10 +6,12 @@
 #ifndef _INC_CREGION_H
 #define _INC_CREGION_H
 
-#include "../common/resource/CResourceBase.h"
+#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
 #include "../common/CVarDefMap.h"
+#include "CTeleport.h"
 #include "CRegionBase.h"
+
 
 class CItemMulti;
 
@@ -23,6 +25,7 @@ enum RTRIG_TYPE
 	RTRIG_STEP,
 	RTRIG_QTY
 };
+
 
 class CRegion : public CResourceDef, public CRegionBase
 {
@@ -177,9 +180,8 @@ public:
 	explicit CRegion( CResourceID rid, lpctstr pszName = nullptr );
 	virtual ~CRegion();
 
-private:
-	CRegion(const CRegion& copy);
-	CRegion& operator=(const CRegion& other);
+	CRegion(const CRegion& copy) = delete;
+	CRegion& operator=(const CRegion& other) = delete;
 };
 
 class CRandGroupDef;
@@ -209,58 +211,9 @@ public:
 	explicit CRegionWorld( CResourceID rid, lpctstr pszName = nullptr );
 	virtual ~CRegionWorld();
 
-private:
-	CRegionWorld(const CRegionWorld& copy);
-	CRegionWorld& operator=(const CRegionWorld& other);
+	CRegionWorld(const CRegionWorld& copy) = delete;
+	CRegionWorld& operator=(const CRegionWorld& other) = delete;
 };
 
-class CTeleport : public CPointSort	// The static world teleporters.
-{
-	// Put a built in trigger here ? can be Array sorted by CPointMap.
-public:
-	static const char *m_sClassName;
-	bool _fNpc;
-	CPointMap _ptDst;
-
-public:
-	explicit CTeleport( const CPointMap & pt ) : CPointSort(pt)
-	{
-		ASSERT( pt.IsValidPoint());
-		_ptDst = pt;
-		_fNpc = false;
-	}
-
-	explicit CTeleport( tchar * pszArgs );
-
-	virtual ~CTeleport() = default;
-
-private:
-	CTeleport(const CTeleport& copy);
-	CTeleport& operator=(const CTeleport& other);
-
-public:
-	bool RealizeTeleport();
-};
-
-class CStartLoc		// The start locations for creating a new char.
-{
-public:
-	static const char *m_sClassName;
-	CSString m_sArea;	// Area/City Name = Britain or Occlo
-	CSString m_sName;	// Place name = Castle Britannia or Docks
-	CPointMap m_pt;
-	int iClilocDescription; //Only for clients 7.00.13 +
-
-public:
-	explicit CStartLoc( lpctstr pszArea )
-	{
-		m_sArea = pszArea;
-		iClilocDescription = 1149559;
-	}
-
-private:
-	CStartLoc(const CStartLoc& copy);
-	CStartLoc& operator=(const CStartLoc& other);
-};
 
 #endif // _INC_CREGION_H

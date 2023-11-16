@@ -58,17 +58,17 @@ class CEventLog
 	// May include __LINE__ or __FILE__ macro as well ?
 
 protected:
-	virtual int EventStr(dword dwMask, lpctstr pszMsg) = 0;
+	virtual int EventStr(dword dwMask, lpctstr pszMsg) noexcept = 0;
 
-    int VEvent(dword dwMask, lpctstr pszFormat, va_list args);
+    int VEvent(dword dwMask, lpctstr pszFormat, va_list args) noexcept;
 
 public:
-	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) __printfargs(3,4);
-	int _cdecl EventDebug(lpctstr pszFormat, ...) __printfargs(2,3);
-	int _cdecl EventError(lpctstr pszFormat, ...) __printfargs(2,3);
-	int _cdecl EventWarn(lpctstr pszFormat, ...) __printfargs(2,3);
+	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) noexcept __printfargs(3,4);
+	int _cdecl EventDebug(lpctstr pszFormat, ...) noexcept  __printfargs(2,3);
+	int _cdecl EventError(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
+	int _cdecl EventWarn(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
 #ifdef _DEBUG
-	int _cdecl EventEvent( lpctstr pszFormat, ... ) __printfargs(2,3);
+	int _cdecl EventEvent( lpctstr pszFormat, ... ) noexcept __printfargs(2,3);
 #endif //_DEBUG
 
 public:
@@ -117,16 +117,15 @@ public:		bool OpenLog(lpctstr pszName = nullptr);
 	bool IsLoggedLevel( LOG_TYPE level ) const;
 	bool IsLogged( dword dwMask ) const;
 
-	virtual int EventStr( dword dwMask, lpctstr pszMsg );
+	virtual int EventStr( dword dwMask, lpctstr pszMsg ) noexcept final;	// final: for now, it doesn't have any other virtual methods
 	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
     void _cdecl CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 
 public:
 	CLog();
 
-private:
-	CLog(const CLog& copy);
-	CLog& operator=(const CLog& other);
+	CLog(const CLog& copy) = delete;
+	CLog& operator=(const CLog& other) = delete;
 } g_Log;		// Log file
 
 
