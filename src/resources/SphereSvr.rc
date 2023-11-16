@@ -46,12 +46,12 @@ BEGIN
 		BEGIN
 			VALUE "CompanyName",		"Menasoft"
 			VALUE "FileDescription",	"SphereServer " SPHERE_VER_NAME
-			VALUE "FileVersion",		SPHERE_BUILD_NAME
+			VALUE "FileVersion",		SPHERE_BUILD_INFO_GIT_STR
 			VALUE "InternalName",		"SphereSvrX"
 			VALUE "LegalCopyright",		COPYRIGHT_STR
 			VALUE "OriginalFilename",	"SphereSvrX.exe"
 			VALUE "ProductName",		"SphereServer"
-			VALUE "ProductVersion",		SPHERE_BUILD_NAME
+			VALUE "ProductVersion",		SPHERE_BUILD_INFO_GIT_STR
 		END
 	END
 

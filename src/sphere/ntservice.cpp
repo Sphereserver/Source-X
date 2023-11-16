@@ -117,7 +117,7 @@ void CNTService::ServiceStartMain(DWORD dwArgc, LPTSTR *lpszArgv)
 {
 	TCHAR *pszMsg = Str_GetTemp();
 
-	sprintf(pszMsg, SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME " - %s", g_Serv.GetName());
+	sprintf(pszMsg, SPHERE_TITLE " " SPHERE_BUILD_NAME_VER_PREFIX SPHERE_BUILD_INFO_GIT_STR " - %s", g_Serv.GetName());
 
 	m_hStatusHandle = RegisterServiceCtrlHandler(pszMsg, service_ctrl);
 	if ( !m_hStatusHandle )	// Not much we can do about this.
@@ -189,7 +189,7 @@ bailout3:
 	if ( !SetSecurityDescriptorDacl(pSD, TRUE, nullptr, FALSE) )
 		goto bailout3;
 
-	SECURITY_ATTRIBUTES sa;
+	SECURITY_ATTRIBUTES sa{};
 	sa.nLength = sizeof(sa);
 	sa.lpSecurityDescriptor = pSD;
 	sa.bInheritHandle = TRUE;
@@ -449,7 +449,11 @@ void CNTService::CmdMainStart()
 //	FUNCTION: main()
 //
 /////////////////////////////////////////////////////////////////////////////////////
+#ifdef _MSC_VER
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
+#else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#endif
 {
 	UnreferencedParameter(hPrevInstance);
     IThread::setThreadName("T_SphereStartup");

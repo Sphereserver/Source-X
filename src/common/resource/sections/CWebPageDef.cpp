@@ -584,7 +584,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	{
 		tchar *pszTemp = Str_GetTemp();
 		snprintf(pszTemp, Str_TempLength(),
-			"HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME "\r\nContent-Length: 0\r\n\r\n", pcDate);
+			"HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " SPHERE_TITLE " " SPHERE_BUILD_NAME_VER_PREFIX SPHERE_BUILD_INFO_STR "\r\nContent-Length: 0\r\n\r\n", pcDate);
 		new PacketWeb(pClient, (byte*)pszTemp, (uint)strlen(pszTemp));
 		return 0;
 	}
@@ -602,7 +602,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	int iLen = snprintf(szTmp, uiWebDataBufSize,
 		"HTTP/1.1 200 OK\r\n" // 100 Continue
 		"Date: %s\r\n"
-		"Server: " SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME "\r\n"
+		"Server: " SPHERE_TITLE " " SPHERE_BUILD_NAME_VER_PREFIX SPHERE_BUILD_INFO_STR "\r\n"
 		"Accept-Ranges: bytes\r\n"
 		"Content-Type: %s\r\n",
 		pcDate,
@@ -849,7 +849,7 @@ void CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	sMsgHead.Format(
 		"HTTP/1.1 %d %s\r\n"
 		"Date: %s\r\n"
-		"Server: " SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME "\r\n"
+		"Server: " SPHERE_TITLE " " SPHERE_BUILD_NAME_VER_PREFIX SPHERE_BUILD_INFO_STR "\r\n"
 		"Content-Type: text/html\r\n"
 		"Content-Length: %d\r\n"
 		"Connection: close\r\n"
