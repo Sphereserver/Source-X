@@ -154,6 +154,7 @@ public:
 	HUE_TYPE _wPrev_Hue;		// Backup of skin color. in case of polymorph etc.
 	HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
 
+	CREID_TYPE m_dwDispIndex; //To change the DispID instance
 
 	// Skills, Stats and health
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )

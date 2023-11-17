@@ -1515,20 +1515,40 @@ word CChar::GetBaseID() const
 
 CREID_TYPE CChar::GetDispID() const
 {
-	const CCharBase * pCharDef = Char_GetDef();
-	ASSERT(pCharDef);
-	return pCharDef->GetDispID();
+	if (CCharBase::IsValidDispID(m_dwDispIndex))
+	{
+		return m_dwDispIndex;
+	}
+	else
+	{
+		const CCharBase * pCharDef = Char_GetDef();
+		ASSERT(pCharDef);
+		return pCharDef->GetDispID();
+	}
 }
 
 // Setting the visual "ID" for this.
 bool CChar::SetDispID(CREID_TYPE id)
 {
+	ADDTOCALLSTACK("CChar::SetDispID");
 	// Just change what this char looks like.
 	// do not change it's basic type.
 
-	CCharBase* pCharDef = Char_GetDef();
-	ASSERT(pCharDef);
-	return pCharDef->SetDispID(id);
+	if (id == GetDispID())
+		return true;
+
+	if (CCharBase::IsValidDispID(id))
+	{
+		m_dwDispIndex = id;
+	}
+	else
+	{
+		const CCharBase* pCharDef = Char_GetDef();
+		ASSERT(pCharDef);
+		m_dwDispIndex = pCharDef->GetDispID();
+		ASSERT(CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)));
+	}
+	return true;
 }
 
 // Just set the base id and not the actual display id.
