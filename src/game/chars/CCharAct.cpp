@@ -2407,7 +2407,7 @@ CItem * CChar::Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id )
 	pItem->SetType(IT_FIGURINE);
 	pItem->SetName(GetName());
 	pItem->SetHue(GetHue());
-	pItem->m_itFigurine.m_ID = GetID();	// Base type of creature.
+	pItem->m_itFigurine.m_ID = GetID();	// Base type of creature. (More1 of i_memory)
 	pItem->m_itFigurine.m_UID = GetUID();
 	pItem->m_uidLink = uidOwner;
 
@@ -2749,11 +2749,14 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	if ( IsTrigUsed(TRIGGER_MOUNT) )
 	{
 		CScriptTriggerArgs Args(pHorse);
-   		if ( OnTrigger(CTRIG_Mount, this, &Args) == TRIGRET_RET_TRUE )
-			return false;
+        Args.m_iN1 = memoryId;
+   		if ( OnTrigger(CTRIG_Mount, this, &Args) == TRIGRET_RET_TRUE )   
+		    return false;
+        else
+            memoryId = ITEMID_TYPE(Args.m_iN1);//(ITEMID_TYPE) Args.m_iN1;
 	}
 
-	// Create the figurine for the horse
+	// Create the figurine for the horse (Memory item equiped on layer 25 of the player)
 	CItem * pMountItem = pHorse->Make_Figurine(GetUID(), memoryId);
 	if ( !pMountItem)
 		return false;

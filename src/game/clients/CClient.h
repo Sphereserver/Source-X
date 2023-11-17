@@ -560,87 +560,207 @@ private:
 	void AOSTooltip_addDefaultItemData(CItem * pItem);
 
 private:
-// Number in comment are the old number working before we use the correct contextmenu ID
 #define MAX_POPUPS 15
 #define POPUPFLAG_LOCKED 0x01
 #define POPUPFLAG_ARROW 0x02
 #define POPUPFLAG_COLOR 0x20
 #define POPUP_REQUEST 0
-#define POPUP_PAPERDOLL 520		//11
-#define POPUP_BACKPACK 302		//12
-#define POPUP_PARTY_ADD 810		//13
-#define POPUP_PARTY_REMOVE 811	//14
-#define POPUP_TRADE_ALLOW 1013	//15
-#define POPUP_TRADE_REFUSE 1014	//16
-#define POPUP_TRADE_OPEN 819	//17
-#define POPUP_GLOBALCHAT_ALLOW 18
-#define POPUP_GLOBALCHAT_REFUSE 19
-#define POPUP_BANKBOX 120		//21
-#define POPUP_VENDORBUY 110		//31
-#define POPUP_VENDORSELL 111	//32
-#define POPUP_PETGUARD 130		//41
-#define POPUP_PETFOLLOW 131		//42
-#define POPUP_PETDROP 43
-#define POPUP_PETKILL 134		//44
-#define POPUP_PETSTOP 135		//45
-#define POPUP_PETSTAY 137		//46
-#define POPUP_PETFRIEND_ADD 133	//47
-#define POPUP_PETFRIEND_REMOVE 140//48
-#define POPUP_PETTRANSFER 136	//49
-#define POPUP_PETRELEASE 138	//50
-#define POPUP_STABLESTABLE 400	//51
-#define POPUP_STABLERETRIEVE 401//52
-#define POPUP_TAME 301			//53
-#define POPUP_PETRENAME 919		//54
-#define POPUP_TRAINSKILL 200	//100
+
+// POPUP_definition need a number. Sphere always used random number. It work correct on CC client but cause bug on EC Client,
+// Correct number was extract by Pinco on the EC client
+// All number are change to adapt EC client. In comment are the old number we used and Cliloc number for reference
+
+
+#define POPUP_VENDORBUY 110		    //31 -3006103
+#define POPUP_VENDORSELL 111	    //32 -3006104
+#define POPUP_BANKBOX 120		    //21 -3006105
+#define POPUP_PETDROP 43            // - 3006109 Drop command do not exist anymore on pet on OSI
+#define POPUP_PETGUARD 130		    //41 -3006107
+#define POPUP_PETFOLLOW 131		    //42 -3006108
+#define POPUP_PETFRIEND_ADD 133	    //47 -3006110
+#define POPUP_PETKILL 134		    //44 -3006111
+#define POPUP_PETSTOP 135		    //45 -3006112
+#define POPUP_PETTRANSFER 136	    //49 -3006113
+#define POPUP_PETSTAY 137		    //46 -3006114
+#define POPUP_PETRELEASE 138	    //50 -3006118
+#define POPUP_PETFRIEND_REMOVE 140  //48 -3006099
+#define POPUP_TRAINSKILL 200	    //100  in reallity it go from 200 to 257 [1 per skill] (see comment down)
+#define POPUP_TAME 301			    //53 -3006130
+#define POPUP_BACKPACK 302		    //12 -3006130
+#define POPUP_STABLESTABLE 400	    //51 -3006126
+#define POPUP_STABLERETRIEVE 401    //52 -3006127
+#define POPUP_PAPERDOLL 520		    //11 -3006123
+#define POPUP_PARTY_ADD 810		    //13 -3000197
+#define POPUP_PARTY_REMOVE 811	    //14 -3000198
+#define POPUP_TRADE_OPEN 819	    //17 -1077728
+#define POPUP_PETRENAME 919		    //54 -1155270
+#define POPUP_TRADE_ALLOW 1013	    //15 -1154112
+#define POPUP_TRADE_REFUSE 1014	    //16 -1154113
+#define POPUP_GLOBALCHAT_ALLOW 1020 //18  -1158415 Accept Friend Requests
+#define POPUP_GLOBALCHAT_REFUSE 1021//19 -1158416 Refuse Friend Requests
 
 /* This is a list of other context menu ID sphere do not use for now.
-OpenMap = 10
-TeleportVendor = 1015
-OpenVendorContainer = 1018
-NPCTalk = 303
-DigForTreasure = 305
-CancelProtection = 308
-EnablePVPWarning = 320
-ClaimBodRewards = 348
-BodRequest = 403
-ViewQuestLog = 404
-CancelQuest = 405
-QuestConversation = 406
-InsuranceMenu = 416
-ToggleItemInsurance = 418
-Bribe = 419
-OpenBackpackPet = 508
-SetSecurity = 600
-ReleaseCoOwnership = 602
-LeaveHouse = 604
-UnpackTransferCrate = 622
-LoadShuriken = 701
-QuestItem = 801
-SiegeBless = 820
-LoyaltyRating = 915
-TitlesMenu = 918
-EmergencyRepairs = 930
-PermanentRepairs = 931
-ShipSecurity = 934
-ResetShipSecurity = 935
-RenameShip = 936
-DryDockShip = 937
-MoveTillerman = 938
-MannequinCompareSlotItem = 956
-MannequinViewSuitStatsWithItems = 957
-MannequinViewStats = 958
-MannequinUseTransparentGump = 959
-MannequinCustomizeBody = 1003
-MannequinRotate = 1004
-MannequinRedeed = 1006
-VoidPool = 1010
-Retrieve = 1012
-SwitchMastery = 953
-VendorSearch = 1016
-AcceptFriendRequests = 1020
-RefuseFriendRequests = 1021
-RelocateContainer = 1022
+10 -- 3006150 -- Open Map
+139 -- 3006120 -- Hire
+170 -- 3006271 -- Recharge Engraving/Embroidery Tool
+303 -- 3006146 -- Talk
+305 -- 3006148 -- Dig For Treasure
+306 -- 3006149 -- Remove Chest
+308 -- 3006157 -- Cancel Protection
+310 -- 3006159 -- Ask about Chyloth
+316 -- 1112282 -- Set to clip plants
+317 -- 1112283 -- Set to cut reeds
+320 -- 1113797 -- Enable PvP Warning
+328 -- 1150660 -- Set to cut topiaries
+340 -- 1154018 -- Grant Citizen Title
+341 -- 1154019 -- Remove City Title
+342 -- 1154031 -- Open Trade Deal
+343 -- 1154060 -- Utilize Trade Deal
+344 -- 1154068 -- Accept Office
+345 -- 1154277 -- Open Inventory
+346 -- 1154278 -- Place Ballot Box
+347 -- 1154571 -- Turn In Minax Artifacts
+348 -- 1155593 -- Claim Rewards
+350 -- 1114453 -- Get Trade Order
+352 -- 1151729 -- Turn in a Trade Order
+359 -- 1155701 -- Get Hunting Permit
+372 -- 1157733 -- Rent Vault
+373 -- 1157734 -- Open Vault
+374 -- 1158021 -- Claim Vault
+376 -- 1157978 -- Vault Actions
+379 -- 1158023 -- Update City Town Crier
+381 -- 1158143 -- Vault Locations
+403 -- 3006152 -- Bulk Order Info
+404 -- 3006154 -- View Quest Log
+405 -- 3006155 -- Cancel Quest
+406 -- 3006156 -- Quest Conversation
+409 -- 3006195 -- Resurrect
+411 -- 3006197 -- Unlock Karma
+412 -- 3006198 -- Tithe Gold
+416 -- 1114299 -- Open Item Insurance Menu
+418 -- 3006201 -- Toggle Item Insurance
+419 -- 1152294 -- Bribe
+422 -- 1154114 -- Convert Mage Armor
+508  -- 3006145 -- Open Backpack
+515 -- 3006216 -- Name Book
+517 -- 3006211 -- Vendors
+600 -- 3006203 -- Set Security
+602 -- 3006205 -- Release Co-Ownership
+604 -- 3006207 -- Leave House
+605 -- 3006214 -- Return Vendor
+606 -- 1115557 -- Rename
+608 -- 3006103 -- Buy
+621 -- 3006220 -- Open Transfer Crate
+622 -- 3006221 -- Unpack Container
+701 -- 3006222 -- Load Ninja Belt
+702 -- 3006223 -- Unload Ninja Belt
+703 -- 3006224 -- Load Fukiya
+704 -- 3006225 -- Unload Fukiya
+720 -- 3006230 -- Refill from stock
+801 -- 3006169 -- Toggle Quest Item
+813 -- 3000199 -- Party Can Loot Me
+820 -- 3006168 -- Siege Bless Item
+910 -- 3006276 -- Salvage All
+911 -- 3006277 -- Salvage Ingots
+912 -- 3006278 -- Salvage Cloth
+915 -- 1049594 -- Loyalty Rating
+918 -- 1115022 -- Open Titles Menu
+920 -- 1116069 -- Dismantle
+922 -- 1116072 -- Unload
+930 -- 1116589 -- Emergency Repairs
+931 -- 1116590 -- Permanent Repairs
+932 -- 1011071 -- Repair item
+933 -- 1116566 -- Ship Access
+934 -- 3006203 -- Set Security
+935 -- 1060700 -- Reset Security
+936 -- 1115557 -- Rename
+937 -- 1149575 -- Dry Dock
+938 -- 1116729 -- Move Tillerman
+939 -- 1150110 -- Abandon Ship
+940 -- 1149570 -- Ship Recall Rune
+941 -- 1115930 -- Unlink
+953 -- 1151948 -- Switch Mastery
+954 -- used for pet bladeweave
+955 -- used for pet bladeweave
+956 -- 1159295 -- Compare With Item In Slot
+957 -- 1159297 -- View Suit Stats With Item
+958 -- 1159296 -- View Suit Stats
+959 -- 1159319 -- Use Transparent Gump
+960 -- 1159396 -- Use Non-Transparent Gump
+961 -- 1159411 -- Add Description
+1001 -- 1151298 -- Appraise for Cleanup
+1003 -- 1151585 -- Customize Body
+1004 -- 1151586 -- Rotate
+1005 -- 1153254 -- Set Keyword
+1006 -- 1151601 -- Redeed
+1007 -- 1151606 -- Switch Clothes
+1010 -- 1152531 -- The Void Pool
+1012 -- 1153880 -- Retrieve
+1015 -- 3002032 -- Teleport
+1016 -- 1154679 -- Vendor Search
+1018 -- 1154699 -- Open Container Containing Item
+1022 -- 1159158 -- Relocate Container
+1026 -- 1159860 -- Add a potion keg
+1027 -- 1159861 -- Remove a potion keg
+
+200 -- 3006000 -- Train Alchemy
+201 -- 3006001 -- Train Anatomy
+202 -- 3006002 -- Train Animal Lore
+203 -- 3006003 -- Train Item Identification
+204 -- 3006004 -- Train Arms Lore
+205 -- 3006005 -- Train Parrying
+206 -- 3006006 -- Train Begging
+207 -- 3006007 -- Train Blacksmithing
+208 -- 3006008 -- Train Bowcraft/Fletching
+209 -- 3006009 -- Train Peacemaking
+210 -- 3006010 -- Train Camping
+211 -- 3006011 -- Train Carpentry
+212 -- 3006012 -- Train Cartography
+213 -- 3006013 -- Train Cooking
+214 -- 3006014 -- Train Detect Hidden
+215 -- 3006015 -- Train Discordance
+216 -- 3006016 -- Train Evaluating Intelligence
+217 -- 3006017 -- Train Healing
+218 -- 3006018 -- Train Fishing
+219 -- 3006019 -- Train Forensic Evaluation
+220 -- 3006020 -- Train Herding
+221 -- 3006021 -- Train Hiding
+222 -- 3006022 -- Train Provocation
+223 -- 3006023 -- Train Inscription
+224 -- 3006024 -- Train Lockpicking
+225 -- 3006025 -- Train Magery
+226 -- 3006026 -- Train Resisting Spells
+227 -- 3006027 -- Train Tactics
+228 -- 3006028 -- Train Snooping
+229 -- 3006029 -- Train Musicianship
+230 -- 3006030 -- Train Poisoning
+231 -- 3006031 -- Train Archery
+232 -- 3006032 -- Train Spirit Speak
+233 -- 3006033 -- Train Stealing
+234 -- 3006034 -- Train Tailoring
+235 -- 3006035 -- Train Animal Taming
+236 -- 3006036 -- Train Taste Identification
+237 -- 3006037 -- Train Tinkering
+238 -- 3006038 -- Train Tracking
+239 -- 3006039 -- Train Veterinary
+240 -- 3006040 -- Train Swordsmanship
+241 -- 3006041 -- Train Mace Fighting
+242 -- 3006042 -- Train Fencing
+243 -- 3006043 -- Train Wrestling
+244 -- 3006044 -- Train Lumberjacking
+245 -- 3006045 -- Train Mining
+246 -- 3006046 -- Train Meditation
+247 -- 3006047 -- Train Stealth
+248 -- 3006048 -- Train Remove Trap
+249 -- 3006049 -- Train Necromancy
+250 -- 3006050 -- Train Focus
+251 -- 3006051 -- Train Chivalry
+252 -- 3006052 -- Train Bushido
+253 -- 3006053 -- Train Ninjitsu
+254 -- not available in game, just a placeholder
+255 -- 3006055 -- Train Mysticism
+256 -- 3006056 -- Train Imbuing
+257 -- 3006057 -- Train Throwing
 */
 
 	PacketDisplayPopup* m_pPopupPacket;
