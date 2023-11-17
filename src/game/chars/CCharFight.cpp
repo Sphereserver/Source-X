@@ -945,7 +945,7 @@ effect_bounce:
             // Preventing recurrent reflection with DAMAGE_REACTIVE.
             if (!(uType & DAMAGE_REACTIVE))
             {
-                int iReflectPhysical = minimum(GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar),250); //Capped to 250
+                int iReflectPhysical = (ushort)std::min(GetPropNum(pCCPChar, PROPCH_REFLECTPHYSICALDAM, pBaseCCPChar),250); //Capped to 250
 
                 if (iReflectPhysical)
                 {
