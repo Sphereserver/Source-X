@@ -1967,7 +1967,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			break;
 		case RC_BUILD:
 			#ifdef __GITREVISION__
-			 sVal.FormatVal(__GITREVISION__);
+			 sVal.Format("%s, rev: %u" __GITBRANCH__, __GITREVISION__ );
 			#else
 			 sVal = __DATE__;
 			#endif

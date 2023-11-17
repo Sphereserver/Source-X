@@ -1790,7 +1790,7 @@ class PacketHouseDesign : public PacketSend
 private:
 	struct StairData
 	{
-		naword m_id;
+		nword m_id;
 		byte m_x;
 		byte m_y;
 		byte m_z;

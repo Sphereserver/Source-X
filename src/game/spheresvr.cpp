@@ -58,7 +58,7 @@ GlobalInitializer::GlobalInitializer()
 	// The order of the instructions is important!
 
 	std::stringstream ssServerDescription;
-	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_BUILD_NAME;
+	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_BUILD_INFO_STR;
 	ssServerDescription << " [" << get_target_os_str() << '-' << get_target_arch_str() << "]";
 	ssServerDescription << " by www.spherecommunity.net";
 	g_sServerDescription = ssServerDescription.str();

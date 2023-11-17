@@ -1,2 +1,3 @@
 #define __GITHASH__ "@GITHASH_VAL@"
 #define __GITREVISION__ @GITREV_VAL@
+#define __GITBRANCH__ "@GITBRANCH_VAL@"

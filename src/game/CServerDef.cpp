@@ -465,7 +465,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		sVal.Format("<a href=\"http://%s\">%s</a>", static_cast<lpctstr>(m_sURL), GetName());
 		break;
 	case SC_VERSION:
-		sVal = SPHERE_BUILD_NAME;
+		sVal = SPHERE_BUILD_INFO_STR;
 		break;
 	default:
         if (!fNoCallChildren)

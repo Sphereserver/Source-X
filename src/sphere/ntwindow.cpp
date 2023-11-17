@@ -31,9 +31,9 @@ CNTApp theApp;
 bool CNTWindow::CAboutDlg::OnInitDialog()
 {
 	char *z = Str_GetTemp();
-	sprintf(z, "%s %s", SPHERE_TITLE, SPHERE_BUILD_NAME);
+	sprintf(z, "%s %s", SPHERE_TITLE, SPHERE_BUILD_INFO_STR);
 	#ifdef __GITREVISION__
-	 sprintf(z, "%s (build %d / GIT hash %s)", z, __GITREVISION__, __GITHASH__);
+	 sprintf(z, "%s (branch \"%s\" / build %d / GIT hash %s)", z, __GITBRANCH__, __GITREVISION__, __GITHASH__);
 	#endif
 	SetDlgItemText(IDC_ABOUT_VERSION, z);
 
@@ -890,7 +890,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 
 bool CNTWindow::NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-#define SPHERE_WINDOW_TITLE_BASE     SPHERE_TITLE " " SPHERE_BUILD_NAME_PREFIX SPHERE_BUILD_NAME
+#define SPHERE_WINDOW_TITLE_BASE     SPHERE_TITLE " " SPHERE_BUILD_NAME_VER_PREFIX SPHERE_BUILD_INFO_GIT_STR
 	theApp.InitInstance(SPHERE_WINDOW_TITLE_BASE, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments
