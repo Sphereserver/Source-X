@@ -31,21 +31,6 @@ jobs:
       with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
-          build-arg: |
-            IMAGE=debian
-            IMAGETAG=latest
           tags: raylde/sphereuo:nightly
-
-    - name: Build and push Docker arm images
-      uses: docker/build-push-action@v5
-      with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/arm64
-          push: true
-          build-arg: |
-            IMAGE=arm64v8/debian
-            IMAGETAG=latest
-          tags: raylde/sphereuo:arm64
