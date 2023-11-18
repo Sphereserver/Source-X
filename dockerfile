@@ -1,4 +1,7 @@
-FROM debian:latest AS build
+ARG IMAGE=debian
+ARG IMAGETAG=latest
+
+FROM $IMAGE:$IMAGETAG AS build
 
 RUN apt-get update && apt-get install -y git libmariadb3 libmariadb-dev cmake g++
 
@@ -8,7 +11,7 @@ RUN git clone https://github.com/SphereUO/Core.git .
 
 RUN mkdir build && cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -B ./build -S ./ && make -j$(nproc) -C ./build
 
-FROM debian:latest AS base
+FROM $IMAGE:$IMAGETAG AS base
 
 WORKDIR /app
 
