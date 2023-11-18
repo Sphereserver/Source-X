@@ -19,6 +19,4 @@ RUN apt-get update && apt-get install -y libmariadb3
 
 COPY --from=build /app/build/bin-x86_64/SphereSvrX64_nightly /app
 
-EXPOSE 2593
-
 CMD ["./SphereSvrX64_nightly"]
