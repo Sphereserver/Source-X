@@ -33,6 +33,7 @@
  *
  *
  ***************************************************************************/
+/*
 PacketGeneric::PacketGeneric(const CClient* target, byte *data, uint length) : PacketSend(0, length, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketGeneric::PacketGeneric");
@@ -41,6 +42,7 @@ PacketGeneric::PacketGeneric(const CClient* target, byte *data, uint length) : P
 	writeData(data, length);
 	push(target);
 }
+*/
 
 
 /***************************************************************************
@@ -4733,8 +4735,7 @@ PacketHouseDesign::PacketHouseDesign(const CItemMultiCustom* house, int revision
 	m_planeCount = 0;
 	m_stairPlaneCount = 0;
 
-	m_stairBuffer = new StairData[STAIRSPERBLOCK];
-	memset(m_stairBuffer, 0, STAIRDATA_BUFFER);
+	m_stairBuffer = new StairData[STAIRSPERBLOCK]{};
 	m_stairCount = 0;
 }
 
@@ -4793,7 +4794,7 @@ bool PacketHouseDesign::writePlaneData(int plane, int itemCount, byte* data, int
 	writeData(compressBuffer, compressLength);
 	delete[] compressBuffer;
 
-	m_planeCount++;
+	m_planeCount += 1;
 	m_itemCount += itemCount;
 	m_dataSize += (4 + compressLength);
 	return true;
@@ -4807,7 +4808,7 @@ bool PacketHouseDesign::writeStairData(ITEMID_TYPE id, int x, int y, int z)
 	m_stairBuffer[m_stairCount].m_x = (byte)(x);
 	m_stairBuffer[m_stairCount].m_y = (byte)(y);
 	m_stairBuffer[m_stairCount].m_z = (byte)(z);
-	m_stairCount++;
+	m_stairCount += 1;
 
 	if (m_stairCount >= STAIRSPERBLOCK)
 		flushStairData();
@@ -4822,8 +4823,8 @@ void PacketHouseDesign::flushStairData(void)
 	if (m_stairCount <= 0)
 		return;
 
-	int stairCount = m_stairCount;
-	int stairSize = stairCount * sizeof(StairData);
+	int stairCount = maximum(0, m_stairCount);
+	uint stairSize = (uint)stairCount * (uint)sizeof(StairData);
 
 	m_stairCount = 0;
 

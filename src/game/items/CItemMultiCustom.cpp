@@ -902,7 +902,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
     if (pClientSrc == nullptr || pClientSrc->GetChar() == nullptr || pClientSrc->IsPriv(PRIV_DEBUG))
         return;
 
-    if (PacketHouseDesign::CanSendTo(pClientSrc->GetNetState()) == false)
+    if (PacketHouseDesign::CanSendToClient(pClientSrc->GetNetState()) == false)
         return;
 
     CDesignDetails * pDesign = nullptr;
@@ -951,7 +951,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
         const int iHeight = rectDesign.GetHeight();
 
         std::vector<const CMultiComponent*> vectorStairs;
-        word wPlaneBuffer[PLANEDATA_BUFFER]{};
+        naword wPlaneBuffer[PLANEDATA_BUFFER]{};
         for (int iCurrentPlane = 0; iCurrentPlane <= _iMaxPlane; ++iCurrentPlane)
         {
             // for each plane, generate a list of items

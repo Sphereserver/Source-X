@@ -44,7 +44,7 @@ struct CUOMultiItemRec_HS // (Multi.mul, High Seas+)
 	short m_dy;
 	short m_dz;
 	dword m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
-	dword m_unknown;	// unknown data
+	dword m_shipAccess;	// 0 or 1 (rope item used to enter/exit galleons)
 
 	ITEMID_TYPE GetDispID() const;
 } PACK_NEEDED;

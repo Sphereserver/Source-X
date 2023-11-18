@@ -623,7 +623,7 @@ size_t CUOMulti::Load(MULTI_TYPE id)
 			m_pItems[i].m_dy = pItems[i].m_dy;
 			m_pItems[i].m_dz = pItems[i].m_dz;
 			m_pItems[i].m_visible = pItems[i].m_visible;
-			m_pItems[i].m_unknown = 0;
+			m_pItems[i].m_shipAccess = 0;
 		}
 
 		delete[] pItems;
