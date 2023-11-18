@@ -527,7 +527,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 			PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1017383)); // poisoned
 
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061168)); // weapon damage ~1_val~ - ~2_val~
-		t->FormatArgs("%d\t%d", pItem->m_attackBase + pItem->m_ModAr, pItem->Weapon_GetAttack(true));
+		t->FormatArgs("%d\t%d", pItem->m_attackBase + pItem->_iModVal, pItem->Weapon_GetAttack(true));
 
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1061167)); // weapon speed ~1_val~
 		t->FormatArgs("%hhu", pItem->GetSpeed());

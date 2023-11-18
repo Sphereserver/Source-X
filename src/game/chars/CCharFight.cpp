@@ -553,7 +553,7 @@ int CChar::CalcArmorDefense() const
 			iDefenseTotal += sm_ArmorLayers[i].m_iCoverage * ArmorRegionMax[i];
 	}
 
-	return maximum(( iDefenseTotal / 100 ) + m_ModAr, 0);
+	return maximum(( iDefenseTotal / 100 ) + _iModVal, 0);
 }
 
  int CChar::CalcPercentArmorDefense(LAYER_TYPE layer) //static

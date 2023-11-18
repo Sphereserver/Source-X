@@ -4751,7 +4751,7 @@ int CItem::Armor_GetDefense() const
 	if ( ! IsTypeArmor())
 		return 0;
 
-	int iVal = m_defenseBase + m_ModAr;
+	int iVal = m_defenseBase + _iModVal;
 	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax )
 	{
 		int iRepairPercent = 50 + ((50 * m_itArmor.m_dwHitsCur) / m_itArmor.m_wHitsMax);
@@ -4772,7 +4772,7 @@ int CItem::Weapon_GetAttack(bool fGetRange) const
 	if ( ! IsTypeWeapon())	// anything can act as a weapon.
 		return 1;
 
-	int iVal = m_attackBase + m_ModAr;
+	int iVal = m_attackBase + _iModVal;
 	if ( fGetRange )
 		iVal += m_attackRange;
 

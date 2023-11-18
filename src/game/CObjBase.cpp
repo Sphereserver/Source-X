@@ -73,7 +73,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 	m_attackBase = m_attackRange = 0;
 	m_defenseBase = m_defenseRange = 0;
-	m_ModAr = 0;
+	_iModVal = 0;
 
 	m_wHue = HUE_DEFAULT;
 	m_ModMaxWeight = 0;
@@ -1458,7 +1458,9 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			break;
 		case OC_MODAR:
 		case OC_MODAC:
-			sVal.FormatVal( m_ModAr );
+			DEBUG_ERR(( "ModAr and ModAc are deprecated. Use ModVal \n"));
+		case OC_MODVAL:
+			sVal.FormatVal( _iModVal );
 			break;
 		case OC_NAME:
 			sVal = GetName();
@@ -1880,8 +1882,10 @@ bool CObjBase::r_LoadVal( CScript & s )
 			break;
 		case OC_MODAR:
 		case OC_MODAC:
+			DEBUG_ERR(( "ModAr and ModAc are deprecated. Use ModVal \n"));
+		case OC_MODVAL:
 			{
-				m_ModAr = s.GetArgVal();
+				_iModVal = s.GetArgVal();
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
 				if ( pChar )
 				{
@@ -1980,8 +1984,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
 	if ( const CCSpawn* pSpawn = GetSpawn() )
 		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID().GetObjUID());
-	if ( m_ModAr )
-		s.WriteKeyVal("MODAR", m_ModAr);
+	if ( _iModVal )
+		s.WriteKeyVal("MODVAL", _iModVal);
 	if ( m_ModMaxWeight )
 		s.WriteKeyVal("MODMAXWEIGHT", m_ModMaxWeight);
 

@@ -883,7 +883,7 @@ public:
 
 public:
 	//	Some global object variables
-	int m_ModAr;
+	int _iModVal;
 
 #define SU_UPDATE_HITS      0x01    // update hits to others
 #define SU_UPDATE_MODE      0x02    // update mode to all
