@@ -12,9 +12,10 @@ ELSE ()
 
 	ELSE ()
 		SET (GIT_CMD git)
-		SET (GIT_ARGS_VALID_REPO rev-parse)
-		SET (GIT_ARGS_REV_HASH   rev-parse HEAD)
-		SET (GIT_ARGS_REV_COUNT  rev-list --count HEAD)
+		SET (GIT_ARGS_VALID_REPO  rev-parse)
+		SET (GIT_ARGS_REV_HASH    rev-parse HEAD)
+		SET (GIT_ARGS_REV_COUNT   rev-list --count HEAD)
+		SET (GIT_ARGS_BRANCH  branch --show-current)
 
 		MESSAGE (STATUS "Checking if the folder is a valid git repo...")
 		
@@ -46,7 +47,7 @@ ELSE ()
 					MESSAGE (WARNING "Git revision not available!")
 					
 				ELSE ()
-					MESSAGE (STATUS "Git revision ${OUT_REV_COUNT}")
+					MESSAGE (STATUS "Git revision number: ${OUT_REV_COUNT}")
 					SET (GITREV_VAL ${OUT_REV_COUNT})
 					
 					MESSAGE (STATUS "Checking git revision hash...")
@@ -55,12 +56,29 @@ ELSE ()
 						OUTPUT_VARIABLE OUT_REV_HASH
 						OUTPUT_STRIP_TRAILING_WHITESPACE
 					)
-					MESSAGE (STATUS "Git revision hash ${OUT_REV_HASH}")
+					MESSAGE (STATUS "Git revision hash: ${OUT_REV_HASH}")
 					SET (GITHASH_VAL ${OUT_REV_HASH})
 					
-					ENDIF ()
-
 				ENDIF ()
+
+			ENDIF ()
+
+			MESSAGE (STATUS "Checking git branch...")
+
+			EXECUTE_PROCESS (COMMAND ${GIT_CMD} ${GIT_ARGS_BRANCH}
+				WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+				OUTPUT_VARIABLE OUT_BRANCH
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+			)
+
+			IF ("${OUT_BRANCH}" STREQUAL "")
+					MESSAGE (WARNING "Git branch not available!")
+					
+				ELSE ()
+					MESSAGE (STATUS "Git branch: ${OUT_BRANCH}")
+					SET (GITBRANCH_VAL ${OUT_BRANCH})
+
+			ENDIF ()
 
 		ENDIF ()
 			

@@ -29,6 +29,8 @@ CResourceRef::CResourceRef(const CResourceRef& copy)
 
 CResourceRef::~CResourceRef()
 {
+    // TODO: Consider using not a bare pointer for m_pLink but a CResourceID, in order to safely check if the father
+    //  resource was deleted or not.
     if (m_pLink != nullptr)
         m_pLink->DelRefInstance();
 }
@@ -127,7 +129,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
         if (pResourceLink == nullptr)
         {
             fRet = false;
-            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd));
+            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd));
         }
     }
 

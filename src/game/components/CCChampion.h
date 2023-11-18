@@ -6,7 +6,7 @@
 #define _INC_CCCHAMPION_H
 
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/resource/CResourceBase.h"
+#include "../../common/resource/CResourceHolder.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../items/CItemMulti.h"

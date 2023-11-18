@@ -13,8 +13,10 @@ function (toolchain_exe_stuff_common)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
-		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
-		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE")
+		MESSAGE (WARNING "You have enabled MSAN. Make sure you do know what you are doing. It doesn't work out of the box. \
+See comments in the toolchain and: https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo")
+		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins -fPIE")
+		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins -fPIE")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
@@ -59,17 +61,25 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	#	Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
 	#	Other: "-fno-expensive-optimizations"
 
+	# MemorySanitizer: it doesn't work out of the box. It needs to be linked to an MSAN-instrumented build of libc++ and libc++abi.
+	#  This means: one should build them from LLVM source... 
+	#  https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo
+	#IF (${USE_MSAN})
+	#	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -stdlib=libc++")
+	#ENDIF()
+	# Use "-stdlib=libstdc++" to link against GCC c/c++ libs (this is done by default)
+	# To use LLVM libc++ use "-stdlib=libc++", but you need to install it separately
+
 
 	#-- Setting common linker flags
 
 	IF (${USE_MSAN})
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie" PARENT_SCOPE)
+		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	"${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie")
 	ENDIF()
 
 	 # -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
-	# Use "-stdlib=libstdc++" to link against GCC c/c++ libs (this is done by default)
-	# To use LLVM libc++ use "-stdlib=libc++", but you need to install it separately
+	
 
 
 	#-- Adding compiler flags per build.

@@ -1,8 +1,9 @@
 #ifndef _INC_SSTRING_H
 #define _INC_SSTRING_H
 
-#include <cstring>
 #include "../common.h"
+#include <cstring>
+
 
 #define STRING_NULL     "\0"
 #define TSTRING_NULL    static_cast<const tchar*>("\0")
@@ -35,6 +36,7 @@
     #define strnicmp		strncasecmp
     void Str_Reverse(char* string);
 #endif
+
 
 /**
 * match result defines
@@ -367,13 +369,6 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
 tchar * Str_UnQuote(tchar * pStr);
 ///@}
 
-
-//--
-
-// extern tchar * Str_GetTemporary(int amount = 1);
-#define Str_GetTemp static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->allocateBuffer
-#define Str_GetWTemp static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->allocateWBuffer
-#define STR_TEMPLENGTH (size_t)(THREAD_STRING_LENGTH)
 
 //--
 

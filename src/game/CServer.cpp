@@ -323,25 +323,25 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			{
 				char szVersion[128];
 				m_ClientVersion.WriteClientVer(szVersion, sizeof(szVersion));
-				snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_NAME ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
+				snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_INFO_STR ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
 					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), szVersion);
 			}
 			break;
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
+			snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
 		case 0x24: // '$'
 			// show at startup.
-			snprintf(pTemp, STR_TEMPLENGTH, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
+			snprintf(pTemp, Str_TempLength(), "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
 				m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), m_TimeZone);
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			snprintf(pTemp, STR_TEMPLENGTH, SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
+			snprintf(pTemp, Str_TempLength(), SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
 				StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
@@ -371,11 +371,11 @@ void CServer::ListClients( CTextConsole *pConsole ) const
     }
 
     if (numClients <= 0)
-        snprintf(ptcMsg, STR_TEMPLENGTH, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_NO_CLIENT));
+        snprintf(ptcMsg, Str_TempLength(), "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_NO_CLIENT));
     else if (numClients == 1)
-        snprintf(ptcMsg, STR_TEMPLENGTH, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
+        snprintf(ptcMsg, Str_TempLength(), "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
     else
-        snprintf(ptcMsg, STR_TEMPLENGTH, "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
+        snprintf(ptcMsg, Str_TempLength(), "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
 
     pConsole->SysMessage(ptcMsg);
 
@@ -394,7 +394,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 			if ( pCharCmd && !pCharCmd->CanDisturb(pChar) )
 				continue;
 
-			snprintf(ptcMsg, STR_TEMPLENGTH, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
+			snprintf(ptcMsg, Str_TempLength(), "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
 		}
 		else
 		{
@@ -415,7 +415,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 					break;
 			}
 
-			snprintf(ptcMsg, STR_TEMPLENGTH, "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
+			snprintf(ptcMsg, Str_TempLength(), "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
 		}
 
         pConsole->SysMessage(ptcMsg);
@@ -667,16 +667,16 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			{
                 if (pSrc != this)
                 {
-                    pSrc->SysMessagef("Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::get()->getActiveThreads());
+                    pSrc->SysMessagef("Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::get().getActiveThreads());
                 }
                 else
                 {
-                    g_Log.Event(LOGL_EVENT, "Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::get()->getActiveThreads());
+                    g_Log.Event(LOGL_EVENT, "Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::get().getActiveThreads());
                 }
-				size_t iThreadCount = ThreadHolder::get()->getActiveThreads();
+				size_t iThreadCount = ThreadHolder::get().getActiveThreads();
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
-					IThread * thrCurrent = ThreadHolder::get()->getThreadAt(iThreads);
+					IThread * thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 					if (thrCurrent != nullptr)
 					{
 						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %lu, Priority: %d, Name: %s.\n",
@@ -811,8 +811,8 @@ longcommand:
 
 			if ( !strnicmp(pszText, "strip tng", 9) || !strnicmp(pszText, "tngstrip", 8))
 			{
-				Str_CopyLimitNull(z, dirname, STR_TEMPLENGTH);
-				Str_ConcatLimitNull(z, "sphere_strip_tng" SPHERE_SCRIPT, STR_TEMPLENGTH);
+				Str_CopyLimitNull(z, dirname, Str_TempLength());
+				Str_ConcatLimitNull(z, "sphere_strip_tng" SPHERE_SCRIPT, Str_TempLength());
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("StripFile is %s.\n", z);
@@ -839,7 +839,7 @@ longcommand:
 
 				while ( (script = g_Cfg.GetResourceFile(i++)) != nullptr )
 				{
-					Str_CopyLimitNull(z, script->GetFilePath(), STR_TEMPLENGTH);
+					Str_CopyLimitNull(z, script->GetFilePath(), Str_TempLength());
 					f = fopen(z, "r");
 					if ( !f )
 					{
@@ -862,7 +862,7 @@ longcommand:
 
 						x = y;
 						GETNONWHITESPACE(x);
-						Str_CopyLimitNull(z, x, STR_TEMPLENGTH);
+						Str_CopyLimitNull(z, x, Str_TempLength());
 
 						_strlwr(z);
 
@@ -893,8 +893,8 @@ longcommand:
 			}
 			else if ( !strnicmp(pszText, "strip axis", 10) || !strnicmp(pszText, "strip", 5) )
 			{
-				Str_CopyLimitNull(z, dirname, STR_TEMPLENGTH);
-				Str_ConcatLimitNull(z, "sphere_strip_axis" SPHERE_SCRIPT, STR_TEMPLENGTH);
+				Str_CopyLimitNull(z, dirname, Str_TempLength());
+				Str_ConcatLimitNull(z, "sphere_strip_axis" SPHERE_SCRIPT, Str_TempLength());
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("StripFile is %s.\n", z);
@@ -921,7 +921,7 @@ longcommand:
 
 				while ( (script = g_Cfg.GetResourceFile(i++)) != nullptr )
 				{
-					Str_CopyLimitNull(z, script->GetFilePath(), STR_TEMPLENGTH);
+					Str_CopyLimitNull(z, script->GetFilePath(), Str_TempLength());
 					f = fopen(z, "r");
 					if ( !f )
 					{
@@ -944,7 +944,7 @@ longcommand:
 
 						x = y;
 						GETNONWHITESPACE(x);
-						Str_CopyLimitNull(z, x, STR_TEMPLENGTH);
+						Str_CopyLimitNull(z, x, Str_TempLength());
 
 						_strlwr(z);
 
@@ -1060,10 +1060,10 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
         ftDump->Printf("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
     }
 
-	size_t iThreadCount = ThreadHolder::get()->getActiveThreads();
+	size_t iThreadCount = ThreadHolder::get().getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
-		IThread* thrCurrent = ThreadHolder::get()->getThreadAt(iThreads);
+		IThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 		if (thrCurrent == nullptr)
 			continue;
 
@@ -1290,7 +1290,7 @@ bool CServer::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		tchar * pszTemp = Str_GetTemp();
 		tchar * pszTempStart = pszTemp;
 
-		Str_CopyLimitNull(pszTemp, ptcKey, STR_TEMPLENGTH);
+		Str_CopyLimitNull(pszTemp, ptcKey, Str_TempLength());
 		tchar * split = strchr(pszTemp, '.');
 		if ( split != nullptr )
 			*split = '\0';
@@ -1462,7 +1462,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			CAccount * pAccount = nullptr;
 			char *pszTemp = Str_GetTemp();
 
-			Str_CopyLimitNull(pszTemp, ptcKey, STR_TEMPLENGTH);
+			Str_CopyLimitNull(pszTemp, ptcKey, Str_TempLength());
 			char *split = strchr(pszTemp, '.');
 			if ( split )
 			{
@@ -1651,7 +1651,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			{
 				pszMsg = Str_GetTemp();
 				g_Log.SetLogMask( s.GetArgFlag( g_Log.GetLogMask(), LOGM_PLAYER_SPEAK ));
-				snprintf(pszMsg, STR_TEMPLENGTH, "Hear All %s.\n", g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) ? "Enabled" : "Disabled" );
+				snprintf(pszMsg, Str_TempLength(), "Hear All %s.\n", g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) ? "Enabled" : "Disabled" );
 			}
 			break;
 
@@ -2221,7 +2221,7 @@ bool CServer::Load()
 	EXC_SET_BLOCK("print sphere infos");
 	g_Log.Event(LOGM_INIT, "%s.\n", g_sServerDescription.c_str());
 #ifdef __GITREVISION__
-	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
+	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [branch %s / build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITBRANCH__, __GITREVISION__, __GITHASH__);
 #else
 	g_Log.Event(LOGM_INIT, "Compiled at %s (%s)\n\n", __DATE__, __TIME__);
 #endif

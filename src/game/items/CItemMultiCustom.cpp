@@ -902,7 +902,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
     if (pClientSrc == nullptr || pClientSrc->GetChar() == nullptr || pClientSrc->IsPriv(PRIV_DEBUG))
         return;
 
-    if (PacketHouseDesign::CanSendTo(pClientSrc->GetNetState()) == false)
+    if (PacketHouseDesign::CanSendToClient(pClientSrc->GetNetState()) == false)
         return;
 
     CDesignDetails * pDesign = nullptr;
@@ -951,7 +951,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
         const int iHeight = rectDesign.GetHeight();
 
         std::vector<const CMultiComponent*> vectorStairs;
-        word wPlaneBuffer[PLANEDATA_BUFFER]{};
+        naword wPlaneBuffer[PLANEDATA_BUFFER]{};
         for (int iCurrentPlane = 0; iCurrentPlane <= _iMaxPlane; ++iCurrentPlane)
         {
             // for each plane, generate a list of items
@@ -2012,23 +2012,23 @@ bool CItemMultiCustom::LoadValidItems()
     int iErrCode = 0;
     for (CSVRowData::iterator itCsv = csvDataRow.begin(), end = csvDataRow.end(); itCsv != end; ++itCsv)
     {
-        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszHeaderFull, "\t", STR_TEMPLENGTH))
+        if (Str_TempLength() < Str_ConcatLimitNull(pszHeaderFull, "\t", Str_TempLength()))
         {
             iErrCode = 1;
             break;
         }
-        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszHeaderFull, itCsv->first.c_str(), STR_TEMPLENGTH))
+        if (Str_TempLength() < Str_ConcatLimitNull(pszHeaderFull, itCsv->first.c_str(), Str_TempLength()))
         {
             iErrCode = 2;
             break;
         }
 
-        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszRowFull, "\t", STR_TEMPLENGTH))
+        if (Str_TempLength() < Str_ConcatLimitNull(pszRowFull, "\t", Str_TempLength()))
         {
             iErrCode = 3;
             break;
         }
-        if (STR_TEMPLENGTH < Str_ConcatLimitNull(pszRowFull, itCsv->second.c_str(), STR_TEMPLENGTH))
+        if (Str_TempLength() < Str_ConcatLimitNull(pszRowFull, itCsv->second.c_str(), Str_TempLength()))
         {
             iErrCode = 4;
             break;

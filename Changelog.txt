@@ -3426,3 +3426,12 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Removing from client's view an object while it's being deleted, in some corner cases made the server crash (Issue #1119).
 - Fixed: Guildstone removal caused an exception (Issue #1165).
 - Fixed: In-game chat not working correctly and generating exceptions since last update (Issue #1140).
+
+02-11-2023, Jhobean
+- Modified: @Mount added argument ARGN1
+	ARGN1 (rw) = The itemID of the item containing the animation use when moounting. (Anim # is in tiledata of this item)
+    NOTE: When mounting a pet you'll read a non sense random value but you can replace it by an ITEMID to force anim
+    Example: 03ea6 for Llama anim or 03e9f for gray horse anim. Yes 03ea6 is a ship part but in tiledata it link to anim 828
+
+18-11-2023, Nolok
+- Fixed: House customization sending wrong component data, breaking it.
