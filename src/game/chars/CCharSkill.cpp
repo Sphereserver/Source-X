@@ -3963,7 +3963,9 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 	if (!IsTakeCrime(pCont, &pCharMark) || pCharMark == nullptr)
 		return 0;	// Not a crime really.
 
-	if (GetTopDist3D(pCharMark) > 1)
+	CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_SNOOPING);
+	int iMaxRange = pSkillDef->m_Range ? pSkillDef->m_Range : 1;
+	if (GetTopDist3D(pCharMark) > iMaxRange)
 	{
 		SysMessageDefault(DEFMSG_SNOOPING_REACH);
 		return (-SKTRIG_QTY);
