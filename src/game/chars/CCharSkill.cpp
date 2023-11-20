@@ -2459,6 +2459,27 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 	{
 		case SKTRIG_START:
 		{
+			// CanSeeLos if pChar or m_Act_P
+			if ( !CanSeeLOS(pChar) || !CanSeeLOS(m_Act_p) )
+			{
+				SysMessageDefault(DEFMSG_MSG_MOUNT_DIST);
+				return -SKTRIG_ABORT;
+			}
+
+			// tamed pets cannot be herded
+			if ( !pChar->IsStatFlag(STATF_PET) )
+			{
+				SysMessage("That animal looks tame already.");
+				return -SKTRIG_ABORT;
+			}
+
+			// is a valid point?
+			if ( !m_Act_p.IsValidPoint())
+			{
+				SysMessage("That location is not valid.");
+				return -SKTRIG_ABORT;
+			}
+
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 				UpdateAnimate(ANIM_ATTACK_WEAPON);
 
@@ -2471,6 +2492,12 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 
 		case SKTRIG_SUCCESS:
 		{
+			// check if is disconnected or ridden
+			if ( pChar->IsDisconnected() || pChar->IsStatFlag(STATF_RIDDEN) )
+			{
+				return -SKTRIG_ABORT;
+			}
+
 			if ( IsPriv(PRIV_GM) )
 			{
 				if ( pChar->GetPrivLevel() > GetPrivLevel() )
