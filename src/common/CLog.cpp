@@ -6,15 +6,15 @@
 #include "CLog.h"
 
 
-int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
+int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args) noexcept
 {
     if (pszFormat == nullptr || pszFormat[0] == '\0')
         return 0;
 
 	tchar* pszTemp = Str_GetTemp();
-    size_t len = vsnprintf(pszTemp, (STR_TEMPLENGTH - 1), pszFormat, args);
+    size_t len = vsnprintf(pszTemp, (Str_TempLength() - 1), pszFormat, args);
     if (! len)
-        Str_CopyLimitNull(pszTemp, pszFormat, (STR_TEMPLENGTH - 1));
+        Str_CopyLimitNull(pszTemp, pszFormat, (Str_TempLength() - 1));
 
     // This get rids of exploits done sending 0x0C to the log subsytem.
     // tchar *	 pFix;
@@ -24,7 +24,7 @@ int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args)
     return EventStr(dwMask, pszTemp);
 }
 
-int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...)
+int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -33,7 +33,7 @@ int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...)
     return iret;
 }
 
-int CEventLog::EventDebug(lpctstr pszFormat, ...)
+int CEventLog::EventDebug(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -42,7 +42,7 @@ int CEventLog::EventDebug(lpctstr pszFormat, ...)
     return iret;
 }
 
-int CEventLog::EventError(lpctstr pszFormat, ...)
+int CEventLog::EventError(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -51,7 +51,7 @@ int CEventLog::EventError(lpctstr pszFormat, ...)
     return iret;
 }
 
-int CEventLog::EventWarn(lpctstr pszFormat, ...)
+int CEventLog::EventWarn(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -61,7 +61,7 @@ int CEventLog::EventWarn(lpctstr pszFormat, ...)
 }
 
 #ifdef _DEBUG
-int CEventLog::EventEvent(lpctstr pszFormat, ...)
+int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
@@ -185,7 +185,7 @@ bool CLog::_OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	// Get the new name based on date.
 	m_dateStamp = CSTime::GetCurrentTime();
 	tchar *pszTemp = Str_GetTemp();
-	snprintf(pszTemp, STR_TEMPLENGTH, SPHERE_FILE "%d-%02d-%02d.log",
+	snprintf(pszTemp, Str_TempLength(), SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
 	CSString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 
@@ -204,7 +204,7 @@ bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
 	THREAD_UNIQUE_LOCK_RETURN(CLog::_OpenLog(pszBaseDirName));
 }
 
-int CLog::EventStr( dword dwMask, lpctstr pszMsg )
+int CLog::EventStr( dword dwMask, lpctstr pszMsg ) noexcept
 {
     ADDTOCALLSTACK("CLog::EventStr");
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff

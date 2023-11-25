@@ -1,6 +1,7 @@
 # Ignore folder and files
 /.git/
 /.vscode/
+*.vshistory*
 /CMakeFiles/
 /spheresvr.dir/
 
@@ -21,28 +22,31 @@
 /save/
 /web/
 
-*.vs
-*.pid
 
 # Ignore files
 *.bak
 *.log
 *.old
 *.tmp
+*.pid
+
 *.o
 *.obj
 *.exe
+*.vs
 *.vcx*
 *.sln
+*.user
+
 
 # Ignore some files in the parent folder
 CMakeCache.txt
 
 # Ignore git versioning file
 /src/common/version/GitRevision.h
-/src/common/libev/config.h
 
 # Ignore other specific files
+/lib/libev/src/config.h
 /lib/mariadb/config.h
 /lib/mariadb/ma_config.h
 /lib/mariadb/mariadb_version.h

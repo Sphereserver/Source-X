@@ -12,7 +12,6 @@
 #else
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wcomment"
-	#pragma GCC diagnostic ignored "-Wold-style-declaration"
 	#pragma GCC diagnostic ignored "-Wparentheses"
 	#pragma GCC diagnostic ignored "-Wsign-compare"
 	#pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -22,6 +21,12 @@
 	#pragma GCC diagnostic ignored "-Wunused-result"
 	#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 	#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+
+#if !defined(__clang__)
+	#pragma GCC diagnostic ignored "-Wold-style-declaration"
+#elif defined(__clang__)
+	#pragma GCC diagnostic ignored "-Wextern-initializer"
+#endif
 
 	#ifdef __MINGW__
 		#include <time.h>

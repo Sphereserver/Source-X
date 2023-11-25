@@ -7,16 +7,16 @@
 #include "../sphere_library/CSFileList.h"
 #include "../CException.h"
 #include "../CLog.h"
-#include "CResourceBase.h"
+#include "CResourceHolder.h"
 #include "CResourceHash.h"
 #include "CResourceScript.h"
 #include "CResourceSortedArrays.h"
 
 
 //***************************************************
-// CResourceBase
+// CResourceHolder
 
-lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
+lpctstr const CResourceHolder::sm_szResourceBlocks[RES_QTY] =	// static
 {
 	"AAAUNUSED",	// unused / unknown.
     "ACCOUNT",		// Define an account instance.
@@ -84,9 +84,9 @@ lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 //*********************************************************
 // Resource Files
 
-CResourceScript * CResourceBase::FindResourceFile( lpctstr pszPath )
+CResourceScript * CResourceHolder::FindResourceFile( lpctstr pszPath )
 {
-	ADDTOCALLSTACK("CResourceBase::FindResourceFile");
+	ADDTOCALLSTACK("CResourceHolder::FindResourceFile");
 	// Just match the titles ( not the whole path)
 
 	lpctstr pszTitle = CScript::GetFilesTitle( pszPath );
@@ -103,9 +103,9 @@ CResourceScript * CResourceBase::FindResourceFile( lpctstr pszPath )
 	return nullptr;
 }
 
-CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
+CResourceScript * CResourceHolder::AddResourceFile( lpctstr pszName )
 {
-	ADDTOCALLSTACK("CResourceBase::AddResourceFile");
+	ADDTOCALLSTACK("CResourceHolder::AddResourceFile");
 	ASSERT(pszName != nullptr);
 	// Is this really just a dir name ?
 
@@ -158,9 +158,9 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
     return pNewRes;
 }
 
-void CResourceBase::AddResourceDir( lpctstr pszDirName )
+void CResourceHolder::AddResourceDir( lpctstr pszDirName )
 {
-	ADDTOCALLSTACK("CResourceBase::AddResourceDir");
+	ADDTOCALLSTACK("CResourceHolder::AddResourceDir");
 	if ( pszDirName[0] == '\0' )
 		return;
 
@@ -193,9 +193,9 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	}
 }
 
-void CResourceBase::LoadResourcesOpen( CScript * pScript )
+void CResourceHolder::LoadResourcesOpen( CScript * pScript )
 {
-	ADDTOCALLSTACK("CResourceBase::LoadResourcesOpen");
+	ADDTOCALLSTACK("CResourceHolder::LoadResourcesOpen");
 	// Load an already open resource file.
 
 	ASSERT(pScript);
@@ -212,9 +212,9 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 		DEBUG_WARN(( "No resource sections in '%s'\n", pScript->GetFilePath()));
 }
 
-bool CResourceBase::LoadResources( CResourceScript * pScript )
+bool CResourceHolder::LoadResources( CResourceScript * pScript )
 {
-	ADDTOCALLSTACK("CResourceBase::LoadResources");
+	ADDTOCALLSTACK("CResourceHolder::LoadResources");
 	// Open the file then load it.
 	if ( pScript == nullptr )
 		return false;
@@ -233,9 +233,9 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 	return true;
 }
 
-CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
+CResourceScript * CResourceHolder::LoadResourcesAdd( lpctstr pszNewFileName )
 {
-	ADDTOCALLSTACK("CResourceBase::LoadResourcesAdd");
+	ADDTOCALLSTACK("CResourceHolder::LoadResourcesAdd");
 	// Make sure this is added to my list of resource files
 	// And load it now.
 
@@ -245,9 +245,9 @@ CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
 	return pScript;
 }
 
-bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical )
+bool CResourceHolder::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical )
 {
-	ADDTOCALLSTACK("CResourceBase::OpenResourceFind");
+	ADDTOCALLSTACK("CResourceHolder::OpenResourceFind");
 	// Open a single resource script file.
 	// Look in the specified path.
 
@@ -271,9 +271,9 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCri
 	return s.Open( sPathName, OF_READ );
 }
 
-bool CResourceBase::LoadResourceSection( CScript * pScript )
+bool CResourceHolder::LoadResourceSection( CScript * pScript )
 {
-	ADDTOCALLSTACK("CResourceBase::LoadResourceSection");
+	ADDTOCALLSTACK("CResourceHolder::LoadResourceSection");
 	UnreferencedParameter(pScript);
 	// Just stub this out for others for now.
 	return false;
@@ -282,9 +282,9 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Section Definitions
 
-lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
+lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
+	ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
 	// Get a portable name for the resource id type.
 
 	const CResourceDef * pResourceDef = ResourceGetDef( rid );
@@ -300,21 +300,21 @@ lpctstr CResourceBase::ResourceGetName( const CResourceID& rid ) const
 	return pszTmp;
 }
 
-lpctstr CResourceBase::GetName() const
+lpctstr CResourceHolder::GetName() const
 {
 	return "CFG";
 }
 
-CResourceScript * CResourceBase::GetResourceFile( size_t i )
+CResourceScript * CResourceHolder::GetResourceFile( size_t i )
 {
 	if ( ! m_ResourceFiles.IsValidIndex(i) )
 		return nullptr;	// All resource files we need to get blocks from later.
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceBase::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
+CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetID_Advance");
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetID_Advance");
     // Find the Resource ID given this name.
     // We are NOT creating a new resource. just looking up an existing one
     // NOTE: Do not enforce the restype.
@@ -355,13 +355,13 @@ CResourceID CResourceBase::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcN
     return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex, wPage);
 }
 
-CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
+CResourceID CResourceHolder::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
+	ADDTOCALLSTACK("CResourceHolder::ResourceGetID");
 	return ResourceGetID_Advance(restype, ptcName, wPage);
 }
 
-CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
+CResourceID CResourceHolder::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
 {
 	// Get a resource of just this index type.
 	CResourceID rid = ResourceGetID( restype, pszName, wPage );
@@ -373,9 +373,9 @@ CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName,
 	return rid;
 }
 
-int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage )
+int CResourceHolder::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word wPage )
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetIndexType");
+	ADDTOCALLSTACK("CResourceHolder::ResourceGetIndexType");
 	// Get a resource of just this index type.
 	const CResourceID rid = ResourceGetID( restype, pszName, wPage );
 	if ( rid.GetResType() != restype )
@@ -383,9 +383,9 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName, word
 	return rid.GetResIndex();
 }
 
-sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourceID& rid) const
+sl::smart_ptr_view<CResourceDef> CResourceHolder::ResourceGetDefRef(const CResourceID& rid) const
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetDefRef");
+	ADDTOCALLSTACK("CResourceHolder::ResourceGetDefRef");
 	if ( ! rid.IsValidResource() )
 		return {};
 	size_t index = m_ResHash.FindKey( rid );
@@ -394,33 +394,33 @@ sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRef(const CResourc
 	return m_ResHash.GetSmartPtrViewAt( rid, index );
 }
 
-sl::smart_ptr_view<CResourceDef> CResourceBase::ResourceGetDefRefByName( RES_TYPE restype, lpctstr pszName, word wPage )
+sl::smart_ptr_view<CResourceDef> CResourceHolder::ResourceGetDefRefByName( RES_TYPE restype, lpctstr pszName, word wPage )
 {
-    ADDTOCALLSTACK("CResourceBase::ResourceGetDefRefByName");
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetDefRefByName");
     // resolve a name to the actual resource def.
     CResourceID res = ResourceGetID(restype, pszName, wPage);
     res.m_wPage = wPage ? wPage : RES_PAGE_ANY;   // Create a CResourceID with page == RES_PAGE_ANY: search independently from the page
     return ResourceGetDefRef(res);
 }
 
-CResourceDef* CResourceBase::ResourceGetDef(const CResourceID& rid) const
+CResourceDef* CResourceHolder::ResourceGetDef(const CResourceID& rid) const
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
+	ADDTOCALLSTACK("CResourceHolder::ResourceGetDef");
 	return ResourceGetDefRef(rid).get();
 }
 
-CResourceDef* CResourceBase::ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage)
+CResourceDef* CResourceHolder::ResourceGetDefByName(RES_TYPE restype, lpctstr pszName, word wPage)
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceGetDefByName");
+	ADDTOCALLSTACK("CResourceHolder::ResourceGetDefByName");
 	return ResourceGetDefRefByName(restype, pszName, wPage).get();
 }
 
 //*******************************************************
 // Open resource section.
 
-bool CResourceBase::ResourceLock( CResourceLock & s, const CResourceID& rid )
+bool CResourceHolder::ResourceLock( CResourceLock & s, const CResourceID& rid )
 {
-	ADDTOCALLSTACK("CResourceBase::ResourceLock");
+	ADDTOCALLSTACK("CResourceHolder::ResourceLock");
 	// Lock a referenced resource object.
 	if ( ! rid.IsValidUID() )
 		return false;

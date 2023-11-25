@@ -926,7 +926,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.
 		lpctstr ptcArticle = pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE);
-		snprintf(pTemp, STR_TEMPLENGTH, "%s %s", ptcArticle, pCharDef->GetTradeName());
+		snprintf(pTemp, Str_TempLength(), "%s %s", ptcArticle, pCharDef->GetTradeName());
 		return pTemp;
 	}
 
@@ -953,7 +953,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
 			{ nullptr, INT32_MAX }
 		};
-		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
+		len = snprintf(pTemp, Str_TempLength(), "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 	else if ( skill == SKILL_BUSHIDO )
 	{
@@ -972,7 +972,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
 			{ nullptr, INT32_MAX }
 		};
-		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
+		len = snprintf(pTemp, Str_TempLength(), "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 	else
 	{
@@ -991,10 +991,10 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
 			{ nullptr, INT32_MAX }
 		};
-		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
+		len = snprintf(pTemp, Str_TempLength(), "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 
-	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetBuffer());
+	snprintf(pTemp + len, Str_TempLength() - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetBuffer());
 	return pTemp;
 }
 

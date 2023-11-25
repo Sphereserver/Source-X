@@ -14,6 +14,22 @@
 #define THREAD_STRING_LENGTH	4096
 
 
+//--
+
+tchar* Str_GetTemp() noexcept;
+
+#if __cplusplus >= 202002L
+// C++20 (and later) code
+consteval
+#else
+constexpr
+#endif
+size_t Str_TempLength() noexcept {
+	return (size_t)(THREAD_STRING_LENGTH);
+}
+
+//--
+
 // Base abstract class for strings, provides basic information of what should be available
 // NOTE: Children should override destroy()
 class AbstractString
@@ -106,7 +122,6 @@ protected:
 */
 
 
-#define MAX_TEMP_LINES_NO_CONTEXT	512
 
 // Temporary string implementation. Works with thread-safe string
 // To create such string:
@@ -114,13 +129,29 @@ protected:
 // it could be also created via new TemporaryString but whats the point if we still use memory allocation? :)
 class TemporaryString : public AbstractString
 {
+	TemporaryString(char* buffer, char* state);
+
 public:
 	TemporaryString();
-	TemporaryString(char *buffer, char *state);
 	~TemporaryString();
 
 	TemporaryString(const TemporaryString& copy) = delete;
 	TemporaryString& operator=(const TemporaryString& other) = delete;
+
+	/**
+	* @brief "Copy" constructor.
+	*
+	* @param pStr string to copy.
+	*/
+	TemporaryString(lpctstr pStr);
+
+	/**
+	* @brief "Copy" constructor.
+	*
+	* @param pStr string to copy.
+	* #param iLen max number of chars (single-byte) to copy.
+	*/
+	TemporaryString(lpctstr pStr, size_t uiLen);
 
 protected:
 	virtual void resize(size_t newLength) override;
@@ -132,11 +163,7 @@ protected:
 private:
 	bool m_useHeap;					// a mark whatever we are in heap (String) or stack (ThreadLocal) mode
 	char *m_state;					// a pointer to thread local state of the line we occupy
-
-	// static buffer to allow similar operations for non-threaded environment
-	// NOTE: this buffer have no protection against overrun, so beware
-	static size_t m_tempPosition;
-	static char m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LENGTH];
 };
+
 
 #endif // _INC_SSTRINGOBJS_H

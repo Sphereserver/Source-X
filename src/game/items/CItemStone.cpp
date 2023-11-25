@@ -1400,17 +1400,17 @@ void CItemStone::AnnounceWar( const CItemStone * pEnemyStone, bool fWeDeclare, b
 	bool fAtWar = IsAtWarWith(pEnemyStone);
 
 	tchar *pszTemp = Str_GetTemp();
-	int len = snprintf( pszTemp, STR_TEMPLENGTH, (fWar) ? "%s %s declared war on %s." : "%s %s requested peace with %s.",
+	int len = snprintf( pszTemp, Str_TempLength(), (fWar) ? "%s %s declared war on %s." : "%s %s requested peace with %s.",
 		(fWeDeclare) ? "You" : pEnemyStone->GetName(),
 		(fWeDeclare) ? "have" : "has",
 		(fWeDeclare) ? pEnemyStone->GetName() : "You" );
 
 	if ( fAtWar )
-		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is ON!" );
+		snprintf( pszTemp+len, Str_TempLength() - len, " War is ON!" );
 	else if ( fWar )
-		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is NOT yet on." );
+		snprintf( pszTemp+len, Str_TempLength() - len, " War is NOT yet on." );
 	else
-		snprintf( pszTemp+len, STR_TEMPLENGTH - len, " War is OFF." );
+		snprintf( pszTemp+len, Str_TempLength() - len, " War is OFF." );
 
 	CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
 	for ( ; pMember != nullptr; pMember = pMember->GetNext())

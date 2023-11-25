@@ -363,7 +363,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		if ((index.GetBlockLength() % sizeof(CUOStaticItemRec)) != 0)
 		{
 			tchar *pszTemp = Str_GetTemp();
-			snprintf(pszTemp, STR_TEMPLENGTH, "CServerStaticsBlock: Read Statics - Block Length of %u", index.GetBlockLength());
+			snprintf(pszTemp, Str_TempLength(), "CServerStaticsBlock: Read Statics - Block Length of %u", index.GetBlockLength());
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), pszTemp);
 		}
 		m_iStatics = (uint)(index.GetBlockLength()/sizeof(CUOStaticItemRec));
@@ -623,7 +623,7 @@ size_t CUOMulti::Load(MULTI_TYPE id)
 			m_pItems[i].m_dy = pItems[i].m_dy;
 			m_pItems[i].m_dz = pItems[i].m_dz;
 			m_pItems[i].m_visible = pItems[i].m_visible;
-			m_pItems[i].m_unknown = 0;
+			m_pItems[i].m_shipAccess = 0;
 		}
 
 		delete[] pItems;

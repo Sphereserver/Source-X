@@ -7,7 +7,7 @@
 #define _INC_CCONTAINER_H
 
 #include "../common/sphere_library/CSObjCont.h"
-#include "../common/resource/CResourceBase.h"
+#include "../common/resource/CResourceHolder.h"
 #include "../common/CUID.h"
 #include "../common/CRect.h"
 

@@ -10,7 +10,7 @@
 
 class AbstractSphereThread;
 
-#define CurrentProfileData static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->m_profile
+#define CurrentProfileData static_cast<AbstractSphereThread *>(ThreadHolder::get().current())->m_profile
 
 
 class ProfileTask

@@ -13,7 +13,7 @@
 #include "../common/sphere_library/CSTime.h"
 #include "../sphere/ProfileData.h"
 #include <exception>
-#include <list>
+#include <vector>
 
 #ifndef _WIN32
 	#include <pthread.h>
@@ -46,7 +46,12 @@
 #endif
 
 class IThread;
-typedef std::list<IThread*> spherethreadlist_t;
+struct SphereThreadData
+{
+	IThread* m_ptr;
+	bool m_closed;
+};
+using spherethreadlist_t = std::vector<SphereThreadData>;
 
 
 // stores a value unique to each thread, intended to hold
@@ -205,39 +210,49 @@ public:
 // Singleton utility class for working with threads. Holds all running threads inside.
 class ThreadHolder
 {
-	ThreadHolder() = default;
+	spherethreadlist_t m_threads;
+	size_t m_threadCount;
+	bool m_inited;
+	SimpleMutex m_mutex;
+
+
+	ThreadHolder() :
+		m_threadCount(0), m_inited(false)
+	{}
 	void init();
+
+	friend void atexit_handler(void);
+	void markThreadsClosing();
+
+	friend class AbstractThread;
+	TlsValue<IThread*> m_currentThread;
 
 public:
 	static constexpr lpctstr m_sClassName = "ThreadHolder";
 
-	static ThreadHolder* get() noexcept;
+	static ThreadHolder& get() noexcept;
 
 	// returns current working thread or DummySphereThread * if no IThread threads are running
 	IThread *current() noexcept;
 	// records a thread to the list. Sould NOT be called, internal usage
 	void push(IThread *thread);
 	// removes a thread from the list. Sould NOT be called, internal usage
-	void pop(IThread *thread);
+	void remove(IThread *thread);
+	// internal usage
+	spherethreadlist_t::iterator findThreadDataIt(IThread* thread);
+	SphereThreadData* findThreadData(IThread* thread);
 	// returns thread at i pos
 	IThread * getThreadAt(size_t at);
 
 	// returns number of running threads. Sould NOT be called, unit tests usage
 	inline size_t getActiveThreads() noexcept { return m_threadCount; }
-
-private:
-	friend class AbstractThread;
-	TlsValue<IThread*> m_currentThread;
-
-	spherethreadlist_t m_threads;
-	size_t m_threadCount;
-	bool m_inited;
-	SimpleMutex m_mutex;
 };
 
 // Thread implementation. See IThread for list of available methods.
 class AbstractThread : public IThread
 {
+	friend class ThreadHolder;
+
 protected:
     bool _thread_selfTerminateAfterThisTick;
 
@@ -293,11 +308,12 @@ private:
 	static SPHERE_THREADENTRY_RETNTYPE SPHERE_THREADENTRY_CALLTYPE runner(void *callerThread);
 };
 
-struct TemporaryStringStorage;
 
 // Sphere thread. Have some sphere-specific
 class AbstractSphereThread : public AbstractThread
 {
+	friend class ThreadHolder;
+
 	bool _fIsClosing;
 #ifdef THREAD_TRACK_CALLSTACK
 	struct STACK_INFO_REC
@@ -320,14 +336,13 @@ public:
 
 public:
 	// allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
-	char *allocateBuffer();
-	TemporaryStringStorage *allocateStringBuffer();
+	char *allocateBuffer() noexcept;
 
 	// allocates a manageable String from the thread local storage
-	void allocateString(TemporaryString &string);
+	void getStringBuffer(TemporaryString &string) noexcept;
 
     void exceptionCaught();
-	bool closing() {
+	bool closing() noexcept {
 		return _fIsClosing;
 	}
 
@@ -344,8 +359,8 @@ public:
 			--m_stackPos;
 	}
 
-    void exceptionNotifyStackUnwinding(void);
-	void printStackTrace();
+    void exceptionNotifyStackUnwinding() noexcept;
+	void printStackTrace() noexcept;
 #endif
 
 	ProfileData m_profile;	// the current active statistical profile.
@@ -385,14 +400,8 @@ public:
 	StackDebugInformation& operator=(const StackDebugInformation& other) = delete;
 
 public:
-	static void printStackTrace()
-	{
-		static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->printStackTrace();
-	}
-    static void freezeCallStack(bool freeze)
-    {
-        static_cast<AbstractSphereThread *>(ThreadHolder::get()->current())->freezeCallStack(freeze);
-    }
+	static void printStackTrace() noexcept;
+	static void freezeCallStack(bool freeze) noexcept;
 };
 
 // Remember, call stack is disabled on Release builds!

@@ -181,7 +181,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 		return nullptr;
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());
+	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());
 	pCorpse->SetName(pszMsg);
 	pCorpse->SetHue(GetHue());
 	pCorpse->SetCorpseType(GetDispID());
