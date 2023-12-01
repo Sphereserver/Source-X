@@ -527,7 +527,7 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 
 bool CCharBase::IsValidDispID( CREID_TYPE id ) noexcept //  static
 {
-    return( id > 0 && id < CREID_QTY );
+    return( id > CREID_INVALID && id < CREID_QTY );
 }
 
 bool CCharBase::IsPlayableID( CREID_TYPE id, bool bCheckGhost) noexcept

@@ -24,6 +24,8 @@
 
 #if !defined(__clang__)
 	#pragma GCC diagnostic ignored "-Wold-style-declaration"
+#elif defined(__clang__)
+	#pragma GCC diagnostic ignored "-Wextern-initializer"
 #endif
 
 	#ifdef __MINGW__

@@ -21,7 +21,7 @@ version: 1.1.0.{build}
 # Set up two building environments (two first class elements in the build matrix)
 image:
   - Visual Studio 2017
-  - Ubuntu
+  - Ubuntu2004
   - macos-monterey
 
 # Environmental variables

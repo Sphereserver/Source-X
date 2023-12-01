@@ -38,11 +38,13 @@ class CClientTooltip;
  *
  *
  ***************************************************************************/
+/*
 class PacketGeneric : public PacketSend
 {
 public:
 	PacketGeneric(const CClient* target, byte *data, uint length);
 };
+*/
 
 /***************************************************************************
  *
@@ -1809,15 +1811,15 @@ protected:
 public:
 	PacketHouseDesign(const CItemMultiCustom* house, int revision);
 	PacketHouseDesign(const PacketHouseDesign* other);
-	virtual ~PacketHouseDesign(void);
+	virtual ~PacketHouseDesign(void) override;
 
 	bool writePlaneData(int plane, int itemCount, byte* data, int dataSize);
 	bool writeStairData(ITEMID_TYPE id, int x, int y, int z);
 	void flushStairData(void);
 	void finalise(void);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
+	virtual bool canSendTo(const CNetState* state) const override { return CanSendToClient(state); }
+	static bool CanSendToClient(const CNetState* state)
 	{
 		return state->isClientVersion(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
 	}
