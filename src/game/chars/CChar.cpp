@@ -3967,6 +3967,10 @@ void CChar::r_Write( CScript & s )
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
 
+    const CREID_TYPE iDispID = GetDispID();
+    if (iDispID != GetID())
+        s.WriteKeyStr("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, iDispID)));
+
 	const uint uiActUID = m_Act_UID.GetObjUID();
 	if ((uiActUID & UID_UNUSED) != UID_UNUSED)
 		s.WriteKeyHex("ACT", uiActUID);
