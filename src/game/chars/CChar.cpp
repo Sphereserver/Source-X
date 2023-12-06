@@ -1530,25 +1530,26 @@ CREID_TYPE CChar::GetDispID() const
 // Setting the visual "ID" for this.
 bool CChar::SetDispID(CREID_TYPE id)
 {
-	ADDTOCALLSTACK("CChar::SetDispID");
-	// Just change what this char looks like.
-	// do not change it's basic type.
+    ADDTOCALLSTACK("CChar::SetDispID");
+    // Just change what this char looks like.
+    // do not change it's basic type.
 
-	if (id == GetDispID())
-		return true;
+    if (id == GetDispID())
+        return true;
 
-	if (CCharBase::IsValidDispID(id))
-	{
-		m_dwDispIndex = id;
-	}
-	else
-	{
-		const CCharBase* pCharDef = Char_GetDef();
-		ASSERT(pCharDef);
-		m_dwDispIndex = pCharDef->GetDispID();
-		ASSERT(CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)));
-	}
-	return true;
+    if (CCharBase::IsValidDispID(id))
+    {
+        m_dwDispIndex = id;
+        Update();
+    }
+    else
+    {
+        const CCharBase* pCharDef = Char_GetDef();
+        ASSERT(pCharDef);
+        m_dwDispIndex = pCharDef->GetDispID();
+        ASSERT(CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)));
+    }
+    return true;
 }
 
 // Just set the base id and not the actual display id.
