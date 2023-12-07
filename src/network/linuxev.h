@@ -11,12 +11,6 @@
 	#include "../../lib/libev/src/ev.h"
 	#include "../common/sphere_library/smutex.h"
 	#include "../sphere/threads.h"
-
-	#ifdef _BSD
-		#define EV_BACKEND_LIST (EVBACKEND_SELECT | EVBACKEND_POLL | EVBACKEND_KQUEUE)
-	#else
-		#define EV_BACKEND_LIST (EVBACKEND_SELECT | EVBACKEND_POLL | EVBACKEND_EPOLL)
-	#endif
 	
 	class CClient;
 	class CNetState;
@@ -36,25 +30,25 @@
 	
 	private:
 		struct ev_loop * m_eventLoop;
-		struct ev_io m_watchMainsock;
+		// struct ev_io m_watchMainsock; // Watcher for Sphere's socket, to accept incoming connections (async read).
 	
 	public:
 		LinuxEv(void);
 		virtual ~LinuxEv(void);
 
-	private:
-		LinuxEv(const LinuxEv& copy);
-		LinuxEv& operator=(const LinuxEv& other);
+		LinuxEv(const LinuxEv& copy) = delete;
+		LinuxEv& operator=(const LinuxEv& other) = delete;
 	
 	public:
-		virtual void onStart();
-		virtual void tick();
-		virtual void waitForClose();
+		virtual void onStart() override;
+		virtual void tick() override;
+		virtual void waitForClose() override;
 		
 	private:
 		void forceClientevent(CNetState *, EventsID);
 		
 	public:
+		void printInitInfo();
 		void forceClientread(CNetState *);
 		void forceClientwrite(CNetState *);
 		// --------------------------------------	

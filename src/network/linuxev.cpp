@@ -26,18 +26,23 @@
 }
 */
 
-// Call this function when the socket is readable again -> we are not sending data anymore
-// The data is sent (if the checks are passing) at each tick on a CNetworkThread, which sets also isSendingAsync to true. If in that tick
-//  the CNetworkThread can't send the data (maybe because socketslave_cb wasn't called, so onAsyncSendComplete wasn't called), wait for the next tick.
-static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
+// Call this callback function when the socket is readable or writable again -> we are not sending data anymore
+// The data is sent when there's some queued data to send.
+static void socketslave_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-	ev_io_stop(loop, w);
-	CNetState* state = reinterpret_cast<CNetState *>( w->data );
+	// libev could call this function aliasing ev_io as a ev_watcher.
+	// ev_watcher is a "parent" struct of ev_io, they share the first member variables.
+	// it's a evil trick, but does the job since C doesn't have struct inheritance
+	
+	ev_io_stop(loop, watcher);
+	CNetState* state = reinterpret_cast<CNetState *>( watcher->data );
 	
 	if ( !g_Serv.IsLoading() )
 	{
 		if ( revents & EV_READ )
 		{	
+			// This happens when the client socket is readable (i can try to retrieve data), this does NOT mean
+			//  that i have data to read. It might also mean that i have done writing to the socket?
 			// g_NetworkOut.onAsyncSendComplete(state);
 		}		
 		else if ( revents & EV_WRITE )
@@ -48,19 +53,19 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 		}
 	}
 	
-	if ( state->isSendingAsync() )
+	if (state->isSendingAsync())
 	{
-		ev_io_start(loop, w);
+		ev_io_start(loop, watcher);
 	}
 }
 
-LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetLoop", IThread::High)
+LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetLoopOut", IThread::High)
+	//, m_watchMainsock{}
 {
-	m_eventLoop = ev_loop_new(EV_BACKEND_LIST);
-	ASSERT(m_eventLoop != nullptr);	// libev probably couldn't find sys/poll.h, select.h and other includes (compiling on ubuntu with both x86_64 and i386 compilers? or more gcc versions?)
-	ev_set_io_collect_interval(m_eventLoop, 0.01);
-	
-	memset(&m_watchMainsock, 0, sizeof(ev_io));
+	// Right now, we use libev to send asynchronously packets to clients.
+	m_eventLoop = ev_loop_new(ev_recommended_backends() | EVFLAG_NOENV);
+	ASSERT(m_eventLoop != nullptr);	// if fails, libev config.h probably was not configured properly
+	ev_set_io_collect_interval(m_eventLoop, 5e-3);	// interval: the second is the unit, use decimals for smaller intervals
 }
 
 LinuxEv::~LinuxEv(void)
@@ -68,15 +73,52 @@ LinuxEv::~LinuxEv(void)
 	ev_loop_destroy(m_eventLoop);
 }
 
+void LinuxEv::printInitInfo()
+{
+	g_Log.Event(LOGM_CLIENTS_LOG, "Networking: Libev. Initialized with backend 0x%x.\n", ev_backend(m_eventLoop));
+}
+
 void LinuxEv::onStart()
 {
-	// g_Log.Event(LOGM_CLIENTS_LOG, "Event start backend 0x%x\n", ev_backend(m_eventLoop));
 	AbstractSphereThread::onStart();
 }
-	
+
+static void periodic_cb(struct ev_loop* /*loop*/, ev_periodic* /*w*/, int /*revents*/) noexcept
+{
+	;
+}
+
 void LinuxEv::tick()
 {	
-	ev_run(m_eventLoop, EVRUN_NOWAIT);
+	/*
+	A flags value of EVRUN_NOWAIT will look for new events,
+	will handle those events and any already outstanding ones,
+	but will not wait and block your process in case there are no events and will return after one iteration of the loop.
+	*/
+	//ev_run(m_eventLoop, EVRUN_NOWAIT);
+
+	// Trying a different approach: enter the event loop, run again if exits.
+	// ev_run will keep handling events until either no event watchers are active anymore or "ev_break" was called
+
+#ifdef _DEBUG
+	g_Log.EventDebug("Networking: Libev. Starting event loop.\n");
+#endif
+
+	// This periodic timer keeps awake the event loop. We could have used ev_ref but it had its problems...
+	// Don't ask me why (maybe i don't get how this actually should work, and this is only a workaround),
+	//  but if we rely on ev_ref to increase the event loop reference counter to keep it alive without this periodic timer/callback,
+	//  the loop will ignore the io_collect_interval. Moreover, it will make the polling backend in use (like most frequently epoll) wait the maximum 
+	//  time (MAX_BLOCKTIME in ev.c, circa 60 seconds) to collect incoming data, only then the callback will be called. So each batch of packets
+	//  would be processed every 60 seconds...
+	struct ev_periodic periodic_check;
+	ev_periodic_init(&periodic_check, periodic_cb, 0, 5e-3, nullptr);
+	ev_periodic_start(m_eventLoop, &periodic_check);
+
+	ev_run(m_eventLoop, 0);
+
+#ifdef _DEBUG
+	g_Log.EventDebug("Networking: Libev. Event loop STOPPED.\n");
+#endif
 }
 
 void LinuxEv::waitForClose()
@@ -95,6 +137,13 @@ void LinuxEv::registerClient(CNetState * state, EventsID eventCheck)
 	ASSERT(state != nullptr);
 	
 	memset(state->iocb(), 0, sizeof(ev_io));
+
+	// Right now we support only async writing to the socket.
+	// Pure async read would mean to call functions and access data typically managed by the main thread,
+	//  but the core isn't designed for such usage, nor we have all the thread synchronization methods for every possible stuff we might need.
+	// A fair compromise TODO would be to async read incoming data, parse that in packets that will be stored in a buffer periodically accessed and processed
+	//  by the main thread.
+	ASSERT(0 == (eventCheck & ~EV_WRITE));
 
 #ifdef _WIN32
 	int fd = EV_WIN32_HANDLE_TO_FD(state->m_socket.GetSocket());

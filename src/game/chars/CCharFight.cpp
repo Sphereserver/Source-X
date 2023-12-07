@@ -1208,7 +1208,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		return( Calc_GetRandVal2(iDmgMin, iDmgMax) );
 }
 
-bool CChar::Fight_IsAttackable()
+bool CChar::Fight_IsAttackableState()
 {
 	ADDTOCALLSTACK("CChar::IsAttackable");
 	return !IsDisconnected() && !IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN|STATF_INVUL);
@@ -1383,7 +1383,8 @@ void CChar::Fight_HitTry()
 		// I can't hit this target, try switch to another one
 		if (m_pNPC)
 		{
-			if ( !Fight_Attack(NPC_FightFindBestTarget()) )
+			std::vector<CChar*> vExcludeTargets { pCharTarg };	// Ignore the current target, i want other npcs
+			if (!Fight_Attack(NPC_FightFindBestTarget(&vExcludeTargets)))
 			{
 				Skill_Start(SKILL_NONE);
 				m_Fight_Targ_UID.InitUID();

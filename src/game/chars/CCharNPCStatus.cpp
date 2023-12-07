@@ -849,7 +849,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	if ( !pChar )
 		return 0;
 
-	if ( !pChar->Fight_IsAttackable() )
+	if ( !pChar->Fight_IsAttackableState() )
 		return -100;
 	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
 		return 100;

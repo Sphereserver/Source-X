@@ -42,8 +42,3 @@ bool CTeleport::RealizeTeleport()
 	else
 		return false;
 }
-
-CTeleport::~CTeleport() noexcept
-{
-	fprintf(stderr, "deleted %s.\n", _ptDst.WriteUsed());
-}
