@@ -3929,6 +3929,8 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
+    if (m_CanMask)
+        s.WriteKeyVal("CANMASK", m_CanMask);
 
 	const uint uiActUID = m_Act_UID.GetObjUID();
 	if ((uiActUID & UID_UNUSED) != UID_UNUSED)
