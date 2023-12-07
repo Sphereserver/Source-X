@@ -3261,6 +3261,7 @@ bool CChar::Death()
             pClient->addPlayerWarMode();
             pClient->addSeason(SEASON_Desolate);
             pClient->addMapWaypoint(pCorpse, MAPWAYPOINT_Corpse);		// add corpse map waypoint on enhanced clients
+            pClient->addTargetCancel();	// cancel target if player death
 
             CItem *pPack = LayerFind(LAYER_PACK);
             if ( pPack )
