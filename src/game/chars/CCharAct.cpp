@@ -1308,7 +1308,7 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 	EXC_TRY("UpdateMove");
 	
 	// if skill is meditation, cancel it if we move
-    if (g_Cfg._bMeditationMovementAbort && Skill_GetActive() == SKILL_MEDITATION)
+    if (g_Cfg._fMeditationMovementAbort && Skill_GetActive() == SKILL_MEDITATION)
     {
         //cancel meditation if we move
         Skill_Fail(true);
