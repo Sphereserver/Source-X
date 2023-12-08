@@ -2469,7 +2469,7 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 			// tamed pets cannot be herded
 			if ( !pChar->IsStatFlag(STATF_PET) )
 			{
-				SysMessage("That animal looks tame already.");
+				SysMessagef(g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAME ), pChar->GetName());
 				return -SKTRIG_ABORT;
 			}
 
