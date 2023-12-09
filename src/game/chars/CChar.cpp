@@ -294,6 +294,7 @@ CChar::CChar( CREID_TYPE baseID ) :
 	_wPrev_Hue = HUE_DEFAULT;
 	_iPrev_id = CREID_INVALID;
 	SetID( baseID );
+    m_dwDispIndex = baseID;
 
 	CCharBase* pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
@@ -1546,8 +1547,13 @@ bool CChar::SetDispID(CREID_TYPE id)
     {
         const CCharBase* pCharDef = Char_GetDef();
         ASSERT(pCharDef);
+
         m_dwDispIndex = pCharDef->GetDispID();
-        ASSERT(CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)));
+        if (!CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)))
+        {
+            g_Log.EventError("DispID of base Char (%s) not valid\n", m_dwDispIndex);
+            return false;
+        }
     }
     return true;
 }
