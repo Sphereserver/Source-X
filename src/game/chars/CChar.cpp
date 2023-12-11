@@ -1551,7 +1551,7 @@ bool CChar::SetDispID(CREID_TYPE id)
         m_dwDispIndex = pCharDef->GetDispID();
         if (!CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)))
         {
-            g_Log.EventError("DispID of base Char (%s) not valid\n", m_dwDispIndex);
+            g_Log.EventError("DispID of base Char (0% " PRIx32 ") not valid\n", m_dwDispIndex);
             return false;
         }
     }
