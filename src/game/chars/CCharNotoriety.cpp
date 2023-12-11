@@ -557,15 +557,15 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 	if ( !pKill )
 		return;
 
-	// What was their noto to me ?
-	NOTO_TYPE NotoThem = pKill->Noto_GetFlag( this, false );
-
 	// Fight is over now that i have won. (if i was fighting at all )
 	// ie. Magery cast might not be a "fight"
 	Fight_Clear(pKill);
 	if ( pKill == this )
 		return;
 
+	// What was their noto to me ?
+	NOTO_TYPE NotoThem = pKill->Noto_GetFlag( this, false );
+	
 	if ( m_pNPC )
 	{
 		if ( pKill->m_pNPC )

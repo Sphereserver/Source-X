@@ -3435,3 +3435,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 18-11-2023, Nolok
 - Fixed: House customization sending wrong component data, breaking it.
+
+19-11-2023, Raylde
+- Modified: Snooping use Range for the distance

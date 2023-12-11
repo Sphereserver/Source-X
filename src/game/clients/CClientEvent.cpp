@@ -411,7 +411,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			}
 		}
 
-		CObjBase *pOldCont = pItem->GetContainer();
 		if (( IsTrigUsed(TRIGGER_DROPON_ITEM) ) || ( IsTrigUsed(TRIGGER_ITEMDROPON_ITEM) ))
 		{
 			CScriptTriggerArgs Args( pObjOn );
@@ -421,9 +420,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				return;
 			}
 		}
-
-		if ( pOldCont != pItem->GetContainer() )
-			return;
 
 		CItem * pItemOn = dynamic_cast <CItem*> ( pObjOn );
 		if (( pItemOn ) && (( IsTrigUsed(TRIGGER_DROPON_SELF) ) || ( IsTrigUsed(TRIGGER_ITEMDROPON_SELF) )))
@@ -547,7 +543,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 	}
 
 	// do the dragging anim for everyone else to see.
-
 	if ( pObjOn != nullptr )
 	{
 		// in pack or other CItemContainer.
