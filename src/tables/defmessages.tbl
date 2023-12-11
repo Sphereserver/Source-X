@@ -1166,5 +1166,6 @@ MSG(NUDGED_OBJECTS,						"Objects Nudged!")
 MSG(TILE_SAME_POINT,					"Thats the same point")
 MSG(HOUSE_ADD_LIMIT,                    "House redeeded. You already own the maximum number of houses permitable.")
 MSG(DEED_NAME,                          "Deed to a %s")
+MSG(LOCATION_INVALID,					"That location is not valid.")
 
 #undef MSG

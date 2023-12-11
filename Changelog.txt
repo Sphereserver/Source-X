@@ -3436,6 +3436,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 18-11-2023, Nolok
 - Fixed: House customization sending wrong component data, breaking it.
 
-01-12-2023, Jhobean
-- Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+09-12-2023, DavideRei
+- Added: DispID can now also be used on chars, to change their appearance.
 
+11-12-2023, Jhobean
+- Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM

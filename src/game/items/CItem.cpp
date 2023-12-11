@@ -2364,6 +2364,8 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%hu,%hu", m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defenseBase )
 		s.WriteKeyFormat("ARMOR", "%hu,%hu", m_defenseBase, m_defenseBase + m_defenseRange);
+    if (m_CanMask)
+        s.WriteKeyVal("CANMASK", m_CanMask);
     if (!GetSpawn())
     {
         if ( m_itNormal.m_more1 )
