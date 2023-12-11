@@ -1021,9 +1021,9 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
             continue;
         if (!pChar->m_pClient && pChar->NPC_IsOwnedBy(pSrc,false))	// it's my pet?
             continue;
-        if (!pChar->CanSeeLOS(pSrc))                                //Avoid hit someone in nearby house
-            continue;
         if (pChar->Noto_CalcFlag(pSrc) == NOTO_GOOD)                //Avoid to hit someone we can't legally attack (same guild, same party, Vendor etc)
+            continue;
+        if (!pChar->CanSeeLOS(pSrc))                                //Avoid hit someone in nearby house
             continue;
 
         pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
