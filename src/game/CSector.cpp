@@ -184,6 +184,9 @@ void CSector::_GoSleep()
 		ASSERT(!pChar->IsDisconnected());
         if (!fCanTick)
             pChar->GoSleep();
+		else
+			if (pChar->IsSleeping())
+				pChar->GoAwake();
     }
 
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
@@ -193,6 +196,9 @@ void CSector::_GoSleep()
 		ASSERT(pChar->IsDisconnected());
 		if (!fCanTick)
 			pChar->GoSleep();
+		else
+			if (pChar->IsSleeping())
+				pChar->GoAwake();
 	}
 
 	for (CSObjContRec* pObjRec : m_Items)
@@ -201,6 +207,9 @@ void CSector::_GoSleep()
 		const bool fCanTick = pItem->CanTick(true);
         if (!fCanTick)
             pItem->GoSleep();
+		else
+			if (pItem->IsSleeping())
+				pItem->GoAwake();
     }
 }
 
