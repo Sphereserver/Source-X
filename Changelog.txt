@@ -3435,3 +3435,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 18-11-2023, Nolok
 - Fixed: House customization sending wrong component data, breaking it.
+
+09-12-2023, DavideRei
+- Added: DispID can now also be used on chars, to change their appearance.

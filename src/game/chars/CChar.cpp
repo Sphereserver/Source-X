@@ -294,6 +294,7 @@ CChar::CChar( CREID_TYPE baseID ) :
 	_wPrev_Hue = HUE_DEFAULT;
 	_iPrev_id = CREID_INVALID;
 	SetID( baseID );
+    m_dwDispIndex = baseID;
 
 	CCharBase* pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
@@ -1515,9 +1516,46 @@ word CChar::GetBaseID() const
 
 CREID_TYPE CChar::GetDispID() const
 {
-	const CCharBase * pCharDef = Char_GetDef();
-	ASSERT(pCharDef);
-	return pCharDef->GetDispID();
+	if (CCharBase::IsValidDispID(m_dwDispIndex))
+	{
+		return m_dwDispIndex;
+	}
+	else
+	{
+		const CCharBase * pCharDef = Char_GetDef();
+		ASSERT(pCharDef);
+		return pCharDef->GetDispID();
+	}
+}
+
+// Setting the visual "ID" for this.
+bool CChar::SetDispID(CREID_TYPE id)
+{
+    ADDTOCALLSTACK("CChar::SetDispID");
+    // Just change what this char looks like.
+    // do not change it's basic type.
+
+    if (id == GetDispID())
+        return true;
+
+    if (CCharBase::IsValidDispID(id))
+    {
+        m_dwDispIndex = id;
+        Update();
+    }
+    else
+    {
+        const CCharBase* pCharDef = Char_GetDef();
+        ASSERT(pCharDef);
+
+        m_dwDispIndex = pCharDef->GetDispID();
+        if (!CCharBase::IsValidDispID((CREID_TYPE)(m_dwDispIndex)))
+        {
+            g_Log.EventError("DispID of base Char (0% " PRIx32 ") not valid\n", m_dwDispIndex);
+            return false;
+        }
+    }
+    return true;
 }
 
 // Just set the base id and not the actual display id.
@@ -2783,6 +2821,9 @@ do_default:
 				}
 			}
 			return true;
+		case CHC_DISPID:
+			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, GetDispID()));
+			break;
 		case CHC_DISPIDDEC:	// for properties dialog.
 			sVal.FormatVal( pCharDef->m_trackID );
 			return true;
@@ -3633,6 +3674,8 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_DISMOUNT:
 			Horse_UnMount();
 			break;
+		case CHC_DISPID:
+			return SetDispID((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 		case CHC_EMOTEACT:
 		{
 			bool fSet = IsStatFlag(STATF_EMOTEACTION);
@@ -3929,6 +3972,12 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
+    if (m_CanMask)
+        s.WriteKeyVal("CANMASK", m_CanMask);
+
+    const CREID_TYPE iDispID = GetDispID();
+    if (iDispID != GetID())
+        s.WriteKeyStr("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, iDispID)));
 
 	const uint uiActUID = m_Act_UID.GetObjUID();
 	if ((uiActUID & UID_UNUSED) != UID_UNUSED)

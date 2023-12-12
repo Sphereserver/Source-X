@@ -367,7 +367,8 @@ public:
 	bool m_iPacketDeathAnimation;	// packet 02c
     bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the %
     bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.
-
+    bool _fMeditationMovementAbort;   // Meditation fails if the player moves.
+    
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
