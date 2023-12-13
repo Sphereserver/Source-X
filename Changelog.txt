@@ -3438,3 +3438,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 09-12-2023, DavideRei
 - Added: DispID can now also be used on chars, to change their appearance.
+
+13-12-2023, Nolok
+- Fixed: Rare crash occurring when a NPC is selecting an attackable target, but there's only one target (not attackable) in sight.

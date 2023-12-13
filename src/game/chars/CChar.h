@@ -1044,7 +1044,7 @@ public:
 	SKILL_TYPE Fight_GetWeaponSkill() const;
     DAMAGE_TYPE Fight_GetWeaponDamType(const CItem* pWeapon = nullptr) const;
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
-	bool Fight_IsAttackable();
+	bool Fight_IsAttackableState();
 
 	// Attacker System
 	enum ATTACKER_CLEAR_TYPE
@@ -1243,7 +1243,7 @@ private:
 	bool NPC_LookAtItem( CItem * pItem, int iDist );
 	bool NPC_LookAround( bool fForceCheckItems = false );
 	int  NPC_WalkToPoint(bool fRun = false);
-	CChar * NPC_FightFindBestTarget();
+	CChar * NPC_FightFindBestTarget(const std::vector<CChar*> * pvExcludeList = nullptr);
 	bool NPC_FightMagery(CChar * pChar);
 	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, int &skill, int iHealThreshold, bool bIgnoreAITargetChoice = false);
 	bool NPC_FightArchery( CChar * pChar );
