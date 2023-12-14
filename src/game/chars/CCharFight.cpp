@@ -2224,19 +2224,19 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	        if (fElemental)
 	        {
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_HIT_BLUNT, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
 				
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAFIRE, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_FIRE, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
 
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREACOLD, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_COLD, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
 
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPOISON, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_POISON, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
 
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAENERGY, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_GENERAL, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
+			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_ENERGY, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
 			
 	        }
 
