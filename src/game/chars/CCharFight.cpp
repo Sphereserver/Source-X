@@ -996,9 +996,9 @@ effect_bounce:
 	return iDmg;
 }
 
-void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, HUE_TYPE effectHue, SOUND_TYPE effectSound)
+void CChar::OnTakeDamageInflictArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, HUE_TYPE effectHue, SOUND_TYPE effectSound)
 {
-    ADDTOCALLSTACK("CChar::OnTakeDamageArea");
+    ADDTOCALLSTACK("CChar::OnTakeDamageInflictArea");
 
     bool fMakeSound = false;
     
@@ -1025,6 +1025,10 @@ void CChar::OnTakeDamageArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgP
             continue;
         if (!pChar->CanSeeLOS(pSrc))                                //Avoid hit someone in nearby house
             continue;
+
+        /* On servUo they modify the damage depending of the distance with this formula
+           There no info about this on UO Wiki 
+           damage *= ( 11 - from.GetDistanceToSqrt( m ) ) / 10; */
 
         pChar->OnTakeDamage(iDmg, pSrc, uType, iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy);
         pChar->Effect(EFFECT_OBJ, ITEMID_FX_SPARKLE_2, this, 1, 15, false, effectHue);
@@ -2220,24 +2224,25 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
         if (pWeapon)
         {
-	        bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
+	     
+            if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+                pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_HIT_BLUNT, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
 
-	        if (fElemental)
+            bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
+            if (fElemental)
 	        {
-		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_HIT_BLUNT, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
 				
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAFIRE, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_FIRE, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
+			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_FIRE, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
 
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREACOLD, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_COLD, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
+			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_COLD, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
 
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPOISON, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_POISON, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
+			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_POISON, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
 
 		        if (GetPropNum(pCCPChar, PROPCH_HITAREAENERGY, pBaseCCPChar) > Calc_GetRandLLVal(100))
-			        pCharTarg->OnTakeDamageArea(iDmg / 2, this, DAMAGE_ENERGY, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
+			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_ENERGY, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
 			
 	        }
 
