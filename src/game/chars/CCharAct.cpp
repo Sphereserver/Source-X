@@ -2204,7 +2204,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
         ModPropNum(pCCPChar, PROPCH_DAMCOLD,       + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMCOLD, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_DAMPOISON,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMPOISON, pItemBaseCCPItemEquippable));
         ModPropNum(pCCPChar, PROPCH_DAMENERGY,     + pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_DAMENERGY, pItemBaseCCPItemEquippable));
-	
+
         if ( pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_NIGHTSIGHT, pItemBaseCCPItemEquippable) )
         {
             StatFlag_Mod( STATF_NIGHTSIGHT, 1 );
