@@ -4578,6 +4578,18 @@ bool CChar::_OnTick()
             }
         }
     }
+	else if (m_pPlayer)
+	{
+		if (Skill_GetActive() == SKILL_NONE)
+		{
+			// if player are in war and have target to attack
+			if (IsStatFlag(STATF_WAR) && m_Fight_Targ_UID != UID_UNUSED  )
+			{
+				//Start fight skill
+				Skill_Start(Fight_GetWeaponSkill());
+			}
+		}
+	}
 
     EXC_CATCH;
 
