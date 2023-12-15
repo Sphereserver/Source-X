@@ -105,15 +105,6 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	if ( ! pCharPlayer->IsClientActive())
 		return false;
 
-	// Might have too many pets already ?
-	int iCount = 0;
-	CItemContainer * pBank = GetBank();
-	if ( pBank->GetContentCount() >= g_Cfg.m_iContainerMaxItems )
-	{
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
-		return false;
-	}
-
 	// Calculate the max limit of pets that the NPC can hold for the player
 	double iSkillTaming = pCharPlayer->Skill_GetAdjusted(SKILL_TAMING);
 	double iSkillAnimalLore = pCharPlayer->Skill_GetAdjusted(SKILL_ANIMALLORE);
@@ -161,16 +152,21 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 		}
 	}
 
-	for (CSObjContRec* pObjRec : *pBank)
+	CItemContainer* pStableCont = pCharPlayer->GetBank(LAYER_STABLE);
+	ASSERT(pStableCont);
+
+	int iCount = 0;
+	for (CSObjContRec* pObjRec : *pStableCont)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
 			++iCount;
-	}
-	if ( iCount >= iPetMax )
-	{
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TOOMANY ) );
-		return false;
+
+		if ( iCount >= iPetMax )
+		{
+			Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TOOMANY ) );
+			return false;
+		}
 	}
 
 	pCharPlayer->m_pClient->m_Targ_Prv_UID = GetUID();
@@ -188,16 +184,17 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 	if ( m_pNPC->m_Brain != NPCBRAIN_STABLE )
 		return false;
 
-	CItemContainer* pBank = GetBank();
-	ASSERT(pBank);
+	CItemContainer* pStableCont = pCharPlayer->GetBank(LAYER_STABLE);
+	ASSERT(pStableCont);
 
 	int iCount = 0;
-	for (CSObjContRec* pObjRec : pBank->GetIterationSafeCont())
+	for (CSObjContRec* pObjRec : pStableCont->GetIterationSafeCont())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->IsType(IT_FIGURINE) && (pItem->m_uidLink == pCharPlayer->GetUID()) )
 		{
-			if ( !pCharPlayer->Use_Figurine(pItem) )
+			CChar* pPet = pCharPlayer->Use_Figurine(pItem);
+			if ( !pPet )
 			{
 				tchar *pszTemp = Str_GetTemp();
 				snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
@@ -206,6 +203,18 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 			}
 
 			pItem->Delete();
+
+			// update the follower slots because in the FIGURINE the followerslots are not updated
+			const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+			if ( !pCharPlayer->FollowersUpdate(pPet, (maximum(0, iFollowerSlots))) )
+			{
+				// this cannot be happen, if happen maybe is a bug
+				g_Log.Event(LOGL_WARN, "Player: %s has no followerslots for %s when retrieving from stablemaster\n", pCharPlayer->GetUID(), pPet->GetUID());
+				pCharPlayer->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_PETSLOTS_TRY_CONTROL));
+				pPet->Delete();
+				return true;
+			}	
+
 			++iCount;
 		}
 	}
