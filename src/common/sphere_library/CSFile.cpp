@@ -131,7 +131,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
         dwShareMode = 0;
 
     if ( uiModeFlags & OF_CREATE )
-        dwCreationDisposition = (OPEN_ALWAYS|CREATE_NEW);
+        dwCreationDisposition = CREATE_ALWAYS;
     else
         dwCreationDisposition = OPEN_EXISTING;
 
