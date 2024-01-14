@@ -2229,7 +2229,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 // OnEat()
 // Generating eating animation
 // also calling @Eat and setting food's level (along with other possible stats 'local.hits',etc?)
-void CChar::EatAnim( lpctstr pszName, ushort uiQty )
+void CChar::EatAnim( CItem* pItem, ushort uiQty )
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
@@ -2238,9 +2238,12 @@ void CChar::EatAnim( lpctstr pszName, ushort uiQty )
 	if ( !IsStatFlag(STATF_ONHORSE) )
 		UpdateAnimate(ANIM_EAT);
 
-	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
-	Emote(pszMsg);
+    if (!(g_Cfg.m_iEmoteFlags & EMOTEF_EAT))
+    {
+ 	    tchar * pszMsg = Str_GetTemp();
+	    snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
+	    Emote(pszMsg);
+    }
 
 	ushort uiHits = 0;
 	ushort uiMana = 0;
@@ -2257,6 +2260,7 @@ void CChar::EatAnim( lpctstr pszName, ushort uiQty )
 		Args.m_iN1 = uiStatsLimit;
 		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
+
 
 		uiHits = (ushort)(Args.m_VarsLocal.GetKeyNum("Hits")) + Stat_GetVal(STAT_STR);
 		uiMana = (ushort)(Args.m_VarsLocal.GetKeyNum("Mana")) + Stat_GetVal(STAT_INT);
