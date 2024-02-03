@@ -214,13 +214,17 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 							{
 								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD)
 								{
-									if (pViewerGuild->GetAlignType() == pMyGuild->GetAlignType())
+									if (IsSetOF(OF_EnableSameAlignGreenNotoriety))
 									{
-										return NOTO_GUILD_SAME;
+										if (pViewerGuild->GetAlignType() == pMyGuild->GetAlignType())
+										{
+											return NOTO_GUILD_SAME;
+										}		
+									}		
+									if (pViewerGuild->GetAlignType() == STONEALIGN_ORDER) && (pMyGuild->GetAlignType() == STONEALIGN_CHAOS) || (pViewerGuild->GetAlignType() == STONEALIGN_CHAOS) && (pMyGuild->GetAlignType() == STONEALIGN_ORDER)
+									{
+										return NOTO_GUILD_WAR;
 									}
-										
-									return NOTO_GUILD_WAR;
-
 								}
 							}
 
