@@ -89,6 +89,7 @@ enum OF_TYPE
     OF_AllowContainerInsideContainer = 0x0800000,    //Allow containers inside other containers even if they are heavier than the container being inserted into.
     OF_VendorStockLimit              = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
     OF_EnableGuildAlignNotoriety     = 0x02000000    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_EnableSameAlignGreenNotoriety = 0x04000000    // Based on OF_EnableGuildAlignNotoriety, if enabled, guilds with same align will see each other green
 };
 
 /**
