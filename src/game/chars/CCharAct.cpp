@@ -2258,7 +2258,8 @@ void CChar::EatAnim( CItem* pItem, ushort uiQty )
 		Args.m_VarsLocal.SetNumNew("Stam", uiStam);
 		Args.m_VarsLocal.SetNumNew("Food", uiFood);
 		Args.m_iN1 = uiStatsLimit;
-		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
+        Args.m_pO1 = pItem;
+		if (OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
 
 
