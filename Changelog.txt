@@ -3442,6 +3442,9 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 13-12-2023, Nolok
 - Fixed: Rare crash occurring when a NPC is selecting an attackable target, but there's only one target (not attackable) in sight.
 
-14-01-2024, Jhobean
+12-02-2024, Drk84
+- Updated SphereCrypt.ini.
+
+20-02-2024, Jhobean
 - Added: Flag EMOTEF_EAT is added on the ini to avoid see the emote when eating.
 - Added: NPC_EAT_GRASS MSG to be able change the hardcode name of "grass" when an animal eat grass

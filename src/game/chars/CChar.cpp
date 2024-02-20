@@ -1558,7 +1558,6 @@ bool CChar::SetDispID(CREID_TYPE id)
     return true;
 }
 
-// Just set the base id and not the actual display id.
 // NOTE: Never return nullptr
 void CChar::SetID( CREID_TYPE id )
 {
@@ -1576,7 +1575,10 @@ void CChar::SetID( CREID_TYPE id )
 
 		pCharDef = CCharBase::FindCharBase(id);
 	}
-
+    
+    //Update DispId
+    m_dwDispIndex = id;
+    
 	ASSERT(pCharDef != nullptr);
 
 	CCharBase* pCharOldDef = Char_GetDef();
