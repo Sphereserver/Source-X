@@ -3442,5 +3442,13 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 13-12-2023, Nolok
 - Fixed: Rare crash occurring when a NPC is selecting an attackable target, but there's only one target (not attackable) in sight.
 
-14-12-2023, Jhobean
+
+
+
+
+12-02-2024, Drk84
+- Updated SphereCrypt.ini.
+
+13-03-2024, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+

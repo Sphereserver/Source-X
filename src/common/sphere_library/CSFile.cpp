@@ -131,13 +131,17 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
         dwShareMode = 0;
 
     if ( uiModeFlags & OF_CREATE )
-        dwCreationDisposition = (OPEN_ALWAYS|CREATE_NEW);
+        dwCreationDisposition = CREATE_ALWAYS;
     else
         dwCreationDisposition = OPEN_EXISTING;
 
     _fileDescriptor = CreateFile( ptcFilename, dwDesiredAccess, dwShareMode, nullptr, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, nullptr );
 #else
-    _fileDescriptor = open( ptcFilename, uiModeFlags );
+    uint uiFilePermissions = 0;
+    if (uiModeFlags & OF_CREATE)
+        uiFilePermissions = (S_IRWXU | S_IRWXG | S_IRWXO); //777
+    
+    _fileDescriptor = open( ptcFilename, uiModeFlags, uiFilePermissions);
 #endif // _WIN32
 
     return (_fileDescriptor != _kInvalidFD);
