@@ -3429,7 +3429,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 02-11-2023, Jhobean
 - Modified: @Mount added argument ARGN1
-	ARGN1 (rw) = The itemID of the item containing the animation use when moounting. (Anim # is in tiledata of this item)
+	  ARGN1 (rw) = The itemID of the item containing the animation use when moounting. (Anim # is in tiledata of this item)
     NOTE: When mounting a pet you'll read a non sense random value but you can replace it by an ITEMID to force anim
     Example: 03ea6 for Llama anim or 03e9f for gray horse anim. Yes 03ea6 is a ship part but in tiledata it link to anim 828
 
@@ -3445,7 +3445,10 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 12-02-2024, Drk84
 - Updated SphereCrypt.ini.
 
-20-02-2024, Jhobean
+13-03-2024, Jhobean
+- Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+
+16-03-2024, Jhobean
 - Added: Flag EMOTEF_EAT is added on the ini to avoid see the emote when eating.
 - Added: NPC_EAT_GRASS MSG to be able change the hardcode name of "grass" when an animal eat grass
 - Added: Item been eaten can now be read on the ARGO parameter of the trigger @eat.
