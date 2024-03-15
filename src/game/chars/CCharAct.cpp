@@ -2233,6 +2233,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 void CChar::EatAnim( CItem* pItem, ushort uiQty )
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
+    ASSERT(pItem);
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
 	Sound(sm_EatSounds[Calc_GetRandVal(ARRAY_COUNT(sm_EatSounds))]);
 
@@ -2241,9 +2242,12 @@ void CChar::EatAnim( CItem* pItem, ushort uiQty )
 
     if (!(g_Cfg.m_iEmoteFlags & EMOTEF_EAT))
     {
- 	    tchar * pszMsg = Str_GetTemp();
-	    snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
-	    Emote(pszMsg);
+        if (pItem != nullptr)
+        {
+ 	        tchar * pszMsg = Str_GetTemp();
+	        snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
+	        Emote(pszMsg);
+        }
     }
 
 	ushort uiHits = 0;
