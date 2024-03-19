@@ -331,39 +331,39 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_FASTERCASTRECOVERY: // unimplemented
                 ADDTNUM(1060412); // faster cast recovery ~1_val~
                 break;
-            case PROPIEQUIP_HITAREACOLD: // unimplemented
+            case PROPIEQUIP_HITAREACOLD:
                 if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1060416); // hit cold area ~1_val~%
                 break;
-            case PROPIEQUIP_HITAREAENERGY: // unimplemented
+            case PROPIEQUIP_HITAREAENERGY:
                 if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1060418); // hit energy area ~1_val~%
                 break;
-            case PROPIEQUIP_HITAREAFIRE: // unimplemented
+            case PROPIEQUIP_HITAREAFIRE:
                 if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1060419); // hit fire area ~1_val~%
                 break;
-            case PROPIEQUIP_HITAREAPHYSICAL: // unimplemented
+            case PROPIEQUIP_HITAREAPHYSICAL:
                 if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1060428); // hit physical area ~1_val~%
                 break;
-            case PROPIEQUIP_HITAREAPOISON: // unimplemented
+            case PROPIEQUIP_HITAREAPOISON:
                 if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1060429); // hit poison area ~1_val~%
                 break;
             case PROPIEQUIP_HITCURSE: // unimplemented
                 ADDTNUM(1113712); // Hit Curse ~1_val~%
                 break;
-            case PROPIEQUIP_HITDISPEL: // unimplemented
+            case PROPIEQUIP_HITDISPEL:
                 ADDTNUM(1060417); // hit dispel ~1_val~%
                 break;
             case PROPIEQUIP_HITFATIGUE: // unimplemented
                 ADDTNUM(1113700); // // Hit Fatigue ~1_val~%
                 break;
-            case PROPIEQUIP_HITFIREBALL: // unimplemented
+            case PROPIEQUIP_HITFIREBALL:
                 ADDTNUM(1060420); // hit fireball ~1_val~%
                 break;
-            case PROPIEQUIP_HITHARM: // unimplemented
+            case PROPIEQUIP_HITHARM:
                 ADDTNUM(1060421); // hit harm ~1_val~%
                 break;
             case PROPIEQUIP_HITLEECHLIFE:
@@ -375,7 +375,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_HITLEECHSTAM:
                 ADDTNUM(1060430); // hit stamina leech ~1_val~%
                 break;
-            case PROPIEQUIP_HITLIGHTNING: // unimplemented
+            case PROPIEQUIP_HITLIGHTNING:
                 ADDTNUM(1060422); // hit lightning ~1_val~%
                 break;
             case PROPIEQUIP_HITLOWERATK: // unimplemented
@@ -384,10 +384,10 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_HITLOWERDEF: // unimplemented
                 ADDTNUM(1060425); // hit lower defense ~1_val~%
                 break;
-            case PROPIEQUIP_HITMAGICARROW: // unimplemented
+            case PROPIEQUIP_HITMAGICARROW:
                 ADDTNUM(1060426); // hit magic arrow ~1_val~%
                 break;
-            case PROPIEQUIP_HITMANADRAIN: // unimplemented
+            case PROPIEQUIP_HITMANADRAIN:
                 ADDTNUM(1113699); // Hit Mana Drain ~1_val~%
                 break;
             case PROPIEQUIP_HITSPARKS: // unimplemented
@@ -459,7 +459,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
             case PROPIEQUIP_REACTIVEPARALYZE: // Unimplemented
                 ADDT(1112364); // reactive paralyze
                 break;
-            case PROPIEQUIP_REFLECTPHYSICALDAM: // Unimplemented
+            case PROPIEQUIP_REFLECTPHYSICALDAM:
                 ADDTNUM(1060442); // reflect physical damage ~1_val~%
                 break;
             case PROPIEQUIP_REGENFOOD: // unimplemented
