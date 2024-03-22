@@ -1782,7 +1782,7 @@ bool CChar::NPC_Act_Food()
 		{
 			//	can take and eat just in place
 			ushort uiEaten = (ushort)(pClosestFood->ConsumeAmount(uiEatAmount));
-			EatAnim(pClosestFood->GetName(), uiEaten);
+			EatAnim(pClosestFood, uiEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
 				pClosestFood->Plant_CropReset();	// set growth if this is a plant
@@ -1847,7 +1847,9 @@ bool CChar::NPC_Act_Food()
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				ushort uiEaten = pResBit->ConsumeAmount(10);
-				EatAnim("grass", uiEaten/10);
+                CSString sMsg = g_Cfg.GetDefaultMsg(DEFMSG_NPC_EAT_GRASS);
+                pResBit->SetName(sMsg); //Change name of Worldgem to grass for the eating emote
+                EatAnim(pResBit, uiEaten / 10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
@@ -2474,7 +2476,7 @@ void CChar::NPC_Food()
 			//	can take and eat just in place
 			EXC_SET_BLOCK("eating nearby");
 			ushort uiEaten = pClosestFood->ConsumeAmount(uiEatAmount);
-			EatAnim(pClosestFood->GetName(), uiEaten);
+			EatAnim(pClosestFood, uiEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
 				pClosestFood->Plant_CropReset();	// set growth if this is a plant
@@ -2531,7 +2533,9 @@ void CChar::NPC_Food()
 			{
 				EXC_SET_BLOCK("eating grass");
 				const ushort uiEaten = pResBit->ConsumeAmount(15);
-				EatAnim("grass", uiEaten/10);
+                CSString sMsg = g_Cfg.GetDefaultMsg(DEFMSG_NPC_EAT_GRASS);
+                pResBit->SetName(sMsg); //Change name of Worldgem to grass for the eating emote
+				EatAnim(pResBit, uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);

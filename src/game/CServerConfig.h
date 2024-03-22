@@ -179,9 +179,10 @@ enum REVEALFLAGS_TYPE
 
 enum EMOTEFLAGS_TYPE
 {
-    EMOTEF_ATTACKER              = 0x01,        // Only show %s is attacking %s! emote to attacked character.
-    EMOTEF_POISON                = 0x02,        // Only show poison emote to affected character.
-    EMOTEF_DESTROY               = 0x04         // Only show item destroy emote to the owner of the item.
+    EMOTEF_ATTACKER             = 0x01,        // Only show %s is attacking %s! emote to attacked character.
+    EMOTEF_POISON               = 0x02,        // Only show poison emote to affected character.
+    EMOTEF_DESTROY              = 0x04,        // Only show item destroy emote to the owner of the item.
+    EMOTEF_EAT                  = 0x08         // Never show emote when eating food.
 };
 
 enum TOOLTIPMODE_TYPE
