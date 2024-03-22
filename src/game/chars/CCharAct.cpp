@@ -2242,12 +2242,9 @@ void CChar::EatAnim( CItem* pItem, ushort uiQty )
 
     if (!(g_Cfg.m_iEmoteFlags & EMOTEF_EAT))
     {
-        if (pItem != nullptr)
-        {
- 	        tchar * pszMsg = Str_GetTemp();
-	        snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
-	        Emote(pszMsg);
-        }
+ 	    tchar * pszMsg = Str_GetTemp();
+	    snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
+	    Emote(pszMsg);
     }
 
 	ushort uiHits = 0;
