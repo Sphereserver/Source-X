@@ -2305,7 +2305,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 	switch ( GetType())
 	{
         case IT_SPELLBOOK:
-            sVal.FormatHex(m_itSpellbook.m_spells1);
+            sVal.FormatHex(m_itSpellbook.m_spells2);
             return;
 
 		case IT_FRUIT:
