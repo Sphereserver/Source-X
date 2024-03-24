@@ -1717,14 +1717,47 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_LOG:
 			{
 				lpctstr	pszArgs = s.GetArgStr();
-				int	 mask = LOGL_EVENT;
-				if ( pszArgs && ( *pszArgs == '@' ))
-				{
-					++pszArgs;
-					if ( *pszArgs != '@' )
-						mask |= LOGM_NOCONTEXT;
-				}
-				g_Log.Event(mask, "%s\n", pszArgs);
+                dword Args[] = { (dword)CTCOL_DEFAULT, (dword)LOGL_EVENT, (dword)0 };
+                dword mask = Args[1];
+                if (*pszArgs == '@')
+                {
+                    ++pszArgs;
+                    if (*pszArgs == '@') // @@ = just a @ symbol
+                        goto log_cont;
+
+                    const char* c = pszArgs;
+                    pszArgs = strchr(c, ' ');
+
+                    if (!pszArgs)
+                        return false;
+
+                    for (int i = 0; (c < pszArgs) && (i < 3); )
+                    {
+                        if (*c == ',') // default value, skip it
+                        {
+                            ++i;
+                            ++c;
+                            continue;
+                        }
+                        Args[i] = (Exp_GetDWVal(c));
+                        ++i;
+
+                        if (*c == ',')
+                            ++c;
+                        else
+                            break;	// no more args here!
+                    }
+                    ++pszArgs;
+                    if (Args[0] > (dword)CTCOL_QTY || Args[0] < (dword)0)
+                        Args[0] = (dword)CTCOL_DEFAULT;
+                    if (Args[1] > (dword)LOGL_QTY || Args[1] < (dword)1)
+                        Args[1] = (dword)LOGL_EVENT;
+                    if (Args[2] > (dword)LOGM_QTY)
+                        Args[2] = (dword)0;
+                    mask = Args[1] | Args[2];
+                }
+log_cont:
+                g_Log.EventCustom((ConsoleTextColor)Args[0], mask, "%s\n", pszArgs);
 			}
 			break;
 
