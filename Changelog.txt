@@ -3461,3 +3461,10 @@ Added: New spellflag SPELLFLAG_ASNYC (0100000000) to randomize field timers like
 Added: New spellflag SPELLFLAG_TARG_ONLYSELF (0200000000) to make spell only be used on character himself. (Issue: #1171)
 	SPELLFLAG_TARG_ONLYSELF should be added to defs.
 	//magery_9 "You can only use this spell on yourself." could be added to defmessages.
+Changed: SERV.LOG command changed to support console colors. (Issue: [Feature Request] Colored Serv & Src Log System #1158)
+	SERV.LOG works same as before.
+	Usage of custom color system is: SERV.LOG @color,type,mask message
+	Example: SERV.LOG @CTCOL_RED,LOGL_EVENT,LOGM_NOCONTEXT|LOGM_KILLS message
+	LOGM, LOGL and CTCOL values should be added to defs.
+Added: Sphere.ini setting CanPetsDrinkPotion (true in default) to make pets drink potion when their owner drop it on it. (Issue: #1147)
+	CanPetsDrinkPotion = 0 can be added to sphere.ini to disable that.
