@@ -1141,6 +1141,18 @@ int CItem::FixWeirdness()
                         return iResultCode;	// get rid of it.
                 }
                 break;
+            case LAYER_STORAGE:
+                switch (GetType())
+                {
+                    case IT_CONTAINER:
+                    case IT_CONTAINER_LOCKED:
+                        SetAttr(ATTR_MOVE_NEVER);
+                        break;
+                    default:
+                        iResultCode = 0x2232;
+                        return iResultCode;
+                }
+                break;
             case LAYER_VENDOR_STOCK:
             case LAYER_VENDOR_EXTRA:
             case LAYER_VENDOR_BUYS:

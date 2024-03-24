@@ -129,6 +129,10 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 			pStr = "Item equipped in the memory layer but it isn't a memory";
 			break;
 
+        case 0x2232:
+            pStr = "Item equipped in the storage layer but it isn't a container";
+            break;
+
 		case 0x2233:
 			pStr = "Item equipped in the mount memory layer but it isn't a mount memory";
 			break;
