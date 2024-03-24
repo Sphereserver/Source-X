@@ -324,6 +324,7 @@ public:
 	bool m_fFlipDroppedItems;		// Flip dropped items.
 	int  m_iItemsMaxAmount;			// Max amount allowed for stackable items.
 	bool m_fCanUndressPets;			// Can players undress their pets?
+    bool m_fCanPetsDrinkPotion;     // Can pets drink potion when their owner dropped potion on it.
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
