@@ -1160,25 +1160,28 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
 	if (IsSetEF(EF_FollowerList))
 	{
-		if (iFollowerSlots > 0)
-		{
-			bool fExists = false;
-			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
-			{
-				if (*it == pChar->GetUID())
-				{
-					fExists = true;
-					break;
-				}
-				++it;
-			}
+        if (iFollowerSlots >= 0)
+        {
+            bool fExists = false;
+            for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+            {
+                if (*it == pChar->GetUID())
+                {
+                    fExists = true;
+                    break;
+                }
+                ++it;
+            }
 
-			if (!fExists && ( (short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
-				m_followers.emplace_back(pChar->GetUID());
-			else
-				return false;
-		}
-		else
+            if (!fExists && ((short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
+            {
+                if (!fCheckOnly)
+                    m_followers.emplace_back(pChar->GetUID());
+            }
+            else
+                return false;
+        }
+		else if (!fCheckOnly)
 		{
 			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
 			{

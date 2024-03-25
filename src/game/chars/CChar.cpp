@@ -3408,17 +3408,17 @@ bool CChar::r_LoadVal( CScript & s )
 							UpdateStatsFlag();
 							return true;
 						}
-						else if (!strnicmp(ptcKey, "DELETE", 6))
+						else if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
 						{
 							if (!m_followers.empty())
 							{
 								CUID uid = (CUID)s.GetArgDWVal();
 								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
 								{
-									if (uid == *it)
-										it = m_followers.erase(it);
-									else
-										++it;
+                                    if (uid == *it)
+                                        it = m_followers.erase(it);
+                                    else
+                                        ++it;
 								}
 							}
 							return true;

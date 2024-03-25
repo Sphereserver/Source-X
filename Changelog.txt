@@ -3456,7 +3456,7 @@ Fixed: The wrong input of Kill trigger, to make it compatible with older sphere 
 Added: New Layer LAYER_STORAGE (80) to let scripters create their own storage system. (Issue: #1209)
       	Only t_container and t_container_locked can be equipped to this layer.
 Changed: Decay time removed from spawned items, as Sphere gives tons of invalid link errors when items decayed. (Issue: #1218)
-Added: New spellflag SPELLFLAG_ASNYC (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
+Added: New spellflag SPELLFLAG_ASYNC (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
 	SPELLFLAG_ASYNC should be added to defs.
 Added: New spellflag SPELLFLAG_TARG_ONLYSELF (0200000000) to make spell only be used on character himself. (Issue: #1171)
 	SPELLFLAG_TARG_ONLYSELF should be added to defs.
@@ -3468,3 +3468,4 @@ Changed: SERV.LOG command changed to support console colors. (Issue: [Feature Re
 	LOGM, LOGL and CTCOL values should be added to defs.
 Added: Sphere.ini setting CanPetsDrinkPotion (true in default) to make pets drink potion when their owner drop it on it. (Issue: #1147)
 	CanPetsDrinkPotion = 0 can be added to sphere.ini to disable that.
+Fixed: Missing fCheckOnly checks block the taming skill. (Issue: #1219)
