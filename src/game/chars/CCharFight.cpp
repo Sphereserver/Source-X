@@ -2074,6 +2074,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
+    Args.m_VarsLocal.SetNum("ItemPoisonReductionChance", 100);
+    Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", 1);
+    int32 iPoison = 0;
+    if (pWeapon)
+    {
+        iPoison = Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill);
+        Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", iPoison / 2);
+    }
+
 	if ( pAmmo && pAmmo->GetUID().IsValidUID() )
 		Args.m_VarsLocal.SetNum("Arrow",(dword)pAmmo->GetUID());
 
@@ -2133,11 +2142,14 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && pWeapon->m_itWeapon.m_poison_skill && 
             (pWeapon->m_itWeapon.m_poison_skill > Calc_GetRandVal(100) || pWeapon->m_itWeapon.m_poison_skill < 10))
 		{
-			byte iPoisonDeliver = (byte)(Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill));
+			byte iPoisonDeliver = (byte)(iPoison);
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
-			pWeapon->m_itWeapon.m_poison_skill -= iPoisonDeliver / 2;	// reduce weapon poison charges
-			pWeapon->UpdatePropertyFlag();
+            if (Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionChance") > Calc_GetRandVal(100))
+            {
+                pWeapon->m_itWeapon.m_poison_skill -= (byte)(Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionAmount"));	// reduce weapon poison charges
+                pWeapon->UpdatePropertyFlag();
+            }
 		}
 
 		// Check if the weapon will be damaged

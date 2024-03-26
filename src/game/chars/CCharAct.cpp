@@ -2287,6 +2287,12 @@ bool CChar::Reveal( uint64 iFlags )
 	if ( !IsStatFlag(iFlags) )
 		return false;
 
+    if (IsTrigUsed(TRIGGER_REVEAL))
+    {
+        if (OnTrigger(CTRIG_Reveal, this, nullptr) == TRIGRET_RET_TRUE)
+            return false;
+    }
+
     CClient* pClient = IsClientActive() ? GetClientActive() : nullptr;
 	if (pClient && pClient->m_pHouseDesign)
 	{

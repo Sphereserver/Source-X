@@ -837,6 +837,9 @@ public:
 	void ChangeExperience(llong delta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
+    bool CanConsume(CItem* pItem, word iQty);
+    bool ConsumeAmount(CItem* pItem, word iQty);
+
 	// skills and actions. -------------------------------------------
 	static bool IsSkillBase( SKILL_TYPE skill ) noexcept;
 	static bool IsSkillNPC( SKILL_TYPE skill ) noexcept;

@@ -35,7 +35,10 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
     "@AddMulti",            // Adding a multi to the MultiStorage,
+    "@AfkMode",             // Changing afk mode by using .AFK command.
 	"@AfterClick",
+    "@ArrowQuest_Add",
+    "@ArrowQuest_Close",
 	"@Attack",				// I am attacking someone (SRC)
 	"@CallGuards",
 
@@ -67,6 +70,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
     "@DelMulti",            // Removing a multi to the MultiStorage,
 	"@Destroy",				//+I am nearly destroyed
 	"@Dismount",			// I am trying to get rid of my ride right now
+    "@Drink",               // I am drinking something.
 	"@Dye",					// My color has been changed
 	"@Eat",
 	"@EnvironChange",		// my environment changed somehow (light,weather,season,region)
@@ -175,6 +179,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 
 	"@Rename",
 	"@Resurrect",
+    "@Reveal",              // Character is revealing.
 	"@SeeCrime",			// I saw a crime
 	"@SeeHidden",			// Can I see hidden chars?
 	"@SeeSnoop",
@@ -4222,12 +4227,20 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			// toggle ?
 			{
 				bool fAFK = ( Skill_GetActive() == NPCACT_NAPPING );
-				bool fMode;
-				if ( s.HasArgs())
-					fMode = ( s.GetArgVal() != 0 );
-				else
-					fMode = ! fAFK;
-				if ( fMode != fAFK )
+				bool fMode = (s.GetArgVal() != 0 ? true : !fAFK);
+
+                if (IsTrigUsed(TRIGGER_AFKMODE))
+                {
+                    CScriptTriggerArgs args(fAFK, fMode);
+                    TRIGRET_TYPE iRet = OnTrigger(CTRIG_AfkMode, this, &args);
+                    fAFK = args.m_iN1 > 0 ? true : false;
+                    fMode = args.m_iN2 > 0 ? true : false;
+
+                    if (iRet == TRIGRET_RET_TRUE) //Block AFK mode switching if RETURN 1 in Trigger.
+                        return true;
+                }
+
+                if ( fMode != fAFK )
 				{
 					if ( fMode )
 					{
@@ -5030,6 +5043,83 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			}
 		}
 	}
+}
+
+bool CChar::CanConsume(CItem* pItem, word iQty)
+{
+    ADDTOCALLSTACK("CChar::CanConsume");
+    if (!pItem || iQty <= 0)
+        return true;
+
+    word iQtyMax = pItem->GetAmount();
+    if (iQty <= iQtyMax)
+        return true;
+
+    CObjBaseTemplate* pTopObj = pItem->GetTopLevelObj();
+    if (!pTopObj)
+        iQty = iQty - iQtyMax;
+    else if (pTopObj)
+    {
+        CChar* pTopChar = dynamic_cast<CChar*>(pTopObj);
+        if (pTopObj == pItem || (pTopChar && pTopChar != this))
+            iQty = iQty - iQtyMax;
+    }
+
+    if (IsContainer())
+    {
+        CItemBase* pItemDef = pItem->Item_GetDef();
+        CContainer* pCont = dynamic_cast<CContainer*>(this);
+        if (pCont)
+        {
+            CResourceQtyArray Resources;
+            Resources.Load(pItemDef->GetResourceName());
+            return pCont->ResourceConsume(&Resources, iQty, true) >= iQty;
+        }
+    }
+    return false;
+}
+
+bool CChar::ConsumeAmount(CItem* pItem, word iQty)
+{
+    ADDTOCALLSTACK("CChar::ConsumeFromPack");
+
+    if (!pItem || iQty <= 0)
+        return true;
+
+    word iQtyMax = pItem->GetAmount();
+    if (iQty < iQtyMax)
+    {
+        pItem->SetAmountUpdate(iQtyMax - iQty);
+        return true;
+    }
+    else if (iQty == iQtyMax)
+    {
+        pItem->Delete();
+        return true;
+    }
+    else
+    {
+        iQty = iQty - iQtyMax;
+        CItemBase* pItemDef = pItem->Item_GetDef();
+        if (pItemDef)
+        {
+            lpctstr resName = pItemDef->GetResourceName();
+            pItem->Delete();
+            CContainer* pCont = dynamic_cast<CContainer*>(this);
+            if (pCont)
+            {
+                CResourceQtyArray Resources;
+                Resources.Load(resName);
+                if (pCont->ResourceConsume(&Resources, iQty, true))
+                {
+                    pCont->ResourceConsume(&Resources, iQty);
+                    return true;
+                }
+            }
+
+        }
+    }
+    return false;
 }
 
 // returns <SkillTotal>

@@ -1081,7 +1081,10 @@ enum CTRIG_TYPE : short
 {
 	CTRIG_AAAUNUSED		= 0,
     CTRIG_AddMulti,         // Adds the given multi to the CMultiStorage of this char (player).
+    CTRIG_AfkMode,          // Switch AFK mode by using .AFK command.
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.
+    CTRIG_ArrowQuest_Add,
+    CTRIG_ArrowQuest_Close,
 	CTRIG_Attack,           // I am attacking someone (SRC).
 	CTRIG_CallGuards,       // I'm calling guards.
     // Here starts @charXXX section
@@ -1113,7 +1116,8 @@ enum CTRIG_TYPE : short
     CTRIG_DelMulti,         // Delete the given multi to the CMultiStorage of this char (player).
 	CTRIG_Destroy,          // I am nearly destroyed.
 	CTRIG_Dismount,         // I'm dismounting.
-	CTRIG_DYE,
+    CTRIG_Drink,            // I'm drinking something.
+    CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
@@ -1221,6 +1225,7 @@ enum CTRIG_TYPE : short
 
 	CTRIG_Rename,       // Changing my name or pets one.
 	CTRIG_Resurrect,    // I'm going to resurrect via function or spell.
+    CTRIG_Reveal,       // Character is revealing.
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.

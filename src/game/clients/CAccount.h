@@ -346,6 +346,7 @@ public:
 	* @return CClient logged into de CAccount, nullptr otherwise.
 	*/
 	CClient * FindClient( const CClient * pExclude = nullptr ) const;
+    void SetBlockStatus(bool fNewStatus);
 };
 
 

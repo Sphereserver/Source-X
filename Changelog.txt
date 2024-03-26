@@ -3466,6 +3466,49 @@ Changed: SERV.LOG command changed to support console colors. (Issue: [Feature Re
 	Usage of custom color system is: SERV.LOG @color,type,mask message
 	Example: SERV.LOG @CTCOL_RED,LOGL_EVENT,LOGM_NOCONTEXT|LOGM_KILLS message
 	LOGM, LOGL and CTCOL values should be added to defs.
+
+25-03-2024, xwerswoodx
 Added: Sphere.ini setting CanPetsDrinkPotion (true in default) to make pets drink potion when their owner drop it on it. (Issue: #1147)
 	CanPetsDrinkPotion = 0 can be added to sphere.ini to disable that.
 Fixed: Missing fCheckOnly checks block the taming skill. (Issue: #1219)
+
+26-03-2024, xwerswoodx
+Added: New trigger @Drink added for characters. (Issue: #1162)
+	I: The character drinking the item.
+	SRC: The character drinking the item.
+	ARGO = the item that drank
+	ARGN1 = cooldown (in seconds)
+	ARGN2 = consumption amount (1 in default)
+	LOCAL.BottleID = empty bottle id that will be given when after item drank. (Will be given ARGN2 amount of empty bottle in default)
+	- Returns:
+	1: Stops character from drinking the item.
+	5: Let character to drink but will only give 1 empty bottle.
+	6: Let character to drink but will not give any empty bottle.
+	- Messages:
+	DRINK_NOT_ENOUGH, "You don't have enough %s to drink this."
+Added: New trigger @AfkMode added for characters. (Issue: #1161)
+	I: The character changing AFK status.
+	SRC: The character changing AFK status.
+	ARGN1 = Current Afk Status
+	ARGN2 = Next Afk Status
+	- Returns:
+	1: Stops character from switching afk status.
+Added: New trigger @Reveal added for characters. (Issue: #1157)
+	I: The character who is revealing.
+	SRC: The character who is revealing.
+	- Returns:
+	1: Prevents character from being revealed.
+Added: New triggers @ArrowQuest_Add and @ArrowQuest_Close added for characters. (Issue: #1116)
+	I: The character who activating/deactivating arrow quest.
+	SRC: The character who activating/deactivating arrow quest.
+Added: New function triggers f_onaccount_block and f_onaccount_unblock. (Issue: #1156)
+	ARGS = Account name.
+	- Returns:
+	1: Prevents account from blocking/unblocking.
+Added: New function trigger f_onserver_broadcast. (Issue: #1145)
+	ARGS = message
+	- Returns:
+	1: Prevents server to send broadcast message.
+Added: Two new LOCAL variables ItemPoisonReductionChance and ItemPoisonReductionAmount to @Hit trigger. (Issue: #1159)
+	LOCAL.ItemPoisonReductionChance = Is the chance that weapon reduce poison morez. (Default 100%)
+	LOCAL.ItemPoisonReductionAmount = Is the amount that weapon reduce. (Default: CurrentPoisonAmount/ 2)
