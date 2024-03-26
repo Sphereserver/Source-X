@@ -923,7 +923,7 @@ effect_bounce:
 			// Preventing recurrent reflection with DAMAGE_REACTIVE.
 			if ( IsStatFlag(STATF_REACTIVE) && !((uType & DAMAGE_GOD) || (uType & DAMAGE_REACTIVE)) )
 			{
-				if ( GetTopDist3D(pSrc) < 2 )
+				if (GetTopDist3D(pSrc) < 2 || (IsSetMagicFlags(MAGICF_REACTIVEARMORTH) && GetTopDist3D(pSrc) <= 2))
 				{
 					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
 					

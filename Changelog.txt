@@ -3513,3 +3513,4 @@ Added: Two new LOCAL variables ItemPoisonReductionChance and ItemPoisonReduction
 	LOCAL.ItemPoisonReductionChance = Is the chance that weapon reduce poison morez. (Default 100%)
 	LOCAL.ItemPoisonReductionAmount = Is the amount that weapon reduce. (Default: CurrentPoisonAmount/ 2)
 Added: You can now use TDATA2 for setting default cooldown (delay) for drinks. (Default: 15secs for potions, 1500 secs for ales)
+Added: MAGICF_REACTIVEARMORTH (010000) MAGICF flag to Sphere.ini to let people decide if reactive armor should reflect two handed weapons.
