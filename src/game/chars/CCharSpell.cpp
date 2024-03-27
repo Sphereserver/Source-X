@@ -2039,7 +2039,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	switch ( layer )
 	{
 		case LAYER_FLAG_Criminal:		pSpell->SetName("Criminal Timer");			break;
-		case LAYER_FLAG_Potion:			pSpell->SetName("Potion Cooldown");			break;
+		case LAYER_FLAG_PotionUsed:		pSpell->SetName("Potion Cooldown");			break;
 		case LAYER_FLAG_Drunk:			pSpell->SetName("Drunk Effect");			break;
 		case LAYER_FLAG_Hallucination:	pSpell->SetName("Hallucination Effect");	break;
 		case LAYER_FLAG_Murders:		pSpell->SetName("Murder Decay");			break;
@@ -3527,6 +3527,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_POISONED) )
 		return false;
+    if (IsStatFlag(STATF_RIDDEN))
+        return false;
 
 	iSkillLevel = (iSkillLevel / 2) + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
@@ -3913,7 +3915,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Hallucination:
 		{
-			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 100*MSECS_PER_TENTH, pCharSrc );
+			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, iDuration, pCharSrc );
             ASSERT(pItem);
 			pItem->m_itSpell.m_spellcharges = Calc_GetRandVal(30);
 		}
