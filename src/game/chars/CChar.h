@@ -1044,7 +1044,7 @@ public:
 	SKILL_TYPE Fight_GetWeaponSkill() const;
     DAMAGE_TYPE Fight_GetWeaponDamType(const CItem* pWeapon = nullptr) const;
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
-	bool Fight_IsAttackableState();
+	bool Fight_IsAttackable();
 
 	// Attacker System
 	enum ATTACKER_CLEAR_TYPE
@@ -1243,7 +1243,7 @@ private:
 	bool NPC_LookAtItem( CItem * pItem, int iDist );
 	bool NPC_LookAround( bool fForceCheckItems = false );
 	int  NPC_WalkToPoint(bool fRun = false);
-	CChar * NPC_FightFindBestTarget(const std::vector<CChar*> * pvExcludeList = nullptr);
+	CChar * NPC_FightFindBestTarget();
 	bool NPC_FightMagery(CChar * pChar);
 	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, int &skill, int iHealThreshold, bool bIgnoreAITargetChoice = false);
 	bool NPC_FightArchery( CChar * pChar );
@@ -1300,7 +1300,6 @@ public:
 
 	// Outside events that occur to us.
 	int  OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical = 0, int iDmgFire = 0, int iDmgCold = 0, int iDmgPoison = 0, int iDmgEnergy = 0, SPELL_TYPE spell = SPELL_NONE );
-	void OnTakeDamageInflictArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, int iDmgPhysical = 0, int iDmgFire = 0, int iDmgCold = 0, int iDmgPoison = 0, int iDmgEnergy = 0, HUE_TYPE effectHue = HUE_DEFAULT, SOUND_TYPE effectSound = SOUND_NONE);
 	void OnHarmedBy( CChar * pCharSrc );
 	bool OnAttackedBy( CChar * pCharSrc, bool fPetsCommand = false, bool fShouldReveal = true );
 

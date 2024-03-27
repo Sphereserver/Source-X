@@ -196,7 +196,6 @@ CServerConfig::CServerConfig()
 	_uiExperimentalFlags= 0;
 	_uiOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
 	_uiAreaFlags		= AREAF_RoomInheritsFlags;
-	_fMeditationMovementAbort = false;
 
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 15;
@@ -592,7 +591,6 @@ enum RC_TYPE
 	RC_MAXSIZECLIENTOUT,		// _uiMaxSizeClientOut
 	RC_MAXSIZEPERTICK,			// _uiNetMaxLengthPerTick
 	RC_MD5PASSWORDS,			// m_fMd5Passwords
-	RC_MEDITATIONMOVEMENTABORT,  // _fMeditationMovementAbort
 	RC_MEDIUMCANHEARGHOSTS,		// m_iMediumCanHearGhosts
 	RC_MINCHARDELETETIME,
 	RC_MINKARMA,				// m_iMinKarma
@@ -701,7 +699,6 @@ enum RC_TYPE
 	RC_QTY
 };
 
-// NOTE: Need to be alphabetized order
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
 {
 	{ "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
@@ -863,7 +860,6 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
 	{ "MAXSIZECLIENTOUT",		{ ELEM_INT64,	static_cast<uint>OFFSETOF(CServerConfig,_iMaxSizeClientOut)		}},
 	{ "MAXSIZEPERTICK",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_uiNetMaxLengthPerTick)	}},
 	{ "MD5PASSWORDS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMd5Passwords) 		}},
-	{ "MEDITATIONMOVEMENTABORT",{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_fMeditationMovementAbort)	}},
 	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMediumCanHearGhosts)	}},
 	{ "MINCHARDELETETIME",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMinCharDeleteTime)	}},
 	{ "MINKARMA",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMinKarma)				}},
@@ -1423,9 +1419,8 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_WALKBUFFER:
 			m_iWalkBuffer = s.GetArgVal() * MSECS_PER_TENTH;
 			break;
-        case RC_MEDITATIONMOVEMENTABORT:
-            _fMeditationMovementAbort = s.GetArgVal() > 0 ? true : false;
-            break;
+
+
 		default:
 			return( sm_szLoadKeys[i].m_elem.SetValStr( this, s.GetArgRaw()));
 	}
@@ -4441,7 +4436,7 @@ bool CServerConfig::LoadIni( bool fTest )
 		if( !fTest )
 		{
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
-			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-X/tree/master/src\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-experimental/tree/master/src\n");
 		}
 		return false;
 	}

@@ -1306,14 +1306,6 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 
 	EXC_TRY("UpdateMove");
-	
-	// if skill is meditation, cancel it if we move
-    if (g_Cfg._fMeditationMovementAbort && Skill_GetActive() == SKILL_MEDITATION)
-    {
-        //cancel meditation if we move
-        Skill_Fail(true);
-    }
-	
 	EXC_SET_BLOCK("FOR LOOP");
 	ClientIterator it;
 	for ( CClient* pClient = it.next(); pClient != nullptr; pClient = it.next() )
@@ -2214,7 +2206,6 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
         if (pItem->IsTypeWeapon())
         {
-            //Necromancy Curse weapon
             CItem * pCursedMemory = LayerFind(LAYER_SPELL_Curse_Weapon);	// Remove the cursed state from SPELL_Curse_Weapon.
             if (pCursedMemory)
                 pItem->ModPropNum(pItemCCPItemEquippable, PROPIEQUIP_HITLEECHLIFE, + pCursedMemory->m_itSpell.m_spelllevel, pItemBaseCCPItemEquippable);
@@ -3270,7 +3261,6 @@ bool CChar::Death()
             pClient->addPlayerWarMode();
             pClient->addSeason(SEASON_Desolate);
             pClient->addMapWaypoint(pCorpse, MAPWAYPOINT_Corpse);		// add corpse map waypoint on enhanced clients
-            pClient->addTargetCancel();	// cancel target if player death
 
             CItem *pPack = LayerFind(LAYER_PACK);
             if ( pPack )

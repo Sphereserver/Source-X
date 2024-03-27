@@ -21,7 +21,7 @@ public:
 		_fNpc = false;
 	}
 	explicit CTeleport(tchar* pszArgs);
-	~CTeleport() noexcept = default;
+	~CTeleport() noexcept;
 
 	CTeleport(const CTeleport& copy) = delete;
 	CTeleport& operator=(const CTeleport& other) = delete;

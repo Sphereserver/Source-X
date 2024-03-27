@@ -949,8 +949,7 @@ void CSector::MoveItemToSector( CItem * pItem )
     {
         if (_CanSleep(true))
         {
-            if (!pItem->CanTick())
-                pItem->GoSleep();
+            pItem->GoSleep();
         }
         else
         {
@@ -1012,8 +1011,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
         }
         else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
         {
-            if (!pChar->CanTick())
-                pChar->GoSleep(); // then make the NPC sleep too.
+            pChar->GoSleep(); // then make the NPC sleep too.
         }
     }
     else

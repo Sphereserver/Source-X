@@ -1558,6 +1558,7 @@ bool CChar::SetDispID(CREID_TYPE id)
     return true;
 }
 
+// Just set the base id and not the actual display id.
 // NOTE: Never return nullptr
 void CChar::SetID( CREID_TYPE id )
 {
@@ -1575,10 +1576,7 @@ void CChar::SetID( CREID_TYPE id )
 
 		pCharDef = CCharBase::FindCharBase(id);
 	}
-    
-    //Update DispId
-    m_dwDispIndex = id;
-    
+
 	ASSERT(pCharDef != nullptr);
 
 	CCharBase* pCharOldDef = Char_GetDef();
@@ -3974,8 +3972,6 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
-    if (m_CanMask)
-        s.WriteKeyVal("CANMASK", m_CanMask);
 
     const CREID_TYPE iDispID = GetDispID();
     if (iDispID != GetID())
