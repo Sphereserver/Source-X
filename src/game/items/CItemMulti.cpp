@@ -2565,7 +2565,7 @@ void CItemMulti::r_Write(CScript & s)
         for (const CUID& uid : _lBans)
         {
             if (uid.IsValidUID())
-                s.WriteKeyHex("ADDBANS", (dword)uid);
+                s.WriteKeyHex("ADDBAN", (dword)uid);
         }
     }
 
