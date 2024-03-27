@@ -627,8 +627,6 @@ int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhys
 
 	if ( IsStatFlag(STATF_DEAD) )	// already dead
 		return -1;
-    if (IsStatFlag(STATF_RIDDEN)) //A mount shouldn't take damage when ridden
-        return -1;
 
 	if ( !(uType & DAMAGE_GOD) )
 	{

@@ -3527,7 +3527,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_POISONED) )
 		return false;
-    if (IsStatFlag(STATF_RIDDEN))
+    if (IsStatFlag(STATF_RIDDEN) && (pSpellDef->IsSpellType(SPELLFLAG_FIELD) || pSpellDef->IsSpellType(SPELLFLAG_AREA)))
         return false;
 
 	iSkillLevel = (iSkillLevel / 2) + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
