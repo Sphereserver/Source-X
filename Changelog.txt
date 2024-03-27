@@ -3517,3 +3517,4 @@ Added: MAGICF_REACTIVEARMORTH (010000) MAGICF flag to Sphere.ini to let people d
 
 27-03-2024, xwerswoodx
 Fixed: Possible fix for accesses and bans not loading for multis. (Issue: #1223)
+Fixed: Possible fix for wrong damage calculation of slayer bonus damage. (Issue: #1179)

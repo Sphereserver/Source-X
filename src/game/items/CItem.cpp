@@ -3862,7 +3862,8 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
     }
     else if (!pComp)
     {
-        SubscribeComponent(new CCFaction());
+        CItemBase* pItemDef = Item_GetDef();
+        SubscribeComponent(new CCFaction(pItemDef->_pFaction));
     }
 
 	return true;
