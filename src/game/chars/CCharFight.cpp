@@ -799,7 +799,7 @@ effect_bounce:
         int iDmgBonus = 1;
         const CCFaction *pSlayer = nullptr;
         const CCFaction *pFaction = GetFaction();
-        const CCFaction *pSrcFaction = pSrc->GetFaction();
+        //const CCFaction *pSrcFaction = pSrc->GetFaction();
         if (pWeapon)
         {
             pSlayer = pWeapon->GetSlayer();
