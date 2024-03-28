@@ -328,7 +328,8 @@ void CCSpawn::GenerateItem()
     }
 
     pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
-    pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
+    //Spawned item shouldn't have decay time, as sphere gives tons of invalid link error when items removed.
+    //pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
     if (IsTrigUsed(TRIGGER_SPAWN))
     {
         CScriptTriggerArgs args;

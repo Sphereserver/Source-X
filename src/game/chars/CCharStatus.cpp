@@ -358,6 +358,16 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 				default:
 					return LAYER_NONE;		// not legal!
 			}
+        case LAYER_STORAGE:
+            fCantEquip = true;
+            switch (pItem->GetType())
+            {
+                case IT_CONTAINER:
+                case IT_CONTAINER_LOCKED:
+                    fCantEquip = false;
+                    break;
+            }
+            break;
 		case LAYER_HAIR:
 			if ( !pItem->IsType(IT_HAIR) )
 				fCantEquip = true;

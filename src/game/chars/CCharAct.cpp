@@ -2287,6 +2287,12 @@ bool CChar::Reveal( uint64 iFlags )
 	if ( !IsStatFlag(iFlags) )
 		return false;
 
+    if (IsTrigUsed(TRIGGER_REVEAL))
+    {
+        if (OnTrigger(CTRIG_Reveal, this, nullptr) == TRIGRET_RET_TRUE)
+            return false;
+    }
+
     CClient* pClient = IsClientActive() ? GetClientActive() : nullptr;
 	if (pClient && pClient->m_pHouseDesign)
 	{
@@ -3145,7 +3151,8 @@ bool CChar::Death()
 			{
 				CScriptTriggerArgs args(this);
 				args.m_iN1 = GetAttackersCount();
-				if ( pKiller->OnTrigger(CTRIG_Kill, this, &args) == TRIGRET_RET_TRUE )
+                args.m_pO1 = this;
+				if ( pKiller->OnTrigger(CTRIG_Kill, pKiller, &args) == TRIGRET_RET_TRUE )
 					continue;
 			}
 

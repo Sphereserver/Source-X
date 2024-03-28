@@ -36,32 +36,28 @@ private:
 	CSString	m_sName;	// Name of the region.
 	CSString	m_sGroup;
 
-#define REGION_ANTIMAGIC_ALL		0x000001	// All magic banned here.
-#define REGION_ANTIMAGIC_RECALL_IN	0x000002	// Teleport,recall in to this, and mark
-#define REGION_ANTIMAGIC_RECALL_OUT	0x000004	// can't recall out of here.
-#define REGION_ANTIMAGIC_GATE		0x000008
-#define REGION_ANTIMAGIC_TELEPORT	0x000010	// Can't teleport into here.
-#define REGION_ANTIMAGIC_DAMAGE		0x000020	// just no bad magic here
-
-#define REGION_FLAG_SHIP			0x000040	// This is a ship region. ship commands
-#define REGION_FLAG_NOBUILDING		0x000080	// No building in this area
-
-#define REGION_FLAG_ANNOUNCE		0x000200	// Announce to all who enter.
-#define REGION_FLAG_INSTA_LOGOUT	0x000400	// Instant Log out is allowed here. (hotel)
-#define REGION_FLAG_UNDERGROUND		0x000800	// dungeon type area. (no weather)
-#define REGION_FLAG_NODECAY			0x001000	// Things on the ground don't decay here.
-
-#define REGION_FLAG_SAFE			0x002000	// This region is safe from all harm.
-#define REGION_FLAG_GUARDED			0x004000	// try TAG.GUARDOWNER
-#define REGION_FLAG_NO_PVP			0x008000	// Players cannot directly harm each other here.
-#define REGION_FLAG_ARENA			0x010000	// Anything goes. no murder counts or crimes.
-
-#define REGION_FLAG_NOMINING            0x020000// Can't use mining in this region.
-#define REGION_FLAG_WALK_NOBLOCKHEIGHT  0x040000// Ignore char height for walkchecks inside this area.
-
+#define REGION_ANTIMAGIC_ALL		        0x0000001	// All magic banned here.
+#define REGION_ANTIMAGIC_RECALL_IN	        0x0000002	// Teleport,recall in to this, and mark
+#define REGION_ANTIMAGIC_RECALL_OUT	        0x0000004	// can't recall out of here.
+#define REGION_ANTIMAGIC_GATE		        0x0000008
+#define REGION_ANTIMAGIC_TELEPORT	        0x0000010	// Can't teleport into here.
+#define REGION_ANTIMAGIC_DAMAGE		        0x0000020	// just no bad magic here
+#define REGION_FLAG_SHIP			        0x0000040	// This is a ship region. ship commands
+#define REGION_FLAG_NOBUILDING		        0x0000080	// No building in this area
+#define REGION_FLAG_HOUSE                   0x0000100    // This is a house region.
+#define REGION_FLAG_ANNOUNCE		        0x0000200	// Announce to all who enter.
+#define REGION_FLAG_INSTA_LOGOUT	        0x0000400	// Instant Log out is allowed here. (hotel)
+#define REGION_FLAG_UNDERGROUND		        0x0000800	// dungeon type area. (no weather)
+#define REGION_FLAG_NODECAY			        0x0001000	// Things on the ground don't decay here.
+#define REGION_FLAG_SAFE			        0x0002000	// This region is safe from all harm.
+#define REGION_FLAG_GUARDED			        0x0004000	// try TAG.GUARDOWNER
+#define REGION_FLAG_NO_PVP			        0x0008000	// Players cannot directly harm each other here.
+#define REGION_FLAG_ARENA			        0x0010000	// Anything goes. no murder counts or crimes.
+#define REGION_FLAG_NOMINING                0x0020000    // Can't use mining in this region.
+#define REGION_FLAG_WALK_NOBLOCKHEIGHT      0x0040000    // Ignore char height for walkchecks inside this area.
 #define REGION_FLAG_INHERIT_PARENT_EVENTS	0x0100000
-#define REGION_FLAG_INHERIT_PARENT_FLAGS	0x0200000
-#define REGION_FLAG_INHERIT_PARENT_TAGS		0x0400000
+#define REGION_FLAG_INHERIT_PARENT_FLAGS	0x00200000
+#define REGION_FLAG_INHERIT_PARENT_TAGS		0x00400000
 
 	dword m_dwFlags;
 

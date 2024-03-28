@@ -15,18 +15,18 @@ class CItem;
     The Original Slayers fall into 6 groups. Abyss, Arachnid, Elemental, Humanoid, Reptilian and Undead.
     Each group has a Super Slayer that will increase damage/success on all monsters within that group.
     Each of those groups have an opposing group. (i.e. Humanoid vs. Undead)
-    ñ The opposing group will do double damage to anyone wielding the Slayer.
-    ñ Mondainís Legacy Slayers, usually found on Talismans, do not have an opposing group.
+    ‚Äì The opposing group will do double damage to anyone wielding the Slayer.
+    ‚Äì Mondain‚Äôs Legacy Slayers, usually found on Talismans, do not have an opposing group.
     A successful use of a Slayer Weapon, Spellbook or Instrument will yield a little white flash on the monster.
     Super Slayer Weapons will do double damage to the monsters they are meant for.
-    ìSingle Slayersî or Slayers that fall into a Super Slayer subcategory will do triple damage
+    ‚ÄúSingle Slayers‚Äù or Slayers that fall into a Super Slayer subcategory will do triple damage
     Slayer Weapons can both be found as monster loot and be crafted by using a runic crafting tool.
     Slayer Spellbooks will cause single target, direct damage spells to do double damage to the monsters they are meant for.
     Player written Slayer Spellbooks can only be crafted by scribes with high magery skill using a scribe pen.
     Slayer Instruments will increase your success chance by 20% when used on the creatures it is meant for.
     Slayer Instruments will decrease your success chance by 20% when used on the creatures from its opposing group.
     Slayer Instruments can only be found as monster loot.
-    Slayer Talismans are found on Mondainís Legacy monsters or as Quest Rewards.
+    Slayer Talismans are found on Mondain‚Äôs Legacy monsters or as Quest Rewards.
 */
 
 #define DAMAGE_SLAYER_LESSER    3   // Lesser Slayer does x3 damage.
@@ -103,7 +103,7 @@ enum NPC_FACTION : llong
     FACTION_LIZARDMAN           = 0x8000000,
     FACTION_REPTILIAN_QTY,
 
-    // Old Mondainís Legacy Slayers
+    // Old Mondain‚Äôs Legacy Slayers
     FACTION_BAT                 = 0x10000000,
     FACTION_BEAR                = 0x20000000,
     FACTION_BEETLE              = 0x40000000,

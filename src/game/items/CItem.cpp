@@ -1141,6 +1141,18 @@ int CItem::FixWeirdness()
                         return iResultCode;	// get rid of it.
                 }
                 break;
+            case LAYER_STORAGE:
+                switch (GetType())
+                {
+                    case IT_CONTAINER:
+                    case IT_CONTAINER_LOCKED:
+                        SetAttr(ATTR_MOVE_NEVER);
+                        break;
+                    default:
+                        iResultCode = 0x2232;
+                        return iResultCode;
+                }
+                break;
             case LAYER_VENDOR_STOCK:
             case LAYER_VENDOR_EXTRA:
             case LAYER_VENDOR_BUYS:
@@ -2249,6 +2261,10 @@ void CItem::r_WriteMore1(CSString & sVal)
 
     switch (GetType())
     {
+        case IT_SPELLBOOK:
+            sVal.FormatHex(m_itSpellbook.m_spells1);
+            return;
+
         case IT_TREE:
         case IT_GRASS:
         case IT_ROCK:
@@ -2300,6 +2316,10 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 	switch ( GetType())
 	{
+        case IT_SPELLBOOK:
+            sVal.FormatHex(m_itSpellbook.m_spells2);
+            return;
+
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
@@ -3842,7 +3862,8 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
     }
     else if (!pComp)
     {
-        SubscribeComponent(new CCFaction());
+        CItemBase* pItemDef = Item_GetDef();
+        SubscribeComponent(new CCFaction(pItemDef->_pFaction));
     }
 
 	return true;
@@ -4337,11 +4358,11 @@ uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 		return 1;
 
 	// Add spell to spellbook bitmask:
-	const uint i = spell - (pBookDef->m_ttSpellbook.m_iOffset + 1);
+	const uint i = (uint)spell - (pBookDef->m_ttSpellbook.m_iOffset + 1u);
 	if ( i < 32u ) // Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31 and are stored in more1.
-		m_itSpellbook.m_spells1 |= (1 << i);
+		m_itSpellbook.m_spells1 |= (1u << i);
 	else if ( i < 64u ) // Replaced the <= with < because of the formula above, the remaining 32 spells have an i value from 32 to 63 and are stored in more2.
-		m_itSpellbook.m_spells2 |= (1 << (i-32u));
+		m_itSpellbook.m_spells2 |= (1u << (i-32u));
 	//else if ( i <= 96 )
 	//	m_itSpellbook.m_spells3 |= (1 << (i-64));	//not used anymore?
 	else

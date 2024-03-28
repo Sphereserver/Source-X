@@ -1,4 +1,4 @@
-﻿#include "../common/resource/sections/CDialogDef.h"
+#include "../common/resource/sections/CDialogDef.h"
 #include "../common/resource/sections/CItemTypeDef.h"
 #include "../common/resource/sections/CSkillClassDef.h"
 #include "../common/resource/sections/CRandGroupDef.h"
@@ -111,6 +111,7 @@ CServerConfig::CServerConfig()
 
 	// In game effects.
 	m_fCanUndressPets		= true;
+    m_fCanPetsDrinkPotion   = true;
 	m_fMonsterFight			= false;
 	m_fMonsterFear			= false;
 	m_iLightDungeon			= 27;
@@ -456,6 +457,7 @@ enum RC_TYPE
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
 	RC_BUILD,
+    RC_CANPETSDRINKPOTION,      // m_fCanPetsDrinkPotion
 	RC_CANSEESAMEPLEVEL,		// m_iCanSeeSamePLevel
 	RC_CANUNDRESSPETS,			// m_fCanUndressPets
 	RC_CHARTAGS,				// m_fCharTags
@@ -727,6 +729,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
 	{ "BANKMAXITEMS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankIMax)			}},
 	{ "BANKMAXWEIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankWMax)			}},
 	{ "BUILD",					{ ELEM_VOID,	0																}},
+    { "CANPETSDRINKPOTION",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCanPetsDrinkPotion)	}},
 	{ "CANSEESAMEPLEVEL",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iCanSeeSamePLevel)	}},
 	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCanUndressPets)		}},
 	{ "CHARTAGS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCharTags)			}},

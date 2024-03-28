@@ -389,6 +389,33 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 	return true;
 }
 
+void CAccount::SetBlockStatus(bool fNewStatus)
+{
+    if (!g_Serv.IsLoading())
+    {
+        if (IsPriv(PRIV_BLOCKED) && fNewStatus == false) {
+
+            CScriptTriggerArgs Args;
+            Args.Init(GetName());
+            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+            g_Serv.r_Call("f_onaccount_unblock", &g_Serv, &Args, nullptr, &iRet);
+            if (iRet == TRIGRET_RET_TRUE)
+                return;
+            ClearPrivFlags(PRIV_BLOCKED);
+        }
+        else if (!IsPriv(PRIV_BLOCKED) && fNewStatus == true)
+        {
+            CScriptTriggerArgs Args;
+            Args.Init(GetName());
+            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+            g_Serv.r_Call("f_onaccount_block", &g_Serv, &Args, nullptr, &iRet);
+            if (iRet == TRIGRET_RET_TRUE)
+                return;
+            SetPrivFlags(PRIV_BLOCKED);
+        }
+    }
+}
+
 bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CAccounts::Account_OnCmd");
@@ -774,7 +801,8 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 
 	if ( fBlock )
 	{
-		SetPrivFlags( PRIV_BLOCKED );
+		//SetPrivFlags( PRIV_BLOCKED );
+        SetBlockStatus(true);
 		pSrc->SysMessagef( g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_BLOCK), GetName() );
 	}
 
@@ -1328,11 +1356,13 @@ bool CAccount::r_LoadVal( CScript & s )
 		case AC_BLOCK:
 			if ( ! s.HasArgs() || s.GetArgVal())
 			{
-				SetPrivFlags( PRIV_BLOCKED );
+				//SetPrivFlags( PRIV_BLOCKED );
+                SetBlockStatus(true);
 			}
 			else
 			{
-				ClearPrivFlags( PRIV_BLOCKED );
+				//ClearPrivFlags( PRIV_BLOCKED );
+                SetBlockStatus(false);
 			}
 			break;
 		case AC_CHARUID:
@@ -1638,10 +1668,12 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 				return true;
 			}
 		case AV_BLOCK:
-			if ( ! s.HasArgs() || s.GetArgVal())
-				SetPrivFlags(PRIV_BLOCKED);
-			else
-				ClearPrivFlags(PRIV_BLOCKED);
+            if (!s.HasArgs() || s.GetArgVal())
+                //SetPrivFlags(PRIV_BLOCKED);
+                SetBlockStatus(true);
+            else
+                //ClearPrivFlags(PRIV_BLOCKED);
+                SetBlockStatus(false);
 			return true;
 
 		case AV_KICK:

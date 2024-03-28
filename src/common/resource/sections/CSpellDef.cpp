@@ -116,10 +116,10 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal( m_idEffect );
             break;
         case SPC_FLAGS:
-            sVal.FormatVal( m_dwFlags );
+            sVal.FormatULLVal( m_dwFlags );
             break;
         case SPC_GROUP:
-            sVal.FormatVal( m_dwGroup );
+            sVal.FormatULLVal( m_dwGroup );
             break;
         case SPC_INTERRUPT:
             sVal = m_Interrupt.Write();
@@ -228,10 +228,10 @@ bool CSpellDef::r_LoadVal( CScript &s )
             m_idEffect = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
             break;
         case SPC_FLAGS:
-            m_dwFlags = s.GetArgVal();
+            m_dwFlags = s.GetArgULLVal();
             break;
         case SPC_GROUP:
-            m_dwGroup = s.GetArgVal();
+            m_dwGroup = s.GetArgULLVal();
             break;
         case SPC_INTERRUPT:
             m_Interrupt.Load( s.GetArgRaw());

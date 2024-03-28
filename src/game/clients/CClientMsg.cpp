@@ -567,6 +567,23 @@ void CClient::addArrowQuest( int x, int y, int id ) const
 {
 	ADDTOCALLSTACK("CClient::addArrowQuest");
 
+    CScriptTriggerArgs args(x, y);
+    if (this->GetNetState()->isClientVersion(MINCLIVER_HS) || this->GetNetState()->isClientEnhanced())
+        args.m_iN3 = id;
+    else
+        args.m_iN3 = 0;
+
+    if (x > 0)
+    {
+        if (IsTrigUsed(TRIGGER_ARROWQUEST_ADD))
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Add, m_pChar, &args);
+    }
+    else
+    {
+        if (IsTrigUsed(TRIGGER_ARROWQUEST_CLOSE))
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Close, m_pChar, &args);
+    }
+
 	new PacketArrowQuest(this, x, y, id);
 }
 

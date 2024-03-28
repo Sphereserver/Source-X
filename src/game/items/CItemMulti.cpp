@@ -228,6 +228,11 @@ bool CItemMulti::MultiRealizeRegion()
     {
         dwFlags |= REGION_FLAG_SHIP;
     }
+    else if (IsType(IT_MULTI) || IsType(IT_MULTI_CUSTOM))
+    {
+        if (Multi_GetSign()->IsType(IT_SIGN_GUMP))
+            dwFlags |= REGION_FLAG_HOUSE;
+    }
     else
     {
         dwFlags |= pRegionBack->GetRegionFlags(); // Houses get some of the attribs of the land around it.
@@ -2539,6 +2544,7 @@ void CItemMulti::r_Write(CScript & s)
             }
         }
     }
+
     if (!_lFriends.empty())
     {
         for (const CUID& uid : _lFriends)
@@ -2547,6 +2553,24 @@ void CItemMulti::r_Write(CScript & s)
             {
                 s.WriteKeyHex("ADDFRIEND", (dword)uid);
             }
+        }
+    }
+
+    if (!_lAccesses.empty())
+    {
+        for (const CUID& uid : _lAccesses)
+        {
+            if (uid.IsValidUID())
+                s.WriteKeyHex("ADDACCESS", (dword)uid);
+        }
+    }
+
+    if (!_lBans.empty())
+    {
+        for (const CUID& uid : _lBans)
+        {
+            if (uid.IsValidUID())
+                s.WriteKeyHex("ADDBAN", (dword)uid);
         }
     }
 

@@ -2058,15 +2058,26 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			return false;
 		}
 
-		if ( pCharSrc->IsPriv(PRIV_GM) )
-			return ItemBounce(pItem);
-
 		if ( !CanCarry(pItem) )
 		{
 			if ( NPC_CanSpeak() )
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_WEAK));
 			return false;
 		}
+
+        if (pItem->IsType(IT_POTION))
+        {
+            if (g_Cfg.m_fCanPetsDrinkPotion == true)
+            {
+                if (Use_Item(pItem))
+                    return true;
+                else
+                    return false; //If can't use item, return it inside player's backpack.
+            }
+        }
+
+        if (pCharSrc->IsPriv(PRIV_GM))
+            return ItemBounce(pItem);
 
 		// Place item on backpack
 		CItemContainer *pPack = GetPack();

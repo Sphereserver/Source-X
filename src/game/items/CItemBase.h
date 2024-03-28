@@ -200,6 +200,7 @@ public:
 		struct
 		{
             CResourceIDBase m_ridEmpty;	// tdata1= the empty container. IT_POTION_EMPTY IT_PITCHER_EMPTY
+            dword m_ridDelay; //tdata2= how long someone need to wait to drink again after using it (in seconds).
 		} m_ttDrink;
 
 		// IT_SHIP_PLANK
