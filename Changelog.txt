@@ -3525,3 +3525,5 @@ Added: REGION_FLAG_HOUSE (0x0100) for houses. (Issue: #1154)
 
 30-03-2024, xwerswoodx
 Added: ARGO object for @MurderMark trigger to get killed character.
+Fixed: ARGN1 (reap amount) doesn't updated depends on the amount left on bit. (Issue: #1224)
+Added: ARGO to get bit uid under @ResourceGather and @RegionResourceGather triggers.

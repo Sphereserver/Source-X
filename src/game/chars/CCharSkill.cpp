@@ -1009,10 +1009,13 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		if ( wAmount > wMaxAmount )
 			wAmount = wMaxAmount;
 	}
+    if (wAmount > pResBit->GetAmount())
+        wAmount = pResBit->GetAmount();
 
 	//(Region)ResourceGather behaviour
 	CScriptTriggerArgs	Args(0, 0, pResBit);
 	Args.m_VarsLocal.SetNum("ResourceID",pOreDef->m_ReapItem);
+    Args.m_pO1 = pResBit;
 	Args.m_iN1 = wAmount;
 	TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_REGIONRESOURCEGATHER) )
