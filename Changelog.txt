@@ -3518,3 +3518,10 @@ Added: MAGICF_REACTIVEARMORTH (010000) MAGICF flag to Sphere.ini to let people d
 27-03-2024, xwerswoodx
 Fixed: Possible fix for accesses and bans not loading for multis. (Issue: #1223)
 Fixed: Possible fix for wrong damage calculation of slayer bonus damage. (Issue: #1179)
+
+28-03-2024, xwerswoodx
+Added: REGION_FLAG_HOUSE (0x0100) for houses. (Issue: #1154)
+	REGION_FLAG_HOUSE 0100 should be added defs.
+
+30-03-2024, xwerswoodx
+Added: ARGO object for @MurderMark trigger to get killed character.
