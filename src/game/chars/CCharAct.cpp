@@ -3618,7 +3618,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		}
 
 		// This could get REALLY EXPENSIVE !
-		if ( IsTrigUsed(TRIGGER_STEP) )
+		if ( m_pArea && IsTrigUsed(TRIGGER_STEP) ) //Check if m_pArea is exists because it may be invalid if it try to walk while multi removing?
 		{
 			if ( m_pArea->OnRegionTrigger( this, RTRIG_STEP ) == TRIGRET_RET_TRUE )
 				return TRIGRET_RET_FALSE;
