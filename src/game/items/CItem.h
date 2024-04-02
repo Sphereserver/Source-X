@@ -58,7 +58,7 @@ private:
 	word m_wAmount;		// Amount of items in pile. 64K max (or corpse type)
 	IT_TYPE m_type;		// What does this item do when dclicked ? defines dynamic_cast type
 	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
-	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
+	uint64	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
 public:
@@ -597,7 +597,7 @@ public:
 	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks
 
 	virtual int IsWeird() const override;
-	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0);
+	char GetFixZ(CPointMap pt, uint64 uiBlockFlags = 0Ui64);
 
 	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;

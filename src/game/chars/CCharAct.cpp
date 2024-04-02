@@ -558,7 +558,7 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 }
 
 // shrunk or died. (or sleeping)
-void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
+void CChar::DropAll(CItemContainer * pCorpse, uint64 uiAttr)
 {
 	ADDTOCALLSTACK("CChar::DropAll");
 	if ( IsStatFlag( STATF_CONJURED ))
@@ -569,11 +569,11 @@ void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
 	{
 		if ( pCorpse == nullptr )
 		{
-			pPack->ContentsDump( GetTopPoint(), iAttr );
+			pPack->ContentsDump(GetTopPoint(), uiAttr);
 		}
 		else
 		{
-			pPack->ContentsTransfer( pCorpse, true );
+			pPack->ContentsTransfer(pCorpse, true);
 		}
 	}
 
@@ -3401,14 +3401,14 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
     }
 
 	// ok to go here ? physical blocking objects ?
-	dword dwBlockFlags = 0;
+	uint64 uiBlockFlags = 0Ui64;
 	height_t ClimbHeight = 0;
 	CRegion *pArea = nullptr;
 
 	EXC_TRY("CanMoveWalkTo");
 
 	EXC_SET_BLOCK("Check Valid Move");
-	pArea = CheckValidMove(ptDst, &dwBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
+	pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
@@ -3561,8 +3561,8 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		if ( uiStamReq > 0 )
 			UpdateStatVal(STAT_DEX, -uiStamReq);
 
-		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
-		m_zClimbHeight = (dwBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
+		StatFlag_Mod(STATF_INDOORS, (uiBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
+		m_zClimbHeight = (uiBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
 	}
 	EXC_CATCH;
 	return pArea;
@@ -4047,7 +4047,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 	pt.m_z += PLAYER_HEIGHT;
 	char startZ = pt.m_z;
 
-	dword dwCan = GetCanMoveFlags(GetCanFlags(), true);	// CAN_C_SWIM
+	uint64 uiCan = GetCanMoveFlags(GetCanFlags(), true);	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )
@@ -4060,20 +4060,20 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 				continue;
 			}
 
-			dword dwBlockFlags = dwCan;
+			uint64 uiBlockFlags = uiCan;
 			// Reset Z back to start Z + PLAYER_HEIGHT so we don't climb buildings
 			pt.m_z = startZ;
 			// Set new Z so we don't end up floating or underground
-			pt.m_z = CWorldMap::GetHeightPoint( pt, dwBlockFlags, true );
+			pt.m_z = CWorldMap::GetHeightPoint(pt, uiBlockFlags, true);
 
 			// don't allow characters to pass through walls or other blocked
 			// paths when they're disembarking from a ship
-			if ( fFromShip && (dwBlockFlags & CAN_I_BLOCK) && !(dwCan & CAN_C_PASSWALLS) && (pt.m_z > startZ) )
+			if (fFromShip && (uiBlockFlags & CAN_I_BLOCK) && !(uiCan & CAN_C_PASSWALLS) && (pt.m_z > startZ))
 			{
 				break;
 			}
 
-			if ( ! ( dwBlockFlags &~ dwCan ))
+			if (!(uiBlockFlags &~ uiCan))
 			{
 				// we can go here. (maybe)
 				if ( Spell_Teleport(pt, true, !fFromShip, false) )

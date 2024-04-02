@@ -54,7 +54,7 @@ public:
 
     CVarDefMap m_TagDefs;		// attach extra tags here.
     CVarDefMap m_BaseDefs;		// New Variable storage system
-    dword	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
+    uint64	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
 
     word	m_attackBase;       // dam for weapons
     word	m_attackRange;      // variable range of attack damage.
@@ -115,12 +115,12 @@ public:
 	*/
     CBaseBaseDef* Base_GetDef() const noexcept;
 
-	inline dword GetCanFlagsBase() const noexcept
+	inline uint64 GetCanFlagsBase() const noexcept
 	{
 		return Base_GetDef()->m_Can;
 	}
 
-    inline dword GetCanFlags() const noexcept
+    inline uint64 GetCanFlags() const noexcept
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
@@ -129,14 +129,14 @@ public:
 		return (GetCanFlagsBase() ^ m_CanMask);
 	}	
 
-	bool Can(dword dwCan) const noexcept
+	bool Can(uint64 uiCan) const noexcept
 	{
-        return (GetCanFlags() & dwCan);
+        return (GetCanFlags() & uiCan);
 	}
 
-    inline bool Can(dword dwCan, dword dwObjCanFlags) const noexcept
+    inline bool Can(uint64 uiCan, uint64 uiObjCanFlags) const noexcept
     {
-        return (dwObjCanFlags & dwCan);
+        return (uiObjCanFlags & uiCan);
     }
 
     bool IsRunningTrigger() const;

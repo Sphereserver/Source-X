@@ -52,7 +52,7 @@ public:
 	word    m_defenseBase;  // base defense bonus given by this (items)/having (chars).
 	word    m_defenseRange; // variable range of defense.
 
-	dword   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
+	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
     RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
 
     CCFaction _pFaction;
@@ -238,10 +238,10 @@ public:
 
     /**
      * @brief   Has the given Can flag.
-     * @param   dwCan    The can flags.
+     * @param   uiCan    The can flags.
      * @return  true if it succeeds, false if it fails.
      */
-	bool Can( dword dwCan ) const;
+	bool Can( uint64 uiCan ) const;
 
     /**
      * @brief   Un link.

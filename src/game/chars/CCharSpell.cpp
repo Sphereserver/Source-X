@@ -2162,9 +2162,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					ptg.m_y += (short)(iy);
 				}
 
-				dword dwBlockFlags = 0;
-				CWorldMap::GetHeightPoint2(ptg, dwBlockFlags, true);
-				if ( dwBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
+				uint64 uiBlockFlags = 0Ui64;
+				CWorldMap::GetHeightPoint2(ptg, uiBlockFlags, true);
+				if (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR))
 				{
 					if (ix < 0)	// field cannot extend fully to the left
 						minX = ix + 1;
@@ -2588,11 +2588,11 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	{
 		if (IsSetMagicFlags(MAGICF_SUMMONWALKCHECK))	// check if the target location is valid
 		{
-			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
-			dword dwBlockFlags = 0;
-			CWorldMap::GetHeightPoint2(ptTarg, dwBlockFlags, true);
+			const uint64 uiCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
+			uint64 uiBlockFlags = 0Ui64;
+			CWorldMap::GetHeightPoint2(ptTarg, uiBlockFlags, true);
 
-			if (dwBlockFlags & ~dwCan)
+			if (uiBlockFlags & ~uiCan)
 			{
 				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
 				pChar->Delete();

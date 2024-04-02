@@ -781,11 +781,11 @@ int CItem::IsWeird() const
 	return( ( ptCont == nullptr ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
+char CItem::GetFixZ( CPointMap pt, uint64 uiBlockFlags )
 {
-	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &dwBlockFlags );
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
-	CWorldMap::GetFixPoint( pt, block );
+	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &uiBlockFlags );
+	CServerMapBlockState block(uiBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight);
+	CWorldMap::GetFixPoint(pt, block);
 	return block.m_Bottom.m_z;
 }
 
@@ -3154,7 +3154,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_weight = s.GetArgWVal();
             break;
 		case IC_CANUSE:
-			m_CanUse = s.GetArgVal();
+			m_CanUse = s.GetArgULLVal();
             break;
 		case IC_CONT:	// needs special processing.
 			{

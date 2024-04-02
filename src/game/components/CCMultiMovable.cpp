@@ -479,10 +479,9 @@ bool CCMultiMovable::CanMoveTo(const CPointMap & pt) const
     if (pItemThis->IsAttr(ATTR_MAGIC))
         return true;
 
-    dword dwBlockFlags = CAN_I_WATER;
-
-    CWorldMap::GetHeightPoint2(pt, dwBlockFlags, true);
-    if (dwBlockFlags & CAN_I_WATER)
+    uint64 uiBlockFlags = CAN_I_WATER;
+    CWorldMap::GetHeightPoint2(pt, uiBlockFlags, true);
+    if (uiBlockFlags & CAN_I_WATER)
         return true;
 
     return false;
@@ -1212,8 +1211,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             CPointMap pt = pItemThis->GetTopPoint();
             pt.m_z = zold;
             pItemThis->SetTopZ(-UO_SIZE_Z);	// bottom of the world where i won't get in the way.
-            dword dwBlockFlags = CAN_I_WATER;
-            char z = CWorldMap::GetHeightPoint2(pt, dwBlockFlags);
+            uint64 uiBlockFlags = CAN_I_WATER;
+            char z = CWorldMap::GetHeightPoint2(pt, uiBlockFlags);
             pItemThis->SetTopZ(zold);	// restore z for now.
             pt.InitPoint();
             pt.m_z = z - zold;

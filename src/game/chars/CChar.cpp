@@ -713,18 +713,18 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
+char CChar::GetFixZ( const CPointMap& pt, uint64 uiBlockFlags)
 {
-	const dword dwCanFlags = GetCanFlags();
-	const dword dwCanMoveFlags = GetCanMoveFlags(dwCanFlags);
+	const uint64 uiCanFlags = GetCanFlags();
+	const uint64 uiCanMoveFlags = GetCanMoveFlags(uiCanFlags);
 
-	if ( !dwBlockFlags )
-		dwBlockFlags = dwCanMoveFlags;
+	if (!uiBlockFlags)
+		uiBlockFlags = uiCanMoveFlags;
 
-    if (dwCanMoveFlags == 0xFFFFFFFF)
+    if (uiCanMoveFlags == UINT64_MAX)
         return pt.m_z;
-	if (dwCanMoveFlags & CAN_C_WALK )
-		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
+	if (uiCanMoveFlags & CAN_C_WALK )
+		uiBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
 	const short iZClimbed = pt.m_z + m_zClimbHeight;
     const height_t uiHeightMount = GetHeightMount( false );
@@ -732,27 +732,27 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 	const int iBlockMaxHeight = std::max(int(iZClimbed + uiHeightMount), int(INT8_MAX));
 	const height_t uiClimbHeight = height_t(std::max(short(iZClimbed + 2), short(UINT8_MAX)));
 
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount );
-	CWorldMap::GetFixPoint( pt, block );
+	CServerMapBlockState block(uiBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount);
+	CWorldMap::GetFixPoint(pt, block);
 
-	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
-	if ( block.m_Top.m_dwBlockFlags )
+	uiBlockFlags = block.m_Bottom.m_uiBlockFlags;
+	if (block.m_Top.m_uiBlockFlags)
 	{
-		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
+		uiBlockFlags |= CAN_I_ROOF;	// we are covered by something.
 		if ( block.m_Top.m_z < (iZClimbed + ((block.m_Top.m_dwTile > TERRAIN_QTY) ? uiHeightMount : uiHeightMount/2 )) )
-			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
+			uiBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
-	if ( dwBlockFlags != 0x0 )
+	if ( uiBlockFlags != 0x0 )
 	{
-		if ( (dwBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST, dwCanFlags) )
-			dwBlockFlags &= ~CAN_I_BLOCK;
+		if ((uiBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST, uiCanFlags))
+			uiBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( (dwBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM, dwCanFlags) )
-			dwBlockFlags &= ~CAN_I_BLOCK;
+		if ((uiBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM, uiCanFlags))
+			uiBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( !Can(CAN_C_FLY, dwCanFlags) )
+		if ( !Can(CAN_C_FLY, uiCanFlags) )
 		{
-			if ( ! ( dwBlockFlags & CAN_I_CLIMB ) ) // we can climb anywhere
+			if (!(uiBlockFlags & CAN_I_CLIMB)) // we can climb anywhere
 			{
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
@@ -766,10 +766,10 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 				}
 			}
 		}
-		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS, dwCanFlags) )
+		if ((uiBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS, uiCanFlags))
 			return pt.m_z;
 
-		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
+		if (block.m_Bottom.m_z >= UO_SIZE_Z)
 			return pt.m_z;
 	}
 
@@ -2794,10 +2794,10 @@ do_default:
 				CPointMap	ptDst = GetTopPoint();
 				DIR_TYPE	dir   = GetDirStr(ptcKey);
 				ptDst.Move( dir );
-				dword		dwBlockFlags = 0;
+				uint64		uiBlockFlags = 0;
 				CRegion	*	pArea;
-				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, nullptr );
-				sVal.FormatHex( pArea ? pArea->GetResourceID().IsValidUID() : 0 );
+				pArea = CheckValidMove(ptDst, &uiBlockFlags, dir, nullptr);
+				sVal.FormatHex(pArea ? pArea->GetResourceID().IsValidUID() : 0);
 			}
 			return true;
 
@@ -2819,12 +2819,12 @@ do_default:
 				ptDst.Move( GetDirStr( ptcKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
-					sVal.FormatHex( UINT32_MAX );
+					sVal.FormatULLHex( UINT64_MAX );
 				else
 				{
-					dword dwBlockFlags = 0;
-					CWorldMap::GetHeightPoint2( ptDst, dwBlockFlags, true );
-					sVal.FormatHex( dwBlockFlags );
+					uint64 uiBlockFlags = 0Ui64;
+					CWorldMap::GetHeightPoint2(ptDst, uiBlockFlags, true);
+					sVal.FormatULLHex(uiBlockFlags);
 				}
 			}
 			return true;

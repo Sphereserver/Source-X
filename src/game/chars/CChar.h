@@ -341,7 +341,7 @@ public:		void  StatFlag_Clear(uint64 uiStatFlag) noexcept;
 //protected:	void _StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
-	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
+	char GetFixZ(const CPointMap& pt, uint64 uiBlockFlags = 0Ui64);
 	bool IsPriv( word flag ) const;
 	virtual PLEVEL_TYPE GetPrivLevel() const override;
 
@@ -456,7 +456,7 @@ private:
 	bool TeleportToCli( int iType, int iArgs );
 	bool TeleportToObj( int iType, tchar * pszArgs );
 private:
-	CRegion * CheckValidMove( CPointMap & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
+	CRegion * CheckValidMove( CPointMap & ptDest, uint64 * uiBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
@@ -533,7 +533,7 @@ public:
 	lpctstr GetPossessPronoun() const;	// his
 	byte GetModeFlag( const CClient *pViewer = nullptr ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
-	dword GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM = false) const;
+	uint64 GetCanMoveFlags(uint64 uiCanFlags, bool fIgnoreGM = false) const;
 
 	virtual int FixWeirdness() override;
 	void CreateNewCharCheck();
@@ -1167,7 +1167,7 @@ public:
 	bool OnFreezeCheck() const;
     bool IsStuck(bool fFreezeCheck);
 
-	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
+	void DropAll(CItemContainer * pCorpse = nullptr, uint64 uiAttr = 0);
 	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool fLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );

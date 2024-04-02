@@ -3530,3 +3530,6 @@ Added: ARGO to get bit uid under @ResourceGather and @RegionResourceGather trigg
 
 31-03-2024, xwerswoodx
 Fixed: Possible fix for the OnRegionTrigger getting called on invalid region while multi creating/removing.
+
+02-04-2024, xwerswoodx
+Changed: dword CAN flags changed with uint64 to increase limits.

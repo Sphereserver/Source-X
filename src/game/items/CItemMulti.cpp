@@ -3308,14 +3308,14 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
                         return nullptr;
                     }
 
-                    dword dwBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK; // Flags to check: Ships should check for swimable tiles.
+                    uint64 uiBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK; // Flags to check: Ships should check for swimable tiles.
                     /*
                     * Intensive check returning the top Z point of the given X, Y coords
                     * It uses the dwBlockBlacks passed to check the new Z level.
                     * Also update those dwBlockFlags with all the flags found at the given location.
                     * 3rd param is set to also update Z with any house component found in the proccess.
                     */
-                    ptn.m_z = CWorldMap::GetHeightPoint2(ptn, dwBlockFlags, true);
+                    ptn.m_z = CWorldMap::GetHeightPoint2(ptn, uiBlockFlags, true);
                     if (abs(ptn.m_z - pt.m_z) > 4)  // Difference of Z > 4? so much, stop.
                     {
                         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);
@@ -3323,13 +3323,13 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
                     }
                     if (fShip)
                     {
-                        if (!(dwBlockFlags & CAN_I_WATER))  // Ships must be placed on water.
+                        if (!(uiBlockFlags & CAN_I_WATER))  // Ships must be placed on water.
                         {
                             pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_SHIPW);
                             return nullptr;
                         }
                     }
-                    else if (dwBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))  // Did the intensive check find some undesired flags? Stop.
+                    else if (uiBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))  // Did the intensive check find some undesired flags? Stop.
                     {
                         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BLOCKED);
                         return nullptr;
