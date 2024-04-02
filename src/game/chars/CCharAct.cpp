@@ -3401,7 +3401,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
     }
 
 	// ok to go here ? physical blocking objects ?
-	uint64 uiBlockFlags = 0Ui64;
+	uint64 uiBlockFlags = 0;
 	height_t ClimbHeight = 0;
 	CRegion *pArea = nullptr;
 

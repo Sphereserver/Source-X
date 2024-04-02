@@ -597,7 +597,7 @@ public:
 	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks
 
 	virtual int IsWeird() const override;
-	char GetFixZ(CPointMap pt, uint64 uiBlockFlags = 0Ui64);
+	char GetFixZ(CPointMap pt, uint64 uiBlockFlags = 0);
 
 	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;

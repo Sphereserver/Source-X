@@ -724,7 +724,7 @@ void CItemBase::GetItemTiledataFlags( uint64 *uiCanFlags, ITEMID_TYPE id ) // st
     CUOItemTypeRec_HS tiledata{};
 	if ( ! CItemBase::GetItemData( id, &tiledata ))
 	{
-        *uiCanFlags = 0Ui64;
+        *uiCanFlags = 0;
 		return;
 	}
 

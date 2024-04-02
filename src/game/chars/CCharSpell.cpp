@@ -2162,7 +2162,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					ptg.m_y += (short)(iy);
 				}
 
-				uint64 uiBlockFlags = 0Ui64;
+				uint64 uiBlockFlags = 0;
 				CWorldMap::GetHeightPoint2(ptg, uiBlockFlags, true);
 				if (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR))
 				{
@@ -2589,7 +2589,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 		if (IsSetMagicFlags(MAGICF_SUMMONWALKCHECK))	// check if the target location is valid
 		{
 			const uint64 uiCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
-			uint64 uiBlockFlags = 0Ui64;
+			uint64 uiBlockFlags = 0;
 			CWorldMap::GetHeightPoint2(ptTarg, uiBlockFlags, true);
 
 			if (uiBlockFlags & ~uiCan)

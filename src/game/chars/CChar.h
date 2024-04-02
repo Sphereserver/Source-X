@@ -341,7 +341,7 @@ public:		void  StatFlag_Clear(uint64 uiStatFlag) noexcept;
 //protected:	void _StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
-	char GetFixZ(const CPointMap& pt, uint64 uiBlockFlags = 0Ui64);
+	char GetFixZ(const CPointMap& pt, uint64 uiBlockFlags = 0);
 	bool IsPriv( word flag ) const;
 	virtual PLEVEL_TYPE GetPrivLevel() const override;
 

@@ -2822,7 +2822,7 @@ do_default:
 					sVal.FormatULLHex( UINT64_MAX );
 				else
 				{
-					uint64 uiBlockFlags = 0Ui64;
+					uint64 uiBlockFlags = 0;
 					CWorldMap::GetHeightPoint2(ptDst, uiBlockFlags, true);
 					sVal.FormatULLHex(uiBlockFlags);
 				}
