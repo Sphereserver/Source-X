@@ -77,6 +77,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@Redeed",
     "@RegionEnter",
     "@RegionLeave",
+    "@ResourceGather",
+    "@ResourceTest",
 	"@SELL",
 	"@Ship_Move",
 	"@Ship_Stop",

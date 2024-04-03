@@ -1,7 +1,11 @@
 
-#include "../chars/CChar.h"
-#include "../CWorldMap.h"
 #include "CItem.h"
+#include "../chars/CChar.h"
+#include "../triggers.h"
+#include "../CWorldMap.h"
+#include "../../common/CScriptTriggerArgs.h"
+#include "../../common/resource/CResourceID.h"
+#include "../CServer.h"
 
 void CItem::Plant_SetTimer()
 {
@@ -26,8 +30,20 @@ bool CItem::Plant_Use(CChar *pChar)
 	const CItemBase* pItemDef = Item_GetDef();
 
 	ITEMID_TYPE iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
-	ITEMID_TYPE iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
+    ITEMID_TYPE iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
+    ITEMID_TYPE iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
     word iAmount = std::max(m_itCrop.m_ridAmount, (word)1);
+    if (IsTrigUsed(TRIGGER_RESOURCETEST))
+    {
+        CScriptTriggerArgs args(iGrowID, iFruitID, iFruitIDOverride);
+        TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceTest, pChar, &args);
+        iGrowID = (ITEMID_TYPE)(RES_GET_INDEX(args.m_iN1));
+        iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(args.m_iN2));
+        iFruitIDOverride = (ITEMID_TYPE)(RES_GET_INDEX(args.m_iN3));
+        if (iRet == TRIGRET_RET_TRUE)
+            return true;
+    }
+
 	if (iGrowID != ITEMID_NOTHING)	// If we set an override, we can reap this at every stage
 	{
 		// not ripe. (but we could just eat it if we are herbivorous ?)
@@ -35,25 +51,41 @@ bool CItem::Plant_Use(CChar *pChar)
 		return true;
 	}
 
-	ITEMID_TYPE iFruitID = ITEMID_NOTHING;
 	if ( iFruitIDOverride != ITEMID_NOTHING )
 		iFruitID = iFruitIDOverride;
-	else
-		iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
 
 	if ( iFruitID == ITEMID_NOTHING )
 		pChar->SysMessageDefault(DEFMSG_CROPS_NO_FRUIT);
 	else
 	{
 		CItem *pItemFruit = CItem::CreateScript(iFruitID, pChar);
+        iAmount = (pItemFruit->IsStackableType() ? iAmount : 1);
         if (pItemFruit)
         {
-            if (pItemFruit->IsStackableType())
-                pItemFruit->SetAmount(iAmount);
+            if (IsTrigUsed(TRIGGER_RESOURCEGATHER))
+            {
+                CScriptTriggerArgs args(iAmount);
+                args.m_pO1 = pItemFruit;
+                TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceGather, pChar, &args);
+                iAmount = (word)(args.m_iN1 > 0 ? args.m_iN1 : 1);
+                if (iRet == TRIGRET_RET_TRUE)
+                {
+                    pItemFruit->Delete(true);
+                    return true;
+                }
+                else if (iRet == TRIGRET_RET_HALFBAKED)
+                {
+                    pItemFruit->SetAmount(iAmount);
+                    pItemFruit->MoveToDecay(GetTopPoint(), g_Cfg.m_iDecay_Item);
+                    goto cropReset;
+                }
+            }
+            pItemFruit->SetAmount(iAmount);
             pChar->ItemBounce(pItemFruit);
         }
 	}
 
+    cropReset:
 	Plant_CropReset();
 	pChar->UpdateAnimate(ANIM_BOW);
 	pChar->Sound(0x13e);
@@ -118,11 +150,18 @@ bool CItem::Plant_OnTick()
 	}
 	else if ( iGrowID )
 	{
-		SetID(iGrowID);
+		Plant_SetID(iGrowID);
 		Update();
 	}
 
 	return true;
+}
+
+bool CItem::Plant_SetID(ITEMID_TYPE id)
+{
+    bool iRet = SetID(id);
+    OnTrigger(ITRIG_Create, &g_Serv, nullptr);
+    return iRet;
 }
 
 // Animals will eat crops before they are ripe, so we need a way to reset them prematurely
@@ -140,7 +179,7 @@ void CItem::Plant_CropReset()
 	const CItemBase *pItemDef = Item_GetDef();
 	ITEMID_TYPE iResetID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridReset.GetResIndex();
 	if ( iResetID != ITEMID_NOTHING )
-		SetID(iResetID);
+		Plant_SetID(iResetID);
 
 	Plant_SetTimer();
 	RemoveFromView();		// remove from most screens.

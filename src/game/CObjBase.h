@@ -1048,6 +1048,8 @@ enum ITRIG_TYPE
     ITRIG_Redeed,               // Redeeding a multi.
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
+    ITRIG_ResourceGather,
+    ITRIG_ResourceTest,
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Move,            // I'm a ship and i'm move around.
     ITRIG_Ship_Stop,            // I'm a ship and i'm stop around.

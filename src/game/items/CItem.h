@@ -840,6 +840,7 @@ public:
 	bool Plant_OnTick();
 	void Plant_CropReset();
 	bool Plant_Use( CChar * pChar );
+    bool Plant_SetID(ITEMID_TYPE id);
 
 	virtual void DupeCopy( const CObjBase * pItem ) override;
 	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );
