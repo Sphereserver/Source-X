@@ -1267,9 +1267,12 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
-					if ( pResDef )
-						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
+                    if (pItem->m_itResource.m_ridRes.IsValidResource())
+                    {
+                        CResourceDef* pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
+                        if (pResDef)
+                            len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
+                    }
 				}
 				break;
 

@@ -3538,7 +3538,7 @@ Fixed: Possible fix for chat debugs. (Issue: #1212) (Issue: https://discord.com/
 03-04-2024, xwerswoodx
 Added: "MOREX" key to set amount of fruit given when the crop ripped.
 Changed: Now @Create trigger called when crop grow to let people to change MORE values in stages if needed.
-Added: @ResourceTest trigger added for crops. (This trigger works seperately for every stage)
+Added: @ResourceTest trigger added for crops. (This trigger works separately for every stage)
 	I: Crop UID
 	SRC: Player who uses plant.
 	ARGN1: Next state item ID [Writeable]
@@ -3546,7 +3546,7 @@ Added: @ResourceTest trigger added for crops. (This trigger works seperately for
 	ARGN3: Fruit ID Override (if exists) [Writeable]
 	- Returns:
 	1: Stop the fruit checks.
-Added: @ResourceGather trigger added for crops. (This trigger works seperately for every stage)
+Added: @ResourceGather trigger added for crops. (This trigger works separately for every stage)
 	I: Crop UID
 	SRC: Player who is gathering plant.
 	ARGN1: Amount of fruit. [Writeable]
@@ -3554,3 +3554,4 @@ Added: @ResourceGather trigger added for crops. (This trigger works seperately f
 	- Returns:
 	1: Prevent player to gather fruit.
 	6: Let player to gather fruit but it will drop to the ground instead of backpack.
+Fixed: Possible fix for invalid ResourceID warnings. (Issue: #1071)

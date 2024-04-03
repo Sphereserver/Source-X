@@ -4277,8 +4277,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if ( !Arg_Qty )
 					return false;
 				return UpdateAnimate((ANIM_TYPE)(Arg_piCmd[0]), true, false,
-					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : 1,
-					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : 1);
+					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : (byte)0,
+					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : (byte)7);
 			}
 			break;
 		case CHV_ATTACK:

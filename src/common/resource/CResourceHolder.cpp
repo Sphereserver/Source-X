@@ -287,9 +287,12 @@ lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
 	ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
 	// Get a portable name for the resource id type.
 
-	const CResourceDef * pResourceDef = ResourceGetDef( rid );
-	if ( pResourceDef )
-		return pResourceDef->GetResourceName();
+    if (rid.IsValidResource())
+    {
+        const CResourceDef* pResourceDef = ResourceGetDef(rid);
+        if (pResourceDef)
+            return pResourceDef->GetResourceName();
+    }
 
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
