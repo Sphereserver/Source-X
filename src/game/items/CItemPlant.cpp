@@ -27,7 +27,8 @@ bool CItem::Plant_Use(CChar *pChar)
 
 	ITEMID_TYPE iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
 	ITEMID_TYPE iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
-	if ( (iGrowID == ITEMID_NOTHING) && (iFruitIDOverride != ITEMID_NOTHING) )	// If we set an override, we can reap this at every stage
+    word iAmount = std::max(m_itCrop.m_ridAmount, (word)1);
+	if (iGrowID != ITEMID_NOTHING)	// If we set an override, we can reap this at every stage
 	{
 		// not ripe. (but we could just eat it if we are herbivorous ?)
 		pChar->SysMessageDefault(DEFMSG_CROPS_NOT_RIPE);
@@ -45,8 +46,12 @@ bool CItem::Plant_Use(CChar *pChar)
 	else
 	{
 		CItem *pItemFruit = CItem::CreateScript(iFruitID, pChar);
-		if ( pItemFruit )
-			pChar->ItemBounce(pItemFruit);
+        if (pItemFruit)
+        {
+            if (pItemFruit->IsStackableType())
+                pItemFruit->SetAmount(iAmount);
+            pChar->ItemBounce(pItemFruit);
+        }
 	}
 
 	Plant_CropReset();

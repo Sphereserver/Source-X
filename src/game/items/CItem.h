@@ -345,6 +345,7 @@ public:
 		{
 			int32 m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
             CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
+            word m_ridAmount;                   // morex = amount of fruit.
 		} m_itCrop;
 
 		// IT_TREE

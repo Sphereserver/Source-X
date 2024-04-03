@@ -3534,3 +3534,6 @@ Fixed: Possible fix for the OnRegionTrigger getting called on invalid region whi
 02-04-2024, xwerswoodx
 Changed: dword CAN flags changed with uint64 to increase limits.
 Fixed: Possible fix for chat debugs. (Issue: #1212) (Issue: https://discord.com/channels/354358315373035542/483721253773901824/1224030729906815077)
+
+03-04-2024, xwerswoodx
+Added: "MOREX" key to set amount of fruit given when the crop ripped.
