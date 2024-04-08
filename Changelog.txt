@@ -3555,3 +3555,6 @@ Added: @ResourceGather trigger added for crops. (This trigger works separately f
 	1: Prevent player to gather fruit.
 	6: Let player to gather fruit but it will drop to the ground instead of backpack.
 Fixed: Possible fix for invalid ResourceID warnings. (Issue: #1071)
+
+08-04-2024, xwerswoodx
+Fixed: Missing REGION reference for multis. (Issue: #1228)
