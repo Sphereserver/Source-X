@@ -808,7 +808,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Curse:
 		case SPELL_Mass_Curse:
 		{
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Mass_Curse ? EE_MASS_CURSE : EE_CURSE)) && m_pPlayer)
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -855,7 +855,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			UpdateStatVal( STAT_INT, +uiStatEffect );
 			return;
 		case SPELL_Reactive_Armor:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -874,7 +874,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Clear(STATF_REFLECTION);
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -891,27 +891,37 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Stoneskin:		// 115 // turns your skin into stone, giving a boost to your AR.
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-			{
-				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
-				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
-                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+        {
+            ELEMENTALENGINEFLAGS_TYPE iType = EE_PROTECTION;
+            if (spell == SPELL_Steelskin)
+                iType = EE_STEELSKIN;
+            else if (spell == SPELL_Stoneskin)
+                iType = EE_STONESKIN;
+            else if (spell == SPELL_Arch_Prot)
+                iType = EE_ARCH_PROTECTION;
+
+            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(iType))
+            {
+                CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+                CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, +pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_FASTERCASTING, +2, pBaseCCPChar);
                 _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
-				Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
-			}
-			else
-			{
-				m_defense = (word)CalcArmorDefense();
-			}
-			if (pClient)
-			{
-				if (spell == SPELL_Protection)
-					pClient->removeBuff(BI_PROTECTION);
-				else if (spell == SPELL_Arch_Prot)
-					pClient->removeBuff(BI_ARCHPROTECTION);
-			}
-			return;
+                Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
+            }
+            else
+            {
+                m_defense = (word)CalcArmorDefense();
+            }
+            if (pClient)
+            {
+                if (spell == SPELL_Protection)
+                    pClient->removeBuff(BI_PROTECTION);
+                else if (spell == SPELL_Arch_Prot)
+                    pClient->removeBuff(BI_ARCHPROTECTION);
+            }
+            return;
+        }
 		/*case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 			return;*/
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
@@ -1366,7 +1376,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	switch ( spell )
 	{
 		case SPELL_Reactive_Armor:
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
 			{
                 wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1389,7 +1399,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_REACTIVEARMOR);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
 				{
 					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1475,7 +1485,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
                     wStatEffectRef = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 				}
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )		// Curse also decrease max resistances on players
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Mass_Curse ? EE_MASS_CURSE : EE_CURSE)) && m_pPlayer)		// Curse also decrease max resistances on players
 				{
 					CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 					CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1502,7 +1512,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
 						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
-					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Mass_Curse ? EE_MASS_CURSE : EE_CURSE)))
 					{
 						for ( int idx = 3; idx < 7; ++idx )
 							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
@@ -1603,7 +1613,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Set( STATF_REFLECTION );
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
 			{
                 wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1618,7 +1628,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_MAGICREFLECTION);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
 				{
 					Str_FromI(-wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1639,7 +1649,15 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				int iPhysicalResist = 0;
 				int iMagicResist = 0;
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+                ELEMENTALENGINEFLAGS_TYPE iType = EE_PROTECTION;
+                if (spell == SPELL_Steelskin)
+                    iType = EE_STEELSKIN;
+                else if (spell == SPELL_Stoneskin)
+                    iType = EE_STONESKIN;
+                else if (spell == SPELL_Arch_Prot)
+                    iType = EE_ARCH_PROTECTION;
+
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(iType))
 				{
 					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
 					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
@@ -1680,7 +1698,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					}
 
 					pClient->removeBuff(BuffIcon);
-					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(iType))
 					{
 						Str_FromI(-iPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
 						Str_FromI(-iMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);

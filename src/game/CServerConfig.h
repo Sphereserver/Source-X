@@ -130,6 +130,23 @@ enum COMBATFLAGS_TYPE
 };
 
 /**
+* @enum     ELEMENTALENGINEFLAGS_TYPE
+* @brief    ElementalEngineFlags (sphere.ini)
+*/
+enum ELEMENTALENGINEFLAGS_TYPE
+{
+    EE_CURSE                    = 0x1,      // Adds Elemental buff/defuff to curse spell.
+    EE_MASS_CURSE               = 0x2,      // Adds Elemental buff/defuff to mass curse spell.
+    EE_REACTIVE_ARMOR           = 0x4,      // Adds Elemental buff/defuff to reactive armor spell.
+    EE_MAGIC_REFLECT            = 0x8,      // Adds Elemental buff/defuff to magic reflect spell.
+    EE_PROTECTION               = 0x10,     // Adds Elemental buff/defuff to protection spell.
+    EE_ARCH_PROTECTION          = 0x20,     // Adds Elemental buff/defuff to arch protection spell.
+    EE_STONESKIN                = 0x40,     // Adds Elemental buff/defuff to stone skin spell.
+    EE_STEELSKIN                = 0x80,     // Adds Elemental buff/defuff to steel skin spell.
+    EE_RESPHYSICAL              = 0x100     // Use RESPHYSICAL value instead of ARMOR for defense calculation.
+};
+
+/**
 * @enum    PARRYFLAGS_TYPE
 * @brief   ParryEra (sphere.ini): Parrying behaviour
 */
@@ -374,6 +391,7 @@ public:
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
+    uint64 m_iElementalEngineFlags;     //Elemental engine flags
 	uint m_iRacialFlags;   // racial traits flags
 	uint m_iRevealFlags;   // reveal flags used for SPELL_REVEAL (mostly for backwards).
 	uint m_iEmoteFlags;    // emote flags
@@ -1111,6 +1129,7 @@ typedef std::map<dword,dword> KRGumpsMap;
 #define IsSetOF(of)				((g_Cfg._uiOptionFlags & of) != 0)
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
+#define IsSetEEFlags(of)        ((g_Cfg.m_iElementalEngineFlags & of) != 0)
 
 
 #endif	// _INC_CSERVERCONFIG_H

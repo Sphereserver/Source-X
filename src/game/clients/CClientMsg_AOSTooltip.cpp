@@ -475,7 +475,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	case IT_CLOTHING:
 	case IT_SHIELD:
 	{
-        if (!IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+        if (!IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) || (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !IsSetEEFlags(EE_RESPHYSICAL)))
         {
             int iArmorRating = pItem->Armor_GetDefense();
 			int iPercentArmorRating = 0;
