@@ -3572,3 +3572,4 @@ Added: ElementalEngineFlags variable added to sphere.ini to let servers to filte
 09-04-2024, xwerswoodx
 Fixed: An issue that causes T_MULTI_CUSTOM keep multi count saved. (Issue: #1232)
 Fixed: Bonded pets cannot see their master while DeadCannotSeeLiving equals to 2. (Issue: #1225)
+Fixed: The issue that causes Guilds without align shown enemy to the players with a guild with align. (Issue: #1208)
