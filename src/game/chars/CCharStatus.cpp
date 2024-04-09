@@ -1027,8 +1027,11 @@ bool CChar::CanSeeAsDead( const CChar *pChar) const
 	{
 		if ( pChar->m_pPlayer )
 		{
-			if ( iDeadCannotSee == 2 )
-				return false;
+            if (IsNPC() && NPC_PetGetOwner() != pChar) //NPCs should see their owners even if iDeadCannotSee equals to 2.
+            {
+                if (iDeadCannotSee == 2)
+                    return false;
+            }
 		}
 		else
 		{
