@@ -3654,7 +3654,7 @@ HOUSE_PRIV CMultiStorage::GetPriv(const CUID& uidMulti)
 {
     ADDTOCALLSTACK("CMultiStorage::GetPrivMulti");
     const CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
-    if (pMulti->IsType(IT_MULTI))
+    if (pMulti->IsType(IT_MULTI) || pMulti->IsType(IT_MULTI_CUSTOM))
     {
         return _lHouses[uidMulti];
     }
