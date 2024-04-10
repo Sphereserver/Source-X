@@ -3575,3 +3575,6 @@ Fixed: Bonded pets cannot see their master while DeadCannotSeeLiving equals to 2
 Fixed: The issue that causes Guilds without an align shown enemy to the players with a guild with an align. (Issue: #1208)
 Fixed: Another fix for Invalid ResourceID console warnings. (Issue: #1071)
 Fixed: GMs cannot dress up players. (Issue: #901)
+
+10-04-2024, xwerswoodx
+Fixed: Wrong check block GMs to unequip item from players.

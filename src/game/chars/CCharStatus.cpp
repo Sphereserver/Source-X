@@ -903,7 +903,7 @@ bool CChar::CanDress(const CChar* pChar) const
 {
     if (IsPriv(PRIV_GM) && (GetPrivLevel() > pChar->GetPrivLevel() || GetPrivLevel() == PLEVEL_Owner))
         return true;
-    else if (pChar->IsOwnedBy(this))
+    else if (g_Cfg.m_fCanUndressPets && pChar->IsOwnedBy(this))
         return true;
     return false;
 }
