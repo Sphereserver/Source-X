@@ -3574,3 +3574,4 @@ Fixed: An issue that causes T_MULTI_CUSTOM keep multi count saved. (Issue: #1232
 Fixed: Bonded pets cannot see their master while DeadCannotSeeLiving equals to 2. (Issue: #1225)
 Fixed: The issue that causes Guilds without an align shown enemy to the players with a guild with an align. (Issue: #1208)
 Fixed: Another fix for Invalid ResourceID console warnings. (Issue: #1071)
+Fixed: GMs cannot dress up players. (Issue: #901)

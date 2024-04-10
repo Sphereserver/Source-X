@@ -899,6 +899,15 @@ CChar * CChar::GetOwner() const
 	return nullptr;
 }
 
+bool CChar::CanDress(const CChar* pChar) const
+{
+    if (IsPriv(PRIV_GM) && (GetPrivLevel() > pChar->GetPrivLevel() || GetPrivLevel() == PLEVEL_Owner))
+        return true;
+    else if (pChar->IsOwnedBy(this))
+        return true;
+    return false;
+}
+
 bool CChar::IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 {
 	ADDTOCALLSTACK("CChar::IsOwnedBy");
@@ -1388,7 +1397,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 			if ( pChar == this )
 				return true;
 			if ( IsPriv(PRIV_GM) )
-				return (GetPrivLevel() >= pChar->GetPrivLevel());
+				return (GetPrivLevel() > pChar->GetPrivLevel() || GetPrivLevel() == PLEVEL_Owner);
 			//The check below is needed otherwise, you cannot resurrect a player ghost by using bandages (unless you are a GM), maybe there is a better way?
 			if (pChar->IsStatFlag(STATF_DEAD) && (Skill_GetActive() == SKILL_HEALING || Skill_GetActive() == SKILL_VETERINARY))
 				return true;

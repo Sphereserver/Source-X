@@ -1112,6 +1112,7 @@ private:
     CChar* Horse_GetValidMountChar();
 
 public:
+    bool CanDress(const CChar* pChar) const;
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
