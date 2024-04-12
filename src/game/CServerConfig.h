@@ -178,7 +178,6 @@ enum MAGICFLAGS_TYPE
     MAGICF_CASTPARALYZED        = 0x0002000,    // Can cast even if paralyzed
     MAGICF_NOREFLECTOWN         = 0x0004000,    // Do not reflect the own spells if the spell reflected from the target.
     MAGICF_DELREFLECTOWN        = 0x0008000,    // Remove reflection instead of damaging himself when NOREFLECTOWN active if the spell reflected from another target.
-    MAGICF_REACTIVEARMORTH      = 0x0010000     // Reactive armor reflect two handed weapons.
 };
 
 enum REVEALFLAGS_TYPE
@@ -391,7 +390,7 @@ public:
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
-    uint64 m_iElementalEngineFlags;     //Elemental engine flags
+    uint m_iElementalEngineFlags;     //Elemental engine flags
 	uint m_iRacialFlags;   // racial traits flags
 	uint m_iRevealFlags;   // reveal flags used for SPELL_REVEAL (mostly for backwards).
 	uint m_iEmoteFlags;    // emote flags

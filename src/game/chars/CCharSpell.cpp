@@ -2281,7 +2281,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
 
-            if (pSpellDef->IsSpellType(SPELLFLAG_ASYNC)) // If the spell has ASYNC flag, the timers should be randomized.
+            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY)) // If the spell has ASYNC flag, the timers should be randomized.
                 iDuration += Calc_GetRandLLVal(iDuration / 2);
 
 			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_TENTH, true);
