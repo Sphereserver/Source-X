@@ -931,17 +931,14 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 
     if (!pDesign->m_vectorComponents.empty())
     {
-        if (_iMaxPlane < 0)
+        // find the highest plane/floor
+        for (const CMultiComponent *pComp : pDesign->m_vectorComponents)
         {
-            // find the highest plane/floor
-            for (const CMultiComponent *pComp : pDesign->m_vectorComponents)
-            {
-                const uchar uiPlane = GetPlane(pComp);
-                if (uiPlane <= _iMaxPlane)
-                    continue;
+            const uchar uiPlane = GetPlane(pComp);
+            if (uiPlane <= _iMaxPlane)
+                continue;
 
-                _iMaxPlane = uiPlane;
-            }
+            _iMaxPlane = uiPlane;
         }
 
         // determine the dimensions of the building
