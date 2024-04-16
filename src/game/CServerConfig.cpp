@@ -200,6 +200,10 @@ CServerConfig::CServerConfig()
 	_uiAreaFlags		= AREAF_RoomInheritsFlags;
 	_fMeditationMovementAbort = false;
 
+    m_iMapViewSize      = UO_MAP_VIEW_SIZE_DEFAULT;
+    m_iMapViewSizeMax   = UO_MAP_VIEW_SIZE_MAX;
+    m_iMapViewRadar     = UO_MAP_VIEW_RADAR;
+
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 15;
 	m_iWalkRegen		= 25;
@@ -573,6 +577,9 @@ enum RC_TYPE
     RC_MANALOSSFAIL,			// m_fManaLossFail
 	RC_MANALOSSPERCENT,			// m_fManaLossPercent
 	RC_MAPCACHETIME,
+    RC_MAPVIEWRADAR,
+    RC_MAPVIEWSIZE,
+    RC_MAPVIEWSIZEMAX,
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
 	RC_MAXCHARSPERACCOUNT,		//
 	RC_MAXCOMPLEXITY,			// m_iMaxCharComplexity
@@ -790,62 +797,65 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
 #endif
     { "DUNGEONLIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDungeon)			}},
     { "ELEMENTALENGINEFLAGS",   { ELEM_MASK_INT, static_cast<uint64>OFFSETOF(CServerConfig, m_iElementalEngineFlags) }},
-	{ "EMOTEFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iEmoteFlags)			}},
-	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fEquippedCast)			}},
-	{ "ERALIMITGEAR",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
-	{ "ERALIMITLOOT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
-	{ "ERALIMITPROPS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
-	{ "EVENTSITEM",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItem)			}},
-	{ "EVENTSPET",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPet)			}},
-	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPlayer)			}},
-	{ "EVENTSREGION",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsRegion)			}},
-	{ "EXPERIENCEKOEFPVM",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVM)	}},
-	{ "EXPERIENCEKOEFPVP",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVP)	}},
-	{ "EXPERIENCEMODE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceMode)		}},
-	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bExperienceSystem)		}},
-	{ "EXPERIMENTAL",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiExperimentalFlags)	}},
-	{ "FEATUREAOS",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureAOS)			}},
-	{ "FEATUREEXTRA",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureExtra)			}},
-	{ "FEATUREKR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureKR)			}},
-	{ "FEATURELBR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureLBR)			}},
-	{ "FEATUREML",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureML)			}},
-	{ "FEATURESA",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureSA)			}},
-	{ "FEATURESE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureSE)			}},
-	{ "FEATURET2A",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureT2A)			}},
-	{ "FEATURETOL",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureTOL)			}},
-	{ "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fFlipDroppedItems)		}},
-	{ "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fSaveGarbageCollect)	}},
-	{ "FREEZERESTARTTIME",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFreezeRestartTime)	}},
-	{ "GAMEMINUTELENGTH",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGameMinuteLength)		}},
-	{ "GENERICSOUNDS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGenericSounds)		}},
-	{ "GUARDLINGER",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGuardLingerTime)		}},
-	{ "GUARDSINSTANTKILL",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGuardsInstantKill)	}},
-	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGuardsOnMurderers)	}},
-	{ "GUESTSMAX",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGuestsMax)			}},
-	{ "GUILDS",					{ ELEM_VOID,	0												}},
-	{ "HEARALL",				{ ELEM_VOID,	0												}},
-	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime)	}},
-	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iHitpointPercentOnRez) }},
-	{ "HITSHUNGERLOSS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iHitsHungerLoss)		}},
-	{ "HITSUPDATERATE",			{ ELEM_VOID,	0												}},
+    { "EMOTEFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iEmoteFlags)			}},
+    { "EQUIPPEDCAST",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fEquippedCast)			}},
+    { "ERALIMITGEAR",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
+    { "ERALIMITLOOT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
+    { "ERALIMITPROPS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
+    { "EVENTSITEM",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItem)			}},
+    { "EVENTSPET",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPet)			}},
+    { "EVENTSPLAYER",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPlayer)			}},
+    { "EVENTSREGION",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsRegion)			}},
+    { "EXPERIENCEKOEFPVM",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVM)	}},
+    { "EXPERIENCEKOEFPVP",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVP)	}},
+    { "EXPERIENCEMODE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceMode)		}},
+    { "EXPERIENCESYSTEM",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bExperienceSystem)		}},
+    { "EXPERIMENTAL",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiExperimentalFlags)	}},
+    { "FEATUREAOS",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureAOS)			}},
+    { "FEATUREEXTRA",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureExtra)			}},
+    { "FEATUREKR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureKR)			}},
+    { "FEATURELBR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureLBR)			}},
+    { "FEATUREML",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureML)			}},
+    { "FEATURESA",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureSA)			}},
+    { "FEATURESE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureSE)			}},
+    { "FEATURET2A",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureT2A)			}},
+    { "FEATURETOL",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureTOL)			}},
+    { "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fFlipDroppedItems)		}},
+    { "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fSaveGarbageCollect)	}},
+    { "FREEZERESTARTTIME",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFreezeRestartTime)	}},
+    { "GAMEMINUTELENGTH",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGameMinuteLength)		}},
+    { "GENERICSOUNDS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGenericSounds)		}},
+    { "GUARDLINGER",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGuardLingerTime)		}},
+    { "GUARDSINSTANTKILL",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGuardsInstantKill)	}},
+    { "GUARDSONMURDERERS",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGuardsOnMurderers)	}},
+    { "GUESTSMAX",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGuestsMax)			}},
+    { "GUILDS",					{ ELEM_VOID,	0												}},
+    { "HEARALL",				{ ELEM_VOID,	0												}},
+    { "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime)	}},
+    { "HITPOINTPERCENTONREZ",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iHitpointPercentOnRez) }},
+    { "HITSHUNGERLOSS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iHitsHungerLoss)		}},
+    { "HITSUPDATERATE",			{ ELEM_VOID,	0												}},
     { "ITEMHITPOINTSUPDATE",    { ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_iItemHitpointsUpdate),  }},
-	{ "ITEMSMAXAMOUNT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iItemsMaxAmount),		}},
-	{ "LEVELMODE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelMode),			}},
-	{ "LEVELNEXTAT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelNextAt),			}},
-	{ "LEVELSYSTEM",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bLevelSystem),			}},
-	{ "LIGHTDAY",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDay),			}},
-	{ "LIGHTNIGHT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightNight),			}},
-	{ "LOCALIPADMIN",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLocalIPAdmin),		}}, // The local ip is assumed to be the admin.
-	{ "LOG",					{ ELEM_VOID,	0												}},
-	{ "LOGMASK",				{ ELEM_VOID,	0												}}, // GetLogMask
-	{ "LOOTINGISACRIME",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLootingIsACrime)		}},
-	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLostNPCTeleport)		}},
-	{ "MAGICFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iMagicFlags)			}},
-	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMagicUnlockDoor)		}},
-	{ "MANALOSSABORT",		    { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fManaLossAbort)		}},
+    { "ITEMSMAXAMOUNT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iItemsMaxAmount),		}},
+    { "LEVELMODE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelMode),			}},
+    { "LEVELNEXTAT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelNextAt),			}},
+    { "LEVELSYSTEM",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bLevelSystem),			}},
+    { "LIGHTDAY",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDay),			}},
+    { "LIGHTNIGHT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightNight),			}},
+    { "LOCALIPADMIN",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLocalIPAdmin),		}}, // The local ip is assumed to be the admin.
+    { "LOG",					{ ELEM_VOID,	0												}},
+    { "LOGMASK",				{ ELEM_VOID,	0												}}, // GetLogMask
+    { "LOOTINGISACRIME",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLootingIsACrime)		}},
+    { "LOSTNPCTELEPORT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLostNPCTeleport)		}},
+    { "MAGICFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iMagicFlags)			}},
+    { "MAGICUNLOCKDOOR",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMagicUnlockDoor)		}},
+    { "MANALOSSABORT",		    { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fManaLossAbort)		}},
     { "MANALOSSFAIL",		    { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fManaLossFail)			}},
-	{ "MANALOSSPERCENT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_fManaLossPercent)		}},
-	{ "MAPCACHETIME",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iMapCacheTime)			}},
+    { "MANALOSSPERCENT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_fManaLossPercent)		}},
+    { "MAPCACHETIME",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iMapCacheTime)			}},
+    { "MAPVIEWRADAR",           { ELEM_BYTE,    static_cast<uint>OFFSETOF(CServerConfig,m_iMapViewRadar)        }},
+    { "MAPVIEWSIZE",            { ELEM_BYTE,    static_cast<uint>OFFSETOF(CServerConfig,m_iMapViewSize)         }},
+    { "MAPVIEWSIZEMAX",         { ELEM_BYTE,    static_cast<uint>OFFSETOF(CServerConfig,m_iMapViewSizeMax)      }},
 	{ "MAXBASESKILL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMaxBaseSkill)			}},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,m_iMaxCharsPerAccount)	}},
 	{ "MAXCOMPLEXITY",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMaxCharComplexity)	}},
@@ -1238,6 +1248,15 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_MAPCACHETIME:
 			_iMapCacheTime = s.GetArgLLVal() * MSECS_PER_SEC;
 			break;
+        case RC_MAPVIEWRADAR:
+            m_iMapViewRadar = s.GetArgBVal();
+            break;
+        case RC_MAPVIEWSIZE:
+            m_iMapViewSize = s.GetArgBVal();
+            break;
+        case RC_MAPVIEWSIZEMAX:
+            m_iMapViewSizeMax = s.GetArgBVal();
+            break;
 		case RC_MAXCHARSPERACCOUNT:
 			m_iMaxCharsPerAccount = (uchar)(s.GetArgVal());
 			if ( m_iMaxCharsPerAccount > MAX_CHARS_PER_ACCT )
@@ -2050,6 +2069,15 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 		case RC_MAPCACHETIME:
 			sVal.FormatLLVal( _iMapCacheTime / MSECS_PER_SEC );
 			break;
+        case RC_MAPVIEWRADAR:
+            sVal.FormatBVal(m_iMapViewRadar);
+            break;
+        case RC_MAPVIEWSIZE:
+            sVal.FormatBVal(m_iMapViewSize);
+            break;
+        case RC_MAPVIEWSIZEMAX:
+            sVal.FormatBVal(m_iMapViewSizeMax);
+            break;
 		case RC_NOTOTIMEOUT:
 			sVal.FormatVal(m_iNotoTimeout);
 			break;

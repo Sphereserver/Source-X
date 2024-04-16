@@ -2454,7 +2454,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 		if (s.HasArgs())
 			iDist = s.GetArgVal();
 		else
-			iDist = UO_MAP_VIEW_SIZE_DEFAULT;
+			iDist = g_Cfg.m_iMapViewSize;
 
 		CObjBaseTemplate* pObj = dynamic_cast <CObjBaseTemplate*>(this);
 		if (pObj == nullptr)

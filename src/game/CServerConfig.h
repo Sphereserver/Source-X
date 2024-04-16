@@ -433,6 +433,10 @@ public:
 	int m_iDistanceTalk;        // Max distance at which Talking can be readed.
     int m_iNPCDistanceHear;     // Max distance at which NPCs can hear.
 
+    byte m_iMapViewSize;        // Visibility for normal items (on old clients it's always 18)
+    byte m_iMapViewSizeMax;     // Max visibility for normal items, default 24.
+    byte m_iMapViewRadar;       // Visibility for castles, keeps and boats, default 31.
+
 	CSString	m_sSpeechSelf;  // [SPEECH ] associated to players.
 	CSString	m_sSpeechPet;   // [SPEECH ] associated to pets.
 	CSString	m_sSpeechOther; // unused?

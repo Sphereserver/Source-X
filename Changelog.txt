@@ -3629,3 +3629,8 @@ Added: Trigger @GetHit is added as an item trigger.
 	- LOCAL.ITEMDAMAGELAYER: The layer of the item being damaged. [Read Only]
 	Returns:
 	1: Prevents damage from being applied to the character.
+Added: MAPVIEWRADAR, MAPVIEWSIZE and MAPVIEWSIZEMAX to sphere.ini that overrides default visual range values. (Issue: #1144)
+	Defaults:
+	  MapViewRadar=31
+	  MapViewSize=18
+	  MapViewSizeMax=24

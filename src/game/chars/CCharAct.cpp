@@ -2996,7 +2996,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		int iPoisonLevel = 0;
 
 		int iDist = GetDist(pCharSrc);
-		if (iDist <= UO_MAP_VIEW_SIZE_MAX)
+		if (iDist <= g_Cfg.m_iMapViewSizeMax)
 		{
 			if (iSkill >= 1000)		//Lethal-Deadly
 				iPoisonLevel = 3 + !bool(Calc_GetRandVal(10));
@@ -3295,7 +3295,7 @@ bool CChar::Death()
 		    // Remove the characters which I can't see as dead from the screen
             if (g_Cfg.m_fDeadCannotSeeLiving)
             {
-                CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIZE_MAX);
+                CWorldSearch AreaChars(GetTopPoint(), g_Cfg.m_iMapViewSizeMax);
                 AreaChars.SetSearchSquare(true);
                 for (;;)
                 {

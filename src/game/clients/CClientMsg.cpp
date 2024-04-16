@@ -308,7 +308,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fItems )
 	{
 		// Remove any multi objects first ! or client will hang
-		CWorldSearch AreaItems(GetChar()->GetTopPoint(), UO_MAP_VIEW_RADAR);
+		CWorldSearch AreaItems(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
 		AreaItems.SetSearchSquare(true);
 		for (;;)
 		{
@@ -1932,7 +1932,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
     // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
     //  If ptOld is an invalid point, just send every object i can see.
-	CWorldSearch AreaItems(ptCharThis, UO_MAP_VIEW_RADAR * 2);    // *2 to catch big multis
+	CWorldSearch AreaItems(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
 	AreaItems.SetSearchSquare(true);
 	for (;;)
 	{
@@ -1959,9 +1959,9 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
             /*
             const CPointMap ptMultiCorner = pMulti->GetRegion()->GetRegionCorner(dirFace);
-            if ( ptOld.GetDistSight(ptMultiCorner) > UO_MAP_VIEW_RADAR )
+            if ( ptOld.GetDistSight(ptMultiCorner) > g_Cfg.m_iMapViewRadar )
             {
-                if (ptCharThis.GetDistSight(ptMultiCorner) <= UO_MAP_VIEW_RADAR )
+                if (ptCharThis.GetDistSight(ptMultiCorner) <= g_Cfg.m_iMapViewRadar )
                 {
                     // this just came into view
                     vecMultis.emplace_back(pItem);

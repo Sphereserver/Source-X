@@ -205,7 +205,7 @@ void CChar::Use_MoonGate( CItem * pItem )
         const CPointMap& ptTop = GetTopPoint();
 		for ( ; i < iCount; ++i )
 		{
-			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
+			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= g_Cfg.m_iMapViewSize )
 				break;
 		}
 

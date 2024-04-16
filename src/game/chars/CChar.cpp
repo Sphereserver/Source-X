@@ -285,7 +285,7 @@ CChar::CChar( CREID_TYPE baseID ) :
     _uiRange = RANGE_MAKE(1, 0);   // RangeH = 1; RangeL = 0
 
 	m_StepStealth = 0;
-	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
+	m_iVisualRange = g_Cfg.m_iMapViewSize;
 	m_virtualGold = 0;
 
 	_iTimePeriodicTick = 0;
@@ -877,7 +877,7 @@ void CChar::SetVisualRange(byte newSight)
 	{
 		THREAD_UNIQUE_LOCK_SET;
 		// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
-		m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
+		m_iVisualRange = minimum(newSight, g_Cfg.m_iMapViewSizeMax);
 		pClient = GetClientActive();
 	}
 	if (pClient)

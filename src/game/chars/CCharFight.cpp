@@ -101,7 +101,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD) // guards only fight for justice, they can't commit a crime!!?
 		return false;
 
-	CWorldSearch AreaChars( GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT );
+	CWorldSearch AreaChars( GetTopPoint(), g_Cfg.m_iMapViewSize );
 	for (;;)
 	{
 		CChar * pChar = AreaChars.GetChar();
@@ -183,7 +183,7 @@ void CChar::CallGuards()
 
 	// We don't have any target yet, let's check everyone nearby
 	CChar * pCriminal;
-	CWorldSearch AreaCrime(GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
+	CWorldSearch AreaCrime(GetTopPoint(), g_Cfg.m_iMapViewSize);
 	while ((pCriminal = AreaCrime.GetChar()) != nullptr)
 	{
 		if (pCriminal == this)

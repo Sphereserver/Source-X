@@ -716,8 +716,8 @@ bool CItem::IsMovable() const
 int CItem::GetVisualRange() const	// virtual
 {
 	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
-		return UO_MAP_VIEW_RADAR;
-	return UO_MAP_VIEW_SIZE_DEFAULT;
+		return g_Cfg.m_iMapViewRadar;
+	return g_Cfg.m_iMapViewSize;
 }
 
 // Retrieve tag.override.speed for this CItem
@@ -5013,17 +5013,18 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 
 	CPointMap ptCoords = pUser->GetTopPoint();
 
-#define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
+    // #define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
+    byte bSight = (g_Cfg.m_iMapViewRadar > 5 ? g_Cfg.m_iMapViewRadar - 5 : 26); //m_iMapViewRadar is 31 in default.
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
 	CSString sSearch;
 	tchar	*pResult = Str_GetTemp();
 
 	// Weather bonus
-	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * BASE_SIGHT) : 0.0;
+	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * bSight) : 0.0;
 	// Light level bonus
-	double rLightSight = (1.0 - (static_cast<double>(iLight) / 25.0)) * BASE_SIGHT * 0.25;
-	int iVisibility = (int) (BASE_SIGHT + rWeatherSight + rLightSight);
+	double rLightSight = (1.0 - (static_cast<double>(iLight) / 25.0)) * bSight * 0.25;
+	int iVisibility = (int) (bSight + rWeatherSight + rLightSight);
 
 	// Check for the nearest land, only check every 4th square for speed
 	const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( ptCoords ); // Are we at sea?
@@ -5113,7 +5114,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		}
 
 		// Track boats separately from other items
-		if ( iDist <= UO_MAP_VIEW_RADAR && // if it's visible in the radar window as a boat, report it
+		if ( iDist <= g_Cfg.m_iMapViewRadar && // if it's visible in the radar window as a boat, report it
 			pItem->m_type == IT_SHIP )
 		{
 			++iBoatSighted; // Keep a tally of how many we see
@@ -5147,14 +5148,14 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		DIR_TYPE dir = ptCoords.GetDir(pItemSighted->GetTopPoint());
 		if (iItemSighted == 1)
 		{
-			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
+			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_STH_DIR), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 			else
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 		}
 		else
 		{
-			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
+			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR_MANY), CPointBase::sm_szDirs[ dir ] );
 			else
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));

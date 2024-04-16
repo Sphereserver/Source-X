@@ -1069,12 +1069,12 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		return false;
 
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
-    const int iRand = Calc_GetRandVal(UO_MAP_VIEW_RADAR);
+    const int iRand = Calc_GetRandVal(g_Cfg.m_iMapViewRadar);
     const CPointMap& ptTop = GetTopPoint();
 	
     int iRange = GetVisualRange();
-    if (iRange > UO_MAP_VIEW_RADAR)
-        iRange = UO_MAP_VIEW_RADAR;
+    if (iRange > g_Cfg.m_iMapViewRadar)
+        iRange = g_Cfg.m_iMapViewRadar;
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
@@ -1331,7 +1331,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	EXC_SET_BLOCK("Distance checks");
 	const CPointMap& ptMe = GetTopPoint();
 	int dist = ptMe.GetDist(m_Act_p);
-    if (dist > UO_MAP_VIEW_RADAR)		// too far away ?
+    if (dist > g_Cfg.m_iMapViewRadar)		// too far away ?
     {
         return false;
     }
