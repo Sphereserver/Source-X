@@ -748,19 +748,31 @@ effect_bounce:
 		Args.m_VarsLocal.SetNum("DamagePercentEnergy", iDmgEnergy);
 	}
 
+    CItem* pItemHit = nullptr;
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
 		if ( OnTrigger( CTRIG_GetHit, pSrc, &Args ) == TRIGRET_RET_TRUE )
 			return 0;
 		iDmg = (int)(Args.m_iN1);
 		uType = (DAMAGE_TYPE)(Args.m_iN2);
+
+        LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
+        pItemHit = LayerFind(iHitLayer);
+        if (pItemHit)
+        {
+            Args.m_pO1 = this;
+            // "ItemDamageLayer" will only be readable.
+            if (pItemHit->OnTrigger(ITRIG_GetHit, pSrc, &Args) == TRIGRET_RET_TRUE)
+                return 0;
+            iDmg = (int)(Args.m_iN1); //Update damage amount and type again after @Hit trigger under item.
+            uType = (DAMAGE_TYPE)(Args.m_iN2);
+            // We don't need to update iHitLayer as it's already called on item
+        }
 	}
 
 	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
 	if ( (iItemDamageChance > Calc_GetRandVal(100)) && !Can(CAN_C_NONHUMANOID) )
 	{
-		LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
-		CItem *pItemHit = LayerFind(iHitLayer);
 		if ( pItemHit )
 			pItemHit->OnTakeDamage(iDmg, pSrc, uType);
 	}
@@ -2113,6 +2125,19 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		iDmg = (int)(Args.m_iN1);
         iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+
+        if (pWeapon)
+        {
+            Args.m_pO1 = this;
+            if (pWeapon->OnTrigger(ITRIG_Hit, pCharTarg, &Args) == TRIGRET_RET_TRUE)
+                return WAR_SWING_EQUIPPING;
+
+            if (Args.m_VarsLocal.GetKeyNum("ArrowHandled") != 0)		// if arrow is handled by script, do nothing with it further
+                pAmmo = nullptr;
+
+            iDmg = (int)(Args.m_iN1);
+            iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+        }
 	}
 
 	// BAD BAD Healing fix.. Cant think of something else -- Radiant

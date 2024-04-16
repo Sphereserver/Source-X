@@ -68,6 +68,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Dye",					// My color has been changed
 	"@EQUIP",		// I have been unequipped
     "@EQUIPTEST",
+    "@GetHit",
+    "@Hit",
 	"@MemoryEquip",
 	"@PICKUP_GROUND",	// I was picked up off the ground.
 	"@PICKUP_PACK",	// picked up from inside some container.

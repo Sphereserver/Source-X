@@ -3592,3 +3592,40 @@ Fixed: An issue that causes a visual bug to remove all tiles while removing a ti
 Changed: EMOTEF_EAT name changed to EMOTEF_HIDE_EAT_PLAYER and limited to only player emotes.
 	EMOTEF_EAT is from the merge of Jhobean's pr so it wasn't in sphere at all.
 Added: EMOTEF_HIDE_EAT_NPC to hide emotes while eating only for npcs.
+Added: Trigger @Hit is added as an item trigger.
+	This trigger nows trigger before @Damage but after character @Hit trigger.
+	Args are same as the character @Hit trigger, but I and ARGO switch the values.
+	Args:
+	- I: The weapon being used.
+	- SRC: The character being hit.
+	- ARGO: The character doing the hitting.
+	- ARGN1: The amount of damage being dealt.
+	- ARGN2: The type(s) of damage.
+	- LOCAL.ARROW: UID of the arrow used (Archery only) [Read Only]
+	- LOCAL.ARROWHANDLED: If set true (1), clears the ammo stack variable.
+	- LOCAL.ITEMDAMAGECHANCE: Sets the damage chance for the weapon. (Default: 25%)
+	- LOCAL.ITEMPOISONREDUCTIONCHANCE: Sets the poison reduction chance for poisoned weapons.
+	- LOCAL.ITEMPOISONREDUCTIONAMOUNT: Sets the amount of poison that reduced from morez value.
+	Returns:
+	1: Cancels the combat swing of the character.
+Added: Trigger @GetHit is added as an item trigger.
+	This trigger nows trigger before @Damage but after character @GetHit trigger.
+	Args are same as the character @GetHit trigger, but I changed to the item, and the character saves on ARGO.
+	Also LOCAL.ITEMDAMAGELAYER only works under character @GetHit trigger, it is only readable under item trigger.
+	Args:
+	- I: The clothing part take a hit.
+	- SRC: The character responsible for the damage.
+	- ARGO: The character being damaged.
+	- ARGN1: The amount of damage being applied. (Before slayer calculation if applicable)
+	- ARGN2: The type(s) of damage being applied.
+	- ARGN3: Hits will be fixed to this amount after the hit if the value is greaten than it (default: 0)
+	- LOCAL.ITEMDAMAGECHANCE: Sets the damage chance for the hitted part of the body. (Armor or shield, if any) (Default: 25%)
+	- LOCAL.DAMAGEPERCENTPHYSICAL: 	The amount in % of the physical damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTPHYSICAL: The amount in % of the physical damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTFIRE: The amount in % of the fire damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTCOLD: The amount in % of the cold damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTPOISON: The amount in % of the poison damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTENERGY: The amount in % of the energy damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.ITEMDAMAGELAYER: The layer of the item being damaged. [Read Only]
+	Returns:
+	1: Prevents damage from being applied to the character.

@@ -1039,6 +1039,8 @@ enum ITRIG_TYPE
 	ITRIG_DYE,
 	ITRIG_EQUIP,                // I have been equipped.
 	ITRIG_EQUIPTEST,            // I'm not yet equiped, but checking if I can.
+    ITRIG_GetHit,               // Triggers when this clothing part get hit from characters.
+    ITRIG_Hit,                  // Triggers when this item used to make a damage on characters.
 	ITRIG_MemoryEquip,          // I'm a memory and I'm being equiped.
 	ITRIG_PICKUP_GROUND,        // I'm being picked up from ground.
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
