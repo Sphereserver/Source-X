@@ -3448,6 +3448,11 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 13-03-2024, Jhobean
 - Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
 
+16-03-2024, Jhobean
+- Added: Flag EMOTEF_EAT is added on the ini to avoid see the emote when eating.
+- Added: NPC_EAT_GRASS MSG to be able change the hardcode name of "grass" when an animal eat grass
+- Added: Item been eaten can now be read on the ARGO parameter of the trigger @Eat.
+
 24-03-2024, xwerswoodx
 Fixed: The issue that causes more1/2 not saved correctly for spellbook. (Issue: #1221)
 Fixed: Players automatically become criminal to everyone when attack someone. (Issue: #1213)
@@ -3510,8 +3515,9 @@ Added: New function trigger f_onserver_broadcast. (Issue: #1145)
 	- Returns:
 	1: Prevents server to send broadcast message.
 Added: Two new LOCAL variables ItemPoisonReductionChance and ItemPoisonReductionAmount to @Hit trigger. (Issue: #1159)
+	This LOCALs changes default behaviour of poisoned weapons while removing poison.
 	LOCAL.ItemPoisonReductionChance = Is the chance that weapon reduce poison morez. (Default 100%)
-	LOCAL.ItemPoisonReductionAmount = Is the amount that weapon reduce. (Default: CurrentPoisonAmount/ 2)
+	LOCAL.ItemPoisonReductionAmount = Is the amount of poison that weapon reduce. (Default: CurrentPoisonAmount/ 2)
 Added: You can now use TDATA2 for setting default cooldown (delay) for drinks. (Default: 15secs for potions, 1500 secs for ales)
 Changed: Reactive armor range increased from 1 to 2 in default.
 
@@ -3581,3 +3587,8 @@ Fixed: Wrong check block GMs to unequip item from players.
 
 14-04-2024, xwerswoodx
 Fixed: An issue that causes a visual bug to remove all tiles while removing a tile in higher floors. (Issue: #345)
+
+16-04-2024, xwerswoodx
+Changed: EMOTEF_EAT name changed to EMOTEF_HIDE_EAT_PLAYER and limited to only player emotes.
+	EMOTEF_EAT is from the merge of Jhobean's pr so it wasn't in sphere at all.
+Added: EMOTEF_HIDE_EAT_NPC to hide emotes while eating only for npcs.

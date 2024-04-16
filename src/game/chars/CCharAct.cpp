@@ -2230,32 +2230,38 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 // OnEat()
 // Generating eating animation
 // also calling @Eat and setting food's level (along with other possible stats 'local.hits',etc?)
-void CChar::EatAnim( lpctstr pszName, ushort uiQty )
+void CChar::EatAnim(CItem* pItem, ushort uiQty)
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
+    ASSERT(pItem); //Should never happen, but make sure item is valid.
+
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
 	Sound(sm_EatSounds[Calc_GetRandVal(ARRAY_COUNT(sm_EatSounds))]);
 
 	if ( !IsStatFlag(STATF_ONHORSE) )
 		UpdateAnimate(ANIM_EAT);
 
-	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
-	Emote(pszMsg);
+    EMOTEFLAGS_TYPE eFlag = (IsPlayer() ? EMOTEF_HIDE_EAT_PLAYER : EMOTEF_HIDE_EAT_NPC);
+    if (!IsSetEmoteFlag(eFlag))
+    {
+        tchar* pszMsg = Str_GetTemp();
+        snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
+        Emote(pszMsg);
+    }
 
 	ushort uiHits = 0;
 	ushort uiMana = 0;
 	ushort uiStam = (ushort)( Calc_GetRandVal2(3, 6) + (uiQty / 5) );
 	ushort uiFood = uiQty;
 	ushort uiStatsLimit = 0;
-	if ( IsTrigUsed(TRIGGER_EAT) )
+	if (IsTrigUsed(TRIGGER_EAT))
 	{
-		CScriptTriggerArgs Args;
+		CScriptTriggerArgs Args(uiStatsLimit);
 		Args.m_VarsLocal.SetNumNew("Hits", uiHits);
 		Args.m_VarsLocal.SetNumNew("Mana", uiMana);
 		Args.m_VarsLocal.SetNumNew("Stam", uiStam);
 		Args.m_VarsLocal.SetNumNew("Food", uiFood);
-		Args.m_iN1 = uiStatsLimit;
+        Args.m_pO1 = pItem;
 		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
 

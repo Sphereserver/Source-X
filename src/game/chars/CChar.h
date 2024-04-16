@@ -1138,7 +1138,7 @@ public:
 	bool Death();
 	bool Reveal( uint64 iFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim( lpctstr pszName, ushort uiQty );
+	void EatAnim(CItem* pItem, ushort uiQty);
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*

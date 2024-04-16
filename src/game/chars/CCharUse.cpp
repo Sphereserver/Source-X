@@ -903,7 +903,7 @@ void CChar::Use_EatQty( CItem * pFood, ushort uiQty )
 	}
 
 	UpdateDir(pFood);
-	EatAnim(pFood->GetName(), uiRestore * uiQty);
+	EatAnim(pFood, uiRestore * uiQty);
 	pFood->ConsumeAmount(uiQty);
 }
 

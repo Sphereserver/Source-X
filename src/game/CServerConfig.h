@@ -198,7 +198,9 @@ enum EMOTEFLAGS_TYPE
 {
     EMOTEF_ATTACKER              = 0x01,        // Only show %s is attacking %s! emote to attacked character.
     EMOTEF_POISON                = 0x02,        // Only show poison emote to affected character.
-    EMOTEF_DESTROY               = 0x04         // Only show item destroy emote to the owner of the item.
+    EMOTEF_DESTROY               = 0x04,        // Only show item destroy emote to the owner of the item.
+    EMOTEF_HIDE_EAT_PLAYER       = 0x08,        // Do not show emote while players eating.
+    EMOTEF_HIDE_EAT_NPC          = 0x010        // Do not show emote while npcs eating.
 };
 
 enum TOOLTIPMODE_TYPE
@@ -1126,9 +1128,10 @@ typedef std::map<dword,dword> KRGumpsMap;
 
 #define IsSetEF(ef)				((g_Cfg._uiExperimentalFlags & ef) != 0)
 #define IsSetOF(of)				((g_Cfg._uiOptionFlags & of) != 0)
-#define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
-#define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
-#define IsSetEEFlags(of)        ((g_Cfg.m_iElementalEngineFlags & of) != 0)
+#define IsSetCombatFlags(cf)	((g_Cfg.m_iCombatFlags & cf) != 0)
+#define IsSetMagicFlags(mf)		((g_Cfg.m_iMagicFlags & mf) != 0)
+#define IsSetEEFlags(eef)       ((g_Cfg.m_iElementalEngineFlags & eef) != 0)
+#define IsSetEmoteFlag(ef)      ((g_Cfg.m_iEmoteFlags & ef) != 0)
 
 
 #endif	// _INC_CSERVERCONFIG_H
