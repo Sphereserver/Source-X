@@ -129,6 +129,10 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 			id = ITEMID_BACKPACK;
 			break;
 
+        case LAYER_STABLE:
+            id = ITEMID_POUCH;
+            break;
+
 		case LAYER_VENDOR_STOCK:
 		case LAYER_VENDOR_EXTRA:
 		case LAYER_VENDOR_BUYS:
@@ -344,6 +348,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 	{
 		case LAYER_PACK:
 		case LAYER_AUCTION:
+        case LAYER_STABLE:
 			if ( !pItem->IsType(IT_CONTAINER) )
 				fCantEquip = true;
 			break;
@@ -442,6 +447,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 		{
 			case LAYER_AUCTION:
 			case LAYER_PACK:
+            case LAYER_STABLE:
 				return LAYER_NONE;	// this should not happen
 			case LAYER_HORSE:
 			case LAYER_DRAGGING:

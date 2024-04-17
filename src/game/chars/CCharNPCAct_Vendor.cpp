@@ -105,12 +105,12 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	if ( ! pCharPlayer->IsClientActive())
 		return false;
 
-	// Might have too many pets already ?
-	int iCount = 0;
-	CItemContainer * pBank = GetBank();
-	if ( pBank->GetContentCount() >= g_Cfg.m_iContainerMaxItems )
+	CItemContainer *pStableContainer = pCharPlayer->GetBank(LAYER_STABLE);
+    ASSERT(pStableContainer); //Should never terminate
+
+	if (pStableContainer->GetContentCount() >= g_Cfg.m_iContainerMaxItems)
 	{
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
+		Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_TOOMANY));
 		return false;
 	}
 
@@ -161,18 +161,6 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 		}
 	}
 
-	for (CSObjContRec* pObjRec : *pBank)
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
-			++iCount;
-	}
-	if ( iCount >= iPetMax )
-	{
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TOOMANY ) );
-		return false;
-	}
-
 	pCharPlayer->m_pClient->m_Targ_Prv_UID = GetUID();
 	pCharPlayer->m_pClient->addTarget( CLIMODE_TARG_PET_STABLE, g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG ) );
 	return true;
@@ -188,16 +176,17 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 	if ( m_pNPC->m_Brain != NPCBRAIN_STABLE )
 		return false;
 
-	CItemContainer* pBank = GetBank();
-	ASSERT(pBank);
+	CItemContainer* pStableContainer = pCharPlayer->GetBank(LAYER_STABLE);
+	ASSERT(pStableContainer);
 
 	int iCount = 0;
-	for (CSObjContRec* pObjRec : pBank->GetIterationSafeCont())
+	for (CSObjContRec* pObjRec : pStableContainer->GetIterationSafeCont())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		if ( pItem->IsType(IT_FIGURINE) && (pItem->m_uidLink == pCharPlayer->GetUID()) )
+		if (pItem->IsType(IT_FIGURINE))
 		{
-			if ( !pCharPlayer->Use_Figurine(pItem) )
+            CChar* pPet = pCharPlayer->Use_Figurine(pItem);
+			if (!pPet)
 			{
 				tchar *pszTemp = Str_GetTemp();
 				snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
@@ -205,7 +194,12 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 				return true;
 			}
 
-			pItem->Delete();
+            pItem->Delete();
+            if (IsSetOF(OF_PetSlots))
+            {
+                const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+                pCharPlayer->FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), false);
+            }
 			++iCount;
 		}
 	}
