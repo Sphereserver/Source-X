@@ -3641,7 +3641,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	For example, if you use .tag.test 100
 	<dTAG.TEST> returns 100
 	<hTAG.TEST> returns 064
-- Merged: raydienull's LAYER_STABLE build merged, but LAYER_AUCTION keep same as LAYER_STABLE added as a new layer.
-- Fixed: raydienull's LAYER_STABLE follower triggers doesn't called while taking pet out of stable.
+- Merged: raydienull's LAYER_STABLE build merged, but LAYER_AUCTION keep same while LAYER_STABLE added as a new layer. (PR: #1201)
+- Fixed: raydienull's LAYER_STABLE follower triggers isn't called while taking pet out of stable.
 - Fixed: raydienull's LAYER_STABLE doesn't work with the new follower system.
 - Removed: Unnecessary LINK == PLAYER checks as figurines will be stocked on the owned player.
