@@ -1035,13 +1035,13 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 {
 	ADDTOCALLSTACK("CClient::Event_Command");
-	if ( mode == 13 || mode == 14 ) // guild and alliance don't pass this.
+	if ( mode == TALKMODE_GUILD || mode == TALKMODE_ALLIANCE ) // guild and alliance don't pass this.
 		return false;
 	if ( pszCommand[0] == 0 )
 		return true;		// should not be said
 	if ( Str_Check(pszCommand) )
 		return true;		// should not be said
-	if ( ( ( m_pChar->GetID() == 0x3db ) && ( pszCommand[0] == '=' ) ) || ( pszCommand[0] == g_Cfg.m_cCommandPrefix ) )
+	if (((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) || (pszCommand[0] == g_Cfg.m_cCommandPrefix)) //Should be dispid, or it's bugged when you change character's dispid to c_man_gm.
 	{
 		// Lazy :P
 	}

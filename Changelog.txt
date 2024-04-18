@@ -3645,3 +3645,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: raydienull's LAYER_STABLE follower triggers isn't called while taking pet out of stable.
 - Fixed: raydienull's LAYER_STABLE doesn't work with the new follower system.
 - Removed: Unnecessary LINK == PLAYER checks as figurines will be stocked on the owned player.
+
+18-04-2024, xwerswoodx
+- Fixed: Setting GMs dispid to c_man_gm in-game, prevents GMs to use in-game commands.
