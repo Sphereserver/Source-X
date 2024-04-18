@@ -1591,7 +1591,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 				default:
 					if (id < 0x4D6)			// before the crane sound the sound IDs are ordered in a way...
 						id += (SOUND_TYPE)type;
-					else if (id < 0x5D5)	// starting with the crane and ending before absymal infernal there's another scheme
+					else if (id < 0x5D4)	// starting with the crane and ending before absymal infernal there's another scheme
 					{
 						switch (type)
 						{
