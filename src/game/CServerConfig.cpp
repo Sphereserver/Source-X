@@ -194,7 +194,7 @@ CServerConfig::CServerConfig()
 	m_iDistanceWhisper	= 3;
 	m_iDistanceTalk		= UO_MAP_VIEW_SIZE_DEFAULT;
 	m_iDragWeightMax = 300;
-    m_iNPCDistanceHear  = 4;
+    m_iNPCDistanceHear  = UO_MAP_VIEW_SIGHT; // Why it was 4? Default range must match with the default value under CClient::Event_Talk_Common.
 	_uiExperimentalFlags= 0;
 	_uiOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
 	_uiAreaFlags		= AREAF_RoomInheritsFlags;
@@ -1298,6 +1298,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_NOTOTIMEOUT:
 			m_iNotoTimeout = s.GetArgVal();
 			break;
+        case RC_NPCDISTANCEHEAR:
+            m_iNPCDistanceHear = s.GetArgVal();
+            break;
 		case RC_WOOLGROWTHTIME:
 			m_iWoolGrowthTime = s.GetArgLLVal() * 60 * MSECS_PER_SEC;
 			break;
@@ -2081,6 +2084,9 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 		case RC_NOTOTIMEOUT:
 			sVal.FormatVal(m_iNotoTimeout);
 			break;
+        case RC_NPCDISTANCEHEAR:
+            sVal.FormatVal(m_iNPCDistanceHear);
+            break;
         case RC_MAXHOUSESACCOUNT:
             sVal.FormatUCVal(_iMaxHousesAccount);
             break;

@@ -1885,7 +1885,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
     //Reduce NPC hear distance for non pets
     int iAltDist = iFullDist;
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
+	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.ini
 
 	for (;;)
 	{
