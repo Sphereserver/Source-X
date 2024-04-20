@@ -618,7 +618,7 @@ void CCChampion::InitializeLists()
 // DONE
 uchar CCChampion::GetCandlesCount()
 {
-    ADDTOCALLSTACK("CCChampion::GetCandlesPerLevel");
+    ADDTOCALLSTACK("CCChampion::GetCandlesCount");
     if (_iLevel == UCHAR_MAX)
         return 16;
 
@@ -641,7 +641,7 @@ uchar CCChampion::GetCandlesCount()
 // DONE
 ushort CCChampion::GetMonstersCount()
 {
-    ADDTOCALLSTACK("CCChampion::GetMonstersPerLevel");
+    ADDTOCALLSTACK("CCChampion::GetMonstersCount");
     if (_iLevel < 1) // Should never happen but put here to make sure avoid invalid index.
         _iLevel = 1;
 
