@@ -1015,8 +1015,8 @@ enum STONEALIGN_TYPE // Types of Guild/Town stones
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-    ITRIG_ADDREDCANDLE = 1,
-    ITRIG_ADDOBJ,				// For t_spawn when obj is add to list
+    ITRIG_ADDOBJ = 1,				// For t_spawn when obj is add to list
+    ITRIG_ADDREDCANDLE,
     ITRIG_ADDWHITECANDLE,
 	ITRIG_AfterClick,
 	ITRIG_Buy,
@@ -1024,12 +1024,15 @@ enum ITRIG_TYPE
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item
 	ITRIG_CLIENTTOOLTIP_AFTERDEFAULT,
+    ITRIG_COMPLETE,
 	ITRIG_ContextMenuRequest,   // A context menu was requested over me.
 	ITRIG_ContextMenuSelect,    // A context menu option was selected, perform actions.
 	ITRIG_Create,               // Item is being created.
 	ITRIG_DAMAGE,               // I have been damaged in some way.
 	ITRIG_DCLICK,               // I have been dclicked.
     ITRIG_DELOBJ,				// For t_spawn when obj is remove from list
+    ITRIG_DELREDCANDLE,
+    ITRIG_DELWHITECANDLE,
 	ITRIG_DESTROY,              //+I am nearly destroyed.
 	ITRIG_DROPON_CHAR,          // I have been dropped on this char.
 	ITRIG_DROPON_GROUND,        // I have been dropped on the ground here.
@@ -1041,6 +1044,7 @@ enum ITRIG_TYPE
 	ITRIG_EQUIPTEST,            // I'm not yet equiped, but checking if I can.
     ITRIG_GetHit,               // Triggers when this clothing part get hit from characters.
     ITRIG_Hit,                  // Triggers when this item used to make a damage on characters.
+    ITRIG_LEVEL,
 	ITRIG_MemoryEquip,          // I'm a memory and I'm being equiped.
 	ITRIG_PICKUP_GROUND,        // I'm being picked up from ground.
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
@@ -1061,6 +1065,7 @@ enum ITRIG_TYPE
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
     ITRIG_Start,                // Start trigger, right now used only on Champions.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
+    ITRIG_STOP,
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.
 	ITRIG_TARGON_CHAR,          // I'm targeting a char.
 	ITRIG_TARGON_GROUND,        // I'm targeting the ground.

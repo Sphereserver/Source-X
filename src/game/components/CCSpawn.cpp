@@ -585,6 +585,7 @@ void CCSpawn::AddObj(const CUID& uid)
     }
 
     bool fIsSpawnChar = (pSpawnItem->IsType(IT_SPAWN_CHAR) || pSpawnItem->IsType(IT_SPAWN_CHAMPION));
+    bool fIsSpawnChampion = pSpawnItem->IsType(IT_SPAWN_CHAMPION);
 
     if (!g_Serv.IsLoading())
     {
@@ -628,7 +629,7 @@ void CCSpawn::AddObj(const CUID& uid)
             pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
         }
 
-        if (GetCurrentSpawned() +1 >= GetAmount()) //Adding one because the item is not yet added at this moment
+        if (GetCurrentSpawned() +1 >= GetAmount() && !fIsSpawnChampion) //Adding one because the item is not yet added at this moment
         {
             pSpawnItem->_SetTimeoutS(-1);
         }
@@ -1221,12 +1222,16 @@ bool CCSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
             OnTickComponent();
             return true;
         case ISPV_START:
-            pItem->SetTimeout(0);
-            return true;
+            {
+                pItem->SetTimeout(0);
+                return true;
+            }
         case ISPV_STOP:
-            KillChildren();
-            pItem->SetTimeout(-1);
-            return true;
+            {
+                KillChildren();
+                pItem->SetTimeout(-1);
+                return true;
+            }
         default:
             break;
     }

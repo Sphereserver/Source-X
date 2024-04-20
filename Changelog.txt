@@ -3649,3 +3649,47 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 18-04-2024, xwerswoodx
 - Fixed: Setting GMs dispid to c_man_gm in-game, prevents GMs to use in-game commands.
 - Changed: Default NPC hear range reverted back to the 14 from 4, as it was 14 in older versions, as there was no reason for changing it. (Issue: #1215)
+
+20-04-2024, xwerswoodx
+- Rework: Champion system fully reworked.
+- Fixed: Candles keep stuck while killing npcs. (Issue: #564)
+- Fixed: LEVELMAX doesn't affect the max level of champion system, and keep spawn npcs for default max level.
+- Changed: Spawn system changed and now it automatically calculate the percentage of spawns per level in descending order.
+- Changed: Candle calculation is now depend on max level, instead of static 4 level.
+- Added: SRC added in @Start trigger. SRC is a reference of player that starts champion spawner.
+- Added: @Complete trigger that triggers when champion completed. (Issue: #477)
+	Args:
+	- I: Champion spawner uid.
+	TODO: Will add attacker list in this trigger.
+- Added: @DelRedCandle trigger that triggers while red candle removing.
+	Args:
+	- I: Champion spawner uid.
+	- ARGO: Candle uid.
+	- ARGN1: Reason of removing. [Read Only]
+		1: Timeout
+		2: User Command
+		3: Clearing all candles
+	Returns:
+	- 1: Cancel the delete action.
+- Added: @DelWhiteCandle trigger that triggers while white candle removing.
+	Args:
+	- I: Champion spawner uid.
+	- ARGO: Candle uid.
+	- ARGN1: Reason of removing. [Read Only]
+		1: Timeout
+		2: User Command
+		3: Clearing all candles
+	Returns:
+	- 1: Cancel the delete action.
+- Added: @Level trigger that triggers when champion level up.
+	Args:
+	- I: Champion spawner uid.
+	- ARGN1: Level [Read Only]
+	- ARGN2: Total monster count for current level. [Read Only]
+	- ARGN3: Needed red candle count for current level. [Read Only]
+- Added: @Stop trigger that triggers when champion stopped.
+	Args:
+	- I: Champion spawner uid.
+	- SRC: The player that stopped spawner.
+	Returns:
+	- 1: Cancel stopping action.

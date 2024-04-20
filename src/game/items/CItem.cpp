@@ -44,21 +44,24 @@
 lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
-	"@AddRedCandle",
 	"@AddObj",				// For t_spawn when obj is add to list
-	"@AddWhiteCandle",
+    "@AddRedCandle",
+    "@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
 	"@CarveCorpse",			//I am a corpse and i am going to be carved.
 	"@Click",
 	"@ClientTooltip",	// Sending tooltip to a client
 	"@ClientTooltip_AfterDefault",
+    "@Complete",
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",
 	"@DAMAGE",				// I have been damaged in some way
 	"@DCLICK",				// I have been dclicked.
 	"@DelObj",				// For t_spawn when obj is remove from list
+    "@DelRedCandle",
+    "@DelWhiteCandle",
 	"@Destroy",				//+I am nearly destroyed
 	"@DropOn_Char",			// I have been dropped on this char
 	"@DropOn_Ground",		// I have been dropped on the ground here
@@ -70,6 +73,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@EQUIPTEST",
     "@GetHit",
     "@Hit",
+    "@Level",
 	"@MemoryEquip",
 	"@PICKUP_GROUND",	// I was picked up off the ground.
 	"@PICKUP_PACK",	// picked up from inside some container.
@@ -90,6 +94,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@SpellEffect",		// cast some spell on me.
 	"@Start",
 	"@STEP",			// I have been walked on.
+    "@Stop",
 	"@TARGON_CANCEL",
 	"@TARGON_CHAR",
 	"@TARGON_GROUND",
