@@ -230,7 +230,7 @@ bool CItemMulti::MultiRealizeRegion()
     }
     else if (IsType(IT_MULTI) || IsType(IT_MULTI_CUSTOM))
     {
-        if (Multi_GetSign()->IsType(IT_SIGN_GUMP))
+        if (CItemBase::IsID_House(GetID()))
             dwFlags |= REGION_FLAG_HOUSE;
     }
     else
@@ -3243,8 +3243,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     * let's remove that difference.
     * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
     */
-    if (pMultiDef && (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON)))
-    // or is this happening only for houses? if (CItemBase::IsID_House(pItemDef->GetID()))
+    if (pMultiDef && CItemBase::IsID_Multi(pItemDef->GetID())) // It only happens for real multis that coming from mul/uop files.
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
     }
