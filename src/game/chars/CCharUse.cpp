@@ -1089,7 +1089,7 @@ void CChar::Use_Drink( CItem * pItem )
 	//Sound(sm_DrinkSounds[Calc_GetRandVal(ARRAY_COUNT(sm_DrinkSounds))]);
 	UpdateAnimate(ANIM_EAT);
     if (wConsume > 0) //if ARGN2 > 0, consume.
-        ConsumeAmount(pItem, wConsume);
+        ConsumeFromPack(pItem, wConsume);
 
 	// Create the empty bottle ?
     if (idbottle != ITEMID_NOTHING)

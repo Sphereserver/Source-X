@@ -5079,7 +5079,7 @@ bool CChar::CanConsume(CItem* pItem, word iQty)
     return false;
 }
 
-bool CChar::ConsumeAmount(CItem* pItem, word iQty)
+bool CChar::ConsumeFromPack(CItem* pItem, word iQty)
 {
     ADDTOCALLSTACK("CChar::ConsumeFromPack");
 

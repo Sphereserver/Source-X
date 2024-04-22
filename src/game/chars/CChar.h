@@ -837,8 +837,15 @@ public:
 	void ChangeExperience(llong delta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
+    /*
+    * @brief Check the pItem stack has amount more than iQty. If not, searches character's backpack to check if character has enough item to consume.
+    */
     bool CanConsume(CItem* pItem, word iQty);
-    bool ConsumeAmount(CItem* pItem, word iQty);
+
+    /*
+    * @brief Consumes iQty amount of the item from your stack. If the stack has less amount than iQty, searches character's backpack to consume from other stacks.
+    */
+    bool ConsumeFromPack(CItem* pItem, word iQty);
 
 	// skills and actions. -------------------------------------------
 	static bool IsSkillBase( SKILL_TYPE skill ) noexcept;

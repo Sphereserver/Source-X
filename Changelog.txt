@@ -3464,8 +3464,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Added: New Layer LAYER_STORAGE (80) to let scripters create their own storage system. (Issue: #1209)
       	Only t_container and t_container_locked can be equipped to this layer.
 - Changed: Decay time removed from spawned items, as Sphere gives tons of invalid link errors when items decayed. (Issue: #1218)
-- Added: New spellflag SPELLFLAG_ASYNC (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
-	SPELLFLAG_ASYNC should be added to defs.
+- Added: New spellflag SPELLFLAG_FIELD_RANDOMDECAY (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
+	SPELLFLAG_FIELD_RANDOMDECAY should be added to defs.
 - Added: New spellflag SPELLFLAG_TARG_ONLYSELF (0200000000) to make spell only be used on character himself. (Issue: #1171)
 	SPELLFLAG_TARG_ONLYSELF should be added to defs.
 	//magery_9 "You can only use this spell on yourself." could be added to defmessages.
@@ -3542,6 +3542,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 02-04-2024, xwerswoodx
 - Changed: dword CAN flags changed with uint64 to increase limits.
+	- CAN flag limit increased from 0xFFFF FFFF (dword/uint max) to 0xFFFF FFFF FFFF FFFF (uint64 max)
+	- But as sphere evaluation expressions (eval, hval etc.) supports int64 instead of uint64, avoid using any flag value more than 2 << 47 (0x1 0000 0000 0000).
 - Fixed: Possible fix for chat debugs. (Issue: #1212) (Issue: https://discord.com/channels/354358315373035542/483721253773901824/1224030729906815077)
 
 03-04-2024, xwerswoodx
@@ -3623,7 +3625,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	- ARGN2: The type(s) of damage being applied.
 	- ARGN3: Hits will be fixed to this amount after the hit if the value is greaten than it (default: 0)
 	- LOCAL.ITEMDAMAGECHANCE: Sets the damage chance for the hitted part of the body. (Armor or shield, if any) (Default: 25%)
-	- LOCAL.DAMAGEPERCENTPHYSICAL: 	The amount in % of the physical damage received, only set if Elemental Engine is enabled. [Read Only]
 	- LOCAL.DAMAGEPERCENTPHYSICAL: The amount in % of the physical damage received, only set if Elemental Engine is enabled. [Read Only]
 	- LOCAL.DAMAGEPERCENTFIRE: The amount in % of the fire damage received, only set if Elemental Engine is enabled. [Read Only]
 	- LOCAL.DAMAGEPERCENTCOLD: The amount in % of the cold damage received, only set if Elemental Engine is enabled. [Read Only]
@@ -3641,10 +3642,11 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	For example, if you use .tag.test 100
 	<dTAG.TEST> returns 100
 	<hTAG.TEST> returns 064
-- Merged: raydienull's LAYER_STABLE build merged, but LAYER_AUCTION keep same while LAYER_STABLE added as a new layer. (PR: #1201)
+- Merged: raydienull's LAYER_STABLE (81) build merged, but LAYER_AUCTION keep same while LAYER_STABLE added as a new layer. (PR: #1201)
 - Fixed: raydienull's LAYER_STABLE follower triggers isn't called while taking pet out of stable.
 - Fixed: raydienull's LAYER_STABLE doesn't work with the new follower system.
 - Removed: Unnecessary LINK == PLAYER checks as figurines will be stocked on the owned player.
+- LAYER_STABLE layer number is 81.
 
 18-04-2024, xwerswoodx
 - Fixed: Setting GMs dispid to c_man_gm in-game, prevents GMs to use in-game commands.
@@ -3696,4 +3698,4 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 21-04-2024, xwerswoodx
 - Fixed: Script multis move 1 block north when their type set as t_multi_addon. (Issue: #1238)
-- Fixed: ADDCOMPONENT command was added as ADDCOMP for houses.
+- Fixed: ADDCOMPONENT command was added as ADDCOMP for houses. (Issue: #1239)

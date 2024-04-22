@@ -2278,14 +2278,14 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_REGIONRESOURCE, m_itResource.m_ridRes.GetResIndex())); //Changed to fix issue but it is not implemented.
+            sVal = g_Cfg.ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
             return;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, m_itFood.m_ridCook.GetResIndex()));
+            sVal = g_Cfg.ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF);
             return;
 
         case IT_TRAP:
@@ -2338,7 +2338,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, m_itCrop.m_ridFruitOverride.GetResIndex()));
+            sVal = g_Cfg.ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
             return;
 
 		case IT_LEATHER:

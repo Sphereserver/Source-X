@@ -42,8 +42,8 @@ enum SPTRIG_TYPE
 class CSpellDef : public CResourceLink
 {
 private:
-    uint64	m_dwFlags;  // Spell Flags.
-    uint64	m_dwGroup;  // Spell group.
+    uint64	m_uiFlags;  // Spell Flags.
+    dword	m_dwGroup;  // Spell group.
 
     CSString m_sName;	// Spell name
 
@@ -71,7 +71,7 @@ public:
 public:
 
     /**
-    * @fn  bool CSpellDef::IsSpellType( uint64 wFlags ) const
+    * @fn  bool CSpellDef::IsSpellType( uint64 uiFlags ) const
     *
     * @brief   Check if this Spell has the given flags.
     *
@@ -79,9 +79,9 @@ public:
     *
     * @return  true if match, false if not.
     */
-    bool IsSpellType( uint64 wFlags ) const
+    bool IsSpellType( uint64 uiFlags ) const
     {
-        return (( m_dwFlags & wFlags ) ? true : false );
+        return (( m_uiFlags & uiFlags ) ? true : false );
     }
 
 public:
