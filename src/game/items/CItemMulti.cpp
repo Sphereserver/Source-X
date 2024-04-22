@@ -2418,7 +2418,8 @@ enum SHL_TYPE
     SHL_ADDACCESS,
     SHL_ADDADDON,
     SHL_ADDBAN,
-    SHL_ADDCOMP,
+    SHL_ADDCOMP, //Kept for backward compatibility.
+    SHL_ADDCOMPONENT, //It was defined as ADDCOMPONENT in changelog.
     SHL_ADDCOOWNER,
     SHL_ADDFRIEND,
     SHL_ADDKEY,
@@ -2469,6 +2470,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "ADDADDON",
     "ADDBAN",
     "ADDCOMP",
+    "ADDCOMPONENT", // Added because it's defined as ADDCOMPONENT in changelog, but added as ADDCOMP
     "ADDCOOWNER",
     "ADDFRIEND",
     "ADDKEY",
@@ -3113,6 +3115,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
 
         // House Storage
         case SHL_ADDCOMP:
+        case SHL_ADDCOMPONENT:
         {
             AddComponent(CUID(s.GetArgDWVal()));
             break;
