@@ -3699,3 +3699,10 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 21-04-2024, xwerswoodx
 - Fixed: Script multis move 1 block north when their type set as t_multi_addon. (Issue: #1238)
 - Fixed: ADDCOMPONENT command was added as ADDCOMP for houses. (Issue: #1239)
+
+22-04-2024, xwerswoodx
+- Changed: Re-activated 56b style hardcoded fishing system, as I don't know why it's deactivated as softcoded system too bad and broken.
+	- Fishing skill in default script pack should updated.
+	- Delay should set to 2.5-3.0
+	- All softcoded system should removed.
+	- If anyone want to code their own fishing system, they can use SKF_SCRIPTED.

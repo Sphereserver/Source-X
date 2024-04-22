@@ -882,7 +882,7 @@ public:
 	bool Skill_Wait( SKILL_TYPE skilltry );
 	bool Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease = 0 ); // calc skill progress.
 	void Skill_Fail( bool fCancel = false );
-	int Skill_Stroke( bool fResource);				// Strokes in crafting skills, calling for SkillStroke trig
+	int Skill_Stroke();				// Strokes in crafting skills, calling for SkillStroke trig
 	ANIM_TYPE Skill_GetAnim( SKILL_TYPE skill);
 	SOUND_TYPE Skill_GetSound( SKILL_TYPE skill);
 	int Skill_Stage( SKTRIG_TYPE stage );

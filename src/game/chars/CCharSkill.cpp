@@ -1345,7 +1345,7 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_STROKE )
 	{
-		if ( Skill_Stroke(false) == -SKTRIG_ABORT )
+		if ( Skill_Stroke() == -SKTRIG_ABORT )
 			return -SKTRIG_ABORT;
 
 		//Use the maximum distance stored in m_AtTracking.m_dwDistMax(ACTARG2), calculated in Cmd_Skill_Tracking, when continuing to track the creature.
@@ -1536,24 +1536,33 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		m_atResource.m_dwStrokeCount = 1;
+        CItem* pSplash = CItem::CreateBase(ITEMID_FX_SPLASH);
+        if (pSplash)
+        {
+            pSplash->SetType(IT_WATER_WASH);
+            pSplash->MoveToDecay(m_Act_p, 1 * MSECS_PER_SEC);
+        }
+        m_atResource.m_dwStrokeCount = Calc_GetRandVal(2) + 1;
 		m_Act_UID = pResBit->GetUID();
 		return Skill_NaturalResource_Setup(pResBit);	// How difficult? 1-1000
 	}
 
-	CItem *pItem = Skill_NaturalResource_Create(pResBit, SKILL_FISHING);
-	if ( !pItem )
-	{
-		SysMessageDefault(DEFMSG_FISHING_2);
-		return -SKTRIG_FAIL;
-	}
-
-	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_FISHING_SUCCESS), pItem->GetName());
-	if ( m_atResource.m_dwBounceItem )
-		ItemBounce(pItem, false);
-	else
-		pItem->MoveToCheck(GetTopPoint(), this);	// put at my feet.
-	return 0;
+    if (stage == SKTRIG_SUCCESS)
+    {
+        CItem* pItem = Skill_NaturalResource_Create(pResBit, SKILL_FISHING);
+        if (!pItem)
+        {
+            SysMessageDefault(DEFMSG_FISHING_2);
+            return -SKTRIG_FAIL;
+        }
+        SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_FISHING_SUCCESS), pItem->GetName());
+        if (m_atResource.m_dwBounceItem)
+            ItemBounce(pItem, false);
+        else
+            pItem->MoveToCheck(GetTopPoint(), this);	// put at my feet.
+        return 0;
+    }
+    return -SKTRIG_QTY;
 }
 
 int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
@@ -3423,8 +3432,8 @@ ANIM_TYPE CChar::Skill_GetAnim( SKILL_TYPE skill )
 {
 	switch ( skill )
 	{
-		/*case SKILL_FISHING:	// softcoded
-			return ANIM_ATTACK_2H_BASH;*/
+		case SKILL_FISHING:
+			return ANIM_ATTACK_2H_BASH;
 		case SKILL_BLACKSMITHING:
 			return ANIM_ATTACK_1H_SLASH;
 		case SKILL_MINING:
@@ -3440,8 +3449,8 @@ SOUND_TYPE CChar::Skill_GetSound( SKILL_TYPE skill )
 {
 	switch ( skill )
 	{
-		/*case SKILL_FISHING:	// softcoded
-			return 0x364;*/
+		case SKILL_FISHING:
+			return 0x364;
 		case SKILL_ALCHEMY:
 			return 0x242;
 		case SKILL_TAILORING:
@@ -3464,14 +3473,16 @@ SOUND_TYPE CChar::Skill_GetSound( SKILL_TYPE skill )
 	}
 }
 
-int CChar::Skill_Stroke( bool fResource )
+int CChar::Skill_Stroke()
 {
-	// fResource means decreasing m_atResource.m_dwStrokeCount instead of m_atCreate.m_dwStrokeCount
 	SKILL_TYPE skill = Skill_GetActive();
 	SOUND_TYPE sound = SOUND_NONE;
 	int64 delay = Skill_GetTimeout();
 	ANIM_TYPE anim = ANIM_WALK_UNARM;
-	if ( m_atCreate.m_dwStrokeCount > 1 )
+    // fResource means decreasing m_atResource.m_dwStrokeCount instead of m_atCreate.m_dwStrokeCount
+    bool fResource = g_Cfg.IsSkillFlag(skill, SKF_GATHER) ? true : false;
+    uint uiStroke = (fResource ? m_atResource.m_dwStrokeCount : m_atCreate.m_dwStrokeCount);
+	if (uiStroke >= 1)
 	{
 		if ( !g_Cfg.IsSkillFlag(skill, SKF_NOSFX) )
 			sound = Skill_GetSound(skill);
@@ -3487,10 +3498,7 @@ int CChar::Skill_Stroke( bool fResource )
 		args.m_VarsLocal.SetNum("Delay", delay);
 		args.m_VarsLocal.SetNum("Anim", anim);
 		args.m_iN1 = 1;	//UpdateDir() ?
-		if ( fResource )
-			args.m_VarsLocal.SetNum("Strokes", m_atResource.m_dwStrokeCount);
-		else
-			args.m_VarsLocal.SetNum("Strokes", m_atCreate.m_dwStrokeCount);
+        args.m_VarsLocal.SetNum("Strokes", uiStroke);
 
 		if ( OnTrigger(CTRIG_SkillStroke, this, &args) == TRIGRET_RET_TRUE )
 			return -SKTRIG_ABORT;
@@ -3513,6 +3521,16 @@ int CChar::Skill_Stroke( bool fResource )
 		Sound(sound);
 	if ( anim )
 		UpdateAnimate(anim);	// keep trying and updating the animation
+
+    if (skill == SKILL_FISHING)
+    {
+        CItem* pSplash = CItem::CreateBase(ITEMID_FX_SPLASH);
+        if (pSplash)
+        {
+            pSplash->SetType(IT_WATER_WASH);
+            pSplash->MoveToDecay(m_Act_p, 1 * MSECS_PER_SEC);
+        }
+    }
 
 	if ( fResource )
 	{
@@ -3540,24 +3558,19 @@ int CChar::Skill_Stroke( bool fResource )
 int CChar::Skill_Stage( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Stage");
-	if ( stage == SKTRIG_STROKE )
-	{
-		if ( g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_CRAFT) )
-			return Skill_Stroke(false);
+    SKILL_TYPE skill = Skill_GetActive();
+    if (skill == SKILL_NONE)
+        return 0; // If idling, return 0 before checks.
 
-		if ( g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_GATHER) )
-			return Skill_Stroke(true);
-	}
-
-	if ( g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_SCRIPTED) )
-		return Skill_Scripted(stage);
-	else if ( g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_FIGHT) )
-		return Skill_Fighting(stage);
-	else if ( g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
-		return Skill_Magery(stage);
-	/*else if ( g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_CRAFT ) )
-		return Skill_MakeItem(stage);*/
-	else switch ( Skill_GetActive() )
+    if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
+        return Skill_Scripted(stage);
+    else if (g_Cfg.IsSkillFlag(skill, SKF_FIGHT))
+        return Skill_Fighting(stage);
+    else if (g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
+        return Skill_Magery(stage);
+    else if (stage == SKTRIG_STROKE && (g_Cfg.IsSkillFlag(skill, SKF_CRAFT) || g_Cfg.IsSkillFlag(skill, SKF_GATHER)))
+        return Skill_Stroke();
+	else switch (skill)
 	{
 		case SKILL_NONE:	// idling.
 		case SKILL_PARRYING:

@@ -420,7 +420,7 @@ bool CItemBase::IsID_House(ITEMID_TYPE id) noexcept
 {
     // IT_MULTI
     // IT_MULTI_CUSTOM
-    return (((id >= ITEMID_HOUSE_SMALL_ST_PL) && (id <= ITEMID_HOUSE_SMALL_SHOP_MB)) || ((id >= ITEMID_HOUSEFOUNDATION_7x7) && (id <= ITEMID_HOUSEFOUNDATION_30x30)));
+    return (((id >= ITEMID_HOUSE_SMALL_ST_PL) && (id <= ITEMID_HOUSE_SMALL_SHOP_MB)) || ((id >= ITEMID_HOUSEFOUNDATION_7x7) && (id <= ITEMID_HOUSEFOUNDATION_32x32)));
 }
 
 int CItemBase::IsID_Door( ITEMID_TYPE id ) noexcept // static
