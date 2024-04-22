@@ -3559,9 +3559,6 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Stage");
     SKILL_TYPE skill = Skill_GetActive();
-    if (skill == SKILL_NONE)
-        return 0; // If idling, return 0 before checks.
-
     if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
         return Skill_Scripted(stage);
     else if (g_Cfg.IsSkillFlag(skill, SKF_FIGHT))
