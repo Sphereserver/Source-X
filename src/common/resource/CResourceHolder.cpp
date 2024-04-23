@@ -284,7 +284,7 @@ bool CResourceHolder::LoadResourceSection( CScript * pScript )
 
 lpctstr CResourceHolder::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
 {
-    ADDTOCALLSTACK("CResourceHolder::ResourceGetNameFromMore");
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
     CResourceID ridValid = CResourceID(iExpectedType, 0);
     if (!rid.IsValidResource())
     {

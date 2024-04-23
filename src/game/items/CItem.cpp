@@ -2278,14 +2278,14 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = g_Cfg.ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
+            sVal = ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE, m_itNormal.m_more1); //Changed to fix issue but it is not implemented.
             return;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = g_Cfg.ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF);
+            sVal = ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF, m_itNormal.m_more1);
             return;
 
         case IT_TRAP:
@@ -2297,21 +2297,21 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_LOOM:
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)), m_itNormal.m_more1);
             return;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)), m_itNormal.m_more1);
             return;
 
         case IT_POTION:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
+            sVal = ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)), m_itNormal.m_more1);
             return;
 
         default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more1))
-                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
+                sVal = ResourceGetName(CResourceID(m_itNormal.m_more1, 0), m_itNormal.m_more1);
             else
                 sVal.FormatHex(m_itNormal.m_more1);
             return;
@@ -2333,12 +2333,12 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itFood.m_MeatType));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itFood.m_MeatType), m_itNormal.m_more2);
 			return;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-            sVal = g_Cfg.ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
+            sVal = ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF, m_itNormal.m_more2);
             return;
 
 		case IT_LEATHER:
@@ -2348,16 +2348,16 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_WOOL:
 		case IT_BLOOD:
         case IT_BONE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more2));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more2), m_itNormal.m_more2);
             return;
 
 		case IT_ANIM_ACTIVE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itAnim.m_PrevType));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itAnim.m_PrevType), m_itNormal.m_more2);
             return;
 
 		default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more2))
-                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
+                sVal = ResourceGetName(CResourceID(m_itNormal.m_more2, 0), m_itNormal.m_more2);
             else
                 sVal.FormatHex(m_itNormal.m_more2);
 			return;
@@ -2989,6 +2989,35 @@ void CItem::r_LoadMore2(dword dwVal)
         m_itNormal.m_more2 = dwVal;
         return;
     }
+}
+
+const lpctstr CItem::ResourceGetName(const CResourceID& rid, dword dwMore)
+{
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        if (CResourceIDBase::IsValidResource(dwMore))
+            return g_Cfg.ResourceGetName(CResourceID(dwMore, 0));
+
+        tchar* pszText = Str_GetTemp();
+        sprintf(pszText, "%d", dwMore);
+        return pszText;
+    }
+    return g_Cfg.ResourceGetName(rid);
+}
+
+const lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, dword dwMore)
+{
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        if (CResourceIDBase::IsValidResource(dwMore))
+            return g_Cfg.ResourceGetName(CResourceID(dwMore, 0));
+
+        tchar* pszText = Str_GetTemp();
+        sprintf(pszText, "%d", dwMore);
+        return pszText;
+
+    }
+    return g_Cfg.ResourceGetName(rid, iExpectedType);
 }
 
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
