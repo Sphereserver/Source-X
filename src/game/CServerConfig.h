@@ -375,7 +375,6 @@ public:
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
-    uint m_iElementalEngineFlags;     //Elemental engine flags
 	uint m_iRacialFlags;   // racial traits flags
 	uint m_iRevealFlags;   // reveal flags used for SPELL_REVEAL (mostly for backwards).
 	uint m_iEmoteFlags;    // emote flags
@@ -1117,7 +1116,6 @@ typedef std::map<dword,dword> KRGumpsMap;
 #define IsSetOF(of)				((g_Cfg._uiOptionFlags & of) != 0)
 #define IsSetCombatFlags(cf)	((g_Cfg.m_iCombatFlags & cf) != 0)
 #define IsSetMagicFlags(mf)		((g_Cfg.m_iMagicFlags & mf) != 0)
-#define IsSetEEFlags(eef)       ((g_Cfg.m_iElementalEngineFlags & eef) != 0)
 #define IsSetEmoteFlag(ef)      ((g_Cfg.m_iEmoteFlags & ef) != 0)
 
 

@@ -1682,7 +1682,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					}
 
 					pClient->removeBuff(BuffIcon);
-					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(iType))
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 					{
 						Str_FromI(-iPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
 						Str_FromI(-iMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);

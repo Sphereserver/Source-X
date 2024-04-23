@@ -174,7 +174,6 @@ CServerConfig::CServerConfig()
 	m_iHitsUpdateRate		= MSECS_PER_SEC;
 	m_iSpeedScaleFactor		= 80000;
 	m_iCombatFlags			= 0;
-    m_iElementalEngineFlags = UINT32_MAX; //In default, all Elemental Engine flags are active, also I put UINT32_MAX to let sphere active new flags (if added) automatically.
 	m_iCombatArcheryMovementDelay = 10;
 	m_iCombatDamageEra		= 0;
 	m_iCombatHitChanceEra	= 0;
@@ -796,7 +795,6 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
     { "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sDumpAccPackets)		}},
 #endif
     { "DUNGEONLIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDungeon)			}},
-    { "ELEMENTALENGINEFLAGS",   { ELEM_MASK_INT, static_cast<uint64>OFFSETOF(CServerConfig, m_iElementalEngineFlags) }},
     { "EMOTEFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iEmoteFlags)			}},
     { "EQUIPPEDCAST",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fEquippedCast)			}},
     { "ERALIMITGEAR",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
@@ -1395,10 +1393,6 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_COMMANDPREFIX:
 			m_cCommandPrefix = *s.GetArgStr();
 			break;
-
-        case RC_ELEMENTALENGINEFLAGS:
-            m_iElementalEngineFlags = s.GetArgUVal();
-            break;
 
 		case RC_EXPERIMENTAL:
 			_uiExperimentalFlags = s.GetArgUVal();
