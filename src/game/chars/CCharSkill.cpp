@@ -3836,16 +3836,36 @@ int CChar::Skill_Done()
 	if ( m_Act_Difficulty < 0 )		// was Bound to fail, but we had to wait for the timer anyhow.
 		return -SKTRIG_FAIL;
 
+    CScriptTriggerArgs args;
+    args.m_VarsLocal.SetNumNew("ITEMDAMAGECHANCE", 25);
+    args.m_VarsLocal.SetNumNew("ITEMDAMAGEAMOUNT", 1);
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
-		if ( Skill_OnCharTrigger(skill, CTRIG_SkillSuccess) == TRIGRET_RET_TRUE )
+		if (Skill_OnCharTrigger(skill, CTRIG_SkillSuccess) == TRIGRET_RET_TRUE, &args)
 			return -SKTRIG_ABORT;
 	}
 	if ( IsTrigUsed(TRIGGER_SUCCESS) )
 	{
-		if ( Skill_OnTrigger(skill, SKTRIG_SUCCESS) == TRIGRET_RET_TRUE )
+		if (Skill_OnTrigger(skill, SKTRIG_SUCCESS) == TRIGRET_RET_TRUE, &args)
 			return -SKTRIG_ABORT;
 	}
+
+    int chance = minimum(maximum((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGECHANCE"), 0), 100);
+    if (IsSetEF(EF_DamageTools) && g_Cfg.IsSkillFlag(skill, SKF_GATHER) && chance > 0)
+    {
+        CItem* pTool = LayerFind(LAYER_HAND1);
+        if (!pTool || !pTool->IsTypeWeapon())
+            pTool = LayerFind(LAYER_HAND2);
+
+        if (pTool && pTool->IsTypeWeapon())
+        {
+            if (Calc_GetRandVal(100) < chance)
+            {
+                int amount = maximum(minimum((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), pTool->m_itWeapon.m_dwHitsCur), 0);
+                pTool->OnTakeDamage(amount, nullptr, DAMAGE_GOD);
+            }
+        }
+    }
 
 	// Success for the skill.
 	iRet = Skill_Stage(SKTRIG_SUCCESS);

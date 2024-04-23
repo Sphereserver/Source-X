@@ -3706,3 +3706,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	- Delay should set to 2.5-3.0
 	- All softcoded system should removed.
 	- If anyone want to code their own fishing system, they can use SKF_SCRIPTED.
+- Added: EF_DAMAGETOOLS flag implemented to the sphere.
+	- Added LOCAL.ITEMDAMAGECHANCE to the @Success trigger for skills to decide damage chance for tools. (Default: 25)
+	- Added LOCAL.ITEMDAMAGEAMOUNT to the @Success trigger for skills to decide damage amount. (Default: 1)
+	- EF_DAMAGETOOLS only affects the skills with SKF_GATHER flag.
