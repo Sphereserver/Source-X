@@ -3521,6 +3521,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	This LOCALs changes default behaviour of poisoned weapons while removing poison.
 	LOCAL.ItemPoisonReductionChance = Is the chance that weapon reduce poison morez. (Default 100%)
 	LOCAL.ItemPoisonReductionAmount = Is the amount of poison that weapon reduce. (Default: CurrentPoisonAmount/ 2)
+	
 - Added: You can now use TDATA2 for setting default cooldown (delay) for drinks. (Default: 15secs for potions, 1500 secs for ales)
 - Changed: Reactive armor range increased from 1 to 2 in default.
 
@@ -3543,7 +3544,8 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 02-04-2024, xwerswoodx
 - Changed: dword CAN flags changed with uint64 to increase limits.
 	- CAN flag limit increased from 0xFFFF FFFF (dword/uint max) to 0xFFFF FFFF FFFF FFFF (uint64 max)
-	- But as sphere evaluation expressions (eval, hval etc.) supports int64 instead of uint64, avoid using any flag value more than 2 << 47 (0x1 0000 0000 0000).
+	- The maximum allowed flag for UINT64 is 1 << 62 (0x4000 0000 0000 0000) as 1 << 63 is reserved for the sign.
+	- But as sphere evaluation expressions (eval, hval, qval etc.) supports int64 instead of uint64, avoid using any flag value more than 1 << 47 (0x1 0000 0000 0000).
 - Fixed: Possible fix for chat debugs. (Issue: #1212) (Issue: https://discord.com/channels/354358315373035542/483721253773901824/1224030729906815077)
 
 03-04-2024, xwerswoodx
@@ -3638,10 +3640,9 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	  MapViewRadar=31
 	  MapViewSize=18
 	  MapViewSizeMax=24
-- Added: 'H' shortcut for variables to get the value as hexadecimal.
-	For example, if you use .tag.test 100
-	<dTAG.TEST> returns 100
-	<hTAG.TEST> returns 064
+	- MapViewRadar affects the visibility range of the multis (castles, keeps, ships etc) and the range of spy glass. (Spyglass range is MapViewRadar - 5)
+	- MapViewSize affects the visibility range of the items.
+	- MapViewSizeMax is the maximum range of MapViewSize allowed for increasing VISUALRANGE on clients.
 - Merged: raydienull's LAYER_STABLE (81) build merged, but LAYER_AUCTION keep same while LAYER_STABLE added as a new layer. (PR: #1201)
 - Fixed: raydienull's LAYER_STABLE follower triggers isn't called while taking pet out of stable.
 - Fixed: raydienull's LAYER_STABLE doesn't work with the new follower system.

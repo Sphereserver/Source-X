@@ -539,16 +539,6 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 				return true;
 			}
 		}
-        else if ((*ptcKey == 'h') || (*ptcKey == 'H')) // <hSOMEVAL> same as <HVAL <SOMEVAL>> to get hex from the val
-        {
-            lpctstr sArgs = ptcKey + 1;
-            if (r_WriteVal(sArgs, sVal, pSrc))
-            {
-                if (*sVal != '-')
-                    sVal.FormatLLHex(ahextoi64(sVal));
-                return true;
-            }
-        }
 		// <r>, <r15>, <r3,15> are shortcuts to rand(), rand(15) and rand(3,15)
 		else if (( *ptcKey == 'r' ) || ( *ptcKey == 'R' ))
 		{
