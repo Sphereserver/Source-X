@@ -3571,7 +3571,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 08-04-2024, xwerswoodx
 - Fixed: Missing REGION reference for multis. (Issue: #1228)
-- Added: SPELLFLAG_NO_ELEMENTALENGINE (0400000000) as spellflag, for ignoring Elemental Engine Damages in specific skills.
+- Added: SPELLFLAG_NO_ELEMENTALENGINE (0400000000) as spellflag, for ignoring Elemental Engine Damages in specific spells. (Issue: #1230)
 
 09-04-2024, xwerswoodx
 - Fixed: An issue that causes T_MULTI_CUSTOM keep multi count saved. (Issue: #1232)
