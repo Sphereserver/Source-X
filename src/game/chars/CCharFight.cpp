@@ -416,7 +416,7 @@ int CChar::CalcArmorDefense() const
 	ADDTOCALLSTACK("CChar::CalcArmorDefense");
 
 	// If Combat Elemental Engine is enabled, we don't need to calculate the AC because RESPHYSICAL is used.
-	if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_RESPHYSICAL))
+	if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 		 return 0;
 
 	int iDefenseTotal = 0;

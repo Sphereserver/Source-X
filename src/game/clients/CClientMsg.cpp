@@ -66,6 +66,7 @@ void CClient::resendBuffs() const
         int64 iTimerEffectSigned = pItem->GetTimerSAdjusted();
 		wTimerEffect = (word)(maximum(iTimerEffectSigned, 0));
         SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+        const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 
 		switch (spell)
 		{
@@ -135,7 +136,7 @@ void CClient::resendBuffs() const
 			case SPELL_Reactive_Armor:
 			{
 				removeBuff(BI_REACTIVEARMOR);
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -161,7 +162,7 @@ void CClient::resendBuffs() const
 				}
 
 				removeBuff(BuffIcon);
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Arch_Prot ? EE_ARCH_PROTECTION : EE_PROTECTION)))
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-pItem->m_itSpell.m_PolyStr, NumBuff[0], sizeof(NumBuff[0]), 10);
 					Str_FromI(-pItem->m_itSpell.m_PolyDex / 10, NumBuff[1], sizeof(NumBuff[0]), 10);
@@ -188,7 +189,7 @@ void CClient::resendBuffs() const
 			case SPELL_Magic_Reflect:
 			{
 				removeBuff(BI_MAGICREFLECTION);
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )

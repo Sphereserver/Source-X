@@ -237,7 +237,7 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
         writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
     }
 
-	if (fElemental && IsSetEEFlags(EE_RESPHYSICAL))
+	if (fElemental)
 		writeInt16((word)other->GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar));
 	else
 		writeInt16(other->m_defense + otherDefinition->m_defense);

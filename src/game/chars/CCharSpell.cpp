@@ -808,7 +808,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Curse:
 		case SPELL_Mass_Curse:
 		{
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Mass_Curse ? EE_MASS_CURSE : EE_CURSE)) && m_pPlayer)
+			if (m_pPlayer && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -855,7 +855,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			UpdateStatVal( STAT_INT, +uiStatEffect );
 			return;
 		case SPELL_Reactive_Armor:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -874,7 +874,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Clear(STATF_REFLECTION);
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -892,15 +892,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
         {
-            ELEMENTALENGINEFLAGS_TYPE iType = EE_PROTECTION;
-            if (spell == SPELL_Steelskin)
-                iType = EE_STEELSKIN;
-            else if (spell == SPELL_Stoneskin)
-                iType = EE_STONESKIN;
-            else if (spell == SPELL_Arch_Prot)
-                iType = EE_ARCH_PROTECTION;
-
-            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(iType))
+            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
             {
                 CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
                 CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1376,7 +1368,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	switch ( spell )
 	{
 		case SPELL_Reactive_Armor:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
                 wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1399,7 +1391,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_REACTIVEARMOR);
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_REACTIVE_ARMOR))
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1485,7 +1477,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
                     wStatEffectRef = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 				}
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Mass_Curse ? EE_MASS_CURSE : EE_CURSE)) && m_pPlayer)		// Curse also decrease max resistances on players
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE) && m_pPlayer)		// Curse also decrease max resistances on players
 				{
 					CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 					CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1512,7 +1504,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
 						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
-					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags((spell == SPELL_Mass_Curse ? EE_MASS_CURSE : EE_CURSE)))
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 					{
 						for ( int idx = 3; idx < 7; ++idx )
 							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
@@ -1613,7 +1605,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Set( STATF_REFLECTION );
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
                 wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1628,7 +1620,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_MAGICREFLECTION);
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(EE_MAGIC_REFLECT))
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1649,15 +1641,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				int iPhysicalResist = 0;
 				int iMagicResist = 0;
-                ELEMENTALENGINEFLAGS_TYPE iType = EE_PROTECTION;
-                if (spell == SPELL_Steelskin)
-                    iType = EE_STEELSKIN;
-                else if (spell == SPELL_Stoneskin)
-                    iType = EE_STONESKIN;
-                else if (spell == SPELL_Arch_Prot)
-                    iType = EE_ARCH_PROTECTION;
-
-				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && IsSetEEFlags(iType))
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
 					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);

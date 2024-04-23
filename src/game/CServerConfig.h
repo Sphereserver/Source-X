@@ -130,23 +130,6 @@ enum COMBATFLAGS_TYPE
 };
 
 /**
-* @enum     ELEMENTALENGINEFLAGS_TYPE
-* @brief    ElementalEngineFlags (sphere.ini)
-*/
-enum ELEMENTALENGINEFLAGS_TYPE
-{
-    EE_CURSE                    = 0x1,      // Adds Elemental buff/defuff to curse spell.
-    EE_MASS_CURSE               = 0x2,      // Adds Elemental buff/defuff to mass curse spell.
-    EE_REACTIVE_ARMOR           = 0x4,      // Adds Elemental buff/defuff to reactive armor spell.
-    EE_MAGIC_REFLECT            = 0x8,      // Adds Elemental buff/defuff to magic reflect spell.
-    EE_PROTECTION               = 0x10,     // Adds Elemental buff/defuff to protection spell.
-    EE_ARCH_PROTECTION          = 0x20,     // Adds Elemental buff/defuff to arch protection spell.
-    EE_STONESKIN                = 0x40,     // Adds Elemental buff/defuff to stone skin spell.
-    EE_STEELSKIN                = 0x80,     // Adds Elemental buff/defuff to steel skin spell.
-    EE_RESPHYSICAL              = 0x100     // Use RESPHYSICAL value instead of ARMOR for defense calculation.
-};
-
-/**
 * @enum    PARRYFLAGS_TYPE
 * @brief   ParryEra (sphere.ini): Parrying behaviour
 */
