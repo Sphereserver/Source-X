@@ -53,8 +53,8 @@ bool CItem::Plant_Use(CChar *pChar)
 		return true;
 	}
 
-	if ( iFruitIDOverride != ITEMID_NOTHING )
-		iFruitID = iFruitIDOverride;
+    if (iFruitIDOverride != ITEMID_NOTHING)
+        iFruitID = iFruitIDOverride;
 
 	if ( iFruitID == ITEMID_NOTHING )
 		pChar->SysMessageDefault(DEFMSG_CROPS_NO_FRUIT);
