@@ -3841,12 +3841,12 @@ int CChar::Skill_Done()
     args.m_VarsLocal.SetNumNew("ITEMDAMAGEAMOUNT", 1);
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
-		if (Skill_OnCharTrigger(skill, CTRIG_SkillSuccess) == TRIGRET_RET_TRUE, &args)
+		if (Skill_OnCharTrigger(skill, CTRIG_SkillSuccess, &args) == TRIGRET_RET_TRUE)
 			return -SKTRIG_ABORT;
 	}
 	if ( IsTrigUsed(TRIGGER_SUCCESS) )
 	{
-		if (Skill_OnTrigger(skill, SKTRIG_SUCCESS) == TRIGRET_RET_TRUE, &args)
+		if (Skill_OnTrigger(skill, SKTRIG_SUCCESS, &args) == TRIGRET_RET_TRUE)
 			return -SKTRIG_ABORT;
 	}
 
