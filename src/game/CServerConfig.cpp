@@ -519,7 +519,6 @@ enum RC_TYPE
 	RC_DUMPPACKETSFORACC,
 #endif
 	RC_DUNGEONLIGHT,
-    RC_ELEMENTALENGINEFLAGS,
 	RC_EMOTEFLAGS,				// m_iEmoteFlags
 	RC_EQUIPPEDCAST,			// m_fEquippedCast
     RC_ERALIMITGEAR,			// _iEraLimitGear
