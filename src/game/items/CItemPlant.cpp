@@ -31,7 +31,9 @@ bool CItem::Plant_Use(CChar *pChar)
 
 	ITEMID_TYPE iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
     ITEMID_TYPE iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
-    ITEMID_TYPE iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
+    ITEMID_TYPE iFruitIDOverride = ITEMID_NOTHING;
+    if (!Can(CAN_I_SCRIPTEDMORE))
+        iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
     word iAmount = std::max(m_itCrop.m_ridAmount, (word)1);
     if (IsTrigUsed(TRIGGER_RESOURCETEST))
     {
@@ -121,7 +123,7 @@ bool CItem::Plant_OnTick()
 	{
 		// Some plants generate a fruit on the ground when ripe.
 		ITEMID_TYPE iFruitID = ITEMID_NOTHING;
-		if ( m_itCrop.m_ridFruitOverride.IsValidUID())
+		if ( m_itCrop.m_ridFruitOverride.IsValidUID() && !Can(CAN_I_SCRIPTEDMORE))
 			iFruitID = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
 		else
 			iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
