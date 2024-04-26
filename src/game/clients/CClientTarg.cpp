@@ -1475,12 +1475,6 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 			}
 		}
 
-        if (pObj != m_pChar && pSpell->IsSpellType(SPELLFLAG_TARG_ONLYSELF) && !IsPriv(PRIV_GM))
-        {
-            SysMessageDefault(DEFMSG_MAGERY_9);
-            return true;
-        }
-
 		if (pObj == m_pChar && pSpell->IsSpellType( SPELLFLAG_TARG_NOSELF ) && !IsPriv(PRIV_GM) )
 		{
 			SysMessageDefault( DEFMSG_MAGERY_3 );

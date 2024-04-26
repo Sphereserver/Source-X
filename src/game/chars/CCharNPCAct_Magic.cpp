@@ -316,28 +316,25 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 
                 if (NPC_GetAiFlags()&NPC_AI_COMBAT && !bIgnoreAITargetChoice)
                 {
-                    if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_ONLYSELF)) {
-                        //	search for the neariest friend in combat if the spell has no SPELLFLAG_TARG_ONLYSELF flag.
-                        CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIGHT);
-                        for (;;)
-                        {
-                            pTarget = AreaChars.GetChar();
-                            if (!pTarget)
-                                break;
+                    CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIGHT);
+                    for (;;)
+                    {
+                        pTarget = AreaChars.GetChar();
+                        if (!pTarget)
+                            break;
 
-                            CItemMemory* pMemory = pTarget->Memory_FindObj(pTarg);
-                            if (pMemory && pMemory->IsMemoryTypes(MEMORY_FIGHT | MEMORY_HARMEDBY | MEMORY_IRRITATEDBY))
-                            {
-                                pFriend[iFriendIndex++] = pTarget;
-                                if (iFriendIndex >= 4)
-                                    break;
-                            }
+                        CItemMemory* pMemory = pTarget->Memory_FindObj(pTarg);
+                        if (pMemory && pMemory->IsMemoryTypes(MEMORY_FIGHT | MEMORY_HARMEDBY | MEMORY_IRRITATEDBY))
+                        {
+                            pFriend[iFriendIndex++] = pTarget;
+                            if (iFriendIndex >= 4)
+                                break;
                         }
                     }
                 }
 
                 //	i cannot cast this on self. ok, then friends only
-                if (pSpellDef->IsSpellType(SPELLFLAG_TARG_NOSELF) && !pSpellDef->IsSpellType(SPELLFLAG_TARG_ONLYSELF)) //Make sure the spell has no ONLYSELF flag to avoid issues.
+                if (pSpellDef->IsSpellType(SPELLFLAG_TARG_NOSELF))
                 {
                     pFriend[0] = pFriend[1];
                     pFriend[1] = pFriend[2];

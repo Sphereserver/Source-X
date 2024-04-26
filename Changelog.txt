@@ -3466,9 +3466,6 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Changed: Decay time removed from spawned items, as Sphere gives tons of invalid link errors when items decayed. (Issue: #1218)
 - Added: New spellflag SPELLFLAG_FIELD_RANDOMDECAY (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
 	SPELLFLAG_FIELD_RANDOMDECAY should be added to defs.
-- Added: New spellflag SPELLFLAG_TARG_ONLYSELF (0200000000) to make spell only be used on character himself. (Issue: #1171)
-	SPELLFLAG_TARG_ONLYSELF should be added to defs.
-	//magery_9 "You can only use this spell on yourself." could be added to defmessages.
 - Changed: SERV.LOG command changed to support console colors. (Issue: [Feature Request] Colored Serv & Src Log System #1158)
 	SERV.LOG works same as before.
 	Usage of custom color system is: SERV.LOG @color,type,mask message
@@ -3571,7 +3568,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 08-04-2024, xwerswoodx
 - Fixed: Missing REGION reference for multis. (Issue: #1228)
-- Added: SPELLFLAG_NO_ELEMENTALENGINE (0400000000) as spellflag, for ignoring Elemental Engine Damages in specific spells. (Issue: #1230)
+- Added: SPELLFLAG_NO_ELEMENTALENGINE (0200000000) as spellflag, for ignoring Elemental Engine Damages in specific spells. (Issue: #1230)
 
 09-04-2024, xwerswoodx
 - Fixed: An issue that causes T_MULTI_CUSTOM keep multi count saved. (Issue: #1232)
