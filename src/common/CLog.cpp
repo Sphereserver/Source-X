@@ -6,7 +6,7 @@
 #include "CLog.h"
 
 
-int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args, ConsoleTextColor iColor) noexcept
+int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept
 {
     if (pszFormat == nullptr || pszFormat[0] == '\0')
         return 0;
@@ -28,7 +28,7 @@ int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(dwMask, pszFormat, vargs);
+    int iret = VEvent(dwMask, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -37,7 +37,7 @@ int CEventLog::EventDebug(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, vargs);
+    int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -46,7 +46,7 @@ int CEventLog::EventError(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGL_ERROR, pszFormat, vargs);
+    int iret = VEvent(LOGL_ERROR, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -55,7 +55,7 @@ int CEventLog::EventWarn(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGL_WARN, pszFormat, vargs);
+    int iret = VEvent(LOGL_WARN, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -64,7 +64,7 @@ int CEventLog::EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFor
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(dwMask, pszFormat, vargs, iColor);
+    int iret = VEvent(dwMask, pszFormat, iColor, vargs);
     va_end(vargs);
     return iret;
 }
@@ -74,7 +74,7 @@ int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGL_EVENT, pszFormat, vargs);
+    int iret = VEvent(LOGL_EVENT, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }

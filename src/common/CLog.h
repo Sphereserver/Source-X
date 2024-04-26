@@ -61,7 +61,7 @@ class CEventLog
 protected:
 	virtual int EventStr(dword dwMask, lpctstr pszMsg, ConsoleTextColor iColor = CTCOL_DEFAULT) noexcept = 0;
 
-    int VEvent(dword dwMask, lpctstr pszFormat, va_list args, ConsoleTextColor iColor = CTCOL_DEFAULT) noexcept;
+    int VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept;
 
 public:
 	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) noexcept __printfargs(3,4);
