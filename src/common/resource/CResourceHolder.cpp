@@ -301,7 +301,7 @@ lpctstr CResourceHolder::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iE
     {
         ridValid = rid;
     }
-    return g_Cfg.ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
+    return ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
 }
 
 lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
