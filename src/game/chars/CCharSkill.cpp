@@ -3850,7 +3850,7 @@ int CChar::Skill_Done()
 			return -SKTRIG_ABORT;
 	}
 
-    int chance = minimum(maximum((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGECHANCE"), 0), 100);
+    int chance = std::min(std::max((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGECHANCE"), (int)0), (int)100);
     if (IsSetEF(EF_DamageTools) && g_Cfg.IsSkillFlag(skill, SKF_GATHER) && chance > 0)
     {
         CItem* pTool = LayerFind(LAYER_HAND1);
@@ -3861,7 +3861,7 @@ int CChar::Skill_Done()
         {
             if (Calc_GetRandVal(100) < chance)
             {
-                int amount = maximum(minimum((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), pTool->m_itWeapon.m_dwHitsCur), 0);
+                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_dwHitsCur), 0);
                 pTool->OnTakeDamage(amount, nullptr, DAMAGE_GOD);
             }
         }
