@@ -2693,16 +2693,11 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             if (m_pRegion != nullptr)
             {
                 if (!IsStrEmpty(ptcKey))
-                {
-                    if (m_pRegion)
-                        return m_pRegion->r_WriteVal(ptcKey, sVal, pSrc);
-                }
-
-                if (m_pRegion)
-                    sVal.FormatHex(m_pRegion->GetResourceID().GetObjUID());
-                else
-                    sVal.FormatHex(0);
+                    return m_pRegion->r_WriteVal(ptcKey, sVal, pSrc);
+                sVal.FormatHex(m_pRegion->GetResourceID().GetObjUID());
             }
+            else
+                sVal.FormatHex(0);
             break;
         }
         case SHL_OWNER:
