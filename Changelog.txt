@@ -3631,6 +3631,10 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	- MapViewRadar affects the visibility range of the multis (castles, keeps, ships etc) and the range of spy glass. (Spyglass range is MapViewRadar - 5)
 	- MapViewSize affects the visibility range of the items.
 	- MapViewSizeMax is the maximum range of MapViewSize allowed for increasing VISUALRANGE on clients.
+Added: 'H' shortcut for variables to get the value as hexadecimal.
+	For example, if you use .tag.test 100
+	<dTAG.TEST> returns 100
+	<hTAG.TEST> returns 064
 - Merged: raydienull's LAYER_STABLE (81) build merged, but LAYER_AUCTION keep same while LAYER_STABLE added as a new layer. (PR: #1201)
 - Fixed: raydienull's LAYER_STABLE follower triggers isn't called while taking pet out of stable.
 - Fixed: raydienull's LAYER_STABLE doesn't work with the new follower system.
@@ -3702,3 +3706,13 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Added: CAN_I_SCRIPTEDMORE (020000000) as item CAN.
 	- This can flag ignores MORE values that entered for hardcoded behaviour.
 	- It's new flag, need couple of updates for fully implemented.
+
+27-04-2024, xwerswoodx
+- Fixed: Return of variables were return decimal value (10-base) instead of hexadecimal (16-base).
+- Added: DecimalVariables (boolean) keyword for sphere.ini. (Default: 0)
+	0: Makes Sphere return variables (TAGs, LOCALs, etc.) in hexadecimal (16-base)
+	1: Makes Sphere return variables (TAGs, LOCALs, etc.) in decimal (10-base)
+	IMPORTANT: If you were using <TAG.NAME> == DECIMAL for checking in your scripts and want to keep that behaviour,
+		    you have to add DecimalVariables=1 to Sphere.ini.
+	SUGGESTION: Always use <hTAG.NAME> for hexadecimal returns, and <dTAG.NAME> for decimal returns to avoid any future issues,
+		     when you switch this setting.

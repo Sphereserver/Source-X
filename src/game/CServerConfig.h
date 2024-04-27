@@ -591,6 +591,7 @@ public:
 	int     m_iMaxPolyStats;        // Max amount of each Stat gained through Polymorph spell. This affects separatelly to each stat.
 
     bool    m_NPCShoveNPC;           //NPC can walk through other NPC, by default this is disabled.
+    bool    m_bDecimalVariables;     //Variables like TAGs, LOCALs returns as decimal (10 base) instead of Hex.
 	// End INI file options.
 
 	CResourceScript m_scpIni;       // Keep this around so we can link to it.

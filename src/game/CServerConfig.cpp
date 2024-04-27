@@ -50,6 +50,7 @@ CServerConfig::CServerConfig()
 	m_iFreezeRestartTime	= 60;
 	m_bAgree				= false;
 	m_fMd5Passwords			= false;
+    m_bDecimalVariables     = false; // In default, variables should return hexadecimal.
 
 	//Magic
 	m_fManaLossAbort		= false;
@@ -514,6 +515,7 @@ enum RC_TYPE
 	RC_DISTANCETALK,
 	RC_DISTANCEWHISPER,
 	RC_DISTANCEYELL,
+    RC_DECIMALVARIABLES,
 	RC_DRAGWEIGHTMAX,
 #ifdef _DUMPSUPPORT
 	RC_DUMPPACKETSFORACC,
@@ -711,7 +713,7 @@ enum RC_TYPE
 };
 
 // NOTE: Need to be alphabetized order
-const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
+const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 {
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
@@ -783,6 +785,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1]
     { "DEADSOCKETTIME",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDeadSocketTime)		}},
     { "DEBUGFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iDebugFlags)			}},
     { "DECAYTIMER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDecay_Item)			}},
+    { "DECIMALVARIABLES",       { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_bDecimalVariables)    }},
     { "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDefaultCommandLevel)	}},
     { "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayPercentAr)		}},
     { "DISPLAYELEMENTALRESISTANCE",{ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayElementalResistance)}},
