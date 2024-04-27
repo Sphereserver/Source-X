@@ -3716,3 +3716,4 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 		    you have to add DecimalVariables=1 to Sphere.ini.
 	SUGGESTION: Always use <hTAG.NAME> for hexadecimal returns, and <dTAG.NAME> for decimal returns to avoid any future issues,
 		     when you switch this setting.
+- Fixed: SPELLFLAG_NOUNPARALYZE flag wasn't working as intended.

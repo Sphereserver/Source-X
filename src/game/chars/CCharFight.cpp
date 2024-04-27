@@ -622,7 +622,6 @@ int CChar::CalcArmorDefense() const
 int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, SPELL_TYPE spell)
 {
 	ADDTOCALLSTACK("CChar::OnTakeDamage");
-
 	if ( pSrc == nullptr )
 		pSrc = this;
 
@@ -777,12 +776,19 @@ effect_bounce:
 			pItemHit->OnTakeDamage(iDmg, pSrc, uType);
 	}
 
+    CSpellDef* pSpellDef = nullptr;
 	// Remove stuck/paralyze effect
-	if ( !(uType & DAMAGE_NOUNPARALYZE) )
+	if (!(uType & DAMAGE_NOUNPARALYZE))
 	{
-		CItem * pParalyze = LayerFind(LAYER_SPELL_Paralyze);
-		if ( pParalyze )
-			pParalyze->Delete();
+        if (spell)
+            pSpellDef = g_Cfg.GetSpellDef(spell);
+
+        if (!pSpellDef || (pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOUNPARALYZE))) // Block spells with SPELLFLAG_NOUNPARALYZE flag, unparalyze the target.
+        {
+            CItem* pParalyze = LayerFind(LAYER_SPELL_Paralyze);
+            if (pParalyze)
+                pParalyze->Delete();
+        }
 
 		CItem * pStuck = LayerFind(LAYER_FLAG_Stuck);
 		if ( pStuck )
@@ -870,7 +876,7 @@ effect_bounce:
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;
 		int iSpellSkill = -1;
-		const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+		pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
