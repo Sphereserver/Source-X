@@ -50,7 +50,7 @@ CServerConfig::CServerConfig()
 	m_iFreezeRestartTime	= 60;
 	m_bAgree				= false;
 	m_fMd5Passwords			= false;
-    m_bDecimalVariables     = false; // In default, variables should return hexadecimal.
+    m_fDecimalVariables     = false; // In default, variables should return hexadecimal.
 
 	//Magic
 	m_fManaLossAbort		= false;
@@ -785,7 +785,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "DEADSOCKETTIME",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDeadSocketTime)		}},
     { "DEBUGFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iDebugFlags)			}},
     { "DECAYTIMER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDecay_Item)			}},
-    { "DECIMALVARIABLES",       { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_bDecimalVariables)    }},
+    { "DECIMALVARIABLES",       { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDecimalVariables)    }},
     { "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDefaultCommandLevel)	}},
     { "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayPercentAr)		}},
     { "DISPLAYELEMENTALRESISTANCE",{ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayElementalResistance)}},
