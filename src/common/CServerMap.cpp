@@ -639,7 +639,7 @@ size_t CUOMulti::Load(MULTI_TYPE id)
 
 CServerMapDiffCollection::CServerMapDiffCollection()
 {
-	m_bLoaded = false;
+	m_fLoaded = false;
 }
 
 CServerMapDiffCollection::~CServerMapDiffCollection()
@@ -658,7 +658,7 @@ void CServerMapDiffCollection::LoadMapDiffs()
 {
 	// Load mapdif* and stadif* Files
 	ADDTOCALLSTACK("CServerMapDiffCollection::LoadMapDiffs");
-	if ( m_bLoaded ) // already loaded
+	if ( m_fLoaded ) // already loaded
 		return;
 
 	CServerMapDiffBlock * pMapDiffBlock = nullptr;
@@ -787,7 +787,7 @@ void CServerMapDiffCollection::LoadMapDiffs()
 		} // Stadif
 	}
 
-	m_bLoaded = true;
+	m_fLoaded = true;
 }
 
 void CServerMapDiffCollection::Init()

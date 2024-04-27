@@ -286,7 +286,7 @@ bool CSector::r_LoadVal( CScript &s )
 			m_dwFlags = s.GetArgVal();
 			return true;
 		case SC_LIGHT:
-			if ( g_Cfg.m_bAllowLightOverride )
+			if ( g_Cfg.m_fAllowLightOverride )
 				SetLight( s.HasArgs() ? s.GetArgVal() : -1 );
 			else
 				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
@@ -356,7 +356,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 			SetWeather( WEATHER_DRY );
 			break;
 		case SEV_LIGHT:
-			if ( g_Cfg.m_bAllowLightOverride )
+			if ( g_Cfg.m_fAllowLightOverride )
 				SetLight( (s.HasArgs()) ? s.GetArgVal() : -1 );
 			else
 				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
@@ -422,7 +422,7 @@ void CSector::r_Write()
 		fHeaderCreated = true;
 	}
 
-	if (g_Cfg.m_bAllowLightOverride && IsLightOverriden())
+	if (g_Cfg.m_fAllowLightOverride && IsLightOverriden())
 	{
 		if (fHeaderCreated == false )
 		{
@@ -595,7 +595,7 @@ int CSector::GetLocalTime() const
 	const CPointMap& pt(GetBasePoint());
 	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
-	if ( !g_Cfg.m_bAllowLightOverride )
+	if ( !g_Cfg.m_fAllowLightOverride )
 	{
 		iLocalTime += ( pt.m_x * 24*60 ) / g_MapList.GetMapSizeX(pt.m_map);
 	}
@@ -656,7 +656,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 	ADDTOCALLSTACK("CSector::GetLightCalc");
 	// What is the light level default here in this sector.
 
-	if ( g_Cfg.m_bAllowLightOverride && IsLightOverriden() )
+	if ( g_Cfg.m_fAllowLightOverride && IsLightOverriden() )
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
@@ -664,7 +664,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 
 	int localtime = GetLocalTime();
 
-	if ( !g_Cfg.m_bAllowLightOverride )
+	if ( !g_Cfg.m_fAllowLightOverride )
 	{
 		//	Normalize time:
 		//	convert	0=midnight	.. (23*60)+59=midnight

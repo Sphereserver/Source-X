@@ -612,7 +612,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
     Noto_Fame(g_Cfg.Calc_FameKill(pKill) / iTotalKillers, pKill);
     Noto_Karma(g_Cfg.Calc_KarmaKill(pKill, NotoThem) / iTotalKillers, INT32_MIN, false, pKill);
 
-    if (g_Cfg.m_bExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_COMBAT))
+    if (g_Cfg.m_fExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_COMBAT))
     {
         int change = (pKill->m_exp / 10) / iTotalKillers;
         if (change)

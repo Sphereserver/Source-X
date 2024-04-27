@@ -56,7 +56,7 @@ CClient::CClient(CNetState* state)
 
 	m_tmSetup.m_dwIP = 0;
 	m_tmSetup.m_iConnect = 0;
-	m_tmSetup.m_bNewSeed = false;
+	m_tmSetup.m_fNewSeed = false;
 
 	m_Env.SetInvalid();
 

@@ -835,7 +835,7 @@ bool CChar::Skill_MakeItem_Success()
 	}
 
 	// Experience gain on craftings
-	if ( g_Cfg.m_bExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_CRAFT) )
+	if ( g_Cfg.m_fExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_CRAFT) )
 	{
 		int exp = 0;
 		if ( pItemVend )

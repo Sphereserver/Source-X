@@ -1037,7 +1037,7 @@ void CChar::CreateNewCharCheck()
 	if ( !m_pPlayer )	// need a starting brain tick.
 	{
 		//	auto-set EXP/LEVEL level
-		if ( g_Cfg.m_bExperienceSystem && g_Cfg.m_iExperienceMode&EXP_MODE_AUTOSET_EXP )
+		if ( g_Cfg.m_fExperienceSystem && g_Cfg.m_iExperienceMode&EXP_MODE_AUTOSET_EXP )
 		{
 			if ( !m_exp )
 			{
@@ -1066,7 +1066,7 @@ void CChar::CreateNewCharCheck()
 				m_exp = (m_exp * mult) / 100;
 			}
 
-			if ( !m_level && g_Cfg.m_bLevelSystem && ( m_exp > g_Cfg.m_iLevelNextAt ))
+			if ( !m_level && g_Cfg.m_fLevelSystem && ( m_exp > g_Cfg.m_iLevelNextAt ))
 				ChangeExperience();
 		}
 
@@ -4941,7 +4941,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			if (!(g_Cfg.m_iExperienceMode&EXP_MODE_ALLOW_DOWN))	// do not allow changes to minus
 				return;
 			// limiting delta to current level? check if delta goes out of level
-			if (g_Cfg.m_bLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
+			if (g_Cfg.m_fLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
 			{
 				uint exp = Calc_ExpGet_Exp(m_level);
 				if (delta + m_exp < exp)
@@ -4977,7 +4977,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		{
 			int iWord = 0;
 			llong absval = abs(delta);
-			llong maxval = (g_Cfg.m_bLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
+			llong maxval = (g_Cfg.m_fLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
 
 			if (absval >= maxval)				// 100%
 				iWord = 7;
@@ -5000,7 +5000,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		}
 	}
 
-	if (g_Cfg.m_bLevelSystem)
+	if (g_Cfg.m_fLevelSystem)
 	{
 		llong level = Calc_ExpGet_Level(m_exp);
 

@@ -2301,7 +2301,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 
 #ifdef _NIGHTLYBUILD
 	g_Log.Event(LOGL_WARN|LOGF_LOGFILE_ONLY, pszNightlyMsg);
-	if (!g_Cfg.m_bAgree)
+	if (!g_Cfg.m_fAgree)
 	{
 		g_Log.Event(LOGL_ERROR,"Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the risks of using nightly builds.\n");
 		return false;
@@ -2313,7 +2313,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 		g_Log.Event(LOGM_INIT, wSockInfo);
 #endif
 
-	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
+	if (g_Cfg.m_fMySql && g_Cfg.m_fMySqlTicks)
 	{
 		EXC_SET_BLOCK( "Connecting to MySQL server" );
 		if (_hDb.Connect())

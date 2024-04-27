@@ -1451,7 +1451,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	if ( pItemChange != nullptr )
 		pItemChange->Delete();
 
-	if ( g_Cfg.m_bAutoResDisp )
+	if ( g_Cfg.m_fAutoResDisp )
 		m_pAccount->SetAutoResDisp(this);
 
 	ClearTargMode();	// clear death menu mode. etc. ready to walk about. cancel any previous modes

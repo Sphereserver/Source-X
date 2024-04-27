@@ -496,7 +496,7 @@ public:
 	uint m_iNpcAi;      // NPCAI Flags.
 
 	//	Experience system
-	bool m_bExperienceSystem;   // Enables the experience system.
+	bool m_fExperienceSystem;   // Enables the experience system.
 #define EXP_MODE_RAISE_COMBAT   0x0001  // Gain experience in combat.
 #define	EXP_MODE_RAISE_CRAFT    0x0002  // Gain experience in crafts.
 #define	EXP_MODE_ALLOW_DOWN     0x0004  // Allow experience to go down.
@@ -505,13 +505,13 @@ public:
 	int  m_iExperienceMode;     // Experience system settings:
 	int  m_iExperienceKoefPVM;  // If combat experience gain is allowed, use these percents for gaining exp in Player versus Monster. 0 Disables the gain.
 	int  m_iExperienceKoefPVP;  // If combat experience gain is allowed, use these percents for gaining exp in Player versus Player. 0 Disables the gain.
-	bool m_bLevelSystem;        // Enable levels system (as a part of experience system).
+	bool m_fLevelSystem;        // Enable levels system (as a part of experience system).
 #define LEVEL_MODE_LINEAR   0   // (each NextLevelAt exp will give a level up).
 #define	LEVEL_MODE_DOUBLE   1   // (you need (NextLevelAt * (level+1)) to get a level up).
 	int  m_iLevelMode;          // Level system settings
 	uint m_iLevelNextAt;        // Amount of experience to raise to the next level.
 
-	bool m_bAutoResDisp;        // Set account RESDISP automatically based on player client version.
+	bool m_fAutoResDisp;        // Set account RESDISP automatically based on player client version.
 	int  m_iAutoPrivFlags;      // Default setting for new accounts specifying default priv level.
 
 	RESDISPLAY_VERSION _iEraLimitGear;	// Don't allow to create gear newer than the given era (softcoded).
@@ -550,8 +550,8 @@ public:
     int			m_iChatFlags;
 
 	//	MySQL features
-	bool    m_bMySql;       // Enables MySQL.
-	bool    m_bMySqlTicks;  // Enables ticks from MySQL.
+	bool    m_fMySql;       // Enables MySQL.
+	bool    m_fMySqlTicks;  // Enables ticks from MySQL.
 	CSString m_sMySqlHost;  // MySQL Host.
 	CSString m_sMySqlUser;  // MySQL User.
 	CSString m_sMySqlPass;  // MySQL Password.
@@ -579,15 +579,15 @@ public:
     int64   _iItemHitpointsUpdate;  // Update period for CCItemDamageable (in seconds in the ini, then converted to msecs).
 	int64   _iTimerCall;            // Amount of time (converted to milliseconds internally) to call f_onserver_timer (0 disables this, default).
     bool    _iTimerCallUnit;        // TRUE mean TimerCall is in second and FALSE mean it's in minute
-	bool    m_bAllowLightOverride;  // Allow manual sector light override?
+	bool    m_fAllowLightOverride;  // Allow manual sector light override?
 	CSString m_sZeroPoint;          // Zero point for sextant coordinates counting. Comment this line out if you are not using ML-sized maps.
 	bool    m_fAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.
 
-	bool    m_bAllowNewbTransfer;   // Set to 1 for items to keep their attr_newbie flag when item is transfered to an NPC.
+	bool    m_fAllowNewbTransfer;   // Set to 1 for items to keep their attr_newbie flag when item is transfered to an NPC.
 
 	bool    m_NPCNoFameTitle;       // NPC will not be addressed as "Lord" or such if this is set.
 
-	bool    m_bAgree;               // AGREE=n for nightly builds.
+	bool    m_fAgree;               // AGREE=n for nightly builds.
 	int     m_iMaxPolyStats;        // Max amount of each Stat gained through Polymorph spell. This affects separatelly to each stat.
 
     bool    m_NPCShoveNPC;           //NPC can walk through other NPC, by default this is disabled.

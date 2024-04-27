@@ -48,7 +48,7 @@ CServerConfig::CServerConfig()
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
 	m_fSecure				= true;
 	m_iFreezeRestartTime	= 60;
-	m_bAgree				= false;
+	m_fAgree				= false;
 	m_fMd5Passwords			= false;
     m_fDecimalVariables     = false; // In default, variables should return hexadecimal.
 
@@ -244,19 +244,19 @@ CServerConfig::CServerConfig()
 	m_fUOGStatus		= true;
 
 	//	Experience
-	m_bExperienceSystem		= false;
+	m_fExperienceSystem		= false;
 	m_iExperienceMode		= 0;
 	m_iExperienceKoefPVP	= 100;
 	m_iExperienceKoefPVM	= 100;
-	m_bLevelSystem			= false;
+	m_fLevelSystem			= false;
 	m_iLevelMode			= LEVEL_MODE_DOUBLE;
 	m_iLevelNextAt			= 0;
 
 	//	MySQL support
-	m_bMySql				= false;
-	m_bMySqlTicks			= false;
+	m_fMySql				= false;
+	m_fMySqlTicks			= false;
 
-    m_bAutoResDisp          = true;
+    m_fAutoResDisp          = true;
 	m_iAutoPrivFlags = 0;
 
 	_iEraLimitGear = RESDISPLAY_VERSION(RDS_QTY - 1); // Always latest by default
@@ -275,8 +275,8 @@ CServerConfig::CServerConfig()
 
 	_iTimerCall			= 0;
 	_iTimerCallUnit		= 0;
-	m_bAllowLightOverride	= true;
-	m_bAllowNewbTransfer	= false;
+	m_fAllowLightOverride	= true;
+	m_fAllowNewbTransfer	= false;
 	m_sZeroPoint			= "1323,1624,0";
 	m_fAllowBuySellAgent	= false;
 
@@ -443,8 +443,8 @@ enum RC_TYPE
 	RC_ADVANCEDLOS,				// m_iAdvancedLos
 	RC_AGREE,
 	RC_ALLOWBUYSELLAGENT,		// m_fAllowBuySellAgent
-	RC_ALLOWLIGHTOVERRIDE,		// m_bAllowLightOverride
-	RC_ALLOWNEWBTRANSFER,		// m_bAllowNewbTransfer
+	RC_ALLOWLIGHTOVERRIDE,		// m_fAllowLightOverride
+	RC_ALLOWNEWBTRANSFER,		// m_fAllowNewbTransfer
 	RC_ARCHERYMAXDIST,			// m_iArcheryMaxDist
 	RC_ARCHERYMINDIST,			// m_iArcheryMinDist
 	RC_AREAFLAGS,				// _uiAreaFlags
@@ -455,7 +455,7 @@ enum RC_TYPE
 	RC_AUTONEWBIEKEYS,			// m_fAutoNewbieKeys
 	RC_AUTOPRIVFLAGS,			// m_iAutoPrivFlags
     RC_AUTOPROCESSPRIORITY,     // m_iAutoProcessPriority
-	RC_AUTORESDISP,				// m_bAutoResDisp
+	RC_AUTORESDISP,				// m_fAutoResDisp
     RC_AUTOSHIPKEYS,            // _fAutoShipKeys
 	RC_BACKPACKOVERLOAD,       // m_iBackpackOverload
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
@@ -533,7 +533,7 @@ enum RC_TYPE
 	RC_EXPERIENCEKOEFPVM,		// m_iExperienceKoefPVM
 	RC_EXPERIENCEKOEFPVP,		// m_iExperienceKoefPVP
 	RC_EXPERIENCEMODE,			// m_iExperienceMode
-	RC_EXPERIENCESYSTEM,		// m_bExperienceSystem
+	RC_EXPERIENCESYSTEM,		// m_fExperienceSystem
 	RC_EXPERIMENTAL,			// _uiExperimentalFlags
 	RC_FEATURESAOS,
 	RC_FEATURESEXTRA,
@@ -563,7 +563,7 @@ enum RC_TYPE
 	RC_ITEMSMAXAMOUNT,			// m_iItemsMaxAmount
 	RC_LEVELMODE,				// m_iLevelMode
 	RC_LEVELNEXTAT,				// m_iLevelNextAt
-	RC_LEVELSYSTEM,				// m_bLevelSystem
+	RC_LEVELSYSTEM,				// m_fLevelSystem
 	RC_LIGHTDAY,				// m_iLightDay
 	RC_LIGHTNIGHT,				// m_iLightNight
 	RC_LOCALIPADMIN,			// m_fLocalIPAdmin
@@ -614,11 +614,11 @@ enum RC_TYPE
 	RC_MULFILES,
 	RC_MURDERDECAYTIME,			// m_iMurderDecayTime;
 	RC_MURDERMINCOUNT,			// m_iMurderMinCount
-	RC_MYSQL,					// m_bMySql
+	RC_MYSQL,					// m_fMySql
 	RC_MYSQLDB,					// m_sMySqlDatabase
 	RC_MYSQLHOST,				// m_sMySqlHost
 	RC_MYSQLPASS,				// m_sMySqlPassword
-	RC_MYSQLTICKS,				// m_bMySqlTicks
+	RC_MYSQLTICKS,				// m_fMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
 	RC_NETWORKTHREADPRIORITY,	// _uiNetworkThreadPriority
@@ -717,10 +717,10 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 {
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
-    { "AGREE",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bAgree)				}},
+    { "AGREE",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAgree)				}},
     { "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAllowBuySellAgent)	}},
-    { "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bAllowLightOverride)	}},
-    { "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bAllowNewbTransfer)	}},
+    { "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAllowLightOverride)	}},
+    { "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAllowNewbTransfer)	}},
     { "ARCHERYMAXDIST",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iArcheryMaxDist)		}},
     { "ARCHERYMINDIST",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iArcheryMinDist)		}},
     { "AREAFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiAreaFlags)			}},
@@ -731,7 +731,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "AUTONEWBIEKEYS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAutoNewbieKeys)		}},
     { "AUTOPRIVFLAGS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAutoPrivFlags)		}},
     { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAutoProcessPriority)	}},
-    { "AUTORESDISP",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bAutoResDisp)			}},
+    { "AUTORESDISP",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAutoResDisp)			}},
     { "AUTOSHIPKEYS",           { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_fAutoShipKeys)		    }},
     { "BACKPACKOVERLOAD",		{ ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iBackpackOverload)	}},
     { "BACKUPLEVELS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSaveBackupLevels)	}},
@@ -809,7 +809,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "EXPERIENCEKOEFPVM",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVM)	}},
     { "EXPERIENCEKOEFPVP",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVP)	}},
     { "EXPERIENCEMODE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceMode)		}},
-    { "EXPERIENCESYSTEM",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bExperienceSystem)		}},
+    { "EXPERIENCESYSTEM",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fExperienceSystem)		}},
     { "EXPERIMENTAL",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiExperimentalFlags)	}},
     { "FEATUREAOS",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureAOS)			}},
     { "FEATUREEXTRA",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureExtra)			}},
@@ -839,7 +839,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "ITEMSMAXAMOUNT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iItemsMaxAmount),		}},
     { "LEVELMODE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelMode),			}},
     { "LEVELNEXTAT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelNextAt),			}},
-    { "LEVELSYSTEM",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bLevelSystem),			}},
+    { "LEVELSYSTEM",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLevelSystem),			}},
     { "LIGHTDAY",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDay),			}},
     { "LIGHTNIGHT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightNight),			}},
     { "LOCALIPADMIN",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLocalIPAdmin),		}}, // The local ip is assumed to be the admin.
@@ -890,11 +890,11 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MULFILES",				{ ELEM_VOID,	0												}},
 	{ "MURDERDECAYTIME",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMurderDecayTime)		}},
 	{ "MURDERMINCOUNT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMurderMinCount)		}}, // amount of murders before we get title.
-	{ "MYSQL",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bMySql)				}},
+	{ "MYSQL",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMySql)				}},
 	{ "MYSQLDATABASE",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlDB)				}},
 	{ "MYSQLHOST",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlHost)			}},
 	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlPass)			}},
-	{ "MYSQLTICKS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_bMySqlTicks)			}},
+	{ "MYSQLTICKS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMySqlTicks)			}},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlUser)			}},
 	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNetHistoryTTL)		}},
 	{ "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreadPriority)}},
@@ -1121,7 +1121,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	switch (i)
 	{
 		case RC_AGREE:
-			m_bAgree = (s.GetArgVal() != 0);
+			m_fAgree = (s.GetArgVal() != 0);
 			break;
 		case RC_ACCTFILES:	// Put acct files here.
 			m_sAcctBaseDir = CSFile::GetMergedFileName( s.GetArgStr(), "" );

@@ -349,7 +349,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				pItem->ClrAttr(ATTR_OWNED);
 
 				// newbie items lose newbie status when transfered to NPC
-				if ( !g_Cfg.m_bAllowNewbTransfer )
+				if ( !g_Cfg.m_fAllowNewbTransfer )
 					pItem->ClrAttr(ATTR_NEWBIE);
 			}
 			if ( pChar->GetBank()->IsItemInside( pContItem ))
@@ -1054,22 +1054,22 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;
 	}
 
-	bool m_bAllowCommand = true;
-	bool m_bAllowSay = true;
+	bool m_fAllowCommand = true;
+	bool m_fAllowSay = true;
 
 	pszCommand += 1;
 	GETNONWHITESPACE(pszCommand);
-	m_bAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
+	m_fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
 
-	if ( !m_bAllowCommand )
-		m_bAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
+	if ( !m_fAllowCommand )
+		m_fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
 
 	//	filter on commands is active - so trigger it
 	if ( !g_Cfg.m_sCommandTrigger.IsEmpty() )
 	{
 		CScriptTriggerArgs Args(pszCommand);
-		Args.m_iN1 = m_bAllowCommand;
-		Args.m_iN2 = m_bAllowSay;
+		Args.m_iN1 = m_fAllowCommand;
+		Args.m_iN2 = m_fAllowSay;
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
@@ -1077,16 +1077,16 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 			if ( tr == TRIGRET_RET_TRUE )
 				return (Args.m_iN2 != 0);
 
-		m_bAllowCommand = ( Args.m_iN1 != 0 );
-		m_bAllowSay = ( Args.m_iN2 != 0 );
+		m_fAllowCommand = ( Args.m_iN1 != 0 );
+		m_fAllowSay = ( Args.m_iN2 != 0 );
 	}
 
-	if ( !m_bAllowCommand && !m_bAllowSay )
+	if ( !m_fAllowCommand && !m_fAllowSay )
 		SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_PRIV));
 
-	if ( m_bAllowCommand )
+	if ( m_fAllowCommand )
 	{
-		m_bAllowSay = false;
+		m_fAllowSay = false;
 
 		// Assume you don't mean yourself !
 		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect)) >= 0 )
@@ -1103,9 +1103,9 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	}
 
 	if ( GetPrivLevel() >= g_Cfg.m_iCommandLog )
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_bAllowCommand);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_fAllowCommand);
 
-	return !m_bAllowSay;
+	return !m_fAllowSay;
 }
 
 void CClient::Event_Attack( CUID uid )

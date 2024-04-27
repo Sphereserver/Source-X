@@ -148,7 +148,7 @@ class CServerMapDiffCollection
 {
 	// This class will be used to access mapdiff data
 private:
-	bool m_bLoaded;
+	bool m_fLoaded;
 
 	CServerMapDiffBlockArray m_pMapDiffBlocks[MAP_SUPPORTED_QTY];
 	CServerMapDiffBlock * GetNewBlock( dword dwBlockId, int map );

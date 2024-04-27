@@ -1687,7 +1687,7 @@ bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
 			}
 			else if ( pObjTop->IsChar() && (pObjTop != this) )
 			{
-				if (( pItem->IsAttr(ATTR_NEWBIE) ) && g_Cfg.m_bAllowNewbTransfer )
+				if (( pItem->IsAttr(ATTR_NEWBIE) ) && g_Cfg.m_fAllowNewbTransfer )
 				{
                     const CChar *pPet = dynamic_cast<const CChar*>( pItem->GetTopLevelObj() );
 					if (pPet && (pPet->GetOwner() == this) )
