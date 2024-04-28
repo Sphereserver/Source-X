@@ -6,7 +6,7 @@
 #include "CLog.h"
 
 
-int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args) noexcept
+int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept
 {
     if (pszFormat == nullptr || pszFormat[0] == '\0')
         return 0;
@@ -21,14 +21,14 @@ int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, va_list args) noexcept
     // if ( ( pFix = strchr( pszText, 0x0C ) ) )
     //	*pFix = ' ';
 
-    return EventStr(dwMask, pszTemp);
+    return EventStr(dwMask, pszTemp, iColor);
 }
 
 int CEventLog::Event(dword dwMask, lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(dwMask, pszFormat, vargs);
+    int iret = VEvent(dwMask, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -37,7 +37,7 @@ int CEventLog::EventDebug(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, vargs);
+    int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -46,7 +46,7 @@ int CEventLog::EventError(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGL_ERROR, pszFormat, vargs);
+    int iret = VEvent(LOGL_ERROR, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -55,7 +55,16 @@ int CEventLog::EventWarn(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGL_WARN, pszFormat, vargs);
+    int iret = VEvent(LOGL_WARN, pszFormat, CTCOL_DEFAULT, vargs);
+    va_end(vargs);
+    return iret;
+}
+
+int CEventLog::EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept
+{
+    va_list vargs;
+    va_start(vargs, pszFormat);
+    int iret = VEvent(dwMask, pszFormat, iColor, vargs);
     va_end(vargs);
     return iret;
 }
@@ -65,7 +74,7 @@ int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
     va_start(vargs, pszFormat);
-    int iret = VEvent(LOGL_EVENT, pszFormat, vargs);
+    int iret = VEvent(LOGL_EVENT, pszFormat, CTCOL_DEFAULT, vargs);
     va_end(vargs);
     return iret;
 }
@@ -204,7 +213,7 @@ bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
 	THREAD_UNIQUE_LOCK_RETURN(CLog::_OpenLog(pszBaseDirName));
 }
 
-int CLog::EventStr( dword dwMask, lpctstr pszMsg ) noexcept
+int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) noexcept
 {
     ADDTOCALLSTACK("CLog::EventStr");
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
@@ -217,7 +226,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg ) noexcept
 
 	try
 	{
-        ConsoleTextColor iLogTextColor = CTCOL_DEFAULT;
+        ConsoleTextColor iLogTextColor = iLogColor;
         ConsoleTextColor iLogTypeColor = CTCOL_DEFAULT;
 
 		// Put up the date/time.

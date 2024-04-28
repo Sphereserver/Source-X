@@ -70,7 +70,7 @@ private:
 	typedef std::queue<FunctionArgsPair_t> QueueFunction_t;
 
 protected:
-	bool	m_bConnected;					//	are we online?
+	bool	m_fConnected;					//	are we online?
 	MYSQL	*_myData;						//	mySQL link
 	QueueFunction_t m_QueryArgs;
 

@@ -34,7 +34,7 @@ public:
 	static const char *m_sClassName;
 
 	SKILL_TYPE m_iSkill;
-	dword	m_CanUse;		// CanUse flags.
+	uint64	m_CanUse;		// CanUse flags.
 							// Not applicable to all.
 	CResourceQtyArray m_SkillMake;	// what skills to create this ? (and non-consumed items)
 
@@ -200,6 +200,7 @@ public:
 		struct
 		{
             CResourceIDBase m_ridEmpty;	// tdata1= the empty container. IT_POTION_EMPTY IT_PITCHER_EMPTY
+            dword m_ridDelay; //tdata2= how long someone need to wait to drink again after using it (in seconds).
 		} m_ttDrink;
 
 		// IT_SHIP_PLANK
@@ -226,9 +227,9 @@ private:
 protected:
 	static void ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew );
 public:
-	static void GetItemTiledataFlags( dword *pdwCanFlags, ITEMID_TYPE id );
-	static height_t GetItemHeightFlags( const CUOItemTypeRec_HS & tile, dword *pdwCanFlags );
-	static void GetItemSpecificFlags( const CUOItemTypeRec_HS & tile, dword *pdwCanFlags, IT_TYPE type, ITEMID_TYPE id );
+	static void GetItemTiledataFlags( uint64 *uiCanFlags, ITEMID_TYPE id );
+	static height_t GetItemHeightFlags( const CUOItemTypeRec_HS & tile, uint64 *uiCanFlags );
+	static void GetItemSpecificFlags( const CUOItemTypeRec_HS & tile, uint64 *uiCanFlags, IT_TYPE type, ITEMID_TYPE id );
 	static bool IsTypeArmor( IT_TYPE type ) noexcept;
 	static bool IsTypeWeapon( IT_TYPE type ) noexcept;
 	static bool IsTypeSpellbook( IT_TYPE type ) noexcept;
@@ -260,7 +261,7 @@ public:
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile );
-	static height_t GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags );
+	static height_t GetItemHeight( ITEMID_TYPE id, uint64 *uiBlockFlags );
 
 	static CREID_TYPE FindCharTrack( ITEMID_TYPE trackID );
 
@@ -363,7 +364,7 @@ class CItemBaseDupe : public CResourceDef
 	height_t	m_Height;
 
 public:
-	dword		m_Can;
+	uint64		m_Can;
 
 	static const char *m_sClassName;
 	CItemBaseDupe(ITEMID_TYPE id, CItemBase* pMasterItem);

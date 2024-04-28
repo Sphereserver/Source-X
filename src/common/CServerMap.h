@@ -73,7 +73,7 @@ public:
 
 struct CServerMapBlocker
 {
-	dword m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
+	uint64 m_uiBlockFlags;	// How does this item block ? CAN_I_PLATFORM
 	dword m_dwTile;			// TERRAIN_QTY + id.
 	char m_z;				// Top (z + ((climbable item) ? height/2 : height)) of a solid object, or bottom (z) of non blocking one.
     height_t m_height;      // The actual height of the item (0 if terrain)
@@ -91,7 +91,7 @@ struct CServerMapBlockState
 	//		CAN_C_FIRE_IMMUNE = i can walk into lava etc. - CAN_I_FIRE = UFLAG1_DAMAGE
 	//		CAN_C_HOVER = i can follow hover routes. - CAN_I_HOVER = UFLAG4_HOVEROVER
 
-	const dword m_dwBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.	
+	const uint64 m_uiBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.	
 	const char m_z;	            // the z we start at. (stay at if we are flying)
 	const int m_iHeight;		// The height we need to stand here.
 	const char m_zClimb;        // We can climb at this height
@@ -103,17 +103,17 @@ struct CServerMapBlockState
 	CServerMapBlocker m_Lowest;	// the lowest item we have found.	
 
 public:
-	CServerMapBlockState( dword dwBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
-	CServerMapBlockState( dword dwBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
+	CServerMapBlockState( uint64 uiBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
+	CServerMapBlockState( uint64 uiBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
 
 private:
 	CServerMapBlockState(const CServerMapBlockState& copy);
 	CServerMapBlockState& operator=(const CServerMapBlockState& other);
 
 public:
-	bool CheckTile( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID );
+	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );
+	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );
+	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID );
 	static lpctstr GetTileName( dword dwID );
 };
 
@@ -148,7 +148,7 @@ class CServerMapDiffCollection
 {
 	// This class will be used to access mapdiff data
 private:
-	bool m_bLoaded;
+	bool m_fLoaded;
 
 	CServerMapDiffBlockArray m_pMapDiffBlocks[MAP_SUPPORTED_QTY];
 	CServerMapDiffBlock * GetNewBlock( dword dwBlockId, int map );

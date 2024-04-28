@@ -72,7 +72,7 @@ lpctstr const CSpellDef::sm_szLoadKeys[SPC_QTY+1] =
 CSpellDef::CSpellDef( SPELL_TYPE id ) :
     CResourceLink( CResourceID( RES_SPELL, id ))
 {
-    m_dwFlags = SPELLFLAG_DISABLED;
+    m_uiFlags = SPELLFLAG_DISABLED;
     m_dwGroup = 0;
     m_sound = 0;
     m_idSpell = ITEMID_NOTHING;
@@ -116,10 +116,10 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal( m_idEffect );
             break;
         case SPC_FLAGS:
-            sVal.FormatVal( m_dwFlags );
+            sVal.FormatULLVal( m_uiFlags );
             break;
         case SPC_GROUP:
-            sVal.FormatVal( m_dwGroup );
+            sVal.FormatDWVal( m_dwGroup );
             break;
         case SPC_INTERRUPT:
             sVal = m_Interrupt.Write();
@@ -228,10 +228,10 @@ bool CSpellDef::r_LoadVal( CScript &s )
             m_idEffect = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
             break;
         case SPC_FLAGS:
-            m_dwFlags = s.GetArgVal();
+            m_uiFlags = s.GetArgULLVal();
             break;
         case SPC_GROUP:
-            m_dwGroup = s.GetArgVal();
+            m_dwGroup = s.GetArgDWVal();
             break;
         case SPC_INTERRUPT:
             m_Interrupt.Load( s.GetArgRaw());

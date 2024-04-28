@@ -37,6 +37,69 @@ enum CHAMPION_ID
 
     CHAMPION_QTY // End of OSI defined Champion spawns.
 };
+
+enum ICHMPL_TYPE
+{
+    ICHMPL_ACTIVE,
+    ICHMPL_ADDREDCANDLE,
+    ICHMPL_ADDWHITECANDLE,
+    ICHMPL_CANDLESNEXTLEVEL,
+    ICHMPL_CHAMPIONID,
+    ICHMPL_CHAMPIONSPAWN,
+    ICHMPL_CHAMPIONSUMMONED,
+    ICHMPL_DEATHCOUNT,
+    ICHMPL_KILLSNEXTRED,
+    ICHMPL_KILLSNEXTWHITE,
+    ICHMPL_LASTACTIVATIONTIME,
+    ICHMPL_LEVEL,
+    ICHMPL_LEVELMAX,
+    ICHMPL_MORE,
+    ICHMPL_MORE1,
+    ICHMPL_NPCGROUP,
+    ICHMPL_REDCANDLES,
+    ICHMPL_SPAWNSCUR,
+    ICHMPL_SPAWNSMAX,
+    ICHMPL_WHITECANDLES,
+    ICHMPL_QTY
+};
+
+enum ICHMPV_TYPE
+{
+    ICHMPV_ADDOBJ,
+    ICHMPV_ADDSPAWN,
+    ICHMPV_DELOBJ,
+    ICHMPV_DELREDCANDLE,
+    ICHMPV_DELWHITECANDLE,
+    ICHMPV_INIT,
+    ICHMPV_MULTICREATE,
+    ICHMPV_START,
+    ICHMPV_STOP,
+    ICHMPV_QTY
+};
+
+enum CHAMPIONDEF_TYPE
+{
+    CHAMPIONDEF_CHAMPIONID,	///< Champion ID: _iChampion.
+    CHAMPIONDEF_DEFNAME,	///< Champion's DEFNAME.
+    CHAMPIONDEF_LEVELMAX,   ///< Max Level for this champion.
+    CHAMPIONDEF_NAME,		///< Champion name: m_sName.
+    CHAMPIONDEF_NPCGROUP,	///< Monster level / group: _iSpawn[n][n].
+    CHAMPIONDEF_SPAWNSMAX,		///< Total amount of monsters: _iSpawnsMax.
+    CHAMPIONDEF_QTY
+};
+
+enum CANDLEDELREASON_TYPE
+{
+    CANDLEDELREASON_TIMEOUT,
+    CANDLEDELREASON_COMMAND,
+    CANDLEDELREASON_CLEAR,
+    CANDLEDELREASON_QTY
+};
+
+class CObjBase;
+class CItem;
+class CChar;
+
 /**
 * @brief This class manages a CItem making it to work as a Champion.
 */
@@ -56,7 +119,10 @@ private:
     idSpawn _spawnGroupsId;     ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
     CResourceIDBase _idSpawn;   ///< legacy more1=ID of the Object to Spawn.
     CREID_TYPE _idChampion;     ///< Boss id
-    bool _fChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
+    CUID m_ChampionSummoned;    ///< True if the champion's boss has been summoned already (wether it was killed or not).
+
+    std::vector<uchar> _MonstersList;
+    std::vector<uchar> _CandleList;
 
     // Ingame Spawn behaviour.
     bool _fActive;                  ///< Champion status
@@ -88,10 +154,14 @@ private:
     ushort _iSpawnsNextRed;
     ushort _iSpawnsNextWhite;           ///< Total monsters needed to the next White candle ( m_iSpawnsNextRed / 5 ).
     ushort _iDeathCount;                ///< Keeping track of how many monsters died already.
-    uchar _iCandlesNextRed;             ///< Required amount of White candles to get the next Red one.
     uchar _iCandlesNextLevel;           ///< Required amount of Red candles to reach the next level.
     std::vector<CUID> _pRedCandles;   ///< Storing the Red Candles, reaching a certain amount of these increases the Champion's Level (refer to _iLevel).
     std::vector<CUID> _pWhiteCandles; ///< Storing the White Candles (sublevel): 4 white candles = 1 red candle (Default max = 4).
+
+    /**
+    * @brief Calculates monsters and candles needed per level and saves them to _MonsterList and _CandleList to avoid unnecessary loops.
+    */
+    void InitializeLists();
 
 public:
     //static const char *m_sClassName;    ///< Class definition
@@ -110,13 +180,17 @@ public:
     * Calls SetLevel(1), which automatically set the relevant data to work from now.
     * SetTimeoutS( 60 * 10 ) // 10 minutes.
     */
-    void Start();
+    void Start(CChar* pChar = nullptr);
     /**
     * @brief Stop the champion, cleaning everything.
     *
     * Clean killed monsters, level, spawned monsters and required monsters per both next White candle and Red candle.
     */
-    void Stop();
+    void Stop(CChar* pChar = nullptr);
+    /**
+    * @brief Just cleaning everything.
+    */
+    void ClearData();
     /**
     * @brief Everything is done, call Stop.
     *
@@ -130,7 +204,7 @@ public:
     * if m_iSpawnsNextWhite < 1 calls AddWhiteCandle
     * otherwise sustracts one monsters from m_iSpawnsNextWhite
     */
-    void OnKill();
+    void OnKill(const CUID& uid = CUID());
     /**
     * @brief Spawns a new character
     *
@@ -158,11 +232,11 @@ public:
     /**
     * @brief Deleting last added White Candle.
     */
-    void DelWhiteCandle();
+    void DelWhiteCandle(CANDLEDELREASON_TYPE reason = CANDLEDELREASON_CLEAR);
     /**
     * @brief Deleting last added Red Candle.d.
     */
-    void DelRedCandle();
+    void DelRedCandle(CANDLEDELREASON_TYPE reason = CANDLEDELREASON_CLEAR);
     /**
     * @brief Clear all White Candles.
     */
@@ -194,7 +268,7 @@ public:
     * @param iMonsters total amount of monsters of the champion.
     * @return amount of killed monsters needed to reach the next level.
     */
-    uint16 GetMonstersPerLevel(uint16 iMonsters) const;
+    uint16 GetMonstersCount();
 
     /**
     * @brief Retrieves how much Red Candles are needed to reach next Champion's Level.
@@ -205,7 +279,7 @@ public:
     * Value stored in morex (m_itNormal.m_morep.m_x).
     * @return how much red candles are needed to reach the next level
     */
-    byte GetCandlesPerLevel(byte iLevel = 255) const;
+    uchar GetCandlesCount();
     /**
     * @brief Set a new Level for this champion.
     *

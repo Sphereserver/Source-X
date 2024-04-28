@@ -44,21 +44,24 @@
 lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
-	"@AddRedCandle",
 	"@AddObj",				// For t_spawn when obj is add to list
-	"@AddWhiteCandle",
+    "@AddRedCandle",
+    "@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
 	"@CarveCorpse",			//I am a corpse and i am going to be carved.
 	"@Click",
 	"@ClientTooltip",	// Sending tooltip to a client
 	"@ClientTooltip_AfterDefault",
+    "@Complete",
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",
 	"@DAMAGE",				// I have been damaged in some way
 	"@DCLICK",				// I have been dclicked.
 	"@DelObj",				// For t_spawn when obj is remove from list
+    "@DelRedCandle",
+    "@DelWhiteCandle",
 	"@Destroy",				//+I am nearly destroyed
 	"@DropOn_Char",			// I have been dropped on this char
 	"@DropOn_Ground",		// I have been dropped on the ground here
@@ -68,6 +71,9 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Dye",					// My color has been changed
 	"@EQUIP",		// I have been unequipped
     "@EQUIPTEST",
+    "@GetHit",
+    "@Hit",
+    "@Level",
 	"@MemoryEquip",
 	"@PICKUP_GROUND",	// I was picked up off the ground.
 	"@PICKUP_PACK",	// picked up from inside some container.
@@ -77,6 +83,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@Redeed",
     "@RegionEnter",
     "@RegionLeave",
+    "@ResourceGather",
+    "@ResourceTest",
 	"@SELL",
 	"@Ship_Move",
 	"@Ship_Stop",
@@ -86,6 +94,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@SpellEffect",		// cast some spell on me.
 	"@Start",
 	"@STEP",			// I have been walked on.
+    "@Stop",
 	"@TARGON_CANCEL",
 	"@TARGON_CHAR",
 	"@TARGON_GROUND",
@@ -712,8 +721,8 @@ bool CItem::IsMovable() const
 int CItem::GetVisualRange() const	// virtual
 {
 	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
-		return UO_MAP_VIEW_RADAR;
-	return UO_MAP_VIEW_SIZE_DEFAULT;
+		return g_Cfg.m_iMapViewRadar;
+	return g_Cfg.m_iMapViewSize;
 }
 
 // Retrieve tag.override.speed for this CItem
@@ -781,11 +790,11 @@ int CItem::IsWeird() const
 	return( ( ptCont == nullptr ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
+char CItem::GetFixZ( CPointMap pt, uint64 uiBlockFlags )
 {
-	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &dwBlockFlags );
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
-	CWorldMap::GetFixPoint( pt, block );
+	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &uiBlockFlags );
+	CServerMapBlockState block(uiBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight);
+	CWorldMap::GetFixPoint(pt, block);
 	return block.m_Bottom.m_z;
 }
 
@@ -1139,6 +1148,18 @@ int CItem::FixWeirdness()
                     default:
                         iResultCode = 0x2231;
                         return iResultCode;	// get rid of it.
+                }
+                break;
+            case LAYER_STORAGE:
+                switch (GetType())
+                {
+                    case IT_CONTAINER:
+                    case IT_CONTAINER_LOCKED:
+                        SetAttr(ATTR_MOVE_NEVER);
+                        break;
+                    default:
+                        iResultCode = 0x2232;
+                        return iResultCode;
                 }
                 break;
             case LAYER_VENDOR_STOCK:
@@ -2249,18 +2270,22 @@ void CItem::r_WriteMore1(CSString & sVal)
 
     switch (GetType())
     {
+        case IT_SPELLBOOK:
+            sVal.FormatHex(m_itSpellbook.m_spells1);
+            return;
+
         case IT_TREE:
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = g_Cfg.ResourceGetName(m_itResource.m_ridRes);
+            sVal = ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
             return;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = g_Cfg.ResourceGetName(m_itFood.m_ridCook);
+            sVal = ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF);
             return;
 
         case IT_TRAP:
@@ -2272,21 +2297,21 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_LOOM:
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
             return;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
             return;
 
         case IT_POTION:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
+            sVal = ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
             return;
 
         default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more1))
-                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
+                sVal = ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more1);
             return;
@@ -2300,17 +2325,21 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 	switch ( GetType())
 	{
+        case IT_SPELLBOOK:
+            sVal.FormatHex(m_itSpellbook.m_spells2);
+            return;
+
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_itFood.m_MeatType ));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itFood.m_MeatType));
 			return;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-			sVal = g_Cfg.ResourceGetName( m_itCrop.m_ridFruitOverride );
-			return;
+            sVal = ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
+            return;
 
 		case IT_LEATHER:
 		case IT_HIDE:
@@ -2318,17 +2347,17 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_FUR:
 		case IT_WOOL:
 		case IT_BLOOD:
-		case IT_BONE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_itNormal.m_more2 ));
-			return;
+        case IT_BONE:
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more2));
+            return;
 
 		case IT_ANIM_ACTIVE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, m_itAnim.m_PrevType ));
-			return;
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itAnim.m_PrevType));
+            return;
 
 		default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more2))
-                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
+                sVal = ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more2);
 			return;
@@ -2364,6 +2393,8 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyFormat("DAM", "%hu,%hu", m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defenseBase )
 		s.WriteKeyFormat("ARMOR", "%hu,%hu", m_defenseBase, m_defenseBase + m_defenseRange);
+    if (m_CanMask)
+        s.WriteKeyVal("CANMASK", m_CanMask);
     if (!GetSpawn())
     {
         if ( m_itNormal.m_more1 )
@@ -2960,6 +2991,34 @@ void CItem::r_LoadMore2(dword dwVal)
     }
 }
 
+const lpctstr CItem::ResourceGetName(const CResourceID& rid)
+{
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        tchar* pszText = Str_GetTemp();
+        if (!rid.IsValidUID())
+            sprintf(pszText, "%d", (int)rid.GetPrivateUID());
+        else
+            sprintf(pszText, "0%" PRIx32, rid.GetResIndex());
+        return pszText;
+    }
+    return g_Cfg.ResourceGetName(rid);
+}
+
+const lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+{
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        tchar* pszText = Str_GetTemp();
+        if (!rid.IsValidUID())
+            sprintf(pszText, "%d", (int)rid.GetPrivateUID());
+        else
+            sprintf(pszText, "0%" PRIx32, rid.GetResIndex());
+        return pszText;
+    }
+    return g_Cfg.ResourceGetName(rid, iExpectedType);
+}
+
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
@@ -3132,7 +3191,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_weight = s.GetArgWVal();
             break;
 		case IC_CANUSE:
-			m_CanUse = s.GetArgVal();
+			m_CanUse = s.GetArgULLVal();
             break;
 		case IC_CONT:	// needs special processing.
 			{
@@ -3840,7 +3899,8 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
     }
     else if (!pComp)
     {
-        SubscribeComponent(new CCFaction());
+        CItemBase* pItemDef = Item_GetDef();
+        SubscribeComponent(new CCFaction(pItemDef->_pFaction));
     }
 
 	return true;
@@ -4335,11 +4395,11 @@ uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 		return 1;
 
 	// Add spell to spellbook bitmask:
-	const uint i = spell - (pBookDef->m_ttSpellbook.m_iOffset + 1);
+	const uint i = (uint)spell - (pBookDef->m_ttSpellbook.m_iOffset + 1u);
 	if ( i < 32u ) // Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31 and are stored in more1.
-		m_itSpellbook.m_spells1 |= (1 << i);
+		m_itSpellbook.m_spells1 |= (1u << i);
 	else if ( i < 64u ) // Replaced the <= with < because of the formula above, the remaining 32 spells have an i value from 32 to 63 and are stored in more2.
-		m_itSpellbook.m_spells2 |= (1 << (i-32u));
+		m_itSpellbook.m_spells2 |= (1u << (i-32u));
 	//else if ( i <= 96 )
 	//	m_itSpellbook.m_spells3 |= (1 << (i-64));	//not used anymore?
 	else
@@ -4986,17 +5046,18 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 
 	CPointMap ptCoords = pUser->GetTopPoint();
 
-#define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
+    // #define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
+    byte bSight = (g_Cfg.m_iMapViewRadar > 5 ? g_Cfg.m_iMapViewRadar - 5 : 26); //m_iMapViewRadar is 31 in default.
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
 	CSString sSearch;
 	tchar	*pResult = Str_GetTemp();
 
 	// Weather bonus
-	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * BASE_SIGHT) : 0.0;
+	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * bSight) : 0.0;
 	// Light level bonus
-	double rLightSight = (1.0 - (static_cast<double>(iLight) / 25.0)) * BASE_SIGHT * 0.25;
-	int iVisibility = (int) (BASE_SIGHT + rWeatherSight + rLightSight);
+	double rLightSight = (1.0 - (static_cast<double>(iLight) / 25.0)) * bSight * 0.25;
+	int iVisibility = (int) (bSight + rWeatherSight + rLightSight);
 
 	// Check for the nearest land, only check every 4th square for speed
 	const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( ptCoords ); // Are we at sea?
@@ -5086,7 +5147,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		}
 
 		// Track boats separately from other items
-		if ( iDist <= UO_MAP_VIEW_RADAR && // if it's visible in the radar window as a boat, report it
+		if ( iDist <= g_Cfg.m_iMapViewRadar && // if it's visible in the radar window as a boat, report it
 			pItem->m_type == IT_SHIP )
 		{
 			++iBoatSighted; // Keep a tally of how many we see
@@ -5120,14 +5181,14 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		DIR_TYPE dir = ptCoords.GetDir(pItemSighted->GetTopPoint());
 		if (iItemSighted == 1)
 		{
-			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
+			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_STH_DIR), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 			else
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 		}
 		else
 		{
-			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
+			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR_MANY), CPointBase::sm_szDirs[ dir ] );
 			else
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));

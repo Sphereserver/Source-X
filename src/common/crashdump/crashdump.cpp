@@ -2,13 +2,13 @@
 
 #include "crashdump.h"
 
-bool CrashDump::m_bEnabled = false;
+bool CrashDump::m_fEnabled = false;
 HMODULE CrashDump::m_hDll = nullptr;
 MINIDUMPWRITEDUMP CrashDump::m_tDumpFunction = nullptr;
 
 bool CrashDump::IsEnabled()
 {
-	return m_bEnabled;
+	return m_fEnabled;
 }
 
 void CrashDump::Enable()
@@ -16,24 +16,24 @@ void CrashDump::Enable()
 	m_hDll = LoadLibrary("dbghelp.dll");
 	if (!m_hDll)
 	{
-		m_bEnabled = false;
+		m_fEnabled = false;
 		return;
 	}
 
 	m_tDumpFunction = reinterpret_cast<MINIDUMPWRITEDUMP>(GetProcAddress(m_hDll, "MiniDumpWriteDump"));
 	if (!m_tDumpFunction)
 	{
-		m_bEnabled = false;
+		m_fEnabled = false;
 		FreeLibrary(m_hDll);
 		return;
 	}
 
-	m_bEnabled = true;
+	m_fEnabled = true;
 }
 
 void CrashDump::Disable()
 {
-	m_bEnabled = false;
+	m_fEnabled = false;
 
 	if (m_tDumpFunction != nullptr)
 		m_tDumpFunction = nullptr;

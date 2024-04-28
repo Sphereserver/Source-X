@@ -1069,12 +1069,12 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		return false;
 
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
-    const int iRand = Calc_GetRandVal(UO_MAP_VIEW_RADAR);
+    const int iRand = Calc_GetRandVal(g_Cfg.m_iMapViewRadar);
     const CPointMap& ptTop = GetTopPoint();
 	
     int iRange = GetVisualRange();
-    if (iRange > UO_MAP_VIEW_RADAR)
-        iRange = UO_MAP_VIEW_RADAR;
+    if (iRange > g_Cfg.m_iMapViewRadar)
+        iRange = g_Cfg.m_iMapViewRadar;
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
@@ -1331,7 +1331,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	EXC_SET_BLOCK("Distance checks");
 	const CPointMap& ptMe = GetTopPoint();
 	int dist = ptMe.GetDist(m_Act_p);
-    if (dist > UO_MAP_VIEW_RADAR)		// too far away ?
+    if (dist > g_Cfg.m_iMapViewRadar)		// too far away ?
     {
         return false;
     }
@@ -1782,7 +1782,7 @@ bool CChar::NPC_Act_Food()
 		{
 			//	can take and eat just in place
 			ushort uiEaten = (ushort)(pClosestFood->ConsumeAmount(uiEatAmount));
-			EatAnim(pClosestFood->GetName(), uiEaten);
+			EatAnim(pClosestFood, uiEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
 				pClosestFood->Plant_CropReset();	// set growth if this is a plant
@@ -1847,7 +1847,8 @@ bool CChar::NPC_Act_Food()
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				ushort uiEaten = pResBit->ConsumeAmount(10);
-				EatAnim("grass", uiEaten/10);
+                pResBit->SetName(g_Cfg.GetDefaultMsg(DEFMSG_NPC_EAT_GRASS));
+				EatAnim(pResBit, uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
@@ -2058,15 +2059,26 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			return false;
 		}
 
-		if ( pCharSrc->IsPriv(PRIV_GM) )
-			return ItemBounce(pItem);
-
 		if ( !CanCarry(pItem) )
 		{
 			if ( NPC_CanSpeak() )
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_WEAK));
 			return false;
 		}
+
+        if (pItem->IsType(IT_POTION))
+        {
+            if (g_Cfg.m_fCanPetsDrinkPotion == true)
+            {
+                if (Use_Item(pItem))
+                    return true;
+                else
+                    return false; //If can't use item, return it inside player's backpack.
+            }
+        }
+
+        if (pCharSrc->IsPriv(PRIV_GM))
+            return ItemBounce(pItem);
 
 		// Place item on backpack
 		CItemContainer *pPack = GetPack();
@@ -2474,7 +2486,7 @@ void CChar::NPC_Food()
 			//	can take and eat just in place
 			EXC_SET_BLOCK("eating nearby");
 			ushort uiEaten = pClosestFood->ConsumeAmount(uiEatAmount);
-			EatAnim(pClosestFood->GetName(), uiEaten);
+			EatAnim(pClosestFood, uiEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
 				pClosestFood->Plant_CropReset();	// set growth if this is a plant
@@ -2531,7 +2543,8 @@ void CChar::NPC_Food()
 			{
 				EXC_SET_BLOCK("eating grass");
 				const ushort uiEaten = pResBit->ConsumeAmount(15);
-				EatAnim("grass", uiEaten/10);
+                pResBit->SetName(g_Cfg.GetDefaultMsg(DEFMSG_NPC_EAT_GRASS));
+				EatAnim(pResBit, uiEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);

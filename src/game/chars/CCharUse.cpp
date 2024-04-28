@@ -205,7 +205,7 @@ void CChar::Use_MoonGate( CItem * pItem )
         const CPointMap& ptTop = GetTopPoint();
 		for ( ; i < iCount; ++i )
 		{
-			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
+			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= g_Cfg.m_iMapViewSize )
 				break;
 		}
 
@@ -903,7 +903,7 @@ void CChar::Use_EatQty( CItem * pFood, ushort uiQty )
 	}
 
 	UpdateDir(pFood);
-	EatAnim(pFood->GetName(), uiRestore * uiQty);
+	EatAnim(pFood, uiRestore * uiQty);
 	pFood->ConsumeAmount(uiQty);
 }
 
@@ -990,6 +990,34 @@ void CChar::Use_Drink( CItem * pItem )
 
 	const CItemBase *pItemDef = pItem->Item_GetDef();
 	ITEMID_TYPE idbottle = (ITEMID_TYPE)pItemDef->m_ttDrink.m_ridEmpty.GetResIndex();
+    dword dwDelay = (pItemDef->m_ttDrink.m_ridDelay ? pItemDef->m_ttDrink.m_ridDelay: (pItem->IsType(IT_BOOZE) ? 1500u : 15u)) * 10; //Minimum should be 1 as if we set 0, it makes effect cooldown infinite.
+    word wConsume = (word)1;
+    word wBottleAmount = wConsume;
+
+    if (IsTrigUsed(TRIGGER_DRINK))
+    {
+        CScriptTriggerArgs args(dwDelay, wConsume);
+        args.m_pO1 = pItem;
+        args.m_VarsLocal.SetNumNew("BottleId", idbottle);
+        TRIGRET_TYPE iRet = OnTrigger(CTRIG_Drink, this, &args);
+        idbottle = (ITEMID_TYPE)args.m_VarsLocal.GetKeyNum("BottleId");
+        dwDelay = (dword)(args.m_iN1 > 0 ? args.m_iN1 : 1); //0 causes stays memory infinitely.
+        wConsume = (word)args.m_iN2;
+        wBottleAmount = wConsume;
+
+        if (iRet == TRIGRET_RET_TRUE)
+            return;
+        else if (iRet == TRIGRET_ELSEIF)
+            wBottleAmount = 1;
+        else if (iRet == TRIGRET_RET_HALFBAKED)
+            wBottleAmount = 0;
+    }
+
+    if (wConsume > 0 && !CanConsume(pItem, wConsume)) // We need to check if he can consume, before creating effects.
+    {
+        SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_DRINK_NOT_ENOUGH), pItem->GetName());
+        return;
+    }
 
 	if ( pItem->IsType(IT_BOOZE) )
 	{
@@ -1012,7 +1040,7 @@ void CChar::Use_Drink( CItem * pItem )
 		}
 		else
 		{
-			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 150*MSECS_PER_TENTH, this);
+			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), (int64)dwDelay, this);
 			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
 		}
 	}
@@ -1034,7 +1062,7 @@ void CChar::Use_Drink( CItem * pItem )
 		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 150, this);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), (int64)dwDelay, this);
 	}
 	else if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
 	{
@@ -1060,11 +1088,19 @@ void CChar::Use_Drink( CItem * pItem )
 
 	//Sound(sm_DrinkSounds[Calc_GetRandVal(ARRAY_COUNT(sm_DrinkSounds))]);
 	UpdateAnimate(ANIM_EAT);
-	pItem->ConsumeAmount();
+    if (wConsume > 0) //if ARGN2 > 0, consume.
+        ConsumeFromPack(pItem, wConsume);
 
 	// Create the empty bottle ?
-	if ( idbottle != ITEMID_NOTHING )
-		ItemBounce(CItem::CreateScript(idbottle, this), false);
+    if (idbottle != ITEMID_NOTHING)
+    {
+        CItem* pBottle = CItem::CreateScript(idbottle, this);
+        if (wBottleAmount > 0)
+        {
+            pBottle->SetAmount(wBottleAmount);
+            ItemBounce(pBottle, false);
+        }
+    }
 }
 
 CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
@@ -1160,25 +1196,28 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
 	if (IsSetEF(EF_FollowerList))
 	{
-		if (iFollowerSlots > 0)
-		{
-			bool fExists = false;
-			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
-			{
-				if (*it == pChar->GetUID())
-				{
-					fExists = true;
-					break;
-				}
-				++it;
-			}
+        if (iFollowerSlots >= 0)
+        {
+            bool fExists = false;
+            for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+            {
+                if (*it == pChar->GetUID())
+                {
+                    fExists = true;
+                    break;
+                }
+                ++it;
+            }
 
-			if (!fExists && ( (short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
-				m_followers.emplace_back(pChar->GetUID());
-			else
-				return false;
-		}
-		else
+            if (!fExists && ((short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
+            {
+                if (!fCheckOnly)
+                    m_followers.emplace_back(pChar->GetUID());
+            }
+            else
+                return false;
+        }
+		else if (!fCheckOnly)
 		{
 			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
 			{

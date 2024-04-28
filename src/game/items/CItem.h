@@ -58,7 +58,7 @@ private:
 	word m_wAmount;		// Amount of items in pile. 64K max (or corpse type)
 	IT_TYPE m_type;		// What does this item do when dclicked ? defines dynamic_cast type
 	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
-	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
+	uint64	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
 public:
@@ -345,6 +345,7 @@ public:
 		{
 			int32 m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
             CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
+            word m_ridAmount;                   // morex = amount of fruit.
 		} m_itCrop;
 
 		// IT_TREE
@@ -597,7 +598,7 @@ public:
 	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks
 
 	virtual int IsWeird() const override;
-	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0);
+	char GetFixZ(CPointMap pt, uint64 uiBlockFlags = 0);
 
 	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
@@ -736,6 +737,9 @@ public:
     void r_LoadMore1(dword dwVal);
     void r_LoadMore2(dword dwVal);
 
+    const lpctstr ResourceGetName(const CResourceID& rid);
+    const lpctstr ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType);
+
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
@@ -839,6 +843,7 @@ public:
 	bool Plant_OnTick();
 	void Plant_CropReset();
 	bool Plant_Use( CChar * pChar );
+    bool Plant_SetID(ITEMID_TYPE id);
 
 	virtual void DupeCopy( const CObjBase * pItem ) override;
 	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );

@@ -3241,7 +3241,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - (Partially) Fixed: Localized messages throwing errors in console when the speaker is not visibile. Partially because i can't still display the speaker name in the journal if the hearer is dead and DeadCannotSeeLiving is set to 2. (Issue #1049)
 - Added: New locals (READ ONLY) in @GetHit trigger: local.damagePercentPhysical, local.damagePercentFire, local.damagePercentCold, local.damagePercentPoison, local.damagePercentEnergy
          These locals contains the amount in % of the elemental damage inflicted, and thus they are available only with Elemental Engine enabled.
-		
+
 22-03-2023, Drk84
 - Fixed: Undefined item ID (it's actually Item ID 00) when adding ON=@Cancel trigger in SKILLMENU. (Issue #1056)		
 
@@ -3429,9 +3429,291 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 02-11-2023, Jhobean
 - Modified: @Mount added argument ARGN1
-	ARGN1 (rw) = The itemID of the item containing the animation use when moounting. (Anim # is in tiledata of this item)
+	  ARGN1 (rw) = The itemID of the item containing the animation use when moounting. (Anim # is in tiledata of this item)
     NOTE: When mounting a pet you'll read a non sense random value but you can replace it by an ITEMID to force anim
     Example: 03ea6 for Llama anim or 03e9f for gray horse anim. Yes 03ea6 is a ship part but in tiledata it link to anim 828
 
 18-11-2023, Nolok
 - Fixed: House customization sending wrong component data, breaking it.
+
+09-12-2023, DavideRei
+- Added: DispID can now also be used on chars, to change their appearance.
+
+13-12-2023, Nolok
+- Fixed: Rare crash occurring when a NPC is selecting an attackable target, but there's only one target (not attackable) in sight.
+
+15-12-2023, raydienull
+- Changed: LAYER_AUCTION to LAYER_STABLE and now is used to store the stabled pets on the player.
+
+12-02-2024, Drk84
+- Updated SphereCrypt.ini.
+
+13-03-2024, Jhobean
+- Added: Item properties functionnality:HITAREAPHYSICAL,HITAREAFIRE,HITAREACOLD,HITAREAPOISON,HITAREAENERGY,HITFIREBALL,HITHARM,HITLIGHTNING,HITMAGICARROW,REFLECTPHYSICALDAM
+
+16-03-2024, Jhobean
+- Added: Flag EMOTEF_EAT is added on the ini to avoid see the emote when eating.
+- Added: NPC_EAT_GRASS MSG to be able change the hardcode name of "grass" when an animal eat grass
+- Added: Item been eaten can now be read on the ARGO parameter of the trigger @Eat.
+
+24-03-2024, xwerswoodx
+- Fixed: The issue that causes more1/2 not saved correctly for spellbook. (Issue: #1221)
+- Fixed: Players automatically become criminal to everyone when attack someone. (Issue: #1213)
+- Fixed: CallGuard not working correctly on the players that only criminal for target. (Issue: #1213, #1040)
+- Fixed: The wrong input of Kill trigger, to make it compatible with older sphere versions. (Issue: #1210)
+- Added: New Layer LAYER_STORAGE (80) to let scripters create their own storage system. (Issue: #1209)
+      	Only t_container and t_container_locked can be equipped to this layer.
+- Changed: Decay time removed from spawned items, as Sphere gives tons of invalid link errors when items decayed. (Issue: #1218)
+- Added: New spellflag SPELLFLAG_FIELD_RANDOMDECAY (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
+	SPELLFLAG_FIELD_RANDOMDECAY should be added to defs.
+- Changed: SERV.LOG command changed to support console colors. (Issue: [Feature Request] Colored Serv & Src Log System #1158)
+	SERV.LOG works same as before.
+	Usage of custom color system is: SERV.LOG @color,type,mask message
+	Example: SERV.LOG @CTCOL_RED,LOGL_EVENT,LOGM_NOCONTEXT|LOGM_KILLS message
+	LOGM, LOGL and CTCOL values should be added to defs.
+
+25-03-2024, xwerswoodx
+- Added: Sphere.ini setting CanPetsDrinkPotion (true in default) to make pets drink potion when their owner drop it on it. (Issue: #1147)
+	CanPetsDrinkPotion = 0 can be added to sphere.ini to disable that.
+- Fixed: Missing fCheckOnly checks block the taming skill. (Issue: #1219)
+
+26-03-2024, xwerswoodx
+- Added: New trigger @Drink added for characters. (Issue: #1162)
+	I: The character drinking the item.
+	SRC: The character drinking the item.
+	ARGO = the item that drank
+	ARGN1 = cooldown (in seconds)
+	ARGN2 = consumption amount (1 in default)
+	LOCAL.BottleID = empty bottle id that will be given when after item drank. (Will be given ARGN2 amount of empty bottle in default)
+	- Returns:
+	1: Stops character from drinking the item.
+	5: Let character to drink but will only give 1 empty bottle.
+	6: Let character to drink but will not give any empty bottle.
+	- Messages:
+	DRINK_NOT_ENOUGH, "You don't have enough %s to drink this."
+- Added: New trigger @AfkMode added for characters. (Issue: #1161)
+	I: The character changing AFK status.
+	SRC: The character changing AFK status.
+	ARGN1 = Current Afk Status
+	ARGN2 = Next Afk Status
+	- Returns:
+	1: Stops character from switching afk status.
+- Added: New trigger @Reveal added for characters. (Issue: #1157)
+	I: The character who is revealing.
+	SRC: The character who is revealing.
+	- Returns:
+	1: Prevents character from being revealed.
+- Added: New triggers @ArrowQuest_Add and @ArrowQuest_Close added for characters. (Issue: #1116)
+	I: The character who activating/deactivating arrow quest.
+	SRC: The character who activating/deactivating arrow quest.
+- Added: New function triggers f_onaccount_block and f_onaccount_unblock. (Issue: #1156)
+	ARGS = Account name.
+	- Returns:
+	1: Prevents account from blocking/unblocking.
+- Added: New function trigger f_onserver_broadcast. (Issue: #1145)
+	ARGS = message
+	- Returns:
+	1: Prevents server to send broadcast message.
+- Added: Two new LOCAL variables ItemPoisonReductionChance and ItemPoisonReductionAmount to @Hit trigger. (Issue: #1159)
+	This LOCALs changes default behaviour of poisoned weapons while removing poison.
+	LOCAL.ItemPoisonReductionChance = Is the chance that weapon reduce poison morez. (Default 100%)
+	LOCAL.ItemPoisonReductionAmount = Is the amount of poison that weapon reduce. (Default: CurrentPoisonAmount/ 2)
+	
+- Added: You can now use TDATA2 for setting default cooldown (delay) for drinks. (Default: 15secs for potions, 1500 secs for ales)
+- Changed: Reactive armor range increased from 1 to 2 in default.
+
+27-03-2024, xwerswoodx
+- Fixed: Possible fix for accesses and bans not loading for multis. (Issue: #1223)
+- Fixed: Possible fix for wrong damage calculation of slayer bonus damage. (Issue: #1179)
+
+28-03-2024, xwerswoodx
+- Added: REGION_FLAG_HOUSE (0x0100) for houses. (Issue: #1154)
+	REGION_FLAG_HOUSE 0100 should be added defs.
+
+30-03-2024, xwerswoodx
+- Added: ARGO object for @MurderMark trigger to get killed character.
+- Fixed: ARGN1 (reap amount) doesn't updated depends on the amount left on bit. (Issue: #1224)
+- Added: ARGO to get bit uid under @ResourceGather and @RegionResourceGather triggers.
+
+31-03-2024, xwerswoodx
+- Fixed: Possible fix for the OnRegionTrigger getting called on invalid region while multi creating/removing.
+
+02-04-2024, xwerswoodx
+- Changed: dword CAN flags changed with uint64 to increase limits.
+	- CAN flag limit increased from 0xFFFF FFFF (dword/uint max) to 0xFFFF FFFF FFFF FFFF (uint64 max)
+	- The maximum allowed flag for UINT64 is 1 << 62 (0x4000 0000 0000 0000) as 1 << 63 is reserved for the sign.
+	- But as sphere evaluation expressions (eval, hval, qval etc.) supports int64 instead of uint64, avoid using any flag value more than 1 << 47 (0x1 0000 0000 0000).
+- Fixed: Possible fix for chat debugs. (Issue: #1212) (Issue: https://discord.com/channels/354358315373035542/483721253773901824/1224030729906815077)
+
+03-04-2024, xwerswoodx
+- Added: "MOREX" key to set amount of fruit given when the crop ripped.
+- Changed: Now @Create trigger called when crop grow to let people to change MORE values in stages if needed.
+- Added: @ResourceTest trigger added for crops. (This trigger works separately for every stage)
+	I: Crop UID
+	SRC: Player who uses plant.
+	ARGN1: Next state item ID [Writeable]
+	ARGN2: Fruit ID (if exists) [Writeable]
+	ARGN3: Fruit ID Override (if exists) [Writeable]
+	- Returns:
+	1: Stop the fruit checks.
+- Added: @ResourceGather trigger added for crops. (This trigger works separately for every stage)
+	I: Crop UID
+	SRC: Player who is gathering plant.
+	ARGN1: Amount of fruit. [Writeable]
+	ARGO: Fruit UID
+	- Returns:
+	1: Prevent player to gather fruit.
+	6: Let player to gather fruit but it will drop to the ground instead of backpack.
+- Fixed: Possible fix for invalid ResourceID warnings. (Issue: #1071)
+
+08-04-2024, xwerswoodx
+- Fixed: Missing REGION reference for multis. (Issue: #1228)
+- Added: SPELLFLAG_NO_ELEMENTALENGINE (0200000000) as spellflag, for ignoring Elemental Engine Damages in specific spells. (Issue: #1230)
+
+09-04-2024, xwerswoodx
+- Fixed: An issue that causes T_MULTI_CUSTOM keep multi count saved. (Issue: #1232)
+- Fixed: Bonded pets cannot see their master while DeadCannotSeeLiving equals to 2. (Issue: #1225)
+- Fixed: The issue that causes Guilds without an align shown enemy to the players with a guild with an align. (Issue: #1208)
+- Fixed: Another fix for Invalid ResourceID console warnings. (Issue: #1071)
+- Fixed: GMs cannot dress up players. (Issue: #901)
+
+10-04-2024, xwerswoodx
+- Fixed: Wrong check block GMs to unequip item from players.
+
+14-04-2024, xwerswoodx
+- Fixed: An issue that causes a visual bug to remove all tiles while removing a tile in higher floors. (Issue: #345)
+
+16-04-2024, xwerswoodx
+- Changed: EMOTEF_EAT name changed to EMOTEF_HIDE_EAT_PLAYER and limited to only player emotes.
+	EMOTEF_EAT is from the merge of Jhobean's pr so it wasn't in sphere at all.
+- Added: EMOTEF_HIDE_EAT_NPC to hide emotes while eating only for npcs.
+- Added: Trigger @Hit is added as an item trigger.
+	This trigger nows trigger before @Damage but after character @Hit trigger.
+	Args are same as the character @Hit trigger, but I and ARGO switch the values.
+	Args:
+	- I: The weapon being used.
+	- SRC: The character being hit.
+	- ARGO: The character doing the hitting.
+	- ARGN1: The amount of damage being dealt.
+	- ARGN2: The type(s) of damage.
+	- LOCAL.ARROW: UID of the arrow used (Archery only) [Read Only]
+	- LOCAL.ARROWHANDLED: If set true (1), clears the ammo stack variable.
+	- LOCAL.ITEMDAMAGECHANCE: Sets the damage chance for the weapon. (Default: 25%)
+	- LOCAL.ITEMPOISONREDUCTIONCHANCE: Sets the poison reduction chance for poisoned weapons.
+	- LOCAL.ITEMPOISONREDUCTIONAMOUNT: Sets the amount of poison that reduced from morez value.
+	Returns:
+	1: Cancels the combat swing of the character.
+- Added: Trigger @GetHit is added as an item trigger.
+	This trigger nows trigger before @Damage but after character @GetHit trigger.
+	Args are same as the character @GetHit trigger, but I changed to the item, and the character saves on ARGO.
+	Also LOCAL.ITEMDAMAGELAYER only works under character @GetHit trigger, it is only readable under item trigger.
+	Args:
+	- I: The clothing part take a hit.
+	- SRC: The character responsible for the damage.
+	- ARGO: The character being damaged.
+	- ARGN1: The amount of damage being applied. (Before slayer calculation if applicable)
+	- ARGN2: The type(s) of damage being applied.
+	- ARGN3: Hits will be fixed to this amount after the hit if the value is greaten than it (default: 0)
+	- LOCAL.ITEMDAMAGECHANCE: Sets the damage chance for the hitted part of the body. (Armor or shield, if any) (Default: 25%)
+	- LOCAL.DAMAGEPERCENTPHYSICAL: The amount in % of the physical damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTFIRE: The amount in % of the fire damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTCOLD: The amount in % of the cold damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTPOISON: The amount in % of the poison damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.DAMAGEPERCENTENERGY: The amount in % of the energy damage received, only set if Elemental Engine is enabled. [Read Only]
+	- LOCAL.ITEMDAMAGELAYER: The layer of the item being damaged. [Read Only]
+	Returns:
+	1: Prevents damage from being applied to the character.
+- Added: MAPVIEWRADAR, MAPVIEWSIZE and MAPVIEWSIZEMAX to sphere.ini that overrides default visual range values. (Issue: #1144)
+	Defaults:
+	  MapViewRadar=31
+	  MapViewSize=18
+	  MapViewSizeMax=24
+	- MapViewRadar affects the visibility range of the multis (castles, keeps, ships etc) and the range of spy glass. (Spyglass range is MapViewRadar - 5)
+	- MapViewSize affects the visibility range of the items.
+	- MapViewSizeMax is the maximum range of MapViewSize allowed for increasing VISUALRANGE on clients.
+Added: 'H' shortcut for variables to get the value as hexadecimal.
+	For example, if you use .tag.test 100
+	<dTAG.TEST> returns 100
+	<hTAG.TEST> returns 064
+- Merged: raydienull's LAYER_STABLE (81) build merged, but LAYER_AUCTION keep same while LAYER_STABLE added as a new layer. (PR: #1201)
+- Fixed: raydienull's LAYER_STABLE follower triggers isn't called while taking pet out of stable.
+- Fixed: raydienull's LAYER_STABLE doesn't work with the new follower system.
+- Removed: Unnecessary LINK == PLAYER checks as figurines will be stocked on the owned player.
+- LAYER_STABLE layer number is 81.
+
+18-04-2024, xwerswoodx
+- Fixed: Setting GMs dispid to c_man_gm in-game, prevents GMs to use in-game commands.
+- Changed: Default NPC hear range reverted back to the 14 from 4, as it was 14 in older versions, as there was no reason for changing it. (Issue: #1215)
+
+20-04-2024, xwerswoodx
+- Rework: Champion system fully reworked.
+- Fixed: Candles keep stuck while killing npcs. (Issue: #564)
+- Fixed: LEVELMAX doesn't affect the max level of champion system, and keep spawn npcs for default max level.
+- Changed: Spawn system changed and now it automatically calculate the percentage of spawns per level in descending order.
+- Changed: Candle calculation is now depend on max level, instead of static 4 level.
+- Added: SRC added in @Start trigger. SRC is a reference of player that starts champion spawner.
+- Added: @Complete trigger that triggers when champion completed. (Issue: #477)
+	Args:
+	- I: Champion spawner uid.
+	TODO: Will add attacker list in this trigger.
+- Added: @DelRedCandle trigger that triggers while red candle removing.
+	Args:
+	- I: Champion spawner uid.
+	- ARGO: Candle uid.
+	- ARGN1: Reason of removing. [Read Only]
+		1: Timeout
+		2: User Command
+		3: Clearing all candles
+	Returns:
+	- 1: Cancel the delete action.
+- Added: @DelWhiteCandle trigger that triggers while white candle removing.
+	Args:
+	- I: Champion spawner uid.
+	- ARGO: Candle uid.
+	- ARGN1: Reason of removing. [Read Only]
+		1: Timeout
+		2: User Command
+		3: Clearing all candles
+	Returns:
+	- 1: Cancel the delete action.
+- Added: @Level trigger that triggers when champion level up.
+	Args:
+	- I: Champion spawner uid.
+	- ARGN1: Level [Read Only]
+	- ARGN2: Total monster count for current level. [Read Only]
+	- ARGN3: Needed red candle count for current level. [Read Only]
+- Added: @Stop trigger that triggers when champion stopped.
+	Args:
+	- I: Champion spawner uid.
+	- SRC: The player that stopped spawner.
+	Returns:
+	- 1: Cancel stopping action.
+
+21-04-2024, xwerswoodx
+- Fixed: Script multis move 1 block north when their type set as t_multi_addon. (Issue: #1238)
+- Fixed: ADDCOMPONENT command was added as ADDCOMP for houses. (Issue: #1239)
+
+22-04-2024, xwerswoodx
+- Changed: Re-activated 56b style hardcoded fishing system, as I don't know why it's deactivated as softcoded system too bad and broken.
+	- Fishing skill in default script pack should updated.
+	- Delay should set to 2.5-3.0
+	- All softcoded system should removed.
+	- If anyone want to code their own fishing system, they can use SKF_SCRIPTED.
+- Added: EF_DAMAGETOOLS flag implemented to the sphere.
+	- Added LOCAL.ITEMDAMAGECHANCE to the @Success trigger for skills to decide damage chance for tools. (Default: 25)
+	- Added LOCAL.ITEMDAMAGEAMOUNT to the @Success trigger for skills to decide damage amount. (Default: 1)
+	- EF_DAMAGETOOLS only affects the skills with SKF_GATHER flag.
+- Added: CAN_I_SCRIPTEDMORE (020000000) as item CAN.
+	- This can flag ignores MORE values that entered for hardcoded behaviour.
+	- It's new flag, need couple of updates for fully implemented.
+
+27-04-2024, xwerswoodx
+- Fixed: Return of variables were return decimal value (10-base) instead of hexadecimal (16-base).
+- Added: DecimalVariables (boolean) keyword for sphere.ini. (Default: 0)
+	0: Makes Sphere return variables (TAGs, LOCALs, etc.) in hexadecimal (16-base)
+	1: Makes Sphere return variables (TAGs, LOCALs, etc.) in decimal (10-base)
+	IMPORTANT: If you were using <TAG.NAME> == DECIMAL for checking in your scripts and want to keep that behaviour,
+		    you have to add DecimalVariables=1 to Sphere.ini.
+	SUGGESTION: Always use <hTAG.NAME> for hexadecimal returns, and <dTAG.NAME> for decimal returns to avoid any future issues,
+		     when you switch this setting.
+- Fixed: SPELLFLAG_NOUNPARALYZE flag wasn't working as intended.

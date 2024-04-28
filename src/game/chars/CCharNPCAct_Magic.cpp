@@ -316,7 +316,6 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 
                 if (NPC_GetAiFlags()&NPC_AI_COMBAT && !bIgnoreAITargetChoice)
                 {
-                    //	search for the neariest friend in combat
                     CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIGHT);
                     for (;;)
                     {
@@ -324,7 +323,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         if (!pTarget)
                             break;
 
-                        CItemMemory *pMemory = pTarget->Memory_FindObj(pTarg);
+                        CItemMemory* pMemory = pTarget->Memory_FindObj(pTarg);
                         if (pMemory && pMemory->IsMemoryTypes(MEMORY_FIGHT | MEMORY_HARMEDBY | MEMORY_IRRITATEDBY))
                         {
                             pFriend[iFriendIndex++] = pTarget;

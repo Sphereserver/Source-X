@@ -3,6 +3,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CWorldComm.h"
+#include "CServer.h"
 
 
 static const SOUND_TYPE sm_Sounds_Ghost[] =
@@ -222,6 +223,15 @@ void CWorldComm::Broadcast(lpctstr pMsg) // static
 {
 	// System broadcast in bold text
 	ADDTOCALLSTACK("CWorldComm::Broadcast");
+
+    CScriptTriggerArgs args;
+    args.Init(pMsg);
+    TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+    g_Serv.r_Call("f_onserver_broadcast", &g_Serv, &args, nullptr, &iRet);
+    if (iRet == TRIGRET_RET_TRUE)
+        return;
+    pMsg = args.m_s1;
+
 	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }
 

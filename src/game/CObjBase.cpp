@@ -1014,10 +1014,10 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				}
 			} break;
 		case OC_CAN:
-			sVal.FormatHex( GetCanFlags() );
+			sVal.FormatULLHex( GetCanFlags() );
 			break;
 		case OC_CANMASK:
-			sVal.FormatHex( m_CanMask );
+			sVal.FormatULLHex( m_CanMask );
 			break;
 		case OC_MODMAXWEIGHT:
 			sVal.FormatVal(m_ModMaxWeight);
@@ -1805,7 +1805,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             return false;
         case OC_CANMASK:
         {
-            m_CanMask = s.GetArgDWVal();
+            m_CanMask = s.GetArgULLVal();
             if (IsItem())
             {
                 CItem* pItem = static_cast<CItem*>(this);

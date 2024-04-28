@@ -82,9 +82,9 @@ void CBaseBaseDef::SetTypeName( lpctstr pszName )
 	m_sName = pszName;
 }
 
-bool CBaseBaseDef::Can( dword dwCan ) const
+bool CBaseBaseDef::Can( uint64 uiCan ) const
 {
-	return (m_Can & dwCan);
+	return (m_Can & uiCan);
 }
 
 void CBaseBaseDef::UnLink()
@@ -196,7 +196,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 			sVal = g_Cfg.ResourceGetName( GetResourceID());
 			break;
         case OBC_CAN:
-            sVal.FormatHex(m_Can);
+            sVal.FormatULLHex(m_Can);
             break;
 
         case OBC_HASCOMPONENTPROPS:
@@ -374,7 +374,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_BASEID:
 			return false;
         case OBC_CAN:
-            m_Can = s.GetArgDWVal(); // | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
+            m_Can = s.GetArgULLVal(); // | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
             return true;
 
 		case OBC_DEFNAME:

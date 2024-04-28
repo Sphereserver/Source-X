@@ -56,7 +56,7 @@ CClient::CClient(CNetState* state)
 
 	m_tmSetup.m_dwIP = 0;
 	m_tmSetup.m_iConnect = 0;
-	m_tmSetup.m_bNewSeed = false;
+	m_tmSetup.m_fNewSeed = false;
 
 	m_Env.SetInvalid();
 
@@ -1289,8 +1289,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					const CPointMap po(pObj->GetTopLevelObj()->GetTopPoint());
 					CPointMap pnt = po;
 					pnt.MoveN( DIR_W, 3 );
-					dword dwBlockFlags = m_pChar->GetCanMoveFlags(m_pChar->GetCanFlags());
-					pnt.m_z = CWorldMap::GetHeightPoint2( pnt, dwBlockFlags );	// ??? Get Area
+					uint64 uiBlockFlags = m_pChar->GetCanMoveFlags(m_pChar->GetCanFlags());
+					pnt.m_z = CWorldMap::GetHeightPoint2( pnt, uiBlockFlags );	// ??? Get Area
 					m_pChar->m_dirFace = pnt.GetDir( po, m_pChar->m_dirFace ); // Face the player
 					m_pChar->Spell_Teleport( pnt, true, false );
 				}

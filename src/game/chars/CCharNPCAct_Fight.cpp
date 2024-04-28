@@ -54,7 +54,7 @@ bool CChar::NPC_FightArchery(CChar * pChar)
     return true;
 }
 
-CChar * CChar::NPC_FightFindBestTarget()
+CChar * CChar::NPC_FightFindBestTarget(const std::vector<CChar*>* pvExcludeList)
 {
     ADDTOCALLSTACK("CChar::NPC_FightFindBestTarget");
     ASSERT(m_pNPC);
@@ -74,17 +74,26 @@ CChar * CChar::NPC_FightFindBestTarget()
         for (size_t i = 0; i < m_lastAttackers.size(); )
         {
             LastAttackers &refAttacker = m_lastAttackers[i];
-            pChar = CUID(refAttacker.charUID).CharFind();
+            pChar = CUID::CharFindFromUID(refAttacker.charUID);
             if (!pChar)
             {
                 ++i;
                 continue;
             }
-            if (!pChar->Fight_IsAttackable())
+            if (!pChar->Fight_IsAttackableState())
             {
                 ++i;
                 continue;
             }
+            if (pvExcludeList)
+            {
+                if (pvExcludeList->cend() != std::find(pvExcludeList->cbegin(), pvExcludeList->cend(), pChar))
+                {
+                    ++i;
+                    continue;
+                }
+            }
+
             if (refAttacker.ignore)
             {
                 bool bIgnore = true;
@@ -140,10 +149,13 @@ CChar * CChar::NPC_FightFindBestTarget()
         return pClosest ? pClosest : pChar;
     }
 
-    // New target not found, check if I can keep attacking my current target
+    // New target not found, return the current target, if any
     CChar *pTarget = m_Fight_Targ_UID.CharFind();
     if (pTarget)
-        return pTarget;
+    {
+        if (!pvExcludeList || (pvExcludeList->cend() == std::find(pvExcludeList->cbegin(), pvExcludeList->cend(), pTarget)))
+            return pTarget;
+    }
 
     return nullptr;
 }
