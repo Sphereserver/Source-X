@@ -200,9 +200,10 @@ CServerConfig::CServerConfig()
 	_uiAreaFlags		= AREAF_RoomInheritsFlags;
 	_fMeditationMovementAbort = false;
 
-    m_iMapViewSize      = UO_MAP_VIEW_SIZE_DEFAULT;
-    m_iMapViewSizeMax   = UO_MAP_VIEW_SIZE_MAX;
-    m_iMapViewRadar     = UO_MAP_VIEW_RADAR;
+  m_iMapViewSize      = UO_MAP_VIEW_SIZE_DEFAULT;
+  m_iMapViewSizeMax   = UO_MAP_VIEW_SIZE_MAX;
+  m_iMapViewRadar     = UO_MAP_VIEW_RADAR;
+
 
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 15;
@@ -713,7 +714,9 @@ enum RC_TYPE
 };
 
 // NOTE: Need to be alphabetized order
+
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
+
 {
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
