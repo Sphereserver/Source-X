@@ -41,6 +41,7 @@ public:
 	static lpctstr GetResourceBlockName( RES_TYPE restype );
 	lpctstr GetName() const;
     lpctstr ResourceGetName( const CResourceID& rid ) const;
+    lpctstr ResourceGetName(const CResourceIDBase& rid, const RES_TYPE iExpectedType);
 	CResourceScript * GetResourceFile( size_t i );
     CResourceID ResourceGetID_Advance( RES_TYPE restype, lpctstr &pszName, word wPage = 0 );    // this moves forward (changes!) the ptcName pointer!
 	CResourceID ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage = 0 );

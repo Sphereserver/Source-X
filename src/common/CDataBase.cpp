@@ -13,7 +13,7 @@ extern CDataBaseAsyncHelper g_asyncHdb;
 
 CDataBase::CDataBase()
 {
-	m_bConnected = false;
+	m_fConnected = false;
 	_myData = nullptr;
 }
 
@@ -28,14 +28,14 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	ADDTOCALLSTACK("CDataBase::Connect");
 	SimpleThreadLock lock(m_connectionMutex);
 
-	m_bConnected = false;
+	m_fConnected = false;
 
 	// Starting with MariaDB 10.6.2+ the format for mysql_get_client_version* changed to report the version of the client library instead of the server version.
 	unsigned long ver = mysql_get_client_version();
 	if ( ver < MIN_MARIADB_VERSION_ALLOW )
 	{
 		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MariaDB client library is too old (version %lu). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MARIADB_VERSION_ALLOW);
-		g_Cfg.m_bMySql = false;
+		g_Cfg.m_fMySql = false;
 		return false;
 	}
 
@@ -63,7 +63,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		return false;
 	}
 
-	return (m_bConnected = true);
+	return (m_fConnected = true);
 }
 
 bool CDataBase::Connect()
@@ -75,7 +75,7 @@ bool CDataBase::Connect()
 bool CDataBase::isConnected()
 {
 	ADDTOCALLSTACK("CDataBase::isConnected");
-	return m_bConnected;
+	return m_fConnected;
 }
 
 void CDataBase::Close()
@@ -84,7 +84,7 @@ void CDataBase::Close()
 	SimpleThreadLock lock(m_connectionMutex);
 	mysql_close(_myData);
 	_myData = nullptr;
-	m_bConnected = false;
+	m_fConnected = false;
 }
 
 bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
@@ -258,7 +258,7 @@ bool CDataBase::_OnTick()
 	static int tickcnt = 0;
 	EXC_TRY("Tick");
 
-	if ( !g_Cfg.m_bMySql )	//	MariaDB is not supported
+	if ( !g_Cfg.m_fMySql )	//	MariaDB is not supported
 		return true;
 
 	//	do not ping sql server too heavily
@@ -390,7 +390,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 	EXC_TRY("WriteVal");
 
 	// Just return 0 if MySQL/MariaDB is disabled
-	if (!g_Cfg.m_bMySql)
+	if (!g_Cfg.m_fMySql)
 	{
 		sVal.FormatVal( 0 );
 		return true;
@@ -472,7 +472,7 @@ bool CDataBase::r_Verb(CScript & s, CTextConsole * pSrc)
 	EXC_TRY("Verb");
 
 	// Just return true if MySQL/MariaDB is disabled
-	if (!g_Cfg.m_bMySql)
+	if (!g_Cfg.m_fMySql)
 		return true;
 
 	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, ARRAY_COUNT(sm_szVerbKeys)-1);

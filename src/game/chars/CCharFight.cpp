@@ -37,7 +37,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 	if ( m_pPlayer )
 	{
 		// I have the option of attacking the criminal. or calling the guards.
-		bool fMakeCriminal = true;
+		bool fMakeCriminal = false; //We don't need to call guards automatically in default.
 		if (IsTrigUsed(TRIGGER_SEECRIME))
 		{
 			CScriptTriggerArgs Args;
@@ -46,9 +46,9 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 			OnTrigger(CTRIG_SeeCrime, pCriminal, &Args);
             fMakeCriminal = Args.m_iN1 ? true : false;
 		}
-		if (fMakeCriminal)
+        Memory_AddObjTypes(pCriminal, MEMORY_SAWCRIME); //Memory should always be added to the player.
+        if (fMakeCriminal) //We call guards automatically if ARGN1 set to 1 (true) in trigger.
         {
-			Memory_AddObjTypes( pCriminal, MEMORY_SAWCRIME );
             pCriminal->Noto_Criminal(pCharMark, true);
         }
 		return;
@@ -101,17 +101,19 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD) // guards only fight for justice, they can't commit a crime!!?
 		return false;
 
-	CWorldSearch AreaChars( GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT );
+	CWorldSearch AreaChars( GetTopPoint(), g_Cfg.m_iMapViewSize );
 	for (;;)
 	{
 		CChar * pChar = AreaChars.GetChar();
 		if ( pChar == nullptr )
 			break;
-		if ( this == pChar )
-			continue;	// I saw myself before.
-		if (pChar->GetPrivLevel() > GetPrivLevel()) // If a GM sees you it it not a crime.
+        if (this == pChar) // Ignore the player himself.
+            continue;
+        if (pChar == pCharMark) // Attacked player should be ignored.
+            continue;   
+		if (pChar->IsPriv(PRIV_GM)) // GMs also should be ignored.
 			continue;
-		if ( ! pChar->CanSeeLOS( this, LOS_NB_WINDOWS )) //what if I was standing behind a window when I saw a crime? :)
+		if ( ! pChar->CanSeeLOS( this, LOS_NB_WINDOWS )) // What if I was standing behind a window when I saw a crime? :)
 			continue;
 
         const bool fYour = (pCharMark && ( pCharMark == pChar ));
@@ -170,7 +172,9 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 void CChar::CallGuards()
 {
 	ADDTOCALLSTACK("CChar::CallGuards");
-	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD|STATF_STONE))
+    if (!m_pPlayer && (!m_pArea || !m_pArea->IsGuarded()))
+        return;
+	if (IsStatFlag(STATF_DEAD|STATF_STONE))
 		return;
 
     // Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
@@ -179,20 +183,20 @@ void CChar::CallGuards()
 
 	// We don't have any target yet, let's check everyone nearby
 	CChar * pCriminal;
-	CWorldSearch AreaCrime(GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
+	CWorldSearch AreaCrime(GetTopPoint(), g_Cfg.m_iMapViewSize);
 	while ((pCriminal = AreaCrime.GetChar()) != nullptr)
 	{
 		if (pCriminal == this)
-			continue;
-		if (!pCriminal->m_pArea->IsGuarded())
 			continue;
 		if (!CanDisturb(pCriminal))	// don't allow guards to be called on someone we can't disturb
 			continue;
 
 		// Mark person as criminal if I saw him criming
 		// Only players call guards this way. NPC's flag criminal instantly
-		if (m_pPlayer && Memory_FindObjTypes(pCriminal, MEMORY_SAWCRIME))
+        if (m_pPlayer && Memory_FindObjTypes(pCriminal, MEMORY_SAWCRIME))
+        {
             pCriminal->Noto_Criminal(this, true);
+        }
 		if (!pCriminal->IsStatFlag(STATF_CRIMINAL) && !(pCriminal->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers))
 			continue;
 
@@ -349,13 +353,10 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 	{
 		if (IsClientActive())	// I decide if this is a crime.
 		{
-			if (!fCommandPet || g_Cfg.m_fAttackingIsACrime)
-			{
-				OnNoticeCrime(pCharSrc, this);
-				CChar* pCharMark = pCharSrc->IsStatFlag(STATF_PET) ? pCharSrc->NPC_PetGetOwner() : pCharSrc;
-				if (pCharMark != pCharSrc)
-					OnNoticeCrime(pCharMark, this);
-			}
+            OnNoticeCrime(pCharSrc, this);
+            CChar* pCharMark = pCharSrc->IsStatFlag(STATF_PET) ? pCharSrc->NPC_PetGetOwner() : nullptr;
+            if (pCharMark != nullptr)
+                OnNoticeCrime(pCharMark, this);
 		}
 		else
 		{
@@ -621,7 +622,6 @@ int CChar::CalcArmorDefense() const
 int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy, SPELL_TYPE spell)
 {
 	ADDTOCALLSTACK("CChar::OnTakeDamage");
-
 	if ( pSrc == nullptr )
 		pSrc = this;
 
@@ -747,29 +747,48 @@ effect_bounce:
 		Args.m_VarsLocal.SetNum("DamagePercentEnergy", iDmgEnergy);
 	}
 
+    CItem* pItemHit = nullptr;
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
 		if ( OnTrigger( CTRIG_GetHit, pSrc, &Args ) == TRIGRET_RET_TRUE )
 			return 0;
 		iDmg = (int)(Args.m_iN1);
 		uType = (DAMAGE_TYPE)(Args.m_iN2);
+
+        LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
+        pItemHit = LayerFind(iHitLayer);
+        if (pItemHit)
+        {
+            Args.m_pO1 = this;
+            // "ItemDamageLayer" will only be readable.
+            if (pItemHit->OnTrigger(ITRIG_GetHit, pSrc, &Args) == TRIGRET_RET_TRUE)
+                return 0;
+            iDmg = (int)(Args.m_iN1); //Update damage amount and type again after @Hit trigger under item.
+            uType = (DAMAGE_TYPE)(Args.m_iN2);
+            // We don't need to update iHitLayer as it's already called on item
+        }
 	}
 
 	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
 	if ( (iItemDamageChance > Calc_GetRandVal(100)) && !Can(CAN_C_NONHUMANOID) )
 	{
-		LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
-		CItem *pItemHit = LayerFind(iHitLayer);
 		if ( pItemHit )
 			pItemHit->OnTakeDamage(iDmg, pSrc, uType);
 	}
 
+    CSpellDef* pSpellDef = nullptr;
 	// Remove stuck/paralyze effect
-	if ( !(uType & DAMAGE_NOUNPARALYZE) )
+	if (!(uType & DAMAGE_NOUNPARALYZE))
 	{
-		CItem * pParalyze = LayerFind(LAYER_SPELL_Paralyze);
-		if ( pParalyze )
-			pParalyze->Delete();
+        if (spell)
+            pSpellDef = g_Cfg.GetSpellDef(spell);
+
+        if (!pSpellDef || (pSpellDef && !pSpellDef->IsSpellType(SPELLFLAG_NOUNPARALYZE))) // Block spells with SPELLFLAG_NOUNPARALYZE flag, unparalyze the target.
+        {
+            CItem* pParalyze = LayerFind(LAYER_SPELL_Paralyze);
+            if (pParalyze)
+                pParalyze->Delete();
+        }
 
 		CItem * pStuck = LayerFind(LAYER_FLAG_Stuck);
 		if ( pStuck )
@@ -798,24 +817,24 @@ effect_bounce:
         int iDmgBonus = 1;
         const CCFaction *pSlayer = nullptr;
         const CCFaction *pFaction = GetFaction();
-        const CCFaction *pSrcFaction = pSrc->GetFaction();
+        //const CCFaction *pSrcFaction = pSrc->GetFaction();
         if (pWeapon)
         {
-            pSlayer = pWeapon->GetFaction();
-            if (pSlayer && pWeapon->GetSlayer()->GetFactionID() != FACTION_NONE)
+            pSlayer = pWeapon->GetSlayer();
+            if (pSlayer && pSlayer->GetFactionID() != FACTION_NONE)
             {
                 if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
                 {
-                    if (pSlayer->GetFactionID() != FACTION_NONE)
+                    if (pFaction && pFaction->GetFactionID() != FACTION_NONE)
                     {
-                        iDmgBonus = pSlayer->GetSlayerDamageBonus(pWeapon->GetSlayer());
+                        iDmgBonus = pSlayer->GetSlayerDamageBonus(pFaction);
                     }
                 }
                 else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                 {
-                    if (pSrcFaction->GetFactionID() != FACTION_NONE)
+                    if (pFaction && pFaction->GetFactionID() != FACTION_NONE)
                     {
-                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrcFaction);
+                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pFaction);
                     }
                 }
             }
@@ -826,20 +845,20 @@ effect_bounce:
             if (pTalisman)
             {
                 pSlayer = pTalisman->GetSlayer();
-                if (pSlayer  && pSlayer->GetFactionID() != FACTION_NONE)
+                if (pSlayer && pSlayer->GetFactionID() != FACTION_NONE)
                 {
                     if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
                     {
-                        if (pFaction->GetFactionID() != FACTION_NONE)
+                        if (pFaction && pFaction->GetFactionID() != FACTION_NONE)
                         {
-                            iDmgBonus = pFaction->GetSlayerDamageBonus(pSlayer);
+                            iDmgBonus = pSlayer->GetSlayerDamageBonus(pFaction);
                         }
                     }
                     else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                     {
-                        if (pSrcFaction->GetFactionID() != FACTION_NONE)
+                        if (pFaction && pFaction->GetFactionID() != FACTION_NONE)
                         {
-                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrcFaction);
+                            iDmgBonus = pSlayer->GetSlayerDamagePenalty(pFaction);
                         }
                     }
                 }
@@ -857,7 +876,7 @@ effect_bounce:
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;
 		int iSpellSkill = -1;
-		const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
+		pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
 			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
@@ -922,7 +941,7 @@ effect_bounce:
 			// Preventing recurrent reflection with DAMAGE_REACTIVE.
 			if ( IsStatFlag(STATF_REACTIVE) && !((uType & DAMAGE_GOD) || (uType & DAMAGE_REACTIVE)) )
 			{
-				if ( GetTopDist3D(pSrc) < 2 )
+				if (GetTopDist3D(pSrc) <= 2)
 				{
 					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
 					
@@ -2073,6 +2092,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
+    Args.m_VarsLocal.SetNum("ItemPoisonReductionChance", 100);
+    Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", 1);
+    int32 iPoison = 0;
+    if (pWeapon)
+    {
+        iPoison = Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill);
+        Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", iPoison / 2);
+    }
+
 	if ( pAmmo && pAmmo->GetUID().IsValidUID() )
 		Args.m_VarsLocal.SetNum("Arrow",(dword)pAmmo->GetUID());
 
@@ -2103,6 +2131,19 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		iDmg = (int)(Args.m_iN1);
         iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+
+        if (pWeapon)
+        {
+            Args.m_pO1 = this;
+            if (pWeapon->OnTrigger(ITRIG_Hit, pCharTarg, &Args) == TRIGRET_RET_TRUE)
+                return WAR_SWING_EQUIPPING;
+
+            if (Args.m_VarsLocal.GetKeyNum("ArrowHandled") != 0)		// if arrow is handled by script, do nothing with it further
+                pAmmo = nullptr;
+
+            iDmg = (int)(Args.m_iN1);
+            iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+        }
 	}
 
 	// BAD BAD Healing fix.. Cant think of something else -- Radiant
@@ -2132,11 +2173,14 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && pWeapon->m_itWeapon.m_poison_skill && 
             (pWeapon->m_itWeapon.m_poison_skill > Calc_GetRandVal(100) || pWeapon->m_itWeapon.m_poison_skill < 10))
 		{
-			byte iPoisonDeliver = (byte)(Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill));
+			byte iPoisonDeliver = (byte)(iPoison);
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
-			pWeapon->m_itWeapon.m_poison_skill -= iPoisonDeliver / 2;	// reduce weapon poison charges
-			pWeapon->UpdatePropertyFlag();
+            if (Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionChance") > Calc_GetRandVal(100))
+            {
+                pWeapon->m_itWeapon.m_poison_skill -= (byte)(Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionAmount"));	// reduce weapon poison charges
+                pWeapon->UpdatePropertyFlag();
+            }
 		}
 
 		// Check if the weapon will be damaged

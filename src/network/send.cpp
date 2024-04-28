@@ -2610,9 +2610,8 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 		mode |= (target->GetNetState()->isClientVersion(MINCLIVER_ML)) ? 0x1 : 0x40;
 	if (target->GetNetState()->isClientVersion(MINCLIVER_ML))
 	{
-		if (character == target->GetChar() ||
-		    (g_Cfg.m_fCanUndressPets ? (character->IsOwnedBy(target->GetChar())) : (target->IsPriv(PRIV_GM) && target->GetPrivLevel() > character->GetPrivLevel())) )
-		mode |= 0x2;
+        if (character == target->GetChar() || target->GetChar()->CanDress(character))
+            mode |= 0x2;
 	}
 
 	writeInt32(character->GetUID());
@@ -4052,7 +4051,7 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, g_Cfg.m_iMapViewSize))
 		return false;
 
 	return true;
@@ -4691,7 +4690,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT) && !character->IsPriv(PRIV_ALLSHOW))
+	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, g_Cfg.m_iMapViewSize) && !character->IsPriv(PRIV_ALLSHOW))
 		return false;
 
 	if (hasExpired(30 * MSECS_PER_SEC))
@@ -4910,7 +4909,7 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, g_Cfg.m_iMapViewSize))
 		return false;
 
 	return true;

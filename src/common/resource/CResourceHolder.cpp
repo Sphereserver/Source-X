@@ -282,14 +282,39 @@ bool CResourceHolder::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Section Definitions
 
+lpctstr CResourceHolder::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+{
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
+    CResourceID ridValid = CResourceID(iExpectedType, 0);
+    if (!rid.IsValidResource())
+    {
+        if (rid.GetResIndex() != 0)
+        {
+            g_Log.EventError("Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
+        }
+    }
+    else if (rid.GetResType() != iExpectedType)
+    {
+        g_Log.EventWarn("Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n", iExpectedType, rid.GetResType());
+    }
+    else
+    {
+        ridValid = rid;
+    }
+    return ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
+}
+
 lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
 	// Get a portable name for the resource id type.
 
-	const CResourceDef * pResourceDef = ResourceGetDef( rid );
-	if ( pResourceDef )
-		return pResourceDef->GetResourceName();
+    if (rid.IsValidResource())
+    {
+        const CResourceDef* pResourceDef = ResourceGetDef(rid);
+        if (pResourceDef)
+            return pResourceDef->GetResourceName();
+    }
 
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);

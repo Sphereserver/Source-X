@@ -231,8 +231,8 @@ void CItemMultiCustom::EndCustomize(bool fForce)
             CPointMap ptDest = Multi_GetSign()->GetTopPoint();
 
             // find ground height, since the signpost is usually raised
-            dword dwBlockFlags = 0;
-            ptDest.m_z = CWorldMap::GetHeightPoint2(ptDest, dwBlockFlags, true);
+            uint64 uiBlockFlags = 0;
+            ptDest.m_z = CWorldMap::GetHeightPoint2(ptDest, uiBlockFlags, true);
 
             pChar->MoveToChar(ptDest);
             pChar->UpdateMove(ptOld);
@@ -931,17 +931,14 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 
     if (!pDesign->m_vectorComponents.empty())
     {
-        if (_iMaxPlane < 0)
+        // find the highest plane/floor
+        for (const CMultiComponent *pComp : pDesign->m_vectorComponents)
         {
-            // find the highest plane/floor
-            for (const CMultiComponent *pComp : pDesign->m_vectorComponents)
-            {
-                const uchar uiPlane = GetPlane(pComp);
-                if (uiPlane <= _iMaxPlane)
-                    continue;
+            const uchar uiPlane = GetPlane(pComp);
+            if (uiPlane <= _iMaxPlane)
+                continue;
 
-                _iMaxPlane = uiPlane;
-            }
+            _iMaxPlane = uiPlane;
         }
 
         // determine the dimensions of the building

@@ -161,6 +161,9 @@ void CChatChannel::RenameChannel(CChatChanMember* pBy, lpctstr pszName)
 void CChatChannel::SendMember(CChatChanMember* pMember, CChatChanMember* pToMember)
 {
     ADDTOCALLSTACK("CChatChannel::SendMember");
+    if (!pMember)
+        return;
+
     CSString sName;
     g_Serv.m_Chats.FormatName(sName, pMember);
 
@@ -193,30 +196,27 @@ void CChatChannel::SendMember(CChatChanMember* pMember, CChatChanMember* pToMemb
 void CChatChannel::RemoveMember(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::RemoveMember");
-
-    for ( size_t i = 0; i < m_Members.size(); )
+    for ( size_t i = 0; i < m_Members.size(); ++i)
     {
         // Tell the other clients in this channel (if any) you are leaving (including yourself)
         CClient * pClient = m_Members[i]->GetClientActive();
 
-        if ( pClient == nullptr )		//	auto-remove offline clients
+        if (!pClient) // auto-remove offline clients
         {
             m_Members[i]->SetChannel(nullptr);
-            m_Members.erase(m_Members.begin() + i);
+            m_Members.erase_index(i);
             continue;
         }
 
-        if (!pClient->m_fUseNewChatSystem)
+        if (!pClient->m_fUseNewChatSystem && pMember)
             pClient->addChatSystemMessage(CHATCMD_RemoveMemberFromChannel, pMember->GetChatName());
 
-        if (m_Members[i] == pMember)	// disjoin
+        if (pMember && m_Members[i] == pMember)	// disjoin
         {
             pClient->addChatSystemMessage(pClient->m_fUseNewChatSystem ? CHATCMD_LeftChannel : CHATCMD_ClearMembers, static_cast<lpctstr>(m_sName));
-            m_Members.erase(m_Members.begin() + i);
+            m_Members.erase_index(i);
             break;
         }
-
-        ++i;
     }
 
     // Delete the channel if there's no members left

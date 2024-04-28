@@ -7,8 +7,7 @@
 #include "../items/CItem.h"
 
 
-CFactionDef::CFactionDef() :
-    _iFaction(FACTION_NONE)
+CFactionDef::CFactionDef() : _iFaction(FACTION_NONE)
 {
 }
 

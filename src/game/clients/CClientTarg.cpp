@@ -1604,12 +1604,12 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true);
+		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true, 1);
 		m_pChar->FollowersUpdate(pCharPet,(-maximum(0, iFollowerSlots)));
 	}
 
-	pCharMaster->GetBank()->ContentAdd( pPetItem );
-	pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_CLAIM ) );
+	m_pChar->GetBank(LAYER_STABLE)->ContentAdd(pPetItem);
+	pCharMaster->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM));
 	return true;
 }
 

@@ -349,7 +349,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				pItem->ClrAttr(ATTR_OWNED);
 
 				// newbie items lose newbie status when transfered to NPC
-				if ( !g_Cfg.m_bAllowNewbTransfer )
+				if ( !g_Cfg.m_fAllowNewbTransfer )
 					pItem->ClrAttr(ATTR_NEWBIE);
 			}
 			if ( pChar->GetBank()->IsItemInside( pContItem ))
@@ -1035,13 +1035,13 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 {
 	ADDTOCALLSTACK("CClient::Event_Command");
-	if ( mode == 13 || mode == 14 ) // guild and alliance don't pass this.
+	if ( mode == TALKMODE_GUILD || mode == TALKMODE_ALLIANCE ) // guild and alliance don't pass this.
 		return false;
 	if ( pszCommand[0] == 0 )
 		return true;		// should not be said
 	if ( Str_Check(pszCommand) )
 		return true;		// should not be said
-	if ( ( ( m_pChar->GetID() == 0x3db ) && ( pszCommand[0] == '=' ) ) || ( pszCommand[0] == g_Cfg.m_cCommandPrefix ) )
+	if (((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) || (pszCommand[0] == g_Cfg.m_cCommandPrefix)) //Should be dispid, or it's bugged when you change character's dispid to c_man_gm.
 	{
 		// Lazy :P
 	}
@@ -1054,22 +1054,22 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;
 	}
 
-	bool m_bAllowCommand = true;
-	bool m_bAllowSay = true;
+	bool m_fAllowCommand = true;
+	bool m_fAllowSay = true;
 
 	pszCommand += 1;
 	GETNONWHITESPACE(pszCommand);
-	m_bAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
+	m_fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
 
-	if ( !m_bAllowCommand )
-		m_bAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
+	if ( !m_fAllowCommand )
+		m_fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
 
 	//	filter on commands is active - so trigger it
 	if ( !g_Cfg.m_sCommandTrigger.IsEmpty() )
 	{
 		CScriptTriggerArgs Args(pszCommand);
-		Args.m_iN1 = m_bAllowCommand;
-		Args.m_iN2 = m_bAllowSay;
+		Args.m_iN1 = m_fAllowCommand;
+		Args.m_iN2 = m_fAllowSay;
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
@@ -1077,16 +1077,16 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 			if ( tr == TRIGRET_RET_TRUE )
 				return (Args.m_iN2 != 0);
 
-		m_bAllowCommand = ( Args.m_iN1 != 0 );
-		m_bAllowSay = ( Args.m_iN2 != 0 );
+		m_fAllowCommand = ( Args.m_iN1 != 0 );
+		m_fAllowSay = ( Args.m_iN2 != 0 );
 	}
 
-	if ( !m_bAllowCommand && !m_bAllowSay )
+	if ( !m_fAllowCommand && !m_fAllowSay )
 		SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_PRIV));
 
-	if ( m_bAllowCommand )
+	if ( m_fAllowCommand )
 	{
-		m_bAllowSay = false;
+		m_fAllowSay = false;
 
 		// Assume you don't mean yourself !
 		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect)) >= 0 )
@@ -1103,9 +1103,9 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	}
 
 	if ( GetPrivLevel() >= g_Cfg.m_iCommandLog )
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_bAllowCommand);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_fAllowCommand);
 
-	return !m_bAllowSay;
+	return !m_fAllowSay;
 }
 
 void CClient::Event_Attack( CUID uid )
@@ -1885,7 +1885,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
     //Reduce NPC hear distance for non pets
     int iAltDist = iFullDist;
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
+	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.ini
 
 	for (;;)
 	{

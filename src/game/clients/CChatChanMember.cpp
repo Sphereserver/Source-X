@@ -196,12 +196,17 @@ const CClient * CChatChanMember::GetClientActive() const
 lpctstr CChatChanMember::GetChatName() const
 {
     ADDTOCALLSTACK("CChatChanMember::GetChatName");
-    return( GetClientActive()->GetAccount()->m_sChatName );
+    const CClient *pClient = GetClientActive();
+
+    if (pClient)
+        return(pClient->GetAccount()->m_sChatName);
+    return "";
 }
 
 bool CChatChanMember::IsIgnoring(lpctstr pszName) const
 {
-    return( FindIgnoringIndex( pszName ) != sl::scont_bad_index() );
+    ADDTOCALLSTACK("CChatChanMember::IsIgnoring");
+    return( FindIgnoringIndex(pszName) != sl::scont_bad_index() );
 }
 
 void CChatChanMember::HideCharacterName()

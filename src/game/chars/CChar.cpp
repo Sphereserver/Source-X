@@ -35,7 +35,10 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
     "@AddMulti",            // Adding a multi to the MultiStorage,
+    "@AfkMode",             // Changing afk mode by using .AFK command.
 	"@AfterClick",
+    "@ArrowQuest_Add",
+    "@ArrowQuest_Close",
 	"@Attack",				// I am attacking someone (SRC)
 	"@CallGuards",
 
@@ -67,6 +70,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
     "@DelMulti",            // Removing a multi to the MultiStorage,
 	"@Destroy",				//+I am nearly destroyed
 	"@Dismount",			// I am trying to get rid of my ride right now
+    "@Drink",               // I am drinking something.
 	"@Dye",					// My color has been changed
 	"@Eat",
 	"@EnvironChange",		// my environment changed somehow (light,weather,season,region)
@@ -175,6 +179,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 
 	"@Rename",
 	"@Resurrect",
+    "@Reveal",              // Character is revealing.
 	"@SeeCrime",			// I saw a crime
 	"@SeeHidden",			// Can I see hidden chars?
 	"@SeeSnoop",
@@ -280,7 +285,7 @@ CChar::CChar( CREID_TYPE baseID ) :
     _uiRange = RANGE_MAKE(1, 0);   // RangeH = 1; RangeL = 0
 
 	m_StepStealth = 0;
-	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
+	m_iVisualRange = g_Cfg.m_iMapViewSize;
 	m_virtualGold = 0;
 
 	_iTimePeriodicTick = 0;
@@ -708,18 +713,18 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
+char CChar::GetFixZ( const CPointMap& pt, uint64 uiBlockFlags)
 {
-	const dword dwCanFlags = GetCanFlags();
-	const dword dwCanMoveFlags = GetCanMoveFlags(dwCanFlags);
+	const uint64 uiCanFlags = GetCanFlags();
+	const uint64 uiCanMoveFlags = GetCanMoveFlags(uiCanFlags);
 
-	if ( !dwBlockFlags )
-		dwBlockFlags = dwCanMoveFlags;
+	if (!uiBlockFlags)
+		uiBlockFlags = uiCanMoveFlags;
 
-    if (dwCanMoveFlags == 0xFFFFFFFF)
+    if (uiCanMoveFlags == UINT64_MAX)
         return pt.m_z;
-	if (dwCanMoveFlags & CAN_C_WALK )
-		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
+	if (uiCanMoveFlags & CAN_C_WALK )
+		uiBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
 	const short iZClimbed = pt.m_z + m_zClimbHeight;
     const height_t uiHeightMount = GetHeightMount( false );
@@ -727,27 +732,27 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 	const int iBlockMaxHeight = std::max(int(iZClimbed + uiHeightMount), int(INT8_MAX));
 	const height_t uiClimbHeight = height_t(std::max(short(iZClimbed + 2), short(UINT8_MAX)));
 
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount );
-	CWorldMap::GetFixPoint( pt, block );
+	CServerMapBlockState block(uiBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount);
+	CWorldMap::GetFixPoint(pt, block);
 
-	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
-	if ( block.m_Top.m_dwBlockFlags )
+	uiBlockFlags = block.m_Bottom.m_uiBlockFlags;
+	if (block.m_Top.m_uiBlockFlags)
 	{
-		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
+		uiBlockFlags |= CAN_I_ROOF;	// we are covered by something.
 		if ( block.m_Top.m_z < (iZClimbed + ((block.m_Top.m_dwTile > TERRAIN_QTY) ? uiHeightMount : uiHeightMount/2 )) )
-			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
+			uiBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
-	if ( dwBlockFlags != 0x0 )
+	if ( uiBlockFlags != 0x0 )
 	{
-		if ( (dwBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST, dwCanFlags) )
-			dwBlockFlags &= ~CAN_I_BLOCK;
+		if ((uiBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST, uiCanFlags))
+			uiBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( (dwBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM, dwCanFlags) )
-			dwBlockFlags &= ~CAN_I_BLOCK;
+		if ((uiBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM, uiCanFlags))
+			uiBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( !Can(CAN_C_FLY, dwCanFlags) )
+		if ( !Can(CAN_C_FLY, uiCanFlags) )
 		{
-			if ( ! ( dwBlockFlags & CAN_I_CLIMB ) ) // we can climb anywhere
+			if (!(uiBlockFlags & CAN_I_CLIMB)) // we can climb anywhere
 			{
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
@@ -761,10 +766,10 @@ char CChar::GetFixZ( const CPointMap& pt, dword dwBlockFlags)
 				}
 			}
 		}
-		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS, dwCanFlags) )
+		if ((uiBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS, uiCanFlags))
 			return pt.m_z;
 
-		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
+		if (block.m_Bottom.m_z >= UO_SIZE_Z)
 			return pt.m_z;
 	}
 
@@ -872,7 +877,7 @@ void CChar::SetVisualRange(byte newSight)
 	{
 		THREAD_UNIQUE_LOCK_SET;
 		// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
-		m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
+		m_iVisualRange = minimum(newSight, g_Cfg.m_iMapViewSizeMax);
 		pClient = GetClientActive();
 	}
 	if (pClient)
@@ -1032,7 +1037,7 @@ void CChar::CreateNewCharCheck()
 	if ( !m_pPlayer )	// need a starting brain tick.
 	{
 		//	auto-set EXP/LEVEL level
-		if ( g_Cfg.m_bExperienceSystem && g_Cfg.m_iExperienceMode&EXP_MODE_AUTOSET_EXP )
+		if ( g_Cfg.m_fExperienceSystem && g_Cfg.m_iExperienceMode&EXP_MODE_AUTOSET_EXP )
 		{
 			if ( !m_exp )
 			{
@@ -1061,7 +1066,7 @@ void CChar::CreateNewCharCheck()
 				m_exp = (m_exp * mult) / 100;
 			}
 
-			if ( !m_level && g_Cfg.m_bLevelSystem && ( m_exp > g_Cfg.m_iLevelNextAt ))
+			if ( !m_level && g_Cfg.m_fLevelSystem && ( m_exp > g_Cfg.m_iLevelNextAt ))
 				ChangeExperience();
 		}
 
@@ -2789,10 +2794,10 @@ do_default:
 				CPointMap	ptDst = GetTopPoint();
 				DIR_TYPE	dir   = GetDirStr(ptcKey);
 				ptDst.Move( dir );
-				dword		dwBlockFlags = 0;
+				uint64		uiBlockFlags = 0;
 				CRegion	*	pArea;
-				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, nullptr );
-				sVal.FormatHex( pArea ? pArea->GetResourceID().IsValidUID() : 0 );
+				pArea = CheckValidMove(ptDst, &uiBlockFlags, dir, nullptr);
+				sVal.FormatHex(pArea ? pArea->GetResourceID().IsValidUID() : 0);
 			}
 			return true;
 
@@ -2814,12 +2819,12 @@ do_default:
 				ptDst.Move( GetDirStr( ptcKey ) );
 				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
-					sVal.FormatHex( UINT32_MAX );
+					sVal.FormatULLHex( UINT64_MAX );
 				else
 				{
-					dword dwBlockFlags = 0;
-					CWorldMap::GetHeightPoint2( ptDst, dwBlockFlags, true );
-					sVal.FormatHex( dwBlockFlags );
+					uint64 uiBlockFlags = 0;
+					CWorldMap::GetHeightPoint2(ptDst, uiBlockFlags, true);
+					sVal.FormatULLHex(uiBlockFlags);
 				}
 			}
 			return true;
@@ -3408,17 +3413,17 @@ bool CChar::r_LoadVal( CScript & s )
 							UpdateStatsFlag();
 							return true;
 						}
-						else if (!strnicmp(ptcKey, "DELETE", 6))
+						else if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
 						{
 							if (!m_followers.empty())
 							{
 								CUID uid = (CUID)s.GetArgDWVal();
 								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
 								{
-									if (uid == *it)
-										it = m_followers.erase(it);
-									else
-										++it;
+                                    if (uid == *it)
+                                        it = m_followers.erase(it);
+                                    else
+                                        ++it;
 								}
 							}
 							return true;
@@ -4222,12 +4227,20 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			// toggle ?
 			{
 				bool fAFK = ( Skill_GetActive() == NPCACT_NAPPING );
-				bool fMode;
-				if ( s.HasArgs())
-					fMode = ( s.GetArgVal() != 0 );
-				else
-					fMode = ! fAFK;
-				if ( fMode != fAFK )
+				bool fMode = (s.GetArgVal() != 0 ? true : !fAFK);
+
+                if (IsTrigUsed(TRIGGER_AFKMODE))
+                {
+                    CScriptTriggerArgs args(fAFK, fMode);
+                    TRIGRET_TYPE iRet = OnTrigger(CTRIG_AfkMode, this, &args);
+                    fAFK = args.m_iN1 > 0 ? true : false;
+                    fMode = args.m_iN2 > 0 ? true : false;
+
+                    if (iRet == TRIGRET_RET_TRUE) //Block AFK mode switching if RETURN 1 in Trigger.
+                        return true;
+                }
+
+                if ( fMode != fAFK )
 				{
 					if ( fMode )
 					{
@@ -4264,8 +4277,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if ( !Arg_Qty )
 					return false;
 				return UpdateAnimate((ANIM_TYPE)(Arg_piCmd[0]), true, false,
-					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : 1,
-					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : 1);
+					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : (byte)0,
+					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : (byte)7);
 			}
 			break;
 		case CHV_ATTACK:
@@ -4928,7 +4941,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			if (!(g_Cfg.m_iExperienceMode&EXP_MODE_ALLOW_DOWN))	// do not allow changes to minus
 				return;
 			// limiting delta to current level? check if delta goes out of level
-			if (g_Cfg.m_bLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
+			if (g_Cfg.m_fLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
 			{
 				uint exp = Calc_ExpGet_Exp(m_level);
 				if (delta + m_exp < exp)
@@ -4964,7 +4977,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		{
 			int iWord = 0;
 			llong absval = abs(delta);
-			llong maxval = (g_Cfg.m_bLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
+			llong maxval = (g_Cfg.m_fLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
 
 			if (absval >= maxval)				// 100%
 				iWord = 7;
@@ -4987,7 +5000,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		}
 	}
 
-	if (g_Cfg.m_bLevelSystem)
+	if (g_Cfg.m_fLevelSystem)
 	{
 		llong level = Calc_ExpGet_Level(m_exp);
 
@@ -5030,6 +5043,83 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			}
 		}
 	}
+}
+
+bool CChar::CanConsume(CItem* pItem, word iQty)
+{
+    ADDTOCALLSTACK("CChar::CanConsume");
+    if (!pItem || iQty <= 0)
+        return true;
+
+    word iQtyMax = pItem->GetAmount();
+    if (iQty <= iQtyMax)
+        return true;
+
+    CObjBaseTemplate* pTopObj = pItem->GetTopLevelObj();
+    if (!pTopObj)
+        iQty = iQty - iQtyMax;
+    else if (pTopObj)
+    {
+        CChar* pTopChar = dynamic_cast<CChar*>(pTopObj);
+        if (pTopObj == pItem || (pTopChar && pTopChar != this))
+            iQty = iQty - iQtyMax;
+    }
+
+    if (IsContainer())
+    {
+        CItemBase* pItemDef = pItem->Item_GetDef();
+        CContainer* pCont = dynamic_cast<CContainer*>(this);
+        if (pCont)
+        {
+            CResourceQtyArray Resources;
+            Resources.Load(pItemDef->GetResourceName());
+            return pCont->ResourceConsume(&Resources, iQty, true) >= iQty;
+        }
+    }
+    return false;
+}
+
+bool CChar::ConsumeFromPack(CItem* pItem, word iQty)
+{
+    ADDTOCALLSTACK("CChar::ConsumeFromPack");
+
+    if (!pItem || iQty <= 0)
+        return true;
+
+    word iQtyMax = pItem->GetAmount();
+    if (iQty < iQtyMax)
+    {
+        pItem->SetAmountUpdate(iQtyMax - iQty);
+        return true;
+    }
+    else if (iQty == iQtyMax)
+    {
+        pItem->Delete();
+        return true;
+    }
+    else
+    {
+        iQty = iQty - iQtyMax;
+        CItemBase* pItemDef = pItem->Item_GetDef();
+        if (pItemDef)
+        {
+            lpctstr resName = pItemDef->GetResourceName();
+            pItem->Delete();
+            CContainer* pCont = dynamic_cast<CContainer*>(this);
+            if (pCont)
+            {
+                CResourceQtyArray Resources;
+                Resources.Load(resName);
+                if (pCont->ResourceConsume(&Resources, iQty, true))
+                {
+                    pCont->ResourceConsume(&Resources, iQty);
+                    return true;
+                }
+            }
+
+        }
+    }
+    return false;
 }
 
 // returns <SkillTotal>

@@ -212,15 +212,13 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 						{
 							if (IsSetOF(OF_EnableGuildAlignNotoriety))
 							{
-								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD)
+								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD && pMyGuild->GetAlignType() != STONEALIGN_STANDARD) //We have to check if my guild is also not STONEALIGN_STANDART.
 								{
 									if (pViewerGuild->GetAlignType() == pMyGuild->GetAlignType())
 									{
 										return NOTO_GUILD_SAME;
 									}
-										
 									return NOTO_GUILD_WAR;
-
 								}
 							}
 
@@ -552,102 +550,98 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage, CChar* pNP
 
 void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 {
-	ADDTOCALLSTACK("CChar::Noto_Kill");
+    ADDTOCALLSTACK("CChar::Noto_Kill");
+    if (!pKill)
+        return;
 
-	if ( !pKill )
-		return;
+    // What was their noto to me ?
+    NOTO_TYPE NotoThem = pKill->Noto_GetFlag( this, false );
 
-	// What was their noto to me ?
-	NOTO_TYPE NotoThem = pKill->Noto_GetFlag( this, false );
+    // Fight is over now that i have won. (if i was fighting at all )
+    // ie. Magery cast might not be a "fight"
+    Fight_Clear(pKill);
+    if (pKill == this)
+        return;
 
-	// Fight is over now that i have won. (if i was fighting at all )
-	// ie. Magery cast might not be a "fight"
-	Fight_Clear(pKill);
-	if ( pKill == this )
-		return;
-
-	if ( m_pNPC )
-	{
-		if ( pKill->m_pNPC )
-		{
+    if ( m_pNPC )
+    {
+        if (pKill->m_pNPC)
+        {
             if (m_pNPC->m_Brain == NPCBRAIN_GUARD)	// don't create corpse if NPC got killed by a guard
             {
                 pKill->StatFlag_Set(STATF_CONJURED);
                 return;
             }
-		}
-	}
-	else if ( NotoThem < NOTO_GUILD_SAME )
-	{
-		// I'm a murderer !
-		if ( !IsPriv(PRIV_GM) )
-		{
-			CScriptTriggerArgs args;
-			args.m_iN1 = m_pPlayer->m_wMurders + 1LL;
-			args.m_iN2 = true;
-			args.m_iN3 = false;
+        }
+    }
+    else if (NotoThem < NOTO_GUILD_SAME)
+    {
+        // I'm a murderer !
+        if (!IsPriv(PRIV_GM))
+        {
+            CScriptTriggerArgs args;
+            args.m_iN1 = m_pPlayer->m_wMurders + 1LL;
+            args.m_iN2 = true;
+            args.m_iN3 = false;
+            args.m_pO1 = pKill;
 
-			if ( IsTrigUsed(TRIGGER_MURDERMARK) )
-			{
-				OnTrigger(CTRIG_MurderMark, this, &args);
-				if (args.m_iN1 < 0)
-					args.m_iN1 = 0;
-			}
+            if ( IsTrigUsed(TRIGGER_MURDERMARK) )
+            {
+                OnTrigger(CTRIG_MurderMark, this, &args);
+                if (args.m_iN1 < 0)
+                    args.m_iN1 = 0;
+            }
 
-			if ( args.m_iN3 < 1 )
-			{
-				m_pPlayer->m_wMurders = (word)(args.m_iN1);
-				if (args.m_iN2)
-					Noto_Criminal();
+            if (args.m_iN3 < 1)
+            {
+                m_pPlayer->m_wMurders = (word)(args.m_iN1);
+                if (args.m_iN2)
+                    Noto_Criminal();
 
-				Noto_Murder();
-			}
+                Noto_Murder();
+            }
+            NotoSave_Update();
+        }
+    }
 
-			NotoSave_Update();
-		}
-	}
+    // No fame/karma/exp gain on these conditions
+    if (NotoThem == NOTO_GUILD_SAME || pKill->IsStatFlag(STATF_CONJURED))
+        return;
 
-	// No fame/karma/exp gain on these conditions
-	if ( NotoThem == NOTO_GUILD_SAME || pKill->IsStatFlag(STATF_CONJURED) )
-		return;
-
-	int iPrvLevel = Noto_GetLevel();	// store title before fame/karma changes to check if it got changed
-	
+    int iPrvLevel = Noto_GetLevel();	// store title before fame/karma changes to check if it got changed
     Noto_Fame(g_Cfg.Calc_FameKill(pKill) / iTotalKillers, pKill);
     Noto_Karma(g_Cfg.Calc_KarmaKill(pKill, NotoThem) / iTotalKillers, INT32_MIN, false, pKill);
 
-	if ( g_Cfg.m_bExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_COMBAT) )
-	{
-		int change = (pKill->m_exp / 10) / iTotalKillers;
-		if ( change )
-		{
-			if ( m_pPlayer && pKill->m_pPlayer )
-				change = (change * g_Cfg.m_iExperienceKoefPVP) / 100;
-			else
-				change = (change * g_Cfg.m_iExperienceKoefPVM) / 100;
-		}
+    if (g_Cfg.m_fExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_COMBAT))
+    {
+        int change = (pKill->m_exp / 10) / iTotalKillers;
+        if (change)
+        {
+            if (m_pPlayer && pKill->m_pPlayer)
+                change = (change * g_Cfg.m_iExperienceKoefPVP) / 100;
+            else
+                change = (change * g_Cfg.m_iExperienceKoefPVM) / 100;
+        }
 
-		if ( change )
-		{
-			//	bonuses of different experiences
-			if ( (m_exp * 4) < pKill->m_exp )		// 200%		[exp < 1/4 of killed]
-				change *= 2;
-			else if ( (m_exp * 2) < pKill->m_exp )	// 150%		[exp < 1/2 of killed]
-				change = (change * 3) / 2;
-			else if ( m_exp <= pKill->m_exp )		// 100%		[exp <= killed]
-				;
-			else if ( m_exp < (pKill->m_exp * 2) )	//  50%		[exp < 2 * killed]
-				change /= 2;
-			else if ( m_exp < (pKill->m_exp * 3) )	//  25%		[exp < 3 * killed]
-				change /= 4;
-			else									//  10%		[exp >= 3 * killed]
-				change /= 10;
-		}
-
-		ChangeExperience(change, pKill);
-	}
-
-	Noto_ChangeNewMsg(iPrvLevel);	// inform any title changes
+        if (change)
+        {
+            // bonuses of different experiences
+            if ((m_exp * 4) < pKill->m_exp)	// 200%		[exp < 1/4 of killed]
+                change *= 2;
+            else if ((m_exp * 2) < pKill->m_exp)	// 150%		[exp < 1/2 of killed]
+                change = (change * 3) / 2;
+            else if (m_exp <= pKill->m_exp)		// 100%		[exp <= killed]
+                ;
+            else if (m_exp < (pKill->m_exp * 2))	//  50%		[exp < 2 * killed]
+                change /= 2;
+            else if (m_exp < (pKill->m_exp * 3))	//  25%		[exp < 3 * killed]
+                change /= 4;
+            else									//  10%		[exp >= 3 * killed]
+                change /= 10;
+        }
+        ChangeExperience(change, pKill);
+    }
+    Noto_ChangeNewMsg(iPrvLevel);	// inform any title changes
 }
 
 void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )

@@ -558,7 +558,7 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 }
 
 // shrunk or died. (or sleeping)
-void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
+void CChar::DropAll(CItemContainer * pCorpse, uint64 uiAttr)
 {
 	ADDTOCALLSTACK("CChar::DropAll");
 	if ( IsStatFlag( STATF_CONJURED ))
@@ -569,11 +569,11 @@ void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
 	{
 		if ( pCorpse == nullptr )
 		{
-			pPack->ContentsDump( GetTopPoint(), iAttr );
+			pPack->ContentsDump(GetTopPoint(), uiAttr);
 		}
 		else
 		{
-			pPack->ContentsTransfer( pCorpse, true );
+			pPack->ContentsTransfer(pCorpse, true);
 		}
 	}
 
@@ -2230,32 +2230,38 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 // OnEat()
 // Generating eating animation
 // also calling @Eat and setting food's level (along with other possible stats 'local.hits',etc?)
-void CChar::EatAnim( lpctstr pszName, ushort uiQty )
+void CChar::EatAnim(CItem* pItem, ushort uiQty)
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
+    ASSERT(pItem); //Should never happen, but make sure item is valid.
+
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
 	Sound(sm_EatSounds[Calc_GetRandVal(ARRAY_COUNT(sm_EatSounds))]);
 
 	if ( !IsStatFlag(STATF_ONHORSE) )
 		UpdateAnimate(ANIM_EAT);
 
-	tchar * pszMsg = Str_GetTemp();
-	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
-	Emote(pszMsg);
+    EMOTEFLAGS_TYPE eFlag = (IsPlayer() ? EMOTEF_HIDE_EAT_PLAYER : EMOTEF_HIDE_EAT_NPC);
+    if (!IsSetEmoteFlag(eFlag))
+    {
+        tchar* pszMsg = Str_GetTemp();
+        snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pItem->GetName());
+        Emote(pszMsg);
+    }
 
 	ushort uiHits = 0;
 	ushort uiMana = 0;
 	ushort uiStam = (ushort)( Calc_GetRandVal2(3, 6) + (uiQty / 5) );
 	ushort uiFood = uiQty;
 	ushort uiStatsLimit = 0;
-	if ( IsTrigUsed(TRIGGER_EAT) )
+	if (IsTrigUsed(TRIGGER_EAT))
 	{
-		CScriptTriggerArgs Args;
+		CScriptTriggerArgs Args(uiStatsLimit);
 		Args.m_VarsLocal.SetNumNew("Hits", uiHits);
 		Args.m_VarsLocal.SetNumNew("Mana", uiMana);
 		Args.m_VarsLocal.SetNumNew("Stam", uiStam);
 		Args.m_VarsLocal.SetNumNew("Food", uiFood);
-		Args.m_iN1 = uiStatsLimit;
+        Args.m_pO1 = pItem;
 		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
 
@@ -2286,6 +2292,12 @@ bool CChar::Reveal( uint64 iFlags )
         iFlags = STATF_INVISIBLE|STATF_HIDDEN|STATF_SLEEPING;
 	if ( !IsStatFlag(iFlags) )
 		return false;
+
+    if (IsTrigUsed(TRIGGER_REVEAL))
+    {
+        if (OnTrigger(CTRIG_Reveal, this, nullptr) == TRIGRET_RET_TRUE)
+            return false;
+    }
 
     CClient* pClient = IsClientActive() ? GetClientActive() : nullptr;
 	if (pClient && pClient->m_pHouseDesign)
@@ -2984,7 +2996,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		int iPoisonLevel = 0;
 
 		int iDist = GetDist(pCharSrc);
-		if (iDist <= UO_MAP_VIEW_SIZE_MAX)
+		if (iDist <= g_Cfg.m_iMapViewSizeMax)
 		{
 			if (iSkill >= 1000)		//Lethal-Deadly
 				iPoisonLevel = 3 + !bool(Calc_GetRandVal(10));
@@ -3145,7 +3157,8 @@ bool CChar::Death()
 			{
 				CScriptTriggerArgs args(this);
 				args.m_iN1 = GetAttackersCount();
-				if ( pKiller->OnTrigger(CTRIG_Kill, this, &args) == TRIGRET_RET_TRUE )
+                args.m_pO1 = this;
+				if ( pKiller->OnTrigger(CTRIG_Kill, pKiller, &args) == TRIGRET_RET_TRUE )
 					continue;
 			}
 
@@ -3282,7 +3295,7 @@ bool CChar::Death()
 		    // Remove the characters which I can't see as dead from the screen
             if (g_Cfg.m_fDeadCannotSeeLiving)
             {
-                CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIZE_MAX);
+                CWorldSearch AreaChars(GetTopPoint(), g_Cfg.m_iMapViewSizeMax);
                 AreaChars.SetSearchSquare(true);
                 for (;;)
                 {
@@ -3394,14 +3407,14 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
     }
 
 	// ok to go here ? physical blocking objects ?
-	dword dwBlockFlags = 0;
+	uint64 uiBlockFlags = 0;
 	height_t ClimbHeight = 0;
 	CRegion *pArea = nullptr;
 
 	EXC_TRY("CanMoveWalkTo");
 
 	EXC_SET_BLOCK("Check Valid Move");
-	pArea = CheckValidMove(ptDst, &dwBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
+	pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
@@ -3554,8 +3567,8 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		if ( uiStamReq > 0 )
 			UpdateStatVal(STAT_DEX, -uiStamReq);
 
-		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
-		m_zClimbHeight = (dwBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
+		StatFlag_Mod(STATF_INDOORS, (uiBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
+		m_zClimbHeight = (uiBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
 	}
 	EXC_CATCH;
 	return pArea;
@@ -3611,7 +3624,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		}
 
 		// This could get REALLY EXPENSIVE !
-		if ( IsTrigUsed(TRIGGER_STEP) )
+		if ( m_pArea && IsTrigUsed(TRIGGER_STEP) ) //Check if m_pArea is exists because it may be invalid if it try to walk while multi removing?
 		{
 			if ( m_pArea->OnRegionTrigger( this, RTRIG_STEP ) == TRIGRET_RET_TRUE )
 				return TRIGRET_RET_FALSE;
@@ -4040,7 +4053,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 	pt.m_z += PLAYER_HEIGHT;
 	char startZ = pt.m_z;
 
-	dword dwCan = GetCanMoveFlags(GetCanFlags(), true);	// CAN_C_SWIM
+	uint64 uiCan = GetCanMoveFlags(GetCanFlags(), true);	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )
@@ -4053,20 +4066,20 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool fFromS
 				continue;
 			}
 
-			dword dwBlockFlags = dwCan;
+			uint64 uiBlockFlags = uiCan;
 			// Reset Z back to start Z + PLAYER_HEIGHT so we don't climb buildings
 			pt.m_z = startZ;
 			// Set new Z so we don't end up floating or underground
-			pt.m_z = CWorldMap::GetHeightPoint( pt, dwBlockFlags, true );
+			pt.m_z = CWorldMap::GetHeightPoint(pt, uiBlockFlags, true);
 
 			// don't allow characters to pass through walls or other blocked
 			// paths when they're disembarking from a ship
-			if ( fFromShip && (dwBlockFlags & CAN_I_BLOCK) && !(dwCan & CAN_C_PASSWALLS) && (pt.m_z > startZ) )
+			if (fFromShip && (uiBlockFlags & CAN_I_BLOCK) && !(uiCan & CAN_C_PASSWALLS) && (pt.m_z > startZ))
 			{
 				break;
 			}
 
-			if ( ! ( dwBlockFlags &~ dwCan ))
+			if (!(uiBlockFlags &~ uiCan))
 			{
 				// we can go here. (maybe)
 				if ( Spell_Teleport(pt, true, !fFromShip, false) )

@@ -2,6 +2,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
+#include "../game/CServerConfig.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
@@ -26,6 +27,8 @@ CListDefContNum::CListDefContNum( lpctstr ptcKey ) : CListDefContElem( ptcKey ),
 
 lpctstr CListDefContNum::GetValStr() const
 {
+    // Left it commented because seems like CListDefContNum is not using anymore.
+    //return Str_FromLL_Fast(m_iVal, Str_GetTemp(), Str_TempLength(), (g_Cfg.m_fDecimalVariables ? 10 : 16));
     return Str_FromLL_Fast(m_iVal, Str_GetTemp(), Str_TempLength(), 16);
 }
 

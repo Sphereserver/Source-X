@@ -65,8 +65,10 @@ void CClient::resendBuffs() const
 		wStatEffect = pItem->m_itSpell.m_spelllevel;
         int64 iTimerEffectSigned = pItem->GetTimerSAdjusted();
 		wTimerEffect = (word)(maximum(iTimerEffectSigned, 0));
+        SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+        const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 
-		switch ( pItem->m_itSpell.m_spell )
+		switch (spell)
 		{
 			case SPELL_Night_Sight:
 				removeBuff(BI_NIGHTSIGHT);
@@ -134,7 +136,7 @@ void CClient::resendBuffs() const
 			case SPELL_Reactive_Armor:
 			{
 				removeBuff(BI_REACTIVEARMOR);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -153,14 +155,14 @@ void CClient::resendBuffs() const
 			{
 				BUFF_ICONS BuffIcon = BI_PROTECTION;
 				dword BuffCliloc = 1075814;
-				if ( pItem->m_itSpell.m_spell == SPELL_Arch_Prot )
+				if (spell == SPELL_Arch_Prot)
 				{
 					BuffIcon = BI_ARCHPROTECTION;
 					BuffCliloc = 1075816;
 				}
 
 				removeBuff(BuffIcon);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-pItem->m_itSpell.m_PolyStr, NumBuff[0], sizeof(NumBuff[0]), 10);
 					Str_FromI(-pItem->m_itSpell.m_PolyDex / 10, NumBuff[1], sizeof(NumBuff[0]), 10);
@@ -187,7 +189,7 @@ void CClient::resendBuffs() const
 			case SPELL_Magic_Reflect:
 			{
 				removeBuff(BI_MAGICREFLECTION);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -307,7 +309,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fItems )
 	{
 		// Remove any multi objects first ! or client will hang
-		CWorldSearch AreaItems(GetChar()->GetTopPoint(), UO_MAP_VIEW_RADAR);
+		CWorldSearch AreaItems(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
 		AreaItems.SetSearchSquare(true);
 		for (;;)
 		{
@@ -566,6 +568,23 @@ void CClient::addLight() const
 void CClient::addArrowQuest( int x, int y, int id ) const
 {
 	ADDTOCALLSTACK("CClient::addArrowQuest");
+
+    CScriptTriggerArgs args(x, y);
+    if (this->GetNetState()->isClientVersion(MINCLIVER_HS) || this->GetNetState()->isClientEnhanced())
+        args.m_iN3 = id;
+    else
+        args.m_iN3 = 0;
+
+    if (x > 0)
+    {
+        if (IsTrigUsed(TRIGGER_ARROWQUEST_ADD))
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Add, m_pChar, &args);
+    }
+    else
+    {
+        if (IsTrigUsed(TRIGGER_ARROWQUEST_CLOSE))
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Close, m_pChar, &args);
+    }
 
 	new PacketArrowQuest(this, x, y, id);
 }
@@ -1250,9 +1269,12 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
-					if ( pResDef )
-						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
+                    if (pItem->m_itResource.m_ridRes.IsValidResource())
+                    {
+                        CResourceDef* pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
+                        if (pResDef)
+                            len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
+                    }
 				}
 				break;
 
@@ -1429,7 +1451,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	if ( pItemChange != nullptr )
 		pItemChange->Delete();
 
-	if ( g_Cfg.m_bAutoResDisp )
+	if ( g_Cfg.m_fAutoResDisp )
 		m_pAccount->SetAutoResDisp(this);
 
 	ClearTargMode();	// clear death menu mode. etc. ready to walk about. cancel any previous modes
@@ -1911,7 +1933,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
     // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
     //  If ptOld is an invalid point, just send every object i can see.
-	CWorldSearch AreaItems(ptCharThis, UO_MAP_VIEW_RADAR * 2);    // *2 to catch big multis
+	CWorldSearch AreaItems(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
 	AreaItems.SetSearchSquare(true);
 	for (;;)
 	{
@@ -1938,9 +1960,9 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
             /*
             const CPointMap ptMultiCorner = pMulti->GetRegion()->GetRegionCorner(dirFace);
-            if ( ptOld.GetDistSight(ptMultiCorner) > UO_MAP_VIEW_RADAR )
+            if ( ptOld.GetDistSight(ptMultiCorner) > g_Cfg.m_iMapViewRadar )
             {
-                if (ptCharThis.GetDistSight(ptMultiCorner) <= UO_MAP_VIEW_RADAR )
+                if (ptCharThis.GetDistSight(ptMultiCorner) <= g_Cfg.m_iMapViewRadar )
                 {
                     // this just came into view
                     vecMultis.emplace_back(pItem);

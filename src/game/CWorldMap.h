@@ -48,10 +48,10 @@ public:
 	// Height checks
 
 	static void GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
-	static char GetHeightPoint2(const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
+	static char GetHeightPoint2(const CPointMap & pt, uint64 & uiBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
 
 	static void GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck = false );
-	static char GetHeightPoint( const CPointMap & pt, dword & dwBlockFlags, bool fHouseCheck = false );
+	static char GetHeightPoint( const CPointMap & pt, uint64 & uiBlockFlags, bool fHouseCheck = false );
 
 	static void GetFixPoint( const CPointMap & pt, CServerMapBlockState & block);
 

@@ -808,7 +808,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Curse:
 		case SPELL_Mass_Curse:
 		{
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
+			if (m_pPlayer && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -855,7 +855,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			UpdateStatVal( STAT_INT, +uiStatEffect );
 			return;
 		case SPELL_Reactive_Armor:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -874,7 +874,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Clear(STATF_REFLECTION);
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -891,27 +891,29 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Stoneskin:		// 115 // turns your skin into stone, giving a boost to your AR.
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-			{
-				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
-				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
-                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+        {
+            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
+            {
+                CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+                CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, +pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_FASTERCASTING, +2, pBaseCCPChar);
                 _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
-				Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
-			}
-			else
-			{
-				m_defense = (word)CalcArmorDefense();
-			}
-			if (pClient)
-			{
-				if (spell == SPELL_Protection)
-					pClient->removeBuff(BI_PROTECTION);
-				else if (spell == SPELL_Arch_Prot)
-					pClient->removeBuff(BI_ARCHPROTECTION);
-			}
-			return;
+                Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
+            }
+            else
+            {
+                m_defense = (word)CalcArmorDefense();
+            }
+            if (pClient)
+            {
+                if (spell == SPELL_Protection)
+                    pClient->removeBuff(BI_PROTECTION);
+                else if (spell == SPELL_Arch_Prot)
+                    pClient->removeBuff(BI_ARCHPROTECTION);
+            }
+            return;
+        }
 		/*case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 			return;*/
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
@@ -1366,7 +1368,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	switch ( spell )
 	{
 		case SPELL_Reactive_Armor:
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
                 wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1389,7 +1391,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_REACTIVEARMOR);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1475,7 +1477,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
                     wStatEffectRef = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 				}
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )		// Curse also decrease max resistances on players
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE) && m_pPlayer)		// Curse also decrease max resistances on players
 				{
 					CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 					CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1502,7 +1504,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
 						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
-					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 					{
 						for ( int idx = 3; idx < 7; ++idx )
 							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
@@ -1603,7 +1605,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Set( STATF_REFLECTION );
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
                 wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1618,7 +1620,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_MAGICREFLECTION);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1639,7 +1641,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				int iPhysicalResist = 0;
 				int iMagicResist = 0;
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
 					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
@@ -1680,7 +1682,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					}
 
 					pClient->removeBuff(BuffIcon);
-					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 					{
 						Str_FromI(-iPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
 						Str_FromI(-iMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);
@@ -2162,9 +2164,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					ptg.m_y += (short)(iy);
 				}
 
-				dword dwBlockFlags = 0;
-				CWorldMap::GetHeightPoint2(ptg, dwBlockFlags, true);
-				if ( dwBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
+				uint64 uiBlockFlags = 0;
+				CWorldMap::GetHeightPoint2(ptg, uiBlockFlags, true);
+				if (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR))
 				{
 					if (ix < 0)	// field cannot extend fully to the left
 						minX = ix + 1;
@@ -2262,6 +2264,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetAttr(ATTR_MAGIC);
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
+
+            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY)) // If the spell has ASYNC flag, the timers should be randomized.
+                iDuration += Calc_GetRandLLVal(iDuration / 2);
+
 			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_TENTH, true);
 		}
 	}
@@ -2584,11 +2590,11 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	{
 		if (IsSetMagicFlags(MAGICF_SUMMONWALKCHECK))	// check if the target location is valid
 		{
-			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
-			dword dwBlockFlags = 0;
-			CWorldMap::GetHeightPoint2(ptTarg, dwBlockFlags, true);
+			const uint64 uiCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
+			uint64 uiBlockFlags = 0;
+			CWorldMap::GetHeightPoint2(ptTarg, uiBlockFlags, true);
 
-			if (dwBlockFlags & ~dwCan)
+			if (uiBlockFlags & ~uiCan)
 			{
 				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
 				pChar->Delete();

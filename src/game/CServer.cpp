@@ -1717,14 +1717,47 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_LOG:
 			{
 				lpctstr	pszArgs = s.GetArgStr();
-				int	 mask = LOGL_EVENT;
-				if ( pszArgs && ( *pszArgs == '@' ))
-				{
-					++pszArgs;
-					if ( *pszArgs != '@' )
-						mask |= LOGM_NOCONTEXT;
-				}
-				g_Log.Event(mask, "%s\n", pszArgs);
+                dword Args[] = { (dword)CTCOL_DEFAULT, (dword)LOGL_EVENT, (dword)0 };
+                dword mask = Args[1];
+                if (*pszArgs == '@')
+                {
+                    ++pszArgs;
+                    if (*pszArgs == '@') // @@ = just a @ symbol
+                        goto log_cont;
+
+                    const char* c = pszArgs;
+                    pszArgs = strchr(c, ' ');
+
+                    if (!pszArgs)
+                        return false;
+
+                    for (int i = 0; (c < pszArgs) && (i < 3); )
+                    {
+                        if (*c == ',') // default value, skip it
+                        {
+                            ++i;
+                            ++c;
+                            continue;
+                        }
+                        Args[i] = (Exp_GetDWVal(c));
+                        ++i;
+
+                        if (*c == ',')
+                            ++c;
+                        else
+                            break;	// no more args here!
+                    }
+                    ++pszArgs;
+                    if (Args[0] > (dword)CTCOL_QTY || Args[0] < (dword)0)
+                        Args[0] = (dword)CTCOL_DEFAULT;
+                    if (Args[1] > (dword)LOGL_QTY || Args[1] < (dword)1)
+                        Args[1] = (dword)LOGL_EVENT;
+                    if (Args[2] > (dword)LOGM_QTY)
+                        Args[2] = (dword)0;
+                    mask = Args[1] | Args[2];
+                }
+log_cont:
+                g_Log.EventCustom((ConsoleTextColor)Args[0], mask, "%s\n", pszArgs);
 			}
 			break;
 
@@ -2268,7 +2301,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 
 #ifdef _NIGHTLYBUILD
 	g_Log.Event(LOGL_WARN|LOGF_LOGFILE_ONLY, pszNightlyMsg);
-	if (!g_Cfg.m_bAgree)
+	if (!g_Cfg.m_fAgree)
 	{
 		g_Log.Event(LOGL_ERROR,"Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the risks of using nightly builds.\n");
 		return false;
@@ -2280,7 +2313,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 		g_Log.Event(LOGM_INIT, wSockInfo);
 #endif
 
-	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
+	if (g_Cfg.m_fMySql && g_Cfg.m_fMySqlTicks)
 	{
 		EXC_SET_BLOCK( "Connecting to MySQL server" );
 		if (_hDb.Connect())

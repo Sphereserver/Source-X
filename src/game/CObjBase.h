@@ -54,7 +54,7 @@ public:
 
     CVarDefMap m_TagDefs;		// attach extra tags here.
     CVarDefMap m_BaseDefs;		// New Variable storage system
-    dword	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
+    uint64	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
 
     word	m_attackBase;       // dam for weapons
     word	m_attackRange;      // variable range of attack damage.
@@ -115,12 +115,12 @@ public:
 	*/
     CBaseBaseDef* Base_GetDef() const noexcept;
 
-	inline dword GetCanFlagsBase() const noexcept
+	inline uint64 GetCanFlagsBase() const noexcept
 	{
 		return Base_GetDef()->m_Can;
 	}
 
-    inline dword GetCanFlags() const noexcept
+    inline uint64 GetCanFlags() const noexcept
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
@@ -129,14 +129,14 @@ public:
 		return (GetCanFlagsBase() ^ m_CanMask);
 	}	
 
-	bool Can(dword dwCan) const noexcept
+	bool Can(uint64 uiCan) const noexcept
 	{
-        return (GetCanFlags() & dwCan);
+        return (GetCanFlags() & uiCan);
 	}
 
-    inline bool Can(dword dwCan, dword dwObjCanFlags) const noexcept
+    inline bool Can(uint64 uiCan, uint64 uiObjCanFlags) const noexcept
     {
-        return (dwObjCanFlags & dwCan);
+        return (uiObjCanFlags & uiCan);
     }
 
     bool IsRunningTrigger() const;
@@ -1015,8 +1015,8 @@ enum STONEALIGN_TYPE // Types of Guild/Town stones
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-    ITRIG_ADDREDCANDLE = 1,
-    ITRIG_ADDOBJ,				// For t_spawn when obj is add to list
+    ITRIG_ADDOBJ = 1,				// For t_spawn when obj is add to list
+    ITRIG_ADDREDCANDLE,
     ITRIG_ADDWHITECANDLE,
 	ITRIG_AfterClick,
 	ITRIG_Buy,
@@ -1024,12 +1024,15 @@ enum ITRIG_TYPE
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item
 	ITRIG_CLIENTTOOLTIP_AFTERDEFAULT,
+    ITRIG_COMPLETE,
 	ITRIG_ContextMenuRequest,   // A context menu was requested over me.
 	ITRIG_ContextMenuSelect,    // A context menu option was selected, perform actions.
 	ITRIG_Create,               // Item is being created.
 	ITRIG_DAMAGE,               // I have been damaged in some way.
 	ITRIG_DCLICK,               // I have been dclicked.
     ITRIG_DELOBJ,				// For t_spawn when obj is remove from list
+    ITRIG_DELREDCANDLE,
+    ITRIG_DELWHITECANDLE,
 	ITRIG_DESTROY,              //+I am nearly destroyed.
 	ITRIG_DROPON_CHAR,          // I have been dropped on this char.
 	ITRIG_DROPON_GROUND,        // I have been dropped on the ground here.
@@ -1039,6 +1042,9 @@ enum ITRIG_TYPE
 	ITRIG_DYE,
 	ITRIG_EQUIP,                // I have been equipped.
 	ITRIG_EQUIPTEST,            // I'm not yet equiped, but checking if I can.
+    ITRIG_GetHit,               // Triggers when this clothing part get hit from characters.
+    ITRIG_Hit,                  // Triggers when this item used to make a damage on characters.
+    ITRIG_LEVEL,
 	ITRIG_MemoryEquip,          // I'm a memory and I'm being equiped.
 	ITRIG_PICKUP_GROUND,        // I'm being picked up from ground.
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
@@ -1048,6 +1054,8 @@ enum ITRIG_TYPE
     ITRIG_Redeed,               // Redeeding a multi.
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
+    ITRIG_ResourceGather,
+    ITRIG_ResourceTest,
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Move,            // I'm a ship and i'm move around.
     ITRIG_Ship_Stop,            // I'm a ship and i'm stop around.
@@ -1057,6 +1065,7 @@ enum ITRIG_TYPE
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
     ITRIG_Start,                // Start trigger, right now used only on Champions.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
+    ITRIG_STOP,
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.
 	ITRIG_TARGON_CHAR,          // I'm targeting a char.
 	ITRIG_TARGON_GROUND,        // I'm targeting the ground.
@@ -1081,7 +1090,10 @@ enum CTRIG_TYPE : short
 {
 	CTRIG_AAAUNUSED		= 0,
     CTRIG_AddMulti,         // Adds the given multi to the CMultiStorage of this char (player).
+    CTRIG_AfkMode,          // Switch AFK mode by using .AFK command.
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.
+    CTRIG_ArrowQuest_Add,
+    CTRIG_ArrowQuest_Close,
 	CTRIG_Attack,           // I am attacking someone (SRC).
 	CTRIG_CallGuards,       // I'm calling guards.
     // Here starts @charXXX section
@@ -1113,7 +1125,8 @@ enum CTRIG_TYPE : short
     CTRIG_DelMulti,         // Delete the given multi to the CMultiStorage of this char (player).
 	CTRIG_Destroy,          // I am nearly destroyed.
 	CTRIG_Dismount,         // I'm dismounting.
-	CTRIG_DYE,
+    CTRIG_Drink,            // I'm drinking something.
+    CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
@@ -1221,6 +1234,7 @@ enum CTRIG_TYPE : short
 
 	CTRIG_Rename,       // Changing my name or pets one.
 	CTRIG_Resurrect,    // I'm going to resurrect via function or spell.
+    CTRIG_Reveal,       // Character is revealing.
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.

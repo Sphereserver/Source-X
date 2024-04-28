@@ -160,7 +160,7 @@ enum MAGICFLAGS_TYPE
     MAGICF_OVERRIDEFIELDS       = 0x0001000,    // Prevent cast multiple field spells on the same tile, making the new field tile remove the previous field
     MAGICF_CASTPARALYZED        = 0x0002000,    // Can cast even if paralyzed
     MAGICF_NOREFLECTOWN         = 0x0004000,    // Do not reflect the own spells if the spell reflected from the target.
-    MAGICF_DELREFLECTOWN        = 0x0008000     // Remove reflection instead of damaging himself when NOREFLECTOWN active if the spell reflected from another target.
+    MAGICF_DELREFLECTOWN        = 0x0008000,    // Remove reflection instead of damaging himself when NOREFLECTOWN active if the spell reflected from another target.
 };
 
 enum REVEALFLAGS_TYPE
@@ -181,7 +181,9 @@ enum EMOTEFLAGS_TYPE
 {
     EMOTEF_ATTACKER              = 0x01,        // Only show %s is attacking %s! emote to attacked character.
     EMOTEF_POISON                = 0x02,        // Only show poison emote to affected character.
-    EMOTEF_DESTROY               = 0x04         // Only show item destroy emote to the owner of the item.
+    EMOTEF_DESTROY               = 0x04,        // Only show item destroy emote to the owner of the item.
+    EMOTEF_HIDE_EAT_PLAYER       = 0x08,        // Do not show emote while players eating.
+    EMOTEF_HIDE_EAT_NPC          = 0x010        // Do not show emote while npcs eating.
 };
 
 enum TOOLTIPMODE_TYPE
@@ -324,6 +326,7 @@ public:
 	bool m_fFlipDroppedItems;		// Flip dropped items.
 	int  m_iItemsMaxAmount;			// Max amount allowed for stackable items.
 	bool m_fCanUndressPets;			// Can players undress their pets?
+    bool m_fCanPetsDrinkPotion;     // Can pets drink potion when their owner dropped potion on it.
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
     uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
@@ -412,6 +415,10 @@ public:
 	int m_iDistanceTalk;        // Max distance at which Talking can be readed.
     int m_iNPCDistanceHear;     // Max distance at which NPCs can hear.
 
+    byte m_iMapViewSize;        // Visibility for normal items (on old clients it's always 18)
+    byte m_iMapViewSizeMax;     // Max visibility for normal items, default 24.
+    byte m_iMapViewRadar;       // Visibility for castles, keeps and boats, default 31.
+
 	CSString	m_sSpeechSelf;  // [SPEECH ] associated to players.
 	CSString	m_sSpeechPet;   // [SPEECH ] associated to pets.
 	CSString	m_sSpeechOther; // unused?
@@ -489,7 +496,7 @@ public:
 	uint m_iNpcAi;      // NPCAI Flags.
 
 	//	Experience system
-	bool m_bExperienceSystem;   // Enables the experience system.
+	bool m_fExperienceSystem;   // Enables the experience system.
 #define EXP_MODE_RAISE_COMBAT   0x0001  // Gain experience in combat.
 #define	EXP_MODE_RAISE_CRAFT    0x0002  // Gain experience in crafts.
 #define	EXP_MODE_ALLOW_DOWN     0x0004  // Allow experience to go down.
@@ -498,13 +505,13 @@ public:
 	int  m_iExperienceMode;     // Experience system settings:
 	int  m_iExperienceKoefPVM;  // If combat experience gain is allowed, use these percents for gaining exp in Player versus Monster. 0 Disables the gain.
 	int  m_iExperienceKoefPVP;  // If combat experience gain is allowed, use these percents for gaining exp in Player versus Player. 0 Disables the gain.
-	bool m_bLevelSystem;        // Enable levels system (as a part of experience system).
+	bool m_fLevelSystem;        // Enable levels system (as a part of experience system).
 #define LEVEL_MODE_LINEAR   0   // (each NextLevelAt exp will give a level up).
 #define	LEVEL_MODE_DOUBLE   1   // (you need (NextLevelAt * (level+1)) to get a level up).
 	int  m_iLevelMode;          // Level system settings
 	uint m_iLevelNextAt;        // Amount of experience to raise to the next level.
 
-	bool m_bAutoResDisp;        // Set account RESDISP automatically based on player client version.
+	bool m_fAutoResDisp;        // Set account RESDISP automatically based on player client version.
 	int  m_iAutoPrivFlags;      // Default setting for new accounts specifying default priv level.
 
 	RESDISPLAY_VERSION _iEraLimitGear;	// Don't allow to create gear newer than the given era (softcoded).
@@ -543,8 +550,8 @@ public:
     int			m_iChatFlags;
 
 	//	MySQL features
-	bool    m_bMySql;       // Enables MySQL.
-	bool    m_bMySqlTicks;  // Enables ticks from MySQL.
+	bool    m_fMySql;       // Enables MySQL.
+	bool    m_fMySqlTicks;  // Enables ticks from MySQL.
 	CSString m_sMySqlHost;  // MySQL Host.
 	CSString m_sMySqlUser;  // MySQL User.
 	CSString m_sMySqlPass;  // MySQL Password.
@@ -572,18 +579,19 @@ public:
     int64   _iItemHitpointsUpdate;  // Update period for CCItemDamageable (in seconds in the ini, then converted to msecs).
 	int64   _iTimerCall;            // Amount of time (converted to milliseconds internally) to call f_onserver_timer (0 disables this, default).
     bool    _iTimerCallUnit;        // TRUE mean TimerCall is in second and FALSE mean it's in minute
-	bool    m_bAllowLightOverride;  // Allow manual sector light override?
+	bool    m_fAllowLightOverride;  // Allow manual sector light override?
 	CSString m_sZeroPoint;          // Zero point for sextant coordinates counting. Comment this line out if you are not using ML-sized maps.
 	bool    m_fAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.
 
-	bool    m_bAllowNewbTransfer;   // Set to 1 for items to keep their attr_newbie flag when item is transfered to an NPC.
+	bool    m_fAllowNewbTransfer;   // Set to 1 for items to keep their attr_newbie flag when item is transfered to an NPC.
 
 	bool    m_NPCNoFameTitle;       // NPC will not be addressed as "Lord" or such if this is set.
 
-	bool    m_bAgree;               // AGREE=n for nightly builds.
+	bool    m_fAgree;               // AGREE=n for nightly builds.
 	int     m_iMaxPolyStats;        // Max amount of each Stat gained through Polymorph spell. This affects separatelly to each stat.
 
     bool    m_NPCShoveNPC;           //NPC can walk through other NPC, by default this is disabled.
+    bool    m_fDecimalVariables;     //Variables like TAGs, LOCALs returns as decimal (10 base) instead of Hex.
 	// End INI file options.
 
 	CResourceScript m_scpIni;       // Keep this around so we can link to it.
@@ -1107,8 +1115,9 @@ typedef std::map<dword,dword> KRGumpsMap;
 
 #define IsSetEF(ef)				((g_Cfg._uiExperimentalFlags & ef) != 0)
 #define IsSetOF(of)				((g_Cfg._uiOptionFlags & of) != 0)
-#define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
-#define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
+#define IsSetCombatFlags(cf)	((g_Cfg.m_iCombatFlags & cf) != 0)
+#define IsSetMagicFlags(mf)		((g_Cfg.m_iMagicFlags & mf) != 0)
+#define IsSetEmoteFlag(ef)      ((g_Cfg.m_iEmoteFlags & ef) != 0)
 
 
 #endif	// _INC_CSERVERCONFIG_H

@@ -70,7 +70,7 @@ void CCItemDamageable::OnTickStatsUpdate()
         _iTimeLastUpdate = iCurtime;
 
         CItem *pItem = static_cast<CItem*>(GetLink());
-        CWorldSearch AreaChars(pItem->GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
+        CWorldSearch AreaChars(pItem->GetTopPoint(), g_Cfg.m_iMapViewSize);
         AreaChars.SetSearchSquare(true);
         CChar *pChar = nullptr;
         for (;;)

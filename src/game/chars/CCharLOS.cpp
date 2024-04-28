@@ -36,7 +36,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 	while ( --iDist >= 0 )
 	{
 		const DIR_TYPE dir = ptSrc.GetDir(ptDst);
-		dword dwBlockFlags;
+		uint64 uiBlockFlags;
 		if ( dir % 2 && !IsSetEF(EF_NoDiagonalCheckLOS) )	// test only diagonal dirs
 		{
 			CPointMap ptTest(ptSrc);
@@ -46,22 +46,22 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 				dirTest2 = DIR_N;
 
 			ptTest.Move(dirTest1);
-			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			char z = CWorldMap::GetHeightPoint2(ptTest, dwBlockFlags, true);
+			uiBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
+			char z = CWorldMap::GetHeightPoint2(ptTest, uiBlockFlags, true);
 			short zDiff = (short)(abs(z - ptTest.m_z));
 
-			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
+			if ( (zDiff > PLAYER_HEIGHT) || (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
 			{
 				ptTest = ptSrc;
 				ptTest.Move(dirTest2);
 				{
-					dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-					z = CWorldMap::GetHeightPoint2(ptTest, dwBlockFlags, true);
+					uiBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
+					z = CWorldMap::GetHeightPoint2(ptTest, uiBlockFlags, true);
 					zDiff = (short)(abs(z - ptTest.m_z));
 					if ( zDiff > PLAYER_HEIGHT )
 						goto blocked;
 
-					if ( dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR) )
+					if (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR))
 					{
 						ptSrc = ptTest;
 						goto blocked;
@@ -74,11 +74,11 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		if ( iDist )
 		{
 			ptSrc.Move(dir);	// NOTE: The dir is very coarse and can change slightly.
-			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			char z = CWorldMap::GetHeightPoint2(ptSrc, dwBlockFlags, true);
+			uiBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
+			char z = CWorldMap::GetHeightPoint2(ptSrc, uiBlockFlags, true);
             short zDiff = (short)(abs(z - ptSrc.m_z));
 
-			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
+			if ( (zDiff > PLAYER_HEIGHT) || (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
 				goto blocked;
 
 			ptSrc.m_z = z;
