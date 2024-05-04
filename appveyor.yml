@@ -20,7 +20,7 @@ version: 1.1.0.{build}
 
 # Set up two building environments (two first class elements in the build matrix)
 image:
-  - Visual Studio 2017
+  - Visual Studio 2022
   - Ubuntu2004
   - macos-monterey
 
@@ -47,8 +47,8 @@ for:
 
     environment:
       MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
-      CMAKE_GEN_32: Visual Studio 15 2017 
-      CMAKE_GEN_64: Visual Studio 15 2017 Win64
+      CMAKE_GEN_32: Visual Studio 17 2022
+      CMAKE_GEN_64: Visual Studio 17 2022 Win64
 
     install:
       # Report our building tools
@@ -56,7 +56,7 @@ for:
       - cmake --version
 
     # Use our custom script instead of automatic MSBuild
-    build_script:    
+    build_script:
       - mkdir %BUILD_DIR_32% %BUILD_DIR_64%
       - cd "%BUILD_DIR_64%"
 
@@ -87,9 +87,9 @@ for:
 
       - ECHO ** Compilation done. Packing the files and uploading to SphereCommunity
       - mkdir accounts logs save scripts
-      - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin-x86_64\Nightly\SphereSvrX64_nightly.exe" 
+      - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin-x86_64\Nightly\SphereSvrX64_nightly.exe"
           "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86_64\mariadb\libmariadb.dll"
-      - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin-x86\Nightly\SphereSvrX32_nightly.exe" 
+      - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin-x86\Nightly\SphereSvrX32_nightly.exe"
           "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\lib\bin\x86\mariadb\libmariadb.dll"
       - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win32-nightly.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
 
@@ -113,7 +113,7 @@ for:
 
       - echo && echo "** Setting up GCC compiler" && echo
       - sudo add-apt-repository universe && sudo apt-get -qq update
-      - sudo apt install -yq --no-install-recommends curl linux-libc-dev:i386 gcc-9 gcc-9-multilib g++-9 g++-9-multilib > /dev/null
+      - sudo apt install -yq --no-install-recommends curl linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
       #- export CC="gcc-9" && export CXX="g++-9"
       #- sudo apt install -yqq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
       #- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
@@ -174,7 +174,7 @@ for:
     artifacts:
       - path: SphereSvrX-linux64-nightly.tar.gz
       - path: SphereSvrX-linux32-nightly.tar.gz
-      
+
 
   - # OSX build
     matrix:
@@ -184,7 +184,7 @@ for:
     environment:
       CMAKE_GEN: Ninja
       CMAKE_TCH_64: cmake/toolchains/OSX-AppleClang-x86_64.cmake
-    
+
     install:
       - sw_vers
       - echo && echo "** Setting up compiler" && echo
@@ -208,7 +208,7 @@ for:
         if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER}" ]; then
           exit 0
         fi
-      - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo      
+      - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo
       - mkdir accounts logs save scripts
       - zip -r SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/
       - zip -r SphereSvrX-osx-x86_64-nightly.zip src/sphere.ini src/sphereCrypt.ini "${BUILD_DIR_64}/bin-x86_64/*"
@@ -216,4 +216,3 @@ for:
 
     artifacts:
       - path: SphereSvrX-osx-x86_64-nightly.zip
-      

@@ -1,4 +1,4 @@
-SET (TOOLCHAIN 1)
+SET (TOOLCHAIN_LOADED 1)
 
 function (toolchain_force_compiler)
 	# Already managed by the generator.
@@ -57,7 +57,7 @@ function (toolchain_after_project)
 	 #						# Disable warnings caused by external c libraries.
 	 # For zlib: C4244, C4245
 
-	SET (CXX_FLAGS_COMMON	"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++17\
+	SET (CXX_FLAGS_COMMON	"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++20\
 							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812")
 
 	# /Zc:__cplusplus is required to make __cplusplus accurate
@@ -82,7 +82,7 @@ function (toolchain_after_project)
 
 
 	#-- Release compiler and linker flags.
-	
+
 	SET (CMAKE_C_FLAGS_RELEASE			"${C_FLAGS_COMMON}   /O2 /EHsc /GL /GA /Gw"			PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /O2 /EHsc /GL /GA /Gw /Gy"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_NODEBUG} ${EXE_LINKER_EXTRA}\
@@ -109,7 +109,7 @@ function (toolchain_after_project)
 	ELSE (CMAKE_CL_64)
 		LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
 	ENDIF (CMAKE_CL_64)
-	
+
 endfunction()
 
 
@@ -141,7 +141,7 @@ function (toolchain_exe_stuff)
 	  # Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 	  #  on a running environment. Also it makes sphere more stable since exceptions are local.
 		_EXCEPTIONS_DEBUG
-	  
+
 	  # Removing WINSOCK warnings until the code gets updated or reviewed.
 		_WINSOCK_DEPRECATED_NO_WARNINGS
 

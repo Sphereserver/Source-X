@@ -1,3 +1,5 @@
+SET (TOOLCHAIN_LOADED 1)
+
 function (toolchain_force_compiler)
 	SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
 	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
@@ -51,12 +53,43 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	#SET (C_ARCH_OPTS	) # set in parent toolchain
 	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
+	SET (CXX_OPTS		"-std=c++20 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
 	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+
+
+	#-- Find libraries to be linked to.
+
+	MESSAGE(STATUS "Locating libraries to be linked to...")
+
+	SET (LIBS_LINK_LIST
+		mariadb
+		dl
+	)
+	FOREACH (LIB_NAME ${LIBS_LINK_LIST})
+		IF (${ARCH_BITS} EQUAL 64)
+			FIND_LIBRARY(
+				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
+				HINT
+				"/usr/lib64/"
+				"/usr/lib64/mysql"
+				"/usr/lib/x86_64-linux-gnu/mysql"
+				"/usr/lib/mysql"
+			)
+		ELSE ()
+			FIND_LIBRARY(
+				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
+				HINT
+				"/usr/lib32"
+				"/usr/lib32/mysql"
+				"/usr/lib/i386-linux-gnu/mysql"
+				"/usr/lib/mysql"
+			)
+		ENDIF ()
+	ENDFOREACH ()
 
 
 	#-- Setting common linker flags
@@ -99,13 +132,13 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	 # Linking Unix libs.
 	 # same here, do not use " " to delimitate these flags!
 	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	mariadb dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mariadb dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_debug)
 
 
@@ -132,7 +165,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
 	ENDIF (TARGET spheresvr_debug)
 
-	
+
 	#-- Set different output folders for each build type
 	# (When we'll have support for multi-target builds...)
 	#SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)

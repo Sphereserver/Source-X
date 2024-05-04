@@ -1572,7 +1572,7 @@ void CChar::SetID( CREID_TYPE id )
 	if ( pCharDef == nullptr )
 	{
 		if ( (id != (CREID_TYPE)-1) && (id != CREID_INVALID) )
-			DEBUG_ERR(("Create Invalid Char 0%x\n", id));
+			DEBUG_ERR(("Setting invalid char ID 0%x\n", id));
 
 		id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
 		if ( id < CREID_INVALID )
@@ -1580,10 +1580,10 @@ void CChar::SetID( CREID_TYPE id )
 
 		pCharDef = CCharBase::FindCharBase(id);
 	}
-    
+
     //Update DispId
     m_dwDispIndex = id;
-    
+
 	ASSERT(pCharDef != nullptr);
 
 	CCharBase* pCharOldDef = Char_GetDef();

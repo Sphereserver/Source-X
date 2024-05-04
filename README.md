@@ -21,12 +21,12 @@ Join SphereServer Discord channel!
 **SphereServer:**
 
 + <a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
-+ <a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>  
++ <a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
 **ScriptPack:**
 The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
-of the new ones.  
-It is currently being revamped to add original OSI features.  
-Beware, it's still not 100% complete!  
+of the new ones.
+It is currently being revamped to add original OSI features.
+Beware, it's still not 100% complete!
 + <a href="https://github.com/Sphereserver/Scripts-X">Up to date</a>
 + <a href="https://github.com/Sphereserver/Scripts-X/releases">Official releases</a>
 
@@ -42,8 +42,8 @@ Beware, it's still not 100% complete!
 
 ## Why a fork?
 
-This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.  
-Though, something has changed script-wise, so we suggest to take a look <a href="docs/Porting%20from%200.56%20to%20X.txt">here</a>.  
+This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.
+Though, something has changed script-wise, so we suggest to take a look <a href="docs/Porting%20from%200.56%20to%20X.txt">here</a>.
 Most notable changes (right now) are:
 
 + Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
@@ -70,7 +70,7 @@ See <https://mariadb.com/docs/skysql/connect/clients/mariadb-client/>
 
 #### Ubuntu and Debian repositories
 
-Ubuntu: Enable "universe" repository: `sudo add-apt-repository universe`  
+Ubuntu: Enable "universe" repository: `sudo add-apt-repository universe`
 Install MariaDB client: `sudo apt-get install mariadb-client` or `sudo apt-get install libmariadb3` (depends on the OS version)
 
 #### CentOS - Red Hat Enterprise Linux - Fedora repositories
@@ -85,7 +85,7 @@ Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-con
 
 ### Generating the project files
 
-The compilation of the code is possible only using recent compilers, since C++17 features are used: latest version of Visual Studio (the oldest one supported is 2015 Update 3), GCC 7.1 and later (even if GCC 6 can work, 7 is reccomended), MinGW distributions using GCC 7.1 and later (like nuwen's), Clang version 6 or greater.<br>
+The compilation of the code is possible only using recent compilers, since C++20 features are used: newer is better. Oldest compiler versions supporting C++20: Visual Studio 2019 version 16.11, GCC 8, MinGW distributions using GCC 8, Clang version 10.<br>
 You need to build Makefiles or Ninja files (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and MinGW).<br>
 Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
@@ -117,7 +117,7 @@ Example to build makefiles on Linux for a 64 bits Nightly version, inside the "b
 
 ```bash
 mkdir build
-cmake -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -B ./build -S ./
+cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -B ./build -S ./
 ```
 
 ### Compiling

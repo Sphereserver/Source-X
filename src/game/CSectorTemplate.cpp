@@ -328,7 +328,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 	ADDTOCALLSTACK("CSectorBase::LinkRegion");
 	// link in a region. may have just moved !
 	// Make sure the smaller regions are first in the array !
-	// Later added regions from the MAP file should be the smaller ones, 
+	// Later added regions from the MAP file should be the smaller ones,
 	//  according to the old rules.
 	ASSERT(pRegionNew);
 	ASSERT( pRegionNew->IsOverlapped(GetRect()) );
@@ -416,12 +416,12 @@ CPointMap CSectorBase::GetBasePoint() const
 	// What is the coord base of this sector. upper left point.
 	const CSectorList* pSectors = CSectorList::Get();
 #if _DEBUG
-	ASSERT( m_index >= 0 && m_index < pSectors->GetSectorQty(m_map) );
+	ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
 	// Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
 #endif
     const int iCols = pSectors->GetSectorCols(m_map);
     const int iSize = pSectors->GetSectorSize(m_map);
-	
+
 	const int iQuot = (m_index % iCols), iRem = (m_index / iCols); // Help the compiler to optimize the division
 	return // Initializer list for CPointMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
 	{

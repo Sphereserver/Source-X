@@ -1,3 +1,5 @@
+SET (TOOLCHAIN_LOADED 1)
+
 SET (CLANG_USE_GCC_LINKER	false CACHE BOOL "NOT CURRENTLY WORKING. By default, Clang requires MSVC (Microsoft's) linker. With this flag, it can be asked to use MinGW-GCC's one.")
 
 
@@ -26,7 +28,7 @@ function (toolchain_exe_stuff_common)
 		SET (CLANG_SUBSYSTEM_PREFIX "--entry=WinMainCRTStartup -m")	# --entry might not work
 	ELSE ()
 		SET (CLANG_SUBSYSTEM_PREFIX "-Xlinker /ENTRY:WinMainCRTStartup -Xlinker /subsystem:")
-	ENDIF()	
+	ENDIF()
 	IF (${WIN32_SPAWN_CONSOLE})
 		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA "${CMAKE_EXE_LINKER_FLAGS_EXTRA} ${CLANG_SUBSYSTEM_PREFIX}console")
 		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
@@ -83,7 +85,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	#SET (C_ARCH_OPTS	) # set in parent toolchain
 	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS		"-std=c11   -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS	"-std=c++17 -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
+	SET (CXX_OPTS	"-std=c++20 -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing;
 	 # -pthread unused here? we only need to specify that to the linker?
 	SET (C_SPECIAL		"-pipe")
@@ -104,7 +106,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	IF (CLANG_USE_GCC_LINKER)
 		SET (CMAKE_EXE_LINKER_FLAGS_COMMON	"${CMAKE_EXE_LINKER_FLAGS_COMMON} -pthread -dynamic -static-libstdc++ -static-libgcc")
 	ENDIF ()
-	
+
 
 
 	#-- Adding compiler flags per build.
@@ -138,7 +140,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	SET (LIBS_PREFIX			$<$<NOT:$<BOOL:${CLANG_USE_GCC_LINKER}>>:lib>)
 	SET (LIBS_TO_LINK_AGAINST 	ws2_32 ${LIBS_PREFIX}mariadb)
 
-	
+
 	IF (TARGET spheresvr_release)
 		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIBS_TO_LINK_AGAINST})
 		TARGET_LINK_OPTIONS ( spheresvr_release		PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")

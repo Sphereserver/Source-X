@@ -2624,7 +2624,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 			else
 			{
 				word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-				if ( (pChar->IsOwnedBy(m_pChar, false)) && ((pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK)) || (m_pChar->IsPriv(PRIV_GM)))
+				if (( pChar->IsOwnedBy(m_pChar, false) && ((pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK)) ) || m_pChar->IsPriv(PRIV_GM))
 				{
 					CREID_TYPE id = pChar->GetID();
 
@@ -2675,7 +2675,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				else
 					m_pPopupPacket->addOption(POPUP_TRADE_REFUSE, 1154113, POPUPFLAG_COLOR, 0xFFFF);
 			}
-			
+
 			if (GetNetState()->isClientVersion(MINCLIVER_GLOBALCHAT) && (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT))
 			{
 				if (pChar->m_pPlayer->m_fRefuseGlobalChatRequests)

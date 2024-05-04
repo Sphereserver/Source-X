@@ -1,3 +1,5 @@
+SET (TOOLCHAIN_LOADED 1)
+
 function (toolchain_force_compiler)
 	SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
 	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
@@ -68,7 +70,7 @@ function (toolchain_exe_stuff_common)
 	#SET (C_ARCH_OPTS	) # set in parent toolchain
 	#SET (CXX_ARCH_OPTS	) # set in parent toolchain
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS	"-std=c++17 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
+	SET (CXX_OPTS	"-std=c++20 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
@@ -128,7 +130,7 @@ function (toolchain_exe_stuff_common)
 		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb ws2_32 )
 		TARGET_LINK_OPTIONS ( spheresvr_debug PUBLIC  "SHELL:${CMAKE_EXE_LINKER_FLAGS_COMMON} ${CMAKE_EXE_LINKER_FLAGS_EXTRA}")
 	ENDIF ()
-	
+
 
 	#-- Set common define macros.
 

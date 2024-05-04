@@ -1,7 +1,8 @@
+SET (TOOLCHAIN_LOADED 1)
+
 function (toolchain_force_compiler)
 	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
 	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
-	LINK_DIRECTORIES ("/usr/local/opt/mariadb-connector-c/lib/mariadb")
 endfunction ()
 
 
@@ -37,6 +38,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
 	ENDIF ()
 
+
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
@@ -44,7 +46,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	SET (CXX_WARNING_OPTS
 		"-w")
 	SET (C_OPTS			"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
+	SET (CXX_OPTS		"-std=c++20 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
@@ -88,23 +90,40 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	 ENDIF ()
 
 
+	 #-- Find libraries to be linked to.
+
+	MESSAGE(STATUS "Locating libraries to be linked to...")
+
+	SET (LIBS_LINK_LIST
+		mariadb
+		dl
+	)
+	FOREACH (LIB_NAME ${LIBS_LINK_LIST})
+		FIND_LIBRARY(
+			LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
+			HINT
+			"/usr/local/opt/mariadb-connector-c/lib/mariadb"
+		)
+	ENDFOREACH ()
+
+
 	#-- Setting per-build linker flags.
 
 	 # Linking Unix libs.
 	 # same here, do not use " " to delimitate these flags!
 	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	mariadb dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mariadb dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		mariadb dl )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH})
 	ENDIF (TARGET spheresvr_debug)
 
 
 	#-- Set common define macros.
-	
+
 	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} Z_PREFIX _GITVERSION _EXCEPTIONS_DEBUG)
 	# _64BITS: 64 bits architecture.
 	# Z_PREFIX: Use the "z_" prefix for the zlib functions
@@ -124,7 +143,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
 	ENDIF (TARGET spheresvr_debug)
 
-	
+
 	#-- Set different output folders for each build type
 	# (When we'll have support for multi-target builds...)
 	#SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)

@@ -15,7 +15,7 @@ jobs:
         fetch-depth: 0
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
-    - name: CMake 
+    - name: CMake
       run: cmake -G "Visual Studio 17 2022" .\
     - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
@@ -24,9 +24,9 @@ jobs:
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win-x86_64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\bin\x86_64\mariadb\libmariadb.dll
 
-    # only upload artifact in pull request or if is main/master branch
+    # only upload artifact in pull request or selected branches
     - name: Upload artifact
-      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
         fetch-depth: 0
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
-    - name: CMake 
+    - name: CMake
       run: cmake -G "Visual Studio 17 2022" -A Win32 .\
     - name: MSBuild
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
@@ -56,7 +56,7 @@ jobs:
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
-      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,7 +100,7 @@ jobs:
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
-      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -129,7 +129,7 @@ jobs:
             sudo apt install -yqq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
             sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
             echo "Done"
-            
+
             # MariaDB dependencies
             echo && echo "Install MariaDB dependencies"
             echo "Installing some deps with apt..."
@@ -148,7 +148,7 @@ jobs:
             sudo dpkg -i temp1.deb temp2.deb 2> /dev/null
             echo "Done"
 
-            
+
     - name: Report building tools
       run:  |
             echo "GCC:" && gcc -v
@@ -168,7 +168,7 @@ jobs:
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
-      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -217,7 +217,7 @@ jobs:
 
     # only upload artifact in pull request or if is main/master branch
     - name: Upload artifact
-      if: contains(fromJson('["master", "main"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
       uses: actions/upload-artifact@v3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -228,7 +228,7 @@ jobs:
 
   upload:
     needs: [windows-x86_64, windows-x86, linux-x86_64, linux-x86, macos-x86_64]
-    if: contains(fromJson('["master", "main"]'), github.ref_name)
+    if: contains(fromJson('["master", "main", "dev"]'), github.ref_name)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -249,7 +249,7 @@ jobs:
           name: Nightly
           tag_name: Nightly
           prerelease: true
-          files: | 
+          files: |
                   Git-Changelog.txt
                   SphereSvrX-win-x86_64-nightly.zip
                   SphereSvrX-win-x86-nightly.zip

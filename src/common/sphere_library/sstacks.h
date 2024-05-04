@@ -373,9 +373,9 @@ tsstack<T, S>::tsstack(const tsstack<T, S> & o) {
 template<typename T, class S>
 tsstack<T, S> & tsstack<T, S>::operator=(const tsstack<T, S> & o) {
     _mutex.lock();
-    o._mutex.shared_lock();
+    o._mutex.lock_shared();
     _s = o._s;
-    o._mutex.shared_unlock();
+    o._mutex.unlock_shared();
     _mutex.unlock();
 }
 
@@ -395,9 +395,9 @@ void tsstack<T, S>::pop() {
 
 template<typename T, class S>
 T tsstack<T, S>::top() const {
-    _mutex.shared_lock();
+    _mutex.lock_shared();
     T x = _s.top();
-    _mutex.shared_unlock();
+    _mutex.unlock_shared();
     return x;
 }
 
@@ -410,17 +410,17 @@ void tsstack<T, S>::clear() {
 
 template<typename T, class S>
 bool tsstack<T, S>::empty() const {
-    _mutex.shared_lock();
+    _mutex.lock_shared();
     bool b = _s.empty();
-    _mutex.shared_unlock();
+    _mutex.unlock_shared();
     return b;
 }
 
 template<typename T, class S>
 size_t tsstack<T, S>::size() const {
-    _mutex.shared_lock();
+    _mutex.lock_shared();
     size_t s = _s.size();
-    _mutex.shared_unlock();
+    _mutex.unlock_shared();
     return s;
 }
 

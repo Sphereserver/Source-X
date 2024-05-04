@@ -108,7 +108,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
 #define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
 #define RES_INDEX_SHIFT	0		// use first 20 bits = 0xFFFFF = 1048575 possible unique indexes.
 #define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
-    
+
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
 
@@ -189,6 +189,7 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     {
         m_wPage = 0;
     }
+    // Create an empty, valid CResourceID of a given type
     explicit CResourceID(RES_TYPE restype) : CResourceIDBase(restype)
     {
         m_wPage = 0;

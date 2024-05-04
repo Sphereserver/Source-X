@@ -47,14 +47,14 @@ jobs:
                 mkdir cov-analysis-linux64
                 tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
                 export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
-    
+
         - name: CMake
           run: |
                 mkdir -p build
-                cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=src/cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
+                cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -S ./ -B ./build
 
         - name: Compilation (cov-build)
-          run: |        
+          run: |
                 cd build
                 cov-build --dir cov-int make
                 tail cov-int/build-log.txt

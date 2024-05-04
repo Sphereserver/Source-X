@@ -3,6 +3,7 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.13)
 SET (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
 
+# GUI checkboxes
 SET (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
 
 SET (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
@@ -11,6 +12,7 @@ SET (USE_MSAN			false CACHE BOOL "Enable MemorySanitizer.")
 SET (USE_LSAN			false CACHE BOOL "Enable LeakSanitizer.")
 SET (USE_UBSAN			false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
 
+# Utility functions
 FUNCTION (booleanize_str_find VAR)
 	IF (${VAR} EQUAL -1)
 		UNSET (${VAR} PARENT_SCOPE)
@@ -20,7 +22,10 @@ FUNCTION (booleanize_str_find VAR)
 ENDFUNCTION ()
 
 
-IF ((NOT TOOLCHAIN) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
+# -- Start: initializations
+
+# Should i load the toolchain passed as argument?
+IF ((NOT TOOLCHAIN_LOADED) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
 	INCLUDE (${CMAKE_TOOLCHAIN_FILE})
 	toolchain_force_compiler ()
 ENDIF ()
@@ -38,14 +43,13 @@ booleanize_str_find(ARCH_HAS_x86_64)
 booleanize_str_find(ARCH_HAS_x86)
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
-IF (NOT TOOLCHAIN)
+IF (NOT TOOLCHAIN_LOADED)
 	INCLUDE ("cmake/CMakeDefaultToolchain.cmake")
 ENDIF ()
 
 
-# Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
+#-- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
 toolchain_after_project()
-
 
 STRING (FIND "${CMAKE_GENERATOR}" "Makefiles" GEN_IS_MAKEFILE)
 STRING (FIND "${CMAKE_GENERATOR}" "Ninja" GEN_IS_NINJA)
@@ -97,7 +101,7 @@ ENDIF (SINGLE_TARGET)
 # Include the list of all our source files
 INCLUDE ("CMakeSources.cmake")
 
-SET (ALL_SRCS 
+SET (ALL_SRCS
 	${LIB_SRCS}
 
 	${game_SRCS}

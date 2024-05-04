@@ -584,7 +584,13 @@ int CVerDataMul::QCompare(size_t left, dword dwRefIndex) const
 void CVerDataMul::QSort(size_t left, size_t right)
 {
 	ADDTOCALLSTACK("CVerDataMul::QSort");
-	static int iReentrant = 0;
+	static uint uiReentrant = 0;
+	if (uiReentrant > 1'000'000)
+	{
+		g_Log.EventError("VerData QSort iterated over 1 million entries, stopping.\n");
+		return;
+	}
+
 	ASSERT(left <= right);
 	size_t j = left;
 	size_t i = right;
@@ -616,12 +622,12 @@ void CVerDataMul::QSort(size_t left, size_t right)
 
 	} while (j <= i);
 
-	++iReentrant;
+	++uiReentrant;
 	if (left < i)
 		QSort(left, i);
 	if (j < right)
 		QSort(j, right);
-	--iReentrant;
+	--uiReentrant;
 }
 
 void CVerDataMul::Load(CSFile & file)

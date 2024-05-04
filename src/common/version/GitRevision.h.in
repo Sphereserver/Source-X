@@ -1,3 +1,8 @@
+#ifndef _INC_GITREVISION_H
+#define _INC_GITREVISION_H
+
 #define __GITHASH__ "@GITHASH_VAL@"
 #define __GITREVISION__ @GITREV_VAL@
 #define __GITBRANCH__ "@GITBRANCH_VAL@"
+
+#endif // _INC_GITREVISION_H
