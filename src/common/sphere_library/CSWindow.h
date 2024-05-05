@@ -1,6 +1,6 @@
 /**
 * @file CSWindow.h
-* @brief Base window class for controls.
+* @brief Base window class for controls on MS Windows OS.
 */
 
 #ifndef _INC_CSWINDOW_H

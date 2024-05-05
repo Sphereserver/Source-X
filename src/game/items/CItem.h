@@ -737,8 +737,8 @@ public:
     void r_LoadMore1(dword dwVal);
     void r_LoadMore2(dword dwVal);
 
-    const lpctstr ResourceGetName(const CResourceID& rid);
-    const lpctstr ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType);
+    lpctstr ResourceGetName(const CResourceID& rid);
+    lpctstr ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType);
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;

@@ -3,6 +3,10 @@ SET (TOOLCHAIN_LOADED 1)
 function (toolchain_force_compiler)
 	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
 	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
+
+	# In order to enable ninja to be verbose
+	#set(CMAKE_VERBOSE_MAKEFILE 		ON CACHE	BOOL "ON" 		FORCE)
+	set(CMAKE_VERBOSE_MAKEFILE 			ON CACHE	BOOL "ON")
 endfunction ()
 
 
@@ -61,7 +65,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	ENDIF()
 
 	 # -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic -lmariadb ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
 	#-I/usr/local/opt/mariadb-connector-c/include/mariadb\
 
 
@@ -103,6 +107,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 			LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
 			HINT
 			"/usr/local/opt/mariadb-connector-c/lib/mariadb"
+			"/opt/homebrew/var/mariadb-connector-c/lib/mariadb"
 		)
 	ENDFOREACH ()
 

@@ -141,10 +141,19 @@ jobs:
             #sudo apt install --fix-broken ./dep1.deb
             echo "Done"
 
-            # Workaround: there are no official packages built for i386 on this OS. Let's install from the previous Ubuntu LTS version repo (Bionic).
+            # Workaround: there are no official packages built for i386 on this OS. Let's install from previous Ubuntu LTS versions repo.
+
             echo "Installing MariaDB i386 manually from Bionic repo..."
             wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/355877539/libmariadb3_3.0.3-1build1_i386.deb
             wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
+
+            #echo "Installing MariaDB i386 manually from Focal repo..."
+            #wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/448491536/libmariadb3_10.3.18-1_i386.deb
+            # No libmariadb-dev ?
+            #wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
+
+            # Third choice: directly download and install packages from Debian repos?
+
             sudo dpkg -i temp1.deb temp2.deb 2> /dev/null
             echo "Done"
 
@@ -207,7 +216,7 @@ jobs:
             mkdir -p build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S . -B ./build
     - name: Ninja
-      run: cd build && ninja && cd ..
+      run: cd build && ninja -v && cd ..
     - name: Create package
       run:  |
             pwd

@@ -74,19 +74,23 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 			FIND_LIBRARY(
 				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
 				HINT
-				"/usr/lib64/"
-				"/usr/lib64/mysql"
+				"/usr/lib/x86_64-linux-gnu/libmariadb3"
 				"/usr/lib/x86_64-linux-gnu/mysql"
+				"/usr/lib/x86_64-linux-gnu"
+				"/usr/lib64/mysql"
+				"/usr/lib64"
 				"/usr/lib/mysql"
+				"/usr/lib"
 			)
 		ELSE ()
 			FIND_LIBRARY(
 				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
 				HINT
-				"/usr/lib32"
-				"/usr/lib32/mysql"
+				"/usr/lib/i386-linux-gnu/libmariadb3"
 				"/usr/lib/i386-linux-gnu/mysql"
+				"/usr/lib/i386-linux-gnu"
 				"/usr/lib/mysql"
+				"/usr/lib"
 			)
 		ENDIF ()
 	ENDFOREACH ()

@@ -2991,7 +2991,7 @@ void CItem::r_LoadMore2(dword dwVal)
     }
 }
 
-const lpctstr CItem::ResourceGetName(const CResourceID& rid)
+lpctstr CItem::ResourceGetName(const CResourceID& rid)
 {
     if (Can(CAN_I_SCRIPTEDMORE))
     {
@@ -3005,7 +3005,7 @@ const lpctstr CItem::ResourceGetName(const CResourceID& rid)
     return g_Cfg.ResourceGetName(rid);
 }
 
-const lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
 {
     if (Can(CAN_I_SCRIPTEDMORE))
     {

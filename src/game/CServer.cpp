@@ -1748,7 +1748,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
                             break;	// no more args here!
                     }
                     ++pszArgs;
-                    if (Args[0] > (dword)CTCOL_QTY || Args[0] < (dword)0)
+                    if (Args[0] > (dword)CTCOL_QTY /*|| Args[0] < (dword)0*/)
                         Args[0] = (dword)CTCOL_DEFAULT;
                     if (Args[1] > (dword)LOGL_QTY || Args[1] < (dword)1)
                         Args[1] = (dword)LOGL_EVENT;
@@ -2357,7 +2357,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 			return false;
 		}
 	}
-	
+
 #ifdef _WIN32
     EXC_SET_BLOCK("finalizing");
     g_NTWindow.SetWindowTitle();
