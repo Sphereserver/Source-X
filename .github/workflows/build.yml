@@ -33,6 +33,7 @@ jobs:
       with:
         name: Build-win-x86_64
         path: SphereSvrX-win-x86_64-nightly.zip
+        overwrite: true
 
 
   windows-x86:
@@ -44,7 +45,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
     - name: CMake
       run: cmake -G "Visual Studio 17 2022" -A Win32 .\
     - name: MSBuild
@@ -63,6 +64,7 @@ jobs:
       with:
         name: Build-win-x86
         path: SphereSvrX-win-x86-nightly.zip
+        overwrite: true
 
 
   linux-x86_64:
@@ -107,6 +109,7 @@ jobs:
       with:
         name: Build-linux-x86_64
         path: SphereSvrX-linux-x86_64-nightly.tar.gz
+        overwrite: true
 
   linux-x86:
     runs-on: ubuntu-22.04
@@ -184,13 +187,14 @@ jobs:
       with:
         name: Build-linux-x86
         path: SphereSvrX-linux-x86-nightly.tar.gz
+        overwrite: true
 
 
   macos-x86_64:
-    runs-on: macos-12
+    runs-on: macos-13   # intel
     env:
       CMAKE_GEN: Ninja
-      CMAKE_TCH_64: cmake/toolchains/OSX-AppleClang-x86_64.cmake
+      CMAKE_TCH: cmake/toolchains/OSX-AppleClang-x86_64.cmake
 
     steps:
     - name: Checkout repository
@@ -214,7 +218,7 @@ jobs:
     - name: CMake
       run: |
             mkdir -p build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" -S . -B ./build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" -S . -B ./build
     - name: Ninja
       run: cd build && ninja -v && cd ..
     - name: Create package
@@ -233,12 +237,65 @@ jobs:
       with:
         name: Build-osx-x86_64
         path: SphereSvrX-osx-x86_64-nightly.zip
+        overwrite: true
+
+
+  macos-arm64:
+    runs-on: macos-14   # apple silicon
+    env:
+      CMAKE_GEN: Ninja
+      CMAKE_TCH: cmake/toolchains/OSX-AppleClang-native.cmake
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Install prerequisites
+      run:  |
+            sw_vers
+
+            echo && echo "** Setting up compiler" && echo
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            export HOMEBREW_NO_INSTALL_CLEANUP=1
+            brew install ninja mariadb-connector-c
+
+    - name: Report building tools
+      run:  |
+            echo "Apple Clang:" && clang --version
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
+    - name: CMake
+      run: |
+            mkdir -p build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" -S . -B ./build
+    - name: Ninja
+      run: cd build && ninja -v && cd ..
+    - name: Create package
+      run:  |
+            pwd
+            mkdir accounts logs save scripts
+            zip -r SphereSvrX-osx-arm64-nightly.zip accounts/ logs/ save/ scripts/
+            zip SphereSvrX-osx-arm64-nightly.zip src/sphere.ini src/sphereCrypt.ini build/bin-native64/*
+
+    # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Build-osx-x86_64
+        path: SphereSvrX-osx-arm64-nightly.zip
+        overwrite: true
 
 
   upload:
-    needs: [windows-x86_64, windows-x86, linux-x86_64, linux-x86, macos-x86_64]
+    needs: [windows-x86_64, windows-x86, linux-x86_64, linux-x86, macos-x86_64, macos-arm64]
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -269,3 +326,4 @@ jobs:
                   SphereSvrX-linux-x86_64-nightly.tar.gz
                   SphereSvrX-linux-x86-nightly.tar.gz
                   SphereSvrX-osx-x86_64-nightly.zip
+                  SphereSvrX-osx-arm64-nightly.zip
