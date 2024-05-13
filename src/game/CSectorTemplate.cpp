@@ -271,7 +271,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 // Balkon: get regions list (to cycle through intercepted house regions)
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegions");
+	//ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegions");  // Called very frequently
 	size_t iQty = m_RegionLinks.size();
 	for ( size_t i = 0; i < iQty; ++i )
 	{

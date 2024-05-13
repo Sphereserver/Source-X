@@ -245,7 +245,7 @@ CSector* CWorldMap::GetSector(int map, short x, short y) noexcept // static
 
 const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetMapBlock");
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 
 	if (!pt.IsValidXY() || !g_MapList.IsInitialized(pt.m_map))
@@ -1519,7 +1519,7 @@ CUOMapMeter CWorldMap::CheckMapTerrain(CUOMapMeter pDefault, short x, short y, u
 		return pDefault;
 	else
 	{
-		const CUOTerrainInfo land(pMeter->m_wTerrainIndex);
+		const CUOTerrainInfo land(pMeter->m_wTerrainIndex, false);
 		if ((land.m_flags & UFLAG1_WATER))
 			return pDefault;
 	}
@@ -1780,47 +1780,45 @@ char CWorldMap::GetHeightPoint2( const CPointMap & pt, uint64 & uiBlockFlags, bo
 //////////////////////////////////////////////////////////////////
 // -CWorldSearch
 
-CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) :
-	_pt(pt), _iDist(iDist)
+CWorldSearch::CWorldSearch(const CPointMap& pt, int iDist) noexcept :
+	_pt(pt), _iDist(iDist), _fAllShow(false), _fSearchSquare(false),
+    _eSearchType(ws_search_e::None), _fInertToggle(false),
+    _ppCurContObjs(nullptr), _pObj(nullptr),
+    _idxObj(0), _idxObjMax(0),
+    _iSectorCur(0)  // Get upper left of search rect.
 {
 	// define a search of the world.
-	_eSearchType = ws_search_e::None;
-	_fAllShow = false;
-	_fSearchSquare = false;
-	_fInertToggle = false;
-	_pObj = nullptr;
-	_idxObj = _idxObjMax = 0;
-
 	_pSectorBase = _pSector = pt.GetSector();
-
 	_rectSector.SetRect(
 		pt.m_x - iDist,
 		pt.m_y - iDist,
 		pt.m_x + iDist + 1,
 		pt.m_y + iDist + 1,
 		pt.m_map);
+}
 
-	// Get upper left of search rect.
-	_iSectorCur = 0;
+CWorldSearch::~CWorldSearch() noexcept
+{
+    if (nullptr != _ppCurContObjs)
+        delete[] _ppCurContObjs;
 }
 
 void CWorldSearch::SetAllShow(bool fView)
 {
-	ADDTOCALLSTACK("CWorldSearch::SetAllShow");
+	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::SetAllShow");
 	_fAllShow = fView;
 }
 
 void CWorldSearch::SetSearchSquare(bool fSquareSearch)
 {
-	ADDTOCALLSTACK("CWorldSearch::SetSearchSquare");
+    //ADDTOCALLSTACK_INTENSIVE("CWorldSearch::SetSearchSquare");
 	_fSearchSquare = fSquareSearch;
 }
 
 void CWorldSearch::RestartSearch()
 {
-	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
+    //ADDTOCALLSTACK_INTENSIVE("CWorldSearch::RestartSearch");
 	_eSearchType = ws_search_e::None;
-	_vCurContObjs.clear();
 	_pObj = nullptr;
 	_idxObj = _idxObjMax = 0;
 }
@@ -1842,7 +1840,6 @@ bool CWorldSearch::GetNextSector()
 			continue;	// same as base.
 
 		_eSearchType = ws_search_e::None;
-		_vCurContObjs.clear();
 		_pObj = nullptr;	// start at head of next Sector.
 		_idxObj = _idxObjMax = 0;
 
@@ -1852,15 +1849,29 @@ bool CWorldSearch::GetNextSector()
 
 CItem* CWorldSearch::GetItem()
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
+    // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
+	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
+
 	while (true)
 	{
 		if (_pObj == nullptr)
 		{
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Items;
-			_vCurContObjs = _pSector->m_Items.GetIterationSafeCont();
-			_idxObjMax = _vCurContObjs.size();
+
+            const size_t sector_obj_num = _pSector->m_Items.size();
+            if (_ppCurContObjs != nullptr) {
+                if (_idxObjMax < sector_obj_num) {
+                    delete[] _ppCurContObjs;
+                    _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+                }
+            }
+            else {
+                _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+            }
+            _idxObjMax = sector_obj_num;
+            memcpy(_ppCurContObjs, _pSector->m_Items.data(), _idxObjMax * sizeof(CSObjContRec*)); // I need this to be as fast as possible
+			
 			_idxObj = 0;
 		}
 		else
@@ -1869,7 +1880,7 @@ CItem* CWorldSearch::GetItem()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Items);
-		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
+		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_ppCurContObjs[_idxObj]);
 		if (_pObj == nullptr)
 		{
 			if (GetNextSector())
@@ -1910,7 +1921,9 @@ CItem* CWorldSearch::GetItem()
 
 CChar* CWorldSearch::GetChar()
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetChar");
+    // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
+	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetChar");
+
 	while (true)
 	{
 		if (_pObj == nullptr)
@@ -1918,8 +1931,20 @@ CChar* CWorldSearch::GetChar()
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Chars;
 			_fInertToggle = false;
-			_vCurContObjs = _pSector->m_Chars_Active.GetIterationSafeCont();
-			_idxObjMax = _vCurContObjs.size();
+
+            const size_t sector_obj_num = _pSector->m_Chars_Active.size();
+            if (_ppCurContObjs != nullptr) {
+                if (_idxObjMax < sector_obj_num) {
+                    delete[] _ppCurContObjs;
+                    _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+                }
+            }
+            else {
+                _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+            }
+            _idxObjMax = sector_obj_num;
+            memcpy(_ppCurContObjs, _pSector->m_Chars_Active.data(), _idxObjMax * sizeof(CSObjContRec*)); // I need this to be as fast as possible
+
 			_idxObj = 0;
 		}
 		else
@@ -1928,17 +1953,29 @@ CChar* CWorldSearch::GetChar()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Chars);
-		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
+		_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_ppCurContObjs[_idxObj]);
 		if (_pObj == nullptr)
 		{
 			if (!_fInertToggle && _fAllShow)
 			{
 				_fInertToggle = true;
-				_vCurContObjs = _pSector->m_Chars_Disconnect.GetIterationSafeCont();
-				_idxObjMax = _vCurContObjs.size();
+
+                const size_t sector_obj_num = _pSector->m_Chars_Disconnect.size();
+                if (_ppCurContObjs != nullptr) {
+                    if (_idxObjMax < sector_obj_num) {
+                        delete[] _ppCurContObjs;
+                        _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+                    }
+                }
+                else {
+                    _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+                }
+                _idxObjMax = sector_obj_num;
+                memcpy(_ppCurContObjs, _pSector->m_Chars_Disconnect.data(), _idxObjMax * sizeof(CSObjContRec*)); // I need this to be as fast as possible
+
 				_idxObj = 0;
 
-				_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_vCurContObjs[_idxObj]);
+				_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_ppCurContObjs[_idxObj]);
 				if (_pObj != nullptr)
 					goto jumpover;
 			}

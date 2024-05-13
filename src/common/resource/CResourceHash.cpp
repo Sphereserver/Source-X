@@ -10,8 +10,8 @@ bool CResourceHashArraySorter::operator()(std::unique_ptr<CResourceDef> const& p
 {
     // <  : true
     // >= : false
-    ASSERT( pObjStored );
-    ASSERT( pObj );
+    DEBUG_ASSERT( pObjStored );
+    DEBUG_ASSERT( pObj );
     CResourceID const& rid = pObj->GetResourceID();
     //ASSERT(rid.GetResPage != RES_PAGE_ANY); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
     CResourceID const& ridStored = pObjStored->GetResourceID();
@@ -26,7 +26,8 @@ bool CResourceHashArraySorter::operator()(std::unique_ptr<CResourceDef> const& p
 
 int CResourceHashArray::_compare(std::unique_ptr<CResourceDef> const& pObjStored, CResourceID const& rid) // static
 {
-    ASSERT( pObjStored );
+    //DEBUG_ASSERT( pObjStored );
+    DEBUG_ASSERT(pObjStored.get() != nullptr);
     CResourceID const& ridStored = pObjStored->GetResourceID();
     const uint dwID1 = ridStored.GetPrivateUID();
     const uint dwID2 = rid.GetPrivateUID();

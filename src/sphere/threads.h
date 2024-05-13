@@ -199,11 +199,14 @@ public:
 	static const uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 	static void setThreadName(const char* name);
 
+    size_t m_threadHolderId;
+
 protected:
 	virtual bool shouldExit() = 0;
 
 public:
-	virtual ~IThread() { };
+    IThread() noexcept : m_threadHolderId(0) { };
+	virtual ~IThread() = default;
 };
 
 
@@ -224,6 +227,8 @@ class ThreadHolder
 	friend void atexit_handler(void);
 	void markThreadsClosing();
 
+    //SphereThreadData* findThreadData(IThread* thread) noexcept;
+
 	friend class AbstractThread;
 	TlsValue<IThread*> m_currentThread;
 
@@ -238,9 +243,6 @@ public:
 	void push(IThread *thread);
 	// removes a thread from the list. Sould NOT be called, internal usage
 	void remove(IThread *thread);
-	// internal usage
-	spherethreadlist_t::iterator findThreadDataIt(IThread* thread);
-	SphereThreadData* findThreadData(IThread* thread);
 	// returns thread at i pos
 	IThread * getThreadAt(size_t at);
 
@@ -273,9 +275,8 @@ public:
 	AbstractThread(const char *name, Priority priority = IThread::Normal);
 	virtual ~AbstractThread();
 
-private:
-	AbstractThread(const AbstractThread& copy);
-	AbstractThread& operator=(const AbstractThread& other);
+	AbstractThread(const AbstractThread& copy) = delete;
+	AbstractThread& operator=(const AbstractThread& other) = delete;
 
 public:
 	threadid_t getId() const { return m_id; }
@@ -394,7 +395,7 @@ private:
 
 public:
 	StackDebugInformation(const char *name) noexcept;
-	~StackDebugInformation();
+	~StackDebugInformation() noexcept;
 
 	StackDebugInformation(const StackDebugInformation& copy) = delete;
 	StackDebugInformation& operator=(const StackDebugInformation& other) = delete;

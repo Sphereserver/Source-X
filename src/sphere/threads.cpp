@@ -132,9 +132,12 @@ IThread* ThreadHolder::current() noexcept
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	auto* tdata = findThreadData(thread);
-	if (!tdata || tdata->m_closed)
+	if (!thread)
 		return nullptr;
+
+    SphereThreadData* tdata = &(m_threads[thread->m_threadHolderId]);
+    if (tdata->m_closed)
+        return nullptr;
 
     // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
 	//ASSERT( thread->isSameThread(thread->getId()) );
@@ -149,26 +152,25 @@ void ThreadHolder::push(IThread *thread)
 
 	SimpleThreadLock lock(m_mutex);
 	m_threads.emplace_back( SphereThreadData{ thread, false });
+    thread->m_threadHolderId = m_threadCount;
 	++m_threadCount;
 }
 
-spherethreadlist_t::iterator ThreadHolder::findThreadDataIt(IThread* thread)
+/*
+SphereThreadData* ThreadHolder::findThreadData(IThread* thread) noexcept
 {
-	// This should always run guarded by a MUTEX!
-	return std::find_if(m_threads.begin(), m_threads.end(),
-		[thread](SphereThreadData const& elem) {
-			return elem.m_ptr == thread;
-		});
-}
+    // If checking for current thread, use another escamotage to retrieve it...
 
-SphereThreadData* ThreadHolder::findThreadData(IThread* thread)
-{
-	// This should always run guarded by a MUTEX!
-	auto it = findThreadDataIt(thread);
-	if (it == m_threads.end())
-		return nullptr;
-	return &(*it);
+    // This should always run guarded by a MUTEX!
+    SimpleThreadLock lock(m_mutex);
+    for (size_t i = 0; i < m_threadCount; ++i)
+    {
+        if (m_threads[i].m_ptr == thread)
+            return &(m_threads[i]);
+    }
+    return nullptr;
 }
+*/
 
 void ThreadHolder::remove(IThread *thread)
 {
@@ -178,7 +180,10 @@ void ThreadHolder::remove(IThread *thread)
     ASSERT(m_threadCount > 0);	// Trying to dequeue thread while no threads are active?
 
     SimpleThreadLock lock(m_mutex);
-	auto it = findThreadDataIt(thread);
+	auto it = std::find_if(m_threads.begin(), m_threads.end(),
+        [thread](SphereThreadData const& elem) {
+            return elem.m_ptr == thread;
+        });
     
     ASSERT(it != m_threads.end());	// Ensure that the thread to dequeue is registered
 	--m_threadCount;
@@ -356,33 +361,33 @@ void AbstractThread::run()
 
             // ensure this is recorded as 'idle' time for this thread (ideally this should
             // be in tick() but we cannot guarantee it to be called there
-            CurrentProfileData.Start(PROFILE_IDLE);
+            GetCurrentProfileData().Start(PROFILE_IDLE);
 		}
         /*
         catch( const CAssert& e )
         {
             gotException = true;
             g_Log.CatchEvent(&e, "[TR] ExcType=CAssert in %s::tick", getName());
-            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
         */
 		catch( const CSError& e )
 		{
 			gotException = true;
 			g_Log.CatchEvent(&e, "[TR] ExcType=CSError in %s::tick", getName());
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
         catch( const std::exception& e )
         {
             gotException = true;
             g_Log.CatchStdException(&e, "[TR] ExcType=std::exception in %s::tick", getName());
-            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
 		catch( ... )
 		{
 			gotException = true;
 			g_Log.CatchEvent(nullptr, "[TR] ExcType=pure in %s::tick", getName());
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 
 		if( gotException )
@@ -778,7 +783,7 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
 	}
 }
 
-StackDebugInformation::~StackDebugInformation()
+StackDebugInformation::~StackDebugInformation() noexcept
 {
 	if (!m_context || m_context->closing())
 		return;

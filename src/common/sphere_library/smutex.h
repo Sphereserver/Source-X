@@ -25,11 +25,11 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
-	SimpleMutex();
-	~SimpleMutex();
-private:
-	SimpleMutex(const SimpleMutex& copy);
-	SimpleMutex& operator=(const SimpleMutex& other);
+	SimpleMutex() noexcept;
+	~SimpleMutex() noexcept;
+
+	SimpleMutex(const SimpleMutex& copy) = delete;
+	SimpleMutex& operator=(const SimpleMutex& other) = delete;
 	///@}
 public:
 	/** @name Interaction:
@@ -41,7 +41,7 @@ public:
 	* Waits for ownership of the specified critical section object. The function
 	* returns when the calling thread is granted ownership.
 	*/
-	inline void lock()
+	inline void lock() noexcept
 	{
 #ifdef _WIN32
 		EnterCriticalSection(&m_criticalSection);
@@ -57,7 +57,7 @@ public:
     * @return True If the critical section is successfully entered or the current
     * thread already owns the critical section, false otherwise.
 	*/
-	inline bool tryLock()
+	inline bool tryLock() noexcept
 	{
 #ifdef _WIN32
 		return TryEnterCriticalSection(&m_criticalSection) == TRUE;
@@ -70,7 +70,7 @@ public:
 	*
 	* Releases ownership of the specified critical section object.
 	*/
-	inline void unlock()
+	inline void unlock() noexcept
 	{
 #ifdef _WIN32
 		LeaveCriticalSection(&m_criticalSection);
@@ -101,15 +101,16 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
-	inline explicit SimpleThreadLock(SimpleMutex &mutex) : m_mutex(mutex), m_locked(true) {
+	inline explicit SimpleThreadLock(SimpleMutex &mutex) noexcept
+        : m_mutex(mutex), m_locked(true) {
 		mutex.lock();
 	}
-	inline ~SimpleThreadLock() {
+	inline ~SimpleThreadLock() noexcept {
 		m_mutex.unlock();
 	}
-private:
-	SimpleThreadLock(const SimpleThreadLock& copy);
-	SimpleThreadLock& operator=(const SimpleThreadLock& other);
+
+	SimpleThreadLock(const SimpleThreadLock& copy) = delete;
+	SimpleThreadLock& operator=(const SimpleThreadLock& other) = delete;
 	///@}
 public:
 	/** @name Operators:
@@ -139,18 +140,19 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
-	inline ManualThreadLock() : m_mutex(nullptr), m_locked(false) {
+	inline ManualThreadLock() noexcept
+        : m_mutex(nullptr), m_locked(false) {
 	}
-	inline explicit ManualThreadLock(SimpleMutex * mutex) : m_locked(false) {
+	inline explicit ManualThreadLock(SimpleMutex * mutex) noexcept : m_locked(false) {
 		setMutex(mutex);
 	}
-	inline ~ManualThreadLock() {
+	inline ~ManualThreadLock() noexcept {
 		if (m_mutex != nullptr)
 			doUnlock();
 	}
-private:
-	ManualThreadLock(const ManualThreadLock& copy);
-	ManualThreadLock& operator=(const ManualThreadLock& other);
+
+	ManualThreadLock(const ManualThreadLock& copy) = delete;
+	ManualThreadLock& operator=(const ManualThreadLock& other) = delete;
 	///@}
 public:
 	/** @name Modifiers:
@@ -160,7 +162,7 @@ public:
 	* @brief Sets the mutex to modify.
 	* @param mutex
 	*/
-	inline void setMutex(SimpleMutex * mutex) {
+	inline void setMutex(SimpleMutex * mutex) noexcept {
 		m_mutex = mutex;
 	}
 	///@}
@@ -180,7 +182,7 @@ public:
 	* Waits for ownership of the specified critical section object. The function
 	* returns when the calling thread is granted ownership.
 	*/
-	void doLock();
+	void doLock() noexcept;
 	/**
 	* @brief Tries to lock the mutex.
 	*
@@ -189,13 +191,13 @@ public:
     * @return True If the critical section is successfully entered or the current
     * thread already owns the critical section, false otherwise.
 	*/
-	bool doTryLock();
+	bool doTryLock() noexcept;
 	/**
 	* @brief Unlocks the mutex.
 	*
 	* Releases ownership of the specified critical section object.
 	*/
-	void doUnlock();
+	void doUnlock() noexcept;
 	///@}
 
 private:

@@ -106,7 +106,7 @@ void CNetworkInput::receiveData()
         }
 
         EXC_SET_BLOCK("start client profile");
-        CurrentProfileData.Count(PROFILE_DATA_RX, received);
+        GetCurrentProfileData().Count(PROFILE_DATA_RX, received);
 
         EXC_SET_BLOCK("messages - parse");
 

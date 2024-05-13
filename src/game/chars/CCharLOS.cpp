@@ -86,7 +86,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		}
 	}
 
-	if ( SphereAbs(int(ptSrc.m_z) - ptDst.m_z) >= 20 )
+	if ( abs(int(ptSrc.m_z) - int(ptDst.m_z)) >= 20 )
 		return false;
 	return true;	// made it all the way to the object with no obstructions.
 }

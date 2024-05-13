@@ -2114,7 +2114,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
             sVal.FormatLLVal(_iItemHitpointsUpdate / MSECS_PER_SEC);
             break;
 		case RC_PROFILE:
-			sVal.FormatVal(CurrentProfileData.GetActiveWindow());
+			sVal.FormatVal(GetCurrentProfileData().GetActiveWindow());
 			break;
 		case RC_RTICKS:
 			{
@@ -4600,14 +4600,14 @@ bool CServerConfig::Load( bool fResync )
         {
             g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
             g_Log.CatchEvent( &e, "g_VerData.Load" );
-            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
             return false;
         }
         catch (...)
         {
             g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt, missing, or there was an error while loading the settings.\n" );
             g_Log.CatchEvent( nullptr, "g_VerData.Load" );
-            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
             return false;
         }
 	}

@@ -467,7 +467,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				StatGet(SERV_STAT_CLIENTS),
 				g_Log.IsLoggedMask( LOGM_PLAYER_SPEAK ) ? "ON" : "OFF",
 				g_Log.IsFileOpen() ? "OPEN" : "CLOSED",
-				CurrentProfileData.IsActive() ? "ON" : "OFF",
+				GetCurrentProfileData().IsActive() ? "ON" : "OFF",
 				g_Cfg.m_fSecure ? "ON" : "OFF"
 				);
 			break;
@@ -1049,15 +1049,15 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
     if (pSrc != this)
     {
-        pSrc->SysMessagef("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+        pSrc->SysMessagef("Profiles %s: (%d sec total)\n", GetCurrentProfileData().IsActive() ? "ON" : "OFF", GetCurrentProfileData().GetActiveWindow());
     }
     else
     {
-        g_Log.Event(LOGL_EVENT, "Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+        g_Log.Event(LOGL_EVENT, "Profiles %s: (%d sec total)\n", GetCurrentProfileData().IsActive() ? "ON" : "OFF", GetCurrentProfileData().GetActiveWindow());
     }
     if (ftDump != nullptr)
     {
-        ftDump->Printf("Profiles %s: (%d sec total)\n", CurrentProfileData.IsActive() ? "ON" : "OFF", CurrentProfileData.GetActiveWindow());
+        ftDump->Printf("Profiles %s: (%d sec total)\n", GetCurrentProfileData().IsActive() ? "ON" : "OFF", GetCurrentProfileData().GetActiveWindow());
     }
 
 	size_t iThreadCount = ThreadHolder::get().getActiveThreads();

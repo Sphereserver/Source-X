@@ -60,7 +60,7 @@ void PingServer::tick()
 	if ( length <= 0 )
 		return;
 
-	CurrentProfileData.Count(PROFILE_DATA_RX, length);
+	GetCurrentProfileData().Count(PROFILE_DATA_RX, length);
 	const ProfileTask sendTask(PROFILE_NETWORK_TX);
 
 	// return the data to them
@@ -68,7 +68,7 @@ void PingServer::tick()
 	if ( sent <= 0 )
 		return;
 
-	CurrentProfileData.Count(PROFILE_DATA_TX, sent);
+	GetCurrentProfileData().Count(PROFILE_DATA_TX, sent);
 }
 
 bool PingServer::shouldExit()

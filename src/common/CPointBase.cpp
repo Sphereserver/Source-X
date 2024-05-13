@@ -140,7 +140,7 @@ void CPointBase::ZeroPoint() noexcept
 
 int CPointBase::GetDistZ( const CPointBase & pt ) const noexcept
 {
-	return SphereAbs(m_z - pt.m_z);
+	return abs(int(m_z) - int(pt.m_z));
 }
 
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
@@ -149,8 +149,9 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
     //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
 
 	// Do not consider z or m_map.
-    const int dx = SphereAbs(m_x - pt.m_x);
-    const int dy = SphereAbs(m_y - pt.m_y);
+    // Do not touch this "abs" call, it gets max performance.
+    const int dx = abs(m_x - pt.m_x);
+    const int dy = abs(m_y - pt.m_y);
 
 	return maximum(dx, dy);
 
@@ -177,8 +178,8 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	const int dx = SphereAbs(m_x - pt.m_x);
-	const int dy = SphereAbs(m_y - pt.m_y);
+	const int dx = abs(m_x - pt.m_x);
+	const int dy = abs(m_y - pt.m_y);
 	return maximum(dx, dy);
 }
 
@@ -189,8 +190,8 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
 	if ( pt.m_map != m_map )
 		return INT16_MAX;
 
-	const int dx = SphereAbs(m_x - pt.m_x);
-	const int dy = SphereAbs(m_y - pt.m_y);
+	const int dx = abs(m_x - pt.m_x);
+	const int dy = abs(m_y - pt.m_y);
 	return maximum(dx, dy);
 }
 
@@ -895,7 +896,9 @@ int CPointBase::Read( tchar * pszVal )
 
 CSector * CPointBase::GetSector() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
+    // This function is called SO frequently that's better to not add it to the call stack.
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
+
 	if ( !IsValidXY() )
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
@@ -925,7 +928,9 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
+    // This function is called SO frequently that's better to not add it to the call stack.
+	// ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
+
 	if ( !IsValidPoint() )
 		return 0;
 

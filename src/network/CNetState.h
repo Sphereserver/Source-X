@@ -16,6 +16,8 @@
     #include "linuxev.h"
 #endif
 
+#include <atomic>
+
 
 #ifdef DEBUGPACKETS
     #define DEBUGNETWORK(_x_)	g_Log.EventDebug _x_;
@@ -45,8 +47,8 @@ protected:
     dword m_seed;	// client seed
     bool m_newseed; // is the client using new seed
 
-    bool m_useAsync;				// is this socket using asynchronous sends
-    volatile bool m_isSendingAsync; // is a packet currently being sent asynchronously?
+    std::atomic_bool m_useAsync;        // is this socket using asynchronous sends
+    std::atomic_bool m_isSendingAsync;  // is a packet currently being sent asynchronously?
 #ifdef _LIBEV
     // non-windows uses ev_io for async operations
     struct ev_io m_eventWatcher;
@@ -91,9 +93,8 @@ public:
     explicit CNetState(int id);
     ~CNetState(void);
 
-private:
-    CNetState(const CNetState& copy);
-    CNetState& operator=(const CNetState& other);
+    CNetState(const CNetState& copy) = delete;
+    CNetState& operator=(const CNetState& other) = delete;
 
 public:
     int id(void) const { return m_id; };	// returns ID of the client
@@ -102,18 +103,18 @@ public:
     void clearQueues(void);					// clears outgoing data queues
 
     void init(SOCKET socket, CSocketAddress addr);		// initialized socket
-    bool isInUse(const CClient* client = nullptr) const volatile; // does this socket still belong to this/a client?
+    bool isInUse(const CClient* client = nullptr) const volatile noexcept; // does this socket still belong to this/a client?
     bool hasPendingData(void) const;			// is there any data waiting to be sent?
     bool canReceive(PacketSend* packet) const;	// can the state receive the given packet?
 
     void detectAsyncMode(void);
-    void setAsyncMode(bool isAsync) { m_useAsync = isAsync; };	// set asynchronous mode
-    bool isAsyncMode(void) const { return m_useAsync; };		// get asyncronous mode
+    void setAsyncMode(bool isAsync) noexcept;   // set asynchronous mode
+    bool isAsyncMode(void) const noexcept;      // get asyncronous mode
 #ifdef _LIBEV
     struct ev_io* iocb(void) { return &m_eventWatcher; };		// get io callback
 #endif
-    bool isSendingAsync(void) const volatile { return m_isSendingAsync; };				// get if async packeet is being sent
-    void setSendingAsync(bool isSending) volatile { m_isSendingAsync = isSending; };	// set if async packet is being sent
+    bool isSendingAsync(void) const noexcept;				// get if async packeet is being sent
+    void setSendingAsync(bool isSending) noexcept;	// set if async packet is being sent
 
     GAMECLIENT_TYPE getClientType(void) const { return m_clientType; };	// determined client type
     dword getCryptVersion(void) const { return m_clientVersion; };		// version as determined by encryption

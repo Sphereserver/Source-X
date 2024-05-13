@@ -1,7 +1,16 @@
 #include "ProfileTask.h"
 #include "threads.h"
 
-ProfileTask::ProfileTask(PROFILE_TYPE id) : m_context(nullptr), m_previousTask(PROFILE_OVERHEAD)
+
+ProfileData& GetCurrentProfileData() noexcept
+{
+    auto cur_thread = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
+    ASSERT(cur_thread);
+    return cur_thread->m_profile;
+}
+
+ProfileTask::ProfileTask(PROFILE_TYPE id) :
+    m_context(nullptr), m_previousTask(PROFILE_OVERHEAD)
 {
 	IThread* icontext = ThreadHolder::get().current();
 	if (icontext == nullptr)

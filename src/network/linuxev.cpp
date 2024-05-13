@@ -59,13 +59,17 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *watcher, int reve
 	}
 }
 
+// intervals: the second is the unit, use decimals for smaller intervals
+static constexpr double kLoopCollectNetworkInputSeconds = 0.002;
+static constexpr double kLoopWaitBeforeNextCycleSeconds = 0.008;
+
 LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetLoopOut", IThread::High)
 	//, m_watchMainsock{}
 {
 	// Right now, we use libev to send asynchronously packets to clients.
 	m_eventLoop = ev_loop_new(ev_recommended_backends() | EVFLAG_NOENV);
 	ASSERT(m_eventLoop != nullptr);	// if fails, libev config.h probably was not configured properly
-	ev_set_io_collect_interval(m_eventLoop, 5e-3);	// interval: the second is the unit, use decimals for smaller intervals
+	ev_set_io_collect_interval(m_eventLoop, kLoopCollectNetworkInputSeconds);
 }
 
 LinuxEv::~LinuxEv(void)
@@ -111,7 +115,7 @@ void LinuxEv::tick()
 	//  time (MAX_BLOCKTIME in ev.c, circa 60 seconds) to collect incoming data, only then the callback will be called. So each batch of packets
 	//  would be processed every 60 seconds...
 	struct ev_periodic periodic_check;
-	ev_periodic_init(&periodic_check, periodic_cb, 0, 5e-3, nullptr);
+	ev_periodic_init(&periodic_check, periodic_cb, 0, kLoopWaitBeforeNextCycleSeconds, nullptr);
 	ev_periodic_start(m_eventLoop, &periodic_check);
 
 	ev_run(m_eventLoop, 0);

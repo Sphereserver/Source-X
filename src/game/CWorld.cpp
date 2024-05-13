@@ -452,13 +452,13 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	{
 		g_Log.CatchEvent( &e, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent(nullptr, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	if ( iResultCode == 0 )
@@ -493,12 +493,12 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	catch ( const CSError& e )	// catch all
 	{
 		g_Log.CatchEvent( &e, "UID=0%x, Asserted cleanup", dwUID );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent( nullptr, "UID=0%x, Asserted cleanup", dwUID );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	return iResultCode;
 }
@@ -593,12 +593,12 @@ void CWorldThread::GarbageCollection_UIDs()
 		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "GarbageCollection_UIDs");
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
 			g_Log.CatchEvent(nullptr, "GarbageCollection_UIDs");
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
 
@@ -943,11 +943,11 @@ bool CWorld::SaveForce() // Save world state
 		{
 			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", _iSaveStage, pCurBlock);
 			fSuccess = false;
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 			goto failedstage;
 		}
 		continue;
@@ -1158,7 +1158,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
 		m_FileMultis.Close();	// close if not already closed.
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
@@ -1168,7 +1168,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
 		m_FileMultis.Close();	// close if not already closed.
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	CScriptTriggerArgs Args(fForceImmediate, _iSaveStage);
@@ -1231,12 +1231,12 @@ void CWorld::SaveStatics()
 	catch (const CSError& e)
 	{
 		g_Log.CatchEvent(&e, "Statics Save FAILED.");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)
 	{
 		g_Log.CatchEvent(nullptr, "Statics Save FAILED.");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	SyncGameTime();
@@ -1280,12 +1280,12 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
 			g_Log.CatchEvent(nullptr, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
 
@@ -1684,7 +1684,7 @@ void CWorld::Close()
 
 	_Sectors.Close();
 
-	memset(g_MapList.m_maps, 0, sizeof(g_MapList.m_maps));
+    g_MapList.m_mapGeoData.clear();
 	if ( g_MapList.m_pMapDiffCollection != nullptr )
 	{
 		delete g_MapList.m_pMapDiffCollection;

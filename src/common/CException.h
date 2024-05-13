@@ -158,24 +158,24 @@ public:
 	catch ( const CAssert& e ) \
 	{ \
 		_EXC_CATCH_EXCEPTION_GENERIC(&e, "CAssert"); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 	} \
 	catch ( const CSError& e ) \
 	{ \
 		_EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError"); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
     catch ( const std::exception& e ) \
 	{ \
 		_EXC_CATCH_EXCEPTION_STD(&e); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
 	catch (...) \
 	{ \
 		_EXC_CATCH_EXCEPTION_GENERIC(nullptr, "pure"); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	}
 
@@ -191,7 +191,7 @@ public:
 		catch ( ... ) \
 		{ \
 			g_Log.EventError("Exception adding debug message on the exception.\n"); \
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		} \
 	}
 
@@ -238,24 +238,24 @@ public:
     catch ( const CAssert& e ) \
 	{ \
 		_EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CAssert"); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 	} \
 	catch ( const CSError& e )	\
 	{ \
 		_EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CSError"); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	} \
     catch ( const std::exception& e ) \
 	{ \
 		_EXC_CATCH_SUB_EXCEPTION_STD(&e, a); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
 	catch (...) \
 	{ \
 		_EXC_CATCH_SUB_EXCEPTION_GENERIC(nullptr, a, "pure"); \
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	}
 
@@ -272,7 +272,7 @@ public:
 		catch ( ... ) \
 		{ \
 			g_Log.EventError("Exception adding debug message on the exception (sub).\n"); \
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		} \
 	}
 

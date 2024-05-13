@@ -876,12 +876,12 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 	catch (const CSError& e)
 	{
 		g_Log.CatchEvent(&e, "Window");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent(nullptr, "Window");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }

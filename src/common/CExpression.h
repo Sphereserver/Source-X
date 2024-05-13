@@ -14,9 +14,10 @@
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 
+
 #undef ISWHITESPACE
 template <typename T>
-bool IsWhitespace(const T ch) noexcept {
+inline bool IsWhitespace(const T ch) noexcept {
     if constexpr (std::is_same_v<T, char>) {
         if (static_cast<unsigned char>(ch) == 0xA0)
             return true;
@@ -208,17 +209,33 @@ bool IsStrEmpty( lpctstr pszTest );
 
 
 // Numeric formulas
-template<typename T> inline T SphereAbs(T x) noexcept
+template<typename T> inline T SphereAbs(const T x) noexcept
 {
-    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
-    static_assert(std::is_signed<T>::value, "Trying to get the absolute value of an unsigned number?");
-	return (x<0) ? -x : x;
+    static_assert(std::is_arithmetic_v<T>, "Invalid data type.");
+    static_assert(std::is_signed_v<T>, "Trying to get the absolute value of an unsigned number?");
+
+    // This need to be the fastest (without optimizations this might be slower than calling the plain *abs function ?).
+    if constexpr (std::is_same_v<T, int8_t>)
+        return static_cast<int8_t>(abs(static_cast<int32_t>(x)));
+    else if constexpr (std::is_same_v<T, int16_t>)
+        return static_cast<int16_t>(abs(static_cast<int32_t>(x)));
+    else if constexpr (std::is_same_v<T, int32_t>)
+        return abs(x);
+	else
+	{
+		static_assert (std::is_same_v<T, int64_t>, "which type?");
+		return llabs(x);
+	}
+
+    // This is good, but standard C functions might be even faster
+	// return (x<0) ? -x : x;
 }
 
 int64 Calc_GetRandLLVal( int64 iQty );					// Get a random value between 0 and iQty - 1
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
 int32 Calc_GetRandVal( int32 iQty );					// Get a random value between 0 and iQty - 1
 int32 Calc_GetRandVal2( int32 iMin, int32 iMax );
+
 int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );

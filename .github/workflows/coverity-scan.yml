@@ -46,7 +46,7 @@ jobs:
                 wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=${TOKEN}&project=Sphereserver/Source-X" -O cov-analysis-linux64.tar.gz
                 mkdir cov-analysis-linux64
                 tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
-                export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+                #export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
 
         - name: CMake
           run: |
@@ -56,7 +56,7 @@ jobs:
         - name: Compilation (cov-build)
           run: |
                 cd build
-                cov-build --dir cov-int make
+                ../cov-analysis-linux64/bin/cov-build --dir ./cov-int make
                 tail cov-int/build-log.txt
 
         - name: Coverity build log

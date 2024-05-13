@@ -190,10 +190,14 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
 
     m_peerAddress = addr;
     m_socket.SetSocket(socket);
-    iSockRet = m_socket.SetNonBlocking();
-    ASSERT(iSockRet == 0);
 
-    // disable NAGLE algorythm for data compression/coalescing.
+    if (g_Cfg.m_fUseAsyncNetwork != 0)
+    {
+        iSockRet = m_socket.SetNonBlocking();
+        ASSERT(iSockRet == 0);
+    }
+
+    // Disable NAGLE algorythm for data compression/coalescing.
     // Send as fast as we can. we handle packing ourselves.
     
     int iSockFlag = 1;
@@ -221,7 +225,7 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
     detectAsyncMode();
 }
 
-bool CNetState::isInUse(const CClient* client) const volatile
+bool CNetState::isInUse(const CClient* client) const volatile noexcept
 {
     if (m_isInUse == false)
         return false;
@@ -248,6 +252,26 @@ void CNetState::markWriteClosed(void) volatile
 void CNetState::markFlush(bool needsFlush) volatile
 {
     m_needsFlush = needsFlush;
+}
+
+void CNetState::setAsyncMode(bool isAsync) noexcept
+{
+    m_useAsync = isAsync;
+}
+
+bool CNetState::isAsyncMode(void) const noexcept
+{
+    return m_useAsync;
+}
+
+bool CNetState::isSendingAsync(void) const noexcept
+{
+    return m_isSendingAsync;
+}
+
+void CNetState::setSendingAsync(bool isSending) noexcept
+{
+    m_isSendingAsync = isSending;
 }
 
 void CNetState::detectAsyncMode(void)

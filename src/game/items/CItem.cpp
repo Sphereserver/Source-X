@@ -5642,7 +5642,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 			}
 
-			m_itRune.m_ptMark = pCharSrc->GetTopPoint();
+			m_itRune.m_ptMark = static_cast<CPointBase const&>(pCharSrc->GetTopPoint());
 			if ( IsType(IT_RUNE) )
 			{
 				m_itRune.m_Strength = pSpellDef->m_vcEffect.GetLinear( iSkillLevel );

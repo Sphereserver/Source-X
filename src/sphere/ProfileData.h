@@ -63,9 +63,8 @@ protected:
 public:
 	ProfileData() noexcept;
 
-private:
-	ProfileData(const ProfileData& copy);
-	ProfileData& operator=(const ProfileData& other);
+	ProfileData(const ProfileData& copy) = delete;
+	ProfileData& operator=(const ProfileData& other) = delete;
 
 public:
 	bool IsActive() const noexcept {

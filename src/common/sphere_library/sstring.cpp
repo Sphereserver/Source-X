@@ -258,7 +258,7 @@ void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 }
 
 
-size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
+size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord ) noexcept
 {
     // Find any of the pszKeyWord in the pTextSearch string.
     // Make sure we look for starts of words.
@@ -296,7 +296,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
     }
 }
 
-int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere)
+int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept
 {
     for (uint i = 0; ; ++i)
     {
@@ -337,7 +337,7 @@ static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable) noexcept
 
 // strcpy doesn't have an argument to truncate the copy to the buffer length;
 // strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
-size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
 {
     if (uiMaxSize == 0)
     {
@@ -361,7 +361,7 @@ size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
     return qty; // bytes copied in pDst string (CAN count the string terminator)
 }
 
-size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
+size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
 {
     if (uiMaxSize == 0)
     {
@@ -386,7 +386,7 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize)
     return qty - 1; // bytes copied in pDst string (not counting the string terminator)
 }
 
-size_t Str_CopyLen(tchar * pDst, lpctstr pSrc)
+size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept
 {
     strcpy(pDst, pSrc);
     return strlen(pDst);
@@ -419,7 +419,7 @@ size_t strlen_mb(const char* ptr)
 }
 */
 
-size_t Str_LengthUTF8(const char* strInUTF8MB)
+size_t Str_LengthUTF8(const char* strInUTF8MB) noexcept
 {
     size_t len; // number of characters in the string
 #ifdef _MSC_VER
@@ -439,7 +439,7 @@ size_t Str_LengthUTF8(const char* strInUTF8MB)
 * If retval >= siz, truncation occurs.
 */
 // Adapted from: OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38
-size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
+size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz) noexcept
 {
     tchar *d = dst;
     size_t n = siz;
@@ -474,7 +474,7 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz)
     return (dlen + (s - src));	/* count does not include '\0' */
 }
 
-tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len)
+tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len) noexcept
 {
     tchar c, sc;
     if ((c = *substr++) != '\0')
@@ -498,7 +498,7 @@ tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t
     return str;
 }
 
-lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
+lpctstr Str_GetArticleAndSpace(lpctstr pszWord) noexcept
 {
     // NOTE: This is wrong many times.
     //  ie. some words need no article (plurals) : boots.
@@ -518,7 +518,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
     return "a ";
 }
 
-int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStrip)
+int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStrip) noexcept
 {
     // That the client can deal with. Basic punctuation and alpha and numbers.
     // RETURN: Output length.
@@ -644,7 +644,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 
 tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 {
-    // TODO: WARNING! Possible Memory Leak here!
+    // TODO: WARNING! Possible Memory Leak here?
     GETNONWHITESPACE(pStr);
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
@@ -833,7 +833,7 @@ int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable
     return -1;
 }
 
-bool Str_Check(lpctstr pszIn)
+bool Str_Check(lpctstr pszIn) noexcept
 {
     if (pszIn == nullptr)
         return true;
@@ -845,7 +845,7 @@ bool Str_Check(lpctstr pszIn)
     return (*p != '\0');
 }
 
-bool Str_CheckName(lpctstr pszIn)
+bool Str_CheckName(lpctstr pszIn) noexcept
 {
     if (pszIn == nullptr)
         return true;
@@ -863,7 +863,7 @@ bool Str_CheckName(lpctstr pszIn)
     return (*p != '\0');
 }
 
-int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
+int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset) noexcept
 {
     if (offset < 0)
         return -1;
@@ -907,7 +907,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
     return -1;
 }
 
-static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText)
+static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText) noexcept
 {
     // pass over existing ? and * in pattern
     for (; *pPattern == '?' || *pPattern == '*'; ++pPattern)
@@ -951,7 +951,7 @@ static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText)
     return match;	// return result
 }
 
-MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
+MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept
 {
     // case independant
 
@@ -1097,7 +1097,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
     // something gets corrupted on the memory and an exception is generated later
     #pragma auto_inline(off)
 #endif
-bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
+bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
 {
     // Parse a list of args. Just get the next arg.
     // similar to strtok()
@@ -1244,7 +1244,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     #pragma auto_inline(on)
 #endif
 
-int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
+int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep) noexcept
 {
     ASSERT(iMax > 1);
     int iQty = 0;
@@ -1265,7 +1265,7 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
     return iQty;
 }
 
-int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
+int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep) noexcept
 {
     tchar * ppTmp[256];
     if (iMax > (int)ARRAY_COUNT(ppTmp))
@@ -1284,7 +1284,7 @@ int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 //I added this to parse commands by checking inline quotes directly.
 //I tested it on every type of things but this is still experimental and being using under STRTOKEN.
 //xwerswoodx
-bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
+bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
 {
     // Parse a list of args. Just get the next arg.
     // similar to strtok()
@@ -1450,7 +1450,7 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
     return true;
 }
 
-int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
+int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep) noexcept
 {
     ASSERT(iMax > 1);
     int iQty = 0;
@@ -1471,7 +1471,7 @@ int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSe
     return iQty;
 }
 
-tchar * Str_UnQuote(tchar * pStr)
+tchar * Str_UnQuote(tchar * pStr) noexcept
 {
     GETNONWHITESPACE(pStr);
     
@@ -1504,20 +1504,20 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
     catch (const std::bad_alloc &e)
     {
         Str_CopyLimitNull(lastError, e.what(), SCRIPT_MAX_LINE_LEN);
-        CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         return -1;
     }
     catch (...)
     {
         Str_CopyLimitNull(lastError, "Unknown", SCRIPT_MAX_LINE_LEN);
-        CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         return -1;
     }
 }
 
 //--
 
-void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes)
+void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes) noexcept
 {
     for (int idx = 0; idx != MBytes * 2; idx += 2) {
         if (Src[idx / 2] == '\0')
@@ -1526,12 +1526,12 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes)
     }
 }
 
-UTF8MBSTR::UTF8MBSTR()
+UTF8MBSTR::UTF8MBSTR() noexcept
 {
     m_strUTF8_MultiByte = new char[1]();
 }
 
-UTF8MBSTR::UTF8MBSTR(lpctstr lpStr)
+UTF8MBSTR::UTF8MBSTR(lpctstr lpStr) noexcept
 {
     if (lpStr)
     {
@@ -1542,7 +1542,7 @@ UTF8MBSTR::UTF8MBSTR(lpctstr lpStr)
         m_strUTF8_MultiByte = new char[1]();
 }
 
-UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr)
+UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr) noexcept
 {
     size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
     m_strUTF8_MultiByte = new char[len + 1]();
@@ -1555,7 +1555,7 @@ UTF8MBSTR::~UTF8MBSTR()
         delete[] m_strUTF8_MultiByte;
 }
 
-void UTF8MBSTR::operator =(lpctstr lpStr)
+void UTF8MBSTR::operator =(lpctstr lpStr) noexcept
 {
     if (m_strUTF8_MultiByte)
         delete[] m_strUTF8_MultiByte;
@@ -1569,7 +1569,7 @@ void UTF8MBSTR::operator =(lpctstr lpStr)
         m_strUTF8_MultiByte = new char[1]();
 }
 
-void UTF8MBSTR::operator =(UTF8MBSTR& lpStr)
+void UTF8MBSTR::operator =(UTF8MBSTR& lpStr) noexcept
 {
     if (m_strUTF8_MultiByte)
         delete[] m_strUTF8_MultiByte;
@@ -1579,12 +1579,7 @@ void UTF8MBSTR::operator =(UTF8MBSTR& lpStr)
     memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
 }
 
-UTF8MBSTR::operator char* ()
-{
-    return m_strUTF8_MultiByte;
-}
-
-size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB)
+size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB) noexcept
 {
     size_t len;
 #if defined(_WIN32) && defined(UNICODE)
@@ -1611,7 +1606,7 @@ size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB)
     return len;
 }
 
-size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut)
+size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) noexcept
 {
     size_t len = Str_LengthUTF8(strInUTF8MB);
     if (!strOut)

@@ -10,7 +10,7 @@
 
 class AbstractSphereThread;
 
-#define CurrentProfileData static_cast<AbstractSphereThread *>(ThreadHolder::get().current())->m_profile
+ProfileData& GetCurrentProfileData() noexcept;
 
 
 class ProfileTask
@@ -23,9 +23,8 @@ public:
 	explicit ProfileTask(PROFILE_TYPE id);
 	~ProfileTask(void);
 
-private:
-	ProfileTask(const ProfileTask& copy);
-	ProfileTask& operator=(const ProfileTask& other);
+	ProfileTask(const ProfileTask& copy) = delete;
+	ProfileTask& operator=(const ProfileTask& other) = delete;
 };
 
 

@@ -17,9 +17,10 @@
 #define SCRIPT_MAX_SECTION_LEN	128
 
 
+// C abs function has different in/out types the std:: ones in cmath. It's defined in stdlib.h.
+#include <stdlib.h>
 #include <memory>   // for smart pointers
 #include <type_traits>
-#include <cstdlib>
 #include "assertion.h"
 #include "basic_threading.h"
 

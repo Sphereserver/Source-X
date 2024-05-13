@@ -264,10 +264,10 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 				{
 					if (g_MapList.IsInitialized(m) || (m == 0)) //Need at least a minimum of map0... (Ben)
 					{
-						int	index = g_MapList.m_mapnum[m];
+                        int	index = g_MapList.m_mapGeoData.maps[m].num;
 						if (index == -1)
 						{
-							g_MapList.m_maps[m] = false;
+							g_MapList.m_mapGeoData.maps[m].enabled = false;
 							continue;
 						}
 
@@ -404,9 +404,9 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 								m_Statics[index].Close();
 
 							if (index == 1 && m_Maps[0].IsFileOpen())
-								g_MapList.m_mapnum[m] = 0;
+								g_MapList.m_mapGeoData.maps[m].num = 0;
 							else
-								g_MapList.m_mapid[m] = 0;
+								g_MapList.m_mapGeoData.maps[m].id = 0;
 						}
 
 						//	mapdif and mapdifl are not required, but if one exists so should

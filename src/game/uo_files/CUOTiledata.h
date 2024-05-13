@@ -32,7 +32,4 @@ public:
 };
 
 
-
-
-
 #endif // _INC_CUOTILEDATA_H

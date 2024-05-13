@@ -79,12 +79,12 @@ void CUOTiledata::Load()
             switch (format)
             {
                 case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec_HS)
-                    offset = 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOTerrainTypeRec_HS ));
+                    offset = 4u + (( id / UOTILE_BLOCK_QTY ) * 4u ) + ( id * sizeof(CUOTerrainTypeRec_HS) );
                     break;
 
                 case VERFORMAT_ORIGINAL: // original format (CUOTerrainTypeRec)
                 default:
-                    offset = 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOTerrainTypeRec ));
+                    offset = 4u + (( id / UOTILE_BLOCK_QTY ) * 4u ) + ( id * sizeof(CUOTerrainTypeRec) );
                     break;
             }
         }

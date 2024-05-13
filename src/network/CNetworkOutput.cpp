@@ -561,7 +561,7 @@ size_t CNetworkOutput::sendData(CNetState* state, const byte* data, size_t lengt
 	}
 
 	if (result > 0 && result != _failed_result())
-		CurrentProfileData.Count(PROFILE_DATA_TX, (dword)(result));
+		GetCurrentProfileData().Count(PROFILE_DATA_TX, (dword)(result));
 
 	return result;
 	EXC_CATCH;

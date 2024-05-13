@@ -341,7 +341,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 	{
 		// Not much we can do about this
 		iRet = 0;
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	return iRet;
@@ -392,7 +392,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 	catch (...)
 	{
 		// Not much we can do about this.
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	sm_prevCatchTick = timeCurrent;
 }

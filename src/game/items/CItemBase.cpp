@@ -658,19 +658,19 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
     catch (const std::exception& e)
     {
         g_Log.CatchStdException(&e, "GetItemData");
-        CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         return false;
     }
 	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
 	catch (...)
 	{
 		g_Log.CatchEvent(nullptr, "GetItemData" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
 

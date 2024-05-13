@@ -21,9 +21,8 @@ public:
 	CVarDefCont()           = default;
 	virtual ~CVarDefCont()  = default;
 
-private:
-	CVarDefCont(const CVarDefCont& copy);
-	CVarDefCont& operator=(const CVarDefCont& other);
+	CVarDefCont(const CVarDefCont& copy) = delete;
+	CVarDefCont& operator=(const CVarDefCont& other) = delete;
 
 public:
     virtual lpctstr GetKey() const noexcept = 0;
