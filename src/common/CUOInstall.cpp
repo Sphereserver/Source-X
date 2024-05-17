@@ -87,7 +87,7 @@ bool CUOInstall::FindInstall()
 	RegCloseKey( hKey );
 
 #else
-	// LINUX has no registry so we must have the INI file show us where it is installed.
+	// Other OSes have no registry so we must have the INI file show us where it is installed.
 #endif
 	return true;
 }

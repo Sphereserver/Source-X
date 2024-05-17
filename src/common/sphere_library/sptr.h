@@ -1,7 +1,7 @@
 #ifndef _INC_SPTR_H
 #define _INC_SPTR_H
 
-#include <object_ptr.hpp>
+#include <object_ptr/object_ptr.hpp>
 
 
 // Sphere Library

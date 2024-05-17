@@ -75,8 +75,8 @@ function (toolchain_exe_stuff_common)
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS		"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"			PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS} ${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"			PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
@@ -134,9 +134,8 @@ function (toolchain_exe_stuff_common)
 
 	#-- Set common define macros.
 
-	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _WIN32 Z_PREFIX _GITVERSION _EXCEPTIONS_DEBUG _CRT_SECURE_NO_WARNINGS _WINSOCK_DEPRECATED_NO_WARNINGS)
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _WIN32 _GITVERSION _EXCEPTIONS_DEBUG _CRT_SECURE_NO_WARNINGS _WINSOCK_DEPRECATED_NO_WARNINGS)
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
-		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 		# _CRT_SECURE_NO_WARNINGS: Temporary setting to do not spam so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.

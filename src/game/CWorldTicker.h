@@ -5,7 +5,7 @@
 #ifndef _INC_CWORLDTICKER_H
 #define _INC_CWORLDTICKER_H
 
-#include "../../lib/parallel_hashmap/phmap.h"
+#include <parallel_hashmap/phmap.h>
 #include "CTimedFunctionHandler.h"
 #include "CTimedObject.h"
 #include <map>

@@ -57,8 +57,8 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS} ${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"			PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Find libraries to be linked to.
@@ -136,23 +136,20 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	 # Linking Unix libs.
 	 # same here, do not use " " to delimitate these flags!
 	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_debug)
 
 
 	#-- Set common define macros.
 
-	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _LINUX _LIBEV Z_PREFIX _POSIX_SOURCE _GITVERSION _EXCEPTIONS_DEBUG)
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _LINUX _GITVERSION _EXCEPTIONS_DEBUG)
 		# _LINUX: linux OS.
-		# _LIBEV: use libev
-		# Z_PREFIX: Use the "z_" prefix for the zlib functions
-		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 

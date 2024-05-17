@@ -1,16 +1,25 @@
 #	Main config	#
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.13)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.19)
 SET (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
 
 # GUI checkboxes
 SET (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
 
+set (predef_LIB_LIBEV_BUILD 	false)
+if (NOT WIN32)
+	set (predef_LIB_LIBEV_BUILD	true)
+endif()
+SET (LIB_LIBEV_BUILD		${predef_LIB_LIBEV_BUILD}	CACHE BOOL "Build libev.")
+SET (LIB_SQLITE_BUILD		true  CACHE BOOL "Build sqlite.")
+SET (LIB_ZLIB_BUILD			true  CACHE BOOL "Build zlib.")
+
 SET (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
-SET (USE_ASAN			false CACHE BOOL "Enable AddressSanitizer.")
-SET (USE_MSAN			false CACHE BOOL "Enable MemorySanitizer.")
-SET (USE_LSAN			false CACHE BOOL "Enable LeakSanitizer.")
-SET (USE_UBSAN		false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
+SET (USE_ASAN				false CACHE BOOL "Enable AddressSanitizer.")
+SET (USE_MSAN				false CACHE BOOL "Enable MemorySanitizer.")
+SET (USE_LSAN				false CACHE BOOL "Enable LeakSanitizer.")
+SET (USE_UBSAN				false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
+
 
 # Utility functions
 FUNCTION (booleanize_str_find VAR)
@@ -30,11 +39,36 @@ IF ((NOT TOOLCHAIN_LOADED) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
 	toolchain_force_compiler ()
 ENDIF ()
 
+
 MESSAGE (STATUS "Scanning system build tools...")
-PROJECT (SphereServer)	# does a scan for C++ and C compilers
+
+if (NOT DEFINED CMAKE_CXX_STANDARD)
+  # only set CMAKE_CXX_STANDARD if not already set
+  # this allows the standard to be set by the caller, for example with -DCMAKE_CXX_STANDARD:STRING=20
+    set (CMAKE_CXX_STANDARD 20)
+elseif (CMAKE_CXX_STANDARD LESS 20)
+    message (WARNING "Current C++ standard ({CMAKE_CXX_STANDARD}) too low, defaulting to the minimum supported, 20.")
+    set (CMAKE_CXX_STANDARD 20)
+endif ()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if (NOT DEFINED CMAKE_C_STANDARD)
+  # only set CMAKE_C_STANDARD if not already set
+  # this allows the standard to be set by the caller, for example with -DCMAKE_C_STANDARD:STRING=11
+    set (CMAKE_C_STANDARD 11)
+elseif (CMAKE_C_STANDARD LESS 11)
+    message (WARNING "Current C standard ({CMAKE_C_STANDARD}) too low, defaulting to 11.")
+    set (CMAKE_C_STANDARD 11)
+endif ()
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
+PROJECT (SphereServer CXX C)	# does a scan for C++ and C compilers
 
 
 # Determine system arch
+# TODO: change name for the variable to ARCH_IS_32BITS and ARCH_IS_64BITS
 INCLUDE ("cmake/CMakeDetectArch.cmake")
 determine_target_architecture(ARCH_DETECTED)
 STRING (FIND "${ARCH_DETECTED}" "x86_64" 	ARCH_HAS_x86_64)
@@ -98,38 +132,17 @@ ELSE (SINGLE_TARGET)
 ENDIF (SINGLE_TARGET)
 
 
-# Include the list of all our source files
-INCLUDE ("CMakeSources.cmake")
-
-SET (ALL_SRCS
-	${LIB_SRCS}
-
-	${game_SRCS}
-	${items_SRCS}
-	${chars_SRCS}
-	${clients_SRCS}
-	${components_SRCS}
-	${uofiles_SRCS}
-	${common_SRCS}
-	${resource_SRCS}
-	${resourcesections_SRCS}
-	${network_SRCS}
-	${crypto_SRCS}
-	${sphere_SRCS}
-	${crashdump_SRCS}
-	${spherelibrary_SRCS}
-	${tables_SRCS}
-	${app_resources_SRCS}
-)
-
+# Include the list of all Sphere source files
+include("src/CMakeSources.cmake")
 
 # Configure output binaries
+set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
 IF (SINGLE_TARGET)
 
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		SET (TARGETS ${TARGETS} spheresvr_release)
 		ADD_EXECUTABLE (spheresvr_release
-					${ALL_SRCS}
+					${SPHERE_SOURCES}
 		#			${docs_TEXT}
 			)
         	SET_TARGET_PROPERTIES (spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
@@ -137,7 +150,7 @@ IF (SINGLE_TARGET)
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		SET (TARGETS ${TARGETS} spheresvr_nightly)
 		ADD_EXECUTABLE (spheresvr_nightly
-					${ALL_SRCS}
+					${SPHERE_SOURCES}
 		#			${docs_TEXT}
 			)
         	SET_TARGET_PROPERTIES (spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
@@ -145,7 +158,7 @@ IF (SINGLE_TARGET)
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		SET (TARGETS ${TARGETS} spheresvr_debug)
 		ADD_EXECUTABLE (spheresvr_debug
-					${ALL_SRCS}
+					${SPHERE_SOURCES}
 		#			${docs_TEXT}
 			)
         	SET_TARGET_PROPERTIES (spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
@@ -155,7 +168,7 @@ ELSE (SINGLE_TARGET)
 
 	SET (TARGETS ${TARGETS} spheresvr)
     	ADD_EXECUTABLE (spheresvr
-            ${ALL_SRCS}
+            ${SPHERE_SOURCES}
             ${docs_TEXT}
 		)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
@@ -165,9 +178,13 @@ ELSE (SINGLE_TARGET)
 ENDIF (SINGLE_TARGET)
 
 
+# Now include external libraries
+add_subdirectory(lib)
+
+
 # Need to clear shared library flags. If not, cmake sets -rdynamic and this
 # add to the executable the full symbol table (included unused symbols).
-# This is a problem because the binary is ~700 KB bigger.
+# This is a problem because the binary is >700 KB bigger.
 SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 
@@ -177,8 +194,3 @@ toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
 # Get the Git revision number
 INCLUDE ("cmake/CMakeGitStatus.cmake")
 
-# Generate config.h file for libev (if we are using it)
-INCLUDE ("cmake/CMakeConditionalConfigureLibev.cmake")
-
-# Configure MariaDB C Connector source headers
-INCLUDE ("lib/mariadb/configure.cmake")

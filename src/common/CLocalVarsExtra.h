@@ -6,7 +6,7 @@
 #ifndef _INC_CLOCALVARSEXTRA_H
 #define _INC_CLOCALVARSEXTRA_H
 
-#include "../../lib/flat_containers/flat_map.hpp"
+#include <flat_containers/flat_map.hpp>
 #include "sphere_library/CSString.h"
 
 

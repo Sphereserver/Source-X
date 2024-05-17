@@ -10,19 +10,19 @@ function (toolchain_exe_stuff_common)
 
 	SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
-		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
+		SET (C_FLAGS_EXTRA 	"${C_FLAGS_EXTRA}   -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
 		MESSAGE (WARNING "You have enabled MSAN. Make sure you do know what you are doing. It doesn't work out of the box. \
 See comments in the toolchain and: https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo")
-		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins -fPIE")
+		SET (C_FLAGS_EXTRA 	"${C_FLAGS_EXTRA}   -fsanitize=memory -fsanitize-memory-track-origins -fPIE")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins -fPIE")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
-		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   -fsanitize=leak")
+		SET (C_FLAGS_EXTRA 	"${C_FLAGS_EXTRA}   -fsanitize=leak")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} -fsanitize=leak")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
@@ -32,7 +32,7 @@ shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
 float-divide-by-zero,float-cast-overflow,pointer-overflow,\
 unreachable,nonnull-attribute,returns-nonnull-attribute \
 -fno-sanitize=enum")
-		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
+		SET (C_FLAGS_EXTRA 	"${C_FLAGS_EXTRA}   ${UBSAN_FLAGS}")
 		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr")
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
@@ -57,8 +57,8 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	SET (C_SPECIAL		"-pipe")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS		"${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${CMAKE_C_FLAGS} ${C_WARNING_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${CXX_WARNING_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 	# GCC flags not supported by clang:
 	#	Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
 	#	Other: "-fno-expensive-optimizations"
@@ -115,7 +115,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	ENDIF()
 
 	 # -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS	"${CMAKE_EXE_LINKER_FLAGS} -pthread -dynamic ${CMAKE_EXE_LINKER_FLAGS_EXTRA}" PARENT_SCOPE)
 
 
 
@@ -149,23 +149,20 @@ unreachable,nonnull-attribute,returns-nonnull-attribute \
 	 # Linking Unix libs.
 	 # same here, do not use " " to delimitate these flags!
 	IF (TARGET spheresvr_release)
-		TARGET_LINK_LIBRARIES ( spheresvr_release	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
+		TARGET_LINK_LIBRARIES ( spheresvr_release	PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
-		TARGET_LINK_LIBRARIES ( spheresvr_nightly	${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_LINK_LIBRARIES ( spheresvr_debug		${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH} )
 	ENDIF (TARGET spheresvr_debug)
 
 
 	#-- Set common define macros.
 
-	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _LINUX _LIBEV Z_PREFIX _POSIX_SOURCE _GITVERSION _EXCEPTIONS_DEBUG)
+	add_compile_definitions(${PREPROCESSOR_DEFS_EXTRA} _LINUX _GITVERSION _EXCEPTIONS_DEBUG)
 		# _LINUX: linux OS.
-		# _LIBEV: use libev
-		# Z_PREFIX: Use the "z_" prefix for the zlib functions
-		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 

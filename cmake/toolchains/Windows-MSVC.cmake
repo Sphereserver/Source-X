@@ -98,7 +98,7 @@ function (toolchain_after_project)
 	#-- Debug compiler and linker flags.
 
 	SET (CMAKE_C_FLAGS_DEBUG			"${C_FLAGS_COMMON}   /Od /EHsc /Oy-"				PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /Od /EHsc /Oy- /MDd /ZI /ob0"	PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /Od /EHsc /Oy- /MDd /ZI /ob1"	PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"/DEBUG /SAFESEH:NO ${EXE_LINKER_EXTRA}" PARENT_SCOPE)
 
 

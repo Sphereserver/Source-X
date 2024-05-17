@@ -10,7 +10,7 @@
 #include "../CServer.h"
 #include "CClient.h"
 
-#include "../../../lib/zlib/zlib.h"
+#include <zlib/zlib.h>
 
 
 CHuffman CClient::m_Comp;
@@ -222,8 +222,8 @@ bool CClient::addRelay( const CServerDef * pServ )
 		CSString sCustomerID(pServ->GetName());
 		sCustomerID.Add(GetAccount()->GetName());
 
-		dwCustomerId = z_crc32(0L, Z_NULL, 0);
-		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetBuffer()), (z_uInt)sCustomerID.GetLength());
+		dwCustomerId = ::crc32(0L, Z_NULL, 0);
+		dwCustomerId = ::crc32(dwCustomerId, reinterpret_cast<const Bytef *>(sCustomerID.GetBuffer()), (uInt)sCustomerID.GetLength());
 
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}

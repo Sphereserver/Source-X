@@ -4,7 +4,7 @@
 #include "../CException.h"
 #include "../CScript.h"
 #include "SQLite.h"
-#include "../../lib/sqlite/sqlite3.h"
+#include <sqlite/sqlite3.h>
 
 
 CSQLite::CSQLite()

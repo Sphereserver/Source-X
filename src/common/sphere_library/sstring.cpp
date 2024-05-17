@@ -1,9 +1,7 @@
 #include "sstring.h"
-#include "../../sphere/threads.h"
 #include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
 #include "../CExpression.h"
-#include "../CScript.h"
 
 
 #if defined(_MSC_VER)
@@ -15,7 +13,7 @@
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 
-#include "../../../lib/regex/deelx.h"
+#include <regex/deelx.h>
 
 #ifdef _MSC_VER
     #pragma warning( pop )

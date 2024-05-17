@@ -523,7 +523,7 @@ src/tables/triggers.tbl
 )
 SOURCE_GROUP (tables FILES ${tables_SRCS})
 
-SET (app_resources_SRCS 
+SET (app_resources_SRCS
 src/resources/SphereSvr.rc
 )
 
@@ -532,4 +532,24 @@ SET (docs_TEXT
 Changelog.txt
 src/sphere.ini
 src/sphereCrypt.ini
+)
+
+
+SET (SPHERE_SOURCES
+	${game_SRCS}
+	${items_SRCS}
+	${chars_SRCS}
+	${clients_SRCS}
+	${components_SRCS}
+	${uofiles_SRCS}
+	${common_SRCS}
+	${resource_SRCS}
+	${resourcesections_SRCS}
+	${network_SRCS}
+	${crypto_SRCS}
+	${sphere_SRCS}
+	${crashdump_SRCS}
+	${spherelibrary_SRCS}
+	${tables_SRCS}
+	${app_resources_SRCS}
 )
