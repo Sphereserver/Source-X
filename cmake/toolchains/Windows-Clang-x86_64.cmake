@@ -1,5 +1,4 @@
-MESSAGE (STATUS ${CMAKE_CURRENT_LIST_DIR})
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/Windows-Clang_common.inc.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Windows-Clang_common.inc.cmake")
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-Clang-x86_64.cmake.")
@@ -8,7 +7,7 @@ function (toolchain_after_project)
 
 	toolchain_after_project_common()	# To enable RC language, to compile Windows Resource files
 
-	LINK_DIRECTORIES ("lib/bin/x86_64/mariadb/")
+	LINK_DIRECTORIES ("lib/_bin/x86_64/mariadb/")
 	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86_64"	PARENT_SCOPE)
 endfunction()
 
@@ -26,7 +25,7 @@ function (toolchain_exe_stuff)
 
 	toolchain_exe_stuff_common()
 
-	# Propagate variables set in toolchain_exe_stuff_common to the upper scope
+	# Propagate global variables set in toolchain_exe_stuff_common to the upper scope
 	SET (CMAKE_C_FLAGS			"${CMAKE_C_FLAGS} ${C_ARCH_OPTS}"       PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} ${CXX_ARCH_OPTS}"	PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" 			PARENT_SCOPE)

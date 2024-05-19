@@ -113,7 +113,7 @@ bool PacketCreate::onReceive(CNetState* net)
 				rtRace = RACETYPE_GARGOYLE;
 				break;
 			default:
-				g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
+				g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "PacketCreate: unknown race_sex_flag (%" PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 		}
 	}
 	else
@@ -4627,7 +4627,7 @@ bool PacketCreateHS::onReceive(CNetState* net)
 		rtRace = RACETYPE_GARGOYLE;
 		break;
 	default:
-		g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
+		g_Log.Event(LOGL_WARN | LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (%" PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	}
 
 	return doCreate(net, charname, isFemale, rtRace,
@@ -4683,7 +4683,7 @@ bool PacketGlobalChatReq::onReceive(CNetState* net)
 		client->addGlobalChatStatusToggle();
 		return true;
 	default:
-		DEBUG_ERR(("%lx:Unknown global chat action 0%lx\n", net->id(), action));
+		DEBUG_ERR(("%x:Unknown global chat action 0%d\n", net->id(), action));
 		return true;
 	}
 }

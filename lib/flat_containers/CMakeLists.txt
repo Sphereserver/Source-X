@@ -11,6 +11,7 @@ set (lib_SOURCES
 # add to the proper directories in the solution explorer (eg. Visual Studio)
 source_group (lib\\flat_containers FILES ${lib_SOURCES})
 
+# create the target. equivalent to add_executable, but for libraries
 add_library(flat_containers INTERFACE ${lib_SOURCES})
 #set_target_properties(flat_containers PROPERTIES LINKER_LANGUAGE CXX)
 

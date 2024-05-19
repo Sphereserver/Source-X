@@ -2576,12 +2576,13 @@ void CClient::addGlobalChatConnect()
 
 	// Set Jabber ID (syntax: CharName_CharUID@ServerID)
 	tchar* pszJID = Str_GetTemp();
-	sprintf(pszJID, "%.6s_%.7lu@%.2hhu", m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()), 0);
+	sprintf(pszJID, "%.6s_%.7u@%.2hhu", m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()), 0);
 	CGlobalChatChanMember::SetJID(pszJID);
 
 	// Send xml to client
 	tchar* pszXML = Str_GetTemp();
-	sprintf(pszXML, "<iq to=\"%s\" id=\"iq_%.10lu\" type=\"6\" version=\"1\" jid=\"%s\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), CGlobalChatChanMember::GetJID());
+	sprintf(pszXML, "<iq to=\"%s\" id=\"iq_%.10u\" type=\"6\" version=\"1\" jid=\"%s\" />",
+			CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), CGlobalChatChanMember::GetJID());
 
 	CGlobalChatChanMember::SetVisible(false);
 	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::InfoQuery, pszXML);
@@ -2609,7 +2610,8 @@ void CClient::addGlobalChatStatusToggle()
 	}
 
 	tchar* pszXML = Str_GetTemp();
-	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10lu\" name=\"%.6s\" show=\"%d\" version=\"1\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
+	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10u\" name=\"%.6s\" show=\"%d\" version=\"1\" />", 
+			CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
 
 	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));
 	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::Presence, pszXML);

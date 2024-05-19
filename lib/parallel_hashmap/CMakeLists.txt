@@ -13,6 +13,7 @@ set (lib_SOURCES
     #parallel_hashmap/phmap_utils.h
 )
 
+# create the target. equivalent to add_executable, but for libraries
 add_library(parallel_hashmap INTERFACE ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).

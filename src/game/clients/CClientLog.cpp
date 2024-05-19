@@ -834,7 +834,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 	// Try all client versions on the msg.
 	if ( !m_Crypt.Init( m_net->m_seed, pEvent->m_Raw, uiLen, GetNetState()->isClientKR() ) )
 	{
-		DEBUG_MSG(( "%x:Odd login message length %" PRIuSIZE_T "?\n", GetSocketID(), uiLen ));
+		DEBUG_MSG(( "%x:Odd login message length %u?\n", GetSocketID(), uiLen ));
 #ifdef _DEBUG
 		xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 #endif

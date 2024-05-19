@@ -11,9 +11,8 @@
 
 #define CLIENT_END 0x00000001
 
-
-typedef struct keyInstance*		tf_keyInstance;
-typedef struct cipherInstance*	tf_cipherInstance;
+struct tf_keyInstance;
+struct tf_cipherInstance;
 class CMD5;
 class CScript;
 
@@ -126,8 +125,8 @@ protected:
 protected:
 	// --------------- Two Fish ------------------------------
 	#define TFISH_RESET 0x100
-	tf_keyInstance tf_key;
-	tf_cipherInstance tf_cipher;
+	void* tf_key;      // keyInstance*
+	void* tf_cipher;   // cipherInstance*
 	byte tf_cipherTable[TFISH_RESET];
 	int tf_position;
 private:

@@ -6,6 +6,7 @@ set (lib_SOURCES
     object_ptr/object_ptr.hpp
 )
 
+# create the target. equivalent to add_executable, but for libraries
 add_library(object_ptr INTERFACE ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).

@@ -1,9 +1,11 @@
 
+add_subdirectory(bcrypt)
 add_subdirectory(flat_containers)
 add_subdirectory(mariadb_connector_c)
 add_subdirectory(object_ptr)
 add_subdirectory(parallel_hashmap)
 add_subdirectory(regex)
+add_subdirectory(twofish)
 
 if (${LIB_LIBEV_BUILD})
   add_subdirectory(libev)
@@ -39,6 +41,7 @@ foreach (tgt ${TARGETS})
   )
 
   # Link to (and import include directories) those clasic (.c/.h) libraries.
+  target_link_libraries(${tgt} PRIVATE bcrypt twofish)
   if (${LIB_LIBEV_BUILD})
     target_link_libraries(${tgt} PRIVATE libev)
   endif()

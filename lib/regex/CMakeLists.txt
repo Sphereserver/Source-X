@@ -5,6 +5,7 @@ set (lib_SOURCES
     regex/deelx.h
 )
 
+# create the target. equivalent to add_executable, but for libraries
 add_library(regex INTERFACE ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).

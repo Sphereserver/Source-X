@@ -10,8 +10,11 @@
 #include "CCrypto.h"
 
 // For TwoFish and MD5 we only provide an interface, so we include the headers of the code doing all the related crypto stuff
-#include "twofish/twofish.h"
+extern "C" {
+#include <twofish/aes.h>
+}
 #include "CMD5.h"
+
 
 
 // ===============================================================================================================
@@ -326,8 +329,8 @@ CCrypto::CCrypto()
 
 CCrypto::~CCrypto()
 {
-	delete tf_cipher;
-	delete tf_key;
+	delete static_cast<cipherInstance*>(tf_cipher);
+	delete static_cast<keyInstance*>(tf_key);
 	delete m_md5_engine;
 }
 

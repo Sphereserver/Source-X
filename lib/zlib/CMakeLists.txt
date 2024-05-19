@@ -41,3 +41,4 @@ target_include_directories (zlib PUBLIC .)
 
 # set compiler flags
 include("../lib_compiler_flags_common_c.cmake")
+target_compile_options(zlib PRIVATE ${c_compiler_options_common})

@@ -4,13 +4,14 @@ project(mariadb_connector C)
 #include("lib_compiler_flags_common_c.cmake")
 
 # Configure MariaDB C Connector source headers
-INCLUDE ("mysql/configure.cmake")
+include ("mysql/configure.cmake")
 
 set (lib_SOURCES
     mysql/config.h
     mysql/mysql.h
 )
 
+# create the target. equivalent to add_executable, but for libraries
 add_library(mariadb_connector INTERFACE ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).

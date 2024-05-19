@@ -389,7 +389,7 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
 
     if ((iRidType != RES_CHARDEF) && (iRidType != RES_UNKNOWN))
     {
-        g_Log.EventError("Spawner UID=0%" PRIx32 " tried to GenerateChar with invalid ResType=%d (ResourceID=0% " PRIx32 ").\n", (dword)pSpawnItem->GetUID(), (int)iRidType, rid.GetPrivateUID() );
+        g_Log.EventError("Spawner UID=0%" PRIx32 " tried to GenerateChar with invalid ResType=%d (ResourceID=0%" PRIx32 ").\n", (dword)pSpawnItem->GetUID(), (int)iRidType, rid.GetPrivateUID() );
         return nullptr;
     }
 

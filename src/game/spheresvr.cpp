@@ -302,7 +302,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = % " PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
+	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = %" PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
 
 #ifdef _WIN32
 	g_Log.Event(LOGM_INIT, "Use '?' to view available console commands\n\n");
@@ -557,7 +557,7 @@ void defragSphere(char *path)
 		inf.Close();
 	}
 	const dword dwTotalUIDs = dwIdxUID;
-	g_Log.Event(LOGM_INIT, "Totally having %" PRIuSIZE_T " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
+	g_Log.Event(LOGM_INIT, "Totally having %" PRIu32 " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(puids, 0, dwTotalUIDs -1);

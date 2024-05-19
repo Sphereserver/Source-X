@@ -794,7 +794,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
 
 		if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
-			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). curAvg(%lld)", iTimeDiff, iTimeMin, m_iWalkTimeAvg);
+			SysMessagef("Walkcheck trace: timeDiff(%" PRId64 ") / timeMin(%" PRId64 "). curAvg(%lld)", iTimeDiff, iTimeMin, m_iWalkTimeAvg);
 
 		// Checking if there a speehack
 		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
@@ -3118,7 +3118,7 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 	{
 		CScriptTriggerArgs Args(pData[0]);
 		enum TRIGRET_TYPE trigReturn;
-		tchar idx[5];
+		tchar idx[12];
 
 		Args.m_s1 = GetPeerStr();
 		Args.m_pO1 = this; // Yay for ARGO.SENDPACKET
@@ -3167,7 +3167,7 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 	{
 		CScriptTriggerArgs Args(pData[0]);
 		enum TRIGRET_TYPE trigReturn;
-		tchar idx[5];
+		tchar idx[12];
 
 		Args.m_s1 = GetPeerStr();
 		Args.m_pO1 = this;

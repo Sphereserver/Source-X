@@ -4,28 +4,48 @@ function (toolchain_force_compiler)
 	# Already managed by the generator.
 	#SET (CMAKE_C_COMPILER 	"...cl.exe" 	CACHE STRING "C compiler" 	FORCE)
 	#SET (CMAKE_CXX_COMPILER "...cl.exe" 	CACHE STRING "C++ compiler" FORCE)
+
+	MESSAGE (STATUS "Toolchain: Windows-MSVC.cmake.")
+	SET(CMAKE_SYSTEM_NAME	"Windows"						PARENT_SCOPE)
+	SET(ARCH_BITS			$<IF:$<BOOL:CMAKE_CL_64>,64,32>	PARENT_SCOPE)
+
 endfunction ()
 
 
 function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: Windows-MSVC.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
+endfunction()
+
+
+function (toolchain_exe_stuff)
+
+	#-- Set mariadb .lib directory for the linker.
+
+	IF (CMAKE_CL_64)
+		LINK_DIRECTORIES ("lib/_bin/x86_64/mariadb/")
+	ELSE ()
+		LINK_DIRECTORIES ("lib/_bin/x86/mariadb/")
+	ENDIF ()
+
+
+		#-- Configure the Windows application type.
 
 	SET (EXE_LINKER_EXTRA "")
 	IF (${WIN32_SPAWN_CONSOLE})
-		SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} /SUBSYSTEM:CONSOLE /ENTRY:WinMainCRTStartup")
-		SET (PREPROCESSOR_DEFS_EXTRA	"_WINDOWS_CONSOLE")
+		SET (EXE_LINKER_EXTRA			${EXE_LINKER_EXTRA} /SUBSYSTEM:CONSOLE /ENTRY:WinMainCRTStartup)
+		SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
 	ELSE ()
-		SET (EXE_LINKER_EXTRA "${EXE_LINKER_EXTRA} /SUBSYSTEM:WINDOWS")
+		SET (EXE_LINKER_EXTRA			${EXE_LINKER_EXTRA} /SUBSYSTEM:WINDOWS)
 	ENDIF ()
+
+
+	#-- Validate sanitizers options and store them between the common compiler flags.
 
 	SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
 		IF (${MSVC_TOOLSET_VERSION} LESS_EQUAL 141) # VS 2017
 			MESSAGE (FATAL_ERROR "This MSVC version doesn't yet support LSAN. Use a newer one instead.")
 		ENDIF()
-		SET (C_FLAGS_EXTRA 		"${C_FLAGS_EXTRA}   /fsanitize=address")
-		SET (CXX_FLAGS_EXTRA 	"${CXX_FLAGS_EXTRA} /fsanitize=address")
+		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} /fsanitize=address)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
@@ -44,21 +64,14 @@ function (toolchain_after_project)
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${ENABLED_SANITIZER})
-		SET (PREPROCESSOR_DEFS_EXTRA "${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS")
+		SET (PREPROCESSOR_DEFS_EXTRA	${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
 	ENDIF ()
 
+
 	#-- Base compiler and linker flags are the same for every build type.
-	 # For vcxproj structure or for cmake generator's fault, CXX flags will be used also for C sources;
-	 # until this gets fixed, CXX and C compiler and linker flags should be the same.
 
-	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
-	SET (C_FLAGS_COMMON		"${C_FLAGS_EXTRA} /W4 /MP /GR /fp:fast\
-							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812")
-	 #						# Disable warnings caused by external c libraries.
-	 # For zlib: C4244, C4245
-
-	SET (CXX_FLAGS_COMMON	"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++20\
-							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812")
+	SET (CXX_FLAGS_COMMON	${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++20\
+							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812)
 
 	# /Zc:__cplusplus is required to make __cplusplus accurate
 	# /Zc:__cplusplus is available starting with Visual Studio 2017 version 15.7
@@ -71,68 +84,37 @@ function (toolchain_after_project)
 		SET(CXX_FLAGS_COMMON "${CXX_FLAGS_COMMON} /Zc:__cplusplus")
 	endif()
 
-	 # These linker flags shouldn't be applied to Debug release.
-	IF (CMAKE_CL_64)	# 64 bits
-		SET(ARCH_BITS	64	PARENT_SCOPE)
-		SET(LINKER_FLAGS_NODEBUG "/OPT:REF,ICF"			)
-	ELSE (CMAKE_CL_64)	# 32 bits
-		SET(ARCH_BITS	32	PARENT_SCOPE)
-		SET(LINKER_FLAGS_NODEBUG "/OPT:REF,ICF"			)
-	ENDIF (CMAKE_CL_64)
 
+	# These linker flags shouldn't be applied to Debug release.
+	SET(LINKER_FLAGS_NODEBUG 	/OPT:REF,ICF)
 
 	#-- Release compiler and linker flags.
 
-	SET (CMAKE_C_FLAGS_RELEASE			"${C_FLAGS_COMMON}   /O2 /EHsc /GL /GA /Gw"			PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /O2 /EHsc /GL /GA /Gw /Gy"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_NODEBUG} ${EXE_LINKER_EXTRA}\
 										 /LTCG" PARENT_SCOPE)
 
 	#-- Nightly compiler and linker flags.
 
-	SET (CMAKE_C_FLAGS_NIGHTLY			"${C_FLAGS_COMMON}   /O2 /EHa /GL /GA /Gw"			PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${LINKER_FLAGS_NODEBUG} ${EXE_LINKER_EXTRA}\
 										 /LTCG" PARENT_SCOPE)
 
 	#-- Debug compiler and linker flags.
 
-	SET (CMAKE_C_FLAGS_DEBUG			"${C_FLAGS_COMMON}   /Od /EHsc /Oy-"				PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /Od /EHsc /Oy- /MDd /ZI /ob1"	PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"/DEBUG /SAFESEH:NO ${EXE_LINKER_EXTRA}" PARENT_SCOPE)
 
 
-	#-- Set mysql .lib directory for the linker.
-
-	IF (CMAKE_CL_64)
-		LINK_DIRECTORIES ("lib/bin/x86_64/mariadb/")
-	ELSE (CMAKE_CL_64)
-		LINK_DIRECTORIES ("lib/bin/x86/mariadb/")
-	ENDIF (CMAKE_CL_64)
-
-endfunction()
-
-
-function (toolchain_exe_stuff)
 	#-- Windows libraries to link against.
 	TARGET_LINK_LIBRARIES ( spheresvr	ws2_32 libmariadb )
 
+
 	#-- Set define macros.
 
-	 # Architecture defines
-	IF (CMAKE_CL_64)
-		TARGET_COMPILE_DEFINITIONS ( spheresvr 	PUBLIC _64BITS _WIN64	)
-	ELSE (CMAKE_CL_64)
-		TARGET_COMPILE_DEFINITIONS ( spheresvr 	PUBLIC _32BITS		)
-	ENDIF (CMAKE_CL_64)
-
-	 # Common defines
+	# Common defines
 	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
 		${PREPROCESSOR_DEFS_EXTRA}
-	  # _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
-		_WIN32
-	  # Use the "z_" prefix for the zlib functions
-		Z_PREFIX
 	  # GIT defs.
 		_GITVERSION
 	  # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam
@@ -166,8 +148,9 @@ function (toolchain_exe_stuff)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY	"${OUTDIR}/Nightly"	)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${OUTDIR}/Debug"	)
 
+
 	#-- Custom .vcxproj settings (for now, it only affects the debugger working directory).
 
 	SET (SRCDIR ${CMAKE_SOURCE_DIR}) # for the sake of shortness
-	CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/cmake/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
+	CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/cmake/toolchains/include/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
 endfunction()

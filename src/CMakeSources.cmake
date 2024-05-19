@@ -68,15 +68,6 @@ src/common/crypto/CCryptoMD5Interface.cpp
 src/common/crypto/CCryptoTwoFishInterface.cpp
 src/common/crypto/CMD5.cpp
 src/common/crypto/CMD5.h
-src/common/crypto/bcrypt/crypt_blowfish.c
-src/common/crypto/bcrypt/crypt_blowfish.h
-src/common/crypto/bcrypt/crypt_gensalt.c
-src/common/crypto/bcrypt/crypt_gensalt.h
-src/common/crypto/bcrypt/ow-crypt.h
-src/common/crypto/bcrypt/wrapper.c
-src/common/crypto/twofish/twofish.cpp
-src/common/crypto/twofish/twofish.h
-src/common/crypto/twofish/twofish_aux.h
 )
 SOURCE_GROUP (common\\crypto FILES ${crypto_SRCS})
 

@@ -1885,7 +1885,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	const uint64 uiCanFlags = GetCanFlags();
 	const uint64 uiMovementCan = GetCanMoveFlags(uiCanFlags);  // actions i can perform to step on a tile (some tiles require a specific ability, like to swim for the water)
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_Log.EventWarn("GetCanMoveFlags() (0x%" PRIx32 ").\n", uiMovementCan);
+		g_Log.EventWarn("GetCanMoveFlags() (0x%" PRIx64 ").\n", uiMovementCan);
 	if (!(uiMovementCan & CAN_C_MOVEMENTCAPABLEMASK))
 		return nullptr;	// cannot move at all, so WTF?
 
@@ -1899,7 +1899,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	CServerMapBlockState block(uiMapMoveFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 3, iHeight);
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 	{
-		g_Log.EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d ); ptDest.m_z(%d) m_zClimbHeight(%d).\n",
+		g_Log.EventWarn("\t\tCServerMapBlockState block( 0%" PRIx64 ", %d, %d, %d ); ptDest.m_z(%d) m_zClimbHeight(%d).\n",
 			uiMapMoveFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 	}
 
@@ -1908,8 +1908,8 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	// Pass along my results.
 	uiMapMoveFlags = block.m_Bottom.m_uiBlockFlags;
 
-    uint uiBlockedBy = 0;
-    // need to check also for UFLAG1_FLOOR?
+    	uint uiBlockedBy = 0;
+    	// need to check also for UFLAG1_FLOOR?
 	if ( block.m_Top.m_uiBlockFlags )
 	{
         const bool fTopLandTile = (block.m_Top.m_dwTile <= TERRAIN_QTY);

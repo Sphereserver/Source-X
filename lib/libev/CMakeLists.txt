@@ -24,6 +24,7 @@ set (lib_SOURCES
 # add to the proper directories in the solution explorer (eg. Visual Studio)
 source_group (lib\\libev FILES ${lib_SOURCES})
 
+# create the target. equivalent to add_executable, but for libraries
 add_library (libev STATIC ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).
@@ -31,3 +32,15 @@ target_include_directories (libev PUBLIC .)
 
 # set compiler flags
 include("../lib_compiler_flags_common_c.cmake")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+    set (c_compiler_options_common
+        ${c_compiler_options_common} -Wno-extern-initializer
+    )
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+    set (c_compiler_options_common
+        ${c_compiler_options_common}
+        #-Wno-error=extern-initializer  # doesn't exist... yet?
+        -w     # suppress all the warnings, since gcc doesn't have -Wno-extern-initializer?
+    )
+endif ()
+target_compile_options(libev PRIVATE ${c_compiler_options_common})
