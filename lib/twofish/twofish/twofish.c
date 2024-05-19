@@ -28,7 +28,10 @@
 *			Constants/Macros/Tables
 -****************************************************************************/
 
-#define		VALIDATE_PARMS	1		/* nonzero --> check all parameters */
+#define		VALIDATE_PARMS	0
+// Enabling VALIDATE_PARMS enables some faulty code.
+
+//#define		VALIDATE_PARMS	1		/* nonzero --> check all parameters */
 #define		FEISTEL			0		/* nonzero --> use Feistel version (slow) */
 
 int  tabEnable=0;					/* are we gathering stats? */

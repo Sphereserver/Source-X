@@ -40,7 +40,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set (c_compiler_options_common
         ${c_compiler_options_common}
         #-Wno-error=extern-initializer  # doesn't exist... yet?
-        -w     # suppress all the warnings, since gcc doesn't have -Wno-extern-initializer?
+        -w     # suppress all the warnings, since gcc doesn't have -Wno-extern-initializer
     )
 endif ()
 target_compile_options(libev PRIVATE ${c_compiler_options_common})

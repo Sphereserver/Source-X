@@ -106,10 +106,16 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 		if ( fileinfo->d_name[0] == '.' )
 			continue;
 
-		sprintf(szFilename, "%s%s", szFileDir, fileinfo->d_name);
+		const int ret = snprintf(szFilename, _MAX_PATH, "%s%s", szFileDir, fileinfo->d_name);
+		szFilename[_MAX_PATH - 1] = '\0';
+		if ((ret < 0) || (ret > _MAX_PATH - 1))
+		{
+			g_Log.EventError("Unable to concatenate the path (too long). Current file '%s'.\n", fileinfo->d_name);
+			break;
+		}
 		len = strlen(szFilename);
 		if ( len > 4 && !strcmpi(&szFilename[len - 4], SPHERE_SCRIPT) )
-            AddTail(fileinfo->d_name);
+			AddTail(fileinfo->d_name);
 #endif
 	}
 #if defined(_WIN32)
