@@ -31,9 +31,9 @@
    where a = primitive root of field generator 0x14D */
 #define	RS_GF_FDBK		0x14D		/* field generator */
 #define	RS_rem(x)		\
-	{ BYTE  b  = (BYTE) (x >> 24);											 \
-	  DWORD g2 = ((b << 1) ^ ((b & 0x80) ? RS_GF_FDBK : 0 )) & 0xFF;		 \
-	  DWORD g3 = ((b >> 1) & 0x7F) ^ ((b & 1) ? RS_GF_FDBK >> 1 : 0 ) ^ g2 ; \
+	{ uint8_t  b  = (uint8_t) (x >> 24);											 \
+	  uint32_t g2 = ((b << 1) ^ ((b & 0x80) ? RS_GF_FDBK : 0 )) & 0xFF;		 \
+	  uint32_t g3 = ((b >> 1) & 0x7F) ^ ((b & 1) ? RS_GF_FDBK >> 1 : 0 ) ^ g2 ; \
 	  x = (x << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b;				 \
 	}
 
@@ -46,7 +46,7 @@
 *----------------------------------------------------------------
 * More statistical properties of this matrix (from MDS.EXE output):
 *
-* Min Hamming weight (one byte difference) =  8. Max=26.  Total =  1020.
+* Min Hamming weight (one uint8_t difference) =  8. Max=26.  Total =  1020.
 * Prob[8]:      7    23    42    20    52    95    88    94   121   128    91
 *             102    76    41    24     8     4     1     3     0     0     0
 * Runs[8]:      2     4     5     6     7     8     9    11
@@ -55,7 +55,7 @@
 * HW= 9: 04050707 080A0E0E 10141C1C 20283838 40507070 80A0E0E0 C6432020 07070504 
 *        0E0E0A08 1C1C1410 38382820 70705040 E0E0A080 202043C6 05070407 0A0E080E 
 *        141C101C 28382038 50704070 A0E080E0 4320C620 02924B02 089A4508 
-* Min Hamming weight (two byte difference) =  3. Max=28.  Total = 390150.
+* Min Hamming weight (two uint8_t difference) =  3. Max=28.  Total = 390150.
 * Prob[3]:      7    18    55   149   270   914  2185  5761 11363 20719 32079
 *           43492 51612 53851 52098 42015 31117 20854 11538  6223  2492  1033
 * MDS OK, ROR:   6+  7+  8+  9+ 10+ 11+ 12+ 13+ 14+ 15+ 16+
@@ -66,9 +66,9 @@
 #define	LFSR2(x) ( ((x) >> 2)  ^ (((x) & 0x02) ?   MDS_GF_FDBK/2 : 0)  \
 							   ^ (((x) & 0x01) ?   MDS_GF_FDBK/4 : 0))
 
-#define	Mx_1(x) ((DWORD)  (x))		/* force result to dword so << will work */
-#define	Mx_X(x) ((DWORD) ((x) ^            LFSR2(x)))	/* 5B */
-#define	Mx_Y(x) ((DWORD) ((x) ^ LFSR1(x) ^ LFSR2(x)))	/* EF */
+#define	Mx_1(x) ((uint32_t)  (x))		/* force result to uint32_t so << will work */
+#define	Mx_X(x) ((uint32_t) ((x) ^            LFSR2(x)))	/* 5B */
+#define	Mx_Y(x) ((uint32_t) ((x) ^ LFSR1(x) ^ LFSR2(x)))	/* EF */
 
 #define	M00		Mul_1
 #define	M01		Mul_Y
@@ -137,7 +137,7 @@
 * log2(skXor[ 0.. 0])
 * log2(skDup[ 0.. 6])=   ---  2.37  0.44  3.94  8.36 13.04 17.99
 ***********************************************************************/
-CONST BYTE P8x8[2][256]=
+const uint8_t P8x8[2][256]=
 	{
 /*  p0:   */
 /*  dpMax      = 10.  lpMax      = 64.  cycleCnt=   1  1  1  0.         */

@@ -22,6 +22,8 @@
 
 #include	"aes.h"
 #include	"table.h"
+#include	"platform.h"			/* platform-specific defines */
+
 
 /*
 +*****************************************************************************
@@ -35,14 +37,14 @@
 #define		FEISTEL			0		/* nonzero --> use Feistel version (slow) */
 
 int  tabEnable=0;					/* are we gathering stats? */
-BYTE tabUsed[256];					/* one bit per table */
+uint8_t tabUsed[256];					/* one bit per table */
 
 #if FEISTEL
-CONST		char *moduleDescription="Pedagogical C code (Feistel)";
+const		char *moduleDescription="Pedagogical C code (Feistel)";
 #else
-CONST		char *moduleDescription="Pedagogical C code";
+const		char *moduleDescription="Pedagogical C code";
 #endif
-CONST		char *modeString = "";
+const		char *modeString = "";
 
 #define	P0_USED		0x01
 #define	P1_USED		0x02
@@ -60,11 +62,11 @@ int			numRounds[4]= {0,ROUNDS_128,ROUNDS_192,ROUNDS_256};
 #define	DEBUG	1					/* force debug */
 #endif
 #endif
-#include	"debug.h"				/* debug display macros */
+//#include	"debug.h"				/* debug display macros */
 
 #ifdef GetCodeSize
-extern DWORD Here(DWORD x);			/* return caller's address! */
-DWORD TwofishCodeStart(void) { return Here(0); };
+extern uint32_t Here(uint32_t x);			/* return caller's address! */
+uint32_t TwofishCodeStart(void) { return Here(0); };
 #endif
 
 /*
@@ -81,7 +83,7 @@ DWORD TwofishCodeStart(void) { return Here(0); };
 * Notes: This routine is for use in generating the tables KAT file.
 *
 -****************************************************************************/
-int TableOp(int op)
+static int TableOp(int op)
 	{
 	static int queryCnt=0;
 	int i;
@@ -114,38 +116,38 @@ int TableOp(int op)
 /*
 +*****************************************************************************
 *
-* Function Name:	ParseHexDword
+* Function Name:	ParseHexuint32_t
 *
-* Function:			Parse ASCII hex nibbles and fill in key/iv dwords
+* Function:			Parse ASCII hex nibbles and fill in key/iv uint32_ts
 *
 * Arguments:		bit			=	# bits to read
 *					srcTxt		=	ASCII source
-*					d			=	ptr to dwords to fill in
+*					d			=	ptr to uint32_ts to fill in
 *					dstTxt		=	where to make a copy of ASCII source
 *									(NULL ok)
 *
 * Return:			Zero if no error.  Nonzero --> invalid hex or length
 *
-* Notes:  Note that the parameter d is a DWORD array, not a byte array.
+* Notes:  Note that the parameter d is a uint32_t array, not a uint8_t array.
 *	This routine is coded to work both for little-endian and big-endian
 *	architectures.  The character stream is interpreted as a LITTLE-ENDIAN
-*	byte stream, since that is how the Pentium works, but the conversion
+*	uint8_t stream, since that is how the Pentium works, but the conversion
 *	happens automatically below. 
 *
 -****************************************************************************/
-int ParseHexDword(int bits,CONST char *srcTxt,DWORD *d,char *dstTxt)
+static int ParseHexuint32_t(int bits,const char *srcTxt,uint32_t *d,char *dstTxt)
 	{
 	int i;
-	DWORD b;
+	uint32_t b;
 	char c;
 #if ALIGN32
-	char alignDummy[3];	/* keep dword alignment */
+	char alignDummy[3];	/* keep uint32_t alignment */
 #endif
 
 	union	/* make sure LittleEndian is defined correctly */
 		{
-		BYTE  b[4];
-		DWORD d[1];
+		uint8_t  b[4];
+		uint32_t d[1];
 		} v;
 	v.d[0]=1;
 	if (v.b[0 ^ ADDR_XOR] != 1)	/* sanity check on compile-time switch */
@@ -186,10 +188,10 @@ int ParseHexDword(int bits,CONST char *srcTxt,DWORD *d,char *dstTxt)
 *
 * Function Name:	f32
 *
-* Function:			Run four bytes through keyed S-boxes and apply MDS matrix
+* Function:			Run four uint8_ts through keyed S-boxes and apply MDS matrix
 *
 * Arguments:		x			=	input to f function
-*					k32			=	pointer to key dwords
+*					k32			=	pointer to key uint32_ts
 *					keyLen		=	total key length (k32 --> keyLey/2 bits)
 *
 * Return:			The output of the keyed permutation applied to x.
@@ -204,20 +206,20 @@ int ParseHexDword(int bits,CONST char *srcTxt,DWORD *d,char *dstTxt)
 *	This version is fairly slow and pedagogical, although a smartcard would
 *	probably perform the operation exactly this way in firmware.   For
 *	ultimate performance, the entire operation can be completed with four
-*	lookups into four 256x32-bit tables, with three dword xors.
+*	lookups into four 256x32-bit tables, with three uint32_t xors.
 *
 *	The MDS matrix is defined in TABLE.H.  To multiply by Mij, just use the
 *	macro Mij(x).
 *
 -****************************************************************************/
-DWORD f32(DWORD x,CONST DWORD *k32,int keyLen)
+static uint32_t f32(uint32_t x,const uint32_t *k32,int keyLen)
 	{
-	BYTE  b[4];
+	uint8_t  b[4];
 	
-	/* Run each byte thru 8x8 S-boxes, xoring with key byte at each stage. */
-	/* Note that each byte goes through a different combination of S-boxes.*/
+	/* Run each uint8_t thru 8x8 S-boxes, xoring with key uint8_t at each stage. */
+	/* Note that each uint8_t goes through a different combination of S-boxes.*/
 
-	*((DWORD *)b) = Bswap(x);	/* make b[0] = LSB, b[3] = MSB */
+	*((uint32_t *)b) = Bswap(x);	/* make b[0] = LSB, b[3] = MSB */
 	switch (((keyLen + 63)/64) & 3)
 		{
 		case 0:		/* 256 bits of key */
@@ -265,10 +267,10 @@ DWORD f32(DWORD x,CONST DWORD *k32,int keyLen)
 * Function Name:	RS_MDS_Encode
 *
 * Function:			Use (12,8) Reed-Solomon code over GF(256) to produce
-*					a key S-box dword from two key material dwords.
+*					a key S-box uint32_t from two key material uint32_ts.
 *
-* Arguments:		k0	=	1st dword
-*					k1	=	2nd dword
+* Arguments:		k0	=	1st uint32_t
+*					k1	=	2nd uint32_t
 *
 * Return:			Remainder polynomial generated using RS code
 *
@@ -279,15 +281,15 @@ DWORD f32(DWORD x,CONST DWORD *k32,int keyLen)
 *	without lookup tables.
 *
 -****************************************************************************/
-DWORD RS_MDS_Encode(DWORD k0,DWORD k1)
+static uint32_t RS_MDS_Encode(uint32_t k0,uint32_t k1)
 	{
 	int i,j;
-	DWORD r;
+	uint32_t r;
 
 	for (i=r=0;i<2;i++)
 		{
 		r ^= (i) ? k0 : k1;			/* merge in 32 more key bits */
-		for (j=0;j<4;j++)			/* shift one byte at a time */
+		for (j=0;j<4;j++)			/* shift one uint8_t at a time */
 			RS_rem(r);				
 		}
 	return r;
@@ -315,8 +317,8 @@ int reKey(keyInstance *key)
 	int		i,k64Cnt;
 	int		keyLen	  = key->keyLen;
 	int		subkeyCnt = ROUND_SUBKEYS + 2*key->numRounds;
-	DWORD	A,B;
-	DWORD	k32e[MAX_KEY_BITS/64],k32o[MAX_KEY_BITS/64]; /* even/odd key dwords */
+	uint32_t	A,B;
+	uint32_t	k32e[MAX_KEY_BITS/64],k32o[MAX_KEY_BITS/64]; /* even/odd key uint32_ts */
 
 #if VALIDATE_PARMS
   #if ALIGN32
@@ -331,7 +333,7 @@ int reKey(keyInstance *key)
 
 	k64Cnt=(keyLen+63)/64;		/* round up to next multiple of 64 bits */
 	for (i=0;i<k64Cnt;i++)
-		{						/* split into even/odd key dwords */
+		{						/* split into even/odd key uint32_ts */
 		k32e[i]=key->key32[2*i  ];
 		k32o[i]=key->key32[2*i+1];
 		/* compute S-box keys using (12,8) Reed-Solomon code over GF(256) */
@@ -340,14 +342,14 @@ int reKey(keyInstance *key)
 
 	for (i=0;i<subkeyCnt/2;i++)					/* compute round subkeys for PHT */
 		{
-		A = f32(i*SK_STEP        ,k32e,keyLen);	/* A uses even key dwords */
-		B = f32(i*SK_STEP+SK_BUMP,k32o,keyLen);	/* B uses odd  key dwords */
+		A = f32(i*SK_STEP        ,k32e,keyLen);	/* A uses even key uint32_ts */
+		B = f32(i*SK_STEP+SK_BUMP,k32o,keyLen);	/* B uses odd  key uint32_ts */
 		B = ROL(B,8);
 		key->subKeys[2*i  ] = A+  B;			/* combine with a PHT */
 		key->subKeys[2*i+1] = ROL(A+2*B,SK_ROTL);
 		}
 
-	DebugDumpKey(key);
+	////DebugDumpKey(key);
 
 	return TRUE;
 	}
@@ -372,7 +374,7 @@ int reKey(keyInstance *key)
 *	the keyMaterial has been parsed.
 *
 -****************************************************************************/
-int makeKey(keyInstance *key, BYTE direction, int keyLen,CONST char *keyMaterial)
+int makeKey(keyInstance *key, uint8_t direction, int keyLen,const char *keyMaterial)
 	{
 	int i;
 
@@ -400,7 +402,7 @@ int makeKey(keyInstance *key, BYTE direction, int keyLen,CONST char *keyMaterial
 	if ((keyMaterial == NULL) || (keyMaterial[0]==0))
 		return TRUE;			/* allow a "dummy" call */
 		
-	if (ParseHexDword(keyLen,keyMaterial,key->key32,key->keyMaterial))
+	if (ParseHexuint32_t(keyLen,keyMaterial,key->key32,key->keyMaterial))
 		return BAD_KEY_MAT;	
 
 	return reKey(key);			/* generate round subkeys */
@@ -416,13 +418,13 @@ int makeKey(keyInstance *key, BYTE direction, int keyLen,CONST char *keyMaterial
 *
 * Arguments:		cipher		=	ptr to cipherInstance to be initialized
 *					mode		=	MODE_ECB, MODE_CBC, or MODE_CFB1
-*					IV			=	ptr to hex ASCII test representing IV bytes
+*					IV			=	ptr to hex ASCII test representing IV uint8_ts
 *
 * Return:			TRUE on success
 *					else error code (e.g., BAD_CIPHER_MODE)
 *
 -****************************************************************************/
-int cipherInit(cipherInstance *cipher, BYTE mode,CONST char *IV)
+int cipherInit(cipherInstance *cipher, uint8_t mode,const char *IV)
 	{
 	int i;
 #if VALIDATE_PARMS				/* first, sanity check on parameters */
@@ -439,10 +441,10 @@ int cipherInit(cipherInstance *cipher, BYTE mode,CONST char *IV)
 
 	if ((mode != MODE_ECB) && (IV))	/* parse the IV */
 		{
-		if (ParseHexDword(BLOCK_SIZE,IV,cipher->iv32,NULL))
+		if (ParseHexuint32_t(BLOCK_SIZE,IV,cipher->iv32,NULL))
 			return BAD_IV_MAT;
-		for (i=0;i<BLOCK_SIZE/32;i++)	/* make byte-oriented copy for CFB1 */
-			((DWORD *)cipher->IV)[i] = Bswap(cipher->iv32[i]);
+		for (i=0;i<BLOCK_SIZE/32;i++)	/* make uint8_t-oriented copy for CFB1 */
+			((uint32_t *)cipher->IV)[i] = Bswap(cipher->iv32[i]);
 		}
 
 	cipher->mode		=	mode;
@@ -472,16 +474,16 @@ int cipherInit(cipherInstance *cipher, BYTE mode,CONST char *IV)
 *		 sizes can be supported.
 *
 -****************************************************************************/
-int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
-				int inputLen, BYTE *outBuffer)
+int blockEncrypt(cipherInstance *cipher, keyInstance *key,const uint8_t *input,
+				int inputLen, uint8_t *outBuffer)
 	{
 	int   i,n,r;					/* loop variables */
-	DWORD x[BLOCK_SIZE/32];			/* block being encrypted */
-	DWORD t0,t1,tmp;				/* temp variables */
+	uint32_t x[BLOCK_SIZE/32];			/* block being encrypted */
+	uint32_t t0,t1,tmp;				/* temp variables */
 	int	  rounds=key->numRounds;	/* number of rounds */
-	BYTE  bit,ctBit,carry;			/* temps for CFB */
+	uint8_t  bit,ctBit,carry;			/* temps for CFB */
 #if ALIGN32
-	BYTE alignDummy;				/* keep 32-bit variable alignment on stack */
+	uint8_t alignDummy;				/* keep 32-bit variable alignment on stack */
 #endif
 
 #if VALIDATE_PARMS
@@ -505,9 +507,9 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 		cipher->mode = MODE_ECB;	/* do encryption in ECB */
 		for (n=0;n<inputLen;n++)
 			{
-			blockEncrypt(cipher,key,cipher->IV,BLOCK_SIZE,(BYTE *)x);
-			bit	  = 0x80 >> (n & 7);/* which bit position in byte */
-			ctBit = (input[n/8] & bit) ^ ((((BYTE *) x)[0] & 0x80) >> (n&7));
+			blockEncrypt(cipher,key,cipher->IV,BLOCK_SIZE,(uint8_t *)x);
+			bit	  = 0x80 >> (n & 7);/* which bit position in uint8_t */
+			ctBit = (input[n/8] & bit) ^ ((((uint8_t *) x)[0] & 0x80) >> (n&7));
 			outBuffer[n/8] = (outBuffer[n/8] & ~ bit) | ctBit;
 			carry = ctBit >> (7 - (n&7));
 			for (i=BLOCK_SIZE/8-1;i>=0;i--)
@@ -525,18 +527,18 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 	for (n=0;n<inputLen;n+=BLOCK_SIZE,input+=BLOCK_SIZE/8,outBuffer+=BLOCK_SIZE/8)
 		{
 #ifdef DEBUG
-		DebugDump(input,"\n",-1,0,0,0,1);
+		//DebugDump(input,"\n",-1,0,0,0,1);
 		if (cipher->mode == MODE_CBC)
-			DebugDump(cipher->iv32,"",IV_ROUND,0,0,0,0);
+			//DebugDump(cipher->iv32,"",IV_ROUND,0,0,0,0);
 #endif
 		for (i=0;i<BLOCK_SIZE/32;i++)	/* copy in the block, add whitening */
 			{
-			x[i]=Bswap(((DWORD *)input)[i]) ^ key->subKeys[INPUT_WHITEN+i];
+			x[i]=Bswap(((uint32_t *)input)[i]) ^ key->subKeys[INPUT_WHITEN+i];
 			if (cipher->mode == MODE_CBC)
 				x[i] ^= Bswap(cipher->iv32[i]);
 			}
 
-		DebugDump(x,"",0,0,0,0,0);
+		//DebugDump(x,"",0,0,0,0,0);
 		for (r=0;r<rounds;r++)			/* main Twofish encryption loop */
 			{	
 #if FEISTEL
@@ -546,7 +548,7 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 			x[2]^= ROL(t0 +   t1 + key->subKeys[ROUND_SUBKEYS+2*r  ], r    /2);
 			x[3]^= ROR(t0 + 2*t1 + key->subKeys[ROUND_SUBKEYS+2*r+1],(r+2) /2);
 
-			DebugDump(x,"",r+1,2*(r&1),1,1,0);
+			//DebugDump(x,"",r+1,2*(r&1),1,1,0);
 #else
 			t0	 = f32(    x[0]   ,key->sboxKeys,key->keyLen);
 			t1	 = f32(ROL(x[1],8),key->sboxKeys,key->keyLen);
@@ -556,7 +558,7 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 			x[3]^= t0 + 2*t1 + key->subKeys[ROUND_SUBKEYS+2*r+1];
 			x[2] = ROR(x[2],1);
 
-			DebugDump(x,"",r+1,2*(r&1),0,1,0);/* make format compatible with optimized code */
+			//DebugDump(x,"",r+1,2*(r&1),0,1,0);/* make format compatible with optimized code */
 #endif
 			if (r < rounds-1)						/* swap for next round */
 				{
@@ -572,14 +574,14 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 #endif
 		for (i=0;i<BLOCK_SIZE/32;i++)	/* copy out, with whitening */
 			{
-			((DWORD *)outBuffer)[i] = Bswap(x[i] ^ key->subKeys[OUTPUT_WHITEN+i]);
+			((uint32_t *)outBuffer)[i] = Bswap(x[i] ^ key->subKeys[OUTPUT_WHITEN+i]);
 			if (cipher->mode == MODE_CBC)
-				cipher->iv32[i] = ((DWORD *)outBuffer)[i];
+				cipher->iv32[i] = ((uint32_t *)outBuffer)[i];
 			}
 #ifdef DEBUG
-		DebugDump(outBuffer,"",rounds+1,0,0,0,1);
+		//DebugDump(outBuffer,"",rounds+1,0,0,0,1);
 		if (cipher->mode == MODE_CBC)
-			DebugDump(cipher->iv32,"",IV_ROUND,0,0,0,0);
+			//DebugDump(cipher->iv32,"",IV_ROUND,0,0,0,0);
 #endif
 		}
 
@@ -608,16 +610,16 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 *		 sizes can be supported.
 *
 -****************************************************************************/
-int blockDecrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
-				int inputLen, BYTE *outBuffer)
+int blockDecrypt(cipherInstance *cipher, keyInstance *key,const uint8_t *input,
+				int inputLen, uint8_t *outBuffer)
 	{
 	int   i,n,r;					/* loop counters */
-	DWORD x[BLOCK_SIZE/32];			/* block being encrypted */
-	DWORD t0,t1;					/* temp variables */
+	uint32_t x[BLOCK_SIZE/32];			/* block being encrypted */
+	uint32_t t0,t1;					/* temp variables */
 	int	  rounds=key->numRounds;	/* number of rounds */
-	BYTE  bit,ctBit,carry;			/* temps for CFB */
+	uint8_t  bit,ctBit,carry;			/* temps for CFB */
 #if ALIGN32
-	BYTE alignDummy;				/* keep 32-bit variable alignment on stack */
+	uint8_t alignDummy;				/* keep 32-bit variable alignment on stack */
 #endif
 
 #if VALIDATE_PARMS
@@ -641,11 +643,11 @@ int blockDecrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 		cipher->mode = MODE_ECB;	/* do encryption in ECB */
 		for (n=0;n<inputLen;n++)
 			{
-			blockEncrypt(cipher,key,cipher->IV,BLOCK_SIZE,(BYTE *)x);
+			blockEncrypt(cipher,key,cipher->IV,BLOCK_SIZE,(uint8_t *)x);
 			bit	  = 0x80 >> (n & 7);
 			ctBit = input[n/8] & bit;
 			outBuffer[n/8] = (outBuffer[n/8] & ~ bit) |
-							 (ctBit ^ ((((BYTE *) x)[0] & 0x80) >> (n&7)));
+							 (ctBit ^ ((((uint8_t *) x)[0] & 0x80) >> (n&7)));
 			carry = ctBit >> (7 - (n&7));
 			for (i=BLOCK_SIZE/8-1;i>=0;i--)
 				{
@@ -661,17 +663,17 @@ int blockDecrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 	/* here for ECB, CBC modes */
 	for (n=0;n<inputLen;n+=BLOCK_SIZE,input+=BLOCK_SIZE/8,outBuffer+=BLOCK_SIZE/8)
 		{
-		DebugDump(input,"\n",rounds+1,0,0,0,1);
+		//DebugDump(input,"\n",rounds+1,0,0,0,1);
 
 		for (i=0;i<BLOCK_SIZE/32;i++)	/* copy in the block, add whitening */
-			x[i]=Bswap(((DWORD *)input)[i]) ^ key->subKeys[OUTPUT_WHITEN+i];
+			x[i]=Bswap(((uint32_t *)input)[i]) ^ key->subKeys[OUTPUT_WHITEN+i];
 
 		for (r=rounds-1;r>=0;r--)			/* main Twofish decryption loop */
 			{
 			t0	 = f32(    x[0]   ,key->sboxKeys,key->keyLen);
 			t1	 = f32(ROL(x[1],8),key->sboxKeys,key->keyLen);
 
-			DebugDump(x,"",r+1,2*(r&1),0,1,0);/* make format compatible with optimized code */
+			//DebugDump(x,"",r+1,2*(r&1),0,1,0);/* make format compatible with optimized code */
 			x[2] = ROL(x[2],1);
 			x[2]^= t0 +   t1 + key->subKeys[ROUND_SUBKEYS+2*r  ]; /* PHT, round keys */
 			x[3]^= t0 + 2*t1 + key->subKeys[ROUND_SUBKEYS+2*r+1];
@@ -683,7 +685,7 @@ int blockDecrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 				t1   = x[1]; x[1]= x[3]; x[3] = t1;
 				}
 			}
-		DebugDump(x,"",0,0,0,0,0);/* make final output match encrypt initial output */
+		//DebugDump(x,"",0,0,0,0,0);/* make final output match encrypt initial output */
 
 		for (i=0;i<BLOCK_SIZE/32;i++)	/* copy out, with whitening */
 			{
@@ -691,11 +693,11 @@ int blockDecrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 			if (cipher->mode == MODE_CBC)
 				{
 				x[i] ^= Bswap(cipher->iv32[i]);
-				cipher->iv32[i] = ((DWORD *)input)[i];
+				cipher->iv32[i] = ((uint32_t *)input)[i];
 				}
-			((DWORD *)outBuffer)[i] = Bswap(x[i]);
+			((uint32_t *)outBuffer)[i] = Bswap(x[i]);
 			}
-		DebugDump(outBuffer,"",-1,0,0,0,1);
+		//DebugDump(outBuffer,"",-1,0,0,0,1);
 		}
 
 	return inputLen;
@@ -703,5 +705,5 @@ int blockDecrypt(cipherInstance *cipher, keyInstance *key,CONST BYTE *input,
 
 
 #ifdef GetCodeSize
-DWORD TwofishCodeSize(void) { return Here(0)-TwofishCodeStart(); };
+uint32_t TwofishCodeSize(void) { return Here(0)-TwofishCodeStart(); };
 #endif

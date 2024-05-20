@@ -131,12 +131,16 @@ unreachable,nonnull-attribute,returns-nonnull-attribute
 	#-- Store common define macros.
 
 	set(cxx_compiler_definitions_common
-		${PREPROCESSOR_DEFS_EXTRA} _GITVERSION _EXCEPTIONS_DEBUG _CRT_SECURE_NO_WARNINGS _WINSOCK_DEPRECATED_NO_WARNINGS)
+		${PREPROCESSOR_DEFS_EXTRA}
+		$<$<NOT:$<BOOL:${CMAKE_NO_GIT_REVISION}>>:_GITVERSION>
+		_EXCEPTIONS_DEBUG
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
+		_CRT_SECURE_NO_WARNINGS
 		# _CRT_SECURE_NO_WARNINGS: Temporary setting to do not spam so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.
+		_WINSOCK_DEPRECATED_NO_WARNINGS
 		# _WINSOCK_DEPRECATED_NO_WARNINGS: Removing warnings until the code gets updated or reviewed.
-
+	)
 
 	#-- Apply define macros, only the ones specific per build type.
 

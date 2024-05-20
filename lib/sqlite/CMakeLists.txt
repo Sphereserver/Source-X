@@ -16,5 +16,6 @@ add_library (sqlite STATIC ${lib_SOURCES})
 target_include_directories (sqlite PUBLIC .)
 
 # set compiler flags
-include("../lib_compiler_flags_common_c.cmake")
-target_compile_options(sqlite PRIVATE ${c_compiler_options_common})
+include("../lib_build_flags_common_c.cmake")
+target_compile_options	(sqlite PRIVATE ${c_compiler_options_common})
+target_link_options	(sqlite PRIVATE ${c_linker_options_common})

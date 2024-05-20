@@ -53,16 +53,6 @@ endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (NOT DEFINED CMAKE_C_STANDARD)
-  # only set CMAKE_C_STANDARD if not already set
-  # this allows the standard to be set by the caller, for example with -DCMAKE_C_STANDARD:STRING=11
-    set (CMAKE_C_STANDARD 11)
-elseif (CMAKE_C_STANDARD LESS 11)
-    message (WARNING "Current C standard ({CMAKE_C_STANDARD}) too low, defaulting to 11.")
-    set (CMAKE_C_STANDARD 11)
-endif ()
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
 
 PROJECT (SphereServer CXX C)	# does a scan for C++ and C compilers
 
@@ -142,35 +132,35 @@ IF (SINGLE_TARGET)
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		SET (TARGETS ${TARGETS} spheresvr_release)
 		ADD_EXECUTABLE (spheresvr_release
-					${SPHERE_SOURCES}
-		#			${docs_TEXT}
-			)
-        	SET_TARGET_PROPERTIES (spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
+			${SPHERE_SOURCES}
+		#	${docs_TEXT}
+		)
+			SET_TARGET_PROPERTIES (spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		SET (TARGETS ${TARGETS} spheresvr_nightly)
 		ADD_EXECUTABLE (spheresvr_nightly
-					${SPHERE_SOURCES}
-		#			${docs_TEXT}
-			)
-        	SET_TARGET_PROPERTIES (spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
+			${SPHERE_SOURCES}
+		#	${docs_TEXT}
+		)
+			SET_TARGET_PROPERTIES (spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		SET (TARGETS ${TARGETS} spheresvr_debug)
 		ADD_EXECUTABLE (spheresvr_debug
-					${SPHERE_SOURCES}
-		#			${docs_TEXT}
-			)
-        	SET_TARGET_PROPERTIES (spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
+			${SPHERE_SOURCES}
+		#	${docs_TEXT}
+		)
+		SET_TARGET_PROPERTIES (spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
 	ENDIF ()
 
 ELSE (SINGLE_TARGET)
 
 	SET (TARGETS ${TARGETS} spheresvr)
-    	ADD_EXECUTABLE (spheresvr
-            ${SPHERE_SOURCES}
-            ${docs_TEXT}
-		)
+	ADD_EXECUTABLE (spheresvr
+		${SPHERE_SOURCES}
+		${docs_TEXT}
+	)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_DEBUG   SphereSvrX${ARCH_BITS}_debug)
@@ -185,8 +175,23 @@ add_subdirectory(lib)
 # Need to clear shared library flags. If not, cmake sets -rdynamic and this
 # add to the executable the full symbol table (included unused symbols).
 # This is a problem because the binary is >700 KB bigger.
-SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
-SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
+SET (CMAKE_C_FLAGS "")
+SET (CMAKE_C_FLAGS_DEBUG "")
+SET (CMAKE_C_FLAGS_NIGHTLY "")
+SET (CMAKE_C_FLAGS_RELEASE "")
+
+SET (CMAKE_CXX_FLAGS "")
+SET (CMAKE_CXX_FLAGS_DEBUG "")
+SET (CMAKE_CXX_FLAGS_NIGHTLY "")
+SET (CMAKE_CXX_FLAGS_RELEASE "")
+
+#SET (CMAKE_EXE_LINKER_FLAGS "")
+#SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+#SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
+#SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 
 toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
 

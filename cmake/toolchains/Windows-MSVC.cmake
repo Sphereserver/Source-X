@@ -21,13 +21,13 @@ function (toolchain_exe_stuff)
 	#-- Set mariadb .lib directory for the linker.
 
 	IF (CMAKE_CL_64)
-		LINK_DIRECTORIES ("lib/_bin/x86_64/mariadb/")
+		TARGET_LINK_DIRECTORIES (spheresvr PRIVATE "lib/_bin/x86_64/mariadb/")
 	ELSE ()
-		LINK_DIRECTORIES ("lib/_bin/x86/mariadb/")
+		TARGET_LINK_DIRECTORIES (spheresvr PRIVATE "lib/_bin/x86/mariadb/")
 	ENDIF ()
 
 
-		#-- Configure the Windows application type.
+	#-- Configure the Windows application type.
 
 	SET (EXE_LINKER_EXTRA "")
 	IF (${WIN32_SPAWN_CONSOLE})
@@ -68,10 +68,18 @@ function (toolchain_exe_stuff)
 	ENDIF ()
 
 
-	#-- Base compiler and linker flags are the same for every build type.
+	#-- Apply compiler flags.
 
-	SET (CXX_FLAGS_COMMON	${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++20\
-							/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703 /wd26812)
+	SET (cxx_compiler_flags_common
+		${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++20
+		/wd4310	# cast truncates constant value
+		/wd4996 # use of deprecated stuff
+		/wd4701 # Potentially uninitialized local variable 'name' used
+		/wd4702 # Unreachable code
+		/wd4703 # Potentially uninitialized local pointer variable 'name' used
+		/wd4127 # 
+		/wd26812# The enum type 'type-name' is unscoped. Prefer 'enum class' over 'enum'
+	)
 
 	# /Zc:__cplusplus is required to make __cplusplus accurate
 	# /Zc:__cplusplus is available starting with Visual Studio 2017 version 15.7
@@ -81,58 +89,50 @@ function (toolchain_exe_stuff)
 	# CMake's ${MSVC_VERSION} is equivalent to _MSC_VER
 	# (according to https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html#variable:MSVC_VERSION)
 	if (MSVC_VERSION GREATER_EQUAL 1914)
-		SET(CXX_FLAGS_COMMON "${CXX_FLAGS_COMMON} /Zc:__cplusplus")
+		SET(cxx_compiler_flags_common	${cxx_compiler_flags_common} /Zc:__cplusplus)
 	endif()
 
+	target_compile_options(spheresvr PRIVATE
+		${cxx_compiler_flags_common}
+		$<$<CONFIG:Release>:	/O2 /EHsc /GL /GA /Gw /Gy /GF /GR->
+		$<$<CONFIG:Nightly>:	/O2 /EHa  /GL /GA /Gw /Gy /GF>
+		$<$<CONFIG:Debug>:		/Od /EHsc /Oy- /MDd /ZI /ob1> #/Gs 
+	)
 
-	# These linker flags shouldn't be applied to Debug release.
-	SET(LINKER_FLAGS_NODEBUG 	/OPT:REF,ICF)
 
-	#-- Release compiler and linker flags.
+	#-- Apply linker flags.
 
-	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /O2 /EHsc /GL /GA /Gw /Gy"		PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_NODEBUG} ${EXE_LINKER_EXTRA}\
-										 /LTCG" PARENT_SCOPE)
+	# For some reason only THIS one isn't created, and CMake complains with an error...
+	set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE})
 
-	#-- Nightly compiler and linker flags.
-
-	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${LINKER_FLAGS_NODEBUG} ${EXE_LINKER_EXTRA}\
-										 /LTCG" PARENT_SCOPE)
-
-	#-- Debug compiler and linker flags.
-
-	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /Od /EHsc /Oy- /MDd /ZI /ob1"	PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"/DEBUG /SAFESEH:NO ${EXE_LINKER_EXTRA}" PARENT_SCOPE)
+	target_link_options(spheresvr PRIVATE
+		$<$<CONFIG:Release>:	${EXE_LINKER_EXTRA}	/OPT:REF,ICF /LTCG>
+		$<$<CONFIG:Nightly>:	${EXE_LINKER_EXTRA}	/OPT:REF,ICF /LTCG>
+		$<$<CONFIG:Debug>:		${EXE_LINKER_EXTRA} /DEBUG /SAFESEH:NO>
+	)
 
 
 	#-- Windows libraries to link against.
-	TARGET_LINK_LIBRARIES ( spheresvr	ws2_32 libmariadb )
-
+	TARGET_LINK_LIBRARIES ( spheresvr	PRIVATE ws2_32 libmariadb )
 
 	#-- Set define macros.
 
 	# Common defines
-	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
+	TARGET_COMPILE_DEFINITIONS ( spheresvr PRIVATE
 		${PREPROCESSOR_DEFS_EXTRA}
-	  # GIT defs.
-		_GITVERSION
-	  # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam
-	  #  so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.
+		$<$<NOT:$<BOOL:${CMAKE_NO_GIT_REVISION}>>:_GITVERSION>
 		_CRT_SECURE_NO_WARNINGS
-	  # Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
-	  #  on a running environment. Also it makes sphere more stable since exceptions are local.
+		# Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam so much in the build proccess.
 		_EXCEPTIONS_DEBUG
-
-	  # Removing WINSOCK warnings until the code gets updated or reviewed.
+		# Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
+	  	#  on a running environment. Also it makes sphere more stable since exceptions are local.
 		_WINSOCK_DEPRECATED_NO_WARNINGS
+		# Removing WINSOCK warnings until the code gets updated or reviewed.
 
 	 # Per-build defines
-		$<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>: NDEBUG >
-
-		$<$<CONFIG:Nightly>:	_NIGHTLYBUILD THREAD_TRACK_CALLSTACK>
-
-		$<$<CONFIG:Debug>:	_DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP>
+	 	$<$<NOT:$<CONFIG:Debug>>:	NDEBUG>
+		$<$<CONFIG:Nightly>:		_NIGHTLYBUILD THREAD_TRACK_CALLSTACK>
+		$<$<CONFIG:Debug>:			_DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP>
 	)
 
 

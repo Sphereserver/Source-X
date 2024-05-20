@@ -137,7 +137,9 @@ unreachable,nonnull-attribute,returns-nonnull-attribute
 	#-- Store common define macros.
 
 	set(cxx_compiler_definitions_common
-		${PREPROCESSOR_DEFS_EXTRA} _GITVERSION _EXCEPTIONS_DEBUG
+		${PREPROCESSOR_DEFS_EXTRA}
+		$<$<NOT:$<BOOL:${CMAKE_NO_GIT_REVISION}>>:_GITVERSION>
+		_EXCEPTIONS_DEBUG
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 	)

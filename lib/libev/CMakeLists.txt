@@ -31,7 +31,7 @@ add_library (libev STATIC ${lib_SOURCES})
 target_include_directories (libev PUBLIC .)
 
 # set compiler flags
-include("../lib_compiler_flags_common_c.cmake")
+include("../lib_build_flags_common_c.cmake")
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     set (c_compiler_options_common
         ${c_compiler_options_common} -Wno-extern-initializer
@@ -43,4 +43,5 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
         -w     # suppress all the warnings, since gcc doesn't have -Wno-extern-initializer
     )
 endif ()
-target_compile_options(libev PRIVATE ${c_compiler_options_common})
+target_compile_options	(libev PRIVATE ${c_compiler_options_common})
+target_link_options	(libev PRIVATE ${c_linker_options_common})
