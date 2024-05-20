@@ -528,7 +528,7 @@ void CClient::addWeather( WEATHER_TYPE weather ) // Send new weather to player
 		return;
 
 	m_Env.m_Weather = weather;
-	new PacketWeather(this, weather, Calc_GetRandVal2(10, 70), 0x10);
+	new PacketWeather(this, weather, g_Rand.GetVal2(10, 70), 0x10);
 }
 
 void CClient::addLight() const
@@ -1022,7 +1022,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 	}
 
 	if ( m_pChar->IsStatFlag( STATF_HALLUCINATING ))
-		wHue = (HUE_TYPE)(Calc_GetRandVal( HUE_DYE_HIGH ));
+		wHue = (HUE_TYPE)(g_Rand.GetVal( HUE_DYE_HIGH ));
 
 	else if ( pChar->IsStatFlag(STATF_STONE)) //Client do not have stone state. So we must send the hue we want. (Affect the paperdoll hue as well)
 		wHue = HUE_STONE;
@@ -1080,13 +1080,13 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 			pCharDef = nullptr;
 			while ( pCharDef == nullptr )
 			{
-				id = (CREID_TYPE)(Calc_GetRandVal(CREID_EQUIP_GM_ROBE));
+				id = (CREID_TYPE)(g_Rand.GetVal(CREID_EQUIP_GM_ROBE));
 				if ( id != CREID_SEA_CREATURE )		// skip this chardef, it can crash many clients
 					pCharDef = CCharBase::FindCharBase(id);
 			}
 		}
 
-		wHue = (HUE_TYPE)(Calc_GetRandVal(HUE_DYE_HIGH));
+		wHue = (HUE_TYPE)(g_Rand.GetVal(HUE_DYE_HIGH));
 	}
 	else
 	{

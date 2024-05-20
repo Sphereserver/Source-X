@@ -372,7 +372,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 			SetNamePool_Fail( ppTitles[0] );
 			return false;
 		}
-		int iCount = Calc_GetRandVal2( 1, atoi( s.GetKey()) );
+		int iCount = g_Rand.GetVal2( 1, atoi( s.GetKey()) );
 		while ( iCount > 0 )
 		{
 			if ( ! s.ReadKey())
@@ -693,8 +693,8 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	for ( uint i = 0; i < iSteps; ++i )
 	{
 		pt = ptOld;
-		pt.m_x += (short)Calc_GetRandVal2(-iSteps, iSteps);
-		pt.m_y += (short)Calc_GetRandVal2(-iSteps, iSteps);
+		pt.m_x += (short)g_Rand.GetVal2(-iSteps, iSteps);
+		pt.m_y += (short)g_Rand.GetVal2(-iSteps, iSteps);
 
 		if ( !pt.IsValidPoint() )	// hit the edge of the world, so go back to the previous valid position
 		{

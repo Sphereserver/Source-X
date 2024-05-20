@@ -4,6 +4,7 @@ add_subdirectory(flat_containers)
 add_subdirectory(mariadb_connector_c)
 add_subdirectory(object_ptr)
 add_subdirectory(parallel_hashmap)
+add_subdirectory(rand)
 add_subdirectory(regex)
 add_subdirectory(twofish)
 
@@ -28,6 +29,7 @@ foreach (tgt ${TARGETS})
     INTERFACE mariadb_connector_c # true interface for the precompiled external library
     INTERFACE object_ptr          # header only lib
     INTERFACE parallel_hashmap    # header only lib
+    INTERFACE rand                # header only lib
     INTERFACE regex               # header only lib
   )
 
@@ -37,6 +39,7 @@ foreach (tgt ${TARGETS})
     PRIVATE $<TARGET_PROPERTY:mariadb_connector,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:object_ptr,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:parallel_hashmap,INTERFACE_INCLUDE_DIRECTORIES>
+    PRIVATE $<TARGET_PROPERTY:rand,INTERFACE_INCLUDE_DIRECTORIES>
     PRIVATE $<TARGET_PROPERTY:regex,INTERFACE_INCLUDE_DIRECTORIES>
   )
 

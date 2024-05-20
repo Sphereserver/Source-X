@@ -276,46 +276,6 @@ int Calc_GetLog2( uint iVal )
 	return i;
 }
 
-int32 Calc_GetRandVal( int32 iQty )
-{
-	if ( iQty < 2 )
-		return 0;
-	if ( iQty >= INT32_MAX )
-		return ( (int32)IMulDivLL(CSRand::genRandInt32(0, iQty - 1), (uint32) iQty, INT32_MAX ) );
-	return CSRand::genRandInt32(0, iQty - 1);
-}
-
-int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
-{
-	if ( iMin > iMax )
-	{
-		int tmp = iMin;
-		iMin = iMax;
-		iMax = tmp;
-	}
-	return CSRand::genRandInt32(iMin, iMax);
-}
-
-int64 Calc_GetRandLLVal( int64 iQty )
-{
-	if ( iQty < 2 )
-		return 0;
-	if ( iQty >= INT64_MAX )
-		return ( IMulDivLL(CSRand::genRandInt64(0, iQty - 1), (uint32) iQty, INT64_MAX ) );
-	return CSRand::genRandInt64(0, iQty - 1);
-}
-
-int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
-{
-	if ( iMin > iMax )
-	{
-		llong tmp = iMin;
-		iMin = iMax;
-		iMax = tmp;
-	}
-	return CSRand::genRandInt64(iMin, iMax);
-}
-
 int Calc_GetBellCurve( int iValDiff, int iVariance )
 {
 	// Produce a log curve.
@@ -791,10 +751,10 @@ try_dec:
 							if ( iCount == 2 )
 							{
 								int64 val2 = GetVal( ppCmd[1] );
-								iResult = Calc_GetRandLLVal2( val1, val2 );
+								iResult = g_Rand.GetLLVal2( val1, val2 );
 							}
 							else
-								iResult = Calc_GetRandLLVal(val1);
+								iResult = g_Rand.GetLLVal(val1);
 						}
 					} break;
 
@@ -1657,13 +1617,13 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		pToParseCasted = static_cast<lptstr>(pToParse);
 		llong llValSecond = GetSingle(pToParseCasted);
 
-		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to Calc_GetRandLLVal2
+		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to g_Rand.GetLLVal2
 		{
 			const llong llValTemp = llValFirst;
 			llValFirst = llValSecond;
 			llValSecond = llValTemp;
 		}
-		return Calc_GetRandLLVal2(llValFirst, llValSecond);
+		return g_Rand.GetLLVal2(llValFirst, llValSecond);
 	}
 
 	// First get the total of the weights
@@ -1688,7 +1648,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	}
 
 	// Now roll the dice to see what value to pick
-	llTotalWeight = Calc_GetRandLLVal(llTotalWeight) + 1;
+	llTotalWeight = g_Rand.GetLLVal(llTotalWeight) + 1;
 
 	// Now loop to that value
 	int i = 1;
@@ -1768,7 +1728,7 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
     }
 
     // Now roll the dice to see what value to pick
-    llTotalWeight = Calc_GetRandLLVal(llTotalWeight) + 1;
+    llTotalWeight = g_Rand.GetLLVal(llTotalWeight) + 1;
 
     // Now loop to that value
     int i = 1;

@@ -15,7 +15,7 @@ int CValueRangeDef::GetLinear( int iPercent ) const
 
 int CValueRangeDef::GetRandom() const
 {
-    return ( (int)m_iLo + Calc_GetRandVal(GetRange()) );
+    return ( (int)m_iLo + g_Rand.GetVal(GetRange()) );
 }
 
 int CValueRangeDef::GetRandomLinear( int iPercent ) const
@@ -149,7 +149,7 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 int CValueCurveDef::GetRandom( ) const
 {
     ADDTOCALLSTACK("CValueCurveDef::GetRandom");
-    return GetLinear( Calc_GetRandVal( 1000 ) );
+    return GetLinear( g_Rand.GetVal( 1000 ) );
 }
 
 

@@ -4238,7 +4238,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 	if ( iHashRange )
 	{
 		// find a new FREE entry starting here
-        int iRandIndex = iIndex + Calc_GetRandVal(iHashRange);
+        int iRandIndex = iIndex + g_Rand.GetVal(iHashRange);
         rid = CResourceID(restype, iRandIndex, wPage);
 
         const bool fCheckPage = (pszName && (g_Exp.m_VarResDefs.GetKeyNum(pszName) != 0));

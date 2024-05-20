@@ -3418,7 +3418,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     }
     else if (pItemDef->IsType(IT_SHIP))
     {
-        pItemNew->Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
+        pItemNew->Sound(g_Rand.GetVal(2) ? 0x12 : 0x13);
     }
     return pItemNew;
 }

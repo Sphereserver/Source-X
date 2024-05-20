@@ -323,7 +323,7 @@ void CCSpawn::GenerateItem()
         ASSERT(pItemDef);
         if (pItemDef->IsStackableType())
         {
-            SetAmount((uint16)Calc_GetRandVal(iAmountPile));
+            SetAmount((uint16)g_Rand.GetVal(iAmountPile));
         }
     }
 
@@ -348,7 +348,7 @@ void CCSpawn::GenerateItem()
             if (!pItem->MoveTo(ptSpawn))
                 goto move_failed;
         }
-        else if (!pItem->MoveNear(ptSpawn, (word)(Calc_GetRandVal(_iMaxDist) + 1)))
+        else if (!pItem->MoveNear(ptSpawn, (word)(g_Rand.GetVal(_iMaxDist) + 1)))
         {
         move_failed:
             // If this fails, try placing the char ON the spawn
@@ -419,7 +419,7 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
     if (pChar->GetTopPoint().IsValidPoint() == false)// Try to place it only if the @Spawn trigger didn't set it a valid P.
     {
         ushort iPlacingTries = 0;
-        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false) || !pChar->CanSeeLOS(pt)) //Character shouldn't spawn where can't see it's spawn point.
+        while (!pChar->MoveNear(pt, _iMaxDist ? (word)(g_Rand.GetVal(_iMaxDist) + 1) : 1) || pChar->IsStuck(false) || !pChar->CanSeeLOS(pt)) //Character shouldn't spawn where can't see it's spawn point.
         {
             ++iPlacingTries;
             if (iPlacingTries <= 3)
@@ -542,11 +542,11 @@ void CCSpawn::DelObj(const CUID& uid)
         int64 iMinutes;
 		if (_iTimeHi <= 0)
 		{
-			iMinutes = Calc_GetRandLLVal(30) + 1;
+			iMinutes = g_Rand.GetLLVal(30) + 1;
 		}
 		else
 		{
-			iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
+			iMinutes = g_Rand.GetVal2(_iTimeLo, _iTimeHi);
 		}
 
 		if (iMinutes <= 0)
@@ -665,11 +665,11 @@ CCRET_TYPE CCSpawn::OnTickComponent()
     CItem *pSpawnItem = GetLink();
     if (_iTimeHi <= 0)
     {
-        iMinutes = Calc_GetRandLLVal(30) + 1;
+        iMinutes = g_Rand.GetLLVal(30) + 1;
     }
     else
     {
-        iMinutes = Calc_GetRandVal2(_iTimeLo, _iTimeHi);
+        iMinutes = g_Rand.GetVal2(_iTimeLo, _iTimeHi);
     }
 
     if (iMinutes <= 0)

@@ -154,7 +154,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 		{
 			// Sphere custom formula
 			if (pCharTarg->IsStatFlag(STATF_SLEEPING | STATF_FREEZE))
-				return(Calc_GetRandVal(10));
+				return(g_Rand.GetVal(10));
 
 			int iSkillVal = pChar->Skill_GetAdjusted(skillAttacker);
 
@@ -189,7 +189,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 			else if (iDiff > 100)
 				iDiff = 100;	// just means it's very hard.
 
-			return Calc_GetRandVal(iDiff);	// always need to have some chance. );
+			return g_Rand.GetVal(iDiff);	// always need to have some chance. );
 		}
 		case 1:
 		{
@@ -431,14 +431,14 @@ int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar *
 	int iSkillMark = pCharMark->Skill_GetAdjusted( SKILL_STEALING );
 	int iWeightItem = pItem->GetWeight();
 	
-	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + IMulDivLL( iWeightItem, 4, WEIGHT_UNITS );
+	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + g_Rand.GetVal(iDexMark/2) + IMulDivLL( iWeightItem, 4, WEIGHT_UNITS );
 	// Melt mod:
-    int iDifficulty = (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + IMulDiv( iWeightItem, 4, WEIGHT_UNITS );
+    int iDifficulty = (iSkillMark/5) + g_Rand.GetVal(iDexMark/2) + IMulDiv( iWeightItem, 4, WEIGHT_UNITS );
 	
 	if ( pItem->IsItemEquipped())
 		iDifficulty += iDexMark/2 + pCharMark->Stat_GetAdjusted(STAT_INT);		// This is REALLY HARD to do.
 	if ( pCharThief->IsStatFlag( STATF_WAR )) // all keyed up.
-		iDifficulty += Calc_GetRandVal( iDexMark/2 );
+		iDifficulty += g_Rand.GetVal( iDexMark/2 );
 	
 	// return( iDifficulty );
 	// Melt mod:
@@ -489,7 +489,7 @@ bool CServerConfig::Calc_CrimeSeen( const CChar * pCharThief, const CChar * pCha
 			iChanceToSee=10;
 	}
 
-	if ( Calc_GetRandVal(1000) > iChanceToSee )
+	if ( g_Rand.GetVal(1000) > iChanceToSee )
 		return false;
 
 	return true;
@@ -566,7 +566,7 @@ size_t CServerConfig::Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpell
 		const CCPropsChar* pCCPChar = pCharCaster->GetComponentProps<CCPropsChar>();
 		const CCPropsChar* pBaseCCPChar = pCharCaster->Base_GetDef()->GetComponentProps<CCPropsChar>();
 		const int iLowerReagentCost = (int)pCharCaster->GetPropNum(pCCPChar, PROPCH_LOWERREAGENTCOST, pBaseCCPChar); //Also used for reducing Tithing points.
-		if ( Calc_GetRandVal(100) >= iLowerReagentCost)
+		if ( g_Rand.GetVal(100) >= iLowerReagentCost)
 		{
 			CContainer* pCont = static_cast<CContainer*>(pCharCaster);
 			const size_t iMissing = pCont->ResourceConsumePart(pReagents, 1, 100, fTest);
@@ -591,7 +591,7 @@ ushort CServerConfig::Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef*
 		const CCPropsChar* pCCPChar = pCharCaster->GetComponentProps<CCPropsChar>();
 		const CCPropsChar* pBaseCCPChar = pCharCaster->Base_GetDef()->GetComponentProps<CCPropsChar>();
 		const int iLowerReagentCost = (int)pCharCaster->GetPropNum(pCCPChar, PROPCH_LOWERREAGENTCOST, pBaseCCPChar); //Also used for reducing Tithing points.
-		if (Calc_GetRandVal(100) >= iLowerReagentCost)
+		if (g_Rand.GetVal(100) >= iLowerReagentCost)
 			return (ushort)pSpell->m_wTithingUse; //Default amount of Tithing points consumed.
 	}
 	return 0; //No tithing points consumed.
@@ -614,13 +614,13 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, 
 	if (pTagStorage)
 	{
 		iCureChance = (int)pTagStorage->GetValNum();
-		return (Calc_GetRandVal(100) <= iCureChance);
+		return (g_Rand.GetVal(100) <= iCureChance);
 	}
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
 		iCureChance = Calc_GetSCurve(iCureLevel - iPoisonLevel, 100);
-		return (Calc_GetRandVal(1000) <= iCureChance);
+		return (g_Rand.GetVal(1000) <= iCureChance);
 	}
 	//If we use MAGICF_OSIFORMULAS, the poison level is in the 0-4+ range.
 	if (!iPoisonLevel) //Lesser Poison (iPoisonLevel 0) is always cured no matter the potion or spell/skill level value
@@ -682,5 +682,5 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, 
 		}
 	}
 
-	return (Calc_GetRandVal(100) <= iCureChance);
+	return (g_Rand.GetVal(100) <= iCureChance);
 }

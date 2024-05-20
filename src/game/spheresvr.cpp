@@ -142,6 +142,7 @@ CServer			g_Serv;				// current state, stuff not saved.
 
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
+CSRand          g_Rand;
 CExpression		g_Exp;				// Global script variables.
 CLog			g_Log;
 CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount

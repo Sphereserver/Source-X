@@ -299,7 +299,7 @@ void CCChampion::SpawnNPC()
 
         if (uiSize > 0 && uiSize <= UCHAR_MAX)
         {
-            uchar ucRand = (uchar)Calc_GetRandVal((int)uiSize);
+            uchar ucRand = (uchar)g_Rand.GetVal((int)uiSize);
             pNpc = idGroup[_iLevel][ucRand]; // Get the npc randomly from the list.
         }
         else

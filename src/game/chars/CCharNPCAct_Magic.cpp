@@ -169,7 +169,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     if (iDist > ((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
         return false;
 
-    if ((iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && (!Calc_GetRandVal(2)))
+    if ((iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && (!g_Rand.GetVal(2)))
     {
         // Within striking distance.
         // Stand and fight for a bit.
@@ -181,14 +181,14 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     int iChance = ((uiMana >= (uiStatInt / 2)) ? uiMana : (uiStatInt - uiMana));
 
     CObjBase * pSrc = this;
-    if (Calc_GetRandVal(iChance) < uiStatInt / 4)
+    if (g_Rand.GetVal(iChance) < uiStatInt / 4)
     {
         // we failed this test, but we could be casting next time
         // back off from the target a bit
-        if (uiMana > (uiStatInt / 3) && Calc_GetRandVal(uiStatInt))
+        if (uiMana > (uiStatInt / 3) && g_Rand.GetVal(uiStatInt))
         {
             if (iDist < 4 || iDist > 8)	// Here is fine?
-                NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
+                NPC_Act_Follow(false, g_Rand.GetVal(3) + 2, true);
             
             return true;
         }
@@ -196,11 +196,11 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     }
 
     // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
-    uchar iRandSpell = (uchar)(Calc_GetRandVal2(0, iSpellCount - 1)); //Spells are being stored using a vector, so it's assumed to be zero-based.
+    uchar iRandSpell = (uchar)(g_Rand.GetVal2(0, iSpellCount - 1)); //Spells are being stored using a vector, so it's assumed to be zero-based.
     bool bSpellSuccess = false, bWandUse = false, bIgnoreAITargetChoice = false;
     int iHealThreshold = g_Cfg.m_iNPCHealthreshold;
 
-    if (pWand && Calc_GetRandVal(100) < 50)
+    if (pWand && g_Rand.GetVal(100) < 50)
     {
         bWandUse = true;
         pSrc = pWand;
@@ -247,7 +247,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     if (!bSpellSuccess)
         return false;
 
-    if ((uiMana > uiStatInt / 3) && Calc_GetRandVal(uiStatInt << 1))
+    if ((uiMana > uiStatInt / 3) && g_Rand.GetVal(uiStatInt << 1))
     {
         if (iDist < 4 || iDist > 8)	// Here is fine?
             NPC_Act_Follow(false, 5, true);
@@ -434,11 +434,11 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
         //	return false;
 
         // less chance for berserker spells
-        /*if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON) && Calc_GetRandVal(2))
+        /*if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON) && g_Rand.GetVal(2))
         return false;
 
         // less chance for field spells as well
-        if (pSpellDef->IsSpellType(SPELLFLAG_FIELD) && Calc_GetRandVal(4))
+        if (pSpellDef->IsSpellType(SPELLFLAG_FIELD) && g_Rand.GetVal(4))
         return false;*/
     }
     m_atMagery.m_iSpell = spell;

@@ -471,7 +471,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
         else if ( pptcCmd[i][0] == 'R' )
         {
             // 1 in x chance of creating this.
-            if ( Calc_GetRandVal( atoi(pptcCmd[i] + 1) ))
+            if ( g_Rand.GetVal( atoi(pptcCmd[i] + 1) ))
                 return nullptr;	// don't create it
         }
     }
@@ -1098,14 +1098,14 @@ int CItem::FixWeirdness()
             // Doors and containers must have a lock complexity set.
             if (!m_itContainer.m_dwLockComplexity)
             {
-                m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
+                m_itContainer.m_dwLockComplexity = 500 + g_Rand.GetVal(600);
             }
             break;
 
         case IT_POTION:
             if (m_itPotion.m_dwSkillQuality == 0) // store bought ?
             {
-                m_itPotion.m_dwSkillQuality = Calc_GetRandVal(950);
+                m_itPotion.m_dwSkillQuality = g_Rand.GetVal(950);
             }
             break;
         case IT_MAP_BLANK:
@@ -1401,7 +1401,7 @@ int64 CItem::GetDecayTime() const
                 return (m_itCrop.m_Respawn_Sec * MSECS_PER_SEC);
 
             const int64 iTimeNextNewMoon = CWorldGameTime::GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
-            const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
+            const int64 iMinutesDelay = g_Rand.GetLLVal(20) * g_Cfg.m_iGameMinuteLength;
 			return (iTimeNextNewMoon - CWorldGameTime::GetCurrentTime().GetTimeRaw() + iMinutesDelay);
         }
 		case IT_MULTI:
@@ -5335,7 +5335,7 @@ int CItem::Use_LockPick( CChar * pCharSrc, bool fTest, bool fFail )
 		if ( ! fTest )
 			pCharSrc->CheckCrimeSeen( SKILL_SNOOPING, nullptr, this, g_Cfg.GetDefaultMsg( DEFMSG_LOCK_PICK_CRIME ) );
 
-		if ( Calc_GetRandVal( g_Cfg.m_iMagicUnlockDoor ))
+		if ( g_Rand.GetVal( g_Cfg.m_iMagicUnlockDoor ))
 			return 10000;	// plain impossible.
 	}
 
@@ -5718,7 +5718,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
     if (fHasMaxHits && (m_itArmor.m_wHitsMax > 0))
     {
         const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
-        if (iSelfRepair > Calc_GetRandVal(10))
+        if (iSelfRepair > g_Rand.GetVal(10))
         {
             const ushort uiOldHits = m_itArmor.m_dwHitsCur;
             m_itArmor.m_dwHitsCur += 2;
@@ -5754,13 +5754,13 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		if ( iDmg == 1 )
 		{
 			// Miss - They will usually survive.
-			if ( Calc_GetRandVal(5))
+			if ( g_Rand.GetVal(5))
 				return 0;
 		}
 		else
 		{
 			// Must have hit.
-			if ( ! Calc_GetRandVal(3))
+			if ( ! g_Rand.GetVal(3))
 				return 1;
 		}
 		Delete();
@@ -6153,7 +6153,7 @@ bool CItem::_OnTick()
                     {
                         pClient->addMapWaypoint(this, MAPWAYPOINT_Remove);	// remove corpse map waypoint on enhanced clients
                     }
-					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
+					SetID((ITEMID_TYPE)(g_Rand.GetVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
 					_SetTimeout(g_Cfg.m_iDecay_CorpsePlayer);
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore

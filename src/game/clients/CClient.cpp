@@ -1345,7 +1345,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				int64 iQty = Str_ParseCmds( s.GetArgStr(), piMidi, ARRAY_COUNT(piMidi) );
 				if ( iQty > 0 )
 				{
-					addMusic( static_cast<MIDI_TYPE>(piMidi[ Calc_GetRandLLVal( iQty ) ]) );
+					addMusic( static_cast<MIDI_TYPE>(piMidi[ g_Rand.GetLLVal( iQty ) ]) );
 				}
 			}
 			break;

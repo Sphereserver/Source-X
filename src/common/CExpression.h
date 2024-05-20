@@ -10,7 +10,7 @@
 #ifndef _INC_CEXPRSSION_H
 #define _INC_CEXPRSSION_H
 
-#include "common.h"
+#include "sphere_library/CSRand.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 
@@ -230,11 +230,6 @@ template<typename T> inline T SphereAbs(const T x) noexcept
     // This is good, but standard C functions might be even faster
 	// return (x<0) ? -x : x;
 }
-
-int64 Calc_GetRandLLVal( int64 iQty );					// Get a random value between 0 and iQty - 1
-int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
-int32 Calc_GetRandVal( int32 iQty );					// Get a random value between 0 and iQty - 1
-int32 Calc_GetRandVal2( int32 iMin, int32 iMax );
 
 int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );

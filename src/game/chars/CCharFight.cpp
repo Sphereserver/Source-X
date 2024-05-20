@@ -147,7 +147,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
             fSeen = true;
             
 			// Off chance of being a criminal. (hehe)
-			if ( Calc_GetRandVal(100) < g_Cfg.m_iSnoopCriminal )
+			if ( g_Rand.GetVal(100) < g_Cfg.m_iSnoopCriminal )
 				pChar->OnNoticeCrime( this, pCharMark );
 
             if ( pChar->m_pNPC )
@@ -298,7 +298,7 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 		// In war mode already
 		if ( m_pPlayer )
 			return;
-		if ( Calc_GetRandVal( 10 ))
+		if ( g_Rand.GetVal( 10 ))
 			return;
 		// NPC will Change targets.
 	}
@@ -720,10 +720,10 @@ effect_bounce:
 			// pre-AOS armor rating (AR)
 			int iArmorRating = pCharDef->m_defense + m_defense;
 
-			int iArMax = iArmorRating * Calc_GetRandVal2(7,35) / 100;
+			int iArMax = iArmorRating * g_Rand.GetVal2(7,35) / 100;
 			int iArMin = iArMax / 2;
 
-			int iDef = Calc_GetRandVal2( iArMin, (iArMax - iArMin) + 1 );
+			int iDef = g_Rand.GetVal2( iArMin, (iArMax - iArMin) + 1 );
 			if ( uType & DAMAGE_MAGIC )		// magical damage halves effectiveness of defense
 				iDef /= 2;
 
@@ -734,7 +734,7 @@ effect_bounce:
 	}
 
 	CScriptTriggerArgs Args( iDmg, uType, (int64)(0) );
-	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(ARRAY_COUNT(sm_ArmorDamageLayers))]);
+	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[g_Rand.GetVal(ARRAY_COUNT(sm_ArmorDamageLayers))]);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
 	Args.m_VarsLocal.SetNum("Spell", (int)spell);
 
@@ -770,7 +770,7 @@ effect_bounce:
 	}
 
 	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
-	if ( (iItemDamageChance > Calc_GetRandVal(100)) && !Can(CAN_C_NONHUMANOID) )
+	if ( (iItemDamageChance > g_Rand.GetVal(100)) && !Can(CAN_C_NONHUMANOID) )
 	{
 		if ( pItemHit )
 			pItemHit->OnTakeDamage(iDmg, pSrc, uType);
@@ -887,12 +887,12 @@ effect_bounce:
 			if ( pProtectionSpell )
 			{
 				const int iChance = pProtectionSpell->m_itSpell.m_spelllevel;
-				if ( iChance > Calc_GetRandVal(1000) )
+				if ( iChance > g_Rand.GetVal(1000) )
 					iDisturbChance = 0;
 			}
 		}
 
-		if ( iDisturbChance > Calc_GetRandVal(1000) )
+		if ( iDisturbChance > g_Rand.GetVal(1000) )
 		{
 			bool bInterrupt = true;
 			if (IsTrigUsed(TRIGGER_SPELLINTERRUPT))
@@ -1279,7 +1279,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	if ( bNoRandom )
 		return( bGetMax ? iDmgMax : iDmgMin );
 	else
-		return( Calc_GetRandVal2(iDmgMin, iDmgMax) );
+		return( g_Rand.GetVal2(iDmgMin, iDmgMax) );
 }
 
 bool CChar::Fight_IsAttackableState()
@@ -1987,7 +1987,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( pAmmo && m_pPlayer  )
 		{
-			if (40 >= Calc_GetRandVal(100))
+			if (40 >= g_Rand.GetVal(100))
 			{
 				pAmmo->UnStackSplit(1);
 				pAmmo->MoveToDecay(pCharTarg->GetTopPoint(), g_Cfg.m_iDecay_Item);
@@ -2009,12 +2009,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 			{
 				static constexpr SOUND_TYPE sm_Snd_Miss_Ranged[] = { 0x233, 0x238 };
-				iSound = sm_Snd_Miss_Ranged[Calc_GetRandVal(ARRAY_COUNT(sm_Snd_Miss_Ranged))];
+				iSound = sm_Snd_Miss_Ranged[g_Rand.GetVal(ARRAY_COUNT(sm_Snd_Miss_Ranged))];
 			}
 			else
 			{
 				static constexpr SOUND_TYPE sm_Snd_Miss[] = { 0x238, 0x239, 0x23a };
-				iSound = sm_Snd_Miss[Calc_GetRandVal(ARRAY_COUNT(sm_Snd_Miss))];
+				iSound = sm_Snd_Miss[g_Rand.GetVal(ARRAY_COUNT(sm_Snd_Miss))];
 			}
 		}
 		Sound(iSound);
@@ -2075,7 +2075,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				pCharTarg->Skill_Experience(SKILL_BUSHIDO, iParryChance);
 
 			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
-			if ( pItemHit && (iParryDamageChance > Calc_GetRandVal(100)) )
+			if ( pItemHit && (iParryDamageChance > g_Rand.GetVal(100)) )
 				pItemHit->OnTakeDamage(1, this, iDmgType);
 
 			//Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);		// moved to scripts (@UseQuick on Parrying skill)
@@ -2097,7 +2097,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
     int32 iPoison = 0;
     if (pWeapon)
     {
-        iPoison = Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill);
+        iPoison = g_Rand.GetVal(pWeapon->m_itWeapon.m_poison_skill);
         Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", iPoison / 2);
     }
 
@@ -2155,7 +2155,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( pAmmo )
 	{
-		if ( pCharTarg->m_pNPC && (40 >= Calc_GetRandVal(100)) )
+		if ( pCharTarg->m_pNPC && (40 >= g_Rand.GetVal(100)) )
 		{
 			pAmmo->UnStackSplit(1);
 			pCharTarg->ItemBounce(pAmmo, false);
@@ -2171,12 +2171,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	{
 		// Check if the weapon is poisoned
 		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && pWeapon->m_itWeapon.m_poison_skill && 
-            (pWeapon->m_itWeapon.m_poison_skill > Calc_GetRandVal(100) || pWeapon->m_itWeapon.m_poison_skill < 10))
+            (pWeapon->m_itWeapon.m_poison_skill > g_Rand.GetVal(100) || pWeapon->m_itWeapon.m_poison_skill < 10))
 		{
 			byte iPoisonDeliver = (byte)(iPoison);
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
-            if (Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionChance") > Calc_GetRandVal(100))
+            if (Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionChance") > g_Rand.GetVal(100))
             {
                 pWeapon->m_itWeapon.m_poison_skill -= (byte)(Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionAmount"));	// reduce weapon poison charges
                 pWeapon->UpdatePropertyFlag();
@@ -2185,17 +2185,17 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		// Check if the weapon will be damaged
 		int iDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
-		if ( iDamageChance > Calc_GetRandVal(100) )
+		if ( iDamageChance > g_Rand.GetVal(100) )
 			pWeapon->OnTakeDamage(iDmg, pCharTarg);
 	}
 	else if ( m_pNPC )
 	{
 		// Base poisoning for NPCs
-		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && 50 >= Calc_GetRandVal(100) )
+		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && 50 >= g_Rand.GetVal(100) )
 		{
 			int iPoisoningSkill = Skill_GetBase(SKILL_POISONING);
 			if ( iPoisoningSkill )
-				pCharTarg->SetPoison(Calc_GetRandVal(iPoisoningSkill), Calc_GetRandVal(iPoisoningSkill / 50), this);
+				pCharTarg->SetPoison(g_Rand.GetVal(iPoisoningSkill), g_Rand.GetVal(iPoisoningSkill / 50), this);
 		}
 	}
 
@@ -2223,7 +2223,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		bool fMakeLeechSound = false;
 		if ( uiHitLifeLeech )
 		{
-			uiHitLifeLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitLifeLeech * 30) / 10000));	// leech 0% ~ 30% of damage value
+			uiHitLifeLeech = (ushort)(g_Rand.GetVal2(0, (iDmg * uiHitLifeLeech * 30) / 10000));	// leech 0% ~ 30% of damage value
 			UpdateStatVal(STAT_STR, uiHitLifeLeech);
             fMakeLeechSound = true;
 		}
@@ -2231,12 +2231,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		ushort uiHitManaLeech = (ushort)GetPropNum(pCCPChar, PROPCH_HITLEECHMANA, pBaseCCPChar);
 		if ( uiHitManaLeech )
 		{
-			uiHitManaLeech = (ushort)(Calc_GetRandVal2(0, (iDmg * uiHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
+			uiHitManaLeech = (ushort)(g_Rand.GetVal2(0, (iDmg * uiHitManaLeech * 40) / 10000));	// leech 0% ~ 40% of damage value
 			UpdateStatVal(STAT_INT, uiHitManaLeech);
             fMakeLeechSound = true;
 		}
 
-		if ( GetPropNum(pCCPChar, PROPCH_HITLEECHSTAM, pBaseCCPChar) > Calc_GetRandLLVal(100) )
+		if ( GetPropNum(pCCPChar, PROPCH_HITLEECHSTAM, pBaseCCPChar) > g_Rand.GetLLVal(100) )
 		{
 			UpdateStatVal(STAT_DEX, (ushort)iDmg);	// leech 100% of damage value
             fMakeLeechSound = true;
@@ -2249,7 +2249,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form )
 				uiManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
 		}
-		if ( GetPropNum(pCCPChar, PROPCH_HITMANADRAIN, pBaseCCPChar) > Calc_GetRandLLVal(100) )
+		if ( GetPropNum(pCCPChar, PROPCH_HITMANADRAIN, pBaseCCPChar) > g_Rand.GetLLVal(100) )
 			uiManaDrain += (ushort)IMulDivLL(iDmg, 20, 100);		// leech 20% of damage value
 
 		ushort uiTargMana = pCharTarg->Stat_GetVal(STAT_INT);
@@ -2269,40 +2269,40 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         if (pWeapon)
         {
 	     
-            if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+            if (GetPropNum(pCCPChar, PROPCH_HITAREAPHYSICAL, pBaseCCPChar) > g_Rand.GetLLVal(100))
                 pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_HIT_BLUNT, 100, 0, 0, 0, 0, static_cast<HUE_TYPE>(0x32), static_cast<SOUND_TYPE>(0x10E));
 
             bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
             if (fElemental)
 	        {
 				
-		        if (GetPropNum(pCCPChar, PROPCH_HITAREAFIRE, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAFIRE, pBaseCCPChar) > g_Rand.GetLLVal(100))
 			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_FIRE, 0, 100, 0, 0, 0, static_cast<HUE_TYPE>(0x488), static_cast<SOUND_TYPE>(0x11D));
 
-		        if (GetPropNum(pCCPChar, PROPCH_HITAREACOLD, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREACOLD, pBaseCCPChar) > g_Rand.GetLLVal(100))
 			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_COLD, 0, 0, 100, 0, 0, static_cast<HUE_TYPE>(0x834), static_cast<SOUND_TYPE>(0xFC));
 
-		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPOISON, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAPOISON, pBaseCCPChar) > g_Rand.GetLLVal(100))
 			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_POISON, 0, 0, 0, 100, 0, static_cast<HUE_TYPE>(0x48E), static_cast<SOUND_TYPE>(0x205));
 
-		        if (GetPropNum(pCCPChar, PROPCH_HITAREAENERGY, pBaseCCPChar) > Calc_GetRandLLVal(100))
+		        if (GetPropNum(pCCPChar, PROPCH_HITAREAENERGY, pBaseCCPChar) > g_Rand.GetLLVal(100))
 			        pCharTarg->OnTakeDamageInflictArea(iDmg / 2, this, DAMAGE_ENERGY, 0, 0, 0, 0, 100, static_cast<HUE_TYPE>(0x78), static_cast<SOUND_TYPE>(0x1F1));
 			
 	        }
 
-	        if (GetPropNum(pCCPChar, PROPCH_HITDISPEL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+	        if (GetPropNum(pCCPChar, PROPCH_HITDISPEL, pBaseCCPChar) > g_Rand.GetLLVal(100))
 		        pCharTarg->OnSpellEffect(SPELL_Dispel, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 						
-	        if (GetPropNum(pCCPChar, PROPCH_HITFIREBALL, pBaseCCPChar) > Calc_GetRandLLVal(100))
+	        if (GetPropNum(pCCPChar, PROPCH_HITFIREBALL, pBaseCCPChar) > g_Rand.GetLLVal(100))
 		        pCharTarg->OnSpellEffect(SPELL_Fireball, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 			
-	        if (GetPropNum(pCCPChar, PROPCH_HITHARM, pBaseCCPChar) > Calc_GetRandLLVal(100))
+	        if (GetPropNum(pCCPChar, PROPCH_HITHARM, pBaseCCPChar) > g_Rand.GetLLVal(100))
 		        pCharTarg->OnSpellEffect(SPELL_Harm, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 			
-	        if (GetPropNum(pCCPChar, PROPCH_HITLIGHTNING, pBaseCCPChar) > Calc_GetRandLLVal(100))
+	        if (GetPropNum(pCCPChar, PROPCH_HITLIGHTNING, pBaseCCPChar) > g_Rand.GetLLVal(100))
 		        pCharTarg->OnSpellEffect(SPELL_Lightning, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
 			
-	        if (GetPropNum(pCCPChar, PROPCH_HITMAGICARROW, pBaseCCPChar) > Calc_GetRandLLVal(100))
+	        if (GetPropNum(pCCPChar, PROPCH_HITMAGICARROW, pBaseCCPChar) > g_Rand.GetLLVal(100))
 		        pCharTarg->OnSpellEffect(SPELL_Magic_Arrow, this, Skill_GetAdjusted(SKILL_MAGERY), pWeapon);
         }
 
@@ -2310,11 +2310,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pCharTarg->_wBloodHue != (HUE_TYPE)(-1) )
 		{
 			static constexpr ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
-			const int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
+			const int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? g_Rand.GetVal2(4, 5) : g_Rand.GetVal2(1, 2);
 
 			for ( int i = 0; i < iBloodQty; ++i )
 			{
-                const ITEMID_TYPE iBloodID = sm_Blood[Calc_GetRandVal(ARRAY_COUNT(sm_Blood))];
+                const ITEMID_TYPE iBloodID = sm_Blood[g_Rand.GetVal(ARRAY_COUNT(sm_Blood))];
 
                 CItem *pBlood = CItem::CreateBase(iBloodID);
                 ASSERT(pBlood);
@@ -2326,8 +2326,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
                 // Looks like the hues with index >= 1000 cause the blood to be black, instead of the right color
                 /*
                 CPointMap pt = pCharTarg->GetTopPoint();
-                pt.m_x += (short)Calc_GetRandVal2(-1, 1);
-                pt.m_y += (short)Calc_GetRandVal2(-1, 1);
+                pt.m_x += (short)g_Rand.GetVal2(-1, 1);
+                pt.m_y += (short)g_Rand.GetVal2(-1, 1);
                 EffectLocation(EFFECT_XYZ, iBloodID, nullptr, &pt, 50, 0, false, pCharTarg->_wBloodHue);
                 */
 			}

@@ -369,7 +369,7 @@ CItem *CContainer::ContentFindRandom() const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindRandom");
 	// returns Pointer of random item, nullptr if player carrying none
-	return static_cast<CItem *>(GetContentIndex(Calc_GetRandVal((int32)GetContentCount())));
+	return static_cast<CItem *>(GetContentIndex(g_Rand.GetVal((int32)GetContentCount())));
 }
 
 int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dwArg ) const

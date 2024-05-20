@@ -841,13 +841,13 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     break;
 			}
 			// Temporary disabled - it's causing weird animations on some weapons
-			/*if ((Calc_GetRandVal(2)) && (pWeapon->GetType() != IT_WEAPON_BOW) && (pWeapon->GetType() != IT_WEAPON_XBOW) && (pWeapon->GetType() != IT_WEAPON_THROWING))
+			/*if ((g_Rand.GetVal(2)) && (pWeapon->GetType() != IT_WEAPON_BOW) && (pWeapon->GetType() != IT_WEAPON_XBOW) && (pWeapon->GetType() != IT_WEAPON_THROWING))
 			{
 				// add some style to the attacks.
 				if (layer == LAYER_HAND2)
-					action = static_cast<ANIM_TYPE>(ANIM_ATTACK_2H_BASH + Calc_GetRandVal(3));
+					action = static_cast<ANIM_TYPE>(ANIM_ATTACK_2H_BASH + g_Rand.GetVal(3));
 				else
-					action = static_cast<ANIM_TYPE>(ANIM_ATTACK_1H_SLASH + Calc_GetRandVal(3));
+					action = static_cast<ANIM_TYPE>(ANIM_ATTACK_1H_SLASH + g_Rand.GetVal(3));
 			}*/
 		}
 
@@ -942,7 +942,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_ATTACK_BOW:
 					case ANIM_ATTACK_XBOW:
 					case ANIM_ATTACK_WRESTLE:
-						switch (Calc_GetRandVal(2))
+						switch (g_Rand.GetVal(2))
 						{
 							case 0: return ANIM_ANI_ATTACK1; break;
 							case 1: return ANIM_ANI_ATTACK2; break;
@@ -990,7 +990,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_DIE_FORWARD:
 						return ANIM_MON_DIE2;
 					case ANIM_GET_HIT:
-						switch (Calc_GetRandVal(3))
+						switch (g_Rand.GetVal(3))
 						{
 							case 0: return ANIM_MON_GETHIT; break;
 							case 1: return ANIM_MON_BlockRight; break;
@@ -1006,7 +1006,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_ATTACK_BOW:
 					case ANIM_ATTACK_XBOW:
 					case ANIM_ATTACK_WRESTLE:
-						switch (Calc_GetRandVal(3))
+						switch (g_Rand.GetVal(3))
 						{
 							case 0: return ANIM_MON_ATTACK1; break;
 							case 1: return ANIM_MON_ATTACK2; break;
@@ -1469,7 +1469,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 						{
 							// 0x236 = hvyswrd1 = (heavy strike)
 							// 0x237 = hvyswrd4 = (heavy strike)
-							id = Calc_GetRandVal( 2 ) ? 0x236 : 0x237;
+							id = g_Rand.GetVal( 2 ) ? 0x236 : 0x237;
 							break;
 						}
 						// if not two handed, don't break, just fall through and use the same sound ID as a fencing weapon
@@ -1477,7 +1477,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 					case IT_WEAPON_FENCE:
 						// 0x23b = sword1
 						// 0x23c = sword7
-						id = Calc_GetRandVal( 2 ) ? 0x23b : 0x23c;
+						id = g_Rand.GetVal( 2 ) ? 0x23b : 0x23c;
 						break;
 					case IT_WEAPON_BOW:
 					case IT_WEAPON_XBOW:
@@ -1503,7 +1503,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 	{
 		const CCharBase* pCharDef = Char_GetDef();
 		if (type == CRESND_RAND)
-			type = Calc_GetRandVal(2) ? CRESND_IDLE : CRESND_NOTICE;		// pick randomly CRESND_IDLE or CRESND_NOTICE
+			type = g_Rand.GetVal(2) ? CRESND_IDLE : CRESND_NOTICE;		// pick randomly CRESND_IDLE or CRESND_NOTICE
 
 		// Do i have an override for this action sound?
 		SOUND_TYPE idOverride = SOUND_NONE;
@@ -1563,14 +1563,14 @@ void CChar::SoundChar( CRESND_TYPE type )
 
 					if (type == CRESND_HIT)
 					{
-						id = sm_Snd_Hit[ Calc_GetRandVal( ARRAY_COUNT( sm_Snd_Hit )) ];		// same sound for every race and sex
+						id = sm_Snd_Hit[ g_Rand.GetVal( ARRAY_COUNT( sm_Snd_Hit )) ];		// same sound for every race and sex
 					}
 					else if ( pCharDef->IsFemale() )
 					{
 						switch ( type )
 						{
-							case CRESND_GETHIT:	id = sm_Snd_Wom_Omf[ Calc_GetRandVal( ARRAY_COUNT(sm_Snd_Wom_Omf)) ];	break;
-							case CRESND_DIE:	id = sm_Snd_Wom_Die[ Calc_GetRandVal( ARRAY_COUNT(sm_Snd_Wom_Die)) ];	break;
+							case CRESND_GETHIT:	id = sm_Snd_Wom_Omf[ g_Rand.GetVal( ARRAY_COUNT(sm_Snd_Wom_Omf)) ];	break;
+							case CRESND_DIE:	id = sm_Snd_Wom_Die[ g_Rand.GetVal( ARRAY_COUNT(sm_Snd_Wom_Die)) ];	break;
 							default:	break;
 						}
 					}
@@ -1578,8 +1578,8 @@ void CChar::SoundChar( CRESND_TYPE type )
 					{
 						switch ( type )
 						{
-							case CRESND_GETHIT:	id = sm_Snd_Man_Omf[ Calc_GetRandVal( ARRAY_COUNT(sm_Snd_Man_Omf)) ];	break;
-							case CRESND_DIE:	id = sm_Snd_Man_Die[ Calc_GetRandVal( ARRAY_COUNT(sm_Snd_Man_Die)) ];	break;
+							case CRESND_GETHIT:	id = sm_Snd_Man_Omf[ g_Rand.GetVal( ARRAY_COUNT(sm_Snd_Man_Omf)) ];	break;
+							case CRESND_DIE:	id = sm_Snd_Man_Die[ g_Rand.GetVal( ARRAY_COUNT(sm_Snd_Man_Die)) ];	break;
 							default:	break;
 						}
 					}
@@ -2236,7 +2236,7 @@ void CChar::EatAnim(CItem* pItem, ushort uiQty)
     ASSERT(pItem); //Should never happen, but make sure item is valid.
 
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
-	Sound(sm_EatSounds[Calc_GetRandVal(ARRAY_COUNT(sm_EatSounds))]);
+	Sound(sm_EatSounds[g_Rand.GetVal(ARRAY_COUNT(sm_EatSounds))]);
 
 	if ( !IsStatFlag(STATF_ONHORSE) )
 		UpdateAnimate(ANIM_EAT);
@@ -2251,7 +2251,7 @@ void CChar::EatAnim(CItem* pItem, ushort uiQty)
 
 	ushort uiHits = 0;
 	ushort uiMana = 0;
-	ushort uiStam = (ushort)( Calc_GetRandVal2(3, 6) + (uiQty / 5) );
+	ushort uiStam = (ushort)( g_Rand.GetVal2(3, 6) + (uiQty / 5) );
 	ushort uiFood = uiQty;
 	ushort uiStatsLimit = 0;
 	if (IsTrigUsed(TRIGGER_EAT))
@@ -2979,7 +2979,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 			pParalyze->Delete();
 	}
 
-	int64 iPoisonDuration = (1 + Calc_GetRandLLVal(2)) * TENTHS_PER_SEC;	//in TENTHS of second
+	int64 iPoisonDuration = (1 + g_Rand.GetLLVal(2)) * TENTHS_PER_SEC;	//in TENTHS of second
 	CItem* pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, iPoisonDuration, pCharSrc, false);
 	if ( !pPoison )
 		return false;
@@ -2999,7 +2999,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		if (iDist <= g_Cfg.m_iMapViewSizeMax)
 		{
 			if (iSkill >= 1000)		//Lethal-Deadly
-				iPoisonLevel = 3 + !bool(Calc_GetRandVal(10));
+				iPoisonLevel = 3 + !bool(g_Rand.GetVal(10));
 			else if (iSkill > 850)	//Greater
 				iPoisonLevel = 2;
 			else if (iSkill > 650)	//Standard
@@ -3199,7 +3199,7 @@ bool CChar::Death()
     }
 
 	// Create the corpse item
-	bool fFrontFall = Calc_GetRandVal(2);
+	bool fFrontFall = g_Rand.GetVal(2);
 	CItemCorpse * pCorpse = MakeCorpse(fFrontFall);
 	if ( pCorpse )
 	{
@@ -3541,7 +3541,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				iWeightLoadPercent += (pVal ? (int)pVal->GetValNum() : g_Cfg.m_iStamRunningPenalty);
 			}
 			const int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
-			if (iChanceForStamLoss > Calc_GetRandVal(1000))
+			if (iChanceForStamLoss > g_Rand.GetVal(1000))
 			{
 
 				pVal = GetKey("OVERRIDE.STAMINAWALKINGPENALTY", true);
@@ -3675,7 +3675,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 			case IT_FIRE:
 				{
 					int iSkillLevel = pItem->m_itSpell.m_spelllevel;	// heat level (0-1000)
-					iSkillLevel = Calc_GetRandVal2(iSkillLevel/2, iSkillLevel);
+					iSkillLevel = g_Rand.GetVal2(iSkillLevel/2, iSkillLevel);
 					if ( IsStatFlag(STATF_FLY) )
 						iSkillLevel /= 2;
 
@@ -3685,7 +3685,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
                         Sound(0x15f);	// fire noise
                         if ( m_pNPC && fStanding )
                         {
-                            m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+                            m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
                             NPC_WalkToPoint(true);		// run away from the threat
                         }
                     }
@@ -3706,7 +3706,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
                     pItem->m_uidLink.CharFind(), pItem->m_itSpell.m_spelllevel, pItem);
                 if (fSpellHit && m_pNPC && fStanding)
                 {
-                    m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+                    m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
                     NPC_WalkToPoint(true);		// run away from the threat
                 }
 				continue;
@@ -3716,7 +3716,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
                 int iDmg = OnTakeDamage( pItem->Use_Trap(), nullptr, DAMAGE_HIT_BLUNT|DAMAGE_GENERAL );
                 if ( (iDmg > 0) && m_pNPC && fStanding )
                 {
-                    m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+                    m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
                     NPC_WalkToPoint(true);		// run away from the threat
                 }
                 continue;
@@ -4512,7 +4512,7 @@ void CChar::_GoAwake()
 
 	CWorldTickingList::AddCharPeriodic(this, false);
 
-	_SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+	_SetTimeout(g_Rand.GetVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }
 
 void CChar::_GoSleep()
@@ -4545,7 +4545,7 @@ bool CChar::_OnTick()
 	if (!_CanTick())
 	{
 		ASSERT(!_IsSleeping());
-		if (GetTopSector()->IsSleeping() && !Calc_GetRandVal(15))
+		if (GetTopSector()->IsSleeping() && !g_Rand.GetVal(15))
 		{
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();
