@@ -60,7 +60,8 @@ int16 CSRand::Get16Val2Fast(int16 iMin, int16 iMax)
     if (iMin > iMax)
         std::swap(iMin, iMax);
     const int16 rb = Get16ValFast(iMax - iMin);
-    return rb + iMin;
+    const int16 rboff = rb + iMin;
+    return rboff;
 }
 
 int32 CSRand::GetValFast(int32 iQty)
@@ -77,7 +78,8 @@ int32 CSRand::GetVal2Fast(int32 iMin, int32 iMax)
     if (iMin > iMax)
         std::swap(iMin, iMax);
     const int32 rb = GetValFast(iMax - iMin);
-    return rb + iMin;
+    const int32 rboff = rb + iMin;
+    return rboff;
 }
 
 int64 CSRand::GetLLValFast(int64 iQty)
@@ -94,7 +96,8 @@ int64 CSRand::GetLLVal2Fast(int64 iMin, int64 iMax)
     if (iMin > iMax)
         std::swap(iMin, iMax);
     const int64 rb = GetLLValFast(iMax - iMin);
-    return rb + iMin;
+    const int64 rboff = rb + iMin;
+    return rboff;
 }
 
 

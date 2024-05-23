@@ -223,7 +223,7 @@ template<typename T> inline T SphereAbs(const T x) noexcept
         return abs(x);
 	else
 	{
-		static_assert (std::is_same_v<T, int64_t>, "which type?");
+		static_assert (std::is_same_v<T, int64_t>, "Forgot to cast the type to a fixed size integer like int32_t? Or trying to use this on an unsigned number?");
 		return llabs(x);
 	}
 

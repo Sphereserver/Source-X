@@ -24,6 +24,7 @@
 #include	"table.h"
 #include	"platform.h"			/* platform-specific defines */
 
+#include <stddef.h>     // Some compilers don't define the NULL macro... (see Apple Clang)
 
 /*
 +*****************************************************************************
@@ -39,12 +40,14 @@
 int  tabEnable=0;					/* are we gathering stats? */
 uint8_t tabUsed[256];					/* one bit per table */
 
+/*
 #if FEISTEL
 const		char *moduleDescription="Pedagogical C code (Feistel)";
 #else
 const		char *moduleDescription="Pedagogical C code";
 #endif
 const		char *modeString = "";
+*/
 
 #define	P0_USED		0x01
 #define	P1_USED		0x02
@@ -83,7 +86,7 @@ uint32_t TwofishCodeStart(void) { return Here(0); };
 * Notes: This routine is for use in generating the tables KAT file.
 *
 -****************************************************************************/
-static int TableOp(int op)
+int TableOp(int op)
 	{
 	static int queryCnt=0;
 	int i;

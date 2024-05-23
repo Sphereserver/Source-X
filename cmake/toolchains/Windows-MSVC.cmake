@@ -92,6 +92,9 @@ function (toolchain_exe_stuff)
 		SET(cxx_compiler_flags_common	${cxx_compiler_flags_common} /Zc:__cplusplus)
 	endif()
 
+	set(CMAKE_C_FLAGS_DEBUG_INIT "" INTERNAL)
+	set(CMAKE_CXX_FLAGS_DEBUG_INIT "" INTERNAL)
+
 	target_compile_options(spheresvr PRIVATE
 		${cxx_compiler_flags_common}
 		$<$<CONFIG:Release>:	/O2 /EHsc /GL /GA /Gw /Gy /GF /GR->
@@ -103,12 +106,12 @@ function (toolchain_exe_stuff)
 	#-- Apply linker flags.
 
 	# For some reason only THIS one isn't created, and CMake complains with an error...
-	set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE})
+	set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE} "")
 
 	target_link_options(spheresvr PRIVATE
 		$<$<CONFIG:Release>:	${EXE_LINKER_EXTRA}	/OPT:REF,ICF /LTCG>
 		$<$<CONFIG:Nightly>:	${EXE_LINKER_EXTRA}	/OPT:REF,ICF /LTCG>
-		$<$<CONFIG:Debug>:		${EXE_LINKER_EXTRA} /DEBUG /SAFESEH:NO>
+		$<$<CONFIG:Debug>:		${EXE_LINKER_EXTRA} /DEBUG /SAFESEH:NO /INCREMENTAL /EDITANDCONTINUE /LTCG:OFF>
 	)
 
 

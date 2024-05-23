@@ -168,16 +168,13 @@ ELSE (SINGLE_TARGET)
 ENDIF (SINGLE_TARGET)
 
 
-# Now include external libraries
-add_subdirectory(lib)
-
-
 # Need to clear shared library flags. If not, cmake sets -rdynamic and this
 # add to the executable the full symbol table (included unused symbols).
 # This is a problem because the binary is >700 KB bigger.
 SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
+# CMake also sets other predefined flags, which we don't want...
 SET (CMAKE_C_FLAGS "")
 SET (CMAKE_C_FLAGS_DEBUG "")
 SET (CMAKE_C_FLAGS_NIGHTLY "")
@@ -188,10 +185,15 @@ SET (CMAKE_CXX_FLAGS_DEBUG "")
 SET (CMAKE_CXX_FLAGS_NIGHTLY "")
 SET (CMAKE_CXX_FLAGS_RELEASE "")
 
-#SET (CMAKE_EXE_LINKER_FLAGS "")
-#SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
-#SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
-#SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+SET (CMAKE_EXE_LINKER_FLAGS "")
+SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
+SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+
+
+# Now include external libraries
+add_subdirectory(lib)
+
 
 toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
 

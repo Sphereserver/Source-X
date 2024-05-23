@@ -46,10 +46,10 @@ function (toolchain_exe_stuff_common)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
-		SET (UBSAN_FLAGS		-fsanitize=undefined,\
-shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,\
-float-divide-by-zero,float-cast-overflow,pointer-overflow,\
-unreachable,nonnull-attribute,returns-nonnull-attribute \
+		SET (UBSAN_FLAGS		-fsanitize=undefined,
+shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,
+float-divide-by-zero,float-cast-overflow,pointer-overflow,
+unreachable,nonnull-attribute,returns-nonnull-attribute 
 -fno-sanitize=enum)
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
 		SET (ENABLED_SANITIZER true)

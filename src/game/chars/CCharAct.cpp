@@ -3488,10 +3488,13 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				return nullptr;
 			}
 
-			else if (pChar->IsStatFlag(STATF_INVISIBLE | STATF_HIDDEN) ) {
-				if ((g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE))
-					// OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE));
+			else if (pChar->IsStatFlag(STATF_INVISIBLE | STATF_HIDDEN) )
+            {
+                if ((g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE))
+                {
+                    // OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE
+                    strncpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE), Str_TempLength());
+                }
 				else
 				{
 					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
@@ -4512,7 +4515,7 @@ void CChar::_GoAwake()
 
 	CWorldTickingList::AddCharPeriodic(this, false);
 
-	_SetTimeout(g_Rand.GetVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+	_SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }
 
 void CChar::_GoSleep()

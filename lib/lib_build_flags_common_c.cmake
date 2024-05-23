@@ -1,9 +1,9 @@
 if (MSVC)
 	set (c_compiler_options_common
-		/O2 /EHsc /GL /GA /Gw /Gy /GF /GR- /GS-
+		/O2 /EHsc /GA /Gw /Gy /GF /GR- /GS-
 	)
 	set (c_linker_options_common
-		/OPT:REF,ICF /LTCG
+		/OPT:REF,ICF /LTCG:OFF
 	)
 
 else (MSVC)

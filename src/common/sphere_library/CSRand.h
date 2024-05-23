@@ -16,13 +16,13 @@ extern struct CSRand
 
 public:
     // Interfaces.
-    int64 GetLLVal(int64 iQty);					// Get a random value between 0 and iQty - 1
+    int64 GetLLVal(int64 iQty);					// Get a random value between 0 and iQty - 1 (slower than the 32bit number variant)
     int64 GetLLVal2(int64 iMin, int64 iMax);
     int32 GetVal(int32 iQty);					// Get a random value between 0 and iQty - 1
     int32 GetVal2(int32 iMin, int32 iMax);
 
-    int64 GetLLValFast(int64 iQty);
-    int64 GetLLVal2Fast(int64 iMin, int64 iMax);
+    int64 GetLLValFast(int64 iQty);             // (slower than the 32bit number variant)
+    int64 GetLLVal2Fast(int64 iMin, int64 iMax);// (slower than the 32bit number variant)
     int32 GetValFast(int32 iQty);
     int32 GetVal2Fast(int32 iMin, int32 iMax);
     int16 Get16ValFast(int16 iQty);

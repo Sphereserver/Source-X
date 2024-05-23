@@ -711,7 +711,8 @@ badcmd:
 		case SSC_FVAL:
 			{
 				llong iVal = Exp_GetLLVal(ptcKey);
-				sVal.Format( "%s%lld.%lld" , ((iVal >= 0) ? "" : "-"), SphereAbs(iVal/10), SphereAbs(iVal%10) );
+                int64 iValAbs = SphereAbs((int64)iVal);
+				sVal.Format( "%s%lld.%lld" , ((iVal >= 0) ? "" : "-"), (iValAbs / 10LL), (iValAbs % 10LL) );
 				return true;
 			}
 		case SSC_HVAL:

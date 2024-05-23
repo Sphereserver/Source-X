@@ -11,7 +11,7 @@ CUOTerrainInfo::CUOTerrainInfo( TERRAIN_TYPE id, bool fNameNeeded )
 {
     if (id >= TERRAIN_QTY)
     {
-        g_Log.EventError("Trying to read data for a terrain with invalid id 0x%" PRIx16 ".\n");
+        g_Log.EventError("Trying to read data for a terrain with invalid id 0x%" PRIx16 ".\n", id);
         return;
     }
 

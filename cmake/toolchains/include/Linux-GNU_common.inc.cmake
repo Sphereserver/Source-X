@@ -80,7 +80,7 @@ unreachable,nonnull-attribute,returns-nonnull-attribute
 
 	set (cxx_local_opts_warnings
 		-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
-		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
+		-Wno-parentheses -Wno-format-security -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
 	)
 	set (cxx_local_opts
 		-std=c++20 -pthread -fexceptions -fnon-call-exceptions

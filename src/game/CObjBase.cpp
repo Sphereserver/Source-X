@@ -3111,7 +3111,7 @@ dword CObjBase::GetPropertyHash() const
 
 void CObjBase::OnTickStatusUpdate()
 {
-	ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate");
+	//ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate"); // Called very frequently.
 	// process m_fStatusUpdate flags
 
 	if (m_fStatusUpdate & SU_UPDATE_TOOLTIP)
@@ -3158,7 +3158,7 @@ void CObjBase::_GoSleep()
 
 bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");
+	//ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");   // Called very frequently.
 	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 
