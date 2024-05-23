@@ -99,6 +99,9 @@ function (toolchain_exe_stuff_common)
 
 	#-- Store common linker flags.
 
+	IF (ENABLED_SANITIZER)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -static-libsan)
+	ENDIF()
 	IF (${USE_MSAN})
 		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie)
 	ENDIF()

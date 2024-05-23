@@ -9,22 +9,22 @@ function (toolchain_after_project)
 
 	LINK_DIRECTORIES ("lib/_bin/x86/mariadb/")
 	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86"	PARENT_SCOPE)
+
+	SET (CLANG_TARGET 		"--target=i686-pc-windows-${CLANG_VENDOR}")
+	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   -march=i686 -m32 ${CLANG_TARGET}" PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -march=i686 -m32 ${CLANG_TARGET}" PARENT_SCOPE)
+	SET (RC_FLAGS			"${CLANG_TARGET}" PARENT_SCOPE)
 endfunction()
 
 
 function (toolchain_exe_stuff)
-	SET (CLANG_TARGET 	"--target=i686-pc-windows-${CLANG_VENDOR}")
-	SET (C_ARCH_OPTS	"-march=i686 -m32 ${CLANG_TARGET}")
-	SET (CXX_ARCH_OPTS	"-march=i686 -m32 ${CLANG_TARGET}")
-	SET (RC_FLAGS		"${CLANG_TARGET}")
-
 	toolchain_exe_stuff_common()
 
 	# Propagate global variables set in toolchain_exe_stuff_common to the upper scope
-	SET (CMAKE_C_FLAGS			"${CMAKE_C_FLAGS} ${C_ARCH_OPTS}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS		"${CMAKE_CXX_FLAGS} ${CXX_ARCH_OPTS}"	PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS	"${CMAKE_EXE_LINKER_FLAGS}"				PARENT_SCOPE)
-	SET (CMAKE_RC_FLAGS			"${RC_FLAGS}"							PARENT_SCOPE)
+	#SET (CMAKE_C_FLAGS			"${CMAKE_C_FLAGS} ${C_ARCH_OPTS}"		PARENT_SCOPE)
+	#SET (CMAKE_CXX_FLAGS		"${CMAKE_CXX_FLAGS} ${CXX_ARCH_OPTS}"	PARENT_SCOPE)
+	#SET (CMAKE_EXE_LINKER_FLAGS	"${CMAKE_EXE_LINKER_FLAGS}"				PARENT_SCOPE)
+	#SET (CMAKE_RC_FLAGS			"${RC_FLAGS}"							PARENT_SCOPE)
 
 	# Set different output folders for each build type
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)

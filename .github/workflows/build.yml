@@ -21,6 +21,7 @@ jobs:
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
     - name: Create package
       run: |
+            pwd
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win-x86_64-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86_64\Nightly\SphereSvrX64_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\_bin\x86_64\mariadb\libmariadb.dll
 
@@ -52,6 +53,7 @@ jobs:
       run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
     - name: Create package
       run:  |
+            pwd
             mkdir accounts, logs, save, scripts
             7z a SphereSvrX-win-x86-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\_bin\x86\mariadb\libmariadb.dll
 

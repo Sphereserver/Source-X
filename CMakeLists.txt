@@ -42,6 +42,10 @@ ENDIF ()
 
 MESSAGE (STATUS "Scanning system build tools...")
 
+PROJECT (SphereServer CXX C)	# does a scan for C++ and C compilers
+
+# Setup global flags, to be done before creating targets.
+
 if (NOT DEFINED CMAKE_CXX_STANDARD)
   # only set CMAKE_CXX_STANDARD if not already set
   # this allows the standard to be set by the caller, for example with -DCMAKE_CXX_STANDARD:STRING=20
@@ -54,7 +58,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
-PROJECT (SphereServer CXX C)	# does a scan for C++ and C compilers
+# Need to clear shared library flags. If not, cmake sets -rdynamic and this
+# add to the executable the full symbol table (included unused symbols).
+# This is a problem because the binary is >700 KB bigger.
+SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
+# CMake also sets other predefined flags, which we don't want...
+SET (CMAKE_C_FLAGS "")
+SET (CMAKE_C_FLAGS_DEBUG "")
+SET (CMAKE_C_FLAGS_NIGHTLY "")
+SET (CMAKE_C_FLAGS_RELEASE "")
+
+SET (CMAKE_CXX_FLAGS "")
+SET (CMAKE_CXX_FLAGS_DEBUG "")
+SET (CMAKE_CXX_FLAGS_NIGHTLY "")
+SET (CMAKE_CXX_FLAGS_RELEASE "")
+
+SET (CMAKE_EXE_LINKER_FLAGS "")
+SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
+SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 
 
 # Determine system arch
@@ -65,6 +89,7 @@ STRING (FIND "${ARCH_DETECTED}" "x86_64" 	ARCH_HAS_x86_64)
 STRING (FIND "${ARCH_DETECTED}" "x86" 		ARCH_HAS_x86)
 booleanize_str_find(ARCH_HAS_x86_64)
 booleanize_str_find(ARCH_HAS_x86)
+
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 IF (NOT TOOLCHAIN_LOADED)
@@ -120,6 +145,7 @@ ELSE (SINGLE_TARGET)
     SET (CMAKE_CONFIGURATION_TYPES "Debug;Release;Nightly" CACHE STRING "" FORCE)
 
 ENDIF (SINGLE_TARGET)
+MESSAGE(STATUS "bits ${ARCH_BITS}")
 
 
 # Include the list of all Sphere source files
@@ -167,36 +193,10 @@ ELSE (SINGLE_TARGET)
 
 ENDIF (SINGLE_TARGET)
 
-
-# Need to clear shared library flags. If not, cmake sets -rdynamic and this
-# add to the executable the full symbol table (included unused symbols).
-# This is a problem because the binary is >700 KB bigger.
-SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-
-# CMake also sets other predefined flags, which we don't want...
-SET (CMAKE_C_FLAGS "")
-SET (CMAKE_C_FLAGS_DEBUG "")
-SET (CMAKE_C_FLAGS_NIGHTLY "")
-SET (CMAKE_C_FLAGS_RELEASE "")
-
-SET (CMAKE_CXX_FLAGS "")
-SET (CMAKE_CXX_FLAGS_DEBUG "")
-SET (CMAKE_CXX_FLAGS_NIGHTLY "")
-SET (CMAKE_CXX_FLAGS_RELEASE "")
-
-SET (CMAKE_EXE_LINKER_FLAGS "")
-SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
-SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
-SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
-
-
 # Now include external libraries
 add_subdirectory(lib)
 
-
 toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
-
 
 # Get the Git revision number
 INCLUDE ("cmake/CMakeGitStatus.cmake")

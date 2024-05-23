@@ -7,12 +7,19 @@ function (toolchain_force_compiler)
 
 	MESSAGE (STATUS "Toolchain: Windows-MSVC.cmake.")
 	SET(CMAKE_SYSTEM_NAME	"Windows"						PARENT_SCOPE)
-	SET(ARCH_BITS			$<IF:$<BOOL:CMAKE_CL_64>,64,32>	PARENT_SCOPE)
-
 endfunction ()
 
 
 function (toolchain_after_project)
+
+	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		MESSAGE (STATUS "Detected 64 bits architecture")
+		SET(ARCH_BITS	64	PARENT_SCOPE)
+	ELSE ()
+		MESSAGE (STATUS "Detected 32 bits architecture")
+		SET(ARCH_BITS	32	PARENT_SCOPE)
+	ENDIF ()
+
 endfunction()
 
 
@@ -77,7 +84,7 @@ function (toolchain_exe_stuff)
 		/wd4701 # Potentially uninitialized local variable 'name' used
 		/wd4702 # Unreachable code
 		/wd4703 # Potentially uninitialized local pointer variable 'name' used
-		/wd4127 # 
+		/wd4127 # The controlling expression of an if statement or while loop evaluates to a constant.
 		/wd26812# The enum type 'type-name' is unscoped. Prefer 'enum class' over 'enum'
 	)
 

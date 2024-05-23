@@ -447,7 +447,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				"#         Immediate save world (## to save both world and statics)\n"
 				"A         Update pending changes on Accounts file\n"
 				"B [msg]   Broadcast message to all clients\n"
-				"C         List of online Clients (%lu)\n"
+				"C         List of online Clients (%" PRIuSIZE_T ")\n"
 				"DA        Dump Areas to external file\n"
 				"DUI       Dump Unscripted Items to external file\n"
 				"E         Clear internal variables (like script profile)\n"

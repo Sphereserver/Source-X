@@ -206,7 +206,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 	ADDTOCALLSTACK("CChar::Stat_SetMax");
 	ASSERT((i > STAT_NONE) && (i < STAT_QTY)); // allow for food
     if ((i <= STAT_NONE) || (i >= STAT_QTY))
-        return; // Warnings wouldn't shut up...
+        return; // Warnings wouldn't shut up otherwise...
 
 	if ( g_Cfg._uiStatFlag &&
      ((g_Cfg._uiStatFlag & STAT_FLAG_DENYMAX) || (m_pPlayer && (g_Cfg._uiStatFlag & STAT_FLAG_DENYMAXP)) || (m_pNPC && (g_Cfg._uiStatFlag & STAT_FLAG_DENYMAXN))) )
