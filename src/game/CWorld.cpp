@@ -851,7 +851,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
+		snprintf(time, Str_TempLength(), "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
 
@@ -1090,17 +1090,24 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     uiPreviousSaveSize /= 1024;
     uiPreviousSaveSize += (uiPreviousSaveSize*20)/100;  // Just to be sure increase the space requirement by 20%
     ullong uiServMem = (ullong)g_Serv.StatGet(SERV_STAT_MEM);   // In KB
+#ifdef _DEBUG
+    constexpr ullong mem_adjust_build = 2;
+#else
+    constexpr ullong mem_adjust_build = 1;
+#endif
+    ullong mem_adjust_save_size;
     if (fSizeErr)
     {
         // In case we have corrupted or unexistant previous save files, check for this arbitrary amount of free space.
-        uiPreviousSaveSize = maximum(uiPreviousSaveSize, (uiServMem/8));
+        mem_adjust_save_size = 8;
     }
     else
     {
         // Work around suspiciously low previous save files sizes
-        uiPreviousSaveSize = maximum(uiPreviousSaveSize, (uiServMem/20));
+        mem_adjust_save_size = 20;
     }
 
+    uiPreviousSaveSize = std::max(uiPreviousSaveSize, uiServMem / (mem_adjust_save_size * mem_adjust_build));
     if (uiFreeSpace < uiPreviousSaveSize)
     {
         g_Log.Event(LOGL_CRIT, "-----------------------------");

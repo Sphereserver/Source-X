@@ -2003,14 +2003,14 @@ height_t CItem::GetHeight() const
 
     height_t tmpHeight;
 
-    const ITEMID_TYPE iDispID = GetDispID();
-    const CItemBase * pItemDef = CItemBase::FindItemBase(iDispID);
+    const ITEMID_TYPE uiDispID = GetDispID();
+    const CItemBase * pItemDef = CItemBase::FindItemBase(uiDispID);
     ASSERT(pItemDef);
     tmpHeight = pItemDef->GetHeight();
     if (tmpHeight)
         return tmpHeight;
 
-    const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(iDispID);
+    const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(uiDispID);
     if (pDupeDef)
     {
         tmpHeight = pDupeDef->GetHeight();
@@ -2018,17 +2018,14 @@ height_t CItem::GetHeight() const
             return tmpHeight;
     }
 
-	char * heightDef = Str_GetTemp();
-
-	sprintf(heightDef, "itemheight_0%x", (uint)iDispID);
+	char heightDef[24]{"itemheight_"};
+    Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 16);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
-	//DEBUG_ERR(("2 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "itemheight_%u", (uint)iDispID);
+    Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 10);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
-	//DEBUG_ERR(("3 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
@@ -2997,9 +2994,9 @@ lpctstr CItem::ResourceGetName(const CResourceID& rid)
     {
         tchar* pszText = Str_GetTemp();
         if (!rid.IsValidUID())
-            sprintf(pszText, "%d", (int)rid.GetPrivateUID());
+            snprintf(pszText, Str_TempLength(), "%d", (int)rid.GetPrivateUID());
         else
-            sprintf(pszText, "0%" PRIx32, rid.GetResIndex());
+            snprintf(pszText, Str_TempLength(),"0%" PRIx32, rid.GetResIndex());
         return pszText;
     }
     return g_Cfg.ResourceGetName(rid);
@@ -3011,9 +3008,9 @@ lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedTyp
     {
         tchar* pszText = Str_GetTemp();
         if (!rid.IsValidUID())
-            sprintf(pszText, "%d", (int)rid.GetPrivateUID());
+            snprintf(pszText, Str_TempLength(), "%d", (int)rid.GetPrivateUID());
         else
-            sprintf(pszText, "0%" PRIx32, rid.GetResIndex());
+            snprintf(pszText, Str_TempLength(), "0%" PRIx32, rid.GetResIndex());
         return pszText;
     }
     return g_Cfg.ResourceGetName(rid, iExpectedType);

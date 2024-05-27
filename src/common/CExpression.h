@@ -191,9 +191,8 @@ public:
 	CExpression();
 	~CExpression();
 
-private:
-	CExpression(const CExpression& copy);
-	CExpression& operator=(const CExpression& other);
+	CExpression(const CExpression& copy) = delete;
+	CExpression& operator=(const CExpression& other) = delete;
 } g_Exp;
 
 
@@ -207,6 +206,8 @@ bool IsStrNumericDec( lpctstr pszTest );
 bool IsStrNumeric( lpctstr pszTest );
 bool IsStrEmpty( lpctstr pszTest );
 
+// strncpy does not always return the amount of bytes written 
+int StrncpyBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError = true);
 
 // Numeric formulas
 template<typename T> inline T SphereAbs(const T x) noexcept

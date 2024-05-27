@@ -158,7 +158,7 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                     fQtyOnly = true;
 
                 tchar *pszTmp = Str_GetTemp();
-                m_Reags.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
+                m_Reags.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
                 if ( fQtyOnly && pszTmp[0] == '\0' )
                     strcpy( pszTmp, "0" ); // Return 0 for empty quantity
                 sVal = pszTmp;
@@ -166,7 +166,7 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             else
             {
                 tchar *pszTmp = Str_GetTemp();
-                m_Reags.WriteKeys( pszTmp );
+                m_Reags.WriteKeys( pszTmp, Str_TempLength() );
                 sVal = pszTmp;
             }
             break;
@@ -184,7 +184,7 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
         case SPC_SKILLREQ:
         {
             tchar *pszTmp = Str_GetTemp();
-            m_SkillReq.WriteKeys( pszTmp );
+            m_SkillReq.WriteKeys( pszTmp, Str_TempLength() );
             sVal = pszTmp;
         }
         break;

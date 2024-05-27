@@ -869,7 +869,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 		tchar *pszTemp = Str_GetTemp();
 		Str_CopyLimitNull(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_MADEOF ), Str_TempLength());
 
-		pItemDef->m_BaseResources.WriteNames( pszTemp + strlen(pszTemp) );
+		pItemDef->m_BaseResources.WriteNames( pszTemp + strlen(pszTemp), Str_TempLength() );
 		SysMessage( pszTemp );
 	}
 

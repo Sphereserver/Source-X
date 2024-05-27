@@ -22,11 +22,14 @@ Join SphereServer Discord channel!
 
 + <a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
 + <a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
+<br>
+
 **ScriptPack:**
 The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
 of the new ones.
 It is currently being revamped to add original OSI features.
 Beware, it's still not 100% complete!
+
 + <a href="https://github.com/Sphereserver/Scripts-X">Up to date</a>
 + <a href="https://github.com/Sphereserver/Scripts-X/releases">Official releases</a>
 
@@ -103,6 +106,7 @@ How to set a toolchain:
   When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
  was not set, by default the makefiles for all of the three build types are generated.<br>
 <br />
+
 You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
 
 Example of CMake CLI additional parameters:<br>

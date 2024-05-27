@@ -90,28 +90,15 @@ public:
 	*/
 	CAccount(lpctstr pszName, bool fGuest = false);
 
-private:
-	CAccount(const CAccount& copy);
-	CAccount& operator=(const CAccount& other);
+	CAccount(const CAccount& copy) = delete;
+	CAccount& operator=(const CAccount& other) = delete;
 
 public:
-	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
-    {
-        return m_BaseDefs.GetKeyStr( ptcKey, fZero );
-    }
-	int64 GetDefNum( lpctstr ptcKey ) const
-    {
-        return m_BaseDefs.GetKeyNum( ptcKey );
-    }
-	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true)
-	{
-		m_BaseDefs.SetNum(ptcKey, iVal, fZero);
-	}
-	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
-	{
-		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
-	}
-	void DeleteDef(lpctstr ptcKey) { m_BaseDefs.DeleteKey(ptcKey); }
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const;
+	int64 GetDefNum( lpctstr ptcKey ) const;
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero = true);
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+	void DeleteDef(lpctstr ptcKey);
 
 
 	/**

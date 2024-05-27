@@ -8,5 +8,6 @@ function export_flags {
 	export TSAN_OPTIONS='${_SAN_COMMON_FLAGS}'
 }
 
+export ASAN_SYMBOLIZER_PATH='/usr/bin/addr2line'
 export_flags
 

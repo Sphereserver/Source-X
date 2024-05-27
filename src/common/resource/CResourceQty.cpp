@@ -16,18 +16,23 @@
 //**********************************************
 // -CResourceQty
 
-size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) const
+size_t CResourceQty::WriteKey( tchar * pszArgs, size_t uiBufSize, bool fQtyOnly, bool fKeyOnly ) const
 {
     ADDTOCALLSTACK("CResourceQty::WriteKey");
     size_t i = 0;
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
-        i = sprintf( pszArgs, "%" PRId64 " ", GetResQty());
+    {
+        size_t ret = snprintf( pszArgs, uiBufSize, "%" PRId64 " ", GetResQty());
+        i = StrncpyBytesWritten(ret, uiBufSize);
+    }
     if ( !fQtyOnly )
+    {
         i += Str_CopyLen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
+    }
     return i;
 }
 
-size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
+size_t CResourceQty::WriteNameSingle( tchar * pszArgs, size_t uiBufLen, int iQty ) const
 {
     ADDTOCALLSTACK("CResourceQty::WriteNameSingle");
     if ( GetResType() == RES_ITEMDEF )
@@ -35,13 +40,16 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
         const CItemBase * pItemBase = CItemBase::FindItemBase((ITEMID_TYPE)(m_rid.GetResIndex()));
         //DEBUG_ERR(("pItemBase 0x%x  m_rid 0%x  m_rid.GetResIndex() 0%x\n",pItemBase,m_rid,m_rid.GetResIndex()));
         if ( pItemBase )
-            return( Str_CopyLen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
+        {
+            lpctstr ptcSrc = pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false));
+            return Str_CopyLimitNull(pszArgs, ptcSrc, uiBufLen);
+        }
     }
     auto pResourceDef = static_cast<const CScriptObj *>(g_Cfg.RegisteredResourceGetDef(m_rid));
     if ( pResourceDef != nullptr )
-        return( Str_CopyLen( pszArgs, pResourceDef->GetName()) );
+        return Str_CopyLimitNull(pszArgs, pResourceDef->GetName(), uiBufLen);
     else
-        return( Str_CopyLen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
+        return Str_CopyLimitNull(pszArgs, g_Cfg.ResourceGetName(m_rid), uiBufLen);
 }
 
 bool CResourceQty::Load(lpctstr &pszCmds)
@@ -222,7 +230,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
     return iValid;
 }
 
-void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly, bool fKeyOnly ) const
+void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t uiBufSize, size_t index, bool fQtyOnly, bool fKeyOnly ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::WriteKeys");
     size_t max = size();
@@ -235,15 +243,16 @@ void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly,
         {
             pszArgs += sprintf( pszArgs, "," );
         }
-        pszArgs += (*this)[i].WriteKey( pszArgs, fQtyOnly, fKeyOnly );
+        pszArgs += (*this)[i].WriteKey( pszArgs, uiBufSize, fQtyOnly, fKeyOnly );
     }
     *pszArgs = '\0';
 }
 
 
-void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
+void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t uiBufSize, size_t index ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::WriteNames");
+    size_t bytes_to_write;
     size_t max = size();
     if ( index > 0 && index < max )
         max = index;
@@ -252,7 +261,8 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
     {
         if ( i > 0 && index == 0 )
         {
-            pszArgs += sprintf( pszArgs, ", " );
+            bytes_to_write = sprintf( pszArgs, ", " );
+            pszArgs += StrncpyBytesWritten(bytes_to_write, uiBufSize);
         }
 
         const CResourceQty& resQty = (*this)[i];
@@ -261,13 +271,17 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
         {
             if (resQty.GetResType() == RES_SKILL )
             {
-                pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 " ", iQty / 10, iQty % 10);
+                bytes_to_write = sprintf( pszArgs, "%" PRId64 ".%" PRId64 " ", iQty / 10, iQty % 10);
+                pszArgs += StrncpyBytesWritten(bytes_to_write, uiBufSize);
             }
             else
-                pszArgs += sprintf( pszArgs, "%" PRId64 " ", iQty);
+            {
+                bytes_to_write = sprintf( pszArgs, "%" PRId64 " ", iQty);
+                pszArgs += StrncpyBytesWritten(bytes_to_write, uiBufSize);
+            }
         }
 
-        pszArgs += resQty.WriteNameSingle( pszArgs, (int)iQty );
+        pszArgs += resQty.WriteNameSingle( pszArgs, uiBufSize, (int)iQty );
     }
     *pszArgs = '\0';
 }

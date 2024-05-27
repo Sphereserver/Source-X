@@ -246,7 +246,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 							fQtyOnly	= true;
 
 						tchar *pszTmp = Str_GetTemp();
-						m_BaseResources.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
+						m_BaseResources.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
 						if ( fQtyOnly && pszTmp[0] == '\0' )
 							strcpy( pszTmp, "0" );
 
@@ -256,7 +256,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 				else
 				{
 					tchar *pszTmp = Str_GetTemp();
-					m_BaseResources.WriteKeys( pszTmp );
+					m_BaseResources.WriteKeys( pszTmp, Str_TempLength() );
 					sVal = pszTmp;
 				}
 			}

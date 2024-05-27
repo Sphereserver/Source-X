@@ -1,24 +1,28 @@
 #	Main config	#
 
 CMAKE_MINIMUM_REQUIRED (VERSION 3.19)
-SET (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
+set (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
 
 # GUI checkboxes
-SET (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
+set (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
+set (RUNTIME_STATIC_LINK	false CACHE BOOL "Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++).")
 
 set (predef_LIB_LIBEV_BUILD 	false)
 if (NOT WIN32)
 	set (predef_LIB_LIBEV_BUILD	true)
 endif()
-SET (LIB_LIBEV_BUILD		${predef_LIB_LIBEV_BUILD}	CACHE BOOL "Build libev.")
-SET (LIB_SQLITE_BUILD		true  CACHE BOOL "Build sqlite.")
-SET (LIB_ZLIB_BUILD			true  CACHE BOOL "Build zlib.")
+set (LIB_LIBEV_BUILD		${predef_LIB_LIBEV_BUILD}	CACHE BOOL "Build libev.")
+set (LIB_SQLITE_BUILD		true  CACHE BOOL "Build sqlite.")
+set (LIB_ZLIB_BUILD			true  CACHE BOOL "Build zlib.")
 
-SET (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
-SET (USE_ASAN				false CACHE BOOL "Enable AddressSanitizer.")
-SET (USE_MSAN				false CACHE BOOL "Enable MemorySanitizer.")
-SET (USE_LSAN				false CACHE BOOL "Enable LeakSanitizer.")
-SET (USE_UBSAN				false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
+if (WIN32)
+	set (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
+endif()
+
+set (USE_ASAN				false CACHE BOOL "Enable AddressSanitizer.")
+set (USE_MSAN				false CACHE BOOL "Enable MemorySanitizer.")
+set (USE_LSAN				false CACHE BOOL "Enable LeakSanitizer.")
+set (USE_UBSAN				false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
 
 
 # Utility functions
@@ -145,7 +149,6 @@ ELSE (SINGLE_TARGET)
     SET (CMAKE_CONFIGURATION_TYPES "Debug;Release;Nightly" CACHE STRING "" FORCE)
 
 ENDIF (SINGLE_TARGET)
-MESSAGE(STATUS "bits ${ARCH_BITS}")
 
 
 # Include the list of all Sphere source files

@@ -101,6 +101,22 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	return val;
 }
 
+int StrncpyBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError)
+{
+    if (uiBufSize < 1)
+        goto err;
+    if (uiBytesToWrite >= uiBufSize - 1)
+        goto err;
+    return uiBytesToWrite;
+
+err:
+    //throw CSError(LOGL_ERROR, 0, "Buffer size too small for snprintf.\n");
+    if (fPrintError) {
+        g_Log.EventError("Buffer size too small for snprintf.\n");
+    }
+    return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
+}
+
 llong power(llong base, llong level)
 {
 	double rc = pow((double)base, (double)level);

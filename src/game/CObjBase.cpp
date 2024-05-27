@@ -1995,7 +1995,7 @@ void CObjBase::r_Write( CScript & s )
 	{
 		dword dUID = (dword)uid;
 		char* pszTag = Str_GetTemp();
-		sprintf(pszTag, "FOLLOWER.%d", dUID);
+		snprintf(pszTag, Str_TempLength(), "FOLLOWER.%d", dUID);
 		s.WriteKeyHex(pszTag, dUID);
 	}
 }

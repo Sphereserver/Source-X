@@ -1852,6 +1852,7 @@ CItem* CWorldSearch::GetItem()
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
 	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
 
+    constexpr size_t kuiContainerScaleFactor = 2;
 	while (true)
 	{
 		if (_pObj == nullptr)
@@ -1860,18 +1861,25 @@ CItem* CWorldSearch::GetItem()
 			_eSearchType = ws_search_e::Items;
 
             const size_t sector_obj_num = _pSector->m_Items.size();
-            if (_ppCurContObjs != nullptr) {
-                if (_idxObjMax < sector_obj_num) {
-                    delete[] _ppCurContObjs;
-                    _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+            if (0 != sector_obj_num)
+            {
+                if (_ppCurContObjs != nullptr)
+                {
+                    if (_idxObjMax < sector_obj_num * kuiContainerScaleFactor)
+                    {
+                        delete[] _ppCurContObjs;
+                        _ppCurContObjs = new CSObjContRec * [sector_obj_num * kuiContainerScaleFactor];
+                    }
                 }
+                else
+                {
+                    _ppCurContObjs = new CSObjContRec * [sector_obj_num * kuiContainerScaleFactor];
+                }
+
+                memcpy(_ppCurContObjs, _pSector->m_Items.data(), sector_obj_num * sizeof(CSObjContRec*)); // I need this to be as fast as possible
             }
-            else {
-                _ppCurContObjs = new CSObjContRec * [sector_obj_num];
-            }
+
             _idxObjMax = sector_obj_num;
-            memcpy(_ppCurContObjs, _pSector->m_Items.data(), _idxObjMax * sizeof(CSObjContRec*)); // I need this to be as fast as possible
-			
 			_idxObj = 0;
 		}
 		else
@@ -1924,6 +1932,7 @@ CChar* CWorldSearch::GetChar()
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
 	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetChar");
 
+    constexpr size_t kuiContainerScaleFactor = 2;
 	while (true)
 	{
 		if (_pObj == nullptr)
@@ -1933,18 +1942,24 @@ CChar* CWorldSearch::GetChar()
 			_fInertToggle = false;
 
             const size_t sector_obj_num = _pSector->m_Chars_Active.size();
-            if (_ppCurContObjs != nullptr) {
-                if (_idxObjMax < sector_obj_num) {
-                    delete[] _ppCurContObjs;
-                    _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+            if (0 != sector_obj_num)
+            {
+                if (_ppCurContObjs != nullptr)
+                {
+                    if (_idxObjMax < sector_obj_num * kuiContainerScaleFactor)
+                    {
+                        delete[] _ppCurContObjs;
+                        _ppCurContObjs = new CSObjContRec * [sector_obj_num * kuiContainerScaleFactor];
+                    }
                 }
+                else
+                {
+                    _ppCurContObjs = new CSObjContRec * [sector_obj_num * kuiContainerScaleFactor];
+                }
+                memcpy(_ppCurContObjs, _pSector->m_Chars_Active.data(), sector_obj_num * sizeof(CSObjContRec*)); // I need this to be as fast as possible
             }
-            else {
-                _ppCurContObjs = new CSObjContRec * [sector_obj_num];
-            }
-            _idxObjMax = sector_obj_num;
-            memcpy(_ppCurContObjs, _pSector->m_Chars_Active.data(), _idxObjMax * sizeof(CSObjContRec*)); // I need this to be as fast as possible
 
+            _idxObjMax = sector_obj_num;
 			_idxObj = 0;
 		}
 		else
@@ -1961,18 +1976,24 @@ CChar* CWorldSearch::GetChar()
 				_fInertToggle = true;
 
                 const size_t sector_obj_num = _pSector->m_Chars_Disconnect.size();
-                if (_ppCurContObjs != nullptr) {
-                    if (_idxObjMax < sector_obj_num) {
-                        delete[] _ppCurContObjs;
-                        _ppCurContObjs = new CSObjContRec * [sector_obj_num];
+                if (0 != sector_obj_num)
+                {
+                    if (_ppCurContObjs != nullptr)
+                    {
+                        if (_idxObjMax < sector_obj_num * kuiContainerScaleFactor)
+                        {
+                            delete[] _ppCurContObjs;
+                            _ppCurContObjs = new CSObjContRec * [sector_obj_num * kuiContainerScaleFactor];
+                        }
                     }
+                    else
+                    {
+                        _ppCurContObjs = new CSObjContRec * [sector_obj_num * 2];
+                    }
+                    memcpy(_ppCurContObjs, _pSector->m_Chars_Disconnect.data(), sector_obj_num * sizeof(CSObjContRec*)); // I need this to be as fast as possible
                 }
-                else {
-                    _ppCurContObjs = new CSObjContRec * [sector_obj_num];
-                }
+                
                 _idxObjMax = sector_obj_num;
-                memcpy(_ppCurContObjs, _pSector->m_Chars_Disconnect.data(), _idxObjMax * sizeof(CSObjContRec*)); // I need this to be as fast as possible
-
 				_idxObj = 0;
 
 				_pObj = (_idxObj >= _idxObjMax) ? nullptr : static_cast <CObjBase*> (_ppCurContObjs[_idxObj]);

@@ -70,39 +70,20 @@ public:
 
 public:
 	CServerDef( lpctstr pszName, CSocketAddressIP dwIP );
-    virtual ~CServerDef() { }
+    virtual ~CServerDef() = default;
 
-private:
-	CServerDef(const CServerDef& copy);
-	CServerDef& operator=(const CServerDef& other);
+	CServerDef(const CServerDef& copy) = delete;
+	CServerDef& operator=(const CServerDef& other) = delete;
 
 public:
-	lpctstr GetStatus() const
-	{
-		return m_sStatus;
-	}
-
+	lpctstr GetStatus() const noexcept;
+    
 	size_t StatGet( SERV_STAT_TYPE i ) const;
+	void StatInc( SERV_STAT_TYPE i );
+	void StatDec( SERV_STAT_TYPE i );
+	void SetStat( SERV_STAT_TYPE i, dword dwVal );
 
-	void StatInc( SERV_STAT_TYPE i )
-	{
-		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		++m_stStat[i];
-	}
-	void StatDec( SERV_STAT_TYPE i )
-	{
-		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		--m_stStat[i];
-	}
-	void SetStat( SERV_STAT_TYPE i, dword dwVal )
-	{
-		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		m_stStat[i] = dwVal;
-	}
-
-	virtual lpctstr GetName() const override {
-		return m_sName;
-	}
+	virtual lpctstr GetName() const override;
 	void SetName( lpctstr pszName );
 
 	virtual int64 GetAgeHours() const;
@@ -113,13 +94,9 @@ public:
 	virtual bool r_LoadVal( CScript & s ) override;
 	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
-	bool IsConnected() const {
-		return m_timeLastValid > 0;
-	}
+	bool IsConnected() const noexcept;
 
-	void SetCryptVersion() {
-		m_ClientVersion.SetClientVer(m_sClientVersion.GetBuffer());
-	}
+	void SetCryptVersion();
 };
 
 #endif // _INC_CSERVERDEF_H

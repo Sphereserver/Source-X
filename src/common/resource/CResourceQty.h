@@ -46,8 +46,8 @@ public:
         return Load( const_cast<lpctstr&>(arg) );
     }
     bool Load( lpctstr & pszCmds );
-    size_t WriteKey( tchar * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
-    size_t WriteNameSingle( tchar * pszArgs, int iQty = 0 ) const;
+    size_t WriteKey( tchar * pszArgs, size_t uiBufSize, bool fQtyOnly = false, bool fKeyOnly = false ) const;
+    size_t WriteNameSingle( tchar * pszArgs, size_t uiBufLen, int iQty = 0 ) const;
 
 public:
     CResourceQty() : m_iQty(0) { };
@@ -67,8 +67,8 @@ public:
 
 public:
     size_t Load( lpctstr pszCmds );
-    void WriteKeys( tchar * pszArgs, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
-    void WriteNames( tchar * pszArgs, size_t index = 0 ) const;
+    void WriteKeys( tchar * pszArgs, size_t uiBufSize, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
+    void WriteNames( tchar * pszArgs, size_t uiBufSize, size_t index = 0 ) const;
 
     size_t FindResourceID( const CResourceID& rid ) const;
     size_t FindResourceType( RES_TYPE type ) const;

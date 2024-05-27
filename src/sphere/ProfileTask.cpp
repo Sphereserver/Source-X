@@ -12,7 +12,11 @@ ProfileData& GetCurrentProfileData() noexcept
 ProfileTask::ProfileTask(PROFILE_TYPE id) :
     m_context(nullptr), m_previousTask(PROFILE_OVERHEAD)
 {
-	IThread* icontext = ThreadHolder::get().current();
+    auto& th = ThreadHolder::get();
+    if (th.closing())
+        return;
+
+	IThread* icontext = th.current();
 	if (icontext == nullptr)
 	{
 		// Thread was deleted, manually or by app closing signal.

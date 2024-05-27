@@ -111,10 +111,25 @@ void IThread::setThreadName(const char* name)
  * ThreadHolder
 **/
 
+ThreadHolder::ThreadHolder() noexcept :
+	m_threadCount(0), m_inited(false), m_closing(false)
+{}
+
+void ThreadHolder::init()
+{
+	ASSERT(!m_inited);
+    m_inited = true;
+}
+
 ThreadHolder& ThreadHolder::get() noexcept
 {
 	static ThreadHolder instance;
 	return instance;
+}
+
+bool ThreadHolder::closing() noexcept
+{
+    return m_closing;
 }
 
 IThread* ThreadHolder::current() noexcept
@@ -132,7 +147,7 @@ IThread* ThreadHolder::current() noexcept
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	if (!thread)
+	if (!thread || m_closing)
 		return nullptr;
 
     SphereThreadData* tdata = &(m_threads[thread->m_threadHolderId]);
@@ -192,6 +207,7 @@ void ThreadHolder::remove(IThread *thread)
 
 void ThreadHolder::markThreadsClosing()
 {
+    m_closing = true;
 	for (auto& thread_data : m_threads)
 	{
 		auto sphere_thread = static_cast<AbstractSphereThread*>(thread_data.m_ptr);
@@ -218,11 +234,6 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 	return nullptr;
 }
 
-void ThreadHolder::init()
-{
-	ASSERT(!m_inited);
-    m_inited = true;
-}
 
 /*
  * AbstractThread
@@ -769,7 +780,11 @@ void DummySphereThread::tick()
 StackDebugInformation::StackDebugInformation(const char *name) noexcept
 	: m_context(nullptr)
 {
-    IThread *icontext = ThreadHolder::get().current();
+    auto& th = ThreadHolder::get();
+    if (th.closing())
+        return;
+
+    IThread *icontext = th.current();
 	if (icontext == nullptr)
 	{
 		// Thread was deleted, manually or by app closing signal.

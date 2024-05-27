@@ -279,10 +279,7 @@ void CCrypto::SetClientVer( const CCrypto & crypt )
 bool CCrypto::SetClientVer( lpctstr pszVersion )
 {
 	ADDTOCALLSTACK("CCrypto::SetClientVer");
-	int iVer = 0;
-
-	iVer = GetVersionFromString(pszVersion);
-
+	int iVer = GetVersionFromString(pszVersion);
 	m_fInit = false;
 
 	if ( ! SetClientVerEnum( iVer ) )

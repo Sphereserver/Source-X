@@ -319,9 +319,9 @@ lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
 	if ( !rid.IsValidUID() )
-		sprintf( pszTmp, "%d", (int)rid.GetPrivateUID() );
+		snprintf( pszTmp, Str_TempLength(), "%d", (int)rid.GetPrivateUID() );
 	else
-		sprintf( pszTmp, "0%" PRIx32, rid.GetResIndex() );
+		snprintf( pszTmp, Str_TempLength(), "0%" PRIx32, rid.GetResIndex() );
 	return pszTmp;
 }
 

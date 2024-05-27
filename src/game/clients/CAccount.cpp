@@ -631,18 +631,43 @@ void CAccount::DeleteChars()
 	}
 }
 
-
 CAccount::~CAccount()
 {
 	g_Serv.StatDec( SERV_STAT_ACCOUNTS );
 
 	DeleteChars();
+    if (CClient * pClient = FindClient())
+    {
+        pClient->m_pAccount = nullptr;
+    }
+
 	ClearPasswordTries(true);
+}
+
+lpctstr CAccount::GetDefStr( lpctstr ptcKey, bool fZero ) const
+{
+    return m_BaseDefs.GetKeyStr( ptcKey, fZero );
+}
+int64 CAccount::GetDefNum( lpctstr ptcKey ) const
+{
+    return m_BaseDefs.GetKeyNum( ptcKey );
+}
+void CAccount::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero)
+{
+    CAccount::m_BaseDefs.SetNum(ptcKey, iVal, fZero);
+}
+void CAccount::SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted, bool fZero)
+{
+    m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
+}
+
+void CAccount::DeleteDef(lpctstr ptcKey)
+{
+    m_BaseDefs.DeleteKey(ptcKey);
 }
 
 void CAccount::SetPrivLevel( PLEVEL_TYPE plevel )
 {
-	ADDTOCALLSTACK("CAccount::SetPrivLevel");
 	m_PrivLevel = plevel;	// PLEVEL_Counsel
 }
 

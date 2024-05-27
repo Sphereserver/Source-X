@@ -33,25 +33,32 @@ function (toolchain_exe_stuff_common)
 	#-- Validate sanitizers options and store them between the common compiler flags.
 
 	SET (ENABLED_SANITIZER false)
+	# From https://clang.llvm.org/docs/ClangCommandLineReference.html
+	# -static-libsan Statically link the sanitizer runtime (Not supported for ASan, TSan or UBSan on darwin)
+
 	IF (${USE_ASAN})
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address )#-static-libsan)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory )#-static-libsan)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=leak)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak )#-static-libsan)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
-		SET (UBSAN_FLAGS		-fsanitize=undefined,
-shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds,
-float-divide-by-zero,float-cast-overflow,pointer-overflow,
-unreachable,nonnull-attribute,returns-nonnull-attribute 
--fno-sanitize=enum)
+		SET (UBSAN_FLAGS
+			-fsanitize=undefined,shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds
+			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute 
+			-fno-sanitize=enum
+		)
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)# -static-libsan)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${ENABLED_SANITIZER})
@@ -102,13 +109,12 @@ unreachable,nonnull-attribute,returns-nonnull-attribute
 
 	#-- Store common linker flags.
 
-	IF (ENABLED_SANITIZER)
-		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -static-libsan)
-	ENDIF()
 	IF (${USE_MSAN})
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie)
 	ENDIF()
-	set (cxx_linker_options_common			${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pthread -dynamic)
+	set (cxx_linker_options_common			${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pthread -dynamic
+		$<$<BOOL:${RUNTIME_STATIC_LINK}>:	-static-libstdc++ -static-libgcc> # no way to statically link against libc
+	)
 
 
 	#-- Store common define macros.

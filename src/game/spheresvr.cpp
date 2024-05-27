@@ -372,7 +372,10 @@ void Sphere_ExitServer()
     if (!g_Serv._fCloseNTWindowOnTerminate)
         g_Log.Event(LOGM_INIT | LOGF_CONSOLE_ONLY, "You can now close this window.\n");
 #endif
+
     g_Log.Close();
+    ThreadHolder::get().markThreadsClosing();
+
 #ifdef _WIN32
     if (iExitFlag != 5)
         g_NTWindow.NTWindow_ExitServer();
@@ -737,7 +740,7 @@ void defragSphere(char *path)
 				{
 					*p = 0;
 					strcpy(z, p1);
-					sprintf(z1, "0%" PRIx32, dwIdxUID);
+					snprintf(z1, sizeof(z1), "0%" PRIx32, dwIdxUID);
 					strcat(buf, z1);
 					strcat(buf, z);
 				}

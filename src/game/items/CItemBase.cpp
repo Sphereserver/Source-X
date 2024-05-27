@@ -1295,9 +1295,9 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 
 					tchar *pszTmp = Str_GetTemp();
 					if ( fKeyOnly || fQtyOnly )
-						m_SkillMake.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
+						m_SkillMake.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
 					else
-						m_SkillMake.WriteNames( pszTmp, index );
+						m_SkillMake.WriteNames( pszTmp, Str_TempLength(), index );
 					if ( fQtyOnly && pszTmp[0] == '\0' )
 						strcpy( pszTmp, "0" );
 					sVal = pszTmp;
@@ -1305,7 +1305,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 				else
 				{
 					tchar *pszTmp = Str_GetTemp();
-					m_SkillMake.WriteNames( pszTmp );
+					m_SkillMake.WriteNames( pszTmp, Str_TempLength() );
 					sVal = pszTmp;
 				}
 			}
@@ -1317,7 +1317,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			// Print the resources need to make in nice format.
 			{
 				tchar *pszTmp = Str_GetTemp();
-				m_BaseResources.WriteNames( pszTmp );
+				m_BaseResources.WriteNames( pszTmp, Str_TempLength() );
 				sVal = pszTmp;
 			}
 			break;

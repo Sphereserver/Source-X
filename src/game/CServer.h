@@ -75,9 +75,8 @@ public:
 	CServer();
 	virtual ~CServer();
 
-private:
-	CServer(const CServer& copy);
-	CServer& operator=(const CServer& other);
+	CServer(const CServer& copy) = delete;
+	CServer& operator=(const CServer& other) = delete;
 
 public:
     SERVMODE_TYPE GetServerMode() const;

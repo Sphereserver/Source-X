@@ -12,6 +12,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/sphere_library/CSTime.h"
 #include "../sphere/ProfileData.h"
+#include <atomic>
 #include <exception>
 #include <vector>
 
@@ -215,16 +216,16 @@ class ThreadHolder
 {
 	spherethreadlist_t m_threads;
 	size_t m_threadCount;
-	bool m_inited;
+	std::atomic_bool m_inited;
+    std::atomic_bool m_closing;
 	SimpleMutex m_mutex;
 
 
-	ThreadHolder() :
-		m_threadCount(0), m_inited(false)
-	{}
+	ThreadHolder() noexcept;
 	void init();
 
 	friend void atexit_handler(void);
+    friend void Sphere_ExitServer(void);
 	void markThreadsClosing();
 
     //SphereThreadData* findThreadData(IThread* thread) noexcept;
@@ -237,6 +238,7 @@ public:
 
 	static ThreadHolder& get() noexcept;
 
+    bool closing() noexcept;
 	// returns current working thread or DummySphereThread * if no IThread threads are running
 	IThread *current() noexcept;
 	// records a thread to the list. Sould NOT be called, internal usage
@@ -279,10 +281,12 @@ public:
 	AbstractThread& operator=(const AbstractThread& other) = delete;
 
 public:
-	threadid_t getId() const { return m_id; }
-	const char *getName() const { return m_name; }
-	void overwriteInternalThreadName(const char* name) {	// Use it only if you know what you are doing!
-		m_name = name;										//  This doesn't actually do the change of the thread name!
+	threadid_t getId() const noexcept { return m_id; }
+	const char *getName() const noexcept { return m_name; }
+	void overwriteInternalThreadName(const char* name) noexcept {
+        // Use it only if you know what you are doing!
+        //  This doesn't actually do the change of the thread name!
+		m_name = name;
 	}
 
 	bool isActive() const;

@@ -270,7 +270,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal ) const
 
 	int iPercent = (int)IMulDivLL( iCount, 100, iTotal );
 	tchar *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, "%d%%", iPercent);
+	snprintf(pszTemp, Str_TempLength(), "%d%%", iPercent);
 	size_t len = strlen(pszTemp);
 
 	PrintTelnet(pszTemp);
@@ -679,8 +679,8 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 					IThread * thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 					if (thrCurrent != nullptr)
 					{
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %lu, Priority: %d, Name: %s.\n",
-							(iThreads + 1), thrCurrent->getId(), thrCurrent->getPriority(), thrCurrent->getName());
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %" PRIu64 ", Priority: %d, Name: %s.\n",
+							(iThreads + 1), (uint64)thrCurrent->getId(), thrCurrent->getPriority(), thrCurrent->getName());
 					}
 				}
 			} break;
@@ -1826,7 +1826,7 @@ log_cont:
 			pszMsg = Str_GetTemp();
 			g_Cfg.m_fSecure = s.GetArgFlag( g_Cfg.m_fSecure, true ) != 0;
 			SetSignals();
-			sprintf(pszMsg, "Secure mode %s.\n", g_Cfg.m_fSecure ? "re-enabled" : "disabled" );
+			snprintf(pszMsg, Str_TempLength(), "Secure mode %s.\n", g_Cfg.m_fSecure ? "re-enabled" : "disabled" );
 			break;
 		case SV_SHRINKMEM:
 			{
@@ -2290,7 +2290,7 @@ bool CServer::Load()
 nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 				return false;
 			}
-			sprintf(wSockInfo, "Using WinSock ver %d.%d (%s)\n", HIBYTE(wsaData.wVersion), LOBYTE(wsaData.wVersion), wsaData.szDescription);
+			snprintf(wSockInfo, Str_TempLength(), "Using WinSock ver %d.%d (%s)\n", HIBYTE(wsaData.wVersion), LOBYTE(wsaData.wVersion), wsaData.szDescription);
 		}
 	}
 #endif
