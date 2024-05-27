@@ -288,7 +288,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: Build-osx-x86_64
+        name: Build-osx-arm64
         path: SphereSvrX-osx-arm64-nightly.zip
         overwrite: true
 

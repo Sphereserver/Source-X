@@ -267,7 +267,7 @@ int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (sta
 #define Exp_GetU32Val( pa )		static_cast<uint32>	(g_Exp.GetVal( pa ))
 #define Exp_GetU64Val( pa )		static_cast<uint64>	(g_Exp.GetVal( pa ))
 
-#ifdef _32BITS
+#if INTPTR_MAX == INT32_MAX
 	#define Exp_GetSTVal		Exp_GetU32Val
 	#define Exp_GetSTSingle		Exp_GetUSingle
 #else

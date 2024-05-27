@@ -36,7 +36,7 @@
 
 #define PHMAP_VERSION_MAJOR 1
 #define PHMAP_VERSION_MINOR 3
-#define PHMAP_VERSION_PATCH 11
+#define PHMAP_VERSION_PATCH 12
 
 // Included for the __GLIBC__ macro (or similar macros on other systems).
 #include <limits.h>
@@ -648,6 +648,15 @@
     #define PHMAP_IF_CONSTEXPR(expr) if constexpr ((expr))
 #else 
     #define PHMAP_IF_CONSTEXPR(expr) if ((expr))
+#endif
+
+// ----------------------------------------------------------------------
+// builtin unreachable
+// ----------------------------------------------------------------------
+#if PHMAP_HAVE_BUILTIN(__builtin_unreachable)
+    #define PHMAP_BUILTIN_UNREACHABLE() __builtin_unreachable()
+#else
+    #define PHMAP_BUILTIN_UNREACHABLE() (void)0
 #endif
 
 // ----------------------------------------------------------------------
