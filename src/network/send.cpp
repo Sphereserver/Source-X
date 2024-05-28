@@ -3572,18 +3572,18 @@ PacketGumpDialog::PacketGumpDialog(int x, int y, CObjBase* object, dword context
 	writeInt32(y);
 }
 
-void PacketGumpDialog::writeControls(const CClient* target, const CSString* controls, uint controlCount, const CSString* texts, uint textCount)
+void PacketGumpDialog::writeControls(const CClient* target, std::vector<CSString> const* controls, std::vector<CSString> const* texts)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
 	const CNetState* net = target->GetNetState();
 	if (net->isClientVersion(MINCLIVER_COMPRESSDIALOG) || net->isClientKR() || net->isClientEnhanced())
-		writeCompressedControls(controls, controlCount, texts, textCount);
+		writeCompressedControls(controls, texts);
 	else
-		writeStandardControls(controls, controlCount, texts, textCount);
+		writeStandardControls(controls, texts);
 }
 
-void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount)
+void PacketGumpDialog::writeCompressedControls(std::vector<CSString> const* controls, std::vector<CSString> const* texts)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeCompressedControls");
 
@@ -3592,51 +3592,60 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 
 	seek(19);
 
+    if (controls)
 	{
 		// compress and write controls
 		int controlLength = 1;
-		for (uint i = 0; i < controlCount; ++i)
-			controlLength += (int)controls[i].GetLength() + 2;
+		for (CSString const& ctrl : *controls)
+			controlLength += ctrl.GetLength() + 2; // String terminator not needed.
 
 		char* toCompress = new char[controlLength];
 
-		int controlLengthActual = 0;
-		for (uint i = 0; i < controlCount; ++i)
-			controlLengthActual += snprintf(&toCompress[controlLengthActual], (size_t(controlLength) - controlLengthActual), "{%s}", controls[i].GetBuffer());
-		++ controlLengthActual;
+		int controlLengthCurrent = 0;
+		for (CSString const& ctrl : *controls)
+        {
+            const size_t uiAvailableLength = (size_t)std::max(0, controlLength - controlLengthCurrent);
+            const size_t uiJustWrittenLength = snprintf(&toCompress[controlLengthCurrent], uiAvailableLength, "{%s}", ctrl.GetBuffer());
+        	controlLengthCurrent += uiJustWrittenLength;
+        }
+		++ controlLengthCurrent;
 
-		ASSERT(controlLengthActual == controlLength);
+		ASSERT(controlLengthCurrent == controlLength);
 
-		uLong compressLength = ::compressBound(controlLengthActual);
+		uLong compressLength = ::compressBound(controlLengthCurrent);
 		byte* compressBuffer = new byte[compressLength];
 
-		int error = ::compress2(compressBuffer, &compressLength, (byte*)toCompress, controlLengthActual, Z_DEFAULT_COMPRESSION);
+		int error = ::compress2(compressBuffer, &compressLength, (byte*)toCompress, controlLengthCurrent, Z_DEFAULT_COMPRESSION);
 		delete[] toCompress;
 
 		if (error != Z_OK || compressLength <= 0)
 		{
 			delete[] compressBuffer;
 			g_Log.EventError("Compress failed with error %d when generating gump. Using old packet.\n", error);
-
-			writeStandardControls(controls, controlCount, texts, textCount);
+			writeStandardControls(controls, texts);
 			return;
 		}
 
 		writeInt32(compressLength + 4);
-		writeInt32(controlLengthActual);
+		writeInt32(controlLengthCurrent);
 		writeData(compressBuffer, compressLength);
 
 		delete[] compressBuffer;
 	}
+    else
+    {
+        writeInt32(0);
+    }
 
+    if (texts)
 	{
 		// compress and write texts
 		uint textsPosition(getPosition());
 
-		for (uint i = 0; i < textCount; i++)
+		for (CSString const& txt : *texts)
 		{
-			writeInt16((word)(texts[i].GetLength()));
-			writeStringFixedNETUTF16(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
+			writeInt16((word)(txt.GetLength()));
+			writeStringFixedNETUTF16(txt.GetBuffer(), txt.GetLength());
 		}
 
 		uint textsLength = getPosition() - textsPosition;
@@ -3648,15 +3657,13 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 		if (error != Z_OK || compressLength <= 0)
 		{
 			delete[] compressBuffer;
-
 			g_Log.EventError("Compress failed with error %d when generating gump. Using old packet.\n", error);
-
-			writeStandardControls(controls, controlCount, texts, textCount);
+			writeStandardControls(controls, texts);
 			return;
 		}
 
 		seek(textsPosition);
-		writeInt32((dword)textCount);
+		writeInt32((dword)texts->size());
 		writeInt32(compressLength + 4);
 		writeInt32((dword)textsLength);
 		writeData(compressBuffer, compressLength);
@@ -3665,7 +3672,7 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 	}
 }
 
-void PacketGumpDialog::writeStandardControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount)
+void PacketGumpDialog::writeStandardControls(std::vector<CSString> const* controls, std::vector<CSString> const* texts)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeStandardControls");
 
@@ -3678,27 +3685,41 @@ void PacketGumpDialog::writeStandardControls(const CSString* controls, uint cont
 	uint controlLengthPosition(getPosition());
 	skip(2);
 
-	// write controls
-	for (uint i = 0; i < controlCount; i++)
-	{
-		writeCharASCII('{');
-		writeStringASCII(static_cast<lpctstr>(controls[i]), false);
-		writeCharASCII('}');
-	}
+    if (controls)
+    {
+        // write controls
+        for (CSString const& ctrl : *controls)
+        {
+            writeCharASCII('{');
+            writeStringASCII(ctrl.GetBuffer(), false);
+            writeCharASCII('}');
+        }
 
-	// write controls length
-	uint endPosition(getPosition());
-	seek(controlLengthPosition);
-	writeInt16((word)(endPosition - controlLengthPosition - 2));
-	seek(endPosition);
+        // write controls length
+        uint endPosition(getPosition());
+        seek(controlLengthPosition);
+        writeInt16((word)(endPosition - controlLengthPosition - 2));
+        seek(endPosition);
+    }
+    else
+    {
+        writeInt16(0);
+    }
 
-	// write texts
-	writeInt16((word)(textCount));
-	for (uint i = 0; i < textCount; i++)
-	{
-		writeInt16((word)(texts[i].GetLength()));
-		writeStringFixedNETUTF16(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
-	}
+    if (texts)
+    {
+        // write texts
+        writeInt16((word)texts->size());
+        for (CSString const& txt : *texts)
+        {
+            writeInt16((word)txt.GetLength());
+            writeStringFixedNETUTF16(txt.GetBuffer(), txt.GetLength());
+        }
+    }
+    else
+    {
+        writeInt16(0);
+    }
 }
 
 

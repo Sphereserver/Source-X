@@ -541,7 +541,7 @@ public:
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
-	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, uint iControls, const CSString * psText, uint iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
+	void addGumpDialog( CLIMODE_TYPE mode, std::vector<CSString> const* vsControls, std::vector<CSString> const* vsText, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
 	bool addGumpDialogProps( const CUID& uid );
 

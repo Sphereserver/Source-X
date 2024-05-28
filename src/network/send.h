@@ -1223,11 +1223,11 @@ class PacketGumpDialog : public PacketSend
 {
 public:
 	PacketGumpDialog(int x, int y, CObjBase* object, dword context);
-	void writeControls(const CClient* target, const CSString* controls, uint controlCount, const CSString* texts, uint textCount);
+	void writeControls(const CClient* target, std::vector<CSString> const* controls, std::vector<CSString> const* texts);
 
 protected:
-	void writeCompressedControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount);
-	void writeStandardControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount);
+	void writeCompressedControls(std::vector<CSString> const* controls, std::vector<CSString> const* texts);
+	void writeStandardControls(std::vector<CSString> const* controls, std::vector<CSString> const* texts);
 };
 
 /***************************************************************************

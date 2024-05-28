@@ -23,7 +23,7 @@ size_t CResourceQty::WriteKey( tchar * pszArgs, size_t uiBufSize, bool fQtyOnly,
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
     {
         size_t ret = snprintf( pszArgs, uiBufSize, "%" PRId64 " ", GetResQty());
-        i = StrncpyBytesWritten(ret, uiBufSize);
+        i = StrncpyCharBytesWritten(ret, uiBufSize);
     }
     if ( !fQtyOnly )
     {
@@ -262,7 +262,7 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t uiBufSize, size_t in
         if ( i > 0 && index == 0 )
         {
             bytes_to_write = sprintf( pszArgs, ", " );
-            pszArgs += StrncpyBytesWritten(bytes_to_write, uiBufSize);
+            pszArgs += StrncpyCharBytesWritten(bytes_to_write, uiBufSize);
         }
 
         const CResourceQty& resQty = (*this)[i];
@@ -272,12 +272,12 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t uiBufSize, size_t in
             if (resQty.GetResType() == RES_SKILL )
             {
                 bytes_to_write = sprintf( pszArgs, "%" PRId64 ".%" PRId64 " ", iQty / 10, iQty % 10);
-                pszArgs += StrncpyBytesWritten(bytes_to_write, uiBufSize);
+                pszArgs += StrncpyCharBytesWritten(bytes_to_write, uiBufSize);
             }
             else
             {
                 bytes_to_write = sprintf( pszArgs, "%" PRId64 " ", iQty);
-                pszArgs += StrncpyBytesWritten(bytes_to_write, uiBufSize);
+                pszArgs += StrncpyCharBytesWritten(bytes_to_write, uiBufSize);
             }
         }
 

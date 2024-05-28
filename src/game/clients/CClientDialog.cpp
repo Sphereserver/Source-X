@@ -41,7 +41,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 		}
 	}
 
-	addGumpDialog( mode, pDlg->m_sControls, pDlg->m_uiControls, pDlg->m_sText, pDlg->m_uiTexts, pDlg->m_x, pDlg->m_y, pObj, context );
+	addGumpDialog(mode, &pDlg->m_sControls, &pDlg->m_sText, pDlg->m_x, pDlg->m_y, pObj, context);
 	return true;
 }
 
@@ -76,7 +76,9 @@ void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 	SetTargMode( CLIMODE_INPVAL );
 }
 
-void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, uint uiControls, const CSString * psText, uint uiTexts, int x, int y, CObjBase * pObj, dword dwRid )
+void
+CClient::addGumpDialog( CLIMODE_TYPE mode, std::vector<CSString> const* vsControls, std::vector<CSString> const* vsText,
+    int x, int y, CObjBase * pObj, dword dwRid)
 {
 	ADDTOCALLSTACK("CClient::addGumpDialog");
 	// Add a generic GUMP menu.
@@ -94,7 +96,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, uin
 	}
 
 	PacketGumpDialog* cmd = new PacketGumpDialog(x, y, pObj, context_mode);
-	cmd->writeControls(this, psControls, uiControls, psText, uiTexts);
+	cmd->writeControls(this, vsControls, vsText);
 	cmd->push(this);
 
 	if ( m_pChar )

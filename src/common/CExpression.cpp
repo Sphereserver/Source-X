@@ -101,7 +101,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	return val;
 }
 
-int StrncpyBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError)
+int StrncpyCharBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError)
 {
     if (uiBufSize < 1)
         goto err;

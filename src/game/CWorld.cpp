@@ -1256,6 +1256,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
     ADDTOCALLSTACK("CWorld::LoadFile");
     EXC_TRY("LoadFile");
     g_Log.Event(LOGM_INIT, "Loading %s...\n", pszLoadName);
+    g_Log.Flush();
     CScript s;
 	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )  // don't cache this script
 	{

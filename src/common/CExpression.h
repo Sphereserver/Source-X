@@ -206,8 +206,8 @@ bool IsStrNumericDec( lpctstr pszTest );
 bool IsStrNumeric( lpctstr pszTest );
 bool IsStrEmpty( lpctstr pszTest );
 
-// strncpy does not always return the amount of bytes written 
-int StrncpyBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError = true);
+// strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
+int StrncpyCharBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError = true);
 
 // Numeric formulas
 template<typename T> inline T SphereAbs(const T x) noexcept
