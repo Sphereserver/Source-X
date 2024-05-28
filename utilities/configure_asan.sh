@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 function export_flags { 
 	local _SAN_COMMON_FLAGS=handle_abort=true:abort_on_error=false
 	#ASAN_MORE=check_initialization_order=1

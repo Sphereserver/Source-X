@@ -3595,16 +3595,16 @@ void PacketGumpDialog::writeCompressedControls(std::vector<CSString> const* cont
     if (controls)
 	{
 		// compress and write controls
-		int controlLength = 1;
+		size_t controlLength = 1;
 		for (CSString const& ctrl : *controls)
-			controlLength += ctrl.GetLength() + 2; // String terminator not needed.
+			controlLength += (uint)ctrl.GetLength() + 2; // String terminator not needed.
 
 		char* toCompress = new char[controlLength];
 
-		int controlLengthCurrent = 0;
+		size_t controlLengthCurrent = 0;
 		for (CSString const& ctrl : *controls)
         {
-            const size_t uiAvailableLength = (size_t)std::max(0, controlLength - controlLengthCurrent);
+            const size_t uiAvailableLength = std::max(size_t(0), controlLength - controlLengthCurrent);
             const size_t uiJustWrittenLength = snprintf(&toCompress[controlLengthCurrent], uiAvailableLength, "{%s}", ctrl.GetBuffer());
         	controlLengthCurrent += uiJustWrittenLength;
         }

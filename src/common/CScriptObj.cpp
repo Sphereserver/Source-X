@@ -4,6 +4,7 @@
 #else
     #include <sys/wait.h>
 	#include <errno.h>	// errno
+    //#include <spawn.h>
 #endif
 
 #include "../game/chars/CChar.h"
@@ -953,6 +954,18 @@ badcmd:
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
 					Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 #else
+                // vfork deprecated since Mac OS Monterey... TODO: use posix_spawn?
+                /*
+                pid_t pid;
+                char *argv[] = {
+                    Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1],
+					Arg_ppCmd[2], Arg_ppCmd[3], Arg_ppCmd[4],
+					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
+					Arg_ppCmd[8], Arg_ppCmd[9], nullptr
+                };
+                posix_spawn(&pid, argv[0], nullptr, nullptr, argv, environ);  //include spawn.h
+                */
+
 				// I think fork will cause problems.. we'll see.. if yes new thread + execlp is required.
 				int child_pid = vfork();
 				if ( child_pid < 0 )

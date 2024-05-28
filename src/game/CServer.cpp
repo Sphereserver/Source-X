@@ -1073,15 +1073,15 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
         if (pSrc != this)
         {
-            pSrc->SysMessagef("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            pSrc->SysMessagef("Thread %llu, Name=%s\n", (ullong)thrCurrent->getId(), thrCurrent->getName());
         }
         else
         {
-            g_Log.Event(LOGL_EVENT, "Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+            g_Log.Event(LOGL_EVENT, "Thread %llu, Name=%s\n", (ullong)thrCurrent->getId(), thrCurrent->getName());
         }
 		if (ftDump != nullptr)
 		{
-			ftDump->Printf("Thread %lu, Name=%s\n", thrCurrent->getId(), thrCurrent->getName());
+			ftDump->Printf("Thread %llu, Name=%s\n", (ullong)thrCurrent->getId(), thrCurrent->getName());
 		}
 
 		for (int i = 0; i < PROFILE_QTY; ++i)

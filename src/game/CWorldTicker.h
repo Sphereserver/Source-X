@@ -5,11 +5,23 @@
 #ifndef _INC_CWORLDTICKER_H
 #define _INC_CWORLDTICKER_H
 
-#include <parallel_hashmap/phmap.h>
 #include "CTimedFunctionHandler.h"
 #include "CTimedObject.h"
 #include <map>
 //#include <unordered_set>
+
+#ifdef _WIN32
+    #undef SRWLOCK_INIT
+#endif
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#endif
+#include <parallel_hashmap/phmap.h>
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
+
 
 
 class CObjBase;

@@ -73,6 +73,7 @@ function (toolchain_exe_stuff_common)
 		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
 		# clang-specific:
 		-Wno-format-security
+		-Wno-deprecated-declarations # spams so much warnings for the use of sprintf
 	)
 	set (cxx_local_opts
 		-std=c++20 -pthread -fexceptions -fnon-call-exceptions
