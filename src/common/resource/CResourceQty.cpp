@@ -22,8 +22,8 @@ size_t CResourceQty::WriteKey( tchar * pszArgs, size_t uiBufSize, bool fQtyOnly,
     size_t i = 0;
     if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
     {
-        size_t ret = snprintf( pszArgs, uiBufSize, "%" PRId64 " ", GetResQty());
-        i = StrncpyCharBytesWritten(ret, uiBufSize);
+        int ret = snprintf( pszArgs, uiBufSize, "%" PRId64 " ", GetResQty());
+        i = (size_t)StrncpyCharBytesWritten(ret, uiBufSize);
     }
     if ( !fQtyOnly )
     {
@@ -252,7 +252,7 @@ void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t uiBufSize, size_t ind
 void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t uiBufSize, size_t index ) const
 {
     ADDTOCALLSTACK("CResourceQtyArray::WriteNames");
-    size_t bytes_to_write;
+    int bytes_to_write;
     size_t max = size();
     if ( index > 0 && index < max )
         max = index;

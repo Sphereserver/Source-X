@@ -104,9 +104,10 @@ function (toolchain_exe_stuff)
 
 	target_compile_options(spheresvr PRIVATE
 		${cxx_compiler_flags_common}
-		$<$<CONFIG:Release>:	/O2 /EHsc /GL /GA /Gw /Gy /GF /GR->
-		$<$<CONFIG:Nightly>:	/O2 /EHa  /GL /GA /Gw /Gy /GF>
-		$<$<CONFIG:Debug>:		/Od /EHsc /Oy- /MDd /ZI /ob1> #/Gs 
+		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/O2 /EHsc /GL /GA /Gw /Gy /GF /GR->
+		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/O2 /EHa  /GL /GA /Gw /Gy /GF>
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd>	/Od /EHsc /Oy- /MDd /ob1 $<IF:$<BOOL:${USE_ASAN}>,/Zi,/ZI>> #/Gs 
+		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
 	)
 
 
@@ -116,9 +117,9 @@ function (toolchain_exe_stuff)
 	set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE} "")
 
 	target_link_options(spheresvr PRIVATE
-		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   /OPT:REF,ICF /LTCG>
-		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   /OPT:REF,ICF /LTCG>
-		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /DEBUG /LTCG:OFF /SAFESEH:NO /INCREMENTAL /EDITANDCONTINUE>
+		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG>
+		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG>
+		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /DEBUG /LTCG:OFF /SAFESEH:NO $<$<NOT:$<BOOL:${USE_ASAN}>>:/INCREMENTAL /EDITANDCONTINUE>>
 	)
 
 
@@ -163,4 +164,9 @@ function (toolchain_exe_stuff)
 
 	SET (SRCDIR ${CMAKE_SOURCE_DIR}) # for the sake of shortness
 	CONFIGURE_FILE("${CMAKE_SOURCE_DIR}/cmake/toolchains/include/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
+
+
+	#-- Solution settings.
+	# Set spheresvr as startup project.
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT spheresvr)
 endfunction()

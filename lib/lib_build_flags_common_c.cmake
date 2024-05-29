@@ -4,6 +4,9 @@ if (MSVC)
 	)
 	set (c_linker_options_common
 		/OPT:REF,ICF /LTCG:OFF
+		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>
+		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd>
 	)
 
 else (MSVC)

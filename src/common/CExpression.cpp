@@ -101,13 +101,15 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	return val;
 }
 
-int StrncpyCharBytesWritten(size_t uiBytesToWrite, size_t uiBufSize, bool fPrintError)
+int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError)
 {
+    if (iBytesToWrite < 0)
+        return 0;
     if (uiBufSize < 1)
         goto err;
-    if (uiBytesToWrite >= uiBufSize - 1)
+    if ((uint)iBytesToWrite >= uiBufSize - 1)
         goto err;
-    return uiBytesToWrite;
+    return iBytesToWrite;
 
 err:
     //throw CSError(LOGL_ERROR, 0, "Buffer size too small for snprintf.\n");

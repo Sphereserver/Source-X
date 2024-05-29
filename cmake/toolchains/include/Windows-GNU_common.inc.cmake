@@ -144,7 +144,7 @@ function (toolchain_exe_stuff_common)
 		target_compile_options 		(${tgt} PRIVATE ${cxx_compiler_options_common})
 		target_compile_definitions 	(${tgt} PRIVATE ${cxx_compiler_definitions_common})
 		target_link_options 		(${tgt} PRIVATE ${cxx_linker_options_common})
-		target_link_libraries 		(${tgt} PRIVATE mariadb ws2_32})
+		target_link_libraries 		(${tgt} PRIVATE mariadb ws2_32)
 	endforeach()
 
 

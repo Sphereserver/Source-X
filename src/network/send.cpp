@@ -3595,18 +3595,18 @@ void PacketGumpDialog::writeCompressedControls(std::vector<CSString> const* cont
     if (controls)
 	{
 		// compress and write controls
-		size_t controlLength = 1;
+		uint controlLength = 1;
 		for (CSString const& ctrl : *controls)
 			controlLength += (uint)ctrl.GetLength() + 2; // String terminator not needed.
 
 		char* toCompress = new char[controlLength];
 
-		size_t controlLengthCurrent = 0;
+		uint controlLengthCurrent = 0;
 		for (CSString const& ctrl : *controls)
         {
-            const size_t uiAvailableLength = std::max(size_t(0), controlLength - controlLengthCurrent);
-            const size_t uiJustWrittenLength = snprintf(&toCompress[controlLengthCurrent], uiAvailableLength, "{%s}", ctrl.GetBuffer());
-        	controlLengthCurrent += uiJustWrittenLength;
+            const uint uiAvailableLength = std::max(0u, controlLength - controlLengthCurrent);
+            const int iJustWrittenLength = snprintf(&toCompress[controlLengthCurrent], uiAvailableLength, "{%s}", ctrl.GetBuffer());
+        	controlLengthCurrent += iJustWrittenLength;
         }
 		++ controlLengthCurrent;
 
@@ -3626,9 +3626,9 @@ void PacketGumpDialog::writeCompressedControls(std::vector<CSString> const* cont
 			return;
 		}
 
-		writeInt32(compressLength + 4);
+		writeInt32((dword)compressLength + 4u);
 		writeInt32(controlLengthCurrent);
-		writeData(compressBuffer, compressLength);
+		writeData(compressBuffer, (uint)compressLength);
 
 		delete[] compressBuffer;
 	}

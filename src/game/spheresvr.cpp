@@ -222,13 +222,7 @@ static bool WritePidFile(int iMode = 0)
 		if (pidFile)
 		{
 			pid_t spherepid = STDFUNC_GETPID();
-
-			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
-#if defined(_WIN32) && !defined(_MSC_VER)
-			fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
-#else
 			fprintf(pidFile, "%d\n", spherepid);
-#endif
 			fclose(pidFile);
 			return true;
 		}

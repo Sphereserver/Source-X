@@ -110,7 +110,7 @@ uint CDialogDef::GumpAddText( lpctstr pszText )
 {
     ADDTOCALLSTACK("CDialogDef::GumpAddText");
     m_sText.emplace_back(pszText);
-    return (m_sText.size() - 1);
+    return uint(m_sText.size() - 1);
 }
 
 #define SKIP_ALL( args )		SKIP_SEPARATORS( args ); GETNONWHITESPACE( args );
