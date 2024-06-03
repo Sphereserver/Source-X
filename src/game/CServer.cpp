@@ -1329,11 +1329,11 @@ bool CServer::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 	else if (!strnicmp(ptcKey, "GMPAGE.", 7))
 	{
 		ptcKey += 7;
-		size_t iNum = Exp_GetULLVal(ptcKey);
-		if (iNum >= g_World.m_GMPages.size())
+		size_t uiNum = Exp_GetSTVal(ptcKey);
+		if (uiNum >= g_World.m_GMPages.size())
 			return false;
 
-		CGMPage* pGMPage = g_World.m_GMPages[iNum].get();
+		CGMPage* pGMPage = g_World.m_GMPages[uiNum].get();
 		if (!pGMPage)
 			return false;
 

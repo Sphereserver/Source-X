@@ -119,7 +119,7 @@ int TableOp(int op)
 /*
 +*****************************************************************************
 *
-* Function Name:	ParseHexuint32_t
+* Function Name:	ParseHexDword
 *
 * Function:			Parse ASCII hex nibbles and fill in key/iv uint32_ts
 *
@@ -138,7 +138,7 @@ int TableOp(int op)
 *	happens automatically below. 
 *
 -****************************************************************************/
-static int ParseHexuint32_t(int bits,const char *srcTxt,uint32_t *d,char *dstTxt)
+static int ParseHexDword(int bits,const char *srcTxt,uint32_t *d,char *dstTxt)
 	{
 	int i;
 	uint32_t b;
@@ -191,7 +191,7 @@ static int ParseHexuint32_t(int bits,const char *srcTxt,uint32_t *d,char *dstTxt
 *
 * Function Name:	f32
 *
-* Function:			Run four uint8_ts through keyed S-boxes and apply MDS matrix
+* Function:			Run four bytes through keyed S-boxes and apply MDS matrix
 *
 * Arguments:		x			=	input to f function
 *					k32			=	pointer to key uint32_ts
@@ -405,7 +405,7 @@ int makeKey(keyInstance *key, uint8_t direction, int keyLen,const char *keyMater
 	if ((keyMaterial == NULL) || (keyMaterial[0]==0))
 		return TRUE;			/* allow a "dummy" call */
 		
-	if (ParseHexuint32_t(keyLen,keyMaterial,key->key32,key->keyMaterial))
+	if (ParseHexDword(keyLen,keyMaterial,key->key32,key->keyMaterial))
 		return BAD_KEY_MAT;	
 
 	return reKey(key);			/* generate round subkeys */
@@ -421,7 +421,7 @@ int makeKey(keyInstance *key, uint8_t direction, int keyLen,const char *keyMater
 *
 * Arguments:		cipher		=	ptr to cipherInstance to be initialized
 *					mode		=	MODE_ECB, MODE_CBC, or MODE_CFB1
-*					IV			=	ptr to hex ASCII test representing IV uint8_ts
+*					IV			=	ptr to hex ASCII test representing IV bytes
 *
 * Return:			TRUE on success
 *					else error code (e.g., BAD_CIPHER_MODE)
@@ -429,7 +429,6 @@ int makeKey(keyInstance *key, uint8_t direction, int keyLen,const char *keyMater
 -****************************************************************************/
 int cipherInit(cipherInstance *cipher, uint8_t mode,const char *IV)
 	{
-	int i;
 #if VALIDATE_PARMS				/* first, sanity check on parameters */
 	if (cipher == NULL)			
 		return BAD_PARAMS;		/* must have a cipherInstance to initialize */
@@ -442,11 +441,13 @@ int cipherInit(cipherInstance *cipher, uint8_t mode,const char *IV)
   #endif
 #endif
 
+    cipher->cipherSig = 0x48534946;
+
 	if ((mode != MODE_ECB) && (IV))	/* parse the IV */
 		{
-		if (ParseHexuint32_t(BLOCK_SIZE,IV,cipher->iv32,NULL))
+		if (ParseHexDword(BLOCK_SIZE,IV,cipher->iv32,NULL))
 			return BAD_IV_MAT;
-		for (i=0;i<BLOCK_SIZE/32;i++)	/* make uint8_t-oriented copy for CFB1 */
+		for (int i=0;i<BLOCK_SIZE/32;i++)	/* make uint8_t-oriented copy for CFB1 */
 			((uint32_t *)cipher->IV)[i] = Bswap(cipher->iv32[i]);
 		}
 
@@ -523,7 +524,7 @@ int blockEncrypt(cipherInstance *cipher, keyInstance *key,const uint8_t *input,
 				}
 			}
 		cipher->mode = MODE_CFB1;	/* restore mode for next time */
-		return inputLen;
+		//return inputLen;
 		}
 
 	/* here for ECB, CBC modes */

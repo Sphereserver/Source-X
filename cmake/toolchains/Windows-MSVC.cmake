@@ -50,7 +50,7 @@ function (toolchain_exe_stuff)
 	SET (ENABLED_SANITIZER false)
 	IF (${USE_ASAN})
 		IF (${MSVC_TOOLSET_VERSION} LESS_EQUAL 141) # VS 2017
-			MESSAGE (FATAL_ERROR "This MSVC version doesn't yet support LSAN. Use a newer one instead.")
+			MESSAGE (FATAL_ERROR "This MSVC version doesn't yet support ASAN. Use a newer one instead.")
 		ENDIF()
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} /fsanitize=address)
 		SET (ENABLED_SANITIZER true)
@@ -99,14 +99,15 @@ function (toolchain_exe_stuff)
 		SET(cxx_compiler_flags_common	${cxx_compiler_flags_common} /Zc:__cplusplus)
 	endif()
 
+	# Needed, otherwise throws a error... Regression?
 	set(CMAKE_C_FLAGS_DEBUG_INIT "" INTERNAL)
 	set(CMAKE_CXX_FLAGS_DEBUG_INIT "" INTERNAL)
 
 	target_compile_options(spheresvr PRIVATE
 		${cxx_compiler_flags_common}
-		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/O2 /EHsc /GL /GA /Gw /Gy /GF /GR->
-		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/O2 /EHa  /GL /GA /Gw /Gy /GF>
-		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd>	/Od /EHsc /Oy- /MDd /ob1 $<IF:$<BOOL:${USE_ASAN}>,/Zi,/ZI>> #/Gs 
+		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHsc /GL /GA /Gw /Gy /GF /GR-  $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHa  /GL /GA /Gw /Gy /GF		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od 		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>> #/Gs 
 		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
 	)
 
@@ -119,12 +120,15 @@ function (toolchain_exe_stuff)
 	target_link_options(spheresvr PRIVATE
 		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG>
 		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG>
-		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /DEBUG /LTCG:OFF /SAFESEH:NO $<$<NOT:$<BOOL:${USE_ASAN}>>:/INCREMENTAL /EDITANDCONTINUE>>
+		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /DEBUG /LTCG:OFF /SAFESEH:NO $<$<NOT:$<BOOL:${ENABLED_SANITIZER}>>:/INCREMENTAL /EDITANDCONTINUE>>
 	)
+	# MSVC doesn't yet have an option to statically link against *san sanitizer libraries.
+	# /INCREMENTAL and /EDITANDCONTINUE not compatible with a MSVC Asan build.
 
 
 	#-- Windows libraries to link against.
 	TARGET_LINK_LIBRARIES ( spheresvr	PRIVATE ws2_32 libmariadb )
+	
 
 	#-- Set define macros.
 

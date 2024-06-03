@@ -37,18 +37,20 @@ protected:
     CClient* m_client; // client
     CSocketAddress m_peerAddress; // client address
     CNetworkThread* m_parent;
+    int64 m_iConnectionTimeMs;
 
-    volatile bool m_isInUse;		// is currently in use
-    volatile bool m_isReadClosed;	// is closed by read thread
-    volatile bool m_isWriteClosed;	// is closed by write thread
-    volatile bool m_needsFlush;		// does data need to be flushed
+    volatile std::atomic_bool m_isInUse;		// is currently in use
+    volatile std::atomic_bool m_isReadClosed;	// is closed by read thread
+    volatile std::atomic_bool m_isWriteClosed;	// is closed by write thread
+    volatile std::atomic_bool m_needsFlush;		// does data need to be flushed
+
+    volatile std::atomic_bool m_useAsync;        // is this socket using asynchronous sends
+    volatile std::atomic_bool m_isSendingAsync;  // is a packet currently being sent asynchronously?
 
     bool m_seeded;	// is seed received
-    dword m_seed;	// client seed
     bool m_newseed; // is the client using new seed
+    dword m_seed;	// client seed
 
-    std::atomic_bool m_useAsync;        // is this socket using asynchronous sends
-    std::atomic_bool m_isSendingAsync;  // is a packet currently being sent asynchronously?
 #ifdef _LIBEV
     // non-windows uses ev_io for async operations
     struct ev_io m_eventWatcher;
@@ -108,13 +110,13 @@ public:
     bool canReceive(PacketSend* packet) const;	// can the state receive the given packet?
 
     void detectAsyncMode(void);
-    void setAsyncMode(bool isAsync) noexcept;   // set asynchronous mode
-    bool isAsyncMode(void) const noexcept;      // get asyncronous mode
+    void setAsyncMode(bool isAsync) volatile noexcept;   // set asynchronous mode
+    bool isAsyncMode(void) const volatile noexcept;      // get asyncronous mode
 #ifdef _LIBEV
     struct ev_io* iocb(void) { return &m_eventWatcher; };		// get io callback
 #endif
-    bool isSendingAsync(void) const noexcept;				// get if async packeet is being sent
-    void setSendingAsync(bool isSending) noexcept;	// set if async packet is being sent
+    bool isSendingAsync(void) const volatile noexcept;				// get if async packeet is being sent
+    void setSendingAsync(bool isSending) volatile noexcept;	// set if async packet is being sent
 
     GAMECLIENT_TYPE getClientType(void) const { return m_clientType; };	// determined client type
     dword getCryptVersion(void) const { return m_clientVersion; };		// version as determined by encryption
@@ -127,8 +129,8 @@ public:
     bool isReadClosed(void) const volatile { return m_isReadClosed; }	// is the socket closed by read-thread?
     bool isWriteClosed(void) const volatile { return m_isWriteClosed; }	// is the socket closed by write-thread?
 
-    void markFlush(bool needsFlush) volatile; // mark socket as needing a flush
-    bool needsFlush(void) const volatile { return m_needsFlush; } // does the socket need to be flushed?
+    void markFlush(bool needsFlush) volatile noexcept; // mark socket as needing a flush
+    bool needsFlush(void) const volatile noexcept{ return m_needsFlush; } // does the socket need to be flushed?
 
     CClient* getClient(void) const { return m_client; } // get linked client
 

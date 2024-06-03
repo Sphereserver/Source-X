@@ -25,12 +25,14 @@ struct HistoryIP
     int m_connected;
     bool m_blocked;
     int m_ttl;
+    size_t m_connectionAttempts; // since i remember of this IP
+    int64 m_timeLastConnectedMs;
     int64 m_blockExpire;
     int m_pingDecay;
 
     void update(void);
     bool checkPing(void); // IP is blocked -or- too many pings to it?
-    void setBlocked(bool isBlocked, int timeout = -1); // timeout in seconds
+    void setBlocked(bool isBlocked, int64 timeoutSeconds = -1);
 };
 
 typedef std::deque<HistoryIP> IPHistoryList;

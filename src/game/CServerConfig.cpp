@@ -41,8 +41,8 @@ CServerConfig::CServerConfig()
 	m_fUseNTService		= false;
 	m_fUseHTTP			= 2;
 	m_fUseAuthID		= true;
-	_iMapCacheTime		= 2  * 60 * MSECS_PER_SEC;
-	_iSectorSleepDelay  = 10 * 60 * MSECS_PER_SEC;
+	_iMapCacheTime		= 2ll  * 60 * MSECS_PER_SEC;
+	_iSectorSleepDelay  = 10ll * 60 * MSECS_PER_SEC;
 	m_fUseMapDiffs		= false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
@@ -77,9 +77,9 @@ CServerConfig::CServerConfig()
 	m_iSpell_Teleport_Sound_NPC			= 0x01fe;
 
 	// Decay
-	m_iDecay_Item			= 30*60 * MSECS_PER_SEC;
-	m_iDecay_CorpsePlayer	= 7*60 * MSECS_PER_SEC;
-	m_iDecay_CorpseNPC		= 7*60 * MSECS_PER_SEC;
+	m_iDecay_Item			= 30ll * 60 * MSECS_PER_SEC;
+	m_iDecay_CorpsePlayer	= 7ll * 60 * MSECS_PER_SEC;
+	m_iDecay_CorpseNPC		= 7ll * 60 * MSECS_PER_SEC;
 
 	// Accounts
 	m_iClientsMax		= FD_SETSIZE-1;
@@ -89,9 +89,9 @@ CServerConfig::CServerConfig()
 
 	m_iGuestsMax			= 0;
 	m_iArriveDepartMsg		= 1;
-	m_iClientLingerTime		= 10*60 * MSECS_PER_SEC;
-	m_iDeadSocketTime		= 5*60 * MSECS_PER_SEC;
-	m_iMinCharDeleteTime	= 7*24*60*60 * MSECS_PER_SEC;
+	m_iClientLingerTime		= 10ll * 60 * MSECS_PER_SEC;
+	m_iDeadSocketTime		= 5ll * 60 * MSECS_PER_SEC;
+	m_iMinCharDeleteTime	= 7ll * 24*60*60 * MSECS_PER_SEC;
 	m_iMaxCharsPerAccount	= 5;
 	m_fLocalIPAdmin			= true;
     _iMaxHousesAccount = 1;
@@ -106,7 +106,7 @@ CServerConfig::CServerConfig()
 	m_iSaveBackupLevels			= 10;
 	m_iSaveBackgroundTime		= 0;		// Use the new background save.
 	m_fSaveGarbageCollect		= true;		// Always force a full garbage collection.
-	m_iSavePeriod				= 20 * 60 * MSECS_PER_SEC;
+	m_iSavePeriod				= 20ll * 60 * MSECS_PER_SEC;
 	m_iSaveSectorsPerTick		= 1;
 	m_iSaveStepMaxComplexity	= 500;
 
@@ -139,12 +139,12 @@ CServerConfig::CServerConfig()
 	m_fVendorTradeTitle		= true;
 	m_iVendorMaxSell		= 255;
 	m_iVendorMarkup			= 15;
-	m_iGameMinuteLength		= 20 * MSECS_PER_SEC; // 20 seconds
+	m_iGameMinuteLength		= 20ll * MSECS_PER_SEC; // 20 seconds
 	m_fNoWeather			= true;
 	m_fFlipDroppedItems		= true;
 	m_iItemsMaxAmount		= 60000;
 	m_iMurderMinCount		= 5;
-	m_iMurderDecayTime		= 8*60*60 * MSECS_PER_SEC;
+	m_iMurderDecayTime		= 8ll * 60 * 60 * MSECS_PER_SEC;
 	m_iMaxCharComplexity	= 32;
 	m_iMaxItemComplexity	= 25;
 	m_iMaxSectorComplexity	= 1024;
@@ -153,8 +153,8 @@ CServerConfig::CServerConfig()
 	m_iMinKarma				= -10000;
 	m_iMaxKarma				= 10000;
 	m_iMaxFame				= 10000;
-	m_iGuardLingerTime		= 3*60 * MSECS_PER_SEC;
-	m_iCriminalTimer		= 3*60 * MSECS_PER_SEC;
+	m_iGuardLingerTime		= 3ll *60 * MSECS_PER_SEC;
+	m_iCriminalTimer		= 3ll *60 * MSECS_PER_SEC;
 	m_iHitpointPercentOnRez	= 10;
 	m_iHitsHungerLoss		= 0;
 	m_fLootingIsACrime		= true;
@@ -208,7 +208,7 @@ CServerConfig::CServerConfig()
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 15;
 	m_iWalkRegen		= 25;
-	m_iWoolGrowthTime	= 30*60 * MSECS_PER_SEC;
+	m_iWoolGrowthTime	= 30ll * 60 * MSECS_PER_SEC;
 	m_iAttackerTimeout	= 30;
 
 	m_iCommandLog		= 0;
@@ -268,11 +268,11 @@ CServerConfig::CServerConfig()
 
 	m_iDefaultCommandLevel	= 7;	// PLevel 7 default for command levels.
 
-	m_iRegenRate[STAT_STR]	= 40 * MSECS_PER_SEC;       // Seconds to heal ONE hp (before stam/food adjust)
-	m_iRegenRate[STAT_INT]	= 20 * MSECS_PER_SEC;       // Seconds to heal ONE mn
-	m_iRegenRate[STAT_DEX]	= 10 * MSECS_PER_SEC;       // Seconds to heal ONE stm
-	m_iRegenRate[STAT_FOOD] = 60*60 * MSECS_PER_SEC;    // Food usage (1 time per 60 minutes)
-    _iItemHitpointsUpdate   = 10 * MSECS_PER_SEC;       // Delay to send hitpoints update packet for items.
+	m_iRegenRate[STAT_STR]	= 40ll * MSECS_PER_SEC;       // Seconds to heal ONE hp (before stam/food adjust)
+	m_iRegenRate[STAT_INT]	= 20ll * MSECS_PER_SEC;       // Seconds to heal ONE mn
+	m_iRegenRate[STAT_DEX]	= 10ll * MSECS_PER_SEC;       // Seconds to heal ONE stm
+	m_iRegenRate[STAT_FOOD] = 60ll * 60 * MSECS_PER_SEC;  // Food usage (1 time per 60 minutes)
+    _iItemHitpointsUpdate   = 10ll * MSECS_PER_SEC;       // Delay to send hitpoints update packet for items.
 
 	_iTimerCall			= 0;
 	_iTimerCallUnit		= 0;
@@ -310,17 +310,19 @@ CServerConfig::CServerConfig()
 	_uiNetMaxPacketsPerTick = 50;
 	_uiNetMaxLengthPerTick	= 18'000;
 	m_iNetMaxQueueSize		= 75;
+    _iMaxConnectRequestsPerIP = 5;
+    _iTimeoutIncompleteConnectionMs = 5ll * MSECS_PER_SEC;
 	_iMaxSizeClientOut		= 80'000;
 	_iMaxSizeClientIn		= 10'000;
 	m_fUsePacketPriorities	= false;
 	m_fUseExtraBuffer		= true;
 
-	m_iTooltipCache			= 30 * MSECS_PER_SEC;
+	m_iTooltipCache			= 30ll * MSECS_PER_SEC;
 	m_iTooltipMode			= TOOLTIPMODE_SENDVERSION;
 	m_iContextMenuLimit		= 15;
 
 	m_iClientLoginMaxTries	= 0;		// maximum bad password tries before a temp ip ban
-	m_iClientLoginTempBan	= 3*60 * MSECS_PER_SEC;
+	m_iClientLoginTempBan	= 3ll * 60 * MSECS_PER_SEC;
 	m_iMaxShipPlankTeleport = UO_MAP_VIEW_SIZE_DEFAULT;
 	m_sChatStaticChannels = "General, Help, Trade, Looking For Group";
 	m_iChatFlags = (CHATF_AUTOJOIN | CHATF_CHANNELCREATION | CHATF_CHANNELMODERATION | CHATF_CUSTOMNAMES);
@@ -584,6 +586,7 @@ enum RC_TYPE
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
 	RC_MAXCHARSPERACCOUNT,		//
 	RC_MAXCOMPLEXITY,			// m_iMaxCharComplexity
+    RC_MAXCONNECTREQUESTSPERIP,  // m_iMaxConnectRequestsPerIP
 	RC_MAXFAME,					// m_iMaxFame
     RC_MAXHOUSESACCOUNT,        // _iMaxHousesAccount
     RC_MAXHOUSESGUILD,          // _iMaxHousesGuild
@@ -682,6 +685,7 @@ enum RC_TYPE
 	RC_TELEPORTSOUNDSTAFF,		// m_iSpell_Teleport_Sound_Staff
 	RC_TELNETLOG,				// m_fTelnetLog
     RC_TICKPERIOD,
+    RC_TIMEOUTINCOMPLETECONN,   // _iTimeoutIncompleteConnectionMs
 	RC_TIMERCALL,				// _iTimerCall
 	RC_TIMERCALLUNIT,			// _iTimerCallUnit
 	RC_TIMEUP,
@@ -717,7 +721,7 @@ enum RC_TYPE
 
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 
-{
+{ 
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
     { "AGREE",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAgree)				}},
@@ -862,6 +866,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MAXBASESKILL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMaxBaseSkill)			}},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,m_iMaxCharsPerAccount)	}},
 	{ "MAXCOMPLEXITY",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMaxCharComplexity)	}},
+    { "MAXCONNECTREQUESTSPERIP",{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iMaxConnectRequestsPerIP)	} },
     { "MAXFAME",                { ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMaxFame)				}},
     { "MAXHOUSESACCOUNT",       { ELEM_BYTE,    static_cast<uint>OFFSETOF(CServerConfig,_iMaxHousesAccount)		}},
     { "MAXHOUSESGUILD",         { ELEM_BYTE,    static_cast<uint>OFFSETOF(CServerConfig,_iMaxHousesGuild)		}},
@@ -960,6 +965,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "TELEPORTSOUNDSTAFF",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Staff)	}},
 	{ "TELNETLOG",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fTelnetLog)			}},
     { "TICKPERIOD",				{ ELEM_INT,	    0			                                    }},
+    { "TIMEOUTINCOMPLETECONN",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iTimeoutIncompleteConnectionMs) } },
 	{ "TIMERCALL",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iTimerCall)				}},
 	{ "TIMERCALLUNIT",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_iTimerCallUnit)			}},
 	{ "TIMEUP",					{ ELEM_VOID,	0												}},
@@ -3244,6 +3250,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_RESOURCES:
 		// Add these all to the list of files we need to include.
+        g_Log.Event(LOGM_NOCONTEXT|LOGM_INIT, "Caching script files...\n");
 		while ( pScript->ReadKey() )
 		{
 			AddResourceFile( pScript->GetKey() );

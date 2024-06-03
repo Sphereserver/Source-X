@@ -62,7 +62,7 @@ void NotifyDebugger()
 
 
 #ifdef _WIN32
-int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, uint nMaxError) // static
+int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, dword dwErrorBufLength) // static
 {
     //	PURPOSE:  copies error message text to a string
     //
@@ -78,7 +78,7 @@ int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, uint nMaxErr
     DWORD nChars = ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         lpSource,
         dwError, LANG_NEUTRAL,
-        lpszError, nMaxError, Arguments);
+        lpszError, dwErrorBufLength, Arguments);
 
     if (nChars > (DWORD)0)
     {     // successful translation -- trim any trailing junk

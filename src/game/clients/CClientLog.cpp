@@ -62,12 +62,36 @@ lpctstr CClient::GetConnectTypeStr(CONNECT_TYPE iType)
 void CClient::SetConnectType( CONNECT_TYPE iType )
 {
 	ADDTOCALLSTACK("CClient::SetConnectType");
+
+    auto _IsFullyConnectedType = [](const CONNECT_TYPE typ) -> bool {
+        switch (typ)
+        {
+        case CONNECT_GAME:
+        case CONNECT_HTTP:
+        case CONNECT_TELNET:
+        case CONNECT_UOG:
+        case CONNECT_AXIS:
+            return true;
+        default:
+            return false;
+        }
+    };
+
+	if (_IsFullyConnectedType(iType) && !_IsFullyConnectedType(m_iConnectType))
+	{
+		HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
+		-- history.m_connecting;
+	}
+	m_iConnectType = iType;
+
+/*
 	m_iConnectType = iType;
 	if ( iType == CONNECT_GAME )
 	{
 		HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
 		-- history.m_connecting;
 	}
+*/
 }
 
 //---------------------------------------------------------------------
@@ -500,7 +524,7 @@ bool CClient::OnRxAxis( const byte * pData, uint iLen )
 					}
 					else if ( ! sMsg.IsEmpty())
 					{
-						SysMessagef("\"MSG:%s\"", (lpctstr)sMsg);
+						SysMessagef("\"MSG:%s\"", sMsg.GetBuffer());
 						return false;
 					}
 					m_Targ_Text.Clear();

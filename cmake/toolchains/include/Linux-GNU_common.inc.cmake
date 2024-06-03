@@ -48,20 +48,20 @@ function (toolchain_exe_stuff_common)
 	SET (ENABLED_SANITIZER false)
 
 	IF (${USE_ASAN})
-		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope)
-		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address -static-libasan)
+		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=address -fno-sanitize-recover=address -fsanitize-address-use-after-scope)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libasan>)
 		SET (ENABLED_SANITIZER 	true)
 	ENDIF ()
 	IF (${USE_MSAN})
 		MESSAGE (FATAL_ERROR "Linux GCC doesn't yet support MSAN")
 		SET (USE_MSAN false)
 		#SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE)
-		#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory )#-static-libmsan)
+		#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory )#$<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libmsan>)
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=leak)
-		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak -static-liblsan)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-liblsan>)
 		SET (ENABLED_SANITIZER	true)
 	ENDIF ()
 	IF (${USE_UBSAN})
@@ -71,7 +71,7 @@ function (toolchain_exe_stuff_common)
 			-fno-sanitize=enum
 		)
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
-		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined -static-libubsan)
+		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libubsan>)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 
@@ -121,7 +121,9 @@ function (toolchain_exe_stuff_common)
 		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie)
 	ENDIF()
 	set (cxx_linker_options_common 			${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pthread -dynamic
-		$<$<BOOL:${RUNTIME_STATIC_LINK}>:	-static-libstdc++ -static-libgcc -static> # to statically link libc
+		$<$<BOOL:${RUNTIME_STATIC_LINK}>:	-static-libstdc++ -static-libgcc # no way to safely statically link against libc
+			#$<$<BOOL:${ENABLED_SANITIZER}>: -fsanitize-link-runtime -fsanitize-link-c++-runtime>
+		>
 	)
 
 

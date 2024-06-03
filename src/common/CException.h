@@ -46,11 +46,12 @@ public:
 	CSError( LOG_TYPE eSev, dword hErr, lpctstr pszDescription );
 	CSError( const CSError& e );	// copy contstructor needed.
     virtual ~CSError() = default;
-public:
-	CSError& operator=(const CSError& other);
+
+    CSError& operator=(const CSError& other) = delete;
+
 public:
 #ifdef _WIN32
-	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
+	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, dword dwErrorBufLength);
 #endif
 	virtual bool GetErrorMessage( lptstr lpszError, uint uiMaxError ) const;
 };
@@ -69,8 +70,7 @@ public:
 	}
     virtual ~CAssert() = default;
 
-private:
-	CAssert& operator=(const CAssert& other);
+	CAssert& operator=(const CAssert& other) = delete;
 
 public:
 	virtual bool GetErrorMessage(lptstr lpszError, uint uiMaxError ) const override;

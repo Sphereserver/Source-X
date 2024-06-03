@@ -46,7 +46,7 @@
 *----------------------------------------------------------------
 * More statistical properties of this matrix (from MDS.EXE output):
 *
-* Min Hamming weight (one uint8_t difference) =  8. Max=26.  Total =  1020.
+* Min Hamming weight (one byte difference) =  8. Max=26.  Total =  1020.
 * Prob[8]:      7    23    42    20    52    95    88    94   121   128    91
 *             102    76    41    24     8     4     1     3     0     0     0
 * Runs[8]:      2     4     5     6     7     8     9    11

@@ -96,7 +96,13 @@ void ProfileData::Start(PROFILE_TYPE id)
 
 	// accumulate the time for this task.
 	llong llDiff = ( llTicksStart - m_CurrentTime );
-    ASSERT(llDiff >= 0);
+    if ((llDiff < 0) && (llDiff > -10)) {
+        // The timer might not be very very precise.
+        llDiff = 0;
+    }
+    else {
+        ASSERT(llDiff >= 0);
+    }
 	m_TimeTotal += llDiff;
     ASSERT(m_TimeTotal >= 0);
 	m_CurrentTimes[m_CurrentTask].m_Time += llDiff;

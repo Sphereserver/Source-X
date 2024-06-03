@@ -26,7 +26,7 @@ CClient::CClient(CNetState* state)
 {
 	// This may be a web connection or Telnet ?
 	m_net = state;
-	SetConnectType( CONNECT_UNK );	// don't know what sort of connect this is yet.
+    m_iConnectType = CONNECT_UNK; // don't know what sort of connect this is yet.
 
 	// update ip history
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());

@@ -534,7 +534,6 @@ void AbstractThread::onStart()
 	// a small delay when setting it from AbstractThread::start and it's possible for the id
 	// to not be set fast enough (particular when using pthreads)
 	m_id = getCurrentThreadId();
-	ThreadHolder::get().m_currentThread = this;
 
 	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());

@@ -116,11 +116,11 @@ typedef struct
 #if ALIGN32
 	uint8_t dummyAlign[3];				/* keep 32-bit alignment */
 #endif
-	uint8_t  IV[MAX_IV_SIZE];			/* CFB1 iv uint8_ts  (CBC uses iv32) */
+	uint8_t  IV[MAX_IV_SIZE];			/* CFB1 iv bytes  (CBC uses iv32) */
 
 	/* Twofish-specific parameters: */
 	uint32_t cipherSig;				/* set to VALID_SIG by cipherInit() */
-	uint32_t iv32[BLOCK_SIZE/32];		/* CBC IV uint8_ts arranged as dwords */
+	uint32_t iv32[BLOCK_SIZE/32];		/* CBC IV bytes arranged as dwords */
 	} cipherInstance;
 
 /* Function protoypes */
@@ -219,18 +219,18 @@ int TestTwofish(int mode,int keySize) /* keySize must be 128, 192, or 256 */
 		memcpy(ci.iv32,iv,sizeof(ci.iv32));	/* copy the IV to ci */
 		}
 
-	/* select number of uint8_ts to encrypt (multiple of block) */
+	/* select number of bytes to encrypt (multiple of block) */
 	/* e.g., byteCnt = 16, 32, 48, 64 */
 	byteCnt = (BLOCK_SIZE/8) * (1 + (rand() % MAX_BLK_CNT));
 
 	for (i=0;i<byteCnt;i++)		/* generate test data */
 		plainText[i]=(uint8_t) rand();
 	
-	/* encrypt the uint8_ts */
+	/* encrypt the bytes */
 	if (blockEncrypt(&ci,&ki, plainText,byteCnt*8,cipherText) != byteCnt*8)
 		return 1;
 
-	/* decrypt the uint8_ts */
+	/* decrypt the bytes */
 	if (mode != MODE_ECB)		/* first re-init the IV (if needed) */
 		memcpy(ci.iv32,iv,sizeof(ci.iv32));
 

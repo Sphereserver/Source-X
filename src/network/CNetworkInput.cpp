@@ -540,7 +540,8 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
     }
     if (!fHTTPReq && (uiOrigRemainingLength > INT8_MAX))
     {
-        g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n", state->id(), uiOrigRemainingLength, INT8_MAX);
+        g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n",
+            state->id(), uiOrigRemainingLength, INT8_MAX);
         return false;
     }
 

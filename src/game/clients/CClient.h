@@ -387,16 +387,15 @@ public:
 	explicit CClient(CNetState* state);
 	~CClient();
 
-private:
-	CClient(const CClient& copy);
-	CClient& operator=(const CClient& other);
+	CClient(const CClient& copy) = delete;
+	CClient& operator=(const CClient& other) = delete;
 
 public:
 	void CharDisconnect();
 
 	CClient* GetNext() const
 	{
-		return ( static_cast <CClient*>( CSObjListRec::GetNext()));
+		return static_cast <CClient*>(CSObjListRec::GetNext());
 	}
 
 	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;

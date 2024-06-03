@@ -1,28 +1,34 @@
 #	Main config	#
 
 CMAKE_MINIMUM_REQUIRED (VERSION 3.19)
-set (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
+set (CMAKE_SUPPRESS_REGENERATION TRUE)	# Supress the ZERO_CHECK generation
 
 # GUI checkboxes
-set (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
-set (RUNTIME_STATIC_LINK	false CACHE BOOL "Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++).")
+option (CMAKE_NO_GIT_REVISION
+	"Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
+	FALSE
+)
+option (RUNTIME_STATIC_LINK
+	"Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
+	FALSE
+)
 
-set (predef_LIB_LIBEV_BUILD 	false)
+set (predef_LIB_LIBEV_BUILD 	FALSE)
 if (NOT WIN32)
-	set (predef_LIB_LIBEV_BUILD	true)
+	set (predef_LIB_LIBEV_BUILD	TRUE)
 endif()
-set (LIB_LIBEV_BUILD		${predef_LIB_LIBEV_BUILD}	CACHE BOOL "Build libev.")
-set (LIB_SQLITE_BUILD		true  CACHE BOOL "Build sqlite.")
-set (LIB_ZLIB_BUILD			true  CACHE BOOL "Build zlib.")
+option (LIB_LIBEV_BUILD			"Build libev." ${predef_LIB_LIBEV_BUILD})
+option (LIB_SQLITE_BUILD		"Build sqlite." TRUE)
+option (LIB_ZLIB_BUILD			"Build zlib." TRUE)
 
 if (WIN32)
-	set (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
+	option (WIN32_SPAWN_CONSOLE	"Spawn an additional console, useful for debugging." FALSE)
 endif()
 
-set (USE_ASAN				false CACHE BOOL "Enable AddressSanitizer.")
-set (USE_MSAN				false CACHE BOOL "Enable MemorySanitizer.")
-set (USE_LSAN				false CACHE BOOL "Enable LeakSanitizer.")
-set (USE_UBSAN				false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
+option (USE_ASAN				"Enable AddressSanitizer." FALSE)
+option (USE_MSAN				"Enable MemorySanitizer." FALSE)
+option (USE_LSAN				"Enable LeakSanitizer." FALSE)
+option (USE_UBSAN				"Enable Undefined Behavior Sanitizer." FALSE)
 
 
 # Utility functions

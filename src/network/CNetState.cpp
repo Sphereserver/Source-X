@@ -16,16 +16,14 @@
 #define NETWORK_DISCONNECTPRI	PacketSend::PRI_HIGHEST			// packet priorty to continue sending before closing sockets
 
 
-CNetState::CNetState(int id)
+CNetState::CNetState(int id) :
+    m_outgoing{}, m_incoming{}
 {
     m_id = id;
     m_client = nullptr;
     m_needsFlush = false;
     m_useAsync = false;
-    m_outgoing.currentTransaction = nullptr;
-    m_outgoing.pendingTransaction = nullptr;
-    m_incoming.buffer = nullptr;
-    m_incoming.rawBuffer = nullptr;
+    m_iConnectionTimeMs = -1;
     m_packetExceptions = 0;
     _iInByteCounter = _iOutByteCounter = 0;
     m_clientType = CLIENTTYPE_2D;
@@ -36,6 +34,7 @@ CNetState::CNetState(int id)
 
     clear();
 }
+
 
 CNetState::~CNetState(void)
 {
@@ -135,6 +134,7 @@ void CNetState::clear(void)
         m_incoming.rawBuffer = nullptr;
     }
 
+    m_iConnectionTimeMs = -1;
     m_sequence = 0;
     m_seeded = false;
     m_newseed = false;
@@ -204,6 +204,8 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
     iSockRet = m_socket.SetSockOpt(TCP_NODELAY, &iSockFlag, sizeof(iSockFlag), IPPROTO_TCP);
     CheckReportNetAPIErr(iSockRet, "NetState::init.TCP_NODELAY");
 
+    m_iConnectionTimeMs = CSTime::GetPreciseSysTimeMilli();
+
     g_Serv.StatInc(SERV_STAT_CLIENTS);
     CClient* client = new CClient(this);
     m_client = client;
@@ -249,27 +251,27 @@ void CNetState::markWriteClosed(void) volatile
     m_isWriteClosed = true;
 }
 
-void CNetState::markFlush(bool needsFlush) volatile
+void CNetState::markFlush(bool needsFlush) volatile noexcept
 {
     m_needsFlush = needsFlush;
 }
 
-void CNetState::setAsyncMode(bool isAsync) noexcept
+void CNetState::setAsyncMode(bool isAsync) volatile noexcept
 {
     m_useAsync = isAsync;
 }
 
-bool CNetState::isAsyncMode(void) const noexcept
+bool CNetState::isAsyncMode(void) const volatile noexcept
 {
     return m_useAsync;
 }
 
-bool CNetState::isSendingAsync(void) const noexcept
+bool CNetState::isSendingAsync(void) const volatile noexcept
 {
     return m_isSendingAsync;
 }
 
-void CNetState::setSendingAsync(bool isSending) noexcept
+void CNetState::setSendingAsync(bool isSending) volatile noexcept
 {
     m_isSendingAsync = isSending;
 }
