@@ -11,7 +11,7 @@
 
 // For TwoFish and MD5 we only provide an interface, so we include the headers of the code doing all the related crypto stuff
 extern "C" {
-#include <twofish/aes.h>
+#include <twofish/twofish.h>
 }
 #include "CMD5.h"
 

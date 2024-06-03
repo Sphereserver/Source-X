@@ -3,7 +3,7 @@
 #include "CCrypto.h"
 
 extern "C" {
-#include <twofish/aes.h>
+#include <twofish/twofish.h>
 }
 
 
@@ -26,7 +26,7 @@ void CCrypto::InitTwoFish()
     auto key_casted_ptr = static_cast<keyInstance*>(tf_key);
     auto cipher_casted_ptr = static_cast<cipherInstance*>(tf_cipher);
 
-    ::makeKey( key_casted_ptr, 1 /*DIR_DECRYPT*/, 0x80, nullptr );
+    ::makeKey(key_casted_ptr, 1 /*DIR_DECRYPT*/, 0x80); //, nullptr );
     ::cipherInit( cipher_casted_ptr, 1/*MODE_ECB*/, nullptr );
 
     key_casted_ptr->key32[0] = key_casted_ptr->key32[1] = key_casted_ptr->key32[2] = key_casted_ptr->key32[3] = dwIP; //0x7f000001;

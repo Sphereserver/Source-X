@@ -2,10 +2,8 @@ cmake_minimum_required (VERSION 3.19)
 project(twofish C)
 
 set (lib_SOURCES
-    twofish/aes.h
-    twofish/debug.h
-    twofish/platform.h
-    twofish/table.h
+    twofish/twofish.h
+    twofish/twofish_aux.h
     twofish/twofish.c
 )
 
