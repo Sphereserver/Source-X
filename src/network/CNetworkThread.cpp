@@ -11,7 +11,7 @@
 
 static const char* GenerateNetworkThreadName(size_t id)
 {
-    char* name = new char[IThread::m_nameMaxLength];
+    char* name = Str_GetTemp();
     snprintf(name, IThread::m_nameMaxLength, "T_Net #%" PRIuSIZE_T, id);
     return name;
 }
@@ -25,8 +25,6 @@ CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
 
 CNetworkThread::~CNetworkThread(void)
 {
-    // thread name was allocated by GenerateNetworkThreadName, so should be delete[]'d
-    delete[] getName();
 }
 
 void CNetworkThread::assignNetworkState(CNetState* state)

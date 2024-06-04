@@ -932,16 +932,17 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 
-				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, ppszArgs[0]);
+				const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, false);
+                if (rid.IsEmpty())
+                {
+                    m_tmAdd.m_id = 0;
+                    return true;
+                }
+
 				m_tmAdd.m_id = rid.GetResIndex();
-				if (iQty > 1)
-				{
-					m_tmAdd.m_vcAmount = (word)atoi(ppszArgs[1]);
-					m_tmAdd.m_vcAmount = maximum(m_tmAdd.m_vcAmount, 1);
-				}
-				else
-					m_tmAdd.m_vcAmount = 1;
-				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
+                m_tmAdd.m_vcAmount = (iQty > 1) ? std::max((word)1, (word)atoi(ppszArgs[1])) : 1;
+
+                if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
 					return addTargetChars(CLIMODE_TARG_ADDCHAR, (CREID_TYPE)m_tmAdd.m_id, false);
@@ -959,6 +960,72 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, "MENU_ADDITEM"));
 			}
 			break;
+        case CV_ADDITEM:
+            if (!s.HasArgs())
+            {
+                SysMessageDefault(DEFMSG_CMD_INVALID);
+                return true;
+            }
+            {
+                tchar *ppszArgs[2];
+                size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, ARRAY_COUNT(ppszArgs));
+
+                if (!IsValidGameObjDef(ppszArgs[0]))
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
+                if (rid.IsEmpty())
+                    rid = g_Cfg.ResourceGetID(RES_ITEMDEF, ppszArgs[0], 0, true);
+
+                const RES_TYPE restype = rid.GetResType();
+                if ((restype != RES_ITEMDEF) /* multi are still considered as items */ &&
+                    (restype != RES_CHAMPION) && (restype != RES_SPAWN) /* item spawns? */)
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                m_tmAdd.m_id = rid.GetResIndex();
+                m_tmAdd.m_vcAmount = (iQty > 1) ? std::max((word)1, (word)atoi(ppszArgs[1])) : 1;
+
+                return addTargetItems(CLIMODE_TARG_ADDITEM, (ITEMID_TYPE)m_tmAdd.m_id);
+            }
+        case CV_ADDCHAR:
+            if (!s.HasArgs())
+            {
+                SysMessageDefault(DEFMSG_CMD_INVALID);
+                return true;
+            }
+            {
+                tchar *ppszArgs[2];
+                size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, ARRAY_COUNT(ppszArgs));
+
+                if (!IsValidGameObjDef(ppszArgs[0]))
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
+                if (rid.IsEmpty())
+                    rid = g_Cfg.ResourceGetID(RES_CHARDEF, ppszArgs[0], 0, true);
+
+                const RES_TYPE restype = rid.GetResType();
+                if ((restype != RES_CHARDEF) && (restype != RES_SPAWN))
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                m_tmAdd.m_id = rid.GetResIndex();
+                m_tmAdd.m_vcAmount = (iQty > 1) ? std::max((word)1, (word)atoi(ppszArgs[1])) : 1;
+
+                m_Targ_Prv_UID.InitUID();
+                return addTargetChars(CLIMODE_TARG_ADDCHAR, (CREID_TYPE)m_tmAdd.m_id, false);
+            }
 		case CV_ADDBUFF:
 			{
 				tchar * ppArgs[11];

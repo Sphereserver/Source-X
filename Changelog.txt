@@ -3718,14 +3718,12 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 		     when you switch this setting.
 - Fixed: SPELLFLAG_NOUNPARALYZE flag wasn't working as intended.
 
-02-06-2024, Nolok
+03-06-2024, Nolok
 - Added ini settings:
-// Maximum number of connection requests before rejecting/blocking IP. Reset after <NetTTL> seconds elapsed after last connection attempt.
-MaxConnectRequestsPerIP=5
-
-// Maximum time in milliseconds to wait before closing a connection request wich did not make it into a successful login (classic DDoS just asks to connect without doing anything else, or sends garbage data).
-TimeoutIncompleteConn=5 * 1000  // 5 seconds
-
+	// Maximum number of connection requests before rejecting/blocking IP. Reset after <NetTTL> seconds elapsed after last connection attempt.
+	MaxConnectRequestsPerIP=5
+	// Maximum time in milliseconds to wait before closing a connection request wich did not make it into a successful login (classic DDoS just asks to connect without doing anything else, or sends garbage data).
+	TimeoutIncompleteConn=5 * 1000  // 5 seconds
 - Added serv_trig function f_onserver_connectreq_ex, called after an IP exceeds MaxConnectRequestsPerIP:
 	ARGS (RO): IP address.
 	ARGN1 (RO): System time in milliseconds since the last connection.
@@ -3734,8 +3732,11 @@ TimeoutIncompleteConn=5 * 1000  // 5 seconds
 	LOCAL.BAN_TIMEOUT (RW): 5 * 60 (default), seconds to keep banned the ip from new connections to the server (permanent if negative).
 	RETURN 1: Only reject the connection.
 	RETURN 2: Reject and ban the IP for <LOCAL.BAN_TIMEOUT> seconds.
-
 - Added serv_trig function f_onserver_connection_acquired, called after an IP successifully establishes a connection with the server and passess the security checks:
 	ARGS (RO): IP address.
 	ARGN1 (RO): System time in milliseconds since the last connection.
 	ARGN2 (RO): System time in milliseconds of this connection attempt.
+
+04-06-2024, Nolok
+- Added: client commands ADDITEM and ADDCHAR, to be used in place of .ADD when there's the need to force the argument to be an item or a char.
+	This can be useful when using raw IDs (like 01, 0bd1, etc) instead of defnames.

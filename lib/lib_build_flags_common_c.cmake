@@ -11,10 +11,9 @@ if (MSVC)
 		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
 	)
 	set (c_linker_options_common
-		/NODEFAULTLIB:libcmt /NODEFAULTLIB:libcmtd
-		$<$<CONFIG:Release>: /OPT:REF,ICF /LTCG:ON>
-		$<$<CONFIG:Nightly>: /OPT:REF,ICF /LTCG:ON>
-		$<$<CONFIG:Debug>:   /DEBUG /LTCG:OFF>
+		$<$<CONFIG:Release>: /OPT:REF,ICF /LTCG:ON /NODEFAULTLIB:libcmtd>
+		$<$<CONFIG:Nightly>: /OPT:REF,ICF /LTCG:ON /NODEFAULTLIB:libcmtd>
+		$<$<CONFIG:Debug>:   /DEBUG /LTCG:OFF /NODEFAULTLIB:libcmt>
 	)
 
 else (MSVC)

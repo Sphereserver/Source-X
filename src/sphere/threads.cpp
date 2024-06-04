@@ -104,6 +104,10 @@ void IThread::setThreadName(const char* name)
 #elif defined(__NetBSD__)
 	pthread_setname_np(getCurrentThreadId(), "%s", name_trimmed);
 #endif
+
+    auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
+    ASSERT(athr);
+    athr->overwriteInternalThreadName(name_trimmed);
 }
 
 
@@ -254,7 +258,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 		++AbstractThread::m_threadsAvailable;
 	}
 	m_id = 0;
-	m_name = name;
+    Str_CopyLimitNull(m_name, name, sizeof(m_name));
 	m_handle = 0;
 	m_hangCheck = 0;
     _thread_selfTerminateAfterThisTick = true;
@@ -275,6 +279,13 @@ AbstractThread::~AbstractThread()
 		// No pthread equivalent
 #endif
 	}
+}
+
+void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
+{
+    // Use it only if you know what you are doing!
+    //  This doesn't actually do the change of the thread name!
+    Str_CopyLimitNull(m_name, name, sizeof(m_name));
 }
 
 void AbstractThread::start()

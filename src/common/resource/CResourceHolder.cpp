@@ -337,9 +337,9 @@ CResourceScript * CResourceHolder::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
+CResourceID CResourceHolder::ResourceGetID_EatStr(RES_TYPE restype, lpctstr &ptcName, word wPage, bool fCanFail)
 {
-    ADDTOCALLSTACK("CResourceHolder::ResourceGetID_Advance");
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetID_EatStr");
     // Find the Resource ID given this name.
     // We are NOT creating a new resource. just looking up an existing one
     // NOTE: Do not enforce the restype.
@@ -366,6 +366,7 @@ CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &pt
     }
     */
 
+    lpctstr ptcNameStart = ptcName;
     dword dwEvalPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
     int iEvalResType  = RES_GET_TYPE(dwEvalPrivateUID);
     int iEvalResIndex = RES_GET_INDEX(dwEvalPrivateUID);
@@ -374,22 +375,33 @@ CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &pt
     if ((restype != RES_UNKNOWN) && (iEvalResType == RES_UNKNOWN))
     {
         // Label it with the type we want.
+        ASSERT(restype > RES_UNKNOWN && restype <= RES_QTY);
+        if (restype == RES_QTY)
+        {
+            // RES_QTY means i don't care, because i pass a defname and it already carries data about which kind of resource it is.
+            // If it doesn't (?!), or simply i pass an ID instead of a defname (which i expected), i'll have unexpected results, so better throw an error.
+            // If i pass a bare ID, Sphere cannot know if you meant a char, item, etc...
+            if (!fCanFail)
+                g_Log.EventError("Can't get the resource type from a bare ID ('%s')!\n", ptcNameStart);
+            return CResourceID(RES_UNKNOWN /* 0 */, 0, 0u);
+        }
         return CResourceID(restype, iEvalResIndex, wPage);
     }
     // CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
     return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex, wPage);
 }
 
-CResourceID CResourceHolder::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
+CResourceID CResourceHolder::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage, bool fCanFail )
 {
 	ADDTOCALLSTACK("CResourceHolder::ResourceGetID");
-	return ResourceGetID_Advance(restype, ptcName, wPage);
+	return ResourceGetID_EatStr(restype, ptcName, wPage, fCanFail);
 }
 
 CResourceID CResourceHolder::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
 {
 	// Get a resource of just this index type.
-	CResourceID rid = ResourceGetID( restype, pszName, wPage );
+    ASSERT(restype != RES_QTY);
+	CResourceID rid = ResourceGetID( restype, pszName, wPage, true );
 	if ( rid.GetResType() != restype )
 	{
 		rid.Init();

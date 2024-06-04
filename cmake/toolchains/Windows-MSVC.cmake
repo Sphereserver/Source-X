@@ -118,9 +118,10 @@ function (toolchain_exe_stuff)
 	set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE} "")
 
 	target_link_options(spheresvr PRIVATE
-		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG>
-		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG>
-		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /DEBUG /LTCG:OFF /SAFESEH:NO $<$<NOT:$<BOOL:${ENABLED_SANITIZER}>>:/INCREMENTAL /EDITANDCONTINUE>>
+		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG /NODEFAULTLIB:libcmtd>
+		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG /NODEFAULTLIB:libcmtd>
+		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /DEBUG /LTCG:OFF /SAFESEH:NO /NODEFAULTLIB:libcmt
+			$<$<NOT:$<BOOL:${ENABLED_SANITIZER}>>:/INCREMENTAL /EDITANDCONTINUE> >
 	)
 	# MSVC doesn't yet have an option to statically link against *san sanitizer libraries.
 	# /INCREMENTAL and /EDITANDCONTINUE not compatible with a MSVC Asan build.

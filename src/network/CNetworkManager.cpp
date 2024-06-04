@@ -178,7 +178,7 @@ void CNetworkManager::acceptNewConnection(void)
         return;
     }
 
-    if (ip.m_connectionAttempts >= g_Cfg._iMaxConnectRequestsPerIP)
+    if ((g_Cfg._iMaxConnectRequestsPerIP > 0) && (ip.m_connectionAttempts >= (size_t)g_Cfg._iMaxConnectRequestsPerIP))
     {
         // Call this special scripted function.
         CScriptTriggerArgs fargs_ex(client_addr.GetAddrStr());

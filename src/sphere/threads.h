@@ -197,7 +197,7 @@ public:
 		return isSameThreadId(getCurrentThreadId(), otherThreadId);
 	}
 
-	static const uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+	static constexpr uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 	static void setThreadName(const char* name);
 
     size_t m_threadHolderId;
@@ -262,7 +262,7 @@ protected:
 
 private:
 	threadid_t m_id;
-	const char *m_name;
+	char m_name[30];
 	static int m_threadsAvailable;
 	spherethread_t m_handle;
 	uint m_hangCheck;
@@ -283,11 +283,8 @@ public:
 public:
 	threadid_t getId() const noexcept { return m_id; }
 	const char *getName() const noexcept { return m_name; }
-	void overwriteInternalThreadName(const char* name) noexcept {
-        // Use it only if you know what you are doing!
-        //  This doesn't actually do the change of the thread name!
-		m_name = name;
-	}
+
+    void overwriteInternalThreadName(const char* name) noexcept;
 
 	bool isActive() const;
 	bool isCurrentThread() const;

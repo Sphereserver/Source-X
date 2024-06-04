@@ -369,8 +369,7 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
 tchar * Str_UnQuote(tchar * pStr) noexcept;
 ///@}
 
-
-//--
+//---
 
 void CharToMultiByteNonNull(byte* Dest, const char* Src, int MBytes) noexcept;
 
@@ -400,6 +399,21 @@ public:
 private:
     char* m_strUTF8_MultiByte;
 };
+
+
+//---
+
+ssize_t fReadUntilDelimiter(char **buf, size_t *bufsiz, int delimiter, FILE *fp) noexcept; // equivalent to POSIX getline
+ssize_t fReadUntilDelimiter_StaticBuf(char *buf, const size_t bufsiz, const int delimiter, FILE *fp) noexcept;
+inline ssize_t fReadLine_StaticBuf(char *buf, const size_t bufsiz, FILE *fp) noexcept
+{
+    return fReadUntilDelimiter_StaticBuf(buf, bufsiz, '\n', fp);
+}
+ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char *data, const size_t datasize) noexcept;
+inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexcept
+{
+    return sGetDelimiter_StaticBuf('\n', data, datasize);
+}
 
 
 #endif // _INC_SSTRING_H

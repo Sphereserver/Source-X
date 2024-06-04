@@ -26,22 +26,21 @@ private:
 	iterator m_tail;
 
 public:
-	ThreadSafeQueue()
+	ThreadSafeQueue() noexcept
 	{
-		m_list.push_back( T() ); // at least one element must be in the queue
+        m_list.emplace_back(T{}); // at least one element must be in the queue
 		m_head = m_list.begin();
 		m_tail = m_list.end();
 	}
 
-private:
-	ThreadSafeQueue( const ThreadSafeQueue& copy );
-	ThreadSafeQueue& operator=( const ThreadSafeQueue& other );
+	ThreadSafeQueue( const ThreadSafeQueue& copy ) = delete;
+	ThreadSafeQueue& operator=( const ThreadSafeQueue& other ) = delete;
 
 public:
 	// Append an element to the end of the queue (writer)
-	void push( const T& value )
+	void push( const T& value ) noexcept
 	{
-		m_list.push_back( value );
+		m_list.emplace_back( value );
 		m_tail = m_list.end();
 		clean();
 	}
@@ -59,7 +58,7 @@ public:
 			return 0;
 
 		size_t toSkip = 1;
-		for ( const_iterator it = m_list.begin(), end = m_list.end(); (it != m_head) && (it != end); ++it )
+		for ( const_iterator it = m_list.cbegin(), end = m_list.cend(); (it != m_head) && (it != end); ++it )
 			++toSkip;
 
 		return m_list.size() - toSkip;
