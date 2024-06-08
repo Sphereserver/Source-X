@@ -3,16 +3,12 @@
 #include <cstring>
 #include "CMD5.h"
 
-CMD5::CMD5()
+CMD5::CMD5() noexcept
 {
 	reset();
 }
 
-CMD5::~CMD5()
-{
-}
-
-void CMD5::reset()
+void CMD5::reset() noexcept
 {
 	// Reset our finalizd state.
 	m_finalized = false;
@@ -28,12 +24,11 @@ void CMD5::reset()
 	m_bits[1] = 0;
 }
 
-inline void byteReverse( uchar *buffer, uint longs )
+static void byteReverse( uchar *buffer, uint longs ) noexcept
 {
-	uint temp;
     do
 	{
-		temp = (uint)((uint)(buffer[3]) << 8 | buffer[2]) << 16 | ((uint)(buffer[1]) << 8 | buffer[0]);
+		const uint temp = (uint)((uint)(buffer[3]) << 8 | buffer[2]) << 16 | ((uint)(buffer[1]) << 8 | buffer[0]);
 		reinterpret_cast<uint *>(buffer)[0] = temp;
 		buffer += 4;
     }
@@ -47,7 +42,7 @@ inline void byteReverse( uchar *buffer, uint longs )
 #define F4(x, y, z) (y ^ (x | ~z))
 #define MD5STEP( f, w, x, y, z, data, s ) ( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x )
 
-void CMD5::update()
+void CMD5::private_update() noexcept
 {
     uint a, b, c, d;
 	uint *ptrInput = reinterpret_cast<uint *>( m_input );
@@ -131,7 +126,7 @@ void CMD5::update()
     m_buffer[3] += d;
 }
 
-void CMD5::update( const uchar *data, uint length )
+void CMD5::update( const uchar *data, uint length ) noexcept
 {
 	if( m_finalized )
 		return;
@@ -170,7 +165,7 @@ void CMD5::update( const uchar *data, uint length )
 		// We have enough data to clear our temporary buffer
 		memcpy( ptrInput, data, temp );
 		byteReverse( m_input, 16 );
-		update();
+        private_update();
 
 		data += temp;
 		length -= temp;
@@ -181,7 +176,7 @@ void CMD5::update( const uchar *data, uint length )
 	{
 		memcpy( m_input, data, 64 );
 		byteReverse( m_input, 16 );
-		update();
+        private_update();
 		data += 64;
 		length -= 64;
 	}
@@ -189,7 +184,7 @@ void CMD5::update( const uchar *data, uint length )
 	memcpy( m_input, data, length );
 }
 
-void CMD5::finalize()
+void CMD5::finalize() noexcept
 {
 	if( m_finalized )
 		return;
@@ -211,7 +206,7 @@ void CMD5::finalize()
 	{
 		memset( ptrInput, 0, count );
 		byteReverse( m_input, 16 );
-		update();
+        private_update();
 
 		// Fill the next block with zeros and leave free space for
 		// our bitcount
@@ -230,7 +225,7 @@ void CMD5::finalize()
 	reinterpret_cast<uint *>(m_input)[14] = m_bits[0];
 	reinterpret_cast<uint *>(m_input)[15] = m_bits[1];
 
-	update();
+    private_update();
 
 	// Reverse our Digest
 	byteReverse( reinterpret_cast<uchar *>(m_buffer), 4 );
@@ -238,7 +233,7 @@ void CMD5::finalize()
 	m_finalized = true;
 }
 
-void CMD5::numericDigest( uchar *digest )
+void CMD5::numericDigest( uchar *digest ) noexcept
 {
 	if( !m_finalized )
 		return;
@@ -253,7 +248,7 @@ void CMD5::numericDigest( uchar *digest )
 	}
 }
 
-void CMD5::digest( char *digest )
+void CMD5::digest( char *digest ) noexcept
 {
 	if( !m_finalized )
 		return;
@@ -270,4 +265,13 @@ void CMD5::digest( char *digest )
 		snprintf( temp, sizeof(temp), "%02x", buffer[i] );
 		strcat( digest, temp );
 	}
+}
+
+
+void CMD5::fastDigest(char * digest, const char * message) noexcept // static
+{
+    CMD5 ctx;
+    ctx.update(reinterpret_cast<const uchar *>(message), (uint)(strlen(message)));
+    ctx.finalize();
+    ctx.digest(digest);
 }

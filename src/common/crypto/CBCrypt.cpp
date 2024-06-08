@@ -15,8 +15,7 @@
 
 #include "CBCrypt.h"
 
-#include "bcrypt/ow-crypt.h"
-//#include <cstring>
+#include <bcrypt/ow-crypt.h>
 #include <random>
 
 #define BCRYPT_HASHSIZE	(64)

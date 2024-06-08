@@ -224,7 +224,6 @@ public:
 private:
 	// encrypt/decrypt stuff.
 	CCrypto m_Crypt;			// Client source communications are always encrypted.
-	static CHuffman m_Comp;
 
 public:
 	// Gump stuff

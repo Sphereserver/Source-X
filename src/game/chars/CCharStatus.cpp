@@ -658,7 +658,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 	if ( pCharDef->IsFemale() )
 		mode |= CHARMODE_FEMALE;
 
-	if ( pViewer && (pViewer->GetNetState()->isClientVersion(MINCLIVER_SA) || pViewer->GetNetState()->isClientEnhanced()) )
+	if ( pViewer && (pViewer->GetNetState()->isClientVersionNumber(MINCLIVER_SA) || pViewer->GetNetState()->isClientEnhanced()) )
 	{
 		if ( IsStatFlag(STATF_HOVERING) )
 			mode |= CHARMODE_FLYING;

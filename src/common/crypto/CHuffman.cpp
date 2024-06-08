@@ -1,10 +1,12 @@
 #include "../../sphere/threads.h"
-#include "CCrypto.h"
+#include "CHuffman.h"
 
+
+#define COMPRESS_TREE_SIZE (256+1)
 
 // Huffman compression. Used to compress the outgoing data (packets sent from server to client).
 
-const word CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
+static constexpr word kxCompress_Base[COMPRESS_TREE_SIZE] =
 {
 	// The "golden" key for (0.0.0.0)
 	// lowest 4 bits is the length. other source uses 2 int's per word here.
@@ -56,7 +58,7 @@ uint CHuffman::Compress( byte * pOutput, const byte * pInput, uint outLen, uint 
 
     for ( uint i = 0; i <= inLen; ++i )
 	{
-        word value = sm_xCompress_Base[ ( i == inLen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
+        word value = kxCompress_Base[ ( i == inLen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
 		int nBits = value & 0xF;
 		value >>= 4;
 		while ( nBits-- )

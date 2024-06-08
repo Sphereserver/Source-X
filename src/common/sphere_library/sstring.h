@@ -3,6 +3,8 @@
 
 #include "../common.h"
 #include <cstring>
+#include <charconv>
+#include <string_view>
 
 
 #define STRING_NULL     "\0"
@@ -415,5 +417,23 @@ inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexc
     return sGetDelimiter_StaticBuf('\n', data, datasize);
 }
 
+//---
+
+template <typename T>
+bool svtonum(std::string_view const& view, T& value)
+{
+    if (view.empty())
+        return false;
+
+    const char* first = view.data();
+    const char* last  = view.data() + view.length();
+    const std::from_chars_result res = std::from_chars(first, last, value);
+
+    if (res.ec != std::errc())
+        return false;
+    if (res.ptr != last)
+        return false;
+    return true;
+}
 
 #endif // _INC_SSTRING_H

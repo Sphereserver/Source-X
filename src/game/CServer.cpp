@@ -10,12 +10,14 @@
 	#include "../common/crashdump/crashdump.h"
 #endif
 
+#include "../common/crypto/CCryptoKeyCalc.h"
 #include "../common/sphere_library/CSAssoc.h"
-#include "../common/CException.h"
 #include "../common/sphere_library/CSFileList.h"
-#include "../common/CTextConsole.h"
+#include "../common/CException.h"
 #include "../common/CLog.h"
-#include "../common/sphereversion.h"	// sphere version
+#include "../common/CTextConsole.h"
+#include "../common/CUOClientVersion.h"
+#include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/CIPHistoryManager.h"
 #include "../network/CNetworkManager.h"
@@ -321,10 +323,9 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 		case 0x21:	// '!'
 			// typical (first time) poll response.
 			{
-				char szVersion[128];
-				m_ClientVersion.WriteClientVer(szVersion, sizeof(szVersion));
+				std::string cliver = m_ClientVersion.GetClientVer();
 				snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_INFO_STR ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
-					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), szVersion);
+					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), cliver.c_str());
 			}
 			break;
 		case 0x22: // '"'
@@ -976,7 +977,7 @@ longcommand:
 		}
 
 		if ( g_Cfg.IsConsoleCmd(low) )
-			pszText++;
+			++pszText;
 
 		CScript	script(pszText);
 		if ( !g_Cfg.CanUsePrivVerb(this, pszText, pSrc) )
@@ -1359,6 +1360,7 @@ enum SV_TYPE
 	SV_ALLCLIENTS,
 	SV_B,
 	SV_BLOCKIP,
+    SV_CALCCRYPT,
 	SV_CHARS, //read only
 	SV_CLEARLISTS,
 	SV_CONSOLE,
@@ -1398,6 +1400,7 @@ lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
 	"ALLCLIENTS",
 	"B",
 	"BLOCKIP",
+    "CALCCRYPT",
 	"CHARS", // read only
 	"CLEARLISTS",
 	"CONSOLE",
@@ -1576,6 +1579,39 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			}
 			break;
 
+        case SV_CALCCRYPT:
+            {
+                tchar* ppArgs[3];
+                const int iArgs = Str_ParseCmds(s.GetArgRaw(), ppArgs, ARRAY_COUNT(ppArgs), ", ");
+                if (iArgs < 1)
+                    return false;
+                // 1st arg: client version string
+                // 2nd arg (optional): client type (GAMECLIENT_TYPE enum)
+
+                GAMECLIENT_TYPE cliType = (iArgs >= 2) ? (GAMECLIENT_TYPE)atoi(ppArgs[1]) : CLIENTTYPE_2D;
+                if ((cliType < CLIENTTYPE_2D) || (cliType > CLIENTTYPE_EC))
+                {
+                    g_Log.EventError("Invalid client type, defaulting to 2D (Classic Client).\n");
+                    cliType = CLIENTTYPE_2D;
+                }
+
+                ENCRYPTION_TYPE encTypeForce = (iArgs >= 3) ? (ENCRYPTION_TYPE)atoi(ppArgs[2]) : ENC_NONE;
+                if ((encTypeForce < ENC_NONE) || (encTypeForce >= ENC_QTY))
+                {
+                    g_Log.EventError("Invalid encryption type, defaulting to 'autodetect'.\n");
+                    encTypeForce = ENC_NONE;
+                }
+
+                const CUOClientVersion cliver_standard(ppArgs[0]);
+                const CCryptoClientKey cckey = CCryptoKeyCalc::CalculateLoginKeys(cliver_standard, cliType, encTypeForce);
+
+                const std::string cryptIniStr = CCryptoKeyCalc::FormattedLoginKey(cliver_standard, cliType, cckey);
+                if (pSrc != this)
+                    pSrc->SysMessagef(cryptIniStr.c_str());
+                else
+                    g_Log.Event(LOGL_EVENT, "%s\n", cryptIniStr.c_str());
+            }
+            break;
 		case SV_CONSOLE:
 			{
 				CSString z = s.GetArgRaw();
@@ -2347,13 +2383,13 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 		return false;
 
 	EXC_SET_BLOCK("init encryption");
-	if ( m_ClientVersion.GetClientVer() )
+	if ( m_ClientVersion.GetClientVerNumber() )
 	{
-		char szVersion[128];
-		g_Log.Event(LOGM_INIT, "ClientVersion=%s\n", m_ClientVersion.WriteClientVer(szVersion, sizeof(szVersion)));
+        std::string cliverstr = m_ClientVersion.GetClientVer();
+		g_Log.Event(LOGM_INIT, "ClientVersion=%s\n", cliverstr.c_str());
 		if ( !m_ClientVersion.IsValid() )
 		{
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Bad Client Version '%s'\n", szVersion);
+			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Bad Client Version '%s'\n", cliverstr.c_str());
 			return false;
 		}
 	}

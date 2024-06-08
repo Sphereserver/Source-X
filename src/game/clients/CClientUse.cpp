@@ -328,7 +328,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_SHIP_TILLER:
 		{
-			if (m_net->isClientVersion(MINCLIVER_HS))
+			if (m_net->isClientVersionNumber(MINCLIVER_HS))
 			{
 				CItemShip* pShip = dynamic_cast<CItemShip*>(pItem->m_uidLink.ItemFind());
 				if (pShip)
@@ -1413,12 +1413,12 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	if ( g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD )
 	{
 		PacketTradeAction cmd2(SECURE_TRADE_UPDATELEDGER);
-		if ( GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
+		if ( GetNetState()->isClientVersionNumber(MINCLIVER_NEWSECURETRADE) )
 		{
 			cmd2.prepareUpdateLedger(pCont1, (dword)(m_pChar->m_virtualGold % 1000000000), (dword)(m_pChar->m_virtualGold / 1000000000));
 			cmd2.send(this);
 		}
-		if ( pChar->GetClientActive()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
+		if ( pChar->GetClientActive()->GetNetState()->isClientVersionNumber(MINCLIVER_NEWSECURETRADE) )
 		{
 			cmd2.prepareUpdateLedger(pCont2, (dword)(pChar->m_virtualGold % 1000000000), (dword)(pChar->m_virtualGold / 1000000000));
 			cmd2.send(pChar->GetClientActive());

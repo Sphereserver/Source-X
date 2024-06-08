@@ -217,7 +217,7 @@ bool CServerDef::IsConnected() const noexcept
 
 void CServerDef::SetCryptVersion()
 {
-    m_ClientVersion.SetClientVer(m_sClientVersion.GetBuffer());
+    m_ClientVersion.SetClientVerFromString(m_sClientVersion.GetBuffer());
 }
 
 void CServerDef::SetValidTime()
@@ -329,7 +329,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			break;
 		case SC_CLIENTVERSION:
 			m_sClientVersion = s.GetArgRaw();
-			// m_ClientVersion.SetClientVer( s.GetArgRaw());
+			// m_ClientVersion.SetClientVerNumber( s.GetArgRaw());
 			break;
 		case SC_ADMINEMAIL:
         {
@@ -436,8 +436,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		break;
 	case SC_CLIENTVERSION:
 		{
-			char pcVersion[ 128 ];
-			sVal = m_ClientVersion.WriteClientVer(pcVersion, sizeof(pcVersion));
+			sVal = m_ClientVersion.GetClientVer().c_str();
 		}
 		break;
 	case SC_CREATE:

@@ -8,7 +8,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");
     // Algorithm: a kind of rotation cipher
 
-    const dword dwCliVer = GetClientVer();
+    const dword dwCliVer = GetClientVerNumber();
 	if ( dwCliVer >= 1253700u )
 	{
 		for ( size_t i = 0; i < inLen; ++i )

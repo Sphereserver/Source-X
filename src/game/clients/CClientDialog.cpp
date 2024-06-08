@@ -193,7 +193,7 @@ bool CClient::Dialog_Close( CObjBase * pObj, dword dwRid, int buttonID )
 
 	new PacketGumpChange(this, dwRid, buttonID);
 
-	if ( GetNetState()->isClientVersion(MINCLIVER_CLOSEDIALOG) )
+	if ( GetNetState()->isClientVersionNumber(MINCLIVER_CLOSEDIALOG) )
 	{
 		CChar * pSrc = dynamic_cast<CChar*>( pObj );
 		if ( pSrc )

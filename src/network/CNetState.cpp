@@ -1,4 +1,5 @@
 #include "../common/sphereproto.h"
+#include "../common/CUOClientVersion.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
@@ -27,8 +28,8 @@ CNetState::CNetState(int id) :
     m_packetExceptions = 0;
     _iInByteCounter = _iOutByteCounter = 0;
     m_clientType = CLIENTTYPE_2D;
-    m_clientVersion = 0;
-    m_reportedVersion = 0;
+    m_clientVersionNumber = 0;
+    m_reportedVersionNumber = 0;
     m_isInUse = false;
     m_parent = nullptr;
 
@@ -139,7 +140,7 @@ void CNetState::clear(void)
     m_seeded = false;
     m_newseed = false;
     m_seed = 0;
-    m_clientVersion = m_reportedVersion = 0;
+    m_clientVersionNumber = m_reportedVersionNumber = 0;
     m_clientType = CLIENTTYPE_2D;
     m_isSendingAsync = false;
     m_packetExceptions = 0;
@@ -298,7 +299,7 @@ void CNetState::detectAsyncMode(void)
     //   without async networking (but should switch over as soon as it has been determined)
     // - a minor issue with this is that for clients without encryption we cannot determine their version
     //   until after they have fully logged into the game server and sent a client version packet.
-    else if (isClientVersion(MINCLIVER_AUTOASYNC) || isClientKR() || isClientEnhanced())
+    else if (isClientVersionNumber(MINCLIVER_AUTOASYNC) || isClientKR() || isClientEnhanced())
         setAsyncMode(true);
     else
         setAsyncMode(false);
@@ -380,4 +381,35 @@ void CNetState::endTransaction(void)
 
     m_parent->queuePacketTransaction(m_outgoing.pendingTransaction);
     m_outgoing.pendingTransaction = nullptr;
+}
+
+
+bool CNetState::isClientCryptVersionNumber(dword version) const
+{
+    return m_clientVersionNumber && CUOClientVersion(m_clientVersionNumber) >= CUOClientVersion(version);
+};
+
+bool CNetState::isClientReportedVersionNumber(dword version) const
+{
+    return m_reportedVersionNumber && CUOClientVersion(m_reportedVersionNumber) >= CUOClientVersion(version);
+};
+
+bool CNetState::isClientVersionNumber(dword version) const
+{
+    return isClientCryptVersionNumber(version) || isClientReportedVersionNumber(version);
+}
+
+bool CNetState::isCryptLessVersionNumber(dword version) const
+{
+    return m_clientVersionNumber && CUOClientVersion(m_clientVersionNumber) < CUOClientVersion(version);
+};
+
+bool CNetState::isClientReportedLessVersionNumber(dword version) const
+{
+    return m_reportedVersionNumber && CUOClientVersion(m_reportedVersionNumber) < CUOClientVersion(version);
+};
+
+bool CNetState::isClientLessVersionNumber(dword version) const
+{
+    return isCryptLessVersionNumber(version) || isClientReportedLessVersionNumber(version);
 }

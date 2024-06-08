@@ -570,7 +570,7 @@ void CClient::addArrowQuest( int x, int y, int id ) const
 	ADDTOCALLSTACK("CClient::addArrowQuest");
 
     CScriptTriggerArgs args(x, y);
-    if (this->GetNetState()->isClientVersion(MINCLIVER_HS) || this->GetNetState()->isClientEnhanced())
+    if (this->GetNetState()->isClientVersionNumber(MINCLIVER_HS) || this->GetNetState()->isClientEnhanced())
         args.m_iN3 = id;
     else
         args.m_iN3 = 0;
@@ -1598,7 +1598,7 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	// always show max count for some stupid reason. (client bug)
 	// pad out the rest of the chars.
 	uint iClientMin = 5;
-	if (GetNetState()->isClientVersion(MINCLIVER_PADCHARLIST) || !GetNetState()->getCryptVersion())
+	if (GetNetState()->isClientVersionNumber(MINCLIVER_PADCHARLIST) || !GetNetState()->getCryptVersion())
 		iClientMin = maximum(iQty, 5);
 
 	for ( ; count < iClientMin; ++count)
@@ -2997,7 +2997,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	}*/
 
     dword dwFeatureFlags;
-    dword dwCliVer = m_Crypt.GetClientVer();
+    dword dwCliVer = m_Crypt.GetClientVerNumber();
     if ( dwCliVer && (dwCliVer < 1260000) )
     {
         dwFeatureFlags = 0x03;
@@ -3136,16 +3136,14 @@ byte CClient::LogIn( lpctstr ptcAccName, lpctstr ptcPassword, CSString & sMsg )
 	size_t iLen3 = Str_GetBare( szTmp, ptcAccName, MAX_NAME_SIZE );
 	if ( (iLen1 == 0) || (iLen1 != iLen3) || (iLen1 > MAX_NAME_SIZE) )	// a corrupt message.
 	{
-		char pcVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.WriteClientVer(pcVersion, sizeof(pcVersion)));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.GetClientVer().c_str());
 		return( PacketLoginError::BadAccount );
 	}
 
 	iLen3 = Str_GetBare( szTmp, ptcPassword, MAX_NAME_SIZE );
 	if ( iLen2 != iLen3 )	// a corrupt message.
 	{
-		char pcVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.WriteClientVer(pcVersion, sizeof(pcVersion)));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.GetClientVer().c_str());
 		return( PacketLoginError::BadPassword );
 	}
 

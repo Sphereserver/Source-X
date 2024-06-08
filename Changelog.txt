@@ -3740,3 +3740,19 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 04-06-2024, Nolok
 - Added: client commands ADDITEM and ADDCHAR, to be used in place of .ADD when there's the need to force the argument to be an item or a char.
 	This can be useful when using raw IDs (like 01, 0bd1, etc) instead of defnames.
+
+08-06-2024, Nolok
+- Changed: how the client versions are handled internally, since newest clients have a revision number > 100 and it broke compatibility with previous internal representations.
+- Added: SERV.CALCCRYPT <client version string>, <optional: client type id>, <optional: force crypt type/algorithm>.
+	Returns the line for the given client version to be added to SphereCrypt.ini.
+	Client type id:
+		0	// Standard client (Classic, default)
+		1	// Old 3D client
+		2	// KR client
+		3	// Enhanced Client
+	Force crypt type:
+		0	// None (default: auto detect)
+		1	// Blowfish
+		2	// Blowfish + Twofish
+		3	// Twofish
+		4	// Login (old cypher used for some 1.x clients)

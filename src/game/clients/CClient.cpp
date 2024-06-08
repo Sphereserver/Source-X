@@ -1,6 +1,7 @@
 #include "../../common/resource/sections/CResourceNamedDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CUOClientVersion.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/CIPHistoryManager.h"
@@ -33,7 +34,7 @@ CClient::CClient(CNetState* state)
 	++ history.m_connecting;
 	++ history.m_connected;
 
-	m_Crypt.SetClientVer( g_Serv.m_ClientVersion );
+	m_Crypt.SetClientVerFromOther( g_Serv.m_ClientVersion );
 	m_pAccount = nullptr;
 	m_pChar = nullptr;
 	m_pGMPage = nullptr;
@@ -675,8 +676,7 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 			break;
 		case CC_CLIENTVERSION:
 			{
-				char szVersion[ 128 ];
-				sVal = m_Crypt.WriteClientVer( szVersion, sizeof(szVersion) );
+				sVal = m_Crypt.GetClientVer().c_str();
 			}
 			break;
 		case CC_DEBUG:
@@ -706,17 +706,16 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 				ptcKey += strlen(sm_szLoadKeys[index]);
 				GETNONWHITESPACE(ptcKey);
 
-				dword iCliVer = GetNetState()->getReportedVersion();
+				dword uiCliVer = GetNetState()->getReportedVersion();
 				if ( ptcKey[0] == '\0' )
 				{
 					// Return full version string (eg: 5.0.2d)
-					tchar ptcVersion[128];
-					sVal = CCrypto::WriteClientVerString(iCliVer, ptcVersion, sizeof(ptcVersion));
+					sVal = CUOClientVersion(uiCliVer).GetVersionString().c_str();
 				}
 				else
 				{
 					// Return raw version number (eg: 5.0.2d = 5000204)
-					sVal.FormatUVal(iCliVer);
+					sVal.FormatUVal(uiCliVer);
 				}
 			}
 			break;

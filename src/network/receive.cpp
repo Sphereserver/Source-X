@@ -1,6 +1,7 @@
 
 #include "../common/resource/sections/CDialogDef.h"
 #include "../common/CLog.h"
+#include "../common/CUOClientVersion.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItem.h"
@@ -90,7 +91,7 @@ bool PacketCreate::onReceive(CNetState* net)
 	RACE_TYPE rtRace = RACETYPE_HUMAN; // Human
 
 	// determine which race the client has selected
-	if (net->isClientVersion(MINCLIVER_SA))
+	if (net->isClientVersionNumber(MINCLIVER_SA))
 	{
 		/*
 			m_sex values from clients 7.0.0.0+
@@ -407,7 +408,7 @@ uint PacketItemDropReq::getExpectedLength(CNetState* net, Packet* packet)
 	UnreferencedParameter(packet);
 
 	// different size depending on client
-	if (net != nullptr && (net->isClientVersion(MINCLIVER_ITEMGRID) || net->isClientKR() || net->isClientEnhanced()))
+	if (net != nullptr && (net->isClientVersionNumber(MINCLIVER_ITEMGRID) || net->isClientKR() || net->isClientEnhanced()))
 		return 15;
 
 	return 14;
@@ -429,7 +430,7 @@ bool PacketItemDropReq::onReceive(CNetState* net)
 	byte z = readByte();
 
 	byte grid = 0;
-	if ( net->isClientVersion(MINCLIVER_ITEMGRID) || net->isClientKR() || net->isClientEnhanced() )
+	if ( net->isClientVersionNumber(MINCLIVER_ITEMGRID) || net->isClientKR() || net->isClientEnhanced() )
 	{
 		grid = readByte();
 
@@ -2479,12 +2480,12 @@ bool PacketClientVersion::onReceive(CNetState* net)
 		CClient* client = net->getClient();
 		ASSERT(client);
 
-		dword version = CCrypto::GetVerFromString(versionStr);
-		net->m_reportedVersion = version;
+		dword version = CUOClientVersion(versionStr).GetLegacyVersionNumber();
+		net->m_reportedVersionNumber = version;
 		net->detectAsyncMode();
 
 		DEBUG_MSG(("Getting CliVersionReported %u\n", version));
-		if ((g_Serv.m_ClientVersion.GetClientVer() != 0) && (g_Serv.m_ClientVersion.GetClientVer() != version))
+		if ((g_Serv.m_ClientVersion.GetClientVerNumber() != 0) && (g_Serv.m_ClientVersion.GetClientVerNumber() != version))
 			client->addLoginErr(PacketLoginError::BadVersion);
         //we have asked client version in serverlist to configure character list and game feature.
         if ( client->m_pAccount )
@@ -2563,7 +2564,7 @@ bool PacketScreenSize::onReceive(CNetState* net)
     skip(2);
 
 	//DEBUG_MSG(("PacketScreenSize::onReceive 0x%hx - 0x%hx (%hu-%hu)\n", x, y, x, y));
-	if (net->isClientVersion(MINCLIVER_NEWBOOK))
+	if (net->isClientVersionNumber(MINCLIVER_NEWBOOK))
 	{
 		switch (x)
 		{
@@ -2908,7 +2909,7 @@ bool PacketAosTooltipInfo::onReceive(CNetState* net)
 	if (character == nullptr)
 		return false;
 
-	if (net->isClientVersion(MINCLIVER_TOOLTIP) == false)
+	if (net->isClientVersionNumber(MINCLIVER_TOOLTIP) == false)
 		return true;
 	else if (client->GetResDisp() < RDS_AOS || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		return true;
@@ -3320,7 +3321,7 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 	ClientIterator it;
 	for ( CClient *pClient = it.next(); pClient != nullptr; pClient = it.next() )
 	{
-		if ( !pClient->GetNetState()->isClientVersion(MINCLIVER_NEWMOBILEANIM) )
+		if ( !pClient->GetNetState()->isClientVersionNumber(MINCLIVER_NEWMOBILEANIM) )
 			continue;
 		if ( !pClient->CanSee(character) )
 			continue;
@@ -3527,7 +3528,7 @@ bool PacketAOSTooltipReq::onReceive(CNetState* net)
 	if (character == nullptr)
 		return false;
 
-	if (net->isClientVersion(MINCLIVER_TOOLTIP) == false)
+	if (net->isClientVersionNumber(MINCLIVER_TOOLTIP) == false)
 		return true;
 	else if (client->GetResDisp() < RDS_AOS || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		return true;

@@ -62,12 +62,16 @@ src/common/crypto/CBCrypt.h
 src/common/crypto/CCrypto.cpp
 src/common/crypto/CCrypto.h
 src/common/crypto/CCryptoBlowFish.cpp
-src/common/crypto/CCryptoHuffman.cpp
 src/common/crypto/CCryptoLogin.cpp
+src/common/crypto/CCryptoKeyCalc.cpp
+src/common/crypto/CCryptoKeyCalc.h
 src/common/crypto/CCryptoMD5Interface.cpp
 src/common/crypto/CCryptoTwoFishInterface.cpp
+src/common/crypto/CHuffman.cpp
+src/common/crypto/CHuffman.h
 src/common/crypto/CMD5.cpp
 src/common/crypto/CMD5.h
+src/common/crypto/crypto_common.h
 )
 SOURCE_GROUP (common\\crypto FILES ${crypto_SRCS})
 
@@ -150,6 +154,8 @@ src/common/CSVFile.cpp
 src/common/CSVFile.h
 src/common/CTextConsole.cpp
 src/common/CTextConsole.h
+src/common/CUOClientVersion.cpp
+src/common/CUOClientVersion.h
 src/common/CUOInstall.cpp
 src/common/CUOInstall.h
 src/common/CVarDefMap.cpp

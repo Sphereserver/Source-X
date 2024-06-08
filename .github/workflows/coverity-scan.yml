@@ -16,7 +16,7 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
         - name: Checkout repository
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
           with:
             fetch-depth: 0
 
@@ -59,10 +59,11 @@ jobs:
                 ../cov-analysis-linux64/bin/cov-build --dir ./cov-int make
                 tail cov-int/build-log.txt
 
-        - name: Coverity build log
-          run:  |
-                echo "Printing Coverity log..."
-                cat cov-int/scm_log.txt
+        #- name: Coverity scm log
+        #  run:  |
+        #        echo "Printing Coverity scm log..."
+        #        ../cov-analysis-linux64/bin/ cov-import-scm --dir ./cov-int --scm git --log ./cov-int/scm-log.txt 2>&1
+        #        cat cov-int/scm_log.txt
 
         - name: Submit the result to Coverity Scan
           run: |

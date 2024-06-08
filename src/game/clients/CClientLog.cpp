@@ -1,6 +1,7 @@
 // Login and low level stuff for the client.
 
 #include "../../common/crypto/CCrypto.h"
+#include "../../common/crypto/CHuffman.h"
 #include "../../common/sphere_library/CSFileList.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
@@ -13,9 +14,6 @@
 #include <zlib/zlib.h>
 
 
-CHuffman CClient::m_Comp;
-
-
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
@@ -23,7 +21,7 @@ uint CClient::xCompress( byte * pOutput, const byte * pInput, uint outLen, uint 
 {
 	ADDTOCALLSTACK("CClient::xCompress");
 	// The game server will compress the outgoing data to the clients.
-	return m_Comp.Compress( pOutput, pInput, outLen, inLen );
+	return CHuffman::Compress( pOutput, pInput, outLen, inLen );
 }
 
 bool CClient::IsConnecting() const
@@ -123,8 +121,8 @@ bool CClient::addLoginErr(byte code)
 		"AuthID is not correct. This normally means that the client did not log in via the login server",
 		"The account details entered are invalid (username or password is too short, too long or contains invalid characters). This can sometimes be caused by incorrect/missing encryption keys",
 		"The account details entered are invalid (username or password is too short, too long or contains invalid characters). This can sometimes be caused by incorrect/missing encryption keys",
-		"Encryption error (packet length does not match what was expected)",
-		"Encryption error (unknown encryption or bad login packet)",
+		"Encryption error: packet length does not match what was expected",
+		"Encryption error: bad login packet or unknown encryption (encryption key missing in " SPHERE_FILE "Crypt.ini?)",
 		"Encrypted client not permitted. See the USECRYPT setting in " SPHERE_FILE ".ini",
 		"Unencrypted client not permitted. See the USENOCRYPT setting in " SPHERE_FILE ".ini",
 		"Another character on this account is already ingame",
@@ -139,7 +137,7 @@ bool CClient::addLoginErr(byte code)
 	if (code >= ARRAY_COUNT(sm_Login_ErrMsg))
 		code = PacketLoginError::Other;
 	
-	g_Log.EventWarn( "%x:Bad Login %d (%s)\n", GetSocketID(), code, sm_Login_ErrMsg[(size_t)(code)] );
+	g_Log.EventWarn( "%x:Bad Login %d. %s.\n", GetSocketID(), code, sm_Login_ErrMsg[(size_t)code] );
 
 	// translate the code into a code the client will understand
 	switch (code)
@@ -177,7 +175,7 @@ bool CClient::addLoginErr(byte code)
 			break;
 	}
 
-	if ( GetNetState()->m_clientVersion || GetNetState()->m_reportedVersion )	// only reply the packet to valid clients
+	if ( GetNetState()->m_clientVersionNumber || GetNetState()->m_reportedVersionNumber )	// only reply the packet to valid clients
 		new PacketLoginError(this, static_cast<PacketLoginError::Reason>(code));
 	GetNetState()->markReadClosed();
 	return false;
@@ -906,8 +904,8 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 				CAccount * pAcc = g_Accounts.Account_Find( szAccount );
 				if (pAcc)
 				{
-                    if (m_Crypt.GetClientVer())
-                        pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVer());
+                    if (m_Crypt.GetClientVerNumber())
+                        pAcc->m_TagDefs.SetNum("clientversion", m_Crypt.GetClientVerNumber());
 					if (GetNetState()->getReportedVersion())
                         pAcc->m_TagDefs.SetNum("reportedcliver", GetNetState()->getReportedVersion());
                     else
@@ -953,19 +951,19 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 					if ( tmSid != 0 && tmSid == pEvent->CharListReq.m_Account )
 					{
 						// request client version if the client has not reported it to server yet
-						if ( (tmVerReported == 0) && (tmVer > 1260400) )
+						if ( (tmVerReported == 0) && (tmVer > 1'26'04'00) )
                         {   // if we send this packet to clients < 1.26.04.00 we'll desynchronize the stream and break the login process
 							new PacketClientVersionReq(this);
                         }
 
 						if ( tmVerReported != 0 )
 						{
-							GetNetState()->m_reportedVersion = tmVerReported;
+							GetNetState()->m_reportedVersionNumber = tmVerReported;
 						}
 						else if ( tmVer != 0 )
 						{
-							m_Crypt.SetClientVerEnum(tmVer, false);
-							GetNetState()->m_clientVersion = tmVer;
+							m_Crypt.SetClientVerFromNumber(tmVer, false);
+							GetNetState()->m_clientVersionNumber = tmVer;
 						}
 
 						// client version change may toggle async mode, it's important to flush pending data to the client before this happens
@@ -1018,11 +1016,11 @@ bool CClient::xCanEncLogin(bool bCheckCliver)
 	}
 	else
 	{
-		if ( !g_Serv.m_ClientVersion.GetClientVer() ) // Any Client allowed
+		if ( !g_Serv.m_ClientVersion.GetClientVerNumber() ) // Any Client allowed
 			return true;
 		
 		if ( m_Crypt.GetEncryptionType() != ENC_NONE )
-			return ( m_Crypt.GetClientVer() == g_Serv.m_ClientVersion.GetClientVer() );
+			return ( m_Crypt.GetClientVerNumber() == g_Serv.m_ClientVersion.GetClientVerNumber() );
 		else
 			return true;	// if unencrypted we check that later
 	}

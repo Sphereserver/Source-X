@@ -46,7 +46,7 @@ void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button wa
 
 	if (m_pChar == nullptr)
 		return;
-	m_fUseNewChatSystem = (GetNetState()->isClientVersion(MINCLIVER_NEWCHATSYSTEM) || GetNetState()->isClientVersion(CLIENTTYPE_EC + MINCLIVER_NEWCHATSYSTEM_EC));
+	m_fUseNewChatSystem = (GetNetState()->isClientVersionNumber(MINCLIVER_NEWCHATSYSTEM) || GetNetState()->isClientVersionNumber(CLIENTTYPE_EC + MINCLIVER_NEWCHATSYSTEM_EC));
 
 	if ( IsTrigUsed(TRIGGER_USERCHATBUTTON) )
 	{
@@ -487,7 +487,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			// Still in same container.
 			ASSERT(pItemOn);
 
-			if (pItemOn->IsTypeMulti() && (GetNetState()->isClientVersion(MINCLIVER_HS) || GetNetState()->isClientEnhanced()))
+			if (pItemOn->IsTypeMulti() && (GetNetState()->isClientVersionNumber(MINCLIVER_HS) || GetNetState()->isClientEnhanced()))
 			{
 				pt.m_x += pItemOn->GetTopPoint().m_x;
 				pt.m_y += pItemOn->GetTopPoint().m_y;
@@ -2640,7 +2640,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
 
-					if (GetNetState()->isClientVersion(MINCLIVER_NEWDAMAGE))
+					if (GetNetState()->isClientVersionNumber(MINCLIVER_NEWDAMAGE))
 						m_pPopupPacket->addOption(POPUP_PETRENAME, 1115557, POPUPFLAG_COLOR, 0xFFFF);
 
 					if (!pChar->IsStatFlag(STATF_CONJURED))
@@ -2668,7 +2668,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 		else if (pChar == m_pChar)
 		{
 			m_pPopupPacket->addOption(POPUP_BACKPACK, 6145, POPUPFLAG_COLOR, 0xFFFF);
-			if (GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))
+			if (GetNetState()->isClientVersionNumber(MINCLIVER_STATUS_V6))
 			{
 				if (pChar->GetDefNum("REFUSETRADES", true))
 					m_pPopupPacket->addOption(POPUP_TRADE_ALLOW, 1154112, POPUPFLAG_COLOR, 0xFFFF);
@@ -2676,7 +2676,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_TRADE_REFUSE, 1154113, POPUPFLAG_COLOR, 0xFFFF);
 			}
 
-			if (GetNetState()->isClientVersion(MINCLIVER_GLOBALCHAT) && (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT))
+			if (GetNetState()->isClientVersionNumber(MINCLIVER_GLOBALCHAT) && (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT))
 			{
 				if (pChar->m_pPlayer->m_fRefuseGlobalChatRequests)
 					m_pPopupPacket->addOption(POPUP_GLOBALCHAT_ALLOW, 1158415, POPUPFLAG_COLOR, 0xFFFF);
@@ -2696,7 +2696,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);
 			}
 
-			if (GetNetState()->isClientVersion(MINCLIVER_TOL) && m_pChar->GetDist(pChar) <= 2)
+			if (GetNetState()->isClientVersionNumber(MINCLIVER_TOL) && m_pChar->GetDist(pChar) <= 2)
 				m_pPopupPacket->addOption(POPUP_TRADE_OPEN, 1077728, POPUPFLAG_COLOR, 0xFFFF);
 		}
 

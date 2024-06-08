@@ -1107,19 +1107,19 @@ bool CAccount::SetAutoResDisp(CClient *pClient)
 		return false;
 
 	const CNetState* pNS = pClient->GetNetState();
-	if (pNS->isClientVersion(MINCLIVER_TOL))
+	if (pNS->isClientVersionNumber(MINCLIVER_TOL))
 		return SetResDisp(RDS_TOL);
-	else if (pNS->isClientVersion(MINCLIVER_HS))
+	else if (pNS->isClientVersionNumber(MINCLIVER_HS))
 		return SetResDisp(RDS_HS);
-	else if (pNS->isClientVersion(MINCLIVER_SA))
+	else if (pNS->isClientVersionNumber(MINCLIVER_SA))
 		return SetResDisp(RDS_SA);
-	else if (pNS->isClientVersion(MINCLIVER_ML))
+	else if (pNS->isClientVersionNumber(MINCLIVER_ML))
 		return SetResDisp(RDS_ML);
-	else if (pNS->isClientVersion(MINCLIVER_SE))
+	else if (pNS->isClientVersionNumber(MINCLIVER_SE))
 		return SetResDisp(RDS_SE);
-	else if (pNS->isClientVersion(MINCLIVER_AOS))
+	else if (pNS->isClientVersionNumber(MINCLIVER_AOS))
 		return SetResDisp(RDS_AOS);
-	else if (pNS->isClientVersion(MINCLIVER_LBR))
+	else if (pNS->isClientVersionNumber(MINCLIVER_LBR))
 		return SetResDisp(RDS_LBR);
 	else
 		return SetResDisp(RDS_T2A);
