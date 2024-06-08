@@ -7,6 +7,7 @@
 #include "CLog.h"
 #include "CRect.h"
 #include "CPointBase.h"
+#include <cmath>
 
 
 DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
