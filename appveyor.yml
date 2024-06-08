@@ -47,8 +47,7 @@ for:
 
     environment:
       MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
-      CMAKE_GEN_32: Visual Studio 17 2022
-      CMAKE_GEN_64: Visual Studio 17 2022 Win64
+      CMAKE_GEN: Visual Studio 17 2022
 
     install:
       # Report our building tools
@@ -65,8 +64,8 @@ for:
         ) ELSE (
           ECHO. $$ECHO ** Starting to build 64 bits Nightly version && ECHO.
         )
-      - cmake -G "%CMAKE_GEN_64%" -S ..\ -B .
-      - msbuild SphereServer.sln %MSBUILD_FLAGS% /maxcpucount /p:Configuration=Nightly
+      - cmake -G "%CMAKE_GEN%" -S ..\ -B .
+      - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 64 bits Nightly version && ECHO.
 
       # if we are testing a pull request, building only a version will be sufficient, so stop this script
@@ -75,8 +74,8 @@ for:
       - cd "..\%BUILD_DIR_32%"
 
       - ECHO. && ECHO ** Starting to build 32 bits Nightly version && ECHO.
-      - cmake -G "%CMAKE_GEN_32%" -S ..\ -B .
-      - msbuild SphereServer.sln %MSBUILD_FLAGS% /maxcpucount /p:Configuration=Nightly
+      - cmake -G "%CMAKE_GEN_%" -A Win32 -S ..\ -B .
+      - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
       - ECHO. && ECHO ** End of the compilation of the 32 bits Nightly version && ECHO.
 
       - cd ..

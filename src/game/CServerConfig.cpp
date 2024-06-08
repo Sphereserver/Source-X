@@ -222,7 +222,8 @@ CServerConfig::CServerConfig()
 	m_iCanSeeSamePLevel		= 0;
 	m_fSuppressCapitals		= false;
 
-	m_iAdvancedLos		= 0;
+	m_iAdvancedLos		= ADVANCEDLOS_DISABLED;
+    m_iDistanceFormula = DISTANCE_FORMULA_NODIAGONAL_NOZ;
 
 	// New ones
 	m_iFeatureT2A		= FEATURE_T2A_UPDATE;
@@ -515,7 +516,8 @@ enum RC_TYPE
 	RC_DEFAULTCOMMANDLEVEL,		//m_iDefaultCommandLevel
 	RC_DISPLAYPERCENTAR,	    //m_fDisplayPercentAr
 	RC_DISPLAYELEMENTALRESISTANCE, //m_fDisplayElementalResistance
-	RC_DISTANCETALK,
+    RC_DISTANCEFORMULA,
+    RC_DISTANCETALK,
 	RC_DISTANCEWHISPER,
 	RC_DISTANCEYELL,
     RC_DECIMALVARIABLES,
@@ -796,6 +798,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDefaultCommandLevel)	}},
     { "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayPercentAr)		}},
     { "DISPLAYELEMENTALRESISTANCE",{ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayElementalResistance)}},
+    { "DISTANCEFORMULA",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceFormula)		}},
     { "DISTANCETALK",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceTalk)		}},
     { "DISTANCEWHISPER",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceWhisper)		}},
     { "DISTANCEYELL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceYell)		}},
@@ -1318,7 +1321,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
             break;
 		case RC_PROFILE:
 			{
-				int seconds = s.GetArgVal();
+				int seconds = std::max(0, s.GetArgVal());   // 0 does not enable it
 				size_t threadCount = ThreadHolder::get().getActiveThreads();
 				for (size_t j = 0; j < threadCount; ++j)
 				{

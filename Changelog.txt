@@ -3756,3 +3756,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 		2	// Blowfish + Twofish
 		3	// Twofish
 		4	// Login (old cypher used for some 1.x clients)
+
+09-06-2024, Nolok
+- Added: DistanceFormula ini setting, it selects the method use to calculate distance between two object/points.
+	DISTANCE_FORMULA_NODIAGONAL_NOZ 0	(linear/integer distance, considering the span this results in a "square" area with the object at the center; do not consider z)
+	DISTANCE_FORMULA_DIAGONAL_NOZ	1	(as if we could traverse diagonally each tile, this results in a "circular" area with the object at the center; do not consider z))
+	DISTANCE_FORMULA_DIAGONAL_Z		2	(same as above, consider z)
+	Sphere X defaults to DISTANCE_FORMULA_NODIAGONAL_NOZ, older Sphere versions used DISTANCE_FORMULA_DIAGONAL_NOZ.

@@ -148,18 +148,28 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
     //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
 
-	// Do not consider z or m_map.
-    // Do not touch this "abs" call, it gets max performance.
-    const int dx = abs(m_x - pt.m_x);
-    const int dy = abs(m_y - pt.m_y);
-
-	return maximum(dx, dy);
-
-	// What the heck?
-	/*double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy)));
-
-	return (int)(( (dist - floor(dist)) > 0.5 ) ? (ceil(dist)) : (floor(dist)));*/
-	// Return the real distance return((int) sqrt(dx*dx+dy*dy+dz*dz));
+    switch (g_Cfg.m_iDistanceFormula)
+    {
+        default:
+        case DISTANCE_FORMULA_NODIAGONAL_NOZ:
+        {
+            // Do not touch this "abs" call, it gets max performance.
+            const int dx = abs(m_x - pt.m_x);
+            const int dy = abs(m_y - pt.m_y);
+            return maximum(dx, dy);
+        }
+        case DISTANCE_FORMULA_DIAGONAL_NOZ:
+        {
+            const double dist = sqrt(static_cast<double>((pt.m_x * pt.m_x) + (pt.m_y * pt.m_y)));
+            return (int)(((dist - floor(dist)) > 0.5) ? ceil(dist) : floor(dist));
+        }
+        case DISTANCE_FORMULA_DIAGONAL_Z:
+        {
+            const double dist = sqrt(static_cast<double>((pt.m_x * pt.m_x) + (pt.m_y * pt.m_y) + (pt.m_z * pt.m_z)));
+            return (int)(((dist - floor(dist)) > 0.5) ? ceil(dist) : floor(dist));
+        }
+    }
+	// Return the real distance, considering z return((int) sqrt(dx*dx+dy*dy+dz*dz));
 }
 
 int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance between points

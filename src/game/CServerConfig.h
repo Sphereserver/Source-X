@@ -464,6 +464,11 @@ public:
 #define	ADVANCEDLOS_NPC				0x02
 	int	m_iAdvancedLos;     // AdvancedLOS
 
+#define DISTANCE_FORMULA_NODIAGONAL_NOZ     0
+#define DISTANCE_FORMULA_DIAGONAL_NOZ       1
+#define DISTANCE_FORMULA_DIAGONAL_Z         2
+    int m_iDistanceFormula;
+
 	// New ones
 	int	m_iFeatureT2A;		// T2A features.
 	int	m_iFeatureLBR;		// LBR features.
