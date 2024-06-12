@@ -34,6 +34,7 @@
 #include "triggers.h"
 
 
+// .ini settings.
 CServerConfig::CServerConfig()
 {
 	m_timePeriodic = 0;
@@ -80,6 +81,7 @@ CServerConfig::CServerConfig()
 	m_iDecay_Item			= 30ll * 60 * MSECS_PER_SEC;
 	m_iDecay_CorpsePlayer	= 7ll * 60 * MSECS_PER_SEC;
 	m_iDecay_CorpseNPC		= 7ll * 60 * MSECS_PER_SEC;
+    m_uiItemTimers = 0;
 
 	// Accounts
 	m_iClientsMax		= FD_SETSIZE-1;
@@ -569,6 +571,7 @@ enum RC_TYPE
 	RC_HITSUPDATERATE,
     RC_ITEMHITPOINTSUPDATE,     // _iItemHitpointsUpdate
 	RC_ITEMSMAXAMOUNT,			// m_iItemsMaxAmount
+    RC_ITEMTIMERS,              // m_uiItemTimers
 	RC_LEVELMODE,				// m_iLevelMode
 	RC_LEVELNEXTAT,				// m_iLevelNextAt
 	RC_LEVELSYSTEM,				// m_fLevelSystem
@@ -853,6 +856,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "HITSUPDATERATE",			{ ELEM_VOID,	0												}},
     { "ITEMHITPOINTSUPDATE",    { ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_iItemHitpointsUpdate),  }},
     { "ITEMSMAXAMOUNT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iItemsMaxAmount),		}},
+    { "ITEMTIMERS",             { ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_uiItemTimers),  } },
     { "LEVELMODE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelMode),			}},
     { "LEVELNEXTAT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLevelNextAt),			}},
     { "LEVELSYSTEM",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLevelSystem),			}},

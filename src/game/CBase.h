@@ -154,8 +154,9 @@ public:
 #define CAN_I_DAMAGEABLE	    0x2000000	// Display item health bar on HS clients >= 7.0.30.0 (MORE1L = cur hitpoints / MORE1H = max hitpoints)
 #define CAN_I_BLOCKLOS_HEIGHT   0x4000000   // blocks LOS without blocking walkchecks, but only if the item is too high for the viewer.
 #define CAN_I_EQUIPONCAST       0x8000000   // Allow items to stay equipped while EquippedCast disabled in sphere.ini.
-//                              0x10000000  // CAN_O_NOSLEEP
+//                              0x10000000  // CAN_O_NOSLEEP, defined below
 #define CAN_I_SCRIPTEDMORE      0x20000000  // This item doesn't use an hardcoded behavior, so its MORE value might be used for custom stuff.
+#define CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
 
 // (CItemBase) CanEquip specific defs.
 #define CAN_U_ALL           0x000       // Can be used by everyone.

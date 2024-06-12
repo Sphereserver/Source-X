@@ -3168,6 +3168,7 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
     bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
+    const bool fIgnoreCont = (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fCanTick)
     {
@@ -3179,7 +3180,7 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 			{
 				if (fParentGoingToSleep)
 					fCanTick = false;
-				else
+				else if (!fIgnoreCont)
 					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
 			}
 

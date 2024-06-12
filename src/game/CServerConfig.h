@@ -258,9 +258,13 @@ public:
 	uint m_iDebugFlags;         // DEBUG In game effects to turn on and off.
 
 	// Decay
-	int64  m_iDecay_Item;         // Base decay time in minutes (but stored as milliseconds).
-	int64  m_iDecay_CorpsePlayer; // Time in minutes for a playercorpse to decay.
-	int64  m_iDecay_CorpseNPC;    // Time in minutes for a NPC corpse to decay.
+	int64  m_iDecay_Item;           // Base decay time in minutes (but stored as milliseconds).
+	int64  m_iDecay_CorpsePlayer;   // Time in minutes for a playercorpse to decay.
+	int64  m_iDecay_CorpseNPC;      // Time in minutes for a NPC corpse to decay.
+
+#define ITEM_CANTIMER_BASE          0x0 // Timer only if top-level (on map) or equipped directly on a char.
+#define ITEM_CANTIMER_IN_CONTAINER  0x1 // Items can hold a timer even if equipped.
+    uint m_uiItemTimers;            // Flags regulating behavior of timers on items.
 
 	// Save
 	int  m_iSaveNPCSkills;			// Only save NPC skills above this

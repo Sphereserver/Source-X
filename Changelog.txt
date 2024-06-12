@@ -3764,7 +3764,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	DISTANCE_FORMULA_DIAGONAL_Z		2	(same as above, but FORCE every distance check to consider z) --> BEWARE! Not thoroughly tested, it MIGHT cause unexpected behaviors.
 	Sphere X defaults to DISTANCE_FORMULA_NODIAGONAL_NOZ, older Sphere versions used DISTANCE_FORMULA_DIAGONAL_NOZ.
 
-10-06-2024, Nolok
+12-06-2024, Nolok
 - Fixed: negative value hex representation in scripts, now it should match the expected one (like in v0.56b).
 - Fixed: script files caching discarding the last line of the file.
 - Fixed: dialog data buffer not emptied after the dialog packet is sent (resulting in displaying a garbled dialog).
@@ -3772,3 +3772,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: error message if trying to open a non existant script file (example: from spheretables.scp).
 - Added: SERV.BUILDNUM (alias for BUILD, returning the git revision number or -1 for special builds, not linked to git).
 - Added: SERV.BUILDBRANCH and SERV.BUILDSTR (the latter showing both branch name and build number, or the compilation date if the build is not linked to git).
+
+13-06-2024, Nolok
+- Added: ini flag ItemTimers to define global rules for item timers.
+	// ITEM_CANTIMER_BASE			0	// Items cannot have an active timer nor a timer can be set for them if are placed inside a item container. Items placed on the map or equipped can have a timer.
+	// ITEM_CANTIMER_IN_CONTAINER	1	// Items can hold a timer even if equipped.
+- Added: item CAN flag (Issue #1180):
+	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).

@@ -37,6 +37,7 @@
 #define STRINGIFY(x)		_STRINGIFY_AUX(x)
 
 #define ARRAY_COUNT(a)			(sizeof(a)/sizeof((a)[0]))
+#define HAS_FLAG(var, flag)     (((var) & (flag)) == flag)
 
 
 #if __cplusplus >= 201703L  // is C++17 enabled?

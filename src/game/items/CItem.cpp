@@ -6031,6 +6031,16 @@ bool CItem::_CanHoldTimer() const
 	ADDTOCALLSTACK("CItem::_CanHoldTimer");
 	EXC_TRY("Can have a TIMER?");
 
+    if (g_World.IsScheduledObjDeletion(this))
+    {
+        return false;
+    }
+
+    if (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED))
+    {
+        return true;
+    }
+
 	if (_IsIdle())
 	{
 		return true;
@@ -6054,8 +6064,9 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
+    const bool fIgnoreCont = (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 	// ATTR_DECAY ignores/overrides fParentGoingToSleep
-	if (IsAttr(ATTR_DECAY) && (pCont == nullptr))
+	if (fIgnoreCont || (IsAttr(ATTR_DECAY) && !pCont))
 	{
 		return CObjBase::_CanTick(false);
 	}
@@ -6304,7 +6315,15 @@ bool CItem::_OnTick()
 		return false;
 
 	EXC_SET_BLOCK("default behaviour4");
-	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), GetUID().GetObjUID()));
+    if (auto pContObj = dynamic_cast<CObjBase const*>(GetParent()))
+    {
+        g_Log.EventError("Timer expired without DECAY flag '%s' (UID=0%x)? Inside container '%s' (UID=0%x).\n",
+            GetName(), GetUID().GetObjUID(), pContObj->GetName(), pContObj->GetUID().GetObjUID());
+    }
+    else
+    {
+        g_Log.EventError("Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), GetUID().GetObjUID());
+    }
 
     EXC_CATCH;
 

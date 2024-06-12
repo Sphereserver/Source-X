@@ -637,7 +637,7 @@ public:
 	}
 	bool IsAttr(uint64 uiAttr) const	// ATTR_DECAY
 	{
-		return((m_Attr & uiAttr) ? true : false);
+		return ((m_Attr & uiAttr) == uiAttr);
 	}
 	void SetCanUse(uint64 uiCanUse)
 	{
@@ -649,7 +649,7 @@ public:
 	}
 	bool IsCanUse(uint64 uiCanUse) const	// CanUse_None
 	{
-		return ((m_CanUse & uiCanUse) ? true : false);
+		return ((m_CanUse & uiCanUse) == uiCanUse);
 	}
 
 	height_t GetHeight() const;

@@ -931,11 +931,23 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 
-				const CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, false);
+				CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
+                /* 
                 if (rid.IsEmpty())
                 {
                     m_tmAdd.m_id = 0;
                     return true;
+                }
+                */
+                // A great number of scripts, other than 3rd party GM assistants, still use .add for items instead of .additem, so in case a bare ID
+                //  is passed, it's wise to consider it as an item ID.
+                if (rid.IsEmpty())
+                {
+#if _DEBUG
+                    g_Log.EventDebug("Use .ADDITEM or .ADDCHAR instead of .ADD; it is being kept for backwards compatibility, but it's more prone to errors, as it always considers given IDs to be items.\n");
+#endif
+                    rid = g_Cfg.ResourceGetID(RES_ITEMDEF, ppszArgs[0], 0, false);
+                    ASSERT(!rid.IsEmpty());
                 }
 
 				m_tmAdd.m_id = rid.GetResIndex();
