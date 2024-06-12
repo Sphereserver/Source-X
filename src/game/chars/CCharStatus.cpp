@@ -461,7 +461,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 				break;
 			default:
 			{
-				if ( !CanMove(pItemPrev) )
+				if ( !CanMoveItem(pItemPrev) )
 					return LAYER_NONE;
 				if (!fTest && !ItemBounce(pItemPrev) )
 					return LAYER_NONE;
@@ -732,6 +732,10 @@ uint64 CChar::GetCanMoveFlags(uint64 uiCanFlags, bool fIgnoreGM) const
 
 	if ( IsStatFlag(STATF_HOVERING) )
 		uiCanFlags |= CAN_C_HOVER;
+
+    // if we can walk than we can CLIMB. The char flag for doing that is FLY.
+    if (uiCanFlags & CAN_C_WALK)
+        uiCanFlags |= CAN_C_FLY;
 
 	return ( uiCanFlags & CAN_C_MOVEMASK );
 }
@@ -1617,9 +1621,9 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
     return true;
 }
 
-bool CChar::CanMove( const CItem *pItem, bool fMsg ) const
+bool CChar::CanMoveItem( const CItem *pItem, bool fMsg ) const
 {
-	ADDTOCALLSTACK("CChar::CanMove");
+	ADDTOCALLSTACK("CChar::CanMoveItem");
 	// Is it possible that i could move this ?
 	// NOT: test if need to steal. IsTakeCrime()
 	// NOT: test if close enough. CanTouch()
@@ -1776,7 +1780,7 @@ bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume ) const
 
 	if ( fMoveOrConsume )
 	{
-		if ( !CanMove(pItem) )
+		if ( !CanMoveItem(pItem) )
 			return false;	// ? using does not imply moving in all cases ! such as reading ?
 		if ( IsTakeCrime(pItem) )
 			return false;
@@ -1825,12 +1829,186 @@ bool CChar::IsVerticalSpace( const CPointMap& ptDest, bool fForceMount ) const
 		uiBlockFlags |= CAN_I_CLIMB;
 
     const height_t iHeightMount = GetHeightMount();
-	CServerMapBlockState block(uiBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, iHeightMount);
+	CServerMapBlockingState block(uiBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeightMount, ptDest.m_z + m_zClimbHeight + 2, iHeightMount);
 	CWorldMap::GetHeightPoint(ptDest, block, true);
 
 	if ( iHeightMount + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
 		return false;
 	return true;
+}
+
+bool CChar::CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const
+{
+    ADDTOCALLSTACK("CChar::CanStandAt");
+    ASSERT(ptDest);
+    ASSERT(pArea);
+    ASSERT(blockingState);
+
+    uint64 uiMapPointMovementFlags = uiMyMovementFlags;
+    CWorldMap::GetHeightPoint(*ptDest, *blockingState, true);
+
+    // Pass along my results, blockingState got modified.
+    uiMapPointMovementFlags = blockingState->m_Bottom.m_uiBlockFlags;
+
+    uint uiBlockedBy = 0;
+    // need to check also for UFLAG1_FLOOR?
+    if (blockingState->m_Top.m_uiBlockFlags)
+    {
+        const bool fTopLandTile = (blockingState->m_Top.m_dwTile <= TERRAIN_QTY);
+        if (!fTopLandTile && (blockingState->m_Top.m_uiBlockFlags & (CAN_I_ROOF|CAN_I_PLATFORM|CAN_I_BLOCK)) && Can(CAN_C_NOINDOORS))
+            return false;
+
+        const short iHeightDiff = (blockingState->m_Top.m_z - blockingState->m_Bottom.m_z);
+        const height_t uiHeightReq = fTopLandTile ? (uiMyHeight / 2) : uiMyHeight;
+
+        if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK))
+        {
+            g_Log.EventWarn("block.m_Top.m_z (%hhd) - block.m_Bottom.m_z (%hhd) < m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )(%hhu).\n",
+                blockingState->m_Top.m_z, blockingState->m_Bottom.m_z, m_zClimbHeight, blockingState->m_Top.m_dwTile, (height_t)(m_zClimbHeight + uiHeightReq));
+        }
+        if ((iHeightDiff < uiHeightReq) && !Can(CAN_C_NOBLOCKHEIGHT) && !pArea->IsFlag(REGION_FLAG_WALK_NOBLOCKHEIGHT))
+        {
+            // Two cases possible:
+            // 1) On the dest P we would be covered by something and we wouldn't fit under this!
+            // 2) On the dest P there's an item but we can pass through it (this special case will be handled with fPassTrough late
+            uiMapPointMovementFlags |= CAN_I_BLOCK;
+            uiBlockedBy |= CAN_I_ROOF;
+        }
+        else if (iHeightDiff < (m_zClimbHeight + uiHeightReq))
+        {
+            // i'm trying to walk on a point over my head, it's possible to climb it but there isn't enough room for me to fit between Top and Bottom tile
+            // (i'd bang my head against the ceiling!)
+            uiMapPointMovementFlags |= CAN_I_BLOCK;
+            uiBlockedBy |= CAN_I_CLIMB;
+        }
+    }
+
+    const bool fLandTile = (blockingState->m_Bottom.m_dwTile <= TERRAIN_QTY);
+    bool fPassTrough = false;
+    if ((uiMyMovementFlags != UINT64_MAX) && (uiMapPointMovementFlags != 0x0))
+    {
+        // It IS in my way and HAS a flag set, check further
+        if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK))
+            g_Log.EventWarn("BOTTOMitemID (0%" PRIx32 ") TOPitemID (0%" PRIx32 ").\n", (blockingState->m_Bottom.m_dwTile - TERRAIN_QTY), (blockingState->m_Top.m_dwTile - TERRAIN_QTY));
+
+        if (uiMapPointMovementFlags & CAN_I_WATER)
+        {
+            if (Can(CAN_C_SWIM, uiMyMovementFlags))
+            {
+                // I can swim, and water tiles have the impassable flag, so let's remove it
+                uiMapPointMovementFlags &= ~CAN_I_BLOCK;
+            }
+            else
+            {
+                // Item is water and i can't swim
+                uiMapPointMovementFlags |= CAN_I_BLOCK; // it should be already added in the tiledata, but we better make that sure
+                uiBlockedBy |= CAN_I_WATER;
+            }
+        }
+        if ((uiMapPointMovementFlags & CAN_I_PLATFORM) && !Can(CAN_C_WALK, uiMyMovementFlags))
+        {
+            // Item is walkable (land, not water) and i can't walk
+            uiMapPointMovementFlags |= CAN_I_BLOCK;
+            uiBlockedBy |= CAN_I_PLATFORM;
+        }
+        if ((uiMapPointMovementFlags & CAN_I_DOOR))
+        {
+            if (Can(CAN_C_GHOST, uiMyMovementFlags))
+            {
+                fPassTrough = true;
+            }
+            else
+            {
+                // Item is a door and i'm not a ghost
+                uiMapPointMovementFlags |= CAN_I_BLOCK;
+                uiBlockedBy |= CAN_I_DOOR;
+            }
+        }
+        if ((uiMapPointMovementFlags & CAN_I_HOVER))
+        {
+            if (Can(CAN_C_HOVER, uiMyMovementFlags) || IsStatFlag(STATF_HOVERING))
+            {
+                ; //fPassTrough = true;
+            }
+            else
+            {
+                uiMapPointMovementFlags |= CAN_I_BLOCK;
+                uiBlockedBy |= CAN_I_HOVER;
+            }
+        }
+
+        if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK))
+            g_Log.EventWarn("block.m_Lowest.m_z %hhd, block.m_Bottom.m_z %hhd, block.m_Top.m_z %hhd.\n", blockingState->m_Lowest.m_z, blockingState->m_Bottom.m_z, blockingState->m_Top.m_z);
+
+        if (blockingState->m_Bottom.m_z >= UO_SIZE_Z)
+            return false;
+
+        if (fLandTile)
+        {
+            // It's a land tile
+            if ((uiMapPointMovementFlags & CAN_I_BLOCK) && !(uiBlockedBy & CAN_I_CLIMB))
+                return false;
+            if (blockingState->m_Bottom.m_z > ptDest->m_z + m_zClimbHeight + uiMyHeight + 3)
+                return false;
+        }
+        else
+        {
+            // It's an item
+            if (!fPassTrough && (uiMapPointMovementFlags & CAN_I_BLOCK))
+            {
+                // It's a blocking item. I should need special capabilities to pass through (or over) it.
+                if (!(uiBlockedBy & CAN_I_CLIMB))
+                    return false;
+                if (!Can(CAN_C_PASSWALLS, uiMyMovementFlags))
+                {
+                    // I can't pass through it, but can i climb or fly on it?
+                    if (Can(CAN_C_FLY, uiMyMovementFlags))
+                    {
+                        if (blockingState->m_Top.m_uiBlockFlags & CAN_I_ROOF)
+                        {
+                            // Roof tiles usually don't have the impassable/block tiledata flag, but i don't want flying chars to pass over the wall (bottom tile)
+                            //  and through roof (top tile) and enter a building in this way
+                            return false;
+                        }
+                    }
+                    else if (uiMapPointMovementFlags & CAN_I_CLIMB)
+                    {
+                        // If dwBlockFlags & CAN_I_CLIMB, then it's a "climbable" item (and i can climb it, 
+                        //  since i don't have CAN_I_CLIMB in uiBlockedBy)
+                    }
+                    else
+                    {
+                        // Standard check
+                        // Keep in mind that m_z, when an item is encountered in the mapblockstate, is equal to the item z + its height
+                        if (blockingState->m_Bottom.m_z > ptDest->m_z + m_zClimbHeight + 2) // Too high to climb.
+                            return false;
+                    }
+                }
+            }
+        }
+    }
+
+    if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK))
+        g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", uiMyHeight, blockingState->m_Top.m_z, ptDest->m_z);
+
+    if ((uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
+    {
+        if (!fPathfinding)
+            SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
+        return false;
+    }
+
+    // Be wary that now block.m_Bottom isn't just the "tile with lowest (p.z + height)", because if you are stepping on an item with height != 0,
+    //  the bottom tile would always be the terrain, and the item above that (but at the same z) flags would be ignored.
+    // We need to consider the item flags instead of the terrain's.
+    // So, now block.m_Bottom is the item with lowest Z, ignoring the height, but block.m_Bottom.m_z is that item's (p.z + height).
+    if (!fPassTrough)
+    {
+        // If i pass through a door and set our new Z to block.m_Bottom.m_z, we'll be on the top of the door
+        ptDest->m_z = blockingState->m_Bottom.m_z;
+    }
+
+    return true;
 }
 
 CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
@@ -1844,33 +2022,35 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	//  pdwBlockFlags = what is blocking me. (can be null = don't care)
 
 	//	test diagonal dirs by two others *only* when already having a normal location
-    const CPointMap ptOld(GetTopPoint());
-	if ( ptOld.IsValidPoint() && !fPathFinding && (dir % 2) )
-	{
-		DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1); // get 1st ortogonal
-		DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1); // get 2nd ortogonal
-		if ( dirTest2 == DIR_QTY )		// roll over
-			dirTest2 = DIR_N;
-
-        CPointMap ptTest(ptOld);
-		ptTest.Move(dirTest1);
-		if ( !CheckValidMove(ptTest, uiBlockFlags, DIR_QTY, pClimbHeight) )
-			return nullptr;
-
-		ptTest = ptOld;
-		ptTest.Move(dirTest2);
-		if ( !CheckValidMove(ptTest, uiBlockFlags, DIR_QTY, pClimbHeight) )
-			return nullptr;
-	}
-
-    if (!ptDest.IsValidPoint())
     {
-		if (!ptOld.IsValidPoint())
-		{
-			DEBUG_WARN(("Character with UID=0%x on invalid location %d,%d,%d,%d wants to move into another invalid location %d,%d,%d,%d.\n",
-				GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map));
-		}
-        return nullptr;
+        const CPointMap ptOld(GetTopPoint());
+        if (!fPathFinding && ptOld.IsValidPoint() && (dir % 2))
+        {
+            DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1); // get 1st ortogonal
+            DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1); // get 2nd ortogonal
+            if (dirTest2 == DIR_QTY)		// roll over
+                dirTest2 = DIR_N;
+
+            CPointMap ptTest(ptOld);
+            ptTest.Move(dirTest1);
+            if (!CheckValidMove(ptTest, uiBlockFlags, DIR_QTY, pClimbHeight))
+                return nullptr;
+
+            ptTest = ptOld;
+            ptTest.Move(dirTest2);
+            if (!CheckValidMove(ptTest, uiBlockFlags, DIR_QTY, pClimbHeight))
+                return nullptr;
+        }
+
+        if (!ptDest.IsValidPoint())
+        {
+            if (!ptOld.IsValidPoint())
+            {
+                g_Log.EventWarn("Character with UID=0%x on invalid location %d,%d,%d,%d wants to move into another invalid location %d,%d,%d,%d. Is pathfinding check: %d\n",
+                    GetUID().GetObjUID(), ptOld.m_x, ptOld.m_y, ptOld.m_z, ptOld.m_map, ptDest.m_x, ptDest.m_y, ptDest.m_z, ptDest.m_map, int(fPathFinding));
+            }
+            return nullptr;
+        }
     }
 
     CRegion *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
@@ -1882,192 +2062,33 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 		return nullptr;
 	}
 
+    // Now check if i can stand on that tile.
+
 	const uint64 uiCanFlags = GetCanFlags();
 	const uint64 uiMovementCan = GetCanMoveFlags(uiCanFlags);  // actions i can perform to step on a tile (some tiles require a specific ability, like to swim for the water)
+
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_Log.EventWarn("GetCanMoveFlags() (0x%" PRIx64 ").\n", uiMovementCan);
 	if (!(uiMovementCan & CAN_C_MOVEMENTCAPABLEMASK))
 		return nullptr;	// cannot move at all, so WTF?
 
-	uint64 uiMapMoveFlags = uiMovementCan;
-	if (uiMovementCan & CAN_C_WALK )
-	{
-		uiMapMoveFlags |= CAN_C_FLY;	// if we can walk than we can CLIMB. The char flag for doing that is FLY.
-	}
 
-    const height_t iHeight = IsSetEF(EF_WalkCheckHeightMounted) ? GetHeightMount() : GetHeight();
-	CServerMapBlockState block(uiMapMoveFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 3, iHeight);
-	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-	{
-		g_Log.EventWarn("\t\tCServerMapBlockState block( 0%" PRIx64 ", %d, %d, %d ); ptDest.m_z(%d) m_zClimbHeight(%d).\n",
-			uiMapMoveFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + iHeight, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
-	}
-
-	CWorldMap::GetHeightPoint(ptDest, block, true);
-
-	// Pass along my results.
-	uiMapMoveFlags = block.m_Bottom.m_uiBlockFlags;
-
-    	uint uiBlockedBy = 0;
-    	// need to check also for UFLAG1_FLOOR?
-	if ( block.m_Top.m_uiBlockFlags )
-	{
-        const bool fTopLandTile = (block.m_Top.m_dwTile <= TERRAIN_QTY);
-        if (!fTopLandTile && (block.m_Top.m_uiBlockFlags & (CAN_I_ROOF|CAN_I_PLATFORM|CAN_I_BLOCK)) && Can(CAN_C_NOINDOORS))
-            return nullptr;
-
-        const short iHeightDiff = (block.m_Top.m_z - block.m_Bottom.m_z);
-        const height_t uiHeightReq = fTopLandTile ? (iHeight / 2) : iHeight;
-        
-		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-        {
-			g_Log.EventWarn("block.m_Top.m_z (%hhd) - block.m_Bottom.m_z (%hhd) < m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? iHeightMount : iHeightMount/2 )(%hhu).\n",
-				block.m_Top.m_z, block.m_Bottom.m_z, m_zClimbHeight, block.m_Top.m_dwTile, (height_t)(m_zClimbHeight + uiHeightReq) );
-        }
-		if ((iHeightDiff < uiHeightReq) && !Can(CAN_C_NOBLOCKHEIGHT) && !pArea->IsFlag(REGION_FLAG_WALK_NOBLOCKHEIGHT))
-        {
-            // Two cases possible:
-            // 1) On the dest P we would be covered by something and we wouldn't fit under this!
-            // 2) On the dest P there's an item but we can pass through it (this special case will be handled with fPassTrough late
-			uiMapMoveFlags |= CAN_I_BLOCK;
-            uiBlockedBy |= CAN_I_ROOF;
-        }
-        else if (iHeightDiff < (m_zClimbHeight + uiHeightReq) )
-        {
-            // i'm trying to walk on a point over my head, it's possible to climb it but there isn't enough room for me to fit between Top and Bottom tile
-            // (i'd bang my head against the ceiling!)
-			uiMapMoveFlags |= CAN_I_BLOCK;
-            uiBlockedBy |= CAN_I_CLIMB;
-        }
-	}
-
-    const bool fLandTile = (block.m_Bottom.m_dwTile <= TERRAIN_QTY);
-    bool fPassTrough = false;
-	if ((uiMovementCan != UINT64_MAX) && (uiMapMoveFlags != 0x0))
-	{
-        // It IS in my way and HAS a flag set, check further
-		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-			g_Log.EventWarn("BOTTOMitemID (0%" PRIx32 ") TOPitemID (0%" PRIx32 ").\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
-        
-        if (uiMapMoveFlags & CAN_I_WATER)
-        {
-            if (Can(CAN_C_SWIM, uiCanFlags))
-            {
-                // I can swim, and water tiles have the impassable flag, so let's remove it
-				uiMapMoveFlags &= ~CAN_I_BLOCK;
-            }
-            else
-            {
-                // Item is water and i can't swim
-				uiMapMoveFlags |= CAN_I_BLOCK; // it should be already added in the tiledata, but we better make that sure
-                uiBlockedBy |= CAN_I_WATER;
-            }
-        }
-        if ((uiMapMoveFlags & CAN_I_PLATFORM) && !Can(CAN_C_WALK, uiCanFlags))
-        {
-            // Item is walkable (land, not water) and i can't walk
-			uiMapMoveFlags |= CAN_I_BLOCK;
-            uiBlockedBy |= CAN_I_PLATFORM;
-        }
-		if ((uiMapMoveFlags & CAN_I_DOOR))
-        {
-            if (Can(CAN_C_GHOST, uiCanFlags))
-            {
-                fPassTrough = true;
-            }
-            else
-            {
-                // Item is a door and i'm not a ghost
-				uiMapMoveFlags |= CAN_I_BLOCK;
-                uiBlockedBy |= CAN_I_DOOR;
-            }
-        }
-		if ( (uiMapMoveFlags & CAN_I_HOVER) )
-        {
-            if (Can(CAN_C_HOVER, uiCanFlags) || IsStatFlag(STATF_HOVERING))
-            {
-                ; //fPassTrough = true;
-            }
-            else
-            {
-				uiMapMoveFlags |= CAN_I_BLOCK;
-                uiBlockedBy |= CAN_I_HOVER;
-            }
-        }
-
-        if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-            g_Log.EventWarn("block.m_Lowest.m_z %hhd, block.m_Bottom.m_z %hhd, block.m_Top.m_z %hhd.\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z);
-
-        if ( block.m_Bottom.m_z >= UO_SIZE_Z )
-            return nullptr;
-        
-        if (fLandTile)
-        {
-            // It's a land tile
-            if ((uiMapMoveFlags & CAN_I_BLOCK) && !(uiBlockedBy & CAN_I_CLIMB))
-                return nullptr;
-            if (block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + iHeight + 3)
-                return nullptr;
-        }
-        else
-        {
-            // It's an item
-            if (!fPassTrough && (uiMapMoveFlags & CAN_I_BLOCK))
-            {
-                // It's a blocking item. I should need special capabilities to pass through (or over) it.
-                if (!(uiBlockedBy & CAN_I_CLIMB))
-                    return nullptr;
-                if (!Can(CAN_C_PASSWALLS, uiCanFlags))
-                {
-                    // I can't pass through it, but can i climb or fly on it?
-                    if (Can(CAN_C_FLY, uiCanFlags))
-                    {
-                        if (block.m_Top.m_uiBlockFlags & CAN_I_ROOF)
-                        {
-                            // Roof tiles usually don't have the impassable/block tiledata flag, but i don't want flying chars to pass over the wall (bottom tile)
-                            //  and through roof (top tile) and enter a building in this way
-                            return nullptr;
-                        }
-                    }
-                    else if (uiMapMoveFlags & CAN_I_CLIMB)
-                    {
-                        // If dwBlockFlags & CAN_I_CLIMB, then it's a "climbable" item (and i can climb it, 
-                        //  since i don't have CAN_I_CLIMB in uiBlockedBy)
-                    }
-                    else
-                    {
-                        // Standard check
-                        // Keep in mind that m_z, when an item is encountered in the mapblockstate, is equal to the item z + its height
-                        if (block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + 2) // Too high to climb.
-                            return nullptr;
-                    }
-                }
-            }
-        }
-    }
-
-	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", iHeight, block.m_Top.m_z, ptDest.m_z);
-	if ( (iHeight + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
-	{
-		SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
-		return nullptr;
-	}
-
-	if (uiBlockFlags)
-		*uiBlockFlags = uiMapMoveFlags;
-	if ( pClimbHeight && (uiMapMoveFlags & CAN_I_CLIMB) )
-		*pClimbHeight = block.m_zClimbHeight;
-
-    // Be wary that now block.m_Bottom isn't just the "tile with lowest (p.z + height)", because if you are stepping on an item with height != 0,
-    //  the bottom tile would always be the terrain, and the item above that (but at the same z) flags would be ignored.
-    // We need to consider the item flags instead of the terrain's.
-    // So, now block.m_Bottom is the item with lowest Z, ignoring the height, but block.m_Bottom.m_z is that item's (p.z + height).
-    if (!fPassTrough)
+    const height_t uiHeight = IsSetEF(EF_WalkCheckHeightMounted) ? GetHeightMount() : GetHeight();
+    CServerMapBlockingState blockingState(uiMovementCan, ptDest.m_z, ptDest.m_z + m_zClimbHeight + uiHeight, ptDest.m_z + m_zClimbHeight + 3, uiHeight);
+    if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
     {
-        // If i pass through a door and set our new Z to block.m_Bottom.m_z, we'll be on the top of the door
-	    ptDest.m_z = block.m_Bottom.m_z;
+        g_Log.EventWarn("\t\tCServerMapBlockState block( 0%" PRIx64 ", %d, %d, %d ); ptDest.m_z(%d) m_zClimbHeight(%d).\n",
+            uiMovementCan, ptDest.m_z, ptDest.m_z + m_zClimbHeight + uiHeight, ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
     }
+
+    const bool fCanStand = CanStandAt(&ptDest, pArea, uiMovementCan, uiHeight, &blockingState, fPathFinding);
+    if (!fCanStand)
+        return nullptr;
+
+    if (uiBlockFlags)
+        *uiBlockFlags = blockingState.m_Bottom.m_uiBlockFlags;
+    if (pClimbHeight && (blockingState.m_Bottom.m_uiBlockFlags & CAN_I_CLIMB))
+        *pClimbHeight = blockingState.m_zClimbHeight;
 
 	return pArea;
 }
@@ -2077,7 +2098,7 @@ void CChar::FixClimbHeight()
 	ADDTOCALLSTACK("CChar::FixClimbHeight");
 	const CPointMap& pt = GetTopPoint();
     const height_t iHeightMount = GetHeightMount();
-	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + iHeightMount + 3, pt.m_z + 2, iHeightMount);
+	CServerMapBlockingState block(CAN_I_CLIMB, pt.m_z, pt.m_z + iHeightMount + 3, pt.m_z + 2, iHeightMount);
 	CWorldMap::GetHeightPoint(pt, block, true);
 
 	if ( (block.m_Bottom.m_z == pt.m_z) && (block.m_uiBlockFlags & CAN_I_CLIMB) )	// we are standing on stairs

@@ -466,6 +466,9 @@ enum RC_TYPE
 	RC_BANKMAXITEMS,
 	RC_BANKMAXWEIGHT,
 	RC_BUILD,
+    RC_BUILDBRANCH,
+    RC_BUILDNUM,
+    RC_BUILDSTR,
     RC_CANPETSDRINKPOTION,      // m_fCanPetsDrinkPotion
 	RC_CANSEESAMEPLEVEL,		// m_iCanSeeSamePLevel
 	RC_CANUNDRESSPETS,			// m_fCanUndressPets
@@ -747,6 +750,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "BANKMAXITEMS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankIMax)			}},
     { "BANKMAXWEIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iBankWMax)			}},
     { "BUILD",					{ ELEM_VOID,	0																}},
+    { "BUILDBRANCH",			{ ELEM_VOID,	0																}},
+    { "BUILDNUM",				{ ELEM_VOID,	0																}},
+    { "BUILDSTR",				{ ELEM_VOID,	0																}},
     { "CANPETSDRINKPOTION",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCanPetsDrinkPotion)	}},
     { "CANSEESAMEPLEVEL",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iCanSeeSamePLevel)	}},
     { "CANUNDRESSPETS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fCanUndressPets)		}},
@@ -1914,19 +1920,17 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			{
 				ptcKey += 5;
 			}
-			else
-				return false;
+            else
+            {
+                return false;
+            }
 
 			// Get the position of the arguments after the round brackets
 			tchar * pszArgsNext;
 			if (! Str_Parse(const_cast<tchar*>(ptcKey), &pszArgsNext, ")") )
 				return false;
-			// Get the argument inside the round brackets
-			tchar * pVal;
-			if ( !Str_ParseCmds(const_cast<tchar*>(ptcKey), &pVal, 1, ")") )
-				return false;
 
-			uint id = Exp_GetUVal(pVal);
+			uint id = Exp_GetUVal(ptcKey);
 			if ( fTerrain && (id >= TERRAIN_QTY) )
 			{
 				// Invalid id
@@ -2001,23 +2005,34 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 	switch (index)
 	{
-		case RC_ATTACKERTIMEOUT:
-			sVal.FormatVal(m_iAttackerTimeout);
-			break;
-		case RC_BACKPACKOVERLOAD:
-			sVal.FormatVal( m_iBackpackOverload / WEIGHT_UNITS );
-			break;
-		case RC_BANKMAXWEIGHT:
-			sVal.FormatVal( m_iBankWMax / WEIGHT_UNITS );
-			break;
-		case RC_BUILD:
-			#ifdef __GITREVISION__
-			 sVal.Format("%s (%d)", __GITBRANCH__, __GITREVISION__ );
-			#else
-			 sVal = __DATE__;
-			#endif
-			break;
-		case RC_CHATFLAGS:
+        case RC_ATTACKERTIMEOUT:
+            sVal.FormatVal(m_iAttackerTimeout);
+            break;
+        case RC_BACKPACKOVERLOAD:
+            sVal.FormatVal(m_iBackpackOverload / WEIGHT_UNITS);
+            break;
+        case RC_BANKMAXWEIGHT:
+            sVal.FormatVal(m_iBankWMax / WEIGHT_UNITS);
+            break;
+
+        case RC_BUILD:
+        case RC_BUILDNUM:
+            sVal.FormatVal(SPHERE_BUILD_VER);
+        break;
+
+        case RC_BUILDBRANCH:
+            sVal = SPHERE_BUILD_BRANCH_NAME;
+        break;
+
+        case RC_BUILDSTR:
+#ifdef __GITREVISION__
+            sVal.Format("%s (%d)", __GITBRANCH__, __GITREVISION__);
+#else
+            sVal.Format("%s (%d)", SPHERE_BUILD_BRANCH_NAME, __DATE__);
+#endif
+            break;
+
+        case RC_CHATFLAGS:
 			sVal.FormatHex(m_iChatFlags);
 			break;
 		case RC_CHATSTATICCHANNELS:
@@ -4636,6 +4651,7 @@ bool CServerConfig::Load( bool fResync )
 			return false;
 		}
 
+        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables." SPHERE_SCRIPT ")...\n");
 		LoadResourcesOpen(&m_scpTables);
 		m_scpTables.Close();
 	}

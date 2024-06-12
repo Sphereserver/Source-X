@@ -8,7 +8,7 @@
 #include "CUOItemInfo.h"
 
 
-CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
+CUOItemInfo::CUOItemInfo( ITEMID_TYPE id, bool fNameNotNeeded)
 {
     if ( id >= ITEMID_MULTI )
     {
@@ -20,7 +20,10 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
         m_wHue = 0;
         m_wLightIndex = 0;
         m_height = 0;
-        strcpy( m_name, CItemBase::IsID_Ship(id) ? "ship" : "structure" );
+        if (!fNameNotNeeded)
+        {
+            strcpy(m_name, CItemBase::IsID_Ship(id) ? "ship" : "structure");
+        }
         return;
     }
 
@@ -33,5 +36,8 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
     m_wHue = cachedEntry->m_wHue;
     m_wLightIndex = cachedEntry->m_wLightIndex;
     m_height = cachedEntry->m_height;
-    Str_CopyLimitNull(m_name, cachedEntry->m_name, ARRAY_COUNT(m_name));
+    if (!fNameNotNeeded)
+    {
+        Str_CopyLimitNull(m_name, cachedEntry->m_name, ARRAY_COUNT(m_name));
+    }
 }

@@ -255,20 +255,32 @@ bool CResourceHolder::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fC
 		pszFilename = s.GetFilePath();
 
 	// search the local dir or full path first.
-	if ( s.Open(pszFilename, OF_READ | OF_NONCRIT ))
-		return true;
-	if ( !fCritical )
-		return false;
+    if (CSFile::FileExists(pszFilename))
+    {
+        if (s.Open(pszFilename, OF_READ | OF_NONCRIT))
+            return true;
+        if (!fCritical)
+            return false;
+    }
 
 	// next, check the script file path
 	CSString sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
-	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ) )
-		return true;
+    if (CSFile::FileExists(sPathName))
+    {
+        if (s.Open(sPathName, OF_READ | OF_NONCRIT))
+            return true;
+    }
 
 	// finally, strip the directory and re-check script file path
 	lpctstr pszTitle = CSFile::GetFilesTitle(pszFilename);
 	sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
-	return s.Open( sPathName, OF_READ );
+    if (CSFile::FileExists(sPathName))
+    {
+        return s.Open(sPathName, OF_READ);
+    }
+
+    g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't find file '%s' in any of the expected paths!.\n", pszFilename);
+    return false;
 }
 
 bool CResourceHolder::LoadResourceSection( CScript * pScript )

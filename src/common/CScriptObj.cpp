@@ -540,7 +540,8 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 				return true;
 			}
 		}
-        else if ((*ptcKey == 'h') || (*ptcKey == 'H')) // <hSOMEVAL> same as <HVAL <SOMEVAL>> to get hex from the val
+        // <hSOMEVAL> same as <HVAL <SOMEVAL>> to get hex from the val
+        else if ((*ptcKey == 'h') || (*ptcKey == 'H'))
         {
             lpctstr sArgs = ptcKey + 1;
             if (r_WriteVal(sArgs, sVal, pSrc))
@@ -1782,7 +1783,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 	size_t iBegin = 0;
 	size_t i = 0;
 	EXC_TRY("ParseScriptText Main Loop");
-	for ( i = 0; ptcResponse[i]; ++i )
+	for ( i = 0; ptcResponse[i] != '\0'; ++i)
 	{
 		const tchar ch = ptcResponse[i];
 
@@ -1793,7 +1794,25 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			{
                 const tchar chNext = ptcResponse[i + 1];
 				if ((chNext != '<') && !IsAlnum(chNext))
-					continue;	// Ignore this
+					continue;	// Ignore this, it might be a operator like <=
+                if ((chBegin == '<') && (chNext == '<'))
+                {
+                    // Is a << operator? I want a whitespace after the operator.
+                    if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
+                    {
+                        lpctstr ptcOpTest = &(ptcResponse[4]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a << operator
+                                i += 2; // Skip < and the whitespace
+                                continue;
+                            }
+                        }
+                    }
+                }
 
 				// Set the statement start
 				iBegin = i;
@@ -1835,6 +1854,30 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 				if (ptcTestNested == ptcTestOrig)
 				{
 					// Otherwise, it might be the << operator.
+                    // Though, we should NOT have reached here, this should have been catched above --> if (!pContext->_fParseScriptText_Brackets).
+
+                    // This shouldn't be necessary... but 
+                    /*
+                    // Is a << operator? I want a whitespace after the operator.
+                    if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
+                    {
+                        lpctstr ptcOpTest = &(ptcResponse[4]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a << operator
+                                i += 2; // Skip < and the whitespace
+                                pContext->_fParseScriptText_Brackets = false;
+                                continue;
+                            }
+                        }
+                    }
+                    // Print an error! I thought it was a << operator but it is not! What's happening here ?!
+                    */
+
+                    pContext->_fParseScriptText_Brackets = false;
 					++i;
 					continue;
 				}

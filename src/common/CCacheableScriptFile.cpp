@@ -45,8 +45,13 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
     _strFileName = ptcFilename;
     lpctstr ptcModeStr = _GetModeStr();
     _pStream = fopen(ptcFilename, ptcModeStr);
-    if ( _pStream == nullptr ) 
+    if (_pStream == nullptr)
+    {
+#ifdef _DEBUG
+        g_Log.EventDebug("Can't open script file '%s'. Errno: %d, strerr: %s.\n", ptcFilename, errno, strerror(errno));
+#endif
         return false;
+    }
 
     _fileDescriptor = (file_descriptor_t)STDFUNC_FILENO(_pStream);
     _fClosed = false;
@@ -68,12 +73,13 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
     }
     else
     {
+        static constexpr int iMaxFileLength = 5 * 1'000'000;
         const int iFileLength = _GetLength();
         ASSERT(iFileLength >= 0);
         bool fUTF = false, fFirstLine = true;
-        if (iFileLength > 5 * 1'000'000)
+        if (iFileLength > iMaxFileLength)
         {
-            g_Log.EventError("Single script file bigger than %d MB? Skipping.\n", iFileLength / 1'000'000);
+            g_Log.EventError("Single script file bigger than %d MB? Size is %d MB. Skipping.\n", iMaxFileLength / 1'000'000, iFileLength / 1'000'000);
         }
         else
         {
@@ -86,13 +92,16 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
             _fileContent->reserve(iFileLength / 25);
 
             ssize_t iStrLen;
-            for (const char *fileCursor = fileContentCopy.get();; fileCursor += (size_t)iStrLen + 1u)
+            for (const char *fileCursor = fileContentCopy.get();; fileCursor += (size_t)iStrLen)
             {
                 iStrLen = sGetLine_StaticBuf(fileCursor, SCRIPT_MAX_LINE_LEN);
                 if (iStrLen < 0)
                     break;
-                if (iStrLen < 1 || (fileCursor[iStrLen] != '\n'))
+                if (iStrLen < 1 /*|| (fileCursor[iStrLen] != '\n') It can also be a '\0' value, but it might not be necessary to check for either of the two...*/)
+                {
+                    ++ iStrLen; // Skip \n
                     continue;
+                }
 
                 // first line may contain utf marker (byte order mark)
                 if (fFirstLine && iStrLen >= 3 &&
@@ -109,10 +118,15 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
                 {
                     const int ch = str_start[len_to_copy - 1];
                     if (ch == '\n' || ch == '\r')
+                    {
+                        // Do not copy that, but skip it.
                         len_to_copy -= 1;
+                        iStrLen += 1;
+                    }
                     else
                         break;
                 }
+
                 if (len_to_copy == 0)
                     _fileContent->emplace_back();
                 else
@@ -249,7 +263,7 @@ void CCacheableScriptFile::dupeFrom(CCacheableScriptFile *other)
 
 bool CCacheableScriptFile::_HasCache() const
 {
-    if ((_fileContent == nullptr) || _fileContent->empty())
+    if ((_fileContent == nullptr) /* || _fileContent->empty()  Exclude this: might just be an empty file!*/)
         return false;
     return true;
 }

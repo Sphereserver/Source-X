@@ -260,7 +260,7 @@ public:
 	inline static bool IsVisibleLayer( LAYER_TYPE layer ) noexcept;
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
-	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile );
+	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile, bool fNameNotNeeded = false );
 	static height_t GetItemHeight( ITEMID_TYPE id, uint64 *uiBlockFlags );
 
 	static CREID_TYPE FindCharTrack( ITEMID_TYPE trackID );

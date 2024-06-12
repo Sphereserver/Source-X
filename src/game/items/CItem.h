@@ -6,6 +6,7 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
+#include "../../common/sphere_library/CSObjCont.h"
 #include "../../common/resource/CResourceHolder.h"
 #include "../../common/CServerMap.h"
 #include "../../common/CRect.h"
@@ -715,14 +716,19 @@ public:
 	virtual CObjBaseTemplate* GetTopLevelObj() override;
 	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
-	CObjBase * GetContainer() const;
+    inline CObjBase * GetContainer() const noexcept {
+        // What is this CItem contained in ?
+        // Container should be a CChar or CItemContainer
+        return (dynamic_cast <CObjBase*> (GetParent()));
+        // Called very frequently, worth inlining.
+    }
 	CItem * GetTopContainer();
 	const CItem* GetTopContainer() const;
 
-	uchar GetContainedGridIndex() const {
+	uchar GetContainedGridIndex() const noexcept {
 		return m_containedGridIndex;
 	}
-	void SetContainedGridIndex(uchar index) {
+	void SetContainedGridIndex(uchar index) noexcept {
 		m_containedGridIndex = index;
 	}
 

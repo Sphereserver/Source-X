@@ -634,7 +634,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 
 	// Since broken webs become spider silk, we should get out of here now if we aren't in a web.
 	CItem *pFlag = LayerFind(LAYER_FLAG_Stuck);
-	if ( CanMove(pItemWeb, false) )
+	if ( CanMoveItem(pItemWeb, false) )
 	{
 		if ( pFlag )
 			pFlag->Delete();
@@ -917,7 +917,7 @@ bool CChar::Use_Eat( CItem * pItemFood, ushort uiQty )
 	// IT_FOOD or IT_FOOD_RAW
 	// NOTE: Some foods like apples are stackable !
 
-	if ( !CanMove(pItemFood) )
+	if ( !CanMoveItem(pItemFood) )
 	{
 		SysMessageDefault(DEFMSG_FOOD_CANTMOVE);
 		return false;
@@ -982,7 +982,7 @@ void CChar::Use_Drink( CItem * pItem )
 	// IT_WATER_WASH:
 	// IT_BOOZE:
 
-	if ( !CanMove(pItem) )
+	if ( !CanMoveItem(pItem) )
 	{
 		SysMessageDefault(DEFMSG_DRINK_CANTMOVE);
 		return;

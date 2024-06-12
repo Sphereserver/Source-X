@@ -3111,8 +3111,10 @@ dword CObjBase::GetPropertyHash() const
 
 void CObjBase::OnTickStatusUpdate()
 {
+    // process m_fStatusUpdate flags
+    
 	//ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate"); // Called very frequently.
-	// process m_fStatusUpdate flags
+    EXC_TRY("CObjBase::OnTickStatusUpdate");
 
 	if (m_fStatusUpdate & SU_UPDATE_TOOLTIP)
 	{
@@ -3126,6 +3128,8 @@ void CObjBase::OnTickStatusUpdate()
 			pItemDmg->OnTickStatsUpdate();
 		}
 	}
+
+    EXC_CATCH;
 }
 
 void CObjBase::_GoAwake()

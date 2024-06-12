@@ -564,7 +564,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, I
 		dir = item->m_itCorpse.m_facing_dir;
 	}
 
-	if (character->CanMove(item, false))
+	if (character->CanMoveItem(item, false))
 		flags |= ITEMF_MOVABLE;
 
 	if (target->IsPriv(PRIV_DEBUG))

@@ -6,6 +6,7 @@
 #endif
 
 #if defined(_WIN32) && !defined(pid_t)
+    //#include <timeapi.h>    // for timeBeginPeriod
 	#define pid_t int
 #endif
 
@@ -33,14 +34,6 @@
 // Headers for InitRuntimeStaticMembers
 #include "clients/CClient.h"
 
-/*
-#ifdef _SANITIZERS
-const char* __asan_default_options() {
-    //return "verbosity=1:malloc_context_size=20";
-    return "sleep_before_dying=5";
-}
-#endif
-*/
 
 // Dynamic allocation of some global stuff
 std::string g_sServerDescription;
@@ -63,18 +56,23 @@ GlobalInitializer::GlobalInitializer()
 	ssServerDescription << " by www.spherecommunity.net";
 	g_sServerDescription = ssServerDescription.str();
 
+//-- Time
+
+/*
 #ifdef _WIN32
-	// Needed to get precise system time.
-	LARGE_INTEGER liProfFreq;
-	if (QueryPerformanceFrequency(&liProfFreq))
-	{
-		CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
-	}
-#endif // _WIN32
+    // Ensure it's ACTUALLY necessary, before resorting to this.
+    timeBeginPeriod(1); // from timeapi.h, we need also to link against Winmm.lib...
+#endif
+*/
+    PeriodicSyncTimeConstants();
+
+//--- Sphere threading system
 
 	DummySphereThread::createInstance();
 
-// Set exception catcher?
+//--- Exception handling
+
+    // Set exception catcher?
 #if defined(_WIN32) && defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
     // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
     // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
@@ -84,6 +82,8 @@ GlobalInitializer::GlobalInitializer()
 
 	// Set function to handle the invalid case where a pure virtual function is called.
     SetPurecallHandler();
+
+//--- Pre-startup sanity checks
 
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");
@@ -102,11 +102,24 @@ GlobalInitializer::GlobalInitializer()
 	EXC_CATCH;
 }
 
-void GlobalInitializer::InitRuntimeDefaultValues()
+void GlobalInitializer::InitRuntimeDefaultValues() // static
 {
 	CPointBase::InitRuntimeDefaultValues();
 }
 
+void GlobalInitializer::PeriodicSyncTimeConstants() // static
+{
+    // TODO: actually call it periodically!
+
+#ifdef _WIN32
+    // Needed to get precise system time.
+    LARGE_INTEGER liProfFreq;
+    if (QueryPerformanceFrequency(&liProfFreq))
+    {
+        CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
+    }
+#endif  // _WIN32
+}
 
 static GlobalInitializer g_GlobalInitializer;
 

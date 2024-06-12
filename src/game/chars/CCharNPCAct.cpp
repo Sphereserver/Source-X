@@ -509,7 +509,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 						if ( !pItem )	break;
 						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 )		continue;		// item is too high
 						else if ( !pItem->Can(CAN_I_BLOCK) )				continue;		// this item not blocking me
-						else if ( !CanMove(pItem) || !CanCarry(pItem) )		fClearedWay = false;
+						else if ( !CanMoveItem(pItem) || !CanCarry(pItem) )		fClearedWay = false;
 						else
 						{
 							//	move this item to the position I am currently in
@@ -1552,7 +1552,7 @@ void CChar::NPC_Act_Looting()
 	if ( pCorpse && !pCorpse->IsContainerEmpty() )
 		pItem = static_cast<CItem*>( pCorpse->GetContentIndex(g_Rand.GetValFast( (int)pCorpse->GetContentCount() )) );
 
-	if ( !CanTouch(pItem) || !CanMove(pItem) || !CanCarry(pItem) )
+	if ( !CanTouch(pItem) || !CanMoveItem(pItem) || !CanCarry(pItem) )
 	{
 		NPC_LootMemory(pItem);
 		return;

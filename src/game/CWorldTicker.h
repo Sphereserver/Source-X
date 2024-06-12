@@ -21,6 +21,7 @@
 #ifdef __GNUC__
     #pragma GCC diagnostic pop
 #endif
+//#include <flat_containers/flat_map.hpp>
 
 
 
@@ -38,12 +39,14 @@ public:
 private:
     using TimedObjectsContainer = std::vector<CTimedObject*>;
     struct WorldTickList : public std::map<int64, TimedObjectsContainer>
+    //struct WorldTickList : public fc::vector_map<int64, TimedObjectsContainer>
     {
         THREAD_CMUTEX_DEF;
     };
 
     using TimedCharsContainer = std::vector<CChar*>;
     struct CharTickList : public std::map<int64, TimedCharsContainer>
+    //struct CharTickList : public fc::vector_map<int64, TimedCharsContainer>
     {
         THREAD_CMUTEX_DEF;
     };

@@ -793,7 +793,7 @@ int CItem::IsWeird() const
 char CItem::GetFixZ( CPointMap pt, uint64 uiBlockFlags )
 {
 	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &uiBlockFlags );
-	CServerMapBlockState block(uiBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight);
+	CServerMapBlockingState block(uiBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight);
 	CWorldMap::GetFixPoint(pt, block);
 	return block.m_Bottom.m_z;
 }
@@ -4050,13 +4050,6 @@ void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)
 	Update();
 }
 
-CObjBase * CItem::GetContainer() const
-{
-	// What is this CItem contained in ?
-	// Container should be a CChar or CItemContainer
-	return ( dynamic_cast <CObjBase*> (GetParent()));
-}
-
 const CItem* CItem::GetTopContainer() const
 {
 	//Get the top container
@@ -5181,14 +5174,14 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_STH_DIR), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 			else
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), pItemSighted->GetNameFull(false), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 		}
 		else
 		{
 			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR_MANY), CPointBase::sm_szDirs[ dir ] );
 			else
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), pItemSighted->GetNameFull(false), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
 		}
 		strcat( pResult, sSearch);
 	}

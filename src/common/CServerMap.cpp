@@ -17,7 +17,7 @@
 
 
 //////////////////////////////////////////////////////////////////
-// -CServerMapBlockState
+// -CServerMapBlockingState
 
 CCachedMulItem::CCachedMulItem()
 {
@@ -45,7 +45,7 @@ int64 CCachedMulItem::GetCacheAge() const
 	return (CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_timeRef );
 }
 
-CServerMapBlockState::CServerMapBlockState( uint64 uiBlockFlags, char z, int iHeight, height_t zHeight ) :
+CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, char z, int iHeight, height_t zHeight ) noexcept :
 	m_uiBlockFlags(uiBlockFlags), m_z(z), m_iHeight(iHeight), m_zClimb(0), m_zHeight(zHeight)
 {
 	// m_z = PLAYER_HEIGHT
@@ -67,7 +67,7 @@ CServerMapBlockState::CServerMapBlockState( uint64 uiBlockFlags, char z, int iHe
 	m_zClimbHeight = 0;
 }
 
-CServerMapBlockState::CServerMapBlockState( uint64 uiBlockFlags, char z, int iHeight, char zClimb, height_t zHeight ) :
+CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, char z, int iHeight, char zClimb, height_t zHeight ) noexcept :
 	m_uiBlockFlags(uiBlockFlags), m_z(z), m_iHeight(iHeight), m_zClimb(zClimb), m_zHeight(zHeight)
 {
 	m_Top.m_uiBlockFlags = 0;
@@ -88,9 +88,9 @@ CServerMapBlockState::CServerMapBlockState( uint64 uiBlockFlags, char z, int iHe
 	m_zClimbHeight = 0;
 }
 
-lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
+lpctstr CServerMapBlockingState::GetTileName( dword dwID )	// static
 {
-	ADDTOCALLSTACK("CServerMapBlockState::GetTileName");
+	ADDTOCALLSTACK("CServerMapBlockingState::GetTileName");
 	if ( dwID == 0 )
 		return "<null>";
 	tchar * pStr = Str_GetTemp();
@@ -108,9 +108,9 @@ lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
 	return pStr;
 }
 
-bool CServerMapBlockState::CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
+bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
 {
-	ADDTOCALLSTACK("CServerMapBlockState::CheckTile");
+	ADDTOCALLSTACK("CServerMapBlockingState::CheckTile");
 	// RETURN:
 	//  true = continue processing
 
@@ -175,9 +175,9 @@ bool CServerMapBlockState::CheckTile( uint64 uiItemBlockFlags, char zBottom, hei
 	return true;
 }
 
-bool CServerMapBlockState::CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
+bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
 {
-	ADDTOCALLSTACK("CServerMapBlockState::CheckTile_Item");
+	ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Item");
 	// RETURN:
 	//  true = continue processing
 
@@ -262,9 +262,9 @@ bool CServerMapBlockState::CheckTile_Item( uint64 uiItemBlockFlags, char zBottom
 
 }
 
-bool CServerMapBlockState::CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID )
+bool CServerMapBlockingState::CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID )
 {
-	ADDTOCALLSTACK("CServerMapBlockState::CheckTile_Terrain");
+	ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Terrain");
 	// RETURN:
 	//  true = i can step on it, so continue processing
 

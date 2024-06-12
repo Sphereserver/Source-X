@@ -248,12 +248,15 @@ const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 
+    EXC_TRY("GetMapBlock");
+
 	if (!pt.IsValidXY() || !g_MapList.IsInitialized(pt.m_map))
 	{
-		g_Log.EventWarn("Attempting to access invalid memory block at %s.\n", pt.WriteUsed());
+		g_Log.EventWarn("Attempting to access invalid map block at %s.\n", pt.WriteUsed());
 		return nullptr;
 	}
 
+    EXC_SET_BLOCK("Try to get from cache");
 	const ProfileTask mapTask(PROFILE_MAP);
 
 	const int iBx = pt.m_x / UO_BLOCK_SIZE;
@@ -268,11 +271,15 @@ const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 		return block.get();
 	}
 
+    EXC_SET_BLOCK("Create new");
 	// else load and add it to the cache.
 	block = std::make_unique<CServerMapBlock>(iBx, iBy, pt.m_map);
 	ASSERT(block);
 
 	return block.get();
+
+    EXC_CATCH;
+    return nullptr;
 }
 
 // Tile info fromMAP*.MUL at given coordinates
@@ -290,6 +297,7 @@ std::optional<CUOMapMeter> CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
 	const CUOMapMeter* pMeter = GetMapMeter(pt);
 	if (!pMeter)
 		return std::nullopt;
+
 	CUOMapMeter pMapTop(*pMeter);
 	const CUOMapMeter pMapLeft(CheckMapTerrain(pMapTop, pt.m_x, pt.m_y + 1, pt.m_map));
 	const CUOMapMeter pMapBottom(CheckMapTerrain(pMapTop, pt.m_x + 1, pt.m_y + 1, pt.m_map));
@@ -899,7 +907,7 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 
 //****************************************************
 
-void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block) // static
+void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockingState & block) // static
 {
 	//Will get the highest CAN_I_PLATFORM|CAN_I_CLIMB and places it into block.Bottom
 	ADDTOCALLSTACK("CWorldMap::GetFixPoint");
@@ -1219,16 +1227,16 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	}
 }
 
-void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck) // static
+void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockingState & block, bool fHouseCheck) // static
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
     const CItemBase * pItemDef = nullptr;
     const CItemBaseDupe * pDupeDef = nullptr;
 	CItem * pItem = nullptr;
 	uint64 uiBlockThis = 0;
+    int x2 = 0, y2 = 0;
 	char z = 0;
 	height_t zHeight = 0;
-	int x2 = 0, y2 = 0;
 
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
@@ -1530,7 +1538,7 @@ char CWorldMap::GetHeightPoint(const CPointMap & pt, uint64 & uiBlockFlags, bool
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
 	const uint64 uiCan = uiBlockFlags;
-	CServerMapBlockState block( uiBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
+	CServerMapBlockingState block( uiBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
 	GetHeightPoint(pt, block, fHouseCheck);
 
 	// Pass along my results.
@@ -1559,9 +1567,11 @@ char CWorldMap::GetHeightPoint(const CPointMap & pt, uint64 & uiBlockFlags, bool
 	return block.m_Bottom.m_z;
 }
 
-void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck ) // static
+void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockingState & block, bool fHouseCheck ) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2");
+    EXC_TRYSUB("GHP2 with blockFlags");
+
+	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2(blockingState)");
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
@@ -1640,37 +1650,37 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & bl
 	}
 
 	{
-	// Any dynamic items here ?
-	// NOTE: This could just be an item that an NPC could just move ?
-	CWorldSearch Area( pt );
-	for (;;)
-	{
-		const CItem * pItem = Area.GetItem();
-		if ( pItem == nullptr )
-			break;
+	    // Any dynamic items here ?
+	    // NOTE: This could just be an item that an NPC could just move ?
+	    CWorldSearch Area( pt );
+	    for (;;)
+	    {
+		    const CItem * pItem = Area.GetItem();
+		    if ( pItem == nullptr )
+			    break;
 
-		char zitem = pItem->GetTopZ();
+		    char zitem = pItem->GetTopZ();
 
-        // Invis items should not block ???
-		const CItemBase * pItemDef = pItem->Item_GetDef();
-		ASSERT(pItemDef);
+            // Invis items should not block ???
+		    const CItemBase * pItemDef = pItem->Item_GetDef();
+		    ASSERT(pItemDef);
 
-		// Get Attributes from ItemDef. If they are not set, get them from the static object (DISPID)
-		uiBlockThis = pItemDef->Can(CAN_I_DOOR | CAN_I_WATER | CAN_I_CLIMB | CAN_I_BLOCK | CAN_I_PLATFORM);
-		height_t zHeight = pItemDef->GetHeight();
+		    // Get Attributes from ItemDef. If they are not set, get them from the static object (DISPID)
+		    uiBlockThis = pItemDef->Can(CAN_I_DOOR | CAN_I_WATER | CAN_I_CLIMB | CAN_I_BLOCK | CAN_I_PLATFORM);
+		    height_t zHeight = pItemDef->GetHeight();
 
-		uint64 uiStaticBlockThis = 0;
-		height_t zStaticHeight = CItemBase::GetItemHeight(pItem->GetDispID(), &uiStaticBlockThis);
+		    uint64 uiStaticBlockThis = 0;
+		    height_t zStaticHeight = CItemBase::GetItemHeight(pItem->GetDispID(), &uiStaticBlockThis);
 
-		if (uiBlockThis == 0)
-			uiBlockThis = uiStaticBlockThis;
-		if (zHeight == 0)
-			zHeight = zStaticHeight;
+		    if (uiBlockThis == 0)
+			    uiBlockThis = uiStaticBlockThis;
+		    if (zHeight == 0)
+			    zHeight = zStaticHeight;
 
-		if ( !block.CheckTile(uiBlockThis, zitem, zHeight, pItemDef->GetDispID() + (ITEMID_TYPE)TERRAIN_QTY ) )
-		{
-		}
-	}
+		    if ( !block.CheckTile(uiBlockThis, zitem, zHeight, pItemDef->GetDispID() + (ITEMID_TYPE)TERRAIN_QTY ) )
+		    {
+		    }
+	    }
 	}
 
 	// Check Terrain here.
@@ -1705,12 +1715,15 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & bl
 	{
 		block.m_Bottom = block.m_Lowest;
 	}
+
+    EXC_CATCHSUB("GHP2 with blockFlags");
 }
 
 // Height of player who walked to X/Y/OLDZ
 char CWorldMap::GetHeightPoint2( const CPointMap & pt, uint64 & uiBlockFlags, bool fHouseCheck ) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2");
+    EXC_TRYSUB("GHP2 with blockFlags");
+    //ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2(blockFlags)");
 	// Given our coords at pt including pt.m_z
 	// What is the height that gravity would put me at should i step here ?
 	// Assume my head height is PLAYER_HEIGHT/2
@@ -1734,7 +1747,7 @@ char CWorldMap::GetHeightPoint2( const CPointMap & pt, uint64 & uiBlockFlags, bo
 	// ??? NOTE: some creatures should be taller than others !!!
 
 	const uint64 uiCan = uiBlockFlags;
-	CServerMapBlockState block(uiBlockFlags, pt.m_z, PLAYER_HEIGHT);
+	CServerMapBlockingState block(uiBlockFlags, pt.m_z, PLAYER_HEIGHT);
 	GetHeightPoint2( pt, block, fHouseCheck );
 
 	// Pass along my results.
@@ -1774,6 +1787,9 @@ char CWorldMap::GetHeightPoint2( const CPointMap & pt, uint64 & uiBlockFlags, bo
 		return( pt.m_z );
 
 	return( block.m_Bottom.m_z );
+
+    EXC_CATCHSUB("GHP2 with blockFlags");
+    return UO_SIZE_MIN_Z;
 }
 
 

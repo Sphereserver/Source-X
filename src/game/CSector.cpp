@@ -695,9 +695,9 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 	{
 		// Clouds of some sort...
 		if (fNight)
-			iTargLight += ( g_Rand.GetVal( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
+			iTargLight += ( g_Rand.GetValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
 		else
-			iTargLight += ( g_Rand.GetVal( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
+			iTargLight += ( g_Rand.GetValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
 	}
 
 	if ( fNight )
@@ -841,11 +841,11 @@ WEATHER_TYPE CSector::GetWeatherCalc() const
 		return( WEATHER_DRY );
 
 	// Rain chance also controls the chance of snow. If it isn't possible to rain then it cannot snow either
-	int iPercentRoll = g_Rand.GetVal( 100 );
+	int iPercentRoll = g_Rand.GetValFast( 100 );
 	if ( iPercentRoll < GetRainChance() )
 	{
 		// It is precipitating... but is it rain or snow?
-		if ( GetColdChance() && g_Rand.GetVal(100) <= GetColdChance()) // Should it actually snow here?
+		if ( GetColdChance() && g_Rand.GetValFast(100) <= GetColdChance()) // Should it actually snow here?
 			return WEATHER_SNOW;
 		return WEATHER_RAIN;
 	}
@@ -1211,7 +1211,7 @@ bool CSector::_OnTick()
 	int iRegionPeriodic = 0;
 
 	WEATHER_TYPE weatherprv = m_Env.m_Weather;
-	if ( ! g_Rand.GetVal( 30 ))	// change less often
+	if ( ! g_Rand.GetValFast( 30 ))	// change less often
 	{
 		m_Env.m_Weather = GetWeatherCalc();
 		if ( weatherprv != m_Env.m_Weather )
@@ -1237,23 +1237,23 @@ bool CSector::_OnTick()
 				break;
 
 			case WEATHER_SNOW:
-				if ( ! g_Rand.GetVal(5) )
-					sound = sm_SfxWind[ g_Rand.GetVal( ARRAY_COUNT( sm_SfxWind )) ];
+				if ( ! g_Rand.GetValFast(5) )
+					sound = sm_SfxWind[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxWind )) ];
 				break;
 
 			case WEATHER_RAIN:
 				{
-					int iVal = g_Rand.GetVal(30);
+					int iVal = g_Rand.GetValFast(30);
 					if ( iVal < 5 )
 					{
 						// Mess up the light levels for a sec..
 						LightFlash();
-						sound = sm_SfxThunder[ g_Rand.GetVal( ARRAY_COUNT( sm_SfxThunder )) ];
+						sound = sm_SfxThunder[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxThunder )) ];
 					}
 					else if ( iVal < 10 )
-						sound = sm_SfxRain[ g_Rand.GetVal( ARRAY_COUNT( sm_SfxRain )) ];
+						sound = sm_SfxRain[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxRain )) ];
 					else if ( iVal < 15 )
-						sound = sm_SfxWind[ g_Rand.GetVal( ARRAY_COUNT( sm_SfxWind )) ];
+						sound = sm_SfxWind[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxWind )) ];
 				}
 				break;
 

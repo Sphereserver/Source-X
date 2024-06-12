@@ -4155,7 +4155,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 		SysMessageDefault(DEFMSG_STEALING_REACH);
 		return -SKTRIG_ABORT;
 	}
-	if (!CanMove(pItem) || !CanCarry(pItem))
+	if (!CanMoveItem(pItem) || !CanCarry(pItem))
 	{
 		SysMessageDefault(DEFMSG_STEALING_HEAVY);
 		return -SKTRIG_ABORT;

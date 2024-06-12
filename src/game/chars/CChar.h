@@ -21,8 +21,8 @@
 
 
 class CWorldTicker;
-
 class CCharNPC;
+class CMapBlockingState;
 
 
 enum NPCBRAIN_TYPE	// General AI type.
@@ -315,9 +315,8 @@ public:
 	virtual ~CChar(); // Delete character
 	bool DupeFrom(const CChar * pChar, bool fNewbieItems);
 
-private:
-	CChar(const CChar& copy);
-	CChar& operator=(const CChar& other);
+	CChar(const CChar& copy) = delete;
+	CChar& operator=(const CChar& other) = delete;
 
 protected:
 	void DeleteCleanup(bool fForce);	// Not virtual!
@@ -406,7 +405,7 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool CanTouch( const CPointMap & pt ) const;
 	bool CanTouch( const CObjBase * pObj ) const;
 	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
-	bool CanMove( const CItem * pItem, bool fMsg = true ) const;
+	bool CanMoveItem( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
 	bool CanUse( const CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
@@ -476,6 +475,9 @@ public:
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
 	bool MoveToNearestShore(bool fNoMsg = false);
 
+    bool CanMove(bool fCheckOnly) const;
+    bool ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequirement, bool fPathfinding);
+    bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
 	TRIGRET_TYPE CheckLocation( bool fStanding = false );

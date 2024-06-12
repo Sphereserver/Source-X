@@ -732,7 +732,7 @@ char CChar::GetFixZ( const CPointMap& pt, uint64 uiBlockFlags)
 	const int iBlockMaxHeight = std::max(int(iZClimbed + uiHeightMount), int(INT8_MAX));
 	const height_t uiClimbHeight = height_t(std::max(short(iZClimbed + 2), short(UINT8_MAX)));
 
-	CServerMapBlockState block(uiBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount);
+	CServerMapBlockingState block(uiBlockFlags, pt.m_z, iBlockMaxHeight, uiClimbHeight, uiHeightMount);
 	CWorldMap::GetFixPoint(pt, block);
 
 	uiBlockFlags = block.m_Bottom.m_uiBlockFlags;

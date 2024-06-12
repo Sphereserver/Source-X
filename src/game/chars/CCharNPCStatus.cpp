@@ -634,7 +634,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 	// RETURN:
 	//  0-100 percent = how bad do we want it ?
 
-	if ( !CanMove(pItem, false) )
+	if ( !CanMoveItem(pItem, false) )
 		return 0;
 
 	CCharBase * pCharDef = Char_GetDef();

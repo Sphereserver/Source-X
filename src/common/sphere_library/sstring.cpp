@@ -44,7 +44,7 @@ void Str_Reverse(char* string)
 int Str_ToI (lpctstr ptcStr, int base) noexcept
 {
     const auto e = errno;
-    const auto ret = int(std::strtol(ptcStr, nullptr, base));
+    const auto ret = int(::strtol(ptcStr, nullptr, base));
     errno = e;
     return ret;
 }
@@ -52,7 +52,7 @@ int Str_ToI (lpctstr ptcStr, int base) noexcept
 uint Str_ToUI(lpctstr ptcStr, int base) noexcept
 {
     const auto e = errno;
-    const auto ret = uint(std::strtoul(ptcStr, nullptr, base));
+    const auto ret = uint(::strtoul(ptcStr, nullptr, base));
     errno = e;
     return ret;
 }
@@ -60,7 +60,7 @@ uint Str_ToUI(lpctstr ptcStr, int base) noexcept
 llong Str_ToLL(lpctstr ptcStr, int base) noexcept
 {
     const auto e = errno;
-    const auto ret = std::strtoll(ptcStr, nullptr, base);
+    const auto ret = ::strtoll(ptcStr, nullptr, base);
     errno = e;
     return ret;
 }
@@ -68,7 +68,7 @@ llong Str_ToLL(lpctstr ptcStr, int base) noexcept
 ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
 {
     const auto e = errno;
-    const auto ret = std::strtoull(ptcStr, nullptr, base);
+    const auto ret = ::strtoull(ptcStr, nullptr, base);
     errno = e;
     return ret;
 }
@@ -90,26 +90,30 @@ tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcep
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-    static constexpr tchar chars[] = "0123456789abcdef";
 
     const bool sign = (val < 0);
-    /*if (sign && !hex) {
-        if (hex)
-            val = INT_MAX - val;
-        else
-            val = -val;
+    uint uval;
+    if (sign)
+    {
+        if (hex) {
+            uval = UINT_MAX - (uint)(-val) + 1u;
+            // Add 1 because UINT_MAX would be equal to -1, if signed.
+        }
+        else {
+            uval = (uint)abs(val);
+        }
     }
-    */
-    if (sign && !hex) {
-        val = -val;
+    else {
+        uval = (uint)val;
     }
 
     buf[--buf_length] = '\0';
+    static constexpr tchar chars[] = "0123456789abcdef";
     do
     {
-        buf[--buf_length] = chars[val % base];
-        val /= base;
-    } while (val);
+        buf[--buf_length] = chars[uval % base];
+        uval /= base;
+    } while (uval);
 
     if (hex) {
         buf[--buf_length] = '0';
@@ -161,27 +165,36 @@ tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noe
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-    static constexpr tchar chars[] = "0123456789abcdef";
-
+    
     const bool sign = (val < 0);
-    /*if (sign && !hex) {
-        if (hex)
-            val = LLONG_MAX - val;
-        else
-            val = -val;
+    ullong uval;
+    if (sign)
+    {
+        if (hex) {
+            const ullong uval_neg = (ullong)(-val);
+            const ullong max_bytes = (uval_neg < (ullong)UINT_MAX + 1u) ? (ullong)UINT_MAX : ULLONG_MAX;
+            // Check if i can output it as a 32 bits number, if too big use a 64 bits number.
+            // Why? Sphere users expect for historical reasons to get whenever possible a number with a format like
+            //  0FFFFFFFF (32 bits -1) instead of 0FFFFFFFFFFFFFFFF (64 bits -1).
+            uval = max_bytes - uval_neg + 1;
+            // Add 1 because UINT_MAX/ULLONG_MAX would be equal to -1, if signed.
+        }
+        else {
+            uval = (ullong)llabs(val);
+        }
     }
-    */
-    if (sign && !hex) {
-        val = -val;
+    else {
+        uval = (ullong)val;
     }
 
     buf[--buf_length] = '\0';
+    static constexpr tchar chars[] = "0123456789abcdef";
     do
     {
-        buf[--buf_length] = chars[val % base];
-        val /= base;
-    } while (val);
-
+        buf[--buf_length] = chars[uval % base];
+        uval /= base;
+    } while (uval);
+    
     if (hex) {
         buf[--buf_length] = '0';
     }
@@ -666,6 +679,7 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
     }
 }
 
+/*
 void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
 {
     // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
@@ -684,17 +698,118 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
         {
             if (ch == '<')
             {
-                fOpenedOneAngular = true;
-                ++iOpenAngular;
+                bool fOperator = false;
+                if ((ptcTest[1] == '<') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
+                {
+                    // I want a whitespace after the operator and some text after it.
+                    lpctstr ptcOpTest = &(ptcTest[3]);
+                    if (*ptcOpTest != '\0')
+                    {
+                        GETNONWHITESPACE(ptcOpTest);
+                        if (*ptcOpTest != '\0')  // There's more text to parse
+                        {
+                            // I guess i have sufficient proof: skip, it's a << operator
+                            fOperator = true;
+                            ptcTest += 2; // Skip the second > and the following whitespace
+                        }
+                    }
+                }
+                if (!fOperator)
+                {
+                    fOpenedOneAngular = true;
+                    ++iOpenAngular;
+                }
             }
             else if (ch == '>')
             {
-                --iOpenAngular;
-                if (fOpenedOneAngular && !iOpenAngular)
+                bool fOperator = false;
+                if ((ptcTest[1] == '>') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
                 {
-                    ptcLine = ptcTest + 1;
-                    return;
+                    if ((ptcLine == ptcTest) || ((iOpenAngular > 0) && IsWhitespace(*(ptcTest - 1))))
+                    {
+                        lpctstr ptcOpTest = &(ptcTest[3]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a >> operator
+                                fOperator = true;
+                                ptcTest += 2; // Skip the second > and the following whitespace
+                            }
+                        }
+                    }
                 }
+                if (!fOperator)
+                {
+                    --iOpenAngular;
+                    if (fOpenedOneAngular && !iOpenAngular)
+                    {
+                        ptcLine = ptcTest + 1;
+                        return;
+                    }
+                }
+            }
+        }
+        ++ptcTest;
+    }
+}
+*/
+
+void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
+{
+    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
+    bool fOpenedOneAngular = false;
+    int iOpenAngular = 0, iOpenCurly = 0;
+    tchar* ptcTest = ptcLine;
+    while (const tchar ch = *ptcTest)
+    {
+        if (IsWhitespace(ch))
+            ;
+        else if (ch == '(')
+            ++iOpenCurly;
+        else if (ch == ')')
+            --iOpenCurly;
+        else if (iOpenCurly == 0)
+        {
+            if (ch == '<')
+            {
+                bool fOperator = false;
+                if ((ptcTest[1] == '<') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
+                {
+                    // I guess i have sufficient proof: skip, it's a << operator
+                    fOperator = true;
+                }
+                if (!fOperator)
+                {
+                    fOpenedOneAngular = true;
+                    ++iOpenAngular;
+                }
+                else
+                    ptcTest += 2; // Skip the second > and the following whitespace
+            }
+            else if (ch == '>')
+            {
+                bool fOperator = false;
+                if ((ptcTest[1] == '>') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
+                {
+                    if ((ptcLine == ptcTest) || ((iOpenAngular > 0) && IsWhitespace(*(ptcTest - 1))))
+                    {
+                        // I guess i have sufficient proof: skip, it's a >> operator
+                        fOperator = true;
+                    }
+                }
+                if (!fOperator)
+                {
+                    --iOpenAngular;
+                    if (fOpenedOneAngular && !iOpenAngular)
+                    {
+                        ptcLine = ptcTest + 1;
+                        return;
+                    }
+                }
+                else
+                    ptcTest += 2; // Skip the second > and the following whitespace
             }
         }
         ++ptcTest;
@@ -1737,11 +1852,18 @@ ssize_t fReadUntilDelimiter_StaticBuf(char *buf, const size_t bufsiz, const int 
 
 ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char *sp, const size_t datasize) noexcept
 {
+    // Returns the number of chars before the delimiter (or the end of the string).
     // buf: line array
     const char *ptr, *eptr;
 
+    if (*sp == '\0')
+        return -1;
+
     for (ptr = sp, eptr = sp + datasize;; ++ptr) {
         if (*ptr == '\0') {
+            if (ptr != sp) {
+                return ptr - sp;
+            }
             return -1;
         }
         if (*ptr == delimiter) {

@@ -18,7 +18,7 @@ lpctstr const CExpression::sm_szMsgNames[DEFMSG_QTY] =
 	#include "../tables/defmessages.tbl"
 };
 
-dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
+dword ahextoi( lpctstr pszStr ) // Convert decimal or hex string to 32 bit integer
 {
 	// Unfortunatly the library func cant handle the number FFFFFFFF
 	// tchar * sstop; return( strtol( s, &sstop, 16 ));
@@ -61,7 +61,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 	return val;
 }
 
-int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
+int64 ahextoi64( lpctstr pszStr ) // Convert decimal or hex string to int64
 {
 	if ( pszStr == nullptr )
 		return 0;
@@ -77,6 +77,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	}
 
 	int64 val = 0;
+    ushort ndigits = 0;
 	for (;;)
 	{
 		tchar ch = static_cast<tchar>(toupper(*pszStr));
@@ -85,6 +86,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 		else if ( bHex && ( ch >= 'A' ) && ( ch <= 'F' ))
 		{
 			ch -= 'A' - 10;
+            ++ndigits;
 		}
 		else if ( !bHex && ( ch == '.' ) )
 		{
@@ -98,6 +100,9 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 		val += ch;
 		++pszStr;
 	}
+    if (ndigits <= 8)
+        return (llong)(int)val;
+
 	return val;
 }
 
@@ -384,7 +389,8 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 		}
 
 		lpctstr pStart = pszArgs;
-		ullong val = 0;
+		llong val = 0;
+        ushort ndigits = 0;
 		while (true)
 		{
 			tchar ch = *pszArgs;
@@ -403,12 +409,15 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 					break;
 				}
 				ch -= 'a' - 10;
+                ++ ndigits;
 			}
 			val *= 0x10;
 			val += ch;
-			++pszArgs;
+            ++ pszArgs;
 		}
-		return (llong)val;
+        if (ndigits <= 8)
+            return (llong)(int)val;
+		return val;
 	}
 	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
 	{

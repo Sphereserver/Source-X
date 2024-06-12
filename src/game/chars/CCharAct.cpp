@@ -944,10 +944,10 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_ATTACK_WRESTLE:
 						switch (g_Rand.GetVal(2))
 						{
-							case 0: return ANIM_ANI_ATTACK1; break;
-							case 1: return ANIM_ANI_ATTACK2; break;
+							case 0: return ANIM_ANI_ATTACK1;
+							case 1: return ANIM_ANI_ATTACK2;
 						}
-
+                        break;
 					case ANIM_DIE_BACK:
 						return ANIM_ANI_DIE1;
 					case ANIM_DIE_FORWARD:
@@ -990,7 +990,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_DIE_FORWARD:
 						return ANIM_MON_DIE2;
 					case ANIM_GET_HIT:
-						switch (g_Rand.GetVal(3))
+						switch (g_Rand.GetValFast(3))
 						{
 							case 0: return ANIM_MON_GETHIT; break;
 							case 1: return ANIM_MON_BlockRight; break;
@@ -1006,12 +1006,13 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_ATTACK_BOW:
 					case ANIM_ATTACK_XBOW:
 					case ANIM_ATTACK_WRESTLE:
-						switch (g_Rand.GetVal(3))
+						switch (g_Rand.GetValFast(3))
 						{
-							case 0: return ANIM_MON_ATTACK1; break;
-							case 1: return ANIM_MON_ATTACK2; break;
-							case 2: return ANIM_MON_ATTACK3; break;
+							case 0: return ANIM_MON_ATTACK1;
+							case 1: return ANIM_MON_ATTACK2;
+							case 2: return ANIM_MON_ATTACK3;
 						}
+                        break;
 					default:
 						return ANIM_WALK_UNARM;
 				}
@@ -1641,7 +1642,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		return -1;
 	if ((pItemParent == this ) && (iItemLayer == LAYER_DRAGGING ))
 		return pItem->GetAmount();
-	if ( !CanTouch(pItem) || !CanMove(pItem, true) )
+	if ( !CanTouch(pItem) || !CanMoveItem(pItem, true) )
 		return -1;
 
 	CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
@@ -2032,7 +2033,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 	if ( IsSetEF( EF_ItemStacking ) )
 	{
 		char iItemHeight = pItem->GetHeight();
-		CServerMapBlockState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(iItemHeight,1) );
+		CServerMapBlockingState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(iItemHeight,1) );
 		//CWorldMap::GetHeightPoint( pt, block, true );
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 
@@ -3360,6 +3361,138 @@ void CChar::Flip()
 	UpdateDir( GetDirTurn( m_dirFace, 1 ));
 }
 
+bool CChar::CanMove(bool fCheckOnly) const
+{
+    ADDTOCALLSTACK("CChar::CanMove");
+
+    if (!IsPriv(PRIV_GM))
+    {
+        if (Can(CAN_C_NONMOVER | CAN_C_STATUE))
+            return false;
+
+        if (!fCheckOnly)
+        {
+            if (OnFreezeCheck())
+            {
+                SysMessageDefault(DEFMSG_MSG_FROZEN);
+                return false;
+            }
+
+            else if ((Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)))
+            {
+                int iWeight = GetTotalWeight() / WEIGHT_UNITS;
+                int iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this) / WEIGHT_UNITS;
+                SysMessageDefault((iWeight > iMaxWeight) ? DEFMSG_MSG_FATIGUE_WEIGHT : DEFMSG_MSG_FATIGUE);
+                return false;
+            }
+        }
+        else
+        {
+            if (IsStatFlag(STATF_FREEZE|STATF_STONE))
+                return false;
+            // We might want to add dex check here as well...? there wasn't
+        }
+    }
+    return true;
+}
+
+bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequirement, bool fPathFinding)
+{
+    // If i'm not pathfinding, ensure that i pass a valid uiStaminaRequirement, since i'll need it for the walk checks.
+    ASSERT(fPathFinding || (nullptr != uiStaminaRequirement));
+    ushort uiLocalStamReq = 0;
+
+    CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
+    CWorldSearch AreaChars(ptDst);
+    for (;;)
+    {
+        CChar *pChar = AreaChars.GetChar();
+        if (!pChar)
+            break;
+        if (pChar->Can(CAN_C_STATUE))
+            goto set_and_return_false; // can't walk over a statue
+        if ((pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_INSUBSTANTIAL)))
+            continue;
+        if (m_pNPC && pChar->m_pNPC && !g_Cfg.m_NPCShoveNPC && !GetKeyNum("OVERRIDE.SHOVE", true))	// NPCs can't walk over another NPC unless they have the TAG.OVERRIDE.SHOVE set or the NPCCanShoveNPC ini flag is enabled.
+            goto set_and_return_false;
+
+        uiLocalStamReq = 10;		// Stam consume for push the char. OSI seem to be 10% and not a fix 10
+        if (IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD) || (pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE)))
+            uiLocalStamReq = 0;	// On SPHERE, need 0 stam to reveal someone
+        else if ((pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0))		// chars under Wraith Form effect can always walk through chars in Felucca
+            uiLocalStamReq = 0;
+
+        TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
+        if (!fPathFinding)  //You want to avoid to trig the triggers if it's only a pathfinding evaluation
+        {
+            if (IsTrigUsed(TRIGGER_PERSONALSPACE))
+            {
+                CScriptTriggerArgs Args(uiLocalStamReq);
+                iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
+                if (iRet == TRIGRET_RET_TRUE)
+                    goto set_and_return_false;
+                uiLocalStamReq = (ushort)(Args.m_iN1);
+            }
+            if (IsTrigUsed(TRIGGER_CHARSHOVE))
+            {
+                CScriptTriggerArgs Args(uiLocalStamReq);
+                iRet = this->OnTrigger(CTRIG_charShove, pChar, &Args);
+                if (iRet == TRIGRET_RET_TRUE)
+                    goto set_and_return_false;
+                uiLocalStamReq = (ushort)(Args.m_iN1);
+            }
+        }
+
+        if ((uiLocalStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)))
+            goto set_and_return_false;
+
+        if (Stat_GetVal(STAT_DEX) < uiLocalStamReq)		// check if we have enough stamina to push the char
+        {
+            if (!fPathFinding)
+            {
+                tchar *pszMsg = Str_GetTemp();
+                snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
+                SysMessage(pszMsg);
+            }
+
+            goto set_and_return_false;
+        }
+        else if (!fPathFinding)
+        {
+            tchar *pszMsg = Str_GetTemp();
+            if (pChar->IsStatFlag(STATF_INVISIBLE | STATF_HIDDEN))
+            {
+                if ((g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE))
+                {
+                    // OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE
+                    strncpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE), Str_TempLength());
+                }
+                else
+                {
+                    snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
+                    pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
+                }
+            }
+            else if (pChar->IsStatFlag(STATF_SLEEPING))
+                snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
+            else
+                snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
+
+            if (iRet != TRIGRET_RET_FALSE)
+                SysMessage(pszMsg);
+        }
+
+        break;
+    }
+
+    *uiStaminaRequirement = uiLocalStamReq;
+    return true;    // I can shove the char/I can stand at its position.
+
+set_and_return_false:
+    *uiStaminaRequirement = uiLocalStamReq;
+    return false;   // I can't shove the char.
+}
+
 // For both players and NPC's
 // Walk towards this point as best we can.
 // Affect stamina as if we WILL move !
@@ -3370,40 +3503,23 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
-    int iWeight = 0;
-    int iMaxWeight = 0;
+    // Physical capability.
+    if (!CanMove(fCheckOnly))
+        return nullptr;
+
+    // Special check, if the client is in house design mode.
     if (!IsPriv(PRIV_GM))
     {
-        if (Can(CAN_C_NONMOVER | CAN_C_STATUE)) //|| IsStatFlag(STATF_FREEZE|STATF_STONE) ) this part of condition does not seem necessary?
+        CClient *pClient = GetClientActive();
+        if (pClient && pClient->m_pHouseDesign)
+        {
+            if (pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst))
+            {
+                ptDst.m_z = GetTopZ();
+                return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+            }
             return nullptr;
-
-        iWeight = GetTotalWeight() / WEIGHT_UNITS;
-        iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this) / WEIGHT_UNITS;
-	    if ( !fCheckOnly )
-	    {
-		    if ( OnFreezeCheck() )
-		    {
-			    SysMessageDefault(DEFMSG_MSG_FROZEN);
-			    return nullptr;
-		    }
-
-		    else if ( (Stat_GetVal(STAT_DEX) <= 0) && (!IsStatFlag(STATF_DEAD)) )
-		    {
-			    SysMessageDefault((iWeight > iMaxWeight) ? DEFMSG_MSG_FATIGUE_WEIGHT : DEFMSG_MSG_FATIGUE);
-			    return nullptr;
-		    }
-	    }
-
-	    CClient *pClient = GetClientActive();
-	    if ( pClient && pClient->m_pHouseDesign )
-	    {
-		    if ( pClient->m_pHouseDesign->GetDesignArea().IsInside2d(ptDst) )
-		    {
-			    ptDst.m_z = GetTopZ();
-			    return ptDst.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
-		    }
-		    return nullptr;
-	    }
+        }
     }
 
 	// ok to go here ? physical blocking objects ?
@@ -3412,8 +3528,8 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 	CRegion *pArea = nullptr;
 
 	EXC_TRY("CanMoveWalkTo");
-
 	EXC_SET_BLOCK("Check Valid Move");
+
 	pArea = CheckValidMove(ptDst, &uiBlockFlags, DIR_TYPE(dir & ~DIR_MASK_RUNNING), &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
@@ -3432,110 +3548,37 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		return nullptr;
 
 	EXC_SET_BLOCK("Creature bumping");
-	ushort uiStamReq = 0;
+    ushort uiStamReq = 0;
 	if ( fCheckChars && !IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_INSUBSTANTIAL) )
 	{
-		CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
-		CWorldSearch AreaChars(ptDst);
-		for (;;)
-		{
-			CChar *pChar = AreaChars.GetChar();
-			if (!pChar)
-				break;
-            if (pChar->Can(CAN_C_STATUE))
-                return nullptr; // can't walk over a statue
-			if ( (pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_INSUBSTANTIAL)) )
-				continue;
-			if ( m_pNPC && pChar->m_pNPC && !g_Cfg.m_NPCShoveNPC && !GetKeyNum("OVERRIDE.SHOVE", true) )	// NPCs can't walk over another NPC unless they have the TAG.OVERRIDE.SHOVE set or the NPCCanShoveNPC ini flag is enabled.
-				return nullptr;
-
-			uiStamReq = 10;		// Stam consume for push the char. OSI seem to be 10% and not a fix 10
-			if ( IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD) || (pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE)) )
-				uiStamReq = 0;	// On SPHERE, need 0 stam to reveal someone
-			else if ( (pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0) )		// chars under Wraith Form effect can always walk through chars in Felucca
-				uiStamReq = 0;
-
-			TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-			if (!fPathFinding)  //You want avoid to trig the triggers if it's only a pathfinding evaluation
-			{
-				if ( IsTrigUsed(TRIGGER_PERSONALSPACE) )
-				{
-					CScriptTriggerArgs Args(uiStamReq);
-					iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
-					if ( iRet == TRIGRET_RET_TRUE )
-						return nullptr;
-                			uiStamReq = (ushort)(Args.m_iN1);
-				}
-				if ( IsTrigUsed(TRIGGER_CHARSHOVE) )
-				{
-					CScriptTriggerArgs Args(uiStamReq);
-					iRet = this->OnTrigger(CTRIG_charShove, pChar, &Args);
-					if ( iRet == TRIGRET_RET_TRUE )
-						return nullptr;
-                			uiStamReq = (ushort)(Args.m_iN1);
-				}
-			}
-
-
-			if ( (uiStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)) )
-				return nullptr;
-
-			tchar *pszMsg = Str_GetTemp();
-			if ( Stat_GetVal(STAT_DEX) < uiStamReq )		// check if we have enough stamina to push the char
-			{
-				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
-				SysMessage(pszMsg);
-				return nullptr;
-			}
-
-			else if (pChar->IsStatFlag(STATF_INVISIBLE | STATF_HIDDEN) )
-            {
-                if ((g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE))
-                {
-                    // OSILIKEPERSONALSPACE flag block the reveal but DEFMSG_HIDING_STUMBLE_OSILIKE is send. To avoid it, simply use return 1 in @PERSONALSPACE
-                    strncpy(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE_OSILIKE), Str_TempLength());
-                }
-				else
-				{
-					snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
-					if (!fPathFinding) // When NPC use pathfinding(NPC_AI_PATH) to calculate their destination, char should not be reveal
-						pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
-				}
-			}
-
-			else if ( pChar->IsStatFlag(STATF_SLEEPING) )
-				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
-			else
-				snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
-
-			if ( iRet != TRIGRET_RET_FALSE )
-				SysMessage(pszMsg);
-
-			break;
-		}
+        if (!ShoveCharAtPosition(ptDst, &uiStamReq, fPathFinding))
+            return nullptr;
 	}
 
 	if ( !fCheckOnly )
 	{
-		// Falling trigger
+		// Falling trigger.
 		//lack config feature for sphere.ini if wanted.
 		if (GetTopZ() - 10 >= ptDst.m_z)
 		{
 			//char is falling
-			CScriptTriggerArgs Args(ptDst.m_x, ptDst.m_y, ptDst.m_z);
-
 			if ( IsTrigUsed(TRIGGER_FALLING) )
 			{
+                CScriptTriggerArgs Args(ptDst.m_x, ptDst.m_y, ptDst.m_z);
 				OnTrigger(CTRIG_Falling, this, &Args);
 			}
 		}
-		//
-		EXC_SET_BLOCK("Stamina penalty");
-        if (iWeight < iMaxWeight) //Normal situation
-		{
-			int iWeightLoadPercent = (iWeight * 100) / iMaxWeight;
-			ushort uiStamPenalty = 0;
 
+        // Check stamina penalty.
+        const int iWeight = GetTotalWeight() / WEIGHT_UNITS;
+        const int iMaxWeight = g_Cfg.Calc_MaxCarryWeight(this) / WEIGHT_UNITS;
+		EXC_SET_BLOCK("Stamina penalty");
+        if (iWeight < iMaxWeight)
+		{
+            //Normal situation
+
+            int iWeightLoadPercent = (iWeight * 100) / iMaxWeight;
+			ushort uiStamPenalty = 0;
 			CVarDefCont* pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
 
 			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
@@ -3543,8 +3586,9 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 				//FIXME: Running penality should be a percentage... For now, it adding a flat value take on the ini.
 				iWeightLoadPercent += (pVal ? (int)pVal->GetValNum() : g_Cfg.m_iStamRunningPenalty);
 			}
+
 			const int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
-			if (iChanceForStamLoss > g_Rand.GetVal(1000))
+			if (iChanceForStamLoss > g_Rand.GetValFast(1000))
 			{
 
 				pVal = GetKey("OVERRIDE.STAMINAWALKINGPENALTY", true);
@@ -3553,14 +3597,13 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 			}
 			uiStamReq += uiStamPenalty;
 		}
-
-		else //Overweight and lost more stamina each step
+		else
         {
-            ushort uiWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
+            //Overweight and lost more stamina each step
 
+            ushort uiWeightPenalty = ushort(g_Cfg.m_iStaminaLossOverweight + ((iWeight - iMaxWeight) / 5));
             if (IsStatFlag(STATF_ONHORSE))
 				uiWeightPenalty /= 3;
-
 			if (IsStatFlag(STATF_FLY | STATF_HOVERING))
 				uiWeightPenalty += ushort((uiWeightPenalty * g_Cfg.m_iStamRunningPenaltyOverweight) / 100);
 
@@ -3573,6 +3616,7 @@ CRegion * CChar::CanMoveWalkTo( CPointMap & ptDst, bool fCheckChars, bool fCheck
 		StatFlag_Mod(STATF_INDOORS, (uiBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
 		m_zClimbHeight = (uiBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
 	}
+
 	EXC_CATCH;
 	return pArea;
 }
@@ -4388,7 +4432,8 @@ TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptT
 // process m_fStatusUpdate flags
 void CChar::OnTickStatusUpdate()
 {
-	ADDTOCALLSTACK("CChar::OnTickStatusUpdate");
+	//ADDTOCALLSTACK_INTENSIVE("CChar::OnTickStatusUpdate");
+    EXC_TRYSUB("CChar::OnTickStatusUpdate");
 
 	if ( IsClientActive() )
 		GetClientActive()->UpdateStats();
@@ -4413,6 +4458,8 @@ void CChar::OnTickStatusUpdate()
 	}
 
 	CObjBase::OnTickStatusUpdate();
+
+    EXC_CATCHSUB("CChar::OnTickStatusUpdate");
 }
 
 // Food decay, decrease FOOD value.

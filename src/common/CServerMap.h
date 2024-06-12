@@ -79,7 +79,7 @@ struct CServerMapBlocker
     height_t m_height;      // The actual height of the item (0 if terrain)
 };
 
-struct CServerMapBlockState
+struct CServerMapBlockingState
 {
 	// Go through the list of stuff at this location to decide what is  blocking us and what is not.
 	//  dwBlockFlags = what we can pass thru. doors, water, walls ?
@@ -103,12 +103,11 @@ struct CServerMapBlockState
 	CServerMapBlocker m_Lowest;	// the lowest item we have found.	
 
 public:
-	CServerMapBlockState( uint64 uiBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
-	CServerMapBlockState( uint64 uiBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
+	CServerMapBlockingState( uint64 uiBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT ) noexcept;
+	CServerMapBlockingState( uint64 uiBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT ) noexcept;
 
-private:
-	CServerMapBlockState(const CServerMapBlockState& copy);
-	CServerMapBlockState& operator=(const CServerMapBlockState& other);
+	CServerMapBlockingState(const CServerMapBlockingState& copy) = delete;
+	CServerMapBlockingState& operator=(const CServerMapBlockingState& other) = delete;
 
 public:
 	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );

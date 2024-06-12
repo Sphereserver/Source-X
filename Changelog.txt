@@ -3761,5 +3761,14 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: DistanceFormula ini setting, it selects the method use to calculate distance between two object/points.
 	DISTANCE_FORMULA_NODIAGONAL_NOZ 0	(linear/integer distance, considering the span this results in a "square" area with the object at the center; do not consider z)
 	DISTANCE_FORMULA_DIAGONAL_NOZ	1	(as if we could traverse diagonally each tile, this results in a "circular" area with the object at the center; do not consider z))
-	DISTANCE_FORMULA_DIAGONAL_Z		2	(same as above, consider z)
+	DISTANCE_FORMULA_DIAGONAL_Z		2	(same as above, but FORCE every distance check to consider z) --> BEWARE! Not thoroughly tested, it MIGHT cause unexpected behaviors.
 	Sphere X defaults to DISTANCE_FORMULA_NODIAGONAL_NOZ, older Sphere versions used DISTANCE_FORMULA_DIAGONAL_NOZ.
+
+10-06-2024, Nolok
+- Fixed: negative value hex representation in scripts, now it should match the expected one (like in v0.56b).
+- Fixed: script files caching discarding the last line of the file.
+- Fixed: dialog data buffer not emptied after the dialog packet is sent (resulting in displaying a garbled dialog).
+- Fixed: << operator parsing (without hopefully breaking something else). Remember that you MUST leave a whitespace between the operator and the operands.
+- Added: error message if trying to open a non existant script file (example: from spheretables.scp).
+- Added: SERV.BUILDNUM (alias for BUILD, returning the git revision number or -1 for special builds, not linked to git).
+- Added: SERV.BUILDBRANCH and SERV.BUILDSTR (the latter showing both branch name and build number, or the compilation date if the build is not linked to git).

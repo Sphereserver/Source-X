@@ -12,7 +12,7 @@
 
 struct CUOItemInfo : public CUOItemTypeRec_HS
 {
-    explicit CUOItemInfo( ITEMID_TYPE id );
+    explicit CUOItemInfo( ITEMID_TYPE id, bool fNameNotNeeded = false);
 };
 
 

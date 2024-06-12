@@ -473,8 +473,8 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
-			(word)(tmp_MinX + g_Rand.GetVal(tmp_MaxX - tmp_MinX)),
-			(word)(tmp_MinY + g_Rand.GetVal(tmp_MaxY - tmp_MinY)),
+			(word)(tmp_MinX + g_Rand.GetValFast(tmp_MaxX - tmp_MinX)),
+			(word)(tmp_MinY + g_Rand.GetValFast(tmp_MaxY - tmp_MinY)),
 			0);
 	}
 
@@ -497,7 +497,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		}
 	}
 
-	const int iRandOnce = (int)g_Rand.GetVal(UINT16_MAX);
+	const int iRandOnce = g_Rand.GetValFast(UINT16_MAX);
 	return {
 		(short)(sm_ContSize[i].m_minx + (iRandOnce % (sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx))),
 		(short)(sm_ContSize[i].m_miny + (iRandOnce % (sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny))),

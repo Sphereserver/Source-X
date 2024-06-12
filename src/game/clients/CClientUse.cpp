@@ -115,7 +115,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		if (fMustEquip)
 		{
-			if (!m_pChar->CanMove(pItem))
+			if (!m_pChar->CanMoveItem(pItem))
 				return false;
 			/*Before weight behavior rework we had this check too :
 			if ( (pObjTop != m_pChar) && !m_pChar->CanCarry(pItem) )
@@ -266,7 +266,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_POTION:
 		{
-			if ( !m_pChar->CanMove(pItem) )
+			if ( !m_pChar->CanMoveItem(pItem) )
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_POTION_FAIL);
 				return false;
@@ -367,7 +367,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_RUNE:
 		{
-			if ( !m_pChar->CanMove(pItem, true) )
+			if ( !m_pChar->CanMoveItem(pItem, true) )
 				return false;
 			addPromptConsole(CLIMODE_PROMPT_NAME_RUNE, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_RUNE_NAME), pItem->GetUID());
 			return true;

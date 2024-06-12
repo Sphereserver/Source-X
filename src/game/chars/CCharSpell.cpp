@@ -2788,7 +2788,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 			SysMessageDefault(DEFMSG_SPELL_TRY_FROZENHANDS);
 			return false;
 		}
-		else if ( !CanMove( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
+		else if ( !CanMoveItem( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
 			return false;
 		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->Can(CAN_I_EQUIPONCAST) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true) && !ItemBounce(pItemPrev))
 		{

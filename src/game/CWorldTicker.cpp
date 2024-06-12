@@ -65,6 +65,7 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
         return;
     }
     TimedObjectsContainer& cont = itList->second;  // direct access to the container.
+    //TimedObjectsContainer& cont = itList.underlying->second;  // direct access to the container.
 
     cont.erase(std::remove(cont.begin(), cont.end(), pTimedObject), cont.end());
     if (cont.empty())
@@ -169,6 +170,7 @@ void CWorldTicker::_RemoveCharTicking(const int64 iOldTimeout, CChar* pChar)
         return;
     }
     TimedCharsContainer& cont = itList->second;  // direct access to the container.
+    //TimedCharsContainer& cont = itList.underlying->second;  // direct access to the container.
 
     cont.erase(std::remove(cont.begin(), cont.end(), pChar), cont.end());
     if (cont.empty())
@@ -353,6 +355,7 @@ void CWorldTicker::Tick()
             while ((itList != itListEnd) && (iCurTime > (iTime = itList->first)))
             {
                 TimedObjectsContainer& cont = itList->second;
+                //TimedObjectsContainer& cont = itList.underlying->second;
 
                 TimedObjectsContainer::iterator itContEnd = cont.end();
                 for (auto it = cont.begin(); it != itContEnd;)
@@ -533,6 +536,7 @@ void CWorldTicker::Tick()
         while ((itList != itListEnd) && (iCurTime > (iTime = itList->first)))
         {
             TimedCharsContainer& cont = itList->second;
+            //TimedCharsContainer& cont = itList.underlying->second;
 
             TimedCharsContainer::iterator itContEnd = cont.end();
             for (auto it = cont.begin(); it != itContEnd;)

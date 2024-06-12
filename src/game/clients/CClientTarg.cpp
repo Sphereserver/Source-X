@@ -1946,7 +1946,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		default:
 			// Item to smash ? furniture ???
 
-			if ( ! m_pChar->CanMove(pItemTarg) )
+			if ( ! m_pChar->CanMoveItem(pItemTarg) )
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_WEAPON_IMMUNE );
 				return false;	// ? using does not imply moving in all cases ! such as reading ?

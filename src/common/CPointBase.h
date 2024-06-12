@@ -70,7 +70,10 @@ public:
 	int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
 	int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
 
-	bool IsValidZ() const noexcept;
+    inline bool IsValidZ() const noexcept
+    {
+        return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
+    }
 	bool IsValidXY() const noexcept;
 	bool IsCharValid() const noexcept;
 	inline bool IsValidPoint() const noexcept

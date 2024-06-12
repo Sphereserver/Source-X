@@ -13,7 +13,7 @@
 	#define SPHERE_BUILD_VER			__GITREVISION__
 	#define SPHERE_BUILD_BRANCH_NAME	__GITBRANCH__
 #else
-	#define SPHERE_BUILD_VER			0
+	#define SPHERE_BUILD_VER			-1
 	#define SPHERE_BUILD_BRANCH_NAME	"no-git"
 #endif
 

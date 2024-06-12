@@ -42,6 +42,8 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 	}
 
 	addGumpDialog(mode, &pDlg->m_sControls, &pDlg->m_sText, pDlg->m_x, pDlg->m_y, pObj, context);
+    pDlg->m_sControls.clear();
+    pDlg->m_sText.clear();
 	return true;
 }
 
