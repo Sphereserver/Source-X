@@ -11,24 +11,60 @@
 #include "../../sphere/threads.h"
 
 
+// Windows epoch is January 1, 1601 (start of Gregorian calendar cycle)
+// Unix epoch is January 1, 1970 (adjustment in "ticks" 100 nanosecond)
+#define UNIX_TICKS_PER_SECOND 10000000 //a tick is 100ns
+#if _WIN32
+#   define UNIX_TIME_START 0x019DB1DED53E8000LL     // January 1, 1970 (start of Unix epoch) in "ticks"
+#   define WINDOWS_UNIX_EPOCH_OFFSET 11644473600    // (number of seconds between January 1, 1601 and January 1, 1970).
+#endif
+
 #ifdef _WIN32
-    #if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
-	    // We don't have GetSupportedTickCount on Windows versions previous to Vista. We need to check for overflows
+//#   include <sysinfoapi.h>
+#   if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
+	    // We don't have GetSupportedTickCount on Windows versions previous to Vista/Windows Server 2008. We need to check for overflows
 	    //  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
 	    //	with GetSupportedTickCount) manually every time we compare two values.
-
-        // Precision is in the order of 10-16 ms.
+#       if _MSC_VER
+#           pragma warning(push)
+#           pragma warning(disable: 28159)
+#       endif
+        // Precision should be in the order of 10-16 ms.
 	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount(); }
-    #else
+#   else
 	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount64(); }
-    #endif
+#   endif
+#   if _MSC_VER
+#       pragma warning(pop)
+#   endif
 #endif
 
 
 //**************************************************************
-// -CSTime - absolute time
+// -CSTime - monotonic time
 
-llong CSTime::GetPreciseSysTimeMicro() noexcept // static
+// More precision requires more CPU time!
+llong CSTime::GetMonotonicSysTimeNano() noexcept // static
+{
+#ifdef _WIN32
+    // From Windows documentation:
+    //	On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
+    // Since i think no one will run Sphere on a pre XP os, we can avoid checking for overflows, in case QueryPerformanceCounter fails.
+    LARGE_INTEGER liQPCStart;
+    if (!QueryPerformanceCounter(&liQPCStart))
+        return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
+    return (llong)((liQPCStart.QuadPart * 1.0e9) / _kllTimeProfileFrequency);
+
+#else
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (llong)((ts.tv_sec * (llong)1.0e9) + (llong)ts.tv_nsec); // microseconds
+#endif
+}
+
+
+// More precision requires more CPU time!
+llong CSTime::GetMonotonicSysTimeMicro() noexcept // static
 {
 #ifdef _WIN32
 	// From Windows documentation:
@@ -38,26 +74,67 @@ llong CSTime::GetPreciseSysTimeMicro() noexcept // static
 	if (!QueryPerformanceCounter(&liQPCStart))
 		return GetSupportedTickCount() * 1000; // GetSupportedTickCount has only millisecond precision
 	return (llong)((liQPCStart.QuadPart * 1.0e6) / _kllTimeProfileFrequency);
+
 #else
 	struct timespec ts;
+#   if   defined(CLOCK_MONOTONIC_RAW)
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+#   else
 	clock_gettime(CLOCK_MONOTONIC, &ts);
+#   endif
 	return (llong)((ts.tv_sec * (llong)1.0e6) + (llong)round(ts.tv_nsec / 1.0e3)); // microseconds
 #endif
 }
 
-llong CSTime::GetPreciseSysTimeMilli() noexcept // static
+llong CSTime::GetMonotonicSysTimeMilli() noexcept // static
 {
 #ifdef _WIN32
+    // Max precision under Windows, but slowest...
 	LARGE_INTEGER liQPCStart;
 	if (!QueryPerformanceCounter(&liQPCStart))
 		return GetSupportedTickCount();
 	return (llong)((liQPCStart.QuadPart * 1.0e3) / _kllTimeProfileFrequency);
+
+/*
+    // Less precision, but faster (needs sysinfoapi.h).
+    FILETIME ft;
+//#if _WIN32_WINNT >= _WIN32_WINNT_WIN8
+//    GetSystemTimePreciseAsFileTime(&ft);  // This might actually be slower...
+//#else
+    GetSystemTimeAsFileTime(&ft);   // from sysinfoapi.h
+    // GetSystemTimeAsFileTime might have a resolution between 55ms or 10ms, not good...
+    // This blog post (https://devblogs.microsoft.com/oldnewthing/20170921-00/?p=97057) highlights the timeBeginPeriod function,
+    //  it "should" make it work with a higher resolution, but at which cost? That should be eventually benchmarked, if we want to go this way...
+//#endif
+
+    // The suggested way to do it (but IntelliSense warns about li being uninitialized...)
+    //ULARGE_INTEGER li;
+    //li.LowPart = ft.dwLowDateTime;
+    //li.HighPart = ft.dwHighDateTime;
+    //unsigned long long valueAsHns = li.QuadPart;
+
+    // The other way, which makes IntelliSense shut up.
+    const unsigned long long valueAsHns = (unsigned long long)ft.dwLowDateTime | ((unsigned long long)ft.dwHighDateTime << 32u);
+    const unsigned long long valueAsUs = valueAsHns/10;
+    const unsigned long long valueAsMs = valueAsUs/1000;
+    return valueAsMs;
+*/
+
 #else
 	struct timespec ts;
+#   if   defined(CLOCK_MONOTONIC_COARSE)
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
+#   elif defined(CLOCK_MONOTONIC_RAW)
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+#   else
 	clock_gettime(CLOCK_MONOTONIC, &ts);
+#   endif
 	return (llong)((ts.tv_sec * (llong)1.0e3) + (llong)round(ts.tv_nsec / 1.0e6)); // milliseconds
 #endif
 }
+
+
+// Wall clock time
 
 CSTime CSTime::GetCurrentTime()	noexcept // static
 {

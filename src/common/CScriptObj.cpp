@@ -1854,7 +1854,6 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 				if (ptcTestNested == ptcTestOrig)
 				{
 					// Otherwise, it might be the << operator.
-                    // Though, we should NOT have reached here, this should have been catched above --> if (!pContext->_fParseScriptText_Brackets).
 
                     // This shouldn't be necessary... but 
                     /*
@@ -1877,7 +1876,6 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
                     // Print an error! I thought it was a << operator but it is not! What's happening here ?!
                     */
 
-                    pContext->_fParseScriptText_Brackets = false;
 					++i;
 					continue;
 				}

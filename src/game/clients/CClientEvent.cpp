@@ -195,7 +195,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 
 	EXC_SET_BLOCK("FastLoot");
 	//	fastloot (,emptycontainer) protection
-	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
+	const int64 iCurTime = CSTime::GetMonotonicSysTimeMilli();
 	if ( m_tNextPickup > iCurTime)
 	{
 		EXC_SET_BLOCK("FastLoot - addItemDragCancel(0)");
@@ -729,7 +729,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	//NOTE: If WalkBuffer=20 in ini, it's egal 2000 here
 
 
-	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
+	const int64 iCurTime = CSTime::GetMonotonicSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
 	int64 iTimeMin = 0;  // minimum time to move 1 step in milliseconds
 	m_timeWalkStep = iCurTime; //Take the time of step for the next time we enter here

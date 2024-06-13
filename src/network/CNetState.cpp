@@ -205,7 +205,7 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
     iSockRet = m_socket.SetSockOpt(TCP_NODELAY, &iSockFlag, sizeof(iSockFlag), IPPROTO_TCP);
     CheckReportNetAPIErr(iSockRet, "NetState::init.TCP_NODELAY");
 
-    m_iConnectionTimeMs = CSTime::GetPreciseSysTimeMilli();
+    m_iConnectionTimeMs = CSTime::GetMonotonicSysTimeMilli();
 
     g_Serv.StatInc(SERV_STAT_CLIENTS);
     CClient* client = new CClient(this);

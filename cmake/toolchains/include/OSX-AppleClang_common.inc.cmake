@@ -54,7 +54,7 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS
 			-fsanitize=undefined,shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds
-			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute 
+			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute
 			-fno-sanitize=enum
 		)
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
@@ -120,12 +120,13 @@ function (toolchain_exe_stuff_common)
 
 
 	#-- Apply linker flags, only the ones specific per build type.
-	IF (TARGET spheresvr_release)
-		target_link_options (spheresvr_release PRIVATE	-s)
-	ENDIF ()
-	IF (TARGET spheresvr_nightly AND NOT ${ENABLED_SANITIZER})
-		target_link_options (spheresvr_nightly PRIVATE	-s)
-	ENDIF ()
+	# -s got deprecated, we could directly call 'strip'
+	#IF (TARGET spheresvr_release)
+	#	target_link_options (spheresvr_release PRIVATE	-s)
+	#ENDIF ()
+	#IF (TARGET spheresvr_nightly AND NOT ${ENABLED_SANITIZER})
+	#	target_link_options (spheresvr_nightly PRIVATE	-s)
+	#ENDIF ()
 
 
 	#-- Store common define macros.

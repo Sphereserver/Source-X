@@ -142,7 +142,7 @@ void CNetworkManager::acceptNewConnection(void)
     }
 
     const int64 iIpPrevConnectionTime = ip.m_timeLastConnectedMs;
-    ip.m_timeLastConnectedMs = CSTime::GetPreciseSysTimeMilli();
+    ip.m_timeLastConnectedMs = CSTime::GetMonotonicSysTimeMilli();
     ip.m_connectionAttempts += 1;
 
     DEBUGNETWORK(("Incoming connection from '%s' [IP history: blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d].\n",
@@ -403,7 +403,7 @@ void CNetworkManager::tick(void)
 {
     ADDTOCALLSTACK("CNetworkManager::tick");
 
-    const int64 iCurSysTimeMs = CSTime::GetPreciseSysTimeMilli();
+    const int64 iCurSysTimeMs = CSTime::GetMonotonicSysTimeMilli();
     EXC_TRY("Tick");
     for (int i = 0; i < m_stateCount; ++i)
     {

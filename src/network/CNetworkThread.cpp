@@ -125,7 +125,7 @@ void CNetworkThread::tick(void)
     setPriority(static_cast<IThread::Priority>(g_Cfg._uiNetworkThreadPriority));
 
     static constexpr int64 kiStateDataCheckPeriod = 10 * 1000; // 10 seconds, expressed in milliseconds
-    const int64 iTimeCur = CSTime::GetPreciseSysTimeMilli();
+    const int64 iTimeCur = CSTime::GetMonotonicSysTimeMilli();
     if (iTimeCur - _iTimeLastStateDataCheck > kiStateDataCheckPeriod)
     {
         _iTimeLastStateDataCheck = iTimeCur;
