@@ -5,10 +5,13 @@
  * Defines for easy C++17 thread-locking for class methods.
 **/
 
-//#ifdef _DEBUG
+#define MT_ENGINES  0   // are we using/working on true multithreaded network/scripting engines?
 
 #include <mutex>
 #include <shared_mutex>
+
+
+#if MT_ENGINES == 1  //_DEBUG
 
 #define THREAD_CMUTEX           _classMutex     // Name of the Class Mutex
 #define THREAD_CMUTEX_DEF	    mutable std::shared_mutex THREAD_CMUTEX				            // Use this in the class definition to add the class mutex.
@@ -35,9 +38,9 @@
 #define THREAD_UNIQUE_LOCK_RETURN(x) \
 		{THREAD_UNIQUE_LOCK_SET; \
 		TS_RETURN(x);}
-/*
+
 #else
-	#define THREAD_CMUTEX_DEF	            (void)0
+	#define THREAD_CMUTEX_DEF	            ;
 	#define THREAD_SHARED_LOCK_SET	        (void)0
 	#define THREAD_SHARED_LOCK		        (void)0
 	#define THREAD_SHARED_UNLOCK	        (void)0
@@ -48,6 +51,6 @@
 	#define THREAD_SHARED_LOCK_RETURN(x)	return (x)
     #define THREAD_UNIQUE_LOCK_RETURN(x)	return (x)
 #endif
-*/
+
 
 #endif // _INC_BASIC_THREADING_H

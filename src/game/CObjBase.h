@@ -15,6 +15,7 @@
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
+#include <atomic>
 
 
 class PacketSend;
@@ -38,7 +39,7 @@ private:
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
-    bool _fDeleting;
+    volatile std::atomic_bool _fDeleting;
 
     std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
@@ -48,7 +49,7 @@ public:
     static const char *m_sClassName;
     static dword sm_iCount;    // how many total objects in the world ?
 
-    
+
     int _iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
     int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
@@ -67,13 +68,13 @@ public:
 
     CResourceRefArray m_OEvents;
     std::vector<CUID> m_followers;
-    
+
 public:
     explicit CObjBase(bool fItem);
     virtual ~CObjBase();
-private:
-    CObjBase(const CObjBase& copy);
-    CObjBase& operator=(const CObjBase& other);
+
+    CObjBase(const CObjBase& copy) = delete;
+    CObjBase& operator=(const CObjBase& other) = delete;
 
 protected:
     /**
@@ -127,7 +128,7 @@ public:
 		//  If a flag in m_CanMask isn't enabled in m_Can, it is considered as enabled in this Can check
 		// So m_CanMask is useful to dynamically switch on/off some of the read-only CAN flags in the ITEMDEF/CHARDEF.
 		return (GetCanFlagsBase() ^ m_CanMask);
-	}	
+	}
 
 	bool Can(uint64 uiCan) const noexcept
 	{
@@ -663,7 +664,7 @@ public:
      */
 	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1,
         bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
-	
+
 	/**
 	* @fn  void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	*
@@ -890,7 +891,7 @@ public:
 #define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
 	uchar m_fStatusUpdate;  // update flags for next tick
 
- 
+
 protected:
     virtual void _GoAwake() override;
     virtual void _GoSleep() override;

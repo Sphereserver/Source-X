@@ -90,6 +90,10 @@ SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
 SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 
+set (is_win32_app_linker)
+IF (WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
+	set (is_win32_app_linker WIN32)	# if not set, it defaults to console subsystem
+ENDIF ()
 
 # Determine system arch
 # TODO: change name for the variable to ARCH_IS_32BITS and ARCH_IS_64BITS
@@ -166,7 +170,7 @@ IF (SINGLE_TARGET)
 
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		SET (TARGETS ${TARGETS} spheresvr_release)
-		ADD_EXECUTABLE (spheresvr_release
+		ADD_EXECUTABLE (spheresvr_release ${is_win32_app_linker}
 			${SPHERE_SOURCES}
 		#	${docs_TEXT}
 		)
@@ -174,7 +178,7 @@ IF (SINGLE_TARGET)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		SET (TARGETS ${TARGETS} spheresvr_nightly)
-		ADD_EXECUTABLE (spheresvr_nightly
+		ADD_EXECUTABLE (spheresvr_nightly ${is_win32_app_linker}
 			${SPHERE_SOURCES}
 		#	${docs_TEXT}
 		)
@@ -182,7 +186,7 @@ IF (SINGLE_TARGET)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		SET (TARGETS ${TARGETS} spheresvr_debug)
-		ADD_EXECUTABLE (spheresvr_debug
+		ADD_EXECUTABLE (spheresvr_debug ${is_win32_app_linker}
 			${SPHERE_SOURCES}
 		#	${docs_TEXT}
 		)
@@ -192,7 +196,7 @@ IF (SINGLE_TARGET)
 ELSE (SINGLE_TARGET)
 
 	SET (TARGETS ${TARGETS} spheresvr)
-	ADD_EXECUTABLE (spheresvr
+	ADD_EXECUTABLE (spheresvr ${is_win32_app_linker}
 		${SPHERE_SOURCES}
 		${docs_TEXT}
 	)

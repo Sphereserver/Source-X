@@ -15,12 +15,13 @@ function (toolchain_exe_stuff_common)
 
 	#-- Configure the Windows application type.
 
-	IF (${WIN32_SPAWN_CONSOLE})
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA  ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -mconsole)
-		SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
-	#ELSE ()
-	#	SET (CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -mwindows)
-	ENDIF ()
+	# Subsystem is already managed by is_win32_app_linker. GCC doesn't need us to specify the entry point.
+	#IF (${WIN32_SPAWN_CONSOLE})
+	#	add_link_options ("LINKER:SHELL:-mconsole")
+	#	SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
+	##ELSE ()
+	##	add_link_options ("LINKER:SHELL:-mwindows")
+	#ENDIF ()
 
 
 	#-- Validate sanitizers options and store them between the common compiler flags.

@@ -15,8 +15,8 @@
 // Unix epoch is January 1, 1970 (adjustment in "ticks" 100 nanosecond)
 #define UNIX_TICKS_PER_SECOND 10000000 //a tick is 100ns
 #if _WIN32
-#   define UNIX_TIME_START 0x019DB1DED53E8000LL     // January 1, 1970 (start of Unix epoch) in "ticks"
-#   define WINDOWS_UNIX_EPOCH_OFFSET 11644473600    // (number of seconds between January 1, 1601 and January 1, 1970).
+//#   define UNIX_TIME_START 0x019DB1DED53E8000LL     // January 1, 1970 (start of Unix epoch) in "ticks"
+//#   define WINDOWS_UNIX_EPOCH_OFFSET 11644473600    // (number of seconds between January 1, 1601 and January 1, 1970).
 #endif
 
 #ifdef _WIN32
