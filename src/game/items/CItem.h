@@ -627,29 +627,34 @@ public:
   */
 	HUE_TYPE GetHueVisible() const;
 
-	void SetAttr(uint64 uiAttr)
+	void SetAttr(uint64 uiAttr) noexcept
 	{
 		m_Attr |= uiAttr;
 	}
-	void ClrAttr(uint64 uiAttr)
+	void ClrAttr(uint64 uiAttr) noexcept
 	{
 		m_Attr &= ~uiAttr;
 	}
-	bool IsAttr(uint64 uiAttr) const	// ATTR_DECAY
+	bool IsAttr(uint64 uiAttr) const noexcept
 	{
-		return ((m_Attr & uiAttr) == uiAttr);
+        // true even if only one flag among those passed is present
+		return (m_Attr & uiAttr);
 	}
-	void SetCanUse(uint64 uiCanUse)
+	void SetCanUse(uint64 uiCanUse) noexcept
 	{
 		m_CanUse |= uiCanUse;
 	}
-	void ClrCanUse(uint64 uiCanUse)
+	void ClrCanUse(uint64 uiCanUse) noexcept
 	{
 		m_CanUse &= ~uiCanUse;
 	}
-	bool IsCanUse(uint64 uiCanUse) const	// CanUse_None
+	bool IsCanUse(uint64 uiCanUse) const noexcept
 	{
-		return ((m_CanUse & uiCanUse) == uiCanUse);
+        // true even if only one flag among those passed is present
+        return (m_CanUse & uiCanUse);
+
+        // true only if m_CanUse has every one of the passed flags.
+		//return ((m_CanUse & uiCanUse) == uiCanUse);
 	}
 
 	height_t GetHeight() const;
