@@ -3112,7 +3112,7 @@ dword CObjBase::GetPropertyHash() const
 void CObjBase::OnTickStatusUpdate()
 {
     // process m_fStatusUpdate flags
-    
+
 	//ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate"); // Called very frequently.
     EXC_TRY("CObjBase::OnTickStatusUpdate");
 
@@ -3153,10 +3153,10 @@ void CObjBase::_GoSleep()
 	ADDTOCALLSTACK("CObjBase::_GoSleep");
 	CTimedObject::_GoSleep();
 
-	if (_IsTimerSet())
-	{
+	//if (_IsTimerSet())
+	//{
 		CWorldTickingList::DelObjSingle(this);
-	}
+	//}
 	CWorldTickingList::DelObjStatusUpdate(this, false);
 }
 
@@ -3183,7 +3183,6 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 				else if (!fIgnoreCont)
 					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
 			}
-
         }
     }
 

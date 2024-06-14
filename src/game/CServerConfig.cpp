@@ -4651,11 +4651,11 @@ bool CServerConfig::Load( bool fResync )
 	{
 		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT ))
 		{
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables." SPHERE_SCRIPT ")...\n" );
+			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n" );
 			return false;
 		}
 
-        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables." SPHERE_SCRIPT ")...\n");
+        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n");
 		LoadResourcesOpen(&m_scpTables);
 		m_scpTables.Close();
 	}
