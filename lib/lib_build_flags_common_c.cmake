@@ -20,8 +20,12 @@ else (MSVC)
 	set (c_compiler_options_common
 		-pipe -fexceptions -fnon-call-exceptions
 		-O3
-		$<IF:$<BOOL:${ENABLED_SANITIZER}>,-ggdb3,-s>
+		$<$<BOOL:${ENABLED_SANITIZER}>:-ggdb3>
 	)
+	if (NOT ${CLANG_USE_GCC_LINKER})
+		set (c_compiler_options_common ${c_compiler_options_common} _CRT_SECURE_NO_WARNINGS)
+	endif()
+
 	set (c_linker_options_common
 	)
 

@@ -34,14 +34,13 @@ function (toolchain_exe_stuff)
 	ENDIF ()
 
 
-	#-- Configure the Windows application type.
+	#-- Configure the Windows application type and add global linker flags.
 
-	SET (EXE_LINKER_EXTRA "")
 	IF (${WIN32_SPAWN_CONSOLE})
-		SET (EXE_LINKER_EXTRA			${EXE_LINKER_EXTRA} /SUBSYSTEM:CONSOLE /ENTRY:WinMainCRTStartup)
+		add_link_options ("LINKER:/ENTRY:WinMainCRTStartup")	# Handled by is_win32_app_linker -> "LINKER:/SUBSYSTEM:CONSOLE"
 		SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
-	ELSE ()
-		SET (EXE_LINKER_EXTRA			${EXE_LINKER_EXTRA} /SUBSYSTEM:WINDOWS)
+	#ELSE ()
+	#	add_link_options ("LINKER:/ENTRY:WinMainCRTStartup") 	# Handled by is_win32_app_linker -> "LINKER: /SUBSYSTEM:WINDOWS"
 	ENDIF ()
 
 
@@ -107,7 +106,7 @@ function (toolchain_exe_stuff)
 		${cxx_compiler_flags_common}
 		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHsc /GL /GA /Gw /Gy /GF /GR-  $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
 		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHa  /GL /GA /Gw /Gy /GF		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od 		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>> #/Gs 
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od 		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>> #/Gs
 		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
 	)
 
@@ -129,7 +128,7 @@ function (toolchain_exe_stuff)
 
 	#-- Windows libraries to link against.
 	TARGET_LINK_LIBRARIES ( spheresvr	PRIVATE ws2_32 libmariadb )
-	
+
 
 	#-- Set define macros.
 

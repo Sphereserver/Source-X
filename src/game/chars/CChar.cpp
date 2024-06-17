@@ -294,6 +294,8 @@ CChar::CChar( CREID_TYPE baseID ) :
     _iRegenTickCount = 0;
 	_iTimeLastCallGuards = 0;
 
+    m_fIgnoreNextPetCmd = 0;
+
     m_zClimbHeight = 0;
 	m_fClimbUpdated = false;
 	_wPrev_Hue = HUE_DEFAULT;
