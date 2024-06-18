@@ -1,6 +1,7 @@
 #include "../../common/CLog.h"
 #include "../uo_files/CUOTerrainInfo.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "CChar.h"
 #include <cmath>
 

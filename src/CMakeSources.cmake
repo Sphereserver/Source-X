@@ -333,6 +333,8 @@ src/game/CWorldGameTime.h
 src/game/CWorldImport.cpp
 src/game/CWorldMap.cpp
 src/game/CWorldMap.h
+src/game/CWorldSearch.cpp
+src/game/CWorldSearch.h
 src/game/CWorldTicker.cpp
 src/game/CWorldTicker.h
 src/game/CWorldTickingList.cpp

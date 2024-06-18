@@ -8,6 +8,7 @@
 #include "../items/CItemVendable.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CClient.h"
 

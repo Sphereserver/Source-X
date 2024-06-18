@@ -6,7 +6,7 @@
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../CWorldGameTime.h"
-#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

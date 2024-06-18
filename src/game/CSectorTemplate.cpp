@@ -306,7 +306,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			continue;
 		if ( ! pRegion->IsInside2d( pt ))
 			continue;
-        pRLinks->push_back(pRegion);
+        pRLinks->emplace_back(pRegion);
 	}
 	return pRLinks->size();
 }

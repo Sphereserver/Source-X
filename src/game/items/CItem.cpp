@@ -21,6 +21,7 @@
 #include "../CWorldTickingList.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"

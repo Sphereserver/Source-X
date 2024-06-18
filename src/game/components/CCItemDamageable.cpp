@@ -3,7 +3,7 @@
 #include "../CServer.h"
 #include "../CObjBase.h"
 #include "../CWorldGameTime.h"
-#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"

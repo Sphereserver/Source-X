@@ -7,6 +7,7 @@
 #include "../clients/CClient.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 

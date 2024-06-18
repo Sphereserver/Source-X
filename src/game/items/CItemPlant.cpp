@@ -2,7 +2,7 @@
 #include "CItem.h"
 #include "../chars/CChar.h"
 #include "../triggers.h"
-#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/resource/CResourceID.h"
 #include "../CServer.h"
