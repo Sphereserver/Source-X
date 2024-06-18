@@ -337,7 +337,15 @@ int CSFile::SeekToEnd()
 bool CSFile::_Write( const void * pData, int iLength )
 {
     ADDTOCALLSTACK("CSFile::_Write");
+    ASSERT(iLength >= 0);
+    if (iLength <= 0)
+        return true;
+
+#if defined(_WIN32)
+    ASSERT(_fileDescriptor != nullptr);
+#elif defined(__unix__) or defined(unix)
     ASSERT(_fileDescriptor >= 0);
+#endif
 
 #ifdef _WIN32
 	DWORD dwWritten;

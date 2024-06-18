@@ -660,7 +660,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
-		return (uchar)g_Cfg.m_iLightDungeon;
+		return (uchar)std::clamp(g_Cfg.m_iLightDungeon, LIGHT_BRIGHT, LIGHT_DARK);
 
 	int localtime = GetLocalTime();
 
@@ -678,26 +678,21 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		//	0...	x	...12*60
 		int iTargLight = ((localtime * ( g_Cfg.m_iLightNight - g_Cfg.m_iLightDay ))/(12*60) + g_Cfg.m_iLightDay);
 
-		if ( iTargLight < LIGHT_BRIGHT )
-			iTargLight = LIGHT_BRIGHT;
-		if ( iTargLight > LIGHT_DARK )
-			iTargLight = LIGHT_DARK;
-
-		return (uchar)(iTargLight);
+		return (uchar)std::clamp(iTargLight, LIGHT_BRIGHT, LIGHT_DARK);;
 	}
 
 	const int hour = ( localtime / ( 60)) % 24;
 	const bool fNight = ( hour < 6 || hour > 12+8 );	// Is it night or day ?
-	int iTargLight = (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay;	// Target light level.
+	byte uiTargLight = (byte)std::min((int)UINT8_MAX, (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay);	// Target light level.
 
 	// Check for clouds...if it is cloudy, then we don't even need to check for the effects of the moons...
 	if ( GetWeather())
 	{
 		// Clouds of some sort...
 		if (fNight)
-			iTargLight += ( g_Rand.GetValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
+			uiTargLight += byte( g_Rand.Get16ValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
 		else
-			iTargLight += ( g_Rand.GetValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
+			uiTargLight += byte( g_Rand.Get16ValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
 	}
 
 	if ( fNight )
@@ -709,7 +704,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		// Check to see if Trammel is up here...
 		if ( IsMoonVisible( iTrammelPhase, localtime ))
 		{
-			static const byte sm_TrammelPhaseBrightness[] =
+			static constexpr byte sm_TrammelPhaseBrightness[] =
 			{
 				0, // New Moon
 				TRAMMEL_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -722,14 +717,14 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 			};
 
 			ASSERT( iTrammelPhase < ARRAY_COUNT(sm_TrammelPhaseBrightness));
-			iTargLight -= sm_TrammelPhaseBrightness[iTrammelPhase];
+			uiTargLight -= std::min(uiTargLight, sm_TrammelPhaseBrightness[iTrammelPhase]);
 		}
 
 		// Felucca
 		uint iFeluccaPhase = CWorldGameTime::GetMoonPhase( true );
 		if ( IsMoonVisible( iFeluccaPhase, localtime ))
 		{
-			static const byte sm_FeluccaPhaseBrightness[] =
+			static constexpr byte sm_FeluccaPhaseBrightness[] =
 			{
 				0, // New Moon
 				FELUCCA_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -742,23 +737,23 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 			};
 
 			ASSERT( iFeluccaPhase < ARRAY_COUNT(sm_FeluccaPhaseBrightness));
-			iTargLight -= sm_FeluccaPhaseBrightness[iFeluccaPhase];
+			uiTargLight -= std::min(uiTargLight, sm_FeluccaPhaseBrightness[iFeluccaPhase]);
 		}
 	}
 
-	if ( iTargLight < LIGHT_BRIGHT )
-		iTargLight = LIGHT_BRIGHT;
-	if ( iTargLight > LIGHT_DARK )
-		iTargLight = LIGHT_DARK;
+	//if ( uiTargLight < LIGHT_BRIGHT /* 0 */)
+	//	uiTargLight = LIGHT_BRIGHT;
+	if ( uiTargLight > LIGHT_DARK )
+		uiTargLight = LIGHT_DARK;
 
-	if ( fQuickSet || m_Env.m_Light == iTargLight )		// Initializing the sector
-		return (uchar)(iTargLight);
+	if ( fQuickSet || m_Env.m_Light == uiTargLight )		// Initializing the sector
+		return uiTargLight;
 
 	// Gradual transition to global light level.
-	if ( m_Env.m_Light > iTargLight )
-		return ( m_Env.m_Light - 1 );
+	if ( m_Env.m_Light > uiTargLight )
+		return ((m_Env.m_Light > LIGHT_BRIGHT) ? (m_Env.m_Light - 1) : m_Env.m_Light);
 	else
-		return ( m_Env.m_Light + 1 );
+		return ((m_Env.m_Light < UINT8_MAX) ? (m_Env.m_Light + 1) : m_Env.m_Light);
 }
 
 void CSector::SetLightNow( bool fFlash )
