@@ -6,6 +6,7 @@
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItemMulti.h"
 #include "CItemShip.h"

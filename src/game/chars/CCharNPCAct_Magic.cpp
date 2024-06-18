@@ -1,9 +1,10 @@
 // Actions specific to an NPC.
 
-#include "../CWorldMap.h"
-#include "CCharNPC.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../triggers.h"
+#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
+#include "CCharNPC.h"
 
 // Retrieves all the spells this character has to spells[x] list
 int CCharNPC::Spells_GetCount()

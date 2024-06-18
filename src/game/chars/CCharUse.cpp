@@ -7,12 +7,14 @@
 #include "../components/CCSpawn.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
-static const int MASK_RETURN_FOLLOW_LINKS = 0x02;
+static constexpr int MASK_RETURN_FOLLOW_LINKS = 0x02;
+
 
 bool CChar::Use_MultiLockDown( CItem * pItemTarg )
 {

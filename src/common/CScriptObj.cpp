@@ -15,6 +15,7 @@
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 #include "../game/CWorldMap.h"
+#include "../game/CWorldSearch.h"
 #include "../game/CWorldTimedFunctions.h"
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"

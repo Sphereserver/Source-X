@@ -8,6 +8,7 @@
 #include "../CObjBase.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CCMultiMovable.h"
 

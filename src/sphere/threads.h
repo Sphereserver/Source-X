@@ -216,8 +216,8 @@ class ThreadHolder
 {
 	spherethreadlist_t m_threads;
 	size_t m_threadCount;
-	std::atomic_bool m_inited;
-    std::atomic_bool m_closing;
+	volatile std::atomic_bool m_inited;
+    volatile std::atomic_bool m_closing;
 	SimpleMutex m_mutex;
 
 

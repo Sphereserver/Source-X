@@ -11,6 +11,7 @@
 #include "../clients/CClient.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItemMultiCustom.h"
 

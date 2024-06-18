@@ -7,6 +7,7 @@
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

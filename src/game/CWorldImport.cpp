@@ -3,7 +3,7 @@
 #include "items/CItem.h"
 #include "CObjBase.h"
 #include "CWorld.h"
-#include "CWorldMap.h"
+#include "CWorldSearch.h"
 
 struct CImportSer : public CSObjListRec
 {
@@ -17,23 +17,22 @@ public:
 	LAYER_TYPE m_layer;	// UOX does this diff than us. so store this here.
 
 public:
-	bool IsTopLevel() const
+	bool IsTopLevel() const noexcept
 	{
 		return( m_dwContSer == UID_UNUSED );
 	}
 
-	CImportSer( dword dwSer ) :
+	CImportSer( dword dwSer ) noexcept :
 		m_dwSer( dwSer )
 	{
 		m_pObj = nullptr;
 		m_dwContSer = UID_UNUSED;
 		m_layer = LAYER_NONE;
 	}
-	~CImportSer() = default;
+	~CImportSer() noexcept = default;
 
-private:
-	CImportSer(const CImportSer& copy);
-	CImportSer& operator=(const CImportSer& other);
+	CImportSer(const CImportSer& copy) = delete;
+	CImportSer& operator=(const CImportSer& other) = delete;
 };
 
 struct CImportFile
@@ -62,9 +61,8 @@ public:
 		m_pszArg2 = nullptr;
 	}
 
-private:
-	CImportFile(const CImportFile& copy);
-	CImportFile& operator=(const CImportFile& other);
+	CImportFile(const CImportFile& copy) = delete;
+	CImportFile& operator=(const CImportFile& other) = delete;
 
 public:
 	void CheckLast();

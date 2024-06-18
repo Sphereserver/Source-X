@@ -5,6 +5,7 @@
 #include "../chars/CCharNPC.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "CItem.h"
 #include "CItemCorpse.h"
 

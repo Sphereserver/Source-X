@@ -4,6 +4,7 @@
 #include "../items/CItemVendable.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../spheresvr.h"
 #include "CChar.h"
 #include "CCharNPC.h"

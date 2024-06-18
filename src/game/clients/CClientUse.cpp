@@ -7,6 +7,7 @@
 #include "../items/CItemShip.h"
 #include "../components/CCSpawn.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CClient.h"
 

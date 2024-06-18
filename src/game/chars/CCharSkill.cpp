@@ -9,6 +9,7 @@
 #include "../triggers.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
