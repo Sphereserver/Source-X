@@ -425,6 +425,7 @@ void CWorldTicker::Tick()
             // Erase in chunks, call erase the least times possible.
             if (!_vecWorldObjsToEraseFromList.empty())
             {
+                /*
                 g_Log.EventDebug("-- Start WORLDTICK. I need to remove %lu items:\n", _vecWorldObjsToEraseFromList.size());
                 std::stringstream ss;
                 for (size_t elem : _vecWorldObjsToEraseFromList)
@@ -432,12 +433,13 @@ void CWorldTicker::Tick()
                     ss << elem << ' ';
                 }
                 g_Log.EventDebug("%s\n", ss.str().c_str());
+                */
 
                 if (_vecWorldObjsToEraseFromList.size() > 1)
                 {
                     size_t uiCurMapElemIdx = 0;
                     size_t uiCurVecElemIdx = 0;
-                    size_t uiSubRangeStartIdx = 0;
+                    //size_t uiSubRangeStartIdx = 0;
                     WorldTickList::iterator itSubRangeStart = _mWorldTickList.begin();
                     WorldTickList::iterator itMap = _mWorldTickList.begin();
                     bool fContiguous = true;
@@ -450,7 +452,7 @@ void CWorldTicker::Tick()
                         {
                             if (uiCurMapElemIdx == _vecWorldObjsToEraseFromList[uiCurVecElemIdx])
                             {
-                                uiSubRangeStartIdx = uiCurMapElemIdx;
+                                //uiSubRangeStartIdx = uiCurMapElemIdx;
                                 itSubRangeStart = itMap;
                                 fFirstMatch = true;
 
@@ -475,7 +477,7 @@ void CWorldTicker::Tick()
                                 // It isn't contiguous. Go below.
                                 ASSERT(!fContiguous);
                                 // This is the first one that matches after previous mismatches. We start this chunk from here.
-                                uiSubRangeStartIdx = uiCurMapElemIdx;
+                                //uiSubRangeStartIdx = uiCurMapElemIdx;
                                 fContiguous = true;
                             }
 
@@ -494,7 +496,7 @@ void CWorldTicker::Tick()
                             {
                                 // This is an element after the first one successive to the previous contiguous block (2nd, 3rd...)
                                 // Ignore it.
-                                g_Log.EventDebug("Skip this %lu\n", uiCurMapElemIdx);
+                                //g_Log.EventDebug("Skip this %lu\n", uiCurMapElemIdx);
                                 ++itMap;
                             }
                             else
@@ -503,12 +505,13 @@ void CWorldTicker::Tick()
                                 // I want to erase until the previous one
                                 // erase doesn't delete the last element in the range
                                 itMap = _mWorldTickList.erase(itSubRangeStart, itMap);
+                                //g_Log.EventDebug("Skip this %lu, not to be deleted, and...\n", uiCurMapElemIdx);
+                                //g_Log.EventDebug("Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
+
                                 ++itMap;
                                 itSubRangeStart = itMap;
-                                uiSubRangeStartIdx = uiCurMapElemIdx;   // Not really needed
+                                //uiSubRangeStartIdx = uiCurMapElemIdx;   // Not really needed
                                 fContiguous = false;
-
-                                g_Log.EventDebug("Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
                             }
                             ++uiCurMapElemIdx;
                             continue;
@@ -519,13 +522,13 @@ void CWorldTicker::Tick()
                     if (fFirstMatch && fContiguous)
                     {
                         /*itMap =*/ _mWorldTickList.erase(itSubRangeStart, itMap); // last range to erase
-                        g_Log.EventDebug("(End cycle) Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
+                        //g_Log.EventDebug("(End cycle) Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
                     }
                 }
                 else
                 {
                     _mWorldTickList.erase(std::next(_mWorldTickList.begin(), _vecWorldObjsToEraseFromList.front()));
-                    g_Log.EventDebug("Erasing 1 item.\n");
+                    //g_Log.EventDebug("Erasing 1 item.\n");
                 }
             }
 
@@ -703,6 +706,7 @@ void CWorldTicker::Tick()
             // Erase in chunks, call erase the least times possible.
             if (!_vecPeriodicCharsToEraseFromList.empty())
             {
+                /*
                 g_Log.EventDebug("-- Start CHARPERIODICTICK. I need to remove %lu items:\n", _vecPeriodicCharsToEraseFromList.size());
                 std::stringstream ss;
                 for (size_t elem : _vecPeriodicCharsToEraseFromList)
@@ -710,12 +714,13 @@ void CWorldTicker::Tick()
                     ss << elem << ' ';
                 }
                 g_Log.EventDebug("%s\n", ss.str().c_str());
+                */
 
                 if (_vecPeriodicCharsToEraseFromList.size() > 1)
                 {
                     size_t uiCurMapElemIdx = 0;
                     size_t uiCurVecElemIdx = 0;
-                    size_t uiSubRangeStartIdx = 0;
+                   // size_t uiSubRangeStartIdx = 0;
                     CharTickList::iterator itSubRangeStart = _mCharTickList.begin();
                     CharTickList::iterator itMap = _mCharTickList.begin();
                     bool fContiguous = true;
@@ -728,7 +733,7 @@ void CWorldTicker::Tick()
                         {
                             if (uiCurMapElemIdx == _vecPeriodicCharsToEraseFromList[uiCurVecElemIdx])
                             {
-                                uiSubRangeStartIdx = uiCurMapElemIdx;
+                                //uiSubRangeStartIdx = uiCurMapElemIdx;
                                 itSubRangeStart = itMap;
                                 fFirstMatch = true;
 
@@ -753,7 +758,7 @@ void CWorldTicker::Tick()
                                 // It isn't contiguous. Go below.
                                 ASSERT(!fContiguous);
                                 // This is the first one that matches after previous mismatches. We start this chunk from here.
-                                uiSubRangeStartIdx = uiCurMapElemIdx;
+                                //uiSubRangeStartIdx = uiCurMapElemIdx;
                                 fContiguous = true;
                             }
 
@@ -772,7 +777,7 @@ void CWorldTicker::Tick()
                             {
                                 // This is an element after the first one successive to the previous contiguous block (2nd, 3rd...)
                                 // Ignore it.
-                                g_Log.EventDebug("Skip this %lu\n", uiCurMapElemIdx);
+                                //g_Log.EventDebug("Skip this %lu\n", uiCurMapElemIdx);
                                 ++itMap;
                             }
                             else
@@ -780,13 +785,14 @@ void CWorldTicker::Tick()
                                 // This is the first element after the previous contiguous block
                                 // I want to erase until the previous one
                                 // erase doesn't delete the last element in the range
+                                //g_Log.EventDebug("Skip this %lu, not to be deleted, and...\n", uiCurMapElemIdx);
+                                //g_Log.EventDebug("Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
+
                                 itMap = _mCharTickList.erase(itSubRangeStart, itMap);
                                 ++itMap;
                                 itSubRangeStart = itMap;
-                                uiSubRangeStartIdx = uiCurMapElemIdx;   // Not really needed
+                                //uiSubRangeStartIdx = uiCurMapElemIdx;   // Not really needed
                                 fContiguous = false;
-
-                                g_Log.EventDebug("Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
                             }
                             ++uiCurMapElemIdx;
                             continue;
@@ -797,13 +803,13 @@ void CWorldTicker::Tick()
                     if (fFirstMatch && fContiguous)
                     {
                         /*itMap =*/ _mCharTickList.erase(itSubRangeStart, itMap); // last range to erase
-                        g_Log.EventDebug("(End cycle) Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
+                        //g_Log.EventDebug("(End cycle) Erasing %lu items starting from pos %lu\n", (uiCurMapElemIdx - uiSubRangeStartIdx), uiSubRangeStartIdx);
                     }
                 }
                 else
                 {
                     _mCharTickList.erase(std::next(_mCharTickList.begin(), _vecPeriodicCharsToEraseFromList.front()));
-                    g_Log.EventDebug("Erasing 1 item.\n");
+                    //g_Log.EventDebug("Erasing 1 item.\n");
                 }
             }
 

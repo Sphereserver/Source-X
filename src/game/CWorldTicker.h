@@ -21,7 +21,6 @@
 #ifdef __GNUC__
     #pragma GCC diagnostic pop
 #endif
-//#include <flat_containers/flat_map.hpp>
 #include <parallel_hashmap/btree.h>
 
 
@@ -38,17 +37,11 @@ public:
     ~CWorldTicker() = default;
 
 private:
-    //using TimedObjectsContainer = std::vector<CTimedObject*>;
-    //struct WorldTickList : public std::map<int64, TimedObjectsContainer>
-    //struct WorldTickList : public fc::vector_map<int64, TimedObjectsContainer>
     struct WorldTickList : public phmap::btree_multimap<int64, CTimedObject*>
     {
         THREAD_CMUTEX_DEF;
     };
 
-    //using TimedCharsContainer = std::vector<CChar*>;
-    //struct CharTickList : public std::map<int64, TimedCharsContainer>
-    //struct CharTickList : public fc::vector_map<int64, TimedCharsContainer>
     struct CharTickList : public phmap::btree_multimap<int64, CChar*>
     {
         THREAD_CMUTEX_DEF;
