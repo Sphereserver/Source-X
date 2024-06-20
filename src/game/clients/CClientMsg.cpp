@@ -310,11 +310,11 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fItems )
 	{
 		// Remove any multi objects first ! or client will hang
-		CWorldSearch AreaItems(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
-		AreaItems.SetSearchSquare(true);
+		auto AreaItems = CWorldSearch::GetInstance(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
+		AreaItems->SetSearchSquare(true);
 		for (;;)
 		{
-			CItem * pItem = AreaItems.GetItem();
+			CItem * pItem = AreaItems->GetItem();
 			if ( pItem == nullptr )
 				break;
 			addObjectRemove(pItem);
@@ -323,12 +323,12 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fChars )
 	{
 		CChar * pCharSrc = GetChar();
-		CWorldSearch AreaChars(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
-		AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
-		AreaChars.SetSearchSquare(true);
+		auto AreaChars = CWorldSearch::GetInstance(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
+		AreaChars->SetAllShow(IsPriv(PRIV_ALLSHOW));
+		AreaChars->SetSearchSquare(true);
 		for (;;)
 		{
-			CChar * pChar = AreaChars.GetChar();
+			CChar * pChar = AreaChars->GetChar();
 			if ( pChar == nullptr )
 				break;
 			if ( pChar == pCharSrc )
@@ -1930,15 +1930,17 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
     std::vector<CItem*> vecMultis;
+    vecMultis.reserve(5);
     std::vector<CItem*> vecItems;
+    vecItems.reserve(15);
 
     // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
     //  If ptOld is an invalid point, just send every object i can see.
-	CWorldSearch AreaItems(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
-	AreaItems.SetSearchSquare(true);
+	auto Area = CWorldSearch::GetInstance(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
+	Area->SetSearchSquare(true);
 	for (;;)
 	{
-        CItem* pItem = AreaItems.GetItem();
+        CItem* pItem = Area->GetItem();
 		if ( !pItem )
 			break;
 
@@ -2024,12 +2026,12 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	iSeeCurrent = 0;
 	iSeeMax = g_Cfg.m_iMaxCharComplexity * 5;
 
-	CWorldSearch AreaChars(pCharThis->GetTopPoint(), iViewDist);
-	AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
-	AreaChars.SetSearchSquare(true);
+	Area->Reset(pCharThis->GetTopPoint(), iViewDist);
+	Area->SetAllShow(IsPriv(PRIV_ALLSHOW));
+	Area->SetSearchSquare(true);
 	for (;;)
 	{
-        CChar* pChar = AreaChars.GetChar();
+        CChar* pChar = Area->GetChar();
 		if ( !pChar || iSeeCurrent > iSeeMax )
 			break;
 		if ( pCharThis == pChar || !CanSee(pChar) )

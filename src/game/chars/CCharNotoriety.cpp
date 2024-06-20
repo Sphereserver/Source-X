@@ -5,9 +5,8 @@
 #include "CCharNPC.h"
 
 // I'm a murderer?
-bool CChar::Noto_IsMurderer() const
+bool CChar::Noto_IsMurderer() const noexcept
 {
-	ADDTOCALLSTACK("CChar::Noto_IsMurderer");
 	return ( m_pPlayer && (m_pPlayer->m_wMurders > g_Cfg.m_iMurderMinCount) );
 }
 

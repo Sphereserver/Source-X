@@ -1648,10 +1648,10 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	// Check if there's too many items on the same spot
 	uint iItemCount = 0;
 	const CItem * pItem = nullptr;
-	CWorldSearch AreaItems(ptNewPlace);
+	auto AreaItems = CWorldSearch::GetInstance(ptNewPlace);
 	for (;;)
 	{
-		pItem = AreaItems.GetItem();
+		pItem = AreaItems->GetItem();
 		if ( pItem == nullptr )
 			break;
 
@@ -5119,14 +5119,15 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	}
 
 	// Check for interesting items, like boats, carpets, etc.., ignore our stuff
+    auto Area = CWorldSearch::GetInstance(ptCoords, iVisibility);
+
 	CItem * pItemSighted = nullptr;
 	CItem * pBoatSighted = nullptr;
 	int iItemSighted = 0;
 	int iBoatSighted = 0;
-	CWorldSearch ItemsArea( ptCoords, iVisibility );
 	for (;;)
 	{
-		CItem * pItem = ItemsArea.GetItem();
+		CItem * pItem = Area->GetItem();
 		if ( pItem == nullptr )
 			break;
 		if ( pItem == this )
@@ -5197,12 +5198,13 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	}
 
 	// Check for creatures
+    Area->RestartSearch();
+
 	CChar * pCharSighted = nullptr;
 	int iCharSighted = 0;
-	CWorldSearch AreaChar( ptCoords, iVisibility );
 	for (;;)
 	{
-		CChar * pChar = AreaChar.GetChar();
+		CChar * pChar = Area->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar == pUser )
@@ -5918,10 +5920,10 @@ void CItem::OnExplosion()
 		iDmgPhysical = 100;
 
 	CChar * pSrc = m_uidLink.CharFind();
-	CWorldSearch AreaChars( GetTopPoint(), m_itExplode.m_iDist );
+	auto AreaChars = CWorldSearch::GetInstance( GetTopPoint(), m_itExplode.m_iDist );
 	for (;;)
 	{
-		CChar * pChar = AreaChars.GetChar();
+		CChar * pChar = AreaChars->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar->CanSeeLOS(this) )
@@ -6046,7 +6048,7 @@ bool CItem::_CanHoldTimer() const
         return false;
     }
 
-    if (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED))
+    if (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED))
     {
         return true;
     }
@@ -6074,7 +6076,7 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fIgnoreCont = (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 	// ATTR_DECAY ignores/overrides fParentGoingToSleep
 	if (fIgnoreCont || (IsAttr(ATTR_DECAY) && !pCont))
 	{

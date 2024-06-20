@@ -3153,10 +3153,10 @@ void CObjBase::_GoSleep()
 	ADDTOCALLSTACK("CObjBase::_GoSleep");
 	CTimedObject::_GoSleep();
 
-	//if (_IsTimerSet())
-	//{
+	if (_IsTimerSet())
+	{
 		CWorldTickingList::DelObjSingle(this);
-	//}
+	}
 	CWorldTickingList::DelObjStatusUpdate(this, false);
 }
 
@@ -3168,7 +3168,7 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
     bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
-    const bool fIgnoreCont = (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fCanTick)
     {

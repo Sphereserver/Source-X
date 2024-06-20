@@ -60,6 +60,9 @@ protected:
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
 	llong m_CurrentTime;			// in milliseconds
 
+    friend class ProfileTask;
+    uint m_iMapTaskCounter;
+
 public:
 	ProfileData() noexcept;
 

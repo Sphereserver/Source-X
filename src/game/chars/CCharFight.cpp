@@ -101,10 +101,10 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD) // guards only fight for justice, they can't commit a crime!!?
 		return false;
 
-	CWorldSearch AreaChars( GetTopPoint(), g_Cfg.m_iMapViewSize );
+	auto AreaChars = CWorldSearch::GetInstance( GetTopPoint(), g_Cfg.m_iMapViewSize );
 	for (;;)
 	{
-		CChar * pChar = AreaChars.GetChar();
+		CChar * pChar = AreaChars->GetChar();
 		if ( pChar == nullptr )
 			break;
         if (this == pChar) // Ignore the player himself.
@@ -183,8 +183,8 @@ void CChar::CallGuards()
 
 	// We don't have any target yet, let's check everyone nearby
 	CChar * pCriminal;
-	CWorldSearch AreaCrime(GetTopPoint(), g_Cfg.m_iMapViewSize);
-	while ((pCriminal = AreaCrime.GetChar()) != nullptr)
+	auto AreaCrime = CWorldSearch::GetInstance(GetTopPoint(), g_Cfg.m_iMapViewSize);
+	while ((pCriminal = AreaCrime->GetChar()) != nullptr)
 	{
 		if (pCriminal == this)
 			continue;
@@ -232,9 +232,9 @@ bool CChar::CallGuards( CChar * pCriminal )
 	else
 	{
 		// Search for a free guards nearby
-		CWorldSearch AreaGuard(GetTopPoint(), UO_MAP_VIEW_SIGHT);
+		auto AreaGuard = CWorldSearch::GetInstance(GetTopPoint(), UO_MAP_VIEW_SIGHT);
 		CChar *pGuardFound = nullptr;
-		while ((pGuardFound = AreaGuard.GetChar()) != nullptr)
+		while ((pGuardFound = AreaGuard->GetChar()) != nullptr)
 		{
 			if (pGuardFound->m_pNPC && (pGuardFound->m_pNPC->m_Brain == NPCBRAIN_GUARD) && // Char found must be a guard
 				(pGuardFound->m_Fight_Targ_UID == pCriminal->GetUID() || !pGuardFound->IsStatFlag(STATF_WAR)))	// and will be eligible to fight this target if it's not already on a fight or if its already attacking this target (to avoid spamming docens of guards at the same target).
@@ -1025,13 +1025,13 @@ void CChar::OnTakeDamageInflictArea(int iDmg, CChar* pSrc, DAMAGE_TYPE uType, in
     if (IsAosFlagEnabled(FEATURE_AOS_DAMAGE))
         iDistance=10; // 5 for ML and 10 for aos
 
-    CWorldSearch AreaChars(GetTopPoint(), iDistance);
+    auto AreaChars = CWorldSearch::GetInstance(GetTopPoint(), iDistance);
     for (;;)
         //pSrc = Char make the attack
         //pChar = Char scanned on the loop iteration
         //this = Char get the initial hit
     {
-        CChar* pChar = AreaChars.GetChar();
+        CChar* pChar = AreaChars->GetChar();
         if (!pChar)
             break;
         if ((pChar == this) || (pChar == pSrc))                     //This char already receive the base hit. Damage already done

@@ -494,11 +494,11 @@ int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
 	int ry = 1 + abs( rect.m_bottom - rect.m_top ) / 2;
 
-	CWorldSearch AreaItem( ptCtr, maximum( rx, ry ));
-	AreaItem.SetSearchSquare( true );
+	auto AreaItem = CWorldSearch::GetInstance( ptCtr, maximum( rx, ry ));
+	AreaItem->SetSearchSquare( true );
 	for (;;)
 	{
-		CItem * pItem = AreaItem.GetItem();
+		CItem * pItem = AreaItem->GetItem();
 		if ( pItem == nullptr )
 			break;
 		if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -555,7 +555,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	CRectMap rect;
 	rect.SetRect( m_tmTile.m_ptFirst.m_x, m_tmTile.m_ptFirst.m_y, pt.m_x, pt.m_y, pt.m_map);
-	CPointMap ptCtr = rect.GetCenter();
+	CPointMap ptCtr(rect.GetCenter());
 	ptCtr.m_map = pt.m_map;
 
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
@@ -603,12 +603,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
-			CWorldSearch AreaItem( ptCtr, iRadius );
-			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaItem.SetSearchSquare( true );
+			auto Area = CWorldSearch::GetInstance( ptCtr, iRadius );
+			Area->SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			Area->SetSearchSquare( true );
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = Area->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -619,12 +619,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				++iCount;
 			}
 
-			CWorldSearch AreaChar( ptCtr, iRadius );
-			AreaChar.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaChar.SetSearchSquare( true );
-			for (;;)
+            Area->RestartSearch();
+            for (;;)
 			{
-				CChar* pChar = AreaChar.GetChar();
+				CChar* pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
@@ -641,12 +639,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKE:		// NUKE all items in the region.
 		{
-			CWorldSearch AreaItem( ptCtr, iRadius );
-			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaItem.SetSearchSquare( true );
+			auto AreaItem = CWorldSearch::GetInstance( ptCtr, iRadius );
+			AreaItem->SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaItem->SetSearchSquare( true );
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = AreaItem->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -670,12 +668,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKECHAR:
 		{
-			CWorldSearch AreaChar( ptCtr, iRadius );
-			AreaChar.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaChar.SetSearchSquare( true );
+			auto AreaChar = CWorldSearch::GetInstance( ptCtr, iRadius );
+			AreaChar->SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaChar->SetSearchSquare( true );
 			for (;;)
 			{
-				CChar* pChar = AreaChar.GetChar();
+				CChar* pChar = AreaChar->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
@@ -1523,10 +1521,10 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 		// All the pets that could hear me.
 		bool fGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-		CWorldSearch AreaChars( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
+		auto AreaChars = CWorldSearch::GetInstance( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
 		for (;;)
 		{
-			CChar * pCharPet = AreaChars.GetChar();
+			CChar * pCharPet = AreaChars->GetChar();
 			if ( pCharPet == nullptr )
 				break;
 			if ( pCharPet == m_pChar )

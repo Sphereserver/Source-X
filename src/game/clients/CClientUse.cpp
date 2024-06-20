@@ -1157,10 +1157,10 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 				iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
 			m_pChar->m_atTracking.m_dwDistMax = (dword)(iSkillLevel / 10 + 10);
 		}
-		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
+		auto AreaChars = CWorldSearch::GetInstance(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
 		for (;;)
 		{
-			CChar *pChar = AreaChars.GetChar();
+			CChar *pChar = AreaChars->GetChar();
 			if ( !pChar )
 				break;
 			if ( m_pChar == pChar )

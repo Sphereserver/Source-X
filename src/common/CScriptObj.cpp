@@ -2534,14 +2534,14 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			CPointMap pt = pObjTop->GetTopPoint();
 			if (iType & 1)		// FORITEM, FOROBJ
 			{
-				CWorldSearch AreaItems(pt, iDist);
+				auto AreaItems = CWorldSearch::GetInstance(pt, iDist);
 				for (;;)
 				{
 					++LoopsMade;
 					if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
 						goto toomanyloops;
 
-					CItem* pItem = AreaItems.GetItem();
+					CItem* pItem = AreaItems->GetItem();
 					if (pItem == nullptr)
 						break;
 					TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
@@ -2561,15 +2561,15 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			}
 			if (iType & 2)		// FORCHAR, FOROBJ
 			{
-				CWorldSearch AreaChars(pt, iDist);
-				AreaChars.SetAllShow((iType & 0x20) ? true : false);
+				auto AreaChars = CWorldSearch::GetInstance(pt, iDist);
+				AreaChars->SetAllShow((iType & 0x20) ? true : false);
 				for (;;)
 				{
 					++LoopsMade;
 					if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
 						goto toomanyloops;
 
-					CChar* pChar = AreaChars.GetChar();
+					CChar* pChar = AreaChars->GetChar();
 					if (pChar == nullptr)
 						break;
 					if ((iType & 0x10) && (!pChar->IsClientActive()))	// FORCLIENTS

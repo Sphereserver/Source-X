@@ -10,7 +10,7 @@
 
 class AbstractSphereThread;
 
-ProfileData& GetCurrentProfileData() noexcept;
+ProfileData& GetCurrentProfileData();
 
 
 class ProfileTask
@@ -20,8 +20,10 @@ private:
 	PROFILE_TYPE m_previousTask;
 
 public:
+    static const char *m_sClassName;
+
 	explicit ProfileTask(PROFILE_TYPE id);
-	~ProfileTask(void);
+	~ProfileTask(void) noexcept;
 
 	ProfileTask(const ProfileTask& copy) = delete;
 	ProfileTask& operator=(const ProfileTask& other) = delete;

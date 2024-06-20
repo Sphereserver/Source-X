@@ -131,10 +131,10 @@ bool CItem::Plant_OnTick()
 		if (iFruitID != ITEMID_NOTHING)
 		{
 			// Put a fruit on the ground if not already here.
-			CWorldSearch AreaItems(GetTopPoint());
+			auto AreaItems = CWorldSearch::GetInstance(GetTopPoint());
 			for (;;)
 			{
-				CItem *pItem = AreaItems.GetItem();
+				CItem *pItem = AreaItems->GetItem();
 				if ( !pItem )
 				{
 					CItem *pItemFruit = CItem::CreateScript(iFruitID);

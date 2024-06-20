@@ -1886,11 +1886,10 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
     //Reduce NPC hear distance for non pets
     int iAltDist = iFullDist;
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.ini
-
+	auto AreaChars = CWorldSearch::GetInstance(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.
 	for (;;)
 	{
-		pChar = AreaChars.GetChar();
+		pChar = AreaChars->GetChar();
 
         //No more Chars to check
 		if ( !pChar )
@@ -3063,10 +3062,10 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			char iCharZ = pt.m_z;
 
 			pt.Move(m_pChar->m_dirFace);
-			CWorldSearch Area(pt, 1);
+			auto Area = CWorldSearch::GetInstance(pt, 1);
 			for (;;)
 			{
-				CItem *pItem = Area.GetItem();
+				CItem *pItem = Area->GetItem();
 				if ( !pItem )
 					return;
 

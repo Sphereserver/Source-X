@@ -247,11 +247,11 @@ bool CItemMulti::MultiRealizeRegion()
 
     //We have to update the Characters if not moving around like Player Vendors.
     //Otherwise, when you reboot server, the region.name of the characters returns as Region name instead of multis.
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CChar* pChar = Area.GetChar();
+        CChar* pChar = Area->GetChar();
         if (pChar == nullptr) //Invalid char? Ignore.
         {
             break;
@@ -278,11 +278,11 @@ void CItemMulti::MultiUnRealizeRegion()
     m_pRegion->UnRealizeRegion();
 
     // find all creatures in the region and remove this from them.
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CChar * pChar = Area.GetChar();
+        CChar * pChar = Area->GetChar();
         if (pChar == nullptr)
         {
             break;
@@ -464,11 +464,11 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
         return nullptr;
     }
 
-    CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearch::GetInstance(GetTopPoint(), Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CItem * pItem = Area.GetItem();
+        CItem * pItem = Area->GetItem();
         if (pItem == nullptr)
         {
             return nullptr;
@@ -1043,12 +1043,12 @@ void CItemMulti::Eject(const CUID& uidChar)
 
 void CItemMulti::EjectAll(CUID uidCharNoTp)
 {
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     CChar *pCharNoTp = uidCharNoTp.CharFind();
     for (;;)
     {
-        CChar * pChar = Area.GetChar();
+        CChar * pChar = Area->GetChar();
         if (pChar == nullptr)
         {
             break;
@@ -1340,11 +1340,12 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     {
         ptArea = m_pRegion->m_pt;
     }
-    CWorldSearch Area(ptArea, Multi_GetDistanceMax());    // largest area.
-    Area.SetSearchSquare(true);
+
+    auto Area = CWorldSearch::GetInstance(ptArea, Multi_GetDistanceMax());    // largest area.
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CItem * pItem = Area.GetItem();
+        CItem * pItem = Area->GetItem();
         if (pItem == nullptr)
         {
             break;
@@ -1380,7 +1381,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
                 if (fTransferAddons)    // Shall be transfered, but addons needs an special transfer code by redeeding.
                 {
                     static_cast<CItemMulti*>(pItem)->Redeed(false, false);
-                    Area.RestartSearch();    // we removed an item and this will mess the search loop, so restart to fix it.
+                    Area->RestartSearch();    // we removed an item and this will mess the search loop, so restart to fix it.
                     continue;
                 }
                 else
@@ -3273,11 +3274,11 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
             CPointMap ptn = pt;             // A copy to work on.
 
             // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
-            CWorldSearch Area(pt, std::max(rect.GetWidth(), rect.GetHeight()));
-            Area.SetSearchSquare(true);
+            auto Area = CWorldSearch::GetInstance(pt, std::max(rect.GetWidth(), rect.GetHeight()));
+            Area->SetSearchSquare(true);
             for (;;)
             {
-                CChar * pCharSearch = Area.GetChar();
+                CChar * pCharSearch = Area->GetChar();
                 if (pCharSearch == nullptr)
                 {
                     break;

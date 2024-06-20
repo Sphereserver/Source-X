@@ -110,9 +110,9 @@ public:
 	CServerMapBlockingState& operator=(const CServerMapBlockingState& other) = delete;
 
 public:
-	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID );
+	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID ) noexcept;
 	static lpctstr GetTileName( dword dwID );
 };
 
