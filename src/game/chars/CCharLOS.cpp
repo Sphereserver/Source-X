@@ -425,7 +425,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		{
 			if ( !((flags & LOS_NB_LOCAL_DYNAMIC) && (pSrcRegion == pNowRegion)) )
 			{
-				auto AreaItems = CWorldSearch::GetInstance(ptNow, 0);
+				auto AreaItems = CWorldSearchHolder::GetInstance(ptNow, 0);
 				for (;;)
 				{
 					pItem = AreaItems->GetItem();

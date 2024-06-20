@@ -55,7 +55,7 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	// Find the resource object.
 	EXC_SET_BLOCK("find existant bit");
 	CItem * pResBit;
-	auto Area = CWorldSearch::GetInstance(pt);
+	auto Area = CWorldSearchHolder::GetInstance(pt);
 	for (;;)
 	{
 		pResBit = Area->GetItem();
@@ -346,7 +346,7 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 	bool fElem[4] = { false, false, false, false };
 
 	// Check dynamics
-	auto Area = CWorldSearch::GetInstance( pt, iDistance );
+	auto Area = CWorldSearchHolder::GetInstance( pt, iDistance );
 	Area->SetAllShow( true );
 	for (;;)
 	{
@@ -647,7 +647,7 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 	int iTestDistance;
 
 	// Check dynamics first since they are the easiest.
-	auto Area = CWorldSearch::GetInstance( pt, iDistance );
+	auto Area = CWorldSearchHolder::GetInstance( pt, iDistance );
 	for (;;)
 	{
         const CItem * pItem = Area->GetItem();
@@ -1108,7 +1108,7 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockingState & blo
 
 	// Any dynamic items here ?
 	// NOTE: This could just be an item that an NPC could just move ?
-	auto Area = CWorldSearch::GetInstance( pt );
+	auto Area = CWorldSearchHolder::GetInstance( pt );
 
 	for (;;)
 	{
@@ -1407,7 +1407,7 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockingState & b
 
 	// Any dynamic items here ?
 	// NOTE: This could just be an item that an NPC could just move ?
-	auto Area = CWorldSearch::GetInstance( pt );
+	auto Area = CWorldSearchHolder::GetInstance( pt );
 
 	for (;;)
 	{
@@ -1654,7 +1654,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockingState &
 	{
 	    // Any dynamic items here ?
 	    // NOTE: This could just be an item that an NPC could just move ?
-	    auto Area = CWorldSearch::GetInstance( pt );
+	    auto Area = CWorldSearchHolder::GetInstance( pt );
 	    for (;;)
 	    {
 		    const CItem * pItem = Area->GetItem();

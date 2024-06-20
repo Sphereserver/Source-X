@@ -197,7 +197,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 	{
 		if ( fTakePets )	// look for any creatures that might be following me near by
 		{
-			auto Area = CWorldSearch::GetInstance(ptOld, UO_MAP_VIEW_SIGHT);
+			auto Area = CWorldSearchHolder::GetInstance(ptOld, UO_MAP_VIEW_SIGHT);
 			for (;;)
 			{
 				CChar * pChar = Area->GetChar();
@@ -2080,7 +2080,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel, int64 iDu
 		return;
 
     {
-        auto AreaChar = CWorldSearch::GetInstance(pntTarg, iDist);
+        auto AreaChar = CWorldSearchHolder::GetInstance(pntTarg, iDist);
         for (;;)
         {
             CChar * pChar = AreaChar->GetChar();
@@ -2097,7 +2097,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel, int64 iDu
 
 	if ( !pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ))	// prevent damage nearby items on ground
 	{
-		auto AreaItem = CWorldSearch::GetInstance( pntTarg, iDist );
+		auto AreaItem = CWorldSearchHolder::GetInstance( pntTarg, iDist );
 		for (;;)
 		{
 			CItem * pItem = AreaItem->GetItem();
@@ -2204,7 +2204,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			}
 
 			// Check for direct cast on a creature.
-			auto Area = CWorldSearch::GetInstance( ptg );
+			auto Area = CWorldSearchHolder::GetInstance( ptg );
 			for (;;)
 			{
 				CChar * pChar = Area->GetChar();

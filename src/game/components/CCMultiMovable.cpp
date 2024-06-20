@@ -154,7 +154,7 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     }
 
     // add chars to the list
-    auto Area = CWorldSearch::GetInstance(pItemThis->GetTopPoint(), iMaxDist);
+    auto Area = CWorldSearchHolder::GetInstance(pItemThis->GetTopPoint(), iMaxDist);
 
     Area->SetAllShow(true);
     Area->SetSearchSquare(true);

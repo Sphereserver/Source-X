@@ -137,7 +137,7 @@ void CImportFile::ImportFix()
 				ASSERT(pItemCheck);
 				pItemCheck->SetAttr(ATTR_MOVE_NEVER);
 
-				auto AreaItems = CWorldSearch::GetInstance(m_pCurSer->m_pObj->GetTopPoint());
+				auto AreaItems = CWorldSearchHolder::GetInstance(m_pCurSer->m_pObj->GetTopPoint());
 				for (;;)
 				{
 					CItem * pItem = AreaItems->GetItem();
@@ -762,7 +762,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	{
 		// Export as UOX format. for world forge stuff.
 		int index = 0;
-		auto AreaItems = CWorldSearch::GetInstance( pSrc->GetTopPoint(), iDist );
+		auto AreaItems = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );
 		AreaItems->SetSearchSquare(true);
 		for (;;)
 		{
@@ -777,7 +777,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	// (???NPC) Chars and the stuff they are carrying.
 	if ( wModeFlags & IMPFLAGS_CHARS )
 	{
-		auto AreaChars = CWorldSearch::GetInstance( pSrc->GetTopPoint(), iDist );
+		auto AreaChars = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );
 		AreaChars->SetSearchSquare(true);
 		AreaChars->SetAllShow( pSrc->IsPriv( PRIV_ALLSHOW ));	// show logged out chars?
 		for (;;)
@@ -792,7 +792,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	if ( wModeFlags & IMPFLAGS_ITEMS )
 	{
 		// Items on the ground.
-		auto AreaItems = CWorldSearch::GetInstance( pSrc->GetTopPoint(), iDist );
+		auto AreaItems = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );
 		AreaItems->SetSearchSquare(true);
 		AreaItems->SetAllShow( pSrc->IsPriv( PRIV_ALLSHOW ));	// show logged out chars?
 		for (;;)

@@ -131,7 +131,7 @@ bool CItem::Plant_OnTick()
 		if (iFruitID != ITEMID_NOTHING)
 		{
 			// Put a fruit on the ground if not already here.
-			auto AreaItems = CWorldSearch::GetInstance(GetTopPoint());
+			auto AreaItems = CWorldSearchHolder::GetInstance(GetTopPoint());
 			for (;;)
 			{
 				CItem *pItem = AreaItems->GetItem();

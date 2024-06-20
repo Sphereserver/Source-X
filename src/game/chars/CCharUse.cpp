@@ -1430,7 +1430,7 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	// Already a plant here ?
-	auto AreaItems = CWorldSearch::GetInstance(pt);
+	auto AreaItems = CWorldSearchHolder::GetInstance(pt);
 	for (;;)
 	{
 		CItem *pItem = AreaItems->GetItem();

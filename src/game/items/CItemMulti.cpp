@@ -247,7 +247,7 @@ bool CItemMulti::MultiRealizeRegion()
 
     //We have to update the Characters if not moving around like Player Vendors.
     //Otherwise, when you reboot server, the region.name of the characters returns as Region name instead of multis.
-    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
     Area->SetSearchSquare(true);
     for (;;)
     {
@@ -278,7 +278,7 @@ void CItemMulti::MultiUnRealizeRegion()
     m_pRegion->UnRealizeRegion();
 
     // find all creatures in the region and remove this from them.
-    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
     Area->SetSearchSquare(true);
     for (;;)
     {
@@ -464,7 +464,7 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
         return nullptr;
     }
 
-    auto Area = CWorldSearch::GetInstance(GetTopPoint(), Multi_GetDistanceMax());
+    auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), Multi_GetDistanceMax());
     Area->SetSearchSquare(true);
     for (;;)
     {
@@ -1043,7 +1043,7 @@ void CItemMulti::Eject(const CUID& uidChar)
 
 void CItemMulti::EjectAll(CUID uidCharNoTp)
 {
-    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
     Area->SetSearchSquare(true);
     CChar *pCharNoTp = uidCharNoTp.CharFind();
     for (;;)
@@ -1341,7 +1341,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         ptArea = m_pRegion->m_pt;
     }
 
-    auto Area = CWorldSearch::GetInstance(ptArea, Multi_GetDistanceMax());    // largest area.
+    auto Area = CWorldSearchHolder::GetInstance(ptArea, Multi_GetDistanceMax());    // largest area.
     Area->SetSearchSquare(true);
     for (;;)
     {
@@ -3274,7 +3274,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
             CPointMap ptn = pt;             // A copy to work on.
 
             // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
-            auto Area = CWorldSearch::GetInstance(pt, std::max(rect.GetWidth(), rect.GetHeight()));
+            auto Area = CWorldSearchHolder::GetInstance(pt, std::max(rect.GetWidth(), rect.GetHeight()));
             Area->SetSearchSquare(true);
             for (;;)
             {

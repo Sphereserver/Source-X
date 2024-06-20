@@ -230,7 +230,7 @@ void CVarDefMap::DeleteKey( lpctstr key )
 
 void CVarDefMap::Clear()
 {
-	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Empty");
+	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::Clear");
 	iterator it = m_Container.begin();
 	while ( it != m_Container.end() )
 	{

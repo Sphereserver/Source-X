@@ -1,16 +1,23 @@
 #ifndef _INC_CWORLDSEARCH_H
 #define _INC_CWORLDSEARCH_H
 
-//#include "../common/sphere_library/CSReferenceCount.h"
+#include "../common/sphere_library/CSReferenceCount.h"
 #include "../common/CRect.h"
 
+/*
 #ifdef _MSC_VER
 #   pragma warning(push)
 #   pragma warning(disable : 4244)
 #   pragma warning(disable : 4267)
 #   pragma warning(disable : 4324)
 #endif
+
 #include <cdrc/rc_ptr.h>
+
+#ifdef _MSC_VER
+#   pragma warning(pop)
+#endif
+*/
 
 class CSObjContRec;
 class CObjBase;
@@ -52,12 +59,11 @@ public:
     CWorldSearch& operator=(const CWorldSearch& other) = delete;
 
     CWorldSearch() noexcept;
-    CWorldSearch(size_t uiPreallocateSize) noexcept;
+    CWorldSearch(size_t uiPreallocateSize);
     ~CWorldSearch() noexcept;
 
 public:
-    //static CSReferenceCounted<CWorldSearch> GetInstance(const CPointMap& pt, int iDist = 0);
-    static cdrc::rc_ptr<CWorldSearch> GetInstance(const CPointMap& pt, int iDist = 0);
+    //static cdrc::rc_ptr<CWorldSearch> GetInstance(const CPointMap& pt, int iDist = 0);
     void Reset(const CPointMap& pt, int iDist = 0);
     void SetAllShow(bool fView);
     void SetSearchSquare(bool fSquareSearch);
@@ -69,8 +75,9 @@ private:
     bool GetNextSector();
 };
 
-#ifdef _MSC_VER
-    #pragma warning(pop)
-#endif
+struct CWorldSearchHolder
+{
+    static CSReferenceCounted<CWorldSearch> GetInstance(const CPointMap& pt, int iDist = 0);
+};
 
 #endif  // _INC_CWORLDSEARCH_H

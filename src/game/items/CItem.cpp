@@ -1639,7 +1639,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	// Check if there's too many items on the same spot
 	uint iItemCount = 0;
 	const CItem * pItem = nullptr;
-	auto AreaItems = CWorldSearch::GetInstance(ptNewPlace);
+	auto AreaItems = CWorldSearchHolder::GetInstance(ptNewPlace);
 	for (;;)
 	{
 		pItem = AreaItems->GetItem();
@@ -5110,7 +5110,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	}
 
 	// Check for interesting items, like boats, carpets, etc.., ignore our stuff
-    auto Area = CWorldSearch::GetInstance(ptCoords, iVisibility);
+    auto Area = CWorldSearchHolder::GetInstance(ptCoords, iVisibility);
 
 	CItem * pItemSighted = nullptr;
 	CItem * pBoatSighted = nullptr;
@@ -5911,7 +5911,7 @@ void CItem::OnExplosion()
 		iDmgPhysical = 100;
 
 	CChar * pSrc = m_uidLink.CharFind();
-	auto AreaChars = CWorldSearch::GetInstance( GetTopPoint(), m_itExplode.m_iDist );
+	auto AreaChars = CWorldSearchHolder::GetInstance( GetTopPoint(), m_itExplode.m_iDist );
 	for (;;)
 	{
 		CChar * pChar = AreaChars->GetChar();

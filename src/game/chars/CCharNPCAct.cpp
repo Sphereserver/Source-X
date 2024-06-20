@@ -503,7 +503,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 					else		point = ptFirstTry;
 
 					//	Scan point for items that could be moved by me and move them to my position
-					auto AreaItems = CWorldSearch::GetInstance(point);
+					auto AreaItems = CWorldSearchHolder::GetInstance(point);
 					for (;;)
 					{
 						CItem *pItem = AreaItems->GetItem();
@@ -1108,7 +1108,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	// Any interesting chars here ?
 	int iDist = 0;
 	CChar *pChar = nullptr;
-	auto AreaChars = CWorldSearch::GetInstance(ptTop, iRange);
+	auto AreaChars = CWorldSearchHolder::GetInstance(ptTop, iRange);
 	for (;;)
 	{
 		pChar = AreaChars->GetChar();
@@ -1137,7 +1137,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( fForceCheckItems )
 	{
 		CItem *pItem = nullptr;
-		auto AreaItems = CWorldSearch::GetInstance(ptTop, iRange);
+		auto AreaItems = CWorldSearchHolder::GetInstance(ptTop, iRange);
 		for (;;)
 		{
 			pItem = AreaItems->GetItem();
@@ -1731,7 +1731,7 @@ bool CChar::NPC_Act_Food()
 
 	// Search for food nearby
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	auto AreaItems = CWorldSearch::GetInstance(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+	auto AreaItems = CWorldSearchHolder::GetInstance(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
 		CItem * pItem = AreaItems->GetItem();
@@ -2451,7 +2451,7 @@ void CChar::NPC_Food()
 	// Search for food nearby
 	EXC_SET_BLOCK("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	auto AreaItems = CWorldSearch::GetInstance(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
+	auto AreaItems = CWorldSearchHolder::GetInstance(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
 		CItem *pItem = AreaItems->GetItem();

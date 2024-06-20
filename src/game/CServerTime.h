@@ -27,14 +27,14 @@ struct CServerTime
     inline CServerTime() noexcept;
     inline CServerTime(int64 iTimeInMilliseconds) noexcept;
 
-    void Init() noexcept;
-    void InitTime(int64 iTimeBase) noexcept;
-    bool IsTimeValid() const noexcept;
+    inline void Init() noexcept;
+    inline void InitTime(int64 iTimeBase) noexcept;
+    inline bool IsTimeValid() const noexcept;
 
 	/*
 	* @brief Get the time value in milliseconds.
 	*/
-	int64 GetTimeRaw() const noexcept;
+	inline int64 GetTimeRaw() const noexcept;
 
 	CServerTime operator+(int64 iTimeDiff) const noexcept;
 	CServerTime operator-(int64 iTimeDiff) const noexcept;
@@ -60,6 +60,27 @@ CServerTime::CServerTime() noexcept
 CServerTime::CServerTime(int64 iTimeInMilliseconds) noexcept
 {
     InitTime(iTimeInMilliseconds);
+}
+
+int64 CServerTime::GetTimeRaw() const noexcept
+{
+    return (m_llPrivateTime < 0) ? 0 : m_llPrivateTime;
+}
+
+void CServerTime::Init() noexcept
+{
+    m_llPrivateTime = 0;
+}
+
+void CServerTime::InitTime(int64 llTimeBase) noexcept
+{
+    m_llPrivateTime = (llTimeBase < 0) ? 0 : llTimeBase;
+}
+
+
+bool CServerTime::IsTimeValid() const noexcept
+{
+    return bool(m_llPrivateTime > 0);
 }
 
 int64 CServerTime::GetTimeDiff(const CServerTime & time) const noexcept
