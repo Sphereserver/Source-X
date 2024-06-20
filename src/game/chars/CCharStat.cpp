@@ -71,8 +71,14 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 
 int CChar::Stat_GetMod( STAT_TYPE i ) const
 {
-	ADDTOCALLSTACK("CChar::Stat_GetMod");
-	ASSERT(i >= 0 && i < STAT_QTY);
+    [[unlikely]]
+    if (i < 0 || i >= STAT_QTY)
+    {
+        ADDTOCALLSTACK("CChar::Stat_GetMod");
+        ASSERT(i >= 0 && i < STAT_QTY);
+    }
+
+    [[likely]]
 	return m_Stat[i].m_mod;
 }
 
@@ -300,9 +306,14 @@ ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 {
-	ADDTOCALLSTACK("CChar::Stat_GetBase");
-	ASSERT(i >= 0 && i < STAT_QTY);
+    [[unlikely]]
+    if (i < 0 || i >= STAT_QTY)
+    {
+        ADDTOCALLSTACK("CChar::Stat_GetBase");
+        ASSERT(i >= 0 && i < STAT_QTY);
+    }
 
+    [[likely]]
 	return m_Stat[i].m_base;
 }
 
@@ -608,12 +619,11 @@ void CChar::Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state)
 
 short CChar::GetKarma() const
 {
-    return (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, m_iKarma)));
+    return (short)std::clamp((int)m_iKarma, g_Cfg.m_iMinKarma, g_Cfg.m_iMaxKarma);
 }
 
 void CChar::SetKarma(short iNewKarma, CChar* pNPC)
 {
-
 	/*
     Issue: 1118
 	https://github.com/Sphereserver/Source-X/issues/1118

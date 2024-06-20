@@ -240,6 +240,7 @@ src/common/sphere_library/CSObjList.h
 src/common/sphere_library/CSObjListRec.h
 src/common/sphere_library/CSObjSortArray.h
 src/common/sphere_library/CSPtrTypeArray.h
+src/common/sphere_library/CSReferenceCount.h
 src/common/sphere_library/CSTypedArray.h
 src/common/sphere_library/CSQueue.cpp
 src/common/sphere_library/CSQueue.h

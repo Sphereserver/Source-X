@@ -503,10 +503,10 @@ int CChar::NPC_WalkToPoint( bool fRun )
 					else		point = ptFirstTry;
 
 					//	Scan point for items that could be moved by me and move them to my position
-					CWorldSearch	AreaItems(point);
+					auto AreaItems = CWorldSearch::GetInstance(point);
 					for (;;)
 					{
-						CItem *pItem = AreaItems.GetItem();
+						CItem *pItem = AreaItems->GetItem();
 						if ( !pItem )	break;
 						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 )		continue;		// item is too high
 						else if ( !pItem->Can(CAN_I_BLOCK) )				continue;		// this item not blocking me
@@ -1108,10 +1108,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	// Any interesting chars here ?
 	int iDist = 0;
 	CChar *pChar = nullptr;
-	CWorldSearch AreaChars(ptTop, iRange);
+	auto AreaChars = CWorldSearch::GetInstance(ptTop, iRange);
 	for (;;)
 	{
-		pChar = AreaChars.GetChar();
+		pChar = AreaChars->GetChar();
 		if ( !pChar )
 			break;
 		if ( pChar == this )	// just myself.
@@ -1137,10 +1137,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( fForceCheckItems )
 	{
 		CItem *pItem = nullptr;
-		CWorldSearch AreaItems(ptTop, iRange);
+		auto AreaItems = CWorldSearch::GetInstance(ptTop, iRange);
 		for (;;)
 		{
-			pItem = AreaItems.GetItem();
+			pItem = AreaItems->GetItem();
 			if ( !pItem )
 				break;
 
@@ -1731,10 +1731,10 @@ bool CChar::NPC_Act_Food()
 
 	// Search for food nearby
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+	auto AreaItems = CWorldSearch::GetInstance(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
-		CItem * pItem = AreaItems.GetItem();
+		CItem * pItem = AreaItems->GetItem();
 		if ( !pItem )
 			break;
 		if ( !CanSee(pItem) )
@@ -2451,10 +2451,10 @@ void CChar::NPC_Food()
 	// Search for food nearby
 	EXC_SET_BLOCK("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch AreaItems(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
+	auto AreaItems = CWorldSearch::GetInstance(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = AreaItems->GetItem();
 		if ( !pItem )
             break;
 		if ( !CanSee(pItem) || pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )

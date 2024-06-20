@@ -1430,10 +1430,10 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	// Already a plant here ?
-	CWorldSearch AreaItems(pt);
+	auto AreaItems = CWorldSearch::GetInstance(pt);
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = AreaItems->GetItem();
 		if ( !pItem )
 			break;
 		if ( pItem->IsType(IT_TREE) || pItem->IsType(IT_FOLIAGE) )		// there's already a tree here

@@ -503,8 +503,8 @@ public:
     bool IsNPC() const;
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain() const;
-    NPCBRAIN_TYPE GetNPCBrainGroup() const;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
-	NPCBRAIN_TYPE GetNPCBrainAuto() const;	// Guess default NPC brain
+    NPCBRAIN_TYPE GetNPCBrainGroup() const noexcept;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	NPCBRAIN_TYPE GetNPCBrainAuto() const noexcept;	// Guess default NPC brain
 	void ClearNPC();
 
 
@@ -689,7 +689,7 @@ public:
 	*
 	* @return true if I am.
 	*/
-	bool Noto_IsMurderer() const;
+	bool Noto_IsMurderer() const noexcept;
 
 	/**
 	* @brief I'm evil?

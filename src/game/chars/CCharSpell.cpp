@@ -192,15 +192,15 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 		}
 	}
 
-	CPointMap ptOld = GetTopPoint();
+	CPointMap ptOld(GetTopPoint());
 	if ( ptOld.IsValidPoint() )		// guards might have just been created
 	{
 		if ( fTakePets )	// look for any creatures that might be following me near by
 		{
-			CWorldSearch Area(ptOld, UO_MAP_VIEW_SIGHT);
+			auto Area = CWorldSearch::GetInstance(ptOld, UO_MAP_VIEW_SIGHT);
 			for (;;)
 			{
-				CChar * pChar = Area.GetChar();
+				CChar * pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( pChar == this )
@@ -2079,26 +2079,28 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel, int64 iDu
 	if ( pSpellDef == nullptr )
 		return;
 
-	CWorldSearch AreaChar( pntTarg, iDist );
-	for (;;)
-	{
-		CChar * pChar = AreaChar.GetChar();
-		if ( pChar == nullptr )
-			break;
-		if ( pChar == this )
-		{
-			if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF) )
-				continue;
-		}
-		pChar->OnSpellEffect( spelltype, this, iSkillLevel, nullptr, iDuration);
-	}
+    {
+        auto AreaChar = CWorldSearch::GetInstance(pntTarg, iDist);
+        for (;;)
+        {
+            CChar * pChar = AreaChar->GetChar();
+            if (pChar == nullptr)
+                break;
+            if (pChar == this)
+            {
+                if (pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF))
+                    continue;
+            }
+            pChar->OnSpellEffect(spelltype, this, iSkillLevel, nullptr, iDuration);
+        }
+    }
 
 	if ( !pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ))	// prevent damage nearby items on ground
 	{
-		CWorldSearch AreaItem( pntTarg, iDist );
+		auto AreaItem = CWorldSearch::GetInstance( pntTarg, iDist );
 		for (;;)
 		{
-			CItem * pItem = AreaItem.GetItem();
+			CItem * pItem = AreaItem->GetItem();
 			if ( pItem == nullptr )
 				break;
 			pItem->OnSpellEffect( spelltype, this, iSkillLevel, nullptr );
@@ -2189,7 +2191,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			bool fGoodLoc = true;
 
 			// Where is this ?
-			CPointMap ptg = pntTarg;
+			CPointMap ptg(pntTarg);
 			if ( dx > dy )
 			{
 				ptg.m_y += (short)(ix);
@@ -2202,10 +2204,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			}
 
 			// Check for direct cast on a creature.
-			CWorldSearch AreaChar( ptg );
+			auto Area = CWorldSearch::GetInstance( ptg );
 			for (;;)
 			{
-				CChar * pChar = AreaChar.GetChar();
+				CChar * pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 
@@ -2238,10 +2240,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				continue;
 
 			// Check for direct cast on an item.
-			CWorldSearch AreaItem( ptg );
+            Area->RestartSearch();
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = Area->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( pItem->IsType(IT_SPELL) && IsSetMagicFlags(MAGICF_OVERRIDEFIELDS) )

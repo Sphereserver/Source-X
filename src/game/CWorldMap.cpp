@@ -55,10 +55,10 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	// Find the resource object.
 	EXC_SET_BLOCK("find existant bit");
 	CItem * pResBit;
-	CWorldSearch Area(pt);
+	auto Area = CWorldSearch::GetInstance(pt);
 	for (;;)
 	{
-		pResBit = Area.GetItem();
+		pResBit = Area->GetItem();
 		if ( !pResBit )
 			break;
 		// NOTE: ??? Not all resource objects are world gems. should they be ?
@@ -83,11 +83,11 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	if ( !pRegion )
 		return nullptr;
 
-	CWorldSearch AreaItems( pt );
-	AreaItems.SetAllShow(true);
+	Area->RestartSearch();
+	Area->SetAllShow(true);
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = Area->GetItem();
 		if ( !pItem )
 			break;
 		if ( pItem->GetType() != iType )
@@ -346,13 +346,13 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 	bool fElem[4] = { false, false, false, false };
 
 	// Check dynamics
-	CWorldSearch Area( pt, iDistance );
-	Area.SetAllShow( true );
+	auto Area = CWorldSearch::GetInstance( pt, iDistance );
+	Area->SetAllShow( true );
 	for (;;)
 	{
 		z = 0;
 		Height = 0;
-		pItem = Area.GetItem();
+		pItem = Area->GetItem();
 		if ( pItem == nullptr )
 			break;
 
@@ -647,10 +647,10 @@ CPointMap CWorldMap::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int
 	int iTestDistance;
 
 	// Check dynamics first since they are the easiest.
-	CWorldSearch Area( pt, iDistance );
+	auto Area = CWorldSearch::GetInstance( pt, iDistance );
 	for (;;)
 	{
-        const CItem * pItem = Area.GetItem();
+        const CItem * pItem = Area->GetItem();
 		if ( pItem == nullptr )
 			break;
 
@@ -1108,11 +1108,11 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockingState & blo
 
 	// Any dynamic items here ?
 	// NOTE: This could just be an item that an NPC could just move ?
-	CWorldSearch Area( pt );
+	auto Area = CWorldSearch::GetInstance( pt );
 
 	for (;;)
 	{
-		pItem = Area.GetItem();
+		pItem = Area->GetItem();
 		if ( !pItem )
 			break;
 
@@ -1407,11 +1407,11 @@ void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockingState & b
 
 	// Any dynamic items here ?
 	// NOTE: This could just be an item that an NPC could just move ?
-	CWorldSearch Area( pt );
+	auto Area = CWorldSearch::GetInstance( pt );
 
 	for (;;)
 	{
-		pItem = Area.GetItem();
+		pItem = Area->GetItem();
 		if ( !pItem )
 			break;
 
@@ -1609,8 +1609,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockingState &
 	// Any multi items here ?
 	if ( fHouseCheck )
 	{
-		CRegionLinks rlinks;
-        rlinks.reserve(5);
+		static thread_local CRegionLinks rlinks;
 		size_t iRegionQty = pt.GetRegions( REGION_TYPE_MULTI, &rlinks );
 		if ( iRegionQty > 0 )
 		{
@@ -1649,15 +1648,16 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockingState &
 				}
 			}
 		}
-	}
+        rlinks.clear();
+    }
 
 	{
 	    // Any dynamic items here ?
 	    // NOTE: This could just be an item that an NPC could just move ?
-	    CWorldSearch Area( pt );
+	    auto Area = CWorldSearch::GetInstance( pt );
 	    for (;;)
 	    {
-		    const CItem * pItem = Area.GetItem();
+		    const CItem * pItem = Area->GetItem();
 		    if ( pItem == nullptr )
 			    break;
 

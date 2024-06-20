@@ -1704,11 +1704,11 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 	else
 		iRadius = iSkill / 100; //Default Sphere Detecting Hidden Radius.
 
-	CWorldSearch Area(GetTopPoint(), iRadius);
-	bool bFound = false;
+	auto Area = CWorldSearch::GetInstance(GetTopPoint(), iRadius);
+	bool fFound = false;
 	for (;;)
 	{
-		CChar *pChar = Area.GetChar();
+		CChar *pChar = Area->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar == this || !pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) )
@@ -1722,10 +1722,10 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 
 		pChar->Reveal();
 		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_DETECTHIDDEN_SUCC), pChar->GetName());
-		bFound = true;
+		fFound = true;
 	}
 
-	if ( !bFound )
+	if ( !fFound )
 		return -SKTRIG_FAIL;
 
 	return 0;
@@ -1814,10 +1814,10 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 		{
 			int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
 			int iRadius = ( peace / 100 ) + 2;	// 2..12
-			CWorldSearch Area(GetTopPoint(), iRadius);
+			auto Area = CWorldSearch::GetInstance(GetTopPoint(), iRadius);
 			for (;;)
 			{
-				CChar *pChar = Area.GetChar();
+				CChar *pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					return -SKTRIG_FAIL;
 				if (( pChar == this ) || !CanSee(pChar) )
@@ -3976,7 +3976,7 @@ bool CChar::Skill_Snoop_Check(const CItemContainer * pItem)
 		case IT_SHIP_HOLD:
 			// Must be on board a ship to open the hatch.
 			ASSERT(m_pArea);
-			if (m_pArea->GetResourceID() != pItem->m_uidLink)
+			if (m_pArea->GetResourceID().GetObjUID() != pItem->m_uidLink.GetObjUID())
 			{
 				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_HATCH_FAIL));
 				return true;

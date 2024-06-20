@@ -131,11 +131,6 @@ bool CServer::SetProcessPriority(int iPriorityLevel)
     return fSuccess;
 }
 
-SERVMODE_TYPE CServer::GetServerMode() const
-{
-    return m_iModeCode.load(std::memory_order_acquire);
-}
-
 void CServer::SetServerMode( SERVMODE_TYPE mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");

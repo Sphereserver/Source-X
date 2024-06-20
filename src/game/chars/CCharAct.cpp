@@ -1844,10 +1844,10 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		char iStackMaxZ = GetTopZ() + 16;
 		CItem * pStack = nullptr;
 		CPointMap ptNewPlace = pItem->GetTopPoint();
-		CWorldSearch AreaItems(ptNewPlace);
+		auto AreaItems = CWorldSearch::GetInstance(ptNewPlace);
 		for (;;)
 		{
-			pStack = AreaItems.GetItem();
+			pStack = AreaItems->GetItem();
 			if ( pStack == nullptr )
 				break;
 			if (( pStack->GetTopZ() <= pItem->GetTopZ()) || ( pStack->GetTopZ() > iStackMaxZ ))
@@ -2041,15 +2041,15 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 		CPointMap ptStack = pt;
 		const char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
 		const CItem * pStack = nullptr;
-		CWorldSearch AreaItems(ptStack);
-		pStack = AreaItems.GetItem();
+		auto AreaItems = CWorldSearch::GetInstance(ptStack);
+		pStack = AreaItems->GetItem();
 		if (pStack != nullptr) //If there nothing  on the ground, drop the item normally and flip it if it's possible
 		{
 			for (uint i = 0;; ++i)
 			{
 				if (i != 0) //on first iteration, pStack already contain the item on the ground. If you getitem again, you'll obtain nullptr
 				{
-					pStack = AreaItems.GetItem();
+					pStack = AreaItems->GetItem();
 				}
 				if (pStack == nullptr)
 				{
@@ -3297,11 +3297,11 @@ bool CChar::Death()
 		    // Remove the characters which I can't see as dead from the screen
             if (g_Cfg.m_fDeadCannotSeeLiving)
             {
-                CWorldSearch AreaChars(GetTopPoint(), g_Cfg.m_iMapViewSizeMax);
-                AreaChars.SetSearchSquare(true);
+                auto AreaChars = CWorldSearch::GetInstance(GetTopPoint(), g_Cfg.m_iMapViewSizeMax);
+                AreaChars->SetSearchSquare(true);
                 for (;;)
                 {
-                    CChar *pChar = AreaChars.GetChar();
+                    CChar *pChar = AreaChars->GetChar();
                     if (!pChar)
                         break;
                     if (!CanSeeAsDead(pChar))
@@ -3404,10 +3404,10 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
     ushort uiLocalStamReq = 0;
 
     CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
-    CWorldSearch AreaChars(ptDst);
+    auto AreaChars = CWorldSearch::GetInstance(ptDst);
     for (;;)
     {
-        CChar *pChar = AreaChars.GetChar();
+        CChar *pChar = AreaChars->GetChar();
         if (!pChar)
             break;
         if (pChar->Can(CAN_C_STATUE))
@@ -3685,10 +3685,10 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 
 	bool fStepCancel = false;
 	bool fSpellHit = false;
-	CWorldSearch AreaItems( GetTopPoint() );
+	auto AreaItems = CWorldSearch::GetInstance( GetTopPoint() );
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = AreaItems->GetItem();
 		if ( !pItem )
 			break;
 
