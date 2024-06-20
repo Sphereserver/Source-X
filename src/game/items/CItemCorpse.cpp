@@ -142,7 +142,7 @@ CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
 {
 	ADDTOCALLSTACK("CChar::FindMyCorpse");
 	// If they are standing on their own corpse then res the corpse !
-	auto Area = CWorldSearch::GetInstance(GetTopPoint(), iRadius);
+	auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
 	for (;;)
 	{
 		CItem *pItem = Area->GetItem();

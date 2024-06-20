@@ -788,11 +788,13 @@ bool CChar::_IsStatFlag(uint64 uiStatFlag) const noexcept
 	return (_uiStatFlag & uiStatFlag);
 }
 */
+#if MT_ENGINES
 bool CChar::IsStatFlag( uint64 uiStatFlag) const noexcept
 {
 //	THREAD_SHARED_LOCK_SET;
 	return (_uiStatFlag & uiStatFlag);
 }
+#endif
 
 /*
 void CChar::_StatFlag_Set( uint64 uiStatFlag) noexcept

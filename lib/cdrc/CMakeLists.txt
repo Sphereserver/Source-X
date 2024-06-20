@@ -24,9 +24,17 @@ source_group (lib\\cdrc\\custom FILES ${lib_custom_SOURCES})
 add_library(cdrc STATIC ${lib_SOURCES} ${lib_custom_SOURCES})
 
 # set compiler flags
-#include("../lib_build_flags_common_c.cmake")
-#target_compile_options	(libev PRIVATE ${c_compiler_options_common})
-#target_link_options	(libev PRIVATE ${c_linker_options_common})
+if (MSVC)
+    set(my_comp_options
+        /wd4244
+        /wd4267
+        /wd4324
+    )
+endif ()
+
+include("../lib_build_flags_common_c.cmake")
+target_compile_options	(cdrc PRIVATE ${c_compiler_options_common} ${my_comp_options})
+target_link_options	(cdrc PRIVATE ${c_linker_options_common})
 
 # make the headers available in the include path (accessible with < >).
 target_include_directories (cdrc PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

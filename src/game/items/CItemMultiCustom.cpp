@@ -174,7 +174,7 @@ void CItemMultiCustom::BeginCustomize(CClient* pClientSrc, bool continueCustomiz
     pChar->UpdateMove(ptOld);
 
     // hide all dynamic items inside the house
-    auto Area = CWorldSearch::GetInstance(GetTopPoint(), GetDesignArea().GetWidth() / 2);
+    auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), GetDesignArea().GetWidth() / 2);
     Area->SetSearchSquare(true);
     for (;;)
     {
@@ -339,7 +339,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         return;
 
     // remove all existing dynamic item fixtures
-    auto Area = CWorldSearch::GetInstance(ptMe, GetDesignArea().GetWidth());
+    auto Area = CWorldSearchHolder::GetInstance(ptMe, GetDesignArea().GetWidth());
     Area->SetSearchSquare(true);
     CItem * pItem;
     for (;;)
@@ -1408,7 +1408,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         }
     }
 
-    auto Area = CWorldSearch::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());	// largest area.
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());	// largest area.
     Area->SetSearchSquare(true);
     for (;;)
     {

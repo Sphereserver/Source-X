@@ -2534,7 +2534,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			CPointMap pt = pObjTop->GetTopPoint();
 			if (iType & 1)		// FORITEM, FOROBJ
 			{
-				auto AreaItems = CWorldSearch::GetInstance(pt, iDist);
+				auto AreaItems = CWorldSearchHolder::GetInstance(pt, iDist);
 				for (;;)
 				{
 					++LoopsMade;
@@ -2561,7 +2561,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			}
 			if (iType & 2)		// FORCHAR, FOROBJ
 			{
-				auto AreaChars = CWorldSearch::GetInstance(pt, iDist);
+				auto AreaChars = CWorldSearchHolder::GetInstance(pt, iDist);
 				AreaChars->SetAllShow((iType & 0x20) ? true : false);
 				for (;;)
 				{

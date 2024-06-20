@@ -568,7 +568,7 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
 	}
 
 	// Is there a nasty object here that will hurt us ?
-	auto AreaItems = CWorldSearch::GetInstance(pt);
+	auto AreaItems = CWorldSearchHolder::GetInstance(pt);
 	for (;;)
 	{
 		CItem * pItem = AreaItems->GetItem();

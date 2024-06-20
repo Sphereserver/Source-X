@@ -1844,7 +1844,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		char iStackMaxZ = GetTopZ() + 16;
 		CItem * pStack = nullptr;
 		CPointMap ptNewPlace = pItem->GetTopPoint();
-		auto AreaItems = CWorldSearch::GetInstance(ptNewPlace);
+		auto AreaItems = CWorldSearchHolder::GetInstance(ptNewPlace);
 		for (;;)
 		{
 			pStack = AreaItems->GetItem();
@@ -2041,7 +2041,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 		CPointMap ptStack = pt;
 		const char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
 		const CItem * pStack = nullptr;
-		auto AreaItems = CWorldSearch::GetInstance(ptStack);
+		auto AreaItems = CWorldSearchHolder::GetInstance(ptStack);
 		pStack = AreaItems->GetItem();
 		if (pStack != nullptr) //If there nothing  on the ground, drop the item normally and flip it if it's possible
 		{
@@ -3297,7 +3297,7 @@ bool CChar::Death()
 		    // Remove the characters which I can't see as dead from the screen
             if (g_Cfg.m_fDeadCannotSeeLiving)
             {
-                auto AreaChars = CWorldSearch::GetInstance(GetTopPoint(), g_Cfg.m_iMapViewSizeMax);
+                auto AreaChars = CWorldSearchHolder::GetInstance(GetTopPoint(), g_Cfg.m_iMapViewSizeMax);
                 AreaChars->SetSearchSquare(true);
                 for (;;)
                 {
@@ -3404,7 +3404,7 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
     ushort uiLocalStamReq = 0;
 
     CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
-    auto AreaChars = CWorldSearch::GetInstance(ptDst);
+    auto AreaChars = CWorldSearchHolder::GetInstance(ptDst);
     for (;;)
     {
         CChar *pChar = AreaChars->GetChar();
@@ -3685,7 +3685,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 
 	bool fStepCancel = false;
 	bool fSpellHit = false;
-	auto AreaItems = CWorldSearch::GetInstance( GetTopPoint() );
+	auto AreaItems = CWorldSearchHolder::GetInstance( GetTopPoint() );
 	for (;;)
 	{
 		CItem *pItem = AreaItems->GetItem();
@@ -4596,7 +4596,7 @@ bool CChar::_OnTick()
 	if (!_CanTick())
 	{
 		ASSERT(!_IsSleeping());
-		if (GetTopSector()->IsSleeping() && !g_Rand.GetVal(15))
+		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();

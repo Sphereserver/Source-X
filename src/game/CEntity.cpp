@@ -201,7 +201,7 @@ void CEntity::Copy(const CEntity *target)
 
 CCRET_TYPE CEntity::_OnTick()
 {
-    ADDTOCALLSTACK("CEntity::_OnTick");
+    ADDTOCALLSTACK_INTENSIVE("CEntity::_OnTick");
     if (_lComponents.empty())
         return CCRET_CONTINUE;
 

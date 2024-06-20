@@ -59,19 +59,6 @@ bool CUID::IsChar(dword dwPrivateUID) noexcept // static
 }
 
 
-bool CUID::IsObjDisconnected() const noexcept
-{
-	// Not in the game world for some reason.
-	return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == UID_O_DISCONNECT);
-}
-
-bool CUID::IsObjTopLevel() const noexcept
-{
-	// on the ground in the world.
-	// might be static in client ?
-	return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == 0);
-}
-
 bool CUID::IsItemEquipped() const noexcept
 {
 	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM|UID_O_DISCONNECT)) == (UID_F_ITEM|UID_O_EQUIPPED))

@@ -60,7 +60,7 @@ bool CTimedObject::OnTick()
 
 void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK("CTimedObject::_SetTimeout");
+    ADDTOCALLSTACK_INTENSIVE("CTimedObject::_SetTimeout");
     // Assume we have the mutex already locked here
 
     const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
@@ -93,7 +93,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK("CTimedObject::SetTimeout");
+    ADDTOCALLSTACK_INTENSIVE("CTimedObject::SetTimeout");
     THREAD_UNIQUE_LOCK_SET;
     _SetTimeout(iDelayInMsecs);
 }

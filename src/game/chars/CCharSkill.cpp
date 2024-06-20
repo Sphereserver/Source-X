@@ -1704,7 +1704,7 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 	else
 		iRadius = iSkill / 100; //Default Sphere Detecting Hidden Radius.
 
-	auto Area = CWorldSearch::GetInstance(GetTopPoint(), iRadius);
+	auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
 	bool fFound = false;
 	for (;;)
 	{
@@ -1814,7 +1814,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 		{
 			int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
 			int iRadius = ( peace / 100 ) + 2;	// 2..12
-			auto Area = CWorldSearch::GetInstance(GetTopPoint(), iRadius);
+			auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
 			for (;;)
 			{
 				CChar *pChar = Area->GetChar();
@@ -3558,7 +3558,9 @@ int CChar::Skill_Stroke()
 
 int CChar::Skill_Stage( SKTRIG_TYPE stage )
 {
-	ADDTOCALLSTACK("CChar::Skill_Stage");
+	ADDTOCALLSTACK_INTENSIVE("CChar::Skill_Stage");
+    EXC_TRY("Skill_Stage");
+
     SKILL_TYPE skill = Skill_GetActive();
     if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
         return Skill_Scripted(stage);
@@ -3678,6 +3680,9 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 	}
 
 	SysMessageDefault(DEFMSG_SKILL_NOSKILL);
+
+    EXC_CATCH;
+
 	return -SKTRIG_QTY;
 }
 

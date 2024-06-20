@@ -317,7 +317,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 
                 if (HAS_FLAGS_STRICT(NPC_GetAiFlags(), NPC_AI_COMBAT) && !bIgnoreAITargetChoice)
                 {
-                    auto AreaChars = CWorldSearch::GetInstance(GetTopPoint(), UO_MAP_VIEW_SIGHT);
+                    auto AreaChars = CWorldSearchHolder::GetInstance(GetTopPoint(), UO_MAP_VIEW_SIGHT);
                     for (;;)
                     {
                         pTarget = AreaChars->GetChar();

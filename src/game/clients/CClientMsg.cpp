@@ -310,7 +310,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fItems )
 	{
 		// Remove any multi objects first ! or client will hang
-		auto AreaItems = CWorldSearch::GetInstance(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
+		auto AreaItems = CWorldSearchHolder::GetInstance(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
 		AreaItems->SetSearchSquare(true);
 		for (;;)
 		{
@@ -323,7 +323,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fChars )
 	{
 		CChar * pCharSrc = GetChar();
-		auto AreaChars = CWorldSearch::GetInstance(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
+		auto AreaChars = CWorldSearchHolder::GetInstance(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
 		AreaChars->SetAllShow(IsPriv(PRIV_ALLSHOW));
 		AreaChars->SetSearchSquare(true);
 		for (;;)
@@ -1936,7 +1936,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
     // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
     //  If ptOld is an invalid point, just send every object i can see.
-	auto Area = CWorldSearch::GetInstance(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
+	auto Area = CWorldSearchHolder::GetInstance(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
 	Area->SetSearchSquare(true);
 	for (;;)
 	{

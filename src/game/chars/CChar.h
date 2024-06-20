@@ -328,8 +328,17 @@ public:
 	// Status and attributes ------------------------------------
 	virtual int IsWeird() const override;
 
+#if MT_ENGINES
 //protected:	bool _IsStatFlag(uint64 uiStatFlag) const noexcept;
 public:		bool  IsStatFlag(uint64 uiStatFlag) const noexcept;
+#else
+public:
+    // called very frequently, it's wise to inline it if we can
+    inline bool IsStatFlag(uint64 uiStatFlag) const noexcept
+    {
+        return (_uiStatFlag & uiStatFlag);
+    }
+#endif
 
 //protected:	void _StatFlag_Set(uint64 uiStatFlag) noexcept;
 public:		void  StatFlag_Set(uint64 uiStatFlag) noexcept;

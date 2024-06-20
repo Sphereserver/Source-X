@@ -494,7 +494,7 @@ int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
 	int ry = 1 + abs( rect.m_bottom - rect.m_top ) / 2;
 
-	auto AreaItem = CWorldSearch::GetInstance( ptCtr, maximum( rx, ry ));
+	auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, maximum( rx, ry ));
 	AreaItem->SetSearchSquare( true );
 	for (;;)
 	{
@@ -603,7 +603,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
-			auto Area = CWorldSearch::GetInstance( ptCtr, iRadius );
+			auto Area = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
 			Area->SetAllShow( IsPriv( PRIV_ALLSHOW ));
 			Area->SetSearchSquare( true );
 			for (;;)
@@ -639,7 +639,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKE:		// NUKE all items in the region.
 		{
-			auto AreaItem = CWorldSearch::GetInstance( ptCtr, iRadius );
+			auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
 			AreaItem->SetAllShow( IsPriv( PRIV_ALLSHOW ));
 			AreaItem->SetSearchSquare( true );
 			for (;;)
@@ -668,7 +668,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKECHAR:
 		{
-			auto AreaChar = CWorldSearch::GetInstance( ptCtr, iRadius );
+			auto AreaChar = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
 			AreaChar->SetAllShow( IsPriv( PRIV_ALLSHOW ));
 			AreaChar->SetSearchSquare( true );
 			for (;;)
@@ -1521,7 +1521,7 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 		// All the pets that could hear me.
 		bool fGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-		auto AreaChars = CWorldSearch::GetInstance( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
+		auto AreaChars = CWorldSearchHolder::GetInstance( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
 		for (;;)
 		{
 			CChar * pCharPet = AreaChars->GetChar();

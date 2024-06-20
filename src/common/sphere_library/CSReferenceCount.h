@@ -3,43 +3,13 @@
 
 #include <type_traits>
 
-
 template <typename T, typename ...ConstructorParams>
-class CSReferenceCountedOwned
-{
-public:
-    friend class CSReferenceCountedOwned;
-    T _heldObj;
-    unsigned int _counted_references;
-
-    CSReferenceCountedOwned(ConstructorParams&& ...params) noexcept :
-        _counted_references(1), _heldObj(std::forward<ConstructorParams>(params)...)
-    {
-    }
-    CSReferenceCountedOwned(CSReferenceCountedOwned&& other) noexcept = default;
-    ~CSReferenceCountedOwned() noexcept = default;
-
-    CSReferenceCountedOwned(CSReferenceCountedOwned const& other) noexcept = delete;
-    CSReferenceCountedOwned& operator=(CSReferenceCountedOwned const& other) noexcept = delete;
-
-    T& operator*() noexcept
-    {
-        return _heldObj;
-    }
-    T* operator->() noexcept
-    {
-        return &_heldObj;
-    }
-
-    auto GetRef() noexcept
-    {
-        return CSReferenceCounted<T>(this);
-    }
-};
+class CSReferenceCountedOwned;
 
 template <typename T>
 class CSReferenceCounted
 {
+    friend class CSReferenceCountedOwned<T>;
     CSReferenceCountedOwned<T> * _owner;
 
 protected:
@@ -82,6 +52,40 @@ public:
     T* operator->() noexcept
     {
         return &_owner->_heldObj;
+    }
+};
+
+
+template <typename T, typename ...ConstructorParams>
+class CSReferenceCountedOwned
+{
+public:
+    friend class CSReferenceCountedOwned;
+    T _heldObj;
+    unsigned int _counted_references;
+
+    CSReferenceCountedOwned(ConstructorParams&& ...params) noexcept :
+        _counted_references(1), _heldObj(std::forward<ConstructorParams>(params)...)
+    {
+    }
+    CSReferenceCountedOwned(CSReferenceCountedOwned&& other) noexcept = default;
+    ~CSReferenceCountedOwned() noexcept = default;
+
+    CSReferenceCountedOwned(CSReferenceCountedOwned const& other) noexcept = delete;
+    CSReferenceCountedOwned& operator=(CSReferenceCountedOwned const& other) noexcept = delete;
+
+    T& operator*() noexcept
+    {
+        return _heldObj;
+    }
+    T* operator->() noexcept
+    {
+        return &_heldObj;
+    }
+
+    auto GetRef() noexcept
+    {
+        return CSReferenceCounted<T>(this);
     }
 };
 

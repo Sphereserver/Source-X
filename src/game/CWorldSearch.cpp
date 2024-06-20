@@ -10,55 +10,58 @@
 static constexpr size_t kuiContainerScaleFactor = 2;
 
 
-class CWorldSearchInstancesHolder
+class CWorldSearchHolderInternal
 {
     static constexpr size_t kuiPreallocateSize = 20;
     static constexpr size_t kuiCachedInstances = 20;
+    std::array<CSReferenceCountedOwned<CWorldSearch>, kuiCachedInstances> _instances;
     //std::vector<CSReferenceCountedOwned<CWorldSearch>> _instances;
-    std::array<cdrc::rc_ptr<CWorldSearch>, kuiCachedInstances> _instances;
+    //std::array<cdrc::rc_ptr<CWorldSearch>, kuiCachedInstances> _instances;
 
 public:
-    ~CWorldSearchInstancesHolder() noexcept = default;
-    CWorldSearchInstancesHolder() noexcept
+    ~CWorldSearchHolderInternal() noexcept = default;
+    CWorldSearchHolderInternal() noexcept
     {
-        for (auto& inst : _instances)
-        {
-            inst = cdrc::make_rc<CWorldSearch>(kuiPreallocateSize);
-        }
+        //for (auto& inst : _instances) {
+        //    inst = cdrc::make_rc<CWorldSearch>(kuiPreallocateSize);
+        //}
         //_instances.resize(kuiCachedInstances);
     }
 
-    //CSReferenceCounted<CWorldSearch> GetOne(const CPointMap& pt, int iDist)
-    cdrc::rc_ptr<CWorldSearch> GetOne(const CPointMap& pt, int iDist)
+    //cdrc::rc_ptr<CWorldSearch> GetOne(const CPointMap& pt, int iDist)
+    CSReferenceCounted<CWorldSearch> GetOne(const CPointMap& pt, int iDist)
     {
         for (auto& inst : _instances)
         {
-            //if (inst._counted_references == 1)
-            if (inst.use_count() == 1)
+            //if (inst.use_count() == 1)
+            if (inst._counted_references == 1)
             {
                 // It's free, it's only referenced by me (i'm ownling it).
                 inst->Reset(pt, iDist);
-                return inst;
-                //return inst.GetRef();
+                //return inst;
+                return inst.GetRef();
             }
         }
 
         // No free instances!
-        //throw CSError(LOGL_CRIT, 0, "Not enough instances of CWorldSearch!");
+        throw CSError(LOGL_CRIT, 0, "Not enough instances of CWorldSearch!");
 
+        /*
         g_Log.Event(LOGL_ERROR, "Not enough instances of CWorldSearch! Creating a new, un-cached one. This will be slower!\n");
         auto inst = cdrc::make_rc<CWorldSearch>(kuiPreallocateSize);
         inst->Reset(pt, iDist);
         return inst;
+        */
 
     }
 };
 
 //--------------
 
-cdrc::rc_ptr<CWorldSearch> CWorldSearch::GetInstance(const CPointMap& pt, int iDist) // static 
+//cdrc::rc_ptr<CWorldSearch> CWorldSearch::GetInstance(const CPointMap& pt, int iDist) // static
+CSReferenceCounted<CWorldSearch> CWorldSearchHolder::GetInstance(const CPointMap& pt, int iDist)    // static
 {
-    static CWorldSearchInstancesHolder holder;
+    static CWorldSearchHolderInternal holder;
     return holder.GetOne(pt, iDist);
 }
 
@@ -71,7 +74,7 @@ CWorldSearch::CWorldSearch() noexcept :
 {
 }
 
-CWorldSearch::CWorldSearch(size_t uiPreallocateSize) noexcept :
+CWorldSearch::CWorldSearch(size_t uiPreallocateSize) :
     CWorldSearch()
 {
     if (!uiPreallocateSize)
@@ -105,7 +108,7 @@ void CWorldSearch::Reset(const CPointMap& pt, int iDist)
     _fInertToggle = false;
     _pObj = nullptr;
     _idxObj = 0;
-    _idxObjMax = 0;
+    //_idxObjMax = 0;   // Don't! Recycle the allocated space for _ppCurContObjs.
     _iSectorCur = 0; // Get upper left of search rect.
 
     _pt = pt;
