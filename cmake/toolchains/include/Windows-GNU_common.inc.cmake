@@ -8,6 +8,8 @@ endfunction ()
 
 function (toolchain_after_project_common)
 	ENABLE_LANGUAGE(RC)
+	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
+	MESSAGE (STATUS "Target Arch: ${ARCH}")
 endfunction ()
 
 

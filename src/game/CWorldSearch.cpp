@@ -70,7 +70,8 @@ CWorldSearch::CWorldSearch() noexcept :
     _eSearchType(ws_search_e::None), _fInertToggle(false),
     _ppCurContObjs(nullptr), _pObj(nullptr),
     _idxObj(0), _idxObjMax(0),
-    _pSector(nullptr), _pSectorBase(nullptr), _iSectorCur(0)  // Get upper left of search rect.
+    _iSectorCur(0),  // Get upper left of search rect.
+    _pSectorBase(nullptr), _pSector(nullptr)
 {
 }
 

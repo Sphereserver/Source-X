@@ -1,11 +1,20 @@
+/**
+* @file CSReferenceCount.h
+* @brief Lightweight wrapped pointer reference counter to a master/owner object.
+*/
+
 #ifndef _INC_CSREFERENCECOUNT_H
 #define _INC_CSREFERENCECOUNT_H
 
 #include <type_traits>
+#include <utility>
 
 template <typename T, typename ...ConstructorParams>
 class CSReferenceCountedOwned;
 
+// This one is a reference to a CSReferenceCountedOwner.
+// CSReferenceCountedOwner holds the original object/value and the number of child references.
+// The CSReferenceCountedOwner object must not be moved in memory, it will invalidate _owner address.
 template <typename T>
 class CSReferenceCounted
 {
@@ -60,7 +69,6 @@ template <typename T, typename ...ConstructorParams>
 class CSReferenceCountedOwned
 {
 public:
-    friend class CSReferenceCountedOwned;
     T _heldObj;
     unsigned int _counted_references;
 
