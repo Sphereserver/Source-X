@@ -637,22 +637,21 @@ bool CItemBase::IsID_Chair( ITEMID_TYPE id ) noexcept // static
 
 bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData, bool fNameNotNeeded) // static
 {
-	ADDTOCALLSTACK("CItemBase::GetItemData");
+	//ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemData");
 	// Read from g_Install.m_fTileData
 	// Get an Item tiledata def data.
 	// Invalid object id ?
 	// NOTE: This data should already be read into the m_ItemBase table ???
-
-    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+    try
     {
-        g_Log.EventError("ITEMDEF has invalid ID=%d (0%x) (value is greater than the tiledata maximum index).\n", id, id);
-        return false;
-    }
-    if (!IsValidDispID(id))
-		return false;
-
-	try
-	{
+        if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+        {
+            g_Log.EventError("ITEMDEF has invalid ID=%d (0%x) (value is greater than the tiledata maximum index).\n", id, id);
+            return false;
+        }
+        if (!IsValidDispID(id))
+		    return false;
+	
 		*pData = CUOItemInfo(id, fNameNotNeeded);
 	}
     catch (const std::exception& e)

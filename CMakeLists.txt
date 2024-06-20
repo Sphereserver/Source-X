@@ -95,15 +95,6 @@ IF (WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
 	set (is_win32_app_linker WIN32)	# if not set, it defaults to console subsystem
 ENDIF ()
 
-# Determine system arch
-# TODO: change name for the variable to ARCH_IS_32BITS and ARCH_IS_64BITS
-INCLUDE ("cmake/CMakeDetectArch.cmake")
-determine_target_architecture(ARCH_DETECTED)
-STRING (FIND "${ARCH_DETECTED}" "x86_64" 	ARCH_HAS_x86_64)
-STRING (FIND "${ARCH_DETECTED}" "x86" 		ARCH_HAS_x86)
-booleanize_str_find(ARCH_HAS_x86_64)
-booleanize_str_find(ARCH_HAS_x86)
-
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 IF (NOT TOOLCHAIN_LOADED)
