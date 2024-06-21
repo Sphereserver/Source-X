@@ -164,23 +164,26 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
-
     // Manual CComponents addition
-
-    /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
-    * but it's required to add it also on item's creation depending on it's CItemBase can flags.
-    */
-	if (CCItemDamageable::CanSubscribe(this))
+    //  If it's a memory, those won't be needed, and we can avoid dynamically allocating useless stuff.
+    if (id != ITEMID_MEMORY)
     {
-        SubscribeComponent(new CCItemDamageable(this));
-    }
-    if (CCFaction::CanSubscribe(this))
-    {
-        SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
+        /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
+        * but it's required to add it also on item's creation depending on it's CItemBase can flags.
+        */
+        if (CCItemDamageable::CanSubscribe(this))
+        {
+            SubscribeComponent(new CCItemDamageable(this));
+        }
+        if (CCFaction::CanSubscribe(this))
+        {
+            SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
+        }
+
+        TrySubscribeComponentProps<CCPropsItem>();
+        TrySubscribeComponentProps<CCPropsItemChar>();
     }
 
-	TrySubscribeComponentProps<CCPropsItem>();
-	TrySubscribeComponentProps<CCPropsItemChar>();
 }
 
 void CItem::DeleteCleanup(bool fForce)

@@ -26,6 +26,38 @@
 #include "CObjBase.h"
 
 
+DIR_TYPE GetDirStr(lpctstr pszDir)
+{
+    char iDir2, iDir = static_cast<char>(toupper(pszDir[0]));
+
+    switch (iDir)
+    {
+        case 'E':
+        return DIR_E;
+        case 'W':
+        return DIR_W;
+        case 'N':
+        iDir2 = static_cast<char>(toupper(pszDir[1]));
+        if (iDir2 == 'E')
+            return DIR_NE;
+        if (iDir2 == 'W')
+            return DIR_NW;
+        return DIR_N;
+        case 'S':
+        iDir2 = static_cast<char>(toupper(pszDir[1]));
+        if (iDir2 == 'E')
+            return DIR_SE;
+        if (iDir2 == 'W')
+            return DIR_SW;
+        return DIR_S;
+        default:
+        if ((iDir >= '0') && (iDir <= '7'))
+            return static_cast<DIR_TYPE>(iDir - '0');
+    }
+    return DIR_QTY;
+}
+
+
 static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];
@@ -54,6 +86,7 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 
 	return true;
 }
+
 
 /////////////////////////////////////////////////////////////////
 // -CObjBase stuff
@@ -3637,34 +3670,3 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 	return false;
 }
 
-
-DIR_TYPE GetDirStr( lpctstr pszDir )
-{
-	char iDir2, iDir = static_cast< char >( toupper( pszDir[ 0 ] ) );
-
-	switch ( iDir )
-	{
-		case 'E':
-            return DIR_E;
-		case 'W':
-            return DIR_W;
-		case 'N':
-			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' )
-                return DIR_NE;
-			if ( iDir2 == 'W' )
-                return DIR_NW;
-			return DIR_N;
-		case 'S':
-			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' )
-                return DIR_SE;
-			if ( iDir2 == 'W' )
-                return DIR_SW;
-			return DIR_S;
-		default:
-			if ( ( iDir >= '0' ) && ( iDir <= '7' ) )
-				return static_cast< DIR_TYPE >( iDir - '0' );
-	}
-	return DIR_QTY;
-}

@@ -3779,3 +3779,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// ITEM_CANTIMER_IN_CONTAINER	1	// Items can hold a timer even if equipped.
 - Added: item CAN flag (Issue #1180):
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
+
+21-06-2024, Nolok
+- Improvement: optimized various C++ core subsystems, resulting in a significantly reduced CPU usage and (slightly) reduced startup time.
+- Fixed: RAM usage always increasing during uptime. Caused by a couple of memory leaks, the greatest happening because the cached map blocks were not properly released.
+- Fixed: adopted a more conservative memory allocation policy for strings, resulting in reduced RAM usage.
+- Changed: I_MEMORY (ITEMID_MEMORY) items won't have anymore the ComponentProps Faction, ItemChar, Item, reducing their memory footprint.

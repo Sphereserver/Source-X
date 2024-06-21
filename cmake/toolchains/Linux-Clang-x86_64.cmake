@@ -3,9 +3,9 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Linux-Clang_common.inc.cmake")
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Linux-Clang-x86_64.cmake.")
 	#SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
-	SET(ARCH_BASE			"x86"		CACHE INTERNAL FORCE) # override
-	SET(ARCH_BITS			64			CACHE INTERNAL FORCE) # override
-	SET(ARCH				"x86_64"	CACHE INTERNAL FORCE) # override
+	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
+	SET(ARCH_BITS			64			CACHE INTERNAL "" FORCE) # override
+	SET(ARCH				"x86_64"	CACHE INTERNAL "" FORCE) # override
 
 	toolchain_after_project_common()
 

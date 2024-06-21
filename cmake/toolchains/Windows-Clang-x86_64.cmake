@@ -3,9 +3,9 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Windows-Clang_common.inc.cmake")
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-Clang-x86_64.cmake.")
 	#SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
-	SET(ARCH_BASE			"x86"		CACHE INTERNAL FORCE) # override
-	SET(ARCH_BITS			64			CACHE INTERNAL FORCE) # override
-	SET(ARCH				"x86_64"	CACHE INTERNAL FORCE) # override
+	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
+	SET(ARCH_BITS			64			CACHE INTERNAL "" FORCE) # override
+	SET(ARCH				"x86_64"	CACHE INTERNAL "" FORCE) # override
 
 	toolchain_after_project_common()	# To enable RC language, to compile Windows Resource files
 

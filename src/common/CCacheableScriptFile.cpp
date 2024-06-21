@@ -84,8 +84,9 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
         else
         {
             // Fastest method: read the script file all at once.
-            auto fileContentCopy = std::make_unique<char[]>((size_t)iFileLength + 1u);
+            auto fileContentCopy = std::make_unique_for_overwrite<char[]>((size_t)iFileLength + 1u);
             fread(fileContentCopy.get(), sizeof(char), (size_t)iFileLength, _pStream);
+            fileContentCopy[(size_t)iFileLength - 1u] = '\0';
 
             // Allocate string vectors for each script line.
             _fileContent = new std::vector<std::string>;

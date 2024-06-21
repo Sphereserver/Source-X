@@ -25,6 +25,15 @@ class CCSpawn;
 class CSector;
 class CWorldTicker;
 
+
+/**
+ * @brief   Gets dir string.
+ * @param   pszDir  The dir.
+ * @return  The dir string.
+ */
+DIR_TYPE GetDirStr(lpctstr pszDir);
+
+
 class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
@@ -38,8 +47,8 @@ private:
 	int64 m_timestamp;          // TimeStamp
 
 protected:
+
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
-    volatile std::atomic_bool _fDeleting;
 
     std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
@@ -64,10 +73,26 @@ public:
     word	m_defenseRange;     // variable range of defense.
     int 	m_ModMaxWeight;		// ModMaxWeight prop.
     HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
+    int m_ModAr;
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
     std::vector<CUID> m_followers;
+
+    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
+
+#   define SU_UPDATE_HITS      0x01    // update hits to others
+#   define SU_UPDATE_MODE      0x02    // update mode to all
+#   define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
+    uchar m_fStatusUpdate;  // update flags for next tick
+
+    volatile std::atomic_bool _fDeleting;
+
+protected:
+    PacketPropertyList* m_PropertyList;	// currently cached property list packet
+    dword m_PropertyHash;				// latest property list hash
+    dword m_PropertyRevision;			// current property list revision
+
 
 public:
     explicit CObjBase(bool fItem);
@@ -882,16 +907,6 @@ public:
      */
 	TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
 
-public:
-	//	Some global object variables
-	int m_ModAr;
-
-#define SU_UPDATE_HITS      0x01    // update hits to others
-#define SU_UPDATE_MODE      0x02    // update mode to all
-#define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
-	uchar m_fStatusUpdate;  // update flags for next tick
-
-
 protected:
     virtual void _GoAwake() override;
     virtual void _GoSleep() override;
@@ -904,13 +919,6 @@ protected:
 
     virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
     //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
-
-public:
-    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
-protected:
-	PacketPropertyList* m_PropertyList;	// currently cached property list packet
-	dword m_PropertyHash;				// latest property list hash
-	dword m_PropertyRevision;			// current property list revision
 
 public:
 
@@ -965,53 +973,9 @@ public:
      * @brief   Updates the property status update flag.
      */
 	void UpdatePropertyFlag();
+
 };
 
-
-/**
-* @enum    MEMORY_TYPE
-*
-* @brief   Values that represent memory types ( IT_EQ_MEMORY_OBJ ).
-*
-* Types of memory a CChar has about a game object. (m_wHue)
-*/
-enum MEMORY_TYPE
-{
-	MEMORY_NONE = 0,
-	MEMORY_SAWCRIME         = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
-	MEMORY_IPET             = 0x0002,	// I am a pet. (this link is my master) (never time out)
-	MEMORY_FIGHT            = 0x0004,	// Active fight going on now. may not have done any damage. and they may not know they are fighting me.
-	MEMORY_IAGGRESSOR       = 0x0008,	// I was the agressor here. (good or evil)
-	MEMORY_HARMEDBY         = 0x0010,	// I was harmed by them. (but they may have been retaliating)
-	MEMORY_IRRITATEDBY      = 0x0020,	// I saw them snoop from me or someone, or i have been attacked, or someone used Provocation on me.
-	MEMORY_SPEAK            = 0x0040,	// We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
-	MEMORY_AGGREIVED        = 0x0080,	// I was attacked and was the inocent party here !
-	MEMORY_GUARD            = 0x0100,	// Guard this item (never time out)
-	MEMORY_LEGACY_ISPAWNED  = 0x0200,	// UNUSED (but keep this for backwards compatibility). I am spawned from this item. (never time out)
-	MEMORY_GUILD            = 0x0400,	// This is my guild stone. (never time out) only have 1
-	MEMORY_TOWN             = 0x0800,	// This is my town stone. (never time out) only have 1
-	MEMORY_UNUSED           = 0x1000,	// UNUSED!!!! I am following this Object (never time out)
-	MEMORY_UNUSED2          = 0x2000,	// UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
-	MEMORY_FRIEND           = 0x4000,	// They can command me but not release me. (not primary blame)
-	MEMORY_UNUSED3          = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
-};
-
-enum NPC_MEM_ACT_TYPE	// A simgle primary memory about the object.
-{
-	NPC_MEM_ACT_NONE = 0,       // we spoke about something non-specific,
-	NPC_MEM_ACT_SPEAK_TRAIN,    // I am speaking about training. Waiting for money
-	NPC_MEM_ACT_SPEAK_HIRE,     // I am speaking about being hired. Waiting for money
-	NPC_MEM_ACT_FIRSTSPEAK,     // I attempted (or could have) to speak to player. but have had no response.
-	NPC_MEM_ACT_TAMED,          // I was tamed by this person previously.
-	NPC_MEM_ACT_IGNORE          // I looted or looked at and discarded this item (ignore it)
-};
-
-enum STONEALIGN_TYPE // Types of Guild/Town stones
-{
-	STONEALIGN_STANDARD = 0,
-	STONEALIGN_ORDER,
-	STONEALIGN_CHAOS
-};
 
 enum ITRIG_TYPE
 {
@@ -1075,16 +1039,6 @@ enum ITRIG_TYPE
 	ITRIG_ToolTip,              // A tooltip is being requested from me.
 	ITRIG_UNEQUIP,              // I'm being unequiped.
 	ITRIG_QTY
-};
-
-enum WAR_SWING_TYPE	// m_Act_War_Swing_State
-{
-	WAR_SWING_INVALID = -1,
-	WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
-	WAR_SWING_READY,			// we can swing at any time.
-	WAR_SWING_SWINGING,			// we are swinging our weapon.
-    //--
-    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
 };
 
 enum CTRIG_TYPE : short
@@ -1297,14 +1251,6 @@ enum CTRIG_TYPE : short
 
 	CTRIG_QTY
 };
-
-
-/**
- * @brief   Gets dir string.
- * @param   pszDir  The dir.
- * @return  The dir string.
- */
-DIR_TYPE GetDirStr( lpctstr pszDir );
 
 
 #endif // _INC_COBJBASE_H

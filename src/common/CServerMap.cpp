@@ -567,6 +567,12 @@ CUOMulti::~CUOMulti()
 	Release();
 }
 
+void CUOMulti::HitCacheTime() noexcept
+{
+    // When was this last referenced.
+    CCachedMulItem::m_timeRef = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+}
+
 const CUOMultiItemRec_HS * CUOMulti::GetItem( size_t i ) const
 {
 	ASSERT( i<m_iItemQty );

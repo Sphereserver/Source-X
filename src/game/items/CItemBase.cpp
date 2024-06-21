@@ -1012,7 +1012,7 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 	// ARGS:
 	// iQualityLevel = 0-100
 
-	CValueRangeDef values = m_values;
+	CValueRangeDef values(m_values);
 
 	if ( m_values.m_iLo == INT64_MIN || m_values.m_iHi == INT64_MIN )
 	{
@@ -1023,8 +1023,8 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 	}
 	else
 	{
-		values.m_iLo = llabs(values.m_iLo);
-		values.m_iHi = llabs(values.m_iHi);
+		values.m_iLo = abs(values.m_iLo);
+		values.m_iHi = abs(values.m_iHi);
 	}
 
 	return values.GetLinear(iQualityLevel*10);
@@ -1523,6 +1523,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 				if ( iArgQty <= 0 )
 					return false;
 				m_flip_id.clear();
+                m_flip_id.reserve(iArgQty);
 				for ( int i = 0; i < iArgQty; ++i )
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
@@ -1532,6 +1533,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 						continue;
 					m_flip_id.emplace_back(id);
 				}
+                m_flip_id.shrink_to_fit();
 			}
 			break;
 		case IBC_DYE:

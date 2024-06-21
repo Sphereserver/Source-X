@@ -46,13 +46,13 @@ bool IsTrigUsed(const char *name)
 
 void TriglistInit()
 {
-    TRIGGER_T_ID	trig;
+    TRIGGER_T_ID trig{};
     g_triggers_id.clear();
 
 #define ADD(_a_) \
     snprintf(trig.m_name, TRIGGER_NAME_MAX_LEN, "@%s", #_a_); \
     trig.m_used = 0; \
-    g_triggers_id.emplace_back(std::move(trig));
+    g_triggers_id.push_back(trig);
 
 #include "../tables/triggers.tbl"
 #undef ADD

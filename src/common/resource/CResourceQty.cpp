@@ -197,6 +197,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
             ( pszCmds[1] == '\0' || pszCmds[1] == ',' ))
         {
             clear();	// clear any previous stuff.
+            reserve(4);
             ++pszCmds;
         }
         else
@@ -226,6 +227,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 
         ++pszCmds;
     }
+    shrink_to_fit();
 
     return iValid;
 }

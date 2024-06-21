@@ -41,6 +41,17 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_QTY
 };
 
+
+enum WAR_SWING_TYPE	: int // m_Act_War_Swing_State
+{
+    WAR_SWING_INVALID = -1,
+    WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
+    WAR_SWING_READY,			// we can swing at any time.
+    WAR_SWING_SWINGING,			// we are swinging our weapon.
+    //--
+    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
+};
+
 class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR

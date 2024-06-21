@@ -6,7 +6,7 @@
 
 # Convert CMake vars into the format that OpenBLAS expects (modified for SphereServer)
 
-# Lazy workaround
+# TODO: Lazy workaround, this has to be fixed if someone desires to cross compile. !!!!!!!!
 set (CMAKE_SYSTEM_PROCESSOR "${CMAKE_HOST_SYSTEM_PROCESSOR}" CACHE INTERNAL "" FORCE)
 
 string(TOUPPER "${CMAKE_SYSTEM_NAME}" HOST_OS)
