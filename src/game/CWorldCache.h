@@ -14,9 +14,9 @@ class CWorldCache
 
 	int64	_iTimeLastMapBlockCacheCheck;
 	
-	using MapBlockCacheCont = std::unique_ptr<CServerMapBlock>;
-	using MapBlockCache = std::unique_ptr<MapBlockCacheCont[]>;
-	MapBlockCache _mapBlocks[MAP_SUPPORTED_QTY];
+	using MapBlockCacheCont = std::unique_ptr<CServerMapBlock>;     // Info about a single map block
+	using MapBlockCache = std::unique_ptr<MapBlockCacheCont[]>;     // An element per each map block
+	MapBlockCache _mapBlocks[MAP_SUPPORTED_QTY];                    // An element per each map
 
 public:
 	static const char* m_sClassName;

@@ -26,6 +26,7 @@ struct CUOMapMeter
 {
     word m_wTerrainIndex;  // TERRAIN_TYPE index to Radarcol and CUOTerrainTypeRec/CUOTerrainTypeRec_HS
     char m_z;
+
     static bool IsTerrainNull( word wTerrainIndex );
 } PACK_NEEDED;
 
