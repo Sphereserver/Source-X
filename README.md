@@ -1,6 +1,6 @@
 # SphereServer X
 
-Ultima Online game server developed in C++
+Ultima Online game server, developed in C++.
 <br>
 [![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
 [![GitHub repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
@@ -11,12 +11,12 @@ Ultima Online game server developed in C++
 <br>
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
 <br>
-[![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml)
-[![Build status: Windows x86]   (https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml)
-[![Build status: Linux x86_64]  (https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml)
-[![Build status: Linux x86]     (https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml)
-[![Build status: MacOS x86_64]  (https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml)
-[![Build status: MacOS ARM]     (https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml)
+[![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml)
+[![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml)
+[![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml)
+[![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml)
+[![Build status: MacOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml)
+[![Build status: MacOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml)
 <br><br>
 Join the SphereServer Discord channel!
 [![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs)
@@ -35,8 +35,8 @@ of the new ones.
 It is currently being revamped to add original OSI features.
 Beware, it's still not 100% complete!
 
-+ <a href="https://github.com/Sphereserver/Scripts-X">Up to date</a>
-+ <a href="https://github.com/Sphereserver/Scripts-X/releases">Official releases</a>
++ <a href="https://github.com/Sphereserver/Scripts-X">Current (most updated)</a>
++ <a href="https://github.com/Sphereserver/Scripts-X/releases">Milestone releases</a>
 
 ### Resources
 
@@ -233,3 +233,4 @@ Copyright 2023 SphereServer development team.<br>
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>
 You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
+

@@ -1072,7 +1072,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
 				uiPreviousSaveSize += uiCurSavefileSize;
 		}
 		else
-			fSizeErr = true;        
+			fSizeErr = true;
     };
 
     if (fStatics)
@@ -1278,7 +1278,8 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 
 	while ( s.FindNextSection() )
 	{
-		if (! ( ++iLoadStage & 0x1FF ))	// don't update too often
+        // Print the percent state of the current file loading.
+		if (! ( ++iLoadStage & 0xFF ))	// don't update too often
 			g_Serv.PrintPercent( s.GetPosition(), iLoadSize );
 
 		try
@@ -1414,7 +1415,7 @@ bool CWorld::LoadAll() // Load world from script
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
-	
+
 	for (int m = 0; m < MAP_SUPPORTED_QTY; ++m)
 	{
 		if (!g_MapList.IsMapSupported(m))

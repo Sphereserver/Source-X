@@ -1,4 +1,4 @@
-name: Build
+name: Build Nightly Windows x86
 
 on:
   - push
