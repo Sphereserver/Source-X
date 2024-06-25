@@ -110,16 +110,18 @@ bool CPointBase::operator!= ( const CPointBase & pt ) const noexcept
 	return ( ! ( *this == pt ));
 }
 
-const CPointBase& CPointBase::operator+= ( const CPointBase & pt ) noexcept
+const CPointBase& CPointBase::operator+= ( const CPointBase & pt )
 {
+    ASSERT(m_map == pt.m_map);
 	m_x += pt.m_x;
 	m_y += pt.m_y;
 	m_z += pt.m_z;
 	return( * this );
 }
 
-const CPointBase& CPointBase::operator-= ( const CPointBase & pt ) noexcept
+const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
 {
+    ASSERT(m_map == pt.m_map);
 	m_x -= pt.m_x;
 	m_y -= pt.m_y;
 	m_z -= pt.m_z;
@@ -139,12 +141,6 @@ void CPointBase::ZeroPoint() noexcept
 	m_map = 0;
 }
 
-int CPointBase::GetDistZ( const CPointBase & pt ) const noexcept
-{
-	//return abs(int(m_z) - int(pt.m_z));
-    return (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
-}
-
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
 {
     // This method is one of the most called in the whole app (maybe the most). ADDTOCALLSTACK unneededly sucks cpu.
@@ -162,20 +158,31 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
             const int dy = abs(m_y - pt.m_y);
             */
 
-            // This is faster than the above in MSVC 2022 x86_64 debug version.
-            // It should be benchmarked for Nightly (optimized) builds, to see if this becomes slower than the call to abs.
-            //  (The presence of a conditional expression might reduce the efficacy of the CPU branch predictor)
+            /*
+            // This is faster than the above.
             const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
             const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
-            return maximum(dx, dy);
+            */
+            // return maximum(dx, dy);
+
+            // This is even faster.
+            const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
+            const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
+            return (dx > dy) * dx + (dx < dy) * dy;
+            
         }
         case DISTANCE_FORMULA_DIAGONAL_NOZ:
         {
             const int dx = m_x - pt.m_x;
             const int dy = m_y - pt.m_y;
+
             const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy)));
-            const double flr = floor(dist);
-            return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
+            //const double dist = hypot(dx, dy);  // To test if faster
+
+            return (int)round(dist);
+
+            //const double flr = floor(dist);
+            //return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
 
             // Test, avoids another function call?
             // return (((dist - floor(dist)) > 0.5) ? int(dist) : int(dist + 1));
@@ -207,9 +214,12 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
 {
 	//const int dx = abs(m_x - pt.m_x);
 	//const int dy = abs(m_y - pt.m_y);
-    const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
-    const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
-	return maximum(dx, dy);
+    //const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+    //const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+    //return maximum(dx, dy);
+    const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
+    const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
+    return (dx > dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -221,9 +231,12 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
 
 	//const int dx = abs(m_x - pt.m_x);
 	//const int dy = abs(m_y - pt.m_y);
-    const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
-    const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
-	return maximum(dx, dy);
+    //const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+    //const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+    //return maximum(dx, dy);
+    const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
+    const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
+    return (dx > dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
@@ -238,10 +251,12 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
             const int dist = GetDist(pt);
 
             // Get the deltas and correct the Z for height first
-            int dz = (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
+            //int dz = (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
+            int dz = (m_z > pt.m_z) * (m_z - pt.m_z) + (m_z < pt.m_z) * (pt.m_z - m_z);
             dz /= (PLAYER_HEIGHT / 2); // Take player height into consideration
 
-            return maximum(dz, dist);
+            //return maximum(dz, dist);
+            return (dz > dist) * dz + (dz < dist) * dist;
         }
         case DISTANCE_FORMULA_DIAGONAL_Z:
         {
@@ -252,9 +267,7 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
             //dz /= (PLAYER_HEIGHT / 2);
 
             const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy) + (dz * dz)));
-            const double flr = floor(dist);
-            return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
-            // Or just use std::round. In any case, we need to round to give the best result, because with a simple cast the compiler will truncate the decimal part.
+            return (int)round(dist);
         }
     }
 }
@@ -294,8 +307,9 @@ void CPointBase::ValidatePoint() noexcept
 		m_y = iMaxY - 1;
 }
 
-bool CPointBase::IsSame2D( const CPointBase & pt ) const noexcept
+bool CPointBase::IsSame2D( const CPointBase & pt ) const
 {
+    ASSERT(m_map == pt.m_map);
 	return ( m_x == pt.m_x && m_y == pt.m_y );
 }
 

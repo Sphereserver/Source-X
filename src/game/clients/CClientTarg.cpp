@@ -1192,9 +1192,12 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 			Str_CopyLimitNull( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME), Str_TempLength() - len);
 
 	}
-	else if ( pCorpse->GetTimeStamp() > 0 )
+	else if ( pCorpse->GetTimeStampS() > 0 )
 	{
-		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
+		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER),
+            pCorpse->GetName(),
+            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS() * MSECS_PER_SEC) / MSECS_PER_SEC));
+
 		if ( pName )
 			snprintf( pszTemp + len, Str_TempLength() - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else

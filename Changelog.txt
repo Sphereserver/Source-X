@@ -3785,3 +3785,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Fixed: RAM usage always increasing during uptime. Caused by a couple of memory leaks, the greatest happening because the cached map blocks were not properly released.
 - Fixed: adopted a more conservative memory allocation policy for strings, resulting in reduced RAM usage.
 - Changed: I_MEMORY (ITEMID_MEMORY) items won't have anymore the ComponentProps Faction, ItemChar, Item, reducing their memory footprint.
+
+25-06-2024, Nolok
+- Fixed: LASTUSED, LASTDISCONNECTED, TIMESTAMP being interpreted as a number with a different base (seconds or tenths of seconds or milliseconds) in different contexts. Now they expect in scripts only values in seconds.
+- Fixed: crash when moving a char in an area full of teleporters, or whichever items made the char move multiple times in the same tick.

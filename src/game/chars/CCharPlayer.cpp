@@ -26,7 +26,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) :
 	m_SkillLock{}, m_StatLock{},
 	m_pAccount(pAccount)
 {
-	_iTimeLastUsed = _iTimeLastDisconnected = 0;
+	_iTimeLastUsedMs = _iTimeLastDisconnectedMs = 0;
 
     m_SpeechHue = m_EmoteHue = 0;
 	m_wDeaths = m_wMurders = 0;
@@ -48,8 +48,8 @@ CCharPlayer::~CCharPlayer()
 	m_Speech.clear();
 
 	CMultiStorage* pOldStorage = _pMultiStorage;
-	_pMultiStorage = nullptr;
-	delete pOldStorage;			// I need _pMultiStorage to be nullptr before CMultiStorage destructor is called
+	_pMultiStorage = nullptr;   // I need _pMultiStorage to be nullptr before CMultiStorage destructor is called !
+	delete pOldStorage;
 }
 
 CAccount * CCharPlayer::GetAccount() const
@@ -239,10 +239,12 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			sVal = m_Speech.ContainsResourceName(RES_SPEECH, ptcKey) ? "1" : "0";
 			return true;
 		case CPC_LASTDISCONNECTED:
-			sVal.FormatLLVal(CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeLastDisconnected) / MSECS_PER_SEC);  //seconds
+            // Stored as ms, but printed as seconds
+			sVal.FormatLLVal(CWorldGameTime::GetCurrentTime().GetTimeDiff(_iTimeLastDisconnectedMs) / MSECS_PER_SEC);
 			return true;
 		case CPC_LASTUSED:
-			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( _iTimeLastUsed ) / MSECS_PER_SEC );  //seconds
+            // Stored as ms, but printed as seconds
+			sVal.FormatLLVal( CWorldGameTime::GetCurrentTime().GetTimeDiff( _iTimeLastUsedMs ) / MSECS_PER_SEC );
 			return true;
 		case CPC_LIGHT:
 			sVal.FormatHex(m_LocalLight);
@@ -460,12 +462,13 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			if ( pChar->IsClientActive() )
 				pChar->GetClientActive()->addKRToolbar( m_fKrToolbarEnabled );
 			return true;
-		// FIXME !!! OVERFLOW!!! NO NEED TO MULTIPLY EACH TIME !!!
 		case CPC_LASTDISCONNECTED:
-			_iTimeLastDisconnected = s.GetArgLLVal() * MSECS_PER_SEC;
+            // Accepts seconds but stores as milliseconds.
+			_iTimeLastDisconnectedMs = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_LASTUSED:
-			_iTimeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
+            // Accepts seconds but stores as milliseconds.
+			_iTimeLastUsedMs = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_PFLAG:
 			{
@@ -537,10 +540,10 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 
 	s.WriteKeyStr("ACCOUNT", pAccount->GetName());
 
-	if (_iTimeLastUsed > 0)
-		s.WriteKeyVal("LASTUSED", _iTimeLastUsed);
-	if (_iTimeLastDisconnected > 0)
-		s.WriteKeyVal("LASTDISCONNECTED", _iTimeLastDisconnected);
+	if (_iTimeLastUsedMs > 0)
+		s.WriteKeyVal("LASTUSED", _iTimeLastUsedMs / MSECS_PER_SEC);
+	if (_iTimeLastDisconnectedMs > 0)
+		s.WriteKeyVal("LASTDISCONNECTED", _iTimeLastDisconnectedMs / MSECS_PER_SEC);
 
 	if ( m_wDeaths )
 		s.WriteKeyVal( "DEATHS", m_wDeaths );

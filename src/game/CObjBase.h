@@ -44,7 +44,7 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
     friend class CWorldTicker;
 
 private:
-	int64 m_timestamp;          // TimeStamp
+	int64 m_iTimeStampS;          // TimeStamp
 
 protected:
 
@@ -204,13 +204,13 @@ public:
      * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
      * @return  The timestamp.
      */
-	int64 GetTimeStamp() const;
+	int64 GetTimeStampS() const;
 
     /**
      * @brief   Sets time stamp.
      * @param   t_time  The time.
      */
-	void SetTimeStamp(int64 t_time);
+	void SetTimeStampS(int64 t_time);
 
     /*
     * @brief    Add iDelta to this object's timer (if active) and its child objects.
@@ -603,7 +603,7 @@ public:
 public:
 
     /**
-     * @fn  virtual bool CObjBase::MoveTo(CPointMap pt, bool bForceFix = false) = 0;
+     * @fn  virtual bool CObjBase::MoveTo(CPointMap pt, bool fCheckLocation = true, bool fForceFix = false) = 0;
      *
      * @brief   Move To Location.
      *

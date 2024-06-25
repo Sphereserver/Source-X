@@ -22,18 +22,18 @@ else (MSVC)
 		-O3
 		$<$<BOOL:${ENABLED_SANITIZER}>:-ggdb3>
 	)
-	if (NOT ${CLANG_USE_GCC_LINKER})
-		set (c_compiler_options_common ${c_compiler_options_common} _CRT_SECURE_NO_WARNINGS)
-	endif()
-
-	set (c_linker_options_common
-	)
 
 	if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
 		set (c_compiler_options_common ${c_compiler_options_common}
 			-fno-expensive-optimizations
 		)
 	endif ()
+
+	#set (c_compiler_definitions_common ${c_compiler_definitions_common}
+	#)
+
+	#set (c_linker_options_common ${c_linker_options_common}
+	#)
 
 	#if (${CMAKE_C_COMPILER_ID} STREQUAL Clang)
 #endif()

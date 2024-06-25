@@ -2171,7 +2171,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), (uint)lenstr);
 
 	// message time
-	CSTime datetime(message->GetTimeStamp());
+	CSTime datetime(message->GetTimeStampS());
 	snprintf(tempstr, Str_TempLength(), "%s", datetime.Format("%b %d, %Y"));
 	lenstr = strlen(tempstr) + 1;
 
