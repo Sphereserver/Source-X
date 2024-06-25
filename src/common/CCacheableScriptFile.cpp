@@ -92,12 +92,16 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
             _fileContent = new std::vector<std::string>;
             _fileContent->reserve(iFileLength / 25);
 
+            const char *fileCursor = fileContentCopy.get();
+            size_t uiFileCursorRemainingLegth = iFileLength;
             ssize_t iStrLen;
-            for (const char *fileCursor = fileContentCopy.get();; fileCursor += (size_t)iStrLen)
+            for (;; fileCursor += (size_t)iStrLen, uiFileCursorRemainingLegth -= (size_t)iStrLen)
             {
-                iStrLen = sGetLine_StaticBuf(fileCursor, SCRIPT_MAX_LINE_LEN);
+                iStrLen = sGetLine_StaticBuf(fileCursor, minimum(uiFileCursorRemainingLegth, SCRIPT_MAX_LINE_LEN));
                 if (iStrLen < 0)
+                {
                     break;
+                }
                 if (iStrLen < 1 /*|| (fileCursor[iStrLen] != '\n') It can also be a '\0' value, but it might not be necessary to check for either of the two...*/)
                 {
                     ++ iStrLen; // Skip \n
@@ -135,6 +139,8 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
                 fFirstLine = false;
                 fUTF = false;
             }   // closes while
+
+            ASSERT(uiFileCursorRemainingLegth <= 1);
         }   // closes else
 
         fclose(_pStream);

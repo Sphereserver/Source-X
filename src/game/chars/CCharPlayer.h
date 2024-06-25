@@ -39,8 +39,8 @@ public:
 	static const char *m_sClassName;
 	CAccount * m_pAccount;		// The account index. (for idle players mostly)
 
-	int64 _iTimeLastUsed;			// Time the player char was last used (connected).
-	int64 _iTimeLastDisconnected;
+	int64 _iTimeLastUsedMs;			// Time the player char was last used (connected).
+	int64 _iTimeLastDisconnectedMs;
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
     HUE_TYPE m_SpeechHue;	// speech hue used (sent by client)

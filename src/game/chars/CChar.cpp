@@ -503,7 +503,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->_iTimeLastUsed = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_pPlayer->_iTimeLastUsedMs = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
 	FixClimbHeight();
@@ -525,7 +525,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
 
 	if (m_pPlayer)
 	{
-		m_pPlayer->_iTimeLastDisconnected = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+		m_pPlayer->_iTimeLastDisconnectedMs = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	}
 
     if (m_pParty)

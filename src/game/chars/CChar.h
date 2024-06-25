@@ -500,7 +500,7 @@ public:
     bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
-	TRIGRET_TYPE CheckLocation( bool fStanding = false );
+	TRIGRET_TYPE CheckLocation(bool fCanCheckRecursively, bool fStanding);
 
 public:
 	// Client Player specific stuff. -------------------------

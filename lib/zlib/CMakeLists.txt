@@ -41,5 +41,9 @@ target_include_directories (zlib PUBLIC .)
 
 # set compiler flags
 include("../lib_build_flags_common_c.cmake")
-target_compile_options	(zlib PRIVATE ${c_compiler_options_common})
-target_link_options	(zlib PRIVATE ${c_linker_options_common})
+target_compile_options      (zlib PRIVATE ${c_compiler_options_common})
+target_compile_definitions  (zlib PRIVATE ${c_compiler_definitions_common})
+if (MSVC)
+    target_compile_definitions (zlib PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_WARNINGS)
+endif ()
+target_link_options		    (zlib PRIVATE ${c_linker_options_common})

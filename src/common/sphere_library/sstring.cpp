@@ -1869,7 +1869,7 @@ ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char *sp, const size_
         if (*ptr == delimiter) {
             return ptr - sp;
         }
-        if (ptr + 2 >= eptr) {
+        if (ptr + 1 >= eptr) {
             return -1; // buffer too small
         }
     }

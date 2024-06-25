@@ -18,5 +18,6 @@ target_include_directories (twofish PUBLIC .)
 
 # set compiler flags
 include("../lib_build_flags_common_c.cmake")
-target_compile_options	(twofish PRIVATE ${c_compiler_options_common})
-target_link_options	(twofish PRIVATE ${c_linker_options_common})
+target_compile_options      (twofish PRIVATE ${c_compiler_options_common})
+target_compile_definitions  (twofish PRIVATE ${c_compiler_definitions_common})
+target_link_options		    (twofish PRIVATE ${c_linker_options_common})

@@ -97,7 +97,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	}
 
 	CChar *pCharCorpse = m_uidLink.CharFind();
-	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_SLEEPING) && !GetTimeStamp() )
+	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_SLEEPING) && !GetTimeStampS() )
 		return pCharCorpse;
 
 	return nullptr;
@@ -199,7 +199,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (IsStatFlag(STATF_DEAD))
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;
-		pCorpse->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());	// death time
+		pCorpse->SetTimeStampS(CWorldGameTime::GetCurrentTime().GetTimeRaw());	// death time
 		if (Attacker_GetLast())
 			pCorpse->m_itCorpse.m_uidKiller = Attacker_GetLast()->GetUID();
 		else
@@ -207,7 +207,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	}
 	else	// sleeping (not dead)
 	{
-		pCorpse->SetTimeStamp(0);
+		pCorpse->SetTimeStampS(0);
 		pCorpse->m_itCorpse.m_uidKiller = GetUID();
 	}
 

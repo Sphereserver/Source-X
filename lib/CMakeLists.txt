@@ -7,6 +7,7 @@ add_subdirectory(object_ptr)
 add_subdirectory(parallel_hashmap)
 add_subdirectory(rand)
 add_subdirectory(regex)
+#add_subdirectory(simde)
 add_subdirectory(twofish)
 
 if (${LIB_LIBEV_BUILD})
@@ -45,7 +46,7 @@ foreach (tgt ${TARGETS})
   )
 
   # Link to (and import include directories) those clasic (.c/.h) libraries.
-  target_link_libraries(${tgt} PRIVATE bcrypt cdrc twofish)
+  target_link_libraries(${tgt} PRIVATE bcrypt twofish) # cdrc (not needed for now)
   if (${LIB_LIBEV_BUILD})
     target_link_libraries(${tgt} PRIVATE libev)
   endif()
