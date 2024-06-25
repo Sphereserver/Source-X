@@ -86,7 +86,7 @@ bool CRegion::RealizeRegion()
 			//	Yes, this sector overlapped, so add it to the sector list
 			if ( !pSector->LinkRegion(this) )
 			{
-				g_Log.EventError("Linking sector #%d for map %d for region %s failed (fatal for this region).\n", i, m_pt.m_map, GetName());
+				g_Log.EventError("Linking sector #%d (map %d) for region %s failed (fatal for this region).\n", i, int(m_pt.m_map), GetName());
 				return false;
 			}
 			++m_iLinkedSectors;
@@ -792,7 +792,7 @@ bool CRegion::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				CChar * pChar = pClient->GetChar();
 				if ( !pChar || ( pChar->GetRegion() != this ))
 					continue;
-				
+
 				CScript script(s.GetArgRaw());
 				script.CopyParseState(s);
 				pChar->r_Verb(script, pSrc);
