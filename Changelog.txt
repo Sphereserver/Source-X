@@ -3785,3 +3785,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Fixed: RAM usage always increasing during uptime. Caused by a couple of memory leaks, the greatest happening because the cached map blocks were not properly released.
 - Fixed: adopted a more conservative memory allocation policy for strings, resulting in reduced RAM usage.
 - Changed: I_MEMORY (ITEMID_MEMORY) items won't have anymore the ComponentProps Faction, ItemChar, Item, reducing their memory footprint.
+
+24-06-2024, Jhobean
+- Changed: @NPCRESTOCK References modification. Now SRC:Server I:NPC (Before it was always server)
