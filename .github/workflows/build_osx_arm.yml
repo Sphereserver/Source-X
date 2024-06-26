@@ -1,4 +1,4 @@
-name: Build MacOS ARM
+name: MacOS ARM
 
 on:
   - push

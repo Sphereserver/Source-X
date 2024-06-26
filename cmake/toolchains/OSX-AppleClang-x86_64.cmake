@@ -6,6 +6,7 @@ function (toolchain_after_project)
 	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
 	SET(ARCH_BITS			64			CACHE INTERNAL "" FORCE) # override
 	SET(ARCH				"x86_64"	CACHE INTERNAL "" FORCE) # override
+	SET(CMAKE_SYSTEM_PROCESSOR "${ARCH}" CACHE INTERNAL "" FORCE)
 
 	toolchain_after_project_common()
 

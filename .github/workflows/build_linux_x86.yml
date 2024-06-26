@@ -1,4 +1,4 @@
-name: Build Linux x86
+name: Linux x86
 
 on:
   - push
@@ -51,14 +51,14 @@ jobs:
             #wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
 
             # Third choice: directly download and install packages from Debian repos?
-            echo "Packets to be installed by libmariadb3:"
-            dpkg-deb -c temp1.deb
+            #echo "Packages to be installed by libmariadb3:"
+            #dpkg-deb -c temp1.deb
             echo "Installing via dpkg libmariadb3"
             sudo dpkg -i temp1.deb
             echo "Done"
 
-            echo "Packets to be installed by libmariadb-dev:"
-            dpkg-deb -c temp2.deb
+            #echo "Packages to be installed by libmariadb-dev:"
+            #dpkg-deb -c temp2.deb
             echo "Installing via dpkg libmariadb-dev"
             sudo dpkg -i temp2.deb
 

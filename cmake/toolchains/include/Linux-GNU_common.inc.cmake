@@ -7,7 +7,6 @@ endfunction ()
 
 function (toolchain_after_project_common)
 	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
-	MESSAGE (STATUS "Target Arch: ${ARCH}")
 endfunction ()
 
 function (toolchain_exe_stuff_common)
