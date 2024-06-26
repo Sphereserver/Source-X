@@ -1,4 +1,4 @@
-name: Build Windows x86_64
+name: Windows x86_64
 
 on:
   - push

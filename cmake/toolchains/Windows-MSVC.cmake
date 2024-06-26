@@ -20,6 +20,14 @@ function (toolchain_after_project)
 		SET(ARCH_BITS	32	CACHE INTERNAL "" FORCE) # override
 	ENDIF ()
 ]]
+	if (NOT CMAKE_VS_PLATFORM_NAME)
+		set (CMAKE_VS_PLATFORM_NAME "${CMAKE_VS_PLATFORM_NAME_DEFAULT}")
+	endif ()
+	if (${CMAKE_VS_PLATFORM_NAME} STREQUAL "Win32")
+	set (CMAKE_SYSTEM_PROCESSOR "x86" CACHE INTERNAL "" FORCE)
+	endif ()
+	set (CMAKE_SYSTEM_PROCESSOR "${CMAKE_VS_PLATFORM_NAME}" CACHE INTERNAL "" FORCE)
+
 	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
 
 	MESSAGE (STATUS "Target Arch: ${ARCH}")
