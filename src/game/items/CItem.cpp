@@ -1650,7 +1650,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 
 	// Check if there's too many items on the same spot
 
-    if (g_Cfg.m_iMaxItemComplexity > 0)
+    //if (g_Cfg.m_iMaxItemComplexity > 0) // It might be wise to keep this always on.
     {
         uint iItemCount = 0;
         const CItem * pItem = nullptr;

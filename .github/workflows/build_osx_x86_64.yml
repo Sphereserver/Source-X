@@ -1,4 +1,4 @@
-name: Build Nightly MacOS x86_64
+name: Build MacOS x86_64
 
 on:
   - push

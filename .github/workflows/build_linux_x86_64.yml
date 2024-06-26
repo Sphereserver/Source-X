@@ -1,4 +1,4 @@
-name: Build Nightly Linux x86_64
+name: Build Linux x86_64
 
 on:
   - push
