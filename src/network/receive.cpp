@@ -1230,7 +1230,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			CSTime datetime = CSTime::GetCurrentTime();
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(datetime.GetTime());
+			newMessage->SetTimeStampS(datetime.GetTime());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 

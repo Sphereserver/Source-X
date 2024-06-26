@@ -1,0 +1,125 @@
+name: Build Nightly Linux x86
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  linux-x86:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Install prerequisites
+      run:  |
+            lsb_release -d
+
+            echo && echo "** Setting up repos" && echo
+            sudo sudo dpkg --add-architecture i386
+            sudo add-apt-repository universe && sudo apt-get -qq update > /dev/null
+            echo "Done"
+
+            echo && echo "** Installing and setting up compiler and tools" && echo
+            sudo apt install -yqq --no-install-recommends ninja-build linux-libc-dev:i386 gcc-12 gcc-12-multilib g++-12 g++-12-multilib > /dev/null
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+            echo "Done"
+
+            # MariaDB dependencies
+            echo && echo "Install MariaDB dependencies"
+            echo "Installing some deps with apt..."
+            sudo apt install -yqq --no-install-recommends libc6:i386 libgcc-s1:i386 zlib1g:i386
+            echo "Installing libssl1.1 manually from Bionic repo..."
+            wget --quiet --output-document=dep1.deb http://launchpadlibrarian.net/367327733/libssl1.1_1.1.0g-2ubuntu4_i386.deb
+            sudo dpkg -r --force-all libssl1.1 2> /dev/null
+            sudo dpkg -i --force-all dep1.deb  2> /dev/null
+            #sudo apt install --fix-broken ./dep1.deb
+            echo "Done"
+
+            # Workaround: there are no official packages built for i386 on this OS. Let's install from previous Ubuntu LTS versions repo.
+
+            echo "Installing MariaDB i386 manually from Bionic repo..."
+            wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/355877539/libmariadb3_3.0.3-1build1_i386.deb
+            wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
+
+            #echo "Installing MariaDB i386 manually from Focal repo..."
+            #wget --quiet --output-document=temp1.deb http://launchpadlibrarian.net/448491536/libmariadb3_10.3.18-1_i386.deb
+            # No libmariadb-dev ?
+            #wget --quiet --output-document=temp2.deb http://launchpadlibrarian.net/355877538/libmariadb-dev_3.0.3-1build1_i386.deb
+
+            # Third choice: directly download and install packages from Debian repos?
+
+            sudo dpkg -i temp1.deb temp2.deb 2> /dev/null
+            echo "Done"
+
+
+    - name: Report building tools
+      run:  |
+            echo "GCC:" && gcc -v
+            echo && echo "CMake:" && cmake --version
+            echo && echo "Ninja:" && ninja --version
+
+    - name: CMake
+      run: |
+            mkdir -p build
+            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86.cmake -S ./ -B ./build
+    - name: Ninja
+      run: cd build && ninja && cd ..
+    - name: Create package
+      run:  |
+            mkdir accounts logs save scripts
+            tar -czf SphereSvrX-linux-x86-nightly.tar.gz accounts/ logs/ save/ scripts/ build/bin-x86/SphereSvrX32_nightly src/sphere.ini src/sphereCrypt.ini
+
+    # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
+    - name: Upload artifact
+      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+      uses: actions/upload-artifact@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: Build-linux-x86
+        path: SphereSvrX-linux-x86-nightly.tar.gz
+        overwrite: true
+
+
+  upload_github_release:
+    needs: linux-x86
+    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
+    if: contains(fromJson('["master", "main"]'), github.ref_name)
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-linux-x86
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Nightly
+          tag_name: Nightly
+          prerelease: true
+          files: SphereSvrX-linux-x86-nightly.tar.gz
+
+
+  upload_selfhost_release:
+    needs: linux-x86
+    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-linux-x86
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+      - name: Push release
+        run: |
+          curl -sST "{SphereSvrX-linux-x86-nightly.zip}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}

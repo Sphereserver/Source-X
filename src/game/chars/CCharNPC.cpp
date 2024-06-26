@@ -281,22 +281,22 @@ void CChar::NPC_LoadScript( bool fRestock )
 	}					
 
 	CCharBase * pCharDef = Char_GetDef();
-    CChar * pChar = this->GetChar();
-	// 1) CHARDEF trigger
-	if ( m_pPlayer == nullptr ) //	CHARDEF triggers (based on body type)
-	{
-		if ( pChar != nullptr )
-		{
-			CUID uidOldAct = pChar->m_Act_UID;
-			pChar->m_Act_UID = GetUID();
-			pChar->ReadScriptReducedTrig(pCharDef, CTRIG_Create);
-			pChar->m_Act_UID = uidOldAct;
-		}
-	}
-	//This remains untouched but moved after the chardef's section
-	if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
-        pChar->ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock);
 
+    CChar * pChar = this->GetChar();
+    if (pChar != nullptr)
+    {
+	    // 1) CHARDEF trigger
+	    if ( m_pPlayer == nullptr ) //	CHARDEF triggers (based on body type)
+	    {
+		    CUID uidOldAct = pChar->m_Act_UID;
+		    pChar->m_Act_UID = GetUID();
+		    pChar->ReadScriptReducedTrig(pCharDef, CTRIG_Create);
+		    pChar->m_Act_UID = uidOldAct;
+	    }
+	    //This remains untouched but moved after the chardef's section
+	    if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
+            pChar->ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock);
+    }
 	CreateNewCharCheck();	//This one is giving stats, etc to the char, so we can read/set them in the next triggers.
 }
 

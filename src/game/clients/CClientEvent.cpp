@@ -888,7 +888,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		// Check if I stepped on any item/teleport
-		TRIGRET_TYPE iRet = m_pChar->CheckLocation(false);
+		TRIGRET_TYPE iRet = m_pChar->CheckLocation(true, false);
 		if (iRet == TRIGRET_RET_FALSE)
 		{
 			m_pChar->SetUnkPoint(ptOld);	// we already moved, so move back to previous location
@@ -1901,7 +1901,9 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 			for (CSObjContRec* pObjRec : pChar->GetIterationSafeCont())
 			{
 				CItem* pItem = static_cast<CItem*>(pObjRec);
-				pItem->OnHear(pszText, m_pChar);
+                if (pItem->CanHear()) {
+                    pItem->OnHear(pszText, m_pChar);
+                }
 			}
 		}
 

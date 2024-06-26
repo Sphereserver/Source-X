@@ -1,6 +1,6 @@
 # SphereServer X
 
-Ultima Online game server developed in C++
+Ultima Online game server, developed in C++.
 <br>
 [![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
 [![GitHub repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
@@ -9,11 +9,16 @@ Ultima Online game server developed in C++
 [![GitHub issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
 <br>
-[![Build](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml)
-[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
+<br>
+[![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml)
+[![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml)
+[![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml)
+[![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml)
+[![Build status: MacOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml)
+[![Build status: MacOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml)
 <br><br>
-Join SphereServer Discord channel!
+Join the SphereServer Discord channel!
 [![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs)
 
 ### Download automated SphereServer builds and ScriptPack releases
@@ -30,8 +35,8 @@ of the new ones.
 It is currently being revamped to add original OSI features.
 Beware, it's still not 100% complete!
 
-+ <a href="https://github.com/Sphereserver/Scripts-X">Up to date</a>
-+ <a href="https://github.com/Sphereserver/Scripts-X/releases">Official releases</a>
++ <a href="https://github.com/Sphereserver/Scripts-X">Current (most updated)</a>
++ <a href="https://github.com/Sphereserver/Scripts-X/releases">Milestone releases</a>
 
 ### Resources
 
@@ -88,7 +93,7 @@ Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-con
 
 ### Generating the project files
 
-The compilation of the code is possible only using recent compilers, since C++20 features are used: newer is better. Oldest compiler versions supporting C++20: Visual Studio 2019 version 16.11, GCC 8, MinGW distributions using GCC 8, Clang version 10.<br>
+The compilation of the code is possible only using recent compilers, since C++20 features are used: the newer the compiler, the better. Oldest compiler versions supporting C++20: Visual Studio 2019 version 16.11, GCC 8, MinGW distributions using GCC 8, Clang version 10.<br>
 You need to build Makefiles or Ninja files (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and MinGW).<br>
 Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
@@ -98,12 +103,12 @@ Does CMake give you an error? Ensure that you have Git installed, and if you are
 
 #### Toolchains and custom CMake variables
 
-When generating project files, if you don't specify a toolchain, the CMake script will pick the 32 bits one as default.<br>
+When generating project files, if you don't specify a toolchain, the CMake script will pick the native one as default.<br>
 How to set a toolchain:
 
 + Via CMake GUI: when configuring for the first time the project, choose "Specify toolchain file for cross-compiling", then on the next step you'll be allowed to select the toolchain file
 + Via CMake CLI (command line interface): pass the parameter `-DCMAKE_TOOLCHAIN_FILE="..."`
-  When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
+  When using Makefiles or Ninja, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is **Nightly**, **Debug** or **Release**. If the build type
  was not set, by default the makefiles for all of the three build types are generated.<br>
 <br />
 
@@ -228,3 +233,4 @@ Copyright 2023 SphereServer development team.<br>
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>
 You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
+

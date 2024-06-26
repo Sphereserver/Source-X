@@ -2854,9 +2854,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		// The timeout is stored as server time (not real world time) in milliseconds.
 		// When a char logs out, the logout server time is stored.
 		// When the char logs in again, move forward its timers by the time it spent offline.
-		if (m_pChar->m_pPlayer->_iTimeLastDisconnected > 0)
+		if (m_pChar->m_pPlayer->_iTimeLastDisconnectedMs > 0)
 		{
-			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnected;
+			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnectedMs;
 			if (iDelta < 0)
 			{
 				g_Log.EventWarn("World Time was manually changed. The TIMERs belonging to the char '%s' (UID=0%x) couldn't be frozen during its logout.\n", m_pChar->GetName(), m_pChar->GetUID().GetObjUID());

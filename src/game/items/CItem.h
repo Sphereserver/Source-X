@@ -624,6 +624,7 @@ public:
     void SetComponentOfMulti(const CUID& uidMulti);
     void SetLockDownOfMulti(const CUID& uidMulti);
 
+    bool CanHear() const;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 
 	CItemBase * Item_GetDef() const;

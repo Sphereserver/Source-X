@@ -1640,38 +1640,42 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		return true;
 
 	// Check if there's too many items on the same spot
-	uint iItemCount = 0;
-	const CItem * pItem = nullptr;
-	auto AreaItems = CWorldSearchHolder::GetInstance(ptNewPlace);
-	for (;;)
-	{
-		pItem = AreaItems->GetItem();
-		if ( pItem == nullptr )
-			break;
 
-		++iItemCount;
-		if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
-		{
-			Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
-			iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
-			break;
-		}
-	}
-
-	/*  // From 56b
-		// Too many items on the same spot!
-        if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+    if (g_Cfg.m_iMaxItemComplexity > 0)
+    {
+        uint iItemCount = 0;
+        const CItem * pItem = nullptr;
+        auto AreaItems = CWorldSearchHolder::GetInstance(ptNewPlace);
+        for (;;)
         {
-            Speak("Too many items here!");
-            if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+            pItem = AreaItems->GetItem();
+            if (pItem == nullptr)
+                break;
+
+            ++iItemCount;
+            if (iItemCount > g_Cfg.m_iMaxItemComplexity)
             {
-                Speak("The ground collapses!");
-                Delete();
+                Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
+                iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
+                break;
             }
-            // attempt to reject the move.
-            return false;
         }
-    */
+
+        /*  // From 56b
+            // Too many items on the same spot!
+            if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+            {
+                Speak("Too many items here!");
+                if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+                {
+                    Speak("The ground collapses!");
+                    Delete();
+                }
+                // attempt to reject the move.
+                return false;
+            }
+        */
+    }
 
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));
@@ -2098,10 +2102,17 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 
 void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 {
+    ADDTOCALLSTACK("CItem::OnHear");
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
 	UnreferencedParameter(pszCmd);
 	UnreferencedParameter(pSrc);
 	ASSERT(false);
+}
+
+bool CItem::CanHear() const
+{
+    //ADDTOCALLSTACK("CItem::CanHear");
+    return IsType(IT_SHIP) || IsType(IT_COMM_CRYSTAL);
 }
 
 CItemBase * CItem::Item_GetDef() const
@@ -5237,7 +5248,7 @@ lpctstr CItem::Use_Sextant( CPointMap pntCoords ) const
 
 bool CItem::IsBookWritable() const
 {
-	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStamp() == 0) );
+	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStampS() == 0) );
 }
 
 bool CItem::IsBookSystem() const	// stored in RES_BOOK
