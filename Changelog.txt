@@ -3789,3 +3789,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 25-06-2024, Nolok
 - Fixed: LASTUSED, LASTDISCONNECTED, TIMESTAMP being interpreted as a number with a different base (seconds or tenths of seconds or milliseconds) in different contexts. Now they expect in scripts only values in seconds.
 - Fixed: crash when moving a char in an area full of teleporters, or whichever items made the char move multiple times in the same tick.
+
+26-06-2024, Jhobean
+- Changed: @NPCRESTOCK References modification. Now SRC:Server I:NPC (Before it was always server)
