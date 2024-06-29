@@ -1209,10 +1209,18 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
                 ++it;
             }
 
-            if (!fExists && ((short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
+            if (!fExists && ((short)(m_followers.size()) + iFollowerSlots <= iMaxFollower || IsPriv(PRIV_GM)))
             {
                 if (!fCheckOnly)
-                    m_followers.emplace_back(pChar->GetUID());
+                {
+                    for (short i = 0; i < iFollowerSlots; ++i)
+                    {
+                        m_followers.emplace_back(pChar->GetUID());
+                    }
+                    short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
+                    iCurFollower += iFollowerSlots;
+                    SetDefNum("CURFOLLOWER", maximum(iCurFollower, 0));
+                }
             }
             else
                 return false;
