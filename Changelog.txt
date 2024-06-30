@@ -3779,3 +3779,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// ITEM_CANTIMER_IN_CONTAINER	1	// Items can hold a timer even if equipped.
 - Added: item CAN flag (Issue #1180):
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
+
+30-06-2024, Tolokio
+-Fixed: Maxhits to work normal even if u change it. Fix as well @statchange undesired behaviours.
