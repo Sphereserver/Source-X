@@ -3782,3 +3782,5 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 30-06-2024, Tolokio
 -Fixed: Maxhits to work normal even if u change it. Fix as well @statchange undesired behaviours.
+-Fixed: negative modstr no longer provoke negative str. Now it is set to zero before ushort. This make negative original value to be lost, but fix other issues hard to explain.
+-Note: If u dont want maxhits to change once it is set (as before), u need to use @statchange to denied the change. It takes no more than 3 mins to do it. 
