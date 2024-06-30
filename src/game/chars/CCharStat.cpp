@@ -377,6 +377,8 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 	}
 
 	m_Stat[i].m_base = uiVal;
+    if (i != STAT_FOOD)
+        Stat_SetMax(i, uiVal);
 
 	if ( (i == STAT_STR) && (uiVal < uiStatVal) )
 	{
