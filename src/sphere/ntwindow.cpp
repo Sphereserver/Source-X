@@ -308,11 +308,12 @@ void CNTWindow::List_AddSingle(COLORREF color, LPCTSTR ptcText)
 
 void CNTWindow::List_AddGroup(std::deque<std::unique_ptr<ConsoleOutput>>&& msgs)
 {
+    std::deque<std::unique_ptr<ConsoleOutput>> moved_msgs(std::move(msgs));
 	const int iMaxTextLen = (64 * 1024);
 
 	// Erase the old text to make space for all the message queue at once
 	int iTotalTextLen = 0;
-	for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+	for (std::unique_ptr<ConsoleOutput> const& co : moved_msgs)
 	{
 		iTotalTextLen += co->GetTextString().GetLength();
 	}
@@ -329,7 +330,7 @@ void CNTWindow::List_AddGroup(std::deque<std::unique_ptr<ConsoleOutput>>&& msgs)
 	}
 
 	// Append all the messages at once
-	for (std::unique_ptr<ConsoleOutput> const& co : msgs)
+	for (std::unique_ptr<ConsoleOutput> const& co : moved_msgs)
 	{
 		const COLORREF color = (COLORREF)CTColToRGB(co->GetTextColor());
 		const lpctstr ptcText = co->GetTextString().GetBuffer();
@@ -876,12 +877,12 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 	catch (const CSError& e)
 	{
 		g_Log.CatchEvent(&e, "Window");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent(nullptr, "Window");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }

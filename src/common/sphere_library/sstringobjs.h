@@ -38,9 +38,8 @@ public:
 	AbstractString();
 	virtual ~AbstractString() = default;
 
-private:
-	AbstractString(const AbstractString& copy);
-	AbstractString& operator=(const AbstractString& other);
+	AbstractString(const AbstractString& copy) = delete;
+	AbstractString& operator=(const AbstractString& other) = delete;
 
 public:
 	// information

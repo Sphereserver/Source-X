@@ -28,17 +28,19 @@ public:
     *
     * Sets m_pData to nullptr and counters to zero.
     */
-    CSTypedArray() {}
+    CSTypedArray() noexcept = default;
     /**
     * @brief Copy constructor.
     */
-    CSTypedArray<TYPE>(const CSTypedArray<TYPE> & copy);
+
+    CSTypedArray(const CSTypedArray<TYPE> & copy);
     /**
     * @brief Assign operator
     */
     CSTypedArray<TYPE> & operator=(const CSTypedArray<TYPE> &array);
 public:
     ///@}
+
     /** @name Modifiers:
     */
     ///@{
@@ -82,7 +84,7 @@ public:
 
 /* Template methods (inlined or not) are defined here */
 
-// CSTypedArray:: Constructors, Destructor, Asign operator.
+// CSTypedArray:: Constructors, Destructor, Assign operator.
 
 template<class TYPE>
 CSTypedArray<TYPE>::CSTypedArray(const CSTypedArray<TYPE> & copy) : std::vector<TYPE>(static_cast<const std::vector<TYPE>&>(copy)) {}

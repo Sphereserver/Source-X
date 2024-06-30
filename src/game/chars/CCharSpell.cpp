@@ -7,6 +7,7 @@
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -148,7 +149,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
                     g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_1),
                     g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_2)
                 };
-                SysMessage(sm_szPunishMsg[Calc_GetRandVal(ARRAY_COUNT(sm_szPunishMsg))]);
+                SysMessage(sm_szPunishMsg[g_Rand.GetVal(ARRAY_COUNT(sm_szPunishMsg))]);
 
                 int iCell = 0;
                 if ( m_pPlayer && m_pPlayer->GetAccount() )
@@ -191,15 +192,15 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 		}
 	}
 
-	CPointMap ptOld = GetTopPoint();
+	CPointMap ptOld(GetTopPoint());
 	if ( ptOld.IsValidPoint() )		// guards might have just been created
 	{
 		if ( fTakePets )	// look for any creatures that might be following me near by
 		{
-			CWorldSearch Area(ptOld, UO_MAP_VIEW_SIGHT);
+			auto Area = CWorldSearchHolder::GetInstance(ptOld, UO_MAP_VIEW_SIGHT);
 			for (;;)
 			{
-				CChar * pChar = Area.GetChar();
+				CChar * pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( pChar == this )
@@ -266,7 +267,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
                 g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_1),
                 g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_2)
             };
-            SysMessage(sm_szPunishMsg[Calc_GetRandVal(ARRAY_COUNT(sm_szPunishMsg))]);
+            SysMessage(sm_szPunishMsg[g_Rand.GetVal(ARRAY_COUNT(sm_szPunishMsg))]);
             return false;
         }
 
@@ -808,7 +809,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Curse:
 		case SPELL_Mass_Curse:
 		{
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )
+			if (m_pPlayer && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -855,7 +856,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			UpdateStatVal( STAT_INT, +uiStatEffect );
 			return;
 		case SPELL_Reactive_Armor:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -874,7 +875,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Clear(STATF_REFLECTION);
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
 				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -891,27 +892,29 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case SPELL_Stoneskin:		// 115 // turns your skin into stone, giving a boost to your AR.
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
-			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
-			{
-				CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
-				CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
-                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
+        {
+            if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
+            {
+                CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
+                CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
+                ModPropNum(pCCPChar, PROPCH_RESPHYSICAL, +pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
                 ModPropNum(pCCPChar, PROPCH_FASTERCASTING, +2, pBaseCCPChar);
                 _CheckLimitEffectSkill(pSpell->m_itSpell.m_PolyDex, this, SKILL_MAGICRESISTANCE);
-				Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
-			}
-			else
-			{
-				m_defense = (word)CalcArmorDefense();
-			}
-			if (pClient)
-			{
-				if (spell == SPELL_Protection)
-					pClient->removeBuff(BI_PROTECTION);
-				else if (spell == SPELL_Arch_Prot)
-					pClient->removeBuff(BI_ARCHPROTECTION);
-			}
-			return;
+                Skill_AddBase(SKILL_MAGICRESISTANCE, pSpell->m_itSpell.m_PolyDex - Skill_GetBase(SKILL_MAGICRESISTANCE));
+            }
+            else
+            {
+                m_defense = (word)CalcArmorDefense();
+            }
+            if (pClient)
+            {
+                if (spell == SPELL_Protection)
+                    pClient->removeBuff(BI_PROTECTION);
+                else if (spell == SPELL_Arch_Prot)
+                    pClient->removeBuff(BI_ARCHPROTECTION);
+            }
+            return;
+        }
 		/*case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 			return;*/
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
@@ -1145,9 +1148,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					SetName(pCharDef->IsFemale() ? "#NAMES_GARGOYLE_FEMALE" : "#NAMES_GARGOYLE_MALE");
 
 				if (IsPlayableCharacter())
-					SetHue((HUE_TYPE)(Calc_GetRandVal2(HUE_SKIN_LOW, HUE_SKIN_HIGH)) | HUE_UNDERWEAR);
+					SetHue((HUE_TYPE)(g_Rand.GetVal2(HUE_SKIN_LOW, HUE_SKIN_HIGH)) | HUE_UNDERWEAR);
 
-				HUE_TYPE RandomHairHue = (HUE_TYPE)(Calc_GetRandVal2(HUE_HAIR_LOW, HUE_HAIR_HIGH));
+				HUE_TYPE RandomHairHue = (HUE_TYPE)(g_Rand.GetVal2(HUE_HAIR_LOW, HUE_HAIR_HIGH));
 				CItem *pHair = LayerFind(LAYER_HAIR);
 				if (pHair)
 				{
@@ -1366,7 +1369,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	switch ( spell )
 	{
 		case SPELL_Reactive_Armor:
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
                 wStatEffectRef = 15 + (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1389,7 +1392,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_REACTIVEARMOR);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1475,7 +1478,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				{
                     wStatEffectRef = 8 + (pCaster->Skill_GetBase(SKILL_EVALINT) / 100) - (Skill_GetBase(SKILL_MAGICRESISTANCE) / 100);
 				}
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && m_pPlayer )		// Curse also decrease max resistances on players
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE) && m_pPlayer)		// Curse also decrease max resistances on players
 				{
 					CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 					CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
@@ -1502,7 +1505,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 					for ( int idx = STAT_STR; idx < STAT_BASE_QTY; ++idx )
 						Str_FromI(wStatEffectRef, NumBuff[idx], sizeof(NumBuff[0]), 10);
-					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 					{
 						for ( int idx = 3; idx < 7; ++idx )
 							Str_FromI(10, NumBuff[idx], sizeof(NumBuff[0]), 10);
@@ -1603,7 +1606,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Magic_Reflect:
 			StatFlag_Set( STATF_REFLECTION );
-			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 			{
                 wStatEffectRef = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
 
@@ -1618,7 +1621,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_MAGICREFLECTION);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-wStatEffectRef, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -1639,7 +1642,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				int iPhysicalResist = 0;
 				int iMagicResist = 0;
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
 					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
@@ -1680,7 +1683,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					}
 
 					pClient->removeBuff(BuffIcon);
-					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+					if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 					{
 						Str_FromI(-iPhysicalResist, NumBuff[0], sizeof(NumBuff[0]), 10);
 						Str_FromI(-iMagicResist/10, NumBuff[1], sizeof(NumBuff[0]), 10);
@@ -1737,18 +1740,18 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		case SPELL_Liquor:	// 92 = extreme drunkeness ?
 		{
 			// Chance to get sober quickly
-			if (10 > Calc_GetRandVal(100))
+			if (10 > g_Rand.GetVal(100))
 				--iCharges;
 
 			Stat_AddVal(STAT_INT, -1);
 			Stat_AddVal(STAT_DEX, -1);
 
-			if ( !Calc_GetRandVal(3) )
+			if ( !g_Rand.GetVal(3) )
 			{
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_ALCOHOL_HIC));
 				if ( !IsStatFlag(STATF_ONHORSE) )
 				{
-					UpdateDir( (DIR_TYPE)Calc_GetRandVal(8) );
+					UpdateDir( (DIR_TYPE)g_Rand.GetVal(8) );
 					UpdateAnimate(ANIM_BOW);
 				}
 			}
@@ -1767,12 +1770,12 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		{
 			if (iCharges <=0 || iLevel <= 0)
 				return false;
-			iSecondsDelay = Calc_GetRandLLVal2(15, 30);
+			iSecondsDelay = g_Rand.GetLLVal2(15, 30);
 		
 			if (IsClientActive())
 			{
 				static const SOUND_TYPE sm_sounds[] = { 0x243, 0x244 };
-				m_pClient->addSound(sm_sounds[Calc_GetRandVal(ARRAY_COUNT(sm_sounds))]);
+				m_pClient->addSound(sm_sounds[g_Rand.GetVal(ARRAY_COUNT(sm_sounds))]);
 				m_pClient->addChar(this);
 				m_pClient->addPlayerSee(CPointMap());
 			}
@@ -1791,24 +1794,24 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				switch (iLevel)
 				{
 					case 4:
-						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(16, 33), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), g_Rand.GetVal2(16, 33), 100);
                         iSecondsDelay = 5;
 						break;
 					case 3:
-						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(15, 30), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), g_Rand.GetVal2(15, 30), 100);
                         iSecondsDelay = 5;
 						break;
 					case 2:
-						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(7, 15), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), g_Rand.GetVal2(7, 15), 100);
                         iSecondsDelay = 4;
 						break;
 					case 1:
-						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), g_Rand.GetVal2(5, 10), 100);;
                         iSecondsDelay = 3;
 						break;
 					default:
 					case 0:
-						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), Calc_GetRandVal2(4, 7), 100);
+						iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), g_Rand.GetVal2(4, 7), 100);
                         iSecondsDelay = 2;
 						break;
 				}
@@ -1852,7 +1855,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
 				iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
-				iSecondsDelay = (5 + Calc_GetRandLLVal(4));
+				iSecondsDelay = (5 + g_Rand.GetLLVal(4));
 				
 				static lpctstr const sm_Poison_Message[] =
 				{
@@ -1916,7 +1919,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					break;
 			}
 
-			int iSpellPower = (int)(Calc_GetRandLLVal2((int64)iLevel - 2, (int64)iLevel + 1));
+			int iSpellPower = (int)(g_Rand.GetLLVal2((int64)iLevel - 2, (int64)iLevel + 1));
 			iEffect = iSpellPower * ( 3 - ( (Stat_GetBase(STAT_DEX) / Stat_GetAdjusted(STAT_DEX) ) * 2));
 			iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL;
 		}
@@ -2076,26 +2079,28 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel, int64 iDu
 	if ( pSpellDef == nullptr )
 		return;
 
-	CWorldSearch AreaChar( pntTarg, iDist );
-	for (;;)
-	{
-		CChar * pChar = AreaChar.GetChar();
-		if ( pChar == nullptr )
-			break;
-		if ( pChar == this )
-		{
-			if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF) )
-				continue;
-		}
-		pChar->OnSpellEffect( spelltype, this, iSkillLevel, nullptr, iDuration);
-	}
+    {
+        auto AreaChar = CWorldSearchHolder::GetInstance(pntTarg, iDist);
+        for (;;)
+        {
+            CChar * pChar = AreaChar->GetChar();
+            if (pChar == nullptr)
+                break;
+            if (pChar == this)
+            {
+                if (pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF))
+                    continue;
+            }
+            pChar->OnSpellEffect(spelltype, this, iSkillLevel, nullptr, iDuration);
+        }
+    }
 
 	if ( !pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ))	// prevent damage nearby items on ground
 	{
-		CWorldSearch AreaItem( pntTarg, iDist );
+		auto AreaItem = CWorldSearchHolder::GetInstance( pntTarg, iDist );
 		for (;;)
 		{
-			CItem * pItem = AreaItem.GetItem();
+			CItem * pItem = AreaItem->GetItem();
 			if ( pItem == nullptr )
 				break;
 			pItem->OnSpellEffect( spelltype, this, iSkillLevel, nullptr );
@@ -2162,9 +2167,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					ptg.m_y += (short)(iy);
 				}
 
-				dword dwBlockFlags = 0;
-				CWorldMap::GetHeightPoint2(ptg, dwBlockFlags, true);
-				if ( dwBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
+				uint64 uiBlockFlags = 0;
+				CWorldMap::GetHeightPoint2(ptg, uiBlockFlags, true);
+				if (uiBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR))
 				{
 					if (ix < 0)	// field cannot extend fully to the left
 						minX = ix + 1;
@@ -2186,7 +2191,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			bool fGoodLoc = true;
 
 			// Where is this ?
-			CPointMap ptg = pntTarg;
+			CPointMap ptg(pntTarg);
 			if ( dx > dy )
 			{
 				ptg.m_y += (short)(ix);
@@ -2199,10 +2204,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			}
 
 			// Check for direct cast on a creature.
-			CWorldSearch AreaChar( ptg );
+			auto Area = CWorldSearchHolder::GetInstance( ptg );
 			for (;;)
 			{
-				CChar * pChar = AreaChar.GetChar();
+				CChar * pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 
@@ -2235,10 +2240,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				continue;
 
 			// Check for direct cast on an item.
-			CWorldSearch AreaItem( ptg );
+            Area->RestartSearch();
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = Area->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( pItem->IsType(IT_SPELL) && IsSetMagicFlags(MAGICF_OVERRIDEFIELDS) )
@@ -2262,6 +2267,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetAttr(ATTR_MAGIC);
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
+
+            if (pSpellDef->IsSpellType(SPELLFLAG_FIELD_RANDOMDECAY)) // If the spell has ASYNC flag, the timers should be randomized.
+                iDuration += g_Rand.GetLLVal(iDuration / 2);
+
 			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_TENTH, true);
 		}
 	}
@@ -2528,7 +2537,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 			m_atMagery.m_iSummonID = CREID_RISING_COLOSSUS;	
 			break;
 		case SPELL_Summon_Undead: //Sphere custom spell.
-			switch (Calc_GetRandVal(15))
+			switch (g_Rand.GetVal(15))
 			{
 			case 1:				
 				m_atMagery.m_iSummonID = CREID_LICH;			
@@ -2584,11 +2593,11 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	{
 		if (IsSetMagicFlags(MAGICF_SUMMONWALKCHECK))	// check if the target location is valid
 		{
-			const dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
-			dword dwBlockFlags = 0;
-			CWorldMap::GetHeightPoint2(ptTarg, dwBlockFlags, true);
+			const uint64 uiCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
+			uint64 uiBlockFlags = 0;
+			CWorldMap::GetHeightPoint2(ptTarg, uiBlockFlags, true);
 
-			if (dwBlockFlags & ~dwCan)
+			if (uiBlockFlags & ~uiCan)
 			{
 				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
 				pChar->Delete();
@@ -2782,7 +2791,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 			SysMessageDefault(DEFMSG_SPELL_TRY_FROZENHANDS);
 			return false;
 		}
-		else if ( !CanMove( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
+		else if ( !CanMoveItem( pItemPrev ) ) //If we are unable to do any action because of certain conditions(dead, paralyzed, stoned and so on) and wielding some item while MAGICF_CASTPARALYZED is disabled interrupt the cast.
 			return false;
 		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->Can(CAN_I_EQUIPONCAST) && !pItemPrev->GetPropNum(COMP_PROPS_ITEMEQUIPPABLE, PROPIEQUIP_SPELLCHANNELING, true) && !ItemBounce(pItemPrev))
 		{
@@ -2848,7 +2857,7 @@ bool CChar::Spell_CastDone()
 		if (pItem == nullptr)
 			return false;
 		if (!pItem->m_itWeapon.m_spelllevel)
-			iSkillLevel = Calc_GetRandVal(500);
+			iSkillLevel = g_Rand.GetVal(500);
 		else
 			iSkillLevel = pItem->m_itWeapon.m_spelllevel;
 	}
@@ -3173,7 +3182,7 @@ bool CChar::Spell_CastDone()
 				int iGet = 0;
 				for (size_t i = 0; i < ARRAY_COUNT(sm_Item_Bone); ++i)
 				{
-					if (!Calc_GetRandVal(2 + iGet))
+					if (!g_Rand.GetVal(2 + iGet))
 						break;
 					CItem *pItem = CItem::CreateScript(sm_Item_Bone[i], this);
 					pItem->MoveToCheck(m_Act_p, this);
@@ -3530,7 +3539,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
     if (IsStatFlag(STATF_RIDDEN) && (pSpellDef->IsSpellType(SPELLFLAG_FIELD) || pSpellDef->IsSpellType(SPELLFLAG_AREA)))
         return false;
 
-	iSkillLevel = (iSkillLevel / 2) + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
+	iSkillLevel = (iSkillLevel / 2) + g_Rand.GetVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
 
 	if (pSpellDef->m_idLayer && !iDuration) //By using SPELLEFFECT command (and the spell has a layer where to store properties)  we need to calculate the duration. 
@@ -3542,7 +3551,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	if ( fPotion )
 	{
 		static const SOUND_TYPE sm_DrinkSounds[] = { 0x030, 0x031 };
-		iSound = sm_DrinkSounds[Calc_GetRandVal(ARRAY_COUNT(sm_DrinkSounds))];
+		iSound = sm_DrinkSounds[g_Rand.GetVal(ARRAY_COUNT(sm_DrinkSounds))];
 	}
 
 
@@ -3917,7 +3926,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		{
 			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, iDuration, pCharSrc );
             ASSERT(pItem);
-			pItem->m_itSpell.m_spellcharges = Calc_GetRandVal(30);
+			pItem->m_itSpell.m_spellcharges = g_Rand.GetVal(30);
 		}
 		break;
 

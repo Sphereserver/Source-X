@@ -56,7 +56,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	{
 		if ( ! CItemBase::GetItemData( id, &tiledata ) )	// some valid items don't show up here !
 		{
-			// warn? ignore? // return nullptr;
+			// TODO: warn? ignore? // return nullptr;
 		}
 	}
 	else
@@ -420,7 +420,7 @@ bool CItemBase::IsID_House(ITEMID_TYPE id) noexcept
 {
     // IT_MULTI
     // IT_MULTI_CUSTOM
-    return (((id >= ITEMID_HOUSE_SMALL_ST_PL) && (id <= ITEMID_HOUSE_SMALL_SHOP_MB)) || ((id >= ITEMID_HOUSEFOUNDATION_7x7) && (id <= ITEMID_HOUSEFOUNDATION_30x30)));
+    return (((id >= ITEMID_HOUSE_SMALL_ST_PL) && (id <= ITEMID_HOUSE_SMALL_SHOP_MB)) || ((id >= ITEMID_HOUSEFOUNDATION_7x7) && (id <= ITEMID_HOUSEFOUNDATION_32x32)));
 }
 
 int CItemBase::IsID_Door( ITEMID_TYPE id ) noexcept // static
@@ -635,42 +635,41 @@ bool CItemBase::IsID_Chair( ITEMID_TYPE id ) noexcept // static
 	}
 }
 
-bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // static
+bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData, bool fNameNotNeeded) // static
 {
-	ADDTOCALLSTACK("CItemBase::GetItemData");
+	//ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemData");
 	// Read from g_Install.m_fTileData
 	// Get an Item tiledata def data.
 	// Invalid object id ?
 	// NOTE: This data should already be read into the m_ItemBase table ???
-
-    if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+    try
     {
-        g_Log.EventError("ITEMDEF has invalid ID=%d (0%x) (value is greater than the tiledata maximum index).\n", id, id);
-        return false;
-    }
-    if (!IsValidDispID(id))
-		return false;
-
-	try
-	{
-		*pData = CUOItemInfo(id);
+        if (id >= g_Install.m_tiledata.GetItemMaxIndex())
+        {
+            g_Log.EventError("ITEMDEF has invalid ID=%d (0%x) (value is greater than the tiledata maximum index).\n", id, id);
+            return false;
+        }
+        if (!IsValidDispID(id))
+		    return false;
+	
+		*pData = CUOItemInfo(id, fNameNotNeeded);
 	}
     catch (const std::exception& e)
     {
         g_Log.CatchStdException(&e, "GetItemData");
-        CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+        GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         return false;
     }
 	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
 	catch (...)
 	{
 		g_Log.CatchEvent(nullptr, "GetItemData" );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
 
@@ -698,61 +697,61 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 	return true;
 }
 
-void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata, dword *pdwBlockFlags, IT_TYPE type, ITEMID_TYPE id ) // static
+void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata, uint64 *uiBlockFlags, IT_TYPE type, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemSpecificFlags");
 	if ( type == IT_DOOR )
 	{
-        *pdwBlockFlags &= ~CAN_I_BLOCK;
+        *uiBlockFlags &= ~CAN_I_BLOCK;
 		if ( IsID_DoorOpen(id))
-            *pdwBlockFlags &= ~CAN_I_DOOR;
+            *uiBlockFlags &= ~CAN_I_DOOR;
 		else
-            *pdwBlockFlags |= CAN_I_DOOR;
+            *uiBlockFlags |= CAN_I_DOOR;
 	}
 
 	if ( tiledata.m_flags & UFLAG3_LIGHT )	// this may actually be a moon gate or fire ?
-        *pdwBlockFlags |= CAN_I_LIGHT;	// normally of type IT_LIGHT_LIT;
+        *uiBlockFlags |= CAN_I_LIGHT;	// normally of type IT_LIGHT_LIT;
 
 	if ( (tiledata.m_flags & UFLAG2_STACKABLE) || type == IT_REAGENT || id == ITEMID_EMPTY_BOTTLE )
-        *pdwBlockFlags |= CAN_I_PILE;
+        *uiBlockFlags |= CAN_I_PILE;
 }
 
-void CItemBase::GetItemTiledataFlags( dword *pdwCanFlags, ITEMID_TYPE id ) // static
+void CItemBase::GetItemTiledataFlags( uint64 *uiCanFlags, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemTiledataFlags");
 
     CUOItemTypeRec_HS tiledata{};
-	if ( ! CItemBase::GetItemData( id, &tiledata ))
+	if ( ! CItemBase::GetItemData( id, &tiledata, true ))
 	{
-        *pdwCanFlags = 0;
+        *uiCanFlags = 0;
 		return;
 	}
 
 	if ( tiledata.m_flags & UFLAG4_DOOR )
-        *pdwCanFlags |= CAN_I_DOOR;
+        *uiCanFlags |= CAN_I_DOOR;
 	if ( tiledata.m_flags & UFLAG1_WATER )
-        *pdwCanFlags |= CAN_I_WATER;
+        *uiCanFlags |= CAN_I_WATER;
 	if ( tiledata.m_flags & UFLAG2_PLATFORM )
-        *pdwCanFlags |= CAN_I_PLATFORM;
+        *uiCanFlags |= CAN_I_PLATFORM;
 	if ( tiledata.m_flags & UFLAG1_BLOCK )
-        *pdwCanFlags |= CAN_I_BLOCK;
+        *uiCanFlags |= CAN_I_BLOCK;
 	if ( tiledata.m_flags & UFLAG2_CLIMBABLE )
-        *pdwCanFlags |= CAN_I_CLIMB;
+        *uiCanFlags |= CAN_I_CLIMB;
 	if ( tiledata.m_flags & UFLAG1_DAMAGE )
-        *pdwCanFlags |= CAN_I_FIRE;
+        *uiCanFlags |= CAN_I_FIRE;
 	if ( tiledata.m_flags & UFLAG4_ROOF )
-        *pdwCanFlags |= CAN_I_ROOF;
+        *uiCanFlags |= CAN_I_ROOF;
 	if ( tiledata.m_flags & UFLAG4_HOVEROVER )
-        *pdwCanFlags |= CAN_I_HOVER;
+        *uiCanFlags |= CAN_I_HOVER;
 }
 
-height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, dword *pdwCanFlags ) // static
+height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, uint64 *uiCanFlags ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemHeightFlags");
 	// Chairs are marked as blocking for some reason ?
 	if ( tiledata.m_flags & UFLAG4_DOOR ) // door
 	{
-		*pdwCanFlags = CAN_I_DOOR;
+		*uiCanFlags = CAN_I_DOOR;
 		return tiledata.m_height;
 	}
 
@@ -760,36 +759,36 @@ height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, dwor
 	{
 		if ( tiledata.m_flags & UFLAG1_WATER )	// water
 		{
-            *pdwCanFlags = CAN_I_WATER;
+            *uiCanFlags = CAN_I_WATER;
 			return tiledata.m_height;
 		}
-        *pdwCanFlags = CAN_I_BLOCK;
+        *uiCanFlags = CAN_I_BLOCK;
 	}
 	else
 	{
 		//DEBUG_ERR(("tiledata.m_flags 0x%x\n",tiledata.m_flags));
-        *pdwCanFlags = 0;
+        *uiCanFlags = 0;
 		if ( ! ( tiledata.m_flags & (UFLAG2_PLATFORM|UFLAG4_ROOF|UFLAG4_HOVEROVER) ))
 			return 0;	// have no effective height if it doesn't block.
 	}
 
 	if ( tiledata.m_flags & UFLAG4_ROOF)
-        *pdwCanFlags |= CAN_I_ROOF;
+        *uiCanFlags |= CAN_I_ROOF;
 	else if ( tiledata.m_flags & UFLAG2_PLATFORM )
-        *pdwCanFlags |= CAN_I_PLATFORM;
+        *uiCanFlags |= CAN_I_PLATFORM;
 
 	if ( tiledata.m_flags & UFLAG2_CLIMBABLE )
 	{
 		// actual standing height is height/2
-        *pdwCanFlags |= CAN_I_CLIMB;
+        *uiCanFlags |= CAN_I_CLIMB;
 	}
 	if ( tiledata.m_flags & UFLAG4_HOVEROVER )
-        *pdwCanFlags |= CAN_I_HOVER;
+        *uiCanFlags |= CAN_I_HOVER;
 	//DEBUG_WARN(("tiledata.m_height(%d)\n",tiledata.m_height));
 	return tiledata.m_height;
 }
 
-height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags ) // static
+height_t CItemBase::GetItemHeight( ITEMID_TYPE id, uint64 *uiBlockFlags ) // static
 {
 	ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemHeight");
 	// Get just the height and the blocking flags for the item by id.
@@ -804,24 +803,24 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword *pdwBlockFlags ) // sta
 		CItemBase * pBase = dynamic_cast <CItemBase *>(pBaseStub);
 		if ( pBase )
 		{
-			*pdwBlockFlags = pBase->m_Can & CAN_I_MOVEMASK;
+			*uiBlockFlags = pBase->m_Can & CAN_I_MOVEMASK;
 			return pBase->GetHeight();
 		}
 	}
 
 	// Not already loaded.
     CUOItemTypeRec_HS tiledata = {};
-	if ( ! GetItemData( id, &tiledata ))
+	if ( ! GetItemData( id, &tiledata, true ))
 	{
-		*pdwBlockFlags = CAN_I_MOVEMASK;
+		*uiBlockFlags = CAN_I_MOVEMASK;
 		return UO_SIZE_Z;
 	}
 	if ( IsID_Chair( id ) )
 	{
-		*pdwBlockFlags = 0;
+		*uiBlockFlags = 0;
 		return 0;	// have no effective height if they don't block.
 	}
-	return GetItemHeightFlags( tiledata, pdwBlockFlags );
+	return GetItemHeightFlags( tiledata, uiBlockFlags );
 }
 
 IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledata ) // static
@@ -1013,7 +1012,7 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 	// ARGS:
 	// iQualityLevel = 0-100
 
-	CValueRangeDef values = m_values;
+	CValueRangeDef values(m_values);
 
 	if ( m_values.m_iLo == INT64_MIN || m_values.m_iHi == INT64_MIN )
 	{
@@ -1024,8 +1023,8 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 	}
 	else
 	{
-		values.m_iLo = llabs(values.m_iLo);
-		values.m_iHi = llabs(values.m_iHi);
+		values.m_iLo = abs(values.m_iLo);
+		values.m_iHi = abs(values.m_iHi);
 	}
 
 	return values.GetLinear(iQualityLevel*10);
@@ -1186,7 +1185,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			}
 			break;
 		case IBC_CANUSE:
-			sVal.FormatHex( m_CanUse );
+			sVal.FormatULLHex( m_CanUse );
 			break;
 		case IBC_DYE:
 			sVal.FormatVal( m_Can & CAN_I_DYE );
@@ -1295,9 +1294,9 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 
 					tchar *pszTmp = Str_GetTemp();
 					if ( fKeyOnly || fQtyOnly )
-						m_SkillMake.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
+						m_SkillMake.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
 					else
-						m_SkillMake.WriteNames( pszTmp, index );
+						m_SkillMake.WriteNames( pszTmp, Str_TempLength(), index );
 					if ( fQtyOnly && pszTmp[0] == '\0' )
 						strcpy( pszTmp, "0" );
 					sVal = pszTmp;
@@ -1305,7 +1304,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 				else
 				{
 					tchar *pszTmp = Str_GetTemp();
-					m_SkillMake.WriteNames( pszTmp );
+					m_SkillMake.WriteNames( pszTmp, Str_TempLength() );
 					sVal = pszTmp;
 				}
 			}
@@ -1317,7 +1316,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 			// Print the resources need to make in nice format.
 			{
 				tchar *pszTmp = Str_GetTemp();
-				m_BaseResources.WriteNames( pszTmp );
+				m_BaseResources.WriteNames( pszTmp, Str_TempLength() );
 				sVal = pszTmp;
 			}
 			break;
@@ -1508,7 +1507,7 @@ bool CItemBase::r_LoadVal( CScript &s )
         }
 		break;
 		case IBC_CANUSE:
-			m_CanUse = s.GetArgVal();
+			m_CanUse = s.GetArgULLVal();
 			break;
 		case IBC_DISPID:
 			// Can't set this.
@@ -1524,6 +1523,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 				if ( iArgQty <= 0 )
 					return false;
 				m_flip_id.clear();
+                m_flip_id.reserve(iArgQty);
 				for ( int i = 0; i < iArgQty; ++i )
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
@@ -1533,6 +1533,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 						continue;
 					m_flip_id.emplace_back(id);
 				}
+                m_flip_id.shrink_to_fit();
 			}
 			break;
 		case IBC_DYE:

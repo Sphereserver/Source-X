@@ -44,7 +44,8 @@ enum LOG_TYPE
 	LOGM_KILLS			= 0x010000,	// Log player combat results.
 	LOGM_HTTP			= 0x020000,
 	LOGM_NOCONTEXT		= 0x040000,	// do not include context information
-	LOGM_DEBUG			= 0x080000	// debug kind of message with "DEBUG:" prefix
+	LOGM_DEBUG			= 0x080000,	// debug kind of message with "DEBUG:" prefix
+    LOGM_QTY            = 0x0FFF00  // All masks.
 };
 
 class CSError;
@@ -58,15 +59,16 @@ class CEventLog
 	// May include __LINE__ or __FILE__ macro as well ?
 
 protected:
-	virtual int EventStr(dword dwMask, lpctstr pszMsg) noexcept = 0;
+	virtual int EventStr(dword dwMask, lpctstr pszMsg, ConsoleTextColor iColor = CTCOL_DEFAULT) noexcept = 0;
 
-    int VEvent(dword dwMask, lpctstr pszFormat, va_list args) noexcept;
+    int VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept;
 
 public:
 	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) noexcept __printfargs(3,4);
 	int _cdecl EventDebug(lpctstr pszFormat, ...) noexcept  __printfargs(2,3);
 	int _cdecl EventError(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
 	int _cdecl EventWarn(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
+    int _cdecl EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept __printfargs(4,5);
 #ifdef _DEBUG
 	int _cdecl EventEvent( lpctstr pszFormat, ... ) noexcept __printfargs(2,3);
 #endif //_DEBUG
@@ -117,7 +119,7 @@ public:		bool OpenLog(lpctstr pszName = nullptr);
 	bool IsLoggedLevel( LOG_TYPE level ) const;
 	bool IsLogged( dword dwMask ) const;
 
-	virtual int EventStr( dword dwMask, lpctstr pszMsg ) noexcept final;	// final: for now, it doesn't have any other virtual methods
+	virtual int EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor = CTCOL_DEFAULT ) noexcept final;	// final: for now, it doesn't have any other virtual methods
 	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
     void _cdecl CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 

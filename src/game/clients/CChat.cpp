@@ -382,9 +382,12 @@ void CChat::QuitChat(CChatChanMember* pClient)
 	ADDTOCALLSTACK("CChat::QuitChat");
 	// Remove from old channel (if any)
 
-	CChatChannel* pCurrentChannel = pClient->GetChannel();
-	if (pCurrentChannel)
-		pCurrentChannel->RemoveMember(pClient);
+    if (!pClient)
+        return;
+
+    CChatChannel* pCurrentChannel = pClient->GetChannel();
+    if (pCurrentChannel)
+        pCurrentChannel->RemoveMember(pClient);
 }
 
 void CChat::FormatName(CSString& sName, const CChatChanMember* pMember, bool fSystem)

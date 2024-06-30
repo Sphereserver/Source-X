@@ -149,7 +149,7 @@ public:
 		{
 			dword m_dwIP;
 			int m_iConnect;	// used for debug only.
-			bool m_bNewSeed;
+			bool m_fNewSeed;
 		} m_tmSetup;
 
 		// CLIMODE_SETUP_CHARLIST
@@ -224,7 +224,6 @@ public:
 private:
 	// encrypt/decrypt stuff.
 	CCrypto m_Crypt;			// Client source communications are always encrypted.
-	static CHuffman m_Comp;
 
 public:
 	// Gump stuff
@@ -387,16 +386,15 @@ public:
 	explicit CClient(CNetState* state);
 	~CClient();
 
-private:
-	CClient(const CClient& copy);
-	CClient& operator=(const CClient& other);
+	CClient(const CClient& copy) = delete;
+	CClient& operator=(const CClient& other) = delete;
 
 public:
 	void CharDisconnect();
 
 	CClient* GetNext() const
 	{
-		return ( static_cast <CClient*>( CSObjListRec::GetNext()));
+		return static_cast <CClient*>(CSObjListRec::GetNext());
 	}
 
 	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
@@ -541,7 +539,7 @@ public:
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
-	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, uint iControls, const CSString * psText, uint iTexts, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
+	void addGumpDialog( CLIMODE_TYPE mode, std::vector<CSString> const* vsControls, std::vector<CSString> const* vsText, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
 
 	bool addGumpDialogProps( const CUID& uid );
 

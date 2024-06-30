@@ -23,7 +23,7 @@ void CheckReportNetAPIErr(int retval, lpctstr ptcOperation)
 		return;
 
 #if _DEBUG
-	g_Log.EventDebug("Socket operation: '%s' errored (code %d).\n", ptcOperation);
+	g_Log.EventDebug("Socket operation: '%s' errored (code %d).\n", ptcOperation, retval);
 	g_Log.EventDebug("Errno: %d. Error string: '%s'.\n", (int)errno, strerror(errno));
 #else
 	UnreferencedParameter(ptcOperation);

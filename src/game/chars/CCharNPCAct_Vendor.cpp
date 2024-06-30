@@ -105,38 +105,38 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	if ( ! pCharPlayer->IsClientActive())
 		return false;
 
-	// Might have too many pets already ?
-	int iCount = 0;
-	CItemContainer * pBank = GetBank();
-	if ( pBank->GetContentCount() >= g_Cfg.m_iContainerMaxItems )
+	CItemContainer *pStableContainer = pCharPlayer->GetBank(LAYER_STABLE);
+    ASSERT(pStableContainer); //Should never terminate
+
+	if (pStableContainer->GetContentCount() >= g_Cfg.m_iContainerMaxItems)
 	{
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
+		Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_TOOMANY));
 		return false;
 	}
 
 	// Calculate the max limit of pets that the NPC can hold for the player
-	double iSkillTaming = pCharPlayer->Skill_GetAdjusted(SKILL_TAMING);
-	double iSkillAnimalLore = pCharPlayer->Skill_GetAdjusted(SKILL_ANIMALLORE);
-	double iSkillVeterinary = pCharPlayer->Skill_GetAdjusted(SKILL_VETERINARY);
-	double iSkillSum = iSkillTaming + iSkillAnimalLore + iSkillVeterinary;
+	const ushort uiSkillTaming = pCharPlayer->Skill_GetAdjusted(SKILL_TAMING);
+    const ushort uiSkillAnimalLore = pCharPlayer->Skill_GetAdjusted(SKILL_ANIMALLORE);
+    const ushort uiSkillVeterinary = pCharPlayer->Skill_GetAdjusted(SKILL_VETERINARY);
+    const ushort uiSkillSum = uiSkillTaming + uiSkillAnimalLore + uiSkillVeterinary;
 
-	int iPetMax;
-	int iMaxPlayerPets = (int)m_TagDefs.GetKeyNum("MAXPLAYERPETS");
-	if (iMaxPlayerPets)
+    const int iMaxPlayerPets = std::max(0, (int)m_TagDefs.GetKeyNum("MAXPLAYERPETS"));
+    int iPetMax;
+    if (iMaxPlayerPets)
 	{
 		iPetMax = iMaxPlayerPets;
 	}
 	else
 	{
-		if (iSkillSum >= 240.0)
+		if (uiSkillSum >= 240'0)
 		{
 			iPetMax = 5;
 		}
-		else if (iSkillSum >= 200.0)
+		else if (uiSkillSum >= 200'0)
 		{
 			iPetMax = 4;
 		}
-		else if (iSkillSum >= 160.0)
+		else if (uiSkillSum >= 160'0)
 		{
 			iPetMax = 3;
 		}
@@ -145,36 +145,30 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 			iPetMax = 2;
 		}
 
-		if (iSkillTaming >= 100.0)
+		if (uiSkillTaming >= 100'0)
 		{
-			iPetMax += (int)((iSkillTaming - 90.0) / 10);
+			iPetMax += (int)((uiSkillTaming - 90'0) / 10);
 		}
 
-		if (iSkillAnimalLore >= 100.0)
+		if (uiSkillAnimalLore >= 100'0)
 		{
-			iPetMax += (int)((iSkillAnimalLore - 90.0) / 10);
+			iPetMax += (int)((uiSkillAnimalLore - 90'0) / 10);
 		}
 
-		if (iSkillVeterinary >= 100.0)
+		if (uiSkillVeterinary >= 100'0)
 		{
-			iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
+			iPetMax += (int)((uiSkillVeterinary - 90'0) / 10);
 		}
 	}
 
-	for (CSObjContRec* pObjRec : *pBank)
-	{
-		CItem* pItem = static_cast<CItem*>(pObjRec);
-		if ( pItem->IsType(IT_FIGURINE) && pItem->m_uidLink == pCharPlayer->GetUID() )
-			++iCount;
-	}
-	if ( iCount >= iPetMax )
-	{
-		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TOOMANY ) );
-		return false;
-	}
+    if (pStableContainer->GetContentCount() >= (size_t)iPetMax)
+    {
+        Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_TOOMANY));
+        return false;
+    }
 
 	pCharPlayer->m_pClient->m_Targ_Prv_UID = GetUID();
-	pCharPlayer->m_pClient->addTarget( CLIMODE_TARG_PET_STABLE, g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG ) );
+	pCharPlayer->m_pClient->addTarget( CLIMODE_TARG_PET_STABLE, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_TARG) );
 	return true;
 }
 
@@ -188,16 +182,17 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 	if ( m_pNPC->m_Brain != NPCBRAIN_STABLE )
 		return false;
 
-	CItemContainer* pBank = GetBank();
-	ASSERT(pBank);
+	CItemContainer* pStableContainer = pCharPlayer->GetBank(LAYER_STABLE);
+	ASSERT(pStableContainer);
 
 	int iCount = 0;
-	for (CSObjContRec* pObjRec : pBank->GetIterationSafeCont())
+	for (CSObjContRec* pObjRec : pStableContainer->GetIterationSafeCont())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		if ( pItem->IsType(IT_FIGURINE) && (pItem->m_uidLink == pCharPlayer->GetUID()) )
+		if (pItem->IsType(IT_FIGURINE))
 		{
-			if ( !pCharPlayer->Use_Figurine(pItem) )
+            CChar* pPet = pCharPlayer->Use_Figurine(pItem);
+			if (!pPet)
 			{
 				tchar *pszTemp = Str_GetTemp();
 				snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
@@ -205,7 +200,12 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 				return true;
 			}
 
-			pItem->Delete();
+            pItem->Delete();
+            if (IsSetOF(OF_PetSlots))
+            {
+                const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+                pCharPlayer->FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), false);
+            }
 			++iCount;
 		}
 	}

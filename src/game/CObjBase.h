@@ -15,6 +15,7 @@
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
+#include <atomic>
 
 
 class PacketSend;
@@ -23,6 +24,15 @@ class CCSpawn;
 
 class CSector;
 class CWorldTicker;
+
+
+/**
+ * @brief   Gets dir string.
+ * @param   pszDir  The dir.
+ * @return  The dir string.
+ */
+DIR_TYPE GetDirStr(lpctstr pszDir);
+
 
 class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
 {
@@ -34,11 +44,11 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, pub
     friend class CWorldTicker;
 
 private:
-	int64 m_timestamp;          // TimeStamp
+	int64 m_iTimeStampS;          // TimeStamp
 
 protected:
+
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
-    bool _fDeleting;
 
     std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
@@ -48,13 +58,13 @@ public:
     static const char *m_sClassName;
     static dword sm_iCount;    // how many total objects in the world ?
 
-    
+
     int _iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
     int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
     CVarDefMap m_TagDefs;		// attach extra tags here.
     CVarDefMap m_BaseDefs;		// New Variable storage system
-    dword	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
+    uint64	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
 
     word	m_attackBase;       // dam for weapons
     word	m_attackRange;      // variable range of attack damage.
@@ -63,17 +73,33 @@ public:
     word	m_defenseRange;     // variable range of defense.
     int 	m_ModMaxWeight;		// ModMaxWeight prop.
     HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
+    int m_ModAr;
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
     std::vector<CUID> m_followers;
-    
+
+    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
+
+#   define SU_UPDATE_HITS      0x01    // update hits to others
+#   define SU_UPDATE_MODE      0x02    // update mode to all
+#   define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
+    uchar m_fStatusUpdate;  // update flags for next tick
+
+    volatile std::atomic_bool _fDeleting;
+
+protected:
+    PacketPropertyList* m_PropertyList;	// currently cached property list packet
+    dword m_PropertyHash;				// latest property list hash
+    dword m_PropertyRevision;			// current property list revision
+
+
 public:
     explicit CObjBase(bool fItem);
     virtual ~CObjBase();
-private:
-    CObjBase(const CObjBase& copy);
-    CObjBase& operator=(const CObjBase& other);
+
+    CObjBase(const CObjBase& copy) = delete;
+    CObjBase& operator=(const CObjBase& other) = delete;
 
 protected:
     /**
@@ -115,28 +141,28 @@ public:
 	*/
     CBaseBaseDef* Base_GetDef() const noexcept;
 
-	inline dword GetCanFlagsBase() const noexcept
+	inline uint64 GetCanFlagsBase() const noexcept
 	{
 		return Base_GetDef()->m_Can;
 	}
 
-    inline dword GetCanFlags() const noexcept
+    inline uint64 GetCanFlags() const noexcept
 	{
 		// m_CanMask is XORed to m_Can:
 		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
 		//  If a flag in m_CanMask isn't enabled in m_Can, it is considered as enabled in this Can check
 		// So m_CanMask is useful to dynamically switch on/off some of the read-only CAN flags in the ITEMDEF/CHARDEF.
 		return (GetCanFlagsBase() ^ m_CanMask);
-	}	
-
-	bool Can(dword dwCan) const noexcept
-	{
-        return (GetCanFlags() & dwCan);
 	}
 
-    inline bool Can(dword dwCan, dword dwObjCanFlags) const noexcept
+	bool Can(uint64 uiCan) const noexcept
+	{
+        return (GetCanFlags() & uiCan);
+	}
+
+    inline bool Can(uint64 uiCan, uint64 uiObjCanFlags) const noexcept
     {
-        return (dwObjCanFlags & dwCan);
+        return (uiObjCanFlags & uiCan);
     }
 
     bool IsRunningTrigger() const;
@@ -178,13 +204,13 @@ public:
      * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
      * @return  The timestamp.
      */
-	int64 GetTimeStamp() const;
+	int64 GetTimeStampS() const;
 
     /**
      * @brief   Sets time stamp.
      * @param   t_time  The time.
      */
-	void SetTimeStamp(int64 t_time);
+	void SetTimeStampS(int64 t_time);
 
     /*
     * @brief    Add iDelta to this object's timer (if active) and its child objects.
@@ -577,7 +603,7 @@ public:
 public:
 
     /**
-     * @fn  virtual bool CObjBase::MoveTo(CPointMap pt, bool bForceFix = false) = 0;
+     * @fn  virtual bool CObjBase::MoveTo(CPointMap pt, bool fCheckLocation = true, bool fForceFix = false) = 0;
      *
      * @brief   Move To Location.
      *
@@ -663,7 +689,7 @@ public:
      */
 	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1,
         bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
-	
+
 	/**
 	* @fn  void CObjBase::EffectLocation(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = nullptr, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	*
@@ -881,16 +907,6 @@ public:
      */
 	TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
 
-public:
-	//	Some global object variables
-	int m_ModAr;
-
-#define SU_UPDATE_HITS      0x01    // update hits to others
-#define SU_UPDATE_MODE      0x02    // update mode to all
-#define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
-	uchar m_fStatusUpdate;  // update flags for next tick
-
- 
 protected:
     virtual void _GoAwake() override;
     virtual void _GoSleep() override;
@@ -903,13 +919,6 @@ protected:
 
     virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
     //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
-
-public:
-    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
-protected:
-	PacketPropertyList* m_PropertyList;	// currently cached property list packet
-	dword m_PropertyHash;				// latest property list hash
-	dword m_PropertyRevision;			// current property list revision
 
 public:
 
@@ -964,59 +973,15 @@ public:
      * @brief   Updates the property status update flag.
      */
 	void UpdatePropertyFlag();
+
 };
 
-
-/**
-* @enum    MEMORY_TYPE
-*
-* @brief   Values that represent memory types ( IT_EQ_MEMORY_OBJ ).
-*
-* Types of memory a CChar has about a game object. (m_wHue)
-*/
-enum MEMORY_TYPE
-{
-	MEMORY_NONE = 0,
-	MEMORY_SAWCRIME         = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
-	MEMORY_IPET             = 0x0002,	// I am a pet. (this link is my master) (never time out)
-	MEMORY_FIGHT            = 0x0004,	// Active fight going on now. may not have done any damage. and they may not know they are fighting me.
-	MEMORY_IAGGRESSOR       = 0x0008,	// I was the agressor here. (good or evil)
-	MEMORY_HARMEDBY         = 0x0010,	// I was harmed by them. (but they may have been retaliating)
-	MEMORY_IRRITATEDBY      = 0x0020,	// I saw them snoop from me or someone, or i have been attacked, or someone used Provocation on me.
-	MEMORY_SPEAK            = 0x0040,	// We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
-	MEMORY_AGGREIVED        = 0x0080,	// I was attacked and was the inocent party here !
-	MEMORY_GUARD            = 0x0100,	// Guard this item (never time out)
-	MEMORY_LEGACY_ISPAWNED  = 0x0200,	// UNUSED (but keep this for backwards compatibility). I am spawned from this item. (never time out)
-	MEMORY_GUILD            = 0x0400,	// This is my guild stone. (never time out) only have 1
-	MEMORY_TOWN             = 0x0800,	// This is my town stone. (never time out) only have 1
-	MEMORY_UNUSED           = 0x1000,	// UNUSED!!!! I am following this Object (never time out)
-	MEMORY_UNUSED2          = 0x2000,	// UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
-	MEMORY_FRIEND           = 0x4000,	// They can command me but not release me. (not primary blame)
-	MEMORY_UNUSED3          = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
-};
-
-enum NPC_MEM_ACT_TYPE	// A simgle primary memory about the object.
-{
-	NPC_MEM_ACT_NONE = 0,       // we spoke about something non-specific,
-	NPC_MEM_ACT_SPEAK_TRAIN,    // I am speaking about training. Waiting for money
-	NPC_MEM_ACT_SPEAK_HIRE,     // I am speaking about being hired. Waiting for money
-	NPC_MEM_ACT_FIRSTSPEAK,     // I attempted (or could have) to speak to player. but have had no response.
-	NPC_MEM_ACT_TAMED,          // I was tamed by this person previously.
-	NPC_MEM_ACT_IGNORE          // I looted or looked at and discarded this item (ignore it)
-};
-
-enum STONEALIGN_TYPE // Types of Guild/Town stones
-{
-	STONEALIGN_STANDARD = 0,
-	STONEALIGN_ORDER,
-	STONEALIGN_CHAOS
-};
 
 enum ITRIG_TYPE
 {
 	// XTRIG_UNKNOWN = some named trigger not on this list.
-    ITRIG_ADDREDCANDLE = 1,
-    ITRIG_ADDOBJ,				// For t_spawn when obj is add to list
+    ITRIG_ADDOBJ = 1,				// For t_spawn when obj is add to list
+    ITRIG_ADDREDCANDLE,
     ITRIG_ADDWHITECANDLE,
 	ITRIG_AfterClick,
 	ITRIG_Buy,
@@ -1024,12 +989,15 @@ enum ITRIG_TYPE
 	ITRIG_Click,
 	ITRIG_CLIENTTOOLTIP,        // Sending tooltip to client for this item
 	ITRIG_CLIENTTOOLTIP_AFTERDEFAULT,
+    ITRIG_COMPLETE,
 	ITRIG_ContextMenuRequest,   // A context menu was requested over me.
 	ITRIG_ContextMenuSelect,    // A context menu option was selected, perform actions.
 	ITRIG_Create,               // Item is being created.
 	ITRIG_DAMAGE,               // I have been damaged in some way.
 	ITRIG_DCLICK,               // I have been dclicked.
     ITRIG_DELOBJ,				// For t_spawn when obj is remove from list
+    ITRIG_DELREDCANDLE,
+    ITRIG_DELWHITECANDLE,
 	ITRIG_DESTROY,              //+I am nearly destroyed.
 	ITRIG_DROPON_CHAR,          // I have been dropped on this char.
 	ITRIG_DROPON_GROUND,        // I have been dropped on the ground here.
@@ -1039,6 +1007,9 @@ enum ITRIG_TYPE
 	ITRIG_DYE,
 	ITRIG_EQUIP,                // I have been equipped.
 	ITRIG_EQUIPTEST,            // I'm not yet equiped, but checking if I can.
+    ITRIG_GetHit,               // Triggers when this clothing part get hit from characters.
+    ITRIG_Hit,                  // Triggers when this item used to make a damage on characters.
+    ITRIG_LEVEL,
 	ITRIG_MemoryEquip,          // I'm a memory and I'm being equiped.
 	ITRIG_PICKUP_GROUND,        // I'm being picked up from ground.
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
@@ -1048,6 +1019,8 @@ enum ITRIG_TYPE
     ITRIG_Redeed,               // Redeeding a multi.
     ITRIG_RegionEnter,          // Ship entering a new region.
     ITRIG_RegionLeave,          // Ship leaving the region.
+    ITRIG_ResourceGather,
+    ITRIG_ResourceTest,
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Move,            // I'm a ship and i'm move around.
     ITRIG_Ship_Stop,            // I'm a ship and i'm stop around.
@@ -1057,6 +1030,7 @@ enum ITRIG_TYPE
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
     ITRIG_Start,                // Start trigger, right now used only on Champions.
 	ITRIG_STEP,                 // I have been walked on. (or shoved)
+    ITRIG_STOP,
 	ITRIG_TARGON_CANCEL,        // Someone requested me (item) to target, now the targeting was canceled.
 	ITRIG_TARGON_CHAR,          // I'm targeting a char.
 	ITRIG_TARGON_GROUND,        // I'm targeting the ground.
@@ -1067,21 +1041,14 @@ enum ITRIG_TYPE
 	ITRIG_QTY
 };
 
-enum WAR_SWING_TYPE	// m_Act_War_Swing_State
-{
-	WAR_SWING_INVALID = -1,
-	WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
-	WAR_SWING_READY,			// we can swing at any time.
-	WAR_SWING_SWINGING,			// we are swinging our weapon.
-    //--
-    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
-};
-
 enum CTRIG_TYPE : short
 {
 	CTRIG_AAAUNUSED		= 0,
     CTRIG_AddMulti,         // Adds the given multi to the CMultiStorage of this char (player).
+    CTRIG_AfkMode,          // Switch AFK mode by using .AFK command.
 	CTRIG_AfterClick,       // I'm not yet clicked, name should be generated before.
+    CTRIG_ArrowQuest_Add,
+    CTRIG_ArrowQuest_Close,
 	CTRIG_Attack,           // I am attacking someone (SRC).
 	CTRIG_CallGuards,       // I'm calling guards.
     // Here starts @charXXX section
@@ -1113,7 +1080,8 @@ enum CTRIG_TYPE : short
     CTRIG_DelMulti,         // Delete the given multi to the CMultiStorage of this char (player).
 	CTRIG_Destroy,          // I am nearly destroyed.
 	CTRIG_Dismount,         // I'm dismounting.
-	CTRIG_DYE,
+    CTRIG_Drink,            // I'm drinking something.
+    CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
@@ -1221,6 +1189,7 @@ enum CTRIG_TYPE : short
 
 	CTRIG_Rename,       // Changing my name or pets one.
 	CTRIG_Resurrect,    // I'm going to resurrect via function or spell.
+    CTRIG_Reveal,       // Character is revealing.
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.
@@ -1282,14 +1251,6 @@ enum CTRIG_TYPE : short
 
 	CTRIG_QTY
 };
-
-
-/**
- * @brief   Gets dir string.
- * @param   pszDir  The dir.
- * @return  The dir string.
- */
-DIR_TYPE GetDirStr( lpctstr pszDir );
 
 
 #endif // _INC_COBJBASE_H

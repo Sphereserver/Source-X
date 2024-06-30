@@ -1,16 +1,37 @@
 #	Main config	#
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.13)
-SET (CMAKE_SUPPRESS_REGENERATION true)	# Supress the ZERO_CHECK generation
+CMAKE_MINIMUM_REQUIRED (VERSION 3.19)
+set (CMAKE_SUPPRESS_REGENERATION TRUE)	# Supress the ZERO_CHECK generation
 
-SET (CMAKE_NO_GIT_REVISION	false CACHE BOOL "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github.")
+# GUI checkboxes
+option (CMAKE_NO_GIT_REVISION
+	"Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
+	FALSE
+)
+option (RUNTIME_STATIC_LINK
+	"Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
+	FALSE
+)
 
-SET (WIN32_SPAWN_CONSOLE	false CACHE BOOL "Spawn an additional console, useful for debugging.")
-SET (USE_ASAN			false CACHE BOOL "Enable AddressSanitizer.")
-SET (USE_MSAN			false CACHE BOOL "Enable MemorySanitizer.")
-SET (USE_LSAN			false CACHE BOOL "Enable LeakSanitizer.")
-SET (USE_UBSAN			false CACHE BOOL "Enable Undefined Behavior Sanitizer.")
+set (predef_LIB_LIBEV_BUILD 	FALSE)
+if (NOT WIN32)
+	set (predef_LIB_LIBEV_BUILD	TRUE)
+endif()
+option (LIB_LIBEV_BUILD			"Build libev." ${predef_LIB_LIBEV_BUILD})
+option (LIB_SQLITE_BUILD		"Build sqlite." TRUE)
+option (LIB_ZLIB_BUILD			"Build zlib." TRUE)
 
+if (WIN32)
+	option (WIN32_SPAWN_CONSOLE	"Spawn an additional console, useful for debugging." FALSE)
+endif()
+
+option (USE_ASAN				"Enable AddressSanitizer." FALSE)
+option (USE_MSAN				"Enable MemorySanitizer." FALSE)
+option (USE_LSAN				"Enable LeakSanitizer." FALSE)
+option (USE_UBSAN				"Enable Undefined Behavior Sanitizer." FALSE)
+
+
+# Utility functions
 FUNCTION (booleanize_str_find VAR)
 	IF (${VAR} EQUAL -1)
 		UNSET (${VAR} PARENT_SCOPE)
@@ -20,32 +41,69 @@ FUNCTION (booleanize_str_find VAR)
 ENDFUNCTION ()
 
 
-IF ((NOT TOOLCHAIN) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
+# -- Start: initializations
+
+# Should i load the toolchain passed as argument?
+IF ((NOT TOOLCHAIN_LOADED) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
 	INCLUDE (${CMAKE_TOOLCHAIN_FILE})
 	toolchain_force_compiler ()
 ENDIF ()
 
+
 MESSAGE (STATUS "Scanning system build tools...")
-PROJECT (SphereServer)	# does a scan for C++ and C compilers
+
+PROJECT (SphereServer CXX C)	# does a scan for C++ and C compilers
+
+# Setup global flags, to be done before creating targets.
+
+if (NOT DEFINED CMAKE_CXX_STANDARD)
+  # only set CMAKE_CXX_STANDARD if not already set
+  # this allows the standard to be set by the caller, for example with -DCMAKE_CXX_STANDARD:STRING=20
+    set (CMAKE_CXX_STANDARD 20)
+elseif (CMAKE_CXX_STANDARD LESS 20)
+    message (WARNING "Current C++ standard ({CMAKE_CXX_STANDARD}) too low, defaulting to the minimum supported, 20.")
+    set (CMAKE_CXX_STANDARD 20)
+endif ()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 
-# Determine system arch
-INCLUDE ("cmake/CMakeDetectArch.cmake")
-determine_target_architecture(ARCH_DETECTED)
-STRING (FIND "${ARCH_DETECTED}" "x86_64" 	ARCH_HAS_x86_64)
-STRING (FIND "${ARCH_DETECTED}" "x86" 		ARCH_HAS_x86)
-booleanize_str_find(ARCH_HAS_x86_64)
-booleanize_str_find(ARCH_HAS_x86)
+# Need to clear shared library flags. If not, cmake sets -rdynamic and this
+# add to the executable the full symbol table (included unused symbols).
+# This is a problem because the binary is >700 KB bigger.
+SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
+# CMake also sets other predefined flags, which we don't want...
+SET (CMAKE_C_FLAGS "")
+SET (CMAKE_C_FLAGS_DEBUG "")
+SET (CMAKE_C_FLAGS_NIGHTLY "")
+SET (CMAKE_C_FLAGS_RELEASE "")
+
+SET (CMAKE_CXX_FLAGS "")
+SET (CMAKE_CXX_FLAGS_DEBUG "")
+SET (CMAKE_CXX_FLAGS_NIGHTLY "")
+SET (CMAKE_CXX_FLAGS_RELEASE "")
+
+SET (CMAKE_EXE_LINKER_FLAGS "")
+SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
+SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+
+set (is_win32_app_linker)
+IF (WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
+	set (is_win32_app_linker WIN32)	# if not set, it defaults to console subsystem
+ENDIF ()
+
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
-IF (NOT TOOLCHAIN)
+IF (NOT TOOLCHAIN_LOADED)
 	INCLUDE ("cmake/CMakeDefaultToolchain.cmake")
 ENDIF ()
 
 
-# Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
+#-- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
 toolchain_after_project()
-
 
 STRING (FIND "${CMAKE_GENERATOR}" "Makefiles" GEN_IS_MAKEFILE)
 STRING (FIND "${CMAKE_GENERATOR}" "Ninja" GEN_IS_NINJA)
@@ -94,87 +152,56 @@ ELSE (SINGLE_TARGET)
 ENDIF (SINGLE_TARGET)
 
 
-# Include the list of all our source files
-INCLUDE ("CMakeSources.cmake")
-
-SET (ALL_SRCS 
-	${LIB_SRCS}
-
-	${game_SRCS}
-	${items_SRCS}
-	${chars_SRCS}
-	${clients_SRCS}
-	${components_SRCS}
-	${uofiles_SRCS}
-	${common_SRCS}
-	${resource_SRCS}
-	${resourcesections_SRCS}
-	${network_SRCS}
-	${crypto_SRCS}
-	${sphere_SRCS}
-	${crashdump_SRCS}
-	${spherelibrary_SRCS}
-	${tables_SRCS}
-	${app_resources_SRCS}
-)
-
+# Include the list of all Sphere source files
+include("src/CMakeSources.cmake")
 
 # Configure output binaries
+set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
 IF (SINGLE_TARGET)
 
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		SET (TARGETS ${TARGETS} spheresvr_release)
-		ADD_EXECUTABLE (spheresvr_release
-					${ALL_SRCS}
-		#			${docs_TEXT}
-			)
-        	SET_TARGET_PROPERTIES (spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
+		ADD_EXECUTABLE (spheresvr_release ${is_win32_app_linker}
+			${SPHERE_SOURCES}
+		#	${docs_TEXT}
+		)
+			SET_TARGET_PROPERTIES (spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		SET (TARGETS ${TARGETS} spheresvr_nightly)
-		ADD_EXECUTABLE (spheresvr_nightly
-					${ALL_SRCS}
-		#			${docs_TEXT}
-			)
-        	SET_TARGET_PROPERTIES (spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
+		ADD_EXECUTABLE (spheresvr_nightly ${is_win32_app_linker}
+			${SPHERE_SOURCES}
+		#	${docs_TEXT}
+		)
+			SET_TARGET_PROPERTIES (spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		SET (TARGETS ${TARGETS} spheresvr_debug)
-		ADD_EXECUTABLE (spheresvr_debug
-					${ALL_SRCS}
-		#			${docs_TEXT}
-			)
-        	SET_TARGET_PROPERTIES (spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
+		ADD_EXECUTABLE (spheresvr_debug ${is_win32_app_linker}
+			${SPHERE_SOURCES}
+		#	${docs_TEXT}
+		)
+		SET_TARGET_PROPERTIES (spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
 	ENDIF ()
 
 ELSE (SINGLE_TARGET)
 
 	SET (TARGETS ${TARGETS} spheresvr)
-    	ADD_EXECUTABLE (spheresvr
-            ${ALL_SRCS}
-            ${docs_TEXT}
-		)
+	ADD_EXECUTABLE (spheresvr ${is_win32_app_linker}
+		${SPHERE_SOURCES}
+		${docs_TEXT}
+	)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
 	SET_TARGET_PROPERTIES (spheresvr PROPERTIES OUTPUT_NAME_DEBUG   SphereSvrX${ARCH_BITS}_debug)
 
 ENDIF (SINGLE_TARGET)
 
-
-# Need to clear shared library flags. If not, cmake sets -rdynamic and this
-# add to the executable the full symbol table (included unused symbols).
-# This is a problem because the binary is ~700 KB bigger.
-SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
-SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+# Now include external libraries
+add_subdirectory(lib)
 
 toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
-
 
 # Get the Git revision number
 INCLUDE ("cmake/CMakeGitStatus.cmake")
 
-# Generate config.h file for libev (if we are using it)
-INCLUDE ("cmake/CMakeConditionalConfigureLibev.cmake")
-
-# Configure MariaDB C Connector source headers
-INCLUDE ("lib/mariadb/configure.cmake")

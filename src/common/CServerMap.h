@@ -15,17 +15,18 @@
 
 class CCachedMulItem
 {
-private:
+protected:
 	int64 m_timeRef;		// When in world.GetTime() was this last referenced.
 
 public:
 	static const char *m_sClassName;
 	CCachedMulItem();
-	virtual ~CCachedMulItem() = default;
+    // Do not make it virtual, since we never store this base class in a container which could store a polymorphic/child type.
+    //  We will spare 8 bytes (for the virtual table pointer)
+	~CCachedMulItem() = default;
 
-private:
-	CCachedMulItem(const CCachedMulItem& copy);
-	CCachedMulItem& operator=(const CCachedMulItem& other);
+	CCachedMulItem(const CCachedMulItem& copy) = delete;
+	CCachedMulItem& operator=(const CCachedMulItem& other) = delete;
 
 public:
 	void InitCacheTime();
@@ -48,9 +49,8 @@ public:
 	CServerStaticsBlock();
 	~CServerStaticsBlock();
 
-private:
-	CServerStaticsBlock(const CServerStaticsBlock& copy);
-	CServerStaticsBlock& operator=(const CServerStaticsBlock& other);
+	CServerStaticsBlock(const CServerStaticsBlock& copy) = delete;
+	CServerStaticsBlock& operator=(const CServerStaticsBlock& other) = delete;
 
 public:
     // These methods are called so frequently but in so few pieces of code that's very important to inline them
@@ -73,13 +73,13 @@ public:
 
 struct CServerMapBlocker
 {
-	dword m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
+	uint64 m_uiBlockFlags;	// How does this item block ? CAN_I_PLATFORM
 	dword m_dwTile;			// TERRAIN_QTY + id.
 	char m_z;				// Top (z + ((climbable item) ? height/2 : height)) of a solid object, or bottom (z) of non blocking one.
     height_t m_height;      // The actual height of the item (0 if terrain)
 };
 
-struct CServerMapBlockState
+struct CServerMapBlockingState
 {
 	// Go through the list of stuff at this location to decide what is  blocking us and what is not.
 	//  dwBlockFlags = what we can pass thru. doors, water, walls ?
@@ -91,7 +91,7 @@ struct CServerMapBlockState
 	//		CAN_C_FIRE_IMMUNE = i can walk into lava etc. - CAN_I_FIRE = UFLAG1_DAMAGE
 	//		CAN_C_HOVER = i can follow hover routes. - CAN_I_HOVER = UFLAG4_HOVEROVER
 
-	const dword m_dwBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.	
+	const uint64 m_uiBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.	
 	const char m_z;	            // the z we start at. (stay at if we are flying)
 	const int m_iHeight;		// The height we need to stand here.
 	const char m_zClimb;        // We can climb at this height
@@ -103,35 +103,33 @@ struct CServerMapBlockState
 	CServerMapBlocker m_Lowest;	// the lowest item we have found.	
 
 public:
-	CServerMapBlockState( dword dwBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
-	CServerMapBlockState( dword dwBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
+	CServerMapBlockingState( uint64 uiBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT ) noexcept;
+	CServerMapBlockingState( uint64 uiBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT ) noexcept;
 
-private:
-	CServerMapBlockState(const CServerMapBlockState& copy);
-	CServerMapBlockState& operator=(const CServerMapBlockState& other);
+	CServerMapBlockingState(const CServerMapBlockingState& copy) = delete;
+	CServerMapBlockingState& operator=(const CServerMapBlockingState& other) = delete;
 
 public:
-	bool CheckTile( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID );
+	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID ) noexcept;
 	static lpctstr GetTileName( dword dwID );
 };
 
 struct CServerMapDiffBlock
 {
 	// A patched map block
-	CUOStaticItemRec * m_pStaticsBlock;		// Patched statics
-	int m_iStaticsCount;					// Patched statics count
 	CUOMapBlock * m_pTerrainBlock;			// Patched terrain
+    CUOStaticItemRec * m_pStaticsBlock;		// Patched statics
+    int m_iStaticsCount;					// Patched statics count
 	dword m_BlockId;						// Block represented
 	int m_map;	// Map this block is from
 
 	CServerMapDiffBlock(dword dwBlockId, int map);
 	~CServerMapDiffBlock();
 
-private:
-	CServerMapDiffBlock(const CServerMapDiffBlock& copy);
-	CServerMapDiffBlock& operator=(const CServerMapDiffBlock& other);
+	CServerMapDiffBlock(const CServerMapDiffBlock& copy) = delete;
+	CServerMapDiffBlock& operator=(const CServerMapDiffBlock& other) = delete;
 };
 
 struct CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, dword >
@@ -139,16 +137,15 @@ struct CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, d
     CServerMapDiffBlockArray() = default;
 	int CompareKey( dword id, CServerMapDiffBlock* pBase, bool fNoSpaces ) const;
 
-private:
-	CServerMapDiffBlockArray(const CServerMapDiffBlockArray& copy);
-	CServerMapDiffBlockArray& operator=(const CServerMapDiffBlockArray& other);
+	CServerMapDiffBlockArray(const CServerMapDiffBlockArray& copy) = delete;
+	CServerMapDiffBlockArray& operator=(const CServerMapDiffBlockArray& other) = delete;
 };
 
 class CServerMapDiffCollection
 {
 	// This class will be used to access mapdiff data
 private:
-	bool m_bLoaded;
+	bool m_fLoaded;
 
 	CServerMapDiffBlockArray m_pMapDiffBlocks[MAP_SUPPORTED_QTY];
 	CServerMapDiffBlock * GetNewBlock( dword dwBlockId, int map );
@@ -158,9 +155,8 @@ public:
 	CServerMapDiffCollection();
 	~CServerMapDiffCollection();
 
-private:
-	CServerMapDiffCollection(const CServerMapDiffCollection& copy);
-	CServerMapDiffCollection& operator=(const CServerMapDiffCollection& other);
+	CServerMapDiffCollection(const CServerMapDiffCollection& copy) = delete;
+	CServerMapDiffCollection& operator=(const CServerMapDiffCollection& other) = delete;
 
 public:
 	void Init();
@@ -189,9 +185,8 @@ public:
 	CServerMapBlock(int bx, int by, int map);
 	virtual ~CServerMapBlock();
 
-private:
-	CServerMapBlock(const CServerMapBlock& copy);
-	CServerMapBlock& operator=(const CServerMapBlock& other);
+	CServerMapBlock(const CServerMapBlock& copy) = delete;
+	CServerMapBlock& operator=(const CServerMapBlock& other) = delete;
 
 public:
 	inline int GetOffsetX(int x) const
@@ -215,25 +210,28 @@ public:
 	}
 };
 
-class CUOMulti : public CCachedMulItem
+class CUOMulti : private CCachedMulItem
 {
 	// Load all the relivant info for the
-private:
-	MULTI_TYPE m_id;
 
 protected:
 	CUOMultiItemRec_HS * m_pItems;
 	uint m_iItemQty;
 
+private:
+    MULTI_TYPE m_id;
+
 public:
 	static const char *m_sClassName;
+
 	CUOMulti();
 	explicit CUOMulti( MULTI_TYPE id );
-	virtual ~CUOMulti();
+	~CUOMulti();
 
-private:
-	CUOMulti(const CUOMulti& copy);
-	CUOMulti& operator=(const CUOMulti& other);
+    CUOMulti(const CUOMulti& copy) = delete;
+	CUOMulti& operator=(const CUOMulti& other) = delete;
+
+    void HitCacheTime() noexcept;
 
 private:
 	void Init();

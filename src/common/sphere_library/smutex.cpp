@@ -3,7 +3,7 @@
 
 // SimpleMutex:: Constructors, Destructor, Asign operator.
 
-SimpleMutex::SimpleMutex()
+SimpleMutex::SimpleMutex() noexcept
 {
 #ifdef _WIN32
 	InitializeCriticalSectionAndSpinCount(&m_criticalSection, 0x80000020);
@@ -16,7 +16,7 @@ SimpleMutex::SimpleMutex()
 #endif
 }
 
-SimpleMutex::~SimpleMutex()
+SimpleMutex::~SimpleMutex() noexcept
 {
 #ifdef _WIN32
 	DeleteCriticalSection(&m_criticalSection);
@@ -28,13 +28,13 @@ SimpleMutex::~SimpleMutex()
 
 // ManualThreadLock:: Interaction.
 
-void ManualThreadLock::doLock()
+void ManualThreadLock::doLock() noexcept
 {
 	m_mutex->lock();
 	m_locked = true;
 }
 
-bool ManualThreadLock::doTryLock()
+bool ManualThreadLock::doTryLock() noexcept
 {
 	if (m_mutex->tryLock() == false)
 		return false;
@@ -43,7 +43,7 @@ bool ManualThreadLock::doTryLock()
 	return true;
 }
 
-void ManualThreadLock::doUnlock()
+void ManualThreadLock::doUnlock() noexcept
 {
 	m_locked = false;
 	m_mutex->unlock();

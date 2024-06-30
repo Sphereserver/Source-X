@@ -286,7 +286,7 @@ bool CSector::r_LoadVal( CScript &s )
 			m_dwFlags = s.GetArgVal();
 			return true;
 		case SC_LIGHT:
-			if ( g_Cfg.m_bAllowLightOverride )
+			if ( g_Cfg.m_fAllowLightOverride )
 				SetLight( s.HasArgs() ? s.GetArgVal() : -1 );
 			else
 				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
@@ -356,7 +356,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 			SetWeather( WEATHER_DRY );
 			break;
 		case SEV_LIGHT:
-			if ( g_Cfg.m_bAllowLightOverride )
+			if ( g_Cfg.m_fAllowLightOverride )
 				SetLight( (s.HasArgs()) ? s.GetArgVal() : -1 );
 			else
 				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
@@ -422,7 +422,7 @@ void CSector::r_Write()
 		fHeaderCreated = true;
 	}
 
-	if (g_Cfg.m_bAllowLightOverride && IsLightOverriden())
+	if (g_Cfg.m_fAllowLightOverride && IsLightOverriden())
 	{
 		if (fHeaderCreated == false )
 		{
@@ -595,7 +595,7 @@ int CSector::GetLocalTime() const
 	const CPointMap& pt(GetBasePoint());
 	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
-	if ( !g_Cfg.m_bAllowLightOverride )
+	if ( !g_Cfg.m_fAllowLightOverride )
 	{
 		iLocalTime += ( pt.m_x * 24*60 ) / g_MapList.GetMapSizeX(pt.m_map);
 	}
@@ -656,15 +656,15 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 	ADDTOCALLSTACK("CSector::GetLightCalc");
 	// What is the light level default here in this sector.
 
-	if ( g_Cfg.m_bAllowLightOverride && IsLightOverriden() )
+	if ( g_Cfg.m_fAllowLightOverride && IsLightOverriden() )
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
-		return (uchar)g_Cfg.m_iLightDungeon;
+		return (uchar)std::clamp(g_Cfg.m_iLightDungeon, LIGHT_BRIGHT, LIGHT_DARK);
 
 	int localtime = GetLocalTime();
 
-	if ( !g_Cfg.m_bAllowLightOverride )
+	if ( !g_Cfg.m_fAllowLightOverride )
 	{
 		//	Normalize time:
 		//	convert	0=midnight	.. (23*60)+59=midnight
@@ -678,26 +678,21 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		//	0...	x	...12*60
 		int iTargLight = ((localtime * ( g_Cfg.m_iLightNight - g_Cfg.m_iLightDay ))/(12*60) + g_Cfg.m_iLightDay);
 
-		if ( iTargLight < LIGHT_BRIGHT )
-			iTargLight = LIGHT_BRIGHT;
-		if ( iTargLight > LIGHT_DARK )
-			iTargLight = LIGHT_DARK;
-
-		return (uchar)(iTargLight);
+		return (uchar)std::clamp(iTargLight, LIGHT_BRIGHT, LIGHT_DARK);;
 	}
 
 	const int hour = ( localtime / ( 60)) % 24;
 	const bool fNight = ( hour < 6 || hour > 12+8 );	// Is it night or day ?
-	int iTargLight = (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay;	// Target light level.
+	byte uiTargLight = (byte)std::min((int)UINT8_MAX, (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay);	// Target light level.
 
 	// Check for clouds...if it is cloudy, then we don't even need to check for the effects of the moons...
 	if ( GetWeather())
 	{
 		// Clouds of some sort...
 		if (fNight)
-			iTargLight += ( Calc_GetRandVal( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
+			uiTargLight += byte( g_Rand.Get16ValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
 		else
-			iTargLight += ( Calc_GetRandVal( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
+			uiTargLight += byte( g_Rand.Get16ValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
 	}
 
 	if ( fNight )
@@ -709,7 +704,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		// Check to see if Trammel is up here...
 		if ( IsMoonVisible( iTrammelPhase, localtime ))
 		{
-			static const byte sm_TrammelPhaseBrightness[] =
+			static constexpr byte sm_TrammelPhaseBrightness[] =
 			{
 				0, // New Moon
 				TRAMMEL_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -722,14 +717,14 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 			};
 
 			ASSERT( iTrammelPhase < ARRAY_COUNT(sm_TrammelPhaseBrightness));
-			iTargLight -= sm_TrammelPhaseBrightness[iTrammelPhase];
+			uiTargLight -= std::min(uiTargLight, sm_TrammelPhaseBrightness[iTrammelPhase]);
 		}
 
 		// Felucca
 		uint iFeluccaPhase = CWorldGameTime::GetMoonPhase( true );
 		if ( IsMoonVisible( iFeluccaPhase, localtime ))
 		{
-			static const byte sm_FeluccaPhaseBrightness[] =
+			static constexpr byte sm_FeluccaPhaseBrightness[] =
 			{
 				0, // New Moon
 				FELUCCA_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -742,23 +737,23 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 			};
 
 			ASSERT( iFeluccaPhase < ARRAY_COUNT(sm_FeluccaPhaseBrightness));
-			iTargLight -= sm_FeluccaPhaseBrightness[iFeluccaPhase];
+			uiTargLight -= std::min(uiTargLight, sm_FeluccaPhaseBrightness[iFeluccaPhase]);
 		}
 	}
 
-	if ( iTargLight < LIGHT_BRIGHT )
-		iTargLight = LIGHT_BRIGHT;
-	if ( iTargLight > LIGHT_DARK )
-		iTargLight = LIGHT_DARK;
+	//if ( uiTargLight < LIGHT_BRIGHT /* 0 */)
+	//	uiTargLight = LIGHT_BRIGHT;
+	if ( uiTargLight > LIGHT_DARK )
+		uiTargLight = LIGHT_DARK;
 
-	if ( fQuickSet || m_Env.m_Light == iTargLight )		// Initializing the sector
-		return (uchar)(iTargLight);
+	if ( fQuickSet || m_Env.m_Light == uiTargLight )		// Initializing the sector
+		return uiTargLight;
 
 	// Gradual transition to global light level.
-	if ( m_Env.m_Light > iTargLight )
-		return ( m_Env.m_Light - 1 );
+	if ( m_Env.m_Light > uiTargLight )
+		return ((m_Env.m_Light > LIGHT_BRIGHT) ? (m_Env.m_Light - 1) : m_Env.m_Light);
 	else
-		return ( m_Env.m_Light + 1 );
+		return ((m_Env.m_Light < UINT8_MAX) ? (m_Env.m_Light + 1) : m_Env.m_Light);
 }
 
 void CSector::SetLightNow( bool fFlash )
@@ -841,11 +836,11 @@ WEATHER_TYPE CSector::GetWeatherCalc() const
 		return( WEATHER_DRY );
 
 	// Rain chance also controls the chance of snow. If it isn't possible to rain then it cannot snow either
-	int iPercentRoll = Calc_GetRandVal( 100 );
+	int iPercentRoll = g_Rand.GetValFast( 100 );
 	if ( iPercentRoll < GetRainChance() )
 	{
 		// It is precipitating... but is it rain or snow?
-		if ( GetColdChance() && Calc_GetRandVal(100) <= GetColdChance()) // Should it actually snow here?
+		if ( GetColdChance() && g_Rand.GetValFast(100) <= GetColdChance()) // Should it actually snow here?
 			return WEATHER_SNOW;
 		return WEATHER_RAIN;
 	}
@@ -1211,7 +1206,7 @@ bool CSector::_OnTick()
 	int iRegionPeriodic = 0;
 
 	WEATHER_TYPE weatherprv = m_Env.m_Weather;
-	if ( ! Calc_GetRandVal( 30 ))	// change less often
+	if ( ! g_Rand.GetValFast( 30 ))	// change less often
 	{
 		m_Env.m_Weather = GetWeatherCalc();
 		if ( weatherprv != m_Env.m_Weather )
@@ -1237,23 +1232,23 @@ bool CSector::_OnTick()
 				break;
 
 			case WEATHER_SNOW:
-				if ( ! Calc_GetRandVal(5) )
-					sound = sm_SfxWind[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxWind )) ];
+				if ( ! g_Rand.GetValFast(5) )
+					sound = sm_SfxWind[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxWind )) ];
 				break;
 
 			case WEATHER_RAIN:
 				{
-					int iVal = Calc_GetRandVal(30);
+					int iVal = g_Rand.GetValFast(30);
 					if ( iVal < 5 )
 					{
 						// Mess up the light levels for a sec..
 						LightFlash();
-						sound = sm_SfxThunder[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxThunder )) ];
+						sound = sm_SfxThunder[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxThunder )) ];
 					}
 					else if ( iVal < 10 )
-						sound = sm_SfxRain[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxRain )) ];
+						sound = sm_SfxRain[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxRain )) ];
 					else if ( iVal < 15 )
-						sound = sm_SfxWind[ Calc_GetRandVal( ARRAY_COUNT( sm_SfxWind )) ];
+						sound = sm_SfxWind[ g_Rand.GetValFast( ARRAY_COUNT( sm_SfxWind )) ];
 				}
 				break;
 

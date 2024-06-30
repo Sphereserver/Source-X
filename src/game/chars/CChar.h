@@ -21,8 +21,8 @@
 
 
 class CWorldTicker;
-
 class CCharNPC;
+class CMapBlockingState;
 
 
 enum NPCBRAIN_TYPE	// General AI type.
@@ -39,6 +39,17 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_BERSERK,	// 9 = attack closest (blades, vortex)
 	NPCBRAIN_DRAGON,	// 10 = we can breath fire. may be tamable ? hirable ?
 	NPCBRAIN_QTY
+};
+
+
+enum WAR_SWING_TYPE	: int // m_Act_War_Swing_State
+{
+    WAR_SWING_INVALID = -1,
+    WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
+    WAR_SWING_READY,			// we can swing at any time.
+    WAR_SWING_SWINGING,			// we are swinging our weapon.
+    //--
+    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
 };
 
 class CChar : public CObjBase, public CContainer, public CTextConsole
@@ -315,9 +326,8 @@ public:
 	virtual ~CChar(); // Delete character
 	bool DupeFrom(const CChar * pChar, bool fNewbieItems);
 
-private:
-	CChar(const CChar& copy);
-	CChar& operator=(const CChar& other);
+	CChar(const CChar& copy) = delete;
+	CChar& operator=(const CChar& other) = delete;
 
 protected:
 	void DeleteCleanup(bool fForce);	// Not virtual!
@@ -329,8 +339,17 @@ public:
 	// Status and attributes ------------------------------------
 	virtual int IsWeird() const override;
 
+#if MT_ENGINES
 //protected:	bool _IsStatFlag(uint64 uiStatFlag) const noexcept;
 public:		bool  IsStatFlag(uint64 uiStatFlag) const noexcept;
+#else
+public:
+    // called very frequently, it's wise to inline it if we can
+    inline bool IsStatFlag(uint64 uiStatFlag) const noexcept
+    {
+        return (_uiStatFlag & uiStatFlag);
+    }
+#endif
 
 //protected:	void _StatFlag_Set(uint64 uiStatFlag) noexcept;
 public:		void  StatFlag_Set(uint64 uiStatFlag) noexcept;
@@ -341,7 +360,7 @@ public:		void  StatFlag_Clear(uint64 uiStatFlag) noexcept;
 //protected:	void _StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
-	char GetFixZ(const CPointMap& pt, dword dwBlockFlags = 0);
+	char GetFixZ(const CPointMap& pt, uint64 uiBlockFlags = 0);
 	bool IsPriv( word flag ) const;
 	virtual PLEVEL_TYPE GetPrivLevel() const override;
 
@@ -406,7 +425,7 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool CanTouch( const CPointMap & pt ) const;
 	bool CanTouch( const CObjBase * pObj ) const;
 	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
-	bool CanMove( const CItem * pItem, bool fMsg = true ) const;
+	bool CanMoveItem( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
 	bool CanUse( const CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
@@ -456,7 +475,7 @@ private:
 	bool TeleportToCli( int iType, int iArgs );
 	bool TeleportToObj( int iType, tchar * pszArgs );
 private:
-	CRegion * CheckValidMove( CPointMap & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
+	CRegion * CheckValidMove( CPointMap & ptDest, uint64 * uiBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
 	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
@@ -476,9 +495,12 @@ public:
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool fFromShip = false);
 	bool MoveToNearestShore(bool fNoMsg = false);
 
+    bool CanMove(bool fCheckOnly) const;
+    bool ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequirement, bool fPathfinding);
+    bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
-	TRIGRET_TYPE CheckLocation( bool fStanding = false );
+	TRIGRET_TYPE CheckLocation(bool fCanCheckRecursively, bool fStanding);
 
 public:
 	// Client Player specific stuff. -------------------------
@@ -501,8 +523,8 @@ public:
     bool IsNPC() const;
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain() const;
-    NPCBRAIN_TYPE GetNPCBrainGroup() const;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
-	NPCBRAIN_TYPE GetNPCBrainAuto() const;	// Guess default NPC brain
+    NPCBRAIN_TYPE GetNPCBrainGroup() const noexcept;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	NPCBRAIN_TYPE GetNPCBrainAuto() const noexcept;	// Guess default NPC brain
 	void ClearNPC();
 
 
@@ -533,7 +555,7 @@ public:
 	lpctstr GetPossessPronoun() const;	// his
 	byte GetModeFlag( const CClient *pViewer = nullptr ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
-	dword GetCanMoveFlags(dword dwCanFlags, bool fIgnoreGM = false) const;
+	uint64 GetCanMoveFlags(uint64 uiCanFlags, bool fIgnoreGM = false) const;
 
 	virtual int FixWeirdness() override;
 	void CreateNewCharCheck();
@@ -687,7 +709,7 @@ public:
 	*
 	* @return true if I am.
 	*/
-	bool Noto_IsMurderer() const;
+	bool Noto_IsMurderer() const noexcept;
 
 	/**
 	* @brief I'm evil?
@@ -837,6 +859,16 @@ public:
 	void ChangeExperience(llong delta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
+    /*
+    * @brief Check the pItem stack has amount more than iQty. If not, searches character's backpack to check if character has enough item to consume.
+    */
+    bool CanConsume(CItem* pItem, word iQty);
+
+    /*
+    * @brief Consumes iQty amount of the item from your stack. If the stack has less amount than iQty, searches character's backpack to consume from other stacks.
+    */
+    bool ConsumeFromPack(CItem* pItem, word iQty);
+
 	// skills and actions. -------------------------------------------
 	static bool IsSkillBase( SKILL_TYPE skill ) noexcept;
 	static bool IsSkillNPC( SKILL_TYPE skill ) noexcept;
@@ -872,7 +904,7 @@ public:
 	bool Skill_Wait( SKILL_TYPE skilltry );
 	bool Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease = 0 ); // calc skill progress.
 	void Skill_Fail( bool fCancel = false );
-	int Skill_Stroke( bool fResource);				// Strokes in crafting skills, calling for SkillStroke trig
+	int Skill_Stroke();				// Strokes in crafting skills, calling for SkillStroke trig
 	ANIM_TYPE Skill_GetAnim( SKILL_TYPE skill);
 	SOUND_TYPE Skill_GetSound( SKILL_TYPE skill);
 	int Skill_Stage( SKTRIG_TYPE stage );
@@ -1109,6 +1141,7 @@ private:
     CChar* Horse_GetValidMountChar();
 
 public:
+    bool CanDress(const CChar* pChar) const;
 	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	CChar * GetOwner() const;
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
@@ -1134,7 +1167,7 @@ public:
 	bool Death();
 	bool Reveal( uint64 iFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim( lpctstr pszName, ushort uiQty );
+	void EatAnim(CItem* pItem, ushort uiQty);
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*
@@ -1164,7 +1197,7 @@ public:
 	bool OnFreezeCheck() const;
     bool IsStuck(bool fFreezeCheck);
 
-	void DropAll( CItemContainer * pCorpse = nullptr, uint64 dwAttr = 0 );
+	void DropAll(CItemContainer * pCorpse = nullptr, uint64 uiAttr = 0);
 	void UnEquipAllItems( CItemContainer * pCorpse = nullptr, bool fLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );

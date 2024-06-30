@@ -103,3 +103,24 @@ CResourceID& CResourceID::operator = (const CResourceIDBase& rid)
     m_wPage = 0;
     return *this;
 }
+
+bool CResourceID::operator == (const CResourceID & rid) const noexcept
+{
+    return ((rid.m_wPage == m_wPage) && (rid.m_dwInternalVal == m_dwInternalVal));
+}
+
+void CResourceID::Init() noexcept
+{
+    m_dwInternalVal = UID_UNUSED;
+    m_wPage = 0;
+}
+void CResourceID::Clear() noexcept
+{
+    m_dwInternalVal = UID_PLAIN_CLEAR;
+    m_wPage = 0;
+}
+
+bool CResourceID::IsEmpty() const noexcept
+{
+    return ((m_dwInternalVal & UID_O_INDEX_MASK) == 0 /* means also that restype = 0/RES_UNKNOWN */) && (m_wPage == 0);
+}

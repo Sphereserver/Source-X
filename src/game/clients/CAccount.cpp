@@ -389,6 +389,33 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 	return true;
 }
 
+void CAccount::SetBlockStatus(bool fNewStatus)
+{
+    if (!g_Serv.IsLoading())
+    {
+        if (IsPriv(PRIV_BLOCKED) && fNewStatus == false) {
+
+            CScriptTriggerArgs Args;
+            Args.Init(GetName());
+            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+            g_Serv.r_Call("f_onaccount_unblock", &g_Serv, &Args, nullptr, &iRet);
+            if (iRet == TRIGRET_RET_TRUE)
+                return;
+            ClearPrivFlags(PRIV_BLOCKED);
+        }
+        else if (!IsPriv(PRIV_BLOCKED) && fNewStatus == true)
+        {
+            CScriptTriggerArgs Args;
+            Args.Init(GetName());
+            TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+            g_Serv.r_Call("f_onaccount_block", &g_Serv, &Args, nullptr, &iRet);
+            if (iRet == TRIGRET_RET_TRUE)
+                return;
+            SetPrivFlags(PRIV_BLOCKED);
+        }
+    }
+}
+
 bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CAccounts::Account_OnCmd");
@@ -604,18 +631,43 @@ void CAccount::DeleteChars()
 	}
 }
 
-
 CAccount::~CAccount()
 {
 	g_Serv.StatDec( SERV_STAT_ACCOUNTS );
 
 	DeleteChars();
+    if (CClient * pClient = FindClient())
+    {
+        pClient->m_pAccount = nullptr;
+    }
+
 	ClearPasswordTries(true);
+}
+
+lpctstr CAccount::GetDefStr( lpctstr ptcKey, bool fZero ) const
+{
+    return m_BaseDefs.GetKeyStr( ptcKey, fZero );
+}
+int64 CAccount::GetDefNum( lpctstr ptcKey ) const
+{
+    return m_BaseDefs.GetKeyNum( ptcKey );
+}
+void CAccount::SetDefNum(lpctstr ptcKey, int64 iVal, bool fZero)
+{
+    CAccount::m_BaseDefs.SetNum(ptcKey, iVal, fZero);
+}
+void CAccount::SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted, bool fZero)
+{
+    m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fZero);
+}
+
+void CAccount::DeleteDef(lpctstr ptcKey)
+{
+    m_BaseDefs.DeleteKey(ptcKey);
 }
 
 void CAccount::SetPrivLevel( PLEVEL_TYPE plevel )
 {
-	ADDTOCALLSTACK("CAccount::SetPrivLevel");
 	m_PrivLevel = plevel;	// PLEVEL_Counsel
 }
 
@@ -774,7 +826,8 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 
 	if ( fBlock )
 	{
-		SetPrivFlags( PRIV_BLOCKED );
+		//SetPrivFlags( PRIV_BLOCKED );
+        SetBlockStatus(true);
 		pSrc->SysMessagef( g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_BLOCK), GetName() );
 	}
 
@@ -1011,13 +1064,13 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 	{
 		static tchar const passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
 		int len = (int)strlen(passwdChars);
-		int charsCnt = Calc_GetRandVal(4) + 6;	// 6 - 10 chars
+		int charsCnt = g_Rand.GetVal(4) + 6;	// 6 - 10 chars
 		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_ENTER - 1) )
 			charsCnt = MAX_ACCOUNT_PASSWORD_ENTER - 1;
 
 		tchar szTmp[MAX_ACCOUNT_PASSWORD_ENTER + 1];
 		for ( int i = 0; i < charsCnt; ++i )
-			szTmp[i] = passwdChars[Calc_GetRandVal(len)];
+			szTmp[i] = passwdChars[g_Rand.GetVal(len)];
 
 		szTmp[charsCnt] = '\0';
 		m_sNewPassword = szTmp;
@@ -1054,19 +1107,19 @@ bool CAccount::SetAutoResDisp(CClient *pClient)
 		return false;
 
 	const CNetState* pNS = pClient->GetNetState();
-	if (pNS->isClientVersion(MINCLIVER_TOL))
+	if (pNS->isClientVersionNumber(MINCLIVER_TOL))
 		return SetResDisp(RDS_TOL);
-	else if (pNS->isClientVersion(MINCLIVER_HS))
+	else if (pNS->isClientVersionNumber(MINCLIVER_HS))
 		return SetResDisp(RDS_HS);
-	else if (pNS->isClientVersion(MINCLIVER_SA))
+	else if (pNS->isClientVersionNumber(MINCLIVER_SA))
 		return SetResDisp(RDS_SA);
-	else if (pNS->isClientVersion(MINCLIVER_ML))
+	else if (pNS->isClientVersionNumber(MINCLIVER_ML))
 		return SetResDisp(RDS_ML);
-	else if (pNS->isClientVersion(MINCLIVER_SE))
+	else if (pNS->isClientVersionNumber(MINCLIVER_SE))
 		return SetResDisp(RDS_SE);
-	else if (pNS->isClientVersion(MINCLIVER_AOS))
+	else if (pNS->isClientVersionNumber(MINCLIVER_AOS))
 		return SetResDisp(RDS_AOS);
-	else if (pNS->isClientVersion(MINCLIVER_LBR))
+	else if (pNS->isClientVersionNumber(MINCLIVER_LBR))
 		return SetResDisp(RDS_LBR);
 	else
 		return SetResDisp(RDS_T2A);
@@ -1328,11 +1381,13 @@ bool CAccount::r_LoadVal( CScript & s )
 		case AC_BLOCK:
 			if ( ! s.HasArgs() || s.GetArgVal())
 			{
-				SetPrivFlags( PRIV_BLOCKED );
+				//SetPrivFlags( PRIV_BLOCKED );
+                SetBlockStatus(true);
 			}
 			else
 			{
-				ClearPrivFlags( PRIV_BLOCKED );
+				//ClearPrivFlags( PRIV_BLOCKED );
+                SetBlockStatus(false);
 			}
 			break;
 		case AC_CHARUID:
@@ -1638,10 +1693,12 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 				return true;
 			}
 		case AV_BLOCK:
-			if ( ! s.HasArgs() || s.GetArgVal())
-				SetPrivFlags(PRIV_BLOCKED);
-			else
-				ClearPrivFlags(PRIV_BLOCKED);
+            if (!s.HasArgs() || s.GetArgVal())
+                //SetPrivFlags(PRIV_BLOCKED);
+                SetBlockStatus(true);
+            else
+                //ClearPrivFlags(PRIV_BLOCKED);
+                SetBlockStatus(false);
 			return true;
 
 		case AV_KICK:

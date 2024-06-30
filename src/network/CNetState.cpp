@@ -1,4 +1,5 @@
 #include "../common/sphereproto.h"
+#include "../common/CUOClientVersion.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
@@ -16,26 +17,25 @@
 #define NETWORK_DISCONNECTPRI	PacketSend::PRI_HIGHEST			// packet priorty to continue sending before closing sockets
 
 
-CNetState::CNetState(int id)
+CNetState::CNetState(int id) :
+    m_outgoing{}, m_incoming{}
 {
     m_id = id;
     m_client = nullptr;
     m_needsFlush = false;
     m_useAsync = false;
-    m_outgoing.currentTransaction = nullptr;
-    m_outgoing.pendingTransaction = nullptr;
-    m_incoming.buffer = nullptr;
-    m_incoming.rawBuffer = nullptr;
+    m_iConnectionTimeMs = -1;
     m_packetExceptions = 0;
     _iInByteCounter = _iOutByteCounter = 0;
     m_clientType = CLIENTTYPE_2D;
-    m_clientVersion = 0;
-    m_reportedVersion = 0;
+    m_clientVersionNumber = 0;
+    m_reportedVersionNumber = 0;
     m_isInUse = false;
     m_parent = nullptr;
 
     clear();
 }
+
 
 CNetState::~CNetState(void)
 {
@@ -135,11 +135,12 @@ void CNetState::clear(void)
         m_incoming.rawBuffer = nullptr;
     }
 
+    m_iConnectionTimeMs = -1;
     m_sequence = 0;
     m_seeded = false;
     m_newseed = false;
     m_seed = 0;
-    m_clientVersion = m_reportedVersion = 0;
+    m_clientVersionNumber = m_reportedVersionNumber = 0;
     m_clientType = CLIENTTYPE_2D;
     m_isSendingAsync = false;
     m_packetExceptions = 0;
@@ -190,15 +191,21 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
 
     m_peerAddress = addr;
     m_socket.SetSocket(socket);
-    iSockRet = m_socket.SetNonBlocking();
-    ASSERT(iSockRet == 0);
 
-    // disable NAGLE algorythm for data compression/coalescing.
+    if (g_Cfg.m_fUseAsyncNetwork != 0)
+    {
+        iSockRet = m_socket.SetNonBlocking();
+        ASSERT(iSockRet == 0);
+    }
+
+    // Disable NAGLE algorythm for data compression/coalescing.
     // Send as fast as we can. we handle packing ourselves.
     
     int iSockFlag = 1;
     iSockRet = m_socket.SetSockOpt(TCP_NODELAY, &iSockFlag, sizeof(iSockFlag), IPPROTO_TCP);
     CheckReportNetAPIErr(iSockRet, "NetState::init.TCP_NODELAY");
+
+    m_iConnectionTimeMs = CSTime::GetMonotonicSysTimeMilli();
 
     g_Serv.StatInc(SERV_STAT_CLIENTS);
     CClient* client = new CClient(this);
@@ -221,7 +228,7 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
     detectAsyncMode();
 }
 
-bool CNetState::isInUse(const CClient* client) const volatile
+bool CNetState::isInUse(const CClient* client) const volatile noexcept
 {
     if (m_isInUse == false)
         return false;
@@ -245,9 +252,29 @@ void CNetState::markWriteClosed(void) volatile
     m_isWriteClosed = true;
 }
 
-void CNetState::markFlush(bool needsFlush) volatile
+void CNetState::markFlush(bool needsFlush) volatile noexcept
 {
     m_needsFlush = needsFlush;
+}
+
+void CNetState::setAsyncMode(bool isAsync) volatile noexcept
+{
+    m_useAsync = isAsync;
+}
+
+bool CNetState::isAsyncMode(void) const volatile noexcept
+{
+    return m_useAsync;
+}
+
+bool CNetState::isSendingAsync(void) const volatile noexcept
+{
+    return m_isSendingAsync;
+}
+
+void CNetState::setSendingAsync(bool isSending) volatile noexcept
+{
+    m_isSendingAsync = isSending;
 }
 
 void CNetState::detectAsyncMode(void)
@@ -272,7 +299,7 @@ void CNetState::detectAsyncMode(void)
     //   without async networking (but should switch over as soon as it has been determined)
     // - a minor issue with this is that for clients without encryption we cannot determine their version
     //   until after they have fully logged into the game server and sent a client version packet.
-    else if (isClientVersion(MINCLIVER_AUTOASYNC) || isClientKR() || isClientEnhanced())
+    else if (isClientVersionNumber(MINCLIVER_AUTOASYNC) || isClientKR() || isClientEnhanced())
         setAsyncMode(true);
     else
         setAsyncMode(false);
@@ -354,4 +381,35 @@ void CNetState::endTransaction(void)
 
     m_parent->queuePacketTransaction(m_outgoing.pendingTransaction);
     m_outgoing.pendingTransaction = nullptr;
+}
+
+
+bool CNetState::isClientCryptVersionNumber(dword version) const
+{
+    return m_clientVersionNumber && CUOClientVersion(m_clientVersionNumber) >= CUOClientVersion(version);
+};
+
+bool CNetState::isClientReportedVersionNumber(dword version) const
+{
+    return m_reportedVersionNumber && CUOClientVersion(m_reportedVersionNumber) >= CUOClientVersion(version);
+};
+
+bool CNetState::isClientVersionNumber(dword version) const
+{
+    return isClientCryptVersionNumber(version) || isClientReportedVersionNumber(version);
+}
+
+bool CNetState::isCryptLessVersionNumber(dword version) const
+{
+    return m_clientVersionNumber && CUOClientVersion(m_clientVersionNumber) < CUOClientVersion(version);
+};
+
+bool CNetState::isClientReportedLessVersionNumber(dword version) const
+{
+    return m_reportedVersionNumber && CUOClientVersion(m_reportedVersionNumber) < CUOClientVersion(version);
+};
+
+bool CNetState::isClientLessVersionNumber(dword version) const
+{
+    return isCryptLessVersionNumber(version) || isClientReportedLessVersionNumber(version);
 }

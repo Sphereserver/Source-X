@@ -8,6 +8,7 @@
 #include "../items/CItemVendable.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -493,11 +494,11 @@ int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
 	int ry = 1 + abs( rect.m_bottom - rect.m_top ) / 2;
 
-	CWorldSearch AreaItem( ptCtr, maximum( rx, ry ));
-	AreaItem.SetSearchSquare( true );
+	auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, maximum( rx, ry ));
+	AreaItem->SetSearchSquare( true );
 	for (;;)
 	{
-		CItem * pItem = AreaItem.GetItem();
+		CItem * pItem = AreaItem->GetItem();
 		if ( pItem == nullptr )
 			break;
 		if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -554,7 +555,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	CRectMap rect;
 	rect.SetRect( m_tmTile.m_ptFirst.m_x, m_tmTile.m_ptFirst.m_y, pt.m_x, pt.m_y, pt.m_map);
-	CPointMap ptCtr = rect.GetCenter();
+	CPointMap ptCtr(rect.GetCenter());
 	ptCtr.m_map = pt.m_map;
 
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
@@ -602,12 +603,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
-			CWorldSearch AreaItem( ptCtr, iRadius );
-			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaItem.SetSearchSquare( true );
+			auto Area = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
+			Area->SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			Area->SetSearchSquare( true );
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = Area->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -618,12 +619,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				++iCount;
 			}
 
-			CWorldSearch AreaChar( ptCtr, iRadius );
-			AreaChar.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaChar.SetSearchSquare( true );
-			for (;;)
+            Area->RestartSearch();
+            for (;;)
 			{
-				CChar* pChar = AreaChar.GetChar();
+				CChar* pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
@@ -640,12 +639,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKE:		// NUKE all items in the region.
 		{
-			CWorldSearch AreaItem( ptCtr, iRadius );
-			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaItem.SetSearchSquare( true );
+			auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
+			AreaItem->SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaItem->SetSearchSquare( true );
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = AreaItem->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -669,12 +668,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKECHAR:
 		{
-			CWorldSearch AreaChar( ptCtr, iRadius );
-			AreaChar.SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaChar.SetSearchSquare( true );
+			auto AreaChar = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
+			AreaChar->SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaChar->SetSearchSquare( true );
 			for (;;)
 			{
-				CChar* pChar = AreaChar.GetChar();
+				CChar* pChar = AreaChar->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
@@ -766,8 +765,8 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 				return 1;
 		}
 		if ( pChar->IsPlayableCharacter())
-			return( Calc_GetRandVal(10));
-		return Calc_GetRandVal(60);
+			return( g_Rand.GetVal(10));
+		return g_Rand.GetVal(60);
 	}
 
 	lpctstr pszHe = pChar->GetPronoun();
@@ -839,9 +838,9 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 		if ( pItem->IsAttr( ATTR_IDENTIFIED ))
 		{
 			// already identified so easier.
-			return Calc_GetRandVal(20);
+			return g_Rand.GetVal(20);
 		}
-		return Calc_GetRandVal(60);
+		return g_Rand.GetVal(60);
 	}
 
 	pItem->SetAttr(ATTR_IDENTIFIED);
@@ -869,7 +868,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 		tchar *pszTemp = Str_GetTemp();
 		Str_CopyLimitNull(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_MADEOF ), Str_TempLength());
 
-		pItemDef->m_BaseResources.WriteNames( pszTemp + strlen(pszTemp) );
+		pItemDef->m_BaseResources.WriteNames( pszTemp + strlen(pszTemp), Str_TempLength() );
 		SysMessage( pszTemp );
 	}
 
@@ -895,7 +894,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 	{
 		if ( pChar == m_pChar )
 			return( 2 );
-		return Calc_GetRandVal(60);
+		return g_Rand.GetVal(60);
 	}
 
 	static lpctstr const sm_szIntDesc[] =
@@ -982,7 +981,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 
 	if ( fTest )
 	{
-		return Calc_GetRandVal(60);
+		return g_Rand.GetVal(60);
 	}
 
 	tchar *pszTemp = Str_GetTemp();
@@ -1096,7 +1095,7 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 		// based on rareity ?
 		if ( pChar == m_pChar )
 			return( 2 );
-		return Calc_GetRandVal(60);
+		return g_Rand.GetVal(60);
 	}
 
 	// Add in error cased on your skill level.
@@ -1172,7 +1171,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	}
 
 	if (fTest)
-		return (pCorpse->m_uidLink == m_pChar->GetUID()) ? 2 : Calc_GetRandVal(60);
+		return (pCorpse->m_uidLink == m_pChar->GetUID()) ? 2 : g_Rand.GetVal(60);
 
 	CChar * pCharKiller = pCorpse->m_itCorpse.m_uidKiller.CharFind();
 	lpctstr pName = pCharKiller ? pCharKiller->GetName() : nullptr;
@@ -1193,9 +1192,12 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 			Str_CopyLimitNull( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME), Str_TempLength() - len);
 
 	}
-	else if ( pCorpse->GetTimeStamp() > 0 )
+	else if ( pCorpse->GetTimeStampS() > 0 )
 	{
-		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
+		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER),
+            pCorpse->GetName(),
+            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS() * MSECS_PER_SEC) / MSECS_PER_SEC));
+
 		if ( pName )
 			snprintf( pszTemp + len, Str_TempLength() - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
@@ -1264,7 +1266,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	}
 
 	if ( fTest )
-		return Calc_GetRandVal(60);
+		return g_Rand.GetVal(60);
 
 
 	static const lpctstr sm_szPoisonMessages[] =
@@ -1522,10 +1524,10 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 		// All the pets that could hear me.
 		bool fGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-		CWorldSearch AreaChars( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
+		auto AreaChars = CWorldSearchHolder::GetInstance( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
 		for (;;)
 		{
-			CChar * pCharPet = AreaChars.GetChar();
+			CChar * pCharPet = AreaChars->GetChar();
 			if ( pCharPet == nullptr )
 				break;
 			if ( pCharPet == m_pChar )
@@ -1604,12 +1606,12 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true);
+		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true, 1);
 		m_pChar->FollowersUpdate(pCharPet,(-maximum(0, iFollowerSlots)));
 	}
 
-	pCharMaster->GetBank()->ContentAdd( pPetItem );
-	pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_CLAIM ) );
+	m_pChar->GetBank(LAYER_STABLE)->ContentAdd(pPetItem);
+	pCharMaster->Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM));
 	return true;
 }
 
@@ -1782,9 +1784,9 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			CChar *pChar = dynamic_cast<CChar *>(this);
 			CItem *pItem = dynamic_cast<CItem *>(this);
 			if ( pChar )
-				pChar->OnTakeDamage( 80 + Calc_GetRandVal(150), m_pChar, DAMAGE_HIT_BLUNT|DAMAGE_FIRE );
+				pChar->OnTakeDamage( 80 + g_Rand.GetVal(150), m_pChar, DAMAGE_HIT_BLUNT|DAMAGE_FIRE );
 			else if ( pItem )
-				pItem->OnTakeDamage( 80 + Calc_GetRandVal(150), m_pChar, DAMAGE_HIT_BLUNT|DAMAGE_FIRE );
+				pItem->OnTakeDamage( 80 + g_Rand.GetVal(150), m_pChar, DAMAGE_HIT_BLUNT|DAMAGE_FIRE );
 		}
 		return true;
 
@@ -1946,7 +1948,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		default:
 			// Item to smash ? furniture ???
 
-			if ( ! m_pChar->CanMove(pItemTarg) )
+			if ( ! m_pChar->CanMoveItem(pItemTarg) )
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_WEAPON_IMMUNE );
 				return false;	// ? using does not imply moving in all cases ! such as reading ?
@@ -2465,7 +2467,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	pChar->SysMessage( sTemp );
 
 	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
-	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", CWorldGameTime::GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
+	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", CWorldGameTime::GetCurrentTime().GetTimeRaw() + (g_Rand.GetVal2(2,5) * MSECS_PER_SEC));
 
 	new PacketPartyInvite(pChar->GetClientActive(), m_pChar);
 

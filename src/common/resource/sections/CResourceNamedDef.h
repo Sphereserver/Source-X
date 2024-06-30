@@ -1,3 +1,7 @@
+#ifndef _INC_CRESOURCENAMEDDEF_H
+#define _INC_CRESOURCENAMEDDEF_H
+
+
 #include "../../sphere_library/CSString.h"
 #include "../CResourceLink.h"
 
@@ -21,3 +25,6 @@ public:
     virtual lpctstr GetName() const override;
 
 };
+
+
+#endif //_INC_CRESOURCENAMEDDEF_H

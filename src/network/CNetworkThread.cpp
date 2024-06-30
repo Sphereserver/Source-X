@@ -11,7 +11,7 @@
 
 static const char* GenerateNetworkThreadName(size_t id)
 {
-    char* name = new char[IThread::m_nameMaxLength];
+    char* name = Str_GetTemp();
     snprintf(name, IThread::m_nameMaxLength, "T_Net #%" PRIuSIZE_T, id);
     return name;
 }
@@ -25,8 +25,6 @@ CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
 
 CNetworkThread::~CNetworkThread(void)
 {
-    // thread name was allocated by GenerateNetworkThreadName, so should be delete[]'d
-    delete[] getName();
 }
 
 void CNetworkThread::assignNetworkState(CNetState* state)
@@ -127,7 +125,7 @@ void CNetworkThread::tick(void)
     setPriority(static_cast<IThread::Priority>(g_Cfg._uiNetworkThreadPriority));
 
     static constexpr int64 kiStateDataCheckPeriod = 10 * 1000; // 10 seconds, expressed in milliseconds
-    const int64 iTimeCur = CSTime::GetPreciseSysTimeMilli();
+    const int64 iTimeCur = CSTime::GetMonotonicSysTimeMilli();
     if (iTimeCur - _iTimeLastStateDataCheck > kiStateDataCheckPeriod)
     {
         _iTimeLastStateDataCheck = iTimeCur;

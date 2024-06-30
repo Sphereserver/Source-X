@@ -1,25 +1,6 @@
 #include "CServerConfig.h"
 #include "CServerTime.h"
 
-int64 CServerTime::GetTimeRaw() const noexcept
-{
-	return (m_llPrivateTime < 0) ? 0 : m_llPrivateTime;
-}
-
-void CServerTime::Init() noexcept
-{
-	m_llPrivateTime = 0;
-}
-
-void CServerTime::InitTime( int64 llTimeBase ) noexcept
-{
-	m_llPrivateTime = (llTimeBase < 0) ? 0 : llTimeBase;
-}
-
-bool CServerTime::IsTimeValid() const noexcept
-{
-	return bool(m_llPrivateTime > 0);
-}
 
 CServerTime CServerTime::operator+( int64 llTimeDiff ) const noexcept
 {

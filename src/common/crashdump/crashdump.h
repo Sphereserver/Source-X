@@ -26,7 +26,7 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess,
 class CrashDump
 {
 	private:
-		static bool m_bEnabled;
+		static bool m_fEnabled;
 		static HMODULE m_hDll;
 		static MINIDUMPWRITEDUMP m_tDumpFunction;
 

@@ -50,8 +50,9 @@ public:
 
 public:
 	// Static methods
-	static llong GetPreciseSysTimeMicro() noexcept;
-	static llong GetPreciseSysTimeMilli() noexcept;
+    static llong GetMonotonicSysTimeNano() noexcept;  // REALLY, use this only when you're sure it's necessary...
+	static llong GetMonotonicSysTimeMicro() noexcept; // Use this only when you're sure it's necessary...
+	static llong GetMonotonicSysTimeMilli() noexcept;
 
 	static CSTime GetCurrentTime() noexcept;
 

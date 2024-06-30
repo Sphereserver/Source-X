@@ -52,11 +52,17 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
             iLo	= iTmp;
         }
 
+        if (iHi > UINT32_MAX)
+        {
+            g_Log.EventError("TERRAIN with greatest ID 0x%" PRIx64 " (> 0xFFFF FFFF)?\n", (int64)iHi);
+            return false;
+        }
+
         // Get the weak ptr from reshash
         sl::smart_ptr_view<CResourceDef> def_registered = g_Cfg.RegisteredResourceGetDefRef(GetResourceID());
         for (llong i = iLo; i <= iHi; ++i )
         {
-            g_World.m_TileTypes.emplace_index_grow(i, def_registered);
+            g_World.m_TileTypes.emplace_index_grow((size_t)i, def_registered);
         }
         return true;
     }

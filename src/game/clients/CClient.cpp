@@ -1,6 +1,7 @@
 #include "../../common/resource/sections/CResourceNamedDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CUOClientVersion.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/CIPHistoryManager.h"
@@ -26,14 +27,14 @@ CClient::CClient(CNetState* state)
 {
 	// This may be a web connection or Telnet ?
 	m_net = state;
-	SetConnectType( CONNECT_UNK );	// don't know what sort of connect this is yet.
+    m_iConnectType = CONNECT_UNK; // don't know what sort of connect this is yet.
 
 	// update ip history
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
 	++ history.m_connecting;
 	++ history.m_connected;
 
-	m_Crypt.SetClientVer( g_Serv.m_ClientVersion );
+	m_Crypt.SetClientVerFromOther( g_Serv.m_ClientVersion );
 	m_pAccount = nullptr;
 	m_pChar = nullptr;
 	m_pGMPage = nullptr;
@@ -45,7 +46,7 @@ CClient::CClient(CNetState* state)
 
 	m_iWalkStepCount = 0;
 	m_iWalkTimeAvg	= 500;
-	m_timeWalkStep = CSTime::GetPreciseSysTimeMilli();
+	m_timeWalkStep = CSTime::GetMonotonicSysTimeMilli();
 	m_lastDir = 0;
 
     _fShowPublicHouseContent = true;
@@ -56,7 +57,7 @@ CClient::CClient(CNetState* state)
 
 	m_tmSetup.m_dwIP = 0;
 	m_tmSetup.m_iConnect = 0;
-	m_tmSetup.m_bNewSeed = false;
+	m_tmSetup.m_fNewSeed = false;
 
 	m_Env.SetInvalid();
 
@@ -675,8 +676,7 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 			break;
 		case CC_CLIENTVERSION:
 			{
-				char szVersion[ 128 ];
-				sVal = m_Crypt.WriteClientVer( szVersion, sizeof(szVersion) );
+				sVal = m_Crypt.GetClientVer().c_str();
 			}
 			break;
 		case CC_DEBUG:
@@ -706,17 +706,16 @@ bool CClient::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 				ptcKey += strlen(sm_szLoadKeys[index]);
 				GETNONWHITESPACE(ptcKey);
 
-				dword iCliVer = GetNetState()->getReportedVersion();
+				dword uiCliVer = GetNetState()->getReportedVersion();
 				if ( ptcKey[0] == '\0' )
 				{
 					// Return full version string (eg: 5.0.2d)
-					tchar ptcVersion[128];
-					sVal = CCrypto::WriteClientVerString(iCliVer, ptcVersion, sizeof(ptcVersion));
+					sVal = CUOClientVersion(uiCliVer).GetVersionString().c_str();
 				}
 				else
 				{
 					// Return raw version number (eg: 5.0.2d = 5000204)
-					sVal.FormatUVal(iCliVer);
+					sVal.FormatUVal(uiCliVer);
 				}
 			}
 			break;
@@ -932,16 +931,29 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 
-				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, ppszArgs[0]);
+				CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
+                /* 
+                if (rid.IsEmpty())
+                {
+                    m_tmAdd.m_id = 0;
+                    return true;
+                }
+                */
+                // A great number of scripts, other than 3rd party GM assistants, still use .add for items instead of .additem, so in case a bare ID
+                //  is passed, it's wise to consider it as an item ID.
+                if (rid.IsEmpty())
+                {
+#if _DEBUG
+                    g_Log.EventDebug("Use .ADDITEM or .ADDCHAR instead of .ADD; it is being kept for backwards compatibility, but it's more prone to errors, as it always considers given IDs to be items.\n");
+#endif
+                    rid = g_Cfg.ResourceGetID(RES_ITEMDEF, ppszArgs[0], 0, false);
+                    ASSERT(!rid.IsEmpty());
+                }
+
 				m_tmAdd.m_id = rid.GetResIndex();
-				if (iQty > 1)
-				{
-					m_tmAdd.m_vcAmount = (word)atoi(ppszArgs[1]);
-					m_tmAdd.m_vcAmount = maximum(m_tmAdd.m_vcAmount, 1);
-				}
-				else
-					m_tmAdd.m_vcAmount = 1;
-				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
+                m_tmAdd.m_vcAmount = (iQty > 1) ? std::max((word)1, (word)atoi(ppszArgs[1])) : 1;
+
+                if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
 					return addTargetChars(CLIMODE_TARG_ADDCHAR, (CREID_TYPE)m_tmAdd.m_id, false);
@@ -959,6 +971,72 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, "MENU_ADDITEM"));
 			}
 			break;
+        case CV_ADDITEM:
+            if (!s.HasArgs())
+            {
+                SysMessageDefault(DEFMSG_CMD_INVALID);
+                return true;
+            }
+            {
+                tchar *ppszArgs[2];
+                size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, ARRAY_COUNT(ppszArgs));
+
+                if (!IsValidGameObjDef(ppszArgs[0]))
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
+                if (rid.IsEmpty())
+                    rid = g_Cfg.ResourceGetID(RES_ITEMDEF, ppszArgs[0], 0, true);
+
+                const RES_TYPE restype = rid.GetResType();
+                if ((restype != RES_ITEMDEF) /* multi are still considered as items */ &&
+                    (restype != RES_CHAMPION) && (restype != RES_SPAWN) /* item spawns? */)
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                m_tmAdd.m_id = rid.GetResIndex();
+                m_tmAdd.m_vcAmount = (iQty > 1) ? std::max((word)1, (word)atoi(ppszArgs[1])) : 1;
+
+                return addTargetItems(CLIMODE_TARG_ADDITEM, (ITEMID_TYPE)m_tmAdd.m_id);
+            }
+        case CV_ADDCHAR:
+            if (!s.HasArgs())
+            {
+                SysMessageDefault(DEFMSG_CMD_INVALID);
+                return true;
+            }
+            {
+                tchar *ppszArgs[2];
+                size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, ARRAY_COUNT(ppszArgs));
+
+                if (!IsValidGameObjDef(ppszArgs[0]))
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
+                if (rid.IsEmpty())
+                    rid = g_Cfg.ResourceGetID(RES_CHARDEF, ppszArgs[0], 0, true);
+
+                const RES_TYPE restype = rid.GetResType();
+                if ((restype != RES_CHARDEF) && (restype != RES_SPAWN))
+                {
+                    SysMessageDefault(DEFMSG_CMD_INVALID);
+                    return true;
+                }
+
+                m_tmAdd.m_id = rid.GetResIndex();
+                m_tmAdd.m_vcAmount = (iQty > 1) ? std::max((word)1, (word)atoi(ppszArgs[1])) : 1;
+
+                m_Targ_Prv_UID.InitUID();
+                return addTargetChars(CLIMODE_TARG_ADDCHAR, (CREID_TYPE)m_tmAdd.m_id, false);
+            }
 		case CV_ADDBUFF:
 			{
 				tchar * ppArgs[11];
@@ -1121,7 +1199,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 		case CV_CHANGEFACE:		// open 'face selection' dialog (enhanced clients only)
 		{
-			addGumpDialog(CLIMODE_DIALOG, nullptr, 0, nullptr, 0, 50, 50, m_pChar, CLIMODE_DIALOG_FACESELECTION);
+			addGumpDialog(CLIMODE_DIALOG, nullptr, nullptr, 50, 50, m_pChar, CLIMODE_DIALOG_FACESELECTION);
 			break;
 		}
 
@@ -1289,8 +1367,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					const CPointMap po(pObj->GetTopLevelObj()->GetTopPoint());
 					CPointMap pnt = po;
 					pnt.MoveN( DIR_W, 3 );
-					dword dwBlockFlags = m_pChar->GetCanMoveFlags(m_pChar->GetCanFlags());
-					pnt.m_z = CWorldMap::GetHeightPoint2( pnt, dwBlockFlags );	// ??? Get Area
+					uint64 uiBlockFlags = m_pChar->GetCanMoveFlags(m_pChar->GetCanFlags());
+					pnt.m_z = CWorldMap::GetHeightPoint2( pnt, uiBlockFlags );	// ??? Get Area
 					m_pChar->m_dirFace = pnt.GetDir( po, m_pChar->m_dirFace ); // Face the player
 					m_pChar->Spell_Teleport( pnt, true, false );
 				}
@@ -1345,7 +1423,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				int64 iQty = Str_ParseCmds( s.GetArgStr(), piMidi, ARRAY_COUNT(piMidi) );
 				if ( iQty > 0 )
 				{
-					addMusic( static_cast<MIDI_TYPE>(piMidi[ Calc_GetRandLLVal( iQty ) ]) );
+					addMusic( static_cast<MIDI_TYPE>(piMidi[ g_Rand.GetLLVal( iQty ) ]) );
 				}
 			}
 			break;

@@ -39,8 +39,8 @@ extern struct CScriptProfiler
 //	Time measurement macros for the profiler (use them only for the profiler!)
 #define	TIME_PROFILE_INIT	    llong llTicksStart = 0, llTicksEnd = 0
 
-#define	TIME_PROFILE_START	    llTicksStart = CSTime::GetPreciseSysTimeMilli();
-#define TIME_PROFILE_END	    llTicksEnd = CSTime::GetPreciseSysTimeMilli();
+#define	TIME_PROFILE_START	    llTicksStart = CSTime::GetMonotonicSysTimeMilli();
+#define TIME_PROFILE_END	    llTicksEnd = CSTime::GetMonotonicSysTimeMilli();
 
 #define TIME_PROFILE_GET_HI	    ((llTicksEnd - llTicksStart) / 1000)            // Get only the seconds
 #define	TIME_PROFILE_GET_LO	    (((llTicksEnd - llTicksStart) * 10) % 10000)    // Get milliseconds only, without the seconds part

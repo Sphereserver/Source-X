@@ -16,6 +16,8 @@
     #include "linuxev.h"
 #endif
 
+#include <atomic>
+
 
 #ifdef DEBUGPACKETS
     #define DEBUGNETWORK(_x_)	g_Log.EventDebug _x_;
@@ -35,18 +37,20 @@ protected:
     CClient* m_client; // client
     CSocketAddress m_peerAddress; // client address
     CNetworkThread* m_parent;
+    int64 m_iConnectionTimeMs;
 
-    volatile bool m_isInUse;		// is currently in use
-    volatile bool m_isReadClosed;	// is closed by read thread
-    volatile bool m_isWriteClosed;	// is closed by write thread
-    volatile bool m_needsFlush;		// does data need to be flushed
+    volatile std::atomic_bool m_isInUse;		// is currently in use
+    volatile std::atomic_bool m_isReadClosed;	// is closed by read thread
+    volatile std::atomic_bool m_isWriteClosed;	// is closed by write thread
+    volatile std::atomic_bool m_needsFlush;		// does data need to be flushed
+
+    volatile std::atomic_bool m_useAsync;        // is this socket using asynchronous sends
+    volatile std::atomic_bool m_isSendingAsync;  // is a packet currently being sent asynchronously?
 
     bool m_seeded;	// is seed received
-    dword m_seed;	// client seed
     bool m_newseed; // is the client using new seed
+    dword m_seed;	// client seed
 
-    bool m_useAsync;				// is this socket using asynchronous sends
-    volatile bool m_isSendingAsync; // is a packet currently being sent asynchronously?
 #ifdef _LIBEV
     // non-windows uses ev_io for async operations
     struct ev_io m_eventWatcher;
@@ -83,17 +87,16 @@ protected:
 
 public:
     GAMECLIENT_TYPE m_clientType;	// type of client
-    dword m_clientVersion;			// client version (encryption)
-    dword m_reportedVersion;		// client version (reported)
+    dword m_clientVersionNumber;			// client version (encryption)
+    dword m_reportedVersionNumber;		// client version (reported)
     byte m_sequence;				// movement sequence
 
 public:
     explicit CNetState(int id);
     ~CNetState(void);
 
-private:
-    CNetState(const CNetState& copy);
-    CNetState& operator=(const CNetState& other);
+    CNetState(const CNetState& copy) = delete;
+    CNetState& operator=(const CNetState& other) = delete;
 
 public:
     int id(void) const { return m_id; };	// returns ID of the client
@@ -102,22 +105,22 @@ public:
     void clearQueues(void);					// clears outgoing data queues
 
     void init(SOCKET socket, CSocketAddress addr);		// initialized socket
-    bool isInUse(const CClient* client = nullptr) const volatile; // does this socket still belong to this/a client?
+    bool isInUse(const CClient* client = nullptr) const volatile noexcept; // does this socket still belong to this/a client?
     bool hasPendingData(void) const;			// is there any data waiting to be sent?
     bool canReceive(PacketSend* packet) const;	// can the state receive the given packet?
 
     void detectAsyncMode(void);
-    void setAsyncMode(bool isAsync) { m_useAsync = isAsync; };	// set asynchronous mode
-    bool isAsyncMode(void) const { return m_useAsync; };		// get asyncronous mode
+    void setAsyncMode(bool isAsync) volatile noexcept;   // set asynchronous mode
+    bool isAsyncMode(void) const volatile noexcept;      // get asyncronous mode
 #ifdef _LIBEV
     struct ev_io* iocb(void) { return &m_eventWatcher; };		// get io callback
 #endif
-    bool isSendingAsync(void) const volatile { return m_isSendingAsync; };				// get if async packeet is being sent
-    void setSendingAsync(bool isSending) volatile { m_isSendingAsync = isSending; };	// set if async packet is being sent
+    bool isSendingAsync(void) const volatile noexcept;				// get if async packeet is being sent
+    void setSendingAsync(bool isSending) volatile noexcept;	// set if async packet is being sent
 
     GAMECLIENT_TYPE getClientType(void) const { return m_clientType; };	// determined client type
-    dword getCryptVersion(void) const { return m_clientVersion; };		// version as determined by encryption
-    dword getReportedVersion(void) const { return m_reportedVersion; }; // version as reported by client
+    dword getCryptVersion(void) const { return m_clientVersionNumber; };		// version as determined by encryption
+    dword getReportedVersion(void) const { return m_reportedVersionNumber; }; // version as reported by client
 
     void markReadClosed(void) volatile;		// mark socket as closed by read thread
     void markWriteClosed(void) volatile;	// mark socket as closed by write thread
@@ -126,8 +129,8 @@ public:
     bool isReadClosed(void) const volatile { return m_isReadClosed; }	// is the socket closed by read-thread?
     bool isWriteClosed(void) const volatile { return m_isWriteClosed; }	// is the socket closed by write-thread?
 
-    void markFlush(bool needsFlush) volatile; // mark socket as needing a flush
-    bool needsFlush(void) const volatile { return m_needsFlush; } // does the socket need to be flushed?
+    void markFlush(bool needsFlush) volatile noexcept; // mark socket as needing a flush
+    bool needsFlush(void) const volatile noexcept{ return m_needsFlush; } // does the socket need to be flushed?
 
     CClient* getClient(void) const { return m_client; } // get linked client
 
@@ -135,12 +138,13 @@ public:
     bool isClientKR(void) const { return m_clientType == CLIENTTYPE_KR; }; // is this a KR client?
     bool isClientEnhanced(void) const { return m_clientType == CLIENTTYPE_EC; }; // is this an Enhanced client?
 
-    bool isCryptVersion(dword version) const { return m_clientVersion && m_clientVersion >= version; };			// check the minimum crypt version
-    bool isReportedVersion(dword version) const { return m_reportedVersion && m_reportedVersion >= version; };	// check the minimum reported verson
-    bool isClientVersion(dword version) const { return isCryptVersion(version) || isReportedVersion(version); } // check the minimum client version
-    bool isCryptLessVersion(dword version) const { return m_clientVersion && m_clientVersion < version; };		// check the maximum crypt version
-    bool isReportedLessVersion(dword version) const { return m_reportedVersion && m_reportedVersion < version; };	// check the maximum reported version
-    bool isClientLessVersion(dword version) const { return isCryptLessVersion(version) || isReportedLessVersion(version); } // check the maximum client version
+    bool isClientCryptVersionNumber(dword version) const;		// check the minimum crypt version (client uses the crypt key assigned to a specific client version in spherecrypt.ini)
+    bool isClientReportedVersionNumber(dword version) const;	// check the minimum reported verson
+    bool isClientVersionNumber(dword version) const;            // check the minimum client version (crypt or reported)
+
+    bool isCryptLessVersionNumber(dword version) const;		// check the maximum crypt version
+    bool isClientReportedLessVersionNumber(dword version) const;	// check the maximum reported version
+    bool isClientLessVersionNumber(dword version) const; // check the maximum client version
 
     void beginTransaction(int priority);	// begin a transaction for grouping packets
     void endTransaction(void);				// end transaction

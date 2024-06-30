@@ -1,6 +1,6 @@
 // Actions specific to an NPC.
 
-#include "../../../lib/flat_containers/flat_set.hpp"
+#include <flat_containers/flat_set.hpp>
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
@@ -182,14 +182,14 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		case CNC_NEED:
 		{
 			tchar *pszTmp = Str_GetTemp();
-			m_Need.WriteKey( pszTmp );
+			m_Need.WriteKey( pszTmp, Str_TempLength() );
 			sVal = pszTmp;
 		}
 		break;
 		case CNC_NEEDNAME:
 		{
 			tchar *pszTmp = Str_GetTemp();
-			m_Need.WriteNameSingle( pszTmp );
+			m_Need.WriteNameSingle( pszTmp, Str_TempLength() );
 			sVal = pszTmp;
 		}
 		break;
@@ -251,7 +251,7 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 	if ( m_Need.GetResourceID().IsValidUID())
 	{
 		TemporaryString tsTemp;
-		m_Need.WriteKey(tsTemp.buffer());
+		m_Need.WriteKey(tsTemp.buffer(), tsTemp.capacity());
 		s.WriteKeyStr( "NEED", tsTemp.buffer());
 	}
 }
@@ -282,22 +282,21 @@ void CChar::NPC_LoadScript( bool fRestock )
 
 	CCharBase * pCharDef = Char_GetDef();
 
-	// 1) CHARDEF trigger
-	if ( m_pPlayer == nullptr ) //	CHARDEF triggers (based on body type)
-	{
-		CChar * pChar = this->GetChar();
-		if ( pChar != nullptr )
-		{
-			CUID uidOldAct = pChar->m_Act_UID;
-			pChar->m_Act_UID = GetUID();
-			pChar->ReadScriptReducedTrig(pCharDef, CTRIG_Create);
-			pChar->m_Act_UID = uidOldAct;
-		}
-	}
-	//This remains untouched but moved after the chardef's section
-	if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
-		ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock);
-
+    CChar * pChar = this->GetChar();
+    if (pChar != nullptr)
+    {
+	    // 1) CHARDEF trigger
+	    if ( m_pPlayer == nullptr ) //	CHARDEF triggers (based on body type)
+	    {
+		    CUID uidOldAct = pChar->m_Act_UID;
+		    pChar->m_Act_UID = GetUID();
+		    pChar->ReadScriptReducedTrig(pCharDef, CTRIG_Create);
+		    pChar->m_Act_UID = uidOldAct;
+	    }
+	    //This remains untouched but moved after the chardef's section
+	    if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
+            pChar->ReadScriptReducedTrig(pCharDef, CTRIG_NPCRestock);
+    }
 	CreateNewCharCheck();	//This one is giving stats, etc to the char, so we can read/set them in the next triggers.
 }
 

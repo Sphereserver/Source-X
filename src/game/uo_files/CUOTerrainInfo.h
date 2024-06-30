@@ -12,7 +12,7 @@
 
 struct CUOTerrainInfo : public CUOTerrainTypeRec_HS
 {
-    CUOTerrainInfo( TERRAIN_TYPE id );
+    CUOTerrainInfo( TERRAIN_TYPE id, bool fNameNeeded = true );
 };
 
 

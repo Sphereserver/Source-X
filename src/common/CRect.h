@@ -73,14 +73,14 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	bool IsOverlapped( const CRect & rect ) const noexcept;
 	bool IsEqual( const CRect & rect ) const noexcept;
 
-	virtual void NormalizeRect();
-    void NormalizeRectMax( int cx, int cy );
+	virtual void NormalizeRect() noexcept;
+    void NormalizeRectMax( int cx, int cy ) noexcept;
 
     CPointBase GetCenter() const;
     CPointBase GetRectCorner( DIR_TYPE dir ) const;
-    CSector * GetSector( int i ) const;	// ge all the sectors that make up this rect.
+    CSector * GetSector( int i ) const noexcept;	// ge all the sectors that make up this rect.
 
-	void SetRect( int left, int top, int right, int bottom, int map );
+	void SetRect( int left, int top, int right, int bottom, int map ) noexcept;
 
 	size_t Read( lpctstr pVal );
 	tchar * Write( tchar * ptcBuffer, uint uiBufferLen ) const;
@@ -108,8 +108,8 @@ struct CRectMap : public CRect
 
 	bool IsValid() const noexcept;
 
-	virtual void NormalizeRect() override;
-	void NormalizeRectMax();
+	virtual void NormalizeRect() noexcept override;
+	void NormalizeRectMax() noexcept;
 };
 
 

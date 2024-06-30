@@ -15,7 +15,7 @@ class CTextConsole;
 class CObjBase;
 
 
-enum COMP_TYPE : uchar
+enum COMP_TYPE : ushort
 {
     COMP_CHAMPION,
     COMP_SPAWN,

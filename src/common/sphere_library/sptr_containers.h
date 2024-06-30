@@ -3,6 +3,7 @@
 
 #include "ssorted_vector.h"
 #include "sptr.h"
+#include <algorithm> // for std::find_if
 
 
 // Sphere library

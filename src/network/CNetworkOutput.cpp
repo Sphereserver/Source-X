@@ -38,9 +38,9 @@ void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVE
 	}
 
 	if (dwError != 0)
-		DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed with error code 0x%x, %d bytes sent.\n", state->id(), dwError, cbTransferred));
+		DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed with error code 0x%" PRIx32 ", %" PRIu32 " bytes sent.\n", state->id(), (uint32_t)dwError, (uint32_t)cbTransferred));
 	//else
-	//	DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed successfully, %d bytes sent.\n", state->id(), cbTransferred));
+	//	DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed successfully, %" PRIu32 " bytes sent.\n", state->id(), (uint32_t)cbTransferred));
 
 	thread->onAsyncSendComplete(state, dwError == 0 && cbTransferred > 0);
 }
@@ -561,7 +561,7 @@ size_t CNetworkOutput::sendData(CNetState* state, const byte* data, size_t lengt
 	}
 
 	if (result > 0 && result != _failed_result())
-		CurrentProfileData.Count(PROFILE_DATA_TX, (dword)(result));
+		GetCurrentProfileData().Count(PROFILE_DATA_TX, (dword)(result));
 
 	return result;
 	EXC_CATCH;

@@ -6,7 +6,7 @@
 #ifndef _INC_CENTITYPROPS_H
 #define _INC_CENTITYPROPS_H
 
-#include "../../lib/flat_containers/flat_map.hpp"
+#include <flat_containers/flat_map.hpp>
 #include "CComponentProps.h"
 #include <memory>
 

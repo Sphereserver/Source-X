@@ -113,12 +113,17 @@ void CNetworkManager::acceptNewConnection(void)
     ADDTOCALLSTACK("CNetworkManager::acceptNewConnection");
 
     EXC_TRY("acceptNewConnection");
-    CSocketAddress client_addr;
-
     DEBUGNETWORK(("Receiving new connection.\n"));
+
+    // 1. Use "select" to check if the main socket of the server has data to read and it's ready to do so.
+    // 2. Use "accept" to extract the first connection request from the queue and creates a new connected socket for the client.
+    //  The listening socket remains open to accept further connections. Each call to accept only handles one connection request.
+    //  Therefore, to handle multiple incoming connections at the same time, we must call accept in a loop/repeatedly. We wait for the new acceptNewConnection call.
+    // 3. Use "recv" on the new socket to receive the data.
 
     // accept socket connection
     EXC_SET_BLOCK("accept");
+    CSocketAddress client_addr;
     SOCKET h = g_Serv.m_SocketMain.Accept(client_addr);
     if (h == INVALID_SOCKET)
         return;
@@ -127,12 +132,26 @@ void CNetworkManager::acceptNewConnection(void)
     EXC_SET_BLOCK("ip history");
 
     DEBUGNETWORK(("Retrieving IP history for '%s'.\n", client_addr.GetAddrStr()));
+    const int maxIp = g_Cfg.m_iConnectingMaxIP;
+    const int climaxIp = g_Cfg.m_iClientsMaxIP;
     HistoryIP& ip = m_ips.getHistoryForIP(client_addr);
-    int maxIp = g_Cfg.m_iConnectingMaxIP;
-    int climaxIp = g_Cfg.m_iClientsMaxIP;
+    if (ip.m_ttl < g_Cfg.m_iNetHistoryTTL)
+    {
+        // This is an IP of interest, i want to remember it for longer.
+        ip.m_ttl = g_Cfg.m_iNetHistoryTTL;
+    }
 
-    DEBUGNETWORK(("Incoming connection from '%s' [blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d]\n",
+    const int64 iIpPrevConnectionTime = ip.m_timeLastConnectedMs;
+    ip.m_timeLastConnectedMs = CSTime::GetMonotonicSysTimeMilli();
+    ip.m_connectionAttempts += 1;
+
+    DEBUGNETWORK(("Incoming connection from '%s' [IP history: blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d].\n",
         ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected));
+
+    const auto _printIPBlocked = [&ip](void) -> void {
+        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Blocked connection from '%s' [IP history: blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d].\n",
+            ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected);
+    };
 
     // check if ip is allowed to connect
     if (ip.checkPing() ||								// check for ip ban
@@ -144,19 +163,107 @@ void CNetworkManager::acceptNewConnection(void)
 
         CLOSESOCKET(h);
 
+        _printIPBlocked();
         if (ip.m_blocked)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Connection from %s rejected. (Blocked IP)\n", static_cast<lpctstr>(client_addr.GetAddrStr()));
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: Blocked IP.\n");
         else if (maxIp && ip.m_connecting > maxIp)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Connection from %s rejected. (CONNECTINGMAXIP reached %d/%d)\n", static_cast<lpctstr>(client_addr.GetAddrStr()), ip.m_connecting, maxIp);
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CONNECTINGMAXIP reached %d/%d.\n", ip.m_connecting, maxIp);
         else if (climaxIp && ip.m_connected > climaxIp)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", static_cast<lpctstr>(client_addr.GetAddrStr()), ip.m_connected, climaxIp);
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CLIENTMAXIP reached %d/%d.\n", ip.m_connected, climaxIp);
         else if (ip.m_pings >= g_Cfg.m_iNetMaxPings)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", static_cast<lpctstr>(client_addr.GetAddrStr()), ip.m_pings, (int)(g_Cfg.m_iNetMaxPings));
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: MAXPINGS reached %d/%d.\n", ip.m_pings, g_Cfg.m_iNetMaxPings);
         else
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Connection from %s rejected.\n", static_cast<lpctstr>(client_addr.GetAddrStr()));
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: unclassified.\n");
 
         return;
     }
+
+    if ((g_Cfg._iMaxConnectRequestsPerIP > 0) && (ip.m_connectionAttempts >= (size_t)g_Cfg._iMaxConnectRequestsPerIP))
+    {
+        // Call this special scripted function.
+        CScriptTriggerArgs fargs_ex(client_addr.GetAddrStr());
+        fargs_ex.m_iN1 = iIpPrevConnectionTime;
+        fargs_ex.m_iN2 = ip.m_timeLastConnectedMs;  // Current connection time.
+        fargs_ex.m_iN3 = ip.m_connectionAttempts;
+        fargs_ex.m_VarsLocal.SetNumNew("BAN_TIMEOUT", 5ll * 60);
+        TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
+        g_Serv.r_Call("f_onserver_connectreq_ex", &g_Serv, &fargs_ex, nullptr, &fret);
+        if (fret == TRIGRET_RET_TRUE)
+        {
+            // reject
+            CLOSESOCKET(h);
+            
+            _printIPBlocked();
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick via script 'f_onserver_connectreq_ex'.\n");
+        }
+        else if (fret == TRIGRET_RET_DEFAULT) // 2
+        {
+            // block IP
+            CLOSESOCKET(h);
+            ip.setBlocked(true, fargs_ex.m_VarsLocal.GetKeyNum("BAN_TIMEOUT"));
+
+            _printIPBlocked();
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick + IP block via script 'f_onserver_connectreq_ex'.\n");
+        }
+    }
+   
+    /*
+    // Check if there's already more data waiting to be read (suspicious?).
+    // Classic client (but not some 3rd party clients) have pending data after the second connection request
+    //  (first: serverlist, second: redirected to the actual game server), so right now this kind of check isn't useful (unless coupled with some
+    //  other kind of checks to filter out legitimate clients sending legit data).
+
+    uint64 iIncomingDataStreamLength;
+#ifdef _WIN32
+    u_long pending_data_size;
+    if (ioctlsocket(h, FIONREAD, &pending_data_size) != NO_ERROR)
+    {
+        const int iWSAErrCode = WSAGetLastError();
+        lptstr ptcErrorBuf = Str_GetTemp();
+        CSError::GetSystemErrorMessage(dword(iWSAErrCode), // iWSAErrCode shouldn't be negative
+            ptcErrorBuf, Str_TempLength());
+
+        _printIPBlocked();
+        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: ioctlsocket (FIONREAD) failed. Error Code: %d ('%s').\n",
+            iWSAErrCode, ptcErrorBuf);
+
+        CLOSESOCKET(h);
+        ASSERT(iWSAErrCode > 0);
+        return;
+    }
+    iIncomingDataStreamLength = pending_data_size;
+#else
+    ssize_t pending_data_size = recv(h, nullptr, 0, MSG_DONTWAIT | MSG_PEEK | MSG_TRUNC);
+    if (pending_data_size < 0)
+    {
+        _printIPBlocked();
+        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: recv (peek,trunc) failed. Error Code: %d ('%s'),\n",
+            errno, strerror(errno));
+
+        CLOSESOCKET(h);
+        return;
+    }
+    iIncomingDataStreamLength = uint64(pending_data_size);
+#endif
+    DEBUGNETWORK(("Size of pending data after accepting connection: %" PRIu64 " bytes.\n", iIncomingDataStreamLength));
+
+    if (iIncomingDataStreamLength > 0)
+    {
+        _printIPBlocked();
+        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: size of pending data after accepting connection > 0 (%" PRIu64 " bytes).\n",
+            iIncomingDataStreamLength);
+
+        CLOSESOCKET(h);
+        return;
+    }
+    */
+
+    // Call this special scripted function.
+    CScriptTriggerArgs fargs_acquired(client_addr.GetAddrStr());
+    fargs_acquired.m_iN1 = iIpPrevConnectionTime;
+    fargs_acquired.m_iN2 = ip.m_timeLastConnectedMs; // Current connection time.
+    TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
+    g_Serv.r_Call("f_onserver_connection_acquired", &g_Serv, &fargs_acquired, nullptr, &fret);
 
     // select an empty slot
     EXC_SET_BLOCK("detecting slot");
@@ -165,16 +272,16 @@ void CNetworkManager::acceptNewConnection(void)
     {
         // not enough empty slots
         EXC_SET_BLOCK("no slot available");
-        DEBUGNETWORK(("Unable to allocate new slot for client, too many clients already connected.\n"));
+        _printIPBlocked();        
+        
+        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CLIENTMAX reached.\n");
         CLOSESOCKET(h);
-
-        g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Connection from %s rejected. (CLIENTMAX reached)\n", static_cast<lpctstr>(client_addr.GetAddrStr()));
         return;
     }
 
-    DEBUGNETWORK(("%x:Allocated slot for client (%u).\n", state->id(), (uint)(h)));
+    DEBUGNETWORK(("%x:Allocated slot for client (socket %u).\n", state->id(), (uint)h));
 
-    // assign slot
+    // assign slot and a CClient
     EXC_SET_BLOCK("assigning slot");
     state->init(h, client_addr);
 
@@ -228,12 +335,18 @@ void CNetworkManager::start(void)
     // create network states
     ASSERT(m_states == nullptr);
     ASSERT(m_stateCount == 0);
+    constexpr int kMaxFd = minimum(1024, FD_SETSIZE);
+    if (g_Cfg.m_iClientsMax > kMaxFd)
+    {
+        g_Log.EventWarn("ClientsMax setting > %d (system limit), defaulting to max.\n", kMaxFd);
+        g_Cfg.m_iClientsMax = kMaxFd;
+    }
     m_states = new CNetState * [g_Cfg.m_iClientsMax];
     for (int l = 0; l < g_Cfg.m_iClientsMax; ++l)
         m_states[l] = new CNetState(l);
     m_stateCount = g_Cfg.m_iClientsMax;
 
-    DEBUGNETWORK(("Created %d network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
+    DEBUGNETWORK(("Created %d network slots (system limit of %d clients)\n", m_stateCount, kMaxFd));
 
     // create network threads
     createNetworkThreads(g_Cfg._uiNetworkThreads);
@@ -243,9 +356,12 @@ void CNetworkManager::start(void)
     {
         // start network threads
         for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-            (*it)->start();		// The thread structure (class) was created via createNetworkThreads, now spawn a new thread and do the work inside there.
-                                // The start method creates a thread with "runner" as main function thread. Runner calls Start, which calls onStart.
-                                // onStart, among the other things, actually sets the thread name.
+        {
+            // The thread structure (class) was created via createNetworkThreads, now spawn a new thread and do the work inside there.
+            // The start method creates a thread with "runner" as main function thread. Runner calls Start, which calls onStart.
+            // onStart, among the other things, actually sets the thread name.
+            (*it)->start();
+        }
 
         g_Log.Event(LOGM_INIT, "Started %" PRIuSIZE_T " network threads.\n", m_threads.size());
     }
@@ -287,12 +403,31 @@ void CNetworkManager::tick(void)
 {
     ADDTOCALLSTACK("CNetworkManager::tick");
 
+    const int64 iCurSysTimeMs = CSTime::GetMonotonicSysTimeMilli();
     EXC_TRY("Tick");
     for (int i = 0; i < m_stateCount; ++i)
     {
         CNetState* state = m_states[i];
         if (state->isInUse() == false)
             continue;
+
+        // If the client hasn't completed login for a definite amount of time, disconnect it...
+        const CClient* pClient = state->getClient();
+        if (!pClient || (pClient->GetConnectType() == CONNECT_UNK))
+        {
+            const int64 iTimeSinceConnectionMs = iCurSysTimeMs - state->m_iConnectionTimeMs;
+            if (iTimeSinceConnectionMs > g_Cfg._iTimeoutIncompleteConnectionMs)
+            {
+                EXC_SET_BLOCK("mark closed for timeout");
+                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_EVENT,
+                    "%x:Force closing connection from IP %s. Reason: timed out before completing login.\n",
+                    state->id(), state->m_peerAddress.GetAddrStr());
+                //state->markReadClosed();
+                //state->markWriteClosed();
+                state->clear();
+                continue;
+            }
+        }
 
         // clean packet queue entries
         EXC_SET_BLOCK("cleaning queues");
@@ -371,7 +506,9 @@ void CNetworkManager::processAllInput(void)
 
     // checkNewConnection will work on both Windows and Linux because it uses the select method, even if it's not the most efficient way to do it
     if (checkNewConnection())
+    {
         acceptNewConnection();
+    }
 
     if (isInputThreaded() == false)	// Don't do this if the input is multi threaded, since the CNetworkThread ticks automatically by itself
     {

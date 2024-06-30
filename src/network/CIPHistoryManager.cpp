@@ -3,9 +3,9 @@
 #include "../game/CServerConfig.h"
 #include "../game/CWorldGameTime.h"
 #include "CIPHistoryManager.h"
+#include <algorithm>
 
-#define NETHISTORY_TTL			g_Cfg.m_iNetHistoryTTL			// time to remember an ip
-#define NETHISTORY_PINGDECAY	60								// time to decay 1 'ping'
+#define NETHISTORY_PINGDECAY	60		// time to decay 1 'ping'
 
 
 /***************************************************************************
@@ -15,10 +15,11 @@
  *
  *
  ***************************************************************************/
+
 void HistoryIP::update(void)
 {
     // reset ttl
-    m_ttl = NETHISTORY_TTL;
+    m_ttl = g_Cfg.m_iNetHistoryTTL;
 }
 
 bool HistoryIP::checkPing(void)
@@ -29,22 +30,22 @@ bool HistoryIP::checkPing(void)
     return (m_blocked || (m_pings++ >= g_Cfg.m_iNetMaxPings));
 }
 
-void HistoryIP::setBlocked(bool isBlocked, int timeout)
+void HistoryIP::setBlocked(bool isBlocked, int64 timeoutSeconds)
 {
     // block ip
     ADDTOCALLSTACK("HistoryIP:setBlocked");
     if (isBlocked == true)
     {
         CScriptTriggerArgs args(m_ip.GetAddrStr());
-        args.m_iN1 = timeout;
+        args.m_iN1 = timeoutSeconds;
         g_Serv.r_Call("f_onserver_blockip", &g_Serv, &args);
-        timeout = (int)(args.m_iN1);
+        timeoutSeconds = args.m_iN1;
     }
 
     m_blocked = isBlocked;
 
-    if (isBlocked && timeout >= 0)
-        m_blockExpire = CWorldGameTime::GetCurrentTime().GetTimeRaw() + (timeout * MSECS_PER_SEC);
+    if (isBlocked && timeoutSeconds >= 0)
+        m_blockExpire = CWorldGameTime::GetCurrentTime().GetTimeRaw() + (timeoutSeconds * MSECS_PER_SEC);
     else
         m_blockExpire = 0;
 }
@@ -72,7 +73,7 @@ void IPHistoryManager::tick(void)
     ADDTOCALLSTACK("IPHistoryManager::tick");
 
     // check if ttl should decay (only do this once every second)
-    bool decayTTL = (!(m_lastDecayTime > 0) || CWorldGameTime::GetCurrentTime().GetTimeDiff(m_lastDecayTime) > MSECS_PER_SEC);
+    const bool decayTTL = (!(m_lastDecayTime > 0) || CWorldGameTime::GetCurrentTime().GetTimeDiff(m_lastDecayTime) > 1 * MSECS_PER_SEC);
     if (decayTTL)
         m_lastDecayTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
@@ -103,14 +104,9 @@ void IPHistoryManager::tick(void)
     }
 
     // clear old ip history
-    for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
-    {
-        if (it->m_ttl >= 0)
-            continue;
-
-        m_ips.erase(it);
-        break;
-    }
+    std::erase_if(m_ips, [](HistoryIP const& elem) {
+        return elem.m_ttl < 0;
+        });
 }
 
 HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip) noexcept
@@ -125,14 +121,21 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip) noexcep
     }
 
     // create a new entry
-    HistoryIP hist = {};
-    hist.m_ip = ip;
-    hist.m_pingDecay = NETHISTORY_PINGDECAY;
+    HistoryIP hist = {
+        .m_ip = ip,
+        .m_pings = 0,
+        .m_connecting = 0,
+        .m_connected = 0,
+        .m_blocked = 0,
+        .m_ttl = 0,     // updated by update() method
+        .m_connectionAttempts = 0,
+        .m_timeLastConnectedMs = 0,  // set by the caller, if needed
+        .m_blockExpire = 0,
+        .m_pingDecay = NETHISTORY_PINGDECAY
+    };
     hist.update();
 
-    m_ips.emplace_back(std::move(hist));
-
-    return getHistoryForIP(ip);
+    return m_ips.emplace_back(std::move(hist));
 }
 
 HistoryIP& IPHistoryManager::getHistoryForIP(const char* ip)

@@ -6,6 +6,7 @@
 #endif
 
 #if defined(_WIN32) && !defined(pid_t)
+    //#include <timeapi.h>    // for timeBeginPeriod
 	#define pid_t int
 #endif
 
@@ -33,14 +34,6 @@
 // Headers for InitRuntimeStaticMembers
 #include "clients/CClient.h"
 
-/*
-#ifdef _SANITIZERS
-const char* __asan_default_options() {
-    //return "verbosity=1:malloc_context_size=20";
-    return "sleep_before_dying=5";
-}
-#endif
-*/
 
 // Dynamic allocation of some global stuff
 std::string g_sServerDescription;
@@ -63,18 +56,23 @@ GlobalInitializer::GlobalInitializer()
 	ssServerDescription << " by www.spherecommunity.net";
 	g_sServerDescription = ssServerDescription.str();
 
+//-- Time
+
+/*
 #ifdef _WIN32
-	// Needed to get precise system time.
-	LARGE_INTEGER liProfFreq;
-	if (QueryPerformanceFrequency(&liProfFreq))
-	{
-		CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
-	}
-#endif // _WIN32
+    // Ensure it's ACTUALLY necessary, before resorting to this.
+    timeBeginPeriod(1); // from timeapi.h, we need also to link against Winmm.lib...
+#endif
+*/
+    PeriodicSyncTimeConstants();
+
+//--- Sphere threading system
 
 	DummySphereThread::createInstance();
 
-// Set exception catcher?
+//--- Exception handling
+
+    // Set exception catcher?
 #if defined(_WIN32) && defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
     // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
     // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
@@ -84,6 +82,8 @@ GlobalInitializer::GlobalInitializer()
 
 	// Set function to handle the invalid case where a pure virtual function is called.
     SetPurecallHandler();
+
+//--- Pre-startup sanity checks
 
 	constexpr const char* m_sClassName = "GlobalInitializer";
 	EXC_TRY("Pre-startup Init");
@@ -102,11 +102,24 @@ GlobalInitializer::GlobalInitializer()
 	EXC_CATCH;
 }
 
-void GlobalInitializer::InitRuntimeDefaultValues()
+void GlobalInitializer::InitRuntimeDefaultValues() // static
 {
 	CPointBase::InitRuntimeDefaultValues();
 }
 
+void GlobalInitializer::PeriodicSyncTimeConstants() // static
+{
+    // TODO: actually call it periodically!
+
+#ifdef _WIN32
+    // Needed to get precise system time.
+    LARGE_INTEGER liProfFreq;
+    if (QueryPerformanceFrequency(&liProfFreq))
+    {
+        CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
+    }
+#endif  // _WIN32
+}
 
 static GlobalInitializer g_GlobalInitializer;
 
@@ -142,6 +155,7 @@ CServer			g_Serv;				// current state, stuff not saved.
 
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
+CSRand          g_Rand;
 CExpression		g_Exp;				// Global script variables.
 CLog			g_Log;
 CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
@@ -221,13 +235,7 @@ static bool WritePidFile(int iMode = 0)
 		if (pidFile)
 		{
 			pid_t spherepid = STDFUNC_GETPID();
-
-			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
-#if defined(_WIN32) && !defined(_MSC_VER)
-			fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
-#else
 			fprintf(pidFile, "%d\n", spherepid);
-#endif
 			fclose(pidFile);
 			return true;
 		}
@@ -302,7 +310,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = % " PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
+	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = %" PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
 
 #ifdef _WIN32
 	g_Log.Event(LOGM_INIT, "Use '?' to view available console commands\n\n");
@@ -371,7 +379,10 @@ void Sphere_ExitServer()
     if (!g_Serv._fCloseNTWindowOnTerminate)
         g_Log.Event(LOGM_INIT | LOGF_CONSOLE_ONLY, "You can now close this window.\n");
 #endif
+
     g_Log.Close();
+    ThreadHolder::get().markThreadsClosing();
+
 #ifdef _WIN32
     if (iExitFlag != 5)
         g_NTWindow.NTWindow_ExitServer();
@@ -557,7 +568,7 @@ void defragSphere(char *path)
 		inf.Close();
 	}
 	const dword dwTotalUIDs = dwIdxUID;
-	g_Log.Event(LOGM_INIT, "Totally having %" PRIuSIZE_T " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
+	g_Log.Event(LOGM_INIT, "Totally having %" PRIu32 " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(puids, 0, dwTotalUIDs -1);
@@ -736,7 +747,7 @@ void defragSphere(char *path)
 				{
 					*p = 0;
 					strcpy(z, p1);
-					sprintf(z1, "0%" PRIx32, dwIdxUID);
+					snprintf(z1, sizeof(z1), "0%" PRIx32, dwIdxUID);
 					strcat(buf, z1);
 					strcat(buf, z);
 				}

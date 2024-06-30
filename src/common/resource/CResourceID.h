@@ -108,7 +108,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
 #define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
 #define RES_INDEX_SHIFT	0		// use first 20 bits = 0xFFFFF = 1048575 possible unique indexes.
 #define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
-    
+
 #define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
 
@@ -123,7 +123,7 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
         m_dwInternalVal = UID_PLAIN_CLEAR;
     }
 
-    CResourceIDBase() noexcept
+    inline CResourceIDBase() noexcept
     {
         Init();
     }
@@ -141,15 +141,15 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
 
     void FixRes();
 
-    RES_TYPE GetResType() const noexcept
+    inline RES_TYPE GetResType() const noexcept
     {
         return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
     }
-    uint GetResIndex() const noexcept
+    inline uint GetResIndex() const noexcept
     {
         return RES_GET_INDEX(m_dwInternalVal);
     }
-    bool operator == (const CResourceIDBase & rid) const noexcept
+    inline bool operator == (const CResourceIDBase & rid) const noexcept
     {
         return (rid.m_dwInternalVal == m_dwInternalVal);
     }
@@ -174,61 +174,39 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
     #define RES_PAGE_MAX    UINT16_MAX - 1
     #define RES_PAGE_ANY    UINT16_MAX      // Pick a CResourceID independently from the page
 
-    void Init()
-    {
-        m_dwInternalVal = UID_UNUSED;
-        m_wPage = 0;
-    }
-    void Clear()
-    {
-        m_dwInternalVal = UID_PLAIN_CLEAR;
-        m_wPage = 0;
-    }
+    void Init() noexcept;
+    void Clear() noexcept;
 
-    CResourceID() : CResourceIDBase()
-    {
-        m_wPage = 0;
-    }
-    explicit CResourceID(RES_TYPE restype) : CResourceIDBase(restype)
-    {
-        m_wPage = 0;
-    }
+    CResourceID() : CResourceIDBase(), m_wPage(0)
+    {}
+    // Create an empty, valid CResourceID of a given type
+    explicit CResourceID(RES_TYPE restype) : CResourceIDBase(restype), m_wPage(0)
+    {}
     explicit CResourceID(RES_TYPE, const CResourceIDBase&) = delete;
-    explicit CResourceID(RES_TYPE restype, int iIndex) : CResourceIDBase(restype, iIndex)
-    {
-        m_wPage = 0;
-    }
+    explicit CResourceID(RES_TYPE restype, int iIndex) : CResourceIDBase(restype, iIndex), m_wPage(0)
+    {}
     explicit CResourceID(RES_TYPE, const CResourceIDBase&, word) = delete;
-    explicit CResourceID(RES_TYPE restype, int iIndex, word wPage) : CResourceIDBase(restype, iIndex)
-    {
-        m_wPage = wPage;
-    }
+    explicit CResourceID(RES_TYPE restype, int iIndex, word wPage) : CResourceIDBase(restype, iIndex), m_wPage(wPage)
+    {}
     explicit CResourceID(const CResourceIDBase&, word) = delete;
-    explicit CResourceID(dword dwPrivateID, word wPage) : CResourceIDBase(dwPrivateID)
-    {
-        m_wPage = wPage;
-    }
+    explicit CResourceID(dword dwPrivateID, word wPage) : CResourceIDBase(dwPrivateID), m_wPage(wPage)
+    {}
 
-    CResourceID(const CResourceID & rid) : CResourceIDBase(rid)     // copy constructor
-    {
-        m_wPage = rid.m_wPage;
-    }
-    CResourceID(const CResourceIDBase & rid): CResourceIDBase(rid)
-    {
-        m_wPage = 0;
-    }
+    // copy constructor
+    CResourceID(const CResourceID & rid) : CResourceIDBase(rid), m_wPage(rid.m_wPage)
+    {}
+    CResourceID(const CResourceIDBase & rid): CResourceIDBase(rid), m_wPage(0)
+    {}
 
     CResourceID& operator = (const CResourceID& rid);              // assignment operator
     CResourceID& operator = (const CResourceIDBase& rid);
+    bool operator == (const CResourceID & rid) const noexcept;
 
-    word GetResPage() const noexcept
+    inline word GetResPage() const noexcept
     {
         return m_wPage;
     }
-    bool operator == (const CResourceID & rid) const noexcept
-    {
-        return ((rid.m_wPage == m_wPage) && (rid.m_dwInternalVal == m_dwInternalVal));
-    }
+    bool IsEmpty() const noexcept;
 };
 
 

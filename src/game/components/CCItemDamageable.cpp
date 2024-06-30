@@ -3,7 +3,7 @@
 #include "../CServer.h"
 #include "../CObjBase.h"
 #include "../CWorldGameTime.h"
-#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
@@ -70,12 +70,12 @@ void CCItemDamageable::OnTickStatsUpdate()
         _iTimeLastUpdate = iCurtime;
 
         CItem *pItem = static_cast<CItem*>(GetLink());
-        CWorldSearch AreaChars(pItem->GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
-        AreaChars.SetSearchSquare(true);
+        auto AreaChars = CWorldSearchHolder::GetInstance(pItem->GetTopPoint(), g_Cfg.m_iMapViewSize);
+        AreaChars->SetSearchSquare(true);
         CChar *pChar = nullptr;
         for (;;)
         {
-            pChar = AreaChars.GetChar();
+            pChar = AreaChars->GetChar();
             if (!pChar)
             {
                 break;

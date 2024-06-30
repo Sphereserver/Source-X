@@ -37,6 +37,8 @@
 #include "../network/CNetworkOutput.h"
 #include "../network/CNetworkThread.h"
 
+#include "../sphere/ProfileTask.h"
+
 
 #define ADD(a,b) const char * a::m_sClassName = b
 
@@ -113,6 +115,7 @@ ADD(CNetworkInput,			"CNetworkInput");
 ADD(CNetworkOutput,			"CNetworkOutput");
 ADD(CNetworkThread,			"CNetworkThread");
 ADD(CNetworkManager,		"CNetworkManager");
+ADD(ProfileTask,			"ProfileTask");
 #ifdef _WIN32
 	ADD(CNTWindow,              "CNTWindow");
 #endif

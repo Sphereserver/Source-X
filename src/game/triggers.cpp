@@ -1,50 +1,66 @@
 
-#include <vector>
 #include "../common/CLog.h"
 #include "CServer.h"
 #include "triggers.h"
 
 //Trigger function start
 
-struct T_TRIGGERS
+static constexpr lpctstr kOrderedTrigsNames[] = {
+    #define ADD(_a_) \
+    "@" #_a_ ,
+
+    #include "../tables/triggers.tbl"
+    #undef ADD
+};
+
+struct TRIGGER_T_ID
 {
     char	m_name[TRIGGER_NAME_MAX_LEN];
     int		m_used;
 };
-std::vector<T_TRIGGERS> g_triggers;
+//struct TRIGGER_T_str
+//{
+//    int		m_used;
+//};
+std::vector<TRIGGER_T_ID> g_triggers_id;
+
 
 bool IsTrigUsed(E_TRIGGERS id)
 {
     if ( g_Serv.IsLoading() == true)
         return false;
-    return (( (uint)id < g_triggers.size() ) && g_triggers[id].m_used );
+
+    return (( (uint)id < g_triggers_id.size() ) && g_triggers_id[id].m_used );
 }
 
 bool IsTrigUsed(const char *name)
 {
     if ( g_Serv.IsLoading() == true)
         return false;
-    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
-    {
-        if ( !strcmpi(it->m_name, name) )
-            return (it->m_used != 0); // Returns true or false for known triggers
-    }
-    return true; //Must return true for custom triggers
+
+    int index = FindTableSorted(name, kOrderedTrigsNames, ARRAY_COUNT(kOrderedTrigsNames));
+    if (index >= 0)
+        return IsTrigUsed((E_TRIGGERS)index);
+    return false;
 }
 
 void TriglistInit()
 {
-    T_TRIGGERS	trig;
-    g_triggers.clear();
+    TRIGGER_T_ID trig{};
+    g_triggers_id.clear();
 
-#define ADD(_a_)	snprintf(trig.m_name, TRIGGER_NAME_MAX_LEN, "@%s", #_a_); trig.m_used = 0; g_triggers.emplace_back(trig);
+#define ADD(_a_) \
+    snprintf(trig.m_name, TRIGGER_NAME_MAX_LEN, "@%s", #_a_); \
+    trig.m_used = 0; \
+    g_triggers_id.push_back(trig);
+
 #include "../tables/triggers.tbl"
 #undef ADD
 }
 
 void TriglistClear()
 {
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers_id.begin(), end = g_triggers_id.end(); it != end; ++it )
     {
         it->m_used = 0;
     }
@@ -52,13 +68,13 @@ void TriglistClear()
 
 void TriglistAdd(E_TRIGGERS id)
 {
-    if ( g_triggers.size() )
-        ++ g_triggers[id].m_used;
+    if (g_triggers_id.size() )
+        ++ g_triggers_id[id].m_used;
 }
 
 void TriglistAdd(const char *name)
 {
-    for ( auto it = g_triggers.begin(), end = g_triggers.end(); it != end; ++it )
+    for ( auto it = g_triggers_id.begin(), end = g_triggers_id.end(); it != end; ++it )
     {
         if ( !strcmpi(it->m_name, name) )
         {
@@ -71,7 +87,7 @@ void TriglistAdd(const char *name)
 void Triglist(int &total, int &used)
 {
     total = used = 0;
-    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
+    for ( auto it = g_triggers_id.cbegin(), end = g_triggers_id.cend(); it != end; ++it )
     {
         ++total;
         if ( it->m_used )
@@ -81,7 +97,7 @@ void Triglist(int &total, int &used)
 
 void TriglistPrint()
 {
-    for ( auto it = g_triggers.cbegin(), end = g_triggers.cend(); it != end; ++it )
+    for ( auto it = g_triggers_id.cbegin(), end = g_triggers_id.cend(); it != end; ++it )
     {
         if (it->m_used)
         {

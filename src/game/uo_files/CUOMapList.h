@@ -20,15 +20,37 @@ extern class CUOMapList
     friend class  CServerMapBlock;
 
 protected:
-    bool m_maps[MAP_SUPPORTED_QTY];	    // list of supported maps
-    int m_mapnum[MAP_SUPPORTED_QTY];    // real map number (0 for 0 and 1, 2 for 2, and so on) - file name
-    int m_mapid[MAP_SUPPORTED_QTY];	    // map id used by the client
-    int m_sizex[MAP_SUPPORTED_QTY];
-    int m_sizey[MAP_SUPPORTED_QTY];
+    struct MapGeoData
+    {
+        bool enabled;     // supported map?
+        bool initialized;
+        int num;          // real map number (0 for 0 and 1, 2 for 2, and so on) - file name
+        int id;           // map id used by the client
+        int sizex;
+        int sizey;
+        int sectorsize;
 
-    int m_sectorsize[MAP_SUPPORTED_QTY];
+        static constexpr MapGeoData invalid() noexcept
+        {
+            return {
+                .enabled = true,
+                .initialized = false,
+                .num = -1,
+                .id = -1,
+                .sizex = -1,
+                .sizey = -1,
+                .sectorsize = -1
+            };
+        }
+    };
 
-    bool m_mapsinitalized[MAP_SUPPORTED_QTY];
+    struct MapGeoDataHolder
+    {
+        MapGeoData maps[MAP_SUPPORTED_QTY];
+
+        void clear() noexcept;
+    }
+    m_mapGeoData;
 
     CServerMapDiffCollection * m_pMapDiffCollection;
 
@@ -36,18 +58,17 @@ public:
     /** @name Constructors, Destructor, Asign operator:
      */
     ///@{
-    CUOMapList();
+    CUOMapList() noexcept;
 
-private:
-    CUOMapList(const CUOMapList& copy);
-    CUOMapList& operator=(const CUOMapList& other);
+    CUOMapList(const CUOMapList& copy) = delete;
+    CUOMapList& operator=(const CUOMapList& other) = delete;
     ///@}
 
 public:
     /** @name Modifiers:
      */
     ///@{
-    void Clear();
+    void Clear() noexcept;
     void ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid);
     void Init();
     bool Load(int map, char *args);
@@ -80,20 +101,20 @@ public:
 
 // Inline methods definition
 
-int CUOMapList::GetMapSizeX(int map) const noexcept
+inline int CUOMapList::GetMapSizeX(int map) const noexcept
 {
     // Used by CPointBase::IsValidXY(), which is called a LOT
     //ASSERT(IsMapSupported(map));
     //ASSERT(m_sizex[map] != -1);
-    return m_sizex[map];
+    return m_mapGeoData.maps[map].sizex;
 }
 
-int CUOMapList::GetMapSizeY(int map) const noexcept
+inline int CUOMapList::GetMapSizeY(int map) const noexcept
 {
     // Used by CPointBase::IsValidXY(), which is called a LOT
     //ASSERT(IsMapSupported(map));
     //ASSERT(m_sizey[map] != -1);
-    return m_sizey[map];
+    return m_mapGeoData.maps[map].sizey;
 }
 
 #endif //_INC_CUOMAPLIST_H

@@ -3,6 +3,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CWorldComm.h"
+#include "CServer.h"
 
 
 static const SOUND_TYPE sm_Sounds_Ghost[] =
@@ -66,11 +67,11 @@ void CWorldComm::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE
 					for ( int i = 0; i < sTextGhost.GetLength(); ++i )
 					{
 						if ( sTextGhost[i] != ' ' &&  sTextGhost[i] != '\t' )
-							sTextGhost[i] = Calc_GetRandVal(2) ? 'O' : 'o';
+							sTextGhost[i] = g_Rand.GetVal(2) ? 'O' : 'o';
 					}
 				}
 				pszSpeak = sTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( ARRAY_COUNT( sm_Sounds_Ghost )) ], pSrc );
+				pClient->addSound( sm_Sounds_Ghost[ g_Rand.GetVal( ARRAY_COUNT( sm_Sounds_Ghost )) ], pSrc );
 			}
 
 			if ( !fCanSee && pSrc )
@@ -166,14 +167,14 @@ void CWorldComm::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nachar * pwT
 					for ( i = 0; i < MAX_TALK_BUFFER - 1 && pwText[i]; ++i )
 					{
 						if ( pwText[i] != ' ' && pwText[i] != '\t' )
-							wTextGhost[i] = Calc_GetRandVal(2) ? 'O' : 'o';
+							wTextGhost[i] = g_Rand.GetVal(2) ? 'O' : 'o';
 						else
 							wTextGhost[i] = pwText[i];
 					}
 					wTextGhost[i] = '\0';
 				}
 				pwSpeak = wTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( ARRAY_COUNT( sm_Sounds_Ghost )) ], pSrc );
+				pClient->addSound( sm_Sounds_Ghost[ g_Rand.GetVal( ARRAY_COUNT( sm_Sounds_Ghost )) ], pSrc );
 			}
 
 			// Must label the text.
@@ -222,6 +223,15 @@ void CWorldComm::Broadcast(lpctstr pMsg) // static
 {
 	// System broadcast in bold text
 	ADDTOCALLSTACK("CWorldComm::Broadcast");
+
+    CScriptTriggerArgs args;
+    args.Init(pMsg);
+    TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
+    g_Serv.r_Call("f_onserver_broadcast", &g_Serv, &args, nullptr, &iRet);
+    if (iRet == TRIGRET_RET_TRUE)
+        return;
+    pMsg = args.m_s1;
+
 	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }
 

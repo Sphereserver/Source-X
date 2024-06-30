@@ -1,6 +1,7 @@
 #include "../sphere/threads.h"
 #include "uo_files/uofiles_macros.h"
 #include "CObjBaseTemplate.h"
+#include "CServerConfig.h"
 
 
 CObjBaseTemplate::CObjBaseTemplate() :
@@ -163,7 +164,7 @@ DIR_TYPE CObjBaseTemplate::GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDe
 
 int CObjBaseTemplate::GetVisualRange() const    // virtual
 {
-	return UO_MAP_VIEW_SIZE_DEFAULT;
+	return g_Cfg.m_iMapViewSize;
 }
 
 

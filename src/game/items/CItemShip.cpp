@@ -6,6 +6,7 @@
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
@@ -305,10 +306,10 @@ CItem * CItemShip::GetShipPlank(size_t index)
     // Find plank(s) if the list is empty
     if (m_uidPlanks.empty())
     {
-        CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
+        auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), Multi_GetDistanceMax());
         for (;;)
         {
-            const CItem * pItem = Area.GetItem();
+            const CItem * pItem = Area->GetItem();
             if (pItem == nullptr)
                 break;
 

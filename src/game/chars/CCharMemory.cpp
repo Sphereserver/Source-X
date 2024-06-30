@@ -172,8 +172,8 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 	if ( pMemory )
 	{
 		pMemory->SetMemoryTypes( pMemory->GetMemoryTypes() | MemTypes );
-		pMemory->m_itEqMemory.m_pt = GetTopPoint();	// Where did the fight start ?
-		pMemory->SetTimeStamp(CWorldGameTime::GetCurrentTime().GetTimeRaw());
+		pMemory->m_itEqMemory.m_pt = static_cast<CPointBase const&>(GetTopPoint());	// Where did the fight start ?
+		pMemory->SetTimeStampS(CWorldGameTime::GetCurrentTime().GetTimeRaw());
 		Memory_UpdateFlags( pMemory );
 	}
 }
@@ -424,7 +424,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
 	// g_Cfg.m_iAttackerTimeout = 0 means attackers doesnt decay. (but cleared when the attacker is killed or the char dies)
 
-	if  (GetDist(pTarg) > UO_MAP_VIEW_RADAR || ((g_Cfg.m_iAttackerTimeout != 0) && (elapsed >= 0) && (elapsed > g_Cfg.m_iAttackerTimeout)) )
+	if  (GetDist(pTarg) > g_Cfg.m_iMapViewRadar || ((g_Cfg.m_iAttackerTimeout != 0) && (elapsed >= 0) && (elapsed > g_Cfg.m_iAttackerTimeout)) )
 	{
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:
@@ -432,7 +432,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		return true;
 	}
 
-	const int64 iTimeDiff = CWorldGameTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStamp() );
+	const int64 iTimeDiff = CWorldGameTime::GetCurrentTime().GetTimeDiff( pMemory->GetTimeStampS() );
 
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*MSECS_PER_SEC )

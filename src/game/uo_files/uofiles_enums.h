@@ -554,6 +554,9 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
 
     //Individual Spell Layers
     LAYER_SPELL_Mana_Drain,
+
+    LAYER_STORAGE, //80 New Storage layer, can equip t_container and t_container_locked.
+    LAYER_STABLE,  //81 New stable layer, now stabled pets will be stored in this layer of the player instead of npc's itself.
     LAYER_QTY
 };
 

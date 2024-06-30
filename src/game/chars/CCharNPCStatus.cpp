@@ -4,6 +4,7 @@
 #include "../items/CItemVendable.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../spheresvr.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -567,10 +568,10 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
 	}
 
 	// Is there a nasty object here that will hurt us ?
-	CWorldSearch AreaItems(pt);
+	auto AreaItems = CWorldSearchHolder::GetInstance(pt);
 	for (;;)
 	{
-		CItem * pItem = AreaItems.GetItem();
+		CItem * pItem = AreaItems->GetItem();
 		if ( pItem == nullptr )
 			break;
 
@@ -634,7 +635,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 	// RETURN:
 	//  0-100 percent = how bad do we want it ?
 
-	if ( !CanMove(pItem, false) )
+	if ( !CanMoveItem(pItem, false) )
 		return 0;
 
 	CCharBase * pCharDef = Char_GetDef();

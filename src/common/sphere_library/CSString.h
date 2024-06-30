@@ -148,7 +148,7 @@ public:
 	* @param iLen new length of the string.
 	* @return the new length of the CSString.
 	*/
-	int Resize(int iLen);
+	int Resize(int iLen, bool fPreciseSize = false);
 
 	/**
 	* @brief Get the length of the held string.

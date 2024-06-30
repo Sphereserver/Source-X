@@ -75,12 +75,14 @@ public:
 	CServer();
 	virtual ~CServer();
 
-private:
-	CServer(const CServer& copy);
-	CServer& operator=(const CServer& other);
+	CServer(const CServer& copy) = delete;
+	CServer& operator=(const CServer& other) = delete;
 
 public:
-    SERVMODE_TYPE GetServerMode() const;
+    inline SERVMODE_TYPE GetServerMode() const noexcept {
+        return m_iModeCode.load(std::memory_order_acquire);
+    }
+
 	void SetServerMode( SERVMODE_TYPE mode );
     bool IsValidBusy() const;
     int GetExitFlag() const;

@@ -26,6 +26,38 @@
 #include "CObjBase.h"
 
 
+DIR_TYPE GetDirStr(lpctstr pszDir)
+{
+    char iDir2, iDir = static_cast<char>(toupper(pszDir[0]));
+
+    switch (iDir)
+    {
+        case 'E':
+        return DIR_E;
+        case 'W':
+        return DIR_W;
+        case 'N':
+        iDir2 = static_cast<char>(toupper(pszDir[1]));
+        if (iDir2 == 'E')
+            return DIR_NE;
+        if (iDir2 == 'W')
+            return DIR_NW;
+        return DIR_N;
+        case 'S':
+        iDir2 = static_cast<char>(toupper(pszDir[1]));
+        if (iDir2 == 'E')
+            return DIR_SE;
+        if (iDir2 == 'W')
+            return DIR_SW;
+        return DIR_S;
+        default:
+        if ((iDir >= '0') && (iDir <= '7'))
+            return static_cast<DIR_TYPE>(iDir - '0');
+    }
+    return DIR_QTY;
+}
+
+
 static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];
@@ -55,6 +87,7 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 	return true;
 }
 
+
 /////////////////////////////////////////////////////////////////
 // -CObjBase stuff
 // Either a player, npc or item.
@@ -68,7 +101,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
-	m_timestamp = 0;
+	m_iTimeStampS = 0;
 	m_CanMask = 0;
 
 	m_attackBase = m_attackRange = 0;
@@ -204,14 +237,14 @@ bool CObjBase::IsContainer() const
 	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
-int64 CObjBase::GetTimeStamp() const
+int64 CObjBase::GetTimeStampS() const
 {
-	return m_timestamp;
+	return m_iTimeStampS;
 }
 
-void CObjBase::SetTimeStamp(int64 t_time)
+void CObjBase::SetTimeStampS(int64 t_time)
 {
-	m_timestamp = t_time;
+	m_iTimeStampS = t_time;
 }
 
 void CObjBase::TimeoutRecursiveResync(int64 iDelta)
@@ -372,7 +405,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 			SetNamePool_Fail( ppTitles[0] );
 			return false;
 		}
-		int iCount = Calc_GetRandVal2( 1, atoi( s.GetKey()) );
+		int iCount = g_Rand.GetVal2( 1, atoi( s.GetKey()) );
 		while ( iCount > 0 )
 		{
 			if ( ! s.ReadKey())
@@ -446,12 +479,12 @@ void CObjBase::r_WriteSafe( CScript & s )
 	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent(&e, "Write Object 0%x", uid);
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent(nullptr, "Write Object 0%x", uid);
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 }
 
@@ -693,8 +726,8 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	for ( uint i = 0; i < iSteps; ++i )
 	{
 		pt = ptOld;
-		pt.m_x += (short)Calc_GetRandVal2(-iSteps, iSteps);
-		pt.m_y += (short)Calc_GetRandVal2(-iSteps, iSteps);
+		pt.m_x += (short)g_Rand.GetVal2(-iSteps, iSteps);
+		pt.m_y += (short)g_Rand.GetVal2(-iSteps, iSteps);
 
 		if ( !pt.IsValidPoint() )	// hit the edge of the world, so go back to the previous valid position
 		{
@@ -1014,10 +1047,10 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 				}
 			} break;
 		case OC_CAN:
-			sVal.FormatHex( GetCanFlags() );
+			sVal.FormatULLHex( GetCanFlags() );
 			break;
 		case OC_CANMASK:
-			sVal.FormatHex( m_CanMask );
+			sVal.FormatULLHex( m_CanMask );
 			break;
 		case OC_MODMAXWEIGHT:
 			sVal.FormatVal(m_ModMaxWeight);
@@ -1560,7 +1593,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatVal( pItem->GetSpeed() );
 		}	break;
 		case OC_TIMESTAMP:
-			sVal.FormatLLVal( GetTimeStamp() / MSECS_PER_TENTH ); // in tenths of second.
+			sVal.FormatLLVal( GetTimeStampS() );
 			break;
 		case OC_VERSION:
 			sVal = SPHERE_BUILD_INFO_STR;
@@ -1805,7 +1838,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             return false;
         case OC_CANMASK:
         {
-            m_CanMask = s.GetArgDWVal();
+            m_CanMask = s.GetArgULLVal();
             if (IsItem())
             {
                 CItem* pItem = static_cast<CItem*>(this);
@@ -1938,7 +1971,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:
-			SetTimeStamp(s.GetArgLLVal());
+			SetTimeStampS(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
             if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
@@ -1976,8 +2009,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyHex( "COLOR", GetHue());
 	if ( _IsTimerSet() )
 		s.WriteKeyVal( "TIMER", _GetTimerAdjusted());
-	if ( m_timestamp > 0 )
-		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
+	if ( m_iTimeStampS > 0 )
+		s.WriteKeyVal( "TIMESTAMP", GetTimeStampS());
 	if ( const CCSpawn* pSpawn = GetSpawn() )
 		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID().GetObjUID());
 	if ( m_ModAr )
@@ -1995,7 +2028,7 @@ void CObjBase::r_Write( CScript & s )
 	{
 		dword dUID = (dword)uid;
 		char* pszTag = Str_GetTemp();
-		sprintf(pszTag, "FOLLOWER.%d", dUID);
+		snprintf(pszTag, Str_TempLength(), "FOLLOWER.%d", dUID);
 		s.WriteKeyHex(pszTag, dUID);
 	}
 }
@@ -3111,8 +3144,10 @@ dword CObjBase::GetPropertyHash() const
 
 void CObjBase::OnTickStatusUpdate()
 {
-	ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate");
-	// process m_fStatusUpdate flags
+    // process m_fStatusUpdate flags
+
+	//ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate"); // Called very frequently.
+    EXC_TRY("CObjBase::OnTickStatusUpdate");
 
 	if (m_fStatusUpdate & SU_UPDATE_TOOLTIP)
 	{
@@ -3126,6 +3161,8 @@ void CObjBase::OnTickStatusUpdate()
 			pItemDmg->OnTickStatsUpdate();
 		}
 	}
+
+    EXC_CATCH;
 }
 
 void CObjBase::_GoAwake()
@@ -3158,12 +3195,13 @@ void CObjBase::_GoSleep()
 
 bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");
+	//ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");   // Called very frequently.
 	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
     bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
+    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fCanTick)
     {
@@ -3175,10 +3213,9 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 			{
 				if (fParentGoingToSleep)
 					fCanTick = false;
-				else
+				else if (!fIgnoreCont)
 					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
 			}
-
         }
     }
 
@@ -3633,34 +3670,3 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 	return false;
 }
 
-
-DIR_TYPE GetDirStr( lpctstr pszDir )
-{
-	char iDir2, iDir = static_cast< char >( toupper( pszDir[ 0 ] ) );
-
-	switch ( iDir )
-	{
-		case 'E':
-            return DIR_E;
-		case 'W':
-            return DIR_W;
-		case 'N':
-			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' )
-                return DIR_NE;
-			if ( iDir2 == 'W' )
-                return DIR_NW;
-			return DIR_N;
-		case 'S':
-			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' )
-                return DIR_SE;
-			if ( iDir2 == 'W' )
-                return DIR_SW;
-			return DIR_S;
-		default:
-			if ( ( iDir >= '0' ) && ( iDir <= '7' ) )
-				return static_cast< DIR_TYPE >( iDir - '0' );
-	}
-	return DIR_QTY;
-}

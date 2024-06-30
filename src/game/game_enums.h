@@ -13,7 +13,7 @@ enum ePayGold
     PAYGOLD_HIRE
 };
 
-enum RESDISPLAY_VERSION
+enum RESDISPLAY_VERSION : char
 {
 	RDS_PRET2A,
 	RDS_T2A,

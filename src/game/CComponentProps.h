@@ -6,7 +6,7 @@
 #ifndef _INC_CCOMPONENTPROPS_H
 #define _INC_CCOMPONENTPROPS_H
 
-#include "../../lib/flat_containers/flat_map.hpp"
+#include <flat_containers/flat_map.hpp>
 #include "../common/sphere_library/CSString.h"
 #include "game_enums.h"
 

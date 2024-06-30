@@ -40,9 +40,8 @@ public:
     CNetworkThread(CNetworkManager* manager, size_t id);
     virtual ~CNetworkThread(void);
 
-private:
-    CNetworkThread(const CNetworkThread& copy);
-    CNetworkThread& operator=(const CNetworkThread& other);
+    CNetworkThread(const CNetworkThread& copy) = delete;
+    CNetworkThread& operator=(const CNetworkThread& other) = delete;
 
 public:
     void assignNetworkState(CNetState* state);	// assign a network state to this thread

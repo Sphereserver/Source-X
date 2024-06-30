@@ -1,26 +1,29 @@
 # Ignore folder and files
-/.git/
-/.vscode/
+/.git
+/.vscode
 *.vshistory*
-/CMakeFiles/
-/spheresvr.dir/
+/.kdev*
+
+/CMakeFiles
+/spheresvr.dir
 
 /bin
 /bin64
 /Debug
 /Release
 /Nightly
-/backup/
-/x64/
-/x86/
-/obj/
-/build/
+/backup
+/x64
+/x86
+/obj
+/build
 
 /mul
-/accounts/
-/logs/
-/save/
-/web/
+/accounts
+/logs
+/save
+/web
+/scripts
 
 
 # Ignore files
@@ -29,14 +32,19 @@
 *.old
 *.tmp
 *.pid
+*.swp*
+*.fuse*
 
 *.o
 *.obj
 *.exe
+
 *.vs
-*.vcx*
+*.vcxproj
 *.sln
 *.user
+*.*workspace
+*.kdev*
 
 
 # Ignore some files in the parent folder
@@ -46,7 +54,7 @@ CMakeCache.txt
 /src/common/version/GitRevision.h
 
 # Ignore other specific files
-/lib/libev/src/config.h
-/lib/mariadb/config.h
-/lib/mariadb/ma_config.h
-/lib/mariadb/mariadb_version.h
+/lib/libev/libev/config.h
+/lib/mariadb_connector_c/mysql/config.h
+/lib/mariadb_connector_c/mysql/ma_config.h
+/lib/mariadb_connector_c/mysql/mariadb_version.h

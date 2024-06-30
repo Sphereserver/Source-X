@@ -129,6 +129,10 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 			pStr = "Item equipped in the memory layer but it isn't a memory";
 			break;
 
+        case 0x2232:
+            pStr = "Item equipped in the storage layer but it isn't a container";
+            break;
+
 		case 0x2233:
 			pStr = "Item equipped in the mount memory layer but it isn't a mount memory";
 			break;
@@ -448,13 +452,13 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	{
 		g_Log.CatchEvent( &e, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent(nullptr, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	if ( iResultCode == 0 )
@@ -489,12 +493,12 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	catch ( const CSError& e )	// catch all
 	{
 		g_Log.CatchEvent( &e, "UID=0%x, Asserted cleanup", dwUID );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent( nullptr, "UID=0%x, Asserted cleanup", dwUID );
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	return iResultCode;
 }
@@ -589,12 +593,12 @@ void CWorldThread::GarbageCollection_UIDs()
 		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "GarbageCollection_UIDs");
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
 			g_Log.CatchEvent(nullptr, "GarbageCollection_UIDs");
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
 
@@ -847,7 +851,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
+		snprintf(time, Str_TempLength(), "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
 
@@ -939,11 +943,11 @@ bool CWorld::SaveForce() // Save world state
 		{
 			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", _iSaveStage, pCurBlock);
 			fSuccess = false;
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 			goto failedstage;
 		}
 		continue;
@@ -1068,7 +1072,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
 				uiPreviousSaveSize += uiCurSavefileSize;
 		}
 		else
-			fSizeErr = true;        
+			fSizeErr = true;
     };
 
     if (fStatics)
@@ -1086,17 +1090,24 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     uiPreviousSaveSize /= 1024;
     uiPreviousSaveSize += (uiPreviousSaveSize*20)/100;  // Just to be sure increase the space requirement by 20%
     ullong uiServMem = (ullong)g_Serv.StatGet(SERV_STAT_MEM);   // In KB
+#ifdef _DEBUG
+    constexpr ullong mem_adjust_build = 2;
+#else
+    constexpr ullong mem_adjust_build = 1;
+#endif
+    ullong mem_adjust_save_size;
     if (fSizeErr)
     {
         // In case we have corrupted or unexistant previous save files, check for this arbitrary amount of free space.
-        uiPreviousSaveSize = maximum(uiPreviousSaveSize, (uiServMem/8));
+        mem_adjust_save_size = 8;
     }
     else
     {
         // Work around suspiciously low previous save files sizes
-        uiPreviousSaveSize = maximum(uiPreviousSaveSize, (uiServMem/20));
+        mem_adjust_save_size = 20;
     }
 
+    uiPreviousSaveSize = std::max(uiPreviousSaveSize, uiServMem / (mem_adjust_save_size * mem_adjust_build));
     if (uiFreeSpace < uiPreviousSaveSize)
     {
         g_Log.Event(LOGL_CRIT, "-----------------------------");
@@ -1154,7 +1165,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
 		m_FileMultis.Close();	// close if not already closed.
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)	// catch all
 	{
@@ -1164,7 +1175,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
 		m_FileMultis.Close();	// close if not already closed.
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	CScriptTriggerArgs Args(fForceImmediate, _iSaveStage);
@@ -1227,12 +1238,12 @@ void CWorld::SaveStatics()
 	catch (const CSError& e)
 	{
 		g_Log.CatchEvent(&e, "Statics Save FAILED.");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)
 	{
 		g_Log.CatchEvent(nullptr, "Statics Save FAILED.");
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
 	SyncGameTime();
@@ -1245,6 +1256,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
     ADDTOCALLSTACK("CWorld::LoadFile");
     EXC_TRY("LoadFile");
     g_Log.Event(LOGM_INIT, "Loading %s...\n", pszLoadName);
+    g_Log.Flush();
     CScript s;
 	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )  // don't cache this script
 	{
@@ -1266,7 +1278,8 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 
 	while ( s.FindNextSection() )
 	{
-		if (! ( ++iLoadStage & 0x1FF ))	// don't update too often
+        // Print the percent state of the current file loading.
+		if (! ( ++iLoadStage & 0xFF ))	// don't update too often
 			g_Serv.PrintPercent( s.GetPosition(), iLoadSize );
 
 		try
@@ -1276,12 +1289,12 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
 			g_Log.CatchEvent(nullptr, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
 
@@ -1402,7 +1415,7 @@ bool CWorld::LoadAll() // Load world from script
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
-	
+
 	for (int m = 0; m < MAP_SUPPORTED_QTY; ++m)
 	{
 		if (!g_MapList.IsMapSupported(m))
@@ -1662,7 +1675,9 @@ void CWorld::Close()
 	m_Multis.clear();
 
     {
+#if MT_ENGINES
         std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.THREAD_CMUTEX);
+#endif
 		_Ticker._ObjStatusUpdates.clear();
     }
 
@@ -1680,7 +1695,7 @@ void CWorld::Close()
 
 	_Sectors.Close();
 
-	memset(g_MapList.m_maps, 0, sizeof(g_MapList.m_maps));
+    g_MapList.m_mapGeoData.clear();
 	if ( g_MapList.m_pMapDiffCollection != nullptr )
 	{
 		delete g_MapList.m_pMapDiffCollection;

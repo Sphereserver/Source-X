@@ -256,7 +256,7 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 		return;
 
 	bool bUpdateChar1 = false;
-	bool bUpdateChar2 = pChar2->GetClientActive()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE);
+	bool bUpdateChar2 = pChar2->GetClientActive()->GetNetState()->isClientVersionNumber(MINCLIVER_NEWSECURETRADE);
 
 	// To prevent cheating, check if the char really have these gold/platinum values
 	const int64 iMaxValue = pChar1->m_virtualGold;
@@ -473,8 +473,8 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
-			(word)(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
-			(word)(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
+			(word)(tmp_MinX + g_Rand.GetValFast(tmp_MaxX - tmp_MinX)),
+			(word)(tmp_MinY + g_Rand.GetValFast(tmp_MaxY - tmp_MinY)),
 			0);
 	}
 
@@ -497,7 +497,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		}
 	}
 
-	const int iRandOnce = (int)Calc_GetRandVal(UINT16_MAX);
+	const int iRandOnce = g_Rand.GetValFast(UINT16_MAX);
 	return {
 		(short)(sm_ContSize[i].m_minx + (iRandOnce % (sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx))),
 		(short)(sm_ContSize[i].m_miny + (iRandOnce % (sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny))),
@@ -793,7 +793,7 @@ void CItemContainer::MakeKey()
 	ADDTOCALLSTACK("CItemContainer::MakeKey");
 	SetType(IT_CONTAINER);
 	m_itContainer.m_UIDLock = GetUID();
-	m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
+	m_itContainer.m_dwLockComplexity = 500 + g_Rand.GetVal(600);
 
 	CItem *pKey = CreateScript(ITEMID_KEY_COPPER);
 	ASSERT(pKey);

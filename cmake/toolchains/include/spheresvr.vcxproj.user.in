@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">	
+	<PropertyGroup>
+		<!-- Exclude static code analysis for 3rd party code -->
+		<CAExcludePath>lib/flat_containers/flat_containers/;lib/libev/libev/;lib/mariadb/mariadb/;lib/object_ptr/object_ptr/;lib/parallel_hashmap/parallel_hashmap/;lib/sqlite/sqlite/;lib/regex/regex/;lib/zlib/zlib/;$(CAExcludePath)</CAExcludePath>
+
+		<!-- Set the working directory for the execution of the application with the debugger -->
+		<LocalDebuggerWorkingDirectory>@OUTDIR@$(Configuration)/</LocalDebuggerWorkingDirectory>
+		<DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+	</PropertyGroup>
+</Project>

@@ -1,0 +1,17 @@
+#https://stackoverflow.com/questions/20496084/git-status-ignore-line-endings-in-identical-files-on-windows-linux
+
+# Set the default behavior for all files.
+*       text=auto
+
+# Normalize and convert to native line endings on checkout.
+*.c     text
+*.cpp   text
+*.h     text
+*.hpp   text
+
+# Ignore all differences in line endings.
+*       -crlf
+
+# Convert to LF line endings on checkout.
+#*      text eol=lf
+

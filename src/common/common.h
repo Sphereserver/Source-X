@@ -17,9 +17,10 @@
 #define SCRIPT_MAX_SECTION_LEN	128
 
 
+// C abs function has different in/out types the std:: ones in cmath. It's defined in stdlib.h.
+#include <stdlib.h>
 #include <memory>   // for smart pointers
 #include <type_traits>
-#include <cstdlib>
 #include "assertion.h"
 #include "basic_threading.h"
 
@@ -32,20 +33,20 @@
 #endif
 
 
+// Strings
 #define _STRINGIFY_AUX(x)	#x
 #define STRINGIFY(x)		_STRINGIFY_AUX(x)
 
-#define ARRAY_COUNT(a)			(sizeof(a)/sizeof((a)[0]))
+// Sizes
+#define ARRAY_COUNT(a)			        (sizeof(a)/sizeof((a)[0]))
 
+// Flags and bitmasks. Those macros works with 1 or multiple ORed flags together.
+#define HAS_FLAGS_STRICT(var, flag)     (((var) & (flag)) == flag)          // Every one of the passed flags has to be set
+#define HAS_FLAGS_ANY(var, flag)        (static_cast<bool>((var) & (flag))) // True if even only one of the passed flags are set
 
-#if __cplusplus >= 201703L  // is C++17 enabled?
-    #define FALLTHROUGH [[fallthrough]]
-	#define NODISCARD	[[nodiscard]]
-#else
-    #define FALLTHROUGH // fall through
-    /* yep, the comment appears to silence the warning with GCC, dunno for clang */
-	#define NODISCARD
-#endif
+// Cpp attributes
+#define FALLTHROUGH [[fallthrough]]
+#define NODISCARD	[[nodiscard]]
 
 
 /*

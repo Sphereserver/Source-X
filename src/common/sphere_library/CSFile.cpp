@@ -140,7 +140,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
     uint uiFilePermissions = 0;
     if (uiModeFlags & OF_CREATE)
         uiFilePermissions = (S_IRWXU | S_IRWXG | S_IRWXO); //777
-    
+
     _fileDescriptor = open( ptcFilename, uiModeFlags, uiFilePermissions);
 #endif // _WIN32
 
@@ -337,6 +337,15 @@ int CSFile::SeekToEnd()
 bool CSFile::_Write( const void * pData, int iLength )
 {
     ADDTOCALLSTACK("CSFile::_Write");
+    ASSERT(iLength >= 0);
+    if (iLength <= 0)
+        return true;
+
+#if defined(_WIN32)
+    ASSERT(_fileDescriptor != nullptr);
+#elif defined(__unix__) or defined(unix)
+    ASSERT(_fileDescriptor >= 0);
+#endif
 
 #ifdef _WIN32
 	DWORD dwWritten;

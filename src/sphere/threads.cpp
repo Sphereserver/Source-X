@@ -104,6 +104,10 @@ void IThread::setThreadName(const char* name)
 #elif defined(__NetBSD__)
 	pthread_setname_np(getCurrentThreadId(), "%s", name_trimmed);
 #endif
+
+    auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
+    ASSERT(athr);
+    athr->overwriteInternalThreadName(name_trimmed);
 }
 
 
@@ -111,10 +115,25 @@ void IThread::setThreadName(const char* name)
  * ThreadHolder
 **/
 
+ThreadHolder::ThreadHolder() noexcept :
+	m_threadCount(0), m_inited(false), m_closing(false)
+{}
+
+void ThreadHolder::init()
+{
+	ASSERT(!m_inited);
+    m_inited = true;
+}
+
 ThreadHolder& ThreadHolder::get() noexcept
 {
 	static ThreadHolder instance;
 	return instance;
+}
+
+bool ThreadHolder::closing() noexcept
+{
+    return m_closing;
 }
 
 IThread* ThreadHolder::current() noexcept
@@ -132,9 +151,12 @@ IThread* ThreadHolder::current() noexcept
 	if (thread == nullptr)
 		return DummySphereThread::getInstance();
 
-	auto* tdata = findThreadData(thread);
-	if (!tdata || tdata->m_closed)
+	if (!thread || m_closing)
 		return nullptr;
+
+    SphereThreadData* tdata = &(m_threads[thread->m_threadHolderId]);
+    if (tdata->m_closed)
+        return nullptr;
 
     // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
 	//ASSERT( thread->isSameThread(thread->getId()) );
@@ -149,26 +171,25 @@ void ThreadHolder::push(IThread *thread)
 
 	SimpleThreadLock lock(m_mutex);
 	m_threads.emplace_back( SphereThreadData{ thread, false });
+    thread->m_threadHolderId = m_threadCount;
 	++m_threadCount;
 }
 
-spherethreadlist_t::iterator ThreadHolder::findThreadDataIt(IThread* thread)
+/*
+SphereThreadData* ThreadHolder::findThreadData(IThread* thread) noexcept
 {
-	// This should always run guarded by a MUTEX!
-	return std::find_if(m_threads.begin(), m_threads.end(),
-		[thread](SphereThreadData const& elem) {
-			return elem.m_ptr == thread;
-		});
-}
+    // If checking for current thread, use another escamotage to retrieve it...
 
-SphereThreadData* ThreadHolder::findThreadData(IThread* thread)
-{
-	// This should always run guarded by a MUTEX!
-	auto it = findThreadDataIt(thread);
-	if (it == m_threads.end())
-		return nullptr;
-	return &(*it);
+    // This should always run guarded by a MUTEX!
+    SimpleThreadLock lock(m_mutex);
+    for (size_t i = 0; i < m_threadCount; ++i)
+    {
+        if (m_threads[i].m_ptr == thread)
+            return &(m_threads[i]);
+    }
+    return nullptr;
 }
+*/
 
 void ThreadHolder::remove(IThread *thread)
 {
@@ -178,7 +199,10 @@ void ThreadHolder::remove(IThread *thread)
     ASSERT(m_threadCount > 0);	// Trying to dequeue thread while no threads are active?
 
     SimpleThreadLock lock(m_mutex);
-	auto it = findThreadDataIt(thread);
+	auto it = std::find_if(m_threads.begin(), m_threads.end(),
+        [thread](SphereThreadData const& elem) {
+            return elem.m_ptr == thread;
+        });
     
     ASSERT(it != m_threads.end());	// Ensure that the thread to dequeue is registered
 	--m_threadCount;
@@ -187,6 +211,7 @@ void ThreadHolder::remove(IThread *thread)
 
 void ThreadHolder::markThreadsClosing()
 {
+    m_closing = true;
 	for (auto& thread_data : m_threads)
 	{
 		auto sphere_thread = static_cast<AbstractSphereThread*>(thread_data.m_ptr);
@@ -213,11 +238,6 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 	return nullptr;
 }
 
-void ThreadHolder::init()
-{
-	ASSERT(!m_inited);
-    m_inited = true;
-}
 
 /*
  * AbstractThread
@@ -238,7 +258,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 		++AbstractThread::m_threadsAvailable;
 	}
 	m_id = 0;
-	m_name = name;
+    Str_CopyLimitNull(m_name, name, sizeof(m_name));
 	m_handle = 0;
 	m_hangCheck = 0;
     _thread_selfTerminateAfterThisTick = true;
@@ -259,6 +279,13 @@ AbstractThread::~AbstractThread()
 		// No pthread equivalent
 #endif
 	}
+}
+
+void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
+{
+    // Use it only if you know what you are doing!
+    //  This doesn't actually do the change of the thread name!
+    Str_CopyLimitNull(m_name, name, sizeof(m_name));
 }
 
 void AbstractThread::start()
@@ -356,33 +383,33 @@ void AbstractThread::run()
 
             // ensure this is recorded as 'idle' time for this thread (ideally this should
             // be in tick() but we cannot guarantee it to be called there
-            CurrentProfileData.Start(PROFILE_IDLE);
+            GetCurrentProfileData().Start(PROFILE_IDLE);
 		}
         /*
         catch( const CAssert& e )
         {
             gotException = true;
             g_Log.CatchEvent(&e, "[TR] ExcType=CAssert in %s::tick", getName());
-            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
         */
 		catch( const CSError& e )
 		{
 			gotException = true;
 			g_Log.CatchEvent(&e, "[TR] ExcType=CSError in %s::tick", getName());
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
         catch( const std::exception& e )
         {
             gotException = true;
             g_Log.CatchStdException(&e, "[TR] ExcType=std::exception in %s::tick", getName());
-            CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+            GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
         }
 		catch( ... )
 		{
 			gotException = true;
 			g_Log.CatchEvent(nullptr, "[TR] ExcType=pure in %s::tick", getName());
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
+			GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 		}
 
 		if( gotException )
@@ -518,7 +545,6 @@ void AbstractThread::onStart()
 	// a small delay when setting it from AbstractThread::start and it's possible for the id
 	// to not be set fast enough (particular when using pthreads)
 	m_id = getCurrentThreadId();
-	ThreadHolder::get().m_currentThread = this;
 
 	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());
@@ -764,7 +790,11 @@ void DummySphereThread::tick()
 StackDebugInformation::StackDebugInformation(const char *name) noexcept
 	: m_context(nullptr)
 {
-    IThread *icontext = ThreadHolder::get().current();
+    auto& th = ThreadHolder::get();
+    if (th.closing())
+        return;
+
+    IThread *icontext = th.current();
 	if (icontext == nullptr)
 	{
 		// Thread was deleted, manually or by app closing signal.
@@ -778,7 +808,7 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
 	}
 }
 
-StackDebugInformation::~StackDebugInformation()
+StackDebugInformation::~StackDebugInformation() noexcept
 {
 	if (!m_context || m_context->closing())
 		return;

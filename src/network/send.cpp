@@ -14,7 +14,6 @@
 #include "../game/items/CItemMap.h"
 #include "../game/items/CItemMessage.h"
 #include "../game/items/CItemMultiCustom.h"
-#include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
 #include "../game/components/CCItemDamageable.h"
 #include "../game/components/CCPropsChar.h"
@@ -23,7 +22,7 @@
 #include "CNetworkManager.h"
 #include "send.h"
 
-#include "../../lib/zlib/zlib.h"
+#include <zlib/zlib.h>
 
 
 /***************************************************************************
@@ -143,15 +142,15 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	writeInt32(object->GetUID());
 	writeStringFixedASCII(object->GetName(), 30);
 
-	if (state->isClientVersion(MINCLIVER_STATUS_V6))
+	if (state->isClientVersionNumber(MINCLIVER_STATUS_V6))
 		version = 6;
-	else if (state->isClientVersion(MINCLIVER_STATUS_V5))
+	else if (state->isClientVersionNumber(MINCLIVER_STATUS_V5))
 		version = 5;
-	else if (state->isClientVersion(MINCLIVER_STATUS_V4))
+	else if (state->isClientVersionNumber(MINCLIVER_STATUS_V4))
 		version = 4;
-	else if (state->isClientVersion(MINCLIVER_STATUS_V3))
+	else if (state->isClientVersionNumber(MINCLIVER_STATUS_V3))
 		version = 3;
-	else if (state->isClientVersion(MINCLIVER_STATUS_V2))
+	else if (state->isClientVersionNumber(MINCLIVER_STATUS_V2))
 		version = 2;
 	else
 		version = 1;
@@ -565,7 +564,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, const CItem* item, I
 		dir = item->m_itCorpse.m_facing_dir;
 	}
 
-	if (character->CanMove(item, false))
+	if (character->CanMoveItem(item, false))
 		flags |= ITEMF_MOVABLE;
 
 	if (target->IsPriv(PRIV_DEBUG))
@@ -767,7 +766,7 @@ PacketMovementAck::PacketMovementAck(const CClient* target, byte sequence) : Pac
 	ADDTOCALLSTACK("PacketMovementAck::PacketMovementAck");
 
 	writeByte(sequence);
-	writeByte((byte)(target->GetChar()->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(target->GetChar()->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersionNumber(MINCLIVER_NOTOINVUL), true)));
 	push(target);
 }
 
@@ -836,7 +835,7 @@ PacketDragAnimation::PacketDragAnimation(const CChar* source, const CItem* item,
 bool PacketDragAnimation::canSendTo(const CNetState* state) const
 {
 	// don't send to SA clients
-	if (state->isClientEnhanced() || state->isClientVersion(MINCLIVER_SA))
+	if (state->isClientEnhanced() || state->isClientVersionNumber(MINCLIVER_SA))
 		return false;
 
 	return PacketSend::canSendTo(state);
@@ -858,7 +857,7 @@ PacketContainerOpen::PacketContainerOpen(const CClient* target, const CObjBase* 
 	writeInt16((word)gump);
 
 	// HS clients needs an extra 'container type' byte (0x00 for vendors, 0x7D for spellbooks/containers)
-	if (target->GetNetState()->isClientVersion(MINCLIVER_HS) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced())
+	if (target->GetNetState()->isClientVersionNumber(MINCLIVER_HS) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced())
 	{
 		word ContType = (gump == GUMP_VENDOR_RECT) ? 0x00 : 0x7D;
 		writeInt16(ContType);
@@ -913,7 +912,7 @@ PacketItemContainer::PacketItemContainer(const CClient* target, const CItem* ite
 	writeInt16(pt.m_x);
 	writeInt16(pt.m_y);
 
-	if (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced())
+	if (target->GetNetState()->isClientVersionNumber(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced())
 		writeByte(item->GetContainedGridIndex());
 
 	writeInt32(container->GetUID());
@@ -939,7 +938,7 @@ void PacketItemContainer::completeForTarget(const CClient* target, const CItem* 
 {
 	ADDTOCALLSTACK("PacketItemContainer::completeForTarget");
 
-	bool shouldIncludeGrid = (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
+	bool shouldIncludeGrid = (target->GetNetState()->isClientVersionNumber(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
 
 	if (getLength() >= 20)
 	{
@@ -1107,7 +1106,7 @@ PacketSkills::PacketSkills(const CClient* target, const CChar* character, SKILL_
 	if (character == nullptr)
 		character = target->GetChar();
 
-	bool includeCaps = target->GetNetState()->isClientVersion(MINCLIVER_SKILLCAPS);
+	bool includeCaps = target->GetNetState()->isClientVersionNumber(MINCLIVER_SKILLCAPS);
 	if (skill >= SKILL_QTY)
 	{
 		// all skills
@@ -1188,7 +1187,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
     const CNetState* ns = target->GetNetState();
     ASSERT(ns);
     const bool fClientEnhanced = ns->isClientEnhanced();
-	const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || fClientEnhanced);
+	const bool fIncludeGrid = (ns->isClientVersionNumber(MINCLIVER_ITEMGRID) || ns->isClientKR() || fClientEnhanced);
     bool fIsLayerSent[LAYER_HORSE] = {};
 
 	const CChar* viewer = target->GetChar();
@@ -1312,7 +1311,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 
     const CNetState* ns = target->GetNetState();
     ASSERT(ns);
-    const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
+    const bool fIncludeGrid = (ns->isClientVersionNumber(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 
 	initLength();
 	skip(2);
@@ -1352,7 +1351,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 
     const CNetState* ns = target->GetNetState();
     ASSERT(ns);
-    const bool fIncludeGrid = (ns->isClientVersion(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
+    const bool fIncludeGrid = (ns->isClientVersionNumber(MINCLIVER_ITEMGRID) || ns->isClientKR() || ns->isClientEnhanced());
 	const CSpellDef* spellDefinition;
 
 	initLength();
@@ -1781,7 +1780,7 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	writeInt16(y);	// y
 	writeInt16(z);	// z
 
-	if ( target->GetNetState()->isClientVersion(MINCLIVER_HS) )
+	if ( target->GetNetState()->isClientVersionNumber(MINCLIVER_HS) )
 		writeInt32((dword)color);	// hue
 
 	trim();
@@ -2172,7 +2171,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), (uint)lenstr);
 
 	// message time
-	CSTime datetime(message->GetTimeStamp());
+	CSTime datetime(message->GetTimeStampS());
 	snprintf(tempstr, Str_TempLength(), "%s", datetime.Format("%b %d, %Y"));
 	lenstr = strlen(tempstr) + 1;
 
@@ -2371,7 +2370,7 @@ PacketCharacterMove::PacketCharacterMove(const CClient* target, const CChar* cha
 	writeByte(direction);
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));
-	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersionNumber(MINCLIVER_NOTOINVUL), true)));
 
 	push(target);
 }
@@ -2406,9 +2405,9 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 	writeByte(character->GetDirFlag());
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));
-	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, ns->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, ns->isClientVersionNumber(MINCLIVER_NOTOINVUL), true)));
 
-	bool isNewMobilePacket = ns->isClientVersion(MINCLIVER_NEWMOBINCOMING);
+	bool isNewMobilePacket = ns->isClientVersionNumber(MINCLIVER_NEWMOBINCOMING);
 
 	if (character->IsStatFlag(STATF_SLEEPING) == false)
 	{
@@ -2607,12 +2606,11 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 
 	uint mode = 0;
 	if (character->IsStatFlag(STATF_WAR))
-		mode |= (target->GetNetState()->isClientVersion(MINCLIVER_ML)) ? 0x1 : 0x40;
-	if (target->GetNetState()->isClientVersion(MINCLIVER_ML))
+		mode |= (target->GetNetState()->isClientVersionNumber(MINCLIVER_ML)) ? 0x1 : 0x40;
+	if (target->GetNetState()->isClientVersionNumber(MINCLIVER_ML))
 	{
-		if (character == target->GetChar() ||
-		    (g_Cfg.m_fCanUndressPets ? (character->IsOwnedBy(target->GetChar())) : (target->IsPriv(PRIV_GM) && target->GetPrivLevel() > character->GetPrivLevel())) )
-		mode |= 0x2;
+        if (character == target->GetChar() || target->GetChar()->CanDress(character))
+            mode |= 0x2;
 	}
 
 	writeInt32(character->GetUID());
@@ -3257,7 +3255,7 @@ PacketServerList::PacketServerList(const CClient* target) : PacketSend(XCMD_Serv
 	ADDTOCALLSTACK("PacketServerList::PacketServerList");
 
 	// clients before 4.0.0 require serverlist ips to be in reverse
-	bool reverseIp = target->GetNetState()->isClientLessVersion(MAXCLIVER_REVERSEIP);
+	bool reverseIp = target->GetNetState()->isClientLessVersionNumber(MAXCLIVER_REVERSEIP);
 
 	initLength();
 	writeByte(0xFF);
@@ -3574,18 +3572,18 @@ PacketGumpDialog::PacketGumpDialog(int x, int y, CObjBase* object, dword context
 	writeInt32(y);
 }
 
-void PacketGumpDialog::writeControls(const CClient* target, const CSString* controls, uint controlCount, const CSString* texts, uint textCount)
+void PacketGumpDialog::writeControls(const CClient* target, std::vector<CSString> const* controls, std::vector<CSString> const* texts)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
 	const CNetState* net = target->GetNetState();
-	if (net->isClientVersion(MINCLIVER_COMPRESSDIALOG) || net->isClientKR() || net->isClientEnhanced())
-		writeCompressedControls(controls, controlCount, texts, textCount);
+	if (net->isClientVersionNumber(MINCLIVER_COMPRESSDIALOG) || net->isClientKR() || net->isClientEnhanced())
+		writeCompressedControls(controls, texts);
 	else
-		writeStandardControls(controls, controlCount, texts, textCount);
+		writeStandardControls(controls, texts);
 }
 
-void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount)
+void PacketGumpDialog::writeCompressedControls(std::vector<CSString> const* controls, std::vector<CSString> const* texts)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeCompressedControls");
 
@@ -3594,71 +3592,78 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 
 	seek(19);
 
+    if (controls)
 	{
 		// compress and write controls
-		int controlLength = 1;
-		for (uint i = 0; i < controlCount; ++i)
-			controlLength += (int)controls[i].GetLength() + 2;
+		uint controlLength = 1;
+		for (CSString const& ctrl : *controls)
+			controlLength += (uint)ctrl.GetLength() + 2; // String terminator not needed.
 
 		char* toCompress = new char[controlLength];
 
-		int controlLengthActual = 0;
-		for (uint i = 0; i < controlCount; ++i)
-			controlLengthActual += snprintf(&toCompress[controlLengthActual], (size_t(controlLength) - controlLengthActual), "{%s}", controls[i].GetBuffer());
-		++ controlLengthActual;
+		uint controlLengthCurrent = 0;
+		for (CSString const& ctrl : *controls)
+        {
+            const uint uiAvailableLength = std::max(0u, controlLength - controlLengthCurrent);
+            const int iJustWrittenLength = snprintf(&toCompress[controlLengthCurrent], uiAvailableLength, "{%s}", ctrl.GetBuffer());
+        	controlLengthCurrent += iJustWrittenLength;
+        }
+		++ controlLengthCurrent;
 
-		ASSERT(controlLengthActual == controlLength);
+		ASSERT(controlLengthCurrent == controlLength);
 
-		z_uLong compressLength = z_compressBound(controlLengthActual);
+		uLong compressLength = ::compressBound(controlLengthCurrent);
 		byte* compressBuffer = new byte[compressLength];
 
-		int error = z_compress2(compressBuffer, &compressLength, (byte*)toCompress, controlLengthActual, Z_DEFAULT_COMPRESSION);
+		int error = ::compress2(compressBuffer, &compressLength, (byte*)toCompress, controlLengthCurrent, Z_DEFAULT_COMPRESSION);
 		delete[] toCompress;
 
 		if (error != Z_OK || compressLength <= 0)
 		{
 			delete[] compressBuffer;
 			g_Log.EventError("Compress failed with error %d when generating gump. Using old packet.\n", error);
-
-			writeStandardControls(controls, controlCount, texts, textCount);
+			writeStandardControls(controls, texts);
 			return;
 		}
 
-		writeInt32(compressLength + 4);
-		writeInt32(controlLengthActual);
-		writeData(compressBuffer, compressLength);
+		writeInt32((dword)compressLength + 4u);
+		writeInt32(controlLengthCurrent);
+		writeData(compressBuffer, (uint)compressLength);
 
 		delete[] compressBuffer;
 	}
+    else
+    {
+        writeInt32(0);
+    }
 
+    if (texts)
 	{
 		// compress and write texts
 		uint textsPosition(getPosition());
 
-		for (uint i = 0; i < textCount; i++)
+		for (CSString const& txt : *texts)
 		{
-			writeInt16((word)(texts[i].GetLength()));
-			writeStringFixedNETUTF16(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
+			writeInt16((word)(txt.GetLength()));
+			writeStringFixedNETUTF16(txt.GetBuffer(), txt.GetLength());
 		}
 
 		uint textsLength = getPosition() - textsPosition;
 
-		z_uLong compressLength = z_compressBound((z_uLong)textsLength);
+		uLong compressLength = ::compressBound((uLong)textsLength);
 		byte* compressBuffer = new byte[compressLength];
 
-		int error = z_compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], (z_uLong)textsLength, Z_DEFAULT_COMPRESSION);
+		int error = ::compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], (uLong)textsLength, Z_DEFAULT_COMPRESSION);
 		if (error != Z_OK || compressLength <= 0)
 		{
 			delete[] compressBuffer;
-
 			g_Log.EventError("Compress failed with error %d when generating gump. Using old packet.\n", error);
-
-			writeStandardControls(controls, controlCount, texts, textCount);
+			writeStandardControls(controls, texts);
 			return;
 		}
 
 		seek(textsPosition);
-		writeInt32((dword)textCount);
+		writeInt32((dword)texts->size());
 		writeInt32(compressLength + 4);
 		writeInt32((dword)textsLength);
 		writeData(compressBuffer, compressLength);
@@ -3667,7 +3672,7 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, uint co
 	}
 }
 
-void PacketGumpDialog::writeStandardControls(const CSString* controls, uint controlCount, const CSString* texts, uint textCount)
+void PacketGumpDialog::writeStandardControls(std::vector<CSString> const* controls, std::vector<CSString> const* texts)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeStandardControls");
 
@@ -3680,27 +3685,41 @@ void PacketGumpDialog::writeStandardControls(const CSString* controls, uint cont
 	uint controlLengthPosition(getPosition());
 	skip(2);
 
-	// write controls
-	for (uint i = 0; i < controlCount; i++)
-	{
-		writeCharASCII('{');
-		writeStringASCII(static_cast<lpctstr>(controls[i]), false);
-		writeCharASCII('}');
-	}
+    if (controls)
+    {
+        // write controls
+        for (CSString const& ctrl : *controls)
+        {
+            writeCharASCII('{');
+            writeStringASCII(ctrl.GetBuffer(), false);
+            writeCharASCII('}');
+        }
 
-	// write controls length
-	uint endPosition(getPosition());
-	seek(controlLengthPosition);
-	writeInt16((word)(endPosition - controlLengthPosition - 2));
-	seek(endPosition);
+        // write controls length
+        uint endPosition(getPosition());
+        seek(controlLengthPosition);
+        writeInt16((word)(endPosition - controlLengthPosition - 2));
+        seek(endPosition);
+    }
+    else
+    {
+        writeInt16(0);
+    }
 
-	// write texts
-	writeInt16((word)(textCount));
-	for (uint i = 0; i < textCount; i++)
-	{
-		writeInt16((word)(texts[i].GetLength()));
-		writeStringFixedNETUTF16(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
-	}
+    if (texts)
+    {
+        // write texts
+        writeInt16((word)texts->size());
+        for (CSString const& txt : *texts)
+        {
+            writeInt16((word)txt.GetLength());
+            writeStringFixedNETUTF16(txt.GetBuffer(), txt.GetLength());
+        }
+    }
+    else
+    {
+        writeInt16(0);
+    }
 }
 
 
@@ -3835,7 +3854,7 @@ PacketArrowQuest::PacketArrowQuest(const CClient* target, int x, int y, int id) 
 	writeInt16((word)x);
 	writeInt16((word)y);
 
-	if (target->GetNetState()->isClientVersion(MINCLIVER_HS) || target->GetNetState()->isClientEnhanced())
+	if (target->GetNetState()->isClientVersionNumber(MINCLIVER_HS) || target->GetNetState()->isClientEnhanced())
 		writeInt32(id);
 
 	trim();
@@ -4052,7 +4071,7 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, g_Cfg.m_iMapViewSize))
 		return false;
 
 	return true;
@@ -4071,7 +4090,7 @@ PacketDisplayPopup::PacketDisplayPopup(const CClient* target, CUID uid) : Packet
 	ADDTOCALLSTACK("PacketDisplayPopup::PacketDisplayPopup");
 
 	m_popupCount = 0;
-	m_newPacketFormat = target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() || target->GetNetState()->isClientVersion(MINCLIVER_NEWCONTEXTMENU);
+	m_newPacketFormat = target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() || target->GetNetState()->isClientVersionNumber(MINCLIVER_NEWCONTEXTMENU);
 
 	if (m_newPacketFormat)
 		writeInt16(2);
@@ -4691,7 +4710,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT) && !character->IsPriv(PRIV_ALLSHOW))
+	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, g_Cfg.m_iMapViewSize) && !character->IsPriv(PRIV_ALLSHOW))
 		return false;
 
 	if (hasExpired(30 * MSECS_PER_SEC))
@@ -4768,10 +4787,10 @@ bool PacketHouseDesign::writePlaneData(int plane, int itemCount, byte* data, int
 	ADDTOCALLSTACK("PacketHouseDesign::writePlaneData");
 
 	// compress data
-	z_uLong compressLength = z_compressBound(dataSize);
+	uLong compressLength = ::compressBound(dataSize);
 	byte* compressBuffer = new byte[compressLength];
 
-	int error = z_compress2(compressBuffer, &compressLength, data, dataSize, Z_DEFAULT_COMPRESSION);
+	int error = ::compress2(compressBuffer, &compressLength, data, dataSize, Z_DEFAULT_COMPRESSION);
 	if ( error != Z_OK )
 	{
 		// an error occured with this floor, but we should be able to continue to the next without problems
@@ -4829,10 +4848,10 @@ void PacketHouseDesign::flushStairData(void)
 	m_stairCount = 0;
 
 	// compress data
-	z_uLong compressLength = z_compressBound(stairSize);
+	uLong compressLength = ::compressBound(stairSize);
 	byte* compressBuffer = new byte[compressLength];
 
-	int error = z_compress2(compressBuffer, &compressLength, (byte*)m_stairBuffer, stairSize, Z_DEFAULT_COMPRESSION);
+	int error = ::compress2(compressBuffer, &compressLength, (byte*)m_stairBuffer, stairSize, Z_DEFAULT_COMPRESSION);
 	if ( error != Z_OK )
 	{
 		// an error occured with this block, but we should be able to continue to the next without problems
@@ -4910,7 +4929,7 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (object == nullptr || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, g_Cfg.m_iMapViewSize))
 		return false;
 
 	return true;
@@ -5163,7 +5182,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	}
 	else
 	{
-		source = (item->Can(CAN_I_DAMAGEABLE) && ns->isClientVersion(MINCLIVER_STATUS_V6)) ? Damageable : TileData;
+		source = (item->Can(CAN_I_DAMAGEABLE) && ns->isClientVersionNumber(MINCLIVER_STATUS_V6)) ? Damageable : TileData;
 		id = (ITEMID_TYPE)(id & 0xFFFF);
 	}
 
@@ -5181,7 +5200,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CItem *item)
 	writeInt16(hue);
 	writeByte(flags);
 
-	if ( ns->isClientVersion(MINCLIVER_HS) )
+	if ( ns->isClientVersionNumber(MINCLIVER_HS) )
 		writeInt16(0);		// 0 = World Item, 1 = Player Item (why should a item on the ground be defined as player item? and what is the difference?)
 
 	trim();
@@ -5211,7 +5230,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, const CChar* mobil
 	writeInt16(hue);
 	writeByte(0);
 
-	if (target->GetNetState()->isClientVersion(MINCLIVER_HS))
+	if (target->GetNetState()->isClientVersionNumber(MINCLIVER_HS))
 		writeInt16(0);
 
 	trim();

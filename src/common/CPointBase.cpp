@@ -7,6 +7,7 @@
 #include "CLog.h"
 #include "CRect.h"
 #include "CPointBase.h"
+#include <cmath>
 
 
 DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
@@ -109,16 +110,18 @@ bool CPointBase::operator!= ( const CPointBase & pt ) const noexcept
 	return ( ! ( *this == pt ));
 }
 
-const CPointBase& CPointBase::operator+= ( const CPointBase & pt ) noexcept
+const CPointBase& CPointBase::operator+= ( const CPointBase & pt )
 {
+    ASSERT(m_map == pt.m_map);
 	m_x += pt.m_x;
 	m_y += pt.m_y;
 	m_z += pt.m_z;
 	return( * this );
 }
 
-const CPointBase& CPointBase::operator-= ( const CPointBase & pt ) noexcept
+const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
 {
+    ASSERT(m_map == pt.m_map);
 	m_x -= pt.m_x;
 	m_y -= pt.m_y;
 	m_z -= pt.m_z;
@@ -138,27 +141,62 @@ void CPointBase::ZeroPoint() noexcept
 	m_map = 0;
 }
 
-int CPointBase::GetDistZ( const CPointBase & pt ) const noexcept
-{
-	return SphereAbs(m_z - pt.m_z);
-}
-
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
 {
-    // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
+    // This method is one of the most called in the whole app (maybe the most). ADDTOCALLSTACK unneededly sucks cpu.
+    // This has to be optimized as much as possible.
     //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
 
-	// Do not consider z or m_map.
-    const int dx = SphereAbs(m_x - pt.m_x);
-    const int dy = SphereAbs(m_y - pt.m_y);
+    switch (g_Cfg.m_iDistanceFormula)
+    {
+        default:
+        case DISTANCE_FORMULA_NODIAGONAL_NOZ:
+        {
+            /*
+            // Do not touch this "abs" call, it's the fastest function to do so.
+            const int dx = abs(m_x - pt.m_x);
+            const int dy = abs(m_y - pt.m_y);
+            */
 
-	return maximum(dx, dy);
+            /*
+            // This is faster than the above.
+            const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+            const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+            */
+            // return maximum(dx, dy);
 
-	// What the heck?
-	/*double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy)));
+            // This is even faster.
+            const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
+            const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
+            return (dx > dy) * dx + (dx < dy) * dy;
+            
+        }
+        case DISTANCE_FORMULA_DIAGONAL_NOZ:
+        {
+            const int dx = m_x - pt.m_x;
+            const int dy = m_y - pt.m_y;
 
-	return (int)(( (dist - floor(dist)) > 0.5 ) ? (ceil(dist)) : (floor(dist)));*/
-	// Return the real distance return((int) sqrt(dx*dx+dy*dy+dz*dz));
+            const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy)));
+            //const double dist = hypot(dx, dy);  // To test if faster
+
+            return (int)round(dist);
+
+            //const double flr = floor(dist);
+            //return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
+
+            // Test, avoids another function call?
+            // return (((dist - floor(dist)) > 0.5) ? int(dist) : int(dist + 1));
+        }
+        case DISTANCE_FORMULA_DIAGONAL_Z:
+        {
+            /*
+            const int dz = m_z - pt.m_z;
+            const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy) + (dz * dz)));
+            return (int)(((dist - floor(dist)) > 0.5) ? ceil(dist) : floor(dist));
+            */
+            return GetDist3D(pt);
+        }
+    }
 }
 
 int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance between points
@@ -167,19 +205,21 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist");
 
 	// Get the basic 2d distance.
-	if ( !pt.IsValidPoint() )
+	if ( !pt.IsValidPoint() || (pt.m_map != m_map))
 		return INT16_MAX;
-	if ( pt.m_map != m_map )
-		return INT16_MAX;
-
 	return GetDistBase(pt);
 }
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	const int dx = SphereAbs(m_x - pt.m_x);
-	const int dy = SphereAbs(m_y - pt.m_y);
-	return maximum(dx, dy);
+	//const int dx = abs(m_x - pt.m_x);
+	//const int dy = abs(m_y - pt.m_y);
+    //const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+    //const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+    //return maximum(dx, dy);
+    const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
+    const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
+    return (dx > dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -189,29 +229,47 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
 	if ( pt.m_map != m_map )
 		return INT16_MAX;
 
-	const int dx = SphereAbs(m_x - pt.m_x);
-	const int dy = SphereAbs(m_y - pt.m_y);
-	return maximum(dx, dy);
+	//const int dx = abs(m_x - pt.m_x);
+	//const int dy = abs(m_y - pt.m_y);
+    //const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+    //const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+    //return maximum(dx, dy);
+    const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
+    const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
+    return (dx > dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
 {
-	// OK, 1 unit of Z is not the same (real life) distance as 1 unit of X (or Y)
-	const int dist = GetDist(pt);
+    switch (g_Cfg.m_iDistanceFormula)
+    {
+        default:
+        case DISTANCE_FORMULA_NODIAGONAL_NOZ:
+        case DISTANCE_FORMULA_DIAGONAL_NOZ:
+        {
+            // OK, 1 unit of Z is not the same (real life) distance as 1 unit of X (or Y)
+            const int dist = GetDist(pt);
 
-	// Get the deltas and correct the Z for height first
-	const int dz = (GetDistZ(pt) / (PLAYER_HEIGHT / 2)); // Take player height into consideration
+            // Get the deltas and correct the Z for height first
+            //int dz = (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
+            int dz = (m_z > pt.m_z) * (m_z - pt.m_z) + (m_z < pt.m_z) * (pt.m_z - m_z);
+            dz /= (PLAYER_HEIGHT / 2); // Take player height into consideration
 
-	return maximum(dz, dist);
-	// What the heck?
-	/*double realdist = sqrt(static_cast<double>((dist * dist) + (dz * dz)));
+            //return maximum(dz, dist);
+            return (dz > dist) * dz + (dz < dist) * dist;
+        }
+        case DISTANCE_FORMULA_DIAGONAL_Z:
+        {
+            const int dx = m_x - pt.m_x;
+            const int dy = m_y - pt.m_y;
+            const int dz = m_z - pt.m_z;
+            // Should we take player height into consideration also here?
+            //dz /= (PLAYER_HEIGHT / 2);
 
-	return (int)(( (realdist - floor(realdist)) > 0.5 ) ? (ceil(realdist)) : (floor(realdist)));*/
-}
-
-bool CPointBase::IsValidZ() const noexcept
-{
-	return ( (m_z > -UO_SIZE_Z) && (m_z < UO_SIZE_Z) );
+            const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy) + (dz * dz)));
+            return (int)round(dist);
+        }
+    }
 }
 
 bool CPointBase::IsValidXY() const noexcept
@@ -249,8 +307,9 @@ void CPointBase::ValidatePoint() noexcept
 		m_y = iMaxY - 1;
 }
 
-bool CPointBase::IsSame2D( const CPointBase & pt ) const noexcept
+bool CPointBase::IsSame2D( const CPointBase & pt ) const
 {
+    ASSERT(m_map == pt.m_map);
 	return ( m_x == pt.m_x && m_y == pt.m_y );
 }
 
@@ -895,7 +954,9 @@ int CPointBase::Read( tchar * pszVal )
 
 CSector * CPointBase::GetSector() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
+    // This function is called SO frequently that's better to not add it to the call stack.
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
+
 	if ( !IsValidXY() )
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
@@ -925,7 +986,9 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
+    // This function is called SO frequently that's better to not add it to the call stack.
+	// ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
+
 	if ( !IsValidPoint() )
 		return 0;
 

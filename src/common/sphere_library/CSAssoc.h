@@ -62,7 +62,7 @@ struct CElementDef
 {
 	static const int sm_Lengths[ELEM_QTY];
 	ELEM_TYPE m_type;
-	uint	m_offset;	// The offset into the class instance for this item.
+	size_t	m_offset;	// The offset into the class instance for this item.
 
 	// get structure value.
 	void * GetValPtr( const void * pBaseInst ) const;

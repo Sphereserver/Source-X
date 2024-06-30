@@ -13,7 +13,7 @@
 	#define SPHERE_BUILD_VER			__GITREVISION__
 	#define SPHERE_BUILD_BRANCH_NAME	__GITBRANCH__
 #else
-	#define SPHERE_BUILD_VER			0
+	#define SPHERE_BUILD_VER			-1
 	#define SPHERE_BUILD_BRANCH_NAME	"no-git"
 #endif
 
@@ -52,8 +52,12 @@
 #define SPHERE_BUILD_NAME_VER_PREFIX    "Version "
 #define SPHERE_BUILD_INFO_STR			SPHERE_VER_NAME SPHERE_BUILD_TYPE_STR
 
+#ifdef _GITVERSION
 // For security purposes, do NOT show the branch/revision to players or send it to a client or assistant, since those can be catched.
 #define SPHERE_BUILD_INFO_GIT_STR		SPHERE_VER_NAME SPHERE_BUILD_TYPE_STR " (" SPHERE_BUILD_BRANCH_NAME ", rev " SPHERE_BUILD_VER_STR ")"
+#else
+#define SPHERE_BUILD_INFO_GIT_STR		SPHERE_VER_NAME SPHERE_BUILD_TYPE_STR
+#endif
 
 
 #endif // _INC_SPHEREVERSION_H

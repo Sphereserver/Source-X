@@ -40,7 +40,7 @@ void CSectorList::Init()
 
 		MapSectorsData& sd = _SectorData[iMap];
 		sd._iSectorSize = sd._iSectorColumns = sd._iSectorRows = sd._iSectorQty = 0;
-		sd._pSectors.release();
+		sd._pSectors.reset();
 
 		if (!g_MapList.IsMapSupported(iMap))
 			continue;

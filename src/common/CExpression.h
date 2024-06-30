@@ -10,13 +10,14 @@
 #ifndef _INC_CEXPRSSION_H
 #define _INC_CEXPRSSION_H
 
-#include "common.h"
+#include "sphere_library/CSRand.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 
+
 #undef ISWHITESPACE
 template <typename T>
-bool IsWhitespace(const T ch) noexcept {
+inline bool IsWhitespace(const T ch) noexcept {
     if constexpr (std::is_same_v<T, char>) {
         if (static_cast<unsigned char>(ch) == 0xA0)
             return true;
@@ -190,9 +191,8 @@ public:
 	CExpression();
 	~CExpression();
 
-private:
-	CExpression(const CExpression& copy);
-	CExpression& operator=(const CExpression& other);
+	CExpression(const CExpression& copy) = delete;
+	CExpression& operator=(const CExpression& other) = delete;
 } g_Exp;
 
 
@@ -206,19 +206,32 @@ bool IsStrNumericDec( lpctstr pszTest );
 bool IsStrNumeric( lpctstr pszTest );
 bool IsStrEmpty( lpctstr pszTest );
 
+// strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
+int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError = true);
 
 // Numeric formulas
-template<typename T> inline T SphereAbs(T x) noexcept
+template<typename T> inline T SphereAbs(const T x) noexcept
 {
-    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
-    static_assert(std::is_signed<T>::value, "Trying to get the absolute value of an unsigned number?");
-	return (x<0) ? -x : x;
+    static_assert(std::is_arithmetic_v<T>, "Invalid data type.");
+    static_assert(std::is_signed_v<T>, "Trying to get the absolute value of an unsigned number?");
+
+    // This need to be the fastest (without optimizations this might be slower than calling the plain *abs function ?).
+    if constexpr (std::is_same_v<T, int8_t>)
+        return static_cast<int8_t>(abs(static_cast<int32_t>(x)));
+    else if constexpr (std::is_same_v<T, int16_t>)
+        return static_cast<int16_t>(abs(static_cast<int32_t>(x)));
+    else if constexpr (std::is_same_v<T, int32_t>)
+        return abs(x);
+	else
+	{
+		static_assert (std::is_same_v<T, int64_t>, "Forgot to cast the type to a fixed size integer like int32_t? Or trying to use this on an unsigned number?");
+		return llabs(x);
+	}
+
+    // This is good, but standard C functions might be even faster
+	// return (x<0) ? -x : x;
 }
 
-int64 Calc_GetRandLLVal( int64 iQty );					// Get a random value between 0 and iQty - 1
-int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
-int32 Calc_GetRandVal( int32 iQty );					// Get a random value between 0 and iQty - 1
-int32 Calc_GetRandVal2( int32 iMin, int32 iMax );
 int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
@@ -254,7 +267,7 @@ int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (sta
 #define Exp_GetU32Val( pa )		static_cast<uint32>	(g_Exp.GetVal( pa ))
 #define Exp_GetU64Val( pa )		static_cast<uint64>	(g_Exp.GetVal( pa ))
 
-#ifdef _32BITS
+#if INTPTR_MAX == INT32_MAX
 	#define Exp_GetSTVal		Exp_GetU32Val
 	#define Exp_GetSTSingle		Exp_GetUSingle
 #else

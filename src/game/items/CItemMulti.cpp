@@ -6,6 +6,7 @@
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItemMulti.h"
 #include "CItemShip.h"
@@ -228,6 +229,11 @@ bool CItemMulti::MultiRealizeRegion()
     {
         dwFlags |= REGION_FLAG_SHIP;
     }
+    else if (IsType(IT_MULTI) || IsType(IT_MULTI_CUSTOM))
+    {
+        if (CItemBase::IsID_House(GetID()))
+            dwFlags |= REGION_FLAG_HOUSE;
+    }
     else
     {
         dwFlags |= pRegionBack->GetRegionFlags(); // Houses get some of the attribs of the land around it.
@@ -241,11 +247,11 @@ bool CItemMulti::MultiRealizeRegion()
 
     //We have to update the Characters if not moving around like Player Vendors.
     //Otherwise, when you reboot server, the region.name of the characters returns as Region name instead of multis.
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CChar* pChar = Area.GetChar();
+        CChar* pChar = Area->GetChar();
         if (pChar == nullptr) //Invalid char? Ignore.
         {
             break;
@@ -272,11 +278,11 @@ void CItemMulti::MultiUnRealizeRegion()
     m_pRegion->UnRealizeRegion();
 
     // find all creatures in the region and remove this from them.
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CChar * pChar = Area.GetChar();
+        CChar * pChar = Area->GetChar();
         if (pChar == nullptr)
         {
             break;
@@ -458,11 +464,11 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
         return nullptr;
     }
 
-    CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CItem * pItem = Area.GetItem();
+        CItem * pItem = Area->GetItem();
         if (pItem == nullptr)
         {
             return nullptr;
@@ -1037,12 +1043,12 @@ void CItemMulti::Eject(const CUID& uidChar)
 
 void CItemMulti::EjectAll(CUID uidCharNoTp)
 {
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
+    Area->SetSearchSquare(true);
     CChar *pCharNoTp = uidCharNoTp.CharFind();
     for (;;)
     {
-        CChar * pChar = Area.GetChar();
+        CChar * pChar = Area->GetChar();
         if (pChar == nullptr)
         {
             break;
@@ -1334,11 +1340,12 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     {
         ptArea = m_pRegion->m_pt;
     }
-    CWorldSearch Area(ptArea, Multi_GetDistanceMax());    // largest area.
-    Area.SetSearchSquare(true);
+
+    auto Area = CWorldSearchHolder::GetInstance(ptArea, Multi_GetDistanceMax());    // largest area.
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CItem * pItem = Area.GetItem();
+        CItem * pItem = Area->GetItem();
         if (pItem == nullptr)
         {
             break;
@@ -1374,7 +1381,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
                 if (fTransferAddons)    // Shall be transfered, but addons needs an special transfer code by redeeding.
                 {
                     static_cast<CItemMulti*>(pItem)->Redeed(false, false);
-                    Area.RestartSearch();    // we removed an item and this will mess the search loop, so restart to fix it.
+                    Area->RestartSearch();    // we removed an item and this will mess the search loop, so restart to fix it.
                     continue;
                 }
                 else
@@ -2413,7 +2420,8 @@ enum SHL_TYPE
     SHL_ADDACCESS,
     SHL_ADDADDON,
     SHL_ADDBAN,
-    SHL_ADDCOMP,
+    SHL_ADDCOMP, //Kept for backward compatibility.
+    SHL_ADDCOMPONENT, //It was defined as ADDCOMPONENT in changelog.
     SHL_ADDCOOWNER,
     SHL_ADDFRIEND,
     SHL_ADDKEY,
@@ -2464,6 +2472,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "ADDADDON",
     "ADDBAN",
     "ADDCOMP",
+    "ADDCOMPONENT", // Added because it's defined as ADDCOMPONENT in changelog, but added as ADDCOMP
     "ADDCOOWNER",
     "ADDFRIEND",
     "ADDKEY",
@@ -2539,6 +2548,7 @@ void CItemMulti::r_Write(CScript & s)
             }
         }
     }
+
     if (!_lFriends.empty())
     {
         for (const CUID& uid : _lFriends)
@@ -2547,6 +2557,24 @@ void CItemMulti::r_Write(CScript & s)
             {
                 s.WriteKeyHex("ADDFRIEND", (dword)uid);
             }
+        }
+    }
+
+    if (!_lAccesses.empty())
+    {
+        for (const CUID& uid : _lAccesses)
+        {
+            if (uid.IsValidUID())
+                s.WriteKeyHex("ADDACCESS", (dword)uid);
+        }
+    }
+
+    if (!_lBans.empty())
+    {
+        for (const CUID& uid : _lBans)
+        {
+            if (uid.IsValidUID())
+                s.WriteKeyHex("ADDBAN", (dword)uid);
         }
     }
 
@@ -2660,6 +2688,18 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                 }
             }
             sVal.FormatVal(0);
+            break;
+        }
+        case SHL_REGION:
+        {
+            if (m_pRegion != nullptr)
+            {
+                if (!IsStrEmpty(ptcKey))
+                    return m_pRegion->r_WriteVal(ptcKey, sVal, pSrc);
+                sVal.FormatHex(m_pRegion->GetResourceID().GetObjUID());
+            }
+            else
+                sVal.FormatHex(0);
             break;
         }
         case SHL_OWNER:
@@ -3072,6 +3112,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
 
         // House Storage
         case SHL_ADDCOMP:
+        case SHL_ADDCOMPONENT:
         {
             AddComponent(CUID(s.GetArgDWVal()));
             break;
@@ -3202,8 +3243,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     * let's remove that difference.
     * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
     */
-    if (pMultiDef && (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON)))
-    // or is this happening only for houses? if (CItemBase::IsID_House(pItemDef->GetID()))
+    if (pMultiDef && CItemBase::IsID_Multi(pItemDef->GetID())) // It only happens for real multis that coming from mul/uop files.
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
     }
@@ -3234,11 +3274,11 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
             CPointMap ptn = pt;             // A copy to work on.
 
             // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
-            CWorldSearch Area(pt, std::max(rect.GetWidth(), rect.GetHeight()));
-            Area.SetSearchSquare(true);
+            auto Area = CWorldSearchHolder::GetInstance(pt, std::max(rect.GetWidth(), rect.GetHeight()));
+            Area->SetSearchSquare(true);
             for (;;)
             {
-                CChar * pCharSearch = Area.GetChar();
+                CChar * pCharSearch = Area->GetChar();
                 if (pCharSearch == nullptr)
                 {
                     break;
@@ -3284,14 +3324,14 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
                         return nullptr;
                     }
 
-                    dword dwBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK; // Flags to check: Ships should check for swimable tiles.
+                    uint64 uiBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK; // Flags to check: Ships should check for swimable tiles.
                     /*
                     * Intensive check returning the top Z point of the given X, Y coords
                     * It uses the dwBlockBlacks passed to check the new Z level.
                     * Also update those dwBlockFlags with all the flags found at the given location.
                     * 3rd param is set to also update Z with any house component found in the proccess.
                     */
-                    ptn.m_z = CWorldMap::GetHeightPoint2(ptn, dwBlockFlags, true);
+                    ptn.m_z = CWorldMap::GetHeightPoint2(ptn, uiBlockFlags, true);
                     if (abs(ptn.m_z - pt.m_z) > 4)  // Difference of Z > 4? so much, stop.
                     {
                         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);
@@ -3299,13 +3339,13 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
                     }
                     if (fShip)
                     {
-                        if (!(dwBlockFlags & CAN_I_WATER))  // Ships must be placed on water.
+                        if (!(uiBlockFlags & CAN_I_WATER))  // Ships must be placed on water.
                         {
                             pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_SHIPW);
                             return nullptr;
                         }
                     }
-                    else if (dwBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))  // Did the intensive check find some undesired flags? Stop.
+                    else if (uiBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))  // Did the intensive check find some undesired flags? Stop.
                     {
                         pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BLOCKED);
                         return nullptr;
@@ -3357,7 +3397,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         return nullptr;
     }
 
-    pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
+    pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->GetAttrRaw() & (ATTR_MAGIC | ATTR_INVIS)));
     pItemNew->SetHue(pDeed->GetHue());
     pItemNew->MoveToUpdate(pt);
 
@@ -3380,7 +3420,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     }
     else if (pItemDef->IsType(IT_SHIP))
     {
-        pItemNew->Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
+        pItemNew->Sound(g_Rand.GetVal(2) ? 0x12 : 0x13);
     }
     return pItemNew;
 }
@@ -3613,7 +3653,7 @@ HOUSE_PRIV CMultiStorage::GetPriv(const CUID& uidMulti)
 {
     ADDTOCALLSTACK("CMultiStorage::GetPrivMulti");
     const CItemMulti *pMulti = static_cast<CItemMulti*>(uidMulti.ItemFind());
-    if (pMulti->IsType(IT_MULTI))
+    if (pMulti->IsType(IT_MULTI) || pMulti->IsType(IT_MULTI_CUSTOM))
     {
         return _lHouses[uidMulti];
     }

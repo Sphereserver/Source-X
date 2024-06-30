@@ -37,7 +37,7 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
     ADDTOCALLSTACK("CSFileText::_Open");
 
     // Open a text file.
-    
+
 	if ( !ptcFilename )
         ptcFilename = _strFileName.GetBuffer();
     else
@@ -45,10 +45,10 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
     if ( _strFileName.IsEmpty() )
         return false;
-	
+
     _uiMode = uiModeFlags;
     lpctstr ptcModeStr = _GetModeStr();
-  
+
     _pStream = fopen( ptcFilename, ptcModeStr );
     if ( _pStream == nullptr )
         return false;

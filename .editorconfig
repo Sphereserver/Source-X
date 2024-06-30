@@ -4,17 +4,56 @@ root = true
 # Unix-style newlines with a newline ending every file
 [*]
 charset = utf-8
-trim_trailing_whitespace = true
 end_of_line = lf
+trim_trailing_whitespace = true
 insert_final_newline = true
 
 # Tab indentation (no size specified)
 [Makefile]
 indent_style = tab
 
-[*.{c,h,cpp,hpp}]
+[*.{c,h,cpp,cxx,hpp}]
+charset = utf-8
 indent_size = 4
 indent_style = space
-cpp_indent_case_contents_when_block = true
-cpp_new_line_before_open_brace_namespace = same_line
-cpp_indent_namespace_contents = true
+trim_trailing_whitespace = true
+insert_final_newline = true
+end_of_line = lf
+cpp_new_line_before_open_brace_namespace = new_line
+cpp_indent_preserve_comments = true
+cpp_indent_namespace_contents = false
+cpp_indent_case_labels = true
+cpp_indent_case_contents = false
+cpp_indent_case_contents_when_block = false
+cpp_allow_comment_after_lbrace = true
+cpp_simple_block_style = do_not_change
+cpp_space_before_function_open_parenthesis = remove
+cpp_space_within_parameter_list_parentheses = false
+cpp_space_between_empty_parameter_list_parentheses = false
+cpp_space_after_keywords_in_control_flow_statements = true
+cpp_space_within_control_flow_statement_parentheses = false
+cpp_space_before_lambda_open_parenthesis = false
+cpp_space_within_cast_parentheses = false
+cpp_space_after_cast_close_parenthesis = false
+cpp_space_within_expression_parentheses = false
+cpp_space_before_initializer_list_open_brace = false
+cpp_space_within_initializer_list_braces = true
+cpp_space_before_open_square_bracket = false
+cpp_space_within_square_brackets = false
+cpp_space_before_empty_square_brackets = false
+cpp_space_between_empty_square_brackets = false
+cpp_space_group_square_brackets = true
+cpp_space_within_lambda_brackets = false
+cpp_space_between_empty_lambda_brackets = false
+cpp_space_before_comma = false
+cpp_space_after_comma = true
+cpp_space_remove_around_member_operators = false
+cpp_space_before_inheritance_colon = true
+cpp_space_before_constructor_colon = true
+cpp_space_remove_before_semicolon = true
+cpp_space_after_semicolon = false
+cpp_space_remove_around_unary_operator = false
+cpp_space_around_binary_operator = ignore
+cpp_space_around_assignment_operator = insert
+cpp_space_pointer_reference_alignment = ignore
+cpp_space_around_ternary_operator = insert

@@ -7,11 +7,15 @@
 #include "../CExpression.h"
 #include "../CScript.h"
 #include "../CLog.h"
+#include "../CUOClientVersion.h"
 #include "CCrypto.h"
 
 // For TwoFish and MD5 we only provide an interface, so we include the headers of the code doing all the related crypto stuff
-#include "twofish/twofish.h"
+extern "C" {
+#include <twofish/twofish.h>
+}
 #include "CMD5.h"
+
 
 
 // ===============================================================================================================
@@ -36,12 +40,13 @@ void CCryptoKeysHolder::LoadKeyTable(CScript& s)
 
 	while (s.ReadKeyParse())
 	{
-		CCryptoClientKey c;
-		c.m_client = ahextoi(s.GetKey());
-		c.m_key_1 = s.GetArgVal();
-		c.m_key_2 = s.GetArgVal();
-		c.m_EncType = (ENCRYPTION_TYPE)s.GetArgVal();
-		client_keys.emplace_back(std::move(c));
+		client_keys.emplace_back(
+            CCryptoClientKey{
+                .m_client = ahextoi(s.GetKey()),
+                .m_key_1 = s.GetArgDWVal(),
+                .m_key_2 = s.GetArgDWVal(),
+                .m_EncType = (ENCRYPTION_TYPE)s.GetArgVal()
+            });
 	}
 }
 
@@ -55,7 +60,7 @@ void CCryptoKeysHolder::addNoCryptKey(void)
 
 // --
 
-void CCrypto::SetClientVersion( dword iVer )
+void CCrypto::SetClientVerNumber( dword iVer )
 {
 	m_iClientVersion = iVer;
 }
@@ -94,7 +99,7 @@ bool CCrypto::SetEncryptionType( ENCRYPTION_TYPE etWho )
 	return false;
 }
 
-dword CCrypto::GetClientVer() const
+dword CCrypto::GetClientVerNumber() const
 {
 	return m_iClientVersion;
 }
@@ -102,7 +107,7 @@ dword CCrypto::GetClientVer() const
 bool CCrypto::IsValid() const
 {
 	return ( m_iClientVersion > 0 );
-	//return ( (m_iClientVersion > 0) && (m_iClientVersion < 10000000) );	// should be safer? which versions do the Enhanced clients report?
+	//return ( (m_iClientVersion > 0) && (m_iClientVersion < 100'00'000'00) );	// should be safer?
 }
 
 bool CCrypto::IsInit() const
@@ -121,124 +126,27 @@ ENCRYPTION_TYPE CCrypto::GetEncryptionType() const
 }
 
 
-// ---------------------------------------------------------------------------------------------------------------
 // ===============================================================================================================
 // ---------------------------------------------------------------------------------------------------------------
 // ===============================================================================================================
 
-/*
-const word CCrypto::packet_size[0xde] = {
-		0x0068, 0x0005, 0x0007, 0x8000, 0x0002, 0x0005, 0x0005, 0x0007, 0x000e, 0x0005, 0x000b, 0x0007, 0x8000, 0x0003, 0x8000, 0x003d,
-		0x00d7, 0x8000, 0x8000, 0x000a, 0x0006, 0x0009, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0025, 0x8000, 0x0005, 0x0004, 0x0008,
-		0x0013, 0x0008, 0x0003, 0x001a, 0x0007, 0x0014, 0x0005, 0x0002, 0x0005, 0x0001, 0x0005, 0x0002, 0x0002, 0x0011, 0x000f, 0x000a,
-		0x0005, 0x8000, 0x0002, 0x0002, 0x000a, 0x028d, 0x8000, 0x0008, 0x0007, 0x0009, 0x8000, 0x8000, 0x8000, 0x0002, 0x0025, 0x8000,
-		0x00c9, 0x8000, 0x8000, 0x0229, 0x02c9, 0x0005, 0x8000, 0x000b, 0x0049, 0x005d, 0x0005, 0x0009, 0x8000, 0x8000, 0x0006, 0x0002,
-		0x8000, 0x8000, 0x8000, 0x0002, 0x000c, 0x0001, 0x000b, 0x006e, 0x006a, 0x8000, 0x8000, 0x0004, 0x0002, 0x0049, 0x8000, 0x0031,
-		0x0005, 0x0009, 0x000f, 0x000d, 0x0001, 0x0004, 0x8000, 0x0015, 0x8000, 0x8000, 0x0003, 0x0009, 0x0013, 0x0003, 0x000e, 0x8000,
-		0x001c, 0x8000, 0x0005, 0x0002, 0x8000, 0x0023, 0x0010, 0x0011, 0x8000, 0x0009, 0x8000, 0x0002, 0x8000, 0x000d, 0x0002, 0x8000,
-		0x003e, 0x8000, 0x0002, 0x0027, 0x0045, 0x0002, 0x8000, 0x8000, 0x0042, 0x8000, 0x8000, 0x8000, 0x000b, 0x8000, 0x8000, 0x8000,
-		0x0013, 0x0041, 0x8000, 0x0063, 0x8000, 0x0009, 0x8000, 0x0002, 0x8000, 0x001a, 0x8000, 0x0102, 0x0135, 0x0033, 0x8000, 0x8000,
-		0x0003, 0x0009, 0x0009, 0x0009, 0x0095, 0x8000, 0x8000, 0x0004, 0x8000, 0x8000, 0x0005, 0x8000, 0x8000, 0x8000, 0x8000, 0x000d,
-		0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0040, 0x0009, 0x8000, 0x8000, 0x0003, 0x0006, 0x0009, 0x0003, 0x8000, 0x8000, 0x8000,
-		0x0024, 0x8000, 0x8000, 0x8000, 0x0006, 0x00cb, 0x0001, 0x0031, 0x0002, 0x0006, 0x0006, 0x0007, 0x8000, 0x0001, 0x8000, 0x004e,
-		0x8000, 0x0002, 0x0019, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x010c, 0x8000, 0x8000, 0x0009, 0x8000
-};
 
-int CCrypto::GetPacketSize(byte packet) // static
+std::string CCrypto::GetClientVer() const
 {
-	if ( packet >= 0xde )
-		return -1;
-
-	return( packet_size[packet] );
-}
-*/
-
-// ===============================================================================================================
-// ---------------------------------------------------------------------------------------------------------------
-// ===============================================================================================================
-
-int CCrypto::GetVerFromString( lpctstr pszVersion )
-{
-	ADDTOCALLSTACK("CCrypt::GetVerFromString");
-	// Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
-
-	if ( (pszVersion == nullptr) || (*pszVersion == '\0') )
-		return 0;
-
-	byte iLetter = 0;
-	size_t iMax = strlen(pszVersion);
-	for ( size_t i = 0; i < iMax; ++i )
-	{
-		if ( IsAlpha(pszVersion[i]) )
-		{
-			iLetter = (pszVersion[i] - 'a') + 1;
-			break;
-		}
-	}
-
-	tchar *piVer[3];
-	Str_ParseCmds(const_cast<tchar *>(pszVersion), piVer, ARRAY_COUNT(piVer), ".");
-
-	// Don't rely on all values reported by client, because it can be easily faked. Injection users can report any
-	// client version they want, and some custom clients may also report client version as "Custom" instead X.X.Xy
-	if ( !piVer[0] || !piVer[1] || !piVer[2] || (iLetter > 26) )
-		return 0;
-
-	return (atoi(piVer[0]) * 1000000) + (atoi(piVer[1]) * 10000) + (atoi(piVer[2]) * 100) + iLetter;
+	ADDTOCALLSTACK("CCrypto::GetClientVer");
+	return CUOClientVersion(GetClientVerNumber()).GetVersionString();
 }
 
-int CCrypto::GetVerFromNumber( dword maj, dword min, dword rev, dword pat )
+bool CCrypto::SetClientVerFromNumber( dword uiVer, bool fSetEncrypt )
 {
-	ADDTOCALLSTACK("CCrypto::GetVerFromNumber");
-	// Get version of new clients (5.0.6.5+), which report the client version as numbers (eg: 5,0,6,5)
-
-	return (maj * 1000000) + (min * 10000) + (rev * 100) + pat;
-}
-
-char* CCrypto::WriteClientVerString( dword iClientVersion, char * pStr, uint uiBufLen)
-{
-	ADDTOCALLSTACK("CCrypto::WriteClientVerString");
-	if ( iClientVersion >= MINCLIVER_NEWVERSIONING )
-	{
-		snprintf(pStr, uiBufLen, "%u.%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100, iClientVersion % 100);
-	}
-	else
-	{
-		int iVer = snprintf(pStr, uiBufLen, "%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100);
-		char iPatch = iClientVersion % 100;
-		if ( iPatch )
-		{
-			pStr[iVer++] = iPatch + 'a' - 1;
-			pStr[iVer] = '\0';
-		}
-	}
-
-	return pStr;
-}
-
-int CCrypto::GetVersionFromString( lpctstr pszVersion )
-{
-	ADDTOCALLSTACK("CCrypto::GetVersionFromString");
-	return CCrypto::GetVerFromString( pszVersion );
-}
-
-char* CCrypto::WriteClientVer( char * pcStr, uint uiBufLen) const
-{
-	ADDTOCALLSTACK("CCrypto::WriteClientVer");
-	return( CCrypto::WriteClientVerString( GetClientVer(), pcStr, uiBufLen ) );
-}
-
-bool CCrypto::SetClientVerEnum( dword iVer, bool bSetEncrypt )
-{
-	ADDTOCALLSTACK("CCrypto::SetClientVerEnum");
+	ADDTOCALLSTACK("CCrypto::SetClientVerFromNumber");
 	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
-	for (size_t i = 0; i < keys_holder->client_keys.size(); ++i )
+	for (uint i = 0; i < keys_holder->client_keys.size(); ++i )
 	{
 		CCryptoClientKey & key = keys_holder->client_keys[i];
-
-		if ( iVer == key.m_client )
+		if ( uiVer == key.m_client )
 		{
-			if ( SetClientVerIndex( i, bSetEncrypt ))
+			if ( SetClientVerFromKeyIndex( i, fSetEncrypt ))
 				return true;
 		}
 	}
@@ -246,45 +154,42 @@ bool CCrypto::SetClientVerEnum( dword iVer, bool bSetEncrypt )
 	return false;
 }
 
-bool CCrypto::SetClientVerIndex( size_t iVer, bool bSetEncrypt )
+bool CCrypto::SetClientVerFromKeyIndex( uint uiIndex, bool fSetEncrypt )
 {
-	ADDTOCALLSTACK("CCrypto::SetClientVerIndex");
+	ADDTOCALLSTACK("CCrypto::SetClientVerFromKeyIndex");
 	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
 
-	if ( iVer >= keys_holder->client_keys.size() )
+	if ( (size_t)uiIndex >= keys_holder->client_keys.size() )
 		return false;
 
-	CCryptoClientKey & key = keys_holder->client_keys[iVer];
+	CCryptoClientKey & key = keys_holder->client_keys[uiIndex];
 
-	SetClientVersion(key.m_client);
+	SetClientVerNumber(key.m_client);
 	SetMasterKeys(key.m_key_1, key.m_key_2); // Hi - Lo
-	if ( bSetEncrypt )
+	if ( fSetEncrypt )
 		SetEncryptionType(key.m_EncType);
 
 	return true;
 }
 
-void CCrypto::SetClientVer( const CCrypto & crypt )
+void CCrypto::SetClientVerFromOther( const CCrypto & crypt )
 {
-	ADDTOCALLSTACK("CCrypto::SetClientVer");
+	ADDTOCALLSTACK("CCrypto::SetClientVerFromOther");
 	m_fInit = false;
 	m_iClientVersion = crypt.m_iClientVersion;
 	m_MasterHi = crypt.m_MasterHi;
 	m_MasterLo = crypt.m_MasterLo;
 }
 
-bool CCrypto::SetClientVer( lpctstr pszVersion )
+bool CCrypto::SetClientVerFromString( lpctstr pszVersion )
 {
-	ADDTOCALLSTACK("CCrypto::SetClientVer");
-	int iVer = 0;
-
-	iVer = GetVersionFromString(pszVersion);
-
+	ADDTOCALLSTACK("CCrypto::SetClientVerFromString");
+	uint uiVer = CUOClientVersion(pszVersion).GetLegacyVersionNumber();
 	m_fInit = false;
 
-	if ( ! SetClientVerEnum( iVer ) )
+	if ( ! SetClientVerFromNumber( uiVer ) )
 	{
-		DEBUG_ERR(( "Unsupported ClientVersion '%s'/'0x%x'. Use Ignition?\n", pszVersion, iVer ));
+		DEBUG_ERR(( "Unsupported ClientVersion '%s'/'0x%x'. Using Ignition or similar tools?\n", pszVersion, uiVer ));
 		return false;
 	}
 
@@ -307,8 +212,8 @@ CCrypto::CCrypto()
 
 	m_fInit = false;
 	m_fRelayPacket = false;
-	//SetClientVerEnum(client_keys[0][2]);
-	SetClientVerEnum(0);
+	//SetClientVerNumber(client_keys[0][2]);
+	SetClientVerNumber(0u);
 
 	tf_cipher	= new cipherInstance;
 	tf_key		= new keyInstance;
@@ -326,8 +231,8 @@ CCrypto::CCrypto()
 
 CCrypto::~CCrypto()
 {
-	delete tf_cipher;
-	delete tf_key;
+	delete static_cast<cipherInstance*>(tf_cipher);
+	delete static_cast<keyInstance*>(tf_key);
 	delete m_md5_engine;
 }
 
@@ -423,7 +328,7 @@ bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, uint out
 
 	// assume that clients prior to 2.0.4 do not double encrypt
 	// (note: assumption has been made based on the encryption type in spherecrypt.ini, further testing is required!)
-	if ( GetClientVer() < 2000400u )
+	if ( GetClientVerNumber() < 2000400u )
 	{
 		InitBlowFish();
 		InitTwoFish();
@@ -618,10 +523,10 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 	m_seed = dwIP;
 	SetConnectType( CONNECT_LOGIN );
 
-	dword tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
-	dword tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
+	const dword tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
+	const dword tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
 
-	SetClientVerIndex(0);
+	SetClientVerFromKeyIndex(0);
 	SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 
 	CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
@@ -634,14 +539,14 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 #ifdef DEBUG_CRYPT_MSGS
 			DEBUG_ERR(("Unknown client, i = %" PRIuSIZE_T "\n", i));
 #endif
-			SetClientVerIndex(0);
+			SetClientVerFromKeyIndex(0);
 			SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
 			break;
 		}
 
 		SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 		// Set client version properties
-		SetClientVerIndex(i);
+		SetClientVerFromKeyIndex(i);
 
 		// Test Decrypt
 		if (!Decrypt(pRaw.get(), pEvent, MAX_BUFFER, inLen ))
@@ -651,7 +556,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
         }
 
 #ifdef DEBUG_CRYPT_MSGS
-		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
+		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVerNumber(), m_Raw[0], pEvent[0]));
 #endif
 		bool isValid = (pRaw[0] == 0x80 && pRaw[30] == 0x00 && pRaw[60] == 0x00 );
 		if ( isValid )
@@ -693,7 +598,7 @@ bool CCrypto::LoginCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 				}
 
 				// set seed, clientversion, cryptmask
-				SetClientVerIndex(i);
+				SetClientVerFromKeyIndex(i);
 				SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo);
 				break;
 			}
@@ -737,7 +642,7 @@ bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
         }
 
 #ifdef DEBUG_CRYPT_MSGS
-		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
+		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVerNumber(), m_Raw[0], pEvent[0]));
 #endif
 
 		if ( pRaw[0] == 0x91 )
@@ -755,10 +660,10 @@ bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
     {
         const dword tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
         const dword tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
-        SetClientVerIndex(0);
+        SetClientVerFromKeyIndex(0);
 
 		CCryptoKeysHolder* keys_holder = CCryptoKeysHolder::get();
-        for (size_t i = 0;;)
+        for (uint i = 0;;)
         {
             if ( i >= keys_holder->client_keys.size() )
             {
@@ -766,14 +671,14 @@ bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
 #ifdef DEBUG_CRYPT_MSGS
                 DEBUG_ERR(("Unknown client, i = %" PRIuSIZE_T "\n", i));
 #endif
-                SetClientVerIndex(0);
+                SetClientVerFromKeyIndex(0);
 				SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
                 break;
             }
 
             // Set client version properties
 			SetCryptMask(tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
-            SetClientVerIndex(i);
+            SetClientVerFromKeyIndex(i);
             if (GetEncryptionType() != ENC_LOGIN)
             {
                 ++i;
@@ -785,7 +690,7 @@ bool CCrypto::GameCryptStart( dword dwIP, const byte * pEvent, uint inLen )
             {
                 g_Log.EventError("NET-IN: LoginCryptStart failed (decrypt).\n");
 				SetCryptMask( tmp_CryptMaskHi, tmp_CryptMaskLo); // Hi - Lo
-                SetClientVerIndex(0);
+                SetClientVerFromKeyIndex(0);
                 return false;
             }
 

@@ -87,7 +87,7 @@ bool CUOInstall::FindInstall()
 	RegCloseKey( hKey );
 
 #else
-	// LINUX has no registry so we must have the INI file show us where it is installed.
+	// Other OSes have no registry so we must have the INI file show us where it is installed.
 #endif
 	return true;
 }
@@ -264,10 +264,10 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 				{
 					if (g_MapList.IsInitialized(m) || (m == 0)) //Need at least a minimum of map0... (Ben)
 					{
-						int	index = g_MapList.m_mapnum[m];
+                        int	index = g_MapList.m_mapGeoData.maps[m].num;
 						if (index == -1)
 						{
-							g_MapList.m_maps[m] = false;
+							g_MapList.m_mapGeoData.maps[m].enabled = false;
 							continue;
 						}
 
@@ -404,9 +404,9 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 								m_Statics[index].Close();
 
 							if (index == 1 && m_Maps[0].IsFileOpen())
-								g_MapList.m_mapnum[m] = 0;
+								g_MapList.m_mapGeoData.maps[m].num = 0;
 							else
-								g_MapList.m_mapid[m] = 0;
+								g_MapList.m_mapGeoData.maps[m].id = 0;
 						}
 
 						//	mapdif and mapdifl are not required, but if one exists so should
@@ -584,7 +584,13 @@ int CVerDataMul::QCompare(size_t left, dword dwRefIndex) const
 void CVerDataMul::QSort(size_t left, size_t right)
 {
 	ADDTOCALLSTACK("CVerDataMul::QSort");
-	static int iReentrant = 0;
+	static uint uiReentrant = 0;
+	if (uiReentrant > 1'000'000)
+	{
+		g_Log.EventError("VerData QSort iterated over 1 million entries, stopping.\n");
+		return;
+	}
+
 	ASSERT(left <= right);
 	size_t j = left;
 	size_t i = right;
@@ -616,12 +622,12 @@ void CVerDataMul::QSort(size_t left, size_t right)
 
 	} while (j <= i);
 
-	++iReentrant;
+	++uiReentrant;
 	if (left < i)
 		QSort(left, i);
 	if (j < right)
 		QSort(j, right);
-	--iReentrant;
+	--uiReentrant;
 }
 
 void CVerDataMul::Load(CSFile & file)

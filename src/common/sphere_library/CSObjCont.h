@@ -62,15 +62,14 @@ public:
     CSObjCont();
     virtual ~CSObjCont();
 
-private:
     /**
     * @brief No copies allowed.
     */
-    CSObjCont(const CSObjCont& copy);
+    CSObjCont(const CSObjCont& copy) = delete;
     /**
     * @brief No copies allowed.
     */
-    CSObjCont& operator=(const CSObjCont& other);
+    CSObjCont& operator=(const CSObjCont& other) = delete;
     ///@}
 
     /** @name Iterators:
@@ -94,6 +93,9 @@ public:
     inline reverse_iterator rend()   noexcept               { return _Contents.rend();   }
     inline const_reverse_iterator rbegin()  const noexcept  { return _Contents.rbegin(); }
     inline const_reverse_iterator rend()    const noexcept  { return _Contents.rend();   }
+
+    inline size_t size() const noexcept                     { return _Contents.size();   }
+    inline const CSObjContRec *const * data() const noexcept{ return _Contents.data();   }
 
     /**
     * @brief Returns a copy of the CSObjCont base container, which is safe to iterate on even if one of its elements is ::Delete'd.

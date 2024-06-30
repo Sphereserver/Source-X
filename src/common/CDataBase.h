@@ -13,8 +13,8 @@
 #include <vector>
 #include <queue>
 
-#include "../../lib/mariadb/errmsg.h"	// mysql standard include
-#include "../../lib/mariadb/mysql.h"	// this needs to be defined AFTER common.h
+#include <mysql/errmsg.h>	// mysql standard include
+#include <mysql/mysql.h>	// this needs to be defined AFTER common.h
 
 
 #define	MIN_MARIADB_VERSION_ALLOW	30002
@@ -70,7 +70,7 @@ private:
 	typedef std::queue<FunctionArgsPair_t> QueueFunction_t;
 
 protected:
-	bool	m_bConnected;					//	are we online?
+	bool	m_fConnected;					//	are we online?
 	MYSQL	*_myData;						//	mySQL link
 	QueueFunction_t m_QueryArgs;
 

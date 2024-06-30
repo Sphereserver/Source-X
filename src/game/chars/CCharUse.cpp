@@ -7,12 +7,14 @@
 #include "../components/CCSpawn.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
-static const int MASK_RETURN_FOLLOW_LINKS = 0x02;
+static constexpr int MASK_RETURN_FOLLOW_LINKS = 0x02;
+
 
 bool CChar::Use_MultiLockDown( CItem * pItemTarg )
 {
@@ -205,7 +207,7 @@ void CChar::Use_MoonGate( CItem * pItem )
         const CPointMap& ptTop = GetTopPoint();
 		for ( ; i < iCount; ++i )
 		{
-			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
+			if ( ptTop.GetDist(g_Cfg.m_MoonGates[i]) <= g_Cfg.m_iMapViewSize )
 				break;
 		}
 
@@ -272,7 +274,7 @@ bool CChar::Use_Kindling( CItem * pKindling )
 		return false;
 	}
 
-	if ( !Skill_UseQuick(SKILL_CAMPING, Calc_GetRandLLVal(30)) )
+	if ( !Skill_UseQuick(SKILL_CAMPING, g_Rand.GetLLVal(30)) )
 	{
 		SysMessageDefault(DEFMSG_ITEMUSE_KINDLING_FAIL);
 		return false;
@@ -382,8 +384,8 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 
 	pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * 1000);
 	static const SOUND_TYPE sm_TrainingDummySounds[] = { 0x3A4, 0x3A6, 0x3A9, 0x3AE, 0x3B4, 0x3B6 };
-	pItem->Sound(sm_TrainingDummySounds[Calc_GetRandVal(ARRAY_COUNT(sm_TrainingDummySounds))]);
-	Skill_Experience(skill, Calc_GetRandVal(40));
+	pItem->Sound(sm_TrainingDummySounds[g_Rand.GetVal(ARRAY_COUNT(sm_TrainingDummySounds))]);
+	Skill_Experience(skill, g_Rand.GetVal(40));
 	return true;
 }
 
@@ -428,7 +430,7 @@ bool CChar::Use_Train_PickPocketDip( CItem * pItem, bool fSetup )
 		return false;
 
 	pItem->Sound(SOUND_RUSTLE);
-	if ( Skill_UseQuick(SKILL_STEALING, Calc_GetRandVal(40)) )
+	if ( Skill_UseQuick(SKILL_STEALING, g_Rand.GetVal(40)) )
 	{
 		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_SUCCESS);
 		pItem->SetAnim(pItem->GetDispID(), 3 * 1000);
@@ -439,7 +441,7 @@ bool CChar::Use_Train_PickPocketDip( CItem * pItem, bool fSetup )
 		pItem->Sound(SOUND_GLASS_BREAK4);
 		pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * 1000);
 	}
-	Skill_Experience(SKILL_STEALING, Calc_GetRandVal(40));
+	Skill_Experience(SKILL_STEALING, g_Rand.GetVal(40));
 	return true;
 }
 
@@ -583,7 +585,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		m_pClient->m_SkillThrowingAnimRender = AnimRender;
 	}
 
-	if ( Skill_UseQuick(skill, Calc_GetRandVal(40)) )
+	if ( Skill_UseQuick(skill, g_Rand.GetVal(40)) )
 	{
 		static lpctstr const sm_Txt_ArcheryButte_Success[] =
 		{
@@ -592,7 +594,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT3),
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT4)
 		};
-		Emote(sm_Txt_ArcheryButte_Success[Calc_GetRandVal(ARRAY_COUNT(sm_Txt_ArcheryButte_Success))]);
+		Emote(sm_Txt_ArcheryButte_Success[g_Rand.GetVal(ARRAY_COUNT(sm_Txt_ArcheryButte_Success))]);
 		Sound(pWeapon->Weapon_GetSoundHit());
 
 		if ( WeaponAmmoID )
@@ -607,7 +609,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		Sound(pWeapon->Weapon_GetSoundMiss());
 	}
 
-	Skill_Experience(skill, Calc_GetRandVal(40));
+	Skill_Experience(skill, g_Rand.GetVal(40));
 	return true;
 }
 
@@ -628,13 +630,13 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 	// Try to break it.
 
     if (pItemWeb->m_itWeb.m_dwHitsCur == 0)
-        pItemWeb->m_itWeb.m_dwHitsCur = 60 + Calc_GetRandVal(250);
+        pItemWeb->m_itWeb.m_dwHitsCur = 60 + g_Rand.GetVal(250);
     else if (pItemWeb->m_itWeb.m_dwHitsCur > INT32_MAX)
         pItemWeb->m_itWeb.m_dwHitsCur = INT32_MAX;
 
 	// Since broken webs become spider silk, we should get out of here now if we aren't in a web.
 	CItem *pFlag = LayerFind(LAYER_FLAG_Stuck);
-	if ( CanMove(pItemWeb, false) )
+	if ( CanMoveItem(pItemWeb, false) )
 	{
 		if ( pFlag )
 			pFlag->Delete();
@@ -756,7 +758,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	}
 
 	// Quickly use arms lore skill, but don't gain any skill until later on
-	int iArmsLoreDiff = Calc_GetRandVal(30);
+	int iArmsLoreDiff = g_Rand.GetVal(30);
 	if ( !Skill_UseQuick(SKILL_ARMSLORE, iArmsLoreDiff, false) )
 	{
 		// apply arms lore skillgain for failure
@@ -827,13 +829,13 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		// not sure if this is working!
 		******************************/
 		// Failure
-		if ( !Calc_GetRandVal(6) )
+		if ( !g_Rand.GetVal(6) )
 		{
 			pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_2);
 			-- pItemArmor->m_itArmor.m_wHitsMax;
 			-- pItemArmor->m_itArmor.m_dwHitsCur;
 		}
-		else if ( !Calc_GetRandVal(3) )
+		else if ( !g_Rand.GetVal(3) )
 		{
 			pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_3);
 			-- pItemArmor->m_itArmor.m_dwHitsCur;
@@ -841,7 +843,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		else
 			pszText = g_Cfg.GetDefaultMsg( DEFMSG_REPAIR_4 );
 
-		iDamagePercent = Calc_GetRandVal(iDamagePercent);	// some random amount
+		iDamagePercent = g_Rand.GetVal(iDamagePercent);	// some random amount
 	}
 
 	ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, false);
@@ -903,7 +905,7 @@ void CChar::Use_EatQty( CItem * pFood, ushort uiQty )
 	}
 
 	UpdateDir(pFood);
-	EatAnim(pFood->GetName(), uiRestore * uiQty);
+	EatAnim(pFood, uiRestore * uiQty);
 	pFood->ConsumeAmount(uiQty);
 }
 
@@ -917,7 +919,7 @@ bool CChar::Use_Eat( CItem * pItemFood, ushort uiQty )
 	// IT_FOOD or IT_FOOD_RAW
 	// NOTE: Some foods like apples are stackable !
 
-	if ( !CanMove(pItemFood) )
+	if ( !CanMoveItem(pItemFood) )
 	{
 		SysMessageDefault(DEFMSG_FOOD_CANTMOVE);
 		return false;
@@ -982,7 +984,7 @@ void CChar::Use_Drink( CItem * pItem )
 	// IT_WATER_WASH:
 	// IT_BOOZE:
 
-	if ( !CanMove(pItem) )
+	if ( !CanMoveItem(pItem) )
 	{
 		SysMessageDefault(DEFMSG_DRINK_CANTMOVE);
 		return;
@@ -990,11 +992,39 @@ void CChar::Use_Drink( CItem * pItem )
 
 	const CItemBase *pItemDef = pItem->Item_GetDef();
 	ITEMID_TYPE idbottle = (ITEMID_TYPE)pItemDef->m_ttDrink.m_ridEmpty.GetResIndex();
+    dword dwDelay = (pItemDef->m_ttDrink.m_ridDelay ? pItemDef->m_ttDrink.m_ridDelay: (pItem->IsType(IT_BOOZE) ? 1500u : 15u)) * 10; //Minimum should be 1 as if we set 0, it makes effect cooldown infinite.
+    word wConsume = (word)1;
+    word wBottleAmount = wConsume;
+
+    if (IsTrigUsed(TRIGGER_DRINK))
+    {
+        CScriptTriggerArgs args(dwDelay, wConsume);
+        args.m_pO1 = pItem;
+        args.m_VarsLocal.SetNumNew("BottleId", idbottle);
+        TRIGRET_TYPE iRet = OnTrigger(CTRIG_Drink, this, &args);
+        idbottle = (ITEMID_TYPE)args.m_VarsLocal.GetKeyNum("BottleId");
+        dwDelay = (dword)(args.m_iN1 > 0 ? args.m_iN1 : 1); //0 causes stays memory infinitely.
+        wConsume = (word)args.m_iN2;
+        wBottleAmount = wConsume;
+
+        if (iRet == TRIGRET_RET_TRUE)
+            return;
+        else if (iRet == TRIGRET_ELSEIF)
+            wBottleAmount = 1;
+        else if (iRet == TRIGRET_RET_HALFBAKED)
+            wBottleAmount = 0;
+    }
+
+    if (wConsume > 0 && !CanConsume(pItem, wConsume)) // We need to check if he can consume, before creating effects.
+    {
+        SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_DRINK_NOT_ENOUGH), pItem->GetName());
+        return;
+    }
 
 	if ( pItem->IsType(IT_BOOZE) )
 	{
 		// Beer wine and liquor. vary strength of effect. m_itBooze.m_EffectStr
-		int iStrength = Calc_GetRandVal(300) + 10;
+		int iStrength = g_Rand.GetVal(300) + 10;
 
 		// Create ITEMID_PITCHER if drink a pitcher.
 		// GLASS or MUG or Bottle ?
@@ -1012,7 +1042,7 @@ void CChar::Use_Drink( CItem * pItem )
 		}
 		else
 		{
-			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 150*MSECS_PER_TENTH, this);
+			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), (int64)dwDelay, this);
 			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
 		}
 	}
@@ -1034,7 +1064,7 @@ void CChar::Use_Drink( CItem * pItem )
 		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 150, this);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), (int64)dwDelay, this);
 	}
 	else if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
 	{
@@ -1058,13 +1088,21 @@ void CChar::Use_Drink( CItem * pItem )
 			SetPoison(pItem->m_itFood.m_poison_skill * 10, 1 + (pItem->m_itFood.m_poison_skill / 50), this);
 	}
 
-	//Sound(sm_DrinkSounds[Calc_GetRandVal(ARRAY_COUNT(sm_DrinkSounds))]);
+	//Sound(sm_DrinkSounds[g_Rand.GetVal(ARRAY_COUNT(sm_DrinkSounds))]);
 	UpdateAnimate(ANIM_EAT);
-	pItem->ConsumeAmount();
+    if (wConsume > 0) //if ARGN2 > 0, consume.
+        ConsumeFromPack(pItem, wConsume);
 
 	// Create the empty bottle ?
-	if ( idbottle != ITEMID_NOTHING )
-		ItemBounce(CItem::CreateScript(idbottle, this), false);
+    if (idbottle != ITEMID_NOTHING)
+    {
+        CItem* pBottle = CItem::CreateScript(idbottle, this);
+        if (wBottleAmount > 0)
+        {
+            pBottle->SetAmount(wBottleAmount);
+            ItemBounce(pBottle, false);
+        }
+    }
 }
 
 CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
@@ -1160,25 +1198,28 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
 	if (IsSetEF(EF_FollowerList))
 	{
-		if (iFollowerSlots > 0)
-		{
-			bool fExists = false;
-			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
-			{
-				if (*it == pChar->GetUID())
-				{
-					fExists = true;
-					break;
-				}
-				++it;
-			}
+        if (iFollowerSlots >= 0)
+        {
+            bool fExists = false;
+            for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+            {
+                if (*it == pChar->GetUID())
+                {
+                    fExists = true;
+                    break;
+                }
+                ++it;
+            }
 
-			if (!fExists && ( (short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
-				m_followers.emplace_back(pChar->GetUID());
-			else
-				return false;
-		}
-		else
+            if (!fExists && ((short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
+            {
+                if (!fCheckOnly)
+                    m_followers.emplace_back(pChar->GetUID());
+            }
+            else
+                return false;
+        }
+		else if (!fCheckOnly)
 		{
 			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
 			{
@@ -1236,7 +1277,7 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 		}
 
 		// Need tinkering tools ???
-		if ( !Skill_UseQuick(SKILL_TINKERING, 30 + Calc_GetRandLLVal(40)) )
+		if ( !Skill_UseQuick(SKILL_TINKERING, 30 + g_Rand.GetLLVal(40)) )
 		{
 			SysMessageDefault(DEFMSG_MSG_KEY_FAILC);
 			return false;
@@ -1389,10 +1430,10 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	// Already a plant here ?
-	CWorldSearch AreaItems(pt);
+	auto AreaItems = CWorldSearchHolder::GetInstance(pt);
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = AreaItems->GetItem();
 		if ( !pItem )
 			break;
 		if ( pItem->IsType(IT_TREE) || pItem->IsType(IT_FOLIAGE) )		// there's already a tree here
@@ -1434,7 +1475,7 @@ bool CChar::Use_BedRoll( CItem * pItem )
 				SysMessageDefault(DEFMSG_ITEMUSE_BEDROLL);
 				return true;
 			}
-			pItem->SetID(Calc_GetRandVal(2) ? ITEMID_BEDROLL_O_EW : ITEMID_BEDROLL_O_NS);
+			pItem->SetID(g_Rand.GetVal(2) ? ITEMID_BEDROLL_O_EW : ITEMID_BEDROLL_O_NS);
 			pItem->Update();
 			return true;
 		case ITEMID_BEDROLL_C_NS:
@@ -1588,7 +1629,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE);
 			else
 			{
-				switch(Calc_GetRandVal(3))
+				switch(g_Rand.GetVal(3))
 				{
 					case 1:
 						id = ITEMID_JAR_HONEY;
@@ -1606,7 +1647,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			else
             {
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
-				OnTakeDamage(Calc_GetRandVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
+				OnTakeDamage(g_Rand.GetVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
 			}
 			pItem->SetTimeoutS(15 * 60);
 			return true;

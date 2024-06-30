@@ -52,7 +52,7 @@ jobs:
       run:  |
             echo "GCC:" && gcc -v
             echo && echo "CMake:" && cmake --version
-            echo && echo "Ninja:" && ninja --version
+            #echo && echo "Ninja:" && ninja --version
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

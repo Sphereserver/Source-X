@@ -1,4 +1,5 @@
 #include "../common/crypto/CCrypto.h"
+#include "../common/CUOClientVersion.h"
 #include "../game/clients/CClient.h"
 #include "../game/CServer.h"
 #include "../game/CWorldGameTime.h"
@@ -106,7 +107,7 @@ void CNetworkInput::receiveData()
         }
 
         EXC_SET_BLOCK("start client profile");
-        CurrentProfileData.Count(PROFILE_DATA_RX, received);
+        GetCurrentProfileData().Count(PROFILE_DATA_RX, received);
 
         EXC_SET_BLOCK("messages - parse");
 
@@ -540,7 +541,8 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
     }
     if (!fHTTPReq && (uiOrigRemainingLength > INT8_MAX))
     {
-        g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n", state->id(), uiOrigRemainingLength, INT8_MAX);
+        g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n",
+            state->id(), uiOrigRemainingLength, INT8_MAX);
         return false;
     }
 
@@ -584,7 +586,7 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
         EXC_SET_BLOCK("game client seed");
         dword seed = 0;
 
-        DEBUGNETWORK(("%x:Client connected with a seed length of %u ([0]=0x%x)\n", state->id(), uiOrigRemainingLength, (int)(pOrigRemainingData[0])));
+        DEBUGNETWORK(("%x:Client connected with a seed length of %u ([0]=0x%x)\n", state->id(), uiOrigRemainingLength, (uint)(pOrigRemainingData[0])));
         if (state->m_newseed || (pOrigRemainingData[0] == XCMD_NewSeed && uiOrigRemainingLength >= NETWORK_SEEDLEN_NEW))
         {
             DEBUGNETWORK(("%x:Receiving new client login handshake.\n", state->id()));
@@ -599,13 +601,15 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
             if (buffer->getRemainingLength() >= (NETWORK_SEEDLEN_NEW - 1))
             {
                 seed = buffer->readInt32();
-                dword versionMajor = buffer->readInt32();
-                dword versionMinor = buffer->readInt32();
-                dword versionRevision = buffer->readInt32();
-                dword versionPatch = buffer->readInt32();
+                const dword versionMajor = buffer->readInt32();
+                const dword versionMinor = buffer->readInt32();
+                const dword versionRevision = buffer->readInt32();
+                const dword versionPatch = buffer->readInt32();
+                const CUOClientVersion cver(versionMajor, versionMinor, versionRevision, versionPatch);
+                state->m_reportedVersionNumber = cver.GetLegacyVersionNumber();
 
-                DEBUG_MSG(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", state->id(), versionMajor, versionMinor, versionRevision, versionPatch));
-                state->m_reportedVersion = CCrypto::GetVerFromNumber(versionMajor, versionMinor, versionRevision, versionPatch);
+                DEBUG_MSG(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n",
+                    state->id(), versionMajor, versionMinor, versionRevision, versionPatch));
             }
             else
             {
@@ -627,7 +631,7 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
             seed = buffer->readInt32();
         }
 
-        DEBUGNETWORK(("%x:Client connected with a seed of 0x%x (new handshake=%d, version=%u).\n", state->id(), seed, state->m_newseed ? 1 : 0, state->m_reportedVersion));
+        DEBUGNETWORK(("%x:Client connected with a seed of 0x%x (new handshake=%d, version=%u).\n", state->id(), seed, state->m_newseed ? 1 : 0, state->m_reportedVersionNumber));
 
         if (seed == 0)
         {

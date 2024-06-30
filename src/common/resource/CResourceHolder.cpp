@@ -255,20 +255,32 @@ bool CResourceHolder::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fC
 		pszFilename = s.GetFilePath();
 
 	// search the local dir or full path first.
-	if ( s.Open(pszFilename, OF_READ | OF_NONCRIT ))
-		return true;
-	if ( !fCritical )
-		return false;
+    if (CSFile::FileExists(pszFilename))
+    {
+        if (s.Open(pszFilename, OF_READ | OF_NONCRIT))
+            return true;
+        if (!fCritical)
+            return false;
+    }
 
 	// next, check the script file path
 	CSString sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
-	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ) )
-		return true;
+    if (CSFile::FileExists(sPathName))
+    {
+        if (s.Open(sPathName, OF_READ | OF_NONCRIT))
+            return true;
+    }
 
 	// finally, strip the directory and re-check script file path
 	lpctstr pszTitle = CSFile::GetFilesTitle(pszFilename);
 	sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
-	return s.Open( sPathName, OF_READ );
+    if (CSFile::FileExists(sPathName))
+    {
+        return s.Open(sPathName, OF_READ);
+    }
+
+    g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't find file '%s' in any of the expected paths!.\n", pszFilename);
+    return false;
 }
 
 bool CResourceHolder::LoadResourceSection( CScript * pScript )
@@ -282,21 +294,46 @@ bool CResourceHolder::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Section Definitions
 
+lpctstr CResourceHolder::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+{
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
+    CResourceID ridValid = CResourceID(iExpectedType, 0);
+    if (!rid.IsValidResource())
+    {
+        if (rid.GetResIndex() != 0)
+        {
+            g_Log.EventError("Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
+        }
+    }
+    else if (rid.GetResType() != iExpectedType)
+    {
+        g_Log.EventWarn("Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n", iExpectedType, rid.GetResType());
+    }
+    else
+    {
+        ridValid = rid;
+    }
+    return ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
+}
+
 lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
 {
 	ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
 	// Get a portable name for the resource id type.
 
-	const CResourceDef * pResourceDef = ResourceGetDef( rid );
-	if ( pResourceDef )
-		return pResourceDef->GetResourceName();
+    if (rid.IsValidResource())
+    {
+        const CResourceDef* pResourceDef = ResourceGetDef(rid);
+        if (pResourceDef)
+            return pResourceDef->GetResourceName();
+    }
 
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
 	if ( !rid.IsValidUID() )
-		sprintf( pszTmp, "%d", (int)rid.GetPrivateUID() );
+		snprintf( pszTmp, Str_TempLength(), "%d", (int)rid.GetPrivateUID() );
 	else
-		sprintf( pszTmp, "0%" PRIx32, rid.GetResIndex() );
+		snprintf( pszTmp, Str_TempLength(), "0%" PRIx32, rid.GetResIndex() );
 	return pszTmp;
 }
 
@@ -312,9 +349,9 @@ CResourceScript * CResourceHolder::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &ptcName, word wPage)
+CResourceID CResourceHolder::ResourceGetID_EatStr(RES_TYPE restype, lpctstr &ptcName, word wPage, bool fCanFail)
 {
-    ADDTOCALLSTACK("CResourceHolder::ResourceGetID_Advance");
+    ADDTOCALLSTACK("CResourceHolder::ResourceGetID_EatStr");
     // Find the Resource ID given this name.
     // We are NOT creating a new resource. just looking up an existing one
     // NOTE: Do not enforce the restype.
@@ -341,6 +378,7 @@ CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &pt
     }
     */
 
+    lpctstr ptcNameStart = ptcName;
     dword dwEvalPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
     int iEvalResType  = RES_GET_TYPE(dwEvalPrivateUID);
     int iEvalResIndex = RES_GET_INDEX(dwEvalPrivateUID);
@@ -349,22 +387,33 @@ CResourceID CResourceHolder::ResourceGetID_Advance(RES_TYPE restype, lpctstr &pt
     if ((restype != RES_UNKNOWN) && (iEvalResType == RES_UNKNOWN))
     {
         // Label it with the type we want.
+        ASSERT(restype > RES_UNKNOWN && restype <= RES_QTY);
+        if (restype == RES_QTY)
+        {
+            // RES_QTY means i don't care, because i pass a defname and it already carries data about which kind of resource it is.
+            // If it doesn't (?!), or simply i pass an ID instead of a defname (which i expected), i'll have unexpected results, so better throw an error.
+            // If i pass a bare ID, Sphere cannot know if you meant a char, item, etc...
+            if (!fCanFail)
+                g_Log.EventError("Can't get the resource type from a bare ID ('%s')!\n", ptcNameStart);
+            return CResourceID(RES_UNKNOWN /* 0 */, 0, 0u);
+        }
         return CResourceID(restype, iEvalResIndex, wPage);
     }
     // CResourceID always needs to be a valid resource (there's an ASSERT in CResourceID copy constructor).
     return CResourceID((RES_TYPE)iEvalResType, iEvalResIndex, wPage);
 }
 
-CResourceID CResourceHolder::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage )
+CResourceID CResourceHolder::ResourceGetID( RES_TYPE restype, lpctstr ptcName, word wPage, bool fCanFail )
 {
 	ADDTOCALLSTACK("CResourceHolder::ResourceGetID");
-	return ResourceGetID_Advance(restype, ptcName, wPage);
+	return ResourceGetID_EatStr(restype, ptcName, wPage, fCanFail);
 }
 
 CResourceID CResourceHolder::ResourceGetIDType( RES_TYPE restype, lpctstr pszName, word wPage )
 {
 	// Get a resource of just this index type.
-	CResourceID rid = ResourceGetID( restype, pszName, wPage );
+    ASSERT(restype != RES_QTY);
+	CResourceID rid = ResourceGetID( restype, pszName, wPage, true );
 	if ( rid.GetResType() != restype )
 	{
 		rid.Init();

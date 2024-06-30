@@ -11,8 +11,9 @@
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
-#include "../CWorldMap.h"
 #include "../CWorldGameTime.h"
+#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -46,7 +47,7 @@ void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button wa
 
 	if (m_pChar == nullptr)
 		return;
-	m_fUseNewChatSystem = (GetNetState()->isClientVersion(MINCLIVER_NEWCHATSYSTEM) || GetNetState()->isClientVersion(CLIENTTYPE_EC + MINCLIVER_NEWCHATSYSTEM_EC));
+	m_fUseNewChatSystem = (GetNetState()->isClientVersionNumber(MINCLIVER_NEWCHATSYSTEM) || GetNetState()->isClientVersionNumber(CLIENTTYPE_EC + MINCLIVER_NEWCHATSYSTEM_EC));
 
 	if ( IsTrigUsed(TRIGGER_USERCHATBUTTON) )
 	{
@@ -195,7 +196,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 
 	EXC_SET_BLOCK("FastLoot");
 	//	fastloot (,emptycontainer) protection
-	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
+	const int64 iCurTime = CSTime::GetMonotonicSysTimeMilli();
 	if ( m_tNextPickup > iCurTime)
 	{
 		EXC_SET_BLOCK("FastLoot - addItemDragCancel(0)");
@@ -349,7 +350,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				pItem->ClrAttr(ATTR_OWNED);
 
 				// newbie items lose newbie status when transfered to NPC
-				if ( !g_Cfg.m_bAllowNewbTransfer )
+				if ( !g_Cfg.m_fAllowNewbTransfer )
 					pItem->ClrAttr(ATTR_NEWBIE);
 			}
 			if ( pChar->GetBank()->IsItemInside( pContItem ))
@@ -487,7 +488,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			// Still in same container.
 			ASSERT(pItemOn);
 
-			if (pItemOn->IsTypeMulti() && (GetNetState()->isClientVersion(MINCLIVER_HS) || GetNetState()->isClientEnhanced()))
+			if (pItemOn->IsTypeMulti() && (GetNetState()->isClientVersionNumber(MINCLIVER_HS) || GetNetState()->isClientEnhanced()))
 			{
 				pt.m_x += pItemOn->GetTopPoint().m_x;
 				pt.m_y += pItemOn->GetTopPoint().m_y;
@@ -729,7 +730,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 	//NOTE: If WalkBuffer=20 in ini, it's egal 2000 here
 
 
-	const int64 iCurTime = CSTime::GetPreciseSysTimeMilli();
+	const int64 iCurTime = CSTime::GetMonotonicSysTimeMilli();
     int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
 	int64 iTimeMin = 0;  // minimum time to move 1 step in milliseconds
 	m_timeWalkStep = iCurTime; //Take the time of step for the next time we enter here
@@ -794,7 +795,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			m_iWalkTimeAvg = g_Cfg.m_iWalkBuffer;
 
 		if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
-			SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). curAvg(%lld)", iTimeDiff, iTimeMin, m_iWalkTimeAvg);
+			SysMessagef("Walkcheck trace: timeDiff(%" PRId64 ") / timeMin(%" PRId64 "). curAvg(%lld)", iTimeDiff, iTimeMin, m_iWalkTimeAvg);
 
 		// Checking if there a speehack
 		if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
@@ -887,7 +888,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		// Check if I stepped on any item/teleport
-		TRIGRET_TYPE iRet = m_pChar->CheckLocation(false);
+		TRIGRET_TYPE iRet = m_pChar->CheckLocation(true, false);
 		if (iRet == TRIGRET_RET_FALSE)
 		{
 			m_pChar->SetUnkPoint(ptOld);	// we already moved, so move back to previous location
@@ -1035,13 +1036,13 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 {
 	ADDTOCALLSTACK("CClient::Event_Command");
-	if ( mode == 13 || mode == 14 ) // guild and alliance don't pass this.
+	if ( mode == TALKMODE_GUILD || mode == TALKMODE_ALLIANCE ) // guild and alliance don't pass this.
 		return false;
 	if ( pszCommand[0] == 0 )
 		return true;		// should not be said
 	if ( Str_Check(pszCommand) )
 		return true;		// should not be said
-	if ( ( ( m_pChar->GetID() == 0x3db ) && ( pszCommand[0] == '=' ) ) || ( pszCommand[0] == g_Cfg.m_cCommandPrefix ) )
+	if (((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) || (pszCommand[0] == g_Cfg.m_cCommandPrefix)) //Should be dispid, or it's bugged when you change character's dispid to c_man_gm.
 	{
 		// Lazy :P
 	}
@@ -1054,22 +1055,22 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;
 	}
 
-	bool m_bAllowCommand = true;
-	bool m_bAllowSay = true;
+	bool m_fAllowCommand = true;
+	bool m_fAllowSay = true;
 
 	pszCommand += 1;
 	GETNONWHITESPACE(pszCommand);
-	m_bAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
+	m_fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
 
-	if ( !m_bAllowCommand )
-		m_bAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
+	if ( !m_fAllowCommand )
+		m_fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
 
 	//	filter on commands is active - so trigger it
 	if ( !g_Cfg.m_sCommandTrigger.IsEmpty() )
 	{
 		CScriptTriggerArgs Args(pszCommand);
-		Args.m_iN1 = m_bAllowCommand;
-		Args.m_iN2 = m_bAllowSay;
+		Args.m_iN1 = m_fAllowCommand;
+		Args.m_iN2 = m_fAllowSay;
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
@@ -1077,16 +1078,16 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 			if ( tr == TRIGRET_RET_TRUE )
 				return (Args.m_iN2 != 0);
 
-		m_bAllowCommand = ( Args.m_iN1 != 0 );
-		m_bAllowSay = ( Args.m_iN2 != 0 );
+		m_fAllowCommand = ( Args.m_iN1 != 0 );
+		m_fAllowSay = ( Args.m_iN2 != 0 );
 	}
 
-	if ( !m_bAllowCommand && !m_bAllowSay )
+	if ( !m_fAllowCommand && !m_fAllowSay )
 		SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_PRIV));
 
-	if ( m_bAllowCommand )
+	if ( m_fAllowCommand )
 	{
-		m_bAllowSay = false;
+		m_fAllowSay = false;
 
 		// Assume you don't mean yourself !
 		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect)) >= 0 )
@@ -1103,9 +1104,9 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	}
 
 	if ( GetPrivLevel() >= g_Cfg.m_iCommandLog )
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_bAllowCommand);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_fAllowCommand);
 
-	return !m_bAllowSay;
+	return !m_fAllowSay;
 }
 
 void CClient::Event_Attack( CUID uid )
@@ -1885,11 +1886,10 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
     //Reduce NPC hear distance for non pets
     int iAltDist = iFullDist;
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
-
+	auto AreaChars = CWorldSearchHolder::GetInstance(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.
 	for (;;)
 	{
-		pChar = AreaChars.GetChar();
+		pChar = AreaChars->GetChar();
 
         //No more Chars to check
 		if ( !pChar )
@@ -1901,7 +1901,9 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 			for (CSObjContRec* pObjRec : pChar->GetIterationSafeCont())
 			{
 				CItem* pItem = static_cast<CItem*>(pObjRec);
-				pItem->OnHear(pszText, m_pChar);
+                if (pItem->CanHear()) {
+                    pItem->OnHear(pszText, m_pChar);
+                }
 			}
 		}
 
@@ -2624,7 +2626,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 			else
 			{
 				word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-				if ( (pChar->IsOwnedBy(m_pChar, false)) && ((pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK)) || (m_pChar->IsPriv(PRIV_GM)))
+				if (( pChar->IsOwnedBy(m_pChar, false) && ((pChar->m_pNPC->m_Brain != NPCBRAIN_BERSERK)) ) || m_pChar->IsPriv(PRIV_GM))
 				{
 					CREID_TYPE id = pChar->GetID();
 
@@ -2640,7 +2642,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
 
-					if (GetNetState()->isClientVersion(MINCLIVER_NEWDAMAGE))
+					if (GetNetState()->isClientVersionNumber(MINCLIVER_NEWDAMAGE))
 						m_pPopupPacket->addOption(POPUP_PETRENAME, 1115557, POPUPFLAG_COLOR, 0xFFFF);
 
 					if (!pChar->IsStatFlag(STATF_CONJURED))
@@ -2668,15 +2670,15 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 		else if (pChar == m_pChar)
 		{
 			m_pPopupPacket->addOption(POPUP_BACKPACK, 6145, POPUPFLAG_COLOR, 0xFFFF);
-			if (GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))
+			if (GetNetState()->isClientVersionNumber(MINCLIVER_STATUS_V6))
 			{
 				if (pChar->GetDefNum("REFUSETRADES", true))
 					m_pPopupPacket->addOption(POPUP_TRADE_ALLOW, 1154112, POPUPFLAG_COLOR, 0xFFFF);
 				else
 					m_pPopupPacket->addOption(POPUP_TRADE_REFUSE, 1154113, POPUPFLAG_COLOR, 0xFFFF);
 			}
-			
-			if (GetNetState()->isClientVersion(MINCLIVER_GLOBALCHAT) && (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT))
+
+			if (GetNetState()->isClientVersionNumber(MINCLIVER_GLOBALCHAT) && (g_Cfg.m_iChatFlags & CHATF_GLOBALCHAT))
 			{
 				if (pChar->m_pPlayer->m_fRefuseGlobalChatRequests)
 					m_pPopupPacket->addOption(POPUP_GLOBALCHAT_ALLOW, 1158415, POPUPFLAG_COLOR, 0xFFFF);
@@ -2696,7 +2698,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);
 			}
 
-			if (GetNetState()->isClientVersion(MINCLIVER_TOL) && m_pChar->GetDist(pChar) <= 2)
+			if (GetNetState()->isClientVersionNumber(MINCLIVER_TOL) && m_pChar->GetDist(pChar) <= 2)
 				m_pPopupPacket->addOption(POPUP_TRADE_OPEN, 1077728, POPUPFLAG_COLOR, 0xFFFF);
 		}
 
@@ -3062,10 +3064,10 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			char iCharZ = pt.m_z;
 
 			pt.Move(m_pChar->m_dirFace);
-			CWorldSearch Area(pt, 1);
+			auto Area = CWorldSearchHolder::GetInstance(pt, 1);
 			for (;;)
 			{
-				CItem *pItem = Area.GetItem();
+				CItem *pItem = Area->GetItem();
 				if ( !pItem )
 					return;
 
@@ -3118,7 +3120,7 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 	{
 		CScriptTriggerArgs Args(pData[0]);
 		enum TRIGRET_TYPE trigReturn;
-		tchar idx[5];
+		tchar idx[12];
 
 		Args.m_s1 = GetPeerStr();
 		Args.m_pO1 = this; // Yay for ARGO.SENDPACKET
@@ -3167,7 +3169,7 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 	{
 		CScriptTriggerArgs Args(pData[0]);
 		enum TRIGRET_TYPE trigReturn;
-		tchar idx[5];
+		tchar idx[12];
 
 		Args.m_s1 = GetPeerStr();
 		Args.m_pO1 = this;

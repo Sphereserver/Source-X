@@ -797,7 +797,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 	}
 
 	tchar *pszMsg = Str_GetTemp();
-	snprintf(pszMsg, Str_TempLength(), Calc_GetRandVal(2) ?
+	snprintf(pszMsg, Str_TempLength(), g_Rand.GetVal(2) ?
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_AMNT ) :
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_RATE ), (int)uiWage );
 	Speak(pszMsg);

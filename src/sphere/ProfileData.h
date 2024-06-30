@@ -60,12 +60,14 @@ protected:
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
 	llong m_CurrentTime;			// in milliseconds
 
+    friend class ProfileTask;
+    uint m_iMapTaskCounter;
+
 public:
 	ProfileData() noexcept;
 
-private:
-	ProfileData(const ProfileData& copy);
-	ProfileData& operator=(const ProfileData& other);
+	ProfileData(const ProfileData& copy) = delete;
+	ProfileData& operator=(const ProfileData& other) = delete;
 
 public:
 	bool IsActive() const noexcept {

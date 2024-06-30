@@ -21,6 +21,7 @@
 #include "../CWorldTickingList.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
@@ -44,21 +45,24 @@
 lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
-	"@AddRedCandle",
 	"@AddObj",				// For t_spawn when obj is add to list
-	"@AddWhiteCandle",
+    "@AddRedCandle",
+    "@AddWhiteCandle",
 	"@AfterClick",
 	"@Buy",
 	"@CarveCorpse",			//I am a corpse and i am going to be carved.
 	"@Click",
 	"@ClientTooltip",	// Sending tooltip to a client
 	"@ClientTooltip_AfterDefault",
+    "@Complete",
 	"@ContextMenuRequest",
 	"@ContextMenuSelect",
 	"@Create",
 	"@DAMAGE",				// I have been damaged in some way
 	"@DCLICK",				// I have been dclicked.
 	"@DelObj",				// For t_spawn when obj is remove from list
+    "@DelRedCandle",
+    "@DelWhiteCandle",
 	"@Destroy",				//+I am nearly destroyed
 	"@DropOn_Char",			// I have been dropped on this char
 	"@DropOn_Ground",		// I have been dropped on the ground here
@@ -68,6 +72,9 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@Dye",					// My color has been changed
 	"@EQUIP",		// I have been unequipped
     "@EQUIPTEST",
+    "@GetHit",
+    "@Hit",
+    "@Level",
 	"@MemoryEquip",
 	"@PICKUP_GROUND",	// I was picked up off the ground.
 	"@PICKUP_PACK",	// picked up from inside some container.
@@ -77,6 +84,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
     "@Redeed",
     "@RegionEnter",
     "@RegionLeave",
+    "@ResourceGather",
+    "@ResourceTest",
 	"@SELL",
 	"@Ship_Move",
 	"@Ship_Stop",
@@ -86,6 +95,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@SpellEffect",		// cast some spell on me.
 	"@Start",
 	"@STEP",			// I have been walked on.
+    "@Stop",
 	"@TARGON_CANCEL",
 	"@TARGON_CHAR",
 	"@TARGON_GROUND",
@@ -154,23 +164,26 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
-
     // Manual CComponents addition
-
-    /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
-    * but it's required to add it also on item's creation depending on it's CItemBase can flags.
-    */
-	if (CCItemDamageable::CanSubscribe(this))
+    //  If it's a memory, those won't be needed, and we can avoid dynamically allocating useless stuff.
+    if (id != ITEMID_MEMORY)
     {
-        SubscribeComponent(new CCItemDamageable(this));
-    }
-    if (CCFaction::CanSubscribe(this))
-    {
-        SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
+        /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
+        * but it's required to add it also on item's creation depending on it's CItemBase can flags.
+        */
+        if (CCItemDamageable::CanSubscribe(this))
+        {
+            SubscribeComponent(new CCItemDamageable(this));
+        }
+        if (CCFaction::CanSubscribe(this))
+        {
+            SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
+        }
+
+        TrySubscribeComponentProps<CCPropsItem>();
+        TrySubscribeComponentProps<CCPropsItemChar>();
     }
 
-	TrySubscribeComponentProps<CCPropsItem>();
-	TrySubscribeComponentProps<CCPropsItemChar>();
 }
 
 void CItem::DeleteCleanup(bool fForce)
@@ -462,7 +475,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
         else if ( pptcCmd[i][0] == 'R' )
         {
             // 1 in x chance of creating this.
-            if ( Calc_GetRandVal( atoi(pptcCmd[i] + 1) ))
+            if ( g_Rand.GetVal( atoi(pptcCmd[i] + 1) ))
                 return nullptr;	// don't create it
         }
     }
@@ -712,8 +725,8 @@ bool CItem::IsMovable() const
 int CItem::GetVisualRange() const	// virtual
 {
 	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
-		return UO_MAP_VIEW_RADAR;
-	return UO_MAP_VIEW_SIZE_DEFAULT;
+		return g_Cfg.m_iMapViewRadar;
+	return g_Cfg.m_iMapViewSize;
 }
 
 // Retrieve tag.override.speed for this CItem
@@ -781,11 +794,11 @@ int CItem::IsWeird() const
 	return( ( ptCont == nullptr ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
+char CItem::GetFixZ( CPointMap pt, uint64 uiBlockFlags )
 {
-	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &dwBlockFlags );
-	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
-	CWorldMap::GetFixPoint( pt, block );
+	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), &uiBlockFlags );
+	CServerMapBlockingState block(uiBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight);
+	CWorldMap::GetFixPoint(pt, block);
 	return block.m_Bottom.m_z;
 }
 
@@ -1089,14 +1102,14 @@ int CItem::FixWeirdness()
             // Doors and containers must have a lock complexity set.
             if (!m_itContainer.m_dwLockComplexity)
             {
-                m_itContainer.m_dwLockComplexity = 500 + Calc_GetRandVal(600);
+                m_itContainer.m_dwLockComplexity = 500 + g_Rand.GetVal(600);
             }
             break;
 
         case IT_POTION:
             if (m_itPotion.m_dwSkillQuality == 0) // store bought ?
             {
-                m_itPotion.m_dwSkillQuality = Calc_GetRandVal(950);
+                m_itPotion.m_dwSkillQuality = g_Rand.GetVal(950);
             }
             break;
         case IT_MAP_BLANK:
@@ -1139,6 +1152,18 @@ int CItem::FixWeirdness()
                     default:
                         iResultCode = 0x2231;
                         return iResultCode;	// get rid of it.
+                }
+                break;
+            case LAYER_STORAGE:
+                switch (GetType())
+                {
+                    case IT_CONTAINER:
+                    case IT_CONTAINER_LOCKED:
+                        SetAttr(ATTR_MOVE_NEVER);
+                        break;
+                    default:
+                        iResultCode = 0x2232;
+                        return iResultCode;
                 }
                 break;
             case LAYER_VENDOR_STOCK:
@@ -1380,7 +1405,7 @@ int64 CItem::GetDecayTime() const
                 return (m_itCrop.m_Respawn_Sec * MSECS_PER_SEC);
 
             const int64 iTimeNextNewMoon = CWorldGameTime::GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
-            const int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
+            const int64 iMinutesDelay = g_Rand.GetLLVal(20) * g_Cfg.m_iGameMinuteLength;
 			return (iTimeNextNewMoon - CWorldGameTime::GetCurrentTime().GetTimeRaw() + iMinutesDelay);
         }
 		case IT_MULTI:
@@ -1615,38 +1640,42 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		return true;
 
 	// Check if there's too many items on the same spot
-	uint iItemCount = 0;
-	const CItem * pItem = nullptr;
-	CWorldSearch AreaItems(ptNewPlace);
-	for (;;)
-	{
-		pItem = AreaItems.GetItem();
-		if ( pItem == nullptr )
-			break;
 
-		++iItemCount;
-		if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
-		{
-			Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
-			iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
-			break;
-		}
-	}
-
-	/*  // From 56b
-		// Too many items on the same spot!
-        if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+    //if (g_Cfg.m_iMaxItemComplexity > 0) // It might be wise to keep this always on.
+    {
+        uint iItemCount = 0;
+        const CItem * pItem = nullptr;
+        auto AreaItems = CWorldSearchHolder::GetInstance(ptNewPlace);
+        for (;;)
         {
-            Speak("Too many items here!");
-            if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+            pItem = AreaItems->GetItem();
+            if (pItem == nullptr)
+                break;
+
+            ++iItemCount;
+            if (iItemCount > g_Cfg.m_iMaxItemComplexity)
             {
-                Speak("The ground collapses!");
-                Delete();
+                Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
+                iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
+                break;
             }
-            // attempt to reject the move.
-            return false;
         }
-    */
+
+        /*  // From 56b
+            // Too many items on the same spot!
+            if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+            {
+                Speak("Too many items here!");
+                if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+                {
+                    Speak("The ground collapses!");
+                    Delete();
+                }
+                // attempt to reject the move.
+                return false;
+            }
+        */
+    }
 
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));
@@ -1982,14 +2011,14 @@ height_t CItem::GetHeight() const
 
     height_t tmpHeight;
 
-    const ITEMID_TYPE iDispID = GetDispID();
-    const CItemBase * pItemDef = CItemBase::FindItemBase(iDispID);
+    const ITEMID_TYPE uiDispID = GetDispID();
+    const CItemBase * pItemDef = CItemBase::FindItemBase(uiDispID);
     ASSERT(pItemDef);
     tmpHeight = pItemDef->GetHeight();
     if (tmpHeight)
         return tmpHeight;
 
-    const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(iDispID);
+    const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(uiDispID);
     if (pDupeDef)
     {
         tmpHeight = pDupeDef->GetHeight();
@@ -1997,17 +2026,14 @@ height_t CItem::GetHeight() const
             return tmpHeight;
     }
 
-	char * heightDef = Str_GetTemp();
-
-	sprintf(heightDef, "itemheight_0%x", (uint)iDispID);
+	char heightDef[24]{"itemheight_"};
+    Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 16);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
-	//DEBUG_ERR(("2 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "itemheight_%u", (uint)iDispID);
+    Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 10);
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
-	//DEBUG_ERR(("3 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
@@ -2076,10 +2102,17 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 
 void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 {
+    ADDTOCALLSTACK("CItem::OnHear");
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
 	UnreferencedParameter(pszCmd);
 	UnreferencedParameter(pSrc);
 	ASSERT(false);
+}
+
+bool CItem::CanHear() const
+{
+    //ADDTOCALLSTACK("CItem::CanHear");
+    return IsType(IT_SHIP) || IsType(IT_COMM_CRYSTAL);
 }
 
 CItemBase * CItem::Item_GetDef() const
@@ -2249,18 +2282,22 @@ void CItem::r_WriteMore1(CSString & sVal)
 
     switch (GetType())
     {
+        case IT_SPELLBOOK:
+            sVal.FormatHex(m_itSpellbook.m_spells1);
+            return;
+
         case IT_TREE:
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = g_Cfg.ResourceGetName(m_itResource.m_ridRes);
+            sVal = ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
             return;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = g_Cfg.ResourceGetName(m_itFood.m_ridCook);
+            sVal = ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF);
             return;
 
         case IT_TRAP:
@@ -2272,21 +2309,21 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_LOOM:
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
             return;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
             return;
 
         case IT_POTION:
-            sVal = g_Cfg.ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
+            sVal = ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
             return;
 
         default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more1))
-                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
+                sVal = ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more1);
             return;
@@ -2300,17 +2337,21 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 	switch ( GetType())
 	{
+        case IT_SPELLBOOK:
+            sVal.FormatHex(m_itSpellbook.m_spells2);
+            return;
+
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_itFood.m_MeatType ));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itFood.m_MeatType));
 			return;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-			sVal = g_Cfg.ResourceGetName( m_itCrop.m_ridFruitOverride );
-			return;
+            sVal = ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
+            return;
 
 		case IT_LEATHER:
 		case IT_HIDE:
@@ -2318,17 +2359,17 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_FUR:
 		case IT_WOOL:
 		case IT_BLOOD:
-		case IT_BONE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_itNormal.m_more2 ));
-			return;
+        case IT_BONE:
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more2));
+            return;
 
 		case IT_ANIM_ACTIVE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, m_itAnim.m_PrevType ));
-			return;
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itAnim.m_PrevType));
+            return;
 
 		default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more2))
-                sVal = g_Cfg.ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
+                sVal = ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more2);
 			return;
@@ -2962,6 +3003,34 @@ void CItem::r_LoadMore2(dword dwVal)
     }
 }
 
+lpctstr CItem::ResourceGetName(const CResourceID& rid)
+{
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        tchar* pszText = Str_GetTemp();
+        if (!rid.IsValidUID())
+            snprintf(pszText, Str_TempLength(), "%d", (int)rid.GetPrivateUID());
+        else
+            snprintf(pszText, Str_TempLength(),"0%" PRIx32, rid.GetResIndex());
+        return pszText;
+    }
+    return g_Cfg.ResourceGetName(rid);
+}
+
+lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+{
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        tchar* pszText = Str_GetTemp();
+        if (!rid.IsValidUID())
+            snprintf(pszText, Str_TempLength(), "%d", (int)rid.GetPrivateUID());
+        else
+            snprintf(pszText, Str_TempLength(), "0%" PRIx32, rid.GetResIndex());
+        return pszText;
+    }
+    return g_Cfg.ResourceGetName(rid, iExpectedType);
+}
+
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
@@ -3134,7 +3203,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_weight = s.GetArgWVal();
             break;
 		case IC_CANUSE:
-			m_CanUse = s.GetArgVal();
+			m_CanUse = s.GetArgULLVal();
             break;
 		case IC_CONT:	// needs special processing.
 			{
@@ -3842,7 +3911,8 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
     }
     else if (!pComp)
     {
-        SubscribeComponent(new CCFaction());
+        CItemBase* pItemDef = Item_GetDef();
+        SubscribeComponent(new CCFaction(pItemDef->_pFaction));
     }
 
 	return true;
@@ -3993,13 +4063,6 @@ void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)
 	_SetTimeout(iTicksTimeout);
 	//RemoveFromView();
 	Update();
-}
-
-CObjBase * CItem::GetContainer() const
-{
-	// What is this CItem contained in ?
-	// Container should be a CChar or CItemContainer
-	return ( dynamic_cast <CObjBase*> (GetParent()));
 }
 
 const CItem* CItem::GetTopContainer() const
@@ -4337,11 +4400,11 @@ uint CItem::AddSpellbookSpell( SPELL_TYPE spell, bool fUpdate )
 		return 1;
 
 	// Add spell to spellbook bitmask:
-	const uint i = spell - (pBookDef->m_ttSpellbook.m_iOffset + 1);
+	const uint i = (uint)spell - (pBookDef->m_ttSpellbook.m_iOffset + 1u);
 	if ( i < 32u ) // Replaced the <= with < because of the formula above, the first 32 spells have an i value from 0 to 31 and are stored in more1.
-		m_itSpellbook.m_spells1 |= (1 << i);
+		m_itSpellbook.m_spells1 |= (1u << i);
 	else if ( i < 64u ) // Replaced the <= with < because of the formula above, the remaining 32 spells have an i value from 32 to 63 and are stored in more2.
-		m_itSpellbook.m_spells2 |= (1 << (i-32u));
+		m_itSpellbook.m_spells2 |= (1u << (i-32u));
 	//else if ( i <= 96 )
 	//	m_itSpellbook.m_spells3 |= (1 << (i-64));	//not used anymore?
 	else
@@ -4988,17 +5051,18 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 
 	CPointMap ptCoords = pUser->GetTopPoint();
 
-#define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
+    // #define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
+    byte bSight = (g_Cfg.m_iMapViewRadar > 5 ? g_Cfg.m_iMapViewRadar - 5 : 26); //m_iMapViewRadar is 31 in default.
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
 	CSString sSearch;
 	tchar	*pResult = Str_GetTemp();
 
 	// Weather bonus
-	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * BASE_SIGHT) : 0.0;
+	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * bSight) : 0.0;
 	// Light level bonus
-	double rLightSight = (1.0 - (static_cast<double>(iLight) / 25.0)) * BASE_SIGHT * 0.25;
-	int iVisibility = (int) (BASE_SIGHT + rWeatherSight + rLightSight);
+	double rLightSight = (1.0 - (static_cast<double>(iLight) / 25.0)) * bSight * 0.25;
+	int iVisibility = (int) (bSight + rWeatherSight + rLightSight);
 
 	// Check for the nearest land, only check every 4th square for speed
 	const CUOMapMeter * pMeter = CWorldMap::GetMapMeter( ptCoords ); // Are we at sea?
@@ -5060,14 +5124,15 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	}
 
 	// Check for interesting items, like boats, carpets, etc.., ignore our stuff
+    auto Area = CWorldSearchHolder::GetInstance(ptCoords, iVisibility);
+
 	CItem * pItemSighted = nullptr;
 	CItem * pBoatSighted = nullptr;
 	int iItemSighted = 0;
 	int iBoatSighted = 0;
-	CWorldSearch ItemsArea( ptCoords, iVisibility );
 	for (;;)
 	{
-		CItem * pItem = ItemsArea.GetItem();
+		CItem * pItem = Area->GetItem();
 		if ( pItem == nullptr )
 			break;
 		if ( pItem == this )
@@ -5088,7 +5153,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		}
 
 		// Track boats separately from other items
-		if ( iDist <= UO_MAP_VIEW_RADAR && // if it's visible in the radar window as a boat, report it
+		if ( iDist <= g_Cfg.m_iMapViewRadar && // if it's visible in the radar window as a boat, report it
 			pItem->m_type == IT_SHIP )
 		{
 			++iBoatSighted; // Keep a tally of how many we see
@@ -5122,28 +5187,29 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 		DIR_TYPE dir = ptCoords.GetDir(pItemSighted->GetTopPoint());
 		if (iItemSighted == 1)
 		{
-			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
+			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_STH_DIR), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 			else
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), pItemSighted->GetNameFull(false), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 		}
 		else
 		{
-			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
+			if ( iDist > g_Cfg.m_iMapViewRadar) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR_MANY), CPointBase::sm_szDirs[ dir ] );
 			else
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), pItemSighted->GetNameFull(false), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
 		}
 		strcat( pResult, sSearch);
 	}
 
 	// Check for creatures
+    Area->RestartSearch();
+
 	CChar * pCharSighted = nullptr;
 	int iCharSighted = 0;
-	CWorldSearch AreaChar( ptCoords, iVisibility );
 	for (;;)
 	{
-		CChar * pChar = AreaChar.GetChar();
+		CChar * pChar = Area->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar == pUser )
@@ -5182,7 +5248,7 @@ lpctstr CItem::Use_Sextant( CPointMap pntCoords ) const
 
 bool CItem::IsBookWritable() const
 {
-	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStamp() == 0) );
+	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStampS() == 0) );
 }
 
 bool CItem::IsBookSystem() const	// stored in RES_BOOK
@@ -5276,7 +5342,7 @@ int CItem::Use_LockPick( CChar * pCharSrc, bool fTest, bool fFail )
 		if ( ! fTest )
 			pCharSrc->CheckCrimeSeen( SKILL_SNOOPING, nullptr, this, g_Cfg.GetDefaultMsg( DEFMSG_LOCK_PICK_CRIME ) );
 
-		if ( Calc_GetRandVal( g_Cfg.m_iMagicUnlockDoor ))
+		if ( g_Rand.GetVal( g_Cfg.m_iMagicUnlockDoor ))
 			return 10000;	// plain impossible.
 	}
 
@@ -5583,7 +5649,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 			}
 
-			m_itRune.m_ptMark = pCharSrc->GetTopPoint();
+			m_itRune.m_ptMark = static_cast<CPointBase const&>(pCharSrc->GetTopPoint());
 			if ( IsType(IT_RUNE) )
 			{
 				m_itRune.m_Strength = pSpellDef->m_vcEffect.GetLinear( iSkillLevel );
@@ -5659,7 +5725,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
     if (fHasMaxHits && (m_itArmor.m_wHitsMax > 0))
     {
         const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
-        if (iSelfRepair > Calc_GetRandVal(10))
+        if (iSelfRepair > g_Rand.GetVal(10))
         {
             const ushort uiOldHits = m_itArmor.m_dwHitsCur;
             m_itArmor.m_dwHitsCur += 2;
@@ -5695,13 +5761,13 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		if ( iDmg == 1 )
 		{
 			// Miss - They will usually survive.
-			if ( Calc_GetRandVal(5))
+			if ( g_Rand.GetVal(5))
 				return 0;
 		}
 		else
 		{
 			// Must have hit.
-			if ( ! Calc_GetRandVal(3))
+			if ( ! g_Rand.GetVal(3))
 				return 1;
 		}
 		Delete();
@@ -5859,10 +5925,10 @@ void CItem::OnExplosion()
 		iDmgPhysical = 100;
 
 	CChar * pSrc = m_uidLink.CharFind();
-	CWorldSearch AreaChars( GetTopPoint(), m_itExplode.m_iDist );
+	auto AreaChars = CWorldSearchHolder::GetInstance( GetTopPoint(), m_itExplode.m_iDist );
 	for (;;)
 	{
-		CChar * pChar = AreaChars.GetChar();
+		CChar * pChar = AreaChars->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar->CanSeeLOS(this) )
@@ -5982,6 +6048,16 @@ bool CItem::_CanHoldTimer() const
 	ADDTOCALLSTACK("CItem::_CanHoldTimer");
 	EXC_TRY("Can have a TIMER?");
 
+    if (g_World.IsScheduledObjDeletion(this))
+    {
+        return false;
+    }
+
+    if (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED))
+    {
+        return true;
+    }
+
 	if (_IsIdle())
 	{
 		return true;
@@ -6005,8 +6081,9 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
+    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 	// ATTR_DECAY ignores/overrides fParentGoingToSleep
-	if (IsAttr(ATTR_DECAY) && (pCont == nullptr))
+	if (fIgnoreCont || (IsAttr(ATTR_DECAY) && !pCont))
 	{
 		return CObjBase::_CanTick(false);
 	}
@@ -6094,7 +6171,7 @@ bool CItem::_OnTick()
                     {
                         pClient->addMapWaypoint(this, MAPWAYPOINT_Remove);	// remove corpse map waypoint on enhanced clients
                     }
-					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
+					SetID((ITEMID_TYPE)(g_Rand.GetVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
 					_SetTimeout(g_Cfg.m_iDecay_CorpsePlayer);
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore
@@ -6255,7 +6332,15 @@ bool CItem::_OnTick()
 		return false;
 
 	EXC_SET_BLOCK("default behaviour4");
-	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), GetUID().GetObjUID()));
+    if (auto pContObj = dynamic_cast<CObjBase const*>(GetParent()))
+    {
+        g_Log.EventError("Timer expired without DECAY flag '%s' (UID=0%x)? Inside container '%s' (UID=0%x).\n",
+            GetName(), GetUID().GetObjUID(), pContObj->GetName(), pContObj->GetUID().GetObjUID());
+    }
+    else
+    {
+        g_Log.EventError("Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), GetUID().GetObjUID());
+    }
 
     EXC_CATCH;
 

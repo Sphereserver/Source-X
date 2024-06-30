@@ -4,6 +4,7 @@
 #else
     #include <sys/wait.h>
 	#include <errno.h>	// errno
+    //#include <spawn.h>
 #endif
 
 #include "../game/chars/CChar.h"
@@ -14,6 +15,7 @@
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 #include "../game/CWorldMap.h"
+#include "../game/CWorldSearch.h"
 #include "../game/CWorldTimedFunctions.h"
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
@@ -539,6 +541,17 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 				return true;
 			}
 		}
+        // <hSOMEVAL> same as <HVAL <SOMEVAL>> to get hex from the val
+        else if ((*ptcKey == 'h') || (*ptcKey == 'H'))
+        {
+            lpctstr sArgs = ptcKey + 1;
+            if (r_WriteVal(sArgs, sVal, pSrc))
+            {
+                if (*sVal != '-')
+                    sVal.FormatLLHex(ahextoi64(sVal));
+                return true;
+            }
+        }
 		// <r>, <r15>, <r3,15> are shortcuts to rand(), rand(15) and rand(3,15)
 		else if (( *ptcKey == 'r' ) || ( *ptcKey == 'R' ))
 		{
@@ -568,7 +581,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			if ( min >= max )
 				sVal.FormatLLVal(min);
 			else
-				sVal.FormatLLVal(Calc_GetRandLLVal2(min, max));
+				sVal.FormatLLVal(g_Rand.GetLLVal2(min, max));
 
 			return true;
 		}
@@ -701,7 +714,8 @@ badcmd:
 		case SSC_FVAL:
 			{
 				llong iVal = Exp_GetLLVal(ptcKey);
-				sVal.Format( "%s%lld.%lld" , ((iVal >= 0) ? "" : "-"), SphereAbs(iVal/10), SphereAbs(iVal%10) );
+                int64 iValAbs = SphereAbs((int64)iVal);
+				sVal.Format( "%s%lld.%lld" , ((iVal >= 0) ? "" : "-"), (iValAbs / 10LL), (iValAbs % 10LL) );
 				return true;
 			}
 		case SSC_HVAL:
@@ -942,6 +956,18 @@ badcmd:
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
 					Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 #else
+                // vfork deprecated since Mac OS Monterey... TODO: use posix_spawn?
+                /*
+                pid_t pid;
+                char *argv[] = {
+                    Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1],
+					Arg_ppCmd[2], Arg_ppCmd[3], Arg_ppCmd[4],
+					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
+					Arg_ppCmd[8], Arg_ppCmd[9], nullptr
+                };
+                posix_spawn(&pid, argv[0], nullptr, nullptr, argv, environ);  //include spawn.h
+                */
+
 				// I think fork will cause problems.. we'll see.. if yes new thread + execlp is required.
 				int child_pid = vfork();
 				if ( child_pid < 0 )
@@ -1758,7 +1784,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 	size_t iBegin = 0;
 	size_t i = 0;
 	EXC_TRY("ParseScriptText Main Loop");
-	for ( i = 0; ptcResponse[i]; ++i )
+	for ( i = 0; ptcResponse[i] != '\0'; ++i)
 	{
 		const tchar ch = ptcResponse[i];
 
@@ -1769,7 +1795,25 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			{
                 const tchar chNext = ptcResponse[i + 1];
 				if ((chNext != '<') && !IsAlnum(chNext))
-					continue;	// Ignore this
+					continue;	// Ignore this, it might be a operator like <=
+                if ((chBegin == '<') && (chNext == '<'))
+                {
+                    // Is a << operator? I want a whitespace after the operator.
+                    if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
+                    {
+                        lpctstr ptcOpTest = &(ptcResponse[4]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a << operator
+                                i += 2; // Skip < and the whitespace
+                                continue;
+                            }
+                        }
+                    }
+                }
 
 				// Set the statement start
 				iBegin = i;
@@ -1811,6 +1855,28 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 				if (ptcTestNested == ptcTestOrig)
 				{
 					// Otherwise, it might be the << operator.
+
+                    // This shouldn't be necessary... but 
+                    /*
+                    // Is a << operator? I want a whitespace after the operator.
+                    if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
+                    {
+                        lpctstr ptcOpTest = &(ptcResponse[4]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a << operator
+                                i += 2; // Skip < and the whitespace
+                                pContext->_fParseScriptText_Brackets = false;
+                                continue;
+                            }
+                        }
+                    }
+                    // Print an error! I thought it was a << operator but it is not! What's happening here ?!
+                    */
+
 					++i;
 					continue;
 				}
@@ -2454,7 +2520,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 		if (s.HasArgs())
 			iDist = s.GetArgVal();
 		else
-			iDist = UO_MAP_VIEW_SIZE_DEFAULT;
+			iDist = g_Cfg.m_iMapViewSize;
 
 		CObjBaseTemplate* pObj = dynamic_cast <CObjBaseTemplate*>(this);
 		if (pObj == nullptr)
@@ -2468,14 +2534,14 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			CPointMap pt = pObjTop->GetTopPoint();
 			if (iType & 1)		// FORITEM, FOROBJ
 			{
-				CWorldSearch AreaItems(pt, iDist);
+				auto AreaItems = CWorldSearchHolder::GetInstance(pt, iDist);
 				for (;;)
 				{
 					++LoopsMade;
 					if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
 						goto toomanyloops;
 
-					CItem* pItem = AreaItems.GetItem();
+					CItem* pItem = AreaItems->GetItem();
 					if (pItem == nullptr)
 						break;
 					TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
@@ -2495,15 +2561,15 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			}
 			if (iType & 2)		// FORCHAR, FOROBJ
 			{
-				CWorldSearch AreaChars(pt, iDist);
-				AreaChars.SetAllShow((iType & 0x20) ? true : false);
+				auto AreaChars = CWorldSearchHolder::GetInstance(pt, iDist);
+				AreaChars->SetAllShow((iType & 0x20) ? true : false);
 				for (;;)
 				{
 					++LoopsMade;
 					if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
 						goto toomanyloops;
 
-					CChar* pChar = AreaChars.GetChar();
+					CChar* pChar = AreaChars->GetChar();
 					if (pChar == nullptr)
 						break;
 					if ((iType & 0x10) && (!pChar->IsClientActive()))	// FORCLIENTS
@@ -3011,7 +3077,7 @@ jump_in:
 					EXC_SET_BLOCK("dorand/doswitch");
 					int64 iVal = s.GetArgLLVal();
 					if ( iCmd == SK_DORAND )
-						iVal = Calc_GetRandLLVal(iVal);
+						iVal = g_Rand.GetLLVal(iVal);
 					for ( ; ; --iVal )
 					{
 						iRet = OnTriggerRun( s, (iVal == 0) ? TRIGRUN_SINGLE_TRUE : TRIGRUN_SINGLE_FALSE, pSrc, pArgs, pResult );

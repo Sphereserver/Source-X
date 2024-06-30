@@ -8,6 +8,7 @@
 #include "../CObjBase.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CCMultiMovable.h"
 
@@ -83,8 +84,8 @@ bool CCMultiMovable::SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType, bo
 
     if (!pItemThis->IsAttr(ATTR_MAGIC))	// make sound.
     {
-        if (!Calc_GetRandVal(10))
-            pItemThis->Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
+        if (!g_Rand.GetVal(10))
+            pItemThis->Sound(g_Rand.GetVal(2) ? 0x12 : 0x13);
     }
 
     pItemThis->m_itShip._eMovementType = (eMovementType >= SMT_NORMAL) ? SMT_NORMAL : eMovementType;	//checking here that packet is legit from client and not modified by 3rd party tools to send speed > 2.
@@ -153,12 +154,13 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     }
 
     // add chars to the list
-    CWorldSearch AreaChar(pItemThis->GetTopPoint(), iMaxDist);
-    AreaChar.SetAllShow(true);
-    AreaChar.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(pItemThis->GetTopPoint(), iMaxDist);
+
+    Area->SetAllShow(true);
+    Area->SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)
     {
-        CChar *pChar = AreaChar.GetChar();
+        CChar *pChar = Area->GetChar();
         if (pChar == nullptr)
             break;
         if (!pMulti->GetRegion()->IsInside2d(pChar->GetTopPoint()))
@@ -174,11 +176,11 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     }
 
     // last, add the rest of the items
-    CWorldSearch AreaItem(pItemThis->GetTopPoint(), iMaxDist);
-    AreaItem.SetSearchSquare(true);
+    Area->Reset(pItemThis->GetTopPoint(), iMaxDist);
+    Area->SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)
     {
-        CItem *pItem = AreaItem.GetItem();
+        CItem *pItem = Area->GetItem();
         if (pItem == nullptr)
             break;
         if (pItem == pItemThis)	// already listed.
@@ -320,7 +322,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
             continue;
 
         const CNetState* pNetState = pClient->GetNetState();
-        const bool fClientUsesSmoothSailing = !IsSetOF(OF_NoSmoothSailing) && (pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced());
+        const bool fClientUsesSmoothSailing = !IsSetOF(OF_NoSmoothSailing) && (pNetState->isClientVersionNumber(MINCLIVER_HS) || pNetState->isClientEnhanced());
 
         const CPointMap& ptMe = pCharClient->GetTopPoint();
         const int iViewDist = pCharClient->GetVisualRange();
@@ -349,7 +351,7 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                 if (pObj->IsItem())
                 {
                     if ((ptMe.GetDistSight(pt) < iViewDist)
-                        && ( (ptMe.GetDistSight(ptOld) >= iViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing) ))
+                        && ( (ptMe.GetDistSight(ptOld) >= iViewDist) || !(pNetState->isClientVersionNumber(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing) ))
                     {
                         CItem *pItem = static_cast<CItem *>(pObj);
                         pClient->addItem(pItem);
@@ -364,9 +366,9 @@ bool CCMultiMovable::MoveDelta(const CPointMap& ptDelta, bool fUpdateViewFull)
                             pClient->addPlayerUpdate();     // update my (client) position
                     }
                     else if ((ptMe.GetDistSight(pt) <= iViewDist)
-                        && ((ptMe.GetDistSight(ptOld) > iViewDist) || !(pNetState->isClientVersion(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
+                        && ((ptMe.GetDistSight(ptOld) > iViewDist) || !(pNetState->isClientVersionNumber(MINCLIVER_HS) || pNetState->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
                     {
-                        if ((pt.GetDist(ptOld) > 1) && (pNetState->isClientLessVersion(MINCLIVER_HS)) && (pt.GetDistSight(ptOld) < iViewDist))
+                        if ((pt.GetDist(ptOld) > 1) && (pNetState->isClientLessVersionNumber(MINCLIVER_HS)) && (pt.GetDistSight(ptOld) < iViewDist))
                             pClient->addCharMove(pChar);
                         else
                         {
@@ -479,10 +481,9 @@ bool CCMultiMovable::CanMoveTo(const CPointMap & pt) const
     if (pItemThis->IsAttr(ATTR_MAGIC))
         return true;
 
-    dword dwBlockFlags = CAN_I_WATER;
-
-    CWorldMap::GetHeightPoint2(pt, dwBlockFlags, true);
-    if (dwBlockFlags & CAN_I_WATER)
+    uint64 uiBlockFlags = CAN_I_WATER;
+    CWorldMap::GetHeightPoint2(pt, uiBlockFlags, true);
+    if (uiBlockFlags & CAN_I_WATER)
         return true;
 
     return false;
@@ -1212,8 +1213,8 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
             CPointMap pt = pItemThis->GetTopPoint();
             pt.m_z = zold;
             pItemThis->SetTopZ(-UO_SIZE_Z);	// bottom of the world where i won't get in the way.
-            dword dwBlockFlags = CAN_I_WATER;
-            char z = CWorldMap::GetHeightPoint2(pt, dwBlockFlags);
+            uint64 uiBlockFlags = CAN_I_WATER;
+            char z = CWorldMap::GetHeightPoint2(pt, uiBlockFlags);
             pItemThis->SetTopZ(zold);	// restore z for now.
             pt.InitPoint();
             pt.m_z = z - zold;
@@ -1239,7 +1240,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
     {
         if (pszSpeak == nullptr)
         {
-            switch (Calc_GetRandVal(3))
+            switch (g_Rand.GetVal(3))
             {
                 case 1:
                     pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_REPLY_1);

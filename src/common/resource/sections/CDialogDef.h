@@ -8,6 +8,7 @@
 
 #include "../../sphere_library/CSString.h"
 #include "../CResourceLink.h"
+#include <vector>
 
 class CClient;
 
@@ -28,17 +29,14 @@ public:
     explicit CDialogDef( CResourceID rid );
     virtual ~CDialogDef() = default;
 
-private:
-    CDialogDef(const CDialogDef& copy);
-    CDialogDef& operator=(const CDialogDef& other);
+    CDialogDef(const CDialogDef& copy) = delete;
+    CDialogDef& operator=(const CDialogDef& other) = delete;
 
 public:
     // temporary placeholders - valid only during dialog setup
     CObjBase *	m_pObj;
-    CSString	m_sControls[1024];
-    CSString	m_sText[512];
-    uint		m_uiTexts;
-    uint		m_uiControls;
+    std::vector<CSString>	m_sControls;
+    std::vector<CSString>	m_sText;
     int			m_x;
     int			m_y;
 

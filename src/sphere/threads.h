@@ -12,6 +12,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/sphere_library/CSTime.h"
 #include "../sphere/ProfileData.h"
+#include <atomic>
 #include <exception>
 #include <vector>
 
@@ -196,14 +197,17 @@ public:
 		return isSameThreadId(getCurrentThreadId(), otherThreadId);
 	}
 
-	static const uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+	static constexpr uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 	static void setThreadName(const char* name);
+
+    size_t m_threadHolderId;
 
 protected:
 	virtual bool shouldExit() = 0;
 
 public:
-	virtual ~IThread() { };
+    IThread() noexcept : m_threadHolderId(0) { };
+	virtual ~IThread() = default;
 };
 
 
@@ -212,17 +216,19 @@ class ThreadHolder
 {
 	spherethreadlist_t m_threads;
 	size_t m_threadCount;
-	bool m_inited;
+	volatile std::atomic_bool m_inited;
+    volatile std::atomic_bool m_closing;
 	SimpleMutex m_mutex;
 
 
-	ThreadHolder() :
-		m_threadCount(0), m_inited(false)
-	{}
+	ThreadHolder() noexcept;
 	void init();
 
 	friend void atexit_handler(void);
+    friend void Sphere_ExitServer(void);
 	void markThreadsClosing();
+
+    //SphereThreadData* findThreadData(IThread* thread) noexcept;
 
 	friend class AbstractThread;
 	TlsValue<IThread*> m_currentThread;
@@ -232,15 +238,13 @@ public:
 
 	static ThreadHolder& get() noexcept;
 
+    bool closing() noexcept;
 	// returns current working thread or DummySphereThread * if no IThread threads are running
 	IThread *current() noexcept;
 	// records a thread to the list. Sould NOT be called, internal usage
 	void push(IThread *thread);
 	// removes a thread from the list. Sould NOT be called, internal usage
 	void remove(IThread *thread);
-	// internal usage
-	spherethreadlist_t::iterator findThreadDataIt(IThread* thread);
-	SphereThreadData* findThreadData(IThread* thread);
 	// returns thread at i pos
 	IThread * getThreadAt(size_t at);
 
@@ -258,7 +262,7 @@ protected:
 
 private:
 	threadid_t m_id;
-	const char *m_name;
+	char m_name[30];
 	static int m_threadsAvailable;
 	spherethread_t m_handle;
 	uint m_hangCheck;
@@ -273,16 +277,14 @@ public:
 	AbstractThread(const char *name, Priority priority = IThread::Normal);
 	virtual ~AbstractThread();
 
-private:
-	AbstractThread(const AbstractThread& copy);
-	AbstractThread& operator=(const AbstractThread& other);
+	AbstractThread(const AbstractThread& copy) = delete;
+	AbstractThread& operator=(const AbstractThread& other) = delete;
 
 public:
-	threadid_t getId() const { return m_id; }
-	const char *getName() const { return m_name; }
-	void overwriteInternalThreadName(const char* name) {	// Use it only if you know what you are doing!
-		m_name = name;										//  This doesn't actually do the change of the thread name!
-	}
+	threadid_t getId() const noexcept { return m_id; }
+	const char *getName() const noexcept { return m_name; }
+
+    void overwriteInternalThreadName(const char* name) noexcept;
 
 	bool isActive() const;
 	bool isCurrentThread() const;
@@ -394,7 +396,7 @@ private:
 
 public:
 	StackDebugInformation(const char *name) noexcept;
-	~StackDebugInformation();
+	~StackDebugInformation() noexcept;
 
 	StackDebugInformation(const StackDebugInformation& copy) = delete;
 	StackDebugInformation& operator=(const StackDebugInformation& other) = delete;

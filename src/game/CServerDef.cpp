@@ -38,7 +38,7 @@
 #else			// (Unix)
 	#include <sys/resource.h>
 #endif
-	bool	m_bPmemory = true;		// process memory information is available?
+	bool	m_fPmemory = true;		// process memory information is available?
 
 //////////////////////////////////////////////////////////////////////
 // -CServerDef
@@ -67,7 +67,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
 		d = 0;
-		if ( m_bPmemory )
+		if ( m_fPmemory )
 		{
 #ifdef _WIN32
 			if ( !m_hmPsapiDll )			// try to load psapi.dll if not loaded yet
@@ -76,7 +76,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 				m_hmPsapiDll = LoadLibrary(TEXT("psapi.dll"));
 				if (m_hmPsapiDll == nullptr)
 				{
-					m_bPmemory = false;
+					m_fPmemory = false;
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
@@ -111,30 +111,31 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
                     }
 				}
 			}
+            if ( d != 0 )
+				d /= 1024;
 #else
-			struct rusage usage;
-			int res = getrusage(RUSAGE_SELF, &usage);
-
-			if ( res == 0 && usage.ru_idrss )
-				d = usage.ru_idrss;
-			else
 			{
 				CSFileText inf;
-				tchar * buf = Str_GetTemp(), * head;
-
-				sprintf(buf, "/proc/%d/status", getpid());
-				if ( inf.Open(buf, OF_READ|OF_TEXT) )
+                char buf[50];
+				char * head;
+				if ( inf.Open("/proc/self/status", OF_READ|OF_TEXT) )
 				{
 					for (;;)
 					{
-						if ( !inf.ReadString(buf, SCRIPT_MAX_LINE_LEN) )
+						if ( !inf.ReadString(buf, sizeof(buf)) )
 							break;
 
-						if ( (head = strstr(buf, "VmSize:")) != nullptr )
+						if ( (head = strstr(buf, "VmRSS:")) != nullptr )
 						{
-							head += 7;
-							GETNONWHITESPACE(head)
-							d = atoi(head) * 1000;
+							head += 6;
+                            GETNONWHITESPACE(head);
+                            char* head_stop = head;
+                            while (head_stop ++) {
+                                if (!isdigit(*head_stop))
+                                    break;
+                            }
+                            *head_stop = '\0';
+							d = atoi(head); // In kB
 							break;
 						}
 					}
@@ -145,12 +146,9 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 			if ( !d )
 			{
 				g_Log.EventError(("Unable to load process information from getrusage() and procfs. Memory information will be not available.\n"));
-				m_bPmemory = false;
+				m_fPmemory = false;
 			}
 #endif
-
-			if ( d != 0 )
-				d /= 1024;
 		}
 	}
 	return d;
@@ -182,6 +180,44 @@ void CServerDef::SetName( lpctstr pszName )
 	}
 
 	m_sName = szName;
+}
+
+void CServerDef::StatInc(SERV_STAT_TYPE i)
+{
+    ASSERT(i >= 0 && i < SERV_STAT_QTY);
+    ++m_stStat[i];
+}
+
+void CServerDef::StatDec(SERV_STAT_TYPE i)
+{
+    ASSERT(i >= 0 && i < SERV_STAT_QTY);
+    --m_stStat[i];
+}
+
+void CServerDef::SetStat(SERV_STAT_TYPE i, dword dwVal)
+{
+    ASSERT(i >= 0 && i < SERV_STAT_QTY);
+    m_stStat[i] = dwVal;
+}
+
+lpctstr CServerDef::GetName() const // virtual override
+{
+    return m_sName;
+}
+
+lpctstr CServerDef::GetStatus() const noexcept
+{
+    return m_sStatus;
+}
+
+bool CServerDef::IsConnected() const noexcept
+{
+    return m_timeLastValid > 0;
+}
+
+void CServerDef::SetCryptVersion()
+{
+    m_ClientVersion.SetClientVerFromString(m_sClientVersion.GetBuffer());
 }
 
 void CServerDef::SetValidTime()
@@ -293,7 +329,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			break;
 		case SC_CLIENTVERSION:
 			m_sClientVersion = s.GetArgRaw();
-			// m_ClientVersion.SetClientVer( s.GetArgRaw());
+			// m_ClientVersion.SetClientVerNumber( s.GetArgRaw());
 			break;
 		case SC_ADMINEMAIL:
         {
@@ -400,8 +436,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		break;
 	case SC_CLIENTVERSION:
 		{
-			char pcVersion[ 128 ];
-			sVal = m_ClientVersion.WriteClientVer(pcVersion, sizeof(pcVersion));
+			sVal = m_ClientVersion.GetClientVer().c_str();
 		}
 		break;
 	case SC_CREATE:

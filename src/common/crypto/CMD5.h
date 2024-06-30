@@ -22,32 +22,24 @@ private:
 	uchar m_input[64];
 	bool m_finalized;
 
-	void update();
+	void private_update() noexcept;
 
 public:
-	CMD5();
-	~CMD5();
-private:
-	CMD5(const CMD5& copy);
-	CMD5& operator=(const CMD5& other);
+	CMD5() noexcept;
+    ~CMD5() noexcept = default;
+    CMD5(const CMD5& copy) = delete;
+    CMD5& operator=(const CMD5& other) = delete;
 
-public:
-	void reset();
-	void update( const uchar * data, uint length );
-	void finalize();
+	void reset() noexcept;
+	void update( const uchar * data, uint length ) noexcept;
+	void finalize() noexcept;
 
 	// Digest has to be 33 bytes long
-	void digest( char * digest );
+	void digest( char * digest ) noexcept;
 	// Get digest in a "numeric" form to be usable
-	void numericDigest( uchar * digest );
+	void numericDigest( uchar * digest ) noexcept;
 	
-	inline static void fastDigest( char * digest, const char * message )
-	{
-		CMD5 ctx;
-		ctx.update( reinterpret_cast<const uchar *>(message), (uint)(strlen( message ) ));
-		ctx.finalize();
-		ctx.digest( digest );
-	}
+    static void fastDigest(char * digest, const char * message) noexcept;
 };
 
 #endif // _INC_CMD5_H

@@ -22,6 +22,7 @@ ProfileData::ProfileData() noexcept
 	m_CurrentTime = llTicksStart;
 	m_CurrentTask = PROFILE_IDLE;
 	m_TimeTotal = 0;
+    m_iMapTaskCounter = 0;
 }
 
 int ProfileData::GetActiveWindow() const noexcept
@@ -96,7 +97,18 @@ void ProfileData::Start(PROFILE_TYPE id)
 
 	// accumulate the time for this task.
 	llong llDiff = ( llTicksStart - m_CurrentTime );
-    ASSERT(llDiff >= 0);
+    if ((llDiff < 0) && (llDiff > -10)) {
+        // The timer might not be very very precise.
+        llDiff = 0;
+    }
+    else {
+        ASSERT(llDiff >= 0);
+    }
+
+    //if (m_CurrentTask == PROFILE_MAP) {
+    //    llDiff *= 10;
+    //}
+
 	m_TimeTotal += llDiff;
     ASSERT(m_TimeTotal >= 0);
 	m_CurrentTimes[m_CurrentTask].m_Time += llDiff;

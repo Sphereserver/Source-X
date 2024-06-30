@@ -18,7 +18,7 @@ lpctstr const CExpression::sm_szMsgNames[DEFMSG_QTY] =
 	#include "../tables/defmessages.tbl"
 };
 
-dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
+dword ahextoi( lpctstr pszStr ) // Convert decimal or hex string to 32 bit integer
 {
 	// Unfortunatly the library func cant handle the number FFFFFFFF
 	// tchar * sstop; return( strtol( s, &sstop, 16 ));
@@ -61,7 +61,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 	return val;
 }
 
-int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
+int64 ahextoi64( lpctstr pszStr ) // Convert decimal or hex string to int64
 {
 	if ( pszStr == nullptr )
 		return 0;
@@ -77,6 +77,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	}
 
 	int64 val = 0;
+    ushort ndigits = 0;
 	for (;;)
 	{
 		tchar ch = static_cast<tchar>(toupper(*pszStr));
@@ -85,6 +86,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 		else if ( bHex && ( ch >= 'A' ) && ( ch <= 'F' ))
 		{
 			ch -= 'A' - 10;
+            ++ndigits;
 		}
 		else if ( !bHex && ( ch == '.' ) )
 		{
@@ -98,7 +100,28 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 		val += ch;
 		++pszStr;
 	}
+    if (ndigits <= 8)
+        return (llong)(int)val;
+
 	return val;
+}
+
+int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError)
+{
+    if (iBytesToWrite < 0)
+        return 0;
+    if (uiBufSize < 1)
+        goto err;
+    if ((uint)iBytesToWrite >= uiBufSize - 1)
+        goto err;
+    return iBytesToWrite;
+
+err:
+    //throw CSError(LOGL_ERROR, 0, "Buffer size too small for snprintf.\n");
+    if (fPrintError) {
+        g_Log.EventError("Buffer size too small for snprintf.\n");
+    }
+    return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
 }
 
 llong power(llong base, llong level)
@@ -276,46 +299,6 @@ int Calc_GetLog2( uint iVal )
 	return i;
 }
 
-int32 Calc_GetRandVal( int32 iQty )
-{
-	if ( iQty < 2 )
-		return 0;
-	if ( iQty >= INT32_MAX )
-		return ( (int32)IMulDivLL(CSRand::genRandInt32(0, iQty - 1), (uint32) iQty, INT32_MAX ) );
-	return CSRand::genRandInt32(0, iQty - 1);
-}
-
-int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
-{
-	if ( iMin > iMax )
-	{
-		int tmp = iMin;
-		iMin = iMax;
-		iMax = tmp;
-	}
-	return CSRand::genRandInt32(iMin, iMax);
-}
-
-int64 Calc_GetRandLLVal( int64 iQty )
-{
-	if ( iQty < 2 )
-		return 0;
-	if ( iQty >= INT64_MAX )
-		return ( IMulDivLL(CSRand::genRandInt64(0, iQty - 1), (uint32) iQty, INT64_MAX ) );
-	return CSRand::genRandInt64(0, iQty - 1);
-}
-
-int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
-{
-	if ( iMin > iMax )
-	{
-		llong tmp = iMin;
-		iMin = iMax;
-		iMax = tmp;
-	}
-	return CSRand::genRandInt64(iMin, iMax);
-}
-
 int Calc_GetBellCurve( int iValDiff, int iVariance )
 {
 	// Produce a log curve.
@@ -406,7 +389,8 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 		}
 
 		lpctstr pStart = pszArgs;
-		ullong val = 0;
+		llong val = 0;
+        ushort ndigits = 0;
 		while (true)
 		{
 			tchar ch = *pszArgs;
@@ -425,12 +409,15 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 					break;
 				}
 				ch -= 'a' - 10;
+                ++ ndigits;
 			}
 			val *= 0x10;
 			val += ch;
-			++pszArgs;
+            ++ pszArgs;
 		}
-		return (llong)val;
+        if (ndigits <= 8)
+            return (llong)(int)val;
+		return val;
 	}
 	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
 	{
@@ -791,10 +778,10 @@ try_dec:
 							if ( iCount == 2 )
 							{
 								int64 val2 = GetVal( ppCmd[1] );
-								iResult = Calc_GetRandLLVal2( val1, val2 );
+								iResult = g_Rand.GetLLVal2( val1, val2 );
 							}
 							else
-								iResult = Calc_GetRandLLVal(val1);
+								iResult = g_Rand.GetLLVal(val1);
 						}
 					} break;
 
@@ -1657,13 +1644,13 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 		pToParseCasted = static_cast<lptstr>(pToParse);
 		llong llValSecond = GetSingle(pToParseCasted);
 
-		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to Calc_GetRandLLVal2
+		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to g_Rand.GetLLVal2
 		{
 			const llong llValTemp = llValFirst;
 			llValFirst = llValSecond;
 			llValSecond = llValTemp;
 		}
-		return Calc_GetRandLLVal2(llValFirst, llValSecond);
+		return g_Rand.GetLLVal2(llValFirst, llValSecond);
 	}
 
 	// First get the total of the weights
@@ -1688,7 +1675,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	}
 
 	// Now roll the dice to see what value to pick
-	llTotalWeight = Calc_GetRandLLVal(llTotalWeight) + 1;
+	llTotalWeight = g_Rand.GetLLVal(llTotalWeight) + 1;
 
 	// Now loop to that value
 	int i = 1;
@@ -1768,7 +1755,7 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
     }
 
     // Now roll the dice to see what value to pick
-    llTotalWeight = Calc_GetRandLLVal(llTotalWeight) + 1;
+    llTotalWeight = g_Rand.GetLLVal(llTotalWeight) + 1;
 
     // Now loop to that value
     int i = 1;

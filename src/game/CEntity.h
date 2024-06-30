@@ -6,7 +6,7 @@
 #ifndef _INC_CENTITY_H
 #define _INC_CENTITY_H
 
-#include "../../lib/flat_containers/flat_map.hpp"
+#include <flat_containers/flat_map.hpp>
 #include "CComponent.h"
 #include <map>
 

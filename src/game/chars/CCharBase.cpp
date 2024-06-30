@@ -193,7 +193,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_AVERSIONS:
 			{
 				tchar *pszTmp = Str_GetTemp();
-				m_Aversions.WriteKeys(pszTmp);
+				m_Aversions.WriteKeys(pszTmp, Str_TempLength());
 				sVal = pszTmp;
 			}
 			break;
@@ -209,7 +209,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_DESIRES:
 			{
 				tchar *pszTmp = Str_GetTemp();
-				m_Desires.WriteKeys(pszTmp);
+				m_Desires.WriteKeys(pszTmp, Str_TempLength());
 				sVal = pszTmp;
 			}
 			break;
@@ -234,7 +234,7 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_FOODTYPE:
 			{
 				tchar *pszTmp = Str_GetTemp();
-				m_FoodType.WriteKeys(pszTmp);
+				m_FoodType.WriteKeys(pszTmp, Str_TempLength());
 				sVal = pszTmp;
 			}
 			break;

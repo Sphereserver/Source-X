@@ -1,7 +1,7 @@
 #ifndef _INC_SPTR_H
 #define _INC_SPTR_H
 
-#include <object_ptr.hpp>
+#include <object_ptr/object_ptr.hpp>
 
 
 // Sphere Library
@@ -118,7 +118,7 @@ namespace sl
         // Construct an object_ptr from a raw pointer convertible to T*, such as BaseOfT*
         template <
             typename U,
-            typename = std::enable_if_t<std::is_convertible<U*, T*>::value>>
+            typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
             constexpr smart_ptr_view(U* ptr_) noexcept = delete;
 
         // Convert to a raw pointer
@@ -154,7 +154,7 @@ namespace sl
         /// Construct a raw_ptr_view from a raw pointer convertible to T*, such as BaseOfT*
         template <
             typename U,
-            typename = std::enable_if_t<std::is_convertible<U*, T*>::value>>
+            typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
             constexpr raw_ptr_view(U* ptr_) noexcept : ptr(ptr_) {}
 
         /// Do NOT construct a raw_ptr_view from a smart pointer that holds a pointer convertible to T*,

@@ -3,8 +3,11 @@
 * @brief Sphere standard data types.
 */
 
-// WARNING: do not include datatypes.h directly, but include common.h first!
-//	If you include datatypes.h you won't have windows.h and its data types.
+// !!!!!!!!!!!!!!!!!! WARNING: do not include datatypes.h directly, but include common.h first!
+// !!!!!!!!!!!!!!!!!!   If you include datatypes.h you won't have windows.h and its data types.
+
+//----------------------------------------------------------------------------------------------
+
 
 // If windows.h was included the api string types were declared, so let's declare our aliases.
 // This is outside the main include guard since this file can be loaded multiple times, with windows.h included or not.
@@ -77,14 +80,6 @@ typedef	uint16_t		uint16;
 typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
-// We have UINTPTR_MAX and UINTPTR_MIN
-/*
-#ifdef _32BITS
-	#define POINTER_MAX		UINT32_MAX
-#else // !_32BITS
-	#define POINTER_MAX		UINT64_MAX
-#endif // _32BITS
-*/
 
 #ifndef _WIN32			//	assume unix if !_WIN32
 

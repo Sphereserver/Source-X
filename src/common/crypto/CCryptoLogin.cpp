@@ -8,7 +8,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");
     // Algorithm: a kind of rotation cipher
 
-    const dword dwCliVer = GetClientVer();
+    const dword dwCliVer = GetClientVerNumber();
 	if ( dwCliVer >= 1253700u )
 	{
 		for ( size_t i = 0; i < inLen; ++i )
@@ -42,10 +42,27 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
+            dword MaskShiftOperand, MaskShifted;
 
-			// FIXME: are these formulas right? because shifting by a number that can be max 0xFF (255) can return a huge number...
-			//	and dword isn't obviously big enough, so it causes undefined behavior.
+            MaskShiftOperand = ((5 * MaskHi * MaskHi) & 0xff);
+            MaskShifted = (MaskShiftOperand >= 32u /*sizeof(dword)*/) ? 0u : (m_MasterHi >> MaskShiftOperand);
 			m_CryptMaskHi =
+				MaskShifted
+				+ (MaskHi * m_MasterHi)
+				+ (MaskLo * MaskLo * 0x35ce9581)
+				+ 0x07afcc37;
+
+            MaskShiftOperand = ((3 * MaskLo * MaskLo) & 0xff);
+            MaskShifted = (MaskShiftOperand >= 32u /*sizeof(dword)*/) ? 0u : (m_MasterLo >> MaskShiftOperand);
+			m_CryptMaskLo =
+				MaskShifted
+				+ (MaskLo * m_MasterLo)
+				- (m_CryptMaskHi * m_CryptMaskHi * 0x4c3a1353)
+				+ 0x16ef783f;
+            
+            // Old formula could cause undefined behavior
+            /*
+            m_CryptMaskHi =
 				(m_MasterHi >> ((5 * MaskHi * MaskHi) & 0xff))
 				+ (MaskHi * m_MasterHi)
 				+ (MaskLo * MaskLo * 0x35ce9581)
@@ -55,6 +72,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 				+ (MaskLo * m_MasterLo)
 				- (m_CryptMaskHi * m_CryptMaskHi * 0x4c3a1353)
 				+ 0x16ef783f;
+            */
 		}
 		return true;
 	}

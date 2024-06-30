@@ -15,6 +15,7 @@
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -65,8 +66,10 @@ void CClient::resendBuffs() const
 		wStatEffect = pItem->m_itSpell.m_spelllevel;
         int64 iTimerEffectSigned = pItem->GetTimerSAdjusted();
 		wTimerEffect = (word)(maximum(iTimerEffectSigned, 0));
+        SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+        const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 
-		switch ( pItem->m_itSpell.m_spell )
+		switch (spell)
 		{
 			case SPELL_Night_Sight:
 				removeBuff(BI_NIGHTSIGHT);
@@ -134,7 +137,7 @@ void CClient::resendBuffs() const
 			case SPELL_Reactive_Armor:
 			{
 				removeBuff(BI_REACTIVEARMOR);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -153,14 +156,14 @@ void CClient::resendBuffs() const
 			{
 				BUFF_ICONS BuffIcon = BI_PROTECTION;
 				dword BuffCliloc = 1075814;
-				if ( pItem->m_itSpell.m_spell == SPELL_Arch_Prot )
+				if (spell == SPELL_Arch_Prot)
 				{
 					BuffIcon = BI_ARCHPROTECTION;
 					BuffCliloc = 1075816;
 				}
 
 				removeBuff(BuffIcon);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-pItem->m_itSpell.m_PolyStr, NumBuff[0], sizeof(NumBuff[0]), 10);
 					Str_FromI(-pItem->m_itSpell.m_PolyDex / 10, NumBuff[1], sizeof(NumBuff[0]), 10);
@@ -187,7 +190,7 @@ void CClient::resendBuffs() const
 			case SPELL_Magic_Reflect:
 			{
 				removeBuff(BI_MAGICREFLECTION);
-				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
+				if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) && !pSpellDef->IsSpellType(SPELLFLAG_NO_ELEMENTALENGINE))
 				{
 					Str_FromI(-wStatEffect, NumBuff[0], sizeof(NumBuff[0]), 10);
 					for ( int idx = 1; idx < 5; ++idx )
@@ -307,11 +310,11 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fItems )
 	{
 		// Remove any multi objects first ! or client will hang
-		CWorldSearch AreaItems(GetChar()->GetTopPoint(), UO_MAP_VIEW_RADAR);
-		AreaItems.SetSearchSquare(true);
+		auto AreaItems = CWorldSearchHolder::GetInstance(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
+		AreaItems->SetSearchSquare(true);
 		for (;;)
 		{
-			CItem * pItem = AreaItems.GetItem();
+			CItem * pItem = AreaItems->GetItem();
 			if ( pItem == nullptr )
 				break;
 			addObjectRemove(pItem);
@@ -320,12 +323,12 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fChars )
 	{
 		CChar * pCharSrc = GetChar();
-		CWorldSearch AreaChars(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
-		AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
-		AreaChars.SetSearchSquare(true);
+		auto AreaChars = CWorldSearchHolder::GetInstance(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
+		AreaChars->SetAllShow(IsPriv(PRIV_ALLSHOW));
+		AreaChars->SetSearchSquare(true);
 		for (;;)
 		{
-			CChar * pChar = AreaChars.GetChar();
+			CChar * pChar = AreaChars->GetChar();
 			if ( pChar == nullptr )
 				break;
 			if ( pChar == pCharSrc )
@@ -526,7 +529,7 @@ void CClient::addWeather( WEATHER_TYPE weather ) // Send new weather to player
 		return;
 
 	m_Env.m_Weather = weather;
-	new PacketWeather(this, weather, Calc_GetRandVal2(10, 70), 0x10);
+	new PacketWeather(this, weather, g_Rand.GetVal2(10, 70), 0x10);
 }
 
 void CClient::addLight() const
@@ -566,6 +569,23 @@ void CClient::addLight() const
 void CClient::addArrowQuest( int x, int y, int id ) const
 {
 	ADDTOCALLSTACK("CClient::addArrowQuest");
+
+    CScriptTriggerArgs args(x, y);
+    if (this->GetNetState()->isClientVersionNumber(MINCLIVER_HS) || this->GetNetState()->isClientEnhanced())
+        args.m_iN3 = id;
+    else
+        args.m_iN3 = 0;
+
+    if (x > 0)
+    {
+        if (IsTrigUsed(TRIGGER_ARROWQUEST_ADD))
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Add, m_pChar, &args);
+    }
+    else
+    {
+        if (IsTrigUsed(TRIGGER_ARROWQUEST_CLOSE))
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Close, m_pChar, &args);
+    }
 
 	new PacketArrowQuest(this, x, y, id);
 }
@@ -1003,7 +1023,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 	}
 
 	if ( m_pChar->IsStatFlag( STATF_HALLUCINATING ))
-		wHue = (HUE_TYPE)(Calc_GetRandVal( HUE_DYE_HIGH ));
+		wHue = (HUE_TYPE)(g_Rand.GetVal( HUE_DYE_HIGH ));
 
 	else if ( pChar->IsStatFlag(STATF_STONE)) //Client do not have stone state. So we must send the hue we want. (Affect the paperdoll hue as well)
 		wHue = HUE_STONE;
@@ -1061,13 +1081,13 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 			pCharDef = nullptr;
 			while ( pCharDef == nullptr )
 			{
-				id = (CREID_TYPE)(Calc_GetRandVal(CREID_EQUIP_GM_ROBE));
+				id = (CREID_TYPE)(g_Rand.GetVal(CREID_EQUIP_GM_ROBE));
 				if ( id != CREID_SEA_CREATURE )		// skip this chardef, it can crash many clients
 					pCharDef = CCharBase::FindCharBase(id);
 			}
 		}
 
-		wHue = (HUE_TYPE)(Calc_GetRandVal(HUE_DYE_HIGH));
+		wHue = (HUE_TYPE)(g_Rand.GetVal(HUE_DYE_HIGH));
 	}
 	else
 	{
@@ -1250,9 +1270,12 @@ void CClient::addItemName( CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
-					if ( pResDef )
-						len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
+                    if (pItem->m_itResource.m_ridRes.IsValidResource())
+                    {
+                        CResourceDef* pResDef = g_Cfg.RegisteredResourceGetDef(pItem->m_itResource.m_ridRes);
+                        if (pResDef)
+                            len += snprintf(szName + len, sizeof(szName) - len, " (%s)", pResDef->GetName());
+                    }
 				}
 				break;
 
@@ -1429,7 +1452,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	if ( pItemChange != nullptr )
 		pItemChange->Delete();
 
-	if ( g_Cfg.m_bAutoResDisp )
+	if ( g_Cfg.m_fAutoResDisp )
 		m_pAccount->SetAutoResDisp(this);
 
 	ClearTargMode();	// clear death menu mode. etc. ready to walk about. cancel any previous modes
@@ -1576,7 +1599,7 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	// always show max count for some stupid reason. (client bug)
 	// pad out the rest of the chars.
 	uint iClientMin = 5;
-	if (GetNetState()->isClientVersion(MINCLIVER_PADCHARLIST) || !GetNetState()->getCryptVersion())
+	if (GetNetState()->isClientVersionNumber(MINCLIVER_PADCHARLIST) || !GetNetState()->getCryptVersion())
 		iClientMin = maximum(iQty, 5);
 
 	for ( ; count < iClientMin; ++count)
@@ -1907,15 +1930,17 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
     std::vector<CItem*> vecMultis;
+    vecMultis.reserve(5);
     std::vector<CItem*> vecItems;
+    vecItems.reserve(15);
 
     // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
     //  If ptOld is an invalid point, just send every object i can see.
-	CWorldSearch AreaItems(ptCharThis, UO_MAP_VIEW_RADAR * 2);    // *2 to catch big multis
-	AreaItems.SetSearchSquare(true);
+	auto Area = CWorldSearchHolder::GetInstance(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
+	Area->SetSearchSquare(true);
 	for (;;)
 	{
-        CItem* pItem = AreaItems.GetItem();
+        CItem* pItem = Area->GetItem();
 		if ( !pItem )
 			break;
 
@@ -1938,9 +1963,9 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
             /*
             const CPointMap ptMultiCorner = pMulti->GetRegion()->GetRegionCorner(dirFace);
-            if ( ptOld.GetDistSight(ptMultiCorner) > UO_MAP_VIEW_RADAR )
+            if ( ptOld.GetDistSight(ptMultiCorner) > g_Cfg.m_iMapViewRadar )
             {
-                if (ptCharThis.GetDistSight(ptMultiCorner) <= UO_MAP_VIEW_RADAR )
+                if (ptCharThis.GetDistSight(ptMultiCorner) <= g_Cfg.m_iMapViewRadar )
                 {
                     // this just came into view
                     vecMultis.emplace_back(pItem);
@@ -2001,12 +2026,12 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	iSeeCurrent = 0;
 	iSeeMax = g_Cfg.m_iMaxCharComplexity * 5;
 
-	CWorldSearch AreaChars(pCharThis->GetTopPoint(), iViewDist);
-	AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
-	AreaChars.SetSearchSquare(true);
+	Area->Reset(pCharThis->GetTopPoint(), iViewDist);
+	Area->SetAllShow(IsPriv(PRIV_ALLSHOW));
+	Area->SetSearchSquare(true);
 	for (;;)
 	{
-        CChar* pChar = AreaChars.GetChar();
+        CChar* pChar = Area->GetChar();
 		if ( !pChar || iSeeCurrent > iSeeMax )
 			break;
 		if ( pCharThis == pChar || !CanSee(pChar) )
@@ -2554,12 +2579,13 @@ void CClient::addGlobalChatConnect()
 
 	// Set Jabber ID (syntax: CharName_CharUID@ServerID)
 	tchar* pszJID = Str_GetTemp();
-	sprintf(pszJID, "%.6s_%.7lu@%.2hhu", m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()), 0);
+	sprintf(pszJID, "%.6s_%.7u@%.2hhu", m_pChar->GetName(), static_cast<dword>(m_pChar->GetUID()), 0);
 	CGlobalChatChanMember::SetJID(pszJID);
 
 	// Send xml to client
 	tchar* pszXML = Str_GetTemp();
-	sprintf(pszXML, "<iq to=\"%s\" id=\"iq_%.10lu\" type=\"6\" version=\"1\" jid=\"%s\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), CGlobalChatChanMember::GetJID());
+	sprintf(pszXML, "<iq to=\"%s\" id=\"iq_%.10u\" type=\"6\" version=\"1\" jid=\"%s\" />",
+			CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), CGlobalChatChanMember::GetJID());
 
 	CGlobalChatChanMember::SetVisible(false);
 	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::InfoQuery, pszXML);
@@ -2587,7 +2613,8 @@ void CClient::addGlobalChatStatusToggle()
 	}
 
 	tchar* pszXML = Str_GetTemp();
-	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10lu\" name=\"%.6s\" show=\"%d\" version=\"1\" />", CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
+	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10u\" name=\"%.6s\" show=\"%d\" version=\"1\" />", 
+			CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
 
 	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));
 	new PacketGlobalChat(this, 0, PacketGlobalChat::Connect, PacketGlobalChat::Presence, pszXML);
@@ -2827,9 +2854,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		// The timeout is stored as server time (not real world time) in milliseconds.
 		// When a char logs out, the logout server time is stored.
 		// When the char logs in again, move forward its timers by the time it spent offline.
-		if (m_pChar->m_pPlayer->_iTimeLastDisconnected > 0)
+		if (m_pChar->m_pPlayer->_iTimeLastDisconnectedMs > 0)
 		{
-			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnected;
+			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnectedMs;
 			if (iDelta < 0)
 			{
 				g_Log.EventWarn("World Time was manually changed. The TIMERs belonging to the char '%s' (UID=0%x) couldn't be frozen during its logout.\n", m_pChar->GetName(), m_pChar->GetUID().GetObjUID());
@@ -2973,7 +3000,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	}*/
 
     dword dwFeatureFlags;
-    dword dwCliVer = m_Crypt.GetClientVer();
+    dword dwCliVer = m_Crypt.GetClientVerNumber();
     if ( dwCliVer && (dwCliVer < 1260000) )
     {
         dwFeatureFlags = 0x03;
@@ -3112,16 +3139,14 @@ byte CClient::LogIn( lpctstr ptcAccName, lpctstr ptcPassword, CSString & sMsg )
 	size_t iLen3 = Str_GetBare( szTmp, ptcAccName, MAX_NAME_SIZE );
 	if ( (iLen1 == 0) || (iLen1 != iLen3) || (iLen1 > MAX_NAME_SIZE) )	// a corrupt message.
 	{
-		char pcVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.WriteClientVer(pcVersion, sizeof(pcVersion)));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.GetClientVer().c_str());
 		return( PacketLoginError::BadAccount );
 	}
 
 	iLen3 = Str_GetBare( szTmp, ptcPassword, MAX_NAME_SIZE );
 	if ( iLen2 != iLen3 )	// a corrupt message.
 	{
-		char pcVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.WriteClientVer(pcVersion, sizeof(pcVersion)));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), m_Crypt.GetClientVer().c_str());
 		return( PacketLoginError::BadPassword );
 	}
 

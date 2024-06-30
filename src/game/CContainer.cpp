@@ -369,7 +369,7 @@ CItem *CContainer::ContentFindRandom() const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindRandom");
 	// returns Pointer of random item, nullptr if player carrying none
-	return static_cast<CItem *>(GetContentIndex(Calc_GetRandVal((int32)GetContentCount())));
+	return static_cast<CItem *>(GetContentIndex(g_Rand.GetVal((int32)GetContentCount())));
 }
 
 int CContainer::ContentConsumeTest( const CResourceID& rid, int amount, dword dwArg ) const
@@ -661,7 +661,7 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 		{
 			ptcKey += 2;
 			SKIP_SEPARATORS(ptcKey);
-			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_ITEMDEF, ptcKey));
+			pRef = ContentFind(g_Cfg.ResourceGetID_EatStr(RES_ITEMDEF, ptcKey));
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
@@ -680,7 +680,7 @@ bool CContainer::r_GetRefContainer( lpctstr &ptcKey, CScriptObj *&pRef )
 		{
 			ptcKey += 4;
 			SKIP_SEPARATORS(ptcKey);
-			pRef = ContentFind(g_Cfg.ResourceGetID_Advance(RES_TYPEDEF, ptcKey));
+			pRef = ContentFind(g_Cfg.ResourceGetID_EatStr(RES_TYPEDEF, ptcKey));
 			SKIP_SEPARATORS(ptcKey);
 			return true;
 		}
