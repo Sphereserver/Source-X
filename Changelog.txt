@@ -3792,3 +3792,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 26-06-2024, Jhobean
 - Changed: @NPCRESTOCK References modification. Now SRC:Server I:NPC (Before it was always server)
+
+30-06-2024, DavideRei
+- Fixed: hallucination spell duration (before it was fixed at 1000 seconds)
+- Fixed: wrong layer checked for potion delay to set the memory name
+- Modified: blocked spelleffect on ridden chars for spells with flag SPELLFLAG_FIELD or SPELLFLAG_AREA
+- Fixed: NPC_Act_Follow use combat target even if the npc is not in combat
+- Fixed: wrong highest threat when there are no attackers
