@@ -295,7 +295,10 @@ uint CChar::Stat_GetSum() const
 ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
-    return ushort(Stat_GetBase(i) + Stat_GetMod(i));
+    int t = Stat_GetBase(i) + Stat_GetMod(i);
+    if (t < 0)
+        t = 0;
+    return ushort(t);
 }
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
@@ -334,17 +337,6 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
 			uiVal = (ushort)(args.m_iN3);
-
-			if (i != STAT_FOOD && m_Stat[i].m_max < 1) // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
-			{
-				args.m_iN1 = i + 4LL; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
-				args.m_iN2 = uiStatVal;
-				args.m_iN3 = uiVal;
-				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
-					return;
-				// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-				uiVal = (ushort)(args.m_iN3);
-			}
 		}
 	}
 	switch ( i )
@@ -377,6 +369,8 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 	}
 
 	m_Stat[i].m_base = uiVal;
+    if (i != STAT_FOOD)
+        Stat_SetMax(i, uiVal);
 
 	if ( (i == STAT_STR) && (uiVal < uiStatVal) )
 	{
