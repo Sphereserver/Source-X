@@ -2,16 +2,20 @@
 
 # Set the default behavior for all files.
 *       text=auto
-
-# Normalize and convert to native line endings on checkout.
-*.c     text
-*.cpp   text
-*.h     text
-*.hpp   text
-
 # Ignore all differences in line endings.
 *       -crlf
+
+# Normalize and convert to native line endings on checkout.
+*.c     text eol=lf
+*.cpp   text eol=lf
+*.h     text eol=lf
+*.hpp   text eol=lf
+*.txt	text eol=lf
 
 # Convert to LF line endings on checkout.
 #*      text eol=lf
 
+# CMake template files
+*.h.in linguist-language=C++
+#*.cpp.in linguist-language=C++
+#*.c.in linguist-language=C
