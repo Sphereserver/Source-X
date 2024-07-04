@@ -35,6 +35,7 @@ void CCItemDamageable::SetCurHits(word iCurHits)
         _fNeedUpdate = true;
     }
     _iCurHits = iCurHits;
+    OnTickStatsUpdate();
 }
 
 void CCItemDamageable::SetMaxHits(word iMaxHits)
