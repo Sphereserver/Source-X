@@ -3781,6 +3781,14 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
 
 30-06-2024, Tolokio
--Fixed: Maxhits to work normal even if u change it. Fix as well @statchange undesired behaviours.
--Fixed: negative modstr no longer provoke negative str. Now it is set to zero before ushort. This make negative original value to be lost, but fix other issues hard to explain.
--Note: If u dont want maxhits to change once it is set (as before), u need to use @statchange to denied the change. It takes no more than 3 mins to do it. 
+-Changed: Maxhits is no longer an override of "STR" for maxhits calculation. Maxhits old behaviour would need to be done by script usin @statchange.
+-Fixed: @statchange work now as pretended. Maxhit old behaviour was messing it doing it to work at 60%. Now works 100% porcent and allow you to control all stat stuff in just once trigger. No more checks on equipments or complex things. All at same place and clear.
+-Note: You can use a tag0. to set any override any stat or maxstat this way:
+  on=@statchange
+  if <tag0.override.maxstat_<argn1>> //This method replace setting maxhits on @create. U can use notepad++ to mass replace
+	  argn3=<tag0.override.maxstat_<argn1>>
+  endif
+ on=@create
+   tag.override.maxstat_0 = 1000 //override maxhits
+   tag.override.maxstat_1 = 1000 //override maxmana
+   tag.override.maxstat_2 = 1000 //override maxdex
