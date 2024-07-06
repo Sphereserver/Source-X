@@ -3779,3 +3779,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// ITEM_CANTIMER_IN_CONTAINER	1	// Items can hold a timer even if equipped.
 - Added: item CAN flag (Issue #1180):
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
+
+06/07/2024, Tolokio
+FIXED-> "ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const" will set any negative value to 0 before ushort is done and retrieved. I dont agree with this fix.
