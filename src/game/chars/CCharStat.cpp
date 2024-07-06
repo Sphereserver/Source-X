@@ -295,7 +295,10 @@ uint CChar::Stat_GetSum() const
 ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
-    return ushort(Stat_GetBase(i) + Stat_GetMod(i));
+    int t = Stat_GetBase(i) + Stat_GetMod(i);
+    if (t < 0)
+        t = 0;
+    return ushort(t)
 }
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
