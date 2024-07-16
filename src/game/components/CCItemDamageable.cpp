@@ -45,6 +45,7 @@ void CCItemDamageable::SetMaxHits(word iMaxHits)
         _fNeedUpdate = true;
     }
     _iMaxHits = iMaxHits;
+    OnTickStatsUpdate();
 }
 
 word CCItemDamageable::GetCurHits() const
