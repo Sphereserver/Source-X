@@ -3779,3 +3779,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// ITEM_CANTIMER_IN_CONTAINER	1	// Items can hold a timer even if equipped.
 - Added: item CAN flag (Issue #1180):
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
+
+19-07-2024, Jhobean
+- Added: @NPCSpecialAction now trig when dragon use fire breath. ARGO contain the target if there no target, ARGO contain the NPC doing the special action.
+

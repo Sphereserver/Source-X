@@ -284,6 +284,16 @@ void CChar::NPC_Act_Fight()
             iDist <= 8 &&
             CanSeeLOS(pChar, LOS_NB_WINDOWS)) //Dragon can breath through a window
         {
+            if (IsTrigUsed(TRIGGER_NPCSPECIALACTION) && pChar != nullptr)
+            {
+                CScriptTriggerArgs args(pChar);
+                args.m_pO1 = pChar;
+                if (OnTrigger(CTRIG_NPCSpecialAction, this, &args) == TRIGRET_RET_TRUE)
+                {
+                    UpdateStatVal(STAT_DEX, -1); //cost 1 on stamina to avoid to enter on infinite loop of return 1
+                    return;
+                }
+            }
             if (!IsSetCombatFlags(COMBAT_NODIRCHANGE))
                 UpdateDir(pChar);
             Skill_Start(NPCACT_BREATH);

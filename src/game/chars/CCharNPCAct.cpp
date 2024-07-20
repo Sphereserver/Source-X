@@ -1918,7 +1918,9 @@ void CChar::NPC_Act_Idle()
 	{
 		if ( IsTrigUsed(TRIGGER_NPCSPECIALACTION) )
 		{
-			if ( OnTrigger( CTRIG_NPCSpecialAction, this ) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgs args(this); 
+            args.m_pO1 = this; //Need to set a value in ARGO to avoid error in script. NPCSPECIALACTION is use on brain dragon and ARGO is require.
+            if (OnTrigger(CTRIG_NPCSpecialAction, this, &args) == TRIGRET_RET_TRUE)
 				return;
 		}
 
