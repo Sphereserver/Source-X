@@ -1,8 +1,10 @@
-# Ignore folder and files
+# Ignore folders
 /.git
 /.vscode
 *.vshistory*
 /.kdev*
+/.ctagsd
+/.codelite
 
 /CMakeFiles
 /spheresvr.dir
