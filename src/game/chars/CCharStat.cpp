@@ -42,9 +42,8 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 			iVal = (int)(args.m_iN3);
 		}
 	}
-
 	const int iPrevVal = iVal;
-    iVal = std::clamp(iVal, -UINT16_MAX, UINT16_MAX);
+    iVal = std::clamp(iVal, static_cast<int>(-UINT16_MAX), static_cast<int>(-UINT16_MAX));
 	if (iVal != iPrevVal)
     {
 		g_Log.EventError("Trying to set MOD%s to invalid value=%d. Defaulting it to %d.\n",
@@ -104,7 +103,7 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
     }
 
 	const int iPrevVal = iVal;
-    iVal = std::clamp(iVal, -UINT16_MAX, UINT16_MAX);
+    iVal = std::clamp(iVal, static_cast<int>(-UINT16_MAX), static_cast<int>(-UINT16_MAX));
 	if (iVal != iPrevVal)
     {
 		g_Log.EventError("Trying to set MODMAX%s to invalid value=%d. Defaulting it to %d.\n",
@@ -131,7 +130,7 @@ void CChar::Stat_AddMaxMod( STAT_TYPE i, int iVal )
         return;
 
 	const int iPrevVal = iVal;
-    iVal = std::clamp(iVal, -UINT16_MAX, UINT16_MAX);
+    iVal = std::clamp(iVal, static_cast<int>(-UINT16_MAX), static_cast<int>(-UINT16_MAX));
 	if (iVal != iPrevVal)
     {
 		g_Log.EventError("Trying to add to MODMAX%s an invalid value=%d. Defaulting the addend to %d.\n",
@@ -190,7 +189,7 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
     ASSERT((i >= 0) && (i < STAT_QTY)); // allow for food
 
     int iPrevVal = iVal;
-    iVal = std::clamp(iVal, -UINT16_MAX, UINT16_MAX);
+    iVal = std::clamp(iVal, static_cast<int>(-UINT16_MAX), static_cast<int>(-UINT16_MAX));
 	if (iVal != iPrevVal)
     {
 		g_Log.EventError("Trying to add to %s an invalid value=%d. Defaulting the addend to %d.\n",
