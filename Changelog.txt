@@ -3808,6 +3808,18 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: alert anim on NPCs when they start combat, pillage anim when they loot something (items on ground or in bodies) and "summon" anim when they are summoned or added
 - Modified: now standard anims (SEA_MONSTER, ANIMAL, MONSTER) and UOP anims are handled correctly depending on which actions anim they have on anim files (checked on last client version).
 	Please note that some actions are handled by the client (for example walk, run, fly, getHit while flying, die) and they could not work depending on which client you are using.
+- Added: missing/new actions to be used with .ANIM command.
+	ANIM_ALERT              = 35,
+    ANIM_THROW              = 36,
+    ANIM_PILLAGE            = 37,
+    ANIM_STOMP              = 38,
+    ANIM_FLY                = 39,
+    ANIM_LAND               = 40,
+    ANIM_GETHIT_AIR         = 41,
+    ANIM_SUMMON             = 42,
+    ANIM_SPECIAL            = 43,   //UOP anims
+    ANIM_BOSS_SPECIAL_1     = 44,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+    ANIM_BOSS_SPECIAL_2     = 45,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
 - Modified: now custom anims can be handled by scripts using ANIM command under CHARDEF, to set which anim actions they have/don't have, using the following flags.
 
 	MONSTER (H slot) default configuration is with actions: 0 (Walk), 1 (Stand), 2 (Die1), 3 (Die2), 4 (Attack1), 5 (Attack2), 6 (Attack3), 10 (GetHit), 11 (Pillage), 15 (Block Right), 16 (Block Left), 17 (Idle), 18 (Fidget)

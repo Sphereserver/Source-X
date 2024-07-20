@@ -266,9 +266,9 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_LAND               = 40,
     ANIM_GETHIT_AIR         = 41,
     ANIM_SUMMON             = 42,
-    ANIM_SPECIAL            = 43,
-    ANIM_BOSS_SPECIAL_1     = 44,
-    ANIM_BOSS_SPECIAL_2     = 45,
+    ANIM_SPECIAL            = 43,   //UOP anims
+    ANIM_BOSS_SPECIAL_1     = 44,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+    ANIM_BOSS_SPECIAL_2     = 45,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
 
     ANIM_QTY		= 0x32,
     ANIM_MASK_MAX   = 64    // CCharBase::m_Anims bitmask can hold a maximum of 64 values (1 << 63)
