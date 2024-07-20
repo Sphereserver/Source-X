@@ -3849,5 +3849,5 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
     No LIEDOWN action   = 040,
     No DIE2 action      = 080
 
-	So for example if you have a flying custom anim, with Cast2 action but not Pillage action you can set ANIM=020A0
+	So for example if you have a MONSTER (H slot) flying custom anim, with Cast2 action but not Pillage action you can set ANIM=020A0
 	If you have a custom anim with default configuration, you don't need to set ANIM=
