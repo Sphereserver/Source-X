@@ -354,7 +354,8 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	//pChar->NPC_PetSetOwner(this);
 	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr, false, iDuration);
 	pChar->Update();
-	pChar->UpdateAnimate(ANIM_CAST_DIR);
+    pChar->UpdateAnimate(ANIM_SUMMON);
+    pChar->SetTimeout(2000);
 	pChar->SoundChar(CRESND_GETHIT);
 	m_Act_UID = pChar->GetUID();	// for last target stuff
 	return pChar;

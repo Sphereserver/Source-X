@@ -89,6 +89,8 @@ src/game/uo_files/CUOMapList.h
 src/game/uo_files/CUOMapList.cpp
 src/game/uo_files/CUOMapMeter.h
 src/game/uo_files/CUOMapMeter.cpp
+src/game/uo_files/CUOMobtypes.h
+src/game/uo_files/CUOMobtypes.cpp
 src/game/uo_files/CUOMultiItemRec.h
 src/game/uo_files/CUOMultiItemRec.cpp
 src/game/uo_files/CUOStaticItemRec.h

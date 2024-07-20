@@ -485,6 +485,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
     // --
 
     m_tiledata.Load();
+    m_mobtypes.Load();
 
 	return (VERFILE_TYPE)i;
 }

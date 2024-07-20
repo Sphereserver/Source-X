@@ -3286,7 +3286,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	{
 		UpdateStatVal( STAT_DEX, -(ushort)( 4 + g_Rand.GetVal(6) ) );
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
-			UpdateAnimate( ANIM_MON_Stomp );
+			UpdateAnimate(ANIM_THROW);
 
 		_SetTimeout(3000);
 		return 0;
