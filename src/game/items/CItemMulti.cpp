@@ -3397,7 +3397,7 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
         return nullptr;
     }
 
-    pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
+    pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->GetAttrRaw() & (ATTR_MAGIC | ATTR_INVIS)));
     pItemNew->SetHue(pDeed->GetHue());
     pItemNew->MoveToUpdate(pt);
 

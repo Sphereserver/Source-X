@@ -3780,6 +3780,19 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: item CAN flag (Issue #1180):
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
 
+21-06-2024, Nolok
+- Improvement: optimized various C++ core subsystems, resulting in a significantly reduced CPU usage and (slightly) reduced startup time.
+- Fixed: RAM usage always increasing during uptime. Caused by a couple of memory leaks, the greatest happening because the cached map blocks were not properly released.
+- Fixed: adopted a more conservative memory allocation policy for strings, resulting in reduced RAM usage.
+- Changed: I_MEMORY (ITEMID_MEMORY) items won't have anymore the ComponentProps Faction, ItemChar, Item, reducing their memory footprint.
+
+25-06-2024, Nolok
+- Fixed: LASTUSED, LASTDISCONNECTED, TIMESTAMP being interpreted as a number with a different base (seconds or tenths of seconds or milliseconds) in different contexts. Now they expect in scripts only values in seconds.
+- Fixed: crash when moving a char in an area full of teleporters, or whichever items made the char move multiple times in the same tick.
+
+26-06-2024, Jhobean
+- Changed: @NPCRESTOCK References modification. Now SRC:Server I:NPC (Before it was always server)
+
 19-07-2024, Jhobean
 - Added: @NPCSpecialAction now trig when dragon use fire breath. ARGO contain the target if there no target, ARGO contain the NPC doing the special action.
 

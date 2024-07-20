@@ -340,7 +340,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 		ASSERT(pRegion);
 		if ( pRegionNew == pRegion )
 		{
-			DEBUG_ERR(( "region already linked!\n" ));
+			DEBUG_ERR(( "Region already linked!\n" ));
 			return false;
 		}
 

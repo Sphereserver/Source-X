@@ -41,6 +41,17 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_QTY
 };
 
+
+enum WAR_SWING_TYPE	: int // m_Act_War_Swing_State
+{
+    WAR_SWING_INVALID = -1,
+    WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
+    WAR_SWING_READY,			// we can swing at any time.
+    WAR_SWING_SWINGING,			// we are swinging our weapon.
+    //--
+    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
+};
+
 class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR
@@ -489,7 +500,7 @@ public:
     bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
-	TRIGRET_TYPE CheckLocation( bool fStanding = false );
+	TRIGRET_TYPE CheckLocation(bool fCanCheckRecursively, bool fStanding);
 
 public:
 	// Client Player specific stuff. -------------------------

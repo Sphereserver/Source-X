@@ -1,56 +1,66 @@
 # SphereServer X
 
-Ultima Online game server developed in C++
-<br>
-[![GitHub license](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
-[![GitHub repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
-[![GitHub stars](https://img.shields.io/github/stars/Sphereserver/Source-X?logo=github)](https://github.com/Sphereserver/Source-X/stargazers)
-<br>
-[![GitHub issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
-<br>
-[![Build](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml/badge.svg)](https://github.com/Sphereserver/Source-X/actions/workflows/build.yml)
-[![Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin?svg=true)](https://ci.appveyor.com/project/cbnolok/sphereserver-x)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
+Ultima Online game server, developed in C++.
 <br><br>
-Join SphereServer Discord channel!
-[![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs)
-
-### Download automated SphereServer builds and ScriptPack releases
-
-**SphereServer:**
-
-+ <a href="https://github.com/Sphereserver/Source-X/releases">Github Release</a>
-+ <a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
+[![GitHub License](https://img.shields.io/github/license/Sphereserver/Source-X?color=blue)](https://github.com/Sphereserver/Source-X/blob/master/LICENSE)
+&nbsp; &nbsp; [![GitHub Repo size](https://img.shields.io/github/repo-size/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/)
+&nbsp; &nbsp; [![GitHub Stars](https://img.shields.io/github/stars/Sphereserver/Source-X?logo=github)](https://github.com/Sphereserver/Source-X/stargazers)
 <br>
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
+&nbsp; &nbsp; [![GitHub Issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
+| Join the SphereServer Discord channel! |
+| :---: |
+| [![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs) |
 
-**ScriptPack:**
+## Releases
+
+### **Core**
+
+| Branch: Master <br> (most stable pre-releases) | Branch: Dev <br> (most recent, potentially unstable) |
+| :--- | :--- |
+| [![GitHub last commit on Master branch](https://img.shields.io/github/last-commit/Sphereserver/Source-X/master.svg)](https://github.com/Sphereserver/Source-X/) &nbsp; <a href="https://github.com/Sphereserver/Source-X/blob/master/Changelog.txt">Changelog</a> | [![GitHub last commit on Dev branch](https://img.shields.io/github/last-commit/Sphereserver/Source-X/dev.svg)](https://github.com/Sphereserver/Source-X/tree/dev) &nbsp; <a href="https://github.com/Sphereserver/Source-X/blob/dev/Changelog.txt">Changelog</a> |
+| **Nightly builds:** | **Nightly builds:** |
+| [![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml) | [![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml) |
+|  [![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml) | [![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml) |
+| [![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml) | [![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml) |
+|  [![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml) | [![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml) |
+| [![Build status: MacOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml) | [![Build status: MacOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml) |
+|  [![Build status: MacOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml) | [![Build status: MacOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml) |
+
+**Click the badges or follow the links:**
+
++ <a href="https://github.com/Sphereserver/Source-X/releases">Github Nightly builds</a>
++ <a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
+
+### **ScriptPack**
+
 The official script pack is fully compatible with X new syntax, has all the new X features and preserves legacy/classic systems, which can be activated back in place
 of the new ones.
-It is currently being revamped to add original OSI features.
-Beware, it's still not 100% complete!
+<br>It is currently being revamped to add original OSI features.
+<br>**Beware, it's still not 100% complete!**
 
-+ <a href="https://github.com/Sphereserver/Scripts-X">Up to date</a>
-+ <a href="https://github.com/Sphereserver/Scripts-X/releases">Official releases</a>
++ <a href="https://github.com/Sphereserver/Scripts-X">Current (most updated)</a>
++ <a href="https://github.com/Sphereserver/Scripts-X/releases">Milestone releases</a>
 
-### Resources
+## Resources
 
 + <a href="https://wiki.spherecommunity.net/">Scripting guide</a>
-+ <a href="https://www.sphereserver.net/">Official website</a>
++ <a href="https://forum.spherecommunity.net/sshare.php">ScriptShare</a>
++ <a href="https://www.sphereserver.net/">SphereCommunity website</a>
 
-#### Coming from a different SphereServer version?
+### Coming from a different SphereServer version?
 
 + From 0.56d? <a href="docs/Porting%20from%200.56%20to%20X.txt">Here</a> a list of major scripting changes!
 + From an older 0.55 or 0.56 version? <a href="docs/Porting%20from%200.55%20to%200.56.txt">This</a> might help resuming major changes until 0.56d.
 
-## Why a fork?
+## Why the fork?
 
 This branch started in 2016 from a slow and radical rework of SphereServer 0.56d, while trying to preserve script compatibility with the starting branch.
 Though, something has changed script-wise, so we suggest to take a look <a href="docs/Porting%20from%200.56%20to%20X.txt">here</a>.
 Most notable changes (right now) are:
 
 + Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
-+ Support for x86_64 (64 bits) architecture, Mac OSX and MinGW compiler for Windows;
++ Support for x86_64 (64 bits) and ARM architectures, Mac OSX builds, Clang and GCC Linux builds, MinGW compiler for Windows;
 + CMake is now the standard way to generate updated build and project files;
 + Switched from MySQL 5.x to MariaDB client;
 + Added (and still adding) comments to the code to make it more understandable;
@@ -62,10 +72,12 @@ Most notable changes (right now) are:
 ### Required libraries (Windows)
 
 + `libmariadb.dll` (MariaDB Client v10.*package),  found in lib/bin/*cpu_architecture*/mariadb/libmariadb.dll
+<br>
 
 ### Required libraries (Linux)
 
 + MariaDB Client library. Get it from the following sources.
+<br>
 
 #### From MariaDB website
 
@@ -79,6 +91,7 @@ Install MariaDB client: `sudo apt-get install mariadb-client` or `sudo apt-get i
 #### CentOS - Red Hat Enterprise Linux - Fedora repositories
 
 Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-connector-c`
+<br>
 
 ### Required libraries (MacOS)
 
@@ -88,7 +101,7 @@ Then install MariaDB client via yum (CentOS or RH) or dnf (Fedora): `mariadb-con
 
 ### Generating the project files
 
-The compilation of the code is possible only using recent compilers, since C++20 features are used: newer is better. Oldest compiler versions supporting C++20: Visual Studio 2019 version 16.11, GCC 8, MinGW distributions using GCC 8, Clang version 10.<br>
+The compilation of the code is possible only using recent compilers, since C++20 features are used: the newer the compiler, the better. Oldest compiler versions supporting C++20: Visual Studio 2019 version 16.11, GCC 8, MinGW distributions using GCC 8, Clang version 10.<br>
 You need to build Makefiles or Ninja files (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and MinGW).<br>
 Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
@@ -98,12 +111,12 @@ Does CMake give you an error? Ensure that you have Git installed, and if you are
 
 #### Toolchains and custom CMake variables
 
-When generating project files, if you don't specify a toolchain, the CMake script will pick the 32 bits one as default.<br>
+When generating project files, if you don't specify a toolchain, the CMake script will pick the native one as default.<br>
 How to set a toolchain:
 
 + Via CMake GUI: when configuring for the first time the project, choose "Specify toolchain file for cross-compiling", then on the next step you'll be allowed to select the toolchain file
 + Via CMake CLI (command line interface): pass the parameter `-DCMAKE_TOOLCHAIN_FILE="..."`
-  When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
+  When using Makefiles or Ninja, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is **Nightly**, **Debug** or **Release**. If the build type
  was not set, by default the makefiles for all of the three build types are generated.<br>
 <br />
 
@@ -133,8 +146,10 @@ Building will require more packages than the ones needed to run Sphere.
 ##### Ubuntu and Debian
 
 Install these additional packages:
-++ `sudo apt-get install git cmake`<br>
-++ MariaDB client: `sudo apt-get install libmariadb-dev` and  `libmariadb3` or `mariadb-client` (depends on the OS version)
+
++ `sudo apt-get install git cmake`
++ MariaDB client: `sudo apt-get install libmariadb-dev` and  `libmariadb3` or `mariadb-client` (depends on the OS version)
+
 If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to
  install MariaDB packages adding the postfix `:i386` to each package name.
 
@@ -223,8 +238,9 @@ if (fTrue)<br>
 
 ## Licensing
 
-Copyright 2023 SphereServer development team.<br>
+Copyright 2024 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>
 You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
+

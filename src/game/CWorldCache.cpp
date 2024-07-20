@@ -52,7 +52,7 @@ void CWorldCache::CheckMapBlockCache(int64 iCurTime, int64 iCacheTime)
 				continue;
 
 			if (iCacheTime <= 0 || (block->m_CacheTime.GetCacheAge() >= iCacheTime))
-				block.release();
+				block.reset();
 		}
 	}
 

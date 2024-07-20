@@ -284,7 +284,7 @@ void CChar::NPC_Act_Fight()
             iDist <= 8 &&
             CanSeeLOS(pChar, LOS_NB_WINDOWS)) //Dragon can breath through a window
         {
-            if (IsTrigUsed(TRIGGER_NPCSPECIALACTION) && pChar != nullptr)
+            if (IsTrigUsed(TRIGGER_NPCSPECIALACTION))
             {
                 CScriptTriggerArgs args(pChar);
                 args.m_pO1 = pChar;

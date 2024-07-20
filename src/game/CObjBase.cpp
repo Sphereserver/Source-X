@@ -26,6 +26,38 @@
 #include "CObjBase.h"
 
 
+DIR_TYPE GetDirStr(lpctstr pszDir)
+{
+    char iDir2, iDir = static_cast<char>(toupper(pszDir[0]));
+
+    switch (iDir)
+    {
+        case 'E':
+        return DIR_E;
+        case 'W':
+        return DIR_W;
+        case 'N':
+        iDir2 = static_cast<char>(toupper(pszDir[1]));
+        if (iDir2 == 'E')
+            return DIR_NE;
+        if (iDir2 == 'W')
+            return DIR_NW;
+        return DIR_N;
+        case 'S':
+        iDir2 = static_cast<char>(toupper(pszDir[1]));
+        if (iDir2 == 'E')
+            return DIR_SE;
+        if (iDir2 == 'W')
+            return DIR_SW;
+        return DIR_S;
+        default:
+        if ((iDir >= '0') && (iDir <= '7'))
+            return static_cast<DIR_TYPE>(iDir - '0');
+    }
+    return DIR_QTY;
+}
+
+
 static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];
@@ -55,6 +87,7 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 	return true;
 }
 
+
 /////////////////////////////////////////////////////////////////
 // -CObjBase stuff
 // Either a player, npc or item.
@@ -68,7 +101,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
-	m_timestamp = 0;
+	m_iTimeStampS = 0;
 	m_CanMask = 0;
 
 	m_attackBase = m_attackRange = 0;
@@ -204,14 +237,14 @@ bool CObjBase::IsContainer() const
 	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
-int64 CObjBase::GetTimeStamp() const
+int64 CObjBase::GetTimeStampS() const
 {
-	return m_timestamp;
+	return m_iTimeStampS;
 }
 
-void CObjBase::SetTimeStamp(int64 t_time)
+void CObjBase::SetTimeStampS(int64 t_time)
 {
-	m_timestamp = t_time;
+	m_iTimeStampS = t_time;
 }
 
 void CObjBase::TimeoutRecursiveResync(int64 iDelta)
@@ -1560,7 +1593,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatVal( pItem->GetSpeed() );
 		}	break;
 		case OC_TIMESTAMP:
-			sVal.FormatLLVal( GetTimeStamp() / MSECS_PER_TENTH ); // in tenths of second.
+			sVal.FormatLLVal( GetTimeStampS() );
 			break;
 		case OC_VERSION:
 			sVal = SPHERE_BUILD_INFO_STR;
@@ -1938,7 +1971,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:
-			SetTimeStamp(s.GetArgLLVal());
+			SetTimeStampS(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
             if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
@@ -1976,8 +2009,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyHex( "COLOR", GetHue());
 	if ( _IsTimerSet() )
 		s.WriteKeyVal( "TIMER", _GetTimerAdjusted());
-	if ( m_timestamp > 0 )
-		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
+	if ( m_iTimeStampS > 0 )
+		s.WriteKeyVal( "TIMESTAMP", GetTimeStampS());
 	if ( const CCSpawn* pSpawn = GetSpawn() )
 		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID().GetObjUID());
 	if ( m_ModAr )
@@ -3637,34 +3670,3 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 	return false;
 }
 
-
-DIR_TYPE GetDirStr( lpctstr pszDir )
-{
-	char iDir2, iDir = static_cast< char >( toupper( pszDir[ 0 ] ) );
-
-	switch ( iDir )
-	{
-		case 'E':
-            return DIR_E;
-		case 'W':
-            return DIR_W;
-		case 'N':
-			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' )
-                return DIR_NE;
-			if ( iDir2 == 'W' )
-                return DIR_NW;
-			return DIR_N;
-		case 'S':
-			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
-			if ( iDir2 == 'E' )
-                return DIR_SE;
-			if ( iDir2 == 'W' )
-                return DIR_SW;
-			return DIR_S;
-		default:
-			if ( ( iDir >= '0' ) && ( iDir <= '7' ) )
-				return static_cast< DIR_TYPE >( iDir - '0' );
-	}
-	return DIR_QTY;
-}

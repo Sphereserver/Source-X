@@ -253,6 +253,7 @@ src/common/sphere_library/CSTime.h
 src/common/sphere_library/CSWindow.cpp
 src/common/sphere_library/CSWindow.h
 src/common/sphere_library/scontainer_ops.h
+src/common/sphere_library/sfastmath.h
 src/common/sphere_library/smap.h
 src/common/sphere_library/smutex.h
 src/common/sphere_library/smutex.cpp

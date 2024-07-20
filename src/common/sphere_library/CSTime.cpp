@@ -343,6 +343,8 @@ time_t CSTime::GetTime() const noexcept
 {
 	// Although not defined by the C standard, this is almost always an integral value holding the number of seconds 
 	//  (not counting leap seconds) since 00:00, Jan 1 1970 UTC, corresponding to UNIX time.
+    // 
+    // TODO: Is this on Windows defined since January 1, 1601 ?
 	return m_time;
 }
 

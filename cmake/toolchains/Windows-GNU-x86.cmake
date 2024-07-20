@@ -4,8 +4,9 @@ function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-GNU-x86.cmake.")
 	#SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
 	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
-	SET(ARCH_BITS			64			CACHE INTERNAL "" FORCE) # override
+	SET(ARCH_BITS			32			CACHE INTERNAL "" FORCE) # override
 	SET(ARCH				"x86"		CACHE INTERNAL "" FORCE) # override
+	SET(CMAKE_SYSTEM_PROCESSOR "${ARCH}" CACHE INTERNAL "" FORCE)
 
 	toolchain_after_project_common()	# Also to enable RC language, to compile Windows Resource files
 

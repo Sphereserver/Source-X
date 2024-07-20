@@ -11,10 +11,6 @@ CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	UnreferencedParameter(id);
 }
 
-CItemMemory::~CItemMemory()
-{
-}
-
 word CItemMemory::SetMemoryTypes( word wType )	// For memory type objects.
 {
 	SetHueQuick( wType );
