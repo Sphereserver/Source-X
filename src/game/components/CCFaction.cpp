@@ -119,7 +119,7 @@ bool CCFaction::IsOppositeLesserSlayer(const CCFaction *target) const
     else if ((myFaction & FACTION_OPHIDIAN) && (targFaction & FACTION_OPHIDIAN))
         return true;
     else if ((myFaction & FACTION_SNAKE) && (targFaction & FACTION_SNAKE))
-        return true; 
+        return true;
     else if ((myFaction & FACTION_LIZARDMAN) && (targFaction & FACTION_LIZARDMAN))
         return true;
 
@@ -146,7 +146,7 @@ bool CCFaction::IsOppositeLesserSlayer(const CCFaction *target) const
     return false;
 }
 
-enum CHF_TYPE
+enum CHF_TYPE : int
 {
     CHF_FACTION,
     CHF_SLAYER,
@@ -195,7 +195,7 @@ bool CCFaction::r_LoadVal(CScript & s)
         case CHF_FACTION:
         case CHF_SLAYER:
         {
-            SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
+            SetFactionID(static_cast<NPC_FACTION>(s.GetArgLLVal()));
             return true;
         }
     }
@@ -302,48 +302,49 @@ void CCFaction::SetFactionID(NPC_FACTION faction)
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::SetFactionID");
     ASSERT(faction < FACTION_QTY);
+    ASSERT(faction >= 0);
     _iFaction = faction;
 }
 
 bool CCFaction::IsGroupElemental() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupElemental");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupElemental");
     return ((_iFaction >= FACTION_ELEMENTAL) && (_iFaction < FACTION_ELEMENTAL_QTY));
 }
 
 bool CCFaction::IsGroupFey() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupFey");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupFey");
     return (_iFaction == FACTION_FEY);
 }
 
 bool CCFaction::IsGroupAbyss() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupAbyss");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupAbyss");
     return ((_iFaction >= FACTION_DEMON) && (_iFaction < FACTION_ABYSS_QTY));
 }
 
 bool CCFaction::IsGroupHumanoid() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupHumanoid");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupHumanoid");
     return ((_iFaction >= FACTION_REPOND) && (_iFaction < FACTION_HUMANOID_QTY));
 }
 
 bool CCFaction::IsGroupUndead() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupUndead");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupUndead");
     return ((_iFaction >= FACTION_UNDEAD) && (_iFaction < FACTION_UNDEAD_QTY));
 }
 
 bool CCFaction::IsGroupArachnid() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupArachnid");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupArachnid");
     return ((_iFaction >= FACTION_ARACHNID) && (_iFaction < FACTION_ARACHNID_QTY));
 }
 
 bool CCFaction::IsGroupReptilian() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupReptilian");
+    //ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupReptilian");
     return ((_iFaction >= FACTION_REPTILE) && (_iFaction < FACTION_REPTILIAN_QTY));
 }
 

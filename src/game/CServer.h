@@ -85,10 +85,10 @@ public:
 
 	void SetServerMode( SERVMODE_TYPE mode );
     bool IsValidBusy() const;
-    int GetExitFlag() const;
+    int GetExitFlag() const noexcept;
     void SetExitFlag(int iFlag);
-    bool IsLoading() const;
-    bool IsResyncing() const;
+    bool IsLoading() const noexcept;
+    bool IsResyncing() const noexcept;
 	void Shutdown( int64 iMinutes );
 	void SetSignals( bool fMsg = true );
     bool SetProcessPriority(int iPriorityLevel);

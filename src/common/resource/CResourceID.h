@@ -95,22 +95,37 @@ enum RES_TYPE	// all the script resource sections we know how to deal with !
 #define RES_NEWBIE_PROF_NINJA		(10000+10)
 
 
-struct CResourceIDBase : public CUID    // It has not the "page" part/variable. Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
-{
-    // What is a Resource? Look at the comment made to the RES_TYPE enum.
-    // RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
-    // RES_INDEX: Resource Index
+/*
+    What is a Resource? Look at the comment made to the RES_TYPE enum.
+      RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
+      RES_INDEX: Resource Index
 
-    // m_dwInternalVal:
-    // - Uppper 4 bits: RESERVED for flags UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
-    // - Usable size: 8 bits (res_type) + 20 bits (index) = 28 --> it's a 28 bits number.
+    CResourceIDBase.m_dwInternalVal structure:
+    - Uppper 4 bits: RESERVED for flags UID_F_RESOURCE, UID_F_ITEM, UID_O_EQUIPPED, UID_O_CONTAINED.
+    - Usable size: 8 bits (res_type) + 20 bits (index) = 28 --> it's a 28 bits number.
+
+*/
+
 #define RES_TYPE_SHIFT	20		// skip first 20 bits, use next 8 bits = 0xFFFF = 65535 possible unique RES_TYPEs;
 #define RES_TYPE_MASK	0xFF	//  0xFF = 8 bits.
 #define RES_INDEX_SHIFT	0		// use first 20 bits = 0xFFFFF = 1048575 possible unique indexes.
 #define RES_INDEX_MASK	0xFFFFF	//  0xFFFFF = 20 bits.
 
-#define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
-#define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
+[[nodiscard]] inline constexpr
+dword ResGetType(dword dwObjUid) noexcept {
+    return ( (dwObjUid >> RES_TYPE_SHIFT) & RES_TYPE_MASK );
+}
+
+[[nodiscard]] inline constexpr
+dword ResGetIndex(dword dwObjUid) noexcept {
+    return (dwObjUid & (dword)RES_INDEX_MASK);
+}
+
+
+struct CResourceIDBase : public CUID
+{
+    // Unlike CResourceID, CResourceIDBase has not the "page" part/variable.
+    //  Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
 
     void InitUID() = delete;
     void ClearUID() = delete;
@@ -143,11 +158,11 @@ struct CResourceIDBase : public CUID    // It has not the "page" part/variable. 
 
     inline RES_TYPE GetResType() const noexcept
     {
-        return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
+        return (RES_TYPE)(ResGetType(m_dwInternalVal));
     }
     inline uint GetResIndex() const noexcept
     {
-        return RES_GET_INDEX(m_dwInternalVal);
+        return ResGetIndex(m_dwInternalVal);
     }
     inline bool operator == (const CResourceIDBase & rid) const noexcept
     {
@@ -176,6 +191,8 @@ struct CResourceID : public CResourceIDBase     // It has the "page" part. Use i
 
     void Init() noexcept;
     void Clear() noexcept;
+
+    // TODO: set iIndex to unsigned.
 
     CResourceID() : CResourceIDBase(), m_wPage(0)
     {}

@@ -36,7 +36,7 @@ enum CCRET_TYPE
 class CComponent
 {
     COMP_TYPE _iType;
-    
+
 
 protected:
     CComponent(COMP_TYPE type);

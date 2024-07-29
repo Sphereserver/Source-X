@@ -1042,7 +1042,8 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;		// should not be said
 	if ( Str_Check(pszCommand) )
 		return true;		// should not be said
-	if (((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) || (pszCommand[0] == g_Cfg.m_cCommandPrefix)) //Should be dispid, or it's bugged when you change character's dispid to c_man_gm.
+	if ( ((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) //  WTF? In any case, keep using dispid, or it's bugged when you change character's dispid to c_man_gm.
+        || (pszCommand[0] == g_Cfg.m_cCommandPrefix))
 	{
 		// Lazy :P
 	}
@@ -1055,22 +1056,22 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;
 	}
 
-	bool m_fAllowCommand = true;
-	bool m_fAllowSay = true;
+	bool fAllowCommand = true;
+	bool fAllowSay = true;
 
 	pszCommand += 1;
 	GETNONWHITESPACE(pszCommand);
-	m_fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
+	fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
 
-	if ( !m_fAllowCommand )
-		m_fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
+	if ( !fAllowCommand )
+		fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
 
 	//	filter on commands is active - so trigger it
 	if ( !g_Cfg.m_sCommandTrigger.IsEmpty() )
 	{
 		CScriptTriggerArgs Args(pszCommand);
-		Args.m_iN1 = m_fAllowCommand;
-		Args.m_iN2 = m_fAllowSay;
+		Args.m_iN1 = fAllowCommand;
+		Args.m_iN2 = fAllowSay;
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
@@ -1078,16 +1079,16 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 			if ( tr == TRIGRET_RET_TRUE )
 				return (Args.m_iN2 != 0);
 
-		m_fAllowCommand = ( Args.m_iN1 != 0 );
-		m_fAllowSay = ( Args.m_iN2 != 0 );
+		fAllowCommand = ( Args.m_iN1 != 0 );
+		fAllowSay = ( Args.m_iN2 != 0 );
 	}
 
-	if ( !m_fAllowCommand && !m_fAllowSay )
+	if ( !fAllowCommand && !fAllowSay )
 		SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_PRIV));
 
-	if ( m_fAllowCommand )
+	if ( fAllowCommand )
 	{
-		m_fAllowSay = false;
+		fAllowSay = false;
 
 		// Assume you don't mean yourself !
 		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect)) >= 0 )
@@ -1104,9 +1105,9 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	}
 
 	if ( GetPrivLevel() >= g_Cfg.m_iCommandLog )
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_fAllowCommand);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, fAllowCommand);
 
-	return !m_fAllowSay;
+	return !fAllowSay;
 }
 
 void CClient::Event_Attack( CUID uid )

@@ -286,7 +286,7 @@ enum CRESND_TYPE	// Placeholders (not real sound IDs): the SoundChar method choo
 	CRESND_RAND		= -1,	// pick up randomly CRESND_IDLE or CRESND_NOTICE
     CRESND_IDLE		= 0,	// just random noise. or default "no" response
     CRESND_NOTICE,			// just random noise. or default "yes" response
-    
+
 	CRESND_HIT,
     CRESND_GETHIT,
     CRESND_DIE
@@ -450,7 +450,7 @@ enum SKILL_TYPE	// List of skill numbers (things that can be done at a given tim
 };
 
 
-enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
+enum LAYER_TYPE	: unsigned char	// defined by UO. Only one item can be in a slot.
 {
     LAYER_NONE = 0,	// spells that are layed on the CChar ?
     LAYER_HAND1,	// 1 = spellbook or weapon.

@@ -411,7 +411,7 @@ inline ssize_t fReadLine_StaticBuf(char *buf, const size_t bufsiz, FILE *fp) noe
 {
     return fReadUntilDelimiter_StaticBuf(buf, bufsiz, '\n', fp);
 }
-ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char *data, const size_t datasize) noexcept;
+ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char* ptr_string, const size_t datasize) noexcept;
 inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexcept
 {
     return sGetDelimiter_StaticBuf('\n', data, datasize);

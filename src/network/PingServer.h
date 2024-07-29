@@ -28,10 +28,10 @@ private:
 	PingServer& operator=(const PingServer& other);
 
 public:
-	virtual void onStart();
-	virtual void tick();
-	virtual bool shouldExit();
-	virtual void waitForClose();
+	virtual void onStart() override;
+	virtual void tick() override;
+	virtual bool shouldExit() noexcept override;
+	virtual void waitForClose() override;
 };
 
 

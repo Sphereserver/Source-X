@@ -2,6 +2,7 @@
 #include "../common/CException.h"
 #include "../common/CLog.h"
 #include "../common/CRect.h"
+#include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "items/CItemShip.h"
@@ -34,6 +35,7 @@ void CCharsActiveList::OnRemoveObj(CSObjContRec* pObjRec )
 {
 	ADDTOCALLSTACK("CCharsActiveList::OnRemoveObj");
     ASSERT(pObjRec);
+    DEBUG_ASSERT(nullptr != dynamic_cast<const CChar*>(pObjRec));
 
 	// Override this = called when removed from group.
 	CSObjCont::OnRemoveObj(pObjRec);
@@ -76,6 +78,7 @@ bool CItemsList::sm_fNotAMove = false;
 void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 {
 	ADDTOCALLSTACK("CItemsList::OnRemoveObj");
+    DEBUG_ASSERT(nullptr != dynamic_cast<const CItem*>(pObjRec));
 
 	// Item is picked up off the ground. (may be put right back down though)
 	CItem * pItem = static_cast<CItem*>(pObjRec);
@@ -85,9 +88,9 @@ void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 		pItem->OnMoveFrom();	// IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
 	}
 
-	//ASSERT(pObjRec->GetParent() == this);
+	DEBUG_ASSERT(pObjRec->GetParent() == this);
 	CSObjCont::OnRemoveObj(pObjRec);
-	//ASSERT(pObjRec->GetParent() == nullptr);
+	DEBUG_ASSERT(pObjRec->GetParent() == nullptr);
 
 	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
 }
@@ -98,13 +101,28 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	// Add to top level.
 	// Either MoveTo() or SetTimeout is being called.
 	ASSERT( pItem );
+    //DEBUG_ASSERT(nullptr != dynamic_cast<const CItem*>(pItem));
 
 	CSObjCont* pParent = pItem->GetParent();
 	if (pParent != this)
 	{
-		//ASSERT((pItem->GetParent() == nullptr) || (pItem->GetParent() == &g_World.m_ObjNew));
+		DEBUG_ASSERT(
+            (pParent == nullptr) ||
+            (pParent == g_World.GetObjectsNew()) ||
+            (nullptr != dynamic_cast<const CSectorObjCont*>(pParent))
+        );
+
 		CSObjCont::InsertContentTail(pItem); // this also removes the Char from the old sector
-		//ASSERT(pItem->GetParent() == this);
+
+		DEBUG_ASSERT(pItem->GetParent() == this);
+#ifdef _DEBUG
+        const CSObjCont* pObjNew = g_World.GetObjectsNew();
+        auto itNew = std::find(pObjNew->cbegin(), pObjNew->cend(), pItem);
+        DEBUG_ASSERT(itNew == pObjNew->cend());
+
+        auto itOldParent = std::find(pParent->cbegin(), pParent->cend(), pItem);
+        DEBUG_ASSERT(itOldParent == pParent->cend());
+#endif
 	}
 
     pItem->RemoveUIDFlags(UID_O_DISCONNECT);
@@ -416,7 +434,7 @@ CPointMap CSectorBase::GetBasePoint() const
 	// What is the coord base of this sector. upper left point.
 	const CSectorList* pSectors = CSectorList::Get();
 #if _DEBUG
-	ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
+	DEBUG_ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
 	// Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
 #endif
     const int iCols = pSectors->GetSectorCols(m_map);

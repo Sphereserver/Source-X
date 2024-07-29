@@ -22,12 +22,10 @@ public:
 	CItemVendable( ITEMID_TYPE id, CItemBase * pItemDef );
 	virtual ~CItemVendable();
 
-private:
-	CItemVendable(const CItemVendable& copy);
-	CItemVendable& operator=(const CItemVendable& other);
+	CItemVendable(const CItemVendable& copy) = delete;
+	CItemVendable& operator=(const CItemVendable& other) = delete;
 
 public:
-
 	word GetQuality() const;
 	void SetQuality( word quality = 0 );
 

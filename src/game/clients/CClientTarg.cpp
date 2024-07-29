@@ -712,7 +712,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				{
 					if ( ++iArg >= iArgQty )
 						iArg = 1;
-					CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(RES_GET_INDEX(piArgs[iArg])), nullptr, m_pChar);
+                    CItem *pItem = CItem::CreateTemplate((ITEMID_TYPE)(ResGetIndex((dword)piArgs[iArg])), nullptr, m_pChar);
                     if (!pItem)
                         continue;
 					pItem->SetAttr( ATTR_MOVE_NEVER );
@@ -1239,7 +1239,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	switch ( pItem->GetType())
 	{
 		case IT_POTION:
-			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Poison )
+			if ( ResGetIndex(pItem->m_itPotion.m_Type) == SPELL_Poison )
 			{
 				iPoisonLevel = pItem->m_itPotion.m_dwSkillQuality;
 			}
@@ -1631,7 +1631,7 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
         return false;
     }
 
-	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type)));
+	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(pDeed->m_itDeed.m_Type)));
     if (!OnTarg_Use_Multi(pItemDef, pt, pDeed))
     {
         return false;
@@ -1728,7 +1728,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 
 	case IT_POTION:
 		// Use a potion on something else.
-		if ( RES_GET_INDEX(pItemUse->m_itPotion.m_Type) == SPELL_Explosion )
+		if ( ResGetIndex(pItemUse->m_itPotion.m_Type) == SPELL_Explosion )
 		{
 			// Throw explosion potion
 			if ( !pItemUse->IsItemEquipped() || pItemUse->GetEquipLayer() != LAYER_DRAGGING )
@@ -2122,7 +2122,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				case IT_HIDE:
 					// IT_LEATHER
 					// Cut up the hides and create strips of leather
-					iOutID = (ITEMID_TYPE)(RES_GET_INDEX(pItemTarg->Item_GetDef()->m_ttNormal.m_tData1));
+					iOutID = (ITEMID_TYPE)(ResGetIndex(pItemTarg->Item_GetDef()->m_ttNormal.m_tData1));
 					if ( ! iOutID )
 						iOutID = ITEMID_LEATHER_1;
 					iOutQty = pItemTarg->GetAmount();

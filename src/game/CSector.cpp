@@ -207,7 +207,7 @@ void CSector::_GoSleep()
 void CSector::GoSleep()
 {
 	ADDTOCALLSTACK("CSector::GoSleep");
-	THREAD_UNIQUE_LOCK_SET;
+	MT_ENGINE_UNIQUE_LOCK_SET;
 	CSector::_GoSleep();
 }
 
@@ -269,7 +269,7 @@ void CSector::_GoAwake()
 void CSector::GoAwake()
 {
 	ADDTOCALLSTACK("CSector::GoAwake");
-	THREAD_UNIQUE_LOCK_SET;
+	MT_ENGINE_UNIQUE_LOCK_SET;
 	CSector::_GoAwake();
 }
 
@@ -971,7 +971,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
 	// Already here?
 	if (IsCharActiveIn(pChar))
-		return false;	
+		return false;
 
 	// Check my save parity vs. this sector's
 	if ( pChar->IsStatFlag( STATF_SAVEPARITY ) != m_fSaveParity )
@@ -1068,13 +1068,14 @@ void CSector::SetSectorWakeStatus()
     }
 }
 
-void CSector::Close()
+void CSector::Close(bool fClosingWorld)
 {
 	ADDTOCALLSTACK("CSector::Close");
+
 	// Clear up all dynamic data for this sector.
-	m_Items.ClearContainer();
-	m_Chars_Active.ClearContainer();
-	m_Chars_Disconnect.ClearContainer();
+	m_Items.ClearContainer(fClosingWorld);
+	m_Chars_Active.ClearContainer(fClosingWorld);
+	m_Chars_Disconnect.ClearContainer(fClosingWorld);
 
 	// These are resource type things.
 	//m_Teleports.clear();

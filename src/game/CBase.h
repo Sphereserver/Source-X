@@ -20,6 +20,7 @@
 #define RANGE_GET_LO(iRange)    (iRange & 0xFF)
 
 // Map Movement flags.
+// TODO: convert them to uint64_t static variables
 #define CAN_C_GHOST         0x0001  // Moves thru doors etc.
 #define CAN_C_SWIM          0x0002	// dolphin, elemental or is water.
 #define CAN_C_WALK          0x0004	// Can walk on land, climbed on walked over else Frozen by nature(Corpser).

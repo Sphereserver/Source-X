@@ -48,6 +48,11 @@
 #define FALLTHROUGH [[fallthrough]]
 #define NODISCARD	[[nodiscard]]
 
+#ifdef _DEBUG
+    #define NOEXCEPT_NODEBUG
+#else
+    #define NOEXCEPT_NODEBUG noexcept
+#endif
 
 /*
 	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
@@ -69,11 +74,11 @@ inline void UnreferencedParameter(T const&) noexcept {
     #ifdef _MSC_VER
         #ifdef __SANITIZE_ADDRESS__
             #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
-        #else 
-            #define NO_SANITIZE_ADDRESS 
+        #else
+            #define NO_SANITIZE_ADDRESS
         #endif
     #else
-        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address"))) 
+        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address")))
     #endif
 #endif
 

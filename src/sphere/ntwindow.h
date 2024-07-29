@@ -25,7 +25,7 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
 
     virtual void onStart();
     virtual void terminate(bool ended);
-    virtual bool shouldExit();
+    virtual bool shouldExit() noexcept override;
     virtual void tick();
 
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);

@@ -58,7 +58,7 @@ class CChar : public CObjBase, public CContainer, public CTextConsole
 
 	friend class CWorldTicker;
 
-    // THREAD_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
+    // MT_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
 
 private:
 	// Spell type effects.
@@ -202,6 +202,8 @@ public:
 	int			m_Act_Effect;
 	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
+
+    std::vector<CUID> m_followers;
 
 	// Args related to specific actions type (m_Act_SkillCurrent)
 	union

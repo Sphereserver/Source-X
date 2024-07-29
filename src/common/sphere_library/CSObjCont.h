@@ -47,7 +47,7 @@ class CSObjCont
 {
 protected:
     BASECONT _Contents;
-    bool _fIsClearing;
+    bool _fClearingContainer;
 
 public:
     friend class CSObjContRec;
@@ -96,6 +96,8 @@ public:
 
     inline size_t size() const noexcept                     { return _Contents.size();   }
     inline const CSObjContRec *const * data() const noexcept{ return _Contents.data();   }
+
+    inline BASECONT::iterator erase(BASECONT::iterator it)  { return _Contents.erase(it); }
 
     /**
     * @brief Returns a copy of the CSObjCont base container, which is safe to iterate on even if one of its elements is ::Delete'd.
@@ -167,8 +169,9 @@ public:
 
     /**
     * @brief Remove all records of the CSObjCont.
+    * @param fClosingWorld Am i closing world UIDs or just destroyng everything before shutdown?
     */
-    void ClearContainer();
+    void ClearContainer(bool fClosingWorld);
 
     /**
     * @brief Insert a record at head.

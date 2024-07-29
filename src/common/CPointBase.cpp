@@ -128,17 +128,19 @@ const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
 	return( * this );
 }
 
-void CPointBase::InitPoint() noexcept
+CPointBase& CPointBase::InitPoint() noexcept
 {
 	m_x = m_y = -1;	// invalid location.
 	m_z = 0;
 	m_map = 0;
+    return *this;
 }
-void CPointBase::ZeroPoint() noexcept
+CPointBase& CPointBase::ZeroPoint() noexcept
 {
 	m_x = m_y = 0;	// invalid location.
 	m_z = 0;
 	m_map = 0;
+    return *this;
 }
 
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
@@ -169,7 +171,7 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
             const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
             const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
             return (dx > dy) * dx + (dx < dy) * dy;
-            
+
         }
         case DISTANCE_FORMULA_DIAGONAL_NOZ:
         {
@@ -382,7 +384,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			ptcKey += 6;
 			SKIP_SEPARATORS( ptcKey );
 			iStatic = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iStatic );
+			type = ResGetType( iStatic );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
 			SKIP_SEPARATORS( ptcKey );
@@ -390,12 +392,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		else
 		{
 			iStatic = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iStatic );
+			type = ResGetType( iStatic );
 		}
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iStatic)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(iStatic)));
 			if ( !pItemDef )
 			{
 				sVal.FormatVal( 0 );
@@ -525,7 +527,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			ptcKey += 6;
 			SKIP_SEPARATORS( ptcKey );
 			iComponent = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iComponent );
+			type = ResGetType( iComponent );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
 			SKIP_SEPARATORS( ptcKey );
@@ -533,12 +535,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		else
 		{
 			iComponent = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iComponent );
+			type = ResGetType( iComponent );
 		}
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iComponent)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(iComponent)));
 			if ( pItemDef == nullptr )
 			{
 				sVal.FormatVal( 0 );
@@ -771,7 +773,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 							sVal = pTypeDef->GetResourceName();
 						else
 							sVal.Clear();
-					} return true;	
+					} return true;
 					case PT_TERRAIN:
 					{
 						ptcKey += 7;
@@ -941,7 +943,7 @@ int CPointBase::Read( tchar * pszVal )
 		case 0:
 			break;
 	}
-    
+
     if (!ptTest.IsValidPoint())
     {
         InitPoint();

@@ -529,7 +529,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pSpell->m_itSpell.m_spell));
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !spell || !pSpellDef )
 		return;
@@ -951,7 +951,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pSpell->m_itSpell.m_spell));
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !spell || !pSpellDef )
 		return;
@@ -1723,7 +1723,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 	ASSERT(pItem);
 
-	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell));
 	const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (!pSpellDef)
 		return false;
@@ -1973,7 +1973,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_HARM))
 	{
-		iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
+        iDmgType = (DAMAGE_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("DamageType")));
 		if (iDmgType > 0 && iEffect > 0) // This is necessary if we have a spell that is harmful but does no damage periodically.
 		{
 			OnTakeDamage(iEffect, pItem->m_uidLink.CharFind(), iDmgType,
@@ -2911,8 +2911,8 @@ bool CChar::Spell_CastDone()
 	if (fIsSpellField)
 	{
 		//Setting new IDs as another variables to pass as different arguments to the field function.
-		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
-		it2test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2")));
+        it1test = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+        it2test = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject2")));
 		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth");
 		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge");
 	}
@@ -3282,7 +3282,7 @@ void CChar::Spell_CastFail(bool fAbort)
 	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
 	
-	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+	iT1 = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
 	Sound( SOUND_SPELL_FIZZLE );
@@ -3641,8 +3641,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);		// remember that effect/duration is calculated before triggers
-	DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
-	ITEMID_TYPE iEffectID = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+    DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("DamageType")));
+    ITEMID_TYPE iEffectID = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode") > 0 ? true : false;
 	iSound = (SOUND_TYPE)(Args.m_VarsLocal.GetKeyNum("Sound"));
 	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect"));

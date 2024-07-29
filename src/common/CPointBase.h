@@ -40,8 +40,8 @@ public:
 	uchar m_map;		// another map? (only if top level.)
 
 public:
-	void InitPoint() noexcept;
-	void ZeroPoint() noexcept;
+	CPointBase& InitPoint() noexcept;
+	CPointBase& ZeroPoint() noexcept;
 
 	CPointBase() noexcept;
 

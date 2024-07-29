@@ -272,7 +272,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				SysMessageDefault(DEFMSG_ITEMUSE_POTION_FAIL);
 				return false;
 			}
-			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Explosion )
+			if ( ResGetIndex(pItem->m_itPotion.m_Type) == SPELL_Explosion )
 			{
 				// Throw explosion potion
 				if ( m_pChar->ItemPickup(pItem, 1) == -1 )	// put the potion in our hand
@@ -347,7 +347,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_WAND:
 		case IT_SCROLL:
 		{
-			const SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
+			const SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pItem->m_itWeapon.m_spell));
 			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return false;

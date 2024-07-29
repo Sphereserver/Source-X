@@ -275,7 +275,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 					if ( *pArgs )
 					{
 						iCount = 1;
-						rResult = RES_GET_INDEX(int(MakeFloatMath(pArgs))); // RES_GET_INDEX
+						rResult = ResGetIndex(int(MakeFloatMath(pArgs))); // ResGetIndex
 					}
 					else
 					{

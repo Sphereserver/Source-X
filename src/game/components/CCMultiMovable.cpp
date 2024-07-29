@@ -1262,7 +1262,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
     return true;
 }
 
-enum CML_TYPE
+enum CML_TYPE : int
 {
     CML_ANCHOR,
     CML_DIRFACE,
