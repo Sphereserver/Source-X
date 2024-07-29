@@ -88,7 +88,7 @@ bool UnixTerminal::isReady()
 
 	// echo to console
 	fputc(c, stdout);
-	fflush(stdout);
+	//fflush(stdout);
 
 	m_nextChar = static_cast<tchar>(c);
 	return m_nextChar != '\0';
@@ -138,6 +138,7 @@ void UnixTerminal::print(lpctstr message)
 	wrefresh(m_window);
 #else
 	fputs(message, stdout);
+    //fflush(stdout);
 #endif
 }
 
@@ -168,7 +169,7 @@ void UnixTerminal::prepare()
 
 	// set new terminal attributes
 	termios term_caps = m_original;
-	term_caps.c_lflag &= ~(ICANON | ECHO);
+	term_caps.c_lflag &= ~ unsigned(ICANON | ECHO);
 	term_caps.c_cc[VMIN] = 1;
 
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)

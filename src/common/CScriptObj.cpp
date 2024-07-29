@@ -596,10 +596,10 @@ badcmd:
 	switch ( index )
 	{
         case SSC_RESOURCEINDEX:
-            sVal.FormatHex(RES_GET_INDEX(Exp_GetVal(ptcKey)));
+            sVal.FormatHex(ResGetIndex(Exp_GetVal(ptcKey)));
             break;
         case SSC_RESOURCETYPE:
-            sVal.FormatHex(RES_GET_TYPE(Exp_GetVal(ptcKey)));
+            sVal.FormatHex(ResGetType(Exp_GetVal(ptcKey)));
             break;
 
 		case SSC_LISTCOL:
@@ -742,7 +742,7 @@ badcmd:
 			{
 				const int64 val = Exp_GetLLVal(ptcKey);
 				SKIP_ARGSEP(ptcKey);
-				
+
 				const uint bit = Exp_GetUVal(ptcKey);
 				if (bit >= 64)
 				{
@@ -811,15 +811,15 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT(ppArgs));
             if ( iQty < 3 )
                 return false;
-                
+
             int64 iPos = Exp_GetVal( ppArgs[0] );
             int64 iCnt = Exp_GetVal( ppArgs[1] );
             if (iCnt < 0)
                 return false;
-            
+
             if ( *ppArgs[2] == '"')
                 ++ppArgs[2];
-                
+
             for (tchar *pEnd = ppArgs[2] + strlen(ppArgs[2]) - 1; pEnd >= ppArgs[2]; --pEnd)
             {
                 if ( *pEnd == '"')
@@ -829,7 +829,7 @@ badcmd:
                 }
             }
             int64 iLen = strlen(ppArgs[2]);
-            
+
 			const bool fBackwards = (iPos < 0);
 			if (fBackwards)
 				iPos = iLen - iCnt;
@@ -1008,17 +1008,17 @@ badcmd:
             int iQty = Str_ParseCmdsAdv(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT(ppArgs), ",");
             if ( iQty < 3 )
                 return false;
-                
+
             tchar *iSep = Str_UnQuote(ppArgs[2]); //New function, trim (") and (') chars directly.
             for (tchar *iSeperator = iSep + strlen(iSep) - 1; iSeperator > iSep; --iSeperator)
                 *iSeperator = '\0';
-            
+
             tchar *pArgs = Str_UnQuote(ppArgs[0]);
             sVal.Clear();
             tchar *ppCmd[255];
             int count = Str_ParseCmdsAdv(pArgs, ppCmd, ARRAY_COUNT(ppCmd), iSep); //Remove unnecessary chars from seperator to avoid issues.
             tchar *ppArrays[2];
-            
+
             //Getting range of array index...
             int iArrays = Str_ParseCmdsAdv(ppArgs[1], ppArrays, ARRAY_COUNT(ppArrays), "-");
             llong iValue = Exp_GetLLVal(ppArgs[1]);
@@ -1030,7 +1030,7 @@ badcmd:
                 if (iValueEnd <= 0 || iValueEnd > count)
                     iValueEnd = count;
             }
-            
+
             if (iValue < 0)
                 return false;
             else if (iValue > 0)
@@ -1250,7 +1250,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						pSrc = &g_Serv;
 						ASSERT(pSrc);
 					}
-				}	
+				}
 			}
 
 			return pRef->r_Verb( script, pSrc );
@@ -1488,7 +1488,8 @@ bool CScriptObj::r_Load( CScript & s )
 	{
 		if ( s.IsKeyHead( "ON", 2 ) )	// trigger scripting marks the end
 			break;
-		r_LoadVal(s);
+
+        r_LoadVal(s);
 	}
 	return true;
 }
@@ -1610,7 +1611,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 	}
 
 	// We have some subexpressions, connected between them by logical operators.
-	
+
 	bool fWholeExprVal = false;
 	for (int i = 0; i < iQty; ++i)
 	{
@@ -1641,13 +1642,13 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 			fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
 		}
 
-		
+
 		if (sCur.uiType & SType::None)
 		{
 			ASSERT(i == iQty - 1);	// It should be the last subexpression
 			ASSERT((sPrev.uiType & SType::Or) || (sPrev.uiType & SType::And));
 		}
-		
+
 	}
 
 	return fWholeExprVal;
@@ -1694,7 +1695,7 @@ static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lp
 		{
 			// The separator we have found is before the nested QVAL.
 			ptcSrc = ptcSepPos;
-			break; 
+			break;
 		}
 
 		// Found a nested QVAL. Skip it, otherwise we'll catch the wrong separator
@@ -1856,7 +1857,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 				{
 					// Otherwise, it might be the << operator.
 
-                    // This shouldn't be necessary... but 
+                    // This shouldn't be necessary... but
                     /*
                     // Is a << operator? I want a whitespace after the operator.
                     if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
@@ -1976,7 +1977,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 
 			// If i'm here it means that finally i'm at the end of the statement inside brackets.
 			pContext->_fParseScriptText_Brackets = false; // Close the statement.
-	
+
 			if ((eQval == QvalStatus::End) && (iQvalOpenBrackets != 0))
 			{
 				// I had an incomplete QVAL statement.
@@ -2013,7 +2014,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 						fRes = true;
 				}
 			}
-			
+
 
 			if ( fRes == false )
 			{
@@ -2056,7 +2057,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 	EXC_DEBUG_START;
 	g_Log.EventDebug("response '%s' source addr '0%p' flags '%d' args '%p'\n", ptcResponse, static_cast<void *>(pSrc), iFlags, static_cast<void *>(pArgs));
 	EXC_DEBUG_END;
-	
+
 	pContext->_fParseScriptText_Brackets = false;
 	return i;
 }
@@ -2116,7 +2117,7 @@ bool CScriptObj::Execute_Call(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs
 		else
 			fRes = pRef->r_Call(argRaw, pSrc, pArgs, &sVal);
 	}
-	
+
 	return fRes;
 }
 

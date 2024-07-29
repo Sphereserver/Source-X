@@ -245,9 +245,26 @@ void CWorldThread::InitUIDs()
 void CWorldThread::CloseAllUIDs()
 {
 	ADDTOCALLSTACK("CWorldThread::CloseAllUIDs");
-	m_ObjDelete.ClearContainer();	// empty our list of unplaced objects (and delete the objects in the list)
+
+    for (auto const& elem : m_ObjNew)
+    {
+        auto itObjDel = std::find(m_ObjDelete.begin(), m_ObjDelete.end(), elem);
+        if (itObjDel != m_ObjDelete.end()) {
+            // Avoid duplicates between the containers, for some reason it happens...
+            // This will just remove the pointer from the container, it doesn't call the destructor.'
+            // Not doing this might result in a double free.
+            m_ObjDelete.erase(itObjDel);
+        }
+    }
+
+    // empty our list of unplaced objects (and delete the objects in the list)
+    m_ObjNew.ClearContainer(true);
+
+    // empty our list of objects to delete (and delete the objects in the list)
+    m_ObjDelete.ClearContainer(true);
+
+    // special internal objects
 	m_ObjSpecialDelete.ClearContainer();
-	m_ObjNew.ClearContainer();		// empty our list of objects to delete (and delete the objects in the list)
 
 	if (_ppUIDObjArray != nullptr)
 	{
@@ -340,7 +357,7 @@ dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 setcount:
 		// We have run out of free UID's !!! Grow the array
 		const size_t uiOldArraySize = _uiUIDObjArraySize;
-		_uiUIDObjArraySize = ((dwIndex + 0x1000) & ~0xFFF);
+		_uiUIDObjArraySize = size_t((dwIndex + 0x1000u) & ~0xFFFu);
 
 		CObjBase** pNewBlock = (CObjBase**)realloc(_ppUIDObjArray, _uiUIDObjArraySize * sizeof(CObjBase*));
 		if (pNewBlock == nullptr)
@@ -390,7 +407,17 @@ void CWorldThread::AddIdleObj(CSObjContRec* obj)
 
 void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
 {
-	m_ObjDelete.InsertContentTail(obj);
+    const auto servMode = g_Serv.GetServerMode();
+    const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
+    // If the world is being destroyed, do not schedule the object for deletion but delete it right away.
+
+    if (fDestroy)
+    {
+        obj->RemoveSelf();
+        delete obj;
+    }
+    else
+        m_ObjDelete.InsertContentTail(obj);
 }
 
 void CWorldThread::ScheduleSpecialObjDeletion(CSObjListRec* obj)
@@ -515,15 +542,23 @@ void CWorldThread::GarbageCollection_NewObjs()
 
 		for (size_t i = 0; i < iObjCount; ++i)
 		{
+            auto itObjDel = std::find(m_ObjDelete.begin(), m_ObjDelete.end(), m_ObjNew.data()[i]);
+            if (itObjDel != m_ObjDelete.end()) {
+                // This will just remove the pointer from the container, it doesn't call the destructor.'
+                // Not doing this might result in a double free.
+                m_ObjDelete.erase(itObjDel);
+            }
+
 			CObjBase * pObj = dynamic_cast<CObjBase*>(m_ObjNew.GetContentIndex(i));
 			if (pObj == nullptr)
 				continue;
 
 			ReportGarbageCollection(pObj, 0x3202);
 		}
-		m_ObjNew.ClearContainer();	// empty our list of unplaced objects (and delete the objects in the list)
+
+		m_ObjNew.ClearContainer(false);	// empty our list of unplaced objects (and delete the objects in the list)
 	}
-	m_ObjDelete.ClearContainer();	// empty our list of objects to delete (and delete the objects in the list)
+	m_ObjDelete.ClearContainer(false);	// empty our list of objects to delete (and delete the objects in the list)
 	m_ObjSpecialDelete.ClearContainer();
 
 
@@ -808,7 +843,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		for ( size_t i = 0; i < iQty; ++i )
 		{
 			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs[i]);
-			if ( !pRegion || !pRegion->HasResourceName() || !pRegion->m_iModified )
+			if ( !pRegion || !pRegion->HasResourceName() || !pRegion->m_dwModifiedFlags )
 				continue;
 
 			m_FileData.WriteSection("WORLDSCRIPT %s", pRegion->GetResourceName());
@@ -932,7 +967,7 @@ bool CWorld::SaveForce() // Save world state
 				pCurBlock = save_msgs[5];
 
 			fSave = SaveStage();
-			if ( !(_iSaveStage & 0x1FF) )
+			if ( !(_iSaveStage & 0x7F) )
 			{
 				g_Serv.PrintPercent( _iSaveStage, (ssize_t)iSectorsQty + 3 );
 			}
@@ -1279,7 +1314,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	while ( s.FindNextSection() )
 	{
         // Print the percent state of the current file loading.
-		if (! ( ++iLoadStage & 0xFF ))	// don't update too often
+		if (! ( ++iLoadStage & 0x7F ))	// don't update too often
 			g_Serv.PrintPercent( s.GetPosition(), iLoadSize );
 
 		try
@@ -1359,7 +1394,7 @@ bool CWorld::LoadWorld() // Load world from script
 		m_Parties.clear();
 		m_GMPages.clear();
 
-		_Sectors.Close();
+		_Sectors.Close(true);
 		CloseAllUIDs();
 		_GameClock.Init();
 
@@ -1676,7 +1711,7 @@ void CWorld::Close()
 
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.MT_CMUTEX);
 #endif
 		_Ticker._ObjStatusUpdates.clear();
     }
@@ -1693,7 +1728,7 @@ void CWorld::Close()
         pClient->CharDisconnect();
     }
 
-	_Sectors.Close();
+	_Sectors.Close(true);
 
     g_MapList.m_mapGeoData.clear();
 	if ( g_MapList.m_pMapDiffCollection != nullptr )
@@ -1733,7 +1768,7 @@ void CWorld::_OnTick()
 	_Ticker.Tick();
 
 	EXC_SET_BLOCK("Delete objects");
-	m_ObjDelete.ClearContainer();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
+	m_ObjDelete.ClearContainer(false);	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 	m_ObjSpecialDelete.ClearContainer();
 
 	int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();

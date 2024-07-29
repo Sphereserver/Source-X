@@ -380,8 +380,8 @@ CResourceID CResourceHolder::ResourceGetID_EatStr(RES_TYPE restype, lpctstr &ptc
 
     lpctstr ptcNameStart = ptcName;
     dword dwEvalPrivateUID = Exp_GetDWVal(ptcName);    // May be some complex expression {}
-    int iEvalResType  = RES_GET_TYPE(dwEvalPrivateUID);
-    int iEvalResIndex = RES_GET_INDEX(dwEvalPrivateUID);
+    int iEvalResType  = ResGetType(dwEvalPrivateUID);
+    int iEvalResIndex = ResGetIndex(dwEvalPrivateUID);
 
     // We are NOT creating.
     if ((restype != RES_UNKNOWN) && (iEvalResType == RES_UNKNOWN))
@@ -477,6 +477,6 @@ bool CResourceHolder::ResourceLock( CResourceLock & s, const CResourceID& rid )
     CResourceLink* pResourceLink = dynamic_cast <CResourceLink*>(ResourceGetDefRef(rid).get());
     if (pResourceLink)
         return pResourceLink->ResourceLock(s);
-	
+
 	return false;
 }

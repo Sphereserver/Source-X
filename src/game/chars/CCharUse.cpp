@@ -116,7 +116,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-		ITEMID_TYPE id = (ITEMID_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp));
+        ITEMID_TYPE id = (ITEMID_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
 			break;
 
@@ -1061,7 +1061,7 @@ void CChar::Use_Drink( CItem * pItem )
 		if ( iEnhance )
 			iSkillQuality += IMulDiv(iSkillQuality, iEnhance, 100);
 
-		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
+		OnSpellEffect((SPELL_TYPE)(ResGetIndex(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
 		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), (int64)dwDelay, this);

@@ -22,16 +22,17 @@ public:
 	static const char *m_sClassName;
 
 private:
-	/**
+	tchar* m_pchData;	// Data pointer.
+	// Both the following lengths do not count the '\0', so we can always assume it's +1 char longer.
+	int	m_iLength;		// Length of string.
+	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
+
+    /**
 	* @brief Initializes internal data.
 	*
 	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
 	*/
 	void Init();
-
-	tchar* m_pchData;	// Data pointer.
-	int	m_iLength;		// Length of string.
-	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
 
 public:
 	/** @name Constructors, Destructor, Asign operator:
@@ -326,7 +327,7 @@ public:
     */
     void FormatHex(dword dwVal);
 
-	
+
 	/**
 	* @brief Print a char value into the string.
 	* @see Format()
@@ -512,7 +513,7 @@ public:
 	*/
 	NODISCARD
 	inline lpctstr GetBuffer() const noexcept;
-	
+
 	// Provide only a read-only buffer: if we modify it we'll break the internal length counter, other than possibly write past the end of the string (the buffer is small).
 	//inline lptstr GetBuffer() noexcept;
 

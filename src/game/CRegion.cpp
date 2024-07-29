@@ -21,7 +21,7 @@ CRegion::CRegion( CResourceID rid, lpctstr pszName ) :
 {
 	ADDTOCALLSTACK("CRegion::CRegion()");
 	m_dwFlags	= 0;
-	m_iModified	= 0;
+	m_dwModifiedFlags	= 0;
 	m_iLinkedSectors = 0;
 	if ( pszName )
 		SetName( pszName );
@@ -35,14 +35,12 @@ CRegion::~CRegion()
 	UnRealizeRegion();
 }
 
-void CRegion::SetModified( int iModFlag ) noexcept
+void CRegion::SetModified( dword dwModFlag ) noexcept
 {
-#ifdef _MSC_VER
-    //_CrtCheckMemory();
-#endif
 	if ( !m_iLinkedSectors )
         return;
-	m_iModified	= m_iModified | iModFlag;
+
+	m_dwModifiedFlags = m_dwModifiedFlags | dwModFlag;
 }
 
 void CRegion::UnRealizeRegion()
@@ -210,7 +208,7 @@ bool CRegion::MakeRegionDefname()
     return true;
 }
 
-enum RC_TYPE
+enum RC_TYPE : int // Even if it would implicitly be set to int, specify it to silence UBSanitizer.
 {
 	RC_ANNOUNCE,
 	RC_ARENA,
@@ -638,18 +636,18 @@ void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 void CRegion::r_WriteModified( CScript &s )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteModified");
-	if ( m_iModified & REGMOD_NAME )
+	if ( m_dwModifiedFlags & REGMOD_NAME )
 		s.WriteKeyStr("NAME", GetName() );
 
-	if ( m_iModified & REGMOD_GROUP )
+	if ( m_dwModifiedFlags & REGMOD_GROUP )
 		s.WriteKeyStr("GROUP", m_sGroup.GetBuffer() );
 
-	if ( m_iModified & REGMOD_FLAGS )
+	if ( m_dwModifiedFlags & REGMOD_FLAGS )
 	{
 		s.WriteKeyHex("FLAGS", GetRegionFlags() );
 	}
 
-	if ( m_iModified & REGMOD_EVENTS )
+	if ( m_dwModifiedFlags & REGMOD_EVENTS )
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
@@ -1006,7 +1004,7 @@ void CRegionWorld::r_WriteModified( CScript &s )
 	ADDTOCALLSTACK("CRegionWorld::r_WriteModified");
 	CRegion::r_WriteModified( s );
 
-	if ( m_iModified & REGMOD_TAGS )
+	if ( m_dwModifiedFlags & REGMOD_TAGS )
 	{
 		m_TagDefs.r_WritePrefix(s, "TAG", "GUARDOWNER");
 	}

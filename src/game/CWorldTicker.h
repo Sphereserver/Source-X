@@ -39,18 +39,18 @@ public:
 private:
     struct WorldTickList : public phmap::btree_multimap<int64, CTimedObject*>
     {
-        THREAD_CMUTEX_DEF;
+        MT_CMUTEX_DEF;
     };
 
     struct CharTickList : public phmap::btree_multimap<int64, CChar*>
     {
-        THREAD_CMUTEX_DEF;
+        MT_CMUTEX_DEF;
     };
 
     struct StatusUpdatesList : public phmap::parallel_flat_hash_set<CObjBase*>
     //struct StatusUpdatesList : public std::unordered_set<CObjBase*>
     {
-        THREAD_CMUTEX_DEF;
+        MT_CMUTEX_DEF;
     };
 
     WorldTickList _mWorldTickList;
@@ -73,7 +73,7 @@ private:
     CTimedFunctionHandler _TimedFunctions; // CTimedFunction Container/Wrapper
 
     CWorldClock* _pWorldClock;
-    int64        _iLastTickDone;  
+    int64        _iLastTickDone;
 
 public:
     void Tick();

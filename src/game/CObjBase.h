@@ -47,7 +47,6 @@ private:
 	int64 m_iTimeStampS;          // TimeStamp
 
 protected:
-
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
     std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
@@ -77,7 +76,6 @@ public:
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
-    std::vector<CUID> m_followers;
 
     std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
 
@@ -86,7 +84,9 @@ public:
 #   define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
     uchar m_fStatusUpdate;  // update flags for next tick
 
-    volatile std::atomic_bool _fDeleting;
+#   define SF_DELETING         0x01
+#   define SF_TOPLEVEL         0x02
+    uchar _uiInternalStateFlags;
 
 protected:
     PacketPropertyList* m_PropertyList;	// currently cached property list packet
@@ -112,7 +112,7 @@ protected:
 public:
     inline bool _IsBeingDeleted() const noexcept
     {
-        return _fDeleting;
+        return HAS_FLAGS_ANY(_uiInternalStateFlags, SF_DELETING);
     }
 
 protected:  virtual bool _IsIdle() const;

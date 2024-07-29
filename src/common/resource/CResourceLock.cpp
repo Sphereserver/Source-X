@@ -31,7 +31,7 @@ bool CResourceLock::_Open(lpctstr ptcUnused, uint uiUnused)
 bool CResourceLock::Open(lpctstr ptcUnused, uint uiUnused)
 {
     ADDTOCALLSTACK("CResourceLock::Open");
-    THREAD_UNIQUE_LOCK_RETURN(CResourceLock::_Open(ptcUnused, uiUnused));
+    MT_UNIQUE_LOCK_RETURN(CResourceLock::_Open(ptcUnused, uiUnused));
 }
 
 void CResourceLock::_Close()
@@ -58,7 +58,7 @@ void CResourceLock::_Close()
 void CResourceLock::Close()
 {
     ADDTOCALLSTACK("CResourceLock::Close");
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     CResourceLock::_Close();
 }
 
@@ -91,7 +91,7 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
     ADDTOCALLSTACK_INTENSIVE("CResourceLock::ReadTextLine");
-    THREAD_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
+    MT_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
 }
 
 int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context )

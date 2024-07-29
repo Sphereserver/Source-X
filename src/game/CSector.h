@@ -134,7 +134,7 @@ public:
 	void Restock();
 	void RespawnDeadNPCs();
 
-	void Close();
+	void Close(bool fClosingWorld);
 	virtual lpctstr GetName() const override { return "Sector"; }
 };
 

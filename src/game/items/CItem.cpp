@@ -189,7 +189,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 void CItem::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
-	_fDeleting = true;
+	_uiInternalStateFlags |= SF_DELETING;
 
 	// We don't want to have invalid pointers over there
 	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
@@ -215,7 +215,7 @@ void CItem::DeleteCleanup(bool fForce)
 				if ( pHorse && pHorse->IsDisconnected() && ! pHorse->m_pPlayer )
 				{
                     pHorse->m_atRidden.m_uidFigurine.InitUID();
-					pHorse->Delete(fForce);
+                    pHorse->Delete(fForce);
 				}
 			}
 			break;
@@ -259,7 +259,7 @@ bool CItem::Delete(bool fForce)
 	if (( NotifyDelete() == false ) && !fForce)
 		return false;
 
-	DeletePrepare();	// Virtual -> Must remove early because virtuals will fail in child destructor.
+	DeletePrepare();	 // Virtual -> Must call it early because virtuals will fail in child destructors.
 	DeleteCleanup(fForce);
 
 	return CObjBase::Delete(fForce);
@@ -1722,7 +1722,7 @@ lpctstr CItem::GetName() const
 		{
 			if ( IsType( IT_SCROLL ) || IsType( IT_POTION ) )
 			{
-				if ( RES_GET_INDEX(m_itPotion.m_Type) != SPELL_Explosion )
+				if ( ResGetIndex(m_itPotion.m_Type) != SPELL_Explosion )
 				{
 					const CSpellDef * pSpell = g_Cfg.GetSpellDef((SPELL_TYPE)(m_itSpell.m_spell));
 					if (pSpell != nullptr)
@@ -1866,7 +1866,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 
 	if ( fIdentified && IsAttr(ATTR_MAGIC) && IsTypeArmorWeapon())	// wand is also a weapon.
 	{
-		SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(m_itWeapon.m_spell));
+		SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(m_itWeapon.m_spell));
 		if ( spell )
 		{
 			const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
@@ -1919,7 +1919,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		case IT_BONE:
 			if ( fIdentified )
 			{
-				CREID_TYPE id = static_cast<CREID_TYPE>(RES_GET_INDEX(m_itSkin.m_creid));
+				CREID_TYPE id = static_cast<CREID_TYPE>(ResGetIndex(m_itSkin.m_creid));
 				if ( id)
 				{
 					const CCharBase * pCharDef = CCharBase::FindCharBase( id );
@@ -2309,16 +2309,16 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_LOOM:
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
-            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, ResGetIndex(m_itNormal.m_more1)));
             return;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
-            sVal = ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, ResGetIndex(m_itNormal.m_more1)));
             return;
 
         case IT_POTION:
-            sVal = ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
+            sVal = ResourceGetName(CResourceID(RES_SPELL, ResGetIndex(m_itPotion.m_Type)));
             return;
 
         default:
@@ -2906,7 +2906,7 @@ void CItem::r_LoadMore1(dword dwVal)
     // Ensure that (when needed) the dwVal is stored as a CResourceIDBase,
     //  plus, do some extra checks for spawns
 
-    const int iIndex = RES_GET_INDEX(dwVal);
+    const int iIndex = ResGetIndex(dwVal);
     switch (GetType())
     {
     case IT_TREE:
@@ -2964,7 +2964,7 @@ void CItem::r_LoadMore2(dword dwVal)
     ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore2");
     // Ensure that (when needed) the dwVal is stored as a CResourceIDBase
 
-    const int iIndex = RES_GET_INDEX(dwVal);
+    const int iIndex = ResGetIndex(dwVal);
     switch (GetType())
     {
     case IT_CROPS:
@@ -3168,7 +3168,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				for ( addCircle = atoi(ppVal[0]); addCircle; --addCircle )
 				{
 					for ( short i = 1; i < 9; ++i )
-						AddSpellbookSpell((SPELL_TYPE)(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
+						AddSpellbookSpell((SPELL_TYPE)(ResGetIndex(((addCircle - 1) * 8) + i)), false);
 
 					if ( includeLower == false )
 						break;
@@ -3178,7 +3178,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_ADDSPELL:
 			// Add this spell to the i_spellbook.
 			{
-				SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(s.GetArgVal()));
+				SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(s.GetArgVal()));
 				if (AddSpellbookSpell(spell, false))
 					return false;
                 break;
@@ -3328,7 +3328,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             break;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
+			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, ResGetIndex(s.GetArgDWVal()));
             break;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
@@ -5553,7 +5553,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( IsType(IT_WAND) )	// try to recharge the wand.
 	{
-		if ( !m_itWeapon.m_spell || RES_GET_INDEX(m_itWeapon.m_spell) == (word)spell )
+		if ( !m_itWeapon.m_spell || ResGetIndex(m_itWeapon.m_spell) == (word)spell )
 		{
 			SetAttr(ATTR_MAGIC);
 			if ( !m_itWeapon.m_spell || ( pCharSrc && pCharSrc->IsPriv(PRIV_GM) ) )
@@ -5774,7 +5774,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		return INT32_MAX;
 
 	case IT_POTION:
-		if ( RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion )
+		if ( ResGetIndex(m_itPotion.m_Type) == SPELL_Explosion )
 		{
 			CSpellDef *pSpell = g_Cfg.GetSpellDef(SPELL_Explosion);
 			if (!pSpell)
@@ -6263,7 +6263,7 @@ bool CItem::_OnTick()
 			{
 				EXC_SET_BLOCK("default behaviour::IT_POTION");
 				// This is a explosion potion?
-				if ( (RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion) && m_itPotion.m_ignited )
+				if ( (ResGetIndex(m_itPotion.m_Type) == SPELL_Explosion) && m_itPotion.m_ignited )
 				{
 					if ( m_itPotion.m_tick <= 1 )
 					{

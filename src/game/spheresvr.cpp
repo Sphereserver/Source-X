@@ -200,7 +200,7 @@ void MainThread::tick()
 	Sphere_OnTick();
 }
 
-bool MainThread::shouldExit()
+bool MainThread::shouldExit() noexcept
 {
 	if (g_Serv.GetExitFlag() != 0)
 		return true;
@@ -249,10 +249,11 @@ int Sphere_InitServer( int argc, char *argv[] )
 {
 	constexpr const char *m_sClassName = "SphereInit";
 	EXC_TRY("Init Server");
-	EXC_SET_BLOCK("loading ini and scripts");
+    GlobalInitializer::InitRuntimeDefaultValues();
+
+    EXC_SET_BLOCK("loading ini and scripts");
 	if ( !g_Serv.Load() )
 		return -3;
-	GlobalInitializer::InitRuntimeDefaultValues();
 
 	if ( argc > 1 )
 	{
@@ -778,20 +779,29 @@ int _cdecl main( int argc, char * argv[] )
 	static constexpr lpctstr m_sClassName = "main";
 	EXC_TRY("MAIN");
 
-#ifndef _WIN32
-    IThread::setThreadName("T_SphereStartup");
-    g_UnixTerminal.start();
-    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
-    g_Cfg.LoadIni(false);
-#endif
-
-	const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
+    	const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
 	if (atexit_handler_result != 0)
 	{
 		g_Log.Event(LOGL_CRIT, "atexit handler registration failed.\n");
 		goto exit_server;
 	}
 
+	{
+        // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
+        	const IThread* curthread = ThreadHolder::get().current();
+        ASSERT(curthread != nullptr);
+        ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
+    }
+
+#ifndef _WIN32
+    IThread::setThreadName("T_SphereStartup");
+
+    g_UnixTerminal.start();
+
+    // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
+    g_Serv.SetServerMode(SERVMODE_PreLoadingINI);
+    g_Cfg.LoadIni(false);
+#endif
 
     g_Serv.SetServerMode(SERVMODE_Loading);
 	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
@@ -812,8 +822,8 @@ int _cdecl main( int argc, char * argv[] )
         //  an instance of CNetworkInput nad CNetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 		g_NetworkManager.start();
 
-		const bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
-		if (shouldRunInThread)
+		const bool fShouldCoreRunInSeparateThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
+		if (fShouldCoreRunInSeparateThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
 			IThread::setThreadName("T_Monitor");

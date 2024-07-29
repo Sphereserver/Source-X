@@ -34,7 +34,7 @@
 class CSFile
 {
 protected:
-    THREAD_CMUTEX_DEF;
+    MT_CMUTEX_DEF;
 
 public:
 	static const char * m_sClassName;
@@ -107,7 +107,7 @@ public:     lpctstr GetFilePath() const;
 	*/
 protected:  virtual bool _SetFilePath( lpctstr pszName );
 public:     virtual bool SetFilePath( lpctstr pszName );
-	
+
 	///@}
 	/** @name Content Management:
 	 */

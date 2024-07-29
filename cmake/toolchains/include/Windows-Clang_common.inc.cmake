@@ -44,7 +44,16 @@ function (toolchain_exe_stuff_common)
 	# -static-libsan Statically link the sanitizer runtime (Not supported for ASan, TSan or UBSan on darwin)
 
 	IF (${USE_ASAN})
-		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=address -fno-sanitize-recover=address -fsanitize-address-use-after-scope)
+    SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
+      -fsanitize=address -fno-sanitize-recover=address
+      -fsanitize-address-use-after-scope -fsanitize=pointer-compare -fsanitize=pointer-subtract
+      # Flags for additional instrumentation not strictly needing asan to be enabled
+      -fcf-protection=full -fstack-check -fstack-protector-all -fstack-clash-protection
+      # Not supported by Clang, but supported by GCC
+      #-fvtable-verify=preinit -fharden-control-flow-redundancy -fhardcfr-check-exceptions
+      # Other
+      #-fsanitize-trap=all
+    )
 		IF (${CLANG_USE_GCC_LINKER})
 			set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address)
 		ENDIF ()
@@ -69,11 +78,13 @@ function (toolchain_exe_stuff_common)
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
-		SET (UBSAN_FLAGS
-			-fsanitize=undefined,shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds
-			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute
-			-fno-sanitize=enum
-		)
+    SET (UBSAN_FLAGS
+      -fsanitize=undefined,float-divide-by-zero,local-bounds
+      -fno-sanitize=enum
+      # Supported?
+      -fsanitize=unsigned-integer-overflow #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
+      -fsanitize=implicit-conversion
+    )
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return)
 		#IF (${CLANG_USE_GCC_LINKER})
 			#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)
@@ -93,18 +104,23 @@ function (toolchain_exe_stuff_common)
 	#-- Store compiler flags common to all builds.
 
 	SET (cxx_local_opts_warnings
-		-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-parentheses -Wno-conversion-null
-		-Wno-misleading-indentation -Wno-implicit-fallthrough
-	)
+    -Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
+    -Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
+    -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
+
+    # clang -specific:
+    # -fforce-emit-vtables
+  )
 	SET (cxx_local_opts
 		-std=c++20 -fexceptions -fnon-call-exceptions
 		-pipe -ffast-math
 		-mno-ms-bitfields
 		# -mno-ms-bitfields is needed to fix structure packing;
 		# -pthread unused here? we only need to specify that to the linker?
+    -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
 
 		# clang-specific:
-		-Wno-format-security
+    #
 
 		# Flags supported by GCC but not by Clang: -fno-expensive-optimizations, -Wno-error=maybe-uninitialized
 	)
@@ -119,7 +135,7 @@ function (toolchain_exe_stuff_common)
 		SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
 	ENDIF ()
 	IF (TARGET spheresvr_release)
-		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -O3 -flto=full -fvirtual-function-elimination ${COMPILE_OPTIONS_EXTRA})
 		#[[
 		IF (NOT ${CLANG_USE_GCC_LINKER})
 			if (${RUNTIME_STATIC_LINK})
@@ -134,7 +150,7 @@ function (toolchain_exe_stuff_common)
 		IF (ENABLED_SANITIZER)
 			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA} )
 		ELSE ()
-			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA} )
+			TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 -flto=full -fvirtual-function-elimination ${COMPILE_OPTIONS_EXTRA} )
 		ENDIF ()
 		#[[
 		IF (NOT ${CLANG_USE_GCC_LINKER})

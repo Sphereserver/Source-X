@@ -45,18 +45,21 @@ CSString::CSString(bool fDefaultInit) :
 CSString::CSString(lpctstr pStr) :
 	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
+    //Init();
 	Copy(pStr);
 }
 
 CSString::CSString(lpctstr pStr, int iLen) :
 	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
+    //Init();
 	CopyLen(pStr, iLen);
 }
 
 CSString::CSString(const CSString& s) :
 	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
+    //Init();
 	Copy(s.GetBuffer());
 }
 
@@ -95,9 +98,7 @@ void CSString::Clear(bool fTotal) noexcept
 
 bool CSString::IsValid() const noexcept
 {
-	if (!m_pchData || !m_iMaxLength)
-		return false;
-	return (m_pchData[m_iLength] == '\0');
+    return ((m_iMaxLength != 0) && (m_pchData != nullptr) && (m_pchData[m_iLength] == '\0'));
 }
 
 int CSString::Resize(int iNewLength, bool fPreciseSize)
@@ -117,7 +118,7 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
         else
         {
             //m_iMaxLength = iNewLength + (STRING_DEFAULT_SIZE >> 1);   // Probably too much...
-            m_iMaxLength = (iNewLength * 3) >> 1;   // >> 2 = / 2
+            m_iMaxLength = (iNewLength * 3) >> 1;   // >> 2 is equal to doing / 2
         }
 
 #ifdef DEBUG_STRINGS
@@ -128,7 +129,7 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
 		tchar *pNewData = new tchar[size_t(m_iMaxLength + 1)]; // new operator throws on error
 		if (fValid)
 		{
-			const int iMinLength = minimum(iNewLength, m_iLength + 1);
+			const int iMinLength = 1 + minimum(iNewLength, m_iLength);
 			Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
 			delete[] m_pchData;
 		}

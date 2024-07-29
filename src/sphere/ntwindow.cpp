@@ -199,7 +199,7 @@ void CNTWindow::terminate(bool ended)
     AbstractSphereThread::terminate(ended);
 }
 
-bool CNTWindow::shouldExit()
+bool CNTWindow::shouldExit() noexcept
 {
     return AbstractThread::shouldExit();
 }

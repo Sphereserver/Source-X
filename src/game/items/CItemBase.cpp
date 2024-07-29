@@ -480,8 +480,11 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) noexcept // static
 
 	for ( uint i = 0; i < ARRAY_COUNT(sm_Item_DoorBase); ++i)
 	{
-		const int did = id - sm_Item_DoorBase[i];
-		if ( did >= 0 && did <= 15 )
+        if (id < sm_Item_DoorBase[i])
+            continue;
+
+		const uint did = id - sm_Item_DoorBase[i];
+		if ( did <= 15 )
 			return ( did+1 );
 	}
 	return 0;
@@ -642,6 +645,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData, bool fNa
 	// Get an Item tiledata def data.
 	// Invalid object id ?
 	// NOTE: This data should already be read into the m_ItemBase table ???
+    ASSERT(pData);
     try
     {
         if (id >= g_Install.m_tiledata.GetItemMaxIndex())
@@ -651,7 +655,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData, bool fNa
         }
         if (!IsValidDispID(id))
 		    return false;
-	
+
 		*pData = CUOItemInfo(id, fNameNotNeeded);
 	}
     catch (const std::exception& e)
@@ -702,17 +706,17 @@ void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata, uint64
 	ADDTOCALLSTACK("CItemBase::GetItemSpecificFlags");
 	if ( type == IT_DOOR )
 	{
-        *uiBlockFlags &= ~CAN_I_BLOCK;
+        *uiBlockFlags &= ~ (uint64)CAN_I_BLOCK;
 		if ( IsID_DoorOpen(id))
-            *uiBlockFlags &= ~CAN_I_DOOR;
+            *uiBlockFlags &= ~ (uint64)CAN_I_DOOR;
 		else
             *uiBlockFlags |= CAN_I_DOOR;
 	}
 
-	if ( tiledata.m_flags & UFLAG3_LIGHT )	// this may actually be a moon gate or fire ?
+	if ( tiledata.m_flags & (uint64)UFLAG3_LIGHT )	// this may actually be a moon gate or fire ?
         *uiBlockFlags |= CAN_I_LIGHT;	// normally of type IT_LIGHT_LIT;
 
-	if ( (tiledata.m_flags & UFLAG2_STACKABLE) || type == IT_REAGENT || id == ITEMID_EMPTY_BOTTLE )
+	if ( (tiledata.m_flags & (uint64)UFLAG2_STACKABLE) || type == IT_REAGENT || id == ITEMID_EMPTY_BOTTLE )
         *uiBlockFlags |= CAN_I_PILE;
 }
 
@@ -809,7 +813,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, uint64 *uiBlockFlags ) // sta
 	}
 
 	// Not already loaded.
-    CUOItemTypeRec_HS tiledata = {};
+    CUOItemTypeRec_HS tiledata {};
 	if ( ! GetItemData( id, &tiledata, true ))
 	{
 		*uiBlockFlags = CAN_I_MOVEMASK;
@@ -1642,7 +1646,7 @@ bool CItemBase::r_LoadVal( CScript &s )
                     g_Log.EventError( "Setting new ID for base type %s not allowed\n", GetResourceName());
                     return false;
                 }
-                
+
                 ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
                 CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
                 if ( ! pItemDef )
@@ -1650,7 +1654,7 @@ bool CItemBase::r_LoadVal( CScript &s )
                     g_Log.EventError( "Setting unknown base ID=0%x for base type %s\n", id, GetResourceName());
                     return false;
 				}
-                
+
                 /*
                  * I add Is Duped Item check to check if item is from DUPELIST of base item, and ID won't change to baseid for unnecessarily.
                  * I made this change to fix issue #512 (https://github.com/Sphereserver/Source-X/issues/512)
@@ -1712,16 +1716,16 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_TDATA1:
-			m_ttNormal.m_tData1 = s.GetArgVal();
+			m_ttNormal.m_tData1 = s.GetArgDWVal();
 			break;
 		case IBC_TDATA2:
-			m_ttNormal.m_tData2 = s.GetArgVal();
+			m_ttNormal.m_tData2 = s.GetArgDWVal();
 			break;
 		case IBC_TDATA3:
-			m_ttNormal.m_tData3 = s.GetArgVal();
+			m_ttNormal.m_tData3 = s.GetArgDWVal();
 			break;
 		case IBC_TDATA4:
-			m_ttNormal.m_tData4 = s.GetArgVal();
+			m_ttNormal.m_tData4 = s.GetArgDWVal();
 			break;
 
 		case IBC_TWOHANDS:
@@ -1931,7 +1935,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, ARRAY_COUNT(piArgs));
 	if ( iQty <= 1 )
 		return false;
-	return AddComponent((ITEMID_TYPE)(RES_GET_INDEX(piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
+	return AddComponent((ITEMID_TYPE)(ResGetIndex((dword)piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
 }
 
 int CItemBaseMulti::GetDistanceMax() const

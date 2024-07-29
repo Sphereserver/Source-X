@@ -23,7 +23,7 @@ void CContainer::_GoAwake()
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		//std::unique_lock<std::shared_mutex> lock(pItem->THREAD_CMUTEX);
+		//std::unique_lock<std::shared_mutex> lock(pItem->MT_CMUTEX);
 		if (pItem->IsSleeping())
 			pItem->GoAwake();
 	}
@@ -35,7 +35,7 @@ void CContainer::_GoSleep()
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		//std::unique_lock<std::shared_mutex> lock(pItem->THREAD_CMUTEX);
+		//std::unique_lock<std::shared_mutex> lock(pItem->MT_CMUTEX);
 		if (!pItem->CanTick(true))
 		{
 			pItem->GoSleep();
@@ -51,13 +51,12 @@ void CContainer::ContentDelete(bool fForce)
         return;
 
     // delete all entries.
-    ASSERT(!_fIsClearing);
-    _fIsClearing = true;
 
     // Loop through a copy of the current state of the container, since by deleting other container objects it could happen that
     //	other objects are deleted and appended to this list, thus invalidating the iterators used by the for loop.
     const auto stateCopy = GetIterationSafeContReverse();
     _Contents.clear();
+
 
     for (CSObjContRec* pRec : stateCopy)	// iterate the list.
     {
@@ -69,8 +68,6 @@ void CContainer::ContentDelete(bool fForce)
 
 		EXC_CATCH;
     }
-
-    _fIsClearing = false;
 }
 
 void CContainer::ContentNotifyDelete()
@@ -191,7 +188,8 @@ void CContainer::OnRemoveObj( CSObjContRec *pObRec )	// Override this = called w
 	ADDTOCALLSTACK("CContainer::OnRemoveObj");
 	// remove this object from the container list.
 	// Overload the RemoveAt for general lists to come here.
-	CItem *pItem = static_cast<CItem *>(pObRec);
+	DEBUG_ASSERT(dynamic_cast<const CItem *>(pObRec));
+    CItem *pItem = static_cast<CItem *>(pObRec);
 	ASSERT(pItem);
 
 	CSObjCont::OnRemoveObj(pItem);
@@ -501,7 +499,7 @@ void CContainer::ContentsDump( const CPointMap &pt, uint64 iAttrLeave )
 	// Just dump the contents onto the ground.
 
     iAttrLeave |= ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_CURSED2|ATTR_BLESSED2;
-	
+
 	for (size_t i = 0; i < GetContentCount(); )
 	{
 		CItem* pItem = static_cast<CItem*>(GetContentIndex(i));

@@ -44,7 +44,7 @@ bool CResourceScript::_CheckForChange()
 bool CResourceScript::CheckForChange()
 {
     ADDTOCALLSTACK("CResourceScript::CheckForChange");
-    THREAD_UNIQUE_LOCK_RETURN(CResourceScript::_CheckForChange());
+    MT_UNIQUE_LOCK_RETURN(CResourceScript::_CheckForChange());
 }
 
 void CResourceScript::ReSync()

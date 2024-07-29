@@ -61,7 +61,7 @@ void CTimedFunctionHandler::Clear()
 {
     ADDTOCALLSTACK("CTimedFunctionHandler::Clear");
 
-    _timedFunctions.ClearContainer();
+    _timedFunctions.ClearContainer(false);
 }
 
 TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr ptcCommand, int iLoopsMade, CScriptLineContext StartContext,

@@ -54,7 +54,7 @@ void PingServer::tick()
 	socklen_t addr_len = sizeof(addr);
 
 	const ProfileTask receiveTask(PROFILE_NETWORK_RX);
-	
+
 	// receive data from someone
 	int length = recvfrom(m_socket.GetSocket(), buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr *>(&addr), &addr_len);
 	if ( length <= 0 )
@@ -71,7 +71,7 @@ void PingServer::tick()
 	GetCurrentProfileData().Count(PROFILE_DATA_TX, sent);
 }
 
-bool PingServer::shouldExit()
+bool PingServer::shouldExit() noexcept
 {
 	if (m_socket.IsOpen() == false)
 		return true;

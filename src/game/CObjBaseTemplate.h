@@ -31,13 +31,12 @@ public:
 	CObjBaseTemplate();
 	virtual ~CObjBaseTemplate() = default;
 
-private:
-	CObjBaseTemplate(const CObjBaseTemplate& copy);
-	CObjBaseTemplate& operator=(const CObjBaseTemplate& other);
+	CObjBaseTemplate(const CObjBaseTemplate& copy) = delete;
+	CObjBaseTemplate& operator=(const CObjBaseTemplate& other) = delete;
 
 public:
     const CUID& GetUID() const noexcept {
-		return m_UID; 
+		return m_UID;
 	}
 	bool IsItem() const noexcept {
 		return m_UID.IsItem();

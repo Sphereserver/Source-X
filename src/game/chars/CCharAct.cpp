@@ -41,7 +41,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 	{
 		if ( pszArgs[0] && iType == 1 )
 			dwUID = 0;
-		iArg = RES_GET_INDEX( Exp_GetVal( pszArgs ));
+		iArg = ResGetIndex( Exp_GetVal( pszArgs ));
 	}
 
 	while ( dwCount-- )
@@ -397,9 +397,10 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CChar::OnRemoveObj");
+
+    ASSERT(pObRec);
+    ASSERT(dynamic_cast<const CItem*>(pObRec));
 	CItem * pItem = static_cast <CItem*>(pObRec);
-	if ( !pItem )
-		return;
 
 	LAYER_TYPE layer = pItem->GetEquipLayer();
 	if (( IsTrigUsed(TRIGGER_UNEQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMUNEQUIP) ))
@@ -1308,14 +1309,14 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 
 	EXC_TRY("UpdateMove");
-	
+
 	// if skill is meditation, cancel it if we move
     if (g_Cfg._fMeditationMovementAbort && Skill_GetActive() == SKILL_MEDITATION)
     {
         //cancel meditation if we move
         Skill_Fail(true);
     }
-	
+
 	EXC_SET_BLOCK("FOR LOOP");
 	ClientIterator it;
 	for ( CClient* pClient = it.next(); pClient != nullptr; pClient = it.next() )
@@ -2773,7 +2774,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	{
 		CScriptTriggerArgs Args(pHorse);
         Args.m_iN1 = memoryId;
-   		if ( OnTrigger(CTRIG_Mount, this, &Args) == TRIGRET_RET_TRUE )   
+   		if ( OnTrigger(CTRIG_Mount, this, &Args) == TRIGRET_RET_TRUE )
 		    return false;
         else
             memoryId = ITEMID_TYPE(Args.m_iN1);//(ITEMID_TYPE) Args.m_iN1;
@@ -3790,7 +3791,7 @@ TRIGRET_TYPE CChar::CheckLocation(bool fCanCheckRecursively, bool fStanding)
                 if (fSpellHit)
                     continue;
 
-                fSpellHit = OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell)),
+                fSpellHit = OnSpellEffect((SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell)),
                     pItem->m_uidLink.CharFind(), pItem->m_itSpell.m_spelllevel, pItem);
                 if (fSpellHit && m_pNPC && fStanding)
                 {

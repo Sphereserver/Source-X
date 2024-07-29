@@ -16,7 +16,12 @@ class CItem;
 class CSector;
 class CTeleport;
 
-struct CCharsDisconnectList : public CSObjCont
+struct CSectorObjCont
+{
+    // Marker class.
+};
+
+struct CCharsDisconnectList : public CSObjCont, public CSectorObjCont
 {
 	CCharsDisconnectList() = default;
 	CCharsDisconnectList(const CCharsDisconnectList& copy) = delete;
@@ -25,12 +30,12 @@ struct CCharsDisconnectList : public CSObjCont
 	void AddCharDisconnected(CChar* pChar);
 };
 
-struct CCharsActiveList : public CSObjCont
+struct CCharsActiveList : public CSObjCont, public CSectorObjCont
 {
 private:
 	int m_iClients;				// How many clients in this sector now?
 	int64 m_iTimeLastClient;	// age the sector based on last client here.
-    
+
 protected:
 	void OnRemoveObj(CSObjContRec* pObjRec);	// Override this = called when removed from list.
 
@@ -51,7 +56,7 @@ public:
 	}
 };
 
-struct CItemsList : public CSObjCont
+struct CItemsList : public CSObjCont, public CSectorObjCont
 {
 	static bool sm_fNotAMove;	// hack flag to prevent items from bouncing around too much.
 
