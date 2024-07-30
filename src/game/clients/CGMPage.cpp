@@ -47,7 +47,7 @@ void CGMPage::ClearHandler()
 
 void CGMPage::r_Write(CScript& s) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CGMPage::r_Write");
+	ADDTOCALLSTACK_DEBUG("CGMPage::r_Write");
 	s.WriteSection("GMPAGE %s", GetName());
 	s.WriteKeyHex("CHARUID", m_uidChar.GetObjUID());
 	s.WriteKeyStr("P", m_pt.WriteUsed());

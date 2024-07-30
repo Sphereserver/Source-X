@@ -113,7 +113,7 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
 
 void CItemShip::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemShip::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemShip::r_Write");
     CItemMulti::r_Write(s);
     if (m_uidHold.IsValidUID())
         s.WriteKeyHex("HATCH", m_uidHold.GetObjUID());

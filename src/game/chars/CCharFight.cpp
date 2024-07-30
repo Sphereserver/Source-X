@@ -1079,7 +1079,7 @@ byte CChar::GetRangeH() const
 // What sort of weapon am i using?
 SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponSkill");
+	ADDTOCALLSTACK_DEBUG("CChar::Fight_GetWeaponSkill");
 	const CItem * pWeapon = m_uidWeapon.ItemFind();
 	if ( pWeapon == nullptr )
 		return SKILL_WRESTLING;
@@ -1088,7 +1088,7 @@ SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 
 DAMAGE_TYPE CChar::Fight_GetWeaponDamType(const CItem* pWeapon) const
 {
-    ADDTOCALLSTACK_INTENSIVE("CChar::Fight_GetWeaponDamType");
+    ADDTOCALLSTACK_DEBUG("CChar::Fight_GetWeaponDamType");
     DAMAGE_TYPE iDmgType = DAMAGE_HIT_BLUNT;
     if ( pWeapon )
     {

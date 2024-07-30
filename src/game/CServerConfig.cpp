@@ -2329,13 +2329,13 @@ static constexpr lpctstr _ptcStatName[STAT_QTY] = // not alphabetically sorted o
 
 STAT_TYPE CServerConfig::GetStatKey( lpctstr ptcKey ) // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatKey");
+	//ADDTOCALLSTACK_DEBUG("CServerConfig::GetStatKey");
 	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, ARRAY_COUNT(_ptcStatName));
 }
 
 lpctstr CServerConfig::GetStatName(STAT_TYPE iKey) // static
 {
-    //ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatName");
+    //ADDTOCALLSTACK_DEBUG("CServerConfig::GetStatName");
     ASSERT(iKey >= STAT_STR && iKey < STAT_QTY);
     return _ptcStatName[iKey];
 }

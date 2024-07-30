@@ -640,7 +640,7 @@ bool CItemBase::IsID_Chair( ITEMID_TYPE id ) noexcept // static
 
 bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData, bool fNameNotNeeded) // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemData");
+	//ADDTOCALLSTACK_DEBUG("CItemBase::GetItemData");
 	// Read from g_Install.m_fTileData
 	// Get an Item tiledata def data.
 	// Invalid object id ?
@@ -794,7 +794,7 @@ height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, uint
 
 height_t CItemBase::GetItemHeight( ITEMID_TYPE id, uint64 *uiBlockFlags ) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemHeight");
+	ADDTOCALLSTACK_DEBUG("CItemBase::GetItemHeight");
 	// Get just the height and the blocking flags for the item by id.
 	// used for walk block checking.
 
@@ -2217,7 +2217,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemBase::FindItemBase");
+    ADDTOCALLSTACK_DEBUG("CItemBase::FindItemBase");
 	// CItemBase is a like item already loaded.
 	if ( id <= ITEMID_NOTHING )
 		return nullptr;

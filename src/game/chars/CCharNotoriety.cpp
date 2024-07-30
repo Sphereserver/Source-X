@@ -710,7 +710,7 @@ void CChar::NotoSave_Clear()
 
 void CChar::NotoSave_Update()
 {
-	//ADDTOCALLSTACK_INTENSIVE("CChar::NotoSave_Update");
+	//ADDTOCALLSTACK_DEBUG("CChar::NotoSave_Update");
     EXC_TRY("NotoSave_Update");
 
     NotoSave_Clear();

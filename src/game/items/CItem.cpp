@@ -762,7 +762,7 @@ byte CItem::GetRangeH() const
 
 int CItem::IsWeird() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::IsWeird");
+	ADDTOCALLSTACK_DEBUG("CItem::IsWeird");
 	// Does item i have a "link to reality"?
 	// (Is the container it is in still there)
 	// RETURN: 0 = success ok
@@ -2341,7 +2341,7 @@ void CItem::r_WriteMore1(CSString & sVal)
 
 void CItem::r_WriteMore2( CSString & sVal )
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore2");
+	ADDTOCALLSTACK_DEBUG("CItem::r_WriteMore2");
 	// do special processing to represent this.
 
 	switch ( GetType())
@@ -2387,7 +2387,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 void CItem::r_Write( CScript & s )
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::r_Write");
+	ADDTOCALLSTACK_DEBUG("CItem::r_Write");
 	const CItemBase *pItemDef = Item_GetDef();
 	if ( !pItemDef )
 		return;
@@ -2911,7 +2911,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 
 void CItem::r_LoadMore1(dword dwVal)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore1");
+    ADDTOCALLSTACK_DEBUG("CItem::r_LoadMore1");
     // Ensure that (when needed) the dwVal is stored as a CResourceIDBase,
     //  plus, do some extra checks for spawns
 
@@ -2970,7 +2970,7 @@ void CItem::r_LoadMore1(dword dwVal)
 
 void CItem::r_LoadMore2(dword dwVal)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore2");
+    ADDTOCALLSTACK_DEBUG("CItem::r_LoadMore2");
     // Ensure that (when needed) the dwVal is stored as a CResourceIDBase
 
     const int iIndex = ResGetIndex(dwVal);
@@ -6086,7 +6086,7 @@ bool CItem::_CanHoldTimer() const
 
 bool CItem::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::_CanTick");
+	ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();

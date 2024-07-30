@@ -26,7 +26,7 @@ lpctstr const CItemMessage::sm_szLoadKeys[CIC_QTY+1] =
 
 void CItemMessage::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemMessage::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemMessage::r_Write");
     CItemVendable::r_Write(s);
     s.WriteKeyStr("AUTHOR", m_sAuthor.GetBuffer());
 

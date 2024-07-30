@@ -125,19 +125,19 @@ void CWorldSearch::Reset(const CPointMap& pt, int iDist)
 
 void CWorldSearch::SetAllShow(bool fView)
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::SetAllShow");
+	//ADDTOCALLSTACK_DEBUG("CWorldSearch::SetAllShow");
 	_fAllShow = fView;
 }
 
 void CWorldSearch::SetSearchSquare(bool fSquareSearch)
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::SetSearchSquare");
+	//ADDTOCALLSTACK_DEBUG("CWorldSearch::SetSearchSquare");
 	_fSearchSquare = fSquareSearch;
 }
 
 void CWorldSearch::RestartSearch()
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::RestartSearch");
+	//ADDTOCALLSTACK_DEBUG("CWorldSearch::RestartSearch");
 	_eSearchType = ws_search_e::None;
 	_pObj = nullptr;
 	_idxObj = _idxObjMax = 0;
@@ -172,7 +172,7 @@ bool CWorldSearch::GetNextSector()
 CItem* CWorldSearch::GetItem()
 {
 	// This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
-	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetItem");
+	//ADDTOCALLSTACK_DEBUG("CWorldSearch::GetItem");
 
 	while (true)
 	{
@@ -251,7 +251,7 @@ CItem* CWorldSearch::GetItem()
 CChar* CWorldSearch::GetChar()
 {
 	// This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
-	//ADDTOCALLSTACK_INTENSIVE("CWorldSearch::GetChar");
+	//ADDTOCALLSTACK_DEBUG("CWorldSearch::GetChar");
 
 	while (true)
 	{

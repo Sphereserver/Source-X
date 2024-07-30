@@ -82,7 +82,7 @@ void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
 
 void CItemCommCrystal::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemCommCrystal::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemCommCrystal::r_Write");
     CItemVendable::r_Write(s);
     m_Speech.r_Write(s, "SPEECH");
 }

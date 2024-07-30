@@ -205,53 +205,6 @@ public:
 };
 
 
-// Singleton utility class for working with threads. Holds all running threads inside.
-class ThreadHolder
-{
-    friend class AbstractThread;
-
-    struct SphereThreadData {
-        IThread *m_ptr;
-        bool m_closed;
-    };
-    using spherethreadlist_t = std::vector<SphereThreadData>;
-    spherethreadlist_t m_threads;
-
-    using spherethreadpair_t = std::pair<threadid_t, AbstractSphereThread *>;
-    std::vector<spherethreadpair_t> m_spherethreadpairs_systemid_ptr;
-
-	int m_threadCount;
-    volatile std::atomic_bool m_closing;
-	mutable std::shared_mutex m_mutex;
-
-	ThreadHolder() noexcept;
-    ~ThreadHolder() noexcept = default;
-
-	friend void atexit_handler(void);
-    friend void Sphere_ExitServer(void);
-	void markThreadsClosing();
-
-    //SphereThreadData* findThreadData(IThread* thread) noexcept;
-
-public:
-	static constexpr lpctstr m_sClassName = "ThreadHolder";
-
-	static ThreadHolder& get() noexcept;
-
-    bool closing() noexcept;
-	// returns current working thread or DummySphereThread * if no IThread threads are running
-	IThread *current();
-	// records a thread to the list. Sould NOT be called, internal usage
-	void push(IThread *thread);
-	// removes a thread from the list. Sould NOT be called, internal usage
-	void remove(IThread *thread);
-	// returns thread at i pos
-	IThread * getThreadAt(size_t at);
-
-	// returns number of running threads. Sould NOT be called, unit tests usage
-	inline size_t getActiveThreads() noexcept { return m_threadCount; }
-};
-
 // Thread implementation. See IThread for list of available methods.
 class AbstractThread : public IThread
 {
@@ -381,7 +334,55 @@ protected:
 };
 
 
-// used to hold debug information for stack
+// Singleton utility class for working with threads. Holds all running threads inside.
+class ThreadHolder
+{
+    friend class AbstractThread;
+
+    struct SphereThreadData {
+        IThread *m_ptr;
+        bool m_closed;
+    };
+    using spherethreadlist_t = std::vector<SphereThreadData>;
+    spherethreadlist_t m_threads;
+
+    using spherethreadpair_t = std::pair<threadid_t, AbstractSphereThread *>;
+    std::vector<spherethreadpair_t> m_spherethreadpairs_systemid_ptr;
+
+	int m_threadCount;
+    volatile std::atomic_bool m_closing;
+	mutable std::shared_mutex m_mutex;
+
+	ThreadHolder() noexcept;
+    ~ThreadHolder() noexcept = default;
+
+	friend void atexit_handler(void);
+    friend void Sphere_ExitServer(void);
+	void markThreadsClosing();
+
+    //SphereThreadData* findThreadData(IThread* thread) noexcept;
+
+public:
+	static constexpr lpctstr m_sClassName = "ThreadHolder";
+
+	static ThreadHolder& get() noexcept;
+
+    bool closing() noexcept;
+	// returns current working thread or DummySphereThread * if no IThread threads are running
+	IThread *current();
+	// records a thread to the list. Sould NOT be called, internal usage
+	void push(IThread *thread);
+	// removes a thread from the list. Sould NOT be called, internal usage
+	void remove(IThread *thread);
+	// returns thread at i pos
+	IThread * getThreadAt(size_t at);
+
+	// returns number of running threads. Sould NOT be called, unit tests usage
+	inline size_t getActiveThreads() noexcept { return m_threadCount; }
+};
+
+
+// used to hold debug information for the function call stack
 #ifdef THREAD_TRACK_CALLSTACK
 class StackDebugInformation
 {
@@ -406,16 +407,16 @@ public:
 // Add to the call stack these functions only in debug mode, to have the most precise call stack
 //  even if these functions are thought to be very safe and (nearly) exception-free.
 #ifdef _DEBUG
-	#define ADDTOCALLSTACK_INTENSIVE(_function_)	ADDTOCALLSTACK(_function_)
+	#define ADDTOCALLSTACK_DEBUG(_function_)	ADDTOCALLSTACK(_function_)
 #else
-	#define ADDTOCALLSTACK_INTENSIVE(_function_)    (void)0
+	#define ADDTOCALLSTACK_DEBUG(_function_)    (void)0
 #endif
 
 
 #else // THREAD_TRACK_CALLSTACK
 
 #define ADDTOCALLSTACK(_function_)                  (void)0
-#define ADDTOCALLSTACK_INTENSIVE(_function_)        (void)0
+#define ADDTOCALLSTACK_DEBUG(_function_)        (void)0
 
 #endif // THREAD_TRACK_CALLSTACK
 

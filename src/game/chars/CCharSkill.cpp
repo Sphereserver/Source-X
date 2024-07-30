@@ -3558,7 +3558,7 @@ int CChar::Skill_Stroke()
 
 int CChar::Skill_Stage( SKTRIG_TYPE stage )
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::Skill_Stage");
+	ADDTOCALLSTACK_DEBUG("CChar::Skill_Stage");
     EXC_TRY("Skill_Stage");
 
     SKILL_TYPE skill = Skill_GetActive();

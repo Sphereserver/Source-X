@@ -239,7 +239,7 @@ bool CSectorBase::IsInDungeon() const
 
 CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegion");
+	ADDTOCALLSTACK_DEBUG("CSectorBase::GetRegion");
 	// Does it match the mask of types we care about ?
 	// Assume sorted so that the smallest are first.
 	//
@@ -289,7 +289,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 // Balkon: get regions list (to cycle through intercepted house regions)
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
-	//ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegions");  // Called very frequently
+	//ADDTOCALLSTACK_DEBUG("CSectorBase::GetRegions");  // Called very frequently
 	size_t iQty = m_RegionLinks.size();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
@@ -430,7 +430,7 @@ bool CSectorBase::IsFlagSet( dword dwFlag ) const noexcept
 
 CPointMap CSectorBase::GetBasePoint() const
 {
-	// ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
+	// ADDTOCALLSTACK_DEBUG("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
 	// What is the coord base of this sector. upper left point.
 	const CSectorList* pSectors = CSectorList::Get();
 #if _DEBUG
@@ -452,7 +452,7 @@ CPointMap CSectorBase::GetBasePoint() const
 
 CRectMap CSectorBase::GetRect() const noexcept
 {
-    //ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
+    //ADDTOCALLSTACK_DEBUG("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
 	// Get a rectangle for the sector.
 	const CPointMap& pt = GetBasePoint();
     const int iSectorSize = CSectorList::Get()->GetSectorSize(pt.m_map);

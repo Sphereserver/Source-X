@@ -59,7 +59,7 @@ CCSpawn *CCSpawn::GetBadSpawn(int index)
 
 CCSpawn::CCSpawn(CItem *pLink, bool fIsChampion) : CComponent(COMP_SPAWN), _fIsChampion(fIsChampion)
 {
-    //ADDTOCALLSTACK_INTENSIVE("CCSpawn::CCSpawn");
+    //ADDTOCALLSTACK_DEBUG("CCSpawn::CCSpawn");
     _pLink = pLink;
     _iAmount = 1;
     _iPile = 1;
