@@ -9,7 +9,6 @@
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 
-#ifdef _DEBUG
 #include <fcntl.h>
 int IsDebuggerPresent(void)
 {
@@ -35,12 +34,10 @@ int IsDebuggerPresent(void)
 
 	return debugger_present;
 }
-#endif // _DEBUG
 
 #endif // !_WIN32
 
 
-#ifdef _DEBUG
 void NotifyDebugger()
 {
     if (IsDebuggerPresent())
@@ -58,7 +55,6 @@ void NotifyDebugger()
 
     }
 }
-#endif // _DEBUG
 
 
 #ifdef _WIN32
@@ -342,12 +338,20 @@ void _cdecl Signal_Children(int sig = 0)
 #ifndef _WIN32
 void SetUnixSignals( bool fSet )    // Signal handlers are installed only in secure mode
 {
-#if defined(_SANITIZERS)
-#   define __SANS true
+
+#ifdef _SANITIZERS
+    const bool fSan = true;
 #else
-#   define __SANS false
+    const bool fSan = false;
 #endif
-    if (!IsDebuggerPresent() || !__SANS)
+
+#ifdef _DEBUG
+    const bool fDebugger = IsDebuggerPresent();
+#else
+    const bool fDebugger = false;
+#endif
+
+    if (!fDebugger && !fSan)
     {
         signal( SIGHUP,  fSet ? &Signal_Hangup : SIG_DFL );
         signal( SIGTERM, fSet ? &Signal_Terminate : SIG_DFL );
@@ -361,6 +365,6 @@ void SetUnixSignals( bool fSet )    // Signal handlers are installed only in sec
 
 	signal( SIGPIPE,	fSet ? SIG_IGN : SIG_DFL );
 	signal( SIGCHLD,	fSet ? &Signal_Children : SIG_DFL );
-#undef __SANS
+
 }
 #endif
