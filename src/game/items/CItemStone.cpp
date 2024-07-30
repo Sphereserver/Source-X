@@ -119,7 +119,7 @@ lpctstr CItemStone::GetTypeName() const
 
 void CItemStone::r_Write( CScript & s )
 {
-	ADDTOCALLSTACK_INTENSIVE("CItemStone::r_Write");
+	ADDTOCALLSTACK_DEBUG("CItemStone::r_Write");
 	CItem::r_Write( s );
 	s.WriteKeyVal( "ALIGN", GetAlignType());
 	if ( ! m_sAbbrev.IsEmpty())

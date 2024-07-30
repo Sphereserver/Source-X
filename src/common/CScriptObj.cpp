@@ -200,14 +200,14 @@ lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 
 size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_GetFunctionIndex");
+    ADDTOCALLSTACK_DEBUG("CScriptObj::r_GetFunctionIndex");
     GETNONWHITESPACE( pszFunction );
     return g_Cfg.m_Functions.find_sorted(pszFunction);
 }
 
 bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_CanCall");
+    ADDTOCALLSTACK_DEBUG("CScriptObj::r_CanCall");
     if (uiFunctionIndex == sl::scont_bad_index())
         return false;
     ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());

@@ -4486,7 +4486,7 @@ TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptT
 // process m_fStatusUpdate flags
 void CChar::OnTickStatusUpdate()
 {
-	//ADDTOCALLSTACK_INTENSIVE("CChar::OnTickStatusUpdate");
+	//ADDTOCALLSTACK_DEBUG("CChar::OnTickStatusUpdate");
     EXC_TRYSUB("CChar::OnTickStatusUpdate");
 
 	if ( IsClientActive() )
@@ -4591,7 +4591,7 @@ void CChar::OnTickSkill()
 
 bool CChar::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::_CanTick");
+	ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
 	EXC_TRY("Can tick?");
 
 	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))

@@ -407,7 +407,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 
 void CSector::r_Write()
 {
-	ADDTOCALLSTACK_INTENSIVE("CSector::r_Write");
+	ADDTOCALLSTACK_DEBUG("CSector::r_Write");
 	if ( m_fSaveParity == g_World.m_fSaveParity )
 		return; // already saved.
 	CPointMap pt = GetBasePoint();
@@ -1024,7 +1024,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
 bool CSector::_CanSleep(bool fCheckAdjacents) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CSector::_CanSleep");
+	ADDTOCALLSTACK_DEBUG("CSector::_CanSleep");
 	if ( (g_Cfg._iSectorSleepDelay == 0) || IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
     if (m_Chars_Active.GetClientsNumber() > 0)

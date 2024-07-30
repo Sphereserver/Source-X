@@ -442,7 +442,7 @@ bool CWorldThread::IsScheduledSpecialObjDeletion(const CSObjListRec* obj) const 
 
 int CWorldThread::FixObjTry( CObjBase * pObj, dword dwUID )
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldThread::FixObjTry");
+	ADDTOCALLSTACK_DEBUG("CWorldThread::FixObjTry");
 	// RETURN: 0 = success.
 	if ( !pObj )
 		return 0x7102;

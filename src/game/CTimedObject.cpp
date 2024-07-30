@@ -41,14 +41,14 @@ void CTimedObject::_GoAwake()
 
 bool CTimedObject::_CanTick(bool fParentGoingToSleep) const
 {
-    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::_CanTick");
     UnreferencedParameter(fParentGoingToSleep);
     return !_IsSleeping();
 }
 
 bool CTimedObject::CanTick(bool fParentGoingToSleep) const
 {
-    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::CanTick");
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::CanTick");
     MT_ENGINE_SHARED_LOCK_RETURN(_CanTick(fParentGoingToSleep));
 }
 
@@ -60,7 +60,7 @@ bool CTimedObject::OnTick()
 
 void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK_INTENSIVE("CTimedObject::_SetTimeout");
+    ADDTOCALLSTACK_DEBUG("CTimedObject::_SetTimeout");
     // Assume we have the mutex already locked here
 
     const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
@@ -93,7 +93,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK_INTENSIVE("CTimedObject::SetTimeout");
+    ADDTOCALLSTACK_DEBUG("CTimedObject::SetTimeout");
     MT_ENGINE_UNIQUE_LOCK_SET;
     _SetTimeout(iDelayInMsecs);
 }

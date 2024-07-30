@@ -298,7 +298,7 @@ CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) :
 
 tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 {
-	//ADDTOCALLSTACK_INTENSIVE("CScriptKeyAlloc::_GetKeyBufferRaw");
+	//ADDTOCALLSTACK_DEBUG("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
 	if ( iLen > SCRIPT_MAX_LINE_LEN )
 		iLen = SCRIPT_MAX_LINE_LEN;
@@ -515,8 +515,8 @@ bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
 	// This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
-	// this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
-	//ADDTOCALLSTACK_INTENSIVE("CScript::_ReadTextLine");
+	// this much often, so here it's to be preferred ADDTOCALLSTACK_DEBUG, even if we'll lose stack trace precision.
+	//ADDTOCALLSTACK_DEBUG("CScript::_ReadTextLine");
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
@@ -838,7 +838,7 @@ CScriptLineContext CScript::GetContext() const
 
 bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteSection");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteSection");
 	// Write out the section header.
 
 	// EndSection();	// End any previous section.
@@ -866,7 +866,7 @@ bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
 
 bool CScript::WriteKeySingle(lptstr ptcKey)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeySingle");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteKeySingle");
 	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
 		return false;
@@ -896,7 +896,7 @@ bool CScript::WriteKeySingle(lptstr ptcKey)
 
 bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyStr");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteKeyStr");
 	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
 		return false;
@@ -942,7 +942,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 static thread_local tchar ptcWriteKeyBuf[SCRIPT_MAX_LINE_LEN];
 void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteKeyFormat");
 	va_list vargs;
 	va_start( vargs, pszVal );
 	vsnprintf(ptcWriteKeyBuf, sizeof(ptcWriteKeyBuf), pszVal, vargs);

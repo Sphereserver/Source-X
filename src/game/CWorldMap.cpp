@@ -225,7 +225,7 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 // gets sector # from one map
 CSector* CWorldMap::GetSector(int map, int index) noexcept // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector(index)");
+	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetSector(index)");
 
 	const int iMapSectorQty = g_World._Sectors.GetSectorQty(map);
 	if (index >= iMapSectorQty)
@@ -239,14 +239,14 @@ CSector* CWorldMap::GetSector(int map, int index) noexcept // static
 
 CSector* CWorldMap::GetSector(int map, short x, short y) noexcept // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetSector(x,y)");
+	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetSector(x,y)");
 	return g_World._Sectors.GetSector(map, x, y);
 }
 
 
 const CServerMapBlock* CWorldMap::GetMapBlock(const CPointMap& pt) // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetMapBlock");
+	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetMapBlock");
 	// Get a map block from the cache. load it if not.
 
     EXC_TRY("GetMapBlock");
@@ -1230,7 +1230,7 @@ void CWorldMap::GetFixPoint( const CPointMap & pt, CServerMapBlockingState & blo
 
 void CWorldMap::GetHeightPoint(const CPointMap & pt, CServerMapBlockingState & block, bool fHouseCheck) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
+	ADDTOCALLSTACK_DEBUG("CWorldMap::GetHeightPoint");
     const CItemBase * pItemDef = nullptr;
     const CItemBaseDupe * pDupeDef = nullptr;
 	CItem * pItem = nullptr;
@@ -1537,7 +1537,7 @@ CUOMapMeter CWorldMap::CheckMapTerrain(CUOMapMeter pDefault, short x, short y, u
 
 char CWorldMap::GetHeightPoint(const CPointMap & pt, uint64 & uiBlockFlags, bool fHouseCheck) // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint");
+	ADDTOCALLSTACK_DEBUG("CWorldMap::GetHeightPoint");
 	const uint64 uiCan = uiBlockFlags;
 	CServerMapBlockingState block( uiBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
 	GetHeightPoint(pt, block, fHouseCheck);
@@ -1572,7 +1572,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockingState &
 {
     EXC_TRYSUB("GHP2 with blockFlags");
 
-	//ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2(blockingState)");
+	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetHeightPoint2(blockingState)");
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
@@ -1725,7 +1725,7 @@ void CWorldMap::GetHeightPoint2( const CPointMap & pt, CServerMapBlockingState &
 char CWorldMap::GetHeightPoint2( const CPointMap & pt, uint64 & uiBlockFlags, bool fHouseCheck ) // static
 {
     EXC_TRYSUB("GHP2 with blockFlags");
-    //ADDTOCALLSTACK_INTENSIVE("CWorldMap::GetHeightPoint2(blockFlags)");
+    //ADDTOCALLSTACK_DEBUG("CWorldMap::GetHeightPoint2(blockFlags)");
 	// Given our coords at pt including pt.m_z
 	// What is the height that gravity would put me at should i step here ?
 	// Assume my head height is PLAYER_HEIGHT/2

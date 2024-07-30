@@ -10,7 +10,7 @@
 
 const CServerTime& CWorldGameTime::GetCurrentTime() noexcept // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CWorldGameTime::GetCurrentTime");
+	//ADDTOCALLSTACK_DEBUG("CWorldGameTime::GetCurrentTime");
 	return g_World._GameClock.GetCurrentTime();  // Time in milliseconds
 }
 

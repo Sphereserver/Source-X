@@ -362,7 +362,7 @@ HUE_TYPE CObjBase::GetHue() const
 
 int CObjBase::IsWeird() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::IsWeird");
+	ADDTOCALLSTACK_DEBUG("CObjBase::IsWeird");
 	int iResultCode = CObjBaseTemplate::IsWeird();
 	if ( iResultCode )
 	{
@@ -735,7 +735,7 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 // ASCII packet
 void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::Speak");
+	ADDTOCALLSTACK_DEBUG("CObjBase::Speak");
 	CWorldComm::Speak( this, pText, wHue, mode, font );
 }
 
@@ -743,7 +743,7 @@ void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYP
 // Unicode packet
 void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
+	ADDTOCALLSTACK_DEBUG("CObjBase::SpeakUTF8");
 	// convert UTF8 to UTF16 UNICODE.
 	nachar szBuffer[ MAX_TALK_BUFFER ];
 	CvtSystemToNETUTF16( szBuffer, ARRAY_COUNT(szBuffer), pText, -1 );
@@ -755,7 +755,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 // Difference with SpeakUTF8: this method accepts as text input an nachar, which is a network aligned utf16 unicode characters array
 void CObjBase::SpeakUTF8Ex( const nachar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
+	ADDTOCALLSTACK_DEBUG("CObjBase::SpeakUTF8Ex");
 	CWorldComm::SpeakUNICODE( this, pText, wHue, mode, font, lang );
 }
 
@@ -2033,7 +2033,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 
 void CObjBase::r_Write( CScript & s )
 {
-	ADDTOCALLSTACK_INTENSIVE("CObjBase::r_Write");
+	ADDTOCALLSTACK_DEBUG("CObjBase::r_Write");
 	s.WriteKeyHex( "SERIAL", GetUID().GetObjUID());
 	if ( IsIndividualName() )
 		s.WriteKeyStr( "NAME", GetIndividualName());
@@ -3219,7 +3219,7 @@ void CObjBase::_GoSleep()
 
 bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
-	//ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");   // Called very frequently.
+	//ADDTOCALLSTACK_DEBUG("CObjBase::_CanTick");   // Called very frequently.
 	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 

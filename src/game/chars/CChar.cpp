@@ -662,7 +662,7 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 // RETURN: invalid code.
 int CChar::IsWeird() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::IsWeird");
+	ADDTOCALLSTACK_DEBUG("CChar::IsWeird");
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 		return iResultCode;
@@ -1474,7 +1474,7 @@ bool CChar::SetName( lpctstr pszName )
 
 height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeightMount");
+	ADDTOCALLSTACK_DEBUG("CChar::GetHeightMount");
 	height_t height = GetHeight();
 	if ( IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 		height += 4;
@@ -1485,7 +1485,7 @@ height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 
 height_t CChar::GetHeight() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeight");
+	ADDTOCALLSTACK_DEBUG("CChar::GetHeight");
 	if ( m_height ) //set by a dynamic variable (On=@Create  Height=10)
 		return m_height;
 
