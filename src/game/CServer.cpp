@@ -78,13 +78,17 @@ void CServer::SetSignals( bool fMsg )
 
 #ifndef _WIN32
 	SetUnixSignals(g_Cfg.m_fSecure);
+    LOG_TYPE lt = LOGM_INIT;
+    if (!IsLoading()) {
+        lt = (LOG_TYPE)((uint)lt | (uint)LOGL_EVENT);
+    }
 	if ( g_Cfg.m_fSecure )
 	{
-		g_Log.Event( (IsLoading() ? 0 : LOGL_EVENT) | LOGM_INIT, "Signal handlers installed.\n" );
+		g_Log.Event( lt, "Signal handlers installed.\n" );
 	}
 	else
 	{
-		g_Log.Event( (IsLoading() ? 0 : LOGL_EVENT) | LOGM_INIT, "Signal handlers UNinstalled.\n" );
+		g_Log.Event( lt, "Signal handlers UNinstalled.\n" );
 	}
 #endif
 
@@ -131,11 +135,6 @@ bool CServer::SetProcessPriority(int iPriorityLevel)
     return fSuccess;
 }
 
-SERVMODE_TYPE CServer::GetServerMode() const
-{
-    return m_iModeCode.load(std::memory_order_acquire);
-}
-
 void CServer::SetServerMode( SERVMODE_TYPE mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
@@ -165,7 +164,7 @@ bool CServer::IsValidBusy() const
     return false;
 }
 
-int CServer::GetExitFlag() const
+int CServer::GetExitFlag() const noexcept
 {
     return m_iExitFlag.load(std::memory_order_acquire);
 }
@@ -178,12 +177,12 @@ void CServer::SetExitFlag(int iFlag)
     m_iExitFlag.store(iFlag, std::memory_order_release);
 }
 
-bool CServer::IsLoading() const
+bool CServer::IsLoading() const noexcept
 {
     return ( m_fResyncPause || (GetServerMode() > SERVMODE_Run) );
 }
 
-bool CServer::IsResyncing() const
+bool CServer::IsResyncing() const noexcept
 {
     return m_fResyncPause || (GetServerMode() == SERVMODE_ResyncLoad);
 }
@@ -1960,6 +1959,7 @@ extern void defragSphere(char *);
 
 bool CServer::CommandLine( int argc, tchar * argv[] )
 {
+    ADDTOCALLSTACK("CServer::CommandLine");
 	// Console Command line.
 	// This runs after script file enum but before loading the world file.
 	// RETURN:
@@ -2286,6 +2286,7 @@ void CServer::_OnTick()
 bool CServer::Load()
 {
 	EXC_TRY("Load");
+    ADDTOCALLSTACK("CServer::Load");
 
 	EXC_SET_BLOCK("print sphere infos");
 	g_Log.Event(LOGM_INIT, "%s.\n", g_sServerDescription.c_str());

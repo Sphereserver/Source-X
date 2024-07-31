@@ -97,20 +97,20 @@ lpctstr CServerMapBlockingState::GetTileName( dword dwID )	// static
 	if ( dwID < TERRAIN_QTY )
 	{
 		const CUOTerrainInfo land( (TERRAIN_TYPE)dwID );
-		strcpy( pStr, land.m_name );
+		strncpy( pStr, land.m_name, Str_TempLength() );
 	}
 	else
 	{
 		dwID -= TERRAIN_QTY;
 		const CUOItemInfo item((ITEMID_TYPE)dwID);
-		strcpy( pStr, item.m_name );
+		strncpy( pStr, item.m_name, Str_TempLength());
 	}
 	return pStr;
 }
 
-bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
+bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID ) noexcept
 {
-	ADDTOCALLSTACK("CServerMapBlockingState::CheckTile");
+	//ADDTOCALLSTACK("CServerMapBlockingState::CheckTile");
 	// RETURN:
 	//  true = continue processing
 
@@ -175,9 +175,9 @@ bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, char zBottom, 
 	return true;
 }
 
-bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
+bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID ) noexcept
 {
-	ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Item");
+	//ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Item");
 	// RETURN:
 	//  true = continue processing
 
@@ -262,9 +262,9 @@ bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBot
 
 }
 
-bool CServerMapBlockingState::CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID )
+bool CServerMapBlockingState::CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID ) noexcept
 {
-	ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Terrain");
+	//ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Terrain");
 	// RETURN:
 	//  true = i can step on it, so continue processing
 
@@ -565,6 +565,12 @@ CUOMulti::CUOMulti( MULTI_TYPE id )
 CUOMulti::~CUOMulti()
 {
 	Release();
+}
+
+void CUOMulti::HitCacheTime() noexcept
+{
+    // When was this last referenced.
+    CCachedMulItem::m_timeRef = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 }
 
 const CUOMultiItemRec_HS * CUOMulti::GetItem( size_t i ) const

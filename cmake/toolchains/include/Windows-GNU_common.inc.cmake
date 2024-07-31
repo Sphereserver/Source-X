@@ -8,6 +8,7 @@ endfunction ()
 
 function (toolchain_after_project_common)
 	ENABLE_LANGUAGE(RC)
+	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
 endfunction ()
 
 
@@ -15,12 +16,13 @@ function (toolchain_exe_stuff_common)
 
 	#-- Configure the Windows application type.
 
-	IF (${WIN32_SPAWN_CONSOLE})
-		SET (CMAKE_EXE_LINKER_FLAGS_EXTRA  ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -mconsole)
-		SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
-	#ELSE ()
-	#	SET (CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -mwindows)
-	ENDIF ()
+	# Subsystem is already managed by is_win32_app_linker. GCC doesn't need us to specify the entry point.
+	#IF (${WIN32_SPAWN_CONSOLE})
+	#	add_link_options ("LINKER:SHELL:-mconsole")
+	#	SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
+	##ELSE ()
+	##	add_link_options ("LINKER:SHELL:-mwindows")
+	#ENDIF ()
 
 
 	#-- Validate sanitizers options and store them between the common compiler flags.
@@ -29,7 +31,19 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_ASAN})
 		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support ASAN")
 		SET (USE_ASAN false)
-		#SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} -fsanitize=address -fsanitize-address-use-after-scope)
+		#[[
+    SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=address -fno-sanitize-recover=address
+      -fsanitize-address-use-after-scope -fsanitize=pointer-compare -fsanitize=pointer-subtract
+      # Flags for additional instrumentation not strictly needing asan to be enabled
+      #-fvtable-verify=preinit # This causes a GCC internal error! Tested with 13.2.0
+      -fstack-check -fstack-protector-all
+      -fcf-protection=full
+      # GCC 14?
+      #-fharden-control-flow-redundancy -fhardcfr-check-exceptions
+      # Other
+      #-fsanitize-trap=all
+    )
+    ]]
 		#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libasan>)
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
@@ -50,10 +64,15 @@ function (toolchain_exe_stuff_common)
 	IF (${USE_UBSAN})
 		MESSAGE (FATAL_ERROR "MinGW-GCC doesn't yet support UBSAN")
 		SET (USE_UBSAN false)
-#		SET (UBSAN_FLAGS
-#			-fsanitize=undefined,#shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds
-#			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute
-#			-fno-sanitize=enum)
+    #[[
+    SET (UBSAN_FLAGS
+			-fsanitize=undefined,float-divide-by-zero
+			-fno-sanitize=enum
+			# Unsupported (yet?) by GCC 13
+			#-fsanitize=unsigned-integer-overflow #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
+      #-fsanitize=implicit-conversion, local-bounds
+		)
+    ]]
 		#SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
 		#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined #$<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libubsan>)
 		#SET (ENABLED_SANITIZER true)
@@ -67,7 +86,8 @@ function (toolchain_exe_stuff_common)
 
 	set (cxx_local_opts_warnings
 		-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
-		-Wno-parentheses -Wno-format-security -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
+		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
+    -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
 	)
 	set (cxx_local_opts
 		-std=c++20 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields

@@ -110,7 +110,7 @@ bool CRect::IsEqual( const CRect & rect ) const noexcept
         m_map == rect.m_map;
 }
 
-void CRect::NormalizeRect()
+void CRect::NormalizeRect() noexcept
 {
     if ( m_bottom < m_top )
     {
@@ -128,7 +128,7 @@ void CRect::NormalizeRect()
         m_map = 0;
 }
 
-void CRect::SetRect( int left, int top, int right, int bottom, int map )
+void CRect::SetRect( int left, int top, int right, int bottom, int map ) noexcept
 {
     m_left = left;
     m_top = top;
@@ -138,7 +138,7 @@ void CRect::SetRect( int left, int top, int right, int bottom, int map )
     NormalizeRect();
 }
 
-void CRect::NormalizeRectMax( int cx, int cy )
+void CRect::NormalizeRectMax( int cx, int cy ) noexcept
 {
     if ( m_left < 0 )
         m_left = 0;
@@ -279,9 +279,9 @@ CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 	return pt;
 }
 
-CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up this rect.
+CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that make up this rect.
 {
-	ADDTOCALLSTACK_INTENSIVE("CRect::GetSector");
+	//ADDTOCALLSTACK_DEBUG("CRect::GetSector");
 	// get all the CSector(s) that overlap this rect.
 	// RETURN: nullptr = no more
 
@@ -348,15 +348,15 @@ bool CRectMap::IsValid() const noexcept
     return true;
 }
 
-void CRectMap::NormalizeRect()
+void CRectMap::NormalizeRect() noexcept
 {
-	//ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRect");
+	//ADDTOCALLSTACK_DEBUG("CRectMap::NormalizeRect");
 	CRect::NormalizeRect();
 	NormalizeRectMax();
 }
 
-void CRectMap::NormalizeRectMax()
+void CRectMap::NormalizeRectMax() noexcept
 {
-    //ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRectMax");
+    //ADDTOCALLSTACK_DEBUG("CRectMap::NormalizeRectMax");
 	CRect::NormalizeRectMax( g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
 }

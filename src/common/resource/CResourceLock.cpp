@@ -31,7 +31,7 @@ bool CResourceLock::_Open(lpctstr ptcUnused, uint uiUnused)
 bool CResourceLock::Open(lpctstr ptcUnused, uint uiUnused)
 {
     ADDTOCALLSTACK("CResourceLock::Open");
-    THREAD_UNIQUE_LOCK_RETURN(CResourceLock::_Open(ptcUnused, uiUnused));
+    MT_UNIQUE_LOCK_RETURN(CResourceLock::_Open(ptcUnused, uiUnused));
 }
 
 void CResourceLock::_Close()
@@ -58,14 +58,14 @@ void CResourceLock::_Close()
 void CResourceLock::Close()
 {
     ADDTOCALLSTACK("CResourceLock::Close");
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     CResourceLock::_Close();
 }
 
 bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
     // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
-    // this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
+    // this much often, so here it's to be preferred ADDTOCALLSTACK_DEBUG, even if we'll lose stack trace precision.
     ADDTOCALLSTACK("CResourceLock::_ReadTextLine");
     // ARGS:
     // fRemoveBlanks = Don't report any blank lines, (just keep reading)
@@ -90,8 +90,8 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 }
 bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    ADDTOCALLSTACK_INTENSIVE("CResourceLock::ReadTextLine");
-    THREAD_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
+    ADDTOCALLSTACK_DEBUG("CResourceLock::ReadTextLine");
+    MT_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
 }
 
 int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context )

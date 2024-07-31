@@ -369,7 +369,7 @@ enum SECURE_TRADE_TYPE
 	SECURE_TRADE_UPDATELEDGER = 4
 };
 
-enum SEASON_TYPE
+enum SEASON_TYPE : uchar
 {
 	// The seasons can be:
 	SEASON_Spring = 0,
@@ -539,7 +539,7 @@ enum MAPWAYPOINT_TYPE
 	MAPWAYPOINT_GreenDotFlashing = 0xF
 };
 
-enum WEATHER_TYPE
+enum WEATHER_TYPE : uchar
 {
 	WEATHER_DEFAULT = 0xFE,
 	WEATHER_DRY = 0xFF,

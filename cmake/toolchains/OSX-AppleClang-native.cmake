@@ -2,15 +2,17 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/OSX-AppleClang_common.inc.cmake")
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: OSX-AppleClang-native.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"OSX"		PARENT_SCOPE)
+	#SET(CMAKE_SYSTEM_NAME	"OSX"		PARENT_SCOPE) # Darwin
+
+	toolchain_after_project_common()
 
 	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		MESSAGE (STATUS "Detected 64 bits architecture")
-		SET(ARCH_BITS	64	PARENT_SCOPE)
+		#MESSAGE (STATUS "Detected 64 bits architecture")
+		#SET(ARCH_BITS	64	CACHE INTERNAL) # override
 		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native64"	PARENT_SCOPE)
 	ELSE (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		MESSAGE (STATUS "Detected 32 bits architecture")
-		SET(ARCH_BITS	32	PARENT_SCOPE)
+		#MESSAGE (STATUS "Detected 32 bits architecture")
+		#SET(ARCH_BITS	32	CACHE INTERNAL) # override
 		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native32"	PARENT_SCOPE)
 	ENDIF (CMAKE_SIZEOF_VOID_P EQUAL 8)
 

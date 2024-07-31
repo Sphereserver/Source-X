@@ -240,6 +240,7 @@ src/common/sphere_library/CSObjList.h
 src/common/sphere_library/CSObjListRec.h
 src/common/sphere_library/CSObjSortArray.h
 src/common/sphere_library/CSPtrTypeArray.h
+src/common/sphere_library/CSReferenceCount.h
 src/common/sphere_library/CSTypedArray.h
 src/common/sphere_library/CSQueue.cpp
 src/common/sphere_library/CSQueue.h
@@ -252,6 +253,7 @@ src/common/sphere_library/CSTime.h
 src/common/sphere_library/CSWindow.cpp
 src/common/sphere_library/CSWindow.h
 src/common/sphere_library/scontainer_ops.h
+src/common/sphere_library/sfastmath.h
 src/common/sphere_library/smap.h
 src/common/sphere_library/smutex.h
 src/common/sphere_library/smutex.cpp
@@ -333,6 +335,8 @@ src/game/CWorldGameTime.h
 src/game/CWorldImport.cpp
 src/game/CWorldMap.cpp
 src/game/CWorldMap.h
+src/game/CWorldSearch.cpp
+src/game/CWorldSearch.h
 src/game/CWorldTicker.cpp
 src/game/CWorldTicker.h
 src/game/CWorldTickingList.cpp

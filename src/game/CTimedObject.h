@@ -20,7 +20,7 @@ public:
     static const char* m_sClassName;
 
 protected:
-    THREAD_CMUTEX_DEF;
+    MT_CMUTEX_DEF;
 
 private:
     int64 _iTimeout;
@@ -129,7 +129,7 @@ public:             bool IsTimerExpired() const noexcept;
     /**
      * @brief   Gets timer (in milliseconds).
      * @return  The adjusted timer.
-    
+
     */
 protected:  int64 _GetTimerAdjusted() const noexcept;
 public:     int64  GetTimerAdjusted() const noexcept;

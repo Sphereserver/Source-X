@@ -21,6 +21,7 @@
 #include "../CWorldTickingList.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
@@ -163,29 +164,32 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
-
     // Manual CComponents addition
-
-    /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
-    * but it's required to add it also on item's creation depending on it's CItemBase can flags.
-    */
-	if (CCItemDamageable::CanSubscribe(this))
+    //  If it's a memory, those won't be needed, and we can avoid dynamically allocating useless stuff.
+    if (id != ITEMID_MEMORY)
     {
-        SubscribeComponent(new CCItemDamageable(this));
-    }
-    if (CCFaction::CanSubscribe(this))
-    {
-        SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
+        /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
+        * but it's required to add it also on item's creation depending on it's CItemBase can flags.
+        */
+        if (CCItemDamageable::CanSubscribe(this))
+        {
+            SubscribeComponent(new CCItemDamageable(this));
+        }
+        if (CCFaction::CanSubscribe(this))
+        {
+            SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
+        }
+
+        TrySubscribeComponentProps<CCPropsItem>();
+        TrySubscribeComponentProps<CCPropsItemChar>();
     }
 
-	TrySubscribeComponentProps<CCPropsItem>();
-	TrySubscribeComponentProps<CCPropsItemChar>();
 }
 
 void CItem::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
-	_fDeleting = true;
+	_uiInternalStateFlags |= SF_DELETING;
 
 	// We don't want to have invalid pointers over there
 	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
@@ -211,7 +215,7 @@ void CItem::DeleteCleanup(bool fForce)
 				if ( pHorse && pHorse->IsDisconnected() && ! pHorse->m_pPlayer )
 				{
                     pHorse->m_atRidden.m_uidFigurine.InitUID();
-					pHorse->Delete(fForce);
+                    pHorse->Delete(fForce);
 				}
 			}
 			break;
@@ -255,7 +259,7 @@ bool CItem::Delete(bool fForce)
 	if (( NotifyDelete() == false ) && !fForce)
 		return false;
 
-	DeletePrepare();	// Virtual -> Must remove early because virtuals will fail in child destructor.
+	DeletePrepare();	 // Virtual -> Must call it early because virtuals will fail in child destructors.
 	DeleteCleanup(fForce);
 
 	return CObjBase::Delete(fForce);
@@ -749,7 +753,7 @@ byte CItem::GetRangeH() const
 
 int CItem::IsWeird() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::IsWeird");
+	ADDTOCALLSTACK_DEBUG("CItem::IsWeird");
 	// Does item i have a "link to reality"?
 	// (Is the container it is in still there)
 	// RETURN: 0 = success ok
@@ -1636,38 +1640,42 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 		return true;
 
 	// Check if there's too many items on the same spot
-	uint iItemCount = 0;
-	const CItem * pItem = nullptr;
-	CWorldSearch AreaItems(ptNewPlace);
-	for (;;)
-	{
-		pItem = AreaItems.GetItem();
-		if ( pItem == nullptr )
-			break;
 
-		++iItemCount;
-		if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
-		{
-			Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
-			iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
-			break;
-		}
-	}
-
-	/*  // From 56b
-		// Too many items on the same spot!
-        if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+    //if (g_Cfg.m_iMaxItemComplexity > 0) // It might be wise to keep this always on.
+    {
+        uint iItemCount = 0;
+        const CItem * pItem = nullptr;
+        auto AreaItems = CWorldSearchHolder::GetInstance(ptNewPlace);
+        for (;;)
         {
-            Speak("Too many items here!");
-            if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+            pItem = AreaItems->GetItem();
+            if (pItem == nullptr)
+                break;
+
+            ++iItemCount;
+            if (iItemCount > g_Cfg.m_iMaxItemComplexity)
             {
-                Speak("The ground collapses!");
-                Delete();
+                Speak(g_Cfg.GetDefaultMsg(DEFMSG_TOO_MANY_ITEMS));
+                iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
+                break;
             }
-            // attempt to reject the move.
-            return false;
         }
-    */
+
+        /*  // From 56b
+            // Too many items on the same spot!
+            if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
+            {
+                Speak("Too many items here!");
+                if ( iItemCount > g_Cfg.m_iMaxItemComplexity + g_Cfg.m_iMaxItemComplexity/2 )
+                {
+                    Speak("The ground collapses!");
+                    Delete();
+                }
+                // attempt to reject the move.
+                return false;
+            }
+        */
+    }
 
 	SetDecayTime(iDecayTime);
 	Sound(GetDropSound(nullptr));
@@ -1714,7 +1722,7 @@ lpctstr CItem::GetName() const
 		{
 			if ( IsType( IT_SCROLL ) || IsType( IT_POTION ) )
 			{
-				if ( RES_GET_INDEX(m_itPotion.m_Type) != SPELL_Explosion )
+				if ( ResGetIndex(m_itPotion.m_Type) != SPELL_Explosion )
 				{
 					const CSpellDef * pSpell = g_Cfg.GetSpellDef((SPELL_TYPE)(m_itSpell.m_spell));
 					if (pSpell != nullptr)
@@ -1858,7 +1866,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 
 	if ( fIdentified && IsAttr(ATTR_MAGIC) && IsTypeArmorWeapon())	// wand is also a weapon.
 	{
-		SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(m_itWeapon.m_spell));
+		SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(m_itWeapon.m_spell));
 		if ( spell )
 		{
 			const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
@@ -1911,7 +1919,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		case IT_BONE:
 			if ( fIdentified )
 			{
-				CREID_TYPE id = static_cast<CREID_TYPE>(RES_GET_INDEX(m_itSkin.m_creid));
+				CREID_TYPE id = static_cast<CREID_TYPE>(ResGetIndex(m_itSkin.m_creid));
 				if ( id)
 				{
 					const CCharBase * pCharDef = CCharBase::FindCharBase( id );
@@ -2094,10 +2102,17 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 
 void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 {
+    ADDTOCALLSTACK("CItem::OnHear");
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
 	UnreferencedParameter(pszCmd);
 	UnreferencedParameter(pSrc);
 	ASSERT(false);
+}
+
+bool CItem::CanHear() const
+{
+    //ADDTOCALLSTACK("CItem::CanHear");
+    return IsType(IT_SHIP) || IsType(IT_COMM_CRYSTAL);
 }
 
 CItemBase * CItem::Item_GetDef() const
@@ -2294,16 +2309,16 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_LOOM:
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
-            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_ITEMDEF, ResGetIndex(m_itNormal.m_more1)));
             return;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
-            sVal = ResourceGetName(CResourceID(RES_CHARDEF, RES_GET_INDEX(m_itNormal.m_more1)));
+            sVal = ResourceGetName(CResourceID(RES_CHARDEF, ResGetIndex(m_itNormal.m_more1)));
             return;
 
         case IT_POTION:
-            sVal = ResourceGetName(CResourceID(RES_SPELL, RES_GET_INDEX(m_itPotion.m_Type)));
+            sVal = ResourceGetName(CResourceID(RES_SPELL, ResGetIndex(m_itPotion.m_Type)));
             return;
 
         default:
@@ -2317,7 +2332,7 @@ void CItem::r_WriteMore1(CSString & sVal)
 
 void CItem::r_WriteMore2( CSString & sVal )
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore2");
+	ADDTOCALLSTACK_DEBUG("CItem::r_WriteMore2");
 	// do special processing to represent this.
 
 	switch ( GetType())
@@ -2363,7 +2378,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 void CItem::r_Write( CScript & s )
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::r_Write");
+	ADDTOCALLSTACK_DEBUG("CItem::r_Write");
 	const CItemBase *pItemDef = Item_GetDef();
 	if ( !pItemDef )
 		return;
@@ -2887,11 +2902,11 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 
 void CItem::r_LoadMore1(dword dwVal)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore1");
+    ADDTOCALLSTACK_DEBUG("CItem::r_LoadMore1");
     // Ensure that (when needed) the dwVal is stored as a CResourceIDBase,
     //  plus, do some extra checks for spawns
 
-    const int iIndex = RES_GET_INDEX(dwVal);
+    const int iIndex = ResGetIndex(dwVal);
     switch (GetType())
     {
     case IT_TREE:
@@ -2946,10 +2961,10 @@ void CItem::r_LoadMore1(dword dwVal)
 
 void CItem::r_LoadMore2(dword dwVal)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItem::r_LoadMore2");
+    ADDTOCALLSTACK_DEBUG("CItem::r_LoadMore2");
     // Ensure that (when needed) the dwVal is stored as a CResourceIDBase
 
-    const int iIndex = RES_GET_INDEX(dwVal);
+    const int iIndex = ResGetIndex(dwVal);
     switch (GetType())
     {
     case IT_CROPS:
@@ -3153,7 +3168,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				for ( addCircle = atoi(ppVal[0]); addCircle; --addCircle )
 				{
 					for ( short i = 1; i < 9; ++i )
-						AddSpellbookSpell((SPELL_TYPE)(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
+						AddSpellbookSpell((SPELL_TYPE)(ResGetIndex(((addCircle - 1) * 8) + i)), false);
 
 					if ( includeLower == false )
 						break;
@@ -3163,7 +3178,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_ADDSPELL:
 			// Add this spell to the i_spellbook.
 			{
-				SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(s.GetArgVal()));
+				SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(s.GetArgVal()));
 				if (AddSpellbookSpell(spell, false))
 					return false;
                 break;
@@ -3313,7 +3328,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             break;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, RES_GET_INDEX(s.GetArgDWVal()));
+			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, ResGetIndex(s.GetArgDWVal()));
             break;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
@@ -5109,14 +5124,15 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	}
 
 	// Check for interesting items, like boats, carpets, etc.., ignore our stuff
+    auto Area = CWorldSearchHolder::GetInstance(ptCoords, iVisibility);
+
 	CItem * pItemSighted = nullptr;
 	CItem * pBoatSighted = nullptr;
 	int iItemSighted = 0;
 	int iBoatSighted = 0;
-	CWorldSearch ItemsArea( ptCoords, iVisibility );
 	for (;;)
 	{
-		CItem * pItem = ItemsArea.GetItem();
+		CItem * pItem = Area->GetItem();
 		if ( pItem == nullptr )
 			break;
 		if ( pItem == this )
@@ -5187,12 +5203,13 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	}
 
 	// Check for creatures
+    Area->RestartSearch();
+
 	CChar * pCharSighted = nullptr;
 	int iCharSighted = 0;
-	CWorldSearch AreaChar( ptCoords, iVisibility );
 	for (;;)
 	{
-		CChar * pChar = AreaChar.GetChar();
+		CChar * pChar = Area->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar == pUser )
@@ -5231,7 +5248,7 @@ lpctstr CItem::Use_Sextant( CPointMap pntCoords ) const
 
 bool CItem::IsBookWritable() const
 {
-	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStamp() == 0) );
+	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStampS() == 0) );
 }
 
 bool CItem::IsBookSystem() const	// stored in RES_BOOK
@@ -5536,7 +5553,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( IsType(IT_WAND) )	// try to recharge the wand.
 	{
-		if ( !m_itWeapon.m_spell || RES_GET_INDEX(m_itWeapon.m_spell) == (word)spell )
+		if ( !m_itWeapon.m_spell || ResGetIndex(m_itWeapon.m_spell) == (word)spell )
 		{
 			SetAttr(ATTR_MAGIC);
 			if ( !m_itWeapon.m_spell || ( pCharSrc && pCharSrc->IsPriv(PRIV_GM) ) )
@@ -5757,7 +5774,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		return INT32_MAX;
 
 	case IT_POTION:
-		if ( RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion )
+		if ( ResGetIndex(m_itPotion.m_Type) == SPELL_Explosion )
 		{
 			CSpellDef *pSpell = g_Cfg.GetSpellDef(SPELL_Explosion);
 			if (!pSpell)
@@ -5908,10 +5925,10 @@ void CItem::OnExplosion()
 		iDmgPhysical = 100;
 
 	CChar * pSrc = m_uidLink.CharFind();
-	CWorldSearch AreaChars( GetTopPoint(), m_itExplode.m_iDist );
+	auto AreaChars = CWorldSearchHolder::GetInstance( GetTopPoint(), m_itExplode.m_iDist );
 	for (;;)
 	{
-		CChar * pChar = AreaChars.GetChar();
+		CChar * pChar = AreaChars->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar->CanSeeLOS(this) )
@@ -6036,7 +6053,7 @@ bool CItem::_CanHoldTimer() const
         return false;
     }
 
-    if (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED))
+    if (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED))
     {
         return true;
     }
@@ -6060,11 +6077,11 @@ bool CItem::_CanHoldTimer() const
 
 bool CItem::_CanTick(bool fParentGoingToSleep) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CItem::_CanTick");
+	ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fIgnoreCont = (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 	// ATTR_DECAY ignores/overrides fParentGoingToSleep
 	if (fIgnoreCont || (IsAttr(ATTR_DECAY) && !pCont))
 	{
@@ -6246,7 +6263,7 @@ bool CItem::_OnTick()
 			{
 				EXC_SET_BLOCK("default behaviour::IT_POTION");
 				// This is a explosion potion?
-				if ( (RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion) && m_itPotion.m_ignited )
+				if ( (ResGetIndex(m_itPotion.m_Type) == SPELL_Explosion) && m_itPotion.m_ignited )
 				{
 					if ( m_itPotion.m_tick <= 1 )
 					{

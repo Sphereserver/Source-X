@@ -7,12 +7,14 @@
 #include "../components/CCSpawn.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
-static const int MASK_RETURN_FOLLOW_LINKS = 0x02;
+static constexpr int MASK_RETURN_FOLLOW_LINKS = 0x02;
+
 
 bool CChar::Use_MultiLockDown( CItem * pItemTarg )
 {
@@ -114,7 +116,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-		ITEMID_TYPE id = (ITEMID_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp));
+        ITEMID_TYPE id = (ITEMID_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
 			break;
 
@@ -1059,7 +1061,7 @@ void CChar::Use_Drink( CItem * pItem )
 		if ( iEnhance )
 			iSkillQuality += IMulDiv(iSkillQuality, iEnhance, 100);
 
-		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
+		OnSpellEffect((SPELL_TYPE)(ResGetIndex(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
 		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), (int64)dwDelay, this);
@@ -1428,10 +1430,10 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	// Already a plant here ?
-	CWorldSearch AreaItems(pt);
+	auto AreaItems = CWorldSearchHolder::GetInstance(pt);
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = AreaItems->GetItem();
 		if ( !pItem )
 			break;
 		if ( pItem->IsType(IT_TREE) || pItem->IsType(IT_FOLIAGE) )		// there's already a tree here

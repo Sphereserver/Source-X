@@ -7,6 +7,7 @@
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -191,15 +192,15 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 		}
 	}
 
-	CPointMap ptOld = GetTopPoint();
+	CPointMap ptOld(GetTopPoint());
 	if ( ptOld.IsValidPoint() )		// guards might have just been created
 	{
 		if ( fTakePets )	// look for any creatures that might be following me near by
 		{
-			CWorldSearch Area(ptOld, UO_MAP_VIEW_SIGHT);
+			auto Area = CWorldSearchHolder::GetInstance(ptOld, UO_MAP_VIEW_SIGHT);
 			for (;;)
 			{
-				CChar * pChar = Area.GetChar();
+				CChar * pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( pChar == this )
@@ -528,7 +529,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pSpell->m_itSpell.m_spell));
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !spell || !pSpellDef )
 		return;
@@ -950,7 +951,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pSpell->m_itSpell.m_spell));
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !spell || !pSpellDef )
 		return;
@@ -1722,7 +1723,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 	ASSERT(pItem);
 
-	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell));
 	const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (!pSpellDef)
 		return false;
@@ -1972,7 +1973,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_HARM))
 	{
-		iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
+        iDmgType = (DAMAGE_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("DamageType")));
 		if (iDmgType > 0 && iEffect > 0) // This is necessary if we have a spell that is harmful but does no damage periodically.
 		{
 			OnTakeDamage(iEffect, pItem->m_uidLink.CharFind(), iDmgType,
@@ -2041,7 +2042,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	switch ( layer )
 	{
 		case LAYER_FLAG_Criminal:		pSpell->SetName("Criminal Timer");			break;
-		case LAYER_FLAG_Potion:			pSpell->SetName("Potion Cooldown");			break;
+		case LAYER_FLAG_PotionUsed:		pSpell->SetName("Potion Cooldown");			break;
 		case LAYER_FLAG_Drunk:			pSpell->SetName("Drunk Effect");			break;
 		case LAYER_FLAG_Hallucination:	pSpell->SetName("Hallucination Effect");	break;
 		case LAYER_FLAG_Murders:		pSpell->SetName("Murder Decay");			break;
@@ -2078,26 +2079,28 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel, int64 iDu
 	if ( pSpellDef == nullptr )
 		return;
 
-	CWorldSearch AreaChar( pntTarg, iDist );
-	for (;;)
-	{
-		CChar * pChar = AreaChar.GetChar();
-		if ( pChar == nullptr )
-			break;
-		if ( pChar == this )
-		{
-			if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF) )
-				continue;
-		}
-		pChar->OnSpellEffect( spelltype, this, iSkillLevel, nullptr, iDuration);
-	}
+    {
+        auto AreaChar = CWorldSearchHolder::GetInstance(pntTarg, iDist);
+        for (;;)
+        {
+            CChar * pChar = AreaChar->GetChar();
+            if (pChar == nullptr)
+                break;
+            if (pChar == this)
+            {
+                if (pSpellDef->IsSpellType(SPELLFLAG_HARM) && !IsSetMagicFlags(MAGICF_CANHARMSELF))
+                    continue;
+            }
+            pChar->OnSpellEffect(spelltype, this, iSkillLevel, nullptr, iDuration);
+        }
+    }
 
 	if ( !pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ))	// prevent damage nearby items on ground
 	{
-		CWorldSearch AreaItem( pntTarg, iDist );
+		auto AreaItem = CWorldSearchHolder::GetInstance( pntTarg, iDist );
 		for (;;)
 		{
-			CItem * pItem = AreaItem.GetItem();
+			CItem * pItem = AreaItem->GetItem();
 			if ( pItem == nullptr )
 				break;
 			pItem->OnSpellEffect( spelltype, this, iSkillLevel, nullptr );
@@ -2188,7 +2191,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			bool fGoodLoc = true;
 
 			// Where is this ?
-			CPointMap ptg = pntTarg;
+			CPointMap ptg(pntTarg);
 			if ( dx > dy )
 			{
 				ptg.m_y += (short)(ix);
@@ -2201,10 +2204,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			}
 
 			// Check for direct cast on a creature.
-			CWorldSearch AreaChar( ptg );
+			auto Area = CWorldSearchHolder::GetInstance( ptg );
 			for (;;)
 			{
-				CChar * pChar = AreaChar.GetChar();
+				CChar * pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					break;
 
@@ -2237,10 +2240,10 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 				continue;
 
 			// Check for direct cast on an item.
-			CWorldSearch AreaItem( ptg );
+            Area->RestartSearch();
 			for (;;)
 			{
-				CItem * pItem = AreaItem.GetItem();
+				CItem * pItem = Area->GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( pItem->IsType(IT_SPELL) && IsSetMagicFlags(MAGICF_OVERRIDEFIELDS) )
@@ -2908,8 +2911,8 @@ bool CChar::Spell_CastDone()
 	if (fIsSpellField)
 	{
 		//Setting new IDs as another variables to pass as different arguments to the field function.
-		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
-		it2test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2")));
+        it1test = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+        it2test = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject2")));
 		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth");
 		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge");
 	}
@@ -3279,7 +3282,7 @@ void CChar::Spell_CastFail(bool fAbort)
 	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
 	
-	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+	iT1 = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
 	Sound( SOUND_SPELL_FIZZLE );
@@ -3533,6 +3536,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_POISONED) )
 		return false;
+    if (IsStatFlag(STATF_RIDDEN) && (pSpellDef->IsSpellType(SPELLFLAG_FIELD) || pSpellDef->IsSpellType(SPELLFLAG_AREA)))
+        return false;
 
 	iSkillLevel = (iSkillLevel / 2) + g_Rand.GetVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
@@ -3636,8 +3641,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);		// remember that effect/duration is calculated before triggers
-	DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType")));
-	ITEMID_TYPE iEffectID = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1")));
+    DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("DamageType")));
+    ITEMID_TYPE iEffectID = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode") > 0 ? true : false;
 	iSound = (SOUND_TYPE)(Args.m_VarsLocal.GetKeyNum("Sound"));
 	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect"));
@@ -3919,7 +3924,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Hallucination:
 		{
-			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 100*MSECS_PER_TENTH, pCharSrc );
+			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, iDuration, pCharSrc );
             ASSERT(pItem);
 			pItem->m_itSpell.m_spellcharges = g_Rand.GetVal(30);
 		}

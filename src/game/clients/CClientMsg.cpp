@@ -15,6 +15,7 @@
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -65,7 +66,7 @@ void CClient::resendBuffs() const
 		wStatEffect = pItem->m_itSpell.m_spelllevel;
         int64 iTimerEffectSigned = pItem->GetTimerSAdjusted();
 		wTimerEffect = (word)(maximum(iTimerEffectSigned, 0));
-        SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+        SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell));
         const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 
 		switch (spell)
@@ -309,11 +310,11 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fItems )
 	{
 		// Remove any multi objects first ! or client will hang
-		CWorldSearch AreaItems(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
-		AreaItems.SetSearchSquare(true);
+		auto AreaItems = CWorldSearchHolder::GetInstance(GetChar()->GetTopPoint(), g_Cfg.m_iMapViewRadar);
+		AreaItems->SetSearchSquare(true);
 		for (;;)
 		{
-			CItem * pItem = AreaItems.GetItem();
+			CItem * pItem = AreaItems->GetItem();
 			if ( pItem == nullptr )
 				break;
 			addObjectRemove(pItem);
@@ -322,12 +323,12 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fChars )
 	{
 		CChar * pCharSrc = GetChar();
-		CWorldSearch AreaChars(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
-		AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
-		AreaChars.SetSearchSquare(true);
+		auto AreaChars = CWorldSearchHolder::GetInstance(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
+		AreaChars->SetAllShow(IsPriv(PRIV_ALLSHOW));
+		AreaChars->SetSearchSquare(true);
 		for (;;)
 		{
-			CChar * pChar = AreaChars.GetChar();
+			CChar * pChar = AreaChars->GetChar();
 			if ( pChar == nullptr )
 				break;
 			if ( pChar == pCharSrc )
@@ -1787,7 +1788,7 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	// Place an item from a deed. preview all the stuff
 
 	ASSERT( m_Targ_UID == pDeed->GetUID());
-	ITEMID_TYPE iddef = (ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type));
+	ITEMID_TYPE iddef = (ITEMID_TYPE)(ResGetIndex(pDeed->m_itDeed.m_Type));
 	m_tmUseItem.m_pParent = pDeed->GetParent();	// Cheat Verify.
 	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef, pDeed->GetHue() );
 }
@@ -1929,15 +1930,17 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
     std::vector<CItem*> vecMultis;
+    vecMultis.reserve(5);
     std::vector<CItem*> vecItems;
+    vecItems.reserve(15);
 
     // ptOld: the point from where i moved (i can call this method when i'm moving to a new position),
     //  If ptOld is an invalid point, just send every object i can see.
-	CWorldSearch AreaItems(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
-	AreaItems.SetSearchSquare(true);
+	auto Area = CWorldSearchHolder::GetInstance(ptCharThis, g_Cfg.m_iMapViewRadar * 2);    // *2 to catch big multis
+	Area->SetSearchSquare(true);
 	for (;;)
 	{
-        CItem* pItem = AreaItems.GetItem();
+        CItem* pItem = Area->GetItem();
 		if ( !pItem )
 			break;
 
@@ -2023,12 +2026,12 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	iSeeCurrent = 0;
 	iSeeMax = g_Cfg.m_iMaxCharComplexity * 5;
 
-	CWorldSearch AreaChars(pCharThis->GetTopPoint(), iViewDist);
-	AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
-	AreaChars.SetSearchSquare(true);
+	Area->Reset(pCharThis->GetTopPoint(), iViewDist);
+	Area->SetAllShow(IsPriv(PRIV_ALLSHOW));
+	Area->SetSearchSquare(true);
 	for (;;)
 	{
-        CChar* pChar = AreaChars.GetChar();
+        CChar* pChar = Area->GetChar();
 		if ( !pChar || iSeeCurrent > iSeeMax )
 			break;
 		if ( pCharThis == pChar || !CanSee(pChar) )
@@ -2851,9 +2854,9 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		// The timeout is stored as server time (not real world time) in milliseconds.
 		// When a char logs out, the logout server time is stored.
 		// When the char logs in again, move forward its timers by the time it spent offline.
-		if (m_pChar->m_pPlayer->_iTimeLastDisconnected > 0)
+		if (m_pChar->m_pPlayer->_iTimeLastDisconnectedMs > 0)
 		{
-			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnected;
+			const int64 iDelta = CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_pChar->m_pPlayer->_iTimeLastDisconnectedMs;
 			if (iDelta < 0)
 			{
 				g_Log.EventWarn("World Time was manually changed. The TIMERs belonging to the char '%s' (UID=0%x) couldn't be frozen during its logout.\n", m_pChar->GetName(), m_pChar->GetUID().GetObjUID());

@@ -41,26 +41,26 @@ void CTimedObject::_GoAwake()
 
 bool CTimedObject::_CanTick(bool fParentGoingToSleep) const
 {
-    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::_CanTick");
     UnreferencedParameter(fParentGoingToSleep);
     return !_IsSleeping();
 }
 
 bool CTimedObject::CanTick(bool fParentGoingToSleep) const
 {
-    //ADDTOCALLSTACK_INTENSIVE("CTimedObject::CanTick");
-    THREAD_SHARED_LOCK_RETURN(_CanTick(fParentGoingToSleep));
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::CanTick");
+    MT_ENGINE_SHARED_LOCK_RETURN(_CanTick(fParentGoingToSleep));
 }
 
 bool CTimedObject::OnTick()
 {
     ADDTOCALLSTACK("CTimedObject::OnTick");
-    THREAD_UNIQUE_LOCK_RETURN(_OnTick());
+    MT_ENGINE_UNIQUE_LOCK_RETURN(_OnTick());
 }
 
 void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK("CTimedObject::_SetTimeout");
+    ADDTOCALLSTACK_DEBUG("CTimedObject::_SetTimeout");
     // Assume we have the mutex already locked here
 
     const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
@@ -93,8 +93,8 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
-    ADDTOCALLSTACK("CTimedObject::SetTimeout");
-    THREAD_UNIQUE_LOCK_SET;
+    ADDTOCALLSTACK_DEBUG("CTimedObject::SetTimeout");
+    MT_ENGINE_UNIQUE_LOCK_SET;
     _SetTimeout(iDelayInMsecs);
 }
 
@@ -137,7 +137,7 @@ int64 CTimedObject::_GetTimerAdjusted() const noexcept
 }
 int64 CTimedObject::GetTimerAdjusted() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(_GetTimerAdjusted());
+    MT_ENGINE_SHARED_LOCK_RETURN(_GetTimerAdjusted());
 }
 
 int64 CTimedObject::_GetTimerDAdjusted() const noexcept
@@ -154,7 +154,7 @@ int64 CTimedObject::_GetTimerDAdjusted() const noexcept
 }
 int64 CTimedObject::GetTimerDAdjusted() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(_GetTimerDAdjusted());
+    MT_ENGINE_SHARED_LOCK_RETURN(_GetTimerDAdjusted());
 }
 
 int64 CTimedObject::_GetTimerSAdjusted() const noexcept
@@ -171,44 +171,44 @@ int64 CTimedObject::_GetTimerSAdjusted() const noexcept
 }
 int64 CTimedObject::GetTimerSAdjusted() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(_GetTimerSAdjusted());
+    MT_ENGINE_SHARED_LOCK_RETURN(_GetTimerSAdjusted());
 }
 
 
 void CTimedObject::GoSleep()
 {
-    THREAD_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET;
     _GoSleep();
 }
 
 void CTimedObject::GoAwake()
 {
-    THREAD_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET;
     _GoAwake(); // Call virtuals!
 }
 
 PROFILE_TYPE CTimedObject::GetProfileType() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(CTimedObject::_GetProfileType());
+    MT_ENGINE_SHARED_LOCK_RETURN(CTimedObject::_GetProfileType());
 }
 
 void CTimedObject::ClearTimeout() noexcept
 {
-    THREAD_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET;
     CTimedObject::_ClearTimeout();
 }
 
 bool CTimedObject::IsSleeping() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(CTimedObject::_IsSleeping());
+    MT_ENGINE_SHARED_LOCK_RETURN(CTimedObject::_IsSleeping());
 }
 
 bool CTimedObject::IsTimerSet() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(CTimedObject::_IsTimerSet());
+    MT_ENGINE_SHARED_LOCK_RETURN(CTimedObject::_IsTimerSet());
 }
 
 bool CTimedObject::IsTimerExpired() const noexcept
 {
-    THREAD_SHARED_LOCK_RETURN(CTimedObject::_IsTimerExpired());
+    MT_ENGINE_SHARED_LOCK_RETURN(CTimedObject::_IsTimerExpired());
 }

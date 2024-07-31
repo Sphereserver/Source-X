@@ -41,13 +41,24 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_QTY
 };
 
+
+enum WAR_SWING_TYPE	: int // m_Act_War_Swing_State
+{
+    WAR_SWING_INVALID = -1,
+    WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
+    WAR_SWING_READY,			// we can swing at any time.
+    WAR_SWING_SWINGING,			// we are swinging our weapon.
+    //--
+    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
+};
+
 class CChar : public CObjBase, public CContainer, public CTextConsole
 {
 	// RES_WORLDCHAR
 
 	friend class CWorldTicker;
 
-    // THREAD_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
+    // MT_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
 
 private:
 	// Spell type effects.
@@ -192,6 +203,8 @@ public:
 	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
 
+    std::vector<CUID> m_followers;
+
 	// Args related to specific actions type (m_Act_SkillCurrent)
 	union
 	{
@@ -328,8 +341,17 @@ public:
 	// Status and attributes ------------------------------------
 	virtual int IsWeird() const override;
 
+#if MT_ENGINES
 //protected:	bool _IsStatFlag(uint64 uiStatFlag) const noexcept;
 public:		bool  IsStatFlag(uint64 uiStatFlag) const noexcept;
+#else
+public:
+    // called very frequently, it's wise to inline it if we can
+    inline bool IsStatFlag(uint64 uiStatFlag) const noexcept
+    {
+        return (_uiStatFlag & uiStatFlag);
+    }
+#endif
 
 //protected:	void _StatFlag_Set(uint64 uiStatFlag) noexcept;
 public:		void  StatFlag_Set(uint64 uiStatFlag) noexcept;
@@ -480,7 +502,7 @@ public:
     bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
-	TRIGRET_TYPE CheckLocation( bool fStanding = false );
+	TRIGRET_TYPE CheckLocation(bool fCanCheckRecursively, bool fStanding);
 
 public:
 	// Client Player specific stuff. -------------------------
@@ -503,8 +525,8 @@ public:
     bool IsNPC() const;
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain() const;
-    NPCBRAIN_TYPE GetNPCBrainGroup() const;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
-	NPCBRAIN_TYPE GetNPCBrainAuto() const;	// Guess default NPC brain
+    NPCBRAIN_TYPE GetNPCBrainGroup() const noexcept;	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	NPCBRAIN_TYPE GetNPCBrainAuto() const noexcept;	// Guess default NPC brain
 	void ClearNPC();
 
 
@@ -689,7 +711,7 @@ public:
 	*
 	* @return true if I am.
 	*/
-	bool Noto_IsMurderer() const;
+	bool Noto_IsMurderer() const noexcept;
 
 	/**
 	* @brief I'm evil?

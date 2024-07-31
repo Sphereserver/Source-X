@@ -17,13 +17,11 @@ class CItemMemory : public CItem
 	// Allow extra tags for the memory
 public:
 	static const char *m_sClassName;
-	CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef );
+    CItemMemory(ITEMID_TYPE id, CItemBase * pItemDef);
+	virtual ~CItemMemory() override = default;
 
-	virtual ~CItemMemory();
-
-private:
-	CItemMemory(const CItemMemory& copy);
-	CItemMemory& operator=(const CItemMemory& other);
+	CItemMemory(const CItemMemory& copy) = delete;
+	CItemMemory& operator=(const CItemMemory& other) = delete;
 
 public:
 	word SetMemoryTypes( word wType );

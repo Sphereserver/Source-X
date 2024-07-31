@@ -294,6 +294,8 @@ CChar::CChar( CREID_TYPE baseID ) :
     _iRegenTickCount = 0;
 	_iTimeLastCallGuards = 0;
 
+    m_fIgnoreNextPetCmd = 0;
+
     m_zClimbHeight = 0;
 	m_fClimbUpdated = false;
 	_wPrev_Hue = HUE_DEFAULT;
@@ -368,7 +370,9 @@ CChar::~CChar()
 void CChar::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::DeleteCleanup");
-	_fDeleting = true;
+	// Clean up CChar specific data. Not virtual method.
+
+    //_uiInternalStateFlags |= SF_DELETING;
 
 	// We don't want to have invalid pointers over there
 	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
@@ -431,8 +435,8 @@ bool CChar::NotifyDelete(bool fForce)
 void CChar::DeletePrepare()
 {
 	ADDTOCALLSTACK("CChar::DeletePrepare");
-	CContainer::ContentDelete(true);	// This object and its contents need to be deleted on the same tick
-	CObjBase::DeletePrepare();
+    CContainer::ContentDelete(true);	// This object and its contents need to be deleted on the same tick
+    CObjBase::DeletePrepare();
 }
 
 bool CChar::Delete(bool fForce)
@@ -450,6 +454,7 @@ bool CChar::Delete(bool fForce)
 		pClient->GetNetState()->markReadClosed();
 	}
 
+	DeletePrepare();
 	DeleteCleanup(fForce);	// not virtual
 
 	if (m_pPlayer && fForce)
@@ -501,7 +506,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->_iTimeLastUsed = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+	m_pPlayer->_iTimeLastUsedMs = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
 	FixClimbHeight();
@@ -523,7 +528,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
 
 	if (m_pPlayer)
 	{
-		m_pPlayer->_iTimeLastDisconnected = CWorldGameTime::GetCurrentTime().GetTimeRaw();
+		m_pPlayer->_iTimeLastDisconnectedMs = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 	}
 
     if (m_pParty)
@@ -657,7 +662,7 @@ bool CChar::SetNPCBrain( NPCBRAIN_TYPE NPCBrain )
 // RETURN: invalid code.
 int CChar::IsWeird() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::IsWeird");
+	ADDTOCALLSTACK_DEBUG("CChar::IsWeird");
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 		return iResultCode;
@@ -786,11 +791,13 @@ bool CChar::_IsStatFlag(uint64 uiStatFlag) const noexcept
 	return (_uiStatFlag & uiStatFlag);
 }
 */
+#if MT_ENGINES
 bool CChar::IsStatFlag( uint64 uiStatFlag) const noexcept
 {
-//	THREAD_SHARED_LOCK_SET;
+	MT_ENGINE_SHARED_LOCK_SET;
 	return (_uiStatFlag & uiStatFlag);
 }
+#endif
 
 /*
 void CChar::_StatFlag_Set( uint64 uiStatFlag) noexcept
@@ -800,7 +807,7 @@ void CChar::_StatFlag_Set( uint64 uiStatFlag) noexcept
 */
 void CChar::StatFlag_Set(uint64 uiStatFlag) noexcept
 {
-//	THREAD_UNIQUE_LOCK_SET;
+	MT_ENGINE_UNIQUE_LOCK_SET;
 	_uiStatFlag |= uiStatFlag;
 }
 
@@ -812,7 +819,7 @@ void CChar::_StatFlag_Clear(uint64 uiStatFlag) noexcept
 */
 void CChar::StatFlag_Clear(uint64 uiStatFlag) noexcept
 {
-//	THREAD_UNIQUE_LOCK_SET;
+	MT_ENGINE_UNIQUE_LOCK_SET;
 	_uiStatFlag &= ~uiStatFlag;
 }
 
@@ -827,7 +834,7 @@ void CChar::_StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 */
 void CChar::StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 {
-//	THREAD_UNIQUE_LOCK_SET;
+//	MT_ENGINE_UNIQUE_LOCK_SET;
 //	_StatFlag_Mod(uiStatFlag, fMod);
 	if (fMod)
 		_uiStatFlag |= uiStatFlag;
@@ -875,7 +882,7 @@ void CChar::SetVisualRange(byte newSight)
 {
 	CClient* pClient;
 	{
-		THREAD_UNIQUE_LOCK_SET;
+		MT_ENGINE_UNIQUE_LOCK_SET;
 		// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
 		m_iVisualRange = minimum(newSight, g_Cfg.m_iMapViewSizeMax);
 		pClient = GetClientActive();
@@ -1467,7 +1474,7 @@ bool CChar::SetName( lpctstr pszName )
 
 height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeightMount");
+	ADDTOCALLSTACK_DEBUG("CChar::GetHeightMount");
 	height_t height = GetHeight();
 	if ( IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 		height += 4;
@@ -1478,7 +1485,7 @@ height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 
 height_t CChar::GetHeight() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::GetHeight");
+	ADDTOCALLSTACK_DEBUG("CChar::GetHeight");
 	if ( m_height ) //set by a dynamic variable (On=@Create  Height=10)
 		return m_height;
 
@@ -2241,7 +2248,7 @@ bool CChar::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 	return ( CObjBase::r_GetRef( ptcKey, pRef ));
 }
 
-enum CHC_TYPE
+enum CHC_TYPE : int
 {
 	#define ADD(a,b) CHC_##a,
 	#include "../../tables/CChar_props.tbl"
@@ -3326,6 +3333,18 @@ bool CChar::r_LoadVal( CScript & s )
 
     EXC_SET_BLOCK("Keyword");
 	lpctstr	ptcKey = s.GetKey();
+
+    if (!strnicmp("FOLLOWER", ptcKey, 8))
+    {
+        if (ptcKey[8] == '.')
+        {
+            ptcKey = ptcKey + 4;
+            CUID ptcArg = CUID(s.GetArgDWVal());
+            m_followers.emplace_back(ptcArg);
+            return true;
+        }
+    }
+
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
@@ -3698,7 +3717,7 @@ bool CChar::r_LoadVal( CScript & s )
 			if (g_Serv.IsLoading())
 			{
 				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
-				_uiStatFlag = s.GetArgLLVal() & ~STATF_SAVEPARITY;
+				_uiStatFlag = s.GetArgLLVal() & ~ (uint64)STATF_SAVEPARITY;
 				break;
 			}
 			// Don't modify STATF_SAVEPARITY, STATF_PET, STATF_SPAWNED here
@@ -3945,6 +3964,13 @@ void CChar::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
+    for (CUID uid : m_followers) {
+        dword dUID = (dword)uid;
+        char *pszTag = Str_GetTemp();
+        snprintf(pszTag, Str_TempLength(), "FOLLOWER.%d", dUID);
+        s.WriteKeyHex(pszTag, dUID);
+    }
+
 	if (iValLastHit != 0)
 	{
 		pVarLastHit->SetValNum(iValLastHit);
@@ -4009,7 +4035,8 @@ void CChar::r_Write( CScript & s )
 			The character action is one of the valid skill OR
 			The character action is one of the NPC Action that uses ACTARG1/ACTARG2/ACTARG3
 			*/
-		if ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN)
+		if ((action > SKILL_NONE && action < SKILL_QTY) ||
+            action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN)
 		{
 			if (m_atUnk.m_dwArg1 != 0)
 				s.WriteKeyHex("ACTARG1", m_atUnk.m_dwArg1);

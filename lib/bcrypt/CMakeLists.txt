@@ -19,5 +19,6 @@ source_group (lib\\bcrypt FILES ${lib_SOURCES})
 
 # set compiler flags
 include("../lib_build_flags_common_c.cmake")
-target_compile_options	(bcrypt PRIVATE ${c_compiler_options_common})
-target_link_options	(bcrypt PRIVATE ${c_linker_options_common})
+target_compile_options      (bcrypt PRIVATE ${c_compiler_options_common})
+target_compile_definitions  (bcrypt PRIVATE ${c_compiler_definitions_common})
+target_link_options		    (bcrypt PRIVATE ${c_linker_options_common})

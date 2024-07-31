@@ -38,15 +38,21 @@ void CWorldTickingList::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // s
 void CWorldTickingList::ClearTickingLists() // static
 {
     {
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._mWorldTickList.THREAD_CMUTEX);
+#if MT_ENGINES
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._mWorldTickList.MT_CMUTEX);
+#endif
         g_World._Ticker._mWorldTickList.clear();
     }
     {
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._mCharTickList.THREAD_CMUTEX);
+#if MT_ENGINES
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._mCharTickList.MT_CMUTEX);
+#endif
         g_World._Ticker._mCharTickList.clear();
     }
     {
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._ObjStatusUpdates.THREAD_CMUTEX);
+#if MT_ENGINES
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._ObjStatusUpdates.MT_CMUTEX);
+#endif
         g_World._Ticker._ObjStatusUpdates.clear();
     }
 }

@@ -14,107 +14,13 @@
 #include "components/CCFaction.h"
 #include "CEntityProps.h"
 
-struct CBaseBaseDef : public CResourceLink, public CEntityProps
-{
-	// Minimal amount of common info to define RES_ITEMDEF or RES_CHARDEF, (it might just be a DUPE)
-	// The unique index id.	(WILL not be the same as artwork if outside artwork range)
 
-	// TAGS
-	static lpctstr const sm_szLoadKeys[];
-	// Base type of both CItemBase and CCharBase
-
-protected:
-	dword       m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
-	CSString    m_sName;		// default type name. (ei, "human" vs specific "Dennis")
-
-private:
-    dword       _dwInstances;   // How many CResourceRef objects refer to this ?
-
-	height_t    m_Height;       // Height of the object.
-	// -------------- ResLevel -------------
-    byte        m_Expansion;
-	byte        m_ResLevel;     // ResLevel required for players to see me
-	HUE_TYPE    m_ResDispDnHue; // Hue shown to players who don't have my ResLevel
-	word        m_ResDispDnId;  // ID shown to players who don't have my ResLevel
-	// -------------------------------------
-
-public:
-	CVarDefMap  m_TagDefs;  // TAGs storage
-	CVarDefMap  m_BaseDefs; // New Variable storage system
-
-	// When events happen to the char. check here for reaction.
-	CResourceRefArray   m_TEvents;          // Action or motivation type indexes. (NPC only)
-	CResourceQtyArray   m_BaseResources;    // RESOURCES=10 MEAT (What is this made of)
-
-	word    m_attackBase;   // base attack for weapons/chars. not magic plus.
-	word    m_attackRange;  // variable range of attack damage.
-
-	word    m_defenseBase;  // base defense bonus given by this (items)/having (chars).
-	word    m_defenseRange; // variable range of defense.
-
-	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
-    RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
-
-    CCFaction _pFaction;
-
-
-public:
-    CCFaction GetFaction();
-
-    /**
-     * @brief   Gets definition string.
-     * @param   ptcKey  The key.
-     * @param   fZero   true to zero.
-     * @return  The definition string.
-     */
-	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
-	{
-		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
-	}
-
-    /**
-     * @brief   Gets definition number.
-     * @param   ptcKey  The key.
-     * @return  The definition number.
-     */
-	int64 GetDefNum( lpctstr ptcKey ) const
-	{
-		return m_BaseDefs.GetKeyNum( ptcKey );
-	}
-
-    /**
-     * @brief   Sets definition number.
-     * @param   ptcKey      The key.
-     * @param   iVal        Zero-based index of the value.
-     * @param   fDeleteZero true to zero.
-     */
-	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
-	{
-		m_BaseDefs.SetNum(ptcKey, iVal, fDeleteZero, fWarnOverwrite);
-	}
-
-    /**
-     * @brief   Sets definition string.
-     * @param   ptcKey      The key.
-     * @param   pszVal      The value.
-     * @param   fQuoted     true if quoted.
-     * @param   fDeleteZero true to zero.
-     */
-	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
-	{
-		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
-	}
-
-    /**
-     * @brief   Deletes the definition described by ptcKey.
-     * @param   ptcKey  The key.
-     */
-	void DeleteDef(lpctstr ptcKey)
-	{
-		m_BaseDefs.DeleteKey(ptcKey);
-	}
+#define RANGE_MAKE(iHi, iLo)    (((iHi & 0xFF) << 8) | (iLo & 0xFF))   // Highest byte contains highest value, lowest contains the lowest value
+#define RANGE_GET_HI(iRange)    ((iRange >> 8) & 0xFF)
+#define RANGE_GET_LO(iRange)    (iRange & 0xFF)
 
 // Map Movement flags.
+// TODO: convert them to uint64_t static variables
 #define CAN_C_GHOST         0x0001  // Moves thru doors etc.
 #define CAN_C_SWIM          0x0002	// dolphin, elemental or is water.
 #define CAN_C_WALK          0x0004	// Can walk on land, climbed on walked over else Frozen by nature(Corpser).
@@ -190,13 +96,114 @@ public:
 #define CAN_I_MOVEMASK      (CAN_I_DOOR|CAN_I_WATER|CAN_I_PLATFORM|CAN_I_BLOCK|CAN_I_CLIMB|CAN_I_FIRE|CAN_I_ROOF|CAN_I_HOVER)
 
 
+struct CBaseBaseDef : public CResourceLink, public CEntityProps
+{
+	// Minimal amount of common info to define RES_ITEMDEF or RES_CHARDEF, (it might just be a DUPE)
+	// The unique index id.	(WILL not be the same as artwork if outside artwork range)
+
+	// TAGS
+	static lpctstr const sm_szLoadKeys[];
+	// Base type of both CItemBase and CCharBase
+
+protected:
+	dword       m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
+	CSString    m_sName;		// default type name. (ei, "human" vs specific "Dennis")
+
+private:
+    dword       _dwInstances;   // How many CResourceRef objects refer to this ?
+
+	height_t    m_Height;       // Height of the object.
+	// -------------- ResLevel -------------
+public:
+    RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
+private:
+    byte        m_Expansion;
+	byte        m_ResLevel;     // ResLevel required for players to see me
+	HUE_TYPE    m_ResDispDnHue; // Hue shown to players who don't have my ResLevel
+	word        m_ResDispDnId;  // ID shown to players who don't have my ResLevel
+	// -------------------------------------
+
+public:
+	CVarDefMap  m_TagDefs;  // TAGs storage
+	CVarDefMap  m_BaseDefs; // New Variable storage system
+
+	// When events happen to the char. check here for reaction.
+	CResourceRefArray   m_TEvents;          // Action or motivation type indexes. (NPC only)
+	CResourceQtyArray   m_BaseResources;    // RESOURCES=10 MEAT (What is this made of)
+
+	word    m_attackBase;   // base attack for weapons/chars. not magic plus.
+	word    m_attackRange;  // variable range of attack damage.
+
+	word    m_defenseBase;  // base defense bonus given by this (items)/having (chars).
+	word    m_defenseRange; // variable range of defense.
+
+	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
+
+    CCFaction _pFaction;
+
+
+public:
+    CCFaction GetFaction();
+
+    /**
+     * @brief   Gets definition string.
+     * @param   ptcKey  The key.
+     * @param   fZero   true to zero.
+     * @return  The definition string.
+     */
+	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
+	{
+		return m_BaseDefs.GetKeyStr( ptcKey, fZero );
+	}
+
+    /**
+     * @brief   Gets definition number.
+     * @param   ptcKey  The key.
+     * @return  The definition number.
+     */
+	int64 GetDefNum( lpctstr ptcKey ) const
+	{
+		return m_BaseDefs.GetKeyNum( ptcKey );
+	}
+
+    /**
+     * @brief   Sets definition number.
+     * @param   ptcKey      The key.
+     * @param   iVal        Zero-based index of the value.
+     * @param   fDeleteZero true to zero.
+     */
+	void SetDefNum(lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true)
+	{
+		m_BaseDefs.SetNum(ptcKey, iVal, fDeleteZero, fWarnOverwrite);
+	}
+
+    /**
+     * @brief   Sets definition string.
+     * @param   ptcKey      The key.
+     * @param   pszVal      The value.
+     * @param   fQuoted     true if quoted.
+     * @param   fDeleteZero true to zero.
+     */
+	void SetDefStr(lpctstr ptcKey, lpctstr pszVal, bool fQuoted = false, bool fDeleteZero = true, bool fWarnOverwrite = true)
+	{
+		m_BaseDefs.SetStr(ptcKey, fQuoted, pszVal, fDeleteZero, fWarnOverwrite);
+	}
+
+    /**
+     * @brief   Deletes the definition described by ptcKey.
+     * @param   ptcKey  The key.
+     */
+	void DeleteDef(lpctstr ptcKey)
+	{
+		m_BaseDefs.DeleteKey(ptcKey);
+	}
+
 public:
 	CBaseBaseDef( CResourceID id );
 	virtual ~CBaseBaseDef();
 
-private:
-	CBaseBaseDef(const CBaseBaseDef& copy);
-	CBaseBaseDef& operator=(const CBaseBaseDef& other);
+	CBaseBaseDef(const CBaseBaseDef& copy) = delete;
+	CBaseBaseDef& operator=(const CBaseBaseDef& other) = delete;
 
 public:
     /**
@@ -332,9 +339,6 @@ public:
     * @return  Value.
     */
     static ushort ConvertRangeStr(lpctstr ptcRange);
-#define RANGE_MAKE(iHi, iLo)    (((iHi & 0xFF) << 8) | (iLo & 0xFF))   // Highest byte contains highest value, lowest contains the lowest value
-#define RANGE_GET_HI(iRange)    ((iRange >> 8) & 0xFF)
-#define RANGE_GET_LO(iRange)    (iRange & 0xFF)
 };
 
 #endif // _INC_CBASE_H

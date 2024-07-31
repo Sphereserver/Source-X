@@ -5,9 +5,8 @@
 #include "CCharNPC.h"
 
 // I'm a murderer?
-bool CChar::Noto_IsMurderer() const
+bool CChar::Noto_IsMurderer() const noexcept
 {
-	ADDTOCALLSTACK("CChar::Noto_IsMurderer");
 	return ( m_pPlayer && (m_pPlayer->m_wMurders > g_Cfg.m_iMurderMinCount) );
 }
 
@@ -705,17 +704,20 @@ int64 CChar::NotoSave_GetTime( int id )
 
 void CChar::NotoSave_Clear()
 {
-	ADDTOCALLSTACK("CChar::NotoSave_Clear");
 	if ( !m_notoSaves.empty() )
 		m_notoSaves.clear();
 }
 
 void CChar::NotoSave_Update()
 {
-	ADDTOCALLSTACK("CChar::NotoSave_Update");
-	NotoSave_Clear();
+	//ADDTOCALLSTACK_DEBUG("CChar::NotoSave_Update");
+    EXC_TRY("NotoSave_Update");
+
+    NotoSave_Clear();
 	UpdateMode();
 	UpdatePropertyFlag();
+
+    EXC_CATCH;
 }
 
 void CChar::NotoSave_CheckTimeout()

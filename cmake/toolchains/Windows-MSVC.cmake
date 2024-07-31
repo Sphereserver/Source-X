@@ -6,20 +6,32 @@ function (toolchain_force_compiler)
 	#SET (CMAKE_CXX_COMPILER "...cl.exe" 	CACHE STRING "C++ compiler" FORCE)
 
 	MESSAGE (STATUS "Toolchain: Windows-MSVC.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Windows"						PARENT_SCOPE)
+	#SET(CMAKE_SYSTEM_NAME	"Windows"						PARENT_SCOPE)
 endfunction ()
 
 
 function (toolchain_after_project)
-
+#[[
 	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
 		MESSAGE (STATUS "Detected 64 bits architecture")
-		SET(ARCH_BITS	64	PARENT_SCOPE)
+		SET(ARCH_BITS	64	CACHE INTERNAL "" FORCE) # override
 	ELSE ()
 		MESSAGE (STATUS "Detected 32 bits architecture")
-		SET(ARCH_BITS	32	PARENT_SCOPE)
+		SET(ARCH_BITS	32	CACHE INTERNAL "" FORCE) # override
 	ENDIF ()
+]]
+	if (NOT CMAKE_VS_PLATFORM_NAME)
+		set (CMAKE_VS_PLATFORM_NAME "${CMAKE_VS_PLATFORM_NAME_DEFAULT}")
+	endif ()
+	if (${CMAKE_VS_PLATFORM_NAME} STREQUAL "Win32")
+	set (CMAKE_SYSTEM_PROCESSOR "x86" CACHE INTERNAL "" FORCE)
+	endif ()
+	set (CMAKE_SYSTEM_PROCESSOR "${CMAKE_VS_PLATFORM_NAME}" CACHE INTERNAL "" FORCE)
 
+	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
+
+	MESSAGE (STATUS "Target Arch: ${ARCH}")
+	MESSAGE (STATUS "Generating for MSVC platform ${CMAKE_VS_PLATFORM_NAME}.")
 endfunction()
 
 
@@ -34,14 +46,13 @@ function (toolchain_exe_stuff)
 	ENDIF ()
 
 
-	#-- Configure the Windows application type.
+	#-- Configure the Windows application type and add global linker flags.
 
-	SET (EXE_LINKER_EXTRA "")
 	IF (${WIN32_SPAWN_CONSOLE})
-		SET (EXE_LINKER_EXTRA			${EXE_LINKER_EXTRA} /SUBSYSTEM:CONSOLE /ENTRY:WinMainCRTStartup)
+		add_link_options ("LINKER:/ENTRY:WinMainCRTStartup")	# Handled by is_win32_app_linker -> "LINKER:/SUBSYSTEM:CONSOLE"
 		SET (PREPROCESSOR_DEFS_EXTRA	_WINDOWS_CONSOLE)
-	ELSE ()
-		SET (EXE_LINKER_EXTRA			${EXE_LINKER_EXTRA} /SUBSYSTEM:WINDOWS)
+	#ELSE ()
+	#	add_link_options ("LINKER:/ENTRY:WinMainCRTStartup") 	# Handled by is_win32_app_linker -> "LINKER: /SUBSYSTEM:WINDOWS"
 	ENDIF ()
 
 
@@ -105,12 +116,15 @@ function (toolchain_exe_stuff)
 
 	target_compile_options(spheresvr PRIVATE
 		${cxx_compiler_flags_common}
-		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHsc /GL /GA /Gw /Gy /GF /GR-  $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHa  /GL /GA /Gw /Gy /GF		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od 		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>> #/Gs 
+		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHsc /Oy /GL /GA /Gw /Gy /GF /GR-  $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHa  /Oy /GL /GA /Gw /Gy /GF		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od 		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>> #/Gs
 		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
 	)
 
+	if ("${ARCH}" STREQUAL "x86_64")
+		target_compile_options(spheresvr PRIVATE	/arch:SSE2)
+	endif ()
 
 	#-- Apply linker flags.
 
@@ -129,7 +143,7 @@ function (toolchain_exe_stuff)
 
 	#-- Windows libraries to link against.
 	TARGET_LINK_LIBRARIES ( spheresvr	PRIVATE ws2_32 libmariadb )
-	
+
 
 	#-- Set define macros.
 

@@ -25,7 +25,7 @@ struct CScriptLineContext
 
 class CScriptFileContext
 {
-    THREAD_CMUTEX_DEF;
+    MT_CMUTEX_DEF;
     friend class CResourceLock;
     // Track a temporary context into a script.
     // NOTE: This should ONLY be stack based !

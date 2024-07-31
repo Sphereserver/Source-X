@@ -19,7 +19,7 @@ CEntity::~CEntity()
 
 void CEntity::Delete(bool fForce)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::Delete");
+    ADDTOCALLSTACK_DEBUG("CEntity::Delete");
     if (_lComponents.empty())
         return;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -33,7 +33,7 @@ void CEntity::Delete(bool fForce)
 
 void CEntity::ClearComponents()
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::ClearComponents");
+    ADDTOCALLSTACK_DEBUG("CEntity::ClearComponents");
     if (_lComponents.empty())
         return;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -47,7 +47,7 @@ void CEntity::ClearComponents()
 
 void CEntity::SubscribeComponent(CComponent * pComponent)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::SubscribeComponent");
+    ADDTOCALLSTACK_DEBUG("CEntity::SubscribeComponent");
     const COMP_TYPE compType = pComponent->GetType();
     const auto pairResult = _lComponents.try_emplace(compType, pComponent);
     if (pairResult.second == false)
@@ -62,7 +62,7 @@ void CEntity::SubscribeComponent(CComponent * pComponent)
 
 void CEntity::UnsubscribeComponent(CComponent *pComponent)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::UnsubscribeComponent");
+    ADDTOCALLSTACK_DEBUG("CEntity::UnsubscribeComponent");
     if (_lComponents.empty())
     {
         return;
@@ -81,13 +81,13 @@ void CEntity::UnsubscribeComponent(CComponent *pComponent)
 
 bool CEntity::IsComponentSubscribed(CComponent *pComponent) const
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::IsComponentSubscribed");
+    ADDTOCALLSTACK_DEBUG("CEntity::IsComponentSubscribed");
     return ( !_lComponents.empty() && (_lComponents.end() != _lComponents.find(pComponent->GetType())) );
 }
 
 CComponent * CEntity::GetComponent(COMP_TYPE type) const
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::GetComponent");
+    ADDTOCALLSTACK_DEBUG("CEntity::GetComponent");
     ASSERT(type < COMP_QTY);
     if (_lComponents.empty())
     {
@@ -99,7 +99,7 @@ CComponent * CEntity::GetComponent(COMP_TYPE type) const
 
 bool CEntity::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::r_GetRef");
+    ADDTOCALLSTACK_DEBUG("CEntity::r_GetRef");
     if (_lComponents.empty())
         return false;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -116,7 +116,7 @@ bool CEntity::r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef)
 
 void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::r_Write");
+    ADDTOCALLSTACK_DEBUG("CEntity::r_Write");
     if (_lComponents.empty() && !s.IsWriteMode())
         return;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -129,7 +129,7 @@ void CEntity::r_Write(CScript & s) // Storing data in the worldsave.
 
 bool CEntity::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::r_WriteVal");
+    ADDTOCALLSTACK_DEBUG("CEntity::r_WriteVal");
     if (_lComponents.empty())
         return false;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -146,7 +146,7 @@ bool CEntity::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc)
 
 bool CEntity::r_LoadVal(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::r_LoadVal");
+    ADDTOCALLSTACK_DEBUG("CEntity::r_LoadVal");
     if (_lComponents.empty())
         return false;
     for (auto it = _lComponents.begin(), itEnd = _lComponents.end(); it != itEnd; ++it)
@@ -163,7 +163,7 @@ bool CEntity::r_LoadVal(CScript & s)
 
 bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script.
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::r_Verb");
+    ADDTOCALLSTACK_DEBUG("CEntity::r_Verb");
     EXC_TRY("Verb");
 
     if (_lComponents.empty())
@@ -184,7 +184,7 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from s
 
 void CEntity::Copy(const CEntity *target)
 {
-    ADDTOCALLSTACK_INTENSIVE("CEntity::Copy");
+    ADDTOCALLSTACK_DEBUG("CEntity::Copy");
     if (_lComponents.empty())
         return;
     for (auto it = target->_lComponents.begin(), itEnd = target->_lComponents.end(); it != itEnd; ++it)
@@ -201,7 +201,7 @@ void CEntity::Copy(const CEntity *target)
 
 CCRET_TYPE CEntity::_OnTick()
 {
-    ADDTOCALLSTACK("CEntity::_OnTick");
+    ADDTOCALLSTACK_DEBUG("CEntity::_OnTick");
     if (_lComponents.empty())
         return CCRET_CONTINUE;
 

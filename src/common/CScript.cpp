@@ -239,7 +239,7 @@ uint8 CScriptKey::GetArgU8Val()
     ADDTOCALLSTACK("CScriptKey::GetArgU8Val");
     ASSERT(m_pszKey);
     ASSERT(m_pszArg);
-    return Exp_Get8Val( m_pszArg );
+    return Exp_GetU8Val( m_pszArg );
 }
 
 uint16 CScriptKey::GetArgU16Val()
@@ -287,7 +287,7 @@ CScriptKey::CScriptKey() :
 {
 }
 
-CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) : 
+CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) :
 	m_pszKey( ptcKey ), m_pszArg( ptcArg )
 {
 }
@@ -298,7 +298,7 @@ CScriptKey::CScriptKey( tchar * ptcKey, tchar * ptcArg ) :
 
 tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 {
-	//ADDTOCALLSTACK_INTENSIVE("CScriptKeyAlloc::_GetKeyBufferRaw");
+	//ADDTOCALLSTACK_DEBUG("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
 	if ( iLen > SCRIPT_MAX_LINE_LEN )
 		iLen = SCRIPT_MAX_LINE_LEN;
@@ -316,7 +316,7 @@ tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 {
     ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
-    THREAD_UNIQUE_LOCK_RETURN(CScriptKeyAlloc::_GetKeyBufferRaw(iLen));
+    MT_UNIQUE_LOCK_RETURN(CScriptKeyAlloc::_GetKeyBufferRaw(iLen));
 }
 */
 
@@ -509,14 +509,14 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 {
     ADDTOCALLSTACK("CScript::Open");
-    THREAD_UNIQUE_LOCK_RETURN(CScript::_Open(ptcFilename, uiFlags));
+    MT_UNIQUE_LOCK_RETURN(CScript::_Open(ptcFilename, uiFlags));
 }
 
 bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
 	// This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
-	// this much often, so here it's to be preferred ADDTOCALLSTACK_INTENSIVE, even if we'll lose stack trace precision.
-	//ADDTOCALLSTACK_INTENSIVE("CScript::_ReadTextLine");
+	// this much often, so here it's to be preferred ADDTOCALLSTACK_DEBUG, even if we'll lose stack trace precision.
+	//ADDTOCALLSTACK_DEBUG("CScript::_ReadTextLine");
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
@@ -537,7 +537,7 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 }
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    THREAD_UNIQUE_LOCK_RETURN(CScript::_ReadTextLine(fRemoveBlanks));
+    MT_UNIQUE_LOCK_RETURN(CScript::_ReadTextLine(fRemoveBlanks));
 }
 
 bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
@@ -580,7 +580,7 @@ int CScript::_Seek( int iOffset, int iOrigin )
 int CScript::Seek( int iOffset, int iOrigin )
 {
     ADDTOCALLSTACK("CScript::Seek");
-    THREAD_UNIQUE_LOCK_RETURN(CScript::_Seek(iOffset, iOrigin));
+    MT_UNIQUE_LOCK_RETURN(CScript::_Seek(iOffset, iOrigin));
 }
 
 bool CScript::FindNextSection()
@@ -731,7 +731,7 @@ bool CScript::ReadKeyParse() // Read line from script
 	tchar* pszArgs = m_pszArg;
 	pszArgs += 2;
 	GETNONWHITESPACE( pszArgs );
-	
+
 	const int iKeyIndex = (strnicmp(m_pszKey, "FLOAT.", 6) == 0) ? 1 : 0;
 	TemporaryString tsBuf;
 	if ( m_pszArg[0] == '.' )	// ".=" concatenation operator
@@ -816,7 +816,7 @@ bool CScript::_SeekContext( CScriptLineContext LineContext )
 }
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
-    THREAD_UNIQUE_LOCK_RETURN(CScript::_SeekContext(LineContext));
+    MT_UNIQUE_LOCK_RETURN(CScript::_SeekContext(LineContext));
 }
 
 CScriptLineContext CScript::_GetContext() const
@@ -829,7 +829,7 @@ CScriptLineContext CScript::_GetContext() const
 
 CScriptLineContext CScript::GetContext() const
 {
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     CScriptLineContext LineContext;
     LineContext.m_iLineNum = m_iLineNum;
     LineContext.m_iOffset = _GetPosition();
@@ -838,7 +838,7 @@ CScriptLineContext CScript::GetContext() const
 
 bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteSection");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteSection");
 	// Write out the section header.
 
 	// EndSection();	// End any previous section.
@@ -852,13 +852,13 @@ bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
 		va_end(vargs);
 	}
 
-	
+
 	memcpy(tsHeader.buffer(), "\n[", 2u);	// 2 -> not counting the string terminator
 	size_t offset = 2;
 	offset += Str_CopyLimitNull(tsHeader.buffer() + offset, tsSectionFormatted.buffer(), tsHeader.capacity() - 2);
 	offset += Str_ConcatLimitNull(tsHeader.buffer() + offset, "]\n", tsHeader.capacity() - offset);
 
-	THREAD_UNIQUE_LOCK_SET;
+	MT_UNIQUE_LOCK_SET;
 	_Write(tsHeader.buffer(), int(offset));
 
 	return true;
@@ -866,7 +866,7 @@ bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
 
 bool CScript::WriteKeySingle(lptstr ptcKey)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeySingle");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteKeySingle");
 	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
 		return false;
@@ -896,7 +896,7 @@ bool CScript::WriteKeySingle(lptstr ptcKey)
 
 bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyStr");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteKeyStr");
 	if (ptcKey == nullptr || ptcKey[0] == '\0')
 	{
 		return false;
@@ -942,7 +942,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 static thread_local tchar ptcWriteKeyBuf[SCRIPT_MAX_LINE_LEN];
 void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
-	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
+	ADDTOCALLSTACK_DEBUG("CScript::WriteKeyFormat");
 	va_list vargs;
 	va_start( vargs, pszVal );
 	vsnprintf(ptcWriteKeyBuf, sizeof(ptcWriteKeyBuf), pszVal, vargs);

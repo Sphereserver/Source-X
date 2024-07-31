@@ -9,7 +9,6 @@
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 
-#ifdef _DEBUG
 #include <fcntl.h>
 int IsDebuggerPresent(void)
 {
@@ -35,12 +34,10 @@ int IsDebuggerPresent(void)
 
 	return debugger_present;
 }
-#endif // _DEBUG
 
 #endif // !_WIN32
 
 
-#ifdef _DEBUG
 void NotifyDebugger()
 {
     if (IsDebuggerPresent())
@@ -58,7 +55,6 @@ void NotifyDebugger()
 
     }
 }
-#endif // _DEBUG
 
 
 #ifdef _WIN32
@@ -340,17 +336,35 @@ void _cdecl Signal_Children(int sig = 0)
 #endif
 
 #ifndef _WIN32
-void SetUnixSignals( bool bSet )    // Signal handlers are installed only in secure mode
+void SetUnixSignals( bool fSet )    // Signal handlers are installed only in secure mode
 {
-	signal( SIGHUP,		bSet ? &Signal_Hangup : SIG_DFL );
-	signal( SIGTERM,	bSet ? &Signal_Terminate : SIG_DFL );
-	signal( SIGQUIT,	bSet ? &Signal_Terminate : SIG_DFL );
-	signal( SIGABRT,	bSet ? &Signal_Terminate : SIG_DFL );
-	signal( SIGILL,		bSet ? &Signal_Terminate : SIG_DFL );
-	signal( SIGINT,		bSet ? &Signal_Break : SIG_DFL );
-	signal( SIGSEGV,	bSet ? &Signal_Illegal_Instruction : SIG_DFL );
-	signal( SIGFPE,		bSet ? &Signal_Illegal_Instruction : SIG_DFL );
-	signal( SIGPIPE,	bSet ? SIG_IGN : SIG_DFL );
-	signal( SIGCHLD,	bSet ? &Signal_Children : SIG_DFL );
+
+#ifdef _SANITIZERS
+    const bool fSan = true;
+#else
+    const bool fSan = false;
+#endif
+
+#ifdef _DEBUG
+    const bool fDebugger = IsDebuggerPresent();
+#else
+    const bool fDebugger = false;
+#endif
+
+    if (!fDebugger && !fSan)
+    {
+        signal( SIGHUP,  fSet ? &Signal_Hangup : SIG_DFL );
+        signal( SIGTERM, fSet ? &Signal_Terminate : SIG_DFL );
+        signal( SIGQUIT, fSet ? &Signal_Terminate : SIG_DFL );
+        signal( SIGABRT, fSet ? &Signal_Terminate : SIG_DFL );
+        signal( SIGILL,  fSet ? &Signal_Terminate : SIG_DFL );
+        signal( SIGINT,  fSet ? &Signal_Break : SIG_DFL );
+        signal( SIGSEGV, fSet ? &Signal_Illegal_Instruction : SIG_DFL );
+        signal( SIGFPE,  fSet ? &Signal_Illegal_Instruction : SIG_DFL );
+    }
+
+	signal( SIGPIPE,	fSet ? SIG_IGN : SIG_DFL );
+	signal( SIGCHLD,	fSet ? &Signal_Children : SIG_DFL );
+
 }
 #endif

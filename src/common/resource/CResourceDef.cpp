@@ -44,7 +44,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
             return true;
         }
 
-        const int iKeyIndex = (int)RES_GET_INDEX(dwKeyVal);
+        const int iKeyIndex = (int)ResGetIndex(dwKeyVal);
         if ( iKeyIndex == iResIndex)
             DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, dwKeyVal, dwResPrivateUID ));
         else

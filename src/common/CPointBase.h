@@ -40,8 +40,8 @@ public:
 	uchar m_map;		// another map? (only if top level.)
 
 public:
-	void InitPoint() noexcept;
-	void ZeroPoint() noexcept;
+	CPointBase& InitPoint() noexcept;
+	CPointBase& ZeroPoint() noexcept;
 
 	CPointBase() noexcept;
 
@@ -59,24 +59,22 @@ public:
 	CPointBase& operator = (const CPointBase&) noexcept = default;
 	bool operator == ( const CPointBase & pt ) const noexcept;
 	bool operator != ( const CPointBase & pt ) const noexcept;
-	const CPointBase& operator += ( const CPointBase & pt ) noexcept;
-	const CPointBase& operator -= ( const CPointBase & pt ) noexcept;
+	const CPointBase& operator += ( const CPointBase & pt );
+	const CPointBase& operator -= ( const CPointBase & pt );
 
-	
-	int GetDistZ( const CPointBase & pt ) const noexcept;
-	int GetDistBase( const CPointBase & pt ) const noexcept;	    // Distance between points
-	int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
-	int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight
-	int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
-	int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
+	[[nodiscard]] int GetDistBase( const CPointBase & pt ) const noexcept;	    // Distance between points
+    [[nodiscard]] int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
+    [[nodiscard]] int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight
+    [[nodiscard]] int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
+    [[nodiscard]] int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
 
-    inline bool IsValidZ() const noexcept
+    [[nodiscard]] inline bool IsValidZ() const noexcept
     {
         return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
     }
-	bool IsValidXY() const noexcept;
-	bool IsCharValid() const noexcept;
-	inline bool IsValidPoint() const noexcept
+    [[nodiscard]] bool IsValidXY() const noexcept;
+    [[nodiscard]] bool IsCharValid() const noexcept;
+    [[nodiscard]] inline bool IsValidPoint() const noexcept
 	{
 		// Called a LOT of times, it's worth inlining it.
 		return (IsValidXY() && IsValidZ());
@@ -84,7 +82,7 @@ public:
 
 	void ValidatePoint() noexcept;
 
-	bool IsSame2D( const CPointBase & pt ) const noexcept;
+	bool IsSame2D( const CPointBase & pt ) const;
 
 	void Set( const CPointBase & pt ) noexcept;
 	void Set( short x, short y, char z = 0, uchar map = 0 ) noexcept;
@@ -140,6 +138,19 @@ struct CPointMap : public CPointBase
 	CPointMap& operator = (const CPointBase& pt) noexcept {
 		return CPointMap::operator=(static_cast<const CPointMap&>(pt));
 	}
+
+    //  Trying to avoid "creating a class section" warning, with mixed results...
+    /*
+    explicit operator CPointBase() const noexcept {
+        return CPointBase(m_x, m_y, m_z, m_map);
+    }
+    explicit operator CPointBase const & () const noexcept {
+        return CPointBase(m_x, m_y, m_z, m_map);
+    }
+    explicit operator CPointBase &&() const noexcept {
+        return CPointBase(m_x, m_y, m_z, m_map);
+    }
+    */
 };
 
 struct CPointSort : public CPointMap

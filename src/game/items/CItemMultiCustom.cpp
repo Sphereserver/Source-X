@@ -11,6 +11,7 @@
 #include "../clients/CClient.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItemMultiCustom.h"
 
@@ -173,11 +174,11 @@ void CItemMultiCustom::BeginCustomize(CClient* pClientSrc, bool continueCustomiz
     pChar->UpdateMove(ptOld);
 
     // hide all dynamic items inside the house
-    CWorldSearch Area(GetTopPoint(), GetDesignArea().GetWidth() / 2);
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), GetDesignArea().GetWidth() / 2);
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CItem * pItem = Area.GetItem();
+        CItem * pItem = Area->GetItem();
         if (pItem == nullptr)
             break;
         if (pItem != this)
@@ -338,12 +339,12 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         return;
 
     // remove all existing dynamic item fixtures
-    CWorldSearch Area(ptMe, GetDesignArea().GetWidth());
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(ptMe, GetDesignArea().GetWidth());
+    Area->SetSearchSquare(true);
     CItem * pItem;
     for (;;)
     {
-        pItem = Area.GetItem();
+        pItem = Area->GetItem();
         if (pItem == nullptr)
             break;
 
@@ -1407,11 +1408,11 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         }
     }
 
-    CWorldSearch Area(m_pRegion->m_pt, Multi_GetDistanceMax());	// largest area.
-    Area.SetSearchSquare(true);
+    auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());	// largest area.
+    Area->SetSearchSquare(true);
     for (;;)
     {
-        CItem * pItem = Area.GetItem();
+        CItem * pItem = Area->GetItem();
         if (pItem == nullptr)
         {
             break;
@@ -1435,7 +1436,7 @@ void CItemMultiCustom::ClearFloor(char iFloor)
         if (pItem->IsType(IT_MULTI_ADDON) || pItem->IsType(IT_MULTI))  // If the item is a house Addon, redeed it.
         {
             static_cast<CItemMulti*>(pItem)->Redeed(false, false);
-            Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it.
+            Area->RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it.
             continue;
         }
         pItem->RemoveFromView();
@@ -1694,7 +1695,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
 
 void CItemMultiCustom::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemMultiCustom::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemMultiCustom::r_Write");
     CItemMulti::r_Write(s);
 
     CMultiComponent * comp;

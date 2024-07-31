@@ -11,7 +11,7 @@ CSectorList::CSectorList() : _SectorData{}
 
 CSectorList::~CSectorList()
 {
-	Close();
+	Close(true);
 }
 
 const CSectorList* CSectorList::Get() noexcept // static
@@ -28,7 +28,7 @@ void CSectorList::Init()
 	// Initialize sector data for every map plane
 	TemporaryString ts;
 	TemporaryString tsConcat;
-	
+
 	for (int iMap = 0; iMap < MAP_SUPPORTED_QTY; ++iMap)
 	{
 		/*
@@ -40,7 +40,7 @@ void CSectorList::Init()
 
 		MapSectorsData& sd = _SectorData[iMap];
 		sd._iSectorSize = sd._iSectorColumns = sd._iSectorRows = sd._iSectorQty = 0;
-		sd._pSectors.release();
+		sd._pSectors.reset();
 
 		if (!g_MapList.IsMapSupported(iMap))
 			continue;
@@ -70,7 +70,7 @@ void CSectorList::Init()
 			ASSERT(pSector);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
 		}
-		
+
 	}
 
 	for (MapSectorsData& sd : _SectorData)
@@ -88,7 +88,7 @@ void CSectorList::Init()
     g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", tsConcat.buffer());
 }
 
-void CSectorList::Close()
+void CSectorList::Close(bool fClosingWorld)
 {
 	ADDTOCALLSTACK("CSectorList::Close");
 
@@ -100,7 +100,7 @@ void CSectorList::Close()
 		// Delete everything in sector
 		for (int iSector = 0; iSector < sd._iSectorQty; ++iSector)
 		{
-			sd._pSectors[iSector].Close();
+			sd._pSectors[iSector].Close(fClosingWorld);
 		}
 	}
 	_fInitialized = false;

@@ -9,32 +9,6 @@
 #include <cstdio>   // for vsnprintf
 #endif
 
-
-/**
-* @brief Default memory alloc size for CSString.
-*
-* Those tests are OUTDATED!
-* 
-* - Empty World! (total strings on start =480,154)
-*  - 16 bytes : memory:  8,265,143 [Mem=42,516 K] [reallocations=12,853]
-*  - 32 bytes : memory: 16,235,008 [Mem=50,916 K] [reallocations=11,232]
-*  - 36 bytes : memory: 17,868,026 [Mem=50,592 K] [reallocations=11,144]
-*  - 40 bytes : memory: 19,627,696 [Mem=50,660 K] [reallocations=11,108]
-*  - 42 bytes : memory: 20,813,400 [Mem=50,240 K] [reallocations=11,081] BEST
-*  - 48 bytes : memory: 23,759,788 [Mem=58,704 K] [reallocations=11,048]
-*  - 56 bytes : memory: 27,689,157 [Mem=57,924 K] [reallocations=11,043]
-*  - 64 bytes : memory: 31,618,882 [Mem=66,260 K] [reallocations=11,043]
-*  - 128 bytes : memory: 62,405,304 [Mem=98,128 K] [reallocations=11,042] <- was in [0.55R4.0.2 - 0.56a]
-* - Full World! (total strings on start ~1,388,081)
-*  - 16 bytes : memory:  29,839,759 [Mem=227,232 K] [reallocations=269,442]
-*  - 32 bytes : memory:  53,335,580 [Mem=250,568 K] [reallocations=224,023]
-*  - 40 bytes : memory:  63,365,178 [Mem=249,978 K] [reallocations=160,987]
-*  - 42 bytes : memory:  66,120,092 [Mem=249,896 K] [reallocations=153,181] BEST
-*  - 48 bytes : memory:  74,865,847 [Mem=272,016 K] [reallocations=142,813]
-*  - 56 bytes : memory:  87,050,665 [Mem=273,108 K] [reallocations=141,507]
-*  - 64 bytes : memory:  99,278,582 [Mem=295,932 K] [reallocations=141,388]
-*  - 128 bytes : memory: 197,114,039 [Mem=392,056 K] [reallocations=141,234] <- was in [0.55R4.0.2 - 0.56a]
-*/
 #define	STRING_DEFAULT_SIZE	42
 
 //#define DEBUG_STRINGS
@@ -69,23 +43,23 @@ CSString::CSString(bool fDefaultInit) :
 }
 
 CSString::CSString(lpctstr pStr) :
-	m_pchData(nullptr)
+	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
-	Init();
+    //Init();
 	Copy(pStr);
 }
 
 CSString::CSString(lpctstr pStr, int iLen) :
-	m_pchData(nullptr)
+	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
-	Init();
+    //Init();
 	CopyLen(pStr, iLen);
 }
 
 CSString::CSString(const CSString& s) :
-	m_pchData(nullptr)
+	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
-	Init();
+    //Init();
 	Copy(s.GetBuffer());
 }
 
@@ -124,12 +98,10 @@ void CSString::Clear(bool fTotal) noexcept
 
 bool CSString::IsValid() const noexcept
 {
-	if (!m_pchData || !m_iMaxLength)
-		return false;
-	return (m_pchData[m_iLength] == '\0');
+    return ((m_iMaxLength != 0) && (m_pchData != nullptr) && (m_pchData[m_iLength] == '\0'));
 }
 
-int CSString::Resize(int iNewLength)
+int CSString::Resize(int iNewLength, bool fPreciseSize)
 {
 	if (iNewLength >= m_iMaxLength)
 	{
@@ -137,15 +109,27 @@ int CSString::Resize(int iNewLength)
 #ifdef DEBUG_STRINGS
 		gMemAmount -= m_iMaxLength;
 #endif
-		m_iMaxLength = iNewLength + (STRING_DEFAULT_SIZE >> 1);	// allow grow, and always expand only
+
+        // allow grow, and expand only
+        if (fPreciseSize)
+        {
+            m_iMaxLength = iNewLength;
+        }
+        else
+        {
+            //m_iMaxLength = iNewLength + (STRING_DEFAULT_SIZE >> 1);   // Probably too much...
+            m_iMaxLength = (iNewLength * 3) >> 1;   // >> 2 is equal to doing / 2
+        }
+
 #ifdef DEBUG_STRINGS
 		gMemAmount += m_iMaxLength;
 		++gReallocs;
 #endif
+
 		tchar *pNewData = new tchar[size_t(m_iMaxLength + 1)]; // new operator throws on error
 		if (fValid)
 		{
-			const int iMinLength = minimum(iNewLength, m_iLength + 1);
+			const int iMinLength = 1 + minimum(iNewLength, m_iLength);
 			Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
 			delete[] m_pchData;
 		}
@@ -200,7 +184,7 @@ void CSString::Copy(lpctstr pszStr)
 	if ((pszStr != m_pchData) && pszStr)
 	{
 		const size_t uiLen = strlen(pszStr);
-		Resize((int)uiLen); // it adds a +1
+		Resize((int)uiLen, true); // it adds a +1
 		Str_CopyLimitNull(m_pchData, pszStr, size_t(uiLen + 1));
 	}
 }
@@ -209,7 +193,7 @@ void CSString::CopyLen(lpctstr pszStr, int iLen)
 {
     if ((pszStr != m_pchData) && pszStr)
     {
-        Resize(iLen); // it adds a +1
+        Resize(iLen, true); // it adds a +1
         Str_CopyLimitNull(m_pchData, pszStr, size_t(iLen + 1));
     }
 }

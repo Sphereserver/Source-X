@@ -1,6 +1,7 @@
 #include "../../common/CLog.h"
 #include "../uo_files/CUOTerrainInfo.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "CChar.h"
 #include <cmath>
 
@@ -424,10 +425,10 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		{
 			if ( !((flags & LOS_NB_LOCAL_DYNAMIC) && (pSrcRegion == pNowRegion)) )
 			{
-				CWorldSearch AreaItems(ptNow, 0);
+				auto AreaItems = CWorldSearchHolder::GetInstance(ptNow, 0);
 				for (;;)
 				{
-					pItem = AreaItems.GetItem();
+					pItem = AreaItems->GetItem();
 					if ( !pItem )
 						break;
 					if ( pItem->GetUnkPoint().m_x != ptNow.m_x || pItem->GetUnkPoint().m_y != ptNow.m_y )

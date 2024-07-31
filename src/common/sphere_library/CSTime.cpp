@@ -15,8 +15,8 @@
 // Unix epoch is January 1, 1970 (adjustment in "ticks" 100 nanosecond)
 #define UNIX_TICKS_PER_SECOND 10000000 //a tick is 100ns
 #if _WIN32
-#   define UNIX_TIME_START 0x019DB1DED53E8000LL     // January 1, 1970 (start of Unix epoch) in "ticks"
-#   define WINDOWS_UNIX_EPOCH_OFFSET 11644473600    // (number of seconds between January 1, 1601 and January 1, 1970).
+//#   define UNIX_TIME_START 0x019DB1DED53E8000LL     // January 1, 1970 (start of Unix epoch) in "ticks"
+//#   define WINDOWS_UNIX_EPOCH_OFFSET 11644473600    // (number of seconds between January 1, 1601 and January 1, 1970).
 #endif
 
 #ifdef _WIN32
@@ -343,6 +343,8 @@ time_t CSTime::GetTime() const noexcept
 {
 	// Although not defined by the C standard, this is almost always an integral value holding the number of seconds 
 	//  (not counting leap seconds) since 00:00, Jan 1 1970 UTC, corresponding to UNIX time.
+    // 
+    // TODO: Is this on Windows defined since January 1, 1601 ?
 	return m_time;
 }
 

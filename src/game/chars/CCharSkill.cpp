@@ -9,6 +9,7 @@
 #include "../triggers.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
@@ -1030,7 +1031,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		return nullptr;
 
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
-	ITEMID_TYPE id = (ITEMID_TYPE)(RES_GET_INDEX( Args.m_VarsLocal.GetKeyNum("ResourceID")));
+	ITEMID_TYPE id = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("ResourceID")));
 
 	wAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
 	if ( wAmount <= 0 )
@@ -1123,7 +1124,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	
 	if ( pOreDef->IsType( IT_ORE ))
 	{
-		ITEMID_TYPE idIngot = (ITEMID_TYPE)(RES_GET_INDEX( pOreDef->m_ttOre.m_idIngot));
+		ITEMID_TYPE idIngot = (ITEMID_TYPE)(ResGetIndex( pOreDef->m_ttOre.m_idIngot));
 		const CItemBase* pBaseDef = CItemBase::FindItemBase(idIngot); //Usually a lingot, but could be a a gem also.
 		if (!pBaseDef)
 		{
@@ -1177,7 +1178,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	{
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp))));
+		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp))));
 		
 		//We have finished the ore or the item being smelted.
 		if (iOreQty <= 0)
@@ -1703,11 +1704,11 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 	else
 		iRadius = iSkill / 100; //Default Sphere Detecting Hidden Radius.
 
-	CWorldSearch Area(GetTopPoint(), iRadius);
-	bool bFound = false;
+	auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
+	bool fFound = false;
 	for (;;)
 	{
-		CChar *pChar = Area.GetChar();
+		CChar *pChar = Area->GetChar();
 		if ( pChar == nullptr )
 			break;
 		if ( pChar == this || !pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) )
@@ -1721,10 +1722,10 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 
 		pChar->Reveal();
 		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_DETECTHIDDEN_SUCC), pChar->GetName());
-		bFound = true;
+		fFound = true;
 	}
 
-	if ( !bFound )
+	if ( !fFound )
 		return -SKTRIG_FAIL;
 
 	return 0;
@@ -1813,10 +1814,10 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 		{
 			int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
 			int iRadius = ( peace / 100 ) + 2;	// 2..12
-			CWorldSearch Area(GetTopPoint(), iRadius);
+			auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
 			for (;;)
 			{
-				CChar *pChar = Area.GetChar();
+				CChar *pChar = Area->GetChar();
 				if ( pChar == nullptr )
 					return -SKTRIG_FAIL;
 				if (( pChar == this ) || !CanSee(pChar) )
@@ -2112,7 +2113,7 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_FAIL )
 		return 0;	// lose the poison sometimes ?
 
-	if ( RES_GET_INDEX(pPoison->m_itPotion.m_Type) != SPELL_Poison )
+	if ( ResGetIndex(pPoison->m_itPotion.m_Type) != SPELL_Poison )
 		return -SKTRIG_ABORT;
 
 	CItem * pItem = m_Act_Prv_UID.ItemFind();
@@ -3557,7 +3558,9 @@ int CChar::Skill_Stroke()
 
 int CChar::Skill_Stage( SKTRIG_TYPE stage )
 {
-	ADDTOCALLSTACK("CChar::Skill_Stage");
+	ADDTOCALLSTACK_DEBUG("CChar::Skill_Stage");
+    EXC_TRY("Skill_Stage");
+
     SKILL_TYPE skill = Skill_GetActive();
     if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
         return Skill_Scripted(stage);
@@ -3677,6 +3680,9 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 	}
 
 	SysMessageDefault(DEFMSG_SKILL_NOSKILL);
+
+    EXC_CATCH;
+
 	return -SKTRIG_QTY;
 }
 
@@ -3975,7 +3981,7 @@ bool CChar::Skill_Snoop_Check(const CItemContainer * pItem)
 		case IT_SHIP_HOLD:
 			// Must be on board a ship to open the hatch.
 			ASSERT(m_pArea);
-			if (m_pArea->GetResourceID() != pItem->m_uidLink)
+			if (m_pArea->GetResourceID().GetObjUID() != pItem->m_uidLink.GetObjUID())
 			{
 				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_HATCH_FAIL));
 				return true;

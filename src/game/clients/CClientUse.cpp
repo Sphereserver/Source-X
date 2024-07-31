@@ -7,6 +7,7 @@
 #include "../items/CItemShip.h"
 #include "../components/CCSpawn.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -271,7 +272,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				SysMessageDefault(DEFMSG_ITEMUSE_POTION_FAIL);
 				return false;
 			}
-			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Explosion )
+			if ( ResGetIndex(pItem->m_itPotion.m_Type) == SPELL_Explosion )
 			{
 				// Throw explosion potion
 				if ( m_pChar->ItemPickup(pItem, 1) == -1 )	// put the potion in our hand
@@ -346,7 +347,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_WAND:
 		case IT_SCROLL:
 		{
-			const SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itWeapon.m_spell));
+			const SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pItem->m_itWeapon.m_spell));
 			const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return false;
@@ -1156,10 +1157,10 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 				iSkillLevel = maximum(iSkillLevel, 200);			// humans always have a 20.0 minimum skill (racial traits)
 			m_pChar->m_atTracking.m_dwDistMax = (dword)(iSkillLevel / 10 + 10);
 		}
-		CWorldSearch AreaChars(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
+		auto AreaChars = CWorldSearchHolder::GetInstance(m_pChar->GetTopPoint(), m_pChar->m_atTracking.m_dwDistMax);
 		for (;;)
 		{
-			CChar *pChar = AreaChars.GetChar();
+			CChar *pChar = AreaChars->GetChar();
 			if ( !pChar )
 				break;
 			if ( m_pChar == pChar )

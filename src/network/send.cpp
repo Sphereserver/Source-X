@@ -1751,7 +1751,7 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 {
 	ADDTOCALLSTACK("PacketAddTarget::PacketAddTarget(2)");
 
-	//CItemBase *pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(id)));
+	//CItemBase *pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(id)));
 	CItemBase *pItemDef = CItemBase::FindItemBase(id);
 	if ( !pItemDef )
 		return;
@@ -2171,7 +2171,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), (uint)lenstr);
 
 	// message time
-	CSTime datetime(message->GetTimeStamp());
+	CSTime datetime(message->GetTimeStampS());
 	snprintf(tempstr, Str_TempLength(), "%s", datetime.Format("%b %d, %Y"));
 	lenstr = strlen(tempstr) + 1;
 
@@ -2679,7 +2679,7 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 		if (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false)
 			continue;
 
-		layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
+		layer = (LAYER_TYPE)(item->GetContainedLayer());
 		ASSERT(layer < LAYER_HORSE);
 		switch (layer) // don't put these on a corpse.
 		{

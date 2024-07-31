@@ -116,7 +116,7 @@ int CChar::Attacker_GetHighestThreat() const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetHighestThreat");
     if (m_lastAttackers.empty())
-        return -1;
+        return 0;
 
     int highThreat = 0;
     for (const LastAttackers & refAttacker : m_lastAttackers)

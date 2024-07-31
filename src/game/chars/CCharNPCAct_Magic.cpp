@@ -1,9 +1,10 @@
 // Actions specific to an NPC.
 
-#include "../CWorldMap.h"
-#include "CCharNPC.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../triggers.h"
+#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
+#include "CCharNPC.h"
 
 // Retrieves all the spells this character has to spells[x] list
 int CCharNPC::Spells_GetCount()
@@ -314,12 +315,12 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                 pFriend[1] = pFriend[2] = pFriend[3] = nullptr;
                 iFriendIndex = 1;
 
-                if (NPC_GetAiFlags()&NPC_AI_COMBAT && !bIgnoreAITargetChoice)
+                if (HAS_FLAGS_STRICT(NPC_GetAiFlags(), NPC_AI_COMBAT) && !bIgnoreAITargetChoice)
                 {
-                    CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIGHT);
+                    auto AreaChars = CWorldSearchHolder::GetInstance(GetTopPoint(), UO_MAP_VIEW_SIGHT);
                     for (;;)
                     {
-                        pTarget = AreaChars.GetChar();
+                        pTarget = AreaChars->GetChar();
                         if (!pTarget)
                             break;
 

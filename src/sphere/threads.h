@@ -47,13 +47,6 @@
 #endif
 
 class IThread;
-struct SphereThreadData
-{
-	IThread* m_ptr;
-	bool m_closed;
-};
-using spherethreadlist_t = std::vector<SphereThreadData>;
-
 
 // stores a value unique to each thread, intended to hold
 // a pointer (e.g. the current IThread instance)
@@ -72,9 +65,8 @@ public:
 	TlsValue();
 	~TlsValue();
 
-private:
-	TlsValue(const TlsValue& copy);
-	TlsValue& operator=(const TlsValue& other);
+	TlsValue(const TlsValue& copy) = delete;
+	TlsValue& operator=(const TlsValue& other) = delete;
 
 public:
 	// allows assignment to set the current value
@@ -83,7 +75,7 @@ public:
 		set(value);
 		return *this;
 	}
-	
+
 	// allows a cast to get current value
 	operator T() const { return get(); }
 
@@ -104,7 +96,7 @@ TlsValue<T>::TlsValue()
 	_ready = (pthread_key_create(&_key, nullptr) == 0);
 #endif
 }
-	
+
 template<class T>
 TlsValue<T>::~TlsValue()
 {
@@ -145,6 +137,10 @@ T TlsValue<T>::get() const
 // Interface for threads. Almost always should be used instead of any implementing classes
 class IThread
 {
+public: // TODO: lazy
+    threadid_t m_threadSystemId;
+    int m_threadHolderId;
+
 public:
 	enum Priority
 	{
@@ -170,7 +166,7 @@ public:
 	virtual void setPriority(Priority) = 0;
 	virtual Priority getPriority() const = 0;
 
-	static inline threadid_t getCurrentThreadId() noexcept
+	static inline threadid_t getCurrentThreadSystemId() noexcept
 	{
 #if defined(_WIN32)
 		return ::GetCurrentThreadId();
@@ -194,63 +190,20 @@ public:
 
 	inline bool isSameThread(threadid_t otherThreadId) const noexcept
 	{
-		return isSameThreadId(getCurrentThreadId(), otherThreadId);
+		return isSameThreadId(getCurrentThreadSystemId(), otherThreadId);
 	}
 
 	static constexpr uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 	static void setThreadName(const char* name);
 
-    size_t m_threadHolderId;
-
 protected:
-	virtual bool shouldExit() = 0;
+	virtual bool shouldExit() noexcept = 0;
 
 public:
-    IThread() noexcept : m_threadHolderId(0) { };
+    IThread() noexcept : m_threadSystemId(0), m_threadHolderId(-1) { };
 	virtual ~IThread() = default;
 };
 
-
-// Singleton utility class for working with threads. Holds all running threads inside.
-class ThreadHolder
-{
-	spherethreadlist_t m_threads;
-	size_t m_threadCount;
-	std::atomic_bool m_inited;
-    std::atomic_bool m_closing;
-	SimpleMutex m_mutex;
-
-
-	ThreadHolder() noexcept;
-	void init();
-
-	friend void atexit_handler(void);
-    friend void Sphere_ExitServer(void);
-	void markThreadsClosing();
-
-    //SphereThreadData* findThreadData(IThread* thread) noexcept;
-
-	friend class AbstractThread;
-	TlsValue<IThread*> m_currentThread;
-
-public:
-	static constexpr lpctstr m_sClassName = "ThreadHolder";
-
-	static ThreadHolder& get() noexcept;
-
-    bool closing() noexcept;
-	// returns current working thread or DummySphereThread * if no IThread threads are running
-	IThread *current() noexcept;
-	// records a thread to the list. Sould NOT be called, internal usage
-	void push(IThread *thread);
-	// removes a thread from the list. Sould NOT be called, internal usage
-	void remove(IThread *thread);
-	// returns thread at i pos
-	IThread * getThreadAt(size_t at);
-
-	// returns number of running threads. Sould NOT be called, unit tests usage
-	inline size_t getActiveThreads() noexcept { return m_threadCount; }
-};
 
 // Thread implementation. See IThread for list of available methods.
 class AbstractThread : public IThread
@@ -261,7 +214,6 @@ protected:
     bool _thread_selfTerminateAfterThisTick;
 
 private:
-	threadid_t m_id;
 	char m_name[30];
 	static int m_threadsAvailable;
 	spherethread_t m_handle;
@@ -270,7 +222,7 @@ private:
 	uint m_tickPeriod;
 	AutoResetEvent m_sleepEvent;
 
-	bool m_terminateRequested;
+	volatile std::atomic_bool m_terminateRequested;
 	ManualResetEvent m_terminateEvent;
 
 public:
@@ -281,29 +233,28 @@ public:
 	AbstractThread& operator=(const AbstractThread& other) = delete;
 
 public:
-	threadid_t getId() const noexcept { return m_id; }
-	const char *getName() const noexcept { return m_name; }
+	virtual threadid_t getId() const noexcept override { return m_threadSystemId; }
+	virtual const char *getName() const noexcept override { return m_name; }
+
+	virtual bool isActive() const override;
+	virtual bool checkStuck() override;
+
+	virtual void start() override;
+	virtual void terminate(bool ended) override;
+	virtual void waitForClose() override;
+	void awaken();
+
+	virtual void setPriority(Priority pri) override;
+	virtual Priority getPriority() const override { return m_priority; }
 
     void overwriteInternalThreadName(const char* name) noexcept;
-
-	bool isActive() const;
-	bool isCurrentThread() const;
-	bool checkStuck();
-
-	virtual void start();
-	virtual void terminate(bool ended);
-	virtual void waitForClose();
-	virtual void awaken();
-
-	void setPriority(Priority pri);
-	Priority getPriority() const { return m_priority; }
-
+    bool isCurrentThread() const noexcept;
 
 protected:
 	virtual void tick() = 0;
 	// NOTE: this should not be too long-lasted function, so no world loading, etc here!!!
 	virtual void onStart();
-	virtual bool shouldExit();
+	virtual bool shouldExit() noexcept override;
 
 private:
 	void run();
@@ -324,7 +275,7 @@ class AbstractSphereThread : public AbstractThread
 	};
 
 	STACK_INFO_REC m_stackInfo[0x1000];
-	size_t m_stackPos;
+	ssize_t m_stackPos;
 	bool m_freezeCallStack;
     bool m_exceptionStackUnwinding;
 #endif
@@ -354,12 +305,8 @@ public:
 		m_freezeCallStack = freeze;
 	}
 
-	void pushStackCall(const char *name) noexcept;
-	inline void popStackCall(void) noexcept
-	{
-		if (m_freezeCallStack == false)
-			--m_stackPos;
-	}
+	void pushStackCall(const char *name) NOEXCEPT_NODEBUG;
+	void popStackCall() NOEXCEPT_NODEBUG;
 
     void exceptionNotifyStackUnwinding() noexcept;
 	void printStackTrace() noexcept;
@@ -368,10 +315,10 @@ public:
 	ProfileData m_profile;	// the current active statistical profile.
 
 protected:
-	virtual bool shouldExit();
+	virtual bool shouldExit() noexcept;
 };
 
-// Dummy thread for context when no thread really exists
+// Dummy thread for context when no thread really exists. To be called only once, at startup.
 class DummySphereThread : public AbstractSphereThread
 {
 private:
@@ -387,7 +334,55 @@ protected:
 };
 
 
-// used to hold debug information for stack
+// Singleton utility class for working with threads. Holds all running threads inside.
+class ThreadHolder
+{
+    friend class AbstractThread;
+
+    struct SphereThreadData {
+        IThread *m_ptr;
+        bool m_closed;
+    };
+    using spherethreadlist_t = std::vector<SphereThreadData>;
+    spherethreadlist_t m_threads;
+
+    using spherethreadpair_t = std::pair<threadid_t, AbstractSphereThread *>;
+    std::vector<spherethreadpair_t> m_spherethreadpairs_systemid_ptr;
+
+	int m_threadCount;
+    volatile std::atomic_bool m_closing;
+	mutable std::shared_mutex m_mutex;
+
+	ThreadHolder() noexcept;
+    ~ThreadHolder() noexcept = default;
+
+	friend void atexit_handler(void);
+    friend void Sphere_ExitServer(void);
+	void markThreadsClosing();
+
+    //SphereThreadData* findThreadData(IThread* thread) noexcept;
+
+public:
+	static constexpr lpctstr m_sClassName = "ThreadHolder";
+
+	static ThreadHolder& get() noexcept;
+
+    bool closing() noexcept;
+	// returns current working thread or DummySphereThread * if no IThread threads are running
+	IThread *current();
+	// records a thread to the list. Sould NOT be called, internal usage
+	void push(IThread *thread);
+	// removes a thread from the list. Sould NOT be called, internal usage
+	void remove(IThread *thread);
+	// returns thread at i pos
+	IThread * getThreadAt(size_t at);
+
+	// returns number of running threads. Sould NOT be called, unit tests usage
+	inline size_t getActiveThreads() noexcept { return m_threadCount; }
+};
+
+
+// used to hold debug information for the function call stack
 #ifdef THREAD_TRACK_CALLSTACK
 class StackDebugInformation
 {
@@ -412,16 +407,16 @@ public:
 // Add to the call stack these functions only in debug mode, to have the most precise call stack
 //  even if these functions are thought to be very safe and (nearly) exception-free.
 #ifdef _DEBUG
-	#define ADDTOCALLSTACK_INTENSIVE(_function_)	ADDTOCALLSTACK(_function_)
+	#define ADDTOCALLSTACK_DEBUG(_function_)	ADDTOCALLSTACK(_function_)
 #else
-	#define ADDTOCALLSTACK_INTENSIVE(_function_)    (void)0
+	#define ADDTOCALLSTACK_DEBUG(_function_)    (void)0
 #endif
 
 
 #else // THREAD_TRACK_CALLSTACK
 
 #define ADDTOCALLSTACK(_function_)                  (void)0
-#define ADDTOCALLSTACK_INTENSIVE(_function_)        (void)0
+#define ADDTOCALLSTACK_DEBUG(_function_)        (void)0
 
 #endif // THREAD_TRACK_CALLSTACK
 

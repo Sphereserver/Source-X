@@ -57,7 +57,9 @@ jobs:
           run: |
                 cd build
                 ../cov-analysis-linux64/bin/cov-build --dir ./cov-int make
+                echo "Printing last lines of cov-int/build-log.txt:"
                 tail cov-int/build-log.txt
+                pwd
 
         #- name: Coverity scm log
         #  run:  |
@@ -67,6 +69,7 @@ jobs:
 
         - name: Submit the result to Coverity Scan
           run: |
+                pwd
                 tar czvf build-data.tgz cov-int
                 curl \
                     --form project=SphereServer/Source-X \

@@ -15,7 +15,7 @@ class CTextConsole;
 class CObjBase;
 
 
-enum COMP_TYPE : uchar
+enum COMP_TYPE : ushort
 {
     COMP_CHAMPION,
     COMP_SPAWN,
@@ -36,7 +36,7 @@ enum CCRET_TYPE
 class CComponent
 {
     COMP_TYPE _iType;
-    
+
 
 protected:
     CComponent(COMP_TYPE type);

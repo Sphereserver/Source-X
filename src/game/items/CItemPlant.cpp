@@ -2,7 +2,7 @@
 #include "CItem.h"
 #include "../chars/CChar.h"
 #include "../triggers.h"
-#include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/resource/CResourceID.h"
 #include "../CServer.h"
@@ -39,9 +39,9 @@ bool CItem::Plant_Use(CChar *pChar)
     {
         CScriptTriggerArgs args(iGrowID, iFruitID, iFruitIDOverride);
         TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceTest, pChar, &args);
-        iGrowID = (ITEMID_TYPE)(RES_GET_INDEX(args.m_iN1));
-        iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(args.m_iN2));
-        iFruitIDOverride = (ITEMID_TYPE)(RES_GET_INDEX(args.m_iN3));
+        iGrowID = (ITEMID_TYPE)(ResGetIndex((dword)args.m_iN1));
+        iFruitID = (ITEMID_TYPE)(ResGetIndex((dword)args.m_iN2));
+        iFruitIDOverride = (ITEMID_TYPE)(ResGetIndex((dword)args.m_iN3));
         if (iRet == TRIGRET_RET_TRUE)
             return true;
     }
@@ -131,10 +131,10 @@ bool CItem::Plant_OnTick()
 		if (iFruitID != ITEMID_NOTHING)
 		{
 			// Put a fruit on the ground if not already here.
-			CWorldSearch AreaItems(GetTopPoint());
+			auto AreaItems = CWorldSearchHolder::GetInstance(GetTopPoint());
 			for (;;)
 			{
-				CItem *pItem = AreaItems.GetItem();
+				CItem *pItem = AreaItems->GetItem();
 				if ( !pItem )
 				{
 					CItem *pItemFruit = CItem::CreateScript(iFruitID);

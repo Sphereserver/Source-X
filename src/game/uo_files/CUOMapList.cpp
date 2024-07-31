@@ -156,6 +156,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
     //	#5 - map5.mul			(ter mur, 1280x4096, 16056320 bytes)
     //
 
+#define SECTORSIZE_DEFAULT  64  /* 8 x 8 */
     MapGeoData& map_data = m_mapGeoData.maps[map];
     switch (index)
     {
@@ -181,7 +182,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
             }
 
             if (map_data.sectorsize <= 0)
-                map_data.sectorsize = 64;
+                map_data.sectorsize = SECTORSIZE_DEFAULT;
             break;
 
         case 2: // map2.mul
@@ -190,7 +191,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
             if (map_data.sizey <= 0)
                 map_data.sizey = 1600;
             if (map_data.sectorsize <= 0)
-                map_data.sectorsize = 64;
+                map_data.sectorsize = SECTORSIZE_DEFAULT;
             break;
 
         case 3: // map3.mul
@@ -199,7 +200,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
             if (map_data.sizey <= 0)
                 map_data.sizey = 2048;
             if (map_data.sectorsize <= 0)
-                map_data.sectorsize = 64;
+                map_data.sectorsize = SECTORSIZE_DEFAULT;
             break;
 
         case 4: // map4.mul
@@ -208,7 +209,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
             if (map_data.sizey <= 0)
                 map_data.sizey = 1448;
             if (map_data.sectorsize <= 0)
-                map_data.sectorsize = 64;
+                map_data.sectorsize = SECTORSIZE_DEFAULT;
             break;
 
         case 5: // map5.mul
@@ -217,7 +218,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
             if (map_data.sizey <= 0)
                 map_data.sizey = 4096;
             if (map_data.sectorsize <= 0)
-                map_data.sectorsize = 64;
+                map_data.sectorsize = SECTORSIZE_DEFAULT;
             break;
 
         default:

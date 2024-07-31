@@ -90,15 +90,10 @@ SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "")
 SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 
-
-# Determine system arch
-# TODO: change name for the variable to ARCH_IS_32BITS and ARCH_IS_64BITS
-INCLUDE ("cmake/CMakeDetectArch.cmake")
-determine_target_architecture(ARCH_DETECTED)
-STRING (FIND "${ARCH_DETECTED}" "x86_64" 	ARCH_HAS_x86_64)
-STRING (FIND "${ARCH_DETECTED}" "x86" 		ARCH_HAS_x86)
-booleanize_str_find(ARCH_HAS_x86_64)
-booleanize_str_find(ARCH_HAS_x86)
+set (is_win32_app_linker)
+IF (WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
+	set (is_win32_app_linker WIN32)	# if not set, it defaults to console subsystem
+ENDIF ()
 
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
@@ -166,7 +161,7 @@ IF (SINGLE_TARGET)
 
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		SET (TARGETS ${TARGETS} spheresvr_release)
-		ADD_EXECUTABLE (spheresvr_release
+		ADD_EXECUTABLE (spheresvr_release ${is_win32_app_linker}
 			${SPHERE_SOURCES}
 		#	${docs_TEXT}
 		)
@@ -174,7 +169,7 @@ IF (SINGLE_TARGET)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		SET (TARGETS ${TARGETS} spheresvr_nightly)
-		ADD_EXECUTABLE (spheresvr_nightly
+		ADD_EXECUTABLE (spheresvr_nightly ${is_win32_app_linker}
 			${SPHERE_SOURCES}
 		#	${docs_TEXT}
 		)
@@ -182,7 +177,7 @@ IF (SINGLE_TARGET)
 	ENDIF ()
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		SET (TARGETS ${TARGETS} spheresvr_debug)
-		ADD_EXECUTABLE (spheresvr_debug
+		ADD_EXECUTABLE (spheresvr_debug ${is_win32_app_linker}
 			${SPHERE_SOURCES}
 		#	${docs_TEXT}
 		)
@@ -192,7 +187,7 @@ IF (SINGLE_TARGET)
 ELSE (SINGLE_TARGET)
 
 	SET (TARGETS ${TARGETS} spheresvr)
-	ADD_EXECUTABLE (spheresvr
+	ADD_EXECUTABLE (spheresvr ${is_win32_app_linker}
 		${SPHERE_SOURCES}
 		${docs_TEXT}
 	)

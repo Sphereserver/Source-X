@@ -2,8 +2,11 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Windows-Clang_common.inc.cmake")
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-Clang-x86.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
-	SET(ARCH_BITS			32				PARENT_SCOPE)
+	#SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
+	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
+	SET(ARCH_BITS			32			CACHE INTERNAL "" FORCE) # override
+	SET(ARCH				"x86"		CACHE INTERNAL "" FORCE) # override
+	SET(CMAKE_SYSTEM_PROCESSOR "${ARCH}" CACHE INTERNAL "" FORCE)
 
 	toolchain_after_project_common()	# To enable RC language, to compile Windows Resource files
 
@@ -30,5 +33,5 @@ function (toolchain_exe_stuff)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"	)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"	)
-	
+
 endfunction()

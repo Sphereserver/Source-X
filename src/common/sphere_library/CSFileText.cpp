@@ -29,7 +29,7 @@ bool CSFileText::_IsFileOpen() const
 }
 bool CSFileText::IsFileOpen() const
 {
-    THREAD_SHARED_LOCK_RETURN(_pStream != nullptr);
+    MT_SHARED_LOCK_RETURN(_pStream != nullptr);
 }
 
 bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
@@ -37,7 +37,7 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
     ADDTOCALLSTACK("CSFileText::_Open");
 
     // Open a text file.
-    
+
 	if ( !ptcFilename )
         ptcFilename = _strFileName.GetBuffer();
     else
@@ -45,10 +45,10 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
     if ( _strFileName.IsEmpty() )
         return false;
-	
+
     _uiMode = uiModeFlags;
     lpctstr ptcModeStr = _GetModeStr();
-  
+
     _pStream = fopen( ptcFilename, ptcModeStr );
     if ( _pStream == nullptr )
         return false;
@@ -61,7 +61,7 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
 bool CSFileText::Open(lpctstr ptcFilename, uint uiModeFlags)
 {
     ADDTOCALLSTACK("CSFileText::Open");
-    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Open(ptcFilename, uiModeFlags));
+    MT_UNIQUE_LOCK_RETURN(CSFileText::_Open(ptcFilename, uiModeFlags));
 }
 
 void CSFileText::_Close()
@@ -84,7 +84,7 @@ void CSFileText::_Close()
 void CSFileText::Close()
 {
     ADDTOCALLSTACK("CSFileText::Close");
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     CSFileText::_Close();
 }
 
@@ -120,7 +120,7 @@ int CSFileText::Seek( int iOffset, int iOrigin )
     // RETURN:
     //  true = success
     ADDTOCALLSTACK("CSFileText::Seek");
-    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Seek(iOffset, iOrigin));
+    MT_UNIQUE_LOCK_RETURN(CSFileText::_Seek(iOffset, iOrigin));
 }
 
 void CSFileText::_Flush() const
@@ -136,7 +136,7 @@ void CSFileText::_Flush() const
 void CSFileText::Flush() const
 {
     ADDTOCALLSTACK("CSFileText::Flush");
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     CSFileText::_Flush();
 }
 
@@ -152,7 +152,7 @@ bool CSFileText::_IsEOF() const
 bool CSFileText::IsEOF() const
 {
     //ADDTOCALLSTACK("CSFileText::IsEOF");
-    THREAD_SHARED_LOCK_RETURN(CSFileText::_IsEOF());
+    MT_SHARED_LOCK_RETURN(CSFileText::_IsEOF());
 }
 
 
@@ -173,7 +173,7 @@ int _cdecl CSFileText::Printf( lpctstr pFormat, ... )
     ADDTOCALLSTACK("CSFileText::Printf");
     ASSERT(pFormat);
 
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
 
     va_list vargs;
     va_start( vargs, pFormat );
@@ -193,7 +193,7 @@ int CSFileText::Read( void * pBuffer, int sizemax ) const
     if ( IsEOF() )
         return 0;	// LINUX will ASSERT if we read past end.
 
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     size_t ret = fread( pBuffer, 1, sizemax, _pStream );
     if (ret > INT_MAX)
     {
@@ -218,7 +218,7 @@ tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
 tchar * CSFileText::ReadString( tchar * pBuffer, int sizemax )
 {
     ADDTOCALLSTACK("CSFileText::ReadString");
-    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_ReadString(pBuffer, sizemax));
+    MT_UNIQUE_LOCK_RETURN(CSFileText::_ReadString(pBuffer, sizemax));
 }
 
 int CSFileText::_VPrintf( lpctstr pFormat, va_list args )
@@ -237,7 +237,7 @@ int CSFileText::VPrintf(lpctstr pFormat, va_list args)
     ADDTOCALLSTACK("CSFileText::VPrintf");
     ASSERT(pFormat);
 
-    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_VPrintf(pFormat, args));
+    MT_UNIQUE_LOCK_RETURN(CSFileText::_VPrintf(pFormat, args));
 }
 
 bool CSFileText::_Write( const void * pData, int iLen )
@@ -267,7 +267,7 @@ bool CSFileText::Write(const void* pData, int iLen)
 {
     // RETURN: 1 = success else fail.
     ADDTOCALLSTACK("CSFileText::Write");
-    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Write(pData, iLen));
+    MT_UNIQUE_LOCK_RETURN(CSFileText::_Write(pData, iLen));
 }
 
 bool CSFileText::_WriteString( lpctstr pStr )
@@ -282,7 +282,7 @@ bool CSFileText::_WriteString( lpctstr pStr )
 bool CSFileText::WriteString(lpctstr pStr)
 {
     ADDTOCALLSTACK("CSFileText::WriteString");
-    THREAD_UNIQUE_LOCK_RETURN(CSFileText::_WriteString(pStr));
+    MT_UNIQUE_LOCK_RETURN(CSFileText::_WriteString(pStr));
 }
 
 // CSFileText:: Mode operations.

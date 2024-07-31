@@ -7,6 +7,7 @@
 #include "../clients/CClient.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 
@@ -502,10 +503,10 @@ int CChar::NPC_WalkToPoint( bool fRun )
 					else		point = ptFirstTry;
 
 					//	Scan point for items that could be moved by me and move them to my position
-					CWorldSearch	AreaItems(point);
+					auto AreaItems = CWorldSearchHolder::GetInstance(point);
 					for (;;)
 					{
-						CItem *pItem = AreaItems.GetItem();
+						CItem *pItem = AreaItems->GetItem();
 						if ( !pItem )	break;
 						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 )		continue;		// item is too high
 						else if ( !pItem->Can(CAN_I_BLOCK) )				continue;		// this item not blocking me
@@ -1107,10 +1108,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	// Any interesting chars here ?
 	int iDist = 0;
 	CChar *pChar = nullptr;
-	CWorldSearch AreaChars(ptTop, iRange);
+	auto AreaChars = CWorldSearchHolder::GetInstance(ptTop, iRange);
 	for (;;)
 	{
-		pChar = AreaChars.GetChar();
+		pChar = AreaChars->GetChar();
 		if ( !pChar )
 			break;
 		if ( pChar == this )	// just myself.
@@ -1136,10 +1137,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( fForceCheckItems )
 	{
 		CItem *pItem = nullptr;
-		CWorldSearch AreaItems(ptTop, iRange);
+		auto AreaItems = CWorldSearchHolder::GetInstance(ptTop, iRange);
 		for (;;)
 		{
-			pItem = AreaItems.GetItem();
+			pItem = AreaItems->GetItem();
 			if ( !pItem )
 				break;
 
@@ -1278,8 +1279,10 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	//If the NPC action is following somebody, directly assign the character from  the m_Act_UID value. 
 	if (Skill_GetActive() == NPCACT_FOLLOW_TARG)
 		pChar = m_Act_UID.CharFind();
-	else
+	else if (Fight_IsActive())
 		pChar = m_Fight_Targ_UID.IsValidUID() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+    else
+        pChar = m_Act_UID.CharFind();
 	if (pChar == nullptr)
 	{
 		// free to do as i wish !
@@ -1730,10 +1733,10 @@ bool CChar::NPC_Act_Food()
 
 	// Search for food nearby
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+	auto AreaItems = CWorldSearchHolder::GetInstance(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
-		CItem * pItem = AreaItems.GetItem();
+		CItem * pItem = AreaItems->GetItem();
 		if ( !pItem )
 			break;
 		if ( !CanSee(pItem) )
@@ -2450,10 +2453,10 @@ void CChar::NPC_Food()
 	// Search for food nearby
 	EXC_SET_BLOCK("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch AreaItems(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
+	auto AreaItems = CWorldSearchHolder::GetInstance(ptMe, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
-		CItem *pItem = AreaItems.GetItem();
+		CItem *pItem = AreaItems->GetItem();
 		if ( !pItem )
             break;
 		if ( !CanSee(pItem) || pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )

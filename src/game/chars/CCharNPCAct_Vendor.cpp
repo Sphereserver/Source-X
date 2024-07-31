@@ -42,7 +42,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 
 	bool bRestockNow = false;
         int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
-    
+
 	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) >= 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
@@ -59,7 +59,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			bRestockNow = false;
 	}
         int64 iNextRestock = CWorldGameTime::GetCurrentTime().GetTimeRaw() + iRestockDelay;
-    
+
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
 	{
@@ -69,7 +69,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			if ( !pCont )
 				return false;
 
-			pCont->ClearContainer();
+			pCont->ClearContainer(false);
 		}
         bFillStock = true;  // force the vendor to restock.
 	}
@@ -337,7 +337,7 @@ bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountT
 
 	ushort iTrain = uiAmountToTrain;
 	if ( (pCharSrc->Skill_GetSum() + uiAmountToTrain) > pCharSrc->Skill_GetSumMax() )
-	{	
+	{
 		for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 		{
 			if ( !g_Cfg.m_SkillIndexDefs.valid_index((SKILL_TYPE)i) )

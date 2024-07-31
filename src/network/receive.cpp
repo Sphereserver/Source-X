@@ -1230,7 +1230,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			CSTime datetime = CSTime::GetCurrentTime();
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(datetime.GetTime());
+			newMessage->SetTimeStampS(datetime.GetTime());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
@@ -2199,7 +2199,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 #ifdef _DEBUG
     if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
 	{
-		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, RES_GET_INDEX(context)));
+		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, ResGetIndex(context)));
 		if (resource == nullptr)
 			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
 		else
@@ -2254,7 +2254,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 		context = g_Cfg.GetKRDialogMap(context);
 
 	CResourceID	ridContext;
-    if ((RES_TYPE)RES_GET_TYPE(context) == RES_DIALOG)
+    if ((RES_TYPE)ResGetType(context) == RES_DIALOG)
     {
         ridContext = CResourceID(context, 0);
     }

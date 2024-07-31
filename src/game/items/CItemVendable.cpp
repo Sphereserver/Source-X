@@ -94,7 +94,7 @@ bool CItemVendable::r_LoadVal(CScript &s)
 
 void CItemVendable::r_Write(CScript &s)
 {
-	ADDTOCALLSTACK_INTENSIVE("CItemVendable::r_Write");
+	ADDTOCALLSTACK_DEBUG("CItemVendable::r_Write");
 	CItem::r_Write(s);
 	if ( GetQuality() != 0 )
 		s.WriteKeyVal( "QUALITY", GetQuality());
@@ -201,7 +201,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor , bool forselling )
 		if ( IsType(IT_DEED) )
 		{
 			// Deeds just represent the item they are deeding.
-			pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(m_itDeed.m_Type)));
+			pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(m_itDeed.m_Type)));
 			if ( !pItemDef )
 				return 1;
 		}

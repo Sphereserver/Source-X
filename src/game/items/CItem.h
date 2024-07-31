@@ -25,19 +25,68 @@
 class CWorldTicker;
 class CCSpawn;
 
-enum ITC_TYPE	// Item Template commands
+
+/**
+* @enum    MEMORY_TYPE
+*
+* @brief   Values that represent memory types ( IT_EQ_MEMORY_OBJ ).
+*
+* Types of memory a CChar has about a game object. (m_wHue)
+*/
+enum MEMORY_TYPE
 {
-	ITC_BREAK,
-	ITC_BUY,
-	ITC_CONTAINER,
-	ITC_FULLINTERP,
-	ITC_FUNC,
-	ITC_ITEM,
-	ITC_ITEMNEWBIE,
-	ITC_NEWBIESWAP,
-	ITC_SELL,
-	ITC_QTY
+    MEMORY_NONE = 0,
+    MEMORY_SAWCRIME = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
+    MEMORY_IPET = 0x0002,	// I am a pet. (this link is my master) (never time out)
+    MEMORY_FIGHT = 0x0004,	// Active fight going on now. may not have done any damage. and they may not know they are fighting me.
+    MEMORY_IAGGRESSOR = 0x0008,	// I was the agressor here. (good or evil)
+    MEMORY_HARMEDBY = 0x0010,	// I was harmed by them. (but they may have been retaliating)
+    MEMORY_IRRITATEDBY = 0x0020,	// I saw them snoop from me or someone, or i have been attacked, or someone used Provocation on me.
+    MEMORY_SPEAK = 0x0040,	// We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
+    MEMORY_AGGREIVED = 0x0080,	// I was attacked and was the inocent party here !
+    MEMORY_GUARD = 0x0100,	// Guard this item (never time out)
+    MEMORY_LEGACY_ISPAWNED = 0x0200,	// UNUSED (but keep this for backwards compatibility). I am spawned from this item. (never time out)
+    MEMORY_GUILD = 0x0400,	// This is my guild stone. (never time out) only have 1
+    MEMORY_TOWN = 0x0800,	// This is my town stone. (never time out) only have 1
+    MEMORY_UNUSED = 0x1000,	// UNUSED!!!! I am following this Object (never time out)
+    MEMORY_UNUSED2 = 0x2000,	// UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
+    MEMORY_FRIEND = 0x4000,	// They can command me but not release me. (not primary blame)
+    MEMORY_UNUSED3 = 0x8000	// UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
 };
+
+enum NPC_MEM_ACT_TYPE	// A simgle primary memory about the object.
+{
+    NPC_MEM_ACT_NONE = 0,       // we spoke about something non-specific,
+    NPC_MEM_ACT_SPEAK_TRAIN,    // I am speaking about training. Waiting for money
+    NPC_MEM_ACT_SPEAK_HIRE,     // I am speaking about being hired. Waiting for money
+    NPC_MEM_ACT_FIRSTSPEAK,     // I attempted (or could have) to speak to player. but have had no response.
+    NPC_MEM_ACT_TAMED,          // I was tamed by this person previously.
+    NPC_MEM_ACT_IGNORE          // I looted or looked at and discarded this item (ignore it)
+};
+
+enum STONEALIGN_TYPE // Types of Guild/Town stones
+{
+    STONEALIGN_STANDARD = 0,
+    STONEALIGN_ORDER,
+    STONEALIGN_CHAOS
+};
+
+
+// Item Template commands
+enum ITC_TYPE
+{
+    ITC_BREAK,
+    ITC_BUY,
+    ITC_CONTAINER,
+    ITC_FULLINTERP,
+    ITC_FUNC,
+    ITC_ITEM,
+    ITC_ITEMNEWBIE,
+    ITC_NEWBIESWAP,
+    ITC_SELL,
+    ITC_QTY
+};
+
 
 class CItem : public CObjBase
 {
@@ -54,21 +103,17 @@ public:
 	static lpctstr const sm_szTrigName[ITRIG_QTY+1];
 	static lpctstr const sm_szTemplateTable[ITC_QTY+1];
 
-private:
+protected:
 	ITEMID_TYPE m_dwDispIndex;		// The current display type. ITEMID_TYPE
 	word m_wAmount;		// Amount of items in pile. 64K max (or corpse type)
+    word m_weight;
 	IT_TYPE m_type;		// What does this item do when dclicked ? defines dynamic_cast type
-	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
 	uint64	m_CanUse;		// Base attribute flags. can_u_all/male/female..
-	word	m_weight;
+    uint64	m_Attr;
+    uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
 
 public:
-	CUID GetComponentOfMulti() const;
-	CUID GetLockDownOfMulti() const;
-    void SetComponentOfMulti(const CUID& uidMulti);
-    void SetLockDownOfMulti(const CUID& uidMulti);
-
-	byte	m_speed;
+    byte m_speed;
 
 // Attribute flags.
 #define ATTR_IDENTIFIED			0x0001				// This is the identified name. ???
@@ -114,13 +159,11 @@ public:
 #define ATTR_VVVITEM			0x100000000000000	// ? Vice vs Virtue Item (Has CliLoc)
 
 
-	uint64	m_Attr;
-
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
 	// Type specific info. IT_TYPE
-	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1 morem) ) = 14 bytes
+	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1 morem) ) = 14 bytes (+ padding?)
 	{
 		// IT_NORMAL
 		struct	// used only to save and restore all this junk.
@@ -549,11 +592,10 @@ protected:
 	CItem( ITEMID_TYPE id, CItemBase * pItemDef );	// only created via CreateBase()
 	bool SetBase(CItemBase* pItemDef);
 public:
-	virtual ~CItem();
+	virtual ~CItem() override;
 
-private:
-	CItem(const CItem& copy);
-	CItem& operator=(const CItem& other);
+	CItem(const CItem& copy) = delete;
+	CItem& operator=(const CItem& other) = delete;
 
 protected:
 	virtual int FixWeirdness() override;
@@ -577,6 +619,12 @@ public:
 	bool _CanHoldTimer() const;
 
 public:
+    CUID GetComponentOfMulti() const;
+    CUID GetLockDownOfMulti() const;
+    void SetComponentOfMulti(const CUID& uidMulti);
+    void SetLockDownOfMulti(const CUID& uidMulti);
+
+    bool CanHear() const;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 
 	CItemBase * Item_GetDef() const;
@@ -635,6 +683,10 @@ public:
 	{
 		m_Attr &= ~uiAttr;
 	}
+    uint64 GetAttrRaw() const noexcept
+    {
+        return m_Attr;
+    }
 	bool IsAttr(uint64 uiAttr) const noexcept
 	{
         // true even if only one flag among those passed is present
@@ -776,10 +828,10 @@ public:
 	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
 
 	// Item type specific stuff.
-    inline bool IsType(IT_TYPE type) const {
+    inline bool IsType(IT_TYPE type) const noexcept {
         return ( m_type == type );
     }
-    inline IT_TYPE GetType() const {
+    inline IT_TYPE GetType() const noexcept {
         return m_type;
     }
 	bool SetType( IT_TYPE type, bool fPreCheck = true );

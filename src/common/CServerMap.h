@@ -15,17 +15,18 @@
 
 class CCachedMulItem
 {
-private:
+protected:
 	int64 m_timeRef;		// When in world.GetTime() was this last referenced.
 
 public:
 	static const char *m_sClassName;
 	CCachedMulItem();
-	virtual ~CCachedMulItem() = default;
+    // Do not make it virtual, since we never store this base class in a container which could store a polymorphic/child type.
+    //  We will spare 8 bytes (for the virtual table pointer)
+	~CCachedMulItem() = default;
 
-private:
-	CCachedMulItem(const CCachedMulItem& copy);
-	CCachedMulItem& operator=(const CCachedMulItem& other);
+	CCachedMulItem(const CCachedMulItem& copy) = delete;
+	CCachedMulItem& operator=(const CCachedMulItem& other) = delete;
 
 public:
 	void InitCacheTime();
@@ -48,9 +49,8 @@ public:
 	CServerStaticsBlock();
 	~CServerStaticsBlock();
 
-private:
-	CServerStaticsBlock(const CServerStaticsBlock& copy);
-	CServerStaticsBlock& operator=(const CServerStaticsBlock& other);
+	CServerStaticsBlock(const CServerStaticsBlock& copy) = delete;
+	CServerStaticsBlock& operator=(const CServerStaticsBlock& other) = delete;
 
 public:
     // These methods are called so frequently but in so few pieces of code that's very important to inline them
@@ -110,27 +110,26 @@ public:
 	CServerMapBlockingState& operator=(const CServerMapBlockingState& other) = delete;
 
 public:
-	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID );
+	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID ) noexcept;
 	static lpctstr GetTileName( dword dwID );
 };
 
 struct CServerMapDiffBlock
 {
 	// A patched map block
-	CUOStaticItemRec * m_pStaticsBlock;		// Patched statics
-	int m_iStaticsCount;					// Patched statics count
 	CUOMapBlock * m_pTerrainBlock;			// Patched terrain
+    CUOStaticItemRec * m_pStaticsBlock;		// Patched statics
+    int m_iStaticsCount;					// Patched statics count
 	dword m_BlockId;						// Block represented
 	int m_map;	// Map this block is from
 
 	CServerMapDiffBlock(dword dwBlockId, int map);
 	~CServerMapDiffBlock();
 
-private:
-	CServerMapDiffBlock(const CServerMapDiffBlock& copy);
-	CServerMapDiffBlock& operator=(const CServerMapDiffBlock& other);
+	CServerMapDiffBlock(const CServerMapDiffBlock& copy) = delete;
+	CServerMapDiffBlock& operator=(const CServerMapDiffBlock& other) = delete;
 };
 
 struct CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, dword >
@@ -138,9 +137,8 @@ struct CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, d
     CServerMapDiffBlockArray() = default;
 	int CompareKey( dword id, CServerMapDiffBlock* pBase, bool fNoSpaces ) const;
 
-private:
-	CServerMapDiffBlockArray(const CServerMapDiffBlockArray& copy);
-	CServerMapDiffBlockArray& operator=(const CServerMapDiffBlockArray& other);
+	CServerMapDiffBlockArray(const CServerMapDiffBlockArray& copy) = delete;
+	CServerMapDiffBlockArray& operator=(const CServerMapDiffBlockArray& other) = delete;
 };
 
 class CServerMapDiffCollection
@@ -157,9 +155,8 @@ public:
 	CServerMapDiffCollection();
 	~CServerMapDiffCollection();
 
-private:
-	CServerMapDiffCollection(const CServerMapDiffCollection& copy);
-	CServerMapDiffCollection& operator=(const CServerMapDiffCollection& other);
+	CServerMapDiffCollection(const CServerMapDiffCollection& copy) = delete;
+	CServerMapDiffCollection& operator=(const CServerMapDiffCollection& other) = delete;
 
 public:
 	void Init();
@@ -188,9 +185,8 @@ public:
 	CServerMapBlock(int bx, int by, int map);
 	virtual ~CServerMapBlock();
 
-private:
-	CServerMapBlock(const CServerMapBlock& copy);
-	CServerMapBlock& operator=(const CServerMapBlock& other);
+	CServerMapBlock(const CServerMapBlock& copy) = delete;
+	CServerMapBlock& operator=(const CServerMapBlock& other) = delete;
 
 public:
 	inline int GetOffsetX(int x) const
@@ -214,25 +210,28 @@ public:
 	}
 };
 
-class CUOMulti : public CCachedMulItem
+class CUOMulti : private CCachedMulItem
 {
 	// Load all the relivant info for the
-private:
-	MULTI_TYPE m_id;
 
 protected:
 	CUOMultiItemRec_HS * m_pItems;
 	uint m_iItemQty;
 
+private:
+    MULTI_TYPE m_id;
+
 public:
 	static const char *m_sClassName;
+
 	CUOMulti();
 	explicit CUOMulti( MULTI_TYPE id );
-	virtual ~CUOMulti();
+	~CUOMulti();
 
-private:
-	CUOMulti(const CUOMulti& copy);
-	CUOMulti& operator=(const CUOMulti& other);
+    CUOMulti(const CUOMulti& copy) = delete;
+	CUOMulti& operator=(const CUOMulti& other) = delete;
+
+    void HitCacheTime() noexcept;
 
 private:
 	void Init();

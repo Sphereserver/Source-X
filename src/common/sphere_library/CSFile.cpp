@@ -79,7 +79,7 @@ void CSFile::Close()
 {
     ADDTOCALLSTACK("CSFile::Close");
 
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
     CSFile::_Close();
 }
 
@@ -140,7 +140,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
     uint uiFilePermissions = 0;
     if (uiModeFlags & OF_CREATE)
         uiFilePermissions = (S_IRWXU | S_IRWXG | S_IRWXO); //777
-    
+
     _fileDescriptor = open( ptcFilename, uiModeFlags, uiFilePermissions);
 #endif // _WIN32
 
@@ -150,7 +150,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
 bool CSFile::Open( lpctstr ptcFilename, uint uiModeFlags )
 {
     ADDTOCALLSTACK("CSFile::Open");
-    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Open(ptcFilename, uiModeFlags));
+    MT_UNIQUE_LOCK_RETURN(CSFile::_Open(ptcFilename, uiModeFlags));
 }
 
 bool CSFile::_IsFileOpen() const
@@ -159,7 +159,7 @@ bool CSFile::_IsFileOpen() const
 }
 bool CSFile::IsFileOpen() const
 {
-    THREAD_SHARED_LOCK_RETURN(_fileDescriptor != _kInvalidFD);
+    MT_SHARED_LOCK_RETURN(_fileDescriptor != _kInvalidFD);
 }
 
 lpctstr CSFile::_GetFilePath() const
@@ -168,7 +168,7 @@ lpctstr CSFile::_GetFilePath() const
 }
 lpctstr CSFile::GetFilePath() const
 {
-    THREAD_SHARED_LOCK_RETURN(_strFileName.GetBuffer());
+    MT_SHARED_LOCK_RETURN(_strFileName.GetBuffer());
 }
 
 bool CSFile::_SetFilePath( lpctstr pszName )
@@ -191,7 +191,7 @@ bool CSFile::_SetFilePath( lpctstr pszName )
 bool CSFile::SetFilePath( lpctstr pszName )
 {
     ADDTOCALLSTACK("CFile::SetFilePath");
-    THREAD_UNIQUE_LOCK_RETURN(CSFile::_SetFilePath(pszName));
+    MT_UNIQUE_LOCK_RETURN(CSFile::_SetFilePath(pszName));
 }
 
 
@@ -221,7 +221,7 @@ int CSFile::_GetLength()
 int CSFile::GetLength()
 {
     ADDTOCALLSTACK("CSFile::GetLength");
-    THREAD_UNIQUE_LOCK_RETURN(CSFile::_GetLength());
+    MT_UNIQUE_LOCK_RETURN(CSFile::_GetLength());
 }
 
 int CSFile::_GetPosition() const
@@ -253,13 +253,13 @@ int CSFile::_GetPosition() const
 int CSFile::GetPosition() const
 {
     ADDTOCALLSTACK("CSFile::GetPosition");
-    THREAD_UNIQUE_LOCK_RETURN(CSFile::_GetPosition());
+    MT_UNIQUE_LOCK_RETURN(CSFile::_GetPosition());
 }
 
 int CSFile::Read( void * pData, int iLength ) const
 {
     ADDTOCALLSTACK("CSFile::Read");
-    THREAD_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET;
 
 #ifdef _WIN32
 	DWORD ret;
@@ -309,7 +309,7 @@ int CSFile::_Seek( int iOffset, int iOrigin )
 int CSFile::Seek( int iOffset, int iOrigin )
 {
     ADDTOCALLSTACK("CSFile::Seek");
-    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Seek(iOffset, iOrigin));
+    MT_UNIQUE_LOCK_RETURN(CSFile::_Seek(iOffset, iOrigin));
 }
 
 void CSFile::_SeekToBegin()
@@ -337,6 +337,15 @@ int CSFile::SeekToEnd()
 bool CSFile::_Write( const void * pData, int iLength )
 {
     ADDTOCALLSTACK("CSFile::_Write");
+    ASSERT(iLength >= 0);
+    if (iLength <= 0)
+        return true;
+
+#if defined(_WIN32)
+    ASSERT(_fileDescriptor != nullptr);
+#elif defined(__unix__) or defined(unix)
+    ASSERT(_fileDescriptor >= 0);
+#endif
 
 #ifdef _WIN32
 	DWORD dwWritten;
@@ -361,7 +370,7 @@ bool CSFile::_Write( const void * pData, int iLength )
 bool CSFile::Write(const void* pData, int iLength)
 {
     ADDTOCALLSTACK("CSFile::Write");
-    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Write(pData, iLength));
+    MT_UNIQUE_LOCK_RETURN(CSFile::_Write(pData, iLength));
 }
 
 // CSFile:: File name operations.
@@ -458,7 +467,7 @@ uint CSFile::_GetFullMode() const
 }
 uint CSFile::GetFullMode() const
 {
-    THREAD_SHARED_LOCK_RETURN(_uiMode);
+    MT_SHARED_LOCK_RETURN(_uiMode);
 }
 
 uint CSFile::_GetMode() const
@@ -467,7 +476,7 @@ uint CSFile::_GetMode() const
 }
 uint CSFile::GetMode() const
 {
-    THREAD_SHARED_LOCK_RETURN(_uiMode & 0x0FFFFFFF);
+    MT_SHARED_LOCK_RETURN(_uiMode & 0x0FFFFFFF);
 }
 
 bool CSFile::_IsWriteMode() const
@@ -476,7 +485,7 @@ bool CSFile::_IsWriteMode() const
 }
 bool CSFile::IsWriteMode() const
 {
-    THREAD_SHARED_LOCK_RETURN(_uiMode & OF_WRITE);
+    MT_SHARED_LOCK_RETURN(_uiMode & OF_WRITE);
 }
 
 
