@@ -3975,7 +3975,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				// For a book the page is... the page number
 				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
-                int iArgPage = ResGetIndex(Exp_GetVal(pArg2));
+                int iArgPage = ResGetIndex(Exp_GetDWVal(pArg2));
                 if ( iArgPage < RES_PAGE_MAX )
                     wPage = (word)iArgPage;
                 else

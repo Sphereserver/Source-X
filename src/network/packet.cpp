@@ -184,7 +184,7 @@ void Packet::resize(uint newsize)
 			memcpy(buffer, m_buffer, m_bufferSize);
 			delete[] m_buffer;
 		}
-		
+
 		m_buffer = buffer;
 		m_bufferSize = newsize;
 		m_length = m_bufferSize;
@@ -205,9 +205,13 @@ void Packet::skip(int count)
 {
 	// ensure we can't go lower than 0
 	if (count < 0 && (uint)SphereAbs(count) > m_position)
+    {
 		m_position = 0;
-	else
-		m_position += (uint)count;
+        return;
+    }
+
+    ASSERT((int64)m_position + count < UINT32_MAX);
+	m_position += (uint)count;
 }
 
 byte &Packet::operator[](uint index)
@@ -235,7 +239,7 @@ void Packet::writeCharASCII(const char value)
 {
 	if ((m_position + sizeof(char)) > m_bufferSize)
 		expand(sizeof(char));
-	
+
 	ASSERT((m_position + sizeof(char)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(value);
 }
@@ -244,7 +248,7 @@ void Packet::writeCharUTF16(const wchar value)
 {
 	if ((m_position + sizeof(wchar)) > m_bufferSize)
 		expand(sizeof(wchar));
-	
+
 	ASSERT((m_position + sizeof(wchar)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(value);
 	m_buffer[m_position++] = (byte)(value >> 8);
@@ -254,7 +258,7 @@ void Packet::writeCharNETUTF16(const wchar value)
 {
 	if ((m_position + sizeof(wchar)) > m_bufferSize)
 		expand(sizeof(wchar));
-	
+
 	ASSERT((m_position + sizeof(wchar)) <= m_bufferSize);
 	// Big endian
 	m_buffer[m_position++] = (byte)(value >> 8);
@@ -265,7 +269,7 @@ void Packet::writeByte(const byte value)
 {
 	if ((m_position + sizeof(byte)) > m_bufferSize)
 		expand(sizeof(byte));
-	
+
 	ASSERT((m_position + sizeof(byte)) <= m_bufferSize);
 	m_buffer[m_position++] = value;
 }
@@ -274,7 +278,7 @@ void Packet::writeData(const byte* buffer, uint size)
 {
 	if ((m_position + (sizeof(byte) * size)) > m_bufferSize)
 		expand((sizeof(byte) * size));
-	
+
 	ASSERT((m_position + (sizeof(byte) * size)) <= m_bufferSize);
 	memcpy(&m_buffer[m_position], buffer, sizeof(byte) * size);
 	m_position += size;
@@ -284,7 +288,7 @@ void Packet::writeInt16(const word value)
 {
 	if ((m_position + sizeof(word)) > m_bufferSize)
 		expand(sizeof(word));
-	
+
 	ASSERT((m_position + sizeof(word)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(value >> 8);
 	m_buffer[m_position++] = (byte)(value);
@@ -294,7 +298,7 @@ void Packet::writeInt32(const dword value)
 {
 	if ((m_position + sizeof(dword)) > m_bufferSize)
 		expand(sizeof(dword));
-	
+
 	ASSERT((m_position + sizeof(dword)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(value >> 24);
 	m_buffer[m_position++] = (byte)(value >> 16);
@@ -306,7 +310,7 @@ void Packet::writeInt64(const int64 value)
 {
 	if ((m_position + sizeof(int64)) > m_bufferSize)
 		expand(sizeof(int64));
-	
+
 	ASSERT((m_position + sizeof(int64)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(value >> 56);
 	m_buffer[m_position++] = (byte)(value >> 48);
@@ -322,7 +326,7 @@ void Packet::writeInt64(const dword hi, const dword lo)
 {
 	if ((m_position + sizeof(int64)) > m_bufferSize)
 		expand(sizeof(int64));
-	
+
 	ASSERT((m_position + sizeof(int64)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(hi);
 	m_buffer[m_position++] = (byte)(hi >> 8);
@@ -378,7 +382,7 @@ void Packet::writeStringASCII(const wchar* value, bool terminate)
 		value++;
 	}
 	delete[] buffer;
-	
+
 	if (terminate)
 		writeCharASCII('\0');
 #else
@@ -436,7 +440,7 @@ void Packet::writeStringFixedASCII(const wchar* value, uint size, bool terminate
 			reinterpret_cast<wchar *>(buffer)[i] = reinterpret_cast<const nachar*>(value)[i];
 		reinterpret_cast<wchar *>(buffer)[i] = '\0';
 	}
-	
+
 	CvtNETUTF16ToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH);
 
 	writeStringFixedASCII(buffer, size, terminate);
@@ -458,12 +462,12 @@ void Packet::writeStringUTF16(const char* value, bool terminate)
 	if (terminate)
 		writeCharUTF16('\0');
 #else
-	
+
 	ASSERT(value != nullptr);
 
 	wchar * buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
-	
+
 	writeStringNETUTF16(buffer, terminate);
 #endif
 }
@@ -490,12 +494,12 @@ void Packet::writeStringFixedUTF16(const char* value, uint size, bool terminate)
 		}
 	}
 #else
-	
+
 	ASSERT(value != nullptr);
 
 	wchar * buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
-	
+
 	writeStringFixedNETUTF16(buffer, size, terminate);
 #endif
 }
@@ -577,7 +581,7 @@ void Packet::writeStringNETUTF16(const char* value, bool terminate)
 
 	wchar* buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
-	
+
 	writeStringUTF16(buffer, terminate);
 #endif
 }
@@ -606,10 +610,10 @@ void Packet::writeStringFixedNETUTF16(const char* value, uint size, bool termina
 #else
 
 	ASSERT(value != nullptr);
-	
+
 	wchar* buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
-	
+
 	writeStringFixedUTF16(buffer, size, terminate);
 #endif
 }
@@ -744,8 +748,8 @@ word Packet::readInt16(void)
 	if ((m_position + sizeof(word)) > m_length)
 		return 0;
 
-	word w =(( m_buffer[m_position] <<  8 ) |
-			 ( m_buffer[m_position + 1]));
+	word w =(((word)m_buffer[m_position] <<  8u) |
+			 ((word)m_buffer[m_position + 1u]));
 
 	m_position += 2;
 	return w;
@@ -756,10 +760,10 @@ dword Packet::readInt32(void)
 	if ((m_position + sizeof(dword)) > m_length)
 		return 0;
 
-	dword dw = ((m_buffer[m_position] << 24) |
-			   (m_buffer[m_position + 1] << 16) |
-			   (m_buffer[m_position + 2] << 8) |
-			   (m_buffer[m_position + 3]));
+	dword dw = (((dword)m_buffer[m_position] << 24u) |
+			   ((dword)m_buffer[m_position + 1u] << 16u) |
+			   ((dword)m_buffer[m_position + 2u] << 8u) |
+			   ((dword)m_buffer[m_position + 3u]));
 
 	m_position += 4;
 	return dw;
@@ -819,7 +823,7 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 #endif
 	delete[] bufferReal;
 #else
-	
+
 	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
 	CvtSystemToNETUTF16(reinterpret_cast<nachar*>(buffer), (int)(length), bufferReal, (int)(length));
@@ -1253,7 +1257,7 @@ void PacketSend::send(const CClient *client, bool appendTransaction)
 	fixLength();
 	if (client != nullptr)
 		target(client);
-	
+
 	// check target is set and can receive this packet
 	if (m_target == nullptr || canSendTo(m_target) == false)
 		return;

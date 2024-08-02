@@ -202,7 +202,7 @@ void CObjBase::DeletePrepare()
     CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
 
     const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode != SERVMODE_Exiting && servMode != SERVMODE_Loading);
+    const bool fDestroyingWorld = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
     if (!fDestroyingWorld)
     {
         RemoveFromView();

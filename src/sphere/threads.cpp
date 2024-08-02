@@ -13,10 +13,8 @@
 #if defined(_WIN32)
 	#include <process.h>
 	#include <objbase.h>
-#elif !defined(_BSD)
-#ifndef __APPLE__
+#elif !defined(_BSD) && !defined(__APPLE__)
 	#include <sys/prctl.h>
-#endif
 #endif
 
 
@@ -66,7 +64,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
+static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
 #endif
 
 void IThread::setThreadName(const char* name)
@@ -161,7 +159,6 @@ IThread* ThreadHolder::current()
         throw CSError(LOGL_FATAL, 0, "Thread handle not found in vector?");
     }
 
-    //auto thread = static_cast<IThread *>((*handle_found).second);
     auto thread = static_cast<IThread *>(found->second);
 
     ASSERT(thread->m_threadHolderId != -1);
@@ -755,7 +752,6 @@ void AbstractSphereThread::pushStackCall(const char *name) NOEXCEPT_NODEBUG
     ++m_stackPos;
     _stackpos = m_stackPos;
     m_stackInfo[m_stackPos].functionName = name;
-    //printf("[%s]++++Pushed at pos %zd function: %s.\n", getName(), m_stackPos, name);
 }
 
 void AbstractSphereThread::popStackCall() NOEXCEPT_NODEBUG
@@ -763,18 +759,9 @@ void AbstractSphereThread::popStackCall() NOEXCEPT_NODEBUG
     if (m_freezeCallStack == true)
         return;
 
-    //std::cout << "--Pos pre-pop: " << m_stackPos << "\n";
-    /*
-    printf("[%s]--Popping at pos %zd function: %s.\n", getName(), m_stackPos, m_stackInfo[m_stackPos].functionName);
-    if (m_stackPos != _stackpos) {
-        printf("m_pos %zd, global %zu.\n", m_stackPos, _stackpos);
-        fflush(stdin);
-        NotifyDebugger();
-    }
-    */
     --m_stackPos;
     _stackpos = m_stackPos;
-    //DEBUG_ASSERT(m_stackPos >= -1);
+    ASSERT(m_stackPos >= -1);
 
 }
 
