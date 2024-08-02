@@ -110,7 +110,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 		return false;
 
 	ptNew.m_z = GetFixZ(ptNew);
-	
+
     if (!IsPriv(PRIV_GM))
     {
         if ( g_Cfg.m_iMountHeight )
@@ -215,7 +215,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool fTakePets, bool fCheckAntiMagi
 		}
 	}
 
-	MoveToChar(ptNew, true, true); 	// move character
+	MoveToChar(ptNew, true, false); 	// move character
 
 	CClient *pClient = GetClientActive();
 	CClient *pClientIgnore = nullptr;
@@ -313,7 +313,7 @@ bool CChar::Spell_CreateGate(CPointMap ptDest, bool fCheckAntiMagic)
     pGateOrig->SetAttr(ATTR_MOVE_NEVER);
     pGateOrig->m_itNormal.m_more1 = (dword)GetUID();
     pGateOrig->m_itTelepad.m_ptMark = ptDest;
-   
+
     CItem *pGateDest = CItem::CreateBase(idDest);
     ASSERT(pGateDest);
     pGateDest->SetType(IT_TELEPAD);
@@ -500,7 +500,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNo
 			Effect(EFFECT_OBJ, pSpellDef->m_idEffect, this, 10, 16);
 		Sound(pSpellDef->m_sound);
 	}
-	
+
     if (IsClientActive())
     {
         CClient *pClient = GetClientActive();
@@ -1320,7 +1320,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 			CCPropsChar* pCCPChar = GetComponentProps<CCPropsChar>();
 			CCPropsChar* pBaseCCPChar = Base_GetDef()->GetComponentProps<CCPropsChar>();
-            
+
             ModPropNum(pCCPChar, PROPCH_RESFIRE,   - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
             ModPropNum(pCCPChar, PROPCH_RESPOISON, - pSpell->m_itSpell.m_PolyDex, pBaseCCPChar);
             ModPropNum(pCCPChar, PROPCH_RESCOLD,     + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);
@@ -1649,7 +1649,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE), uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
                     wStatEffectRef = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
                     wStatEffectRef = minimum(75, wStatEffectRef);
-					
+
 					iPhysicalResist = 15 - (uiCasterInscription / 200);
 					int iPhysicalResistMin = minimum(INT16_MAX, iPhysicalResist);
 					pSpell->m_itSpell.m_PolyStr = (short)(maximum(-INT16_MAX, iPhysicalResistMin ));
@@ -1704,7 +1704,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
             Skill_AddBase( SKILL_MEDITATION, + wStatEffectRef );
 			return;
         }
-			
+
 
 		/*case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 		case SPELL_BeastForm:		// 107 // polymorphs you into an animal for a while.
@@ -1732,7 +1732,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	int iEffect = 0;
 	DAMAGE_TYPE iDmgType = 0;
 	int64 iSecondsDelay = 5; //default value for custom spells, can be overriden by Sphere spells below.
-	
+
 	switch ( spell )
 	{
 		case SPELL_Ale:		// 90 = drunkeness ?
@@ -1771,7 +1771,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (iCharges <=0 || iLevel <= 0)
 				return false;
 			iSecondsDelay = g_Rand.GetLLVal2(15, 30);
-		
+
 			if (IsClientActive())
 			{
 				static const SOUND_TYPE sm_sounds[] = { 0x243, 0x244 };
@@ -1856,7 +1856,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
 				iEffect = IMulDiv(Stat_GetMaxAdjusted(STAT_STR), iLevel * 2, 100);
 				iSecondsDelay = (5 + g_Rand.GetLLVal(4));
-				
+
 				static lpctstr const sm_Poison_Message[] =
 				{
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1),
@@ -1874,11 +1874,11 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					Emote(pszMsg, GetClientActive());
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_Message[iLevel]);
 			}
-			
+
 			static const int sm_iPoisonMax[] = { 2, 4, 6, 8, 10 };
 			iEffect = maximum(sm_iPoisonMax[iLevel], iEffect);
 			iDmgType = DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NODISTURB | DAMAGE_NOREVEAL;
-	
+
 			// We will have this effect again.
 			if (IsSetOF(OF_Buffs) && IsClientActive())
 			{
@@ -1946,7 +1946,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	Args.m_VarsLocal.SetNum("Delay", iSecondsDelay);
 	Args.m_VarsLocal.SetNum("DamageType", iDmgType);
 	Args.m_VarsLocal.SetNum("Effect", iEffect);
-	
+
 	if (IsTrigUsed(TRIGGER_SPELLEFFECTTICK))
 	{
 		switch (OnTrigger(CTRIG_SpellEffectTick, this, &Args))
@@ -2446,7 +2446,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 					SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 				}
 				return false;
-			}	
+			}
 
 			// Check for Tithing
 			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
@@ -2505,51 +2505,51 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	{
 		switch (spell)
 		{
-		/*The creature ID for the Summon Spell is already stored in m_atMagery.m_iSummonID when the creature 
+		/*The creature ID for the Summon Spell is already stored in m_atMagery.m_iSummonID when the creature
 		is chosen from the summoning menu.*/
-		case SPELL_Summon:						
-			break; 
+		case SPELL_Summon:
+			break;
 		case SPELL_Blade_Spirit:
-			m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;	
+			m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;
 			break;
-		case SPELL_Vortex:			
-			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX; 
+		case SPELL_Vortex:
+			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX;
 			break;
-		case SPELL_Air_Elem:		
-			m_atMagery.m_iSummonID = CREID_AIR_ELEM;		
+		case SPELL_Air_Elem:
+			m_atMagery.m_iSummonID = CREID_AIR_ELEM;
 			break;
-		case SPELL_Daemon:			
-			m_atMagery.m_iSummonID = CREID_DEMON;			
+		case SPELL_Daemon:
+			m_atMagery.m_iSummonID = CREID_DEMON;
 			break;
-		case SPELL_Earth_Elem:		
-			m_atMagery.m_iSummonID = CREID_EARTH_ELEM;	
+		case SPELL_Earth_Elem:
+			m_atMagery.m_iSummonID = CREID_EARTH_ELEM;
 			break;
-		case SPELL_Fire_Elem:		
-			m_atMagery.m_iSummonID = CREID_FIRE_ELEM;	
+		case SPELL_Fire_Elem:
+			m_atMagery.m_iSummonID = CREID_FIRE_ELEM;
 			break;
-		case SPELL_Water_Elem:		
-			m_atMagery.m_iSummonID = CREID_WATER_ELEM;	
+		case SPELL_Water_Elem:
+			m_atMagery.m_iSummonID = CREID_WATER_ELEM;
 			break;
-		case SPELL_Vengeful_Spirit:	
-			m_atMagery.m_iSummonID = CREID_REVENANT;		
+		case SPELL_Vengeful_Spirit:
+			m_atMagery.m_iSummonID = CREID_REVENANT;
 			break;
 		case SPELL_Rising_Colossus:
-			m_atMagery.m_iSummonID = CREID_RISING_COLOSSUS;	
+			m_atMagery.m_iSummonID = CREID_RISING_COLOSSUS;
 			break;
 		case SPELL_Summon_Undead: //Sphere custom spell.
 			switch (g_Rand.GetVal(15))
 			{
-			case 1:				
-				m_atMagery.m_iSummonID = CREID_LICH;			
+			case 1:
+				m_atMagery.m_iSummonID = CREID_LICH;
 				break;
 			case 3:
 			case 5:
 			case 7:
-			case 9:				
-				m_atMagery.m_iSummonID = CREID_SKELETON;		
+			case 9:
+				m_atMagery.m_iSummonID = CREID_SKELETON;
 				break;
-			default:			
-				m_atMagery.m_iSummonID = CREID_ZOMBIE;			
+			default:
+				m_atMagery.m_iSummonID = CREID_ZOMBIE;
 				break;
 			}
 			break;
@@ -2579,7 +2579,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 			}
 			break;
 		}
-		default: 
+		default:
 			m_atMagery.m_iSummonID = CREID_INVALID;
 			break;
 		}
@@ -2749,7 +2749,7 @@ bool CChar::Spell_TargCheck()
 					return false;
 				}
 			}
-			
+
 			// Is it a valid teleport location that allows this ?
 			CRegion* pArea = CheckValidMove(m_Act_p, nullptr, DIR_QTY, nullptr);
 			if (!pArea)
@@ -3281,7 +3281,7 @@ void CChar::Spell_CastFail(bool fAbort)
 
 	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender");
-	
+
 	iT1 = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
@@ -3542,7 +3542,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	iSkillLevel = (iSkillLevel / 2) + g_Rand.GetVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
 
-	if (pSpellDef->m_idLayer && !iDuration) //By using SPELLEFFECT command (and the spell has a layer where to store properties)  we need to calculate the duration. 
+	if (pSpellDef->m_idLayer && !iDuration) //By using SPELLEFFECT command (and the spell has a layer where to store properties)  we need to calculate the duration.
 		iDuration = GetSpellDuration(spell, iSkillLevel, pCharSrc);    // tenths of second
 
 	SOUND_TYPE iSound = pSpellDef->m_sound;
@@ -3842,7 +3842,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				}
 			}
 			break;
-	
+
 
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:

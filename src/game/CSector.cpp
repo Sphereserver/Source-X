@@ -1077,8 +1077,8 @@ void CSector::Close(bool fClosingWorld)
 	m_Chars_Active.ClearContainer(fClosingWorld);
 	m_Chars_Disconnect.ClearContainer(fClosingWorld);
 
-	// These are resource type things.
-	//m_Teleports.clear();
+	// These are resource type things, loaded from scripts, not save files. Do not delete them.
+	//m_Teleports.ClearFree();
 	//m_RegionLinks.clear();
 }
 

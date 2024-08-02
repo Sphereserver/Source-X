@@ -170,7 +170,7 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
             // This is even faster.
             const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
             const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-            return (dx > dy) * dx + (dx < dy) * dy;
+            return (dx >= dy) * dx + (dx < dy) * dy;
 
         }
         case DISTANCE_FORMULA_DIAGONAL_NOZ:
@@ -221,7 +221,7 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
     //return maximum(dx, dy);
     const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
     const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-    return (dx > dy) * dx + (dx < dy) * dy;
+    return (dx >= dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -238,7 +238,7 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
     //return maximum(dx, dy);
     const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
     const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-    return (dx > dy) * dx + (dx < dy) * dy;
+    return (dx >= dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
@@ -258,7 +258,7 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
             dz /= (PLAYER_HEIGHT / 2); // Take player height into consideration
 
             //return maximum(dz, dist);
-            return (dz > dist) * dz + (dz < dist) * dist;
+            return (dz >= dist) * dz + (dz < dist) * dist;
         }
         case DISTANCE_FORMULA_DIAGONAL_Z:
         {

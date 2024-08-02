@@ -888,7 +888,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		// Check if I stepped on any item/teleport
-		TRIGRET_TYPE iRet = m_pChar->CheckLocation(true, false);
+		TRIGRET_TYPE iRet = m_pChar->CheckLocationEffects(false);
 		if (iRet == TRIGRET_RET_FALSE)
 		{
 			m_pChar->SetUnkPoint(ptOld);	// we already moved, so move back to previous location

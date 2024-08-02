@@ -603,7 +603,7 @@ public:
 public:
 
     /**
-     * @fn  virtual bool CObjBase::MoveTo(CPointMap pt, bool fCheckLocation = true, bool fForceFix = false) = 0;
+     * @fn  virtual bool CObjBase::MoveTo(CPointMap pt, bool fCheckLocationEffects = true, bool fForceFix = false) = 0;
      *
      * @brief   Move To Location.
      *

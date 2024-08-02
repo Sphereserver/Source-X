@@ -3640,15 +3640,17 @@ void CChar::CheckRevealOnMove()
 }
 
 // We are at this location. What will happen?
-// This function is called at every second on ALL chars
+// This function is called at every second (or more) on ALL chars
 // (even walking or not), so avoid heavy codes here.
 // RETURN:
 //	true = we can move there
 //	false = we can't move there
 //	default = we teleported
-TRIGRET_TYPE CChar::CheckLocation(bool fCanCheckRecursively, bool fStanding)
+TRIGRET_TYPE CChar::CheckLocationEffects(bool fStanding)
 {
-	ADDTOCALLSTACK("CChar::CheckLocation");
+	ADDTOCALLSTACK("CChar::CheckLocationEffects");
+    // This can also be called from char periodic ticks (not classic timer).
+
     static thread_local uint _uiRecursingStep = 0;
     static thread_local uint _uiRecursingItemStep = 0;
     static constexpr uint _kuiRecursingStepLimit = 20;
@@ -3678,153 +3680,146 @@ TRIGRET_TYPE CChar::CheckLocation(bool fCanCheckRecursively, bool fStanding)
             _SetTimeoutD(1);
         }
 
-        // This could get REALLY EXPENSIVE! (If not cause a buffer overflow for excessive recursion...)
-        if (fCanCheckRecursively)
+        if (_uiRecursingStep >= _kuiRecursingStepLimit)
         {
-            if (_uiRecursingStep >= _kuiRecursingStepLimit)
+            g_Log.EventError("Calling recursively @STEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
+        }
+        else
+        {
+            if (m_pArea && IsTrigUsed(TRIGGER_STEP)) //Check if m_pArea is exists because it may be invalid if it try to walk while multi removing?
             {
-                g_Log.EventError("Calling recursively @STEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
-            }
-            else
-            {
-                if (m_pArea && IsTrigUsed(TRIGGER_STEP)) //Check if m_pArea is exists because it may be invalid if it try to walk while multi removing?
+                _uiRecursingStep += 1;
+                if (m_pArea->OnRegionTrigger(this, RTRIG_STEP) == TRIGRET_RET_TRUE)
                 {
-                    _uiRecursingStep += 1;
-                    if (m_pArea->OnRegionTrigger(this, RTRIG_STEP) == TRIGRET_RET_TRUE)
-                    {
-                        _uiRecursingStep -= 1;
-                        return TRIGRET_RET_FALSE;
-                    }
-
-                    CRegion *pRoom = GetTopPoint().GetRegion(REGION_TYPE_ROOM);
-                    if (pRoom && pRoom->OnRegionTrigger(this, RTRIG_STEP) == TRIGRET_RET_TRUE)
-                    {
-                        _uiRecursingStep -= 1;
-                        return TRIGRET_RET_FALSE;
-                    }
                     _uiRecursingStep -= 1;
+                    return TRIGRET_RET_FALSE;
                 }
+
+                CRegion *pRoom = GetTopPoint().GetRegion(REGION_TYPE_ROOM);
+                if (pRoom && pRoom->OnRegionTrigger(this, RTRIG_STEP) == TRIGRET_RET_TRUE)
+                {
+                    _uiRecursingStep -= 1;
+                    return TRIGRET_RET_FALSE;
+                }
+                _uiRecursingStep -= 1;
             }
         }
     }
 
-    if (fCanCheckRecursively)
+    bool fStepCancel = false;
+    bool fSpellHit = false;
+    auto AreaItems = CWorldSearchHolder::GetInstance(GetTopPoint());
+    for (;;)
     {
-        // We are safe to skip it, since this doesn't have checks that would negate the movement here (except for the trigger).
+        CItem *pItem = AreaItems->GetItem();
+        if (!pItem)
+            break;
 
-        bool fStepCancel = false;
-        bool fSpellHit = false;
-        auto AreaItems = CWorldSearchHolder::GetInstance(GetTopPoint());
-        for (;;)
+        int zdiff = pItem->GetTopZ() - GetTopZ();
+        int height = pItem->Item_GetDef()->GetHeight();
+        if (height < 3)
+            height = 3;
+
+        if ((zdiff > height) || (zdiff < -3))
+            continue;
+
+        if (IsTrigUsed(TRIGGER_STEP) || IsTrigUsed(TRIGGER_ITEMSTEP))
         {
-            CItem *pItem = AreaItems->GetItem();
-            if (!pItem)
-                break;
-
-            int zdiff = pItem->GetTopZ() - GetTopZ();
-            int	height = pItem->Item_GetDef()->GetHeight();
-            if (height < 3)
-                height = 3;
-
-            if ((zdiff > height) || (zdiff < -3))
-                continue;
-
-            if (IsTrigUsed(TRIGGER_STEP) || IsTrigUsed(TRIGGER_ITEMSTEP))
+            if (_uiRecursingItemStep >= _kuiRecursingItemStepLimit)
             {
-                if (_uiRecursingItemStep >= _kuiRecursingItemStepLimit)
-                {
-                    g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
-                }
-                else
-                {
-                    _uiRecursingItemStep += 1;
-                    CScriptTriggerArgs Args(fStanding ? 1 : 0);
-                    TRIGRET_TYPE iRet = pItem->OnTrigger(ITRIG_STEP, this, &Args);
-                    _uiRecursingItemStep -= 1;
-                    if (iRet == TRIGRET_RET_TRUE)		// block walk
-                    {
-                        fStepCancel = true;
-                        continue;
-                    }
-                    if (iRet == TRIGRET_RET_HALFBAKED)	// allow walk, skipping hardcoded checks below
-                        continue;
-                }
+                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
             }
-
-            switch (pItem->GetType())
+            else
             {
-                case IT_WEB:
+                _uiRecursingItemStep += 1;
+                CScriptTriggerArgs Args(fStanding ? 1 : 0);
+                TRIGRET_TYPE iRet = pItem->OnTrigger(ITRIG_STEP, this, &Args);
+                _uiRecursingItemStep -= 1;
+                if (iRet == TRIGRET_RET_TRUE) // block walk
+                {
+                    fStepCancel = true;
+                    continue;
+                }
+                if (iRet == TRIGRET_RET_HALFBAKED) // allow walk, skipping hardcoded checks below
+                    continue;
+            }
+        }
+
+        switch (pItem->GetType())
+        {
+            case IT_WEB:
                 if (fStanding)
                     continue;
-                if (Use_Item_Web(pItem))	// we got stuck in a spider web
+                if (Use_Item_Web(pItem)) // we got stuck in a spider web
                     return TRIGRET_RET_TRUE;
                 continue;
 
-                case IT_FIRE:
-                {
-                    int iSkillLevel = pItem->m_itSpell.m_spelllevel;	// heat level (0-1000)
-                    iSkillLevel = g_Rand.GetVal2(iSkillLevel/2, iSkillLevel);
-                    if (IsStatFlag(STATF_FLY))
-                        iSkillLevel /= 2;
+            case IT_FIRE:
+            {
+                int iSkillLevel = pItem->m_itSpell.m_spelllevel; // heat level (0-1000)
+                iSkillLevel = g_Rand.GetVal2(iSkillLevel / 2, iSkillLevel);
+                if (IsStatFlag(STATF_FLY))
+                    iSkillLevel /= 2;
 
-                    int iDmg = OnTakeDamage(g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), nullptr, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0);
-                    if (iDmg > 0)
+                int iDmg = OnTakeDamage(g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), nullptr, DAMAGE_FIRE | DAMAGE_GENERAL, 0, 100, 0, 0, 0);
+                if (iDmg > 0)
+                {
+                    Sound(0x15f); // fire noise
+                    if (m_pNPC && fStanding)
                     {
-                        Sound(0x15f);	// fire noise
-                        if (m_pNPC && fStanding)
-                        {
-                            m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
-                            NPC_WalkToPoint(true);		// run away from the threat
-                        }
+                        m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
+                        NPC_WalkToPoint(true); // run away from the threat
                     }
                 }
+            }
                 continue;
 
-                case IT_SPELL:
-                    // Workaround: only hit 1 spell on each loop. If we hit all spells (eg: multiple field spells)
-                    // it will allow weird exploits like cast many Fire Fields on the same spot to take more damage,
-                    // or Paralyze Field + Fire Field to make the target get stuck forever being damaged with no way
-                    // to get out of the field, since the damage won't allow cast any spell and the Paralyze Field
-                    // will immediately paralyze again with 0ms delay at each damage tick.
-                    // On OSI if the player cast multiple fields on the same tile, it will remove the previous field
-                    // tile that got overlapped. But Sphere doesn't use this method, so this workaround is needed.
+            case IT_SPELL:
+                // Workaround: only hit 1 spell on each loop. If we hit all spells (eg: multiple field spells)
+                // it will allow weird exploits like cast many Fire Fields on the same spot to take more damage,
+                // or Paralyze Field + Fire Field to make the target get stuck forever being damaged with no way
+                // to get out of the field, since the damage won't allow cast any spell and the Paralyze Field
+                // will immediately paralyze again with 0ms delay at each damage tick.
+                // On OSI if the player cast multiple fields on the same tile, it will remove the previous field
+                // tile that got overlapped. But Sphere doesn't use this method, so this workaround is needed.
                 if (fSpellHit)
                     continue;
 
-                fSpellHit = OnSpellEffect((SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell)),
-                    pItem->m_uidLink.CharFind(), pItem->m_itSpell.m_spelllevel, pItem);
+                fSpellHit =
+                    OnSpellEffect((SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell)), pItem->m_uidLink.CharFind(), pItem->m_itSpell.m_spelllevel, pItem);
                 if (fSpellHit && m_pNPC && fStanding)
                 {
                     m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
-                    NPC_WalkToPoint(true);		// run away from the threat
+                    NPC_WalkToPoint(true); // run away from the threat
                 }
                 continue;
 
-                case IT_TRAP:
-                case IT_TRAP_ACTIVE:
+            case IT_TRAP:
+            case IT_TRAP_ACTIVE:
+            {
+                int iDmg = OnTakeDamage(pItem->Use_Trap(), nullptr, DAMAGE_HIT_BLUNT | DAMAGE_GENERAL);
+                if ((iDmg > 0) && m_pNPC && fStanding)
                 {
-                    int iDmg = OnTakeDamage(pItem->Use_Trap(), nullptr, DAMAGE_HIT_BLUNT|DAMAGE_GENERAL);
-                    if ((iDmg > 0) && m_pNPC && fStanding)
-                    {
-                        m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
-                        NPC_WalkToPoint(true);		// run away from the threat
-                    }
-                    continue;
+                    m_Act_p.Move((DIR_TYPE)(g_Rand.GetVal(DIR_QTY)));
+                    NPC_WalkToPoint(true); // run away from the threat
                 }
+                continue;
+            }
 
-                case IT_SWITCH:
+            case IT_SWITCH:
                 if (pItem->m_itSwitch.m_wStep)
                     Use_Item(pItem);
                 continue;
-                case IT_MOONGATE:
-                case IT_TELEPAD:
+
+            case IT_MOONGATE:
+            case IT_TELEPAD:
                 if (fStanding)
                     continue;
                 Use_MoonGate(pItem);
                 return TRIGRET_RET_DEFAULT;
 
-                case IT_SHIP_PLANK:
-                case IT_ROPE:
+            case IT_SHIP_PLANK:
+            case IT_ROPE:
                 if (!fStanding && !IsStatFlag(STATF_HOVERING) && !pItem->IsAttr(ATTR_STATIC))
                 {
                     // Check if we can go out of the ship (in the same direction of plank)
@@ -3836,20 +3831,14 @@ TRIGRET_TYPE CChar::CheckLocation(bool fCanCheckRecursively, bool fStanding)
                     }
                 }
                 continue;
-                default:
+
+            default:
                 continue;
-            }
         }
-
-        if (fStepCancel)
-            return TRIGRET_RET_FALSE;
     }
 
-    if (fCanCheckRecursively && !_IsTimerSet())
-    {
-        // We want it to check for the consequences only on the next tick.
-        SetTimeoutD(1);
-    }
+    if (fStepCancel)
+        return TRIGRET_RET_FALSE;
 
     if (fStanding)
         return TRIGRET_RET_TRUE;
@@ -4071,8 +4060,12 @@ bool CChar::MoveToRegionReTest( dword dwType )
 // This could be us just taking a step or being teleported.
 // Low level: DOES NOT UPDATE DISPLAYS or container flags. (may be offline)
 // This does not check for gravity.
-bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation, bool fForceFix, bool fAllowReject)
+bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocationEffects, bool fForceFix, bool fAllowReject)
 {
+    // WARNING: If you are using fCheckLocationEffects = true, be sure to NOT create situations where this call to CheckLocationEffects
+    //  makes it recursively call itself (moving to something that moves again the char and so on).
+    // Using CheckLocationEffects here is often not necessary, since it's called at each char PeriodicTick.
+
 	ADDTOCALLSTACK("CChar::MoveToChar");
 
 	if ( !pt.IsValidPoint() )
@@ -4122,7 +4115,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 		}
 	}
 
-    if (fCheckLocation && (CheckLocation(false, fStanding) == TRIGRET_RET_FALSE) && ptOld.IsValidPoint())
+    if (fCheckLocationEffects && (CheckLocationEffects(fStanding) == TRIGRET_RET_FALSE) && ptOld.IsValidPoint())
     {
         SetTopPoint(ptOld);
         return false;
@@ -4132,8 +4125,10 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocation,
 
 bool CChar::MoveTo(const CPointMap& pt, bool fForceFix)
 {
+    ADDTOCALLSTACK_DEBUG("CChar::MoveTo");
+
 	m_fClimbUpdated = false; // update climb height
-    return MoveToChar(pt, true, fForceFix);
+    return MoveToChar(pt, true, false, fForceFix);
 }
 
 void CChar::SetTopZ( char z )
@@ -4780,7 +4775,7 @@ bool CChar::OnTickPeriodic()
     {
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET_BLOCK("check location");
-        CheckLocation(true, true);
+        CheckLocationEffects(true);
     }
 
     EXC_SET_BLOCK("update stats");

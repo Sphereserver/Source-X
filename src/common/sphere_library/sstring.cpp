@@ -454,6 +454,9 @@ size_t Str_LengthUTF8(const char* strInUTF8MB) noexcept
 // Adapted from: OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38
 size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz) noexcept
 {
+    if (siz == 0)
+        return 0;
+
     tchar *d = dst;
     size_t n = siz;
     size_t dlen;
@@ -489,7 +492,7 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz) noexcept
 
 tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len) noexcept
 {
-    if (substr_len == 0)
+    if (str_len == 0 || substr_len == 0)
         return nullptr;
 
     tchar c, sc;

@@ -2043,7 +2043,10 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			ptcDest = ptcResponse + iBegin;
 			memcpy(ptcDest, sVal.GetBuffer(), iWriteValLen);
 
-			i = iBegin + iWriteValLen - 1;
+			//i = iBegin + iWriteValLen - 1;
+            i = iBegin + iWriteValLen;
+            if (i != 0)
+                i -= 1;
 
 			if (fNoRecurseBrackets) // just do this one then bail out.
 			{
@@ -2623,6 +2626,9 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 		if (rid.IsValidUID())
 		{
 			const dword dwTotal = g_World.GetUIDCount();
+            if (dwTotal == 0)
+                return TRIGRET_ENDIF;
+
 			dword dwCount = dwTotal - 1;
 			dword dwTotalInstances = 0; // Will acquire the correct value for this during the loop
 			dword dwUID = 0;

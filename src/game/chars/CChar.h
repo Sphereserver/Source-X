@@ -490,7 +490,7 @@ public:
 	bool MoveToRegion(CRegionWorld* pNewArea, bool fAllowReject);
 
 	bool MoveToRegionReTest( dword dwType );
-	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
+	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocationEffects = true, bool fForceFix = false, bool fAllowReject = true);
 	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) override;
 	virtual void SetTopZ( char z ) override;
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
@@ -502,7 +502,7 @@ public:
     bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
-	TRIGRET_TYPE CheckLocation(bool fCanCheckRecursively, bool fStanding);
+	TRIGRET_TYPE CheckLocationEffects(bool fStanding);
 
 public:
 	// Client Player specific stuff. -------------------------
