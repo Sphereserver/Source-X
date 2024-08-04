@@ -45,6 +45,9 @@ foreach (tgt ${TARGETS})
     PRIVATE $<TARGET_PROPERTY:regex,INTERFACE_INCLUDE_DIRECTORIES>
   )
 
+  # import the compile_definitions defined by the INTERFACE targets
+  target_compile_definitions(${tgt} PUBLIC ${INTERFACE_COMPILE_DEFINITIONS})
+
   # Link to (and import include directories) those clasic (.c/.h) libraries.
   target_link_libraries(${tgt} PRIVATE bcrypt twofish) # cdrc (not needed for now)
   if (${LIB_LIBEV_BUILD})

@@ -502,10 +502,11 @@ tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t
         {
             do
             {
-                if (str_len-- < 1 || (sc = *str++) == '\0')
+                if (str_len < 1 || (sc = *str++) == '\0')
                 {
                     return nullptr;
                 }
+                str_len -= 1;
             } while (sc != c);
             if (substr_len > str_len)
             {

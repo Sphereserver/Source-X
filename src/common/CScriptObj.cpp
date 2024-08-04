@@ -1748,7 +1748,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 	return true;
 }
 
-size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs, std::shared_ptr<ScriptedExprContext> pContext)
+int CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs, std::shared_ptr<ScriptedExprContext> pContext)
 {
 	ADDTOCALLSTACK("CScriptObj::ParseScriptText");
 	//ASSERT(ptcResponse[0] != ' ');	// Not needed: i remove whitespaces and invalid characters here.
@@ -1779,11 +1779,12 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 	const tchar chEnd	= fHTML ? '%' : '>';
 
 	// Variables used to handle the QVAL special case and do lazy evaluation, instead of fully evaluating the whole string on the first pass.
+	// As an aftertought QVAL parsing could have been moved into a separate function, but it's intricate enough and it's working, so let's leave as it is...'
 	enum class QvalStatus { None, Condition, Returns, End } eQval = QvalStatus::None;
 	int iQvalOpenBrackets = 0;
 
-	size_t iBegin = 0;
-	size_t i = 0;
+	size_t uiSubstitutionBegin = 0;
+	int i = 0;
 	EXC_TRY("ParseScriptText Main Loop");
 	for ( i = 0; ptcResponse[i] != '\0'; ++i)
 	{
@@ -1817,7 +1818,8 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
                 }
 
 				// Set the statement start
-				iBegin = i;
+				ASSERT(i >= 0);
+				uiSubstitutionBegin = (size_t)i;
 				pContext->_fParseScriptText_Brackets = true;
 
 				// Set-up to process special statements: is it a QVAL?
@@ -1926,12 +1928,12 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 
 			// Parse what's inside the open bracket
 			tchar* ptcRecurseParse = ptcResponse + i;
-			const size_t ilen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
+			const int iLen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
 
 			pContext->_fParseScriptText_Brackets = true;
 			--pContext->_iParseScriptText_Reentrant;
 
-			i += ilen;
+			i += iLen;
 			continue;
 		}
 
@@ -1989,7 +1991,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			EXC_SET_BLOCK("writeval");
 
 			ptcResponse[i] = '\0'; // Needed for r_WriteVal
-			lpctstr ptcKey = ptcResponse + iBegin + 1; // move past the opening bracket
+			lpctstr ptcKey = ptcResponse + uiSubstitutionBegin + 1; // move past the opening bracket
 
 			CSString sVal;
 			bool fRes;
@@ -2031,22 +2033,20 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			//-- In the output string, substitute the raw substring with its parsed value
 			EXC_SET_BLOCK("mem shifting");
 
-			const size_t iWriteValLen = sVal.GetLength();
+			const size_t uiWriteValLen = sVal.GetLength();
 
 			// Make room for the obtained value, moving to left (if it's shorter than the scripted statement) or right (if longer) the string characters after it.
-			tchar* ptcDest = ptcResponse + iBegin + iWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
+			tchar* ptcDest = ptcResponse + uiSubstitutionBegin + uiWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
 			const tchar * const ptcLeftover = ptcResponse + i + 1;	// End of the statement we just evaluated
-			const size_t iLeftoverLen = strlen(ptcLeftover) + 1;
-			memmove(ptcDest, ptcLeftover, iLeftoverLen);
+			const size_t uiLeftoverLen = strlen(ptcLeftover) + 1;
+			memmove(ptcDest, ptcLeftover, uiLeftoverLen);
 
 			// Insert the obtained value in the room we created.
-			ptcDest = ptcResponse + iBegin;
-			memcpy(ptcDest, sVal.GetBuffer(), iWriteValLen);
+			ptcDest = ptcResponse + uiSubstitutionBegin;
+			memcpy(ptcDest, sVal.GetBuffer(), uiWriteValLen);
 
-			//i = iBegin + iWriteValLen - 1;
-            i = iBegin + iWriteValLen;
-            if (i != 0)
-                i -= 1;
+            // This can be negative.
+			i = (int)(uiSubstitutionBegin + uiWriteValLen) - 1;
 
 			if (fNoRecurseBrackets) // just do this one then bail out.
 			{

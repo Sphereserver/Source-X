@@ -55,7 +55,7 @@ function (toolchain_exe_stuff_common)
 
 	IF (${USE_ASAN})
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
-      -fsanitize=address -fno-sanitize-recover=address
+      -fsanitize=address -fno-sanitize-recover=address #-fsanitize-cfi # cfi: control flow integrity
       -fsanitize-address-use-after-scope -fsanitize=pointer-compare -fsanitize=pointer-subtract
       # Flags for additional instrumentation not strictly needing asan to be enabled
       -fcf-protection=full -fstack-check -fstack-protector-all -fstack-clash-protection
@@ -65,6 +65,7 @@ function (toolchain_exe_stuff_common)
       #-fsanitize-trap=all
 		)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
@@ -72,11 +73,13 @@ function (toolchain_exe_stuff_common)
 See comments in the toolchain and: https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo")
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins -fPIE)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=leak)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak>)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
@@ -89,6 +92,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     )
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 

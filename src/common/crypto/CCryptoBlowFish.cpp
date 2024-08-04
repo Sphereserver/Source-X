@@ -249,6 +249,7 @@ bool CCrypto::sm_fBFishTablesReady = false; // static
 static dword s_dwCodingData[CRYPT_GAMEKEY_COUNT][18+1024];	// to be filled by InitTables
 
 
+NO_SANITIZE_UNDEFINED // integer overflow is expected
 void CCrypto::PrepareKey(CCryptoKeysHolder::CCryptoKey & key, int iTable )	// static
 {
 	ADDTOCALLSTACK("CCrypto::PrepareKey");
@@ -257,8 +258,8 @@ void CCrypto::PrepareKey(CCryptoKeysHolder::CCryptoKey & key, int iTable )	// st
 	key.u_iKey[1] ^= pCodes[0];
 	for(int i=0; i<8; ++i)
 	{
-		key.u_iKey[0] ^= pCodes[i*2+1]^(((pCodes[18+key.u_cKey[7]]+pCodes[18+key.u_cKey[6]+0x100])^pCodes[18+key.u_cKey[5]+0x200])+pCodes[18+key.u_cKey[4]+0x300]);
-		key.u_iKey[1] ^= pCodes[i*2+2]^(((pCodes[18+key.u_cKey[3]]+pCodes[18+key.u_cKey[2]+0x100])^pCodes[18+key.u_cKey[1]+0x200])+pCodes[18+key.u_cKey[0]+0x300]);
+		key.u_iKey[0] ^= pCodes[i*2+1] ^ (((pCodes[18+key.u_cKey[7]]+pCodes[18+key.u_cKey[6]+0x100]) ^ pCodes[18+key.u_cKey[5]+0x200]) + pCodes[18+key.u_cKey[4]+0x300]);
+		key.u_iKey[1] ^= pCodes[i*2+2] ^ (((pCodes[18+key.u_cKey[3]]+pCodes[18+key.u_cKey[2]+0x100]) ^ pCodes[18+key.u_cKey[1]+0x200]) + pCodes[18+key.u_cKey[0]+0x300]);
 	}
 	key.u_iKey[0] ^= pCodes[17];
 
@@ -267,7 +268,8 @@ void CCrypto::PrepareKey(CCryptoKeysHolder::CCryptoKey & key, int iTable )	// st
 	key.u_iKey[1] = tmp;
 }
 
-void CCrypto::InitTables()		// static
+NO_SANITIZE_UNDEFINED // integer overflow is expected
+void CCrypto::InitTables() // static
 {
 	ADDTOCALLSTACK("CCrypto::InitTables");
 	for (int i=0; i<CRYPT_GAMEKEY_COUNT; ++i)
@@ -275,9 +277,13 @@ void CCrypto::InitTables()		// static
 		memcpy(s_dwCodingData[i], s_kdwInitData, sizeof(s_kdwInitData));
 
 		dword code[3];
-		code[0] = (s_kKeyTable[i][0] << 24) + (s_kKeyTable[i][1] << 16) + (s_kKeyTable[i][2] << 8) + s_kKeyTable[i][3];
-		code[1] = (s_kKeyTable[i][4] << 24) + (s_kKeyTable[i][5] << 16) + (s_kKeyTable[i][0] << 8) + s_kKeyTable[i][1];
-		code[2] = (s_kKeyTable[i][2] << 24) + (s_kKeyTable[i][3] << 16) + (s_kKeyTable[i][4] << 8) + s_kKeyTable[i][5];
+		//code[0] = (s_kKeyTable[i][0] << 24) + (s_kKeyTable[i][1] << 16) + (s_kKeyTable[i][2] << 8) + s_kKeyTable[i][3];
+		//code[1] = (s_kKeyTable[i][4] << 24) + (s_kKeyTable[i][5] << 16) + (s_kKeyTable[i][0] << 8) + s_kKeyTable[i][1];
+		//code[2] = (s_kKeyTable[i][2] << 24) + (s_kKeyTable[i][3] << 16) + (s_kKeyTable[i][4] << 8) + s_kKeyTable[i][5];
+        code[0] = ((dword)s_kKeyTable[i][0] << 24) + ((dword)s_kKeyTable[i][1] << 16) + ((dword)s_kKeyTable[i][2] << 8) + (dword)s_kKeyTable[i][3];
+		code[1] = ((dword)s_kKeyTable[i][4] << 24) + ((dword)s_kKeyTable[i][5] << 16) + ((dword)s_kKeyTable[i][0] << 8) + (dword)s_kKeyTable[i][1];
+		code[2] = ((dword)s_kKeyTable[i][2] << 24) + ((dword)s_kKeyTable[i][3] << 16) + ((dword)s_kKeyTable[i][4] << 8) + (dword)s_kKeyTable[i][5];
+
 		int j;
 		for(j=0; j<18; ++j)
 		{

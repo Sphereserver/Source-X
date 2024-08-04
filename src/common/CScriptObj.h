@@ -90,13 +90,13 @@ public:
 	* It does check if we are requesting another ref.
 	*/
 	virtual bool r_WriteVal(lpctstr pKey, CSString& sVal, CTextConsole* pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false);
-	
+
 	/*
 	* @brief Do the first-level parsing of a script line and eventually replace requested values got by r_WriteVal.
 	*/
-	size_t ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr,
+	int ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr,
 		std::shared_ptr<ScriptedExprContext> pContext = std::make_shared<ScriptedExprContext>() );
-	
+
 	/*
 	* @brief Execute a script command.
 	* Called when parsing a script section with OnTriggerRun or if issued by a CClient.

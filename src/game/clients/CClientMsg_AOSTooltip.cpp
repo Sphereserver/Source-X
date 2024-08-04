@@ -12,7 +12,8 @@
 
 // Simple string hashing algorithm function by D. J. Bernstein
 // Original code found at: http://www.cse.yorku.ca/~oz/hash.html
-uint HashString(lpctstr str, size_t length)
+NO_SANITIZE_UNDEFINED
+static uint HashString(lpctstr str, const size_t length)   // integer overflow is expected
 {
 	uint hash = 5381;
 	for (size_t i = 0; i < length; ++i)

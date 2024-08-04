@@ -10,6 +10,10 @@
 #include <map>
 //#include <unordered_set>
 
+#ifdef ADDRESS_SANITIZER
+    #define MYASAN_
+#endif
+
 #ifdef _WIN32
     #undef SRWLOCK_INIT
 #endif
@@ -17,7 +21,14 @@
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wshift-count-overflow"
 #endif
+
+// TODO: TEMPORARY !!
+#undef ADDRESS_SANITIZER
 #include <parallel_hashmap/phmap.h>
+#ifdef MYASAN_
+    #define ADDRESS_SANITIZER
+#endif
+
 #ifdef __GNUC__
     #pragma GCC diagnostic pop
 #endif
