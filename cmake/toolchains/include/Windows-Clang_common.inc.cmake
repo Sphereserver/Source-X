@@ -45,7 +45,7 @@ function (toolchain_exe_stuff_common)
 
 	IF (${USE_ASAN})
     SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
-      -fsanitize=address -fno-sanitize-recover=address
+      -fsanitize=address -fno-sanitize-recover=address #-fsanitize-cfi # cfi: control flow integrity
       -fsanitize-address-use-after-scope -fsanitize=pointer-compare -fsanitize=pointer-subtract
       # Flags for additional instrumentation not strictly needing asan to be enabled
       -fcf-protection=full -fstack-check -fstack-protector-all -fstack-clash-protection
@@ -57,6 +57,7 @@ function (toolchain_exe_stuff_common)
 		IF (${CLANG_USE_GCC_LINKER})
 			set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address)
 		ENDIF ()
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
@@ -66,6 +67,7 @@ function (toolchain_exe_stuff_common)
 		#IF (${CLANG_USE_GCC_LINKER})
 			#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory)
 		#ENDIF
+    #SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
@@ -75,6 +77,7 @@ function (toolchain_exe_stuff_common)
 		#IF (${CLANG_USE_GCC_LINKER})
 			#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak)
 		#ENDIF
+    #SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
 		#SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
@@ -89,8 +92,10 @@ function (toolchain_exe_stuff_common)
 		#IF (${CLANG_USE_GCC_LINKER})
 			#set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)
 		#ENDIF
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
+
 	IF (${ENABLED_SANITIZER})
 		SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
 		if (${RUNTIME_STATIC_LINK})

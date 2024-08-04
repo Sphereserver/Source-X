@@ -47,30 +47,38 @@ static constexpr word kxCompress_Base[COMPRESS_TREE_SIZE] =
 	0x00d4 // terminator
 } ;
 
+NO_SANITIZE_UNDEFINED // integer overflow is expected
 uint CHuffman::Compress( byte * pOutput, const byte * pInput, uint outLen, uint inLen ) // static
 {
 	ADDTOCALLSTACK("CHuffman::Compress");
-	
+
     uint iLen = 0;
-	int bitidx = 0;	    // Offset in output byte (xOutVal)
+	byte bitidx = 0;	    // Offset in output byte (xOutVal)
 	byte xOutVal = 0;   // Don't bother to init this. It will just roll off all junk anyhow.
 
 
     for ( uint i = 0; i <= inLen; ++i )
 	{
         word value = kxCompress_Base[ ( i == inLen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
-		int nBits = value & 0xF;
-		value >>= 4;
-		while ( nBits-- )
+		byte nBits = (byte)(value & (word)0xF);
+		value >>= 4u;
+		while ( nBits )
 		{
             if (iLen >= outLen)
                 return 0; // error: i'm trying to write more bytes than the output buffer length
-			xOutVal <<= 1;
-			xOutVal |= (value >> nBits) & 0x1;
-			if ( ++bitidx == 8)
+
+			nBits -= 1u;
+
+ 			//xOutVal <<= 1;
+            xOutVal = (byte)((uint)xOutVal << 1u);
+
+            //xOutVal |= ((value >> nBits) & 0x1);
+			xOutVal |= (((uint)value >> (uint)nBits) & 0x1u);
+
+            if ( ++bitidx == 8)
 			{
 				bitidx = 0;
-				pOutput[iLen++] = xOutVal;  
+				pOutput[iLen++] = xOutVal;
 			}
 		}
 	}
@@ -78,8 +86,10 @@ uint CHuffman::Compress( byte * pOutput, const byte * pInput, uint outLen, uint 
 	{
         if (iLen >= outLen)
             return 0;
-		pOutput[iLen++] = xOutVal << (8 - bitidx);
+
+        // pOutput[iLen++] = xOutVal << (8u - bitidx);
+		pOutput[iLen++] = (byte)((uint)xOutVal << (uint)(8u - bitidx));
 	}
-    
+
 	return iLen;
 }
