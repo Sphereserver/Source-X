@@ -658,9 +658,18 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 						pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
 					}
 
-					CObjBaseTemplate* pContObjBaseT = pCont->GetTopLevelObj();
-					ASSERT(pContObjBaseT);
-					pItem->r_Call(ptcFunctionName, dynamic_cast<CTextConsole*>(pContObjBaseT), pScriptArgs.get());
+					// use pCont is exist, if not use g_Serv
+					if (pCont)
+					{
+						CObjBaseTemplate* pContObjBaseT = pCont->GetTopLevelObj();
+						ASSERT(pContObjBaseT);
+						pItem->r_Call(ptcFunctionName, dynamic_cast<CTextConsole*>(pContObjBaseT), pScriptArgs.get());
+					}
+					else
+					{
+						pItem->r_Call(ptcFunctionName, &g_Serv, pScriptArgs.get());
+					}
+					
 					if (pItem->IsDeleted())
 					{
 						pItem = nullptr;
