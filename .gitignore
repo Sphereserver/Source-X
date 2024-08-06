@@ -34,7 +34,7 @@
 *.old
 *.tmp
 *.pid
-*.swp*
+*.*swp*
 *.fuse*
 
 *.o
