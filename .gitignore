@@ -34,7 +34,7 @@
 *.old
 *.tmp
 *.pid
-*.swp*
+*.*swp*
 *.fuse*
 
 *.o
@@ -45,6 +45,7 @@
 *.vcxproj
 *.sln
 *.user
+*.*project
 *.*workspace
 *.kdev*
 
