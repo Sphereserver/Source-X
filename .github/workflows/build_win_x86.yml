@@ -1,8 +1,16 @@
 name: Windows x86
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
 
 jobs:
   windows-x86:

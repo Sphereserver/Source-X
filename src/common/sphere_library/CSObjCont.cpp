@@ -32,7 +32,8 @@ CSObjCont::CSObjCont() :
 
 CSObjCont::~CSObjCont()
 {
-	ClearContainer(true);
+    // Do not virtually call this method, since i'm in the destructor of the base-most class.
+	CSObjCont::ClearContainer(true);
 }
 
 // CSObjCont:: Modifiers.

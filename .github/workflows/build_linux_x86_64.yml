@@ -1,8 +1,16 @@
 name: Linux x86_64
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
 
 jobs:
   linux-x86_64:
@@ -87,4 +95,4 @@ jobs:
           run-id: ${{ github.run_id }}
       - name: Push release
         run: |
-          curl -sST "{SphereSvrX-linux-x86_64-nightly.zip}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
+          curl -sST "{SphereSvrX-linux-x86_64-nightly.tar.gz}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}
