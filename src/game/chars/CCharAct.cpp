@@ -4973,8 +4973,6 @@ TRIGRET_TYPE CChar::CheckLocationEffects(bool fStanding)
                     NPC_WalkToPoint(true); // run away from the threat
                 }
                 continue;
-                default:
-                continue;
             }
 
             case IT_SWITCH:
