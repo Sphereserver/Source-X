@@ -35,7 +35,7 @@ public:
 public:
 	CSectorList();
 	~CSectorList();
-	
+
 	CSectorList(const CSectorList& copy) = delete;
 	CSectorList& operator=(const CSectorList& other) = delete;
 
@@ -43,7 +43,7 @@ public:
 	static const CSectorList* Get() noexcept;
 
 	void Init();
-	void Close();
+	void Close(bool fClosingWorld);
 
 	int GetSectorSize(int map) const noexcept;
 	int GetSectorQty(int map) const noexcept;

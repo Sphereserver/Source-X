@@ -166,11 +166,11 @@ void CResourceLink::SetTrigger(int i)
     ADDTOCALLSTACK("CResourceLink::SetTrigger");
     if ( i >= 0 )
     {
-        for ( int j = 0; j < MAX_TRIGGERS_ARRAY; ++j )
+        for ( dword j = 0; j < MAX_TRIGGERS_ARRAY; ++j )
         {
             if ( i < 32 )
             {
-                const dword flag = 1 << i;
+                const dword flag = 1u << i;
                 m_dwOnTriggers[j] |= flag;
                 return;
             }
@@ -186,11 +186,11 @@ bool CResourceLink::HasTrigger(int i) const
     if ( i < XTRIG_UNKNOWN )
         i = XTRIG_UNKNOWN;
 
-    for ( int j = 0; j < MAX_TRIGGERS_ARRAY; ++j )
+    for ( dword j = 0; j < MAX_TRIGGERS_ARRAY; ++j )
     {
         if ( i < 32 )
         {
-            dword flag = 1 << i;
+            const dword flag = 1u << i;
             return ((m_dwOnTriggers[j] & flag) != 0);
         }
         i -= 32;

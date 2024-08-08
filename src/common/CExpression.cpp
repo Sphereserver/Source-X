@@ -499,7 +499,7 @@ try_dec:
 						if ( *pszArgs )
 						{
 							iCount = 1;
-							iResult = RES_GET_INDEX( GetVal(pszArgs) );
+                            iResult = ResGetIndex((dword)GetVal(pszArgs));
 						}
 						else
 						{

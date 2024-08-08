@@ -24,6 +24,10 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id, bool fNameNotNeeded)
         {
             strcpy(m_name, CItemBase::IsID_Ship(id) ? "ship" : "structure");
         }
+        else
+        {
+            m_name[0] = '\0';
+        }
         return;
     }
 
@@ -39,5 +43,9 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id, bool fNameNotNeeded)
     if (!fNameNotNeeded)
     {
         Str_CopyLimitNull(m_name, cachedEntry->m_name, ARRAY_COUNT(m_name));
+    }
+    else
+    {
+        m_name[0] = '\0';
     }
 }

@@ -42,7 +42,7 @@ find_library ( HAVE_LIBRT rt )
 # Tweaks
 set ( HAVE_CLOCK_SYSCALL ${HAVE_CLOCK_GETTIME} )
 
-CONFIGURE_FILE ("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
-                "${CMAKE_CURRENT_SOURCE_DIR}/libev/config.h" )
+CONFIGURE_FILE ("${CMAKE_CURRENT_LIST_DIR}/config.h.in"
+                "${CMAKE_CURRENT_LIST_DIR}/libev/config.h" )
 
 message (STATUS "Done.")

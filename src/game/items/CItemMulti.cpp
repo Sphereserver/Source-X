@@ -2518,7 +2518,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 
 void CItemMulti::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemMulti::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemMulti::r_Write");
     CItem::r_Write(s);
     if (m_pRegion)
     {

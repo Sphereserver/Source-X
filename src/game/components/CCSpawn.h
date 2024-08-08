@@ -21,7 +21,6 @@ class CUID;
 
 class CCSpawn : public CComponent
 {
-    THREAD_CMUTEX_DEF;
     CItem* _pLink;
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];

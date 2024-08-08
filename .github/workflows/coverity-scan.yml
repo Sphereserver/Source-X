@@ -70,6 +70,7 @@ jobs:
         - name: Submit the result to Coverity Scan
           run: |
                 pwd
+                cd build
                 tar czvf build-data.tgz cov-int
                 curl \
                     --form project=SphereServer/Source-X \

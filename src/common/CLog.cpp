@@ -101,7 +101,7 @@ const CScript * CLog::_SetScriptContext( const CScript * pScriptContext )
 
 const CScript * CLog::SetScriptContext(const CScript * pScriptContext)
 {
-    THREAD_UNIQUE_LOCK_RETURN(CLog::_SetScriptContext(pScriptContext));
+    MT_UNIQUE_LOCK_RETURN(CLog::_SetScriptContext(pScriptContext));
 }
 
 const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
@@ -113,7 +113,7 @@ const CScriptObj * CLog::_SetObjectContext( const CScriptObj * pObjectContext )
 
 const CScriptObj * CLog::SetObjectContext(const CScriptObj * pObjectContext)
 {
-    THREAD_UNIQUE_LOCK_RETURN(CLog::_SetObjectContext(pObjectContext));
+    MT_UNIQUE_LOCK_RETURN(CLog::_SetObjectContext(pObjectContext));
 }
 
 bool CLog::SetFilePath( lpctstr pszName )
@@ -210,7 +210,7 @@ bool CLog::_OpenLog( lpctstr pszBaseDirName )	// name set previously.
 bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
 {
 	ADDTOCALLSTACK("CLog::OpenLog");
-	THREAD_UNIQUE_LOCK_RETURN(CLog::_OpenLog(pszBaseDirName));
+	MT_UNIQUE_LOCK_RETURN(CLog::_OpenLog(pszBaseDirName));
 }
 
 int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) noexcept
@@ -303,7 +303,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Print to log file.
 		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
 		{
-			THREAD_UNIQUE_LOCK_SET;
+			MT_UNIQUE_LOCK_SET;
 
 			if ( datetime.GetDay() != m_dateStamp.GetDay())
 			{

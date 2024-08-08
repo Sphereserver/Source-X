@@ -1,7 +1,6 @@
-// https://gist.github.com/imneme/9b769cefccac1f2bd728596da3a856dd
-
 #ifndef XORSHIFT_HPP_INCLUDED
 #define XORSHIFT_HPP_INCLUDED 1
+// https://gist.github.com/imneme/9b769cefccac1f2bd728596da3a856dd
 
 /*
  * A C++ implementation of a family of truncated XorShift* generators.

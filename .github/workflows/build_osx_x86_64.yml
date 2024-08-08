@@ -1,8 +1,16 @@
 name: MacOS x86_64
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
 
 jobs:
   macos-x86_64:

@@ -200,14 +200,14 @@ lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 
 size_t CScriptObj::r_GetFunctionIndex(lpctstr pszFunction) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_GetFunctionIndex");
+    ADDTOCALLSTACK_DEBUG("CScriptObj::r_GetFunctionIndex");
     GETNONWHITESPACE( pszFunction );
     return g_Cfg.m_Functions.find_sorted(pszFunction);
 }
 
 bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
 {
-    ADDTOCALLSTACK_INTENSIVE("CScriptObj::r_CanCall");
+    ADDTOCALLSTACK_DEBUG("CScriptObj::r_CanCall");
     if (uiFunctionIndex == sl::scont_bad_index())
         return false;
     ASSERT(uiFunctionIndex < g_Cfg.m_Functions.size());
@@ -596,10 +596,10 @@ badcmd:
 	switch ( index )
 	{
         case SSC_RESOURCEINDEX:
-            sVal.FormatHex(RES_GET_INDEX(Exp_GetVal(ptcKey)));
+            sVal.FormatHex(ResGetIndex(Exp_GetVal(ptcKey)));
             break;
         case SSC_RESOURCETYPE:
-            sVal.FormatHex(RES_GET_TYPE(Exp_GetVal(ptcKey)));
+            sVal.FormatHex(ResGetType(Exp_GetVal(ptcKey)));
             break;
 
 		case SSC_LISTCOL:
@@ -742,7 +742,7 @@ badcmd:
 			{
 				const int64 val = Exp_GetLLVal(ptcKey);
 				SKIP_ARGSEP(ptcKey);
-				
+
 				const uint bit = Exp_GetUVal(ptcKey);
 				if (bit >= 64)
 				{
@@ -811,15 +811,15 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT(ppArgs));
             if ( iQty < 3 )
                 return false;
-                
+
             int64 iPos = Exp_GetVal( ppArgs[0] );
             int64 iCnt = Exp_GetVal( ppArgs[1] );
             if (iCnt < 0)
                 return false;
-            
+
             if ( *ppArgs[2] == '"')
                 ++ppArgs[2];
-                
+
             for (tchar *pEnd = ppArgs[2] + strlen(ppArgs[2]) - 1; pEnd >= ppArgs[2]; --pEnd)
             {
                 if ( *pEnd == '"')
@@ -829,7 +829,7 @@ badcmd:
                 }
             }
             int64 iLen = strlen(ppArgs[2]);
-            
+
 			const bool fBackwards = (iPos < 0);
 			if (fBackwards)
 				iPos = iLen - iCnt;
@@ -1008,17 +1008,17 @@ badcmd:
             int iQty = Str_ParseCmdsAdv(const_cast<tchar *>(ptcKey), ppArgs, ARRAY_COUNT(ppArgs), ",");
             if ( iQty < 3 )
                 return false;
-                
+
             tchar *iSep = Str_UnQuote(ppArgs[2]); //New function, trim (") and (') chars directly.
             for (tchar *iSeperator = iSep + strlen(iSep) - 1; iSeperator > iSep; --iSeperator)
                 *iSeperator = '\0';
-            
+
             tchar *pArgs = Str_UnQuote(ppArgs[0]);
             sVal.Clear();
             tchar *ppCmd[255];
             int count = Str_ParseCmdsAdv(pArgs, ppCmd, ARRAY_COUNT(ppCmd), iSep); //Remove unnecessary chars from seperator to avoid issues.
             tchar *ppArrays[2];
-            
+
             //Getting range of array index...
             int iArrays = Str_ParseCmdsAdv(ppArgs[1], ppArrays, ARRAY_COUNT(ppArrays), "-");
             llong iValue = Exp_GetLLVal(ppArgs[1]);
@@ -1030,7 +1030,7 @@ badcmd:
                 if (iValueEnd <= 0 || iValueEnd > count)
                     iValueEnd = count;
             }
-            
+
             if (iValue < 0)
                 return false;
             else if (iValue > 0)
@@ -1250,7 +1250,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						pSrc = &g_Serv;
 						ASSERT(pSrc);
 					}
-				}	
+				}
 			}
 
 			return pRef->r_Verb( script, pSrc );
@@ -1488,7 +1488,8 @@ bool CScriptObj::r_Load( CScript & s )
 	{
 		if ( s.IsKeyHead( "ON", 2 ) )	// trigger scripting marks the end
 			break;
-		r_LoadVal(s);
+
+        r_LoadVal(s);
 	}
 	return true;
 }
@@ -1610,7 +1611,7 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 	}
 
 	// We have some subexpressions, connected between them by logical operators.
-	
+
 	bool fWholeExprVal = false;
 	for (int i = 0; i < iQty; ++i)
 	{
@@ -1641,13 +1642,13 @@ bool CScriptObj::Evaluate_Conditional(lptstr ptcExpr, CTextConsole* pSrc, CScrip
 			fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
 		}
 
-		
+
 		if (sCur.uiType & SType::None)
 		{
 			ASSERT(i == iQty - 1);	// It should be the last subexpression
 			ASSERT((sPrev.uiType & SType::Or) || (sPrev.uiType & SType::And));
 		}
-		
+
 	}
 
 	return fWholeExprVal;
@@ -1694,7 +1695,7 @@ static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lp
 		{
 			// The separator we have found is before the nested QVAL.
 			ptcSrc = ptcSepPos;
-			break; 
+			break;
 		}
 
 		// Found a nested QVAL. Skip it, otherwise we'll catch the wrong separator
@@ -1747,7 +1748,7 @@ bool CScriptObj::Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextC
 	return true;
 }
 
-size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs, std::shared_ptr<ScriptedExprContext> pContext)
+int CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs, std::shared_ptr<ScriptedExprContext> pContext)
 {
 	ADDTOCALLSTACK("CScriptObj::ParseScriptText");
 	//ASSERT(ptcResponse[0] != ' ');	// Not needed: i remove whitespaces and invalid characters here.
@@ -1778,11 +1779,12 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 	const tchar chEnd	= fHTML ? '%' : '>';
 
 	// Variables used to handle the QVAL special case and do lazy evaluation, instead of fully evaluating the whole string on the first pass.
+	// As an aftertought QVAL parsing could have been moved into a separate function, but it's intricate enough and it's working, so let's leave as it is...'
 	enum class QvalStatus { None, Condition, Returns, End } eQval = QvalStatus::None;
 	int iQvalOpenBrackets = 0;
 
-	size_t iBegin = 0;
-	size_t i = 0;
+	size_t uiSubstitutionBegin = 0;
+	int i = 0;
 	EXC_TRY("ParseScriptText Main Loop");
 	for ( i = 0; ptcResponse[i] != '\0'; ++i)
 	{
@@ -1816,7 +1818,8 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
                 }
 
 				// Set the statement start
-				iBegin = i;
+				ASSERT(i >= 0);
+				uiSubstitutionBegin = (size_t)i;
 				pContext->_fParseScriptText_Brackets = true;
 
 				// Set-up to process special statements: is it a QVAL?
@@ -1856,7 +1859,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 				{
 					// Otherwise, it might be the << operator.
 
-                    // This shouldn't be necessary... but 
+                    // This shouldn't be necessary... but
                     /*
                     // Is a << operator? I want a whitespace after the operator.
                     if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
@@ -1925,12 +1928,12 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 
 			// Parse what's inside the open bracket
 			tchar* ptcRecurseParse = ptcResponse + i;
-			const size_t ilen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
+			const int iLen = ParseScriptText(ptcRecurseParse, pSrc, 2, pArgs );
 
 			pContext->_fParseScriptText_Brackets = true;
 			--pContext->_iParseScriptText_Reentrant;
 
-			i += ilen;
+			i += iLen;
 			continue;
 		}
 
@@ -1976,7 +1979,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 
 			// If i'm here it means that finally i'm at the end of the statement inside brackets.
 			pContext->_fParseScriptText_Brackets = false; // Close the statement.
-	
+
 			if ((eQval == QvalStatus::End) && (iQvalOpenBrackets != 0))
 			{
 				// I had an incomplete QVAL statement.
@@ -1988,7 +1991,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			EXC_SET_BLOCK("writeval");
 
 			ptcResponse[i] = '\0'; // Needed for r_WriteVal
-			lpctstr ptcKey = ptcResponse + iBegin + 1; // move past the opening bracket
+			lpctstr ptcKey = ptcResponse + uiSubstitutionBegin + 1; // move past the opening bracket
 
 			CSString sVal;
 			bool fRes;
@@ -2013,7 +2016,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 						fRes = true;
 				}
 			}
-			
+
 
 			if ( fRes == false )
 			{
@@ -2030,19 +2033,20 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 			//-- In the output string, substitute the raw substring with its parsed value
 			EXC_SET_BLOCK("mem shifting");
 
-			const size_t iWriteValLen = sVal.GetLength();
+			const size_t uiWriteValLen = sVal.GetLength();
 
 			// Make room for the obtained value, moving to left (if it's shorter than the scripted statement) or right (if longer) the string characters after it.
-			tchar* ptcDest = ptcResponse + iBegin + iWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
+			tchar* ptcDest = ptcResponse + uiSubstitutionBegin + uiWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
 			const tchar * const ptcLeftover = ptcResponse + i + 1;	// End of the statement we just evaluated
-			const size_t iLeftoverLen = strlen(ptcLeftover) + 1;
-			memmove(ptcDest, ptcLeftover, iLeftoverLen);
+			const size_t uiLeftoverLen = strlen(ptcLeftover) + 1;
+			memmove(ptcDest, ptcLeftover, uiLeftoverLen);
 
 			// Insert the obtained value in the room we created.
-			ptcDest = ptcResponse + iBegin;
-			memcpy(ptcDest, sVal.GetBuffer(), iWriteValLen);
+			ptcDest = ptcResponse + uiSubstitutionBegin;
+			memcpy(ptcDest, sVal.GetBuffer(), uiWriteValLen);
 
-			i = iBegin + iWriteValLen - 1;
+            // This can be negative.
+			i = (int)(uiSubstitutionBegin + uiWriteValLen) - 1;
 
 			if (fNoRecurseBrackets) // just do this one then bail out.
 			{
@@ -2056,7 +2060,7 @@ size_t CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int
 	EXC_DEBUG_START;
 	g_Log.EventDebug("response '%s' source addr '0%p' flags '%d' args '%p'\n", ptcResponse, static_cast<void *>(pSrc), iFlags, static_cast<void *>(pArgs));
 	EXC_DEBUG_END;
-	
+
 	pContext->_fParseScriptText_Brackets = false;
 	return i;
 }
@@ -2116,7 +2120,7 @@ bool CScriptObj::Execute_Call(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs
 		else
 			fRes = pRef->r_Call(argRaw, pSrc, pArgs, &sVal);
 	}
-	
+
 	return fRes;
 }
 
@@ -2622,6 +2626,9 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 		if (rid.IsValidUID())
 		{
 			const dword dwTotal = g_World.GetUIDCount();
+            if (dwTotal == 0)
+                return TRIGRET_ENDIF;
+
 			dword dwCount = dwTotal - 1;
 			dword dwTotalInstances = 0; // Will acquire the correct value for this during the loop
 			dword dwUID = 0;

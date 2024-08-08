@@ -230,10 +230,10 @@ void CChar::NPC_Act_Fight()
             break;
         case (TRIGRET_TYPE)(2) :
         {
-            SKILL_TYPE iSkillforced = (SKILL_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("skill"));
+            SKILL_TYPE iSkillforced = (SKILL_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("skill"));
             if (iSkillforced)
             {
-                SPELL_TYPE iSpellforced = (SPELL_TYPE)RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("spell"));
+                SPELL_TYPE iSpellforced = (SPELL_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("spell"));
                 if (g_Cfg.IsSkillFlag(iSkillforced, SKF_MAGIC))
                 {
                     m_atMagery.m_iSpell = iSpellforced;

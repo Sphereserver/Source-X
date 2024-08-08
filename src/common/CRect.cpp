@@ -281,7 +281,7 @@ CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 
 CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that make up this rect.
 {
-	//ADDTOCALLSTACK_INTENSIVE("CRect::GetSector");
+	//ADDTOCALLSTACK_DEBUG("CRect::GetSector");
 	// get all the CSector(s) that overlap this rect.
 	// RETURN: nullptr = no more
 
@@ -350,13 +350,13 @@ bool CRectMap::IsValid() const noexcept
 
 void CRectMap::NormalizeRect() noexcept
 {
-	//ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRect");
+	//ADDTOCALLSTACK_DEBUG("CRectMap::NormalizeRect");
 	CRect::NormalizeRect();
 	NormalizeRectMax();
 }
 
 void CRectMap::NormalizeRectMax() noexcept
 {
-    //ADDTOCALLSTACK_INTENSIVE("CRectMap::NormalizeRectMax");
+    //ADDTOCALLSTACK_DEBUG("CRectMap::NormalizeRectMax");
 	CRect::NormalizeRectMax( g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
 }

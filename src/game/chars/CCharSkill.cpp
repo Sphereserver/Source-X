@@ -1031,7 +1031,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		return nullptr;
 
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
-	ITEMID_TYPE id = (ITEMID_TYPE)(RES_GET_INDEX( Args.m_VarsLocal.GetKeyNum("ResourceID")));
+	ITEMID_TYPE id = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("ResourceID")));
 
 	wAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
 	if ( wAmount <= 0 )
@@ -1124,7 +1124,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	
 	if ( pOreDef->IsType( IT_ORE ))
 	{
-		ITEMID_TYPE idIngot = (ITEMID_TYPE)(RES_GET_INDEX( pOreDef->m_ttOre.m_idIngot));
+		ITEMID_TYPE idIngot = (ITEMID_TYPE)(ResGetIndex( pOreDef->m_ttOre.m_idIngot));
 		const CItemBase* pBaseDef = CItemBase::FindItemBase(idIngot); //Usually a lingot, but could be a a gem also.
 		if (!pBaseDef)
 		{
@@ -1178,7 +1178,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	{
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum(pszTmp))));
+		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp))));
 		
 		//We have finished the ore or the item being smelted.
 		if (iOreQty <= 0)
@@ -2113,7 +2113,7 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_FAIL )
 		return 0;	// lose the poison sometimes ?
 
-	if ( RES_GET_INDEX(pPoison->m_itPotion.m_Type) != SPELL_Poison )
+	if ( ResGetIndex(pPoison->m_itPotion.m_Type) != SPELL_Poison )
 		return -SKTRIG_ABORT;
 
 	CItem * pItem = m_Act_Prv_UID.ItemFind();
@@ -3286,7 +3286,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	{
 		UpdateStatVal( STAT_DEX, -(ushort)( 4 + g_Rand.GetVal(6) ) );
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
-			UpdateAnimate(ANIM_THROW);
+			UpdateAnimate( ANIM_MON_Stomp );
 
 		_SetTimeout(3000);
 		return 0;
@@ -3558,7 +3558,7 @@ int CChar::Skill_Stroke()
 
 int CChar::Skill_Stage( SKTRIG_TYPE stage )
 {
-	ADDTOCALLSTACK_INTENSIVE("CChar::Skill_Stage");
+	ADDTOCALLSTACK_DEBUG("CChar::Skill_Stage");
     EXC_TRY("Skill_Stage");
 
     SKILL_TYPE skill = Skill_GetActive();

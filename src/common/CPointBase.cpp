@@ -128,24 +128,26 @@ const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
 	return( * this );
 }
 
-void CPointBase::InitPoint() noexcept
+CPointBase& CPointBase::InitPoint() noexcept
 {
 	m_x = m_y = -1;	// invalid location.
 	m_z = 0;
 	m_map = 0;
+    return *this;
 }
-void CPointBase::ZeroPoint() noexcept
+CPointBase& CPointBase::ZeroPoint() noexcept
 {
 	m_x = m_y = 0;	// invalid location.
 	m_z = 0;
 	m_map = 0;
+    return *this;
 }
 
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
 {
     // This method is one of the most called in the whole app (maybe the most). ADDTOCALLSTACK unneededly sucks cpu.
     // This has to be optimized as much as possible.
-    //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
+    //ADDTOCALLSTACK_DEBUG("CPointBase::GetDistBase");
 
     switch (g_Cfg.m_iDistanceFormula)
     {
@@ -168,8 +170,8 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
             // This is even faster.
             const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
             const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-            return (dx > dy) * dx + (dx < dy) * dy;
-            
+            return (dx >= dy) * dx + (dx < dy) * dy;
+
         }
         case DISTANCE_FORMULA_DIAGONAL_NOZ:
         {
@@ -202,7 +204,7 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
 int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance between points
 {
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
-	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist");
+	//ADDTOCALLSTACK_DEBUG("CPointBase::GetDist");
 
 	// Get the basic 2d distance.
 	if ( !pt.IsValidPoint() || (pt.m_map != m_map))
@@ -219,7 +221,7 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
     //return maximum(dx, dy);
     const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
     const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-    return (dx > dy) * dx + (dx < dy) * dy;
+    return (dx >= dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -236,7 +238,7 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
     //return maximum(dx, dy);
     const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
     const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-    return (dx > dy) * dx + (dx < dy) * dy;
+    return (dx >= dy) * dx + (dx < dy) * dy;
 }
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
@@ -256,7 +258,7 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
             dz /= (PLAYER_HEIGHT / 2); // Take player height into consideration
 
             //return maximum(dz, dist);
-            return (dz > dist) * dz + (dz < dist) * dist;
+            return (dz >= dist) * dz + (dz < dist) * dist;
         }
         case DISTANCE_FORMULA_DIAGONAL_Z:
         {
@@ -382,7 +384,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			ptcKey += 6;
 			SKIP_SEPARATORS( ptcKey );
 			iStatic = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iStatic );
+			type = ResGetType( iStatic );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
 			SKIP_SEPARATORS( ptcKey );
@@ -390,12 +392,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		else
 		{
 			iStatic = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iStatic );
+			type = ResGetType( iStatic );
 		}
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iStatic)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(iStatic)));
 			if ( !pItemDef )
 			{
 				sVal.FormatVal( 0 );
@@ -525,7 +527,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			ptcKey += 6;
 			SKIP_SEPARATORS( ptcKey );
 			iComponent = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iComponent );
+			type = ResGetType( iComponent );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
 			SKIP_SEPARATORS( ptcKey );
@@ -533,12 +535,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		else
 		{
 			iComponent = Exp_GetVal( ptcKey );
-			type = RES_GET_TYPE( iComponent );
+			type = ResGetType( iComponent );
 		}
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iComponent)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(iComponent)));
 			if ( pItemDef == nullptr )
 			{
 				sVal.FormatVal( 0 );
@@ -771,7 +773,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 							sVal = pTypeDef->GetResourceName();
 						else
 							sVal.Clear();
-					} return true;	
+					} return true;
 					case PT_TERRAIN:
 					{
 						ptcKey += 7;
@@ -821,7 +823,7 @@ bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 
 DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const // Direction to point pt
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDir");
+	ADDTOCALLSTACK_DEBUG("CPointBase::GetDir");
 	// Get the 2D direction between points.
 	const int dx = (m_x-pt.m_x);
     const int dy = (m_y-pt.m_y);
@@ -880,7 +882,7 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 
 tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const noexcept
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
+	ADDTOCALLSTACK_DEBUG("CPointBase::WriteUsed");
 	if ( m_map )
 		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
 	else if ( m_z )
@@ -941,7 +943,7 @@ int CPointBase::Read( tchar * pszVal )
 		case 0:
 			break;
 	}
-    
+
     if (!ptTest.IsValidPoint())
     {
         InitPoint();
@@ -955,7 +957,7 @@ int CPointBase::Read( tchar * pszVal )
 CSector * CPointBase::GetSector() const
 {
     // This function is called SO frequently that's better to not add it to the call stack.
-	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
+	//ADDTOCALLSTACK_DEBUG("CPointBase::GetSector");
 
 	if ( !IsValidXY() )
 	{
@@ -970,7 +972,7 @@ CSector * CPointBase::GetSector() const
 
 CRegion * CPointBase::GetRegion( dword dwType ) const
 {
-	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegion");
+	ADDTOCALLSTACK_DEBUG("CPointBase::GetRegion");
 	// What region in the current CSector am i in ?
 	// We only need to update this every 8 or so steps ?
 	// REGION_TYPE_AREA
@@ -987,7 +989,7 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
     // This function is called SO frequently that's better to not add it to the call stack.
-	// ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
+	// ADDTOCALLSTACK_DEBUG("CPointBase::GetRegions");
 
 	if ( !IsValidPoint() )
 		return 0;

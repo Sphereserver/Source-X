@@ -3464,7 +3464,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Added: New Layer LAYER_STORAGE (80) to let scripters create their own storage system. (Issue: #1209)
       	Only t_container and t_container_locked can be equipped to this layer.
 - Changed: Decay time removed from spawned items, as Sphere gives tons of invalid link errors when items decayed. (Issue: #1218)
-- Added: New spellflag SPELLFLAG_FIELD_RANDOMDECAY (0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
+- Added: New spellflag SPELLFLAG_FIELD_RANDOMDECAY (CHANGED on 06/08/2024: 02000, it was before 0100000000) to randomize field timers like old sphere versions. (Issue: #1169)
 	SPELLFLAG_FIELD_RANDOMDECAY should be added to defs.
 - Changed: SERV.LOG command changed to support console colors. (Issue: [Feature Request] Colored Serv & Src Log System #1158)
 	SERV.LOG works same as before.
@@ -3568,7 +3568,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 
 08-04-2024, xwerswoodx
 - Fixed: Missing REGION reference for multis. (Issue: #1228)
-- Added: SPELLFLAG_NO_ELEMENTALENGINE (0200000000) as spellflag, for ignoring Elemental Engine Damages in specific spells. (Issue: #1230)
+- Added: SPELLFLAG_NO_ELEMENTALENGINE (CHANGED on 06/08/2024: 04000, it was before 0200000000) as spellflag, for ignoring Elemental Engine Damages in specific spells. (Issue: #1230)
 
 09-04-2024, xwerswoodx
 - Fixed: An issue that causes T_MULTI_CUSTOM keep multi count saved. (Issue: #1232)
@@ -3851,3 +3851,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 	So for example if you have a MONSTER (H slot) flying custom anim, with Cast2 action but not Pillage action you can set ANIM=020A0
 	If you have a custom anim with default configuration, you don't need to set ANIM=
+
+06-08-2024, Gladie
+- Fixed: changed value of some recent spellflags, since the previous values waere too big to be stored in a standard numerical variable.
+	New values:
+	SPELLFLAG_FIELD_RANDOMDECAY     02000
+	SPELLFLAG_NO_ELEMENTALENGINE    04000

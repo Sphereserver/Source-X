@@ -1695,7 +1695,7 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
 
 void CItemMultiCustom::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemMultiCustom::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemMultiCustom::r_Write");
     CItemMulti::r_Write(s);
 
     CMultiComponent * comp;

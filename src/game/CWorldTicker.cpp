@@ -43,7 +43,7 @@ void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
 */
 
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
 #endif
     _mWorldTickList.emplace(iTimeout, pTimedObject);
 }
@@ -54,7 +54,7 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
 
     //g_Log.EventDebug("Trying to erase TimedObject 0x%p with old timeout %ld.\n", pTimedObject, iOldTimeout);
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
 #endif
     const auto itMap = _mWorldTickList.equal_range(iOldTimeout);
     decltype(_mWorldTickList)::const_iterator itFound = itMap.second;  // first element greater than the key we look for
@@ -68,7 +68,7 @@ void CWorldTicker::_RemoveTimedObject(const int64 iOldTimeout, CTimedObject* pTi
                 g_Log.EventDebug("The same TimedObject is inserted multiple times in mWorldTickList. This shouldn't happen. Removing only the first one.\n");
             }
             itFound = it;
-#if !_DEBUG
+#if !defined(_DEBUG)
             break;
 #endif
         }
@@ -166,7 +166,7 @@ void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
 void CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
 {
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_mCharTickList.MT_CMUTEX);
 #endif
 
 
@@ -178,7 +178,7 @@ void CWorldTicker::_RemoveCharTicking(const int64 iOldTimeout, CChar* pChar)
 {
     // I'm reasonably sure that the element i'm trying to remove is present in this container.
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_mCharTickList.MT_CMUTEX);
 #endif
 
     const auto itMap = _mCharTickList.equal_range(iOldTimeout);
@@ -218,7 +218,7 @@ void CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
     if (fNeedsLock)
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(pChar->THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(pChar->MT_CMUTEX);
 #endif
         iTickNext = pChar->_iTimeNextRegen;
         iTickOld = pChar->_iTimePeriodicTick;
@@ -269,7 +269,7 @@ void CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
     if (fNeedsLock)
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(pChar->THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(pChar->MT_CMUTEX);
 #endif
         iTickOld = pChar->_iTimePeriodicTick;
     }
@@ -293,7 +293,7 @@ void CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     UnreferencedParameter(fNeedsLock);
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.MT_CMUTEX);
 #endif
         _ObjStatusUpdates.insert(pObj);
     }
@@ -308,7 +308,7 @@ void CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     UnreferencedParameter(fNeedsLock);
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.MT_CMUTEX);
 #endif
         _ObjStatusUpdates.erase(pObj);
     }
@@ -342,7 +342,7 @@ void CWorldTicker::Tick()
             {
                 EXC_SETSUB_BLOCK("Selection");
 #if MT_ENGINES
-                std::unique_lock<std::shared_mutex> lock_su(_ObjStatusUpdates.THREAD_CMUTEX);
+                std::unique_lock<std::shared_mutex> lock_su(_ObjStatusUpdates.MT_CMUTEX);
 #endif
                 if (!_ObjStatusUpdates.empty())
                 {
@@ -380,7 +380,7 @@ void CWorldTicker::Tick()
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables and for the unique_lock
             EXC_TRYSUB("Timed Objects Selection");
 #if MT_ENGINES
-            std::unique_lock<std::shared_mutex> lock(_mWorldTickList.THREAD_CMUTEX);
+            std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
 #endif
 
             WorldTickList::iterator itMap = _mWorldTickList.begin();
@@ -547,7 +547,7 @@ void CWorldTicker::Tick()
             CTimedObject* pTimedObj = static_cast<CTimedObject*>(pObjVoid);
 
 #if MT_ENGINES
-            std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->THREAD_CMUTEX);
+            std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->MT_CMUTEX);
 #endif
 
             const PROFILE_TYPE profile = pTimedObj->_GetProfileType();
@@ -663,7 +663,7 @@ void CWorldTicker::Tick()
         // Need here a new, inner scope to get rid of EXC_TRYSUB variables, and for the unique_lock
         EXC_TRYSUB("Char Periodic Ticks Selection");
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_mCharTickList.THREAD_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_mCharTickList.MT_CMUTEX);
 #endif
 
         CharTickList::iterator itMap       = _mCharTickList.begin();
@@ -700,9 +700,9 @@ void CWorldTicker::Tick()
 
     {
         EXC_TRYSUB("Periodic Chars Delete from List");
-#if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->THREAD_CMUTEX);
-#endif
+//#if MT_ENGINES
+//        std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->MT_CMUTEX);
+//#endif
             // Erase in chunks, call erase the least times possible.
             if (!_vecPeriodicCharsToEraseFromList.empty())
             {

@@ -1,6 +1,6 @@
 /**
 * @file CRegion.h
-* @brief 
+* @brief
 */
 
 #ifndef _INC_CREGION_H
@@ -65,7 +65,7 @@ public:
 	static const char *m_sClassName;
 	CPointMap m_pt;			// safe point in the region. (for teleporting to)
 	int m_iLinkedSectors;	// just for statistics tracking. How many sectors are linked ?
-	int m_iModified;
+	dword m_dwModifiedFlags;
 
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szTrigName[RTRIG_QTY+1];
@@ -116,7 +116,7 @@ public:
 #define REGMOD_NAME		0x0008
 #define REGMOD_GROUP	0x0010
 
-	void SetModified( int iModFlag ) noexcept;
+	void SetModified( dword dwModFlag ) noexcept;
 	void SetName( lpctstr pszName );
 	virtual lpctstr GetName() const override
 	{

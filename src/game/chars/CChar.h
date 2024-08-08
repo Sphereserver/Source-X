@@ -58,7 +58,7 @@ class CChar : public CObjBase, public CContainer, public CTextConsole
 
 	friend class CWorldTicker;
 
-    // THREAD_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
+    // MT_CMUTEX_DEF; // It inherits from CObjBase which inherits CTimedObject, which already has a class mutex.
 
 private:
 	// Spell type effects.
@@ -202,6 +202,8 @@ public:
 	int			m_Act_Effect;
 	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
+
+    std::vector<CUID> m_followers;
 
 	// Args related to specific actions type (m_Act_SkillCurrent)
 	union
@@ -488,7 +490,7 @@ public:
 	bool MoveToRegion(CRegionWorld* pNewArea, bool fAllowReject);
 
 	bool MoveToRegionReTest( dword dwType );
-	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocation = true, bool fForceFix = false, bool fAllowReject = true);
+	bool MoveToChar(const CPointMap& pt, bool fStanding = true, bool fCheckLocationEffects = true, bool fForceFix = false, bool fAllowReject = true);
 	virtual bool MoveTo(const CPointMap& pt, bool fForceFix = false) override;
 	virtual void SetTopZ( char z ) override;
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, ushort iSteps = 0 ) override;
@@ -500,7 +502,7 @@ public:
     bool CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovementFlags, height_t uiMyHeight, CServerMapBlockingState* blockingState, bool fPathfinding) const;
 	CRegion * CanMoveWalkTo( CPointMap & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
-	TRIGRET_TYPE CheckLocation(bool fCanCheckRecursively, bool fStanding);
+	TRIGRET_TYPE CheckLocationEffects(bool fStanding);
 
 public:
 	// Client Player specific stuff. -------------------------

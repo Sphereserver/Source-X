@@ -74,11 +74,11 @@ bool CTimedFunction::_OnTick() // virtual
 
 	CUID uid(_uidAttached);
 	CScript s(_ptcCommand);
-	
+
 	delete this; // This has to be the last function call to ever access this object!
 
 	// From now on, this object does NOT exist anymore!
-	return _ExecTimedFunction(std::move(uid), std::move(s));	
+	return _ExecTimedFunction(std::move(uid), std::move(s));
 }
 
 bool CTimedFunction::OnTick() // virtual
@@ -88,7 +88,7 @@ bool CTimedFunction::OnTick() // virtual
 	CUID uid;
 	CScript s;
 	{
-		THREAD_SHARED_LOCK_SET;
+		MT_ENGINE_SHARED_LOCK_SET;
 		uid.SetPrivateUID(_uidAttached);
 		s.ParseKey(_ptcCommand);
 	}

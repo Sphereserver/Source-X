@@ -731,7 +731,7 @@ enum RC_TYPE
 
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 
-{ 
+{
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
     { "AGREE",					{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAgree)				}},
@@ -820,9 +820,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "DUNGEONLIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDungeon)			}},
     { "EMOTEFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iEmoteFlags)			}},
     { "EQUIPPEDCAST",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fEquippedCast)			}},
-    { "ERALIMITGEAR",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
-    { "ERALIMITLOOT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
-    { "ERALIMITPROPS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
+    { "ERALIMITGEAR",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
+    { "ERALIMITLOOT",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
+    { "ERALIMITPROPS",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
     { "EVENTSITEM",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItem)			}},
     { "EVENTSPET",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPet)			}},
     { "EVENTSPLAYER",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPlayer)			}},
@@ -2332,13 +2332,13 @@ static constexpr lpctstr _ptcStatName[STAT_QTY] = // not alphabetically sorted o
 
 STAT_TYPE CServerConfig::GetStatKey( lpctstr ptcKey ) // static
 {
-	//ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatKey");
+	//ADDTOCALLSTACK_DEBUG("CServerConfig::GetStatKey");
 	return (STAT_TYPE) FindTable( ptcKey, _ptcStatName, ARRAY_COUNT(_ptcStatName));
 }
 
 lpctstr CServerConfig::GetStatName(STAT_TYPE iKey) // static
 {
-    //ADDTOCALLSTACK_INTENSIVE("CServerConfig::GetStatName");
+    //ADDTOCALLSTACK_DEBUG("CServerConfig::GetStatName");
     ASSERT(iKey >= STAT_STR && iKey < STAT_QTY);
     return _ptcStatName[iKey];
 }
@@ -3978,7 +3978,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			{
 				// For a book the page is... the page number
 				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
-                int iArgPage = RES_GET_INDEX(Exp_GetVal(pArg2));
+                int iArgPage = ResGetIndex(Exp_GetDWVal(pArg2));
                 if ( iArgPage < RES_PAGE_MAX )
                     wPage = (word)iArgPage;
                 else

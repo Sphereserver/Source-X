@@ -12,11 +12,12 @@
 
 // Simple string hashing algorithm function by D. J. Bernstein
 // Original code found at: http://www.cse.yorku.ca/~oz/hash.html
-uint HashString(lpctstr str, size_t length)
+NO_SANITIZE_UNDEFINED
+static uint HashString(lpctstr str, const size_t length)   // integer overflow is expected
 {
 	uint hash = 5381;
 	for (size_t i = 0; i < length; ++i)
-		hash = ((hash << 5) + hash) + *(str++);
+		hash = ((hash << 5) + hash) + (uint)(*(str++));
 
 	return hash;
 }
@@ -111,7 +112,7 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
                 pObj->AddPropsTooltipData(pObj);
 			}
-			
+
 			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP_AFTERDEFAULT) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP_AFTERDEFAULT)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP_AFTERDEFAULT)))
 			{
 				CScriptTriggerArgs args(pObj);
@@ -165,7 +166,7 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 			pObj->SetPropertyList(propertyList);
 		}
 	}
-	
+
 	if (propertyList->isEmpty() == false)
 	{
 		switch (g_Cfg.m_iTooltipMode)
@@ -661,7 +662,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerSAdjusted());
-		
+
 	} break;
 
 	case IT_SPAWN_ITEM:

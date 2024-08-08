@@ -48,6 +48,11 @@
 #define FALLTHROUGH [[fallthrough]]
 #define NODISCARD	[[nodiscard]]
 
+#ifdef _DEBUG
+    #define NOEXCEPT_NODEBUG
+#else
+    #define NOEXCEPT_NODEBUG noexcept
+#endif
 
 /*
 	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
@@ -63,18 +68,52 @@ inline void UnreferencedParameter(T const&) noexcept {
 
 /* Sanitizers utility */
 
-#ifndef _DEBUG
-    #define NO_SANITIZE_ADDRESS
-#else
-    #ifdef _MSC_VER
-        #ifdef __SANITIZE_ADDRESS__
-            #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
-        #else 
-            #define NO_SANITIZE_ADDRESS 
-        #endif
+#if defined(_MSC_VER)
+
+    #if defined(__SANITIZE_ADDRESS__) || defined(ADDRESS_SANITIZER)
+        #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
     #else
-        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address"))) 
+        #define NO_SANITIZE_ADDRESS
     #endif
+
+    // Not yet implemented on MSVC, as of 2022 ver.
+    #define NO_SANITIZE_UNDEFINED
+
+#elif defined(__clang__)
+
+    #if defined(__SANITIZE_ADDRESS__) || defined(ADDRESS_SANITIZER)
+        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
+    #else
+        #define NO_SANITIZE_ADDRESS
+    #endif
+
+    //#if __has_feature(undefined_behavior_sanitizer) || defined(UNDEFINED_BEHAVIOR_SANITIZER)
+        // Clang doesn't have an attribute nor a pragma for this (yet?)
+    //    #define NO_SANITIZE_UNDEFINED __attribute__((no_sanitize_undefined))
+    //#else
+        #define NO_SANITIZE_UNDEFINED
+    //#endif
+
+#elif defined(__GNUC__)
+
+    #if defined(__SANITIZE_ADDRESS__) || defined(ADDRESS_SANITIZER)
+        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address")))
+    #else
+        #define NO_SANITIZE_ADDRESS
+    #endif
+
+    // GCC still hasn't __SANITIZE_UNDEFINED__ ?
+    //#if defined(__SANITIZE_UNDEFINED__) || defined(UNDEFINED_BEHAVIOR_SANITIZER)
+    //    #define NO_SANITIZE_UNDEFINED __attribute__((no_sanitize("undefined")))
+    //#else
+        #define NO_SANITIZE_UNDEFINED
+    //#endif
+
+#else
+
+    #define NO_SANITIZE_ADDRESS
+    #define NO_SANITIZE_UNDEFINED
+
 #endif
 
 

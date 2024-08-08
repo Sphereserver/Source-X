@@ -23,7 +23,7 @@ void CCSpawn::AddBadSpawn()
     {
         return;
     }
-    THREAD_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET;
     if (std::find(_vBadSpawns.cbegin(), _vBadSpawns.cend(), this) == _vBadSpawns.cend())
     {
         _vBadSpawns.emplace_back(this); //only if it's not inserted already.
@@ -34,7 +34,7 @@ void CCSpawn::AddBadSpawn()
 void CCSpawn::DelBadSpawn()
 {
     ADDTOCALLSTACK("CCSpawn::DelBadSpawn");
-    THREAD_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET;
     if (!_vBadSpawns.empty())
     {
         _vBadSpawns.erase(std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this));
@@ -59,7 +59,7 @@ CCSpawn *CCSpawn::GetBadSpawn(int index)
 
 CCSpawn::CCSpawn(CItem *pLink, bool fIsChampion) : CComponent(COMP_SPAWN), _fIsChampion(fIsChampion)
 {
-    //ADDTOCALLSTACK_INTENSIVE("CCSpawn::CCSpawn");
+    //ADDTOCALLSTACK_DEBUG("CCSpawn::CCSpawn");
     _pLink = pLink;
     _iAmount = 1;
     _iPile = 1;
@@ -656,7 +656,7 @@ void CCSpawn::AddObj(const CUID& uid)
 
     if (GetCurrentSpawned() >= GetAmount())
     {
-        pSpawnItem->m_CanMask &= ~CAN_O_NOSLEEP;
+        pSpawnItem->m_CanMask &= ~ (uint64)CAN_O_NOSLEEP;
 
         if (pSpawnItem->GetTopSector()->IsSleeping())
             pSpawnItem->_GoSleep();
@@ -720,20 +720,40 @@ void CCSpawn::KillChildren()
     for (std::vector<CUID>::iterator it = _uidList.begin(), itEnd = _uidList.end(); it != itEnd; ++it)
     {
         CObjBase* pObj = it->ObjFind();
+        if (!pObj)
+        {
+            // Unregistered UID?
+            continue;
+        }
+
         CChar *pChar = dynamic_cast<CChar*>(pObj);
         if (pChar)
         {
+#ifdef _DEBUG
+            auto parent = pChar->GetParent();
+            const auto sector = pChar->GetTopSector();
+            DEBUG_ASSERT(parent == &sector->m_Chars_Active || parent == &sector->m_Chars_Disconnect);
+#endif
             pChar->SetSpawn(nullptr);   // Just to prevent CObjBase to call DelObj.
             pChar->Delete();
+
             continue;
         }
+
         CItem *pItem = dynamic_cast<CItem*>(pObj);
         if (pItem)
         {
+#ifdef _DEBUG
+            auto parent = pItem->GetParent();
+            const auto sector = pItem->GetTopSector();
+            DEBUG_ASSERT(parent == &sector->m_Items);
+#endif
             pItem->SetSpawn(nullptr);   // Just to prevent CObjBase to call DelObj.
             pItem->Delete();
+
             continue;
         }
+        ASSERT(false);
     }
     _uidList.clear();
     _fKillingChildren = false;

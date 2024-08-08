@@ -54,8 +54,18 @@ function (toolchain_exe_stuff_common)
 
 
 	IF (${USE_ASAN})
-		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=address -fno-sanitize-recover=address -fsanitize-address-use-after-scope)
+		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
+      -fsanitize=address -fno-sanitize-recover=address #-fsanitize-cfi # cfi: control flow integrity
+      -fsanitize-address-use-after-scope -fsanitize=pointer-compare -fsanitize=pointer-subtract
+      # Flags for additional instrumentation not strictly needing asan to be enabled
+      -fcf-protection=full -fstack-check -fstack-protector-all -fstack-clash-protection
+      # Not supported by Clang, but supported by GCC
+      #-fvtable-verify=preinit -fharden-control-flow-redundancy -fhardcfr-check-exceptions
+      # Other
+      #-fsanitize-trap=all
+		)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_MSAN})
@@ -63,20 +73,26 @@ function (toolchain_exe_stuff_common)
 See comments in the toolchain and: https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo")
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins -fPIE)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_LSAN})
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=leak)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak>)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS
-			-fsanitize=undefined,shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds
-			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute
-			-fno-sanitize=enum)
+			-fsanitize=undefined,float-divide-by-zero,local-bounds
+			-fno-sanitize=enum
+			# Supported?
+			-fsanitize=unsigned-integer-overflow #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
+      -fsanitize=implicit-conversion
+    )
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)
+    SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
 		SET (ENABLED_SANITIZER true)
 	ENDIF ()
 
@@ -91,9 +107,11 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 	set (cxx_local_opts_warnings
 		-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
 		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
-		# clang-specific:
-		-Wno-format-security
-	)
+		-Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
+
+		# clang -specific:
+    # -fforce-emit-vtables
+		)
 	set (cxx_local_opts
 		-std=c++20 -pthread -fexceptions -fnon-call-exceptions
 		-pipe -ffast-math
@@ -122,17 +140,17 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 		SET (COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
 	ENDIF ()
 	IF (TARGET spheresvr_release)
-		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -O3 -flto=full -fvirtual-function-elimination ${COMPILE_OPTIONS_EXTRA})
 	ENDIF ()
 	IF (TARGET spheresvr_nightly)
 		IF (ENABLED_SANITIZER)
 			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
 		ELSE ()
-			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+			 TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -O3 -flto=full -fvirtual-function-elimination ${COMPILE_OPTIONS_EXTRA})
 		ENDIF ()
 	ENDIF ()
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
 	ENDIF ()
 
 

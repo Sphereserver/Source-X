@@ -67,10 +67,10 @@ bool CNetworkOutput::processOutput()
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
 
 	const ProfileTask networkTask(PROFILE_NETWORK_TX);
+	static thread_local uchar tick = 0;
 
-	static uchar tick = 0;
 	EXC_TRY("CNetworkOutput");
-	++tick;
+	tick = (tick == 16) ? 0 : (tick + 1);
 
 	// decide which queues need to be processed
 	bool toProcess[PacketSend::PRI_QTY];

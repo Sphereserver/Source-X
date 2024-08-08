@@ -91,7 +91,7 @@ bool CItemMap::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bo
 
 void CItemMap::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_INTENSIVE("CItemMap::r_Write");
+    ADDTOCALLSTACK_DEBUG("CItemMap::r_Write");
     CItemVendable::r_Write(s);
     for ( size_t i = 0; i < m_Pins.size(); i++ )
         s.WriteKeyFormat("PIN", "%i,%i", m_Pins[i].m_x, m_Pins[i].m_y);

@@ -66,7 +66,7 @@ void CClient::resendBuffs() const
 		wStatEffect = pItem->m_itSpell.m_spelllevel;
         int64 iTimerEffectSigned = pItem->GetTimerSAdjusted();
 		wTimerEffect = (word)(maximum(iTimerEffectSigned, 0));
-        SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+        SPELL_TYPE spell = (SPELL_TYPE)(ResGetIndex(pItem->m_itSpell.m_spell));
         const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(spell);
 
 		switch (spell)
@@ -1788,7 +1788,7 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	// Place an item from a deed. preview all the stuff
 
 	ASSERT( m_Targ_UID == pDeed->GetUID());
-	ITEMID_TYPE iddef = (ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type));
+	ITEMID_TYPE iddef = (ITEMID_TYPE)(ResGetIndex(pDeed->m_itDeed.m_Type));
 	m_tmUseItem.m_pParent = pDeed->GetParent();	// Cheat Verify.
 	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef, pDeed->GetHue() );
 }

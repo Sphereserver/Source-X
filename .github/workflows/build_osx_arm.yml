@@ -1,8 +1,16 @@
 name: MacOS ARM
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
 
 jobs:
   macos-arm64:
@@ -89,7 +97,7 @@ jobs:
       - name: Download builds
         uses: actions/download-artifact@v4
         with:
-          name: Build-arm64
+          name: Build-osx-arm64
           merge-multiple: true
           run-id: ${{ github.run_id }}
       - name: Push release
