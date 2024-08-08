@@ -913,14 +913,12 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 		{
 			// Animals have certain anims. Monsters have others.
 
-			// Animals have certain anims. Monsters have others.
-
             CUOMobTypesType mobTypesRow = { 0, 0 };
 
             CREID_TYPE dispID = GetDispID();
 
             //Check mobtypes.txt to get the anim type
-            if (g_Install.m_mobtypes.IsLoaded())
+            if (g_Cfg.m_fUseMobTypes && g_Install.m_mobtypes.IsLoaded())
             {
                 mobTypesRow.m_type = g_Install.m_mobtypes.GetEntry((ushort)dispID)->m_type;
                 mobTypesRow.m_flags = g_Install.m_mobtypes.GetEntry((ushort)dispID)->m_flags;
@@ -939,7 +937,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
             {
 
                 //Only mount animations, 3 actions
-                if (dispID == CREID_BOURA_AR || dispID == CREID_TARANTULA || dispID == CREID_DRAGON_SERPENTINE_ETH) // Only Mount
+                if (dispID == CREID_BOURA_AR || dispID == CREID_TARANTULA || dispID == CREID_DRAGON_SERPENTINE_ETH)
                 {
                     switch (action)
                     {
@@ -1771,7 +1769,9 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_CAST_DIR:
-                    case ANIM_CAST_AREA:
+                    case ANIM_CAST_AREA:                  
+                    case ANIM_ATTACK_BOW: //return ANIM_MON_AttackBow; //Always Empty except for standard ID 13, 15 and 16
+                    case ANIM_ATTACK_XBOW: //return ANIM_MON_AttackXBow; //Always Empty except for standard ID 13, 15 and 16
 
                         //Check how many cast actions are present
                         //Stomp action is not a cast for Corpser, Earth Elemental and Gorilla
@@ -1843,17 +1843,17 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                             }
 
                             if (dispID == CREID_SHADOW_LORD
-                                || pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK1) //Custom Anim without Attack1
+                                || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK1)) //Custom Anim without Attack1
                             {
                                 attackActions--;
                             }
                             if (dispID == CREID_EAGLE || dispID == CREID_SHADOW_LORD
-                                || pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK2) //Custom Anim without Attack2
+                                || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK2)) //Custom Anim without Attack2
                             {
                                 attackActions--;
                             }
                             if (dispID == CREID_EAGLE || dispID == CREID_DRAGON_CRIMSON || dispID == CREID_DRAGON_PLATINUM || dispID == CREID_SHADOW_LORD
-                                || pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK3) //Custom Anim without Attack3
+                                || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK3)) //Custom Anim without Attack3
                             {
                                 attackActions--;
                             }
@@ -1961,17 +1961,17 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                         if (dispID == CREID_SHADOW_LORD
-                            || pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK1) //Custom Anim without Attack1
+                            || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK1)) //Custom Anim without Attack1
                         {
                             attackActions--;
                         }
                         if (dispID == CREID_EAGLE || dispID == CREID_SHADOW_LORD
-                            || pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK2) //Custom Anim without Attack2
+                            || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK2)) //Custom Anim without Attack2
                         {
                             attackActions--;
                         }
                         if (dispID == CREID_EAGLE || dispID == CREID_DRAGON_CRIMSON || dispID == CREID_DRAGON_PLATINUM || dispID == CREID_SHADOW_LORD
-                            || pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK3) //Custom Anim without Attack3
+                            || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_ATTACK3)) //Custom Anim without Attack3
                         {
                             attackActions--;
                         }
@@ -1998,12 +1998,6 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                             return ANIM_MON_STAND;
                         }
                         break;
-
-                    case ANIM_ATTACK_BOW:
-                        return ANIM_MON_AttackBow; //Always Empty except for standard ID 13, 15 and 16
-
-                    case ANIM_ATTACK_XBOW:
-                        return ANIM_MON_AttackXBow; //Always Empty except for standard ID 13, 15 and 16
 
                     case ANIM_DIE_BACK:
                         //Die while flying animation
@@ -2052,12 +2046,12 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                         if (dispID == CREID_EAGLE || dispID == CREID_CORPSER
-                            || pCharDef->m_Anims & AFLAG_CUST_MON_NO_BLOCKR) //Custom anims without BlockRight
+                            || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_BLOCKR)) //Custom anims without BlockRight
                         {
                             blockActions--;
                         }
                         if (dispID == CREID_EAGLE || dispID == CREID_CORPSER || dispID == CREID_DRAGON_CRIMSON || dispID == CREID_DRAGON_PLATINUM
-                            || pCharDef->m_Anims & AFLAG_CUST_MON_NO_BLOCKL) //Custom anims without BlockLeft
+                            || (pCharDef->m_Anims & AFLAG_CUST_MON_NO_BLOCKL)) //Custom anims without BlockLeft
                         {
                             blockActions--;
                         }

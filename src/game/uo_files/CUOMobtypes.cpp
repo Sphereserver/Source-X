@@ -8,6 +8,7 @@
 #include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../common/CUOInstall.h"
+#include "../../game/uo_files/uofiles_enums_creid.h"
 #include "CUOMobtypes.h"
 
 void CUOMobTypes::Load()
@@ -23,8 +24,8 @@ void CUOMobTypes::Load()
 
     if (g_Install.OpenFile(csvMobTypes, "mobtypes.txt", (word)(OF_READ | OF_TEXT | OF_DEFAULTMODE)))
     {
-        _mobTypesEntries.resize(4096);
-        for (int i = 0; i < 4096; i++)
+        _mobTypesEntries.resize(CREID_QTY);
+        for (int i = 0; i < _mobTypesEntries.size(); i++)
         {
             mobTypesRow.m_type = 4;
             mobTypesRow.m_flags = 0;
@@ -42,8 +43,6 @@ void CUOMobTypes::Load()
 
                 std::string tmpString = pszTemp;
 
-                std::vector<std::string> splitArray;
-
                 int len = (int)tmpString.length();
                 len = Str_TrimEndWhitespace(tmpString.data(), len);
 
@@ -51,13 +50,9 @@ void CUOMobTypes::Load()
                     continue;
 
                 //Split the string
-                char* pch;
-                pch = strtok(tmpString.data(), " \t");
-                while (pch != NULL)
-                {
-                    splitArray.push_back(pch);
-                    pch = strtok(NULL, " \t");
-                }
+                std::vector<tchar*> splitArray;
+                splitArray.resize(3);
+                size_t iQty = Str_ParseCmds(tmpString.data(), splitArray.data(), 3, " \t#");
 
                 if (splitArray.size() < 3)
                 {
@@ -65,22 +60,23 @@ void CUOMobTypes::Load()
                     continue;
                 }
 
-                if (!IsStrNumeric(splitArray[0].data()))
+                if (!IsStrNumeric(splitArray[0]))
                 {
                     g_Log.EventError("Mobtypes.txt: non numeric ID on line %" PRIuSIZE_T " \n", count);
                     continue;
                 }
 
                 int animIndex = std::stoi(splitArray[0]);
-                if (splitArray[1] == "MONSTER")
+                std::string sType = splitArray[1];
+                if (sType == "MONSTER")
                     mobTypesRow.m_type = 0;
-                else if (splitArray[1] == "SEA_MONSTER")
+                else if (sType == "SEA_MONSTER")
                     mobTypesRow.m_type = 1;
-                else if (splitArray[1] == "ANIMAL")
+                else if (sType == "ANIMAL")
                     mobTypesRow.m_type = 2;
-                else if (splitArray[1] == "HUMAN")
+                else if (sType == "HUMAN")
                     mobTypesRow.m_type = 3;
-                else if (splitArray[1] == "EQUIPMENT")
+                else if (sType == "EQUIPMENT")
                     mobTypesRow.m_type = 4;
                 else
                 {
@@ -88,24 +84,7 @@ void CUOMobTypes::Load()
                     g_Log.EventError("Mobtypes.txt: wrong type found on line %" PRIuSIZE_T " \n", count);
                 }
 
-                //Comment check
-                std::size_t posComment = splitArray[2].find('#');
-
-                if (posComment == -1) //No comment
-                {
-
-                }
-                else if (posComment > 0) //Comment after flags without a space or tab
-                {
-                    splitArray[2] = splitArray[2].substr(0, posComment - 1);
-                }
-                else if (posComment == 0)
-                {
-                    g_Log.EventError("Mobtypes.txt: comment instead of flags found on line %" PRIuSIZE_T " \n", count);
-                    continue;
-                }
-
-                mobTypesRow.m_flags = std::strtol(splitArray[2].data(), NULL, 16);
+                mobTypesRow.m_flags = std::strtol(splitArray[2], NULL, 16);
 
                 _mobTypesEntries[animIndex] = mobTypesRow;
             }
