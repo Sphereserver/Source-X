@@ -86,7 +86,10 @@ void CUOMobTypes::Load()
 
                 mobTypesRow.m_flags = std::strtol(splitArray[2], NULL, 16);
 
-                _mobTypesEntries[animIndex] = mobTypesRow;
+                if (animIndex <= _mobTypesEntries.size()) //Safety check
+                {
+                    _mobTypesEntries[animIndex] = mobTypesRow;
+                }
             }
         }
         csvMobTypes.Close();
