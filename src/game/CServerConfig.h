@@ -240,6 +240,7 @@ public:
 	int64  _iMapCacheTime;     // Time in sec to keep unused map data..
 	int64  _iSectorSleepDelay;    // The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;        // Whether or not to use map diff files.
+    bool m_fUseMobTypes;        // Whether or not to use mobtypes.txt file.
 
 	CSString m_sWorldBaseDir;   // save\" = world files go here.
 	CSString m_sAcctBaseDir;    // Where do the account files go/come from ?

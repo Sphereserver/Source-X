@@ -20,7 +20,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_defense = 0;
 	m_defenseBase = 0;
 	m_defenseRange = 0;
-	m_Anims = 0xFFFFFF;
+	m_Anims = 0;
   	m_MaxFood = 0;			// Default value
 	_wBloodHue = 0;
 	m_wColor = 0;

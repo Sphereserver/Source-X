@@ -45,6 +45,7 @@ CServerConfig::CServerConfig()
 	_iMapCacheTime		= 2ll  * 60 * MSECS_PER_SEC;
 	_iSectorSleepDelay  = 10ll * 60 * MSECS_PER_SEC;
 	m_fUseMapDiffs		= false;
+    m_fUseMobTypes      = false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
 	m_fSecure				= true;
@@ -707,6 +708,7 @@ enum RC_TYPE
 	RC_USEEXTRABUFFER,			// m_fUseExtraBuffer
 	RC_USEHTTP,					// m_fUseHTTP
 	RC_USEMAPDIFFS,				// m_fUseMapDiffs
+    RC_USEMOBTYPES,             // m_fUseMobTypes
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
 	RC_VENDORMARKUP,			// m_iVendorMarkup
@@ -992,6 +994,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseExtraBuffer)		}},
 	{ "USEHTTP",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_fUseHTTP)				}},
 	{ "USEMAPDIFFS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseMapDiffs)			}},
+    { "USEMOBTYPES",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseMobTypes)			} },
 	{ "USENOCRYPT",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsenocrypt)			}},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsePacketPriorities)	}},
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},

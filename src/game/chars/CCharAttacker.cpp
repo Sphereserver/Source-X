@@ -23,6 +23,11 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
         TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, pChar, 0);
         if (tRet == TRIGRET_RET_TRUE)
             return false;
+        else
+        {
+            if (pChar->IsNPC())
+                UpdateAnimate(ANIM_ALERT);
+        }
     }
 
     CScriptTriggerArgs Args;

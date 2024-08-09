@@ -227,7 +227,48 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_ANI_SLEEP			= 0x0b,	// lie down (not all have this)
     ANIM_ANI_DIE2			= 0x0c,
 
-    ANIM_QTY_ANI	= 13,
+    ANIM_QTY_ANI            = 13,
+
+    //UOP anims
+    ANIM_UOP_WALK_COMBAT    = 0,
+    ANIM_UOP_STAND_COMBAT   = 1,
+    ANIM_UOP_DIE_BACKWARD   = 2,
+    ANIM_UOP_DIE_FORWARD    = 3,
+    ANIM_UOP_ATTACK_1       = 4,
+    ANIM_UOP_ATTACK_2       = 5,
+
+    ANIM_UOP_GETHIT         = 10,
+    ANIM_UOP_PILLAGE        = 11,
+    ANIM_UOP_CAST_1         = 12,
+    ANIM_UOP_CAST_2         = 13,
+
+    ANIM_UOP_BLOCK          = 15,
+
+    ANIM_UOP_FLY            = 19,
+
+    ANIM_UOP_WALK           = 22,
+    ANIM_UOP_SPECIAL        = 23,
+    ANIM_UOP_RUN            = 24,
+    ANIM_UOP_STAND          = 25,
+    ANIM_UOP_FIDGET         = 26,
+    ANIM_UOP_ROAR           = 27,
+    ANIM_UOP_PEACE_TO_COMBAT = 28,
+    ANIM_UOP_WALK_MOUNTED   = 29, //Or Boss Special 1
+    ANIM_UOP_RUN_MOUNTED    = 30, //Or Boss Special 2
+    ANIM_UOP_STAND_MOUNTED  = 31,
+
+    //Missing actions
+    ANIM_ALERT              = 35,
+    ANIM_THROW              = 36,
+    ANIM_PILLAGE            = 37,
+    ANIM_STOMP              = 38,
+    ANIM_FLY                = 39,
+    ANIM_LAND               = 40,
+    ANIM_GETHIT_AIR         = 41,
+    ANIM_SUMMON             = 42,
+    ANIM_SPECIAL            = 43,   //UOP anims
+    ANIM_BOSS_SPECIAL_1     = 44,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+    ANIM_BOSS_SPECIAL_2     = 45,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
 
     ANIM_QTY		= 0x32,
     ANIM_MASK_MAX   = 64    // CCharBase::m_Anims bitmask can hold a maximum of 64 values (1 << 63)
@@ -278,6 +319,65 @@ enum ANIM_TYPE_NEW	// not all creatures animate the same for some reason. http:/
 
     NANIM_SPELL_QTY = 2,
 
+};
+
+enum ANIM_TYPE_FLAGS
+{
+    //Mobtypes.txt
+    ATFLAG_None                             = 0x00000,
+    ATFLAG_Use10IfHittedWhileFlying         = 0x00001,
+    ATFLAG_Use2IfHittedWhileRunning         = 0x00002,
+    ATFLAG_IdleAt8Frame                     = 0x00004,
+    ATFLAG_CanFlying                        = 0x00008,
+    ATFLAG_Unknown10                        = 0x00010, //HUMAN 10, Unknown
+    ATFLAG_CalculateOffsetLowGroupExtended  = 0x00020, //Animal in Monster Slot
+    ATFLAG_CalculateOffsetByLowGroup        = 0x00040, //Monster in Animal slot
+    ATFLAG_ReplaceAttack1With2              = 0x00080,
+    ATFLAG_ReplaceGetHitBlockPillage        = 0x00100,
+    ATFLAG_ReplaceFlyAction                 = 0x00200,
+    ATFLAG_CalculateOffsetByPeopleGroup     = 0x00400,  //Animal or Monster in People slot: doesn't seems to be used
+    ATFLAG_Unknown800                       = 0x00800, //MONSTER 800, unknown: Corpser, Gazer, Reaper
+    ATFLAG_StompAction                      = 0x01000,
+    ATFLAG_Unknown2000                      = 0x02000,   //Used for UOP but unknown
+    ATFLAG_Unknown4000                      = 0x04000,   //ANIMAL 4000, Unknown (Open Animal Backpack?) Polar Bear, HIRYU, Ridgeback, Savage Ridgeback, Giant Beetle
+    ATFLAG_Unknown8000                      = 0x08000,   //HUMAN 8000, Unknown
+    ATFLAG_UseUopAnimation                  = 0x10000,
+    ATFLAG_HumanPaperdoll                   = 0x20000,  //Let Open Paperdoll in Standard Client
+    ATFLAG_Unknown40000                     = 0x40000,  //Unused
+    ATFLAG_Unknown80000                     = 0x80000,   //Unused
+
+    //Custom in monster script ANIM=
+    //The default configuration is with this actions:
+    // 0 (Walk), 1 (Stand), 2 (Die1), 3 (Die2),
+    // 4 (Attack1), 5 (Attack2), 6 (Attack3),
+    // 10 (GetHit), 11 (Pillage), 15 (Block Right), 16 (Block Left),
+    // 17 (Idle), 18 (Fidget)
+    AFLAG_CUST_MON_NO_DIE2                  = 0x01,
+    AFLAG_CUST_MON_NO_ATTACK1               = 0x02,
+    AFLAG_CUST_MON_NO_ATTACK2               = 0x04,
+    AFLAG_CUST_MON_NO_ATTACK3               = 0x08,
+    AFLAG_CUST_MON_NO_GETHIT                = 0x10,
+    AFLAG_CUST_MON_NO_PILLAGE               = 0x20,
+    AFLAG_CUST_MON_STOMP                    = 0x40,
+    AFLAG_CUST_MON_CAST2                    = 0x80,
+    AFLAG_CUST_MON_CAST3                    = 0x100,
+    AFLAG_CUST_MON_NO_BLOCKR                = 0x200,
+    AFLAG_CUST_MON_NO_BLOCKL                = 0x400,
+    AFLAG_CUST_MON_NO_FIDGET1               = 0x800,
+    AFLAG_CUST_MON_NO_FIDGET2               = 0x1000,
+    AFLAG_CUST_MON_FLY                      = 0x2000,
+    AFLAG_CUST_MON_ATTACKSFROM9             = 0x10000,
+
+    //Custom in animal script ANIM=
+    //The default configuration is with all actions: 1 - 12
+    AFLAG_CUST_ANI_NO_EAT                   = 0x01,
+    AFLAG_CUST_ANI_NO_ALERT                 = 0x02,
+    AFLAG_CUST_ANI_NO_ATTACK2               = 0x04,
+    AFLAG_CUST_ANI_NO_GETHIT                = 0x08,
+    AFLAG_CUST_ANI_NO_FIDGET1               = 0x10,
+    AFLAG_CUST_ANI_NO_FIDGET2               = 0x20,
+    AFLAG_CUST_ANI_NO_LIEDOWN               = 0x40,
+    AFLAG_CUST_ANI_NO_DIE2                  = 0x80
 };
 
 

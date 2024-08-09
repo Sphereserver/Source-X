@@ -10,6 +10,7 @@
 #include "../game/uo_files/CUOTiledata.h"
 #include "../game/uo_files/CUOIndexRec.h"
 #include "../game/uo_files/CUOMapList.h"
+#include "../game/uo_files/CUOMobtypes.h"
 #include "sphere_library/CSFile.h"
 #include "CSVFile.h"
 
@@ -51,6 +52,8 @@ public:
     CUOTiledata m_tiledata;
 
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
+
+    CUOMobTypes m_mobtypes;
 
 public:
 	CSString GetFullExePath( lpctstr pszName = nullptr ) const;
