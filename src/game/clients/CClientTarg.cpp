@@ -333,7 +333,8 @@ bool CClient::OnTarg_Char_Add( CObjBase * pObj, const CPointMap & pt )
 	pChar->MoveToChar(pt);
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->Update();
-	pChar->UpdateAnimate(ANIM_CAST_DIR);
+    pChar->UpdateAnimate(ANIM_SUMMON);
+    pChar->SetTimeout(2000);
 	pChar->SoundChar(CRESND_GETHIT);
 	m_pChar->m_Act_UID = pChar->GetUID();		// for last target stuff. (trigger stuff)
 	return true;

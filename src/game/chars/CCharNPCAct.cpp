@@ -1573,6 +1573,8 @@ void CChar::NPC_Act_Looting()
 		Speak(g_Cfg.GetDefaultMsg(DEFMSG_LOOT_RUMMAGE), HUE_TEXT_DEF, TALKMODE_EMOTE);
 
 	ItemBounce(pItem, false);
+    UpdateAnimate(ANIM_PILLAGE);
+    SetTimeout(1000);
 }
 
 bool CChar::NPC_Act_Flee()
