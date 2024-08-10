@@ -11,9 +11,8 @@
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
-#include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
-#include "../CWorldSearch.h"
+#include "../CWorldGameTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -888,7 +887,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		// Check if I stepped on any item/teleport
-		TRIGRET_TYPE iRet = m_pChar->CheckLocation(true, false);
+		TRIGRET_TYPE iRet = m_pChar->CheckLocation(false);
 		if (iRet == TRIGRET_RET_FALSE)
 		{
 			m_pChar->SetUnkPoint(ptOld);	// we already moved, so move back to previous location
@@ -1042,8 +1041,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;		// should not be said
 	if ( Str_Check(pszCommand) )
 		return true;		// should not be said
-	if ( ((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) //  WTF? In any case, keep using dispid, or it's bugged when you change character's dispid to c_man_gm.
-        || (pszCommand[0] == g_Cfg.m_cCommandPrefix))
+	if (((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) || (pszCommand[0] == g_Cfg.m_cCommandPrefix)) //Should be dispid, or it's bugged when you change character's dispid to c_man_gm.
 	{
 		// Lazy :P
 	}
@@ -1056,22 +1054,22 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return true;
 	}
 
-	bool fAllowCommand = true;
-	bool fAllowSay = true;
+	bool m_fAllowCommand = true;
+	bool m_fAllowSay = true;
 
 	pszCommand += 1;
 	GETNONWHITESPACE(pszCommand);
-	fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
+	m_fAllowCommand = g_Cfg.CanUsePrivVerb(this, pszCommand, this);
 
-	if ( !fAllowCommand )
-		fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
+	if ( !m_fAllowCommand )
+		m_fAllowSay = ( GetPrivLevel() <= PLEVEL_Player );
 
 	//	filter on commands is active - so trigger it
 	if ( !g_Cfg.m_sCommandTrigger.IsEmpty() )
 	{
 		CScriptTriggerArgs Args(pszCommand);
-		Args.m_iN1 = fAllowCommand;
-		Args.m_iN2 = fAllowSay;
+		Args.m_iN1 = m_fAllowCommand;
+		Args.m_iN2 = m_fAllowSay;
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
@@ -1079,16 +1077,16 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 			if ( tr == TRIGRET_RET_TRUE )
 				return (Args.m_iN2 != 0);
 
-		fAllowCommand = ( Args.m_iN1 != 0 );
-		fAllowSay = ( Args.m_iN2 != 0 );
+		m_fAllowCommand = ( Args.m_iN1 != 0 );
+		m_fAllowSay = ( Args.m_iN2 != 0 );
 	}
 
-	if ( !fAllowCommand && !fAllowSay )
+	if ( !m_fAllowCommand && !m_fAllowSay )
 		SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_PRIV));
 
-	if ( fAllowCommand )
+	if ( m_fAllowCommand )
 	{
-		fAllowSay = false;
+		m_fAllowSay = false;
 
 		// Assume you don't mean yourself !
 		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, ARRAY_COUNT(sm_szCmd_Redirect)) >= 0 )
@@ -1105,9 +1103,9 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	}
 
 	if ( GetPrivLevel() >= g_Cfg.m_iCommandLog )
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, fAllowCommand);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_fAllowCommand);
 
-	return !fAllowSay;
+	return !m_fAllowSay;
 }
 
 void CClient::Event_Attack( CUID uid )
@@ -1887,10 +1885,11 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
     //Reduce NPC hear distance for non pets
     int iAltDist = iFullDist;
 
-	auto AreaChars = CWorldSearchHolder::GetInstance(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.
+	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iFullDist); // Search for the iFullDist, as it can be overriden in sphere.ini
+
 	for (;;)
 	{
-		pChar = AreaChars->GetChar();
+		pChar = AreaChars.GetChar();
 
         //No more Chars to check
 		if ( !pChar )
@@ -1902,9 +1901,7 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 			for (CSObjContRec* pObjRec : pChar->GetIterationSafeCont())
 			{
 				CItem* pItem = static_cast<CItem*>(pObjRec);
-                if (pItem->CanHear()) {
-                    pItem->OnHear(pszText, m_pChar);
-                }
+				pItem->OnHear(pszText, m_pChar);
 			}
 		}
 
@@ -3065,10 +3062,10 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			char iCharZ = pt.m_z;
 
 			pt.Move(m_pChar->m_dirFace);
-			auto Area = CWorldSearchHolder::GetInstance(pt, 1);
+			CWorldSearch Area(pt, 1);
 			for (;;)
 			{
-				CItem *pItem = Area->GetItem();
+				CItem *pItem = Area.GetItem();
 				if ( !pItem )
 					return;
 

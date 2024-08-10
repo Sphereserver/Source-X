@@ -63,7 +63,7 @@ enum DEFMSG_TYPE
 	DEFMSG_QTY
 };
 
-enum INTRINSIC_TYPE : int   // Even if it would implicitly be set to int, specify it to silence false warning by UBSanitizer.
+enum INTRINSIC_TYPE
 {
 	INTRINSIC_ABS = 0,
 	INTRINSIC_ARCCOS,

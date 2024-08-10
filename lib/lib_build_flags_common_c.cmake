@@ -20,7 +20,9 @@ else (MSVC)
 	set (c_compiler_options_common
 		-pipe -fexceptions -fnon-call-exceptions
 		-O3
-		$<$<BOOL:${ENABLED_SANITIZER}>:-ggdb3>
+		$<IF:$<BOOL:${ENABLED_SANITIZER}>,-ggdb3,-s>
+	)
+	set (c_linker_options_common
 	)
 
 	if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
@@ -28,12 +30,6 @@ else (MSVC)
 			-fno-expensive-optimizations
 		)
 	endif ()
-
-	#set (c_compiler_definitions_common ${c_compiler_definitions_common}
-	#)
-
-	#set (c_linker_options_common ${c_linker_options_common}
-	#)
 
 	#if (${CMAKE_C_COMPILER_ID} STREQUAL Clang)
 #endif()

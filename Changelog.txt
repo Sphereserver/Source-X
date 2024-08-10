@@ -60,8 +60,8 @@ Gump Enums, New Container Defines, Misc Switches from Prop Attributes to Flags, 
 
 - Added: uofiles_enums.h - New Gump Enums for several new containers, cards, and other miscellaneous assets.
 - Added: CContainer.cpp - definitions for the new Container Gump assets.
-- Updated: Tables - Removed Only<Race/Sex> as these are unused.
-	Split the NoDropTrade back into separate flags as they also have separated CliLocs.
+- Updated: Tables - Removed Only<Race/Sex> as these are unused. 
+	Split the NoDropTrade back into separate flags as they also have separated CliLocs. 
 	Moved over Balanced, BattleLust, and BloodDrinker as they are now being checked as Item Attributes.
 	These all are now stored on Items only.
 	cItemBase_props.tbl had AlterItem added to it.
@@ -91,7 +91,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
   the second param will result in default timer according to your magery skill.
 
 29-05-2016, Kaylala (Khaos)
-- Updated: Tables - Removed Balanced, BloodDrinker, and BattleLust from BaseBaseDef tables
+- Updated: Tables - Removed Balanced, BloodDrinker, and BattleLust from BaseBaseDef tables 
   and CObjBase tables since they were moved. Moved Bane and SplinteringWeapon to CItem tables.
 - Added: Attr_SplinteringWeapon to CItem.h.
 - Added: SplinteringWeapon, Balanced, and Bane to Item Properties and removed them from Obj
@@ -229,8 +229,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 23-10-2017, Drk84
 - [Port from 0.56d, 14-02-2017, Coruja] Fixed: Combat Hit Chance formulas incorrectly assuming that defender is always using the same combat skill as the attacker.
-
-24-10-2017, Drk84
+  
+24-10-2017, Drk84 
 - [Port from 0.56d, 19-09-2017, Coruja] Fixed: Client 'Open Spellbook' macro making the client crash if it tries to open the requested spellbook gump when the spellbook item is not loaded yet.
 
 24-10-2017, Nolok
@@ -263,7 +263,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
   The stat bonus are BONUS_STR, BONUS_DEX, BONUS_INT and BONUS_STATS and they can be found in sphere_skills.scp
   Normally you can see the skill values adjusted by the stats bonues by checking the value of the skill in the Skill Menu when the "Show Real" option is turned OFF,
   The adjusted skill value is used by Sphere for calculating the chance of success for NON-combat skills (and also ResistingSpells), in the scripts there was no
- "short-way" to display the correct chance of success unless using a lot of multiplication and division.
+ "short-way" to display the correct chance of success unless using a lot of multiplication and division. 
   Usage:   SkillAdjusted.skillnumber or SkillAdjusted.skillkey (Example: SkillAdjusted.1 or SkillAdjusted.Anatomy)
   Example calculating chance of success by scripts:
   ON=@SkillStart
@@ -312,7 +312,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - [Port from 0.56d, 05-09-2016, Coruja] Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
 
 13-12-2017, Drk84
-- Possible fix for stat cap issue when the sum of the players stats are at StatCap -1.
+- Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
 
 23-12-2017, Nolok
 - Added: trigger @NPCActWander. It is called each step an NPC does while wandering. ARGN1 = 0 if it will continue to wander, 1 if randomly deciding to stop, 2 if deciding to stop because
@@ -347,11 +347,11 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	if set, will be used instead of obtaining it from the SOUND property. Set one of these overrides to -1 if you don't want that action-related sound to be played.
 
 14-01-2018, Drk84
-- Fixed: The effect value of spells that equips a "memory item" on a character (Bless, Curse and so on) was calculated twice, also causing to ignore the
+- Fixed: The effect value of spells that equips a "memory item" on a character (Bless, Curse and so on) was calculated twice, also causing to ignore the 
 	value of local.effect.
-
+	
 25-01-2018, Nolok & Drk84
-- Changed the way ACTARG1/ACTARG2/ACTARG3 are saved, they will be saved only if their value is different from 0 and the character's action is a valid skill or is one
+- Changed the way ACTARG1/ACTARG2/ACTARG3 are saved, they will be saved only if their value is different from 0 and the character's action is a valid skill or is one 
 	of the action that uses ACTARG1/ACTARG2/ACTARG3 (NPCACT_FLEE, NPCACT_TALK, NPCACT_TALKFOLLOW, NPCACT_RIDDEN).
 - Reverted the following changes made in a precedent commit for avoiding conflict with Spellcasting or custom scripts.
 	Removed the call to Skill_CleanUp method inside the trigger checks in Skill_UseQuick.
@@ -466,7 +466,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Added: New item property PICKUPSOUND to override default pickup sound for items (it can be used together with DROPSOUND).
 - [Port from 0.56d, 02-01-2018, Coruja]
 	Fixed: ENHANCEPOTIONS item property only working when FEATURE_AOS_UPDATE_B .ini feature is enabled.
-- [Port from 0.56d, 19-02-2018, Coruja]
+- [Port from 0.56d, 19-02-2018, Coruja] 
 	Fixed: Sphere console not closing correctly when it get closed before load startup files.
 	Fixed: Multis (houses/boats) not being loaded at proper distance when client is walking.
 - [Port from 0.56d, 14-03-2018, Coruja]
@@ -563,10 +563,10 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: parrying chance didn't scale correctly with Dexterity.
 - [Port from 0.56d, 18-04-2018, Coruja] Changed: Small improvements on tooltip engine (containers weren't resending their tooltip after their weight changed,
     and some tooltips weren't updated for items with an expired timer).
-
+	
 30-04-2018, Drk84
 - Added behaviour for the Focus skill, the skill is used automatically and only when FEATURE_AOS_UPDATE_B is enabled.
-  The Focus skill increase, passively, the amount of stamina gained by 1 for each 10% points of skill value and increase by 1 the amount of mana gained for
+  The Focus skill increase, passively, the amount of stamina gained by 1 for each 10% points of skill value and increase by 1 the amount of mana gained for 
   each 20% points of skill value.
 
 02-05-2018, XuN
@@ -651,7 +651,7 @@ To modify their HP use HITS and MAXHITS on them
 -Added RegenItemHits to control the update period of those items' hp.
 
 08-05-2018, Drk84
-- Fixed #79: Protection spell AR stacking when COMBAT_ELEMENTAL_ENGINE is disabled.
+- Fixed #79: Protection spell AR stacking when COMBAT_ELEMENTAL_ENGINE is disabled. 
 
 08-05-2018, XuN
 House triggers:
@@ -664,7 +664,7 @@ House triggers:
         return false will remove this item from the commit.*
     *if not return false a local.MaxZ will check the P.Z value of the item and update it if it's higher than the old one.
     -Changed @HouseDesignCommit: added local.MAXZ(Read Only) returning the value of the top placed item.
-
+    
 Added character storage for it's own houses:
 	- Added AddHouse uid(WO): Adds the given uid to the player's house.
 		If the player current count of houses is greater than the limit he has, the house will be redeeded.
@@ -688,7 +688,7 @@ Massive changes on multis (houses for now).
     - Added MaxHousesAccount = Max houses an account can have (default 1).
     - Added MaxHousesPlayer = Max houses one player can have (default 1).
     - Added AutoHouseKeys = 1 to generate keys for multis on creation, 0 to disable.
-
+	
 Updated [sphere_def.scp]:
     [DEFNAME house_types]
     house_private=0
@@ -699,17 +699,17 @@ Updated [sphere_def.scp]:
     transfer_lockdowns	= 01	// Transfer LockDowns
     transfer_addon		= 02	// Transfer Addons
     transfer_all		= 04	// Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
-
+	
 Updated [sphere_defs_types_hardcoded.scp]
     [TYPEDEFS]:
     t_multi_addon=201   // AddOns, the deed must have attr_magic to bypass placement checks and allow the addon to be placed inside houses.
-
+	
 New keys added to [MULTIDEF ] (and updated [multis_houses.scp] with them):
 -BaseStorage (RW): Base limit of item storage for this multi.
 -BaseVendors (RW): Base limit of vendor capacity for this multi.
 -LockdownsPercent (RW): Base LockdownsPercent value for this multi.
 (Read the House Storage support revisions for more info.)
-
+	
 Added internal storage for Owner, Coowners, Friends, Bans, Locked down items (Lockdowns), Vendors and House Components.
 
 -House Permissions:
@@ -749,8 +749,8 @@ Added internal storage for Owner, Coowners, Friends, Bans, Locked down items (Lo
 	- Added Components(R): Returns the total count of Components.
 	- Added GenerateBaseComponents(W): Regenerates the components the house has on the [MULTIDEF ] (this does NOT delete current components nor recode/remove current keys).
 	- Added DeleteAllComponents(W): Removes all current components.
-
-
+	
+	
 * Passing as param -1 (or 0FFFFFFF) will clear those lists but nothing more, it won't remove the objects, clear; attrs, props, events, etc; applied, it must be done before clearing the list.
 - Added REF to OWNER, COOWNER.x, FRIEND.x, BAN.x, LOCKDOWN.x, VENDOR.x, COMPONENT.x, to access the objects inside and work on them, eg: OWNER.say I'm da Boss!, local.coowner=<coowner.13.uid>, etc
 
@@ -780,12 +780,12 @@ Added internal storage for Owner, Coowners, Friends, Bans, Locked down items (Lo
             TRANSFER_LOCKDOWNS= 0x1 // Transfer LockDowns, if there's only need of transfering lockdowns use MoveLocksToCrate)
             TRANSFER_ADDON    = 0x2 // Transfer Addons
             TRANSFER_ALL      = 0x4 // Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
-
+			
 
 AddOns support:
     -Added t_multi_addon: Works like current multis&addons but will not count towards the House's limit.
 	It's just a type definition to alter how these items works inside 'real' multis, but the current items using it (ie: m_fountain_white) will work the same excepting that they won't create keys by default.
-
+	
 - Redeeding
 	-Houses with search for TAG.DEED_ID to generate the new deed, if not value is set i_deed will be used, i_deed will be set by default on new placed multis.
     -Added Redeed(WO) fShowMsg, fMoveToCrate: Redeeds the multi to the OWNER's backpack (if there is no owner, there is no redeed).
@@ -833,7 +833,7 @@ Updated [sphere_defs.scp]:
     transfer_lockdowns	= 01	// Transfer LockDowns
     transfer_addon		= 02	// Transfer Addons
     transfer_all		= 04	// Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
-
+        
 Added to [MULTIDEF ]:
 -BaseStorage (RW): Homologue to the House property BaseStorage.
 -BaseVendors (RW): Homologue to the House property BaseVendors.
@@ -842,22 +842,22 @@ Added to [MULTIDEF ]:
 -Changed: now t_multis will be saved too in spheremultis.scp along with t_multi_custom.
 
 10-05-2018, Drk84
-- Added @EffectRemove trigger for characters,
+- Added @EffectRemove trigger for characters, 
 	Argo: the spell item.
 	Src: the caster.
 	Default object: the target of the spell.
 	Argn1: the spell number.
 	Return 0: remove the spell memory item but don't execute the default spell behaviour when the spell item is removed.
-
-  The trigger works similarly to @EffectAdd but is fired  when a spell memory item is removed (and after the @Destroy trigger of the item)
+	
+  The trigger works similarly to @EffectAdd but is fired  when a spell memory item is removed (and after the @Destroy trigger of the item) 
   The trigger is needed if you plan to use return 0 in the @EffectAdd trigger, otherwise the default spell behaviour will be executed when the spell item get removed.
   Example
-	I cast a curse spell and I have a return 0 in my @EffectAdd trigger, no default curse effect are applied but when the spell expires the curse item
+	I cast a curse spell and I have a return 0 in my @EffectAdd trigger, no default curse effect are applied but when the spell expires the curse item 
 	will be removed and the spell target will get the additional stats from the expired curse! Using return 0 in @EffectRemove will prevent this
   Additional notes:
 	Both @EffectAdd and @EffectRemove with return 0 can conflict with Poison and Poison Fields spells or scripts that call the poison function, that's because the
 	poison status and effect is applied no matter what.
-	For Summoning spells, returning 0 in @EffectRemove will prevent the summon to disappear.
+	For Summoning spells, returning 0 in @EffectRemove will prevent the summon to disappear. 
 
 10-05-2018, Nolok
 - Fixed: false-positive speedhack check when trying to walk on a disabled map.
@@ -1362,7 +1362,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 - [Port from 0.56d, 25-09-2018, Coruja] Added: New function CODEXOFWISDOM to open client Codex of Wisdom menu at given topic ID.
 	Syntax: CODEXOFWISDOM TopicID (1~176), [ForceOpen (0/1)]
 - [Port from 0.56d, 01-11-2018, Coruja] Added: Support for new Whip weapon type.
-
+	
 17-12-2018, Nolok
 - [Port from 0.56d, 04-07-2018, Coruja]
 	- Added: Support for 'EquipLastWeapon' client macro.
@@ -1409,7 +1409,7 @@ Added CanSleep function (Read Only) for sectors to check wether a sector can Sle
 	Examples:
 		With an EFFECT value of 20 the maximum tracking distance is 20 tiles, no matter the skill score.
 		With an EFFECT value of 10,100 the maximum tracking distance will vary from 10 to 100 tiles depending from the player Tracking skill.
-		If EFFECT is not defined and we have 90.0 in Tracking Skill the maximum tracking distance will be 100 tiles (900 / 10 + 10, this is the default behaviour)
+		If EFFECT is not defined and we have 90.0 in Tracking Skill the maximum tracking distance will be 100 tiles (900 / 10 + 10, this is the default behaviour)	
 	Notes
 		When using the Tracking skill, the maximum distance is stored in ACTARG2, this means that the value can be changed in the @PreStart, @Start and
 		@Stroke triggers, but because the maximum distance is calculated after @Select and before @PreStart changing the value in @PreStart and @Start will take
@@ -1799,25 +1799,25 @@ WARNING: Important change!
 24-07-2019, Drk84
 - Added: Two optional parameters "linearcheck" and "forcecheck" to the SKILLUSEQUICK character command:
 	SKILLUSEQUICK "skillId", "difficulty", "linearcheck", "forcecheck"
-
+	
 	Linearcheck:
 	This optional parameter when set to 1 will make Sphere performs a linear check instead of using the default Bell Curve formula.
 	The linear check is usually used for combat checks (hitting, parrying, resisting spells) while the Bell curve check is usually used by almost all of the other skills.
-	Take note that when using the linear check, the highest is the difficulty value the easier is to pass the test, while the opposite is true for a Bell curve check.
-
+	Take note that when using the linear check, the highest is the difficulty value the easier is to pass the test, while the opposite is true for a Bell curve check. 
+	
 	Forcecheck:
 	This optional paramter allows the execution of the Skill_UseQuick method by a skill with SKF_SCRIPTED flag.
 	By default Sphere does not allow a skill with SKF_SCRIPTED flag to execute the Skill_UseQuick method, setting the value to 1 will allow the execution
 	of the Skill_UseQuick method.
-
+		
 	Examples:
 	skillusequick skill_appraise,75			//Make a quick check with item id skill with a difficulty of 75 and using the bell formula.
 	skillusequick skill_appraise,<itemid>/10,1		//Make a quick check with the item id skill with a difficulty equal to the character itemid value and using the linear check formula.
 	skillusequick skill_parrying,50,0,1		//Assuming that the parrying skill has the SKF_SCRIPTED flag, make a quick check with parrying skill,  using the Bell curve formula with a difficulty of 50 and forcing the execution of  the Skill_UseQuick method.
-
+	
 	Special Cases
 	Sphere internally uses a quick check when certain actions are performed:
-
+	
 	Camping: Camping skill uses a quick check for activating up campfires.
 	Mining:  Lingot smelting is handled by a quick check.
 	Musicianship: Playing an instrument is handled by a quick check.
@@ -1827,7 +1827,7 @@ WARNING: Important change!
 	Tinkering: Copying a key is performed by a Tinkering quick check.
 	Training Dummies: All the Melee, Ranged and Pickpocket dummies uses a quick check.
 	Tracking: Tracking uses a quick check when STARTING to track (the tracking menu is displayed and the quarry category is selected).
-
+  
 25-07-2019, Nolok
 - Changed: The "too dumb to be able to use NPC Advanced Pathfinding" INT value from 70 to 30 (to ignore this check enable NPC_AI_ALWAYSINT in the ini).
 
@@ -1837,7 +1837,7 @@ WARNING: Important change!
 28-07-2019, Nolok
 - Fixed: When a derived ITEMDEF (like [ITEMDEF i_something], not [ITEMDEF 01234]) was created and neither a type and a valid id were set in the script, the item base was considered having
 	random type, layer, weight, tiledata flags and CAN flags.
-- Fixed: NotoSaves weren't always cleared right when they timed out.
+- Fixed: NotoSaves weren't always cleared right when they timed out. 
 - Fixed: Attacker elapsed time value wasn't increased exactly every second (but after a greater delay) (Issue #304).
 
 30-07-2019, Nolok
@@ -1948,7 +1948,7 @@ WARNING: Important change!
 - Changed: Veterinary now works with all tameable creatures: that means all NPCs with brain set to BRAIN_ANIMAL, BRAIN_DRAGON or BRAIN_MONSTER AND with a Taming skill above 0.
 		   Before Veterinary only worked with BRAIN_ANIMAL npcs. Remember that a NPC  is tameable when it has a Taming Skill above 0 and an Animal Lore skill set to 0
 		   and the NPCs ID it's not one of the playable character races.
-- Changed: All NPCs with a Poisoning skill above 0 can now apply poison (if unarmed), before only creatures with BRAIN_MONSTER could apply a poison.
+- Changed: All NPCs with a Poisoning skill above 0 can now apply poison (if unarmed), before only creatures with BRAIN_MONSTER could apply a poison. 
 - Fixed:   There was no timeout for the NPC action THROWING, resulting in a mass spam of throwing actions, the timeout is now 3 seconds.
 
 16-11-2019, Nolok
@@ -2047,7 +2047,7 @@ R/W Keywords available for the t_champion_spawn item:
     "SPAWNSMAX": Gets or sets the total maximum spawns.
     "WHITECANDLES": Gets thhe count of white candles (read only).
 
-Verbs available for the t_champion_spawn item:
+Verbs available for the t_champion_spawn item:	
     "ADDOBJ": Inserts an already created npc into the champion spawn (be sure you add them when the champion is activated, or they will be removed when it start).
     "DELOBJ": Removes one character from the champion counting towards the progression of itself, this does not remove the character.
     "ADDREDCANDLE": Advances the champion by adding one red candle (red candles and levels explained below).
@@ -2059,7 +2059,7 @@ Verbs available for the t_champion_spawn item:
     "MULTICREATE": Emplaces a champion by script, a champion requires a multi area to be renamed and have custom flags, forbidding recalls or whatever.
     "START": Activates the champion.
     "STOP": Deactivates the champion and removes any progress and npcs.
-
+	
 Default levels explanation:
 	Level 1: From start until 6th red candle is finished.
 	Level 2: From 7th red candle to Level 10th red candle.
@@ -2095,7 +2095,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 23-01-2020, Drk84
 - Added: New ini flag DisplayArmorAsPercent.
-         When enabled, display, in the tooltip, the Armor of the item as a percentage of its full armor value, the percentage is based upon the body parts the item covers.
+         When enabled, display, in the tooltip, the Armor of the item as a percentage of its full armor value, the percentage is based upon the body parts the item covers. 
          Remember that the displayed value is just for "cosmetical" purpose and, by default, is not used when calculating combat damage, the full AR is the one used.
 		 In some cases, the Armor value displayed in the tooltip will not match with the sum of the AR of each piece of armor displayed in the status gump, this happens when an armor item cover location
 		 overlaps with another armor item cover location that as an higher value.
@@ -2278,7 +2278,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Adding the Blade Spirits spell to a spellbook added the Clumsy spell. (Issue #496)
 		 Warning: existing Spellbooks with the Blade Spirits spell added by scroll or addspell have the more1 value corrupted and so need they must be replaced.
 		 Only Magery Spellbooks are affected because other spellsbooks doesn't have more than 32 spells (Mastery Spells are not implemented).
-
+		 
 29-08-2020, Drk84
 - Fixed: Cant create areas in the new maps (ilshenar, ter mur, etc) (Issue  #499).
 
@@ -2299,7 +2299,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 
 20-11-2020, Drk84
 - Fixed: Dismounting from a NPC cleared the actarg1 value of the rider instead of the NPC mount. (Issue #527)
-		 This means that when unmounting and the character is using a skill that makes use of the Actarg1 value, such  as casting a spell, the skill will continue its execution normally.
+		 This means that when unmounting and the character is using a skill that makes use of the Actarg1 value, such  as casting a spell, the skill will continue its execution normally. 
 - Fixed: Invalid spell ID didn't abort the skill execution when the magic skill succeeds (this is related to the issue above), causing a possible skill gain.
 
 01-12-2020, Nolok
@@ -2314,7 +2314,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Modified: Before this modification, because VALUE is READ only, the only way to change the price of an item was changing the PRICE.
 		NOW, PRICE keyword only used to set the selling price of an item sold by a player vendor. PRICE of an item will no longer
 		change the gold you will receive when selling it to a NPC. PRICE is now exclusive to player vendor.
-- Added: tag.override.value can now be add to an item to change his value when trading with a NPC. In scripts, on vendor template
+- Added: tag.override.value can now be add to an item to change his value when trading with a NPC. In scripts, on vendor template 
 		(BUY= or SELL=). For changing the value of the itemdef, you must use tag.override.value=xxx instead of old syntax price=xxx.
 
 05-12-2020, Drk84
@@ -2440,7 +2440,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Changed: ISTIMERF to also accept STRMATCH-style arguments.
 
 31-01-2021, Jhobean
-- Fixed: when hits, stam or mana were set to negative value, overflow occurred and the stat was set at near maximum values. Now setting a stat to a negative value will set it to 0. (Issue #406)
+- Fixed: when hits, stam or mana were set to negative value, overflow occurred and the stat was set at near maximum values. Now setting a stat to a negative value will set it to 0. (Issue #406) 
 - Fixed: Using stacked deeds consumed the whole pile.
 
 30-01-2021, Ben
@@ -2461,7 +2461,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: REGEN values not saved (issue #595).
 	RegenHits, RegenMana, RegenStam and RegenFood will now be saved only if their value is equal or above to 1 and different from the default value in the ini setting.
 	Default values in the ini are: 40 seconds for RegenHits, 20 seconds for RegenMana, 10 seconds for RegenStam and 86400 seconds (one day) for RegenFood.
-
+	
 03-03-2021, Drk84
 - Updated SphereCrypt.ini
 - Fixed: Reagents consumed on magical skill abortion (issue #605).
@@ -2479,7 +2479,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 	local.damagetype (R/W) = The damage type of the spell, if you are making a custom spell you must set a value otherwise the spell will not cause damage.
 	return 1: Destroy the spell memory and block the spell execution.
 	return 0: If the spell has the flag SPELLFLAG_SCRIPTED blocks the spell execution
-
+	
 	These triggers fires on the following spells and any custom spells with the SPELLFLAG_TICK:
 		Poison: You can now change the damage and damage type by changing the local.effect and local.damage value in these triggers.
 		Strangle and Pain Spike: You can now change the damage and damage type in these triggers.
@@ -2489,7 +2489,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Custom Spells: Simply add SPELLFLAG_TICK to the spell spellflags. By default every spell memory starts with one charge.
 			Spells with SPELLFLAG_HARM and local.damagetype set will cause damage every local.delay seconds.
 			Spells with SPELLFLAG_HEAL will heal hitpoints every local.delay seconds.
-			Remember that is not mandatory to use  SPELLFLAG_SCRIPTED to make a custom spell, you can just use a spell id higher than 1055, usually i choose 2000.
+			Remember that is not mandatory to use  SPELLFLAG_SCRIPTED to make a custom spell, you can just use a spell id higher than 1055, usually i choose 2000. 
 
 	It's RECOMMENDED to UPDATE the spells scripts file and sphere defs file, alternatively just add the following line, in the spellflag section in defs.scp/sphere_defs.scp:
 		spellflag_tick			   080000000  // A spell is going to tick and causing an effect.
@@ -2556,20 +2556,20 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		 https://www.uoguide.com/Lesser_Cure_Potion
 		 https://www.uoguide.com/Cure_Potion
 		 https://www.uoguide.com/Greater_Cure_Potion
-
+		 
 		 If MAGICF_OSIFORMULAS is disabled the chance to cure is based upon sphere classic bell formula:
 		 Example if the poison level is 60.0 and the healing skill is 50.0, the chance of curing the poison is around 25%.
-
+		 
 		 In addition, you can override the cure poison chance by using the TAG.OVERRIDE.CUREPOISONCHANCE in the poison item that will be placed upon the character.
 		 In this case a simple percent check is made,
 		 You can add this tag by using @SpellEffectAdd/@EffectAdd (see also below), example:
 		  ON=@EffectAdd
 			argo.tag.override.curepoisonchance = 25 //a 25% chance of curing the poison.
-
+			
 - Changed: For consistency renamed characters triggers @EffectAdd and @EffectRemove to @SpellEffectAdd and SpellEffectRemove.
 		Added spell triggers @EffectAdd and @EffectRemove (spell triggers  must be defined in the spell block).
 		Quick summary for @SpellEffectAdd/@EffectAdd and @SpellEffectRemove/@EffectRemove:
-
+		
 		@SpellEffectAdd/@EffectAdd
 		Argo: the spell item.
 		Src: the caster.
@@ -2577,21 +2577,21 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Argn1: the spell number.
 		return 0: Let default checks to happen.
 		return 1: Blocks any action and stops everything, also deletes the memory (Blocking any changes, this will cause also the effect to do not have duration)
-
+		
 		@SpellEffectRemove/@EffectRemove
 		Argo: the spell item.
 		Src: the caster.
 		Default object: the target of the spell.
 		Argn1: the spell number.
 		Return 0: remove the spell memory item but don't execute the default spell behaviour when the spell item is removed.
-
+		
 20-04-2021, Drk84
 - Fixed: Trading layer item was added to the character weight when starting a trade (Issue #660).
 - Fixed: MonsterFear in Sphere.ini does not seem to affect monsters (Issue #603).
 	   I also changed a little the motivation formula, now the remaining health of the NPC counts more towards the fleeing chance.
 	   Take in consideration that if the NPC has a big STR value it will be unlikely to flee.
 	   Remember that you can modify ARGN2 in @NpcActFight trigger to set the motivation value (ARGN2 <= 0 the NPC will flee).
-
+	   
 22-04-2021, Drk84
 - Fixed: The NEW object after executing the NEWDUPE command always returned the last created item instead of the newly duped character (Issue #661).
 
@@ -2606,76 +2606,76 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Added: New item/char triggers @Smelt/@ItemSmelt and @CarveCorpse/@ItemCarveCorpse (Issue #616).
 		@Smelt(Item Trigger)/@ItemSmelt (Character Trigger)
 		These triggers are fired when a character attempts to smelt ores and items on a forge or by the SMELT command but also:
-
+		
 		Src: The character smelting the item.
 		Default Object: The item being smelted in the @Smelt trigger.
 						The character smelting the item in the @ItemSmelt trigger.
-
-		Argn1: R/W, the adjusted mining skill of the character.
+						
+		Argn1: R/W, the adjusted mining skill of the character. 
 		Argn2: R, the total amount of different resources the item being smelted has.
 				  For example a mace is made of iron  ingots and logs, so the number of different resources is 2.
 				  For ores the total amount of different resources is always 1.
-
+				  
 		local.resource.n.ID: R/W, The ID of the itemdef that will be created if the smelting check is succesfull, n starts at 0.
 		local.resource.n.amount: R/W, The amount value that will set on that particular resource if the smelting check is succesfull, n starts at 0.
-
+		
 		Return 1: Fails the smelting attempt and block default smelting behaviour.
 		Return 0: Succeeds the smel attempt and block default smelting behaviour.
-
+		
 		Notes:
 		If you are using the ScriptPack X you need to COMMENT the following lines in the types_forge.scp file for enabling  the smelting of items/ores by forge:
 		TARGETF f_craft_blacksmith_smelt_targ
 		RETURN 1
-
+		
 		Reading local.resource.n.ID:
 		The itemdef of the resource being created is in numerical format so for outputting it in readable format you need to use:
 		serv.itemdef.<local.resource.<dlocal._for>.iD>>
-
+		
 		For assigning the value just use the plain itemdef instead:
 		local.resource.n.ID = i_ingot_gold
 		local.resource.n.amount = 30
-
+		
 		Only ingots and gems will "survive" the smelting process, the rest of resources is not created.
 		For every ingots that can be created Sphere makes two additional check:
-		First, the character need to have the minimum skill to smelt the ores
+		First, the character need to have the minimum skill to smelt the ores 
 		Second, the character must pass a skillquick check, if fail up to half of the item amount value is consumed (so non-ores items are usually destroyed).
-
+		
 		Example:
 		Given an item with the following resource property
 		RESOURCES=6 i_ingot_iron,1 i_log,1 i_gem_diamond,3 i_ingot_bronze
 		ON=@ItemSmelt //
 		FOR 0 <eval <argn2> - 1>
 			serv.log resource obtained <serv.itemdef.<local.resource.<dlocal._for>.ID>.baseid> - Amount: <local.resource.<dlocal._for>.amount>
-		endfor
+		endfor 
 		Argn2 is 4 (i_ingot_iron, i_log, i_gem_diamond and i_ingot_bronze)
 		The output will be:
 		i_ingot_iron - 6, i_log 1 - ,i_gem_diamond -3, i_ingot_bronze - 3
-
-
+		
+		
 		@CarveCorpse (Item Trigger)/@ItemCarveCorpse(Character Trigger)
 		These triggers are fired when a character attempts to carve a corpse or a corpse is being  carved:
-
+		
 		Src: The character carving the corpse.
 		Default Object: The corpse being carved in the @CarveCorpse trigger.
 						The character carving the corpse in the @ItemCarveCorpse trigger.
 		Argo: 			The item used for carving the corpse.
-
+						
 		Argn1:	R	The total amount of different resources the corpse being carved has.
 					For example the ogre resources property contains only the i_ribs_raw item so the number of different resources is just 1.
-
+						
 		local.resource.n.ID: R/W, The ID of the itemdef that will be created when carving the corpse, n starts at 0.
 		local.resource.n.amount: R/W, The amount of value that will be set on that particular resource, n starts at 0.
-
+		
 		Return 1: Block the default carving behaviour.
-
+		
 		Notes
 		local.resource.n.ID stores the itemdef of the resource being created in numerical format so for outputting it in readable format you need to use:
 		serv.itemdef.<local.resource.<dlocal._for>.iD>>
-
+		
 		For assigning the value just use the plain itemdef instead:
 		local.resource.n.ID = i_gem_ruby
 		local.resource.n.amount = 5
-
+		
 		Example:
 		[TYPEDEF t_corpse]
 		ON=@CarveCorpse
@@ -2684,8 +2684,8 @@ Must have event, even if it's empty, since it's applied by the source to generat
 			if (<src.forensics> >= 900) && (<argo.baseid> == i_dagger)
 				local.resource.<dlocal._for>.amount += 5
 			endif
-		endfor
-		If we are carving an ogre, ARGN1 will be 1 and the output will be
+		endfor 
+		If we are carving an ogre, ARGN1 will be 1 and the output will be 
 		Raw Ribs- 2
 		If player forensics skill is >= 90.0% and we are using a dagger for carving we get an additional 5 i_ribs_raw
 
@@ -2701,11 +2701,11 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Crash when accessing  a non-existant SRC (the caster) in the @EffectRemove and @EffectTick triggers.
 		 Remember to use the ISVALID command by assigning SRC to a REF to check if the caster is still valid
 - Fixed: Necromancy spells Blood Oath and Evil Omen have their default behaviour executed even if their spell definition has the SPELLFLAG_SCRIPTED set.
-- Fixed: Poison memory item  was not re-created after a character was poisoned again.
+- Fixed: Poison memory item  was not re-created after a character was poisoned again. 
 - Changed: At great request set cap to 100 for LOWERMANACOST.
 
 06-06-2021, Jhobean
-- Fixed: Fix illimited arrow with Tdata3=0 for bow (Issue #698).
+- Fixed: Fix illimited arrow with Tdata3=0 for bow (Issue #698). 
 
 07-06-2021, Drk84
 - Fixed: Dragon breath action and Throwing Action (not the Throwing skill) spam.(Issue #689).
@@ -2725,12 +2725,12 @@ Must have event, even if it's empty, since it's applied by the source to generat
 		Argo: The weapon/shield used for parry, if any.
 		Local.ParryChance: The chance to parry the blow. The chance will be passed to the SkillUseQuick/UseQuick triggers.
 		Local.ParrySkillID: The skill used for parrying, this can be changed by setting the appropriate skill ID.
-			Example by setting  local.ParrySkillID = <weapon.skill> the parrying check will be made by using the weapon skill and thus the UseQuick trigger of the weapon
+			Example by setting  local.ParrySkillID = <weapon.skill> the parrying check will be made by using the weapon skill and thus the UseQuick trigger of the weapon 
 			skill will be called.
 		Local.ItemParryDamageChance: The chance that the parrying item will be damaged (default 100%).
 		Local.Damage: The amount of damage (raw) before the parry reduction.
 		Return 1: Completely blocks the damage as if the parry damage reduction was set to 100.
-
+		
 10-06-2021, Drk84
 - Fixed: Damage was always reduced by parry even if the character failed the parry action.
 
@@ -2767,7 +2767,7 @@ Must have event, even if it's empty, since it's applied by the source to generat
 - Fixed: Pets are now able again to damage their own owner, this wasn't noticeable unless the COMBAT_NOPETDESERT flag was enabled (Issue #724).
 
 01-08-2021, jkachhad
-- Added: New dialog section "prebutton" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger.
+- Added: New dialog section "prebutton" - Provides input processing before button triggers. This section can be utilized to check if the input is valid (obj in range, line of sight, etc..). This should reduce amount of code in each button trigger. 	
 Example:
 	[dialog d_test]
 	...
@@ -2816,15 +2816,15 @@ It will check if distance is > 10, so you don't need to write the distance check
 		//    0 --> Ignore this, stop hardcoded behavior but generate a log message
 		//    1 --> Ignore this, stop hardcoded behavior and do not generate a log message
 		//    2 --> Disconnect client and generate log message (default behavior)
-
-
+		
+		
 13-09-2021, Drk84
 -Fixed: Failing the smelting action consumed the whole ore/item stack instead of a random amount (a value between 1 and half the stack size).
 -Added: ARGN3 in the @ItemSmelt/@Smelt trigger, setting it to 1 will skip the minimum requirement for smelting ore to ingots.
 		By default the minimum requirement for smelting is stored in the TDATA1 property of the ingot itemdef.
 
 05-10-2021, Jhobean
-- Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort.
+- Added: Ini setting ManaLossAbort / ReagentLossAbort, to make the char lose part of the mana/reag required to cast the spell if the spell is abort. 
 	ManaLossFail / ReagentLossFail are now use only when the spell fizzle because of lacking skill. (Issue #769)
 - Fixed: ManaLossAbort/ManaLossFail consume the exact amount of mana required for the spell. ManaLossPercent will now control the % of mana player lost.
 - Fixed: ARGN1 value from @Hit trigger was sometime negative even if negative damage was impossible
@@ -2832,23 +2832,23 @@ It will check if distance is > 10, so you don't need to write the distance check
 
 02-11-2021, Drk84
 - Changed: In old clients (starting from 2.0.0 ) the "You are frozen and can not move."  will appear again when a player is paralyzed and attempting to move, thanks for a1exp for the solution.(Issue #789)
-		   Recent clients (i think from 6.0.0+) seems to block the movement request when the statf_frozen flag is applied, while clients 5.0.0+ will get the "You are frozen and can not move."
-		   message if attempting to use the pathfinding.
+		   Recent clients (i think from 6.0.0+) seems to block the movement request when the statf_frozen flag is applied, while clients 5.0.0+ will get the "You are frozen and can not move." 
+		   message if attempting to use the pathfinding. 
 - Changed: Mana Drain behaviour slightly changed: (Issue #781)
 		   1)It will use its own layer (LAYER_SPELL_MANA_DRAIN, layer number 79) instead of LAYER_SPELL_STATS, in this way casting Mana Drain will not remove stat spells on the affected characters.
 		   2)The Mana Drain effect value depends if you have enabled MAGICF_OSIFORMULAS or not.
-			 If enabled the effect value is calculated from this formula: (400 + Caster Eval Int - Target Magic Resistance ) / 10.
+			 If enabled the effect value is calculated from this formula: (400 + Caster Eval Int - Target Magic Resistance ) / 10. 
 			 If disabled the effect value is by default 10,30, only in this case you can overwrite the effect of Mana Drain by changing the value in the SPELLDEF  or by changing local.effect in the @SpellEffect/@Effect triggers, same for duration (default duration is 5 seconds).
 		   3)In both cases the mana lost is temporary! If you want to get a permanent drain effect just use the following script under the Mana Drain SPELLDEF
-
+			 
 			 ON=@EffectRemove
 			 return 0	//Return 0 will prevent the recover mana  behaviour of the Mana Spell but the Mana Drain spell item will still be destroyed.
-			Remember to update your scripts by changing
-			In spells_magery.scp file:
-			LAYER = LAYER_SPELL_STATS to LAYER = LAYER_SPELL_MANA_DRAIN
+			Remember to update your scripts by changing 
+			In spells_magery.scp file: 
+			LAYER = LAYER_SPELL_STATS to LAYER = LAYER_SPELL_MANA_DRAIN 
 			In your defs.scp file:
 			LAYER_SPELL_Mana_Drain			79
-
+			
 03-11-2021, Drk84
 - Fixed: MT_NONMOVER flag makes the NPCs spam attacks. (Issue #767)
 - Updated SphereCrypt.ini.
@@ -2932,7 +2932,7 @@ Also excluded GMs from most checks inside this code.
 
 12-02-2022, Soulless
 - Changed: 'StaminaLossOverweightMultiplier' to 'StaminaLossOverweight', and changed the value for additional increase of stamina loss from every
-  25 stones to every 5 stones.
+  25 stones to every 5 stones. 
 
 13-02-2022, XuN
 - Fixed players being able to cast spells on items inside their bankbox when they are not supossed to reach it.
@@ -2957,7 +2957,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 09-06-2022, Drk84
 - Fixed: NPCs canceling other npcs from hearing player speech (Issue #859).
-- Fixed: Undefined keyword 'shipturnleft'  (Issue #860).
+- Fixed: Undefined keyword 'shipturnleft'  (Issue #860). 
 
 25-06-2022, Drk84
 - Fixed: Screensize.Y returning wrong value with clients > 5.00.00 (Issue #630).
@@ -2966,7 +2966,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 
 30-06-2022, Drk84
 - Fixed: Summoned ridden creatures did not disappear when the Summon Spell timer expired until they were dismounted (Issue #582).
-- Fixed: When using Elemental Resistance setting, Protection spell with the SPELLFLAG_SCRIPT still called the default Protection behaviour when resisting a spell.
+- Fixed: When using Elemental Resistance setting, Protection spell with the SPELLFLAG_SCRIPT still called the default Protection behaviour when resisting a spell. 
 
 08-07-2022, Drk84
 - Fixed: Ugly workaround for the ONAME property bug (Issue #825).
@@ -2986,7 +2986,7 @@ Note: The only way the server has to know if the bankself is closed is to store 
 		 Notes: Only positive numbers are accepted, if ACTIONEFFECT is set to a value less than 0 Sphere will use the default value of the skill.
 				ACTIONEFFECT has, by default, no effect in @UseQuick/@SkillUseQuick triggers
 - Added: ARGN2 in trigger @Start/@SkillStart, this allow to override/read the DELAY  value from the skill definition (how much time it takes for the skill to be completed).
-
+		
 26-07-2022, Drk84
 - Fixed: Wrong calculation in Magic Resistance check.
 
@@ -2997,10 +2997,10 @@ Note: The only way the server has to know if the bankself is closed is to store 
 			t_armor_chain			302
 			t_armor_ring			303
 			t_talisman				304
-- Added: SPELLFLAG_FREEZEONCAST, when a player casts this spell it gets frozen, opposite to SPELLFLAG_NOFREEZEONCAST
+- Added: SPELLFLAG_FREEZEONCAST, when a player casts this spell it gets frozen, opposite to SPELLFLAG_NOFREEZEONCAST 
 		 Example use: freeze while opening a gate or recall). MAGICF_FREEZEONCAST must be disabled.
 		 *IMPORTANTE* You need to add the following definition under [DEFNAME spell_flags] in your scripts:
-			spellflag_freezeoncast	   00001000
+			spellflag_freezeoncast	   00001000 
 - Added: Chars TAG, TAG.SkillMod%d being %d the SKILL ID. This allows you to increase the bonus for certaing skill instead of modifying the raw base value (just like stats affect skill bonus).
 		 Example: TAG.SkillMod10 = 100 will bonus you 10.0% in Camping (SKILL 10). If you click on "show real" in the skill menu, you won't see this bonus but the real value.
 		 Note that most of the internal calculations are used taking in account stats + tag bonus.
@@ -3038,11 +3038,11 @@ Note: The only way the server has to know if the bankself is closed is to store 
 - Changed: Skills with SKF_GATHER, @Start/@SkillStart, now ACT is the Worldgem Bit we're gathering from.
 
 09-09-2022, Jhobean
-- Added: @SendPaperdoll There 3 ways (Dclick a player, use client macro or use the context menu) to open a paperdoll and requesting the paperdoll packet (0x88).
-		 All 3 method will initiate the trigger on the player doing the action. This trigger could be use to modify some aspect of paperdoll on custom client or
+- Added: @SendPaperdoll There 3 ways (Dclick a player, use client macro or use the context menu) to open a paperdoll and requesting the paperdoll packet (0x88). 
+		 All 3 method will initiate the trigger on the player doing the action. This trigger could be use to modify some aspect of paperdoll on custom client or 
 		 to detect someone looking your paperdoll.
 			SRC = The player asking to open the paperdoll
-			i = The player concerned in the information packet
+			i = The player concerned in the information packet 
 
 19-09-2022, Tolokio
 -Added: Wake() is now avaible to be used by script using command: "wake". Wake function require to wake a sleeping NPC (death corpse and invisible body)
@@ -3076,7 +3076,7 @@ Notes:
 		 The command syntaxis: PARTY.CREATE msg,uid(s).
 		 Where msg is 0/1 sending default sysmessages or not, the following args (up to 9 more) is/are the players to add to this party.
 		 Note that by using PARTY.CREATE the player will be forced to enter the party, so you need to add your own "acceptance system".
-
+		
 24-10-2022, Raylde/Jhobean
 [sphere.ini]: Added TimerCallUnit to be able use seconds instead of minutes with TimerCall
 
@@ -3095,12 +3095,12 @@ Notes:
 - Changed: AR (the old armour value) property can be displayed up to 65k. (Issue #968)
 - Changed: The DAM property (for both characters and weapons) can be displayed up to 65k. (Issue #967)
 - Added: t_armor_bone typedef (value 305). If you want to use it you need to add it in the core/defs_types_hardcoded.scp file under the typedef section. (Issue #890)
-
+		
 03-12-2022, Drk84
 - Fix: Deleting a player while it's in a guild cause the server to crash. (Issue #971)
 
 06-12-2022, Drk84
-- Added [Sphere.ini] : New Sphere.ini settings "DisplayElementalResistance". (Issue #742)
+- Added [Sphere.ini] : New Sphere.ini settings "DisplayElementalResistance". (Issue #742) 
 			   This setting allows to display the elemental resistances (Fire, Cold, Energy, Poison but not Physical) on status bar and tooltips, even if combat flag ELEMENTAL_ENGINE is disabled.
 			   Remember that the old AC(and MODAR) system will be used if ELEMENTAL_ENGINE flag is disabled.
 
@@ -3109,7 +3109,7 @@ Notes:
 - Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948)
 - Fix: Removed no longer needed / duplicated code.
 - Fix: At @redeed, return 1 no longer avoid house deletion. (Redeed can be prevented by script at house dialog, so there is no need of this feature. Also wiki says return 1 just prevent deed creation, not house deletion.)
-- Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948)
+- Fixed: Possible fix for disconnected characters on a movable multi being re-connected when the multi starts to move. (Issue #948) 
 
 13-12-2022, Drk84
 Fixed: @Ship_Turn not firing, this trigger will fire on a T_SHIP item and for every item on the deck. (Issue #981)
@@ -3126,22 +3126,22 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 		Example script;
 		on=@Ship_Stop (UID/I = Ship)
 		TAG0.SHIPMOVE=
-
+		
 		Accordingly, the ship is still under multidef.
 		on=@Ship_Move (UID/I = Ship, ARGN1 = Move Direction)
 		TAG0.SHIPMOVE=1 // or <ARGN1>
-
+		
 		You can check whether the ship is in motion or not. In addition, in @Ship_Move trigger, the direction of the ship is sent to the trigger as <ARGN1>.
 		@Ship_Move trigger is only triggered on successful ship movements. It will not trigger if the ship is stuck somewhere.
-
+		
 31-12-2022, Drk84
 - Added: New command DIRMOVE for ships, read only, returns the direction (0..8) where the ship is going. (Issue #993)
-- Added: New command DAMADJUSTED, read only, return the damage range including the various modifier (like CombatBonusStat, tactics bonus if enabled etc).
+- Added: New command DAMADJUSTED, read only, return the damage range including the various modifier (like CombatBonusStat, tactics bonus if enabled etc). 
 		 It pratically returns the damage range shown in the character status panel.
 		 Example:
 		 ON=@Hit
 		 argn1 = <R<damadjusted>> //This recalculates the full damage including the various bonus if any.
-
+		
 01-12-2023, Drk84
 - Added: New trigger @NpcActCast, this trigger is fired when an NPC is going to select which spell is going to cast.
 		 This triggers can fires multiple time if the NPC cannot cast the selected spell (for example because the spell has the SPELLFLAG_PLAYERONLY flag).
@@ -3157,7 +3157,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 			 ARGN2: It's 1 if the spell is being cast by a wand, 0 otherwise, read only.
 			 Return 1: Interrupt spell selection.
 - Changed: If the NPC is wielding a wand, it has a 50% to use the wand instead of the a spell from the spellbook11. Remember that the wand must have the ATTR_MAGIC set.
-- Fixed: Bonus from CombatBonusStat, when the stat was above 100, was not properly applied when COMBAT_DAMAGEERA was set to 2 (AOS)
+- Fixed: Bonus from CombatBonusStat, when the stat was above 100, was not properly applied when COMBAT_DAMAGEERA was set to 2 (AOS)    
 
 02-01-2023, Drk84
 - Added [Sphere.ini]: New Sphere.ini settings "NPCHealThreshold", this setting determines the amount of target hitpoints (in %) at which a NPC will try to heal by spell.
@@ -3169,10 +3169,10 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Replaced: HEALTHPERCENT command is replaced by STATPERCENT.stat_key command where stat_key is STR for hits, dex for stamina and int for mana.
 			Example: if we have 25 mana and 50 int and we do .show statpercent.int we will get 50%.
 - Added: CURE command, for curing poison and hallucination effect.
-		 Example:
+		 Example: 
 		 CURE remove the poison memory item and clear the poison flag.
-		 CURE 1 remove the poison memory item, the hallucination memory item, clear the poison and hallucination flags.
-
+		 CURE 1 remove the poison memory item, the hallucination memory item, clear the poison and hallucination flags.			
+		 
 10-01-2023, Jhobean/Drk84/Luxion
 - Fixed: Sectors clients going negative and disconnected clients being displayed on ships.
 
@@ -3183,7 +3183,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 	Added <LOCAL.OLD> and <LOCAL.NEW> keys to catch hash/fame changes under trigger. also moved under functions to trigger with .fame 1 / .karma 5 commands.
 
 16-01-2023, tolokio
-- Added: @charShove trigger.
+- Added: @charShove trigger. 
 		Fires when a char is going to step another char.
 		src->The char being stepped
 		Default Object->the one who step on the other.
@@ -3203,7 +3203,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Changed: Added more checks to avoid TIMER being set on objects which shouldn't tick/have a timer.
 
 07-02-2023, Jhobean
-- Changed: Spawn now continues to generate Items/NPC even on sleeping sectors. If the sector is sleeping when the spawn point reaches the max amount of objects, it will finally go in the sleeping state.
+- Changed: Spawn now continues to generate Items/NPC even on sleeping sectors. If the sector is sleeping when the spawn point reaches the max amount of objects, it will finally go in the sleeping state. 
 	This change will avoid the scenario in which a player enters a dungeon/region which partially spawned, even if a sufficient amount of time elapsed, because the sector went sleeping too soon.
 - Fixed: Dragging an item linked to a spawn point now unlinks them. This will avoid to have item dissapearing on player packpack when the spawn point is resetted and sets the spawn to continue spawning new items.
 - Added: 2 news triggers for Spawn objects:
@@ -3224,14 +3224,14 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 -Fixed: When using ISNEARBYTPE command the last argument "CheckZ" on FindItemTypeNearby method was never used.
 
 20-02-2023, Drk84
--(Cheap) Fixed: Spawn Keyword AT.n.xx not working properly. (Issue #1033)
+-(Cheap) Fixed: Spawn Keyword AT.n.xx not working properly. (Issue #1033) 
 
 27-02-2023, Drk84
 - Fixed: Wrong duration for Gate Travel Spell. (Issue #1043)
 - Fixed: More accurate messages when a container/hold is locked and you have/don't have the key. (Issue #1044)
-- Added: New local in the @GetHit trigger:
-		 LOCAL.SPELL: Read Only, display  the spell number that damaged the character.
-
+- Added: New local in the @GetHit trigger: 
+		 LOCAL.SPELL: Read Only, display  the spell number that damaged the character. 
+		 
 02-03-2023, Drk84
 - Fixed: Animation was played while out of range when COMBAT_SWING_NORANGE flag is enabled. (Issue #819)
 - Fixed: Spell duration was calculated two times when a spell was cast.
@@ -3243,7 +3243,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
          These locals contains the amount in % of the elemental damage inflicted, and thus they are available only with Elemental Engine enabled.
 
 22-03-2023, Drk84
-- Fixed: Undefined item ID (it's actually Item ID 00) when adding ON=@Cancel trigger in SKILLMENU. (Issue #1056)
+- Fixed: Undefined item ID (it's actually Item ID 00) when adding ON=@Cancel trigger in SKILLMENU. (Issue #1056)		
 
 07-04-2023, Drk84
 - Fixed: ModMaxWeight not working on NPCs. (Issue #1061)
@@ -3298,7 +3298,7 @@ Fixed: Multi type items weren't calling the @Destroy triggers when removed. (Iss
 - Fixed: Invalid MULTICOMPONENT and MULTILOCKDOWN tag on items throwing an exception.
 
 13-05-2023, Drk84
-- Fixed: Timer not set when an ammunition item was placed on the ground because the strike missed.  (Issue #1072)
+- Fixed: Timer not set when an ammunition item was placed on the ground because the strike missed.  (Issue #1072) 
 - Fixed: Casting the SUMMON CREATURE spell while a fighting skill was active caused the spell creature ID to be resetted. (Issue #1070)
 
 14-05-2023, Nolok
@@ -3336,16 +3336,16 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 13-09-2023, Drk84
 - Fixed: Sphere.ini setting ManaLossPercent not consuming mana unless set to 100. (Issue #1096)
 		Remember that the mana lost depends from the spell Mana base cost and eventually the LowerManaCost property if set.
-
+		
 14-09-2023, Drk84
 - Fixed: Using ATTACKER.TARGET on a fighting NPC will return always -1. (Issue #1098)
-
+		
 15-09-2023, Drk84
 - Fixed: Ship plank not remaining open when turning the ship around. ( Issue #1089)
 	   The ship plank will now autoclose after 5 seconds.
-- Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081)
+- Fixed: Client Linger Timer is 3600 seconds on stoned players. (Issue #1081) 
 
-23-09-2023 / 1-10-2023 (2 commits), Jhobean
+23-09-2023 / 1-10-2023 (2 commits), Jhobean 
 - Fixed: When deleting account, f_onchar_delete was not call on char and char's item was not remove causing warning on next server boot. ( Issue #1029)
 - Changed: Optimisation how f_onchar_delete is launch and avoid dual launch when delete char on login screen.
 
@@ -3395,7 +3395,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 - Fixed: Setting GuardsOnMurderers to 0 causes vendors to run away players and call guards. (Issue: #720)
 
 16-10-2023, Nolok
-- Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers.
+- Fixed: Memory leaks due to the old CSPtrTypeArray and CSObjArray containers, replaced with new ones using smart pointers as wrappers. 
 - Fixed: Possible random errors caused by reading some internal data before it was initialized during server startup (CCrypto::client_keys, holding SphereCrypt data, and ThreadHolder, holding threads data).
 - Fixed: CSString instances becoming invalid after calling the Clear method.
 
@@ -3518,7 +3518,7 @@ Additionally, the problem of zig-zag issue following in the South direction has 
 	This LOCALs changes default behaviour of poisoned weapons while removing poison.
 	LOCAL.ItemPoisonReductionChance = Is the chance that weapon reduce poison morez. (Default 100%)
 	LOCAL.ItemPoisonReductionAmount = Is the amount of poison that weapon reduce. (Default: CurrentPoisonAmount/ 2)
-
+	
 - Added: You can now use TDATA2 for setting default cooldown (delay) for drinks. (Default: 15secs for potions, 1500 secs for ales)
 - Changed: Reactive armor range increased from 1 to 2 in default.
 
@@ -3779,26 +3779,3 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// ITEM_CANTIMER_IN_CONTAINER	1	// Items can hold a timer even if equipped.
 - Added: item CAN flag (Issue #1180):
 	CAN_I_TIMER_CONTAINED   0x40000000  // This item (if not "sleeping") can have a timer even if inside a container (overrides global default behavior).
-
-21-06-2024, Nolok
-- Improvement: optimized various C++ core subsystems, resulting in a significantly reduced CPU usage and (slightly) reduced startup time.
-- Fixed: RAM usage always increasing during uptime. Caused by a couple of memory leaks, the greatest happening because the cached map blocks were not properly released.
-- Fixed: adopted a more conservative memory allocation policy for strings, resulting in reduced RAM usage.
-- Changed: I_MEMORY (ITEMID_MEMORY) items won't have anymore the ComponentProps Faction, ItemChar, Item, reducing their memory footprint.
-
-25-06-2024, Nolok
-- Fixed: LASTUSED, LASTDISCONNECTED, TIMESTAMP being interpreted as a number with a different base (seconds or tenths of seconds or milliseconds) in different contexts. Now they expect in scripts only values in seconds.
-- Fixed: crash when moving a char in an area full of teleporters, or whichever items made the char move multiple times in the same tick.
-
-26-06-2024, Jhobean
-- Changed: @NPCRESTOCK References modification. Now SRC:Server I:NPC (Before it was always server)
-
-30-06-2024 (merged on 20-07-2024), DavideRei
-- Fixed: hallucination spell duration (before it was fixed at 1000 seconds)
-- Fixed: wrong layer checked for potion delay to set the memory name
-- Modified: blocked spelleffect on ridden chars for spells with flag SPELLFLAG_FIELD or SPELLFLAG_AREA
-- Fixed: NPC_Act_Follow use combat target even if the npc is not in combat
-- Fixed: wrong highest threat when there are no attackers
-
-20-07-2024, Nolok
-- Changed: When trying to set/modify a STAT to reach a value < 0, print an error and default that stat to 0. Nevertheless, remember to check for underflows or overflows in your scripts before passing the value to the core! This update is a safety net but you can expect bugs anyways if you don't check the math in the scripts.

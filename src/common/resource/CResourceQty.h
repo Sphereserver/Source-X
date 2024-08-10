@@ -15,30 +15,29 @@ struct CResourceQty
 private:
     CResourceID m_rid;		// A RES_SKILL, RES_ITEMDEF, or RES_TYPEDEF
     int64 m_iQty;			// How much of this ?
-
 public:
-    inline const CResourceID& GetResourceID() const noexcept
+    inline const CResourceID& GetResourceID() const
     {
         return m_rid;
     }
-    void SetResourceID(const CResourceID& rid, int iQty) noexcept
+    void SetResourceID(const CResourceID& rid, int iQty)
     {
         m_rid = rid;
         m_iQty = iQty;
     }
-    inline RES_TYPE GetResType() const noexcept
+    inline RES_TYPE GetResType() const
     {
         return m_rid.GetResType();
     }
-    inline int GetResIndex() const noexcept
+    inline int GetResIndex() const
     {
         return m_rid.GetResIndex();
     }
-    inline int64 GetResQty() const noexcept
+    inline int64 GetResQty() const
     {
         return m_iQty;
     }
-    inline void SetResQty(int64 iQuantity) noexcept
+    inline void SetResQty(int64 iQuantity)
     {
         m_iQty = iQuantity;
     }
@@ -57,12 +56,8 @@ public:
 class CResourceQtyArray : public std::vector<CResourceQty>
 {
     // Define a list of index id's (not references) to resource objects. (Not owned by the list)
-
-    bool m_mergeOnLoad;
-
 public:
     static const char *m_sClassName;
-
     CResourceQtyArray();
     explicit CResourceQtyArray(lpctstr pszCmds);
     bool operator == ( const CResourceQtyArray & array ) const;
@@ -94,6 +89,9 @@ public:
     }
 
     void setNoMergeOnLoad();
+
+private:
+    bool m_mergeOnLoad;
 };
 
 

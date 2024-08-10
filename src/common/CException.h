@@ -22,10 +22,14 @@ void SetExceptionTranslator();
 
 #ifndef _WIN32
     void SetUnixSignals( bool );
-    int IsDebuggerPresent();	// Windows already has this function
+    #ifdef _DEBUG
+	    int IsDebuggerPresent();	// Windows already has this function
+    #endif
 #endif
 
-void NotifyDebugger();
+#ifdef _DEBUG
+    void NotifyDebugger();
+#endif
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
@@ -155,7 +159,6 @@ public:
 	{ \
 		_EXC_CATCH_EXCEPTION_GENERIC(&e, "CAssert"); \
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
-		EXC_NOTIFY_DEBUGGER; \
 	} \
 	catch ( const CSError& e ) \
 	{ \
@@ -307,13 +310,6 @@ public:
 
 
 #endif //_EXCEPTIONS_DEBUG
-
-
-/*--- Advanced tooling --- */
-
-//https://rkd.me.uk/posts/2020-04-11-stack-corruption-and-how-to-debug-it.html
-#define STACK_RA_CHECK_SETUP void* ra_start = __builtin_return_address(0);
-#define STACK_RA_CHECK assert(ra_start == __builtin_return_address(0)); assert(((intptr_t)ra_start & 0xffffffff00000000) == ((intptr_t)main & 0xffffffff00000000));
 
 
 #endif // _INC_CEXCEPTION_H

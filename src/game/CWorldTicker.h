@@ -21,7 +21,7 @@
 #ifdef __GNUC__
     #pragma GCC diagnostic pop
 #endif
-#include <parallel_hashmap/btree.h>
+//#include <flat_containers/flat_map.hpp>
 
 
 
@@ -37,20 +37,24 @@ public:
     ~CWorldTicker() = default;
 
 private:
-    struct WorldTickList : public phmap::btree_multimap<int64, CTimedObject*>
+    using TimedObjectsContainer = std::vector<CTimedObject*>;
+    struct WorldTickList : public std::map<int64, TimedObjectsContainer>
+    //struct WorldTickList : public fc::vector_map<int64, TimedObjectsContainer>
     {
-        MT_CMUTEX_DEF;
+        THREAD_CMUTEX_DEF;
     };
 
-    struct CharTickList : public phmap::btree_multimap<int64, CChar*>
+    using TimedCharsContainer = std::vector<CChar*>;
+    struct CharTickList : public std::map<int64, TimedCharsContainer>
+    //struct CharTickList : public fc::vector_map<int64, TimedCharsContainer>
     {
-        MT_CMUTEX_DEF;
+        THREAD_CMUTEX_DEF;
     };
 
     struct StatusUpdatesList : public phmap::parallel_flat_hash_set<CObjBase*>
     //struct StatusUpdatesList : public std::unordered_set<CObjBase*>
     {
-        MT_CMUTEX_DEF;
+        THREAD_CMUTEX_DEF;
     };
 
     WorldTickList _mWorldTickList;
@@ -59,21 +63,12 @@ private:
     friend class CWorldTickingList;
     StatusUpdatesList _ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
 
-    // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
-    std::vector<void*> _vecObjs;
-    // "Index" in the multimap
-    std::vector<size_t> _vecWorldObjsToEraseFromList;
-    // "Index" in the multimap
-    std::vector<size_t> _vecPeriodicCharsToEraseFromList;
-
-    //----
-
     friend class CWorld;
     friend class CWorldTimedFunctions;
     CTimedFunctionHandler _TimedFunctions; // CTimedFunction Container/Wrapper
 
     CWorldClock* _pWorldClock;
-    int64        _iLastTickDone;
+    int64        _iLastTickDone;  
 
 public:
     void Tick();

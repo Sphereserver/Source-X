@@ -16,7 +16,7 @@
 //	CEventLog
 // -----------------------------
 
-enum LOG_TYPE : uint
+enum LOG_TYPE
 {
 	// --severity Level
 	//	it can be only one of them, so we don't need to use a bitmask
@@ -85,7 +85,7 @@ private:
 extern struct CLog : public CSFileText, public CEventLog
 {
 private:
-	// MT_CMUTEX_DEF; // There's already the CSFileText::MT_CMUTEX
+	// THREAD_CMUTEX_DEF; // There's already the CSFileText::THREAD_CMUTEX
 
 	dword m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
 	CSTime m_dateStamp;			// last real time stamp.
@@ -104,7 +104,7 @@ public:     const CScript * SetScriptContext( const CScript * pScriptContext );
 protected:  const CScriptObj * _SetObjectContext( const CScriptObj * pObjectContext );
 public:	    const CScriptObj * SetObjectContext( const CScriptObj * pObjectContext );
 
-
+	
 protected:	bool _OpenLog(lpctstr pszName = nullptr);	// name set previously.
 public:		bool OpenLog(lpctstr pszName = nullptr);
 

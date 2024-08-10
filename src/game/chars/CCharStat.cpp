@@ -44,12 +44,12 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 	}
 
 	const int iPrevVal = iVal;
-    iVal = std::clamp(iVal, int(-UINT16_MAX), int(UINT16_MAX));
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
+	else if (iVal < -UINT16_MAX)
+		iVal = -UINT16_MAX;
 	if (iVal != iPrevVal)
-    {
-		g_Log.EventError("Trying to set MOD%s to invalid value=%d. Defaulting it to %d.\n",
-                         g_Cfg.GetStatName(i), iPrevVal, iVal);
-    }
+		g_Log.EventWarn("Trying to set MOD%s to invalid value=%d. Defaulting it to %d.\n", g_Cfg.GetStatName(i), iPrevVal, iVal);
 
 	m_Stat[i].m_mod = iVal;
 
@@ -71,14 +71,8 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 
 int CChar::Stat_GetMod( STAT_TYPE i ) const
 {
-    [[unlikely]]
-    if (i < 0 || i >= STAT_QTY)
-    {
-        ADDTOCALLSTACK("CChar::Stat_GetMod");
-        ASSERT(i >= 0 && i < STAT_QTY);
-    }
-
-    [[likely]]
+	ADDTOCALLSTACK("CChar::Stat_GetMod");
+	ASSERT(i >= 0 && i < STAT_QTY);
 	return m_Stat[i].m_mod;
 }
 
@@ -104,12 +98,12 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
     }
 
 	const int iPrevVal = iVal;
-    iVal = std::clamp(iVal, int(-UINT16_MAX), int(UINT16_MAX));
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
+	else if (iVal < -UINT16_MAX)
+		iVal = -UINT16_MAX;
 	if (iVal != iPrevVal)
-    {
-		g_Log.EventError("Trying to set MODMAX%s to invalid value=%d. Defaulting it to %d.\n",
-                         g_Cfg.GetStatName(i), iPrevVal, iVal);
-    }
+		g_Log.EventWarn("Trying to set MODMAX%s to invalid value=%d. Defaulting it to %d.\n", g_Cfg.GetStatName(i), iPrevVal, iVal);
 
     m_Stat[i].m_maxMod = iVal;
 
@@ -131,12 +125,12 @@ void CChar::Stat_AddMaxMod( STAT_TYPE i, int iVal )
         return;
 
 	const int iPrevVal = iVal;
-    iVal = std::clamp(iVal, int(-UINT16_MAX), int(UINT16_MAX));
+	if (iVal > UINT16_MAX)
+		iVal = UINT16_MAX;
+	else if (iVal < -UINT16_MAX)
+		iVal = -UINT16_MAX;
 	if (iVal != iPrevVal)
-    {
-		g_Log.EventError("Trying to add to MODMAX%s an invalid value=%d. Defaulting the addend to %d.\n",
-                         g_Cfg.GetStatName(i), iPrevVal, iVal);
-    }
+		g_Log.EventWarn("Trying to add MODMAX%s to invalid value=%d. Defaulting it to %d.\n", g_Cfg.GetStatName(i), iPrevVal, iVal);
 
     m_Stat[i].m_maxMod += iVal;
 
@@ -188,23 +182,8 @@ void CChar::Stat_AddVal( STAT_TYPE i, int iVal )
     }
 
     ASSERT((i >= 0) && (i < STAT_QTY)); // allow for food
-
-    int iPrevVal = iVal;
-    iVal = std::clamp(iVal, int(-UINT16_MAX), int(UINT16_MAX));
-	if (iVal != iPrevVal)
-    {
-		g_Log.EventError("Trying to add to %s an invalid value=%d. Defaulting the addend to %d.\n",
-                         g_Cfg.GetStatName(i), iPrevVal, iVal);
-    }
-
-    iPrevVal = m_Stat[i].m_val + iVal;
-    iVal = maximum(0, iPrevVal);
-	if (iVal != iPrevVal)
-    {
-		g_Log.EventError("Trying to set %s to invalid value=%d. Defaulting it to %d.\n",
-                         g_Cfg.GetStatName(i), iPrevVal, iVal);
-    }
-    m_Stat[i].m_val = (ushort)iVal;
+    iVal = m_Stat[i].m_val + iVal;
+    m_Stat[i].m_val = (ushort)(maximum(0, iVal));
 
     if ((i == STAT_STR) && (iVal <= 0))
     {   // Ensure this char will tick and die
@@ -315,20 +294,15 @@ uint CChar::Stat_GetSum() const
 
 ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 {
-	ADDTOCALLSTACK_DEBUG("CChar::Stat_GetAdjusted");
+	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
     return ushort(Stat_GetBase(i) + Stat_GetMod(i));
 }
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 {
-    [[unlikely]]
-    if (i < 0 || i >= STAT_QTY)
-    {
-        ADDTOCALLSTACK("CChar::Stat_GetBase");
-        ASSERT(i >= 0 && i < STAT_QTY);
-    }
+	ADDTOCALLSTACK("CChar::Stat_GetBase");
+	ASSERT(i >= 0 && i < STAT_QTY);
 
-    [[likely]]
 	return m_Stat[i].m_base;
 }
 
@@ -358,37 +332,18 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 			args.m_iN3 = uiVal;
 			if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
-
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
+			uiVal = (ushort)(args.m_iN3);
 
-            int64 iPrevVal = args.m_iN3;
-            int64 iVal = std::clamp(iPrevVal, int64(-UINT16_MAX), int64(UINT16_MAX));
-            if (iVal != iPrevVal)
-            {
-                g_Log.EventError("Trying to set %s to invalid value=%" PRId64 ". Defaulting it to %" PRId64 ".\n",
-                                g_Cfg.GetStatName(i), iPrevVal, iVal);
-            }
-            uiVal = (ushort)iVal;
-
-            // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
-			if (i != STAT_FOOD && m_Stat[i].m_max < 1)
+			if (i != STAT_FOOD && m_Stat[i].m_max < 1) // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
 			{
 				args.m_iN1 = i + 4LL; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
 				args.m_iN2 = uiStatVal;
 				args.m_iN3 = uiVal;
 				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
-
 				// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-
-                iPrevVal = args.m_iN3;
-                iVal = std::clamp(iPrevVal, int64(-UINT16_MAX), int64(UINT16_MAX));
-                if (iVal != iPrevVal)
-                {
-                    g_Log.EventError("Trying to set MAX%s to invalid value=%" PRId64 ". Defaulting it to %" PRId64 ".\n",
-                                    g_Cfg.GetStatName(i), iPrevVal, iVal);
-                }
-                uiVal = (ushort)iVal;
+				uiVal = (ushort)(args.m_iN3);
 			}
 		}
 	}
@@ -482,16 +437,13 @@ uint CChar::Stat_GetSumLimit() const
     ADDTOCALLSTACK("CChar::Stat_GetSumLimit");
     // The return value is uint, but the value supported by the packets is a word (which is smaller)
 	const CVarDefCont* pTagStorage = GetKey("OVERRIDE.STATSUM", true);
-    if (pTagStorage)
-        return (uint)pTagStorage->GetValNum();
-
     if ( m_pPlayer )
     {
         const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
         ASSERT(pSkillClass);
-        return (uint)(pSkillClass->m_StatSumMax);
+        return pTagStorage ? ((uint)(pTagStorage->GetValNum())) : (uint)(pSkillClass->m_StatSumMax);
     }
-    return 300;
+    return pTagStorage ? (uint)(pTagStorage->GetValNum()) : 300;
 }
 
 bool CChar::Stats_Regen()
@@ -656,11 +608,12 @@ void CChar::Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state)
 
 short CChar::GetKarma() const
 {
-    return (short)std::clamp((int)m_iKarma, g_Cfg.m_iMinKarma, g_Cfg.m_iMaxKarma);
+    return (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, m_iKarma)));
 }
 
 void CChar::SetKarma(short iNewKarma, CChar* pNPC)
 {
+
 	/*
     Issue: 1118
 	https://github.com/Sphereserver/Source-X/issues/1118

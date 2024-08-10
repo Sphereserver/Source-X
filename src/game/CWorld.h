@@ -92,19 +92,6 @@ public:
 	NODISCARD bool IsScheduledObjDeletion(const CSObjContRec* obj) const noexcept;
 	NODISCARD bool IsScheduledSpecialObjDeletion(const CSObjListRec* obj) const noexcept;
 
-
-    NODISCARD inline const CSObjCont* GetObjectsNew() noexcept {
-        return &m_ObjNew;
-    }
-    /*
-    NODISCARD inline const CSObjCont* GetObjectsDeleting() noexcept {
-        return &m_ObjDelete;
-    }
-    NODISCARD inline const CSObjList* GetObjectsSpecialDeleting() noexcept {
-        return &m_ObjSpecialDelete;
-    }
-    */
-
 	int FixObjTry( CObjBase * pObj, dword dwUID = 0 );
 	int FixObj( CObjBase * pObj, dword dwUID = 0 );
 

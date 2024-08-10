@@ -8,7 +8,6 @@
 #include "../items/CItemVendable.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
-#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -494,11 +493,11 @@ int CClient::Cmd_Extract( CScript * pScript, const CRectMap &rect, int & zlowest
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
 	int ry = 1 + abs( rect.m_bottom - rect.m_top ) / 2;
 
-	auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, maximum( rx, ry ));
-	AreaItem->SetSearchSquare( true );
+	CWorldSearch AreaItem( ptCtr, maximum( rx, ry ));
+	AreaItem.SetSearchSquare( true );
 	for (;;)
 	{
-		CItem * pItem = AreaItem->GetItem();
+		CItem * pItem = AreaItem.GetItem();
 		if ( pItem == nullptr )
 			break;
 		if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -555,7 +554,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	CRectMap rect;
 	rect.SetRect( m_tmTile.m_ptFirst.m_x, m_tmTile.m_ptFirst.m_y, pt.m_x, pt.m_y, pt.m_map);
-	CPointMap ptCtr(rect.GetCenter());
+	CPointMap ptCtr = rect.GetCenter();
 	ptCtr.m_map = pt.m_map;
 
 	int rx = 1 + abs( rect.m_right - rect.m_left ) / 2;
@@ -603,12 +602,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
-			auto Area = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
-			Area->SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			Area->SetSearchSquare( true );
+			CWorldSearch AreaItem( ptCtr, iRadius );
+			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaItem.SetSearchSquare( true );
 			for (;;)
 			{
-				CItem * pItem = Area->GetItem();
+				CItem * pItem = AreaItem.GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -619,10 +618,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				++iCount;
 			}
 
-            Area->RestartSearch();
-            for (;;)
+			CWorldSearch AreaChar( ptCtr, iRadius );
+			AreaChar.SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaChar.SetSearchSquare( true );
+			for (;;)
 			{
-				CChar* pChar = Area->GetChar();
+				CChar* pChar = AreaChar.GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
@@ -639,12 +640,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKE:		// NUKE all items in the region.
 		{
-			auto AreaItem = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
-			AreaItem->SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaItem->SetSearchSquare( true );
+			CWorldSearch AreaItem( ptCtr, iRadius );
+			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaItem.SetSearchSquare( true );
 			for (;;)
 			{
-				CItem * pItem = AreaItem->GetItem();
+				CItem * pItem = AreaItem.GetItem();
 				if ( pItem == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pItem->GetTopPoint()))
@@ -668,12 +669,12 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_NUKECHAR:
 		{
-			auto AreaChar = CWorldSearchHolder::GetInstance( ptCtr, iRadius );
-			AreaChar->SetAllShow( IsPriv( PRIV_ALLSHOW ));
-			AreaChar->SetSearchSquare( true );
+			CWorldSearch AreaChar( ptCtr, iRadius );
+			AreaChar.SetAllShow( IsPriv( PRIV_ALLSHOW ));
+			AreaChar.SetSearchSquare( true );
 			for (;;)
 			{
-				CChar* pChar = AreaChar->GetChar();
+				CChar* pChar = AreaChar.GetChar();
 				if ( pChar == nullptr )
 					break;
 				if ( ! rect.IsInside2d( pChar->GetTopPoint()))
@@ -712,7 +713,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 				{
 					if ( ++iArg >= iArgQty )
 						iArg = 1;
-                    CItem *pItem = CItem::CreateTemplate((ITEMID_TYPE)(ResGetIndex((dword)piArgs[iArg])), nullptr, m_pChar);
+					CItem * pItem = CItem::CreateTemplate((ITEMID_TYPE)(RES_GET_INDEX(piArgs[iArg])), nullptr, m_pChar);
                     if (!pItem)
                         continue;
 					pItem->SetAttr( ATTR_MOVE_NEVER );
@@ -1192,12 +1193,9 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 			Str_CopyLimitNull( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME), Str_TempLength() - len);
 
 	}
-	else if ( pCorpse->GetTimeStampS() > 0 )
+	else if ( pCorpse->GetTimeStamp() > 0 )
 	{
-		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER),
-            pCorpse->GetName(),
-            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS() * MSECS_PER_SEC) / MSECS_PER_SEC));
-
+		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
 		if ( pName )
 			snprintf( pszTemp + len, Str_TempLength() - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
@@ -1239,7 +1237,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	switch ( pItem->GetType())
 	{
 		case IT_POTION:
-			if ( ResGetIndex(pItem->m_itPotion.m_Type) == SPELL_Poison )
+			if ( RES_GET_INDEX(pItem->m_itPotion.m_Type) == SPELL_Poison )
 			{
 				iPoisonLevel = pItem->m_itPotion.m_dwSkillQuality;
 			}
@@ -1524,10 +1522,10 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 		// All the pets that could hear me.
 		bool fGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-		auto AreaChars = CWorldSearchHolder::GetInstance( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
+		CWorldSearch AreaChars( m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT );
 		for (;;)
 		{
-			CChar * pCharPet = AreaChars->GetChar();
+			CChar * pCharPet = AreaChars.GetChar();
 			if ( pCharPet == nullptr )
 				break;
 			if ( pCharPet == m_pChar )
@@ -1631,7 +1629,7 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
         return false;
     }
 
-	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(pDeed->m_itDeed.m_Type)));
+	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type)));
     if (!OnTarg_Use_Multi(pItemDef, pt, pDeed))
     {
         return false;
@@ -1728,7 +1726,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 
 	case IT_POTION:
 		// Use a potion on something else.
-		if ( ResGetIndex(pItemUse->m_itPotion.m_Type) == SPELL_Explosion )
+		if ( RES_GET_INDEX(pItemUse->m_itPotion.m_Type) == SPELL_Explosion )
 		{
 			// Throw explosion potion
 			if ( !pItemUse->IsItemEquipped() || pItemUse->GetEquipLayer() != LAYER_DRAGGING )
@@ -2122,7 +2120,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				case IT_HIDE:
 					// IT_LEATHER
 					// Cut up the hides and create strips of leather
-					iOutID = (ITEMID_TYPE)(ResGetIndex(pItemTarg->Item_GetDef()->m_ttNormal.m_tData1));
+					iOutID = (ITEMID_TYPE)(RES_GET_INDEX(pItemTarg->Item_GetDef()->m_ttNormal.m_tData1));
 					if ( ! iOutID )
 						iOutID = ITEMID_LEATHER_1;
 					iOutQty = pItemTarg->GetAmount();

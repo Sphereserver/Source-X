@@ -24,8 +24,9 @@ public:
     CClientTooltip(dword dwClilocID, lpctstr ptcArgs);
     CClientTooltip(dword dwClilocID, int64 iArgs);
 
-    CClientTooltip(const CClientTooltip& copy) = delete;
-    CClientTooltip& operator=(const CClientTooltip& other) = delete;
+private:
+    CClientTooltip(const CClientTooltip& copy);
+    CClientTooltip& operator=(const CClientTooltip& other);
 
 public:
     void __cdecl FormatArgs(lpctstr format, ...) __printfargs(2,3);

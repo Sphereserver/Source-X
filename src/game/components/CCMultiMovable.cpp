@@ -8,7 +8,6 @@
 #include "../CObjBase.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
-#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CCMultiMovable.h"
 
@@ -154,13 +153,12 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     }
 
     // add chars to the list
-    auto Area = CWorldSearchHolder::GetInstance(pItemThis->GetTopPoint(), iMaxDist);
-
-    Area->SetAllShow(true);
-    Area->SetSearchSquare(true);
+    CWorldSearch AreaChar(pItemThis->GetTopPoint(), iMaxDist);
+    AreaChar.SetAllShow(true);
+    AreaChar.SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)
     {
-        CChar *pChar = Area->GetChar();
+        CChar *pChar = AreaChar.GetChar();
         if (pChar == nullptr)
             break;
         if (!pMulti->GetRegion()->IsInside2d(pChar->GetTopPoint()))
@@ -176,11 +174,11 @@ uint CCMultiMovable::ListObjs(CObjBase ** ppObjList)
     }
 
     // last, add the rest of the items
-    Area->Reset(pItemThis->GetTopPoint(), iMaxDist);
-    Area->SetSearchSquare(true);
+    CWorldSearch AreaItem(pItemThis->GetTopPoint(), iMaxDist);
+    AreaItem.SetSearchSquare(true);
     while (uiCount < MAX_MULTI_LIST_OBJS)
     {
-        CItem *pItem = Area->GetItem();
+        CItem *pItem = AreaItem.GetItem();
         if (pItem == nullptr)
             break;
         if (pItem == pItemThis)	// already listed.
@@ -1262,7 +1260,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
     return true;
 }
 
-enum CML_TYPE : int
+enum CML_TYPE
 {
     CML_ANCHOR,
     CML_DIRFACE,

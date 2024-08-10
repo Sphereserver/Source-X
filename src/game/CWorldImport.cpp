@@ -3,7 +3,7 @@
 #include "items/CItem.h"
 #include "CObjBase.h"
 #include "CWorld.h"
-#include "CWorldSearch.h"
+#include "CWorldMap.h"
 
 struct CImportSer : public CSObjListRec
 {
@@ -17,22 +17,23 @@ public:
 	LAYER_TYPE m_layer;	// UOX does this diff than us. so store this here.
 
 public:
-	bool IsTopLevel() const noexcept
+	bool IsTopLevel() const
 	{
 		return( m_dwContSer == UID_UNUSED );
 	}
 
-	CImportSer( dword dwSer ) noexcept :
+	CImportSer( dword dwSer ) :
 		m_dwSer( dwSer )
 	{
 		m_pObj = nullptr;
 		m_dwContSer = UID_UNUSED;
 		m_layer = LAYER_NONE;
 	}
-	~CImportSer() noexcept = default;
+	~CImportSer() = default;
 
-	CImportSer(const CImportSer& copy) = delete;
-	CImportSer& operator=(const CImportSer& other) = delete;
+private:
+	CImportSer(const CImportSer& copy);
+	CImportSer& operator=(const CImportSer& other);
 };
 
 struct CImportFile
@@ -61,8 +62,9 @@ public:
 		m_pszArg2 = nullptr;
 	}
 
-	CImportFile(const CImportFile& copy) = delete;
-	CImportFile& operator=(const CImportFile& other) = delete;
+private:
+	CImportFile(const CImportFile& copy);
+	CImportFile& operator=(const CImportFile& other);
 
 public:
 	void CheckLast();
@@ -136,11 +138,10 @@ void CImportFile::ImportFix()
 				CItem * pItemCheck = dynamic_cast <CItem*>( m_pCurSer->m_pObj );
 				ASSERT(pItemCheck);
 				pItemCheck->SetAttr(ATTR_MOVE_NEVER);
-
-				auto AreaItems = CWorldSearchHolder::GetInstance(m_pCurSer->m_pObj->GetTopPoint());
+				CWorldSearch AreaItems( m_pCurSer->m_pObj->GetTopPoint());
 				for (;;)
 				{
-					CItem * pItem = AreaItems->GetItem();
+					CItem * pItem = AreaItems.GetItem();
 					if ( pItem == nullptr )
 						break;
 					if ( ! pItem->IsSameType( m_pCurSer->m_pObj ))
@@ -762,11 +763,11 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	{
 		// Export as UOX format. for world forge stuff.
 		int index = 0;
-		auto AreaItems = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );
-		AreaItems->SetSearchSquare(true);
+		CWorldSearch AreaItems( pSrc->GetTopPoint(), iDist );
+		AreaItems.SetSearchSquare(true);
 		for (;;)
 		{
-			CItem * pItem = AreaItems->GetItem();
+			CItem * pItem = AreaItems.GetItem();
 			if ( pItem == nullptr )
 				break;
 			pItem->WriteUOX( s, index++ );
@@ -777,12 +778,12 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	// (???NPC) Chars and the stuff they are carrying.
 	if ( wModeFlags & IMPFLAGS_CHARS )
 	{
-		auto AreaChars = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );
-		AreaChars->SetSearchSquare(true);
-		AreaChars->SetAllShow( pSrc->IsPriv( PRIV_ALLSHOW ));	// show logged out chars?
+		CWorldSearch AreaChars( pSrc->GetTopPoint(), iDist );
+		AreaChars.SetSearchSquare(true);
+		AreaChars.SetAllShow( pSrc->IsPriv( PRIV_ALLSHOW ));	// show logged out chars?
 		for (;;)
 		{
-			CChar * pChar = AreaChars->GetChar();
+			CChar * pChar = AreaChars.GetChar();
 			if ( pChar == nullptr )
 				break;
 			pChar->r_WriteSafe( s );
@@ -792,12 +793,12 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	if ( wModeFlags & IMPFLAGS_ITEMS )
 	{
 		// Items on the ground.
-		auto AreaItems = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );
-		AreaItems->SetSearchSquare(true);
-		AreaItems->SetAllShow( pSrc->IsPriv( PRIV_ALLSHOW ));	// show logged out chars?
+		CWorldSearch AreaItems( pSrc->GetTopPoint(), iDist );
+		AreaItems.SetSearchSquare(true);
+		AreaItems.SetAllShow( pSrc->IsPriv( PRIV_ALLSHOW ));	// show logged out chars?
 		for (;;)
 		{
-			CItem * pItem = AreaItems->GetItem();
+			CItem * pItem = AreaItems.GetItem();
 			if ( pItem == nullptr )
 				break;
 			pItem->r_WriteSafe( s );

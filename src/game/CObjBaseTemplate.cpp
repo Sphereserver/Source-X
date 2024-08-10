@@ -61,7 +61,7 @@ void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 void CObjBaseTemplate::SetContainedLayer( byte layer ) noexcept
 {
 	// used for corpse or Restock count as well in Vendor container.
-	m_pt.m_z = (char)layer;
+	m_pt.m_z = layer;
 }
 
 void CObjBaseTemplate::SetContainedPoint( const CPointMap & pt ) noexcept

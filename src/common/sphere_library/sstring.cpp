@@ -165,7 +165,7 @@ tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noe
         STR_FROM_SET_ZEROSTR;
         return buf;
     }
-
+    
     const bool sign = (val < 0);
     ullong uval;
     if (sign)
@@ -194,7 +194,7 @@ tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noe
         buf[--buf_length] = chars[uval % base];
         uval /= base;
     } while (uval);
-
+    
     if (hex) {
         buf[--buf_length] = '0';
     }
@@ -385,7 +385,7 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
         pDst[0] = '\0';
         return 0;
     }
-
+    
     size_t qty = 0; // how much bytes do i have to copy? (1 based)
     do
     {
@@ -408,14 +408,14 @@ size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept
 // the number of characters in a multibyte string is the sum of mblen()'s
 // note: the simpler approach is std::mbstowcs(NULL, s.c_str(), s.size())
 /*
-size_t strlen_mb(const char* ptr)
+size_t strlen_mb(const char* ptr)  
 {
     // From: https://en.cppreference.com/w/c/string/multibyte/mblen
 
     // ensure that at some point we have called setlocale:
     //--    // allow mblen() to work with UTF-8 multibyte encoding
     //--    std::setlocale(LC_ALL, "en_US.utf8");
-
+    
     size_t result = 0;
     const char* end = ptr + strlen(ptr);
     mblen(nullptr, 0); // reset the conversion state
@@ -489,9 +489,6 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz) noexcept
 
 tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len) noexcept
 {
-    if (substr_len == 0)
-        return nullptr;
-
     tchar c, sc;
     if ((c = *substr++) != '\0')
     {
@@ -1436,7 +1433,7 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
         else if (sep == '<' || sep == '>')
             fSepHasAngle = true;
     }
-
+    
     for (; ; ++pLine)
     {
         tchar * pLineNext = pLine;
@@ -1456,12 +1453,12 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
                     ++pLineNext;
                     chNext = *pLineNext;
                 }
-
+                    
                 if ((chNext == '\0') || (chNext == ',') || (chNext == ' ') || (chNext == '\''))
                     --iQuotes;
                 else
                     ++iQuotes;
-
+                    
                 if (iQuotes < 0)
                 {
                     iQuotes = 0;
@@ -1529,7 +1526,7 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
                         --iAngle;
                 }
             }
-
+            
             // separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
             // enclosed by brackets. but, if one of the separators is a bracket, don't care if we are inside or outside, separate anyways.
 
@@ -1592,11 +1589,11 @@ int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSe
 tchar * Str_UnQuote(tchar * pStr) noexcept
 {
     GETNONWHITESPACE(pStr);
-
+    
     tchar ch = *pStr;
     if ((ch == '"') || (ch == '\''))
         ++pStr;
-
+        
     for (tchar *pEnd = pStr + strlen(pStr) - 1; pEnd >= pStr; --pEnd)
     {
         if ((*pEnd == '"') || (*pEnd == '\''))
@@ -1853,27 +1850,26 @@ ssize_t fReadUntilDelimiter_StaticBuf(char *buf, const size_t bufsiz, const int 
     return -1;
 }
 
-ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char *ptr_string, const size_t datasize) noexcept
+ssize_t sGetDelimiter_StaticBuf(const int delimiter, const char *sp, const size_t datasize) noexcept
 {
     // Returns the number of chars before the delimiter (or the end of the string).
     // buf: line array
-    const char *ptr_cursor, *ptr_end;
+    const char *ptr, *eptr;
 
-    if (*ptr_string == '\0') {
+    if (*sp == '\0')
         return -1;
-    }
 
-    for (ptr_cursor = ptr_string, ptr_end = ptr_string + datasize;; ++ptr_cursor) {
-        if (*ptr_cursor == '\0') {
-            if (ptr_cursor != ptr_string) {
-                return ptr_cursor - ptr_string;
+    for (ptr = sp, eptr = sp + datasize;; ++ptr) {
+        if (*ptr == '\0') {
+            if (ptr != sp) {
+                return ptr - sp;
             }
             return -1;
         }
-        if (*ptr_cursor == delimiter) {
-            return ptr_cursor - ptr_string;
+        if (*ptr == delimiter) {
+            return ptr - sp;
         }
-        if (ptr_cursor + 1 > ptr_end) {
+        if (ptr + 2 >= eptr) {
             return -1; // buffer too small
         }
     }

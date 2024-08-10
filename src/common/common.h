@@ -33,26 +33,22 @@
 #endif
 
 
-// Strings
 #define _STRINGIFY_AUX(x)	#x
 #define STRINGIFY(x)		_STRINGIFY_AUX(x)
 
-// Sizes
-#define ARRAY_COUNT(a)			        (sizeof(a)/sizeof((a)[0]))
+#define ARRAY_COUNT(a)			(sizeof(a)/sizeof((a)[0]))
+#define HAS_FLAG(var, flag)     (((var) & (flag)) == flag)
 
-// Flags and bitmasks. Those macros works with 1 or multiple ORed flags together.
-#define HAS_FLAGS_STRICT(var, flag)     (((var) & (flag)) == flag)          // Every one of the passed flags has to be set
-#define HAS_FLAGS_ANY(var, flag)        (static_cast<bool>((var) & (flag))) // True if even only one of the passed flags are set
 
-// Cpp attributes
-#define FALLTHROUGH [[fallthrough]]
-#define NODISCARD	[[nodiscard]]
-
-#ifdef _DEBUG
-    #define NOEXCEPT_NODEBUG
+#if __cplusplus >= 201703L  // is C++17 enabled?
+    #define FALLTHROUGH [[fallthrough]]
+	#define NODISCARD	[[nodiscard]]
 #else
-    #define NOEXCEPT_NODEBUG noexcept
+    #define FALLTHROUGH // fall through
+    /* yep, the comment appears to silence the warning with GCC, dunno for clang */
+	#define NODISCARD
 #endif
+
 
 /*
 	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
@@ -74,11 +70,11 @@ inline void UnreferencedParameter(T const&) noexcept {
     #ifdef _MSC_VER
         #ifdef __SANITIZE_ADDRESS__
             #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
-        #else
-            #define NO_SANITIZE_ADDRESS
+        #else 
+            #define NO_SANITIZE_ADDRESS 
         #endif
     #else
-        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address")))
+        #define NO_SANITIZE_ADDRESS __attribute__((no_sanitize("address"))) 
     #endif
 #endif
 

@@ -4,29 +4,13 @@ root = true
 # Unix-style newlines with a newline ending every file
 [*]
 charset = utf-8
+end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-# Optional: git will commit as lf, this will only affect local files
-end_of_line = lf
-
-[*.md]
-trim_trailing_whitespace = false
-
+# Tab indentation (no size specified)
 [Makefile]
 indent_style = tab
-
-[*.{py,yml,sh,cmake}]
-indent_style = space
-indent_size = 2
-
-[*.{py,yml,sh,cmake}.in]
-indent_style = space
-indent_size = 2
-
-[CMakeLists.txt]
-indent_style = space
-indent_size = 2
 
 [*.{c,h,cpp,cxx,hpp}]
 charset = utf-8

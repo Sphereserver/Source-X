@@ -207,7 +207,7 @@ void CSector::_GoSleep()
 void CSector::GoSleep()
 {
 	ADDTOCALLSTACK("CSector::GoSleep");
-	MT_ENGINE_UNIQUE_LOCK_SET;
+	THREAD_UNIQUE_LOCK_SET;
 	CSector::_GoSleep();
 }
 
@@ -269,7 +269,7 @@ void CSector::_GoAwake()
 void CSector::GoAwake()
 {
 	ADDTOCALLSTACK("CSector::GoAwake");
-	MT_ENGINE_UNIQUE_LOCK_SET;
+	THREAD_UNIQUE_LOCK_SET;
 	CSector::_GoAwake();
 }
 
@@ -407,7 +407,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 
 void CSector::r_Write()
 {
-	ADDTOCALLSTACK_DEBUG("CSector::r_Write");
+	ADDTOCALLSTACK_INTENSIVE("CSector::r_Write");
 	if ( m_fSaveParity == g_World.m_fSaveParity )
 		return; // already saved.
 	CPointMap pt = GetBasePoint();
@@ -660,7 +660,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
-		return (uchar)std::clamp(g_Cfg.m_iLightDungeon, LIGHT_BRIGHT, LIGHT_DARK);
+		return (uchar)g_Cfg.m_iLightDungeon;
 
 	int localtime = GetLocalTime();
 
@@ -678,21 +678,26 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		//	0...	x	...12*60
 		int iTargLight = ((localtime * ( g_Cfg.m_iLightNight - g_Cfg.m_iLightDay ))/(12*60) + g_Cfg.m_iLightDay);
 
-		return (uchar)std::clamp(iTargLight, LIGHT_BRIGHT, LIGHT_DARK);;
+		if ( iTargLight < LIGHT_BRIGHT )
+			iTargLight = LIGHT_BRIGHT;
+		if ( iTargLight > LIGHT_DARK )
+			iTargLight = LIGHT_DARK;
+
+		return (uchar)(iTargLight);
 	}
 
 	const int hour = ( localtime / ( 60)) % 24;
 	const bool fNight = ( hour < 6 || hour > 12+8 );	// Is it night or day ?
-	byte uiTargLight = (byte)std::min((int)UINT8_MAX, (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay);	// Target light level.
+	int iTargLight = (fNight) ? g_Cfg.m_iLightNight : g_Cfg.m_iLightDay;	// Target light level.
 
 	// Check for clouds...if it is cloudy, then we don't even need to check for the effects of the moons...
 	if ( GetWeather())
 	{
 		// Clouds of some sort...
 		if (fNight)
-			uiTargLight += byte( g_Rand.Get16ValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
+			iTargLight += ( g_Rand.GetValFast( 2 ) + 1 );	// 1-2 light levels darker if cloudy at night
 		else
-			uiTargLight += byte( g_Rand.Get16ValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
+			iTargLight += ( g_Rand.GetValFast( 4 ) + 1 );	// 1-4 light levels darker if cloudy during the day.
 	}
 
 	if ( fNight )
@@ -704,7 +709,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		// Check to see if Trammel is up here...
 		if ( IsMoonVisible( iTrammelPhase, localtime ))
 		{
-			static constexpr byte sm_TrammelPhaseBrightness[] =
+			static const byte sm_TrammelPhaseBrightness[] =
 			{
 				0, // New Moon
 				TRAMMEL_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -717,14 +722,14 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 			};
 
 			ASSERT( iTrammelPhase < ARRAY_COUNT(sm_TrammelPhaseBrightness));
-			uiTargLight -= std::min(uiTargLight, sm_TrammelPhaseBrightness[iTrammelPhase]);
+			iTargLight -= sm_TrammelPhaseBrightness[iTrammelPhase];
 		}
 
 		// Felucca
 		uint iFeluccaPhase = CWorldGameTime::GetMoonPhase( true );
 		if ( IsMoonVisible( iFeluccaPhase, localtime ))
 		{
-			static constexpr byte sm_FeluccaPhaseBrightness[] =
+			static const byte sm_FeluccaPhaseBrightness[] =
 			{
 				0, // New Moon
 				FELUCCA_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -737,23 +742,23 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 			};
 
 			ASSERT( iFeluccaPhase < ARRAY_COUNT(sm_FeluccaPhaseBrightness));
-			uiTargLight -= std::min(uiTargLight, sm_FeluccaPhaseBrightness[iFeluccaPhase]);
+			iTargLight -= sm_FeluccaPhaseBrightness[iFeluccaPhase];
 		}
 	}
 
-	//if ( uiTargLight < LIGHT_BRIGHT /* 0 */)
-	//	uiTargLight = LIGHT_BRIGHT;
-	if ( uiTargLight > LIGHT_DARK )
-		uiTargLight = LIGHT_DARK;
+	if ( iTargLight < LIGHT_BRIGHT )
+		iTargLight = LIGHT_BRIGHT;
+	if ( iTargLight > LIGHT_DARK )
+		iTargLight = LIGHT_DARK;
 
-	if ( fQuickSet || m_Env.m_Light == uiTargLight )		// Initializing the sector
-		return uiTargLight;
+	if ( fQuickSet || m_Env.m_Light == iTargLight )		// Initializing the sector
+		return (uchar)(iTargLight);
 
 	// Gradual transition to global light level.
-	if ( m_Env.m_Light > uiTargLight )
-		return ((m_Env.m_Light > LIGHT_BRIGHT) ? (m_Env.m_Light - 1) : m_Env.m_Light);
+	if ( m_Env.m_Light > iTargLight )
+		return ( m_Env.m_Light - 1 );
 	else
-		return ((m_Env.m_Light < UINT8_MAX) ? (m_Env.m_Light + 1) : m_Env.m_Light);
+		return ( m_Env.m_Light + 1 );
 }
 
 void CSector::SetLightNow( bool fFlash )
@@ -971,7 +976,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
 	// Already here?
 	if (IsCharActiveIn(pChar))
-		return false;
+		return false;	
 
 	// Check my save parity vs. this sector's
 	if ( pChar->IsStatFlag( STATF_SAVEPARITY ) != m_fSaveParity )
@@ -1024,7 +1029,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 
 bool CSector::_CanSleep(bool fCheckAdjacents) const
 {
-	ADDTOCALLSTACK_DEBUG("CSector::_CanSleep");
+	ADDTOCALLSTACK_INTENSIVE("CSector::_CanSleep");
 	if ( (g_Cfg._iSectorSleepDelay == 0) || IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
     if (m_Chars_Active.GetClientsNumber() > 0)
@@ -1068,14 +1073,13 @@ void CSector::SetSectorWakeStatus()
     }
 }
 
-void CSector::Close(bool fClosingWorld)
+void CSector::Close()
 {
 	ADDTOCALLSTACK("CSector::Close");
-
 	// Clear up all dynamic data for this sector.
-	m_Items.ClearContainer(fClosingWorld);
-	m_Chars_Active.ClearContainer(fClosingWorld);
-	m_Chars_Disconnect.ClearContainer(fClosingWorld);
+	m_Items.ClearContainer();
+	m_Chars_Active.ClearContainer();
+	m_Chars_Disconnect.ClearContainer();
 
 	// These are resource type things.
 	//m_Teleports.clear();

@@ -26,12 +26,12 @@ CSVFile::~CSVFile()
 int CSVFile::GetColumnCount() const
 {
     ADDTOCALLSTACK("CSVFile::GetColumnCount");
-    MT_SHARED_LOCK_RETURN(_iColumnCount);
+    THREAD_SHARED_LOCK_RETURN(_iColumnCount);
 }
 int CSVFile::GetCurrentRow() const
 {
     ADDTOCALLSTACK("CSVFile::GetCurrentRow");
-    MT_SHARED_LOCK_RETURN(_iCurrentRow);
+    THREAD_SHARED_LOCK_RETURN(_iCurrentRow);
 }
 
 bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
@@ -65,7 +65,7 @@ bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 		_Close();
 		return false;
 	}
-
+	
 	// second row lets us validate the column count
 	if ( _ReadRowContent(ppColumnNames, 1) != _iColumnCount )
 	{
@@ -91,7 +91,7 @@ bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 bool CSVFile::Open(lpctstr ptcFilename, uint uiModeFlags)
 {
     ADDTOCALLSTACK("CSVFile::Open");
-    MT_UNIQUE_LOCK_RETURN(CSVFile::_Open(ptcFilename, uiModeFlags));
+    THREAD_UNIQUE_LOCK_RETURN(CSVFile::_Open(ptcFilename, uiModeFlags));
 }
 
 int CSVFile::_ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
@@ -142,6 +142,6 @@ bool CSVFile::_ReadNextRowContent(CSVRowData& target)
 bool CSVFile::ReadNextRowContent(CSVRowData& target)
 {
     ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
-    MT_UNIQUE_LOCK_RETURN(CSVFile::_ReadNextRowContent(target));
+    THREAD_UNIQUE_LOCK_RETURN(CSVFile::_ReadNextRowContent(target));
 }
 

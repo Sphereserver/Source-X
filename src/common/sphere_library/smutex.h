@@ -108,9 +108,6 @@ public:
 	inline ~SimpleThreadLock() noexcept {
 		m_mutex.unlock();
 	}
-	inline void unlock() noexcept {
-        m_mutex.unlock();
-    }
 
 	SimpleThreadLock(const SimpleThreadLock& copy) = delete;
 	SimpleThreadLock& operator=(const SimpleThreadLock& other) = delete;

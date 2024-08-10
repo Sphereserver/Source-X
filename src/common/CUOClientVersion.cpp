@@ -117,16 +117,11 @@ CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
     if ((ptcVersion == nullptr) || (*ptcVersion == '\0'))
         return;
 
-    // Ranges algorithms not yet supported by Apple Clang...
-    // const ptrdiff_t count = std::ranges::count(std::string_view(ptcVersion), '.');
-    const auto svVersion = std::string_view(ptcVersion);
-    const auto count = std::count(svVersion.cbegin(), svVersion.cend(), '_');
+    ptrdiff_t count = std::ranges::count(std::string_view(ptcVersion), '.');
     if (count == 2)
         ApplyVersionFromStringOldFormat(ptcVersion);
-    else if (count == 3)
+    if (count == 3)
         ApplyVersionFromStringOldFormat(ptcVersion);
-    else
-        ASSERT(false); // Malformed string?
 }
 
 

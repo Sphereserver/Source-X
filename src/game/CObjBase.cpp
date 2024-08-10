@@ -26,38 +26,6 @@
 #include "CObjBase.h"
 
 
-DIR_TYPE GetDirStr(lpctstr pszDir)
-{
-    char iDir2, iDir = static_cast<char>(toupper(pszDir[0]));
-
-    switch (iDir)
-    {
-        case 'E':
-        return DIR_E;
-        case 'W':
-        return DIR_W;
-        case 'N':
-        iDir2 = static_cast<char>(toupper(pszDir[1]));
-        if (iDir2 == 'E')
-            return DIR_NE;
-        if (iDir2 == 'W')
-            return DIR_NW;
-        return DIR_N;
-        case 'S':
-        iDir2 = static_cast<char>(toupper(pszDir[1]));
-        if (iDir2 == 'E')
-            return DIR_SE;
-        if (iDir2 == 'W')
-            return DIR_SW;
-        return DIR_S;
-        default:
-        if ((iDir >= '0') && (iDir <= '7'))
-            return static_cast<DIR_TYPE>(iDir - '0');
-    }
-    return DIR_QTY;
-}
-
-
 static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];
@@ -87,7 +55,6 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 	return true;
 }
 
-
 /////////////////////////////////////////////////////////////////
 // -CObjBase stuff
 // Either a player, npc or item.
@@ -96,12 +63,12 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 {
 	++ sm_iCount;
 
-	_uiInternalStateFlags = 0;
+	_fDeleting = false;
 
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
-	m_iTimeStampS = 0;
+	m_timestamp = 0;
 	m_CanMask = 0;
 
 	m_attackBase = m_attackRange = 0;
@@ -181,7 +148,7 @@ bool CObjBase::_IsIdle() const
 
 bool CObjBase::IsIdle() const
 {
-	MT_ENGINE_SHARED_LOCK_RETURN(_IsIdle());
+	THREAD_SHARED_LOCK_RETURN(_IsIdle());
 }
 
 bool CObjBase::_IsDeleted() const
@@ -191,47 +158,24 @@ bool CObjBase::_IsDeleted() const
 
 bool CObjBase::IsDeleted() const
 {
-	MT_ENGINE_SHARED_LOCK_RETURN(_IsDeleted());
+	THREAD_SHARED_LOCK_RETURN(_IsDeleted());
 }
 
 void CObjBase::DeletePrepare()
 {
 	ADDTOCALLSTACK("CObjBase::DeletePrepare");
-    // Preparations before actually deleting the object. Unlink it from the world and from other objects.
-
-    CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
-
-    const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode != SERVMODE_Exiting && servMode != SERVMODE_Loading);
-    if (!fDestroyingWorld)
-    {
-        RemoveFromView();
-    }
-
-    const bool fTopLevel = dynamic_cast<const CSectorObjCont*>(GetParent());
-/*
-#ifdef _DEBUG
-    if (fTopLevel)
-    {
-        // This will not always work. When you clear a CSObjCont, OnRemoveObj isn't called automatically
-        //  (in most of the cases it isn't actually needed). Though, this means that for some superclasses of CSObjCont
-        //  (es containers for spawned objects), the top level flag (UID_O_DISCONNECT) is not set.
-        //DEBUG_ASSERT(GetUID().IsObjTopLevel());
-    }
-#endif
-*/
-
-    // This HAS to be called before the CItem and CChar parts are destroyed.
+	// Prepare to delete.
+	CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
+	RemoveFromView();
 	RemoveSelf();
-
-    if (fTopLevel)
-        	_uiInternalStateFlags |= SF_TOPLEVEL;
 }
 
 void CObjBase::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::DeleteCleanup");
-	_uiInternalStateFlags |= SF_DELETING;
+	_fDeleting = true;
+
+	RemoveSelf();
 
 	CEntity::Delete(fForce);
 	CWorldTimedFunctions::ClearUID(GetUID());
@@ -241,30 +185,10 @@ bool CObjBase::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::Delete");
 
-    bool fScheduleDeletion = true;
-    const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
-    if (fDestroyingWorld)
-    {
-        // Why resort to _uiInternalStateFlags and not simply check if GetParent() is a CSectorObjCont* ?
-        //  Because at this point CSObjContRec::RemoveSelf might have been called (it depends on how CObjBase::Delete was called,
-        //  if via a destructor or else), and GetParent() might already be nullptr.
-        // There are cases (like sector closing) where the item is stored inside its CSectorObjCont just to later call the object destructor,
-        //  even if its GetParent() is nullptr. That's also the reason because we set fScheduleDeletion to false: this CObjBase will be
-        //  deleted/destructed by its parent container.
-        if (HAS_FLAGS_ANY(_uiInternalStateFlags, SF_TOPLEVEL))
-        {
-            // If top level, the sector will tale care of destroying it.
-            fScheduleDeletion = false;
-        }
-    }
+	DeletePrepare();		// virtual!
+	DeleteCleanup(fForce);	// not virtual!
 
-	DeletePrepare();           // virtual, but if called by the destructor this will fail to call upper (CChar, CItem, etc) virtual methods.
-    DeleteCleanup(fForce);     // not virtual!
-
-    if (fScheduleDeletion) {
-        g_World.ScheduleObjDeletion(this);
-    }
+	g_World.ScheduleObjDeletion(this);
 
 	return true;
 }
@@ -280,14 +204,14 @@ bool CObjBase::IsContainer() const
 	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
-int64 CObjBase::GetTimeStampS() const
+int64 CObjBase::GetTimeStamp() const
 {
-	return m_iTimeStampS;
+	return m_timestamp;
 }
 
-void CObjBase::SetTimeStampS(int64 t_time)
+void CObjBase::SetTimeStamp(int64 t_time)
 {
-	m_iTimeStampS = t_time;
+	m_timestamp = t_time;
 }
 
 void CObjBase::TimeoutRecursiveResync(int64 iDelta)
@@ -362,7 +286,7 @@ HUE_TYPE CObjBase::GetHue() const
 
 int CObjBase::IsWeird() const
 {
-	ADDTOCALLSTACK_DEBUG("CObjBase::IsWeird");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::IsWeird");
 	int iResultCode = CObjBaseTemplate::IsWeird();
 	if ( iResultCode )
 	{
@@ -735,7 +659,7 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 // ASCII packet
 void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
-	ADDTOCALLSTACK_DEBUG("CObjBase::Speak");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::Speak");
 	CWorldComm::Speak( this, pText, wHue, mode, font );
 }
 
@@ -743,7 +667,7 @@ void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYP
 // Unicode packet
 void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
-	ADDTOCALLSTACK_DEBUG("CObjBase::SpeakUTF8");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
 	// convert UTF8 to UTF16 UNICODE.
 	nachar szBuffer[ MAX_TALK_BUFFER ];
 	CvtSystemToNETUTF16( szBuffer, ARRAY_COUNT(szBuffer), pText, -1 );
@@ -755,7 +679,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 // Difference with SpeakUTF8: this method accepts as text input an nachar, which is a network aligned utf16 unicode characters array
 void CObjBase::SpeakUTF8Ex( const nachar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
-	ADDTOCALLSTACK_DEBUG("CObjBase::SpeakUTF8Ex");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
 	CWorldComm::SpeakUNICODE( this, pText, wHue, mode, font, lang );
 }
 
@@ -793,7 +717,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	return MoveTo(pt);
 }
 
-void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode ) const
+void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode ) const
 {
 	ADDTOCALLSTACK("CObjBase::UpdateObjMessage");
 	// Show everyone a msg coming from this object.
@@ -807,9 +731,9 @@ void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * 
 			continue;
 
 		if (( pClient->GetChar() == this ) && pTextYou != nullptr )
-			pClient->addBarkParse(pTextYou, this, wHue, mode, font, fUnicode );
+			pClient->addBarkParse(pTextYou, this, wHue, mode, font, bUnicode );
 		else if (( pClient->GetChar() != this ) && pTextThem != nullptr )
-			pClient->addBarkParse(pTextThem, this, wHue, mode, font, fUnicode );
+			pClient->addBarkParse(pTextThem, this, wHue, mode, font, bUnicode );
 
 		//pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
 	}
@@ -1223,7 +1147,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 								if ( !strnicmp(ptcKey, "ID", 2) )
 								{
-									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, ResGetIndex(itGumpFound->first), RES_PAGE_ANY)) );
+									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, RES_GET_INDEX(itGumpFound->first), RES_PAGE_ANY)) );
 								}
 								else if ( !strnicmp(ptcKey, "COUNT", 5) )
 								{
@@ -1636,7 +1560,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 			sVal.FormatVal( pItem->GetSpeed() );
 		}	break;
 		case OC_TIMESTAMP:
-			sVal.FormatLLVal( GetTimeStampS() );
+			sVal.FormatLLVal( GetTimeStamp() / MSECS_PER_TENTH ); // in tenths of second.
 			break;
 		case OC_VERSION:
 			sVal = SPHERE_BUILD_INFO_STR;
@@ -1791,6 +1715,17 @@ bool CObjBase::r_LoadVal( CScript & s )
             return true;
         }
     }
+
+	if (!strnicmp("FOLLOWER", ptcKey, 8))
+	{
+		if (ptcKey[8] == '.')
+		{
+			ptcKey = ptcKey + 4;
+			CUID ptcArg = (CUID)s.GetArgDWVal();
+			m_followers.emplace_back(ptcArg);
+			return true;
+		}
+	}
 
 	int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( index < 0 )
@@ -2003,7 +1938,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:
-			SetTimeStampS(s.GetArgLLVal());
+			SetTimeStamp(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
             if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
@@ -2033,7 +1968,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 
 void CObjBase::r_Write( CScript & s )
 {
-	ADDTOCALLSTACK_DEBUG("CObjBase::r_Write");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::r_Write");
 	s.WriteKeyHex( "SERIAL", GetUID().GetObjUID());
 	if ( IsIndividualName() )
 		s.WriteKeyStr( "NAME", GetIndividualName());
@@ -2041,8 +1976,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyHex( "COLOR", GetHue());
 	if ( _IsTimerSet() )
 		s.WriteKeyVal( "TIMER", _GetTimerAdjusted());
-	if ( m_iTimeStampS > 0 )
-		s.WriteKeyVal( "TIMESTAMP", GetTimeStampS());
+	if ( m_timestamp > 0 )
+		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
 	if ( const CCSpawn* pSpawn = GetSpawn() )
 		s.WriteKeyHex("SPAWNITEM", pSpawn->GetLink()->GetUID().GetObjUID());
 	if ( m_ModAr )
@@ -2055,6 +1990,14 @@ void CObjBase::r_Write( CScript & s )
 
 	m_TagDefs.r_WritePrefix(s, "TAG");
 	m_OEvents.r_Write(s, "EVENTS");
+
+	for (CUID uid : m_followers)
+	{
+		dword dUID = (dword)uid;
+		char* pszTag = Str_GetTemp();
+		snprintf(pszTag, Str_TempLength(), "FOLLOWER.%d", dUID);
+		s.WriteKeyHex(pszTag, dUID);
+	}
 }
 
 enum OV_TYPE
@@ -2256,7 +2199,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					}
 				}
 				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-				pThis->Effect( (EFFECT_TYPE)(piCmd[0]), (ITEMID_TYPE)(ResGetIndex((dword)piCmd[1]) ),
+				pThis->Effect( (EFFECT_TYPE)(piCmd[0]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[1]) ),
 					pCharSrc,
 					(iArgQty >= 3)? (uchar)(piCmd[2]) : 5,		// byte bSpeedSeconds = 5,
 					(iArgQty >= 4)? (uchar)(piCmd[3]) : 1,		// byte bLoop = 1,
@@ -2296,7 +2239,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			}
 			//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-			pThis->EffectLocation((EFFECT_TYPE)(piCmd[3]), (ITEMID_TYPE)(ResGetIndex((dword)piCmd[4])),
+			pThis->EffectLocation((EFFECT_TYPE)(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
                 pCharSrc ? &pCharSrc->GetTopPoint() : nullptr,
                 &ptDest,
 				(iArgQty >= 3) ? (uchar)(piCmd[5]) : 5,		// byte bSpeedSeconds = 5,
@@ -2577,7 +2520,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				default:
 					break;
 				}
-				OnSpellEffect((SPELL_TYPE)(ResGetIndex((dword)piCmd[0])), pCharSrc, (int)(piCmd[1]), pItemSrc);
+				OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(piCmd[0])), pCharSrc, (int)(piCmd[1]), pItemSrc);
 			}
 			break;
 
@@ -3169,7 +3112,7 @@ dword CObjBase::GetPropertyHash() const
 void CObjBase::OnTickStatusUpdate()
 {
     // process m_fStatusUpdate flags
-
+    
 	//ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate"); // Called very frequently.
     EXC_TRY("CObjBase::OnTickStatusUpdate");
 
@@ -3219,13 +3162,13 @@ void CObjBase::_GoSleep()
 
 bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
-	//ADDTOCALLSTACK_DEBUG("CObjBase::_CanTick");   // Called very frequently.
+	//ADDTOCALLSTACK_INTENSIVE("CObjBase::_CanTick");   // Called very frequently.
 	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
     bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
-    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fIgnoreCont = (HAS_FLAG(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fCanTick)
     {
@@ -3240,6 +3183,7 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 				else if (!fIgnoreCont)
 					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
 			}
+
         }
     }
 
@@ -3694,3 +3638,34 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 	return false;
 }
 
+
+DIR_TYPE GetDirStr( lpctstr pszDir )
+{
+	char iDir2, iDir = static_cast< char >( toupper( pszDir[ 0 ] ) );
+
+	switch ( iDir )
+	{
+		case 'E':
+            return DIR_E;
+		case 'W':
+            return DIR_W;
+		case 'N':
+			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
+			if ( iDir2 == 'E' )
+                return DIR_NE;
+			if ( iDir2 == 'W' )
+                return DIR_NW;
+			return DIR_N;
+		case 'S':
+			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
+			if ( iDir2 == 'E' )
+                return DIR_SE;
+			if ( iDir2 == 'W' )
+                return DIR_SW;
+			return DIR_S;
+		default:
+			if ( ( iDir >= '0' ) && ( iDir <= '7' ) )
+				return static_cast< DIR_TYPE >( iDir - '0' );
+	}
+	return DIR_QTY;
+}

@@ -531,9 +531,9 @@ NPCBRAIN_TYPE CChar::GetNPCBrain() const
     return m_pNPC->m_Brain;
 }
 
-NPCBRAIN_TYPE CChar::GetNPCBrainGroup() const noexcept
+NPCBRAIN_TYPE CChar::GetNPCBrainGroup() const
 {
-    //ADDTOCALLSTACK("CChar::GetNPCBrainGroup");
+    ADDTOCALLSTACK("CChar::GetNPCBrainGroup");
     // Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
     //	(can return also _BERSERK and _DRAGON)
     // For tracking and other purposes.
@@ -553,9 +553,9 @@ NPCBRAIN_TYPE CChar::GetNPCBrainGroup() const noexcept
     return NPCBRAIN_NONE;
 }
 
-NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const noexcept
+NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const
 {
-	//ADDTOCALLSTACK("CChar::GetNPCBrainAuto");
+	ADDTOCALLSTACK("CChar::GetNPCBrainAuto");
 	// Auto-detect the brain
 	const CREID_TYPE id = GetDispID();
 	
@@ -1029,7 +1029,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 
 bool CChar::CanDisturb( const CChar *pChar ) const
 {
-	ADDTOCALLSTACK_DEBUG("CChar::CanDisturb");
+	ADDTOCALLSTACK_INTENSIVE("CChar::CanDisturb");
 	// I can see/disturb only players with priv same/less than me.
 	if ( !pChar )
 		return false;

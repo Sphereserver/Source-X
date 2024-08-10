@@ -182,11 +182,11 @@ public:
     int GetRandomLinear( int iPercent ) const;
 
 public:
-    CValueCurveDef() noexcept = default;
-    ~CValueCurveDef() noexcept = default;
+    CValueCurveDef() { };
 
-    CValueCurveDef(const CValueCurveDef& copy) = delete;
-    CValueCurveDef& operator=(const CValueCurveDef& other) = delete;
+private:
+    CValueCurveDef(const CValueCurveDef& copy);
+    CValueCurveDef& operator=(const CValueCurveDef& other);
 };
 
 

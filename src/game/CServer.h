@@ -79,16 +79,13 @@ public:
 	CServer& operator=(const CServer& other) = delete;
 
 public:
-    inline SERVMODE_TYPE GetServerMode() const noexcept {
-        return m_iModeCode.load(std::memory_order_acquire);
-    }
-
+    SERVMODE_TYPE GetServerMode() const;
 	void SetServerMode( SERVMODE_TYPE mode );
     bool IsValidBusy() const;
-    int GetExitFlag() const noexcept;
+    int GetExitFlag() const;
     void SetExitFlag(int iFlag);
-    bool IsLoading() const noexcept;
-    bool IsResyncing() const noexcept;
+    bool IsLoading() const;
+    bool IsResyncing() const;
 	void Shutdown( int64 iMinutes );
 	void SetSignals( bool fMsg = true );
     bool SetProcessPriority(int iPriorityLevel);

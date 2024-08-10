@@ -110,44 +110,46 @@ bool CPointBase::operator!= ( const CPointBase & pt ) const noexcept
 	return ( ! ( *this == pt ));
 }
 
-const CPointBase& CPointBase::operator+= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator+= ( const CPointBase & pt ) noexcept
 {
-    ASSERT(m_map == pt.m_map);
 	m_x += pt.m_x;
 	m_y += pt.m_y;
 	m_z += pt.m_z;
 	return( * this );
 }
 
-const CPointBase& CPointBase::operator-= ( const CPointBase & pt )
+const CPointBase& CPointBase::operator-= ( const CPointBase & pt ) noexcept
 {
-    ASSERT(m_map == pt.m_map);
 	m_x -= pt.m_x;
 	m_y -= pt.m_y;
 	m_z -= pt.m_z;
 	return( * this );
 }
 
-CPointBase& CPointBase::InitPoint() noexcept
+void CPointBase::InitPoint() noexcept
 {
 	m_x = m_y = -1;	// invalid location.
 	m_z = 0;
 	m_map = 0;
-    return *this;
 }
-CPointBase& CPointBase::ZeroPoint() noexcept
+void CPointBase::ZeroPoint() noexcept
 {
 	m_x = m_y = 0;	// invalid location.
 	m_z = 0;
 	m_map = 0;
-    return *this;
+}
+
+int CPointBase::GetDistZ( const CPointBase & pt ) const noexcept
+{
+	//return abs(int(m_z) - int(pt.m_z));
+    return (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
 }
 
 int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance between points
 {
     // This method is one of the most called in the whole app (maybe the most). ADDTOCALLSTACK unneededly sucks cpu.
     // This has to be optimized as much as possible.
-    //ADDTOCALLSTACK_DEBUG("CPointBase::GetDistBase");
+    //ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDistBase");
 
     switch (g_Cfg.m_iDistanceFormula)
     {
@@ -160,31 +162,20 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
             const int dy = abs(m_y - pt.m_y);
             */
 
-            /*
-            // This is faster than the above.
+            // This is faster than the above in MSVC 2022 x86_64 debug version.
+            // It should be benchmarked for Nightly (optimized) builds, to see if this becomes slower than the call to abs.
+            //  (The presence of a conditional expression might reduce the efficacy of the CPU branch predictor)
             const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
             const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
-            */
-            // return maximum(dx, dy);
-
-            // This is even faster.
-            const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
-            const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-            return (dx > dy) * dx + (dx < dy) * dy;
-
+            return maximum(dx, dy);
         }
         case DISTANCE_FORMULA_DIAGONAL_NOZ:
         {
             const int dx = m_x - pt.m_x;
             const int dy = m_y - pt.m_y;
-
             const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy)));
-            //const double dist = hypot(dx, dy);  // To test if faster
-
-            return (int)round(dist);
-
-            //const double flr = floor(dist);
-            //return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
+            const double flr = floor(dist);
+            return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
 
             // Test, avoids another function call?
             // return (((dist - floor(dist)) > 0.5) ? int(dist) : int(dist + 1));
@@ -204,7 +195,7 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const noexcept // Distance 
 int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance between points
 {
     // This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
-	//ADDTOCALLSTACK_DEBUG("CPointBase::GetDist");
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDist");
 
 	// Get the basic 2d distance.
 	if ( !pt.IsValidPoint() || (pt.m_map != m_map))
@@ -216,12 +207,9 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
 {
 	//const int dx = abs(m_x - pt.m_x);
 	//const int dy = abs(m_y - pt.m_y);
-    //const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
-    //const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
-    //return maximum(dx, dy);
-    const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
-    const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-    return (dx > dy) * dx + (dx < dy) * dy;
+    const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+    const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+	return maximum(dx, dy);
 }
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -233,12 +221,9 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance
 
 	//const int dx = abs(m_x - pt.m_x);
 	//const int dy = abs(m_y - pt.m_y);
-    //const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
-    //const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
-    //return maximum(dx, dy);
-    const int dx = (m_x > pt.m_x) * (m_x - pt.m_x) + (m_x < pt.m_x) * (pt.m_x - m_x);
-    const int dy = (m_y > pt.m_y) * (m_y - pt.m_y) + (m_y < pt.m_y) * (pt.m_y - m_y);
-    return (dx > dy) * dx + (dx < dy) * dy;
+    const int dx = (m_x > pt.m_x) ? (m_x - pt.m_x) : (pt.m_x - m_x);
+    const int dy = (m_y > pt.m_y) ? (m_y - pt.m_y) : (pt.m_y - m_y);
+	return maximum(dx, dy);
 }
 
 int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance between points
@@ -253,12 +238,10 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
             const int dist = GetDist(pt);
 
             // Get the deltas and correct the Z for height first
-            //int dz = (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
-            int dz = (m_z > pt.m_z) * (m_z - pt.m_z) + (m_z < pt.m_z) * (pt.m_z - m_z);
+            int dz = (m_z > pt.m_z) ? (m_z - pt.m_z) : (pt.m_z - m_z);
             dz /= (PLAYER_HEIGHT / 2); // Take player height into consideration
 
-            //return maximum(dz, dist);
-            return (dz > dist) * dz + (dz < dist) * dist;
+            return maximum(dz, dist);
         }
         case DISTANCE_FORMULA_DIAGONAL_Z:
         {
@@ -269,7 +252,9 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
             //dz /= (PLAYER_HEIGHT / 2);
 
             const double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy) + (dz * dz)));
-            return (int)round(dist);
+            const double flr = floor(dist);
+            return (int)(((dist - flr) > 0.5) ? ceil(dist) : flr);
+            // Or just use std::round. In any case, we need to round to give the best result, because with a simple cast the compiler will truncate the decimal part.
         }
     }
 }
@@ -309,9 +294,8 @@ void CPointBase::ValidatePoint() noexcept
 		m_y = iMaxY - 1;
 }
 
-bool CPointBase::IsSame2D( const CPointBase & pt ) const
+bool CPointBase::IsSame2D( const CPointBase & pt ) const noexcept
 {
-    ASSERT(m_map == pt.m_map);
 	return ( m_x == pt.m_x && m_y == pt.m_y );
 }
 
@@ -384,7 +368,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			ptcKey += 6;
 			SKIP_SEPARATORS( ptcKey );
 			iStatic = Exp_GetVal( ptcKey );
-			type = ResGetType( iStatic );
+			type = RES_GET_TYPE( iStatic );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
 			SKIP_SEPARATORS( ptcKey );
@@ -392,12 +376,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		else
 		{
 			iStatic = Exp_GetVal( ptcKey );
-			type = ResGetType( iStatic );
+			type = RES_GET_TYPE( iStatic );
 		}
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(iStatic)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iStatic)));
 			if ( !pItemDef )
 			{
 				sVal.FormatVal( 0 );
@@ -527,7 +511,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 			ptcKey += 6;
 			SKIP_SEPARATORS( ptcKey );
 			iComponent = Exp_GetVal( ptcKey );
-			type = ResGetType( iComponent );
+			type = RES_GET_TYPE( iComponent );
 			if ( type == 0 )
 				type = RES_ITEMDEF;
 			SKIP_SEPARATORS( ptcKey );
@@ -535,12 +519,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 		else
 		{
 			iComponent = Exp_GetVal( ptcKey );
-			type = ResGetType( iComponent );
+			type = RES_GET_TYPE( iComponent );
 		}
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex(iComponent)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iComponent)));
 			if ( pItemDef == nullptr )
 			{
 				sVal.FormatVal( 0 );
@@ -773,7 +757,7 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 							sVal = pTypeDef->GetResourceName();
 						else
 							sVal.Clear();
-					} return true;
+					} return true;	
 					case PT_TERRAIN:
 					{
 						ptcKey += 7;
@@ -823,7 +807,7 @@ bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 
 DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const // Direction to point pt
 {
-	ADDTOCALLSTACK_DEBUG("CPointBase::GetDir");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetDir");
 	// Get the 2D direction between points.
 	const int dx = (m_x-pt.m_x);
     const int dy = (m_y-pt.m_y);
@@ -882,7 +866,7 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 
 tchar * CPointBase::WriteUsed( tchar * ptcBuffer, size_t uiBufferLen) const noexcept
 {
-	ADDTOCALLSTACK_DEBUG("CPointBase::WriteUsed");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
 		snprintf(ptcBuffer, uiBufferLen, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
 	else if ( m_z )
@@ -943,7 +927,7 @@ int CPointBase::Read( tchar * pszVal )
 		case 0:
 			break;
 	}
-
+    
     if (!ptTest.IsValidPoint())
     {
         InitPoint();
@@ -957,7 +941,7 @@ int CPointBase::Read( tchar * pszVal )
 CSector * CPointBase::GetSector() const
 {
     // This function is called SO frequently that's better to not add it to the call stack.
-	//ADDTOCALLSTACK_DEBUG("CPointBase::GetSector");
+	//ADDTOCALLSTACK_INTENSIVE("CPointBase::GetSector");
 
 	if ( !IsValidXY() )
 	{
@@ -972,7 +956,7 @@ CSector * CPointBase::GetSector() const
 
 CRegion * CPointBase::GetRegion( dword dwType ) const
 {
-	ADDTOCALLSTACK_DEBUG("CPointBase::GetRegion");
+	ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegion");
 	// What region in the current CSector am i in ?
 	// We only need to update this every 8 or so steps ?
 	// REGION_TYPE_AREA
@@ -989,7 +973,7 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 {
     // This function is called SO frequently that's better to not add it to the call stack.
-	// ADDTOCALLSTACK_DEBUG("CPointBase::GetRegions");
+	// ADDTOCALLSTACK_INTENSIVE("CPointBase::GetRegions");
 
 	if ( !IsValidPoint() )
 		return 0;

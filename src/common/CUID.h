@@ -81,18 +81,8 @@ public:
         return IsChar(m_dwInternalVal);
     }
 
-    inline bool IsObjDisconnected() const noexcept // Called very frequently
-    {
-        // Not in the game world for some reason.
-        return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == UID_O_DISCONNECT);
-    }
-
-    bool IsObjTopLevel() const noexcept
-    {
-        // on the ground in the world.
-        // might be static in client ?
-        return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == 0);
-    }
+	bool IsObjDisconnected() const noexcept;
+	bool IsObjTopLevel() const noexcept;
 
 	bool IsItemEquipped() const noexcept;
 	bool IsItemInContainer() const noexcept;

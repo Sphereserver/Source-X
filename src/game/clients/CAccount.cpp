@@ -1519,7 +1519,7 @@ bool CAccount::r_LoadVal( CScript & s )
 
 void CAccount::r_Write(CScript &s)
 {
-	ADDTOCALLSTACK_DEBUG("CAccount::r_Write");
+	ADDTOCALLSTACK_INTENSIVE("CAccount::r_Write");
 	if ( GetPrivLevel() >= PLEVEL_QTY )
 		return;
 

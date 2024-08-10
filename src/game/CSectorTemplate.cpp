@@ -2,7 +2,6 @@
 #include "../common/CException.h"
 #include "../common/CLog.h"
 #include "../common/CRect.h"
-#include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "items/CItemShip.h"
@@ -35,7 +34,6 @@ void CCharsActiveList::OnRemoveObj(CSObjContRec* pObjRec )
 {
 	ADDTOCALLSTACK("CCharsActiveList::OnRemoveObj");
     ASSERT(pObjRec);
-    DEBUG_ASSERT(nullptr != dynamic_cast<const CChar*>(pObjRec));
 
 	// Override this = called when removed from group.
 	CSObjCont::OnRemoveObj(pObjRec);
@@ -78,7 +76,6 @@ bool CItemsList::sm_fNotAMove = false;
 void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 {
 	ADDTOCALLSTACK("CItemsList::OnRemoveObj");
-    DEBUG_ASSERT(nullptr != dynamic_cast<const CItem*>(pObjRec));
 
 	// Item is picked up off the ground. (may be put right back down though)
 	CItem * pItem = static_cast<CItem*>(pObjRec);
@@ -88,9 +85,9 @@ void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 		pItem->OnMoveFrom();	// IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
 	}
 
-	DEBUG_ASSERT(pObjRec->GetParent() == this);
+	//ASSERT(pObjRec->GetParent() == this);
 	CSObjCont::OnRemoveObj(pObjRec);
-	DEBUG_ASSERT(pObjRec->GetParent() == nullptr);
+	//ASSERT(pObjRec->GetParent() == nullptr);
 
 	pItem->SetUIDContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
 }
@@ -101,28 +98,13 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	// Add to top level.
 	// Either MoveTo() or SetTimeout is being called.
 	ASSERT( pItem );
-    //DEBUG_ASSERT(nullptr != dynamic_cast<const CItem*>(pItem));
 
 	CSObjCont* pParent = pItem->GetParent();
 	if (pParent != this)
 	{
-		DEBUG_ASSERT(
-            (pParent == nullptr) ||
-            (pParent == g_World.GetObjectsNew()) ||
-            (nullptr != dynamic_cast<const CSectorObjCont*>(pParent))
-        );
-
+		//ASSERT((pItem->GetParent() == nullptr) || (pItem->GetParent() == &g_World.m_ObjNew));
 		CSObjCont::InsertContentTail(pItem); // this also removes the Char from the old sector
-
-		DEBUG_ASSERT(pItem->GetParent() == this);
-#ifdef _DEBUG
-        const CSObjCont* pObjNew = g_World.GetObjectsNew();
-        auto itNew = std::find(pObjNew->cbegin(), pObjNew->cend(), pItem);
-        DEBUG_ASSERT(itNew == pObjNew->cend());
-
-        auto itOldParent = std::find(pParent->cbegin(), pParent->cend(), pItem);
-        DEBUG_ASSERT(itOldParent == pParent->cend());
-#endif
+		//ASSERT(pItem->GetParent() == this);
 	}
 
     pItem->RemoveUIDFlags(UID_O_DISCONNECT);
@@ -239,7 +221,7 @@ bool CSectorBase::IsInDungeon() const
 
 CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 {
-	ADDTOCALLSTACK_DEBUG("CSectorBase::GetRegion");
+	ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegion");
 	// Does it match the mask of types we care about ?
 	// Assume sorted so that the smallest are first.
 	//
@@ -289,7 +271,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 // Balkon: get regions list (to cycle through intercepted house regions)
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
-	//ADDTOCALLSTACK_DEBUG("CSectorBase::GetRegions");  // Called very frequently
+	//ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRegions");  // Called very frequently
 	size_t iQty = m_RegionLinks.size();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
@@ -324,7 +306,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			continue;
 		if ( ! pRegion->IsInside2d( pt ))
 			continue;
-        pRLinks->emplace_back(pRegion);
+        pRLinks->push_back(pRegion);
 	}
 	return pRLinks->size();
 }
@@ -358,7 +340,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 		ASSERT(pRegion);
 		if ( pRegionNew == pRegion )
 		{
-			DEBUG_ERR(( "Region already linked!\n" ));
+			DEBUG_ERR(( "region already linked!\n" ));
 			return false;
 		}
 
@@ -430,11 +412,11 @@ bool CSectorBase::IsFlagSet( dword dwFlag ) const noexcept
 
 CPointMap CSectorBase::GetBasePoint() const
 {
-	// ADDTOCALLSTACK_DEBUG("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
+	// ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
 	// What is the coord base of this sector. upper left point.
 	const CSectorList* pSectors = CSectorList::Get();
 #if _DEBUG
-	DEBUG_ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
+	ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
 	// Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
 #endif
     const int iCols = pSectors->GetSectorCols(m_map);
@@ -452,7 +434,7 @@ CPointMap CSectorBase::GetBasePoint() const
 
 CRectMap CSectorBase::GetRect() const noexcept
 {
-    //ADDTOCALLSTACK_DEBUG("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
+    //ADDTOCALLSTACK_INTENSIVE("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
 	// Get a rectangle for the sector.
 	const CPointMap& pt = GetBasePoint();
     const int iSectorSize = CSectorList::Get()->GetSectorSize(pt.m_map);

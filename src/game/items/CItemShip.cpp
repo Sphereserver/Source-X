@@ -6,7 +6,6 @@
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
-#include "../CWorldSearch.h"
 #include "../triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
@@ -113,7 +112,7 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
 
 void CItemShip::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK_DEBUG("CItemShip::r_Write");
+    ADDTOCALLSTACK_INTENSIVE("CItemShip::r_Write");
     CItemMulti::r_Write(s);
     if (m_uidHold.IsValidUID())
         s.WriteKeyHex("HATCH", m_uidHold.GetObjUID());
@@ -306,10 +305,10 @@ CItem * CItemShip::GetShipPlank(size_t index)
     // Find plank(s) if the list is empty
     if (m_uidPlanks.empty())
     {
-        auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), Multi_GetDistanceMax());
+        CWorldSearch Area(GetTopPoint(), Multi_GetDistanceMax());
         for (;;)
         {
-            const CItem * pItem = Area->GetItem();
+            const CItem * pItem = Area.GetItem();
             if (pItem == nullptr)
                 break;
 

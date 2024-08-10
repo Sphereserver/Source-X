@@ -5,9 +5,6 @@ function (toolchain_force_compiler)
 	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
 endfunction ()
 
-function (toolchain_after_project_common)
-	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
-endfunction ()
 
 function (toolchain_exe_stuff_common)
 
@@ -51,17 +48,7 @@ function (toolchain_exe_stuff_common)
 	SET (ENABLED_SANITIZER false)
 
 	IF (${USE_ASAN})
-		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=address -fno-sanitize-recover=address
-      -fsanitize-address-use-after-scope -fsanitize=pointer-compare -fsanitize=pointer-subtract
-      # Flags for additional instrumentation not strictly needing asan to be enabled
-      #-fvtable-verify=preinit # This causes a GCC internal error! Tested with 13.2.0
-      -fstack-check -fstack-protector-all
-      -fcf-protection=full
-      # GCC 14?
-      #-fharden-control-flow-redundancy -fhardcfr-check-exceptions
-      # Other
-      #-fsanitize-trap=all
-    )
+		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} -fsanitize=address -fno-sanitize-recover=address -fsanitize-address-use-after-scope)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libasan>)
 		SET (ENABLED_SANITIZER 	true)
 	ENDIF ()
@@ -79,11 +66,9 @@ function (toolchain_exe_stuff_common)
 	ENDIF ()
 	IF (${USE_UBSAN})
 		SET (UBSAN_FLAGS
-			-fsanitize=undefined,float-divide-by-zero
+			-fsanitize=undefined,shift,integer-divide-by-zero,vla-bound,null,signed-integer-overflow,bounds-strict
+			-fsanitize=float-divide-by-zero,float-cast-overflow,pointer-overflow,unreachable,nonnull-attribute,returns-nonnull-attribute
 			-fno-sanitize=enum
-			# Unsupported (yet?) by GCC 13
-			#-fsanitize=unsigned-integer-overflow #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
-      #-fsanitize=implicit-conversion, local-bounds
 		)
 		SET (CXX_FLAGS_EXTRA 	${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA 	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libubsan>)
@@ -99,8 +84,7 @@ function (toolchain_exe_stuff_common)
 
 	set (cxx_local_opts_warnings
 		-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
-		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
-		-Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
+		-Wno-parentheses -Wno-format-security -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
 	)
 	set (cxx_local_opts
 		-std=c++20 -pthread -fexceptions -fnon-call-exceptions
@@ -127,7 +111,7 @@ function (toolchain_exe_stuff_common)
 		ENDIF ()
 	ENDIF ()
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
 	ENDIF ()
 
 

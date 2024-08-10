@@ -28,12 +28,11 @@ public:
 
 private:
 	bool   m_fSaveParity;		// has the sector been saved relative to the char entering it ?
+	CSectorEnviron m_Env;		// Current Environment
 
 	byte m_RainChance;		// 0 to 100%
 	byte m_ColdChance;		// Will be snow if rain chance success.
 	byte m_ListenItems;		// Items on the ground that listen ?
-
-    CSectorEnviron m_Env;		// Current Environment
 
 private:
 	WEATHER_TYPE GetWeatherCalc() const;
@@ -46,8 +45,9 @@ public:
 	CSector();
 	~CSector();
 
-	CSector(const CSector& copy) = delete;
-	CSector& operator=(const CSector& other) = delete;
+private:
+	CSector(const CSector& copy);
+	CSector& operator=(const CSector& other);
 
 public:
 	virtual void Init(int index, uchar map, short x, short y) override;
@@ -134,7 +134,7 @@ public:
 	void Restock();
 	void RespawnDeadNPCs();
 
-	void Close(bool fClosingWorld);
+	void Close();
 	virtual lpctstr GetName() const override { return "Sector"; }
 };
 

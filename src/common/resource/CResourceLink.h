@@ -12,8 +12,7 @@
 class CResourceScript;
 
 
-// Each array can store 8 bytes * 4 bits per byte = 32 bits, or 32 values for 32 triggers.
-#define MAX_TRIGGERS_ARRAY	10
+#define MAX_TRIGGERS_ARRAY	6
 
 class CResourceLink : public CResourceDef
 {
@@ -28,8 +27,8 @@ private:
     dword _dwRefInstances;	// How many CResourceRef objects refer to this ?
 
 public:
-    dword m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
     static const char *m_sClassName;
+    dword m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
 
 #define XTRIG_UNKNOWN 0	// bit 0 is reserved to say there are triggers here that do not conform.
 

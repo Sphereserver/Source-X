@@ -4,9 +4,9 @@
 #include <algorithm>
 
 
-CSObjContRec::CSObjContRec() :
-    m_pParent(nullptr)
+CSObjContRec::CSObjContRec()
 {
+    m_pParent = nullptr;
 }
 
 CSObjContRec::~CSObjContRec()
@@ -16,73 +16,55 @@ CSObjContRec::~CSObjContRec()
 
 void CSObjContRec::RemoveSelf()
 {
-    if (m_pParent) {
+    if (m_pParent)
         m_pParent->OnRemoveObj(this);	// call any approriate virtuals.
-    }
 }
 
 //---
 
 // CSObjCont:: Constructors, Destructor, Assign operator.
 
-CSObjCont::CSObjCont() :
-    _fClearingContainer(false)
+CSObjCont::CSObjCont()
 {
+	_fIsClearing = false;
 }
 
 CSObjCont::~CSObjCont()
 {
-	ClearContainer(true);
+	ClearContainer();
 }
 
 // CSObjCont:: Modifiers.
 
-void CSObjCont::ClearContainer(bool fClosingWorld)
+void CSObjCont::ClearContainer()
 {
 	if (_Contents.empty())
 		return;
 
 	// delete all entries.
+	ASSERT(!_fIsClearing);
+	_fIsClearing = true;
 
 	// Loop through a copy of the current state of the container, since by deleting other container objects it could happen that
 	//	other objects are deleted and appended to this list, thus invalidating the iterators used by the for loop.
 	const auto stateCopy = GetIterationSafeContReverse();
 	_Contents.clear();
-    _fClearingContainer = true;
 
-    EXC_TRY("Deleting objects");
+	for (CSObjContRec* pRec : stateCopy)	// iterate the list.
+	{
+		EXC_TRY("Deleting objects scheduled for deletion");
 
-    if (fClosingWorld)
-    {
-        EXC_SET_BLOCK("Closing world cleanup.");
-        // Do not notify the parent element.
-        for (CSObjContRec* pRec : stateCopy)
-        {
-            // This might not be true for some containers.
-            //  Example: sectors. We might want to delete the object here just after it's been detatched from its sector.
-            //ASSERT(pRec->GetParent() == this);
+		if (pRec->GetParent() == this)
+		{
+			// I still haven't figured why sometimes, when force closing sectors, an item is stored in both the g_World.m_ObjDelete and the sector object lists
+			OnRemoveObj(pRec);
+			delete pRec;
+		}
 
-            //pRec->m_pParent->_ContentsAlreadyDeleted.emplace_back(pRec);
-            pRec->m_pParent = nullptr;
-            delete pRec;
-        }
-    }
-    else
-    {
-        EXC_SET_BLOCK("Standard cleanup.");
-        	for (CSObjContRec* pRec : stateCopy)
-        {
-            // This might not be true for some containers.
-            //  Example: sectors. We might want to delete the object here just after it's been detatched from its sector.
-            //ASSERT(pRec->GetParent() == this);
+		EXC_CATCH;
+	}
 
-            OnRemoveObj(pRec);
-            delete pRec;
-        }
-    }
-
-    _fClearingContainer = false;
-	EXC_CATCH;
+	_fIsClearing = false;
 }
 
 /*
@@ -119,27 +101,15 @@ void CSObjCont::OnRemoveObj(CSObjContRec* pObjRec)	// Override this = called whe
 {
 	// just remove from list. DON'T delete !
 	ASSERT(pObjRec);
-
 	ASSERT(pObjRec->GetParent() == this);
 
 	pObjRec->m_pParent = nullptr;	// We are now unlinked.
 
-	iterator itObjRec = std::find(begin(), end(), pObjRec);
-    if (itObjRec == end())
-        return;
-
-	/*
-	if (!_fClearingContainer)
-    {
-        // _fCleaning == true happens when a CSObjCont deletes its CSObjContRec.
-        //  CSObjContRec::RemoveSelf calls its CSObjCont::OnRemoveObj, so we are here, but in this case _Contents is empty,
-        //  so it's expected not to find the object here..
-        iterator itObjRec = std::find(begin(), end(), pObjRec);
-        ASSERT(itObjRec != end());
-
-        _Contents.erase(itObjRec);
-    }
-    */
-
-    _Contents.erase(itObjRec);
+	if (!_fIsClearing)
+	{
+		const iterator itEnd = end();
+		iterator itObjRec = std::find(begin(), itEnd, pObjRec);
+		ASSERT(itObjRec != itEnd);
+		_Contents.erase(itObjRec);
+	}
 }

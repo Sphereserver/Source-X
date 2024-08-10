@@ -43,6 +43,5 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
         -w     # suppress all the warnings, since gcc doesn't have -Wno-extern-initializer
     )
 endif ()
-target_compile_options      (libev PRIVATE ${c_compiler_options_common})
-target_compile_definitions  (libev PRIVATE ${c_compiler_definitions_common})
-target_link_options		    (libev PRIVATE ${c_linker_options_common})
+target_compile_options	(libev PRIVATE ${c_compiler_options_common})
+target_link_options	(libev PRIVATE ${c_linker_options_common})

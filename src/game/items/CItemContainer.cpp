@@ -22,7 +22,7 @@ CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
 CItemContainer::~CItemContainer()
 {
 	CItemContainer::DeletePrepare();
-	CContainer::ClearContainer(false);		// get rid of my contents first to protect against weight calc errors.
+	CContainer::ClearContainer();		// get rid of my contents first to protect against weight calc errors.
 
     CItemMulti *pMulti = nullptr;
     if (_uidMultiSecured.IsValidUID())
@@ -60,10 +60,9 @@ bool CItemContainer::NotifyDelete()
 void CItemContainer::DeletePrepare()
 {
 	ADDTOCALLSTACK("CItemContainer::DeletePrepare");
-
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
 		Trade_Delete();
-
+	
 	CContainer::ContentDelete(false);	// This object and its contents need to be deleted on the same tick
 	CItem::DeletePrepare();
 }
@@ -347,7 +346,7 @@ void CItemContainer::OnWeightChange( int iChange )
 	// Some containers do not add weight to you.
 	if ( !IsWeighed() )
 		return;
-
+	
 	// Propagate the weight change up the stack if there is one.
 	CContainer *pCont = dynamic_cast<CContainer *>(GetParent());
 	if ( !pCont )
@@ -538,7 +537,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				// delete all it's pieces.
 				CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
 				ASSERT(pCont);
-				pCont->ClearContainer(false);
+				pCont->ClearContainer();
 				break;
 			}
             default:
@@ -1002,7 +1001,7 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_EXTRA:
 					// clear all this junk periodically.
 					// sell it back for cash value ?
-					ClearContainer(false);
+					ClearContainer();
 					break;
 
 				case LAYER_VENDOR_BUYS:
@@ -1295,7 +1294,7 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			return false;
 		case ICV_EMPTY:
 		{
-			ClearContainer(false);
+			ClearContainer();
 			return true;
 		}
 		case ICV_FIXWEIGHT:
@@ -1352,7 +1351,7 @@ bool CItemContainer::_OnTick()
 	{
 		case IT_TRASH_CAN:
 			// Empty it !
-			ClearContainer(false);
+			ClearContainer();
 			return true;
 		case IT_CONTAINER:
 			if ( IsAttr(ATTR_MAGIC) )

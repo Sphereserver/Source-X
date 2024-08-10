@@ -34,11 +34,11 @@ public:
 	// we increase the access level from protected to public in order to allow manual execution when
 	// configuration disables using threads
 	// TODO: in the future, such simulated functionality should lie in AbstractThread inself instead of hacks
-	virtual void tick() override;
+	virtual void tick();
 
 protected:
-	virtual void onStart() override;
-	virtual bool shouldExit() noexcept override;
+	virtual void onStart();
+	virtual bool shouldExit();
 };
 
 //////////////////////////////////////////////////////////////
