@@ -3858,3 +3858,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	So for example if you have a MONSTER (H slot) flying custom anim, with Cast2 action but not Pillage action you can set ANIM=020A0
 	If you have a custom anim with default configuration, you don't need to set ANIM=
 
+10-08-2024, Gladie
+- Fixed:  CAN_I_DAMAGEABLE not updating status bar (PR #1259, issues #1248, #1260).
+
