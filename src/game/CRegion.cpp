@@ -193,9 +193,13 @@ bool CRegion::MakeRegionDefname()
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( ptcKey ) )
         {
-            int iVarThis = Str_ToI( ptcKey );
-            if ( iVarThis >= iVar )
-                iVar = iVarThis + 1;
+            std::optional<int> iconv = Str_ToI( ptcKey );
+            if (iconv.has_value())
+            {
+                int iVarThis = iconv.value();
+                if ( iVarThis >= iVar )
+                    iVar = iVarThis + 1;
+            }
         }
         else
             ++iVar;

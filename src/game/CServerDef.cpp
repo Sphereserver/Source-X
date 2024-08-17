@@ -63,6 +63,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 	ADDTOCALLSTACK("CServerDef::StatGet");
 	ASSERT( i >= 0 && i < SERV_STAT_QTY );
 	size_t	d = m_stStat[i];
+
 	EXC_TRY("StatGet");
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
@@ -168,7 +169,7 @@ void CServerDef::SetName( lpctstr pszName )
 
 	// No HTML tags using <> either.
 	tchar szName[ 2*MAX_SERVER_NAME_SIZE ];
-	size_t len = Str_GetBare( szName, pszName, sizeof(szName), "<>/\"\\" );
+	const int len = Str_GetBare( szName, pszName, sizeof(szName), "<>/\"\\" );
 	if ( len <= 0 )
 		return;
 
@@ -194,10 +195,10 @@ void CServerDef::StatDec(SERV_STAT_TYPE i)
     --m_stStat[i];
 }
 
-void CServerDef::SetStat(SERV_STAT_TYPE i, dword dwVal)
+void CServerDef::SetStat(SERV_STAT_TYPE i, size_t uiVal)
 {
     ASSERT(i >= 0 && i < SERV_STAT_QTY);
-    m_stStat[i] = dwVal;
+    m_stStat[i] = uiVal;
 }
 
 lpctstr CServerDef::GetName() const // virtual override
@@ -361,7 +362,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			SetName( s.GetArgStr() );
 			break;
 		case SC_SERVPORT:
-			m_ip.SetPort( (word)s.GetArgVal() );
+			m_ip.SetPort( s.GetArgWVal() );
 			break;
 
 		case SC_ACCOUNTS:
@@ -379,10 +380,10 @@ bool CServerDef::r_LoadVal( CScript & s )
 			}
 			break;
 		case SC_ITEMS:
-			SetStat( SERV_STAT_ITEMS, s.GetArgVal() );
+			SetStat( SERV_STAT_ITEMS, s.GetArgDWVal() );
 			break;
 		case SC_CHARS:
-			SetStat( SERV_STAT_CHARS, s.GetArgVal() );
+			SetStat( SERV_STAT_CHARS, s.GetArgDWVal() );
 			break;
 		case SC_TIMEZONE:
 			m_TimeZone = (char)s.GetArgVal();
@@ -464,7 +465,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		sVal = GetName();	// What the name should be. Fill in from ping.
 		break;
 	case SC_SERVPORT:
-		sVal.FormatVal( m_ip.GetPort() );
+		sVal.FormatWVal( m_ip.GetPort() );
 		break;
 	case SC_ACCOUNTS:
 		sVal.FormatSTVal( StatGet( SERV_STAT_ACCOUNTS ) );

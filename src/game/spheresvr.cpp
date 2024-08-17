@@ -121,6 +121,9 @@ void GlobalInitializer::PeriodicSyncTimeConstants() // static
 #endif  // _WIN32
 }
 
+
+/* Start global declarations */
+
 static GlobalInitializer g_GlobalInitializer;
 
 #ifdef _WIN32
@@ -135,8 +138,12 @@ UnixTerminal g_UnixTerminal;
 LinuxEv g_NetworkEvent;
 #endif
 
+CServer		g_Serv;   // current state, stuff not saved.
+CLog			g_Log;
+
 // Config data from sphere.ini is needed from the beginning.
 CServerConfig	g_Cfg;
+CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -150,15 +157,10 @@ CWorld			g_World;			// the world. (we save this stuff)
 
 
 // Again, game servers stuff.
-CServer			g_Serv;				// current state, stuff not saved.
-
-
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
 CSRand          g_Rand;
 CExpression		g_Exp;				// Global script variables.
-CLog			g_Log;
-CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
@@ -509,23 +511,24 @@ void defragSphere(char *path)
 	CSFileText inf;
 	CSFile ouf;
 	char z[_MAX_PATH], z1[_MAX_PATH], buf[1024];
-	size_t i;
 	char *p = nullptr, *p1 = nullptr;
-	size_t dBytesRead;
+	size_t uiBytesRead;
 	size_t dTotalMb;
 	const size_t mb10 = 10*1024*1024;
 	const size_t mb5 = 5*1024*1024;
-	bool bSpecial;
+	bool fSpecial;
 
 	g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " SPHERE_TITLE " saves.\n"
 		"Use it on your risk and if you know what you are doing since it can possibly harm your server.\n"
 		"The process can take up to several hours depending on the CPU you have.\n"
 		"After finished, you will have your '" SPHERE_FILE "*.scp' files converted and saved as '" SPHERE_FILE "*.scp.new'.\n");
 
-	constexpr dword MAX_UID = 40'000'000U; // limit to 100mln of objects, takes 100mln*4 ~= 400mb
+    // UID_O_INDEX_MASK ?
+	constexpr dword MAX_UID = 40'000'000U; // limit to 40mln of objects, takes 40mln*4bytes ~= 160mb
+
 	dword dwIdxUID = 0;
 	dword* puids = (dword*)calloc(MAX_UID, sizeof(dword));
-	for ( i = 0; i < 3; ++i )
+	for ( uint i = 0; i < 3; ++i )
 	{
 		Str_CopyLimitNull(z, path, sizeof(z));
 		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
@@ -538,14 +541,14 @@ void defragSphere(char *path)
 			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
 			continue;
 		}
-		dBytesRead = dTotalMb = 0;
+		uiBytesRead = dTotalMb = 0;
 		while ((dwIdxUID < MAX_UID) && !feof(inf._pStream))
 		{
 			fgets(buf, sizeof(buf), inf._pStream);
-			dBytesRead += strlen(buf);
-			if ( dBytesRead > mb10 )
+			uiBytesRead += strlen(buf);
+			if ( uiBytesRead > mb10 )
 			{
-				dBytesRead -= mb10;
+				uiBytesRead -= mb10;
 				dTotalMb += 10;
 				g_Log.Event(LOGM_INIT, "Total read %" PRIuSIZE_T " Mb\n", dTotalMb);
 			}
@@ -574,7 +577,7 @@ void defragSphere(char *path)
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(puids, 0, dwTotalUIDs -1);
 
-	for ( i = 0; i < 5; ++i )
+	for ( uint i = 0; i < 5; ++i )
 	{
 		Str_CopyLimitNull(z, path, sizeof(z));
 		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
@@ -595,7 +598,7 @@ void defragSphere(char *path)
 			continue;
 		}
 
-		dBytesRead = dTotalMb = 0;
+		uiBytesRead = dTotalMb = 0;
 		while ( inf.ReadString(buf, sizeof(buf)) )
 		{
 			dwIdxUID = (dword)strlen(buf);
@@ -604,11 +607,11 @@ void defragSphere(char *path)
 
 			buf[dwIdxUID] = buf[dwIdxUID +1] = buf[dwIdxUID +2] = 0;	// just to be sure to be in line always
 							// NOTE: it is much faster than to use memcpy to clear before reading
-			bSpecial = false;
-			dBytesRead += dwIdxUID;
-			if ( dBytesRead > mb5 )
+			fSpecial = false;
+			uiBytesRead += dwIdxUID;
+			if ( uiBytesRead > mb5 )
 			{
-				dBytesRead -= mb5;
+				uiBytesRead -= mb5;
 				dTotalMb += 5;
 				g_Log.Event(LOGM_INIT, "Total processed %" PRIuSIZE_T " Mb\n", dTotalMb);
 			}
@@ -631,7 +634,7 @@ void defragSphere(char *path)
 			else if (( buf[0] == 'M' ) && ( strstr(buf, "MEMBER=0") == buf ))		// MEMBER=
 			{
 				p += 7;
-				bSpecial = true;
+				fSpecial = true;
 			}
 			else if (( buf[0] == 'M' ) && ( strstr(buf, "MORE1=0") == buf ))		// MORE1=
 				p += 6;
@@ -668,7 +671,7 @@ void defragSphere(char *path)
 					((( *p1 >= '0' ) && ( *p1 <= '9' )) ||
 					 (( *p1 >= 'a' ) && ( *p1 <= 'f' ))) )
                     ++p1;
-				if ( !bSpecial )
+				if ( !fSpecial )
 				{
 					if ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' )) // some more text in line
 						p = nullptr;
@@ -759,6 +762,7 @@ void defragSphere(char *path)
 		inf.Close();
 		ouf.Close();
 	}
+
 	free(puids);
 	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
 }
@@ -788,9 +792,10 @@ int _cdecl main( int argc, char * argv[] )
 
 	{
         // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
-        	const IThread* curthread = ThreadHolder::get().current();
+        const IThread* curthread = ThreadHolder::get().current();
         ASSERT(curthread != nullptr);
         ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
+        (void)curthread;
     }
 
 #ifndef _WIN32

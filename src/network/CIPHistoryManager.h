@@ -25,7 +25,7 @@ struct HistoryIP
     int m_connected;
     bool m_blocked;
     int m_ttl;
-    size_t m_connectionAttempts; // since i remember of this IP
+    int64 m_connectionAttempts; // since i remember of this IP
     int64 m_timeLastConnectedMs;
     int64 m_blockExpire;
     int m_pingDecay;

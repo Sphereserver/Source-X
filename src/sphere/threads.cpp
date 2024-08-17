@@ -142,6 +142,12 @@ IThread* ThreadHolder::current()
 
 	if (m_spherethreadpairs_systemid_ptr.empty()) {
         auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
+        if (!thread) {
+            // Should never happen.
+            EXC_NOTIFY_DEBUGGER;
+	    std::abort();
+        }
+
         thread->m_threadSystemId = tid;
         lock.unlock();
         push(thread);

@@ -270,6 +270,7 @@ src/common/sphere_library/sstring.cpp
 src/common/sphere_library/sstring.h
 src/common/sphere_library/sstringobjs.cpp
 src/common/sphere_library/sstringobjs.h
+src/common/sphere_library/stypecast.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 

@@ -116,9 +116,9 @@ function (toolchain_exe_stuff)
 
 	target_compile_options(spheresvr PRIVATE
 		${cxx_compiler_flags_common}
-		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHsc /Oy /GL /GA /Gw /Gy /GF /GR-  $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	/EHa  /Oy /GL /GA /Gw /Gy /GF		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od 		$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>> #/Gs
+		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	  /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	  /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od /Gs	$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
 		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
 	)
 

@@ -1103,9 +1103,20 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, ARRAY_COUNT(ppCmd), ", ");
             if ( iQty < 3 )
                 return false;
-            int iPrefixCode = Str_ToI(ppCmd[0]);
-            int iCost = Str_ToI(ppCmd[1]);
-            CSString sHash = CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost)));
+
+            std::optional<int> iconv;
+
+            iconv = Str_ToI(ppCmd[0]);
+            if (!iconv.has_value())
+                return false;
+            int iPrefixCode = *iconv;
+
+            iconv = Str_ToI(ppCmd[1]);
+            if (!iconv.has_value())
+                return false;
+            int iCost = *iconv;
+
+            CSString sHash(CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost))));
             sVal.Format("%s", sHash.GetBuffer());
         } return true;
 
@@ -1115,6 +1126,7 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, ARRAY_COUNT(ppCmd), ", ");
             if ( iQty < 2 )
                 return false;
+
             bool fValidated = CBCrypt::ValidateBCrypt(ppCmd[0], ppCmd[1]);
             sVal.FormatVal((int)fValidated);
         } return true;
@@ -1897,7 +1909,7 @@ int CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iF
 					pContext->_fParseScriptText_Brackets = false;
 
 					tchar* ptcRecurseParse = ptcResponse + i;
-					const size_t iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
+					const int iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
 
 					pContext->_fParseScriptText_Brackets = true;
 					-- pContext->_iParseScriptText_Reentrant;
@@ -2136,7 +2148,11 @@ bool CScriptObj::Execute_FullTrigger(CScript& s, CTextConsole* pSrc, CScriptTrig
 	CScriptObj* pRef = this;
 	if (iArgQty == 2)
 	{
-		CChar* pCharFound = CUID::CharFindFromUID(Str_ToI(piCmd[1]));
+        std::optional<dword> iconv = Str_ToU(piCmd[1]);
+        if (!iconv.has_value())
+            return false;
+
+		CChar* pCharFound = CUID::CharFindFromUID(*iconv);
 		if (pCharFound)
 			pRef = pCharFound;
 	}

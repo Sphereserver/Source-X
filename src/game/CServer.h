@@ -73,7 +73,7 @@ private:
 
 public:
 	CServer();
-	virtual ~CServer();
+	virtual ~CServer() override;
 
 	CServer(const CServer& copy) = delete;
 	CServer& operator=(const CServer& other) = delete;

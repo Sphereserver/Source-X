@@ -48,7 +48,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
             CPointMap pntTemp;
             pntTemp.Read(s.GetArgStr());
             CMapPinRec pin(pntTemp.m_x, pntTemp.m_y);
-            m_Pins.emplace_back(pin);
+            m_Pins.emplace_back(std::move(pin));
             return true;
         }
         return CItem::r_LoadVal(s);
@@ -73,7 +73,11 @@ bool CItemMap::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, bo
         if ( !strnicmp(ptcKey, "PIN.", 4) )
         {
             ptcKey += 4;
-            uint i = Exp_GetUVal(ptcKey) - 1;
+            uint i = Exp_GetUVal(ptcKey);
+            if (i == 0)
+                return false;
+
+            i -= 1;
             if ( m_Pins.IsValidIndex(i) )
             {
                 sVal.Format("%i,%i", m_Pins[i].m_x, m_Pins[i].m_y);

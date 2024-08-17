@@ -1007,7 +1007,7 @@ public:
 	bool Spell_CastDone();
 	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0) override;
 	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
-	CChar * Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1);
+	CChar* Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature);
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------

@@ -1060,8 +1060,8 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
         ftDump->Printf("Profiles %s: (%d sec total)\n", GetCurrentProfileData().IsActive() ? "ON" : "OFF", GetCurrentProfileData().GetActiveWindow());
     }
 
-	size_t iThreadCount = ThreadHolder::get().getActiveThreads();
-	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
+	size_t uiThreadCount = ThreadHolder::get().getActiveThreads();
+	for ( size_t iThreads = 0; iThreads < uiThreadCount; ++iThreads)
 	{
 		IThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 		if (thrCurrent == nullptr)

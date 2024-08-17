@@ -139,7 +139,7 @@ bool CResourceDef::MakeResourceName()
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( ptcKey ) )
         {
-            size_t uiVarThis = Str_ToUI( ptcKey );
+            size_t uiVarThis = Str_ToU( ptcKey );
             if ( uiVarThis >= uiVar )
                 uiVar = uiVarThis + 1;
         }

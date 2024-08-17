@@ -123,7 +123,7 @@ CClient::~CClient()
 	}
 
 	if (m_net->isClosed() == false)
-		g_Log.EventError("Client being deleted without being safely removed from the network system\n");
+		g_Log.EventError("Client being deleted without being safely removed from the network system.\n");
 
 	EXC_CATCH;
 }
@@ -932,7 +932,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 
 				CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, ppszArgs[0], 0, true);
-                /* 
+                /*
                 if (rid.IsEmpty())
                 {
                     m_tmAdd.m_id = 0;

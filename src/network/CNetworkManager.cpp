@@ -178,7 +178,7 @@ void CNetworkManager::acceptNewConnection(void)
         return;
     }
 
-    if ((g_Cfg._iMaxConnectRequestsPerIP > 0) && (ip.m_connectionAttempts >= (size_t)g_Cfg._iMaxConnectRequestsPerIP))
+    if ((g_Cfg._iMaxConnectRequestsPerIP > 0) && (ip.m_connectionAttempts >= (int64)g_Cfg._iMaxConnectRequestsPerIP))
     {
         // Call this special scripted function.
         CScriptTriggerArgs fargs_ex(client_addr.GetAddrStr());
@@ -192,7 +192,7 @@ void CNetworkManager::acceptNewConnection(void)
         {
             // reject
             CLOSESOCKET(h);
-            
+
             _printIPBlocked();
             g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick via script 'f_onserver_connectreq_ex'.\n");
         }
@@ -206,7 +206,7 @@ void CNetworkManager::acceptNewConnection(void)
             g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick + IP block via script 'f_onserver_connectreq_ex'.\n");
         }
     }
-   
+
     /*
     // Check if there's already more data waiting to be read (suspicious?).
     // Classic client (but not some 3rd party clients) have pending data after the second connection request
@@ -272,8 +272,8 @@ void CNetworkManager::acceptNewConnection(void)
     {
         // not enough empty slots
         EXC_SET_BLOCK("no slot available");
-        _printIPBlocked();        
-        
+        _printIPBlocked();
+
         g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CLIENTMAX reached.\n");
         CLOSESOCKET(h);
         return;

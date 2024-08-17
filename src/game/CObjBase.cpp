@@ -1702,7 +1702,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 					SKIP_SEPARATORS( ptcKey );
 					if (! *ptcKey )
-						sVal.Format("%d=%s", ct->m_clilocid, ct->m_args);
+						sVal.Format("%u=%s", ct->m_clilocid, ct->m_args);
 					else if ( !strnicmp( ptcKey, "ID", 2 )) //Cliloc.
 						sVal.FormatDWVal(ct->m_clilocid);
 					else if ( !strnicmp( ptcKey, "VAL", 3 )) //Arguments.
@@ -2347,7 +2347,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				CSString sPrompt;
 				sPrompt.Format("%s (# = default)", (lpctstr)(Arg_ppCmd[0]));
-				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
+				pClientSrc->addGumpInputVal( true, INPVAL_STYLE_TEXTEDIT,
 					iMaxLength,	sPrompt, sOrgValue, this );
 			}
 			break;

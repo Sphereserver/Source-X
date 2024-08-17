@@ -136,7 +136,7 @@ bool CClient::addLoginErr(byte code)
 
 	if (code >= ARRAY_COUNT(sm_Login_ErrMsg))
 		code = PacketLoginError::Other;
-	
+
 	g_Log.EventWarn( "%x:Bad Login %d. %s.\n", GetSocketID(), code, sm_Login_ErrMsg[(size_t)code] );
 
 	// translate the code into a code the client will understand
@@ -254,7 +254,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 
 	EXC_SET_BLOCK("server relay packet");
 	new PacketServerRelay(this, dwAddr, pServ->m_ip.GetPort(), dwCustomerId);
-	
+
 	m_Targ_Mode = CLIMODE_SETUP_RELAY;
 	return true;
 	EXC_CATCH;
@@ -680,7 +680,7 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxWebPageRequest");
-	
+
     // Seems to be a web browser pointing at us ? typical stuff :
 	if ( GetConnectType() != CONNECT_HTTP )
 		return false;
@@ -730,7 +730,11 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		{
 			pszArgs += 15;
 			GETNONWHITESPACE(pszArgs);
-            uiContentLength = Str_ToUI(pszArgs, 10);
+            std::optional<uint> iconv = Str_ToU(pszArgs, 10);
+            if (!iconv.has_value())
+                continue;
+
+            uiContentLength = *iconv;
 		}
 		else if ( ! strnicmp( pszArgs, "If-Modified-Since:", 18 ))
 		{
@@ -787,7 +791,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.TCP_NODELAY");
 	if (iSocketRet)
 		return false;
-	
+
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{
 		if (uiContentLength > strlen(ppLines[iQtyLines-1]) )
@@ -863,7 +867,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		addLoginErr( PacketLoginError::BadEncLength );
 		return false;
 	}
-	
+
 	GetNetState()->detectAsyncMode();
 	SetConnectType( m_Crypt.GetConnectType() );
 
@@ -877,7 +881,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		addLoginErr( PacketLoginError::BadVersion );
 		return false;
 	}
-	
+
     ASSERT(uiLen <= sizeof(CEvent));
     std::unique_ptr<CEvent> bincopy = std::make_unique<CEvent>();		// in buffer. (from client)
     memcpy(bincopy->m_Raw, pEvent->m_Raw, uiLen);
@@ -886,7 +890,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
         g_Log.EventError("NET-IN: xProcessClientSetup failed (Decrypt).\n");
         return false;
     }
-	
+
     byte lErr = PacketLoginError::EncUnknown;
 	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 
@@ -993,7 +997,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		}
 #endif
 	}
-	
+
 	xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 
 	if ( lErr != PacketLoginError::Success )	// it never matched any crypt format.
@@ -1010,15 +1014,15 @@ bool CClient::xCanEncLogin(bool bCheckCliver)
 	if ( !bCheckCliver )
 	{
 		if ( m_Crypt.GetEncryptionType() == ENC_NONE )
-			return ( g_Cfg.m_fUsenocrypt ); // Server don't want no-crypt clients 
-		
+			return ( g_Cfg.m_fUsenocrypt ); // Server don't want no-crypt clients
+
 		return ( g_Cfg.m_fUsecrypt ); // Server don't want crypt clients
 	}
 	else
 	{
 		if ( !g_Serv.m_ClientVersion.GetClientVerNumber() ) // Any Client allowed
 			return true;
-		
+
 		if ( m_Crypt.GetEncryptionType() != ENC_NONE )
 			return ( m_Crypt.GetClientVerNumber() == g_Serv.m_ClientVersion.GetClientVerNumber() );
 		else
