@@ -1,3 +1,4 @@
+Table Of Contents
 - [Getting Started With Sphere server](#getting-started-with-sphere-server)
   - [Downloading the Sphere server](#downloading-the-sphere-server)
     - [\[Linux Only\] Download dependencies](#linux-only-download-dependencies)
@@ -13,7 +14,7 @@
     - [Configure maps](#configure-maps)
   - [Setup Scripts](#setup-scripts)
     - [Download scripts](#download-scripts)
-    - [Fix the spheretables.scp](#fix-the-spheretablesscp)
+    - [Tweak the spheretables.scp](#tweak-the-spheretablesscp)
   - [Start the server](#start-the-server)
   - [Connect to your server](#connect-to-your-server)
   - [Making yourself an admin](#making-yourself-an-admin)
@@ -30,18 +31,10 @@ shard which, later on, can be tweaked and customised as needed.
 ## Downloading the Sphere server
 The first obvious step is to download the Sphere server. 
 
-You can choose to either download:
-- the older version, 
-[Sphere](https://forum.spherecommunity.net/sshare.php?srt=4&prj=7);
-- the newest, nightly version, 
-[SphereX](https://forum.spherecommunity.net/sshare.php?srt=4);
+Go to the [SphereX](https://forum.spherecommunity.net/sshare.php?srt=4) 
+Download page and download the latest nightly version for your platform.
 
-since Sphere is not actively maintaned anymore, this guide will cover the setup of
-the SphereX version. However, the steps should be quite similar between the two
-versions.
-
-Once you've downloaded the `SphereSvrX-*-nightly.zip` file, extract the zip or 
-tgz into a new folder.
+Extract the zip or tgz into a new folder.
 
 ### [Linux Only] Download dependencies
 In order for the server to work correctly, you'll need to install mariadb
@@ -279,13 +272,13 @@ started in no time.
 
 ### Download scripts
 Head out to the 
-[SphereX Github page](https://github.com/Sphereserver/Scripts-X)click on `Code`
+[SphereX Github page](https://github.com/Sphereserver/Scripts-X) click on `Code`
 and hit `Download ZIP`. 
 
 Unzip the content of the package into the server's `scripts` folder.
 
-### Fix the spheretables.scp
-Now we need to fix few stuff according to our `sphere.ini` configuration.
+### Tweak the spheretables.scp
+Now we need to tweak few settings according to our `sphere.ini` configuration.
 Go ahead and open with your text editor the file `scripts/spheretables.scp`.
 
 Let's comment out all the configurations related to all non Felucca and 
@@ -436,12 +429,11 @@ same machine
 
 Now save your profile and hit back. On the main screen make sure that the 
 profile you've just created is selected and hit Play. If you've done everything
-correctly, the Ultima Online login screen should pop up.
+correctly, the Ultima Online login screen should pop up. As per previous 
+configuration you can now try to login with any username and password: this
+operation will automatically create a new user for you.
 
-As per previous configuration you can now try to login with any username and
-password: this operation will automatically create a new user for you.
-
-So, pick a username and password and try to login. Create a new character et
+So, pick a username and password and try to login. Create a new character et 
 voila': you're the first player of your own personal Ultima Online Shard!
 
 ## Making yourself an admin
@@ -459,7 +451,7 @@ ACCOUNT <your_account_username> PLEVEL 7
 ```
 And hit enter.
 
-So, for instance, if your account name (not player name!) is `admin`, you 
+So, for instance, if your account name (**not player name!**) is `admin`, you
 should just type
 ```
 ACCOUNT admin PLEVEL 7
@@ -533,7 +525,8 @@ Head out to your game window and type in the chat
 ```
 Place the item right close to you and double-click it.
 
-As before, hit Felucca and, in the submenue click all the spawn items **once**.
+As before, hit Felucca and, in the submenu, click all the spawn items **once**.
+
 Do the same thing for Trammel.
 
 Same steps as before:
