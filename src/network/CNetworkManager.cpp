@@ -203,7 +203,7 @@ void CNetworkManager::acceptNewConnection(void)
             ip.setBlocked(true, fargs_ex.m_VarsLocal.GetKeyNum("BAN_TIMEOUT"));
 
             _printIPBlocked();
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick + IP block via script 'f_onserver_connectreq_ex'.\n");
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick + IP block allowed by script 'f_onserver_connectreq_ex'.\n");
         }
     }
 

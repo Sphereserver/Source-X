@@ -56,12 +56,11 @@ public:
     IPHistoryManager(void);
     ~IPHistoryManager(void);
 
-private:
-    IPHistoryManager(const IPHistoryManager& copy);
-    IPHistoryManager& operator=(const IPHistoryManager& other);
+    IPHistoryManager(const IPHistoryManager& copy) = delete;
+    IPHistoryManager& operator=(const IPHistoryManager& other) = delete;
 
 public:
-    void tick(void);	// period events
+    void tick(void);	// periodic events
 
     HistoryIP& getHistoryForIP(const CSocketAddressIP& ip) noexcept;	// get history for an ip
     HistoryIP& getHistoryForIP(const char* ip);				// get history for an ip

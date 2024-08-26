@@ -508,15 +508,14 @@ void defragSphere(char *path)
 {
 	ASSERT(path != nullptr);
 
+    	constexpr size_t mb10 = 10*1024*1024;
+	constexpr size_t mb5  = 5*1024*1024;
+
 	CSFileText inf;
 	CSFile ouf;
-	char z[_MAX_PATH], z1[_MAX_PATH], buf[1024];
-	char *p = nullptr, *p1 = nullptr;
-	size_t uiBytesRead;
-	size_t dTotalMb;
-	const size_t mb10 = 10*1024*1024;
-	const size_t mb5 = 5*1024*1024;
-	bool fSpecial;
+    char file_buf[1024];
+	char path_buf[_MAX_PATH], path_buf_2[_MAX_PATH];
+	char *str_ptr = nullptr, *str_ptr_2 = nullptr;
 
 	g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " SPHERE_TITLE " saves.\n"
 		"Use it on your risk and if you know what you are doing since it can possibly harm your server.\n"
@@ -530,43 +529,43 @@ void defragSphere(char *path)
 	dword* puids = (dword*)calloc(MAX_UID, sizeof(dword));
 	for ( uint i = 0; i < 3; ++i )
 	{
-		Str_CopyLimitNull(z, path, sizeof(z));
-		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
-		else if ( i == 1 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
-		else				strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
+		Str_CopyLimitNull(path_buf, path, sizeof(path_buf));
+		if ( i == 0 )		strcat(path_buf, SPHERE_FILE "statics" SPHERE_SCRIPT);
+		else if ( i == 1 )	strcat(path_buf, SPHERE_FILE "world" SPHERE_SCRIPT);
+		else				strcat(path_buf, SPHERE_FILE "chars" SPHERE_SCRIPT);
 
-		g_Log.Event(LOGM_INIT, "Reading current UIDs: %s\n", z);
-		if ( !inf.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
+		g_Log.Event(LOGM_INIT, "Reading current UIDs: %s\n", path_buf);
+		if ( !inf.Open(path_buf, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
 			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
 			continue;
 		}
-		uiBytesRead = dTotalMb = 0;
+		size_t uiBytesRead = 0, uiTotalMb = 0;
 		while ((dwIdxUID < MAX_UID) && !feof(inf._pStream))
 		{
-			fgets(buf, sizeof(buf), inf._pStream);
-			uiBytesRead += strlen(buf);
+			fgets(file_buf, sizeof(file_buf), inf._pStream);
+			uiBytesRead += strlen(file_buf);
 			if ( uiBytesRead > mb10 )
 			{
 				uiBytesRead -= mb10;
-				dTotalMb += 10;
-				g_Log.Event(LOGM_INIT, "Total read %" PRIuSIZE_T " Mb\n", dTotalMb);
+				uiTotalMb += 10;
+				g_Log.Event(LOGM_INIT, "Total read %" PRIuSIZE_T " Mb\n", uiTotalMb);
 			}
-			if (( buf[0] == 'S' ) && ( strstr(buf, "SERIAL=") == buf ))
+			if (( file_buf[0] == 'S' ) && ( strstr(file_buf, "SERIAL=") == file_buf ))
 			{
-				p = buf + 7;
-				p1 = p;
-				while (*p1 && (*p1 != '\r') && (*p1 != '\n'))
+				str_ptr = file_buf + 7;
+				str_ptr_2 = str_ptr;
+				while (*str_ptr_2 && (*str_ptr_2 != '\r') && (*str_ptr_2 != '\n'))
 				{
-					++p1;
+					++str_ptr_2;
 				}
-				*p1 = 0;
+				*str_ptr_2 = 0;
 
 				//	prepare new uid
-				*(p-1) = '0';
-				*p = 'x';
-				--p;
-				puids[dwIdxUID++] = strtoul(p, &p1, 16);
+				*(str_ptr-1) = '0';
+				*str_ptr = 'x';
+				--str_ptr;
+				puids[dwIdxUID++] = strtoul(str_ptr, &str_ptr_2, 16);
 			}
 		}
 		inf.Close();
@@ -579,125 +578,125 @@ void defragSphere(char *path)
 
 	for ( uint i = 0; i < 5; ++i )
 	{
-		Str_CopyLimitNull(z, path, sizeof(z));
-		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
-		else if ( i == 1 )	strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
-		else if ( i == 2 )	strcat(z, SPHERE_FILE "data" SPHERE_SCRIPT);
-		else if ( i == 3 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
-		else if ( i == 4 )	strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
-		g_Log.Event(LOGM_INIT, "Updating UID-s in %s to %s.new\n", z, z);
-		if ( !inf.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
+		Str_CopyLimitNull(path_buf, path, sizeof(path_buf));
+		if ( !i )			strcat(path_buf, SPHERE_FILE "accu.scp");
+		else if ( i == 1 )	strcat(path_buf, SPHERE_FILE "chars" SPHERE_SCRIPT);
+		else if ( i == 2 )	strcat(path_buf, SPHERE_FILE "data" SPHERE_SCRIPT);
+		else if ( i == 3 )	strcat(path_buf, SPHERE_FILE "world" SPHERE_SCRIPT);
+		else if ( i == 4 )	strcat(path_buf, SPHERE_FILE "statics" SPHERE_SCRIPT);
+		g_Log.Event(LOGM_INIT, "Updating UID-s in %s to %s.new\n", path_buf, path_buf);
+		if ( !inf.Open(path_buf, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
 			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
 			continue;
 		}
-		Str_ConcatLimitNull(z, ".new", sizeof(z));
-		if ( !ouf.Open(z, OF_WRITE|OF_CREATE|OF_DEFAULTMODE) )
+		Str_ConcatLimitNull(path_buf, ".new", sizeof(path_buf));
+		if ( !ouf.Open(path_buf, OF_WRITE|OF_CREATE|OF_DEFAULTMODE) )
 		{
 			g_Log.Event(LOGM_INIT, "Cannot open file for writing. Skipped!\n");
 			continue;
 		}
 
-		uiBytesRead = dTotalMb = 0;
-		while ( inf.ReadString(buf, sizeof(buf)) )
+		size_t uiBytesRead = 0, uiTotalMb = 0;
+		while ( inf.ReadString(file_buf, sizeof(file_buf)) )
 		{
-			dwIdxUID = (dword)strlen(buf);
-			if (dwIdxUID > (ARRAY_COUNT(buf) - 3))
-				dwIdxUID = ARRAY_COUNT(buf) - 3;
+			dwIdxUID = (dword)strlen(file_buf);
+			if (dwIdxUID > (ARRAY_COUNT(file_buf) - 3))
+				dwIdxUID = ARRAY_COUNT(file_buf) - 3;
 
-			buf[dwIdxUID] = buf[dwIdxUID +1] = buf[dwIdxUID +2] = 0;	// just to be sure to be in line always
+			file_buf[dwIdxUID] = file_buf[dwIdxUID +1] = file_buf[dwIdxUID +2] = 0;	// just to be sure to be in line always
 							// NOTE: it is much faster than to use memcpy to clear before reading
-			fSpecial = false;
+			bool fSpecial = false;
 			uiBytesRead += dwIdxUID;
 			if ( uiBytesRead > mb5 )
 			{
 				uiBytesRead -= mb5;
-				dTotalMb += 5;
-				g_Log.Event(LOGM_INIT, "Total processed %" PRIuSIZE_T " Mb\n", dTotalMb);
+				uiTotalMb += 5;
+				g_Log.Event(LOGM_INIT, "Total processed %" PRIuSIZE_T " Mb\n", uiTotalMb);
 			}
-			p = buf;
+			str_ptr = file_buf;
 
 			//	Note 28-Jun-2004
 			//	mounts seems having ACTARG1 > 0x30000000. The actual UID is ACTARG1-0x30000000. The
 			//	new also should be new+0x30000000. need investigation if this can help making mounts
 			//	not to disappear after the defrag
-			if (( buf[0] == 'A' ) && ( strstr(buf, "ACTARG1=0") == buf ))		// ACTARG1=
-				p += 8;
-			else if (( buf[0] == 'C' ) && ( strstr(buf, "CONT=0") == buf ))			// CONT=
-				p += 5;
-			else if (( buf[0] == 'C' ) && ( strstr(buf, "CHARUID=0") == buf ))		// CHARUID=
-				p += 8;
-			else if (( buf[0] == 'L' ) && ( strstr(buf, "LASTCHARUID=0") == buf ))	// LASTCHARUID=
-				p += 12;
-			else if (( buf[0] == 'L' ) && ( strstr(buf, "LINK=0") == buf ))			// LINK=
-				p += 5;
-			else if (( buf[0] == 'M' ) && ( strstr(buf, "MEMBER=0") == buf ))		// MEMBER=
+			if (( file_buf[0] == 'A' ) && ( strstr(file_buf, "ACTARG1=0") == file_buf ))		// ACTARG1=
+				str_ptr += 8;
+			else if (( file_buf[0] == 'C' ) && ( strstr(file_buf, "CONT=0") == file_buf ))			// CONT=
+				str_ptr += 5;
+			else if (( file_buf[0] == 'C' ) && ( strstr(file_buf, "CHARUID=0") == file_buf ))		// CHARUID=
+				str_ptr += 8;
+			else if (( file_buf[0] == 'L' ) && ( strstr(file_buf, "LASTCHARUID=0") == file_buf ))	// LASTCHARUID=
+				str_ptr += 12;
+			else if (( file_buf[0] == 'L' ) && ( strstr(file_buf, "LINK=0") == file_buf ))			// LINK=
+				str_ptr += 5;
+			else if (( file_buf[0] == 'M' ) && ( strstr(file_buf, "MEMBER=0") == file_buf ))		// MEMBER=
 			{
-				p += 7;
+				str_ptr += 7;
 				fSpecial = true;
 			}
-			else if (( buf[0] == 'M' ) && ( strstr(buf, "MORE1=0") == buf ))		// MORE1=
-				p += 6;
-			else if (( buf[0] == 'M' ) && ( strstr(buf, "MORE2=0") == buf ))		// MORE2=
-				p += 6;
-			else if (( buf[0] == 'S' ) && ( strstr(buf, "SERIAL=0") == buf ))		// SERIAL=
-				p += 7;
-			else if ((( buf[0] == 'T' ) && ( strstr(buf, "TAG.") == buf )) ||		// TAG.=
-					 (( buf[0] == 'R' ) && ( strstr(buf, "REGION.TAG") == buf )))
+			else if (( file_buf[0] == 'M' ) && ( strstr(file_buf, "MORE1=0") == file_buf ))		// MORE1=
+				str_ptr += 6;
+			else if (( file_buf[0] == 'M' ) && ( strstr(file_buf, "MORE2=0") == file_buf ))		// MORE2=
+				str_ptr += 6;
+			else if (( file_buf[0] == 'S' ) && ( strstr(file_buf, "SERIAL=0") == file_buf ))		// SERIAL=
+				str_ptr += 7;
+			else if ((( file_buf[0] == 'T' ) && ( strstr(file_buf, "TAG.") == file_buf )) ||		// TAG.=
+					 (( file_buf[0] == 'R' ) && ( strstr(file_buf, "REGION.TAG") == file_buf )))
 			{
-				while ( *p && ( *p != '=' ))
-                    ++p;
-				++p;
+				while ( *str_ptr && ( *str_ptr != '=' ))
+                    ++str_ptr;
+				++str_ptr;
 			}
-			else if (( i == 2 ) && strchr(buf, '='))	// spheredata.scp - plain VARs
+			else if (( i == 2 ) && strchr(file_buf, '='))	// spheredata.scp - plain VARs
 			{
-				while ( *p && ( *p != '=' ))
-                    ++p;
-				++p;
+				while ( *str_ptr && ( *str_ptr != '=' ))
+                    ++str_ptr;
+				++str_ptr;
 			}
 			else
-                p = nullptr;
+                str_ptr = nullptr;
 
 			//	UIDs are always hex, so prefixed by 0
-			if ( p && ( *p != '0' ))
-                p = nullptr;
+			if ( str_ptr && ( *str_ptr != '0' ))
+                str_ptr = nullptr;
 
 			//	here we got potentialy UID-contained variable
 			//	check if it really is only UID-like var containing
-			if ( p )
+			if ( str_ptr )
 			{
-				p1 = p;
-				while ( *p1 &&
-					((( *p1 >= '0' ) && ( *p1 <= '9' )) ||
-					 (( *p1 >= 'a' ) && ( *p1 <= 'f' ))) )
-                    ++p1;
+				str_ptr_2 = str_ptr;
+				while ( *str_ptr_2 &&
+					((( *str_ptr_2 >= '0' ) && ( *str_ptr_2 <= '9' )) ||
+					 (( *str_ptr_2 >= 'a' ) && ( *str_ptr_2 <= 'f' ))) )
+                    ++str_ptr_2;
 				if ( !fSpecial )
 				{
-					if ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' )) // some more text in line
-						p = nullptr;
+					if ( *str_ptr_2 && ( *str_ptr_2 != '\r' ) && ( *str_ptr_2 != '\n' )) // some more text in line
+						str_ptr = nullptr;
 				}
 			}
 
 			//	here we definitely know that this is very uid-like
-			if ( p )
+			if ( str_ptr )
 			{
 				char c, c1, c2;
-				c = *p1;
+				c = *str_ptr_2;
 
-				*p1 = 0;
+				*str_ptr_2 = 0;
 				//	here in p we have the current value of the line.
 				//	check if it is a valid UID
 
 				//	prepare converting 0.. to 0x..
-				c1 = *(p-1);
-				c2 = *p;
-				*(p-1) = '0';
-				*p = 'x';
-				--p;
-				dwIdxUID = strtoul(p, &p1, 16);
-				++p;
-				*(p-1) = c1;
-				*p = c2;
+				c1 = *(str_ptr-1);
+				c2 = *str_ptr;
+				*(str_ptr-1) = '0';
+				*str_ptr = 'x';
+				--str_ptr;
+				dwIdxUID = strtoul(str_ptr, &str_ptr_2, 16);
+				++str_ptr;
+				*(str_ptr-1) = c1;
+				*str_ptr = c2;
 				//	Note 28-Jun-2004
 				//	The search algourytm is very simple and fast. But maybe integrate some other, at least /2 algorythm
 				//	since has amount/2 tryes at worst chance to get the item and never scans the whole array
@@ -746,18 +745,19 @@ void defragSphere(char *path)
 				}*/
 
 				//	replace UID by the new one since it has been found
-				*p1 = c;
+				*str_ptr_2 = c;
 				if (dwIdxUID != 0xFFFFFFFFL )
 				{
-					*p = 0;
-					strcpy(z, p1);
-					snprintf(z1, sizeof(z1), "0%" PRIx32, dwIdxUID);
-					strcat(buf, z1);
-					strcat(buf, z);
+					*str_ptr = 0;
+                    ASSERT(strlen(str_ptr_2) < sizeof(path_buf));
+					Str_CopyLimitNull(path_buf, str_ptr_2, sizeof(path_buf));  // here we don't need anymore the old values of path_buf, so i can reuse it here
+					snprintf(path_buf_2, sizeof(path_buf_2), "0%" PRIx32, dwIdxUID);
+					strcat(file_buf, path_buf_2);
+					strcat(file_buf, path_buf);
 				}
 			}
 			//	output the resulting line
-			ouf.Write(buf, (int)strlen(buf));
+			ouf.Write(file_buf, (int)strlen(file_buf));
 		}
 		inf.Close();
 		ouf.Close();
