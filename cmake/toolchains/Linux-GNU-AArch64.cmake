@@ -42,9 +42,9 @@ function (toolchain_after_project)
   else ()
     # possible native/host lib locations
     set (lib_search_paths
-      "/usr/aarch64-linux-gnu/libmariadb3"
-      "/usr/aarch64-linux-gnu/mysql"
-      "/usr/aarch64-linux-gnu"
+      "/usr/lib/aarch64-linux-gnu/libmariadb3"
+      "/usr/lib/aarch64-linux-gnu/mysql"
+      "/usr/lib/aarch64-linux-gnu"
       "/usr/lib64/mysql"
       "/usr/lib64"
       "/usr/lib/mysql"

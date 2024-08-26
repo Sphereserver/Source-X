@@ -43,12 +43,12 @@ function (toolchain_after_project)
     )
   else (CROSSCOMPILING_ARCH)
     set (local_lib_search_paths
-      "/usr/i686-linux-gnu/libmariadb3"
-      "/usr/i686-linux-gnu/mysql"
-      "/usr/i686-linux-gnu"
-      "/usr/i386-linux-gnu/libmariadb3"
-      "/usr/i386-linux-gnu/mysql"
-      "/usr/i386-linux-gnu"
+      "/usr/lib/i686-linux-gnu/libmariadb3"
+      "/usr/lib/i686-linux-gnu/mysql"
+      "/usr/lib/i686-linux-gnu"
+      "/usr/lib/i386-linux-gnu/libmariadb3"
+      "/usr/lib/i386-linux-gnu/mysql"
+      "/usr/lib/i386-linux-gnu"
       "/usr/lib32/mysql"
       "/usr/lib32"
     )
@@ -67,7 +67,7 @@ function (toolchain_after_project)
     set (lib_search_paths
       ${local_lib_search_paths}
       ${local_extra_lib_search_paths}
-      CACHE STRING "Library search paths (hint)" FORCE
+      CACHE STRING "Library search paths" FORCE
     )
   endif (CROSSCOMPILING_ARCH)
 

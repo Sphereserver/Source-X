@@ -47,19 +47,19 @@ function (toolchain_after_project)
     )
   else (CROSSCOMPILING_ARCH)
     set (local_lib_search_paths
-      "/usr/i686-linux-gnu/libmariadb3"
-      "/usr/i686-linux-gnu/mysql"
-      "/usr/i686-linux-gnu"
-      "/usr/i386-linux-gnu/libmariadb3"
-      "/usr/i386-linux-gnu/mysql"
-      "/usr/i386-linux-gnu"
+      "/usr/lib/i686-linux-gnu/libmariadb3"
+      "/usr/lib/i686-linux-gnu/mysql"
+      "/usr/lib/i686-linux-gnu"
+      "/usr/lib/i386-linux-gnu/libmariadb3"
+      "/usr/lib/i386-linux-gnu/mysql"
+      "/usr/lib/i386-linux-gnu"
       "/usr/lib32/mysql"
       "/usr/lib32"
     )
 
     if ("${CMAKE_HOST_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
       # I'm compiling for x86 on an x86_64 host.
-      set (CMAKE_LIBRARY_PATH ${local_lib_search_paths} CACHE PATH ""
+      set (CMAKE_LIBRARY_PATH ${local_lib_search_paths} CACHE PATH "")
     else ()
       # I'm compiling for x86 on an x86 OS (32 bits), so natively: i have libs on /usr/lib and not /usr/lib32.
       set (local_extra_lib_search_paths
