@@ -614,7 +614,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 						continue;
 					if ( pItem->IsItemInContainer())
 					{
-						pItem->SetContainedLayer(i16_narrow8(pItem->GetAmount()));	// set the Restock amount.
+						pItem->SetContainedLayer(n16_narrow8(pItem->GetAmount()));	// set the Restock amount.
 					}
 				}
 				continue;
@@ -669,7 +669,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					{
 						pItem->r_Call(ptcFunctionName, &g_Serv, pScriptArgs.get());
 					}
-					
+
 					if (pItem->IsDeleted())
 					{
 						pItem = nullptr;

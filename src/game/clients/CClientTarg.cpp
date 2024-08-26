@@ -1067,12 +1067,12 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	// Poisoned ?
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
-		uint iLevel = (uint)IMulDiv( 
-			i_promote32(pItem->m_itWeapon.m_poison_skill),
-			i_narrow32(ARRAY_COUNT(sm_szPoisonMessages)),
+		uint iLevel = (uint)IMulDiv(
+			n_promote32(pItem->m_itWeapon.m_poison_skill),
+			usize_narrow32(ARRAY_COUNT(sm_szPoisonMessages)),
 			100);
 		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
-			iLevel = i_narrow32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
+			iLevel = usize_narrow32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
 		len += snprintf( pszTemp+len, Str_TempLength() - len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
@@ -1288,7 +1288,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	{
 		uint iLevel = (uint)IMulDiv( iPoisonLevel, ARRAY_COUNT(sm_szPoisonMessages), 1000 );
 		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
-			iLevel = i_narrow32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
+			iLevel = usize_narrow32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
 		SysMessage(sm_szPoisonMessages[iLevel] );
 	}
 	else
@@ -1441,7 +1441,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
         return false;
 
 	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_iSpell );
-	if ( ! pSpell )	
+	if ( ! pSpell )
 		return false;
 
 	if ( pObj )
@@ -1649,7 +1649,7 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
 
     if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))
         return nullptr;
-    
+
     return CItemMulti::Multi_Create(GetChar(), pItemDef, pt, pDeed);
 }
 
@@ -1991,9 +1991,9 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		m_pChar->m_Act_UID = m_Targ_UID;  //The target.
 
 		/*An NPC will be healed by the Veterinary skill if the following conditions are satisfied:
-		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)	
+		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)
 		*/
-		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0 && 
+		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0 &&
 			!pCharTarg->IsPlayableCharacter() )
 		{
 			switch (pCharTarg->GetNPCBrain())

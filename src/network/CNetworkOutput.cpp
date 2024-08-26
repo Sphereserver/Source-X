@@ -352,7 +352,7 @@ bool CNetworkOutput::processByteQueue(CNetState* state)
 
 	if (result > 0)
 	{
-		state->_iOutByteCounter += minimum(INT64_MAX, result);
+		state->_iOutByteCounter += minimum((uint64)INT64_MAX, (uint64)result);
 		state->m_outgoing.bytes.RemoveDataAmount(result);
 	}
 
