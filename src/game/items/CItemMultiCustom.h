@@ -20,7 +20,7 @@ public:
     struct CMultiComponent
     {
         CUOMultiItemRec_HS m_item;
-        short m_isStair;
+        ushort m_isStair;
         bool m_isFloor;
     };
 
@@ -65,8 +65,8 @@ private:
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
 
     CPointMap GetComponentPoint(const CMultiComponent * pComponent) const;
-    CPointMap GetComponentPoint(short dx, short dy, char dz) const;
-    
+    CPointMap GetComponentPoint(int16 dx, int16 dy, int8 dz) const;
+
     /**
     * @brief Removes a CMultiComponent from the components list.
     * @param pComponent the component.
@@ -74,10 +74,10 @@ private:
     virtual void DeleteComponent(const CUID& uidComponent, bool fRemoveFromList) override final;
 
     void CopyDesign(CDesignDetails * designFrom, CDesignDetails * designTo);
-    void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
-    void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
-    char CalculateLevel(char z);
-    void ClearFloor(char iFloor);
+    void GetLockdownsAt(int16 dx, int16 dy, int8 dz, std::vector<CUID> &vList);
+    void GetSecuredAt(int16 dx, int16 dy, int8 dz, std::vector<CUID> &vList);
+    int8 CalculateLevel(int8 z);
+    void ClearFloor(int8 iFloor);
 
 private:
     using ValidItemsContainer = std::map<ITEMID_TYPE, uint>;	// ItemID, FeatureMask
@@ -99,12 +99,12 @@ public:
     void EndCustomize(bool fForce = false);
     void SwitchToLevel(CClient * pClientSrc, uchar iLevel);
     void CommitChanges(CClient * pClientSrc = nullptr);
-    void AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN, short iStairID = 0);
-    void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z = INT8_MIN);
-    void AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
-    void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
+    void AddItem(CClient * pClientSrc, ITEMID_TYPE id, int16 x, int16 y, int8 z = INT8_MIN, ushort iStairID = 0);
+    void AddStairs(CClient * pClientSrc, ITEMID_TYPE id, int16 x, int16 y, int8 z = INT8_MIN);
+    void AddRoof(CClient * pClientSrc, ITEMID_TYPE id, int16 x, int16 y, int8 z);
+    void RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, int16 x, int16 y, int8 z);
     bool RemoveStairs(CMultiComponent * pStairComponent);
-    void RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z);
+    void RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, int16 x, int16 y, int8 z);
     void SendVersionTo(CClient * pClientSrc) const;
     void SendStructureTo(CClient * pClientSrc);
     void BackupStructure();
@@ -115,13 +115,13 @@ public:
     const CSphereMultiCustom * GetMultiItemDefs();
     const CRect GetDesignArea();
     size_t GetFixtureCount(CDesignDetails * pDesign = nullptr);
-    size_t GetComponentsAt(short dx, short dy, char dz, CMultiComponent ** pComponents, CDesignDetails * pDesign = nullptr);
+    size_t GetComponentsAt(int16 dx, int16 dy, int8 dz, CMultiComponent ** pComponents, CDesignDetails * pDesign = nullptr);
     int GetRevision(const CClient * pClientSrc = nullptr) const;
     uchar GetLevelCount();
 
-    static uchar GetPlane(char z);
-    static uchar GetPlane(const CMultiComponent * pComponent);
-    static char GetPlaneZ(uchar plane);
+    static uint8 GetPlane(int8 z);
+    static uint8 GetPlane(const CMultiComponent * pComponent);
+    static int8 GetPlaneZ(uint8 plane);
     static bool IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool fMulti);
 
     CDesignDetails* GetDesignMain()

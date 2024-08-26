@@ -37,7 +37,7 @@ function (toolchain_after_project)
       "/usr/aarch64-linux-gnu/usr/lib/libmariadb3"
       "/usr/aarch64-linux-gnu/usr/lib/mysql"
       "/usr/aarch64-linux-gnu/usr/lib/"
-      CACHE STRING "Library search paths (hint)" FORCE
+      CACHE STRING "Library search paths" FORCE
     )
   else ()
     # possible native/host lib locations
@@ -49,7 +49,7 @@ function (toolchain_after_project)
       "/usr/lib64"
       "/usr/lib/mysql"
       "/usr/lib"
-      CACHE STRING "Library search paths (hint)" FORCE
+      CACHE STRING "Library search paths" FORCE
     )
   endif ()
 

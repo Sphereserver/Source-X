@@ -692,7 +692,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
     while (len > 0)
     {
         --len;
-        if (pStr[len] < 0 || !IsWhitespace(pStr[len]))
+        if (!IsWhitespace(pStr[len]))
         {
             ++len;
             break;
