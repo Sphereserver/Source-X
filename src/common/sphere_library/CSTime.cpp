@@ -171,7 +171,7 @@ static std::tm safe_localtime(const time_t t) noexcept
     // Standard C localtime is not thread-safe. We need alternatives.
     // https://stackoverflow.com/questions/38034033/c-localtime-this-function-or-variable-may-be-unsafe
 
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__) || defined(_POSIX_VERSION)
     localtime_r(&t, &atm);
 #elif defined(_MSC_VER)
     localtime_s(&atm, &t);
@@ -207,6 +207,26 @@ static std::tm safe_localtime(const time_t t) noexcept
     atm.tm_mon  = (int)(uint)ymd.month() - 1;
     atm.tm_year = (int)ymd.year() - 1900;
     atm.tm_isdst= (int)is_dst;
+#endif
+
+    return atm;
+}
+
+static std::tm safe_gmtime(const time_t t) noexcept
+{
+    std::tm atm {};
+
+    // gmtime is in Coordinated Universal Time (UTC), while localtime is in your timezone
+    // Standard C gmtime is not thread-safe. We need alternatives.
+
+#if defined(__unix__) || defined(__APPLE__) || defined(_POSIX_VERSION)
+    gmtime_r(&t, &atm);
+#elif defined(_MSC_VER)
+    gmtime_s(&atm, &t);
+#elif defined(__STDC_LIB_EXT1__)
+    gmtime_s(&t, &atm);
+#else
+    static_assert(false, "This platform doesn't look to have a thread-safe gmtime function?");
 #endif
 
     return atm;
@@ -292,14 +312,9 @@ lpctstr CSTime::Format(lpctstr pszFormat) const
 	if ( pszFormat == nullptr )
 		pszFormat = "%Y/%m/%d %H:%M:%S";
 
-	struct tm* ptmTemp = localtime(&m_time);
-	if (ptmTemp == nullptr )
-	{
-		pszTemp[0] = '\0';
-		return( pszTemp );
-	}
+	const std::tm ptmTemp = safe_localtime(m_time);
 
-	FormatDateTime(pszTemp, pszFormat, ptmTemp);
+	FormatDateTime(pszTemp, pszFormat, &ptmTemp);
 	return pszTemp;
 }
 
@@ -309,14 +324,9 @@ lpctstr CSTime::FormatGmt(lpctstr pszFormat) const
 	if ( pszFormat == nullptr )
 		pszFormat = "%a, %d %b %Y %H:%M:%S GMT";
 
-	struct tm* ptmTemp = gmtime(&m_time);
-	if (ptmTemp == nullptr )
-	{
-		pszTemp[0] = '\0';
-		return( pszTemp );
-	}
+	const std::tm ptmTemp = safe_gmtime(m_time);
 
-	FormatDateTime(pszTemp, pszFormat, ptmTemp);
+	FormatDateTime(pszTemp, pszFormat, &ptmTemp);
 	return pszTemp;
 }
 
