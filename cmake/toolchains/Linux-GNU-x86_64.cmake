@@ -1,16 +1,62 @@
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Linux-GNU_common.inc.cmake")
+# For this toolchain, the operating system is the same between host and target, but target can have a different arch than host's.
+
+
+function (toolchain_force_compiler)
+  if (NOT CROSSCOMPILING_ARCH)
+	  SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
+	  SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
+  else ()
+    message(FATAL_ERROR "Incomplete/to be tested.") # are the names/paths correct?
+
+    set(CMAKE_C_COMPILER   "x86_64-pc-linux-gnu-gcc" CACHE STRING "C compiler" FORCE)
+    set(CMAKE_CXX_COMPILER "x86_64-pc-linux-gnu-g++" CACHE STRING "C++ compiler" FORCE)
+
+    # where is the target environment located
+    set(CMAKE_FIND_ROOT_PATH "/usr/x86_64-pc-linux-gnu" CACHE INTERNAL "" FORCE)
+
+    # adjust the default behavior of the FIND_XXX() commands:
+    # search programs in the host environment
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "NEVER" CACHE INTERNAL "" FORCE)
+
+    # search headers and libraries in the target environment
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE "ONLY" CACHE INTERNAL "" FORCE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY "ONLY" CACHE INTERNAL "" FORCE)
+  endif()
+endfunction ()
+
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Linux-GNU-x86_64.cmake.")
-	#SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
-	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
-	SET(ARCH_BITS			64			CACHE INTERNAL "" FORCE) # override
-	SET(ARCH				"x86_64"	CACHE INTERNAL "" FORCE) # override
-	SET(CMAKE_SYSTEM_PROCESSOR "${ARCH}" CACHE INTERNAL "" FORCE)
+  # Do not set CMAKE_SYSTEM_NAME if compiling for the same OS, otherwise CMAKE_CROSSCOMPILING will be set to TRUE
+	#SET(CMAKE_SYSTEM_NAME	"Linux"		CACHE INTERNAL "" FORCE) # target os
+  SET(CMAKE_SYSTEM_PROCESSOR "x86_64" CACHE INTERNAL "" FORCE) # target arch
+  SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86_64"	PARENT_SCOPE)
+  #set(ARCH_BITS 64 CACHE INTERNAL "" FORCE) # provide it
+
+  if (CROSSCOMPILING_ARCH)
+    # possible cross-compilation foreign arch lib locations
+    set (lib_search_paths
+      "/usr/x86_64-linux-gnu/usr/lib/libmariadb3"
+      "/usr/x86_64-linux-gnu/usr/lib/mysql"
+      "/usr/x86_64-linux-gnu/usr/lib/"
+      CACHE STRING "Library search paths (hint)" FORCE
+    )
+  else ()
+    # possible native/host lib locations
+    set (lib_search_paths
+      "/usr/x86_64-linux-gnu/libmariadb3"
+      "/usr/x86_64-linux-gnu/mysql"
+      "/usr/x86_64-linux-gnu"
+      "/usr/lib64/mysql"
+      "/usr/lib64"
+      "/usr/lib/mysql"
+      "/usr/lib"
+      CACHE STRING "Library search paths (hint)" FORCE
+    )
+  endif ()
 
 	toolchain_after_project_common()
-
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86_64"	PARENT_SCOPE)
 
 	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   -march=x86-64 -m64" PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -march=x86-64 -m64" PARENT_SCOPE)

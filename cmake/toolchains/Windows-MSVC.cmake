@@ -6,31 +6,21 @@ function (toolchain_force_compiler)
 	#SET (CMAKE_CXX_COMPILER "...cl.exe" 	CACHE STRING "C++ compiler" FORCE)
 
 	MESSAGE (STATUS "Toolchain: Windows-MSVC.cmake.")
-	#SET(CMAKE_SYSTEM_NAME	"Windows"						PARENT_SCOPE)
+	#SET(CMAKE_SYSTEM_NAME	"Windows"						CACHE INTERNAL "" FORCE)
 endfunction ()
 
 
 function (toolchain_after_project)
-#[[
-	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		MESSAGE (STATUS "Detected 64 bits architecture")
-		SET(ARCH_BITS	64	CACHE INTERNAL "" FORCE) # override
-	ELSE ()
-		MESSAGE (STATUS "Detected 32 bits architecture")
-		SET(ARCH_BITS	32	CACHE INTERNAL "" FORCE) # override
-	ENDIF ()
-]]
 	if (NOT CMAKE_VS_PLATFORM_NAME)
 		set (CMAKE_VS_PLATFORM_NAME "${CMAKE_VS_PLATFORM_NAME_DEFAULT}")
 	endif ()
 	if (${CMAKE_VS_PLATFORM_NAME} STREQUAL "Win32")
-	set (CMAKE_SYSTEM_PROCESSOR "x86" CACHE INTERNAL "" FORCE)
+	  set (CMAKE_SYSTEM_PROCESSOR "x86" CACHE INTERNAL "" FORCE)
 	endif ()
 	set (CMAKE_SYSTEM_PROCESSOR "${CMAKE_VS_PLATFORM_NAME}" CACHE INTERNAL "" FORCE)
 
 	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
 
-	MESSAGE (STATUS "Target Arch: ${ARCH}")
 	MESSAGE (STATUS "Generating for MSVC platform ${CMAKE_VS_PLATFORM_NAME}.")
 endfunction()
 

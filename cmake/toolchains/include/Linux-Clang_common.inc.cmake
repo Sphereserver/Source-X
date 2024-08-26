@@ -1,13 +1,9 @@
 SET (TOOLCHAIN_LOADED 1)
 
-function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
-endfunction ()
-
 function (toolchain_after_project_common)
 	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
 endfunction ()
+
 
 function (toolchain_exe_stuff_common)
 
@@ -20,29 +16,11 @@ function (toolchain_exe_stuff_common)
 		dl
 	)
 	FOREACH (LIB_NAME ${LIBS_LINK_LIST})
-		IF (${ARCH_BITS} EQUAL 64)
-			FIND_LIBRARY(
-				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
-				HINT
-				"/usr/lib/x86_64-linux-gnu/libmariadb3"
-				"/usr/lib/x86_64-linux-gnu/mysql"
-				"/usr/lib/x86_64-linux-gnu"
-				"/usr/lib64/mysql"
-				"/usr/lib64"
-				"/usr/lib/mysql"
-				"/usr/lib"
-			)
-		ELSE ()
-			FIND_LIBRARY(
-				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
-				HINT
-				"/usr/lib/i386-linux-gnu/libmariadb3"
-				"/usr/lib/i386-linux-gnu/mysql"
-				"/usr/lib/i386-linux-gnu"
-				"/usr/lib/mysql"
-				"/usr/lib"
-			)
-		ENDIF ()
+    FIND_LIBRARY(
+      LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
+      PATH ${lib_search_paths}
+    )
+    MESSAGE (STATUS "Library ${LIB_NAME}: ${LIB_${LIB_NAME}_WITH_PATH}")
 	ENDFOREACH ()
 
 
@@ -52,6 +30,7 @@ function (toolchain_exe_stuff_common)
 	# From https://clang.llvm.org/docs/ClangCommandLineReference.html
 	# -static-libsan Statically link the sanitizer runtime (Not supported for ASan, TSan or UBSan on darwin)
 
+  #string(REPLACE ";" " " CXX_FLAGS_EXTRA "${CXX_FLAGS_EXTRA}")
 
 	IF (${USE_ASAN})
 		SET (CXX_FLAGS_EXTRA	${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
@@ -117,6 +96,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 		-pipe -ffast-math
 	)
 	set (cxx_compiler_options_common  ${cxx_local_opts_warnings} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
+  #separate_arguments(cxx_compiler_options_common)
 
 	# GCC flags not supported by clang:
 	#	Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"

@@ -1,19 +1,9 @@
 SET (TOOLCHAIN_LOADED 1)
 
-SET (CLANG_USE_GCC_LINKER	false CACHE BOOL "NOT CURRENTLY WORKING. By default, Clang requires MSVC (Microsoft's) linker. With this flag, it can be asked to use MinGW-GCC's one.")
-
-
-function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
-
-	IF (CLANG_USE_GCC_LINKER)
-		# Not working, see above. Use MSVC.
-		SET (CLANG_VENDOR "gnu" PARENT_SCOPE)
-	ELSE ()
-		SET (CLANG_VENDOR "msvc" PARENT_SCOPE)
-	ENDIF ()
-endfunction ()
+option (CLANG_USE_GCC_LINKER
+  "NOT CURRENTLY WORKING. By default, Clang requires MSVC (Microsoft's) linker. With this flag, it can be asked to use MinGW-GCC's one."
+  FALSE
+)
 
 
 function (toolchain_after_project_common)

@@ -1,8 +1,8 @@
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/OSX-AppleClang_common.inc.cmake")
-# UNTESTED !
+
 
 function (toolchain_force_compiler)
-  if (CROSSCOMPILE_ARCH)
+  if (CROSSCOMPILING_ARCH)
     message(FATAL_ERROR "This toolchain (as it is now) doesn't support cross-compilation.")
   endif ()
 
@@ -15,18 +15,18 @@ endfunction ()
 
 
 function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: OSX-AppleClang-x86_64.cmake.")
+	MESSAGE (STATUS "Toolchain: OSX-AppleClang-AArch64.cmake.")
   # Do not set CMAKE_SYSTEM_NAME if compiling for the same OS, otherwise CMAKE_CROSSCOMPILING will be set to TRUE
 	#SET(CMAKE_SYSTEM_NAME	"Darwin" CACHE INTERNAL "" FORCE)
-  SET(CMAKE_SYSTEM_PROCESSOR "x86_64" CACHE INTERNAL "" FORCE)
-  SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin-x86_64"	PARENT_SCOPE)
+  SET(CMAKE_SYSTEM_PROCESSOR "aarch64" CACHE INTERNAL "" FORCE)
+  SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-aarch64"	PARENT_SCOPE)
   #set(ARCH_BITS 64 CACHE INTERNAL "" FORCE) # provide it
 
 	toolchain_after_project_common()
 
-  # -target=-x86_64-apple-darwin ?
-	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   -march=x86-64 -m64" PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -march=x86-64 -m64" PARENT_SCOPE)
+  # Official Clang doesn't support -march=native for ARM arch, but Apple Clang does...
+	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   --target=aarch64-apple-darwin" PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} --target=aarch64-apple-darwin" PARENT_SCOPE)
 endfunction()
 
 

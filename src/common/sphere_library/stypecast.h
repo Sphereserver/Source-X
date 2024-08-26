@@ -1,7 +1,7 @@
 #ifndef _INC_STYPECAST_H
 #define _INC_STYPECAST_H
 
-//#include <cstdint>
+#include <climits>
 #include <limits>
 #include <type_traits>
 
@@ -194,17 +194,17 @@ auto n16_narrow8_checked(const T a)
 [[nodiscard]]
 constexpr uint32 usize_narrow32(const size_t a) noexcept
 {
-    // This doesn't work for some reason, n64_narrow32 static_asserts will be evaluated and fail on 32 bits compilation
+    // This doesn't work because n64_narrow32 static_asserts will be evaluated and fail on 32 bits compilation.
     /*
     if constexpr (sizeof(size_t) == 8)
         return n64_narrow32(a);
     else
         return a;
     */
-#if UINTPTR_MAX == ULONG_LONG_MAX
+#if SIZE_MAX == ULLONG_MAX
     // ptr size is 8 -> 64 bits
     return n64_narrow32(a);
-#elif UINTPTR_MAX == UINT_MAX
+#elif SIZE_MAX == UINT_MAX
     // ptr size is 4 -> 32 bits
     return a;
 #else

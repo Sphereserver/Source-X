@@ -1,24 +1,60 @@
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Linux-Clang_common.inc.cmake")
 
+
+function (toolchain_force_compiler)
+  if (CROSSCOMPILING_ARCH)
+    message(FATAL_ERROR "Can't cross-compile with a 'native' toolchain.")
+  endif ()
+
+  SET (CMAKE_C_COMPILER 	"clang" 	  CACHE STRING "C compiler" 	FORCE)
+  SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
+endfunction ()
+
+
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Linux-Clang-native.cmake.")
+  # Do not set CMAKE_SYSTEM_NAME if compiling for the same OS, otherwise CMAKE_CROSSCOMPILING will be set to TRUE
+	#SET(CMAKE_SYSTEM_NAME	"Linux"      CACHE INTERNAL "" FORCE) # target OS
+  IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native64"	PARENT_SCOPE)
+  ELSE ()
+    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native32"	PARENT_SCOPE)
+  ENDIF ()
 
-	#SET(CMAKE_SYSTEM_NAME	"Linux"      PARENT_SCOPE)
+  # possible native/host lib locations
+  set (local_usr_lib_subfolders
+    "libmariadb3"
+    "mysql"
+  )
+  foreach (local_usr_lib_subfolders subfolder)
+    # ARCH variable is set by CMakeGitStatus
+    set (local_lib_search_paths
+      ${local_lib_search_paths}
+      "/usr/${ARCH}-linux-gnu/${subfolder}"
+    )
+  endforeach()
+  set (lib_search_paths
+    ${local_lib_search_paths}
+    "/usr/lib64/mysql"
+    "/usr/lib64"
+    "/usr/lib/mysql"
+    "/usr/lib"
+    CACHE STRING "Library search paths" FORCE
+  )
 
 	toolchain_after_project_common()
 
-	IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		#MESSAGE (STATUS "Detected 64 bits architecture")
-		#SET(ARCH_BITS	64	CACHE INTERNAL) # override
-		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native64"	PARENT_SCOPE)
-	ELSE ()
-		#MESSAGE (STATUS "Detected 32 bits architecture")
-		#SET(ARCH_BITS	32	CACHE INTERNAL) # override
-		SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-native32"	PARENT_SCOPE)
-	ENDIF ()
-
-	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   -march=native" PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -march=native" PARENT_SCOPE)
+  if ("${ARCH_BASE}" STREQUAL "arm")
+    # Clang doesn't support -march=native for ARM (but it IS supported by Apple Clang, btw)
+    # Also:
+    #  https://community.arm.com/arm-community-blogs/b/tools-software-ides-blog/posts/compiler-flags-across-architectures-march-mtune-and-mcpu
+    #  https://code.fmsolvr.fz-juelich.de/i.lilikakis/fmsolvr/commit/bd010058b8b8c92385d1ccc321912bf1359d66b0
+    set (local_arch_cmd -mcpu=native)
+  else ()
+    set (local_arch_cmd -march=native -mtune=native)
+  endif ()
+	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   ${local_arch_cmd}" PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} ${local_arch_cmd}" PARENT_SCOPE)
 endfunction()
 
 

@@ -1,16 +1,10 @@
 SET (TOOLCHAIN_LOADED 1)
 
-function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"clang" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "clang++" 	CACHE STRING "C++ compiler" FORCE)
-
-	# In order to enable ninja to be verbose
-	set(CMAKE_VERBOSE_MAKEFILE 			ON CACHE	BOOL "ON")
-endfunction ()
 
 function (toolchain_after_project_common)
 	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
 endfunction ()
+
 
 function (toolchain_exe_stuff_common)
 
@@ -30,6 +24,7 @@ function (toolchain_exe_stuff_common)
 			"/opt/homebrew/var/mariadb-connector-c/lib/mariadb"
 			"/opt/homebrew/lib/mariadb"
 		)
+    MESSAGE (STATUS "Library ${LIB_NAME}: ${LIB_${LIB_NAME}_WITH_PATH}")
 	ENDFOREACH ()
 
 
