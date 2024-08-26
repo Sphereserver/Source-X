@@ -12,6 +12,9 @@ Ultima Online game server, developed in C++.
 | :---: |
 | [![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs) |
 
+## Getting Started tutorial
+If you're new to the Sphere server and want to setup your first shard, [this is your go-to guide](docs/Getting-started.md)!
+
 ## Releases
 
 ### **Core**
