@@ -4540,15 +4540,21 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			GETNONWHITESPACE( psTmp );
 			tchar * ttVal[2];
 			int iTmp = 1;
-			int iArg = Str_ParseCmds( psTmp, ttVal, ARRAY_COUNT( ttVal ), " ,\t" );
+			const int iArg = Str_ParseCmds( psTmp, ttVal, ARRAY_COUNT( ttVal ), " ,\t" );
 			if (!iArg)
 			{
 				return false;
 			}
 			if ( iArg == 2 )
 			{
-				if ( IsDigit( ttVal[1][0] ) )
-					iTmp = Str_ToI( ttVal[1] );
+                if ( IsDigit( ttVal[1][0] ) )
+                {
+                    std::optional<int> iconv = Str_ToI(ttVal[1]);
+                    if (!iconv.has_value())
+                        return false;
+
+                    iTmp = *iconv;
+                }
 			}
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
 

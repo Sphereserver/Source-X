@@ -1,13 +1,9 @@
 SET (TOOLCHAIN_LOADED 1)
 
-function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
-endfunction ()
-
 function (toolchain_after_project_common)
 	include ("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
 endfunction ()
+
 
 function (toolchain_exe_stuff_common)
 
@@ -20,29 +16,11 @@ function (toolchain_exe_stuff_common)
 		dl
 	)
 	FOREACH (LIB_NAME ${LIBS_LINK_LIST})
-		IF (${ARCH_BITS} EQUAL 64)
-			FIND_LIBRARY(
-				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
-				HINT
-				"/usr/lib/x86_64-linux-gnu/libmariadb3"
-				"/usr/lib/x86_64-linux-gnu/mysql"
-				"/usr/lib/x86_64-linux-gnu"
-				"/usr/lib64/mysql"
-				"/usr/lib64"
-				"/usr/lib/mysql"
-				"/usr/lib"
-			)
-		ELSE ()
-			FIND_LIBRARY(
-				LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
-				HINT
-				"/usr/lib/i386-linux-gnu/libmariadb3"
-				"/usr/lib/i386-linux-gnu/mysql"
-				"/usr/lib/i386-linux-gnu"
-				"/usr/lib/mysql"
-				"/usr/lib"
-			)
-		ENDIF ()
+    FIND_LIBRARY(
+      LIB_${LIB_NAME}_WITH_PATH	${LIB_NAME}
+      PATH ${lib_search_paths}
+    )
+    MESSAGE (STATUS "Library ${LIB_NAME}: ${LIB_${LIB_NAME}_WITH_PATH}")
 	ENDFOREACH ()
 
 

@@ -3857,3 +3857,56 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	New values:
 	SPELLFLAG_FIELD_RANDOMDECAY     02000
 	SPELLFLAG_NO_ELEMENTALENGINE    04000
+
+10-08-2024, DavideRei
+- Added: read mobtypes.txt (if available among mul files) and cache it to check animations type when using creatures animations
+- Added: alert anim on NPCs when they start combat, pillage anim when they loot something (items on ground or in bodies) and "summon" anim when they are summoned or added
+- Modified: now standard anims (SEA_MONSTER, ANIMAL, MONSTER) and UOP anims are handled correctly depending on which actions anim they have on anim files (checked on last client version).
+	Please note that some actions are handled by the client (for example walk, run, fly, getHit while flying, die) and they could not work depending on which client you are using.
+- Added: missing/new actions to be used with .ANIM command.
+    ANIM_ALERT              = 35,
+    ANIM_THROW              = 36,
+    ANIM_PILLAGE            = 37,
+    ANIM_STOMP              = 38,
+    ANIM_FLY                = 39,
+    ANIM_LAND               = 40,
+    ANIM_GETHIT_AIR         = 41,
+    ANIM_SUMMON             = 42,
+    ANIM_SPECIAL            = 43,   //UOP anims
+    ANIM_BOSS_SPECIAL_1     = 44,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+    ANIM_BOSS_SPECIAL_2     = 45,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+
+- Modified: now custom anims can be handled by scripts using ANIM command under CHARDEF, to set which anim actions they have/don't have, using the following flags.
+	MONSTER (H slot) default configuration is with actions: 0 (Walk), 1 (Stand), 2 (Die1), 3 (Die2), 4 (Attack1), 5 (Attack2), 6 (Attack3), 10 (GetHit), 11 (Pillage), 15 (Block Right), 16 (Block Left), 17 (Idle), 18 (Fidget)
+    No DIE2 action		= 01,
+    No ATTACK1 action   = 02,
+    No ATTACK2 action   = 04,
+    No ATTACK3 action   = 08,
+    No GETHIT action    = 010,
+    No PILLAGE action   = 020,
+    STOMP action		= 040,
+    CAST2 action        = 080,
+    CAST3 action        = 0100,
+    No BLOCKR action    = 0200,
+    No BLOCKL action    = 0400,
+    No FIDGET1 action   = 0800,
+    No FIDGET2 action   = 01000,
+    FLY action          = 02000,
+    Anims with Attacks 1-2-3 in actions 9,10,11 and with GetHit in action 20 (there are many custom WOW anims with this configuration) = 0x10000
+
+	ANIMAL (L slot) default configuration is with all actions: 1 - 12
+    No EAT action       = 01,
+    No ALERT action     = 02,
+    No ATTACK2 action   = 04,
+    No GETHIT action    = 08,
+    No FIDGET1 action   = 010,
+    No FIDGET2 action   = 020,
+    No LIEDOWN action   = 040,
+    No DIE2 action      = 080
+
+	So for example if you have a MONSTER (H slot) flying custom anim, with Cast2 action but not Pillage action you can set ANIM=020A0
+	If you have a custom anim with default configuration, you don't need to set ANIM=
+
+10-08-2024, Gladie
+- Fixed:  CAN_I_DAMAGEABLE not updating status bar (PR #1259, issues #1248, #1260).
+

@@ -2686,7 +2686,11 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
             return CPointMap();
 
         SKIP_NONNUM(pCmd);
-		size_t i = Str_ToUI(pCmd);
+        std::optional<uint> iconv = Str_ToU(pCmd);
+        if (!iconv.has_value())
+            return CPointMap();
+
+		size_t i = iconv.value();
         if (i > 0)
         {
             i -= 1;
@@ -3764,8 +3768,14 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 					if (iStartVersion == 2)
 					{
-						if ( pScript->ReadKey())
-							pStart->iClilocDescription = Str_ToI(pScript->GetKey());
+                        if ( pScript->ReadKey())
+                        {
+                            std::optional<int> iconv = Str_ToI(pScript->GetKey());
+                            if (!iconv.has_value())
+                                continue;
+
+                            pStart->iClilocDescription = *iconv;
+                        }
 					}
 				}
 				m_StartDefs.emplace_back(pStart);

@@ -1,10 +1,5 @@
 SET (TOOLCHAIN_LOADED 1)
 
-function (toolchain_force_compiler)
-	SET (CMAKE_C_COMPILER 	"gcc" 	CACHE STRING "C compiler" 	FORCE)
-	SET (CMAKE_CXX_COMPILER "g++" 	CACHE STRING "C++ compiler" FORCE)
-endfunction ()
-
 
 function (toolchain_after_project_common)
 	ENABLE_LANGUAGE(RC)

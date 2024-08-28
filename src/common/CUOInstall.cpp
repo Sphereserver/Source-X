@@ -5,6 +5,9 @@
 #include "CUOInstall.h"
 #include "common.h"
 #include "CException.h"
+#include <sstream>
+
+#define MAP_MAX_SUPPORTED_INDEX 6
 
 
 //////////////////////////////////////////////////////////////////
@@ -32,7 +35,7 @@ bool CUOInstall::FindInstall()
 #ifdef _WIN32
 	// Get the install path from the registry.
 
-	static lpctstr m_szKeys[] =
+	static constexpr lpctstr m_szKeys[] =
 	{
 		"Software\\Origin Worlds Online\\Ultima Online\\1.0",
 		"Software\\Origin Worlds Online\\Ultima Online Third Dawn\\1.0",
@@ -40,7 +43,7 @@ bool CUOInstall::FindInstall()
 		"Software\\Electronic Arts\\EA Games\\Ultima Online Stygian Abyss Classic",
 		"Software\\Electronic Arts\\EA Games\\Ultima Online Classic"
 	};
-	
+
 	HKEY hKey = nullptr;
 	LSTATUS lRet = 0;
 	for ( size_t i = 0; i < ARRAY_COUNT(m_szKeys); ++i )
@@ -104,7 +107,7 @@ void CUOInstall::DetectMulVersions()
 	// this can be tested for by checking the file size, which was 3188736 bytes at release
 	if ( m_File[VERFILE_TILEDATA].IsFileOpen() && m_File[VERFILE_TILEDATA].GetLength() >= 3188736 )
 		m_FileFormat[VERFILE_TILEDATA] = VERFORMAT_HIGHSEAS;
-	
+
 	// check for High Seas multi format
 	// we can't use multi.mul length because it varies and multi.idx is always 98184 bytes, the best option
 	// so far seems to be to check the size of the first entry to see if its length is divisible by the new
@@ -235,7 +238,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 		if ( GetBaseFileName((VERFILE_TYPE)i) == nullptr )
 			continue;
 
-		bool bFileLoaded = true;
+		bool fFileLoaded = true;
 		switch (i)
 		{
 			default:
@@ -248,7 +251,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 							break;
 
 						default:
-							bFileLoaded = false;
+							fFileLoaded = false;
 							break;
 					}
 				}
@@ -257,14 +260,14 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 			case VERFILE_MAP:
 			{
 				// map file is handled differently
-				tchar z[256];
+				tchar verdata_str_buf[256];
 
 				//	check for map files of custom maps
 				for (int m = 0; m < MAP_SUPPORTED_QTY; ++m)
 				{
 					if (g_MapList.IsInitialized(m) || (m == 0)) //Need at least a minimum of map0... (Ben)
 					{
-                        int	index = g_MapList.m_mapGeoData.maps[m].num;
+                        const int index = g_MapList.m_mapGeoData.maps[m].num;
 						if (index == -1)
 						{
 							g_MapList.m_mapGeoData.maps[m].enabled = false;
@@ -273,8 +276,8 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 
 						if (!m_Maps[index].IsFileOpen())
 						{
-							sprintf(z, "map%d.mul", index);
-							OpenFile(m_Maps[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+							sprintf(verdata_str_buf, "map%d.mul", index);
+							OpenFile(m_Maps[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 
 							if (m_Maps[index].IsFileOpen())
 							{
@@ -282,8 +285,8 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 							}
 							else
 							{
-								sprintf(z, "map%dLegacyMUL.uop", index);
-								OpenFile(m_Maps[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+								sprintf(verdata_str_buf, "map%dLegacyMUL.uop", index);
+								OpenFile(m_Maps[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 
 								//Should parse uop file here for faster reference later.
 								if (m_Maps[index].IsFileOpen())
@@ -330,8 +333,8 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 
 											for (dword x = 0; x < dwLoop; ++x)
 											{
-												sprintf(z, "build/map%dlegacymul/%.8u.dat", index, x);
-												if (HashFileName(z) == qwHash)
+												sprintf(verdata_str_buf, "build/map%dlegacymul/%.8u.dat", index, x);
+												if (HashFileName(verdata_str_buf) == qwHash)
 												{
 													pMapAddress.dwFirstBlock = x * 4096;
 													pMapAddress.dwLastBlock = (x * 4096) + (dwCompressedSize / 196) - 1;
@@ -346,47 +349,47 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 								}//End of UOP Map parsing
 								else if (index == 0) // neither file exists, map0 is required
 								{
-									bFileLoaded = false;
+									fFileLoaded = false;
 									break;
 								}
 							}
 						}
 						if (!m_Staidx[index].IsFileOpen())
 						{
-							sprintf(z, "staidx%d.mul", index);
-							OpenFile(m_Staidx[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+							sprintf(verdata_str_buf, "staidx%d.mul", index);
+							OpenFile(m_Staidx[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 						}
 						if (!m_Statics[index].IsFileOpen())
 						{
-							sprintf(z, "statics%d.mul", index);
-							OpenFile(m_Statics[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+							sprintf(verdata_str_buf, "statics%d.mul", index);
+							OpenFile(m_Statics[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 						}
 						if (g_Cfg.m_fUseMapDiffs)
 						{
 							if (!m_Mapdif[index].IsFileOpen())
 							{
-								sprintf(z, "mapdif%d.mul", index);
-								OpenFile(m_Mapdif[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+								sprintf(verdata_str_buf, "mapdif%d.mul", index);
+								OpenFile(m_Mapdif[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 							}
 							if (!m_Mapdifl[index].IsFileOpen())
 							{
-								sprintf(z, "mapdifl%d.mul", index);
-								OpenFile(m_Mapdifl[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+								sprintf(verdata_str_buf, "mapdifl%d.mul", index);
+								OpenFile(m_Mapdifl[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 							}
 							if (!m_Stadif[index].IsFileOpen())
 							{
-								sprintf(z, "stadif%d.mul", index);
-								OpenFile(m_Stadif[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+								sprintf(verdata_str_buf, "stadif%d.mul", index);
+								OpenFile(m_Stadif[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 							}
 							if (!m_Stadifi[index].IsFileOpen())
 							{
-								sprintf(z, "stadifi%d.mul", index);
-								OpenFile(m_Stadifi[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+								sprintf(verdata_str_buf, "stadifi%d.mul", index);
+								OpenFile(m_Stadifi[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 							}
 							if (!m_Stadifl[index].IsFileOpen())
 							{
-								sprintf(z, "stadifl%d.mul", index);
-								OpenFile(m_Stadifl[index], z, OF_READ | OF_SHARE_DENY_WRITE);
+								sprintf(verdata_str_buf, "stadifl%d.mul", index);
+								OpenFile(m_Stadifl[index], verdata_str_buf, OF_READ | OF_SHARE_DENY_WRITE);
 							}
 						}
 
@@ -437,7 +440,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 		}
 
 		// stop if we hit a failure
-		if (bFileLoaded == false)
+		if (fFileLoaded == false)
 			return (VERFILE_TYPE)i;
 	}
 
@@ -449,11 +452,11 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 
 	g_MapList.Init();
 
-	tchar * z = Str_GetTemp();
-	tchar * z1 = Str_GetTemp();
-	for ( uchar j = 0; j < 7; ++j )
+    std::stringstream maps_ss;
+	tchar * mapname_str_buf = Str_GetTemp();
+	for ( uchar j = 0; j <= MAP_MAX_SUPPORTED_INDEX; ++j )
 	{
-		if ( j == 5 )	// ML just added some changes on maps 0/1 instead a new map
+		if ( j == 5 )	// ML just added some changes on maps 0/1 instead of a new map
 			continue;
 
 		bool fSup = false;
@@ -466,21 +469,22 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 		{
 			switch ( j )
 			{
-				case 0: sprintf(z1, "Felucca (%d)", j);			break;
-				case 1: sprintf(z1, "Trammel (%d)", j);			break;
-				case 2: sprintf(z1, "Ilshenar (%d)", j);		break;
-				case 3: sprintf(z1, "Malas (%d)", j);			break;
-				case 4: sprintf(z1, "Tokuno Islands (%d)", j);	break;
-				case 6: sprintf(z1, "Ter Mur (%d)", j-1);		break;
+				case 0: sprintf(mapname_str_buf, "Felucca (%d)", j);			break;
+				case 1: sprintf(mapname_str_buf, "Trammel (%d)", j);			break;
+				case 2: sprintf(mapname_str_buf, "Ilshenar (%d)", j);		break;
+				case 3: sprintf(mapname_str_buf, "Malas (%d)", j);			break;
+				case 4: sprintf(mapname_str_buf, "Tokuno Islands (%d)", j);	break;
+				case 6: sprintf(mapname_str_buf, "Ter Mur (%d)", j-1);		break;
 			}
-			if ( *z )
-				strcat(z, ", ");
-			strcat(z, z1);
+			if (maps_ss.peek() != std::char_traits<char>::eof()) //( !maps_ss.view().empty() )
+				maps_ss << ", ";
+			maps_ss << mapname_str_buf;
 		}
 	}
 
-	if ( *z )
-		g_Log.Event(LOGM_INIT, "Expansion maps supported: %s\n", z);
+	const std::string maps_str(maps_ss.str());
+	if ( !maps_str.empty() )
+		g_Log.Event(LOGM_INIT, "Expansion maps supported: %s\n", maps_str.c_str());
 
     // --
 
@@ -796,9 +800,9 @@ ullong HashFileName(CSString csFile)
 				ebx += (int32) csFile[ i + 2 ] << 16;
 			case 2:
 				ebx += (int32) csFile[ i + 1 ] << 8;
-			case 1:		
+			case 1:
 				ebx += (int32) csFile[ i ];
-				break;			
+				break;
 		}
 
 		esi = ( esi ^ edi ) - ( ( edi >> 18 ) ^ ( edi << 14 ) );

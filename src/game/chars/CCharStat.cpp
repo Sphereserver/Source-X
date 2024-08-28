@@ -71,15 +71,10 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 
 int CChar::Stat_GetMod( STAT_TYPE i ) const
 {
-    [[unlikely]]
-    if (i < 0 || i >= STAT_QTY)
-    {
-        ADDTOCALLSTACK("CChar::Stat_GetMod");
-        ASSERT(i >= 0 && i < STAT_QTY);
-    }
+    ADDTOCALLSTACK("CChar::Stat_GetMod");
+    ASSERT(i >= 0 && i < STAT_QTY);
 
-    [[likely]]
-	return m_Stat[i].m_mod;
+    return m_Stat[i].m_mod;
 }
 
 void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
@@ -321,15 +316,10 @@ ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 {
-    [[unlikely]]
-    if (i < 0 || i >= STAT_QTY)
-    {
-        ADDTOCALLSTACK("CChar::Stat_GetBase");
-        ASSERT(i >= 0 && i < STAT_QTY);
-    }
+    ADDTOCALLSTACK("CChar::Stat_GetBase");
+    ASSERT(i >= 0 && i < STAT_QTY);
 
-    [[likely]]
-	return m_Stat[i].m_base;
+    return m_Stat[i].m_base;
 }
 
 void CChar::Stat_AddBase( STAT_TYPE i, int iVal )

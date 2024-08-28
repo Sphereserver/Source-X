@@ -81,7 +81,7 @@ public:
 	size_t StatGet( SERV_STAT_TYPE i ) const;
 	void StatInc( SERV_STAT_TYPE i );
 	void StatDec( SERV_STAT_TYPE i );
-	void SetStat( SERV_STAT_TYPE i, dword dwVal );
+	void SetStat( SERV_STAT_TYPE i, size_t uiVal );
 
 	virtual lpctstr GetName() const override;
 	void SetName( lpctstr pszName );

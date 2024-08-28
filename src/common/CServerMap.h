@@ -54,7 +54,7 @@ public:
 
 public:
     // These methods are called so frequently but in so few pieces of code that's very important to inline them
-	inline uint GetStaticQty() const { 
+	inline uint GetStaticQty() const {
 		return m_iStatics;
 	}
     inline const CUOStaticItemRec * GetStatic( uint i ) const
@@ -75,7 +75,7 @@ struct CServerMapBlocker
 {
 	uint64 m_uiBlockFlags;	// How does this item block ? CAN_I_PLATFORM
 	dword m_dwTile;			// TERRAIN_QTY + id.
-	char m_z;				// Top (z + ((climbable item) ? height/2 : height)) of a solid object, or bottom (z) of non blocking one.
+	int8 m_z;				// Top (z + ((climbable item) ? height/2 : height)) of a solid object, or bottom (z) of non blocking one.
     height_t m_height;      // The actual height of the item (0 if terrain)
 };
 
@@ -83,7 +83,7 @@ struct CServerMapBlockingState
 {
 	// Go through the list of stuff at this location to decide what is  blocking us and what is not.
 	//  dwBlockFlags = what we can pass thru. doors, water, walls ?
-	//		CAN_C_GHOST	= Moves thru doors etc.	- CAN_I_DOOR = UFLAG4_DOOR						
+	//		CAN_C_GHOST	= Moves thru doors etc.	- CAN_I_DOOR = UFLAG4_DOOR
 	//		CAN_C_SWIM = walk thru water - CAN_I_WATER = UFLAG1_WATER
 	//		CAN_C_WALK = it is possible that i can step up. - CAN_I_PLATFORM = UFLAG2_PLATFORM
 	//		CAN_C_PASSWALLS	= walk through all blcking items - CAN_I_BLOCK = UFLAG1_BLOCK
@@ -91,28 +91,28 @@ struct CServerMapBlockingState
 	//		CAN_C_FIRE_IMMUNE = i can walk into lava etc. - CAN_I_FIRE = UFLAG1_DAMAGE
 	//		CAN_C_HOVER = i can follow hover routes. - CAN_I_HOVER = UFLAG4_HOVEROVER
 
-	const uint64 m_uiBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.	
-	const char m_z;	            // the z we start at. (stay at if we are flying)
+	const uint64 m_uiBlockFlags;	// The block flags we (the specific char who requested this class instance) can overcome.
+	const int8 m_z;	            // the z we start at. (stay at if we are flying)
 	const int m_iHeight;		// The height we need to stand here.
-	const char m_zClimb;        // We can climb at this height
+	const int8 m_zClimb;        // We can climb at this height
     const height_t m_zHeight;   // our height
 	height_t m_zClimbHeight;	// return item climb height here
-	
+
 	CServerMapBlocker m_Top;
 	CServerMapBlocker m_Bottom;	// What i would be standing on.
-	CServerMapBlocker m_Lowest;	// the lowest item we have found.	
+	CServerMapBlocker m_Lowest;	// the lowest item we have found.
 
 public:
-	CServerMapBlockingState( uint64 uiBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT ) noexcept;
-	CServerMapBlockingState( uint64 uiBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT ) noexcept;
+	CServerMapBlockingState( uint64 uiBlockFlags, int8 m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT ) noexcept;
+	CServerMapBlockingState( uint64 uiBlockFlags, int8 m_z, int iHeight, int8 zClimb, height_t zHeight = PLAYER_HEIGHT ) noexcept;
 
 	CServerMapBlockingState(const CServerMapBlockingState& copy) = delete;
 	CServerMapBlockingState& operator=(const CServerMapBlockingState& other) = delete;
 
 public:
-	bool CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
-	bool CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zheight, dword wID ) noexcept;
-	bool CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID ) noexcept;
+	bool CheckTile( uint64 uiItemBlockFlags, int8 zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Item( uint64 uiItemBlockFlags, int8 zBottom, height_t zheight, dword wID ) noexcept;
+	bool CheckTile_Terrain( uint64 uiItemBlockFlags, int8 z, dword dwID ) noexcept;
 	static lpctstr GetTileName( dword dwID );
 };
 
@@ -189,25 +189,20 @@ public:
 	CServerMapBlock& operator=(const CServerMapBlock& other) = delete;
 
 public:
-	inline int GetOffsetX(int x) const
+	inline int GetOffsetX(int x) const noexcept
 	{
 		return (x - m_x);
 	}
-	inline int GetOffsetY( int y ) const
+	inline int GetOffsetY( int y ) const noexcept
 	{
 		return (y - m_y);
 	}
 
-	inline const CUOMapBlock * GetTerrainBlock() const
+	inline const CUOMapBlock * GetTerrainBlock() const noexcept
 	{
 		return &m_Terrain;
 	}
-	const CUOMapMeter* GetTerrain(int xo, int yo) const
-	{
-		ASSERT(xo >= 0 && xo < UO_BLOCK_SIZE);
-		ASSERT(yo >= 0 && yo < UO_BLOCK_SIZE);
-		return &(m_Terrain.m_Meter[yo * UO_BLOCK_SIZE + xo]);
-	}
+	const CUOMapMeter* GetTerrain(int xo, int yo) const;
 };
 
 class CUOMulti : private CCachedMulItem

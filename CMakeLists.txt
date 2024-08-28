@@ -8,6 +8,10 @@ option (CMAKE_NO_GIT_REVISION
 	"Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
 	FALSE
 )
+option (CROSSCOMPILE
+  "Are we compiling for a different target architecture?"
+  FALSE
+)
 option (RUNTIME_STATIC_LINK
 	"Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
 	FALSE

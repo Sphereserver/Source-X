@@ -2,13 +2,13 @@
 #define _INC_TARGET_INFO_H
 
 
-[[maybe_unused]]
+[[maybe_unused, nodiscard]]
 constexpr const char* get_target_os_str()
 {
 #if defined(_WIN32)
     return "Windows";
 #elif defined(_BSD)
-    return "FreeBSD";
+    return "BSD";
 #elif defined(__linux__)
     return "Linux";
 #elif defined(__APPLE__)
@@ -18,14 +18,14 @@ constexpr const char* get_target_os_str()
 #endif
 }
 
-[[maybe_unused]]
+[[maybe_unused, nodiscard]]
 constexpr const char* get_target_word_size_str()
 {
     return (sizeof(void*) == 8) ? "64" : "32";
 }
 
 // __ARM_ARCH
-[[maybe_unused]]
+[[maybe_unused, nodiscard]]
 constexpr const char* get_target_arch_str()
 {
 #if defined(__x86_64__) || defined(_M_X64)

@@ -914,27 +914,35 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 		{
 			// Animals have certain anims. Monsters have others.
 
-            CUOMobTypesType mobTypesRow = { 0, 0 };
-
+            CUOMobTypesEntry mobTypesRow {MOBTE_QTY, 0};
             CREID_TYPE dispID = GetDispID();
+            bool fUseMobTypes = g_Cfg.m_fUseMobTypes && g_Install.m_mobtypes.IsLoaded();
 
             //Check mobtypes.txt to get the anim type
-            if (g_Cfg.m_fUseMobTypes && g_Install.m_mobtypes.IsLoaded())
+            if (fUseMobTypes)
             {
-                mobTypesRow.m_type = g_Install.m_mobtypes.GetEntry((ushort)dispID)->m_type;
-                mobTypesRow.m_flags = g_Install.m_mobtypes.GetEntry((ushort)dispID)->m_flags;
-            }
-            else
-            {
-                //Old Method
-                if (GetDispID() >= CREID_HORSE_TAN)
+                const CUOMobTypesEntry *pMobtEntry = g_Install.m_mobtypes.GetEntry(dispID);
+
+                if (pMobtEntry->m_uiType == MOBTE_QTY)
                 {
-                    mobTypesRow.m_type = 2;
+                    // Invalid entry, fall back to old method.
+                    fUseMobTypes = false;
+                }
+                else
+                {
+                    mobTypesRow.m_uiType = pMobtEntry->m_uiType;
+                    mobTypesRow.m_uiFlags = pMobtEntry->m_uiFlags;
                 }
             }
 
+            if (!fUseMobTypes)
+            {
+                //Old Method
+                mobTypesRow.m_uiType = (dispID >= CREID_HORSE_TAN) ? MOBTE_ANIMAL : MOBTE_MONSTER;
+            }
+
             //Standard UOP Animations
-            if (mobTypesRow.m_flags & ATFLAG_UseUopAnimation)
+            if (mobTypesRow.m_uiFlags & ATFLAG_UseUopAnimation)
             {
 
                 //Only mount animations, 3 actions
@@ -1031,7 +1039,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_RUN_UNARM:
                     case ANIM_RUN_ARMED:
                         //If the creature can fly we can use flying action for running
-                        if (mobTypesRow.m_flags & ATFLAG_CanFlying)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_CanFlying)
                         {
                             //Phoenix and Parrot Bird don't have run anims
                             if (IsStatFlag(STATF_FLY | STATF_HOVERING) || (dispID == CREID_PARROT_BIRD || dispID == CREID_PHOENIX) )
@@ -1080,7 +1088,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         else
                         {
                             return ANIM_UOP_STAND_COMBAT;
-                        }                        
+                        }
 
                     case ANIM_FIDGET1:
                     case ANIM_BOW:
@@ -1124,7 +1132,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_THROW:
 
                         // 2 actions for cast
-                        if (dispID == CREID_CLOCKWORK_EXODUS) 
+                        if (dispID == CREID_CLOCKWORK_EXODUS)
                         {
                             switch (g_Rand.GetVal(2))
                             {
@@ -1152,12 +1160,12 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
                         else if (dispID == CREID_TS_TENTACLE || dispID == CREID_CHARYBDIS_TENTACLE)
                         {
-                            return ANIM_UOP_ATTACK_1;                                
+                            return ANIM_UOP_ATTACK_1;
                         }
                         else if (dispID == CREID_CHARYBDIS)
                         {
                             return ANIM_UOP_GETHIT;
-                        }                        
+                        }
                         else if (dispID == CREID_PUMPKIN_DEMON)
                         {
                             return ANIM_UOP_PEACE_TO_COMBAT;
@@ -1209,7 +1217,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                                 case 1: return ANIM_UOP_ATTACK_2; break;
                             }
                             break;
-                        }                        
+                        }
 
                     case ANIM_DIE_BACK:
                         return ANIM_UOP_DIE_BACKWARD;
@@ -1225,7 +1233,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         else
                         {
                             return ANIM_UOP_DIE_FORWARD;
-                        }                        
+                        }
 
                     case ANIM_BLOCK:
                         //No Block
@@ -1305,7 +1313,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
             }
             //Sea Monster: H slot with only 9 actions in L slot order
             //Only Sea Serpent and Dolphin
-            else if (mobTypesRow.m_type == 1)
+            else if (mobTypesRow.m_uiType == MOBTE_SEA_MONSTER)
             {
                 switch (action)
                 {
@@ -1330,13 +1338,13 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         return ANIM_MON_ATTACK1;
 
                     case ANIM_CAST_DIR:
-                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3 
+                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3
                             return ANIM_MON_AttackBow;
                         else
                             return ANIM_MON_ATTACK2;
 
                     case ANIM_CAST_AREA:
-                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3 
+                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3
                             return ANIM_MON_DIE2;
                         else
                             return ANIM_MON_ATTACK3;
@@ -1353,7 +1361,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_ATTACK_BOW:
                     case ANIM_ATTACK_XBOW:
                     case ANIM_ATTACK_WRESTLE:
-                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3 
+                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3
                         {
                             switch (g_Rand.GetVal(2))
                             {
@@ -1388,7 +1396,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         return ANIM_MON_DIE2;
 
                     case ANIM_THROW:
-                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3 
+                        if (dispID == CREID_DOLPHIN) //Dolphin doesn't have ANIM_MON_ATTACK2 and ANIM_MON_ATTACK3
                         {
                             return ANIM_MON_AttackBow;
                         }
@@ -1405,8 +1413,8 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                 }
             }
             //Animal
-			else if ((mobTypesRow.m_type == 2 && !(mobTypesRow.m_flags & ATFLAG_CalculateOffsetLowGroupExtended))
-                || (mobTypesRow.m_type == 0 && (mobTypesRow.m_flags & ATFLAG_CalculateOffsetByLowGroup)))
+			else if ((mobTypesRow.m_uiType == MOBTE_ANIMAL && !(mobTypesRow.m_uiFlags & ATFLAG_CalculateOffsetLowGroupExtended))
+                || (mobTypesRow.m_uiType == MOBTE_MONSTER && (mobTypesRow.m_uiFlags & ATFLAG_CalculateOffsetByLowGroup)))
 			{
                 //Partial actions
                 if (dispID == CREID_PARROT || dispID == CREID_BIRD_CROW)
@@ -1693,7 +1701,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                 ANIM_TYPE attack1 = ANIM_MON_ATTACK1;
                 ANIM_TYPE cast1 = ANIM_MON_WALK, cast2 = ANIM_MON_WALK, cast3 = ANIM_MON_WALK;
                 ushort castActions = 0, attackActions = 3, blockActions = 2;
-                
+
                 //Standard and Custom Anims
                 switch (action)
                 {
@@ -1705,7 +1713,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_RUN_UNARM:
                     case ANIM_RUN_ARMED:
                         //If the creature can fly we can use flying action for running
-                        if ((mobTypesRow.m_flags & ATFLAG_CanFlying)
+                        if ((mobTypesRow.m_uiFlags & ATFLAG_CanFlying)
                             || (pCharDef->m_Anims & AFLAG_CUST_MON_FLY)) //Custom anims with Fly action
                         {
                             return ANIM_MON_FLY;
@@ -1719,7 +1727,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_STAND_WAR_1H:
                     case ANIM_STAND_WAR_2H:
                         //Stand action in crossbow
-                        if (mobTypesRow.m_flags & ATFLAG_IdleAt8Frame)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_IdleAt8Frame)
                         {
                             return ANIM_MON_AttackXBow;
                         }
@@ -1770,13 +1778,13 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_CAST_DIR:
-                    case ANIM_CAST_AREA:                  
+                    case ANIM_CAST_AREA:
                     case ANIM_ATTACK_BOW: //return ANIM_MON_AttackBow; //Always Empty except for standard ID 13, 15 and 16
                     case ANIM_ATTACK_XBOW: //return ANIM_MON_AttackXBow; //Always Empty except for standard ID 13, 15 and 16
 
                         //Check how many cast actions are present
                         //Stomp action is not a cast for Corpser, Earth Elemental and Gorilla
-                        if (((mobTypesRow.m_flags & ATFLAG_StompAction)
+                        if (((mobTypesRow.m_uiFlags & ATFLAG_StompAction)
                             && (dispID != CREID_CORPSER && dispID != CREID_EARTH_ELEM && dispID != CREID_GORILLA))
                             || (pCharDef->m_Anims & AFLAG_CUST_MON_STOMP)) //Custom Anim with Stomp action
                         {
@@ -1827,7 +1835,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
                         else //No cast Actions
                         {
-                            if (mobTypesRow.m_flags & ATFLAG_ReplaceAttack1With2)
+                            if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceAttack1With2)
                             {
                                 attack1 = ANIM_MON_ATTACK2;
                             }
@@ -1886,17 +1894,17 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_GET_HIT:
                         if (IsStatFlag(STATF_FLY | STATF_HOVERING)) //Running or Flying
                         {
-                            if (mobTypesRow.m_flags & ATFLAG_Use2IfHittedWhileRunning)
+                            if (mobTypesRow.m_uiFlags & ATFLAG_Use2IfHittedWhileRunning)
                             {
                                 return ANIM_MON_DIE1;
                             }
                             //GetHit while flying
-                            else if ((mobTypesRow.m_flags & ATFLAG_CanFlying) && !(mobTypesRow.m_flags & ATFLAG_Use10IfHittedWhileFlying))
+                            else if ((mobTypesRow.m_uiFlags & ATFLAG_CanFlying) && !(mobTypesRow.m_uiFlags & ATFLAG_Use10IfHittedWhileFlying))
                             {
                                 return ANIM_MON_DIE_FLIGHT;
                             }
                         }
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceGetHitBlockPillage)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceGetHitBlockPillage)
                         {
                             return ANIM_MON_STAND;
                         }
@@ -1945,7 +1953,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_ATTACK_2H_PIERCE:
                     case ANIM_ATTACK_WRESTLE:
 
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceAttack1With2)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceAttack1With2)
                         {
                             attack1 = ANIM_MON_ATTACK2;
                         }
@@ -2002,7 +2010,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 
                     case ANIM_DIE_BACK:
                         //Die while flying animation
-                        if ((mobTypesRow.m_flags & ATFLAG_StompAction) && (mobTypesRow.m_flags & ATFLAG_CanFlying) && (mobTypesRow.m_flags & ATFLAG_Use10IfHittedWhileFlying)
+                        if ((mobTypesRow.m_uiFlags & ATFLAG_StompAction) && (mobTypesRow.m_uiFlags & ATFLAG_CanFlying) && (mobTypesRow.m_uiFlags & ATFLAG_Use10IfHittedWhileFlying)
                             && IsStatFlag(STATF_FLY | STATF_HOVERING))
                         {
                             return ANIM_MON_DIE_FLIGHT;
@@ -2014,7 +2022,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 
                     case ANIM_DIE_FORWARD:
                         //Die while flying animation
-                        if ((mobTypesRow.m_flags & ATFLAG_StompAction) && (mobTypesRow.m_flags & ATFLAG_CanFlying) && (mobTypesRow.m_flags & ATFLAG_Use10IfHittedWhileFlying)
+                        if ((mobTypesRow.m_uiFlags & ATFLAG_StompAction) && (mobTypesRow.m_uiFlags & ATFLAG_CanFlying) && (mobTypesRow.m_uiFlags & ATFLAG_Use10IfHittedWhileFlying)
                             && IsStatFlag(STATF_FLY | STATF_HOVERING))
                         {
                             return ANIM_MON_DIE_FLIGHT;
@@ -2033,7 +2041,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_BLOCK:
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceGetHitBlockPillage)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceGetHitBlockPillage)
                         {
                             return ANIM_MON_STAND;
                         }
@@ -2075,11 +2083,11 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         break;
 
                     case ANIM_THROW:
-                        if (mobTypesRow.m_flags & ATFLAG_IdleAt8Frame) //Action Throw in Bow action
+                        if (mobTypesRow.m_uiFlags & ATFLAG_IdleAt8Frame) //Action Throw in Bow action
                         {
                             return ANIM_MON_AttackBow;
                         }
-                        else if (((mobTypesRow.m_flags & ATFLAG_StompAction)
+                        else if (((mobTypesRow.m_uiFlags & ATFLAG_StompAction)
                             && (dispID != CREID_CORPSER && dispID != CREID_EARTH_ELEM && dispID != CREID_GORILLA))
                             || (pCharDef->m_Anims & AFLAG_CUST_MON_STOMP)) //Custom anims with Stomp action
                         {
@@ -2103,7 +2111,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_PILLAGE:
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceGetHitBlockPillage)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceGetHitBlockPillage)
                         {
                             return ANIM_MON_FIDGET1;
                         }
@@ -2135,11 +2143,11 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     case ANIM_STOMP:
                     case ANIM_SPECIAL:
                     case ANIM_SUMMON:
-                        if ((mobTypesRow.m_flags & ATFLAG_StompAction) || (pCharDef->m_Anims & AFLAG_CUST_MON_STOMP))
+                        if ((mobTypesRow.m_uiFlags & ATFLAG_StompAction) || (pCharDef->m_Anims & AFLAG_CUST_MON_STOMP))
                         {
                             return ANIM_MON_Stomp;
                         }
-                        else if ((mobTypesRow.m_flags & ATFLAG_CanFlying) && !(pCharDef->m_Anims & AFLAG_CUST_MON_FLY)) //Standard flying anims with Land/TakeOff action
+                        else if ((mobTypesRow.m_uiFlags & ATFLAG_CanFlying) && !(pCharDef->m_Anims & AFLAG_CUST_MON_FLY)) //Standard flying anims with Land/TakeOff action
                         {
                             return ANIM_MON_LAND;
                         }
@@ -2164,12 +2172,12 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_ALERT:
-                        if (((mobTypesRow.m_flags & ATFLAG_StompAction) && dispID != CREID_CORPSER && dispID != CREID_EARTH_ELEM)
+                        if (((mobTypesRow.m_uiFlags & ATFLAG_StompAction) && dispID != CREID_CORPSER && dispID != CREID_EARTH_ELEM)
                             || (pCharDef->m_Anims & AFLAG_CUST_MON_STOMP)) //Custom anims with Stomp action
                         {
                             return ANIM_MON_Stomp;
                         }
-                        else if ((mobTypesRow.m_flags & ATFLAG_CanFlying) && !(pCharDef->m_Anims & AFLAG_CUST_MON_FLY)) //Standard flying anims with Land/TakeOff action
+                        else if ((mobTypesRow.m_uiFlags & ATFLAG_CanFlying) && !(pCharDef->m_Anims & AFLAG_CUST_MON_FLY)) //Standard flying anims with Land/TakeOff action
                         {
                             return ANIM_MON_LAND;
                         }
@@ -2179,7 +2187,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_FLY:
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceFlyAction)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceFlyAction)
                         {
                             return ANIM_MON_WALK;
                         }
@@ -2189,7 +2197,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_LAND:
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceFlyAction)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceFlyAction)
                         {
                             return ANIM_MON_STAND;
                         }
@@ -2199,11 +2207,11 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                         }
 
                     case ANIM_GETHIT_AIR:
-                        if (mobTypesRow.m_flags & ATFLAG_ReplaceFlyAction)
+                        if (mobTypesRow.m_uiFlags & ATFLAG_ReplaceFlyAction)
                         {
                             return ANIM_MON_STAND;
                         }
-                        else if (mobTypesRow.m_flags & ATFLAG_Use10IfHittedWhileFlying)
+                        else if (mobTypesRow.m_uiFlags & ATFLAG_Use10IfHittedWhileFlying)
                         {
                             return ANIM_MON_GETHIT;
                         }

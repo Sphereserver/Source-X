@@ -184,13 +184,15 @@ void CChatChanMember::ToggleWhoIs()
 CClient * CChatChanMember::GetClientActive()
 {
     ADDTOCALLSTACK("CChatChanMember::GetClientActive");
-    return( static_cast <CClient*>( this ));
+    DEBUG_ASSERT(dynamic_cast<CClient*>(this));
+    return static_cast <CClient*>( this );
 }
 
 const CClient * CChatChanMember::GetClientActive() const
 {
-    ADDTOCALLSTACK("CChatChanMember::GetClientActive");
-    return( static_cast <const CClient*>( this ));
+    ADDTOCALLSTACK("CChatChanMember::GetClientActive(const)");
+    DEBUG_ASSERT(dynamic_cast<const CClient*>(this));
+    return static_cast <const CClient*>( this );
 }
 
 lpctstr CChatChanMember::GetChatName() const

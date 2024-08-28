@@ -2316,15 +2316,15 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if ( !Skill_CanUse(skill) )
 		return false;
 
-	ushort iManaUse = g_Cfg.Calc_SpellManaCost(this, pSpellDef, pSrc);
-	ushort iTithingUse = g_Cfg.Calc_SpellTithingCost(this, pSpellDef, pSrc);
+	ushort uiManaUse = g_Cfg.Calc_SpellManaCost(this, pSpellDef, pSrc);
+	ushort uiTithingUse = g_Cfg.Calc_SpellTithingCost(this, pSpellDef, pSrc);
 
-	CScriptTriggerArgs Args( spellRef, iManaUse, pSrc );
+	CScriptTriggerArgs Args( spellRef, uiManaUse, pSrc );
 	if ( fTest )
 		Args.m_iN3 |= 0x0001;
 	if ( fFailMsg )
 		Args.m_iN3 |= 0x0002;
-	Args.m_VarsLocal.SetNum("TithingUse",iTithingUse);
+	Args.m_VarsLocal.SetNum("TithingUse",uiTithingUse);
 
 	if ( IsTrigUsed(TRIGGER_SELECT) )
 	{
@@ -2356,8 +2356,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			return false;
         spellRef = (SPELL_TYPE)(Args.m_iN1);
 	}
-	iManaUse = (ushort)(Args.m_iN2);
-	iTithingUse = (ushort)(Args.m_VarsLocal.GetKeyNum("TithingUse"));
+	uiManaUse = (ushort)(Args.m_iN2);
+	uiTithingUse = (ushort)(Args.m_VarsLocal.GetKeyNum("TithingUse"));
 
 	if ( !pSrc->IsChar() )// Looking for non-character sources
 	{
@@ -2365,12 +2365,14 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 		CItem * pItem = dynamic_cast <CItem*> (pSrc);
 		if ( !pItem )
 			return false;
+
 		if ( ! pItem->IsAttr( ATTR_MAGIC ))
 		{
 			if ( fFailMsg )
 				SysMessageDefault( DEFMSG_SPELL_ENCHANT_LACK );
 			return false;
 		}
+
 		CObjBaseTemplate * pObjTop = pSrc->GetTopLevelObj();
 		if ( pObjTop != this )		// magic items must be on your person to use.
 		{
@@ -2430,6 +2432,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 					SysMessageDefault( DEFMSG_SPELL_TRY_NOBOOK );
 				return false;
 			}
+
 			if ( ! pBook->IsSpellInBook( spellRef ))
 			{
 				if ( fFailMsg )
@@ -2452,15 +2455,16 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			// Check for Tithing
 			CVarDefContNum* pVarTithing = GetDefKeyNum("Tithing", false);
 			int64 iValTithing = pVarTithing ? pVarTithing->GetValNum() : 0;
-			if (iValTithing < iTithingUse)
+			if (iValTithing < uiTithingUse)
 			{
 				if (fFailMsg)
-					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), iTithingUse);
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING), uiTithingUse);
 				return false;
 			}
+
 			// Consume tithing points if casting is successfull.
-			if (!fTest && iTithingUse)
-				pVarTithing->SetValNum(iValTithing - iTithingUse);
+			if (!fTest && uiTithingUse)
+				pVarTithing->SetValNum(iValTithing - uiTithingUse);
 		}
 	}
 
@@ -2470,25 +2474,26 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 		{
 			if ( fFailMsg )
 				SysMessageDefault( DEFMSG_MAGERY_6 ); // An anti-magic field disturbs the spells.
+
 			m_Act_Difficulty = -1;	// Give very little credit for failure !
 			return false;
 		}
 	}
 
 	// Check for mana
-	if (Stat_GetVal(STAT_INT) < iManaUse)
+	if (Stat_GetVal(STAT_INT) < uiManaUse)
 	{
 		if (fFailMsg)
 			SysMessageDefault(DEFMSG_SPELL_TRY_NOMANA);
 		return false;
 	}
 	// Consume mana if casting is successfull
-	if (!fTest && iManaUse)
-		UpdateStatVal(STAT_INT, -iManaUse);
+	if (!fTest && uiManaUse)
+		UpdateStatVal(STAT_INT, -uiManaUse);
 
 	return true;
 }
-CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1)
+CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature)
 {
 	ADDTOCALLSTACK("CChar::Spell_CanSummon");
 	//Create the NPC and check if we can actually place it in the world, but do not place it yet.
@@ -2498,9 +2503,9 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	if (!pSpellDef || !pSpellDef->GetPrimarySkill(&iSkill, nullptr))
 		return nullptr;
 
-	if (iC1)//if iC1 is set that means we are overriding the default summoned creature.
+	if (uiCreature)//if iC1 is set that means we are overriding the default summoned creature.
 	{
-		m_atMagery.m_iSummonID = iC1;
+		m_atMagery.m_iSummonID = uiCreature;
 	}
 	else
 	{
@@ -2626,6 +2631,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE i
 	}
 	return pChar;
 }
+
 bool CChar::Spell_TargCheck_Face()
 {
 	ADDTOCALLSTACK("CChar::Spell_TargCheck_Face");

@@ -2,6 +2,7 @@
 #ifndef _WIN32
 	#include <sys/time.h>
 #endif
+#include <algorithm>
 
 #include "../common/resource/CResourceLock.h"
 #include "../common/CLog.h"
@@ -3345,7 +3346,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	uint countPos = getPosition();
 	skip(1);
 
-	uint count = target->Setup_FillCharList(this, account->m_uidLastChar.CharFind());
+	uchar count =  n32_narrow8(
+        target->Setup_FillCharList(this, account->m_uidLastChar.CharFind()));
 	seek(countPos);
 
 	writeByte((byte)count);
@@ -3387,18 +3389,18 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-    if (tmVerReported > 1260000)
+    if (tmVerReported > 1'26'00'00)
     {
 		const CNetState* ns = target->GetNetState();
         dword flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
-            maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
+            std::max(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
         if (ns->getClientType() == CLIENTTYPE_2D)
             flags |= 0x400;
         writeInt32(flags);
 
         if (ns->isClientEnhanced() )
         {
-            word iLastCharSlot = 0;
+            word wLastCharSlot = 0;
             for ( ushort i = 0; i < count; ++i )
             {
                 if ( !account->m_Chars.IsValidIndex(i) )
@@ -3406,10 +3408,10 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
                 if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
                     continue;
 
-                iLastCharSlot = (word)i;
+                wLastCharSlot = (word)i;
                 break;
             }
-            writeInt16(iLastCharSlot);
+            writeInt16(wLastCharSlot);
         }
     }
 
@@ -3597,16 +3599,17 @@ void PacketGumpDialog::writeCompressedControls(std::vector<CSString> const* cont
 		// compress and write controls
 		uint controlLength = 1;
 		for (CSString const& ctrl : *controls)
-			controlLength += (uint)ctrl.GetLength() + 2; // String terminator not needed.
+        {
+            controlLength += (uint)ctrl.GetLength() + 2; // String terminator not needed.
+        }
 
 		char* toCompress = new char[controlLength];
-
 		uint controlLengthCurrent = 0;
 		for (CSString const& ctrl : *controls)
         {
             const uint uiAvailableLength = std::max(0u, controlLength - controlLengthCurrent);
             const int iJustWrittenLength = snprintf(&toCompress[controlLengthCurrent], uiAvailableLength, "{%s}", ctrl.GetBuffer());
-        	controlLengthCurrent += iJustWrittenLength;
+            controlLengthCurrent += iJustWrittenLength;
         }
 		++ controlLengthCurrent;
 

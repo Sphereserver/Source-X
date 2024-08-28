@@ -16,8 +16,8 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 	if ( pObj == nullptr )
 		return false;
 
-	CResourceDef *	pRes	= g_Cfg.RegisteredResourceGetDef( rid );
-	CDialogDef *	pDlg	= dynamic_cast <CDialogDef*>(pRes);
+	CResourceDef * pRes = g_Cfg.RegisteredResourceGetDef( rid );
+	CDialogDef *	pDlg	 = dynamic_cast <CDialogDef*>(pRes);
 	if ( !pRes || !pDlg )
 	{
 		DEBUG_ERR(("Invalid RES_DIALOG.\n"));
@@ -48,13 +48,13 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 }
 
 
-void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
+void CClient::addGumpInputVal( bool fCancel, INPVAL_STYLE style,
 	dword iMaxLength,
 	lpctstr pszText1,
 	lpctstr pszText2,
 	CObjBase * pObj )
 {
-	ADDTOCALLSTACK("CClient::addGumpInpVal");
+	ADDTOCALLSTACK("CClient::addGumpInputVal");
 	// CLIMODE_INPVAL
 	// Should result in PacketGumpValueInputResponse::onReceive
 	// just input an objects attribute.

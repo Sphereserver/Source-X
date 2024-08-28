@@ -45,7 +45,7 @@ int64 CCachedMulItem::GetCacheAge() const
 	return (CWorldGameTime::GetCurrentTime().GetTimeRaw() - m_timeRef );
 }
 
-CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, char z, int iHeight, height_t zHeight ) noexcept :
+CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, int8 z, int iHeight, height_t zHeight ) noexcept :
 	m_uiBlockFlags(uiBlockFlags), m_z(z), m_iHeight(iHeight), m_zClimb(0), m_zHeight(zHeight)
 {
 	// m_z = PLAYER_HEIGHT
@@ -67,7 +67,7 @@ CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, char z, i
 	m_zClimbHeight = 0;
 }
 
-CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, char z, int iHeight, char zClimb, height_t zHeight ) noexcept :
+CServerMapBlockingState::CServerMapBlockingState( uint64 uiBlockFlags, int8 z, int iHeight, int8 zClimb, height_t zHeight ) noexcept :
 	m_uiBlockFlags(uiBlockFlags), m_z(z), m_iHeight(iHeight), m_zClimb(zClimb), m_zHeight(zHeight)
 {
 	m_Top.m_uiBlockFlags = 0;
@@ -108,13 +108,13 @@ lpctstr CServerMapBlockingState::GetTileName( dword dwID )	// static
 	return pStr;
 }
 
-bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID ) noexcept
+bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, int8 zBottom, height_t zHeight, dword dwID ) noexcept
 {
 	//ADDTOCALLSTACK("CServerMapBlockingState::CheckTile");
 	// RETURN:
 	//  true = continue processing
 
-	char zTop = zBottom;
+	int8 zTop = zBottom;
 	if ( (uiItemBlockFlags & CAN_I_CLIMB) )
 		zTop = minimum(zTop + ( zHeight / 2 ), UO_SIZE_Z);	// standing position is half way up climbable items.
 	else
@@ -175,7 +175,7 @@ bool CServerMapBlockingState::CheckTile( uint64 uiItemBlockFlags, char zBottom, 
 	return true;
 }
 
-bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBottom, height_t zHeight, dword dwID ) noexcept
+bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, int8 zBottom, height_t zHeight, dword dwID ) noexcept
 {
 	//ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Item");
 	// RETURN:
@@ -203,7 +203,7 @@ bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBot
 
 	if ( zTop < m_Lowest.m_z )
 	{
-        m_Lowest = {uiItemBlockFlags, dwID, (char)zTop, zHeight};
+        m_Lowest = {uiItemBlockFlags, dwID, (int8)zTop, zHeight};
 	}
 
     // Why was this block of code added? By returning, it blocks the m_Bottom state to be updated
@@ -231,7 +231,7 @@ bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBot
                 else if ( m_Bottom.m_uiBlockFlags & CAN_I_PLATFORM ) //than items with CAN_I_PLATFORM
 				    return true;
 			}
-            m_Bottom = {uiItemBlockFlags, dwID, (char)zTop, zHeight};
+            m_Bottom = {uiItemBlockFlags, dwID, (int8)zTop, zHeight};
 
 			if (uiItemBlockFlags & CAN_I_CLIMB) // return climb height
 				m_zClimbHeight = (( zHeight + 1 )/2); //if height is an odd number, then we need to add 1; if it isn't, this does nothing
@@ -262,7 +262,7 @@ bool CServerMapBlockingState::CheckTile_Item( uint64 uiItemBlockFlags, char zBot
 
 }
 
-bool CServerMapBlockingState::CheckTile_Terrain( uint64 uiItemBlockFlags, char z, dword dwID ) noexcept
+bool CServerMapBlockingState::CheckTile_Terrain( uint64 uiItemBlockFlags, int8 z, dword dwID ) noexcept
 {
 	//ADDTOCALLSTACK("CServerMapBlockingState::CheckTile_Terrain");
 	// RETURN:
@@ -534,6 +534,12 @@ CServerMapBlock::~CServerMapBlock()
 	--sm_iCount;
 }
 
+const CUOMapMeter* CServerMapBlock::GetTerrain(int xo, int yo) const
+{
+	ASSERT(xo >= 0 && xo < UO_BLOCK_SIZE);
+	ASSERT(yo >= 0 && yo < UO_BLOCK_SIZE);
+	return &(m_Terrain.m_Meter[yo * UO_BLOCK_SIZE + xo]);
+}
 
 //////////////////////////////////////////////////////////////////
 // -CUOMulti

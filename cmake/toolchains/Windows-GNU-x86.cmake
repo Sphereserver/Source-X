@@ -1,18 +1,30 @@
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/include/Windows-GNU_common.inc.cmake")
 
+
+function (toolchain_force_compiler)
+  if (CROSSCOMPILE_ARCH)
+    message(FATAL_ERROR "This toolchain (as it is now) doesn't support cross-compilation.")
+  endif ()
+
+	SET (CMAKE_C_COMPILER 	"gcc" 	  CACHE STRING "C compiler" 	FORCE)
+	SET (CMAKE_CXX_COMPILER "g++" 	  CACHE STRING "C++ compiler" FORCE)
+
+	# In order to enable ninja to be verbose
+	#set(CMAKE_VERBOSE_MAKEFILE 			ON CACHE	BOOL "ON")
+endfunction ()
+
+
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-GNU-x86.cmake.")
-	#SET(CMAKE_SYSTEM_NAME	"Windows"		PARENT_SCOPE)
-	SET(ARCH_BASE			"x86"		CACHE INTERNAL "" FORCE) # override
-	SET(ARCH_BITS			32			CACHE INTERNAL "" FORCE) # override
-	SET(ARCH				"x86"		CACHE INTERNAL "" FORCE) # override
-	SET(CMAKE_SYSTEM_PROCESSOR "${ARCH}" CACHE INTERNAL "" FORCE)
+  # Do not set CMAKE_SYSTEM_NAME if compiling for the same OS, otherwise CMAKE_CROSSCOMPILING will be set to TRUE
+	#SET(CMAKE_SYSTEM_NAME	"Windows"		CACHE INTERNAL "" FORCE)
+  SET(CMAKE_SYSTEM_PROCESSOR "x86" CACHE INTERNAL "" FORCE)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin_x86"	PARENT_SCOPE)
+  #set(ARCH_BITS 32 CACHE INTERNAL "" FORCE) # provide it
 
 	toolchain_after_project_common()	# Also to enable RC language, to compile Windows Resource files
 
 	LINK_DIRECTORIES ("lib/_bin/x86/mariadb/")
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin_x86"	PARENT_SCOPE)
-
 	SET (CMAKE_C_FLAGS		"${CMAKE_C_FLAGS}   -march=i686 -m32" PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -march=i686 -m32" PARENT_SCOPE)
 	SET (RC_FLAGS			"--target=pe-i386" PARENT_SCOPE)

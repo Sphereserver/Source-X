@@ -219,7 +219,7 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 	{
 		return false;
 	}
-	
+
 	pAccount->DeleteChars();
 	m_Accounts.RemovePtr( pAccount );
 	return true;
@@ -498,7 +498,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		CClient	*pClient = pAccount->FindClient();
 
 		char	*z = Str_GetTemp();
-		snprintf(z, Str_TempLength(), 
+		snprintf(z, Str_TempLength(),
 			"Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
 			pAccount->m_Last_IP.GetAddrStr(), pAccount->_dateConnectedLast.Format(nullptr),
@@ -637,11 +637,9 @@ CAccount::~CAccount()
 
 	DeleteChars();
     if (CClient * pClient = FindClient())
-    {
         pClient->m_pAccount = nullptr;
-    }
 
-	ClearPasswordTries(true);
+	//ClearPasswordTries(true); // I'm destroying the account. Does it even matter? -> no.
 }
 
 lpctstr CAccount::GetDefStr( lpctstr ptcKey, bool fZero ) const

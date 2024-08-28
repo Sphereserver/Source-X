@@ -10,89 +10,112 @@
 #include "../../common/CUOInstall.h"
 #include "../../game/uo_files/uofiles_enums_creid.h"
 #include "CUOMobtypes.h"
+#include <string_view>
 
 void CUOMobTypes::Load()
 {
     ADDTOCALLSTACK("CUOMobTypes::Load");
     g_Log.Event(LOGM_INIT, "Caching mobtypes.txt...\n");
 
-    CUOMobTypesType mobTypesRow = {0,0};
-
-    _mobTypesEntries.clear();
-
+    _vMobTypesEntries.clear();
     CSFileText csvMobTypes;
 
     if (g_Install.OpenFile(csvMobTypes, "mobtypes.txt", (word)(OF_READ | OF_TEXT | OF_DEFAULTMODE)))
     {
-        _mobTypesEntries.resize(CREID_QTY);
-        for (int i = 0; i < _mobTypesEntries.size(); i++)
+        _vMobTypesEntries.resize(CREID_QTY);
+        for (size_t i = 0; i < _vMobTypesEntries.size(); ++i)
         {
-            mobTypesRow.m_type = 4;
-            mobTypesRow.m_flags = 0;
-            _mobTypesEntries[i] = mobTypesRow;
+            _vMobTypesEntries[i] = CUOMobTypesEntry{MOBTE_QTY, 0};
         }
 
-        tchar* pszTemp = Str_GetTemp();
-        size_t count = 0;
+        tchar* ptcTemp = Str_GetTemp();
+        size_t uiLineCount = 0;
+        CUOMobTypesEntry mobTypesRow {};
         while (!csvMobTypes.IsEOF())
         {
-            csvMobTypes.ReadString(pszTemp, 200);
-            if (*pszTemp)
+            csvMobTypes.ReadString(ptcTemp, 200);
+            if (*ptcTemp)
             {
-                count++;
+                ++ uiLineCount;
 
-                std::string tmpString = pszTemp;
+                int iLineLength = (int)strnlen(ptcTemp, Str_TempLength());
+                iLineLength = Str_TrimEndWhitespace(ptcTemp, iLineLength);
 
-                int len = (int)tmpString.length();
-                len = Str_TrimEndWhitespace(tmpString.data(), len);
-
-                if (len == 0 || tmpString[0] == '#') //Empty line or commented
+                if (iLineLength == 0 || ptcTemp[0] == '#') //Empty line or commented
                     continue;
 
                 //Split the string
-                std::vector<tchar*> splitArray;
-                splitArray.resize(3);
-                size_t iQty = Str_ParseCmds(tmpString.data(), splitArray.data(), 3, " \t#");
-
-                if (splitArray.size() < 3)
+                tchar* pptcSplitArray[3];
+                const int iQty = Str_ParseCmds(ptcTemp, pptcSplitArray, ARRAY_COUNT(pptcSplitArray), " \t#");
+                if (iQty < 3)
                 {
-                    g_Log.EventError("Mobtypes.txt: not enough parameters on line %" PRIuSIZE_T " \n", count);
+                    g_Log.EventError("Mobtypes.txt: not enough parameters on line %" PRIuSIZE_T " \n", uiLineCount);
                     continue;
                 }
 
-                if (!IsStrNumeric(splitArray[0]))
+                //if (!IsStrNumeric(pptcSplitArray[0]))
+                //{
+                //    g_Log.EventError("Mobtypes.txt: non numeric ID on line %" PRIuSIZE_T " \n", uiLineCount);
+                //    continue;
+                //}
+                // const uint uiAnimIndex = (uint)std::stoul(pptcSplitArray[0]);
+
+                std::optional<dword> iconv = Str_ToU(pptcSplitArray[0], 10);
+                if (!iconv.has_value())
                 {
-                    g_Log.EventError("Mobtypes.txt: non numeric ID on line %" PRIuSIZE_T " \n", count);
+                    g_Log.EventError(
+                        "Mobtypes.txt: Invalid char ID on line %" PRIuSIZE_T ".\n", uiLineCount);
                     continue;
                 }
+                const uint uiAnimIndex = *iconv;
 
-                int animIndex = std::stoi(splitArray[0]);
-                std::string sType = splitArray[1];
+                const std::string_view sType(pptcSplitArray[1]);
                 if (sType == "MONSTER")
-                    mobTypesRow.m_type = 0;
+                    mobTypesRow.m_uiType = MOBTE_MONSTER;
                 else if (sType == "SEA_MONSTER")
-                    mobTypesRow.m_type = 1;
+                    mobTypesRow.m_uiType = MOBTE_SEA_MONSTER;
                 else if (sType == "ANIMAL")
-                    mobTypesRow.m_type = 2;
+                    mobTypesRow.m_uiType = MOBTE_ANIMAL;
                 else if (sType == "HUMAN")
-                    mobTypesRow.m_type = 3;
+                    mobTypesRow.m_uiType = MOBTE_HUMAN;
                 else if (sType == "EQUIPMENT")
-                    mobTypesRow.m_type = 4;
+                    mobTypesRow.m_uiType = MOBTE_EQUIPMENT;
                 else
                 {
-                    mobTypesRow.m_type = 0;
-                    g_Log.EventError("Mobtypes.txt: wrong type found on line %" PRIuSIZE_T " \n", count);
+                    mobTypesRow.m_uiType = MOBTE_QTY;
+                    g_Log.EventError("Mobtypes.txt: wrong type found on line %" PRIuSIZE_T " \n", uiLineCount);
                 }
 
-                mobTypesRow.m_flags = std::strtol(splitArray[2], NULL, 16);
-
-                if (animIndex <= _mobTypesEntries.size()) //Safety check
+                //mobTypesRow.m_flags = (dword)std::strtoul(pptcSplitArray[2], nullptr, 16);
+                iconv = Str_ToU(pptcSplitArray[2], 16);
+                if (!iconv.has_value())
                 {
-                    _mobTypesEntries[animIndex] = mobTypesRow;
+                    g_Log.EventError(
+                        "Mobtypes.txt: Invalid flags for char ID %" PRIu32 " on line %" PRIuSIZE_T ".\n",
+                        uiAnimIndex, uiLineCount);
+                    continue;
+                }
+                mobTypesRow.m_uiFlags = *iconv;
+
+                if (uiAnimIndex <= _vMobTypesEntries.size()) //Safety check
+                {
+                    _vMobTypesEntries[uiAnimIndex] = mobTypesRow;
+                }
+                else
+                {
+                    g_Log.EventError(
+                        "Mobtypes.txt: trying to load data for an invalid char ID %" PRIu32 " on line %" PRIuSIZE_T ".\n",
+                        uiAnimIndex, uiLineCount);
                 }
             }
         }
+
         csvMobTypes.Close();
     }
 }
 
+const CUOMobTypesEntry* CUOMobTypes::GetEntry(uint id) const
+{
+    ASSERT(id < _vMobTypesEntries.size());
+    return &(_vMobTypesEntries[id]);
+}

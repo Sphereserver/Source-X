@@ -38,10 +38,11 @@ bool IsTrigUsed(const char *name)
     if ( g_Serv.IsLoading() == true)
         return false;
 
-    int index = FindTableSorted(name, kOrderedTrigsNames, ARRAY_COUNT(kOrderedTrigsNames));
+    const int index = FindTableSorted(name, kOrderedTrigsNames, ARRAY_COUNT(kOrderedTrigsNames));
     if (index >= 0)
         return IsTrigUsed((E_TRIGGERS)index);
-    return false;
+
+    return true; //Must return true for custom triggers
 }
 
 void TriglistInit()

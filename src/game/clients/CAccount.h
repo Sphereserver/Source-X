@@ -106,7 +106,7 @@ public:
 	* We should go track down and delete all the chars and clients that use this account !
 	*/
 	// virtual not required at the moment but might be if subclassed
-	virtual ~CAccount();
+	virtual ~CAccount() override;
 
 	/************************************************************************
 	* SCP related section.
@@ -349,8 +349,9 @@ protected:
 	static lpctstr const sm_szVerbKeys[]; // ACCOUNT action list.
 	CObjNameSortArray m_Accounts; // Sorted CAccount list.
 public:
-    CAccounts() : m_fLoading(false) {
-
+    CAccounts() noexcept
+        : m_fLoading(false)
+    {
     }
 	/**
 	* CAccount needs CAccounts methods.

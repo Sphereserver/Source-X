@@ -77,7 +77,7 @@
 	#define __except(P)		catch(int)
 #endif  // _MSC_VER
 
-const OSVERSIONINFO * Sphere_GetOSInfo();
+const OSVERSIONINFO * Sphere_GetOSInfo() noexcept;
 
 
 #endif	// _INC_OS_WINDOWS_H

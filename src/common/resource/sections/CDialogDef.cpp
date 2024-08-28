@@ -139,7 +139,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     // The first part of the key is GUMPCTL_TYPE
     lpctstr ptcKey = s.GetKey();
 
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
+    const int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
     if ( index < 0 )
     {
         const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
@@ -151,13 +151,13 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             if ( r_Call(uiFunctionIndex, pSrc, &Args, &sVal) )
                 return true;
         }
+
         if (!m_pObj)
             return CResourceLink::r_Verb(s, pSrc);
         return m_pObj->r_Verb(s, pSrc);
     }
 
     lpctstr pszArgs	= s.GetArgStr();
-
     switch( index )
     {
         case GUMPCTL_PAGE:
@@ -177,6 +177,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "page %d", iNewPage );
             return true;
         }
+
         case GUMPCTL_BUTTON:			// 7 = X,Y,Down gump,Up gump,pressable(1/0),page,id
         case GUMPCTL_BUTTONTILEART:		// 11 = X,Y,Down gump,Up gump,pressable(1/0),page,id,tileart,hue,X,Y
         {
@@ -210,6 +211,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 
             return true;
         }
+
         case GUMPCTL_GUMPPIC:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -220,6 +222,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "gumppic %d %d %d%s%s", x, y, id, *pszArgs ? " hue=" : "", *pszArgs ? pszArgs : "" );
             return true;
         }
+
         case GUMPCTL_GUMPPICTILED:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -231,6 +234,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "gumppictiled %d %d %d %d %d", x, y, sX, sY, id );
             return true;
         }
+
         case GUMPCTL_PICINPIC:
         {
             GET_RELATIVE(x, m_iOriginX);
@@ -244,6 +248,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format("picinpic %d %d %d %d %d %d %d", x, y, id, w, h, sX, sY);
             return true;
         }
+
         case GUMPCTL_RESIZEPIC:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -255,6 +260,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "resizepic %d %d %d %d %d", x, y, id, sX, sY );
             return true;
         }
+
         case GUMPCTL_TILEPIC:
         case GUMPCTL_TILEPICHUE:
         {
@@ -271,6 +277,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 
             return true;
         }
+
         case GUMPCTL_DTEXT:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -284,6 +291,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "text %d %d %d %u", x, y, hue, iText );
             return true;
         }
+
         case GUMPCTL_DCROPPEDTEXT:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -298,6 +306,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "croppedtext %d %d %d %d %d %u", x, y, w, h, hue, iText );
             return true;
         }
+
         case GUMPCTL_DHTMLGUMP:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -312,6 +321,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "htmlgump %d %d %d %d %u %d %d", x, y, w, h, iText, bck, options );
             return true;
         }
+
         case GUMPCTL_DTEXTENTRY:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -326,6 +336,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "textentry %d %d %d %d %d %d %u", x, y, w, h, hue, id, iText );
             return true;
         }
+
         case GUMPCTL_DTEXTENTRYLIMITED:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -341,6 +352,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "textentrylimited %d %d %d %d %d %d %u %d", x, y, w, h, hue, id, iText, charLimit );
             return true;
         }
+
         case GUMPCTL_CHECKBOX:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -353,6 +365,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "checkbox %d %d %d %d %d %d", x, y, down, up, state, id );
             return true;
         }
+
         case GUMPCTL_RADIO:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -365,6 +378,18 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "radio %d %d %d %d %d %d", x, y, down, up, state, id );
             return true;
         }
+
+        case GUMPCTL_TOOLTIP:
+        {
+            // The client expects this to be sent as a string in decimal notation.
+            std::optional<uint> conv = Str_ToU(pszArgs);
+            if (!conv.has_value())
+                return false;
+
+            m_sControls.emplace_back(false).Format( "tooltip %u", conv.value() );
+            return true;
+        }
+
         case GUMPCTL_CHECKERTRANS:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -375,6 +400,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "checkertrans %d %d %d %d", x, y, width, height );
             return true;
         }
+
         case GUMPCTL_DORIGIN:
         {
             // GET_RELATIVE( x, m_iOriginX );
@@ -400,9 +426,11 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 
             return true;
         }
+
         case GUMPCTL_NODISPOSE:
             m_fNoDispose = true;
             break;
+
         case GUMPCTL_CROPPEDTEXT:
         case GUMPCTL_TEXT:
         case GUMPCTL_TEXTENTRY:
@@ -427,6 +455,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
                 m_sControls.emplace_back(false).Format( "xmfhtmlgumpcolor %d %d %d %d %d %d %d%s%s", x, y, sX, sY, cliloc, hasBack, canScroll, *pszArgs ? " " : "", *pszArgs ? pszArgs : "" );
             return true;
         }
+
         case GUMPCTL_XMFHTMLTOK: // 9 = x y width height has_background has_scrollbar color cliloc_id @args
         {
             GET_RELATIVE(x, m_iOriginX);
@@ -442,6 +471,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format("xmfhtmltok %d %d %d %d %d %d %d %d %s", x, y, sX, sY, hasBack, canScroll, color, cliloc, *pszArgs ? pszArgs : "");
             return true;
         }
+
         default:
             break;
     }
@@ -536,6 +566,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     const auto trigRet = OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, pClient->GetChar(), &Args );
     m_sText.shrink_to_fit();
     m_sControls.shrink_to_fit();
+
     if ( trigRet == TRIGRET_RET_TRUE )
         return false;
     return true;

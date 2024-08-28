@@ -41,36 +41,76 @@ void Str_Reverse(char* string)
 }
 #endif
 
-int Str_ToI (lpctstr ptcStr, int base) noexcept
+std::optional<char> Str_ToI8 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = int(::strtol(ptcStr, nullptr, base));
-    errno = e;
-    return ret;
+    char val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
-uint Str_ToUI(lpctstr ptcStr, int base) noexcept
+std::optional<uchar> Str_ToU8 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = uint(::strtoul(ptcStr, nullptr, base));
-    errno = e;
-    return ret;
+    uchar val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
-llong Str_ToLL(lpctstr ptcStr, int base) noexcept
+std::optional<short> Str_ToI16 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = ::strtoll(ptcStr, nullptr, base);
-    errno = e;
-    return ret;
+    short val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
-ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
+std::optional<ushort> Str_ToU16 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = ::strtoull(ptcStr, nullptr, base);
-    errno = e;
-    return ret;
+    ushort val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<int> Str_ToI (lpctstr ptcStr, int base) noexcept
+{
+    int val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<uint> Str_ToU(lpctstr ptcStr, int base) noexcept
+{
+    uint val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<llong> Str_ToLL(lpctstr ptcStr, int base) noexcept
+{
+    llong val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base) noexcept
+{
+    ullong val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
 #define STR_FROM_SET_ZEROSTR \
@@ -652,7 +692,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
     while (len > 0)
     {
         --len;
-        if (pStr[len] < 0 || !IsWhitespace(pStr[len]))
+        if (!IsWhitespace(pStr[len]))
         {
             ++len;
             break;

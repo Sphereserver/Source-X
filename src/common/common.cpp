@@ -7,7 +7,8 @@
 
 extern "C"
 {
-    void globalstartsymbol() {}	// put this here as just the starting offset.
+    // Put this here as just the starting offset. Needed by Windows crash dump.
+    void globalstartsymbol() {}
 }
 
 #ifndef _WIN32
@@ -16,7 +17,7 @@ extern "C"
         #include <cstring>
 		#include <time.h>
 		#include <sys/types.h>
-		int getTimezone()
+		int getTimezone() noexcept
 		{
 			tm tp;
 			memset(&tp, 0x00, sizeof(tp));
@@ -27,7 +28,7 @@ extern "C"
 
 #else // _WIN32
 
-	const OSVERSIONINFO * Sphere_GetOSInfo()
+	const OSVERSIONINFO * Sphere_GetOSInfo() noexcept
 	{
 		// NEVER return nullptr !
 		static OSVERSIONINFO g_osInfo;
@@ -47,14 +48,16 @@ extern "C"
 #endif // !_WIN32
 
 
-CLanguageID::CLanguageID(int iDefault) :
+// TODO: move those in a separate cpp file.
+
+CLanguageID::CLanguageID(int iDefault) noexcept :
 	m_codes{}
 {
 		UnreferencedParameter(iDefault);
 		ASSERT(iDefault == 0);
 }
 
-void CLanguageID::GetStrDef(tchar* pszLang)
+void CLanguageID::GetStrDef(tchar* pszLang) noexcept
 {
     if (!IsDef())
     {
@@ -67,7 +70,7 @@ void CLanguageID::GetStrDef(tchar* pszLang)
     }
 }
 
-void CLanguageID::GetStr(tchar* pszLang) const
+void CLanguageID::GetStr(tchar* pszLang) const noexcept
 {
     memcpy(pszLang, m_codes, 3);
     pszLang[3] = '\0';
@@ -80,7 +83,7 @@ lpctstr CLanguageID::GetStr() const
     return pszTmp;
 }
 
-bool CLanguageID::Set(lpctstr pszLang)
+bool CLanguageID::Set(lpctstr pszLang) noexcept
 {
     // needs not be terminated!
     if (pszLang != nullptr)

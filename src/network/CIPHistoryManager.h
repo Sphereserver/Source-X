@@ -25,7 +25,7 @@ struct HistoryIP
     int m_connected;
     bool m_blocked;
     int m_ttl;
-    size_t m_connectionAttempts; // since i remember of this IP
+    int64 m_connectionAttempts; // since i remember of this IP
     int64 m_timeLastConnectedMs;
     int64 m_blockExpire;
     int m_pingDecay;
@@ -56,12 +56,11 @@ public:
     IPHistoryManager(void);
     ~IPHistoryManager(void);
 
-private:
-    IPHistoryManager(const IPHistoryManager& copy);
-    IPHistoryManager& operator=(const IPHistoryManager& other);
+    IPHistoryManager(const IPHistoryManager& copy) = delete;
+    IPHistoryManager& operator=(const IPHistoryManager& other) = delete;
 
 public:
-    void tick(void);	// period events
+    void tick(void);	// periodic events
 
     HistoryIP& getHistoryForIP(const CSocketAddressIP& ip) noexcept;	// get history for an ip
     HistoryIP& getHistoryForIP(const char* ip);				// get history for an ip

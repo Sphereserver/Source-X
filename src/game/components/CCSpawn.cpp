@@ -468,7 +468,7 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
 CResourceIDBase CCSpawn::GetCharRid()
 {
     ADDTOCALLSTACK("CCSpawn::GetCharRid");
-    const CItem* pSpawnItem = static_cast<const CItem*>(GetLink());
+    auto pSpawnItem = static_cast<const CItem*>(GetLink());
 
     CResourceIDBase rid;
     const CResourceDef* pDef = FixDef();
@@ -483,7 +483,7 @@ CResourceIDBase CCSpawn::GetCharRid()
     RES_TYPE iRidType = rid.GetResType();
     if (iRidType == RES_SPAWN)
     {
-        const CRandGroupDef* pSpawnGroup = static_cast<const CRandGroupDef*>(pDef);
+        auto pSpawnGroup = dynamic_cast<const CRandGroupDef*>(pDef);
         ASSERT(pSpawnGroup);
         size_t i = pSpawnGroup->GetRandMemberIndex();
         if (i != sl::scont_bad_index())
