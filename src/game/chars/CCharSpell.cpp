@@ -1016,7 +1016,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_POLYMORPH;
 					break;
 				case SPELL_Lich_Form:
-					m_atMagery.m_iSummonID = CREID_LICH;
+					m_atMagery.m_uiSummonID = CREID_LICH;
 					Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
                     Stats_AddRegenVal(STAT_STR, - pSpell->m_itSpell.m_PolyDex);	// RegenHitsVal
                     ModPropNum(pCCPChar, PROPCH_RESFIRE,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
@@ -1025,7 +1025,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_LICHFORM;
 					break;
 				case SPELL_Wraith_Form:
-					m_atMagery.m_iSummonID = CREID_SPECTRE;
+					m_atMagery.m_uiSummonID = CREID_SPECTRE;
 					iBuffIcon = BI_WRAITHFORM;
                     pSpell->m_itSpell.m_PolyStr = 15;
                     pSpell->m_itSpell.m_PolyDex = 5;
@@ -1035,12 +1035,12 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
                     ModPropNum(pCCPChar, PROPCH_RESENERGY,    - pSpell->m_itSpell.m_spellcharges, pBaseCCPChar);
 					break;
 				case SPELL_Horrific_Beast:
-					m_atMagery.m_iSummonID = CREID_HORRIFIC_BEAST;
+					m_atMagery.m_uiSummonID = CREID_HORRIFIC_BEAST;
                     Stats_AddRegenVal(STAT_STR, + pSpell->m_itSpell.m_spellcharges);
 					iBuffIcon = BI_HORRIFICBEAST;
 					break;
 				case SPELL_Vampiric_Embrace:
-					m_atMagery.m_iSummonID = CREID_VAMPIRE_BAT;
+					m_atMagery.m_uiSummonID = CREID_VAMPIRE_BAT;
                     ModPropNum(pCCPChar, PROPCH_HITLEECHLIFE, + pSpell->m_itSpell.m_PolyStr, pBaseCCPChar);	// +Hit Leech Life
                     Stats_AddRegenVal(STAT_DEX, + pSpell->m_itSpell.m_PolyDex);		    // +RegenStamVal
                     Stats_AddRegenVal(STAT_INT, + pSpell->m_itSpell.m_spellcharges);	// RegenManaVal
@@ -1048,11 +1048,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_VAMPIRICEMBRACE;
 					break;
 				case SPELL_Stone_Form:
-					m_atMagery.m_iSummonID = CREID_STONE_FORM;
+					m_atMagery.m_uiSummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_STONEFORM;
 					break;
 				case SPELL_Reaper_Form:
-					m_atMagery.m_iSummonID = CREID_STONE_FORM;
+					m_atMagery.m_uiSummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_REAPERFORM;
 					break;
 				default:
@@ -1060,7 +1060,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 
 			const ushort SPELL_MAX_POLY_STAT = (ushort)(g_Cfg.m_iMaxPolyStats);
-			SetID(m_atMagery.m_iSummonID);
+			SetID(m_atMagery.m_uiSummonID);
 
 			const CCharBase * pCharDef = Char_GetDef();
 			ASSERT(pCharDef);
@@ -2505,7 +2505,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 
 	if (uiCreature)//if iC1 is set that means we are overriding the default summoned creature.
 	{
-		m_atMagery.m_iSummonID = uiCreature;
+		m_atMagery.m_uiSummonID = uiCreature;
 	}
 	else
 	{
@@ -2516,46 +2516,46 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 		case SPELL_Summon:
 			break;
 		case SPELL_Blade_Spirit:
-			m_atMagery.m_iSummonID = CREID_BLADE_SPIRIT;
+			m_atMagery.m_uiSummonID = CREID_BLADE_SPIRIT;
 			break;
 		case SPELL_Vortex:
-			m_atMagery.m_iSummonID = CREID_ENERGY_VORTEX;
+			m_atMagery.m_uiSummonID = CREID_ENERGY_VORTEX;
 			break;
 		case SPELL_Air_Elem:
-			m_atMagery.m_iSummonID = CREID_AIR_ELEM;
+			m_atMagery.m_uiSummonID = CREID_AIR_ELEM;
 			break;
 		case SPELL_Daemon:
-			m_atMagery.m_iSummonID = CREID_DEMON;
+			m_atMagery.m_uiSummonID = CREID_DEMON;
 			break;
 		case SPELL_Earth_Elem:
-			m_atMagery.m_iSummonID = CREID_EARTH_ELEM;
+			m_atMagery.m_uiSummonID = CREID_EARTH_ELEM;
 			break;
 		case SPELL_Fire_Elem:
-			m_atMagery.m_iSummonID = CREID_FIRE_ELEM;
+			m_atMagery.m_uiSummonID = CREID_FIRE_ELEM;
 			break;
 		case SPELL_Water_Elem:
-			m_atMagery.m_iSummonID = CREID_WATER_ELEM;
+			m_atMagery.m_uiSummonID = CREID_WATER_ELEM;
 			break;
 		case SPELL_Vengeful_Spirit:
-			m_atMagery.m_iSummonID = CREID_REVENANT;
+			m_atMagery.m_uiSummonID = CREID_REVENANT;
 			break;
 		case SPELL_Rising_Colossus:
-			m_atMagery.m_iSummonID = CREID_RISING_COLOSSUS;
+			m_atMagery.m_uiSummonID = CREID_RISING_COLOSSUS;
 			break;
 		case SPELL_Summon_Undead: //Sphere custom spell.
 			switch (g_Rand.GetVal(15))
 			{
 			case 1:
-				m_atMagery.m_iSummonID = CREID_LICH;
+				m_atMagery.m_uiSummonID = CREID_LICH;
 				break;
 			case 3:
 			case 5:
 			case 7:
 			case 9:
-				m_atMagery.m_iSummonID = CREID_SKELETON;
+				m_atMagery.m_uiSummonID = CREID_SKELETON;
 				break;
 			default:
-				m_atMagery.m_iSummonID = CREID_ZOMBIE;
+				m_atMagery.m_uiSummonID = CREID_ZOMBIE;
 				break;
 			}
 			break;
@@ -2569,15 +2569,15 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 			}
 			if (IsPriv(PRIV_GM))
 			{
-				m_atMagery.m_iSummonID = pCorpse->m_itCorpse.m_BaseID;
+				m_atMagery.m_uiSummonID = pCorpse->m_itCorpse.m_BaseID;
 			}
 			else if (CCharBase::IsPlayableID(pCorpse->GetCorpseType())) 	// Must be a human corpse ?
 			{
-				m_atMagery.m_iSummonID = CREID_ZOMBIE;
+				m_atMagery.m_uiSummonID = CREID_ZOMBIE;
 			}
 			else
 			{
-				m_atMagery.m_iSummonID = pCorpse->GetCorpseType();
+				m_atMagery.m_uiSummonID = pCorpse->GetCorpseType();
 			}
 			if (!pCorpse->IsTopLevel())
 			{
@@ -2586,12 +2586,12 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 			break;
 		}
 		default:
-			m_atMagery.m_iSummonID = CREID_INVALID;
+			m_atMagery.m_uiSummonID = CREID_INVALID;
 			break;
 		}
 	}
 
-	CChar* pChar = CChar::CreateBasic(m_atMagery.m_iSummonID);
+	CChar* pChar = CChar::CreateBasic(m_atMagery.m_uiSummonID);
 	if (pChar == nullptr)
 		return nullptr;
 

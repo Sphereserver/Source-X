@@ -44,9 +44,6 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_BaseResources.setNoMergeOnLoad();
 }
 
-CBaseBaseDef::~CBaseBaseDef()
-{
-}
 
 void CBaseBaseDef::DelInstance()
 {
@@ -56,9 +53,14 @@ void CBaseBaseDef::DelInstance()
 	--_dwInstances;
 }
 
-CCFaction CBaseBaseDef::GetFaction()
+CCFaction const& CBaseBaseDef::GetFaction() const noexcept
 {
-	return _pFaction;
+	return _Faction;
+}
+
+CCFaction & CBaseBaseDef::GetFaction() noexcept
+{
+	return _Faction;
 }
 
 lpctstr CBaseBaseDef::GetTypeName() const
@@ -145,9 +147,14 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 			sVal = GetResourceName();
 			break;
 
-        case OBC_FACTION:
-        case OBC_SLAYER:
-            sVal.FormatULLHex(_pFaction.GetFactionID());
+        case OBC_FACTION_GROUP:
+        case OBC_SLAYER_GROUP:
+            sVal.FormatHex(num_alias_cast<uint32>(_Faction.GetGroup()));
+            break;
+
+        case OBC_FACTION_SPECIES:
+        case OBC_SLAYER_SPECIES:
+            sVal.FormatHex(num_alias_cast<uint32>(_Faction.GetSpecies()));
             break;
 
 		case OBC_ARMOR:
@@ -326,11 +333,18 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				bool fQuoted = false;
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
 			}
-			break;
-        case OBC_FACTION:
-        case OBC_SLAYER:
-            _pFaction.SetFactionID( static_cast<NPC_FACTION>(s.GetArgULLVal()) );
+			return true;
+
+        case OBC_FACTION_GROUP:
+        case OBC_SLAYER_GROUP:
+            _Faction.SetGroup(num_alias_cast<CFactionDef::Group>(s.GetArgU32Val()));
             return true;
+
+        case OBC_FACTION_SPECIES:
+        case OBC_SLAYER_SPECIES:
+            _Faction.SetSpecies(num_alias_cast<CFactionDef::Species>(s.GetArgU32Val()));
+            return true;
+
 		//Set as number only
 		case OBC_EXPANSION:
 		case OBC_VELOCITY:
@@ -349,6 +363,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					SetDefStr(sm_szLoadKeys[OBC_DESCRIPTION], GetDefStr(sm_szLoadKeys[OBC_SUBSECTION]), false, true, false);
 			}
 			return true;
+
 		case OBC_ARMOR:
 			{
 				int64 piVal[2];
@@ -360,6 +375,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					m_defenseRange = 0;
 			}
 			return true;
+
 		case OBC_DAM:
 			{
 				int64 piVal[2];
@@ -371,6 +387,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					m_attackRange = 0;
 			}
 			return true;
+
 		case OBC_BASEID:
 			return false;
         case OBC_CAN:
@@ -431,7 +448,8 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 	m_defenseBase = pBase->m_defenseBase;
 	m_defenseRange = pBase->m_defenseRange;
 	m_Can = pBase->m_Can;
-    _pFaction.SetFactionID(pBase->_pFaction.GetFactionID());
+    _Faction.SetGroup(pBase->_Faction.GetGroup());
+    _Faction.SetSpecies(pBase->_Faction.GetSpecies());
     CEntityProps::Copy(pBase);
 }
 

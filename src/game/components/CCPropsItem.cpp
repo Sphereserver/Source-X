@@ -29,7 +29,7 @@ CCPropsItem::CCPropsItem() : CComponentProps(COMP_PROPS_ITEM)
 // If a CItem: subscribed in CItemBase::SetType and CItem::SetType
 // If a CChar: subscribed in CCharBase::CCharBase and CChar::CChar
 /*
-bool CCPropsItem::CanSubscribe(const CObjBase* pObj) // static
+bool CCPropsItem::CanSubscribe(const CObjBase* pObj) noexcept // static
 {
     return (pObj->IsItem() || pObj->IsChar());
 }
@@ -179,16 +179,16 @@ void CCPropsItem::AddPropsTooltipData(CObjBase* pLinkedObj)
 #define ADDTSTR(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, ptcVal))
 
     /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
-    
+
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
         PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
-        
+
         if (iVal == 0)
             continue;
-        
+
         if (pLinkedObj->IsItem())
         {
             // Show tooltips for these props only if the linked obj is an item
@@ -209,7 +209,7 @@ void CCPropsItem::AddPropsTooltipData(CObjBase* pLinkedObj)
     }
     // End of Numeric properties
 
-/*    
+/*
     // String properties
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {

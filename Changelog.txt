@@ -3859,5 +3859,12 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	If you have a custom anim with default configuration, you don't need to set ANIM=
 
 10-08-2024, Gladie
-- Fixed:  CAN_I_DAMAGEABLE not updating status bar (PR #1259, issues #1248, #1260).
+- Fixed: CAN_I_DAMAGEABLE not updating status bar (PR #1259, issues #1248, #1260).
 
+29-08-2024, Nolok
+  WARNING! POTENTIALLY BREAKING CHANGE! Scripts will need to be updated.
+- Changed: since there was too much data to be stored in the FACTION/SLAYER property, so that it sometimes couldn't fit and caused issues,
+	it has been split in two different properties:
+	  - FACTION/SLAYER_GROUP (expects a bitmask, max value of the usable flag: 0x800000),
+	  - FACTION/SLAYER_SPECIES (plain number, max value 255).
+	    SPECIES with index/value 1 are always considered to be SuperSlayers for their group.

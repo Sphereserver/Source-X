@@ -90,9 +90,8 @@ public:
     CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef);
     virtual ~CItemMultiCustom();
 
-private:
-    CItemMultiCustom(const CItemMultiCustom& copy);
-    CItemMultiCustom& operator=(const CItemMultiCustom& other);
+    CItemMultiCustom(const CItemMultiCustom& copy) = delete;
+    CItemMultiCustom& operator=(const CItemMultiCustom& other) = delete;
 
 public:
     void BeginCustomize(CClient* pClientSrc, bool continueCustomize = false);

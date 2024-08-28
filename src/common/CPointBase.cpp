@@ -9,6 +9,7 @@
 #include "CPointBase.h"
 #include <cmath>
 
+static_assert(sizeof(CPointBase) == sizeof(CPointMap), "CPointBase and CPointMap have to have the same size. Was a virtual method added?");
 
 DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 {

@@ -26,17 +26,17 @@ CCPropsItemWeaponRanged::CCPropsItemWeaponRanged() : CComponentProps(COMP_PROPS_
 {
 }
 
-static bool CanSubscribeTypeIWR(IT_TYPE type)
+static bool CanSubscribeTypeIWR(IT_TYPE type) noexcept
 {
     return (type == IT_WEAPON_BOW || type == IT_WEAPON_XBOW);
 }
 
-bool CCPropsItemWeaponRanged::CanSubscribe(const CItemBase* pItemBase) // static
+bool CCPropsItemWeaponRanged::CanSubscribe(const CItemBase* pItemBase) noexcept // static
 {
     return CanSubscribeTypeIWR(pItemBase->GetType());
 }
 
-bool CCPropsItemWeaponRanged::CanSubscribe(const CItem* pItem) // static
+bool CCPropsItemWeaponRanged::CanSubscribe(const CItem* pItem) noexcept // static
 {
     return CanSubscribeTypeIWR(pItem->GetType());
 }

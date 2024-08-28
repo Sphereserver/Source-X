@@ -29,19 +29,19 @@ CCPropsItemWeapon::CCPropsItemWeapon() : CComponentProps(COMP_PROPS_ITEMWEAPON)
     _uiRange = 0;
 }
 
-static bool CanSubscribeTypeIW(IT_TYPE type)
+static bool CanSubscribeTypeIW(IT_TYPE type) noexcept
 {
     return (type == IT_WEAPON_AXE || type == IT_WEAPON_BOW || type == IT_WEAPON_FENCE || type == IT_WEAPON_MACE_CROOK || type == IT_WEAPON_MACE_PICK || type == IT_WEAPON_MACE_SHARP ||
         type == IT_WEAPON_MACE_SMITH || type == IT_WEAPON_MACE_STAFF || type == IT_WEAPON_SWORD || type == IT_WEAPON_THROWING || type == IT_WEAPON_WHIP || type == IT_WEAPON_XBOW ||
         type == IT_FISH_POLE || type == IT_MUSICAL);
 }
 
-bool CCPropsItemWeapon::CanSubscribe(const CItemBase* pItemBase) // static
+bool CCPropsItemWeapon::CanSubscribe(const CItemBase* pItemBase) noexcept // static
 {
     return CanSubscribeTypeIW(pItemBase->GetType());
 }
 
-bool CCPropsItemWeapon::CanSubscribe(const CItem* pItem) // static
+bool CCPropsItemWeapon::CanSubscribe(const CItem* pItem) noexcept // static
 {
     return CanSubscribeTypeIW(pItem->GetType());
 }
@@ -125,7 +125,7 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* 
 void CCPropsItemWeapon::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyNum");
-    
+
     switch (iPropIndex)
     {
         case PROPIWEAP_RANGEH:
@@ -175,7 +175,7 @@ void CCPropsItemWeapon::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVa
             _uiRange = CBaseBaseDef::ConvertRangeStr(ptcVal);
             break;
         }
-        
+
         default:
             ASSERT(IsPropertyStr(iPropIndex));
             ASSERT((iLimitToExpansion >= RDS_PRET2A) && (iLimitToExpansion < RDS_QTY));

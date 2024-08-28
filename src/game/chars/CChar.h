@@ -226,7 +226,7 @@ public:
 		struct
 		{
 			SPELL_TYPE m_iSpell;			// ACTARG1 = Currently casting spell.
-			CREID_TYPE m_iSummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
+			CREID_TYPE m_uiSummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
 		} m_atMagery;
 
 		// SKILL_ALCHEMY

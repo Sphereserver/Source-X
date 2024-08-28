@@ -141,9 +141,9 @@ LinuxEv g_NetworkEvent;
 CLog			g_Log;
 
 // Config data from sphere.ini is needed from the beginning.
-CServerConfig	g_Cfg;
-CServer		g_Serv;   // current state, stuff not saved.
-CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
+CServerConfig   g_Cfg;
+CServer         g_Serv;   // current state, stuff not saved.
+CAccounts       g_Accounts;			// All the player accounts. name sorted CAccount
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)

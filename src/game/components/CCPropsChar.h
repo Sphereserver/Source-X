@@ -28,7 +28,7 @@ public:
     CCPropsChar();
     virtual ~CCPropsChar() = default;
 
-    //static bool CanSubscribe(const CObjBase* pObj);
+    //static bool CanSubscribe(const CObjBase* pObj) noexcept;
     static bool IgnoreElementalProperty(PropertyIndex_t iPropIndex);
 
     virtual lpctstr GetName() const override {

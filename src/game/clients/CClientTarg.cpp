@@ -37,12 +37,15 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	{
 		const CItem * pItem = static_cast <CItem*> (pObj);
 		if ( pItem->GetAmount() > 1 )
-			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
+			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) [amount=%u] to '%s'",
+                     GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
 		else
-			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(),
+                     (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 	}
 	else
-		snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+		snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(),
+                 (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 
 	// Check priv level for the new verb.
 	if ( ! g_Cfg.CanUsePrivVerb( pObj, m_Targ_Text, this ))
@@ -1486,7 +1489,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	}
 
 	m_pChar->m_atMagery.m_iSpell			= m_tmSkillMagery.m_iSpell;
-	m_pChar->m_atMagery.m_iSummonID		= m_tmSkillMagery.m_iSummonID;
+	m_pChar->m_atMagery.m_uiSummonID		= m_tmSkillMagery.m_uiSummonID;
 
 	m_pChar->m_Act_Prv_UID				= m_Targ_Prv_UID;	// Source (wand or you?)
 	m_pChar->m_Act_UID					= pObj ? pObj->GetUID() : CUID(UID_PLAIN_CLEAR);

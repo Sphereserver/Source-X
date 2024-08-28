@@ -114,7 +114,6 @@ CResourceQtyArray::CResourceQtyArray(lpctstr pszCmds)
 
 void CResourceQtyArray::setNoMergeOnLoad()
 {
-    ADDTOCALLSTACK("CResourceQtyArray::setNoMergeOnLoad");
     m_mergeOnLoad = false;
 }
 

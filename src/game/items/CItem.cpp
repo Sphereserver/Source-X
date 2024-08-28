@@ -1234,7 +1234,8 @@ int CItem::FixWeirdness()
         // unreasonably long for a top level item ?
         if (_GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
-			g_Log.EventWarn("FixWeirdness on Item (UID=0%x [%s]): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID(), GetName());
+			g_Log.EventWarn("FixWeirdness on Item (UID=0%x [%s]): timer unreasonably long (> 90 days) on a top level object. Setting to 1 hour.\n",
+                GetUID().GetObjUID(), GetName());
             _SetTimeoutS(60 * 60);
         }
     }
@@ -3921,7 +3922,7 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
     else if (!pComp)
     {
         CItemBase* pItemDef = Item_GetDef();
-        SubscribeComponent(new CCFaction(pItemDef->_pFaction));
+        SubscribeComponent(new CCFaction(pItemDef->GetFaction()));
     }
 
 	return true;

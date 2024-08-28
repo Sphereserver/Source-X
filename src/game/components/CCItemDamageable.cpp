@@ -18,12 +18,12 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _fNeedUpdate = true;
 }
 
-CItem * CCItemDamageable::GetLink() const
+CItem * CCItemDamageable::GetLink() const noexcept
 {
     return _pLink;
 }
 
-bool CCItemDamageable::CanSubscribe(const CItem* pItem) // static
+bool CCItemDamageable::CanSubscribe(const CItem* pItem) noexcept // static
 {
     return pItem->Can(CAN_I_DAMAGEABLE);
 }

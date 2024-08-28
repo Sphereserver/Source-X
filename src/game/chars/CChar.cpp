@@ -4664,7 +4664,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				return false;
 
 			m_atMagery.m_iSpell = SPELL_Polymorph;
-			m_atMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+			m_atMagery.m_uiSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 			m_Act_UID = GetUID();
 			m_Act_Prv_UID = GetUID();
 

@@ -39,11 +39,11 @@ class CComponent
 
 
 protected:
-    CComponent(COMP_TYPE type);
+    CComponent(COMP_TYPE type) noexcept;
 
 public:
     virtual ~CComponent() = default;
-    COMP_TYPE GetType() const;
+    COMP_TYPE GetType() const noexcept;
 
     /* Script's compatibility
     * All methods here are meant to be proccessed from CEntity so they may behave a little different

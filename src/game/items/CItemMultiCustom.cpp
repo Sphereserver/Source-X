@@ -1932,7 +1932,7 @@ bool CItemMultiCustom::LoadValidItems()
     if (!sm_mapValidItems.empty())	// already loaded?
         return true;
 
-    static const char * sm_szItemFiles[][32] =
+    static constexpr const char * sm_szItemFiles[][32] =
     {
         // list of files containing valid items
         { "doors.txt", "Piece1", "Piece2", "Piece3", "Piece4", "Piece5", "Piece6", "Piece7", "Piece8", nullptr },
@@ -1975,7 +1975,14 @@ bool CItemMultiCustom::LoadValidItems()
                 const std::string& strCurRow = csvDataRow[sm_szItemFiles[i][ii]];
                 if (strCurRow.empty() || !IsDigit(strCurRow[0]))
                     continue;
-                ITEMID_TYPE itemid = (ITEMID_TYPE)std::stoul(strCurRow, nullptr, 10);
+
+                auto iconv = Str_ToU(strCurRow.c_str(), 10);
+                if (iconv.has_value())
+                {
+                    g_Log.EventWarn("Invalid number in file '%s', row=%d. Skipping.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow());
+                    continue;
+                }
+                ITEMID_TYPE itemid = (ITEMID_TYPE)*iconv;
                 if (itemid <= 0 || itemid >= ITEMID_MULTI)
                     continue;
 
@@ -1993,7 +2000,13 @@ bool CItemMultiCustom::LoadValidItems()
                     DEBUG_WARN(("No FeatureMask in file '%s', row=%d.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow()));
                     continue;
                 }
-                sm_mapValidItems[itemid] = (uint)std::stoul(strFeatureMask, nullptr, 10);
+                iconv = Str_ToU(strCurRow.c_str(), 10);
+                if (iconv.has_value())
+                {
+                    g_Log.EventWarn("Invalid FeatureMask number in file '%s', row=%d. Skipping.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow());
+                    continue;
+                }
+                sm_mapValidItems[itemid] = *iconv;
             }
         }
 

@@ -8,6 +8,8 @@
 
 #include "../CComponent.h"
 
+
+class CChar;
 class CItem;
 
 
@@ -33,116 +35,135 @@ class CItem;
 #define DAMAGE_SLAYER_SUPER     2   // Super Slayer does x2 damage.
 #define DAMAGE_SLAYER_OPPOSITE  2   // Opposite Slayer does x2 damage.
 
-/*
-    Groups of NPC_FACTION
-*/
-enum NPC_GROUP
-{
-    NPCGROUP_NONE       = 0,
-    NPCGROUP_FEY        = 0x1,
-    NPCGROUP_ELEMENTAL  = 0x2,
-    NPCGROUP_ABYSS      = 0x4,
-    NPCGROUP_HUMANOID   = 0x8,
-    NPCGROUP_UNDEAD     = 0x10,
-    NPCGROUP_ARACHNID   = 0x20,
-    NPCGROUP_REPTILIAN  = 0x40,
-    NPCGROUP_QTY
-};
 
-/*
-    Faction IDs
-*/
-enum NPC_FACTION : llong
-{
-    FACTION_NONE                = 0,
-    // Fey Group (opposed to Abyss Group)
-    FACTION_FEY                 = 0x1,          // SuperSlayer
-
-    // Elemental Group (opposed to Abyss Group)
-    FACTION_ELEMENTAL           = 0x2,          //  SuperSlayer
-    FACTION_AIR_ELEMENTAL       = 0x4,
-    FACTION_BLOOD_ELEMENTAL     = 0x8,
-    FACTION_EARTH_ELEMENTAL     = 0x10,
-    FACTION_FIRE_ELEMENTAL      = 0x20,
-    FACTION_POISON_ELEMENTAL    = 0x40,
-    FACTION_SNOW_ELEMENTAL      = 0x90,
-    FACTION_WATER_ELEMENTAL     = 0x100,
-    FACTION_ELEMENTAL_QTY,
-
-    // Abyss Group (opposed to Elemental and Fey Groups)
-    FACTION_DEMON               = 0x200,        // SuperSlayer
-    FACTION_GARGOYLE            = 0x400,
-    FACTION_ABYSS_QTY,
-
-    // Humanoid Group (opposed to Undead Group)
-    FACTION_REPOND              = 0x800,        // SuperSlayer
-    FACTION_GOBLIN              = 0x1000,
-    FACTION_VERMIN              = 0x2000,
-    FACTION_OGRE                = 0x4000,
-    FACTION_ORC                 = 0x8000,
-    FACTION_TROLL               = 0x10000,
-    FACTION_HUMANOID_QTY,
-
-    // Undead Group (opposed to Humanoid Group)
-    FACTION_UNDEAD              = 0x20000,      // SuperSlayer
-    FACTION_MAGE                = 0x40000,
-    FACTION_UNDEAD_QTY,
-
-    // Arachnid Group (opposed to Reptilian Group)
-    FACTION_ARACHNID            = 0x80000,      // SuperSlayer
-    FACTION_SCORPION            = 0x100000,
-    FACTION_SPIDER              = 0x200000,
-    FACTION_TERATHAN            = 0x400000,
-    FACTION_ARACHNID_QTY,
-
-    // Reptile Group (opposed to Arachnid)
-    FACTION_REPTILE             = 0x800000,     // SuperSlayer
-    FACTION_DRAGON              = 0x1000000,
-    FACTION_OPHIDIAN            = 0x2000000,
-    FACTION_SNAKE               = 0x4000000,
-    FACTION_LIZARDMAN           = 0x8000000,
-    FACTION_REPTILIAN_QTY,
-
-    // Old Mondain’s Legacy Slayers
-    FACTION_BAT                 = 0x10000000,
-    FACTION_BEAR                = 0x20000000,
-    FACTION_BEETLE              = 0x40000000,
-    FACTION_BIRD                = 0x80000000,
-
-    // Standalone Slayers
-    FACTION_BOVINE              = 0x100000000,
-    FACTION_FLAME               = 0x200000000,
-    FACTION_ICE                 = 0x400000000,
-    FACTION_WOLF                = 0x800000000,
-    FACTION_QTY
-};
-
-class CChar;
 /*
     This class is used to store FACTION for NPCs and SLAYER for items
     Initially involved in the Slayer system it handles Super Slayer,
     Lesser Slayer and Opposites to increase damage dealt/received
 */
-
 class CFactionDef
 {
 protected:
-    NPC_FACTION _iFaction;
+    uint32 _uiFactionData;
+
 public:
-    CFactionDef();
-    NPC_FACTION GetFactionID() const;
-    void SetFactionID(NPC_FACTION faction);
+    enum class Group : uint32
+    {
+        NONE       = 0,
+        FEY        = 0x1,
+        ELEMENTAL  = 0x2,
+        ABYSS      = 0x4,
+        HUMANOID   = 0x8,
+        UNDEAD     = 0x10,
+        ARACHNID   = 0x20,
+        REPTILIAN  = 0x40,
+        QTY
+        // MAX = 0x800000
+    };
+    // Lowest two bytes are used to store the species as a plain number.
+    static constexpr uint32 _kuiGroupMask = 0xFFFF'FF00;
+    static constexpr uint32 _kuiGroupReservedBytes = 8;
+    static constexpr uint32 _kuiGroupMaxVal = (_kuiGroupMask >> _kuiGroupReservedBytes);
+
+    // TODO: move the values to scripts, we don't need to know here what's the number for a given species.
+    //  Only interested in superslayers (which num is always 1 btw)
+    static constexpr uint32 _kuiSuperSlayerSpeciesIndex = 1;
+    enum class Species : uint32
+    {
+        NONE                = 0,
+        // MAX = 255
+        // Super Slayers always have species ID 1.
+
+        // Fey Group (opposed to Abyss Group)
+        FEY_SSLAYER         = _kuiSuperSlayerSpeciesIndex,          // SuperSlayer
+
+        // Elemental Group (opposed to Abyss Group)
+        ELEMENTAL_SSLAYER   = _kuiSuperSlayerSpeciesIndex,          //  SuperSlayer
+        AIR_ELEMENTAL,
+        BLOOD_ELEMENTAL,
+        EARTH_ELEMENTAL,
+        FIRE_ELEMENTAL,
+        POISON_ELEMENTAL,
+        SNOW_ELEMENTAL,
+        WATER_ELEMENTAL,
+        ELEMENTAL_QTY,
+
+        // Abyss Group (opposed to Elemental and Fey Groups)
+        DEMON_SSLAYER       = _kuiSuperSlayerSpeciesIndex,        // SuperSlayer
+        GARGOYLE,
+        ABYSS_QTY,
+
+        // Humanoid Group (opposed to Undead Group)
+        REPOND_SSLAYER      = _kuiSuperSlayerSpeciesIndex,        // SuperSlayer
+        GOBLIN,
+        VERMIN,
+        OGRE,
+        ORC,
+        TROLL,
+        HUMANOID_QTY,
+
+        // Undead Group (opposed to Humanoid Group)
+        UNDEAD_SSLAYER       = _kuiSuperSlayerSpeciesIndex,      // SuperSlayer
+        MAGE,
+        UNDEAD_QTY,
+
+        // Arachnid Group (opposed to Reptilian Group)
+        ARACHNID_SSLAYER     = _kuiSuperSlayerSpeciesIndex,      // SuperSlayer
+        SCORPION,
+        SPIDER,
+        TERATHAN,
+        ARACHNID_QTY,
+
+        // Reptile Group (opposed to Arachnid)
+        REPTILE_SSLAYER      = _kuiSuperSlayerSpeciesIndex,     // SuperSlayer
+        DRAGON,
+        OPHIDIAN,
+        SNAKE,
+        LIZARDMAN,
+        REPTILIAN_QTY,
+
+        // Old Mondain’s Legacy Slayers
+        BAT_SSLAYER          = _kuiSuperSlayerSpeciesIndex,
+        BEAR,
+        BEETLE,
+        BIRD,
+        //ANIMAL_QTY, // This is not a real slayer group, but we might add ANIMAL_QTY for convenience
+
+        // Standalone Slayers
+        BOVINE_SSLAYER       = _kuiSuperSlayerSpeciesIndex,
+        FLAME,
+        ICE,
+        WOLF
+        //STANDALONE_QTY
+    };
+    // The upper 6 bytes are used to store the family/group as a bitmask.
+    static constexpr uint32 _kuiSpeciesMask = 0x0000'00FF;
+    //static constexpr uint32 _kuiSpeciesReservedBytes = 24;
+    static constexpr uint32 _kuiSpeciesMaxVal = _kuiSpeciesMask; // 255
+
+
+public:
+    CFactionDef() noexcept;
+    ~CFactionDef() noexcept = default;
+
+    bool IsNone() const noexcept;
+    Group GetGroup() const noexcept;
+    bool SetGroup (Group faction) noexcept;
+    Species GetSpecies() const noexcept;
+    bool SetSpecies(Species species) noexcept;
 };
+
 
 class CCFaction : public CFactionDef, public CComponent
 {
     static lpctstr const sm_szLoadKeys[];
 
 public:
-    CCFaction();
-    CCFaction(CCFaction *copy);
+    CCFaction() noexcept;
+    CCFaction(CCFaction *copy) noexcept;
 	virtual ~CCFaction() override = default;
-    static bool CanSubscribe(const CItem* pItem);
+
+    static bool CanSubscribe(const CItem* pItem) noexcept;
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr) override;
@@ -152,48 +173,6 @@ public:
     virtual void Copy(const CComponent *target) override;
     bool r_Load(CScript & s);  // Load a character from Script
     virtual CCRET_TYPE OnTickComponent() override;
-    /*
-        Sets the Group to the specified type.
-    */
-    void SetFactionID(NPC_FACTION group);
-    /*
-        Return true if I'm in the 'Elemental' group.
-    */
-    bool IsGroupElemental() const;
-    /*
-    Return true if I'm in the 'Fey' group.
-    */
-    bool IsGroupFey() const;
-    /*
-    Return true if I'm in the 'Abyss' group.
-    */
-    bool IsGroupAbyss() const;
-    /*
-    Return true if I'm in the 'Humaoind' group.
-    */
-    bool IsGroupHumanoid() const;
-    /*
-    Return true if I'm in the 'Undead' group.
-    */
-    bool IsGroupUndead() const;
-    /*
-    Return true if I'm in the 'Arachnid' group.
-    */
-    bool IsGroupArachnid() const;
-    /*
-    Return true if I'm in the 'Reptilian' group.
-    */
-    bool IsGroupReptilian() const;
-
-    /*
-        Checks for an specific Group and returns it I fit in anyone or FACTION_QTY if not.
-    */
-    NPC_GROUP GetGroupID() const;
-
-    /*
-    Checks for an specific Faction and returns it I fit in anyone or FACTION_QTY if not.
-    */
-    NPC_FACTION GetFactionID() const;
 
     /*
         Checks my group and the target's one and return true if we are enemies.

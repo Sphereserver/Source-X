@@ -28,7 +28,7 @@ public:
     CCPropsItem();
     virtual ~CCPropsItem() = default;
 
-    //static bool CanSubscribe(const CObjBase* pObj);
+    //static bool CanSubscribe(const CObjBase* pObj) noexcept;
 
     virtual lpctstr GetName() const override {
         return "Item";

@@ -265,11 +265,11 @@ public:
 
 	static CREID_TYPE FindCharTrack( ITEMID_TYPE trackID );
 
-	IT_TYPE GetType() const
+	IT_TYPE GetType() const noexcept
 	{
 		return m_type;
 	}
-	bool IsType( IT_TYPE type ) const
+	bool IsType( IT_TYPE type ) const noexcept
 	{
 		return ( type == m_type );
 	}
@@ -277,7 +277,7 @@ public:
 
 	virtual void SetTypeName( lpctstr pszName ) override;
 
-	LAYER_TYPE GetEquipLayer() const
+	LAYER_TYPE GetEquipLayer() const noexcept
 	{
 		// Is this item really equippable ?
 		return (LAYER_TYPE)m_layer;
@@ -378,7 +378,7 @@ public:
 	static CItemBaseDupe* GetDupeRef(ITEMID_TYPE id);
 
 	virtual void UnLink() override;
-	CItemBase* GetItemDef() const;	
+	CItemBase* GetItemDef() const;
 
 	inline uint64 GetTFlags() const noexcept
 	{

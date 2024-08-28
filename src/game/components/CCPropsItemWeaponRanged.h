@@ -30,8 +30,8 @@ public:
     CCPropsItemWeaponRanged();
     virtual ~CCPropsItemWeaponRanged() = default;
 
-    static bool CanSubscribe(const CItemBase* pItemBase);
-    static bool CanSubscribe(const CItem* pItem);
+    static bool CanSubscribe(const CItemBase* pItemBase) noexcept;
+    static bool CanSubscribe(const CItem* pItem) noexcept;
 
 
     virtual lpctstr GetName() const override {

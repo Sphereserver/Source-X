@@ -30,7 +30,7 @@ CCPropsChar::CCPropsChar() : CComponentProps(COMP_PROPS_CHAR)
 // If a CItem: subscribed in CItemBase::SetType and CItem::SetType
 // If a CChar: subscribed in CCharBase::CCharBase and CChar::CChar
 /*
-bool CCPropsChar::CanSubscribe(const CObjBase* pObj) // static
+bool CCPropsChar::CanSubscribe(const CObjBase* pObj) noexcept // static
 {
     return (pObj->IsItem() || pObj->IsChar());
 }
@@ -170,7 +170,7 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
             pChar->UpdateStatsFlag();
             break;
         }
-        
+
         default:
             //pLinkedObj->UpdatePropertyFlag();
             break;
@@ -227,7 +227,7 @@ bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_
             return true;
         }
     }
-    
+
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
         DeletePropertyNum(fPropStr);
@@ -273,17 +273,17 @@ void CCPropsChar::AddPropsTooltipData(CObjBase* pLinkedObj)
     UnreferencedParameter(pLinkedObj);
 
     /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
-    
+
 /*
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
         PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
-        
+
         if (iVal == 0)
             continue;
-        
+
         switch (prop)
         {
             default: // unimplemented

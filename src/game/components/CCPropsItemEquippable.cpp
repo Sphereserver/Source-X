@@ -27,12 +27,12 @@ CCPropsItemEquippable::CCPropsItemEquippable() : CComponentProps(COMP_PROPS_ITEM
 {
 }
 
-bool CCPropsItemEquippable::CanSubscribe(const CItemBase* pItemBase) // static
+bool CCPropsItemEquippable::CanSubscribe(const CItemBase* pItemBase) noexcept // static
 {
     return pItemBase->IsTypeEquippable();
 }
 
-bool CCPropsItemEquippable::CanSubscribe(const CItem* pItem) // static
+bool CCPropsItemEquippable::CanSubscribe(const CItem* pItem) noexcept // static
 {
     return pItem->IsTypeEquippable();
 }
@@ -56,7 +56,7 @@ bool CCPropsItemEquippable::IsPropertyStr(PropertyIndex_t iPropIndex) const
 }
 
 
-/* The idea is: 
+/* The idea is:
     - Changed: Elemental damages and resistances (RESFIRE, DAMFIRE...) are now loaded only if COMBAT_ELEMENTAL_ENGINE is on, otherwise those keywords will be IGNORED. Bear in mind that if you have created
         equippable items when that flag was off and you decide to turn it on later, you'll need to RECREATE all of those ITEMS in order to make them load the elemental properties.
     We'll use this method when we have figured how to avoid possible bugs when equipping and unequipping items and switching COMBAT_ELEMENTAL_ENGINE on and off.
@@ -312,7 +312,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                     ADDTNUM(1113593); // Fire Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERKINETIC: // Unimplemented
-                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))   
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1113597); // Kinetic Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERPOISON: // Unimplemented

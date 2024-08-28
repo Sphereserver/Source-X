@@ -139,11 +139,13 @@ public:
 
 	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
 
-    CCFaction _pFaction;
+private:
+    CCFaction _Faction;
 
 
 public:
-    CCFaction GetFaction();
+    CCFaction const& GetFaction() const noexcept;
+    CCFaction &GetFaction() noexcept;
 
     /**
      * @brief   Gets definition string.
@@ -200,7 +202,7 @@ public:
 
 public:
 	CBaseBaseDef( CResourceID id );
-	virtual ~CBaseBaseDef();
+	virtual ~CBaseBaseDef() = default;
 
 	CBaseBaseDef(const CBaseBaseDef& copy) = delete;
 	CBaseBaseDef& operator=(const CBaseBaseDef& other) = delete;

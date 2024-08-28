@@ -1541,7 +1541,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
 			{
 				m_tmSkillMagery.m_iSpell = SPELL_Summon;
-				m_tmSkillMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+				m_tmSkillMagery.m_uiSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
 				lpctstr pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
 				if ( !pSpellDef->m_sTargetPrompt.IsEmpty() )
@@ -1557,7 +1557,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			else
 			{
 				m_pChar->m_atMagery.m_iSpell = SPELL_Summon;
-				m_pChar->m_atMagery.m_iSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
+				m_pChar->m_atMagery.m_uiSummonID = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
 				if ( IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 				{
@@ -1566,7 +1566,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 				else
 				{
-					int skill;
+					int skill = SKILL_NONE;
 					if ( !pSpellDef->GetPrimarySkill(&skill, nullptr) )
 						return false;
 

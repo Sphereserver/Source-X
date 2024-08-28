@@ -29,9 +29,8 @@ public:
 	CSVFile();
 	~CSVFile();
 
-private:
-	CSVFile(const CSVFile& copy);
-	CSVFile& operator=(const CSVFile& other);
+	CSVFile(const CSVFile& copy) = delete;
+	CSVFile& operator=(const CSVFile& other) = delete;
 
 private:    int _GetColumnCount() const { return _iColumnCount; }
 public:     int GetColumnCount() const;
