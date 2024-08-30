@@ -294,7 +294,7 @@ dword CWorldThread::GetUIDCount() const
 	return (dword)_uiUIDObjArraySize;
 }
 
-CObjBase *CWorldThread::FindUID(dword dwIndex) const
+CObjBase *CWorldThread::FindUID(dword dwIndex) const noexcept
 {
 	if ( !dwIndex || dwIndex >= GetUIDCount() )
 		return nullptr;

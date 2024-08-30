@@ -4,15 +4,12 @@
 #include "CChatChanMember.h"
 #include "CClient.h"
 
-CChatChanMember::CChatChanMember()
+CChatChanMember::CChatChanMember() noexcept
+    :m_fChatActive(false), m_fReceiving(true), m_fAllowWhoIs(true), m_pChannel(nullptr)
 {
-    m_fChatActive = false;
-    m_pChannel = nullptr;
-    m_fReceiving = true;
-    m_fAllowWhoIs = true;
 }
 
-CChatChanMember::~CChatChanMember()
+CChatChanMember::~CChatChanMember() noexcept
 {
     if ( IsChatActive()) // Are we chatting currently ?
     {
@@ -20,7 +17,7 @@ CChatChanMember::~CChatChanMember()
     }
 }
 
-CChatChannel * CChatChanMember::GetChannel() const
+CChatChannel * CChatChanMember::GetChannel() const noexcept
 {
     return m_pChannel;
 }
@@ -30,7 +27,7 @@ void CChatChanMember::SetChannel(CChatChannel * pChannel)
     m_pChannel = pChannel;
 }
 
-bool CChatChanMember::IsChatActive() const
+bool CChatChanMember::IsChatActive() const noexcept
 {
     return m_fChatActive;
 }
@@ -181,14 +178,14 @@ void CChatChanMember::ToggleWhoIs()
     SendChatMsg((GetWhoIs() == true) ? CHATMSG_ShowingName : CHATMSG_NotShowingName);
 }
 
-CClient * CChatChanMember::GetClientActive()
+CClient * CChatChanMember::GetClientActive() NOEXCEPT_NODEBUG
 {
     ADDTOCALLSTACK("CChatChanMember::GetClientActive");
     DEBUG_ASSERT(dynamic_cast<CClient*>(this));
     return static_cast <CClient*>( this );
 }
 
-const CClient * CChatChanMember::GetClientActive() const
+const CClient * CChatChanMember::GetClientActive() const NOEXCEPT_NODEBUG
 {
     ADDTOCALLSTACK("CChatChanMember::GetClientActive(const)");
     DEBUG_ASSERT(dynamic_cast<const CClient*>(this));

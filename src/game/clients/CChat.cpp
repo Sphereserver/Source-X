@@ -6,6 +6,9 @@
 #include "CChatChanMember.h"
 #include "CClient.h"
 
+
+lpctstr CChat::m_sClassName = "CChat";
+
 bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember* pMember)
 {
 	ADDTOCALLSTACK("CChat::CreateChannel");
@@ -377,7 +380,7 @@ void CChat::Action(CClient* pClient, const nachar* pszText, int len, CLanguageID
 	}
 }
 
-void CChat::QuitChat(CChatChanMember* pClient)
+void CChat::QuitChat(CChatChanMember* pClient) noexcept
 {
 	ADDTOCALLSTACK("CChat::QuitChat");
 	// Remove from old channel (if any)
@@ -387,7 +390,11 @@ void CChat::QuitChat(CChatChanMember* pClient)
 
     CChatChannel* pCurrentChannel = pClient->GetChannel();
     if (pCurrentChannel)
+    {
+        EXC_TRY("Removing channel member");
         pCurrentChannel->RemoveMember(pClient);
+        EXC_CATCH;
+    }
 }
 
 void CChat::FormatName(CSString& sName, const CChatChanMember* pMember, bool fSystem)
@@ -471,7 +478,7 @@ void CChat::BroadcastAddChannel(CChatChannel* pChannel)
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
-		pClient->addChatSystemMessage(CHATCMD_AddChannel, pChannel->GetName(), pClient->m_fUseNewChatSystem ? nullptr : pChannel->GetPassword());
+		pClient->addChatSystemMessage(CHATCMD_AddChannel, pChannel->GetName(), (pClient->m_fUseNewChatSystem ? nullptr : pChannel->GetPassword()));
 }
 
 void CChat::BroadcastRemoveChannel(CChatChannel* pChannel)

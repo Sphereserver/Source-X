@@ -33,7 +33,7 @@ public:
 	void Broadcast(CChatChanMember * pFrom, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
 	void BroadcastAddChannel(CChatChannel* pChannel);
 	void BroadcastRemoveChannel(CChatChannel* pChannel);
-	void QuitChat(CChatChanMember * pClient);
+	void QuitChat(CChatChanMember * pClient) noexcept;
 
 	bool IsChannel(const CChatChannel* pChannel) const;
 	void JoinChannel(lpctstr pszChannel, lpctstr pszPassword, CChatChanMember* pMember = nullptr);

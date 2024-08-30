@@ -274,18 +274,18 @@ CBaseBaseDef* CObjBase::Base_GetDef() const noexcept
 	return (static_cast <CBaseBaseDef*>(m_BaseRef.GetRef()));
 }
 
-bool CObjBase::IsContainer() const
+bool CObjBase::IsContainer() const noexcept
 {
 	// Simple test if object is a container.
 	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
-int64 CObjBase::GetTimeStampS() const
+int64 CObjBase::GetTimeStampS() const noexcept
 {
 	return m_iTimeStampS;
 }
 
-void CObjBase::SetTimeStampS(int64 t_time)
+void CObjBase::SetTimeStampS(int64 t_time) noexcept
 {
 	m_iTimeStampS = t_time;
 }

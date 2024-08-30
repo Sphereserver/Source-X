@@ -1,7 +1,7 @@
 #ifndef _INC_STYPECAST_H
 #define _INC_STYPECAST_H
 
-#include <climits>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 
@@ -75,7 +75,7 @@ template <typename T>
 [[nodiscard]] inline
 auto n64_narrow32_checked(const T a)
 {
-    ASSERT(a < std::numeric_limits<int32>::max());
+    ASSERT(a <= std::numeric_limits<int32>::max());
     return n64_narrow32(a);
 }
 
@@ -88,7 +88,7 @@ constexpr auto n64_narrow16(const T a) noexcept
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
 
-    // Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
+    // Since the narrowing can be implementation specific, here we decide that we take only the lower 16 bytes and discard the upper ones.
     constexpr uint64 umask = 0x0000'0000'0000'FFFF;
     if constexpr (std::is_signed_v<T>)
     {
@@ -105,8 +105,35 @@ template <typename T>
 [[nodiscard]] inline
 auto n64_narrow16_checked(const T a)
 {
-    ASSERT(a < std::numeric_limits<int16>::max());
+    ASSERT(a <= std::numeric_limits<int16>::max());
     return n64_narrow16(a);
+}
+
+// Narrow a 64 bits number to a 8 bits number, discarding any upper exceeding bytes.
+template <typename T>
+[[nodiscard]]
+constexpr auto n64_narrow8(const T a) noexcept
+{
+    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type");
+    static_assert(std::is_floating_point_v<T> == false, "Corresponding 8-bit floating point type does not exist?");
+    static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
+    static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
+
+    // Since the narrowing can be implementation specific, here we decide that we take only the lower 8 bytes and discard the upper ones.
+    constexpr uint64 umask = 0x0000'0000'0000'00FF;
+    if constexpr (std::is_signed_v<T>)
+        return static_cast<int8>(a & umask);
+    else
+        return static_cast<uint8>(a & umask);
+}
+
+// Narrow a 64 bits number to a 8 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
+template <typename T>
+[[nodiscard]] inline
+auto n64_narrow8_checked(const T a)
+{
+    ASSERT(a <= std::numeric_limits<int8>::max());
+    return n64_narrow8(a);
 }
 
 // Narrow a 32 bits number to a 16 bits number, discarding any upper exceeding bytes.
@@ -135,7 +162,7 @@ template <typename T>
 [[nodiscard]] inline
 auto n32_narrow16_checked(const T a)
 {
-    ASSERT(a < std::numeric_limits<int16>::max());
+    ASSERT(a <= std::numeric_limits<int16>::max());
     return n32_narrow16(a);
 }
 
@@ -160,7 +187,7 @@ template <typename T>
 [[nodiscard]] inline
 auto n32_narrow8_checked(const T a)
 {
-    ASSERT(a < std::numeric_limits<int8>::max());
+    ASSERT(a <= std::numeric_limits<int8>::max());
     return n32_narrow8(a);
 }
 
@@ -186,7 +213,7 @@ template <typename T>
 [[nodiscard]] inline
 auto n16_narrow8_checked(const T a)
 {
-    ASSERT(a < std::numeric_limits<int8>::max());
+    ASSERT(a <= std::numeric_limits<int8>::max());
     return n16_narrow8(a);
 }
 
@@ -201,14 +228,12 @@ constexpr uint32 usize_narrow32(const size_t a) noexcept
     else
         return a;
     */
-#if SIZE_MAX == ULLONG_MAX
-    // ptr size is 8 -> 64 bits
+#if SIZE_MAX == UINT64_MAX
     return n64_narrow32(a);
-#elif SIZE_MAX == UINT_MAX
-    // ptr size is 4 -> 32 bits
+#elif SIZE_MAX == UINT32_MAX
     return a;
 #else
-#   error "Pointer size is neither 8 nor 4?"
+#   error "size_t is neither 8 nor 4 bytes?"
 #endif
 }
 
@@ -216,12 +241,12 @@ constexpr uint32 usize_narrow32(const size_t a) noexcept
 [[nodiscard]] inline
 uint32 usize_narrow32_checked(const size_t a)
 {
-    ASSERT(a < std::numeric_limits<uint32>::max());
+    ASSERT(a <= std::numeric_limits<uint32>::max());
     return usize_narrow32(a);
 }
 
 
-// Unsigned (and size_t) to signed.
+/* Unsigned (and size_t) to signed, checked. */
 
 // Convert an 8 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
@@ -241,6 +266,22 @@ int16 i16_from_u16_checked(const uint16 a) // not clamping/capping
 }
 template <typename T> int16 i16_from_u16_checked(T) = delete;
 
+[[nodiscard]] inline
+int16 i16_from_u32_checked(const uint32 a) // not clamping/capping
+{
+    ASSERT(a <= (uint32_t)std::numeric_limits<int16_t>::max());
+    return static_cast<int16>(a);
+}
+template <typename T> int16 i16_from_u32_checked(T) = delete;
+
+[[nodiscard]] inline
+int16 i16_from_u64_checked(const uint64 a) // not clamping/capping
+{
+    ASSERT(a <= (uint64_t)std::numeric_limits<int16_t>::max());
+    return static_cast<int16>(a);
+}
+template <typename T> int16 i16_from_u64_checked(T) = delete;
+
 // Convert a 32 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
 int32 i32_from_u32_checked(const uint32 a) // not clamping/capping
@@ -249,6 +290,14 @@ int32 i32_from_u32_checked(const uint32 a) // not clamping/capping
     return static_cast<int32>(a);
 }
 template <typename T> int32 i32_from_u32_checked(T) = delete;
+
+[[nodiscard]] inline
+int32 i32_from_u64_checked(const uint64 a) // not clamping/capping
+{
+    ASSERT(a <= (uint64_t)std::numeric_limits<int32_t>::max());
+    return static_cast<int32>(a);
+}
+template <typename T> int32 i32_from_u64_checked(T) = delete;
 
 // Convert a 64 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
@@ -260,6 +309,65 @@ int64 i64_from_u64_checked(const uint64 a) // not clamping/capping
 template <typename T> int64 i64_from_u64_checked(T) = delete;
 
 
+// size_t conversions
+
+[[nodiscard]] inline
+int8 i8_from_usize_checked(const size_t a) // not clamping/capping
+{
+#if SIZE_MAX == UINT64_MAX
+    return n64_narrow8_checked(a);
+#elif SIZE_MAX == UINT32_MAX
+    return n32_narrow8_checked(a);
+#else
+#   error "size_t is neither 8 nor 4 bytes?"
+#endif
+}
+template <typename T> int8 i8_from_usize_checked(T) = delete;
+
+
+[[nodiscard]] inline
+int16 i16_from_usize_checked(const size_t a) // not clamping/capping
+{
+#if SIZE_MAX == UINT64_MAX
+    return n64_narrow16_checked(a);
+#elif SIZE_MAX == UINT32_MAX
+    return n32_narrow16_checked(a);
+#else
+#   error "size_t is neither 8 nor 4 bytes?"
+#endif
+}
+template <typename T> int16 i16_from_usize_checked(T) = delete;
+
+[[nodiscard]] inline
+int32 i32_from_usize_checked(const size_t a) // not clamping/capping
+{
+#if SIZE_MAX == UINT64_MAX
+    return n64_narrow32_checked(a);
+#elif SIZE_MAX == UINT32_MAX
+    return i32_from_u32_checked(a);
+#else
+#   error "size_t is neither 8 nor 4 bytes?"
+#endif
+}
+template <typename T> int32 i32_from_usize_checked(T) = delete;
+
+[[nodiscard]] inline
+int64 i64_from_usize_checked(const size_t a) // not clamping/capping
+{
+#if SIZE_MAX == UINT64_MAX
+    return i64_from_u64_checked(a);
+#elif SIZE_MAX == UINT32_MAX
+    return static_cast<int64>(a);   // For sure it will fit
+#else
+#   error "size_t is neither 8 nor 4 bytes?"
+#endif
+}
+template <typename T> int64 i64_from_usize_checked(T) = delete;
+
+
+/* Unsigned (and size_t) to signed, clamping. */
+
+
 [[nodiscard]] constexpr
 int8 i8_from_u8_clamping(const uint8 a) noexcept
 {
@@ -269,19 +377,19 @@ int8 i8_from_u8_clamping(const uint8 a) noexcept
 [[nodiscard]] constexpr
 int16 i16_from_u16_clamping(const uint16 a) noexcept
 {
-    return (a > (uint16_t)std::numeric_limits<int16_t>::max()) ? (uint16_t)std::numeric_limits<int16_t>::max() : (int16_t)a;
+    return (a > (uint16_t)std::numeric_limits<int16_t>::max()) ? std::numeric_limits<int16_t>::max() : (int16_t)a;
 }
 
 [[nodiscard]] constexpr
 int32 i32_from_u32_clamping(const uint32 a) noexcept
 {
-    return (a > (uint32_t)std::numeric_limits<int32_t>::max()) ? (uint32_t)std::numeric_limits<int32_t>::max() : (int32_t)a;
+    return (a > (uint32_t)std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : (int32_t)a;
 }
 
 [[nodiscard]] constexpr
 int64 i64_from_u64_clamping(const uint64 a) noexcept
 {
-    return (a > (uint64_t)std::numeric_limits<int64_t>::max()) ? (uint64_t)std::numeric_limits<int64_t>::max() : (int64_t)a;
+    return (a > (uint64_t)std::numeric_limits<int64_t>::max()) ? std::numeric_limits<int64_t>::max() : (int64_t)a;
 }
 
 [[nodiscard]] constexpr

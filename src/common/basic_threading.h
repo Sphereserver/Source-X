@@ -40,10 +40,12 @@
 // A single macro to lock the class mutex and return the value in a thread-safe way.
 // Do not use to return references! (It will return the address of the local-scoped, temporary variable _MT_RETURN_val)
 #define MT_SHARED_LOCK_RETURN(x) \
+        /* Creating and locking a mutex might THROW std::system_error ! */ \
 		{MT_SHARED_LOCK_SET; \
 		MT_RETURN(x);}
 
 #define MT_UNIQUE_LOCK_RETURN(x) \
+        /* Creating and locking a mutex might THROW std::system_error ! */ \
 		{MT_UNIQUE_LOCK_SET; \
 		MT_RETURN(x);}
 

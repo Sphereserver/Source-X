@@ -2119,13 +2119,13 @@ void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 	ASSERT(false);
 }
 
-bool CItem::CanHear() const
+bool CItem::CanHear() const noexcept
 {
     //ADDTOCALLSTACK("CItem::CanHear");
     return IsType(IT_SHIP) || IsType(IT_COMM_CRYSTAL);
 }
 
-CItemBase * CItem::Item_GetDef() const
+CItemBase * CItem::Item_GetDef() const noexcept
 {
 	return static_cast <CItemBase*>( Base_GetDef() );
 }

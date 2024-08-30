@@ -6,18 +6,21 @@
 #ifndef _INC_CGLOBALCHATCHANMEMBER_H
 #define _INC_CGLOBALCHATCHANMEMBER_H
 
+#include "../../common/sphere_library/CSString.h"
+
 class CClient;
+
 
 class CGlobalChatChanMember		// This is member of CClient
 {
 public:
 	static const char* m_sClassName;
 
-	CGlobalChatChanMember();
-	virtual ~CGlobalChatChanMember();
+	CGlobalChatChanMember() noexcept;
+	virtual ~CGlobalChatChanMember() noexcept = default;
 
 private:
-	lpctstr m_pszJID;	// client Jabber ID
+	CSString m_strJID;	// client Jabber ID
 	bool m_fVisible;	// client visibility status (online/offline)
 
 public:
@@ -26,9 +29,8 @@ public:
 	void SetVisible(bool fNewStatus);
 	bool IsVisible() const;
 
-private:
-	CGlobalChatChanMember(const CGlobalChatChanMember& copy);
-	CGlobalChatChanMember& operator=(const CGlobalChatChanMember& other);
+	CGlobalChatChanMember(const CGlobalChatChanMember& copy) = delete;
+	CGlobalChatChanMember& operator=(const CGlobalChatChanMember& other) = delete;
 };
 
 #endif // _INC_CGLOBALCHATCHANMEMBER_H

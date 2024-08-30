@@ -81,7 +81,7 @@ public:
 	// UID Managenent
     #define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(INTPTR_MAX))
 	dword GetUIDCount() const;
-	CObjBase * FindUID(dword dwIndex) const;
+	CObjBase * FindUID(dword dwIndex) const noexcept;
 	void FreeUID(dword dwIndex);
 	dword AllocUID( dword dwIndex, CObjBase * pObj );
 

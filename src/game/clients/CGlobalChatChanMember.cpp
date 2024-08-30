@@ -3,24 +3,20 @@
 #include "CClient.h"
 #include "CGlobalChatChanMember.h"
 
-CGlobalChatChanMember::CGlobalChatChanMember()
+CGlobalChatChanMember::CGlobalChatChanMember() noexcept :
+    m_fVisible(false)
 {
-	m_pszJID = Str_GetTemp();
-	m_fVisible = false;
 }
 
-CGlobalChatChanMember::~CGlobalChatChanMember()
-{
-}
 
 void CGlobalChatChanMember::SetJID(lpctstr pszJID)
 {
-	m_pszJID = pszJID;
+	m_strJID = pszJID;
 }
 
 lpctstr CGlobalChatChanMember::GetJID() const
 {
-	return m_pszJID;
+	return m_strJID.GetBuffer();
 }
 
 void CGlobalChatChanMember::SetVisible(bool fNewStatus)

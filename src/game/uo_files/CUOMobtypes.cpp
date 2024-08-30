@@ -25,7 +25,7 @@ void CUOMobTypes::Load()
         _vMobTypesEntries.resize(CREID_QTY);
         for (size_t i = 0; i < _vMobTypesEntries.size(); ++i)
         {
-            _vMobTypesEntries[i] = CUOMobTypesEntry{MOBTE_QTY, 0};
+            _vMobTypesEntries[i] = CUOMobTypesEntry{MOBTE_EQUIPMENT, 0};
         }
 
         tchar* ptcTemp = Str_GetTemp();
@@ -41,24 +41,21 @@ void CUOMobTypes::Load()
                 int iLineLength = (int)strnlen(ptcTemp, Str_TempLength());
                 iLineLength = Str_TrimEndWhitespace(ptcTemp, iLineLength);
 
-                if (iLineLength == 0 || ptcTemp[0] == '#') //Empty line or commented
+                //Empty line or commented
+                if (iLineLength == 0 || ptcTemp[0] == '#')
+                    continue;
+                GETNONWHITESPACE(ptcTemp);
+                if (ptcTemp[0] == '#')
                     continue;
 
                 //Split the string
-                tchar* pptcSplitArray[3];
+                tchar* pptcSplitArray[4]; // Bigger on purpose, put possible trailing garbage in the fourth element to keep clean the third.
                 const int iQty = Str_ParseCmds(ptcTemp, pptcSplitArray, ARRAY_COUNT(pptcSplitArray), " \t#");
                 if (iQty < 3)
                 {
                     g_Log.EventError("Mobtypes.txt: not enough parameters on line %" PRIuSIZE_T " \n", uiLineCount);
                     continue;
                 }
-
-                //if (!IsStrNumeric(pptcSplitArray[0]))
-                //{
-                //    g_Log.EventError("Mobtypes.txt: non numeric ID on line %" PRIuSIZE_T " \n", uiLineCount);
-                //    continue;
-                //}
-                // const uint uiAnimIndex = (uint)std::stoul(pptcSplitArray[0]);
 
                 std::optional<dword> iconv = Str_ToU(pptcSplitArray[0], 10);
                 if (!iconv.has_value())
@@ -119,3 +116,4 @@ const CUOMobTypesEntry* CUOMobTypes::GetEntry(uint id) const
     ASSERT(id < _vMobTypesEntries.size());
     return &(_vMobTypesEntries[id]);
 }
+

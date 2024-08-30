@@ -624,10 +624,10 @@ public:
     void SetComponentOfMulti(const CUID& uidMulti);
     void SetLockDownOfMulti(const CUID& uidMulti);
 
-    bool CanHear() const;
+    bool CanHear() const noexcept;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 
-	CItemBase * Item_GetDef() const;
+	CItemBase * Item_GetDef() const noexcept;
 
 	ITEMID_TYPE GetID() const;
     inline virtual word GetBaseID() const override {

@@ -46,9 +46,11 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 
         const int iKeyIndex = (int)ResGetIndex(dwKeyVal);
         if ( iKeyIndex == iResIndex)
-            DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, dwKeyVal, dwResPrivateUID ));
+            g_Log.EventWarn( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n",
+                             pszName, dwKeyVal, dwResPrivateUID );
         else
-            DEBUG_WARN(( "DEFNAME=%s: redefinition (0%x!=0%x)\n", pszName, iKeyIndex, iResIndex ));
+            g_Log.EventWarn("DEFNAME=%s: redefinition (0%x!=0%x)\n",
+                            pszName, iKeyIndex, iResIndex);
 
         pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, dwResPrivateUID );
     }

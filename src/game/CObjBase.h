@@ -204,13 +204,13 @@ public:
      * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
      * @return  The timestamp.
      */
-	int64 GetTimeStampS() const;
+	int64 GetTimeStampS() const noexcept;
 
     /**
      * @brief   Sets time stamp.
      * @param   t_time  The time.
      */
-	void SetTimeStampS(int64 t_time);
+	void SetTimeStampS(int64 t_time) noexcept;
 
     /*
     * @brief    Add iDelta to this object's timer (if active) and its child objects.
@@ -859,7 +859,7 @@ public:
      *
      * @return  true if container, false if not.
      */
-	bool IsContainer() const;
+	bool IsContainer() const noexcept;
 
     /**
      * @fn  virtual void CObjBase::Update(const CClient * pClientExclude = nullptr) = 0;
