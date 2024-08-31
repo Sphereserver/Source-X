@@ -7,8 +7,9 @@
 
 #define MT_ENGINES  0   // are we using/working on true multithreaded network/scripting engines?
 
-#include <mutex>
-#include <shared_mutex>
+
+#include <mutex>        // As per standard, std::mutex has a noexcept constructor.
+#include <shared_mutex> // As per standard, std::shared_mutex has NOT a noexcept contructor, nevertheless its implementations should actually not throw.
 
 
 // Name of the Class Mutex
@@ -73,6 +74,38 @@
 	#define MT_ENGINE_SHARED_LOCK_RETURN(x)    return (x)
     #define MT_ENGINE_UNIQUE_LOCK_RETURN(x)    return (x)
 #endif
+
+
+// Try acquiring a lock (try multiple times), to be used only for CRITICAL mutexes, that you pray will never fail (for an OS error) to be locked (not because they are already locked). If successiful, call func_, usually a lambda. If fails, program explodes (std::abort).
+
+#define RETRY_LOCK_ATTEMPTS_MAX 20
+#define RETRY_LOCK_FOR_TASK_IMPL_(lock_type_, mutex_name_, lock_name_, max_retries_, retval_, func_) \
+    { \
+        bool success_acquire_ = false; \
+        for (uint spin_attempt_ = 0; spin_attempt_ < max_retries_; ++spin_attempt_) { \
+            try { \
+                lock_type_ <std::remove_reference_t<decltype(mutex_name_)>> lock_name_ ((mutex_name_)); \
+                retval_ = func_(); \
+                success_acquire_ = true; \
+                break; \
+            } catch (const std::system_error& e_) { \
+                STDERR_LOG("[File '%s', line %d, function '%s']. Failed to acquire lock on attempt %u. Exc msg: '%s'.\n", \
+                           __FILE__, __LINE__, __func__, spin_attempt_ + 1, e_.what()); \
+            } \
+        } \
+        if (!success_acquire_) { \
+            /*throw std::runtime_error("Failed to acquire lock after " #max_retries_ " attempts."); */ \
+            /* That should never happen. */ \
+            EXC_NOTIFY_DEBUGGER; \
+            std::abort(); \
+        } \
+    }
+
+#define RETRY_SHARED_LOCK_FOR_TASK(mutex_name_, lock_name_, retval_, func_) \
+    RETRY_LOCK_FOR_TASK_IMPL_(std::shared_lock, (mutex_name_), (lock_name_), RETRY_LOCK_ATTEMPTS_MAX, (retval_), (func_))
+
+#define RETRY_UNIQUE_LOCK_FOR_TASK(mutex_name_, lock_name_, retval_, func_) \
+    RETRY_LOCK_FOR_TASK_IMPL_(std::unique_lock, (mutex_name_), (lock_name_), RETRY_LOCK_ATTEMPTS_MAX, (retval_), (func_))
 
 
 #endif // _INC_BASIC_THREADING_H

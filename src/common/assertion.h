@@ -1,15 +1,15 @@
 #ifndef _INC_ASSERTION_H
 #define _INC_ASSERTION_H
 
-#ifndef STATIC_ANALYSIS
+#ifndef STATIC_ANALYSIS_
     #if defined(__COVERITY__)
-        #define STATIC_ANALYSIS
+        #define STATIC_ANALYSIS_
     #endif
 #endif
 
 extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
 
-#define PERSISTANT_ASSERT(exp)  if ( !(exp) )   Assert_Fail(#exp, __FILE__, __LINE__)
+#define PERSISTANT_ASSERT(exp)  [[unlikely]] if ( !(exp) )   Assert_Fail(#exp, __FILE__, __LINE__)
 
 #if defined(STATIC_ANALYSIS)
     #include <cassert>
@@ -27,6 +27,6 @@ extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
 #endif
 
 
-#undef STATIC_ANALYSIS
+#undef STATIC_ANALYSIS_
 #endif // ! _INC_ASSERTION_H
 

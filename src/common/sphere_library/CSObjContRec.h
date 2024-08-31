@@ -27,7 +27,7 @@ public:
     /**
     * @brief set references for parent, next and previous to nullptr.
     */
-    CSObjContRec();
+    CSObjContRec() noexcept;
     virtual ~CSObjContRec();
 
     /**

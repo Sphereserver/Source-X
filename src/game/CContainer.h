@@ -19,12 +19,11 @@ class CContainer : public CSObjCont	// This class contains a list of items but m
 {
 public:
 	static const char *m_sClassName;
-	CContainer();
+	CContainer() noexcept;
 	virtual ~CContainer() = default;
 
-private:
-	CContainer(const CContainer& copy);
-	CContainer& operator=(const CContainer& other);
+	CContainer(const CContainer& copy) = delete;
+	CContainer& operator=(const CContainer& other) = delete;
 
 public:
     int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)

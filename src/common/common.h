@@ -34,6 +34,8 @@
 #include "sphere_library/stypecast.h"
 
 
+/* Coding helpers */
+
 // Strings
 #define _STRINGIFY_AUX(x)	#x
 #define STRINGIFY(x)		_STRINGIFY_AUX(x)
@@ -44,6 +46,83 @@
 // Flags and bitmasks. Those macros works with 1 or multiple ORed flags together.
 #define HAS_FLAGS_STRICT(var, flag)     (((var) & (flag)) == flag)          // Every one of the passed flags has to be set
 #define HAS_FLAGS_ANY(var, flag)        (static_cast<bool>((var) & (flag))) // True if even only one of the passed flags are set
+
+
+/* Start of arithmetic code */
+
+//#define IsNegative(c)			(((c) < 0) ? 1 : 0)
+template <typename T>
+constexpr bool IsNegative(T val) noexcept {
+    return (val < 0);
+}
+
+//-- Bitwise magic: combine numbers.
+
+// MAKEWORD:  defined in minwindef.h (loaded by windows.h), so it's missing only on Linux.
+// MAKEDWORD: undefined even on Windows, it isn't in windows.h.
+// MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
+#define MAKEDWORD(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
+
+
+//#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
+constexpr int IMulDiv(const int a, const int b, const int c) noexcept
+{
+	const int ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+
+constexpr uint UIMulDiv(const uint a, const uint b, const uint c) noexcept
+{
+	const int ab = a * b;
+	return ((ab + (c / 2)) / c) - IsNegative(ab);
+}
+
+//#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
+constexpr llong IMulDivLL(const llong a, const llong b, const llong c) noexcept
+{
+	const llong ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+constexpr realtype IMulDivRT(const realtype a, const realtype b, const realtype c) noexcept
+{
+	const realtype ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+
+//#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
+constexpr int IMulDivDown(const int a, const int b, const int c) noexcept
+{
+	return (a*b)/c;
+}
+constexpr llong IMulDivDownLL(const llong a, const llong b, const llong c) noexcept
+{
+	return (a*b)/c;
+}
+
+//#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
+template<typename T>
+constexpr T sign(const T n) noexcept
+{
+    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
+	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
+}
+
+#define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+#define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+#define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+
+
+/* End of arithmetic code */
+
+
+/* Compiler/c++ language helpers */
+
+//#include <type_traits> // already included by stypecast.h
+#define ASSERT_NOT_NOEXCEPT_CONSTRUCTOR(_ClassType) \
+    static_assert(!std::is_nothrow_constructible_v<_ClassType>, #_ClassType " constructor should not be noexcept!")
+
+// Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
+#define CANTHROW    noexcept(false)
 
 // Cpp attributes
 #define FALLTHROUGH [[fallthrough]]
@@ -62,12 +141,31 @@
 */
 #undef UNREFERENCED_PARAMETER
 template <typename T>
-inline constexpr void UnreferencedParameter(T const&) noexcept {
+constexpr void UnreferencedParameter(T const&) noexcept {
     ;
 }
 
+// For unrecoverable/unloggable errors. Should be used almost *never*.
+#define STDERR_LOG(...)     fprintf(stderr, __VA_ARGS__); fflush(stderr)
 
-/* Sanitizers utility */
+// use to indicate that a function uses printf-style arguments, allowing GCC
+// to validate the format string and arguments:
+// a = 1-based index of format string
+// b = 1-based index of arguments
+// (note: add 1 to index for non-static class methods because 'this' argument
+// is inserted in position 1)
+#ifdef _MSC_VER
+	#define __printfargs(a,b)
+#else
+	#ifdef _WIN32
+		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
+	#else
+		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
+	#endif
+#endif
+
+
+/* Sanitizers utilities */
 
 #if defined(_MSC_VER)
 
@@ -115,87 +213,6 @@ inline constexpr void UnreferencedParameter(T const&) noexcept {
     #define NO_SANITIZE_ADDRESS
     #define NO_SANITIZE_UNDEFINED
 
-#endif
-
-
-/* Start of arithmetic code */
-
-#define IsNegative(c)			(((c) < 0) ? 1 : 0)
-
-
-//-- Bitwise magic: combine numbers.
-
-// MAKEWORD:  defined in minwindef.h (loaded by windows.h), so it's missing only on Linux.
-// MAKEDWORD: undefined even on Windows, it isn't in windows.h.
-// MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
-#define MAKEDWORD(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
-
-
-//#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
-inline constexpr int IMulDiv(const int a, const int b, const int c) noexcept
-{
-	const int ab = a*b;
-	return ((ab + (c/2)) / c) - IsNegative(ab);
-}
-
-inline constexpr uint UIMulDiv(const uint a, const uint b, const uint c) noexcept
-{
-	const int ab = a * b;
-	return ((ab + (c / 2)) / c) - IsNegative(ab);
-}
-
-//#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
-inline constexpr llong IMulDivLL(const llong a, const llong b, const llong c) noexcept
-{
-	const llong ab = a*b;
-	return ((ab + (c/2)) / c) - IsNegative(ab);
-}
-inline constexpr realtype IMulDivRT(const realtype a, const realtype b, const realtype c) noexcept
-{
-	const realtype ab = a*b;
-	return ((ab + (c/2)) / c) - IsNegative(ab);
-}
-
-//#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
-inline constexpr int IMulDivDown(const int a, const int b, const int c) noexcept
-{
-	return (a*b)/c;
-}
-inline constexpr llong IMulDivDownLL(const llong a, const llong b, const llong c) noexcept
-{
-	return (a*b)/c;
-}
-
-//#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
-template<typename T>
-inline constexpr T sign(const T n) noexcept
-{
-    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
-	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
-}
-
-#define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
-#define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
-#define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
-
-
-/* End of arithmetic code */
-
-
-// use to indicate that a function uses printf-style arguments, allowing GCC
-// to validate the format string and arguments:
-// a = 1-based index of format string
-// b = 1-based index of arguments
-// (note: add 1 to index for non-static class methods because 'this' argument
-// is inserted in position 1)
-#ifdef _MSC_VER
-	#define __printfargs(a,b)
-#else
-	#ifdef _WIN32
-		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
-	#else
-		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
-	#endif
 #endif
 
 

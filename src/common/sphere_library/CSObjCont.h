@@ -171,7 +171,7 @@ public:
     * @brief Remove all records of the CSObjCont.
     * @param fClosingWorld Am i closing world UIDs or just destroyng everything before shutdown?
     */
-    void ClearContainer(bool fClosingWorld);
+    void ClearContainer(bool fClosingWorld) noexcept;
 
     /**
     * @brief Insert a record at head.

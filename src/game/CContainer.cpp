@@ -11,7 +11,7 @@
 #include "CContainer.h"
 
 
-CContainer::CContainer() :
+CContainer::CContainer() noexcept :
 	m_totalweight(0)
 {
 }

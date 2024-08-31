@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <atomic>
+#include "../common/basic_threading.h"
 #include "../common/CException.h"
-#include "../common/common.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "ProfileTask.h"
@@ -126,84 +126,128 @@ ThreadHolder& ThreadHolder::get() noexcept
 bool ThreadHolder::closing() noexcept
 {
     std::shared_lock<std::shared_mutex> lock(m_mutex);
-    return m_closing;
+    volatile auto ret = m_closing;
+    return ret;
 }
 
-IThread* ThreadHolder::current()
+IThread* ThreadHolder::current() noexcept
 {
-    // Do not use ASSERTs here, would cause recursion.
+    // Do not use ASSERTs here, would cause recursion
+    // RETRY_SHARED_LOCK_FOR_TASK is used to try to not make mutex lock fail and, if needed,
+    //  handle failure while allowing this function to be noexcept.
 
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
+    IThread* retval = nullptr;
+    RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
+        ([this, &lock]() -> IThread*
+        {
+            if (m_closing)
+                return nullptr;
 
-    if (m_closing)
-        return nullptr;
+            const threadid_t tid = IThread::getCurrentThreadSystemId();
 
-    const threadid_t tid = IThread::getCurrentThreadSystemId();
+            if (m_spherethreadpairs_systemid_ptr.empty()) {
+                auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
+                if (!thread) {
+                    // Should never happen.
+                    EXC_NOTIFY_DEBUGGER;
+                    std::abort();
+                }
 
-	if (m_spherethreadpairs_systemid_ptr.empty()) {
-        auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
-        if (!thread) {
-            // Should never happen.
-            EXC_NOTIFY_DEBUGGER;
-	    std::abort();
-        }
+                thread->m_threadSystemId = tid;
+                lock.unlock();
+                push(thread);
+                return thread;
+            }
 
-        thread->m_threadSystemId = tid;
-        lock.unlock();
-        push(thread);
-        return thread;
-    }
+            spherethreadpair_t *found = nullptr;
+            for (auto &elem : m_spherethreadpairs_systemid_ptr) {
+                if (elem.first == tid) {
+                    found = &elem;
+                    break;
+                }
+            }
+            if (!found) {
+                //throw CSError(LOGL_FATAL, 0, "Thread handle not found in vector?");
+                STDERR_LOG("Thread handle not found in vector?");
 
-    spherethreadpair_t *found = nullptr;
-    for (auto &elem : m_spherethreadpairs_systemid_ptr) {
-        if (elem.first == tid) {
-            found = &elem;
-            break;
-        }
-    }
-    if (!found) {
-        throw CSError(LOGL_FATAL, 0, "Thread handle not found in vector?");
-    }
+                // Should never happen.
+                EXC_NOTIFY_DEBUGGER;
+                std::abort();
+            }
 
-    auto thread = static_cast<IThread *>(found->second);
+            auto thread = static_cast<IThread *>(found->second);
 
-    ASSERT(thread->m_threadHolderId != -1);
-    SphereThreadData *tdata = &(m_threads[thread->m_threadHolderId]);
-    if (tdata->m_closed)
-        return nullptr;
+            ASSERT(thread->m_threadHolderId != -1);
+            SphereThreadData *tdata = &(m_threads[thread->m_threadHolderId]);
+            if (tdata->m_closed)
+                return nullptr;
 
-    // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
-    //DEBUG_ASSERT( thread->isSameThread(thread->getId()) );
+            // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
+            //DEBUG_ASSERT( thread->isSameThread(thread->getId()) );
 
-	return thread;
+            return thread;
+    }));
+
+    return retval;
 }
 
-void ThreadHolder::push(IThread *thread)
+void ThreadHolder::push(IThread *thread) noexcept
 {
-    auto sphere_thread = dynamic_cast<AbstractSphereThread*>(thread);
-    if (!sphere_thread)
-        throw CSError(LOGL_FATAL, 0, "IThread not being an AbstractSphereThread?");
+    bool fExceptionThrown = false;
+    try
+    {
+        auto sphere_thread = dynamic_cast<AbstractSphereThread*>(thread);
+        if (!sphere_thread)
+        {
+            //throw CSError(LOGL_FATAL, 0, "IThread not being an AbstractSphereThread?");
+            STDERR_LOG("IThread not being an AbstractSphereThread?");
+            fExceptionThrown = true;
+        }
 
-	std::unique_lock<std::shared_mutex> lock(m_mutex);
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
 
-    ASSERT(thread->m_threadSystemId != 0);
-    ASSERT(thread->m_threadHolderId == -1);
+        ASSERT(thread->m_threadSystemId != 0);
+        ASSERT(thread->m_threadHolderId == -1);
 
-	m_threads.emplace_back( SphereThreadData{ thread, false });
-    thread->m_threadHolderId = m_threadCount + 1;
+        m_threads.emplace_back( SphereThreadData{ thread, false });
+        thread->m_threadHolderId = m_threadCount + 1;
 
 #ifdef _DEBUG
-    auto it_thread = std::find_if(
-        m_spherethreadpairs_systemid_ptr.begin(),
-        m_spherethreadpairs_systemid_ptr.end(),
-        [sphere_thread](spherethreadpair_t const &elem) noexcept -> bool { return elem.second == sphere_thread; });
+        auto it_thread = std::find_if(
+            m_spherethreadpairs_systemid_ptr.begin(),
+            m_spherethreadpairs_systemid_ptr.end(),
+            [sphere_thread](spherethreadpair_t const &elem) noexcept -> bool { return elem.second == sphere_thread; });
 
-    // I don't want duplicates.
-    DEBUG_ASSERT(it_thread == m_spherethreadpairs_systemid_ptr.end());
+        // I don't want duplicates.
+        DEBUG_ASSERT(it_thread == m_spherethreadpairs_systemid_ptr.end());
 #endif
-    m_spherethreadpairs_systemid_ptr.emplace_back(sphere_thread->m_threadSystemId, sphere_thread);
+        m_spherethreadpairs_systemid_ptr.emplace_back(sphere_thread->m_threadSystemId, sphere_thread);
 
-	++m_threadCount;
+        ++m_threadCount;
+
+    }
+    catch (CAssert const& e)
+    {
+        fExceptionThrown = true;
+        STDERR_LOG("ASSERT failed.\n");
+    }
+    catch (std::system_error const& e)
+    {
+        fExceptionThrown = true;
+        STDERR_LOG("Mutex cannot be acquired. Err: '%s'.\n", e.what());
+    }
+    catch (...)
+    {
+        fExceptionThrown = true;
+        STDERR_LOG("Unknown exception thrown.\n");
+    }
+
+    if (fExceptionThrown)
+    {
+        // Should never happen.
+        EXC_NOTIFY_DEBUGGER;
+        std::abort();
+    }
 }
 
 /*
@@ -222,7 +266,7 @@ SphereThreadData* ThreadHolder::findThreadData(IThread* thread) noexcept
 }
 */
 
-void ThreadHolder::remove(IThread *thread)
+void ThreadHolder::remove(IThread *thread) CANTHROW
 {
     if (!thread)
         throw CSError(LOGL_FATAL, 0, "thread == nullptr");
@@ -250,7 +294,7 @@ void ThreadHolder::remove(IThread *thread)
     m_spherethreadpairs_systemid_ptr.erase(it_thread);
 }
 
-void ThreadHolder::markThreadsClosing()
+void ThreadHolder::markThreadsClosing() CANTHROW
 {
     std::unique_lock<std::shared_mutex> lock(m_mutex);
 
@@ -264,7 +308,7 @@ void ThreadHolder::markThreadsClosing()
 	//printf("Marking threads as closing.\n");
 }
 
-IThread * ThreadHolder::getThreadAt(size_t at)
+IThread * ThreadHolder::getThreadAt(size_t at) CANTHROW
 {
     std::shared_lock<std::shared_mutex> lock(m_mutex);
 
