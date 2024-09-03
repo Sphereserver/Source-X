@@ -11,7 +11,6 @@
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"
-#include "components/CCFaction.h"
 #include "CEntityProps.h"
 
 
@@ -139,14 +138,7 @@ public:
 
 	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
 
-private:
-    CCFaction _Faction;
-
-
 public:
-    CCFaction const& GetFaction() const noexcept;
-    CCFaction &GetFaction() noexcept;
-
     /**
      * @brief   Gets definition string.
      * @param   ptcKey  The key.

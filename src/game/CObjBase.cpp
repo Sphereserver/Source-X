@@ -1012,10 +1012,6 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
 		case OC_ONAME:
-		case OC_SLAYER:
-		case OC_SLAYERLESSER:
-		case OC_SLAYERMISC:
-		case OC_SLAYERSUPER:
 		{
 			const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 			sVal = pVar ? pVar->GetValStr() : "";
@@ -1805,10 +1801,6 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
 		case OC_ONAME:
-		case OC_SLAYER:
-		case OC_SLAYERLESSER:
-		case OC_SLAYERMISC:
-		case OC_SLAYERSUPER:
 		{
 			bool fQuoted = false;
 			SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
@@ -3315,11 +3307,6 @@ void CObjBase::SetSpawn(CCSpawn * spawn)
         _uidSpawn.SetObjUID(spawn->GetLink()->GetUID());
     else
         _uidSpawn.InitUID();
-}
-
-CCFaction * CObjBase::GetFaction()
-{
-    return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
 CSString CObjBase::GetPropStr( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, const CComponentProps* pBaseCompProps ) const

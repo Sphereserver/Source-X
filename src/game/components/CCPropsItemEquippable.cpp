@@ -95,6 +95,18 @@ bool CCPropsItemEquippable::GetPropertyNumPtr(PropertyIndex_t iPropIndex, Proper
 {
     ADDTOCALLSTACK("CCPropsItemChar::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
+
+    if (iPropIndex == PROPIEQUIP_SLAYER_GROUP)
+    {
+        *piOutVal = num_alias_cast<PropertyValNum_t>(_faction.GetGroup());
+        return true;
+    }
+    else if (iPropIndex == PROPIEQUIP_SLAYER_SPECIES)
+    {
+        *piOutVal = num_alias_cast<PropertyValNum_t>(_faction.GetSpecies());
+        return true;
+    }
+
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
@@ -116,6 +128,18 @@ void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyV
         if (0 == _mPropsNum.erase(iPropIndex))
             return; // I didn't have this property, so avoid further processing.
     }
+
+    else if (iPropIndex == PROPIEQUIP_SLAYER_GROUP)
+    {
+        _faction.SetGroup(num_alias_cast<CFactionDef::Group>(iVal));
+        return;
+    }
+    else if (iPropIndex == PROPIEQUIP_SLAYER_SPECIES)
+    {
+        _faction.SetSpecies(num_alias_cast<CFactionDef::Species>(iVal));
+        return;
+    }
+
     else
     {
         _mPropsNum[iPropIndex] = iVal;

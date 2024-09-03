@@ -247,7 +247,7 @@ int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (sta
 #define Exp_GetRange( pa )		static_cast<int>	(g_Exp.GetRangeNumber( pa ))
 #define Exp_GetLLRange( pa )						 g_Exp.GetRangeNumber( pa )
 
-#define Exp_GetCVal( pa )		static_cast<char>	(g_Exp.GetVal( pa ))
+#define Exp_GetCVal( pa )		static_cast<schar>	(g_Exp.GetVal( pa ))
 #define Exp_GetUCVal( pa )		static_cast<uchar>	(g_Exp.GetVal( pa ))
 #define Exp_GetSVal( pa )		static_cast<short>	(g_Exp.GetVal( pa ))
 #define Exp_GetUSVal( pa )		static_cast<ushort> (g_Exp.GetVal( pa ))

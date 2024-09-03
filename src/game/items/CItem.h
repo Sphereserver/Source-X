@@ -10,7 +10,7 @@
 #include "../../common/resource/CResourceHolder.h"
 #include "../../common/CServerMap.h"
 #include "../../common/CRect.h"
-#include "../components/CCFaction.h"
+#include "../components/subcomponents/CFactionDef.h"
 #include "../CServerTime.h"
 #include "../CBase.h"
 #include "../CObjBase.h"
@@ -24,6 +24,7 @@
 
 class CWorldTicker;
 class CCSpawn;
+class CFactionDef;
 
 
 /**
@@ -600,7 +601,6 @@ public:
 protected:
 	virtual int FixWeirdness() override;
 	void DeleteCleanup(bool fForce);
-
 public:
 	virtual bool NotifyDelete(); // overridden CItemContainer:: method
 	virtual bool Delete(bool fForce = false) override;
@@ -618,7 +618,17 @@ public:
 	//virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
 	bool _CanHoldTimer() const;
 
-public:
+    virtual void DupeCopy( const CObjBase * pItem ) override;
+
+	static CItem * CreateBase( ITEMID_TYPE id, IT_TYPE type = IT_INVALID ); // If type == IT_INVALID, read the type from the def (default behaviour)
+	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = nullptr, bool fDupeCheck = false, CChar * pSrc = nullptr );
+	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr, IT_TYPE type = IT_INVALID); // If type == IT_INVALID, read the type from the def (default behaviour)
+	CItem * GenerateScript(CChar * pSrc = nullptr);
+	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = nullptr, bool fSetNew = false );
+	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = nullptr, CChar * pSrc = nullptr );
+
+	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
+
     CUID GetComponentOfMulti() const;
     CUID GetLockDownOfMulti() const;
     void SetComponentOfMulti(const CUID& uidMulti);
@@ -631,7 +641,7 @@ public:
 
 	ITEMID_TYPE GetID() const;
     inline virtual word GetBaseID() const override {
-        return (word)GetID();
+        return enum32_narrow_n16_checked(GetID());
     }
 	inline ITEMID_TYPE GetDispID() const noexcept {
 		// This is what the item looks like.
@@ -649,7 +659,6 @@ public:
 	virtual int IsWeird() const override;
 	char GetFixZ(CPointMap pt, uint64 uiBlockFlags = 0);
 
-	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
 
     /**
@@ -855,6 +864,9 @@ public:
 
 	void ConvertBolttoCloth();
 
+    const CFactionDef* GetSlayer() const noexcept;
+    CFactionDef* GetSlayer() noexcept;
+
 	// Spells
 	SKILL_TYPE GetSpellBookSkill();
 	SPELL_TYPE GetScrollSpell() const;
@@ -908,18 +920,7 @@ public:
 	bool Plant_Use( CChar * pChar );
     bool Plant_SetID(ITEMID_TYPE id);
 
-	virtual void DupeCopy( const CObjBase * pItem ) override;
 	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );
-
-	static CItem * CreateBase( ITEMID_TYPE id, IT_TYPE type = IT_INVALID ); // If type == IT_INVALID, read the type from the def (default behaviour)
-	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = nullptr, bool fDupeCheck = false, CChar * pSrc = nullptr );
-	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr, IT_TYPE type = IT_INVALID); // If type == IT_INVALID, read the type from the def (default behaviour)
-	CItem * GenerateScript(CChar * pSrc = nullptr);
-	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = nullptr, bool fSetNew = false );
-	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = nullptr, CChar * pSrc = nullptr );
-
-	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
-
 };
 
 #endif // _INC_CITEM_H

@@ -6,6 +6,7 @@
 #ifndef _INC_CCPROPSITEMEQUIPPABLE_H
 #define _INC_CCPROPSITEMEQUIPPABLE_H
 
+#include "subcomponents/CFactionDef.h"
 #include "../CComponentProps.h"
 
 class CItemBase;
@@ -60,10 +61,22 @@ public:
 
     virtual void AddPropsTooltipData(CObjBase* pLinkedObj) override;
 
+    inline const CFactionDef* GetFaction() const noexcept;
+    inline CFactionDef* GetFaction() noexcept;
+
 private:
     BaseContNum_t _mPropsNum;
     BaseContStr_t _mPropsStr;
+
+    CFactionDef _faction;
 };
 
+
+const CFactionDef* CCPropsItemEquippable::GetFaction() const noexcept {
+    return &_faction;
+}
+CFactionDef* CCPropsItemEquippable::GetFaction() noexcept {
+    return &_faction;
+}
 
 #endif //_INC_CCPROPSITEMEQUIPPABLE_H

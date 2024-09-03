@@ -97,8 +97,9 @@ function (toolchain_exe_stuff)
 	# CMake's ${MSVC_VERSION} is equivalent to _MSC_VER
 	# (according to https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html#variable:MSVC_VERSION)
 	if (MSVC_VERSION GREATER_EQUAL 1914)
-		SET(cxx_compiler_flags_common	${cxx_compiler_flags_common} /Zc:__cplusplus)
+		SET(local_msvc_compat_options /Zc:__cplusplus)
 	endif()
+  SET(cxx_compiler_flags_common	${cxx_compiler_flags_common} /Zc:preprocessor ${local_msvc_compat_options})
 
 	# Needed, otherwise throws a error... Regression?
 	set(CMAKE_C_FLAGS_DEBUG_INIT "" INTERNAL)

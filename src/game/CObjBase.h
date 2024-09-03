@@ -194,13 +194,6 @@ public:
     void SetSpawn(CCSpawn *spawn);
 
     /**
-    * @brief   Returns Faction CComponent.
-    * @return  The CCFaction.
-    */
-    CCFaction *GetFaction();
-
-
-    /**
      * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
      * @return  The timestamp.
      */

@@ -3346,7 +3346,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	uint countPos = getPosition();
 	skip(1);
 
-	uchar count =  n32_narrow8(
+	uchar count =  n32_narrow_n8(
         target->Setup_FillCharList(this, account->m_uidLastChar.CharFind()));
 	seek(countPos);
 

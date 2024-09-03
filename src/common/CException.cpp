@@ -3,6 +3,7 @@
 
 #ifndef _WIN32
 #include <sys/wait.h>
+//#include <pthread.h>    // for pthread_exit
 #include <csignal>
 #include <cstring>
 
@@ -47,6 +48,7 @@ void NotifyDebugger()
     #ifdef _MSC_VER
         __debugbreak();
     #else
+        SetAbortImmediate(false);
         std::abort();
     #endif
 #else
@@ -56,6 +58,42 @@ void NotifyDebugger()
     }
 }
 
+
+// Is it unrecoverable? Should i exit cleanly or stop immediately?
+// Set this just before calling abort.
+static bool* _GetAbortImmediate() noexcept
+{
+    static bool _fIsAbortImmediate = true;
+    return &_fIsAbortImmediate;
+}
+void SetAbortImmediate(bool on) noexcept
+{
+    *_GetAbortImmediate() = on;
+}
+bool IsAbortImmediate() noexcept
+{
+    return *_GetAbortImmediate();
+}
+
+void RaiseRecoverableAbort()
+{
+    EXC_NOTIFY_DEBUGGER;
+    SetAbortImmediate(false);
+    std::abort();
+}
+void RaiseImmediateAbort()
+{
+    EXC_NOTIFY_DEBUGGER;
+    SetAbortImmediate(true);
+
+//#if !defined(_WIN32)
+//    pthread_exit(EXIT_FAILURE);
+#if defined(__GNUC__) || defined(__clang__)
+    __builtin_trap();
+#else
+    std::abort();
+#endif
+}
 
 #ifdef _WIN32
 int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, dword dwErrorBufLength) // static
@@ -235,7 +273,7 @@ void SetExceptionTranslator()
 }
 
 #ifndef _WIN32
-void _cdecl Signal_Hangup(int sig = 0) // If shutdown is initialized
+void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
 {
     UnreferencedParameter(sig);
 
@@ -254,11 +292,11 @@ void _cdecl Signal_Hangup(int sig = 0) // If shutdown is initialized
     g_Serv.SetExitFlag(SIGHUP);
 }
 
-void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
+void _cdecl Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
 {
-    sigset_t set;
 
-    g_Log.Event(LOGL_FATAL, "Server Unstable: %s\n", strsignal(sig));
+    g_Log.Event(LOGL_FATAL, "Server Unstable: %s signal received\n", strsignal(sig));
+
 #ifdef THREAD_TRACK_CALLSTACK
     static bool _Signal_Terminate_stack_printed = false;
     if (!_Signal_Terminate_stack_printed)
@@ -270,16 +308,42 @@ void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
 
     if (sig)
     {
+        if ((sig == SIGABRT) && IsAbortImmediate())
+        {
+            // No clean ending. Abort right now.
+            STDERR_LOG("FATAL: Immediate abort requested.");
+
+#if defined(__GNUC__) || defined(__clang__)
+            __builtin_trap();
+#else
+            signal(SIGABRT, SIG_DFL);
+            raise(SIGABRT);
+#endif
+
+            return;
+        }
+
+        sigset_t set;
         signal(sig, &Signal_Terminate);
         sigemptyset(&set);
         sigaddset(&set, sig);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     }
 
     g_Serv.SetExitFlag(SIGABRT);
-    for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
-        ThreadHolder::get().getThreadAt(i)->terminate(false);
-    //exit(EXIT_FAILURE);
+
+    try
+    {
+        for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
+            ThreadHolder::get().getThreadAt(i)->terminate(false);
+    }
+    catch (...)
+    {
+        RaiseImmediateAbort();
+    }
+
+    //exit(EXIT_FAILURE); // Having set the exit flag, all threads "should" terminate cleanly.
 }
 
 void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using secure mode
@@ -292,13 +356,14 @@ void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using sec
 
     g_Log.Event(LOGL_FATAL, "Secure Mode prevents CTRL+C\n");
 
-    sigset_t set;
     if (sig)
     {
+        sigset_t set;
         signal(sig, &Signal_Break);
         sigemptyset(&set);
         sigaddset(&set, sig);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     }
 }
 
@@ -307,7 +372,6 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
 #ifdef THREAD_TRACK_CALLSTACK
     StackDebugInformation::freezeCallStack(true);
 #endif
-    sigset_t set;
 
     g_Log.Event(LOGL_FATAL, "%s\n", strsignal(sig));
 #ifdef THREAD_TRACK_CALLSTACK
@@ -316,10 +380,12 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
 
     if (sig)
     {
+        sigset_t set;
         signal(sig, &Signal_Illegal_Instruction);
         sigemptyset(&set);
         sigaddset(&set, sig);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     }
 
 #ifdef THREAD_TRACK_CALLSTACK

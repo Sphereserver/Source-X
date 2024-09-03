@@ -7,7 +7,6 @@
 #define _INC_CCHAR_H
 
 #include "../../common/sphereproto.h"
-#include "../components/CCFaction.h"
 #include "../clients/CParty.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemCorpse.h"
@@ -23,6 +22,7 @@
 class CWorldTicker;
 class CCharNPC;
 class CMapBlockingState;
+class CFactionDef;
 
 
 enum NPCBRAIN_TYPE	// General AI type.
@@ -112,8 +112,8 @@ public:
 
 	struct NotoSaves
 	{
-		dword		charUID;	// Character viewing me
-		int64		time;		// Update timer
+		int64		time;		// Updaete timer
+        dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
 	};
@@ -136,23 +136,32 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
-    ushort _uiRange;
-
-	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
+    ushort _iRegenTickCount;    // ticks until next regen.
 
 	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
 	uint m_exp;					// character experience
 	uint m_level;				// character experience level
-	byte m_iVisualRange;		// Visual Range
 	//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
 	bool m_fClimbUpdated;		// FixClimbHeight() called?
 	bool m_fIgnoreNextPetCmd;	// return 1 in speech block for this pet will make it ignore target petcmds while allowing the rest to perform them
 	height_t m_zClimbHeight;	// The height at the end of the climbable.
 
 	// Saved stuff.
+	byte m_iVisualRange;		// Visual Range
+    height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
+    HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
+
 	DIR_TYPE m_dirFace;			// facing this dir.
 	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
+
+	int64  _iTimeCreate;	    // When was i created ?
+	int64  _iTimePeriodicTick;
+	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
+
+	int64 _iTimeLastHitsUpdate;
+	int64 _iTimeLastCallGuards;
+
 	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
 	// Speech
@@ -161,9 +170,8 @@ public:
 	HUE_TYPE m_EmoteHueOverride;	// emote hue to use
 
 	// In order to revert to original Hue and body.
-	CREID_TYPE _iPrev_id;		// Backup of body type for ghosts and poly
 	HUE_TYPE _wPrev_Hue;		// Backup of skin color. in case of polymorph etc.
-	HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
+	CREID_TYPE _iPrev_id;		// Backup of body type for ghosts and poly
 
 	CREID_TYPE m_dwDispIndex; //To change the DispID instance
 
@@ -172,26 +180,18 @@ public:
 
 	struct
 	{
-		ushort  m_base;      // Base stat: STR, INT, DEX
 		int     m_mod;	     // Modifier to base stat: ModSTR, ModINT, ModDex (signed to allow negative modifiers). Accepted values between -UINT16_MAX and +UINT16_MAX
+        int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
+		ushort  m_base;      // Base stat: STR, INT, DEX
 		ushort  m_val;       // Hits, Mana, Stam
 		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
-        int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
+		ushort  m_regenVal;  // Amount of Stat to gain at each regen
 		int64   m_regenRate; // Regen each this much milliseconds.
         int64   m_regenLast; // Time of the last regen.
-        ushort  m_regenVal;  // Amount of Stat to gain at each regen
 	} m_Stat[STAT_QTY];
 
     short m_iKarma;
     ushort m_uiFame;
-
-	int64  _iTimeCreate;	    // When was i created ?
-	int64  _iTimePeriodicTick;
-	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
-    ushort _iRegenTickCount;    // ticks until next regen.
-
-	int64 _iTimeLastHitsUpdate;
-	int64 _iTimeLastCallGuards;
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
@@ -200,8 +200,11 @@ public:
 	CUID		m_Act_Prv_UID;		// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
 	int			m_Act_Effect;
-	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
+	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
+
+    ushort _uiRange;
+
 
     std::vector<CUID> m_followers;
 
@@ -1036,10 +1039,13 @@ public:
 	void SoundChar(CRESND_TYPE type);
 	void Action_StartSpecial(CREID_TYPE id);
 
+    const CFactionDef* GetFaction() const noexcept;
+    CFactionDef* GetFaction() noexcept;
+
 private:
 	void OnNoticeCrime( CChar * pCriminal, CChar * pCharMark );
 public:
-	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction );
+	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr ptcAction );
 
 private:
 	// Armor, weapons and combat ------------------------------------

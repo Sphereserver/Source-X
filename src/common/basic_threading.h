@@ -96,8 +96,7 @@
         if (!success_acquire_) { \
             /*throw std::runtime_error("Failed to acquire lock after " #max_retries_ " attempts."); */ \
             /* That should never happen. */ \
-            EXC_NOTIFY_DEBUGGER; \
-            std::abort(); \
+            RaiseImmediateAbort(); \
         } \
     }
 

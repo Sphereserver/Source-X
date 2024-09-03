@@ -1187,15 +1187,16 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
 
         if (Args.m_iN1 == 1)
         {
-            iFollowerSlots = -(short)(Args.m_iN2);
+            iFollowerSlots = - n64_narrow_n16(Args.m_iN2);
         }
         else
         {
-            iFollowerSlots = (short)(Args.m_iN2);
+            iFollowerSlots = n64_narrow_n16(Args.m_iN2);
         }
 	}
 
-	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true));
+	short iMaxFollower = n64_narrow_n16(GetDefNum("MAXFOLLOWER", true));
+    ASSERT(iMaxFollower >= 0);
 	if (IsSetEF(EF_FollowerList))
 	{
         if (iFollowerSlots >= 0)
@@ -1211,7 +1212,7 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
                 ++it;
             }
 
-            if (!fExists && ((short)(m_followers.size()) < iMaxFollower || IsPriv(PRIV_GM)))
+            if ((!fExists && (i16_from_usize_checked(m_followers.size()) < iMaxFollower)) || IsPriv(PRIV_GM))
             {
                 if (!fCheckOnly)
                     m_followers.emplace_back(pChar->GetUID());

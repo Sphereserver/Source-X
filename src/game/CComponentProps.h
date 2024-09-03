@@ -17,6 +17,7 @@ class CClientTooltip;
 
 enum COMPPROPS_TYPE : uchar
 {
+    COMP_PROPS_FACTION,
     COMP_PROPS_ITEMCHAR,
     COMP_PROPS_CHAR,
     COMP_PROPS_ITEM,
@@ -138,7 +139,7 @@ protected:
 
 public:
     virtual ~CComponentProps() noexcept = default;
-    
+
     inline COMPPROPS_TYPE GetType() const noexcept {
         return _iType;
     }

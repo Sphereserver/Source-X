@@ -37,8 +37,8 @@
 /* Coding helpers */
 
 // Strings
-#define _STRINGIFY_AUX(x)	#x
-#define STRINGIFY(x)		_STRINGIFY_AUX(x)
+#define STRINGIFY_IMPL_(x)	#x
+#define STRINGIFY(x)		STRINGIFY_IMPL_(x)
 
 // Sizes
 #define ARRAY_COUNT(a)			        (sizeof(a)/sizeof((a)[0]))
@@ -117,9 +117,44 @@ constexpr T sign(const T n) noexcept
 
 /* Compiler/c++ language helpers */
 
+// Ensure that a constexpr value or a generic expression is evaluated at compile time.
+template <typename T>
+consteval T ensure_comptime(T&& val_) noexcept {
+    return val_;
+}
+
+/*
+	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
+	operator= is on many clases private and the UnreferencedParameter macro from mingw is (P)=(P),
+	so we have a compilation error here.
+*/
+#undef UNREFERENCED_PARAMETER
+template <typename T>
+constexpr void UnreferencedParameter(T const&) noexcept {
+    ;
+}
+
 //#include <type_traits> // already included by stypecast.h
-#define ASSERT_NOT_NOEXCEPT_CONSTRUCTOR(_ClassType) \
-    static_assert(!std::is_nothrow_constructible_v<_ClassType>, #_ClassType " constructor should not be noexcept!")
+
+// Arguments: Class, arguments...
+#define STATIC_ASSERT_NOEXCEPT_CONSTRUCTOR(_ClassType, ...) \
+    static_assert( std::is_nothrow_constructible_v<_ClassType __VA_OPT__(,) __VA_ARGS__>, #_ClassType  " constructor should be noexcept!")
+#define STATIC_ASSERT_THROWING_CONSTRUCTOR(_ClassType, ...) \
+    static_assert(!std::is_nothrow_constructible_v<_ClassType __VA_OPT__(,) __VA_ARGS__>, #_ClassType " constructor should *not* be noexcept!")
+
+// Arguments: function_name, arguments...
+#define STATIC_ASSERT_NOEXCEPT_FREE_FUNCTION(_func, ...) \
+    static_assert( std::is_nothrow_invocable_v<decltype(&_func) __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+#define STATIC_ASSERT_THROWING_FREE_FUNCTION(_func, ...) \
+    static_assert(!std::is_nothrow_invocable_v<decltype(&_func) __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+// static_assert( noexcept(std::declval<decltype(&_func)>()()), #_func " should be noexcept");
+
+// Arguments: Class, function_name, arguments...
+#define STATIC_ASSERT_NOEXCEPT_MEMBER_FUNCTION(_ClassType, _func, ...) \
+    static_assert( std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+#define STATIC_ASSERT_THROWING_MEMBER_FUNCTION(_ClassType, _func, ...) \
+    static_assert(!std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+
 
 // Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
 #define CANTHROW    noexcept(false)
@@ -134,16 +169,6 @@ constexpr T sign(const T n) noexcept
     #define NOEXCEPT_NODEBUG noexcept
 #endif
 
-/*
-	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
-	operator= is on many clases private and the UnreferencedParameter macro from mingw is (P)=(P),
-	so we have a compilation error here.
-*/
-#undef UNREFERENCED_PARAMETER
-template <typename T>
-constexpr void UnreferencedParameter(T const&) noexcept {
-    ;
-}
 
 // For unrecoverable/unloggable errors. Should be used almost *never*.
 #define STDERR_LOG(...)     fprintf(stderr, __VA_ARGS__); fflush(stderr)

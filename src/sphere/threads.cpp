@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <system_error>
 #include "../common/basic_threading.h"
 #include "../common/CException.h"
 #include "../common/CLog.h"
@@ -105,6 +106,10 @@ void IThread::setThreadName(const char* name)
 
     auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
     ASSERT(athr);
+
+    g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Setting thread (ThreadHolder ID %d, internal name '%s') system name: '%s'.\n",
+            athr->m_threadHolderId, athr->getName(), name_trimmed);
+
     athr->overwriteInternalThreadName(name_trimmed);
 }
 
@@ -114,7 +119,7 @@ void IThread::setThreadName(const char* name)
 **/
 
 ThreadHolder::ThreadHolder() noexcept :
-	m_threadCount(-1), m_closing(false)
+	m_threadCount(0), m_closingThreads(false)
 {}
 
 ThreadHolder& ThreadHolder::get() noexcept
@@ -126,13 +131,14 @@ ThreadHolder& ThreadHolder::get() noexcept
 bool ThreadHolder::closing() noexcept
 {
     std::shared_lock<std::shared_mutex> lock(m_mutex);
-    volatile auto ret = m_closing;
+    volatile auto ret = m_closingThreads;
     return ret;
 }
 
 IThread* ThreadHolder::current() noexcept
 {
-    // Do not use ASSERTs here, would cause recursion
+    // Do not use ASSERTs here, would cause recursion.
+
     // RETRY_SHARED_LOCK_FOR_TASK is used to try to not make mutex lock fail and, if needed,
     //  handle failure while allowing this function to be noexcept.
 
@@ -140,17 +146,24 @@ IThread* ThreadHolder::current() noexcept
     RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
         ([this, &lock]() -> IThread*
         {
-            if (m_closing)
+            [[unlikely]]
+            if (m_closingThreads)
+            {
+                //STDERR_LOG("Closing?\n");
                 return nullptr;
+            }
 
             const threadid_t tid = IThread::getCurrentThreadSystemId();
 
-            if (m_spherethreadpairs_systemid_ptr.empty()) {
+            [[unlikely]]
+            if (m_spherethreadpairs_systemid_ptr.empty())
+            {
                 auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
-                if (!thread) {
+                [[unlikely]]
+                if (!thread)
+                {
                     // Should never happen.
-                    EXC_NOTIFY_DEBUGGER;
-                    std::abort();
+                    RaiseImmediateAbort();
                 }
 
                 thread->m_threadSystemId = tid;
@@ -160,27 +173,34 @@ IThread* ThreadHolder::current() noexcept
             }
 
             spherethreadpair_t *found = nullptr;
-            for (auto &elem : m_spherethreadpairs_systemid_ptr) {
-                if (elem.first == tid) {
+            for (auto &elem : m_spherethreadpairs_systemid_ptr)
+            {
+                if (elem.first == tid)
+                {
                     found = &elem;
                     break;
                 }
             }
-            if (!found) {
+            [[unlikely]]
+            if (!found)
+            {
                 //throw CSError(LOGL_FATAL, 0, "Thread handle not found in vector?");
-                STDERR_LOG("Thread handle not found in vector?");
+                //STDERR_LOG("Thread handle not found in vector?");
 
                 // Should never happen.
-                EXC_NOTIFY_DEBUGGER;
-                std::abort();
+                RaiseImmediateAbort();
             }
 
             auto thread = static_cast<IThread *>(found->second);
 
             ASSERT(thread->m_threadHolderId != -1);
             SphereThreadData *tdata = &(m_threads[thread->m_threadHolderId]);
+            [[unlikely]]
             if (tdata->m_closed)
+            {
+                //STDERR_LOG("Closed? Idx %u, Name %s.\n", thread->m_threadHolderId, thread->getName());
                 return nullptr;
+            }
 
             // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
             //DEBUG_ASSERT( thread->isSameThread(thread->getId()) );
@@ -210,7 +230,7 @@ void ThreadHolder::push(IThread *thread) noexcept
         ASSERT(thread->m_threadHolderId == -1);
 
         m_threads.emplace_back( SphereThreadData{ thread, false });
-        thread->m_threadHolderId = m_threadCount + 1;
+        thread->m_threadHolderId = m_threadCount;
 
 #ifdef _DEBUG
         auto it_thread = std::find_if(
@@ -223,13 +243,15 @@ void ThreadHolder::push(IThread *thread) noexcept
 #endif
         m_spherethreadpairs_systemid_ptr.emplace_back(sphere_thread->m_threadSystemId, sphere_thread);
 
-        ++m_threadCount;
+        ++ m_threadCount;
 
     }
     catch (CAssert const& e)
     {
         fExceptionThrown = true;
-        STDERR_LOG("ASSERT failed.\n");
+        lptstr ptcBuf = Str_GetTemp();
+        e.GetErrorMessage(ptcBuf, usize_narrow_u32(Str_TempLength()));
+        STDERR_LOG("ASSERT failed.\n%s\n", ptcBuf);
     }
     catch (std::system_error const& e)
     {
@@ -245,8 +267,19 @@ void ThreadHolder::push(IThread *thread) noexcept
     if (fExceptionThrown)
     {
         // Should never happen.
-        EXC_NOTIFY_DEBUGGER;
-        std::abort();
+        RaiseImmediateAbort();
+    }
+
+    if (dynamic_cast<DummySphereThread const*>(thread))
+    {
+        // Too early in the init process to use the console...
+        printf("Registered thread '%s' with ThreadHolder ID %d.\n",
+            thread->getName(), thread->m_threadHolderId);
+    }
+    else
+    {
+        g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Registered thread '%s' with ThreadHolder ID %d.\n",
+            thread->getName(), thread->m_threadHolderId);
     }
 }
 
@@ -296,34 +329,52 @@ void ThreadHolder::remove(IThread *thread) CANTHROW
 
 void ThreadHolder::markThreadsClosing() CANTHROW
 {
+	g_Log.Event(LOGM_INIT|LOGM_NOCONTEXT|LOGL_EVENT, "Marking threads as closing.\n");
+
     std::unique_lock<std::shared_mutex> lock(m_mutex);
 
-    m_closing = true;
+    m_closingThreads = true;
 	for (auto& thread_data : m_threads)
 	{
 		auto sphere_thread = static_cast<AbstractSphereThread*>(thread_data.m_ptr);
 		sphere_thread->_fIsClosing = true;
 		thread_data.m_closed = true;
 	}
-	//printf("Marking threads as closing.\n");
 }
 
-IThread * ThreadHolder::getThreadAt(size_t at) CANTHROW
+IThread * ThreadHolder::getThreadAt(size_t at) noexcept
 {
-    std::shared_lock<std::shared_mutex> lock(m_mutex);
+    IThread* retval = nullptr;
+    RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
+        ([this, at]() -> IThread*
+        {
+// MSVC: warning C5101: use of preprocessor directive in function-like macro argument list is undefined behavior.
+//#ifdef _DEBUG
+            [[unlikely]]
+            if (getActiveThreads() != m_threads.size())
+            {
+                STDERR_LOG("Active threads %" PRIuSIZE_T ", threads container size %" PRIuSIZE_T ".\n", getActiveThreads(), m_threads.size());
+                RaiseImmediateAbort();
+            }
+//#endif
+            [[unlikely]]
+            	if ( at > getActiveThreads() )
+                return nullptr;
 
-	if ( at > getActiveThreads() )
-		return nullptr;
+            /*
+            for ( spherethreadlist_t::const_iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it )
+            {
+                if ( at == 0 )
+                    return it->m_ptr;
 
-	for ( spherethreadlist_t::const_iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it )
-	{
-		if ( at == 0 )
-			return it->m_ptr;
+                --at;
+            }
+            return nullptr;
+            */
+            return m_threads[at].m_ptr;
+    }));
 
-		--at;
-	}
-
-	return nullptr;
+    return retval;
 }
 
 
@@ -378,6 +429,11 @@ void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
 
 void AbstractThread::start()
 {
+    //ThreadHolder::get().push(this);
+    //printf("Starting thread '%s' with ThreadHolder ID %d.\n",
+    //                 getName(), m_threadHolderId);
+    //fflush(stdout);
+
 #ifdef _WIN32
 	m_handle = reinterpret_cast<spherethread_t>(_beginthreadex(nullptr, 0, &runner, this, 0, nullptr));
 #else
@@ -635,8 +691,11 @@ void AbstractThread::onStart()
 
     ThreadHolder::get().push(this);
 
-	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
+    	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());
+
+    g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Started thread '%s' with ThreadHolder ID %d and system ID %" PRIu64 ".\n",
+                     getName(), m_threadHolderId, (uint64)m_threadSystemId);
 }
 
 void AbstractThread::setPriority(IThread::Priority pri)
@@ -787,18 +846,25 @@ void AbstractSphereThread::exceptionCaught()
 #endif
 }
 
-#include <iostream>
-#include "../game/CServerConfig.h"
-
 #ifdef THREAD_TRACK_CALLSTACK
 static thread_local ssize_t _stackpos = -1;
-void AbstractSphereThread::pushStackCall(const char *name) NOEXCEPT_NODEBUG
+void AbstractSphereThread::pushStackCall(const char *name) noexcept
 {
+    [[unlikely]]
     if (m_freezeCallStack == true)
         return;
 
-    DEBUG_ASSERT(m_stackPos >= -1);
-    DEBUG_ASSERT(m_stackPos < (ssize_t)sizeof(m_stackInfo));
+#ifdef _DEBUG
+    [[unlikely]]
+    if (m_stackPos < -1) {
+        RaiseImmediateAbort();
+    }
+    [[unlikely]]
+    if (m_stackPos >= (ssize_t)sizeof(m_stackInfo)) {
+        RaiseImmediateAbort();
+    }
+#endif
+
     ++m_stackPos;
     _stackpos = m_stackPos;
     m_stackInfo[m_stackPos].functionName = name;
@@ -899,30 +965,37 @@ void DummySphereThread::tick()
 StackDebugInformation::StackDebugInformation(const char *name) noexcept
 	: m_context(nullptr)
 {
+    STATIC_ASSERT_NOEXCEPT_CONSTRUCTOR(StackDebugInformation, const char*);
+    STATIC_ASSERT_NOEXCEPT_MEMBER_FUNCTION(AbstractSphereThread, pushStackCall, const char*);
+
     auto& th = ThreadHolder::get();
+    [[unlikely]]
     if (th.closing())
         return;
 
     IThread *icontext = th.current();
-	if (icontext == nullptr)
+	[[unlikely]]
+    if (icontext == nullptr)
 	{
 		// Thread was deleted, manually or by app closing signal.
 		return;
 	}
 
 	m_context = static_cast<AbstractSphereThread*>(icontext);
-	if (m_context != nullptr && !m_context->closing())
+    [[likely]]
+    if (m_context != nullptr && !m_context->closing())
 	{
 		m_context->pushStackCall(name);
-        //printf("-  -  -  -  Pushing stack call: %s.\n", name);
 	}
 }
 
 StackDebugInformation::~StackDebugInformation() noexcept
 {
+    [[unlikely]]
 	if (!m_context || m_context->closing())
 		return;
 
+    [[unlikely]]
     if (std::uncaught_exceptions() != 0)
     {
         // Exception was thrown and stack unwinding is in progress.

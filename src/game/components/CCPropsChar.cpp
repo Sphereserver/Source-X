@@ -90,6 +90,18 @@ bool CCPropsChar::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyValNum_t
 {
     ADDTOCALLSTACK("CCPropsChar::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
+
+    if (iPropIndex == PROPCH_FACTION_GROUP)
+    {
+        *piOutVal = num_alias_cast<PropertyValNum_t>(_faction.GetGroup());
+        return true;
+    }
+    else if (iPropIndex == PROPCH_FACTION_SPECIES)
+    {
+        *piOutVal = num_alias_cast<PropertyValNum_t>(_faction.GetSpecies());
+        return true;
+    }
+
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
@@ -111,7 +123,18 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
         if (0 == _mPropsNum.erase(iPropIndex))
             return; // I didn't have this property, so avoid further processing.
     }
-    else
+
+    else if (iPropIndex == PROPCH_FACTION_GROUP)
+    {
+        _faction.SetGroup(num_alias_cast<CFactionDef::Group>(iVal));
+        return;
+    }
+    else if (iPropIndex == PROPCH_FACTION_SPECIES)
+    {
+        _faction.SetSpecies(num_alias_cast<CFactionDef::Species>(iVal));
+        return;
+    }
+
     {
         _mPropsNum[iPropIndex] = iVal;
         //_mPropsNum.container.shrink_to_fit();

@@ -80,9 +80,9 @@ uint32 u32_from_usize_clamping(const size_t a) noexcept
 // Promote to the corresponding 32 bits numeric type a smaller numeric variable.
 template <typename T>
 [[nodiscard]]
-constexpr auto n_promote32(const T a) noexcept
+constexpr auto n_promote_n32(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) < 4, "Input variable is not smaller than a 32 bit number.");
     if constexpr (std::is_signed_v<T>)
@@ -95,12 +95,20 @@ constexpr auto n_promote32(const T a) noexcept
         return static_cast<uint32>(a);
 }
 
+template <typename T>
+[[nodiscard]]
+constexpr auto enum_promote_n32(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n_promote_n32(static_cast<std::underlying_type_t<const T>>(a));
+}
+
 // Promote to the corresponding 64 bits numeric type a smaller numeric variable.
 template <typename T>
 [[nodiscard]]
-constexpr auto n_promote64(const T a) noexcept
+constexpr auto n_promote_n64(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) < 8, "Input variable is not smaller than a 64 bit number.");
     if constexpr (std::is_signed_v<T>)
@@ -113,12 +121,20 @@ constexpr auto n_promote64(const T a) noexcept
         return static_cast<uint64>(a);
 }
 
+template <typename T>
+[[nodiscard]]
+constexpr auto enum_promote_n64(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n_promote_n64(static_cast<std::underlying_type_t<const T>>(a));
+}
+
 // Narrow a 64 bits number to a 32 bits number, discarding any upper exceeding bytes.
 template <typename T>
 [[nodiscard]]
-constexpr auto n64_narrow32(const T a) noexcept
+constexpr auto n64_narrow_n32(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
 
@@ -137,18 +153,27 @@ constexpr auto n64_narrow32(const T a) noexcept
 // Narrow a 64 bits number to a 32 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
 template <typename T>
 [[nodiscard]] inline
-auto n64_narrow32_checked(const T a)
+auto n64_narrow_n32_checked(const T a)
 {
     ASSERT(a <= std::numeric_limits<int32>::max());
-    return n64_narrow32(a);
+    return n64_narrow_n32(a);
 }
+
+template <typename T>
+[[nodiscard]]
+constexpr auto enum64_narrow_n32_checked(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n64_narrow_n32_checked(static_cast<std::underlying_type_t<const T>>(a));
+}
+
 
 // Narrow a 64 bits number to a 16 bits number, discarding any upper exceeding bytes.
 template <typename T>
 [[nodiscard]]
-constexpr auto n64_narrow16(const T a) noexcept
+constexpr auto n64_narrow_n16(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
 
@@ -167,18 +192,26 @@ constexpr auto n64_narrow16(const T a) noexcept
 // Narrow a 64 bits number to a 16 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
 template <typename T>
 [[nodiscard]] inline
-auto n64_narrow16_checked(const T a)
+auto n64_narrow_n16_checked(const T a)
 {
     ASSERT(a <= std::numeric_limits<int16>::max());
-    return n64_narrow16(a);
+    return n64_narrow_n16(a);
+}
+
+template <typename T>
+[[nodiscard]]
+constexpr auto enum64_narrow_n16_checked(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n64_narrow_n16_checked(static_cast<std::underlying_type_t<const T>>(a));
 }
 
 // Narrow a 64 bits number to a 8 bits number, discarding any upper exceeding bytes.
 template <typename T>
 [[nodiscard]]
-constexpr auto n64_narrow8(const T a) noexcept
+constexpr auto n64_narrow_n8(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type");
     static_assert(std::is_floating_point_v<T> == false, "Corresponding 8-bit floating point type does not exist?");
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
@@ -194,18 +227,26 @@ constexpr auto n64_narrow8(const T a) noexcept
 // Narrow a 64 bits number to a 8 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
 template <typename T>
 [[nodiscard]] inline
-auto n64_narrow8_checked(const T a)
+auto n64_narrow_n8_checked(const T a)
 {
     ASSERT(a <= std::numeric_limits<int8>::max());
-    return n64_narrow8(a);
+    return n64_narrow_n8(a);
+}
+
+template <typename T>
+[[nodiscard]]
+constexpr auto enum64_narrow_n8_checked(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n64_narrow_n8_checked(static_cast<std::underlying_type_t<const T>>(a));
 }
 
 // Narrow a 32 bits number to a 16 bits number, discarding any upper exceeding bytes.
 template <typename T>
 [[nodiscard]]
-constexpr auto n32_narrow16(const T a) noexcept
+constexpr auto n32_narrow_n16(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
     static_assert(sizeof(T) == 4, "Input variable is not a 32 bit number.");
 
@@ -224,18 +265,26 @@ constexpr auto n32_narrow16(const T a) noexcept
 // Narrow a 32 bits number to a 16 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
 template <typename T>
 [[nodiscard]] inline
-auto n32_narrow16_checked(const T a)
+auto n32_narrow_n16_checked(const T a)
 {
     ASSERT(a <= std::numeric_limits<int16>::max());
-    return n32_narrow16(a);
+    return n32_narrow_n16(a);
+}
+
+template <typename T>
+[[nodiscard]]
+constexpr auto enum32_narrow_n16_checked(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n32_narrow_n16_checked(static_cast<std::underlying_type_t<const T>>(a));
 }
 
 // Narrow a 32 bits number to a 8 bits number, discarding any upper exceeding bytes.
 template <typename T>
 [[nodiscard]]
-constexpr auto n32_narrow8(const T a) noexcept
+constexpr auto n32_narrow_n8(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(sizeof(T) == 4, "Input variable is not a 32 bit number.");
 
     // Since the narrowing can be implementation specific, here we decide that we take only the lower 16 bytes and discard the upper ones.
@@ -249,18 +298,26 @@ constexpr auto n32_narrow8(const T a) noexcept
 // Narrow a 32 bits number to an 8 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
 template <typename T>
 [[nodiscard]] inline
-auto n32_narrow8_checked(const T a)
+auto n32_narrow_n8_checked(const T a)
 {
     ASSERT(a <= std::numeric_limits<int8>::max());
-    return n32_narrow8(a);
+    return n32_narrow_n8(a);
+}
+
+template <typename T>
+[[nodiscard]]
+constexpr auto enum32_narrow_n8_checked(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n32_narrow_n8_checked(static_cast<std::underlying_type_t<const T>>(a));
 }
 
 // Narrow a 16 bits number to an 8 bits number, discarding any upper exceeding bytes.
 template <typename T>
 [[nodiscard]]
-constexpr auto n16_narrow8(const T a) noexcept
+constexpr auto n16_narrow_n8(const T a) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    static_assert(std::is_arithmetic_v<T>, "Input variable has not a arithmetic type.");
     static_assert(std::is_integral_v<T>, "Only integral types are supported by this function.");
     static_assert(sizeof(T) == 2, "Input variable is not a 16 bit number.");
 
@@ -275,25 +332,33 @@ constexpr auto n16_narrow8(const T a) noexcept
 // Narrow a 16 bits number to an 8 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow.
 template <typename T>
 [[nodiscard]] inline
-auto n16_narrow8_checked(const T a)
+auto n16_narrow_n8_checked(const T a)
 {
     ASSERT(a <= std::numeric_limits<int8>::max());
-    return n16_narrow8(a);
+    return n16_narrow_n8(a);
+}
+
+template <typename T>
+[[nodiscard]]
+constexpr auto enum16_narrow_n8_checked(const T a) noexcept
+{
+    static_assert(std::is_enum_v<T>, "Input variable is not an enum type.");
+    return n16_narrow_n8_checked(static_cast<std::underlying_type_t<const T>>(a));
 }
 
 // If size_t is bigger than a 32 bits number, narrow it to a 32 bits number discarding any upper exceeding bytes, otherwise plain return the same value..
 [[nodiscard]]
-constexpr uint32 usize_narrow32(const size_t a) noexcept
+constexpr uint32 usize_narrow_u32(const size_t a) noexcept
 {
-    // This doesn't work because n64_narrow32 static_asserts will be evaluated and fail on 32 bits compilation.
+    // This doesn't work because n64_narrow_n32 static_asserts will be evaluated and fail on 32 bits compilation.
     /*
     if constexpr (sizeof(size_t) == 8)
-        return n64_narrow32(a);
+        return n64_narrow_n32(a);
     else
         return a;
     */
 #if SIZE_MAX == UINT64_MAX
-    return n64_narrow32(a);
+    return n64_narrow_n32(a);
 #elif SIZE_MAX == UINT32_MAX
     return a;
 #else
@@ -303,10 +368,10 @@ constexpr uint32 usize_narrow32(const size_t a) noexcept
 
 // If size_t is bigger than a 32 bits number, narrow it to a 32 bits number and ASSERT (because you're reasonably sure but not absolutely certain) that it won't overflow. If size_t has 32 bits size, plain return the same value.
 [[nodiscard]] inline
-uint32 usize_narrow32_checked(const size_t a)
+uint32 usize_narrow_u32_checked(const size_t a)
 {
     ASSERT(a <= std::numeric_limits<uint32>::max());
-    return usize_narrow32(a);
+    return usize_narrow_u32(a);
 }
 
 
@@ -378,9 +443,9 @@ template <typename T> int64 i64_from_u64_checked(T) = delete; // disable implici
 int8 i8_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
-    return n64_narrow8_checked(a);
+    return n64_narrow_n8_checked(a);
 #elif SIZE_MAX == UINT32_MAX
-    return n32_narrow8_checked(a);
+    return n32_narrow_n8_checked(a);
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -392,9 +457,9 @@ template <typename T> int8 i8_from_usize_checked(T) = delete; // disable implici
 int16 i16_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
-    return n64_narrow16_checked(a);
+    return n64_narrow_n16_checked(a);
 #elif SIZE_MAX == UINT32_MAX
-    return n32_narrow16_checked(a);
+    return n32_narrow_n16_checked(a);
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -405,7 +470,7 @@ template <typename T> int16 i16_from_usize_checked(T) = delete; // disable impli
 int32 i32_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
-    return i32_from_u32_clamping(n64_narrow32_checked(a));
+    return i32_from_u32_clamping(n64_narrow_n32_checked(a));
 #elif SIZE_MAX == UINT32_MAX
     return i32_from_u32_checked(num_alias_cast<uint32>(a));
 #else

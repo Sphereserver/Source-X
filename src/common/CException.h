@@ -27,6 +27,13 @@ void SetExceptionTranslator();
 
 void NotifyDebugger();
 
+void SetAbortImmediate(bool on) noexcept;
+bool AbortImmediate() noexcept;
+
+void RaiseRecoverableAbort();
+void RaiseImmediateAbort();
+
+
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
 

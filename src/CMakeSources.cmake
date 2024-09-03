@@ -454,10 +454,10 @@ src/game/clients/CParty.h
 SOURCE_GROUP (game\\clients FILES ${clients_SRCS})
 
 SET (components_SRCS
+src/game/components/subcomponents/CFactionDef.cpp
+src/game/components/subcomponents/CFactionDef.h
 src/game/components/CCChampion.cpp
 src/game/components/CCChampion.h
-src/game/components/CCFaction.cpp
-src/game/components/CCFaction.h
 src/game/components/CCItemDamageable.cpp
 src/game/components/CCItemDamageable.h
 src/game/components/CCMultiMovable.cpp

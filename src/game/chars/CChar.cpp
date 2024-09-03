@@ -328,7 +328,6 @@ CChar::CChar( CREID_TYPE baseID ) :
     // SubscribeComponent Prop Components
 	TrySubscribeComponentProps<CCPropsChar>();
 	TrySubscribeComponentProps<CCPropsItemChar>();
-	SubscribeComponent(new CCFaction(pCharDef->GetFaction()));
 
 	ASSERT(IsDisconnected());
 }
@@ -336,8 +335,8 @@ CChar::CChar( CREID_TYPE baseID ) :
 // Delete character
 CChar::~CChar()
 {
-	EXC_TRY("Cleanup in destructor");
 	ADDTOCALLSTACK("CChar::~CChar");
+    	EXC_TRY("Cleanup in destructor");
 
 	CChar::DeletePrepare();
 	CChar::DeleteCleanup(true);
@@ -1248,7 +1247,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 				pItem->m_uidLink = myUID; //If the character being duped has an item which linked to himself, set the newly duped character link instead.
 			else if (IsSetOF(OF_PetSlots) &&  pItem->IsMemoryTypes(MEMORY_IPET) && pTest3 == NPC_PetGetOwner())
 			{
-				const short iFollowerSlots = n64_narrow16(GetDefNum("FOLLOWERSLOTS", true, 1));
+				const short iFollowerSlots = n64_narrow_n16(GetDefNum("FOLLOWERSLOTS", true, 1));
 				//If we have reached the maximum follower slots we remove the ownership of the pet by clearing the memory flag instead of using NPC_PetClearOwners().
 				if (!pTest3->FollowersUpdate(this, maximum(0, iFollowerSlots)))
 					Memory_ClearTypes(MEMORY_IPET);
@@ -1471,6 +1470,19 @@ bool CChar::SetName( lpctstr pszName )
 	ADDTOCALLSTACK("CChar::SetName");
 	return SetNamePool( pszName );
 }
+
+const CFactionDef* CChar::GetFaction() const noexcept
+{
+    auto pComp = static_cast<CCPropsChar const*>(GetComponentProps(COMP_PROPS_CHAR));
+	return (!pComp ? nullptr : pComp->GetFaction());
+}
+
+CFactionDef* CChar::GetFaction() noexcept
+{
+    auto pComp = static_cast<CCPropsChar*>(GetComponentProps(COMP_PROPS_CHAR));
+	return (!pComp ? nullptr : pComp->GetFaction());
+}
+
 
 height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
@@ -2517,7 +2529,7 @@ do_default:
 					}
 					if ( m_notoSaves.size() )
 					{
-						size_t notoIndex = Exp_GetVal(ptcKey);
+						size_t notoIndex = Exp_GetSTVal(ptcKey);
 						SKIP_SEPARATORS(ptcKey);
 						if ( notoIndex < m_notoSaves.size() )
 						{
@@ -3758,6 +3770,7 @@ bool CChar::r_LoadVal( CScript & s )
 			Stat_SetVal(STAT_DEX, (ushort)std::max(s.GetArgVal(), 0));
 			UpdateStamFlag();
 			break;
+
 		case CHC_STEPSTEALTH:
 			m_StepStealth = s.GetArgVal();
 			break;

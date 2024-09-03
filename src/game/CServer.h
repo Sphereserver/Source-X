@@ -86,7 +86,7 @@ public:
 	void SetServerMode( SERVMODE_TYPE mode );
     bool IsValidBusy() const;
     int GetExitFlag() const noexcept;
-    void SetExitFlag(int iFlag);
+    void SetExitFlag(int iFlag) noexcept;
     bool IsLoading() const noexcept;
     bool IsResyncing() const noexcept;
 	void Shutdown( int64 iMinutes );

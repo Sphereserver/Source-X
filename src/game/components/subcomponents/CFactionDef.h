@@ -1,17 +1,17 @@
 /**
-* @file CCFaction.h
+* @file CFactionDef.h
 *
 */
 
-#ifndef _INC_CCFACTION_H
-#define _INC_CCFACTION_H
+#ifndef _INC_CFACTIONDEF_H
+#define _INC_CFACTIONDEF_H
 
-#include "../CComponent.h"
+#include "../../../common/common.h"
 
 
 class CChar;
 class CItem;
-
+class CItemBase;
 
 /*
     The Original Slayers fall into 6 groups. Abyss, Arachnid, Elemental, Humanoid, Reptilian and Undead.
@@ -21,7 +21,12 @@ class CItem;
     – Mondain’s Legacy Slayers, usually found on Talismans, do not have an opposing group.
     A successful use of a Slayer Weapon, Spellbook or Instrument will yield a little white flash on the monster.
     Super Slayer Weapons will do double damage to the monsters they are meant for.
-    “Single Slayers” or Slayers that fall into a Super Slayer subcategory will do triple damage
+    “Single Slayers” or Slayers that fall into a Super Slayer subcategory will do triple damage.
+
+    The following Super Slayers primarily are found on Talisman: Bat, Bear, Beetle, Bird, Bovine, Flame, Ice, Mage, Vermin, & Wolf.
+    The following Super Slayers primarily are found on musical instruments, weapons, and spellbooks:
+        Abyss, Arachnid, Elemental, Fey, Repond, Reptile, and Undead Slayer.
+
     Slayer Weapons can both be found as monster loot and be crafted by using a runic crafting tool.
     Slayer Spellbooks will cause single target, direct damage spells to do double damage to the monsters they are meant for.
     Player written Slayer Spellbooks can only be crafted by scribes with high magery skill using a scribe pen.
@@ -31,15 +36,20 @@ class CItem;
     Slayer Talismans are found on Mondain’s Legacy monsters or as Quest Rewards.
 */
 
-#define DAMAGE_SLAYER_LESSER    3   // Lesser Slayer does x3 damage.
-#define DAMAGE_SLAYER_SUPER     2   // Super Slayer does x2 damage.
-#define DAMAGE_SLAYER_OPPOSITE  2   // Opposite Slayer does x2 damage.
+
+/*
+TODO: enable customization of slayer bonus damage?
+Until the Stygian Abyss expansion, all Slayers did double damage to applicable monsters. However, following that expansion, Lesser Slayers do triple damage, and Super Slayers still do double damage.
+*/
+#define DAMAGE_SLAYER_LESSER    300   // Lesser Slayer does x3 (300%) damage.
+#define DAMAGE_SLAYER_SUPER     200   // Super Slayer does x2 (200%) damage.
+#define DAMAGE_SLAYER_OPPOSITE  200   // Opposite Slayer does x2 (200%) damage.
 
 
 /*
     This class is used to store FACTION for NPCs and SLAYER for items
     Initially involved in the Slayer system it handles Super Slayer,
-    Lesser Slayer and Opposites to increase damage dealt/received
+    Lesser Slayer and Opposites to increase damage dealt/received.
 */
 class CFactionDef
 {
@@ -151,65 +161,46 @@ public:
     bool SetGroup (Group faction) noexcept;
     Species GetSpecies() const noexcept;
     bool SetSpecies(Species species) noexcept;
-};
 
-
-class CCFaction : public CFactionDef, public CComponent
-{
-    static lpctstr const sm_szLoadKeys[];
-
-public:
-    CCFaction() noexcept;
-    CCFaction(CCFaction *copy) noexcept;
-	virtual ~CCFaction() override = default;
-
-    static bool CanSubscribe(const CItem* pItem) noexcept;
-    virtual void Delete(bool fForced = false) override;
-    virtual bool r_LoadVal(CScript & s) override;
-    virtual bool r_WriteVal(lpctstr ptcKey, CSString & s, CTextConsole * pSrc = nullptr) override;
-    virtual void r_Write(CScript & s) override;
-    virtual bool r_GetRef(lpctstr & ptcKey, CScriptObj * & pRef) override;
-    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
-    virtual void Copy(const CComponent *target) override;
-    bool r_Load(CScript & s);  // Load a character from Script
-    virtual CCRET_TYPE OnTickComponent() override;
-
-    /*
+        /*
         Checks my group and the target's one and return true if we are enemies.
     */
-    bool IsOppositeGroup(const CCFaction *target) const;
+    bool IsOppositeGroup(const CFactionDef *target) const noexcept;
 
     /*
     Returns true if I'm a Super Slayer and the target has also the same type
     */
-    bool IsOppositeSuperSlayer(const CCFaction *target) const;
+    bool IsSuperSlayerVersus(const CFactionDef *target) const noexcept;
+
     /*
     Returns true if I'm a Lesser Slayer and the target has also the same type
     */
-    bool IsOppositeLesserSlayer(const CCFaction *target) const;
-    /*
-        Returns true if I'm a Super Slayer
-    */
-    bool IsSuperSlayer() const;
+    bool IsLesserSlayerVersus(const CFactionDef *target) const noexcept;
 
     /*
-        Returns true if I'm a Lesser Slayer
+        Returns true if I have a Super Slayer property
     */
-    bool IsLesserSlayer() const;
+    bool HasSuperSlayer() const noexcept;
+
+    /*
+        Returns true if I have a Lesser Slayer property
+    */
+
+    bool HasLesserSlayer() const noexcept;
     /*
         Returns the Slayers's damage bonus (if any).
         NOTE: We can't direct check for target's Super Slayer or Lesser Slayer and compare
         with ours because we may both have more than one Group (even if we shouldn't,
         Sphere's 'versatility' forces us to do so).
     */
-    int GetSlayerDamageBonus(const CCFaction *target) const;
+    int GetSlayerDamageBonusPercent(const CFactionDef *target) const noexcept;
 
     /*
         Wielding a slayer type against its opposite will cause the attacker to take more damage
         returns the penalty damage.
     */
-    int GetSlayerDamagePenalty(const CCFaction *target) const;
-
+    int GetSlayerDamagePenaltyPercent(const CFactionDef *target) const noexcept;
 };
 
-#endif // _INC_CCFACTION_H
+
+#endif // _INC_CFACTIONDEF_H

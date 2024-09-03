@@ -4,6 +4,7 @@
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"
+#include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldSearch.h"
@@ -92,7 +93,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 //	pCharMark = offended char.
 // RETURN:
 //  true = somebody saw me.
-bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction )
+bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr ptcAction )
 {
 	ADDTOCALLSTACK("CChar::CheckCrimeSeen");
     // Who notices ?
@@ -121,12 +122,13 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
             continue;
 
 		tchar *z = Str_GetTemp();
-		if ( pItem && pAction )
+		if ( pItem && ptcAction )
 		{
 			if ( pCharMark )
-				snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_2), GetName(), pAction, fYour ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_YOUR) : pCharMark->GetName(), fYour ? "" : g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_S), pItem->GetName());
+				snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_2), GetName(),
+                    ptcAction, fYour ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_YOUR) : pCharMark->GetName(), fYour ? "" : g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_S), pItem->GetName());
 			else
-				snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_1), GetName(), pAction, pItem->GetName());
+				snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_1), GetName(), ptcAction, pItem->GetName());
 		}
 
 		// They are not a criminal til someone calls the guards !!!
@@ -134,7 +136,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 		{
 			if (IsTrigUsed(TRIGGER_SEESNOOP))
 			{
-				CScriptTriggerArgs Args(pAction);
+				CScriptTriggerArgs Args(ptcAction);
 				Args.m_iN1 = SkillToSee;
 				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
 				Args.m_pO1 = pCharMark;
@@ -806,70 +808,60 @@ effect_bounce:
 
     if (IsSetCombatFlags(COMBAT_SLAYER))
     {
-		CItem *pWeapon = nullptr;
+		CItem *pSrcWeapon = nullptr;
 		if (uiType & DAMAGE_MAGIC)	// If the damage is magic, we are probably using a spell or a weapon that causes also magical damage.
 		{
-			pWeapon = pSrc->GetSpellbookLayer();	// Search for an equipped spellbook
-			if ( !pWeapon ) //No spellbook, so it's a weapon causing magical damage.
-				pWeapon = pSrc->m_uidWeapon.ItemFind();	// then force a weapon find.
+			pSrcWeapon = pSrc->GetSpellbookLayer();	// Search for an equipped spellbook
+			if ( !pSrcWeapon ) //No spellbook, so it's a weapon causing magical damage.
+				pSrcWeapon = pSrc->m_uidWeapon.ItemFind();	// then force a weapon find.
 		}
 		else //Other types of damage.
 		{
-			pWeapon = pSrc->m_uidWeapon.ItemFind();	//  force a weapon find.
+			pSrcWeapon = pSrc->m_uidWeapon.ItemFind();	//  force a weapon find.
 		}
-        int iDmgBonus = 1;
-        const CCFaction *pSlayer = nullptr;
-        const CCFaction *pFaction = GetFaction();
-        //const CCFaction *pSrcFaction = pSrc->GetFaction();
-        if (pWeapon)
+
+        const CFactionDef *pMyFaction = GetFaction();
+        if (pMyFaction && !pMyFaction->IsNone())
         {
-            pSlayer = pWeapon->GetSlayer();
-            if (pSlayer && !pSlayer->IsNone())
+            int iDmgBonusPercent = 100;
+            if (pSrcWeapon)
             {
-                if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
-                {
-                    if (pFaction && !pFaction->IsNone())
-                    {
-                        iDmgBonus = pSlayer->GetSlayerDamageBonus(pFaction);
-                    }
-                }
-                else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
-                {
-                    if (pFaction && !pFaction->IsNone())
-                    {
-                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pFaction);
-                    }
-                }
-            }
-        }
-        if (iDmgBonus == 1) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
-        {
-            const CItem *pTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
-            if (pTalisman)
-            {
-                pSlayer = pTalisman->GetSlayer();
-                if (pSlayer && pSlayer->IsNone())
+                const CFactionDef *pSrcSlayer = pSrcWeapon->GetSlayer();
+                if (pSrcSlayer && !pSrcSlayer->IsNone())
                 {
                     if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
                     {
-                        if (pFaction && pFaction->IsNone())
-                        {
-                            iDmgBonus = pSlayer->GetSlayerDamageBonus(pFaction);
-                        }
+                        iDmgBonusPercent = pSrcSlayer->GetSlayerDamageBonusPercent(pMyFaction);
                     }
                     else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                     {
-                        if (pFaction && pFaction->IsNone())
+                        iDmgBonusPercent = pSrcSlayer->GetSlayerDamagePenaltyPercent(pMyFaction);
+                    }
+                }
+            }
+            if (iDmgBonusPercent == 100) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
+            {
+                const CItem *pSrcTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
+                if (pSrcTalisman)
+                {
+                    const CFactionDef *pSrcSlayer = pSrcTalisman->GetSlayer();
+                    if (pSrcSlayer && !pSrcSlayer->IsNone())
+                    {
+                        if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
                         {
-                            iDmgBonus = pSlayer->GetSlayerDamagePenalty(pFaction);
+                            iDmgBonusPercent = pSrcSlayer->GetSlayerDamageBonusPercent(pMyFaction);
+                        }
+                        else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
+                        {
+                            iDmgBonusPercent = pSrcSlayer->GetSlayerDamagePenaltyPercent(pMyFaction);
                         }
                     }
                 }
             }
-        }
-        if (iDmgBonus > 1)
-        {
-            iDmg *= iDmgBonus;
+            if (iDmgBonusPercent != 100)
+            {
+                iDmg += (iDmg * iDmgBonusPercent) / 100;
+            }
         }
     }
 

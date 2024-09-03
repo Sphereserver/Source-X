@@ -1071,11 +1071,11 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
 		uint iLevel = (uint)IMulDiv(
-			n_promote32(pItem->m_itWeapon.m_poison_skill),
-			usize_narrow32(ARRAY_COUNT(sm_szPoisonMessages)),
+			n_promote_n32(pItem->m_itWeapon.m_poison_skill),
+			usize_narrow_u32(ARRAY_COUNT(sm_szPoisonMessages)),
 			100);
 		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
-			iLevel = usize_narrow32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
+			iLevel = usize_narrow_u32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
 		len += snprintf( pszTemp+len, Str_TempLength() - len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
@@ -1291,7 +1291,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	{
 		uint iLevel = (uint)IMulDiv( iPoisonLevel, ARRAY_COUNT(sm_szPoisonMessages), 1000 );
 		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
-			iLevel = usize_narrow32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
+			iLevel = usize_narrow_u32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
 		SysMessage(sm_szPoisonMessages[iLevel] );
 	}
 	else

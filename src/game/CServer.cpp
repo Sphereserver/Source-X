@@ -169,7 +169,7 @@ int CServer::GetExitFlag() const noexcept
     return m_iExitFlag.load(std::memory_order_acquire);
 }
 
-void CServer::SetExitFlag(int iFlag)
+void CServer::SetExitFlag(int iFlag) noexcept
 {
     ADDTOCALLSTACK("CServer::SetExitFlag");
     if ( GetExitFlag() )

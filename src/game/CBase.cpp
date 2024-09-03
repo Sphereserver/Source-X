@@ -53,15 +53,6 @@ void CBaseBaseDef::DelInstance()
 	--_dwInstances;
 }
 
-CCFaction const& CBaseBaseDef::GetFaction() const noexcept
-{
-	return _Faction;
-}
-
-CCFaction & CBaseBaseDef::GetFaction() noexcept
-{
-	return _Faction;
-}
 
 lpctstr CBaseBaseDef::GetTypeName() const
 {
@@ -146,16 +137,6 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 		case OBC_DEFNAME:
 			sVal = GetResourceName();
 			break;
-
-        case OBC_FACTION_GROUP:
-        case OBC_SLAYER_GROUP:
-            sVal.FormatHex(num_alias_cast<uint32>(_Faction.GetGroup()));
-            break;
-
-        case OBC_FACTION_SPECIES:
-        case OBC_SLAYER_SPECIES:
-            sVal.FormatHex(num_alias_cast<uint32>(_Faction.GetSpecies()));
-            break;
 
 		case OBC_ARMOR:
 			{
@@ -335,16 +316,6 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			}
 			return true;
 
-        case OBC_FACTION_GROUP:
-        case OBC_SLAYER_GROUP:
-            _Faction.SetGroup(num_alias_cast<CFactionDef::Group>(s.GetArgU32Val()));
-            return true;
-
-        case OBC_FACTION_SPECIES:
-        case OBC_SLAYER_SPECIES:
-            _Faction.SetSpecies(num_alias_cast<CFactionDef::Species>(s.GetArgU32Val()));
-            return true;
-
 		//Set as number only
 		case OBC_EXPANSION:
 		case OBC_VELOCITY:
@@ -448,8 +419,6 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 	m_defenseBase = pBase->m_defenseBase;
 	m_defenseRange = pBase->m_defenseRange;
 	m_Can = pBase->m_Can;
-    _Faction.SetGroup(pBase->_Faction.GetGroup());
-    _Faction.SetSpecies(pBase->_Faction.GetSpecies());
     CEntityProps::Copy(pBase);
 }
 

@@ -6,6 +6,7 @@
 #ifndef _INC_CCPROPSCHAR_H
 #define _INC_CCPROPSCHAR_H
 
+#include "subcomponents/CFactionDef.h"
 #include "../CComponentProps.h"
 
 
@@ -54,10 +55,23 @@ public:
 
     virtual void AddPropsTooltipData(CObjBase* pLinkedObj) override;
 
+    inline const CFactionDef* GetFaction() const noexcept;
+    inline CFactionDef* GetFaction() noexcept;
+
 private:
     BaseContNum_t _mPropsNum;
     BaseContStr_t _mPropsStr;
+
+    CFactionDef _faction;
 };
+
+
+const CFactionDef* CCPropsChar::GetFaction() const noexcept {
+    return &_faction;
+}
+CFactionDef* CCPropsChar::GetFaction() noexcept {
+    return &_faction;
+}
 
 
 #endif //_INC_CCPROPSCHAR_H
