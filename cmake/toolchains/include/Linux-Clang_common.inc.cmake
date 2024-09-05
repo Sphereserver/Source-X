@@ -84,6 +84,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 	#-- Store compiler flags common to all builds.
 
 	set (cxx_local_opts_warnings
+    -Werror
 		-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
 		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
 		-Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
@@ -139,7 +140,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 	IF (${USE_MSAN})
 		set (CMAKE_EXE_LINKER_FLAGS_EXTRA	${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie)
 	ENDIF()
-	set (cxx_linker_options_common			${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pthread -dynamic
+	set (cxx_linker_options_common			${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pthread -dynamic -Wl,--fatal-warnings
 		$<$<BOOL:${RUNTIME_STATIC_LINK}>:	-static-libstdc++ -static-libgcc> # no way to safely statically link against libc
 	)
 

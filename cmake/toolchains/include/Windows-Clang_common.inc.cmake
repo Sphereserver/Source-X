@@ -99,6 +99,7 @@ function (toolchain_exe_stuff_common)
 	#-- Store compiler flags common to all builds.
 
 	SET (cxx_local_opts_warnings
+    -Werror
     -Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-implicit-fallthrough
     -Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-unused-result
     -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
@@ -179,7 +180,7 @@ function (toolchain_exe_stuff_common)
 
 	set 	(cxx_linker_options_common	${CMAKE_EXE_LINKER_FLAGS_EXTRA})
 	if (${CLANG_USE_GCC_LINKER})
-		set (cxx_linker_options_common	${cxx_linker_options_common} -pthread -dynamic)
+		set (cxx_linker_options_common	${cxx_linker_options_common} -pthread -dynamic -Wl,--fatal-warnings)
 		if (${RUNTIME_STATIC_LINK})
 			set (cxx_linker_options_common	${cxx_linker_options_common} -static-libstdc++ -static-libgcc) # no way to statically link against libc? maybe we can on windows?
 		endif ()

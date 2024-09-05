@@ -80,6 +80,7 @@ function (toolchain_exe_stuff)
 
 	SET (cxx_compiler_flags_common
 		${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast /std:c++20
+    /WX     # treat all warnings as errors
 		/wd4310	# cast truncates constant value
 		/wd4996 # use of deprecated stuff
 		/wd4701 # Potentially uninitialized local variable 'name' used
@@ -109,7 +110,7 @@ function (toolchain_exe_stuff)
 		${cxx_compiler_flags_common}
 		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	  /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
 		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	  /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /MDd /ob1 /Od /Gs	$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
+		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /ob1 /Od /Gs	$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
 		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
 	)
 
@@ -123,10 +124,11 @@ function (toolchain_exe_stuff)
 	set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE} "")
 
 	target_link_options(spheresvr PRIVATE
-		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG /NODEFAULTLIB:libcmtd>
-		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /OPT:REF,ICF /LTCG /NODEFAULTLIB:libcmtd>
-		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /DEBUG /LTCG:OFF /SAFESEH:NO /NODEFAULTLIB:libcmt
-			$<$<NOT:$<BOOL:${ENABLED_SANITIZER}>>:/INCREMENTAL /EDITANDCONTINUE> >
+    /WX     # treat all warnings as errors
+		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
+		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
+		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
+			$<IF:$<BOOL:${ENABLED_SANITIZER}>,/INCREMENTAL:NO /EDITANDCONTINUE:NO,/INCREMENTAL /EDITANDCONTINUE> >
 	)
 	# MSVC doesn't yet have an option to statically link against *san sanitizer libraries.
 	# /INCREMENTAL and /EDITANDCONTINUE not compatible with a MSVC Asan build.

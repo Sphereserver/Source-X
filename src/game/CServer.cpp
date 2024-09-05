@@ -1818,8 +1818,10 @@ log_cont:
 					break;
 				}
 				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
-					IMPFLAGS_BOTH|IMPFLAGS_ACCOUNT, INT16_MAX,
-					Arg_ppCmd[1], Arg_ppCmd[2] ))
+                    IMPFLAGS_BOTH|IMPFLAGS_ACCOUNT, INT16_MAX,
+                    0, 0,
+                    Arg_ppCmd[1], Arg_ppCmd[2] )
+                )
 				{
                     if (pSrc != this)
                     {

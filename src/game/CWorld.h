@@ -231,8 +231,8 @@ public:
 	bool DumpAreas( CTextConsole * pSrc, lpctstr pszFilename );
 	void Close();
 
-	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0);
-	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0,
+	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, short dx = 0, short dy = 0);
+	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, short dx = 0, short dy = 0,
                 tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
 
 	virtual lpctstr GetName() const override {

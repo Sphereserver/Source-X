@@ -68,7 +68,7 @@ public:
 	void CheckLast();
 	void ImportFix();
 	bool ImportSCP( CScript & s, word wModeFlags );
-	bool ImportWSC( CScript & s, word wModeFlags, int dx, int dy );
+	bool ImportWSC( CScript & s, word wModeFlags, short dx, short dy );
 };
 
 void CImportFile::CheckLast()
@@ -302,7 +302,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 	return true;
 }
 
-bool CImportFile::ImportWSC( CScript & s, word wModeFlags, int dx, int dy )
+bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
 {
 	ADDTOCALLSTACK("CImportFile::ImportWSC");
 	// This file is a WSC or UOX world script file.
@@ -773,7 +773,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, int dx, int dy )
 	return true;
 }
 
-bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, int dx, int dy, tchar * pszArg1, tchar * pszArg2 )
+bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, short dx, short dy, tchar * pszArg1, tchar * pszArg2 )
 {
 	ADDTOCALLSTACK("CWorld::Import");
 	// wModeFlags = IMPFLAGS_TYPE
@@ -861,7 +861,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 
 
 
-bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, int dx, int dy )
+bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, short dx, short dy )
 {
 	ADDTOCALLSTACK("CWorld::Export");
 	// wModeFlags = IMPFLAGS_TYPE
