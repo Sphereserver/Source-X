@@ -232,11 +232,12 @@ public:
 	void Close();
 
 	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0);
-	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
+	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0,
+                tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
 
 	virtual lpctstr GetName() const override {
 	    return "World";
-	    }
+    }
 
 } g_World;
 

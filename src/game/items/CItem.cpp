@@ -2261,7 +2261,7 @@ bool CItem::CanSendAmount() const noexcept
     return true;
 }
 
-void CItem::WriteUOX( CScript & s, int index )
+void CItem::WriteUOX( CScript & s, int index, int dx, int dy )
 {
 	ADDTOCALLSTACK("CItem::WriteUOX");
 	s.Printf( "SECTION WORLDITEM %d\n", index );
@@ -2269,8 +2269,8 @@ void CItem::WriteUOX( CScript & s, int index )
 	s.Printf( "SERIAL %u\n", (dword) GetUID());
 	s.Printf( "NAME %s\n", GetName());
 	s.Printf( "ID %d\n", GetDispID());
-	s.Printf( "X %d\n", GetTopPoint().m_x );
-	s.Printf( "Y %d\n", GetTopPoint().m_y );
+	s.Printf( "X %d\n", GetTopPoint().m_x + dx );
+	s.Printf( "Y %d\n", GetTopPoint().m_y + dy );
 	s.Printf( "Z %d\n", GetTopZ());
 	s.Printf( "CONT %d\n", -1 );
 	s.Printf( "TYPE %d\n", m_type );

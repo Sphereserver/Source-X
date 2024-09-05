@@ -1639,7 +1639,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
 					(Arg_Qty >= 2) ? (word)atoi(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
-					(Arg_Qty >= 3)? atoi(Arg_ppCmd[2]) : INT16_MAX ))
+					(Arg_Qty >= 3) ? atoi(Arg_ppCmd[2]) : INT16_MAX ))
 				{
                     if (pSrc != this)
                     {

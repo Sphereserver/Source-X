@@ -802,7 +802,7 @@ public:
 	virtual void Flip() override;
 	bool LoadSetContainer( const CUID& uid, LAYER_TYPE layer );
 
-	void WriteUOX( CScript & s, int index );
+	void WriteUOX( CScript & s, int index, int dx, int dy );
 
 	void r_WriteMore1( CSString & sVal );
 	void r_WriteMore2( CSString & sVal );
