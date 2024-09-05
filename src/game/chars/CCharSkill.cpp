@@ -3306,7 +3306,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	{
 		UpdateStatVal( STAT_DEX, -(ushort)( 4 + g_Rand.GetVal(6) ) );
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
-			UpdateAnimate( ANIM_MON_Stomp );
+			UpdateAnimate( ANIM_THROW );
 
 		_SetTimeout(3000);
 		return 0;
@@ -3315,7 +3315,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	if ( stage != SKTRIG_SUCCESS )
 		return -SKTRIG_QTY;
 
-	CPointMap pntMe = GetTopPoint();
+	const CPointMap pntMe(GetTopPoint());
 	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
 		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
 

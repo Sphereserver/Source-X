@@ -134,7 +134,7 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
         _faction.SetSpecies(num_alias_cast<CFactionDef::Species>(iVal));
         return;
     }
-
+    else
     {
         _mPropsNum[iPropIndex] = iVal;
         //_mPropsNum.container.shrink_to_fit();
