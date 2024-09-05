@@ -45,14 +45,12 @@ jobs:
             mkdir -p build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" -S . -B ./build
     - name: Ninja
-      run: cd build && ninja -v && cd ..
+      run: cd build && ninja && cd ..
     - name: Create package
       run:  |
             pwd
             mkdir accounts logs save scripts
-            zip -r SphereSvrX-osx-arm64-nightly.zip accounts/ logs/ save/ scripts/
-            zip SphereSvrX-osx-arm64-nightly.zip src/sphere.ini src/sphereCrypt.ini build/bin-aarch64/*
-      # zip SphereSvrX-osx-arm64-nightly.zip src/sphere.ini src/sphereCrypt.ini build/bin-native64/*
+            zip -rj SphereSvrX-osx-arm64-nightly.zip accounts/ logs/ save/ scripts/ src/sphere.ini src/sphereCrypt.ini build/bin-aarch64/*
 
     # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
     - name: Upload artifact
