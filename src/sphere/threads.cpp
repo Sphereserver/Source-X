@@ -146,8 +146,8 @@ IThread* ThreadHolder::current() noexcept
     RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
         ([this, &lock]() -> IThread*
         {
-            [[unlikely]]
             if (m_closingThreads)
+            [[unlikely]]
             {
                 //STDERR_LOG("Closing?\n");
                 return nullptr;
@@ -155,12 +155,12 @@ IThread* ThreadHolder::current() noexcept
 
             const threadid_t tid = IThread::getCurrentThreadSystemId();
 
-            [[unlikely]]
             if (m_spherethreadpairs_systemid_ptr.empty())
+            [[unlikely]]
             {
                 auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
-                [[unlikely]]
                 if (!thread)
+                [[unlikely]]
                 {
                     // Should never happen.
                     RaiseImmediateAbort();
@@ -181,8 +181,8 @@ IThread* ThreadHolder::current() noexcept
                     break;
                 }
             }
-            [[unlikely]]
             if (!found)
+            [[unlikely]]
             {
                 //throw CSError(LOGL_FATAL, 0, "Thread handle not found in vector?");
                 //STDERR_LOG("Thread handle not found in vector?");
@@ -195,8 +195,8 @@ IThread* ThreadHolder::current() noexcept
 
             ASSERT(thread->m_threadHolderId != -1);
             SphereThreadData *tdata = &(m_threads[thread->m_threadHolderId]);
-            [[unlikely]]
             if (tdata->m_closed)
+            [[unlikely]]
             {
                 //STDERR_LOG("Closed? Idx %u, Name %s.\n", thread->m_threadHolderId, thread->getName());
                 return nullptr;
@@ -350,16 +350,20 @@ IThread * ThreadHolder::getThreadAt(size_t at) noexcept
         {
 // MSVC: warning C5101: use of preprocessor directive in function-like macro argument list is undefined behavior.
 //#ifdef _DEBUG
-            [[unlikely]]
             if (getActiveThreads() != m_threads.size())
+            [[unlikely]]
             {
                 STDERR_LOG("Active threads %" PRIuSIZE_T ", threads container size %" PRIuSIZE_T ".\n", getActiveThreads(), m_threads.size());
                 RaiseImmediateAbort();
             }
 //#endif
-            [[unlikely]]
+
             	if ( at > getActiveThreads() )
+            [[unlikely]]
+            {
                 return nullptr;
+            }
+
 
             /*
             for ( spherethreadlist_t::const_iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it )
@@ -850,17 +854,15 @@ void AbstractSphereThread::exceptionCaught()
 static thread_local ssize_t _stackpos = -1;
 void AbstractSphereThread::pushStackCall(const char *name) noexcept
 {
-    [[unlikely]]
-    if (m_freezeCallStack == true)
+    if (m_freezeCallStack == true) [[unlikely]] {
         return;
+    }
 
 #ifdef _DEBUG
-    [[unlikely]]
-    if (m_stackPos < -1) {
+    if (m_stackPos < -1) [[unlikely]] {
         RaiseImmediateAbort();
     }
-    [[unlikely]]
-    if (m_stackPos >= (ssize_t)sizeof(m_stackInfo)) {
+    if (m_stackPos >= (ssize_t)sizeof(m_stackInfo)) [[unlikely]] {
         RaiseImmediateAbort();
     }
 #endif
@@ -969,34 +971,32 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
     STATIC_ASSERT_NOEXCEPT_MEMBER_FUNCTION(AbstractSphereThread, pushStackCall, const char*);
 
     auto& th = ThreadHolder::get();
-    [[unlikely]]
-    if (th.closing())
+    if (th.closing()) [[unlikely]]
         return;
 
     IThread *icontext = th.current();
-	[[unlikely]]
     if (icontext == nullptr)
+    [[unlikely]]
 	{
 		// Thread was deleted, manually or by app closing signal.
 		return;
 	}
 
 	m_context = static_cast<AbstractSphereThread*>(icontext);
-    [[likely]]
     if (m_context != nullptr && !m_context->closing())
 	{
+        [[unlikely]]
 		m_context->pushStackCall(name);
 	}
 }
 
 StackDebugInformation::~StackDebugInformation() noexcept
 {
-    [[unlikely]]
-	if (!m_context || m_context->closing())
+	if (!m_context || m_context->closing()) [[unlikely]]
 		return;
 
-    [[unlikely]]
     if (std::uncaught_exceptions() != 0)
+    [[unlikely]]
     {
         // Exception was thrown and stack unwinding is in progress.
         m_context->exceptionNotifyStackUnwinding();

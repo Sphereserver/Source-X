@@ -155,7 +155,12 @@ template <typename T>
 [[nodiscard]] inline
 auto n64_narrow_n32_checked(const T a)
 {
-    ASSERT(a <= std::numeric_limits<int32>::max());
+    if constexpr (std::is_signed_v<T>) {
+        ASSERT(a <= std::numeric_limits<int32>::max());
+    }
+    else {
+        ASSERT(a <= std::numeric_limits<uint32>::max());
+    }
     return n64_narrow_n32(a);
 }
 
@@ -194,7 +199,12 @@ template <typename T>
 [[nodiscard]] inline
 auto n64_narrow_n16_checked(const T a)
 {
-    ASSERT(a <= std::numeric_limits<int16>::max());
+    if constexpr (std::is_signed_v<T>) {
+        ASSERT(a <= std::numeric_limits<int16>::max());
+    }
+    else {
+        ASSERT(a <= std::numeric_limits<uint16>::max());
+    }
     return n64_narrow_n16(a);
 }
 
@@ -229,7 +239,12 @@ template <typename T>
 [[nodiscard]] inline
 auto n64_narrow_n8_checked(const T a)
 {
-    ASSERT(a <= std::numeric_limits<int8>::max());
+    if constexpr (std::is_signed_v<T>) {
+        ASSERT(a <= std::numeric_limits<int8>::max());
+    }
+    else {
+        ASSERT(a <= std::numeric_limits<uint8>::max());
+    }
     return n64_narrow_n8(a);
 }
 
@@ -267,7 +282,12 @@ template <typename T>
 [[nodiscard]] inline
 auto n32_narrow_n16_checked(const T a)
 {
-    ASSERT(a <= std::numeric_limits<int16>::max());
+    if constexpr (std::is_signed_v<T>) {
+        ASSERT(a <= std::numeric_limits<int16>::max());
+    }
+    else {
+        ASSERT(a <= std::numeric_limits<uint16>::max());
+    }
     return n32_narrow_n16(a);
 }
 
@@ -300,7 +320,12 @@ template <typename T>
 [[nodiscard]] inline
 auto n32_narrow_n8_checked(const T a)
 {
-    ASSERT(a <= std::numeric_limits<int8>::max());
+    if constexpr (std::is_signed_v<T>) {
+        ASSERT(a <= std::numeric_limits<int8>::max());
+    }
+    else {
+        ASSERT(a <= std::numeric_limits<uint8>::max());
+    }
     return n32_narrow_n8(a);
 }
 
@@ -334,7 +359,12 @@ template <typename T>
 [[nodiscard]] inline
 auto n16_narrow_n8_checked(const T a)
 {
-    ASSERT(a <= std::numeric_limits<int8>::max());
+    if constexpr (std::is_signed_v<T>) {
+        ASSERT(a <= std::numeric_limits<int8>::max());
+    }
+    else {
+        ASSERT(a <= std::numeric_limits<uint8>::max());
+    }
     return n16_narrow_n8(a);
 }
 

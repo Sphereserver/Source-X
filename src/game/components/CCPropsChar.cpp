@@ -273,6 +273,9 @@ void CCPropsChar::r_Write(CScript & s)
     // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
     BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
     BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
+
+    s.WriteKeyVal(_ptcPropertyKeys[PROPCH_FACTION_GROUP],   num_alias_cast<int32>(_faction.GetGroup()));
+    s.WriteKeyVal(_ptcPropertyKeys[PROPCH_FACTION_SPECIES], num_alias_cast<int32>(_faction.GetSpecies()));
 }
 
 void CCPropsChar::Copy(const CComponentProps * target)
@@ -284,6 +287,8 @@ void CCPropsChar::Copy(const CComponentProps * target)
 
     _mPropsNum = pTarget->_mPropsNum;
     _mPropsStr = pTarget->_mPropsStr;
+
+    _faction = pTarget->_faction;
 }
 
 void CCPropsChar::AddPropsTooltipData(CObjBase* pLinkedObj)
