@@ -98,12 +98,18 @@ bool CCPropsItemEquippable::GetPropertyNumPtr(PropertyIndex_t iPropIndex, Proper
 
     if (iPropIndex == PROPIEQUIP_SLAYER_GROUP)
     {
-        *piOutVal = num_alias_cast<PropertyValNum_t>(_faction.GetGroup());
+        auto group = _faction.GetGroup();
+        if (group == CFactionDef::Group::NONE)
+            return false;
+        *piOutVal = (int32)enum_alias_cast<uint32>(group);
         return true;
     }
     else if (iPropIndex == PROPIEQUIP_SLAYER_SPECIES)
     {
-        *piOutVal = num_alias_cast<PropertyValNum_t>(_faction.GetSpecies());
+        auto species = _faction.GetSpecies();
+        if (species == CFactionDef::Species::NONE)
+            return false;
+        *piOutVal = (int32)enum_alias_cast<uint32>(species);
         return true;
     }
 
@@ -117,7 +123,7 @@ bool CCPropsItemEquippable::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSStri
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -126,18 +132,18 @@ void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyV
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
 
     else if (iPropIndex == PROPIEQUIP_SLAYER_GROUP)
     {
-        _faction.SetGroup(num_alias_cast<CFactionDef::Group>(iVal));
-        return;
+        _faction.SetGroup(enum_alias_cast<CFactionDef::Group>((uint32)iVal));
+        return true;
     }
     else if (iPropIndex == PROPIEQUIP_SLAYER_SPECIES)
     {
-        _faction.SetSpecies(num_alias_cast<CFactionDef::Species>(iVal));
-        return;
+        _faction.SetSpecies(enum_alias_cast<CFactionDef::Species>((uint32)iVal));
+        return true;
     }
 
     else
@@ -147,13 +153,15 @@ void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyV
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+
+    return true;
 }
 
-void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyStr");
     ASSERT(ptcVal);
@@ -163,7 +171,7 @@ void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr p
     if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -172,10 +180,11 @@ void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr p
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
 void CCPropsItemEquippable::DeletePropertyNum(PropertyIndex_t iPropIndex)
@@ -217,8 +226,10 @@ void CCPropsItemEquippable::r_Write(CScript & s)
     BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
     BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
 
-    s.WriteKeyVal(_ptcPropertyKeys[PROPIEQUIP_SLAYER_GROUP],   num_alias_cast<int32>(_faction.GetGroup()));
-    s.WriteKeyVal(_ptcPropertyKeys[PROPIEQUIP_SLAYER_SPECIES], num_alias_cast<int32>(_faction.GetSpecies()));
+    if (_faction.GetGroup() != CFactionDef::Group::NONE)
+        s.WriteKeyVal(_ptcPropertyKeys[PROPIEQUIP_SLAYER_GROUP],   (int64)enum_alias_cast<uint32>(_faction.GetGroup()));
+    if (_faction.GetSpecies() != CFactionDef::Species::NONE)
+        s.WriteKeyVal(_ptcPropertyKeys[PROPIEQUIP_SLAYER_SPECIES], (int64)enum_alias_cast<uint32>(_faction.GetSpecies()));
 }
 
 void CCPropsItemEquippable::Copy(const CComponentProps * target)

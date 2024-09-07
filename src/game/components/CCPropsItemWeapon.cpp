@@ -122,7 +122,7 @@ bool CCPropsItemWeapon::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* 
     }
 }
 
-void CCPropsItemWeapon::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemWeapon::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyNum");
 
@@ -146,7 +146,7 @@ void CCPropsItemWeapon::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNu
             if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
             {
                 if (0 == _mPropsNum.erase(iPropIndex))
-                    return; // I didn't have this property, so avoid further processing.
+                    return true; // I didn't have this property, so avoid further processing.
             }
             else
             {
@@ -157,13 +157,14 @@ void CCPropsItemWeapon::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNu
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
-void CCPropsItemWeapon::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemWeapon::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemWeapon::SetPropertyStr");
     ASSERT(ptcVal);
@@ -183,7 +184,7 @@ void CCPropsItemWeapon::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVa
             if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
             {
                 if (0 == _mPropsNum.erase(iPropIndex))
-                    return; // I didn't have this property, so avoid further processing.
+                    return true; // I didn't have this property, so avoid further processing.
             }
             else
             {
@@ -194,10 +195,11 @@ void CCPropsItemWeapon::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVa
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
 void CCPropsItemWeapon::DeletePropertyNum(PropertyIndex_t iPropIndex)

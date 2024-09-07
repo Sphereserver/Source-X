@@ -211,7 +211,7 @@ void Packet::skip(int count)
     }
 
     ASSERT((int64)m_position + count < UINT32_MAX);
-	m_position += (uint)count;
+	m_position = (uint)((int64)m_position + count);
 }
 
 byte &Packet::operator[](uint index)

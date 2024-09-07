@@ -35,13 +35,13 @@ bool CComponentProps::BaseCont_GetPropertyStr(const BaseContStr_t* container, Pr
     return false;
 }
 
-void CComponentProps::BaseProp_LoadPropVal(PropertyIndex_t iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion)
+bool CComponentProps::BaseProp_LoadPropVal(PropertyIndex_t iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion)
 {
     ADDTOCALLSTACK("CComponentProps::BaseProp_LoadPropVal");
     if (fPropStr)
-        SetPropertyStr(iPropIndex, s.GetArgStr(), pLinkedObj, iLimitToExpansion, true);
+        return SetPropertyStr(iPropIndex, s.GetArgStr(), pLinkedObj, iLimitToExpansion, true);
     else
-        SetPropertyNum(iPropIndex, s.GetArgVal(), pLinkedObj, iLimitToExpansion, true);
+        return SetPropertyNum(iPropIndex, s.GetArgVal(), pLinkedObj, iLimitToExpansion, true);
 }
 
 bool CComponentProps::BaseProp_WritePropVal(PropertyIndex_t iPropIndex, bool fPropStr, CSString & sVal) const

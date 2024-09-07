@@ -599,7 +599,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv.has_value())
                     return false;
 
-				pChar->SetID(num_alias_cast<CREID_TYPE>(*iconv));
+				pChar->SetID(enum_alias_cast<CREID_TYPE>(*iconv));
 				continue;
 			}
 			else if ( s.IsKey("SKIN" ))
@@ -608,7 +608,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv.has_value())
                     return false;
 
-				pChar->SetHue(num_alias_cast<HUE_TYPE>(*iconv));
+				pChar->SetHue(n_alias_cast<HUE_TYPE>(*iconv));
 				continue;
 			}
 			else if ( s.IsKey("DIR" ))
@@ -617,7 +617,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv.has_value())
                     return false;
 
-				pChar->m_dirFace = num_alias_cast<DIR_TYPE>(*iconv);
+				pChar->m_dirFace = enum_alias_cast<DIR_TYPE>(*iconv);
 				if ( (pChar->m_dirFace < 0) || (pChar->m_dirFace >= DIR_QTY) )
 					pChar->m_dirFace = DIR_SE;
 				continue;
@@ -628,7 +628,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv.has_value())
                     return false;
 
-				pChar->_iPrev_id = num_alias_cast<CREID_TYPE>(*iconv);
+				pChar->_iPrev_id = enum_alias_cast<CREID_TYPE>(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("XSKIN" ))
@@ -637,7 +637,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv.has_value())
                     return false;
 
-				pChar->_wPrev_Hue = num_alias_cast<HUE_TYPE>(*iconv);
+				pChar->_wPrev_Hue = n_alias_cast<HUE_TYPE>(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("FONT" ))
@@ -646,7 +646,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv.has_value())
                     return false;
 
-				pChar->m_fonttype = num_alias_cast<FONT_TYPE>(*iconv);
+				pChar->m_fonttype = enum_alias_cast<FONT_TYPE>(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("KARMA" ))
@@ -727,7 +727,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
                 if (!iconv_int.has_value())
                     return false;
 
-				const auto skill = num_alias_cast<SKILL_TYPE>(*iconv_int);
+				const auto skill = enum_alias_cast<SKILL_TYPE>(*iconv_int);
 
                 std::optional<ushort> iconv = Str_ToU16(pArg);
                 if (!iconv.has_value())

@@ -5,17 +5,68 @@
 #include <limits>
 #include <type_traits>
 
+// Helper template to work on enum types.
+
+// Primary template for non-enum types, T will simply be itself
+template<typename T, typename = void>
+struct underlying_or_self
+{
+    using type = T;
+};
+
+// Specialization for enum types, using SFINAE to enable only if T is an enum
+template<typename T>
+struct underlying_or_self<T, std::enable_if_t<std::is_enum_v<T>>>
+{
+    using type = std::underlying_type_t<T>;
+};
+
+// Helper alias
+template<typename T>
+using underlying_or_self_t = typename underlying_or_self<T>::type;
+
 
 // Use this as a double check, to be sure at compile time that the two variables have the same size and sign.
 template <typename Tout, typename Tin>
 [[nodiscard]]
-constexpr Tout num_alias_cast(const Tin a) noexcept
+constexpr Tout n_alias_cast(const Tin a) noexcept
 {
-    static_assert(std::is_arithmetic_v<Tin>  || std::is_enum_v<Tin>,  "Input variable is not a numeric type.");
-    static_assert(std::is_arithmetic_v<Tout> || std::is_enum_v<Tout>, "Output variable is not a numeric type.");
+    static_assert(std::is_arithmetic_v<Tin>,  "Input variable is not an arithmetictype.");
+    static_assert(std::is_arithmetic_v<Tout>, "Output variable is not an arithmetic type.");
     static_assert(sizeof(Tin) == sizeof(Tout), "Input and output types do not have the same size.");
     static_assert(!(std::is_signed_v<Tin>  && std::is_unsigned_v<Tout>), "Casting signed to unsigned.");
     static_assert(!(std::is_signed_v<Tout> && std::is_unsigned_v<Tin> ), "Casting unsigned to signed.");
+    return static_cast<Tout>(a);
+}
+
+template <typename Tout, typename Tin>
+[[nodiscard]]
+constexpr Tout enum_alias_cast(const Tin a) noexcept
+{
+    static_assert(std::is_enum_v<Tin>  || std::is_enum_v<Tout>,  "Nor input nor output variables are an enum.");
+    static_assert(std::is_arithmetic_v<Tin>  || std::is_enum_v<Tin>,  "Input variable is not a numeric type.");
+    static_assert(std::is_arithmetic_v<Tout> || std::is_enum_v<Tout>, "Output variable is not a numeric type.");
+    static_assert(sizeof(Tin) == sizeof(Tout), "Input and output types do not have the same size.");
+
+    static_assert(!(std::is_signed_v<underlying_or_self_t<Tin>>  && std::is_unsigned_v<underlying_or_self_t<Tout>>), "Casting signed to unsigned.");
+    static_assert(!(std::is_signed_v<underlying_or_self_t<Tout>> && std::is_unsigned_v<underlying_or_self_t<Tin>> ), "Casting unsigned to signed.");
+
+    /*
+    static_assert(std::is_enum_v<Tin> ||
+            !(std::is_signed_v<std::underlying_type_t<Tout>>  && std::is_unsigned_v<Tin>),
+        "Casting unsigned to signed.");
+    static_assert(std::is_enum_v<Tin> ||
+            !(std::is_unsigned_v<std::underlying_type_t<Tout>>  && std::is_signed_v<Tin>),
+        "Casting signed to unsigned.");
+
+    static_assert(std::is_enum_v<Tout> ||
+            !(std::is_signed_v<std::underlying_type_t<Tin>>  && std::is_unsigned_v<Tout>),
+        "Casting signed to unsigned.");
+    static_assert(std::is_enum_v<Tout> ||
+            !(std::is_unsigned_v<std::underlying_type_t<Tin>>  && std::is_signed_v<Tout>),
+        "Casting unsigned to signed.");
+    */
+
     return static_cast<Tout>(a);
 }
 
@@ -502,7 +553,7 @@ int32 i32_from_usize_checked(const size_t a) // not clamping/capping
 #if SIZE_MAX == UINT64_MAX
     return i32_from_u32_clamping(n64_narrow_n32_checked(a));
 #elif SIZE_MAX == UINT32_MAX
-    return i32_from_u32_checked(num_alias_cast<uint32>(a));
+    return i32_from_u32_checked(n_alias_cast<uint32>(a));
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -513,7 +564,7 @@ template <typename T> int32 i32_from_usize_checked(T) = delete; // disable impli
 int64 i64_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
-    return i64_from_u64_checked(num_alias_cast<uint64>(a));
+    return i64_from_u64_checked(n_alias_cast<uint64>(a));
 #elif SIZE_MAX == UINT32_MAX
     return static_cast<int64>(a);   // For sure it will fit
 #else

@@ -73,7 +73,7 @@ bool CCPropsItemChar::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* ps
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemChar::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -94,7 +94,7 @@ void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -103,7 +103,7 @@ void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     switch (iPropIndex)
@@ -128,9 +128,11 @@ void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_
         //    pLinkedObj->UpdatePropertyFlag();
         //    break;
     }
+
+    return true;
 }
 
-void CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemChar::SetPropertyStr");
     ASSERT(ptcVal);
@@ -140,7 +142,7 @@ void CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal,
     if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -149,10 +151,11 @@ void CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal,
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
 void CCPropsItemChar::DeletePropertyNum(PropertyIndex_t iPropIndex)

@@ -3646,7 +3646,7 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 				if ( pTriggerArgObj )
 					csTriggerArgs.m_pO1 = pTriggerArgObj;
 			}
-			else if ( iTriggerArgType == 4 ) // FULL TRIGGER
+			else if ( iTriggerArgType == 4 ) // FULLTRIGGER
 			{
 				tchar * Arg_ppCmd[5];
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_ppCmd, ARRAY_COUNT(Arg_ppCmd), ",");
@@ -3680,4 +3680,3 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 
 	return false;
 }
-

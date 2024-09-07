@@ -45,8 +45,9 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 		iArg = ResGetIndex( Exp_GetVal( pszArgs ));
 	}
 
-	while ( dwCount-- )
+	while ( dwCount )
 	{
+        -- dwCount;
 		if ( ++dwUID >= dwTotal )
 		{
 			dwUID = 1;

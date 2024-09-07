@@ -19,33 +19,33 @@ bool CFactionDef::IsNone() const noexcept
 
 CFactionDef::Group CFactionDef::GetGroup() const noexcept
 {
-    const auto masked_shifted = (_uiFactionData & _kuiGroupMask) >> _kuiGroupReservedBytes;
-    return num_alias_cast<CFactionDef::Group>(masked_shifted);
+    const uint32 masked_shifted = (_uiFactionData & _kuiGroupMask) >> _kuiGroupReservedBytes;
+    return enum_alias_cast<CFactionDef::Group>(masked_shifted);
 }
 
 bool CFactionDef::SetGroup(CFactionDef::Group group) noexcept
 {
-    const auto group_numeric = num_alias_cast<uint32>(group);
+    const uint32 group_numeric = enum_alias_cast<uint32>(group);
     if (group_numeric > _kuiGroupMaxVal)
         return false;
 
-    const auto masked_shifted = (group_numeric & _kuiGroupMaxVal) << _kuiGroupReservedBytes;
-    _uiFactionData = (_uiFactionData & ~_kuiGroupMask) | num_alias_cast<uint32>(masked_shifted);
+    const uint32 masked_shifted = (group_numeric & _kuiGroupMaxVal) << _kuiGroupReservedBytes;
+    _uiFactionData = (_uiFactionData & ~_kuiGroupMask) | n_alias_cast<uint32>(masked_shifted);
     return true;
 }
 
 CFactionDef::Species CFactionDef::GetSpecies() const noexcept
 {
-    return num_alias_cast<CFactionDef::Species>(_uiFactionData & _kuiSpeciesMask);
+    return enum_alias_cast<CFactionDef::Species>(_uiFactionData & _kuiSpeciesMask);
 }
 
 bool CFactionDef::SetSpecies(CFactionDef::Species species) noexcept
 {
-    const auto species_numeric = num_alias_cast<uint32>(species);
+    const uint32 species_numeric = enum_alias_cast<uint32>(species);
     if (species_numeric > _kuiSpeciesMaxVal)
         return false;
 
-    const auto masked = species_numeric & _kuiSpeciesMask;
+    const uint32 masked = species_numeric & _kuiSpeciesMask;
     _uiFactionData = (_uiFactionData & ~_kuiSpeciesMask) | masked;
     return true;
 }
@@ -104,8 +104,8 @@ bool CFactionDef::IsLesserSlayerVersus(const CFactionDef *target) const noexcept
 
     // Do i belong to the same group?
     if (!(
-        num_alias_cast<uint32>(GetGroup()) &
-        num_alias_cast<uint32>(target->GetGroup()))
+        enum_alias_cast<uint32>(GetGroup()) &
+        enum_alias_cast<uint32>(target->GetGroup()))
     )
         return false;
 
@@ -116,7 +116,7 @@ bool CFactionDef::IsLesserSlayerVersus(const CFactionDef *target) const noexcept
 bool CFactionDef::HasSuperSlayer() const noexcept
 {
     ADDTOCALLSTACK_DEBUG("CFactionDef::HasSuperSlayer");
-    return (GetGroup() != Group::NONE && (_kuiSuperSlayerSpeciesIndex == num_alias_cast<uint32>(GetSpecies())));
+    return (GetGroup() != Group::NONE && (_kuiSuperSlayerSpeciesIndex == enum_alias_cast<uint32>(GetSpecies())));
 }
 
 bool CFactionDef::HasLesserSlayer() const noexcept
