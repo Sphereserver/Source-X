@@ -13,6 +13,9 @@ project_root_dir="$(git rev-parse --show-toplevel)"
 gersemi_cmd='env PWD="$project_root_dir" gersemi -i "{}"'
 #gersemi_cmd='gersemi -i "{}" --list-expansion favour-inlining --no-warn-about-unknown-commands'
 
+# Replace tabs with 4 spaces
+sed_cmd='sed -i "s/\t/    /g" "{}"'
+
 #looks like cmake-format is unmantained
 #cmake-format CMakeLists.txt --separate-ctrl-name-with-space --separate-fn-name-with-space --dangle-parens --max-subgroups-hwrap=2 --max-pargs-hwrap=4 --max-rows-cmdline=120
 
@@ -23,10 +26,16 @@ format_files() {
         if [ -f "{}" ]; then
             echo "Formatting {}"
             '"$gersemi_cmd"'
+            '"$sed_cmd"'
         else
-            echo "{} does not exist"
+            echo "{} does not exist?"
         fi
     '
+    #if git diff --exit-code "{}" > /dev/null; then
+    #    result="$result CHANGED"
+    #else
+    #    result="$result unchanged"
+    #fi
 }
 
 # Case to determine the files based on the action

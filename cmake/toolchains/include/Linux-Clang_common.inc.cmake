@@ -113,14 +113,14 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     #separate_arguments(cxx_compiler_options_common)
 
     # GCC flags not supported by clang:
-    #	Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
-    #	Other: "-fno-expensive-optimizations"
+    #    Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
+    #    Other: "-fno-expensive-optimizations"
 
     # MemorySanitizer: it doesn't work out of the box. It needs to be linked to an MSAN-instrumented build of libc++ and libc++abi.
     #  This means: one should build them from LLVM source...
     #  https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo
     #IF (${USE_MSAN})
-    #	SET (CMAKE_CXX_FLAGS	"${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    #    SET (CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     #ENDIF()
     # Use "-stdlib=libstdc++" to link against GCC c/c++ libs (this is done by default)
     # To use LLVM libc++ use "-stdlib=libc++", but you need to install it separately
@@ -200,7 +200,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 
     #-- Set different output folders for each build type
     # (When we'll have support for multi-target builds...)
-    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)
-    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"	)
-    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"	)
+    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"    )
+    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"    )
+    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"    )
 endfunction()

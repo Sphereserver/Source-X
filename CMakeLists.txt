@@ -1,4 +1,4 @@
-#	Main config	#
+#    Main config    #
 
 cmake_minimum_required(VERSION 3.19)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Supress the ZERO_CHECK generation
@@ -161,7 +161,7 @@ if(SINGLE_TARGET)
             spheresvr_release
             ${is_win32_app_linker}
             ${SPHERE_SOURCES}
-            #	${docs_TEXT}
+            #    ${docs_TEXT}
         )
         set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
     endif()
@@ -171,7 +171,7 @@ if(SINGLE_TARGET)
             spheresvr_nightly
             ${is_win32_app_linker}
             ${SPHERE_SOURCES}
-            #	${docs_TEXT}
+            #    ${docs_TEXT}
         )
         set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
     endif()
@@ -181,7 +181,7 @@ if(SINGLE_TARGET)
             spheresvr_debug
             ${is_win32_app_linker}
             ${SPHERE_SOURCES}
-            #	${docs_TEXT}
+            #    ${docs_TEXT}
         )
         set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
     endif()

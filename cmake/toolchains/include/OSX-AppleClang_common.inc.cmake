@@ -112,8 +112,8 @@ function(toolchain_exe_stuff_common)
     set(cxx_compiler_options_common ${cxx_local_opts_warnings} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
 
     # GCC flags not supported by clang:
-    #	Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
-    #	Other: "-fno-expensive-optimizations"
+    #    Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
+    #    Other: "-fno-expensive-optimizations"
 
     #-- Apply compiler flags, only the ones specific per build type.
 
@@ -154,10 +154,10 @@ function(toolchain_exe_stuff_common)
     #-- Apply linker flags, only the ones specific per build type.
     # -s got deprecated, we could directly call 'strip'
     #IF (TARGET spheresvr_release)
-    #	target_link_options (spheresvr_release PRIVATE	-s)
+    #    target_link_options (spheresvr_release PRIVATE    -s)
     #ENDIF ()
     #IF (TARGET spheresvr_nightly AND NOT ${ENABLED_SANITIZER})
-    #	target_link_options (spheresvr_nightly PRIVATE	-s)
+    #    target_link_options (spheresvr_nightly PRIVATE    -s)
     #ENDIF ()
 
     #-- Store common define macros.
@@ -193,7 +193,7 @@ function(toolchain_exe_stuff_common)
 
     #-- Set different output folders for each build type
     # (When we'll have support for multi-target builds...)
-    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"	)
-    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"	)
-    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY	"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"	)
+    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"    )
+    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"    )
+    #SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Nightly"    )
 endfunction()

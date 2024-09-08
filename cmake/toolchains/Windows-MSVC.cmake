@@ -2,11 +2,11 @@ set(TOOLCHAIN_LOADED 1)
 
 function(toolchain_force_compiler)
     # Already managed by the generator.
-    #SET (CMAKE_C_COMPILER 	"...cl.exe" 	CACHE STRING "C compiler" 	FORCE)
-    #SET (CMAKE_CXX_COMPILER "...cl.exe" 	CACHE STRING "C++ compiler" FORCE)
+    #SET (CMAKE_C_COMPILER     "...cl.exe"     CACHE STRING "C compiler"     FORCE)
+    #SET (CMAKE_CXX_COMPILER "...cl.exe"     CACHE STRING "C++ compiler" FORCE)
 
     message(STATUS "Toolchain: Windows-MSVC.cmake.")
-    #SET(CMAKE_SYSTEM_NAME	"Windows"						CACHE INTERNAL "" FORCE)
+    #SET(CMAKE_SYSTEM_NAME    "Windows"                        CACHE INTERNAL "" FORCE)
 endfunction()
 
 function(toolchain_after_project)
@@ -38,7 +38,7 @@ function(toolchain_exe_stuff)
         add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:/SUBSYSTEM:CONSOLE"
         set(PREPROCESSOR_DEFS_EXTRA _WINDOWS_CONSOLE)
         #ELSE ()
-        #	add_link_options ("LINKER:/ENTRY:WinMainCRTStartup") 	# Handled by is_win32_app_linker -> "LINKER: /SUBSYSTEM:WINDOWS"
+        #    add_link_options ("LINKER:/ENTRY:WinMainCRTStartup")     # Handled by is_win32_app_linker -> "LINKER: /SUBSYSTEM:WINDOWS"
     endif()
 
     #-- Validate sanitizers options and store them between the common compiler flags.
@@ -106,13 +106,13 @@ function(toolchain_exe_stuff)
     set(CMAKE_CXX_FLAGS_DEBUG_INIT "" INTERNAL)
 
     # gersemi: off
-	target_compile_options(spheresvr PRIVATE
-		${cxx_compiler_flags_common}
-		$<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	  /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>	  /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-		$<$<CONFIG:Debug>:	 $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /ob1 /Od /Gs	$<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
-		# ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
-	)
+    target_compile_options(spheresvr PRIVATE
+        ${cxx_compiler_flags_common}
+        $<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>      /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+        $<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>      /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+        $<$<CONFIG:Debug>:     $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /ob1 /Od /Gs    $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
+        # ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
+    )
     # gersemi: on
 
     if("${ARCH}" STREQUAL "x86_64")
@@ -125,13 +125,13 @@ function(toolchain_exe_stuff)
     set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY CACHE INTERNAL ${CMAKE_EXE_LINKER_FLAGS_RELEASE} "")
 
     # gersemi: off
-	target_link_options(spheresvr PRIVATE
+    target_link_options(spheresvr PRIVATE
     /WX     # treat all warnings as errors
-		$<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
-		$<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
-		$<$<CONFIG:Debug>:	 ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
-			$<IF:$<BOOL:${ENABLED_SANITIZER}>,/INCREMENTAL:NO /EDITANDCONTINUE:NO,/INCREMENTAL /EDITANDCONTINUE> >
-	)
+        $<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
+        $<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
+        $<$<CONFIG:Debug>:     ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
+            $<IF:$<BOOL:${ENABLED_SANITIZER}>,/INCREMENTAL:NO /EDITANDCONTINUE:NO,/INCREMENTAL /EDITANDCONTINUE> >
+    )
     # gersemi: on
     # MSVC doesn't yet have an option to statically link against *san sanitizer libraries.
     # /INCREMENTAL and /EDITANDCONTINUE not compatible with a MSVC Asan build.
