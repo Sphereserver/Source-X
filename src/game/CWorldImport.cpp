@@ -416,7 +416,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
 				m_pCurSer->m_layer = static_cast<LAYER_TYPE>(atoi(pArg));
 				continue;
 			}
-			else if (pItem == nullptr)
+			if (pItem == nullptr)
 			{
 				DEBUG_ERR(( "Import:Found '%s' before ID.\n", s.GetKey()));
 				continue;
