@@ -150,7 +150,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         GETNONWHITESPACE(ptcArgs);
     };
 
-    const auto _CalcRelative = [](lptstr& ptcArgs, int iCoordBase) -> int
+    const auto _CalcRelative = [](lptstr& ptcArgs, int &iCoordBase) -> int
     {
         int c;
         	if ( *ptcArgs == '-' && IsSpace(ptcArgs[1]))
