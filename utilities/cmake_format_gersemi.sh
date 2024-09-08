@@ -7,9 +7,12 @@ if [ "$#" -ne 1 ]; then
 fi
 
 action=$1
+project_root_dir="$(git rev-parse --show-toplevel)"
 
-# Define the gersemi command
-gersemi_cmd='gersemi -i "{}" --list-expansion favour-inlining --no-warn-about-unknown-commands'
+# Define the gersemi command; change the execution folder in order to make it read .gersemirc 
+gersemi_cmd='env PWD="$project_root_dir" gersemi -i "{}"'
+#gersemi_cmd='gersemi -i "{}" --list-expansion favour-inlining --no-warn-about-unknown-commands'
+
 #looks like cmake-format is unmantained
 #cmake-format CMakeLists.txt --separate-ctrl-name-with-space --separate-fn-name-with-space --dangle-parens --max-subgroups-hwrap=2 --max-pargs-hwrap=4 --max-rows-cmdline=120
 
@@ -30,7 +33,7 @@ format_files() {
 case $action in
     --all)
         # Find all *.cmake files and CMakeLists.txt
-        files=$(find "$(git rev-parse --show-toplevel)" \
+        files=$(find "$project_root_dir" \
           -type d -name 'CMakeFiles' -prune -o \
           -type d -name 'build' -prune -o \
           -type d -name '.*' -prune -o \
@@ -47,7 +50,7 @@ case $action in
         files=$( git diff --name-only HEAD~1 HEAD | grep -E '\.cmake$|CMakeLists\.txt$' )
         ;;
     *)
-        echo "Invalid option. Use '--all' or '--changed'."
+        echo "Invalid option."
         exit 1
         ;;
 esac
