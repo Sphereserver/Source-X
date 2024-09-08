@@ -11,8 +11,8 @@ ColumnLimit: 160
 
 ##-- Alignment
 AlignAfterOpenBracket: AlwaysBreak
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
 #AlignEscapedNewlinesLeft: false
 AlignTrailingComments: true
 
@@ -63,6 +63,7 @@ BreakStringLiterals: false
 ##-- Indentation
 IndentCaseBlocks: false
 IndentCaseLabels: true
+IndentExternBlock: AfterExternBlock
 IndentGotoLabels: true
 IndentPPDirectives: AfterHash
 LambdaBodyIndentation: Signature
