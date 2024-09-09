@@ -969,6 +969,7 @@ badcmd:
                 */
 
 				// I think fork will cause problems.. we'll see.. if yes new thread + execlp is required.
+				// TODO: use posix_spawn
 				int child_pid = vfork();
 				if ( child_pid < 0 )
 				{

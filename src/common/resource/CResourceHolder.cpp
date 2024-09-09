@@ -113,7 +113,7 @@ CResourceScript * CResourceHolder::AddResourceFile( lpctstr pszName )
 		throw CSError(LOGL_ERROR, 0, "Filename too long!");
 
 	tchar szName[_MAX_PATH];
-	strcpy(szName, pszName);
+	Str_CopyLimitNull(szName, pszName, sizeof(szName));
 
 	tchar szTitle[_MAX_PATH];
 	lpctstr ptcTitle = CScript::GetFilesTitle(szName);

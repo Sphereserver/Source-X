@@ -1974,7 +1974,7 @@ bool CObjBase::r_LoadVal( CScript & s )
                 * So the new timer will be the current time in msecs (SetTimeout)
                 * For older builds, the timer is stored in seconds (SetTimeoutD)
                 */
-                if (iPrevBuild && (iPrevBuild >= 2866)) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
+                if (iPrevBuild >= 2866) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
                 {
 					// If TIMER = 0 was saved it means that at the moment of the worldsave the timer was elapsed but its object could not tick,
 					//	since it was waiting a GoAwake() call. Now set the timer to tick asap.

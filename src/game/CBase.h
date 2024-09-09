@@ -193,7 +193,7 @@ public:
 	}
 
 public:
-	CBaseBaseDef( CResourceID id );
+	CBaseBaseDef( CResourceID const& id );
 	virtual ~CBaseBaseDef() = default;
 
 	CBaseBaseDef(const CBaseBaseDef& copy) = delete;

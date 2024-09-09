@@ -394,7 +394,9 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 			if ( pCharCmd && !pCharCmd->CanDisturb(pChar) )
 				continue;
 
-			snprintf(ptcMsg, Str_TempLength(), "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, !pAcc ? "null" : pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
+			snprintf(ptcMsg, Str_TempLength(),
+                     "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n",
+                     pClient->GetSocketID(), chRank, (!pAcc ? "null" : pAcc->GetName()), pChar->GetName(), pClient->GetPeerStr());
 		}
 		else
 		{
@@ -415,7 +417,9 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 					break;
 			}
 
-			snprintf(ptcMsg, Str_TempLength(), "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
+			snprintf(ptcMsg, Str_TempLength(),
+                     "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n",
+                     pClient->GetSocketID(), chRank, (pAcc ? pAcc->GetName() : "<NA>"), pClient->GetPeerStr(), pszState);
 		}
 
         pConsole->SysMessage(ptcMsg);
@@ -497,7 +501,8 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				switch ( tolower(*ptcKey) )
 				{
 					case 'a': // areas
-						ptcKey++;	GETNONWHITESPACE( ptcKey );
+						ptcKey++;
+                        GETNONWHITESPACE( ptcKey );
 						if ( !g_World.DumpAreas( pSrc, ptcKey ) )
 						{
                             if (pSrc != this)

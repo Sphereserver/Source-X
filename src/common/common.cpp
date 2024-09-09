@@ -61,7 +61,7 @@ void CLanguageID::GetStrDef(tchar* pszLang) noexcept
 {
     if (!IsDef())
     {
-        strcpy(pszLang, "enu");
+        strcpy(pszLang, "enu"); // NOLINT(clang-analyzer-security.insecureAPI.strcpy)
     }
     else
     {

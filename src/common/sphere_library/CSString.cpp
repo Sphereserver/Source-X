@@ -136,6 +136,7 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
 		pNewData[m_iLength] = '\0';
 		m_pchData = pNewData;
 	}
+	ASSERT(m_pchData);
 	m_iLength = iNewLength;
 	m_pchData[m_iLength] = '\0';
 	return m_iLength;

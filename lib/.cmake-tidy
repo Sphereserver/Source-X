@@ -1,2 +1,2 @@
 # Disable all checks in this folder.
-Checks: '-*'
+Checks: -*

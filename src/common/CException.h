@@ -126,7 +126,7 @@ public:
 #define EXC_TRY(a) \
 	lpctstr inLocalBlock = ""; \
 	lpctstr inLocalArgs = a; \
-	uint inLocalBlockCnt = 0; \
+	uint inLocalBlockCnt = 0;  /* NOLINT(misc-const-correctness) */ \
 	bool fCATCHExcept = false; \
 	UnreferencedParameter(fCATCHExcept); \
 	try \

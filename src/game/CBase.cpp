@@ -24,7 +24,7 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 };
 
 
-CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
+CBaseBaseDef::CBaseBaseDef( CResourceID const& id ) :
 	CResourceLink( id ),
 	m_sName(false)
 {

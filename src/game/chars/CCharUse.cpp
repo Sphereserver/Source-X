@@ -204,6 +204,7 @@ void CChar::Use_MoonGate( CItem * pItem )
 		// What gate are we at ?
 		size_t i = 0;
 		size_t iCount = g_Cfg.m_MoonGates.size();
+        ASSERT(iCount != 0);
         const CPointMap& ptTop = GetTopPoint();
 		for ( ; i < iCount; ++i )
 		{
