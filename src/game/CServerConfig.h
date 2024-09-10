@@ -572,7 +572,7 @@ public:
 	uint _uiNetworkThreadPriority;  // priority of network threads
 	int	 m_fUseAsyncNetwork;        // 0=normal send, 1=async send, 2=async send for 4.0.0+ only
 	int	 m_iNetMaxPings;            // max pings before blocking an ip
-	int	 m_iNetHistoryTTL;          // time to remember an ip
+	int	 m_iNetHistoryTTLSeconds;          // time to remember an ip
 	uint _uiNetMaxPacketsPerTick;   // max packets to send per tick (per queue)
 	uint _uiNetMaxLengthPerTick;    // max packet length to send per tick (per queue) (also max length of individual packets)
     int64 _iMaxSizeClientOut;       // Maximum number of bytes a client can send to the server in 10 seconds before being disconnected

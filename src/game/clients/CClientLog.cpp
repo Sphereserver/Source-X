@@ -61,7 +61,7 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 {
 	ADDTOCALLSTACK("CClient::SetConnectType");
 
-    auto _IsFullyConnectedType = [](const CONNECT_TYPE typ) -> bool {
+    auto _IsFullyConnectedType = [](const CONNECT_TYPE typ) noexcept -> bool {
         switch (typ)
         {
         case CONNECT_GAME:
@@ -78,7 +78,7 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 	if (_IsFullyConnectedType(iType) && !_IsFullyConnectedType(m_iConnectType))
 	{
 		HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-		-- history.m_connecting;
+		-- history.m_iPendingConnectionRequests;
 	}
 	m_iConnectType = iType;
 
@@ -279,7 +279,7 @@ bool CClient::Login_Relay( uint iRelay ) // Relay player to a selected IP
 
 	// >= 1.26.00 clients list Gives us a 1 based index for some reason.
 	if ( iRelay > 0 )
-		iRelay --;
+		-- iRelay;
 
 	CServerRef pServ;
 	if ( iRelay <= 0 )

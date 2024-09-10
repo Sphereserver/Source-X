@@ -20,15 +20,15 @@
 struct HistoryIP
 {
     CSocketAddressIP m_ip;
-    int m_pings;
-    int m_connecting;
-    int m_connected;
-    bool m_blocked;
-    int m_ttl;
-    int64 m_connectionAttempts; // since i remember of this IP
-    int64 m_timeLastConnectedMs;
-    int64 m_blockExpire;
-    int m_pingDecay;
+    bool m_fBlocked;
+    int m_iPingDecay;
+    int m_iPings;        // How many times i tried to connect from this ip. Decays over time.
+    int m_iConnectionRequests; // Like pings, but doesn't decay, it's forgotten when the IP is forgotten.
+    int m_iPendingConnectionRequests;
+    int m_iAliveSuccessfulConnections;
+    int m_iTTLSeconds;
+    int64 m_iTimeLastConnectedMs;
+    int64 m_iBlockExpireMs;
 
     void update(void);
     bool checkPing(void); // IP is blocked -or- too many pings to it?

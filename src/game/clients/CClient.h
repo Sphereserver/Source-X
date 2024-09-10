@@ -384,7 +384,7 @@ public:
 
 public:
 	explicit CClient(CNetState* state);
-	~CClient();
+	~CClient() noexcept;
 
 	CClient(const CClient& copy) = delete;
 	CClient& operator=(const CClient& other) = delete;

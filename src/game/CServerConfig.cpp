@@ -310,7 +310,7 @@ CServerConfig::CServerConfig()
 	_uiNetworkThreadPriority= IThread::Disabled;
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
-	m_iNetHistoryTTL		= 300;
+	m_iNetHistoryTTLSeconds 		= 300;
 	_uiNetMaxPacketsPerTick = 50;
 	_uiNetMaxLengthPerTick	= 18'000;
 	m_iNetMaxQueueSize		= 75;
@@ -919,7 +919,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlPass)			}},
 	{ "MYSQLTICKS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMySqlTicks)			}},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlUser)			}},
-	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNetHistoryTTL)		}},
+	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig, m_iNetHistoryTTLSeconds)		}},
 	{ "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreadPriority)}},
 	{ "NETWORKTHREADS",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreads)		}},
 	{ "NORESROBE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fNoResRobe)			}},

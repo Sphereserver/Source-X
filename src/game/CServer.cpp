@@ -1571,11 +1571,11 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
                 {
                     if (pSrc != this)
                     {
-                        pSrc->SysMessagef("IP%s blocked\n", history.m_blocked ? " already" : "");
+                        pSrc->SysMessagef("IP%s blocked\n", (history.m_fBlocked ? " already" : ""));
                     }
                     else
                     {
-                        g_Log.Event(LOGL_EVENT, "IP%s blocked\n", history.m_blocked ? " already" : "");
+                        g_Log.Event(LOGL_EVENT, "IP%s blocked\n", (history.m_fBlocked ? " already" : ""));
                     }
                 }
 
@@ -1909,11 +1909,11 @@ log_cont:
 				HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(s.GetArgRaw());
                 if (pSrc != this)
                 {
-                    pSrc->SysMessagef("IP%s unblocked\n", history.m_blocked ? "" : " already");
+                    pSrc->SysMessagef("IP%s unblocked\n", (history.m_fBlocked ? "" : " already"));
                 }
                 else
                 {
-                    g_Log.Event(LOGL_EVENT, "IP%s unblocked\n", history.m_blocked ? "" : " already");
+                    g_Log.Event(LOGL_EVENT, "IP%s unblocked\n", (history.m_fBlocked ? "" : " already"));
                 }
 				history.setBlocked(false);
 			}
