@@ -823,7 +823,7 @@ effect_bounce:
         const CFactionDef *pMyFaction = GetFaction();
         if (pMyFaction && !pMyFaction->IsNone())
         {
-            int iDmgBonusPercent = 100;
+            int iDmgBonusPercent = 0;
             if (pSrcWeapon)
             {
                 const CFactionDef *pSrcSlayer = pSrcWeapon->GetSlayer();
@@ -839,7 +839,7 @@ effect_bounce:
                     }
                 }
             }
-            if (iDmgBonusPercent == 100) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
+            if (iDmgBonusPercent == 0) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
             {
                 const CItem *pSrcTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
                 if (pSrcTalisman)
@@ -858,7 +858,7 @@ effect_bounce:
                     }
                 }
             }
-            if (iDmgBonusPercent != 100)
+            if (iDmgBonusPercent != 0)
             {
                 iDmg += (iDmg * iDmgBonusPercent) / 100;
             }

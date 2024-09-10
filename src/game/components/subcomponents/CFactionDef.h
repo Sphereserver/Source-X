@@ -38,15 +38,6 @@ class CItemBase;
 
 
 /*
-TODO: enable customization of slayer bonus damage?
-Until the Stygian Abyss expansion, all Slayers did double damage to applicable monsters. However, following that expansion, Lesser Slayers do triple damage, and Super Slayers still do double damage.
-*/
-#define DAMAGE_SLAYER_LESSER    300   // Lesser Slayer does x3 (300%) damage.
-#define DAMAGE_SLAYER_SUPER     200   // Super Slayer does x2 (200%) damage.
-#define DAMAGE_SLAYER_OPPOSITE  200   // Opposite Slayer does x2 (200%) damage.
-
-
-/*
     This class is used to store FACTION for NPCs and SLAYER for items
     Initially involved in the Slayer system it handles Super Slayer,
     Lesser Slayer and Opposites to increase damage dealt/received.

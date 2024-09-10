@@ -125,22 +125,30 @@ bool CFactionDef::HasLesserSlayer() const noexcept
     return ((GetGroup() != Group::NONE) && (GetSpecies() != Species::NONE) && !HasSuperSlayer());
 }
 
+/*
+TODO: enable customization of slayer bonus damage?
+Until the Stygian Abyss expansion, all Slayers did double damage to applicable monsters. However, following that expansion, Lesser Slayers do triple damage, and Super Slayers still do double damage.
+*/
+#define DAMAGE_SLAYER_LESSER    200   // Lesser Slayer does x3 (100 + 200%) damage.
+#define DAMAGE_SLAYER_SUPER     100   // Super Slayer does x2 (100 + 100%) damage.
+#define DAMAGE_SLAYER_OPPOSITE  100   // Opposite Slayer does x2 (100 + 100%) damage.
+
 int CFactionDef::GetSlayerDamageBonusPercent(const CFactionDef *target) const noexcept
 {
-    ADDTOCALLSTACK_DEBUG("CFactionDef::GetSlayerDamageBonus");
+    ADDTOCALLSTACK_DEBUG("CFactionDef::GetSlayerDamageBonusPercent");
     if (IsLesserSlayerVersus(target))
         return DAMAGE_SLAYER_LESSER;
-    else if (IsSuperSlayerVersus(target))
+    if (IsSuperSlayerVersus(target))
         return DAMAGE_SLAYER_SUPER;
-    return 100;
+    return 0;
 }
 
 int CFactionDef::GetSlayerDamagePenaltyPercent(const CFactionDef * target) const noexcept
 {
-    ADDTOCALLSTACK_DEBUG("CFactionDef::GetSlayerDamagePenalty");
+    ADDTOCALLSTACK_DEBUG("CFactionDef::GetSlayerDamagePenaltyPercent");
     if (HasSuperSlayer() && IsOppositeGroup(target))
-        return DAMAGE_SLAYER_OPPOSITE;
-    return 100;
+        return - DAMAGE_SLAYER_OPPOSITE;
+    return 0;
 }
 
 
