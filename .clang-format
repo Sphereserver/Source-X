@@ -12,7 +12,7 @@ ColumnLimit: 160
 ##-- Alignment
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
+AlignConsecutiveDeclarations: false
 #AlignEscapedNewlinesLeft: false
 AlignTrailingComments: true
 

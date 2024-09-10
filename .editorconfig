@@ -6,9 +6,15 @@ root = true
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
-
 # Optional: git will commit as lf, this will only affect local files
 end_of_line = lf
+
+[*.txt]
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_style = space
+indent_size = 4
 
 [*.md]
 trim_trailing_whitespace = false
@@ -18,15 +24,15 @@ indent_style = tab
 
 [*.{py,yml,sh,cmake}]
 indent_style = space
-indent_size = 2
+indent_size = 4
 
 [*.{py,yml,sh,cmake}.in]
 indent_style = space
-indent_size = 2
+indent_size = 4
 
 [CMakeLists.txt]
 indent_style = space
-indent_size = 2
+indent_size = 4
 
 [*.{c,h,cpp,cxx,hpp}]
 charset = utf-8
