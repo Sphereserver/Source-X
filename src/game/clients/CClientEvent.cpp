@@ -2693,7 +2693,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 			else if (m_pChar->m_pParty != nullptr && m_pChar->m_pParty->IsPartyMaster(m_pChar))
 			{
-				if (m_pChar->m_pParty == nullptr)
+				if (pChar->m_pParty == nullptr)
 					m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 				else if (pChar->m_pParty == m_pChar->m_pParty)
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);
