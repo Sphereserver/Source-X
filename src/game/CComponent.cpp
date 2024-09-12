@@ -7,6 +7,8 @@ CComponent::CComponent(COMP_TYPE type) noexcept :
 {
 }
 
+CComponent::~CComponent() = default;
+
 COMP_TYPE CComponent::GetType() const noexcept
 {
     return _iType;

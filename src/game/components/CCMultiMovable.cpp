@@ -36,6 +36,8 @@ CCMultiMovable::CCMultiMovable(bool fCanTurn) :
     _pCaptain = nullptr;
 }
 
+CCMultiMovable::~CCMultiMovable() = default;
+
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)
 {
     _pCaptain = pSrc;

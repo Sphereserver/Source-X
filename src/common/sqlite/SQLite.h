@@ -27,8 +27,8 @@ typedef vstrlist row;
 
 // Forward declarations
 struct sqlite3;
-class Table;
-class TablePtr;
+class SQLiteTable;
+class SQLiteTablePtr;
 
 
 // Main wrapper
@@ -49,8 +49,8 @@ public:
 	int GetLastError() const    { return m_iLastError; };
 	void ClearError()           { m_iLastError=0; };  // SQLITE_OK = 0
 
-	TablePtr QuerySQLPtr( lpctstr strSQL );
-	Table QuerySQL( lpctstr strSQL );
+	SQLiteTablePtr QuerySQLPtr( lpctstr strSQL );
+	SQLiteTable QuerySQL( lpctstr strSQL );
 	int QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult );
 	int ExecuteSQL( lpctstr strSQL );
 	int IsSQLComplete( lpctstr strSQL );
@@ -92,12 +92,13 @@ private:
 };
 
 // Table class...
-class Table
+class SQLiteTable
 {
 	friend class CSQLite;
+
 public:
-	Table(void){ m_iRows=m_iCols=0;	m_iPos=-1; };
-	virtual ~Table() {};
+	SQLiteTable();
+	virtual ~SQLiteTable();
 
 	// Gets the number of columns
 	int GetColCount(){ return m_iCols; };
@@ -153,7 +154,7 @@ public:
 	// Adds the rows from another table to this table
 	// It is the caller's reponsibility to make sure
 	// The two tables are matching
-	void JoinTable(Table & tblJoin);
+	void JoinTable(SQLiteTable & tblJoin);
 
 private:
 	int m_iRows, m_iCols;
@@ -166,52 +167,52 @@ private:
 
 // A class to contain a pointer to a Table class,
 // Which will spare the user from freeing a pointer.
-class TablePtr
+class SQLiteTablePtr
 {
 public:
 	// Default constructor
-	TablePtr( );
+	SQLiteTablePtr( );
 
 	// Construct from a Table*
-	TablePtr( Table * pTable );
+	SQLiteTablePtr( SQLiteTable * pTable );
 
 	// Copy constructor.
 	// Will prevent the original TablePtr from deleting the table.
 	// If you have a previous table connected to this class,
 	//   you do not have to worry,
 	//   it will commit suicide before eating the new table.
-	TablePtr( const TablePtr& cTablePtr );
+	SQLiteTablePtr( const SQLiteTablePtr & cTablePtr );
 
 	// Destructor...
-	virtual ~TablePtr();
+	virtual ~SQLiteTablePtr();
 
 	// Copy operator.
 	// Will prevent the original TablePtr from deleting the table.
 	// If you have a previous table connected to this class,
 	//   you do not have to worry,
 	//   it will commit suicide before eating the new table.
-	void operator =(const TablePtr& cTablePtr);
+	void operator =(const SQLiteTablePtr & cTablePtr);
 
 	// Functor operator, will de-reference the m_pTable member.
 	// WARNING: Use with care! Check for non-null m_pTable first!
-	Table& operator()() { return *m_pTable; };
+	SQLiteTable& operator()() { return *m_pTable; };
 
 	// bool operator, to check if m_pTable is valid.
-	operator bool() { return m_pTable != 0; };
+	operator bool() { return m_pTable != nullptr; };
 
 	// Detaches the class from the Table,
 	// and returns the Table that were just detached...
-	Table * Detach();
+	SQLiteTable * Detach();
 
 	// Frees the current Table, and attaches the pTable.
-	void Attach(Table * pTable);
+	void Attach(SQLiteTable * pTable);
 
 	// Frees the current Table.
 	void Destroy();
 
 	// Pointer to the table.
 	// I do not see any reason for encapsulating in Get/Set functions.
-	Table * m_pTable;
+	SQLiteTable * m_pTable;
 };
 
 

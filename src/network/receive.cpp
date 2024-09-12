@@ -3293,7 +3293,7 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
-		if ( character->OnTrigger(CTRIG_ToggleFlying,character,0) == TRIGRET_RET_TRUE )
+		if ( character->OnTrigger(CTRIG_ToggleFlying, character, nullptr) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

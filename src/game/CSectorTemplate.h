@@ -23,7 +23,8 @@ struct CSectorObjCont
 
 struct CCharsDisconnectList : public CSObjCont, public CSectorObjCont
 {
-	CCharsDisconnectList() = default;
+	CCharsDisconnectList();
+    virtual ~CCharsDisconnectList();
 	CCharsDisconnectList(const CCharsDisconnectList& copy) = delete;
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other) = delete;
 
@@ -41,6 +42,7 @@ protected:
 
 public:
 	CCharsActiveList();
+    ~CCharsActiveList();
 	CCharsActiveList(const CCharsActiveList& copy) = delete;
 	CCharsActiveList& operator=(const CCharsActiveList& other) = delete;
 

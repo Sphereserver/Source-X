@@ -46,9 +46,11 @@ tchar* Str_GetTemp() noexcept
 */
 
 AbstractString::AbstractString() :
-	m_buf(0), m_length(0), m_realLength(0)
+	m_buf(nullptr), m_length(0), m_realLength(0)
 {
 }
+
+AbstractString::~AbstractString() = default;
 
 void AbstractString::ensureLengthHeap(size_t newLength)
 {

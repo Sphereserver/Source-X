@@ -27,11 +27,9 @@ public:
     /**
     * @brief set references for parent, next and previous to nullptr.
     */
-    CSObjListRec() noexcept :
-    m_pParent(nullptr), m_pNext(nullptr), m_pPrev(nullptr)
-    {}
+    CSObjListRec() noexcept;
 
-    virtual inline ~CSObjListRec();
+    virtual ~CSObjListRec();
 
     /**
     * @brief No copies allowed.
@@ -80,11 +78,6 @@ private:
 
 
 /* Inline Methods Definitions */
-
-inline CSObjListRec::~CSObjListRec()
-{
-    RemoveSelf();
-}
 
 // CSObjListRec:: Capacity.
 

@@ -53,6 +53,12 @@ public:
 	}
 };
 
+IThread::IThread() noexcept :
+    m_threadSystemId(0), m_threadHolderId(-1)
+    { };
+
+// This is needed to prevent weak-vtables warning (puts the vtable in this translation unit instead of every translation unit)
+IThread::~IThread() noexcept = default;
 
 #ifdef _WIN32
 #pragma pack(push, 8)
@@ -492,7 +498,8 @@ void AbstractThread::terminate(bool ended)
 #ifdef _WIN32
 			_endthreadex(EXIT_SUCCESS);
 #else
-			pthread_exit(EXIT_SUCCESS);
+            //exit(EXIT_SUCCESS)
+			pthread_exit(nullptr);
 #endif
 		}
 	}
@@ -604,7 +611,11 @@ SPHERE_THREADENTRY_RETNTYPE AbstractThread::runner(void *callerThread)
 		caller->terminate(true);
 	}
 
-	return 0;
+#ifdef _WIN32
+    return 0;
+#else
+	return nullptr;
+#endif
 }
 
 bool AbstractThread::isActive() const

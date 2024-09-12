@@ -17,7 +17,7 @@ public:
 	static const char* m_sClassName;
 
 	CGlobalChatChanMember() noexcept;
-	virtual ~CGlobalChatChanMember() noexcept = default;
+	virtual ~CGlobalChatChanMember() noexcept;
 
 private:
 	CSString m_strJID;	// client Jabber ID

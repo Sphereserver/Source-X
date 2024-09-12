@@ -13,7 +13,20 @@
 /***************************************************************************
 *
 *
-*	class CVarDefContNum		List element implementation (Number)
+*	class CListDefContElem        List element implementation (base class)
+*
+*
+***************************************************************************/
+
+CListDefContElem::CListDefContElem(lpctstr ptcKey)
+    : m_Key(ptcKey)
+    {}
+CListDefContElem::~CListDefContElem() = default;
+
+/***************************************************************************
+*
+*
+*	class CListDefContNum         List element implementation (Number)
 *
 *
 ***************************************************************************/

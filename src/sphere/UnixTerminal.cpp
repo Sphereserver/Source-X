@@ -74,7 +74,7 @@ bool UnixTerminal::isReady()
 	tvTimeout.tv_sec = 0;
 	tvTimeout.tv_usec = 1;
 
-	if (select(1, &consoleFds, 0, 0, &tvTimeout) <= 0)
+	if (select(1, &consoleFds, nullptr, nullptr, &tvTimeout) <= 0)
 		return false;
 
 	// get next character

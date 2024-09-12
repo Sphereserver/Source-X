@@ -65,10 +65,10 @@ public:
 public:
 	CScriptKey();
 	CScriptKey( tchar * ptcKey, tchar * ptcArg );
-	virtual ~CScriptKey() = default;
-private:
-	CScriptKey(const CScriptKey& copy);
-	CScriptKey& operator=(const CScriptKey& other);
+	~CScriptKey() = default;
+
+    CScriptKey(const CScriptKey& copy) = delete;
+	CScriptKey& operator=(const CScriptKey& other) = delete;
 };
 
 class CScriptKeyAlloc : public CScriptKey
@@ -91,11 +91,10 @@ public:
 
 public:
 	CScriptKeyAlloc() = default;
-	virtual ~CScriptKeyAlloc() = default;
+	~CScriptKeyAlloc() = default;
 
-private:
-	CScriptKeyAlloc(const CScriptKeyAlloc& copy);
-	CScriptKeyAlloc& operator=(const CScriptKeyAlloc& other);
+	CScriptKeyAlloc(const CScriptKeyAlloc& copy) = delete;
+	CScriptKeyAlloc& operator=(const CScriptKeyAlloc& other) = delete;
 };
 
 

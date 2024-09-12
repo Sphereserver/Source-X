@@ -8,6 +8,7 @@ CGlobalChatChanMember::CGlobalChatChanMember() noexcept :
 {
 }
 
+CGlobalChatChanMember::~CGlobalChatChanMember() noexcept = default;
 
 void CGlobalChatChanMember::SetJID(lpctstr pszJID)
 {

@@ -37,16 +37,17 @@ lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 
 class CSFileConsole : public CTextConsole
 {
-private:
-	CSFileConsole(const CSFileConsole& copy);
-	CSFileConsole& operator=(const CSFileConsole& other);
-
 public:
 	static const char *m_sClassName;
 	CSFileText m_FileOut;
 
 public:
 	CSFileConsole() = default;
+    virtual ~CSFileConsole();
+    CSFileConsole(const CSFileConsole& copy) = delete;
+	CSFileConsole& operator=(const CSFileConsole& other) = delete;
+
+
 	virtual PLEVEL_TYPE GetPrivLevel() const
 	{
 		return PLEVEL_Admin;
@@ -63,6 +64,7 @@ public:
 	}
 };
 
+CSFileConsole::~CSFileConsole() = default;
 
 //********************************************************
 // -CWebPageDef

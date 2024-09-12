@@ -1610,7 +1610,10 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						break;
 					}
 				}
-				SysMessagef( pszArgs[0], pszArgs[1], pszArgs[2] ? pszArgs[2] : 0, pszArgs[3] ? pszArgs[3] : 0);
+				SysMessagef(pszArgs[0],
+                            pszArgs[1],
+                            pszArgs[2] ? pszArgs[2] : nullptr,
+                            pszArgs[3] ? pszArgs[3] : nullptr);
 			}
 			break;
 		case CV_SMSGU:

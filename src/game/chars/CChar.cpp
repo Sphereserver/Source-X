@@ -2616,7 +2616,7 @@ do_default:
 					--i;
 				}
 
-				sVal = 0;
+				sVal = "0";
 				delete[] pszFameAt0;
 				return true;
 			}
@@ -2712,7 +2712,7 @@ do_default:
 					--i;
 				}
 
-				sVal = 0;
+				sVal = "0";
 				delete[] pszKarmaAt0;
 				return true;
 			}
@@ -2890,7 +2890,7 @@ do_default:
 				sVal = IsDisconnected() ? "0" : "1";
 				return true;
 			}
-			sVal = 0;
+			sVal = "0";
 			return true;
 		case CHC_ISSTUCK:
 			{

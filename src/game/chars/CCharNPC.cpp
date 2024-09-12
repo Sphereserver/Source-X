@@ -325,7 +325,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
 		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
+		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}
@@ -342,7 +342,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
 		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
+		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}

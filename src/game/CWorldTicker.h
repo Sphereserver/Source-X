@@ -9,6 +9,7 @@
 #include "CTimedObject.h"
 #include <map>
 
+/* Include phmap.h */
 #ifdef ADDRESS_SANITIZER
     #define MYASAN_
 #endif
@@ -31,8 +32,20 @@
 #ifdef __GNUC__
     #pragma GCC diagnostic pop
 #endif
+/* End of phmap.h inclusion */
+
+/* Include btree.h */
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
 #include <parallel_hashmap/btree.h>
 
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
+/* End of btree.h inclusion */
 
 
 class CObjBase;

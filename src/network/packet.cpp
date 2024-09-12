@@ -1222,6 +1222,8 @@ PacketSend::PacketSend(const PacketSend *other)
 	m_position = other->m_position;
 }
 
+PacketSend::~PacketSend() = default;
+
 void PacketSend::initLength(void)
 {
 //	DEBUGNETWORK(("Packet %x starts dynamic with pos %d.\n", m_buffer[0], m_position));
@@ -1323,6 +1325,15 @@ bool PacketSend::canSendTo(const CNetState* state) const
 	return true;
 }
 
+/***************************************************************************
+ *
+ *
+ *	class SimplePacketTransaction		Interface for defining a packet transaction
+ *
+ *
+ ***************************************************************************/
+
+PacketTransaction::~PacketTransaction() = default;
 
 /***************************************************************************
  *

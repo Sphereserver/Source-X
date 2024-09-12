@@ -33,6 +33,12 @@
 #include "spheresvr.h"
 #include "triggers.h"
 
+#include <cstddef>
+#ifndef OFFSETOF
+//#   define OFFSETOF(TYPE, ELEMENT) (offsetof(TYPE, ELEMENT))
+# define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
+#endif
+
 
 // .ini settings.
 CServerConfig::CServerConfig()
@@ -729,6 +735,12 @@ enum RC_TYPE
 
 // NOTE: Need to be alphabetized order
 
+// TODO: use offsetof by cstddef. Though, it requires the class/struct to be a POD type, so we need to encapsulate the values in a separate struct.
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 
 {
@@ -1012,6 +1024,10 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "ZEROPOINT",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sZeroPoint)			}},
 	{ nullptr,					{ ELEM_VOID,	0,												}}
 };
+
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
 
 bool CServerConfig::r_LoadVal( CScript &s )
 {

@@ -1187,7 +1187,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					}
 					//++count;
 				}
-				sVal.Format(ptcArg[0], ptcArg[1], ptcArg[2] ? ptcArg[2] : 0, ptcArg[3] ? ptcArg[3] : 0);
+				sVal.Format(ptcArg[0], ptcArg[1], (ptcArg[2] ? ptcArg[2] : nullptr), (ptcArg[3] ? ptcArg[3] : nullptr));
 				return true;
 			} break;
 		case OC_DIALOGLIST:

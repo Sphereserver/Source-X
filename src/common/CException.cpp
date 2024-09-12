@@ -397,7 +397,7 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
 void _cdecl Signal_Children(int sig = 0)
 {
     UnreferencedParameter(sig);
-    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+    while (waitpid((pid_t)(-1), nullptr, WNOHANG) > 0) {}
 }
 #endif
 

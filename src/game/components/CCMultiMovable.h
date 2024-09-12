@@ -25,7 +25,7 @@ protected:
 
 public:
     CCMultiMovable(bool fCanTurn);
-    virtual ~CCMultiMovable() = default;
+    virtual ~CCMultiMovable();
     //CItem *GetLink() const;
 
     bool _OnTick();

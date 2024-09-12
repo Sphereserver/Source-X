@@ -324,7 +324,7 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	}
 	if ( IsTrigUsed(TRIGGER_PARTYLEAVE) )
 	{
-		if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, pCharRemove, 0) == TRIGRET_RET_TRUE )
+		if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, pCharRemove, nullptr) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

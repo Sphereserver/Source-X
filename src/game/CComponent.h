@@ -41,7 +41,7 @@ protected:
     CComponent(COMP_TYPE type) noexcept;
 
 public:
-    virtual ~CComponent() = default;
+    virtual ~CComponent();
     COMP_TYPE GetType() const noexcept;
 
     /* Script's compatibility

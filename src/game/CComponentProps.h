@@ -48,6 +48,7 @@ public:
     CComponentProps(COMPPROPS_TYPE type) noexcept {
         _iType = type;
     }
+    virtual ~CComponentProps() noexcept;
 
     virtual lpctstr GetName() const = 0;
     virtual PropertyIndex_t GetPropsQty() const = 0;
@@ -137,8 +138,6 @@ protected:
     static void BaseCont_Write_ContStr(const BaseContStr_t* container, const lpctstr *ptcPropsTable, CScript &s);
 
 public:
-    virtual ~CComponentProps() noexcept = default;
-
     inline COMPPROPS_TYPE GetType() const noexcept {
         return _iType;
     }

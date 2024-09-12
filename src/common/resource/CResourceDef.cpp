@@ -10,6 +10,17 @@
 #include "CResourceDef.h"
 
 
+CResourceDef::CResourceDef(const CResourceID& rid, lpctstr pszDefName) :
+    m_rid(rid), m_pDefName(nullptr)
+{
+    SetResourceName(pszDefName);
+}
+CResourceDef::CResourceDef(const CResourceID& rid, const CVarDefContNum * pDefName) :
+    m_rid(rid), m_pDefName(pDefName)
+{
+}
+CResourceDef::~CResourceDef() = default;
+
 bool CResourceDef::SetResourceName( lpctstr pszName )
 {
     ADDTOCALLSTACK("CResourceDef::SetResourceName");

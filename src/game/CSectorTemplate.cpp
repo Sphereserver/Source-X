@@ -14,6 +14,9 @@
 ////////////////////////////////////////////////////////////////////////
 // -CCharsDisconnectList
 
+CCharsDisconnectList::CCharsDisconnectList() = default;
+CCharsDisconnectList::~CCharsDisconnectList() = default;
+
 void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
 {
     ADDTOCALLSTACK("CCharsDisconnectList::AddCharDisconnected");
@@ -25,11 +28,12 @@ void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
 ////////////////////////////////////////////////////////////////////////
 // -CCharsActiveList
 
-CCharsActiveList::CCharsActiveList()
+CCharsActiveList::CCharsActiveList() :
+     m_iClients(0), m_iTimeLastClient(0)
 {
-	m_iTimeLastClient = 0;
-	m_iClients = 0;
 }
+
+CCharsActiveList::~CCharsActiveList() = default;
 
 void CCharsActiveList::OnRemoveObj(CSObjContRec* pObjRec )
 {

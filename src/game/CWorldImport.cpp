@@ -22,18 +22,21 @@ public:
 		return( m_dwContSer == UID_UNUSED );
 	}
 
-	CImportSer( dword dwSer ) noexcept :
-		m_dwSer( dwSer )
-	{
-		m_pObj = nullptr;
-		m_dwContSer = UID_UNUSED;
-		m_layer = LAYER_NONE;
-	}
-	~CImportSer() noexcept = default;
+	CImportSer( dword dwSer ) noexcept;
+	~CImportSer() noexcept;
 
 	CImportSer(const CImportSer& copy) = delete;
 	CImportSer& operator=(const CImportSer& other) = delete;
 };
+
+CImportSer::CImportSer( dword dwSer ) noexcept :
+    m_dwSer( dwSer )
+{
+    m_pObj = nullptr;
+	m_dwContSer = UID_UNUSED;
+	m_layer = LAYER_NONE;
+}
+CImportSer::~CImportSer() noexcept = default;
 
 struct CImportFile
 {

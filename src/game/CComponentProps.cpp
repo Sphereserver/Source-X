@@ -3,6 +3,8 @@
 #include "CComponentProps.h"
 
 
+CComponentProps::~CComponentProps() noexcept = default;
+
 bool CComponentProps::BaseCont_GetPropertyNum(const BaseContNum_t* container, PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const
 {
     ADDTOCALLSTACK("CComponentProps::GetPropertyNum");

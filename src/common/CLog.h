@@ -73,12 +73,11 @@ public:
 	int _cdecl EventEvent( lpctstr pszFormat, ... ) noexcept __printfargs(2,3);
 #endif //_DEBUG
 
-public:
-	CEventLog() = default;
+	CEventLog();
+    virtual ~CEventLog();
 
-private:
-	CEventLog(const CEventLog& copy);
-	CEventLog& operator=(const CEventLog& other);
+	CEventLog(const CEventLog& copy) = delete;
+	CEventLog& operator=(const CEventLog& other) = delete;
 };
 
 
@@ -108,7 +107,7 @@ public:	    const CScriptObj * SetObjectContext( const CScriptObj * pObjectConte
 protected:	bool _OpenLog(lpctstr pszName = nullptr);	// name set previously.
 public:		bool OpenLog(lpctstr pszName = nullptr);
 
-	bool SetFilePath(lpctstr pszName);
+	virtual bool SetFilePath(lpctstr pszName) override;
 
 	lpctstr GetLogDir() const;
 	dword GetLogMask() const;
@@ -125,6 +124,7 @@ public:		bool OpenLog(lpctstr pszName = nullptr);
 
 public:
 	CLog();
+    virtual ~CLog() override;
 
 	CLog(const CLog& copy) = delete;
 	CLog& operator=(const CLog& other) = delete;

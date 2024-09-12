@@ -13,6 +13,10 @@
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
 
+
+CSFileList::CSFileList() = default;
+CSFileList::~CSFileList() = default;
+
 // Similar to the MFC CFileFind
 bool CSFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
 {

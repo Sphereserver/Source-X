@@ -231,6 +231,7 @@ extern class CServerConfig : public CResourceHolder
 
 public:
 	static const char *m_sClassName;
+
 	int64 m_timePeriodic; // When to perform the next periodic update
 
 	// Begin INI file options.
@@ -376,7 +377,7 @@ public:
     bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the %
     bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.
     bool _fMeditationMovementAbort;   // Meditation fails if the player moves.
-    
+
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
@@ -609,7 +610,6 @@ public:
 	CResourceScript m_scpIni;       // Keep this around so we can link to it.
 	CResourceScript m_scpCryptIni;  // Encryption keys are in here
 
-public:
 	CResourceScript m_scpTables;        // Script's loaded.
 
 	CSStringSortArray m_ResourceList;   // Sections lists.

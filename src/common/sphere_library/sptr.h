@@ -1,7 +1,16 @@
 #ifndef _INC_SPTR_H
 #define _INC_SPTR_H
 
+#ifndef _MSVC
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
 #include <object_ptr/object_ptr.hpp>
+
+#ifndef _MSVC
+#pragma GCC diagnostic pop
+#endif
 
 
 // Sphere Library

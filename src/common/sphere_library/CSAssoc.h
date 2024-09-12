@@ -10,10 +10,6 @@
 #include "CSFile.h"
 
 
-#ifndef OFFSETOF			// stddef.h ?
-	#define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
-#endif
-
 // -----------------------------
 //	CValStr
 // -----------------------------
@@ -100,9 +96,9 @@ class CSStringListRec : public CSObjListRec, public CSString
 
 public:
 	static const char *m_sClassName;
-	explicit CSStringListRec( lpctstr pszVal ) : CSString( pszVal )
-	{
-	}
+
+    CSStringListRec( lpctstr pszVal );
+    virtual ~CSStringListRec();
 
 	CSStringListRec(const CSStringListRec& copy) = delete;
 	CSStringListRec& operator=(const CSStringListRec& other) = delete;
@@ -117,8 +113,9 @@ class CSStringList : public CSObjList 	// obviously a list of strings.
 {
 public:
 	static const char *m_sClassName;
-	CSStringList() = default;
-	virtual ~CSStringList() = default;
+
+	CSStringList();
+	virtual ~CSStringList();
 
 	CSStringList(const CSStringList& copy) = delete;
 	CSStringList& operator=(const CSStringList& other) = delete;

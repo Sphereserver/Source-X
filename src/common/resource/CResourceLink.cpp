@@ -23,6 +23,8 @@ CResourceLink::CResourceLink(const CResourceID& rid, const CVarDefContNum * pDef
     ClearTriggers();
 }
 
+CResourceLink::~CResourceLink() = default;
+
 void CResourceLink::ScanSection( RES_TYPE restype )
 {
     ADDTOCALLSTACK("CResourceLink::ScanSection");

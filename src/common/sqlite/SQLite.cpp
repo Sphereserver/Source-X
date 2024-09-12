@@ -61,7 +61,7 @@ int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 	mapQueryResult.Clear();
 	mapQueryResult.SetNumNew("NUMROWS", 0);
 
-	TablePtr retTable = QuerySQLPtr(strSQL);
+	SQLiteTablePtr retTable = QuerySQLPtr(strSQL);
     if (retTable.m_pTable == nullptr)
         goto err_and_ret;
 
@@ -92,11 +92,11 @@ err_and_ret:
 	return m_iLastError;
 }
 
-Table CSQLite::QuerySQL( lpctstr strSQL )
+SQLiteTable CSQLite::QuerySQL( lpctstr strSQL )
 {
 	if (!IsOpen()) {
 		m_iLastError=SQLITE_ERROR;
-		return Table();
+		return SQLiteTable();
 	}
 
 	char ** retStrings = nullptr;
@@ -114,7 +114,7 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 
 	sqlite3_free(errmsg);
 
-	Table retTable;
+	SQLiteTable retTable;
 
 	if (iRows>0)
         retTable.m_iPos=0;
@@ -158,7 +158,7 @@ Table CSQLite::QuerySQL( lpctstr strSQL )
 	return retTable;
 }
 
-TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
+SQLiteTablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 {
 	if (!IsOpen())
     {
@@ -181,7 +181,7 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 
 	sqlite3_free(errmsg);
 
-	Table * retTable = new Table();
+	SQLiteTable * retTable = new SQLiteTable();
 
 	if (iRows>0)
         retTable->m_iPos=0;
@@ -221,7 +221,7 @@ TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 	sqlite3_free_table(retStrings);
     m_iLastError=SQLITE_OK;
 
-	return TablePtr(retTable);
+	return SQLiteTablePtr(retTable);
 }
 
 void CSQLite::ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut )
@@ -553,16 +553,21 @@ bool CSQLite::r_Verb(CScript & s, CTextConsole * pSrc)
 // Table Class...
 
 
-lpctstr Table::GetColName( int iCol )
+SQLiteTable::SQLiteTable() :
+    m_iRows(0), m_iCols(0), m_iPos(-1)
+{}
+SQLiteTable::~SQLiteTable() = default;
+
+lpctstr SQLiteTable::GetColName( int iCol )
 {
 	if (iCol>=0 && iCol<m_iCols)
 	{
 		return &m_strlstCols[iCol][0];
 	}
-	return 0;
+	return nullptr;
 }
 
-bool Table::GoFirst()
+bool SQLiteTable::GoFirst()
 {
 	if (m_lstRows.size())
 	{
@@ -572,7 +577,7 @@ bool Table::GoFirst()
 	return false;
 }
 
-bool Table::GoLast()
+bool SQLiteTable::GoLast()
 {
 	if (m_lstRows.size())
 	{
@@ -582,7 +587,7 @@ bool Table::GoLast()
 	return false;
 }
 
-bool Table::GoNext()
+bool SQLiteTable::GoNext()
 {
 	if (m_iPos+1<(int)m_lstRows.size())
 	{
@@ -592,7 +597,7 @@ bool Table::GoNext()
 	return false;
 }
 
-bool Table::GoPrev()
+bool SQLiteTable::GoPrev()
 {
 	if (m_iPos>0)
 	{
@@ -602,7 +607,7 @@ bool Table::GoPrev()
 	return false;
 }
 
-bool Table::GoRow(uint iRow)
+bool SQLiteTable::GoRow(uint iRow)
 {
 	if (iRow<m_lstRows.size())
 	{
@@ -612,12 +617,13 @@ bool Table::GoRow(uint iRow)
 	return false;
 }
 
-lpctstr Table::GetValue(lpctstr lpColName)
+lpctstr SQLiteTable::GetValue(lpctstr lpColName)
 {
 	if (!lpColName)
-        return 0;
+        return nullptr;
 	if (m_iPos<0)
-        return 0;
+        return nullptr;
+
 	for (int i=0; i<m_iCols; ++i)
 	{
 		if (!strcmpi(&m_strlstCols[i][0],lpColName))
@@ -625,48 +631,53 @@ lpctstr Table::GetValue(lpctstr lpColName)
 			return &m_lstRows[m_iPos][i][0];
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
-lpctstr Table::GetValue(int iColIndex)
-{
-	if (iColIndex<0 || iColIndex>=m_iCols) return 0;
-	if (m_iPos<0) return 0;
-	return &m_lstRows[m_iPos][iColIndex][0];
-}
-
-lpctstr Table::operator [] (lpctstr lpColName)
-{
-	if (!lpColName)
-        return 0;
-	if (m_iPos<0)
-        return 0;
-	for (int i=0; i<m_iCols; ++i)
-	{
-		if (!strcmpi(&m_strlstCols[i][0],lpColName))
-		{
-			return &m_lstRows[m_iPos][i][0];
-		}
-	}
-	return 0;
-}
-
-lpctstr Table::operator [] (int iColIndex)
+lpctstr SQLiteTable::GetValue(int iColIndex)
 {
 	if (iColIndex<0 || iColIndex>=m_iCols)
-        return 0;
+        return nullptr;
 	if (m_iPos<0)
-        return 0;
+        return nullptr;
+
 	return &m_lstRows[m_iPos][iColIndex][0];
 }
 
-void Table::JoinTable(Table & tblJoin)
+lpctstr SQLiteTable::operator [] (lpctstr lpColName)
+{
+	if (!lpColName)
+        return nullptr;
+	if (m_iPos<0)
+        return nullptr;
+
+	for (int i=0; i<m_iCols; ++i)
+	{
+		if (!strcmpi(&m_strlstCols[i][0],lpColName))
+		{
+			return &m_lstRows[m_iPos][i][0];
+		}
+	}
+	return nullptr;
+}
+
+lpctstr SQLiteTable::operator [] (int iColIndex)
+{
+	if (iColIndex<0 || iColIndex>=m_iCols)
+        return nullptr;
+	if (m_iPos<0)
+        return nullptr;
+	return &m_lstRows[m_iPos][iColIndex][0];
+}
+
+void SQLiteTable::JoinTable(SQLiteTable & tblJoin)
 {
 	if (m_iCols==0) {
 		*this=tblJoin;
 		return;
 	}
-	if (m_iCols!=tblJoin.m_iCols) return;
+	if (m_iCols!=tblJoin.m_iCols)
+        return;
 
 	if (tblJoin.m_iRows>0)
 	{
@@ -679,51 +690,53 @@ void Table::JoinTable(Table & tblJoin)
 	}
 }
 
-TablePtr::TablePtr( )
+//--
+
+SQLiteTablePtr::SQLiteTablePtr( )
 {
 	m_pTable=nullptr;
 }
 
-TablePtr::TablePtr( Table * pTable )
+SQLiteTablePtr::SQLiteTablePtr( SQLiteTable * pTable )
 {
 	m_pTable = pTable;
 }
 
-TablePtr::TablePtr( const TablePtr& cTablePtr )
+SQLiteTablePtr::SQLiteTablePtr( const SQLiteTablePtr & cTablePtr )
 {
 	m_pTable=cTablePtr.m_pTable;
-	((TablePtr *)&cTablePtr)->m_pTable=nullptr;
+	((SQLiteTablePtr *)&cTablePtr)->m_pTable=nullptr;
 }
 
-TablePtr::~TablePtr()
+SQLiteTablePtr::~SQLiteTablePtr()
 {
 	if (m_pTable)
         delete m_pTable;
 }
 
-void TablePtr::operator =( const TablePtr& cTablePtr )
+void SQLiteTablePtr::operator =( const SQLiteTablePtr & cTablePtr )
 {
 	if (m_pTable)
         delete m_pTable;
 	m_pTable=cTablePtr.m_pTable;
-	((TablePtr *)&cTablePtr)->m_pTable=nullptr;
+	((SQLiteTablePtr *)&cTablePtr)->m_pTable=nullptr;
 }
 
-Table * TablePtr::Detach()
+SQLiteTable * SQLiteTablePtr::Detach()
 {
-	Table * pTable=m_pTable;
+	SQLiteTable * pTable=m_pTable;
 	m_pTable=nullptr;
 	return pTable;
 }
 
-void TablePtr::Attach( Table * pTable )
+void SQLiteTablePtr::Attach( SQLiteTable * pTable )
 {
 	if (m_pTable)
         delete m_pTable;
 	m_pTable=pTable;
 }
 
-void TablePtr::Destroy()
+void SQLiteTablePtr::Destroy()
 {
 	if (m_pTable)
         delete m_pTable;

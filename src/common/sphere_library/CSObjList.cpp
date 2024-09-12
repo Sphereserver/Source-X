@@ -3,6 +3,18 @@
 #include "../CException.h"
 
 
+// CSObjListRec:: Constructors, Destructor, Assign operator.
+
+CSObjListRec::CSObjListRec() noexcept :
+    m_pParent(nullptr), m_pNext(nullptr), m_pPrev(nullptr)
+    {}
+
+CSObjListRec::~CSObjListRec()
+{
+     RemoveSelf();
+}
+
+
 // CSObjListRec:: Capacity.
 
 void CSObjListRec::RemoveSelf()
