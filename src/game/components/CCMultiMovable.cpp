@@ -614,6 +614,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
 
                         pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
                         pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
+                        pt.m_z = pMultiThis->GetTopPoint().m_z + componentnew.m_dz;
                     }
                 }
             }
