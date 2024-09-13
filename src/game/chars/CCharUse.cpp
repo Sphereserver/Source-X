@@ -1182,7 +1182,7 @@ short CChar::GetFollowerSlots() const
 short CChar::GetCurFollowers() const
 {
     if (!IsSetEF(EF_FollowerList))
-        return GetDefNum("CURFOLLOWER", true);
+        return n64_narrow_n16(GetDefNum("CURFOLLOWER", true));
 
     return std::accumulate(
         m_followers.cbegin(),

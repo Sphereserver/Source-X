@@ -437,7 +437,7 @@ try_dec:
 	}
 	else if ( ! _ISCSYMF(pszArgs[0]) )
 	{
-	#pragma region maths
+    //#pragma region maths  // MSVC specific
 		// some sort of math op ?
 
 		switch ( pszArgs[0] )
@@ -471,10 +471,10 @@ try_dec:
 		case '\0':
 			return 0;
 		}
-#pragma endregion maths
+//#pragma endregion maths   // MSVC specific
 	}
 	else
-	#pragma region intrinsics
+//#pragma region intrinsics // MSVC specific
 	{
 		// Symbol or intrinsinc function ?
 
@@ -883,7 +883,7 @@ try_dec:
 		if ( m_VarDefs.GetParseVal( ptcArgsOriginal, &llVal ) )     // DEF.
 			return llVal;
 	}
-#pragma endregion intrinsics
+//#pragma endregion intrinsics  // MSVC specific
 
 	// hard end ! Error of some sort.
 	if (ptcStartingString[0] != '\0')

@@ -102,7 +102,7 @@ function(toolchain_exe_stuff_common)
         -Wdisabled-optimization
         #-Winvalid-pch
         -Wzero-as-null-pointer-constant
-        -Wnull-dereference
+        #-Wnull-dereference # Don't: on GCC 12 causes some false positives...
         -Wduplicated-cond
 
         # Supported by Clang, but unsupported by GCC:
@@ -154,7 +154,7 @@ function(toolchain_exe_stuff_common)
         endif()
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
+        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
     endif()
 
     #-- Store common linker flags.

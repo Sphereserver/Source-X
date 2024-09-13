@@ -113,8 +113,9 @@ void IThread::setThreadName(const char* name)
     auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
     ASSERT(athr);
 
-    g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Setting thread (ThreadHolder ID %d, internal name '%s') system name: '%s'.\n",
-            athr->m_threadHolderId, athr->getName(), name_trimmed);
+    g_Log.Event(LOGF_CONSOLE_ONLY|LOGM_DEBUG|LOGL_EVENT,
+                "Setting thread (ThreadHolder ID %d, internal name '%s') system name: '%s'.\n",
+                athr->m_threadHolderId, athr->getName(), name_trimmed);
 
     athr->overwriteInternalThreadName(name_trimmed);
 }

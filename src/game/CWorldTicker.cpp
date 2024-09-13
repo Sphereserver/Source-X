@@ -3,12 +3,10 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
-#include "items/CItemShip.h"
 #include "CSector.h"
 #include "CWorldClock.h"
 #include "CWorldGameTime.h"
 #include "CWorldTicker.h"
-#include <sstream>
 
 
 CWorldTicker::CWorldTicker(CWorldClock *pClock)

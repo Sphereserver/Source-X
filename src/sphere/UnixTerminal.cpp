@@ -163,18 +163,21 @@ void UnixTerminal::prepare()
 	refresh();		// draw screen
 
 #else
-	// save existing attributes
-	if (tcgetattr(STDIN_FILENO, &m_original) < 0)
-		throw CSError(LOGL_WARN, 0, "failed to get terminal attributes");
+    // Am i running Sphere in a terminal?
+    if (isatty(STDIN_FILENO))
+    {
+        // save existing attributes
+        if (tcgetattr(STDIN_FILENO, &m_original) < 0)
+            throw CSError(LOGL_WARN, 0, "failed to get terminal attributes");
 
-	// set new terminal attributes
-	termios term_caps = m_original;
-	term_caps.c_lflag &= ~ unsigned(ICANON | ECHO);
-	term_caps.c_cc[VMIN] = 1;
+        // set new terminal attributes
+        termios term_caps = m_original;
+        term_caps.c_lflag &= ~ unsigned(ICANON | ECHO);
+        term_caps.c_cc[VMIN] = 1;
 
-	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
-		throw CSError(LOGL_WARN, 0, "failed to set terminal attributes");
-
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
+            throw CSError(LOGL_WARN, 0, "failed to set terminal attributes");
+    }
 	setbuf(stdin, nullptr);
 #endif
 

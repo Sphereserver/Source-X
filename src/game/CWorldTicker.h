@@ -14,7 +14,7 @@
 #endif
 
 #ifdef _WIN32
-    #define MYSRWLOCK_
+//    #define MYSRWLOCK_
     #undef SRWLOCK_INIT
 #endif
 #ifdef __GNUC__
@@ -29,9 +29,9 @@
 #ifdef MYASAN_
     #define ADDRESS_SANITIZER
 #endif
-#ifdef MYSRWLOCK_
-#   define SRWLOCK_INIT
-#endif
+//#ifdef MYSRWLOCK_
+//#   define SRWLOCK_INIT
+//#endif
 
 #ifdef __GNUC__
     #pragma GCC diagnostic pop

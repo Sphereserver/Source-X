@@ -201,7 +201,8 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
 	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())
 	{
-		auto tfObj = static_cast<CTimedFunction*>(obj);
+        auto tfObj = static_cast<CTimedFunction*>(obj);
+        ASSERT(tfObj);
 		const CUID& uid = tfObj->GetUID();
 		if (uid.IsValidUID())
 		{

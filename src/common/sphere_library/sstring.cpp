@@ -1,5 +1,5 @@
 #include "sstring.h"
-#include "../../common/CLog.h"
+//#include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
 #include "../CExpression.h"
 
@@ -10,6 +10,7 @@
     #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
 #else
     #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpragmas"
     #pragma GCC diagnostic ignored "-Winvalid-utf8"
     #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
     #if defined(__GNUC__) && !defined(__clang__)

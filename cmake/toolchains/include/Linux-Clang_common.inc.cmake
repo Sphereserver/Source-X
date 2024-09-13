@@ -176,7 +176,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
         endif()
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
+        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
     endif()
 
     #-- Store common linker flags.
