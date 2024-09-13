@@ -2613,7 +2613,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 
 		if (IsSetOF(OF_PetSlots))
 		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, 1);
+            short iFollowerSlots = GetFollowerSlots();
 			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);

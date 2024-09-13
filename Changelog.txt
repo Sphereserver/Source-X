@@ -3876,7 +3876,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: log message when a new thread is created or a thread is being renamed.
 
 10-09-2024, Nolok
-Updated: f_onserver_connectreq_ex now is called whenever an ini connection limit is exceeded (pings, max connections...).
+- Updated: f_onserver_connectreq_ex now is called whenever an ini connection limit is exceeded (pings, max connections...).
     Now it stores these parameters:
     - ARGS  = IP address
     - LOCAL.TIME_CUR_CONNECTED_MS (RO)  = Monotonic system time when this connection request was handled (milliseconds)
@@ -3890,3 +3890,8 @@ Updated: f_onserver_connectreq_ex now is called whenever an ini connection limit
     RETURN -1: Don't do anything, let the connection pass.
     RETURN 1:  Only reject the connection.
     RETURN 2:  Reject and ban the IP for <LOCAL.BAN_TIMEOUT> seconds.
+
+13-09-2024, Nolok
+- Fixed: When acquiring a new pet follower, CurFollower incremented by 1 regardless of pet's FollowerSlots value (Issue #1251).
+- Fixed: dynamic FOLLOWERSLOTS property wasn't correctly saved and loaded from a worldsave.
+- Added: FOLLOWER.<index> to reference char followers.

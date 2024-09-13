@@ -14,7 +14,6 @@
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
 

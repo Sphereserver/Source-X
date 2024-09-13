@@ -7,7 +7,6 @@
 
 #include "CTimedFunctionHandler.h"
 #include "CTimedObject.h"
-#include <map>
 
 /* Include phmap.h */
 #ifdef ADDRESS_SANITIZER
@@ -15,6 +14,7 @@
 #endif
 
 #ifdef _WIN32
+    #define MYSRWLOCK_
     #undef SRWLOCK_INIT
 #endif
 #ifdef __GNUC__
@@ -25,8 +25,12 @@
 // TODO: undef is TEMPORARY !! There's a bug that needs to be solved
 #undef ADDRESS_SANITIZER
 #include <parallel_hashmap/phmap.h>
+
 #ifdef MYASAN_
     #define ADDRESS_SANITIZER
+#endif
+#ifdef MYSRWLOCK_
+#   define SRWLOCK_INIT
 #endif
 
 #ifdef __GNUC__

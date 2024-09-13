@@ -9,7 +9,6 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "components/CCChampion.h"
-#include "components/CCPropsItemChar.h"
 #include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
@@ -21,7 +20,6 @@
 #include "CWorldTickingList.h"
 #include "CWorldTimedFunctions.h"
 #include "CTimedFunction.h"
-#include "spheresvr.h"
 #include "triggers.h"
 #include "CObjBase.h"
 

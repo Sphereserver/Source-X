@@ -88,7 +88,7 @@ bool UnixTerminal::isReady()
 
 	// echo to console
 	fputc(c, stdout);
-	//fflush(stdout);
+    fflush(stdout);
 
 	m_nextChar = static_cast<tchar>(c);
 	return m_nextChar != '\0';

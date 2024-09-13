@@ -58,9 +58,7 @@ CCharNPC::CCharNPC( CChar * pChar, NPCBRAIN_TYPE NPCBrain )
 	m_timeRestock = 0;
 }
 
-CCharNPC::~CCharNPC()
-{
-}
+CCharNPC::~CCharNPC() = default;
 
 bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 {
@@ -82,9 +80,6 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			m_bonded = (s.GetArgVal() > 0);
 			if ( !g_Serv.IsLoading() )
 				pChar->UpdatePropertyFlag();
-			break;
-		case CNC_FOLLOWERSLOTS:
-			pChar->SetDefNum(s.GetKey(), s.GetArgVal(), false );
 			break;
 		case CNC_ACTPRI:
 			m_Act_Motivation = (uchar)(s.GetArgVal());
@@ -166,9 +161,6 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			//On these ones, check BaseDef if not found on dynamic
 		case CNC_BONDED:
 			sVal.FormatVal( m_bonded );
-			break;
-		case CNC_FOLLOWERSLOTS:
-			sVal.FormatLLVal(pChar->GetDefNum(ptcKey, true));
 			break;
 		case CNC_ACTPRI:
 			sVal.FormatVal( m_Act_Motivation );

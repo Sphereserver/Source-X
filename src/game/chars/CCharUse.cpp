@@ -12,6 +12,8 @@
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+#include <numeric>
+
 
 static constexpr int MASK_RETURN_FOLLOW_LINKS = 0x02;
 
@@ -1149,7 +1151,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 
 	if ( fCheckFollowerSlots && IsSetOF(OF_PetSlots) )
 	{
-		const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+        const short iFollowerSlots = GetFollowerSlots();
 		if ( !FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), true) )
 		{
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
@@ -1172,27 +1174,49 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 	return pPet;
 }
 
-bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnly )
+short CChar::GetFollowerSlots() const
+{
+    return n64_narrow_n16(GetDefNum("FOLLOWERSLOTS", true, 1));
+}
+
+short CChar::GetCurFollowers() const
+{
+    if (!IsSetEF(EF_FollowerList))
+        return GetDefNum("CURFOLLOWER", true);
+
+    return std::accumulate(
+        m_followers.cbegin(),
+        m_followers.cend(),
+        (short)0,
+        [](short accumulator, auto const& input_struct) -> short
+        {
+            return accumulator + input_struct.followerslots;
+        });
+}
+
+bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fCheckOnly )
 {
 	ADDTOCALLSTACK("CChar::FollowersUpdate");
 	// Attemp to update followers on this character based on pChar
 	// This is supossed to be called only when OF_PetSlots is enabled, so no need to check it here.
 
+    const bool fIgnoreMax = IsPriv(PRIV_GM);
+
     if (!fCheckOnly && IsTrigUsed(TRIGGER_FOLLOWERSUPDATE))
     {
         CScriptTriggerArgs Args;
-        Args.m_iN1 = (iFollowerSlots >= 0) ? 0 : 1;
-        Args.m_iN2 = abs(iFollowerSlots);
-        if (OnTrigger(CTRIG_FollowersUpdate, pChar, &Args) == TRIGRET_RET_TRUE)
+        Args.m_iN1 = (iPetFollowerSlots >= 0) ? 0 : 1;
+        Args.m_iN2 = abs(iPetFollowerSlots);
+        if (OnTrigger(CTRIG_FollowersUpdate, pCharPet, &Args) == TRIGRET_RET_TRUE)
             return false;
 
         if (Args.m_iN1 == 1)
         {
-            iFollowerSlots = - n64_narrow_n16(Args.m_iN2);
+            iPetFollowerSlots = - n64_narrow_n16(Args.m_iN2);
         }
         else
         {
-            iFollowerSlots = n64_narrow_n16(Args.m_iN2);
+            iPetFollowerSlots = n64_narrow_n16(Args.m_iN2);
         }
 	}
 
@@ -1200,44 +1224,48 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnl
     ASSERT(iMaxFollower >= 0);
 	if (IsSetEF(EF_FollowerList))
 	{
-        if (iFollowerSlots >= 0)
+        if (iPetFollowerSlots >= 0)
         {
-            bool fExists = false;
-            for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
+            bool fCharAlreadyFollower = false;
+            for (auto const& follower_data : m_followers)
             {
-                if (*it == pChar->GetUID())
+                if (follower_data.uid == pCharPet->GetUID())
                 {
-                    fExists = true;
+                    fCharAlreadyFollower = true;
                     break;
                 }
-                ++it;
             }
 
-            if ((!fExists && (i16_from_usize_checked(m_followers.size()) < iMaxFollower)) || IsPriv(PRIV_GM))
+            if (!fCharAlreadyFollower && (fIgnoreMax || (GetCurFollowers() + iPetFollowerSlots <= iMaxFollower)))
             {
                 if (!fCheckOnly)
-                    m_followers.emplace_back(pChar->GetUID());
+                {
+                    m_followers.emplace_back(
+                        FollowerCharData {
+                            .uid = pCharPet->GetUID(),
+                            .followerslots = pCharPet->GetFollowerSlots()
+                        });
+                }
             }
             else
                 return false;
         }
 		else if (!fCheckOnly)
 		{
-			for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end();)
-			{
-				if (*it == pChar->GetUID())
-					it = m_followers.erase(it);
-				else
-					++it;
-			}
+            std::erase_if(
+                m_followers,
+                [pCharPet](auto const& inp_struct) -> bool {
+                    return inp_struct.uid == pCharPet->GetUID();
+                });
 		}
 	}
 	else
 	{
-		short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true));
-		iCurFollower = iCurFollower + iFollowerSlots;
-		if (!fCheckOnly)
-			SetDefNum("CURFOLLOWER", maximum(iCurFollower, 0));
+        short iNewCurFollower = GetCurFollowers() + iPetFollowerSlots;
+        if (!fIgnoreMax && (iNewCurFollower > iMaxFollower))
+            return false;
+        if (!fCheckOnly)
+            SetDefNum("CURFOLLOWER", maximum(iNewCurFollower, 0));
 	}
 
 	if ( !fCheckOnly )

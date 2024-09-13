@@ -423,7 +423,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			return true;
 	}
 
-	bool bSuccess = false;
+    bool fSuccess = false;
 	CItem *pItemTarg = dynamic_cast<CItem *>(pObj);
 	CChar *pCharTarg = dynamic_cast<CChar *>(pObj);
 
@@ -434,9 +434,9 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 		{
 			if ( !pCharTarg || pCharTarg == pSrc || pCharTarg == this )
 				break;
-			bSuccess = pCharTarg->OnAttackedBy(pSrc, true);	// we know who told them to do this.
-			if ( bSuccess )
-				bSuccess = Fight_Attack(pCharTarg, true);
+            fSuccess = pCharTarg->OnAttackedBy(pSrc, true);	// we know who told them to do this.
+            if ( fSuccess )
+                fSuccess = Fight_Attack(pCharTarg, true);
 			break;
 		}
 
@@ -444,7 +444,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pCharTarg )
 				break;
 			m_Act_UID = pCharTarg->GetUID();
-			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
+            fSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 
 		case PC_FRIEND:
@@ -465,7 +465,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			Memory_AddObjTypes(pCharTarg, MEMORY_FRIEND);
 
 			m_Act_UID = pCharTarg->GetUID();
-			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
+            fSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 		}
 
@@ -487,7 +487,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			pMemory->Delete();
 
 			m_Act_UID = pSrc->GetUID();
-			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
+            fSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 		}
 
@@ -495,7 +495,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pt.IsValidPoint() )
 				break;
 			m_Act_p = pt;
-			bSuccess = Skill_Start(NPCACT_GOTO);
+            fSuccess = Skill_Start(NPCACT_GOTO);
 			break;
 
 		case PC_GUARD:
@@ -503,7 +503,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			pCharTarg->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_GUARD_SUCCESS), GetName());
 			m_Act_UID = pCharTarg->GetUID();
-			bSuccess = Skill_Start(NPCACT_GUARD_TARG);
+            fSuccess = Skill_Start(NPCACT_GUARD_TARG);
 			break;
 
 		case PC_TRANSFER:
@@ -511,14 +511,14 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			if ( IsSetOF(OF_PetSlots) )
 			{
-				short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+                short iFollowerSlots = GetFollowerSlots();
 				if ( !pCharTarg->FollowersUpdate(this, (maximum(0, iFollowerSlots)), true) )
 				{
 					pSrc->SysMessageDefault(DEFMSG_PETSLOTS_TRY_TRANSFER);
 					break;
 				}
 			}
-			bSuccess = NPC_PetSetOwner( pCharTarg );
+            fSuccess = NPC_PetSetOwner( pCharTarg );
 			break;
 
 		case PC_PRICE:	// "PRICE" the vendor item.
@@ -536,8 +536,8 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 	}
 
 	// Make some sound to confirm we heard it
-	NPC_OnPetCommand(bSuccess, pSrc);
-	return bSuccess;
+    NPC_OnPetCommand(fSuccess, pSrc);
+    return fSuccess;
 }
 
 void CChar::NPC_PetClearOwners()
@@ -583,7 +583,7 @@ void CChar::NPC_PetClearOwners()
 
 	if ( pOwner && IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+        short iFollowerSlots = GetFollowerSlots();
 		pOwner->FollowersUpdate(this, -maximum(0, iFollowerSlots));
 	}
 }
@@ -617,7 +617,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
+        const short iFollowerSlots = GetFollowerSlots();
 		pChar->FollowersUpdate(this, maximum(0, iFollowerSlots));
 	}
 

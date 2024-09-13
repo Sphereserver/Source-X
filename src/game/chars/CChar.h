@@ -205,8 +205,12 @@ public:
 
     ushort _uiRange;
 
-
-    std::vector<CUID> m_followers;
+    struct FollowerCharData
+    {
+        CUID uid;
+        short followerslots;
+    };
+    std::vector<FollowerCharData> m_followers;
 
 	// Args related to specific actions type (m_Act_SkillCurrent)
 	union
@@ -1155,7 +1159,9 @@ public:
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
 	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
-	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
+    bool FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false );
+    short GetFollowerSlots() const;
+    short GetCurFollowers() const;
 
 	int  ItemPickup( CItem * pItem, word amount );
 	bool ItemEquip( CItem * pItem, CChar * pCharMsg = nullptr, bool fFromDClick = false );

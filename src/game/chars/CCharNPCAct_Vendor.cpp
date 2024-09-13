@@ -203,7 +203,7 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
             pItem->Delete();
             if (IsSetOF(OF_PetSlots))
             {
-                const short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+                const short iFollowerSlots = GetFollowerSlots();
                 pCharPlayer->FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), false);
             }
 			++iCount;

@@ -5,7 +5,6 @@
 #include "../../common/CUID.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"
-#include "../../sphere/ProfileTask.h"
 #include "../clients/CAccount.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
@@ -23,7 +22,6 @@
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldTickingList.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharBase.h"
@@ -1247,7 +1245,7 @@ bool CChar::DupeFrom(const CChar * pChar, bool fNewbieItems )
 				pItem->m_uidLink = myUID; //If the character being duped has an item which linked to himself, set the newly duped character link instead.
 			else if (IsSetOF(OF_PetSlots) &&  pItem->IsMemoryTypes(MEMORY_IPET) && pTest3 == NPC_PetGetOwner())
 			{
-				const short iFollowerSlots = n64_narrow_n16(GetDefNum("FOLLOWERSLOTS", true, 1));
+                const short iFollowerSlots = GetFollowerSlots();
 				//If we have reached the maximum follower slots we remove the ownership of the pet by clearing the memory flag instead of using NPC_PetClearOwners().
 				if (!pTest3->FollowersUpdate(this, maximum(0, iFollowerSlots)))
 					Memory_ClearTypes(MEMORY_IPET);
@@ -2306,6 +2304,23 @@ bool CChar::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 	if ( iKeyNum < 0 )
 	{
 do_default:
+
+        if (!strnicmp("FOLLOWER", ptcKey, 8))
+        {
+            if (ptcKey[8] == '.')
+            {
+                ptcKey += 9;
+                const uint uiIndex = Exp_GetUVal(ptcKey);
+                if (uiIndex >= m_followers.size())
+                    return false;
+
+                CChar* pCharArg = CUID::CharFindFromUID(m_followers[uiIndex].uid);
+                ASSERT(pCharArg);
+                if (pCharArg->r_WriteVal(ptcKey, sVal, pSrc, fNoCallParent, fNoCallChildren))
+                    return true;
+            }
+        }
+
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_WriteVal( this, ptcKey, sVal ))
@@ -2338,43 +2353,44 @@ do_default:
     CChar * pCharSrc = pSrc->GetChar();
 	switch ( iKeyNum )
 	{
+        case CHC_FOLLOWERSLOTS:
+            sVal.FormatLLVal(GetFollowerSlots());
+            break;
+
 		//return as decimal number or 0 if not set
 		case CHC_CURFOLLOWER:
 		{
-			if (!IsSetEF(EF_FollowerList)) //Using an old system?
-			{
-				sVal.FormatLLVal(GetDefNum(ptcKey,false));
-			}
-			else
-			{
-				if (strlen(ptcKey) == 11)
-				{
-					sVal.FormatULLVal(m_followers.size());
-					return true;
-				}
-				sVal.FormatVal(0);
-				ptcKey += 11;
-				if (*ptcKey == '.')
-				{
-					++ptcKey;
-					if (!m_followers.empty())
-					{
-						int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
-						SKIP_SEPARATORS(ptcKey);
-						if (iIndex < (int)m_followers.size())
-						{
-							if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
-							{
-								CUID uid = m_followers[iIndex];
-								sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
-								return true;
-							}
-						}
-					}
-				}
-			}
-			return true;
-		}
+            if (!IsSetEF(EF_FollowerList)) //Using an old system?
+            {
+                sVal.FormatLLVal(GetDefNum(ptcKey,false));
+                return true;
+            }
+
+            if (strlen(ptcKey) == 11)
+            {
+                sVal.FormatSVal(GetCurFollowers());
+                return true;
+            }
+
+            sVal.FormatVal(0);
+            ptcKey += 11;
+            if (*ptcKey == '.' && !m_followers.empty())
+            {
+                ++ptcKey;
+                int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
+                SKIP_SEPARATORS(ptcKey);
+                if (iIndex < (int)m_followers.size())
+                {
+                    if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
+                    {
+                        CUID const& uid = m_followers[iIndex].uid;
+                        sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
+                        return true;
+                    }
+                }
+            }
+            return true;
+        }
 		//On these ones, check BaseDef if not found on dynamic
 		case CHC_MAXFOLLOWER:
 		case CHC_SPELLTIMEOUT:
@@ -3346,20 +3362,45 @@ bool CChar::r_LoadVal( CScript & s )
     EXC_SET_BLOCK("Keyword");
 	lpctstr	ptcKey = s.GetKey();
 
-    if (!strnicmp("FOLLOWER", ptcKey, 8))
-    {
-        if (ptcKey[8] == '.')
-        {
-            ptcKey = ptcKey + 4;
-            CUID ptcArg = CUID(s.GetArgDWVal());
-            m_followers.emplace_back(ptcArg);
-            return true;
-        }
-    }
-
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
+        if (!strnicmp("FOLLOWER", ptcKey, 8))
+        {
+            if (ptcKey[8] == '.')
+            {
+                ptcKey += 9;
+                // I'm probably loading from a save, or that's a very weird way to add a follower...
+                //  Anyways, i expect the followers to be passed with sequential incremental ids: 0, 1, 2... Not random order.
+                const uint uiIndex = Exp_GetUVal(ptcKey);
+                if (uiIndex != m_followers.size())
+                    return false;
+
+                const CUID uidPet(Exp_GetDWVal(ptcKey));
+                const CChar* pCharPet = uidPet.CharFind();
+                if (!pCharPet)
+                    return false;
+
+                const bool fExists =
+                    !m_followers.empty() &&
+                    m_followers.end() !=
+                        std::find_if(m_followers.begin(), m_followers.end(),
+                            [&uidPet](auto const& inp_struct) -> bool {
+                                return inp_struct.uid == uidPet;
+                        });
+                if (fExists)
+                    return false;
+
+                m_followers.emplace_back(
+                    FollowerCharData {
+                        .uid = uidPet,
+                        .followerslots = pCharPet->GetFollowerSlots()
+                    });
+
+                return true;
+            }
+        }
+
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_LoadVal( this, s ))
@@ -3422,68 +3463,68 @@ bool CChar::r_LoadVal( CScript & s )
             Stats_SetRegenVal(STAT_FOOD, s.GetArgUSVal());
             break;
 
+        case CHC_FOLLOWERSLOTS:
+            SetDefNum(s.GetKey(), s.GetArgVal(), false );
+            break;
+
 		case CHC_CURFOLLOWER:
 			if (!IsSetEF(EF_FollowerList))
 			{
-				SetDefNum(s.GetKey(), s.GetArgLLVal(), false);
+                SetDefNum(s.GetKey(), s.GetArgSVal(), false);
 				UpdateStatsFlag();
 				break;
 			}
-			else
-			{
-				if (strlen(ptcKey) > 11)
-				{
-					ptcKey += 11;
-					if (*ptcKey == '.')
-					{
-						++ptcKey;
-						if (!strnicmp(ptcKey, "CLEAR", 5))
-						{
-							if (!m_followers.empty())
-								m_followers.clear();
-							UpdateStatsFlag();
-							return true;
-						}
-						else if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
-						{
-							if (!m_followers.empty())
-							{
-								CUID uid = (CUID)s.GetArgDWVal();
-								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
-								{
-                                    if (uid == *it)
-                                        it = m_followers.erase(it);
-                                    else
-                                        ++it;
-								}
-							}
-							return true;
-						}
-						else if (!strnicmp(ptcKey, "ADD", 3))
-						{
-							bool fExists = false;
-							CUID uid = (CUID)s.GetArgDWVal();
-							if (!m_followers.empty())
-							{
-								for (std::vector<CUID>::iterator it = m_followers.begin(); it != m_followers.end(); )
-								{
-									if (uid == *it)
-									{
-										fExists = true;
-										break;
-									}
-									else
-										++it;
-								}
-							}
 
-							if (!fExists)
-								m_followers.emplace_back(uid);
-							return true;
-						}
-					}
-				}
-			}
+            if (strlen(ptcKey) < 12)
+                return false;
+
+            ptcKey += 11;
+            if (*ptcKey != '.')
+                return false;
+
+            ++ptcKey;
+            if (!strnicmp(ptcKey, "CLEAR", 5))
+            {
+                if (!m_followers.empty())
+                    m_followers.clear();
+                UpdateStatsFlag();
+                return true;
+            }
+            else if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
+            {
+                if (!m_followers.empty())
+                {
+                    const CUID uid(s.GetArgDWVal());
+                    std::erase_if(m_followers,
+                                  [&uid](auto const& inp_struct) -> bool
+                                  {
+                                      return inp_struct.uid == uid;
+                                  });
+                }
+                return true;
+            }
+            else if (!strnicmp(ptcKey, "ADD", 3))
+            {
+                const CUID uid(s.GetArgDWVal());
+                const bool fExists =
+                    !m_followers.empty() &&
+                        m_followers.end() !=
+                        std::find_if(m_followers.begin(), m_followers.end(),
+                            [&uid](auto const& inp_struct) -> bool {
+                                return inp_struct.uid == uid;
+                            });
+                if (!fExists)
+                {
+                    const CChar* pCharPet = uid.CharFind();
+                    ASSERT(pCharPet);
+                    m_followers.emplace_back(
+                        FollowerCharData{
+                            .uid = uid,
+                            .followerslots = pCharPet->GetFollowerSlots()
+                        });
+                }
+                return true;
+            }
 			return false;
 		case CHC_MAXFOLLOWER:
 		case CHC_TITHING:
@@ -3977,11 +4018,12 @@ void CChar::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
-    for (CUID uid : m_followers) {
-        dword dUID = (dword)uid;
+    for (uint i = 0; auto const& fdata : m_followers) {
+        dword dUID = (dword)fdata.uid;
         char *pszTag = Str_GetTemp();
-        snprintf(pszTag, Str_TempLength(), "FOLLOWER.%d", dUID);
+        snprintf(pszTag, Str_TempLength(), "FOLLOWER.%u", i);
         s.WriteKeyHex(pszTag, dUID);
+        ++ i;
     }
 
 	if (iValLastHit != 0)
@@ -4244,7 +4286,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 	EXC_TRY("Verb");
 
 	if ( IsClientActive() && GetClientActive()->r_Verb(s, pSrc) )
-		return true;
+        return true;
 
     if (CEntity::r_Verb(s, pSrc))
     {
@@ -4277,7 +4319,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
                     fMode = args.m_iN2 > 0 ? true : false;
 
                     if (iRet == TRIGRET_RET_TRUE) //Block AFK mode switching if RETURN 1 in Trigger.
-                        return true;
+                        break;
                 }
 
                 if ( fMode != fAFK )
@@ -4377,10 +4419,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_CURE:
 			{
-				bool bCureHallucination = false;
+                bool fCureHallucination = false;
 				if (s.HasArgs())
-					bCureHallucination = (bool)s.GetArgVal();
-				SetPoisonCure(bCureHallucination);
+                    fCureHallucination = (bool)s.GetArgVal();
+                SetPoisonCure(fCureHallucination);
 			}
 			break;
 		case CHV_DISCONNECT:
@@ -4418,7 +4460,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				pItem->SetAttr(ATTR_MOVE_NEVER);
 				LayerAdd( pItem, LAYER_HAND2 );
 			}
-			return true;
+            break;
 		case CHV_EQUIPARMOR:
 			return ItemEquipArmor(false);
 		case CHV_EQUIPWEAPON:
@@ -4431,7 +4473,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if (*pszVerbArg == '\0')
 			{
 				UpdateDir(dynamic_cast<CObjBase*>(pCharSrc));
-				return true;
+                break;
 			}
 			else if (IsStrNumeric(pszVerbArg))
 			{
@@ -4439,7 +4481,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if (pTowards != nullptr)
 				{
 					UpdateDir(pTowards);
-					return true;
+                    break;
 				}
 			}
 			else
@@ -4449,7 +4491,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if (pt.IsValidPoint())
 				{
 					UpdateDir(pt);
-					return true;
+                    break;
 				}
 			}
 			return false;
@@ -4484,7 +4526,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					return false;
 				pObj = pObj->GetTopLevelObj();
 				Spell_Teleport( pObj->GetTopPoint(), true, false );
-				return true;
+                break;
 			}
 			return false;
 		case CHV_HEAR:
