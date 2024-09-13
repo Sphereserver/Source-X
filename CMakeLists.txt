@@ -15,6 +15,11 @@ option(
     "Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
     FALSE
 )
+option(
+    CMAKE_EXPORT_COMPILE_COMMANDS
+    "Export compiler commands to compile_commands.json"
+    TRUE
+)
 
 set(predef_LIB_LIBEV_BUILD FALSE)
 if(NOT WIN32)
