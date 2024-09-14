@@ -1,4 +1,5 @@
 #include "../../common/sphere_library/CSString.h"
+#include "../clients/CClientTooltip.h"
 #include "../items/CItem.h"
 #include "CCPropsItemWeapon.h"
 

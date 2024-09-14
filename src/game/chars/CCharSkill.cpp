@@ -3,8 +3,12 @@
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/resource/sections/CRegionResourceDef.h"
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
 #include "../items/CItemVendable.h"
 #include "../triggers.h"
 #include "../CServer.h"
@@ -12,7 +16,6 @@
 #include "../CWorldSearch.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-
 #include <cmath>
 
 //----------------------------------------------------------------------

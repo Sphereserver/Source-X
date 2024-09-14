@@ -809,12 +809,12 @@ void CScript::CloseForce()
 	CScript::Close();
 }
 
-bool CScript::_SeekContext( CScriptLineContext LineContext )
+bool CScript::_SeekContext(const CScriptLineContext &LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
 	return (_Seek( LineContext.m_iOffset, SEEK_SET ) == LineContext.m_iOffset);
 }
-bool CScript::SeekContext( CScriptLineContext LineContext )
+bool CScript::SeekContext( CScriptLineContext const& LineContext )
 {
     MT_UNIQUE_LOCK_RETURN(CScript::_SeekContext(LineContext));
 }

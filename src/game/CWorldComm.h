@@ -7,6 +7,7 @@
 #define _INC_CWORLDCOMM_H
 
 #include "../common/common.h"
+#include "../common/CLanguageID.h"
 #include "../common/sphereproto.h"
 #include "uo_files/uofiles_enums.h"
 #include "uo_files/uofiles_types.h"

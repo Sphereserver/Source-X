@@ -4,15 +4,15 @@
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/resource/sections/CResourceNamedDef.h"
-#include "../common/sphere_library/CSFileList.h"
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/CNetworkManager.h"
 #include "../network/CSocket.h"
 #include "../sphere/ProfileTask.h"
-#include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
 #include "chars/CChar.h"
@@ -32,6 +32,10 @@
 #include "CWorldMap.h"
 #include "spheresvr.h"
 #include "triggers.h"
+
+#ifdef _WIN32
+#   include "../sphere/ntwindow.h"     // g_NTWindow
+#endif
 
 #include <cstddef>
 #ifndef OFFSETOF
@@ -736,6 +740,7 @@ enum RC_TYPE
 // NOTE: Need to be alphabetized order
 
 // TODO: use offsetof by cstddef. Though, it requires the class/struct to be a POD type, so we need to encapsulate the values in a separate struct.
+// This hack does happen because this class hasn't virtual methods? Or simply because the compiler is so smart and protects us from ourselves?
 #ifdef __GNUC__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"

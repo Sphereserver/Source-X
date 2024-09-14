@@ -1,10 +1,15 @@
 
 // Actions specific to an NPC.
 
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"

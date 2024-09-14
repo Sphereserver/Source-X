@@ -8,9 +8,9 @@
 
 
 #include "../common/CUID.h"
+#include "../common/CLanguageID.h"
 #include "../common/sphereproto.h"
 #include "../common/CRect.h"
-#include "../game/CRegion.h"
 #include "../game/game_enums.h"
 #include "../game/CServerConfig.h"
 #include "CNetState.h"

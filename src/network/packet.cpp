@@ -204,7 +204,7 @@ void Packet::seek(uint pos)
 void Packet::skip(int count)
 {
 	// ensure we can't go lower than 0
-	if (count < 0 && (uint)SphereAbs(count) > m_position)
+    if (count < 0 && (uint)abs(count) > m_position)
     {
 		m_position = 0;
         return;

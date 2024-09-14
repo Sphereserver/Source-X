@@ -6,12 +6,17 @@
 #define _INC_CSERVERMAP_H
 
 #include "../game/uo_files/CUOMapBlock.h"
-#include "../game/uo_files/CUOStaticItemRec.h"
-#include "../game/uo_files/CUOMultiItemRec.h"
+#include "../game/uo_files/CUOMapList.h"
 #include "../game/uo_files/uofiles_macros.h"
 #include "../game/uo_files/uofiles_types.h"
 #include "sphere_library/CSObjSortArray.h"
-#include "CRect.h"
+#include "CPointBase.h"
+
+
+struct CUOStaticItemRec;
+struct CUOMultiItemRec_HS;
+
+// TODO: move some classes out from this file
 
 class CCachedMulItem
 {
@@ -28,7 +33,6 @@ public:
 	CCachedMulItem(const CCachedMulItem& copy) = delete;
 	CCachedMulItem& operator=(const CCachedMulItem& other) = delete;
 
-public:
 	void InitCacheTime();
 	bool IsTimeValid() const;
 	void HitCacheTime();
@@ -37,13 +41,9 @@ public:
 
 class CServerStaticsBlock
 {
-private:
 	uint m_iStatics;
 	CUOStaticItemRec * m_pStatics;	// dyn alloc array block.
 
-public:
-	void LoadStatics(dword dwBlockIndex, int map);
-	void LoadStatics(uint uiCount, CUOStaticItemRec * pStatics);
 public:
 	static const char *m_sClassName;
 	CServerStaticsBlock();
@@ -53,22 +53,15 @@ public:
 	CServerStaticsBlock& operator=(const CServerStaticsBlock& other) = delete;
 
 public:
+    void LoadStatics(dword dwBlockIndex, int map);
+    void LoadStatics(uint uiCount, CUOStaticItemRec * pStatics);
+
     // These methods are called so frequently but in so few pieces of code that's very important to inline them
 	inline uint GetStaticQty() const {
 		return m_iStatics;
 	}
-    inline const CUOStaticItemRec * GetStatic( uint i ) const
-    {
-        ASSERT( i < m_iStatics );
-        return( &m_pStatics[i] );
-    }
-    inline bool IsStaticPoint( uint i, int xo, int yo ) const
-    {
-        ASSERT( (xo >= 0) && (xo < UO_BLOCK_SIZE) );
-        ASSERT( (yo >= 0) && (yo < UO_BLOCK_SIZE) );
-        ASSERT( i < m_iStatics );
-        return( (m_pStatics[i].m_x == xo) && (m_pStatics[i].m_y == yo) );
-    }
+    const CUOStaticItemRec * GetStatic( uint i ) const;
+    bool IsStaticPoint( uint i, int xo, int yo ) const;
 };
 
 struct CServerMapBlocker
@@ -110,7 +103,7 @@ public:
 	CServerMapBlockingState& operator=(const CServerMapBlockingState& other) = delete;
 
 public:
-	bool CheckTile( uint64 uiItemBlockFlags, int8 zBottom, height_t zheight, dword wID ) noexcept;
+    bool CheckTile( uint64 uiItemBlockFlags, int8 zBottom, height_t zheight, dword wID ) noexcept;
 	bool CheckTile_Item( uint64 uiItemBlockFlags, int8 zBottom, height_t zheight, dword wID ) noexcept;
 	bool CheckTile_Terrain( uint64 uiItemBlockFlags, int8 z, dword dwID ) noexcept;
 	static lpctstr GetTileName( dword dwID );

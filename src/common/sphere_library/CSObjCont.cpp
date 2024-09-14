@@ -1,6 +1,6 @@
-#include "CSObjCont.h"
 #include "../assertion.h"
 #include "../CException.h"
+#include "CSObjCont.h"
 #include <algorithm>
 
 

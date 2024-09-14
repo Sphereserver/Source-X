@@ -83,9 +83,8 @@ public:
 public:
 	CUOInstall();
 
-private:
-	CUOInstall(const CUOInstall& copy);
-	CUOInstall& operator=(const CUOInstall& other);
+    CUOInstall(const CUOInstall& copy) = delete;
+    CUOInstall& operator=(const CUOInstall& other) = delete;
 } g_Install;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,9 +109,9 @@ public:
 public:
 	CVerDataMul();
 	~CVerDataMul();
-private:
-	CVerDataMul(const CVerDataMul& copy);
-	CVerDataMul& operator=(const CVerDataMul& other);
+
+    CVerDataMul(const CVerDataMul& copy) = delete;
+    CVerDataMul& operator=(const CVerDataMul& other) = delete;
 } g_VerData;
 
 #endif	// _INC_CUOINSTALL_H

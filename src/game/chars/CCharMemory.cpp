@@ -1,8 +1,9 @@
 
 // Actions specific to an NPC.
-
+#include "../../common/CExpression.h"
 #include "../../network/send.h"
-#include "../clients/CClient.h"
+#include "../items/CItemMemory.h"
+#include "../items/CItemStone.h"
 #include "../CWorldGameTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"

@@ -5,6 +5,7 @@
 #include "../common/sphere_library/sstring.h"
 #include "../common/CLog.h"
 
+
 void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 {
 #ifdef _WIN32

@@ -7,7 +7,7 @@
 #define _INC_CUOVERSIONBLOCK_H
 
 #include "../../common/common.h"
-#include "uofiles_macros.h"
+#include "uofiles_enums.h"
 
 #define VERDATA_MAKE_INDEX( f, i )	((f+1)<< 26 | (i))
 

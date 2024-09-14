@@ -1,9 +1,7 @@
 
 #include "../sphere/threads.h"
-#include "CException.h"
 #include "CExpression.h"
 #include "CSVFile.h"
-#include "CScript.h"
 #include "common.h"
 
 CSVFile::CSVFile()
@@ -54,8 +52,8 @@ bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 	}
 
 	// find the types and names of the columns
-	tchar * ppColumnTypes[MAX_COLUMNS];
-	tchar * ppColumnNames[MAX_COLUMNS];
+	tchar * ppColumnTypes[kuiMaxColumns];
+	tchar * ppColumnNames[kuiMaxColumns];
 
 	// first row tells us how many columns there are
 	_iColumnCount = _ReadRowContent(ppColumnTypes, 0);
@@ -97,7 +95,7 @@ bool CSVFile::Open(lpctstr ptcFilename, uint uiModeFlags)
 int CSVFile::_ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
 {
 	ADDTOCALLSTACK("CSVFile::_ReadRowContent");
-	ASSERT(columns > 0 && columns <= MAX_COLUMNS);
+    ASSERT(columns > 0 && columns <= i32_from_u32_clamping(kuiMaxColumns));
 	if ( _GetPosition() != rowIndex )
 		_Seek(rowIndex, SEEK_SET);
 
@@ -119,7 +117,7 @@ bool CSVFile::_ReadRowContent(int rowIndex, CSVRowData& target)
 {
 	ADDTOCALLSTACK("CSVFile::_ReadRowContent");
 	// get row data
-	tchar * ppRowContent[MAX_COLUMNS];
+	tchar * ppRowContent[kuiMaxColumns];
 	int columns = _ReadRowContent(ppRowContent, rowIndex);
 	if ( columns != _iColumnCount )
 		return false;

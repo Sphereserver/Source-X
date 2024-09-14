@@ -6,21 +6,20 @@
 #ifndef _INC_COBJBASE_H
 #define _INC_COBJBASE_H
 
-#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
+#include "../common/CLanguageID.h"
 #include "../common/CScriptObj.h"
-#include "clients/CClientTooltip.h"
 #include "CObjBaseTemplate.h"
 #include "CTimedObject.h"
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
-#include <atomic>
 
 
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
+class CClientTooltip;
 
 class CSector;
 class CWorldTicker;

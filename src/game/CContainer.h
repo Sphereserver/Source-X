@@ -7,13 +7,19 @@
 #define _INC_CCONTAINER_H
 
 #include "../common/sphere_library/CSObjCont.h"
-#include "../common/resource/CResourceHolder.h"
-#include "../common/CUID.h"
-#include "../common/CRect.h"
+#include "../common/CScriptObj.h"
 
 
+class CSString;
+class CItem;
 class CItemContainer;
 class CObjBase;
+struct CPointMap;
+struct CScriptLineContext;
+class CScriptTriggerArgs;
+class CResourceQtyArray;
+struct CResourceID;
+class CTextConsole;
 
 class CContainer : public CSObjCont	// This class contains a list of items but may or may not be an item itself.
 {
@@ -127,7 +133,7 @@ public:
      * @param   iDecendLevels   Zero-based index of the decend levels.
      * @return  null if it fails, else a pointer to a CItem.
      */
-	CItem * ContentFind( CResourceID rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
+    CItem * ContentFind( CResourceID const& rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
@@ -144,7 +150,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, CResourceID rid, dword dwArg = 0, int iDecendLevels = 255 );
+    TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, CResourceID const& rid, dword dwArg = 0, int iDecendLevels = 255 );
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );

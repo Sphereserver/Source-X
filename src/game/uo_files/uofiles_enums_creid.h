@@ -6,6 +6,8 @@
 #ifndef _INC_UOFILES_ENUMS_CREID_H
 #define _INC_UOFILES_ENUMS_CREID_H
 
+#include <cstdint>
+
 enum CREID_TYPE	: uint32_t // enum the creature animations. (dont allow any others !) also know as "model number"
 {
 	CREID_INVALID = 0,

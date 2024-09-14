@@ -1,9 +1,6 @@
 // this thing is somehow required to be able to initialise OLE
 #define _WIN32_DCOM
 
-#include <algorithm>
-#include <atomic>
-#include <system_error>
 #include "../common/basic_threading.h"
 #include "../common/CException.h"
 #include "../common/CLog.h"
@@ -17,6 +14,10 @@
 #elif !defined(_BSD) && !defined(__APPLE__)
 	#include <sys/prctl.h>
 #endif
+
+#include <algorithm>
+#include <atomic>
+#include <system_error>
 
 
 // number of exceptions after which we restart thread and think that the thread have gone in exceptioning loops

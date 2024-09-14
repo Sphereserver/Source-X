@@ -4,7 +4,6 @@
 */
 
 #include "../../sphere/threads.h"
-#include "../../common/CException.h"
 #include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../common/CUOInstall.h"

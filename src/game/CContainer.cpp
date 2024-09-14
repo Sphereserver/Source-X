@@ -1,12 +1,11 @@
 
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CUID.h"
 #include "../network/send.h"
 #include "chars/CChar.h"
-#include "items/CItem.h"
 #include "items/CItemContainer.h"
-#include "items/CItemVendable.h"
-#include "CObjBaseTemplate.h"
 #include "triggers.h"
 #include "CContainer.h"
 
@@ -214,7 +213,7 @@ void CContainer::r_WriteContent( CScript &s ) const
 	}
 }
 
-CItem *CContainer::ContentFind( CResourceID rid, dword dwArg, int iDecendLevels ) const
+CItem *CContainer::ContentFind( CResourceID const& rid, dword dwArg, int iDecendLevels ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFind");
 	// send all the items in the container.
@@ -244,9 +243,8 @@ CItem *CContainer::ContentFind( CResourceID rid, dword dwArg, int iDecendLevels 
 	return nullptr;
 }
 
-TRIGRET_TYPE CContainer::OnContTriggerForLoop(
-	CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
-	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, CResourceID rid, dword dwArg, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnContTriggerForLoop(CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+                                              CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, const CResourceID &rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )

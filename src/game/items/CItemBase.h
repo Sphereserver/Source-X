@@ -6,16 +6,19 @@
 #ifndef _INC_CITEMBASE_H
 #define _INC_CITEMBASE_H
 
-#include "../../common/resource/CResourceHolder.h"
-#include "../uo_files/uofiles_enums_itemid.h"
-#include "../uo_files/uofiles_enums_creid.h"
-#include "../uo_files/CUOItemTypeRec.h"
+#include "../../common/sphere_library/CSTypedArray.h"
+#include "../../common/resource/CValueDefs.h"
+#include "../../common/CRect.h"
 #include "../CBase.h"
-#include "../CServerConfig.h"
 #include "item_types.h"
 
 
+#define WEIGHT_UNITS 10
+
 class CFactionDef;
+struct CUOItemTypeRec_HS;
+enum CREID_TYPE : uint32;
+enum ITEMID_TYPE : uint32;
 
 class CItemBase : public CBaseBaseDef
 {
@@ -259,7 +262,7 @@ public:
 	bool SetMaxAmount(word amount);
 
 	static CItemBase * FindItemBase( ITEMID_TYPE id );
-	inline static bool IsValidDispID( ITEMID_TYPE id ) noexcept;
+    static bool IsValidDispID( ITEMID_TYPE id ) noexcept;
 
 	// NOTE: ??? All this stuff should be moved to scripts !
 	// Classify item by ID
@@ -274,7 +277,7 @@ public:
     static bool IsID_WaterWash( ITEMID_TYPE id ) noexcept;
     static bool IsID_Chair( ITEMID_TYPE id ) noexcept;
 
-	inline static bool IsVisibleLayer( LAYER_TYPE layer ) noexcept;
+    static bool IsVisibleLayer( LAYER_TYPE layer ) noexcept;
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile, bool fNameNotNeeded = false );
@@ -327,7 +330,6 @@ public:
 	{
 		return Can( CAN_I_PILE );
 	}
-#define WEIGHT_UNITS 10
 	word GetWeight() const noexcept; // Get weight in tenths of a stone.
 	byte GetSpeed() const;
 
@@ -459,20 +461,6 @@ public:
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };
-
-
-/* Inline Methods Definitions */
-
-bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) noexcept // static
-{
-	return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
-}
-
-bool CItemBase::IsValidDispID( ITEMID_TYPE id ) noexcept // static
-{
-	// Is this id in the base artwork set ? tile or multi.
-	return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );
-}
 
 
 #endif // _INC_CITEMBASE_H

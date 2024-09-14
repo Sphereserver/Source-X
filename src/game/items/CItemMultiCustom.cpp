@@ -5,6 +5,7 @@
 #include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CUOInstall.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -13,6 +14,7 @@
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
 #include "../triggers.h"
+#include "CItemContainer.h"
 #include "CItemMultiCustom.h"
 
 /////////////////////////////////////////////////////////////////////////////

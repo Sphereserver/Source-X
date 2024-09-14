@@ -16,7 +16,6 @@
 #include "../common/resource/CResourceScript.h"
 #include "../common/resource/CResourceSortedArrays.h"
 #include "../common/resource/CValueDefs.h"
-#include "../common/CExpression.h"
 #include "../common/CServerMap.h"
 #include "../common/CTextConsole.h"
 #include "../common/sphereproto.h"

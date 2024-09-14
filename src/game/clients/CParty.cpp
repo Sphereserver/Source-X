@@ -1,6 +1,7 @@
 
-#include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
+#include "../../common/CLog.h"
 #include "../../common/CScriptObj.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"

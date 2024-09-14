@@ -1,8 +1,9 @@
-#include <cstdio>
-#include "../common/sphere_library/CSString.h"
+
+#include "../common/sphere_library/CSTime.h"
 #include "../game/CScriptProfiler.h"
 #include "ProfileData.h"
 #include "threads.h"
+#include <cstring>
 
 ProfileData::ProfileData() noexcept
 {

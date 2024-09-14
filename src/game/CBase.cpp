@@ -1,8 +1,7 @@
 
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/common.h"
-#include "components/CCPropsItemChar.h"
-#include "components/CCPropsItemWeapon.h"
 #include "CServerConfig.h"
 #include "CBase.h"
 #include <algorithm>

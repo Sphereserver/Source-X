@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #define _WIN32_DCOM
+#endif
 #include "smutex.h"
 
 // SimpleMutex:: Constructors, Destructor, Asign operator.

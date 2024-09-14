@@ -6,13 +6,12 @@
 #ifndef _INC_CTEXTCONSOLE_H
 #define _INC_CTEXTCONSOLE_H
 
-#include "sphere_library/sstringobjs.h"
-#include "common.h"
+#include "sphere_library/CSString.h"
 
 
 class CChar;
 
-enum PLEVEL_TYPE			// Priviledge (priv) levels.
+enum PLEVEL_TYPE : int			// Priviledge (priv) levels.
 {
 	PLEVEL_Guest = 0,		// 0 = This is just a guest account. (cannot PK)
 	PLEVEL_Player,			// 1 = Player or NPC.

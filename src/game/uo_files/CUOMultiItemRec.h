@@ -7,7 +7,6 @@
 #define _INC_CUOMULTIITEMREC_H
 
 #include "../../common/common.h"
-#include "uofiles_enums.h"
 #include "uofiles_enums_itemid.h"
 
 // All these structures must be byte packed.

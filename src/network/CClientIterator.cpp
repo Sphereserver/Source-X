@@ -1,3 +1,4 @@
+#include "../game/clients/CClient.h"
 #include "CNetState.h"
 #include "CNetworkManager.h"
 #include "CClientIterator.h"
@@ -9,7 +10,7 @@ ClientIterator::ClientIterator(const CNetworkManager* network)
     m_nextClient = static_cast<CClient*> (m_network->m_clients.GetContainerHead());
 }
 
-ClientIterator::~ClientIterator(void)
+ClientIterator::~ClientIterator()
 {
     m_network = nullptr;
     m_nextClient = nullptr;

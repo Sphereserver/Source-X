@@ -1,6 +1,7 @@
 #ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service
-	#include <process.h>				// getpid()
+    #include "../sphere/ntwindow.h"
+    #include <process.h>				// getpid()
 #else
 	#include "../sphere/UnixTerminal.h"
 #endif
@@ -14,25 +15,23 @@
 	#include "../network/linuxev.h"
 #endif
 
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CLog.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CUOInstall.h"
-#include "../common/sphereversion.h"	// sphere version
+#include "../common/sphereversion.h"
 #include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
-#include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
+#include "CObjBase.h"
 #include "CScriptProfiler.h"
-#include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include <sstream>
 #include <cstdlib>
-
-// Headers for InitRuntimeStaticMembers
-#include "clients/CClient.h"
 
 
 // Dynamic allocation of some global stuff

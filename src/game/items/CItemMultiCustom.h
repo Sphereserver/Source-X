@@ -6,8 +6,8 @@
 #ifndef _INC_CITEMMULTICUSTOM_H
 #define _INC_CITEMMULTICUSTOM_H
 
+#include "../uo_files/CUOMultiItemRec.h"
 #include "CItemMulti.h"
-#include "../components/CCMultiMovable.h"
 
 
 class PacketHouseDesign;
@@ -39,9 +39,8 @@ private:
         CSphereMultiCustom() = default;
         void LoadFrom(CDesignDetails * pDesign);
 
-    private:
-        CSphereMultiCustom(const CSphereMultiCustom& copy);
-        CSphereMultiCustom& operator=(const CSphereMultiCustom& other);
+        CSphereMultiCustom(const CSphereMultiCustom& copy) = delete;
+        CSphereMultiCustom& operator=(const CSphereMultiCustom& other) = delete;
     };
 
 private:

@@ -1,16 +1,25 @@
 // define the base types of an item (rather than the instance)
 
+
+#include "../../common/resource/CResourceLock.h"
 #include "../../common/CUOInstall.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../sphere/ProfileTask.h"
+#include "../../sphere/threads.h"
 #include "../components/CCPropsItem.h"
 #include "../components/CCPropsItemChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../components/CCPropsItemWeaponRanged.h"
-#include "../../common/resource/CResourceLock.h"
+#include "../uo_files/uofiles_enums_itemid.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../uo_files/uofiles_macros.h"
+#include "../uo_files/CUOMultiItemRec.h"
 #include "../uo_files/CUOItemInfo.h"
+#include "../uo_files/CUOItemTypeRec.h"
+#include "../CServerConfig.h"
 #include "CItemBase.h"
 
 
@@ -534,6 +543,11 @@ bool CItemBase::IsID_WaterWash( ITEMID_TYPE id ) noexcept // static
 	if ( id >= ITEMID_WATER_TROUGH_1 && id <= ITEMID_WATER_TROUGH_2	)
 		return true;
 	return IsID_WaterFish( id );
+}
+
+bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) noexcept // static
+{
+    return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
 }
 
 bool CItemBase::IsID_Chair( ITEMID_TYPE id ) noexcept // static
@@ -1302,7 +1316,10 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 					else
 						m_SkillMake.WriteNames( pszTmp, Str_TempLength(), index );
 					if ( fQtyOnly && pszTmp[0] == '\0' )
-						strcpy( pszTmp, "0" );
+                    {
+                        pszTmp[0] = '0';
+                        pszTmp[1] = '\0';
+                    }
 					sVal = pszTmp;
 				}
 				else
@@ -2299,6 +2316,11 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	return pBase;
 }
 
+bool CItemBase::IsValidDispID( ITEMID_TYPE id ) noexcept // static
+{
+    // Is this id in the base artwork set ? tile or multi.
+    return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );
+}
 
 //**************************************************
 

@@ -7,40 +7,10 @@
 #define _INC_SPHEREPROTO_H
 
 #include "../network/net_datatypes.h"
-#include "../sphere/threads.h"
-#include "sphere_library/CSString.h"
 
 
 //---------------------------PROTOCOL DEFS---------------------------
 
-
-class CLanguageID
-{
-	// 3 letter code for language.
-	// ENU,FRA,DEU,etc. (see langcode.iff)
-	// terminate with a 0
-	// 0 = english default.
-	char m_codes[4]; // UNICODE language pref. ('ENU'=english)
-
-public:
-	CLanguageID() noexcept :
-		m_codes{}
-	{}
-	CLanguageID( const char * pszInit ) noexcept
-	{
-		Set( pszInit );
-	}
-	CLanguageID(int iDefault) noexcept;
-
-	bool IsDef() const noexcept
-	{
-		return ( m_codes[0] != 0 );
-	}
-    void GetStrDef(tchar* pszLang) noexcept;
-    void GetStr(tchar* pszLang) const noexcept;
-    lpctstr GetStr() const;
-    bool Set(lpctstr pszLang) noexcept;
-};
 
 enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 {

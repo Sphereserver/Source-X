@@ -1,5 +1,5 @@
 #include "../../network/CClientIterator.h"
-#include "../chars/CChar.h"
+#include "../game_macros.h"
 #include "../CServer.h"
 #include "CChat.h"
 #include "CChatChannel.h"

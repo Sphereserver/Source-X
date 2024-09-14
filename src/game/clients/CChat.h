@@ -8,8 +8,10 @@
 
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphere_library/sptr_containers.h"
-#include "../../common/sphereproto.h"
+#include "../../common/CLanguageID.h"
 
+struct naword;
+using nachar = naword;
 
 class CClient;
 class CChatChannel;
@@ -23,9 +25,9 @@ public:
 
 	CChat() = default;
 	~CChat() = default;
-	CChat(const CChat& copy) = delete;
-	CChat& operator=(const CChat& other) = delete;
 
+	CChat(const CChat& copy) = delete;
+    CChat& operator=(const CChat& other) = delete;
 
 	static bool IsValidName(lpctstr pszName, bool fPlayer);
 

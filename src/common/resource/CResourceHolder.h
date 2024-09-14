@@ -6,14 +6,14 @@
 #ifndef _INC_CResourceHolder_H
 #define _INC_CResourceHolder_H
 
-#include "../sphere_library/CSTime.h"
-#include "../CScriptContexts.h"
+#include "../sphere_library/CSObjArray.h"
+#include "../sphere_library/CSString.h"
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 #include "CResourceLink.h"
-#include "CResourceScript.h"
-#include "CResourceQty.h"
 
+
+class CResourceScript;
 
 class CResourceHolder : public CScriptObj
 {

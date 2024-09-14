@@ -1,13 +1,7 @@
 
-#ifdef _WIN32
-	#include <process.h>
-#else
-    #include <sys/wait.h>
-	#include <errno.h>	// errno
-    //#include <spawn.h>
-#endif
-
 #include "../game/chars/CChar.h"
+#include "../game/chars/CStoneMember.h"
+#include "../game/items/CItem.h"
 #include "../game/clients/CAccount.h"
 #include "../game/clients/CClient.h"
 #include "../game/CScriptProfiler.h"
@@ -20,15 +14,25 @@
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
+#include "sphere_library/CSRand.h"
 #include "resource/sections/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
 #include "CFloatMath.h"
 #include "CExpression.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
+#include <signal.h>
+
+#ifdef _WIN32
+#   include <process.h>
+#else
+#   include <sys/wait.h>
+#   include <errno.h>	// errno
+//  #include <spawn.h>
+#endif
+
 
 class CStoneMember;
-
 
 enum SREF_TYPE
 {
@@ -976,16 +980,23 @@ badcmd:
                     g_Log.EventError("%s failed when executing '%s'\n", sm_szLoadKeys[index], ptcKey);
 					return false;
 				}
-				else if ( child_pid == 0 )
+
+                if ( child_pid == 0 )
 				{
 					//Don't touch this :P
 					execlp( Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1], Arg_ppCmd[2],
 										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
 										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 
-                    g_Log.EventError("%s failed with error %d (\"%s\") when executing '%s'\n", sm_szLoadKeys[index], errno, strerror(errno), ptcKey);
+                    g_Log.EventError(
+                        "%s failed with error %d (\"%s\") when executing '%s'\n",
+                        sm_szLoadKeys[index], errno, strerror(errno), ptcKey);
+
                     raise(SIGKILL);
-                    g_Log.EventError("%s failed to handle error. Server is UNSTABLE\n", sm_szLoadKeys[index]);
+
+                    g_Log.EventError(
+                        "%s failed to handle error. Server is UNSTABLE\n",
+                        sm_szLoadKeys[index]);
 					while(true) {} // do NOT leave here until the process receives SIGKILL otherwise it will free up resources
 								   // it inherited from the main process, which pretty will fuck everything up. Normally this point should never be reached.
 				}

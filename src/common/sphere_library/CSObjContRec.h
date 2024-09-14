@@ -6,7 +6,6 @@
 #ifndef _INC_CSOBJCONTREC_H
 #define _INC_CSOBJCONTREC_H
 
-#include <cstddef>  // for nullptr
 class CSObjCont;
 
 

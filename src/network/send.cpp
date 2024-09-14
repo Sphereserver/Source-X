@@ -1,23 +1,21 @@
 
-#ifndef _WIN32
-	#include <sys/time.h>
-#endif
-#include <algorithm>
-
 #include "../common/resource/CResourceLock.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../common/CUOInstall.h"
 #include "../game/chars/CChar.h"
+#include "../game/components/CCItemDamageable.h"
+#include "../game/components/CCPropsChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/clients/CClientTooltip.h"
 #include "../game/clients/CParty.h"
-#include "../game/items/CItem.h"
+#include "../game/items/CItemCorpse.h"
 #include "../game/items/CItemMap.h"
 #include "../game/items/CItemMessage.h"
 #include "../game/items/CItemMultiCustom.h"
+#include "../game/items/CItemStone.h"
 #include "../game/items/CItemVendable.h"
-#include "../game/components/CCItemDamageable.h"
-#include "../game/components/CCPropsChar.h"
+#include "../game/uo_files/uofiles_enums_creid.h"
 #include "../game/CServer.h"
 #include "../game/CWorldGameTime.h"
 #include "CNetworkManager.h"
@@ -26,6 +24,12 @@
 namespace zlib {
 #include <zlib/zlib.h>
 }
+
+#ifndef _WIN32
+#   include <sys/time.h>
+#endif
+#include <algorithm>
+
 
 /***************************************************************************
  *

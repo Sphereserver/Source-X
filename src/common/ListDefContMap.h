@@ -8,7 +8,6 @@
 
 #include <deque>
 #include <set>
-#include "common.h"
 #include "sphere_library/CSString.h"
 
 

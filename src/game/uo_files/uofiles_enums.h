@@ -10,7 +10,7 @@
 * @brief Movement type for ships
 * From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
 */
-enum ShipMovementType
+enum ShipMovementType : int
 {
     SMT_STOP,   // No movement
     SMT_SLOW,   // 1 tile movement
@@ -21,7 +21,7 @@ enum ShipMovementType
 * @Speed type for ships
 * this has to sync with the outgoing 0xF6 packet
 */
-enum ShipMovementSpeed
+enum ShipMovementSpeed : int
 {
     SMS_STOP,    // 0x0 = no movement
     SMS_NORMAL,  // 0x01 = one tile

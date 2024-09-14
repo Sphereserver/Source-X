@@ -1,7 +1,11 @@
 // Actions specific to an NPC.
 
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../clients/CClient.h"
 #include "../components/CCSpawn.h"
+#include "../items/CItemContainer.h"
+#include "../items/CItemMemory.h"
 #include "../items/CItemVendable.h"
 #include "../CServerTime.h"
 #include "../triggers.h"

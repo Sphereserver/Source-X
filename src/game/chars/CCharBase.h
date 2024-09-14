@@ -6,17 +6,15 @@
 #ifndef _INC_CCHARBASE_H
 #define _INC_CCHARBASE_H
 
-#include "../../common/sphere_library/CSString.h"
-#include "../../common/resource/CResourceHolder.h"
-#include "../../common/sphereproto.h"
-#include "../../common/CScriptObj.h"
-#include "../../common/CTextConsole.h"
-#include "../uo_files/uofiles_enums_creid.h"
 #include "../CBase.h"
 
 
-class CScript;
 class CFactionDef;
+class CScript;
+class CSString;
+class CTextConsole;
+enum CREID_TYPE	: uint32_t;
+enum ITEMID_TYPE : uint32_t;
 
 class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of monster/creature.
 {

@@ -1,6 +1,8 @@
 
 #include "../sphere/ProfileTask.h"
+#include "../sphere/threads.h"
 #include "../game/CServer.h"
+#include "sphere_library/sstringobjs.h"
 #include "CException.h"
 #include "CScript.h"
 #include "CLog.h"

@@ -1,5 +1,9 @@
 // Actions specific to an NPC.
-#include "../clients/CClient.h"
+#include "../../common/CExpression.h"
+#include "../../common/CException.h"
+#include "../../common/CScriptTriggerArgs.h"
+#include "../items/CItemMemory.h"
+#include "../items/CItemStone.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

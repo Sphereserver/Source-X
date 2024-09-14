@@ -1,6 +1,7 @@
 
 #ifdef _WIN32
-	#include "../sphere/ntservice.h"	// g_Service
+	#include "../sphere/ntservice.h"    // g_Service
+    #include "../sphere/ntwindow.h"     // g_NTWindow
 #else
 	#include "../sphere/UnixTerminal.h"
     #include <sys/resource.h>   // for setpriority
@@ -11,9 +12,8 @@
 #endif
 
 #include "../common/crypto/CCryptoKeyCalc.h"
-#include "../common/sphere_library/CSAssoc.h"
-#include "../common/sphere_library/CSFileList.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../common/CTextConsole.h"
 #include "../common/CUOClientVersion.h"
@@ -22,12 +22,9 @@
 #include "../network/CIPHistoryManager.h"
 #include "../network/CNetworkManager.h"
 #include "../sphere/ProfileTask.h"
-#include "../sphere/ntwindow.h"
 #include "chars/CChar.h"
 #include "clients/CAccount.h"
-#include "clients/CChatChannel.h"
 #include "clients/CClient.h"
-#include "items/CItemShip.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"
 #include "CWorld.h"

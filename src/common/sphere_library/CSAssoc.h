@@ -6,8 +6,8 @@
 #ifndef _INC_CSASSOC_H
 #define _INC_CSASSOC_H
 
+#include "../sphere_library/CSString.h"
 #include "CSObjList.h"
-#include "CSFile.h"
 
 
 // -----------------------------

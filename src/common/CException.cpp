@@ -4,7 +4,7 @@
 #ifndef _WIN32
 #include <sys/wait.h>
 //#include <pthread.h>    // for pthread_exit
-#include <csignal>
+#include <signal.h>
 #include <cstring>
 
 #include "../game/CServer.h"
@@ -52,7 +52,7 @@ void NotifyDebugger()
         std::abort();
     #endif
 #else
-        std::raise(SIGINT);
+        raise(SIGINT);
 #endif
 
     }

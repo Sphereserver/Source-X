@@ -7,7 +7,7 @@
 #define _INC_CUOINDEXREC_H
 
 #include "../../common/common.h"
-#include "CUOVersionBlock.h"
+
 
 // All these structures must be byte packed.
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -19,6 +19,7 @@
 	#define PACK_NEEDED __attribute__ ((packed))
 #endif
 
+struct CUOVersionBlock;
 
 /**
 * 12 byte block = used for table indexes. (staidx0.mul,multi.idx,anim.idx)

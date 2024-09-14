@@ -1,6 +1,7 @@
 #include "../game/CServerConfig.h"
 #include "sphere_library/CSRand.h"
-#include "CException.h"
+//#include "CException.h"
+#include "CLog.h"
 #include "CExpression.h"
 #include <algorithm>
 #include <complex>

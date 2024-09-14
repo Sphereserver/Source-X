@@ -6,8 +6,10 @@
 #ifndef _INC_ASYNCDB_H
 #define _INC_ASYNCDB_H
 
+#include "../common/sphere_library/CSString.h"
 #include "../common/sphere_library/smutex.h"
 #include "threads.h"
+#include <deque>
 
 
 class CDataBaseAsyncHelper : public AbstractSphereThread

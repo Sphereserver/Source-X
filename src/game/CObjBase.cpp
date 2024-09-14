@@ -1,6 +1,7 @@
-
+#include "../common/sphere_library/CSRand.h"
 #include "../common/resource/CResourceLock.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../network/CClientIterator.h"
@@ -8,6 +9,7 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "clients/CClientTooltip.h"
 #include "components/CCChampion.h"
 #include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"

@@ -1,11 +1,11 @@
 
 #include "CCItemDamageable.h"
 #include "../CServer.h"
-#include "../CObjBase.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../chars/CChar.h"
+#include "../items/CItem.h"
 #include "../clients/CClient.h"
 
 

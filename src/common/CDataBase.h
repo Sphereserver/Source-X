@@ -10,7 +10,6 @@
 #include "sphere_library/smutex.h"
 #include "CScriptObj.h"
 #include "CVarDefMap.h"
-#include <vector>
 #include <queue>
 
 #include <mysql/errmsg.h>	// mysql standard include
@@ -20,8 +19,6 @@
 #define	MIN_MARIADB_VERSION_ALLOW	30002
 
 
-class CVarDefMap;
-
 class CDataBase : public CScriptObj
 {
 public:
@@ -30,9 +27,8 @@ public:
 	CDataBase();
 	~CDataBase();
 
-private:
-	CDataBase(const CDataBase& copy);
-	CDataBase& operator=(const CDataBase& other);
+    CDataBase(const CDataBase& copy) = delete;
+    CDataBase& operator=(const CDataBase& other) = delete;
 
 public:
 	bool Connect(const char *user, const char *password, const char *base = "", const char *host = "localhost");

@@ -4,6 +4,8 @@
 #include "../../common/CLog.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemChar.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../uo_files/uofiles_enums_itemid.h"
 #include "../CServerConfig.h"
 #include "CCharBase.h"
 

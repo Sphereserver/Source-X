@@ -9,12 +9,17 @@
 #include "../../common/sphere_library/CSObjArray.h"
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphereproto.h"
+#include "CChatChannel.h"
 
 
 class CClient;
 
 class CChatChanMember
 {
+    friend class CChatChannel;
+    friend class CChat;
+    // friend CClient;
+
     // This is a member of the CClient.
     bool m_fChatActive;
     bool m_fReceiving;
@@ -24,17 +29,6 @@ class CChatChanMember
 public:
     static const char *m_sClassName;
     CSObjArray<CSString *> m_IgnoredMembers;	// Player's list of ignored members
-
-private:
-    friend class CChatChannel;
-    friend class CChat;
-    // friend CClient;
-    bool GetWhoIs() const { return m_fAllowWhoIs; }
-    void SetWhoIs(bool fAllowWhoIs) { m_fAllowWhoIs = fAllowWhoIs; }
-    bool IsReceivingAllowed() const { return m_fReceiving; }
-    lpctstr GetChatName() const;
-
-    size_t FindIgnoringIndex( lpctstr pszName) const;
 
 public:
     CChatChanMember() noexcept;
@@ -70,6 +64,14 @@ public:
     void ShowCharacterName();
     void AddIgnore(lpctstr pszName);
     void RemoveIgnore(lpctstr pszName);
+
+private:
+    bool GetWhoIs() const { return m_fAllowWhoIs; }
+    void SetWhoIs(bool fAllowWhoIs) { m_fAllowWhoIs = fAllowWhoIs; }
+    bool IsReceivingAllowed() const { return m_fReceiving; }
+    lpctstr GetChatName() const;
+
+    size_t FindIgnoringIndex( lpctstr pszName) const;
 };
 
 #endif // _INC_CCHATCHANMEMBER_H

@@ -1,6 +1,4 @@
 
-#include "../CServer.h"
-#include "CClient.h"
 #include "CGlobalChatChanMember.h"
 
 CGlobalChatChanMember::CGlobalChatChanMember() noexcept :

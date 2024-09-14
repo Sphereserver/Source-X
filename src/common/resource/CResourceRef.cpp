@@ -4,7 +4,6 @@
 */
 
 #include "../../game/CServerConfig.h"
-#include "../../game/CServer.h"
 #include "../CException.h"
 #include "../CScript.h"
 #include "CResourceRef.h"
@@ -206,4 +205,13 @@ void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const
     {
         s.WriteKeyStr( ptcKey, GetResourceName( j ));
     }
+}
+
+bool CResourceRefArray::ContainsResourceID( const CResourceID & rid ) const
+{
+    return FindResourceID(rid) != sl::scont_bad_index();
+}
+bool CResourceRefArray::ContainsResourceName( RES_TYPE restype, lpctstr & ptcKey ) const
+{
+    return FindResourceName(restype, ptcKey) != sl::scont_bad_index();
 }

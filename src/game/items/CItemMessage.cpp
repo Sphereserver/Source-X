@@ -1,5 +1,6 @@
 
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "CItemMessage.h"
 #include "CItemVendable.h"
 

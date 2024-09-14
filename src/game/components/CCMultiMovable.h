@@ -1,7 +1,16 @@
 #ifndef _INC_CCMULTIMOVABLE_H
 #define _INC_CCMULTIMOVABLE_H
 
-#include "../CRegion.h"
+#include "../../common/common.h"
+#include "../uo_files/uofiles_enums.h"
+
+class CSString;
+class CChar;
+class CObjBase;
+struct  CPointMap;
+class CRegionWorld;
+class CScript;
+class CTextConsole;
 
 
 struct ShipSpeed // speed of a ship

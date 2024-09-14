@@ -1,5 +1,6 @@
 
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../chars/CChar.h"

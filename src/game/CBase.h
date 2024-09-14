@@ -6,8 +6,8 @@
 #ifndef _INC_CBASE_H
 #define _INC_CBASE_H
 
-#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
+#include "../common/resource/CResourceQty.h"
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"

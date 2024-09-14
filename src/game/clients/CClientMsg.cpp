@@ -2,10 +2,13 @@
 // Game server messages. (No login stuff)
 
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemMessage.h"
 #include "../items/CItemMultiCustom.h"

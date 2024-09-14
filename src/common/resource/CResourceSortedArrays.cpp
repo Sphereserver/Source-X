@@ -5,6 +5,7 @@
 
 #include "../sphere_library/CSAssoc.h"
 #include "../sphere_library/sstring.h"
+#include "../../game/items/CItemMulti.h"
 #include "../CScriptObj.h"
 #include "CResourceSortedArrays.h"
 

@@ -1,6 +1,8 @@
 #include "../../common/crypto/CMD5.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CClientIterator.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"

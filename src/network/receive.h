@@ -6,7 +6,6 @@
 #ifndef _INC_RECEIVE_H
 #define _INC_RECEIVE_H
 
-#include "../common/sphere_library/CSTime.h"
 #include "../common/CUID.h"
 #include "../common/sphereproto.h"
 #include "../game/uo_files/uofiles_enums.h"

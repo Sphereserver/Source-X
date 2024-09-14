@@ -7,13 +7,10 @@
 #define _INC_THREADS_H
 
 #include "../common/common.h"
-#include "../common/sphere_library/smutex.h"
 #include "../common/sphere_library/sresetevents.h"
 #include "../common/sphere_library/sstringobjs.h"
-#include "../common/sphere_library/CSTime.h"
 #include "../sphere/ProfileData.h"
 #include <atomic>
-#include <exception>
 #include <vector>
 
 #ifndef _WIN32

@@ -6,7 +6,6 @@
 #define _INC_CSFILETEXT_H
 
 #include "CSFile.h"
-#include <cstdio>
 
 /**
 * @brief Text files. Try to be compatible with MFC CFile class.
@@ -22,15 +21,15 @@ public:
 public:
     CSFileText();
     virtual ~CSFileText();
-private:
+
     /**
     * @brief No copy on construction allowed.
     */
-    CSFileText(const CSFileText& copy);
+    CSFileText(const CSFileText& copy) = delete;
     /**
     * @brief No copy allowed.
     */
-    CSFileText& operator=(const CSFileText& other);
+    CSFileText& operator=(const CSFileText& other) = delete;
     ///@}
     /** @name File management:
     */

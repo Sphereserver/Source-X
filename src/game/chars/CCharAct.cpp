@@ -1,15 +1,17 @@
-#include <flat_containers/flat_set.hpp>
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
+#include "../../common/CUOInstall.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CClient.h"
-#include "../items/CItem.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
 #include "../items/CItemMultiCustom.h"
 #include "../components/CCSpawn.h"
 #include "../components/CCPropsChar.h"
-#include "../components/CCPropsItemChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../CContainer.h"
@@ -19,11 +21,11 @@
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "../../common/CUOInstall.h"
+#include <flat_containers/flat_set.hpp>
+
 
 // "GONAME", "GOTYPE", "GOCHAR"
 // 0 = object name

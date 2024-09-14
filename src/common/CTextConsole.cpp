@@ -3,6 +3,7 @@
 #include "../game/chars/CChar.h"
 #include "../sphere/threads.h"
 #include "sphere_library/CSAssoc.h"
+#include "sphere_library/sstringobjs.h"
 #include "CTextConsole.h"
 
 

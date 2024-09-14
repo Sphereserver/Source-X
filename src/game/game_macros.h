@@ -6,6 +6,7 @@
 #ifndef _INC_GAME_MACROS_H
 #define _INC_GAME_MACROS_H
 
+#include <cstdint>
 
 /*  Parametric macros  */
 
@@ -70,7 +71,7 @@
 #define DAMAGE_THROWN		0x40000	// Damage flag for the throw NPCs action (not the throwing skill!).
 #define DAMAGE_REACTIVE     0x80000 // Damage reflected by Reactive Armor spell.
 
-typedef uint DAMAGE_TYPE;		// describe a type of damage.
+typedef uint32_t DAMAGE_TYPE;		// describe a type of damage.
 
 
 //--Spellflags

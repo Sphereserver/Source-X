@@ -1,7 +1,9 @@
 //  CChar is either an NPC or a Player.
 
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CUID.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"
@@ -12,6 +14,7 @@
 #include "../items/CItemMemory.h"
 #include "../items/CItemShip.h"
 #include "../items/CItemMulti.h"
+#include "../items/CItemStone.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemChar.h"
 #include "../components/CCSpawn.h"
@@ -23,9 +26,9 @@
 #include "../CWorldMap.h"
 #include "../CWorldTickingList.h"
 #include "../triggers.h"
-#include "CChar.h"
 #include "CCharBase.h"
 #include "CCharNPC.h"
+#include "CChar.h"
 #include <algorithm>
 
 

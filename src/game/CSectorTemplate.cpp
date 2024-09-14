@@ -1,14 +1,12 @@
-#include <algorithm>
-#include "../common/CException.h"
 #include "../common/CLog.h"
 #include "../common/CRect.h"
 #include "../game/CWorld.h"
-#include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "items/CItemShip.h"
 #include "CSectorList.h"
 #include "CWorldGameTime.h"
 #include "CSectorTemplate.h"
+#include <algorithm>
 
 
 ////////////////////////////////////////////////////////////////////////

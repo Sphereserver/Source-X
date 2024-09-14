@@ -6,19 +6,12 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../../common/sphere_library/CSObjCont.h"
-#include "../../common/resource/CResourceHolder.h"
-#include "../../common/CServerMap.h"
-#include "../../common/CRect.h"
 #include "../components/subcomponents/CFactionDef.h"
 #include "../CServerTime.h"
-#include "../CBase.h"
 #include "../CObjBase.h"
 #include "../CObjBaseTemplate.h"
-#include "../game_enums.h"
 #include "../game_macros.h"
 #include "../CServerConfig.h"
-#include "../CEntity.h"
 #include "CItemBase.h"
 
 
@@ -34,7 +27,7 @@ class CFactionDef;
 *
 * Types of memory a CChar has about a game object. (m_wHue)
 */
-enum MEMORY_TYPE
+enum MEMORY_TYPE : int
 {
     MEMORY_NONE = 0,
     MEMORY_SAWCRIME = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
@@ -782,12 +775,7 @@ public:
 	virtual CObjBaseTemplate* GetTopLevelObj() override;
 	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
-    inline CObjBase * GetContainer() const noexcept {
-        // What is this CItem contained in ?
-        // Container should be a CChar or CItemContainer
-        return (dynamic_cast <CObjBase*> (GetParent()));
-        // Called very frequently, worth inlining.
-    }
+    CObjBase * GetContainer() const noexcept;
 	CItem * GetTopContainer();
 	const CItem* GetTopContainer() const;
 

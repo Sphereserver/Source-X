@@ -5,6 +5,7 @@
 #include "../../common/sphere_library/CSFileList.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CIPHistoryManager.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/send.h"

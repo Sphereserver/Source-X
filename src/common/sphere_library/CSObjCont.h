@@ -7,6 +7,7 @@
 #define _INC_CSOBJCONT_H
 
 #include "CSObjContRec.h"
+#include <cstddef>
 #include <vector>
 #include <utility> // for std::move
 

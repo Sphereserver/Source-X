@@ -1,11 +1,11 @@
 
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../common/CScriptTriggerArgs.h"
 #include "../sphere/threads.h"
-#include "CObjBase.h"
 #include "CServer.h"
 #include "CServerConfig.h"
 #include "CServerDef.h"

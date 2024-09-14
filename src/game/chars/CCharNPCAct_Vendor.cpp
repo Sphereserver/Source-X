@@ -1,10 +1,11 @@
 // Actions specific to an NPC.
 
-#include "../../network/receive.h"
+#include "../../common/CExpression.h"
 #include "../clients/CClient.h"
+#include "../items/CItemContainer.h"
+#include "../items/CItemMemory.h"
 #include "../CWorldGameTime.h"
 #include "../CPathFinder.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -306,7 +307,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	{
 		int iDiffPercent = IMulDiv(wTrainCost, 100, pGold->GetAmount());
 		uiTrainVal = (ushort)IMulDiv(uiTrainVal,100,iDiffPercent);
-        wTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, uiTrainVal * uiTrainMult), pGold, PAYGOLD_TRAIN);
+        /* wTrainCost = (word)*/ pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, uiTrainVal * uiTrainMult), pGold, PAYGOLD_TRAIN);
 	}
 	else if (wGoldAmount == wTrainCost)
 	{

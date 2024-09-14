@@ -1,6 +1,5 @@
 #include "../common/CLog.h"
 #include "../common/CUID.h"
-#include "../sphere/ProfileTask.h"
 #include "CObjBase.h"
 #include "CServerConfig.h"
 #include "CServerTime.h"

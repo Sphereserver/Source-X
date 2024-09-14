@@ -3,7 +3,6 @@
 #include "CServer.h"
 #include "triggers.h"
 
-//Trigger function start
 
 static constexpr lpctstr kOrderedTrigsNames[] = {
     #define ADD(_a_) \

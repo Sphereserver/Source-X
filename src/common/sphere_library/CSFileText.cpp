@@ -1,5 +1,4 @@
 #include "../../sphere/threads.h"
-#include "../CLog.h"
 #include "CSFileText.h"
 
 #ifdef _WIN32

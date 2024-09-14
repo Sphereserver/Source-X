@@ -5,6 +5,7 @@
 #include "resource/sections/CResourceNamedDef.h"
 #include "CLog.h"
 #include "CException.h"
+#include "CExpression.h"
 #include "CScriptTriggerArgs.h"
 #include "CDataBase.h"
 

@@ -12,16 +12,16 @@
 */
 
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
+#include "../../common/CLog.h"
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorldGameTime.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
-#include <algorithm> 
 #include <sstream> 
-#include <cctype>
 
 #define CANDLESNEXTRED 4
 #define MAXSPAWN 2400

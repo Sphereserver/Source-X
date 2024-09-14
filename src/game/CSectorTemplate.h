@@ -11,14 +11,14 @@
 #include "../common/CRect.h"
 #include "CTeleport.h"
 
-
+class CChar;
 class CItem;
 class CSector;
 class CTeleport;
 
 struct CSectorObjCont
 {
-    // Marker class.
+    // Marker class, consider it as a "tag".
 };
 
 struct CCharsDisconnectList : public CSObjCont, public CSectorObjCont

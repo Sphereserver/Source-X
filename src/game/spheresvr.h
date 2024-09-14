@@ -6,7 +6,7 @@
 #ifndef _INC_SPHERESVR_H
 #define _INC_SPHERESVR_H
 
-#include "../common/common.h"
+#include "../common/sphere_library/CSAssoc.h"
 #include "../sphere/threads.h"
 
 

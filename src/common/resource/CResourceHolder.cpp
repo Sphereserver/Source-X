@@ -1,16 +1,11 @@
 
-#include "../../game/chars/CChar.h"
-#include "../../game/items/CItem.h"
-#include "../../game/triggers.h"
-#include "../../game/game_enums.h"
-#include "../../game/game_macros.h"
 #include "../sphere_library/CSFileList.h"
 #include "../CException.h"
+#include "../CExpression.h"
 #include "../CLog.h"
 #include "CResourceHolder.h"
 #include "CResourceHash.h"
 #include "CResourceScript.h"
-#include "CResourceSortedArrays.h"
 
 
 //***************************************************

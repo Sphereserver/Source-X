@@ -48,7 +48,16 @@
 #define NOTEXTMETRIC
 #define NOWH
 
-#include <windows.h>
+#   ifdef _MSC_VER
+// Workaround to a possible VS compiler bug: instead of complaining if a macro expands to a "defined" macro,
+//  it complains if a define macro contains the words "defined" in its name...
+#       pragma warning(push)
+#       pragma warning(disable: 5105)
+#   endif
+#   include <windows.h>
+#   ifdef _MSC_VER
+#       pragma warning(pop)
+#   endif
 
 
 /*	file handling definitions  */

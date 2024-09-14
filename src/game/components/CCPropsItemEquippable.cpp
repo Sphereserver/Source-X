@@ -1,7 +1,8 @@
 
 #include "CCPropsItemEquippable.h"
-#include "../items/CItem.h"
+#include "../clients/CClientTooltip.h"
 #include "../chars/CChar.h"
+#include "../items/CItem.h"
 
 
 lpctstr const CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =

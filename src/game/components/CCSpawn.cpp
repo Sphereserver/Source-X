@@ -1,6 +1,8 @@
 #include "../../common/resource/sections/CRandGroupDef.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CObjBase.h"

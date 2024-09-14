@@ -4,6 +4,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
+#include "../items/CItemContainer.h"
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CCharNPC.h"

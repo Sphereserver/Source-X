@@ -1,12 +1,12 @@
 #include "../../common/resource/sections/CResourceNamedDef.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CUOClientVersion.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/CIPHistoryManager.h"
-#include "../../network/send.h"
-#include "../../network/packet.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
 #include "../items/CItemMultiCustom.h"
@@ -226,6 +226,11 @@ void CClient::CharDisconnect()
         m_pChar->ItemBounce(pItemDragging);
 
 	m_pChar = nullptr;
+}
+
+CClient* CClient::GetNext() const
+{
+    return static_cast <CClient*>(CSObjListRec::GetNext());
 }
 
 bool CClient::IsPriv(word flag) const

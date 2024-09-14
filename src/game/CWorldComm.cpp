@@ -1,5 +1,5 @@
+#include "../common/sphere_library/CSRand.h"
 #include "../network/CClientIterator.h"
-#include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CWorldComm.h"

@@ -101,7 +101,7 @@ endif()
 
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 if(NOT TOOLCHAIN_LOADED)
-    include("cmake/DefaultToolchain.cmake")
+    include("cmake/DetectDefaultToolchain.cmake")
 endif()
 
 #-- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE

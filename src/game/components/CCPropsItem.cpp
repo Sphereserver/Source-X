@@ -1,6 +1,7 @@
 
 #include "CCPropsItem.h"
-#include "../items/CItem.h"
+#include "../clients/CClientTooltip.h"
+#include "../CObjBase.h"
 
 
 lpctstr const CCPropsItem::_ptcPropertyKeys[PROPIT_QTY + 1] =

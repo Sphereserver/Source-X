@@ -1,5 +1,6 @@
-
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ProfileData.h"

@@ -6,7 +6,6 @@
 #ifndef _INC_CSOBJLISTREC_H
 #define _INC_CSOBJLISTREC_H
 
-#include <cstddef>  // for nullptr
 class CSObjList;
 
 

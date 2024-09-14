@@ -7,7 +7,7 @@
 #define _INC_CVALUEDEFS_H
 
 #include "../sphere_library/CSTypedArray.h"
-
+#include "../common.h"
 
 /**
 * @struct  CValueRangeDef

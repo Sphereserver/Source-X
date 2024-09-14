@@ -7,7 +7,6 @@
 #define _INC_CPOINTBASE_H
 
 #include "../game/uo_files/uofiles_enums.h"
-#include "../game/uo_files/CUOMapList.h"
 #include "../common/common.h"
 #include <vector>
 

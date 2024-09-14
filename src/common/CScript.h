@@ -137,8 +137,8 @@ private:	virtual void _Close() override;
 public:     virtual void Close() override;
 private:    virtual int _Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
 public:     virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
-private:    bool _SeekContext( CScriptLineContext LineContext );
-public:     bool SeekContext( CScriptLineContext LineContext );
+private:    bool _SeekContext( CScriptLineContext const& LineContext );
+public:     bool SeekContext( CScriptLineContext const& LineContext );
 private:	CScriptLineContext _GetContext() const;
 public:     CScriptLineContext GetContext() const;
 

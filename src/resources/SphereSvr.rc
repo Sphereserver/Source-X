@@ -1,7 +1,7 @@
 // Microsoft Visual C++ generated resource script (hand-edited).
 //
 #include "win_resource.h"
-#define COPYRIGHT_STR "Copyright (C) 1998-2023 SphereServer development team"
+#define COPYRIGHT_STR "Copyright (C) 1998-2024 SphereServer development team"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -9,10 +9,21 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #ifdef _WIN32
-	#ifndef WIN32_LEAN_AND_MEAN
-		#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
-	#endif
-	#include <windows.h>
+#   ifndef WIN32_LEAN_AND_MEAN
+#       define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
+#   endif
+
+#   ifdef _MSC_VER
+        // Workaround to a possible VS compiler bug: instead of complaining if a macro expands to a "defined" macro,
+        //  it complains if a define macro contains the words "defined" in its name...
+#       pragma warning(push)
+#       pragma warning(disable: 5105)
+#   endif
+#   include <windows.h>
+#   ifdef _MSC_VER
+#       pragma warning(pop)
+#   endif
+
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

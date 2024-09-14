@@ -1,7 +1,6 @@
 
 #include "../common/CScriptObj.h"
 #include "../common/CScriptTriggerArgs.h"
-#include "../game/triggers.h"
 #include "../game/CServer.h"
 #include "asyncdb.h"
 

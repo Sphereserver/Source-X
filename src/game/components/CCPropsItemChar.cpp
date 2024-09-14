@@ -1,7 +1,8 @@
 
 #include "CCPropsItemChar.h"
-#include "../items/CItem.h"
 #include "../chars/CChar.h"
+#include "../clients/CClientTooltip.h"
+#include "../items/CItem.h"
 
 
 lpctstr const CCPropsItemChar::_ptcPropertyKeys[PROPITCH_QTY + 1] =

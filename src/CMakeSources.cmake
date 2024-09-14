@@ -116,6 +116,8 @@ set(common_SRCS
     src/common/sqlite/SQLite.h
     src/common/assertion.h
     src/common/basic_threading.h
+    src/common/common.cpp
+    src/common/common.h
     src/common/CCacheableScriptFile.cpp
     src/common/CCacheableScriptFile.h
     src/common/CDataBase.cpp
@@ -126,6 +128,8 @@ set(common_SRCS
     src/common/CExpression.h
     src/common/CFloatMath.cpp
     src/common/CFloatMath.h
+    src/common/CLanguageID.cpp
+    src/common/CLanguageID.h
     src/common/CLocalVarsExtra.cpp
     src/common/CLocalVarsExtra.h
     src/common/CLog.cpp
@@ -134,8 +138,6 @@ set(common_SRCS
     src/common/CServerMap.h
     src/common/CUID.cpp
     src/common/CUID.h
-    src/common/common.cpp
-    src/common/common.h
     src/common/CPointBase.cpp
     src/common/CPointBase.h
     src/common/CRect.cpp

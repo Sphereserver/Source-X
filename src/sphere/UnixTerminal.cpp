@@ -2,7 +2,6 @@
 #ifndef _WIN32
 
 #include "../common/CException.h"
-#include "../game/CServer.h"
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES

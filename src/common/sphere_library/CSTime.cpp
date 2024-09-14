@@ -4,12 +4,12 @@
 // Replace the MFC CTime function. Must be usable with file system.
 //
 
-#include <cmath>
-#include <chrono>
-#include "CSTime.h"
-#include "CSString.h"
-#include "../../common/CLog.h"
 #include "../../sphere/threads.h"
+#include "../CLog.h"
+#include "sstring.h"
+#include "CSTime.h"
+#include <cmath>
+//#include <chrono>
 
 
 // Windows epoch is January 1, 1601 (start of Gregorian calendar cycle)

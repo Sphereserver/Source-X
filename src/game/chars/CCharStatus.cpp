@@ -1,16 +1,20 @@
 //  CChar is either an NPC or a Player.
 
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMulti.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../uo_files/CUOStaticItemRec.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 
 bool CChar::IsResourceMatch( const CResourceID& rid, dword dwAmount ) const
 {

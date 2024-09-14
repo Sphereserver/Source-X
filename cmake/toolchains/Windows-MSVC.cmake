@@ -18,7 +18,7 @@ function(toolchain_after_project)
     endif()
     set(CMAKE_SYSTEM_PROCESSOR "${CMAKE_VS_PLATFORM_NAME}" CACHE INTERNAL "" FORCE)
 
-    include("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/DetectArch.cmake")
 
     message(STATUS "Generating for MSVC platform ${CMAKE_VS_PLATFORM_NAME}.")
 endfunction()

@@ -7,6 +7,7 @@
 #define _INC_CSOBJLIST_H
 
 #include "CSObjListRec.h"
+#include <cstddef>
 
 class CSObjList
 {

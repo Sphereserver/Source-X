@@ -8,22 +8,27 @@
 
 #include "../../common/sphereproto.h"
 #include "../clients/CParty.h"
-#include "../items/CItemContainer.h"
-#include "../items/CItemCorpse.h"
-#include "../items/CItemMemory.h"
-#include "../items/CItemStone.h"
-#include "../game_macros.h"
+#include "../CContainer.h"
 #include "../CObjBase.h"
 #include "../CTimedObject.h"
+#include "../game_macros.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 
 
-class CWorldTicker;
 class CCharNPC;
-class CMapBlockingState;
 class CFactionDef;
-
+class CItem;
+class CItemContainer;
+class CItemCorpse;
+class CItemMemory;
+class CItemVendable;
+class CItemStone;
+class CMapBlockingState;
+class CStoneMember;
+class CWorldTicker;
+enum MEMORY_TYPE : int;
+enum IT_TYPE : int32_t;
 
 enum NPCBRAIN_TYPE	// General AI type.
 {

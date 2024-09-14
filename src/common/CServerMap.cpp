@@ -5,15 +5,16 @@
 #include "CException.h"
 #include "CUOInstall.h"
 #include "CServerMap.h"
-#include "CRect.h"
-#include "../game/uo_files/CUOTerrainInfo.h"
 #include "../game/uo_files/CUOItemInfo.h"
+#include "../game/uo_files/CUOMultiItemRec.h"
+#include "../game/uo_files/CUOStaticItemRec.h"
+#include "../game/uo_files/CUOTerrainInfo.h"
 #include "../game/CBase.h"
 #include "../common/CLog.h"
-#include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../game/CWorldGameTime.h"
 #include "../sphere/threads.h"
+
 
 
 //////////////////////////////////////////////////////////////////
@@ -349,6 +350,18 @@ int CServerMapDiffBlockArray::CompareKey( dword id, CServerMapDiffBlock* pBase, 
 //////////////////////////////////////////////////////////////////
 // -CServerStaticsBlock
 
+CServerStaticsBlock::CServerStaticsBlock()
+{
+    m_iStatics = 0;
+    m_pStatics = nullptr;
+}
+
+CServerStaticsBlock::~CServerStaticsBlock()
+{
+    if ( m_pStatics != nullptr )
+        delete[] m_pStatics;
+}
+
 void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 {
 	ADDTOCALLSTACK("CServerStaticsBlock::LoadStatics");
@@ -395,16 +408,18 @@ void CServerStaticsBlock::LoadStatics( uint uiCount, CUOStaticItemRec * pStatics
 	}
 }
 
-CServerStaticsBlock::CServerStaticsBlock()
+const CUOStaticItemRec * CServerStaticsBlock::GetStatic( uint i ) const
 {
-	m_iStatics = 0;
-	m_pStatics = nullptr;
+    ASSERT( i < m_iStatics );
+    return( &m_pStatics[i] );
 }
 
-CServerStaticsBlock::~CServerStaticsBlock()
+bool CServerStaticsBlock::IsStaticPoint( uint i, int xo, int yo ) const
 {
-	if ( m_pStatics != nullptr )
-		delete[] m_pStatics;
+    ASSERT( (xo >= 0) && (xo < UO_BLOCK_SIZE) );
+    ASSERT( (yo >= 0) && (yo < UO_BLOCK_SIZE) );
+    ASSERT( i < m_iStatics );
+    return( (m_pStatics[i].m_x == xo) && (m_pStatics[i].m_y == yo) );
 }
 
 //////////////////////////////////////////////////////////////////

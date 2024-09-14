@@ -1,11 +1,14 @@
 
 // Fight/Criminal actions/Noto.
 
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
+#include "../items/CItemMemory.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldSearch.h"
 #include "../triggers.h"

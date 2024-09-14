@@ -9,22 +9,23 @@
 #include "../../common/crypto/CCrypto.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CTextConsole.h"
-#include "../../network/receive.h"
 #include "../../network/send.h"
-#include "../items/CItemBase.h"
-#include "../items/CItemContainer.h"
 #include "../CSectorEnviron.h"
 #include "../game_enums.h"
 #include "CAccount.h"
-#include "CChat.h"
 #include "CChatChanMember.h"
 #include "CGlobalChatChanMember.h"
-#include "CClientTooltip.h"
 #include "CGMPage.h"
 
 
+class CItemBase;
+class CItemContainer;
 class CItemMap;
 class CItemMultiCustom;
+class CSObjCont;
+struct VendorItem;
+enum CREID_TYPE : uint32;
+enum ITEMID_TYPE : uint32;
 
 enum CV_TYPE
 {
@@ -392,10 +393,7 @@ public:
 public:
 	void CharDisconnect();
 
-	CClient* GetNext() const
-	{
-		return static_cast <CClient*>(CSObjListRec::GetNext());
-	}
+    CClient* GetNext() const;
 
 	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me

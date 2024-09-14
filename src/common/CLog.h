@@ -9,7 +9,6 @@
 #include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
 #include "../sphere/ConsoleInterface.h"
-#include "../sphere/UnixTerminal.h"
 #include <exception>
 
 // -----------------------------

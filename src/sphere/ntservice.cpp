@@ -4,6 +4,7 @@
 
 #include <direct.h>
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"

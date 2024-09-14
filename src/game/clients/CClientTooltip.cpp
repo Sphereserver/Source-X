@@ -1,9 +1,6 @@
-
-#include <cstdio>
-
-#include "../../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/sstring.h"
 #include "CClientTooltip.h"
-
+#include <cstdarg>
 
 CClientTooltip::CClientTooltip(dword dwClilocID)
 {

@@ -1,9 +1,8 @@
-#include "../common/CLog.h"
-#include "../game/CServerConfig.h"
+#include "../sphere/threads.h"
 #include "packet.h"
 #include "receive.h"
-#include "send.h"
 #include "CPacketManager.h"
+#include <cstring>
 
 
 PacketManager::PacketManager(void)

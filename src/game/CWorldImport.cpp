@@ -1,9 +1,12 @@
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
+#include "uo_files/uofiles_enums_creid.h"
 #include "CObjBase.h"
 #include "CWorld.h"
 #include "CWorldSearch.h"
+
 
 struct CImportSer : public CSObjListRec
 {
