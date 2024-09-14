@@ -8,7 +8,7 @@ option(
 
 function(toolchain_after_project_common)
     enable_language(RC)
-    include("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/DetectArch.cmake")
 endfunction()
 
 function(toolchain_exe_stuff_common)

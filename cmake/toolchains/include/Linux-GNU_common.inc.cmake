@@ -1,7 +1,7 @@
 set(TOOLCHAIN_LOADED 1)
 
 function(toolchain_after_project_common)
-    include("${CMAKE_SOURCE_DIR}/cmake/CMakeDetectArch.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/DetectArch.cmake")
 endfunction()
 
 function(toolchain_exe_stuff_common)
