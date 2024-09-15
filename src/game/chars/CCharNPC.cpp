@@ -83,7 +83,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 				pChar->UpdatePropertyFlag();
 			break;
 		case CNC_ACTPRI:
-			m_Act_Motivation = (uchar)(s.GetArgVal());
+            m_Act_Motivation = s.GetArgUCVal();
 			break;
 		case CNC_NPC:
 			m_Brain = NPCBRAIN_TYPE(s.GetArgVal());
@@ -93,7 +93,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			{
 				pChar->m_ptHome = pChar->GetTopPoint();
 			}
-			m_Home_Dist_Wander = (word)(s.GetArgVal());
+            m_Home_Dist_Wander = s.GetArgWVal();
 			break;
 		case CNC_NEED:
 		case CNC_NEEDNAME:
