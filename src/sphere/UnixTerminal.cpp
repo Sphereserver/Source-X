@@ -137,7 +137,7 @@ void UnixTerminal::print(lpctstr message)
 	wrefresh(m_window);
 #else
 	fputs(message, stdout);
-    //fflush(stdout);
+    fflush(stdout);
 #endif
 }
 

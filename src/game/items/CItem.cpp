@@ -2132,6 +2132,11 @@ ITEMID_TYPE CItem::GetID() const
 	return pItemDef->GetID();
 }
 
+dword CItem::GetBaseID() const
+{
+    return GetID();
+}
+
 bool CItem::SetID( ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CItem::SetID");

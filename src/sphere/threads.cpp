@@ -286,8 +286,9 @@ void ThreadHolder::push(IThread *thread) noexcept
     }
     else
     {
-        g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Registered thread '%s' with ThreadHolder ID %d.\n",
-            thread->getName(), thread->m_threadHolderId);
+        g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
+                    "Registered thread '%s' with ThreadHolder ID %d.\n",
+                    thread->getName(), thread->m_threadHolderId);
     }
 }
 
@@ -711,7 +712,8 @@ void AbstractThread::onStart()
     	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());
 
-    g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Started thread '%s' with ThreadHolder ID %d and system ID %" PRIu64 ".\n",
+    g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
+                    "Started thread '%s' with ThreadHolder ID %d and system ID %" PRIu64 ".\n",
                      getName(), m_threadHolderId, (uint64)m_threadSystemId);
 }
 
@@ -917,7 +919,7 @@ void AbstractSphereThread::printStackTrace() noexcept
     //EXC_NOTIFY_DEBUGGER;
 
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-	g_Log.EventDebug(" _______ thread (id) name _______ |  # | _____________ function _____________ |\n");
+    g_Log.EventDebug(" _ thread (id) name _ |  # | _____________ function _____________ |\n");
 	for ( ssize_t i = 0; i < (ssize_t)ARRAY_COUNT(m_stackInfo); ++i )
 	{
 		if( m_stackInfo[i].functionName == nullptr )

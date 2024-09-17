@@ -140,9 +140,19 @@ public:
 
 public:
     /**
+     * @brief   Gets definition pointer.
+     * @param   ptcKey  The key.
+     * @return  The definition pointer.
+     */
+    CVarDefCont * GetKey( lpctstr ptcKey ) const
+    {
+        return m_BaseDefs.GetKey(ptcKey);
+    }
+
+    /**
      * @brief   Gets definition string.
      * @param   ptcKey  The key.
-     * @param   fZero   true to zero.
+     * @param   fZero   Return "0" if empty/undefined.
      * @return  The definition string.
      */
 	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const

@@ -260,6 +260,7 @@ CChar::CChar( CREID_TYPE baseID ) :
 	m_sTitle(false),
     m_Skill{}, m_Stat{}
 {
+    ADDTOCALLSTACK("CChar::CChar");
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
 
 	m_pArea = nullptr;
@@ -312,7 +313,7 @@ CChar::CChar( CREID_TYPE baseID ) :
 	m_defenseRange = pCharDef->m_defenseRange;
 	_wBloodHue = pCharDef->_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 
-	SetName( pCharDef->GetTypeName());	// set the name in case there is a name template.
+    CChar::SetName( pCharDef->GetTypeName());	// set the name in case there is a name template.
 
     Stat_SetVal( STAT_FOOD, Stat_GetMaxAdjusted(STAT_FOOD) );
     m_uiFame = 0;
@@ -1533,10 +1534,9 @@ CREID_TYPE CChar::GetID() const
 	return pCharDef->GetID();
 }
 
-word CChar::GetBaseID() const
+dword CChar::GetBaseID() const
 {
-	// future: strongly typed enums will remove the need for this cast
-	return (word)(GetID());
+    return GetID();
 }
 
 CREID_TYPE CChar::GetDispID() const
@@ -1908,9 +1908,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 						0x322, 0x323, 0x324, 0x325, 0x326, 0x369, 0x386, 0x387, 0x388, 0x389, 0x38A, 0x59D,
 						0x6B8, 0x725, 0x853
 					};
-					constexpr uint iMax = ARRAY_COUNT(sm_ElfHairHues);
+                    constexpr uint uiMax = ARRAY_COUNT(sm_ElfHairHues);
 					bool isValid = 0;
-					for ( uint i = 0; i < iMax; ++i )
+                    for ( uint i = 0; i < uiMax; ++i )
 					{
 						if ( sm_ElfHairHues[i] == wHairHue )
 						{
@@ -1930,9 +1930,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
 					};
-					constexpr uint iMax = ARRAY_COUNT(sm_GargoyleHornHues);
+                    constexpr uint uiMax = ARRAY_COUNT(sm_GargoyleHornHues);
 					bool isValid = 0;
-					for ( uint i = 0; i < iMax; ++i )
+                    for ( uint i = 0; i < uiMax; ++i )
 					{
 						if ( sm_GargoyleHornHues[i] == wHairHue )
 						{
@@ -1993,23 +1993,23 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 				case RACETYPE_GARGOYLE:
 				{
-					static constexpr int sm_GargoyleBeardHues[] =
+                    static constexpr ushort sm_GargoyleBeardHues[] =
 					{
 						0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B,
 						0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D
 					};
-					int iMax = ARRAY_COUNT(sm_GargoyleBeardHues);
+                    const uint uiMax = ARRAY_COUNT(sm_GargoyleBeardHues);
 					bool isValid = 0;
-					for ( int i = 0; i < iMax; ++i )
+                    for ( uint i = 0; i < uiMax; ++i )
 					{
-						if ( sm_GargoyleBeardHues[i] == wHairHue )
+                        if ( sm_GargoyleBeardHues[i] == wBeardHue )
 						{
 							isValid = 1;
 							break;
 						}
 					}
 					if ( !isValid )
-						wHairHue = (HUE_TYPE)(sm_GargoyleBeardHues[0]);
+                        wBeardHue = (HUE_TYPE)(sm_GargoyleBeardHues[0]);
 				}
 				break;
 
@@ -2423,7 +2423,7 @@ do_default:
 					}
 					else if ( !strnicmp(ptcKey, "TARGET", 6 ) )
 					{
-						ptcKey += 6;
+                        //ptcKey += 6;
 						//Using both m_Act_UID and m_Fight_Targ_UID will take care of both spell and fighting targets.
 						if (m_Act_UID.IsValidUID()  || m_Fight_Targ_UID.IsValidUID())
 							sVal.FormatHex((dword)(m_Fight_Targ_UID));
@@ -3365,45 +3365,62 @@ bool CChar::r_LoadVal( CScript & s )
     EXC_SET_BLOCK("Keyword");
 	lpctstr	ptcKey = s.GetKey();
 
+    if (!strnicmp("FOLLOWER", ptcKey, 8))
+    {
+        // Need to do this before FindTableHeadSorted, because it might match FOLLOWERSLOTS instead!
+        if (ptcKey[8] == '.')
+        {
+            ptcKey += 9;
+            // I'm probably loading from a save, or that's a very weird way to add a follower...
+            //  Anyways, i expect the followers to be passed with sequential incremental ids: 0, 1, 2... Not random order.
+
+            const uint uiIndex = Exp_GetUVal(ptcKey);
+            if (uiIndex != m_followers.size())
+                return false;
+
+            int64 piVals[2]{};
+            const int iValsCount = Str_ParseCmds(s.GetArgStr(), piVals, ARRAY_COUNT(piVals));
+            if (iValsCount < 1)
+                return false;
+            if (iValsCount < 2)
+            {
+                g_Log.EventWarn("Missing FollowerSlots number (old Sphere build?), defaulting to 1.\n");
+                piVals[1] = 1;
+            }
+
+            const CUID uidPet(piVals[0]);
+            const short iFollowerSlots = n64_narrow_n16(piVals[1]);
+
+            // If i'm loading the world, this char might not exist yet!
+            //const CChar* pCharPet = uidPet.CharFind();
+            //if (!pCharPet)
+            //    return false;
+
+            // Already loaded as a follower?!
+            const bool fExists =
+                !m_followers.empty() &&
+                m_followers.end() !=
+                    std::find_if(m_followers.begin(), m_followers.end(),
+                                 [&uidPet](auto const& inp_struct) -> bool {
+                                     return inp_struct.uid == uidPet;
+                                 });
+            if (fExists)
+                return false;
+
+            m_followers.emplace_back(
+                FollowerCharData {
+                    .uid = uidPet,
+                    .followerslots = iFollowerSlots
+                    //.followerslots = pCharPet->GetFollowerSlots() // If the char doesn't exist yet...
+                });
+
+            return true;
+        }
+    }
+
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
-        if (!strnicmp("FOLLOWER", ptcKey, 8))
-        {
-            if (ptcKey[8] == '.')
-            {
-                ptcKey += 9;
-                // I'm probably loading from a save, or that's a very weird way to add a follower...
-                //  Anyways, i expect the followers to be passed with sequential incremental ids: 0, 1, 2... Not random order.
-                const uint uiIndex = Exp_GetUVal(ptcKey);
-                if (uiIndex != m_followers.size())
-                    return false;
-
-                const CUID uidPet(Exp_GetDWVal(ptcKey));
-                const CChar* pCharPet = uidPet.CharFind();
-                if (!pCharPet)
-                    return false;
-
-                const bool fExists =
-                    !m_followers.empty() &&
-                    m_followers.end() !=
-                        std::find_if(m_followers.begin(), m_followers.end(),
-                            [&uidPet](auto const& inp_struct) -> bool {
-                                return inp_struct.uid == uidPet;
-                        });
-                if (fExists)
-                    return false;
-
-                m_followers.emplace_back(
-                    FollowerCharData {
-                        .uid = uidPet,
-                        .followerslots = pCharPet->GetFollowerSlots()
-                    });
-
-                return true;
-            }
-        }
-
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_LoadVal( this, s ))
@@ -4022,10 +4039,9 @@ void CChar::r_Write( CScript & s )
 	CObjBase::r_Write(s);
 
     for (uint i = 0; auto const& fdata : m_followers) {
-        dword dUID = (dword)fdata.uid;
-        char *pszTag = Str_GetTemp();
-        snprintf(pszTag, Str_TempLength(), "FOLLOWER.%u", i);
-        s.WriteKeyHex(pszTag, dUID);
+        char *pcTag = Str_GetTemp();
+        snprintf(pcTag, Str_TempLength(), "FOLLOWER.%u", i);
+        s.WriteKeyFormat(pcTag, "0%" PRIx32 ",%d", fdata.uid.GetObjUID(), fdata.followerslots);
         ++ i;
     }
 

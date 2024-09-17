@@ -633,9 +633,7 @@ public:
 	CItemBase * Item_GetDef() const noexcept;
 
 	ITEMID_TYPE GetID() const;
-    inline virtual word GetBaseID() const override {
-        return enum32_narrow_n16_checked(GetID());
-    }
+    virtual dword GetBaseID() const override final;
 	inline ITEMID_TYPE GetDispID() const noexcept {
 		// This is what the item looks like.
 		// May not be the same as the item that defines it's type.

@@ -1123,6 +1123,30 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 		return nullptr;
 	}
 
+    std::optional<short> iFollowerSlots;
+    const bool fShouldCheckFollowerSlots = (fCheckFollowerSlots && IsSetOF(OF_PetSlots));
+    auto _CheckFollowerSlots = [this](short iFollowerSlots) -> bool
+    {
+            if ( !FollowersUpdate(this, iFollowerSlots, true) )
+            {
+                SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
+                return false;
+            }
+            return true;
+    };
+
+    if (fShouldCheckFollowerSlots)
+    {
+        const CVarDefCont *pFigurineVarDef = pItem->m_TagDefs.GetKey("FOLLOWERSLOTS");
+        if (pFigurineVarDef)
+        {
+            // The figurine has a FOLLOWERSLOTS override for the char. Use this.
+            iFollowerSlots = pFigurineVarDef->GetValNum();
+            if (!_CheckFollowerSlots(iFollowerSlots.value()))
+                return nullptr;
+        }
+    }
+
 	// Create a new NPC if there's no one linked to this figurine
     bool fCreatedNewNpc = false;
 	CChar *pPet = pItem->m_itFigurine.m_UID.CharFind();
@@ -1138,7 +1162,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 				return nullptr;
 			}
 		}
-		fCreatedNewNpc = true;
+        fCreatedNewNpc = true;
 		pPet = CreateNPC(id);
 		ASSERT(pPet);
 		pPet->SetName(pItem->GetName());
@@ -1150,17 +1174,22 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 		}
 	}
 
-	if ( fCheckFollowerSlots && IsSetOF(OF_PetSlots) )
-	{
-        const short iFollowerSlots = GetFollowerSlots();
-		if ( !FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), true) )
-		{
-			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
-			if ( fCreatedNewNpc )
-				pPet->Delete();
-			return nullptr;
-		}
-	}
+    if (fShouldCheckFollowerSlots)
+    {
+        ASSERT(pPet);
+        if (!iFollowerSlots.has_value())
+            iFollowerSlots = pPet->GetFollowerSlots();
+
+        ASSERT(iFollowerSlots.has_value());
+        if ( !FollowersUpdate(pPet, iFollowerSlots.value(), true) )
+        {
+            if ( fCreatedNewNpc )
+                pPet->Delete();
+            return nullptr;
+        }
+
+        pPet->SetDefNum("FOLLOWERSLOTS", iFollowerSlots.value(), true);
+    }
 
 	if ( pPet->IsDisconnected() )
 		pPet->StatFlag_Clear(STATF_RIDDEN);		// pull the creature out of IDLE space
@@ -1177,7 +1206,9 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 
 short CChar::GetFollowerSlots() const
 {
-    return n64_narrow_n16(GetDefNum("FOLLOWERSLOTS", true, 1));
+    const int64 val = GetDefNum("FOLLOWERSLOTS", true, 1);
+    ASSERT(val >= 0);
+    return n64_narrow_n16(val);
 }
 
 short CChar::GetCurFollowers() const
@@ -1221,7 +1252,7 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
         }
 	}
 
-	short iMaxFollower = n64_narrow_n16(GetDefNum("MAXFOLLOWER", true));
+    const short iMaxFollower = n64_narrow_n16(GetDefNum("MAXFOLLOWER", true));
     ASSERT(iMaxFollower >= 0);
 	if (IsSetEF(EF_FollowerList))
 	{
@@ -1237,14 +1268,15 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
                 }
             }
 
-            if (!fCharAlreadyFollower && (fIgnoreMax || (GetCurFollowers() + iPetFollowerSlots <= iMaxFollower)))
+            const short iNewCurFollower = GetCurFollowers() + iPetFollowerSlots;
+            if (!fCharAlreadyFollower && (fIgnoreMax || (iNewCurFollower <= iMaxFollower)))
             {
                 if (!fCheckOnly)
                 {
                     m_followers.emplace_back(
                         FollowerCharData {
                             .uid = pCharPet->GetUID(),
-                            .followerslots = pCharPet->GetFollowerSlots()
+                            .followerslots = iPetFollowerSlots
                         });
                 }
             }
@@ -1252,11 +1284,18 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
                 return false;
         }
 		else if (!fCheckOnly)
-		{
+        {
+            // If iPetFollowerSlots is negative, remove this follower.
             std::erase_if(
                 m_followers,
-                [pCharPet](auto const& inp_struct) -> bool {
-                    return inp_struct.uid == pCharPet->GetUID();
+                [pCharPet, iPetFollowerSlots](auto const& inp_struct) -> bool {
+                    const bool fIsSame = inp_struct.uid == pCharPet->GetUID();
+                    if (!fIsSame)
+                        return false;
+                    if (inp_struct.followerslots != iPetFollowerSlots)
+                        g_Log.EventWarn("Removed Follower with UID 0%" PRIx32 " with actual FollowerSlots %d, but expected %d.\n",
+                                        inp_struct.uid.GetObjUID(), inp_struct.followerslots, abs(iPetFollowerSlots));
+                    return true;
                 });
 		}
 	}
@@ -1266,7 +1305,7 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
         if (!fIgnoreMax && (iNewCurFollower > iMaxFollower))
             return false;
         if (!fCheckOnly)
-            SetDefNum("CURFOLLOWER", maximum(iNewCurFollower, 0));
+            SetDefNum("CURFOLLOWER", iNewCurFollower);
 	}
 
 	if ( !fCheckOnly )
@@ -1280,6 +1319,7 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 {
 	ADDTOCALLSTACK("CChar::Use_Key");
 	ASSERT(pKey);
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
 	ASSERT(pKey->IsType(IT_KEY));
 	if ( !pItemTarg )
 	{

@@ -516,7 +516,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( IsSetOF(OF_PetSlots) )
 			{
                 short iFollowerSlots = GetFollowerSlots();
-				if ( !pCharTarg->FollowersUpdate(this, (maximum(0, iFollowerSlots)), true) )
+                if ( !pCharTarg->FollowersUpdate(this, iFollowerSlots, true) )
 				{
 					pSrc->SysMessageDefault(DEFMSG_PETSLOTS_TRY_TRANSFER);
 					break;
@@ -587,8 +587,8 @@ void CChar::NPC_PetClearOwners()
 
 	if ( pOwner && IsSetOF(OF_PetSlots) )
 	{
-        short iFollowerSlots = GetFollowerSlots();
-		pOwner->FollowersUpdate(this, -maximum(0, iFollowerSlots));
+        const short iFollowerSlots = GetFollowerSlots();
+        pOwner->FollowersUpdate(this, -iFollowerSlots);
 	}
 }
 
@@ -600,7 +600,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	if ( m_pPlayer || !pChar || (pChar == this) )
 		return false;
 
-	const CChar * pOwner = NPC_PetGetOwner();
+    CChar * pOwner = NPC_PetGetOwner();
 	if ( pOwner == pChar )
 		return false;
 
@@ -609,8 +609,10 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
     CCSpawn* pSpawn = GetSpawn();
 	if ( pSpawn )
 		pSpawn->DelObj( GetUID() );
+
 	Memory_AddObjTypes(pChar, MEMORY_IPET);
 	NPC_Act_Follow();
+
 	if ( NPC_IsVendor() )
 	{
 		// Clear my cash total.
@@ -622,7 +624,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	if ( IsSetOF(OF_PetSlots) )
 	{
         const short iFollowerSlots = GetFollowerSlots();
-		pChar->FollowersUpdate(this, maximum(0, iFollowerSlots));
+        pChar->FollowersUpdate(this, iFollowerSlots);
 	}
 
 	return true;
@@ -646,24 +648,24 @@ bool CChar::NPC_CheckHirelingStatus()
 	CCharBase * pCharDef = Char_GetDef();
 	int64 iFoodConsumeRate = g_Cfg.m_iRegenRate[STAT_FOOD] / MSECS_PER_SEC;
 
-	uint iWage = pCharDef->GetHireDayWage();
-	if ( ! iWage || ! iFoodConsumeRate )
+    uint uiWage = pCharDef->GetHireDayWage();
+    if ( ! uiWage || ! iFoodConsumeRate )
 		return true;
 
 	// I am hired for money not for food.
-	uint iPeriodWage = (uint)IMulDivLL( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
-	if ( iPeriodWage <= 0 )
-		iPeriodWage = 1;
+    uint uiPeriodWage = (uint)IMulDivLL( uiWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
+    if ( uiPeriodWage <= 0 )
+        uiPeriodWage = 1;
 
 	CItemContainer * pBank = GetBank();
-	if ( pBank->m_itEqBankBox.m_Check_Amount > iPeriodWage )
+    if ( pBank->m_itEqBankBox.m_Check_Amount > uiPeriodWage )
 	{
-		pBank->m_itEqBankBox.m_Check_Amount -= iPeriodWage;
+        pBank->m_itEqBankBox.m_Check_Amount -= uiPeriodWage;
 	}
 	else
 	{
 		tchar* pszMsg = Str_GetTemp();
-		snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), iWage);
+        snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), uiWage);
 		Speak(pszMsg);
 
 		CChar * pOwner = NPC_PetGetOwner();

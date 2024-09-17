@@ -1194,8 +1194,8 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
                     CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
                     if (pPetDef)
                     {
-                        short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
-                        if (!m_pChar->FollowersUpdate(pVendor, (maximum(0, iFollowerSlots) * items[i].m_vcAmount), true))
+                        const short uiFollowerSlots = n64_narrow_n16(pItem->GetDefNum("FOLLOWERSLOTS", true));
+                        if (!m_pChar->FollowersUpdate(pVendor, (uiFollowerSlots * items[i].m_vcAmount), true))
                         {
                             m_pChar->SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
                             return;

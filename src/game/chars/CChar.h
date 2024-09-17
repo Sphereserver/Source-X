@@ -399,15 +399,15 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
 	// Information about us.
 	CREID_TYPE GetID() const;
-	virtual word GetBaseID() const override;
+    virtual dword GetBaseID() const override final;
 	CREID_TYPE GetDispID() const;
 	bool SetDispID(CREID_TYPE id);
 	void SetID( CREID_TYPE id );
 
-	virtual lpctstr GetName() const override;
+    virtual lpctstr GetName() const override final;
 	lpctstr GetNameWithoutIncognito() const;
 	lpctstr GetName( bool fAllowAlt ) const;
-	virtual bool SetName( lpctstr pName ) override;
+    virtual bool SetName( lpctstr pName ) override final;
 
 	height_t GetHeightMount( bool fEyeSubstract = false ) const;
 	height_t GetHeight() const;

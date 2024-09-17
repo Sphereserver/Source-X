@@ -3891,7 +3891,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
     RETURN 1:  Only reject the connection.
     RETURN 2:  Reject and ban the IP for <LOCAL.BAN_TIMEOUT> seconds.
 
-13-09-2024, Nolok
+17-09-2024, Nolok
 - Fixed: When acquiring a new pet follower, CurFollower incremented by 1 regardless of pet's FollowerSlots value (Issue #1251).
 - Fixed: dynamic FOLLOWERSLOTS property wasn't correctly saved and loaded from a worldsave.
+- Added: dynamic FOLLOWERSLOTS property is now copied to the figurine as TAG.FOLLOWERSLOTS when an NPC is shrinked, and it's applied back when unshrinked.
 - Added: FOLLOWER.<index> to reference char followers.
+- Fixed: "mounting"/guiding through the ship pilot exit/dismount bug.

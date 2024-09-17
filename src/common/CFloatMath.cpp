@@ -2,7 +2,6 @@
 #include <cmath>
 #include <complex>
 #include <limits>
-#include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../sphere/threads.h"
 #include "sphere_library/CSRand.h"

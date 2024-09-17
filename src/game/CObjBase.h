@@ -524,14 +524,14 @@ public:
 	// Accessors
 
     /**
-     * @fn  virtual word CObjBase::GetBaseID() const = 0;
+     * @fn  virtual dword CObjBase::GetBaseID() const = 0;
      *
      * @brief   Gets base identifier.
      *
      * @return  The base identifier.
      */
 
-	virtual word GetBaseID() const = 0;
+    virtual dword GetBaseID() const = 0;
 
     /**
      * @fn  void CObjBase::SetUID( dword dwVal, bool fItem );

@@ -3601,7 +3601,8 @@ CItem * CChar::Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id )
 	if ( IsDisconnected() || m_pPlayer )
 		return nullptr;
 
-	CCharBase* pCharDef = Char_GetDef();
+    const CCharBase* pCharDef = Char_GetDef();
+    const CVarDefCont* pDynamicVarFollowerSlots = GetDefKey("FOLLOWERSLOTS", false);
 
 	// turn creature into a figurine.
 	CItem * pItem = CItem::CreateScript( (id == ITEMID_NOTHING) ? pCharDef->m_trackID : id, this );
@@ -3614,6 +3615,8 @@ CItem * CChar::Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id )
 	pItem->m_itFigurine.m_ID = GetID();	// Base type of creature. (More1 of i_memory)
 	pItem->m_itFigurine.m_UID = GetUID();
 	pItem->m_uidLink = uidOwner;
+    if (pDynamicVarFollowerSlots)
+        pItem->m_TagDefs.SetNum("FOLLOWERSLOTS", pDynamicVarFollowerSlots->GetValNum(), false, false);
 
 	if ( IsStatFlag(STATF_INSUBSTANTIAL) )
 		pItem->SetAttr(ATTR_INVIS);

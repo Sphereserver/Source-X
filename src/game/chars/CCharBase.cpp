@@ -342,12 +342,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 			}
 			break;
 		//Set as number only
-		case CBC_FOLLOWERSLOTS:
+        case CBC_FOLLOWERSLOTS:
 		case CBC_MAXFOLLOWER:
-		case CBC_BONDED:
-		case CBC_TITHING:
-			SetDefNum(s.GetKey(), s.GetArgVal(), false);
+            SetDefNum(s.GetKey(), abs(s.GetArgVal()), false);
 			break;
+
+        case CBC_BONDED:
+        case CBC_TITHING:
+            SetDefNum(s.GetKey(), s.GetArgLLVal(), false);
+            break;
 
 		case CBC_ANIM:
 			m_Anims = s.GetArgVal();
