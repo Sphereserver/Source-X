@@ -8,6 +8,7 @@ Ultima Online game server, developed in C++.
 <br>
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/20225/badge.svg)](https://scan.coverity.com/projects/sphereserver-source-x)
 &nbsp; &nbsp; [![GitHub Issues](https://img.shields.io/github/issues/Sphereserver/Source-X.svg)](https://github.com/Sphereserver/Source-X/issues)
+
 | Join the SphereServer Discord channel! |
 | :---: |
 | [![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs) |
@@ -72,7 +73,6 @@ Most notable changes (right now) are:
 ### Required libraries (Windows)
 
 + `libmariadb.dll` (MariaDB Client v10.*package), found in `lib/bin/*cpu_architecture*/mariadb/libmariadb.dll`
-<br>
 
 ### Required libraries (Linux)
 
@@ -120,14 +120,16 @@ Before starting: does CMake give you an error? Ensure that you have Git installe
   When using Makefiles or Ninja, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is **Nightly**, **Debug** or **Release**. If the build type  was not set, by default the makefiles for all of the three build types are generated.  
   **Debug** build is expected to be slow and it's to be used, you guessed it, for debugging purposes (best coupled with a debugger or with sanitizers enabled, more on them right below), so don't use it for a live shard!  
 
-<br>  
 Other useful CMake flags:
 
-+ You can add other compiler flags with the custom variables `C_FLAGS_EXTRA` and `CXX_FLAGS_EXTRA`.
++ You can add other compiler flags with the custom variables `C_FLAGS_EXTRA`, `CXX_FLAGS_EXTRA`, `CMAKE_EXE_LINKER_FLAGS_EXTRA`.
 + Enable Sanitizers: `USE_ASAN[=ON]`, `USE_UBSAN`, `USE_LSAN`, etc.
+  If you are using Address Sanitizer, Undefined Behaviour Sanitizer, Leak Sanitizer on Windows, it might be useful to redirect stderr to stdout to correctly show the output: `SphereSvrX64_nightly > Sphere_ASan_log.txt 2>&1`.
+  Remember to setup Sanitizers settings by setting the respective shell variables. To ease this, there are some batch/shell scripts doing that for you inside `utilities/`.
 + `CROSSCOMPILING_ARCH`: set this to TRUE to tell the compiler you are building binary files for a different architecture (not from x86_64 to x86, but for example from x86 to ARM).
 
 Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run the command inside the project's root folder):  
+
 ```bash
 mkdir build
 cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" -B ./build -S ./
@@ -140,7 +142,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -G "Unix Ma
 Building will require more packages than the ones needed to run Sphere.
 
 + Ubuntu and Debian  
-Install these additional packages:
+  Install these additional packages:
   + Build tools (other than the compiler): `sudo apt-get install git cmake`.
   + MariaDB client: `sudo apt-get install libmariadb-dev` and  `libmariadb3` or `mariadb-client` (depends on the OS version)  
   If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to
@@ -156,13 +158,6 @@ Install these additional packages:
 
 Just run the `make` command inside the `build` folder. You can pass the -jX argument (`make -jX`, where X is a number) to speed up the compilation and split the work between X threads.
 
-#### Address Sanitizer and Undefined Behaviour Sanitizer
-
-You can enable Address Sanitizer (ASan) and Undefined Behaviour Sanitizer (UBSan) with the ENABLE_SANITIZERS checkbox via the GUI, or via the CLI flag `-DENABLE_SANITIZERS=true`.  
-This is easier with GCC and Clang on Linux.  
-Since ASan redirects the error output to stderr, you can retrieve its output by launching sphere from cmd (Command Prompt) or shell with the following command:
-`SphereSvrX64_nightly > Sphere_ASan_log.txt 2>&1`, or simply use the precise flag to redirect the errors to a log file.
-
 ## Coding Notes (add as you wish to standardize the coding for new contributors)
 
 + Make sure you can compile and run the program before pushing a commit.
@@ -171,7 +166,7 @@ Since ASan redirects the error output to stderr, you can retrieve its output by 
   cannot be replicated from script to keep some backwards compatibility.
 + Comment your code, add informations about its logic. It's very important since it helps others to understand your work.
 + Be sure to use Sphere's custom datatypes and the string formatting macros described in src/common/datatypes.h.
-+ When casting numeric data types, always prefer C-style casts, like (int), to C++ static_cast&lt;int&gt;().
++ When casting numeric data types, always prefer C-style casts, like (int), to C++ static_cast&lt;int&gt;(). It's way more concise.
 + Be wary that in SphereScript unsigned values does not exist, all numbers are considered signed, and that 64 bits integers meant
   to be printed to or retrieved by scripts should always be signed.
 + Don't use "long" except if you know why do you actually need it. Always prefer "int" or "llong".
@@ -238,4 +233,3 @@ Copyright 2024 SphereServer development team.
 Licensed under the Apache License, Version 2.0 (the "License").  
 You may not use any file of this project except in compliance with the License.  
 You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
-

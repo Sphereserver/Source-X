@@ -156,7 +156,7 @@ function(toolchain_exe_stuff_common)
     endif()
     if(TARGET spheresvr_nightly)
         if(ENABLED_SANITIZER)
-            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -O1 ${COMPILE_OPTIONS_EXTRA})
+            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
         else()
             target_compile_options(
                 spheresvr_nightly
@@ -174,7 +174,7 @@ function(toolchain_exe_stuff_common)
         ]]
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -Og)
+        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O0)
         #[[
         IF (NOT ${CLANG_USE_GCC_LINKER})
             if (${RUNTIME_STATIC_LINK})
