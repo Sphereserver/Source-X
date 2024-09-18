@@ -1114,7 +1114,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 	ADDTOCALLSTACK("CChar::Use_Figurine");
 	// NOTE: The figurine is NOT destroyed.
 
-	if ( !pItem )
+    if ( !pItem )
 		return nullptr;
 
 	if ( pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsChar() && (pItem->m_uidLink != GetUID()) && !IsPriv(PRIV_GM) )
@@ -1141,7 +1141,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
         if (pFigurineVarDef)
         {
             // The figurine has a FOLLOWERSLOTS override for the char. Use this.
-            iFollowerSlots = pFigurineVarDef->GetValNum();
+            iFollowerSlots = n64_narrow_n16(pFigurineVarDef->GetValNum());
             if (!_CheckFollowerSlots(iFollowerSlots.value()))
                 return nullptr;
         }

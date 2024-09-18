@@ -3388,7 +3388,7 @@ bool CChar::r_LoadVal( CScript & s )
                 piVals[1] = 1;
             }
 
-            const CUID uidPet(piVals[0]);
+            const CUID uidPet((dword)piVals[0]);
             const short iFollowerSlots = n64_narrow_n16(piVals[1]);
 
             // If i'm loading the world, this char might not exist yet!
