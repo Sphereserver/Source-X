@@ -50,8 +50,8 @@ case $action in
         ;;
     --changed)
         # Get modified and staged files (combined)
-        unstaged_files=$(git diff --name-only)
-        staged_files=$(git diff --cached --name-only)
+        unstaged_files=$(git diff --name-only --line-prefix="$project_root_dir/")
+        staged_files=$(git diff --cached --name-only --line-prefix="$project_root_dir/")
         files=$( (echo "$unstaged_files" && echo "$staged_files") | sort | uniq | grep -E '\.cmake$|CMakeLists\.txt$')
         ;;
     --last-commit)

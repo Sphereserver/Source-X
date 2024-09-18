@@ -21,10 +21,12 @@ endfunction()
 function(toolchain_after_project)
     message(STATUS "Toolchain: Linux-Clang-AArch64.cmake.")
     # Do not set CMAKE_SYSTEM_NAME if compiling for the same OS, otherwise CMAKE_CROSSCOMPILING will be set to TRUE
-    #SET(CMAKE_SYSTEM_NAME    "Linux"      CACHE INTERNAL "" FORCE)
+    #unset(CMAKE_SYSTEM_NAME)
+    #set(CMAKE_SYSTEM_NAME    "Linux"      CACHE INTERNAL "" FORCE)
+    unset(CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_SYSTEM_PROCESSOR "aarch64" CACHE INTERNAL "" FORCE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin-aarch64" PARENT_SCOPE)
-    #set(ARCH_BITS 64 CACHE INTERNAL "" FORCE) # provide it
+    #set(ARCH_BITS 64 CACHE INTERNAL "" FORCE)  # automatically gotten from CMAKE_SYSTEM_PROCESSOR
 
     if(CROSSCOMPILING_ARCH)
         # possible cross-compilation foreign arch lib locations

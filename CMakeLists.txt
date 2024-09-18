@@ -15,11 +15,7 @@ option(
     "Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
     FALSE
 )
-option(
-    CMAKE_EXPORT_COMPILE_COMMANDS
-    "Export compiler commands to compile_commands.json"
-    TRUE
-)
+option(CMAKE_EXPORT_COMPILE_COMMANDS "Export compiler commands to compile_commands.json" TRUE)
 
 set(predef_LIB_LIBEV_BUILD FALSE)
 if(NOT WIN32)
@@ -104,7 +100,6 @@ if(NOT TOOLCHAIN_LOADED)
     include("cmake/DetectDefaultToolchain.cmake")
 endif()
 
-
 # -------------------- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
 
 toolchain_after_project()
@@ -124,9 +119,7 @@ if(SINGLE_TARGET)
 
     # TODO: add NightlyWithDebInfo ?
     message(STATUS "Single-target build system (${CMAKE_GENERATOR}) detected: generating multiple projects!")
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-        "Debug" "Nightly" "Release"
-    )
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Nightly" "Release")
     if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
         if(
             (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
@@ -176,7 +169,7 @@ if(SINGLE_TARGET)
         )
         set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
         #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
-         #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
+        #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
         set(TARGETS ${TARGETS} spheresvr_nightly)
@@ -188,7 +181,7 @@ if(SINGLE_TARGET)
         )
         set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
         #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
-         #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
+        #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
         set(TARGETS ${TARGETS} spheresvr_debug)
@@ -210,9 +203,7 @@ else(SINGLE_TARGET)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
     #set_target_properties(spheresvr PROPERTIES CXX_EXTENSIONS OFF)
     #target_compile_features(spheresvr PUBLIC cxx_std_20)
-
 endif(SINGLE_TARGET)
-
 
 # --------------------
 

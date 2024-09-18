@@ -15,10 +15,12 @@ endfunction()
 function(toolchain_after_project)
     message(STATUS "Toolchain: Windows-GNU-x86.cmake.")
     # Do not set CMAKE_SYSTEM_NAME if compiling for the same OS, otherwise CMAKE_CROSSCOMPILING will be set to TRUE
-    #SET(CMAKE_SYSTEM_NAME    "Windows"        CACHE INTERNAL "" FORCE)
+    #unset(CMAKE_SYSTEM_NAME)
+    #set(CMAKE_SYSTEM_NAME    "Windows"        CACHE INTERNAL "" FORCE)
+    unset(CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_SYSTEM_PROCESSOR "x86" CACHE INTERNAL "" FORCE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin_x86" PARENT_SCOPE)
-    #set(ARCH_BITS 32 CACHE INTERNAL "" FORCE) # provide it
+    #set(ARCH_BITS 32 CACHE INTERNAL "" FORCE) # automatically gotten from CMAKE_SYSTEM_PROCESSOR
 
     toolchain_after_project_common() # Also to enable RC language, to compile Windows Resource files
 
