@@ -30,7 +30,6 @@
 #define _INC_DATATYPES_H
 
 
-#include <climits>
 #include <cinttypes>
 /*  -- Macros from <cinttypes> we should use when formatting numbers inside strings		--
 	--  (like in printf/sprintf/etc) to achieve best cross-platform/compiler support	--

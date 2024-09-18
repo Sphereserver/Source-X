@@ -1,5 +1,5 @@
 add_subdirectory(bcrypt)
-add_subdirectory(cdrc)
+#add_subdirectory(cdrc)
 add_subdirectory(flat_containers)
 add_subdirectory(mariadb_connector_c)
 add_subdirectory(object_ptr)

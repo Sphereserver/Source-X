@@ -19,7 +19,13 @@
 
 // C abs function has different in/out types the std:: ones in cmath. It's defined in stdlib.h.
 #include <stdlib.h>
+#include <climits>
+#include <cstring>
+#include <algorithm>
 #include <memory>   // for smart pointers
+#include <string>
+#include <string_view>
+#include <vector>
 #include "assertion.h"
 #include "basic_threading.h"
 

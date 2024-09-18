@@ -1,3 +1,27 @@
+# Precompiled header: it's parsed only once and stored in memory as an intermediate form. This speeds up compilation drastically.
+# Be wise in chosing those, since every time we change one of them, we'll have to recompile every one on the list.
+set(pch_options
+    PRIVATE src/common/common.h
+    #PRIVATE src/common/sphere_library/CSRand.h
+    PRIVATE src/common/sphere_library/CSString.h
+    PRIVATE src/common/sphere_library/sstring.h
+    PRIVATE src/common/sphere_library/sstringobjs.h
+    PRIVATE src/common/CException.h
+    PRIVATE src/common/CExpression.h
+    PRIVATE src/common/CLog.h
+    #PRIVATE src/common/CServerMap.h
+    PRIVATE src/game/CObjBase.h
+    #PRIVATE src/game/CSector.h
+    #PRIVATE src/game/CWorld.h
+    PRIVATE src/sphere/threads.h
+    #PRIVATE src/network/send.h
+    #PRIVATE src/network/receive.h
+    #PRIVATE src/game/clients/CClient.h
+    #PRIVATE src/game/chars/CChar.h
+    #PRIVATE src/game/items/CItem.h
+
+)
+
 # Main program files: threads, console...
 set(sphere_SRCS
     src/sphere/asyncdb.cpp
