@@ -2280,8 +2280,8 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 
 		if (IsSetOF(OF_PetSlots))
 		{
-            short iFollowerSlots = GetFollowerSlots();
-			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
+            short iFollowerSlots = pChar->GetFollowerSlots();
+            if (!FollowersUpdate(pChar, iFollowerSlots, true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_TAMING);
 				return -SKTRIG_QTY;
@@ -2296,7 +2296,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 		if ( pChar->Memory_FindObjTypes( this, MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY|MEMORY_AGGREIVED ))	// I've attacked it before ?
 			iDifficulty += 50;	// is it too much?
 
-		m_atTaming.m_dwStrokeCount = (word)(g_Rand.GetVal(4) + 2);
+        m_atTaming.m_dwStrokeCount = (dword)(g_Rand.GetVal(4) + 2);
 		return iDifficulty;		// How difficult? 1-1000
 	}
 

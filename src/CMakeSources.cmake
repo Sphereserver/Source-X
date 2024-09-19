@@ -15,6 +15,7 @@ set(pch_options
     #PRIVATE src/game/CWorld.h
     PRIVATE src/sphere/threads.h
     #PRIVATE src/network/send.h
+    #PRIVATE src/network/CSocket.h
     #PRIVATE src/network/receive.h
     #PRIVATE src/game/clients/CClient.h
     #PRIVATE src/game/chars/CChar.h

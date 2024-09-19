@@ -3488,6 +3488,9 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 
 		case CHC_CURFOLLOWER:
+            if (!s.HasArgs())
+                return false;
+
 			if (!IsSetEF(EF_FollowerList))
 			{
                 SetDefNum(s.GetKey(), s.GetArgSVal(), false);
@@ -3536,7 +3539,7 @@ bool CChar::r_LoadVal( CScript & s )
                 if (!fExists)
                 {
                     const CChar* pCharPet = uid.CharFind();
-                    ASSERT(pCharPet);
+                    PERSISTANT_ASSERT(pCharPet);
                     m_followers.emplace_back(
                         FollowerCharData{
                             .uid = uid,

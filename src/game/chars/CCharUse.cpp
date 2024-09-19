@@ -1292,7 +1292,7 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
                     const bool fIsSame = inp_struct.uid == pCharPet->GetUID();
                     if (!fIsSame)
                         return false;
-                    if (inp_struct.followerslots != iPetFollowerSlots)
+                    if (inp_struct.followerslots != abs(iPetFollowerSlots))
                         g_Log.EventWarn("Removed Follower with UID 0%" PRIx32 " with actual FollowerSlots %d, but expected %d.\n",
                                         inp_struct.uid.GetObjUID(), inp_struct.followerslots, abs(iPetFollowerSlots));
                     return true;

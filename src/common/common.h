@@ -1,6 +1,7 @@
 /**
 * @file common.h
 * @brief Header that should be included by every file.
+*   When set as a precompiled header, it's automatically included in every file.
 */
 
 #ifndef _INC_COMMON_H
@@ -19,13 +20,19 @@
 
 // C abs function has different in/out types the std:: ones in cmath. It's defined in stdlib.h.
 #include <stdlib.h>
+
 #include <climits>
+//#include <cmath>
 #include <cstring>
+
 #include <algorithm>
 #include <memory>   // for smart pointers
+#include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
+
 #include "assertion.h"
 #include "basic_threading.h"
 

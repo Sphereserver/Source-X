@@ -24,10 +24,6 @@
 namespace zlib {
 #include <zlib/zlib.h>
 }
-
-#ifndef _WIN32
-#   include <sys/time.h>
-#endif
 #include <algorithm>
 
 

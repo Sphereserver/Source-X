@@ -10,3 +10,8 @@ CompileFlags:
     - -I!cmake
     - -I!lib
     - -I!utilities
+
+#  If:
+#    PathMatch: '.*/src/common/common\.h'
+#    Diagnostics:
+#      Suppress: ['-Wunused-include-directive']
