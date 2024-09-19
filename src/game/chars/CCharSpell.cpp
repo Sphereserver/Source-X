@@ -350,6 +350,7 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	}
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
+    ASSERT(FollowersUpdate(pChar, pChar->GetFollowerSlots(), true));
 	pChar->NPC_PetSetOwner(this);
 	pChar->MoveToChar(ptTarg);
 	pChar->m_ptHome = ptTarg;
@@ -359,7 +360,7 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)iSkill), nullptr, false, iDuration);
 	pChar->Update();
     pChar->UpdateAnimate(ANIM_SUMMON);
-    pChar->SetTimeout(2000);
+    pChar->SetTimeoutS(2);
 	pChar->SoundChar(CRESND_GETHIT);
 	m_Act_UID = pChar->GetUID();	// for last target stuff
 	return pChar;
@@ -2617,8 +2618,8 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 
 		if (IsSetOF(OF_PetSlots))
 		{
-            short iFollowerSlots = GetFollowerSlots();
-			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
+            short iFollowerSlots = pChar->GetFollowerSlots();
+            if (!FollowersUpdate(pChar, iFollowerSlots, true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
 				pChar->Delete();
