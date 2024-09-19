@@ -3539,7 +3539,7 @@ bool CChar::r_LoadVal( CScript & s )
                 if (!fExists)
                 {
                     const CChar* pCharPet = uid.CharFind();
-                    PERSISTANT_ASSERT(pCharPet);
+                    ASSERT_ALWAYS(pCharPet);
                     m_followers.emplace_back(
                         FollowerCharData{
                             .uid = uid,

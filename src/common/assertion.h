@@ -9,7 +9,7 @@
 
 extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
 
-#define PERSISTANT_ASSERT(exp)  if ( !(exp) ) [[unlikely]] Assert_Fail(#exp, __FILE__, __LINE__)
+#define ASSERT_ALWAYS(exp)  if ( !(exp) ) [[unlikely]] Assert_Fail(#exp, __FILE__, __LINE__)
 
 #if defined(STATIC_ANALYSIS)
     #include <cassert>

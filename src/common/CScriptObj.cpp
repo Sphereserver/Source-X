@@ -1943,7 +1943,7 @@ int CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iF
 			if (pContext->_iParseScriptText_Reentrant > 32 )
 			{
 				EXC_SET_BLOCK("recursive brackets limit");
-				PERSISTANT_ASSERT(pContext->_iParseScriptText_Reentrant < 32);
+				ASSERT_ALWAYS(pContext->_iParseScriptText_Reentrant < 32);
 			}
 
 			ASSERT(pContext->_fParseScriptText_Brackets == true);
