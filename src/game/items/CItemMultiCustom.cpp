@@ -2002,7 +2002,8 @@ bool CItemMultiCustom::LoadValidItems()
                     g_Log.EventWarn("No FeatureMask in file '%s', row=%d.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow());
                     continue;
                 }
-                iconv = Str_ToU(strCurRow.c_str(), 10);
+                iconv = Str_ToU(strFeatureMask.c_str(), 10);
+
                 if (!iconv.has_value())
                 {
                     g_Log.EventWarn("Invalid FeatureMask number in file '%s', row=%d. Skipping.\n", sm_szItemFiles[i][0], curCSV.GetCurrentRow());
