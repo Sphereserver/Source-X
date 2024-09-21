@@ -13,9 +13,14 @@ ColumnLimit: 160
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: false
-#AlignEscapedNewlinesLeft: false
-AlignTrailingComments: true
-
+#AlignConsecutiveTableGenDefinitionColons:
+#  Enabled: true
+#  AcrossEmptyLines: true
+#  AcrossComments: false
+AlignEscapedNewlines: Left # LeftWithLastLine # Right
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 1
 DerivePointerAlignment: false
 PointerAlignment: Right
 
@@ -48,12 +53,15 @@ BraceWrapping:
 Cpp11BracedListStyle: false
 
 ##-- Line breaks
-AlwaysBreakAfterDefinitionReturnType: None
+#AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
+AlwaysBreakAfterDefinitionReturnType: All
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
+BreakAfterAttributes: Always
 AlwaysBreakTemplateDeclarations: true
 BreakAfterJavaFieldAnnotations: false
 BreakBeforeBinaryOperators: None
+BreakBeforeConceptDeclarations: Always
 BreakConstructorInitializers: AfterColon
 #BreakInheritanceList: AfterColon
 BreakBeforeTernaryOperators: false
@@ -70,6 +78,8 @@ LambdaBodyIndentation: Signature
 NamespaceIndentation: Inner
 
 ##-- Spaces in/between statements/etc
+MaxEmptyLinesToKeep: 2
+SeparateDefinitionBlocks: Always
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: false
 #SpaceAroundPointerQualifiers: Left
@@ -85,19 +95,25 @@ SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 
+
+##-- Code sections/blocks
+#MacroBlockBegin: [regex -> EXC_TRY...]
+#MacroBlockEnd:
+FixNamespaceComments: true
+ShortNamespaceLines: 2
+#StatementMacros: [-> ASSERT?]
+
 ##-- Misc
 AllowAllParametersOfDeclarationOnNextLine: true
 AccessModifierOffset: -4
 BinPackArguments: false
 BinPackParameters: false
-BreakAfterAttributes: Always
-ExperimentalAutoDetectBinPacking: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 DisableFormat: false
+ExperimentalAutoDetectBinPacking: false
 InsertNewlineAtEOF: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 ReflowComments: false
-SeparateDefinitionBlocks: Always
 
 #-- Include order
 #IncludeIsMainRegex: '$?'
