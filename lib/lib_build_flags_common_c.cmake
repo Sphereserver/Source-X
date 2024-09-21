@@ -7,14 +7,14 @@ if(MSVC)
     # gersemi: off
     set (c_compiler_options_common
         /O2 /EHsc /GA /Gw /Gy /GF /GR- /GS-
-        $<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>    $<$<BOOL:${ENABLED_SANITIZER}>:/Zi>>
+        $<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   $<$<BOOL:${ENABLED_SANITIZER}>:/Zi>>
         $<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   $<$<BOOL:${ENABLED_SANITIZER}>:/Zi>>
-        $<$<CONFIG:Debug>:     $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
+        $<$<CONFIG:Debug>:   $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
     )
     set (c_linker_options_common
-        $<$<CONFIG:Release>: /OPT:REF,ICF /LTCG:ON /NODEFAULTLIB:libcmtd>
-        $<$<CONFIG:Nightly>: /OPT:REF,ICF /LTCG:ON /NODEFAULTLIB:libcmtd>
-        $<$<CONFIG:Debug>:   /DEBUG /LTCG:OFF /NODEFAULTLIB:libcmt>
+        $<$<CONFIG:Release>: /OPT:REF,ICF /LTCG:ON  /NODEFAULTLIB:libcmtd>
+        $<$<CONFIG:Nightly>: /OPT:REF,ICF /LTCG:ON  /NODEFAULTLIB:libcmtd>
+        $<$<CONFIG:Debug>:   /DEBUG       /LTCG:OFF /NODEFAULTLIB:libcmt>
     )
     # gersemi: on
 else(MSVC)

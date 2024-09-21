@@ -3,6 +3,7 @@
 cmake_minimum_required(VERSION 3.24)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Supress the ZERO_CHECK generation
 
+
 # --------------------  GUI checkboxes --------------------
 option(
     CMAKE_NO_GIT_REVISION
@@ -42,6 +43,7 @@ function(booleanize_str_find VAR)
         set(${VAR} 1 PARENT_SCOPE)
     endif()
 endfunction()
+
 
 # -------------------- Start: initializations --------------------
 
@@ -100,8 +102,10 @@ if(NOT TOOLCHAIN_LOADED)
     include("cmake/DetectDefaultToolchain.cmake")
 endif()
 
+
 # -------------------- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
 
+message(STATUS)
 toolchain_after_project()
 
 string(FIND "${CMAKE_GENERATOR}" "Makefiles" GEN_IS_MAKEFILE)
@@ -122,7 +126,7 @@ if(SINGLE_TARGET)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Nightly" "Release")
     if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
         if(
-            (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+            (    NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
             AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
             AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly")
         )
@@ -153,8 +157,10 @@ else(SINGLE_TARGET)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Nightly" CACHE STRING "" FORCE)
 endif(SINGLE_TARGET)
 
+
 # Include the list of all Sphere source files
 include("src/CMakeSources.cmake")
+
 
 # Configure output binaries
 set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
@@ -165,7 +171,7 @@ if(SINGLE_TARGET)
             spheresvr_release
             ${is_win32_app_linker}
             ${SPHERE_SOURCES}
-            #    ${docs_TEXT}
+            #${docs_TEXT}
         )
         set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
         #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
@@ -178,7 +184,7 @@ if(SINGLE_TARGET)
             spheresvr_nightly
             ${is_win32_app_linker}
             ${SPHERE_SOURCES}
-            #    ${docs_TEXT}
+            #${docs_TEXT}
         )
         set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
         #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
@@ -191,7 +197,7 @@ if(SINGLE_TARGET)
             spheresvr_debug
             ${is_win32_app_linker}
             ${SPHERE_SOURCES}
-            #    ${docs_TEXT}
+            #${docs_TEXT}
         )
         set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
         #set_target_properties(spheresvr_debug PROPERTIES CXX_EXTENSIONS OFF)
@@ -209,12 +215,26 @@ else(SINGLE_TARGET)
     target_precompile_headers(spheresvr ${pch_options})
 endif(SINGLE_TARGET)
 
+
+# --------------------
+
+#message(STATUS)
+#include("${CMAKE_SOURCE_DIR}/cmake/CompilerFlagsChecker.cmake")
+
 # --------------------
 
 # Now include external libraries
+
+message(STATUS)
+message(STATUS "Configuring external libraries...")
 add_subdirectory(lib)
 
+
+message(STATUS)
 toolchain_exe_stuff() # stuff to be executed after ADD_EXECUTABLE
 
 # Get the Git revision number
+message(STATUS)
+message(STATUS "Retrieving git data...")
 include("cmake/GitStatus.cmake")
+message(STATUS)
