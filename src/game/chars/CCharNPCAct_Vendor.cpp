@@ -192,7 +192,7 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if (pItem->IsType(IT_FIGURINE))
 		{
-            CChar* pPet = pCharPlayer->Use_Figurine(pItem);
+            CChar* pPet = pCharPlayer->Use_Figurine(pItem, true);
 			if (!pPet)
 			{
 				tchar *pszTemp = Str_GetTemp();
@@ -202,11 +202,6 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 			}
 
             pItem->Delete();
-            if (IsSetOF(OF_PetSlots))
-            {
-                const short iFollowerSlots = GetFollowerSlots();
-                pCharPlayer->FollowersUpdate(pPet, (maximum(0, iFollowerSlots)), false);
-            }
 			++iCount;
 		}
 	}

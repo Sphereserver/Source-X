@@ -3895,5 +3895,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Fixed: When acquiring a new pet follower, CurFollower incremented by 1 regardless of pet's FollowerSlots value (Issue #1251).
 - Fixed: dynamic FOLLOWERSLOTS property wasn't correctly saved and loaded from a worldsave.
 - Added: dynamic FOLLOWERSLOTS property is now copied to the figurine as TAG.FOLLOWERSLOTS when an NPC is shrinked, and it's applied back when unshrinked.
-- Added: FOLLOWER.<index> to reference char followers.
 - Fixed: "mounting"/guiding through the ship pilot exit/dismount bug.
+
+21-09-2024, Nolok
+- Changed: CURFOLLOWER.n now works as a reference for that pet, meaning it can be accessed as an object (like with FINDID).
+- Changed: added desired FollowerSlots as a second argument to CURFOLLOWER.ADD. Default value: its FollowerSlots.
+- Changed: @FollowerUpdate ARGN1 and ARGN2 are now read-only. Having them RW and actually get them working would have meant many other changes, breaking script compatibility.
+- Fixed: CURFOLLOWER.DEL/DELETE/CLEAR not working properly.

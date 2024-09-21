@@ -2308,22 +2308,6 @@ bool CChar::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 	{
 do_default:
 
-        if (!strnicmp("FOLLOWER", ptcKey, 8))
-        {
-            if (ptcKey[8] == '.')
-            {
-                ptcKey += 9;
-                const uint uiIndex = Exp_GetUVal(ptcKey);
-                if (uiIndex >= m_followers.size())
-                    return false;
-
-                CChar* pCharArg = CUID::CharFindFromUID(m_followers[uiIndex].uid);
-                ASSERT(pCharArg);
-                if (pCharArg->r_WriteVal(ptcKey, sVal, pSrc, fNoCallParent, fNoCallChildren))
-                    return true;
-            }
-        }
-
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_WriteVal( this, ptcKey, sVal ))
@@ -2377,21 +2361,20 @@ do_default:
 
             sVal.FormatVal(0);
             ptcKey += 11;
-            if (*ptcKey == '.' && !m_followers.empty())
-            {
-                ++ptcKey;
-                int iIndex = std::max((int)0, Exp_GetVal(ptcKey));
-                SKIP_SEPARATORS(ptcKey);
-                if (iIndex < (int)m_followers.size())
-                {
-                    if ((!strnicmp(ptcKey, "UID", 3)) || (*ptcKey == '\0'))
-                    {
-                        CUID const& uid = m_followers[iIndex].uid;
-                        sVal.FormatHex(uid.CharFind() ? (dword)uid : 0);
-                        return true;
-                    }
-                }
-            }
+            if (*ptcKey != '.' || m_followers.empty())
+                return false;
+
+            const uint uiIndex = Exp_GetUVal(ptcKey);
+            if (uiIndex >= m_followers.size())
+                return false;
+
+            CChar* pCharArg = CUID::CharFindFromUID(m_followers[uiIndex].uid);
+            if (!pCharArg)
+                return false;
+
+            if (pCharArg->r_WriteVal(ptcKey, sVal, pSrc, fNoCallParent, fNoCallChildren))
+                return true;
+
             return true;
         }
 		//On these ones, check BaseDef if not found on dynamic
@@ -3367,6 +3350,7 @@ bool CChar::r_LoadVal( CScript & s )
 
     if (!strnicmp("FOLLOWER", ptcKey, 8))
     {
+        // This keyword is used only for WORLDSAVES!
         // Need to do this before FindTableHeadSorted, because it might match FOLLOWERSLOTS instead!
         if (ptcKey[8] == '.')
         {
@@ -3508,44 +3492,77 @@ bool CChar::r_LoadVal( CScript & s )
             ++ptcKey;
             if (!strnicmp(ptcKey, "CLEAR", 5))
             {
-                if (!m_followers.empty())
-                    m_followers.clear();
+                if (m_followers.empty())
+                    return true;
+
+                for (auto& follower : m_followers)
+                {
+                    CChar *pFollower = follower.uid.CharFind();
+                    if (!pFollower)
+                        continue;
+                    pFollower->NPC_PetClearOwners();
+                }
+
+                m_followers.clear();
                 UpdateStatsFlag();
                 return true;
             }
-            else if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
+            if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
             {
-                if (!m_followers.empty())
+                if (m_followers.empty())
+                    return false;
+
+                const CUID uid(s.GetArgDWVal());
+                for (auto it = m_followers.begin(); it != m_followers.end();)
                 {
-                    const CUID uid(s.GetArgDWVal());
-                    std::erase_if(m_followers,
-                                  [&uid](auto const& inp_struct) -> bool
-                                  {
-                                      return inp_struct.uid == uid;
-                                  });
+                    auto& followerData = *it;
+                    if (followerData.uid != uid)
+                    {
+                        ++it;
+                        continue;
+                    }
+
+                    CChar *pChar = uid.CharFind();
+                    it = m_followers.erase(it);
+
+                    if (!pChar)
+                        continue;
+                    pChar->NPC_PetClearOwners();
                 }
                 return true;
             }
-            else if (!strnicmp(ptcKey, "ADD", 3))
+            if (!strnicmp(ptcKey, "ADD", 3))
             {
-                const CUID uid(s.GetArgDWVal());
+                int64 piCmd[2];
+                const int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, ARRAY_COUNT(piCmd) );
+                if ( iArgQty < 1 )
+                    return false;
+
+                const CUID uidNewFollower(s.GetArgDWVal());
                 const bool fExists =
                     !m_followers.empty() &&
-                        m_followers.end() !=
+                    m_followers.end() !=
                         std::find_if(m_followers.begin(), m_followers.end(),
-                            [&uid](auto const& inp_struct) -> bool {
-                                return inp_struct.uid == uid;
-                            });
-                if (!fExists)
+                                     [&uidNewFollower](auto const& inp_struct) -> bool {
+                                         return inp_struct.uid == uidNewFollower;
+                                     });
+                if (fExists)
                 {
-                    const CChar* pCharPet = uid.CharFind();
-                    ASSERT_ALWAYS(pCharPet);
-                    m_followers.emplace_back(
-                        FollowerCharData{
-                            .uid = uid,
-                            .followerslots = pCharPet->GetFollowerSlots()
-                        });
+                    g_Log.EventError("Char is already a follower of mine.\n");
+                    return false;
                 }
+
+                const CChar* pCharPet = uidNewFollower.CharFind();
+                if (!pCharPet)
+                    return false;
+                const short uiNewSlots = (iArgQty >= 2) ? piCmd[1] : pCharPet->GetFollowerSlots();
+
+                m_followers.emplace_back(
+                    FollowerCharData{
+                        .uid = uidNewFollower,
+                        .followerslots = uiNewSlots
+                    });
+
                 return true;
             }
 			return false;

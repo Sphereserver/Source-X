@@ -1236,20 +1236,17 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
 
     if (!fCheckOnly && IsTrigUsed(TRIGGER_FOLLOWERSUPDATE))
     {
+        // Arguments should be read only. Otherwise we have to call this trigger also if fCheckOnly == true and
+        //  everyone scripts have to be changed to recognize this scenario.
+
         CScriptTriggerArgs Args;
         Args.m_iN1 = (iPetFollowerSlots >= 0) ? 0 : 1;
         Args.m_iN2 = abs(iPetFollowerSlots);
+        //Args.m_iN3 = fCheckOnly;
         if (OnTrigger(CTRIG_FollowersUpdate, pCharPet, &Args) == TRIGRET_RET_TRUE)
             return false;
 
-        if (Args.m_iN1 == 1)
-        {
-            iPetFollowerSlots = - n64_narrow_n16(Args.m_iN2);
-        }
-        else
-        {
-            iPetFollowerSlots = n64_narrow_n16(Args.m_iN2);
-        }
+        //iPetFollowerSlots = n64_narrow_n16(Args.m_iN2) * ((Args.m_iN1 == 1) ? -1 : 1);
 	}
 
     const short iMaxFollower = n64_narrow_n16(GetDefNum("MAXFOLLOWER", true));
