@@ -3,7 +3,6 @@
 cmake_minimum_required(VERSION 3.24)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Supress the ZERO_CHECK generation
 
-
 # --------------------  GUI checkboxes --------------------
 option(
     CMAKE_NO_GIT_REVISION
@@ -30,10 +29,11 @@ if(WIN32)
     option(WIN32_SPAWN_CONSOLE "Spawn an additional console, useful for debugging." FALSE)
 endif()
 
+option(USE_COMPILER_HARDENING_OPTIONS "Enable compiler (even runtime) safety checks and code hardening." FALSE)
 option(USE_ASAN "Enable AddressSanitizer." FALSE)
-option(USE_MSAN "Enable MemorySanitizer." FALSE)
-option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
+option(USE_LSAN "Enable LeakSanitizer." FALSE)
+option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
 # -------------------- Utility functions --------------------
 function(booleanize_str_find VAR)
@@ -43,7 +43,6 @@ function(booleanize_str_find VAR)
         set(${VAR} 1 PARENT_SCOPE)
     endif()
 endfunction()
-
 
 # -------------------- Start: initializations --------------------
 
@@ -102,7 +101,6 @@ if(NOT TOOLCHAIN_LOADED)
     include("cmake/DetectDefaultToolchain.cmake")
 endif()
 
-
 # -------------------- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
 
 message(STATUS)
@@ -126,7 +124,7 @@ if(SINGLE_TARGET)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Nightly" "Release")
     if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
         if(
-            (    NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+            (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
             AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
             AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly")
         )
@@ -157,10 +155,8 @@ else(SINGLE_TARGET)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Nightly" CACHE STRING "" FORCE)
 endif(SINGLE_TARGET)
 
-
 # Include the list of all Sphere source files
 include("src/CMakeSources.cmake")
-
 
 # Configure output binaries
 set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
@@ -215,7 +211,6 @@ else(SINGLE_TARGET)
     target_precompile_headers(spheresvr ${pch_options})
 endif(SINGLE_TARGET)
 
-
 # --------------------
 
 #message(STATUS)
@@ -228,7 +223,6 @@ endif(SINGLE_TARGET)
 message(STATUS)
 message(STATUS "Configuring external libraries...")
 add_subdirectory(lib)
-
 
 message(STATUS)
 toolchain_exe_stuff() # stuff to be executed after ADD_EXECUTABLE

@@ -1,8 +1,7 @@
 include(CheckCXXCompilerFlag)
 message(STATUS "Checking available compiler flags...")
 
-
-if (NOT MSVC)
+if(NOT MSVC)
     message(STATUS "-- Compilation options:")
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
     #check_cxx_compiler_flag("" COMP_HAS_)
@@ -13,29 +12,79 @@ if (NOT MSVC)
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
     #check_cxx_compiler_flag("-fforce-emit-vtables" COMP_HAS_F_FORCE_EMIT_VTABLES)
 
-    message(STATUS "-- Compilation options (Address Sanitizer):")
-    # Compiler option flags. Sanitizers related (ASAN).
-    #check_cxx_compiler_flag("-fsanitize=safe-stack" COMP_HAS_)  # Can't be used with asan!
-    check_cxx_compiler_flag("-fsanitize-cfi" COMP_HAS_FSAN_CFI) # cfi: control flow integrity
-    check_cxx_compiler_flag("-fsanitize-address-use-after-scope" COMP_HAS_FSAN_ADDRESS_USE_AFTER_SCOPE)
-    check_cxx_compiler_flag("-fsanitize=pointer-compare" COMP_HAS_FSAN_PTR_COMP)
-    check_cxx_compiler_flag("-fsanitize=pointer-subtract" COMP_HAS_FSAN_PTR_SUB)
-    check_cxx_compiler_flag("-fsanitize-trap=all" COMP_HAS_FSAN_TRAP_ALL)
+    if(${USE_ASAN})
+        # Compiler option flags. Sanitizers related (ASAN).
+        message(STATUS "-- Compilation options (Address Sanitizer):")
 
-    message(STATUS "-- Compilation options (Sanitizers-related and safety checks):")
-    # Compiler option flags. Sanitizers related (other).
-    # fsanitize=signed-integer-overflow # -fno-strict-overflow (which implies -fwrapv-pointer and -fwrapv)
-    check_cxx_compiler_flag("-fcf-protection=full" COMP_HAS_FCF_PROTECTION_FULL)
-    check_cxx_compiler_flag("-fstack-check" COMP_HAS_F_STACK_CHECK)
-    check_cxx_compiler_flag("-fstack-protector-all" COMP_HAS_F_STACK_PROTECTOR_ALL)
-    check_cxx_compiler_flag("-fstack-protector-strong" COMP_HAS_F_STACK_PROTECTOR_STRONG)
-    check_cxx_compiler_flag("-fstack-protector" COMP_HAS_F_STACK_PROTECTOR)
-    check_cxx_compiler_flag("-fstack-clash-protection" COMP_HAS_F_STACK_CLASH_PROTECTION)
-    #Flags GCC specific?
-    check_cxx_compiler_flag("-fvtable-verify=preinit" COMP_HAS_F_VTABLE_VERIFY_PREINIT)
-    check_cxx_compiler_flag("-fharden-control-flow-redundancy" COMP_HAS_F_HARDEN_CFR)
-    check_cxx_compiler_flag("-fhardcfr-check-exceptions" COMP_HAS_F_HARDCFR_CHECK_EXCEPTIONS)
-    #check_cxx_compiler_flag("" COMP_HAS_)
+        check_cxx_compiler_flag("-fsanitize=address" COMP_HAS_ASAN)
+        if(NOT COMP_HAS_ASAN)
+            message(FATAL_ERROR "This compiler does not support Address Sanitizer. Disable it.")
+        endif()
+
+        check_cxx_compiler_flag("-fsanitize-cfi" COMP_HAS_FSAN_CFI) # cfi: control flow integrity
+        check_cxx_compiler_flag("-fsanitize-address-use-after-scope" COMP_HAS_FSAN_ADDRESS_USE_AFTER_SCOPE)
+        check_cxx_compiler_flag("-fsanitize=pointer-compare" COMP_HAS_FSAN_PTR_COMP)
+        check_cxx_compiler_flag("-fsanitize=pointer-subtract" COMP_HAS_FSAN_PTR_SUB)
+        check_cxx_compiler_flag("-fsanitize-trap=all" COMP_HAS_FSAN_TRAP_ALL)
+    endif()
+
+    if(${USE_UBSAN})
+        # Compiler option flags. Sanitizers related (UBSAN).
+        message(STATUS "-- Compilation options (Undefined Behavior Sanitizer):")
+
+        check_cxx_compiler_flag("-fsanitize=undefined" COMP_HAS_UBSAN)
+        if(NOT COMP_HAS_UBSAN)
+            message(FATAL_ERROR "This compiler does not support Undefined Behavior Sanitizer. Disable it.")
+        endif()
+
+        check_cxx_compiler_flag("-fsanitize=float-divide-by-zero" COMP_HAS_FSAN_FLOAT_DIVIDE_BY_ZERO)
+        check_cxx_compiler_flag("-fsanitize=unsigned-integer-overflow" COMP_HAS_FSAN_UNSIGNED_INTEGER_OVERFLOW) #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
+        #check_cxx_compiler_flag("-fsanitize=implicit-conversion" COMP_HAS_FSAN_IMPLICIT_CONVERSION)
+        #check_cxx_compiler_flag("-fsanitize=local-bounds" COMP_HAS_FSAN_LOCAL_BOUNDS)
+        check_cxx_compiler_flag("-fno-sanitize=enum" COMP_HAS_FSAN_NO_ENUM)
+    endif()
+
+    if(${USE_LSAN})
+        # Compiler option flags. Sanitizers related (LSAN).
+        message(STATUS "-- Compilation options (Leak Sanitizer):")
+
+        check_cxx_compiler_flag("-fsanitize=leak" COMP_HAS_LSAN)
+        if(NOT COMP_HAS_LSAN)
+            message(FATAL_ERROR "This compiler does not support Leak Sanitizer. Disable it.")
+        endif()
+    endif()
+
+    if(${USE_MSAN})
+        # Compiler option flags. Sanitizers related (UBSAN).
+
+        message(STATUS "-- Compilation options (Memory Behavior Sanitizer):")
+        check_cxx_compiler_flag("-fsanitize=memory" COMP_HAS_MSAN)
+        if(NOT COMP_HAS_MSAN)
+            message(FATAL_ERROR "This compiler does not support Memory Sanitizer. Disable it.")
+        endif()
+
+        check_cxx_compiler_flag("-fsanitize=memory-track-origins" COMP_HAS_F_SANITIZE_MEMORY_TRACK_ORIGINS)
+        check_cxx_compiler_flag("-fPIE" COMP_HAS_F_PIE)
+    endif()
+
+    if(USE_COMPILER_HARDENING_OPTIONS)
+        message(STATUS "-- Compilation options (code hardening):")
+        # Compiler option flags. Other sanitizers or code hardening.
+        if(NOT USE_ASAN)
+            check_cxx_compiler_flag("-fsanitize=safe-stack" COMP_HAS_F_SANITIZE_SAFE_STACK) # Can't be used with asan!
+        endif()
+        check_cxx_compiler_flag("-fcf-protection=full" COMP_HAS_FCF_PROTECTION_FULL)
+        check_cxx_compiler_flag("-fstack-check" COMP_HAS_F_STACK_CHECK)
+        check_cxx_compiler_flag("-fstack-protector-all" COMP_HAS_F_STACK_PROTECTOR_ALL)
+        check_cxx_compiler_flag("-fstack-protector-strong" COMP_HAS_F_STACK_PROTECTOR_STRONG)
+        check_cxx_compiler_flag("-fstack-protector" COMP_HAS_F_STACK_PROTECTOR)
+        check_cxx_compiler_flag("-fstack-clash-protection" COMP_HAS_F_STACK_CLASH_PROTECTION)
+        #Flags GCC specific?
+        check_cxx_compiler_flag("-fvtable-verify=preinit" COMP_HAS_F_VTABLE_VERIFY_PREINIT)
+        check_cxx_compiler_flag("-fharden-control-flow-redundancy" COMP_HAS_F_HARDEN_CFR)
+        check_cxx_compiler_flag("-fhardcfr-check-exceptions" COMP_HAS_F_HARDCFR_CHECK_EXCEPTIONS)
+        #check_cxx_compiler_flag("" COMP_HAS_)
+    endif()
 
     # Compiler warning flags.
     message(STATUS "-- Compilation options (warnings):")
@@ -65,7 +114,6 @@ if (NOT MSVC)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler warning flags. TODO: To be evaluated...
-    # -Wshadow
     # -Wfree-nonheap-object (good but false positive warnings on GCC?)
     # -Wcast-align=strict
     # -Wcast-user-defined
@@ -86,14 +134,12 @@ if (NOT MSVC)
     check_cxx_compiler_flag("-Wno-deprecated-declarations" COMP_HAS_WNO_DEPRECATED_DECLARATIONS)
     #check_cxx_compiler_flag("-Wno-unknown-pragmas" COMP_HAS_)
     #check_cxx_compiler_flag("" COMP_HAS_)
-
-else (NOT MSVC)
+else(NOT MSVC)
     # Compiler warning flags (MSVC).
     message(STATUS "-- Compilation options (MSVC):")
     check_cxx_compiler_flag("/Wd5105" COMP_HAS_DEFINE_MACRO_EXPANSION) # False positive warning, maybe even a MSVC bug.
     #check_cxx_compiler_flag("" COMP_HAS_)
 endif()
-
 
 # ---- Append options into some lists.
 
@@ -103,47 +149,85 @@ if(COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
     list(APPEND checked_compiler_options "-fno-expensive-optimizations")
 endif()
 
-if(COMP_HAS_FSAN_CFI)
-    list(APPEND checked_compiler_options_asan "-fsanitize-cfi")
-endif()
-if(COMP_HAS_FSAN_ADDRESS_USE_AFTER_SCOPE)
-    list(APPEND checked_compiler_options_asan "-fsanitize-address-use-after-scope")
-endif()
-if(COMP_HAS_FSAN_PTR_COMP)
-    list(APPEND checked_compiler_options_asan "-fsanitize=pointer-compare" )
-endif()
-if(COMP_HAS_FSAN_PTR_SUB)
-    list(APPEND checked_compiler_options_asan "-fsanitize=pointer-subtract" )
-endif()
-if(COMP_HAS_FSAN_TRAP_ALL)
-    list(APPEND checked_compiler_options_asan "-fsanitize-trap=all" )
+if(COMP_HAS_ASAN)
+    list(APPEND checked_compiler_options_asan "-fsanitize=address")
+    if(COMP_HAS_FSAN_CFI)
+        list(APPEND checked_compiler_options_asan "-fsanitize-cfi")
+    endif()
+    if(COMP_HAS_FSAN_ADDRESS_USE_AFTER_SCOPE)
+        list(APPEND checked_compiler_options_asan "-fsanitize-address-use-after-scope")
+    endif()
+    if(COMP_HAS_FSAN_PTR_COMP)
+        list(APPEND checked_compiler_options_asan "-fsanitize=pointer-compare")
+    endif()
+    if(COMP_HAS_FSAN_PTR_SUB)
+        list(APPEND checked_compiler_options_asan "-fsanitize=pointer-subtract")
+    endif()
+    if(COMP_HAS_FSAN_TRAP_ALL)
+        list(APPEND checked_compiler_options_asan "-fsanitize-trap=all")
+    endif()
 endif()
 
+if(COMP_HAS_UBSAN)
+    list(APPEND checked_compiler_options_ubsan "-fsanitize=undefined")
+    if(COMP_HAS_FSAN_FLOAT_DIVIDE_BY_ZERO)
+        list(APPEND checked_compiler_options_ubsan "-fsanitize=float-divide-by-zero")
+    endif()
+    if(COMP_HAS_FSAN_UNSIGNED_INTEGER_OVERFLOW)
+        list(APPEND checked_compiler_options_ubsan "-fsanitize=unsigned-integer-overflow")
+    endif()
+    if(COMP_HAS_FSAN_IMPLICIT_CONVERSION)
+        list(APPEND checked_compiler_options_ubsan "-fsanitize=implicit-conversion")
+    endif()
+    if(COMP_HAS_FSAN_NO_ENUM)
+        list(APPEND checked_compiler_options_ubsan "-fno-sanitize=enum")
+    endif()
+    if(COMP_HAS_FSAN_LOCAL_BOUNDS)
+        list(APPEND checked_compiler_options_ubsan "-fsanitize=local-bounds")
+    endif()
+endif()
+
+if(COMP_HAS_LSAN)
+    list(APPEND checked_compiler_options_lsan "-fsanitize=leak")
+endif()
+
+if(COMP_HAS_MSAN)
+    list(APPEND checked_compiler_options_msan "-fsanitize=memory")
+    if(COMP_HAS_F_SANITIZE_MEMORY_TRACK_ORIGINS)
+        list(APPEND checked_compiler_options_msan "-fsanitize=memory-track-origins")
+    endif()
+    if(COMP_HAS_F_PIE)
+        list(APPEND checked_compiler_options_msan "-fPIE")
+    endif()
+endif()
+
+if(COMP_HAS_F_SANITIZE_SAFE_STACK)
+    list(APPEND checked_compiler_options_sanitize_harden "-fsanitize=safe-stack")
+endif()
 if(COMP_HAS_FCF_PROTECTION_FULL)
-    list(APPEND checked_compiler_options_sanitize_other "-fcf-protection=full")
+    list(APPEND checked_compiler_options_sanitize_harden "-fcf-protection=full")
 endif()
 if(COMP_HAS_F_STACK_CHECK)
-    list(APPEND checked_compiler_options_sanitize_other "-fstack-check")
+    list(APPEND checked_compiler_options_sanitize_harden "-fstack-check")
 endif()
 if(COMP_HAS_F_STACK_PROTECTOR_ALL)
-    list(APPEND checked_compiler_options_sanitize_other "-fstack-protector-all")
+    list(APPEND checked_compiler_options_sanitize_harden "-fstack-protector-all")
 elseif(COMP_HAS_F_STACK_PROTECTOR_STRONG)
-    list(APPEND checked_compiler_options_sanitize_other "-fstack-protector-strong")
+    list(APPEND checked_compiler_options_sanitize_harden "-fstack-protector-strong")
 elseif(COMP_HAS_F_STACK_PROTECTOR)
-    list(APPEND checked_compiler_options_sanitize_other "-fstack-protector")
+    list(APPEND checked_compiler_options_sanitize_harden "-fstack-protector")
 endif()
 if(COMP_HAS_F_STACK_CLASH_PROTECTION)
-    list(APPEND checked_compiler_options_sanitize_other "-fstack-clash-protection")
+    list(APPEND checked_compiler_options_sanitize_harden "-fstack-clash-protection")
 endif()
 if(COMP_HAS_F_VTABLE_VERIFY_PREINIT)
-    list(APPEND checked_compiler_options_sanitize_other "-fvtable-verify=preinit")
+    list(APPEND checked_compiler_options_sanitize_harden "-fvtable-verify=preinit")
 endif()
 if(COMP_HAS_F_HARDEN_CFR)
-    list(APPEND checked_compiler_options_sanitize_other "-fharden-control-flow-redundancy")
+    list(APPEND checked_compiler_options_sanitize_harden "-fharden-control-flow-redundancy")
 endif()
 if(COMP_HAS_F_HARDCFR_CHECK_EXCEPTIONS)
-    list(
-        APPEND checked_compiler_options_sanitize_other "-fhardcfr-check-exceptions")
+    list(APPEND checked_compiler_options_sanitize_harden "-fhardcfr-check-exceptions")
 endif()
 
 if(COMP_HAS_W_USELESS_CAST)
@@ -250,7 +334,6 @@ if(
     unset(COMPILER_SUPPORTS_NULL_DEREFERENCE CACHE)
 endif()
 
-
 # ----
 
 #[[
@@ -258,18 +341,37 @@ set(checked_compiler_options)
 set(checked_compiler_options_asan)
 #set(checked_compiler_options_ubsan)
 #set(checked_compiler_options_lsan)
-set(checked_compiler_options_sanitize_other)
+set(checked_compiler_options_sanitize_harden)
 set(checked_compiler_warnings)
 set(checked_compiler_warnings_disabled)
 set(checked_compiler_flags_msvc)
 ]]
 
-message(STATUS "Adding the following conditional compiler options: ${checked_compiler_options}")
-message(STATUS "Adding the following conditional compiler options for ASan: ${checked_compiler_options_asan}")
-message(STATUS "Adding the following conditional compiler options for sanitizers: ${checked_compiler_options_sanitize_other}")
-message(STATUS "Adding the following conditional compiler warnings: ${checked_compiler_warnings}")
-message(STATUS "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}")
+message(STATUS "Adding the following conditional compiler options: ${checked_compiler_options}.")
+if(COMP_HAS_ASAN)
+    message(STATUS "Adding the following conditional compiler options for ASan: ${checked_compiler_options_asan}.")
+endif()
+if(COMP_HAS_UBSAN)
+    message(STATUS "Adding the following conditional compiler options for UBSan: ${checked_compiler_options_ubsan}.")
+endif()
+if(COMP_HAS_LSAN)
+    message(STATUS "Adding the following conditional compiler options for LSan: ${checked_compiler_options_lsan}.")
+endif()
+
+if(COMP_HAS_MSAN)
+    message(STATUS "Adding the following conditional compiler options for MSan: ${checked_compiler_options_msan}.")
+endif()
+
+message(
+    STATUS
+    "Adding the following conditional compiler options for hardening: ${checked_compiler_options_sanitize_harden}."
+)
+message(STATUS "Adding the following conditional compiler warnings: ${checked_compiler_warnings}.")
+message(
+    STATUS
+    "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}."
+)
 
 if(MSVC)
-    message(STATUS "Adding the following conditional compiler options: ${checked_compiler_flags_msvc}")
+    message(STATUS "Adding the following conditional compiler options: ${checked_compiler_flags_msvc}.")
 endif()
