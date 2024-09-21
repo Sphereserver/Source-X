@@ -398,6 +398,65 @@ void CSString::FormatU64Val(uint64 uiVal)
 
 // CSString:: String operations
 
+tchar CSString::GetAt(int nIndex) const
+{
+    ASSERT(nIndex >= 0);
+    ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
+    return m_pchData[nIndex];
+}
+
+tchar& CSString::ReferenceAt(int nIndex)
+{
+    ASSERT(nIndex >= 0);
+    ASSERT(nIndex < m_iLength);
+    return m_pchData[nIndex];
+}
+
+void CSString::MakeUpper() noexcept
+{
+    _strupr(m_pchData);
+}
+
+void CSString::MakeLower() noexcept
+{
+    _strlwr(m_pchData);
+}
+
+void CSString::Reverse() noexcept
+{
+    Str_Reverse(m_pchData);
+}
+
+int CSString::Compare(lpctstr pStr) const noexcept
+{
+    return strcmp(m_pchData, pStr);
+}
+
+int CSString::CompareNoCase(lpctstr pStr) const noexcept
+{
+    return strcmpi(m_pchData, pStr);
+}
+
+int CSString::indexOf(tchar c) noexcept
+{
+    return indexOf(c, 0);
+}
+
+int CSString::indexOf(const CSString& str) noexcept
+{
+    return indexOf(str, 0);
+}
+
+int CSString::lastIndexOf(tchar c) noexcept
+{
+    return lastIndexOf(c, 0);
+}
+
+int CSString::lastIndexOf(const CSString& str) noexcept
+{
+    return lastIndexOf(str, 0);
+}
+
 int CSString::indexOf(tchar c, int offset) noexcept
 {
 	if ((offset < 0) || !IsValid())

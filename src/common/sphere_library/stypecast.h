@@ -1,6 +1,7 @@
 #ifndef _INC_STYPECAST_H
 #define _INC_STYPECAST_H
 
+//#include "../CLog.h"
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -68,54 +69,6 @@ constexpr Tout enum_alias_cast(const Tin a) noexcept
     */
 
     return static_cast<Tout>(a);
-}
-
-
-/* Unsigned (and size_t) to signed, clamping. */
-
-[[nodiscard]] constexpr
-int8 i8_from_u8_clamping(const uint8 a) noexcept
-{
-    return (a > (uint8_t)std::numeric_limits<int8_t>::max()) ? std::numeric_limits<int8_t>::max() : (int8_t)a;
-}
-
-[[nodiscard]] constexpr
-int16 i16_from_u16_clamping(const uint16 a) noexcept
-{
-    return (a > (uint16_t)std::numeric_limits<int16_t>::max()) ? std::numeric_limits<int16_t>::max() : (int16_t)a;
-}
-
-[[nodiscard]] constexpr
-int32 i32_from_u32_clamping(const uint32 a) noexcept
-{
-    return (a > (uint32_t)std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : (int32_t)a;
-}
-
-[[nodiscard]] constexpr
-int64 i64_from_u64_clamping(const uint64 a) noexcept
-{
-    return (a > (uint64_t)std::numeric_limits<int64_t>::max()) ? std::numeric_limits<int64_t>::max() : (int64_t)a;
-}
-
-[[nodiscard]] constexpr
-int32 i32_from_usize_clamping(const size_t a) noexcept
-{
-    return (a > (size_t)std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : (int32_t)a;
-}
-
-[[nodiscard]] constexpr
-int64 i64_from_usize_clamping(const size_t a) noexcept
-{
-    return (a > (size_t)std::numeric_limits<int64_t>::max()) ? std::numeric_limits<int64_t>::max() : (int64_t)a;
-}
-
-[[nodiscard]] constexpr
-uint32 u32_from_usize_clamping(const size_t a) noexcept
-{
-    if constexpr (sizeof(size_t) == 8)
-        return (a > (size_t)std::numeric_limits<uint32_t>::max()) ? std::numeric_limits<uint32_t>::max() : (uint32_t)a;
-    else
-        return a;
 }
 
 
@@ -456,11 +409,59 @@ uint32 usize_narrow_u32_checked(const size_t a)
 }
 
 
+/* Unsigned (and size_t) to signed, clamping. */
+
+[[nodiscard]] constexpr
+    int8 i8_from_u8_clamping(const uint8 a) noexcept
+{
+    return (a > (uint8_t)std::numeric_limits<int8_t>::max()) ? std::numeric_limits<int8_t>::max() : (int8_t)a;
+}
+
+[[nodiscard]] constexpr
+    int16 i16_from_u16_clamping(const uint16 a) noexcept
+{
+    return (a > (uint16_t)std::numeric_limits<int16_t>::max()) ? std::numeric_limits<int16_t>::max() : (int16_t)a;
+}
+
+[[nodiscard]] constexpr
+    int32 i32_from_u32_clamping(const uint32 a) noexcept
+{
+    return (a > (uint32_t)std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : (int32_t)a;
+}
+
+[[nodiscard]] constexpr
+    int64 i64_from_u64_clamping(const uint64 a) noexcept
+{
+    return (a > (uint64_t)std::numeric_limits<int64_t>::max()) ? std::numeric_limits<int64_t>::max() : (int64_t)a;
+}
+
+[[nodiscard]] constexpr
+    int32 i32_from_usize_clamping(const size_t a) noexcept
+{
+    return (a > (size_t)std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : (int32_t)a;
+}
+
+[[nodiscard]] constexpr
+    int64 i64_from_usize_clamping(const size_t a) noexcept
+{
+    return (a > (size_t)std::numeric_limits<int64_t>::max()) ? std::numeric_limits<int64_t>::max() : (int64_t)a;
+}
+
+[[nodiscard]] constexpr
+    uint32 u32_from_usize_clamping(const size_t a) noexcept
+{
+    if constexpr (sizeof(size_t) == 8)
+        return (a > (size_t)std::numeric_limits<uint32_t>::max()) ? std::numeric_limits<uint32_t>::max() : (uint32_t)a;
+    else
+        return a;
+}
+
+
 /* Unsigned (and size_t) to signed, checked for overflows. */
 
 // Convert an 8 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
-int8 i8_from_u8_checked(const uint8 a) // not clamping/capping
+    int8 i8_from_u8_checked(const uint8 a) // not clamping/capping
 {
     ASSERT(a <= (uint8_t)std::numeric_limits<int8_t>::max());
     return static_cast<int8>(a);
@@ -469,7 +470,7 @@ template <typename T> int8 i8_from_u8_checked(T) = delete; // disable implicit t
 
 // Convert a 16 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
-int16 i16_from_u16_checked(const uint16 a) // not clamping/capping
+    int16 i16_from_u16_checked(const uint16 a) // not clamping/capping
 {
     ASSERT(a <= (uint16_t)std::numeric_limits<int16_t>::max());
     return static_cast<int16>(a);
@@ -477,7 +478,7 @@ int16 i16_from_u16_checked(const uint16 a) // not clamping/capping
 template <typename T> int16 i16_from_u16_checked(T) = delete; // disable implicit type conversion for the input argument
 
 [[nodiscard]] inline
-int16 i16_from_u32_checked(const uint32 a) // not clamping/capping
+    int16 i16_from_u32_checked(const uint32 a) // not clamping/capping
 {
     ASSERT(a <= (uint32_t)std::numeric_limits<int16_t>::max());
     return static_cast<int16>(a);
@@ -485,7 +486,7 @@ int16 i16_from_u32_checked(const uint32 a) // not clamping/capping
 template <typename T> int16 i16_from_u32_checked(T) = delete; // disable implicit type conversion for the input argument
 
 [[nodiscard]] inline
-int16 i16_from_u64_checked(const uint64 a) // not clamping/capping
+    int16 i16_from_u64_checked(const uint64 a) // not clamping/capping
 {
     ASSERT(a <= (uint64_t)std::numeric_limits<int16_t>::max());
     return static_cast<int16>(a);
@@ -494,7 +495,7 @@ template <typename T> int16 i16_from_u64_checked(T) = delete; // disable implici
 
 // Convert a 32 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
-int32 i32_from_u32_checked(const uint32 a) // not clamping/capping
+    int32 i32_from_u32_checked(const uint32 a) // not clamping/capping
 {
     ASSERT(a <= (uint32_t)std::numeric_limits<int32_t>::max());
     return static_cast<int32>(a);
@@ -502,7 +503,7 @@ int32 i32_from_u32_checked(const uint32 a) // not clamping/capping
 template <typename T> int32 i32_from_u32_checked(T) = delete; // disable implicit type conversion for the input argument
 
 [[nodiscard]] inline
-int32 i32_from_u64_checked(const uint64 a) // not clamping/capping
+    int32 i32_from_u64_checked(const uint64 a) // not clamping/capping
 {
     ASSERT(a <= (uint64_t)std::numeric_limits<int32_t>::max());
     return static_cast<int32>(a);
@@ -511,7 +512,7 @@ template <typename T> int32 i32_from_u64_checked(T) = delete; // disable implici
 
 // Convert a 64 bits unsigned value to signed and ASSERT (because you're reasonably sure but not absolutely certain) that it will fit into its signed datatype counterpart (unsigned variables can store greater values than signed ones).
 [[nodiscard]] inline
-int64 i64_from_u64_checked(const uint64 a) // not clamping/capping
+    int64 i64_from_u64_checked(const uint64 a) // not clamping/capping
 {
     ASSERT(a <= (uint64_t)std::numeric_limits<int64_t>::max());
     return static_cast<int64>(a);
@@ -521,7 +522,7 @@ template <typename T> int64 i64_from_u64_checked(T) = delete; // disable implici
 // size_t conversions
 
 [[nodiscard]] inline
-int8 i8_from_usize_checked(const size_t a) // not clamping/capping
+    int8 i8_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
     return n64_narrow_n8_checked(a);
@@ -535,7 +536,7 @@ template <typename T> int8 i8_from_usize_checked(T) = delete; // disable implici
 
 
 [[nodiscard]] inline
-int16 i16_from_usize_checked(const size_t a) // not clamping/capping
+    int16 i16_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
     return n64_narrow_n16_checked(a);
@@ -548,7 +549,7 @@ int16 i16_from_usize_checked(const size_t a) // not clamping/capping
 template <typename T> int16 i16_from_usize_checked(T) = delete; // disable implicit type conversion for the input argument
 
 [[nodiscard]] inline
-int32 i32_from_usize_checked(const size_t a) // not clamping/capping
+    int32 i32_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
     return i32_from_u32_clamping(n64_narrow_n32_checked(a));
@@ -561,7 +562,7 @@ int32 i32_from_usize_checked(const size_t a) // not clamping/capping
 template <typename T> int32 i32_from_usize_checked(T) = delete; // disable implicit type conversion for the input argument
 
 [[nodiscard]] inline
-int64 i64_from_usize_checked(const size_t a) // not clamping/capping
+    int64 i64_from_usize_checked(const size_t a) // not clamping/capping
 {
 #if SIZE_MAX == UINT64_MAX
     return i64_from_u64_checked(n_alias_cast<uint64>(a));
@@ -572,6 +573,8 @@ int64 i64_from_usize_checked(const size_t a) // not clamping/capping
 #endif
 }
 template <typename T> int64 i64_from_usize_checked(T) = delete; // disable implicit type conversion for the input argument
+
+
 
 
 #endif // _INC_STYPECAST_H

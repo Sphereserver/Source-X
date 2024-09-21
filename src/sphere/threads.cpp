@@ -114,10 +114,11 @@ void IThread::setThreadName(const char* name)
     auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
     ASSERT(athr);
 
+#ifdef _DEBUG
     g_Log.Event(LOGF_CONSOLE_ONLY|LOGM_DEBUG|LOGL_EVENT,
                 "Setting thread (ThreadHolder ID %d, internal name '%s') system name: '%s'.\n",
                 athr->m_threadHolderId, athr->getName(), name_trimmed);
-
+#endif
     athr->overwriteInternalThreadName(name_trimmed);
 }
 
@@ -278,6 +279,7 @@ void ThreadHolder::push(IThread *thread) noexcept
         RaiseImmediateAbort();
     }
 
+#ifdef _DEBUG
     if (dynamic_cast<DummySphereThread const*>(thread))
     {
         // Too early in the init process to use the console...
@@ -290,6 +292,7 @@ void ThreadHolder::push(IThread *thread) noexcept
                     "Registered thread '%s' with ThreadHolder ID %d.\n",
                     thread->getName(), thread->m_threadHolderId);
     }
+#endif
 }
 
 /*
@@ -712,9 +715,11 @@ void AbstractThread::onStart()
     	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());
 
+#ifdef _DEBUG
     g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
                     "Started thread '%s' with ThreadHolder ID %d and system ID %" PRIu64 ".\n",
                      getName(), m_threadHolderId, (uint64)m_threadSystemId);
+#endif
 }
 
 void AbstractThread::setPriority(IThread::Priority pri)

@@ -9,7 +9,10 @@
 #include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
 #include "../sphere/ConsoleInterface.h"
-#include <exception>
+
+namespace std {
+class exception;    // Forward declaration
+}
 
 // -----------------------------
 //	CEventLog
