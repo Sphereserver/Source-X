@@ -3472,9 +3472,6 @@ bool CChar::r_LoadVal( CScript & s )
             break;
 
 		case CHC_CURFOLLOWER:
-            if (!s.HasArgs())
-                return false;
-
 			if (!IsSetEF(EF_FollowerList))
 			{
                 SetDefNum(s.GetKey(), s.GetArgSVal(), false);
@@ -3507,6 +3504,10 @@ bool CChar::r_LoadVal( CScript & s )
                 UpdateStatsFlag();
                 return true;
             }
+
+            if (!s.HasArgs())
+                return false;
+
             if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
             {
                 if (m_followers.empty())
@@ -3531,6 +3532,7 @@ bool CChar::r_LoadVal( CScript & s )
                 }
                 return true;
             }
+
             if (!strnicmp(ptcKey, "ADD", 3))
             {
                 int64 piCmd[2];
@@ -3555,7 +3557,7 @@ bool CChar::r_LoadVal( CScript & s )
                 const CChar* pCharPet = uidNewFollower.CharFind();
                 if (!pCharPet)
                     return false;
-                const short uiNewSlots = (iArgQty >= 2) ? piCmd[1] : pCharPet->GetFollowerSlots();
+                const short uiNewSlots = (iArgQty >= 2) ? n64_narrow_n16(piCmd[1]) : pCharPet->GetFollowerSlots();
 
                 m_followers.emplace_back(
                     FollowerCharData{
