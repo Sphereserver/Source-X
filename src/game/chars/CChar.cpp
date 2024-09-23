@@ -1591,7 +1591,7 @@ void CChar::SetID( CREID_TYPE id )
 	CCharBase * pCharDef = CCharBase::FindCharBase(id);
 	if ( pCharDef == nullptr )
 	{
-		if ( (id != (CREID_TYPE)-1) && (id != CREID_INVALID) )
+        if ( id != CREID_INVALID )
 			DEBUG_ERR(("Setting invalid char ID 0%x\n", id));
 
 		id = (CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
@@ -4995,7 +4995,7 @@ lbl_cchar_ontriggerspeech:
 }
 
 // Gaining exp
-uint Calc_ExpGet_Exp(uint level)
+static uint Calc_ExpGet_Exp(uint level)
 {
     if (level <= 1)
         return 0;
@@ -5015,7 +5015,7 @@ uint Calc_ExpGet_Exp(uint level)
 }
 
 // Increasing level
-uint Calc_ExpGet_Level(uint exp)
+static uint Calc_ExpGet_Level(uint exp)
 {
 	if (g_Cfg.m_iLevelNextAt < 1)	//Must do this check in case ini's LevelNextAt is not set or server will freeze because exp will never decrease in the while.
     {

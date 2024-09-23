@@ -70,7 +70,7 @@ void SetAbortImmediate(bool on) noexcept
 {
     *_GetAbortImmediate() = on;
 }
-bool IsAbortImmediate() noexcept
+static bool IsAbortImmediate() noexcept
 {
     return *_GetAbortImmediate();
 }
@@ -225,7 +225,7 @@ void Assert_Fail( lpctstr pExp, lpctstr pFile, long long llLine )
 	throw CAssert(LOGL_CRIT, pExp, pFile, llLine);
 }
 
-void _cdecl Sphere_Purecall_Handler()
+static void _cdecl Sphere_Purecall_Handler()
 {
 	// catch this special type of C++ exception as well.
 	Assert_Fail("purecall", "unknown", 1);
@@ -273,7 +273,7 @@ void SetExceptionTranslator()
 }
 
 #ifndef _WIN32
-void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
+static void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
 {
     UnreferencedParameter(sig);
 
@@ -292,7 +292,7 @@ void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
     g_Serv.SetExitFlag(SIGHUP);
 }
 
-void _cdecl Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
+static void _cdecl Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
 {
 
     g_Log.Event(LOGL_FATAL, "Server Unstable: %s signal received\n", strsignal(sig));
@@ -346,7 +346,7 @@ void _cdecl Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
     //exit(EXIT_FAILURE); // Having set the exit flag, all threads "should" terminate cleanly.
 }
 
-void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using secure mode
+static void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using secure mode
 {
     // Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
     //#ifdef _DEBUG
@@ -367,7 +367,7 @@ void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using sec
     }
 }
 
-void _cdecl Signal_Illegal_Instruction(int sig = 0)
+static void _cdecl Signal_Illegal_Instruction(int sig = 0)
 {
 #ifdef THREAD_TRACK_CALLSTACK
     StackDebugInformation::freezeCallStack(true);
@@ -394,7 +394,7 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
     throw CSError(LOGL_FATAL, sig, strsignal(sig));
 }
 
-void _cdecl Signal_Children(int sig = 0)
+static void _cdecl Signal_Children(int sig = 0)
 {
     UnreferencedParameter(sig);
     while (waitpid((pid_t)(-1), nullptr, WNOHANG) > 0) {}

@@ -803,6 +803,7 @@ char *AbstractSphereThread::allocateBuffer() noexcept
 	return buffer;
 }
 
+static
 TemporaryStringThreadSafeStateHolder::TemporaryStringStorage *
 getThreadRawStringBuffer()
 {

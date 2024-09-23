@@ -702,10 +702,10 @@ SQLiteTablePtr::SQLiteTablePtr( SQLiteTable * pTable )
 	m_pTable = pTable;
 }
 
-SQLiteTablePtr::SQLiteTablePtr( const SQLiteTablePtr & cTablePtr )
+SQLiteTablePtr::SQLiteTablePtr( SQLiteTablePtr & cTablePtr )
 {
 	m_pTable=cTablePtr.m_pTable;
-	((SQLiteTablePtr *)&cTablePtr)->m_pTable=nullptr;
+    cTablePtr.m_pTable=nullptr;
 }
 
 SQLiteTablePtr::~SQLiteTablePtr()
@@ -714,12 +714,12 @@ SQLiteTablePtr::~SQLiteTablePtr()
         delete m_pTable;
 }
 
-void SQLiteTablePtr::operator =( const SQLiteTablePtr & cTablePtr )
+void SQLiteTablePtr::operator =( SQLiteTablePtr & cTablePtr )
 {
 	if (m_pTable)
         delete m_pTable;
 	m_pTable=cTablePtr.m_pTable;
-	((SQLiteTablePtr *)&cTablePtr)->m_pTable=nullptr;
+    cTablePtr.m_pTable=nullptr;
 }
 
 SQLiteTable * SQLiteTablePtr::Detach()

@@ -2,14 +2,12 @@
 #include "../game/CServer.h"
 #include "../game/CServerTime.h"
 #include "../sphere/asyncdb.h"
-#include "resource/sections/CResourceNamedDef.h"
+#include "resource/sections/CResourceNamedDef.h"    // Needed because it was only forward declared.
 #include "CLog.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CScriptTriggerArgs.h"
 #include "CDataBase.h"
-
-extern CDataBaseAsyncHelper g_asyncHdb;
 
 
 CDataBase::CDataBase()

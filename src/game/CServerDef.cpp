@@ -38,7 +38,7 @@
 #else			// (Unix)
 	#include <sys/resource.h>
 #endif
-	bool	m_fPmemory = true;		// process memory information is available?
+    static bool sm_fHasMemoryInfo = true;		// process memory information is available?
 
 //////////////////////////////////////////////////////////////////////
 // -CServerDef
@@ -68,7 +68,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
 		d = 0;
-		if ( m_fPmemory )
+        if ( sm_fHasMemoryInfo )
 		{
 #ifdef _WIN32
 			if ( !m_hmPsapiDll )			// try to load psapi.dll if not loaded yet
@@ -147,7 +147,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 			if ( !d )
 			{
 				g_Log.EventError(("Unable to load process information from getrusage() and procfs. Memory information will be not available.\n"));
-				m_fPmemory = false;
+                sm_fHasMemoryInfo = false;
 			}
 #endif
 		}

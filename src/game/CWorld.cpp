@@ -1,15 +1,15 @@
 #include "../common/CException.h"
 #include "../common/CExpression.h"
+#include "../common/CLog.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/CNetworkManager.h"
 #include "../sphere/ProfileTask.h"
-#include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
 #include "items/CItemMulti.h"
-#include "items/CItemStone.h"
+#include "items/CItemStone.h"   // Needed to use CItemmStone methods, the unique_ptr was forward declared in the header
 #include "CServer.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 
 
-lpctstr GetReasonForGarbageCode(int iCode = -1)
+static lpctstr GetReasonForGarbageCode(int iCode = -1) noexcept
 {
 	lpctstr pStr;
 	switch ( iCode )
@@ -194,7 +194,7 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 	return pStr;
 }
 
-void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
+static void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 {
 	ASSERT(pObj != nullptr);
 
@@ -967,7 +967,7 @@ bool CWorld::SaveForce() // Save world state
 			else
 				pCurBlock = save_msgs[5];
 
-			fSave = SaveStage();
+            fSave = SaveStage();
 			if ( !(_iSaveStage & 0x7F) )
 			{
 				g_Serv.PrintPercent( _iSaveStage, (ssize_t)iSectorsQty + 3 );

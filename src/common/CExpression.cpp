@@ -125,7 +125,7 @@ err:
     return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
 }
 
-llong power(llong base, llong level)
+static llong cexpression_power(llong base, llong level)
 {
 	double rc = pow((double)base, (double)level);
 	return (llong)rc;
@@ -1057,7 +1057,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			llValSecond = GetVal(pExpr);
 			if (llVal < 0)
 			{
-				llVal = power(llVal, llValSecond);
+                llVal = cexpression_power(llVal, llValSecond);
 				break;
 			}
 			else if ((llVal == 0) && (llValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
@@ -1065,7 +1065,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 				g_Log.EventError("Power of zero with zero or negative exponent is undefined.\n");
 				break;
 			}
-			llVal = power(llVal, llValSecond);
+            llVal = cexpression_power(llVal, llValSecond);
 			break;
 	}
 

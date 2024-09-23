@@ -39,4 +39,7 @@ public:
 	void addQuery(bool isQuery, lpctstr sFunction, lpctstr sQuery);
 };
 
+extern CDataBaseAsyncHelper g_asyncHdb;
+
+
 #endif // _INC_ASYNCDB_H

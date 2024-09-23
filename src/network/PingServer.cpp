@@ -3,7 +3,7 @@
 #include "PingServer.h"
 
 
-PingServer g_PingServer;
+static PingServer s_PingServer;
 
 // run the thread in RealTime as we need pings to be responded to ASAP
 PingServer::PingServer() : AbstractSphereThread("PingServer", IThread::RealTime)
