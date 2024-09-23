@@ -35,7 +35,13 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
+set(ENABLED_SANITIZER FALSE)
+if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
+    set(ENABLED_SANITIZER TRUE)
+endif()
+
 # -------------------- Utility functions --------------------
+
 function(booleanize_str_find VAR)
     if(${VAR} EQUAL -1)
         unset(${VAR} PARENT_SCOPE)
@@ -75,7 +81,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
-# CMake also sets other predefined flags, which we don't want...
+# CMake also sets other predefined flags, which we don't want?
+#[[
 set(CMAKE_C_FLAGS "")
 set(CMAKE_C_FLAGS_DEBUG "")
 set(CMAKE_C_FLAGS_NIGHTLY "")
@@ -90,6 +97,7 @@ set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
 set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+]]
 
 set(is_win32_app_linker)
 if(WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
@@ -213,8 +221,26 @@ endif(SINGLE_TARGET)
 
 # --------------------
 
-#message(STATUS)
-#include("${CMAKE_SOURCE_DIR}/cmake/CompilerFlagsChecker.cmake")
+message(STATUS)
+include("${CMAKE_SOURCE_DIR}/cmake/CompilerFlagsChecker.cmake")
+
+# --------------------
+
+if(USE_ASAN)
+    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
+endif()
+if(USE_UBSAN)
+    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
+endif()
+if(USE_LSAN)
+    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
+endif()
+if(USE_MSAN)
+    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
+endif()
+if(ENABLED_SANITIZER)
+    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
+endif()
 
 # --------------------
 

@@ -3,6 +3,19 @@ message(STATUS "Checking available compiler flags...")
 
 if(NOT MSVC)
     message(STATUS "-- Compilation options:")
+
+    # Compiler option flags.
+    list(
+        APPEND
+        compiler_options_base
+        -pthread
+        -fexceptions
+        -fnon-call-exceptions
+        -pipe
+        -ffast-math
+    )
+    list(APPEND compiler_options_warning_base -Werror;-Wall;-Wextra;-Wpedantic)
+
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
     #check_cxx_compiler_flag("" COMP_HAS_)
 
@@ -10,13 +23,17 @@ if(NOT MSVC)
     check_cxx_compiler_flag("-fno-expensive-optimizations" COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
 
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
-    #check_cxx_compiler_flag("-fforce-emit-vtables" COMP_HAS_F_FORCE_EMIT_VTABLES)
+    # check_cxx_compiler_flag("-fforce-emit-vtables" COMP_HAS_F_FORCE_EMIT_VTABLES)
+    # -fwhole-program-vtables
+    # -fstrict-vtable-pointers
 
     if(${USE_ASAN})
         # Compiler option flags. Sanitizers related (ASAN).
         message(STATUS "-- Compilation options (Address Sanitizer):")
 
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=address) # link against sanitizer lib, being required by the following compilation test
         check_cxx_compiler_flag("-fsanitize=address" COMP_HAS_ASAN)
+        unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_ASAN)
             message(FATAL_ERROR "This compiler does not support Address Sanitizer. Disable it.")
         endif()
@@ -32,7 +49,9 @@ if(NOT MSVC)
         # Compiler option flags. Sanitizers related (UBSAN).
         message(STATUS "-- Compilation options (Undefined Behavior Sanitizer):")
 
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=undefined) # link against sanitizer lib, being required by the following compilation test
         check_cxx_compiler_flag("-fsanitize=undefined" COMP_HAS_UBSAN)
+        unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_UBSAN)
             message(FATAL_ERROR "This compiler does not support Undefined Behavior Sanitizer. Disable it.")
         endif()
@@ -48,7 +67,9 @@ if(NOT MSVC)
         # Compiler option flags. Sanitizers related (LSAN).
         message(STATUS "-- Compilation options (Leak Sanitizer):")
 
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=leak) # link against sanitizer lib, being required by the following compilation test
         check_cxx_compiler_flag("-fsanitize=leak" COMP_HAS_LSAN)
+        unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_LSAN)
             message(FATAL_ERROR "This compiler does not support Leak Sanitizer. Disable it.")
         endif()
@@ -56,12 +77,29 @@ if(NOT MSVC)
 
     if(${USE_MSAN})
         # Compiler option flags. Sanitizers related (UBSAN).
-
         message(STATUS "-- Compilation options (Memory Behavior Sanitizer):")
+
+        set(CMAKE_REQUIRED_LIBRARIES -fsanitize=memory) # link against sanitizer lib, being required by the following compilation test
         check_cxx_compiler_flag("-fsanitize=memory" COMP_HAS_MSAN)
+        unset(CMAKE_REQUIRED_LIBRARIES)
         if(NOT COMP_HAS_MSAN)
             message(FATAL_ERROR "This compiler does not support Memory Sanitizer. Disable it.")
         endif()
+
+        # MemorySanitizer: it doesn't work out of the box. It needs to be linked to an MSAN-instrumented build of libc++ and libc++abi.
+        #  This means: one should build them from LLVM source...
+        #  https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo
+        #IF (${USE_MSAN})
+        #    SET (CMAKE_CXX_FLAGS    "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+        #ENDIF()
+        # Use "-stdlib=libstdc++" to link against GCC c/c++ libs (this is done by default)
+        # To use LLVM libc++ use "-stdlib=libc++", but you need to install it separately
+
+        message(
+            WARNING
+            "You have enabled MSAN. Make sure you do know what you are doing. It doesn't work out of the box. \
+See comments in the toolchain and: https://github.com/google/sanitizers/wiki/MemorySanitizerLibcxxHowTo"
+        )
 
         check_cxx_compiler_flag("-fsanitize=memory-track-origins" COMP_HAS_F_SANITIZE_MEMORY_TRACK_ORIGINS)
         check_cxx_compiler_flag("-fPIE" COMP_HAS_F_PIE)
@@ -88,10 +126,10 @@ if(NOT MSVC)
 
     # Compiler warning flags.
     message(STATUS "-- Compilation options (warnings):")
-    check_cxx_compiler_flag("-Wuseless-cast" COMP_HAS_W_USELESS_CAST)
+    #check_cxx_compiler_flag("-Wuseless-cast" COMP_HAS_W_USELESS_CAST)
     check_cxx_compiler_flag("-Wnull-dereference" COMP_HAS_W_NULL_DEREFERENCE)
-    check_cxx_compiler_flag("-Wconversion" COMP_HAS_W_CONVERSION) # Temporarily disabled. Implicit type conversions that might change a value, such as narrowing conversions.
-    check_cxx_compiler_flag("-Wcast-qual" COMP_HAS_W_CAST_QUAL) # casts that remove a type's const or volatile qualifier.
+    #check_cxx_compiler_flag("-Wconversion" COMP_HAS_W_CONVERSION) # Temporarily disabled. Implicit type conversions that might change a value, such as narrowing conversions.
+    #check_cxx_compiler_flag("-Wcast-qual" COMP_HAS_W_CAST_QUAL) # casts that remove a type's const or volatile qualifier.
     check_cxx_compiler_flag("-Wzero-as-null-pointer-constant" COMP_HAS_W_ZERO_NULLPTR)
     check_cxx_compiler_flag("-Wdisabled-optimization" COMP_HAS_W_DISABLE_OPT)
     check_cxx_compiler_flag("-Winvalid-pch" COMP_HAS_W_INVALID_PCH)
@@ -121,18 +159,19 @@ if(NOT MSVC)
 
     # Compiler warning flags. To be disabled.
     message(STATUS "-- Compilation options (disable specific warnings):")
-    check_cxx_compiler_flag("-Wno-format-nonliteral" COMP_HAS_WNO_FORMAT_NONLITERAL) # Since -Wformat=2 is stricter, you would need to disable this warning.
-    check_cxx_compiler_flag("-Wno-nonnull-compare" COMP_HAS_WNO_NONNULL_COMPARE)
-    check_cxx_compiler_flag("-Wno-maybe-uninitialized" COMP_HAS_WNO_MAYBE_UNINIT)
-    check_cxx_compiler_flag("-Wno-switch" COMP_HAS_WNO_SWITCH)
-    check_cxx_compiler_flag("-Wno-implicit-fallthrough" COMP_HAS_WNO_IMPLICIT_FALLTHROUGH)
-    check_cxx_compiler_flag("-Wno-parentheses" COMP_HAS_WNO_PARENTHESES)
-    check_cxx_compiler_flag("-Wno-misleading-indentation" COMP_HAS_WNO_MISLEADING_INDENTATION)
-    check_cxx_compiler_flag("-Wno-unused-result" COMP_HAS_WNO_UNUSED_RESULT)
-    check_cxx_compiler_flag("-Wno-nested-anon-types" COMP_HAS_WNO_NESTED_ANON_TYPES)
-    check_cxx_compiler_flag("-Wno-format-security" COMP_HAS_WNO_FORMAT_SECURITY) # TODO: remove that when we'll have time to fix every printf format issue
-    check_cxx_compiler_flag("-Wno-deprecated-declarations" COMP_HAS_WNO_DEPRECATED_DECLARATIONS)
-    #check_cxx_compiler_flag("-Wno-unknown-pragmas" COMP_HAS_)
+    check_cxx_compiler_flag("-Wunused-function" COMP_HAS_WNO_UNUSED_FUNCTION)
+    check_cxx_compiler_flag("-Wformat-nonliteral" COMP_HAS_WNO_FORMAT_NONLITERAL) # Since -Wformat=2 is stricter, you would need to disable this warning.
+    check_cxx_compiler_flag("-Wnonnull-compare" COMP_HAS_WNO_NONNULL_COMPARE)
+    check_cxx_compiler_flag("-Wmaybe-uninitialized" COMP_HAS_WNO_MAYBE_UNINIT)
+    check_cxx_compiler_flag("-Wswitch" COMP_HAS_WNO_SWITCH)
+    check_cxx_compiler_flag("-Wimplicit-fallthrough" COMP_HAS_WNO_IMPLICIT_FALLTHROUGH)
+    check_cxx_compiler_flag("-Wparentheses" COMP_HAS_WNO_PARENTHESES)
+    check_cxx_compiler_flag("-Wmisleading-indentation" COMP_HAS_WNO_MISLEADING_INDENTATION)
+    check_cxx_compiler_flag("-Wunused-result" COMP_HAS_WNO_UNUSED_RESULT)
+    check_cxx_compiler_flag("-Wnested-anon-types" COMP_HAS_WNO_NESTED_ANON_TYPES)
+    check_cxx_compiler_flag("-Wformat-security" COMP_HAS_WNO_FORMAT_SECURITY) # TODO: remove that when we'll have time to fix every printf format issue
+    check_cxx_compiler_flag("-Wdeprecated-declarations" COMP_HAS_WNO_DEPRECATED_DECLARATIONS)
+    #check_cxx_compiler_flag("-Wunknown-pragmas" COMP_HAS_)
     #check_cxx_compiler_flag("" COMP_HAS_)
 else(NOT MSVC)
     # Compiler warning flags (MSVC).
@@ -151,6 +190,10 @@ endif()
 
 if(COMP_HAS_ASAN)
     list(APPEND checked_compiler_options_asan "-fsanitize=address")
+    list(APPEND checked_linker_options_all "-fsanitize=address")
+    if(RUNTIME_STATIC_LINK)
+        list(APPEND checked_linker_options_all "-static-libasan")
+    endif()
     if(COMP_HAS_FSAN_CFI)
         list(APPEND checked_compiler_options_asan "-fsanitize-cfi")
     endif()
@@ -170,6 +213,10 @@ endif()
 
 if(COMP_HAS_UBSAN)
     list(APPEND checked_compiler_options_ubsan "-fsanitize=undefined")
+    list(APPEND checked_linker_options_all "-fsanitize=undefined")
+    if(RUNTIME_STATIC_LINK)
+        list(APPEND checked_linker_options_all "-static-libubsan")
+    endif()
     if(COMP_HAS_FSAN_FLOAT_DIVIDE_BY_ZERO)
         list(APPEND checked_compiler_options_ubsan "-fsanitize=float-divide-by-zero")
     endif()
@@ -189,15 +236,24 @@ endif()
 
 if(COMP_HAS_LSAN)
     list(APPEND checked_compiler_options_lsan "-fsanitize=leak")
+    list(APPEND checked_linker_options_all "-fsanitize=leak")
+    if(RUNTIME_STATIC_LINK)
+        list(APPEND checked_linker_options_all "-static-liblsan")
+    endif()
 endif()
 
 if(COMP_HAS_MSAN)
     list(APPEND checked_compiler_options_msan "-fsanitize=memory")
+    list(APPEND checked_linker_options_all "-fsanitize=memory")
+    if(RUNTIME_STATIC_LINK)
+        list(APPEND checked_linker_options_all "-static-libmsan")
+    endif()
     if(COMP_HAS_F_SANITIZE_MEMORY_TRACK_ORIGINS)
         list(APPEND checked_compiler_options_msan "-fsanitize=memory-track-origins")
     endif()
     if(COMP_HAS_F_PIE)
         list(APPEND checked_compiler_options_msan "-fPIE")
+        list(APPEND checked_linker_options_all "-pie")
     endif()
 endif()
 
@@ -283,6 +339,9 @@ if(COMP_HAS_W_MISSING_VARIABLE_DECL)
     list(APPEND checked_compiler_warnings "-Wmissing-variable-declarations")
 endif()
 
+if(COMP_HAS_WNO_UNUSED_FUNCTION)
+    list(APPEND checked_compiler_warnings_disabled "-Wno-unused-function")
+endif()
 if(COMP_HAS_WNO_FORMAT_NONLITERAL)
     list(APPEND checked_compiler_warnings_disabled "-Wno-format-nonliteral")
 endif()
@@ -320,7 +379,7 @@ endif()
 # ---- MSVC
 
 if(COMP_HAS_DEFINE_MACRO_EXPANSION)
-    list(APPEND checked_compiler_flags_msvc "/Wd5105")
+    list(APPEND checked_compiler_options_msvc "/Wd5105")
 endif()
 
 # ---- Double checks
@@ -344,34 +403,68 @@ set(checked_compiler_options_asan)
 set(checked_compiler_options_sanitize_harden)
 set(checked_compiler_warnings)
 set(checked_compiler_warnings_disabled)
-set(checked_compiler_flags_msvc)
+set(checked_compiler_options_msvc)
 ]]
 
-message(STATUS "Adding the following conditional compiler options: ${checked_compiler_options}.")
-if(COMP_HAS_ASAN)
-    message(STATUS "Adding the following conditional compiler options for ASan: ${checked_compiler_options_asan}.")
-endif()
-if(COMP_HAS_UBSAN)
-    message(STATUS "Adding the following conditional compiler options for UBSan: ${checked_compiler_options_ubsan}.")
-endif()
-if(COMP_HAS_LSAN)
-    message(STATUS "Adding the following conditional compiler options for LSan: ${checked_compiler_options_lsan}.")
-endif()
+## ----
 
-if(COMP_HAS_MSAN)
-    message(STATUS "Adding the following conditional compiler options for MSan: ${checked_compiler_options_msan}.")
-endif()
-
-message(
-    STATUS
-    "Adding the following conditional compiler options for hardening: ${checked_compiler_options_sanitize_harden}."
-)
-message(STATUS "Adding the following conditional compiler warnings: ${checked_compiler_warnings}.")
-message(
-    STATUS
-    "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}."
+list(
+    APPEND
+    list_gnu_explicit_compiler_options_all
+    ${compiler_options_base}
+    ${compiler_options_warning_base}
+    ${checked_compiler_options}
+    ${checked_compiler_options_asan}
+    ${checked_compiler_options_ubsan}
+    ${checked_compiler_options_lsan}
+    ${checked_compiler_options_msan}
+    ${checked_compiler_options_sanitize_harden}
+    ${checked_compiler_warnings}
+    ${checked_compiler_warnings_disabled}
+    ${checked_compiler_options_msvc}
 )
 
-if(MSVC)
-    message(STATUS "Adding the following conditional compiler options: ${checked_compiler_flags_msvc}.")
+list(APPEND list_gnu_explicit_linker_options_all ${checked_linker_options_all};-pthread;-dynamic;-Wl,--fatal-warnings)
+
+#string(JOIN " " string_checked_compiler_options_all ${list_checked_compiler_options_all})
+#set(string_checked_compiler_options_all CACHE STRING "Additional compiler flags, dynamically added." FORCE)
+set(list_gnu_explicit_compiler_options_all CACHE STRING "Additional compiler flags, dynamically added." FORCE)
+set(list_gnu_explicit_linker_options_all CACHE STRING "Additional linker flags, dynamically added." FORCE)
+
+## ----
+
+if(NOT MSVC)
+    message(STATUS "Adding the following base compiler options: ${compiler_options_base}")
+    message(STATUS "Adding the following base compiler warning options: ${compiler_options_warning_base}")
+
+    message(STATUS "Adding the following conditional compiler options: ${checked_compiler_options}.")
+    if(COMP_HAS_ASAN)
+        message(STATUS "Adding the following conditional compiler options for ASan: ${checked_compiler_options_asan}.")
+    endif()
+    if(COMP_HAS_UBSAN)
+        message(
+            STATUS
+            "Adding the following conditional compiler options for UBSan: ${checked_compiler_options_ubsan}."
+        )
+    endif()
+    if(COMP_HAS_LSAN)
+        message(STATUS "Adding the following conditional compiler options for LSan: ${checked_compiler_options_lsan}.")
+    endif()
+
+    if(COMP_HAS_MSAN)
+        message(STATUS "Adding the following conditional compiler options for MSan: ${checked_compiler_options_msan}.")
+    endif()
+
+    message(
+        STATUS
+        "Adding the following conditional compiler options for hardening: ${checked_compiler_options_sanitize_harden}."
+    )
+    message(STATUS "Adding the following conditional compiler warnings: ${checked_compiler_warnings}.")
+    message(
+        STATUS
+        "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}."
+    )
+    message(STATUS "Adding the following linker options: ${list_gnu_explicit_linker_options_all}.")
+elseif(MSVC)
+    message(STATUS "Adding the following conditional compiler options: ${checked_compiler_options_msvc}.")
 endif()
