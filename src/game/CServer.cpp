@@ -975,11 +975,16 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				size_t iThreadCount = ThreadHolder::get().getActiveThreads();
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
-					IThread * thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
+					AbstractThread * thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 					if (thrCurrent != nullptr)
 					{
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %" PRIu64 ", Priority: %d, Name: %s.\n",
-							(iThreads + 1), (uint64)thrCurrent->getId(), thrCurrent->getPriority(), thrCurrent->getName());
+                        pSrc->SysMessagef(
+                            "%" PRIuSIZE_T " - Id: %" PRIu64 ", Priority: %d, Name: %s.\n",
+                            (iThreads + 1),
+                            (uint64)thrCurrent->getId(),
+                            enum_alias_cast<int>(thrCurrent->getPriority()),
+                            thrCurrent->getName()
+                            );
 					}
 				}
 			} break;
@@ -1362,7 +1367,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 	size_t uiThreadCount = ThreadHolder::get().getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < uiThreadCount; ++iThreads)
 	{
-		IThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
+		AbstractThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 		if (thrCurrent == nullptr)
 			continue;
 

@@ -11,7 +11,7 @@
 #endif
 
 
-UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", IThread::Highest),
+UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", ThreadPriority::Highest),
 #ifdef _USECURSES
 	m_window(nullptr),
 #else

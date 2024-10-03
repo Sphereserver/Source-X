@@ -242,7 +242,7 @@ void CNetState::markReadClosed(void) volatile
 
     DEBUGNETWORK(("%x:Client being closed by read-thread\n", m_id));
     m_isReadClosed = true;
-    if (m_parent != nullptr && m_parent->getPriority() == IThread::Disabled)
+    if (m_parent != nullptr && m_parent->getPriority() == ThreadPriority::Disabled)
         m_parent->awaken();
 }
 

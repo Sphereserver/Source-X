@@ -173,7 +173,7 @@ static PingServer g_PingServer;
 //	Main server loop
 
 MainThread::MainThread()
-	: AbstractSphereThread("T_Main", IThread::RealTime)
+	: AbstractSphereThread("T_Main", ThreadPriority::RealTime)
 {
     m_profile.EnableProfile(PROFILE_NETWORK_RX);
     m_profile.EnableProfile(PROFILE_CLIENTS);
@@ -492,14 +492,14 @@ int _cdecl main( int argc, char * argv[] )
 
 	{
         // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
-        const IThread* curthread = ThreadHolder::get().current();
+        const AbstractThread* curthread = ThreadHolder::get().current();
         ASSERT(curthread != nullptr);
         ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
         (void)curthread;
     }
 
 #ifndef _WIN32
-    IThread::setThreadName("T_SphereStartup");
+    AbstractThread::setThreadName("T_SphereStartup");
 
     g_UnixTerminal.start();
 
@@ -531,7 +531,7 @@ int _cdecl main( int argc, char * argv[] )
 		if (fShouldCoreRunInSeparateThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
-			IThread::setThreadName("T_Monitor");
+            AbstractThread::setThreadName("T_Monitor");
 			Sphere_MainMonitorLoop();	// Use this thread to monitor if the others are stuck
 		}
 		else

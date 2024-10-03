@@ -317,7 +317,7 @@ CServerConfig::CServerConfig()
 
 	// Networking
 	_uiNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
-	_uiNetworkThreadPriority= IThread::Disabled;
+    _iNetworkThreadPriority = enum_alias_cast<int>(ThreadPriority::Disabled);
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
 	m_iNetHistoryTTLSeconds 		= 300;
@@ -644,7 +644,7 @@ enum RC_TYPE
 	RC_MYSQLTICKS,				// m_fMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
-	RC_NETWORKTHREADPRIORITY,	// _uiNetworkThreadPriority
+    RC_NETWORKTHREADPRIORITY,	// _iNetworkThreadPriority
 	RC_NETWORKTHREADS,			// _uiNetworkThreads
 	RC_NORESROBE,
 	RC_NOTOTIMEOUT,
@@ -937,7 +937,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MYSQLTICKS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMySqlTicks)			}},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlUser)			}},
 	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig, m_iNetHistoryTTLSeconds)		}},
-	{ "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreadPriority)}},
+    { "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_iNetworkThreadPriority)}},
 	{ "NETWORKTHREADS",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreads)		}},
 	{ "NORESROBE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fNoResRobe)			}},
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNotoTimeout)			}},
@@ -1483,15 +1483,15 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_NETWORKTHREADPRIORITY:
 			{
-				int priority = s.GetArgVal();
-				if (priority < 1)
-					priority = IThread::Normal;
-				else if (priority > 4)
-					priority = IThread::RealTime;
+                int priority = s.GetArgVal();
+                if (priority < 1)
+                    priority = enum_alias_cast<int>(ThreadPriority::Normal);
+                else if (priority > 4)
+                    priority = enum_alias_cast<int>(ThreadPriority::RealTime);
 				else
-					priority = IThread::Low + (IThread::Priority)priority;
+                    priority = enum_alias_cast<int>(ThreadPriority::Low) + priority;
 
-				_uiNetworkThreadPriority = priority;
+                _iNetworkThreadPriority = priority;
 			}
 			break;
 		case RC_WALKBUFFER:

@@ -391,7 +391,7 @@ void CNetworkManager::start(void)
             if (ntCount > 1)
             {
                 // If we have more than one thread (this hasn't sense... at this point isThreaded should be == true)
-                char name[IThread::m_nameMaxLength];
+                char name[AbstractThread::m_nameMaxLength];
                 snprintf(name, sizeof(name), "T_Net #%u", (uint)pThread->getId());
                 pThread->overwriteInternalThreadName(name);
             }
@@ -453,7 +453,7 @@ void CNetworkManager::tick(void)
             // sent from CNetworkOutput::QueuePacketTransaction can be ignored
             // the safest solution to this is to send additional signals from here
             CNetworkThread* thread = state->getParentThread();
-            if (thread != nullptr && state->hasPendingData() && thread->getPriority() == IThread::Disabled)
+            if (thread != nullptr && state->hasPendingData() && thread->getPriority() == ThreadPriority::Disabled)
                 thread->awaken();
 #endif
             continue;

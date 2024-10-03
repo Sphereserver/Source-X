@@ -569,7 +569,7 @@ public:
 
 	// network settings
 	uint _uiNetworkThreads;         // number of network threads to create
-	uint _uiNetworkThreadPriority;  // priority of network threads
+    int _iNetworkThreadPriority;  // priority of network threads
 	int	 m_fUseAsyncNetwork;        // 0=normal send, 1=async send, 2=async send for 4.0.0+ only
 	int	 m_iNetMaxPings;            // max pings before blocking an ip
 	int	 m_iNetHistoryTTLSeconds;          // time to remember an ip

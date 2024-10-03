@@ -100,7 +100,7 @@ void CNTWindow::CStatusDlg::FillStats()
 	size_t iThreadCount = ThreadHolder::get().getActiveThreads();
 	for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads)
 	{
-		IThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
+		AbstractThread* thrCurrent = ThreadHolder::get().getThreadAt(iThreads);
 		if (thrCurrent == nullptr)
 			continue;
 
@@ -163,7 +163,7 @@ BOOL CNTWindow::CStatusDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 	return false;
 }
 
-CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highest),
+CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", ThreadPriority::Highest),
     _NTWInitParams{}, m_zCommands {{}}
 {
     _fKeepAliveAtShutdown = true;

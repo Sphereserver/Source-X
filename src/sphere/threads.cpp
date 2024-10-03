@@ -54,74 +54,6 @@ public:
 	}
 };
 
-IThread::IThread() noexcept :
-    m_threadSystemId(0), m_threadHolderId(-1)
-    { };
-
-// This is needed to prevent weak-vtables warning (puts the vtable in this translation unit instead of every translation unit)
-IThread::~IThread() noexcept = default;
-
-#if defined(_WIN32) && defined(MSVC_COMPILER)
-#pragma pack(push, 8)
-typedef struct tagTHREADNAME_INFO
-{
-	DWORD dwType;
-	LPCSTR szName;
-	DWORD dwThreadID;
-	DWORD dwFlags;
-} THREADNAME_INFO;
-#pragma pack(pop)
-
-static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
-#endif
-
-void IThread::setThreadName(const char* name)
-{
-	// register the thread name
-
-	// Unix uses prctl to set thread name
-	// thread name must be 16 bytes, zero-padded if shorter
-	char name_trimmed[m_nameMaxLength] = { '\0' };	// m_nameMaxLength = 16
-    Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
-
-#if defined(_WIN32)
-    #if defined(MSVC_COMPILER)	// TODO: support thread naming when compiling with compilers other than Microsoft's
-        // Windows uses THREADNAME_INFO structure to set thread name
-        THREADNAME_INFO info;
-        info.dwType = 0x1000;
-        info.szName = name_trimmed;
-        info.dwThreadID = (DWORD)(-1);
-        info.dwFlags = 0;
-
-        __try
-        {
-            RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-        }
-    #endif // MSVC_COMPILER
-#elif defined(__APPLE__)	// Mac
-	pthread_setname_np(name_trimmed);
-#elif !defined(_BSD)		// Linux
-	prctl(PR_SET_NAME, name_trimmed, 0, 0, 0);
-#elif defined(__FreeBSD__) || defined(__OpenBSD__)
-	pthread_set_name_np(getCurrentThreadId(), name_trimmed);
-#elif defined(__NetBSD__)
-	pthread_setname_np(getCurrentThreadId(), "%s", name_trimmed);
-#endif
-
-    auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
-    ASSERT(athr);
-
-#ifdef _DEBUG
-    g_Log.Event(LOGF_CONSOLE_ONLY|LOGM_DEBUG|LOGL_EVENT,
-                "Setting thread (ThreadHolder ID %d, internal name '%s') system name: '%s'.\n",
-                athr->m_threadHolderId, athr->getName(), name_trimmed);
-#endif
-    athr->overwriteInternalThreadName(name_trimmed);
-}
-
 
 /**
  * ThreadHolder
@@ -144,18 +76,18 @@ bool ThreadHolder::closing() noexcept
     return ret;
 }
 
-IThread* ThreadHolder::current() noexcept
+AbstractThread* ThreadHolder::current() noexcept
 {
     // Do not use ASSERTs here, would cause recursion.
 
     // RETRY_SHARED_LOCK_FOR_TASK is used to try to not make mutex lock fail and, if needed,
     //  handle failure while allowing this function to be noexcept.
 
-    IThread* retval = nullptr;
+    AbstractThread* retval = nullptr;
     RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
-        ([this, &lock]() -> IThread*
+        ([this, &lock]() -> AbstractThread*
         {
-            const threadid_t tid = IThread::getCurrentThreadSystemId();
+            const threadid_t tid = AbstractThread::getCurrentThreadSystemId();
 
             if (m_spherethreadpairs_systemid_ptr.empty())
             [[unlikely]]
@@ -166,7 +98,7 @@ IThread* ThreadHolder::current() noexcept
                     return nullptr;
                 }
 
-                auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
+                auto thread = static_cast<AbstractThread*>(DummySphereThread::getInstance());
                 if (!thread)
                 [[unlikely]]
                 {
@@ -200,7 +132,7 @@ IThread* ThreadHolder::current() noexcept
                 RaiseImmediateAbort();
             }
 
-            auto thread = static_cast<IThread *>(found->second);
+            auto thread = static_cast<AbstractThread *>(found->second);
 
             ASSERT(thread->m_threadHolderId != -1);
             SphereThreadData *tdata = &(m_threads[thread->m_threadHolderId]);
@@ -236,7 +168,7 @@ IThread* ThreadHolder::current() noexcept
     return retval;
 }
 
-void ThreadHolder::push(IThread *thread) noexcept
+void ThreadHolder::push(AbstractThread *thread) noexcept
 {
     bool fExceptionThrown = false;
     try
@@ -244,8 +176,8 @@ void ThreadHolder::push(IThread *thread) noexcept
         auto sphere_thread = dynamic_cast<AbstractSphereThread*>(thread);
         if (!sphere_thread)
         {
-            //throw CSError(LOGL_FATAL, 0, "IThread not being an AbstractSphereThread?");
-            STDERR_LOG("IThread not being an AbstractSphereThread?");
+            //throw CSError(LOGL_FATAL, 0, "AbstractThread not being an AbstractSphereThread?");
+            STDERR_LOG("AbstractThread not being an AbstractSphereThread?");
             fExceptionThrown = true;
         }
 
@@ -311,23 +243,7 @@ void ThreadHolder::push(IThread *thread) noexcept
 #endif
 }
 
-/*
-SphereThreadData* ThreadHolder::findThreadData(IThread* thread) noexcept
-{
-    // If checking for current thread, use another escamotage to retrieve it...
-
-    // This should always run guarded by a MUTEX!
-    SimpleThreadLock lock(m_mutex);
-    for (size_t i = 0; i < m_threadCount; ++i)
-    {
-        if (m_threads[i].m_ptr == thread)
-            return &(m_threads[i]);
-    }
-    return nullptr;
-}
-*/
-
-void ThreadHolder::remove(IThread *thread) CANTHROW
+void ThreadHolder::remove(AbstractThread *thread) CANTHROW
 {
     if (!thread)
         throw CSError(LOGL_FATAL, 0, "thread == nullptr");
@@ -373,11 +289,11 @@ void ThreadHolder::markThreadsClosing() CANTHROW
 	}
 }
 
-IThread * ThreadHolder::getThreadAt(size_t at) noexcept
+AbstractThread * ThreadHolder::getThreadAt(size_t at) noexcept
 {
-    IThread* retval = nullptr;
+    AbstractThread* retval = nullptr;
     RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
-        ([this, at]() -> IThread*
+        ([this, at]() -> AbstractThread*
         {
 // MSVC: warning C5101: use of preprocessor directive in function-like macro argument list is undefined behavior.
 //#ifdef _DEBUG
@@ -389,7 +305,7 @@ IThread * ThreadHolder::getThreadAt(size_t at) noexcept
             }
 //#endif
 
-            	if ( at > getActiveThreads() )
+            if ( at > getActiveThreads() )
             [[unlikely]]
             {
                 return nullptr;
@@ -418,7 +334,8 @@ IThread * ThreadHolder::getThreadAt(size_t at) noexcept
 */
 int AbstractThread::m_threadsAvailable = 0;
 
-AbstractThread::AbstractThread(const char *name, IThread::Priority priority) :
+AbstractThread::AbstractThread(const char *name, ThreadPriority priority) :
+    m_threadSystemId(0), m_threadHolderId(-1),
     _fKeepAliveAtShutdown(false), _fIsClosing(false)
 {
 	if( AbstractThread::m_threadsAvailable == 0 )
@@ -733,7 +650,7 @@ void AbstractThread::onStart()
 
     ThreadHolder::get().push(this);
 
-    	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
+    if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
 		setThreadName(getName());
 
 #ifdef _DEBUG
@@ -743,36 +660,36 @@ void AbstractThread::onStart()
 #endif
 }
 
-void AbstractThread::setPriority(IThread::Priority pri)
+void AbstractThread::setPriority(ThreadPriority pri)
 {
-	ASSERT(((pri >= IThread::Idle) && (pri <= IThread::RealTime)) || (pri == IThread::Disabled));
+    ASSERT(((pri >= ThreadPriority::Idle) && (pri <= ThreadPriority::RealTime)) || (pri == ThreadPriority::Disabled));
 	m_priority = pri;
 
 	// detect a sleep period for thread depending on priority
 	switch( m_priority )
 	{
-		case IThread::Idle:
+        case ThreadPriority::Idle:
 			m_tickPeriod = 1000;
 			break;
-		case IThread::Low:
+        case ThreadPriority::Low:
 			m_tickPeriod = 200;
 			break;
-		case IThread::Normal:
+        case ThreadPriority::Normal:
 			m_tickPeriod = 100;
 			break;
-		case IThread::High:
+        case ThreadPriority::High:
 			m_tickPeriod = 50;
 			break;
-		case IThread::Highest:
+        case ThreadPriority::Highest:
 			m_tickPeriod = 5;
 			break;
-		case IThread::RealTime:
+        case ThreadPriority::RealTime:
 			m_tickPeriod = 0;
 			break;
-		case IThread::Disabled:
+        case ThreadPriority::Disabled:
 			m_tickPeriod = AutoResetEvent::_kiInfinite;
 			break;
-	}\
+    }
 }
 
 bool AbstractThread::shouldExit() noexcept
@@ -780,10 +697,71 @@ bool AbstractThread::shouldExit() noexcept
 	return closing() || m_terminateRequested || _thread_selfTerminateAfterThisTick;
 }
 
+void AbstractThread::setThreadName(const char* name)
+{
+    // register the thread name
+
+    // Unix uses prctl to set thread name
+    // thread name must be 16 bytes, zero-padded if shorter
+    char name_trimmed[m_nameMaxLength] = { '\0' };	// m_nameMaxLength = 16
+    Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
+
+#if defined(_WIN32)
+#if defined(MSVC_COMPILER)
+    // TODO: support thread naming when compiling with compilers other than Microsoft's
+
+    // Windows uses THREADNAME_INFO structure to set thread name
+#pragma pack(push, 8)
+    typedef struct tagTHREADNAME_INFO
+    {
+        DWORD dwType;
+        LPCSTR szName;
+        DWORD dwThreadID;
+        DWORD dwFlags;
+    } THREADNAME_INFO;
+#pragma pack(pop)
+    static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
+
+    THREADNAME_INFO info;
+    info.dwType = 0x1000;
+    info.szName = name_trimmed;
+    info.dwThreadID = (DWORD)(-1);
+    info.dwFlags = 0;
+
+    __try
+    {
+        RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+    }
+#endif // MSVC_COMPILER
+#elif defined(__APPLE__)	// Mac
+    pthread_setname_np(name_trimmed);
+#elif !defined(_BSD)		// Linux
+    prctl(PR_SET_NAME, name_trimmed, 0, 0, 0);
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
+    pthread_set_name_np(getCurrentThreadId(), name_trimmed);
+#elif defined(__NetBSD__)
+    pthread_setname_np(getCurrentThreadId(), "%s", name_trimmed);
+#endif
+
+    auto athr = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
+    ASSERT(athr);
+
+#ifdef _DEBUG
+    g_Log.Event(LOGF_CONSOLE_ONLY|LOGM_DEBUG|LOGL_EVENT,
+        "Setting thread (ThreadHolder ID %d, internal name '%s') system name: '%s'.\n",
+        athr->m_threadHolderId, athr->getName(), name_trimmed);
+#endif
+    athr->overwriteInternalThreadName(name_trimmed);
+}
+
+
 /*
  * AbstractSphereThread
 */
-AbstractSphereThread::AbstractSphereThread(const char *name, Priority priority)
+AbstractSphereThread::AbstractSphereThread(const char *name, ThreadPriority priority)
 	: AbstractThread(name, priority)
 {
 #ifdef THREAD_TRACK_CALLSTACK
@@ -803,7 +781,6 @@ AbstractSphereThread::~AbstractSphereThread()
 {
 	_fIsClosing = true;
 }
-
 
 char *AbstractSphereThread::allocateBuffer() noexcept
 {
@@ -976,7 +953,7 @@ void AbstractSphereThread::printStackTrace() noexcept
 DummySphereThread *DummySphereThread::_instance = nullptr;
 
 DummySphereThread::DummySphereThread()
-	: AbstractSphereThread("dummy", IThread::Normal)
+    : AbstractSphereThread("dummy", ThreadPriority::Normal)
 {
 }
 
@@ -1016,7 +993,7 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
     if (th.closing()) [[unlikely]]
         return;
 
-    IThread *icontext = th.current();
+    AbstractThread *icontext = th.current();
     if (icontext == nullptr)
     [[unlikely]]
 	{
@@ -1048,14 +1025,14 @@ StackDebugInformation::~StackDebugInformation() noexcept
 
 void StackDebugInformation::printStackTrace() noexcept // static
 {
-	IThread* pThreadState = ThreadHolder::get().current();
+    AbstractThread* pThreadState = ThreadHolder::get().current();
 	if (pThreadState)
 		static_cast<AbstractSphereThread*>(pThreadState)->printStackTrace();
 }
 
 void StackDebugInformation::freezeCallStack(bool freeze) noexcept // static
 {
-	IThread* pThreadState = ThreadHolder::get().current();
+    AbstractThread* pThreadState = ThreadHolder::get().current();
 	if (pThreadState)
 		static_cast<AbstractSphereThread*>(pThreadState)->freezeCallStack(freeze);
 }

@@ -457,7 +457,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	UnreferencedParameter(hPrevInstance);
-    IThread::setThreadName("T_SphereStartup");
+    AbstractThread::setThreadName("T_SphereStartup");
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
