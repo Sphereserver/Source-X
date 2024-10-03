@@ -48,16 +48,18 @@
 #define NOTEXTMETRIC
 #define NOWH
 
-#   ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 // Workaround to a possible VS compiler bug: instead of complaining if a macro expands to a "defined" macro,
 //  it complains if a define macro contains the words "defined" in its name...
-#       pragma warning(push)
-#       pragma warning(disable: 5105)
-#   endif
-#   include <windows.h>
-#   ifdef _MSC_VER
-#       pragma warning(pop)
-#   endif
+#   pragma warning(push)
+#   pragma warning(disable: 5105)
+#endif
+
+#include <windows.h>
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#   pragma warning(pop)
+#endif
 
 
 /*	file handling definitions  */
@@ -76,7 +78,7 @@
 	#define STRICT			// strict conversion of handles and pointers.
 #endif
 
-#ifndef _MSC_VER	// No Microsoft compiler
+#ifdef __MINGW32__	// No Microsoft compiler
 	#define _cdecl	__cdecl
 
 	// Not defined for mingw.

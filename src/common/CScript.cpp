@@ -9,10 +9,15 @@
 #include "common.h"
 
 
+/*
+ *  TODO:
+ *  make CScriptKey m_pszKey and m_pszVal private.
+ *  make setter and getters methods that will automatically update the buffer lengths, held in a separate value.
+*/
+
 
 ///////////////////////////////////////////////////////////////
 // -CScriptKey
-
 
 bool CScriptKey::IsKey( lpctstr pszName ) const
 {

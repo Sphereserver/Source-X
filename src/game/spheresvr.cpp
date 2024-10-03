@@ -72,7 +72,7 @@ GlobalInitializer::GlobalInitializer()
 //--- Exception handling
 
     // Set exception catcher?
-#if defined(_WIN32) && defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
+#if defined(MSVC_COMPILER) && !defined(_NIGHTLYBUILD)
     // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
     // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
     //	compiler flag, which slows down code a bit.

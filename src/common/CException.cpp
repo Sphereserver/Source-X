@@ -45,7 +45,7 @@ void NotifyDebugger()
     {
 
 #ifdef _WIN32
-    #ifdef _MSC_VER
+    #ifdef MSVC_COMPILER
         __debugbreak();
     #else
         SetAbortImmediate(false);
@@ -70,10 +70,12 @@ void SetAbortImmediate(bool on) noexcept
 {
     *_GetAbortImmediate() = on;
 }
+#ifndef _WIN32
 static bool IsAbortImmediate() noexcept
 {
     return *_GetAbortImmediate();
 }
+#endif
 
 void RaiseRecoverableAbort()
 {
@@ -234,7 +236,7 @@ static void _cdecl Sphere_Purecall_Handler()
 void SetPurecallHandler()
 {
 	// We don't want sphere to immediately exit if something calls a pure virtual method.
-#ifdef _MSC_VER
+#ifdef MSVC_RUNTIME
 	_set_purecall_handler(Sphere_Purecall_Handler);
 #else
 	// GCC handler for pure calls is __cxxabiv1::__cxa_pure_virtual.
@@ -247,7 +249,7 @@ void SetPurecallHandler()
 
 #include "crashdump/crashdump.h"
 
-void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
+static void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
 {
 #ifndef _NO_CRASHDUMP
 	if ( CrashDump::IsEnabled() )
@@ -267,7 +269,7 @@ void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTER
 
 void SetExceptionTranslator()
 {
-#if defined(_MSC_VER) && !defined(_DEBUG)
+#ifdef MSVC_COMPILER
 	_set_se_translator( Sphere_Exception_Windows );
 #endif
 }

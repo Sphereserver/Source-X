@@ -16,7 +16,7 @@
 *	void SendCompleted_Winsock			Winsock event handler for when async operation completes
 *
 ***************************************************************************/
-void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
+static void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	UnreferencedParameter(dwFlags);
 	ADDTOCALLSTACK("SendCompleted_Winsock");

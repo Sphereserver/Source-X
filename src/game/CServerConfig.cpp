@@ -741,7 +741,7 @@ enum RC_TYPE
 
 // TODO: use offsetof by cstddef. Though, it requires the class/struct to be a POD type, so we need to encapsulate the values in a separate struct.
 // This hack does happen because this class hasn't virtual methods? Or simply because the compiler is so smart and protects us from ourselves?
-#ifdef __GNUC__
+#if NON_MSVC_COMPILER
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
@@ -1030,7 +1030,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ nullptr,					{ ELEM_VOID,	0,												}}
 };
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
 #endif
 
@@ -3052,7 +3052,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		}
 
 		rid = CResourceID( (dword)pVarNum->GetValNum(), 0 );
-		restype	= rid.GetResType();
+
+        // This value won't be read, since we return anyways once in this branch.
+        //restype = rid.GetResType();
 
 		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );

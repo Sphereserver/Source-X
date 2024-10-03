@@ -39,14 +39,14 @@
 /* End of phmap.h inclusion */
 
 /* Include btree.h */
-#ifdef __GNUC__
+#if NON_MSVC_COMPILER
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
 #include <parallel_hashmap/btree.h>
 
-#ifdef __GNUC__
+#if NON_MSVC_COMPILER
     #pragma GCC diagnostic pop
 #endif
 /* End of btree.h inclusion */

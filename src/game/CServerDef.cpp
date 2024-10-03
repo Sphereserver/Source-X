@@ -32,9 +32,9 @@
 
 	//	PSAPI external definitions
 	typedef	intptr_t (WINAPI *pfnGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
-	HMODULE	m_hmPsapiDll = nullptr;
-	pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
-	PROCESS_MEMORY_COUNTERS	pcnt;
+	static HMODULE m_hmPsapiDll = nullptr;
+	static pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
+	static PROCESS_MEMORY_COUNTERS	pcnt;
 #else			// (Unix)
 	#include <sys/resource.h>
 #endif
@@ -77,17 +77,17 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 				m_hmPsapiDll = LoadLibrary(TEXT("psapi.dll"));
 				if (m_hmPsapiDll == nullptr)
 				{
-					m_fPmemory = false;
+                    sm_fHasMemoryInfo = false;
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
                 {
-#ifndef _MSC_VER
+#ifdef NON_MSVC_COMPILER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
                     m_GetProcessMemoryInfo = reinterpret_cast<pfnGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
-#ifndef _MSC_VER
+#if NON_MSVC_COMPILER
 #pragma GCC diagnostic pop
 #endif
                 }

@@ -49,6 +49,21 @@
 
 /* Coding helpers */
 
+// On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
+#if !defined(_MSC_VER) || defined(__clang__)
+#   define NON_MSVC_COMPILER 1
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#   define MSVC_COMPILER 1
+#endif
+
+// On Windows, Clang can use MinGW or MSVC backend.
+#ifdef _MSC_VER
+#   define MSVC_RUNTIME
+#endif
+
+
 // Strings
 #define STRINGIFY_IMPL_(x)	#x
 #define STRINGIFY(x)		STRINGIFY_IMPL_(x)
@@ -197,10 +212,11 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 // b = 1-based index of arguments
 // (note: add 1 to index for non-static class methods because 'this' argument
 // is inserted in position 1)
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
 	#define __printfargs(a,b)
 #else
-	#ifdef _WIN32
+	#ifdef __MINGW32__
+        // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
 		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
 	#else
 		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
@@ -210,7 +226,7 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 
 /* Sanitizers utilities */
 
-#if defined(_MSC_VER)
+#if defined(MSVC_COMPILER)
 
     #if defined(__SANITIZE_ADDRESS__) || defined(ADDRESS_SANITIZER)
         #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
