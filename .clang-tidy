@@ -57,6 +57,8 @@ Checks: >
 CheckOptions:
   - key: 'clang-analyzer-core.NonNullParamChecker:assert_like_macro'
     value: 'DEBUG_ASSERT,ASSERT,PERSISTANT_ASSERT'
+  - key: 'clang-analyzer-config:noreturn_function'
+    value: 'RaiseImmediateAbort,RaiseRecoverableAbort'
   - { key: readability-identifier-naming.NamespaceCase,          value: lower_case }
   - { key: readability-identifier-naming.ClassCase,              value: CamelCase  }
   - { key: readability-identifier-naming.StructCase,             value: CamelCase  }

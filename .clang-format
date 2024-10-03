@@ -76,7 +76,7 @@ PackConstructorInitializers: NextLineOnly
 PenaltyReturnTypeOnItsOwnLine: 200 # Prefer keeping return type on the same line if possible
 
 # Indentation settings
-#AccessModifierOffset: -4
+AccessModifierOffset: -4
 IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: true
