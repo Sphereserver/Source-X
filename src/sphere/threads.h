@@ -31,6 +31,7 @@
 	typedef DWORD threadid_t;
 	#define SPHERE_THREADENTRY_RETNTYPE unsigned
 	#define SPHERE_THREADENTRY_CALLTYPE __stdcall
+	#define SPHERE_THREADT_NULL nullptr
 #else
 	typedef pthread_t spherethread_t;
 #ifdef __APPLE__
@@ -41,6 +42,7 @@
 
 	#define SPHERE_THREADENTRY_RETNTYPE void *
 	#define SPHERE_THREADENTRY_CALLTYPE
+	#define SPHERE_THREADT_NULL 0
 #endif
 
 class IThread;
@@ -207,18 +209,21 @@ class AbstractThread : public IThread
 	friend class ThreadHolder;
 
 protected:
-    bool _thread_selfTerminateAfterThisTick;
+    bool _fKeepAliveAtShutdown;
+    volatile std::atomic_bool _thread_selfTerminateAfterThisTick;
+    volatile std::atomic_bool _fIsClosing;
 
 private:
-	char m_name[30];
+    volatile std::atomic_bool m_terminateRequested;
+
+    char m_name[30];
 	static int m_threadsAvailable;
-	spherethread_t m_handle;
+
+    spherethread_t m_handle;
 	uint m_hangCheck;
 	Priority m_priority;
 	uint m_tickPeriod;
 	AutoResetEvent m_sleepEvent;
-
-	volatile std::atomic_bool m_terminateRequested;
 	ManualResetEvent m_terminateEvent;
 
 public:
@@ -246,13 +251,18 @@ public:
     void overwriteInternalThreadName(const char* name) noexcept;
     bool isCurrentThread() const noexcept;
 
+    bool closing() noexcept
+    {
+        return _fIsClosing;
+    }
+
 protected:
 	virtual void tick() = 0;
 	// NOTE: this should not be too long-lasted function, so no world loading, etc here!!!
 	virtual void onStart();
 	virtual bool shouldExit() noexcept override;
 
-private:
+  private:
 	void run();
 	static SPHERE_THREADENTRY_RETNTYPE SPHERE_THREADENTRY_CALLTYPE runner(void *callerThread);
 };
@@ -263,7 +273,6 @@ class AbstractSphereThread : public AbstractThread
 {
 	friend class ThreadHolder;
 
-	bool _fIsClosing;
 #ifdef THREAD_TRACK_CALLSTACK
 	struct STACK_INFO_REC
 	{
@@ -291,9 +300,6 @@ public:
 	void getStringBuffer(TemporaryString &string) noexcept;
 
     void exceptionCaught();
-	bool closing() noexcept {
-		return _fIsClosing;
-	}
 
 #ifdef THREAD_TRACK_CALLSTACK
 	inline void freezeCallStack(bool freeze) noexcept

@@ -62,6 +62,7 @@ IThread::IThread() noexcept :
 IThread::~IThread() noexcept = default;
 
 #ifdef _WIN32
+/*
 #pragma pack(push, 8)
 typedef struct tagTHREADNAME_INFO
 {
@@ -71,8 +72,11 @@ typedef struct tagTHREADNAME_INFO
 	DWORD dwFlags;
 } THREADNAME_INFO;
 #pragma pack(pop)
+*/
 
+#ifdef MSVC_COMPILER
 static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
+#endif
 #endif
 
 void IThread::setThreadName(const char* name)
@@ -85,7 +89,7 @@ void IThread::setThreadName(const char* name)
     Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
 
 #if defined(_WIN32)
-    #if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft's
+    #if defined(MSVC_COMPILER)	// TODO: support thread naming when compiling with compilers other than Microsoft's
         // Windows uses THREADNAME_INFO structure to set thread name
         THREADNAME_INFO info;
         info.dwType = 0x1000;
@@ -155,18 +159,17 @@ IThread* ThreadHolder::current() noexcept
     RETRY_SHARED_LOCK_FOR_TASK(m_mutex, lock, retval,
         ([this, &lock]() -> IThread*
         {
-            if (m_closingThreads)
-            [[unlikely]]
-            {
-                //STDERR_LOG("Closing?\n");
-                return nullptr;
-            }
-
             const threadid_t tid = IThread::getCurrentThreadSystemId();
 
             if (m_spherethreadpairs_systemid_ptr.empty())
             [[unlikely]]
             {
+                if (m_closingThreads) [[unlikely]]
+                {
+                    //STDERR_LOG("Closing?\n");
+                    return nullptr;
+                }
+
                 auto thread = static_cast<IThread*>(DummySphereThread::getInstance());
                 if (!thread)
                 [[unlikely]]
@@ -190,6 +193,7 @@ IThread* ThreadHolder::current() noexcept
                     break;
                 }
             }
+
             if (!found)
             [[unlikely]]
             {
@@ -209,6 +213,22 @@ IThread* ThreadHolder::current() noexcept
             {
                 //STDERR_LOG("Closed? Idx %u, Name %s.\n", thread->m_threadHolderId, thread->getName());
                 return nullptr;
+            }
+
+            if (m_closingThreads) [[unlikely]]
+            {
+                auto spherethread = dynamic_cast<AbstractSphereThread *>(thread);
+                if (!spherethread)
+                {
+                    // Should never happen.
+                    RaiseImmediateAbort();
+                }
+
+                if (!spherethread->_fKeepAliveAtShutdown)
+                {
+                    //STDERR_LOG("Closing?\n");
+                    return nullptr;
+                }
             }
 
             // Uncomment it only for testing purposes, since this method is called very often and we don't need the additional overhead
@@ -349,6 +369,9 @@ void ThreadHolder::markThreadsClosing() CANTHROW
 	for (auto& thread_data : m_threads)
 	{
 		auto sphere_thread = static_cast<AbstractSphereThread*>(thread_data.m_ptr);
+        if (sphere_thread->_fKeepAliveAtShutdown)
+            continue;
+
 		sphere_thread->_fIsClosing = true;
 		thread_data.m_closed = true;
 	}
@@ -399,7 +422,8 @@ IThread * ThreadHolder::getThreadAt(size_t at) noexcept
 */
 int AbstractThread::m_threadsAvailable = 0;
 
-AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
+AbstractThread::AbstractThread(const char *name, IThread::Priority priority) :
+    _fKeepAliveAtShutdown(false), _fIsClosing(false)
 {
 	if( AbstractThread::m_threadsAvailable == 0 )
 	{
@@ -414,7 +438,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 	}
 	m_threadSystemId = 0;
     Str_CopyLimitNull(m_name, name, sizeof(m_name));
-	m_handle = 0;
+	m_handle = SPHERE_THREADT_NULL;
 	m_hangCheck = 0;
     _thread_selfTerminateAfterThisTick = true;
 	m_terminateRequested = true;
@@ -493,7 +517,7 @@ void AbstractThread::terminate(bool ended)
 		// Common things
 		ThreadHolder::get().remove(this);
 		m_threadSystemId = 0;
-		m_handle = 0;
+		m_handle = SPHERE_THREADT_NULL;
 
 		// let everyone know we have been terminated
 		m_terminateEvent.set();
@@ -626,7 +650,7 @@ SPHERE_THREADENTRY_RETNTYPE AbstractThread::runner(void *callerThread)
 
 bool AbstractThread::isActive() const
 {
-	return (m_handle != 0);
+	return (m_handle != SPHERE_THREADT_NULL);
 }
 
 void AbstractThread::waitForClose()
@@ -756,14 +780,14 @@ void AbstractThread::setPriority(IThread::Priority pri)
 
 bool AbstractThread::shouldExit() noexcept
 {
-	return m_terminateRequested || _thread_selfTerminateAfterThisTick;
+	return closing() || m_terminateRequested || _thread_selfTerminateAfterThisTick;
 }
 
 /*
  * AbstractSphereThread
 */
 AbstractSphereThread::AbstractSphereThread(const char *name, Priority priority)
-	: AbstractThread(name, priority), _fIsClosing(false)
+	: AbstractThread(name, priority)
 {
 #ifdef THREAD_TRACK_CALLSTACK
 	m_stackPos = -1;

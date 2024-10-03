@@ -24,7 +24,7 @@
 #define IDT_ONTICK	1
 
 
-CNTApp theApp;
+static CNTApp theApp;
 
 //************************************
 // -CAboutDlg
@@ -166,6 +166,8 @@ BOOL CNTWindow::CStatusDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 CNTWindow::CNTWindow() : AbstractSphereThread("T_ConsoleWindow", IThread::Highest),
     _NTWInitParams{}, m_zCommands {{}}
 {
+    _fKeepAliveAtShutdown = true;
+
 	m_iLogTextLen		= 0;
 	m_fLogScrollLock	= false;
 	m_dwColorNew		= RGB( 0xaf,0xaf,0xaf );
@@ -274,14 +276,14 @@ void CNTWindow::List_AddSingle(COLORREF color, LPCTSTR ptcText)
 
 	if ( iNewLen > iMaxTextLen )
 	{
-		const int iCut = iNewLen - iMaxTextLen; 
+		const int iCut = iNewLen - iMaxTextLen;
 
 		m_wndLog.SetSel( 0, iCut );
 
 		// These SetRedraw FALSE/TRUE calls will make the log panel scroll much faster when spamming text, but
 		//  it will generate some drawing artifact
 		//m_wndLog.SetRedraw(FALSE);
-		m_wndLog.ReplaceSel( "" );	
+		m_wndLog.ReplaceSel( "" );
 	}
     else if (NTWindow_CanScroll())
         theApp.m_wndMain.m_wndLog.ScrollLine();
@@ -318,7 +320,7 @@ void CNTWindow::List_AddGroup(std::deque<std::unique_ptr<ConsoleOutput>>&& msgs)
 	{
 		iTotalTextLen += co->GetTextString().GetLength();
 	}
-	
+
 	const int iNewLen = m_iLogTextLen + iTotalTextLen;
 
 	if (iNewLen > iMaxTextLen)
@@ -1025,7 +1027,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
             iWaitmSec = 0;
         }
     }
-	
+
 
 	// Give the windows message loops a tick.
 	for (;;)
@@ -1157,7 +1159,7 @@ bool CNTWindow::NTWindow_OnTick( int iWaitmSec )
 							}
 							else if ( !*pszCurSel )							// or there is still no selection
 							{
-								curmatch = firstmatch;	
+								curmatch = firstmatch;
 							}
 							else											// need to find for the next record
 							{
