@@ -87,7 +87,8 @@ enum OF_TYPE
     OF_OWNoDropCarriedItem          = 0x0400000,     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
     OF_AllowContainerInsideContainer = 0x0800000,    //Allow containers inside other containers even if they are heavier than the container being inserted into.
     OF_VendorStockLimit              = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
-    OF_EnableGuildAlignNotoriety     = 0x02000000    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_EnableGuildAlignNotoriety     = 0x02000000,    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_PetBehaviorOwnerNeutral       = 0x04000000, // Should my pets always appear natural to me?
 };
 
 /**
