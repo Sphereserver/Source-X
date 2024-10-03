@@ -131,8 +131,9 @@ constexpr T sign(const T n) noexcept
 /* Compiler/c++ language helpers */
 
 // Ensure that a constexpr value or a generic expression is evaluated at compile time.
+// Constexpr values are constants and cannot be mutated in the code.
 template <typename T>
-consteval T ensure_comptime(T&& val_) noexcept {
+consteval T as_consteval(T&& val_) noexcept {
     return val_;
 }
 
@@ -171,6 +172,10 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 
 // Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
 #define CANTHROW    noexcept(false)
+
+// To be used only as an helper marker, since there are functions with similar names intended to have different signatures and/or not be virtual.
+// This means that we do NOT have forgotten to add the "virtual" qualifier, simply this method isn't virtual.
+#define NONVIRTUAL
 
 // Cpp attributes
 #define FALLTHROUGH [[fallthrough]]

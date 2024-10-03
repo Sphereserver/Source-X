@@ -2355,12 +2355,24 @@ do_default:
 
             if (strlen(ptcKey) == 11)
             {
+                // This returns the total current follower slots.
                 sVal.FormatSVal(GetCurFollowers());
                 return true;
             }
 
             sVal.FormatVal(0);
             ptcKey += 11;
+            if (*ptcKey != '.')
+                return false;
+            ptcKey += 1;
+
+            if (!strnicmp(ptcKey, "CHARCOUNT", 9))
+            {
+                sVal.FormatSTVal(m_followers.size());
+                return true;
+            }
+
+            // Access objects by ID.
             if (*ptcKey != '.' || m_followers.empty())
                 return false;
 
@@ -3508,7 +3520,7 @@ bool CChar::r_LoadVal( CScript & s )
             if (!s.HasArgs())
                 return false;
 
-            if (!strnicmp(ptcKey, "DELETE", 6) || !strnicmp(ptcKey, "DEL", 3))
+            if (!strnicmp(ptcKey, "DELUID", 6))
             {
                 if (m_followers.empty())
                     return false;
@@ -3530,6 +3542,28 @@ bool CChar::r_LoadVal( CScript & s )
                         continue;
                     pChar->NPC_PetClearOwners();
                 }
+                return true;
+            }
+
+            if (!strnicmp(ptcKey, "DELINDEX", 6))
+            {
+                if (m_followers.empty())
+                    return false;
+
+                const uint uiIndex = s.GetArgUVal();
+                if (uiIndex >= m_followers.size())
+                    return false;
+
+                CChar *pChar = m_followers[uiIndex].uid.CharFind();
+                m_followers.erase(m_followers.begin() + uiIndex);
+
+                if (!pChar)
+                {
+                    g_Log.EventWarn("Follower with index %u is an invalid char! (Owner: 0%" PRIx32 ".)\n", uiIndex, GetUID().GetObjUID());
+                    return true;
+                }
+
+                pChar->NPC_PetClearOwners();
                 return true;
             }
 
@@ -4163,10 +4197,14 @@ void CChar::r_Write( CScript & s )
     s.WriteKeyVal("OFAME", GetFame() );
 
 	int iVal;
-	if ((iVal = Stat_GetMod(STAT_FOOD)) != 0)
-		s.WriteKeyVal("MODFOOD", iVal);
+    //if ((iVal = Stat_GetMod(STAT_FOOD)) != 0)
+    //	s.WriteKeyVal("MODFOOD", iVal);
 	if ((iVal = Stat_GetBase(STAT_FOOD)) != Char_GetDef()->m_MaxFood)
 		s.WriteKeyVal("OFOOD", iVal);
+    if ((iVal = Stat_GetMaxMod(STAT_FOOD)) != 0)
+        s.WriteKeyVal("MODMAXFOOD", iVal);
+    if ((iVal = Stat_GetMax(STAT_FOOD)) != 0)
+        s.WriteKeyVal("MAXFOOD", iVal);
 	s.WriteKeyVal("FOOD", Stat_GetVal(STAT_FOOD));
 
 	static constexpr lpctstr _ptcKeyModStat[STAT_BASE_QTY] =
@@ -4182,7 +4220,7 @@ void CChar::r_Write( CScript & s )
 		"ODEX"
 	};
 
-	for (int j = 0; j < STAT_BASE_QTY; ++j)
+    for (int j = 0; j < STAT_BASE_QTY; ++j)
 	{
 		// this is VERY important, saving the MOD first
 		if ((iVal = Stat_GetMod((STAT_TYPE)j)) != 0)

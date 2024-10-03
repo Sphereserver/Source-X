@@ -2498,7 +2498,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	return true;
 }
-CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature)
+CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature, std::optional<short> iFollowerSlotsOverride)
 {
 	ADDTOCALLSTACK("CChar::Spell_CanSummon");
 	//Create the NPC and check if we can actually place it in the world, but do not place it yet.
@@ -2618,7 +2618,7 @@ CChar * CChar::Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE u
 
 		if (IsSetOF(OF_PetSlots))
 		{
-            short iFollowerSlots = pChar->GetFollowerSlots();
+            short iFollowerSlots = iFollowerSlotsOverride.has_value() ? iFollowerSlotsOverride.value() : pChar->GetFollowerSlots();
             if (!FollowersUpdate(pChar, iFollowerSlots, true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
@@ -2841,21 +2841,10 @@ bool CChar::Spell_CastDone()
 	CObjBase * pObjSrc = m_Act_Prv_UID.ObjFind();
 	CChar* pSummon = nullptr;
 
-	ITEMID_TYPE iT1 = ITEMID_NOTHING;
-	ITEMID_TYPE iT2 = ITEMID_NOTHING;
-	CREID_TYPE iC1 = CREID_INVALID;
-	HUE_TYPE iColor = HUE_DEFAULT;
-
-	uint fieldWidth = 0;
-	uint fieldGauge = 0;
-	uint areaRadius = 0;
-
 	SPELL_TYPE spell = m_atMagery.m_iSpell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (pSpellDef == nullptr)
 		return false;
-
-	const bool fIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
 
 	int iSkill, iDifficulty;
 	if (!pSpellDef->GetPrimarySkill(&iSkill, &iDifficulty))
@@ -2881,27 +2870,51 @@ bool CChar::Spell_CastDone()
 	if ( (iSkill == SKILL_MYSTICISM) && (g_Cfg.m_iRacialFlags & RACIALF_GARG_MYSTICINSIGHT) && (iSkillLevel < 300) && IsGargoyle() )
 		iSkillLevel = 300;	// Racial trait (Mystic Insight). Gargoyles always have a minimum of 30.0 Mysticism.
 
-	CScriptTriggerArgs	Args(spell, iSkillLevel, pObjSrc);
-	Args.m_VarsLocal.SetNum("fieldWidth", 0);
-	Args.m_VarsLocal.SetNum("fieldGauge", 0);
-	Args.m_VarsLocal.SetNum("areaRadius", 0);
-	Args.m_VarsLocal.SetNum("duration", GetSpellDuration(spell, iSkillLevel, this), true);  // tenths of second
+    const bool fIsSpellArea = pSpellDef->IsSpellType(SPELLFLAG_AREA);
+    const bool fIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
+    const bool fIsSpellSummon = pSpellDef->IsSpellType(SPELLFLAG_SUMMON);
+
+    HUE_TYPE uiColor = HUE_DEFAULT;
+    ITEMID_TYPE uiCreatedItemID_1 = ITEMID_NOTHING;
+    ITEMID_TYPE uiCreatedItemID_2 = ITEMID_NOTHING;
+    CREID_TYPE uiSummonedCreatureID = CREID_INVALID;
+    short iFollowerSlotsOverride = -1;
+
+    uint uiFieldWidth = 0;
+    uint uiFieldGauge = 0;
+    uint uiAreaRadius = 0;
+
+    CScriptTriggerArgs Args(spell, iSkillLevel, pObjSrc);
+    Args.m_VarsLocal.SetNum("Duration", GetSpellDuration(spell, iSkillLevel, this), true);  // tenths of second
+
+    if (fIsSpellArea)
+    {
+        Args.m_VarsLocal.SetNum("AreaRadius", 0);
+    }
 
 	if (fIsSpellField)
 	{
+        Args.m_VarsLocal.SetNum("FieldWidth", 0);
+        Args.m_VarsLocal.SetNum("FieldGauge", 0);
+
 		switch (spell)	// Only setting ids and locals for field spells
 		{
-		case SPELL_Wall_of_Stone: 	iT1 = ITEMID_STONE_WALL;				iT2 = ITEMID_STONE_WALL;		break;
-		case SPELL_Fire_Field: 		iT1 = ITEMID_FX_FIRE_F_EW; 				iT2 = ITEMID_FX_FIRE_F_NS;		break;
-		case SPELL_Poison_Field:	iT1 = ITEMID_FX_POISON_F_EW;			iT2 = ITEMID_FX_POISON_F_NS;	break;
-		case SPELL_Paralyze_Field:	iT1 = ITEMID_FX_PARA_F_EW;				iT2 = ITEMID_FX_PARA_F_NS;		break;
-		case SPELL_Energy_Field:	iT1 = ITEMID_FX_ENERGY_F_EW;			iT2 = ITEMID_FX_ENERGY_F_NS;	break;
+        case SPELL_Wall_of_Stone: 	uiCreatedItemID_1 = ITEMID_STONE_WALL;				uiCreatedItemID_2 = ITEMID_STONE_WALL;		break;
+        case SPELL_Fire_Field: 		uiCreatedItemID_1 = ITEMID_FX_FIRE_F_EW; 				uiCreatedItemID_2 = ITEMID_FX_FIRE_F_NS;		break;
+        case SPELL_Poison_Field:	uiCreatedItemID_1 = ITEMID_FX_POISON_F_EW;			uiCreatedItemID_2 = ITEMID_FX_POISON_F_NS;	break;
+        case SPELL_Paralyze_Field:	uiCreatedItemID_1 = ITEMID_FX_PARA_F_EW;				uiCreatedItemID_2 = ITEMID_FX_PARA_F_NS;		break;
+        case SPELL_Energy_Field:	uiCreatedItemID_1 = ITEMID_FX_ENERGY_F_EW;			uiCreatedItemID_2 = ITEMID_FX_ENERGY_F_NS;	break;
 		default: break;
 		}
 
-		Args.m_VarsLocal.SetNum("CreateObject1", iT1, false);
-		Args.m_VarsLocal.SetNum("CreateObject2", iT2, false);
+        Args.m_VarsLocal.SetNum("CreateObject1", uiCreatedItemID_1, false);
+        Args.m_VarsLocal.SetNum("CreateObject2", uiCreatedItemID_2, false);
 	}
+
+    if (fIsSpellSummon)
+    {
+        Args.m_VarsLocal.SetNum("FollowerSlotsOverride", iFollowerSlotsOverride);
+    }
 
 	if (IsTrigUsed(TRIGGER_SPELLSUCCESS))
 	{
@@ -2925,58 +2938,67 @@ bool CChar::Spell_CastDone()
 		//Setting new IDs as another variables to pass as different arguments to the field function.
         it1test = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject1")));
         it2test = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("CreateObject2")));
-		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth");
-		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge");
+        uiFieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("FieldWidth");
+        uiFieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("FieldGauge");
 	}
 
-	iC1 = (CREID_TYPE)(Args.m_VarsLocal.GetKeyNum("CreateObject1") & 0xFFFF);
-	areaRadius = (uint)Args.m_VarsLocal.GetKeyNum("areaRadius");
-	int iDuration = (int)(Args.m_VarsLocal.GetKeyNum("duration"));
-	iDuration = maximum(0, iDuration);
-	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
+    uiSummonedCreatureID = (CREID_TYPE)(Args.m_VarsLocal.GetKeyNum("CreateObject1") & 0xFFFF);
+    uiAreaRadius = (uint)Args.m_VarsLocal.GetKeyNum("AreaRadius");
+    int iDuration = (int)(std::max((int64)0, Args.m_VarsLocal.GetKeyNum("Duration")));
+    uiColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor"));
 
-	if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
+    if (fIsSpellSummon)
 	{
+        iFollowerSlotsOverride = n64_narrow_n16(Args.m_VarsLocal.GetKeyNum("FollowerSlotsOverride"));
+
 		if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
 			m_Act_p = GetTopPoint();
 
-		pSummon = Spell_Summon_Try(spell, m_Act_p, iC1);
+        std::optional<short> iMaybeOverride;
+        if (iFollowerSlotsOverride != -1)
+            iMaybeOverride = iFollowerSlotsOverride;
+        pSummon = Spell_Summon_Try(spell, m_Act_p, uiSummonedCreatureID, iMaybeOverride);
 		if (!pSummon)
 		{
 			return false;
 		}
 	}
+
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
+    {
+        if (pSummon)
+            pSummon->Delete(true);
 		return false;
+    }
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED))
 	{
-		if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
+        if (fIsSpellSummon)
 		{
 			Spell_Summon_Place(pSummon, m_Act_p, iDuration);
 		}
 		else if (fIsSpellField)
 		{
-			if (iT1 && iT2)
+            if (uiCreatedItemID_1 && uiCreatedItemID_2)
 			{
-				if (!fieldWidth)
-					fieldWidth = 3;
-				if (!fieldGauge)
-					fieldGauge = 1;
+                if (!uiFieldWidth)
+                    uiFieldWidth = 3;
+                if (!uiFieldGauge)
+                    uiFieldGauge = 1;
 
-				Spell_Field(m_Act_p, iT1, iT2, fieldWidth, fieldGauge, iSkillLevel, this, it1test, it2test, iDuration, iColor);
+                Spell_Field(m_Act_p, uiCreatedItemID_1, uiCreatedItemID_2, uiFieldWidth, uiFieldGauge, iSkillLevel, this, it1test, it2test, iDuration, uiColor);
 			}
 		}
-		else if (pSpellDef->IsSpellType(SPELLFLAG_AREA))
+        else if (fIsSpellArea)
 		{
-			if (!areaRadius)
-				areaRadius = 4;
+            if (!uiAreaRadius)
+                uiAreaRadius = 4;
 
 			if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
-				Spell_Area(GetTopPoint(), areaRadius, iSkillLevel, iDuration);
+                Spell_Area(GetTopPoint(), uiAreaRadius, iSkillLevel, iDuration);
 			else
-				Spell_Area(m_Act_p, areaRadius, iSkillLevel, iDuration);
+                Spell_Area(m_Act_p, uiAreaRadius, iSkillLevel, iDuration);
 		}
 		else if (pSpellDef->IsSpellType(SPELLFLAG_POLY))
 			return false;
@@ -2988,45 +3010,45 @@ bool CChar::Spell_CastDone()
 	}
 	else if (fIsSpellField)
 	{
-		if (!fieldWidth)
-			fieldWidth = 3;
-		if (!fieldGauge)
-			fieldGauge = 1;
+        if (!uiFieldWidth)
+            uiFieldWidth = 3;
+        if (!uiFieldGauge)
+            uiFieldGauge = 1;
 
-		Spell_Field(m_Act_p, iT1, iT2, fieldWidth, fieldGauge, iSkillLevel, this, it1test, it2test, iDuration, iColor);
+        Spell_Field(m_Act_p, uiCreatedItemID_1, uiCreatedItemID_2, uiFieldWidth, uiFieldGauge, iSkillLevel, this, it1test, it2test, iDuration, uiColor);
 	}
-	else if (pSpellDef->IsSpellType(SPELLFLAG_AREA))
+    else if (fIsSpellArea)
 	{
-		if (!areaRadius)
+        if (!uiAreaRadius)
 		{
 			switch (spell)
 			{
-				case SPELL_Arch_Cure:		areaRadius = 2;							break;
-				case SPELL_Arch_Prot:		areaRadius = 3;							break;
-				case SPELL_Mass_Curse:		areaRadius = 2;							break;
-				case SPELL_Reveal:			areaRadius = 1 + (iSkillLevel / 200);	break;
-				case SPELL_Chain_Lightning: areaRadius = 2;							break;
-				case SPELL_Mass_Dispel:		areaRadius = 8;							break;
-				case SPELL_Meteor_Swarm:	areaRadius = 2;							break;
-				case SPELL_Earthquake:		areaRadius = 1 + (iSkillLevel / 150);	break;
-				case SPELL_Poison_Strike:	areaRadius = 2;							break;
-				case SPELL_Wither:			areaRadius = 4;							break;
-				default:					areaRadius = 4;							break;
+                case SPELL_Arch_Cure:		uiAreaRadius = 2;							break;
+                case SPELL_Arch_Prot:		uiAreaRadius = 3;							break;
+                case SPELL_Mass_Curse:		uiAreaRadius = 2;							break;
+                case SPELL_Reveal:			uiAreaRadius = 1 + (iSkillLevel / 200);	break;
+                case SPELL_Chain_Lightning: uiAreaRadius = 2;							break;
+                case SPELL_Mass_Dispel:		uiAreaRadius = 8;							break;
+                case SPELL_Meteor_Swarm:	uiAreaRadius = 2;							break;
+                case SPELL_Earthquake:		uiAreaRadius = 1 + (iSkillLevel / 150);	break;
+                case SPELL_Poison_Strike:	uiAreaRadius = 2;							break;
+                case SPELL_Wither:			uiAreaRadius = 4;							break;
+                default:					uiAreaRadius = 4;							break;
 			}
 		}
 
 		if (!pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ | SPELLFLAG_TARG_XYZ))
-			Spell_Area(GetTopPoint(), areaRadius, iSkillLevel, iDuration);
+            Spell_Area(GetTopPoint(), uiAreaRadius, iSkillLevel, iDuration);
 		else
-			Spell_Area(m_Act_p, areaRadius, iSkillLevel, iDuration);
+            Spell_Area(m_Act_p, uiAreaRadius, iSkillLevel, iDuration);
 	}
-	else if (pSpellDef->IsSpellType(SPELLFLAG_SUMMON))
+    else if (fIsSpellSummon)
 	{
 		Spell_Summon_Place(pSummon, m_Act_p, iDuration);
 	}
 	else
 	{
-		iT1 = it1test;	// Set iT1 to it1test here because spell_field() needed both values to be passed.
+        uiCreatedItemID_1 = it1test;	// Set iT1 to it1test here because spell_field() needed both values to be passed.
 
 		switch (spell)
 		{
@@ -3035,7 +3057,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Create_Food:
 			{
 				const CResourceID ridFoodDefault = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
-				const ITEMID_TYPE idFood = ((iT1 > ITEMID_NOTHING) ? iT1 : (ITEMID_TYPE)(ridFoodDefault.GetResIndex()));
+                const ITEMID_TYPE idFood = ((uiCreatedItemID_1 > ITEMID_NOTHING) ? uiCreatedItemID_1 : (ITEMID_TYPE)(ridFoodDefault.GetResIndex()));
 				CItem *pItem = CItem::CreateScript(idFood, this);
 				ASSERT(pItem);
 				if (pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ))
@@ -3112,12 +3134,12 @@ bool CChar::Spell_CastDone()
 			case SPELL_Flame_Strike:
 			{
 				// Display spell.
-				if (!iT1)
-					iT1 = ITEMID_FX_FLAMESTRIKE;
+                if (!uiCreatedItemID_1)
+                    uiCreatedItemID_1 = ITEMID_FX_FLAMESTRIKE;
 
 				if (pObj == nullptr)
 				{
-                    EffectLocation(EFFECT_XYZ, iT1, nullptr, &m_Act_p, 20, 30);
+                    EffectLocation(EFFECT_XYZ, uiCreatedItemID_1, nullptr, &m_Act_p, 20, 30);
 				}
 				else
 				{
