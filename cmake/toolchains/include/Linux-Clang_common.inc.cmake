@@ -22,7 +22,7 @@ function(toolchain_exe_stuff_common)
 
     #string(REPLACE ";" " " CXX_FLAGS_EXTRA "${CXX_FLAGS_EXTRA}")
 
-    set(cxx_compiler_options_common ${list_gnu_explicit_compiler_options_all} ${CXX_FLAGS_EXTRA})
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${CXX_FLAGS_EXTRA})
     #separate_arguments(cxx_compiler_options_common)
 
     #-- Apply compiler flags, only the ones specific per build type.
@@ -55,7 +55,7 @@ function(toolchain_exe_stuff_common)
     #-- Store common linker flags.
 
     set(cxx_linker_options_common
-        ${list_gnu_explicit_linker_options_all}
+        ${list_explicit_linker_options_all}
         ${CMAKE_EXE_LINKER_FLAGS_EXTRA}
         $<$<BOOL:${RUNTIME_STATIC_LINK}>:
         -static-libstdc++

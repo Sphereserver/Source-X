@@ -31,7 +31,7 @@ function(toolchain_exe_stuff_common)
         # -mno-ms-bitfields is needed to fix structure packing;
         # -pthread unused here? we only need to specify that to the linker?
     )
-    set(cxx_compiler_options_common ${list_gnu_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
 
     #-- Apply compiler flags, only the ones specific per build type.
 
@@ -91,7 +91,7 @@ function(toolchain_exe_stuff_common)
 
     set(cxx_linker_options_common ${CMAKE_EXE_LINKER_FLAGS_EXTRA})
     if(${CLANG_USE_GCC_LINKER})
-        set(cxx_linker_options_common ${list_gnu_explicit_linker_options_all})
+        set(cxx_linker_options_common ${list_explicit_linker_options_all})
         if(${RUNTIME_STATIC_LINK})
             set(cxx_linker_options_common ${cxx_linker_options_common} -static-libstdc++ -static-libgcc) # no way to statically link against libc? maybe we can on windows?
         endif()

@@ -6,9 +6,9 @@ endif()
 if(MSVC)
     # gersemi: off
     set (c_compiler_options_common
-        /O2 /EHsc /GA /Gw /Gy /GF /GR- /GS-
-        $<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   $<$<BOOL:${ENABLED_SANITIZER}>:/Zi>>
-        $<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   $<$<BOOL:${ENABLED_SANITIZER}>:/Zi>>
+        /EHsc /GA /Gw /Gy /GF /GR- /GS-
+        $<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+        $<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
         $<$<CONFIG:Debug>:   $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
     )
     set (c_linker_options_common
@@ -17,7 +17,8 @@ if(MSVC)
         $<$<CONFIG:Debug>:   /DEBUG       /LTCG:OFF /NODEFAULTLIB:libcmt>
     )
     # gersemi: on
-else(MSVC)
+
+elseif(NOT MSVC)
     set(c_compiler_options_common
         -pipe
         -fexceptions

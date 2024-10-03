@@ -42,7 +42,7 @@ function(toolchain_exe_stuff)
     endif()
 
     #-- Validate sanitizers options and store them between the common compiler flags.
-
+    # TODO: move sanitizers checks to CompilerFlagsChecker.cmake.
     set(ENABLED_SANITIZER false)
     if(${USE_ASAN})
         if(${MSVC_TOOLSET_VERSION} LESS_EQUAL 141) # VS 2017
@@ -74,6 +74,7 @@ function(toolchain_exe_stuff)
 
     set(cxx_compiler_flags_common
         ${CXX_FLAGS_EXTRA}
+        ${list_explicit_compiler_options_all}
         /W4
         /MP
         /GR
@@ -126,10 +127,10 @@ function(toolchain_exe_stuff)
 
     # gersemi: off
     target_link_options(spheresvr PRIVATE
-    /WX     # treat all warnings as errors
+        /WX     # treat all warnings as errors
         $<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
         $<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
-        $<$<CONFIG:Debug>:     ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
+        $<$<CONFIG:Debug>:   ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
             $<IF:$<BOOL:${ENABLED_SANITIZER}>,/INCREMENTAL:NO /EDITANDCONTINUE:NO,/INCREMENTAL /EDITANDCONTINUE> >
     )
     # gersemi: on

@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 3.24)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Supress the ZERO_CHECK generation
 
 # --------------------  GUI checkboxes --------------------
+if(NOT MSVC)
+    set (CMAKE_BUILD_TYPE "Nightly" CACHE STRING "Which build type to build? Expected values: Debug, Nightly or Release.")
+endif()
+
 option(
     CMAKE_NO_GIT_REVISION
     "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
@@ -35,7 +39,7 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
-set(ENABLED_SANITIZER FALSE)
+set(ENABLED_SANITIZER CACHE INTERNAL BOOL FALSE)
 if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
     set(ENABLED_SANITIZER TRUE)
 endif()
@@ -81,7 +85,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
-# CMake also sets other predefined flags, which we don't want?
+# In some cases, CMake also sets other predefined flags, which we don't want.
 #[[
 set(CMAKE_C_FLAGS "")
 set(CMAKE_C_FLAGS_DEBUG "")
@@ -98,6 +102,10 @@ set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
 set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 ]]
+# Example: using MSVC, /RTC1 is globally added (all projects) to DEBUG builds. It's mostly fine, except in some cases where we don't want it...
+# We might want to delete only /RTC* flags, instead of erasing all of them altogether.
+#STRING (REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+#STRING (REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
 
 set(is_win32_app_linker)
 if(WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
@@ -136,7 +144,7 @@ if(SINGLE_TARGET)
             AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
             AND (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Nightly")
         )
-            message(WARNING "Invalid parameter -DCMAKE_BUILD_TYPE, defaulting to Nightly.")
+            message(WARNING "Invalid parameter CMAKE_BUILD_TYPE (${CMAKE_BUILD_TYPE}), defaulting to Nightly.")
             # -> needed only for MAKEFILE-STYLE generators, which can't switch between different configs
             set(CMAKE_BUILD_TYPE "Nightly" CACHE STRING "" FORCE)
         else()
@@ -250,7 +258,6 @@ message(STATUS)
 message(STATUS "Configuring external libraries...")
 add_subdirectory(lib)
 
-message(STATUS)
 toolchain_exe_stuff() # stuff to be executed after ADD_EXECUTABLE
 
 # Get the Git revision number

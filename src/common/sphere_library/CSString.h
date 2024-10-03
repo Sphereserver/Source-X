@@ -6,10 +6,12 @@
 #ifndef _INC_CSSTRING_H
 #define _INC_CSSTRING_H
 
+#include "../common.h"
 #ifdef __MINGW32__
 	#include <cstdio>
 #endif // __MINGW32__
 #include <cstdarg>		// needed for va_list
+
 
 /**
 * @brief Custom String implementation.
