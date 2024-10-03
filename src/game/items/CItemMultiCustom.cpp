@@ -1894,7 +1894,7 @@ uint8 CItemMultiCustom::GetPlane(const CMultiComponent * pComponent)
 
 int8 CItemMultiCustom::GetPlaneZ(uint8 plane)
 {
-    return n32_narrow_n8_checked(7 + ((plane - 1) * 20));
+    return n32_narrow_n8_checked(7 + ((plane - 1) * 20), true);
 }
 
 bool CItemMultiCustom::IsValidItem(ITEMID_TYPE id, CClient * pClientSrc, bool fMulti)

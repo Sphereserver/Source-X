@@ -8,7 +8,7 @@ set(pch_options
     PRIVATE src/common/sphere_library/sstringobjs.h
     PRIVATE src/common/CException.h
     PRIVATE src/common/CExpression.h
-    PRIVATE src/common/CLog.h
+    #PRIVATE src/common/CLog.h
     #PRIVATE src/common/CServerMap.h
     PRIVATE src/game/CObjBase.h
     #PRIVATE src/game/CSector.h
@@ -297,6 +297,7 @@ set(spherelibrary_SRCS
     src/common/sphere_library/sstring.h
     src/common/sphere_library/sstringobjs.cpp
     src/common/sphere_library/sstringobjs.h
+    src/common/sphere_library/stypecast.cpp
     src/common/sphere_library/stypecast.h
 )
 source_group(common\\sphere_library FILES ${spherelibrary_SRCS})
