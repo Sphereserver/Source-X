@@ -34,15 +34,14 @@
 	#define SPHERE_THREADT_NULL nullptr
 #else
 	typedef pthread_t spherethread_t;
-#ifdef __APPLE__
+#   ifdef __APPLE__
 	typedef uint64_t  threadid_t;
-#else
+#   else
 	typedef pthread_t threadid_t;
 #endif
 
 	#define SPHERE_THREADENTRY_RETNTYPE void *
 	#define SPHERE_THREADENTRY_CALLTYPE
-	#define SPHERE_THREADT_NULL 0
 #endif
 
 class IThread;
@@ -219,7 +218,11 @@ private:
     char m_name[30];
 	static int m_threadsAvailable;
 
-    spherethread_t m_handle;
+    // pthread_t type is opaque (platform-defined). It can be an integer, a struct, a ptr something. Memset is the safest and more portable way.
+    //spherethread_t m_handle;
+    // Or, since we need here an "invalid" value, just use optional.
+    std::optional<spherethread_t> m_handle;
+
 	uint m_hangCheck;
 	Priority m_priority;
 	uint m_tickPeriod;

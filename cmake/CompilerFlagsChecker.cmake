@@ -16,6 +16,15 @@ if(NOT MSVC)
     )
     list(APPEND base_compiler_options_warning -Werror;-Wall;-Wextra;-Wpedantic)
 
+    # Linker flags (warnings)
+    #check_cxx_compiler_flag("-Wl,--fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V1)
+    #check_cxx_compiler_flag("-Wl,-fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V2)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        set(COMP_LINKER_HAS_FATAL_WARNINGS_V2 TRUE)
+    else()
+        set(COMP_LINKER_HAS_FATAL_WARNINGS_V1 TRUE)
+    endif()
+
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
     #check_cxx_compiler_flag("" COMP_HAS_)
 
@@ -197,6 +206,13 @@ endif()
 # ---- GCC/Clang
 
 if(NOT MSVC)
+    if(COMP_LINKER_HAS_FATAL_WARNINGS_V1)
+        list(APPEND checked_linker_options_all "-Wl,--fatal-warnings")
+    endif()
+    if(COMP_LINKER_HAS_FATAL_WARNINGS_V2)
+        list(APPEND checked_linker_options_all "-Wl,-fatal_warnings")
+    endif()
+
     if(COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
         list(APPEND checked_compiler_options "-fno-expensive-optimizations")
     endif()
@@ -452,7 +468,7 @@ if(NOT MSVC)
         ${checked_compiler_warnings_disabled}
     )
 
-    list(APPEND list_explicit_linker_options_all ${checked_linker_options_all};-pthread;-dynamic;-Wl,--fatal-warnings)
+    list(APPEND list_explicit_linker_options_all ${checked_linker_options_all};-pthread;-dynamic)
 
     #string(JOIN " " string_checked_compiler_options_all ${list_checked_compiler_options_all})
     #set(string_checked_compiler_options_all CACHE INTERNAL STRING)

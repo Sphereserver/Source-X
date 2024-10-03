@@ -61,8 +61,7 @@ IThread::IThread() noexcept :
 // This is needed to prevent weak-vtables warning (puts the vtable in this translation unit instead of every translation unit)
 IThread::~IThread() noexcept = default;
 
-#ifdef _WIN32
-/*
+#if defined(_WIN32) && defined(MSVC_COMPILER)
 #pragma pack(push, 8)
 typedef struct tagTHREADNAME_INFO
 {
@@ -72,11 +71,8 @@ typedef struct tagTHREADNAME_INFO
 	DWORD dwFlags;
 } THREADNAME_INFO;
 #pragma pack(pop)
-*/
 
-#ifdef MSVC_COMPILER
 static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
-#endif
 #endif
 
 void IThread::setThreadName(const char* name)
@@ -104,7 +100,7 @@ void IThread::setThreadName(const char* name)
         __except(EXCEPTION_EXECUTE_HANDLER)
         {
         }
-    #endif
+    #endif // MSVC_COMPILER
 #elif defined(__APPLE__)	// Mac
 	pthread_setname_np(name_trimmed);
 #elif !defined(_BSD)		// Linux
@@ -438,7 +434,6 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority) :
 	}
 	m_threadSystemId = 0;
     Str_CopyLimitNull(m_name, name, sizeof(m_name));
-	m_handle = SPHERE_THREADT_NULL;
 	m_hangCheck = 0;
     _thread_selfTerminateAfterThisTick = true;
 	m_terminateRequested = true;
@@ -480,14 +475,16 @@ void AbstractThread::start()
 	pthread_attr_t threadAttr;
 	pthread_attr_init(&threadAttr);
 	pthread_attr_setdetachstate(&threadAttr, PTHREAD_CREATE_DETACHED);
-	int result = pthread_create( &m_handle, &threadAttr, &runner, this );
+    spherethread_t threadHandle{};
+    int result = pthread_create( &threadHandle, &threadAttr, &runner, this );
 	pthread_attr_destroy(&threadAttr);
 
 	if (result != 0)
 	{
-		m_handle = 0;
+        m_handle = std::nullopt;
 		throw CSError(LOGL_FATAL, 0, "Unable to spawn a new thread");
 	}
+    m_handle = threadHandle;
 #endif
 
 	m_terminateEvent.reset();
@@ -506,10 +503,10 @@ void AbstractThread::terminate(bool ended)
 			if (wasCurrentThread == false)
 			{
 #ifdef _WIN32
-				TerminateThread(m_handle, 0);
-				CloseHandle(m_handle);
+                TerminateThread(m_handle.value(), 0);
+                CloseHandle(m_handle.value());
 #else
-				pthread_cancel(m_handle); // IBM say it so
+                pthread_cancel(m_handle.value()); // IBM say it so
 #endif
 			}
 		}
@@ -517,7 +514,7 @@ void AbstractThread::terminate(bool ended)
 		// Common things
 		ThreadHolder::get().remove(this);
 		m_threadSystemId = 0;
-		m_handle = SPHERE_THREADT_NULL;
+        m_handle = std::nullopt;
 
 		// let everyone know we have been terminated
 		m_terminateEvent.set();
@@ -650,7 +647,7 @@ SPHERE_THREADENTRY_RETNTYPE AbstractThread::runner(void *callerThread)
 
 bool AbstractThread::isActive() const
 {
-	return (m_handle != SPHERE_THREADT_NULL);
+    return m_handle.has_value();
 }
 
 void AbstractThread::waitForClose()
@@ -686,7 +683,7 @@ bool AbstractThread::isCurrentThread() const noexcept
 #ifdef _WIN32
 	return (getId() == ::GetCurrentThreadId());
 #else
-	return pthread_equal(m_handle,pthread_self());
+    return m_handle.has_value() && pthread_equal(m_handle.value(), pthread_self());
 #endif
 }
 

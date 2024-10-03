@@ -50,7 +50,7 @@ extern struct crypt_data _ufc_foobar;
 char* mystrdup(const char* s)
 {
     const size_t len = strlen(s);
-    char* p = malloc(len) + 1;
+    char* p = (char*)(malloc(len + 1));
     if (p)
     {
         //strcpy(p, s);

@@ -77,12 +77,14 @@ static bool IsAbortImmediate() noexcept
 }
 #endif
 
+[[noreturn]]
 void RaiseRecoverableAbort()
 {
     EXC_NOTIFY_DEBUGGER;
     SetAbortImmediate(false);
     std::abort();
 }
+[[noreturn]]
 void RaiseImmediateAbort()
 {
     EXC_NOTIFY_DEBUGGER;

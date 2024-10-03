@@ -99,13 +99,16 @@ set(CMAKE_CXX_FLAGS_RELEASE "")
 
 set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
-set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 ]]
 # Example: using MSVC, /RTC1 is globally added (all projects) to DEBUG builds. It's mostly fine, except in some cases where we don't want it...
 # We might want to delete only /RTC* flags, instead of erasing all of them altogether.
 #STRING (REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 #STRING (REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+
+# Also, it fails to create those predefined flags, which it needs, for custom build types (e.g. Nightly).
+set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
+
 
 set(is_win32_app_linker)
 if(WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})

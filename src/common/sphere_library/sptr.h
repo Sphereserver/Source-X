@@ -3,7 +3,7 @@
 
 // On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
 #ifndef NON_MSVC_COMPILER
-#    if !defined(_MSC_VER) || !defined(__clang__)
+#    if !defined(_MSC_VER) || defined(__clang__)
 #       define NON_MSVC_COMPILER 1
 #    endif
 #endif

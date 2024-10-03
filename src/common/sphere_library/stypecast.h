@@ -499,7 +499,7 @@ constexpr uint32 usize_narrow_u32(const size_t source_val) noexcept
 #if SIZE_MAX == UINT64_MAX
     return n64_narrow_n32(source_val);
 #elif SIZE_MAX == UINT32_MAX
-    return a;
+    return source_val;
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -677,7 +677,7 @@ template <typename T> int64 i64_from_u64_checked(T, bool) = delete; // disable i
 #if SIZE_MAX == UINT64_MAX
     return n64_narrow_n8_checked(source_val, should_assert);
 #elif SIZE_MAX == UINT32_MAX
-    return n32_narrow_n8_checked(source_val);
+    return n32_narrow_n8_checked(source_val, should_assert);
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -691,7 +691,7 @@ template <typename T> int8 i8_from_usize_checked(T, bool) = delete; // disable i
 #if SIZE_MAX == UINT64_MAX
     return n64_narrow_n16_checked(source_val, should_assert);
 #elif SIZE_MAX == UINT32_MAX
-    return n32_narrow_n16_checked(source_val);
+    return n32_narrow_n16_checked(source_val, should_assert);
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -704,7 +704,7 @@ template <typename T> int16 i16_from_usize_checked(T, bool) = delete; // disable
 #if SIZE_MAX == UINT64_MAX
     return i32_from_u32_clamping(n64_narrow_n32_checked(source_val, should_assert));
 #elif SIZE_MAX == UINT32_MAX
-    return i32_from_u32_checked(n_alias_cast<uint32>(source_val));
+    return i32_from_u32_checked(n_alias_cast<uint32>(source_val), should_assert);
 #else
 #   error "size_t is neither 8 nor 4 bytes?"
 #endif
@@ -717,6 +717,7 @@ template <typename T> int32 i32_from_usize_checked(T, bool) = delete; // disable
 #if SIZE_MAX == UINT64_MAX
     return i64_from_u64_checked(n_alias_cast<uint64>(source_val), should_assert);
 #elif SIZE_MAX == UINT32_MAX
+    (void)should_assert;
     return static_cast<int64>(source_val);   // For sure it will fit
 #else
 #   error "size_t is neither 8 nor 4 bytes?"

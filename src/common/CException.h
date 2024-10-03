@@ -28,9 +28,9 @@ void SetExceptionTranslator();
 void NotifyDebugger();
 
 void SetAbortImmediate(bool on) noexcept;
-bool AbortImmediate() noexcept;
-
+[[noreturn]]
 void RaiseRecoverableAbort();
+[[noreturn]]
 void RaiseImmediateAbort();
 
 
