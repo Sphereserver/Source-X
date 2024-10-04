@@ -643,6 +643,10 @@ void AbstractThread::onStart()
 	// when implemented in derived classes this method must always be called too, preferably before
 	// the custom implementation
 
+#ifdef WINDOWS_SEH_EXCEPTION_MODEL
+    SetWindowsStructuredExceptionTranslator();
+#endif
+
 	// we set the id here to ensure it is available before the first tick, otherwise there's
 	// a small delay when setting it from AbstractThread::start and it's possible for the id
 	// to not be set fast enough (particular when using pthreads)

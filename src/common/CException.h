@@ -9,6 +9,17 @@
 //#include "../sphere/threads.h"
 #include "CLog.h"
 
+#if defined(_WIN32) && (defined(MSVC_COMPILER) || (defined(__MINGW32__) && defined(__SEH__)))
+#   define WINDOWS_SEH_EXCEPTION_MODEL 1
+#endif
+
+#if defined(WINDOWS_SEH_EXCEPTION_MODEL) && defined(_NIGHTLYBUILD) && !defined(_NO_CRASHDUMP)
+// We don't want this for Release build because, in order to call _set_se_translator, we should set the /EHa
+//	compiler flag, which slows down code a bit.
+// Also, the crash dump generating code works only when Structured Exception Handling is enabled
+#   define WINDOWS_SHOULD_EMIT_CRASH_DUMP 1
+#endif
+
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
 
@@ -18,7 +29,7 @@ extern "C"
 }
 
 void SetPurecallHandler();
-void SetExceptionTranslator();
+void SetWindowsStructuredExceptionTranslator();
 
 #ifndef _WIN32
     void SetUnixSignals( bool );
@@ -79,20 +90,18 @@ public:
 	virtual bool GetErrorMessage(lptstr lpszError, uint uiMaxError ) const override;
 };
 
-#ifdef _WIN32
+#ifdef WINDOWS_SEH_EXCEPTION_MODEL
 	// Catch and get details on the system exceptions.
-	class CWinException : public CSError
+	class CWinStructuredException : public CSError
 	{
 	public:
 		static const char *m_sClassName;
 		const size_t m_pAddress;
 
-        CWinException(uint uCode, size_t pAddress);
-		virtual ~CWinException();
-	private:
-        CWinException& operator=(const CWinException& other);
+        CWinStructuredException(uint uCode, size_t pAddress);
+		virtual ~CWinStructuredException();
+        CWinStructuredException& operator=(const CWinStructuredException& other) = delete;
 
-	public:
 		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError) const override;
 	};
 #endif

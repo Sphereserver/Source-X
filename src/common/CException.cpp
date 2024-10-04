@@ -1,6 +1,10 @@
 
 #include "CException.h"
 
+#ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
+#include "crashdump/crashdump.h"
+#endif
+
 #ifndef _WIN32
 #include <sys/wait.h>
 //#include <pthread.h>    // for pthread_exit
@@ -66,6 +70,7 @@ static bool* _GetAbortImmediate() noexcept
     static bool _fIsAbortImmediate = true;
     return &_fIsAbortImmediate;
 }
+
 void SetAbortImmediate(bool on) noexcept
 {
     *_GetAbortImmediate() = on;
@@ -84,6 +89,7 @@ void RaiseRecoverableAbort()
     SetAbortImmediate(false);
     std::abort();
 }
+
 [[noreturn]]
 void RaiseImmediateAbort()
 {
@@ -189,16 +195,16 @@ bool CAssert::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 
 #ifdef _WIN32
 
-CWinException::CWinException(uint uCode, size_t pAddress) :
+CWinStructuredException::CWinStructuredException(uint uCode, size_t pAddress) :
 	CSError(LOGL_CRIT, uCode, "Exception"), m_pAddress(pAddress)
 {
 }
 
-CWinException::~CWinException()
+CWinStructuredException::~CWinStructuredException()
 {
 }
 
-bool CWinException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
+bool CWinStructuredException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 {
 	lpctstr zMsg;
 	switch ( m_hError )
@@ -238,7 +244,7 @@ static void _cdecl Sphere_Purecall_Handler()
 void SetPurecallHandler()
 {
 	// We don't want sphere to immediately exit if something calls a pure virtual method.
-#ifdef MSVC_RUNTIME
+#ifdef MSVC_COMPILER
 	_set_purecall_handler(Sphere_Purecall_Handler);
 #else
 	// GCC handler for pure calls is __cxxabiv1::__cxa_pure_virtual.
@@ -247,34 +253,28 @@ void SetPurecallHandler()
 #endif
 }
 
-#if defined(_WIN32) && !defined(_DEBUG)
-
-#include "crashdump/crashdump.h"
-
-static void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
+#ifdef WINDOWS_SEH_EXCEPTION_MODEL
+static void _cdecl Sphere_Structured_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
 {
-#ifndef _NO_CRASHDUMP
+#   ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
 	if ( CrashDump::IsEnabled() )
 		CrashDump::StartCrashDump(GetCurrentProcessId(), GetCurrentThreadId(), pData);
+#   endif
 
-#endif
 	// WIN32 gets an exception.
 	size_t pCodeStart = (size_t)(byte *) &globalstartsymbol;	// sync up to my MAP file.
 
 	size_t pAddr = (size_t)pData->ExceptionRecord->ExceptionAddress;
 	pAddr -= pCodeStart;
 
-	throw CWinException(id, pAddr);
+    throw CWinStructuredException(id, pAddr);
 }
 
-#endif // _WIN32 && !_DEBUG
-
-void SetExceptionTranslator()
+void SetWindowsStructuredExceptionTranslator()
 {
-#ifdef MSVC_COMPILER
-	_set_se_translator( Sphere_Exception_Windows );
-#endif
+    _set_se_translator( Sphere_Structured_Exception_Windows );
 }
+#endif
 
 #ifndef _WIN32
 static void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized

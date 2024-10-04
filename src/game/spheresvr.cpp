@@ -71,12 +71,8 @@ GlobalInitializer::GlobalInitializer()
 
 //--- Exception handling
 
-    // Set exception catcher?
-#if defined(MSVC_COMPILER) && !defined(_NIGHTLYBUILD)
-    // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
-    // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
-    //	compiler flag, which slows down code a bit.
-    SetExceptionTranslator();
+#ifdef WINDOWS_SEH_EXCEPTION_MODEL
+    SetWindowsStructuredExceptionTranslator();
 #endif
 
 	// Set function to handle the invalid case where a pure virtual function is called.
@@ -192,7 +188,6 @@ MainThread::MainThread()
 void MainThread::onStart()
 {
 	AbstractSphereThread::onStart();
-	SetExceptionTranslator();
 }
 
 void MainThread::tick()
