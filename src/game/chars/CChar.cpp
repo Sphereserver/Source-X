@@ -2360,7 +2360,7 @@ do_default:
                 return true;
             }
 
-            sVal.FormatVal(0);
+            sVal.SetValFalse();
             ptcKey += 11;
             if (*ptcKey != '.')
                 return false;
@@ -2373,7 +2373,7 @@ do_default:
             }
 
             // Access objects by ID.
-            if (*ptcKey != '.' || m_followers.empty())
+            if (m_followers.empty())
                 return false;
 
             const uint uiIndex = Exp_GetUVal(ptcKey);
@@ -2383,6 +2383,12 @@ do_default:
             CChar* pCharArg = CUID::CharFindFromUID(m_followers[uiIndex].uid);
             if (!pCharArg)
                 return false;
+
+            if (*ptcKey == '\0')
+            {
+                sVal.SetValTrue();
+                return true;
+            }
 
             if (pCharArg->r_WriteVal(ptcKey, sVal, pSrc, fNoCallParent, fNoCallChildren))
                 return true;
@@ -2403,7 +2409,7 @@ do_default:
 					return true;
 				}
 
-				sVal.FormatVal(0);
+                sVal.SetValFalse();
 				ptcKey += 8;
 
 				if ( *ptcKey == '.' )
@@ -2525,7 +2531,7 @@ do_default:
 					return true;
 				}
 
-				sVal.FormatVal(0);
+                sVal.SetValFalse();
 				ptcKey += 8;
 
 				if ( *ptcKey == '.' )
@@ -2630,7 +2636,7 @@ do_default:
 					--i;
 				}
 
-				sVal = "0";
+                sVal.SetValFalse();
 				delete[] pszFameAt0;
 				return true;
 			}
@@ -2726,7 +2732,7 @@ do_default:
 					--i;
 				}
 
-				sVal = "0";
+                sVal.SetValFalse();
 				delete[] pszKarmaAt0;
 				return true;
 			}
@@ -2812,12 +2818,12 @@ do_default:
 					CResourceQtyArray Resources;
 					if ( Resources.Load(ptcKey) > 0 && SkillResourceTest( &Resources ) )
 					{
-						sVal.FormatVal(1);
+                        sVal.SetValTrue();
 						return true;
 					}
 				}
 			}
-			sVal.FormatVal(0);
+            sVal.SetValFalse();
 			return true;
 		case CHC_CANMOVE:
 			{
@@ -2840,7 +2846,7 @@ do_default:
 				if ( pItem )
 					sVal.FormatHex(pItem->m_itFigurine.m_UID);
 				else
-					sVal.FormatVal(0);
+                    sVal.SetValFalse();
 				return true;
 			}
 		case CHC_MOVE:
@@ -2886,7 +2892,7 @@ do_default:
 			if ( m_pPlayer != nullptr )
 				sVal = ( m_pParty != nullptr ) ? "1" : "0";
 			else
-				sVal = "0";
+                sVal.SetValFalse();
 			return true;
 		case CHC_ISMYPET:
 			if (!m_pNPC)
@@ -2904,7 +2910,7 @@ do_default:
 				sVal = IsDisconnected() ? "0" : "1";
 				return true;
 			}
-			sVal = "0";
+            sVal.SetValFalse();
 			return true;
 		case CHC_ISSTUCK:
 			{

@@ -959,7 +959,7 @@ bool CCChampion::r_WriteVal(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc)
             }
             else
             {
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
             }
             break;
         }

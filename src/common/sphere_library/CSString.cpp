@@ -103,9 +103,9 @@ bool CSString::IsValid() const noexcept
 
 int CSString::Resize(int iNewLength, bool fPreciseSize)
 {
-	if (iNewLength >= m_iMaxLength)
+    const bool fValid = IsValid();
+    if ((iNewLength >= m_iMaxLength) || !fValid)
 	{
-		const bool fValid = IsValid();
 #ifdef DEBUG_STRINGS
 		gMemAmount -= m_iMaxLength;
 #endif
@@ -131,15 +131,25 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
 		{
 			const int iMinLength = 1 + minimum(iNewLength, m_iLength);
 			Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
-			delete[] m_pchData;
 		}
-		pNewData[m_iLength] = '\0';
+        if (fValid)
+            delete[] m_pchData;
 		m_pchData = pNewData;
 	}
 	ASSERT(m_pchData);
 	m_iLength = iNewLength;
 	m_pchData[m_iLength] = '\0';
 	return m_iLength;
+}
+
+void CSString::SetValFalse()
+{
+    Copy("0");
+}
+
+void CSString::SetValTrue()
+{
+    Copy("1");
 }
 
 

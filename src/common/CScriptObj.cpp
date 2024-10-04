@@ -496,7 +496,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			if (pRef == nullptr)
 			{
 				// Invalid ref: just return 0, it isn't an error.
-				sVal.FormatVal(0);
+				sVal.SetValFalse();
 				return true;
 			}
 
@@ -516,7 +516,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 
 		if (pRef == nullptr)	// good command but bad reference.
 		{
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 			return false;
 		}
 		return pRef->r_WriteVal( ptcKey, sVal, pSrc );
@@ -667,7 +667,7 @@ badcmd:
 				if ( pVar )
 					sVal = pVar->GetValStr();
 				else if ( fZero )
-					sVal = "0";
+					sVal.SetValFalse();
 			}
 			return true;
         case SSC_RESDEF0:
@@ -679,7 +679,7 @@ badcmd:
             if ( pVar )
                 sVal = pVar->GetValStr();
             else if ( fZero )
-                sVal = "0";
+                sVal.SetValFalse();
         }
         return true;
 		case SSC_DEFMSG:

@@ -214,6 +214,16 @@ public:
 	*/
 	void SetAt(int nIndex, tchar ch);
 
+    /**
+    * @brief Sets the string to an integer false value (0), usually handy for scripts return values.
+    */
+    void SetValFalse();
+
+    /**
+    * @brief Sets the string to an integer true value (1), usually handy for scripts return values.
+    */
+    void SetValTrue();
+
 	///@}
 
 	/** @name Modifiers:

@@ -865,7 +865,7 @@ bool CCSpawn::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc)
             }
             else
             {
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
             }
             return true;
         }

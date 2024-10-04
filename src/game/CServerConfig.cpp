@@ -1632,7 +1632,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 		if ( !strnicmp(ptcKey, "MAP(", 4) )
 		{
 			ptcKey += 4;
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			// Parse the arguments after the round brackets
 			tchar * pszArgsNext;
@@ -1691,7 +1691,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			lpctstr pszCmd = ptcKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if (!*pszCmd)
 			{
@@ -1738,7 +1738,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			ptcKey = ptcKey + 3;
 			int iMapNumber = Exp_GetVal(ptcKey);
 			SKIP_SEPARATORS(ptcKey);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if ( g_MapList.IsMapSupported(iMapNumber) )
 			{
@@ -1784,7 +1784,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			size_t iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
 			{
@@ -1832,7 +1832,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if (iNumber < 0 || iNumber >= (int) m_Functions.size()) //invalid index can potentially crash the server, this check is strongly needed
 			{
@@ -1879,7 +1879,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			size_t iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 			{
@@ -1914,7 +1914,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			if (cli_num >= g_Serv.StatGet( SERV_STAT_CLIENTS ))
 				return false;
 
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 			ClientIterator it;
 			for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 			{

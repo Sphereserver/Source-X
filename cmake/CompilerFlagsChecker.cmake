@@ -18,7 +18,7 @@ if(NOT MSVC)
 
     # Linker flags (warnings)
     #check_cxx_compiler_flag("-Wl,--fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V1)
-    #check_cxx_compiler_flag("-Wl,-fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V2)
+    #check_cxx_compiler_flag("-Wl,-fatal_warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V2)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
         set(COMP_LINKER_HAS_FATAL_WARNINGS_V2 TRUE)
     else()

@@ -2805,7 +2805,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 				if ( id != GetDispID() )
 					sVal.FormatHex( id );
 				else
-					sVal.FormatVal(0);
+					sVal.SetValFalse();
 			}
 			break;
 		case IC_HEIGHT:

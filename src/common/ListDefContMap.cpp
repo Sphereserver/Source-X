@@ -268,7 +268,7 @@ bool CListDefCont::AddElementStr(lpctstr ptcKey)
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
-        REMOVE_QUOTES( ptcKey );
+    REMOVE_QUOTES( ptcKey );
 
 	m_listElements.emplace_back( new CListDefContStr(m_Key.GetBuffer(), ptcKey) );
 
