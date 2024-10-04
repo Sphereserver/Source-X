@@ -4285,20 +4285,20 @@ void CChar::SleepStart( bool fFrontFall )
 // Cleaning myself (dispel, cure, dismounting ...).
 // Creating the corpse ( MakeCorpse() ).
 // Removing myself from view, generating Death packets.
-// RETURN:
-//		true = successfully died
-//		false = something went wrong? i'm an NPC, just delete (excepting BONDED ones).
-bool CChar::Death()
+CChar::DeathRequestResult CChar::Death()
 {
 	ADDTOCALLSTACK("CChar::Death");
 
-	if ( IsStatFlag(STATF_DEAD|STATF_INVUL) )
-		return true;
+    if ( IsStatFlag(STATF_DEAD) )
+        return DeathRequestResult::AlreadyDead;
+
+    if ( IsStatFlag(STATF_INVUL) )
+        return DeathRequestResult::AbortedNoLog;
 
 	if ( IsTrigUsed(TRIGGER_DEATH) )
 	{
 		if ( OnTrigger(CTRIG_Death, this) == TRIGRET_RET_TRUE )
-			return true;
+            return DeathRequestResult::Aborted;
 	}
 	//Dismount now. Later is may be too late and cause problems
 	if ( m_pNPC )
@@ -4353,7 +4353,8 @@ bool CChar::Death()
 			iKillStrLen += snprintf(
 				pszKillStr + iKillStrLen, Str_TempLength() - iKillStrLen,
 				"%s%c'%s'.",
-				iKillers ? ", " : "", (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
+                iKillers ? ", " : "",
+                (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
 
 			++iKillers;
 		}
@@ -4361,7 +4362,7 @@ bool CChar::Death()
 
 	// Record the kill event for posterity
 	if ( !iKillers )
-		iKillStrLen += snprintf( pszKillStr + iKillStrLen, Str_TempLength() - iKillStrLen, "accident." );
+        /*iKillStrLen +=*/ snprintf( pszKillStr + iKillStrLen, Str_TempLength() - iKillStrLen, "accident." );
 	if ( m_pPlayer )
 		g_Log.Event( LOGL_EVENT|LOGM_KILLS, "%s\n", pszKillStr );
 	if ( m_pParty )
@@ -4385,7 +4386,7 @@ bool CChar::Death()
     }
 
 	// Create the corpse item
-	bool fFrontFall = g_Rand.GetVal(2);
+    bool fFrontFall = g_Rand.GetValFast(2);
 	CItemCorpse * pCorpse = MakeCorpse(fFrontFall);
 	if ( pCorpse )
 	{
@@ -4406,14 +4407,14 @@ bool CChar::Death()
 		{
 			m_CanMask |= CAN_C_GHOST;
 			UpdateMode(nullptr, true);
-			return true;
+            return DeathRequestResult::Success;
 		}
 
 		if ( pCorpse )
 			pCorpse->m_uidLink.InitUID();
 
 		NPC_PetClearOwners();
-		return false;	// delete the NPC
+        return DeathRequestResult::SuccessAndDelete;	// delete the NPC
 	}
 
 	if ( m_pPlayer )
@@ -4495,7 +4496,7 @@ bool CChar::Death()
 
 		}
 	}
-	return true;
+    return DeathRequestResult::Success;
 }
 
 // Check if we are held in place.
@@ -5916,8 +5917,26 @@ bool CChar::OnTickPeriodic()
     */
     if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))
     {
-        EXC_SET_BLOCK("death");
-        return Death();
+        EXC_SET_BLOCK("death?");
+        const DeathRequestResult deathRes = Death();
+        if ((deathRes != DeathRequestResult::Aborted) && (deathRes != DeathRequestResult::AbortedNoLog))
+        {
+            if (deathRes == DeathRequestResult::AlreadyDead)
+                goto do_status_update;
+            if (deathRes == DeathRequestResult::SuccessAndDelete)
+                return false;
+            return true;
+        }
+        else
+        {
+#ifdef _DEBUG
+            if (deathRes != DeathRequestResult::AbortedNoLog)
+            {
+                g_Log.EventEvent("Aborted char '%s' (0x%" PRIx32 " ) death.\n", GetName(), GetUID().GetObjUID());
+            }
+#endif
+            ; // Then, fall through.
+        }
     }
 
     // Stats regeneration
@@ -5935,18 +5954,21 @@ bool CChar::OnTickPeriodic()
     if (IsClientActive())
     {
         CClient* pClient = GetClientActive();
+
         // Players have a silly "always run" flag that gets stuck on.
         if ( (iTimeCur - pClient->m_timeLastEventWalk) > (2 * MSECS_PER_TENTH) )
         {
             StatFlag_Clear(STATF_FLY);
         }
-	// Show returning anim for thowing weapons after throw it
-	if ((pClient->m_timeLastSkillThrowing > 0) && ((iTimeCur - pClient->m_timeLastSkillThrowing) > (2 * MSECS_PER_TENTH)))
-	{
-		pClient->m_timeLastSkillThrowing = 0;
-		if (pClient->m_pSkillThrowingTarg->IsValidUID())
-			Effect(EFFECT_BOLT, pClient->m_SkillThrowingAnimID, pClient->m_pSkillThrowingTarg, 18, 1, false, pClient->m_SkillThrowingAnimHue, pClient->m_SkillThrowingAnimRender);
-	}
+
+        // Show returning anim for thowing weapons after throw it
+        if ((pClient->m_timeLastSkillThrowing > 0) && ((iTimeCur - pClient->m_timeLastSkillThrowing) > (2 * MSECS_PER_TENTH)))
+        {
+            pClient->m_timeLastSkillThrowing = 0;
+            if (pClient->m_pSkillThrowingTarg->IsValidUID())
+                Effect(EFFECT_BOLT, pClient->m_SkillThrowingAnimID, pClient->m_pSkillThrowingTarg, 18, 1, false, pClient->m_SkillThrowingAnimHue, pClient->m_SkillThrowingAnimRender);
+        }
+
         // Check targeting timeout, if set
         if ((pClient->m_Targ_Timeout > 0) && ((iTimeCur - pClient->m_Targ_Timeout) > 0) )
         {
@@ -5961,6 +5983,7 @@ bool CChar::OnTickPeriodic()
         CheckLocationEffects(true);
     }
 
+do_status_update:
     EXC_SET_BLOCK("update stats");
     OnTickStatusUpdate();
     EXC_CATCH;

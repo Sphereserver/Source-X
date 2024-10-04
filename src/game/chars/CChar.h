@@ -1177,16 +1177,28 @@ public:
 
 	virtual void Update(const CClient* pClientExclude = nullptr) override;
 	virtual void Flip() override;
+
+    void EatAnim(CItem* pItem, ushort uiQty);
+    bool Reveal( uint64 iFlags = 0 );
+    void Jail( CTextConsole * pSrc, bool fSet, int iCell );
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
-	bool RaiseCorpse( CItemCorpse * pCorpse );
-	bool Death();
-	bool Reveal( uint64 iFlags = 0 );
-	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim(CItem* pItem, ushort uiQty);
+    bool RaiseCorpse( CItemCorpse * pCorpse );
+
+    enum class DeathRequestResult
+    {
+        Success,
+        SuccessAndDelete,
+        AlreadyDead,
+        Aborted,
+        AbortedNoLog
+    };
+
+    DeathRequestResult Death();
+
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*
