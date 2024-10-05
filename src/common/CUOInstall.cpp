@@ -58,7 +58,7 @@ bool CUOInstall::FindInstall()
 		return false;
 	}
 
-	tchar szValue[ _MAX_PATH ];
+	tchar szValue[ SPHERE_MAX_PATH ];
 	DWORD lSize = sizeof( szValue );
 	DWORD dwType = REG_SZ;
 	lRet = RegQueryValueEx(hKey, "ExePath", nullptr, &dwType, (byte*)szValue, &lSize);

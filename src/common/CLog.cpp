@@ -75,7 +75,6 @@ int CEventLog::EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFor
     return iret;
 }
 
-#ifdef _DEBUG
 int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
@@ -84,7 +83,6 @@ int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
     va_end(vargs);
     return iret;
 }
-#endif //_DEBUG
 
 
 //-------
@@ -265,7 +263,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		}
 
 		// Get the script context. (if there is one)
-		tchar szScriptContext[ _MAX_PATH + 16 ];
+		tchar szScriptContext[ SPHERE_MAX_PATH + 16 ];
 		if ( !(dwMask & LOGM_NOCONTEXT) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();

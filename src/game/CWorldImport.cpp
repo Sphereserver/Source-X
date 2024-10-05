@@ -816,7 +816,7 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	fImport.m_pszArg1 = pszArg1;
 	fImport.m_pszArg2 = pszArg2;
 
-	if ( ! strcmpi( pszFilename + (iLen - 4), ".WSC" ))
+    if ( ! strcmpi( pszFilename + (iLen - 4), ".WSC" ))
 	{
 		if ( ! fImport.ImportWSC(s, wModeFlags, dx, dy ))
 			return false;
@@ -844,7 +844,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 		return false;
 
 	if ( pszFilename == nullptr || *pszFilename == '\0' )
-		pszFilename	= "map_all" SPHERE_SCRIPT;
+		pszFilename	= "map_all" SPHERE_SCRIPT_EXT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
 

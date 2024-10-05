@@ -252,7 +252,7 @@ void CNTService::ServiceStop()
 //	PURPOSE:  Installs the service on the local machine
 void CNTService::CmdInstallService()
 {
-	char	szPath[_MAX_PATH * 2];
+	char	szPath[SPHERE_MAX_PATH * 2];
 	char	szErr[256];
 
 	ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Installing Service.");

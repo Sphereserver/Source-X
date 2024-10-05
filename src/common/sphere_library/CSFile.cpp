@@ -434,7 +434,7 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	ADDTOCALLSTACK("CSFile::GetMergedFileName");
     // Merge path and file name.
 
-	tchar ptcFilePath[ _MAX_PATH ];
+	tchar ptcFilePath[ SPHERE_MAX_PATH ];
     size_t len = 0;
 	if ( pszBase && pszBase[0] )
 	{

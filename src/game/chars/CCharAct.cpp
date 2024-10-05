@@ -5929,12 +5929,12 @@ bool CChar::OnTickPeriodic()
         }
         else
         {
-#ifdef _DEBUG
+//#ifdef _DEBUG
             if (deathRes != DeathRequestResult::AbortedNoLog)
             {
                 g_Log.EventEvent("Aborted char '%s' (0x%" PRIx32 " ) death.\n", GetName(), GetUID().GetObjUID());
             }
-#endif
+//#endif
             ; // Then, fall through.
         }
     }

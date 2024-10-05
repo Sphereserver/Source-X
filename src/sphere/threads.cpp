@@ -643,7 +643,7 @@ void AbstractThread::onStart()
 	// when implemented in derived classes this method must always be called too, preferably before
 	// the custom implementation
 
-#ifdef WINDOWS_SEH_EXCEPTION_MODEL
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
     SetWindowsStructuredExceptionTranslator();
 #endif
 

@@ -12,7 +12,8 @@
 
 #define SPHERE_FILE				"sphere"	// file name prefix
 #define SPHERE_TITLE			"SphereServer"
-#define SPHERE_SCRIPT			".scp"
+#define SPHERE_SCRIPT_EXT		".scp"
+#define SPHERE_SCRIPT_EXT_LEN   4
 
 #define SCRIPT_MAX_LINE_LEN		4096		// default size.
 #define SCRIPT_MAX_SECTION_LEN	128

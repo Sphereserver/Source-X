@@ -748,7 +748,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 						break;
 
 					//	use dclick to open the corresponding script file
-					TCHAR * pos = strstr(zTemp, SPHERE_SCRIPT);
+					TCHAR * pos = strstr(zTemp, SPHERE_SCRIPT_EXT);
 					if ( pos != nullptr )
 					{
 						//	use two formats of file names:
@@ -784,7 +784,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 							// since certain files aren't listed, handle these separately
 							if (filePath == nullptr)
 							{
-								if ( strstr(SPHERE_FILE "tables" SPHERE_SCRIPT, start) )
+								if ( strstr(SPHERE_FILE "tables" SPHERE_SCRIPT_EXT, start) )
 								{
 									TCHAR * z = Str_GetTemp();
 									strcpy(z, g_Cfg.m_sSCPBaseDir);

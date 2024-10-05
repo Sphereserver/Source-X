@@ -79,7 +79,7 @@ static void defragSphere(char *path)
     CSFileText inf;
     CSFile ouf;
     char file_buf[1024];
-    char path_buf[_MAX_PATH], path_buf_2[_MAX_PATH];
+    char path_buf[SPHERE_MAX_PATH], path_buf_2[SPHERE_MAX_PATH];
     char *str_ptr = nullptr, *str_ptr_2 = nullptr;
 
     g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " SPHERE_TITLE " saves.\n"
@@ -95,9 +95,9 @@ static void defragSphere(char *path)
     for ( uint i = 0; i < 3; ++i )
     {
         Str_CopyLimitNull(path_buf, path, sizeof(path_buf));
-        if ( i == 0 )		strcat(path_buf, SPHERE_FILE "statics" SPHERE_SCRIPT);
-        else if ( i == 1 )	strcat(path_buf, SPHERE_FILE "world" SPHERE_SCRIPT);
-        else				strcat(path_buf, SPHERE_FILE "chars" SPHERE_SCRIPT);
+        if ( i == 0 )		strcat(path_buf, SPHERE_FILE "statics" SPHERE_SCRIPT_EXT);
+        else if ( i == 1 )	strcat(path_buf, SPHERE_FILE "world" SPHERE_SCRIPT_EXT);
+        else				strcat(path_buf, SPHERE_FILE "chars" SPHERE_SCRIPT_EXT);
 
         g_Log.Event(LOGM_INIT, "Reading current UIDs: %s\n", path_buf);
         if ( !inf.Open(path_buf, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
@@ -145,10 +145,10 @@ static void defragSphere(char *path)
     {
         Str_CopyLimitNull(path_buf, path, sizeof(path_buf));
         if ( !i )			strcat(path_buf, SPHERE_FILE "accu.scp");
-        else if ( i == 1 )	strcat(path_buf, SPHERE_FILE "chars" SPHERE_SCRIPT);
-        else if ( i == 2 )	strcat(path_buf, SPHERE_FILE "data" SPHERE_SCRIPT);
-        else if ( i == 3 )	strcat(path_buf, SPHERE_FILE "world" SPHERE_SCRIPT);
-        else if ( i == 4 )	strcat(path_buf, SPHERE_FILE "statics" SPHERE_SCRIPT);
+        else if ( i == 1 )	strcat(path_buf, SPHERE_FILE "chars" SPHERE_SCRIPT_EXT);
+        else if ( i == 2 )	strcat(path_buf, SPHERE_FILE "data" SPHERE_SCRIPT_EXT);
+        else if ( i == 3 )	strcat(path_buf, SPHERE_FILE "world" SPHERE_SCRIPT_EXT);
+        else if ( i == 4 )	strcat(path_buf, SPHERE_FILE "statics" SPHERE_SCRIPT_EXT);
         g_Log.Event(LOGM_INIT, "Updating UID-s in %s to %s.new\n", path_buf, path_buf);
         if ( !inf.Open(path_buf, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
         {
@@ -1116,7 +1116,7 @@ longcommand:
 			if ( !strnicmp(pszText, "strip tng", 9) || !strnicmp(pszText, "tngstrip", 8))
 			{
 				Str_CopyLimitNull(z, dirname, Str_TempLength());
-				Str_ConcatLimitNull(z, "sphere_strip_tng" SPHERE_SCRIPT, Str_TempLength());
+				Str_ConcatLimitNull(z, "sphere_strip_tng" SPHERE_SCRIPT_EXT, Str_TempLength());
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("StripFile is %s.\n", z);
@@ -1198,7 +1198,7 @@ longcommand:
 			else if ( !strnicmp(pszText, "strip axis", 10) || !strnicmp(pszText, "strip", 5) )
 			{
 				Str_CopyLimitNull(z, dirname, Str_TempLength());
-				Str_ConcatLimitNull(z, "sphere_strip_axis" SPHERE_SCRIPT, Str_TempLength());
+				Str_ConcatLimitNull(z, "sphere_strip_axis" SPHERE_SCRIPT_EXT, Str_TempLength());
                 if (pSrc != this)
                 {
                     pSrc->SysMessagef("StripFile is %s.\n", z);
@@ -2494,7 +2494,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	// What are we listing our port as to the world.
 	// Tell the admin what we know.
 
-	tchar szName[ _MAX_PATH ];
+	tchar szName[ SPHERE_MAX_PATH ];
 	struct hostent * pHost = nullptr;
 
 	int iRet = gethostname(szName, sizeof(szName));
@@ -2504,7 +2504,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	{
 		pHost = gethostbyname(szName);
 		if ( pHost && pHost->h_addr && pHost->h_name && pHost->h_name[0] )
-			Str_CopyLimitNull(szName, pHost->h_name, _MAX_PATH);
+			Str_CopyLimitNull(szName, pHost->h_name, SPHERE_MAX_PATH);
 	}
 
 	g_Log.Event( LOGM_INIT, "Server started on hostname '%s'\n", szName);

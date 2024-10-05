@@ -71,9 +71,7 @@ public:
 	int _cdecl EventError(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
 	int _cdecl EventWarn(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
     int _cdecl EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept __printfargs(4,5);
-#ifdef _DEBUG
 	int _cdecl EventEvent( lpctstr pszFormat, ... ) noexcept __printfargs(2,3);
-#endif //_DEBUG
 
 	CEventLog();
     virtual ~CEventLog();

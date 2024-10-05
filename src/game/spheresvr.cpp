@@ -71,7 +71,7 @@ GlobalInitializer::GlobalInitializer()
 
 //--- Exception handling
 
-#ifdef WINDOWS_SEH_EXCEPTION_MODEL
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
     SetWindowsStructuredExceptionTranslator();
 #endif
 

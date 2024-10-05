@@ -84,7 +84,6 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
     int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, ARRAY_COUNT(ppBlocks));
     for ( int i = 0; i < iArgCount; ++i )
     {
-        std::shared_ptr<CResourceDef> pResourceDefRef;
         CResourceLink* pResourceLink = nullptr;
 
         pszCmd = ppBlocks[i];
@@ -128,7 +127,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
         if (pResourceLink == nullptr)
         {
             fRet = false;
-            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd));
+            g_Log.EventError("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd);
         }
     }
 
@@ -196,6 +195,13 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr ptcKey ) c
     if ( pResourceLink == nullptr )
         return sl::scont_bad_index();
     return FindResourceID(pResourceLink->GetResourceID());
+}
+
+lpctstr CResourceHolder::GetResourceBlockName( RES_TYPE restype )	// static
+{
+    if ( restype < 0 || restype >= RES_QTY )
+        restype = RES_UNKNOWN;
+    return sm_szResourceBlocks[restype];
 }
 
 void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const

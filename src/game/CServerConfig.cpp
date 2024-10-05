@@ -4685,13 +4685,13 @@ bool CServerConfig::Load( bool fResync )
 	// Now load the *TABLES.SCP file.
 	if ( ! fResync )
 	{
-		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT ))
+		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ))
 		{
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n" );
+			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n" );
 			return false;
 		}
 
-        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n");
+        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n");
 		LoadResourcesOpen(&m_scpTables);
 		m_scpTables.Close();
 	}
@@ -4991,7 +4991,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 		return false;
 
 	if ( pszFilename == nullptr || pszFilename[0] == '\0' )
-		pszFilename	= "unscripted_items" SPHERE_SCRIPT;
+		pszFilename	= "unscripted_items" SPHERE_SCRIPT_EXT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
 

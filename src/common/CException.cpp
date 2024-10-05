@@ -193,7 +193,7 @@ bool CAssert::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-#ifdef _WIN32
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
 
 CWinStructuredException::CWinStructuredException(uint uCode, size_t pAddress) :
 	CSError(LOGL_CRIT, uCode, "Exception"), m_pAddress(pAddress)
@@ -253,7 +253,7 @@ void SetPurecallHandler()
 #endif
 }
 
-#ifdef WINDOWS_SEH_EXCEPTION_MODEL
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
 static void _cdecl Sphere_Structured_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
 {
 #   ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP

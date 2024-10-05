@@ -6,21 +6,37 @@
 #ifndef _INC_OS_UNIX_H
 #define _INC_OS_UNIX_H
 
+//#include <limits.h>         // PATH_MAX
 #include <unistd.h>			// usleep
 #include <cctype>           // toupper, tolower
 
 
 //#define SLASH_PATH	"/"
 
-#ifndef _MAX_PATH			// stdlib.h ?
-	#define _MAX_PATH   260 	// max. length of full pathname
+
+// Max. length of full pathname
+
+/*
+#if defined(PATH_MAX) // limits.h
+#   if PATH_MAX <= 0
+#       define SPHERE_MAX_PATH 260
+#   elif PATH_MAX > 1024
+#       define SPHERE_MAX_PATH 1024 // Define a "big enough" max value, just to avoid the need of enormous char buffers.
+#   else
+#       define SPHERE_MAX_PATH PATH_MAX
+#   endif
+#else
+// If we want to keep compatibility with legacy Windows max path length.
+#   define SPHERE_MAX_PATH 260
 #endif
+*/
+// TODO: enable longer MAX_PATHs on both Linux and Windows, also checking that increasing that limit doesn't cause any buffer overflow.
+#define SPHERE_MAX_PATH 260
 
 #define _cdecl
 #define __cdecl
 #define FAR
 #define E_FAIL			0x80004005	// exception code
-#define HANDLE			dword
 
 
 /*  cross-platform functions macros  */

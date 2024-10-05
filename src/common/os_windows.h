@@ -6,6 +6,17 @@
 #ifndef _INC_OS_WINDOWS_H
 #define _INC_OS_WINDOWS_H
 
+// Windows keeps this reduced limit for compatibility with older API calls and FAT32 path length...
+//  this limit includes the total length of the path, such as directories, subdirectories, and the filename,
+// and it is constrained to 259 characters for the path itself, with the 260th character being reserved for the null terminator.
+// On newer versions, Even though long paths are supported (via path prefix or application manifest - if Vista+),
+// _MAX_PATH is not updated to reflect the new maximum path length (which can now be up to 32,767 characters).
+// The long path feature requires the usage of the wide-character WinAPI calls and the \\?\ prefix.
+#ifdef _MAX_PATH
+#   define SPHERE_MAX_PATH _MAX_PATH
+#else
+#   define SPHERE_MAX_PATH 260
+#endif
 
 // _WIN32_WINNT version constants
 /*
@@ -26,7 +37,6 @@
 #ifndef _WIN32_WINNT
 	#define _WIN32_WINNT 0x0501	// By default we target Windows XP
 #endif
-
 
 #undef FD_SETSIZE
 #define FD_SETSIZE 1024		// for max of n users ! default = 64	(FD: file descriptor)
