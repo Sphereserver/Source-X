@@ -5,7 +5,6 @@
 //
 
 #include "../../sphere/threads.h"
-#include "../CLog.h"
 #include "sstring.h"
 #include "CSTime.h"
 #include <cmath>
@@ -257,7 +256,7 @@ std::tm CSTime::GetLocalTmPlain() const noexcept
 #endif
 
 #if defined(_WIN32) && defined (MSVC_COMPILER)
-static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
+static void SPHERE_CDECL invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
 	UnreferencedParameter(expression);

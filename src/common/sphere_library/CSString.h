@@ -307,7 +307,7 @@ public:
 	* @param pStr formatted string.
 	* @param ... list of values.
 	*/
-	void _cdecl Format(lpctstr pStr, ...) __printfargs(2, 3);
+    void Format(lpctstr pStr, ...) SPHERE_PRINTFARGS(2, 3);
 
     /**
     * @brief Join a formated string (printf like) with values and copy into this.

@@ -1,7 +1,5 @@
 #include "CUOClientVersion.h"
-#include "CExpression.h"
 #include "CLog.h"
-#include "sphereproto.h"
 #include <algorithm>
 #include <string>
 #include <string_view>

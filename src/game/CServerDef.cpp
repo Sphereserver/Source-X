@@ -54,7 +54,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	_iTimeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	// Set default time zone from UTC
-	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
+    m_TimeZone = (char)( TIMEZONE / (60 * 60) );	// Greenwich mean time.
 	m_eAccApp = ACCAPP_Unspecified;
 }
 

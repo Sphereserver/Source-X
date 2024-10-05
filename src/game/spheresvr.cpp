@@ -444,7 +444,7 @@ static void Sphere_MainMonitorLoop()
 			if ( g_Serv.GetExitFlag() )
 				break;
 
-			Sleep(1000);
+            SLEEP(1000);
 		}
 
 		EXC_SET_BLOCK("Checks");
@@ -472,13 +472,13 @@ void atexit_handler()
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
 #else
-int _cdecl main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 #endif
 {
 	static constexpr lpctstr m_sClassName = "main";
 	EXC_TRY("MAIN");
 
-    	const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
+    const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
 	if (atexit_handler_result != 0)
 	{
 		g_Log.Event(LOGL_CRIT, "atexit handler registration failed.\n");
@@ -547,7 +547,7 @@ exit_server:
     {
         while (g_NTWindow.isActive())
         {
-            Sleep (100);
+            SLEEP(100);
         }
     }
 #endif

@@ -408,7 +408,7 @@ void CNTService::CmdRemoveService()
 		while ( QueryServiceStatus(schService, &m_sStatus) )	// wait the service to stop
 		{
 			if ( m_sStatus.dwCurrentState == SERVICE_STOP_PENDING )
-				Sleep(1000);
+                SLEEP(1000);
 			else
 				break;
 		}

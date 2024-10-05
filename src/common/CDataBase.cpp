@@ -167,7 +167,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     return false;
 }
 
-bool __cdecl CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
+bool CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::queryf");
 	TemporaryString tsBuf;
@@ -214,7 +214,7 @@ bool CDataBase::exec(const char *query)
 	return false;
 }
 
-bool __cdecl CDataBase::execf(char *fmt, ...)
+bool CDataBase::execf(char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::execf");
 	TemporaryString tsBuf;

@@ -261,7 +261,7 @@ CSString& CSString::operator=(CSString&& s) noexcept
 
 // CSString:: Formatting
 
-void _cdecl CSString::Format(lpctstr pStr, ...)
+void CSString::Format(lpctstr pStr, ...)
 {
 	va_list vargs;
 	va_start(vargs, pStr);

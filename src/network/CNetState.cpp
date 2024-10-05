@@ -55,7 +55,7 @@ void CNetState::clear(void)
         g_Serv.StatDec(SERV_STAT_CLIENTS);
 
         const CONNECT_TYPE connectionType = m_client->GetConnectType();
-        const LOG_TYPE logFlags = LOG_TYPE(LOGM_NOCONTEXT | LOGM_CLIENTS_LOG | LOGL_EVENT);
+        const LOG_TYPE logFlags = enum_alias_cast<LOG_TYPE>(LOGM_NOCONTEXT | LOGM_CLIENTS_LOG | LOGL_EVENT);
         const size_t uiClients = g_Serv.StatGet(SERV_STAT_CLIENTS);
         const lpctstr ptcAddress = m_peerAddress.GetAddrStr();
         if (connectionType == CONNECT_LOGIN)

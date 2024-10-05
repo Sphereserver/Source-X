@@ -41,7 +41,7 @@ public:
 
 	virtual void SysMessage( lpctstr pszMessage ) const = 0;	// Feed back message.
 	void VSysMessage( lpctstr pszFormat, va_list args ) const;
-	void _cdecl SysMessagef( lpctstr pszFormat, ... ) const __printfargs(2,3);
+    void SysMessagef( lpctstr pszFormat, ... ) const SPHERE_PRINTFARGS(2,3);
 
 public:
 	CTextConsole() { };

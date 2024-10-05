@@ -214,13 +214,13 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 // (note: add 1 to index for non-static class methods because 'this' argument
 // is inserted in position 1)
 #ifdef MSVC_COMPILER
-	#define __printfargs(a,b)
+    #define SPHERE_PRINTFARGS(a,b)
 #else
 	#ifdef __MINGW32__
         // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
-		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
+        #define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
 	#else
-		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
+        #define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
 	#endif
 #endif
 

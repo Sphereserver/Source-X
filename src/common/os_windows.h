@@ -71,6 +71,7 @@
 #   pragma warning(pop)
 #endif
 
+#define SPHERE_CDECL	__cdecl
 
 /*	file handling definitions  */
 #define STDFUNC_FILENO(_x_)		_get_osfhandle(_fileno(_x_))
@@ -89,14 +90,15 @@
 #endif
 
 #ifdef __MINGW32__	// No Microsoft compiler
-	#define _cdecl	__cdecl
-
 	// Not defined for mingw.
 	#define LSTATUS int
-	typedef void (__cdecl *_invalid_parameter_handler)(const wchar_t *,const wchar_t *,const wchar_t *,unsigned int,uintptr_t);
+    typedef void (SPHERE_CDECL *_invalid_parameter_handler)(const wchar_t *,const wchar_t *,const wchar_t *,unsigned int,uintptr_t);
 	// Stuctured exception handling windows api not implemented on mingw.
 	#define __except(P)		catch(int)
 #endif  // _MSC_VER
+
+#define SLEEP       Sleep
+#define TIMEZONE    _timezone
 
 const OSVERSIONINFO * Sphere_GetOSInfo() noexcept;
 

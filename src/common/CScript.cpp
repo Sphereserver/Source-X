@@ -841,7 +841,7 @@ CScriptLineContext CScript::GetContext() const
     return LineContext;
 }
 
-bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
+bool CScript::WriteSection( lpctstr ptcSection, ... )
 {
 	ADDTOCALLSTACK_DEBUG("CScript::WriteSection");
 	// Write out the section header.
@@ -933,7 +933,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 	return true;
 }
 
-//void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
+//void CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
 //{
 //	ADDTOCALLSTACK("CScript::WriteKeyFormat");
 //	tchar	*pszTemp = Str_GetTemp();
@@ -945,7 +945,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 //}
 
 static thread_local tchar ptcWriteKeyBuf[SCRIPT_MAX_LINE_LEN];
-void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
+void CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
 	ADDTOCALLSTACK_DEBUG("CScript::WriteKeyFormat");
 	va_list vargs;

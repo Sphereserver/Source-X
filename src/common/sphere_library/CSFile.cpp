@@ -442,9 +442,9 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 		if (len && ptcFilePath[len - 1] != '\\' && ptcFilePath[len - 1] != '/')
 		{
 #ifdef _WIN32
-			strcat(ptcFilePath, "\\");
+            ptcFilePath[len] = '\\';
 #else
-			strcat(ptcFilePath, "/");
+            ptcFilePath[len] = '/';
 #endif
 		}
 	}

@@ -235,7 +235,7 @@ void Assert_Fail( lpctstr pExp, lpctstr pFile, long long llLine )
 	throw CAssert(LOGL_CRIT, pExp, pFile, llLine);
 }
 
-static void _cdecl Sphere_Purecall_Handler()
+static void SPHERE_CDECL Sphere_Purecall_Handler()
 {
 	// catch this special type of C++ exception as well.
 	Assert_Fail("purecall", "unknown", 1);
@@ -244,6 +244,7 @@ static void _cdecl Sphere_Purecall_Handler()
 void SetPurecallHandler()
 {
 	// We don't want sphere to immediately exit if something calls a pure virtual method.
+    // Those functions set the behavior process-wide, so there's no need to call this on each thread.
 #ifdef MSVC_COMPILER
 	_set_purecall_handler(Sphere_Purecall_Handler);
 #else
@@ -254,7 +255,7 @@ void SetPurecallHandler()
 }
 
 #ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
-static void _cdecl Sphere_Structured_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
+static void SPHERE_CDECL Sphere_Structured_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
 {
 #   ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
 	if ( CrashDump::IsEnabled() )
@@ -272,17 +273,18 @@ static void _cdecl Sphere_Structured_Exception_Windows( unsigned int id, struct 
 
 void SetWindowsStructuredExceptionTranslator()
 {
+    // Process-wide, no need to call this on each thread.
     _set_se_translator( Sphere_Structured_Exception_Windows );
 }
 #endif
 
 #ifndef _WIN32
-static void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
+static void Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
 {
     UnreferencedParameter(sig);
 
 #ifdef THREAD_TRACK_CALLSTACK
-    static bool _Signal_Hangup_stack_printed = false;
+    static thread_local bool _Signal_Hangup_stack_printed = false;
     if (!_Signal_Hangup_stack_printed)
     {
         StackDebugInformation::printStackTrace();
@@ -296,13 +298,13 @@ static void _cdecl Signal_Hangup(int sig = 0) noexcept // If shutdown is initial
     g_Serv.SetExitFlag(SIGHUP);
 }
 
-static void _cdecl Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
+static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
 {
 
     g_Log.Event(LOGL_FATAL, "Server Unstable: %s signal received\n", strsignal(sig));
 
 #ifdef THREAD_TRACK_CALLSTACK
-    static bool _Signal_Terminate_stack_printed = false;
+    static thread_local bool _Signal_Terminate_stack_printed = false;
     if (!_Signal_Terminate_stack_printed)
     {
         StackDebugInformation::printStackTrace();
@@ -350,7 +352,7 @@ static void _cdecl Signal_Terminate(int sig = 0) noexcept // If shutdown is init
     //exit(EXIT_FAILURE); // Having set the exit flag, all threads "should" terminate cleanly.
 }
 
-static void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using secure mode
+static void Signal_Break(int sig = 0)		// signal handler attached when using secure mode
 {
     // Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
     //#ifdef _DEBUG
@@ -371,7 +373,7 @@ static void _cdecl Signal_Break(int sig = 0)		// signal handler attached when us
     }
 }
 
-static void _cdecl Signal_Illegal_Instruction(int sig = 0)
+static void Signal_Illegal_Instruction(int sig = 0)
 {
 #ifdef THREAD_TRACK_CALLSTACK
     StackDebugInformation::freezeCallStack(true);
@@ -398,7 +400,7 @@ static void _cdecl Signal_Illegal_Instruction(int sig = 0)
     throw CSError(LOGL_FATAL, sig, strsignal(sig));
 }
 
-static void _cdecl Signal_Children(int sig = 0)
+static void Signal_Children(int sig = 0)
 {
     UnreferencedParameter(sig);
     while (waitpid((pid_t)(-1), nullptr, WNOHANG) > 0) {}
@@ -410,15 +412,15 @@ void SetUnixSignals( bool fSet )    // Signal handlers are installed only in sec
 {
 
 #ifdef _SANITIZERS
-    const bool fSan = true;
+    constexpr bool fSan = true;
 #else
-    const bool fSan = false;
+    constexpr bool fSan = false;
 #endif
 
 #ifdef _DEBUG
     const bool fDebugger = IsDebuggerPresent();
 #else
-    const bool fDebugger = false;
+    constexpr bool fDebugger = false;
 #endif
 
     if (!fDebugger && !fSan)

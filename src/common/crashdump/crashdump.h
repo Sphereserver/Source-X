@@ -1,4 +1,4 @@
-#if !defined(_INC_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
 #define _INC_CRASHDUMP_H
 
 #include <cstdio>
