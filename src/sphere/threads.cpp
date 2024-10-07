@@ -178,7 +178,8 @@ void ThreadHolder::push(AbstractThread *thread) noexcept
         {
             //throw CSError(LOGL_FATAL, 0, "AbstractThread not being an AbstractSphereThread?");
             STDERR_LOG("AbstractThread not being an AbstractSphereThread?");
-            fExceptionThrown = true;
+            //fExceptionThrown = true;
+            goto soft_throw;
         }
 
         std::unique_lock<std::shared_mutex> lock(m_mutex);
@@ -223,6 +224,7 @@ void ThreadHolder::push(AbstractThread *thread) noexcept
 
     if (fExceptionThrown)
     {
+soft_throw:
         // Should never happen.
         RaiseImmediateAbort();
     }

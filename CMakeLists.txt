@@ -3,47 +3,6 @@
 cmake_minimum_required(VERSION 3.24)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Supress the ZERO_CHECK generation
 
-# --------------------  GUI checkboxes --------------------
-if(NOT MSVC)
-    set (CMAKE_BUILD_TYPE "Nightly" CACHE STRING "Which build type to build? Expected values: Debug, Nightly or Release.")
-endif()
-
-option(
-    CMAKE_NO_GIT_REVISION
-    "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
-    FALSE
-)
-option(CROSSCOMPILE "Are we compiling for a different target architecture?" FALSE)
-option(
-    RUNTIME_STATIC_LINK
-    "Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
-    FALSE
-)
-option(CMAKE_EXPORT_COMPILE_COMMANDS "Export compiler commands to compile_commands.json" TRUE)
-
-set(predef_LIB_LIBEV_BUILD FALSE)
-if(NOT WIN32)
-    set(predef_LIB_LIBEV_BUILD TRUE)
-endif()
-option(LIB_LIBEV_BUILD "Build libev." ${predef_LIB_LIBEV_BUILD})
-option(LIB_SQLITE_BUILD "Build sqlite." TRUE)
-option(LIB_ZLIB_BUILD "Build zlib." TRUE)
-
-if(WIN32)
-    option(WIN32_SPAWN_CONSOLE "Spawn an additional console, useful for debugging." FALSE)
-endif()
-
-option(USE_COMPILER_HARDENING_OPTIONS "Enable compiler (even runtime) safety checks and code hardening." FALSE)
-option(USE_ASAN "Enable AddressSanitizer." FALSE)
-option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
-option(USE_LSAN "Enable LeakSanitizer." FALSE)
-option(USE_MSAN "Enable MemorySanitizer." FALSE)
-
-set(ENABLED_SANITIZER CACHE INTERNAL BOOL FALSE)
-if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
-    set(ENABLED_SANITIZER TRUE)
-endif()
-
 # -------------------- Utility functions --------------------
 
 function(booleanize_str_find VAR)
@@ -63,8 +22,13 @@ if((NOT TOOLCHAIN_LOADED) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
 endif()
 
 message(STATUS "Scanning system build tools...")
-
 project(SphereServer CXX C) # does a scan for C++ and C compilers
+
+# If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
+# We need to do this after "project", otherwise CMake doesn't know where it's running.
+if(NOT TOOLCHAIN_LOADED)
+    include("cmake/DetectDefaultToolchain.cmake")
+endif()
 
 # Setup global flags, to be done before creating targets.
 
@@ -109,16 +73,57 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 # Also, it fails to create those predefined flags, which it needs, for custom build types (e.g. Nightly).
 set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 
+# --------------------  GUI checkboxes --------------------
+
+option(
+    CMAKE_NO_GIT_REVISION
+    "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
+    FALSE
+)
+option(CROSSCOMPILE "Are we compiling for a different target architecture?" FALSE)
+option(
+    RUNTIME_STATIC_LINK
+    "Statically link inside the executable the runtime libraries? (MSVC, libc/libcc, libstdc++)."
+    FALSE
+)
+option(CMAKE_EXPORT_COMPILE_COMMANDS "Export compiler commands to compile_commands.json" TRUE)
+
+set(predef_LIB_LIBEV_BUILD FALSE)
+if(NOT WIN32)
+    set(predef_LIB_LIBEV_BUILD TRUE)
+endif()
+option(LIB_LIBEV_BUILD "Build libev." ${predef_LIB_LIBEV_BUILD})
+option(LIB_SQLITE_BUILD "Build sqlite." TRUE)
+option(LIB_ZLIB_BUILD "Build zlib." TRUE)
+
+if(WIN32)
+    option(WIN_SPAWN_CONSOLE "Spawn an additional console, useful for debugging." FALSE)
+    if(MSVC)
+        option(WIN_GENERATE_CRASHDUMP "For non-Debug builds, add Windows Structured Exception Handling and generate a Crash Dump if a fatal SE is thrown." FALSE)
+    endif()
+endif()
+
+if(NOT MSVC)
+    option(USE_COMPILER_HARDENING_OPTIONS "Enable compiler (even runtime) safety checks and code hardening." FALSE)
+endif()
+option(USE_ASAN "Enable AddressSanitizer." FALSE)
+option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
+option(USE_LSAN "Enable LeakSanitizer." FALSE)
+option(USE_MSAN "Enable MemorySanitizer." FALSE)
+
+set(ENABLED_SANITIZER CACHE INTERNAL BOOL FALSE)
+if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
+    set(ENABLED_SANITIZER TRUE)
+endif()
+
+
+# -------------------- Stuff to set right away, after having parsed the checkboxes/CLI arguments.
 
 set(is_win32_app_linker)
-if(WIN32 AND NOT ${WIN32_SPAWN_CONSOLE})
+if(WIN32 AND NOT ${WIN_SPAWN_CONSOLE})
     set(is_win32_app_linker WIN32) # if not set, it defaults to console subsystem
 endif()
 
-# If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
-if(NOT TOOLCHAIN_LOADED)
-    include("cmake/DetectDefaultToolchain.cmake")
-endif()
 
 # -------------------- Stuff that needs to be executed after PROJECT but before ADD_EXECUTABLE
 
@@ -137,9 +142,9 @@ endif()
 # TODO: check if Ninja can handle different targets.
 if(SINGLE_TARGET)
     # If you want to manually specify the build type, call cmake with parameter: -DCMAKE_BUILD_TYPE=something
-
     # TODO: add NightlyWithDebInfo ?
     message(STATUS "Single-target build system (${CMAKE_GENERATOR}) detected: generating multiple projects!")
+    set (CMAKE_BUILD_TYPE "Nightly" CACHE STRING "Set the build type. Expected values: Debug, Nightly or Release.") # Set only if unset.
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Nightly" "Release")
     if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
         if(

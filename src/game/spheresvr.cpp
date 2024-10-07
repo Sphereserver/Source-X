@@ -207,16 +207,16 @@ bool MainThread::shouldExit() noexcept
 
 static bool WritePidFile(int iMode = 0)
 {
-	lpctstr	file = SPHERE_FILE ".pid";
+	lpctstr	fileName = SPHERE_FILE ".pid";
 	FILE* pidFile;
 
 	if (iMode == 1)		// delete
 	{
-		return (STDFUNC_UNLINK(file) == 0);
+		return (STDFUNC_UNLINK(fileName) == 0);
 	}
 	else if (iMode == 2)	// check for .pid file
 	{
-		pidFile = fopen(file, "r");
+		pidFile = fopen(fileName, "r");
 		if (pidFile)
 		{
 			g_Log.Event(LOGM_INIT, SPHERE_FILE ".pid already exists. Secondary launch or unclean shutdown?\n");
@@ -226,7 +226,7 @@ static bool WritePidFile(int iMode = 0)
 	}
 	else
 	{
-		pidFile = fopen(file, "w");
+		pidFile = fopen(fileName, "w");
 		if (pidFile)
 		{
 			pid_t spherepid = STDFUNC_GETPID();

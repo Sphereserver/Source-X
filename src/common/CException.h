@@ -13,13 +13,13 @@
 #   define WINDOWS_HAS_SEH 1
 #endif
 
-#if defined (WINDOWS_HAS_SEH) && defined(_NIGHTLYBUILD)
+#if defined(WINDOWS_HAS_SEH) && defined(WINDOWS_GENERATE_CRASHDUMP)
 // We don't want this for Release build because, in order to call _set_se_translator, we should set the /EHa
 //	compiler flag, which slows down code a bit.
 #   define WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS 1
-#endif
+//#endif
 
-#if defined(WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS) && !defined(_NO_CRASHDUMP)
+//2#if defined(WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS) && defined(WINDOWS_GENERATE_CRASHDUMP)
 // Also, the crash dump generating code works only when Structured Exception Handling is enabled
 #   define WINDOWS_SHOULD_EMIT_CRASH_DUMP 1
 #endif

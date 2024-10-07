@@ -9,7 +9,7 @@ function(toolchain_exe_stuff_common)
     #-- Configure the Windows application type.
 
     # Subsystem is already managed by is_win32_app_linker. GCC doesn't need us to specify the entry point.
-    #IF (${WIN32_SPAWN_CONSOLE})
+    #IF (${WIN_SPAWN_CONSOLE})
     #    add_link_options ("LINKER:SHELL:-mconsole")
     #    SET (PREPROCESSOR_DEFS_EXTRA    _WINDOWS_CONSOLE)
     ##ELSE ()

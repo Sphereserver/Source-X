@@ -14,13 +14,13 @@ endfunction()
 function(toolchain_exe_stuff_common)
     #-- Configure the Windows application type and add global linker flags.
 
-    if(${WIN32_SPAWN_CONSOLE})
+    if(${WIN_SPAWN_CONSOLE})
         set(PREPROCESSOR_DEFS_EXTRA _WINDOWS_CONSOLE)
         if(${CLANG_USE_GCC_LINKER})
             # --entry might not work
-            add_link_options("LINKER:--entry=WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:-m$<IF:$<BOOL:${WIN32_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
+            add_link_options("LINKER:--entry=WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:-m$<IF:$<BOOL:${WIN_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
         else()
-            add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:/SUBSYSTEM:$<IF:$<BOOL:${WIN32_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
+            add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:/SUBSYSTEM:$<IF:$<BOOL:${WIN_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
         endif()
     endif()
 

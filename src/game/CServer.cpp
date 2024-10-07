@@ -2361,7 +2361,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
             }
 				}
 				continue;
-#if defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#if defined(_WIN32) && !defined(_DEBUG) && defined(WINDOWS_GENERATE_CRASHDUMP)
 			case 'E':
 				CrashDump::Enable();
 				if (CrashDump::IsEnabled())
