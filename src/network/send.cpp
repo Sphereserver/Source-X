@@ -18,6 +18,7 @@
 #include "../game/uo_files/uofiles_enums_creid.h"
 #include "../game/CServer.h"
 #include "../game/CWorldGameTime.h"
+#include "../game/triggers.h"
 #include "CNetworkManager.h"
 #include "send.h"
 
@@ -25,6 +26,8 @@ namespace zlib {
 #include <zlib/zlib.h>
 }
 #include <algorithm>
+#include "../game/components/CCChampion.h"
+#include "../common/resource/sections/CRegionResourceDef.h"
 
 
 /***************************************************************************
@@ -142,7 +145,26 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	initLength();
 
 	writeInt32(object->GetUID());
-	writeStringFixedASCII(object->GetName(), 30);
+
+    bool bCustomName=0;
+    lpctstr ShowName;
+    if (objectChar != nullptr &&
+        objectChar->IsClientType() &&
+        IsTrigUsed(TRIGGER_DISPLAYNAME) &&
+        (objectChar != character)) //Avoid launch trigger if the target is the same character
+    {
+        CScriptTriggerArgs args;
+        args.m_s1 = object->GetName();
+        
+        CChar* pCharBase = const_cast<CChar*>(character); // Remove the const to be able to use on OnTrigger
+        if (objectChar->OnTrigger(CTRIG_DisplayName, pCharBase, &args) == TRIGRET_RET_TRUE)
+        {
+            bCustomName = 1;
+            ShowName = args.m_s1;
+        }
+    }
+
+	writeStringFixedASCII(bCustomName ? ShowName : object->GetName(), 30);
 
 	if (state->isClientVersionNumber(MINCLIVER_STATUS_V6))
 		version = 6;
@@ -2604,7 +2626,7 @@ PacketCharacterListUpdate::PacketCharacterListUpdate(CClient* target, const CCha
  *
  *
  ***************************************************************************/
-PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) : PacketSend(XCMD_PaperDoll, 66, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketPaperdoll::PacketPaperdoll(const CClient* target, CChar* character) : PacketSend(XCMD_PaperDoll, 66, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketPaperdoll::PacketPaperdoll");
 
@@ -2619,15 +2641,34 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 
 	writeInt32(character->GetUID());
 
+    bool bCustomName = 0;
+    CSString ShowName;
+
+
+    if (IsTrigUsed(TRIGGER_DISPLAYNAME) && (target->GetChar() != character)) //Avoid launch trigger if the target is the same character
+    {
+        CScriptTriggerArgs args;
+        args.m_s1 = character->GetName();
+        if (character->OnTrigger(CTRIG_DisplayName, target->GetChar(), &args) == TRIGRET_RET_TRUE)
+        {
+            bCustomName = 1;
+            ShowName = args.m_s1;
+        }
+    }
+
 	if (character->IsStatFlag(STATF_INCOGNITO))
 	{
 		writeStringFixedASCII(character->GetName(), 60);
-	}
+    }
+    else if (bCustomName)
+    {
+        writeStringFixedASCII(ShowName, 60);
+    }
 	else
 	{
 		tchar* text = Str_GetTemp();
-		int len = 0;
 
+		int len = 0;
 		const CStoneMember* guildMember = character->Guild_FindMember(MEMORY_GUILD);
 		if (guildMember != nullptr && guildMember->IsAbbrevOn() && guildMember->GetParentStone()->GetAbbrev()[0])
 		{
@@ -2651,6 +2692,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 	}
 
 	writeByte((byte)mode);
+
 	push(target);
 }
 

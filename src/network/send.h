@@ -948,7 +948,7 @@ public:
 class PacketPaperdoll : public PacketSend
 {
 public:
-	PacketPaperdoll(const CClient* target, const CChar* character);
+	PacketPaperdoll(const CClient* target, CChar* character);
 };
 
 /***************************************************************************
