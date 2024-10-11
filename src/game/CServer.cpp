@@ -2118,6 +2118,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 		if ( !g_Cfg.Load(true) )
 		{
             g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+            g_Serv.r_Call("f_onserver_resync_failed", &g_Serv, NULL);
 
 			if ( fMessage )
 				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
@@ -2128,6 +2129,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 		{
             CScriptTriggerArgs args;
             args.m_iN1 = fMessage == true ? 1 : 0;
+            g_Serv.r_Call("f_onserver_resync_success", &g_Serv, &args);
 
 
             g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));

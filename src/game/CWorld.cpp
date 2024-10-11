@@ -1031,6 +1031,7 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	_iSaveTimer = llTicksStart;
 
     CScriptTriggerArgs SaveTryArgs(fForceImmediate, _iSaveTimer);
+    g_Serv.r_Call("f_onserver_save_try", &g_Serv, &SaveTryArgs);
 
 	// Determine the save name based on the time.
 	// exponentially degrade the saves over time.
