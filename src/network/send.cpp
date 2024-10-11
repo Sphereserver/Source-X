@@ -26,8 +26,6 @@ namespace zlib {
 #include <zlib/zlib.h>
 }
 #include <algorithm>
-#include "../game/components/CCChampion.h"
-#include "../common/resource/sections/CRegionResourceDef.h"
 
 
 /***************************************************************************
@@ -147,7 +145,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	writeInt32(object->GetUID());
 
     bool bCustomName=0;
-    lpctstr ShowName;
+    CSString sShowName;
     if (objectChar != nullptr &&
         objectChar->IsClientType() &&
         IsTrigUsed(TRIGGER_DISPLAYNAME) &&
@@ -160,11 +158,13 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
         if (objectChar->OnTrigger(CTRIG_DisplayName, pCharBase, &args) == TRIGRET_RET_TRUE)
         {
             bCustomName = 1;
-            ShowName = args.m_s1;
+            sShowName = args.m_s1;
         }
     }
-
-	writeStringFixedASCII(bCustomName ? ShowName : object->GetName(), 30);
+    if (bCustomName)
+        writeStringFixedASCII(sShowName, 30);
+    else
+	    writeStringFixedASCII(object->GetName(), 30);
 
 	if (state->isClientVersionNumber(MINCLIVER_STATUS_V6))
 		version = 6;
@@ -2642,7 +2642,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, CChar* character) : Pack
 	writeInt32(character->GetUID());
 
     bool bCustomName = 0;
-    CSString ShowName;
+    CSString sShowName;
 
 
     if (IsTrigUsed(TRIGGER_DISPLAYNAME) && (target->GetChar() != character)) //Avoid launch trigger if the target is the same character
@@ -2652,7 +2652,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, CChar* character) : Pack
         if (character->OnTrigger(CTRIG_DisplayName, target->GetChar(), &args) == TRIGRET_RET_TRUE)
         {
             bCustomName = 1;
-            ShowName = args.m_s1;
+            sShowName = args.m_s1;
         }
     }
 
@@ -2662,7 +2662,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, CChar* character) : Pack
     }
     else if (bCustomName)
     {
-        writeStringFixedASCII(ShowName, 60);
+        writeStringFixedASCII(sShowName, 60);
     }
 	else
 	{
