@@ -128,13 +128,13 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID 
  *
  *
  ***************************************************************************/
-PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketObjectStatus::PacketObjectStatus(CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
     ASSERT(object);
 
 	const CNetState * state = target->GetNetState();
-	const CChar *character = target->GetChar();
+	CChar *character = target->GetChar();
 	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
 	bool fCanRename = false;
 
@@ -154,8 +154,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
         CScriptTriggerArgs args;
         args.m_s1 = object->GetName();
         
-        CChar* pCharBase = const_cast<CChar*>(character); // Remove the const to be able to use on OnTrigger
-        if (objectChar->OnTrigger(CTRIG_DisplayName, pCharBase, &args) == TRIGRET_RET_TRUE)
+        if (objectChar->OnTrigger(CTRIG_DisplayName, character, &args) == TRIGRET_RET_TRUE)
         {
             bCustomName = 1;
             sShowName = args.m_s1;
