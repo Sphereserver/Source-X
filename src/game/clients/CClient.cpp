@@ -14,6 +14,7 @@
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
+#include "../CWorldSearch.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CParty.h"
@@ -1288,6 +1289,54 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					closeUIWindow(pChar, PacketCloseUIWindow::Status);
 			}
 			break;
+
+            
+	    case CV_CLOSECONTAINER:
+            {
+                const CItem *pItem = nullptr;
+                if (s.HasArgs())
+                {
+                    const CUID uid(s.GetArgDWVal());
+                    if (!uid.IsItem())
+                        return (false);
+                    pItem = uid.ItemFind();
+                }
+                if (pItem != nullptr && pItem->IsType(IT_CONTAINER))
+                    closeUIWindow(pItem, PacketCloseUIWindow::Container);
+            }
+            break;
+
+        case CV_CLOSEVENDORMENU:
+            {
+                const CChar *pChar = m_pChar;
+                if (s.HasArgs())
+                {
+                    const CUID uid(s.GetArgDWVal());
+                    if (!uid.IsChar())
+                        return (false);
+                    pChar = uid.CharFind();
+                    if (pChar)
+                        addVendorClose(pChar);
+                }
+                else
+                {
+                    auto AreaChars = CWorldSearchHolder::GetInstance(pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
+                    for (;;)
+                    {
+                        CChar *pChar = AreaChars->GetChar();
+                        if (pChar == nullptr)
+                            break;
+                        if (pChar->m_pPlayer)
+                            continue;
+                        if (pChar == GetChar())
+                            continue;
+                        if (!pChar->NPC_IsVendor())
+                            continue;
+                        addVendorClose(pChar);
+                    }
+                }
+            }
+            break;
 
         case CV_CODEXOFWISDOM:
         {
