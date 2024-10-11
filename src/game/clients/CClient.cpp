@@ -1323,16 +1323,16 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
                     auto AreaChars = CWorldSearchHolder::GetInstance(pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
                     for (;;)
                     {
-                        CChar *pChar = AreaChars->GetChar();
-                        if (pChar == nullptr)
+                        const CChar *pCharArea = AreaChars->GetChar();
+                        if (pCharArea == nullptr)
                             break;
-                        if (pChar->m_pPlayer)
+                        if (pCharArea->m_pPlayer)
                             continue;
-                        if (pChar == GetChar())
+                        if (pCharArea == GetChar())
                             continue;
-                        if (!pChar->NPC_IsVendor())
+                        if (!pCharArea->NPC_IsVendor())
                             continue;
-                        addVendorClose(pChar);
+                        addVendorClose(pCharArea);
                     }
                 }
             }
