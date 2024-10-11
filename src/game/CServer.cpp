@@ -136,6 +136,10 @@ void CServer::SetServerMode( SERVMODE_TYPE mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode.store(mode, std::memory_order_release);
+
+    CScriptTriggerArgs Args(mode);
+    g_Serv.r_Call("f_onserver_mode", &g_Serv, &Args);
+
 #ifdef _WIN32
     g_NTWindow.SetWindowTitle();
 #endif
@@ -2093,6 +2097,9 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 	{
 		m_fResyncPause = true;
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+        CScriptTriggerArgs args;
+        args.m_iN1 = m_fResyncPause == true ? 1 : 0;
+        g_Serv.r_Call("f_onserver_resync_start", &g_Serv, &args);
 
 		if ( fMessage )
 			CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
@@ -2106,10 +2113,12 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 	{
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART));
 		SetServerMode(SERVMODE_ResyncLoad);
+        g_Serv.r_Call("f_onserver_resync_restart", &g_Serv, NULL);
 
 		if ( !g_Cfg.Load(true) )
 		{
             g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+
 			if ( fMessage )
 				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
 			else if ( pSrc && pSrc->GetChar() )
@@ -2117,6 +2126,10 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 		}
 		else
 		{
+            CScriptTriggerArgs args;
+            args.m_iN1 = fMessage == true ? 1 : 0;
+
+
             g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
 			if ( fMessage )
 				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));

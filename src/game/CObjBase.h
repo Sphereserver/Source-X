@@ -1161,6 +1161,8 @@ enum CTRIG_TYPE : short
 	CTRIG_NPCSeeWantItem,   // (NPC only) i see something good.
 	CTRIG_NPCSpecialAction, // (NPC only) performing some special actions (spyder's web, dragon's breath...).
 
+    CTRIG_OpenBank,     // Openbank
+
     CTRIG_PartyAdd,     // Player joined to the party.
 	CTRIG_PartyDisband, // I just disbanded my party.
 	CTRIG_PartyInvite,  // SRC invited me to join a party, so I may chose.

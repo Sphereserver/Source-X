@@ -55,6 +55,8 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		host = pcTemp;
 	}
 
+    g_Serv.r_Call("f_onserver_db_connect", &g_Serv, nullptr);
+
 	if ( !mysql_real_connect(_myData, host, user, password, base, portnum, nullptr, CLIENT_MULTI_STATEMENTS ) )
 	{
 		const char *error = mysql_error(_myData);
@@ -83,6 +85,9 @@ void CDataBase::Close()
 {
 	ADDTOCALLSTACK("CDataBase::Close");
 	SimpleThreadLock lock(m_connectionMutex);
+
+    g_Serv.r_Call("f_onserver_db_close", &g_Serv, nullptr);
+
 	mysql_close(_myData);
 	_myData = nullptr;
 	m_fConnected = false;
@@ -155,6 +160,11 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
             }
             ++rownum;
         }
+
+        CScriptTriggerArgs args;
+        args.m_s1 = query;
+        g_Serv.r_Call("f_onserver_db_query", &g_Serv, &args);
+
         mysql_free_result(m_res);
         return true;
     }
@@ -194,6 +204,10 @@ bool CDataBase::exec(const char *query)
 		result = mysql_query(_myData, query);
 		if (result == 0)
 		{
+            CScriptTriggerArgs args;
+            args.m_s1 = query;
+            g_Serv.r_Call("f_onserver_db_execute", &g_Serv, &args);
+
 			// even though we don't want (or expect) any result data, we must retrieve
 			// is anyway otherwise we will lose our connection to the server
 			MYSQL_RES* res = mysql_store_result(_myData);

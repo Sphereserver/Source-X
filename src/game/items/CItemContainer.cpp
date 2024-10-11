@@ -1048,6 +1048,14 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 		if ( !pCharTop )
 			return;
 
+        CChar* pChar = pCharTop->GetChar();
+
+        if (pChar != nullptr)
+        {
+            if ((pCharOpener->OnTrigger(CTRIG_OpenBank, pChar, nullptr) == TRIGRET_RET_TRUE))
+                return;
+        }
+
 		int iStones = GetWeight() / WEIGHT_UNITS;
 		tchar *pszMsg = Str_GetTemp();
 		if ( pCharTop == pCharOpener )
