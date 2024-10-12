@@ -427,8 +427,13 @@ int CChar::CalcArmorDefense() const
 	int iDefenseTotal = 0;
 	int iArmorCount = 0;
 	int ArmorRegionMax[ARMOR_QTY];
-	for ( int i = 0; i < ARMOR_QTY; ++i )
-		ArmorRegionMax[i] = 0;
+	int ArmorRegionCoverage[ARMOR_QTY];
+
+    for (int i = 0; i < ARMOR_QTY; ++i)
+    {
+        ArmorRegionMax[i] = 0;
+        ArmorRegionCoverage[i] = 0;
+    }
 
 	for (CSObjContRec* pObjRec : *this)
 	{
@@ -437,74 +442,153 @@ int CChar::CalcArmorDefense() const
 		if ( !iDefense && !pItem->IsType(IT_SPELL) )
 			continue;
 
+        const CBaseBaseDef *pItemBase                           = pItem->Base_GetDef();
+        CCPropsItemEquippable *pItemCCPItemEquippable           = pItem->GetComponentProps<CCPropsItemEquippable>();
+        const CCPropsItemEquippable *pItemBaseCCPItemEquippable = pItemBase->GetComponentProps<CCPropsItemEquippable>();
+
 		// reverse of sm_ArmorLayers
 		switch ( pItem->GetEquipLayer() )
 		{
 			case LAYER_HELM:		// 6
-				if (IsSetCombatFlags(COMBAT_STACKARMOR))
-					ArmorRegionMax[ ARMOR_HEAD ] += iDefense;
-				else
-					ArmorRegionMax[ ARMOR_HEAD ] = maximum( ArmorRegionMax[ ARMOR_HEAD ], iDefense );
+                if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
+                    ArmorRegionMax[ARMOR_HEAD] += iDefense;
+                }
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_HEAD] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+                    ArmorRegionMax[ARMOR_HEAD] = maximum(ArmorRegionMax[ARMOR_HEAD], iDefense);
+                }
 				break;
 			case LAYER_COLLAR:	// 10 = gorget or necklace.
-				if (IsSetCombatFlags(COMBAT_STACKARMOR))
-					ArmorRegionMax[ ARMOR_NECK ] += iDefense;
-				else
-					ArmorRegionMax[ ARMOR_NECK ] = maximum( ArmorRegionMax[ ARMOR_NECK ], iDefense );
+                if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
+                    ArmorRegionMax[ARMOR_NECK] += iDefense;
+                }
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_NECK] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+                    ArmorRegionMax[ARMOR_NECK] = maximum(ArmorRegionMax[ARMOR_NECK], iDefense);
+                }
 				break;
 			case LAYER_SHIRT:
 			case LAYER_CHEST:	// 13 = armor chest
 			case LAYER_TUNIC:	// 17 = jester suit
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) {
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
 					ArmorRegionMax[ ARMOR_CHEST ] += iDefense;
 					ArmorRegionMax[ ARMOR_BACK ] += iDefense;
-				} else {
+				}
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_CHEST] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        ArmorRegionCoverage[ARMOR_BACK]  = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
 					ArmorRegionMax[ ARMOR_CHEST ] = maximum( ArmorRegionMax[ ARMOR_CHEST ], iDefense );
 					ArmorRegionMax[ ARMOR_BACK ] = maximum( ArmorRegionMax[ ARMOR_BACK ], iDefense );
 				}
 				break;
 			case LAYER_ARMS:		// 19 = armor
-				if (IsSetCombatFlags(COMBAT_STACKARMOR))
-					ArmorRegionMax[ ARMOR_ARMS ] += iDefense;
-				else
-					ArmorRegionMax[ ARMOR_ARMS ] = maximum( ArmorRegionMax[ ARMOR_ARMS ], iDefense );
+                if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
+                    ArmorRegionMax[ARMOR_ARMS] += iDefense;
+                }
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_ARMS] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+                    ArmorRegionMax[ARMOR_ARMS] = maximum(ArmorRegionMax[ARMOR_ARMS], iDefense);
+                }
 				break;
 			case LAYER_PANTS:
 			case LAYER_SKIRT:
 			case LAYER_HALF_APRON:
-				if (IsSetCombatFlags(COMBAT_STACKARMOR))
-					ArmorRegionMax[ ARMOR_LEGS ] += iDefense;
-				else
-					ArmorRegionMax[ ARMOR_LEGS ] = maximum( ArmorRegionMax[ ARMOR_LEGS ], iDefense );
+                if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
+                    ArmorRegionMax[ARMOR_LEGS] += iDefense;
+                }
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_LEGS] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+                    ArmorRegionMax[ARMOR_LEGS] = maximum(ArmorRegionMax[ARMOR_LEGS], iDefense);
+                }
 				break;
 			case LAYER_SHOES:
-				if (IsSetCombatFlags(COMBAT_STACKARMOR))
-					ArmorRegionMax[ ARMOR_FEET ] += iDefense;
-				else
-					ArmorRegionMax[ ARMOR_FEET ] = maximum( ArmorRegionMax[ ARMOR_FEET ], iDefense );
+                if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
+                    ArmorRegionMax[ARMOR_FEET] += iDefense;
+                }
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_FEET] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+                    ArmorRegionMax[ARMOR_FEET] = maximum(ArmorRegionMax[ARMOR_FEET], iDefense);
+                }
 				break;
 			case LAYER_GLOVES:	// 7
-				if (IsSetCombatFlags(COMBAT_STACKARMOR))
-					ArmorRegionMax[ ARMOR_HANDS ] += iDefense;
-				else
-					ArmorRegionMax[ ARMOR_HANDS ] = maximum( ArmorRegionMax[ ARMOR_HANDS ], iDefense );
+                if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
+                    ArmorRegionMax[ARMOR_HANDS] += iDefense;
+                }
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_HANDS] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+                    ArmorRegionMax[ARMOR_HANDS] = maximum(ArmorRegionMax[ARMOR_HANDS], iDefense);
+                }
 				break;
 			case LAYER_CAPE:		// 20 = cape
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) {
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
 					ArmorRegionMax[ ARMOR_BACK ] += iDefense;
 					ArmorRegionMax[ ARMOR_ARMS ] += iDefense;
-				} else {
+				}
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_BACK] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        ArmorRegionCoverage[ARMOR_ARMS] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
 					ArmorRegionMax[ ARMOR_BACK ] = maximum( ArmorRegionMax[ ARMOR_BACK ], iDefense );
 					ArmorRegionMax[ ARMOR_ARMS ] = maximum( ArmorRegionMax[ ARMOR_ARMS ], iDefense );
 				}
 				break;
 			case LAYER_ROBE:		// 22 = robe over all.
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) {
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
 					ArmorRegionMax[ ARMOR_CHEST ] += iDefense;
 					ArmorRegionMax[ ARMOR_BACK ] += iDefense;
 					ArmorRegionMax[ ARMOR_ARMS ] += iDefense;
 					ArmorRegionMax[ ARMOR_LEGS ] += iDefense;
-				} else {
+				}
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_CHEST] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        ArmorRegionCoverage[ARMOR_BACK]  = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        ArmorRegionCoverage[ARMOR_ARMS]  = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        ArmorRegionCoverage[ARMOR_LEGS]  = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
+
 					ArmorRegionMax[ ARMOR_CHEST ] = maximum( ArmorRegionMax[ ARMOR_CHEST ], iDefense );
 					ArmorRegionMax[ ARMOR_BACK ] = maximum( ArmorRegionMax[ ARMOR_BACK ], iDefense );
 					ArmorRegionMax[ ARMOR_ARMS ] = maximum( ArmorRegionMax[ ARMOR_ARMS ], iDefense );
@@ -512,10 +596,18 @@ int CChar::CalcArmorDefense() const
 				}
 				break;
 			case LAYER_LEGS:
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) {
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
+                {
 					ArmorRegionMax[ ARMOR_LEGS ] += iDefense;
 					ArmorRegionMax[ ARMOR_FEET ] += iDefense;
-				} else {
+				}
+                else
+                {
+                    if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                    {
+                        ArmorRegionCoverage[ARMOR_LEGS] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        ArmorRegionCoverage[ARMOR_FEET] = (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                    }
 					ArmorRegionMax[ ARMOR_LEGS ] = maximum( ArmorRegionMax[ ARMOR_LEGS ], iDefense );
 					ArmorRegionMax[ ARMOR_FEET ] = maximum( ArmorRegionMax[ ARMOR_FEET ], iDefense );
 				}
@@ -538,10 +630,20 @@ int CChar::CalcArmorDefense() const
 						int uShieldAC = ((Skill_GetBase(SKILL_PARRYING) * iDefense) / 2000) + 1;
 						iDefense = minimum(iDefense / 2, uShieldAC);
 					}
-					if (IsSetCombatFlags(COMBAT_STACKARMOR)) //Don't understand, you can't stack shields
-						ArmorRegionMax[shieldZone] += iDefense;
-					else
-						ArmorRegionMax[shieldZone] = maximum(ArmorRegionMax[shieldZone], iDefense);
+
+                    if (IsSetCombatFlags(COMBAT_STACKARMOR)) //Don't understand, you can't stack shields
+                    {
+                        ArmorRegionMax[shieldZone] += iDefense;
+                    }
+                    else
+                    {
+                        if (pItemCCPItemEquippable || pItemBaseCCPItemEquippable)
+                        {
+                            ArmorRegionCoverage[shieldZone] =
+                                (int)pItem->GetPropNum(pItemCCPItemEquippable, PROPIEQUIP_COVERAGEARMOR, pItemBaseCCPItemEquippable);
+                        }
+                        ArmorRegionMax[shieldZone] = maximum(ArmorRegionMax[shieldZone], iDefense);
+                    }
 				}
 				break;
 			case LAYER_SPELL_Protection:
@@ -553,11 +655,20 @@ int CChar::CalcArmorDefense() const
 		++iArmorCount;
 	}
 
-	if ( iArmorCount )
-	{
-		for ( int i=0; i<ARMOR_QTY; ++i )
-			iDefenseTotal += sm_ArmorLayers[i].m_iCoverage * ArmorRegionMax[i];
-	}
+	if (iArmorCount)
+    {
+        for (int i = 0; i < ARMOR_QTY; ++i)
+        {
+            if (ArmorRegionCoverage[i])
+            {
+                iDefenseTotal += ArmorRegionCoverage[i] * ArmorRegionMax[i];
+            }
+            else
+            {
+                iDefenseTotal += sm_ArmorLayers[i].m_iCoverage * ArmorRegionMax[i];
+            }
+        }
+    }
 
 	return maximum(( iDefenseTotal / 100 ) + m_ModAr, 0);
 }
