@@ -547,9 +547,16 @@ enum RC_TYPE
     RC_ERALIMITGEAR,			// _iEraLimitGear
     RC_ERALIMITLOOT,			// _iEraLimitLoot
     RC_ERALIMITPROPS,			// _iEraLimitProps
+    RC_EVENTSCHAR,              // m_sEventsChar
+    RC_EVENTSCHARPLAYER,        // m_sEventsCharPlayer
+    RC_EVENTSCHARSTAFF,         // m_sEventsCharStaff
 	RC_EVENTSITEM,				// m_sEventsItem
-	RC_EVENTSPET,				// m_sEventsPet
-	RC_EVENTSPLAYER,			// m_sEventsPlayer
+	RC_EVENTSITEMWEAPON,		// m_sEventsItemWeapon
+	RC_EVENTSNPC,				// m_sEventsNpc
+	RC_EVENTSNPCANIMAL,			// m_sEventsNpcAnimal
+    RC_EVENTSNPCMONSTER,   // m_sEventsNPCMonster
+    RC_EVENTSNPCMOUNTABLE,      // m_sEventsNPCMountable
+	RC_EVENTSNPCSHOP,		    // m_sEventsNPCShop
 	RC_EVENTSREGION,			// m_sEventsRegion
 	RC_EXPERIENCEKOEFPVM,		// m_iExperienceKoefPVM
 	RC_EXPERIENCEKOEFPVP,		// m_iExperienceKoefPVP
@@ -761,7 +768,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "ARRIVEDEPARTMSG",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iArriveDepartMsg)		}},
     { "ATTACKERTIMEOUT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAttackerTimeout)		}},
     { "ATTACKINGISACRIME",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAttackingIsACrime)	}},
-    { "AUTOHOUSEKEYS",          { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_fAutoHouseKeys)			}},
+    { "AUTOHOUSEKEYS",          { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,_fAutoHouseKeys)		}},
     { "AUTONEWBIEKEYS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fAutoNewbieKeys)		}},
     { "AUTOPRIVFLAGS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAutoPrivFlags)		}},
     { "AUTOPROCESSPRIORITY",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAutoProcessPriority)	}},
@@ -785,17 +792,17 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLoginMaxTries)	}},
     { "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLoginTempBan)	}},
     { "CLIENTMAX",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMax)			}},
-    { "CLIENTMAXIP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMaxIP)			}},
+    { "CLIENTMAXIP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMaxIP)		}},
     { "CLIENTS",				{ ELEM_VOID,	0											    }},	// duplicate
     { "COLORHIDDEN",			{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorHidden)			}},
     { "COLORINVIS",				{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorInvis)			}},
     { "COLORINVISITEM",			{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorInvisItem)		}},
     { "COLORINVISSPELL",		{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorInvisSpell)		}},
     { "COLORNOTOCRIMINAL",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoCriminal)	}},
-    { "COLORNOTODEFAULT",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoDefault)		}},
+    { "COLORNOTODEFAULT",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoDefault)	}},
     { "COLORNOTOEVIL",			{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoEvil)		}},
     { "COLORNOTOGOOD",			{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoGood)		}},
-    { "COLORNOTOGOODNPC",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoGoodNPC)		}},
+    { "COLORNOTOGOODNPC",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoGoodNPC)	}},
     { "COLORNOTOGUILDSAME",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoGuildSame)	}},
     { "COLORNOTOGUILDWAR",		{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoGuildWar)	}},
     { "COLORNOTOINVUL",			{ ELEM_WORD,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorNotoInvul)		}},
@@ -813,7 +820,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "CONNECTINGMAX",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iConnectingMax)		}},
     { "CONNECTINGMAXIP",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iConnectingMaxIP)		}},
     { "CONTAINERMAXITEMS",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iContainerMaxItems)	}},
-    { "CONTEXTMENULIMIT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iContextMenuLimit)		}},
+    { "CONTEXTMENULIMIT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iContextMenuLimit)	}},
     { "CORPSENPCDECAY",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDecay_CorpseNPC)		}},
     { "CORPSEPLAYERDECAY",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDecay_CorpsePlayer)	}},
     { "CRIMINALTIMER",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iCriminalTimer)		}},
@@ -824,8 +831,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "DECAYTIMER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDecay_Item)			}},
     { "DECIMALVARIABLES",       { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDecimalVariables)    }},
     { "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDefaultCommandLevel)	}},
-    { "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayPercentAr)		}},
-    { "DISPLAYELEMENTALRESISTANCE",{ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayElementalResistance)}},
+    { "DISPLAYARMORASPERCENT",  { ELEM_BOOL,    static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayPercentAr)	}},
+    { "DISPLAYELEMENTALRESISTANCE",{ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fDisplayElementalResistance) }},
     { "DISTANCEFORMULA",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceFormula)		}},
     { "DISTANCETALK",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceTalk)		}},
     { "DISTANCEWHISPER",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iDistanceWhisper)		}},
@@ -834,23 +841,30 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 #ifdef _DUMPSUPPORT
     { "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sDumpAccPackets)		}},
 #endif
-    { "DUNGEONLIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDungeon)			}},
+    { "DUNGEONLIGHT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLightDungeon)		}},
     { "EMOTEFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iEmoteFlags)			}},
-    { "EQUIPPEDCAST",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fEquippedCast)			}},
+    { "EQUIPPEDCAST",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fEquippedCast)		}},
     { "ERALIMITGEAR",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
     { "ERALIMITLOOT",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
-    { "ERALIMITPROPS",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
+    { "ERALIMITPROPS",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)		}},
+    { "EVENTSCHAR",             { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsChar)          }},
+    { "EVENTSCHARPLAYER",       { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsCharPlayer)    }},
+    { "EVENTSCHARSTAFF",        { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsCharStaff)     }},
     { "EVENTSITEM",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItem)			}},
-    { "EVENTSPET",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPet)			}},
-    { "EVENTSPLAYER",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPlayer)			}},
-    { "EVENTSREGION",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsRegion)			}},
+    { "EVENTSITEMWEAPON",		{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItemWeapon)	}},
+    { "EVENTSNPC",              { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsNPC)           }},
+    { "EVENTSNPCANIMAL",        { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsNPCAnimal)     }},
+    { "EVENTSNPCMONSTER",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig,m_sEventsNPCMonster)  }},
+    { "EVENTSNPCMOUNTABLE",     { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsNPCMountable)  }},
+    { "EVENTSNPCSHOP",          { ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsNPCShop)       }},
+    { "EVENTSREGION",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsRegion)		}},
     { "EXPERIENCEKOEFPVM",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVM)	}},
     { "EXPERIENCEKOEFPVP",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVP)	}},
     { "EXPERIENCEMODE",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceMode)		}},
-    { "EXPERIENCESYSTEM",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fExperienceSystem)		}},
+    { "EXPERIENCESYSTEM",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fExperienceSystem)	}},
     { "EXPERIMENTAL",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiExperimentalFlags)	}},
     { "FEATUREAOS",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureAOS)			}},
-    { "FEATUREEXTRA",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureExtra)			}},
+    { "FEATUREEXTRA",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureExtra)		}},
     { "FEATUREKR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureKR)			}},
     { "FEATURELBR",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureLBR)			}},
     { "FEATUREML",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureML)			}},
@@ -858,10 +872,10 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "FEATURESE",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureSE)			}},
     { "FEATURET2A",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureT2A)			}},
     { "FEATURETOL",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFeatureTOL)			}},
-    { "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fFlipDroppedItems)		}},
+    { "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fFlipDroppedItems)	}},
     { "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fSaveGarbageCollect)	}},
     { "FREEZERESTARTTIME",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iFreezeRestartTime)	}},
-    { "GAMEMINUTELENGTH",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGameMinuteLength)		}},
+    { "GAMEMINUTELENGTH",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGameMinuteLength)	}},
     { "GENERICSOUNDS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGenericSounds)		}},
     { "GUARDLINGER",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iGuardLingerTime)		}},
     { "GUARDSINSTANTKILL",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fGuardsInstantKill)	}},
@@ -4813,7 +4827,10 @@ bool CServerConfig::Load( bool fResync )
         pRegion->MakeRegionDefname();
     }
 
-	// parse eventsitem
+    /////////////////////
+    // parse eventsitem
+    /////////////////////
+    // all items
 	m_iEventsItemLink.clear();
 	if ( ! m_sEventsItem.IsEmpty() )
 	{
@@ -4821,21 +4838,83 @@ bool CServerConfig::Load( bool fResync )
 		m_iEventsItemLink.r_LoadVal(script, RES_EVENTS);
 	}
 
-	// parse eventspet
-	m_pEventsPetLink.clear();
-	if ( ! m_sEventsPet.IsEmpty() )
-	{
-		CScript script("EVENTSPET", m_sEventsPet);
-		m_pEventsPetLink.r_LoadVal(script, RES_EVENTS);
-	}
+    // all weapons
+    m_iEventsItemWeaponLink.clear();
+    if (!m_sEventsItemWeapon.IsEmpty())
+    {
+        CScript script("EVENTSITEMWEAPON", m_sEventsItemWeapon);
+        m_iEventsItemWeaponLink.r_LoadVal(script, RES_EVENTS);
+    }
 
-	// parse eventsplayer
-	m_pEventsPlayerLink.clear();
-	if ( ! m_sEventsPlayer.IsEmpty() )
-	{
-		CScript script("EVENTSPLAYER", m_sEventsPlayer);
-		m_pEventsPlayerLink.r_LoadVal(script, RES_EVENTS);
-	}
+    /////////////////////
+    // parse eventsnpc
+    /////////////////////
+    // all npcs
+    m_pEventsNPCLink.clear();
+    if (!m_sEventsNPC.IsEmpty())
+    {
+        CScript script("EVENTSNPC", m_sEventsNPC);
+        m_pEventsNPCLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all animals
+    m_pEventsNPCAnimalLink.clear();
+    if (!m_sEventsNPCAnimal.IsEmpty())
+    {
+        CScript script("EVENTSNPCANIMAL", m_sEventsNPCAnimal);
+        m_pEventsNPCAnimalLink.r_LoadVal(script, RES_EVENTS);
+    }
+    // all monsters
+    m_pEventsNPCMonsterLink.clear();
+    if (!m_sEventsNPCMonster.IsEmpty())
+    {
+        CScript script("EVENTSNPCMONSTER", m_sEventsNPCMonster);
+        m_pEventsNPCMonsterLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all mountables
+    m_pEventsNPCMountableLink.clear();
+    if (!m_sEventsNPCMountable.IsEmpty())
+    {
+        CScript script("EVENTSNPCMOUNTABLE", m_sEventsNPCMountable);
+        m_pEventsNPCMountableLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all shopkeepers
+    m_pEventsNPCShopLink.clear();
+    if (!m_sEventsNPCShop.IsEmpty())
+    {
+        CScript script("EVENTSNPCSHOP", m_sEventsNPCShop);
+        m_pEventsNPCShopLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    /////////////////////
+    // parse eventschar
+    /////////////////////
+
+    // allchars (players or staffs)
+    m_pEventsCharLink.clear();
+    if (!m_sEventsChar.IsEmpty())
+    {
+        CScript script("EVENTSCHAR", m_sEventsChar);
+        m_pEventsCharLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all players
+    m_pEventsCharPlayerLink.clear();
+    if (!m_sEventsCharPlayer.IsEmpty())
+    {
+        CScript script("EVENTSCHARPLAYER", m_sEventsCharPlayer);
+        m_pEventsCharPlayerLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all staffs
+    m_pEventsCharStaffLink.clear();
+    if (!m_sEventsCharStaff.IsEmpty())
+    {
+        CScript script("EVENTSCHARSTAFF", m_sEventsCharStaff);
+        m_pEventsCharStaffLink.r_LoadVal(script, RES_EVENTS);
+    }
 
 	// parse eventsregion
 	m_pEventsRegionLink.clear();
