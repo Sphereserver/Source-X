@@ -528,6 +528,11 @@ void CChar::SetDisconnected(CSector* pNewSector)
         GetClientActive()->GetNetState()->markReadClosed();
     }
 
+    if (m_pNPC && IsTrigUsed(TRIGGER_LOGOUT))
+    {
+        OnTrigger(CTRIG_LogOut, this, nullptr);
+    }
+
 	if (m_pPlayer)
 	{
 		m_pPlayer->_iTimeLastDisconnectedMs = CWorldGameTime::GetCurrentTime().GetTimeRaw();
