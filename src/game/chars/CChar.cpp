@@ -159,6 +159,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NPCSeeNewPlayer",		//+(NPC only) i see u for the first time. (in 20 minutes) (check memory time)
 	"@NPCSeeWantItem",		// (NPC only) i see something good.
 	"@NPCSpecialAction",	// Idle
+	"@OpenBank",	        // OpenBank
 
     "@PartyAdd",            // Player joined the party.
 	"@PartyDisband",		//I just disbanded my party
