@@ -2323,6 +2323,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	ushort uiManaUse = g_Cfg.Calc_SpellManaCost(this, pSpellDef, pSrc);
 	ushort uiTithingUse = g_Cfg.Calc_SpellTithingCost(this, pSpellDef, pSrc);
+    bool bSearchBook = true;
+    CItem *pBook = GetSpellbook(spellRef);
 
 	CScriptTriggerArgs Args( spellRef, uiManaUse, pSrc );
 	if ( fTest )
@@ -2330,6 +2332,9 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if ( fFailMsg )
 		Args.m_iN3 |= 0x0002;
 	Args.m_VarsLocal.SetNum("TithingUse",uiTithingUse);
+    Args.m_VarsLocal.SetNum("SearchBook", bSearchBook);
+    if (pBook != nullptr)
+        Args.m_VarObjs.Insert(1, pBook, true);
 
 	if ( IsTrigUsed(TRIGGER_SELECT) )
 	{
@@ -2353,7 +2358,6 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 		if ( iRet == TRIGRET_RET_HALFBAKED )
 			return true;
 	}
-
 	if ( spellRef != Args.m_iN1 )
 	{
 		pSpellDef = g_Cfg.GetSpellDef(spellRef);
@@ -2361,8 +2365,10 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			return false;
         spellRef = (SPELL_TYPE)(Args.m_iN1);
 	}
+
 	uiManaUse = (ushort)(Args.m_iN2);
 	uiTithingUse = (ushort)(Args.m_VarsLocal.GetKeyNum("TithingUse"));
+    bSearchBook  = (bool)Args.m_VarsLocal.GetKeyNum("SearchBook");
 
 	if ( !pSrc->IsChar() )// Looking for non-character sources
 	{
@@ -2430,20 +2436,22 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			}
 
 			// check the spellbook for it.
-			CItem * pBook = GetSpellbook( spellRef );
-			if ( pBook == nullptr )
-			{
-				if ( fFailMsg )
-					SysMessageDefault( DEFMSG_SPELL_TRY_NOBOOK );
-				return false;
-			}
+            if (bSearchBook)
+            {
+                if (pBook == nullptr)
+                {
+                    if (fFailMsg)
+                        SysMessageDefault(DEFMSG_SPELL_TRY_NOBOOK);
+                    return false;
+                }
 
-			if ( ! pBook->IsSpellInBook( spellRef ))
-			{
-				if ( fFailMsg )
-					SysMessageDefault( DEFMSG_SPELL_TRY_NOTYOURBOOK );
-				return false;
-			}
+                if (!pBook->IsSpellInBook(spellRef))
+                {
+                    if (fFailMsg)
+                        SysMessageDefault(DEFMSG_SPELL_TRY_NOTYOURBOOK);
+                    return false;
+                }
+            }
 
 			// check for reagents
 			const size_t iMissingReagents = g_Cfg.Calc_SpellReagentsConsume(this, pSpellDef, pSrc, fTest);
