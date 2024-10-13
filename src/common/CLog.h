@@ -9,7 +9,10 @@
 #include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
 #include "../sphere/ConsoleInterface.h"
-#include <exception>
+
+namespace std {
+class exception;    // Forward declaration
+}
 
 // -----------------------------
 //	CEventLog
@@ -63,14 +66,12 @@ protected:
     int VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept;
 
 public:
-	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) noexcept __printfargs(3,4);
-	int _cdecl EventDebug(lpctstr pszFormat, ...) noexcept  __printfargs(2,3);
-	int _cdecl EventError(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
-	int _cdecl EventWarn(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
-    int _cdecl EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept __printfargs(4,5);
-#ifdef _DEBUG
-	int _cdecl EventEvent( lpctstr pszFormat, ... ) noexcept __printfargs(2,3);
-#endif //_DEBUG
+    int Event( dword dwMask, lpctstr pszFormat, ... ) noexcept SPHERE_PRINTFARGS(3,4);
+    int EventDebug(lpctstr pszFormat, ...) noexcept  SPHERE_PRINTFARGS(2,3);
+    int EventError(lpctstr pszFormat, ...) noexcept SPHERE_PRINTFARGS(2,3);
+    int EventWarn(lpctstr pszFormat, ...) noexcept SPHERE_PRINTFARGS(2,3);
+    int EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept SPHERE_PRINTFARGS(4,5);
+    int EventEvent( lpctstr pszFormat, ... ) noexcept SPHERE_PRINTFARGS(2,3);
 
 	CEventLog();
     virtual ~CEventLog();
@@ -118,8 +119,8 @@ public:		bool OpenLog(lpctstr pszName = nullptr);
 	bool IsLogged( dword dwMask ) const;
 
 	virtual int EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor = CTCOL_DEFAULT ) noexcept final;	// final: for now, it doesn't have any other virtual methods
-	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
-    void _cdecl CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
+    void CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) SPHERE_PRINTFARGS(3,4);
+    void CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) SPHERE_PRINTFARGS(3,4);
 
 public:
 	CLog();

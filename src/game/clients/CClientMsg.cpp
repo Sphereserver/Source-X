@@ -2722,7 +2722,7 @@ void CClient::SendPacket( tchar * ptcKey )
 	while ( *ptcKey )
 	{
 		if ( packet->getLength() > SCRIPT_MAX_LINE_LEN - 4 )
-		{	// we won't get here because this lenght is enforced in all scripts
+        {	// we won't get here because this length is enforced in all scripts
 			DEBUG_ERR(("SENDPACKET too big.\n"));
 
 			delete packet;
@@ -2734,7 +2734,7 @@ void CClient::SendPacket( tchar * ptcKey )
 		if ( toupper(*ptcKey) == 'D' )
 		{
 			++ptcKey;
-			dword iVal = Exp_GetVal(ptcKey);
+            dword iVal = Exp_GetDWVal(ptcKey);
 
 			packet->writeInt32(iVal);
 		}

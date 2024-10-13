@@ -72,7 +72,7 @@ Most notable changes (right now) are:
 
 ### Required libraries (Windows)
 
-+ `libmariadb.dll` (MariaDB Client v10.*package), found in `lib/bin/*cpu_architecture*/mariadb/libmariadb.dll`
++ `libmariadb.dll` (MariaDB Client v10.\* package), found in `lib/bin/*cpu_architecture*/mariadb/libmariadb.dll`
 
 ### Required libraries (Linux)
 
@@ -156,7 +156,7 @@ Building will require more packages than the ones needed to run Sphere.
 
 #### Compiling on Linux
 
-Just run the `make` command inside the `build` folder. You can pass the -jX argument (`make -jX`, where X is a number) to speed up the compilation and split the work between X threads.
+Just run `cmake --build .` in the build directory (the one where you have asked CMake to create its files).
 
 ## Coding Notes (add as you wish to standardize the coding for new contributors)
 

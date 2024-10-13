@@ -1,14 +1,21 @@
 #ifndef _INC_SPTR_H
 #define _INC_SPTR_H
 
-#ifndef _MSC_VER
+// On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
+#ifndef NON_MSVC_COMPILER
+#    if !defined(_MSC_VER) || defined(__clang__)
+#       define NON_MSVC_COMPILER 1
+#    endif
+#endif
+
+#if NON_MSVC_COMPILER
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
 #include <object_ptr/object_ptr.hpp>
 
-#ifndef _MSC_VER
+#if NON_MSVC_COMPILER
 #   pragma GCC diagnostic pop
 #endif
 

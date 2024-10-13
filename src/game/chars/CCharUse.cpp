@@ -1125,9 +1125,9 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool fCheckFollowerSlots )
 
     std::optional<short> iFollowerSlots;
     const bool fShouldCheckFollowerSlots = (fCheckFollowerSlots && IsSetOF(OF_PetSlots));
-    auto _CheckFollowerSlots = [this](short iFollowerSlots) -> bool
+    auto _CheckFollowerSlots = [this](short iFollowerSlots_) -> bool
     {
-            if ( !FollowersUpdate(this, iFollowerSlots, true) )
+            if ( !FollowersUpdate(this, iFollowerSlots_, true) )
             {
                 SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
                 return false;

@@ -206,12 +206,12 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		default:
 			if ( FindTableHeadSorted( ptcKey, CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
 			{
-				sVal = "0";
+				sVal.SetValFalse();
 				return true;
 			}
 			if ( FindTableSorted( ptcKey, CClient::sm_szLoadKeys, CC_QTY ) >= 0 )
 			{
-				sVal = "0";
+				sVal.SetValFalse();
 				return true;
 			}
 			return(false );

@@ -614,7 +614,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 	{
 		if ( pRef == nullptr )		// good command but bad link.
 		{
-			sVal = "0";
+			sVal.SetValFalse();
 			return true;
 		}
 		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
@@ -623,7 +623,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 			if ( pObj )
 				sVal.FormatHex((dword)pObj->GetUID());
 			else
-				sVal.FormatVal(1);
+                sVal.SetValTrue();
 			return true;
 		}
 		return pRef->r_WriteVal(ptcKey, sVal, pSrc);

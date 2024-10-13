@@ -2,7 +2,6 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "../game/CServerConfig.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
@@ -269,7 +268,7 @@ bool CListDefCont::AddElementStr(lpctstr ptcKey)
 	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
-	REMOVE_QUOTES( ptcKey );
+    REMOVE_QUOTES( ptcKey );
 
 	m_listElements.emplace_back( new CListDefContStr(m_Key.GetBuffer(), ptcKey) );
 
@@ -774,14 +773,14 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 	Str_Parse(ppCmds[0], &(ppCmds[1]), "." );
 
 	CListDefCont* pListBase = GetKey(ppCmds[0]);
-	lpctstr ptcArg = s.GetArgRaw();
+    lpctstr ptcArg = s.GetArgRaw();
 
 	// LIST.<list_name>
 	if ( ppCmds[1] && *(ppCmds[1]) )
 	{
 		Str_Parse(ppCmds[1], &(ppCmds[2]), "." );
 
-		if ( !IsSimpleNumberString(ppCmds[1]) )
+        if ( !IsStrNumeric(ppCmds[1]) )
 		{
 			// LIST.<list_name>.<operation>
 			// Am i calling a valid operation?
@@ -806,7 +805,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 					m_Container.insert(pListBase);
 				}
 
-				if ( IsSimpleNumberString(ptcArg) )
+                if ( IsStrNumeric(ptcArg) )
 					return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 				else
 					return pListBase->AddElementStr(ptcArg);
@@ -830,22 +829,22 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 					m_Container.insert(pListBase);
 				}
 
-				tchar* ppCmd[2];
-				ppCmd[0] = const_cast<tchar*>(ptcArg);
-				while ( Str_Parse( ppCmd[0], &(ppCmd[1]), "," ))
+                tchar* ppArgs[2];
+                ppArgs[0] = const_cast<tchar*>(ptcArg);
+                while ( Str_Parse( ppArgs[0], &(ppArgs[1]), "," ))
 				{
-					if ( IsSimpleNumberString(ppCmd[0]) )
-						pListBase->AddElementNum(Exp_Get64Val(ppCmd[0]));
+                    if ( IsStrNumeric(ppArgs[0]) )
+                        pListBase->AddElementNum(Exp_Get64Val(ppArgs[0]));
 					else
-						pListBase->AddElementStr(ppCmd[0]);
-					ppCmd[0] = ppCmd[1];
+                        pListBase->AddElementStr(ppArgs[0]);
+                    ppArgs[0] = ppArgs[1];
 				}
 
 				//insert last element
-				if ( IsSimpleNumberString(ppCmd[0]) )
-					return pListBase->AddElementNum(Exp_Get64Val(ppCmd[0]));
+                if ( IsStrNumeric(ppArgs[0]) )
+                    return pListBase->AddElementNum(Exp_Get64Val(ppArgs[0]));
 				else
-					return pListBase->AddElementStr(ppCmd[0]);
+                    return pListBase->AddElementStr(ppArgs[0]);
 			}
 			else if ( !strnicmp(ppCmds[1], "sort", 4) )
 			{
@@ -889,7 +888,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 				else if ( !strnicmp(ppCmds[2], "insert", 6) && ptcArg && *ptcArg )
 				{
 					// Inserts <args> at the nth index of LIST.xxx
-					const bool fIsNum = ( IsSimpleNumberString(ptcArg) );
+                    const bool fIsNum = ( IsStrNumeric(ptcArg) );
 
 					if ( nIndex >= pListBase->GetCount() )
 					{
@@ -918,7 +917,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 				if ( !pListElem )
 					return false;
 
-				if ( IsSimpleNumberString(ptcArg) )
+                if ( IsStrNumeric(ptcArg) )
 					return pListBase->SetNumAt(nIndex, Exp_Get64Val(ptcArg));
 				else
 					return pListBase->SetStrAt(nIndex, ptcArg);
@@ -933,7 +932,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 					pListBase = new CListDefCont(ppCmds[0]);
 					m_Container.insert(pListBase);
 
-					if ( IsSimpleNumberString(ptcArg) )
+                    if ( IsStrNumeric(ptcArg) )
 						return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 					else
 						return pListBase->AddElementStr(ptcArg);
@@ -953,7 +952,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 			m_Container.insert(pListBase);
 		}
 
-		if ( IsSimpleNumberString(ptcArg) )
+        if ( IsStrNumeric(ptcArg) )
 			return pListBase->AddElementNum(Exp_Get64Val(ptcArg));
 		else
 			return pListBase->AddElementStr(ptcArg);

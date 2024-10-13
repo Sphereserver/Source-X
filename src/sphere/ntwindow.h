@@ -23,10 +23,10 @@ extern struct CNTWindow : public AbstractSphereThread, public CSWindow, public C
         int nCmdShow;
     } _NTWInitParams;
 
-    virtual void onStart();
-    virtual void terminate(bool ended);
+    virtual void onStart() override;
+    virtual void terminate(bool ended) override;
     virtual bool shouldExit() noexcept override;
-    virtual void tick();
+    virtual void tick() override;
 
     bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
     void NTWindow_ExitServer();
@@ -41,7 +41,7 @@ private:
     std::shared_mutex _mutexWindowTitle;
 
     void exitActions();
-    
+
 public:
     class CAboutDlg : public CDialogBase				//	CNTWindow::CAboutDlg
     {

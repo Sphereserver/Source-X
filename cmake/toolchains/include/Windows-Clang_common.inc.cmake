@@ -14,135 +14,36 @@ endfunction()
 function(toolchain_exe_stuff_common)
     #-- Configure the Windows application type and add global linker flags.
 
-    if(${WIN32_SPAWN_CONSOLE})
+    if(${WIN_SPAWN_CONSOLE})
         set(PREPROCESSOR_DEFS_EXTRA _WINDOWS_CONSOLE)
         if(${CLANG_USE_GCC_LINKER})
             # --entry might not work
-            add_link_options("LINKER:--entry=WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:-m$<IF:$<BOOL:${WIN32_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
+            add_link_options("LINKER:--entry=WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:-m$<IF:$<BOOL:${WIN_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
         else()
-            add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:/SUBSYSTEM:$<IF:$<BOOL:${WIN32_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
-        endif()
-    endif()
-
-    #-- Validate sanitizers options and store them between the common compiler flags.
-
-    set(ENABLED_SANITIZER false)
-    # From https://clang.llvm.org/docs/ClangCommandLineReference.html
-    # -static-libsan Statically link the sanitizer runtime (Not supported for ASan, TSan or UBSan on darwin)
-
-    if(${USE_ASAN})
-        set(CXX_FLAGS_EXTRA
-            ${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
-            -fsanitize=address
-            -fno-sanitize-recover=address #-fsanitize-cfi # cfi: control flow integrity
-            -fsanitize-address-use-after-scope
-            -fsanitize=pointer-compare
-            -fsanitize=pointer-subtract
-            # Flags for additional instrumentation not strictly needing asan to be enabled
-            -fcf-protection=full
-            -fstack-check
-            -fstack-protector-all
-            -fstack-clash-protection
-            # Not supported by Clang, but supported by GCC
-            #-fvtable-verify=preinit -fharden-control-flow-redundancy -fhardcfr-check-exceptions
-            # Other
-            #-fsanitize-trap=all
-        )
-        if(${CLANG_USE_GCC_LINKER})
-            set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address)
-        endif()
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
-        set(ENABLED_SANITIZER true)
-    endif()
-    if(${USE_MSAN})
-        message(FATAL_ERROR "Windows Clang doesn't yet support MSAN")
-        set(USE_MSAN false)
-        #SET (CXX_FLAGS_EXTRA         ${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE)
-        #IF (${CLANG_USE_GCC_LINKER})
-        #set (CMAKE_EXE_LINKER_FLAGS_EXTRA     ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory)
-        #ENDIF
-        #SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
-        #SET (ENABLED_SANITIZER true)
-    endif()
-    if(${USE_LSAN})
-        message(FATAL_ERROR "Windows Clang doesn't yet support LSAN")
-        set(USE_LSAN false)
-        #SET (CXX_FLAGS_EXTRA        ${CXX_FLAGS_EXTRA} -fsanitize=leak)
-        #IF (${CLANG_USE_GCC_LINKER})
-        #set (CMAKE_EXE_LINKER_FLAGS_EXTRA     ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak)
-        #ENDIF
-        #SET (PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
-        #SET (ENABLED_SANITIZER true)
-    endif()
-    if(${USE_UBSAN})
-        set(UBSAN_FLAGS
-            -fsanitize=undefined,float-divide-by-zero,local-bounds
-            -fno-sanitize=enum
-            # Supported?
-            -fsanitize=unsigned-integer-overflow #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
-            -fsanitize=implicit-conversion
-        )
-        set(CXX_FLAGS_EXTRA ${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return)
-        #IF (${CLANG_USE_GCC_LINKER})
-        #set (CMAKE_EXE_LINKER_FLAGS_EXTRA     ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)
-        #ENDIF
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
-        set(ENABLED_SANITIZER true)
-    endif()
-
-    if(${ENABLED_SANITIZER})
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
-        if(${RUNTIME_STATIC_LINK})
-            set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -static-libsan)
-        else()
-            set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -shared-libsan)
+            add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:SHELL:/SUBSYSTEM:$<IF:$<BOOL:${WIN_SPAWN_CONSOLE}>,CONSOLE,WINDOWS>"
         endif()
     endif()
 
     #-- Store compiler flags common to all builds.
 
-    set(cxx_local_opts_warnings
-        -Werror
-        -Wall
-        -Wextra
-        -Wno-unknown-pragmas
-        -Wno-switch
-        -Wno-implicit-fallthrough
-        -Wno-parentheses
-        -Wno-misleading-indentation
-        -Wno-conversion-null
-        -Wno-unused-result
-        -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
-        # clang -specific:
-        # -fforce-emit-vtables
-    )
     set(cxx_local_opts
-        -std=c++20
-        -fexceptions
-        -fnon-call-exceptions
-        -pipe
-        -ffast-math
         -mno-ms-bitfields
         # -mno-ms-bitfields is needed to fix structure packing;
         # -pthread unused here? we only need to specify that to the linker?
-        -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
-        # clang-specific:
-        #
-        # Flags supported by GCC but not by Clang: -fno-expensive-optimizations, -Wno-error=maybe-uninitialized
     )
-    set(cxx_compiler_options_common ${cxx_local_opts_warnings} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
 
     #-- Apply compiler flags, only the ones specific per build type.
 
     # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-    set(COMPILE_OPTIONS_EXTRA)
+    set(local_compile_options_extra)
     if(ENABLED_SANITIZER OR TARGET spheresvr_debug)
-        set(COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
+        set(local_compile_options_extra -fno-omit-frame-pointer -fno-inline)
     endif()
     if(TARGET spheresvr_release)
         target_compile_options(
             spheresvr_release
-            PUBLIC -O3 -flto=full -fvirtual-function-elimination ${COMPILE_OPTIONS_EXTRA}
+            PUBLIC -O3 -flto=full -fvirtual-function-elimination ${local_compile_options_extra}
         )
         #[[
         IF (NOT ${CLANG_USE_GCC_LINKER})
@@ -156,11 +57,11 @@ function(toolchain_exe_stuff_common)
     endif()
     if(TARGET spheresvr_nightly)
         if(ENABLED_SANITIZER)
-            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
+            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${local_compile_options_extra})
         else()
             target_compile_options(
                 spheresvr_nightly
-                PUBLIC -O3 -flto=full -fvirtual-function-elimination ${COMPILE_OPTIONS_EXTRA}
+                PUBLIC -O3 -flto=full -fvirtual-function-elimination ${local_compile_options_extra}
             )
         endif()
         #[[
@@ -188,17 +89,13 @@ function(toolchain_exe_stuff_common)
 
     #-- Store common linker flags.
 
-    if(${USE_MSAN})
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie)
-    endif()
-
     set(cxx_linker_options_common ${CMAKE_EXE_LINKER_FLAGS_EXTRA})
     if(${CLANG_USE_GCC_LINKER})
-        set(cxx_linker_options_common ${cxx_linker_options_common} -pthread -dynamic -Wl,--fatal-warnings)
+        set(cxx_linker_options_common ${list_explicit_linker_options_all})
         if(${RUNTIME_STATIC_LINK})
             set(cxx_linker_options_common ${cxx_linker_options_common} -static-libstdc++ -static-libgcc) # no way to statically link against libc? maybe we can on windows?
         endif()
-        #[[
+#[[
     else ()
         if (${RUNTIME_STATIC_LINK})
             set (cxx_linker_options_common    ${cxx_linker_options_common} /MTd )
@@ -282,7 +179,7 @@ function(toolchain_exe_stuff_common)
             endif ()
                 endif()
             endif ()
-]]
+    ]]
     endif()
     set(libs_to_link_against ${libs_to_link_against} ws2_32 ${libs_prefix}mariadb)
 

@@ -144,25 +144,25 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
     lptstr ptcArgs = s.GetArgStr();
     //g_Log.EventDebug("Dialog index %d, KEY %s ARG %s.\n", index, ptcKey, ptcArgs);
 
-    const auto _SkipAll = [](lptstr& ptcArgs) noexcept -> void
+    const auto _SkipAll = [](lptstr& ptcArgs_) noexcept -> void
     {
-        SKIP_SEPARATORS(ptcArgs);
-        GETNONWHITESPACE(ptcArgs);
+        SKIP_SEPARATORS(ptcArgs_);
+        GETNONWHITESPACE(ptcArgs_);
     };
 
-    const auto _CalcRelative = [](lptstr& ptcArgs, int &iCoordBase) -> int
+    const auto _CalcRelative = [](lptstr& ptcArgs_, int &iCoordBase_) -> int
     {
         int c;
-        	if ( *ptcArgs == '-' && IsSpace(ptcArgs[1]))
-            c = iCoordBase, ++ptcArgs;
-        else if ( *ptcArgs == '+' )
-            c = iCoordBase + Exp_GetSingle( ++ptcArgs );
-        else if ( *ptcArgs == '-' )
-            c = iCoordBase - Exp_GetSingle( ++ptcArgs );
-        else if ( *ptcArgs == '*' )
-            iCoordBase = c = iCoordBase + Exp_GetSingle( ++ptcArgs );
+            if ( *ptcArgs_ == '-' && IsSpace(ptcArgs_[1]))
+            c = iCoordBase_, ++ptcArgs_;
+        else if ( *ptcArgs_ == '+' )
+            c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+        else if ( *ptcArgs_ == '-' )
+            c = iCoordBase_ - Exp_GetSingle( ++ptcArgs_ );
+        else if ( *ptcArgs_ == '*' )
+            iCoordBase_ = c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
         else
-            c = Exp_GetSingle( ptcArgs );
+            c = Exp_GetSingle( ptcArgs_ );
         return c;
     };
 

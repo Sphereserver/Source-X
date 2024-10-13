@@ -24,7 +24,7 @@ public:
 	static void SpeakUNICODE(const CObjBaseTemplate* pSrc, const nachar* pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang);
 
 	static void Broadcast(lpctstr pMsg);
-	static void __cdecl Broadcastf(lpctstr pMsg, ...) __printfargs(1, 2);
+    static void Broadcastf(lpctstr pMsg, ...) SPHERE_PRINTFARGS(1, 2);
 };
 
 

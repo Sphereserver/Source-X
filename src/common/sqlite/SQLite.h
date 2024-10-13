@@ -181,7 +181,8 @@ public:
 	// If you have a previous table connected to this class,
 	//   you do not have to worry,
 	//   it will commit suicide before eating the new table.
-	SQLiteTablePtr( const SQLiteTablePtr & cTablePtr );
+    SQLiteTablePtr( SQLiteTablePtr & cTablePtr );
+    SQLiteTablePtr( const SQLiteTablePtr & cTablePtr ) = delete;
 
 	// Destructor...
 	virtual ~SQLiteTablePtr();
@@ -191,7 +192,8 @@ public:
 	// If you have a previous table connected to this class,
 	//   you do not have to worry,
 	//   it will commit suicide before eating the new table.
-	void operator =(const SQLiteTablePtr & cTablePtr);
+    void operator =(SQLiteTablePtr & cTablePtr);
+    void operator =(const SQLiteTablePtr & cTablePtr) = delete;
 
 	// Functor operator, will de-reference the m_pTable member.
 	// WARNING: Use with care! Check for non-null m_pTable first!

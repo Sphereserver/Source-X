@@ -252,7 +252,7 @@ void CWinApp::InitInstance(LPCTSTR pszAppName, HINSTANCE hInstance, LPTSTR lpszC
     m_hInstance	= hInstance;
     m_lpCmdLine	= lpszCmdLine;
 
-    char szFileName[_MAX_PATH];
+    char szFileName[SPHERE_MAX_PATH];
     if (! GetModuleFileName(m_hInstance, szFileName, sizeof(szFileName)))
         return;
     m_pszExeName = szFileName;

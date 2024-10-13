@@ -13,14 +13,14 @@
 #       define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
 #   endif
 
-#   ifdef _MSC_VER
+#   if defined(_MSC_VER) && !defined(__clang__)
         // Workaround to a possible VS compiler bug: instead of complaining if a macro expands to a "defined" macro,
         //  it complains if a define macro contains the words "defined" in its name...
 #       pragma warning(push)
 #       pragma warning(disable: 5105)
 #   endif
 #   include <windows.h>
-#   ifdef _MSC_VER
+#   if defined(_MSC_VER) && !defined(__clang__)
 #       pragma warning(pop)
 #   endif
 
@@ -89,12 +89,12 @@ IDR_MAINFRAME           ICON                    "spheresvr.ico"
 //
 
 #ifdef APSTUDIO_INVOKED
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
 	"win_resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
 	"\r\n"
 	"\0"

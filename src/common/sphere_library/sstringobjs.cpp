@@ -34,7 +34,7 @@ static tchar* getUnsafeStringBuffer() noexcept
 
 tchar* Str_GetTemp() noexcept
 {
-	IThread *pThreadState = ThreadHolder::get().current();
+	AbstractThread *pThreadState = ThreadHolder::get().current();
 	if (pThreadState)
 		return static_cast<AbstractSphereThread*>(pThreadState)->allocateBuffer();
 	return getUnsafeStringBuffer();

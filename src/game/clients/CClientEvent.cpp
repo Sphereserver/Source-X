@@ -1032,7 +1032,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	}
 
 	addPlayerWarMode();
-	m_pChar->UpdateMode( this, m_pChar->IsStatFlag( STATF_DEAD ));
+    m_pChar->UpdateMode(m_pChar->IsStatFlag(STATF_DEAD), this);
 }
 
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
@@ -2236,7 +2236,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 		ptcKey += 6;
 		SKIP_SEPARATORS(ptcKey);
 
-		size_t iQty = m_CheckArray.size();
+        const size_t iQty = m_CheckArray.size();
 		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
@@ -2254,17 +2254,17 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( ptcKey );
+        const dword dwNum = Exp_GetDWSingle( ptcKey );
 		SKIP_SEPARATORS(ptcKey);
 		for ( uint i = 0; i < iQty; ++i )
 		{
 			if ( dwNum == m_CheckArray[i] )
 			{
-				sVal = "1";
+                sVal.SetValTrue();
 				return true;
 			}
 		}
-		sVal = "0";
+		sVal.SetValFalse();
 		return true;
 	}
 	if ( ! strnicmp( ptcKey, "ARGTXT", 6 ))
@@ -2272,14 +2272,14 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 		ptcKey += 6;
 		SKIP_SEPARATORS(ptcKey);
 
-		size_t iQty = m_TextArray.size();
+        const size_t iQty = m_TextArray.size();
 		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( ptcKey );
+        const dword dwNum = Exp_GetDWSingle( ptcKey );
 		SKIP_SEPARATORS(ptcKey);
 
 		for ( uint i = 0; i < iQty; ++i )

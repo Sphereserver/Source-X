@@ -317,7 +317,7 @@ CServerConfig::CServerConfig()
 
 	// Networking
 	_uiNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
-	_uiNetworkThreadPriority= IThread::Disabled;
+    _iNetworkThreadPriority = enum_alias_cast<int>(ThreadPriority::Disabled);
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
 	m_iNetHistoryTTLSeconds 		= 300;
@@ -644,7 +644,7 @@ enum RC_TYPE
 	RC_MYSQLTICKS,				// m_fMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
-	RC_NETWORKTHREADPRIORITY,	// _uiNetworkThreadPriority
+    RC_NETWORKTHREADPRIORITY,	// _iNetworkThreadPriority
 	RC_NETWORKTHREADS,			// _uiNetworkThreads
 	RC_NORESROBE,
 	RC_NOTOTIMEOUT,
@@ -741,7 +741,7 @@ enum RC_TYPE
 
 // TODO: use offsetof by cstddef. Though, it requires the class/struct to be a POD type, so we need to encapsulate the values in a separate struct.
 // This hack does happen because this class hasn't virtual methods? Or simply because the compiler is so smart and protects us from ourselves?
-#ifdef __GNUC__
+#if NON_MSVC_COMPILER
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
@@ -937,7 +937,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MYSQLTICKS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMySqlTicks)			}},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlUser)			}},
 	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig, m_iNetHistoryTTLSeconds)		}},
-	{ "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreadPriority)}},
+    { "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_iNetworkThreadPriority)}},
 	{ "NETWORKTHREADS",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreads)		}},
 	{ "NORESROBE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fNoResRobe)			}},
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNotoTimeout)			}},
@@ -1030,7 +1030,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ nullptr,					{ ELEM_VOID,	0,												}}
 };
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
 #endif
 
@@ -1483,15 +1483,15 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_NETWORKTHREADPRIORITY:
 			{
-				int priority = s.GetArgVal();
-				if (priority < 1)
-					priority = IThread::Normal;
-				else if (priority > 4)
-					priority = IThread::RealTime;
+                int priority = s.GetArgVal();
+                if (priority < 1)
+                    priority = enum_alias_cast<int>(ThreadPriority::Normal);
+                else if (priority > 4)
+                    priority = enum_alias_cast<int>(ThreadPriority::RealTime);
 				else
-					priority = IThread::Low + (IThread::Priority)priority;
+                    priority = enum_alias_cast<int>(ThreadPriority::Low) + priority;
 
-				_uiNetworkThreadPriority = priority;
+                _iNetworkThreadPriority = priority;
 			}
 			break;
 		case RC_WALKBUFFER:
@@ -1632,7 +1632,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 		if ( !strnicmp(ptcKey, "MAP(", 4) )
 		{
 			ptcKey += 4;
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			// Parse the arguments after the round brackets
 			tchar * pszArgsNext;
@@ -1691,7 +1691,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			lpctstr pszCmd = ptcKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if (!*pszCmd)
 			{
@@ -1738,7 +1738,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			ptcKey = ptcKey + 3;
 			int iMapNumber = Exp_GetVal(ptcKey);
 			SKIP_SEPARATORS(ptcKey);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if ( g_MapList.IsMapSupported(iMapNumber) )
 			{
@@ -1784,7 +1784,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			size_t iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
 			{
@@ -1832,7 +1832,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if (iNumber < 0 || iNumber >= (int) m_Functions.size()) //invalid index can potentially crash the server, this check is strongly needed
 			{
@@ -1879,7 +1879,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			size_t iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 			{
@@ -1914,7 +1914,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			if (cli_num >= g_Serv.StatGet( SERV_STAT_CLIENTS ))
 				return false;
 
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 			ClientIterator it;
 			for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 			{
@@ -3052,7 +3052,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		}
 
 		rid = CResourceID( (dword)pVarNum->GetValNum(), 0 );
-		restype	= rid.GetResType();
+
+        // This value won't be read, since we return anyways once in this branch.
+        //restype = rid.GetResType();
 
 		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );
@@ -4683,13 +4685,13 @@ bool CServerConfig::Load( bool fResync )
 	// Now load the *TABLES.SCP file.
 	if ( ! fResync )
 	{
-		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT ))
+		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ))
 		{
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n" );
+			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n" );
 			return false;
 		}
 
-        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n");
+        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n");
 		LoadResourcesOpen(&m_scpTables);
 		m_scpTables.Close();
 	}
@@ -4989,7 +4991,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 		return false;
 
 	if ( pszFilename == nullptr || pszFilename[0] == '\0' )
-		pszFilename	= "unscripted_items" SPHERE_SCRIPT;
+		pszFilename	= "unscripted_items" SPHERE_SCRIPT_EXT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
 

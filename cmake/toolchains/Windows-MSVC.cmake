@@ -34,7 +34,7 @@ function(toolchain_exe_stuff)
 
     #-- Configure the Windows application type and add global linker flags.
 
-    if(${WIN32_SPAWN_CONSOLE})
+    if(${WIN_SPAWN_CONSOLE})
         add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:/SUBSYSTEM:CONSOLE"
         set(PREPROCESSOR_DEFS_EXTRA _WINDOWS_CONSOLE)
         #ELSE ()
@@ -42,7 +42,7 @@ function(toolchain_exe_stuff)
     endif()
 
     #-- Validate sanitizers options and store them between the common compiler flags.
-
+    # TODO: move sanitizers checks to CompilerFlagsChecker.cmake.
     set(ENABLED_SANITIZER false)
     if(${USE_ASAN})
         if(${MSVC_TOOLSET_VERSION} LESS_EQUAL 141) # VS 2017
@@ -74,6 +74,7 @@ function(toolchain_exe_stuff)
 
     set(cxx_compiler_flags_common
         ${CXX_FLAGS_EXTRA}
+        ${list_explicit_compiler_options_all}
         /W4
         /MP
         /GR
@@ -101,16 +102,28 @@ function(toolchain_exe_stuff)
     endif()
     set(cxx_compiler_flags_common ${cxx_compiler_flags_common} /Zc:preprocessor ${local_msvc_compat_options})
 
-    # Needed, otherwise throws a error... Regression?
+    # Needed, otherwise throws a error... Regression in CMake?
     set(CMAKE_C_FLAGS_DEBUG_INIT "" INTERNAL)
     set(CMAKE_CXX_FLAGS_DEBUG_INIT "" INTERNAL)
 
+    if(RUNTIME_STATIC_LINK)
+        set(local_msvc_cmdline_runtime_lib_debug /MTd)
+        set(local_msvc_cmdline_runtime_lib_nondebug /MT)
+    else()
+        set(local_msvc_cmdline_runtime_lib_debug /MDd)
+        set(local_msvc_cmdline_runtime_lib_nondebug /MD)
+    endif()
+    if(WIN_GENERATE_CRASHDUMP)
+        set(local_msvc_cmdline_exception_handler /EHa)
+    else()
+        set(local_msvc_exception_handler /EHsc)
+    endif()
     # gersemi: off
     target_compile_options(spheresvr PRIVATE
         ${cxx_compiler_flags_common}
-        $<$<CONFIG:Release>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-        $<$<CONFIG:Nightly>: $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MT,/MD>   /EHa  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-        $<$<CONFIG:Debug>:   $<IF:$<BOOL:${RUNTIME_STATIC_LINK}>,/MTd,/MDd> /EHsc /Oy- /ob1 /Od /Gs       $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
+        $<$<CONFIG:Release>: ${local_msvc_cmdline_runtime_lib_nondebug} ${local_msvc_exception_handler}  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+        $<$<CONFIG:Nightly>: ${local_msvc_cmdline_runtime_lib_nondebug} ${local_msvc_exception_handler}  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
+        $<$<CONFIG:Debug>:   ${local_msvc_cmdline_runtime_lib_debug} /EHsc /Oy- /ob1 /Od /Gs $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
         # ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
     )
     # gersemi: on
@@ -118,7 +131,6 @@ function(toolchain_exe_stuff)
     if("${ARCH}" STREQUAL "x86_64")
         target_compile_options(spheresvr PRIVATE /arch:SSE2)
     endif()
-
     #-- Apply linker flags.
 
     # For some reason only THIS one isn't created, and CMake complains with an error...
@@ -126,10 +138,10 @@ function(toolchain_exe_stuff)
 
     # gersemi: off
     target_link_options(spheresvr PRIVATE
-    /WX     # treat all warnings as errors
+        /WX     # treat all warnings as errors
         $<$<CONFIG:Release>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
         $<$<CONFIG:Nightly>: ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmtd /OPT:REF,ICF       /LTCG     /INCREMENTAL:NO>
-        $<$<CONFIG:Debug>:     ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
+        $<$<CONFIG:Debug>:   ${EXE_LINKER_EXTRA} /NODEFAULTLIB:libcmt  /SAFESEH:NO /DEBUG /LTCG:OFF
             $<IF:$<BOOL:${ENABLED_SANITIZER}>,/INCREMENTAL:NO /EDITANDCONTINUE:NO,/INCREMENTAL /EDITANDCONTINUE> >
     )
     # gersemi: on
@@ -142,11 +154,13 @@ function(toolchain_exe_stuff)
     #-- Set define macros.
 
     # Common defines
+    #gersemi: off
     target_compile_definitions(
         spheresvr
         PRIVATE
             ${PREPROCESSOR_DEFS_EXTRA}
-            $<$<NOT:$<BOOL:${CMAKE_NO_GIT_REVISION}>>:_GITVERSION>
+            $<$<NOT:$<BOOL:${CMAKE_NO_GIT_REVISION}>>:
+                _GITVERSION>
             _CRT_SECURE_NO_WARNINGS
             # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spam so much in the build proccess.
             _EXCEPTIONS_DEBUG
@@ -156,15 +170,18 @@ function(toolchain_exe_stuff)
             # Removing WINSOCK warnings until the code gets updated or reviewed.
             # Per-build defines
             $<$<NOT:$<CONFIG:Debug>>:
-            NDEBUG>
+                NDEBUG>
             $<$<CONFIG:Nightly>:
-            _NIGHTLYBUILD
-            THREAD_TRACK_CALLSTACK>
+                _NIGHTLYBUILD
+                THREAD_TRACK_CALLSTACK>
             $<$<CONFIG:Debug>:
-            _DEBUG
-            THREAD_TRACK_CALLSTACK
-            _PACKETDUMP>
+                _DEBUG
+                THREAD_TRACK_CALLSTACK
+                _PACKETDUMP>
+            $<$<BOOL:${WIN_GENERATE_CRASHDUMP}>:
+                WINDOWS_GENERATE_CRASHDUMP>
     )
+    #gersemi: on
 
     #-- Custom output directory.
 

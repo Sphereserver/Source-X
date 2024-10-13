@@ -486,13 +486,14 @@ int CChar::GetStatPercent(STAT_TYPE i) const
 	return IMulDiv(Stat_GetVal(i), 100, maxval);
 }
 
-
+[[nodiscard]] RETURNS_NOTNULL
 const CObjBaseTemplate* CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
 	return this;
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 CObjBaseTemplate* CChar::GetTopLevelObj()
 {
 	// Get the object that has a location in the world. (Ground level)
@@ -692,7 +693,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
         iFlags |= STATF_INVISIBLE;
 	
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
-	mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
+        mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
 
 	return mode;
 }

@@ -492,7 +492,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		SKIP_SEPARATORS(pszCmd);
 
 		CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
-		sVal.FormatVal(0);
+		sVal.SetValFalse();
 
 		for ( int i = 0 ; pMember != nullptr; pMember = pMember->GetNext() )
 		{
@@ -515,7 +515,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 	else if ( !strnicmp("memberfromuid.", ptcKey, 14) )
 	{
 		lpctstr pszCmd = ptcKey + 14;
-		sVal.FormatVal(0);
+		sVal.SetValFalse();
 
 		if ( !pszCmd[0] )
 			return true;
@@ -580,7 +580,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		SKIP_SEPARATORS(pszCmd);
 
 		CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
-		sVal.FormatVal(0);
+		sVal.SetValFalse();
 
 		for ( int i = 0 ; pMember != nullptr; pMember = pMember->GetNext() )
 		{
@@ -603,7 +603,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 	else if ( !strnicmp("guildfromuid.", ptcKey, 13) )
 	{
 		lpctstr pszCmd = ptcKey + 13;
-		sVal.FormatVal(0);
+		sVal.SetValFalse();
 
 		if ( !pszCmd[0] )
 			return true;

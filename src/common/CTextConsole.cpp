@@ -139,7 +139,7 @@ void CTextConsole::VSysMessage( lpctstr pszFormat, va_list args ) const
     SysMessage(tsTemp.buffer());
 }
 
-void _cdecl CTextConsole::SysMessagef( lpctstr pszFormat, ... ) const
+void CTextConsole::SysMessagef( lpctstr pszFormat, ... ) const
 {
     va_list vargs;
     va_start( vargs, pszFormat );

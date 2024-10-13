@@ -8,6 +8,24 @@ ClientIterator::ClientIterator(const CNetworkManager* network)
 {
     m_network = (network == nullptr ? &g_NetworkManager : network);
     m_nextClient = static_cast<CClient*> (m_network->m_clients.GetContainerHead());
+
+#ifdef _DEBUG
+    const uint uiCnt = (uint)g_NetworkManager.m_clients.GetContentCount();
+    //g_Log.EventWarn("Client count: %u.\n", uiCnt);
+    uint uiCntReal = 0;
+    if (CClient *pCliLoop = m_nextClient)
+    {
+        //g_Log.EventEvent("Start counting.\n");
+        do ++ uiCntReal;
+        while ((pCliLoop = pCliLoop->GetNext()) != nullptr);
+    }
+    //g_Log.EventWarn("Actual clients in list: %u.\n", uiCntReal);
+    if (uiCnt != uiCntReal)
+    {
+        g_Log.EventWarn("Client count mismatch!.\n");
+        EXC_NOTIFY_DEBUGGER;
+    }
+#endif
 }
 
 ClientIterator::~ClientIterator()

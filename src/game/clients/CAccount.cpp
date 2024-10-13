@@ -73,7 +73,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	char *z = Str_GetTemp();
 
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
-	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT) : (SPHERE_FILE "accu" SPHERE_SCRIPT);
+	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT_EXT) : (SPHERE_FILE "accu" SPHERE_SCRIPT_EXT);
 
 	Str_CopyLimitNull(z, pszBaseDir, Str_TempLength());
 	Str_ConcatLimitNull(z, pszBaseName, Str_TempLength());
@@ -104,7 +104,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 		if (!s.Open(nullptr, OF_WRITE | OF_TEXT | OF_DEFAULTMODE))
 			return false;
 
-		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT " file.\n"
+		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT_EXT " file.\n"
 			"// All account changes should be made here.\n"
 			"// Use the /ACCOUNT UPDATE command to force accounts to update.\n"
 			);
@@ -142,7 +142,7 @@ bool CAccounts::Account_SaveAll()
 
 	s.Printf("// " SPHERE_TITLE " %s accounts file\n"
 		"// NOTE: This file cannot be edited while the server is running.\n"
-		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT ". This is read in at save time.\n",
+		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT_EXT ". This is read in at save time.\n",
 		g_Serv.GetName());
 
 	for ( size_t i = 0; i < m_Accounts.size(); ++i )

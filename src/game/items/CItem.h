@@ -770,8 +770,10 @@ public:
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
-	virtual CObjBaseTemplate* GetTopLevelObj() override;
-	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
     CObjBase * GetContainer() const noexcept;
 	CItem * GetTopContainer();

@@ -13,7 +13,7 @@
 
 
 // All these structures must be byte packed.
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef MSVC_COMPILER
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -59,7 +59,7 @@ public:
 
 
 // Turn off structure packing.
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef MSVC_COMPILER
 	#pragma pack()
 #else
 	#undef PACK_NEEDED
