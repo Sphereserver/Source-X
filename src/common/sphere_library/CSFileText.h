@@ -84,8 +84,8 @@ public:     virtual bool IsEOF() const;
     * @param ... argument list.
     * @return total chars of the output.
     */
-protected:  int _cdecl _Printf( lpctstr pFormat, ... ) __printfargs(2,3);
-public:     int _cdecl Printf(lpctstr pFormat, ...) __printfargs(2, 3);
+protected:  int _Printf( lpctstr pFormat, ... ) SPHERE_PRINTFARGS(2,3);
+public:     int Printf(lpctstr pFormat, ...) SPHERE_PRINTFARGS(2, 3);
     /**
     * @brief Reads data from the file.
     * @param pBuffer buffer where store the readed data.

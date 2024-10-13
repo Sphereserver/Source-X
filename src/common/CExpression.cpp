@@ -125,7 +125,7 @@ err:
     return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
 }
 
-llong power(llong base, llong level)
+static llong cexpression_power(llong base, llong level)
 {
 	double rc = pow((double)base, (double)level);
 	return (llong)rc;
@@ -1057,7 +1057,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			llValSecond = GetVal(pExpr);
 			if (llVal < 0)
 			{
-				llVal = power(llVal, llValSecond);
+                llVal = cexpression_power(llVal, llValSecond);
 				break;
 			}
 			else if ((llVal == 0) && (llValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
@@ -1065,7 +1065,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 				g_Log.EventError("Power of zero with zero or negative exponent is undefined.\n");
 				break;
 			}
-			llVal = power(llVal, llValSecond);
+            llVal = cexpression_power(llVal, llValSecond);
 			break;
 	}
 
@@ -1230,18 +1230,18 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		}
 
         // Helper lambda functions for the next section.
-        auto findLastClosingBracket = [](lptstr pExpr) -> lptstr
+        auto findLastClosingBracket = [](lptstr pExpr_) -> lptstr
         {
             // Returns a pointer to the last closing bracket in the string.
             // If the last character in the string (ignoring comments) is not ')', it means that, if we find a closing bracket,
             //  it's past other characters, so there's other valid text after the ')'.
             // Eg: IF (1+2) > 10. The ')' is not at the end of the line, because there's the remaining part of the script.
-            ASSERT(*pExpr != '\0');
+            ASSERT(*pExpr_ != '\0');
             lptstr pExprFinder;
-            const size_t uiExprLength = strlen(pExpr);
-            const lptstr pComment = Str_FindSubstring(pExpr, "//", uiExprLength, 2);
+            const size_t uiExprLength = strlen(pExpr_);
+            const lptstr pComment = Str_FindSubstring(pExpr_, "//", uiExprLength, 2);
             if (nullptr == pComment) {
-                pExprFinder = pExpr + uiExprLength - 1;
+                pExprFinder = pExpr_ + uiExprLength - 1;
                 // Now pExprFinder is at the end of the string
             }
             else {
@@ -1256,28 +1256,28 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
                     --pExprFinder;
                 else
                     break;
-            } while (pExprFinder > pExpr);
+            } while (pExprFinder > pExpr_);
             return (*pExprFinder == ')') ? pExprFinder : nullptr;
         };
 
-        auto skipBracketedSubexpression = [](lptstr pExpr) -> lptstr
+        auto skipBracketedSubexpression = [](lptstr pExpr_) -> lptstr
         {
-            ASSERT(*pExpr == '(');
-            tchar ch;
+            ASSERT(*pExpr_ == '(');
+            tchar ch_;
             uint uiOpenedCurlyBrackets = 1;
             while (uiOpenedCurlyBrackets != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
             {
-                ch = *(++pExpr);
-                if (ch == '(')
+                ch_ = *(++pExpr_);
+                if (ch_ == '(')
                     ++uiOpenedCurlyBrackets;
-                else if (ch == ')')
+                else if (ch_ == ')')
                     --uiOpenedCurlyBrackets;
-                else if (ch == '\0')
+                else if (ch_ == '\0')
                     return nullptr; // Error
             }
             if (uiOpenedCurlyBrackets != 0)
                 return nullptr; // Error
-            return pExpr;
+            return pExpr_;
         };
 
 

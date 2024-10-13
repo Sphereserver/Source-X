@@ -235,7 +235,7 @@ void CWorldComm::Broadcast(lpctstr pMsg) // static
 	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }
 
-void __cdecl CWorldComm::Broadcastf(lpctstr pMsg, ...) // static
+void CWorldComm::Broadcastf(lpctstr pMsg, ...) // static
 {
 	// System broadcast in bold text
 	ADDTOCALLSTACK("CWorldComm::Broadcastf");

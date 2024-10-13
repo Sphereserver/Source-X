@@ -19,7 +19,7 @@ CSString CFloatMath::FloatMath(lpctstr& Expr)
 }
 
 
-short int _iReentrant_Count = 0;
+static thread_local short int _iReentrant_Count = 0;
 
 realtype CFloatMath::MakeFloatMath( lpctstr & Expr )
 {

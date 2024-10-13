@@ -191,10 +191,10 @@ bool CSkillDef::r_LoadVal( CScript &s )
             m_vcDelay.Load( s.GetArgStr());
             break;
         case SKC_FLAGS:
-            m_dwFlags = s.GetArgVal();
+            m_dwFlags = s.GetArgDWVal();
             break;
         case SKC_GROUP:
-            m_dwGroup = s.GetArgVal();
+            m_dwGroup = s.GetArgDWVal();
             break;
         case SKC_EFFECT:
             m_vcEffect.Load( s.GetArgStr());

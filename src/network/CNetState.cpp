@@ -54,8 +54,8 @@ void CNetState::clear(void)
     {
         g_Serv.StatDec(SERV_STAT_CLIENTS);
 
+        static constexpr LOG_TYPE logFlags = enum_alias_cast<LOG_TYPE>(LOGM_NOCONTEXT | LOGM_CLIENTS_LOG | LOGL_EVENT);
         const CONNECT_TYPE connectionType = m_client->GetConnectType();
-        const LOG_TYPE logFlags = LOG_TYPE(LOGM_NOCONTEXT | LOGM_CLIENTS_LOG | LOGL_EVENT);
         const size_t uiClients = g_Serv.StatGet(SERV_STAT_CLIENTS);
         const lpctstr ptcAddress = m_peerAddress.GetAddrStr();
         if (connectionType == CONNECT_LOGIN)
@@ -242,7 +242,7 @@ void CNetState::markReadClosed(void) volatile
 
     DEBUGNETWORK(("%x:Client being closed by read-thread\n", m_id));
     m_isReadClosed = true;
-    if (m_parent != nullptr && m_parent->getPriority() == IThread::Disabled)
+    if (m_parent != nullptr && m_parent->getPriority() == ThreadPriority::Disabled)
         m_parent->awaken();
 }
 

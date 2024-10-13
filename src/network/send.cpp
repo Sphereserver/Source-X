@@ -134,7 +134,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 
 	const CNetState * state = target->GetNetState();
 	const CChar *character = target->GetChar();
-	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
+    CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : nullptr;
 	bool fCanRename = false;
 
 	byte version = 0;
@@ -199,7 +199,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		writeInt16(iHitsMax);		// Max hit points
 		writeBool(fCanRename);
 		writeByte(version);
-		if (state->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
+        if (state->isClientEnhanced() && objectChar && objectChar->IsClientType() /*objectChar->IsPlayableCharacter()*/)
 		{
 			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
 			WriteVersionSpecific(target, objectChar, version);
@@ -211,7 +211,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 
 void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* other, byte version)
 {
-    bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
+    const bool fElemental = IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE);
 	const CCharBase * otherDefinition = other->Char_GetDef();
 	const CCPropsChar* pCCPChar = other->GetComponentProps<CCPropsChar>();
 	const CCPropsChar* pBaseCCPChar = otherDefinition->GetComponentProps<CCPropsChar>();

@@ -39,7 +39,11 @@ void AutoResetEvent::wait(uint timeout)
 		// if timeout is 0 then the thread's timeslice may not be given up as with normal
 		// sleep methods - so we will check for this condition ourselves and use SleepEx
 		// instead
+#ifdef _WIN32
 		SleepEx(0, TRUE);
+#else
+        SLEEP(0);
+#endif
 		return;
 	}
 

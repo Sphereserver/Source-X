@@ -75,7 +75,6 @@ int CEventLog::EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFor
     return iret;
 }
 
-#ifdef _DEBUG
 int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
@@ -84,7 +83,6 @@ int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
     va_end(vargs);
     return iret;
 }
-#endif //_DEBUG
 
 
 //-------
@@ -265,7 +263,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		}
 
 		// Get the script context. (if there is one)
-		tchar szScriptContext[ _MAX_PATH + 16 ];
+		tchar szScriptContext[ SPHERE_MAX_PATH + 16 ];
 		if ( !(dwMask & LOGM_NOCONTEXT) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();
@@ -360,7 +358,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 
 CSTime CLog::sm_prevCatchTick;
 
-void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ... )
+void CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ... )
 {
 	CSTime timeCurrent = CSTime::GetCurrentTime();
 	if ( sm_prevCatchTick.GetTime() == timeCurrent.GetTime() )	// prevent message floods.
@@ -394,7 +392,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		va_start(vargs, pszCatchContext);
 
 		uiLen += vsnprintf(szMsg + uiLen, sizeof(szMsg) - uiLen, pszCatchContext, vargs);
-		uiLen += snprintf (szMsg + uiLen, sizeof(szMsg) - uiLen, "\n");
+        /*uiLen += */ snprintf (szMsg + uiLen, sizeof(szMsg) - uiLen, "\n");
 
 		EventStr(eSeverity, szMsg);
 		va_end(vargs);
@@ -407,7 +405,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 	sm_prevCatchTick = timeCurrent;
 }
 
-void _cdecl CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatchContext, ...)
+void CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatchContext, ...)
 {
     tchar szMsg[512];
 

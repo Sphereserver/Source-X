@@ -9,143 +9,49 @@ function(toolchain_exe_stuff_common)
 
     message(STATUS "Locating libraries to be linked to...")
 
-    set(LIBS_LINK_LIST mariadb dl)
-    foreach(LIB_NAME ${LIBS_LINK_LIST})
+    set(libs_link_list mariadb dl)
+    foreach(lib_name ${libs_link_list})
         find_library(
-            LIB_${LIB_NAME}_WITH_PATH
-            ${LIB_NAME}
+            lib_${lib_name}_with_path
+            ${lib_name}
             HINT
             "/usr/local/opt/mariadb-connector-c/lib/mariadb"
             "/opt/homebrew/var/mariadb-connector-c/lib/mariadb"
             "/opt/homebrew/lib/mariadb"
         )
-        message(STATUS "Library ${LIB_NAME}: ${LIB_${LIB_NAME}_WITH_PATH}")
+        message(STATUS "Library ${lib_name}: ${lib_${lib_name}_with_path}")
     endforeach()
-
-    #-- Validate sanitizers options and store them between the common compiler flags.
-
-    set(ENABLED_SANITIZER false)
-    # From https://clang.llvm.org/docs/ClangCommandLineReference.html
-    # -static-libsan Statically link the sanitizer runtime (Not supported for ASan, TSan or UBSan on darwin)
-
-    if(${USE_ASAN})
-        set(CXX_FLAGS_EXTRA
-            ${CXX_FLAGS_EXTRA} # -fsanitize=safe-stack # Can't be used with asan!
-            -fsanitize=address
-            -fno-sanitize-recover=address #-fsanitize-cfi # cfi: control flow integrity
-            -fsanitize-address-use-after-scope
-            -fsanitize=pointer-compare
-            -fsanitize=pointer-subtract
-            # Flags for additional instrumentation not strictly needing asan to be enabled
-            -fcf-protection=full
-            -fstack-check
-            -fstack-protector-all
-            -fstack-clash-protection
-            # Not supported by Clang, but supported by GCC
-            #-fvtable-verify=preinit -fharden-control-flow-redundancy -fhardcfr-check-exceptions
-            # Other
-            #-fsanitize-trap=all
-        )
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=address)
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
-        set(ENABLED_SANITIZER true)
-    endif()
-    if(${USE_MSAN})
-        set(CXX_FLAGS_EXTRA ${CXX_FLAGS_EXTRA} -fsanitize=memory -fsanitize-memory-track-origins=2 -fPIE)
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=memory)
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
-        set(ENABLED_SANITIZER true)
-    endif()
-    if(${USE_LSAN})
-        set(CXX_FLAGS_EXTRA ${CXX_FLAGS_EXTRA} -fsanitize=leak)
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=leak)
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
-        set(ENABLED_SANITIZER true)
-    endif()
-    if(${USE_UBSAN})
-        set(UBSAN_FLAGS
-            -fsanitize=undefined,float-divide-by-zero,local-bounds
-            -fno-sanitize=enum
-            # Supported?
-            -fsanitize=unsigned-integer-overflow #Unlike signed integer overflow, this is not undefined behavior, but it is often unintentional.
-            -fsanitize=implicit-conversion
-        )
-        set(CXX_FLAGS_EXTRA ${CXX_FLAGS_EXTRA} ${UBSAN_FLAGS} -fsanitize=return,vptr)
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -fsanitize=undefined)
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
-        set(ENABLED_SANITIZER true)
-    endif()
-
-    if(${ENABLED_SANITIZER})
-        set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA
-            ${CMAKE_EXE_LINKER_FLAGS_EXTRA}
-            $<$<BOOL:${RUNTIME_STATIC_LINK}>:-static-libsan>
-        )
-    endif()
 
     #-- Store compiler flags common to all builds.
 
-    set(cxx_local_opts_warnings
-        -Werror
-        -Wall
-        -Wextra
-        -Wno-unknown-pragmas
-        -Wno-switch
-        -Wno-implicit-fallthrough
-        -Wno-parentheses
-        -Wno-misleading-indentation
-        -Wno-conversion-null
-        -Wno-unused-result
-        -Wno-format-security # TODO: disable that when we'll have time to fix every printf format issue
-        # clang-specific:
-        -Wno-deprecated-declarations # spams so much warnings for the use of sprintf
-    )
-    set(cxx_local_opts
-        -std=c++20
-        -pthread
-        -fexceptions
-        -fnon-call-exceptions
-        -pipe
-        -ffast-math
-    )
-    set(cxx_compiler_options_common ${cxx_local_opts_warnings} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
-
-    # GCC flags not supported by clang:
-    #    Warnings: "-Wno-nonnull-compare -Wno-maybe-uninitialized"
-    #    Other: "-fno-expensive-optimizations"
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
 
     #-- Apply compiler flags, only the ones specific per build type.
 
     # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-    set(COMPILE_OPTIONS_EXTRA)
+    set(local_compile_options_extra)
     if(ENABLED_SANITIZER OR TARGET spheresvr_debug)
-        set(COMPILE_OPTIONS_EXTRA -fno-omit-frame-pointer -fno-inline)
+        set(local_compile_options_extra -fno-omit-frame-pointer -fno-inline)
     endif()
     if(TARGET spheresvr_release)
-        target_compile_options(spheresvr_release PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+        target_compile_options(spheresvr_release PUBLIC -O3 ${local_compile_options_extra})
     endif()
     if(TARGET spheresvr_nightly)
         if(ENABLED_SANITIZER)
-            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${COMPILE_OPTIONS_EXTRA})
+            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${local_compile_options_extra})
         else()
-            target_compile_options(spheresvr_nightly PUBLIC -O3 ${COMPILE_OPTIONS_EXTRA})
+            target_compile_options(spheresvr_nightly PUBLIC -O3 ${local_compile_options_extra})
         endif()
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O0 ${COMPILE_OPTIONS_EXTRA})
+        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O0 ${local_compile_options_extra})
     endif()
 
     #-- Store common linker flags.
 
-    if(${USE_MSAN})
-        set(CMAKE_EXE_LINKER_FLAGS_EXTRA ${CMAKE_EXE_LINKER_FLAGS_EXTRA} -pie)
-    endif()
     set(cxx_linker_options_common
+        ${list_explicit_linker_options_all}
         ${CMAKE_EXE_LINKER_FLAGS_EXTRA}
-        -pthread
-        -dynamic
-        -Wl,-fatal_warnings
         $<$<BOOL:${RUNTIME_STATIC_LINK}>:
         -static-libstdc++
         -static-libgcc> # no way to statically link against libc
@@ -188,7 +94,7 @@ function(toolchain_exe_stuff_common)
         target_compile_options(${tgt} PRIVATE ${cxx_compiler_options_common})
         target_compile_definitions(${tgt} PRIVATE ${cxx_compiler_definitions_common})
         target_link_options(${tgt} PRIVATE ${cxx_linker_options_common})
-        target_link_libraries(${tgt} PRIVATE ${LIB_mariadb_WITH_PATH} ${LIB_dl_WITH_PATH})
+        target_link_libraries(${tgt} PRIVATE ${lib_mariadb_with_path} ${lib_dl_with_path})
     endforeach()
 
     #-- Set different output folders for each build type

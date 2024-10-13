@@ -1,7 +1,5 @@
 #include "../game/uo_files/CUOMapList.h"
 #include "../game/CSectorList.h"
-#include "../game/CServer.h"
-#include "../game/CWorldMap.h"
 #include "CLog.h"
 #include "CRect.h"
 

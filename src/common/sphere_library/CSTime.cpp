@@ -5,7 +5,6 @@
 //
 
 #include "../../sphere/threads.h"
-#include "../CLog.h"
 #include "sstring.h"
 #include "CSTime.h"
 #include <cmath>
@@ -26,7 +25,7 @@
 	    // We don't have GetSupportedTickCount on Windows versions previous to Vista/Windows Server 2008. We need to check for overflows
 	    //  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
 	    //	with GetSupportedTickCount) manually every time we compare two values.
-#       if _MSC_VER
+#       if MSVC_COMPILER
 #           pragma warning(push)
 #           pragma warning(disable: 28159)
 #       endif
@@ -35,7 +34,7 @@
 #   else
 	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount64(); }
 #   endif
-#   if _MSC_VER
+#   if MSVC_COMPILER
 #       pragma warning(pop)
 #   endif
 #endif
@@ -173,7 +172,7 @@ static std::tm safe_localtime(const time_t t) noexcept
 
 #if defined(__unix__) || defined(__APPLE__) || defined(_POSIX_VERSION)
     localtime_r(&t, &atm);
-#elif defined(_MSC_VER)
+#elif defined(MSVC_RUNTIME) || defined(__MINGW32__)
     localtime_s(&atm, &t);
 #elif defined(__STDC_LIB_EXT1__)
     localtime_s(&t, &atm);
@@ -221,7 +220,7 @@ static std::tm safe_gmtime(const time_t t) noexcept
 
 #if defined(__unix__) || defined(__APPLE__) || defined(_POSIX_VERSION)
     gmtime_r(&t, &atm);
-#elif defined(_MSC_VER)
+#elif defined(MSVC_RUNTIME) || defined(__MINGW32__)
     gmtime_s(&atm, &t);
 #elif defined(__STDC_LIB_EXT1__)
     gmtime_s(&t, &atm);
@@ -256,8 +255,8 @@ std::tm CSTime::GetLocalTmPlain() const noexcept
 	#define maxTimeBufferSize 128
 #endif
 
-#if defined(_WIN32) && defined (_MSC_VER)
-static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
+#if defined(_WIN32) && defined (MSVC_COMPILER)
+static void SPHERE_CDECL invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
 	UnreferencedParameter(expression);
@@ -276,12 +275,12 @@ static void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm *
 	ASSERT(ptmTemp != nullptr);
 
 #ifdef _WIN32
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
 	// on windows we need to set the invalid parameter handler, or else the program will terminate when a bad format is encountered
     _invalid_parameter_handler newHandler, oldHandler;
 	newHandler = static_cast<_invalid_parameter_handler>(invalidParameterHandler);
 	oldHandler = _set_invalid_parameter_handler(newHandler);
-#endif // _MSC_VER
+#endif // MSVC_COMPILER
 	try
 	{
 #endif // _WIN32
@@ -298,10 +297,10 @@ static void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm *
 		pszTemp[0] = '\0';
 	}
 
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
 	// restore previous parameter handler
 	_set_invalid_parameter_handler(oldHandler);
-#endif // _MSC_VER
+#endif // MSVC_COMPILER
 #endif // _WIN32
 }
 

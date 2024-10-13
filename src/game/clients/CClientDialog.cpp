@@ -125,7 +125,9 @@ bool CClient::addGumpDialogProps( const CUID& uid )
 		addSkillWindow((SKILL_TYPE)(g_Cfg.m_iMaxSkill), true);
 
 	tchar *pszMsg = Str_GetTemp();
-	strcpy(pszMsg, pObj->IsItem() ? "D_ITEMPROP1" : "D_CHARPROP1" );
+    Str_CopyLimitNull(pszMsg,
+        (pObj->IsItem() ? "D_ITEMPROP1" : "D_CHARPROP1"),
+        Str_TempLength());
 
 	CResourceID rid = g_Cfg.ResourceGetIDType(RES_DIALOG, pszMsg);
 	if ( ! rid.IsValidUID())

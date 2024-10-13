@@ -158,12 +158,12 @@ const CResourceDef* CCSpawn::_FixDef()
 
     if (pItem->IsType(IT_SPAWN_CHAR))
     {
-        auto _TryChar = [this](CREID_TYPE idChar) -> const CResourceDef*
+        auto _TryChar = [this](CREID_TYPE idChar_) -> const CResourceDef*
         {
-            const CResourceDef* pResDef = CCharBase::FindCharBase(idChar);
-            if (pResDef)
-                _idSpawn = CResourceIDBase(RES_CHARDEF, idChar);
-            return pResDef;
+            const CResourceDef* pResDef_ = CCharBase::FindCharBase(idChar_);
+            if (pResDef_)
+                _idSpawn = CResourceIDBase(RES_CHARDEF, idChar_);
+            return pResDef_;
         };
 
         CREID_TYPE idChar = (CREID_TYPE)iIndex;
@@ -204,12 +204,12 @@ const CResourceDef* CCSpawn::_FixDef()
     }
     else if (pItem->IsType(IT_SPAWN_ITEM))
     {
-        auto _TryItem = [this](ITEMID_TYPE idItem) -> const CResourceDef*
+        auto _TryItem = [this](ITEMID_TYPE idItem_) -> const CResourceDef*
         {
-            const CResourceDef* pResDef = CItemBase::FindItemBase(idItem);
-            if (pResDef)
-                _idSpawn = CResourceIDBase(RES_ITEMDEF, idItem);
-            return pResDef;
+            const CResourceDef* pResDef_ = CItemBase::FindItemBase(idItem_);
+            if (pResDef_)
+                _idSpawn = CResourceIDBase(RES_ITEMDEF, idItem_);
+            return pResDef_;
         };
 
         ITEMID_TYPE idItem = (ITEMID_TYPE)iIndex;
@@ -865,7 +865,7 @@ bool CCSpawn::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole *pSrc)
             }
             else
             {
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
             }
             return true;
         }

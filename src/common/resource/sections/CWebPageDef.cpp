@@ -390,8 +390,8 @@ void CWebPageDef::WebPageLog()
 
 	lpctstr pszExt = FileRead.GetFileExt();
 
-	tchar szName[ _MAX_PATH ];
-	Str_CopyLimitNull( szName, m_sDstFilePath, _MAX_PATH);
+	tchar szName[ SPHERE_MAX_PATH ];
+	Str_CopyLimitNull( szName, m_sDstFilePath, SPHERE_MAX_PATH);
 	szName[ m_sDstFilePath.GetLength() - strlen(pszExt) ] = '\0';
 
 	CSTime datetime = CSTime::GetCurrentTime();
@@ -780,7 +780,7 @@ void CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	ADDTOCALLSTACK("CWebPageDef::ServPage");
 	// make sure this is a valid format for the request.
 
-	tchar szPageName[_MAX_PATH];
+	tchar szPageName[SPHERE_MAX_PATH];
 	Str_GetBare( szPageName, pszPage, sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" );
 
 	int iError = 404;

@@ -32,13 +32,13 @@
 
 	//	PSAPI external definitions
 	typedef	intptr_t (WINAPI *pfnGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
-	HMODULE	m_hmPsapiDll = nullptr;
-	pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
-	PROCESS_MEMORY_COUNTERS	pcnt;
+	static HMODULE m_hmPsapiDll = nullptr;
+	static pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
+	static PROCESS_MEMORY_COUNTERS	pcnt;
 #else			// (Unix)
 	#include <sys/resource.h>
 #endif
-	bool	m_fPmemory = true;		// process memory information is available?
+    static bool sm_fHasMemoryInfo = true;		// process memory information is available?
 
 //////////////////////////////////////////////////////////////////////
 // -CServerDef
@@ -54,7 +54,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	_iTimeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	// Set default time zone from UTC
-	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
+    m_TimeZone = (char)( TIMEZONE / (60 * 60) );	// Greenwich mean time.
 	m_eAccApp = ACCAPP_Unspecified;
 }
 
@@ -68,7 +68,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
 		d = 0;
-		if ( m_fPmemory )
+        if ( sm_fHasMemoryInfo )
 		{
 #ifdef _WIN32
 			if ( !m_hmPsapiDll )			// try to load psapi.dll if not loaded yet
@@ -77,17 +77,17 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 				m_hmPsapiDll = LoadLibrary(TEXT("psapi.dll"));
 				if (m_hmPsapiDll == nullptr)
 				{
-					m_fPmemory = false;
+                    sm_fHasMemoryInfo = false;
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
                 {
-#ifndef _MSC_VER
+#ifdef NON_MSVC_COMPILER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
                     m_GetProcessMemoryInfo = reinterpret_cast<pfnGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
-#ifndef _MSC_VER
+#if NON_MSVC_COMPILER
 #pragma GCC diagnostic pop
 #endif
                 }
@@ -147,7 +147,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 			if ( !d )
 			{
 				g_Log.EventError(("Unable to load process information from getrusage() and procfs. Memory information will be not available.\n"));
-				m_fPmemory = false;
+                sm_fHasMemoryInfo = false;
 			}
 #endif
 		}

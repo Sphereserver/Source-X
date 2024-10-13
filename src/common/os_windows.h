@@ -6,6 +6,17 @@
 #ifndef _INC_OS_WINDOWS_H
 #define _INC_OS_WINDOWS_H
 
+// Windows keeps this reduced limit for compatibility with older API calls and FAT32 path length...
+//  this limit includes the total length of the path, such as directories, subdirectories, and the filename,
+// and it is constrained to 259 characters for the path itself, with the 260th character being reserved for the null terminator.
+// On newer versions, Even though long paths are supported (via path prefix or application manifest - if Vista+),
+// _MAX_PATH is not updated to reflect the new maximum path length (which can now be up to 32,767 characters).
+// The long path feature requires the usage of the wide-character WinAPI calls and the \\?\ prefix.
+#ifdef _MAX_PATH
+#   define SPHERE_MAX_PATH _MAX_PATH
+#else
+#   define SPHERE_MAX_PATH 260
+#endif
 
 // _WIN32_WINNT version constants
 /*
@@ -27,7 +38,6 @@
 	#define _WIN32_WINNT 0x0501	// By default we target Windows XP
 #endif
 
-
 #undef FD_SETSIZE
 #define FD_SETSIZE 1024		// for max of n users ! default = 64	(FD: file descriptor)
 
@@ -48,17 +58,20 @@
 #define NOTEXTMETRIC
 #define NOWH
 
-#   ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 // Workaround to a possible VS compiler bug: instead of complaining if a macro expands to a "defined" macro,
 //  it complains if a define macro contains the words "defined" in its name...
-#       pragma warning(push)
-#       pragma warning(disable: 5105)
-#   endif
-#   include <windows.h>
-#   ifdef _MSC_VER
-#       pragma warning(pop)
-#   endif
+#   pragma warning(push)
+#   pragma warning(disable: 5105)
+#endif
 
+#include <windows.h>
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#   pragma warning(pop)
+#endif
+
+#define SPHERE_CDECL	__cdecl
 
 /*	file handling definitions  */
 #define STDFUNC_FILENO(_x_)		_get_osfhandle(_fileno(_x_))
@@ -76,15 +89,16 @@
 	#define STRICT			// strict conversion of handles and pointers.
 #endif
 
-#ifndef _MSC_VER	// No Microsoft compiler
-	#define _cdecl	__cdecl
-
+#ifdef __MINGW32__	// No Microsoft compiler
 	// Not defined for mingw.
 	#define LSTATUS int
-	typedef void (__cdecl *_invalid_parameter_handler)(const wchar_t *,const wchar_t *,const wchar_t *,unsigned int,uintptr_t);
+    typedef void (SPHERE_CDECL *_invalid_parameter_handler)(const wchar_t *,const wchar_t *,const wchar_t *,unsigned int,uintptr_t);
 	// Stuctured exception handling windows api not implemented on mingw.
 	#define __except(P)		catch(int)
 #endif  // _MSC_VER
+
+#define SLEEP       Sleep
+#define TIMEZONE    _timezone
 
 const OSVERSIONINFO * Sphere_GetOSInfo() noexcept;
 

@@ -815,12 +815,12 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 
 	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-#ifdef _MSC_VER
+#   ifdef MSVC_RUNTIME
     size_t aux;
     mbstowcs_s(&aux, buffer, length + 1, bufferReal, length);
-#else
+#   else
     mbstowcs(buffer, bufferReal, length);
-#endif
+#   endif
 	delete[] bufferReal;
 #else
 

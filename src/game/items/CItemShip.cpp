@@ -158,7 +158,7 @@ bool CItemShip::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc,
             if (pItemHold)
                 sVal.FormatHex(pItemHold->GetUID());
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         } break;
 
         case IMCS_PLANK:
@@ -174,7 +174,7 @@ bool CItemShip::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc,
             if (pTiller)
                 sVal.FormatHex(pTiller->GetUID());
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         } break;
 
         default:

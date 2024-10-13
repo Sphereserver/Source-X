@@ -21,7 +21,7 @@ struct TRIGGER_T_ID
 //{
 //    int		m_used;
 //};
-std::vector<TRIGGER_T_ID> g_triggers_id;
+static std::vector<TRIGGER_T_ID> sm_vTriggersId;
 
 
 bool IsTrigUsed(E_TRIGGERS id)
@@ -29,7 +29,7 @@ bool IsTrigUsed(E_TRIGGERS id)
     if ( g_Serv.IsLoading() == true)
         return false;
 
-    return (( (uint)id < g_triggers_id.size() ) && g_triggers_id[id].m_used );
+    return (( (uint)id < sm_vTriggersId.size() ) && sm_vTriggersId[id].m_used );
 }
 
 bool IsTrigUsed(const char *name)
@@ -47,12 +47,12 @@ bool IsTrigUsed(const char *name)
 void TriglistInit()
 {
     TRIGGER_T_ID trig{};
-    g_triggers_id.clear();
+    sm_vTriggersId.clear();
 
 #define ADD(_a_) \
     snprintf(trig.m_name, TRIGGER_NAME_MAX_LEN, "@%s", #_a_); \
     trig.m_used = 0; \
-    g_triggers_id.push_back(trig);
+    sm_vTriggersId.push_back(trig);
 
 #include "../tables/triggers.tbl"
 #undef ADD
@@ -60,7 +60,7 @@ void TriglistInit()
 
 void TriglistClear()
 {
-    for ( auto it = g_triggers_id.begin(), end = g_triggers_id.end(); it != end; ++it )
+    for ( auto it = sm_vTriggersId.begin(), end = sm_vTriggersId.end(); it != end; ++it )
     {
         it->m_used = 0;
     }
@@ -68,13 +68,13 @@ void TriglistClear()
 
 void TriglistAdd(E_TRIGGERS id)
 {
-    if (g_triggers_id.size() )
-        ++ g_triggers_id[id].m_used;
+    if (sm_vTriggersId.size() )
+        ++ sm_vTriggersId[id].m_used;
 }
 
 void TriglistAdd(const char *name)
 {
-    for ( auto it = g_triggers_id.begin(), end = g_triggers_id.end(); it != end; ++it )
+    for ( auto it = sm_vTriggersId.begin(), end = sm_vTriggersId.end(); it != end; ++it )
     {
         if ( !strcmpi(it->m_name, name) )
         {
@@ -87,7 +87,7 @@ void TriglistAdd(const char *name)
 void Triglist(int &total, int &used)
 {
     total = used = 0;
-    for ( auto it = g_triggers_id.cbegin(), end = g_triggers_id.cend(); it != end; ++it )
+    for ( auto it = sm_vTriggersId.cbegin(), end = sm_vTriggersId.cend(); it != end; ++it )
     {
         ++total;
         if ( it->m_used )
@@ -97,7 +97,7 @@ void Triglist(int &total, int &used)
 
 void TriglistPrint()
 {
-    for ( auto it = g_triggers_id.cbegin(), end = g_triggers_id.cend(); it != end; ++it )
+    for ( auto it = sm_vTriggersId.cbegin(), end = sm_vTriggersId.cend(); it != end; ++it )
     {
         if (it->m_used)
         {

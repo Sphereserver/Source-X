@@ -6,12 +6,12 @@
 #ifndef _INC_CSSTRING_H
 #define _INC_CSSTRING_H
 
+#include "../common.h"
 #ifdef __MINGW32__
 	#include <cstdio>
 #endif // __MINGW32__
 #include <cstdarg>		// needed for va_list
 
-#include "sstring.h"
 
 /**
 * @brief Custom String implementation.
@@ -195,7 +195,7 @@ public:
 	* @return character in position nIndex.
 	*/
 	[[nodiscard]]
-	inline tchar GetAt(int nIndex) const;
+    tchar GetAt(int nIndex) const;
 
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
@@ -203,7 +203,7 @@ public:
 	* @return reference to character in position nIndex.
 	*/
 	[[nodiscard]]
-	inline tchar& ReferenceAt(int nIndex);
+    tchar& ReferenceAt(int nIndex);
 
 	/**
 	* @brief Puts a character in a specified position (0 based).
@@ -213,6 +213,16 @@ public:
 	* @param ch character to put.
 	*/
 	void SetAt(int nIndex, tchar ch);
+
+    /**
+    * @brief Sets the string to an integer false value (0), usually handy for scripts return values.
+    */
+    void SetValFalse();
+
+    /**
+    * @brief Sets the string to an integer true value (1), usually handy for scripts return values.
+    */
+    void SetValTrue();
 
 	///@}
 
@@ -273,17 +283,17 @@ public:
 	/**
 	* @brief Changes the capitalization of CSString to upper.
 	*/
-	inline void MakeUpper() noexcept;
+    void MakeUpper() noexcept;
 
 	/**
 	* @brief Changes the capitalization of CSString to lower.
 	*/
-	inline void MakeLower() noexcept;
+    void MakeLower() noexcept;
 
 	/**
 	* @brief Reverses the CSString.
 	*/
-	inline void Reverse() noexcept;
+    void Reverse() noexcept;
 
 	///@}
 
@@ -297,7 +307,7 @@ public:
 	* @param pStr formatted string.
 	* @param ... list of values.
 	*/
-	void _cdecl Format(lpctstr pStr, ...) __printfargs(2, 3);
+    void Format(lpctstr pStr, ...) SPHERE_PRINTFARGS(2, 3);
 
     /**
     * @brief Join a formated string (printf like) with values and copy into this.
@@ -492,7 +502,7 @@ public:
 	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
 	[[nodiscard]]
-	inline int Compare(lpctstr pStr) const noexcept;
+    int Compare(lpctstr pStr) const noexcept;
 
 	/**
 	* @brief Compares the CSString to string pStr (case insensitive) (_strcmpi wrapper).
@@ -505,7 +515,7 @@ public:
 	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
 	[[nodiscard]]
-	inline int CompareNoCase(lpctstr pStr) const noexcept;
+    int CompareNoCase(lpctstr pStr) const noexcept;
 
 	/**
 	* @brief Gets the internal pointer.
@@ -523,7 +533,7 @@ public:
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
 	[[nodiscard]]
-	inline int indexOf(tchar c) noexcept;
+    int indexOf(tchar c) noexcept;
 
 	/**
 	* @brief Look for the first occurence of c in CSString from a position.
@@ -540,7 +550,7 @@ public:
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
 	[[nodiscard]]
-	inline int indexOf(const CSString& str) noexcept;
+    int indexOf(const CSString& str) noexcept;
 
 	/**
 	* @brief Look for the first occurence of a substring in CSString from a position.
@@ -557,7 +567,7 @@ public:
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
 	[[nodiscard]]
-	inline int lastIndexOf(tchar c) noexcept;
+    int lastIndexOf(tchar c) noexcept;
 
 	/**
 	* @brief Look for the last occurence of c in CSString from a position to the end.
@@ -574,7 +584,7 @@ public:
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
 	[[nodiscard]]
-	inline int lastIndexOf(const CSString& str) noexcept;
+    int lastIndexOf(const CSString& str) noexcept;
 
 	/**
 	* @brief Look for the last occurence of a substring in CSString from a position to the end.
@@ -605,7 +615,12 @@ CSString::CSString(CSString&& s) noexcept :
 	*this = std::move(s); // Call the move assignment operator
 }
 
-CSString CSString::EmptyNew()
+CSString::operator lpctstr() const noexcept
+{
+    return GetBuffer();
+}
+
+CSString CSString::EmptyNew()   // static
 {
     return CSString(false);
 }
@@ -625,6 +640,18 @@ int CSString::GetCapacity() const noexcept
 	return m_iMaxLength;
 }
 
+lpctstr CSString::GetBuffer() const noexcept
+{
+    return m_pchData;
+}
+
+/*
+lptstr CSString::GetBuffer() noexcept
+{
+    return m_pchData;
+}
+*/
+
 tchar CSString::operator[](int nIndex) const
 {
 	return GetAt(nIndex);
@@ -635,80 +662,5 @@ tchar& CSString::operator[](int nIndex)
 	return ReferenceAt(nIndex);
 }
 
-tchar CSString::GetAt(int nIndex) const
-{
-	ASSERT(nIndex >= 0);
-	ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
-	return m_pchData[nIndex];
-}
-
-tchar& CSString::ReferenceAt(int nIndex)
-{
-	ASSERT(nIndex >= 0);
-	ASSERT(nIndex < m_iLength);
-	return m_pchData[nIndex];
-}
-
-void CSString::MakeUpper() noexcept
-{
-	_strupr(m_pchData);
-}
-
-void CSString::MakeLower() noexcept
-{
-	_strlwr(m_pchData);
-}
-
-void CSString::Reverse() noexcept
-{
-	Str_Reverse(m_pchData);
-}
-
-CSString::operator lpctstr() const noexcept
-{
-	return GetBuffer();
-}
-
-int CSString::Compare(lpctstr pStr) const noexcept
-{
-	return strcmp(m_pchData, pStr);
-}
-
-int CSString::CompareNoCase(lpctstr pStr) const noexcept
-{
-	return strcmpi(m_pchData, pStr);
-}
-
-lpctstr CSString::GetBuffer() const noexcept
-{
-	return m_pchData;
-}
-
-/*
-lptstr CSString::GetBuffer() noexcept
-{
-	return m_pchData;
-}
-*/
-
-int CSString::indexOf(tchar c) noexcept
-{
-	return indexOf(c, 0);
-}
-
-int CSString::indexOf(const CSString& str) noexcept
-{
-	return indexOf(str, 0);
-}
-
-int CSString::lastIndexOf(tchar c) noexcept
-{
-	return lastIndexOf(c, 0);
-}
-
-int CSString::lastIndexOf(const CSString& str) noexcept
-{
-	return lastIndexOf(str, 0);
-}
 
 #endif // _INC_CSSTRING_H
