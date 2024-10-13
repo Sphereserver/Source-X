@@ -2428,7 +2428,7 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 
 // If character status has been changed
 // (Polymorph, war mode or hide), resend him
-void CChar::UpdateMode( CClient * pExcludeClient, bool fFull )
+void CChar::UpdateMode( bool fFull, CClient * pExcludeClient )
 {
 	ADDTOCALLSTACK("CChar::UpdateMode");
 
@@ -3524,7 +3524,7 @@ bool CChar::Reveal( uint64 iFlags )
 		return false;
 
 	m_StepStealth = 0;
-	UpdateMode(nullptr, true);
+    UpdateMode(true, nullptr);
 	SysMessageDefault(DEFMSG_HIDING_REVEALED);
 	return true;
 }
@@ -4222,8 +4222,6 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		}
 	}
 
-
-
 	CClient *pClient = GetClientActive();
 	if ( pClient && IsSetOF(OF_Buffs) )
 	{
@@ -4253,7 +4251,7 @@ void CChar::Wake()
 
 	RaiseCorpse(pCorpse);
 	StatFlag_Clear(STATF_SLEEPING);
-	UpdateMode();
+    UpdateMode(false, nullptr);
 }
 
 // Sleep
@@ -4277,7 +4275,7 @@ void CChar::SleepStart( bool fFrontFall )
 	SetID(_iPrev_id);
 	StatFlag_Set(STATF_SLEEPING);
 	StatFlag_Clear(STATF_HIDDEN);
-	UpdateMode();
+    UpdateMode(false, nullptr);
 }
 
 // We died, calling @Death, removing trade windows.
@@ -4406,7 +4404,7 @@ CChar::DeathRequestResult CChar::Death()
 		if ( m_pNPC->m_bonded )
 		{
 			m_CanMask |= CAN_C_GHOST;
-			UpdateMode(nullptr, true);
+            UpdateMode(true, nullptr);
             return DeathRequestResult::Success;
 		}
 
@@ -5686,7 +5684,7 @@ void CChar::OnTickStatusUpdate()
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
 	{
-		UpdateMode();
+        UpdateMode(false, nullptr);
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 	}
 

@@ -367,7 +367,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
     ASSERT(pItem);
     pItem->SetType(type, false);
 
-	if (idErrorMsg && idErrorMsg != (ITEMID_TYPE)-1)
+    if (idErrorMsg && idErrorMsg != (ITEMID_TYPE)-1)
 		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
 
 	return pItem;
@@ -1953,9 +1953,17 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		// Who is it stolen from ?
 		const CChar * pChar = m_uidLink.CharFind();
 		if ( pChar )
-			len += snprintf(pTemp + len, Str_TempLength() - len, " (%s %s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN_FROM ), pChar->GetName());
-		else
-			len += snprintf(pTemp + len, Str_TempLength() - len, " (%s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN ) );
+        {
+            /*len +=*/ snprintf(pTemp + len, Str_TempLength() - len,
+                " (%s %s)",
+                g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN_FROM ), pChar->GetName());
+        }
+        else
+        {
+            /*len +=*/ snprintf(pTemp + len, Str_TempLength() - len,
+                " (%s)",
+                g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN ) );
+        }
 	}
 
 	return pTemp;
@@ -4097,6 +4105,7 @@ CItem* CItem::GetTopContainer()
 	return (pItem == this) ? nullptr : pItem;
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 const CObjBaseTemplate* CItem::GetTopLevelObj() const
 {
 	// recursively get the item that is at "top" level.
@@ -4108,6 +4117,7 @@ const CObjBaseTemplate* CItem::GetTopLevelObj() const
 	return pObj->GetTopLevelObj();
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 CObjBaseTemplate* CItem::GetTopLevelObj()
 {
 	// recursively get the item that is at "top" level.
@@ -5060,7 +5070,8 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
 	CSString sSearch;
-	tchar	*pResult = Str_GetTemp();
+    tchar *pResult = Str_GetTemp();
+    size_t uiResultStrAvailableLen = Str_TempLength();
 
 	// Weather bonus
 	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * bSight) : 0.0;
@@ -5118,7 +5129,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_WEATHER);
 			else
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_NO_LAND);
-			Str_CopyLimitNull( pResult, sSearch, Str_TempLength() );
+            SATURATING_SUB_SELF(uiResultStrAvailableLen, Str_CopyLimitNull( pResult, sSearch, uiResultStrAvailableLen ));
 			break;
 		}
 
@@ -5182,7 +5193,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SHIP_SINGLE), pBoatSighted->GetName(), CPointBase::sm_szDirs[dir]);
 		else
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SHIP_MANY), CPointBase::sm_szDirs[dir]);
-		strcat( pResult, sSearch);
+        SATURATING_SUB_SELF(uiResultStrAvailableLen, Str_ConcatLimitNull(pResult, sSearch, uiResultStrAvailableLen));
 	}
 
 	if (iItemSighted) // Report item sightings, also boats beyond the boat visibility range in the radar screen
@@ -5203,8 +5214,8 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			else
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), pItemSighted->GetNameFull(false), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
 		}
-		strcat( pResult, sSearch);
-	}
+        SATURATING_SUB_SELF(uiResultStrAvailableLen, Str_ConcatLimitNull(pResult, sSearch, uiResultStrAvailableLen));
+    }
 
 	// Check for creatures
     Area->RestartSearch();
@@ -5238,8 +5249,8 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_CREAT_SINGLE), CPointBase::sm_szDirs[dir] );
 		else
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_CREAT_MANY), CPointBase::sm_szDirs[dir] );
-		strcat( pResult, sSearch);
-	}
+        Str_ConcatLimitNull(pResult, sSearch, uiResultStrAvailableLen);
+    }
 	return pResult;
 }
 
@@ -5553,7 +5564,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);
 	pSpellDef = g_Cfg.GetSpellDef( spell );
-
+    ASSERT(pSpellDef);
 
 	if ( IsType(IT_WAND) )	// try to recharge the wand.
 	{

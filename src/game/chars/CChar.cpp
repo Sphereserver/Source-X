@@ -1642,7 +1642,7 @@ void CChar::SetID( CREID_TYPE id )
 		if ( pHand )
 			GetPackSafe()->ContentAdd(pHand);
 	}
-	UpdateMode(nullptr, true);
+    UpdateMode(true, nullptr);
 }
 
 
@@ -3828,7 +3828,6 @@ bool CChar::r_LoadVal( CScript & s )
 				DIR_TYPE dir = static_cast<DIR_TYPE>(s.GetArgVal());
 				if (dir <= DIR_INVALID || dir >= DIR_QTY)
 					dir = DIR_SE;
-				m_dirFace = dir;
 				UpdateDir( dir );
 			}
 			break;
@@ -3856,8 +3855,16 @@ bool CChar::r_LoadVal( CScript & s )
 				break;
 			}
 			// Don't modify STATF_SAVEPARITY, STATF_PET, STATF_SPAWNED here
-			_uiStatFlag = (_uiStatFlag & (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED)) | (s.GetArgLLVal() & ~(STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED));
-			NotoSave_Update();
+            static constexpr auto uiFlagsNoChange = (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED);
+            static constexpr auto uiFlagsRequireFullUpdate = (STATF_STONE | STATF_HIDDEN | STATF_DEAD);
+            const auto uiCurFlags = _uiStatFlag;
+            const auto uiNewFlags = s.GetArgULLVal();
+            _uiStatFlag = (_uiStatFlag & uiFlagsNoChange) | (uiNewFlags & ~uiFlagsNoChange);
+            if (uiCurFlags != uiNewFlags)
+            {
+                const bool fDoFullUpdate = (uiCurFlags & uiFlagsRequireFullUpdate) != (uiNewFlags & uiFlagsRequireFullUpdate);
+                NotoSave_Update(fDoFullUpdate);
+            }
 			break;
 		}
 		case CHC_FONT:
@@ -4010,7 +4017,7 @@ bool CChar::r_LoadVal( CScript & s )
 				StatFlag_Mod(STATF_STONE,fSet);
 				if ( fChange )
 				{
-					UpdateMode(nullptr, true);
+                    UpdateMode(true, nullptr);
 					if ( IsClientActive() )
 						m_pClient->addCharMove(this);
 				}
@@ -4636,7 +4643,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( pSrc )
 			{
                 _uiStatFlag = s.GetArgLLFlag( _uiStatFlag, STATF_INSUBSTANTIAL );
-				UpdateMode(nullptr, true);
+                UpdateMode(true, nullptr);
 				if ( IsStatFlag(STATF_INSUBSTANTIAL) )
 				{
 					if ( IsClientActive() )
@@ -4923,7 +4930,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( ! IsPlayableCharacter())
 				return false;
 			SetHue( GetHue() ^ HUE_UNDERWEAR /*, false, pSrc*/ ); //call @Dye on underwear?
-			UpdateMode();
+            UpdateMode(true, nullptr);
 			break;
 		case CHV_UNEQUIP:	// uid
 			return ItemBounce( CUID::ItemFindFromUID(s.GetArgVal()) );

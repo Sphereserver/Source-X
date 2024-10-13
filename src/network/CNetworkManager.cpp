@@ -426,10 +426,11 @@ void CNetworkManager::tick(void)
         if (!pClient || (pClient->GetConnectType() == CONNECT_UNK))
         {
             const int64 iTimeSinceConnectionMs = iCurSysTimeMs - state->m_iConnectionTimeMs;
-            if (iTimeSinceConnectionMs > g_Cfg._iTimeoutIncompleteConnectionMs)
+            const int64 iTimeoutIncompleteConnectionMs = g_Cfg._iTimeoutIncompleteConnectionMs;
+            if (iTimeSinceConnectionMs > iTimeoutIncompleteConnectionMs)
             {
                 EXC_SET_BLOCK("mark closed for timeout");
-                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_EVENT,
+                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN, // LOGM_NOCONTEXT
                     "%x:Force closing connection from IP %s. Reason: timed out before completing login.\n",
                     state->id(), state->m_peerAddress.GetAddrStr());
                 //state->markReadClosed();

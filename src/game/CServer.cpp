@@ -2540,7 +2540,8 @@ void CServer::_OnTick()
 	EXC_TRY("Tick");
 
 #ifndef _WIN32
-	if (g_UnixTerminal.isReady())
+    // This happens on T_Main, and not on T_UnixTerm.
+    if (g_UnixTerminal.isReady())
 	{
 		tchar c = g_UnixTerminal.read();
 		if ( OnConsoleKey(m_sConsoleText, c, false) == 2 )

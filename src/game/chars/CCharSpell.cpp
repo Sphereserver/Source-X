@@ -701,7 +701,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 
 		case LAYER_SPELL_Paralyze:
 			StatFlag_Clear(STATF_FREEZE);
-			UpdateMode();	// immediately tell the client that now he's able to move (without this, it will be able to move only on next tick update)
+            UpdateMode(false, nullptr);	// immediately tell the client that now he's able to move (without this, it will be able to move only on next tick update)
 			if (pClient)
 				pClient->removeBuff(BI_PARALYZE);
 			return;
@@ -1183,7 +1183,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			StatFlag_Set(STATF_INVISIBLE);
 			Reveal(STATF_HIDDEN);	// clear previous Hiding skill effect (this will not reveal the char because STATF_Invisibility still set)
 			UpdateModeFlag();
-			UpdateMode(nullptr, true);
+			UpdateMode(true, nullptr);
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_INVISIBILITY);
@@ -1192,7 +1192,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case LAYER_SPELL_Paralyze:
 			StatFlag_Set(STATF_FREEZE);
-			UpdateMode();
+            UpdateMode(false, nullptr);
 			if (pClient && IsSetOF(OF_Buffs))
 			{
 				pClient->removeBuff(BI_PARALYZE);

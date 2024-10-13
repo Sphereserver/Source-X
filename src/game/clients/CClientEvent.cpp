@@ -1032,7 +1032,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	}
 
 	addPlayerWarMode();
-	m_pChar->UpdateMode( this, m_pChar->IsStatFlag( STATF_DEAD ));
+    m_pChar->UpdateMode(m_pChar->IsStatFlag(STATF_DEAD), this);
 }
 
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)

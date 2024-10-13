@@ -140,6 +140,27 @@ constexpr T sign(const T n) noexcept
 #define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 #define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 
+template <typename T>
+[[nodiscard]]
+constexpr T saturating_sub(T a, T b) noexcept {
+    // Saturating subtraction.
+
+    // Ensure T is an arithmetic type
+    static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
+
+    // For unsigned types
+    if constexpr (std::is_unsigned_v<T>)
+        return (a > b) ? a - b : 0;
+    // For signed types
+    else
+    {
+        if (b > 0 && a < std::numeric_limits<T>::min() + b)
+            return std::numeric_limits<T>::min();  // Saturate to minimum
+        return a - b;
+    }
+}
+
+#define SATURATING_SUB_SELF(var, val) var = saturating_sub(var, val)
 
 /* End of arithmetic code */
 
@@ -196,6 +217,12 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 // Cpp attributes
 #define FALLTHROUGH [[fallthrough]]
 #define NODISCARD	[[nodiscard]]
+
+#if defined(__GNUC__) || defined(__clang__)
+#   define RETURNS_NOTNULL [[gnu::returns_nonnull]]
+#else
+#   define RETURNS_NOTNULL
+#endif
 
 #ifdef _DEBUG
     #define NOEXCEPT_NODEBUG

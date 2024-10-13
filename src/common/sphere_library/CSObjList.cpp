@@ -56,18 +56,26 @@ CSObjListRec * CSObjList::GetContentAt( size_t index ) const
 void CSObjList::ClearContainer()
 {
 	// delete all entries.
+    bool fSuccess = false;
 	EXC_TRY("Deleting objects scheduled for deletion");
 	for (;;)	// iterate the list.
 	{
 		CSObjListRec * pRec = GetContainerHead();
-		if ( pRec == nullptr )
-			break;
+        if ( pRec == nullptr ) {
+            fSuccess = true;
+            break;
+        }
 		ASSERT( pRec->GetParent() == this );
 		delete pRec;
 	}
 	EXC_CATCH;
 
-	m_uiCount = 0;
+    if (fSuccess) {
+        ASSERT(m_uiCount == 0);
+    }
+    else {
+        m_uiCount = 0;
+    }
 	m_pHead = nullptr;
 	m_pTail = nullptr;
 }

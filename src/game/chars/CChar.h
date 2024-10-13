@@ -495,8 +495,10 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	virtual CObjBaseTemplate* GetTopLevelObj() override;
-	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	bool IsSwimming() const;
 	bool MoveToRegion(CRegionWorld* pNewArea, bool fAllowReject);
@@ -555,7 +557,7 @@ public:
 	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 
-	void UpdateMode( CClient * pExcludeClient = nullptr, bool fFull= false );
+    void UpdateMode( bool fFull, CClient * pExcludeClient = nullptr);
 	void UpdateSpeedMode();
 	void UpdateVisualRange();
 	void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = nullptr, bool bFull = false );
@@ -821,8 +823,10 @@ public:
 
 	/**
 	* @brief Clearing notoriety and update myself so everyone checks my noto again.
+    *
+    * @param fCharFullUpdate Should it do a full character entity update instead of a partial one?
 	*/
-	void NotoSave_Update();
+    void NotoSave_Update(bool fCharFullUpdate = false);
 
 	/**
 	* @brief Deleting myself and sending data again for given char.

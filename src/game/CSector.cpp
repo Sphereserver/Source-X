@@ -284,7 +284,7 @@ bool CSector::r_LoadVal( CScript &s )
 			SetWeatherChance( false, s.HasArgs() ? s.GetArgVal() : -1 );
 			return true;
 		case SC_FLAGS:
-			m_dwFlags = s.GetArgVal();
+            m_dwFlags = s.GetArgDWVal();
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_fAllowLightOverride )

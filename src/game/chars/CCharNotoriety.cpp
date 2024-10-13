@@ -712,13 +712,13 @@ void CChar::NotoSave_Clear()
 		m_notoSaves.clear();
 }
 
-void CChar::NotoSave_Update()
+void CChar::NotoSave_Update(bool fCharFullUpdate)
 {
 	//ADDTOCALLSTACK_DEBUG("CChar::NotoSave_Update");
     EXC_TRY("NotoSave_Update");
 
     NotoSave_Clear();
-	UpdateMode();
+    UpdateMode(fCharFullUpdate, nullptr);
 	UpdatePropertyFlag();
 
     EXC_CATCH;
