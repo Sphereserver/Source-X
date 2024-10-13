@@ -1364,7 +1364,7 @@ bool CItemBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 				return false;
 
 			if ( !CCPropsItemWeapon::CanSubscribe(this))
-				sVal.FormatVal(0);
+				sVal.SetValFalse();
 			else
 				sVal.FormatVal( m_layer == LAYER_HAND2 );
 			break;

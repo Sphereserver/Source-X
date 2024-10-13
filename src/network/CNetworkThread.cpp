@@ -12,13 +12,13 @@
 static const char* GenerateNetworkThreadName(size_t id)
 {
     char* name = Str_GetTemp();
-    snprintf(name, IThread::m_nameMaxLength, "T_Net #%" PRIuSIZE_T, id);
+    snprintf(name, AbstractThread::m_nameMaxLength, "T_Net #%" PRIuSIZE_T, id);
     return name;
 }
 
 
 CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
-    : AbstractSphereThread(GenerateNetworkThreadName(id), IThread::Disabled),
+    : AbstractSphereThread(GenerateNetworkThreadName(id), ThreadPriority::Disabled),
     m_manager(manager), m_id(id), _iTimeLastStateDataCheck(0)
 {
 }
@@ -31,7 +31,7 @@ void CNetworkThread::assignNetworkState(CNetState* state)
 {
     ADDTOCALLSTACK("CNetworkThread::assignNetworkState");
     m_assignQueue.push(state);
-    if (getPriority() == IThread::Disabled)
+    if (getPriority() == ThreadPriority::Disabled)
         awaken();
 }
 
@@ -113,8 +113,8 @@ void CNetworkThread::tick(void)
     if (m_states.empty())
     {
         // we haven't been assigned any clients, so go idle for now
-        if (getPriority() != IThread::Disabled)
-            setPriority(IThread::Low);
+        if (getPriority() != ThreadPriority::Disabled)
+            setPriority(ThreadPriority::Low);
         return;
     }
 
@@ -122,7 +122,7 @@ void CNetworkThread::tick(void)
     processOutput();
 
     // we're active, take priority
-    setPriority(static_cast<IThread::Priority>(g_Cfg._uiNetworkThreadPriority));
+    setPriority(static_cast<ThreadPriority>(g_Cfg._iNetworkThreadPriority));
 
     static constexpr int64 kiStateDataCheckPeriod = 10 * 1000; // 10 seconds, expressed in milliseconds
     const int64 iTimeCur = CSTime::GetMonotonicSysTimeMilli();

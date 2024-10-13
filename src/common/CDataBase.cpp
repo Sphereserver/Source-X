@@ -2,14 +2,12 @@
 #include "../game/CServer.h"
 #include "../game/CServerTime.h"
 #include "../sphere/asyncdb.h"
-#include "resource/sections/CResourceNamedDef.h"
+#include "resource/sections/CResourceNamedDef.h"    // Needed because it was only forward declared.
 #include "CLog.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CScriptTriggerArgs.h"
 #include "CDataBase.h"
-
-extern CDataBaseAsyncHelper g_asyncHdb;
 
 
 CDataBase::CDataBase()
@@ -169,7 +167,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     return false;
 }
 
-bool __cdecl CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
+bool CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::queryf");
 	TemporaryString tsBuf;
@@ -216,7 +214,7 @@ bool CDataBase::exec(const char *query)
 	return false;
 }
 
-bool __cdecl CDataBase::execf(char *fmt, ...)
+bool CDataBase::execf(char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::execf");
 	TemporaryString tsBuf;
@@ -405,7 +403,7 @@ bool CDataBase::r_WriteVal(lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, b
 			{
 				ptcKey += strlen(sm_szLoadKeys[index]);
 				GETNONWHITESPACE(ptcKey);
-				sVal.FormatVal(0);
+				sVal.SetValFalse();
 
 				if ( ptcKey[0] != '\0' )
 				{

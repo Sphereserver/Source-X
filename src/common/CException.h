@@ -6,8 +6,23 @@
 #ifndef _INC_CEXCEPTION_H
 #define _INC_CEXCEPTION_H
 
-#include "../sphere/threads.h"
+//#include "../sphere/threads.h"
 #include "CLog.h"
+
+#if defined(_WIN32) && (defined(MSVC_COMPILER) || (defined(__MINGW32__) && defined(__SEH__)))
+#   define WINDOWS_HAS_SEH 1
+#endif
+
+#if defined(WINDOWS_HAS_SEH) && defined(WINDOWS_GENERATE_CRASHDUMP)
+// We don't want this for Release build because, in order to call _set_se_translator, we should set the /EHa
+//	compiler flag, which slows down code a bit.
+#   define WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS 1
+//#endif
+
+//2#if defined(WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS) && defined(WINDOWS_GENERATE_CRASHDUMP)
+// Also, the crash dump generating code works only when Structured Exception Handling is enabled
+#   define WINDOWS_SHOULD_EMIT_CRASH_DUMP 1
+#endif
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
@@ -18,7 +33,9 @@ extern "C"
 }
 
 void SetPurecallHandler();
-void SetExceptionTranslator();
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
+void SetWindowsStructuredExceptionTranslator();
+#endif
 
 #ifndef _WIN32
     void SetUnixSignals( bool );
@@ -28,9 +45,9 @@ void SetExceptionTranslator();
 void NotifyDebugger();
 
 void SetAbortImmediate(bool on) noexcept;
-bool AbortImmediate() noexcept;
-
+[[noreturn]]
 void RaiseRecoverableAbort();
+[[noreturn]]
 void RaiseImmediateAbort();
 
 
@@ -79,20 +96,18 @@ public:
 	virtual bool GetErrorMessage(lptstr lpszError, uint uiMaxError ) const override;
 };
 
-#ifdef _WIN32
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
 	// Catch and get details on the system exceptions.
-	class CWinException : public CSError
+	class CWinStructuredException : public CSError
 	{
 	public:
 		static const char *m_sClassName;
 		const size_t m_pAddress;
 
-        CWinException(uint uCode, size_t pAddress);
-		virtual ~CWinException();
-	private:
-        CWinException& operator=(const CWinException& other);
+        CWinStructuredException(uint uCode, size_t pAddress);
+		virtual ~CWinStructuredException();
+        CWinStructuredException& operator=(const CWinStructuredException& other) = delete;
 
-	public:
 		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError) const override;
 	};
 #endif

@@ -56,7 +56,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 {
 	ADDTOCALLSTACK("CSFileList::ReadDir");
 	// NOTE: It seems NOT to like the trailing \ alone
-	tchar szFileDir[_MAX_PATH];
+	tchar szFileDir[SPHERE_MAX_PATH];
 	size_t len = Str_CopyLen(szFileDir, pszFileDir);
 #ifdef _WIN32
 	if ( len > 0 )
@@ -73,7 +73,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 
 	if ( lFind == -1 )
 #else
-	char szFilename[_MAX_PATH];
+	char szFilename[SPHERE_MAX_PATH];
 	// Need to strip out the *.scp part
 	for ( size_t i = len; i > 0; --i )
 	{
@@ -110,15 +110,15 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 		if ( fileinfo->d_name[0] == '.' )
 			continue;
 
-		const int ret = snprintf(szFilename, _MAX_PATH, "%s%s", szFileDir, fileinfo->d_name);
-		szFilename[_MAX_PATH - 1] = '\0';
-		if ((ret < 0) || (ret > _MAX_PATH - 1))
+		const int ret = snprintf(szFilename, SPHERE_MAX_PATH, "%s%s", szFileDir, fileinfo->d_name);
+		szFilename[SPHERE_MAX_PATH - 1] = '\0';
+		if ((ret < 0) || (ret > SPHERE_MAX_PATH - 1))
 		{
 			g_Log.EventError("Unable to concatenate the path (too long). Current file '%s'.\n", fileinfo->d_name);
 			break;
 		}
 		len = strlen(szFilename);
-		if ( len > 4 && !strcmpi(&szFilename[len - 4], SPHERE_SCRIPT) )
+        if ( (len > SPHERE_SCRIPT_EXT_LEN) && !strcmpi(&szFilename[len - SPHERE_SCRIPT_EXT_LEN], SPHERE_SCRIPT_EXT) )
 			AddTail(fileinfo->d_name);
 #endif
 	}

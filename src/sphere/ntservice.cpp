@@ -252,7 +252,7 @@ void CNTService::ServiceStop()
 //	PURPOSE:  Installs the service on the local machine
 void CNTService::CmdInstallService()
 {
-	char	szPath[_MAX_PATH * 2];
+	char	szPath[SPHERE_MAX_PATH * 2];
 	char	szErr[256];
 
 	ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Installing Service.");
@@ -408,7 +408,7 @@ void CNTService::CmdRemoveService()
 		while ( QueryServiceStatus(schService, &m_sStatus) )	// wait the service to stop
 		{
 			if ( m_sStatus.dwCurrentState == SERVICE_STOP_PENDING )
-				Sleep(1000);
+                SLEEP(1000);
 			else
 				break;
 		}
@@ -450,14 +450,14 @@ void CNTService::CmdMainStart()
 //	FUNCTION: main()
 //
 /////////////////////////////////////////////////////////////////////////////////////
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {
 	UnreferencedParameter(hPrevInstance);
-    IThread::setThreadName("T_SphereStartup");
+    AbstractThread::setThreadName("T_SphereStartup");
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;

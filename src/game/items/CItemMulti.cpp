@@ -2690,7 +2690,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                     break;
                 }
             }
-            sVal.FormatVal(0);
+            sVal.SetValFalse();
             break;
         }
         case SHL_REGION:

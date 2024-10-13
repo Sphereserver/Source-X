@@ -391,7 +391,7 @@ void CNetworkManager::start(void)
             if (ntCount > 1)
             {
                 // If we have more than one thread (this hasn't sense... at this point isThreaded should be == true)
-                char name[IThread::m_nameMaxLength];
+                char name[AbstractThread::m_nameMaxLength];
                 snprintf(name, sizeof(name), "T_Net #%u", (uint)pThread->getId());
                 pThread->overwriteInternalThreadName(name);
             }
@@ -426,10 +426,11 @@ void CNetworkManager::tick(void)
         if (!pClient || (pClient->GetConnectType() == CONNECT_UNK))
         {
             const int64 iTimeSinceConnectionMs = iCurSysTimeMs - state->m_iConnectionTimeMs;
-            if (iTimeSinceConnectionMs > g_Cfg._iTimeoutIncompleteConnectionMs)
+            const int64 iTimeoutIncompleteConnectionMs = g_Cfg._iTimeoutIncompleteConnectionMs;
+            if (iTimeSinceConnectionMs > iTimeoutIncompleteConnectionMs)
             {
                 EXC_SET_BLOCK("mark closed for timeout");
-                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_EVENT,
+                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN, // LOGM_NOCONTEXT
                     "%x:Force closing connection from IP %s. Reason: timed out before completing login.\n",
                     state->id(), state->m_peerAddress.GetAddrStr());
                 //state->markReadClosed();
@@ -453,7 +454,7 @@ void CNetworkManager::tick(void)
             // sent from CNetworkOutput::QueuePacketTransaction can be ignored
             // the safest solution to this is to send additional signals from here
             CNetworkThread* thread = state->getParentThread();
-            if (thread != nullptr && state->hasPendingData() && thread->getPriority() == IThread::Disabled)
+            if (thread != nullptr && state->hasPendingData() && thread->getPriority() == ThreadPriority::Disabled)
                 thread->awaken();
 #endif
             continue;

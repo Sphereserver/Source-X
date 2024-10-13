@@ -1,25 +1,35 @@
+# Based on LLVM style with C++20 support
 BasedOnStyle: LLVM
 Language: Cpp
 Standard: c++20
+
+# Tab and indent settings
 TabWidth: 4
 IndentWidth: 4
 UseTab: Never
 ColumnLimit: 160
 
+# Text line management
 #LineEndingStyle: LF
-#MaxEmptyLinesToKeep: 3
+MaxEmptyLinesToKeep: 2
+InsertNewlineAtEOF: true
 
-##-- Alignment
-AlignAfterOpenBracket: AlwaysBreak
+# Alignment settings
+AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: false
-#AlignEscapedNewlinesLeft: false
-AlignTrailingComments: true
-
+#AlignConsecutiveTableGenDefinitionColons:
+#  Enabled: true
+#  AcrossEmptyLines: true
+#  AcrossComments: false
+AlignEscapedNewlines: Left
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 1
 DerivePointerAlignment: false
 PointerAlignment: Right
 
-##-- Single line statements
+# Single-line statements settings
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
@@ -27,8 +37,8 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: false
 
-##-- Braces
-BreakBeforeBraces: Custom #Allman
+# Braces and wrapping settings
+BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: false
@@ -47,77 +57,78 @@ BraceWrapping:
   SplitEmptyNamespace: false
 Cpp11BracedListStyle: false
 
-##-- Line breaks
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
+# Line breaks and wrapping settings
+#AllowAllParametersOfDeclarationOnNextLine: true
+#AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
+AlwaysBreakAfterDefinitionReturnType: None  # Keep return type on the same line if possible
+AlwaysBreakAfterReturnType: None  # Default value
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
-BreakAfterJavaFieldAnnotations: false
-BreakBeforeBinaryOperators: None
+BreakAfterAttributes: Always
+BreakBeforeBinaryOperators: None  # Default value: No line break before binary operators
+BreakBeforeConceptDeclarations: Always
 BreakConstructorInitializers: AfterColon
-#BreakInheritanceList: AfterColon
-BreakBeforeTernaryOperators: false
+BreakBeforeTernaryOperators: false  # Default value
 BreakConstructorInitializersBeforeComma: true
-BreakStringLiterals: false
+#BreakInheritanceList: AfterColon
+BreakStringLiterals: false  # Default value
+PackConstructorInitializers: NextLineOnly
+PenaltyReturnTypeOnItsOwnLine: 200 # Prefer keeping return type on the same line if possible
 
-##-- Indentation
+# Indentation settings
+AccessModifierOffset: -4
+IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: true
 IndentExternBlock: AfterExternBlock
 IndentGotoLabels: true
 IndentPPDirectives: AfterHash
+IndentWrappedFunctionNames: false
 LambdaBodyIndentation: Signature
 NamespaceIndentation: Inner
 
-##-- Spaces in/between statements/etc
-SpaceAfterCStyleCast: false
-SpaceAfterTemplateKeyword: false
+# Spaces around statements settings
+SpaceAfterCStyleCast: false  # Default value
+SpaceAfterTemplateKeyword: false  # Default value
 #SpaceAroundPointerQualifiers: Left
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCpp11BracedList: true
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
-SpaceInEmptyParentheses: false
-SpacesInAngles: false
-SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: false
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
+SpaceInEmptyParentheses: false  # Default value
+SpacesInAngles: false  # Default value
+SpacesInCStyleCastParentheses: false  # Default value
+SpacesInContainerLiterals: false  # Default value
+SpacesInParentheses: false  # Default value
+SpacesInSquareBrackets: false  # Default value
 
-##-- Misc
-AllowAllParametersOfDeclarationOnNextLine: true
-AccessModifierOffset: -4
-BinPackArguments: false
-BinPackParameters: false
-BreakAfterAttributes: Always
-ExperimentalAutoDetectBinPacking: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-DisableFormat: false
-InsertNewlineAtEOF: true
-KeepEmptyLinesAtTheStartOfBlocks: false
-ReflowComments: false
+# Macros settings
+#MacroBlockBegin: [regex -> EXC_TRY...]
+#MacroBlockEnd:
+#StatementMacros: [-> ASSERT?]
+
+# Scopes settings
+FixNamespaceComments: true
+ShortNamespaceLines: 2
+
+# Miscellaneous settings
 SeparateDefinitionBlocks: Always
+ReflowComments: false
 
-#-- Include order
-#IncludeIsMainRegex: '$?'
+# Include order
 #IncludeBlocks: Regroup
+#IncludeIsMainRegex: '$?'
 IncludeCategories:
 #TODO: main include!
-    # Headers in "" with .h extension.
-    - Regex: '"([A-Za-z0-9\/-_])+\.h"'
-      Priority: 1
-    # Headers in "" with .hpp extension.
-    - Regex: '"([A-Za-z0-9\/-_])+\.hpp"'
-      Priority: 2
-
-    # Headers in <> with .h extension.
-    - Regex: '<([A-Za-z0-9\/-_])+\.h>'
-      Priority: 10
-    # Headers in <> with .hpp extension.
-    - Regex: '<([A-Za-z0-9\/-_])+\.hpp>'
-      Priority: 20
-    # Headers in <> without extension.
-    - Regex: '<([A-Za-z0-9\/-_])+>'
-      Priority: 30
-SortIncludes: false #CaseSensitive
+  - Regex: '"([A-Za-z0-9\/-_])+\.h"'
+    Priority: 1
+  - Regex: '"([A-Za-z0-9\/-_])+\.hpp"'
+    Priority: 2
+  - Regex: '<([A-Za-z0-9\/-_])+\.h>'
+    Priority: 10
+  - Regex: '<([A-Za-z0-9\/-_])+\.hpp>'
+    Priority: 20
+  - Regex: '<([A-Za-z0-9\/-_])+>'
+    Priority: 30
+SortIncludes: false

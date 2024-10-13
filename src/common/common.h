@@ -12,7 +12,8 @@
 
 #define SPHERE_FILE				"sphere"	// file name prefix
 #define SPHERE_TITLE			"SphereServer"
-#define SPHERE_SCRIPT			".scp"
+#define SPHERE_SCRIPT_EXT		".scp"
+#define SPHERE_SCRIPT_EXT_LEN   4
 
 #define SCRIPT_MAX_LINE_LEN		4096		// default size.
 #define SCRIPT_MAX_SECTION_LEN	128
@@ -48,6 +49,21 @@
 
 
 /* Coding helpers */
+
+// On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
+#if !defined(_MSC_VER) || defined(__clang__)
+#   define NON_MSVC_COMPILER 1
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#   define MSVC_COMPILER 1
+#endif
+
+// On Windows, Clang can use MinGW or MSVC backend.
+#ifdef _MSC_VER
+#   define MSVC_RUNTIME
+#endif
+
 
 // Strings
 #define STRINGIFY_IMPL_(x)	#x
@@ -124,6 +140,27 @@ constexpr T sign(const T n) noexcept
 #define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 #define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 
+template <typename T>
+[[nodiscard]]
+constexpr T saturating_sub(T a, T b) noexcept {
+    // Saturating subtraction.
+
+    // Ensure T is an arithmetic type
+    static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
+
+    // For unsigned types
+    if constexpr (std::is_unsigned_v<T>)
+        return (a > b) ? a - b : 0;
+    // For signed types
+    else
+    {
+        if (b > 0 && a < std::numeric_limits<T>::min() + b)
+            return std::numeric_limits<T>::min();  // Saturate to minimum
+        return a - b;
+    }
+}
+
+#define SATURATING_SUB_SELF(var, val) var = saturating_sub(var, val)
 
 /* End of arithmetic code */
 
@@ -131,8 +168,9 @@ constexpr T sign(const T n) noexcept
 /* Compiler/c++ language helpers */
 
 // Ensure that a constexpr value or a generic expression is evaluated at compile time.
+// Constexpr values are constants and cannot be mutated in the code.
 template <typename T>
-consteval T ensure_comptime(T&& val_) noexcept {
+consteval T as_consteval(T&& val_) noexcept {
     return val_;
 }
 
@@ -172,9 +210,19 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 // Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
 #define CANTHROW    noexcept(false)
 
+// To be used only as an helper marker, since there are functions with similar names intended to have different signatures and/or not be virtual.
+// This means that we do NOT have forgotten to add the "virtual" qualifier, simply this method isn't virtual.
+#define NONVIRTUAL
+
 // Cpp attributes
 #define FALLTHROUGH [[fallthrough]]
 #define NODISCARD	[[nodiscard]]
+
+#if defined(__GNUC__) || defined(__clang__)
+#   define RETURNS_NOTNULL [[gnu::returns_nonnull]]
+#else
+#   define RETURNS_NOTNULL
+#endif
 
 #ifdef _DEBUG
     #define NOEXCEPT_NODEBUG
@@ -192,20 +240,21 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 // b = 1-based index of arguments
 // (note: add 1 to index for non-static class methods because 'this' argument
 // is inserted in position 1)
-#ifdef _MSC_VER
-	#define __printfargs(a,b)
+#ifdef MSVC_COMPILER
+    #define SPHERE_PRINTFARGS(a,b)
 #else
-	#ifdef _WIN32
-		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
+	#ifdef __MINGW32__
+        // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
+        #define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
 	#else
-		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
+        #define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
 	#endif
 #endif
 
 
 /* Sanitizers utilities */
 
-#if defined(_MSC_VER)
+#if defined(MSVC_COMPILER)
 
     #if defined(__SANITIZE_ADDRESS__) || defined(ADDRESS_SANITIZER)
         #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)

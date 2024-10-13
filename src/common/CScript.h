@@ -31,11 +31,13 @@ public:
 
 	// Args passed with the key.
 	bool HasArgs() const;
-	tchar * GetArgRaw() const;				// Not need to parse at all.
-	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
-	inline tchar * GetArgStr() {
-		return GetArgStr(nullptr);
-	}
+
+    // Not need to parse at all.
+    tchar * GetArgRaw() const;
+
+    // this could be a quoted string ?
+    tchar * GetArgStr(bool * fQuoted = nullptr);
+
 
 	char GetArgCVal();
 	uchar GetArgUCVal();
@@ -62,7 +64,8 @@ public:
 	dword GetArgFlag( dword dwStart, dword dwMask );
     int64 GetArgLLFlag( uint64 iStart, uint64 iMask );
 
-public:
+// This class is meant only to be inherited.
+protected:
 	CScriptKey();
 	CScriptKey( tchar * ptcKey, tchar * ptcArg );
 	~CScriptKey() = default;
@@ -156,8 +159,8 @@ public:
 	bool ReadKeyParse();
 
 	// Write stuff out to a script file.
-	bool _cdecl WriteSection(lpctstr pszSection, ...) __printfargs(2,3);
-	void _cdecl WriteKeyFormat(lpctstr ptcKey, lpctstr pszFormat, ...) __printfargs(3,4);
+    bool WriteSection(lpctstr pszSection, ...) SPHERE_PRINTFARGS(2,3);
+    void WriteKeyFormat(lpctstr ptcKey, lpctstr pszFormat, ...) SPHERE_PRINTFARGS(3,4);
 	bool WriteKeySingle(lptstr ptcKey);
 	bool WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal);
 

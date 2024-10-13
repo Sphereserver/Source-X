@@ -155,7 +155,7 @@ bool CSFileText::IsEOF() const
 }
 
 
-int _cdecl CSFileText::_Printf(lpctstr pFormat, ...)
+int CSFileText::_Printf(lpctstr pFormat, ...)
 {
     ADDTOCALLSTACK("CSFileText::_Printf");
     ASSERT(pFormat);
@@ -167,7 +167,7 @@ int _cdecl CSFileText::_Printf(lpctstr pFormat, ...)
 
     return iRet;
 }
-int _cdecl CSFileText::Printf( lpctstr pFormat, ... )
+int CSFileText::Printf( lpctstr pFormat, ... )
 {
     ADDTOCALLSTACK("CSFileText::Printf");
     ASSERT(pFormat);

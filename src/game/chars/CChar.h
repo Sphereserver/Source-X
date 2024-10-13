@@ -495,8 +495,10 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	virtual CObjBaseTemplate* GetTopLevelObj() override;
-	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	bool IsSwimming() const;
 	bool MoveToRegion(CRegionWorld* pNewArea, bool fAllowReject);
@@ -555,7 +557,7 @@ public:
 	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 
-	void UpdateMode( CClient * pExcludeClient = nullptr, bool fFull= false );
+    void UpdateMode( bool fFull, CClient * pExcludeClient = nullptr);
 	void UpdateSpeedMode();
 	void UpdateVisualRange();
 	void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = nullptr, bool bFull = false );
@@ -821,8 +823,10 @@ public:
 
 	/**
 	* @brief Clearing notoriety and update myself so everyone checks my noto again.
+    *
+    * @param fCharFullUpdate Should it do a full character entity update instead of a partial one?
 	*/
-	void NotoSave_Update();
+    void NotoSave_Update(bool fCharFullUpdate = false);
 
 	/**
 	* @brief Deleting myself and sending data again for given char.
@@ -1019,7 +1023,7 @@ public:
 	bool Spell_CastDone();
 	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0) override;
 	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
-	CChar* Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature);
+    CChar* Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature, std::optional<short> iFollowerSlotsOverride);
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------
@@ -1177,16 +1181,28 @@ public:
 
 	virtual void Update(const CClient* pClientExclude = nullptr) override;
 	virtual void Flip() override;
+
+    void EatAnim(CItem* pItem, ushort uiQty);
+    bool Reveal( uint64 iFlags = 0 );
+    void Jail( CTextConsole * pSrc, bool fSet, int iCell );
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
-	bool RaiseCorpse( CItemCorpse * pCorpse );
-	bool Death();
-	bool Reveal( uint64 iFlags = 0 );
-	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim(CItem* pItem, ushort uiQty);
+    bool RaiseCorpse( CItemCorpse * pCorpse );
+
+    enum class DeathRequestResult
+    {
+        Success,
+        SuccessAndDelete,
+        AlreadyDead,
+        Aborted,
+        AbortedNoLog
+    };
+
+    DeathRequestResult Death();
+
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*

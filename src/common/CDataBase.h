@@ -37,9 +37,9 @@ public:
 
 	//	select
 	bool query(const char *query, CVarDefMap & mapQueryResult);			//	proceeds the query for SELECT
-	bool __cdecl queryf(CVarDefMap & mapQueryResult, char *fmt, ...) __printfargs(3,4);
+    bool queryf(CVarDefMap & mapQueryResult, char *fmt, ...) SPHERE_PRINTFARGS(3,4);
 	bool exec(const char *query);			//	executes query (pretty faster) for ALTER, UPDATE, INSERT, DELETE, ...
-	bool __cdecl execf(char *fmt, ...) __printfargs(2,3);
+    bool execf(char *fmt, ...) SPHERE_PRINTFARGS(2,3);
 	void addQueryResult(CSString & theFunction, CScriptTriggerArgs * theResult);
 
 	//	set / get / info methods

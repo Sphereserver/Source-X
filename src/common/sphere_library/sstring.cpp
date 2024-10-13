@@ -4,7 +4,7 @@
 #include "../CExpression.h"
 
 
-#if defined(_MSC_VER)
+#ifdef MSVC_COMPILER
     #include <codeanalysis/warnings.h>
     #pragma warning( push )
     #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
@@ -22,7 +22,7 @@
 
 #include <regex/deelx.h>
 
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
     #pragma warning( pop )
 #else
     #pragma GCC diagnostic pop
@@ -482,7 +482,7 @@ size_t strlen_mb(const char* ptr)
 size_t Str_LengthUTF8(const char* strInUTF8MB) noexcept
 {
     size_t len; // number of characters in the string
-#ifdef _MSC_VER
+#ifdef MSVC_RUNTIME
     mbstowcs_s(&len, nullptr, 0, strInUTF8MB, 0); // includes null terminator
     len -= 1;
 #else
@@ -1261,7 +1261,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept
         return MATCH_VALID;
 }
 
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
     // /GL + /LTCG flags inline in linking phase this function, but probably in a wrong way, so that
     // something gets corrupted on the memory and an exception is generated later
     #pragma auto_inline(off)
@@ -1409,7 +1409,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
 
     return true;
 }
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
     #pragma auto_inline(on)
 #endif
 
@@ -1761,7 +1761,7 @@ size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB) noexce
     strOutUTF8MB = new char[len + 1]();
 
 #if defined(_WIN32) && defined(UNICODE)
-#ifdef _MSC_VER
+#ifdef MSVC_RUNTIME
     size_t aux = 0;
     wcstombs_s(&aux, strOutUTF8MB, len + 1, strIn, len);
 #else
@@ -1783,7 +1783,7 @@ size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) n
 
 #if defined(_WIN32) && defined(UNICODE)
     // tchar is wchar_t
-#ifdef _MSC_VER
+#ifdef MSVC_RUNTIME
     size_t aux = 0;
     mbstowcs_s(&aux, strInUTF8MB, len + 1, strInUTF8MB, len);
 #else

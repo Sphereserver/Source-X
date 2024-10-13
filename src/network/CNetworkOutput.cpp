@@ -16,7 +16,7 @@
 *	void SendCompleted_Winsock			Winsock event handler for when async operation completes
 *
 ***************************************************************************/
-void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
+static void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	UnreferencedParameter(dwFlags);
 	ADDTOCALLSTACK("SendCompleted_Winsock");
@@ -126,7 +126,7 @@ bool CNetworkOutput::processOutput()
 	if (packetsSent > 0)
 	{
 		// notify thread there could be more to process
-		if (m_thread->getPriority() == IThread::Disabled)
+		if (m_thread->getPriority() == ThreadPriority::Disabled)
 			m_thread->awaken();
 	}
 
@@ -173,7 +173,7 @@ size_t CNetworkOutput::flush(CNetState* state)
 		// when this isn't the active thread, all we can do is raise a request to flush this
 		// client later
 		state->markFlush(true);
-		if (m_thread->getPriority() == IThread::Disabled)
+		if (m_thread->getPriority() == ThreadPriority::Disabled)
 			m_thread->awaken();
 
 		return 0;
@@ -647,6 +647,6 @@ void CNetworkOutput::QueuePacketTransaction(PacketTransaction* transaction)
 
 	// notify thread
 	CNetworkThread* thread = state->getParentThread();
-	if (thread != nullptr && thread->getPriority() == IThread::Disabled)
+	if (thread != nullptr && thread->getPriority() == ThreadPriority::Disabled)
 		thread->awaken();
 }

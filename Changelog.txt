@@ -3902,3 +3902,12 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Changed: added desired FollowerSlots as a second argument to CURFOLLOWER.ADD. Default value: its FollowerSlots.
 - Changed: @FollowerUpdate ARGN1 and ARGN2 are now read-only. Having them RW and actually get them working would have meant many other changes, breaking script compatibility.
 - Fixed: CURFOLLOWER.DEL/DELETE/CLEAR not working properly.
+
+03-10-2024, Nolok
+- Fixed: LIST.ADD ignoring quoted arguments (Issue #1247).
+- Fixed: FOOD and MAXFOOD not being stored in the worldsave file (Issue #1289).
+- Added: CURFOLLOWER.CHARCOUNT, to return the raw number of characters you own/that are following you. Plain CURFOLLOWER returns the current total FOLLOWERSLOTS you own.
+- Changed: removed CURFOLLOWER.DEL and CURFOLLOWER.DELETE in favor of the more specific:
+    CURFOLLOWER.DELUID: The same as .DEL/DELETE, just removed the pet via its UID.
+    CURFOLLOWER.DELINDEX: Removes the pet via its id in the (cur)follower list for that owner.
+- Added: spells with SPELLFLAG_SUMMON now accept LOCAL.FollowerSlotsOverride in the triggers @Success and @SpellSuccess. Default value (do not override): -1.

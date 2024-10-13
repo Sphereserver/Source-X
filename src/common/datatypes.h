@@ -104,7 +104,7 @@ typedef	uint64_t		uint64;
 
 #else	// _WIN32
 
-	#ifdef _MSC_VER		// already defined on MinGW
+	#ifdef _MSC_VER // already defined on MinGW
 		#include <basetsd.h>
 		typedef SSIZE_T				ssize_t;
 	#endif // _MSC_VER
@@ -115,6 +115,7 @@ typedef	uint64_t		uint64;
 		#define PRIxSIZE_T			"zx"
 		#define PRIdSSIZE_T			"zd"
 	#else
+        // If using MSVC runtime and not GNU/MinGW.
 		#define PRIuSIZE_T			"Iu"
 		#define PRIxSIZE_T			"Ix"
 		#define PRIdSSIZE_T			"Id"

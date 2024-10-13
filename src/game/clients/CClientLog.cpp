@@ -748,7 +748,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 
 	tchar * ppRequest[4];
 	int iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, ARRAY_COUNT(ppRequest), " ");
-	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= _MAX_PATH ))
+	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= SPHERE_MAX_PATH ))
 		return false;
 
 	if ( strchr(ppRequest[1], '\r') || strchr(ppRequest[1], 0x0c) )
@@ -829,7 +829,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		// Host: localhost:2593\r\n
 		// \r\n
 
-		tchar szPageName[_MAX_PATH];
+		tchar szPageName[SPHERE_MAX_PATH];
 		if ( !Str_GetBare( szPageName, Str_TrimWhitespace(ppRequest[1]), sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" ) )
 			return false;
 

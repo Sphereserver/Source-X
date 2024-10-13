@@ -1317,7 +1317,7 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             if (pItemThis->m_itShip.m_Pilot.IsValidUID())
                 sVal.FormatHex(pItemThis->m_itShip.m_Pilot);
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         } break;
 
 

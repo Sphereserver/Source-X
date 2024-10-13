@@ -1132,10 +1132,10 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					if ( pChar )
 						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, nullptr, pChar->GetVisualRange(), flags));
 					else
-						sVal.FormatVal(0);
+						sVal.SetValFalse();
 				}
 				else if ( !pChar )		// no char -> no see
-					sVal.FormatVal(0);
+					sVal.SetValFalse();
 				else					// standart way src TO current object
 					sVal.FormatVal(bCanSee ? pChar->CanSee(this) : pChar->CanSeeLOS(this, (word)(flags)));
 			}
@@ -1199,7 +1199,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					GETNONWHITESPACE( ptcKey );
 
 					CClient * pThisClient = pSrc->GetChar() ? ( pSrc->GetChar()->IsClientActive() ? pSrc->GetChar()->GetClientActive() : nullptr ) : nullptr;
-					sVal.FormatVal(0);
+					sVal.SetValFalse();
 
 					if ( pThisClient )
 					{

@@ -9,10 +9,15 @@
 #include "common.h"
 
 
+/*
+ *  TODO:
+ *  make CScriptKey m_pszKey and m_pszVal private.
+ *  make setter and getters methods that will automatically update the buffer lengths, held in a separate value.
+*/
+
 
 ///////////////////////////////////////////////////////////////
 // -CScriptKey
-
 
 bool CScriptKey::IsKey( lpctstr pszName ) const
 {
@@ -369,7 +374,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr ptcKey, lpctstr pszVal )
     if (ptcKey != m_pszKey)
     {
         // Invalid key, or not yet inited.
-        strcpy(m_pszKey, ptcKey);
+        Str_CopyLimitNull(m_pszKey, ptcKey, m_Mem.GetDataLength());
     }
 	m_pszArg = m_pszKey + lenkey;
 
@@ -485,9 +490,9 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 	lpctstr ptcExt = GetFilesExt(ptcFilename);
 	if ( !ptcExt )
 	{
-		tchar ptcTemp[_MAX_PATH];
-		Str_CopyLimit(ptcTemp, ptcFilename, _MAX_PATH-4); // -4 beause of SPHERE_SCRIPT, which is = ".scp"
-		strcat(ptcTemp, SPHERE_SCRIPT);
+        tchar ptcTemp[SPHERE_MAX_PATH];
+        const size_t uiCopied = Str_CopyLimit(ptcTemp, ptcFilename, sizeof(ptcTemp) - SPHERE_SCRIPT_EXT_LEN);
+        Str_ConcatLimitNull(ptcTemp, SPHERE_SCRIPT_EXT, sizeof(ptcTemp) - uiCopied);
 		_SetFilePath(ptcTemp);
 		uiFlags |= OF_TEXT;
 	}
@@ -836,7 +841,7 @@ CScriptLineContext CScript::GetContext() const
     return LineContext;
 }
 
-bool _cdecl CScript::WriteSection( lpctstr ptcSection, ... )
+bool CScript::WriteSection( lpctstr ptcSection, ... )
 {
 	ADDTOCALLSTACK_DEBUG("CScript::WriteSection");
 	// Write out the section header.
@@ -928,7 +933,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 	return true;
 }
 
-//void _cdecl CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
+//void CScript::WriteKeyFormat( lpctstr ptcKey, lpctstr pszVal, ... )
 //{
 //	ADDTOCALLSTACK("CScript::WriteKeyFormat");
 //	tchar	*pszTemp = Str_GetTemp();
@@ -940,7 +945,7 @@ bool CScript::WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal)
 //}
 
 static thread_local tchar ptcWriteKeyBuf[SCRIPT_MAX_LINE_LEN];
-void _cdecl CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
+void CScript::WriteKeyFormat(lpctstr ptcKey, lpctstr pszVal, ...)
 {
 	ADDTOCALLSTACK_DEBUG("CScript::WriteKeyFormat");
 	va_list vargs;

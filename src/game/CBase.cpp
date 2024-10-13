@@ -235,9 +235,9 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 						tchar *pszTmp = Str_GetTemp();
 						m_BaseResources.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
 						if ( fQtyOnly && pszTmp[0] == '\0' )
-							strcpy( pszTmp, "0" );
-
-						sVal = pszTmp;
+                            sVal.SetValFalse(); // '0'
+                        else
+                            sVal = pszTmp;
 					}
 				}
 				else

@@ -6,7 +6,7 @@
 
 CDataBaseAsyncHelper g_asyncHdb;
 
-CDataBaseAsyncHelper::CDataBaseAsyncHelper(void) : AbstractSphereThread("AsyncDatabaseHelper", IThread::Low)
+CDataBaseAsyncHelper::CDataBaseAsyncHelper(void) : AbstractSphereThread("AsyncDatabaseHelper", ThreadPriority::Low)
 {
 }
 

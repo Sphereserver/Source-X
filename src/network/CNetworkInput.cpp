@@ -54,7 +54,7 @@ bool CNetworkInput::processInput()
     {
         // if the thread does not receive ticks, we must perform a quick select to see if we should
         // wake up the thread
-        if (m_thread->isActive() && m_thread->getPriority() == IThread::Disabled)
+        if (m_thread->isActive() && m_thread->getPriority() == ThreadPriority::Disabled)
         {
             fd_set fds;
             if (checkForData(fds))
