@@ -729,7 +729,11 @@ public:
  *
  *
  ***************************************************************************/
-class PacketAssistVersion : public Packet {};
+class PacketAssistVersion : public Packet
+{
+    public:
+	PacketAssistVersion();
+};
 
 /***************************************************************************
  *
