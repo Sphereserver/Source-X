@@ -926,6 +926,10 @@ bool CWorld::SaveStage() // Save world state in stages.
 	EXC_DEBUG_END;
 
 	++_iSaveStage;	// to avoid loops, we need to skip the current operation in world save
+
+    CScriptTriggerArgs SaveStageArgs(_iSaveStage);
+    g_Serv.r_Call("f_onserver_save_stage", &g_Serv, &SaveStageArgs);
+
 	return false;
 }
 
@@ -992,6 +996,9 @@ failedstage:
 		fSuccess = false;
 	}
 
+    CScriptTriggerArgs Args(fSave, _iSaveStage);
+    g_Serv.r_Call("f_onserver_save_force", &g_Serv, &Args);
+
 	g_Serv.SetServerMode(SERVMODE_Run);			// Game is up and running
 	return fSuccess;
 }
@@ -1022,6 +1029,9 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	llong llTicksStart;
 	TIME_PROFILE_START;
 	_iSaveTimer = llTicksStart;
+
+    CScriptTriggerArgs SaveTryArgs(fForceImmediate, _iSaveTimer);
+    g_Serv.r_Call("f_onserver_save_try", &g_Serv, &SaveTryArgs);
 
 	// Determine the save name based on the time.
 	// exponentially degrade the saves over time.

@@ -360,6 +360,16 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				// Convert physical gold into virtual gold when drop it on bankbox
 				if ( pItem->IsType(IT_GOLD) && (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD) )
 				{
+                    if (IsTrigUsed(TRIGGER_DEPOSIT) || IsTrigUsed(TRIGGER_ITEMDEPOSIT))
+                    {
+                        CScriptTriggerArgs args(pItem);
+                        if (pItem->OnTrigger(ITRIG_DEPOSIT, m_pChar, &args) == TRIGRET_RET_TRUE)
+                        {
+                            Event_Item_Drop_Fail(pItem);
+                            return;
+                        }
+                    }
+
 					pChar->m_virtualGold += pItem->GetAmount();
 					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_DEPOSITED), pItem->GetAmount());
 					addSound(pItem->GetDropSound(pObjOn));

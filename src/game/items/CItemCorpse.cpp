@@ -150,6 +150,8 @@ CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
 			break;
 		if ( !pItem->IsType(IT_CORPSE) )
 			continue;
+        if (pItem->m_TagDefs.GetKeyNum("NOREJOIN")) // OWNERS OF THE BODIES WITH THIS TAG SHOULD NOT STAND ON THE BODIES
+            continue;
 		CItemCorpse *pCorpse = dynamic_cast<CItemCorpse*>(pItem);
 		if ( !pCorpse || (pCorpse->m_uidLink != GetUID()) )
 			continue;

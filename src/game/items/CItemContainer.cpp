@@ -1048,6 +1048,17 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 		if ( !pCharTop )
 			return;
 
+        CChar* pChar = pCharTop->GetChar();
+
+        if (IsTrigUsed(TRIGGER_OPENBANK))
+        {
+            if (pChar != nullptr)
+            {
+                if ((pCharOpener->OnTrigger(CTRIG_OpenBank, pChar, nullptr) == TRIGRET_RET_TRUE))
+                    return;
+            }
+        }
+
 		int iStones = GetWeight() / WEIGHT_UNITS;
 		tchar *pszMsg = Str_GetTemp();
 		if ( pCharTop == pCharOpener )
@@ -1297,6 +1308,18 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 		case ICV_EMPTY:
 		{
 			ClearContainer(false);
+            if (pSrc->GetChar())
+            {
+                CChar *pChar = pSrc->GetChar();
+                if (pChar->IsClientActive())
+                {
+                    CClient *pClient = pChar->GetClientActive();
+                    ASSERT(pClient);
+                    pClient->addItem(this); // may crash client if we dont do this.
+                    pClient->addContainerSetup(this);
+                    OnOpenEvent(pChar, GetTopLevelObj());
+                }
+            }
 			return true;
 		}
 		case ICV_FIXWEIGHT:

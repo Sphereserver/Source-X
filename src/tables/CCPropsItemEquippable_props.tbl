@@ -18,6 +18,7 @@ ADDPROP(BRITTLE,			"BRITTLE",				RDS_AOS)
 ADDPROP(CASTINGFOCUS,		"CASTINGFOCUS",			RDS_SA)
 ADDPROP(COMBATBONUSPERCENT,	"COMBATBONUSPERCENT",	RDS_PRET2A) // Sphere custom
 ADDPROP(COMBATBONUSSTAT,	"COMBATBONUSSTAT",		RDS_PRET2A) // Sphere custom
+ADDPROP(COVERAGEARMOR,		"COVERAGEARMOR",		RDS_PRET2A)
 ADDPROP(DAMCHAOS,			"DAMCHAOS",				RDS_PRET2A) // it's RDS_ML, but we want it to depend on ElementalEngine, not on Expansion
 ADDPROP(DAMCOLD,			"DAMCOLD",				RDS_PRET2A) // it's RDS_AOS, but we want it to depend on ElementalEngine, not on Expansion
 ADDPROP(DAMDIRECT,			"DAMDIRECT",			RDS_PRET2A) // it's RDS_ML, but we want it to depend on ElementalEngine, not on Expansion

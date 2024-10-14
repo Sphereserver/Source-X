@@ -990,6 +990,7 @@ enum ITRIG_TYPE
     ITRIG_DELOBJ,				// For t_spawn when obj is remove from list
     ITRIG_DELREDCANDLE,
     ITRIG_DELWHITECANDLE,
+	ITRIG_DEPOSIT,              // IT_GOLD dropon bank deposit trigger
 	ITRIG_DESTROY,              //+I am nearly destroyed.
 	ITRIG_DROPON_CHAR,          // I have been dropped on this char.
 	ITRIG_DROPON_GROUND,        // I have been dropped on the ground here.
@@ -1106,6 +1107,7 @@ enum CTRIG_TYPE : short
 	CTRIG_itemCreate,           // Created one item.
 	CTRIG_itemDamage,           // Damaged one item.
 	CTRIG_itemDCLICK,           // I have dclicked item.
+	CTRIG_itemDeposit,          // 
 	CTRIG_itemDestroy,          // Item is nearly destroyed.
 	CTRIG_itemDROPON_CHAR,      // I have been dropped on this char.
 	CTRIG_itemDROPON_GROUND,    // I dropped an item on the ground.
@@ -1160,6 +1162,8 @@ enum CTRIG_TYPE : short
 	CTRIG_NPCSeeNewPlayer,  // (NPC only) i see u for the first time. (in 20 minutes) (check memory time).
 	CTRIG_NPCSeeWantItem,   // (NPC only) i see something good.
 	CTRIG_NPCSpecialAction, // (NPC only) performing some special actions (spyder's web, dragon's breath...).
+
+    CTRIG_OpenBank,     // Openbank
 
     CTRIG_PartyAdd,     // Player joined to the party.
 	CTRIG_PartyDisband, // I just disbanded my party.

@@ -1982,7 +1982,18 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
         iDmgType = (DAMAGE_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("DamageType")));
 		if (iDmgType > 0 && iEffect > 0) // This is necessary if we have a spell that is harmful but does no damage periodically.
 		{
-			OnTakeDamage(iEffect, pItem->m_uidLink.CharFind(), iDmgType,
+            //
+            CChar *pLinkedChar = pItem->m_uidLink.CharFind();
+            if (pLinkedChar == nullptr)
+            {
+                // pLinkedChar = this; //  If it is not alive or deleted, should it be like it is self-damaging? Note: Under the OnTakeDamage()
+                Skill_Fail(); // If the memory does not belong to a creature, or if the creature is dead or deleted, skills do not take effect on damage taken.
+            }
+
+			OnTakeDamage(
+                iEffect,
+                pLinkedChar,
+                iDmgType,
 				(iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH)) ? 100 : 0,
 				(iDmgType & DAMAGE_FIRE) ? 100 : 0,
 				(iDmgType & DAMAGE_COLD) ? 100 : 0,
@@ -2323,6 +2334,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 
 	ushort uiManaUse = g_Cfg.Calc_SpellManaCost(this, pSpellDef, pSrc);
 	ushort uiTithingUse = g_Cfg.Calc_SpellTithingCost(this, pSpellDef, pSrc);
+    bool bSearchBook = true;
+    CItem *pBook = GetSpellbook(spellRef);
 
 	CScriptTriggerArgs Args( spellRef, uiManaUse, pSrc );
 	if ( fTest )
@@ -2330,6 +2343,9 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 	if ( fFailMsg )
 		Args.m_iN3 |= 0x0002;
 	Args.m_VarsLocal.SetNum("TithingUse",uiTithingUse);
+    Args.m_VarsLocal.SetNum("SearchBook", bSearchBook);
+    if (pBook != nullptr)
+        Args.m_VarObjs.Insert(1, pBook, true);
 
 	if ( IsTrigUsed(TRIGGER_SELECT) )
 	{
@@ -2353,7 +2369,6 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 		if ( iRet == TRIGRET_RET_HALFBAKED )
 			return true;
 	}
-
 	if ( spellRef != Args.m_iN1 )
 	{
 		pSpellDef = g_Cfg.GetSpellDef(spellRef);
@@ -2361,8 +2376,10 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			return false;
         spellRef = (SPELL_TYPE)(Args.m_iN1);
 	}
+
 	uiManaUse = (ushort)(Args.m_iN2);
 	uiTithingUse = (ushort)(Args.m_VarsLocal.GetKeyNum("TithingUse"));
+    bSearchBook  = (bool)Args.m_VarsLocal.GetKeyNum("SearchBook");
 
 	if ( !pSrc->IsChar() )// Looking for non-character sources
 	{
@@ -2430,20 +2447,22 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bo
 			}
 
 			// check the spellbook for it.
-			CItem * pBook = GetSpellbook( spellRef );
-			if ( pBook == nullptr )
-			{
-				if ( fFailMsg )
-					SysMessageDefault( DEFMSG_SPELL_TRY_NOBOOK );
-				return false;
-			}
+            if (bSearchBook)
+            {
+                if (pBook == nullptr)
+                {
+                    if (fFailMsg)
+                        SysMessageDefault(DEFMSG_SPELL_TRY_NOBOOK);
+                    return false;
+                }
 
-			if ( ! pBook->IsSpellInBook( spellRef ))
-			{
-				if ( fFailMsg )
-					SysMessageDefault( DEFMSG_SPELL_TRY_NOTYOURBOOK );
-				return false;
-			}
+                if (!pBook->IsSpellInBook(spellRef))
+                {
+                    if (fFailMsg)
+                        SysMessageDefault(DEFMSG_SPELL_TRY_NOTYOURBOOK);
+                    return false;
+                }
+            }
 
 			// check for reagents
 			const size_t iMissingReagents = g_Cfg.Calc_SpellReagentsConsume(this, pSpellDef, pSrc, fTest);
