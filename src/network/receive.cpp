@@ -2507,6 +2507,7 @@ bool PacketClientVersion::onReceive(CNetState* net)
 PacketAssistVersion::PacketAssistVersion() : Packet(0)
 {
 }
+PacketAssistVersion::~PacketAssistVersion() = default;
 
 /***************************************************************************
  *

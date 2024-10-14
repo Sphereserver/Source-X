@@ -731,8 +731,9 @@ public:
  ***************************************************************************/
 class PacketAssistVersion : public Packet
 {
-    public:
-	PacketAssistVersion();
+public:
+    PacketAssistVersion();
+    virtual ~PacketAssistVersion();
 };
 
 /***************************************************************************
