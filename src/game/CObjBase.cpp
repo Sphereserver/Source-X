@@ -3253,7 +3253,7 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
-	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
+	ADDTOCALLSTACK("CObjBase::ResendTooltip");
     // Send tooltip packet to all nearby clients
 
     if (g_Serv.IsLoading())
