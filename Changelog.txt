@@ -3911,3 +3911,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
     CURFOLLOWER.DELUID: The same as .DEL/DELETE, just removed the pet via its UID.
     CURFOLLOWER.DELINDEX: Removes the pet via its id in the (cur)follower list for that owner.
 - Added: spells with SPELLFLAG_SUMMON now accept LOCAL.FollowerSlotsOverride in the triggers @Success and @SpellSuccess. Default value (do not override): -1.
+
+13-10-2024, Jhobean
+- Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
