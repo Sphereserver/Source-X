@@ -857,6 +857,16 @@ void CChar::NPC_PetRelease()
 	if (!m_pNPC)
 		return;
 
+    CChar* pCharOwn = NPC_PetGetOwner();
+    if (!pCharOwn)
+        return;
+
+    if (IsTrigUsed(TRIGGER_PETRELEASE))
+    {
+        if (OnTrigger(CTRIG_PetRelease, pCharOwn, nullptr) == TRIGRET_RET_TRUE)
+            return;
+    }
+
 	if (IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)))
 	{
 		Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 10, 15);

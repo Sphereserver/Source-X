@@ -1171,6 +1171,7 @@ enum CTRIG_TYPE : short
     CTRIG_PayGold,          // I'm going to give out money for a service (Skill Training, hiring...).
 	CTRIG_PersonalSpace,	// i just got stepped on by other char.
 	CTRIG_PetDesert,        // I'm deserting from my owner ( starving, being hit by him ...).
+    CTRIG_PetRelease,       // I have been released by my owner.
 	CTRIG_Profile,			// someone hit the profile button for me.
 	CTRIG_ReceiveItem,		// I was just handed an item (Not yet checked if i want it).
 	CTRIG_RegenStat,		// Hits/mana/stam/food regeneration.

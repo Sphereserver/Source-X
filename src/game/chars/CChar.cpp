@@ -170,6 +170,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@PayGold",             // I'm going to give out money for a service (Skill Training, hiring...).
 	"@PersonalSpace",		// +i just got stepped on by other char.
 	"@PetDesert",			// I just went wild again
+    "@PetRelease",			// I just been released by my master
 	"@Profile",				// someone hit the profile button for me.
 	"@ReceiveItem",			// I was just handed an item (Not yet checked if i want it)
 	"@RegenStat",			// Regenerating any stat

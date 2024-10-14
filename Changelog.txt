@@ -3913,8 +3913,12 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: spells with SPELLFLAG_SUMMON now accept LOCAL.FollowerSlotsOverride in the triggers @Success and @SpellSuccess. Default value (do not override): -1.
 
 13-10-2024, Jhobean
+
 - Added: @DisplayName give possibility to change the name other player see on the paperdoll and on status bar. Could be use on RP server where unknow person don't know your name before presentation.
          src.: The player requesting to view the name on the paperdoll or status
          i: The player stalked by the src.
          ARGS (R/W): The name to display
          RETURN 1 : Change the name to the new value of ARGS
+
+- Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
