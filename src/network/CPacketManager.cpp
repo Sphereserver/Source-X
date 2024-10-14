@@ -82,6 +82,7 @@ void PacketManager::registerStandardPackets(void)
     registerPacket(XCMD_CharProfile, new PacketProfileReq());					// profile read/write request
     registerPacket(XCMD_MailMsg, new PacketMailMessage());						//
     registerPacket(XCMD_ClientVersion, new PacketClientVersion());				// client version
+    registerPacket(XCMD_AssistVersion, new PacketAssistVersion());              // assist version
     registerPacket(XCMD_ExtData, new PacketExtendedCommand());					//
     registerPacket(XCMD_PromptUNICODE, new PacketPromptResponseUnicode());		// prompt response (unicode)
     registerPacket(XCMD_ViewRange, new PacketViewRange());						//
