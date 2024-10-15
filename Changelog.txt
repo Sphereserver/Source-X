@@ -3975,3 +3975,31 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: @Logout trigger with npc.
 	There are some entities that can be logout, for example rideable entities that logout when mounted, but there was no trigger for this.
 - Added: COVERAGEARMOR equipable item properties. If there is a COVERAGEARMOR value in an armor, you set what percentage of the ARMOR value you entered for that armor will be given to the character as armor. Previously, this value was fixed, there were fixed percentages for each armor area. If the COVERAGEARMOR value is not entered or is zero, the sphere will make armor calculations based on these fixed values.
+	Note: 
+	COVERAGEARMOR value can be entered above 100 percent.
+	Example; 
+	if ARMOR=10,COVERAGEARMOR=100 is entered, it determines that this character will give 100% of the armor value of that armor piece as armor, if COVERAGEARMOR=200 is entered, it gives 200% of ARMOR=10.
+
+	[ITEMDEF 01410]
+	DEFNAME=i_platemail_arms
+	ARMOR=30 <-- Up to 100%
+	COVERAGEARMOR=100
+	
+	[ITEMDEF 01411]
+	DEFNAME=i_platemail_leggings
+	ARMOR=30 <-- Up to 100%
+	COVERAGEARMOR=100
+	
+	If these values ​​are entered, the armor level the character will gain thanks to these parts will be 60 armor.
+	
+	[ITEMDEF 01410]
+	DEFNAME=i_platemail_arms
+	ARMOR=30 <-- Up to 50%
+	COVERAGEARMOR=50
+	
+	[ITEMDEF 01411]
+	DEFNAME=i_platemail_leggings
+	ARMOR=30 <-- Up to 50%
+	COVERAGEARMOR=50
+	
+	If these values ​​are entered, the armor level the character will gain thanks to these parts will be 30 armor.

@@ -530,14 +530,11 @@ void CChar::SetDisconnected(CSector* pNewSector)
     }
 
     // When you mount rideable creatures, it becomes logout and this is triggered. Since there is no such thing as logout for other creatures, it is only separated as animal.
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoading() && m_pNPC)
     {
-        if (m_pNPC && (m_pNPC->m_Brain == NPCBRAIN_ANIMAL && IsStatFlag(STATF_PET)))
+        if (IsTrigUsed(TRIGGER_LOGOUT))
         {
-            if (IsTrigUsed(TRIGGER_LOGOUT))
-            {
-                OnTrigger(CTRIG_LogOut, this, nullptr);
-            }
+            OnTrigger(CTRIG_LogOut, this, nullptr);
         }
     }
 
