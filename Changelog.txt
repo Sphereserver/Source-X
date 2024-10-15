@@ -4003,3 +4003,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	COVERAGEARMOR=50
 	
 	If these values ​​are entered, the armor level the character will gain thanks to these parts will be 30 armor.
+	
+13-10-2024, canerksk
+- Added: Added new local variable in WOPSYSTEM LOCAL.WOPTalkMode
+	In some clients, different operations can be performed in return for this, for example, if this talkmode went from sphere as TALKMODE SPELL, the operation is performed according to this incoming talk mode according to the client versions. Here, the possibility of changing the talkmode according to the client version used is given. By default, TALKMODE_SPELL
+	@SpellCast
+	Local.WOPTalkMode=0/15
