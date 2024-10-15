@@ -2096,50 +2096,62 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 	if ( fPause )
 	{
 		m_fResyncPause = true;
-        g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+        g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START)); // Only console log message
+
         CScriptTriggerArgs args;
-        args.m_iN1 = m_fResyncPause == true ? 1 : 0;
+        args.m_iN1 = m_fResyncPause ? 1 : 0;
+        args.m_iN2 = fMessage ? 1 : 0;
         g_Serv.r_Call("f_onserver_resync_start", &g_Serv, &args);
+        fMessage = args.m_iN2 == 1 ? true : false;
 
 		if ( fMessage )
-			CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+			CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START)); // World broadcast message
 		else if ( pSrc && pSrc->GetChar() )
-			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
+			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START)); // Only character message
 
 		g_Cfg.Unload(true);
 		SetServerMode(SERVMODE_ResyncPause);
 	}
 	else
 	{
-        g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART));
+        g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART)); // Only console log message
 		SetServerMode(SERVMODE_ResyncLoad);
         g_Serv.r_Call("f_onserver_resync_restart", &g_Serv, NULL);
 
 		if ( !g_Cfg.Load(true) )
 		{
-            g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
-            g_Serv.r_Call("f_onserver_resync_failed", &g_Serv, NULL);
+            g_Log.EventError("%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));  // Only console log message
+
+            CScriptTriggerArgs args;
+            args.m_iN1 = fMessage ? 1 : 0;
+            g_Serv.r_Call("f_onserver_resync_failed", &g_Serv, &args);
+            fMessage = args.m_iN1 == 1 ? true : false;
 
 			if ( fMessage )
-				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED)); // World broadcast message
 			else if ( pSrc && pSrc->GetChar() )
-				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED));
+				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_FAILED)); // Only character message
 		}
 		else
 		{
             CScriptTriggerArgs args;
-            args.m_iN1 = fMessage == true ? 1 : 0;
+            args.m_iN1 = fMessage ? 1 : 0;
             g_Serv.r_Call("f_onserver_resync_success", &g_Serv, &args);
+            fMessage = args.m_iN1 == 1 ? true : false;
 
-
-            g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
+            g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS)); // Only console log message
 			if ( fMessage )
-				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
+				CWorldComm::Broadcast(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS)); // World broadcast message
 			else if ( pSrc && pSrc->GetChar() )
-				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS));
+				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_SUCCESS)); // Only character message
+
 		}
 
 		m_fResyncPause = false;
+
+        CScriptTriggerArgs args;
+        args.m_iN1 = m_fResyncPause ? 1 : 0;
+        g_Serv.r_Call("f_onserver_resync_finish", &g_Serv, &args);
 
 		g_World.SyncGameTime();
 

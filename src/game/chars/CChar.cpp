@@ -105,8 +105,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemCreate",			//?
 	"@itemDamage",			//?
 	"@itemDCLICK",			// I have dclicked item
-	"@itemDeposit",			//+I am nearly destroyed
-	"@itemDestroy",			//+I am nearly destroyed
+	"@itemDeposit",			// IT_GOLD deposited virtualgold
+	"@itemDestroy",			// +I am nearly destroyed
 	"@itemDropOn_Char",		// I have been dropped on this char
 	"@itemDropOn_Ground",	// I dropped an item on the ground
 	"@itemDropOn_Item",		// I have been dropped on this item
@@ -529,9 +529,16 @@ void CChar::SetDisconnected(CSector* pNewSector)
         GetClientActive()->GetNetState()->markReadClosed();
     }
 
-    if (m_pNPC && IsTrigUsed(TRIGGER_LOGOUT))
+    // When you mount rideable creatures, it becomes logout and this is triggered. Since there is no such thing as logout for other creatures, it is only separated as animal.
+    if (!g_Serv.IsLoading())
     {
-        OnTrigger(CTRIG_LogOut, this, nullptr);
+        if (m_pNPC && (m_pNPC->m_Brain == NPCBRAIN_ANIMAL && IsStatFlag(STATF_PET)))
+        {
+            if (IsTrigUsed(TRIGGER_LOGOUT))
+            {
+                OnTrigger(CTRIG_LogOut, this, nullptr);
+            }
+        }
     }
 
 	if (m_pPlayer)

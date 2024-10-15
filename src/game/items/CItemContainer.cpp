@@ -1307,19 +1307,7 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			return false;
 		case ICV_EMPTY:
 		{
-			ClearContainer(false);
-            if (pSrc->GetChar())
-            {
-                CChar *pChar = pSrc->GetChar();
-                if (pChar->IsClientActive())
-                {
-                    CClient *pClient = pChar->GetClientActive();
-                    ASSERT(pClient);
-                    pClient->addItem(this); // may crash client if we dont do this.
-                    pClient->addContainerSetup(this);
-                    OnOpenEvent(pChar, GetTopLevelObj());
-                }
-            }
+			ClearContainer(true);
 			return true;
 		}
 		case ICV_FIXWEIGHT:

@@ -3902,3 +3902,76 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Changed: added desired FollowerSlots as a second argument to CURFOLLOWER.ADD. Default value: its FollowerSlots.
 - Changed: @FollowerUpdate ARGN1 and ARGN2 are now read-only. Having them RW and actually get them working would have meant many other changes, breaking script compatibility.
 - Fixed: CURFOLLOWER.DEL/DELETE/CLEAR not working properly.
+
+13-10-2024, canerksk
+- Added: @Deposit/@ItemDeposit trigger
+	SRC = Char (Player)
+	I/UID = Gold
+	RETURN 1 = Prevents depositing gold into the bank.
+	It works just like DROPON_ITEM/ITEMDROPON_ITEM.
+	When using the virtual gold feature, there was no trigger triggered when physical gold was deposited into the bank, the Dropon_Item was not working because it was triggered lower down, and instead of moving the Dropon_Item up, a separate trigger was added to track the money on the server more easily from another location.
+
+- Added: New optionflag OF_PetBehaviorOwnerNeutral
+	If this setting is enabled, pets you own will appear to you with the original noto (old behavior). If this setting is not enabled, the assets you own will always appear natural to you. This setting only applies when the owning character is looking at the asset they own. It does not apply when someone else is looking at the asset you own.
+
+- Added: @OpenBank trigger
+	SRC = Bank opener
+	I/UID = Bank owner
+	RETURN 1 = prevents the bank from opening.
+
+- Added: New CLOSECONTAINER and CLOSEVENDORMENU function
+	CLOSEVENDORMENU <vendor uid> OR CLOSEVENDORMENU empty if empty, 14 squares will close the sales menu of all near shops.
+		If no value is entered, it closes the sales menu of all vendors in the surrounding area (14 squares). If a value is entered and this value is the vendor uid, it closes the sales menu of the vendor belonging to that serial number.
+	CLOSECONTAINER <container uid>
+		Actually, there is already a package for this, but since dealing with the package takes a long time, such a command was needed. When CLOSECONTAINER <container uid> is entered, that container is closed in the interface.
+
+- Added: Added more server function
+	f_onserver_mode:
+		It is triggered when the server changes mode in any way, for example, saving, resyncing, loading, closing, etc.
+		ARGN1 = Server modes;
+			RestockAll = 0
+			GarbageCollection = 1
+			Saving = 2
+			Running = 3
+			ResyncPause = 4
+			PreLoadingINI = 5
+			Loading = 6 
+			ResyncLoad = 7
+			Exiting = 8
+		
+	f_onserver_resync_start
+		Triggered when resync starts.
+		ARGN1 = Resync Paused
+		ARGN2 = Broadcast message R/W, 1 = with broadcast, 0 = without broadcast
+		
+		
+	f_onserver_resync_restart
+		
+	f_onserver_resync_failed
+		ARGN1 = Broadcast message (R/W), 1 = with broadcast, 0 = without broadcast
+		
+	f_onserver_resync_success
+		ARGN1 = Broadcast message (R/W), 1 = with broadcast, 0 = without broadcast
+			
+	f_onserver_resync_finish
+		ARGN1 = Resync Paused
+		
+	f_onserver_save_stage
+		Triggered when save mode changes
+		ARGN1 = save step (R)
+		
+	f_onserver_save_force
+	f_onserver_save_try
+- Added: @Select/@SpellSelect 2 additional arguments were added to the trigger;
+	LOCAL.SearchBook 1/0 (R/W)
+		IF 1, a spellbook is needed when casting a spell and it looks for a spellbook in the bag, if zero, it casts a spell regardless of whether there is a spellbook or not. default 1
+	REF1 = Spellbook
+		There could be more than one spellbook in the bag, in this context we did not know which spellbook we were casting spells with. The spellbook that allows us to cast spells was set to ref1.
+		If there is no spellbook, this value, i.e. the ref1 value, will not appear.
+- Fixed: When you flood an entity you own with the all come macro, it either does not follow you or comes to you by jumping. If it is already following you, any second command is not valid on the mount. Because it is already following you at that moment. If the Act target of the entity changes or its action changes, when you say all come, the mount will try to come to you normally.
+- Fixed: If an entity poisoned me and I have poison from that entity on me and I take damage because of that poison, while the entity is alive, there is no problem, the damage I take aborts my ability to use my skills. But if the entity is dead, meaning that there is no such entity in the world, I take damage because of the poison from that deleted entity, but my skills do not work.
+- Added: Added NOREJOIN tag for corpses, If the NOREJOIN tag is one, the player cannot come back to life on that corpse. That is, the player comes back to life but not on the corpse.
+	This tag does not prevent the player from coming back to life, it just prevents them from respawning on that corpse. The player always comes back to life, but not on that corpse.
+- Added: @Logout trigger with npc.
+	There are some entities that can be logout, for example rideable entities that logout when mounted, but there was no trigger for this.
+- Added: COVERAGEARMOR equipable item properties. If there is a COVERAGEARMOR value in an armor, you set what percentage of the ARMOR value you entered for that armor will be given to the character as armor. Previously, this value was fixed, there were fixed percentages for each armor area. If the COVERAGEARMOR value is not entered or is zero, the sphere will make armor calculations based on these fixed values.

@@ -5622,50 +5622,47 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
                     goto stopandret;
             }
 
+            ITEMID_TYPE memoryId = Horse_GetMountItemID();
 
-            if (m_pNPC->m_Brain == NPCBRAIN_ANIMAL)
+            // 6) EVENTSNPCANIMAL triggers for all animals npc (without mountables)
+            if (m_pNPC->m_Brain == NPCBRAIN_ANIMAL && memoryId <= ITEMID_NOTHING)
             {
-                // 6) EVENTSNPCANIMAL triggers for all animals npc
-                ITEMID_TYPE memoryId = Horse_GetMountItemID();
-                if (memoryId <= ITEMID_NOTHING)
+                EXC_SET_BLOCK("NPC triggers - EVENTSNPCANIMAL");
+                for (size_t i = 0; i < g_Cfg.m_pEventsNPCAnimalLink.size(); ++i)
                 {
-                    EXC_SET_BLOCK("NPC triggers - EVENTSNPCANIMAL");
-                    for (size_t i = 0; i < g_Cfg.m_pEventsNPCAnimalLink.size(); ++i)
-                    {
-                        CResourceLink *pLink = g_Cfg.m_pEventsNPCAnimalLink[i].GetRef();
-                        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-                            continue;
+                    CResourceLink *pLink = g_Cfg.m_pEventsNPCAnimalLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
 
-                        CResourceLock s;
-                        if (!pLink->ResourceLock(s))
-                            continue;
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
 
-                        executedEvents.emplace(pLink);
-                        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-                        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
-                            goto stopandret;
-                    }
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
                 }
+            }
 
-                // 7) EVENTSNPCMOUNTABLE triggers for all mountables npc
-                if (memoryId > ITEMID_NOTHING)
+            // 7) EVENTSNPCMOUNTABLE triggers for all mountables npc
+            if (memoryId > ITEMID_NOTHING)
+            {
+                EXC_SET_BLOCK("NPC triggers - EVENTSNPCMOUNTABLE");
+                for (size_t i = 0; i < g_Cfg.m_pEventsNPCMountableLink.size(); ++i)
                 {
-                    EXC_SET_BLOCK("NPC triggers - EVENTSNPCMOUNTABLE");
-                    for (size_t i = 0; i < g_Cfg.m_pEventsNPCMountableLink.size(); ++i)
-                    {
-                        CResourceLink *pLink = g_Cfg.m_pEventsNPCMountableLink[i].GetRef();
-                        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-                            continue;
+                    CResourceLink *pLink = g_Cfg.m_pEventsNPCMountableLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
 
-                        CResourceLock s;
-                        if (!pLink->ResourceLock(s))
-                            continue;
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
 
-                        executedEvents.emplace(pLink);
-                        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-                        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
-                            goto stopandret;
-                    }
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
                 }
             }
 

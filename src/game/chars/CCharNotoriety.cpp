@@ -186,7 +186,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 				}
 			}
 
-			if (IsSetOF(OF_PetBehaviorOwnerNeutral) && NPC_IsOwnedBy(pCharViewer, false)) // All pets are neutral to their owners.
+			if (!IsSetOF(OF_PetBehaviorOwnerNeutral) && NPC_IsOwnedBy(pCharViewer, false)) // All pets are neutral to their owners.
 				return NOTO_NEUTRAL;
 		}
 
