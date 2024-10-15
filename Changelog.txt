@@ -3975,3 +3975,8 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: @Logout trigger with npc.
 	There are some entities that can be logout, for example rideable entities that logout when mounted, but there was no trigger for this.
 - Added: COVERAGEARMOR equipable item properties. If there is a COVERAGEARMOR value in an armor, you set what percentage of the ARMOR value you entered for that armor will be given to the character as armor. Previously, this value was fixed, there were fixed percentages for each armor area. If the COVERAGEARMOR value is not entered or is zero, the sphere will make armor calculations based on these fixed values.
+13-10-2024, canerksk
+- Added: Added new local variable in WOPSYSTEM LOCAL.WOPTalkMode
+	In some clients, different operations can be performed in return for this, for example, if this talkmode went from sphere as TALKMODE SPELL, the operation is performed according to this incoming talk mode according to the client versions. Here, the possibility of changing the talkmode according to the client version used is given. By default, TALKMODE_SPELL
+	@SpellCast
+	Local.WOPTalkMode=0/15
