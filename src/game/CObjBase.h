@@ -1089,6 +1089,7 @@ enum CTRIG_TYPE : short
 	CTRIG_HitIgnore,        // I should ignore this target, just giving a record to scripts.
 	CTRIG_HitMiss,          // I just missed.
 	CTRIG_HitParry,			// I succesfully parried an hit.
+	CTRIG_HitReactive,		// Reactive damage trigger
 	CTRIG_HitTry,           // I am trying to hit someone. starting swing.
     CTRIG_HouseDesignBegin, // Starting to customize.
     CTRIG_HouseDesignCommit, // I committed a new house design

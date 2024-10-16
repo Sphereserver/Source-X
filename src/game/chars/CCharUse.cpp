@@ -549,16 +549,19 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		return false;
 
 	CItem *pAmmo = nullptr;
-	const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
-	if (ridAmmo.IsValidUID() && ridAmmo.GetObjUID() > 0)
-	{
-		pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
-		if ( !pAmmo )
-		{
-			SysMessageDefault(DEFMSG_COMBAT_ARCH_NOAMMO);
-			return false;
-		}
-	}
+    if (pWeapon->GetKeyNum("OVERRIDE.AMMONOREQUIRED", true) != 1)
+    {
+        const CResourceID ridAmmo(pWeapon->Weapon_GetRangedAmmoRes());
+        if (ridAmmo.IsValidUID() && ridAmmo.GetObjUID() > 0)
+        {
+            pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
+            if (!pAmmo)
+            {
+                SysMessageDefault(DEFMSG_COMBAT_ARCH_NOAMMO);
+                return false;
+            }
+        }
+    }
 
 	// If there is a different ammo type on the butte, it must be removed first
 	ITEMID_TYPE ButteAmmoID = (ITEMID_TYPE)pButte->m_itArcheryButte.m_ridAmmoType.GetResIndex();
