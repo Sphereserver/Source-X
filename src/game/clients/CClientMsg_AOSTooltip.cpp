@@ -67,14 +67,17 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 	PacketPropertyList* propertyList = pObj->GetPropertyList();
 
-	if (propertyList == nullptr || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
+    CItem* pItem = pObj->IsItem() ? static_cast<CItem*>(pObj) : nullptr;
+    CChar* pChar = pObj->IsChar() ? static_cast<CChar*>(pObj) : nullptr;
+
+    //If pChar is a client we avoid to use cache because we always generate new tooltip for player.
+	if ((pChar && pChar->IsClientActive()) || propertyList == nullptr || propertyList->hasExpired(g_Cfg.m_iTooltipCache)) 
 	{
         pObj->m_TooltipData.clear();
 		pObj->FreePropertyList();
 
         CClientTooltip* t = nullptr;
-        CItem *pItem = pObj->IsItem() ? static_cast<CItem *>(pObj) : nullptr;
-        CChar *pChar = pObj->IsChar() ? static_cast<CChar *>(pObj) : nullptr;
+
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
 		if (fNameOnly) // if we only want to display the name

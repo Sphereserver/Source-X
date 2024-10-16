@@ -3917,7 +3917,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 - Added: @DisplayName give possibility to change the name other player see on the paperdoll and on status bar. Could be use on RP server where unknow person don't know your name before presentation.
          Since the name is use at many place, this trigger happen on 3 differents place in the source.
-         If you use tooltip, you must set TooltipCache=0 on ini to avoid other player see the tooltip you generate for a particular player.
          src.: The player requesting to view the name on the paperdoll or status
          i: The player stalked by the src.
          ARGS (R/W): The name to display
