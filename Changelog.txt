@@ -3943,6 +3943,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
       2593
 
       [EOF]
+- Changed: Now CHARDEFs can read custom Item Resources as an ICON, the restriction of being TILEDATA value is removed. (Issue: #1301)
 
 16-10-2024, canerksk
 Fixed: The mismatched default value check was causing the price of items without a set price to return as -2,147,483,648. (Issue: #1233)
