@@ -4009,3 +4009,20 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	In some clients, different operations can be performed in return for this, for example, if this talkmode went from sphere as TALKMODE SPELL, the operation is performed according to this incoming talk mode according to the client versions. Here, the possibility of changing the talkmode according to the client version used is given. By default, TALKMODE_SPELL
 	@SpellCast
 	Local.WOPTalkMode=0/15
+	
+	
+16-10-2024, canerksk
+- Added: New trigger @HitReactive Reactive Armor plays a key role in the action mechanism and is currently under very fixed rules. It has been added as a new trigger with some variables to make it a bit more flexible.
+	@HitReactive
+	Local.Sound (r/w) =Sound ID, If it is blank or zero, no sound is produced. (Default: 01F1)
+	Local.EffectID (r/w) = Effect ID, If it is empty or zero, no effect will occur. (Default: 0374a)
+	Local.Damage (r/w) = This is the more1l, or PolyStr, value coming from the reactive armor spell to i_rune_reactive_armor.
+	LOCAL.RefDamage (r/w) = The amount of damage that will be reflected to this other party
+	LOCAL.RedDam (r/w) = Amount to be deducted from damage received
+	LOCAL.ReactiveDamType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
+	NOTE; 
+		1. If no RefDamage or RedDam values ​​are entered, the system defaults to the Reactive Armor Effect value.
+		2. No damage amount can be less than 1.
+		
+- Added: New override tag OVERRIDE.AMMONOREQUIRED
+	If a weapon has this tag, it will not ask for an arrow when shooting.
