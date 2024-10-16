@@ -1,6 +1,7 @@
 #ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service
-	#include <process.h>				// getpid()
+    #include "../sphere/ntwindow.h"
+    #include <process.h>				// getpid()
 #else
 	#include "../sphere/UnixTerminal.h"
 #endif
@@ -14,25 +15,23 @@
 	#include "../network/linuxev.h"
 #endif
 
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CLog.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CUOInstall.h"
-#include "../common/sphereversion.h"	// sphere version
+#include "../common/sphereversion.h"
 #include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
-#include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
+#include "CObjBase.h"
 #include "CScriptProfiler.h"
-#include "CSector.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include <sstream>
 #include <cstdlib>
-
-// Headers for InitRuntimeStaticMembers
-#include "clients/CClient.h"
 
 
 // Dynamic allocation of some global stuff
@@ -72,12 +71,8 @@ GlobalInitializer::GlobalInitializer()
 
 //--- Exception handling
 
-    // Set exception catcher?
-#if defined(_WIN32) && defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
-    // We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
-    // We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
-    //	compiler flag, which slows down code a bit.
-    SetExceptionTranslator();
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
+    SetWindowsStructuredExceptionTranslator();
 #endif
 
 	// Set function to handle the invalid case where a pure virtual function is called.
@@ -121,6 +116,9 @@ void GlobalInitializer::PeriodicSyncTimeConstants() // static
 #endif  // _WIN32
 }
 
+
+/* Start global declarations */
+
 static GlobalInitializer g_GlobalInitializer;
 
 #ifdef _WIN32
@@ -135,8 +133,12 @@ UnixTerminal g_UnixTerminal;
 LinuxEv g_NetworkEvent;
 #endif
 
+CLog			g_Log;
+
 // Config data from sphere.ini is needed from the beginning.
-CServerConfig	g_Cfg;
+CServerConfig   g_Cfg;
+CServer         g_Serv;   // current state, stuff not saved.
+CAccounts       g_Accounts;			// All the player accounts. name sorted CAccount
 
 // Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
@@ -150,22 +152,16 @@ CWorld			g_World;			// the world. (we save this stuff)
 
 
 // Again, game servers stuff.
-CServer			g_Serv;				// current state, stuff not saved.
-
-
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
 CSRand          g_Rand;
 CExpression		g_Exp;				// Global script variables.
-CLog			g_Log;
-CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
 
-MainThread g_Main;
-extern PingServer g_PingServer;
-extern CDataBaseAsyncHelper g_asyncHdb;
+static MainThread g_Main;
+static PingServer g_PingServer;
 
 
 
@@ -173,7 +169,7 @@ extern CDataBaseAsyncHelper g_asyncHdb;
 //	Main server loop
 
 MainThread::MainThread()
-	: AbstractSphereThread("T_Main", IThread::RealTime)
+	: AbstractSphereThread("T_Main", ThreadPriority::RealTime)
 {
     m_profile.EnableProfile(PROFILE_NETWORK_RX);
     m_profile.EnableProfile(PROFILE_CLIENTS);
@@ -192,7 +188,6 @@ MainThread::MainThread()
 void MainThread::onStart()
 {
 	AbstractSphereThread::onStart();
-	SetExceptionTranslator();
 }
 
 void MainThread::tick()
@@ -212,16 +207,16 @@ bool MainThread::shouldExit() noexcept
 
 static bool WritePidFile(int iMode = 0)
 {
-	lpctstr	file = SPHERE_FILE ".pid";
+	lpctstr	fileName = SPHERE_FILE ".pid";
 	FILE* pidFile;
 
 	if (iMode == 1)		// delete
 	{
-		return (STDFUNC_UNLINK(file) == 0);
+		return (STDFUNC_UNLINK(fileName) == 0);
 	}
 	else if (iMode == 2)	// check for .pid file
 	{
-		pidFile = fopen(file, "r");
+		pidFile = fopen(fileName, "r");
 		if (pidFile)
 		{
 			g_Log.Event(LOGM_INIT, SPHERE_FILE ".pid already exists. Secondary launch or unclean shutdown?\n");
@@ -231,7 +226,7 @@ static bool WritePidFile(int iMode = 0)
 	}
 	else
 	{
-		pidFile = fopen(file, "w");
+		pidFile = fopen(fileName, "w");
 		if (pidFile)
 		{
 			pid_t spherepid = STDFUNC_GETPID();
@@ -449,7 +444,7 @@ static void Sphere_MainMonitorLoop()
 			if ( g_Serv.GetExitFlag() )
 				break;
 
-			Sleep(1000);
+            SLEEP(1000);
 		}
 
 		EXC_SET_BLOCK("Checks");
@@ -468,302 +463,6 @@ static void Sphere_MainMonitorLoop()
 }
 
 
-//******************************************************
-
-static void dword_q_sort(dword *numbers, dword left, dword right)
-{
-	dword pivot, l_hold, r_hold;
-
-	l_hold = left;
-	r_hold = right;
-	pivot = numbers[left];
-	while (left < right)
-	{
-		while ((numbers[right] >= pivot) && (left < right)) right--;
-		if (left != right)
-		{
-			numbers[left] = numbers[right];
-			left++;
-		}
-		while ((numbers[left] <= pivot) && (left < right)) left++;
-		if (left != right)
-		{
-			numbers[right] = numbers[left];
-			right--;
-		}
-	}
-	numbers[left] = pivot;
-	pivot = left;
-	left = l_hold;
-	right = r_hold;
-	if (left < pivot)
-		dword_q_sort(numbers, left, pivot-1);
-	if (right > pivot)
-		dword_q_sort(numbers, pivot+1, right);
-}
-
-void defragSphere(char *path)
-{
-	ASSERT(path != nullptr);
-
-	CSFileText inf;
-	CSFile ouf;
-	char z[_MAX_PATH], z1[_MAX_PATH], buf[1024];
-	size_t i;
-	char *p = nullptr, *p1 = nullptr;
-	size_t dBytesRead;
-	size_t dTotalMb;
-	const size_t mb10 = 10*1024*1024;
-	const size_t mb5 = 5*1024*1024;
-	bool bSpecial;
-
-	g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " SPHERE_TITLE " saves.\n"
-		"Use it on your risk and if you know what you are doing since it can possibly harm your server.\n"
-		"The process can take up to several hours depending on the CPU you have.\n"
-		"After finished, you will have your '" SPHERE_FILE "*.scp' files converted and saved as '" SPHERE_FILE "*.scp.new'.\n");
-
-	constexpr dword MAX_UID = 40'000'000U; // limit to 100mln of objects, takes 100mln*4 ~= 400mb
-	dword dwIdxUID = 0;
-	dword* puids = (dword*)calloc(MAX_UID, sizeof(dword));
-	for ( i = 0; i < 3; ++i )
-	{
-		Str_CopyLimitNull(z, path, sizeof(z));
-		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
-		else if ( i == 1 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
-		else				strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
-
-		g_Log.Event(LOGM_INIT, "Reading current UIDs: %s\n", z);
-		if ( !inf.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
-		{
-			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
-			continue;
-		}
-		dBytesRead = dTotalMb = 0;
-		while ((dwIdxUID < MAX_UID) && !feof(inf._pStream))
-		{
-			fgets(buf, sizeof(buf), inf._pStream);
-			dBytesRead += strlen(buf);
-			if ( dBytesRead > mb10 )
-			{
-				dBytesRead -= mb10;
-				dTotalMb += 10;
-				g_Log.Event(LOGM_INIT, "Total read %" PRIuSIZE_T " Mb\n", dTotalMb);
-			}
-			if (( buf[0] == 'S' ) && ( strstr(buf, "SERIAL=") == buf ))
-			{
-				p = buf + 7;
-				p1 = p;
-				while (*p1 && (*p1 != '\r') && (*p1 != '\n'))
-				{
-					++p1;
-				}
-				*p1 = 0;
-
-				//	prepare new uid
-				*(p-1) = '0';
-				*p = 'x';
-				--p;
-				puids[dwIdxUID++] = strtoul(p, &p1, 16);
-			}
-		}
-		inf.Close();
-	}
-	const dword dwTotalUIDs = dwIdxUID;
-	g_Log.Event(LOGM_INIT, "Totally having %" PRIu32 " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
-
-	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
-	dword_q_sort(puids, 0, dwTotalUIDs -1);
-
-	for ( i = 0; i < 5; ++i )
-	{
-		Str_CopyLimitNull(z, path, sizeof(z));
-		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
-		else if ( i == 1 )	strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
-		else if ( i == 2 )	strcat(z, SPHERE_FILE "data" SPHERE_SCRIPT);
-		else if ( i == 3 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
-		else if ( i == 4 )	strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
-		g_Log.Event(LOGM_INIT, "Updating UID-s in %s to %s.new\n", z, z);
-		if ( !inf.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
-		{
-			g_Log.Event(LOGM_INIT, "Cannot open file for reading. Skipped!\n");
-			continue;
-		}
-		Str_ConcatLimitNull(z, ".new", sizeof(z));
-		if ( !ouf.Open(z, OF_WRITE|OF_CREATE|OF_DEFAULTMODE) )
-		{
-			g_Log.Event(LOGM_INIT, "Cannot open file for writing. Skipped!\n");
-			continue;
-		}
-
-		dBytesRead = dTotalMb = 0;
-		while ( inf.ReadString(buf, sizeof(buf)) )
-		{
-			dwIdxUID = (dword)strlen(buf);
-			if (dwIdxUID > (ARRAY_COUNT(buf) - 3))
-				dwIdxUID = ARRAY_COUNT(buf) - 3;
-
-			buf[dwIdxUID] = buf[dwIdxUID +1] = buf[dwIdxUID +2] = 0;	// just to be sure to be in line always
-							// NOTE: it is much faster than to use memcpy to clear before reading
-			bSpecial = false;
-			dBytesRead += dwIdxUID;
-			if ( dBytesRead > mb5 )
-			{
-				dBytesRead -= mb5;
-				dTotalMb += 5;
-				g_Log.Event(LOGM_INIT, "Total processed %" PRIuSIZE_T " Mb\n", dTotalMb);
-			}
-			p = buf;
-
-			//	Note 28-Jun-2004
-			//	mounts seems having ACTARG1 > 0x30000000. The actual UID is ACTARG1-0x30000000. The
-			//	new also should be new+0x30000000. need investigation if this can help making mounts
-			//	not to disappear after the defrag
-			if (( buf[0] == 'A' ) && ( strstr(buf, "ACTARG1=0") == buf ))		// ACTARG1=
-				p += 8;
-			else if (( buf[0] == 'C' ) && ( strstr(buf, "CONT=0") == buf ))			// CONT=
-				p += 5;
-			else if (( buf[0] == 'C' ) && ( strstr(buf, "CHARUID=0") == buf ))		// CHARUID=
-				p += 8;
-			else if (( buf[0] == 'L' ) && ( strstr(buf, "LASTCHARUID=0") == buf ))	// LASTCHARUID=
-				p += 12;
-			else if (( buf[0] == 'L' ) && ( strstr(buf, "LINK=0") == buf ))			// LINK=
-				p += 5;
-			else if (( buf[0] == 'M' ) && ( strstr(buf, "MEMBER=0") == buf ))		// MEMBER=
-			{
-				p += 7;
-				bSpecial = true;
-			}
-			else if (( buf[0] == 'M' ) && ( strstr(buf, "MORE1=0") == buf ))		// MORE1=
-				p += 6;
-			else if (( buf[0] == 'M' ) && ( strstr(buf, "MORE2=0") == buf ))		// MORE2=
-				p += 6;
-			else if (( buf[0] == 'S' ) && ( strstr(buf, "SERIAL=0") == buf ))		// SERIAL=
-				p += 7;
-			else if ((( buf[0] == 'T' ) && ( strstr(buf, "TAG.") == buf )) ||		// TAG.=
-					 (( buf[0] == 'R' ) && ( strstr(buf, "REGION.TAG") == buf )))
-			{
-				while ( *p && ( *p != '=' ))
-                    ++p;
-				++p;
-			}
-			else if (( i == 2 ) && strchr(buf, '='))	// spheredata.scp - plain VARs
-			{
-				while ( *p && ( *p != '=' ))
-                    ++p;
-				++p;
-			}
-			else
-                p = nullptr;
-
-			//	UIDs are always hex, so prefixed by 0
-			if ( p && ( *p != '0' ))
-                p = nullptr;
-
-			//	here we got potentialy UID-contained variable
-			//	check if it really is only UID-like var containing
-			if ( p )
-			{
-				p1 = p;
-				while ( *p1 &&
-					((( *p1 >= '0' ) && ( *p1 <= '9' )) ||
-					 (( *p1 >= 'a' ) && ( *p1 <= 'f' ))) )
-                    ++p1;
-				if ( !bSpecial )
-				{
-					if ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' )) // some more text in line
-						p = nullptr;
-				}
-			}
-
-			//	here we definitely know that this is very uid-like
-			if ( p )
-			{
-				char c, c1, c2;
-				c = *p1;
-
-				*p1 = 0;
-				//	here in p we have the current value of the line.
-				//	check if it is a valid UID
-
-				//	prepare converting 0.. to 0x..
-				c1 = *(p-1);
-				c2 = *p;
-				*(p-1) = '0';
-				*p = 'x';
-				--p;
-				dwIdxUID = strtoul(p, &p1, 16);
-				++p;
-				*(p-1) = c1;
-				*p = c2;
-				//	Note 28-Jun-2004
-				//	The search algourytm is very simple and fast. But maybe integrate some other, at least /2 algorythm
-				//	since has amount/2 tryes at worst chance to get the item and never scans the whole array
-				//	It should improve speed since defragmenting 150Mb saves takes ~2:30 on 2.0Mhz CPU
-				{
-					dword dStep = dwTotalUIDs /2;
-					dword d = dStep;
-					for (;;)
-					{
-						dStep /= 2;
-
-						if ( puids[d] == dwIdxUID)
-						{
-							dwIdxUID = d | (puids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
-							break;
-						}
-						else
-						{
-							if (puids[d] < dwIdxUID)
-								d += dStep;
-							else
-								d -= dStep;
-						}
-
-						if ( dStep == 1 )
-						{
-							dwIdxUID = 0xFFFFFFFFL;
-							break; // did not find the UID
-						}
-					}
-				}
-
-				//	Search for this uid in the table
-/*				for ( d = 0; d < dTotalUIDs; d++ )
-				{
-					if ( !uids[d] )	// end of array
-					{
-						uid = 0xFFFFFFFFL;
-						break;
-					}
-					else if ( uids[d] == uid )
-					{
-						uid = d | (uids[d]&0xF0000000);	// do not forget attach item and special flags like 04..
-						break;
-					}
-				}*/
-
-				//	replace UID by the new one since it has been found
-				*p1 = c;
-				if (dwIdxUID != 0xFFFFFFFFL )
-				{
-					*p = 0;
-					strcpy(z, p1);
-					snprintf(z1, sizeof(z1), "0%" PRIx32, dwIdxUID);
-					strcat(buf, z1);
-					strcat(buf, z);
-				}
-			}
-			//	output the resulting line
-			ouf.Write(buf, (int)strlen(buf));
-		}
-		inf.Close();
-		ouf.Close();
-	}
-	free(puids);
-	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
-}
-
-
 void atexit_handler()
 {
 	ThreadHolder::get().markThreadsClosing();
@@ -773,13 +472,13 @@ void atexit_handler()
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
 #else
-int _cdecl main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 #endif
 {
 	static constexpr lpctstr m_sClassName = "main";
 	EXC_TRY("MAIN");
 
-    	const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
+    const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
 	if (atexit_handler_result != 0)
 	{
 		g_Log.Event(LOGL_CRIT, "atexit handler registration failed.\n");
@@ -788,13 +487,14 @@ int _cdecl main( int argc, char * argv[] )
 
 	{
         // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
-        	const IThread* curthread = ThreadHolder::get().current();
+        const AbstractThread* curthread = ThreadHolder::get().current();
         ASSERT(curthread != nullptr);
         ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
+        (void)curthread;
     }
 
 #ifndef _WIN32
-    IThread::setThreadName("T_SphereStartup");
+    AbstractThread::setThreadName("T_SphereStartup");
 
     g_UnixTerminal.start();
 
@@ -826,7 +526,7 @@ int _cdecl main( int argc, char * argv[] )
 		if (fShouldCoreRunInSeparateThread)
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
-			IThread::setThreadName("T_Monitor");
+            AbstractThread::setThreadName("T_Monitor");
 			Sphere_MainMonitorLoop();	// Use this thread to monitor if the others are stuck
 		}
 		else
@@ -847,7 +547,7 @@ exit_server:
     {
         while (g_NTWindow.isActive())
         {
-            Sleep (100);
+            SLEEP(100);
         }
     }
 #endif

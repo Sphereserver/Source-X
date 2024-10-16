@@ -31,11 +31,13 @@ public:
 
 	// Args passed with the key.
 	bool HasArgs() const;
-	tchar * GetArgRaw() const;				// Not need to parse at all.
-	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
-	inline tchar * GetArgStr() {
-		return GetArgStr(nullptr);
-	}
+
+    // Not need to parse at all.
+    tchar * GetArgRaw() const;
+
+    // this could be a quoted string ?
+    tchar * GetArgStr(bool * fQuoted = nullptr);
+
 
 	char GetArgCVal();
 	uchar GetArgUCVal();
@@ -62,13 +64,14 @@ public:
 	dword GetArgFlag( dword dwStart, dword dwMask );
     int64 GetArgLLFlag( uint64 iStart, uint64 iMask );
 
-public:
+// This class is meant only to be inherited.
+protected:
 	CScriptKey();
 	CScriptKey( tchar * ptcKey, tchar * ptcArg );
-	virtual ~CScriptKey() = default;
-private:
-	CScriptKey(const CScriptKey& copy);
-	CScriptKey& operator=(const CScriptKey& other);
+	~CScriptKey() = default;
+
+    CScriptKey(const CScriptKey& copy) = delete;
+	CScriptKey& operator=(const CScriptKey& other) = delete;
 };
 
 class CScriptKeyAlloc : public CScriptKey
@@ -91,11 +94,10 @@ public:
 
 public:
 	CScriptKeyAlloc() = default;
-	virtual ~CScriptKeyAlloc() = default;
+	~CScriptKeyAlloc() = default;
 
-private:
-	CScriptKeyAlloc(const CScriptKeyAlloc& copy);
-	CScriptKeyAlloc& operator=(const CScriptKeyAlloc& other);
+	CScriptKeyAlloc(const CScriptKeyAlloc& copy) = delete;
+	CScriptKeyAlloc& operator=(const CScriptKeyAlloc& other) = delete;
 };
 
 
@@ -138,8 +140,8 @@ private:	virtual void _Close() override;
 public:     virtual void Close() override;
 private:    virtual int _Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
 public:     virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
-private:    bool _SeekContext( CScriptLineContext LineContext );
-public:     bool SeekContext( CScriptLineContext LineContext );
+private:    bool _SeekContext( CScriptLineContext const& LineContext );
+public:     bool SeekContext( CScriptLineContext const& LineContext );
 private:	CScriptLineContext _GetContext() const;
 public:     CScriptLineContext GetContext() const;
 
@@ -157,8 +159,8 @@ public:
 	bool ReadKeyParse();
 
 	// Write stuff out to a script file.
-	bool _cdecl WriteSection(lpctstr pszSection, ...) __printfargs(2,3);
-	void _cdecl WriteKeyFormat(lpctstr ptcKey, lpctstr pszFormat, ...) __printfargs(3,4);
+    bool WriteSection(lpctstr pszSection, ...) SPHERE_PRINTFARGS(2,3);
+    void WriteKeyFormat(lpctstr ptcKey, lpctstr pszFormat, ...) SPHERE_PRINTFARGS(3,4);
 	bool WriteKeySingle(lptstr ptcKey);
 	bool WriteKeyStr(lpctstr ptcKey, lpctstr ptcVal);
 

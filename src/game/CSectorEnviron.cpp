@@ -2,14 +2,14 @@
 #include "CSectorEnviron.h"
 
 
-CSectorEnviron::CSectorEnviron()
+CSectorEnviron::CSectorEnviron() noexcept
 {
     m_Light = LIGHT_BRIGHT;	// set based on time later.
     m_Season = SEASON_Summer;
     m_Weather = WEATHER_DRY;
 }
 
-void CSectorEnviron::SetInvalid()
+void CSectorEnviron::SetInvalid() noexcept
 {
     // Force a resync of all this. we changed location by teleport etc.
     m_Light = UINT8_MAX;	// set based on time later.

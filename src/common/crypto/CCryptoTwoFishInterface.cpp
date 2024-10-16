@@ -1,6 +1,7 @@
+#include "../../network/net_datatypes.h"
 #include "../../sphere/threads.h"
-#include "../sphereproto.h"
 #include "CCrypto.h"
+#include <cstring>
 
 extern "C" {
 #include <twofish/twofish.h>

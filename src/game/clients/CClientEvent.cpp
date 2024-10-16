@@ -1,20 +1,22 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
+#include "../items/CItemContainer.h"
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -1030,7 +1032,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	}
 
 	addPlayerWarMode();
-	m_pChar->UpdateMode( this, m_pChar->IsStatFlag( STATF_DEAD ));
+    m_pChar->UpdateMode(m_pChar->IsStatFlag(STATF_DEAD), this);
 }
 
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
@@ -1192,8 +1194,8 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
                     CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
                     if (pPetDef)
                     {
-                        short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
-                        if (!m_pChar->FollowersUpdate(pVendor, (maximum(0, iFollowerSlots) * items[i].m_vcAmount), true))
+                        const short uiFollowerSlots = n64_narrow_n16(pItem->GetDefNum("FOLLOWERSLOTS", true));
+                        if (!m_pChar->FollowersUpdate(pVendor, (uiFollowerSlots * items[i].m_vcAmount), true))
                         {
                             m_pChar->SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
                             return;
@@ -2234,7 +2236,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 		ptcKey += 6;
 		SKIP_SEPARATORS(ptcKey);
 
-		size_t iQty = m_CheckArray.size();
+        const size_t iQty = m_CheckArray.size();
 		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
@@ -2252,17 +2254,17 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( ptcKey );
+        const dword dwNum = Exp_GetDWSingle( ptcKey );
 		SKIP_SEPARATORS(ptcKey);
 		for ( uint i = 0; i < iQty; ++i )
 		{
 			if ( dwNum == m_CheckArray[i] )
 			{
-				sVal = "1";
+                sVal.SetValTrue();
 				return true;
 			}
 		}
-		sVal = "0";
+		sVal.SetValFalse();
 		return true;
 	}
 	if ( ! strnicmp( ptcKey, "ARGTXT", 6 ))
@@ -2270,14 +2272,14 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 		ptcKey += 6;
 		SKIP_SEPARATORS(ptcKey);
 
-		size_t iQty = m_TextArray.size();
+        const size_t iQty = m_TextArray.size();
 		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( ptcKey );
+        const dword dwNum = Exp_GetDWSingle( ptcKey );
 		SKIP_SEPARATORS(ptcKey);
 
 		for ( uint i = 0; i < iQty; ++i )
@@ -2693,7 +2695,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 			else if (m_pChar->m_pParty != nullptr && m_pChar->m_pParty->IsPartyMaster(m_pChar))
 			{
-				if (m_pChar->m_pParty == nullptr)
+				if (pChar->m_pParty == nullptr)
 					m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 				else if (pChar->m_pParty == m_pChar->m_pParty)
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);

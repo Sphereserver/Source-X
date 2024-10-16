@@ -6,9 +6,12 @@
 #ifndef _INC_CRESOURCESORTEDARRAYS_H
 #define _INC_CRESOURCESORTEDARRAYS_H
 
+#include "../../common/sphere_library/CSObjSortArray.h"
 #include "../../common/sphere_library/sptr_containers.h"
-#include "../CServerMap.h"
+#include "../../game/uo_files/uofiles_types.h"
 
+class CScriptObj;
+class CUOMulti;
 struct CValStr;
 
 

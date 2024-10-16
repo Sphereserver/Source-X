@@ -6,10 +6,6 @@
 #ifndef _INC_CSREFERENCECOUNT_H
 #define _INC_CSREFERENCECOUNT_H
 
-#include <type_traits>
-#include <utility>
-//#include <variant>
-
 template <typename T>
 class CSReferenceCountedOwned;
 //template <typename T>
@@ -127,6 +123,10 @@ public:
 
 /*
 Not yet working
+
+#include <type_traits>
+#include <utility>
+//#include <variant>
 
 template <typename T>
 class CSReferenceCountedVariant : protected std::variant<CSReferenceCounted<T>, CSReferenceCountedOwned<T>>

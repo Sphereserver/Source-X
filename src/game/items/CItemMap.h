@@ -14,8 +14,7 @@ struct CMapPinRec // Pin on a map
 	short m_x;
 	short m_y;
 
-public:
-	CMapPinRec( short x, short y )
+    CMapPinRec( short x, short y ) noexcept
 		: m_x(x), m_y(y)
 	{
 	}
@@ -39,9 +38,8 @@ public:
     CItemMap( ITEMID_TYPE id, CItemBase * pItemDef );
     virtual ~CItemMap();
 
-private:
-    CItemMap(const CItemMap& copy);
-    CItemMap& operator=(const CItemMap& other);
+    CItemMap(const CItemMap& copy) = delete;
+    CItemMap& operator=(const CItemMap& other) = delete;
 
 public:
     virtual bool IsSameType( const CObjBase * pObj ) const override;

@@ -6,12 +6,11 @@
 #ifndef _INC_CBASE_H
 #define _INC_CBASE_H
 
-#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
+#include "../common/resource/CResourceQty.h"
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"
-#include "components/CCFaction.h"
 #include "CEntityProps.h"
 
 
@@ -139,16 +138,21 @@ public:
 
 	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
 
-    CCFaction _pFaction;
-
-
 public:
-    CCFaction GetFaction();
+    /**
+     * @brief   Gets definition pointer.
+     * @param   ptcKey  The key.
+     * @return  The definition pointer.
+     */
+    CVarDefCont * GetKey( lpctstr ptcKey ) const
+    {
+        return m_BaseDefs.GetKey(ptcKey);
+    }
 
     /**
      * @brief   Gets definition string.
      * @param   ptcKey  The key.
-     * @param   fZero   true to zero.
+     * @param   fZero   Return "0" if empty/undefined.
      * @return  The definition string.
      */
 	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
@@ -199,8 +203,8 @@ public:
 	}
 
 public:
-	CBaseBaseDef( CResourceID id );
-	virtual ~CBaseBaseDef();
+	CBaseBaseDef( CResourceID const& id );
+	virtual ~CBaseBaseDef() = default;
 
 	CBaseBaseDef(const CBaseBaseDef& copy) = delete;
 	CBaseBaseDef& operator=(const CBaseBaseDef& other) = delete;

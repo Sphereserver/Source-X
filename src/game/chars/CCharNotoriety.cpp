@@ -1,5 +1,9 @@
 // Actions specific to an NPC.
-#include "../clients/CClient.h"
+#include "../../common/CExpression.h"
+#include "../../common/CException.h"
+#include "../../common/CScriptTriggerArgs.h"
+#include "../items/CItemMemory.h"
+#include "../items/CItemStone.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -708,13 +712,13 @@ void CChar::NotoSave_Clear()
 		m_notoSaves.clear();
 }
 
-void CChar::NotoSave_Update()
+void CChar::NotoSave_Update(bool fCharFullUpdate)
 {
 	//ADDTOCALLSTACK_DEBUG("CChar::NotoSave_Update");
     EXC_TRY("NotoSave_Update");
 
     NotoSave_Clear();
-	UpdateMode();
+    UpdateMode(fCharFullUpdate, nullptr);
 	UpdatePropertyFlag();
 
     EXC_CATCH;

@@ -1,8 +1,11 @@
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
+#include "../items/CItemStone.h"
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldMap.h"
@@ -2687,7 +2690,7 @@ bool CItemMulti::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                     break;
                 }
             }
-            sVal.FormatVal(0);
+            sVal.SetValFalse();
             break;
         }
         case SHL_REGION:

@@ -11,19 +11,20 @@
 #include "../common/CRect.h"
 #include "CTeleport.h"
 
-
+class CChar;
 class CItem;
 class CSector;
 class CTeleport;
 
 struct CSectorObjCont
 {
-    // Marker class.
+    // Marker class, consider it as a "tag".
 };
 
 struct CCharsDisconnectList : public CSObjCont, public CSectorObjCont
 {
-	CCharsDisconnectList() = default;
+	CCharsDisconnectList();
+    virtual ~CCharsDisconnectList();
 	CCharsDisconnectList(const CCharsDisconnectList& copy) = delete;
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other) = delete;
 
@@ -41,6 +42,7 @@ protected:
 
 public:
 	CCharsActiveList();
+    ~CCharsActiveList();
 	CCharsActiveList(const CCharsActiveList& copy) = delete;
 	CCharsActiveList& operator=(const CCharsActiveList& other) = delete;
 

@@ -17,7 +17,6 @@
 	#include <netinet/in.h>
 	#include <unistd.h>
 	#include <arpa/inet.h>
-	#include <signal.h>
 	#include <fcntl.h>
 
 	// Compatibility stuff.

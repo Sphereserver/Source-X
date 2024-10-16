@@ -2,12 +2,13 @@
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
-#include "CException.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "CVarDefMap.h"
 
+
+CVarDefCont::~CVarDefCont() = default;
 
 inline static int VarDefCompare(const CVarDefCont* pVar, lpctstr ptcKey) noexcept
 {

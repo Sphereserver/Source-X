@@ -160,7 +160,7 @@ protected:
 public:
 	explicit PacketSend(byte id, uint len = 0, Priority priority = PRI_NORMAL);
 	PacketSend(const PacketSend* other);
-	virtual ~PacketSend() { };
+	virtual ~PacketSend();
 
 private:
 	PacketSend& operator=(const PacketSend& other);
@@ -199,14 +199,13 @@ protected:
 class PacketTransaction
 {
 protected:
-	PacketTransaction(void) { };
+	PacketTransaction(void) = default;
 
-private:
-	PacketTransaction(const PacketTransaction& copy);
-	PacketTransaction& operator=(const PacketTransaction& other);
+	PacketTransaction(const PacketTransaction& copy) = delete;
+	PacketTransaction& operator=(const PacketTransaction& other) = delete;
 
 public:
-	virtual ~PacketTransaction(void) { };
+	virtual ~PacketTransaction(void);
 
 	virtual PacketSend* front(void) = 0; // get first packet in the transaction
 	virtual void pop(void) = 0; // remove first packet from the transaction
@@ -232,11 +231,10 @@ private:
 
 public:
 	explicit SimplePacketTransaction(PacketSend* packet) : m_packet(packet) { };
-	~SimplePacketTransaction(void);
+	virtual ~SimplePacketTransaction(void);
 
-private:
-	SimplePacketTransaction(const SimplePacketTransaction& copy);
-	SimplePacketTransaction& operator=(const SimplePacketTransaction& other);
+	SimplePacketTransaction(const SimplePacketTransaction& copy) = delete;
+	SimplePacketTransaction& operator=(const SimplePacketTransaction& other) = delete;
 
 public:
 	CNetState* getTarget(void) const { return m_packet->getTarget(); }

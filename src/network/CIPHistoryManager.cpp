@@ -5,8 +5,6 @@
 #include "CIPHistoryManager.h"
 #include <algorithm>
 
-#define NETHISTORY_PINGDECAY	60		// time to decay 1 'ping'
-
 
 /***************************************************************************
  *
@@ -19,7 +17,7 @@
 void HistoryIP::update(void)
 {
     // reset ttl
-    m_ttl = g_Cfg.m_iNetHistoryTTL;
+    m_iTTLSeconds = g_Cfg.m_iNetHistoryTTLSeconds;
 }
 
 bool HistoryIP::checkPing(void)
@@ -27,7 +25,7 @@ bool HistoryIP::checkPing(void)
     // ip is pinging, check if blocked
     update();
 
-    return (m_blocked || (m_pings++ >= g_Cfg.m_iNetMaxPings));
+    return (m_fBlocked || (m_iPings++ >= g_Cfg.m_iNetMaxPings));
 }
 
 void HistoryIP::setBlocked(bool isBlocked, int64 timeoutSeconds)
@@ -42,12 +40,12 @@ void HistoryIP::setBlocked(bool isBlocked, int64 timeoutSeconds)
         timeoutSeconds = args.m_iN1;
     }
 
-    m_blocked = isBlocked;
+    m_fBlocked = isBlocked;
 
     if (isBlocked && timeoutSeconds >= 0)
-        m_blockExpire = CWorldGameTime::GetCurrentTime().GetTimeRaw() + (timeoutSeconds * MSECS_PER_SEC);
+        m_iBlockExpireMs = CWorldGameTime::GetCurrentTime().GetTimeRaw() + (timeoutSeconds * MSECS_PER_SEC);
     else
-        m_blockExpire = 0;
+        m_iBlockExpireMs = 0;
 }
 
 /***************************************************************************
@@ -79,33 +77,33 @@ void IPHistoryManager::tick(void)
 
     for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
     {
-        if (it->m_blocked)
+        if (it->m_fBlocked)
         {
             // blocked ips don't decay, but check if the ban has expired
-            if (it->m_blockExpire > 0 && (CWorldGameTime::GetCurrentTime().GetTimeRaw() > it->m_blockExpire))
+            if (it->m_iBlockExpireMs > 0 && (CWorldGameTime::GetCurrentTime().GetTimeRaw() > it->m_iBlockExpireMs))
                 it->setBlocked(false);
         }
         else if (decayTTL)
         {
-            if (it->m_connected == 0 && it->m_connecting == 0)
+            if (it->m_iAliveSuccessfulConnections == 0 && it->m_iPendingConnectionRequests == 0)
             {
                 // start to forget about clients who aren't connected
-                if (it->m_ttl >= 0)
-                    --it->m_ttl;
+                if (it->m_iTTLSeconds >= 0)
+                    --it->m_iTTLSeconds;
             }
 
             // wait a 5th of TTL between each ping decay, but do not wait less than 30 seconds
-            if (it->m_pings > 0 && --it->m_pingDecay < 0)
+            if (it->m_iPings > 0 && --it->m_iPingDecay < 0)
             {
-                --it->m_pings;
-                it->m_pingDecay = NETHISTORY_PINGDECAY;
+                --it->m_iPings;
+                it->m_iPingDecay = std::max(30, g_Cfg.m_iNetHistoryTTLSeconds / 5);
             }
         }
     }
 
     // clear old ip history
     std::erase_if(m_ips, [](HistoryIP const& elem) {
-        return elem.m_ttl < 0;
+        return elem.m_iTTLSeconds < 0;
         });
 }
 
@@ -123,15 +121,15 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip) noexcep
     // create a new entry
     HistoryIP hist = {
         .m_ip = ip,
-        .m_pings = 0,
-        .m_connecting = 0,
-        .m_connected = 0,
-        .m_blocked = 0,
-        .m_ttl = 0,     // updated by update() method
-        .m_connectionAttempts = 0,
-        .m_timeLastConnectedMs = 0,  // set by the caller, if needed
-        .m_blockExpire = 0,
-        .m_pingDecay = NETHISTORY_PINGDECAY
+        .m_fBlocked                     = 0,
+        .m_iPingDecay                   = 30,
+        .m_iPings                       = 0,
+        .m_iConnectionRequests          = 0,
+        .m_iPendingConnectionRequests   = 0,
+        .m_iAliveSuccessfulConnections  = 0,
+        .m_iTTLSeconds                  = 0, // updated by update() method
+        .m_iTimeLastConnectedMs         = 0, // set by the caller, if needed
+        .m_iBlockExpireMs               = 0,
     };
     hist.update();
 

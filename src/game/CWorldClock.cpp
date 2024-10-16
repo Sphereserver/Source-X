@@ -1,7 +1,6 @@
-#include "../common/CException.h"
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
 #include "CWorldClock.h"
-#include <ctime>
 #include <chrono>
 
 int64 CWorldClock::GetSystemClock() noexcept // static

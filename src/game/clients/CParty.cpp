@@ -1,6 +1,7 @@
 
-#include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
+#include "../../common/CLog.h"
 #include "../../common/CScriptObj.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -324,7 +325,7 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	}
 	if ( IsTrigUsed(TRIGGER_PARTYLEAVE) )
 	{
-		if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, pCharRemove, 0) == TRIGRET_RET_TRUE )
+		if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, pCharRemove, nullptr) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -613,7 +614,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 	{
 		if ( pRef == nullptr )		// good command but bad link.
 		{
-			sVal = "0";
+			sVal.SetValFalse();
 			return true;
 		}
 		if ( ptcKey[0] == '\0' )	// we where just testing the ref.
@@ -622,7 +623,7 @@ bool CPartyDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole *pSrc, 
 			if ( pObj )
 				sVal.FormatHex((dword)pObj->GetUID());
 			else
-				sVal.FormatVal(1);
+                sVal.SetValTrue();
 			return true;
 		}
 		return pRef->r_WriteVal(ptcKey, sVal, pSrc);

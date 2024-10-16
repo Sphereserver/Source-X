@@ -6,12 +6,18 @@
 #ifndef _INC_CSTIME_H
 #define _INC_CSTIME_H
 
+/*
 #ifdef _WIN32
     #include <time.h>
 #else
     #include <sys/time.h>
 #endif
+*/
+#define __STDC_WANT_LIB_EXT1__ 1
+#include <ctime>
+
 #include "../common.h"
+
 
 // Similar to the MFC CTime and CTimeSpan or COleDateTime:
 //  Get time stamp in the real world. based on struct tm
@@ -43,7 +49,7 @@ public:
 	//	int tm_yday;  // days since January 1 - [0, 365]
 	//	int tm_isdst; // daylight savings time flag
 		0, 0, 0,
-		1, 0, 0, 
+		1, 0, 0,
 		0, 0, -1
 	};
 */
@@ -64,7 +70,7 @@ public:
 	CSTime(time_t time) noexcept;
 	CSTime(const CSTime& timeSrc) noexcept;
 
-	CSTime(struct tm time) noexcept;
+	//CSTime(struct tm time) noexcept;
 	CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1) noexcept;
 
 	const CSTime& operator=(const CSTime& timeSrc) noexcept;
@@ -77,6 +83,8 @@ public:
 
 	// Attributes
 	time_t GetTime() const noexcept;
+    std::tm GetLocalTmPlain() const noexcept;
+
 	int GetYear() const noexcept;
 	int GetMonth() const noexcept;
 	int GetDay() const noexcept;
@@ -94,7 +102,7 @@ public:
 	int GetDaysTotal() const noexcept;
 
 private:
-	struct tm* GetLocalTm(struct tm* ptm = nullptr) const noexcept;
+    std::tm GetLocalTm() const noexcept;
 };
 
 #endif // _INC_CTIME_H

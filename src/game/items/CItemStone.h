@@ -85,9 +85,8 @@ public:
 	CItemStone( ITEMID_TYPE id, CItemBase * pItemDef );
 	virtual ~CItemStone();
 
-private:
-	CItemStone(const CItemStone& copy);
-	CItemStone& operator=(const CItemStone& other);
+    CItemStone(const CItemStone& copy) = delete;
+    CItemStone& operator=(const CItemStone& other) = delete;
 
 public:
 	virtual void r_Write( CScript & s ) override;

@@ -2,7 +2,6 @@
 #include "CUOVersionBlock.h"
 
 
-
 // CUOIndexRec:: Modifiers.
 
 void CUOIndexRec::Init()

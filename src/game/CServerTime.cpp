@@ -1,3 +1,4 @@
+#include "../common/CExpression.h"
 #include "CServerConfig.h"
 #include "CServerTime.h"
 

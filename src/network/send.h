@@ -8,9 +8,9 @@
 
 
 #include "../common/CUID.h"
+#include "../common/CLanguageID.h"
 #include "../common/sphereproto.h"
 #include "../common/CRect.h"
-#include "../game/CRegion.h"
 #include "../game/game_enums.h"
 #include "../game/CServerConfig.h"
 #include "CNetState.h"
@@ -30,6 +30,14 @@ class CItemMultiCustom;
 class CItemShip;
 class CClientTooltip;
 
+
+// TODO: define the virtual destructor of each class with virtual methods in the .cpp file.
+//  Not doing that makes the compiler emit the virtual table (vtable) in every translation unit, instead
+//  of having that only in one .cpp file (translation unit) -> the one file where we define the destructor or at least one virtual method.
+#ifdef __clang__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wweak-vtables"
+#endif
 
 /***************************************************************************
  *
@@ -664,12 +672,14 @@ class PacketAction : public PacketSend
 {
 public:
 	PacketAction(const CChar* character, ANIM_TYPE action, word repeat, bool backward, byte delay, byte len);
+    virtual ~PacketAction();
 };
 
 class PacketActionBasic : public PacketSend
 {
 public:
 	PacketActionBasic(const CChar* character, ANIM_TYPE_NEW action, ANIM_TYPE_NEW subaction, byte variation);
+    virtual ~PacketActionBasic();
 };
 
 /***************************************************************************
@@ -683,6 +693,7 @@ class PacketTradeAction : public PacketSend
 {
 public:
 	PacketTradeAction(SECURE_TRADE_TYPE action);
+    ~PacketTradeAction();
 	void prepareContainerOpen(const CChar *character, const CItem *container1, const CItem *container2);
 	void prepareReadyChange(const CItemContainer *container1, const CItemContainer *container2);
 	void prepareClose(const CItemContainer *container);
@@ -2073,6 +2084,10 @@ public:
 		return state->isClientVersionNumber(MINCLIVER_GLOBALCHAT);
 	}
 };
+
+#ifdef __clang__
+    #pragma GCC diagnostic pop
+#endif
 
 
 #endif // _INC_SEND_H

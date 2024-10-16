@@ -6,21 +6,20 @@
 #ifndef _INC_COBJBASE_H
 #define _INC_COBJBASE_H
 
-#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
+#include "../common/CLanguageID.h"
 #include "../common/CScriptObj.h"
-#include "clients/CClientTooltip.h"
 #include "CObjBaseTemplate.h"
 #include "CTimedObject.h"
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
-#include <atomic>
 
 
 class PacketSend;
 class PacketPropertyList;
 class CCSpawn;
+class CClientTooltip;
 
 class CSector;
 class CWorldTicker;
@@ -194,23 +193,16 @@ public:
     void SetSpawn(CCSpawn *spawn);
 
     /**
-    * @brief   Returns Faction CComponent.
-    * @return  The CCFaction.
-    */
-    CCFaction *GetFaction();
-
-
-    /**
      * @brief   Gets timestamp of the item (it's a property and not related at all with TIMER).
      * @return  The timestamp.
      */
-	int64 GetTimeStampS() const;
+	int64 GetTimeStampS() const noexcept;
 
     /**
      * @brief   Sets time stamp.
      * @param   t_time  The time.
      */
-	void SetTimeStampS(int64 t_time);
+	void SetTimeStampS(int64 t_time) noexcept;
 
     /*
     * @brief    Add iDelta to this object's timer (if active) and its child objects.
@@ -532,14 +524,14 @@ public:
 	// Accessors
 
     /**
-     * @fn  virtual word CObjBase::GetBaseID() const = 0;
+     * @fn  virtual dword CObjBase::GetBaseID() const = 0;
      *
      * @brief   Gets base identifier.
      *
      * @return  The base identifier.
      */
 
-	virtual word GetBaseID() const = 0;
+    virtual dword GetBaseID() const = 0;
 
     /**
      * @fn  void CObjBase::SetUID( dword dwVal, bool fItem );
@@ -859,7 +851,7 @@ public:
      *
      * @return  true if container, false if not.
      */
-	bool IsContainer() const;
+	bool IsContainer() const noexcept;
 
     /**
      * @fn  virtual void CObjBase::Update(const CClient * pClientExclude = nullptr) = 0;
@@ -1178,6 +1170,7 @@ enum CTRIG_TYPE : short
     CTRIG_PayGold,          // I'm going to give out money for a service (Skill Training, hiring...).
 	CTRIG_PersonalSpace,	// i just got stepped on by other char.
 	CTRIG_PetDesert,        // I'm deserting from my owner ( starving, being hit by him ...).
+    CTRIG_PetRelease,       // I have been released by my owner.
 	CTRIG_Profile,			// someone hit the profile button for me.
 	CTRIG_ReceiveItem,		// I was just handed an item (Not yet checked if i want it).
 	CTRIG_RegenStat,		// Hits/mana/stam/food regeneration.

@@ -6,6 +6,8 @@
 #ifndef _INC_UOFILES_ENUMS_CREID_H
 #define _INC_UOFILES_ENUMS_CREID_H
 
+#include <cstdint>
+
 enum CREID_TYPE	: uint32_t // enum the creature animations. (dont allow any others !) also know as "model number"
 {
 	CREID_INVALID = 0,
@@ -405,10 +407,11 @@ enum CREID_TYPE	: uint32_t // enum the creature animations. (dont allow any othe
 	CREID_DRAGON_STYGIAN		= 0x33A,
 	CREID_TROGLODYTE			= 0x10B,
 	CREID_GRUBBER				= 0x10E,
-	CREID_BLOODWORM				= 0x11E,
+	CREID_BLOODWORM				= 0x11F,
 	CREID_VOLLEM				= 0x125,
 	CREID_GOBLIN_GRAY			= 0x14E,
 	CREID_BOURA_AR				= 0x1B0, // Armored boura
+    CREID_ANIMATED_WEAPON       = 0x2B4,
 	CREID_STONE_FORM			= 0x2C1,
 	CREID_ABYSSAL_INFERNAL		= 0x2C9,
 	CREID_BEETLE_IRON			= 0x2CA,
@@ -438,12 +441,16 @@ enum CREID_TYPE	: uint32_t // enum the creature animations. (dont allow any othe
 	CREID_WOLF_LEATHER			= 0x2E3,
 	CREID_DREAM_WRAITH			= 0x2E4,
 	CREID_SLASHER_VEILS			= 0x2E5,
+    CREID_TUNNEL_SPIRIT_BODY    = 0x2E6,
+    CREID_TS_TENTACLE           = 0x2E7,
 	CREID_VAMPIRE				= 0x2E8,
 	CREID_VAMPIRE_FEMALE		= 0x2E9,
 	CREID_GARG_ENSLAVED			= 0x2F1,
 
+	CREID_RISING_COLOSSUS       = 0x33d,
 	CREID_LICH_PRIMEVAL			= 0x33e,
-	CREID_RISING_COLOSSUS		= 0x33d,
+    CREID_PARROT_BIRD           = 0x33f,
+    CREID_PHOENIX               = 0x340,
 	CREID_TURKEY_GIANT 			= 0x402,
 
 	// HS (High Seas) monsters
@@ -501,6 +508,22 @@ enum CREID_TYPE	: uint32_t // enum the creature animations. (dont allow any othe
 	CREID_STRATOS 				= 0x598,
 	CREID_PYROS 				= 0x599,
 	CREID_DRAGON_SERPENTINE_ETH = 0x59A,
+    CREID_TIGER_UNDEAD          = 0x5A1,
+    CREID_KHAL_ANKUR            = 0x5C7,
+    CREID_KRUMPUS_IMP           = 0x5CD,
+    CREID_CRAB_COCONUT_MOUNT    = 0x5E6,
+    CREID_CRAB_COCONUT_SMALL    = 0x5E7,
+    CREID_CRAB_COCONUT_LARGE    = 0x5E8,
+    CREID_WAR_BOAR_MOUNT        = 0x5F6,
+    CREID_WAR_CAPYBARA          = 0x5F7,
+    CREID_WAR_CAPYBARA_BABY     = 0x5F8,
+    CREID_RABBIT_DOOM_BABY      = 0x606,
+    CREID_DOG_NEWFOUNDLAND      = 0x60A,
+    CREID_DOG_ALASKAN_MALAMUTE  = 0x60B,
+    CREID_DOG_GREAT_DANE        = 0x60C,
+    CREID_DOG_SAINT_BERNARD     = 0x60D,
+    CREID_DOG_BLACK_RUSSIAN_TERRIER = 0x60F,
+    CREID_DOG_ROTTWEILER        = 0x610,
 
 /* ----	 Special ----	*/
 

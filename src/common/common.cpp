@@ -1,22 +1,20 @@
 
 // contains also some methods/functions declared in os_windows.h and os_unix.h
 
-#include "common.h"
-#include "sphereproto.h"
-#include <cwctype> // iswalnum
-
 extern "C"
 {
-    void globalstartsymbol() {}	// put this here as just the starting offset.
+    // Put this here as just the starting offset. Needed by Windows crash dump.
+    void globalstartsymbol() {}
 }
 
 #ifndef _WIN32
 
 	#ifdef _BSD
+        #include "common.h"
         #include <cstring>
 		#include <time.h>
 		#include <sys/types.h>
-		int getTimezone()
+		int getTimezone() noexcept
 		{
 			tm tp;
 			memset(&tp, 0x00, sizeof(tp));
@@ -27,7 +25,8 @@ extern "C"
 
 #else // _WIN32
 
-	const OSVERSIONINFO * Sphere_GetOSInfo()
+    #include "common.h"
+	const OSVERSIONINFO * Sphere_GetOSInfo() noexcept
 	{
 		// NEVER return nullptr !
 		static OSVERSIONINFO g_osInfo;
@@ -45,52 +44,3 @@ extern "C"
 		return &g_osInfo;
 	}
 #endif // !_WIN32
-
-
-CLanguageID::CLanguageID(int iDefault) :
-	m_codes{}
-{
-		UnreferencedParameter(iDefault);
-		ASSERT(iDefault == 0);
-}
-
-void CLanguageID::GetStrDef(tchar* pszLang)
-{
-    if (!IsDef())
-    {
-        strcpy(pszLang, "enu");
-    }
-    else
-    {
-        memcpy(pszLang, m_codes, 3);
-        pszLang[3] = '\0';
-    }
-}
-
-void CLanguageID::GetStr(tchar* pszLang) const
-{
-    memcpy(pszLang, m_codes, 3);
-    pszLang[3] = '\0';
-}
-
-lpctstr CLanguageID::GetStr() const
-{
-    tchar* pszTmp = Str_GetTemp();
-    GetStr(pszTmp);
-    return pszTmp;
-}
-
-bool CLanguageID::Set(lpctstr pszLang)
-{
-    // needs not be terminated!
-    if (pszLang != nullptr)
-    {
-        memcpy(m_codes, pszLang, 3);
-        m_codes[3] = 0;
-        if (iswalnum(m_codes[0]))
-            return true;
-        // not valid !
-    }
-    m_codes[0] = 0;
-    return false;
-}

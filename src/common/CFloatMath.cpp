@@ -2,7 +2,6 @@
 #include <cmath>
 #include <complex>
 #include <limits>
-#include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../sphere/threads.h"
 #include "sphere_library/CSRand.h"
@@ -20,7 +19,7 @@ CSString CFloatMath::FloatMath(lpctstr& Expr)
 }
 
 
-short int _iReentrant_Count = 0;
+static thread_local short int _iReentrant_Count = 0;
 
 realtype CFloatMath::MakeFloatMath( lpctstr & Expr )
 {

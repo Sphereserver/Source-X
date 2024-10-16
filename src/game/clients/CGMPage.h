@@ -8,7 +8,6 @@
 
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/CScriptObj.h"
-#include "../../common/CRect.h"
 #include "../CServerTime.h"
 #include "CAccount.h"
 

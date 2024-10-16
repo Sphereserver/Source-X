@@ -8,6 +8,7 @@
 
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/CScriptContexts.h"
+#include "../common/CScriptObj.h"
 #include "CTimedFunction.h"
 
 

@@ -32,8 +32,8 @@ public:
     CCPropsItemWeapon();
     virtual ~CCPropsItemWeapon() = default;
 
-    static bool CanSubscribe(const CItemBase* pItemBase);
-    static bool CanSubscribe(const CItem* pItem);
+    static bool CanSubscribe(const CItemBase* pItemBase) noexcept;
+    static bool CanSubscribe(const CItem* pItem) noexcept;
 
 
     virtual lpctstr GetName() const override {
@@ -47,8 +47,8 @@ public:
     virtual bool IsPropertyStr(PropertyIndex_t iPropIndex) const override;
     virtual bool GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const override;
     virtual bool GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString *psOutVal, bool fZero = false) const override;
-    virtual void SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
-    virtual void SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
+    virtual bool SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
+    virtual bool SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
     virtual void DeletePropertyNum(PropertyIndex_t iPropIndex) override;
     virtual void DeletePropertyStr(PropertyIndex_t iPropIndex) override;
 

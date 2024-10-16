@@ -9,6 +9,7 @@
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphere_library/sptr_containers.h"
 #include "../../common/sphereproto.h"
+#include "../../common/CLanguageID.h"
 
 
 class CChatChanMember;
