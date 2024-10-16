@@ -155,6 +155,7 @@ PacketObjectStatus::PacketObjectStatus(CClient* target, CObjBase* object) : Pack
     {
         CScriptTriggerArgs args;
         args.m_s1 = object->GetName();
+        args.m_iN1 =2;//Trigger use on status
         
         if (objectChar->OnTrigger(CTRIG_DisplayName, character, &args) == TRIGRET_RET_TRUE)
         {
@@ -2650,6 +2651,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, CChar* character) : Pack
     {
         CScriptTriggerArgs args;
         args.m_s1 = character->GetName();
+        args.m_iN1 = 1;//Trigger use on paperdoll
         if (character->OnTrigger(CTRIG_DisplayName, target->GetChar(), &args) == TRIGRET_RET_TRUE)
         {
             bCustomName = 1;
