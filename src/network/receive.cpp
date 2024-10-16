@@ -2500,7 +2500,7 @@ bool PacketClientVersion::onReceive(CNetState* net)
 /***************************************************************************
 *
 *
-*	Packet 0xBD : PacketAssistVersion				assist version
+*	Packet 0xBE : PacketAssistVersion				assist version
 *
 *
 ***************************************************************************/

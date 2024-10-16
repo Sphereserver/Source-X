@@ -243,9 +243,9 @@ bool CCharBase::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
 		case CBC_HIREDAYWAGE:
 			sVal.FormatVal( m_iHireDayWage );
 			break;
-		case CBC_ICON:
-			sVal.FormatHex( m_trackID );
-			break;
+        case CBC_ICON:
+            sVal.FormatHex(m_trackID);
+            break;
 		case CBC_INT:
 			sVal.FormatVal( m_Int );
 			break;
@@ -390,14 +390,30 @@ bool CCharBase::r_LoadVal( CScript & s )
 		case CBC_HIREDAYWAGE:
 			m_iHireDayWage = s.GetArgVal();
 			break;
-		case CBC_ICON:
-			{
-				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
-				if ( (id < 0) || (id >= ITEMID_MULTI) )
-					return false;
-				m_trackID = id;
-			}
-			break;
+        case CBC_ICON:
+        {
+            ITEMID_TYPE id = (ITEMID_TYPE)s.GetArgDWVal();
+            if (id > ITEMID_NOTHING) //Is ICON valid item?
+            {
+                m_trackID = id;
+            }
+            else //If ICON is invalid, check the base Character ICON.
+            {
+                CREID_TYPE baseID = (CREID_TYPE)GetResourceID().GetResIndex();
+                CCharBase *pBase = FindCharBase(baseID);
+                if (pBase && pBase->m_trackID > ITEMID_NOTHING)
+                {
+                    m_trackID = pBase->m_trackID;
+                }
+                else
+                {
+                    // This should only happen if the char and the base char has no icon defined.
+                    // If all checks invalid, return i_pet_wisp as default icon.
+                    m_trackID = ITEMID_TRACK_WISP;
+                }
+            }
+            break;
+        }
 		case CBC_ID:
 			return SetDispID((CREID_TYPE)(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
 		case CBC_INT:

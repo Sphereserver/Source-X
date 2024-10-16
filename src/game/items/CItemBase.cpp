@@ -1032,7 +1032,7 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 
 	CValueRangeDef values(m_values);
 
-	if ( m_values.m_iLo == INT64_MIN || m_values.m_iHi == INT64_MIN )
+	if ( m_values.m_iLo == INT32_MIN || m_values.m_iHi == INT32_MIN )
 	{
 		values.m_iLo = CalculateMakeValue(0);		// low quality specimen
 		m_values.m_iLo = -values.m_iLo;				// negative means they will float.

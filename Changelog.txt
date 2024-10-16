@@ -3914,3 +3914,36 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+16-10-2024, xwerswoodx
+- Added: spherecustom.ini definition has been added to Sphere.
+    This allows you to override Sphere settings without touching the Sphere.ini file.
+    For example, when you want to switch from an older Sphere version to 56x or when you haven't updated for a long time, instead of checking all the new data
+  added to Sphere.ini one by one, you can simply use your old sphere.ini as spherecustom.ini. This way, newly added data will take the default settings from 
+  Sphere.ini, while your previous custom settings will override the defaults without requiring any further adjustments.
+    On the other hand, it helps you maintain a clean Sphere.ini. Instead of directly changing the Sphere.ini settings, you can create a spherecustom.ini file 
+  and add only the settings you want to change there, allowing you to easily track the changes without modifying Sphere.ini.
+    Here's an example of a spherecustom.ini:
+      [SPHERE]
+      AGREE=1
+
+      // Server Data
+      ServName=MyCuteServer
+      ServIP=255.255.255.255
+      ServPort=2593
+
+      // Server Settings
+      AdvancedLos=2
+      GuardsInstatntKill=0
+      FeatureT2A = 01|02
+
+      [SERVERS]
+      MyCuteServer
+      255.255.255.255
+      2593
+
+      [EOF]
+- Changed: Now CHARDEFs can read custom Item Resources as an ICON, the restriction of being TILEDATA value is removed. (Issue: #1301)
+
+16-10-2024, canerksk
+Fixed: The mismatched default value check was causing the price of items without a set price to return as -2,147,483,648. (Issue: #1233)

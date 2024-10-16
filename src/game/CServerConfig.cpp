@@ -4542,23 +4542,37 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 
 bool CServerConfig::LoadIni( bool fTest )
 {
-	ADDTOCALLSTACK("CServerConfig::LoadIni");
-	// Load my INI file first.
-	if ( ! OpenResourceFind( m_scpIni, SPHERE_FILE ".ini", !fTest )) // Open script file
-	{
-		if( !fTest )
-		{
-			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
-			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-X/tree/master/src\n");
-		}
-		return false;
-	}
+    ADDTOCALLSTACK("CServerConfig::LoadIni");
+    // Load my INI file first.
+    if (!OpenResourceFind(m_scpIni, SPHERE_FILE ".ini", !fTest)) // Open script file
+    {
+        if (!fTest)
+        {
+            g_Log.Event(LOGL_FATAL | LOGM_INIT | LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
+            g_Log.Event(
+                LOGL_FATAL | LOGM_INIT | LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-X/tree/master/src\n");
+        }
+        return false;
+    }
+    LoadResourcesOpen(&m_scpIni);
+    m_scpIni.Close();
+    m_scpIni.CloseForce();
+    m_scpCustomIni.Close();
+    m_scpCustomIni.CloseForce();
 
-	LoadResourcesOpen(&m_scpIni);
-	m_scpIni.Close();
-	m_scpIni.CloseForce();
+    // Load SphereCustom.ini after Sphere.ini to override values.
+    lpctstr sCustomIni = SPHERE_FILE "custom.ini";
+    if (CSFile::FileExists(sCustomIni))
+    {
+        if (OpenResourceFind(m_scpCustomIni, sCustomIni, !fTest))
+        {
+            LoadResourcesOpen(&m_scpCustomIni);
+            m_scpCustomIni.Close();
+            m_scpCustomIni.CloseForce();
+        }
+    }
 
-	return true;
+    return true;
 }
 
 bool CServerConfig::LoadCryptIni( void )
@@ -4596,8 +4610,9 @@ void CServerConfig::Unload( bool fResync )
 				break;
 			pResFile->CloseForce();
 		}
-		m_scpIni.CloseForce();
-		m_scpTables.CloseForce();
+        m_scpIni.CloseForce();
+        m_scpCustomIni.CloseForce();
+        m_scpTables.CloseForce();
 		return;
 	}
 
@@ -4680,6 +4695,8 @@ bool CServerConfig::Load( bool fResync )
 	{
 		m_scpIni.ReSync();
 		m_scpIni.CloseForce();
+        m_scpCustomIni.ReSync();
+        m_scpCustomIni.CloseForce();
 	}
 
 	// Now load the *TABLES.SCP file.
