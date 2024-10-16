@@ -4543,7 +4543,6 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 bool CServerConfig::LoadIni( bool fTest )
 {
     ADDTOCALLSTACK("CServerConfig::LoadIni");
-	// Load my INI file first.
     // Load my INI file first.
     if (!OpenResourceFind(m_scpIni, SPHERE_FILE ".ini", !fTest)) // Open script file
     {
