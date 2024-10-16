@@ -1,6 +1,8 @@
 #include "../../common/crypto/CMD5.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CClientIterator.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
@@ -71,7 +73,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	char *z = Str_GetTemp();
 
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
-	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT) : (SPHERE_FILE "accu" SPHERE_SCRIPT);
+	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT_EXT) : (SPHERE_FILE "accu" SPHERE_SCRIPT_EXT);
 
 	Str_CopyLimitNull(z, pszBaseDir, Str_TempLength());
 	Str_ConcatLimitNull(z, pszBaseName, Str_TempLength());
@@ -102,7 +104,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 		if (!s.Open(nullptr, OF_WRITE | OF_TEXT | OF_DEFAULTMODE))
 			return false;
 
-		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT " file.\n"
+		s.WriteString( "// Accounts are periodically moved to the " SPHERE_FILE "accu" SPHERE_SCRIPT_EXT " file.\n"
 			"// All account changes should be made here.\n"
 			"// Use the /ACCOUNT UPDATE command to force accounts to update.\n"
 			);
@@ -140,7 +142,7 @@ bool CAccounts::Account_SaveAll()
 
 	s.Printf("// " SPHERE_TITLE " %s accounts file\n"
 		"// NOTE: This file cannot be edited while the server is running.\n"
-		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT ". This is read in at save time.\n",
+		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT_EXT ". This is read in at save time.\n",
 		g_Serv.GetName());
 
 	for ( size_t i = 0; i < m_Accounts.size(); ++i )
@@ -219,7 +221,7 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 	{
 		return false;
 	}
-	
+
 	pAccount->DeleteChars();
 	m_Accounts.RemovePtr( pAccount );
 	return true;
@@ -498,7 +500,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		CClient	*pClient = pAccount->FindClient();
 
 		char	*z = Str_GetTemp();
-		snprintf(z, Str_TempLength(), 
+		snprintf(z, Str_TempLength(),
 			"Account '%s': PLEVEL:%d, BLOCK:%d, IP:%s, CONNECTED:%s, ONLINE:%s\n",
 			pAccount->GetName(), pAccount->GetPrivLevel(), pAccount->IsPriv(PRIV_BLOCKED),
 			pAccount->m_Last_IP.GetAddrStr(), pAccount->_dateConnectedLast.Format(nullptr),
@@ -637,11 +639,9 @@ CAccount::~CAccount()
 
 	DeleteChars();
     if (CClient * pClient = FindClient())
-    {
         pClient->m_pAccount = nullptr;
-    }
 
-	ClearPasswordTries(true);
+	//ClearPasswordTries(true); // I'm destroying the account. Does it even matter? -> no.
 }
 
 lpctstr CAccount::GetDefStr( lpctstr ptcKey, bool fZero ) const

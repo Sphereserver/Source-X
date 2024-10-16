@@ -1,0 +1,20 @@
+CompileFlags:
+  Add:
+    # Exclude the following folders from the source code analysis.
+    - -I!.codelite
+    - -I!.ctagsd
+    - -I!.git
+    - -I!.github
+    - -I!.kdev4
+    - -I!.vscode
+    - -I!build
+    - -I!cmake
+    - -I!lib
+    - -I!utilities
+
+#  If:
+#    PathMatch: '.*/src/common/common\.h'
+#    Diagnostics:
+#      Suppress: ['-Wunused-include-directive']
+
+# TODO: disable clazy-non-pod-global-static

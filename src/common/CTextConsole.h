@@ -6,13 +6,12 @@
 #ifndef _INC_CTEXTCONSOLE_H
 #define _INC_CTEXTCONSOLE_H
 
-#include "sphere_library/sstringobjs.h"
-#include "common.h"
+#include "sphere_library/CSString.h"
 
 
 class CChar;
 
-enum PLEVEL_TYPE			// Priviledge (priv) levels.
+enum PLEVEL_TYPE : int			// Priviledge (priv) levels.
 {
 	PLEVEL_Guest = 0,		// 0 = This is just a guest account. (cannot PK)
 	PLEVEL_Player,			// 1 = Player or NPC.
@@ -42,7 +41,7 @@ public:
 
 	virtual void SysMessage( lpctstr pszMessage ) const = 0;	// Feed back message.
 	void VSysMessage( lpctstr pszFormat, va_list args ) const;
-	void _cdecl SysMessagef( lpctstr pszFormat, ... ) const __printfargs(2,3);
+    void SysMessagef( lpctstr pszFormat, ... ) const SPHERE_PRINTFARGS(2,3);
 
 public:
 	CTextConsole() { };

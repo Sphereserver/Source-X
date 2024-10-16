@@ -1,5 +1,5 @@
 #include "../../sphere/threads.h"
-#include "../CException.h"
+#include "../sphere_library/CSRand.h"
 #include "../CExpression.h"
 #include "CValueDefs.h"
 

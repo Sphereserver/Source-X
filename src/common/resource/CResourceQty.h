@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEQTY_H
 #define _INC_CRESOURCEQTY_H
 
-#include "../sphere_library/CSTypedArray.h" // Needed for constants
+#include "../sphere_library/ssorted_vector.h"
 #include "CResourceID.h"
 
 

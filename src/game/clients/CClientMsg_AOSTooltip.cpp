@@ -1,5 +1,7 @@
+#include "../../common/CExpression.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
+#include "../clients/CClientTooltip.h"
 #include "../items/CItem.h"
 #include "../items/CItemStone.h"
 #include "../components/CCSpawn.h"

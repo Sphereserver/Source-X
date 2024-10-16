@@ -7,6 +7,7 @@
 #define _INC_CSOBJCONT_H
 
 #include "CSObjContRec.h"
+#include <cstddef>
 #include <vector>
 #include <utility> // for std::move
 
@@ -171,7 +172,7 @@ public:
     * @brief Remove all records of the CSObjCont.
     * @param fClosingWorld Am i closing world UIDs or just destroyng everything before shutdown?
     */
-    void ClearContainer(bool fClosingWorld);
+    void ClearContainer(bool fClosingWorld) noexcept;
 
     /**
     * @brief Insert a record at head.

@@ -10,6 +10,7 @@
 #include "../game/uo_files/CUOTiledata.h"
 #include "../game/uo_files/CUOIndexRec.h"
 #include "../game/uo_files/CUOMapList.h"
+#include "../game/uo_files/CUOMobtypes.h"
 #include "sphere_library/CSFile.h"
 #include "CSVFile.h"
 
@@ -52,6 +53,8 @@ public:
 
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
 
+    CUOMobTypes m_mobtypes;
+
 public:
 	CSString GetFullExePath( lpctstr pszName = nullptr ) const;
 	CSString GetFullCDPath( lpctstr pszName = nullptr ) const;
@@ -80,9 +83,8 @@ public:
 public:
 	CUOInstall();
 
-private:
-	CUOInstall(const CUOInstall& copy);
-	CUOInstall& operator=(const CUOInstall& other);
+    CUOInstall(const CUOInstall& copy) = delete;
+    CUOInstall& operator=(const CUOInstall& other) = delete;
 } g_Install;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,9 +109,9 @@ public:
 public:
 	CVerDataMul();
 	~CVerDataMul();
-private:
-	CVerDataMul(const CVerDataMul& copy);
-	CVerDataMul& operator=(const CVerDataMul& other);
+
+    CVerDataMul(const CVerDataMul& copy) = delete;
+    CVerDataMul& operator=(const CVerDataMul& other) = delete;
 } g_VerData;
 
 #endif	// _INC_CUOINSTALL_H

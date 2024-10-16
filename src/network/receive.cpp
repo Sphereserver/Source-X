@@ -1,10 +1,12 @@
 
 #include "../common/resource/sections/CDialogDef.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../common/CUOClientVersion.h"
+#include "../game/uo_files/uofiles_enums_creid.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
-#include "../game/items/CItem.h"
+#include "../game/items/CItemContainer.h"
 #include "../game/items/CItemMap.h"
 #include "../game/items/CItemMessage.h"
 #include "../game/items/CItemMultiCustom.h"
@@ -3304,7 +3306,7 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
-		if ( character->OnTrigger(CTRIG_ToggleFlying,character,0) == TRIGRET_RET_TRUE )
+		if ( character->OnTrigger(CTRIG_ToggleFlying, character, nullptr) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

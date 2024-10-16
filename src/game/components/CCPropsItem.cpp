@@ -1,6 +1,7 @@
 
 #include "CCPropsItem.h"
-#include "../items/CItem.h"
+#include "../clients/CClientTooltip.h"
+#include "../CObjBase.h"
 
 
 lpctstr const CCPropsItem::_ptcPropertyKeys[PROPIT_QTY + 1] =
@@ -29,7 +30,7 @@ CCPropsItem::CCPropsItem() : CComponentProps(COMP_PROPS_ITEM)
 // If a CItem: subscribed in CItemBase::SetType and CItem::SetType
 // If a CChar: subscribed in CCharBase::CCharBase and CChar::CChar
 /*
-bool CCPropsItem::CanSubscribe(const CObjBase* pObj) // static
+bool CCPropsItem::CanSubscribe(const CObjBase* pObj) noexcept // static
 {
     return (pObj->IsItem() || pObj->IsChar());
 }
@@ -71,7 +72,7 @@ bool CCPropsItem::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* psOutV
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItem::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItem::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItem::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -80,7 +81,7 @@ void CCPropsItem::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -89,13 +90,14 @@ void CCPropsItem::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
-void CCPropsItem::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItem::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItem::SetPropertyStr");
     ASSERT(ptcVal);
@@ -105,7 +107,7 @@ void CCPropsItem::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, COb
     if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -114,10 +116,11 @@ void CCPropsItem::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, COb
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
 void CCPropsItem::DeletePropertyNum(PropertyIndex_t iPropIndex)
@@ -179,16 +182,16 @@ void CCPropsItem::AddPropsTooltipData(CObjBase* pLinkedObj)
 #define ADDTSTR(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, ptcVal))
 
     /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
-    
+
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
         PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
-        
+
         if (iVal == 0)
             continue;
-        
+
         if (pLinkedObj->IsItem())
         {
             // Show tooltips for these props only if the linked obj is an item
@@ -209,7 +212,7 @@ void CCPropsItem::AddPropsTooltipData(CObjBase* pLinkedObj)
     }
     // End of Numeric properties
 
-/*    
+/*
     // String properties
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {

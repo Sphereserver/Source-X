@@ -4,16 +4,16 @@
 // Replace the MFC CTime function. Must be usable with file system.
 //
 
-#include <cmath>
-#include "CSTime.h"
-#include "CSString.h"
-#include "../../common/CLog.h"
 #include "../../sphere/threads.h"
+#include "sstring.h"
+#include "CSTime.h"
+#include <cmath>
+//#include <chrono>
 
 
 // Windows epoch is January 1, 1601 (start of Gregorian calendar cycle)
 // Unix epoch is January 1, 1970 (adjustment in "ticks" 100 nanosecond)
-#define UNIX_TICKS_PER_SECOND 10000000 //a tick is 100ns
+//#define UNIX_TICKS_PER_SECOND 10000000 //a tick is 100ns
 #if _WIN32
 //#   define UNIX_TIME_START 0x019DB1DED53E8000LL     // January 1, 1970 (start of Unix epoch) in "ticks"
 //#   define WINDOWS_UNIX_EPOCH_OFFSET 11644473600    // (number of seconds between January 1, 1601 and January 1, 1970).
@@ -25,7 +25,7 @@
 	    // We don't have GetSupportedTickCount on Windows versions previous to Vista/Windows Server 2008. We need to check for overflows
 	    //  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
 	    //	with GetSupportedTickCount) manually every time we compare two values.
-#       if _MSC_VER
+#       if MSVC_COMPILER
 #           pragma warning(push)
 #           pragma warning(disable: 28159)
 #       endif
@@ -34,7 +34,7 @@
 #   else
 	    static inline llong GetSupportedTickCount() noexcept { return (llong)GetTickCount64(); }
 #   endif
-#   if _MSC_VER
+#   if MSVC_COMPILER
 #       pragma warning(pop)
 #   endif
 #endif
@@ -142,6 +142,12 @@ CSTime CSTime::GetCurrentTime()	noexcept // static
 	return CSTime(::time(nullptr));
 }
 
+/*
+CSTime::CSTime( struct tm atm ) noexcept
+{
+	m_time = mktime(&atm);
+}
+*/
 
 CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 			   int nDST) noexcept
@@ -157,24 +163,89 @@ CSTime::CSTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec,
 	m_time = mktime(&atm);
 }
 
-CSTime::CSTime( struct tm atm ) noexcept
+static std::tm safe_localtime(const time_t t) noexcept
 {
-	m_time = mktime(&atm);
+    std::tm atm {};
+
+    // Standard C localtime is not thread-safe. We need alternatives.
+    // https://stackoverflow.com/questions/38034033/c-localtime-this-function-or-variable-may-be-unsafe
+
+#if defined(__unix__) || defined(__APPLE__) || defined(_POSIX_VERSION)
+    localtime_r(&t, &atm);
+#elif defined(MSVC_RUNTIME) || defined(__MINGW32__)
+    localtime_s(&atm, &t);
+#elif defined(__STDC_LIB_EXT1__)
+    localtime_s(&t, &atm);
+#else
+
+    // To be tested! C++20 way.
+    // https://stackoverflow.com/questions/61190884/current-time-and-date-in-c20-days
+    static_assert(false, "Untested yet. If needed, test it and if it's fine delete this static_assert");
+
+    using namespace std::chrono;
+    const auto current_zoned_time = zoned_time{current_zone(), system_clock::from_time_t(t)};
+    const auto local_time_point = current_zoned_time.get_local_time();
+    //const auto local_duration = local_time_point.time_since_epoch();
+
+    // Get a local time_point with days precision
+    const auto ld = floor<days>(local_time_point);
+
+    // Convert local days-precision time_point to a local {y, m, d} calendar
+    const year_month_day ymd{ld};
+
+    // Split time since local midnight into {h, m, s, subseconds}
+    const hh_mm_ss hms{local_time_point - ld};
+
+    // get_info(): Returns a std::chrono::time_zone::transition_info object, which provides information about whether DST is currently active.
+    const bool is_dst = (current_zoned_time.get_info().save != std::chrono::seconds{0});
+
+    atm.tm_sec  = (int)hms.seconds().count();
+    atm.tm_min  = (int)hms.minutes().count();
+    atm.tm_hour = (int)hms.hours().count();
+    atm.tm_mday = (int)(uint)ymd.day();
+    atm.tm_mon  = (int)(uint)ymd.month() - 1;
+    atm.tm_year = (int)ymd.year() - 1900;
+    atm.tm_isdst= (int)is_dst;
+#endif
+
+    return atm;
 }
 
-struct tm* CSTime::GetLocalTm(struct tm* ptm) const noexcept
+static std::tm safe_gmtime(const time_t t) noexcept
 {
-	if (ptm != nullptr)
-	{
-		struct tm* ptmTemp = localtime(&m_time);
-		if (ptmTemp == nullptr)
-			return nullptr;    // indicates the m_time was not initialized!
+    std::tm atm {};
 
-		*ptm = *ptmTemp;
-		return ptm;
-	}
-	else
-		return localtime(&m_time);
+    // gmtime is in Coordinated Universal Time (UTC), while localtime is in your timezone
+    // Standard C gmtime is not thread-safe. We need alternatives.
+
+#if defined(__unix__) || defined(__APPLE__) || defined(_POSIX_VERSION)
+    gmtime_r(&t, &atm);
+#elif defined(MSVC_RUNTIME) || defined(__MINGW32__)
+    gmtime_s(&atm, &t);
+#elif defined(__STDC_LIB_EXT1__)
+    gmtime_s(&t, &atm);
+#else
+    static_assert(false, "This platform doesn't look to have a thread-safe gmtime function?");
+#endif
+
+    return atm;
+}
+
+static std::tm safe_localtime_unoffset(std::tm atm) noexcept
+{
+    	atm.tm_year += 1900;
+	atm.tm_mon += 1;
+    return atm;
+}
+
+std::tm CSTime::GetLocalTm() const noexcept
+{
+	return safe_localtime(m_time);
+}
+
+std::tm CSTime::GetLocalTmPlain() const noexcept
+{
+	return safe_localtime_unoffset(safe_localtime(m_time));
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -184,8 +255,8 @@ struct tm* CSTime::GetLocalTm(struct tm* ptm) const noexcept
 	#define maxTimeBufferSize 128
 #endif
 
-#if defined(_WIN32) && defined (_MSC_VER)
-static void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
+#if defined(_WIN32) && defined (MSVC_COMPILER)
+static void SPHERE_CDECL invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
 	UnreferencedParameter(expression);
@@ -204,12 +275,12 @@ static void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm *
 	ASSERT(ptmTemp != nullptr);
 
 #ifdef _WIN32
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
 	// on windows we need to set the invalid parameter handler, or else the program will terminate when a bad format is encountered
     _invalid_parameter_handler newHandler, oldHandler;
 	newHandler = static_cast<_invalid_parameter_handler>(invalidParameterHandler);
 	oldHandler = _set_invalid_parameter_handler(newHandler);
-#endif // _MSC_VER
+#endif // MSVC_COMPILER
 	try
 	{
 #endif // _WIN32
@@ -226,10 +297,10 @@ static void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm *
 		pszTemp[0] = '\0';
 	}
 
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
 	// restore previous parameter handler
 	_set_invalid_parameter_handler(oldHandler);
-#endif // _MSC_VER
+#endif // MSVC_COMPILER
 #endif // _WIN32
 }
 
@@ -240,14 +311,9 @@ lpctstr CSTime::Format(lpctstr pszFormat) const
 	if ( pszFormat == nullptr )
 		pszFormat = "%Y/%m/%d %H:%M:%S";
 
-	struct tm* ptmTemp = localtime(&m_time);
-	if (ptmTemp == nullptr )
-	{
-		pszTemp[0] = '\0';
-		return( pszTemp );
-	}
+	const std::tm ptmTemp = safe_localtime(m_time);
 
-	FormatDateTime(pszTemp, pszFormat, ptmTemp);
+	FormatDateTime(pszTemp, pszFormat, &ptmTemp);
 	return pszTemp;
 }
 
@@ -257,14 +323,9 @@ lpctstr CSTime::FormatGmt(lpctstr pszFormat) const
 	if ( pszFormat == nullptr )
 		pszFormat = "%a, %d %b %Y %H:%M:%S GMT";
 
-	struct tm* ptmTemp = gmtime(&m_time);
-	if (ptmTemp == nullptr )
-	{
-		pszTemp[0] = '\0';
-		return( pszTemp );
-	}
+	const std::tm ptmTemp = safe_gmtime(m_time);
 
-	FormatDateTime(pszTemp, pszFormat, ptmTemp);
+	FormatDateTime(pszTemp, pszFormat, &ptmTemp);
 	return pszTemp;
 }
 
@@ -297,19 +358,19 @@ bool CSTime::Read(tchar *pszVal)
 	return true;
 }
 
-CSTime::CSTime() noexcept
+CSTime::CSTime() noexcept :
+    m_time(0)
 {
-	m_time = 0;
 }
 
-CSTime::CSTime(time_t time) noexcept
+CSTime::CSTime(time_t time) noexcept :
+    m_time(time)
 {
-	m_time = time;
 }
 
-CSTime::CSTime(const CSTime& timeSrc) noexcept
+CSTime::CSTime(const CSTime& timeSrc) noexcept :
+    m_time(timeSrc.m_time)
 {
-	m_time = timeSrc.m_time;
 }
 
 const CSTime& CSTime::operator=(const CSTime& timeSrc) noexcept
@@ -341,36 +402,36 @@ bool CSTime::operator!=( time_t t ) const noexcept
 
 time_t CSTime::GetTime() const noexcept
 {
-	// Although not defined by the C standard, this is almost always an integral value holding the number of seconds 
+	// Although not defined by the C standard, this is almost always an integral value holding the number of seconds
 	//  (not counting leap seconds) since 00:00, Jan 1 1970 UTC, corresponding to UNIX time.
-    // 
+    //
     // TODO: Is this on Windows defined since January 1, 1601 ?
 	return m_time;
 }
 
 int CSTime::GetYear() const noexcept
 {
-	return (GetLocalTm(nullptr)->tm_year) + 1900;
+	return (GetLocalTm().tm_year) + 1900;
 }
 
 int CSTime::GetMonth() const noexcept       // month of year (1 = Jan)
 {
-	return GetLocalTm(nullptr)->tm_mon + 1;
+	return GetLocalTm().tm_mon + 1;
 }
 
 int CSTime::GetDay() const noexcept         // day of month
 {
-	return GetLocalTm(nullptr)->tm_mday;
+	return GetLocalTm().tm_mday;
 }
 
 int CSTime::GetHour() const noexcept
 {
-	return GetLocalTm(nullptr)->tm_hour;
+	return GetLocalTm().tm_hour;
 }
 
 int CSTime::GetMinute() const noexcept
 {
-	return GetLocalTm(nullptr)->tm_min;
+	return GetLocalTm().tm_min;
 }
 
 void CSTime::Init() noexcept

@@ -36,7 +36,7 @@ class AbstractString
 {
 public:
 	AbstractString();
-	virtual ~AbstractString() = default;
+	virtual ~AbstractString();
 
 	AbstractString(const AbstractString& copy) = delete;
 	AbstractString& operator=(const AbstractString& other) = delete;
@@ -132,7 +132,7 @@ class TemporaryString : public AbstractString
 
 public:
 	TemporaryString();
-	~TemporaryString();
+	virtual ~TemporaryString() override;
 
 	TemporaryString(const TemporaryString& copy) = delete;
 	TemporaryString& operator=(const TemporaryString& other) = delete;

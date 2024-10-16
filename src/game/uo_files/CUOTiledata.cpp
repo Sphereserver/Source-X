@@ -7,6 +7,9 @@
 #include "../../common/CException.h"
 #include "../../common/CLog.h"
 #include "../../common/CUOInstall.h"
+#include "CUOTerrainTypeRec.h"
+#include "uofiles_enums.h"
+#include "uofiles_macros.h"
 #include "CUOTiledata.h"
 
 

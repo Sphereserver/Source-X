@@ -99,9 +99,34 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
             _fileContent = new std::vector<std::string>;
             _fileContent->reserve(iFileLength / 25);
 
+            auto _SkipOneEndline = [](lpctstr &str_end) -> size_t // return how much i have moved past
+            {
+                bool fDoneN = false, fDoneR = false;
+                lpctstr before = str_end;
+                while (true)
+                {
+                    const char ch = *str_end;
+                    if (ch == '\n' && !fDoneN)
+                    {
+                        fDoneN = true;
+                        ++str_end;
+                    }
+                    else if (ch == '\r' && !fDoneR)
+                    {
+                        fDoneR = true;
+                        ++str_end;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return str_end - before;
+            };
+
             const char *fileCursor = fileContentCopy.get();
             size_t uiFileCursorRemainingLegth = iFileLength;
-            ssize_t iStrLen;
+            ssize_t iStrLen = 0;
             for (;; fileCursor += (size_t)iStrLen, uiFileCursorRemainingLegth -= (size_t)iStrLen)
             {
                 if (uiFileCursorRemainingLegth == 0)
@@ -109,11 +134,16 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
                 iStrLen = sGetLine_StaticBuf(fileCursor, minimum(uiFileCursorRemainingLegth, SCRIPT_MAX_LINE_LEN));
                 if (iStrLen < 0)
-                break;
+                    break;
 
                 if (iStrLen < 1 /*|| (fileCursor[iStrLen] != '\n') It can also be a '\0' value, but it might not be necessary to check for either of the two...*/)
                 {
-                    ++ iStrLen; // Skip \n
+                    lpctstr str_end = fileCursor;
+                    size_t uiSkip = _SkipOneEndline(str_end);
+                    ASSERT(uiSkip > 0);
+                    //iStrLen = (ssize_t)std::max((size_t)1, uiSkip);
+                    iStrLen = (ssize_t)uiSkip;
+                    _fileContent->emplace_back();
                     continue;
                 }
 
@@ -128,24 +158,14 @@ bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
                 const lpctstr str_start = (fUTF ? &fileCursor[3] : fileCursor);
                 size_t len_to_copy = (size_t)iStrLen - (fUTF ? 3 : 0);
-                while (len_to_copy > 0)
-                {
-                    const int ch = str_start[len_to_copy - 1];
-                    if (ch == '\n' || ch == '\r')
-                    {
-                        // Do not copy that, but skip it.
-                        len_to_copy -= 1;
-                        iStrLen += 1;
-                    }
-                    else {
-                        break;
-                    }
-                }
+                ASSERT(len_to_copy > 0);
 
-                if (len_to_copy == 0)
-                    _fileContent->emplace_back();
-                else
-                    _fileContent->emplace_back(str_start, len_to_copy);
+                // go past the end of this substring, there should be the delimiter/newline/etc, just skip it.
+                lpctstr str_end = &str_start[len_to_copy];
+                _SkipOneEndline(str_end);
+                _fileContent->emplace_back(str_start, len_to_copy);
+                iStrLen += (str_end - len_to_copy - str_start);
+
                 fFirstLine = false;
                 fUTF = false;
             }   // closes while

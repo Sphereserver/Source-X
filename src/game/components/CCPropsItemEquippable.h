@@ -6,6 +6,7 @@
 #ifndef _INC_CCPROPSITEMEQUIPPABLE_H
 #define _INC_CCPROPSITEMEQUIPPABLE_H
 
+#include "subcomponents/CFactionDef.h"
 #include "../CComponentProps.h"
 
 class CItemBase;
@@ -32,8 +33,8 @@ public:
     CCPropsItemEquippable();
     virtual ~CCPropsItemEquippable() = default;
 
-    static bool CanSubscribe(const CItemBase* pItemBase);
-    static bool CanSubscribe(const CItem* pItem);
+    static bool CanSubscribe(const CItemBase* pItemBase) noexcept;
+    static bool CanSubscribe(const CItem* pItem) noexcept;
 
     static bool IgnoreElementalProperty(PropertyIndex_t iPropIndex);
 
@@ -48,8 +49,8 @@ public:
     virtual bool IsPropertyStr(PropertyIndex_t iPropIndex) const override;
     virtual bool GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const override;
     virtual bool GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString *psOutVal, bool fZero = false) const override;
-    virtual void SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
-    virtual void SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
+    virtual bool SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
+    virtual bool SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion = RDS_QTY, bool fDeleteZero = true) override;
     virtual void DeletePropertyNum(PropertyIndex_t iPropIndex) override;
     virtual void DeletePropertyStr(PropertyIndex_t iPropIndex) override;
 
@@ -60,10 +61,22 @@ public:
 
     virtual void AddPropsTooltipData(CObjBase* pLinkedObj) override;
 
+    inline const CFactionDef* GetFaction() const noexcept;
+    inline CFactionDef* GetFaction() noexcept;
+
 private:
     BaseContNum_t _mPropsNum;
     BaseContStr_t _mPropsStr;
+
+    CFactionDef _faction;
 };
 
+
+const CFactionDef* CCPropsItemEquippable::GetFaction() const noexcept {
+    return &_faction;
+}
+CFactionDef* CCPropsItemEquippable::GetFaction() noexcept {
+    return &_faction;
+}
 
 #endif //_INC_CCPROPSITEMEQUIPPABLE_H

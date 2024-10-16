@@ -1,7 +1,11 @@
 // Actions specific to an NPC.
 
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../clients/CClient.h"
 #include "../components/CCSpawn.h"
+#include "../items/CItemContainer.h"
+#include "../items/CItemMemory.h"
 #include "../items/CItemVendable.h"
 #include "../CServerTime.h"
 #include "../triggers.h"
@@ -423,7 +427,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			return true;
 	}
 
-	bool bSuccess = false;
+    bool fSuccess = false;
 	CItem *pItemTarg = dynamic_cast<CItem *>(pObj);
 	CChar *pCharTarg = dynamic_cast<CChar *>(pObj);
 
@@ -434,9 +438,9 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 		{
 			if ( !pCharTarg || pCharTarg == pSrc || pCharTarg == this )
 				break;
-			bSuccess = pCharTarg->OnAttackedBy(pSrc, true);	// we know who told them to do this.
-			if ( bSuccess )
-				bSuccess = Fight_Attack(pCharTarg, true);
+            fSuccess = pCharTarg->OnAttackedBy(pSrc, true);	// we know who told them to do this.
+            if ( fSuccess )
+                fSuccess = Fight_Attack(pCharTarg, true);
 			break;
 		}
 
@@ -444,7 +448,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pCharTarg )
 				break;
 			m_Act_UID = pCharTarg->GetUID();
-			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
+            fSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 
 		case PC_FRIEND:
@@ -465,7 +469,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			Memory_AddObjTypes(pCharTarg, MEMORY_FRIEND);
 
 			m_Act_UID = pCharTarg->GetUID();
-			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
+            fSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 		}
 
@@ -487,7 +491,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			pMemory->Delete();
 
 			m_Act_UID = pSrc->GetUID();
-			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
+            fSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 		}
 
@@ -495,7 +499,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pt.IsValidPoint() )
 				break;
 			m_Act_p = pt;
-			bSuccess = Skill_Start(NPCACT_GOTO);
+            fSuccess = Skill_Start(NPCACT_GOTO);
 			break;
 
 		case PC_GUARD:
@@ -503,7 +507,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			pCharTarg->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_GUARD_SUCCESS), GetName());
 			m_Act_UID = pCharTarg->GetUID();
-			bSuccess = Skill_Start(NPCACT_GUARD_TARG);
+            fSuccess = Skill_Start(NPCACT_GUARD_TARG);
 			break;
 
 		case PC_TRANSFER:
@@ -511,14 +515,14 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			if ( IsSetOF(OF_PetSlots) )
 			{
-				short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
-				if ( !pCharTarg->FollowersUpdate(this, (maximum(0, iFollowerSlots)), true) )
+                short iFollowerSlots = GetFollowerSlots();
+                if ( !pCharTarg->FollowersUpdate(this, iFollowerSlots, true) )
 				{
 					pSrc->SysMessageDefault(DEFMSG_PETSLOTS_TRY_TRANSFER);
 					break;
 				}
 			}
-			bSuccess = NPC_PetSetOwner( pCharTarg );
+            fSuccess = NPC_PetSetOwner( pCharTarg );
 			break;
 
 		case PC_PRICE:	// "PRICE" the vendor item.
@@ -536,8 +540,8 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 	}
 
 	// Make some sound to confirm we heard it
-	NPC_OnPetCommand(bSuccess, pSrc);
-	return bSuccess;
+    NPC_OnPetCommand(fSuccess, pSrc);
+    return fSuccess;
 }
 
 void CChar::NPC_PetClearOwners()
@@ -583,8 +587,8 @@ void CChar::NPC_PetClearOwners()
 
 	if ( pOwner && IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
-		pOwner->FollowersUpdate(this, -maximum(0, iFollowerSlots));
+        const short iFollowerSlots = GetFollowerSlots();
+        pOwner->FollowersUpdate(this, -iFollowerSlots);
 	}
 }
 
@@ -596,7 +600,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	if ( m_pPlayer || !pChar || (pChar == this) )
 		return false;
 
-	const CChar * pOwner = NPC_PetGetOwner();
+    CChar * pOwner = NPC_PetGetOwner();
 	if ( pOwner == pChar )
 		return false;
 
@@ -605,8 +609,10 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
     CCSpawn* pSpawn = GetSpawn();
 	if ( pSpawn )
 		pSpawn->DelObj( GetUID() );
+
 	Memory_AddObjTypes(pChar, MEMORY_IPET);
 	NPC_Act_Follow();
+
 	if ( NPC_IsVendor() )
 	{
 		// Clear my cash total.
@@ -617,8 +623,8 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		const short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, 1);
-		pChar->FollowersUpdate(this, maximum(0, iFollowerSlots));
+        const short iFollowerSlots = GetFollowerSlots();
+        pChar->FollowersUpdate(this, iFollowerSlots);
 	}
 
 	return true;
@@ -642,24 +648,24 @@ bool CChar::NPC_CheckHirelingStatus()
 	CCharBase * pCharDef = Char_GetDef();
 	int64 iFoodConsumeRate = g_Cfg.m_iRegenRate[STAT_FOOD] / MSECS_PER_SEC;
 
-	uint iWage = pCharDef->GetHireDayWage();
-	if ( ! iWage || ! iFoodConsumeRate )
+    uint uiWage = pCharDef->GetHireDayWage();
+    if ( ! uiWage || ! iFoodConsumeRate )
 		return true;
 
 	// I am hired for money not for food.
-	uint iPeriodWage = (uint)IMulDivLL( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
-	if ( iPeriodWage <= 0 )
-		iPeriodWage = 1;
+    uint uiPeriodWage = (uint)IMulDivLL( uiWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
+    if ( uiPeriodWage <= 0 )
+        uiPeriodWage = 1;
 
 	CItemContainer * pBank = GetBank();
-	if ( pBank->m_itEqBankBox.m_Check_Amount > iPeriodWage )
+    if ( pBank->m_itEqBankBox.m_Check_Amount > uiPeriodWage )
 	{
-		pBank->m_itEqBankBox.m_Check_Amount -= iPeriodWage;
+        pBank->m_itEqBankBox.m_Check_Amount -= uiPeriodWage;
 	}
 	else
 	{
 		tchar* pszMsg = Str_GetTemp();
-		snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), iWage);
+        snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), uiWage);
 		Speak(pszMsg);
 
 		CChar * pOwner = NPC_PetGetOwner();
@@ -850,6 +856,16 @@ void CChar::NPC_PetRelease()
 	ADDTOCALLSTACK("CChar::NPC_PetRelease");
 	if (!m_pNPC)
 		return;
+
+    CChar* pCharOwn = NPC_PetGetOwner();
+    if (!pCharOwn)
+        return;
+
+    if (IsTrigUsed(TRIGGER_PETRELEASE))
+    {
+        if (OnTrigger(CTRIG_PetRelease, pCharOwn, nullptr) == TRIGRET_RET_TRUE)
+            return;
+    }
 
 	if (IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)))
 	{

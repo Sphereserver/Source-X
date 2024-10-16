@@ -30,9 +30,8 @@ public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );
     virtual ~CItemContainer();
 
-private:
-	CItemContainer(const CItemContainer& copy);
-	CItemContainer& operator=(const CItemContainer& other);
+    CItemContainer(const CItemContainer& copy) = delete;
+    CItemContainer& operator=(const CItemContainer& other) = delete;
 
 public:
 	bool IsWeighed() const;

@@ -32,7 +32,7 @@ ndword& ndword::operator = (dword val) noexcept
 }
 
 
-static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes) noexcept
+static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes)
 {
     // Convert a UTF8 encoded string to a single unicode char.
     // RETURN: The length used from input string. < iSizeInBytes
@@ -43,7 +43,7 @@ static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes) noexce
     // 3 16 1110bbbb 10bbbbbb 10bbbbbb
     // 4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb
 
-    byte ch = *pInp;
+    byte ch = (byte)*pInp;
     ASSERT(ch >= 0x80);	// needs special UTF8 decoding.
 
     int iBytes;
@@ -75,7 +75,7 @@ static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes) noexce
     int iInp = 1;
     for (; iInp < iBytes; iInp++)
     {
-        ch = pInp[iInp];
+        ch = (byte)pInp[iInp];
         if ((ch & 0xc0) != 0x80)	// bad coding.
             return -1;
         wCharTmp <<= 6;
@@ -86,7 +86,7 @@ static int CvtSystemToUTF16(wchar& wChar, lpctstr pInp, int iSizeInBytes) noexce
     return iBytes;
 }
 
-static int CvtUTF16ToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar) noexcept
+static int CvtUTF16ToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar)
 {
     // Convert a single unicode char to system string.
     // RETURN: The length < iSizeOutBytes
@@ -145,7 +145,7 @@ static int CvtUTF16ToSystem(tchar* pOut, int iSizeOutBytes, wchar wChar) noexcep
     return iBytes;
 }
 
-int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes) noexcept
+int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes)
 {
     //
     // Convert the system default text format UTF8 to UNICODE
@@ -214,7 +214,7 @@ int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSize
         int iInp = 0;
         for (; iInp < iSizeInBytes; )
         {
-            byte ch = pInp[iInp];
+            byte ch = (byte)pInp[iInp];
             if (ch == 0)
                 break;
 
@@ -246,7 +246,7 @@ int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSize
     return iOut;
 }
 
-int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars) noexcept
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars)
 {
     // ARGS:
     //  iSizeInBytes = space we have (included null char)

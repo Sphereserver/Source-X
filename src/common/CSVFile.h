@@ -9,16 +9,14 @@
 #include <map>
 #include "CCacheableScriptFile.h"
 
-#define MAX_COLUMNS	64	// maximum number of columns in a file
-
 
 typedef std::map<std::string, std::string> CSVRowData;
 
 class CSVFile : public CCacheableScriptFile
 {
-private:
-	tchar * _pszColumnTypes[MAX_COLUMNS];
-	tchar * _pszColumnNames[MAX_COLUMNS];
+    static constexpr uint kuiMaxColumns = 64; // maximum number of columns in a file
+    tchar * _pszColumnTypes[kuiMaxColumns];
+    tchar * _pszColumnNames[kuiMaxColumns];
 	int _iColumnCount;
 	int _iCurrentRow;
 
@@ -29,9 +27,8 @@ public:
 	CSVFile();
 	~CSVFile();
 
-private:
-	CSVFile(const CSVFile& copy);
-	CSVFile& operator=(const CSVFile& other);
+	CSVFile(const CSVFile& copy) = delete;
+	CSVFile& operator=(const CSVFile& other) = delete;
 
 private:    int _GetColumnCount() const { return _iColumnCount; }
 public:     int GetColumnCount() const;
@@ -39,7 +36,7 @@ private:    int _GetCurrentRow() const { return _iCurrentRow; }
 public:     int GetCurrentRow() const;
 
 private:
-	int _ReadRowContent(tchar ** ppOutput, int row, int columns = MAX_COLUMNS);
+    int _ReadRowContent(tchar ** ppOutput, int row, int columns = kuiMaxColumns);
 	bool _ReadRowContent(int row, CSVRowData& target);
 
 	int _ReadNextRowContent(tchar ** ppOutput);

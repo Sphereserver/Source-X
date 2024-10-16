@@ -543,7 +543,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
             if ( pObj )
                 sVal.FormatHex(pObj->GetUID());
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         }
         break;
         case AGC_S:

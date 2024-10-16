@@ -8,14 +8,14 @@
 
 #ifdef _WIN32
 
+#include "../common/common.h"
 
-#ifndef _MSC_VER
+#ifdef NON_MSVC_COMPILER
 	#include <excpt.h>
 #else
 	#include <eh.h>			// exception handling info.
-#endif // _MSC_VER
+#endif // NON_MSVC_COMPILER
 
-#include "../common/common.h"
 
 
 extern class CNTService

@@ -101,6 +101,8 @@ ADDPROP(RESPHYSICAL,		"RESPHYSICAL",			RDS_PRET2A) // it's RDS_AOS, but we want 
 ADDPROP(RESPHYSICALMAX,		"RESPHYSICALMAX",		RDS_PRET2A) // it's RDS_AOS, but we want it to depend on ElementalEngine, not on Expansion
 ADDPROP(RESPOISON,			"RESPOISON",			RDS_PRET2A) // it's RDS_AOS, but we want it to depend on ElementalEngine, not on Expansion
 ADDPROP(RESPOISONMAX,		"RESPOISONMAX",			RDS_PRET2A) // it's RDS_AOS, but we want it to depend on ElementalEngine, not on Expansion
+ADDPROP(SLAYER_GROUP,        "SLAYER_GROUP",        RDS_AOS)
+ADDPROP(SLAYER_SPECIES,        "SLAYER_SPECIES",        RDS_AOS)
 ADDPROP(SOULCHARGE,			"SOULCHARGE",			RDS_AOS)
 ADDPROP(SOULCHARGECOLD,		"SOULCHARGECOLD",		RDS_SA)
 ADDPROP(SOULCHARGEENERGY,	"SOULCHARGEENERGY",		RDS_SA)

@@ -1,5 +1,6 @@
-
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ProfileData.h"
@@ -283,7 +284,7 @@ bool CSector::r_LoadVal( CScript &s )
 			SetWeatherChance( false, s.HasArgs() ? s.GetArgVal() : -1 );
 			return true;
 		case SC_FLAGS:
-			m_dwFlags = s.GetArgVal();
+            m_dwFlags = s.GetArgDWVal();
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_fAllowLightOverride )

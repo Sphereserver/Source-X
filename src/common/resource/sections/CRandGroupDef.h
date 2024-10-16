@@ -21,10 +21,10 @@
 */
 class CRandGroupDef : public CResourceLink
 {
-private:
     static lpctstr const sm_szLoadKeys[];
     int m_iTotalWeight;
     CResourceQtyArray m_Members;
+
 private:
     int CalcTotalWeight();
 public:
@@ -39,9 +39,8 @@ public:
     CSString	m_sSubsection;      // Axis SubSection
     CSString	m_sDescription;     // Axis Description
 
-private:
-    CRandGroupDef(const CRandGroupDef& copy);
-    CRandGroupDef& operator=(const CRandGroupDef& other);
+    CRandGroupDef(const CRandGroupDef& copy) = delete;
+    CRandGroupDef& operator=(const CRandGroupDef& other) = delete;
 
 public:
     virtual bool r_LoadVal( CScript & s ) override;

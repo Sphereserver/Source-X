@@ -1,7 +1,8 @@
 
 #include "CCPropsItemEquippable.h"
-#include "../items/CItem.h"
+#include "../clients/CClientTooltip.h"
 #include "../chars/CChar.h"
+#include "../items/CItem.h"
 
 
 lpctstr const CCPropsItemEquippable::_ptcPropertyKeys[PROPIEQUIP_QTY + 1] =
@@ -27,12 +28,12 @@ CCPropsItemEquippable::CCPropsItemEquippable() : CComponentProps(COMP_PROPS_ITEM
 {
 }
 
-bool CCPropsItemEquippable::CanSubscribe(const CItemBase* pItemBase) // static
+bool CCPropsItemEquippable::CanSubscribe(const CItemBase* pItemBase) noexcept // static
 {
     return pItemBase->IsTypeEquippable();
 }
 
-bool CCPropsItemEquippable::CanSubscribe(const CItem* pItem) // static
+bool CCPropsItemEquippable::CanSubscribe(const CItem* pItem) noexcept // static
 {
     return pItem->IsTypeEquippable();
 }
@@ -56,7 +57,7 @@ bool CCPropsItemEquippable::IsPropertyStr(PropertyIndex_t iPropIndex) const
 }
 
 
-/* The idea is: 
+/* The idea is:
     - Changed: Elemental damages and resistances (RESFIRE, DAMFIRE...) are now loaded only if COMBAT_ELEMENTAL_ENGINE is on, otherwise those keywords will be IGNORED. Bear in mind that if you have created
         equippable items when that flag was off and you decide to turn it on later, you'll need to RECREATE all of those ITEMS in order to make them load the elemental properties.
     We'll use this method when we have figured how to avoid possible bugs when equipping and unequipping items and switching COMBAT_ELEMENTAL_ENGINE on and off.
@@ -95,6 +96,24 @@ bool CCPropsItemEquippable::GetPropertyNumPtr(PropertyIndex_t iPropIndex, Proper
 {
     ADDTOCALLSTACK("CCPropsItemChar::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
+
+    if (iPropIndex == PROPIEQUIP_SLAYER_GROUP)
+    {
+        auto group = _faction.GetGroup();
+        if (group == CFactionDef::Group::NONE)
+            return false;
+        *piOutVal = (int32)enum_alias_cast<uint32>(group);
+        return true;
+    }
+    else if (iPropIndex == PROPIEQUIP_SLAYER_SPECIES)
+    {
+        auto species = _faction.GetSpecies();
+        if (species == CFactionDef::Species::NONE)
+            return false;
+        *piOutVal = (int32)enum_alias_cast<uint32>(species);
+        return true;
+    }
+
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
@@ -105,7 +124,7 @@ bool CCPropsItemEquippable::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSStri
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -114,8 +133,20 @@ void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyV
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
+
+    else if (iPropIndex == PROPIEQUIP_SLAYER_GROUP)
+    {
+        _faction.SetGroup(enum_alias_cast<CFactionDef::Group>((uint32)iVal));
+        return true;
+    }
+    else if (iPropIndex == PROPIEQUIP_SLAYER_SPECIES)
+    {
+        _faction.SetSpecies(enum_alias_cast<CFactionDef::Species>((uint32)iVal));
+        return true;
+    }
+
     else
     {
         _mPropsNum[iPropIndex] = iVal;
@@ -123,13 +154,15 @@ void CCPropsItemEquippable::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyV
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+
+    return true;
 }
 
-void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemEquippable::SetPropertyStr");
     ASSERT(ptcVal);
@@ -139,7 +172,7 @@ void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr p
     if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -148,10 +181,11 @@ void CCPropsItemEquippable::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr p
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
 void CCPropsItemEquippable::DeletePropertyNum(PropertyIndex_t iPropIndex)
@@ -192,6 +226,11 @@ void CCPropsItemEquippable::r_Write(CScript & s)
     // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
     BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
     BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
+
+    if (_faction.GetGroup() != CFactionDef::Group::NONE)
+        s.WriteKeyVal(_ptcPropertyKeys[PROPIEQUIP_SLAYER_GROUP],   (int64)enum_alias_cast<uint32>(_faction.GetGroup()));
+    if (_faction.GetSpecies() != CFactionDef::Species::NONE)
+        s.WriteKeyVal(_ptcPropertyKeys[PROPIEQUIP_SLAYER_SPECIES], (int64)enum_alias_cast<uint32>(_faction.GetSpecies()));
 }
 
 void CCPropsItemEquippable::Copy(const CComponentProps * target)
@@ -204,6 +243,8 @@ void CCPropsItemEquippable::Copy(const CComponentProps * target)
     }
     _mPropsNum = pTarget->_mPropsNum;
     _mPropsStr = pTarget->_mPropsStr;
+
+    _faction = pTarget->_faction;
 }
 
 void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
@@ -312,7 +353,7 @@ void CCPropsItemEquippable::AddPropsTooltipData(CObjBase* pLinkedObj)
                     ADDTNUM(1113593); // Fire Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERKINETIC: // Unimplemented
-                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))   
+                if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
                     ADDTNUM(1113597); // Kinetic Eater ~1_Val~%
                 break;
             case PROPIEQUIP_EATERPOISON: // Unimplemented

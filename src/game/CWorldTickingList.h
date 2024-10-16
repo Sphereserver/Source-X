@@ -5,6 +5,8 @@
 #ifndef _INC_CWORLDTICKINGLIST_H
 #define _INC_CWORLDTICKINGLIST_H
 
+#include "../common/common.h"
+
 class CTimedObject;
 class CObjBase;
 class CChar;

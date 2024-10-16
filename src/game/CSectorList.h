@@ -8,7 +8,6 @@
 
 #include "uo_files/CUOMapList.h"
 #include "CSector.h"
-#include <array>
 
 
 class CSectorList

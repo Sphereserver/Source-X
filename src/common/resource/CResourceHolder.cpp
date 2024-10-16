@@ -1,16 +1,11 @@
 
-#include "../../game/chars/CChar.h"
-#include "../../game/items/CItem.h"
-#include "../../game/triggers.h"
-#include "../../game/game_enums.h"
-#include "../../game/game_macros.h"
 #include "../sphere_library/CSFileList.h"
 #include "../CException.h"
+#include "../CExpression.h"
 #include "../CLog.h"
 #include "CResourceHolder.h"
 #include "CResourceHash.h"
 #include "CResourceScript.h"
-#include "CResourceSortedArrays.h"
 
 
 //***************************************************
@@ -109,15 +104,15 @@ CResourceScript * CResourceHolder::AddResourceFile( lpctstr pszName )
 	ASSERT(pszName != nullptr);
 	// Is this really just a dir name ?
 
-	if (strlen(pszName) >= _MAX_PATH)
+	if (strlen(pszName) >= SPHERE_MAX_PATH)
 		throw CSError(LOGL_ERROR, 0, "Filename too long!");
 
-	tchar szName[_MAX_PATH];
-	strcpy(szName, pszName);
+	tchar szName[SPHERE_MAX_PATH];
+	Str_CopyLimitNull(szName, pszName, sizeof(szName));
 
-	tchar szTitle[_MAX_PATH];
+	tchar szTitle[SPHERE_MAX_PATH];
 	lpctstr ptcTitle = CScript::GetFilesTitle(szName);
-	PERSISTANT_ASSERT(strlen(ptcTitle) < sizeof(szTitle));
+	ASSERT_ALWAYS(strlen(ptcTitle) < sizeof(szTitle));
 	Str_CopyLimitNull(szTitle, ptcTitle, sizeof(szTitle));
 
 	if ( szTitle[0] == '\0' )
@@ -130,8 +125,8 @@ CResourceScript * CResourceHolder::AddResourceFile( lpctstr pszName )
 	if ( pszExt == nullptr )
 	{
 		// No file extension provided, so append .scp to the filename
-		Str_ConcatLimitNull( szName,  SPHERE_SCRIPT, sizeof(szName) );
-		Str_ConcatLimitNull( szTitle, SPHERE_SCRIPT, sizeof(szTitle) );
+		Str_ConcatLimitNull( szName,  SPHERE_SCRIPT_EXT, sizeof(szName) );
+		Str_ConcatLimitNull( szTitle, SPHERE_SCRIPT_EXT, sizeof(szTitle) );
 	}
 
 	if ( ! strnicmp( szTitle, SPHERE_FILE "tables", strlen(SPHERE_FILE "tables")))
@@ -164,7 +159,7 @@ void CResourceHolder::AddResourceDir( lpctstr pszDirName )
 	if ( pszDirName[0] == '\0' )
 		return;
 
-	CSString sFilePath = CSFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT );
+	CSString sFilePath = CSFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT_EXT );
 
 	CSFileList filelist;
 	int iRet = filelist.ReadDir( sFilePath, false );

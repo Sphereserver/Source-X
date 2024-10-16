@@ -1,10 +1,15 @@
 
 // Actions specific to an NPC.
 
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
@@ -1573,6 +1578,8 @@ void CChar::NPC_Act_Looting()
 		Speak(g_Cfg.GetDefaultMsg(DEFMSG_LOOT_RUMMAGE), HUE_TEXT_DEF, TALKMODE_EMOTE);
 
 	ItemBounce(pItem, false);
+    UpdateAnimate(ANIM_PILLAGE);
+    SetTimeout(1000);
 }
 
 bool CChar::NPC_Act_Flee()

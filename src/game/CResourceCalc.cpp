@@ -1,11 +1,12 @@
 // The physics calculations of the world.
 
-#include "CServerConfig.h"
-#include "CServerTime.h"
+#include "../common/sphere_library/CSRand.h"
 #include "chars/CChar.h"
 #include "chars/CCharNPC.h"
+#include "../common/CExpression.h"
 #include "components/CCPropsChar.h"
-
+#include "items/CItem.h"
+#include "CServerConfig.h"
 
 //********************************
 // Movement

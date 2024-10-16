@@ -4,7 +4,6 @@
 */
 
 #include "../../game/CServerConfig.h"
-#include "../../game/CServer.h"
 #include "../CException.h"
 #include "../CScript.h"
 #include "CResourceRef.h"
@@ -85,7 +84,6 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
     int iArgCount = Str_ParseCmds( pszCmd, ppBlocks, ARRAY_COUNT(ppBlocks));
     for ( int i = 0; i < iArgCount; ++i )
     {
-        std::shared_ptr<CResourceDef> pResourceDefRef;
         CResourceLink* pResourceLink = nullptr;
 
         pszCmd = ppBlocks[i];
@@ -129,7 +127,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
         if (pResourceLink == nullptr)
         {
             fRet = false;
-            DEBUG_ERR(("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd));
+            g_Log.EventError("Unknown '%s' Resource '%s'\n", CResourceHolder::GetResourceBlockName(restype), pszCmd);
         }
     }
 
@@ -199,6 +197,13 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr ptcKey ) c
     return FindResourceID(pResourceLink->GetResourceID());
 }
 
+lpctstr CResourceHolder::GetResourceBlockName( RES_TYPE restype )	// static
+{
+    if ( restype < 0 || restype >= RES_QTY )
+        restype = RES_UNKNOWN;
+    return sm_szResourceBlocks[restype];
+}
+
 void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const
 {
     ADDTOCALLSTACK_DEBUG("CResourceRefArray::r_Write");
@@ -206,4 +211,13 @@ void CResourceRefArray::r_Write( CScript & s, lpctstr ptcKey ) const
     {
         s.WriteKeyStr( ptcKey, GetResourceName( j ));
     }
+}
+
+bool CResourceRefArray::ContainsResourceID( const CResourceID & rid ) const
+{
+    return FindResourceID(rid) != sl::scont_bad_index();
+}
+bool CResourceRefArray::ContainsResourceName( RES_TYPE restype, lpctstr & ptcKey ) const
+{
+    return FindResourceName(restype, ptcKey) != sl::scont_bad_index();
 }

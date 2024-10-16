@@ -483,7 +483,9 @@ size_t CChatChannel::FindMemberIndex(lpctstr pszName) const
     ADDTOCALLSTACK("CChatChannel::FindMemberIndex");
     for (size_t i = 0; i < m_Members.size(); ++i)
     {
-        if ( strcmp( m_Members[i]->GetChatName(), pszName) == 0)
+        lpctstr ptcName = m_Members[i]->GetChatName();
+        ASSERT(ptcName);
+        if ( strcmp( ptcName, pszName) == 0)
             return i;
     }
     return sl::scont_bad_index();

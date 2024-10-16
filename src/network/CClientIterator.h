@@ -6,8 +6,7 @@
 #ifndef _INC_CCLIENTITERATOR_H
 #define _INC_CCLIENTITERATOR_H
 
-#include "../game/clients/CClient.h"
-
+class CClient;
 class CNetworkManager;
 
 class ClientIterator
@@ -18,13 +17,11 @@ protected:
 
 public:
     explicit ClientIterator(const CNetworkManager* network = nullptr);
-    ~ClientIterator(void);
+    ~ClientIterator();
 
-private:
-    ClientIterator(const ClientIterator& copy);
-    ClientIterator& operator=(const ClientIterator& other);
+    ClientIterator(const ClientIterator& copy) = delete;
+    ClientIterator& operator=(const ClientIterator& other) = delete;
 
-public:
     CClient* next(bool includeClosing = false); // finds next client
 };
 

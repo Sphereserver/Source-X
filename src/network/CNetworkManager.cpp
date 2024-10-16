@@ -135,78 +135,88 @@ void CNetworkManager::acceptNewConnection(void)
     const int maxIp = g_Cfg.m_iConnectingMaxIP;
     const int climaxIp = g_Cfg.m_iClientsMaxIP;
     HistoryIP& ip = m_ips.getHistoryForIP(client_addr);
-    if (ip.m_ttl < g_Cfg.m_iNetHistoryTTL)
+    if (ip.m_iTTLSeconds < g_Cfg.m_iNetHistoryTTLSeconds)
     {
         // This is an IP of interest, i want to remember it for longer.
-        ip.m_ttl = g_Cfg.m_iNetHistoryTTL;
+        ip.m_iTTLSeconds = g_Cfg.m_iNetHistoryTTLSeconds;
     }
 
-    const int64 iIpPrevConnectionTime = ip.m_timeLastConnectedMs;
-    ip.m_timeLastConnectedMs = CSTime::GetMonotonicSysTimeMilli();
-    ip.m_connectionAttempts += 1;
+    const int64 iIpPrevConnectionTime = ip.m_iTimeLastConnectedMs;
+    ip.m_iTimeLastConnectedMs         = CSTime::GetMonotonicSysTimeMilli();
+    ip.m_iConnectionRequests += 1;
 
     DEBUGNETWORK(("Incoming connection from '%s' [IP history: blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d].\n",
-        ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected));
+        ip.m_ip.GetAddrStr(), ip.m_fBlocked, ip.m_iTTLSeconds, ip.m_iPings, ip.m_iPendingConnectionRequests, ip.m_iAliveSuccessfulConnections));
 
-    const auto _printIPBlocked = [&ip](void) -> void {
+    const auto _printIPBlocked = [&ip](void) noexcept -> void {
         g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Blocked connection from '%s' [IP history: blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d].\n",
-            ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected);
+            ip.m_ip.GetAddrStr(), ip.m_fBlocked, ip.m_iTTLSeconds, ip.m_iPings, ip.m_iPendingConnectionRequests, ip.m_iAliveSuccessfulConnections);
     };
 
     // check if ip is allowed to connect
-    if (ip.checkPing() ||								// check for ip ban
-        (maxIp > 0 && ip.m_connecting > maxIp) ||		// check for too many connecting
-        (climaxIp > 0 && ip.m_connected > climaxIp))	// check for too many connected
+    if (ip.checkPing() ||								                // check for ip ban and connection attempts (decaying)
+        (maxIp > 0 && ip.m_iPendingConnectionRequests > maxIp) ||       // check for too many connecting
+        (climaxIp > 0 && ip.m_iAliveSuccessfulConnections > climaxIp) ||// check for too many connected
+        (g_Cfg._iMaxConnectRequestsPerIP > 0) && (ip.m_iConnectionRequests >= g_Cfg._iMaxConnectRequestsPerIP)) // connection attempts (not decaying)
     {
         EXC_SET_BLOCK("rejected");
-        DEBUGNETWORK(("Closing incoming connection [max ip=%d, clients max ip=%d].\n", maxIp, climaxIp));
+        //DEBUGNETWORK(("Closing incoming connection [max ip=%d, clients max ip=%d].\n", maxIp, climaxIp));
 
         CLOSESOCKET(h);
 
         _printIPBlocked();
-        if (ip.m_blocked)
+        if (ip.m_fBlocked)
             g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: Blocked IP.\n");
-        else if (maxIp && ip.m_connecting > maxIp)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CONNECTINGMAXIP reached %d/%d.\n", ip.m_connecting, maxIp);
-        else if (climaxIp && ip.m_connected > climaxIp)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CLIENTMAXIP reached %d/%d.\n", ip.m_connected, climaxIp);
-        else if (ip.m_pings >= g_Cfg.m_iNetMaxPings)
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: MAXPINGS reached %d/%d.\n", ip.m_pings, g_Cfg.m_iNetMaxPings);
+        else if (maxIp && ip.m_iPendingConnectionRequests > maxIp)
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CONNECTINGMAXIP reached %d/%d.\n", ip.m_iPendingConnectionRequests, maxIp);
+        else if (climaxIp && ip.m_iAliveSuccessfulConnections > climaxIp)
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CLIENTMAXIP reached %d/%d.\n", ip.m_iAliveSuccessfulConnections, climaxIp);
+        else if (ip.m_iPings >= g_Cfg.m_iNetMaxPings)
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: MAXPINGS reached %d/%d.\n", ip.m_iPings, g_Cfg.m_iNetMaxPings);
+        else if (ip.m_iConnectionRequests >= g_Cfg._iMaxConnectRequestsPerIP)
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: MaxConnectRequestsPerIP reached %d/%d.\n", ip.m_iConnectionRequests, g_Cfg._iMaxConnectRequestsPerIP);
         else
             g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: unclassified.\n");
+
+
+        // Call this special scripted function.
+        CScriptTriggerArgs fargs_ex(client_addr.GetAddrStr());
+        fargs_ex.m_VarsLocal.SetNumNew("TIME_CUR_CONNECTED_MS", ip.m_iTimeLastConnectedMs);
+        fargs_ex.m_VarsLocal.SetNumNew("TIME_LAST_CONNECTED_MS", iIpPrevConnectionTime);
+        fargs_ex.m_VarsLocal.SetNumNew("PINGS", ip.m_iPings);
+        fargs_ex.m_VarsLocal.SetNumNew("CONNECTION_REQUESTS", ip.m_iConnectionRequests);
+        fargs_ex.m_VarsLocal.SetNumNew("ALIVE_CONNECTIONS", ip.m_iAliveSuccessfulConnections);
+        fargs_ex.m_VarsLocal.SetNumNew("PENDING_CONNECTING", ip.m_iPendingConnectionRequests);
+        fargs_ex.m_VarsLocal.SetNumNew("BAN_TIMEOUT", 5ll * 60);
+        TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
+        g_Serv.r_Call("f_onserver_connectreq_ex", &g_Serv, &fargs_ex, nullptr, &fret);
+        if (fret == -1)
+        {
+            // RETURN -1: do not block.
+            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Outcome: ignore warnings from 'f_onserver_connectreq_ex'.\n");
+        }
+        else
+        {
+            if (fret == TRIGRET_RET_TRUE)
+            {
+                // RETURN 1: reject
+                CLOSESOCKET(h);
+
+                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Outcome: requested kick via script 'f_onserver_connectreq_ex'.\n");
+            }
+            else
+            {
+                // RETURN 2 (TRIGRET_RET_DEFAULT) or other: block IP
+                CLOSESOCKET(h);
+                ip.setBlocked(true, fargs_ex.m_VarsLocal.GetKeyNum("BAN_TIMEOUT"));
+
+                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Outcome (default): requested kick + IP block allowed by script 'f_onserver_connectreq_ex'.\n");
+            }
+        }
 
         return;
     }
 
-    if ((g_Cfg._iMaxConnectRequestsPerIP > 0) && (ip.m_connectionAttempts >= (size_t)g_Cfg._iMaxConnectRequestsPerIP))
-    {
-        // Call this special scripted function.
-        CScriptTriggerArgs fargs_ex(client_addr.GetAddrStr());
-        fargs_ex.m_iN1 = iIpPrevConnectionTime;
-        fargs_ex.m_iN2 = ip.m_timeLastConnectedMs;  // Current connection time.
-        fargs_ex.m_iN3 = ip.m_connectionAttempts;
-        fargs_ex.m_VarsLocal.SetNumNew("BAN_TIMEOUT", 5ll * 60);
-        TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
-        g_Serv.r_Call("f_onserver_connectreq_ex", &g_Serv, &fargs_ex, nullptr, &fret);
-        if (fret == TRIGRET_RET_TRUE)
-        {
-            // reject
-            CLOSESOCKET(h);
-            
-            _printIPBlocked();
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick via script 'f_onserver_connectreq_ex'.\n");
-        }
-        else if (fret == TRIGRET_RET_DEFAULT) // 2
-        {
-            // block IP
-            CLOSESOCKET(h);
-            ip.setBlocked(true, fargs_ex.m_VarsLocal.GetKeyNum("BAN_TIMEOUT"));
-
-            _printIPBlocked();
-            g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: requested kick + IP block via script 'f_onserver_connectreq_ex'.\n");
-        }
-    }
-   
     /*
     // Check if there's already more data waiting to be read (suspicious?).
     // Classic client (but not some 3rd party clients) have pending data after the second connection request
@@ -261,7 +271,7 @@ void CNetworkManager::acceptNewConnection(void)
     // Call this special scripted function.
     CScriptTriggerArgs fargs_acquired(client_addr.GetAddrStr());
     fargs_acquired.m_iN1 = iIpPrevConnectionTime;
-    fargs_acquired.m_iN2 = ip.m_timeLastConnectedMs; // Current connection time.
+    fargs_acquired.m_iN2 = ip.m_iTimeLastConnectedMs; // Current connection time.
     TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
     g_Serv.r_Call("f_onserver_connection_acquired", &g_Serv, &fargs_acquired, nullptr, &fret);
 
@@ -272,8 +282,8 @@ void CNetworkManager::acceptNewConnection(void)
     {
         // not enough empty slots
         EXC_SET_BLOCK("no slot available");
-        _printIPBlocked();        
-        
+        _printIPBlocked();
+
         g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Reject reason: CLIENTMAX reached.\n");
         CLOSESOCKET(h);
         return;
@@ -381,7 +391,7 @@ void CNetworkManager::start(void)
             if (ntCount > 1)
             {
                 // If we have more than one thread (this hasn't sense... at this point isThreaded should be == true)
-                char name[IThread::m_nameMaxLength];
+                char name[AbstractThread::m_nameMaxLength];
                 snprintf(name, sizeof(name), "T_Net #%u", (uint)pThread->getId());
                 pThread->overwriteInternalThreadName(name);
             }
@@ -416,10 +426,11 @@ void CNetworkManager::tick(void)
         if (!pClient || (pClient->GetConnectType() == CONNECT_UNK))
         {
             const int64 iTimeSinceConnectionMs = iCurSysTimeMs - state->m_iConnectionTimeMs;
-            if (iTimeSinceConnectionMs > g_Cfg._iTimeoutIncompleteConnectionMs)
+            const int64 iTimeoutIncompleteConnectionMs = g_Cfg._iTimeoutIncompleteConnectionMs;
+            if (iTimeSinceConnectionMs > iTimeoutIncompleteConnectionMs)
             {
                 EXC_SET_BLOCK("mark closed for timeout");
-                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_EVENT,
+                g_Log.Event(LOGM_CLIENTS_LOG | LOGL_WARN, // LOGM_NOCONTEXT
                     "%x:Force closing connection from IP %s. Reason: timed out before completing login.\n",
                     state->id(), state->m_peerAddress.GetAddrStr());
                 //state->markReadClosed();
@@ -443,7 +454,7 @@ void CNetworkManager::tick(void)
             // sent from CNetworkOutput::QueuePacketTransaction can be ignored
             // the safest solution to this is to send additional signals from here
             CNetworkThread* thread = state->getParentThread();
-            if (thread != nullptr && state->hasPendingData() && thread->getPriority() == IThread::Disabled)
+            if (thread != nullptr && state->hasPendingData() && thread->getPriority() == ThreadPriority::Disabled)
                 thread->awaken();
 #endif
             continue;

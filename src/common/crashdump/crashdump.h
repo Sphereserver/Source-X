@@ -1,7 +1,9 @@
-#if !defined(_INC_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
 #define _INC_CRASHDUMP_H
 
 #include <cstdio>
+
+// TODO: enable creation of the crash dump also for mingw, since it can manage windows structured exceptions.
 
 #ifndef WIN32_LEAN_AND_MEAN
 	#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed

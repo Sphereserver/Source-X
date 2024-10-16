@@ -16,7 +16,6 @@
 #include "../common/resource/CResourceScript.h"
 #include "../common/resource/CResourceSortedArrays.h"
 #include "../common/resource/CValueDefs.h"
-#include "../common/CExpression.h"
 #include "../common/CServerMap.h"
 #include "../common/CTextConsole.h"
 #include "../common/sphereproto.h"
@@ -231,6 +230,7 @@ extern class CServerConfig : public CResourceHolder
 
 public:
 	static const char *m_sClassName;
+
 	int64 m_timePeriodic; // When to perform the next periodic update
 
 	// Begin INI file options.
@@ -240,6 +240,7 @@ public:
 	int64  _iMapCacheTime;     // Time in sec to keep unused map data..
 	int64  _iSectorSleepDelay;    // The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;        // Whether or not to use map diff files.
+    bool m_fUseMobTypes;        // Whether or not to use mobtypes.txt file.
 
 	CSString m_sWorldBaseDir;   // save\" = world files go here.
 	CSString m_sAcctBaseDir;    // Where do the account files go/come from ?
@@ -375,7 +376,7 @@ public:
     bool m_fDisplayPercentAr;       // Display the ARMOR value in the tooltip as the %
     bool m_fDisplayElementalResistance; //Display the Elemental and MAxElemental Resistances on the paperdoll and tooltips (RESFIRE/RESCOLD/RESENERGY/RESPOISON) even if combat flag Elemental Engine is disabled.
     bool _fMeditationMovementAbort;   // Meditation fails if the player moves.
-    
+
     // Flags for controlling pvp/pvm behaviour of players
 	uint m_iCombatFlags;   // combat flags
 	uint m_iMagicFlags;    // magic flags
@@ -568,10 +569,10 @@ public:
 
 	// network settings
 	uint _uiNetworkThreads;         // number of network threads to create
-	uint _uiNetworkThreadPriority;  // priority of network threads
+    int _iNetworkThreadPriority;  // priority of network threads
 	int	 m_fUseAsyncNetwork;        // 0=normal send, 1=async send, 2=async send for 4.0.0+ only
 	int	 m_iNetMaxPings;            // max pings before blocking an ip
-	int	 m_iNetHistoryTTL;          // time to remember an ip
+	int	 m_iNetHistoryTTLSeconds;          // time to remember an ip
 	uint _uiNetMaxPacketsPerTick;   // max packets to send per tick (per queue)
 	uint _uiNetMaxLengthPerTick;    // max packet length to send per tick (per queue) (also max length of individual packets)
     int64 _iMaxSizeClientOut;       // Maximum number of bytes a client can send to the server in 10 seconds before being disconnected
@@ -609,7 +610,6 @@ public:
     CResourceScript m_scpCustomIni; // Custom optional spherecustom.ini
 	CResourceScript m_scpCryptIni;  // Encryption keys are in here
 
-public:
 	CResourceScript m_scpTables;        // Script's loaded.
 
 	CSStringSortArray m_ResourceList;   // Sections lists.

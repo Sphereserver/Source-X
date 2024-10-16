@@ -8,7 +8,9 @@
 
 #include "../common/common.h"
 
+class CNetState;
 class CNetworkThread;
+class PacketSend;
 class PacketTransaction;
 
 

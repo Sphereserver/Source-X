@@ -71,10 +71,12 @@ public:
 	virtual int IsWeird() const;
 
 	// Parent objects
-	virtual const CObjBaseTemplate* GetTopLevelObj() const {
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const {
 		return this;
 	}
-	virtual CObjBaseTemplate* GetTopLevelObj() {
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() {
 		return this;
 	}
 
