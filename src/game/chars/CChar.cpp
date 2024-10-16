@@ -71,6 +71,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
     "@DelMulti",            // Removing a multi to the MultiStorage,
 	"@Destroy",				//+I am nearly destroyed
 	"@Dismount",			// I am trying to get rid of my ride right now
+    "@DisplayName",		    // Name Show on the paperdoll and status bar
     "@Drink",               // I am drinking something.
 	"@Dye",					// My color has been changed
 	"@Eat",

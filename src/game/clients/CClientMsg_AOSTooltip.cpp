@@ -35,7 +35,6 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 	if (PacketPropertyList::CanSendTo(GetNetState()) == false)
 		return false;
-
 	// Enhanced and KR clients always need the tooltips (but they can't be enabled without FEATURE_AOS_UPDATE_B, since this has to be sent to the client via the packet 0xB9).
 	// Shop items use tooltips whether they're disabled or not,
 	//  so we can just send a basic tooltip with the item name
@@ -68,14 +67,17 @@ bool CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 	PacketPropertyList* propertyList = pObj->GetPropertyList();
 
-	if (propertyList == nullptr || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
+    CItem* pItem = pObj->IsItem() ? static_cast<CItem*>(pObj) : nullptr;
+    CChar* pChar = pObj->IsChar() ? static_cast<CChar*>(pObj) : nullptr;
+
+    //If pChar is a client we avoid to use cache because we always generate new tooltip for player.
+	if ((pChar && pChar->IsClientActive()) || propertyList == nullptr || propertyList->hasExpired(g_Cfg.m_iTooltipCache)) 
 	{
         pObj->m_TooltipData.clear();
 		pObj->FreePropertyList();
 
         CClientTooltip* t = nullptr;
-        CItem *pItem = pObj->IsItem() ? static_cast<CItem *>(pObj) : nullptr;
-        CChar *pChar = pObj->IsChar() ? static_cast<CChar *>(pObj) : nullptr;
+
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
 		if (fNameOnly) // if we only want to display the name
@@ -246,6 +248,22 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 	}
 	else if (pChar)
 	{
+        CChar* pClient = static_cast<CChar*>(GetChar());
+        if (IsTrigUsed(TRIGGER_DISPLAYNAME) && pChar->IsClientType() && (pChar != pClient)) //Avoid launch trigger if the target is the same character
+        {
+            CScriptTriggerArgs args;
+            args.m_s1 = pChar->GetName();
+            args.m_iN1 = 3;//Trigger use on tooltip
+            
+            if (pChar->OnTrigger(CTRIG_DisplayName, pClient, &args) == TRIGRET_RET_TRUE)
+            {
+                /*To make it work correctly TooltipCache must be set to 0 on ini or other player will use wrong tooltip*/
+                /*Maybe a beter way can be done*/
+                PUSH_FRONT_TOOLTIP(pChar, new CClientTooltip(1070722, args.m_s1)); // ~1_NOTHING~
+                return; //Avoid to show the prefix and suffix. Show only the name you want
+            }
+        }
+
 		lpctstr lpPrefix = pChar->GetKeyStr("NAME.PREFIX");
 
 		if (!*lpPrefix)
@@ -253,6 +271,7 @@ void CClient::AOSTooltip_addName(CObjBase* pObj)
 
 		if (!*lpPrefix)
 			lpPrefix = " ";
+
 
 		tchar * lpSuffix = Str_GetTemp();
         Str_CopyLimitNull(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"), Str_TempLength());

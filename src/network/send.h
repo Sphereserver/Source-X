@@ -111,7 +111,7 @@ public:
 class PacketObjectStatus : public PacketSend
 {
 public:
-	PacketObjectStatus(const CClient* target, CObjBase* object);
+	PacketObjectStatus(CClient* target, CObjBase* object);
 
 private:
 	void WriteVersionSpecific(const CClient* target, CChar* other, byte version);
@@ -948,7 +948,7 @@ public:
 class PacketPaperdoll : public PacketSend
 {
 public:
-	PacketPaperdoll(const CClient* target, const CChar* character);
+	PacketPaperdoll(const CClient* target, CChar* character);
 };
 
 /***************************************************************************
