@@ -725,6 +725,20 @@ public:
 /***************************************************************************
  *
  *
+ *	Packet 0xBE : PacketAssistVersion				assist version
+ *
+ *
+ ***************************************************************************/
+class PacketAssistVersion : public Packet
+{
+public:
+    PacketAssistVersion();
+    virtual ~PacketAssistVersion();
+};
+
+/***************************************************************************
+ *
+ *
  *	Packet 0xBF : PacketExtendedCommand				extended command
  *
  *

@@ -139,6 +139,7 @@ enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 	XCMD_MailMsg		= 0xbb,
 	XCMD_Season			= 0xbc,
 	XCMD_ClientVersion	= 0xbd,
+    XCMD_AssistVersion  = 0xbe,
 	XCMD_ExtData		= 0xbf,
 	//	0xC0
 	XCMD_EffectEx		= 0xc0,
