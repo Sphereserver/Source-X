@@ -3945,4 +3945,4 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
       [EOF]
 
 16-10-2024, canerksk
-Fixed: The unmatched default value query was causing the price of items without a set price to return as -2,147,483,648. (Issue: #1233)
+Fixed: The mismatched default value check was causing the price of items without a set price to return as -2,147,483,648. (Issue: #1233)
