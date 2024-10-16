@@ -606,6 +606,7 @@ public:
 	// End INI file options.
 
 	CResourceScript m_scpIni;       // Keep this around so we can link to it.
+    CResourceScript m_scpCustomIni; // Custom optional spherecustom.ini
 	CResourceScript m_scpCryptIni;  // Encryption keys are in here
 
 public:

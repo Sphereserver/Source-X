@@ -2495,6 +2495,17 @@ bool PacketClientVersion::onReceive(CNetState* net)
 	return true;
 }
 
+/***************************************************************************
+*
+*
+*	Packet 0xBE : PacketAssistVersion				assist version
+*
+*
+***************************************************************************/
+PacketAssistVersion::PacketAssistVersion() : Packet(0)
+{
+}
+PacketAssistVersion::~PacketAssistVersion() = default;
 
 /***************************************************************************
  *
