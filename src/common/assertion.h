@@ -7,6 +7,7 @@
     #endif
 #endif
 
+[[noreturn]]
 extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
 
 #define ASSERT_ALWAYS(exp)  if ( !(exp) ) [[unlikely]] Assert_Fail(#exp, __FILE__, __LINE__)
