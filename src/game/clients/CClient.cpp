@@ -256,11 +256,11 @@ void CClient::ClearPrivFlags(word wPrivFlags)
 
 // ------------------------------------------------
 
-bool CClient::IsResDisp(byte flag) const
+bool CClient::IsResDisp(RESDISPLAY_VERSION res) const
 {
     if (GetAccount() == nullptr)
         return false;
-    return(GetAccount()->IsResDisp(flag));
+    return(GetAccount()->IsResDisp(res));
 }
 
 byte CClient::GetResDisp() const
@@ -270,14 +270,14 @@ byte CClient::GetResDisp() const
     return(GetAccount()->GetResDisp());
 }
 
-bool CClient::SetResDisp(byte res)
+bool CClient::SetResDisp(RESDISPLAY_VERSION res)
 {
     if (GetAccount() == nullptr)
         return false;
     return (GetAccount()->SetResDisp(res));
 }
 
-bool CClient::SetGreaterResDisp(byte res)
+bool CClient::SetGreaterResDisp(RESDISPLAY_VERSION res)
 {
     if (GetAccount() == nullptr)
         return false;

@@ -1536,7 +1536,7 @@ CREID_TYPE CChar::GetID() const
 	return pCharDef->GetID();
 }
 
-dword CChar::GetBaseID() const
+dword CChar::GetIDCommon() const
 {
     return GetID();
 }
@@ -2884,7 +2884,8 @@ do_default:
 					sVal.Clear();
 			}
 			return true;
-		case CHC_ID:
+        case CHC_ID:
+            // Same as BASEID??
 			sVal = g_Cfg.ResourceGetName( pCharDef->GetResourceID());
 			return true;
 		case CHC_ISGM:

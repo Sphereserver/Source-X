@@ -399,8 +399,8 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
 	// Information about us.
 	CREID_TYPE GetID() const;
-    virtual dword GetBaseID() const override final;
-	CREID_TYPE GetDispID() const;
+    virtual dword GetIDCommon() const override final;   // The unique index id (will NOT be the same as artwork if outside artwork range).
+    CREID_TYPE GetDispID() const;
 	bool SetDispID(CREID_TYPE id);
 	void SetID( CREID_TYPE id );
 
@@ -437,14 +437,14 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 	bool CanSeeItem( const CItem * pItem ) const;
 	bool CanTouch( const CPointMap & pt ) const;
-	bool CanTouch( const CObjBase * pObj ) const;
-	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
+    bool CanTouch( const CObjBase * pObj );
+    IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem );
 	bool CanMoveItem( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
-	bool CanUse( const CItem * pItem, bool fMoveOrConsume ) const;
+    bool CanUse( const CItem * pItem, bool fMoveOrConsume );
 	bool IsMountCapable() const;
 
-	ushort  Food_CanEat( CObjBase * pObj ) const;
+    ushort  Food_CanEat( CObjBase * pObj ) const;
 	short   Food_GetLevelPercent() const;
 	lpctstr Food_GetLevelMessage( bool fPet, bool fHappy ) const;
 
