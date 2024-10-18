@@ -1332,7 +1332,7 @@ bool CChar::CanTouch( const CPointMap &pt ) const
 	return CanSeeLOS(pt, nullptr, 6);
 }
 
-bool CChar::CanTouch( const CObjBase *pObj ) const
+bool CChar::CanTouch( const CObjBase *pObj )
 {
 	ADDTOCALLSTACK("CChar::CanTouch");
 	// Can I reach this from where i am. swords, spears, arms length = x units.
@@ -1442,8 +1442,8 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		// Check if the item is in my bankbox, and i'm not in the same position from which I opened it the last time.
 		const CPointMap& ptTop = GetTopPoint();
-		CItemContainer* pBank = GetChar()->GetBank();
-		bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
+        CItemContainer* pBank = GetBank();
+        const bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
 		if (fItemContIsInsideBankBox && (pBank->m_itEqBankBox.m_pntOpen != ptTop))
 			return false;
 	}
@@ -1472,7 +1472,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	return fCanTouch;
 }
 
-IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem ) const
+IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem )
 {
 	ADDTOCALLSTACK("CChar::CanTouchStatic");
 	// Might be a dynamic or a static.
@@ -1774,7 +1774,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 	return true;
 }
 
-bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume ) const
+bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume )
 {
 	ADDTOCALLSTACK("CChar::CanUse");
 	// Can the Char use ( CONSUME )  the item where it is ?
