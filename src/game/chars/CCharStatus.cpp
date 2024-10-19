@@ -2026,7 +2026,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	//  Fill in the proper ptDest.m_z value for this location. (if walking)
 	//  pdwBlockFlags = what is blocking me. (can be null = don't care)
 
-	//	test diagonal dirs by two others *only* when already having a normal location
+    //	test diagonal dirs by two others *only* when already having a normal location (not diagonal)
     {
         const CPointMap ptOld(GetTopPoint());
         if (!fPathFinding && ptOld.IsValidPoint() && (dir % 2))

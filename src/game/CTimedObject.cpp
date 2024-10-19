@@ -62,6 +62,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK_DEBUG("CTimedObject::_SetTimeout");
     // Assume we have the mutex already locked here
+    g_Log.EventDebug("[%p] _SetTimeout to %" PRId64 ".\n", (void*)this, iDelayInMsecs);
 
     const ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
     if (_IsDeleted()) //prevent deleted objects from setting new timers to avoid nullptr calls
