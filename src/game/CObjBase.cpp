@@ -225,7 +225,7 @@ void CObjBase::DeletePrepare()
 	RemoveSelf();
 
     if (fTopLevel)
-        	_uiInternalStateFlags |= SF_TOPLEVEL;
+        _uiInternalStateFlags |= SF_TOPLEVEL;
 }
 
 void CObjBase::DeleteCleanup(bool fForce)
@@ -765,6 +765,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	// Move to nearby this other object.
 	// Actually move it within +/- iSteps
 
+    // TODO: WUT??
 	CPointMap ptOld(pt);
 	for ( uint i = 0; i < iSteps; ++i )
 	{
