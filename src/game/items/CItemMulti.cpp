@@ -1227,7 +1227,8 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     }
 
     CChar* pOwner = GetOwner().CharFind();
-    if (!pOwner || !pOwner->m_pPlayer)
+    CChar* pChar = uidChar.CharFind();
+    if ((!pChar || !pChar->m_pPlayer) && (!pOwner || !pOwner->m_pPlayer))
     {
         return;
     }
@@ -1253,11 +1254,26 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
 	}
 	if (fMoveToBank)
 	{
-		pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        if (pOwner)
+        {
+            pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        }
+        else
+        {
+            pChar->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        }
+
 	}
 	else
 	{
-		pOwner->ItemBounce(pDeed, fDisplayMsg);
+        if (pOwner)
+        {
+            pOwner->ItemBounce(pDeed, fDisplayMsg);
+        }
+        else
+        {
+            pChar->ItemBounce(pDeed, fDisplayMsg);
+        }
 	}
     }
     SetKeyNum("REMOVED", 1);
