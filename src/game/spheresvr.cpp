@@ -20,6 +20,7 @@
 #include "../common/CException.h"
 #include "../common/CExpression.h"
 #include "../common/CUOInstall.h"
+#include "../common/CScriptTriggerArgs.h"
 #include "../common/sphereversion.h"
 #include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
@@ -369,6 +370,12 @@ void Sphere_ExitServer()
 		case 6:		ptcReason = "Proccess aborted by SIGABRT signal";	break;
 		default:	ptcReason = "Server shutdown complete";			    break;
 	}
+
+    CScriptTriggerArgs ExitArgs;
+    ExitArgs.m_VarsLocal.SetStrNew("Reason", ptcReason);
+    ExitArgs.m_VarsLocal.SetNum("Flag", iExitFlag);
+    g_Serv.r_Call("f_onserver_exit_later", &g_Serv, &ExitArgs);
+
 
 	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", ptcReason, iExitFlag);
 #ifdef _WIN32
