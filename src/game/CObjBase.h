@@ -1107,7 +1107,7 @@ enum CTRIG_TYPE : short
 	CTRIG_itemCreate,           // Created one item.
 	CTRIG_itemDamage,           // Damaged one item.
 	CTRIG_itemDCLICK,           // I have dclicked item.
-	CTRIG_itemDeposit,          // 
+	CTRIG_itemDeposit,          // IT_GOLD dropon bank deposit trigger
 	CTRIG_itemDestroy,          // Item is nearly destroyed.
 	CTRIG_itemDROPON_CHAR,      // I have been dropped on this char.
 	CTRIG_itemDROPON_GROUND,    // I dropped an item on the ground.

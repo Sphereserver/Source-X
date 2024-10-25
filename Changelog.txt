@@ -3914,3 +3914,11 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+13-10-2024, canerksk
+- Added: @Deposit/@ItemDeposit trigger
+	SRC = Char (Player)
+	I/UID = Gold
+	RETURN 1 = Prevents depositing gold into the bank.
+	It works just like DROPON_ITEM/ITEMDROPON_ITEM.
+	When using the virtual gold feature, there was no trigger triggered when physical gold was deposited into the bank, the Dropon_Item was not working because it was triggered lower down, and instead of moving the Dropon_Item up, a separate trigger was added to track the money on the server more easily from another location.

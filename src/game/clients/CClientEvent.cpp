@@ -363,8 +363,15 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
                     if (IsTrigUsed(TRIGGER_DEPOSIT) || IsTrigUsed(TRIGGER_ITEMDEPOSIT))
                     {
                         CScriptTriggerArgs args(pItem);
-                        if (pItem->OnTrigger(ITRIG_DEPOSIT, m_pChar, &args) == TRIGRET_RET_TRUE)
+                        TRIGRET_TYPE ttResult = pItem->OnTrigger(ITRIG_DEPOSIT, m_pChar, &args);
+                        if (pItem->IsDeleted())
                         {
+                            SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_DEPOSITED_FAIL));
+                            return;
+                        }
+                        if (ttResult == TRIGRET_RET_TRUE)
+                        {
+                            SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_DEPOSITED_FAIL));
                             Event_Item_Drop_Fail(pItem);
                             return;
                         }
