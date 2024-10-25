@@ -62,6 +62,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@DelObj",				// For t_spawn when obj is remove from list
     "@DelRedCandle",
     "@DelWhiteCandle",
+	"@Deposit",				// IT_GOLD deposited virtualgold
 	"@Destroy",				//+I am nearly destroyed
 	"@DropOn_Char",			// I have been dropped on this char
 	"@DropOn_Ground",		// I have been dropped on the ground here
