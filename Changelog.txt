@@ -3914,3 +3914,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+25-10-2024, canerksk
+- Added: Added NOREJOIN tag for corpses, If the NOREJOIN tag is one, the player cannot come back to life on that corpse. That is, the player comes back to life but not on the corpse.
+	This tag does not prevent the player from coming back to life, it just prevents them from respawning on that corpse. The player always comes back to life, but not on that corpse.
