@@ -3914,3 +3914,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+25-10-2024, canerksk 
+- Added: @Logout trigger When NPCs (mounts) are logged out of the session in any way, i.e. mounted or minimised, they will log out (disconnect) but will not trigger.
