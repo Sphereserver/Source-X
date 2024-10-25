@@ -20,6 +20,7 @@
 #include "../common/CException.h"
 #include "../common/CExpression.h"
 #include "../common/CUOInstall.h"
+#include "../common/CScriptTriggerArgs.h"
 #include "../common/sphereversion.h"
 #include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
