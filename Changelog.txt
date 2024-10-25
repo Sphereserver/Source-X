@@ -3914,3 +3914,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+25-10-2024, canerksk
+- Added: New optionflag OF_PetBehaviorOwnerNeutral
+	If this setting is enabled, pets you own will appear to you with the original noto (old behavior). If this setting is not enabled, the assets you own will always appear natural to you. This setting only applies when the owning character is looking at the asset they own. It does not apply when someone else is looking at the asset you own.
