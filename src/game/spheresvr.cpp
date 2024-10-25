@@ -370,6 +370,12 @@ void Sphere_ExitServer()
 		default:	ptcReason = "Server shutdown complete";			    break;
 	}
 
+    CScriptTriggerArgs ExitArgs;
+    ExitArgs.m_VarsLocal.SetStrNew("Reason", ptcReason);
+    ExitArgs.m_VarsLocal.SetNum("Flag", iExitFlag);
+    g_Serv.r_Call("f_onserver_exit_later", &g_Serv, &ExitArgs);
+
+
 	g_Log.Event(LOGM_INIT|LOGL_FATAL, "Server terminated: %s (code %d)\n", ptcReason, iExitFlag);
 #ifdef _WIN32
     if (!g_Serv._fCloseNTWindowOnTerminate)

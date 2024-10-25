@@ -3914,3 +3914,73 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+25-10-2024, canerksk
+- Added: Added more server function
+
+	[PLEVEL 7]
+	f_onserver_mode
+
+	f_onserver_resync_start
+	f_onserver_resync_restart
+	f_onserver_resync_failed
+	f_onserver_resync_success
+	f_onserver_resync_finish
+	
+	f_onserver_save_stage
+	f_onserver_save_force
+	f_onserver_save_try
+	
+	[FUNCTION f_onserver_mode]
+	// It is triggered when the server changes mode in any way, for example, saving, resyncing, loading, closing, etc.
+	// Variables:
+	// ARGN1 (R) = Server modes;
+	// RestockAll = 0
+	// GarbageCollection = 1
+	// Saving = 2
+	// Running = 3
+	// ResyncPause = 4
+	// PreLoadingINI = 5
+	// Loading = 6 
+	// ResyncLoad = 7
+	// Exiting = 8
+	
+	[FUNCTION f_onserver_resync_start]
+	// Triggered when resync starts.
+	// Variables:
+	// ARGN1 (R) = Resync Paused 
+	// ARGN2 (R/W) = Broadcast message, 1(true) = with broadcast, 0(false) = without broadcast
+	
+	[FUNCTION f_onserver_resync_restart]
+	// Triggered when resync re-starts. (Only trig)
+	
+	[FUNCTION f_onserver_resync_failed]
+	// Triggered when resync failed.
+	// Variables:
+	// ARGN1 (R/W) = Broadcast message, 1(true) = with broadcast, 0(false) = without broadcast	
+	
+	[FUNCTION f_onserver_resync_success]
+	// Triggered when resync success.
+	// Variables:
+	// ARGN1 (R/W) = Broadcast message, 1(true) = with broadcast, 0(false) = without broadcast	
+	
+	[FUNCTION f_onserver_resync_finish]
+	// Triggered when resync finished.
+	// Variables:
+	// ARGN1 (R) = Is paused status	
+	
+	[FUNCTION f_onserver_save_stage]
+	// Triggered when save mode changes
+	// Variables:
+	// ARGN1 (R) = save stage num	
+	
+	[FUNCTION f_onserver_save_force]
+	// Triggered when save force mode
+	// Variables:
+	// ARGN1 (R) = save stage
+	// ARGN2 (R) = save stage num	
+	
+	[FUNCTION f_onserver_save_try]
+	// Variables:
+	// ARGN1 (R) = Force Immediate
+	// ARGN2 (R) = Save Timer
