@@ -3918,3 +3918,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 26-10-2024, canerksk
 - Fixed: Memory OnTick link char if not, the skill will not fail.
 	If the memory owner is not present, skills do not fail when taking damage, but if the memory owner is alive, skills fail when taking damage.
+
+- Fixed: The entity was jumping frames in flooded pet commands (come, guard)
+	
