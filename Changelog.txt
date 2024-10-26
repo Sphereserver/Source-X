@@ -3914,3 +3914,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+26-10-2024, canerksk
+- Added: New client function CLOSECONTAINER and CLOSEVENDORMENU 
+	CLOSEVENDORMENU <vendor uid> OR CLOSEVENDORMENU empty if empty, 14 squares will close the sales menu of all near shops.
+		If no value is entered, it closes the sales menu of all vendors in the surrounding area (14 squares). If a value is entered and this value is the vendor uid, it closes the sales menu of the vendor belonging to that serial number.
+	CLOSECONTAINER <container uid>
+		Actually, there is already a package for this, but since dealing with the package takes a long time, such a command was needed. When CLOSECONTAINER <container uid> is entered, that container is closed in the interface.
