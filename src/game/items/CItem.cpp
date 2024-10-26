@@ -3769,6 +3769,24 @@ standard_order:
 				goto stopandret;
 		}
 
+        // Weapons
+        if (pItemDef->IsTypeWeapon(m_type))
+        {
+            EXC_SET_BLOCK("Item triggers - EVENTSITEMWEAPON");
+            for (size_t i = 0; i < g_Cfg.m_iEventsItemWeaponLink.size(); ++i)
+            {
+                CResourceLink *pLink = g_Cfg.m_iEventsItemWeaponLink[i].GetRef();
+                if (!pLink || !pLink->HasTrigger(iAction))
+                    continue;
+                CResourceLock s;
+                if (!pLink->ResourceLock(s))
+                    continue;
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                    goto stopandret;
+            }
+        }
+
 		// 5) TYPEDEF
 		EXC_SET_BLOCK("typedef");
 		{
