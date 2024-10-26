@@ -3914,3 +3914,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+26-10-2024, canerksk
+- Fixed: Memory OnTick link char if not, the skill will not fail.
+	If the memory owner is not present, skills do not fail when taking damage, but if the memory owner is alive, skills fail when taking damage.
