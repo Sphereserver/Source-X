@@ -106,6 +106,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemCreate",			//?
 	"@itemDamage",			//?
 	"@itemDCLICK",			// I have dclicked item
+    "@itemDeposit",         // IT_GOLD deposited virtualgold
 	"@itemDestroy",			//+I am nearly destroyed
 	"@itemDropOn_Char",		// I have been dropped on this char
 	"@itemDropOn_Ground",	// I dropped an item on the ground
