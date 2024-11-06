@@ -87,6 +87,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@HitIgnore",			// I'm going to avoid a target (attacker.n.ignore=1) , should I un-ignore him?.
 	"@HitMiss",				// I just missed.
 	"@HitParry",			// I succesfully parried an hit.
+    "@HitReactive",           // Reactive damage trigger
 	"@HitTry",				// I am trying to hit someone. starting swing.
     "@HouseDesignBegin",    // Starting to customize.
     "@HouseDesignCommit",	// I committed a new house design.
@@ -526,6 +527,14 @@ void CChar::SetDisconnected(CSector* pNewSector)
     if (IsClientActive())
     {
         GetClientActive()->GetNetState()->markReadClosed();
+    }
+
+    if (m_pNPC && !g_Serv.IsLoading())
+    {
+        if (IsTrigUsed(TRIGGER_LOGOUT))
+        {
+            OnTrigger(CTRIG_LogOut, this, nullptr);
+        }
     }
 
 	if (m_pPlayer)
