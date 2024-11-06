@@ -323,20 +323,89 @@ void CChar::NPC_CreateTrigger()
 			return;
 	}
 
-	// 4) EVENTSPET triggers
-	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
-	{
-		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
-		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-			continue;
+	// 4) EVENTSNPC triggers
+    for (size_t i = 0; i < g_Cfg.m_pEventsNPCLink.size(); ++i)
+    {
+        CResourceLink *pLink = g_Cfg.m_pEventsNPCLink[i].GetRef();
+        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+            continue;
 
-		CResourceLock s;
-		if (!pLink->ResourceLock(s))
-			continue;
+        CResourceLock s;
+        if (!pLink->ResourceLock(s))
+            continue;
 
-		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
-		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
-			return;
-	}
+        executedEvents.emplace(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+            return;
+    }
+
+    // 5) EVENTSNPCANIMAL triggers
+    for (size_t i = 0; i < g_Cfg.m_pEventsNPCAnimalLink.size(); ++i)
+    {
+        CResourceLink *pLink = g_Cfg.m_pEventsNPCAnimalLink[i].GetRef();
+        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+            continue;
+
+        CResourceLock s;
+        if (!pLink->ResourceLock(s))
+            continue;
+
+        executedEvents.emplace(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+            return;
+    }
+
+    // 6) EVENTSNPCMONSTER triggers
+    for (size_t i = 0; i < g_Cfg.m_pEventsNPCMonsterLink.size(); ++i)
+    {
+        CResourceLink *pLink = g_Cfg.m_pEventsNPCMonsterLink[i].GetRef();
+        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+            continue;
+
+        CResourceLock s;
+        if (!pLink->ResourceLock(s))
+            continue;
+
+        executedEvents.emplace(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+            return;
+    }
+
+    // 7) EVENTSNPCMOUNTABLE triggers
+    for (size_t i = 0; i < g_Cfg.m_pEventsNPCMountableLink.size(); ++i)
+    {
+        CResourceLink *pLink = g_Cfg.m_pEventsNPCMountableLink[i].GetRef();
+        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+            continue;
+
+        CResourceLock s;
+        if (!pLink->ResourceLock(s))
+            continue;
+
+        executedEvents.emplace(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+            return;
+    }
+
+    // 8) EVENTSNPCSHOP triggers
+    for (size_t i = 0; i < g_Cfg.m_pEventsNPCShopLink.size(); ++i)
+    {
+        CResourceLink *pLink = g_Cfg.m_pEventsNPCShopLink[i].GetRef();
+        if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+            continue;
+
+        CResourceLock s;
+        if (!pLink->ResourceLock(s))
+            continue;
+
+        executedEvents.emplace(pLink);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+            return;
+    }
+
 }

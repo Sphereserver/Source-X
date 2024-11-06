@@ -4064,3 +4064,44 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	Old style NPC walking has been added as an option.
 	If OVERRIDE.MOVESTYLE=1 is given to an entity, this indicates that the movement of that entity will be done using the old style calculation.
 	You can use OF_NPCMovementOldStyle to apply to all entities without needing a tag.
+13-10-2024, canerksk
+	Event definitions in Sphere.ini have been made more extensive.
+	
+	// Events related to all NPCs (out of use)
+	//EventsPet=e_npc_generic_event
+	
+	// Events related to all NPCs
+	EventsNPC=e_npc_all
+	
+	// Events related to all animals (brain_animal without mountables)
+	EventsNPCAnimal=e_npc_animals
+	
+	// Events related to all monsters (brain_monster, brain_dragon, brain_berserk)
+	EventsNPCMonster=e_npc_monsters
+	
+	// Events related to all animals (brain_animal with mountable)
+	EventsNPCMountable=e_npc_mountables
+	
+	// Events related to all shopkeepers (brain_vendor, brain_stable, brain_healer)
+	EventsNPCShop=e_npc_shopkeepers
+	
+	// Events related to all char (player and staff)
+	EventsChar=e_char_all
+	
+	// Events related to all players (if the plevel is lower than 1)
+	EventsCharPlayer=e_char_players
+
+	// Events related to all regions
+	//EventsRegion=er_region_all
+
+	// Events related to all staff (if plevel is higher than 1)
+	EventsCharStaff=e_char_staffs
+	
+	// Events related to all players (out of use)
+	//EventsPlayer=
+	
+	// Events related to all items
+	EventsItem=ei_items
+	
+	// Events related to all weapons
+	EventsItemWeapon=ei_item_weapons
