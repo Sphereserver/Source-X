@@ -3921,3 +3921,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 		If no value is entered, it closes the sales menu of all vendors in the surrounding area (14 squares). If a value is entered and this value is the vendor uid, it closes the sales menu of the vendor belonging to that serial number.
 	CLOSECONTAINER <container uid>
 		Actually, there is already a package for this, but since dealing with the package takes a long time, such a command was needed. When CLOSECONTAINER <container uid> is entered, that container is closed in the interface.
+
+25-10-2024, canerksk
+- Added: Added NOREJOIN tag for corpses, If the NOREJOIN tag is one, the player cannot come back to life on that corpse. That is, the player comes back to life but not on the corpse.
+	This tag does not prevent the player from coming back to life, it just prevents them from respawning on that corpse. The player always comes back to life, but not on that corpse.
