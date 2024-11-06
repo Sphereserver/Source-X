@@ -1982,13 +1982,23 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
         iDmgType = (DAMAGE_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("DamageType")));
 		if (iDmgType > 0 && iEffect > 0) // This is necessary if we have a spell that is harmful but does no damage periodically.
 		{
-			OnTakeDamage(iEffect, pItem->m_uidLink.CharFind(), iDmgType,
-				(iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH)) ? 100 : 0,
-				(iDmgType & DAMAGE_FIRE) ? 100 : 0,
-				(iDmgType & DAMAGE_COLD) ? 100 : 0,
-				(iDmgType & DAMAGE_POISON) ? 100 : 0,
-				(iDmgType & DAMAGE_ENERGY) ? 100 : 0,
-				spell);
+            //
+            CChar *pLinkedChar = pItem->m_uidLink.CharFind();
+            if (pLinkedChar == nullptr)
+            {
+                // pLinkedChar = this; //  If it is not alive or deleted, should it be like it is self-damaging? Note: Under the OnTakeDamage()
+                Skill_Fail(); // If the memory does not belong to a creature, or if the creature is dead or deleted, skills do not take effect on damage taken.
+            }
+
+            OnTakeDamage(iEffect,
+                pLinkedChar,
+                iDmgType,
+                (iDmgType & (DAMAGE_HIT_BLUNT | DAMAGE_HIT_PIERCE | DAMAGE_HIT_SLASH)) ? 100 : 0,
+                (iDmgType & DAMAGE_FIRE) ? 100 : 0,
+                (iDmgType & DAMAGE_COLD) ? 100 : 0,
+                (iDmgType & DAMAGE_POISON) ? 100 : 0,
+                (iDmgType & DAMAGE_ENERGY) ? 100 : 0,
+                spell);
 		}
 	}
 	else if (pSpellDef->IsSpellType(SPELLFLAG_HEAL))
