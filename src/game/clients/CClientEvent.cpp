@@ -2004,6 +2004,15 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
             break;
 		}
        */
+        // NPC's with special key words ?
+        if (pChar->m_pNPC)
+        {
+            if (pChar->m_pNPC->m_Brain == NPCBRAIN_BANKER)
+            {
+                if (FindStrWord(pszText, "BANK") > 0)
+                    break;
+            }
+        }
 	}
 
 	if ( !pChar )

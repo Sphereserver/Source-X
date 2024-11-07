@@ -3915,6 +3915,8 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
 
+07-11-2024, canerksk
+- Fixed: If you are around an entity that you own and you are trying to open a bank next to a bank, the "bank" command is perceived as a pet command and the bank does not open. There is no problem when you type "bank" after mounting the mount, but "bank" does not work when you dismount. (Issue #1331)
 25-10-2024, canerksk
 - Added: Added more server (maria db) function
 
