@@ -3920,4 +3920,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	If the memory owner is not present, skills do not fail when taking damage, but if the memory owner is alive, skills fail when taking damage.
 
 - Fixed: The entity was jumping frames in flooded pet commands (come, guard)
-	
+
+08-11-2024
+- Fixed: ITEMMEMORYEQUIP is not triggered in many default memories.
+			Previously, many memories did not have morex information, but now for some reason many memories have morex information and for this reason the trigger was not triggered in almost most of the memories, the morex query was removed. Also, the slang did not represent the memory item.
