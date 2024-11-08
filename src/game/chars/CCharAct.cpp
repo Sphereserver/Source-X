@@ -280,11 +280,14 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			return;
 		}
 
-		if (!pItem->IsTypeSpellable() && !pItem->m_itSpell.m_spell && !pItem->IsType(IT_WAND))	// can this item have a spell effect ? If so we do not send
-		{
+		//if (!pItem->IsTypeSpellable() && !pItem->m_itSpell.m_spell && !pItem->IsType(IT_WAND))	// can this item have a spell effect ? If so we do not send
+        // Since most of the memories came with a morex information by default, almost no memory was triggered.
+        if (!(pItem->IsTypeSpellable() || pItem->IsType(IT_WAND)))
+        {
 			if ((IsTrigUsed(TRIGGER_MEMORYEQUIP)) || (IsTrigUsed(TRIGGER_ITEMMEMORYEQUIP)))
 			{
-				CScriptTriggerArgs pArgs;
+				//CScriptTriggerArgs pArgs;
+                CScriptTriggerArgs pArgs(pItem); // added "argo" argument
 				pArgs.m_iN1 = layer;
 				if (pItem->OnTrigger(ITRIG_MemoryEquip, this, &pArgs) == TRIGRET_RET_TRUE)
 				{
