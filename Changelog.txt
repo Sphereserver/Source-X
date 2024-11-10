@@ -4140,3 +4140,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 08-11-2024
 - Fixed: ITEMMEMORYEQUIP is not triggered in many default memories.
 			Previously, many memories did not have morex information, but now for some reason many memories have morex information and for this reason the trigger was not triggered in almost most of the memories, the morex query was removed. Also, the slang did not represent the memory item.
+10-11-2024, canerksk
+- Added: To get the character's final karma and fame titles, a lot of combined querying was required with the script, so the NOTOTITLE function was added,
+	.show NOTOTITLE outputs the character's final title according to gender and fame value.

@@ -3319,7 +3319,26 @@ do_default:
 				else
 					sVal = GetTradeTitle();
 			}
-			break;
+		break;
+
+        case CHC_NOTOTITLE:
+        {
+            lpctstr pTitle = Noto_IsMurderer() ? g_Cfg.GetDefaultMsg(DEFMSG_TITLE_MURDERER) :
+                                                     (IsStatFlag(STATF_CRIMINAL) ? g_Cfg.GetDefaultMsg(DEFMSG_TITLE_CRIMINAL) :
+                                                                                   g_Cfg.GetNotoTitle(Noto_GetLevel(), Char_GetDef()->IsFemale()));
+            tchar *pTemp = Str_GetTemp();
+
+            snprintf(pTemp, Str_TempLength(), "%s%s%s%s",
+                (pTitle[0]) ? (Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TITLE_ARTICLE_MALE)) : "",
+                pTitle,
+                (pTitle[0]) ? " " : "",
+                Noto_GetFameTitle());
+
+            sVal = pTemp;
+            //sVal = Noto_GetTitle();
+        }
+        break;
+
 		case CHC_EXP:
 			sVal.FormatVal(m_exp);
 			break;
@@ -4045,6 +4064,11 @@ bool CChar::r_LoadVal( CScript & s )
 		case CHC_TITLE:
 			m_sTitle = s.GetArgStr();
 			break;
+
+        case CHC_NOTOTITLE:
+            // READ ONLY FOR NOW
+            break;
+
 		case CHC_EXP:
 			m_exp = s.GetArgUVal();
 			ChangeExperience();			//	auto-update level if applicable
