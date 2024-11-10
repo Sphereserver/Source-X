@@ -3914,3 +3914,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+10-11-2024, canerksk
+- Added: To get the character's final karma and fame titles, a lot of combined querying was required with the script, so the NOTOTITLE function was added,
+	.show NOTOTITLE outputs the character's final title according to gender and fame value.
