@@ -4143,3 +4143,5 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 10-11-2024, canerksk
 - Added: To get the character's final karma and fame titles, a lot of combined querying was required with the script, so the NOTOTITLE function was added,
 	.show NOTOTITLE outputs the character's final title according to gender and fame value.
+-11-11-2024, canerksk
+- Fixed: Hits, stam and mana increases were not disabled in the Eat trigger, now if the local values ​​are zero, hits, stam, mana are set to not increase. Those who want to increase can enter these local values. Also, anim and sound were added to the local variables. The trigger was not triggered after the values ​​changed, as a temporary solution, it was made to trigger after the values ​​changed, so now when you eat a meal, @Eat is triggered twice, once before the values ​​change and once after the values ​​change.
