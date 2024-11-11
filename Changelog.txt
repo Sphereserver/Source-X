@@ -3914,3 +3914,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+-11-11-2024, canerksk
+- Fixed: Hits, stam and mana increases were not disabled in the Eat trigger, now if the local values ​​are zero, hits, stam, mana are set to not increase. Those who want to increase can enter these local values. Also, anim and sound were added to the local variables. The trigger was not triggered after the values ​​changed, as a temporary solution, it was made to trigger after the values ​​changed, so now when you eat a meal, @Eat is triggered twice, once before the values ​​change and once after the values ​​change.
