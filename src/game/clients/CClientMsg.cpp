@@ -2157,20 +2157,21 @@ void CClient::UpdateStats()
 	{
 		if ( m_fUpdateStats & SF_UPDATE_HITS )
 		{
-			addHitsUpdate( m_pChar);
+			addHitsUpdate(m_pChar, false);
 			m_fUpdateStats &= ~SF_UPDATE_HITS;
 		}
 		if ( m_fUpdateStats & SF_UPDATE_MANA )
 		{
-			addManaUpdate( m_pChar );
+            addManaUpdate(m_pChar, false);
 			m_fUpdateStats &= ~SF_UPDATE_MANA;
 		}
 
 		if ( m_fUpdateStats & SF_UPDATE_STAM )
 		{
-			addStamUpdate( m_pChar );
+            addStamUpdate(m_pChar, false);
 			m_fUpdateStats &= ~SF_UPDATE_STAM;
 		}
+        addAttributesUpdate(m_pChar);
 	}
 }
 
@@ -2197,20 +2198,20 @@ void CClient::addStatusWindow( CObjBase *pObj, bool fRequested ) // Opens the st
 	}
 }
 
-void CClient::addHitsUpdate(CChar *pChar)
+void CClient::addHitsUpdate( CChar *pChar )
 {
     ADDTOCALLSTACK("CClient::addHitsUpdate");
     if (!pChar)
         return;
 
-    PacketHealthUpdate cmdHits(pChar, pChar == m_pChar);
-    cmdHits.send(this);
+	PacketHealthUpdate cmd(pChar, pChar == m_pChar);
+	cmd.send(this);
 
-    PacketMobileAttributes cmdAttr(pChar);
-    cmdAttr.send(this);
+    if (bFull)
+        addAttributesUpdate(pChar);
 }
 
-void CClient::addManaUpdate( CChar *pChar )
+void CClient::addManaUpdate(CChar *pChar, bool bFull)
 {
 	ADDTOCALLSTACK("CClient::addManaUpdate");
 	if ( !pChar )
@@ -2227,9 +2228,12 @@ void CClient::addManaUpdate( CChar *pChar )
 		PacketManaUpdate cmd2(pChar, false);
 		pChar->m_pParty->AddStatsUpdate(pChar, &cmd2);
 	}
+
+    if (bFull)
+        addAttributesUpdate(pChar);
 }
 
-void CClient::addStamUpdate( CChar *pChar )
+void CClient::addStamUpdate(CChar *pChar, bool bFull)
 {
 	ADDTOCALLSTACK("CClient::addStamUpdate");
 	if ( !pChar )
@@ -2246,6 +2250,9 @@ void CClient::addStamUpdate( CChar *pChar )
 		PacketStaminaUpdate cmd2(pChar, false);
 		pChar->m_pParty->AddStatsUpdate(pChar, &cmd2);
 	}
+
+    if (bFull)
+        addAttributesUpdate(pChar);
 }
 
 void CClient::addHealthBarUpdate( const CChar * pChar ) const
@@ -2259,6 +2266,16 @@ void CClient::addHealthBarUpdate( const CChar * pChar ) const
         new PacketHealthBarUpdateNew(this, pChar);
     else if ( PacketHealthBarUpdate::CanSendTo(pNetState) )
         new PacketHealthBarUpdate(this, pChar);
+}
+
+void CClient::addAttributesUpdate(CChar *pChar)
+{
+    ADDTOCALLSTACK("CClient::addAttributesUpdate");
+    if (!pChar)
+        return;
+
+    PacketMobileAttributes cmd(pChar);
+    cmd.send(this);
 }
 
 void CClient::addBondedStatus( const CChar * pChar, bool bIsDead ) const

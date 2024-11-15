@@ -1030,6 +1030,29 @@ PacketDeathMenu::PacketDeathMenu(const CClient* target, Mode mode) : PacketSend(
 	push(target);
 }
 
+/***************************************************************************
+ *
+ *
+ *	Packet 0x2d : PacketMobileAttributes    Sends all stat (NORMAL)
+ *
+ *
+ ***************************************************************************/
+PacketMobileAttributes::PacketMobileAttributes(const CChar *character) : PacketSend(XCMD_MobileAttributes, 17, PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketDeathMenu::PacketDeathMenu");
+
+    writeInt32(character->GetUID());
+
+    writeInt16((word)(character->Stat_GetMaxAdjusted(STAT_STR)));
+    writeInt16((word)(character->Stat_GetVal(STAT_STR)));
+
+    writeInt16((word)(character->Stat_GetMaxAdjusted(STAT_INT)));
+    writeInt16((word)(character->Stat_GetVal(STAT_INT)));
+
+    writeInt16((word)(character->Stat_GetMaxAdjusted(STAT_DEX)));
+    writeInt16((word)(character->Stat_GetVal(STAT_DEX)));
+}
+
 
 /***************************************************************************
  *

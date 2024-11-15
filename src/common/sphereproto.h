@@ -46,6 +46,7 @@ enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 	XCMD_DropRejected	= 0x28,
 	XCMD_DropAccepted	= 0x29,
 	XCMD_DeathMenu		= 0x2c,
+    XCMD_MobileAttributes = 0x2d,
 	XCMD_ItemEquip		= 0x2e,
 	XCMD_Fight			= 0x2f,
 	//	0x30
