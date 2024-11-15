@@ -2198,7 +2198,7 @@ void CClient::addStatusWindow( CObjBase *pObj, bool fRequested ) // Opens the st
 	}
 }
 
-void CClient::addHitsUpdate( CChar *pChar )
+void CClient::addHitsUpdate(CChar *pChar, bool bFull)
 {
     ADDTOCALLSTACK("CClient::addHitsUpdate");
     if (!pChar)
