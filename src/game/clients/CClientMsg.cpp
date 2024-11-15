@@ -2109,8 +2109,8 @@ void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type) const
     if (type)
     {
 		// Classic clients only support MAPWAYPOINT_Remove and MAPWAYPOINT_Healer
-		if ((type != MAPWAYPOINT_Healer) && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced())
-			return;
+		//if ((type != MAPWAYPOINT_Healer) && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced())
+			//return;
 
         if (PacketWaypointAdd::CanSendTo(GetNetState()))
             new PacketWaypointAdd(this, pObj, type);
@@ -2197,14 +2197,17 @@ void CClient::addStatusWindow( CObjBase *pObj, bool fRequested ) // Opens the st
 	}
 }
 
-void CClient::addHitsUpdate( CChar *pChar )
+void CClient::addHitsUpdate(CChar *pChar)
 {
-	ADDTOCALLSTACK("CClient::addHitsUpdate");
-	if ( !pChar )
-		return;
+    ADDTOCALLSTACK("CClient::addHitsUpdate");
+    if (!pChar)
+        return;
 
-	PacketHealthUpdate cmd(pChar, pChar == m_pChar);
-	cmd.send(this);
+    PacketHealthUpdate cmdHits(pChar, pChar == m_pChar);
+    cmdHits.send(this);
+
+    PacketMobileAttributes cmdAttr(pChar);
+    cmdAttr.send(this);
 }
 
 void CClient::addManaUpdate( CChar *pChar )
@@ -2215,6 +2218,9 @@ void CClient::addManaUpdate( CChar *pChar )
 
 	PacketManaUpdate cmd(pChar, true);
 	cmd.send(this);
+
+    PacketMobileAttributes cmdAttr(pChar);
+    cmdAttr.send(this);
 
 	if ( pChar->m_pParty )
 	{
@@ -2231,6 +2237,9 @@ void CClient::addStamUpdate( CChar *pChar )
 
 	PacketStaminaUpdate cmd(pChar, true);
 	cmd.send(this);
+
+    PacketMobileAttributes cmdAttr(pChar);
+    cmdAttr.send(this);
 
 	if ( pChar->m_pParty )
 	{

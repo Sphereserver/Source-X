@@ -1907,7 +1907,8 @@ public:
     virtual bool canSendTo(const CNetState *state) const { return CanSendTo(state); }
     static bool CanSendTo(const CNetState *state)
     {
-        return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
+        //return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
+        return state->isClientVersionNumber(MINCLIVER_NEWVERSIONING) || state->isClientKR() || state->isClientEnhanced();
     }
 };
 
@@ -1926,7 +1927,8 @@ public:
     virtual bool canSendTo(const CNetState *state) const { return CanSendTo(state); }
     static bool CanSendTo(const CNetState *state)
     {
-        return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
+        //return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
+        return state->isClientVersionNumber(MINCLIVER_NEWVERSIONING) || state->isClientKR() || state->isClientEnhanced();
     }
 };
 
