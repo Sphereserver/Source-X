@@ -981,7 +981,7 @@ effect_bounce:
 	SoundChar(CRESND_GETHIT);
 	UpdateStatVal( STAT_STR, -iDmg);
 	if ( pSrc->IsClientActive() )
-		pSrc->GetClientActive()->addHitsUpdate( this );	// always send updates to src
+		pSrc->GetClientActive()->addHitsUpdate( this, true );	// always send updates to src
 
 	if ( IsAosFlagEnabled( FEATURE_AOS_DAMAGE ) )
 	{

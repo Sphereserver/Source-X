@@ -519,9 +519,10 @@ public:
 	bool addBookOpen( CItem * pBook ) const;
 	void addBookPage( const CItem * pBook, word wPage, word wCount ) const;
 	void addStatusWindow( CObjBase * pObj, bool fRequested = false ); // Opens the status window
-	void addHitsUpdate( CChar * pChar );
-	void addManaUpdate( CChar * pChar );
-	void addStamUpdate( CChar * pChar );
+    void addHitsUpdate(CChar *pChar, bool bFull = false);
+    void addManaUpdate(CChar *pChar, bool bFull = false);
+    void addStamUpdate(CChar *pChar, bool bFull = false);
+    void addAttributesUpdate(CChar *pChar);
 	void addHealthBarUpdate( const CChar * pChar ) const;
 	void addBondedStatus( const CChar * pChar, bool fIsDead ) const;
 	void addSkillWindow(SKILL_TYPE skill, bool fFromInfo = false) const; // Opens the skills list

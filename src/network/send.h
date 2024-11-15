@@ -409,6 +409,19 @@ public:
 /***************************************************************************
  *
  *
+ *	Packet 0x2D : PacketMobileAttributes        Sends all stat (NORMAL)
+ *
+ *
+ ***************************************************************************/
+class PacketMobileAttributes : public PacketSend {
+public:
+    PacketMobileAttributes(const CChar *character);
+};
+
+
+/***************************************************************************
+ *
+ *
  *	Packet 0x2E : PacketItemEquipped		sends equipped item (NORMAL)
  *
  *
