@@ -1039,7 +1039,7 @@ PacketDeathMenu::PacketDeathMenu(const CClient* target, Mode mode) : PacketSend(
  ***************************************************************************/
 PacketMobileAttributes::PacketMobileAttributes(const CChar *character) : PacketSend(XCMD_MobileAttributes, 17, PRI_NORMAL)
 {
-    ADDTOCALLSTACK("PacketDeathMenu::PacketDeathMenu");
+    ADDTOCALLSTACK("PacketMobileAttributes::PacketMobileAttributes");
 
     writeInt32(character->GetUID());
 
