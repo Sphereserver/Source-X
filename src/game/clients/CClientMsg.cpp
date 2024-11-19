@@ -3132,18 +3132,21 @@ byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 		return( PacketLoginError::MaxClients );
 	}
 
+    byte ErrorCode = PacketLoginError::Blocked;
+
 	//	Do the scripts allow to login this account?
 	pAccount->m_Last_IP.SetAddrIP(GetPeer().GetAddrIP());
 	CScriptTriggerArgs Args;
 	Args.Init(pAccount->GetName());
 	Args.m_iN1 = GetConnectType();
+    Args.m_iN2 = ErrorCode <= PacketLoginError::Invalid ? PacketLoginError::Blocked : ErrorCode;
 	Args.m_pO1 = this;
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 	g_Serv.r_Call("f_onaccount_login", &g_Serv, &Args, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{
 		sMsg = g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_DENIED );
-		return (PacketLoginError::Blocked);
+        return ((byte)Args.m_iN2);
 	}
 
 	m_pAccount = pAccount;
