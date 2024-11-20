@@ -71,7 +71,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
     Args.m_VarsLocal.SetNum("PORT", portnum);
     Args.m_VarsLocal.SetNum("ISCONNECT", m_fConnected ? 1 : 0);
     TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-    g_Serv.r_Call("f_onserver_mdb_connect", &g_Serv, &Args, nullptr, &tr);
+    g_Serv.r_Call("f_onserver_db_connect", &g_Serv, &Args, nullptr, &tr);
     if (tr == TRIGRET_RET_TRUE)
         return false;
 
@@ -96,7 +96,7 @@ void CDataBase::Close()
 	SimpleThreadLock lock(m_connectionMutex);
 	mysql_close(_myData);
 
-    g_Serv.r_Call("f_onserver_mdb_close", &g_Serv, nullptr);
+    g_Serv.r_Call("f_onserver_db_close", &g_Serv, nullptr);
 
 	_myData = nullptr;
 	m_fConnected = false;
@@ -176,7 +176,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
         Args.m_VarsLocal.SetNum("NUMCOLS", num_fields);
         Args.m_VarsLocal.SetNum("ISERROR", myErr ? 1 : 0);
         TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-        g_Serv.r_Call("f_onserver_mdb_query", &g_Serv, &Args, nullptr, &tr);
+        g_Serv.r_Call("f_onserver_db_query", &g_Serv, &Args, nullptr, &tr);
         if (tr == TRIGRET_RET_TRUE)
             return false;
 
@@ -239,7 +239,7 @@ bool CDataBase::exec(const char *query)
         Args.m_VarsLocal.SetStrNew("EXECUTE", query);
         Args.m_VarsLocal.SetNum("ISERROR", myErr ? 1 : 0);
         TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-        g_Serv.r_Call("f_onserver_mdb_execute", &g_Serv, &Args, nullptr, &tr);
+        g_Serv.r_Call("f_onserver_db_execute", &g_Serv, &Args, nullptr, &tr);
         if (tr == TRIGRET_RET_TRUE)
             return false;
 
@@ -305,7 +305,7 @@ bool CDataBase::_OnTick()
 
     CScriptTriggerArgs Args;
     Args.m_iN1 = tickcnt;
-    g_Serv.r_Call("f_onserver_mdb_tick", &g_Serv, &Args);
+    g_Serv.r_Call("f_onserver_db_tick", &g_Serv, &Args);
     tickcnt = (int)Args.m_iN1;
 
 	//	do not ping sql server too heavily

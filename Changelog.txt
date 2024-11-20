@@ -3919,19 +3919,19 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: Added more server (maria db) function
 
 	[PLEVEL 7]
-	f_onserver_mdb_connect
-	f_onserver_mdb_query
-	f_onserver_mdb_execute
-	f_onserver_mdb_close
-	f_onserver_mdb_tick
+	f_onserver_db_connect
+	f_onserver_db_query
+	f_onserver_db_execute
+	f_onserver_db_close
+	f_onserver_db_tick
 
-	[FUNCTION f_onserver_mdb_connect] 
+	[FUNCTION f_onserver_db_connect] 
 	// Called when the database is connected.
 	// Variables:
 	// Return:
 	//	1 --> Prevents the connection.
 	
-	[FUNCTION f_onserver_mdb_query]
+	[FUNCTION f_onserver_db_query]
 	// called when the database makes a query
 	// Variables:	
 	// LOCAL.QUERY (R) = Query details (string)
@@ -3941,7 +3941,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// Return:
 	//	1 --> Prevents the query.
 	
-	[FUNCTION f_onserver_mdb_execute]
+	[FUNCTION f_onserver_db_execute]
 	// Called when the database performs an execute.
 	// Variables:	
 	// LOCAL.EXECUTE (R) = Execute details (string)
@@ -3949,10 +3949,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// Return:
 	//	1 --> Prevents the execute
 
-	[FUNCTION f_onserver_mdb_close]
+	[FUNCTION f_onserver_db_close]
 	// Called when the database connection is closed.
 	
-	[FUNCTION f_onserver_mdb_tick]
+	[FUNCTION f_onserver_db_tick]
 	// It is called when the database receives a tick (ping).
 	// Variables:
 	// ARGN1 (R/W) = how long will database be a tick? mysqle ping sending time. (Default: 1000ms)
