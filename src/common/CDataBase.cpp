@@ -62,7 +62,20 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		return false;
 	}
 
-	return (m_fConnected = true);
+    m_fConnected = true;
+
+    CScriptTriggerArgs Args;
+    Args.m_VarsLocal.SetNum("VERSION", ver);
+    Args.m_VarsLocal.SetStrNew("USER", user);
+    Args.m_VarsLocal.SetStrNew("HOST", host);
+    Args.m_VarsLocal.SetNum("PORT", portnum);
+    Args.m_VarsLocal.SetNum("ISCONNECT", m_fConnected ? 1 : 0);
+    TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
+    g_Serv.r_Call("f_onserver_db_connect", &g_Serv, &Args, nullptr, &tr);
+    if (tr == TRIGRET_RET_TRUE)
+        return false;
+
+	return m_fConnected;
 }
 
 bool CDataBase::Connect()
@@ -82,6 +95,9 @@ void CDataBase::Close()
 	ADDTOCALLSTACK("CDataBase::Close");
 	SimpleThreadLock lock(m_connectionMutex);
 	mysql_close(_myData);
+
+    g_Serv.r_Call("f_onserver_db_close", &g_Serv, nullptr);
+
 	_myData = nullptr;
 	m_fConnected = false;
 }
@@ -153,6 +169,17 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
             }
             ++rownum;
         }
+
+        CScriptTriggerArgs Args;
+        Args.m_VarsLocal.SetStrNew("QUERY", query);
+        Args.m_VarsLocal.SetNum("NUMROWS", rownum);
+        Args.m_VarsLocal.SetNum("NUMCOLS", num_fields);
+        Args.m_VarsLocal.SetNum("ISERROR", myErr ? 1 : 0);
+        TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
+        g_Serv.r_Call("f_onserver_db_query", &g_Serv, &Args, nullptr, &tr);
+        if (tr == TRIGRET_RET_TRUE)
+            return false;
+
         mysql_free_result(m_res);
         return true;
     }
@@ -185,6 +212,8 @@ bool CDataBase::exec(const char *query)
 		return false;
 
 	int result = 0;
+    MYSQL_RES *m_res  = nullptr;
+    const char *myErr = nullptr;
 
 	{
 		// connection can only handle one query at a time, so we need to lock until we finish
@@ -194,19 +223,33 @@ bool CDataBase::exec(const char *query)
 		{
 			// even though we don't want (or expect) any result data, we must retrieve
 			// is anyway otherwise we will lose our connection to the server
-			MYSQL_RES* res = mysql_store_result(_myData);
-			if (res != nullptr)
-				mysql_free_result(res);
-
-			return true;
+            m_res = mysql_store_result(_myData);
+            if (m_res == nullptr)
+                return false;
 		}
 		else
 		{
-			const char *myErr = mysql_error(_myData);
-			g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n",
-				query, ( *myErr ? myErr : "unknown reason"));
+			myErr = mysql_error(_myData);
 		}
 	}
+
+    if (m_res != nullptr)
+    {
+        CScriptTriggerArgs Args;
+        Args.m_VarsLocal.SetStrNew("EXECUTE", query);
+        Args.m_VarsLocal.SetNum("ISERROR", myErr ? 1 : 0);
+        TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
+        g_Serv.r_Call("f_onserver_db_execute", &g_Serv, &Args, nullptr, &tr);
+        if (tr == TRIGRET_RET_TRUE)
+            return false;
+
+        mysql_free_result(m_res);
+        return true;
+    }
+    else
+    {
+        g_Log.Event(LOGM_NOCONTEXT | LOGL_ERROR, "MariaDB execute \"%s\" failed due to \"%s\"\n", query, (*myErr ? myErr : "unknown reason"));
+    }
 
 	if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
 		Close();
@@ -259,6 +302,11 @@ bool CDataBase::_OnTick()
 
 	if ( !g_Cfg.m_fMySql )	//	MariaDB is not supported
 		return true;
+
+    CScriptTriggerArgs Args;
+    Args.m_iN1 = tickcnt;
+    g_Serv.r_Call("f_onserver_db_tick", &g_Serv, &Args);
+    tickcnt = (int)Args.m_iN1;
 
 	//	do not ping sql server too heavily
 	if ( ++tickcnt >= 1000 )
