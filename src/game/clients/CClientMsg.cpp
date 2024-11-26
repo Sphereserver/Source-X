@@ -2198,7 +2198,7 @@ void CClient::addStatusWindow( CObjBase *pObj, bool fRequested ) // Opens the st
 	}
 }
 
-void CClient::addHitsUpdate( CChar *pChar, bool bFull )
+void CClient::addHitsUpdate( CChar *pChar, bool fFull)
 {
 	ADDTOCALLSTACK("CClient::addHitsUpdate");
 	if ( !pChar )
@@ -2207,11 +2207,11 @@ void CClient::addHitsUpdate( CChar *pChar, bool bFull )
 	PacketHealthUpdate cmd(pChar, pChar == m_pChar);
 	cmd.send(this);
 
-    if (bFull)
+    if (fFull)
         addAttributesUpdate(pChar);
 }
 
-void CClient::addManaUpdate(CChar *pChar, bool bFull)
+void CClient::addManaUpdate(CChar *pChar, bool fFull)
 {
 	ADDTOCALLSTACK("CClient::addManaUpdate");
 	if ( !pChar )
@@ -2226,11 +2226,11 @@ void CClient::addManaUpdate(CChar *pChar, bool bFull)
 		pChar->m_pParty->AddStatsUpdate(pChar, &cmd2);
 	}
 
-    if (bFull)
+    if (fFull)
         addAttributesUpdate(pChar);
 }
 
-void CClient::addStamUpdate(CChar *pChar, bool bFull)
+void CClient::addStamUpdate(CChar *pChar, bool fFull)
 {
 	ADDTOCALLSTACK("CClient::addStamUpdate");
 	if ( !pChar )
@@ -2245,7 +2245,7 @@ void CClient::addStamUpdate(CChar *pChar, bool bFull)
 		pChar->m_pParty->AddStatsUpdate(pChar, &cmd2);
 	}
 
-    if (bFull)
+    if (fFull)
         addAttributesUpdate(pChar);
 }
 
