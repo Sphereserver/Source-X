@@ -17,6 +17,8 @@ function(toolchain_exe_stuff_common)
             HINT
             "/usr/local/opt/mariadb-connector-c/lib/mariadb"
             "/opt/homebrew/var/mariadb-connector-c/lib/mariadb"
+            "/opt/homebrew/opt/mariadb-connector-c/lib/mariadb"
+            "/opt/homebrew/opt/mariadb-connector-c/lib"
             "/opt/homebrew/lib/mariadb"
         )
         message(STATUS "Library ${lib_name}: ${lib_${lib_name}_with_path}")
