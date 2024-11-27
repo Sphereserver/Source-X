@@ -1227,7 +1227,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     }
 
     CChar* pOwner = GetOwner().CharFind();
-    CChar* pChar = uidChar.CharFind();
+    CChar* pChar = uidRedeedingChar.CharFind();
     if ((!pChar || !pChar->m_pPlayer) && (!pOwner || !pOwner->m_pPlayer))
     {
         return;
