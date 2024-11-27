@@ -1174,7 +1174,7 @@ int16 CItemMulti::GetMultiCount() const
     return _iMultiCount;
 }
 
-void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar, CUID uidRedeedingChar)
+void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidRedeedingChar)
 {
     ADDTOCALLSTACK("CItemMulti::Redeed");
     if (GetKeyNum("REMOVED") > 0) // Just don't pass from here again, to avoid duplicated deeds.
@@ -1209,7 +1209,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar, CUID u
     args.m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
     if (IsTrigUsed(TRIGGER_REDEED))
     {
-        tRet = OnTrigger(ITRIG_Redeed, uidChar.CharFind(), &args);
+        tRet = OnTrigger(ITRIG_Redeed, uidRedeedingChar.CharFind(), &args);
         if (args.m_iN2 == 0)
         {
             fMoveToBank = false;
