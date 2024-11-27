@@ -3914,3 +3914,20 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+27-11-2024, canerksk
+- Added: All skills that have a distance query have been adjusted to take the RANGE values ​​of that skill.
+	All skills to be used in RANGE;
+		BLACKSMITHING
+		MINING // It was added before.
+		FISHING // It was added before.
+		LUMBERJACKING // It was added before.
+		PEACEMAKING
+		ENTICEMENT
+		PROVOCATION
+		COOKING
+		TAMING
+		THROWING
+		SNOOPING
+		STEALING
+	Also added BREATH.MAXDIST to Breath. If this property is not given, the default is 14 distance.
