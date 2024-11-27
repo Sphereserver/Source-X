@@ -61,7 +61,7 @@ static int timing_safe_strcmp(const char *str1, const char *str2)
  * nonzero otherwise.
  *
  */
-int bcrypt_gensalt(const char* prefix, int factor, char salt[BCRYPT_HASHSIZE])
+static int bcrypt_gensalt(const char* prefix, int factor, char salt[BCRYPT_HASHSIZE])
 {
 #define RANDBYTES (16)
 	//char input[RANDBYTES];
@@ -94,7 +94,7 @@ int bcrypt_gensalt(const char* prefix, int factor, char salt[BCRYPT_HASHSIZE])
  * The return value is zero if the password could be hashed and nonzero
  * otherwise.
  */
-int bcrypt_hashpw(const char *passwd, const char salt[BCRYPT_HASHSIZE], char hash[BCRYPT_HASHSIZE])
+static int bcrypt_hashpw(const char *passwd, const char salt[BCRYPT_HASHSIZE], char hash[BCRYPT_HASHSIZE])
 {
 	char *aux;
 	aux = crypt_rn(passwd, salt, hash, BCRYPT_HASHSIZE);
@@ -110,7 +110,7 @@ int bcrypt_hashpw(const char *passwd, const char salt[BCRYPT_HASHSIZE], char has
  * passwords don't match.
  *
  */
-int bcrypt_checkpw(const char *passwd, const char hash[BCRYPT_HASHSIZE])
+static int bcrypt_checkpw(const char *passwd, const char hash[BCRYPT_HASHSIZE])
 {
 	int ret;
 	char outhash[BCRYPT_HASHSIZE];

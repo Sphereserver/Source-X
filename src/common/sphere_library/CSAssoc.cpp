@@ -3,6 +3,7 @@
 #include "../CExpression.h"
 #include "../common.h"
 
+
 //***************************************************************************
 // -CValStr
 
@@ -120,3 +121,20 @@ bool CElementDef::GetValStr( const void * pBase, CSString & sVal ) const
 	}
 	return false;
 }
+
+
+//--
+
+// CSObjListRec:: Constructors, Destructor, Assign operator.
+
+CSStringListRec::CSStringListRec( lpctstr pszVal )
+    : CSString( pszVal )
+	{ }
+
+CSStringListRec::~CSStringListRec() = default;
+
+//--
+
+// CSObjStringList: Constructors, Destructor, Assign operator.
+CSStringList::CSStringList() = default;
+CSStringList::~CSStringList() = default;

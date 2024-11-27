@@ -122,8 +122,9 @@ dword ResGetIndex(dword dwObjUid) noexcept {
 }
 
 
-struct CResourceIDBase : public CUID
+class CResourceIDBase : public CUID
 {
+public:
     // Unlike CResourceID, CResourceIDBase has not the "page" part/variable.
     //  Use it to store defnames or UIDs of world objects (items, chars...) or spawns and templates.
 

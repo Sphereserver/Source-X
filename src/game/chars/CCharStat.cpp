@@ -1,8 +1,10 @@
 //  CChar is either an NPC or a Player.
-
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CScriptTriggerArgs.h"
+#include "../items/CItem.h"
 #include "../triggers.h"
 #include "../CServer.h"
 #include "../CWorldGameTime.h"
@@ -71,15 +73,10 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 
 int CChar::Stat_GetMod( STAT_TYPE i ) const
 {
-    [[unlikely]]
-    if (i < 0 || i >= STAT_QTY)
-    {
-        ADDTOCALLSTACK("CChar::Stat_GetMod");
-        ASSERT(i >= 0 && i < STAT_QTY);
-    }
+    ADDTOCALLSTACK("CChar::Stat_GetMod");
+    ASSERT(i >= 0 && i < STAT_QTY);
 
-    [[likely]]
-	return m_Stat[i].m_mod;
+    return m_Stat[i].m_mod;
 }
 
 void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
@@ -321,15 +318,10 @@ ushort CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 
 ushort CChar::Stat_GetBase( STAT_TYPE i ) const
 {
-    [[unlikely]]
-    if (i < 0 || i >= STAT_QTY)
-    {
-        ADDTOCALLSTACK("CChar::Stat_GetBase");
-        ASSERT(i >= 0 && i < STAT_QTY);
-    }
+    ADDTOCALLSTACK("CChar::Stat_GetBase");
+    ASSERT(i >= 0 && i < STAT_QTY);
 
-    [[likely]]
-	return m_Stat[i].m_base;
+    return m_Stat[i].m_base;
 }
 
 void CChar::Stat_AddBase( STAT_TYPE i, int iVal )

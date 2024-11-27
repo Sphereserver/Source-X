@@ -1,6 +1,5 @@
 #include "../common/CLog.h"
 #include "../common/CUID.h"
-#include "../sphere/ProfileTask.h"
 #include "CObjBase.h"
 #include "CServerConfig.h"
 #include "CServerTime.h"
@@ -201,7 +200,8 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
 	for (CSObjContRec* obj : _timedFunctions.GetIterationSafeCont())
 	{
-		auto tfObj = static_cast<CTimedFunction*>(obj);
+        auto tfObj = static_cast<CTimedFunction*>(obj);
+        ASSERT(tfObj);
 		const CUID& uid = tfObj->GetUID();
 		if (uid.IsValidUID())
 		{

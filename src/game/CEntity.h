@@ -8,7 +8,6 @@
 
 #include <flat_containers/flat_map.hpp>
 #include "CComponent.h"
-#include <map>
 
 class CEntity
 {

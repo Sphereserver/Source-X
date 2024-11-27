@@ -1,22 +1,20 @@
 /**
 * @file CCharBase.h
-* 
+*
 */
 
 #ifndef _INC_CCHARBASE_H
 #define _INC_CCHARBASE_H
 
-#include "../../common/sphere_library/CSString.h"
-#include "../../common/resource/CResourceHolder.h"
-#include "../../common/sphereproto.h"
-#include "../../common/CScriptObj.h"
-#include "../../common/CTextConsole.h"
-#include "../uo_files/uofiles_enums_creid.h"
 #include "../CBase.h"
-#include "../components/CCFaction.h"
 
 
+class CFactionDef;
 class CScript;
+class CSString;
+class CTextConsole;
+enum CREID_TYPE	: uint32_t;
+enum ITEMID_TYPE : uint32_t;
 
 class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of monster/creature.
 {
@@ -44,7 +42,6 @@ public:
 	RESDISPLAY_VERSION _iEraLimitLoot;	// Don't allow to create loot newer than the given era (softcoded).
 
     ushort _uiRange;
-
 	short m_iMoveRate;	// move rate percent
 
 						// NPC info ----------------------------------------------------
@@ -62,17 +59,20 @@ public:
 
 	static lpctstr const sm_szLoadKeys[];
 
-private:
-	void SetFoodType( lpctstr pszFood );
-	void CopyBasic( const CCharBase * pCharDef );
-
 public:
 	explicit CCharBase( CREID_TYPE id );
     virtual ~CCharBase() = default;
 
+	CCharBase(const CCharBase& copy) = delete;
+	CCharBase& operator=(const CCharBase& other) = delete;
+
+    	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+	virtual bool r_Load( CScript & s ) override;
+
 private:
-	CCharBase(const CCharBase& copy);
-	CCharBase& operator=(const CCharBase& other);
+	void SetFoodType( lpctstr pszFood );
+	void CopyBasic( const CCharBase * pCharDef );
 
 public:
 	virtual void UnLink() override;
@@ -116,9 +116,6 @@ public:
 
 	lpctstr GetTradeName() const;
 
-	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
-	virtual bool r_Load( CScript & s ) override;
 };
 
 

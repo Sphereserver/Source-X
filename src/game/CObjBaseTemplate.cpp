@@ -1,5 +1,4 @@
 #include "../sphere/threads.h"
-#include "uo_files/uofiles_macros.h"
 #include "CObjBaseTemplate.h"
 #include "CServerConfig.h"
 

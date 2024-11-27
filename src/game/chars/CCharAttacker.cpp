@@ -1,4 +1,5 @@
 // Actions specific to an NPC.
+#include "../../common/CExpression.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -20,9 +21,14 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
     }
     else if (IsTrigUsed(TRIGGER_COMBATSTART))
     {
-        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, pChar, 0);
+        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, pChar, nullptr);
         if (tRet == TRIGRET_RET_TRUE)
             return false;
+        else
+        {
+            if (pChar->IsNPC())
+                UpdateAnimate(ANIM_ALERT);
+        }
     }
 
     CScriptTriggerArgs Args;
@@ -250,7 +256,7 @@ void CChar::Attacker_Clear()
     {
         if (m_lastAttackers.empty() || !Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
         {
-            OnTrigger(CTRIG_CombatEnd, this, 0);
+            OnTrigger(CTRIG_CombatEnd, this, nullptr);
         }
     }
 

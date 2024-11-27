@@ -6,7 +6,6 @@
 #define _INC_CSFILETEXT_H
 
 #include "CSFile.h"
-#include <cstdio>
 
 /**
 * @brief Text files. Try to be compatible with MFC CFile class.
@@ -22,15 +21,15 @@ public:
 public:
     CSFileText();
     virtual ~CSFileText();
-private:
+
     /**
     * @brief No copy on construction allowed.
     */
-    CSFileText(const CSFileText& copy);
+    CSFileText(const CSFileText& copy) = delete;
     /**
     * @brief No copy allowed.
     */
-    CSFileText& operator=(const CSFileText& other);
+    CSFileText& operator=(const CSFileText& other) = delete;
     ///@}
     /** @name File management:
     */
@@ -85,8 +84,8 @@ public:     virtual bool IsEOF() const;
     * @param ... argument list.
     * @return total chars of the output.
     */
-protected:  int _cdecl _Printf( lpctstr pFormat, ... ) __printfargs(2,3);
-public:     int _cdecl Printf(lpctstr pFormat, ...) __printfargs(2, 3);
+protected:  int _Printf( lpctstr pFormat, ... ) SPHERE_PRINTFARGS(2,3);
+public:     int Printf(lpctstr pFormat, ...) SPHERE_PRINTFARGS(2, 3);
     /**
     * @brief Reads data from the file.
     * @param pBuffer buffer where store the readed data.

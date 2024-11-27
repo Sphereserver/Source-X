@@ -160,7 +160,12 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
                 tchar *pszTmp = Str_GetTemp();
                 m_Reags.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
                 if ( fQtyOnly && pszTmp[0] == '\0' )
-                    strcpy( pszTmp, "0" ); // Return 0 for empty quantity
+                {
+                    // Return 0 for empty quantity.
+                    pszTmp[0] = '0';
+                    pszTmp[1] = '\0';
+                }
+
                 sVal = pszTmp;
             }
             else

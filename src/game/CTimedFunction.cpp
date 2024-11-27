@@ -1,7 +1,6 @@
 #include "../common/sphere_library/sstring.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "../sphere/ProfileTask.h"
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CTimedFunctionHandler.h"

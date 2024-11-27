@@ -166,9 +166,8 @@ public:
 	CScriptObj() = default;
 	virtual ~CScriptObj() = default;
 
-private:
-	CScriptObj(const CScriptObj& copy);
-	CScriptObj& operator=(const CScriptObj& other);
+    CScriptObj(const CScriptObj& copy) = delete;
+    CScriptObj& operator=(const CScriptObj& other) = delete;
 };
 
 #endif	// _INC_CSCRIPTOBJ_H

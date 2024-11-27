@@ -18,7 +18,7 @@
 
 // All these structures must be byte packed.
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(MSVC_COMPILER)
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -81,13 +81,13 @@ struct ndword
 
 
 // Turn off structure packing.
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32) && defined(MSVC_COMPILER)
     #pragma pack()
 #endif
 
 
-int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes) noexcept;
-int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars) noexcept;
+int CvtSystemToNETUTF16(nachar* pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes);
+int CvtNETUTF16ToSystem(tchar* pOut, int iSizeOutBytes, const nachar* pInp, int iSizeInChars);
 
 
 #endif // _INC_NET_DATATYPES_H

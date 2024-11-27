@@ -1,7 +1,8 @@
 
 #include "CCPropsItemChar.h"
-#include "../items/CItem.h"
 #include "../chars/CChar.h"
+#include "../clients/CClientTooltip.h"
+#include "../items/CItem.h"
 
 
 lpctstr const CCPropsItemChar::_ptcPropertyKeys[PROPITCH_QTY + 1] =
@@ -31,7 +32,7 @@ CCPropsItemChar::CCPropsItemChar() : CComponentProps(COMP_PROPS_ITEMCHAR)
 // If a CItem: subscribed in CItemBase::SetType and CItem::SetType
 // If a CChar: subscribed in CCharBase::CCharBase and CChar::CChar
 /*
-bool CCPropsItemChar::CanSubscribe(const CObjBase* pObj) // static
+bool CCPropsItemChar::CanSubscribe(const CObjBase* pObj) noexcept // static
 {
     return (pObj->IsItem() || pObj->IsChar());
 }
@@ -73,7 +74,7 @@ bool CCPropsItemChar::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* ps
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemChar::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -94,7 +95,7 @@ void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -103,7 +104,7 @@ void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     switch (iPropIndex)
@@ -128,9 +129,11 @@ void CCPropsItemChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_
         //    pLinkedObj->UpdatePropertyFlag();
         //    break;
     }
+
+    return true;
 }
 
-void CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsItemChar::SetPropertyStr");
     ASSERT(ptcVal);
@@ -140,7 +143,7 @@ void CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal,
     if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion))
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -149,10 +152,11 @@ void CCPropsItemChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal,
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     pLinkedObj->UpdatePropertyFlag();
+    return true;
 }
 
 void CCPropsItemChar::DeletePropertyNum(PropertyIndex_t iPropIndex)
@@ -214,16 +218,16 @@ void CCPropsItemChar::AddPropsTooltipData(CObjBase* pLinkedObj)
 #define ADDTSTR(tooltipID)  TOOLTIP_APPEND(new CClientTooltip(tooltipID, ptcVal))
 
     /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
-    
+
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
         PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
-        
+
         if (iVal == 0)
             continue;
-        
+
         if (pLinkedObj->IsItem())
         {
             // Show tooltips for these props only if the linked obj is an item
@@ -238,7 +242,7 @@ void CCPropsItemChar::AddPropsTooltipData(CObjBase* pLinkedObj)
     }
     // End of Numeric properties
 
-/*    
+/*
     // String properties
     for (const BaseContStrPair_t& propPair : _mPropsStr)
     {

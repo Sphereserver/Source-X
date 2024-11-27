@@ -51,15 +51,15 @@ public:
     void flushAllClients(void);					// force each thread to flush output
 
 public:
-    inline const PacketManager& getPacketManager(void) const { return m_packets; }		// get packet manager
-    inline IPHistoryManager& getIPHistoryManager(void) { return m_ips; }	// get ip history manager
-    inline bool isThreaded(void) const { return m_isThreaded; } // are threads active
-    inline bool isInputThreaded(void) const // is network input handled by thread
+    inline const PacketManager& getPacketManager(void) const noexcept { return m_packets; }		// get packet manager
+    inline IPHistoryManager& getIPHistoryManager(void) noexcept { return m_ips; }	// get ip history manager
+    inline bool isThreaded(void) const noexcept { return m_isThreaded; } // are threads active
+    inline bool isInputThreaded(void) const noexcept // is network input handled by thread
     {
         return m_isThreaded;
     }
 
-    inline bool isOutputThreaded(void) const // is network output handled by thread
+    inline bool isOutputThreaded(void) const noexcept // is network output handled by thread
     {
         return m_isThreaded;
     }

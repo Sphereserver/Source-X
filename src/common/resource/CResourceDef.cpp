@@ -4,11 +4,21 @@
 */
 
 #include "../../sphere/threads.h"
-#include "../CVarDefMap.h"
 #include "../CExpression.h"
 #include "../CLog.h"
 #include "CResourceDef.h"
 
+
+CResourceDef::CResourceDef(const CResourceID& rid, lpctstr pszDefName) :
+    m_rid(rid), m_pDefName(nullptr)
+{
+    SetResourceName(pszDefName);
+}
+CResourceDef::CResourceDef(const CResourceID& rid, const CVarDefContNum * pDefName) :
+    m_rid(rid), m_pDefName(pDefName)
+{
+}
+CResourceDef::~CResourceDef() = default;
 
 bool CResourceDef::SetResourceName( lpctstr pszName )
 {
@@ -46,9 +56,11 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 
         const int iKeyIndex = (int)ResGetIndex(dwKeyVal);
         if ( iKeyIndex == iResIndex)
-            DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, dwKeyVal, dwResPrivateUID ));
+            g_Log.EventWarn( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n",
+                             pszName, dwKeyVal, dwResPrivateUID );
         else
-            DEBUG_WARN(( "DEFNAME=%s: redefinition (0%x!=0%x)\n", pszName, iKeyIndex, iResIndex ));
+            g_Log.EventWarn("DEFNAME=%s: redefinition (0%x!=0%x)\n",
+                            pszName, iKeyIndex, iResIndex);
 
         pVarKeyNum = g_Exp.m_VarResDefs.SetNum( pszName, dwResPrivateUID );
     }
@@ -139,7 +151,7 @@ bool CResourceDef::MakeResourceName()
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( ptcKey ) )
         {
-            size_t uiVarThis = Str_ToUI( ptcKey );
+            size_t uiVarThis = Str_ToU( ptcKey );
             if ( uiVarThis >= uiVar )
                 uiVar = uiVarThis + 1;
         }

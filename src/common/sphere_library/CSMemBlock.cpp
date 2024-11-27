@@ -49,10 +49,12 @@ void CSMemBlock::MemLink( byte * pData )
 
 // CSMemLenBlock:: Constructors, Destructor, Asign operator.
 
-CSMemLenBlock::CSMemLenBlock()
+CSMemLenBlock::CSMemLenBlock() :
+    m_uiLength(0)
 {
-    m_uiLength = 0;
 }
+
+CSMemLenBlock::~CSMemLenBlock() = default;
 
 // CSMemLenBlock:: Modifiers.
 

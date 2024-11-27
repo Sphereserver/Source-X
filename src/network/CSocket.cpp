@@ -5,6 +5,7 @@
 #include "../common/sphere_library/sstring.h"
 #include "../common/CLog.h"
 
+
 void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 {
 #ifdef _WIN32
@@ -432,12 +433,12 @@ CSocketAddress CSocket::GetPeerName( ) const
 int CSocket::SetSockOpt( int nOptionName, const void * optval, int optlen, int nLevel ) const
 {
 	// level = SOL_SOCKET and IPPROTO_TCP.
-	return( setsockopt( m_hSocket, nLevel, nOptionName, reinterpret_cast<const char FAR *>(optval), optlen ));
+    return( setsockopt( m_hSocket, nLevel, nOptionName, reinterpret_cast<const char *>(optval), optlen ));
 }
 
 int CSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLevel ) const
 {
-	return( getsockopt( m_hSocket, nLevel, nOptionName, reinterpret_cast<char FAR *>(optval), reinterpret_cast<socklen_t *>(poptlen)));
+    return( getsockopt( m_hSocket, nLevel, nOptionName, reinterpret_cast<char *>(optval), reinterpret_cast<socklen_t *>(poptlen)));
 }
 
 #ifdef _WIN32
@@ -456,7 +457,7 @@ int CSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLev
 	{
      	// TO BE CALLED IN CClient destructor !!!
 		CancelIo(reinterpret_cast<HANDLE>(m_hSocket));
-		SleepEx(1, TRUE);
+        SleepEx(1, TRUE);
 	}
 
 #else

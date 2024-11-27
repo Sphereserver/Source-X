@@ -7,13 +7,13 @@
 #define _INC_CUOVERSIONBLOCK_H
 
 #include "../../common/common.h"
-#include "uofiles_macros.h"
+#include "uofiles_enums.h"
 
 #define VERDATA_MAKE_INDEX( f, i )	((f+1)<< 26 | (i))
 
 
 // All these structures must be byte packed.
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef MSVC_COMPILER
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -59,7 +59,7 @@ public:
 
 
 // Turn off structure packing.
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef MSVC_COMPILER
 	#pragma pack()
 #else
 	#undef PACK_NEEDED

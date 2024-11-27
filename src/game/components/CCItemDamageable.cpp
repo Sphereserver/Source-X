@@ -1,11 +1,11 @@
 
 #include "CCItemDamageable.h"
 #include "../CServer.h"
-#include "../CObjBase.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldSearch.h"
 #include "../CWorldTickingList.h"
 #include "../chars/CChar.h"
+#include "../items/CItem.h"
 #include "../clients/CClient.h"
 
 
@@ -18,12 +18,12 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
     _fNeedUpdate = true;
 }
 
-CItem * CCItemDamageable::GetLink() const
+CItem * CCItemDamageable::GetLink() const noexcept
 {
     return _pLink;
 }
 
-bool CCItemDamageable::CanSubscribe(const CItem* pItem) // static
+bool CCItemDamageable::CanSubscribe(const CItem* pItem) noexcept // static
 {
     return pItem->Can(CAN_I_DAMAGEABLE);
 }
@@ -35,6 +35,7 @@ void CCItemDamageable::SetCurHits(word iCurHits)
         _fNeedUpdate = true;
     }
     _iCurHits = iCurHits;
+    OnTickStatsUpdate();
 }
 
 void CCItemDamageable::SetMaxHits(word iMaxHits)
@@ -44,6 +45,7 @@ void CCItemDamageable::SetMaxHits(word iMaxHits)
         _fNeedUpdate = true;
     }
     _iMaxHits = iMaxHits;
+    OnTickStatsUpdate();
 }
 
 word CCItemDamageable::GetCurHits() const

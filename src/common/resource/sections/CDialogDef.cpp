@@ -32,6 +32,8 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
     GUMPCTL_GUMPPICTILED, // x, y, gumpID, w, h, hue=color
     GUMPCTL_HTMLGUMP, // 7 = x,y,sx,sy, 0 0 0
 
+    GUMPCTL_ITEMPROPERTY,   // 1 = uid of the item in question.
+
     // Not really controls but more attributes.
     GUMPCTL_NOCLOSE, // 0 = The gump cannot be closed by right clicking.
     GUMPCTL_NODISPOSE, // 0 = The gump cannot be closed by gump-closing macro.
@@ -49,7 +51,6 @@ enum GUMPCTL_TYPE // controls we can put in a gump.
     GUMPCTL_TILEPICHUE, // NEW: x,y,item,color
 
     GUMPCTL_TOOLTIP, // From SE client. tooltip cliloc(1003000)
-    GUMPCTL_ITEMPROPERTY,   // 1 = uid of the item in question.
 
     GUMPCTL_XMFHTMLGUMP, // 7 = x,y,sx,sy, cliloc(1003000) hasBack canScroll
     GUMPCTL_XMFHTMLGUMPCOLOR, // NEW: x,y,w,h ???
@@ -80,6 +81,8 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
     "GUMPPICTILED",
     "HTMLGUMP",
 
+    "ITEMPROPERTY",
+
     "NOCLOSE",
     "NODISPOSE",
     "NOMOVE",
@@ -96,7 +99,6 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
     "TILEPICHUE",
 
     "TOOLTIP",
-    "ITEMPROPERTY",
 
     "XMFHTMLGUMP",
     "XMFHTMLGUMPCOLOR",
@@ -106,40 +108,22 @@ lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 };
 
 
-uint CDialogDef::GumpAddText( lpctstr pszText )
+uint CDialogDef::GumpAddText( lpctstr ptcText )
 {
     ADDTOCALLSTACK("CDialogDef::GumpAddText");
-    m_sText.emplace_back(pszText);
+    m_sText.emplace_back(ptcText);
     return uint(m_sText.size() - 1);
 }
-
-#define SKIP_ALL( args )		SKIP_SEPARATORS( args ); GETNONWHITESPACE( args );
-#define GET_ABSOLUTE( c )		SKIP_ALL( pszArgs );	int c = Exp_GetSingle( pszArgs );
-
-#define GET_EVAL( c )		    SKIP_ALL( pszArgs );	int c = Exp_GetVal( pszArgs );
-
-#define GET_RELATIVE( c, base )								\
-	SKIP_ALL( pszArgs ); int c;								\
-	if ( *pszArgs == '-' && IsSpace(pszArgs[1]))				\
-		c	= base, ++pszArgs;								\
-	else if ( *pszArgs == '+' )								\
-		c = base + Exp_GetSingle( ++pszArgs );					\
-	else if ( *pszArgs == '-' )								\
-		c = base - Exp_GetSingle( ++pszArgs );					\
-	else if ( *pszArgs == '*' )								\
-		base = c	= base + Exp_GetSingle( ++pszArgs );		\
-	else													\
-		c = Exp_GetSingle( pszArgs );
 
 
 bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on this object as a target
 {
     ADDTOCALLSTACK("CDialogDef::r_Verb");
     EXC_TRY("Verb");
+
     // The first part of the key is GUMPCTL_TYPE
     lpctstr ptcKey = s.GetKey();
-
-    int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
+    const int index = FindTableSorted( ptcKey, sm_szLoadKeys, ARRAY_COUNT(sm_szLoadKeys)-1 );
     if ( index < 0 )
     {
         const size_t uiFunctionIndex = r_GetFunctionIndex(ptcKey);
@@ -151,12 +135,40 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             if ( r_Call(uiFunctionIndex, pSrc, &Args, &sVal) )
                 return true;
         }
+
         if (!m_pObj)
             return CResourceLink::r_Verb(s, pSrc);
         return m_pObj->r_Verb(s, pSrc);
     }
 
-    lpctstr pszArgs	= s.GetArgStr();
+    lptstr ptcArgs = s.GetArgStr();
+    //g_Log.EventDebug("Dialog index %d, KEY %s ARG %s.\n", index, ptcKey, ptcArgs);
+
+    const auto _SkipAll = [](lptstr& ptcArgs_) noexcept -> void
+    {
+        SKIP_SEPARATORS(ptcArgs_);
+        GETNONWHITESPACE(ptcArgs_);
+    };
+
+    const auto _CalcRelative = [](lptstr& ptcArgs_, int &iCoordBase_) -> int
+    {
+        int c;
+            if ( *ptcArgs_ == '-' && IsSpace(ptcArgs_[1]))
+            c = iCoordBase_, ++ptcArgs_;
+        else if ( *ptcArgs_ == '+' )
+            c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+        else if ( *ptcArgs_ == '-' )
+            c = iCoordBase_ - Exp_GetSingle( ++ptcArgs_ );
+        else if ( *ptcArgs_ == '*' )
+            iCoordBase_ = c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+        else
+            c = Exp_GetSingle( ptcArgs_ );
+        return c;
+    };
+
+#   define GET_ABSOLUTE(c)          _SkipAll(ptcArgs);   int c = Exp_GetSingle(ptcArgs);
+#   define GET_EVAL(c)              _SkipAll(ptcArgs);   int c = Exp_GetVal(ptcArgs);
+#   define GET_RELATIVE(c, base)    _SkipAll(ptcArgs);   int c = _CalcRelative(ptcArgs, base);
 
     switch( index )
     {
@@ -177,6 +189,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "page %d", iNewPage );
             return true;
         }
+
         case GUMPCTL_BUTTON:			// 7 = X,Y,Down gump,Up gump,pressable(1/0),page,id
         case GUMPCTL_BUTTONTILEART:		// 11 = X,Y,Down gump,Up gump,pressable(1/0),page,id,tileart,hue,X,Y
         {
@@ -210,16 +223,18 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 
             return true;
         }
+
         case GUMPCTL_GUMPPIC:
         {
             GET_RELATIVE( x, m_iOriginX );
             GET_RELATIVE( y, m_iOriginY );
             GET_ABSOLUTE( id );
-            SKIP_ALL( pszArgs );
+            _SkipAll( ptcArgs );
 
-            m_sControls.emplace_back(false).Format( "gumppic %d %d %d%s%s", x, y, id, *pszArgs ? " hue=" : "", *pszArgs ? pszArgs : "" );
+            m_sControls.emplace_back(false).Format( "gumppic %d %d %d%s%s", x, y, id, *ptcArgs ? " hue=" : "", *ptcArgs ? ptcArgs : "" );
             return true;
         }
+
         case GUMPCTL_GUMPPICTILED:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -231,6 +246,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "gumppictiled %d %d %d %d %d", x, y, sX, sY, id );
             return true;
         }
+
         case GUMPCTL_PICINPIC:
         {
             GET_RELATIVE(x, m_iOriginX);
@@ -244,6 +260,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format("picinpic %d %d %d %d %d %d %d", x, y, id, w, h, sX, sY);
             return true;
         }
+
         case GUMPCTL_RESIZEPIC:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -255,35 +272,38 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "resizepic %d %d %d %d %d", x, y, id, sX, sY );
             return true;
         }
+
         case GUMPCTL_TILEPIC:
         case GUMPCTL_TILEPICHUE:
         {
             GET_RELATIVE( x, m_iOriginX );
             GET_RELATIVE( y, m_iOriginY );
             GET_ABSOLUTE( id );
-            SKIP_ALL( pszArgs );
+            _SkipAll( ptcArgs );
 
             // TilePic don't use args, TilePicHue yes :)
             if ( index == GUMPCTL_TILEPIC )
                 m_sControls.emplace_back(false).Format( "tilepic %d %d %d", x, y, id );
             else
-                m_sControls.emplace_back(false).Format( "tilepichue %d %d %d%s%s", x, y, id, *pszArgs ? " " : "", *pszArgs ? pszArgs : "" );
+                m_sControls.emplace_back(false).Format( "tilepichue %d %d %d%s%s", x, y, id, *ptcArgs ? " " : "", *ptcArgs ? ptcArgs : "" );
 
             return true;
         }
+
         case GUMPCTL_DTEXT:
         {
             GET_RELATIVE( x, m_iOriginX );
             GET_RELATIVE( y, m_iOriginY );
             GET_ABSOLUTE( hue );
-            SKIP_ALL( pszArgs )
-            if ( *pszArgs == '.' )
-                ++pszArgs;
+            _SkipAll( ptcArgs );
+            if ( *ptcArgs == '.' )
+                ++ptcArgs;
 
-            uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls.emplace_back(false).Format( "text %d %d %d %u", x, y, hue, iText );
+            const uint uiText = GumpAddText( *ptcArgs ? ptcArgs : "" );
+            m_sControls.emplace_back(false).Format( "text %d %d %d %u", x, y, hue, uiText );
             return true;
         }
+
         case GUMPCTL_DCROPPEDTEXT:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -291,13 +311,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE( w );
             GET_ABSOLUTE( h );
             GET_ABSOLUTE( hue );
-            SKIP_ALL( pszArgs )
-                if ( *pszArgs == '.' )			pszArgs++;
+            _SkipAll( ptcArgs );
+            if ( *ptcArgs == '.' )
+                ptcArgs += 1;
 
-			uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls.emplace_back(false).Format( "croppedtext %d %d %d %d %d %u", x, y, w, h, hue, iText );
+            const uint uiText = GumpAddText( *ptcArgs ? ptcArgs : "" );
+            m_sControls.emplace_back(false).Format( "croppedtext %d %d %d %d %d %u", x, y, w, h, hue, uiText );
             return true;
         }
+
         case GUMPCTL_DHTMLGUMP:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -306,12 +328,13 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE( h );
             GET_ABSOLUTE( bck );
             GET_ABSOLUTE( options );
-            SKIP_ALL( pszArgs )
+            _SkipAll( ptcArgs );
 
-            uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls.emplace_back(false).Format( "htmlgump %d %d %d %d %u %d %d", x, y, w, h, iText, bck, options );
+            const uint uiText = GumpAddText( *ptcArgs ? ptcArgs : "" );
+            m_sControls.emplace_back(false).Format( "htmlgump %d %d %d %d %u %d %d", x, y, w, h, uiText, bck, options );
             return true;
         }
+
         case GUMPCTL_DTEXTENTRY:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -320,12 +343,13 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE( h );
             GET_ABSOLUTE( hue );
             GET_ABSOLUTE( id );
-            SKIP_ALL( pszArgs )
+            _SkipAll( ptcArgs );
 
-            uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls.emplace_back(false).Format( "textentry %d %d %d %d %d %d %u", x, y, w, h, hue, id, iText );
+            const uint uiText = GumpAddText( *ptcArgs ? ptcArgs : "" );
+            m_sControls.emplace_back(false).Format( "textentry %d %d %d %d %d %d %u", x, y, w, h, hue, id, uiText );
             return true;
         }
+
         case GUMPCTL_DTEXTENTRYLIMITED:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -335,12 +359,13 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE( hue );
             GET_ABSOLUTE( id );
             GET_ABSOLUTE( charLimit );
-            SKIP_ALL( pszArgs )
+            _SkipAll( ptcArgs );
 
-            uint iText = GumpAddText( *pszArgs ? pszArgs : "" );
-            m_sControls.emplace_back(false).Format( "textentrylimited %d %d %d %d %d %d %u %d", x, y, w, h, hue, id, iText, charLimit );
+            const uint uiText = GumpAddText( *ptcArgs ? ptcArgs : "" );
+            m_sControls.emplace_back(false).Format( "textentrylimited %d %d %d %d %d %d %u %d", x, y, w, h, hue, id, uiText, charLimit );
             return true;
         }
+
         case GUMPCTL_CHECKBOX:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -353,6 +378,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "checkbox %d %d %d %d %d %d", x, y, down, up, state, id );
             return true;
         }
+
         case GUMPCTL_RADIO:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -365,6 +391,23 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "radio %d %d %d %d %d %d", x, y, down, up, state, id );
             return true;
         }
+
+        case GUMPCTL_TOOLTIP:
+        {
+            tchar* pptcArgs[2];
+            const int iArgs = Str_ParseCmds(ptcArgs, pptcArgs, ARRAY_COUNT(pptcArgs));
+            if (iArgs < 2)
+                return false;
+
+            // The client expects this to be sent as a string in decimal notation. Ensure that.
+            std::optional<uint> conv = Str_ToU(pptcArgs[0]);
+            if (!conv.has_value())
+                return false;
+
+            m_sControls.emplace_back(false).Format( "tooltip %u %s", conv.value(), pptcArgs[1] );
+            return true;
+        }
+
         case GUMPCTL_CHECKERTRANS:
         {
             GET_RELATIVE( x, m_iOriginX );
@@ -375,6 +418,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             m_sControls.emplace_back(false).Format( "checkertrans %d %d %d %d", x, y, width, height );
             return true;
         }
+
         case GUMPCTL_DORIGIN:
         {
             // GET_RELATIVE( x, m_iOriginX );
@@ -382,27 +426,29 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             // m_iOriginX	= x;
             // m_iOriginY	= y;
 
-            SKIP_ALL( pszArgs );
-            if ( *pszArgs == '-' && (IsSpace( pszArgs[1] ) || !pszArgs[1]) )
-                ++pszArgs;
-            else if ( *pszArgs == '*' )
-                m_iOriginX += Exp_GetSingle( ++pszArgs );
+            _SkipAll( ptcArgs );
+            if ( *ptcArgs == '-' && (IsSpace( ptcArgs[1] ) || !ptcArgs[1]) )
+                ++ptcArgs;
+            else if ( *ptcArgs == '*' )
+                m_iOriginX += Exp_GetSingle( ++ptcArgs );
             else
-            	m_iOriginX	= Exp_GetSingle( pszArgs );
+            	m_iOriginX	= Exp_GetSingle( ptcArgs );
 
-            SKIP_ALL( pszArgs );
-            if ( *pszArgs == '-' && (IsSpace( pszArgs[1] ) || !pszArgs[1]) )
-                ++pszArgs;
-            else if ( *pszArgs == '*' )
-                m_iOriginY += Exp_GetSingle( ++pszArgs );
+            _SkipAll( ptcArgs );
+            if ( *ptcArgs == '-' && (IsSpace( ptcArgs[1] ) || !ptcArgs[1]) )
+                ++ptcArgs;
+            else if ( *ptcArgs == '*' )
+                m_iOriginY += Exp_GetSingle( ++ptcArgs );
             else
-                m_iOriginY  = Exp_GetSingle( pszArgs );
+                m_iOriginY  = Exp_GetSingle( ptcArgs );
 
             return true;
         }
+
         case GUMPCTL_NODISPOSE:
             m_fNoDispose = true;
             break;
+
         case GUMPCTL_CROPPEDTEXT:
         case GUMPCTL_TEXT:
         case GUMPCTL_TEXTENTRY:
@@ -419,14 +465,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE( cliloc );
             GET_ABSOLUTE( hasBack );
             GET_ABSOLUTE( canScroll );
-            //SKIP_ALL( pszArgs )
+            //_SkipAll( ptcArgs )
 
             if ( index == GUMPCTL_XMFHTMLGUMP ) // xmfhtmlgump doesn't use color
-                m_sControls.emplace_back(false).Format( "xmfhtmlgump %d %d %d %d %d %d %d" , x, y, sX, sY, cliloc, hasBack, canScroll );
+                m_sControls.emplace_back(false).Format( "xmfhtmlgump %d %d %d %d %d %d %d", x, y, sX, sY, cliloc, hasBack, canScroll );
             else
-                m_sControls.emplace_back(false).Format( "xmfhtmlgumpcolor %d %d %d %d %d %d %d%s%s", x, y, sX, sY, cliloc, hasBack, canScroll, *pszArgs ? " " : "", *pszArgs ? pszArgs : "" );
+                m_sControls.emplace_back(false).Format( "xmfhtmlgumpcolor %d %d %d %d %d %d %d%s%s", x, y, sX, sY, cliloc, hasBack, canScroll, *ptcArgs ? " " : "", *ptcArgs ? ptcArgs : "" );
             return true;
         }
+
         case GUMPCTL_XMFHTMLTOK: // 9 = x y width height has_background has_scrollbar color cliloc_id @args
         {
             GET_RELATIVE(x, m_iOriginX);
@@ -437,18 +484,23 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             GET_ABSOLUTE(canScroll);
             GET_ABSOLUTE(color);
             GET_ABSOLUTE(cliloc);
-            SKIP_ALL(pszArgs);
+            _SkipAll(ptcArgs);
 
-            m_sControls.emplace_back(false).Format("xmfhtmltok %d %d %d %d %d %d %d %d %s", x, y, sX, sY, hasBack, canScroll, color, cliloc, *pszArgs ? pszArgs : "");
+            m_sControls.emplace_back(false).Format("xmfhtmltok %d %d %d %d %d %d %d %d %s", x, y, sX, sY, hasBack, canScroll, color, cliloc, *ptcArgs ? ptcArgs : "");
             return true;
         }
+
         default:
             break;
     }
 
-    m_sControls.emplace_back(false).Format("%s %s", ptcKey, pszArgs);
+    m_sControls.emplace_back(false).Format("%s %s", ptcKey, ptcArgs);
     return true;
     EXC_CATCH;
+
+#   undef GET_ABSOLUTE
+#   undef GET_EVAL
+#   undef GET_RELATIVE
 
     EXC_DEBUG_START;
     EXC_ADD_SCRIPTSRC;
@@ -536,6 +588,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     const auto trigRet = OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, pClient->GetChar(), &Args );
     m_sText.shrink_to_fit();
     m_sControls.shrink_to_fit();
+
     if ( trigRet == TRIGRET_RET_TRUE )
         return false;
     return true;

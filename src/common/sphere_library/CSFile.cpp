@@ -434,18 +434,21 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	ADDTOCALLSTACK("CSFile::GetMergedFileName");
     // Merge path and file name.
 
-	tchar ptcFilePath[ _MAX_PATH ];
+	tchar ptcFilePath[ SPHERE_MAX_PATH ];
     size_t len = 0;
 	if ( pszBase && pszBase[0] )
 	{
-        len = Str_CopyLimitNull( ptcFilePath, pszBase, sizeof(ptcFilePath) - 1); // eventually, leave space for the (back)slash
-		if (len && ptcFilePath[len - 1] != '\\' && ptcFilePath[len - 1] != '/')
+        len = Str_CopyLimitNull(ptcFilePath, pszBase, sizeof(ptcFilePath) - 1); // eventually, leave space for the (back)slash
+		if ((len > 1) && (ptcFilePath[len - 1] != '\\') && (ptcFilePath[len - 1] != '/'))
 		{
+            // Append the slash/backslash, overwriting the string terminator.
 #ifdef _WIN32
-			strcat(ptcFilePath, "\\");
+            ptcFilePath[len] = '\\';
 #else
-			strcat(ptcFilePath, "/");
+            ptcFilePath[len] = '/';
 #endif
+            // Add back the string terminator. We're sure we won't overflow since we passed sizeof(ptcFilePath) - 1.
+            ptcFilePath[len + 1] = '\0';
 		}
 	}
 	else

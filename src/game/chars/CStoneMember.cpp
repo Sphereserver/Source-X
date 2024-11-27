@@ -1,6 +1,8 @@
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../chars/CChar.h"
+#include "../items/CItemStone.h"
 #include "../CServer.h"
 #include "CStoneMember.h"
 
