@@ -3924,4 +3924,3 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 27-11-2024, Gladie
 - Fixed: Redeeding t_multi_addon outside of housing system. Before it was only looking for owner of the multi, but in our case we need to know uid of the redeeding char.
-
