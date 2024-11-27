@@ -10,6 +10,7 @@
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "items/CItemMultiCustom.h"
+#include "uo_files/CUOStaticItemRec.h"
 #include "uo_files/CUOTerrainInfo.h"
 #include "uo_files/CUOMapList.h"
 #include "triggers.h"

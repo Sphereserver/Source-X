@@ -6,7 +6,7 @@
 #ifndef _INC_UOFILES_ENUMS_ITEMID_H
 #define _INC_UOFILES_ENUMS_ITEMID_H
 
-#include <cinttypes>
+#include <cstdint>
 
 #define MULTI_QTY	0x2000	// total address space for multis.
 

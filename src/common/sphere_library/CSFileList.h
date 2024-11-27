@@ -34,16 +34,17 @@ public:
 	int ReadDir( lpctstr pszFilePath, bool bShowError = true );
 
 public:
-	CSFileList() { };
-private:
-	/**
+	CSFileList();
+    virtual ~CSFileList();
+
+    /**
     * @brief No copy on construction allowed.
     */
-	CSFileList(const CSFileList& copy);
+	CSFileList(const CSFileList& copy) = delete;
 	/**
     * @brief No copy allowed.
     */
-	CSFileList& operator=(const CSFileList& other);
+	CSFileList& operator=(const CSFileList& other) = delete;
 };
 
 #endif	// _INC_CSFILELIST_H

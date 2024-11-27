@@ -7,7 +7,6 @@
 #define _INC_CPOINTBASE_H
 
 #include "../game/uo_files/uofiles_enums.h"
-#include "../game/uo_files/CUOMapList.h"
 #include "../common/common.h"
 #include <vector>
 
@@ -34,10 +33,10 @@ public:
 
 public:
 	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.
-	short m_x;		// equipped items dont need x,y
-	short m_y;
-	char m_z;		// this might be layer if equipped ? or equipped on corpse. Not used if in other container.
-	uchar m_map;		// another map? (only if top level.)
+	int16 m_x;		// equipped items dont need x,y
+	int16 m_y;
+	int8  m_z;		// this might be layer if equipped ? or equipped on corpse. Not used if in other container.
+	uint8 m_map;		// another map? (only if top level.)
 
 public:
 	CPointBase& InitPoint() noexcept;

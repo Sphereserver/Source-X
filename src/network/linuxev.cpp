@@ -63,7 +63,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *watcher, int reve
 static constexpr double kLoopCollectNetworkInputSeconds = 0.002;
 static constexpr double kLoopWaitBeforeNextCycleSeconds = 0.008;
 
-LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetLoopOut", IThread::High)
+LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetLoopOut", ThreadPriority::High)
 	//, m_watchMainsock{}
 {
 	// Right now, we use libev to send asynchronously packets to clients.

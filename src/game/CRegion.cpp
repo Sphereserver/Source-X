@@ -1,16 +1,14 @@
 // Common for client and server.
-
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
-#include "../common/CScript.h"
+#include "../common/CExpression.h"
 #include "../network/CClientIterator.h"
-#include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "items/CItem.h"
 #include "CSector.h"
 #include "CSectorList.h"
 #include "CServer.h"
-
 
 
 //*************************************************************************
@@ -131,7 +129,7 @@ bool CRegion::MakeRegionDefname()
     lpctstr ptcKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
     tchar * pbuf = Str_GetTemp();
     tchar * pszDef = pbuf + 2;
-    strcpy(pbuf, "a_");
+    strncpy(pbuf, "a_", Str_TempLength());
 
     lpctstr pszName = GetName();
     GETNONWHITESPACE( pszName );
@@ -193,9 +191,13 @@ bool CRegion::MakeRegionDefname()
         // Is this is subsequent key with a number? Get the highest (plus one)
         if ( IsStrNumericDec( ptcKey ) )
         {
-            int iVarThis = Str_ToI( ptcKey );
-            if ( iVarThis >= iVar )
-                iVar = iVarThis + 1;
+            std::optional<int> iconv = Str_ToI( ptcKey );
+            if (iconv.has_value())
+            {
+                int iVarThis = iconv.value();
+                if ( iVarThis >= iVar )
+                    iVar = iVarThis + 1;
+            }
         }
         else
             ++iVar;

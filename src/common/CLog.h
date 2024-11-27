@@ -9,8 +9,10 @@
 #include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
 #include "../sphere/ConsoleInterface.h"
-#include "../sphere/UnixTerminal.h"
-#include <exception>
+
+namespace std {
+class exception;    // Forward declaration
+}
 
 // -----------------------------
 //	CEventLog
@@ -64,21 +66,18 @@ protected:
     int VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept;
 
 public:
-	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) noexcept __printfargs(3,4);
-	int _cdecl EventDebug(lpctstr pszFormat, ...) noexcept  __printfargs(2,3);
-	int _cdecl EventError(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
-	int _cdecl EventWarn(lpctstr pszFormat, ...) noexcept __printfargs(2,3);
-    int _cdecl EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept __printfargs(4,5);
-#ifdef _DEBUG
-	int _cdecl EventEvent( lpctstr pszFormat, ... ) noexcept __printfargs(2,3);
-#endif //_DEBUG
+    int Event( dword dwMask, lpctstr pszFormat, ... ) noexcept SPHERE_PRINTFARGS(3,4);
+    int EventDebug(lpctstr pszFormat, ...) noexcept  SPHERE_PRINTFARGS(2,3);
+    int EventError(lpctstr pszFormat, ...) noexcept SPHERE_PRINTFARGS(2,3);
+    int EventWarn(lpctstr pszFormat, ...) noexcept SPHERE_PRINTFARGS(2,3);
+    int EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFormat, ...) noexcept SPHERE_PRINTFARGS(4,5);
+    int EventEvent( lpctstr pszFormat, ... ) noexcept SPHERE_PRINTFARGS(2,3);
 
-public:
-	CEventLog() = default;
+	CEventLog();
+    virtual ~CEventLog();
 
-private:
-	CEventLog(const CEventLog& copy);
-	CEventLog& operator=(const CEventLog& other);
+	CEventLog(const CEventLog& copy) = delete;
+	CEventLog& operator=(const CEventLog& other) = delete;
 };
 
 
@@ -108,7 +107,7 @@ public:	    const CScriptObj * SetObjectContext( const CScriptObj * pObjectConte
 protected:	bool _OpenLog(lpctstr pszName = nullptr);	// name set previously.
 public:		bool OpenLog(lpctstr pszName = nullptr);
 
-	bool SetFilePath(lpctstr pszName);
+	virtual bool SetFilePath(lpctstr pszName) override;
 
 	lpctstr GetLogDir() const;
 	dword GetLogMask() const;
@@ -120,11 +119,12 @@ public:		bool OpenLog(lpctstr pszName = nullptr);
 	bool IsLogged( dword dwMask ) const;
 
 	virtual int EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor = CTCOL_DEFAULT ) noexcept final;	// final: for now, it doesn't have any other virtual methods
-	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
-    void _cdecl CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
+    void CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) SPHERE_PRINTFARGS(3,4);
+    void CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) SPHERE_PRINTFARGS(3,4);
 
 public:
 	CLog();
+    virtual ~CLog() override;
 
 	CLog(const CLog& copy) = delete;
 	CLog& operator=(const CLog& other) = delete;

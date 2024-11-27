@@ -45,11 +45,10 @@ public:
 private:    bool _CheckForChange();
 public:     bool CheckForChange();
 
-private:
-    CResourceScript(const CResourceScript& copy);
-    CResourceScript& operator=(const CResourceScript& other);
-
 public:
+    CResourceScript(const CResourceScript& copy) = delete;
+    CResourceScript& operator=(const CResourceScript& other) = delete;
+
     bool IsFirstCheck() const noexcept
     {
         return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());

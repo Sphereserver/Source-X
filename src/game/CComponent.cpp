@@ -1,13 +1,14 @@
 
 #include "CComponent.h"
-#include "CObjBase.h"
 
-CComponent::CComponent(COMP_TYPE type) : 
+CComponent::CComponent(COMP_TYPE type) noexcept :
     _iType(type)
 {
 }
 
-COMP_TYPE CComponent::GetType() const
+CComponent::~CComponent() = default;
+
+COMP_TYPE CComponent::GetType() const noexcept
 {
     return _iType;
 }

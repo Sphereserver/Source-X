@@ -5,14 +5,16 @@
 #include "../../common/sphere_library/CSFileList.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CIPHistoryManager.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/send.h"
 #include "../CServer.h"
 #include "CClient.h"
 
+namespace zlib {
 #include <zlib/zlib.h>
-
+}
 
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
@@ -61,7 +63,7 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 {
 	ADDTOCALLSTACK("CClient::SetConnectType");
 
-    auto _IsFullyConnectedType = [](const CONNECT_TYPE typ) -> bool {
+    auto _IsFullyConnectedType = [](const CONNECT_TYPE typ) noexcept -> bool {
         switch (typ)
         {
         case CONNECT_GAME:
@@ -78,7 +80,7 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 	if (_IsFullyConnectedType(iType) && !_IsFullyConnectedType(m_iConnectType))
 	{
 		HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
-		-- history.m_connecting;
+		-- history.m_iPendingConnectionRequests;
 	}
 	m_iConnectType = iType;
 
@@ -136,7 +138,7 @@ bool CClient::addLoginErr(byte code)
 
 	if (code >= ARRAY_COUNT(sm_Login_ErrMsg))
 		code = PacketLoginError::Other;
-	
+
 	g_Log.EventWarn( "%x:Bad Login %d. %s.\n", GetSocketID(), code, sm_Login_ErrMsg[(size_t)code] );
 
 	// translate the code into a code the client will understand
@@ -244,8 +246,8 @@ bool CClient::addRelay( const CServerDef * pServ )
 		CSString sCustomerID(pServ->GetName());
 		sCustomerID.Add(GetAccount()->GetName());
 
-		dwCustomerId = ::crc32(0L, Z_NULL, 0);
-		dwCustomerId = ::crc32(dwCustomerId, reinterpret_cast<const Bytef *>(sCustomerID.GetBuffer()), (uInt)sCustomerID.GetLength());
+		dwCustomerId = zlib::crc32(0L, nullptr, 0);
+		dwCustomerId = zlib::crc32(dwCustomerId, reinterpret_cast<const zlib::Bytef *>(sCustomerID.GetBuffer()), (zlib::uInt)sCustomerID.GetLength());
 
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}
@@ -254,7 +256,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 
 	EXC_SET_BLOCK("server relay packet");
 	new PacketServerRelay(this, dwAddr, pServ->m_ip.GetPort(), dwCustomerId);
-	
+
 	m_Targ_Mode = CLIMODE_SETUP_RELAY;
 	return true;
 	EXC_CATCH;
@@ -279,7 +281,7 @@ bool CClient::Login_Relay( uint iRelay ) // Relay player to a selected IP
 
 	// >= 1.26.00 clients list Gives us a 1 based index for some reason.
 	if ( iRelay > 0 )
-		iRelay --;
+		-- iRelay;
 
 	CServerRef pServ;
 	if ( iRelay <= 0 )
@@ -680,7 +682,7 @@ bool CClient::OnRxPing( const byte * pData, uint iLen )
 bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxWebPageRequest");
-	
+
     // Seems to be a web browser pointing at us ? typical stuff :
 	if ( GetConnectType() != CONNECT_HTTP )
 		return false;
@@ -730,7 +732,11 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		{
 			pszArgs += 15;
 			GETNONWHITESPACE(pszArgs);
-            uiContentLength = Str_ToUI(pszArgs, 10);
+            std::optional<uint> iconv = Str_ToU(pszArgs, 10);
+            if (!iconv.has_value())
+                continue;
+
+            uiContentLength = *iconv;
 		}
 		else if ( ! strnicmp( pszArgs, "If-Modified-Since:", 18 ))
 		{
@@ -742,7 +748,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 
 	tchar * ppRequest[4];
 	int iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, ARRAY_COUNT(ppRequest), " ");
-	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= _MAX_PATH ))
+	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= SPHERE_MAX_PATH ))
 		return false;
 
 	if ( strchr(ppRequest[1], '\r') || strchr(ppRequest[1], 0x0c) )
@@ -787,7 +793,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 	CheckReportNetAPIErr(iSocketRet, "CClient::Webpage.TCP_NODELAY");
 	if (iSocketRet)
 		return false;
-	
+
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{
 		if (uiContentLength > strlen(ppLines[iQtyLines-1]) )
@@ -823,7 +829,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t uiLen )
 		// Host: localhost:2593\r\n
 		// \r\n
 
-		tchar szPageName[_MAX_PATH];
+		tchar szPageName[SPHERE_MAX_PATH];
 		if ( !Str_GetBare( szPageName, Str_TrimWhitespace(ppRequest[1]), sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" ) )
 			return false;
 
@@ -863,7 +869,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		addLoginErr( PacketLoginError::BadEncLength );
 		return false;
 	}
-	
+
 	GetNetState()->detectAsyncMode();
 	SetConnectType( m_Crypt.GetConnectType() );
 
@@ -877,7 +883,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		addLoginErr( PacketLoginError::BadVersion );
 		return false;
 	}
-	
+
     ASSERT(uiLen <= sizeof(CEvent));
     std::unique_ptr<CEvent> bincopy = std::make_unique<CEvent>();		// in buffer. (from client)
     memcpy(bincopy->m_Raw, pEvent->m_Raw, uiLen);
@@ -886,7 +892,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
         g_Log.EventError("NET-IN: xProcessClientSetup failed (Decrypt).\n");
         return false;
     }
-	
+
     byte lErr = PacketLoginError::EncUnknown;
 	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 
@@ -993,7 +999,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, uint uiLen )
 		}
 #endif
 	}
-	
+
 	xRecordPacketData(this, pEvent->m_Raw, uiLen, "client->server");
 
 	if ( lErr != PacketLoginError::Success )	// it never matched any crypt format.
@@ -1010,15 +1016,15 @@ bool CClient::xCanEncLogin(bool bCheckCliver)
 	if ( !bCheckCliver )
 	{
 		if ( m_Crypt.GetEncryptionType() == ENC_NONE )
-			return ( g_Cfg.m_fUsenocrypt ); // Server don't want no-crypt clients 
-		
+			return ( g_Cfg.m_fUsenocrypt ); // Server don't want no-crypt clients
+
 		return ( g_Cfg.m_fUsecrypt ); // Server don't want crypt clients
 	}
 	else
 	{
 		if ( !g_Serv.m_ClientVersion.GetClientVerNumber() ) // Any Client allowed
 			return true;
-		
+
 		if ( m_Crypt.GetEncryptionType() != ENC_NONE )
 			return ( m_Crypt.GetClientVerNumber() == g_Serv.m_ClientVersion.GetClientVerNumber() );
 		else

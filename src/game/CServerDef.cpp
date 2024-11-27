@@ -1,11 +1,11 @@
 
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../common/CScriptTriggerArgs.h"
 #include "../sphere/threads.h"
-#include "CObjBase.h"
 #include "CServer.h"
 #include "CServerConfig.h"
 #include "CServerDef.h"
@@ -32,13 +32,13 @@
 
 	//	PSAPI external definitions
 	typedef	intptr_t (WINAPI *pfnGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
-	HMODULE	m_hmPsapiDll = nullptr;
-	pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
-	PROCESS_MEMORY_COUNTERS	pcnt;
+	static HMODULE m_hmPsapiDll = nullptr;
+	static pfnGetProcessMemoryInfo m_GetProcessMemoryInfo = nullptr;
+	static PROCESS_MEMORY_COUNTERS	pcnt;
 #else			// (Unix)
 	#include <sys/resource.h>
 #endif
-	bool	m_fPmemory = true;		// process memory information is available?
+    static bool sm_fHasMemoryInfo = true;		// process memory information is available?
 
 //////////////////////////////////////////////////////////////////////
 // -CServerDef
@@ -54,7 +54,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	_iTimeCreate = CWorldGameTime::GetCurrentTime().GetTimeRaw();
 
 	// Set default time zone from UTC
-	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
+    m_TimeZone = (char)( TIMEZONE / (60 * 60) );	// Greenwich mean time.
 	m_eAccApp = ACCAPP_Unspecified;
 }
 
@@ -63,11 +63,12 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 	ADDTOCALLSTACK("CServerDef::StatGet");
 	ASSERT( i >= 0 && i < SERV_STAT_QTY );
 	size_t	d = m_stStat[i];
+
 	EXC_TRY("StatGet");
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
 		d = 0;
-		if ( m_fPmemory )
+        if ( sm_fHasMemoryInfo )
 		{
 #ifdef _WIN32
 			if ( !m_hmPsapiDll )			// try to load psapi.dll if not loaded yet
@@ -76,17 +77,17 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 				m_hmPsapiDll = LoadLibrary(TEXT("psapi.dll"));
 				if (m_hmPsapiDll == nullptr)
 				{
-					m_fPmemory = false;
+                    sm_fHasMemoryInfo = false;
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
                 {
-#ifndef _MSC_VER
+#ifdef NON_MSVC_COMPILER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
                     m_GetProcessMemoryInfo = reinterpret_cast<pfnGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
-#ifndef _MSC_VER
+#if NON_MSVC_COMPILER
 #pragma GCC diagnostic pop
 #endif
                 }
@@ -146,7 +147,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 			if ( !d )
 			{
 				g_Log.EventError(("Unable to load process information from getrusage() and procfs. Memory information will be not available.\n"));
-				m_fPmemory = false;
+                sm_fHasMemoryInfo = false;
 			}
 #endif
 		}
@@ -168,7 +169,7 @@ void CServerDef::SetName( lpctstr pszName )
 
 	// No HTML tags using <> either.
 	tchar szName[ 2*MAX_SERVER_NAME_SIZE ];
-	size_t len = Str_GetBare( szName, pszName, sizeof(szName), "<>/\"\\" );
+	const int len = Str_GetBare( szName, pszName, sizeof(szName), "<>/\"\\" );
 	if ( len <= 0 )
 		return;
 
@@ -194,10 +195,10 @@ void CServerDef::StatDec(SERV_STAT_TYPE i)
     --m_stStat[i];
 }
 
-void CServerDef::SetStat(SERV_STAT_TYPE i, dword dwVal)
+void CServerDef::SetStat(SERV_STAT_TYPE i, size_t uiVal)
 {
     ASSERT(i >= 0 && i < SERV_STAT_QTY);
-    m_stStat[i] = dwVal;
+    m_stStat[i] = uiVal;
 }
 
 lpctstr CServerDef::GetName() const // virtual override
@@ -361,7 +362,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			SetName( s.GetArgStr() );
 			break;
 		case SC_SERVPORT:
-			m_ip.SetPort( (word)s.GetArgVal() );
+			m_ip.SetPort( s.GetArgWVal() );
 			break;
 
 		case SC_ACCOUNTS:
@@ -379,10 +380,10 @@ bool CServerDef::r_LoadVal( CScript & s )
 			}
 			break;
 		case SC_ITEMS:
-			SetStat( SERV_STAT_ITEMS, s.GetArgVal() );
+			SetStat( SERV_STAT_ITEMS, s.GetArgDWVal() );
 			break;
 		case SC_CHARS:
-			SetStat( SERV_STAT_CHARS, s.GetArgVal() );
+			SetStat( SERV_STAT_CHARS, s.GetArgDWVal() );
 			break;
 		case SC_TIMEZONE:
 			m_TimeZone = (char)s.GetArgVal();
@@ -464,7 +465,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		sVal = GetName();	// What the name should be. Fill in from ping.
 		break;
 	case SC_SERVPORT:
-		sVal.FormatVal( m_ip.GetPort() );
+		sVal.FormatWVal( m_ip.GetPort() );
 		break;
 	case SC_ACCOUNTS:
 		sVal.FormatSTVal( StatGet( SERV_STAT_ACCOUNTS ) );

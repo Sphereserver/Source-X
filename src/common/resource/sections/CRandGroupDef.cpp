@@ -2,7 +2,9 @@
 #include "../../../game/chars/CChar.h"
 #include "../../../game/CServerConfig.h"
 #include "../../../game/triggers.h"
+#include "../../sphere_library/CSRand.h"
 #include "../../CException.h"
+#include "../../CExpression.h"
 #include "CRegionResourceDef.h"
 #include "CRandGroupDef.h"
 
@@ -184,7 +186,10 @@ bool CRandGroupDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * p
                     tchar *pszTmp = Str_GetTemp();
                     m_Members.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
                     if ( fQtyOnly && pszTmp[0] == '\0' )
-                        strcpy( pszTmp, "0" );
+                    {
+                        pszTmp[0] = '0';
+                        pszTmp[1] = '\0';
+                    }
 
                     sVal = pszTmp;
                 }

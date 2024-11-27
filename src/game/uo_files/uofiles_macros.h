@@ -6,8 +6,6 @@
 #ifndef _INC_UOFILES_MACROS_H
 #define _INC_UOFILES_MACROS_H
 
-#include "uofiles_enums.h"
-
 
 // Door ID Attribute flags
 #define DOOR_OPENED			0x00000001  // set is open

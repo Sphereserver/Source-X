@@ -7,10 +7,10 @@
 #define _INC_CRESOURCEREF_H
 
 #include "CResourceLink.h"
-#include "CResourceID.h"
 #include <vector>
 
 class CSString;
+struct CResourceID;
 class CResourceLink;
 class CScript;
 
@@ -62,14 +62,8 @@ public:
     bool r_LoadVal( CScript & s, RES_TYPE restype );
     void r_Write( CScript & s, lpctstr ptcKey ) const;
 
-    inline bool ContainsResourceID( const CResourceID & rid ) const
-    {
-        return FindResourceID(rid) != sl::scont_bad_index();
-    }
-    inline bool ContainsResourceName( RES_TYPE restype, lpctstr & ptcKey ) const
-    {
-        return FindResourceName(restype, ptcKey) != sl::scont_bad_index();
-    }
+    bool ContainsResourceID( const CResourceID & rid ) const;
+    bool ContainsResourceName( RES_TYPE restype, lpctstr & ptcKey ) const;
 };
 
 

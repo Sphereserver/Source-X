@@ -2,11 +2,11 @@
 #define _INC_CONSOLEINTERFACE_H
 
 #include "../common/sphere_library/CSString.h"
-#include "../common/basic_threading.h"
 #ifndef _WIN32
     #include <condition_variable>
 #endif
 #include <deque>
+#include <mutex>
 
 
 enum ConsoleTextColor			// needed by both windows and unix

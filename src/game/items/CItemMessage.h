@@ -28,6 +28,7 @@ protected:
     static lpctstr const sm_szVerbKeys[];
 private:
     CSObjArray<CSString*> m_sBodyLines;	// The main body of the text for bboard message or book.
+
 public:
     static const char *m_sClassName;
     CSString m_sAuthor;					// Should just have author name !
@@ -37,9 +38,8 @@ public:
     CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef );
     virtual ~CItemMessage();
 
-private:
-    CItemMessage(const CItemMessage& copy);
-    CItemMessage& operator=(const CItemMessage& other);
+    CItemMessage(const CItemMessage& copy) = delete;
+    CItemMessage& operator=(const CItemMessage& other) = delete;
 
 public:
     virtual void r_Write( CScript & s ) override;

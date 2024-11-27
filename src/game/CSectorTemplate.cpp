@@ -1,18 +1,20 @@
-#include <algorithm>
 #include "../common/CException.h"
 #include "../common/CLog.h"
 #include "../common/CRect.h"
 #include "../game/CWorld.h"
-#include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "items/CItemShip.h"
 #include "CSectorList.h"
 #include "CWorldGameTime.h"
 #include "CSectorTemplate.h"
+#include <algorithm>
 
 
 ////////////////////////////////////////////////////////////////////////
 // -CCharsDisconnectList
+
+CCharsDisconnectList::CCharsDisconnectList() = default;
+CCharsDisconnectList::~CCharsDisconnectList() = default;
 
 void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
 {
@@ -25,11 +27,12 @@ void CCharsDisconnectList::AddCharDisconnected( CChar * pChar )
 ////////////////////////////////////////////////////////////////////////
 // -CCharsActiveList
 
-CCharsActiveList::CCharsActiveList()
+CCharsActiveList::CCharsActiveList() :
+     m_iClients(0), m_iTimeLastClient(0)
 {
-	m_iTimeLastClient = 0;
-	m_iClients = 0;
 }
+
+CCharsActiveList::~CCharsActiveList() = default;
 
 void CCharsActiveList::OnRemoveObj(CSObjContRec* pObjRec )
 {
@@ -88,6 +91,7 @@ void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 		pItem->OnMoveFrom();	// IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
 	}
 
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage) (It's intentional that we don't check it everytime)
 	DEBUG_ASSERT(pObjRec->GetParent() == this);
 	CSObjCont::OnRemoveObj(pObjRec);
 	DEBUG_ASSERT(pObjRec->GetParent() == nullptr);
@@ -106,23 +110,40 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	CSObjCont* pParent = pItem->GetParent();
 	if (pParent != this)
 	{
-		DEBUG_ASSERT(
-            (pParent == nullptr) ||
-            (pParent == g_World.GetObjectsNew()) ||
-            (nullptr != dynamic_cast<const CSectorObjCont*>(pParent))
-        );
-
-		CSObjCont::InsertContentTail(pItem); // this also removes the Char from the old sector
-
-		DEBUG_ASSERT(pItem->GetParent() == this);
 #ifdef _DEBUG
-        const CSObjCont* pObjNew = g_World.GetObjectsNew();
-        auto itNew = std::find(pObjNew->cbegin(), pObjNew->cend(), pItem);
-        DEBUG_ASSERT(itNew == pObjNew->cend());
+        if (!pParent)
+            throw CSError(LOGL_ERROR, 0, "No parent?");
 
-        auto itOldParent = std::find(pParent->cbegin(), pParent->cend(), pItem);
-        DEBUG_ASSERT(itOldParent == pParent->cend());
+        const auto* pNewWorldObjCont = g_World.GetObjectsNew();
+        if (pParent == pNewWorldObjCont)
+        {
+            // Just created, unplaced yet.
+            auto itNew = std::find(pNewWorldObjCont->cbegin(), pNewWorldObjCont->cend(), pItem);
+            DEBUG_ASSERT(itNew != pNewWorldObjCont->cend());
+        }
+        else if (dynamic_cast<const CSectorObjCont*>(pParent))
+        {
+            // I'm moving it here from another sector.
+            auto itOldParent = std::find(pParent->cbegin(), pParent->cend(), pItem);
+            DEBUG_ASSERT(itOldParent != pParent->cend());
+        }
+        else if (dynamic_cast<const CContainer*>(pParent))
+        {
+            // CItemContainer, CChar...
+            auto itOldParent = std::find(pParent->cbegin(), pParent->cend(), pItem);
+            DEBUG_ASSERT(itOldParent != pParent->cend());
+        }
+        else
+        {
+            if (dynamic_cast<const CObjBase*>(pParent))
+                throw CSError(LOGL_ERROR, 0, "Parent is an unknown CObjBase?");
+            throw CSError(LOGL_ERROR, 0, "Parent not NEW nor a Sector? Unknown type.");
+        }
+
 #endif
+
+        CSObjCont::InsertContentTail(pItem); // this also removes the Char from the old sector
+        DEBUG_ASSERT(pItem->GetParent() == this);
 	}
 
     pItem->RemoveUIDFlags(UID_O_DISCONNECT);

@@ -1,4 +1,7 @@
 #include "../../common/CLog.h"
+#include "../items/CItemMulti.h"
+#include "../uo_files/CUOMultiItemRec.h"
+#include "../uo_files/CUOStaticItemRec.h"
 #include "../uo_files/CUOTerrainInfo.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"

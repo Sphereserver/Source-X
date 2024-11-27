@@ -1,9 +1,6 @@
-
-#include <cstdio>
-
-#include "../../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/sstring.h"
 #include "CClientTooltip.h"
-
+#include <cstdarg>
 
 CClientTooltip::CClientTooltip(dword dwClilocID)
 {
@@ -24,7 +21,7 @@ CClientTooltip::CClientTooltip(dword dwClilocID, int64 iArgs)
     snprintf(m_args, MAX_TOOLTIP_LEN - 1, "%" PRId64, iArgs);
 }
 
-void __cdecl CClientTooltip::FormatArgs(lpctstr format, ...)
+void CClientTooltip::FormatArgs(lpctstr format, ...)
 {
     va_list vargs;
     va_start( vargs, format );

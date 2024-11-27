@@ -21,7 +21,7 @@ ProfileTask::ProfileTask(PROFILE_TYPE id) :
     if (th.closing())
         return;
 
-	IThread* icontext = th.current();
+	AbstractThread* icontext = th.current();
 	if (icontext == nullptr)
 	{
 		// Thread was deleted, manually or by app closing signal.

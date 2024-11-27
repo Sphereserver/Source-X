@@ -1,5 +1,4 @@
 #include "../common/sphere_library/sstringobjs.h"
-#include "../common/assertion.h"
 #include "../common/CLog.h"
 #include "CWorld.h"
 #include "CSectorList.h"

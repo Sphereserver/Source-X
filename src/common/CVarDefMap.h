@@ -18,8 +18,8 @@ class CVarDefCont
 public:
 	static const char *m_sClassName;
 
-	CVarDefCont()           = default;
-	virtual ~CVarDefCont()  = default;
+    CVarDefCont() = default;
+	virtual ~CVarDefCont();
 
 	CVarDefCont(const CVarDefCont& copy) = delete;
 	CVarDefCont& operator=(const CVarDefCont& other) = delete;

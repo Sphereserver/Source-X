@@ -6,24 +6,18 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../../common/sphere_library/CSObjCont.h"
-#include "../../common/resource/CResourceHolder.h"
-#include "../../common/CServerMap.h"
-#include "../../common/CRect.h"
-#include "../components/CCFaction.h"
+#include "../components/subcomponents/CFactionDef.h"
 #include "../CServerTime.h"
-#include "../CBase.h"
 #include "../CObjBase.h"
 #include "../CObjBaseTemplate.h"
-#include "../game_enums.h"
 #include "../game_macros.h"
 #include "../CServerConfig.h"
-#include "../CEntity.h"
 #include "CItemBase.h"
 
 
 class CWorldTicker;
 class CCSpawn;
+class CFactionDef;
 
 
 /**
@@ -33,7 +27,7 @@ class CCSpawn;
 *
 * Types of memory a CChar has about a game object. (m_wHue)
 */
-enum MEMORY_TYPE
+enum MEMORY_TYPE : int
 {
     MEMORY_NONE = 0,
     MEMORY_SAWCRIME = 0x0001,	// I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
@@ -600,7 +594,6 @@ public:
 protected:
 	virtual int FixWeirdness() override;
 	void DeleteCleanup(bool fForce);
-
 public:
 	virtual bool NotifyDelete(); // overridden CItemContainer:: method
 	virtual bool Delete(bool fForce = false) override;
@@ -618,21 +611,29 @@ public:
 	//virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
 	bool _CanHoldTimer() const;
 
-public:
+    virtual void DupeCopy( const CObjBase * pItem ) override;
+
+	static CItem * CreateBase( ITEMID_TYPE id, IT_TYPE type = IT_INVALID ); // If type == IT_INVALID, read the type from the def (default behaviour)
+	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = nullptr, bool fDupeCheck = false, CChar * pSrc = nullptr );
+	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr, IT_TYPE type = IT_INVALID); // If type == IT_INVALID, read the type from the def (default behaviour)
+	CItem * GenerateScript(CChar * pSrc = nullptr);
+	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = nullptr, bool fSetNew = false );
+	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = nullptr, CChar * pSrc = nullptr );
+
+	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
+
     CUID GetComponentOfMulti() const;
     CUID GetLockDownOfMulti() const;
     void SetComponentOfMulti(const CUID& uidMulti);
     void SetLockDownOfMulti(const CUID& uidMulti);
 
-    bool CanHear() const;
+    bool CanHear() const noexcept;
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 
-	CItemBase * Item_GetDef() const;
+	CItemBase * Item_GetDef() const noexcept;
 
 	ITEMID_TYPE GetID() const;
-    inline virtual word GetBaseID() const override {
-        return (word)GetID();
-    }
+    virtual dword GetBaseID() const override final;
 	inline ITEMID_TYPE GetDispID() const noexcept {
 		// This is what the item looks like.
 		// May not be the same as the item that defines it's type.
@@ -649,7 +650,6 @@ public:
 	virtual int IsWeird() const override;
 	char GetFixZ(CPointMap pt, uint64 uiBlockFlags = 0);
 
-	CCFaction* GetSlayer() const;
 	byte GetSpeed() const;
 
     /**
@@ -770,15 +770,12 @@ public:
 	bool MoveToCheck(const CPointMap & pt, CChar * pCharMover = nullptr );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, ushort uiSteps = 0 ) override;
 
-	virtual CObjBaseTemplate* GetTopLevelObj() override;
-	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
-    inline CObjBase * GetContainer() const noexcept {
-        // What is this CItem contained in ?
-        // Container should be a CChar or CItemContainer
-        return (dynamic_cast <CObjBase*> (GetParent()));
-        // Called very frequently, worth inlining.
-    }
+    CObjBase * GetContainer() const noexcept;
 	CItem * GetTopContainer();
 	const CItem* GetTopContainer() const;
 
@@ -793,7 +790,7 @@ public:
 	virtual void Flip() override;
 	bool LoadSetContainer( const CUID& uid, LAYER_TYPE layer );
 
-	void WriteUOX( CScript & s, int index );
+	void WriteUOX( CScript & s, int index, int dx, int dy );
 
 	void r_WriteMore1( CSString & sVal );
 	void r_WriteMore2( CSString & sVal );
@@ -855,6 +852,9 @@ public:
 
 	void ConvertBolttoCloth();
 
+    const CFactionDef* GetSlayer() const noexcept;
+    CFactionDef* GetSlayer() noexcept;
+
 	// Spells
 	SKILL_TYPE GetSpellBookSkill();
 	SPELL_TYPE GetScrollSpell() const;
@@ -908,18 +908,7 @@ public:
 	bool Plant_Use( CChar * pChar );
     bool Plant_SetID(ITEMID_TYPE id);
 
-	virtual void DupeCopy( const CObjBase * pItem ) override;
 	CItem * UnStackSplit( word amount, CChar * pCharSrc = nullptr );
-
-	static CItem * CreateBase( ITEMID_TYPE id, IT_TYPE type = IT_INVALID ); // If type == IT_INVALID, read the type from the def (default behaviour)
-	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = nullptr, bool fDupeCheck = false, CChar * pSrc = nullptr );
-	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = nullptr, IT_TYPE type = IT_INVALID); // If type == IT_INVALID, read the type from the def (default behaviour)
-	CItem * GenerateScript(CChar * pSrc = nullptr);
-	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = nullptr, bool fSetNew = false );
-	static CItem * CreateTemplate( ITEMID_TYPE id, CObjBase* pCont = nullptr, CChar * pSrc = nullptr );
-
-	static CItem * ReadTemplate( CResourceLock & s, CObjBase * pCont );
-
 };
 
 #endif // _INC_CITEM_H

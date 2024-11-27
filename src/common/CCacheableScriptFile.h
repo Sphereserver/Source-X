@@ -16,9 +16,9 @@ class CCacheableScriptFile : public CSFileText
 public:
 	CCacheableScriptFile();
 	~CCacheableScriptFile();
-private:
-	CCacheableScriptFile(const CCacheableScriptFile& copy);
-	CCacheableScriptFile& operator=(const CCacheableScriptFile& other);
+
+    CCacheableScriptFile(const CCacheableScriptFile& copy) = delete;
+    CCacheableScriptFile& operator=(const CCacheableScriptFile& other) = delete;
 
 protected:  virtual bool _Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;
 public:     virtual bool Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;

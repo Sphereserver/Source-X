@@ -17,9 +17,8 @@ public:
     CResourceNamedDef(const CResourceID& rid, lpctstr pszName);
     virtual ~CResourceNamedDef() = default;
 
-private:
-    CResourceNamedDef(const CResourceNamedDef& copy);
-    CResourceNamedDef& operator=(const CResourceNamedDef& other);
+    CResourceNamedDef(const CResourceNamedDef& copy) = delete;
+    CResourceNamedDef& operator=(const CResourceNamedDef& other) = delete;
 
 public:
     virtual lpctstr GetName() const override;

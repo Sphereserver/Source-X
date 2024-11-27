@@ -3725,6 +3725,8 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// Maximum time in milliseconds to wait before closing a connection request wich did not make it into a successful login (classic DDoS just asks to connect without doing anything else, or sends garbage data).
 	TimeoutIncompleteConn=5 * 1000  // 5 seconds
 - Added serv_trig function f_onserver_connectreq_ex, called after an IP exceeds MaxConnectRequestsPerIP:
+    WARNING: function arguments and returns CHANGED in the 10-09-2024 commit.
+
 	ARGS (RO): IP address.
 	ARGN1 (RO): System time in milliseconds since the last connection.
 	ARGN2 (RO): System time in milliseconds of this connection attempt.
@@ -3922,3 +3924,4 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 27-11-2024, Gladie
 - Fixed: Redeeding t_multi_addon outside of housing system. Before it was only looking for owner of the multi, but in our case we need to know uid of the redeeding char.
+

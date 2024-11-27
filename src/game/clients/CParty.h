@@ -8,7 +8,6 @@
 
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphere_library/CSObjListRec.h"
-#include "../../common/CRect.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CVarDefMap.h"
 #include "../../common/sphereproto.h"

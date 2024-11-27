@@ -48,6 +48,7 @@ public:
     CComponentProps(COMPPROPS_TYPE type) noexcept {
         _iType = type;
     }
+    virtual ~CComponentProps() noexcept;
 
     virtual lpctstr GetName() const = 0;
     virtual PropertyIndex_t GetPropsQty() const = 0;
@@ -86,7 +87,7 @@ public:
     *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param fDeleteZero If true, if iVal == 0 or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
+    virtual bool SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
 
     /*
     *@brief Set the string value for the given property
@@ -96,7 +97,7 @@ public:
     *@param iLimitToExpansion This EntityProps accepts/stores/uses properties only up to this expansion.
     *@param fDeleteZero If true, if ptcVal == nullptr or is empty, delete the prop (if already existing)
     */
-    virtual void SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
+    virtual bool SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero = true) = 0;
 
     /*
     @brief Delete the numerical property at the given index
@@ -131,14 +132,12 @@ public:
 protected:
     bool BaseCont_GetPropertyNum(const BaseContNum_t* container, PropertyIndex_t iPropIndex, PropertyValNum_t* piOutVal) const;
     bool BaseCont_GetPropertyStr(const BaseContStr_t* container, PropertyIndex_t iPropIndex, CSString *psOutVal, bool fZero = false) const;
-    void BaseProp_LoadPropVal(PropertyIndex_t iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion);
+    bool BaseProp_LoadPropVal(PropertyIndex_t iPropIndex, bool fPropStr, CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion);
     bool BaseProp_WritePropVal(PropertyIndex_t iPropIndex, bool fPropStr, CSString & sVal) const;
     static void BaseCont_Write_ContNum(const BaseContNum_t* container, const lpctstr *ptcPropsTable, CScript &s);
     static void BaseCont_Write_ContStr(const BaseContStr_t* container, const lpctstr *ptcPropsTable, CScript &s);
 
 public:
-    virtual ~CComponentProps() noexcept = default;
-    
     inline COMPPROPS_TYPE GetType() const noexcept {
         return _iType;
     }

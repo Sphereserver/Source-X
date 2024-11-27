@@ -1,16 +1,20 @@
 //  CChar is either an NPC or a Player.
 
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMulti.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../uo_files/CUOStaticItemRec.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 
 bool CChar::IsResourceMatch( const CResourceID& rid, dword dwAmount ) const
 {
@@ -482,13 +486,14 @@ int CChar::GetStatPercent(STAT_TYPE i) const
 	return IMulDiv(Stat_GetVal(i), 100, maxval);
 }
 
-
+[[nodiscard]] RETURNS_NOTNULL
 const CObjBaseTemplate* CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
 	return this;
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 CObjBaseTemplate* CChar::GetTopLevelObj()
 {
 	// Get the object that has a location in the world. (Ground level)
@@ -688,7 +693,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
         iFlags |= STATF_INVISIBLE;
 	
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
-	mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
+        mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
 
 	return mode;
 }

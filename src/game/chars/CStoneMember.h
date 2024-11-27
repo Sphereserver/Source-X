@@ -7,6 +7,7 @@
 #define _INC_CSTONEMEMBER_H
 
 #include "../../common/sphere_library/CSObjListRec.h"
+#include "../../common/sphere_library/CSString.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CUID.h"
 

@@ -6,7 +6,6 @@
 #ifndef _INC_CSOBJCONTREC_H
 #define _INC_CSOBJCONTREC_H
 
-#include <cstddef>  // for nullptr
 class CSObjCont;
 
 
@@ -27,7 +26,7 @@ public:
     /**
     * @brief set references for parent, next and previous to nullptr.
     */
-    CSObjContRec();
+    CSObjContRec() noexcept;
     virtual ~CSObjContRec();
 
     /**

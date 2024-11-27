@@ -204,14 +204,14 @@ void Packet::seek(uint pos)
 void Packet::skip(int count)
 {
 	// ensure we can't go lower than 0
-	if (count < 0 && (uint)SphereAbs(count) > m_position)
+    if (count < 0 && (uint)abs(count) > m_position)
     {
 		m_position = 0;
         return;
     }
 
     ASSERT((int64)m_position + count < UINT32_MAX);
-	m_position += (uint)count;
+	m_position = (uint)((int64)m_position + count);
 }
 
 byte &Packet::operator[](uint index)
@@ -815,12 +815,12 @@ void Packet::readStringASCII(wchar* buffer, uint length, bool includeNull)
 
 	char* bufferReal = new char[(size_t)length + 1]();
 	readStringASCII(bufferReal, length, includeNull);
-#ifdef _MSC_VER
+#   ifdef MSVC_RUNTIME
     size_t aux;
     mbstowcs_s(&aux, buffer, length + 1, bufferReal, length);
-#else
+#   else
     mbstowcs(buffer, bufferReal, length);
-#endif
+#   endif
 	delete[] bufferReal;
 #else
 
@@ -1222,6 +1222,8 @@ PacketSend::PacketSend(const PacketSend *other)
 	m_position = other->m_position;
 }
 
+PacketSend::~PacketSend() = default;
+
 void PacketSend::initLength(void)
 {
 //	DEBUGNETWORK(("Packet %x starts dynamic with pos %d.\n", m_buffer[0], m_position));
@@ -1323,6 +1325,15 @@ bool PacketSend::canSendTo(const CNetState* state) const
 	return true;
 }
 
+/***************************************************************************
+ *
+ *
+ *	class SimplePacketTransaction		Interface for defining a packet transaction
+ *
+ *
+ ***************************************************************************/
+
+PacketTransaction::~PacketTransaction() = default;
 
 /***************************************************************************
  *
