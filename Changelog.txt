@@ -3921,9 +3921,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	Local.Sound (r/w) =Sound ID, If it is blank or zero, no sound is produced. (Default: 01F1)
 	Local.EffectID (r/w) = Effect ID, If it is empty or zero, no effect will occur. (Default: 0374a)
 	Local.Damage (r/w) = This is the more1l, or PolyStr, value coming from the reactive armor spell to i_rune_reactive_armor.
-	LOCAL.RefDamage (r/w) = The amount of damage that will be reflected to this other party
-	LOCAL.RedDamage (r/w) = Amount to be deducted from damage received
-	LOCAL.ReactiveDamType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
+	LOCAL.ReflectDamage (r/w) = The amount of damage that will be reflected to this other party
+	LOCAL.ReduceDamage (r/w) = Amount to be deducted from damage received
+	LOCAL.DamageType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
 	NOTE; 
-		1. If no RefDamage or RedDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
+		1. If no ReflectDamage or ReduceDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
 		2. No damage amount can be less than 1.
