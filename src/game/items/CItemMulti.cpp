@@ -1174,7 +1174,7 @@ int16 CItemMulti::GetMultiCount() const
     return _iMultiCount;
 }
 
-void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
+void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar, CUID uidRedeedingChar)
 {
     ADDTOCALLSTACK("CItemMulti::Redeed");
     if (GetKeyNum("REMOVED") > 0) // Just don't pass from here again, to avoid duplicated deeds.
