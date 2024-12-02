@@ -30,7 +30,7 @@ CCPropsChar::CCPropsChar() : CComponentProps(COMP_PROPS_CHAR)
 // If a CItem: subscribed in CItemBase::SetType and CItem::SetType
 // If a CChar: subscribed in CCharBase::CCharBase and CChar::CChar
 /*
-bool CCPropsChar::CanSubscribe(const CObjBase* pObj) // static
+bool CCPropsChar::CanSubscribe(const CObjBase* pObj) noexcept // static
 {
     return (pObj->IsItem() || pObj->IsChar());
 }
@@ -90,6 +90,23 @@ bool CCPropsChar::GetPropertyNumPtr(PropertyIndex_t iPropIndex, PropertyValNum_t
 {
     ADDTOCALLSTACK("CCPropsChar::GetPropertyNumPtr");
     ASSERT(!IsPropertyStr(iPropIndex));
+
+    if (iPropIndex == PROPCH_FACTION_GROUP)
+    {
+        auto group = _faction.GetGroup();
+        if (group == CFactionDef::Group::NONE)
+            return false;
+        *piOutVal = (int32)enum_alias_cast<uint32>(group);
+        return true;
+    }
+    else if (iPropIndex == PROPCH_FACTION_SPECIES)
+    {
+        auto species = _faction.GetSpecies();
+        if (species == CFactionDef::Species::NONE)
+            return false;
+        *piOutVal = (int32)enum_alias_cast<uint32>(species);
+        return true;
+    }
     return BaseCont_GetPropertyNum(&_mPropsNum, iPropIndex, piOutVal);
 }
 
@@ -100,7 +117,7 @@ bool CCPropsChar::GetPropertyStrPtr(PropertyIndex_t iPropIndex, CSString* psOutV
     return BaseCont_GetPropertyStr(&_mPropsStr, iPropIndex, psOutVal, fZero);
 }
 
-void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyNum");
     ASSERT(!IsPropertyStr(iPropIndex));
@@ -109,7 +126,16 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
     if ((fDeleteZero && (iVal == 0)) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
+    }
+
+    else if (iPropIndex == PROPCH_FACTION_GROUP)
+    {
+        return _faction.SetGroup(enum_alias_cast<CFactionDef::Group>(uint32(iVal)));
+    }
+    else if (iPropIndex == PROPCH_FACTION_SPECIES)
+    {
+        return _faction.SetSpecies(enum_alias_cast<CFactionDef::Species>(uint32(iVal)));
     }
     else
     {
@@ -118,7 +144,7 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
     switch (iPropIndex)
@@ -170,14 +196,16 @@ void CCPropsChar::SetPropertyNum(PropertyIndex_t iPropIndex, PropertyValNum_t iV
             pChar->UpdateStatsFlag();
             break;
         }
-        
+
         default:
             //pLinkedObj->UpdatePropertyFlag();
             break;
     }
+
+    return true;
 }
 
-void CCPropsChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
+bool CCPropsChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, bool fDeleteZero)
 {
     ADDTOCALLSTACK("CCPropsChar::SetPropertyStr");
     ASSERT(ptcVal);
@@ -187,7 +215,7 @@ void CCPropsChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, COb
     if ((fDeleteZero && (*ptcVal == '\0')) || (_iPropertyExpansion[iPropIndex] > iLimitToExpansion) /*|| IgnoreElementalProperty(iPropIndex)*/)
     {
         if (0 == _mPropsNum.erase(iPropIndex))
-            return; // I didn't have this property, so avoid further processing.
+            return true; // I didn't have this property, so avoid further processing.
     }
     else
     {
@@ -196,10 +224,12 @@ void CCPropsChar::SetPropertyStr(PropertyIndex_t iPropIndex, lpctstr ptcVal, COb
     }
 
     if (!pLinkedObj)
-        return;
+        return true;
 
     // Do stuff to the pLinkedObj
-    //pLinkedObj->UpdatePropertyFlag();
+    pLinkedObj->UpdatePropertyFlag();
+
+    return true;
 }
 
 void CCPropsChar::DeletePropertyNum(PropertyIndex_t iPropIndex)
@@ -217,6 +247,7 @@ void CCPropsChar::DeletePropertyStr(PropertyIndex_t iPropIndex)
 bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_VERSION iLimitToExpansion, PropertyIndex_t iPropIndex, bool fPropStr)
 {
     ADDTOCALLSTACK("CCPropsChar::FindLoadPropVal");
+
     if (iPropIndex == PROPCH_NIGHTSIGHT)
     {
         // Special case if it has empty args: Keep old 'switch' from 0 to 1 and viceversa behaviour
@@ -227,7 +258,7 @@ bool CCPropsChar::FindLoadPropVal(CScript & s, CObjBase* pLinkedObj, RESDISPLAY_
             return true;
         }
     }
-    
+
     if (!fPropStr && (*s.GetArgRaw() == '\0'))
     {
         DeletePropertyNum(fPropStr);
@@ -250,6 +281,11 @@ void CCPropsChar::r_Write(CScript & s)
     // r_Write isn't called by CItemBase/CCharBase, so we don't get base props saved
     BaseCont_Write_ContNum(&_mPropsNum, _ptcPropertyKeys, s);
     BaseCont_Write_ContStr(&_mPropsStr, _ptcPropertyKeys, s);
+
+    if (_faction.GetGroup() != CFactionDef::Group::NONE)
+        s.WriteKeyVal(_ptcPropertyKeys[PROPCH_FACTION_GROUP],   (int64)enum_alias_cast<uint32>(_faction.GetGroup()));
+    if (_faction.GetSpecies() != CFactionDef::Species::NONE)
+        s.WriteKeyVal(_ptcPropertyKeys[PROPCH_FACTION_SPECIES], (int64)enum_alias_cast<uint32>(_faction.GetSpecies()));
 }
 
 void CCPropsChar::Copy(const CComponentProps * target)
@@ -261,6 +297,8 @@ void CCPropsChar::Copy(const CComponentProps * target)
 
     _mPropsNum = pTarget->_mPropsNum;
     _mPropsStr = pTarget->_mPropsStr;
+
+    _faction = pTarget->_faction;
 }
 
 void CCPropsChar::AddPropsTooltipData(CObjBase* pLinkedObj)
@@ -273,17 +311,17 @@ void CCPropsChar::AddPropsTooltipData(CObjBase* pLinkedObj)
     UnreferencedParameter(pLinkedObj);
 
     /* Tooltips for "dynamic" properties (stored in the BaseConts: _mPropsNum and _mPropsStr) */
-    
+
 /*
     // Numeric properties
     for (const BaseContNumPair_t& propPair : _mPropsNum)
     {
         PropertyIndex_t prop = propPair.first;
         PropertyValNum_t iVal = propPair.second;
-        
+
         if (iVal == 0)
             continue;
-        
+
         switch (prop)
         {
             default: // unimplemented

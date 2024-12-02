@@ -3,8 +3,12 @@
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/resource/sections/CRegionResourceDef.h"
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
 #include "../items/CItemVendable.h"
 #include "../triggers.h"
 #include "../CServer.h"
@@ -12,7 +16,6 @@
 #include "../CWorldSearch.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-
 #include <cmath>
 
 //----------------------------------------------------------------------
@@ -226,11 +229,11 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	// We need to update the AC given by the Shield when parrying increase.
 	if (skill == SKILL_PARRYING && g_Cfg.m_iCombatParryingEra & PARRYERA_ARSCALING)
 	{
-		
+
 		m_defense = (word)CalcArmorDefense();
 		fUpdateStats = true;
 	}
-	
+
 	if (fUpdateStats)
 		UpdateStatsFlag();
 }
@@ -420,7 +423,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 		if ( Skill_OnTrigger( skill, SKTRIG_GAIN, &pArgs ) == TRIGRET_RET_TRUE )
 			return;
 	}
-	pArgs.GetArgNs( 0, &iChance, &iSkillMax );
+	pArgs.GetArgNs( nullptr, &iChance, &iSkillMax );
 
 	if ( iChance <= 0 )
 		return;
@@ -469,7 +472,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 		const ushort uiStatVal = Stat_GetBase((STAT_TYPE)i);
 		if ( uiStatVal <= 0 )	// some odd condition
 			continue;
-		
+
 		/*Before there was uiStatSum >= uiStatSumMax:
 		That condition prevented the decrease of stats when the player's Stats were equal to the StatCap */
 		if (uiStatSum > uiStatSumMax)	// stat cap already reached
@@ -554,7 +557,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if ( IsTrigUsed(TRIGGER_SKILLUSEQUICK) )
 	{
 		ret = Skill_OnCharTrigger( skill, CTRIG_SkillUseQuick, &pArgs );
-		pArgs.GetArgNs( 0, &difficulty, &result);
+		pArgs.GetArgNs( nullptr, &difficulty, &result);
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -564,7 +567,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if ( IsTrigUsed(TRIGGER_USEQUICK) )
 	{
 		ret = Skill_OnTrigger( skill, SKTRIG_USEQUICK, &pArgs );
-		pArgs.GetArgNs( 0, &difficulty, &result );
+		pArgs.GetArgNs( nullptr, &difficulty, &result );
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -921,7 +924,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		{
 			if (m_Act_Effect >= 0)
 				iConsumePercent = m_Act_Effect;
-			else 
+			else
 			{
 				CSkillDef* pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(pItemDef->m_SkillMake[i].GetResIndex()));
 				if (pSkillDef && !pSkillDef->m_vcEffect.m_aiValues.empty())
@@ -1075,10 +1078,21 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		return true;
 	}
 
-	if ( pItemTarg != nullptr && pItemTarg->IsTopLevel() && pItemTarg->IsType( IT_FORGE ))
-		m_Act_p = pItemTarg->GetTopPoint();
-	else
-		m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_FORGE, 3, false );
+    if (pItemTarg != nullptr && pItemTarg->IsTopLevel() && pItemTarg->IsType(IT_FORGE))
+    {
+        m_Act_p = pItemTarg->GetTopPoint();
+    }
+    else
+    {
+        CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_BLACKSMITHING);
+        int iMaxRange        = pSkillDef->m_Range;
+        if (!iMaxRange)
+        {
+            g_Log.EventError("Blacksmith skill doesn't have a value for RANGE, defaulting to 3\n");
+            iMaxRange = 3;
+        }
+        m_Act_p = CWorldMap::FindItemTypeNearby(GetTopPoint(), IT_FORGE, iMaxRange, false);
+    }
 
 	if ( !m_Act_p.IsValidPoint() || !CanTouch(m_Act_p))
 	{
@@ -1118,10 +1132,10 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	bool fSkipMiningSmeltReq = false;	//Skip the minimum requirement in Mining skill for attempting the smelt action, this will be stored in ARGN3.
 	word iOreQty = pItemOre->GetAmount();
 	word iResourceQty = 0;
-	size_t iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.		
+	size_t iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.
 
 	CScriptTriggerArgs Args(iMiningSkill, iResourceTotalQty);
-	
+
 	if ( pOreDef->IsType( IT_ORE ))
 	{
 		ITEMID_TYPE idIngot = (ITEMID_TYPE)(ResGetIndex( pOreDef->m_ttOre.m_idIngot));
@@ -1158,7 +1172,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			iResourceQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
 			snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
 			Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
-			
+
 		}
 	}
 
@@ -1179,7 +1193,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
 		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp))));
-		
+
 		//We have finished the ore or the item being smelted.
 		if (iOreQty <= 0)
 		{
@@ -1217,7 +1231,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 					continue;
 				return false;
 		}
-		
+
 		const int iSkillRange = pBaseDef->m_ttIngot.m_iSkillMax - pBaseDef->m_ttIngot.m_iSkillMin;
 		int iSmeltingDifficulty = g_Rand.GetVal(iSkillRange);
 
@@ -1240,7 +1254,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			continue;
 		}
 		ingots.at(i)->SetAmount(iResourceQty);
-		/* 
+		/*
 		CItem* pIngots = CItem::CreateScript(pBaseDef->GetID(), this);
 		if ( pIngots == nullptr )
 		{
@@ -1252,7 +1266,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		ItemBounce( pIngots );
 		*/
 
-		
+
 	}
 	//We want to consume the ore before the ingots are created.
 	pItemOre->ConsumeAmount(pItemOre->GetAmount());
@@ -1312,7 +1326,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	if ( pszDef[0] )
 	{
 		tchar *pszMsg = Str_GetTemp();
-		snprintf(pszMsg, Str_TempLength(), 
+		snprintf(pszMsg, Str_TempLength(),
 			pszDef, pObj->GetName(), (pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]) );
 		ObjMessage(pszMsg, this);
 	}
@@ -1402,7 +1416,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	const CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_MINING);
 	const int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
-	if ( !iMaxRange )
+	if (!iMaxRange)
 	{
 		g_Log.EventError("Mining skill doesn't have a value for RANGE, defaulting to 2\n");
 		iMaxRange = 2;
@@ -1498,7 +1512,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_FISHING);
 	int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
-	if ( !iMaxRange )
+	if (!iMaxRange)
 	{
 		g_Log.EventError("Fishing skill doesn't have a value for RANGE, defaulting to 4\n");
 		iMaxRange = 4;
@@ -1600,7 +1614,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_LUMBERJACKING);
 	int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
-	if ( !pSkillDef->m_Range )
+    if (!iMaxRange)
 	{
 		g_Log.EventError("Lumberjacking skill doesn't have a value for RANGE, defaulting to 2\n");
 		iMaxRange = 2;
@@ -1757,6 +1771,10 @@ int CChar::Skill_Musicianship( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_STROKE  )
 		return 0;
+
+    // TODO:
+    // Slayer instruments will increase your success chance by 20% when used on the creatures it is meant for;
+    // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
 	if ( stage == SKTRIG_START )
 		return Use_PlayMusic( m_Act_UID.ItemFind(), g_Rand.GetVal(90));	// How difficult? 1-1000. If no instrument, it immediately fails
 
@@ -1795,7 +1813,11 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 					}
 				}
 			}
-			
+
+            // TODO:
+            // Slayer instruments will increase your success chance by 20% when used on the creatures it is meant for;
+            // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
+
 			// Basic skill check.
 			int iDifficulty = Use_PlayMusic(pInstrument, g_Rand.GetVal(40));
 			if (iDifficulty < -1)	// no instrument: immediate fail
@@ -1814,7 +1836,15 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 		{
 			int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
 			int iRadius = ( peace / 100 ) + 2;	// 2..12
-			auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
+
+            CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_PEACEMAKING);
+            int iMaxRadius = pSkillDef->m_Range;
+            if (!iMaxRadius)
+            {
+                //g_Log.EventError("Peacemaking skill doesn't have a value for RANGE, defaulting to (Peacemaking skill level / 100 + 2) \n");
+                iMaxRadius = iRadius;
+            }
+			auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iMaxRadius);
 			for (;;)
 			{
 				CChar *pChar = Area->GetChar();
@@ -1828,6 +1858,10 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 				int iPeaceDiff = pChar->Skill_GetAdjusted(SKILL_PEACEMAKING);
 				if (iBardingDiff != 0)
 					iPeaceDiff = ((iPeaceDiff + iBardingDiff) / 2);
+
+                // TODO:
+                // Slayer instruments will increase your success chance by 20% when used on the creatures it is meant for;
+                // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
 
 				if ( iPeaceDiff > peace )
 					SysMessagef("%s %s.", pChar->GetName(),g_Cfg.GetDefaultMsg( DEFMSG_PEACEMAKING_IGNORE ));
@@ -1889,7 +1923,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 					{
 						DEBUG_WARN(("Invalid ACTARG1 when using skill Enticement. Expected zero or the UID of an item with type t_musical.\n"));
 						pInstrument = nullptr;
-					}		
+					}
 				}
 			}
 
@@ -1900,12 +1934,16 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 				g_Log.EventError("Act empty in skill Enticement, trigger @Start.\n");
 				return -SKTRIG_ABORT;
 			}
-			
+
 			int iBaseDiff = (int)pChar->GetKeyNum("BARDING.DIFF");
 			if (iBaseDiff != 0)
 				iBaseDiff = iBaseDiff / 18;
 			else
 				iBaseDiff = 40;		// No TAG.BARDING.DIFF? Use default
+
+            // TODO:
+            // Slayer instruments will increase your success chance by 20% when used on the creatures it is meant for;
+            // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
 
 			int iDifficulty = Use_PlayMusic(pInstrument, g_Rand.GetVal(iBaseDiff));	// How difficult? 1-100 (use RandBell). If no instrument, it immediately fails
 			if (iDifficulty < -1)	// no instrument: immediate fail
@@ -1932,9 +1970,15 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 				SysMessagef("%s %s.", pChar->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_ENTICEMENT_BATTLE));
 				return -SKTRIG_ABORT;
 			}
-
+            CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_ENTICEMENT);
+            int iMaxRange = pSkillDef->m_Range;
+            if (!iMaxRange)
+            {
+                //g_Log.EventError("Enticement skill doesn't have a value for RANGE, defaulting 3\n");
+                iMaxRange = 3;
+            }
 			pChar->m_Act_p = GetTopPoint();
-			pChar->NPC_WalkToPoint( ( pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > 3) );
+            pChar->NPC_WalkToPoint((pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > iMaxRange));
 			return 0;
 		}
 
@@ -1949,6 +1993,9 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 	ADDTOCALLSTACK("CChar::Skill_Provocation");
 	// m_Act_Prv_UID = provoke this person
 	// m_Act_UID = against this person.
+
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_PROVOCATION);
+    int iMaxRange = pSkillDef->m_Range;
 
 	if ( stage == SKTRIG_ABORT )
 		return -SKTRIG_ABORT;
@@ -2009,6 +2056,10 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 			else
 				iBaseDiff = 40;		// No TAG.BARDING.DIFF? Use default
 
+            // TODO:
+            // Slayer instruments will increase your success chance by 20% when used on the creatures it is meant for;
+            // Slayer instruments will decrease your success chance by 20% when used on the creatures from its opposing group
+
 			int iDifficulty = Use_PlayMusic(pInstrument, g_Rand.GetVal(iBaseDiff));	// How difficult? 1-100 (use RandBell). If no instrument, it immediately fails
 			if (iDifficulty < -1)	// no instrument: immediate fail
 				return -SKTRIG_ABORT;
@@ -2047,8 +2098,14 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 
 			pCharProv->Memory_AddObjTypes(this, MEMORY_AGGREIVED|MEMORY_IRRITATEDBY);
 
+            if (!iMaxRange)
+            {
+                //g_Log.EventError("Provocation skill doesn't have a value for RANGE, defaulting to UO_MAP_VIEW_SIGHT(14) \n");
+                iMaxRange = UO_MAP_VIEW_SIGHT;
+            }
+
 			// If out of range we might get attacked ourself.
-			if ( (pCharProv->GetTopDist3D(pCharTarg) > UO_MAP_VIEW_SIGHT) || (pCharProv->GetTopDist3D(this) > UO_MAP_VIEW_SIGHT) )
+            if ((pCharProv->GetTopDist3D(pCharTarg) > iMaxRange) || (pCharProv->GetTopDist3D(this) > iMaxRange))
 			{
 				// Check that only "evil" monsters attack provoker back
 				if ( pCharProv->Noto_IsEvil() )
@@ -2068,7 +2125,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 				SysMessageDefault(DEFMSG_PROVOCATION_KIND);
 				return -SKTRIG_ABORT;
 			}
-			
+
 
 			// If the provoked NPC/PC is good, we are flagged criminal for it and guards are called.
 			if ( pCharProv->Noto_GetFlag(this) == NOTO_GOOD )
@@ -2160,7 +2217,13 @@ int CChar::Skill_Cooking( SKTRIG_TYPE stage )
 	// m_Act_p = the heat source
 	// m_Act_UID = the skill tool
 
-	int iMaxDist = 3;
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_COOKING);
+    int iMaxDist         = pSkillDef->m_Range;
+    if (!iMaxDist)
+    {
+        g_Log.EventError("Cooking skill doesn't have a value for RANGE, defaulting to 3\n");
+        iMaxDist = 3;
+    }
 
 	if ( stage == SKTRIG_START )
 	{
@@ -2216,15 +2279,18 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	}
 
 	CSkillDef* pSkillDef = g_Cfg.GetSkillDef(SKILL_TAMING);
-	if (pSkillDef->m_Range <= 0)
-		pSkillDef->m_Range = 10;
-
-	if ( GetTopDist3D(pChar) > pSkillDef->m_Range)
+    int iMaxRange = pSkillDef->m_Range;
+    if (!iMaxRange)
+    {
+        g_Log.EventError("Taming skill doesn't have a value for RANGE, defaulting to 10\n");
+        iMaxRange = 10;
+    }
+	if (GetTopDist3D(pChar) > iMaxRange)
 	{
 		SysMessageDefault( DEFMSG_TAMING_REACH );
 		return -SKTRIG_QTY;
 	}
-	
+
 	if ( !CanSeeLOS( pChar ) )
 	{
 		SysMessageDefault( DEFMSG_TAMING_LOS );
@@ -2248,7 +2314,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			Its Animal Lore is above 0 (no reason why, this is probably an old check)
 			It's ID is either one of the playable characters (Human, Elf or Gargoyle).
 		*/
-		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE) || 
+		if ( !iTameBase || pChar->Skill_GetBase(SKILL_ANIMALLORE) ||
 			pChar->IsPlayableCharacter())
 		{
 			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAMED ), pChar->GetName());
@@ -2257,14 +2323,14 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 
 		if (IsSetOF(OF_PetSlots))
 		{
-			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, 1);
-			if (!FollowersUpdate(pChar, maximum(0, iFollowerSlots), true))
+            short iFollowerSlots = pChar->GetFollowerSlots();
+            if (!FollowersUpdate(pChar, iFollowerSlots, true))
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_TAMING);
 				return -SKTRIG_QTY;
 			}
 		}
-		
+
 	}
 
 	if ( stage == SKTRIG_START )
@@ -2273,7 +2339,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 		if ( pChar->Memory_FindObjTypes( this, MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY|MEMORY_AGGREIVED ))	// I've attacked it before ?
 			iDifficulty += 50;	// is it too much?
 
-		m_atTaming.m_dwStrokeCount = (word)(g_Rand.GetVal(4) + 2);
+        m_atTaming.m_dwStrokeCount = (dword)(g_Rand.GetVal(4) + 2);
 		return iDifficulty;		// How difficult? 1-1000
 	}
 
@@ -2415,7 +2481,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		ObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_HIDING_SUCCESS), this);
 		StatFlag_Set(STATF_HIDDEN);
 		Reveal(STATF_INVISIBLE);	// clear previous invisibility spell effect (this will not reveal the char because STATF_HIDDEN still set)
-		UpdateMode(nullptr, true);
+		UpdateMode(true, nullptr);
 		if ( IsClientActive() )
 		{
 			GetClientActive()->removeBuff( BI_HIDDEN );
@@ -2681,7 +2747,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		SysMessageDefault( DEFMSG_HEALING_REACH );
 		return -SKTRIG_QTY;
 	}
-	
+
 	CChar * pChar = dynamic_cast<CChar*>(pObj);
     if (pChar && pChar->Can(CAN_C_NONSELECTABLE))
     {
@@ -2789,7 +2855,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 			if (pChar != this)
 				pChar->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_2), GetName());
 		}
-		else 
+		else
 		{
 			if (pChar != this)
 				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_HEALING_CURE_3));
@@ -2983,7 +3049,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 		resetting both the RecoilDelay and the SwingAnimationDelay will also cause the ID of the summoned creatured to be resetted.
 		This only happens when the creature to be summoned is chosen on the default "summon menu".
 		*/
-		if ( !m_atMagery.m_iSummonID ) 
+		if ( !m_atMagery.m_uiSummonID )
 		{
 			m_atFight.m_iRecoilDelay = 0;
 			m_atFight.m_iSwingAnimationDelay = 0;
@@ -3214,8 +3280,16 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 
 	const CPointMap& pntMe = GetTopPoint();
-	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
-		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
+
+    int iMaxDist = (int)(GetDefNum("BREATH.MAXDIST", true));
+    if (!iMaxDist)
+    {
+        //g_Log.EventError("Breath skill doesn't have a value for RANGE, defaulting to UO_MAP_VIEW_SIGHT(14) \n");
+        iMaxDist = UO_MAP_VIEW_SIGHT;
+    }
+
+	if (pntMe.GetDist(m_Act_p) > iMaxDist)
+        m_Act_p.StepLinePath(pntMe, iMaxDist);
 
 	int iDamage = (int)(GetDefNum("BREATH.DAM", true));
 
@@ -3240,7 +3314,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		id = ITEMID_FX_FIRE_BALL;
 	if ( !effect )
 		effect = EFFECT_BOLT;
-	
+
 	if (!iDmgType)
 		iDmgType = DAMAGE_FIRE;
 
@@ -3269,7 +3343,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	// m_Fight_Targ_UID = my target.
 
 	if ( stage == SKTRIG_ABORT )
-		return -SKTRIG_ABORT; 
+		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
@@ -3286,7 +3360,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	{
 		UpdateStatVal( STAT_DEX, -(ushort)( 4 + g_Rand.GetVal(6) ) );
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
-			UpdateAnimate( ANIM_MON_Stomp );
+			UpdateAnimate( ANIM_THROW );
 
 		_SetTimeout(3000);
 		return 0;
@@ -3295,9 +3369,18 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	if ( stage != SKTRIG_SUCCESS )
 		return -SKTRIG_QTY;
 
-	CPointMap pntMe = GetTopPoint();
-	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
-		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
+	const CPointMap pntMe(GetTopPoint());
+
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_THROWING);
+    int iMaxRange        = pSkillDef->m_Range;
+    if (!iMaxRange)
+    {
+        //g_Log.EventError("Throwing skill doesn't have a value for RANGE, defaulting to UO_MAP_VIEW_SIGHT(14) \n");
+        iMaxRange = UO_MAP_VIEW_SIGHT;
+    }
+
+	if (pntMe.GetDist(m_Act_p) > iMaxRange)
+        m_Act_p.StepLinePath(pntMe, iMaxRange);
 
 	SoundChar( CRESND_GETHIT );
 
@@ -3310,7 +3393,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	int iDmgPhysical = 0, iDmgFire = 0, iDmgCold = 0, iDmgPoison = 0, iDmgEnergy = 0;
 
 	CVarDefCont * pDam = GetDefKey("THROWDAM",true);
-	
+
 	if ( pDam )
 	{
 		int64 DVal[2];
@@ -3342,7 +3425,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 			iDmgPhysical = 100;
 		iDmgType |= DAMAGE_THROWN;
 	}
-	
+
 	CVarDefCont * pRock = GetDefKey("THROWOBJ",true);
     if ( pRock )
 	{
@@ -3697,7 +3780,7 @@ void CChar::Skill_Fail( bool fCancel )
 	//  else We still get some credit for having tried.
 
 	SKILL_TYPE skill = Skill_GetActive();
-	
+
 	if ( skill == SKILL_NONE )
 		return;
 
@@ -4032,7 +4115,15 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 	if (!IsTakeCrime(pCont, &pCharMark) || pCharMark == nullptr)
 		return 0;	// Not a crime really.
 
-	if (GetTopDist3D(pCharMark) > 1)
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_SNOOPING);
+    int iMaxRange = pSkillDef->m_Range;
+    if (!iMaxRange)
+    {
+        g_Log.EventError("Snooping skill doesn't have a value for RANGE, defaulting to 1\n");
+        iMaxRange = 1;
+    }
+
+	if (GetTopDist3D(pCharMark) > iMaxRange)
 	{
 		SysMessageDefault(DEFMSG_SNOOPING_REACH);
 		return (-SKTRIG_QTY);
@@ -4184,7 +4275,14 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 	bool fGround = false;
 	if (pCharMark != nullptr)
 	{
-		if (GetTopDist3D(pCharMark) > 2)
+        CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_STEALING);
+        int iMaxRange        = pSkillDef->m_Range;
+        if (!iMaxRange)
+        {
+            g_Log.EventError("Stealing skill doesn't have a value for RANGE, defaulting to 2\n");
+            iMaxRange = 2;
+        }
+		if (GetTopDist3D(pCharMark) > iMaxRange)
 		{
 			SysMessageDefault(DEFMSG_STEALING_MARK);
 			return -SKTRIG_QTY;
@@ -4222,7 +4320,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 			pPack->ContentAdd(pItem);
 		}
 	}
-	
+
 	if ((stage == SKTRIG_SUCCESS) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING_SUCCESS))
 		Reveal();
 	else if ((stage == SKTRIG_FAIL) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING_FAIL))
@@ -4254,7 +4352,7 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 	ushort iFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
 
 	//By giving the character skill focus value as difficulty, the chance to succeed is always around 50%
-	if (Skill_UseQuick(SKILL_FOCUS, iFocusValue/10)) 
+	if (Skill_UseQuick(SKILL_FOCUS, iFocusValue/10))
 	{
 		ushort uiGain = 0;
 		switch (stat)
@@ -4271,7 +4369,7 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 		return uiGain;
 	}
 	return -SKTRIG_QTY;
-	
+
 }
 bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 {
@@ -4317,12 +4415,12 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		{
 			anim = Skill_GetAnim(skill);
         }
-		
+
 		CScriptTriggerArgs pArgs;
 		pArgs.m_iN1 = skill;
 		pArgs.m_VarsLocal.SetNumNew("Sound", sound);
 		pArgs.m_VarsLocal.SetNumNew("Anim", anim);
-		
+
 		// Some skill can start right away. Need no targetting.
 		// 0-100 scale of Difficulty
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
@@ -4350,7 +4448,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(skill);
 		int iWaitTime = 1;
-		
+
 		m_Act_Effect = -1;
 
 		const bool fCraftSkill = g_Cfg.IsSkillFlag(skill, SKF_CRAFT);
@@ -4359,7 +4457,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( IsSkillBase(skill) && pSkillDef )
 		{
 			iWaitTime = pSkillDef->m_vcDelay.GetLinear(Skill_GetBase(skill));
-			
+
 			if (!pSkillDef->m_vcEffect.m_aiValues.empty())
 			{
 				if (!fCraftSkill)
@@ -4447,7 +4545,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 				UpdateAnimate(anim);
 		}
 
-		
+
 		//When combat starts, the first @HitTry trigger will be called after the @SkillStart/@Start (as it was before).
 		const bool fFightSkill = g_Cfg.IsSkillFlag(skill, SKF_FIGHT);
 		if ( fFightSkill )

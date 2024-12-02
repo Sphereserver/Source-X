@@ -1,7 +1,7 @@
-cmake_minimum_required (VERSION 3.19)
+cmake_minimum_required(VERSION 3.19)
 project(parallel_hashmap CXX)
 
-set (lib_SOURCES
+set(lib_SOURCES
     parallel_hashmap/btree.h
     #parallel_hashmap/meminfo.h
     parallel_hashmap/phmap.h
@@ -17,9 +17,9 @@ set (lib_SOURCES
 add_library(parallel_hashmap INTERFACE ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).
-target_include_directories (parallel_hashmap INTERFACE .)
+target_include_directories(parallel_hashmap INTERFACE .)
 # add to the proper directories in the solution explorer (eg. Visual Studio)
-source_group (lib\\parallel_hashmap FILES ${lib_SOURCES})
+source_group(lib\\parallel_hashmap FILES ${lib_SOURCES})
 
 #target_compile_definitions(parallel_hashmap INTERFACE
 #  $<$<BOOL:${USE_ASAN}>: ADDRESS_SANITIZER>

@@ -6,7 +6,6 @@
 #ifndef _INC_RECEIVE_H
 #define _INC_RECEIVE_H
 
-#include "../common/sphere_library/CSTime.h"
 #include "../common/CUID.h"
 #include "../common/sphereproto.h"
 #include "../game/uo_files/uofiles_enums.h"
@@ -721,6 +720,20 @@ class PacketClientVersion : public Packet
 public:
 	PacketClientVersion();
 	virtual bool onReceive(CNetState* net);
+};
+
+/***************************************************************************
+ *
+ *
+ *	Packet 0xBE : PacketAssistVersion				assist version
+ *
+ *
+ ***************************************************************************/
+class PacketAssistVersion : public Packet
+{
+public:
+    PacketAssistVersion();
+    virtual ~PacketAssistVersion();
 };
 
 /***************************************************************************

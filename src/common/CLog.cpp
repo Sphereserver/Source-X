@@ -1,9 +1,15 @@
 
 #include "../sphere/ProfileTask.h"
+#include "../sphere/threads.h"
 #include "../game/CServer.h"
+#include "sphere_library/sstringobjs.h"
 #include "CException.h"
 #include "CScript.h"
 #include "CLog.h"
+
+
+CEventLog::CEventLog() = default;
+CEventLog::~CEventLog() = default;
 
 
 int CEventLog::VEvent(dword dwMask, lpctstr pszFormat, ConsoleTextColor iColor, va_list args) noexcept
@@ -69,7 +75,6 @@ int CEventLog::EventCustom(ConsoleTextColor iColor, dword dwMask, lpctstr pszFor
     return iret;
 }
 
-#ifdef _DEBUG
 int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
 {
     va_list vargs;
@@ -78,7 +83,6 @@ int CEventLog::EventEvent(lpctstr pszFormat, ...) noexcept
     va_end(vargs);
     return iret;
 }
-#endif //_DEBUG
 
 
 //-------
@@ -91,6 +95,8 @@ CLog::CLog()
 	m_dwMsgMask = LOGL_ERROR | LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
 	SetFilePath( SPHERE_FILE "log.log" );	// default name to go to.
 }
+
+CLog::~CLog() = default;
 
 const CScript * CLog::_SetScriptContext( const CScript * pScriptContext )
 {
@@ -215,17 +221,18 @@ bool CLog::OpenLog(lpctstr pszBaseDirName)	// name set previously.
 
 int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) noexcept
 {
-    ADDTOCALLSTACK("CLog::EventStr");
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
+
 	if ( !IsLogged(dwMask) )	// I don't care about these.
 		return 0;
 	if ( !pszMsg || !*pszMsg )
 		return 0;
 
-	int iRet = 0;
-
+    int iRet = 0;
 	try
 	{
+        ADDTOCALLSTACK("CLog::EventStr");
+
         ConsoleTextColor iLogTextColor = iLogColor;
         ConsoleTextColor iLogTypeColor = CTCOL_DEFAULT;
 
@@ -241,7 +248,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 				pszLabel = "FATAL:";
                 iLogTypeColor = CTCOL_RED;
 				break;
-			case LOGL_CRIT:		// critical.
+			case LOGL_CRIT:     // critical.
 				pszLabel = "CRITICAL:";
                 iLogTypeColor = CTCOL_RED;
 				break;
@@ -256,7 +263,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		}
 
 		// Get the script context. (if there is one)
-		tchar szScriptContext[ _MAX_PATH + 16 ];
+		tchar szScriptContext[ SPHERE_MAX_PATH + 16 ];
 		if ( !(dwMask & LOGM_NOCONTEXT) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();
@@ -342,6 +349,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Not much we can do about this
 		iRet = 0;
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
+        STDERR_LOG("CLog::EventStr failed to print: '%s'.\n", pszMsg);
 	}
 
 	return iRet;
@@ -350,7 +358,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 
 CSTime CLog::sm_prevCatchTick;
 
-void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ... )
+void CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ... )
 {
 	CSTime timeCurrent = CSTime::GetCurrentTime();
 	if ( sm_prevCatchTick.GetTime() == timeCurrent.GetTime() )	// prevent message floods.
@@ -384,7 +392,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		va_start(vargs, pszCatchContext);
 
 		uiLen += vsnprintf(szMsg + uiLen, sizeof(szMsg) - uiLen, pszCatchContext, vargs);
-		uiLen += snprintf (szMsg + uiLen, sizeof(szMsg) - uiLen, "\n");
+        /*uiLen += */ snprintf (szMsg + uiLen, sizeof(szMsg) - uiLen, "\n");
 
 		EventStr(eSeverity, szMsg);
 		va_end(vargs);
@@ -397,7 +405,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 	sm_prevCatchTick = timeCurrent;
 }
 
-void _cdecl CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatchContext, ...)
+void CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatchContext, ...)
 {
     tchar szMsg[512];
 

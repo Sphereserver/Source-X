@@ -23,9 +23,8 @@ public:
 	PingServer(void);
 	virtual ~PingServer(void);
 
-private:
-	PingServer(const PingServer& copy);
-	PingServer& operator=(const PingServer& other);
+    PingServer(const PingServer& copy) = delete;
+    PingServer& operator=(const PingServer& other) = delete;
 
 public:
 	virtual void onStart() override;

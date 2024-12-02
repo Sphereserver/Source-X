@@ -2,10 +2,13 @@
 // Game server messages. (No login stuff)
 
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemMessage.h"
 #include "../items/CItemMultiCustom.h"
@@ -2719,7 +2722,7 @@ void CClient::SendPacket( tchar * ptcKey )
 	while ( *ptcKey )
 	{
 		if ( packet->getLength() > SCRIPT_MAX_LINE_LEN - 4 )
-		{	// we won't get here because this lenght is enforced in all scripts
+        {	// we won't get here because this length is enforced in all scripts
 			DEBUG_ERR(("SENDPACKET too big.\n"));
 
 			delete packet;
@@ -2731,7 +2734,7 @@ void CClient::SendPacket( tchar * ptcKey )
 		if ( toupper(*ptcKey) == 'D' )
 		{
 			++ptcKey;
-			dword iVal = Exp_GetVal(ptcKey);
+            dword iVal = Exp_GetDWVal(ptcKey);
 
 			packet->writeInt32(iVal);
 		}

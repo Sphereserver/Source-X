@@ -26,24 +26,12 @@ protected:
 
 public:
     static const char *m_sClassName;
-    CResourceDef(const CResourceID& rid, lpctstr pszDefName) :
-        m_rid(rid), m_pDefName(nullptr)
-    {
-        SetResourceName(pszDefName);
-    }
-    CResourceDef(const CResourceID& rid, const CVarDefContNum * pDefName = nullptr) :
-        m_rid(rid), m_pDefName(pDefName)
-    {
-    }
-    virtual ~CResourceDef()
-    {
-        // need a virtual for the dynamic_cast to work.
-        // ?? Attempt to remove m_pDefName ?
-    }
+    CResourceDef(const CResourceID& rid, lpctstr pszDefName);
+    CResourceDef(const CResourceID& rid, const CVarDefContNum * pDefName = nullptr);
+    virtual ~CResourceDef();
 
-private:
-    CResourceDef(const CResourceDef& copy);
-    CResourceDef& operator=(const CResourceDef& other);
+    CResourceDef(const CResourceDef& copy) = delete;
+    CResourceDef& operator=(const CResourceDef& other) = delete;
 
 public:
     inline const CResourceID& GetResourceID() const noexcept

@@ -6,10 +6,8 @@
 #ifndef _INC_CREGION_H
 #define _INC_CREGION_H
 
-#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
 #include "../common/CVarDefMap.h"
-#include "CTeleport.h"
 #include "CRegionBase.h"
 
 

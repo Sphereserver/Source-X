@@ -59,11 +59,10 @@ public:
 
 public:
     CResourceLink(const CResourceID& rid, const CVarDefContNum * pDef = nullptr);
-    virtual ~CResourceLink() = default;
+    virtual ~CResourceLink();
 
-private:
-    CResourceLink(const CResourceLink& copy);
-    CResourceLink& operator=(const CResourceLink& other);
+    CResourceLink(const CResourceLink& copy) = delete;
+    CResourceLink& operator=(const CResourceLink& other) = delete;
 };
 
 #endif // _INC_CRESOURCELINK_H

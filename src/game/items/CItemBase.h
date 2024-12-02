@@ -6,15 +6,19 @@
 #ifndef _INC_CITEMBASE_H
 #define _INC_CITEMBASE_H
 
-#include "../../common/resource/CResourceHolder.h"
-#include "../uo_files/uofiles_enums_itemid.h"
-#include "../uo_files/uofiles_enums_creid.h"
-#include "../uo_files/CUOItemTypeRec.h"
+#include "../../common/sphere_library/CSTypedArray.h"
+#include "../../common/resource/CValueDefs.h"
+#include "../../common/CRect.h"
 #include "../CBase.h"
-#include "../CServerConfig.h"
-#include "../components/CCFaction.h"
 #include "item_types.h"
 
+
+#define WEIGHT_UNITS 10
+
+class CFactionDef;
+struct CUOItemTypeRec_HS;
+enum CREID_TYPE : uint32;
+enum ITEMID_TYPE : uint32;
 
 class CItemBase : public CBaseBaseDef
 {
@@ -24,11 +28,11 @@ class CItemBase : public CBaseBaseDef
 private:
 	CSTypedArray<ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
 	CValueRangeDef m_values;	// range of values given a quality skill
-	IT_TYPE	m_type;				// default double click action type. (if any)
 	uint64  m_qwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
-	word	m_weight;			// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
+    IT_TYPE	m_type;				// default double click action type. (if any)
+	word   m_weight;			// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
 	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
-	byte	m_speed;
+	byte	  m_speed;
 
 public:
 	static const char *m_sClassName;
@@ -221,9 +225,25 @@ public:
 
 	static lpctstr const sm_szLoadKeys[];
 
+public:
+	explicit CItemBase( ITEMID_TYPE id );
+
+	// These don't really get destroyed til the server is shut down but keep this around anyhow.
+	virtual ~CItemBase() = default;
+
+	CItemBase(const CItemBase& copy) = delete;
+	CItemBase& operator=(const CItemBase& other) = delete;
+
+    	void CopyBasic( const CItemBase * pBase );
+	void CopyTransfer( CItemBase * pBase );
+
+    	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
+
 private:
 	static CItemBase * MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE iddupe );
 	int CalculateMakeValue( int iSkillLevel ) const;
+
 protected:
 	static void ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew );
 public:
@@ -242,13 +262,13 @@ public:
 	bool SetMaxAmount(word amount);
 
 	static CItemBase * FindItemBase( ITEMID_TYPE id );
-	inline static bool IsValidDispID( ITEMID_TYPE id ) noexcept;
+    static bool IsValidDispID( ITEMID_TYPE id ) noexcept;
 
 	// NOTE: ??? All this stuff should be moved to scripts !
 	// Classify item by ID
 	static bool IsID_Multi( ITEMID_TYPE id ) noexcept;
     static bool IsID_House( ITEMID_TYPE id ) noexcept;
-	static int	IsID_Door( ITEMID_TYPE id ) noexcept;
+	static int  IsID_Door( ITEMID_TYPE id ) noexcept;
 	static bool IsID_DoorOpen( ITEMID_TYPE id ) noexcept;
     static bool IsID_Ship( ITEMID_TYPE id ) noexcept;
     static bool IsID_GamePiece( ITEMID_TYPE id ) noexcept;
@@ -257,7 +277,7 @@ public:
     static bool IsID_WaterWash( ITEMID_TYPE id ) noexcept;
     static bool IsID_Chair( ITEMID_TYPE id ) noexcept;
 
-	inline static bool IsVisibleLayer( LAYER_TYPE layer ) noexcept;
+    static bool IsVisibleLayer( LAYER_TYPE layer ) noexcept;
 
 	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * ptile, bool fNameNotNeeded = false );
@@ -265,11 +285,11 @@ public:
 
 	static CREID_TYPE FindCharTrack( ITEMID_TYPE trackID );
 
-	IT_TYPE GetType() const
+	IT_TYPE GetType() const noexcept
 	{
 		return m_type;
 	}
-	bool IsType( IT_TYPE type ) const
+	bool IsType( IT_TYPE type ) const noexcept
 	{
 		return ( type == m_type );
 	}
@@ -277,7 +297,7 @@ public:
 
 	virtual void SetTypeName( lpctstr pszName ) override;
 
-	LAYER_TYPE GetEquipLayer() const
+	LAYER_TYPE GetEquipLayer() const noexcept
 	{
 		// Is this item really equippable ?
 		return (LAYER_TYPE)m_layer;
@@ -302,9 +322,6 @@ public:
 	bool IsDupedItem( ITEMID_TYPE id ) const;
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
-	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
-
 	bool IsMovableType() const noexcept
 	{
 		return ( m_weight != UINT16_MAX );
@@ -313,7 +330,6 @@ public:
 	{
 		return Can( CAN_I_PILE );
 	}
-#define WEIGHT_UNITS 10
 	word GetWeight() const noexcept; // Get weight in tenths of a stone.
 	byte GetSpeed() const;
 
@@ -342,18 +358,6 @@ public:
 
 	virtual void UnLink() override;
 
-	void CopyBasic( const CItemBase * pBase );
-	void CopyTransfer( CItemBase * pBase );
-
-public:
-	explicit CItemBase( ITEMID_TYPE id );
-
-	// These don't really get destroyed til the server is shut down but keep this around anyhow.
-	virtual ~CItemBase() = default;
-
-private:
-	CItemBase(const CItemBase& copy);
-	CItemBase& operator=(const CItemBase& other);
 };
 
 class CItemBaseDupe : public CResourceDef
@@ -370,15 +374,14 @@ public:
 	CItemBaseDupe(ITEMID_TYPE id, CItemBase* pMasterItem);
 	virtual	~CItemBaseDupe() = default;
 
-private:
-	CItemBaseDupe(const CItemBaseDupe& copy);
-	CItemBaseDupe& operator=(const CItemBaseDupe& other);
+	CItemBaseDupe(const CItemBaseDupe& copy) = delete;
+	CItemBaseDupe& operator=(const CItemBaseDupe& other) = delete;
 
 public:
 	static CItemBaseDupe* GetDupeRef(ITEMID_TYPE id);
 
 	virtual void UnLink() override;
-	CItemBase* GetItemDef() const;	
+	CItemBase* GetItemDef() const;
 
 	inline uint64 GetTFlags() const noexcept
 	{
@@ -442,9 +445,11 @@ public:
 	explicit CItemBaseMulti( CItemBase* pBase );
 	virtual ~CItemBaseMulti() = default;
 
-private:
-	CItemBaseMulti(const CItemBaseMulti& copy);
-	CItemBaseMulti& operator=(const CItemBaseMulti& other);
+	CItemBaseMulti(const CItemBaseMulti& copy) = delete;
+	CItemBaseMulti& operator=(const CItemBaseMulti& other) = delete;
+
+    	virtual bool r_LoadVal( CScript & s ) override;
+	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pChar = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 public:
 	int GetDistanceMax() const;
@@ -453,25 +458,9 @@ public:
 	bool AddComponent( ITEMID_TYPE id, short dx, short dy, char dz );
 	bool AddComponent( tchar * pArgs );
 	void SetMultiRegion( tchar * pArgs );
-	virtual bool r_LoadVal( CScript & s ) override;
-	virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pChar = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };
-
-
-/* Inline Methods Definitions */
-
-bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) noexcept // static
-{
-	return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
-}
-
-bool CItemBase::IsValidDispID( ITEMID_TYPE id ) noexcept // static
-{
-	// Is this id in the base artwork set ? tile or multi.
-	return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );
-}
 
 
 #endif // _INC_CITEMBASE_H

@@ -1,5 +1,5 @@
+#include "../common/sphere_library/CSRand.h"
 #include "../network/CClientIterator.h"
-#include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CWorldComm.h"
@@ -235,7 +235,7 @@ void CWorldComm::Broadcast(lpctstr pMsg) // static
 	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }
 
-void __cdecl CWorldComm::Broadcastf(lpctstr pMsg, ...) // static
+void CWorldComm::Broadcastf(lpctstr pMsg, ...) // static
 {
 	// System broadcast in bold text
 	ADDTOCALLSTACK("CWorldComm::Broadcastf");

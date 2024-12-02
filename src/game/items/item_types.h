@@ -6,8 +6,9 @@
 #ifndef _INC_ITEMTYPES_H
 #define _INC_ITEMTYPES_H
 
+#include <cstdint>
 
-enum IT_TYPE		// double click type action.
+enum IT_TYPE : int32_t		// double click type action.
 {
 	// NOTE: Never change this list as it will mess up the RES_ITEMDEF or RES_WORLDITEM already stored.
 	// Just add stuff to end.

@@ -7,39 +7,10 @@
 #define _INC_SPHEREPROTO_H
 
 #include "../network/net_datatypes.h"
-#include "../sphere/threads.h"
-#include "sphere_library/CSString.h"
 
 
 //---------------------------PROTOCOL DEFS---------------------------
 
-
-class CLanguageID
-{
-private:
-	// 3 letter code for language.
-	// ENU,FRA,DEU,etc. (see langcode.iff)
-	// terminate with a 0
-	// 0 = english default.
-	char m_codes[4]; // UNICODE language pref. ('ENU'=english)
-public:
-	CLanguageID() :
-		m_codes{}
-	{}
-	CLanguageID( const char * pszInit )
-	{
-		Set( pszInit );
-	}
-	CLanguageID(int iDefault);
-	bool IsDef() const
-	{
-		return ( m_codes[0] != 0 );
-	}
-    void GetStrDef(tchar* pszLang);
-    void GetStr(tchar* pszLang) const;
-    lpctstr GetStr() const;
-    bool Set(lpctstr pszLang);
-};
 
 enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 {
@@ -168,6 +139,7 @@ enum XCMD_TYPE	// XCMD_* messages are unique in both directions.
 	XCMD_MailMsg		= 0xbb,
 	XCMD_Season			= 0xbc,
 	XCMD_ClientVersion	= 0xbd,
+    XCMD_AssistVersion  = 0xbe,
 	XCMD_ExtData		= 0xbf,
 	//	0xC0
 	XCMD_EffectEx		= 0xc0,
@@ -384,11 +356,11 @@ enum SEASON_TYPE : uchar
 enum BBOARDF_TYPE	// Bulletin Board Flags. m_flag
 {
 	BBOARDF_NAME = 0,	// board name
-	BBOARDF_MSG_HEAD,	// 1=message header, 
+	BBOARDF_MSG_HEAD,	// 1=message header,
 	BBOARDF_MSG_BODY,	// 2=message body
 	BBOARDF_REQ_FULL,	// 3=request for full msg.
 	BBOARDF_REQ_HEAD,	// 4=request for just head.
-	BBOARDF_NEW_MSG,	// 5=new message, 
+	BBOARDF_NEW_MSG,	// 5=new message,
 	BBOARDF_DELETE		// 6=Delete
 };
 
@@ -718,6 +690,7 @@ enum RACE_TYPE		// character race, used in new character creation (0x8D) and sta
 /*
     Client Versions numeric constants.
     WARNING: DEPRECATED! Use CUOClientVersion (or at least wrap those numbers in that class).
+    TODO: convert them to CUOClientVersion.
 */
 
 // client versions (expansions)

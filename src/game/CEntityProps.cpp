@@ -1,11 +1,5 @@
 #include "../common/CLog.h"
 #include "chars/CChar.h"
-#include "components/CCPropsChar.h"
-#include "components/CCPropsItem.h"
-#include "components/CCPropsItemChar.h"
-#include "components/CCPropsItemEquippable.h"
-#include "components/CCPropsItemWeapon.h"
-#include "components/CCPropsItemWeaponRanged.h"
 #include "CEntityProps.h"
 
 CEntityProps::CEntityProps()

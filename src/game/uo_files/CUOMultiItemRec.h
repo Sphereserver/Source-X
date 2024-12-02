@@ -7,11 +7,10 @@
 #define _INC_CUOMULTIITEMREC_H
 
 #include "../../common/common.h"
-#include "uofiles_enums.h"
 #include "uofiles_enums_itemid.h"
 
 // All these structures must be byte packed.
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef MSVC_COMPILER
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -51,7 +50,7 @@ struct CUOMultiItemRec_HS // (Multi.mul, High Seas+)
 
 
 // Turn off structure packing.
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef MSVC_COMPILER
 	#pragma pack()
 #else
 	#undef PACK_NEEDED

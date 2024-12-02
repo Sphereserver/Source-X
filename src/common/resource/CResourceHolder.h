@@ -6,14 +6,14 @@
 #ifndef _INC_CResourceHolder_H
 #define _INC_CResourceHolder_H
 
-#include "../sphere_library/CSTime.h"
-#include "../CScriptContexts.h"
+#include "../sphere_library/CSObjArray.h"
+#include "../sphere_library/CSString.h"
 #include "CResourceDef.h"
 #include "CResourceHash.h"
 #include "CResourceLink.h"
-#include "CResourceScript.h"
-#include "CResourceQty.h"
 
+
+class CResourceScript;
 
 class CResourceHolder : public CScriptObj
 {
@@ -70,12 +70,5 @@ public:
 	CResourceHolder(const CResourceHolder& copy) = delete;
 	CResourceHolder& operator=(const CResourceHolder& other) = delete;
 };
-
-inline lpctstr CResourceHolder::GetResourceBlockName( RES_TYPE restype )	// static
-{
-	if ( restype < 0 || restype >= RES_QTY )
-		restype = RES_UNKNOWN;
-	return( sm_szResourceBlocks[restype] );
-}
 
 #endif // _INC_CResourceHolder_H

@@ -4,6 +4,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
+#include "../items/CItemContainer.h"
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
@@ -58,9 +59,7 @@ CCharNPC::CCharNPC( CChar * pChar, NPCBRAIN_TYPE NPCBrain )
 	m_timeRestock = 0;
 }
 
-CCharNPC::~CCharNPC()
-{
-}
+CCharNPC::~CCharNPC() = default;
 
 bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 {
@@ -83,11 +82,8 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			if ( !g_Serv.IsLoading() )
 				pChar->UpdatePropertyFlag();
 			break;
-		case CNC_FOLLOWERSLOTS:
-			pChar->SetDefNum(s.GetKey(), s.GetArgVal(), false );
-			break;
 		case CNC_ACTPRI:
-			m_Act_Motivation = (uchar)(s.GetArgVal());
+            m_Act_Motivation = s.GetArgUCVal();
 			break;
 		case CNC_NPC:
 			m_Brain = NPCBRAIN_TYPE(s.GetArgVal());
@@ -97,7 +93,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			{
 				pChar->m_ptHome = pChar->GetTopPoint();
 			}
-			m_Home_Dist_Wander = (word)(s.GetArgVal());
+            m_Home_Dist_Wander = s.GetArgWVal();
 			break;
 		case CNC_NEED:
 		case CNC_NEEDNAME:
@@ -167,9 +163,6 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		case CNC_BONDED:
 			sVal.FormatVal( m_bonded );
 			break;
-		case CNC_FOLLOWERSLOTS:
-			sVal.FormatLLVal(pChar->GetDefNum(ptcKey, true));
-			break;
 		case CNC_ACTPRI:
 			sVal.FormatVal( m_Act_Motivation );
 			break;
@@ -213,12 +206,12 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		default:
 			if ( FindTableHeadSorted( ptcKey, CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
 			{
-				sVal = "0";
+				sVal.SetValFalse();
 				return true;
 			}
 			if ( FindTableSorted( ptcKey, CClient::sm_szLoadKeys, CC_QTY ) >= 0 )
 			{
-				sVal = "0";
+				sVal.SetValFalse();
 				return true;
 			}
 			return(false );
@@ -325,7 +318,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
 		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
+		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}
@@ -342,7 +335,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
 		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
+		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}

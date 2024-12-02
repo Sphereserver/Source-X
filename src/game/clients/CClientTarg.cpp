@@ -2,10 +2,16 @@
 
 #include "../../network/send.h"
 #include "../../common/resource/sections/CItemTypeDef.h"
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../chars/CChar.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMulti.h"
+#include "../items/CItemStone.h"
 #include "../items/CItemVendable.h"
+#include "../uo_files/CUOStaticItemRec.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
@@ -37,12 +43,15 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	{
 		const CItem * pItem = static_cast <CItem*> (pObj);
 		if ( pItem->GetAmount() > 1 )
-			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
+			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) [amount=%u] to '%s'",
+                     GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
 		else
-			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+			snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(),
+                     (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 	}
 	else
-		snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+		snprintf(pszLogMsg, Str_TempLength(), "'%s' commands uid=0%x (%s) to '%s'", GetName(),
+                 (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 
 	// Check priv level for the new verb.
 	if ( ! g_Cfg.CanUsePrivVerb( pObj, m_Targ_Text, this ))
@@ -333,7 +342,8 @@ bool CClient::OnTarg_Char_Add( CObjBase * pObj, const CPointMap & pt )
 	pChar->MoveToChar(pt);
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->Update();
-	pChar->UpdateAnimate(ANIM_CAST_DIR);
+    pChar->UpdateAnimate(ANIM_SUMMON);
+    pChar->SetTimeout(2000);
 	pChar->SoundChar(CRESND_GETHIT);
 	m_pChar->m_Act_UID = pChar->GetUID();		// for last target stuff. (trigger stuff)
 	return true;
@@ -1066,12 +1076,12 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	// Poisoned ?
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
-		uint iLevel = (uint)IMulDiv( 
-			i_promote32(pItem->m_itWeapon.m_poison_skill),
-			i_narrow32(ARRAY_COUNT(sm_szPoisonMessages)),
+		uint iLevel = (uint)IMulDiv(
+			n_promote_n32(pItem->m_itWeapon.m_poison_skill),
+			usize_narrow_u32(ARRAY_COUNT(sm_szPoisonMessages)),
 			100);
 		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
-			iLevel = i_narrow32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
+			iLevel = usize_narrow_u32(ARRAY_COUNT(sm_szPoisonMessages)) - 1;
 		len += snprintf( pszTemp+len, Str_TempLength() - len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
@@ -1287,7 +1297,7 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	{
 		uint iLevel = (uint)IMulDiv( iPoisonLevel, ARRAY_COUNT(sm_szPoisonMessages), 1000 );
 		if ( iLevel >= ARRAY_COUNT(sm_szPoisonMessages))
-			iLevel = i_narrow32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
+			iLevel = usize_narrow_u32(ARRAY_COUNT(sm_szPoisonMessages) - 1);
 		SysMessage(sm_szPoisonMessages[iLevel] );
 	}
 	else
@@ -1440,7 +1450,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
         return false;
 
 	const CSpellDef * pSpell = g_Cfg.GetSpellDef( m_tmSkillMagery.m_iSpell );
-	if ( ! pSpell )	
+	if ( ! pSpell )
 		return false;
 
 	if ( pObj )
@@ -1485,7 +1495,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	}
 
 	m_pChar->m_atMagery.m_iSpell			= m_tmSkillMagery.m_iSpell;
-	m_pChar->m_atMagery.m_iSummonID		= m_tmSkillMagery.m_iSummonID;
+	m_pChar->m_atMagery.m_uiSummonID		= m_tmSkillMagery.m_uiSummonID;
 
 	m_pChar->m_Act_Prv_UID				= m_Targ_Prv_UID;	// Source (wand or you?)
 	m_pChar->m_Act_UID					= pObj ? pObj->GetUID() : CUID(UID_PLAIN_CLEAR);
@@ -1606,7 +1616,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 
 	if ( IsSetOF(OF_PetSlots) )
 	{
-		short iFollowerSlots =  (short)pCharPet->GetDefNum("FOLLOWERSLOTS", true, 1);
+        short iFollowerSlots = pCharPet->GetFollowerSlots();
 		m_pChar->FollowersUpdate(pCharPet,(-maximum(0, iFollowerSlots)));
 	}
 
@@ -1648,7 +1658,7 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
 
     if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))
         return nullptr;
-    
+
     return CItemMulti::Multi_Create(GetChar(), pItemDef, pt, pDeed);
 }
 
@@ -1990,9 +2000,9 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		m_pChar->m_Act_UID = m_Targ_UID;  //The target.
 
 		/*An NPC will be healed by the Veterinary skill if the following conditions are satisfied:
-		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)	
+		  It has a Taming value above > 0 AND its ID is not the ID one of the playable races (Human, Elf or Gargoyle)
 		*/
-		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0 && 
+		if (pCharTarg->m_pNPC && pCharTarg->Skill_GetBase(SKILL_TAMING) > 0 &&
 			!pCharTarg->IsPlayableCharacter() )
 		{
 			switch (pCharTarg->GetNPCBrain())

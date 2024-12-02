@@ -1,4 +1,5 @@
 #include "../game/chars/CChar.h"
+#include "../game/items/CItem.h"
 #include "../game/CWorld.h"
 #include "CUID.h"
 

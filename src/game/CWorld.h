@@ -81,7 +81,7 @@ public:
 	// UID Managenent
     #define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(INTPTR_MAX))
 	dword GetUIDCount() const;
-	CObjBase * FindUID(dword dwIndex) const;
+	CObjBase * FindUID(dword dwIndex) const noexcept;
 	void FreeUID(dword dwIndex);
 	dword AllocUID( dword dwIndex, CObjBase * pObj );
 
@@ -231,12 +231,13 @@ public:
 	bool DumpAreas( CTextConsole * pSrc, lpctstr pszFilename );
 	void Close();
 
-	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0);
-	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
+	bool Export(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, short dx = 0, short dy = 0);
+	bool Import(lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, short dx = 0, short dy = 0,
+                tchar* pszAgs1 = nullptr, tchar* pszAgs2 = nullptr);
 
 	virtual lpctstr GetName() const override {
 	    return "World";
-	    }
+    }
 
 } g_World;
 

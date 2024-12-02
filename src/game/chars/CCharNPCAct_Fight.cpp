@@ -1,8 +1,10 @@
 // Actions specific to an NPC.
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
 #include "../../common/CScriptTriggerArgs.h"
-#include "../../network/receive.h"
 #include "../components/CCPropsItemWeapon.h"
+#include "../items/item_types.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CPathFinder.h"
 #include "../triggers.h"
 #include "CChar.h"

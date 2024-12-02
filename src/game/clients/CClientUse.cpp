@@ -1,8 +1,11 @@
 
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemShip.h"
 #include "../components/CCSpawn.h"

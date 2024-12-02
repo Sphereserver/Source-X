@@ -5,13 +5,15 @@
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
 
-#include "../../network/CSocket.h"
+#include "../../common/resource/CResourceSortedArrays.h" // For CObjNameSortArray
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/sphereproto.h"
+#include "../../common/sphere_library/CSTime.h"
+#include "../../common/CLanguageID.h"
 #include "../../common/CScriptObj.h"
+#include "../../common/CVarDefMap.h"
+#include "../../network/CSocket.h"
 #include "../chars/CCharRefArray.h"
-#include "../CServerConfig.h"
-#include "../game_enums.h"
+#include <map>
 
 #define PRIV_UNUSED0		0x0001
 #define PRIV_GM				0x0002	// Acts as a GM (dif from having GM level)
@@ -33,6 +35,7 @@
 
 
 class CClient;
+enum PLEVEL_TYPE : int;
 
 /**
 * @brief Single account information.
@@ -106,7 +109,7 @@ public:
 	* We should go track down and delete all the chars and clients that use this account !
 	*/
 	// virtual not required at the moment but might be if subclassed
-	virtual ~CAccount();
+	virtual ~CAccount() override;
 
 	/************************************************************************
 	* SCP related section.
@@ -349,8 +352,9 @@ protected:
 	static lpctstr const sm_szVerbKeys[]; // ACCOUNT action list.
 	CObjNameSortArray m_Accounts; // Sorted CAccount list.
 public:
-    CAccounts() : m_fLoading(false) {
-
+    CAccounts() noexcept
+        : m_fLoading(false)
+    {
     }
 	/**
 	* CAccount needs CAccounts methods.

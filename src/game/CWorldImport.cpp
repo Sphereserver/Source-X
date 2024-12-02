@@ -1,9 +1,12 @@
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
+#include "uo_files/uofiles_enums_creid.h"
 #include "CObjBase.h"
 #include "CWorld.h"
 #include "CWorldSearch.h"
+
 
 struct CImportSer : public CSObjListRec
 {
@@ -22,18 +25,21 @@ public:
 		return( m_dwContSer == UID_UNUSED );
 	}
 
-	CImportSer( dword dwSer ) noexcept :
-		m_dwSer( dwSer )
-	{
-		m_pObj = nullptr;
-		m_dwContSer = UID_UNUSED;
-		m_layer = LAYER_NONE;
-	}
-	~CImportSer() noexcept = default;
+	CImportSer( dword dwSer ) noexcept;
+	~CImportSer() noexcept;
 
 	CImportSer(const CImportSer& copy) = delete;
 	CImportSer& operator=(const CImportSer& other) = delete;
 };
+
+CImportSer::CImportSer( dword dwSer ) noexcept :
+    m_dwSer( dwSer )
+{
+    m_pObj = nullptr;
+	m_dwContSer = UID_UNUSED;
+	m_layer = LAYER_NONE;
+}
+CImportSer::~CImportSer() noexcept = default;
 
 struct CImportFile
 {
@@ -68,7 +74,7 @@ public:
 	void CheckLast();
 	void ImportFix();
 	bool ImportSCP( CScript & s, word wModeFlags );
-	bool ImportWSC( CScript & s, word wModeFlags );
+	bool ImportWSC( CScript & s, word wModeFlags, short dx, short dy );
 };
 
 void CImportFile::CheckLast()
@@ -251,7 +257,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 			ImportFix();
 			if ( wModeFlags & IMPFLAGS_CHARS )
 			{
-				m_pCurObj = CChar::CreateBasic(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
+				m_pCurObj = CChar::CreateBasic((CREID_TYPE)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 			}
 		}
 		else if ( s.IsSectionType( "WORLDITEM" ) || s.IsSectionType("WI"))
@@ -302,7 +308,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 	return true;
 }
 
-bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
+bool CImportFile::ImportWSC( CScript & s, word wModeFlags, short dx, short dy )
 {
 	ADDTOCALLSTACK("CImportFile::ImportWSC");
 	// This file is a WSC or UOX world script file.
@@ -416,7 +422,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 				m_pCurSer->m_layer = static_cast<LAYER_TYPE>(atoi(pArg));
 				continue;
 			}
-			else if (pItem == nullptr)
+			if (pItem == nullptr)
 			{
 				DEBUG_ERR(( "Import:Found '%s' before ID.\n", s.GetKey()));
 				continue;
@@ -424,58 +430,98 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 
 			if ( s.IsKey("X" ))
 			{
-				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_x = (short)( atoi(pArg) );
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				CPointMap pt(pItem->GetUnkPoint());
+				pt.m_x = *iconv + dx;
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
-				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_y = (short)( atoi(pArg) );
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				CPointMap pt(pItem->GetUnkPoint());
+				pt.m_y = *iconv + dy;
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Z" ))
 			{
-				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_z = (char)( atoi(pArg) );
+                std::optional<char> iconv = Str_ToU8(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				CPointMap pt(pItem->GetUnkPoint());
+				pt.m_z = *iconv;
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("COLOR" ))
 			{
-				pItem->SetHue( (HUE_TYPE)( atoi(pArg) ) );
+                std::optional<HUE_TYPE> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->SetHue(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("AMOUNT" ))
 			{
-				pItem->SetAmount( (word)atoi(pArg) );
+                std::optional<word> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->SetAmount(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("MOREX" ))
 			{
-				pItem->m_itNormal.m_morep.m_x = (short)(atoi(pArg));
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->m_itNormal.m_morep.m_x = *iconv;
 				continue;
 			}
 			else if ( s.IsKey("MOREY" ))
 			{
-				pItem->m_itNormal.m_morep.m_y = (short)(atoi(pArg));
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->m_itNormal.m_morep.m_y = *iconv;
 				continue;
 			}
 			else if ( s.IsKey("MOREZ" ))
 			{
-				pItem->m_itNormal.m_morep.m_z = (char)( atoi(pArg) );
+                std::optional<char> iconv = Str_ToI8(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->m_itNormal.m_morep.m_z = *iconv;
 				continue;
 			}
 			else if ( s.IsKey("MORE" ))
 			{
-				pItem->m_itNormal.m_more1 = Str_ToUI(pArg);
+                std::optional<dword> iconv = Str_ToU(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->m_itNormal.m_more1 = *iconv;
 				continue;
 			}
 			else if ( s.IsKey("MORE2" ))
 			{
-				pItem->m_itNormal.m_more2 = Str_ToUI(pArg);
+                std::optional<dword> iconv = Str_ToU(pArg);
+                if (!iconv.has_value())
+                    continue;
+
+				pItem->m_itNormal.m_more2 = *iconv;
 				continue;
 			}
 			else if ( s.IsKey("DYEABLE" ))
@@ -484,6 +530,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 					pItem->m_CanMask |= CAN_I_DYE;
 				continue;
 			}
+			/*
 			else if ( s.IsKey("ATT" ))
 			{
 				// pItem->m_pDef->m_attackBase = atoi(pArg);
@@ -493,6 +540,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 				// ??? translate the type field.
 				//int i = atoi(pArg);
 			}
+			*/
 		}
 
 		if ( mode == IMPFLAGS_CHARS )
@@ -520,65 +568,109 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 
 			if ( s.IsKey("X" ))
 			{
-				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_x = (short)(atoi(pArg));
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				CPointMap pt(pChar->GetUnkPoint());
+				pt.m_x = *iconv;
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
-				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_y = (short)(atoi(pArg));
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				CPointMap pt(pChar->GetUnkPoint());
+				pt.m_y = *iconv;
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Z" ))
 			{
-				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_z = (char)(atoi(pArg));
+                std::optional<char> iconv = Str_ToI8(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				CPointMap pt(pChar->GetUnkPoint());
+				pt.m_z = *iconv;
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("BODY" ))
 			{
-				pChar->SetID((CREID_TYPE)(atoi(pArg)));
+                std::optional<uint> iconv = Str_ToU(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->SetID(enum_alias_cast<CREID_TYPE>(*iconv));
 				continue;
 			}
 			else if ( s.IsKey("SKIN" ))
 			{
-				pChar->SetHue( (HUE_TYPE)( atoi(pArg) ));
+                std::optional<word> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->SetHue(n_alias_cast<HUE_TYPE>(*iconv));
 				continue;
 			}
 			else if ( s.IsKey("DIR" ))
 			{
-				pChar->m_dirFace = (DIR_TYPE)(atoi(pArg));
+                std::optional<int> iconv = Str_ToI(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->m_dirFace = enum_alias_cast<DIR_TYPE>(*iconv);
 				if ( (pChar->m_dirFace < 0) || (pChar->m_dirFace >= DIR_QTY) )
 					pChar->m_dirFace = DIR_SE;
 				continue;
 			}
 			else if ( s.IsKey("XBODY" ))
 			{
-				pChar->_iPrev_id = (CREID_TYPE)(atoi(pArg));
+                std::optional<uint> iconv = Str_ToU(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->_iPrev_id = enum_alias_cast<CREID_TYPE>(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("XSKIN" ))
 			{
-				pChar->_wPrev_Hue = (HUE_TYPE)( atoi(pArg) );
+                std::optional<word> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->_wPrev_Hue = n_alias_cast<HUE_TYPE>(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("FONT" ))
 			{
-				pChar->m_fonttype = (FONT_TYPE)(atoi(pArg));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->m_fonttype = enum_alias_cast<FONT_TYPE>(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("KARMA" ))
 			{
-				pChar->SetKarma((short)(atoi(pArg)));
+                std::optional<short> iconv = Str_ToI16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->SetKarma(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("FAME" ))
 			{
-				pChar->SetFame((ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->SetFame(*iconv);
 				continue;
 			}
 			else if ( s.IsKey("TITLE" ))
@@ -588,33 +680,67 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("STRENGTH" ))
 			{
-				pChar->Stat_SetBase(STAT_STR, (ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->Stat_SetBase(STAT_STR, *iconv);
 			}
 			else if ( s.IsKey("DEXTERITY" ))
 			{
-				pChar->Stat_SetBase(STAT_DEX, (ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->Stat_SetBase(STAT_DEX, *iconv);
 			}
 			else if ( s.IsKey("INTELLIGENCE" ))
 			{
-				pChar->Stat_SetBase(STAT_INT, (ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->Stat_SetBase(STAT_INT, *iconv);
 			}
 			else if ( s.IsKey("HITPOINTS" ))
 			{
-				pChar->Stat_SetVal(STAT_STR,(ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->Stat_SetVal(STAT_STR, *iconv);
 			}
 			else if ( s.IsKey("STAMINA" ))
 			{
-				pChar->Stat_SetVal(STAT_DEX,(ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->Stat_SetVal(STAT_DEX, *iconv);
 			}
 			else if ( s.IsKey( "MANA" ))
 			{
-				pChar->Stat_SetVal(STAT_INT,(ushort)(atoi(pArg)));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->Stat_SetVal(STAT_INT, *iconv);
 			}
 			else if ( s.IsKeyHead( "SKILL", 5 ))
 			{
-				SKILL_TYPE skill = (SKILL_TYPE)(atoi( &(s.GetKey()[5]) ));
+                // TODO: they are not saved like this anymore (not by index but by proper name)
+                std::optional<int> iconv_int = Str_ToI(s.GetKey() + 5);
+                if (!iconv_int.has_value())
+                    return false;
+
+				const auto skill = enum_alias_cast<SKILL_TYPE>(*iconv_int);
+
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
 				if ( pChar->IsSkillBase(skill) && g_Cfg.m_SkillIndexDefs.valid_index(skill) )
-					pChar->Skill_SetBase( skill, (ushort)atoi(pArg));
+					pChar->Skill_SetBase( skill, *iconv);
 			}
 			else if ( s.IsKey("ACCOUNT" ))
 			{
@@ -623,20 +749,28 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("KILLS" ) && pChar->m_pPlayer )
 			{
-				pChar->m_pPlayer->m_wMurders = (word)(atoi(pArg));
+                std::optional<ushort> iconv = Str_ToU16(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				pChar->m_pPlayer->m_wMurders = *iconv;
 			}
 			else if ( s.IsKey("NPCAITYPE" ))
 			{
 				// Convert to proper NPC type.
-				int i = atoi( pArg );
+                std::optional<int> iconv = Str_ToI(pArg);
+                if (!iconv.has_value())
+                    return false;
+
+				const int i = *iconv;
 				switch ( i )
 				{
 				case 0x01:	pChar->SetNPCBrain( NPCBRAIN_HEALER ); break;
 				case 0x02:	pChar->SetNPCBrain( NPCBRAIN_MONSTER ); break;
-				case 0x04:
+				case 0x04:  FALLTHROUGH;
 				case 0x40:	pChar->SetNPCBrain( NPCBRAIN_GUARD ); break;
 				case 0x08:	pChar->SetNPCBrain( NPCBRAIN_BANKER ); break;
-				default:	pChar->SetNPCBrain( pChar->GetNPCBrainAuto() ); break;
+				default:    	pChar->SetNPCBrain( pChar->GetNPCBrainAuto() ); break;
 				}
 			}
 			continue;
@@ -645,7 +779,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 	return true;
 }
 
-bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, tchar * pszArg1, tchar * pszArg2 )
+bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, short dx, short dy, tchar * pszArg1, tchar * pszArg2 )
 {
 	ADDTOCALLSTACK("CWorld::Import");
 	// wModeFlags = IMPFLAGS_TYPE
@@ -672,8 +806,8 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 
 		if ( wModeFlags & IMPFLAGS_RELATIVE )
 		{
-			// dx += ptCenter.m_x;
-			// dy += ptCenter.m_y;
+			dx += ptCenter.m_x;
+			dy += ptCenter.m_y;
 		}
 	}
 
@@ -682,9 +816,9 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	fImport.m_pszArg1 = pszArg1;
 	fImport.m_pszArg2 = pszArg2;
 
-	if ( ! strcmpi( pszFilename + (iLen - 4), ".WSC" ))
+    if ( ! strcmpi( pszFilename + (iLen - 4), ".WSC" ))
 	{
-		if ( ! fImport.ImportWSC(s, wModeFlags ))
+		if ( ! fImport.ImportWSC(s, wModeFlags, dx, dy ))
 			return false;
 	}
 	else
@@ -710,7 +844,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 		return false;
 
 	if ( pszFilename == nullptr || *pszFilename == '\0' )
-		pszFilename	= "map_all" SPHERE_SCRIPT;
+		pszFilename	= "map_all" SPHERE_SCRIPT_EXT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
 
@@ -733,7 +867,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 
 
 
-bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, int dx, int dy )
+bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, short dx, short dy )
 {
 	ADDTOCALLSTACK("CWorld::Export");
 	// wModeFlags = IMPFLAGS_TYPE
@@ -769,12 +903,13 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 			CItem * pItem = AreaItems->GetItem();
 			if ( pItem == nullptr )
 				break;
-			pItem->WriteUOX( s, index++ );
+			pItem->WriteUOX( s, index++, dx, dy );
 		}
 		return true;
 	}
 
 	// (???NPC) Chars and the stuff they are carrying.
+	// This format doesn't (yet?) have relative coords support.
 	if ( wModeFlags & IMPFLAGS_CHARS )
 	{
 		auto AreaChars = CWorldSearchHolder::GetInstance( pSrc->GetTopPoint(), iDist );

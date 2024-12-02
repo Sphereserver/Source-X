@@ -1,10 +1,9 @@
-#include "CWorldSearch.h"
-#include "CSector.h"
 #include "../common/CException.h"
 #include "../common/CLog.h"
 #include "../game/chars/CChar.h"
 #include "../game/items/CItem.h"
-#include "../sphere/threads.h"
+#include "CSector.h"
+#include "CWorldSearch.h"
 #include <array>
 
 static constexpr size_t kuiContainerScaleFactor = 2;
