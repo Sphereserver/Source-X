@@ -3947,3 +3947,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 02-11-2024, raydie
 - Added: Add LAYER_SPELL_Explosion for use delayed explosion spell. Now if set Duration to spell explosion, these duration is the delay to execute the explosion (From UOGuide, explosion spell: 2 second delay between targetting and explosion)
+
+02-12-2024, canerksk
+- Added: New sphere.ini settings ClientSeedMaxLength
+	Maximum length setting for the seed sent by the client Needed for customizable clients. (Can be either 127 or 255)

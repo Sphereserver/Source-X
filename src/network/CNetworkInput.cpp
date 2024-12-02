@@ -532,6 +532,7 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
     ASSERT(client != nullptr);
 
     bool fHTTPReq = false;
+    const byte uiOrigRemainingMaxLength  = g_Cfg.m_bClientSeedMaxLength ? g_Cfg.m_bClientSeedMaxLength : INT8_MAX;
     const uint uiOrigRemainingLength = buffer->getRemainingLength();
     const byte* const pOrigRemainingData = buffer->getRemainingData();
     if (state->m_seeded == false)
@@ -539,10 +540,12 @@ bool CNetworkInput::processUnknownClientData(CNetState* state, Packet* buffer)
         fHTTPReq = (uiOrigRemainingLength >= 5 && memcmp(pOrigRemainingData, "GET /", 5) == 0) ||
             (uiOrigRemainingLength >= 6 && memcmp(pOrigRemainingData, "POST /", 6) == 0);
     }
-    if (!fHTTPReq && (uiOrigRemainingLength > INT8_MAX))
+    if (!fHTTPReq && (uiOrigRemainingLength > uiOrigRemainingMaxLength))
     {
         g_Log.EventWarn("%x:Client connected with a seed length of %u exceeding max length limit of %d, disconnecting.\n",
-            state->id(), uiOrigRemainingLength, INT8_MAX);
+            state->id(),
+            uiOrigRemainingLength,
+            uiOrigRemainingMaxLength);
         return false;
     }
 

@@ -579,7 +579,8 @@ public:
     int64 _iMaxSizeClientIn;        // Maximum number of bytes a client can receive from the server in 10 seconds before being disconnected
     int  _iMaxConnectRequestsPerIP; // Maximum number of connection requests before rejecting/blocking IP.
     int64 _iTimeoutIncompleteConnectionMs; // Maximum time in milliseconds to wait before closing a connection request wich did not make it into a successful login
-	int	 m_iNetMaxQueueSize;        // max packets to hold per queue (comment out for unlimited)
+    byte m_bClientSeedMaxLength;       // Maximum length of seed under processUnknownClientData
+    int	 m_iNetMaxQueueSize;        // max packets to hold per queue (comment out for unlimited)
 	bool m_fUsePacketPriorities;    // true to prioritise sending packets
 	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer
 

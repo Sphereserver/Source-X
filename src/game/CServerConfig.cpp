@@ -106,6 +106,7 @@ CServerConfig::CServerConfig()
 	m_iDeadSocketTime		= 5ll * 60 * MSECS_PER_SEC;
 	m_iMinCharDeleteTime	= 7ll * 24*60*60 * MSECS_PER_SEC;
 	m_iMaxCharsPerAccount	= 5;
+    m_bClientSeedMaxLength  = INT8_MAX;
 	m_fLocalIPAdmin			= true;
     _iMaxHousesAccount = 1;
     _iMaxHousesGuild = 1;
@@ -494,6 +495,7 @@ enum RC_TYPE
 	RC_CLIENTMAX,				// m_iClientsMax
 	RC_CLIENTMAXIP,				// m_iClientsMaxIP
 	RC_CLIENTS,
+	RC_CLIENTSEEDMAXLENGTH,
 	RC_COLORHIDDEN,
 	RC_COLORINVIS,
 	RC_COLORINVISITEM,
@@ -785,8 +787,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLoginMaxTries)	}},
     { "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientLoginTempBan)	}},
     { "CLIENTMAX",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMax)			}},
-    { "CLIENTMAXIP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMaxIP)			}},
-    { "CLIENTS",				{ ELEM_VOID,	0											    }},	// duplicate
+    { "CLIENTMAXIP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iClientsMaxIP)		}},
+    { "CLIENTS",				{ ELEM_VOID,	0											                    }}, // duplicate
+    { "CLIENTSEEDMAXLENGTH",	{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,m_bClientSeedMaxLength)	}},
     { "COLORHIDDEN",			{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorHidden)			}},
     { "COLORINVIS",				{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorInvis)			}},
     { "COLORINVISITEM",			{ ELEM_VOID,	static_cast<uint>OFFSETOF(CServerConfig,m_iColorInvisItem)		}},
@@ -1207,6 +1210,13 @@ bool CServerConfig::r_LoadVal( CScript &s )
             else if (m_iClientsMax < 0)
                 m_iClientsMax = 0;
 			break;
+        case RC_CLIENTSEEDMAXLENGTH:
+            m_bClientSeedMaxLength = (uchar)(s.GetArgVal());
+            if (m_bClientSeedMaxLength < INT8_MAX)
+                m_bClientSeedMaxLength = INT8_MAX;
+            else if (m_bClientSeedMaxLength > UINT8_MAX)
+                m_bClientSeedMaxLength = UINT8_MAX;
+            break;
 		case RC_COLORHIDDEN:
 			m_iColorHidden = (HUE_TYPE)(s.GetArgVal());
 			break;
