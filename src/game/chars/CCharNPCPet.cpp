@@ -173,14 +173,20 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
         case PC_GUARD_ME:
-            m_Act_UID = pSrc->GetUID();
-            Skill_Start(NPCACT_GUARD_TARG);
+            if ((m_Act_UID != pSrc->GetUID()) || (Skill_GetActive() != NPCACT_GUARD_TARG)) // When you do all guard flood, the mount jumps one frame.
+            {
+                m_Act_UID = pSrc->GetUID();
+                Skill_Start(NPCACT_GUARD_TARG);
+            }
             break;
 
 		case PC_COME:
 		case PC_FOLLOW_ME:
-			m_Act_UID = pSrc->GetUID();
-			Skill_Start(NPCACT_FOLLOW_TARG);
+            if ((m_Act_UID != pSrc->GetUID()) || (Skill_GetActive() != NPCACT_FOLLOW_TARG)) // When you do all come flood, the mount jumps one frame.
+            {
+                m_Act_UID = pSrc->GetUID();
+                Skill_Start(NPCACT_FOLLOW_TARG);
+            }
 			break;
 
 		case PC_FOLLOW:

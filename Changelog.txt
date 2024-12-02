@@ -3915,12 +3915,38 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 13-10-2024, Jhobean
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
 
-27-11-2024, canerksk
-- Added: Added NOREJOIN tag for corpses, If the NOREJOIN tag is one, the player cannot come back to life on that corpse. That is, the player comes back to life but not on the corpse.
-	This tag does not prevent the player from coming back to life, it just prevents them from respawning on that corpse. The player always comes back to life, but not on that corpse.
+26-10-2024, canerksk
+- Fixed: Memory OnTick link char if not, the skill will not fail.
+	If the memory owner is not present, skills do not fail when taking damage, but if the memory owner is alive, skills fail when taking damage.
+
+- Fixed: The entity was jumping frames in flooded pet commands (come, guard)
+
+08-11-2024
+- Fixed: ITEMMEMORYEQUIP is not triggered in many default memories.
+			Previously, many memories did not have morex information, but now for some reason many memories have morex information and for this reason the trigger was not triggered in almost most of the memories, the morex query was removed. Also, the slang did not represent the memory item.
 
 27-11-2024, canerksk
+- Added: All skills that have a distance query have been adjusted to take the RANGE values ​​of that skill.
+	All skills to be used in RANGE;
+		BLACKSMITHING
+		MINING // It was added before.
+		FISHING // It was added before.
+		LUMBERJACKING // It was added before.
+		PEACEMAKING
+		ENTICEMENT
+		PROVOCATION
+		COOKING
+		TAMING
+		THROWING
+		SNOOPING
+		STEALING
+	Also added BREATH.MAXDIST to Breath. If this property is not given, the default is 14 distance.
+- Added: Added NOREJOIN tag for corpses, If the NOREJOIN tag is one, the player cannot come back to life on that corpse. That is, the player comes back to life but not on the corpse.
+	This tag does not prevent the player from coming back to life, it just prevents them from respawning on that corpse. The player always comes back to life, but not on that corpse.
 - Fixed: If you are around an entity that you own and you are trying to open a bank next to a bank, the "bank" command is perceived as a pet command and the bank does not open. There is no problem when you type "bank" after mounting the mount, but "bank" does not work when you dismount. (Issue #1331)
 
 27-11-2024, Gladie
 - Fixed: Redeeding t_multi_addon outside of housing system. Before it was only looking for owner of the multi, but in our case we need to know uid of the redeeding char.
+=======
+02-11-2024, raydie
+- Added: Add LAYER_SPELL_Explosion for use delayed explosion spell. Now if set Duration to spell explosion, these duration is the delay to execute the explosion (From UOGuide, explosion spell: 2 second delay between targetting and explosion)
