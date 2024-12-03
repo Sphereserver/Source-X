@@ -150,6 +150,8 @@ CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
 			break;
 		if ( !pItem->IsType(IT_CORPSE) )
 			continue;
+        if (pItem->m_TagDefs.GetKeyNum("NOREJOIN")) // The owner should not rejoin this body even if resurrected on top of it.
+            continue;
 		CItemCorpse *pCorpse = dynamic_cast<CItemCorpse*>(pItem);
 		if ( !pCorpse || (pCorpse->m_uidLink != GetUID()) )
 			continue;
