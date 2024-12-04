@@ -173,7 +173,8 @@ enum REVEALFLAGS_TYPE
     REVEALF_SNOOPING             = 0x0040,    // Do not reveal while a character snooping.
     REVEALF_STEALING             = 0x0080,    // Do not reveal while a character stealing.
     REVEALF_STEALING_SUCCESS     = 0x0100,    // Reveal if stealing successfully finished.
-    REVEALF_STEALING_FAIL        = 0x0200     // Reveal if stealing failed.
+    REVEALF_STEALING_FAIL        = 0x0200,    // Reveal if stealing failed.
+    REVEALF_ONHORSE              = 0x0400     // Reveal if on horse
 };
 
 enum EMOTEFLAGS_TYPE
