@@ -345,11 +345,14 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 
     bool fAggreived = false;
     word wMemTypes = MEMORY_HARMEDBY | MEMORY_IRRITATEDBY;
-    if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+    if (!IsSetCombatFlags(COMBAT_ATTACK_NOAGGREIVED))
     {
-        // I'm the one being attacked first
-        fAggreived = true;
-        wMemTypes |= MEMORY_AGGREIVED;
+        if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+        {
+            // I'm the one being attacked first
+            fAggreived = true;
+            wMemTypes |= MEMORY_AGGREIVED;
+        }
     }
     Memory_AddObjTypes(pCharSrc, wMemTypes);
 	Attacker_Add(pCharSrc);

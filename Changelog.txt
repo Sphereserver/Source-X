@@ -3960,3 +3960,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	NOTE; 
 		1. If no ReflectDamage or ReduceDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
 		2. No damage amount can be less than 1.
+
+04-12-2024, canerksk
+- Changed: Added new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED
+	In the old behavior (55i/55r/56b/56c) we were not guilty when we hit a murderer. Now when we attack a criminal or murderer we are guilty towards that person. An ini setting option has been added for this behavior. Although this is a normal behavior in OSI, it can be perceived as a problem since not every server designs games like OSI.
