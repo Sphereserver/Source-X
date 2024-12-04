@@ -3963,3 +3963,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 4-12-2024, canerksk
 - Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel
+
+4-12-2024, canerksk
+- Added: New ini RevealFlag setting REVEALF_ONHORSE
+	Added REVEALF_ONHORSE setting to RevealFlag to allow or disallow stealth walking if you are on a mount.
