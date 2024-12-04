@@ -3960,3 +3960,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	NOTE; 
 		1. If no ReflectDamage or ReduceDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
 		2. No damage amount can be less than 1.
+
+4-12-2024, canerksk
+- Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel
