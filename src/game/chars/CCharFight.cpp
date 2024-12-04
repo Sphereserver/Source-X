@@ -943,19 +943,59 @@ effect_bounce:
 				{
 					CItem* pReactive = LayerFind(LAYER_SPELL_Reactive);
 
-					if (pReactive)
-					{
-						int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
-						if (iReactiveDamage < 1)
-						{
-							iReactiveDamage = 1;
-						}
+                    if (pReactive)
+                    {
+                        int iReactiveDamage = (iDmg * pReactive->m_itSpell.m_PolyStr) / 100;
+                        int iReactiveRefDam = iReactiveDamage;
+                        int iReactiveRedDam = iReactiveDamage;
+                        SOUND_TYPE ReactiveSnd       = 0x1F1;
+                        ITEMID_TYPE ReactiveEffectID = ITEMID_FX_CURSE_EFFECT;
+                        DAMAGE_TYPE ReactiveDamType  = (DAMAGE_FIXED | DAMAGE_REACTIVE);
 
-						iDmg -= iReactiveDamage;
-						pSrc->OnTakeDamage(iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED | DAMAGE_REACTIVE), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy,(SPELL_TYPE)pReactive->m_itSpell.m_spell);
-						pSrc->Sound(0x1F1);
-						pSrc->Effect(EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16);
-					}
+                        if (IsTrigUsed(TRIGGER_HITREACTIVE))
+                        {
+                            CScriptTriggerArgs HitReactiveArgs;
+                            HitReactiveArgs.m_VarsLocal.SetNum("Sound", ReactiveSnd);         // SOUND
+                            HitReactiveArgs.m_VarsLocal.SetNum("EffectID", ReactiveEffectID); // EFFECTID
+                            HitReactiveArgs.m_VarsLocal.SetNum("Damage", iReactiveDamage);    // DAMAGE VALUE
+                            HitReactiveArgs.m_VarsLocal.SetNum("ReflectDamage", iReactiveRefDam); // REFLECTED DAM
+                            HitReactiveArgs.m_VarsLocal.SetNum("ReduceDamage", iReactiveRedDam);    // REDUCED DAM
+                            HitReactiveArgs.m_VarsLocal.SetNum("DamageType", ReactiveDamType);   // DAMAGE TYPE
+                            OnTrigger(CTRIG_HitReactive, pSrc, &HitReactiveArgs);
+
+                            ReactiveSnd      = (SOUND_TYPE)HitReactiveArgs.m_VarsLocal.GetKeyNum("Sound");            // SOUND
+                            ReactiveEffectID = (ITEMID_TYPE)HitReactiveArgs.m_VarsLocal.GetKeyNum("EffectID");        // EFFECTID
+                            iReactiveDamage  = (int)HitReactiveArgs.m_VarsLocal.GetKeyNum("Damage");                  // DAMAGE VALUE
+                            iReactiveRefDam  = (int)HitReactiveArgs.m_VarsLocal.GetKeyNum("ReflectDamage");            // REFLECTED DAMAGE VALUE
+                            iReactiveRedDam  = (int)HitReactiveArgs.m_VarsLocal.GetKeyNum("ReduceDamage");             // REDUCED DAMAGE VALUE
+                            ReactiveDamType  = (DAMAGE_TYPE)HitReactiveArgs.m_VarsLocal.GetKeyNum("DamageType"); // DAMAGE TYPE
+                            // should it be zero ?
+                            //if (iReactiveDamage < 1)
+                            //    iReactiveDamage = 1;
+
+                            //if (iReactiveRedDam < 1)
+                            //    iReactiveRedDam = 1;
+
+                            //if (iReactiveRefDam < 1)
+                            //    iReactiveRefDam = 1;
+                        }
+
+                        // reduce
+                        if (iReactiveRedDam > 0 || iReactiveDamage > 0)
+                            iDmg -= iReactiveRedDam ? iReactiveRedDam : iReactiveDamage;
+
+                        // reflect
+                        if (iReactiveRefDam > 0 || iReactiveDamage > 0)
+                            pSrc->OnTakeDamage(iReactiveRefDam ? iReactiveRefDam : iReactiveDamage, this, ReactiveDamType, iDmgPhysical, iDmgFire, iDmgCold,
+                                iDmgPoison, iDmgEnergy, (SPELL_TYPE)pReactive->m_itSpell.m_spell);
+
+                        if (ReactiveSnd)
+                            pSrc->Sound(ReactiveSnd);
+
+                        if (ReactiveEffectID)
+                            pSrc->Effect(EFFECT_OBJ, ReactiveEffectID, this, 10, 16);
+
+                    }
                 }
             }
             // Check if REFLECTPHYSICALDAM will reflect some damage back.

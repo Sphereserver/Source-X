@@ -1894,6 +1894,14 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			break;
 		}
 
+        case SPELL_Explosion:
+        {
+            iEffect = iLevel;
+            iDmgType = DAMAGE_MAGIC | DAMAGE_FIRE;
+            Effect(EFFECT_OBJ, ITEMID_FX_EXPLODE_3, pItem->m_uidLink.CharFind(), 10, 16);
+        }
+        break;
+
 		case SPELL_Strangle:
 		{
 			/*
@@ -2047,6 +2055,10 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 		if ( layer == LAYER_SPELL_STATS && spell != pSpellPrev->m_itSpell.m_spell && IsSetMagicFlags(MAGICF_STACKSTATS) )
 			continue;
 
+		// If spell is explosion and there's already an explosion timer, dont remove it
+		if ( spell == SPELL_Explosion && layer == LAYER_SPELL_Explosion )
+			continue;
+
 		pSpellPrev->Delete();
 		break;
 	}
@@ -2055,15 +2067,16 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	CItem *pSpell = CItem::CreateBase(pSpellDef ? pSpellDef->m_idSpell : ITEMID_RHAND_POINT_NW);
 	ASSERT(pSpell);
 
-	switch ( layer )
-	{
-		case LAYER_FLAG_Criminal:		pSpell->SetName("Criminal Timer");			break;
-		case LAYER_FLAG_PotionUsed:		pSpell->SetName("Potion Cooldown");			break;
-		case LAYER_FLAG_Drunk:			pSpell->SetName("Drunk Effect");			break;
-		case LAYER_FLAG_Hallucination:	pSpell->SetName("Hallucination Effect");	break;
-		case LAYER_FLAG_Murders:		pSpell->SetName("Murder Decay");			break;
-		default:						break;
-	}
+    switch ( layer )
+    {
+        case LAYER_FLAG_Criminal:		pSpell->SetName("Criminal Timer");			break;
+        case LAYER_FLAG_PotionUsed:		pSpell->SetName("Potion Cooldown");			break;
+        case LAYER_FLAG_Drunk:			pSpell->SetName("Drunk Effect");			break;
+        case LAYER_FLAG_Hallucination:	pSpell->SetName("Hallucination Effect");	break;
+        case LAYER_FLAG_Murders:		pSpell->SetName("Murder Decay");			break;
+        case LAYER_SPELL_Explosion: 	pSpell->SetName("Explosion Timer");			break;
+        default:						break;
+    }
 
 	g_World.m_uidNew = pSpell->GetUID();
 	pSpell->SetAttr(pSpellDef ? ATTR_NEWBIE|ATTR_MAGIC : ATTR_NEWBIE);
@@ -3910,6 +3923,12 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
                 iSound = SOUND_NONE;
             }
 			break;
+
+        case SPELL_Explosion:
+            // if not a potion and have duration, create effect
+            if (!fPotion && iDuration > 0)
+                Spell_Effect_Create( SPELL_Explosion, LAYER_SPELL_Explosion, iEffect, iDuration, pCharSrc );
+            break;
 
 		case SPELL_Invis:
 			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Invis, iEffect, iDuration, pCharSrc );
