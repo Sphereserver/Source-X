@@ -87,6 +87,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@HitIgnore",			// I'm going to avoid a target (attacker.n.ignore=1) , should I un-ignore him?.
 	"@HitMiss",				// I just missed.
 	"@HitParry",			// I succesfully parried an hit.
+    "@HitReactive",           // Reactive damage trigger
 	"@HitTry",				// I am trying to hit someone. starting swing.
     "@HouseDesignBegin",    // Starting to customize.
     "@HouseDesignCommit",	// I committed a new house design.
@@ -2510,7 +2511,7 @@ do_default:
 			}
 		case CHC_BREATH:
 			{
-				if( !strnicmp(ptcKey, "BREATH.DAM", 10) )
+                if (!strnicmp(ptcKey, "BREATH.MAXDIST", 14) || !strnicmp(ptcKey, "BREATH.DAM", 10))
 				{
 					CVarDefCont * pVar = GetDefKey(ptcKey, true);
 					sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
@@ -3808,7 +3809,7 @@ bool CChar::r_LoadVal( CScript & s )
 			break;
 		case CHC_BREATH:
 			{
-				if ( !strnicmp(ptcKey, "BREATH.DAM", 10) || !strnicmp(ptcKey, "BREATH.HUE", 10) || !strnicmp(ptcKey, "BREATH.ANIM", 11) || !strnicmp(ptcKey, "BREATH.TYPE", 11) || !strnicmp(ptcKey, "BREATH.DAMTYPE", 14))
+				if ( !strnicmp(ptcKey, "BREATH.MAXDIST", 14) || !strnicmp(ptcKey, "BREATH.DAM", 10) || !strnicmp(ptcKey, "BREATH.HUE", 10) || !strnicmp(ptcKey, "BREATH.ANIM", 11) || !strnicmp(ptcKey, "BREATH.TYPE", 11) || !strnicmp(ptcKey, "BREATH.DAMTYPE", 14))
 				{
 					SetDefNum(s.GetKey(), s.GetArgLLVal());
 					return true;
