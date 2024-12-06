@@ -3916,7 +3916,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
 
 27-11-2024, canerksk
-- Added: All skills that have a distance query have been adjusted to take the RANGE values ​​of that skill.
+- Added: All skills that have a distance query have been adjusted to take the RANGE values of that skill.
 	All skills to be used in RANGE;
 		BLACKSMITHING
 		MINING // It was added before.
@@ -3958,8 +3958,30 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	LOCAL.ReduceDamage (r/w) = Amount to be deducted from damage received
 	LOCAL.DamageType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
 	NOTE; 
-		1. If no ReflectDamage or ReduceDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
+		1. If no ReflectDamage or ReduceDamage values are entered, the system defaults to the Reactive Armor Effect value.
 		2. No damage amount can be less than 1.
 
 4-12-2024, canerksk
-- Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel
+- Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel.
+
+6-12-2024, canerksk
+- Added: Added LOCAL.WOPTalkMode in @SpellCast trigger and ini setting WOPTalkMode.
+	In some clients, different operations can be performed in return for this, for example, if this talkmode went from sphere as TALKMODE SPELL, the operation is performed according to this incoming talk mode according to the client versions. Here, the possibility of changing the talkmode according to the client version used is given. By default, TALKMODE_SPELL
+	Default talk mode: TALKMODE_SPELL = 10
+	Sphere.ini;
+	WOPTalkMode=0/14
+	
+	Trigger;
+	@SpellCast
+	Local.WOPTalkMode=0/14
+	
+	TALKMODE_SAY        = 0 // A character speaking.
+	TALKMODE_SYSTEM     = 1 // Display as system prompt
+	TALKMODE_EMOTE      = 2 // *smiles* at object (client shortcut: :+space)
+	TALKMODE_ITEM       = 6 // text labeling an item. Preceeded by "You see"
+	TALKMODE_NOSCROLL   = 7 // As a status msg. Does not scroll (as reported by the packet guides)
+	TALKMODE_WHISPER    = 8 // Only those close can here. (client shortcut: ;+space)
+	TALKMODE_YELL       = 9 // Can be heard 2 screens away. (client shortcut: !+space)
+	TALKMODE_SPELL      = 10 // Used by spells
+	TALKMODE_GUILD      = 13 // Used by guild chat (client shortcut: \)
+	TALKMODE_ALLIANCE   = 14 // Used by alliance chat (client shortcut: shift+\)
