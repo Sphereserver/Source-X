@@ -77,6 +77,7 @@ CServerConfig::CServerConfig()
 	m_iWordsOfPowerFont		= FONT_NORMAL;
 	m_fWordsOfPowerPlayer	= true;
 	m_fWordsOfPowerStaff	= false;
+    m_iWordsOfPowerTalkMode = TALKMODE_SPELL;
 	m_fEquippedCast			= true;
 	m_iMagicUnlockDoor		= 900;
 	m_iSpellTimeout			= 0;
@@ -732,6 +733,7 @@ enum RC_TYPE
 	RC_WOPFONT,
 	RC_WOPPLAYER,
 	RC_WOPSTAFF,
+	RC_WOPTALKMODE,
 	RC_WORLDSAVE,
 	RC_ZEROPOINT,				// m_sZeroPoint
 	RC_QTY
@@ -1025,6 +1027,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "WOPFONT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerFont)		}},
 	{ "WOPPLAYER",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer)	}},
 	{ "WOPSTAFF",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerStaff)	}},
+    { "WOPTALKMODE",            { ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerTalkMode) }},
 	{ "WORLDSAVE",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sWorldBaseDir)			}},
 	{ "ZEROPOINT",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sZeroPoint)			}},
 	{ nullptr,					{ ELEM_VOID,	0,												}}
