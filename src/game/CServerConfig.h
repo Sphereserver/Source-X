@@ -434,17 +434,60 @@ public:
 	CSString	m_sDumpAccPackets;
 #endif
 
-	CSString            m_sEventsPet;			// Key to add Events to all pets.
-	CResourceRefArray   m_pEventsPetLink;		// EventsPet.
+    
+    //////////////////////
+    // Npcs
+    //////////////////////
+    // EVENTSNPC
+    CSString m_sEventsNPC;              // Key to add Events to all npc.
+    CResourceRefArray m_pEventsNPCLink; // m_sEventsNPC.
 
-	CSString            m_sEventsPlayer;		// Key to add Events to all players.
-	CResourceRefArray   m_pEventsPlayerLink;	// EventsPlayer.
+    // EVENTSNPCANIMAL
+    CSString m_sEventsNPCAnimal;              // Key to add Events to all animals
+    CResourceRefArray m_pEventsNPCAnimalLink; // m_sEventsNPCAnimal.
 
-	CSString            m_sEventsRegion;		// Key to add Events to all regions.
-	CResourceRefArray   m_pEventsRegionLink;	// EventsRegion.
+    // EVENTSNPCMONSTER
+    CSString m_sEventsNPCMonster;              // Key to add Events to all monsters (brain_monster, brain_dragon, brain_berserk).
+    CResourceRefArray m_pEventsNPCMonsterLink; // m_sEventsNPCMonster.
 
-	CSString            m_sEventsItem;			// Key to add Events to all items.
-	CResourceRefArray   m_iEventsItemLink;		// EventsItem.
+    // EVENTSNPCMOUNTABLE
+    CSString m_sEventsNPCMountable;              // Key to add Events to all mountables (brain_animal).
+    CResourceRefArray m_pEventsNPCMountableLink; // EventsNPCMountable.
+
+    // EVENTSNPCSHOP
+    CSString m_sEventsNPCShop;                  // Key to add Events to all shopkeepers (brain_vendor).
+    CResourceRefArray m_pEventsNPCShopLink;     // EventsNPCShop.
+
+     //////////////////////
+    // Clients
+    //////////////////////
+    // EVENTSCLIENT
+    CSString m_sEventsClient;              // Key to add Events to all players and staff.
+    CResourceRefArray m_pEventsClientLink; // EventsClient.
+
+    // EVENTSCLIENTSTAFF
+    CSString m_sEventsClientStaff;              // Key to add Events to all players.
+    CResourceRefArray m_pEventsClientStaffLink; // EventsClientStaff.
+
+    // EVENTSCLIENTPLAYER
+    CSString m_sEventsClientPlayer;               // Key to add Events to all players.
+    CResourceRefArray m_pEventsClientPlayerLink;  // EventsClientPlayer.
+
+    //////////////////////
+    // Regions
+    //////////////////////
+    CSString m_sEventsRegion;                   // Key to add Events to all regions.
+    CResourceRefArray m_pEventsRegionLink;      // EventsRegion.
+
+    //////////////////////
+    // Items
+    //////////////////////
+    CSString m_sEventsItem;              // Key to add Events to all items.
+    CResourceRefArray m_iEventsItemLink; // EventsItem.
+
+    // Weapon
+    CSString m_sEventsItemWeapon;              // Key to add Events to all items.
+    CResourceRefArray m_iEventsItemWeaponLink; //EventsItemWeapon.
 
 	// Third Party Tools
 	CSString m_sStripPath;	// Strip Path for TNG and Axis.

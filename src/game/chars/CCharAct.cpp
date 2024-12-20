@@ -5602,48 +5602,191 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			}
 		}
 
-		// 5) EVENTSPET triggers for npcs
-		if (m_pNPC != nullptr)
-		{
-			EXC_SET_BLOCK("NPC triggers - EVENTSPET"); // EVENTSPET (constant events of NPCs set from sphere.ini)
-			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
-			{
-				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-					continue;
+        // NPCs
+        if (m_pNPC != nullptr)
+        {
+            // 5) EVENTSNPC triggers for npcs
+            // All Npcs
+            EXC_SET_BLOCK("NPC triggers - EVENTSNPC"); // EVENTSNPC (constant events of NPCs set from sphere.ini)
+            for (size_t i = 0; i < g_Cfg.m_pEventsNPCLink.size(); ++i)
+            {
+                CResourceLink *pLink = g_Cfg.m_pEventsNPCLink[i].GetRef();
+                if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                    continue;
 
-				CResourceLock s;
-				if (!pLink->ResourceLock(s))
-					continue;
+                CResourceLock s;
+                if (!pLink->ResourceLock(s))
+                    continue;
 
-				executedEvents.emplace(pLink);
-				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-				if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
-					goto stopandret;
-			}
-		}
+                executedEvents.emplace(pLink);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                    goto stopandret;
+            }
 
-		// 6) EVENTSPLAYER triggers for players
-		if ( m_pPlayer != nullptr )
-		{
-			//	EVENTSPLAYER triggers (constant events of players set from sphere.ini)
-			EXC_SET_BLOCK("chardef triggers - EVENTSPLAYER");
-			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.size(); ++i )
-			{
-				CResourceLink *pLink = g_Cfg.m_pEventsPlayerLink[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-					continue;
+            ITEMID_TYPE memoryId = Horse_GetMountItemID();
 
-				CResourceLock s;
-				if (!pLink->ResourceLock(s))
-					continue;
+            // 6) EVENTSNPCANIMAL triggers for all animals npc (without mountables)
+            if (m_pNPC->m_Brain == NPCBRAIN_ANIMAL && memoryId <= ITEMID_NOTHING)
+            {
+                EXC_SET_BLOCK("NPC triggers - EVENTSNPCANIMAL");
+                for (size_t i = 0; i < g_Cfg.m_pEventsNPCAnimalLink.size(); ++i)
+                {
+                    CResourceLink *pLink = g_Cfg.m_pEventsNPCAnimalLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
 
-				executedEvents.emplace(pLink);
-				iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
-				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
-					goto stopandret;
-			}
-		}
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
+
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
+                }
+            }
+
+            // 7) EVENTSNPCMOUNTABLE triggers for all mountables npc
+            if (memoryId > ITEMID_NOTHING)
+            {
+                EXC_SET_BLOCK("NPC triggers - EVENTSNPCMOUNTABLE");
+                for (size_t i = 0; i < g_Cfg.m_pEventsNPCMountableLink.size(); ++i)
+                {
+                    CResourceLink *pLink = g_Cfg.m_pEventsNPCMountableLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
+
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
+
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
+                }
+            }
+
+            // 8) EVENTSNPCMONSTER triggers for all monsters npc
+            // Monsters
+            EXC_SET_BLOCK("NPC triggers - EVENTSNPCMONSTER");
+            if (m_pNPC->m_Brain == NPCBRAIN_MONSTER || m_pNPC->m_Brain == NPCBRAIN_BERSERK || m_pNPC->m_Brain == NPCBRAIN_DRAGON)
+            {
+                for (size_t i = 0; i < g_Cfg.m_pEventsNPCMonsterLink.size(); ++i)
+                {
+                    CResourceLink *pLink = g_Cfg.m_pEventsNPCMonsterLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
+
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
+
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
+                }
+            }
+
+            // Shopkeepers
+            // 9) EVENTSNPCSHOP triggers for all shopkeepers
+            EXC_SET_BLOCK("NPC triggers - EVENTSNPCSHOP");
+            if (m_pNPC->m_Brain == NPCBRAIN_VENDOR || m_pNPC->m_Brain == NPCBRAIN_STABLE || m_pNPC->m_Brain == NPCBRAIN_HEALER)
+            {
+                for (size_t i = 0; i < g_Cfg.m_pEventsNPCShopLink.size(); ++i)
+                {
+                    CResourceLink *pLink = g_Cfg.m_pEventsNPCShopLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
+
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
+
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
+                }
+            }
+
+            // Guards
+            /*
+                EXC_SET_BLOCK("NPC triggers - EVENTSNPCGUARD");
+                if (m_pNPC->m_Brain == NPCBRAIN_GUARD)
+                {
+                }
+            */
+        }
+
+        // Chars
+        if (m_pPlayer != nullptr)
+        {
+            // 10) EVENTSCLIENT triggers for chars (players or staffs)
+            EXC_SET_BLOCK("chardef triggers - EVENTSCLIENT");
+            for (size_t i = 0; i < g_Cfg.m_pEventsClientLink.size(); ++i)
+            {
+                CResourceLink *pLink = g_Cfg.m_pEventsClientLink[i].GetRef();
+                if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                    continue;
+
+                CResourceLock s;
+                if (!pLink->ResourceLock(s))
+                    continue;
+
+                executedEvents.emplace(pLink);
+                iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                    goto stopandret;
+            }
+
+            // 11) EVENTSCLIENTPLAYER triggers for playerss
+            if (GetPrivLevel() <= PLEVEL_Player)
+            {
+                //	EVENTSCLIENTPLAYER triggers (constant events of players set from sphere.ini)
+                EXC_SET_BLOCK("chardef triggers - EVENTSCLIENTPLAYER");
+                for (size_t i = 0; i < g_Cfg.m_pEventsClientPlayerLink.size(); ++i)
+                {
+                    CResourceLink *pLink = g_Cfg.m_pEventsClientPlayerLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
+
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
+
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
+                }
+            }
+
+            // 12) EVENTSCLIENTSTAFF triggers for staffs
+            if (GetPrivLevel() >= PLEVEL_Counsel)
+            {
+                //	EVENTSCLIENTSTAFF triggers (constant events of players set from sphere.ini)
+                EXC_SET_BLOCK("chardef triggers - EVENTSCLIENTSTAFF");
+                for (size_t i = 0; i < g_Cfg.m_pEventsClientStaffLink.size(); ++i)
+                {
+                    CResourceLink *pLink = g_Cfg.m_pEventsClientStaffLink[i].GetRef();
+                    if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                        continue;
+
+                    CResourceLock s;
+                    if (!pLink->ResourceLock(s))
+                        continue;
+
+                    executedEvents.emplace(pLink);
+                    iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+                    if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
+                        goto stopandret;
+                }
+            }
+        }
+
 	}
 
 stopandret:

@@ -548,9 +548,16 @@ enum RC_TYPE
     RC_ERALIMITGEAR,			// _iEraLimitGear
     RC_ERALIMITLOOT,			// _iEraLimitLoot
     RC_ERALIMITPROPS,			// _iEraLimitProps
-	RC_EVENTSITEM,				// m_sEventsItem
-	RC_EVENTSPET,				// m_sEventsPet
-	RC_EVENTSPLAYER,			// m_sEventsPlayer
+    RC_EVENTSCLIENT,        // m_sEventsClient
+    RC_EVENTSCLIENTPLAYER,  // m_sEventsClientPlayer
+    RC_EVENTSCLIENTSTAFF,   // m_sEventsClientStaff
+    RC_EVENTSITEM,        // m_sEventsItem
+    RC_EVENTSITEMWEAPON,   // m_sEventsItemWeapon
+    RC_EVENTSNPC,          // m_sEventsNpc
+    RC_EVENTSNPCANIMAL,    // m_sEventsNpcAnimal
+    RC_EVENTSNPCMONSTER,   // m_sEventsNPCMonster
+    RC_EVENTSNPCMOUNTABLE, // m_sEventsNPCMountable
+    RC_EVENTSNPCSHOP,      // m_sEventsNPCShop
 	RC_EVENTSREGION,			// m_sEventsRegion
 	RC_EXPERIENCEKOEFPVM,		// m_iExperienceKoefPVM
 	RC_EXPERIENCEKOEFPVP,		// m_iExperienceKoefPVP
@@ -842,9 +849,16 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "ERALIMITGEAR",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
     { "ERALIMITLOOT",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
     { "ERALIMITPROPS",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
+    { "EVENTSCLIENT",             { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsClient) } },
+    { "EVENTSCLIENTPLAYER",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsClientPlayer) } },
+    { "EVENTSCLIENTSTAFF",        { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsClientStaff) } },
     { "EVENTSITEM",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItem)			}},
-    { "EVENTSPET",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPet)			}},
-    { "EVENTSPLAYER",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsPlayer)			}},
+    { "EVENTSITEMWEAPON",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsItemWeapon) } },
+    { "EVENTSNPC",              { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsNPC) } },
+    { "EVENTSNPCANIMAL",        { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsNPCAnimal) } },
+    { "EVENTSNPCMONSTER",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsNPCMonster) } },
+    { "EVENTSNPCMOUNTABLE",     { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsNPCMountable) } },
+    { "EVENTSNPCSHOP",          { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsNPCShop) } },
     { "EVENTSREGION",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sEventsRegion)			}},
     { "EXPERIENCEKOEFPVM",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVM)	}},
     { "EXPERIENCEKOEFPVP",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iExperienceKoefPVP)	}},
@@ -4818,7 +4832,10 @@ bool CServerConfig::Load( bool fResync )
         pRegion->MakeRegionDefname();
     }
 
-	// parse eventsitem
+    /////////////////////
+    // parse eventsitem
+    /////////////////////
+    // all items
 	m_iEventsItemLink.clear();
 	if ( ! m_sEventsItem.IsEmpty() )
 	{
@@ -4826,21 +4843,83 @@ bool CServerConfig::Load( bool fResync )
 		m_iEventsItemLink.r_LoadVal(script, RES_EVENTS);
 	}
 
-	// parse eventspet
-	m_pEventsPetLink.clear();
-	if ( ! m_sEventsPet.IsEmpty() )
-	{
-		CScript script("EVENTSPET", m_sEventsPet);
-		m_pEventsPetLink.r_LoadVal(script, RES_EVENTS);
-	}
+        // all weapons
+    m_iEventsItemWeaponLink.clear();
+    if (!m_sEventsItemWeapon.IsEmpty())
+    {
+        CScript script("EVENTSITEMWEAPON", m_sEventsItemWeapon);
+        m_iEventsItemWeaponLink.r_LoadVal(script, RES_EVENTS);
+    }
 
-	// parse eventsplayer
-	m_pEventsPlayerLink.clear();
-	if ( ! m_sEventsPlayer.IsEmpty() )
-	{
-		CScript script("EVENTSPLAYER", m_sEventsPlayer);
-		m_pEventsPlayerLink.r_LoadVal(script, RES_EVENTS);
-	}
+    /////////////////////
+    // parse eventsnpc
+    /////////////////////
+    // all npcs
+    m_pEventsNPCLink.clear();
+    if (!m_sEventsNPC.IsEmpty())
+    {
+        CScript script("EVENTSNPC", m_sEventsNPC);
+        m_pEventsNPCLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all animals
+    m_pEventsNPCAnimalLink.clear();
+    if (!m_sEventsNPCAnimal.IsEmpty())
+    {
+        CScript script("EVENTSNPCANIMAL", m_sEventsNPCAnimal);
+        m_pEventsNPCAnimalLink.r_LoadVal(script, RES_EVENTS);
+    }
+    // all monsters
+    m_pEventsNPCMonsterLink.clear();
+    if (!m_sEventsNPCMonster.IsEmpty())
+    {
+        CScript script("EVENTSNPCMONSTER", m_sEventsNPCMonster);
+        m_pEventsNPCMonsterLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all mountables
+    m_pEventsNPCMountableLink.clear();
+    if (!m_sEventsNPCMountable.IsEmpty())
+    {
+        CScript script("EVENTSNPCMOUNTABLE", m_sEventsNPCMountable);
+        m_pEventsNPCMountableLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all shopkeepers
+    m_pEventsNPCShopLink.clear();
+    if (!m_sEventsNPCShop.IsEmpty())
+    {
+        CScript script("EVENTSNPCSHOP", m_sEventsNPCShop);
+        m_pEventsNPCShopLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    /////////////////////
+    // parse eventsClient
+    /////////////////////
+
+    // allClient (players or staffs)
+    m_pEventsClientLink.clear();
+    if (!m_sEventsClient.IsEmpty())
+    {
+        CScript script("EVENTSCLIENT", m_sEventsClient);
+        m_pEventsClientLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all players
+    m_pEventsClientPlayerLink.clear();
+    if (!m_sEventsClientPlayer.IsEmpty())
+    {
+        CScript script("EVENTSCLIENTPLAYER", m_sEventsClientPlayer);
+        m_pEventsClientPlayerLink.r_LoadVal(script, RES_EVENTS);
+    }
+
+    // all staffs
+    m_pEventsClientStaffLink.clear();
+    if (!m_sEventsClientStaff.IsEmpty())
+    {
+        CScript script("EVENTSCLIENTSTAFF", m_sEventsClientStaff);
+        m_pEventsClientStaffLink.r_LoadVal(script, RES_EVENTS);
+    }
 
 	// parse eventsregion
 	m_pEventsRegionLink.clear();
