@@ -173,7 +173,7 @@ enum IT_TYPE : int32_t		// double click type action.
 	IT_TRAIN_DUMMY,			// 156
 	IT_TRAIN_PICKPOCKET,	// 157
 	IT_BEDROLL,				// 158
-	IT_UNUSED_159,			// 159
+	IT_FLETCHING,			// 159
 	IT_HIDE,				// 160 = hides are cured to make leather.
 	IT_CLOTH_BOLT,			// 161 = must be cut up to make cloth squares.
 	IT_BOARD,				// 162 = logs are plained into decent lumber
@@ -214,7 +214,7 @@ enum IT_TYPE : int32_t		// double click type action.
 	IT_PILOT,				// 197 = ship's pilot (PacketWheelMove)
 	IT_ROPE,				// 198 = t_rope (working like t_ship_plank but without id changes)
     IT_WEAPON_WHIP,			// 199
-    
+
     // New SphereX hardcoded types starting from 300
     IT_SPAWN_CHAMPION = 300,// 300 = t_spawn_champion
     IT_MULTI_ADDON,         // 301 = t_multi_addon

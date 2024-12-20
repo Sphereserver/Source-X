@@ -280,11 +280,14 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			return;
 		}
 
-		if (!pItem->IsTypeSpellable() && !pItem->m_itSpell.m_spell && !pItem->IsType(IT_WAND))	// can this item have a spell effect ? If so we do not send
-		{
+		//if (!pItem->IsTypeSpellable() && !pItem->m_itSpell.m_spell && !pItem->IsType(IT_WAND))	// can this item have a spell effect ? If so we do not send
+        // Since most of the memories came with a morex information by default, almost no memory was triggered.
+        if (!(pItem->IsTypeSpellable() || pItem->IsType(IT_WAND)))
+        {
 			if ((IsTrigUsed(TRIGGER_MEMORYEQUIP)) || (IsTrigUsed(TRIGGER_ITEMMEMORYEQUIP)))
 			{
-				CScriptTriggerArgs pArgs;
+				//CScriptTriggerArgs pArgs;
+                CScriptTriggerArgs pArgs(pItem); // added "argo" argument
 				pArgs.m_iN1 = layer;
 				if (pItem->OnTrigger(ITRIG_MemoryEquip, this, &pArgs) == TRIGRET_RET_TRUE)
 				{
@@ -5721,11 +5724,11 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
         // Chars
         if (m_pPlayer != nullptr)
         {
-            // 10) EVENTSCHAR triggers for chars (players or staffs)
-            EXC_SET_BLOCK("chardef triggers - EVENTSCHAR");
-            for (size_t i = 0; i < g_Cfg.m_pEventsCharLink.size(); ++i)
+            // 10) EVENTSCLIENT triggers for chars (players or staffs)
+            EXC_SET_BLOCK("chardef triggers - EVENTSCLIENT");
+            for (size_t i = 0; i < g_Cfg.m_pEventsClientLink.size(); ++i)
             {
-                CResourceLink *pLink = g_Cfg.m_pEventsCharLink[i].GetRef();
+                CResourceLink *pLink = g_Cfg.m_pEventsClientLink[i].GetRef();
                 if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
                     continue;
 
@@ -5739,14 +5742,14 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
                     goto stopandret;
             }
 
-            // 11) EVENTSCHARPLAYER triggers for playerss
+            // 11) EVENTSCLIENTPLAYER triggers for playerss
             if (GetPrivLevel() <= PLEVEL_Player)
             {
-                //	EVENTSCHARPLAYER triggers (constant events of players set from sphere.ini)
-                EXC_SET_BLOCK("chardef triggers - EVENTSCHARPLAYER");
-                for (size_t i = 0; i < g_Cfg.m_pEventsCharPlayerLink.size(); ++i)
+                //	EVENTSCLIENTPLAYER triggers (constant events of players set from sphere.ini)
+                EXC_SET_BLOCK("chardef triggers - EVENTSCLIENTPLAYER");
+                for (size_t i = 0; i < g_Cfg.m_pEventsClientPlayerLink.size(); ++i)
                 {
-                    CResourceLink *pLink = g_Cfg.m_pEventsCharPlayerLink[i].GetRef();
+                    CResourceLink *pLink = g_Cfg.m_pEventsClientPlayerLink[i].GetRef();
                     if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
                         continue;
 
@@ -5761,14 +5764,14 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
                 }
             }
 
-            // 12) EVENTSCHARSTAFF triggers for staffs
+            // 12) EVENTSCLIENTSTAFF triggers for staffs
             if (GetPrivLevel() >= PLEVEL_Counsel)
             {
-                //	EVENTSCHARSTAFF triggers (constant events of players set from sphere.ini)
-                EXC_SET_BLOCK("chardef triggers - EVENTSCHARSTAFF");
-                for (size_t i = 0; i < g_Cfg.m_pEventsCharStaffLink.size(); ++i)
+                //	EVENTSCLIENTSTAFF triggers (constant events of players set from sphere.ini)
+                EXC_SET_BLOCK("chardef triggers - EVENTSCLIENTSTAFF");
+                for (size_t i = 0; i < g_Cfg.m_pEventsClientStaffLink.size(); ++i)
                 {
-                    CResourceLink *pLink = g_Cfg.m_pEventsCharStaffLink[i].GetRef();
+                    CResourceLink *pLink = g_Cfg.m_pEventsClientStaffLink[i].GetRef();
                     if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
                         continue;
 

@@ -1078,10 +1078,21 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		return true;
 	}
 
-	if ( pItemTarg != nullptr && pItemTarg->IsTopLevel() && pItemTarg->IsType( IT_FORGE ))
-		m_Act_p = pItemTarg->GetTopPoint();
-	else
-		m_Act_p = CWorldMap::FindItemTypeNearby( GetTopPoint(), IT_FORGE, 3, false );
+    if (pItemTarg != nullptr && pItemTarg->IsTopLevel() && pItemTarg->IsType(IT_FORGE))
+    {
+        m_Act_p = pItemTarg->GetTopPoint();
+    }
+    else
+    {
+        CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_BLACKSMITHING);
+        int iMaxRange        = pSkillDef->m_Range;
+        if (!iMaxRange)
+        {
+            g_Log.EventError("Blacksmith skill doesn't have a value for RANGE, defaulting to 3\n");
+            iMaxRange = 3;
+        }
+        m_Act_p = CWorldMap::FindItemTypeNearby(GetTopPoint(), IT_FORGE, iMaxRange, false);
+    }
 
 	if ( !m_Act_p.IsValidPoint() || !CanTouch(m_Act_p))
 	{
@@ -1405,7 +1416,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	const CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_MINING);
 	const int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
-	if ( !iMaxRange )
+	if (!iMaxRange)
 	{
 		g_Log.EventError("Mining skill doesn't have a value for RANGE, defaulting to 2\n");
 		iMaxRange = 2;
@@ -1501,7 +1512,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_FISHING);
 	int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
-	if ( !iMaxRange )
+	if (!iMaxRange)
 	{
 		g_Log.EventError("Fishing skill doesn't have a value for RANGE, defaulting to 4\n");
 		iMaxRange = 4;
@@ -1603,7 +1614,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_LUMBERJACKING);
 	int iTargRange = GetTopPoint().GetDist(m_Act_p);
 	int iMaxRange = pSkillDef->m_Range;
-	if ( !pSkillDef->m_Range )
+    if (!iMaxRange)
 	{
 		g_Log.EventError("Lumberjacking skill doesn't have a value for RANGE, defaulting to 2\n");
 		iMaxRange = 2;
@@ -1825,7 +1836,15 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 		{
 			int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
 			int iRadius = ( peace / 100 ) + 2;	// 2..12
-			auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iRadius);
+
+            CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_PEACEMAKING);
+            int iMaxRadius = pSkillDef->m_Range;
+            if (!iMaxRadius)
+            {
+                //g_Log.EventError("Peacemaking skill doesn't have a value for RANGE, defaulting to (Peacemaking skill level / 100 + 2) \n");
+                iMaxRadius = iRadius;
+            }
+			auto Area = CWorldSearchHolder::GetInstance(GetTopPoint(), iMaxRadius);
 			for (;;)
 			{
 				CChar *pChar = Area->GetChar();
@@ -1951,9 +1970,15 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 				SysMessagef("%s %s.", pChar->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_ENTICEMENT_BATTLE));
 				return -SKTRIG_ABORT;
 			}
-
+            CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_ENTICEMENT);
+            int iMaxRange = pSkillDef->m_Range;
+            if (!iMaxRange)
+            {
+                //g_Log.EventError("Enticement skill doesn't have a value for RANGE, defaulting 3\n");
+                iMaxRange = 3;
+            }
 			pChar->m_Act_p = GetTopPoint();
-			pChar->NPC_WalkToPoint( ( pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > 3) );
+            pChar->NPC_WalkToPoint((pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > iMaxRange));
 			return 0;
 		}
 
@@ -1968,6 +1993,9 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 	ADDTOCALLSTACK("CChar::Skill_Provocation");
 	// m_Act_Prv_UID = provoke this person
 	// m_Act_UID = against this person.
+
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_PROVOCATION);
+    int iMaxRange = pSkillDef->m_Range;
 
 	if ( stage == SKTRIG_ABORT )
 		return -SKTRIG_ABORT;
@@ -2070,8 +2098,14 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 
 			pCharProv->Memory_AddObjTypes(this, MEMORY_AGGREIVED|MEMORY_IRRITATEDBY);
 
+            if (!iMaxRange)
+            {
+                //g_Log.EventError("Provocation skill doesn't have a value for RANGE, defaulting to UO_MAP_VIEW_SIGHT(14) \n");
+                iMaxRange = UO_MAP_VIEW_SIGHT;
+            }
+
 			// If out of range we might get attacked ourself.
-			if ( (pCharProv->GetTopDist3D(pCharTarg) > UO_MAP_VIEW_SIGHT) || (pCharProv->GetTopDist3D(this) > UO_MAP_VIEW_SIGHT) )
+            if ((pCharProv->GetTopDist3D(pCharTarg) > iMaxRange) || (pCharProv->GetTopDist3D(this) > iMaxRange))
 			{
 				// Check that only "evil" monsters attack provoker back
 				if ( pCharProv->Noto_IsEvil() )
@@ -2183,7 +2217,13 @@ int CChar::Skill_Cooking( SKTRIG_TYPE stage )
 	// m_Act_p = the heat source
 	// m_Act_UID = the skill tool
 
-	int iMaxDist = 3;
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_COOKING);
+    int iMaxDist         = pSkillDef->m_Range;
+    if (!iMaxDist)
+    {
+        g_Log.EventError("Cooking skill doesn't have a value for RANGE, defaulting to 3\n");
+        iMaxDist = 3;
+    }
 
 	if ( stage == SKTRIG_START )
 	{
@@ -2239,10 +2279,13 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	}
 
 	CSkillDef* pSkillDef = g_Cfg.GetSkillDef(SKILL_TAMING);
-	if (pSkillDef->m_Range <= 0)
-		pSkillDef->m_Range = 10;
-
-	if ( GetTopDist3D(pChar) > pSkillDef->m_Range)
+    int iMaxRange = pSkillDef->m_Range;
+    if (!iMaxRange)
+    {
+        g_Log.EventError("Taming skill doesn't have a value for RANGE, defaulting to 10\n");
+        iMaxRange = 10;
+    }
+	if (GetTopDist3D(pChar) > iMaxRange)
 	{
 		SysMessageDefault( DEFMSG_TAMING_REACH );
 		return -SKTRIG_QTY;
@@ -3237,8 +3280,16 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 
 	const CPointMap& pntMe = GetTopPoint();
-	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
-		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
+
+    int iMaxDist = (int)(GetDefNum("BREATH.MAXDIST", true));
+    if (!iMaxDist)
+    {
+        //g_Log.EventError("Breath skill doesn't have a value for RANGE, defaulting to UO_MAP_VIEW_SIGHT(14) \n");
+        iMaxDist = UO_MAP_VIEW_SIGHT;
+    }
+
+	if (pntMe.GetDist(m_Act_p) > iMaxDist)
+        m_Act_p.StepLinePath(pntMe, iMaxDist);
 
 	int iDamage = (int)(GetDefNum("BREATH.DAM", true));
 
@@ -3319,8 +3370,17 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 
 	const CPointMap pntMe(GetTopPoint());
-	if ( pntMe.GetDist( m_Act_p ) > UO_MAP_VIEW_SIGHT )
-		m_Act_p.StepLinePath( pntMe, UO_MAP_VIEW_SIGHT );
+
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_THROWING);
+    int iMaxRange        = pSkillDef->m_Range;
+    if (!iMaxRange)
+    {
+        //g_Log.EventError("Throwing skill doesn't have a value for RANGE, defaulting to UO_MAP_VIEW_SIGHT(14) \n");
+        iMaxRange = UO_MAP_VIEW_SIGHT;
+    }
+
+	if (pntMe.GetDist(m_Act_p) > iMaxRange)
+        m_Act_p.StepLinePath(pntMe, iMaxRange);
 
 	SoundChar( CRESND_GETHIT );
 
@@ -4055,7 +4115,15 @@ int CChar::Skill_Snooping(SKTRIG_TYPE stage)
 	if (!IsTakeCrime(pCont, &pCharMark) || pCharMark == nullptr)
 		return 0;	// Not a crime really.
 
-	if (GetTopDist3D(pCharMark) > 1)
+    CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_SNOOPING);
+    int iMaxRange = pSkillDef->m_Range;
+    if (!iMaxRange)
+    {
+        g_Log.EventError("Snooping skill doesn't have a value for RANGE, defaulting to 1\n");
+        iMaxRange = 1;
+    }
+
+	if (GetTopDist3D(pCharMark) > iMaxRange)
 	{
 		SysMessageDefault(DEFMSG_SNOOPING_REACH);
 		return (-SKTRIG_QTY);
@@ -4207,7 +4275,14 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 	bool fGround = false;
 	if (pCharMark != nullptr)
 	{
-		if (GetTopDist3D(pCharMark) > 2)
+        CSkillDef *pSkillDef = g_Cfg.GetSkillDef(SKILL_STEALING);
+        int iMaxRange        = pSkillDef->m_Range;
+        if (!iMaxRange)
+        {
+            g_Log.EventError("Stealing skill doesn't have a value for RANGE, defaulting to 2\n");
+            iMaxRange = 2;
+        }
+		if (GetTopDist3D(pCharMark) > iMaxRange)
 		{
 			SysMessageDefault(DEFMSG_STEALING_MARK);
 			return -SKTRIG_QTY;

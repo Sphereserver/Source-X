@@ -77,6 +77,7 @@ CServerConfig::CServerConfig()
 	m_iWordsOfPowerFont		= FONT_NORMAL;
 	m_fWordsOfPowerPlayer	= true;
 	m_fWordsOfPowerStaff	= false;
+    m_iWordsOfPowerTalkMode = TALKMODE_SPELL;
 	m_fEquippedCast			= true;
 	m_iMagicUnlockDoor		= 900;
 	m_iSpellTimeout			= 0;
@@ -547,9 +548,9 @@ enum RC_TYPE
     RC_ERALIMITGEAR,			// _iEraLimitGear
     RC_ERALIMITLOOT,			// _iEraLimitLoot
     RC_ERALIMITPROPS,			// _iEraLimitProps
-    RC_EVENTSCHAR,        // m_sEventsChar
-    RC_EVENTSCHARPLAYER,  // m_sEventsCharPlayer
-    RC_EVENTSCHARSTAFF,   // m_sEventsCharStaff
+    RC_EVENTSCLIENT,        // m_sEventsClient
+    RC_EVENTSCLIENTPLAYER,  // m_sEventsClientPlayer
+    RC_EVENTSCLIENTSTAFF,   // m_sEventsClientStaff
     RC_EVENTSITEM,        // m_sEventsItem
     RC_EVENTSITEMWEAPON,   // m_sEventsItemWeapon
     RC_EVENTSNPC,          // m_sEventsNpc
@@ -739,6 +740,7 @@ enum RC_TYPE
 	RC_WOPFONT,
 	RC_WOPPLAYER,
 	RC_WOPSTAFF,
+	RC_WOPTALKMODE,
 	RC_WORLDSAVE,
 	RC_ZEROPOINT,				// m_sZeroPoint
 	RC_QTY
@@ -847,9 +849,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "ERALIMITGEAR",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitGear)			}},
     { "ERALIMITLOOT",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitLoot)			}},
     { "ERALIMITPROPS",			{ ELEM_BYTE,	static_cast<uint>OFFSETOF(CServerConfig,_iEraLimitProps)			}},
-    { "EVENTSCHAR",             { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsChar) } },
-    { "EVENTSCHARPLAYER",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsCharPlayer) } },
-    { "EVENTSCHARSTAFF",        { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsCharStaff) } },
+    { "EVENTSCLIENT",             { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsClient) } },
+    { "EVENTSCLIENTPLAYER",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsClientPlayer) } },
+    { "EVENTSCLIENTSTAFF",        { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsClientStaff) } },
     { "EVENTSITEM",				{ ELEM_CSTRING, static_cast<uint>OFFSETOF(CServerConfig,m_sEventsItem)			}},
     { "EVENTSITEMWEAPON",       { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsItemWeapon) } },
     { "EVENTSNPC",              { ELEM_CSTRING, static_cast<uint> OFFSETOF(CServerConfig, m_sEventsNPC) } },
@@ -1039,6 +1041,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "WOPFONT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerFont)		}},
 	{ "WOPPLAYER",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer)	}},
 	{ "WOPSTAFF",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerStaff)	}},
+    { "WOPTALKMODE",            { ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerTalkMode) }},
 	{ "WORLDSAVE",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sWorldBaseDir)			}},
 	{ "ZEROPOINT",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sZeroPoint)			}},
 	{ nullptr,					{ ELEM_VOID,	0,												}}
@@ -4891,31 +4894,31 @@ bool CServerConfig::Load( bool fResync )
     }
 
     /////////////////////
-    // parse eventschar
+    // parse eventsClient
     /////////////////////
 
-    // allchars (players or staffs)
-    m_pEventsCharLink.clear();
-    if (!m_sEventsChar.IsEmpty())
+    // allClient (players or staffs)
+    m_pEventsClientLink.clear();
+    if (!m_sEventsClient.IsEmpty())
     {
-        CScript script("EVENTSCHAR", m_sEventsChar);
-        m_pEventsCharLink.r_LoadVal(script, RES_EVENTS);
+        CScript script("EVENTSCLIENT", m_sEventsClient);
+        m_pEventsClientLink.r_LoadVal(script, RES_EVENTS);
     }
 
     // all players
-    m_pEventsCharPlayerLink.clear();
-    if (!m_sEventsCharPlayer.IsEmpty())
+    m_pEventsClientPlayerLink.clear();
+    if (!m_sEventsClientPlayer.IsEmpty())
     {
-        CScript script("EVENTSCHARPLAYER", m_sEventsCharPlayer);
-        m_pEventsCharPlayerLink.r_LoadVal(script, RES_EVENTS);
+        CScript script("EVENTSCLIENTPLAYER", m_sEventsClientPlayer);
+        m_pEventsClientPlayerLink.r_LoadVal(script, RES_EVENTS);
     }
 
     // all staffs
-    m_pEventsCharStaffLink.clear();
-    if (!m_sEventsCharStaff.IsEmpty())
+    m_pEventsClientStaffLink.clear();
+    if (!m_sEventsClientStaff.IsEmpty())
     {
-        CScript script("EVENTSCHARSTAFF", m_sEventsCharStaff);
-        m_pEventsCharStaffLink.r_LoadVal(script, RES_EVENTS);
+        CScript script("EVENTSCLIENTSTAFF", m_sEventsClientStaff);
+        m_pEventsClientStaffLink.r_LoadVal(script, RES_EVENTS);
     }
 
 	// parse eventsregion

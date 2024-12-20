@@ -1174,7 +1174,7 @@ int16 CItemMulti::GetMultiCount() const
     return _iMultiCount;
 }
 
-void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
+void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidRedeedingChar)
 {
     ADDTOCALLSTACK("CItemMulti::Redeed");
     if (GetKeyNum("REMOVED") > 0) // Just don't pass from here again, to avoid duplicated deeds.
@@ -1209,7 +1209,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     args.m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
     if (IsTrigUsed(TRIGGER_REDEED))
     {
-        tRet = OnTrigger(ITRIG_Redeed, uidChar.CharFind(), &args);
+        tRet = OnTrigger(ITRIG_Redeed, uidRedeedingChar.CharFind(), &args);
         if (args.m_iN2 == 0)
         {
             fMoveToBank = false;
@@ -1230,7 +1230,8 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     }
 
     CChar* pOwner = GetOwner().CharFind();
-    if (!pOwner || !pOwner->m_pPlayer)
+    CChar* pChar = uidRedeedingChar.CharFind();
+    if ((!pChar || !pChar->m_pPlayer) && (!pOwner || !pOwner->m_pPlayer))
     {
         return;
     }
@@ -1256,11 +1257,26 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
 	}
 	if (fMoveToBank)
 	{
-		pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        if (pOwner)
+        {
+            pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        }
+        else
+        {
+            pChar->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        }
+
 	}
 	else
 	{
-		pOwner->ItemBounce(pDeed, fDisplayMsg);
+        if (pOwner)
+        {
+            pOwner->ItemBounce(pDeed, fDisplayMsg);
+        }
+        else
+        {
+            pChar->ItemBounce(pDeed, fDisplayMsg);
+        }
 	}
     }
     SetKeyNum("REMOVED", 1);
