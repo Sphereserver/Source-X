@@ -3986,7 +3986,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	TALKMODE_GUILD      = 13 // Used by guild chat (client shortcut: \)
 	TALKMODE_ALLIANCE   = 14 // Used by alliance chat (client shortcut: shift+\)
 
-13-10-2024, canerksk
+20-12-2024, canerksk
 [Sphere.ini] 
 - Removed: (Action require by admin and must update this)
 	EventsPet=e_npc_generic_event
@@ -4024,3 +4024,4 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	
 	// Events related to all weapons
 	EventsItemWeapon=ei_item_weapons
+
