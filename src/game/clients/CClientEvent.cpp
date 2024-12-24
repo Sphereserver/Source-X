@@ -2975,14 +2975,19 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
         g_Log.EventWarn("%0x:Event_ExtCmd received too long argument\n", GetSocketID());
         return;
     }
-
+    byte bDoorAutoDist = 2;
 	if ( IsTrigUsed(TRIGGER_USEREXTCMD) )
 	{
 		CScriptTriggerArgs Args(pszName);
 		Args.m_iN1 = type;
+        if (type == EXTCMD_DOOR_AUTO)
+            Args.m_VarsLocal.SetNumNew("DoorAutoDist", bDoorAutoDist);
+
 		if ( m_pChar->OnTrigger(CTRIG_UserExtCmd, m_pChar, &Args) == TRIGRET_RET_TRUE )
 			return;
 		Str_CopyLimitNull(pszName, Args.m_s1, MAX_TALK_BUFFER);
+        if (type == EXTCMD_DOOR_AUTO)
+            bDoorAutoDist = (byte)(Args.m_VarsLocal.GetKeyNum("DoorAutoDist"));
 	}
 
 	tchar *ppArgs[2];
@@ -3075,8 +3080,13 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			CPointMap pt = m_pChar->GetTopPoint();
 			char iCharZ = pt.m_z;
 
+            if (bDoorAutoDist > UO_MAP_VIEW_SIGHT)
+                bDoorAutoDist = UO_MAP_VIEW_SIGHT;
+            else if (bDoorAutoDist <= 0)
+                bDoorAutoDist = 1;
+
 			pt.Move(m_pChar->m_dirFace);
-			auto Area = CWorldSearchHolder::GetInstance(pt, 1);
+            auto Area = CWorldSearchHolder::GetInstance(pt, bDoorAutoDist);
 			for (;;)
 			{
 				CItem *pItem = Area->GetItem();

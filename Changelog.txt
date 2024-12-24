@@ -3985,3 +3985,14 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	TALKMODE_SPELL      = 10 // Used by spells
 	TALKMODE_GUILD      = 13 // Used by guild chat (client shortcut: \)
 	TALKMODE_ALLIANCE   = 14 // Used by alliance chat (client shortcut: shift+\)
+
+24-12-2024,canerksk
+- Added: Add OpenDoorMacro and World Search Distance as Local Variables to @UserExtCmd Trigger
+	LOCAL.DoorAutoDist <distance> (R/W)
+	Default Distance = 2
+	eg;
+	@UserExtCmd
+	Serv.Log <DLOCAL.DoorAutoDist>
+	Local.DoorAutoDist=10
+	Serv.Log <DLOCAL.DoorAutoDist>
+
