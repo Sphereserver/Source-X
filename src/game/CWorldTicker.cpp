@@ -226,8 +226,8 @@ void CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
         iTickOld = pChar->_iTimePeriodicTick;
     }
 
-    if (iTickNext == iTickOld)
-    {
+    //if (iTickNext == iTickOld)
+    //{
 /*
 #ifdef _DEBUG
         auto it = std::find_if(_mCharTickList.begin(), _mCharTickList.end(),
@@ -237,8 +237,8 @@ void CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
         DEBUG_ASSERT(it == _mCharTickList.end());
 #endif
 */
-        return;
-    }
+    //    return;
+    //}
 
     //if (iTickNext < CWorldGameTime::GetCurrentTime().GetTimeRaw())    // We do that to get them tick as sooner as possible
     //    return;
