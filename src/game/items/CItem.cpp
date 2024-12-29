@@ -3342,7 +3342,17 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			SetUnkZ( s.GetArgCVal() ); // GetEquipLayer()
             break;
 		case IC_LINK:
-			m_uidLink.SetObjUID(s.GetArgDWVal());
+			{
+                CUID uidLink = (CUID)s.GetArgDWVal();
+                if ((dword)uidLink == 0)
+                {
+                    m_uidLink.InitUID();
+                }
+                else
+                {
+                    m_uidLink.SetObjUID(uidLink);
+                }
+            }
             break;
 
 		case IC_FRUIT:	// m_more2
