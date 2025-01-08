@@ -1285,7 +1285,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	//If the NPC action is following somebody, directly assign the character from  the m_Act_UID value. 
 	if (Skill_GetActive() == NPCACT_FOLLOW_TARG)
 		pChar = m_Act_UID.CharFind();
-	else if (Fight_IsActive())
+    else if (Fight_IsActive() || Skill_GetActive() == NPCACT_FLEE)
 		pChar = m_Fight_Targ_UID.IsValidUID() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
     else
         pChar = m_Act_UID.CharFind();
