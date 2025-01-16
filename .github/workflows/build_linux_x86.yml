@@ -6,11 +6,16 @@ on:
       - 'master'
       - 'main'
       - 'dev'
+    paths-ignore:
+      - '*.txt'
   pull_request:
     branches:
       - 'master'
       - 'main'
       - 'dev'
+    paths-ignore:
+      - '*.txt'
+      - '*.md'
 
 jobs:
   linux-x86:
