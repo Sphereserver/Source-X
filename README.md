@@ -228,7 +228,7 @@ if (fTrue)
 
 ## Licensing
 
-Copyright 2024 SphereServer development team.  
+Copyright 2025 SphereServer development team.  
 
 Licensed under the Apache License, Version 2.0 (the "License").  
 You may not use any file of this project except in compliance with the License.  
