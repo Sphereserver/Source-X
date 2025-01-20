@@ -303,6 +303,7 @@ public:
 	int  m_iWordsOfPowerFont;   // Font used for Words Of Power.
 	bool m_fWordsOfPowerPlayer; // Words of Power for players.
 	bool m_fWordsOfPowerStaff;  // Words of Power for staff.
+    TALKMODE_TYPE m_iWordsOfPowerTalkMode; // Walk mode used for Words Of Power.
 	bool m_fEquippedCast;       // Allow casting while equipped.
     bool m_fManaLossAbort;      // Lose mana when spell casting aborted.
     bool m_fManaLossFail;       // Lose mana when spell casting failed.
