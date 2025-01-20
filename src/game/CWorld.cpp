@@ -502,6 +502,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 			CItem * pItem = dynamic_cast <CItem*>(pObj);
 			if ( pItem != nullptr && pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			{
+                ReportGarbageCollection(pObj, iResultCode);
 				pObj->Delete();
 				return iResultCode;
 			}
