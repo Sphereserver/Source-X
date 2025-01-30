@@ -765,7 +765,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	// Move to nearby this other object.
 	// Actually move it within +/- iSteps
 
-    // TODO: WUT??
+    // TODO: check this again...
 	CPointMap ptOld(pt);
 	for ( uint i = 0; i < iSteps; ++i )
 	{
