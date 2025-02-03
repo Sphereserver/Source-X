@@ -1082,7 +1082,7 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_ENTER);
 }
 
-bool CAccount::SetResDisp(byte what)
+bool CAccount::SetResDisp(RESDISPLAY_VERSION what)
 {
 	if (what >= RDS_T2A && what < RDS_QTY)
 	{
@@ -1092,7 +1092,7 @@ bool CAccount::SetResDisp(byte what)
 	return false;
 }
 
-bool CAccount::SetGreaterResDisp(byte what)
+bool CAccount::SetGreaterResDisp(RESDISPLAY_VERSION what)
 {
 	if (what > m_ResDisp)
 		return SetResDisp(what);
@@ -1485,7 +1485,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			}
 			break;
 		case AC_RESDISP:
-			SetResDisp(s.GetArgBVal());
+            SetResDisp(enum_alias_cast<RESDISPLAY_VERSION>(s.GetArgCVal()));
 			break;
 
 		case AC_TAG0:

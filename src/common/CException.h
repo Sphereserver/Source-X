@@ -138,9 +138,9 @@ public:
 /*--- Main (non SUB) macros ---*/
 
 // EXC_TRY
-#define EXC_TRY(a) \
+#define EXC_TRY(ptcMethodName) \
 	lpctstr inLocalBlock = ""; \
-	lpctstr inLocalArgs = a; \
+    lpctstr inLocalArgs = ptcMethodName; \
 	uint inLocalBlockCnt = 0;  /* NOLINT(misc-const-correctness) */ \
 	bool fCATCHExcept = false; \
 	UnreferencedParameter(fCATCHExcept); \
@@ -148,8 +148,8 @@ public:
 	{
 
 // EXC_SET_BLOCK
-#define EXC_SET_BLOCK(a)	\
-	inLocalBlock = a; \
+#define EXC_SET_BLOCK(ptcBlockName)	\
+    inLocalBlock = ptcBlockName; \
 	++inLocalBlockCnt
 
 // _EXC_CATCH_EXCEPTION_GENERIC (used inside other macros! don't use it manually!)
@@ -217,9 +217,9 @@ public:
 /*--- SUB macros ---*/
 
 // EXC_TRYSUB
-#define EXC_TRYSUB(a) \
+#define EXC_TRYSUB(ptcMethodName) \
 	lpctstr inLocalSubBlock = ""; \
-	lpctstr inLocalSubArgs = a; \
+    lpctstr inLocalSubArgs = ptcMethodName; \
 	uint inLocalSubBlockCnt = 0; \
 	bool fCATCHExceptSub = false; \
 	UnreferencedParameter(fCATCHExceptSub); \
@@ -227,8 +227,8 @@ public:
 	{
 
 // EXC_SETSUB_BLOCK
-#define EXC_SETSUB_BLOCK(a) \
-	inLocalSubBlock = a; \
+#define EXC_SETSUB_BLOCK(ptcBlockName) \
+    inLocalSubBlock = ptcBlockName; \
 	++inLocalSubBlockCnt
 
 // _EXC_CATCH_SUB_EXCEPTION_GENERIC(a,b, "ExceptionType") (used inside other macros! don't use it manually!)
@@ -252,28 +252,28 @@ public:
     _EXC_CAUGHT
 
 // EXC_CATCHSUB(a)
-#define EXC_CATCHSUB(a)	\
+#define EXC_CATCHSUB(ptcCatchContext)	\
 	} \
     catch ( const CAssert& e ) \
 	{ \
-		_EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CAssert"); \
+        _EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, ptcCatchContext, "CAssert"); \
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 	} \
 	catch ( const CSError& e )	\
 	{ \
-		_EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, a, "CSError"); \
+        _EXC_CATCH_SUB_EXCEPTION_GENERIC(&e, ptcCatchContext, "CSError"); \
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	} \
     catch ( const std::exception& e ) \
 	{ \
-		_EXC_CATCH_SUB_EXCEPTION_STD(&e, a); \
+        _EXC_CATCH_SUB_EXCEPTION_STD(&e, ptcCatchContext); \
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	} \
 	catch (...) \
 	{ \
-		_EXC_CATCH_SUB_EXCEPTION_GENERIC(nullptr, a, "pure"); \
+        _EXC_CATCH_SUB_EXCEPTION_GENERIC(nullptr, ptcCatchContext, "pure"); \
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	}

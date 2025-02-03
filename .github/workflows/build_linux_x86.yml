@@ -2,15 +2,24 @@ name: Linux x86
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'main'
-      - 'dev'
+#    branches:
+#      - 'master'
+#      - 'main'
+#      - 'dev'
+      paths-ignore:
+        - '.gitignore'
+        - '.gitattributes'
+        - '**.txt'
+        - '**.md'
+        - '**.rc'
   pull_request:
     branches:
       - 'master'
       - 'main'
       - 'dev'
+    paths-ignore:
+      - '*.txt'
+      - '*.md'
 
 jobs:
   linux-x86:

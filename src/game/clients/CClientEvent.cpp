@@ -115,7 +115,7 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 		if ( !pObj->IsChar() )
 		{
 			CItem *pItem = dynamic_cast<CItem *>(pObj);
-			if (pItem == nullptr || (( pObj->GetBaseID() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
+			if (pItem == nullptr || (( pObj->GetIDCommon() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
 				return;
 
 			if ( wHue < HUE_BLUE_LOW )

@@ -34,7 +34,7 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 lpctstr CPointBase::sm_szDirs[] {"\0"};
 void CPointBase::InitRuntimeDefaultValues()
 {
-	AssignInitlistToCSizedArray(
+    sl::AssignInitlistToCSizedArray(
 		CPointBase::sm_szDirs, ARRAY_COUNT(CPointBase::sm_szDirs),
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_0),

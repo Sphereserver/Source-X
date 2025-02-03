@@ -1796,7 +1796,7 @@ bool CItemMultiCustom::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole 
 
         case IMCC_DESIGNER:
         {
-            ptcKey += 8;
+            //ptcKey += 8;
             CChar * pDesigner = m_pArchitect ? m_pArchitect->GetChar() : nullptr;
             if (pDesigner != nullptr)
                 sVal.FormatHex(pDesigner->GetUID());
@@ -1807,18 +1807,18 @@ bool CItemMultiCustom::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole 
 
         case IMCC_EDITAREA:
         {
-            ptcKey += 8;
+            //ptcKey += 8;
             CRect rectDesign = GetDesignArea();
             sVal.Format("%d,%d,%d,%d", rectDesign.m_left, rectDesign.m_top, rectDesign.m_right, rectDesign.m_bottom);
         } break;
 
         case IMCC_FIXTURES:
-            ptcKey += 8;
+            //ptcKey += 8;
             sVal.FormatSTVal(GetFixtureCount());
             break;
 
         case IMCC_REVISION:
-            ptcKey += 8;
+            //ptcKey += 8;
             sVal.FormatVal(m_designMain.m_iRevision);
             break;
 

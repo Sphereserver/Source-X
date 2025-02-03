@@ -36,7 +36,7 @@ void CClient::resendBuffs() const
 	if ( PacketBuff::CanSendTo(GetNetState()) == false )
 		return;
 
-	CChar *pChar = GetChar();
+    const CChar *pChar = GetChar();
 	ASSERT(pChar);
 
 	// NOTE: If the player logout and login again without close the client, buffs with remaining

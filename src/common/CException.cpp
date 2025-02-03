@@ -229,6 +229,7 @@ bool CWinStructuredException::GetErrorMessage(lptstr lpszError, uint uiMaxError)
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
+[[noreturn]]
 void Assert_Fail( lpctstr pExp, lpctstr pFile, long long llLine )
 {
 	EXC_NOTIFY_DEBUGGER;

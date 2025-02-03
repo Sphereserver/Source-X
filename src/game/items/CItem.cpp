@@ -2140,7 +2140,7 @@ ITEMID_TYPE CItem::GetID() const
 	return pItemDef->GetID();
 }
 
-dword CItem::GetBaseID() const
+dword CItem::GetIDCommon() const
 {
     return GetID();
 }
@@ -2516,7 +2516,7 @@ bool CItem::LoadSetContainer(const CUID& uidCont, LAYER_TYPE layer )
 		}
 	}
 
-	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetBaseID() ));
+    DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetIDCommon() ));
 	return false;		// not a container.
 }
 

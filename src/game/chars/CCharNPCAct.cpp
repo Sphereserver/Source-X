@@ -639,7 +639,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
 		iTickNext = 5 * MSECS_PER_SEC;
 
-	_SetTimeout(iTickNext);
+    _SetTimeout(iTickNext);
 	EXC_CATCH;
 	return 1;
 }

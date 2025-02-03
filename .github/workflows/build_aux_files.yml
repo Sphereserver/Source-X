@@ -6,6 +6,9 @@ on:
       - 'master'
       - 'main'
       - 'dev'
+    paths-ignore:
+      - '*.txt'
+      - '*.md'
 
 jobs:
   upload_github_release:

@@ -633,7 +633,7 @@ public:
 	CItemBase * Item_GetDef() const noexcept;
 
 	ITEMID_TYPE GetID() const;
-    virtual dword GetBaseID() const override final;
+    virtual dword GetIDCommon() const override final; // The unique index id (will NOT be the same as artwork if outside artwork range).
 	inline ITEMID_TYPE GetDispID() const noexcept {
 		// This is what the item looks like.
 		// May not be the same as the item that defines it's type.

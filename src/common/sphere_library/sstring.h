@@ -128,7 +128,7 @@ size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept;
 * @param pStr UTF8 string.
 * @return number of characters in the string, excluding the '\0' terminator.
 */
-size_t Str_LengthUTF8(const char* pStr) noexcept;
+size_t Str_UTF8CharCount(const char* pStr) noexcept;
 
 /**
 * @brief Appends pSrc to string pDst of maximum size uiMaxSize. Always '\0' terminates (unless uiMaxSize <= strlen(pDst)).
@@ -391,23 +391,27 @@ void CharToMultiByteNonNull(byte* Dest, const char* Src, int MBytes) noexcept;
 class UTF8MBSTR
 {
 public:
-    UTF8MBSTR() noexcept;
-    UTF8MBSTR(lpctstr lpStr) noexcept;
-    UTF8MBSTR(UTF8MBSTR& lpStr) noexcept;
+    UTF8MBSTR();
+    UTF8MBSTR(lpctstr lpStr);
+    UTF8MBSTR(UTF8MBSTR& lpStr);
     virtual ~UTF8MBSTR();
 
-    void operator =(lpctstr lpStr) noexcept;
+    void operator =(lpctstr lpStr);
     void operator =(UTF8MBSTR& lpStr) noexcept;
     operator char* () noexcept
     {
-        return m_strUTF8_MultiByte;
+        return m_strUTF8_MultiByte.data();
+    }
+    operator const char* () const noexcept
+    {
+        return m_strUTF8_MultiByte.data();
     }
 
-    static size_t ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB) noexcept;
-    static size_t ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) noexcept;
+    static size_t ConvertStringToUTF8(lpctstr strIn, std::vector<char>* strOutUTF8MB);
+    static size_t ConvertUTF8ToString(const char* strInUTF8MB, std::vector<tchar>* strOut);
 
 private:
-    char* m_strUTF8_MultiByte;
+    std::vector<char> m_strUTF8_MultiByte;
 };
 
 

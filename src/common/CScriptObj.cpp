@@ -1432,7 +1432,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						pChar->m_Act_UID = g_World.m_uidNew;
 					else
 					{
-						const CClient *pClient = dynamic_cast<CClient *>(this);
+                        CClient *pClient = dynamic_cast<CClient *>(this);
 						if ( pClient && pClient->GetChar() )
 							pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 					}
@@ -1465,7 +1465,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	                    pCharSrc->m_Act_UID = g_World.m_uidNew;
 	                else
 	                {
-	                    const CClient *pClient = dynamic_cast<CClient *>(this);
+                        CClient *pClient = dynamic_cast<CClient *>(this);
 	                    if (pClient && pClient->GetChar())
 	                        pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 	                }
