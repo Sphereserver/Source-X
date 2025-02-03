@@ -28,13 +28,10 @@ CTimedObject::~CTimedObject()
 void CTimedObject::_GoAwake()
 {
     ADDTOCALLSTACK("CTimedObject::_GoAwake");
-    /*
-    * if the timeout did expire then it got ignored on its tick and removed from the tick's map so we add it again,
-    * otherwise it's not needed since the timer is already there.
-    */
-    if ((_iTimeout > 0) && (_iTimeout < CWorldGameTime::GetCurrentTime().GetTimeRaw()))
+
+    if (_IsTimerSet())
     {
-        _SetTimeout(1);  // set to 1 msec to tick it ASAP.
+        CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true);
     }
     _fIsSleeping = false;
 }
