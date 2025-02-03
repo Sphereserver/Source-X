@@ -5796,7 +5796,8 @@ void CChar::_GoAwake()
 
 	CWorldTickingList::AddCharPeriodic(this, false);
 
-	_SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+    if (!_IsTimerSet())
+        _SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }
 
 void CChar::_GoSleep()
