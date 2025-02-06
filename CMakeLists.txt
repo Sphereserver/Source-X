@@ -111,7 +111,7 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
-set(ENABLED_SANITIZER CACHE INTERNAL BOOL FALSE)
+set(ENABLED_SANITIZER FALSE CACHE INTERNAL BOOL "Am i using a sanitizer?")
 if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
     set(ENABLED_SANITIZER TRUE)
 endif()
@@ -244,7 +244,7 @@ else(SINGLE_TARGET)
     #target_compile_features(spheresvr PUBLIC cxx_std_20)
     target_precompile_headers(spheresvr ${pch_options})
 
-    # To test
+    # To be tested
     #add_custom_command(TARGET spheresvr POST_BUILD
     #    $<$<CONFIG:Release>:COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr>>
     #    $<$<CONFIG:Nightly>:COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr>>
@@ -255,25 +255,7 @@ endif(SINGLE_TARGET)
 # --------------------
 
 message(STATUS)
-include("${CMAKE_SOURCE_DIR}/cmake/CompilerFlagsChecker.cmake")
-
-# --------------------
-
-if(USE_ASAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
-endif()
-if(USE_UBSAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
-endif()
-if(USE_LSAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
-endif()
-if(USE_MSAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
-endif()
-if(ENABLED_SANITIZER)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
-endif()
+include("${CMAKE_SOURCE_DIR}/cmake/CommonCompilerFlags.cmake")
 
 # --------------------
 
