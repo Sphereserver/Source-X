@@ -197,6 +197,11 @@ if(SINGLE_TARGET)
         #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
         target_precompile_headers(spheresvr_release ${pch_options})
+
+        add_custom_command(TARGET spheresvr_release POST_BUILD
+            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_release>
+            COMMENT "Stripping executable"
+        )
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
         set(TARGETS ${TARGETS} spheresvr_nightly)
@@ -210,6 +215,11 @@ if(SINGLE_TARGET)
         #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
         target_precompile_headers(spheresvr_nightly ${pch_options})
+
+        add_custom_command(TARGET spheresvr_nightly POST_BUILD
+            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_nightly>
+            COMMENT "Stripping executable"
+        )
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
         set(TARGETS ${TARGETS} spheresvr_debug)
@@ -233,6 +243,13 @@ else(SINGLE_TARGET)
     #set_target_properties(spheresvr PROPERTIES CXX_EXTENSIONS OFF)
     #target_compile_features(spheresvr PUBLIC cxx_std_20)
     target_precompile_headers(spheresvr ${pch_options})
+
+    # To test
+    #add_custom_command(TARGET spheresvr POST_BUILD
+    #    $<$<CONFIG:Release>:COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr>>
+    #    $<$<CONFIG:Nightly>:COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr>>
+    #    COMMENT "Stripping executable"
+    #)
 endif(SINGLE_TARGET)
 
 # --------------------
