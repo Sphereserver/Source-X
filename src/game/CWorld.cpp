@@ -185,6 +185,9 @@ static lpctstr GetReasonForGarbageCode(int iCode = -1) noexcept
         case 0x4226:
             pStr = "Old Spawn memory item conversion";
             break;
+        case 0x4227:
+            pStr = "Old Spawn memory item conversion (mislinked)";
+            break;
 
 		case 0xFFFF:
 			pStr = "Bad memory allocation";
