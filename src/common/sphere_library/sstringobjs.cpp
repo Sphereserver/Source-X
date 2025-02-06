@@ -3,28 +3,35 @@
 #include "sstringobjs.h"
 
 
-#define MAX_TEMP_LINES_NO_CONTEXT	512
-#define	STRING_DEFAULT_SIZE	40
-
+// temporary string storage
+#define NO_CONTEXT_TEMPSTRING_MAX_LINES	256
+//#define STRINGOBJ_DEFAULT_SIZE 48
 
 struct TemporaryStringUnsafeStateHolder
 {
 	// NOT thread safe
 	size_t m_tempPosition;
-	char m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LENGTH];
+    std::unique_ptr<char[]> m_tempStrings;
 
 	static TemporaryStringUnsafeStateHolder& get() {
 		static TemporaryStringUnsafeStateHolder instance;
 		return instance;
 	}
+
+private:
+    TemporaryStringUnsafeStateHolder()
+    {
+        m_tempStrings = std::make_unique<char[]>(NO_CONTEXT_TEMPSTRING_MAX_LINES * THREAD_STRING_LENGTH);
+    }
 };
 
-
+[[nodiscard]]
 static tchar* getUnsafeStringBuffer() noexcept
 {
 	auto& unsafe_state_holder = TemporaryStringUnsafeStateHolder::get();
-	tchar* unsafe_buffer = unsafe_state_holder.m_tempStrings[unsafe_state_holder.m_tempPosition++];
-	if (unsafe_state_holder.m_tempPosition >= MAX_TEMP_LINES_NO_CONTEXT)
+    tchar* unsafe_buffer = &(unsafe_state_holder.m_tempStrings[unsafe_state_holder.m_tempPosition * THREAD_STRING_LENGTH]);
+    unsafe_state_holder.m_tempPosition += 1;
+    if (unsafe_state_holder.m_tempPosition >= NO_CONTEXT_TEMPSTRING_MAX_LINES)
 	{
 		unsafe_state_holder.m_tempPosition = 0;
 	}
@@ -32,6 +39,7 @@ static tchar* getUnsafeStringBuffer() noexcept
 }
 
 
+[[nodiscard]]
 tchar* Str_GetTemp() noexcept
 {
 	AbstractThread *pThreadState = ThreadHolder::get().current();
@@ -184,17 +192,17 @@ size_t AbstractString::lastIndexOf(char c) const noexcept
 /*
 HeapString::HeapString()
 {
-	resize(STRING_DEFAULT_SIZE);
+    resize(STRINGOBJ_DEFAULT_SIZE);
 }
 
 HeapString::~HeapString()
 {
-	destroyHeap();
+    destroyHeap();
 }
 
 void HeapString::resize(size_t newLength)
 {
-	ensureLengthHeap(newLength);
+    ensureLengthHeap(newLength);
 }
 */
 
