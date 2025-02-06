@@ -4912,7 +4912,7 @@ TRIGRET_TYPE CChar::CheckLocationEffects(bool fStanding)
         {
             if (_uiRecursingItemStep >= _kuiRecursingItemStepLimit)
             {
-                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
+                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingItemStepLimit);
             }
             else
             {
