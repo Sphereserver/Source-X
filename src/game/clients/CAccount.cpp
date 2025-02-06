@@ -1062,7 +1062,7 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 	ADDTOCALLSTACK("CAccount::SetNewPassword");
 	if ( !pszPassword || !pszPassword[0] )		// no password given, auto-generate password
 	{
-		static tchar const passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
+        static constexpr tchar passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
 		int len = (int)strlen(passwdChars);
 		int charsCnt = g_Rand.GetVal(4) + 6;	// 6 - 10 chars
 		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_ENTER - 1) )
