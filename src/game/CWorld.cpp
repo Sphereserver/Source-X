@@ -411,9 +411,12 @@ void CWorldThread::AddIdleObj(CSObjContRec* obj)
 
 void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
 {
-    const auto servMode = g_Serv.GetServerMode();
-    const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
     // If the world is being destroyed, do not schedule the object for deletion but delete it right away.
+    const auto servMode = g_Serv.GetServerMode();
+    // I can't destroy it while SERVMODE_Loading, because the script parser can't know (without creating a global state holder, TODO) that this
+    //  object was deleted/destroyed. The object pointer will become invalid, and if something uses it, even for calling a method, Sphere will crash.
+    //const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
+    const bool fDestroy = (servMode == SERVMODE_Exiting);
 
     if (fDestroy)
     {
