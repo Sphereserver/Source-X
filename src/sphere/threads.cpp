@@ -1,5 +1,7 @@
-// this thing is somehow required to be able to initialise OLE
-#define _WIN32_DCOM
+#ifdef _WIN32
+    // this thing is somehow required to be able to initialise OLE
+    #define _WIN32_DCOM
+#endif
 
 #include "../common/basic_threading.h"
 #include "../common/CException.h"
@@ -12,7 +14,7 @@
 	#include <process.h>
 	#include <objbase.h>
 #elif !defined(_BSD) && !defined(__APPLE__)
-	#include <sys/prctl.h>
+    #include <sys/prctl.h>  // to set thread name
 #endif
 
 #include <algorithm>
@@ -26,32 +28,42 @@
 // number of milliseconds to wait for a thread to close
 #define THREADJOIN_TIMEOUT	60000
 
+// temporary string storage
+#define THREAD_TEMPSTRING_C_STORAGE     2048
+#define THREAD_TEMPSTRING_OBJ_STORAGE   1024
+
 
 struct TemporaryStringThreadSafeStateHolder
 {
-	// Normal Buffer
+    // C-style string Buffer (char array)
 	SimpleMutex g_tmpStringMutex;
-	std::atomic<int> g_tmpStringIndex = 0;
-	char g_tmpStrings[THREAD_TSTRING_STORAGE][THREAD_STRING_LENGTH];
+    std::atomic<uint> g_tmpStringIndex;
+    std::unique_ptr<char[]> g_tmpStrings;
 
 	// TemporaryString Buffer
 	SimpleMutex g_tmpTemporaryStringMutex;
-	std::atomic<int> g_tmpTemporaryStringIndex = 0;
-
-
+    std::atomic<uint> g_tmpTemporaryStringIndex;
 	struct TemporaryStringStorage
 	{
 		char m_buffer[THREAD_STRING_LENGTH];
 		char m_state;
-	} g_tmpTemporaryStringStorage[THREAD_STRING_STORAGE];
+    };
+    std::unique_ptr<TemporaryStringStorage[]> g_tmpTemporaryStringStorage;
 
+private:
+    TemporaryStringThreadSafeStateHolder() :
+        g_tmpStringIndex(0), g_tmpTemporaryStringIndex(0)
+    {
+        g_tmpStrings = std::make_unique<char[]>(THREAD_TEMPSTRING_C_STORAGE * THREAD_STRING_LENGTH);
+        g_tmpTemporaryStringStorage = std::make_unique<TemporaryStringStorage[]>(THREAD_TEMPSTRING_OBJ_STORAGE);
+    }
 
 public:
-	static TemporaryStringThreadSafeStateHolder* get() noexcept
-	{
-		static TemporaryStringThreadSafeStateHolder instance{};
-		return &instance;
-	}
+    static TemporaryStringThreadSafeStateHolder& get() noexcept
+    {
+        static TemporaryStringThreadSafeStateHolder instance;
+        return instance;
+    }
 };
 
 
@@ -786,18 +798,19 @@ AbstractSphereThread::~AbstractSphereThread()
 
 char *AbstractSphereThread::allocateBuffer() noexcept
 {
-	auto* tsholder = TemporaryStringThreadSafeStateHolder::get();
-	SimpleThreadLock stlBuffer(tsholder->g_tmpStringMutex);
+    auto& tsholder = TemporaryStringThreadSafeStateHolder::get();
+    SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
 
 	char * buffer = nullptr;
-	tsholder->g_tmpStringIndex += 1;
+    tsholder.g_tmpStringIndex += 1;
 
-	if (tsholder->g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
+    if (tsholder.g_tmpStringIndex >= THREAD_TEMPSTRING_C_STORAGE )
 	{
-		tsholder->g_tmpStringIndex = tsholder->g_tmpStringIndex % THREAD_TSTRING_STORAGE;
+        tsholder.g_tmpStringIndex = tsholder.g_tmpStringIndex % THREAD_TEMPSTRING_C_STORAGE;
 	}
 
-	buffer = tsholder->g_tmpStrings[tsholder->g_tmpStringIndex];
+    //buffer = tsholder->g_tmpStrings.get() + (tsholder->g_tmpStringIndex * THREAD_STRING_LENGTH);
+    buffer = &(tsholder.g_tmpStrings[tsholder.g_tmpStringIndex * THREAD_TEMPSTRING_C_STORAGE]);
 	*buffer = '\0';
 
 	return buffer;
@@ -807,24 +820,24 @@ static
 TemporaryStringThreadSafeStateHolder::TemporaryStringStorage *
 getThreadRawStringBuffer()
 {
-	auto* tsholder = TemporaryStringThreadSafeStateHolder::get();
-	SimpleThreadLock stlBuffer(tsholder->g_tmpStringMutex);
+    auto& tsholder = TemporaryStringThreadSafeStateHolder::get();
+    SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
 
-	int initialPosition = tsholder->g_tmpTemporaryStringIndex;
+    int initialPosition = tsholder.g_tmpTemporaryStringIndex;
 	int index;
 	for (;;)
 	{
-		index = tsholder->g_tmpTemporaryStringIndex += 1;
-		if(tsholder->g_tmpTemporaryStringIndex >= THREAD_STRING_STORAGE )
+        index = tsholder.g_tmpTemporaryStringIndex += 1;
+        if(tsholder.g_tmpTemporaryStringIndex >= THREAD_TEMPSTRING_OBJ_STORAGE )
 		{
-			const int inc = tsholder->g_tmpTemporaryStringIndex % THREAD_STRING_STORAGE;
-			tsholder->g_tmpTemporaryStringIndex = inc;
+            const int inc = tsholder.g_tmpTemporaryStringIndex % THREAD_TEMPSTRING_OBJ_STORAGE;
+            tsholder.g_tmpTemporaryStringIndex = inc;
 			index = inc;
 		}
 
-		if(tsholder->g_tmpTemporaryStringStorage[index].m_state == 0 )
+        if(tsholder.g_tmpTemporaryStringStorage[index].m_state == 0 )
 		{
-			auto* store = &tsholder->g_tmpTemporaryStringStorage[index];
+            auto* store = &(tsholder.g_tmpTemporaryStringStorage[index]);
 			*store->m_buffer = '\0';
 			return store;
 		}
@@ -846,8 +859,8 @@ getThreadRawStringBuffer()
 void AbstractSphereThread::getStringBuffer(TemporaryString &string) noexcept
 {
 	ADDTOCALLSTACK("alloc");
-	auto* tsholder = TemporaryStringThreadSafeStateHolder::get();
-	SimpleThreadLock stlBuffer(tsholder->g_tmpTemporaryStringMutex);
+    auto& tsholder = TemporaryStringThreadSafeStateHolder::get();
+    SimpleThreadLock stlBuffer(tsholder.g_tmpTemporaryStringMutex);
 
 	auto* store = getThreadRawStringBuffer();
 	string.init(store->m_buffer, &store->m_state);
