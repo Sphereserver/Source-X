@@ -3720,8 +3720,8 @@ CItem* CChar::Horse_GetValidMountItem()
 			// Assume pMountItem->m_itFigurine.m_ID is correct?
 
 			g_Log.EventWarn("Mount (UID=0%x, id=0%x '%s'): Fixed mislinked figurine with UID=ACTARG1=0%x, id=0%x '%s'\n",
-				(dword)GetUID(), GetBaseID(), GetName(),
-				(dword)(pMountItem->GetUID()), pMountItem->GetBaseID(), pMountItem->GetName());
+                (dword)GetUID(), GetIDCommon(), GetName(),
+                (dword)(pMountItem->GetUID()), pMountItem->GetIDCommon(), pMountItem->GetName());
 		}
 
 		return pMountItem;
@@ -3842,8 +3842,8 @@ CItem* CChar::Horse_GetValidMountItem()
 			pMountItem->m_itFigurine.m_ID = GetID();
 
 			g_Log.EventWarn("Mount (UID=0%x, id=0%x '%s'): Fixed mount item (mount item UID=ACTARG1=0%x) with UID=0%x, id=0%x '%s'\n",
-				(dword)GetUID(), GetBaseID(), GetName(), (dword)m_atRidden.m_uidFigurine,
-				(dword)(pMountItem->GetUID()), pMountItem->GetBaseID(), pMountItem->GetName());
+                (dword)GetUID(), GetIDCommon(), GetName(), (dword)m_atRidden.m_uidFigurine,
+                (dword)(pMountItem->GetUID()), pMountItem->GetIDCommon(), pMountItem->GetName());
 
 			lpctstr ptcFixString;
 			switch (iFixCode)
@@ -3862,7 +3862,7 @@ CItem* CChar::Horse_GetValidMountItem()
     if (iFailureCode)
     {
 		g_Log.EventError("Mount (UID=0%x, id=0%x '%s'): Can't auto-fix invalid mount item (mount item UID=ACTARG1=0%x)'\n",
-			(dword)GetUID(), GetBaseID(), GetName(), (dword)m_atRidden.m_uidFigurine);
+            (dword)GetUID(), GetIDCommon(), GetName(), (dword)m_atRidden.m_uidFigurine);
 
         lpctstr ptcFailureString;
         switch (iFailureCode)
@@ -4007,7 +4007,7 @@ bool CChar::Horse_UnMount()
 			return false;
 	}
 
-	if (pMountItem->GetBaseID() == ITEMID_SHIP_PILOT)
+    if (pMountItem->GetIDCommon() == ITEMID_SHIP_PILOT)
 	{
 		CItem *pShip = pMountItem->m_uidLink.ItemFind();
         if (pShip)
@@ -4912,7 +4912,7 @@ TRIGRET_TYPE CChar::CheckLocationEffects(bool fStanding)
         {
             if (_uiRecursingItemStep >= _kuiRecursingItemStepLimit)
             {
-                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
+                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingItemStepLimit);
             }
             else
             {
@@ -5796,7 +5796,8 @@ void CChar::_GoAwake()
 
 	CWorldTickingList::AddCharPeriodic(this, false);
 
-	_SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+    if (!_IsTimerSet())
+        _SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }
 
 void CChar::_GoSleep()

@@ -16,10 +16,8 @@
 // Typedefs
 //////////////////////////////////////////////////////////////////////////
 
-typedef std::vector<tchar> stdvstring;
-typedef std::vector<stdvstring> vstrlist;
-typedef vstrlist row;
-
+typedef std::vector<tchar> stdvtstring;
+typedef std::vector<stdvtstring> vstrlist;
 
 //////////////////////////////////////////////////////////////////////////
 // Classes
@@ -88,7 +86,7 @@ private:
     CSString _sFileName;
     bool _fInMemory;
 
-	static void ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut );
+    static void ConvertUTF8ToVString( const char * strInUTF8MB, stdvtstring *pStrOut );
 };
 
 // Table class...
@@ -159,6 +157,7 @@ public:
 private:
 	int m_iRows, m_iCols;
 
+    typedef vstrlist row;
 	row m_strlstCols;
 	std::vector<row> m_lstRows;
 

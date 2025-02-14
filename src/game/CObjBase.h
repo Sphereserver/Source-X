@@ -524,14 +524,14 @@ public:
 	// Accessors
 
     /**
-     * @fn  virtual dword CObjBase::GetBaseID() const = 0;
+     * @fn  virtual dword CObjBase::GetIDCommon() const = 0;
      *
-     * @brief   Gets base identifier.
+     * @brief   Gets base identifier (will NOT be the same as artwork if outside artwork range)
      *
      * @return  The base identifier.
      */
 
-    virtual dword GetBaseID() const = 0;
+    virtual dword GetIDCommon() const = 0;
 
     /**
      * @fn  void CObjBase::SetUID( dword dwVal, bool fItem );
