@@ -103,6 +103,8 @@ jobs:
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" \
               -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86.cmake \
               -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_C_FLAGS="-fpch-preprocess" \
+              -DCMAKE_CXX_FLAGS="-fpch-preprocess" \
               -S ./ -B ./build
     - name: Ninja
       run: ninja -C build -v
