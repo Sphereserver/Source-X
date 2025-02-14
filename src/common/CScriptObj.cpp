@@ -31,7 +31,7 @@
 #   include <spawn.h> // for posix_spawn()
 #endif
 
-#ifndef __GLIBC__
+#if !defined(_WIN32) && !defined(__GLIBC__)
 extern char **environ;
 #endif
 
