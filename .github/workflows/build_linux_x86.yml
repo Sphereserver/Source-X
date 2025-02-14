@@ -102,7 +102,7 @@ jobs:
               -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
               -S ./ -B ./build
     - name: Ninja
-      run: ninja -C build
+      run: ninja -C build -v
     - name: Create package
       run:  |
             mkdir accounts logs save scripts
