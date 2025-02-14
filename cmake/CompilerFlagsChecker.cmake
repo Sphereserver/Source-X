@@ -17,6 +17,7 @@ if(NOT MSVC)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler option flags. Expected to work on GCC but not Clang, at the moment.
+    check_cxx_compiler_flag("-fvisibility=hidden" COMP_HAS_FVISIBILITY_HIDDEN)
     check_cxx_compiler_flag("-fno-expensive-optimizations" COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
 
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
@@ -204,6 +205,10 @@ if(NOT MSVC)
     #if(COMP_HAS_LTO)
     #    list(APPEND checked_compiler_options "-flto")
     #endif()
+
+    if(COMP_HAS_FVISIBILITY_HIDDEN)
+        list(APPEND checked_compiler_options "-fvisibility=hidden")
+    endif()
 
     if(COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
         list(APPEND checked_compiler_options "-fno-expensive-optimizations")
