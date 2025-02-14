@@ -88,6 +88,9 @@ jobs:
       with:
         key: ${{github.job}}
 
+    - name: Configure ccache
+      run:  ccache --set-config sloppiness="include_file_mtime, include_file_ctime, time_macros, pch_defines"
+
     - name: Report building tools
       run:  |
             echo "GCC:" && gcc -v
