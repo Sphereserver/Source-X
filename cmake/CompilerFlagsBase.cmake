@@ -1,3 +1,4 @@
+include(CheckLinkerFlag)
 message(STATUS "Setting base compiler flags...")
 
 set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} ${CUSTOM_C_FLAGS}")
@@ -54,6 +55,11 @@ if(NOT MSVC)
         # Probably useful when using lto: -ffunction-sections -fdata-sections
         set(local_compile_options_nondebug -O3)# -flto)
         set(local_link_options_nondebug)#-flto)
+    endif()
+
+    check_linker_flag(CXX -Wl,--gc-sections LINKER_HAS_GC_SECTIONS)
+    if(LINKER_HAS_GC_SECTIONS)
+      list(APPEND local_link_options_nondebug -Wl,--gc-sections)
     endif()
 
     set(custom_compile_options_release
