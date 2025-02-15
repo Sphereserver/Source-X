@@ -1,5 +1,9 @@
 message(STATUS "Setting base compiler flags...")
 
+set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} ${CUSTOM_C_FLAGS}")
+set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${CUSTOM_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CUSTOM_EXE_LINKER_FLAGS}")
+
 if(NOT MSVC)
     # Compiler option flags (minimum).
     list(
@@ -22,6 +26,7 @@ if(NOT MSVC)
         -Wall
         -Wextra
         -Wpedantic
+        -Wdouble-promotion
     )
 
     # Linker option flags (minimum).
