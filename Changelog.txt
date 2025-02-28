@@ -3996,3 +3996,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	@UserExtCmd
 	Serv.Log <DLOCAL.DoorAutoDist>
 	Local.DoorAutoDist=10
+
+28-02-2025, cbnolok
+- Fixed: failing assertion if targeting a non-corpse object when casting Animate Dead spell.
