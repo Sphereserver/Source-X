@@ -3988,3 +3988,11 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 08-01-2025, DavideRei
 - Fixed: NPC FLEE action didn't work because it was using action target (empty) instead of fight target
+
+28-02-2025 (dev), canerksk
+- Added: Add OpenDoorMacro and World Search Distance as Local Variables to @UserExtCmd Trigger
+	LOCAL.DoorAutoDist <distance> (R/W). Default Distance = 2.
+	eg;
+	@UserExtCmd
+	Serv.Log <DLOCAL.DoorAutoDist>
+	Local.DoorAutoDist=10
