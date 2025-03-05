@@ -87,7 +87,9 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			pItem->m_itSpell.m_spelllevel = (word)(100 + g_Rand.Get16ValFast(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
-			pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(50)*MSECS_PER_SEC);
+            const bool fPlaced = pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(50)*MSECS_PER_SEC);
+            if (fPlaced && Can(CAN_O_NOSLEEP))
+                pItem->m_CanMask |= CAN_O_NOSLEEP;
 		}
 		break;
 
@@ -97,16 +99,19 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			CItem * pItem = CItem::CreateScript( (ITEMID_TYPE)(g_Rand.GetVal2Fast(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
 			ASSERT(pItem);
 			pItem->SetType(IT_WEB);
-			pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(170)*MSECS_PER_SEC);
+            const bool fPlaced = pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(170)*MSECS_PER_SEC);
+            if (fPlaced && Can(CAN_O_NOSLEEP))
+                pItem->m_CanMask |= CAN_O_NOSLEEP;
 		}
 		break;
 
 		default:
-			SysMessage( "You have no special abilities" );
+            ASSERT(false);
+            //SysMessage( "You have no special abilities" );
 			return;
 	}
 
-	UpdateStatVal( STAT_DEX, (ushort)(-(5 + g_Rand.Get16ValFast(5)) ));	// the stamina cost
+    UpdateStatVal( STAT_DEX, -(5 + g_Rand.Get16ValFast(5)) );	// the stamina cost
 }
 
 bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command from script
@@ -1951,7 +1956,9 @@ void CChar::NPC_Act_Idle()
 						Action_StartSpecial(CREID_GIANT_SPIDER);
 						return;
 					}
-				} else {
+                }
+                else
+                {
 					if ( GetDispID() == CREID_GIANT_SPIDER )
 					{
 						Action_StartSpecial(CREID_GIANT_SPIDER);
