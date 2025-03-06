@@ -4000,6 +4000,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 28-02-2025, cbnolok
 - Fixed: failing assertion if targeting a non-corpse object when casting Animate Dead spell.
 
-05-03-2025, cbnolok
-- Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (Issue #1249).
+09-03-2025, cbnolok
+- Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (partial fix for Issue #1249).
   Also, stamina wasn't consumed, thus NPCs had no limit in placing those items.

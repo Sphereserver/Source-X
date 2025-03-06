@@ -75,33 +75,31 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 	if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 		UpdateAnimate( ANIM_CAST_AREA );
 
+    CItem * pItem = nullptr;
+    short iMaxTimeoutS = 0;
 	switch ( id )
 	{
 		case CREID_FIRE_ELEM:
 		{
 			// Leave a fire path
-			CItem * pItem = CItem::CreateScript( g_Rand.Get16ValFast(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
+            pItem = CItem::CreateScript( g_Rand.Get16ValFast(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
 			ASSERT(pItem);
 			pItem->SetType(IT_FIRE);
 			pItem->m_itSpell.m_spell = (word)(SPELL_Fire_Field);
 			pItem->m_itSpell.m_spelllevel = (word)(100 + g_Rand.Get16ValFast(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
-            const bool fPlaced = pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(50)*MSECS_PER_SEC);
-            if (fPlaced && Can(CAN_O_NOSLEEP))
-                pItem->m_CanMask |= CAN_O_NOSLEEP;
+            iMaxTimeoutS = 50;
 		}
 		break;
 
 		case CREID_GIANT_SPIDER:
 		{
 			// Leave a web path
-			CItem * pItem = CItem::CreateScript( (ITEMID_TYPE)(g_Rand.GetVal2Fast(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
+            pItem = CItem::CreateScript( (ITEMID_TYPE)(g_Rand.GetVal2Fast(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
 			ASSERT(pItem);
 			pItem->SetType(IT_WEB);
-            const bool fPlaced = pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(170)*MSECS_PER_SEC);
-            if (fPlaced && Can(CAN_O_NOSLEEP))
-                pItem->m_CanMask |= CAN_O_NOSLEEP;
+            iMaxTimeoutS = 170;
 		}
 		break;
 
@@ -110,6 +108,31 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
             //SysMessage( "You have no special abilities" );
 			return;
 	}
+
+    if (pItem)
+    {
+        if (Can(CAN_O_NOSLEEP))
+        {
+            pItem->m_CanMask |= CAN_O_NOSLEEP;
+        }
+        else
+        {
+            const CSector *pItemSector = pItem->GetTopSector();
+            ASSERT(pItemSector);    // fPlaced is true, so the current sector should be valid
+#ifdef _DEBUG
+            const CSector *pCharSector = GetTopSector();
+            ASSERT(pCharSector);
+            ASSERT(pCharSector == pItemSector);
+#endif
+            if (pItemSector->IsSleeping() && !_IsSleeping())
+            {
+                // The char is temporarily walking in a sleeping sector.
+                // The items it creates need to be able to decay, even if in a sleeping sector.
+                pItem->m_CanMask |= CAN_O_NOSLEEP;
+            }
+        }
+        pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(iMaxTimeoutS)*MSECS_PER_SEC);
+    }
 
     UpdateStatVal( STAT_DEX, -(5 + g_Rand.Get16ValFast(5)) );	// the stamina cost
 }
