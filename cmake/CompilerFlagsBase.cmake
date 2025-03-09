@@ -25,9 +25,16 @@ if(NOT MSVC)
         compiler_options_warning_base
         -Werror
         -Wall
+        -Winitialized
+        -Wformat-signedness
         -Wextra
         -Wpedantic
         -Wdouble-promotion
+        -Wconversion
+        -Wsign-conversion
+        -Wduplicated-branches
+        #-Wcast-qual
+        #-Wnrvo
     )
 
     # Linker option flags (minimum).
