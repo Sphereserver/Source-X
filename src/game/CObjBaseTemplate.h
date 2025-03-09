@@ -106,7 +106,8 @@ public:
     }
 	char GetTopZ() const noexcept;
 	uchar GetTopMap() const noexcept;
-	CSector* GetTopSector() const noexcept;
+
+    CSector* GetTopSector() const noexcept; // can return a nullptr!
 
 	// - *Unk* methods: are not virtual and get/set raw values, without any check.
 	void SetUnkPoint(const CPointMap& pt) noexcept {
