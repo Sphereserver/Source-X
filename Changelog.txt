@@ -4003,3 +4003,6 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 09-03-2025, cbnolok
 - Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (partial fix for Issue #1249).
   Also, stamina wasn't consumed, thus NPCs had no limit in placing those items.
+
+11-03-2025, cbnolok
+- Added: log message with informations about the newly created object, if just placed in a sector exceeding complexity threshold.

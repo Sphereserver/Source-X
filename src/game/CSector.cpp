@@ -163,6 +163,8 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		case SC_WEATHER:
 			sVal.FormatVal((int)GetWeather());
 			return true;
+        default:
+            break;
 	}
 	EXC_CATCH;
 
@@ -1368,7 +1370,7 @@ bool CSector::IsDark() const
 
 bool CSector::IsNight() const
 {
-	int iMinutes = GetLocalTime();
+    const int iMinutes = GetLocalTime();
 	return ((iMinutes < 7*60) || (iMinutes > (9+12)*60) );
 }
 
@@ -1382,11 +1384,15 @@ size_t CSector::GetItemComplexity() const
 	return m_Items.GetContentCount();
 }
 
-void CSector::CheckItemComplexity() const noexcept
+bool CSector::CheckItemComplexity() const noexcept
 {
 	const size_t uiCount = GetItemComplexity();
 	if (uiCount > g_Cfg.m_iMaxSectorComplexity)
+    {
 		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", uiCount, GetBasePoint().WriteUsed());
+        return true;
+    }
+    return false;
 }
 
 bool CSector::IsItemInSector( const CItem * pItem ) const
@@ -1429,11 +1435,15 @@ size_t CSector::GetCharComplexity() const
 	return m_Chars_Active.GetContentCount();
 }
 
-void CSector::CheckCharComplexity() const noexcept
+bool CSector::CheckCharComplexity() const noexcept
 {
 	const size_t uiCount = GetCharComplexity();
 	if (uiCount > g_Cfg.m_iMaxCharComplexity)
+    {
 		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", uiCount, GetBasePoint().WriteUsed());
+        return true;
+    }
+    return false;
 }
 
 size_t CSector::GetInactiveChars() const

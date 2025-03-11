@@ -1558,7 +1558,13 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
-		pSector->CheckItemComplexity();
+    {
+        if (pSector->CheckItemComplexity())
+        {
+            g_Log.Event(LOGL_WARN, "Checked while moving to this sector the item '%s' (UID=0x%" PRIx32 ") at P=%s.\n",
+                GetResourceName(), GetUID().GetObjUID(), pt.WriteUsed());
+        }
+    }
 
 	SetTopPoint( pt );
 	if ( fForceFix )
