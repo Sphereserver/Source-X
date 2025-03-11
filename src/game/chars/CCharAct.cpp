@@ -5774,9 +5774,12 @@ bool CChar::_CanTick(bool fParentGoingToSleep) const
 	ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
 	EXC_TRY("Can tick?");
 
-	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))
+    if (IsDisconnected())
 	{
-		// mounted horses can still get a tick.
+        // mounted horses could still get a tick, even if their disconnected body is placed in a sector now sleeping.
+        if (Skill_GetActive() != NPCACT_RIDDEN)
+            return true;
+
 		return false;
 	}
 
@@ -5823,11 +5826,14 @@ bool CChar::_OnTick()
 
 	EXC_SET_BLOCK("Can Tick?");
 
-    if ((_IsSleeping() || IsDisconnected()) && (Skill_GetActive() != NPCACT_RIDDEN))
+    // This check shouldn't be needed, since it's already done in _CanTick, but we'll leave it here for now until further tests.
+    if (_IsSleeping() || IsDisconnected())
 	{
-		// mounted horses can still get a tick.
-		return true;
+        // In this cases, only mounted horses can still get a tick.
+        if (Skill_GetActive() != NPCACT_RIDDEN)
+            return true;
 	}
+
     if (!_CanTick())
 	{
         // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.

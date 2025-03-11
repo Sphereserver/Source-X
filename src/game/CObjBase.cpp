@@ -3215,21 +3215,24 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
     bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
-    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fCanTick)
     {
         if (const CSObjCont* pParent = GetParent())
         {
-            const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
-            // The parent can be another CObjBase (or a Sector, but we are not interested in that case)
-			if (pObjParent)
-			{
-				if (fParentGoingToSleep)
-					fCanTick = false;
-				else if (!fIgnoreCont)
-					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
-			}
+            if (fParentGoingToSleep)
+                fCanTick = false;
+            else if (IsItem())
+            {
+                // The parent can be another CObjBase (or a Sector, but we are not interested in that case)
+                const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
+                if (pObjParent)
+                {
+                    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+                    if (!fIgnoreCont)
+                        fCanTick = pObjParent->CanTick(fParentGoingToSleep);
+                }
+            }
         }
     }
 
