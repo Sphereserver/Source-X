@@ -154,7 +154,7 @@ CWorld			g_World;			// the world. (we save this stuff)
 // Again, game servers stuff.
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
-CSRand          g_Rand;
+CSRand          g_Rand; // TODO: remove this, since now all the members are static.
 CExpression		g_Exp;				// Global script variables.
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler

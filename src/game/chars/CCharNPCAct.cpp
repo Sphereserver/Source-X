@@ -2206,12 +2206,14 @@ void CChar::NPC_OnTickAction()
 		{
 			if (iSkillActive != NPCACT_RIDDEN)
 			{
-				g_Log.EventWarn("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0%" PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName());
+                g_Log.EventWarn("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0%" PRIx32 ", defname=%s.\n",
+                    pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName());
 			}
 		}
 		else
 		{
-			g_Log.EventWarn("Trying to Tick Action on unplaced NPC. UID=0%" PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName());
+            g_Log.EventWarn("Trying to Tick Action on unplaced NPC. UID=0%" PRIx32 ", defname=%s.\n",
+                GetUID().GetObjUID(), GetResourceName());
 		}
         return;
     }
