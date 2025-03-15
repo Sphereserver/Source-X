@@ -4006,3 +4006,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 
 11-03-2025, cbnolok
 - Added: log message with informations about the newly created object, if just placed in a sector exceeding complexity threshold.
+
+15-03-2025, cbnolok
+- Fixed: when using the ini setting ItemTimers=1 (enabling items to tick even if inside a container), the items kept ticking even after a char logout.
+- Fixed: when using the ini setting ItemTimers=1, items ticked on npcs ridden by a disconnected char.
+
+

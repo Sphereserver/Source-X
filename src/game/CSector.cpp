@@ -183,7 +183,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fCanTick = pChar->CanTick(true);
+        const bool fCanTick = pChar->CanTick();
 		ASSERT(!pChar->IsDisconnected());
         if (!fCanTick)
             pChar->GoSleep();
@@ -192,7 +192,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fCanTick = pChar->CanTick(true);
+        const bool fCanTick = pChar->CanTick();
 		ASSERT(pChar->IsDisconnected());
 		if (!fCanTick)
 			pChar->GoSleep();
@@ -201,7 +201,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		const bool fCanTick = pItem->CanTick(true);
+        const bool fCanTick = pItem->CanTick();
         if (!fCanTick)
             pItem->GoSleep();
     }

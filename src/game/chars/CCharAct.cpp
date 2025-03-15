@@ -5769,9 +5769,9 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_CanTick(bool fParentGoingToSleep) const
+bool CChar::_CanTick() const
 {
-	ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
 	EXC_TRY("Can tick?");
 
     if (IsDisconnected())
@@ -5783,7 +5783,7 @@ bool CChar::_CanTick(bool fParentGoingToSleep) const
 		return false;
 	}
 
-	return CObjBase::_CanTick(fParentGoingToSleep);
+    return CObjBase::_CanTick();
 
 	EXC_CATCH;
 

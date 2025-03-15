@@ -913,7 +913,7 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
+    virtual bool _CanTick() const override;
     //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
 
 public:
