@@ -65,7 +65,7 @@
 // Target arch.
 #if defined(_WIN64) || (__SIZEOF_POINTER__ == 8)
 #   define ARCH_64
-#elif defined(_WIN32) || (__SIZEOF_POINTER == 4)
+#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4)
 #   define ARCH_32
 #else
 #   error "Can't detect the arch?"
@@ -98,7 +98,7 @@
 // to validate the format string and arguments:
 // a = 1-based index of format string
 // b = 1-based index of arguments
-// (note: add 1 to index for non-static class methods because 'this' argument
+// (note: add 1 to index for non-static class methods because of the implicit 'this' argument
 // is inserted in position 1)
 #ifdef MSVC_COMPILER
 #define SPHERE_PRINTFARGS(a,b)
