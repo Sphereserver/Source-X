@@ -255,7 +255,7 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     }
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
     else
-        g_Log.EventDebug("[WorldTicker][%p] INFO: Cannot tick and no force, so i'm  not adding CTimedObj to the ticking list.\n", (void*)pTimedObject);
+        g_Log.EventDebug("[WorldTicker][%p] INFO: Cannot tick and no force, so i'm not adding CTimedObj to the ticking list.\n", (void*)pTimedObject);
 #endif
 
     EXC_CATCH;

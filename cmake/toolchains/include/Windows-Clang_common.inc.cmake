@@ -31,7 +31,7 @@ function(toolchain_exe_stuff_common)
         # -mno-ms-bitfields is needed to fix structure packing;
         # -pthread unused here? we only need to specify that to the linker?
     )
-    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts})
 
     #-- Apply compiler flags, only the ones specific per build type.
 
@@ -74,7 +74,7 @@ function(toolchain_exe_stuff_common)
 
     #-- Store common linker flags.
 
-    set(cxx_linker_options_common ${CMAKE_EXE_LINKER_FLAGS_EXTRA})
+    set(cxx_linker_options_common "")
     if(${CLANG_USE_GCC_LINKER})
         set(cxx_linker_options_common ${list_explicit_linker_options_all})
         if(${RUNTIME_STATIC_LINK})

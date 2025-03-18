@@ -45,8 +45,6 @@
 	#include "os_unix.h"
 #endif
 
-#include "sphere_library/stypecast.h"
-
 
 /* Coding helpers */
 
@@ -62,6 +60,55 @@
 // On Windows, Clang can use MinGW or MSVC backend.
 #ifdef _MSC_VER
 #   define MSVC_RUNTIME
+#endif
+
+// Target arch.
+#if defined(_WIN64) || (__SIZEOF_POINTER__ == 8)
+#   define ARCH_64
+#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4)
+#   define ARCH_32
+#else
+#   error "Can't detect the arch?"
+#endif
+
+// Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
+#define CANTHROW    noexcept(false)
+
+// To be used only as an helper marker, since there are functions with similar names intended to have different signatures and/or not be virtual.
+// This means that we do NOT have forgotten to add the "virtual" qualifier, simply this method isn't virtual.
+#define NONVIRTUAL
+
+// Cpp attributes
+#define FALLTHROUGH [[fallthrough]]
+#define NODISCARD	[[nodiscard]]
+
+#if defined(__GNUC__) || defined(__clang__)
+#   define RETURNS_NOTNULL [[gnu::returns_nonnull]]
+#else
+#   define RETURNS_NOTNULL
+#endif
+
+#ifdef _DEBUG
+#define NOEXCEPT_NODEBUG
+#else
+#define NOEXCEPT_NODEBUG noexcept
+#endif
+
+// use to indicate that a function uses printf-style arguments, allowing GCC
+// to validate the format string and arguments:
+// a = 1-based index of format string
+// b = 1-based index of arguments
+// (note: add 1 to index for non-static class methods because of the implicit 'this' argument
+// is inserted in position 1)
+#ifdef MSVC_COMPILER
+#define SPHERE_PRINTFARGS(a,b)
+#else
+#ifdef __MINGW32__
+// Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
+#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
+#else
+#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
+#endif
 #endif
 
 
@@ -186,6 +233,7 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 }
 
 //#include <type_traits> // already included by stypecast.h
+#include "sphere_library/stypecast.h"
 
 // Arguments: Class, arguments...
 #define STATIC_ASSERT_NOEXCEPT_CONSTRUCTOR(_ClassType, ...) \
@@ -206,50 +254,8 @@ constexpr void UnreferencedParameter(T const&) noexcept {
 #define STATIC_ASSERT_THROWING_MEMBER_FUNCTION(_ClassType, _func, ...) \
     static_assert(!std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
 
-
-// Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
-#define CANTHROW    noexcept(false)
-
-// To be used only as an helper marker, since there are functions with similar names intended to have different signatures and/or not be virtual.
-// This means that we do NOT have forgotten to add the "virtual" qualifier, simply this method isn't virtual.
-#define NONVIRTUAL
-
-// Cpp attributes
-#define FALLTHROUGH [[fallthrough]]
-#define NODISCARD	[[nodiscard]]
-
-#if defined(__GNUC__) || defined(__clang__)
-#   define RETURNS_NOTNULL [[gnu::returns_nonnull]]
-#else
-#   define RETURNS_NOTNULL
-#endif
-
-#ifdef _DEBUG
-    #define NOEXCEPT_NODEBUG
-#else
-    #define NOEXCEPT_NODEBUG noexcept
-#endif
-
-
 // For unrecoverable/unloggable errors. Should be used almost *never*.
 #define STDERR_LOG(...)     fprintf(stderr, __VA_ARGS__); fflush(stderr)
-
-// use to indicate that a function uses printf-style arguments, allowing GCC
-// to validate the format string and arguments:
-// a = 1-based index of format string
-// b = 1-based index of arguments
-// (note: add 1 to index for non-static class methods because 'this' argument
-// is inserted in position 1)
-#ifdef MSVC_COMPILER
-    #define SPHERE_PRINTFARGS(a,b)
-#else
-	#ifdef __MINGW32__
-        // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
-        #define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
-	#else
-        #define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
-	#endif
-#endif
 
 
 /* Sanitizers utilities */

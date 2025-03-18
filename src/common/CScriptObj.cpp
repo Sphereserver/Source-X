@@ -28,9 +28,12 @@
 #else
 #   include <sys/wait.h>
 #   include <errno.h>	// errno
-//  #include <spawn.h>
+#   include <spawn.h> // for posix_spawn()
 #endif
 
+#if !defined(_WIN32) && !defined(__GLIBC__)
+extern char **environ;
+#endif
 
 class CStoneMember;
 
@@ -960,47 +963,22 @@ badcmd:
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
 					Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 #else
-                // vfork deprecated since Mac OS Monterey... TODO: use posix_spawn?
-                /*
-                pid_t pid;
                 char *argv[] = {
                     Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1],
 					Arg_ppCmd[2], Arg_ppCmd[3], Arg_ppCmd[4],
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
 					Arg_ppCmd[8], Arg_ppCmd[9], nullptr
                 };
-                posix_spawn(&pid, argv[0], nullptr, nullptr, argv, environ);  //include spawn.h
-                */
 
-				// I think fork will cause problems.. we'll see.. if yes new thread + execlp is required.
-				// TODO: use posix_spawn
-				int child_pid = vfork();
-				if ( child_pid < 0 )
+				pid_t child_pid;
+				if (posix_spawn(&child_pid, argv[0], nullptr, nullptr, argv, environ) != 0)
 				{
-                    g_Log.EventError("%s failed when executing '%s'\n", sm_szLoadKeys[index], ptcKey);
-					return false;
-				}
-
-                if ( child_pid == 0 )
-				{
-					//Don't touch this :P
-					execlp( Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1], Arg_ppCmd[2],
-										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
-										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
-
                     g_Log.EventError(
                         "%s failed with error %d (\"%s\") when executing '%s'\n",
                         sm_szLoadKeys[index], errno, strerror(errno), ptcKey);
-
-                    raise(SIGKILL);
-
-                    g_Log.EventError(
-                        "%s failed to handle error. Server is UNSTABLE\n",
-                        sm_szLoadKeys[index]);
-					while(true) {} // do NOT leave here until the process receives SIGKILL otherwise it will free up resources
-								   // it inherited from the main process, which pretty will fuck everything up. Normally this point should never be reached.
 				}
-				else if(bWait) // parent process here (do we have to wait?)
+
+				if(bWait) // parent process here (do we have to wait?)
 				{
 					int status;
 					do

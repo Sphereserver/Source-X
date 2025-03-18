@@ -607,8 +607,7 @@ protected:
 public:
 	virtual bool _OnTick() override;
 
-	virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
-	//virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+    virtual bool _CanTick() const override;
 	bool _CanHoldTimer() const;
 
     virtual void DupeCopy( const CObjBase * pItem ) override;

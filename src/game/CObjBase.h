@@ -140,11 +140,13 @@ public:
 	*/
     CBaseBaseDef* Base_GetDef() const noexcept;
 
+    [[nodiscard]]
 	inline uint64 GetCanFlagsBase() const noexcept
 	{
 		return Base_GetDef()->m_Can;
 	}
 
+    [[nodiscard]]
     inline uint64 GetCanFlags() const noexcept
 	{
 		// m_CanMask is XORed to m_Can:
@@ -154,11 +156,13 @@ public:
 		return (GetCanFlagsBase() ^ m_CanMask);
 	}
 
+    [[nodiscard]]
 	bool Can(uint64 uiCan) const noexcept
 	{
         return (GetCanFlags() & uiCan);
 	}
 
+    [[nodiscard]]
     inline bool Can(uint64 uiCan, uint64 uiObjCanFlags) const noexcept
     {
         return (uiObjCanFlags & uiCan);
@@ -909,7 +913,7 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
+    virtual bool _CanTick() const override;
     //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
 
 public:
