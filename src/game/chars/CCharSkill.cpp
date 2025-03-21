@@ -2691,8 +2691,11 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 		{
 			if ( IsClientActive() )
 				GetClientActive()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
+
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 				Sound( 0x0f9 );
+
+			SysMessageDefault( MEDITATION_SUCCESS );
 		}
 		++m_atTaming.m_dwStrokeCount;
 
