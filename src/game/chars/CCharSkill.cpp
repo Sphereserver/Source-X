@@ -2695,7 +2695,7 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 				Sound( 0x0f9 );
 
-			SysMessageDefault( MEDITATION_SUCCESS );
+            SysMessageDefault( DEFMSG_MEDITATION_SUCCESS );
 		}
 		++m_atTaming.m_dwStrokeCount;
 
