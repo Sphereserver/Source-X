@@ -4503,6 +4503,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
         if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
 		if ( IsSetOF(OF_AllowContainerInsideContainer)) catresname(zOptionFlags, "AllowContainerInsideContainer");
         if ( IsSetOF(OF_VendorStockLimit) )		    catresname(zOptionFlags, "VendorStockLimit");
+		if ( IsSetOF(OF_NoDclickEquip) )				catresname(zOptionFlags, "NoDclickEquip");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
