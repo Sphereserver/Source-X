@@ -1896,7 +1896,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			if (fLink)
 				return false;
 
-			return ItemEquip(pItem);
+			return IsSetOF(OF_NoDclickEquip) ? false : ItemEquip(pItem);
 		}
 
 		case IT_WEB:
