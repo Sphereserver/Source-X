@@ -1893,10 +1893,10 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
         case IT_WEAPON_WHIP:
 		case IT_TALISMAN:
 		{
-			if (fLink)
+			if (IsSetOF(OF_NoDclickEquip) || fLink) // If no dclick equip is set, don't equip the item
 				return false;
 
-			return IsSetOF(OF_NoDclickEquip) ? false : ItemEquip(pItem);
+			return ItemEquip(pItem);
 		}
 
 		case IT_WEB:
