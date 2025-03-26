@@ -1,23 +1,30 @@
 #include "sstring.h"
-#include "../../common/CLog.h"
+//#include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
 #include "../CExpression.h"
 
 
-#if defined(_MSC_VER)
+#ifdef MSVC_COMPILER
     #include <codeanalysis/warnings.h>
     #pragma warning( push )
     #pragma warning ( disable : ALL_CODE_ANALYSIS_WARNINGS )
-#elif defined(__GNUC__) && !defined(__clang__)
+#else
     #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+    #pragma GCC diagnostic ignored "-Wpragmas"
+    #pragma GCC diagnostic ignored "-Winvalid-utf8"
+    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+    #if defined(__GNUC__) && !defined(__clang__)
+    #   pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+    #elif defined(__clang__)
+    #   pragma GCC diagnostic ignored "-Wweak-vtables"
+    #endif
 #endif
 
 #include <regex/deelx.h>
 
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
     #pragma warning( pop )
-#elif defined(__GNUC__) && !defined(__clang__)
+#else
     #pragma GCC diagnostic pop
 #endif
 
@@ -41,36 +48,76 @@ void Str_Reverse(char* string)
 }
 #endif
 
-int Str_ToI (lpctstr ptcStr, int base) noexcept
+std::optional<char> Str_ToI8 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = int(::strtol(ptcStr, nullptr, base));
-    errno = e;
-    return ret;
+    char val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
-uint Str_ToUI(lpctstr ptcStr, int base) noexcept
+std::optional<uchar> Str_ToU8 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = uint(::strtoul(ptcStr, nullptr, base));
-    errno = e;
-    return ret;
+    uchar val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
-llong Str_ToLL(lpctstr ptcStr, int base) noexcept
+std::optional<short> Str_ToI16 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = ::strtoll(ptcStr, nullptr, base);
-    errno = e;
-    return ret;
+    short val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
-ullong Str_ToULL(lpctstr ptcStr, int base) noexcept
+std::optional<ushort> Str_ToU16 (lpctstr ptcStr, int base) noexcept
 {
-    const auto e = errno;
-    const auto ret = ::strtoull(ptcStr, nullptr, base);
-    errno = e;
-    return ret;
+    ushort val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<int> Str_ToI (lpctstr ptcStr, int base) noexcept
+{
+    int val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<uint> Str_ToU(lpctstr ptcStr, int base) noexcept
+{
+    uint val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<llong> Str_ToLL(lpctstr ptcStr, int base) noexcept
+{
+    llong val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
+}
+
+std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base) noexcept
+{
+    ullong val = 0;
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    if (!fSuccess)
+        return std::nullopt;
+    return val;
 }
 
 #define STR_FROM_SET_ZEROSTR \
@@ -432,10 +479,10 @@ size_t strlen_mb(const char* ptr)
 }
 */
 
-size_t Str_LengthUTF8(const char* strInUTF8MB) noexcept
+size_t Str_UTF8CharCount(const char* strInUTF8MB) noexcept
 {
     size_t len; // number of characters in the string
-#ifdef _MSC_VER
+#ifdef MSVC_RUNTIME
     mbstowcs_s(&len, nullptr, 0, strInUTF8MB, 0); // includes null terminator
     len -= 1;
 #else
@@ -652,7 +699,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
     while (len > 0)
     {
         --len;
-        if (pStr[len] < 0 || !IsWhitespace(pStr[len]))
+        if (!IsWhitespace(pStr[len]))
         {
             ++len;
             break;
@@ -1214,7 +1261,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept
         return MATCH_VALID;
 }
 
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
     // /GL + /LTCG flags inline in linking phase this function, but probably in a wrong way, so that
     // something gets corrupted on the memory and an exception is generated later
     #pragma auto_inline(off)
@@ -1362,7 +1409,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
 
     return true;
 }
-#ifdef _MSC_VER
+#ifdef MSVC_COMPILER
     #pragma auto_inline(on)
 #endif
 
@@ -1648,95 +1695,72 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes) noexcept
     }
 }
 
-UTF8MBSTR::UTF8MBSTR() noexcept
+UTF8MBSTR::UTF8MBSTR() = default;
+
+UTF8MBSTR::UTF8MBSTR(lpctstr lpStr)
 {
-    m_strUTF8_MultiByte = new char[1]();
+    operator=(lpStr);
 }
 
-UTF8MBSTR::UTF8MBSTR(lpctstr lpStr) noexcept
+UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr)
+{
+    m_strUTF8_MultiByte = lpStr.m_strUTF8_MultiByte;
+}
+
+UTF8MBSTR::~UTF8MBSTR() = default;
+
+void UTF8MBSTR::operator =(lpctstr lpStr)
 {
     if (lpStr)
-    {
-        m_strUTF8_MultiByte = nullptr;
-        ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-    }
+        ConvertStringToUTF8(lpStr, &m_strUTF8_MultiByte);
     else
-        m_strUTF8_MultiByte = new char[1]();
-}
-
-UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr) noexcept
-{
-    size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
-    m_strUTF8_MultiByte = new char[len + 1]();
-    memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
-}
-
-UTF8MBSTR::~UTF8MBSTR()
-{
-    if (m_strUTF8_MultiByte)
-        delete[] m_strUTF8_MultiByte;
-}
-
-void UTF8MBSTR::operator =(lpctstr lpStr) noexcept
-{
-    if (m_strUTF8_MultiByte)
-        delete[] m_strUTF8_MultiByte;
-
-    if (lpStr)
-    {
-        m_strUTF8_MultiByte = nullptr;
-        ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-    }
-    else
-        m_strUTF8_MultiByte = new char[1]();
+        m_strUTF8_MultiByte.clear();
 }
 
 void UTF8MBSTR::operator =(UTF8MBSTR& lpStr) noexcept
 {
-    if (m_strUTF8_MultiByte)
-        delete[] m_strUTF8_MultiByte;
-
-    size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
-    m_strUTF8_MultiByte = new char[len + 1]();
-    memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
+    m_strUTF8_MultiByte = lpStr.m_strUTF8_MultiByte;
 }
 
-size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB) noexcept
+size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, std::vector<char>* strOutUTF8MB)
 {
+    ASSERT(strOutUTF8MB);
     size_t len;
 #if defined(_WIN32) && defined(UNICODE)
     // tchar is wchar_t
     len = wcslen(strIn);
 #else
     // tchar is char (UTF8 encoding)
-    len = Str_LengthUTF8(strIn);
+    len = strlen(strIn);
 #endif
-    strOutUTF8MB = new char[len + 1]();
+    strOutUTF8MB->resize(len + 1);
 
 #if defined(_WIN32) && defined(UNICODE)
-#ifdef _MSC_VER
+#   ifdef MSVC_RUNTIME
     size_t aux = 0;
-    wcstombs_s(&aux, strOutUTF8MB, len + 1, strIn, len);
+    wcstombs_s(&aux, strOutUTF8MB->data(), len + 1, strIn, len);
+#   else
+    wcstombs(strOutUTF8MB->data(), strIn, len);
+#   endif
 #else
-    wcstombs(strOutUTF8MB, strIn, len);
+    // already utf8
+    memcpy(strOutUTF8MB->data(), strIn, len);
 #endif
 
-#else
-    memcpy(strOutUTF8MB, strIn, len);
-#endif
-
+    (*strOutUTF8MB)[len] = '\0';
     return len;
 }
 
-size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) noexcept
+size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, std::vector<tchar>* strOut)
 {
-    size_t len = Str_LengthUTF8(strInUTF8MB);
-    if (!strOut)
-        strOut = new tchar[len + 1]();
+    ASSERT(strOut);
+    size_t len;
 
 #if defined(_WIN32) && defined(UNICODE)
     // tchar is wchar_t
-#ifdef _MSC_VER
+    len = Str_UTF8CharCount(strInUTF8MB);
+    strOut->resize(len + 1);
+#ifdef MSVC_RUNTIME
     size_t aux = 0;
     mbstowcs_s(&aux, strInUTF8MB, len + 1, strInUTF8MB, len);
 #else
@@ -1744,9 +1768,12 @@ size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) n
 #endif
 #else
     // tchar is char (UTF8 encoding)
-    memcpy(strOut, strInUTF8MB, len);
+    len = strlen(strInUTF8MB);
+    strOut->resize(len + 1);
+    memcpy(strOut->data(), strInUTF8MB, len);
 #endif
 
+    (*strOut)[len] = '\0';
     return len;
 }
 
@@ -1790,9 +1817,9 @@ fReadUntilDelimiter(char **buf, size_t *bufsiz, int delimiter, FILE *fp) noexcep
     char *ptr, *eptr;
 
 
-    if (*buf == NULL || *bufsiz == 0) {
+    if (*buf == nullptr || *bufsiz == 0) {
         *bufsiz = BUFSIZ;
-        if ((*buf = (char*)malloc(*bufsiz)) == NULL)
+        if ((*buf = (char*)malloc(*bufsiz)) == nullptr)
             return -1;
     }
 
@@ -1817,7 +1844,7 @@ fReadUntilDelimiter(char **buf, size_t *bufsiz, int delimiter, FILE *fp) noexcep
             char *nbuf;
             size_t nbufsiz = *bufsiz * 2;
             ssize_t d = ptr - *buf;
-            if ((nbuf = (char*)realloc(*buf, nbufsiz)) == NULL)
+            if ((nbuf = (char*)realloc(*buf, nbufsiz)) == nullptr)
                 return -1;
             *buf = nbuf;
             *bufsiz = nbufsiz;

@@ -1,16 +1,20 @@
 //  CChar is either an NPC or a Player.
 
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMulti.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../uo_files/CUOStaticItemRec.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 
 bool CChar::IsResourceMatch( const CResourceID& rid, dword dwAmount ) const
 {
@@ -482,13 +486,14 @@ int CChar::GetStatPercent(STAT_TYPE i) const
 	return IMulDiv(Stat_GetVal(i), 100, maxval);
 }
 
-
+[[nodiscard]] RETURNS_NOTNULL
 const CObjBaseTemplate* CChar::GetTopLevelObj() const
 {
 	// Get the object that has a location in the world. (Ground level)
 	return this;
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 CObjBaseTemplate* CChar::GetTopLevelObj()
 {
 	// Get the object that has a location in the world. (Ground level)
@@ -688,7 +693,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
         iFlags |= STATF_INVISIBLE;
 	
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
-	mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
+        mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
 
 	return mode;
 }
@@ -1327,7 +1332,7 @@ bool CChar::CanTouch( const CPointMap &pt ) const
 	return CanSeeLOS(pt, nullptr, 6);
 }
 
-bool CChar::CanTouch( const CObjBase *pObj ) const
+bool CChar::CanTouch( const CObjBase *pObj )
 {
 	ADDTOCALLSTACK("CChar::CanTouch");
 	// Can I reach this from where i am. swords, spears, arms length = x units.
@@ -1437,8 +1442,8 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	{
 		// Check if the item is in my bankbox, and i'm not in the same position from which I opened it the last time.
 		const CPointMap& ptTop = GetTopPoint();
-		CItemContainer* pBank = GetChar()->GetBank();
-		bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
+        CItemContainer* pBank = GetBank();
+        const bool fItemContIsInsideBankBox = pBank->IsItemInside(pObj->GetUID().ItemFind());
 		if (fItemContIsInsideBankBox && (pBank->m_itEqBankBox.m_pntOpen != ptTop))
 			return false;
 	}
@@ -1467,7 +1472,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 	return fCanTouch;
 }
 
-IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem ) const
+IT_TYPE CChar::CanTouchStatic( CPointMap *pPt, ITEMID_TYPE id, const CItem *pItem )
 {
 	ADDTOCALLSTACK("CChar::CanTouchStatic");
 	// Might be a dynamic or a static.
@@ -1769,7 +1774,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 	return true;
 }
 
-bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume ) const
+bool CChar::CanUse( const CItem *pItem, bool fMoveOrConsume )
 {
 	ADDTOCALLSTACK("CChar::CanUse");
 	// Can the Char use ( CONSUME )  the item where it is ?
@@ -1991,7 +1996,7 @@ bool CChar::CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovem
     if (!fPathfinding && (g_Cfg.m_iDebugFlags & DEBUGF_WALK))
         g_Log.EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", uiMyHeight, blockingState->m_Top.m_z, ptDest->m_z);
 
-    if ((uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
+    if (IsStatFlag(STATF_ONHORSE) && (uiMyHeight + ptDest->m_z >= blockingState->m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE))
     {
         if (!fPathfinding)
             SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
@@ -2021,7 +2026,7 @@ CRegion *CChar::CheckValidMove( CPointMap &ptDest, uint64 *uiBlockFlags, DIR_TYP
 	//  Fill in the proper ptDest.m_z value for this location. (if walking)
 	//  pdwBlockFlags = what is blocking me. (can be null = don't care)
 
-	//	test diagonal dirs by two others *only* when already having a normal location
+    //	test diagonal dirs by two others *only* when already having a normal location (not diagonal)
     {
         const CPointMap ptOld(GetTopPoint());
         if (!fPathFinding && ptOld.IsValidPoint() && (dir % 2))

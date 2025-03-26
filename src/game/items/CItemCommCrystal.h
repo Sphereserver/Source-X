@@ -16,14 +16,14 @@ class CItemCommCrystal : public CItemVendable
 protected:
     static lpctstr const sm_szLoadKeys[];
     CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
+
 public:
     static const char *m_sClassName;
     CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef );
     virtual ~CItemCommCrystal();
 
-private:
-    CItemCommCrystal(const CItemCommCrystal& copy);
-    CItemCommCrystal& operator=(const CItemCommCrystal& other);
+    CItemCommCrystal(const CItemCommCrystal& copy) = delete;
+    CItemCommCrystal& operator=(const CItemCommCrystal& other) = delete;
 
 public:
     virtual void OnMoveFrom() override;

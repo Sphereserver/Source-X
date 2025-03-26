@@ -1,12 +1,19 @@
 name: Create/upload auxiliary files to the release.
 
 on:
-  - push
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+    paths-ignore:
+      - '*.txt'
+      - '*.md'
 
 jobs:
   upload_github_release:
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
-    if: contains(fromJson('["master", "main"]'), github.ref_name)
+    #if: contains(fromJson('["master", "main"]'), github.ref_name)
 
     runs-on: ubuntu-latest
     steps:

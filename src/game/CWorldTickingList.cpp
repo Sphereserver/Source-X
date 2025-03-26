@@ -2,6 +2,7 @@
 #include "CWorldTicker.h"
 #include "CWorldTickingList.h"
 
+
 void CWorldTickingList::AddObjSingle(int64 iTimeout, CTimedObject* pObj, bool fForce) // static
 {
     //The lock on pObj should already be acquired by CTimedObject::SetTimeout

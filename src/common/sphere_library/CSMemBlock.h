@@ -18,15 +18,15 @@ public:
 	///@{
 	CSMemBlock();
 	virtual ~CSMemBlock();
-private:
-	/**
+
+    /**
 	* @brief No copy on construction allowed.
     */
-	CSMemBlock(const CSMemBlock& copy);
+	CSMemBlock(const CSMemBlock& copy) = delete;
 	/**
 	* @brief No copy allowed.
     */
-	CSMemBlock& operator=(const CSMemBlock& other);
+	CSMemBlock& operator=(const CSMemBlock& other) = delete;
 	///@}
 	/** @name Modifiers:
 	 */
@@ -82,18 +82,19 @@ public:
 	 */
 	///@{
 	CSMemLenBlock();
-private:
-	/**
+    virtual ~CSMemLenBlock();
+
+    /**
 	* @brief No copy on construction allowed.
     */
-	CSMemLenBlock(const CSMemLenBlock& copy);
+	CSMemLenBlock(const CSMemLenBlock& copy) = delete;
 	/**
 	* @brief No copy allowed.
     */
-	CSMemLenBlock& operator=(const CSMemLenBlock& other);
+	CSMemLenBlock& operator=(const CSMemLenBlock& other) = delete;
 	///@}
-public:
-	/** @name Modifiers:
+
+    /** @name Modifiers:
 	 */
 	///@{
 	/**

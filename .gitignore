@@ -1,4 +1,5 @@
 # Ignore folders
+/.cache
 /.git
 /.vscode
 *.vshistory*

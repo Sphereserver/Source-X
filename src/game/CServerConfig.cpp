@@ -4,15 +4,15 @@
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/resource/sections/CResourceNamedDef.h"
-#include "../common/sphere_library/CSFileList.h"
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/CNetworkManager.h"
 #include "../network/CSocket.h"
 #include "../sphere/ProfileTask.h"
-#include "../sphere/ntwindow.h"
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
 #include "chars/CChar.h"
@@ -33,6 +33,16 @@
 #include "spheresvr.h"
 #include "triggers.h"
 
+#ifdef _WIN32
+#   include "../sphere/ntwindow.h"     // g_NTWindow
+#endif
+
+#include <cstddef>
+#ifndef OFFSETOF
+//#   define OFFSETOF(TYPE, ELEMENT) (offsetof(TYPE, ELEMENT))
+# define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
+#endif
+
 
 // .ini settings.
 CServerConfig::CServerConfig()
@@ -45,6 +55,7 @@ CServerConfig::CServerConfig()
 	_iMapCacheTime		= 2ll  * 60 * MSECS_PER_SEC;
 	_iSectorSleepDelay  = 10ll * 60 * MSECS_PER_SEC;
 	m_fUseMapDiffs		= false;
+    m_fUseMobTypes      = false;
 
 	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
 	m_fSecure				= true;
@@ -66,6 +77,7 @@ CServerConfig::CServerConfig()
 	m_iWordsOfPowerFont		= FONT_NORMAL;
 	m_fWordsOfPowerPlayer	= true;
 	m_fWordsOfPowerStaff	= false;
+    m_iWordsOfPowerTalkMode = TALKMODE_SPELL;
 	m_fEquippedCast			= true;
 	m_iMagicUnlockDoor		= 900;
 	m_iSpellTimeout			= 0;
@@ -306,10 +318,10 @@ CServerConfig::CServerConfig()
 
 	// Networking
 	_uiNetworkThreads		= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
-	_uiNetworkThreadPriority= IThread::Disabled;
+    _iNetworkThreadPriority = enum_alias_cast<int>(ThreadPriority::Disabled);
 	m_fUseAsyncNetwork		= 0;
 	m_iNetMaxPings			= 15;
-	m_iNetHistoryTTL		= 300;
+	m_iNetHistoryTTLSeconds 		= 300;
 	_uiNetMaxPacketsPerTick = 50;
 	_uiNetMaxLengthPerTick	= 18'000;
 	m_iNetMaxQueueSize		= 75;
@@ -633,7 +645,7 @@ enum RC_TYPE
 	RC_MYSQLTICKS,				// m_fMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
-	RC_NETWORKTHREADPRIORITY,	// _uiNetworkThreadPriority
+    RC_NETWORKTHREADPRIORITY,	// _iNetworkThreadPriority
 	RC_NETWORKTHREADS,			// _uiNetworkThreads
 	RC_NORESROBE,
 	RC_NOTOTIMEOUT,
@@ -707,6 +719,7 @@ enum RC_TYPE
 	RC_USEEXTRABUFFER,			// m_fUseExtraBuffer
 	RC_USEHTTP,					// m_fUseHTTP
 	RC_USEMAPDIFFS,				// m_fUseMapDiffs
+    RC_USEMOBTYPES,             // m_fUseMobTypes
 	RC_USENOCRYPT,				// m_Usenocrypt
 	RC_USEPACKETPRIORITY,		// m_fUsePacketPriorities
 	RC_VENDORMARKUP,			// m_iVendorMarkup
@@ -720,12 +733,20 @@ enum RC_TYPE
 	RC_WOPFONT,
 	RC_WOPPLAYER,
 	RC_WOPSTAFF,
+	RC_WOPTALKMODE,
 	RC_WORLDSAVE,
 	RC_ZEROPOINT,				// m_sZeroPoint
 	RC_QTY
 };
 
 // NOTE: Need to be alphabetized order
+
+// TODO: use offsetof by cstddef. Though, it requires the class/struct to be a POD type, so we need to encapsulate the values in a separate struct.
+// This hack does happen because this class hasn't virtual methods? Or simply because the compiler is so smart and protects us from ourselves?
+#if NON_MSVC_COMPILER
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
 
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 
@@ -917,8 +938,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlPass)			}},
 	{ "MYSQLTICKS",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fMySqlTicks)			}},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sMySqlUser)			}},
-	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNetHistoryTTL)		}},
-	{ "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreadPriority)}},
+	{ "NETTTL",					{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig, m_iNetHistoryTTLSeconds)		}},
+    { "NETWORKTHREADPRIORITY",	{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_iNetworkThreadPriority)}},
 	{ "NETWORKTHREADS",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiNetworkThreads)		}},
 	{ "NORESROBE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fNoResRobe)			}},
 	{ "NOTOTIMEOUT",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNotoTimeout)			}},
@@ -992,6 +1013,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseExtraBuffer)		}},
 	{ "USEHTTP",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_fUseHTTP)				}},
 	{ "USEMAPDIFFS",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseMapDiffs)			}},
+    { "USEMOBTYPES",			{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseMobTypes)			} },
 	{ "USENOCRYPT",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsenocrypt)			}},	// we don't want no-crypt clients
 	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUsePacketPriorities)	}},
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
@@ -1005,10 +1027,15 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "WOPFONT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerFont)		}},
 	{ "WOPPLAYER",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer)	}},
 	{ "WOPSTAFF",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerStaff)	}},
+    { "WOPTALKMODE",            { ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerTalkMode) }},
 	{ "WORLDSAVE",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sWorldBaseDir)			}},
 	{ "ZEROPOINT",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sZeroPoint)			}},
 	{ nullptr,					{ ELEM_VOID,	0,												}}
 };
+
+#if defined(__GNUC__) || defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
 
 bool CServerConfig::r_LoadVal( CScript &s )
 {
@@ -1459,15 +1486,15 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_NETWORKTHREADPRIORITY:
 			{
-				int priority = s.GetArgVal();
-				if (priority < 1)
-					priority = IThread::Normal;
-				else if (priority > 4)
-					priority = IThread::RealTime;
+                int priority = s.GetArgVal();
+                if (priority < 1)
+                    priority = enum_alias_cast<int>(ThreadPriority::Normal);
+                else if (priority > 4)
+                    priority = enum_alias_cast<int>(ThreadPriority::RealTime);
 				else
-					priority = IThread::Low + (IThread::Priority)priority;
+                    priority = enum_alias_cast<int>(ThreadPriority::Low) + priority;
 
-				_uiNetworkThreadPriority = priority;
+                _iNetworkThreadPriority = priority;
 			}
 			break;
 		case RC_WALKBUFFER:
@@ -1608,7 +1635,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 		if ( !strnicmp(ptcKey, "MAP(", 4) )
 		{
 			ptcKey += 4;
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			// Parse the arguments after the round brackets
 			tchar * pszArgsNext;
@@ -1667,7 +1694,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			lpctstr pszCmd = ptcKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if (!*pszCmd)
 			{
@@ -1714,7 +1741,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			ptcKey = ptcKey + 3;
 			int iMapNumber = Exp_GetVal(ptcKey);
 			SKIP_SEPARATORS(ptcKey);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if ( g_MapList.IsMapSupported(iMapNumber) )
 			{
@@ -1760,7 +1787,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			size_t iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			for (size_t i = 0; i < g_World.m_Multis.size(); ++i)
 			{
@@ -1808,7 +1835,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			if (iNumber < 0 || iNumber >= (int) m_Functions.size()) //invalid index can potentially crash the server, this check is strongly needed
 			{
@@ -1855,7 +1882,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 
 			size_t iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 
 			for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 			{
@@ -1890,7 +1917,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			if (cli_num >= g_Serv.StatGet( SERV_STAT_CLIENTS ))
 				return false;
 
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 			ClientIterator it;
 			for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 			{
@@ -2683,7 +2710,11 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
             return CPointMap();
 
         SKIP_NONNUM(pCmd);
-		size_t i = Str_ToUI(pCmd);
+        std::optional<uint> iconv = Str_ToU(pCmd);
+        if (!iconv.has_value())
+            return CPointMap();
+
+		size_t i = iconv.value();
         if (i > 0)
         {
             i -= 1;
@@ -3024,7 +3055,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		}
 
 		rid = CResourceID( (dword)pVarNum->GetValNum(), 0 );
-		restype	= rid.GetResType();
+
+        // This value won't be read, since we return anyways once in this branch.
+        //restype = rid.GetResType();
 
 		CResourceDef *	pRes = nullptr;
 		size_t index = m_ResHash.FindKey( rid );
@@ -3761,8 +3794,14 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 
 					if (iStartVersion == 2)
 					{
-						if ( pScript->ReadKey())
-							pStart->iClilocDescription = Str_ToI(pScript->GetKey());
+                        if ( pScript->ReadKey())
+                        {
+                            std::optional<int> iconv = Str_ToI(pScript->GetKey());
+                            if (!iconv.has_value())
+                                continue;
+
+                            pStart->iClilocDescription = *iconv;
+                        }
 					}
 				}
 				m_StartDefs.emplace_back(pStart);
@@ -4649,13 +4688,13 @@ bool CServerConfig::Load( bool fResync )
 	// Now load the *TABLES.SCP file.
 	if ( ! fResync )
 	{
-		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT ))
+		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ))
 		{
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n" );
+			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n" );
 			return false;
 		}
 
-        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT ")...\n");
+        g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n");
 		LoadResourcesOpen(&m_scpTables);
 		m_scpTables.Close();
 	}
@@ -4955,7 +4994,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 		return false;
 
 	if ( pszFilename == nullptr || pszFilename[0] == '\0' )
-		pszFilename	= "unscripted_items" SPHERE_SCRIPT;
+		pszFilename	= "unscripted_items" SPHERE_SCRIPT_EXT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
 

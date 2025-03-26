@@ -1,5 +1,6 @@
-
+#include "../common/sphere_library/CSRand.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/ProfileData.h"
@@ -162,6 +163,8 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 		case SC_WEATHER:
 			sVal.FormatVal((int)GetWeather());
 			return true;
+        default:
+            break;
 	}
 	EXC_CATCH;
 
@@ -180,7 +183,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fCanTick = pChar->CanTick(true);
+        const bool fCanTick = pChar->CanTick();
 		ASSERT(!pChar->IsDisconnected());
         if (!fCanTick)
             pChar->GoSleep();
@@ -189,7 +192,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fCanTick = pChar->CanTick(true);
+        const bool fCanTick = pChar->CanTick();
 		ASSERT(pChar->IsDisconnected());
 		if (!fCanTick)
 			pChar->GoSleep();
@@ -198,7 +201,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		const bool fCanTick = pItem->CanTick(true);
+        const bool fCanTick = pItem->CanTick();
         if (!fCanTick)
             pItem->GoSleep();
     }
@@ -283,7 +286,7 @@ bool CSector::r_LoadVal( CScript &s )
 			SetWeatherChance( false, s.HasArgs() ? s.GetArgVal() : -1 );
 			return true;
 		case SC_FLAGS:
-			m_dwFlags = s.GetArgVal();
+            m_dwFlags = s.GetArgDWVal();
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_fAllowLightOverride )
@@ -1367,7 +1370,7 @@ bool CSector::IsDark() const
 
 bool CSector::IsNight() const
 {
-	int iMinutes = GetLocalTime();
+    const int iMinutes = GetLocalTime();
 	return ((iMinutes < 7*60) || (iMinutes > (9+12)*60) );
 }
 
@@ -1381,11 +1384,15 @@ size_t CSector::GetItemComplexity() const
 	return m_Items.GetContentCount();
 }
 
-void CSector::CheckItemComplexity() const noexcept
+bool CSector::CheckItemComplexity() const noexcept
 {
 	const size_t uiCount = GetItemComplexity();
 	if (uiCount > g_Cfg.m_iMaxSectorComplexity)
+    {
 		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", uiCount, GetBasePoint().WriteUsed());
+        return true;
+    }
+    return false;
 }
 
 bool CSector::IsItemInSector( const CItem * pItem ) const
@@ -1428,11 +1435,15 @@ size_t CSector::GetCharComplexity() const
 	return m_Chars_Active.GetContentCount();
 }
 
-void CSector::CheckCharComplexity() const noexcept
+bool CSector::CheckCharComplexity() const noexcept
 {
 	const size_t uiCount = GetCharComplexity();
 	if (uiCount > g_Cfg.m_iMaxCharComplexity)
+    {
 		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", uiCount, GetBasePoint().WriteUsed());
+        return true;
+    }
+    return false;
 }
 
 size_t CSector::GetInactiveChars() const

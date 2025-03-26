@@ -24,9 +24,8 @@ public:
 	CLocalFloatVars() = default;
 	~CLocalFloatVars() = default;
 
-private:
-	CLocalFloatVars(const CLocalFloatVars& copy);
-	CLocalFloatVars& operator=(const CLocalFloatVars& other);
+    CLocalFloatVars(const CLocalFloatVars& copy) = delete;
+    CLocalFloatVars& operator=(const CLocalFloatVars& other) = delete;
 
 private: //setting, getting
 	bool Set( const char* VarName, const char* VarValue );

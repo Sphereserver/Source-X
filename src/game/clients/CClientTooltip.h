@@ -28,7 +28,7 @@ public:
     CClientTooltip& operator=(const CClientTooltip& other) = delete;
 
 public:
-    void __cdecl FormatArgs(lpctstr format, ...) __printfargs(2,3);
+    void FormatArgs(lpctstr format, ...) SPHERE_PRINTFARGS(2,3);
 };
 
 

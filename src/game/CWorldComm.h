@@ -7,6 +7,7 @@
 #define _INC_CWORLDCOMM_H
 
 #include "../common/common.h"
+#include "../common/CLanguageID.h"
 #include "../common/sphereproto.h"
 #include "uo_files/uofiles_enums.h"
 #include "uo_files/uofiles_types.h"
@@ -23,7 +24,7 @@ public:
 	static void SpeakUNICODE(const CObjBaseTemplate* pSrc, const nachar* pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang);
 
 	static void Broadcast(lpctstr pMsg);
-	static void __cdecl Broadcastf(lpctstr pMsg, ...) __printfargs(1, 2);
+    static void Broadcastf(lpctstr pMsg, ...) SPHERE_PRINTFARGS(1, 2);
 };
 
 

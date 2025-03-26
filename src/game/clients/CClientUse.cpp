@@ -1,8 +1,11 @@
 
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
+#include "../items/CItemCorpse.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemShip.h"
 #include "../components/CCSpawn.h"
@@ -155,6 +158,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_SHAFT:
 		case IT_FEATHER:
+        case IT_FLETCHING:
 			return Skill_Menu(SKILL_BOWCRAFT, "sm_bolts", pItem->GetID());
 
 		case IT_FISH_POLE:	// Just be near water ?
@@ -182,7 +186,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			}
 			else // I have the key but i need to use it to unlock the container.
 			{
-				SysMessageDefault(DEFMSG_LOCK_HAS_KEY); 
+				SysMessageDefault(DEFMSG_LOCK_HAS_KEY);
 				return false;
 			}
 			break;
@@ -191,7 +195,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
 			if ( !m_pChar->GetPackSafe()->ContentFindKeyFor(pItem) ) // I don't have the hold key
 			{
-				
+
 				SysMessageDefault(DEFMSG_LOCK_HOLD_NO_KEY);
 				if ( !IsPriv(PRIV_GM) )
 					return false;
@@ -222,7 +226,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
                 if ( m_pChar->CheckCorpseCrime(pCorpseItem, true, true) )
                     SysMessageDefault(DEFMSG_LOOT_CRIMINAL_ACT);
             }
-			
+
 			return true;
 		}
 
@@ -846,7 +850,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			{
 				if ( (iSelect < -1) && (iShowCount >= 1) )		// just a test. so we are done.
 					return 1;
-				
+
                 CMenuItem miTest;
 				if ( !miTest.ParseLine(s.GetArgRaw(), nullptr, m_pChar) )
 				{
@@ -1147,7 +1151,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		When the Tracking skill starts and the Effect property is defined on the Tracking skill use it
 		instead of the hardcoded formula for the maximum distance.
 		*/
-		
+
 		if (m_pChar->m_Act_Effect >= 0)
 			m_pChar->m_atTracking.m_dwDistMax = (dword)m_pChar->m_Act_Effect;
 		else //This is default Sphere maximum tracking distance.

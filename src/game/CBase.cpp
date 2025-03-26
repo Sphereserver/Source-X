@@ -1,8 +1,7 @@
 
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/common.h"
-#include "components/CCPropsItemChar.h"
-#include "components/CCPropsItemWeapon.h"
 #include "CServerConfig.h"
 #include "CBase.h"
 #include <algorithm>
@@ -24,7 +23,7 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 };
 
 
-CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
+CBaseBaseDef::CBaseBaseDef( CResourceID const& id ) :
 	CResourceLink( id ),
 	m_sName(false)
 {
@@ -44,9 +43,6 @@ CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	m_BaseResources.setNoMergeOnLoad();
 }
 
-CBaseBaseDef::~CBaseBaseDef()
-{
-}
 
 void CBaseBaseDef::DelInstance()
 {
@@ -56,10 +52,6 @@ void CBaseBaseDef::DelInstance()
 	--_dwInstances;
 }
 
-CCFaction CBaseBaseDef::GetFaction()
-{
-	return _pFaction;
-}
 
 lpctstr CBaseBaseDef::GetTypeName() const
 {
@@ -144,11 +136,6 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 		case OBC_DEFNAME:
 			sVal = GetResourceName();
 			break;
-
-        case OBC_FACTION:
-        case OBC_SLAYER:
-            sVal.FormatULLHex(_pFaction.GetFactionID());
-            break;
 
 		case OBC_ARMOR:
 			{
@@ -248,9 +235,9 @@ bool CBaseBaseDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * p
 						tchar *pszTmp = Str_GetTemp();
 						m_BaseResources.WriteKeys( pszTmp, Str_TempLength(), index, fQtyOnly, fKeyOnly );
 						if ( fQtyOnly && pszTmp[0] == '\0' )
-							strcpy( pszTmp, "0" );
-
-						sVal = pszTmp;
+                            sVal.SetValFalse(); // '0'
+                        else
+                            sVal = pszTmp;
 					}
 				}
 				else
@@ -326,11 +313,8 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				bool fQuoted = false;
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
 			}
-			break;
-        case OBC_FACTION:
-        case OBC_SLAYER:
-            _pFaction.SetFactionID( static_cast<NPC_FACTION>(s.GetArgULLVal()) );
-            return true;
+			return true;
+
 		//Set as number only
 		case OBC_EXPANSION:
 		case OBC_VELOCITY:
@@ -349,6 +333,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					SetDefStr(sm_szLoadKeys[OBC_DESCRIPTION], GetDefStr(sm_szLoadKeys[OBC_SUBSECTION]), false, true, false);
 			}
 			return true;
+
 		case OBC_ARMOR:
 			{
 				int64 piVal[2];
@@ -360,6 +345,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					m_defenseRange = 0;
 			}
 			return true;
+
 		case OBC_DAM:
 			{
 				int64 piVal[2];
@@ -371,6 +357,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					m_attackRange = 0;
 			}
 			return true;
+
 		case OBC_BASEID:
 			return false;
         case OBC_CAN:
@@ -392,7 +379,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			m_BaseResources.Load(s.GetArgStr());
 			return true;
 		case OBC_RESLEVEL:
-			return( SetResLevel((uchar)(s.GetArgVal())) );
+            return( SetResLevel(enum_alias_cast<RESDISPLAY_VERSION>(s.GetArgCVal())) );
 		case OBC_RESDISPDNHUE:
 			SetResDispDnHue((HUE_TYPE)(s.GetArgVal()));
 			return true;
@@ -431,7 +418,6 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 	m_defenseBase = pBase->m_defenseBase;
 	m_defenseRange = pBase->m_defenseRange;
 	m_Can = pBase->m_Can;
-    _pFaction.SetFactionID(pBase->_pFaction.GetFactionID());
     CEntityProps::Copy(pBase);
 }
 
@@ -467,7 +453,7 @@ byte CBaseBaseDef::GetResLevel() const
 	return( m_ResLevel );
 }
 
-bool CBaseBaseDef::SetResLevel( byte ResLevel )
+bool CBaseBaseDef::SetResLevel(RESDISPLAY_VERSION ResLevel )
 {
 	if ( ResLevel >= RDS_T2A && ResLevel < RDS_QTY )
 	{

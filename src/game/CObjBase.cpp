@@ -1,6 +1,7 @@
-
+#include "../common/sphere_library/CSRand.h"
 #include "../common/resource/CResourceLock.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../network/CClientIterator.h"
@@ -8,8 +9,8 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
+#include "clients/CClientTooltip.h"
 #include "components/CCChampion.h"
-#include "components/CCPropsItemChar.h"
 #include "components/CCPropsItemWeapon.h"
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
@@ -21,7 +22,6 @@
 #include "CWorldTickingList.h"
 #include "CWorldTimedFunctions.h"
 #include "CTimedFunction.h"
-#include "spheresvr.h"
 #include "triggers.h"
 #include "CObjBase.h"
 
@@ -225,7 +225,7 @@ void CObjBase::DeletePrepare()
 	RemoveSelf();
 
     if (fTopLevel)
-        	_uiInternalStateFlags |= SF_TOPLEVEL;
+        _uiInternalStateFlags |= SF_TOPLEVEL;
 }
 
 void CObjBase::DeleteCleanup(bool fForce)
@@ -274,18 +274,18 @@ CBaseBaseDef* CObjBase::Base_GetDef() const noexcept
 	return (static_cast <CBaseBaseDef*>(m_BaseRef.GetRef()));
 }
 
-bool CObjBase::IsContainer() const
+bool CObjBase::IsContainer() const noexcept
 {
 	// Simple test if object is a container.
 	return (dynamic_cast <const CContainer*>(this) != nullptr);
 }
 
-int64 CObjBase::GetTimeStampS() const
+int64 CObjBase::GetTimeStampS() const noexcept
 {
 	return m_iTimeStampS;
 }
 
-void CObjBase::SetTimeStampS(int64 t_time)
+void CObjBase::SetTimeStampS(int64 t_time) noexcept
 {
 	m_iTimeStampS = t_time;
 }
@@ -765,6 +765,7 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	// Move to nearby this other object.
 	// Actually move it within +/- iSteps
 
+    // TODO: check this again...
 	CPointMap ptOld(pt);
 	for ( uint i = 0; i < iSteps; ++i )
 	{
@@ -1012,10 +1013,6 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
 		case OC_ONAME:
-		case OC_SLAYER:
-		case OC_SLAYERLESSER:
-		case OC_SLAYERMISC:
-		case OC_SLAYERSUPER:
 		{
 			const CVarDefCont * pVar = GetDefKey(ptcKey, true);
 			sVal = pVar ? pVar->GetValStr() : "";
@@ -1136,10 +1133,10 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					if ( pChar )
 						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, nullptr, pChar->GetVisualRange(), flags));
 					else
-						sVal.FormatVal(0);
+						sVal.SetValFalse();
 				}
 				else if ( !pChar )		// no char -> no see
-					sVal.FormatVal(0);
+					sVal.SetValFalse();
 				else					// standart way src TO current object
 					sVal.FormatVal(bCanSee ? pChar->CanSee(this) : pChar->CanSeeLOS(this, (word)(flags)));
 			}
@@ -1191,7 +1188,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					}
 					//++count;
 				}
-				sVal.Format(ptcArg[0], ptcArg[1], ptcArg[2] ? ptcArg[2] : 0, ptcArg[3] ? ptcArg[3] : 0);
+				sVal.Format(ptcArg[0], ptcArg[1], (ptcArg[2] ? ptcArg[2] : nullptr), (ptcArg[3] ? ptcArg[3] : nullptr));
 				return true;
 			} break;
 		case OC_DIALOGLIST:
@@ -1203,7 +1200,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 					GETNONWHITESPACE( ptcKey );
 
 					CClient * pThisClient = pSrc->GetChar() ? ( pSrc->GetChar()->IsClientActive() ? pSrc->GetChar()->GetClientActive() : nullptr ) : nullptr;
-					sVal.FormatVal(0);
+					sVal.SetValFalse();
 
 					if ( pThisClient )
 					{
@@ -1702,7 +1699,7 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
 
 					SKIP_SEPARATORS( ptcKey );
 					if (! *ptcKey )
-						sVal.Format("%d=%s", ct->m_clilocid, ct->m_args);
+						sVal.Format("%u=%s", ct->m_clilocid, ct->m_args);
 					else if ( !strnicmp( ptcKey, "ID", 2 )) //Cliloc.
 						sVal.FormatDWVal(ct->m_clilocid);
 					else if ( !strnicmp( ptcKey, "VAL", 3 )) //Arguments.
@@ -1805,10 +1802,6 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_ABILITYPRIMARY:
 		case OC_ABILITYSECONDARY:
 		case OC_ONAME:
-		case OC_SLAYER:
-		case OC_SLAYERLESSER:
-		case OC_SLAYERMISC:
-		case OC_SLAYERSUPER:
 		{
 			bool fQuoted = false;
 			SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
@@ -1982,7 +1975,7 @@ bool CObjBase::r_LoadVal( CScript & s )
                 * So the new timer will be the current time in msecs (SetTimeout)
                 * For older builds, the timer is stored in seconds (SetTimeoutD)
                 */
-                if (iPrevBuild && (iPrevBuild >= 2866)) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
+                if (iPrevBuild >= 2866) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
                 {
 					// If TIMER = 0 was saved it means that at the moment of the worldsave the timer was elapsed but its object could not tick,
 					//	since it was waiting a GoAwake() call. Now set the timer to tick asap.
@@ -2347,7 +2340,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				CSString sPrompt;
 				sPrompt.Format("%s (# = default)", (lpctstr)(Arg_ppCmd[0]));
-				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
+				pClientSrc->addGumpInputVal( true, INPVAL_STYLE_TEXTEDIT,
 					iMaxLength,	sPrompt, sOrgValue, this );
 			}
 			break;
@@ -3152,13 +3145,13 @@ void CObjBase::UpdatePropertyFlag()
 	if (!(g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B) || g_Serv.IsLoading())
 		return;
 
-	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
+    m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
 	// Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-	if (!IsTopLevel() || _IsTimerExpired())
+    if (!IsTopLevel() || _IsTimerExpired())
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
-	}
+    }
 }
 
 dword CObjBase::GetPropertyHash() const
@@ -3196,12 +3189,7 @@ void CObjBase::_GoAwake()
 	if (auto pContainer = dynamic_cast<CContainer*>(this))
 	{
 		pContainer->_GoAwake(); // This method isn't virtual
-	}
-
-	if (_IsTimerSet())
-	{
-		CWorldTickingList::AddObjSingle(_GetTimeoutRaw(), this, true);
-	}
+    }
 	// CWorldTickingList::AddObjStatusUpdate(this, false);	// Don't! It's done when needed in UpdatePropertyFlag()
 }
 
@@ -3214,35 +3202,19 @@ void CObjBase::_GoSleep()
 	{
 		CWorldTickingList::DelObjSingle(this);
 	}
+
+    // Most objects won't be into the status update list, but we have to check anyways.
 	CWorldTickingList::DelObjStatusUpdate(this, false);
 }
 
-bool CObjBase::_CanTick(bool fParentGoingToSleep) const
+bool CObjBase::_CanTick() const
 {
 	//ADDTOCALLSTACK_DEBUG("CObjBase::_CanTick");   // Called very frequently.
 	// This doesn't check the sector sleeping status, it's only about this object.
     EXC_TRY("Can tick?");
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
-    bool fCanTick = fParentGoingToSleep ? false : !CTimedObject::_IsSleeping();
-    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
-
-    if (fCanTick)
-    {
-        if (const CSObjCont* pParent = GetParent())
-        {
-            const CObjBase* pObjParent = dynamic_cast<const CObjBase*>(pParent);
-            // The parent can be another CObjBase (or a Sector, but we are not interested in that case)
-			if (pObjParent)
-			{
-				if (fParentGoingToSleep)
-					fCanTick = false;
-				else if (!fIgnoreCont)
-					fCanTick = pObjParent->CanTick(fParentGoingToSleep);
-			}
-        }
-    }
-
+    bool fCanTick = !CTimedObject::_IsSleeping();
     if (!fCanTick)
     {
         // Try to call the Can method the less often possible.
@@ -3261,7 +3233,7 @@ bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
-	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
+	ADDTOCALLSTACK("CObjBase::ResendTooltip");
     // Send tooltip packet to all nearby clients
 
     if (g_Serv.IsLoading())
@@ -3315,11 +3287,6 @@ void CObjBase::SetSpawn(CCSpawn * spawn)
         _uidSpawn.SetObjUID(spawn->GetLink()->GetUID());
     else
         _uidSpawn.InitUID();
-}
-
-CCFaction * CObjBase::GetFaction()
-{
-    return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
 CSString CObjBase::GetPropStr( const CComponentProps* pCompProps, CComponentProps::PropertyIndex_t iPropIndex, bool fZero, const CComponentProps* pBaseCompProps ) const
@@ -3659,7 +3626,7 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 				if ( pTriggerArgObj )
 					csTriggerArgs.m_pO1 = pTriggerArgObj;
 			}
-			else if ( iTriggerArgType == 4 ) // FULL TRIGGER
+			else if ( iTriggerArgType == 4 ) // FULLTRIGGER
 			{
 				tchar * Arg_ppCmd[5];
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_ppCmd, ARRAY_COUNT(Arg_ppCmd), ",");
@@ -3693,4 +3660,3 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 
 	return false;
 }
-

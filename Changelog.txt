@@ -3725,6 +3725,8 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// Maximum time in milliseconds to wait before closing a connection request wich did not make it into a successful login (classic DDoS just asks to connect without doing anything else, or sends garbage data).
 	TimeoutIncompleteConn=5 * 1000  // 5 seconds
 - Added serv_trig function f_onserver_connectreq_ex, called after an IP exceeds MaxConnectRequestsPerIP:
+    WARNING: function arguments and returns CHANGED in the 10-09-2024 commit.
+
 	ARGS (RO): IP address.
 	ARGN1 (RO): System time in milliseconds since the last connection.
 	ARGN2 (RO): System time in milliseconds of this connection attempt.
@@ -3808,3 +3810,205 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	New values:
 	SPELLFLAG_FIELD_RANDOMDECAY     02000
 	SPELLFLAG_NO_ELEMENTALENGINE    04000
+
+10-08-2024, DavideRei
+- Added: read mobtypes.txt (if available among mul files) and cache it to check animations type when using creatures animations
+- Added: alert anim on NPCs when they start combat, pillage anim when they loot something (items on ground or in bodies) and "summon" anim when they are summoned or added
+- Modified: now standard anims (SEA_MONSTER, ANIMAL, MONSTER) and UOP anims are handled correctly depending on which actions anim they have on anim files (checked on last client version).
+	Please note that some actions are handled by the client (for example walk, run, fly, getHit while flying, die) and they could not work depending on which client you are using.
+- Added: missing/new actions to be used with .ANIM command.
+    ANIM_ALERT              = 35,
+    ANIM_THROW              = 36,
+    ANIM_PILLAGE            = 37,
+    ANIM_STOMP              = 38,
+    ANIM_FLY                = 39,
+    ANIM_LAND               = 40,
+    ANIM_GETHIT_AIR         = 41,
+    ANIM_SUMMON             = 42,
+    ANIM_SPECIAL            = 43,   //UOP anims
+    ANIM_BOSS_SPECIAL_1     = 44,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+    ANIM_BOSS_SPECIAL_2     = 45,   //Only few UOP anims: Order Variant, Chaos Variant, Stygian Dragon, Scalis
+
+- Modified: now custom anims can be handled by scripts using ANIM command under CHARDEF, to set which anim actions they have/don't have, using the following flags.
+	MONSTER (H slot) default configuration is with actions: 0 (Walk), 1 (Stand), 2 (Die1), 3 (Die2), 4 (Attack1), 5 (Attack2), 6 (Attack3), 10 (GetHit), 11 (Pillage), 15 (Block Right), 16 (Block Left), 17 (Idle), 18 (Fidget)
+    No DIE2 action		= 01,
+    No ATTACK1 action   = 02,
+    No ATTACK2 action   = 04,
+    No ATTACK3 action   = 08,
+    No GETHIT action    = 010,
+    No PILLAGE action   = 020,
+    STOMP action		= 040,
+    CAST2 action        = 080,
+    CAST3 action        = 0100,
+    No BLOCKR action    = 0200,
+    No BLOCKL action    = 0400,
+    No FIDGET1 action   = 0800,
+    No FIDGET2 action   = 01000,
+    FLY action          = 02000,
+    Anims with Attacks 1-2-3 in actions 9,10,11 and with GetHit in action 20 (there are many custom WOW anims with this configuration) = 0x10000
+
+	ANIMAL (L slot) default configuration is with all actions: 1 - 12
+    No EAT action       = 01,
+    No ALERT action     = 02,
+    No ATTACK2 action   = 04,
+    No GETHIT action    = 08,
+    No FIDGET1 action   = 010,
+    No FIDGET2 action   = 020,
+    No LIEDOWN action   = 040,
+    No DIE2 action      = 080
+
+	So for example if you have a MONSTER (H slot) flying custom anim, with Cast2 action but not Pillage action you can set ANIM=020A0
+	If you have a custom anim with default configuration, you don't need to set ANIM=
+
+10-08-2024, Gladie
+- Fixed: CAN_I_DAMAGEABLE not updating status bar (PR #1259, issues #1248, #1260).
+
+09-09-2024, Nolok
+  WARNING! POTENTIALLY BREAKING CHANGE! Scripts will need to be updated.
+- Changed: since there was too much data to be stored in the FACTION/SLAYER property, so that it sometimes couldn't fit and caused issues,
+	it has been split in two different properties:
+	  - FACTION/SLAYER_GROUP (expects a bitmask, max value of the usable flag: 0x800000),
+	  - FACTION/SLAYER_SPECIES (plain number, max value 255).
+	    SPECIES with index/value 1 are always considered to be SuperSlayers for their group.
+	Those properties are stored in the ComponentProps ItemEquippable and Char.
+- Changed: SLAYER now works only on items, FACTION on characters. Before, they were synonyms and could be used on both chars and items to access the same property.
+- Removed: unused properties SLAYER, SLAYER_LESSER, SLAYER_SUPER, SLAYER_MISC.
+- Added: log message when a new thread is created or a thread is being renamed.
+
+10-09-2024, Nolok
+- Updated: f_onserver_connectreq_ex now is called whenever an ini connection limit is exceeded (pings, max connections...).
+    Now it stores these parameters:
+    - ARGS  = IP address
+    - LOCAL.TIME_CUR_CONNECTED_MS (RO)  = Monotonic system time when this connection request was handled (milliseconds)
+    - LOCAL.TIME_LAST_CONNECTED_MS (RO) = Monotonic system time of the previous connection attempt/request (milliseconds)
+    - LOCAL.PINGS (RO)                  = Current number of "pings" (connection attempts, the number decays over time)
+    - LOCAL.CONNECTION_REQUESTS (RO)    = Current number of connection requests since i remember of this IP
+    - LOCAL.ALIVE_CONNECTIONS (RO)      = How many active and successiful connections i have with this IP
+    - LOCAL.PENDING_CONNECTING (RO)     = How many active connection attempts or incomplete connections i have to this IP
+    - LOCAL.BAN_TIMEOUT (RW)            = unchanged -> 5 * 60 (default), seconds to keep banned the ip from new connections to the server (permanent if negative).
+
+    RETURN -1: Don't do anything, let the connection pass.
+    RETURN 1:  Only reject the connection.
+    RETURN 2:  Reject and ban the IP for <LOCAL.BAN_TIMEOUT> seconds.
+
+17-09-2024, Nolok
+- Fixed: When acquiring a new pet follower, CurFollower incremented by 1 regardless of pet's FollowerSlots value (Issue #1251).
+- Fixed: dynamic FOLLOWERSLOTS property wasn't correctly saved and loaded from a worldsave.
+- Added: dynamic FOLLOWERSLOTS property is now copied to the figurine as TAG.FOLLOWERSLOTS when an NPC is shrinked, and it's applied back when unshrinked.
+- Fixed: "mounting"/guiding through the ship pilot exit/dismount bug.
+
+21-09-2024, Nolok
+- Changed: CURFOLLOWER.n now works as a reference for that pet, meaning it can be accessed as an object (like with FINDID).
+- Changed: added desired FollowerSlots as a second argument to CURFOLLOWER.ADD. Default value: its FollowerSlots.
+- Changed: @FollowerUpdate ARGN1 and ARGN2 are now read-only. Having them RW and actually get them working would have meant many other changes, breaking script compatibility.
+- Fixed: CURFOLLOWER.DEL/DELETE/CLEAR not working properly.
+
+03-10-2024, Nolok
+- Fixed: LIST.ADD ignoring quoted arguments (Issue #1247).
+- Fixed: FOOD and MAXFOOD not being stored in the worldsave file (Issue #1289).
+- Added: CURFOLLOWER.CHARCOUNT, to return the raw number of characters you own/that are following you. Plain CURFOLLOWER returns the current total FOLLOWERSLOTS you own.
+- Changed: removed CURFOLLOWER.DEL and CURFOLLOWER.DELETE in favor of the more specific:
+    CURFOLLOWER.DELUID: The same as .DEL/DELETE, just removed the pet via its UID.
+    CURFOLLOWER.DELINDEX: Removes the pet via its id in the (cur)follower list for that owner.
+- Added: spells with SPELLFLAG_SUMMON now accept LOCAL.FollowerSlotsOverride in the triggers @Success and @SpellSuccess. Default value (do not override): -1.
+
+13-10-2024, Jhobean
+- Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
+
+27-11-2024, canerksk
+- Added: All skills that have a distance query have been adjusted to take the RANGE values of that skill.
+	All skills to be used in RANGE;
+		BLACKSMITHING
+		MINING // It was added before.
+		FISHING // It was added before.
+		LUMBERJACKING // It was added before.
+		PEACEMAKING
+		ENTICEMENT
+		PROVOCATION
+		COOKING
+		TAMING
+		THROWING
+		SNOOPING
+		STEALING
+	Also added BREATH.MAXDIST to Breath. If this property is not given, the default is 14 distance.
+- Added: Added NOREJOIN tag for corpses, If the NOREJOIN tag is one, the player cannot come back to life on that corpse. That is, the player comes back to life but not on the corpse.
+	This tag does not prevent the player from coming back to life, it just prevents them from respawning on that corpse. The player always comes back to life, but not on that corpse.
+- Fixed: If you are around an entity that you own and you are trying to open a bank next to a bank, the "bank" command is perceived as a pet command and the bank does not open. There is no problem when you type "bank" after mounting the mount, but "bank" does not work when you dismount. (Issue #1331)
+
+27-11-2024, Gladie
+- Fixed: Redeeding t_multi_addon outside of housing system. Before it was only looking for owner of the multi, but in our case we need to know uid of the redeeding char.
+
+2-12-2024, canerksk
+- Fixed: Memory OnTick link char if not, the skill will not fail.
+	If the memory owner is not present, skills do not fail when taking damage, but if the memory owner is alive, skills fail when taking damage.
+- Fixed: The entity was jumping frames in flooded pet commands (come, guard).
+- Fixed: ITEMMEMORYEQUIP is not triggered in many default memories.
+	Previously, many memories did not have morex information, but now for some reason many memories have morex information and for this reason the trigger was not triggered in almost most of the memories, the morex query was removed. Also, the slang did not represent the memory item.
+
+02-12-2024, raydie
+- Added: Add LAYER_SPELL_Explosion for use delayed explosion spell. Now if set Duration to spell explosion, these duration is the delay to execute the explosion (From UOGuide, explosion spell: 2 second delay between targetting and explosion).
+
+3-12-2024, canerksk
+- Added: New trigger @HitReactive Reactive Armor plays a key role in the action mechanism and is currently under very fixed rules. It has been added as a new trigger with some variables to make it a bit more flexible.
+	@HitReactive
+	Local.Sound (r/w) =Sound ID, If it is blank or zero, no sound is produced. (Default: 01F1)
+	Local.EffectID (r/w) = Effect ID, If it is empty or zero, no effect will occur. (Default: 0374a)
+	Local.Damage (r/w) = This is the more1l, or PolyStr, value coming from the reactive armor spell to i_rune_reactive_armor.
+	LOCAL.ReflectDamage (r/w) = The amount of damage that will be reflected to this other party
+	LOCAL.ReduceDamage (r/w) = Amount to be deducted from damage received
+	LOCAL.DamageType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
+	NOTE; 
+		1. If no ReflectDamage or ReduceDamage values are entered, the system defaults to the Reactive Armor Effect value.
+		2. No damage amount can be less than 1.
+
+4-12-2024, canerksk
+- Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel.
+
+6-12-2024, canerksk
+- Added: Added LOCAL.WOPTalkMode in @SpellCast trigger and ini setting WOPTalkMode.
+	In some clients, different operations can be performed in return for this, for example, if this talkmode went from sphere as TALKMODE SPELL, the operation is performed according to this incoming talk mode according to the client versions. Here, the possibility of changing the talkmode according to the client version used is given. By default, TALKMODE_SPELL
+	Default talk mode: TALKMODE_SPELL = 10
+	Sphere.ini;
+	WOPTalkMode=0/14
+	
+	Trigger;
+	@SpellCast
+	Local.WOPTalkMode=0/14
+	
+	TALKMODE_SAY        = 0 // A character speaking.
+	TALKMODE_SYSTEM     = 1 // Display as system prompt
+	TALKMODE_EMOTE      = 2 // *smiles* at object (client shortcut: :+space)
+	TALKMODE_ITEM       = 6 // text labeling an item. Preceeded by "You see"
+	TALKMODE_NOSCROLL   = 7 // As a status msg. Does not scroll (as reported by the packet guides)
+	TALKMODE_WHISPER    = 8 // Only those close can here. (client shortcut: ;+space)
+	TALKMODE_YELL       = 9 // Can be heard 2 screens away. (client shortcut: !+space)
+	TALKMODE_SPELL      = 10 // Used by spells
+	TALKMODE_GUILD      = 13 // Used by guild chat (client shortcut: \)
+	TALKMODE_ALLIANCE   = 14 // Used by alliance chat (client shortcut: shift+\)
+
+08-01-2025, DavideRei
+- Fixed: NPC FLEE action didn't work because it was using action target (empty) instead of fight target
+
+28-02-2025, canerksk
+- Added: Add OpenDoorMacro and World Search Distance as Local Variables to @UserExtCmd Trigger
+	LOCAL.DoorAutoDist <distance> (R/W). Default Distance = 2.
+	eg;
+	@UserExtCmd
+	Serv.Log <DLOCAL.DoorAutoDist>
+	Local.DoorAutoDist=10
+
+28-02-2025, cbnolok
+- Fixed: failing assertion if targeting a non-corpse object when casting Animate Dead spell.
+
+09-03-2025, cbnolok
+- Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (partial fix for Issue #1249).
+  Also, stamina wasn't consumed, thus NPCs had no limit in placing those items.
+
+11-03-2025, cbnolok
+- Added: log message with informations about the newly created object, if just placed in a sector exceeding complexity threshold.
+
+15-03-2025, cbnolok
+- Fixed: when using the ini setting ItemTimers=1 (enabling items to tick even if inside a container), the items kept ticking even after a char logout.
+- Fixed: when using the ini setting ItemTimers=1, items ticked on npcs ridden by a disconnected char.
+
+

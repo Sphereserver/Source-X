@@ -1,13 +1,17 @@
 // Test things to judge what an NPC might be thinking. (want to do)
 // But take no actions here.
+
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
+#include "../items/CItemContainer.h"
+#include "../items/CItemMemory.h"
 #include "../items/CItemVendable.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CWorldGameTime.h"
-#include "../CWorldMap.h"
 #include "../CWorldSearch.h"
-#include "../spheresvr.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 
 CREID_TYPE CChar::NPC_GetAllyGroupType(CREID_TYPE idTest) // static
 {
@@ -491,7 +495,7 @@ CChar * CChar::NPC_PetGetOwnerRecursive() const
 	CChar *pCharOwner = nullptr, *pCharOwnerNext = const_cast<CChar*>(this);
 	while ((pCharOwnerNext = pCharOwnerNext->NPC_PetGetOwner()) != nullptr)
 	{
-		if (iReentrantCheck_PetGetOwnerRecursive > 30)
+        if (iReentrantCheck_PetGetOwnerRecursive > 16)
 		{
 			DEBUG_ERR(("Too many owners (circular ownership?) to continue searching the primary owner of %s uid=0%x\n", GetName(), GetUID().GetPrivateUID()));
 			iReentrantCheck_PetGetOwnerRecursive = 0;
@@ -728,7 +732,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	if ( pCharOwn != nullptr && pCharOwn != this )
 	{
 		static int sm_iReentrant = 0;
-		if (sm_iReentrant > 32)
+        if (sm_iReentrant > 16)
 		{
 			DEBUG_ERR(("Too many owners (circular ownership?) to continue acquiring hostility level towards %s uid=0%x\n", pCharOwn->GetName(), pCharOwn->GetUID().GetPrivateUID()));
 			return 0;

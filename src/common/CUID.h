@@ -100,13 +100,15 @@ public:
 	void SetObjContainerFlags(dword dwFlags) noexcept;
     void RemoveObjFlags(dword dwFlags) noexcept;
 
-	inline void SetPrivateUID(dword dwVal) noexcept {
-		m_dwInternalVal = dwVal;
-	}
-	inline dword GetPrivateUID() const noexcept {
-		return m_dwInternalVal;
-	}
+    // Internal UID, which also has special flags not understood by the client.
+    inline void SetPrivateUID(dword dwVal) noexcept {
+        m_dwInternalVal = dwVal;
+    }
+    inline dword GetPrivateUID() const noexcept {
+        return m_dwInternalVal;
+    }
 
+    // Most often you want to use ObjUID, which also is the one sent to the client.
 	dword GetObjUID() const noexcept;
 	void SetObjUID(dword dwVal) noexcept;
 

@@ -8,7 +8,6 @@
 
 #include "../../CTextConsole.h"
 #include "../CResourceLink.h"
-#include "../CValueDefs.h"
 
 class CSTime;
 class CClient;

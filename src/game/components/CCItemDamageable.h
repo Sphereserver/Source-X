@@ -20,13 +20,13 @@ class CCItemDamageable : public CComponent
     word _iMaxHits;
     int64 _iTimeLastUpdate;
     bool _fNeedUpdate;
-    
+
 public:
     CCItemDamageable(CItem *pLink);
     virtual ~CCItemDamageable() override = default;
-    static bool CanSubscribe(const CItem* pItem);
+    static bool CanSubscribe(const CItem* pItem) noexcept;
 
-    CItem *GetLink() const;
+    CItem *GetLink() const noexcept;
 
     void SetCurHits(word iCurHits);
     void SetMaxHits(word iMaxHits);

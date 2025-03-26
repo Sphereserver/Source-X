@@ -1,11 +1,13 @@
 #include "../../../game/chars/CChar.h"
 #include "../../../game/clients/CClient.h"
+#include "../../../game/items/CItemStone.h"
 #include "../../../game/CServer.h"
 #include "../../../game/CWorld.h"
 #include "../../../game/CWorldGameTime.h"
 #include "../../../network/CClientIterator.h"
 #include "../../sphere_library/CSFileList.h"
 #include "../../CException.h"
+#include "../../CExpression.h"
 #include "../../sphereversion.h"
 #include "../CResourceLock.h"
 #include "CWebPageDef.h"
@@ -37,16 +39,17 @@ lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 
 class CSFileConsole : public CTextConsole
 {
-private:
-	CSFileConsole(const CSFileConsole& copy);
-	CSFileConsole& operator=(const CSFileConsole& other);
-
 public:
 	static const char *m_sClassName;
 	CSFileText m_FileOut;
 
 public:
 	CSFileConsole() = default;
+    virtual ~CSFileConsole();
+    CSFileConsole(const CSFileConsole& copy) = delete;
+	CSFileConsole& operator=(const CSFileConsole& other) = delete;
+
+
 	virtual PLEVEL_TYPE GetPrivLevel() const
 	{
 		return PLEVEL_Admin;
@@ -63,6 +66,7 @@ public:
 	}
 };
 
+CSFileConsole::~CSFileConsole() = default;
 
 //********************************************************
 // -CWebPageDef
@@ -386,8 +390,8 @@ void CWebPageDef::WebPageLog()
 
 	lpctstr pszExt = FileRead.GetFileExt();
 
-	tchar szName[ _MAX_PATH ];
-	Str_CopyLimitNull( szName, m_sDstFilePath, _MAX_PATH);
+	tchar szName[ SPHERE_MAX_PATH ];
+	Str_CopyLimitNull( szName, m_sDstFilePath, SPHERE_MAX_PATH);
 	szName[ m_sDstFilePath.GetLength() - strlen(pszExt) ] = '\0';
 
 	CSTime datetime = CSTime::GetCurrentTime();
@@ -776,7 +780,7 @@ void CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	ADDTOCALLSTACK("CWebPageDef::ServPage");
 	// make sure this is a valid format for the request.
 
-	tchar szPageName[_MAX_PATH];
+	tchar szPageName[SPHERE_MAX_PATH];
 	Str_GetBare( szPageName, pszPage, sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" );
 
 	int iError = 404;

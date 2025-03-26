@@ -9,7 +9,7 @@
 #include <cstdio>   // for vsnprintf
 #endif
 
-#define	STRING_DEFAULT_SIZE	42
+#define	CSTRING_DEFAULT_SIZE	42
 
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
@@ -67,7 +67,7 @@ CSString::CSString(const CSString& s) :
 // private
 void CSString::Init()
 {
-	m_iMaxLength = STRING_DEFAULT_SIZE;
+    m_iMaxLength = CSTRING_DEFAULT_SIZE;
 #ifdef DEBUG_STRINGS
 	gMemAmount += m_iMaxLength;
 #endif
@@ -103,9 +103,9 @@ bool CSString::IsValid() const noexcept
 
 int CSString::Resize(int iNewLength, bool fPreciseSize)
 {
-	if (iNewLength >= m_iMaxLength)
+    const bool fValid = IsValid();
+    if ((iNewLength >= m_iMaxLength) || !fValid)
 	{
-		const bool fValid = IsValid();
 #ifdef DEBUG_STRINGS
 		gMemAmount -= m_iMaxLength;
 #endif
@@ -117,7 +117,7 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
         }
         else
         {
-            //m_iMaxLength = iNewLength + (STRING_DEFAULT_SIZE >> 1);   // Probably too much...
+            //m_iMaxLength = iNewLength + (CSTRING_DEFAULT_SIZE >> 1);   // Probably too much...
             m_iMaxLength = (iNewLength * 3) >> 1;   // >> 2 is equal to doing / 2
         }
 
@@ -131,14 +131,25 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
 		{
 			const int iMinLength = 1 + minimum(iNewLength, m_iLength);
 			Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
-			delete[] m_pchData;
 		}
-		pNewData[m_iLength] = '\0';
+        if (fValid)
+            delete[] m_pchData;
 		m_pchData = pNewData;
 	}
+	ASSERT(m_pchData);
 	m_iLength = iNewLength;
 	m_pchData[m_iLength] = '\0';
 	return m_iLength;
+}
+
+void CSString::SetValFalse()
+{
+    Copy("0");
+}
+
+void CSString::SetValTrue()
+{
+    Copy("1");
 }
 
 
@@ -250,7 +261,7 @@ CSString& CSString::operator=(CSString&& s) noexcept
 
 // CSString:: Formatting
 
-void _cdecl CSString::Format(lpctstr pStr, ...)
+void CSString::Format(lpctstr pStr, ...)
 {
 	va_list vargs;
 	va_start(vargs, pStr);
@@ -396,6 +407,65 @@ void CSString::FormatU64Val(uint64 uiVal)
 #undef FORMATNUM_WRAPPER
 
 // CSString:: String operations
+
+tchar CSString::GetAt(int nIndex) const
+{
+    ASSERT(nIndex >= 0);
+    ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
+    return m_pchData[nIndex];
+}
+
+tchar& CSString::ReferenceAt(int nIndex)
+{
+    ASSERT(nIndex >= 0);
+    ASSERT(nIndex < m_iLength);
+    return m_pchData[nIndex];
+}
+
+void CSString::MakeUpper() noexcept
+{
+    _strupr(m_pchData);
+}
+
+void CSString::MakeLower() noexcept
+{
+    _strlwr(m_pchData);
+}
+
+void CSString::Reverse() noexcept
+{
+    Str_Reverse(m_pchData);
+}
+
+int CSString::Compare(lpctstr pStr) const noexcept
+{
+    return strcmp(m_pchData, pStr);
+}
+
+int CSString::CompareNoCase(lpctstr pStr) const noexcept
+{
+    return strcmpi(m_pchData, pStr);
+}
+
+int CSString::indexOf(tchar c) noexcept
+{
+    return indexOf(c, 0);
+}
+
+int CSString::indexOf(const CSString& str) noexcept
+{
+    return indexOf(str, 0);
+}
+
+int CSString::lastIndexOf(tchar c) noexcept
+{
+    return lastIndexOf(c, 0);
+}
+
+int CSString::lastIndexOf(const CSString& str) noexcept
+{
+    return lastIndexOf(str, 0);
+}
 
 int CSString::indexOf(tchar c, int offset) noexcept
 {

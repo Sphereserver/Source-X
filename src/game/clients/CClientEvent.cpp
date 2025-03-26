@@ -1,20 +1,22 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
+#include "../items/CItemContainer.h"
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CSector.h"
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
-#include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
 
@@ -113,7 +115,7 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 		if ( !pObj->IsChar() )
 		{
 			CItem *pItem = dynamic_cast<CItem *>(pObj);
-			if (pItem == nullptr || (( pObj->GetBaseID() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
+			if (pItem == nullptr || (( pObj->GetIDCommon() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
 				return;
 
 			if ( wHue < HUE_BLUE_LOW )
@@ -1030,7 +1032,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	}
 
 	addPlayerWarMode();
-	m_pChar->UpdateMode( this, m_pChar->IsStatFlag( STATF_DEAD ));
+    m_pChar->UpdateMode(m_pChar->IsStatFlag(STATF_DEAD), this);
 }
 
 bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
@@ -1192,8 +1194,8 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
                     CCharBase* pPetDef = CCharBase::FindCharBase(CREID_TYPE(pItemPet->m_ttFigurine.m_idChar.GetResIndex()));
                     if (pPetDef)
                     {
-                        short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS");
-                        if (!m_pChar->FollowersUpdate(pVendor, (maximum(0, iFollowerSlots) * items[i].m_vcAmount), true))
+                        const short uiFollowerSlots = n64_narrow_n16(pItem->GetDefNum("FOLLOWERSLOTS", true));
+                        if (!m_pChar->FollowersUpdate(pVendor, (uiFollowerSlots * items[i].m_vcAmount), true))
                         {
                             m_pChar->SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
                             return;
@@ -1986,6 +1988,15 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
             break;
 		}
        */
+        // NPC's with special key words ?
+        if (pChar->m_pNPC)
+        {
+            if (pChar->m_pNPC->m_Brain == NPCBRAIN_BANKER)
+            {
+                if (FindStrWord(pszText, "BANK") > 0)
+                    break;
+            }
+        }
 	}
 
 	if ( !pChar )
@@ -2234,7 +2245,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 		ptcKey += 6;
 		SKIP_SEPARATORS(ptcKey);
 
-		size_t iQty = m_CheckArray.size();
+        const size_t iQty = m_CheckArray.size();
 		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
@@ -2252,17 +2263,17 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( ptcKey );
+        const dword dwNum = Exp_GetDWSingle( ptcKey );
 		SKIP_SEPARATORS(ptcKey);
 		for ( uint i = 0; i < iQty; ++i )
 		{
 			if ( dwNum == m_CheckArray[i] )
 			{
-				sVal = "1";
+                sVal.SetValTrue();
 				return true;
 			}
 		}
-		sVal = "0";
+		sVal.SetValFalse();
 		return true;
 	}
 	if ( ! strnicmp( ptcKey, "ARGTXT", 6 ))
@@ -2270,14 +2281,14 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConso
 		ptcKey += 6;
 		SKIP_SEPARATORS(ptcKey);
 
-		size_t iQty = m_TextArray.size();
+        const size_t iQty = m_TextArray.size();
 		if ( ptcKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
 			return true;
 		}
 
-		dword dwNum = Exp_GetDWSingle( ptcKey );
+        const dword dwNum = Exp_GetDWSingle( ptcKey );
 		SKIP_SEPARATORS(ptcKey);
 
 		for ( uint i = 0; i < iQty; ++i )
@@ -2693,7 +2704,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 			else if (m_pChar->m_pParty != nullptr && m_pChar->m_pParty->IsPartyMaster(m_pChar))
 			{
-				if (m_pChar->m_pParty == nullptr)
+				if (pChar->m_pParty == nullptr)
 					m_pPopupPacket->addOption(POPUP_PARTY_ADD, 197, POPUPFLAG_COLOR, 0xFFFF);
 				else if (pChar->m_pParty == m_pChar->m_pParty)
 					m_pPopupPacket->addOption(POPUP_PARTY_REMOVE, 198, POPUPFLAG_COLOR, 0xFFFF);
@@ -2965,12 +2976,23 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
         return;
     }
 
+    byte bDoorAutoDist = 1;
 	if ( IsTrigUsed(TRIGGER_USEREXTCMD) )
 	{
 		CScriptTriggerArgs Args(pszName);
 		Args.m_iN1 = type;
+
+        if (type == EXTCMD_DOOR_AUTO)
+            Args.m_VarsLocal.SetNumNew("DoorAutoDist", bDoorAutoDist);
+
 		if ( m_pChar->OnTrigger(CTRIG_UserExtCmd, m_pChar, &Args) == TRIGRET_RET_TRUE )
 			return;
+
+        if (type == EXTCMD_DOOR_AUTO)
+        {
+            bDoorAutoDist = (byte)std::clamp(Args.m_VarsLocal.GetKeyNum("DoorAutoDist"), (int64)0, (int64)UO_MAP_VIEW_SIGHT);
+        }
+
 		Str_CopyLimitNull(pszName, Args.m_s1, MAX_TALK_BUFFER);
 	}
 
@@ -3065,7 +3087,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			char iCharZ = pt.m_z;
 
 			pt.Move(m_pChar->m_dirFace);
-			auto Area = CWorldSearchHolder::GetInstance(pt, 1);
+            auto Area = CWorldSearchHolder::GetInstance(pt, bDoorAutoDist);
 			for (;;)
 			{
 				CItem *pItem = Area->GetItem();

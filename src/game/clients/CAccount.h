@@ -5,13 +5,15 @@
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
 
-#include "../../network/CSocket.h"
+#include "../../common/resource/CResourceSortedArrays.h" // For CObjNameSortArray
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/sphereproto.h"
+#include "../../common/sphere_library/CSTime.h"
+#include "../../common/CLanguageID.h"
 #include "../../common/CScriptObj.h"
+#include "../../common/CVarDefMap.h"
+#include "../../network/CSocket.h"
 #include "../chars/CCharRefArray.h"
-#include "../CServerConfig.h"
-#include "../game_enums.h"
+#include <map>
 
 #define PRIV_UNUSED0		0x0001
 #define PRIV_GM				0x0002	// Acts as a GM (dif from having GM level)
@@ -33,6 +35,7 @@
 
 
 class CClient;
+enum PLEVEL_TYPE : int;
 
 /**
 * @brief Single account information.
@@ -51,7 +54,7 @@ private:
 
 	word m_PrivFlags; // optional privileges for char (bit-mapped)
 
-	byte m_ResDisp; // current CAccount resdisp.
+    RESDISPLAY_VERSION m_ResDisp; // current CAccount resdisp.
 	byte m_MaxChars; // Max chars allowed for this CAccount.
 
 	typedef struct { llong m_First; llong m_Last; llong m_vcDelay; } TimeTriesStruct_t;
@@ -106,7 +109,7 @@ public:
 	* We should go track down and delete all the chars and clients that use this account !
 	*/
 	// virtual not required at the moment but might be if subclassed
-	virtual ~CAccount();
+	virtual ~CAccount() override;
 
 	/************************************************************************
 	* SCP related section.
@@ -193,18 +196,18 @@ public:
 	* @param what resdisp to set.
 	* @return true on success, false otherwise.
 	*/
-	bool SetResDisp(byte what);
+    bool SetResDisp(RESDISPLAY_VERSION what);
 	/**
 	* @brief Gets the current resdisp on this CAccount.
 	* @return The current resdisp.
 	*/
-	byte GetResDisp() const { return m_ResDisp; }
+    RESDISPLAY_VERSION GetResDisp() const { return m_ResDisp; }
 	/**
 	* @brief Updates the resdisp if the current is lesser.
 	* @param what the resdisp to update.
 	* @return true if success, false otherwise.
 	*/
-	bool SetGreaterResDisp(byte what);
+    bool SetGreaterResDisp(RESDISPLAY_VERSION what);
 	/**
 	* @brief Sets the resdisp on this CAccount based on pClient version.
 	* @return true if success, false otherwise.
@@ -215,7 +218,7 @@ public:
 	* @param what the resdisp to check.
 	* @return true if the current resdisp is equal to what, false otherwise.
 	*/
-	bool IsResDisp(byte what) const { return ( m_ResDisp == what ); }
+    bool IsResDisp(RESDISPLAY_VERSION what) const { return ( m_ResDisp == what ); }
 
 	/************************************************************************
 	* Privileges related section.
@@ -349,8 +352,9 @@ protected:
 	static lpctstr const sm_szVerbKeys[]; // ACCOUNT action list.
 	CObjNameSortArray m_Accounts; // Sorted CAccount list.
 public:
-    CAccounts() : m_fLoading(false) {
-
+    CAccounts() noexcept
+        : m_fLoading(false)
+    {
     }
 	/**
 	* CAccount needs CAccounts methods.

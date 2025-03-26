@@ -1,5 +1,8 @@
 #include "../common/sphere_library/scontainer_ops.h"
+#include "../common/CExpression.h"
 #include "../game/items/CItem.h"
+#include "../game/uo_files/CUOMultiItemRec.h"
+#include "../game/uo_files/CUOStaticItemRec.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
 #include "../game/CWorldMap.h"
@@ -9,6 +12,10 @@
 #include "CPointBase.h"
 #include <cmath>
 
+#include "../game/uo_files/CUOMapList.h"
+
+
+static_assert(sizeof(CPointBase) == sizeof(CPointMap), "CPointBase and CPointMap have to have the same size. Was a virtual method added?");
 
 DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 {
@@ -27,7 +34,7 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 lpctstr CPointBase::sm_szDirs[] {"\0"};
 void CPointBase::InitRuntimeDefaultValues()
 {
-	AssignInitlistToCSizedArray(
+    sl::AssignInitlistToCSizedArray(
 		CPointBase::sm_szDirs, ARRAY_COUNT(CPointBase::sm_szDirs),
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_0),
@@ -905,6 +912,7 @@ int CPointBase::Read( tchar * pszVal )
     CPointBase ptTest;
     ptTest.m_z = 0;
     ptTest.m_map = 0;
+    bool fError = false;
 
 	tchar * ppVal[4];
 	int iArgs = Str_ParseCmds( pszVal, ppVal, ARRAY_COUNT( ppVal ), " ,\t" );
@@ -914,7 +922,14 @@ int CPointBase::Read( tchar * pszVal )
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-                ptTest.m_map = (uchar)(Str_ToUI(ppVal[3]));
+                const std::optional<uchar> from = Str_ToU8(ppVal[3]);
+                if (!from.has_value())
+                {
+                    fError = true;
+                    break;
+                }
+
+                ptTest.m_map = from.value();
 				if ( !g_MapList.IsMapSupported(ptTest.m_map) )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", ptTest.m_map);
@@ -925,26 +940,48 @@ int CPointBase::Read( tchar * pszVal )
 		case 3: // m_z
 			if (IsDigit(ppVal[2][0]) || ppVal[2][0] == '-')
 			{
-				ptTest.m_z = (char)(Str_ToI(ppVal[2]));
+                const std::optional<char> from = Str_ToI8(ppVal[2]);
+                if (!from.has_value())
+                {
+                    fError = true;
+                    break;
+                }
+
+				ptTest.m_z = from.value();
 			}
 			FALLTHROUGH;
 		case 2:
 			if (IsDigit(ppVal[1][0]))
 			{
-				ptTest.m_y = (short)(Str_ToI(ppVal[1]));
+                const std::optional<short> from = Str_ToI16(ppVal[1]);
+                if (!from.has_value())
+                {
+                    fError = true;
+                    break;
+                }
+
+				ptTest.m_y = from.value();
 			}
 			FALLTHROUGH;
 		case 1:
 			if (IsDigit(ppVal[0][0]))
 			{
-				ptTest.m_x = (short)(Str_ToI(ppVal[0]));
+                std::optional<short> from = Str_ToI16(ppVal[0]);
+                if (!from.has_value())
+                {
+                    fError = true;
+                    break;
+                }
+
+				ptTest.m_x = from.value();
 			}
 			FALLTHROUGH;
 		case 0:
 			break;
 	}
 
-    if (!ptTest.IsValidPoint())
+	fError |= !ptTest.IsValidPoint();
+    if (fError)
     {
         InitPoint();
         return 0;

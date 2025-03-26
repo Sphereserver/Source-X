@@ -1,7 +1,6 @@
 #include "../common/sphere_library/sstring.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "../sphere/ProfileTask.h"
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CTimedFunctionHandler.h"
@@ -27,15 +26,13 @@ bool CTimedFunction::IsDeleted() const // virtual
 }
 
 
-bool CTimedFunction::_CanTick(bool fParentGoingToSleep) const // virtual
+bool CTimedFunction::_CanTick() const // virtual
 {
-	UnreferencedParameter(fParentGoingToSleep);
 	return true;
 }
 
-bool CTimedFunction::CanTick(bool fParentGoingToSleep) const // virtual
+bool CTimedFunction::CanTick() const // virtual
 {
-	UnreferencedParameter(fParentGoingToSleep);
 	return true;
 }
 

@@ -1,9 +1,14 @@
 
 #include "CException.h"
 
+#ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
+#include "crashdump/crashdump.h"
+#endif
+
 #ifndef _WIN32
 #include <sys/wait.h>
-#include <csignal>
+//#include <pthread.h>    // for pthread_exit
+#include <signal.h>
 #include <cstring>
 
 #include "../game/CServer.h"
@@ -44,18 +49,61 @@ void NotifyDebugger()
     {
 
 #ifdef _WIN32
-    #ifdef _MSC_VER
+    #ifdef MSVC_COMPILER
         __debugbreak();
     #else
+        SetAbortImmediate(false);
         std::abort();
     #endif
 #else
-        std::raise(SIGINT);
+        raise(SIGINT);
 #endif
 
     }
 }
 
+
+// Is it unrecoverable? Should i exit cleanly or stop immediately?
+// Set this just before calling abort.
+static bool* _GetAbortImmediate() noexcept
+{
+    static bool _fIsAbortImmediate = true;
+    return &_fIsAbortImmediate;
+}
+
+void SetAbortImmediate(bool on) noexcept
+{
+    *_GetAbortImmediate() = on;
+}
+#ifndef _WIN32
+static bool IsAbortImmediate() noexcept
+{
+    return *_GetAbortImmediate();
+}
+#endif
+
+[[noreturn]]
+void RaiseRecoverableAbort()
+{
+    EXC_NOTIFY_DEBUGGER;
+    SetAbortImmediate(false);
+    std::abort();
+}
+
+[[noreturn]]
+void RaiseImmediateAbort()
+{
+    EXC_NOTIFY_DEBUGGER;
+    SetAbortImmediate(true);
+
+//#if !defined(_WIN32)
+//    pthread_exit(EXIT_FAILURE);
+#if defined(__GNUC__) || defined(__clang__)
+    __builtin_trap();
+#else
+    std::abort();
+#endif
+}
 
 #ifdef _WIN32
 int CSError::GetSystemErrorMessage(dword dwError, lptstr lpszError, dword dwErrorBufLength) // static
@@ -145,18 +193,18 @@ bool CAssert::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-#ifdef _WIN32
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
 
-CWinException::CWinException(uint uCode, size_t pAddress) :
+CWinStructuredException::CWinStructuredException(uint uCode, size_t pAddress) :
 	CSError(LOGL_CRIT, uCode, "Exception"), m_pAddress(pAddress)
 {
 }
 
-CWinException::~CWinException()
+CWinStructuredException::~CWinStructuredException()
 {
 }
 
-bool CWinException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
+bool CWinStructuredException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 {
 	lpctstr zMsg;
 	switch ( m_hError )
@@ -181,13 +229,14 @@ bool CWinException::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
+[[noreturn]]
 void Assert_Fail( lpctstr pExp, lpctstr pFile, long long llLine )
 {
 	EXC_NOTIFY_DEBUGGER;
 	throw CAssert(LOGL_CRIT, pExp, pFile, llLine);
 }
 
-void _cdecl Sphere_Purecall_Handler()
+static void SPHERE_CDECL Sphere_Purecall_Handler()
 {
 	// catch this special type of C++ exception as well.
 	Assert_Fail("purecall", "unknown", 1);
@@ -196,7 +245,8 @@ void _cdecl Sphere_Purecall_Handler()
 void SetPurecallHandler()
 {
 	// We don't want sphere to immediately exit if something calls a pure virtual method.
-#ifdef _MSC_VER
+    // Those functions set the behavior process-wide, so there's no need to call this on each thread.
+#ifdef MSVC_COMPILER
 	_set_purecall_handler(Sphere_Purecall_Handler);
 #else
 	// GCC handler for pure calls is __cxxabiv1::__cxa_pure_virtual.
@@ -205,42 +255,37 @@ void SetPurecallHandler()
 #endif
 }
 
-#if defined(_WIN32) && !defined(_DEBUG)
-
-#include "crashdump/crashdump.h"
-
-void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
+#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
+static void SPHERE_CDECL Sphere_Structured_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
 {
-#ifndef _NO_CRASHDUMP
+#   ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
 	if ( CrashDump::IsEnabled() )
 		CrashDump::StartCrashDump(GetCurrentProcessId(), GetCurrentThreadId(), pData);
+#   endif
 
-#endif
 	// WIN32 gets an exception.
 	size_t pCodeStart = (size_t)(byte *) &globalstartsymbol;	// sync up to my MAP file.
 
 	size_t pAddr = (size_t)pData->ExceptionRecord->ExceptionAddress;
 	pAddr -= pCodeStart;
 
-	throw CWinException(id, pAddr);
+    throw CWinStructuredException(id, pAddr);
 }
 
-#endif // _WIN32 && !_DEBUG
-
-void SetExceptionTranslator()
+void SetWindowsStructuredExceptionTranslator()
 {
-#if defined(_MSC_VER) && !defined(_DEBUG)
-	_set_se_translator( Sphere_Exception_Windows );
-#endif
+    // Process-wide, no need to call this on each thread.
+    _set_se_translator( Sphere_Structured_Exception_Windows );
 }
+#endif
 
 #ifndef _WIN32
-void _cdecl Signal_Hangup(int sig = 0) // If shutdown is initialized
+static void Signal_Hangup(int sig = 0) noexcept // If shutdown is initialized
 {
     UnreferencedParameter(sig);
 
 #ifdef THREAD_TRACK_CALLSTACK
-    static bool _Signal_Hangup_stack_printed = false;
+    static thread_local bool _Signal_Hangup_stack_printed = false;
     if (!_Signal_Hangup_stack_printed)
     {
         StackDebugInformation::printStackTrace();
@@ -254,13 +299,13 @@ void _cdecl Signal_Hangup(int sig = 0) // If shutdown is initialized
     g_Serv.SetExitFlag(SIGHUP);
 }
 
-void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
+static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
 {
-    sigset_t set;
 
-    g_Log.Event(LOGL_FATAL, "Server Unstable: %s\n", strsignal(sig));
+    g_Log.Event(LOGL_FATAL, "Server Unstable: %s signal received\n", strsignal(sig));
+
 #ifdef THREAD_TRACK_CALLSTACK
-    static bool _Signal_Terminate_stack_printed = false;
+    static thread_local bool _Signal_Terminate_stack_printed = false;
     if (!_Signal_Terminate_stack_printed)
     {
         StackDebugInformation::printStackTrace();
@@ -270,19 +315,45 @@ void _cdecl Signal_Terminate(int sig = 0) // If shutdown is initialized
 
     if (sig)
     {
+        if ((sig == SIGABRT) && IsAbortImmediate())
+        {
+            // No clean ending. Abort right now.
+            STDERR_LOG("FATAL: Immediate abort requested.");
+
+#if defined(__GNUC__) || defined(__clang__)
+            __builtin_trap();
+#else
+            signal(SIGABRT, SIG_DFL);
+            raise(SIGABRT);
+#endif
+
+            return;
+        }
+
+        sigset_t set;
         signal(sig, &Signal_Terminate);
         sigemptyset(&set);
         sigaddset(&set, sig);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     }
 
     g_Serv.SetExitFlag(SIGABRT);
-    for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
-        ThreadHolder::get().getThreadAt(i)->terminate(false);
-    //exit(EXIT_FAILURE);
+
+    try
+    {
+        for (size_t i = 0; i < ThreadHolder::get().getActiveThreads(); ++i)
+            ThreadHolder::get().getThreadAt(i)->terminate(false);
+    }
+    catch (...)
+    {
+        RaiseImmediateAbort();
+    }
+
+    //exit(EXIT_FAILURE); // Having set the exit flag, all threads "should" terminate cleanly.
 }
 
-void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using secure mode
+static void Signal_Break(int sig = 0)		// signal handler attached when using secure mode
 {
     // Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
     //#ifdef _DEBUG
@@ -292,22 +363,22 @@ void _cdecl Signal_Break(int sig = 0)		// signal handler attached when using sec
 
     g_Log.Event(LOGL_FATAL, "Secure Mode prevents CTRL+C\n");
 
-    sigset_t set;
     if (sig)
     {
+        sigset_t set;
         signal(sig, &Signal_Break);
         sigemptyset(&set);
         sigaddset(&set, sig);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     }
 }
 
-void _cdecl Signal_Illegal_Instruction(int sig = 0)
+static void Signal_Illegal_Instruction(int sig = 0)
 {
 #ifdef THREAD_TRACK_CALLSTACK
     StackDebugInformation::freezeCallStack(true);
 #endif
-    sigset_t set;
 
     g_Log.Event(LOGL_FATAL, "%s\n", strsignal(sig));
 #ifdef THREAD_TRACK_CALLSTACK
@@ -316,10 +387,12 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
 
     if (sig)
     {
+        sigset_t set;
         signal(sig, &Signal_Illegal_Instruction);
         sigemptyset(&set);
         sigaddset(&set, sig);
-        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        //sigprocmask(SIG_UNBLOCK, &set, nullptr);
+        pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
     }
 
 #ifdef THREAD_TRACK_CALLSTACK
@@ -328,10 +401,10 @@ void _cdecl Signal_Illegal_Instruction(int sig = 0)
     throw CSError(LOGL_FATAL, sig, strsignal(sig));
 }
 
-void _cdecl Signal_Children(int sig = 0)
+static void Signal_Children(int sig = 0)
 {
     UnreferencedParameter(sig);
-    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+    while (waitpid((pid_t)(-1), nullptr, WNOHANG) > 0) {}
 }
 #endif
 
@@ -340,15 +413,15 @@ void SetUnixSignals( bool fSet )    // Signal handlers are installed only in sec
 {
 
 #ifdef _SANITIZERS
-    const bool fSan = true;
+    constexpr bool fSan = true;
 #else
-    const bool fSan = false;
+    constexpr bool fSan = false;
 #endif
 
 #ifdef _DEBUG
     const bool fDebugger = IsDebuggerPresent();
 #else
-    const bool fDebugger = false;
+    constexpr bool fDebugger = false;
 #endif
 
     if (!fDebugger && !fSan)

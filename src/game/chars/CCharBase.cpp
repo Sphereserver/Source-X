@@ -4,6 +4,8 @@
 #include "../../common/CLog.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemChar.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../uo_files/uofiles_enums_itemid.h"
 #include "../CServerConfig.h"
 #include "CCharBase.h"
 
@@ -20,7 +22,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_defense = 0;
 	m_defenseBase = 0;
 	m_defenseRange = 0;
-	m_Anims = 0xFFFFFF;
+	m_Anims = 0;
   	m_MaxFood = 0;			// Default value
 	_wBloodHue = 0;
 	m_wColor = 0;
@@ -340,12 +342,15 @@ bool CCharBase::r_LoadVal( CScript & s )
 			}
 			break;
 		//Set as number only
-		case CBC_FOLLOWERSLOTS:
+        case CBC_FOLLOWERSLOTS:
 		case CBC_MAXFOLLOWER:
-		case CBC_BONDED:
-		case CBC_TITHING:
-			SetDefNum(s.GetKey(), s.GetArgVal(), false);
+            SetDefNum(s.GetKey(), abs(s.GetArgVal()), false);
 			break;
+
+        case CBC_BONDED:
+        case CBC_TITHING:
+            SetDefNum(s.GetKey(), s.GetArgLLVal(), false);
+            break;
 
 		case CBC_ANIM:
 			m_Anims = s.GetArgVal();

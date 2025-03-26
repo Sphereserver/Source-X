@@ -2,7 +2,6 @@
 #ifndef _WIN32
 
 #include "../common/CException.h"
-#include "../game/CServer.h"
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES
@@ -12,7 +11,7 @@
 #endif
 
 
-UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", IThread::Highest),
+UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", ThreadPriority::Highest),
 #ifdef _USECURSES
 	m_window(nullptr),
 #else
@@ -28,6 +27,17 @@ UnixTerminal::~UnixTerminal()
 	restore();
     //_thread_selfTerminateAfterThisTick = true;  // just to be sure
 }
+
+/*
+bool isInputAvailable()
+{
+    fd_set fds;
+    struct timeval tv = {0, 0}; // Non-blocking, immediate return
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv) > 0;
+}
+*/
 
 bool UnixTerminal::isReady()
 {
@@ -74,7 +84,7 @@ bool UnixTerminal::isReady()
 	tvTimeout.tv_sec = 0;
 	tvTimeout.tv_usec = 1;
 
-	if (select(1, &consoleFds, 0, 0, &tvTimeout) <= 0)
+	if (select(1, &consoleFds, nullptr, nullptr, &tvTimeout) <= 0)
 		return false;
 
 	// get next character
@@ -88,7 +98,7 @@ bool UnixTerminal::isReady()
 
 	// echo to console
 	fputc(c, stdout);
-	//fflush(stdout);
+    fflush(stdout);
 
 	m_nextChar = static_cast<tchar>(c);
 	return m_nextChar != '\0';
@@ -138,7 +148,7 @@ void UnixTerminal::print(lpctstr message)
 	wrefresh(m_window);
 #else
 	fputs(message, stdout);
-    //fflush(stdout);
+    fflush(stdout);
 #endif
 }
 
@@ -163,18 +173,28 @@ void UnixTerminal::prepare()
 	refresh();		// draw screen
 
 #else
-	// save existing attributes
-	if (tcgetattr(STDIN_FILENO, &m_original) < 0)
-		throw CSError(LOGL_WARN, 0, "failed to get terminal attributes");
+    // Am i running Sphere in a terminal?
+    if (isatty(STDIN_FILENO))
+    {
+        // save existing attributes
+        if (tcgetattr(STDIN_FILENO, &m_original) < 0)
+            throw CSError(LOGL_WARN, 0, "failed to get terminal attributes");
 
-	// set new terminal attributes
-	termios term_caps = m_original;
-	term_caps.c_lflag &= ~ unsigned(ICANON | ECHO);
-	term_caps.c_cc[VMIN] = 1;
+        // set new terminal attributes
+        termios term_caps = m_original;
+        term_caps.c_lflag &= ~ unsigned(ICANON | ECHO);
+        term_caps.c_cc[VMIN] = 1;
 
-	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
-		throw CSError(LOGL_WARN, 0, "failed to set terminal attributes");
-
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
+            throw CSError(LOGL_WARN, 0, "failed to set terminal attributes");
+    }
+    else
+    {
+//#ifdef _POSIX_VERSION
+        int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+//#endif
+    }
 	setbuf(stdin, nullptr);
 #endif
 

@@ -1,10 +1,11 @@
+#include "../../common/sphere_library/CSRand.h"
+#include "../../common/CExpression.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../chars/CChar.h"
 #include "../items/CItem.h"
 #include "../items/CItemMulti.h"
-#include "../items/CItemShip.h"
 #include "../CObjBase.h"
 #include "../CServer.h"
 #include "../CWorldMap.h"
@@ -35,6 +36,8 @@ CCMultiMovable::CCMultiMovable(bool fCanTurn) :
     _eSpeedMode = SMS_NORMAL;
     _pCaptain = nullptr;
 }
+
+CCMultiMovable::~CCMultiMovable() = default;
 
 void CCMultiMovable::SetCaptain(CTextConsole * pSrc)
 {
@@ -614,6 +617,7 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
 
                         pt.m_x = pMultiThis->GetTopPoint().m_x + componentnew.m_dx;
                         pt.m_y = pMultiThis->GetTopPoint().m_y + componentnew.m_dy;
+                        pt.m_z = pMultiThis->GetTopPoint().m_z + componentnew.m_dz;
                     }
                 }
             }
@@ -1313,7 +1317,7 @@ bool CCMultiMovable::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * 
             if (pItemThis->m_itShip.m_Pilot.IsValidUID())
                 sVal.FormatHex(pItemThis->m_itShip.m_Pilot);
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         } break;
 
 

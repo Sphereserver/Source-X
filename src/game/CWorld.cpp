@@ -1,14 +1,15 @@
-#include "../common/CDataBase.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
+#include "../common/CLog.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/CNetworkManager.h"
 #include "../sphere/ProfileTask.h"
-#include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
 #include "items/CItemMulti.h"
+#include "items/CItemStone.h"   // Needed to use CItemmStone methods, the unique_ptr was forward declared in the header
 #include "CServer.h"
 #include "CScriptProfiler.h"
 #include "CSector.h"
@@ -23,7 +24,7 @@
 #include <sys/stat.h>
 
 
-lpctstr GetReasonForGarbageCode(int iCode = -1)
+static lpctstr GetReasonForGarbageCode(int iCode = -1) noexcept
 {
 	lpctstr pStr;
 	switch ( iCode )
@@ -184,6 +185,9 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
         case 0x4226:
             pStr = "Old Spawn memory item conversion";
             break;
+        case 0x4227:
+            pStr = "Old Spawn memory item conversion (mislinked)";
+            break;
 
 		case 0xFFFF:
 			pStr = "Bad memory allocation";
@@ -193,7 +197,7 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 	return pStr;
 }
 
-void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
+static void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 {
 	ASSERT(pObj != nullptr);
 
@@ -294,7 +298,7 @@ dword CWorldThread::GetUIDCount() const
 	return (dword)_uiUIDObjArraySize;
 }
 
-CObjBase *CWorldThread::FindUID(dword dwIndex) const
+CObjBase *CWorldThread::FindUID(dword dwIndex) const noexcept
 {
 	if ( !dwIndex || dwIndex >= GetUIDCount() )
 		return nullptr;
@@ -407,9 +411,12 @@ void CWorldThread::AddIdleObj(CSObjContRec* obj)
 
 void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
 {
-    const auto servMode = g_Serv.GetServerMode();
-    const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
     // If the world is being destroyed, do not schedule the object for deletion but delete it right away.
+    const auto servMode = g_Serv.GetServerMode();
+    // I can't destroy it while SERVMODE_Loading, because the script parser can't know (without creating a global state holder, TODO) that this
+    //  object was deleted/destroyed. The object pointer will become invalid, and if something uses it, even for calling a method, Sphere will crash.
+    //const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
+    const bool fDestroy = (servMode == SERVMODE_Exiting);
 
     if (fDestroy)
     {
@@ -501,6 +508,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 			CItem * pItem = dynamic_cast <CItem*>(pObj);
 			if ( pItem != nullptr && pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			{
+                ReportGarbageCollection(pObj, iResultCode);
 				pObj->Delete();
 				return iResultCode;
 			}
@@ -724,7 +732,7 @@ void CWorld::GetBackupName( CSString & sArchive, lpctstr pszBaseDir, tchar chTyp
 		pszBaseDir,
 		iGroup, iCount&0x07,
 		chType,
-		SPHERE_SCRIPT );
+		SPHERE_SCRIPT_EXT );
 }
 
 bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int iSaveCount ) // static
@@ -740,7 +748,7 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 
 	// rename previous save to archive name.
 	CSString sSaveName;
-	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT );
+	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT_EXT );
     if ( iSaveCount > 0 )
     {
         if ( ::rename(sSaveName, sArchive) )
@@ -966,7 +974,7 @@ bool CWorld::SaveForce() // Save world state
 			else
 				pCurBlock = save_msgs[5];
 
-			fSave = SaveStage();
+            fSave = SaveStage();
 			if ( !(_iSaveStage & 0x7F) )
 			{
 				g_Serv.PrintPercent( _iSaveStage, (ssize_t)iSectorsQty + 3 );
@@ -1097,7 +1105,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     auto CalcPrevSavesSize = [=, &fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
     {
         struct stat st;
-        CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;
+        CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT_EXT;
 		if (!stat(strSaveFile.GetBuffer(), &st))
 		{
 			const ullong uiCurSavefileSize = (ullong)st.st_size;
@@ -1356,19 +1364,19 @@ bool CWorld::LoadWorld() // Load world from script
 	// NOTE: WE MUST Sync these files ! CHAR and WORLD !!!
 
 	CSString sStaticsName;
-	sStaticsName.Format("%s" SPHERE_FILE "statics" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sStaticsName.Format("%s" SPHERE_FILE "statics" SPHERE_SCRIPT_EXT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sWorldName;
-	sWorldName.Format("%s" SPHERE_FILE "world" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sWorldName.Format("%s" SPHERE_FILE "world" SPHERE_SCRIPT_EXT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sMultisName;
-	sMultisName.Format("%s" SPHERE_FILE "multis" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sMultisName.Format("%s" SPHERE_FILE "multis" SPHERE_SCRIPT_EXT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sCharsName;
-	sCharsName.Format("%s" SPHERE_FILE "chars" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sCharsName.Format("%s" SPHERE_FILE "chars" SPHERE_SCRIPT_EXT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sDataName;
-	sDataName.Format("%s" SPHERE_FILE "data" SPHERE_SCRIPT,	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sDataName.Format("%s" SPHERE_FILE "data" SPHERE_SCRIPT_EXT,	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)

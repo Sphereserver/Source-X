@@ -10,6 +10,7 @@
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "items/CItemMultiCustom.h"
+#include "uo_files/CUOStaticItemRec.h"
 #include "uo_files/CUOTerrainInfo.h"
 #include "uo_files/CUOMapList.h"
 #include "triggers.h"
@@ -331,9 +332,8 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 	const CItemBase * pItemDef = nullptr;
 	const CItemBaseDupe * pDupeDef = nullptr;
     CItem * pItem = nullptr;
-	height_t Height = 0;
-	byte z = 0;
-	CPointMap ptTest;
+    height_t Height = 0;
+    CPointMap ptTest;
 
 	uint iRetElem = 4;
 
@@ -350,9 +350,9 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 	Area->SetAllShow( true );
 	for (;;)
 	{
-		z = 0;
+        schar z = 0;
 		Height = 0;
-		pItem = Area->GetItem();
+        pItem = Area->GetItem();
 		if ( pItem == nullptr )
 			break;
 
@@ -360,14 +360,14 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 		if ( pt.GetDist( ptItemTop ) > iDistance )
 			continue;
 
-		pItemDef = CItemBase::FindItemBase( pItem->GetDispID() );
+        pItemDef = CItemBase::FindItemBase( pItem->GetDispID() );
 		if ( pItemDef == nullptr )
 			continue;
 
 		Height = pItemDef->GetHeight();
 		if ( pItemDef->GetID() != pItem->GetDispID() ) //not a parent item
 		{
-			pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pItem->GetDispID()));
+            pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pItem->GetDispID()));
 			if ( ! pDupeDef )
 			{
 				g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n",pItem->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);

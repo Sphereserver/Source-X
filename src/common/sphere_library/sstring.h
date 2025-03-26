@@ -4,6 +4,7 @@
 #include "../common.h"
 #include <cstring>
 #include <charconv>
+#include <optional>
 #include <string_view>
 
 
@@ -21,6 +22,7 @@
 	#define IsAlpha(c)		iswalpha((wint_t)c)
 	#define IsAlnum(c)		iswalnum((wint_t)c)
 #else
+    // TODO: remove INT_CHARACTER and adapt those calls to unicode chars
 	#define IsDigit(c)		isdigit(INT_CHARACTER(c))
 	#define IsSpace(c)		isspace(INT_CHARACTER(c))
 	#define IsAlpha(c)		isalpha(INT_CHARACTER(c))
@@ -64,17 +66,23 @@ struct KeyTableDesc_s
 */
 
 // If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
-int    Str_ToI  (lpctstr ptcStr, int base = 10) noexcept;
-uint   Str_ToUI (lpctstr ptcStr, int base = 10) noexcept;
-llong  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
-ullong Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<short>  Str_ToI16(lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<ushort> Str_ToU16(lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<int>    Str_ToI  (lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<uint>   Str_ToU (lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<llong>  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] inline
+std::optional<size_t> Str_ToST(lpctstr ptcStr, int base = 10) noexcept;
 
 // The _Fast variants write from the end of the given buffer and return a pointer to the new start of the string, which in most
 //  cases is different from the pointer passed as argument!
-NODISCARD tchar* Str_FromI_Fast   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD tchar* Str_FromUI_Fast  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD tchar* Str_FromLL_Fast  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
-NODISCARD tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
+[[nodiscard]] tchar* Str_FromI_Fast   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
+[[nodiscard]] tchar* Str_FromUI_Fast  (uint val,   tchar* buf, size_t buf_length, uint base = 10) noexcept;
+[[nodiscard]] tchar* Str_FromLL_Fast  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noexcept;
+[[nodiscard]] tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 // These functions use the _Fast methods, but do move the string from the end of the buffer to the beginning, so that the input pointer is still valid.
 void Str_FromI   (int val,    tchar* buf, size_t buf_length, uint base = 10) noexcept;
@@ -120,7 +128,7 @@ size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept;
 * @param pStr UTF8 string.
 * @return number of characters in the string, excluding the '\0' terminator.
 */
-size_t Str_LengthUTF8(const char* pStr) noexcept;
+size_t Str_UTF8CharCount(const char* pStr) noexcept;
 
 /**
 * @brief Appends pSrc to string pDst of maximum size uiMaxSize. Always '\0' terminates (unless uiMaxSize <= strlen(pDst)).
@@ -383,23 +391,27 @@ void CharToMultiByteNonNull(byte* Dest, const char* Src, int MBytes) noexcept;
 class UTF8MBSTR
 {
 public:
-    UTF8MBSTR() noexcept;
-    UTF8MBSTR(lpctstr lpStr) noexcept;
-    UTF8MBSTR(UTF8MBSTR& lpStr) noexcept;
+    UTF8MBSTR();
+    UTF8MBSTR(lpctstr lpStr);
+    UTF8MBSTR(UTF8MBSTR& lpStr);
     virtual ~UTF8MBSTR();
 
-    void operator =(lpctstr lpStr) noexcept;
+    void operator =(lpctstr lpStr);
     void operator =(UTF8MBSTR& lpStr) noexcept;
     operator char* () noexcept
     {
-        return m_strUTF8_MultiByte;
+        return m_strUTF8_MultiByte.data();
+    }
+    operator const char* () const noexcept
+    {
+        return m_strUTF8_MultiByte.data();
     }
 
-    static size_t ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB) noexcept;
-    static size_t ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) noexcept;
+    static size_t ConvertStringToUTF8(lpctstr strIn, std::vector<char>* strOutUTF8MB);
+    static size_t ConvertUTF8ToString(const char* strInUTF8MB, std::vector<tchar>* strOut);
 
 private:
-    char* m_strUTF8_MultiByte;
+    std::vector<char> m_strUTF8_MultiByte;
 };
 
 
@@ -417,17 +429,47 @@ inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexc
     return sGetDelimiter_StaticBuf('\n', data, datasize);
 }
 
-//---
+
+//--- Inline methods
+
+std::optional<size_t> Str_ToST(lpctstr ptcStr, int base) noexcept
+{
+    if constexpr (sizeof(size_t) == 4)
+        return Str_ToU(ptcStr, base);
+    else
+        return Str_ToULL(ptcStr, base);
+}
+
+
+//--- Template methods
 
 template <typename T>
-bool svtonum(std::string_view const& view, T& value)
+bool sv_to_num(std::string_view const& view, T* value, int base = 10) noexcept
 {
+    	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
     if (view.empty())
         return false;
 
     const char* first = view.data();
     const char* last  = view.data() + view.length();
-    const std::from_chars_result res = std::from_chars(first, last, value);
+    const std::from_chars_result res = std::from_chars(first, last, *value, base);
+
+    if (res.ec != std::errc())
+        return false;
+    if (res.ptr != last)
+        return false;
+    return true;
+}
+
+template <typename T>
+bool cstr_to_num(const char * str, T* value, int base = 10, uint str_max_length = SCRIPT_MAX_LINE_LEN) noexcept
+{
+    	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    if (!str || ('\0' == *str))
+        return false;
+
+    const char* last = str + strnlen(str, str_max_length);
+    const std::from_chars_result res = std::from_chars(str, last, *value, base);
 
     if (res.ec != std::errc())
         return false;

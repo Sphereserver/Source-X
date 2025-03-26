@@ -6,12 +6,11 @@
 #ifndef _INC_CBASE_H
 #define _INC_CBASE_H
 
-#include "../common/resource/CResourceHolder.h"
 #include "../common/resource/CResourceRef.h"
+#include "../common/resource/CResourceQty.h"
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"
-#include "components/CCFaction.h"
 #include "CEntityProps.h"
 
 
@@ -106,7 +105,11 @@ struct CBaseBaseDef : public CResourceLink, public CEntityProps
 	// Base type of both CItemBase and CCharBase
 
 protected:
-	dword       m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
+    // The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped".
+    // Since it should hold only base/mul/artwork/anim ID, it shouldn't reach values greater than those held by a word (like m_ResDispDnId),
+    //  but we use a dword to ease conversions.
+    dword       m_dwDispIndex;
+
 	CSString    m_sName;		// default type name. (ei, "human" vs specific "Dennis")
 
 private:
@@ -117,8 +120,8 @@ private:
 public:
     RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
 private:
-    byte        m_Expansion;
-	byte        m_ResLevel;     // ResLevel required for players to see me
+    RESDISPLAY_VERSION        m_Expansion;
+    RESDISPLAY_VERSION        m_ResLevel;     // ResLevel required for players to see me
 	HUE_TYPE    m_ResDispDnHue; // Hue shown to players who don't have my ResLevel
 	word        m_ResDispDnId;  // ID shown to players who don't have my ResLevel
 	// -------------------------------------
@@ -139,16 +142,21 @@ public:
 
 	uint64   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
 
-    CCFaction _pFaction;
-
-
 public:
-    CCFaction GetFaction();
+    /**
+     * @brief   Gets definition pointer.
+     * @param   ptcKey  The key.
+     * @return  The definition pointer.
+     */
+    CVarDefCont * GetKey( lpctstr ptcKey ) const
+    {
+        return m_BaseDefs.GetKey(ptcKey);
+    }
 
     /**
      * @brief   Gets definition string.
      * @param   ptcKey  The key.
-     * @param   fZero   true to zero.
+     * @param   fZero   Return "0" if empty/undefined.
      * @return  The definition string.
      */
 	lpctstr GetDefStr( lpctstr ptcKey, bool fZero = false ) const
@@ -199,8 +207,8 @@ public:
 	}
 
 public:
-	CBaseBaseDef( CResourceID id );
-	virtual ~CBaseBaseDef();
+	CBaseBaseDef( CResourceID const& id );
+	virtual ~CBaseBaseDef() = default;
 
 	CBaseBaseDef(const CBaseBaseDef& copy) = delete;
 	CBaseBaseDef& operator=(const CBaseBaseDef& other) = delete;
@@ -294,7 +302,7 @@ public:
      * @param   ResLevel    The ResLevel.
      * @return  true if it succeeds, false if it fails.
      */
-	bool SetResLevel( byte ResLevel );
+    bool SetResLevel( RESDISPLAY_VERSION ResLevel );
 
     /**
      * @brief   Gets ResDispDNHue.

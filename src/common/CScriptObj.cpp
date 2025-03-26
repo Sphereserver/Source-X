@@ -1,13 +1,7 @@
 
-#ifdef _WIN32
-	#include <process.h>
-#else
-    #include <sys/wait.h>
-	#include <errno.h>	// errno
-    //#include <spawn.h>
-#endif
-
 #include "../game/chars/CChar.h"
+#include "../game/chars/CStoneMember.h"
+#include "../game/items/CItem.h"
 #include "../game/clients/CAccount.h"
 #include "../game/clients/CClient.h"
 #include "../game/CScriptProfiler.h"
@@ -20,15 +14,28 @@
 #include "../sphere/ProfileTask.h"
 #include "crypto/CBCrypt.h"
 #include "crypto/CMD5.h"
+#include "sphere_library/CSRand.h"
 #include "resource/sections/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
 #include "CFloatMath.h"
 #include "CExpression.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"
+#include <signal.h>
+
+#ifdef _WIN32
+#   include <process.h>
+#else
+#   include <sys/wait.h>
+#   include <errno.h>	// errno
+#   include <spawn.h> // for posix_spawn()
+#endif
+
+#if !defined(_WIN32) && !defined(__GLIBC__)
+extern char **environ;
+#endif
 
 class CStoneMember;
-
 
 enum SREF_TYPE
 {
@@ -492,7 +499,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			if (pRef == nullptr)
 			{
 				// Invalid ref: just return 0, it isn't an error.
-				sVal.FormatVal(0);
+				sVal.SetValFalse();
 				return true;
 			}
 
@@ -512,7 +519,7 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 
 		if (pRef == nullptr)	// good command but bad reference.
 		{
-			sVal.FormatVal(0);
+			sVal.SetValFalse();
 			return false;
 		}
 		return pRef->r_WriteVal( ptcKey, sVal, pSrc );
@@ -663,7 +670,7 @@ badcmd:
 				if ( pVar )
 					sVal = pVar->GetValStr();
 				else if ( fZero )
-					sVal = "0";
+					sVal.SetValFalse();
 			}
 			return true;
         case SSC_RESDEF0:
@@ -675,7 +682,7 @@ badcmd:
             if ( pVar )
                 sVal = pVar->GetValStr();
             else if ( fZero )
-                sVal = "0";
+                sVal.SetValFalse();
         }
         return true;
 		case SSC_DEFMSG:
@@ -956,39 +963,22 @@ badcmd:
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
 					Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 #else
-                // vfork deprecated since Mac OS Monterey... TODO: use posix_spawn?
-                /*
-                pid_t pid;
                 char *argv[] = {
                     Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1],
 					Arg_ppCmd[2], Arg_ppCmd[3], Arg_ppCmd[4],
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
 					Arg_ppCmd[8], Arg_ppCmd[9], nullptr
                 };
-                posix_spawn(&pid, argv[0], nullptr, nullptr, argv, environ);  //include spawn.h
-                */
 
-				// I think fork will cause problems.. we'll see.. if yes new thread + execlp is required.
-				int child_pid = vfork();
-				if ( child_pid < 0 )
+				pid_t child_pid;
+				if (posix_spawn(&child_pid, argv[0], nullptr, nullptr, argv, environ) != 0)
 				{
-                    g_Log.EventError("%s failed when executing '%s'\n", sm_szLoadKeys[index], ptcKey);
-					return false;
+                    g_Log.EventError(
+                        "%s failed with error %d (\"%s\") when executing '%s'\n",
+                        sm_szLoadKeys[index], errno, strerror(errno), ptcKey);
 				}
-				else if ( child_pid == 0 )
-				{
-					//Don't touch this :P
-					execlp( Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1], Arg_ppCmd[2],
-										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
-										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 
-                    g_Log.EventError("%s failed with error %d (\"%s\") when executing '%s'\n", sm_szLoadKeys[index], errno, strerror(errno), ptcKey);
-                    raise(SIGKILL);
-                    g_Log.EventError("%s failed to handle error. Server is UNSTABLE\n", sm_szLoadKeys[index]);
-					while(true) {} // do NOT leave here until the process receives SIGKILL otherwise it will free up resources
-								   // it inherited from the main process, which pretty will fuck everything up. Normally this point should never be reached.
-				}
-				else if(bWait) // parent process here (do we have to wait?)
+				if(bWait) // parent process here (do we have to wait?)
 				{
 					int status;
 					do
@@ -1103,9 +1093,20 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, ARRAY_COUNT(ppCmd), ", ");
             if ( iQty < 3 )
                 return false;
-            int iPrefixCode = Str_ToI(ppCmd[0]);
-            int iCost = Str_ToI(ppCmd[1]);
-            CSString sHash = CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost)));
+
+            std::optional<int> iconv;
+
+            iconv = Str_ToI(ppCmd[0]);
+            if (!iconv.has_value())
+                return false;
+            int iPrefixCode = *iconv;
+
+            iconv = Str_ToI(ppCmd[1]);
+            if (!iconv.has_value())
+                return false;
+            int iCost = *iconv;
+
+            CSString sHash(CBCrypt::HashBCrypt(ppCmd[2], iPrefixCode, maximum(4,minimum(31,iCost))));
             sVal.Format("%s", sHash.GetBuffer());
         } return true;
 
@@ -1115,6 +1116,7 @@ badcmd:
             int iQty = Str_ParseCmds(const_cast<tchar*>(ptcKey), ppCmd, ARRAY_COUNT(ppCmd), ", ");
             if ( iQty < 2 )
                 return false;
+
             bool fValidated = CBCrypt::ValidateBCrypt(ppCmd[0], ppCmd[1]);
             sVal.FormatVal((int)fValidated);
         } return true;
@@ -1408,7 +1410,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						pChar->m_Act_UID = g_World.m_uidNew;
 					else
 					{
-						const CClient *pClient = dynamic_cast<CClient *>(this);
+                        CClient *pClient = dynamic_cast<CClient *>(this);
 						if ( pClient && pClient->GetChar() )
 							pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 					}
@@ -1441,7 +1443,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	                    pCharSrc->m_Act_UID = g_World.m_uidNew;
 	                else
 	                {
-	                    const CClient *pClient = dynamic_cast<CClient *>(this);
+                        CClient *pClient = dynamic_cast<CClient *>(this);
 	                    if (pClient && pClient->GetChar())
 	                        pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 	                }
@@ -1897,7 +1899,7 @@ int CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iF
 					pContext->_fParseScriptText_Brackets = false;
 
 					tchar* ptcRecurseParse = ptcResponse + i;
-					const size_t iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
+					const int iLen = ParseScriptText(ptcRecurseParse, pSrc, 4, pArgs);
 
 					pContext->_fParseScriptText_Brackets = true;
 					-- pContext->_iParseScriptText_Reentrant;
@@ -1919,7 +1921,7 @@ int CScriptObj::ParseScriptText(tchar * ptcResponse, CTextConsole * pSrc, int iF
 			if (pContext->_iParseScriptText_Reentrant > 32 )
 			{
 				EXC_SET_BLOCK("recursive brackets limit");
-				PERSISTANT_ASSERT(pContext->_iParseScriptText_Reentrant < 32);
+				ASSERT_ALWAYS(pContext->_iParseScriptText_Reentrant < 32);
 			}
 
 			ASSERT(pContext->_fParseScriptText_Brackets == true);
@@ -2136,7 +2138,11 @@ bool CScriptObj::Execute_FullTrigger(CScript& s, CTextConsole* pSrc, CScriptTrig
 	CScriptObj* pRef = this;
 	if (iArgQty == 2)
 	{
-		CChar* pCharFound = CUID::CharFindFromUID(Str_ToI(piCmd[1]));
+        std::optional<dword> iconv = Str_ToU(piCmd[1]);
+        if (!iconv.has_value())
+            return false;
+
+		CChar* pCharFound = CUID::CharFindFromUID(*iconv);
 		if (pCharFound)
 			pRef = pCharFound;
 	}
@@ -2634,11 +2640,13 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CTextConsol
 			dword dwUID = 0;
 			dword dwFound = 0;
 
-			while (dwCount--)
+			while (dwCount)
 			{
 				// Check the current UID to test is within our range
 				if (++dwUID >= dwTotal)
 					break;
+
+                dwCount -= 1;
 
 				// Acquire the object with this UID and check it exists
 				CObjBase* pObj = g_World.FindUID(dwUID);
@@ -2736,7 +2744,8 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, C
 		}
 		else
 		{
-			g_Log.EventError("FORCHAR[layer/memorytype] called on char 0%" PRIx32 " (%s) without arguments.\n", (dword)(pCharThis->GetUID()), pCharThis->GetName());
+			g_Log.EventError("FORCHAR[layer/memorytype] called on char 0%" PRIx32 " (%s) without arguments.\n",
+                             (dword)(pCharThis->GetUID()), pCharThis->GetName());
 			iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
 		}
 	}

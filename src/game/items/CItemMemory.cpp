@@ -104,8 +104,16 @@ int CItemMemory::FixWeirdness()
     dword dwFlags = GetHue();
     if (dwFlags & MEMORY_LEGACY_ISPAWNED)
     {
-        CCSpawn *pSpawn = static_cast<CCSpawn*>(m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
-        if (pSpawn && pChar)
+        CItem *pSpawnItem = m_uidLink.ItemFind();
+        if (!pSpawnItem)
+        {
+            iResultCode = 0x4227;
+            return iResultCode;
+        }
+
+        CCSpawn *pSpawn = static_cast<CCSpawn*>(pSpawnItem->GetComponent(COMP_SPAWN));
+        ASSERT(pSpawn);
+        if (pSpawn)
         {
             pSpawn->AddObj(pChar->GetUID());
         }

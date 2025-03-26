@@ -71,10 +71,12 @@ public:
 	virtual int IsWeird() const;
 
 	// Parent objects
-	virtual const CObjBaseTemplate* GetTopLevelObj() const {
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const {
 		return this;
 	}
-	virtual CObjBaseTemplate* GetTopLevelObj() {
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() {
 		return this;
 	}
 
@@ -104,7 +106,8 @@ public:
     }
 	char GetTopZ() const noexcept;
 	uchar GetTopMap() const noexcept;
-	CSector* GetTopSector() const noexcept;
+
+    CSector* GetTopSector() const noexcept; // can return a nullptr!
 
 	// - *Unk* methods: are not virtual and get/set raw values, without any check.
 	void SetUnkPoint(const CPointMap& pt) noexcept {

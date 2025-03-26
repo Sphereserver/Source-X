@@ -1,11 +1,12 @@
 
 #include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
+#include "../items/CItemBase.h"
 #include "../CServer.h"
 #include "CClient.h"
 
@@ -16,8 +17,8 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 	if ( pObj == nullptr )
 		return false;
 
-	CResourceDef *	pRes	= g_Cfg.RegisteredResourceGetDef( rid );
-	CDialogDef *	pDlg	= dynamic_cast <CDialogDef*>(pRes);
+	CResourceDef * pRes = g_Cfg.RegisteredResourceGetDef( rid );
+	CDialogDef *	pDlg	 = dynamic_cast <CDialogDef*>(pRes);
 	if ( !pRes || !pDlg )
 	{
 		DEBUG_ERR(("Invalid RES_DIALOG.\n"));
@@ -48,13 +49,13 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, const CResourceID& rid, int iPage
 }
 
 
-void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
+void CClient::addGumpInputVal( bool fCancel, INPVAL_STYLE style,
 	dword iMaxLength,
 	lpctstr pszText1,
 	lpctstr pszText2,
 	CObjBase * pObj )
 {
-	ADDTOCALLSTACK("CClient::addGumpInpVal");
+	ADDTOCALLSTACK("CClient::addGumpInputVal");
 	// CLIMODE_INPVAL
 	// Should result in PacketGumpValueInputResponse::onReceive
 	// just input an objects attribute.
@@ -124,7 +125,9 @@ bool CClient::addGumpDialogProps( const CUID& uid )
 		addSkillWindow((SKILL_TYPE)(g_Cfg.m_iMaxSkill), true);
 
 	tchar *pszMsg = Str_GetTemp();
-	strcpy(pszMsg, pObj->IsItem() ? "D_ITEMPROP1" : "D_CHARPROP1" );
+    Str_CopyLimitNull(pszMsg,
+        (pObj->IsItem() ? "D_ITEMPROP1" : "D_CHARPROP1"),
+        Str_TempLength());
 
 	CResourceID rid = g_Cfg.ResourceGetIDType(RES_DIALOG, pszMsg);
 	if ( ! rid.IsValidUID())
@@ -180,7 +183,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID,
 
 		CResourceLock prebutton;
 		if (g_Cfg.ResourceLock(prebutton, CResourceID(RES_DIALOG, rid.GetResIndex(), RES_DIALOG_PREBUTTON)))
-		stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, m_pChar, pArgs, NULL);
+		stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, m_pChar, pArgs, nullptr);
 
 		if (stopPrebutton != TRIGRET_RET_TRUE)
 		return pObj->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, m_pChar, pArgs);

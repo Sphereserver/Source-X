@@ -1,10 +1,15 @@
 
 // Actions specific to an NPC.
 
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
+#include "../uo_files/uofiles_enums_creid.h"
 #include "../CWorldGameTime.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
@@ -70,38 +75,66 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 	if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 		UpdateAnimate( ANIM_CAST_AREA );
 
+    CItem * pItem = nullptr;
+    short iMaxTimeoutS = 0;
 	switch ( id )
 	{
 		case CREID_FIRE_ELEM:
 		{
 			// Leave a fire path
-			CItem * pItem = CItem::CreateScript( g_Rand.Get16ValFast(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
+            pItem = CItem::CreateScript( g_Rand.Get16ValFast(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
 			ASSERT(pItem);
 			pItem->SetType(IT_FIRE);
 			pItem->m_itSpell.m_spell = (word)(SPELL_Fire_Field);
 			pItem->m_itSpell.m_spelllevel = (word)(100 + g_Rand.Get16ValFast(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
-			pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(50)*MSECS_PER_SEC);
+            iMaxTimeoutS = 50;
 		}
 		break;
 
 		case CREID_GIANT_SPIDER:
 		{
 			// Leave a web path
-			CItem * pItem = CItem::CreateScript( (ITEMID_TYPE)(g_Rand.GetVal2Fast(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
+            pItem = CItem::CreateScript( (ITEMID_TYPE)(g_Rand.GetVal2Fast(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
 			ASSERT(pItem);
 			pItem->SetType(IT_WEB);
-			pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(170)*MSECS_PER_SEC);
+            iMaxTimeoutS = 170;
 		}
 		break;
 
 		default:
-			SysMessage( "You have no special abilities" );
+            ASSERT(false);
+            //SysMessage( "You have no special abilities" );
 			return;
 	}
 
-	UpdateStatVal( STAT_DEX, (ushort)(-(5 + g_Rand.Get16ValFast(5)) ));	// the stamina cost
+    if (pItem)
+    {
+        if (Can(CAN_O_NOSLEEP))
+        {
+            pItem->m_CanMask |= CAN_O_NOSLEEP;
+        }
+        else
+        {
+            const CSector *pItemSector = pItem->GetTopSector();
+            ASSERT(pItemSector);    // fPlaced is true, so the current sector should be valid
+#ifdef _DEBUG
+            const CSector *pCharSector = GetTopSector();
+            ASSERT(pCharSector);
+            ASSERT(pCharSector == pItemSector);
+#endif
+            if (pItemSector->IsSleeping() && !_IsSleeping())
+            {
+                // The char is temporarily walking in a sleeping sector.
+                // The items it creates need to be able to decay, even if in a sleeping sector.
+                pItem->m_CanMask |= CAN_O_NOSLEEP;
+            }
+        }
+        pItem->MoveToDecay( GetTopPoint(), 10 + g_Rand.Get16ValFast(iMaxTimeoutS)*MSECS_PER_SEC);
+    }
+
+    UpdateStatVal( STAT_DEX, -(5 + g_Rand.Get16ValFast(5)) );	// the stamina cost
 }
 
 bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command from script
@@ -572,8 +605,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	CheckRevealOnMove();
 
 	EXC_SET_BLOCK("MoveToChar");
-	//if (!MoveToChar(pMe, false, true))
-    if (!MoveToChar(pMe, false, false))
+    if (!MoveToChar(pMe, false, true))
         return 2;
 
 	EXC_SET_BLOCK("Move Update");
@@ -634,7 +666,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
 		iTickNext = 5 * MSECS_PER_SEC;
 
-	_SetTimeout(iTickNext);
+    _SetTimeout(iTickNext);
 	EXC_CATCH;
 	return 1;
 }
@@ -1280,7 +1312,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	//If the NPC action is following somebody, directly assign the character from  the m_Act_UID value. 
 	if (Skill_GetActive() == NPCACT_FOLLOW_TARG)
 		pChar = m_Act_UID.CharFind();
-	else if (Fight_IsActive())
+    else if (Fight_IsActive() || Skill_GetActive() == NPCACT_FLEE)
 		pChar = m_Fight_Targ_UID.IsValidUID() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
     else
         pChar = m_Act_UID.CharFind();
@@ -1573,6 +1605,8 @@ void CChar::NPC_Act_Looting()
 		Speak(g_Cfg.GetDefaultMsg(DEFMSG_LOOT_RUMMAGE), HUE_TEXT_DEF, TALKMODE_EMOTE);
 
 	ItemBounce(pItem, false);
+    UpdateAnimate(ANIM_PILLAGE);
+    SetTimeout(1000);
 }
 
 bool CChar::NPC_Act_Flee()
@@ -1945,7 +1979,9 @@ void CChar::NPC_Act_Idle()
 						Action_StartSpecial(CREID_GIANT_SPIDER);
 						return;
 					}
-				} else {
+                }
+                else
+                {
 					if ( GetDispID() == CREID_GIANT_SPIDER )
 					{
 						Action_StartSpecial(CREID_GIANT_SPIDER);
@@ -2170,12 +2206,14 @@ void CChar::NPC_OnTickAction()
 		{
 			if (iSkillActive != NPCACT_RIDDEN)
 			{
-				g_Log.EventWarn("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0%" PRIx32 ", defname=%s.\n", pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName());
+                g_Log.EventWarn("Trying to Tick Action on an NPC placed in an invalid area (P=%s). UID=0%" PRIx32 ", defname=%s.\n",
+                    pt.WriteUsed(), GetUID().GetObjUID(), GetResourceName());
 			}
 		}
 		else
 		{
-			g_Log.EventWarn("Trying to Tick Action on unplaced NPC. UID=0%" PRIx32 ", defname=%s.\n", GetUID().GetObjUID(), GetResourceName());
+            g_Log.EventWarn("Trying to Tick Action on unplaced NPC. UID=0%" PRIx32 ", defname=%s.\n",
+                GetUID().GetObjUID(), GetResourceName());
 		}
         return;
     }

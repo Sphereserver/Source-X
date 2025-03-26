@@ -7,7 +7,6 @@
 #define _INC_CITEMSHIP_H
 
 #include "CItemMulti.h"
-#include "../components/CCMultiMovable.h"
 
 
 class CItemShip : public CItemMulti
@@ -35,9 +34,8 @@ public:
     CItemShip(ITEMID_TYPE id, CItemBase * pItemDef);
     virtual ~CItemShip();
 
-private:
-    CItemShip(const CItemShip& copy);
-    CItemShip& operator=(const CItemShip& other);
+    CItemShip(const CItemShip& copy) = delete;
+    CItemShip& operator=(const CItemShip& other) = delete;
 
 public:
     virtual bool _OnTick() override;

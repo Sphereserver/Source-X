@@ -1,6 +1,5 @@
 #include "CUOClientVersion.h"
-#include "CExpression.h"
-#include "sphereproto.h"
+#include "CLog.h"
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -18,11 +17,13 @@ uint CUOClientVersion::GetLegacyVersionNumber() const noexcept
     uint factor_revision    = 100;
     uint factor_minor       = 100'00;
     uint factor_major       = 100'00'00;
-    if (m_revision > 100) {
+    if (m_revision > 100)
+    {
         factor_minor *= 10;
         factor_major *= 10;
     }
-    if (m_minor > 100) {
+    if (m_minor > 100)
+    {
         factor_major *= 10;
     }
 
@@ -75,7 +76,7 @@ CUOClientVersion::CUOClientVersion(dword uiClientVersionNumber) noexcept :
             m_major = uiClientVersionNumber / 100'000'00;
             m_minor = (uiClientVersionNumber / 1000'00) % 100;
             m_revision = (uiClientVersionNumber / 100 ) % 1000;
-            
+
         }
         else if (uiClientVersionNumber > 10'00'000'00)
         {
@@ -120,13 +121,16 @@ CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
     // Ranges algorithms not yet supported by Apple Clang...
     // const ptrdiff_t count = std::ranges::count(std::string_view(ptcVersion), '.');
     const auto svVersion = std::string_view(ptcVersion);
-    const auto count = std::count(svVersion.cbegin(), svVersion.cend(), '_');
+    const auto count = std::count(svVersion.cbegin(), svVersion.cend(), '.');
     if (count == 2)
         ApplyVersionFromStringOldFormat(ptcVersion);
     else if (count == 3)
-        ApplyVersionFromStringOldFormat(ptcVersion);
+        ApplyVersionFromStringNewFormat(ptcVersion);
     else
-        ASSERT(false); // Malformed string?
+    {
+        // Malformed string?
+        g_Log.Event(LOGL_CRIT|LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "Received malformed client version string?.\n");
+    }
 }
 
 
@@ -167,7 +171,7 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexc
     // Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
 
     byte uiLetter = 0;
-    size_t uiMax = strlen(ptcVersion);
+    const size_t uiMax = strnlen(ptcVersion, 20);
     for (size_t i = 0; i < uiMax; ++i)
     {
         if (IsAlpha(ptcVersion[i]))
@@ -195,7 +199,7 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lpctstr ptcVersion) noexc
 {
     // Get version of newer clients, which use only 4 numbers separated by dots (example: 6.0.1.1)
 
-    std::string_view sw(ptcVersion);
+    const std::string_view sw(ptcVersion);
     const size_t dot1 = sw.find_first_of('.', 0);
     const size_t dot2 = sw.find_first_of('.', dot1 + 1);
     const size_t dot3 = sw.find_first_of('.', dot2 + 1);
@@ -210,10 +214,10 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lpctstr ptcVersion) noexc
 
     uint val1, val2, val3, val4;
     bool ok = true;
-    ok = ok && svtonum(sw1, val1);
-    ok = ok && svtonum(sw2, val2);
-    ok = ok && svtonum(sw3, val3);
-    ok = ok && svtonum(sw4, val4);
+    ok = ok && sv_to_num(sw1, &val1);
+    ok = ok && sv_to_num(sw2, &val2);
+    ok = ok && sv_to_num(sw3, &val3);
+    ok = ok && sv_to_num(sw4, &val4);
     if (!ok)
         return;
 

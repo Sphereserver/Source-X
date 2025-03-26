@@ -1,6 +1,7 @@
 /**
 * @file common.h
 * @brief Header that should be included by every file.
+*   When set as a precompiled header, it's automatically included in every file.
 */
 
 #ifndef _INC_COMMON_H
@@ -11,7 +12,8 @@
 
 #define SPHERE_FILE				"sphere"	// file name prefix
 #define SPHERE_TITLE			"SphereServer"
-#define SPHERE_SCRIPT			".scp"
+#define SPHERE_SCRIPT_EXT		".scp"
+#define SPHERE_SCRIPT_EXT_LEN   4
 
 #define SCRIPT_MAX_LINE_LEN		4096		// default size.
 #define SCRIPT_MAX_SECTION_LEN	128
@@ -19,8 +21,19 @@
 
 // C abs function has different in/out types the std:: ones in cmath. It's defined in stdlib.h.
 #include <stdlib.h>
+
+#include <climits>
+//#include <cmath>
+#include <cstring>
+
+#include <algorithm>
 #include <memory>   // for smart pointers
-#include <type_traits>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
 #include "assertion.h"
 #include "basic_threading.h"
 
@@ -33,9 +46,75 @@
 #endif
 
 
+/* Coding helpers */
+
+// On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
+#if !defined(_MSC_VER) || defined(__clang__)
+#   define NON_MSVC_COMPILER 1
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#   define MSVC_COMPILER 1
+#endif
+
+// On Windows, Clang can use MinGW or MSVC backend.
+#ifdef _MSC_VER
+#   define MSVC_RUNTIME
+#endif
+
+// Target arch.
+#if defined(_WIN64) || (__SIZEOF_POINTER__ == 8)
+#   define ARCH_64
+#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4)
+#   define ARCH_32
+#else
+#   error "Can't detect the arch?"
+#endif
+
+// Function specifier, like noexcept. Use this to make us know that the function code was checked and we know it can throw an exception.
+#define CANTHROW    noexcept(false)
+
+// To be used only as an helper marker, since there are functions with similar names intended to have different signatures and/or not be virtual.
+// This means that we do NOT have forgotten to add the "virtual" qualifier, simply this method isn't virtual.
+#define NONVIRTUAL
+
+// Cpp attributes
+#define FALLTHROUGH [[fallthrough]]
+#define NODISCARD	[[nodiscard]]
+
+#if defined(__GNUC__) || defined(__clang__)
+#   define RETURNS_NOTNULL [[gnu::returns_nonnull]]
+#else
+#   define RETURNS_NOTNULL
+#endif
+
+#ifdef _DEBUG
+#define NOEXCEPT_NODEBUG
+#else
+#define NOEXCEPT_NODEBUG noexcept
+#endif
+
+// use to indicate that a function uses printf-style arguments, allowing GCC
+// to validate the format string and arguments:
+// a = 1-based index of format string
+// b = 1-based index of arguments
+// (note: add 1 to index for non-static class methods because of the implicit 'this' argument
+// is inserted in position 1)
+#ifdef MSVC_COMPILER
+#define SPHERE_PRINTFARGS(a,b)
+#else
+#ifdef __MINGW32__
+// Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
+#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
+#else
+#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
+#endif
+#endif
+
+
 // Strings
-#define _STRINGIFY_AUX(x)	#x
-#define STRINGIFY(x)		_STRINGIFY_AUX(x)
+#define STRINGIFY_IMPL_(x)	#x
+#define STRINGIFY(x)		STRINGIFY_IMPL_(x)
 
 // Sizes
 #define ARRAY_COUNT(a)			        (sizeof(a)/sizeof((a)[0]))
@@ -44,15 +123,103 @@
 #define HAS_FLAGS_STRICT(var, flag)     (((var) & (flag)) == flag)          // Every one of the passed flags has to be set
 #define HAS_FLAGS_ANY(var, flag)        (static_cast<bool>((var) & (flag))) // True if even only one of the passed flags are set
 
-// Cpp attributes
-#define FALLTHROUGH [[fallthrough]]
-#define NODISCARD	[[nodiscard]]
 
-#ifdef _DEBUG
-    #define NOEXCEPT_NODEBUG
-#else
-    #define NOEXCEPT_NODEBUG noexcept
-#endif
+/* Start of arithmetic code */
+
+//#define IsNegative(c)			(((c) < 0) ? 1 : 0)
+template <typename T>
+constexpr bool IsNegative(T val) noexcept {
+    return (val < 0);
+}
+
+//-- Bitwise magic: combine numbers.
+
+// MAKEWORD:  defined in minwindef.h (loaded by windows.h), so it's missing only on Linux.
+// MAKEDWORD: undefined even on Windows, it isn't in windows.h.
+// MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
+#define MAKEDWORD(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
+
+
+//#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
+constexpr int IMulDiv(const int a, const int b, const int c) noexcept
+{
+	const int ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+
+constexpr uint UIMulDiv(const uint a, const uint b, const uint c) noexcept
+{
+	const int ab = a * b;
+	return ((ab + (c / 2)) / c) - IsNegative(ab);
+}
+
+//#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
+constexpr llong IMulDivLL(const llong a, const llong b, const llong c) noexcept
+{
+	const llong ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+constexpr realtype IMulDivRT(const realtype a, const realtype b, const realtype c) noexcept
+{
+	const realtype ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+
+//#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
+constexpr int IMulDivDown(const int a, const int b, const int c) noexcept
+{
+	return (a*b)/c;
+}
+constexpr llong IMulDivDownLL(const llong a, const llong b, const llong c) noexcept
+{
+	return (a*b)/c;
+}
+
+//#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
+template<typename T>
+constexpr T sign(const T n) noexcept
+{
+    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
+	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
+}
+
+#define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+#define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+#define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+
+template <typename T>
+[[nodiscard]]
+constexpr T saturating_sub(T a, T b) noexcept {
+    // Saturating subtraction.
+
+    // Ensure T is an arithmetic type
+    static_assert(std::is_arithmetic_v<T>, "T must be an arithmetic type");
+
+    // For unsigned types
+    if constexpr (std::is_unsigned_v<T>)
+        return (a > b) ? a - b : 0;
+    // For signed types
+    else
+    {
+        if (b > 0 && a < std::numeric_limits<T>::min() + b)
+            return std::numeric_limits<T>::min();  // Saturate to minimum
+        return a - b;
+    }
+}
+
+#define SATURATING_SUB_SELF(var, val) var = saturating_sub(var, val)
+
+/* End of arithmetic code */
+
+
+/* Compiler/c++ language helpers */
+
+// Ensure that a constexpr value or a generic expression is evaluated at compile time.
+// Constexpr values are constants and cannot be mutated in the code.
+template <typename T>
+consteval T as_consteval(T&& val_) noexcept {
+    return val_;
+}
 
 /*
 	There is a problem with the UnreferencedParameter macro from mingw and sphereserver.
@@ -61,14 +228,39 @@
 */
 #undef UNREFERENCED_PARAMETER
 template <typename T>
-inline void UnreferencedParameter(T const&) noexcept {
+constexpr void UnreferencedParameter(T const&) noexcept {
     ;
 }
 
+//#include <type_traits> // already included by stypecast.h
+#include "sphere_library/stypecast.h"
 
-/* Sanitizers utility */
+// Arguments: Class, arguments...
+#define STATIC_ASSERT_NOEXCEPT_CONSTRUCTOR(_ClassType, ...) \
+    static_assert( std::is_nothrow_constructible_v<_ClassType __VA_OPT__(,) __VA_ARGS__>, #_ClassType  " constructor should be noexcept!")
+#define STATIC_ASSERT_THROWING_CONSTRUCTOR(_ClassType, ...) \
+    static_assert(!std::is_nothrow_constructible_v<_ClassType __VA_OPT__(,) __VA_ARGS__>, #_ClassType " constructor should *not* be noexcept!")
 
-#if defined(_MSC_VER)
+// Arguments: function_name, arguments...
+#define STATIC_ASSERT_NOEXCEPT_FREE_FUNCTION(_func, ...) \
+    static_assert( std::is_nothrow_invocable_v<decltype(&_func) __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+#define STATIC_ASSERT_THROWING_FREE_FUNCTION(_func, ...) \
+    static_assert(!std::is_nothrow_invocable_v<decltype(&_func) __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+// static_assert( noexcept(std::declval<decltype(&_func)>()()), #_func " should be noexcept");
+
+// Arguments: Class, function_name, arguments...
+#define STATIC_ASSERT_NOEXCEPT_MEMBER_FUNCTION(_ClassType, _func, ...) \
+    static_assert( std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+#define STATIC_ASSERT_THROWING_MEMBER_FUNCTION(_ClassType, _func, ...) \
+    static_assert(!std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
+
+// For unrecoverable/unloggable errors. Should be used almost *never*.
+#define STDERR_LOG(...)     fprintf(stderr, __VA_ARGS__); fflush(stderr)
+
+
+/* Sanitizers utilities */
+
+#if defined(MSVC_COMPILER)
 
     #if defined(__SANITIZE_ADDRESS__) || defined(ADDRESS_SANITIZER)
         #define NO_SANITIZE_ADDRESS __declspec(no_sanitize_address)
@@ -114,235 +306,6 @@ inline void UnreferencedParameter(T const&) noexcept {
     #define NO_SANITIZE_ADDRESS
     #define NO_SANITIZE_UNDEFINED
 
-#endif
-
-
-/* Start of arithmetic code */
-
-#define IsNegative(c)			(((c) < 0) ? 1 : 0)
-
-
-//-- Bitwise magic: combine numbers.
-
-// MAKEWORD:  defined in minwindef.h (loaded by windows.h), so it's missing only on Linux.
-// MAKEDWORD: undefined even on Windows, it isn't in windows.h.
-// MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
-#define MAKEDWORD(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
-
-
-//-- Explicitly promote to a larger type or narrow to a smaller type, instead of inattentive casts.
-
-// Promote to the corresponding 32 bits numeric type a smaller numeric variable.
-template <typename T>
-auto i_promote32(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) < 4, "Input variable is not smaller than a 32 bit number.");
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype32>(a);
-		return static_cast<int32>(a);
-	}
-	else
-		return static_cast<uint32>(a);
-}
-
-// Promote to the corresponding 64 bits numeric type a smaller numeric variable.
-template <typename T>
-auto i_promote64(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) < 8, "Input variable is not smaller than a 64 bit number.");
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype64>(a);
-		return static_cast<int64>(a);
-	}
-	else
-		return static_cast<uint64>(a);
-}
-
-template <typename T>
-auto i_narrow32(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) >= 4, "Input variable is smaller than a 32 bit number.");
-
-	// Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
-	constexpr uint64 umask = 0x0000'0000'FFFF'FFFF;
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype32>(static_cast<uint64>(a) & umask);
-		return static_cast<int32>(static_cast<uint64>(a) & umask);
-	}
-	else
-		return static_cast<uint32>(static_cast<uint64>(a) & umask);
-}
-
-template <typename T>
-auto i_narrow16(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) >= 2, "Input variable is smaller than a 16 bit number.");
-
-	// Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
-	constexpr uint64 umask = 0x0000'0000'FFFF'FFFF;
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype16>(static_cast<uint64>(a) & umask);
-		return static_cast<int16>(static_cast<uint64>(a) & umask);
-	}
-	else
-		return static_cast<uint16>(static_cast<uint64>(a) & umask);
-}
-
-template <typename T>
-auto i64_narrow32(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
-
-	// Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
-	constexpr uint64 umask = 0x0000'0000'FFFF'FFFF;
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype32>(a & umask);
-		return static_cast<int32>(a & umask);
-	}
-	else
-		return static_cast<uint32>(a & umask);
-}
-
-template <typename T>
-auto i64_narrow16(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) == 8, "Input variable is not a 64 bit number.");
-
-	// Since the narrowing can be implementation specific, here we decide that we take only the lower 32 bytes and discard the upper ones.
-	constexpr uint64 umask = 0x0000'0000'0000'FFFF;
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype16>(a & umask);
-		return static_cast<int16>(a & umask);
-	}
-	else
-		return static_cast<uint16>(a & umask);
-}
-
-template <typename T>
-auto i32_narrow16(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T> || (std::is_floating_point_v<T> && std::is_signed_v<T>), "Unsigned floating point numbers are unsupported by the language standard");
-	static_assert(sizeof(T) == 4, "Input variable is not a 32 bit number.");
-
-	// Since the narrowing can be implementation specific, here we decide that we take only the lower 16 bytes and discard the upper ones.
-	constexpr uint32 umask = 0x0000'FFFF;
-	if constexpr (std::is_signed_v<T>)
-	{
-		if constexpr (std::is_floating_point_v<T>)
-			return static_cast<realtype16>(a & umask);
-		return static_cast<int16>(a & umask);
-	}
-	else
-		return static_cast<uint16>(a & umask);
-}
-
-template <typename T>
-auto i16_narrow8(const T a) noexcept
-{
-	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-	static_assert(std::is_integral_v<T>, "Only integral types are supported by this function.");
-	static_assert(sizeof(T) == 2, "Input variable is not a 16 bit number.");
-
-	// Since the narrowing can be implementation specific, here we decide that we take only the lower 16 bytes and discard the upper ones.
-	constexpr uint16 umask = 0x00FF;
-	if constexpr (std::is_signed_v<T>)
-	{
-		return static_cast<int8>(a & umask);
-	}
-	else
-		return static_cast<uint8>(a & umask);
-}
-
-
-//#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
-inline int IMulDiv(const int a, const int b, const int c) noexcept
-{
-	const int ab = a*b;
-	return ((ab + (c/2)) / c) - IsNegative(ab);
-}
-
-inline uint UIMulDiv(const uint a, const uint b, const uint c) noexcept
-{
-	const int ab = a * b;
-	return ((ab + (c / 2)) / c) - IsNegative(ab);
-}
-
-//#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
-inline llong IMulDivLL(const llong a, const llong b, const llong c) noexcept
-{
-	const llong ab = a*b;
-	return ((ab + (c/2)) / c) - IsNegative(ab);
-}
-inline realtype IMulDivRT(const realtype a, const realtype b, const realtype c) noexcept
-{
-	const realtype ab = a*b;
-	return ((ab + (c/2)) / c) - IsNegative(ab);
-}
-
-//#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
-inline int IMulDivDown(const int a, const int b, const int c) noexcept
-{
-	return (a*b)/c;
-}
-inline llong IMulDivDownLL(const llong a, const llong b, const llong c) noexcept
-{
-	return (a*b)/c;
-}
-
-//#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
-template<typename T> inline T sign(const T n) noexcept
-{
-    static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
-	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
-}
-
-#define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
-#define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
-#define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
-
-
-/* End of arithmetic code */
-
-
-// use to indicate that a function uses printf-style arguments, allowing GCC
-// to validate the format string and arguments:
-// a = 1-based index of format string
-// b = 1-based index of arguments
-// (note: add 1 to index for non-static class methods because 'this' argument
-// is inserted in position 1)
-#ifdef _MSC_VER
-	#define __printfargs(a,b)
-#else
-	#ifdef _WIN32
-		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
-	#else
-		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
-	#endif
 #endif
 
 

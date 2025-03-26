@@ -1,9 +1,9 @@
-
 #include "../../common/resource/CResourceLock.h"
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/send.h"
-#include "../../sphere/ProfileTask.h"
 #include "../components/CCChampion.h"
 #include "../components/CCItemDamageable.h"
 #include "../components/CCSpawn.h"
@@ -25,7 +25,6 @@
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
-#include "CItemContainer.h"
 #include "CItemCorpse.h"
 #include "CItemMap.h"
 #include "CItemMemory.h"
@@ -174,10 +173,6 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
         if (CCItemDamageable::CanSubscribe(this))
         {
             SubscribeComponent(new CCItemDamageable(this));
-        }
-        if (CCFaction::CanSubscribe(this))
-        {
-            SubscribeComponent(new CCFaction(pItemDef->GetFaction()));  // Adding it only to equippable items
         }
 
         TrySubscribeComponentProps<CCPropsItem>();
@@ -372,7 +367,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id, IT_TYPE type )	// static
     ASSERT(pItem);
     pItem->SetType(type, false);
 
-	if (idErrorMsg && idErrorMsg != (ITEMID_TYPE)-1)
+    if (idErrorMsg && idErrorMsg != (ITEMID_TYPE)-1)
 		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
 
 	return pItem;
@@ -614,7 +609,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 						continue;
 					if ( pItem->IsItemInContainer())
 					{
-						pItem->SetContainedLayer(i16_narrow8(pItem->GetAmount()));	// set the Restock amount.
+						pItem->SetContainedLayer(n16_narrow_n8(pItem->GetAmount()));	// set the Restock amount.
 					}
 				}
 				continue;
@@ -669,7 +664,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					{
 						pItem->r_Call(ptcFunctionName, &g_Serv, pScriptArgs.get());
 					}
-					
+
 					if (pItem->IsDeleted())
 					{
 						pItem = nullptr;
@@ -1234,7 +1229,8 @@ int CItem::FixWeirdness()
         // unreasonably long for a top level item ?
         if (_GetTimerSAdjusted() > 90ll * 24 * 60 * 60)
         {
-			g_Log.EventWarn("FixWeirdness on Item (UID=0%x [%s]): timer unreasonably long (> 90 days) on a top level object.\n", GetUID().GetObjUID(), GetName());
+			g_Log.EventWarn("FixWeirdness on Item (UID=0%x [%s]): timer unreasonably long (> 90 days) on a top level object. Setting to 1 hour.\n",
+                GetUID().GetObjUID(), GetName());
             _SetTimeoutS(60 * 60);
         }
     }
@@ -1562,7 +1558,13 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
-		pSector->CheckItemComplexity();
+    {
+        if (pSector->CheckItemComplexity())
+        {
+            g_Log.Event(LOGL_WARN, "Checked while moving to this sector the item '%s' (UID=0x%" PRIx32 ") at P=%s.\n",
+                GetResourceName(), GetUID().GetObjUID(), pt.WriteUsed());
+        }
+    }
 
 	SetTopPoint( pt );
 	if ( fForceFix )
@@ -1957,9 +1959,17 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		// Who is it stolen from ?
 		const CChar * pChar = m_uidLink.CharFind();
 		if ( pChar )
-			len += snprintf(pTemp + len, Str_TempLength() - len, " (%s %s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN_FROM ), pChar->GetName());
-		else
-			len += snprintf(pTemp + len, Str_TempLength() - len, " (%s)", g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN ) );
+        {
+            /*len +=*/ snprintf(pTemp + len, Str_TempLength() - len,
+                " (%s %s)",
+                g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN_FROM ), pChar->GetName());
+        }
+        else
+        {
+            /*len +=*/ snprintf(pTemp + len, Str_TempLength() - len,
+                " (%s)",
+                g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_STOLEN ) );
+        }
 	}
 
 	return pTemp;
@@ -2118,13 +2128,13 @@ void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 	ASSERT(false);
 }
 
-bool CItem::CanHear() const
+bool CItem::CanHear() const noexcept
 {
     //ADDTOCALLSTACK("CItem::CanHear");
     return IsType(IT_SHIP) || IsType(IT_COMM_CRYSTAL);
 }
 
-CItemBase * CItem::Item_GetDef() const
+CItemBase * CItem::Item_GetDef() const noexcept
 {
 	return static_cast <CItemBase*>( Base_GetDef() );
 }
@@ -2134,6 +2144,11 @@ ITEMID_TYPE CItem::GetID() const
 	const CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
 	return pItemDef->GetID();
+}
+
+dword CItem::GetIDCommon() const
+{
+    return GetID();
 }
 
 bool CItem::SetID( ITEMID_TYPE id )
@@ -2264,7 +2279,7 @@ bool CItem::CanSendAmount() const noexcept
     return true;
 }
 
-void CItem::WriteUOX( CScript & s, int index )
+void CItem::WriteUOX( CScript & s, int index, int dx, int dy )
 {
 	ADDTOCALLSTACK("CItem::WriteUOX");
 	s.Printf( "SECTION WORLDITEM %d\n", index );
@@ -2272,8 +2287,8 @@ void CItem::WriteUOX( CScript & s, int index )
 	s.Printf( "SERIAL %u\n", (dword) GetUID());
 	s.Printf( "NAME %s\n", GetName());
 	s.Printf( "ID %d\n", GetDispID());
-	s.Printf( "X %d\n", GetTopPoint().m_x );
-	s.Printf( "Y %d\n", GetTopPoint().m_y );
+	s.Printf( "X %d\n", GetTopPoint().m_x + dx );
+	s.Printf( "Y %d\n", GetTopPoint().m_y + dy );
 	s.Printf( "Z %d\n", GetTopZ());
 	s.Printf( "CONT %d\n", -1 );
 	s.Printf( "TYPE %d\n", m_type );
@@ -2507,7 +2522,7 @@ bool CItem::LoadSetContainer(const CUID& uidCont, LAYER_TYPE layer )
 		}
 	}
 
-	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetBaseID() ));
+    DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetIDCommon() ));
 	return false;		// not a container.
 }
 
@@ -2804,7 +2819,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 				if ( id != GetDispID() )
 					sVal.FormatHex( id );
 				else
-					sVal.FormatVal(0);
+					sVal.SetValFalse();
 			}
 			break;
 		case IC_HEIGHT:
@@ -3333,7 +3348,17 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			SetUnkZ( s.GetArgCVal() ); // GetEquipLayer()
             break;
 		case IC_LINK:
-			m_uidLink.SetObjUID(s.GetArgDWVal());
+			{
+                CUID uidLink = (CUID)s.GetArgDWVal();
+                if ((dword)uidLink == 0)
+                {
+                    m_uidLink.InitUID();
+                }
+                else
+                {
+                    m_uidLink.SetObjUID(uidLink);
+                }
+            }
             break;
 
 		case IC_FRUIT:	// m_more2
@@ -3912,18 +3937,6 @@ bool CItem::SetType(IT_TYPE type, bool fPreCheck)
         SubscribeComponent(new CCItemDamageable(this));
     }
 
-    pComp = GetComponent(COMP_FACTION);
-    if (!CCFaction::CanSubscribe(this))
-    {
-        if (pComp)
-            UnsubscribeComponent(pComp);
-    }
-    else if (!pComp)
-    {
-        CItemBase* pItemDef = Item_GetDef();
-        SubscribeComponent(new CCFaction(pItemDef->_pFaction));
-    }
-
 	return true;
 }
 
@@ -4074,6 +4087,12 @@ void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)
 	Update();
 }
 
+CObjBase * CItem::GetContainer() const noexcept {
+    // What is this CItem contained in ?
+    // Container should be a CChar or CItemContainer
+    return (dynamic_cast <CObjBase*> (GetParent()));
+}
+
 const CItem* CItem::GetTopContainer() const
 {
 	//Get the top container
@@ -4102,6 +4121,7 @@ CItem* CItem::GetTopContainer()
 	return (pItem == this) ? nullptr : pItem;
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 const CObjBaseTemplate* CItem::GetTopLevelObj() const
 {
 	// recursively get the item that is at "top" level.
@@ -4113,6 +4133,7 @@ const CObjBaseTemplate* CItem::GetTopLevelObj() const
 	return pObj->GetTopLevelObj();
 }
 
+[[nodiscard]] RETURNS_NOTNULL
 CObjBaseTemplate* CItem::GetTopLevelObj()
 {
 	// recursively get the item that is at "top" level.
@@ -5065,7 +5086,8 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
 	CSString sSearch;
-	tchar	*pResult = Str_GetTemp();
+    tchar *pResult = Str_GetTemp();
+    size_t uiResultStrAvailableLen = Str_TempLength();
 
 	// Weather bonus
 	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * bSight) : 0.0;
@@ -5123,7 +5145,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_WEATHER);
 			else
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_NO_LAND);
-			Str_CopyLimitNull( pResult, sSearch, Str_TempLength() );
+            SATURATING_SUB_SELF(uiResultStrAvailableLen, Str_CopyLimitNull( pResult, sSearch, uiResultStrAvailableLen ));
 			break;
 		}
 
@@ -5187,7 +5209,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SHIP_SINGLE), pBoatSighted->GetName(), CPointBase::sm_szDirs[dir]);
 		else
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SHIP_MANY), CPointBase::sm_szDirs[dir]);
-		strcat( pResult, sSearch);
+        SATURATING_SUB_SELF(uiResultStrAvailableLen, Str_ConcatLimitNull(pResult, sSearch, uiResultStrAvailableLen));
 	}
 
 	if (iItemSighted) // Report item sightings, also boats beyond the boat visibility range in the radar screen
@@ -5208,8 +5230,8 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			else
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), pItemSighted->GetNameFull(false), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
 		}
-		strcat( pResult, sSearch);
-	}
+        SATURATING_SUB_SELF(uiResultStrAvailableLen, Str_ConcatLimitNull(pResult, sSearch, uiResultStrAvailableLen));
+    }
 
 	// Check for creatures
     Area->RestartSearch();
@@ -5243,8 +5265,8 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_CREAT_SINGLE), CPointBase::sm_szDirs[dir] );
 		else
 			sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_CREAT_MANY), CPointBase::sm_szDirs[dir] );
-		strcat( pResult, sSearch);
-	}
+        Str_ConcatLimitNull(pResult, sSearch, uiResultStrAvailableLen);
+    }
 	return pResult;
 }
 
@@ -5558,7 +5580,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);
 	pSpellDef = g_Cfg.GetSpellDef( spell );
-
+    ASSERT(pSpellDef);
 
 	if ( IsType(IT_WAND) )	// try to recharge the wand.
 	{
@@ -6022,11 +6044,6 @@ bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 	return false;
 }
 
-CCFaction * CItem::GetSlayer() const
-{
-    return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
-}
-
 
 void CItem::_GoAwake()
 {
@@ -6084,27 +6101,43 @@ bool CItem::_CanHoldTimer() const
 	return true;
 }
 
-bool CItem::_CanTick(bool fParentGoingToSleep) const
+bool CItem::_CanTick() const
 {
-	ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
+    const bool fCharCont = pCont && pCont->IsChar();
     const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
-	// ATTR_DECAY ignores/overrides fParentGoingToSleep
-	if (fIgnoreCont || (IsAttr(ATTR_DECAY) && !pCont))
-	{
-		return CObjBase::_CanTick(false);
-	}
 
-	// Is it top level or equipped on a Char?
-	if (pCont != nullptr)
+    if (fIgnoreCont)
 	{
-		if (!pCont->IsChar())
-			return false;
-	}
+        if (fCharCont && pCont->IsDisconnected())
+        {
+            const auto pCharCont = static_cast<const CChar*>(pCont);
+            if (pCharCont->Skill_GetActive() != NPCACT_RIDDEN)
+                return false;
 
-	return CObjBase::_CanTick(fParentGoingToSleep);
+            // Check if this ridden npc is ridden by a logged out char, or not.
+            const CChar *pCharOwner = pCharCont->GetOwner();
+            if (!pCharOwner || pCharOwner->IsDisconnected())
+                return false;
+        }
+
+        return CObjBase::_CanTick();
+	}
+    else if (IsAttr(ATTR_DECAY) && !pCont)
+    {
+        // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
+        return CObjBase::_CanTick();
+    }
+    else if (fCharCont && !pCont->CanTick())
+    {
+        // Is it equipped on a Char?
+        return false;
+    }
+
+    return CObjBase::_CanTick();
 
 	EXC_CATCH;
 
@@ -6361,3 +6394,14 @@ bool CItem::_OnTick()
 	return true;
 }
 
+const CFactionDef* CItem::GetSlayer() const noexcept
+{
+    auto pComp = static_cast<CCPropsItemEquippable const*>(GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE));
+	return (!pComp ? nullptr : pComp->GetFaction());
+}
+
+CFactionDef* CItem::GetSlayer() noexcept
+{
+    auto pComp = static_cast<CCPropsItemEquippable*>(GetComponentProps(COMP_PROPS_ITEMEQUIPPABLE));
+	return (!pComp ? nullptr : pComp->GetFaction());
+}

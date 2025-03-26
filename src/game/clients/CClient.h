@@ -9,22 +9,23 @@
 #include "../../common/crypto/CCrypto.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CTextConsole.h"
-#include "../../network/receive.h"
 #include "../../network/send.h"
-#include "../items/CItemBase.h"
-#include "../items/CItemContainer.h"
 #include "../CSectorEnviron.h"
 #include "../game_enums.h"
 #include "CAccount.h"
-#include "CChat.h"
 #include "CChatChanMember.h"
 #include "CGlobalChatChanMember.h"
-#include "CClientTooltip.h"
 #include "CGMPage.h"
 
 
+class CItemBase;
+class CItemContainer;
 class CItemMap;
 class CItemMultiCustom;
+class CSObjCont;
+struct VendorItem;
+enum CREID_TYPE : uint32;
+enum ITEMID_TYPE : uint32;
 
 enum CV_TYPE
 {
@@ -211,7 +212,7 @@ public:
 		struct
 		{
 			SPELL_TYPE m_iSpell;			// targetting what spell ?
-			CREID_TYPE m_iSummonID;
+			CREID_TYPE m_uiSummonID;
 		} m_tmSkillMagery;
 
 		// CLIMODE_TARG_USE_ITEM
@@ -384,7 +385,7 @@ public:
 
 public:
 	explicit CClient(CNetState* state);
-	~CClient();
+	~CClient() noexcept;
 
 	CClient(const CClient& copy) = delete;
 	CClient& operator=(const CClient& other) = delete;
@@ -392,10 +393,7 @@ public:
 public:
 	void CharDisconnect();
 
-	CClient* GetNext() const
-	{
-		return static_cast <CClient*>(CSObjListRec::GetNext());
-	}
+    CClient* GetNext() const;
 
 	virtual bool r_GetRef(lpctstr& ptcKey, CScriptObj*& pRef) override;
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override; // Execute script type command on me
@@ -536,7 +534,7 @@ public:
 
 #define MAX_DIALOG_CONTROLTYPE_QTY  1000
 	void addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText );
-	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
+	void addGumpInputVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, uint count, CObjBase * pObj = nullptr );
 	void addGumpDialog( CLIMODE_TYPE mode, std::vector<CSString> const* vsControls, std::vector<CSString> const* vsText, int x, int y, CObjBase * pObj = nullptr, dword dwRid = 0 );
@@ -788,10 +786,10 @@ public:
 
 	// ------------------------------------------------
 
-    bool IsResDisp(byte flag) const;
+    bool IsResDisp(RESDISPLAY_VERSION res) const;
     byte GetResDisp() const;
-    bool SetResDisp(byte res);
-    bool SetGreaterResDisp(byte res);
+    bool SetResDisp(RESDISPLAY_VERSION res);
+    bool SetGreaterResDisp(RESDISPLAY_VERSION res);
 
 	// ------------------------------------------------
 
@@ -799,10 +797,14 @@ public:
 
     virtual PLEVEL_TYPE GetPrivLevel() const override;
     virtual lpctstr GetName() const override;
-	virtual CChar * GetChar() const override
+    virtual CChar * GetChar() override
 	{
 		return m_pChar;
 	}
+    virtual const CChar * GetChar() const override
+    {
+        return m_pChar;
+    }
 
 	virtual void SysMessage( lpctstr pMsg ) const override; // System message (In lower left corner)
 	bool CanSee( const CObjBaseTemplate * pObj ) const;

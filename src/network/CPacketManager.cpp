@@ -1,9 +1,8 @@
-#include "../common/CLog.h"
-#include "../game/CServerConfig.h"
+#include "../sphere/threads.h"
 #include "packet.h"
 #include "receive.h"
-#include "send.h"
 #include "CPacketManager.h"
+#include <cstring>
 
 
 PacketManager::PacketManager(void)
@@ -83,6 +82,7 @@ void PacketManager::registerStandardPackets(void)
     registerPacket(XCMD_CharProfile, new PacketProfileReq());					// profile read/write request
     registerPacket(XCMD_MailMsg, new PacketMailMessage());						//
     registerPacket(XCMD_ClientVersion, new PacketClientVersion());				// client version
+    registerPacket(XCMD_AssistVersion, new PacketAssistVersion());              // assist version
     registerPacket(XCMD_ExtData, new PacketExtendedCommand());					//
     registerPacket(XCMD_PromptUNICODE, new PacketPromptResponseUnicode());		// prompt response (unicode)
     registerPacket(XCMD_ViewRange, new PacketViewRange());						//

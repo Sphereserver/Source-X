@@ -1,10 +1,10 @@
-#include "CSObjCont.h"
 #include "../assertion.h"
 #include "../CException.h"
+#include "CSObjCont.h"
 #include <algorithm>
 
 
-CSObjContRec::CSObjContRec() :
+CSObjContRec::CSObjContRec() noexcept :
     m_pParent(nullptr)
 {
 }
@@ -32,12 +32,13 @@ CSObjCont::CSObjCont() :
 
 CSObjCont::~CSObjCont()
 {
-	ClearContainer(true);
+    // Do not virtually call this method, since i'm in the destructor of the base-most class.
+	CSObjCont::ClearContainer(true);
 }
 
 // CSObjCont:: Modifiers.
 
-void CSObjCont::ClearContainer(bool fClosingWorld)
+void CSObjCont::ClearContainer(bool fClosingWorld) noexcept
 {
 	if (_Contents.empty())
 		return;

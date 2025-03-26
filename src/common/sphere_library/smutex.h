@@ -6,13 +6,14 @@
 #ifndef _INC_SMUTEX_H
 #define _INC_SMUTEX_H
 
-#include "../common.h"
 #ifndef _WIN32
-	#include <pthread.h>
+#   include <pthread.h>
+#else
+#   include "../common.h"
 #endif
 
 #ifdef _BSD
-	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
+#   define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
 #endif
 
 
@@ -21,6 +22,14 @@
 */
 class SimpleMutex
 {
+private:
+#ifdef _WIN32
+    CRITICAL_SECTION m_criticalSection;   // Windows API specific mutex.
+#else
+    pthread_mutex_t m_criticalSection;   // Unix API specific mutex.
+    pthread_mutexattr_t m_criticalSectionAttr;   // Unix API mutex attr.
+#endif
+
 public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
@@ -79,15 +88,6 @@ public:
 #endif
 	}
 	///@}
-
-private:
-#ifdef _WIN32
-	CRITICAL_SECTION m_criticalSection;   // Windows API specific mutex.
-#else
-	pthread_mutex_t m_criticalSection;   // Unix API specific mutex.
-	pthread_mutexattr_t m_criticalSectionAttr;   // Unix API mutex attr.
-#endif
-
 };
 
 /**

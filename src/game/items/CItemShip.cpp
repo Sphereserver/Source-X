@@ -3,11 +3,10 @@
 //
 
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
-#include "../CWorldMap.h"
 #include "../CWorldSearch.h"
-#include "../triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
 #include "CItem.h"
@@ -154,28 +153,28 @@ bool CItemShip::r_WriteVal(lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc,
     {
         case IMCS_HATCH:
         {
-            ptcKey += 5;
+            //ptcKey += 5;
             CItem * pItemHold = GetShipHold();
             if (pItemHold)
                 sVal.FormatHex(pItemHold->GetUID());
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         } break;
 
         case IMCS_PLANK:
         {
-            ptcKey += 6;
+            //ptcKey += 6;
             sVal.FormatSTVal(GetShipPlankCount());
         } break;
 
         case IMCS_TILLER:
         {
-            ptcKey += 6;
+            //ptcKey += 6;
             const CItem * pTiller = Multi_GetSign();
             if (pTiller)
                 sVal.FormatHex(pTiller->GetUID());
             else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
         } break;
 
         default:

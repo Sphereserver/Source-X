@@ -8,25 +8,20 @@
 
 #include "../common.h"
 
-// temporary string storage
-#define THREAD_STRING_STORAGE	4096
-#define THREAD_TSTRING_STORAGE	2048
-#define THREAD_STRING_LENGTH	4096
-
 
 //--
 
-tchar* Str_GetTemp() noexcept;
+#define THREAD_STRING_LENGTH	4096
 
-#if __cplusplus >= 202002L
-// C++20 (and later) code
+[[nodiscard]]
 consteval
-#else
-constexpr
-#endif
-size_t Str_TempLength() noexcept {
+size_t Str_TempLength() noexcept
+{
 	return (size_t)(THREAD_STRING_LENGTH);
 }
+
+[[nodiscard]]
+tchar* Str_GetTemp() noexcept;
 
 //--
 
@@ -36,7 +31,7 @@ class AbstractString
 {
 public:
 	AbstractString();
-	virtual ~AbstractString() = default;
+	virtual ~AbstractString();
 
 	AbstractString(const AbstractString& copy) = delete;
 	AbstractString& operator=(const AbstractString& other) = delete;
@@ -132,7 +127,7 @@ class TemporaryString : public AbstractString
 
 public:
 	TemporaryString();
-	~TemporaryString();
+	virtual ~TemporaryString() override;
 
 	TemporaryString(const TemporaryString& copy) = delete;
 	TemporaryString& operator=(const TemporaryString& other) = delete;

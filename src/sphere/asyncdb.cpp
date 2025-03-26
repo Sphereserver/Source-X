@@ -1,13 +1,12 @@
 
 #include "../common/CScriptObj.h"
 #include "../common/CScriptTriggerArgs.h"
-#include "../game/triggers.h"
 #include "../game/CServer.h"
 #include "asyncdb.h"
 
 CDataBaseAsyncHelper g_asyncHdb;
 
-CDataBaseAsyncHelper::CDataBaseAsyncHelper(void) : AbstractSphereThread("AsyncDatabaseHelper", IThread::Low)
+CDataBaseAsyncHelper::CDataBaseAsyncHelper(void) : AbstractSphereThread("AsyncDatabaseHelper", ThreadPriority::Low)
 {
 }
 

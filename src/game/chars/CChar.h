@@ -7,23 +7,28 @@
 #define _INC_CCHAR_H
 
 #include "../../common/sphereproto.h"
-#include "../components/CCFaction.h"
 #include "../clients/CParty.h"
-#include "../items/CItemContainer.h"
-#include "../items/CItemCorpse.h"
-#include "../items/CItemMemory.h"
-#include "../items/CItemStone.h"
-#include "../game_macros.h"
+#include "../CContainer.h"
 #include "../CObjBase.h"
 #include "../CTimedObject.h"
+#include "../game_macros.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 
 
-class CWorldTicker;
 class CCharNPC;
+class CFactionDef;
+class CItem;
+class CItemContainer;
+class CItemCorpse;
+class CItemMemory;
+class CItemVendable;
+class CItemStone;
 class CMapBlockingState;
-
+class CStoneMember;
+class CWorldTicker;
+enum MEMORY_TYPE : int;
+enum IT_TYPE : int32_t;
 
 enum NPCBRAIN_TYPE	// General AI type.
 {
@@ -112,8 +117,8 @@ public:
 
 	struct NotoSaves
 	{
-		dword		charUID;	// Character viewing me
-		int64		time;		// Update timer
+		int64		time;		// Updaete timer
+        dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
 	};
@@ -136,23 +141,32 @@ public:
 	// Combat stuff. cached data. (not saved)
 	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
-    ushort _uiRange;
-
-	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
+    ushort _iRegenTickCount;    // ticks until next regen.
 
 	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
 	uint m_exp;					// character experience
 	uint m_level;				// character experience level
-	byte m_iVisualRange;		// Visual Range
 	//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
 	bool m_fClimbUpdated;		// FixClimbHeight() called?
 	bool m_fIgnoreNextPetCmd;	// return 1 in speech block for this pet will make it ignore target petcmds while allowing the rest to perform them
 	height_t m_zClimbHeight;	// The height at the end of the climbable.
 
 	// Saved stuff.
+	byte m_iVisualRange;		// Visual Range
+    height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
+    HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
+
 	DIR_TYPE m_dirFace;			// facing this dir.
 	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
+
+	int64  _iTimeCreate;	    // When was i created ?
+	int64  _iTimePeriodicTick;
+	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
+
+	int64 _iTimeLastHitsUpdate;
+	int64 _iTimeLastCallGuards;
+
 	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
 	// Speech
@@ -161,9 +175,8 @@ public:
 	HUE_TYPE m_EmoteHueOverride;	// emote hue to use
 
 	// In order to revert to original Hue and body.
-	CREID_TYPE _iPrev_id;		// Backup of body type for ghosts and poly
 	HUE_TYPE _wPrev_Hue;		// Backup of skin color. in case of polymorph etc.
-	HUE_TYPE _wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
+	CREID_TYPE _iPrev_id;		// Backup of body type for ghosts and poly
 
 	CREID_TYPE m_dwDispIndex; //To change the DispID instance
 
@@ -172,26 +185,18 @@ public:
 
 	struct
 	{
-		ushort  m_base;      // Base stat: STR, INT, DEX
 		int     m_mod;	     // Modifier to base stat: ModSTR, ModINT, ModDex (signed to allow negative modifiers). Accepted values between -UINT16_MAX and +UINT16_MAX
+        int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
+		ushort  m_base;      // Base stat: STR, INT, DEX
 		ushort  m_val;       // Hits, Mana, Stam
 		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
-        int     m_maxMod;    // Modifier to MaxVal: ModMaxHits, ModMaxMana, ModMaxStam
+		ushort  m_regenVal;  // Amount of Stat to gain at each regen
 		int64   m_regenRate; // Regen each this much milliseconds.
         int64   m_regenLast; // Time of the last regen.
-        ushort  m_regenVal;  // Amount of Stat to gain at each regen
 	} m_Stat[STAT_QTY];
 
     short m_iKarma;
     ushort m_uiFame;
-
-	int64  _iTimeCreate;	    // When was i created ?
-	int64  _iTimePeriodicTick;
-	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
-    ushort _iRegenTickCount;    // ticks until next regen.
-
-	int64 _iTimeLastHitsUpdate;
-	int64 _iTimeLastCallGuards;
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
@@ -200,10 +205,17 @@ public:
 	CUID		m_Act_Prv_UID;		// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
 	int			m_Act_Effect;
-	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
+	CPointMap   m_Act_p;			// Moving to this location. or location of forge we are working on.
 
-    std::vector<CUID> m_followers;
+    ushort _uiRange;
+
+    struct FollowerCharData
+    {
+        CUID uid;
+        short followerslots;
+    };
+    std::vector<FollowerCharData> m_followers;
 
 	// Args related to specific actions type (m_Act_SkillCurrent)
 	union
@@ -226,7 +238,7 @@ public:
 		struct
 		{
 			SPELL_TYPE m_iSpell;			// ACTARG1 = Currently casting spell.
-			CREID_TYPE m_iSummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
+			CREID_TYPE m_uiSummonID;		// ACTARG2 = A sub arg of the skill. (summoned type ?)
 		} m_atMagery;
 
 		// SKILL_ALCHEMY
@@ -387,15 +399,15 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 
 	// Information about us.
 	CREID_TYPE GetID() const;
-	virtual word GetBaseID() const override;
-	CREID_TYPE GetDispID() const;
+    virtual dword GetIDCommon() const override final;   // The unique index id (will NOT be the same as artwork if outside artwork range).
+    CREID_TYPE GetDispID() const;
 	bool SetDispID(CREID_TYPE id);
 	void SetID( CREID_TYPE id );
 
-	virtual lpctstr GetName() const override;
+    virtual lpctstr GetName() const override final;
 	lpctstr GetNameWithoutIncognito() const;
 	lpctstr GetName( bool fAllowAlt ) const;
-	virtual bool SetName( lpctstr pName ) override;
+    virtual bool SetName( lpctstr pName ) override final;
 
 	height_t GetHeightMount( bool fEyeSubstract = false ) const;
 	height_t GetHeight() const;
@@ -425,14 +437,14 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 	bool CanSeeItem( const CItem * pItem ) const;
 	bool CanTouch( const CPointMap & pt ) const;
-	bool CanTouch( const CObjBase * pObj ) const;
-	IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem ) const;
+    bool CanTouch( const CObjBase * pObj );
+    IT_TYPE CanTouchStatic( CPointMap * pPt, ITEMID_TYPE id, const CItem * pItem );
 	bool CanMoveItem( const CItem * pItem, bool fMsg = true ) const;
 	byte GetLightLevel() const;
-	bool CanUse( const CItem * pItem, bool fMoveOrConsume ) const;
+    bool CanUse( const CItem * pItem, bool fMoveOrConsume );
 	bool IsMountCapable() const;
 
-	ushort  Food_CanEat( CObjBase * pObj ) const;
+    ushort  Food_CanEat( CObjBase * pObj ) const;
 	short   Food_GetLevelPercent() const;
 	lpctstr Food_GetLevelMessage( bool fPet, bool fHappy ) const;
 
@@ -483,8 +495,10 @@ private:
 	bool IsVerticalSpace( const CPointMap& ptDest, bool fForceMount = false ) const;
 
 public:
-	virtual CObjBaseTemplate* GetTopLevelObj() override;
-	virtual const CObjBaseTemplate* GetTopLevelObj() const override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual CObjBaseTemplate* GetTopLevelObj() override;
+    [[nodiscard]] RETURNS_NOTNULL
+        virtual const CObjBaseTemplate* GetTopLevelObj() const override;
 
 	bool IsSwimming() const;
 	bool MoveToRegion(CRegionWorld* pNewArea, bool fAllowReject);
@@ -543,7 +557,7 @@ public:
 	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 
-	void UpdateMode( CClient * pExcludeClient = nullptr, bool fFull= false );
+    void UpdateMode( bool fFull, CClient * pExcludeClient = nullptr);
 	void UpdateSpeedMode();
 	void UpdateVisualRange();
 	void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = nullptr, bool bFull = false );
@@ -809,8 +823,10 @@ public:
 
 	/**
 	* @brief Clearing notoriety and update myself so everyone checks my noto again.
+    *
+    * @param fCharFullUpdate Should it do a full character entity update instead of a partial one?
 	*/
-	void NotoSave_Update();
+    void NotoSave_Update(bool fCharFullUpdate = false);
 
 	/**
 	* @brief Deleting myself and sending data again for given char.
@@ -1007,7 +1023,7 @@ public:
 	bool Spell_CastDone();
 	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0) override;
 	bool Spell_CanCast( SPELL_TYPE &spellRef, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
-	CChar * Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE iC1);
+    CChar* Spell_Summon_Try(SPELL_TYPE spell, CPointMap ptTarg, CREID_TYPE uiCreature, std::optional<short> iFollowerSlotsOverride);
 	int64 GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr ); // in tenths of second
 
 	// Memories about objects in the world. -------------------
@@ -1036,10 +1052,13 @@ public:
 	void SoundChar(CRESND_TYPE type);
 	void Action_StartSpecial(CREID_TYPE id);
 
+    const CFactionDef* GetFaction() const noexcept;
+    CFactionDef* GetFaction() noexcept;
+
 private:
 	void OnNoticeCrime( CChar * pCriminal, CChar * pCharMark );
 public:
-	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction );
+	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr ptcAction );
 
 private:
 	// Armor, weapons and combat ------------------------------------
@@ -1149,7 +1168,9 @@ public:
 	CChar * Use_Figurine( CItem * pItem, bool fCheckFollowerSlots = true );
 	CItem * Make_Figurine( const CUID &uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
-	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
+    bool FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots = 0, bool fCheckOnly = false );
+    short GetFollowerSlots() const;
+    short GetCurFollowers() const;
 
 	int  ItemPickup( CItem * pItem, word amount );
 	bool ItemEquip( CItem * pItem, CChar * pCharMsg = nullptr, bool fFromDClick = false );
@@ -1160,16 +1181,28 @@ public:
 
 	virtual void Update(const CClient* pClientExclude = nullptr) override;
 	virtual void Flip() override;
+
+    void EatAnim(CItem* pItem, ushort uiQty);
+    bool Reveal( uint64 iFlags = 0 );
+    void Jail( CTextConsole * pSrc, bool fSet, int iCell );
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( bool fExtra );
 	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool fIgnoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
-	bool RaiseCorpse( CItemCorpse * pCorpse );
-	bool Death();
-	bool Reveal( uint64 iFlags = 0 );
-	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim(CItem* pItem, ushort uiQty);
+    bool RaiseCorpse( CItemCorpse * pCorpse );
+
+    enum class DeathRequestResult
+    {
+        Success,
+        SuccessAndDelete,
+        AlreadyDead,
+        Aborted,
+        AbortedNoLog
+    };
+
+    DeathRequestResult Death();
+
 	/**
 	* @Brief I'm calling guards (Player speech)
 	*
@@ -1343,7 +1376,7 @@ protected:
 	virtual void _GoAwake() override final;
 	virtual void _GoSleep() override final;
 
-	virtual bool _CanTick(bool fParentGoingToSleep = false) const override final;
+    virtual bool _CanTick() const override final;
 
 protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc
 //public:	virtual bool  _OnTick() override final;

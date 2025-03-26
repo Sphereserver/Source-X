@@ -4,8 +4,10 @@
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CExpression.h"
 #include "../clients/CClient.h"
 #include "../items/CItemMulti.h"
+#include "../items/CItemStone.h"
 #include "../CServer.h"
 #include "../CWorld.h"
 #include "../CWorldGameTime.h"
@@ -196,7 +198,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 			if ( pMyGuild )
                 sVal.FormatHex((dword)pMyGuild->GetUID());
 			else
-                sVal.FormatVal(0);
+                sVal.SetValFalse();
 			return true;
 		}
 		else if ( *ptcKey == '.' )
@@ -333,7 +335,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & sVal )
 		default:
 			if ( FindTableSorted( ptcKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
 			{
-				sVal = "0";
+				sVal.SetValFalse();
 				return true;
 			}
 			return false;

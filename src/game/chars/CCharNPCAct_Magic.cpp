@@ -1,6 +1,9 @@
 // Actions specific to an NPC.
 
+#include "../../common/sphere_library/CSRand.h"
 #include "../../common/CScriptTriggerArgs.h"
+#include "../items/CItemContainer.h"
+#include "../items/CItemMemory.h"
 #include "../triggers.h"
 #include "../CWorldMap.h"
 #include "../CWorldSearch.h"
