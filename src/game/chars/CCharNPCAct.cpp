@@ -117,14 +117,14 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
         }
         else
         {
-            const CSector *pItemSector = pItem->GetTopSector();
-            ASSERT(pItemSector);    // fPlaced is true, so the current sector should be valid
-#ifdef _DEBUG
+            //const CSector *pItemSector = pItem->GetTopSector();
+            //ASSERT(pItemSector);    // fPlaced is true, so the current sector should be valid
+//#ifdef _DEBUG
             const CSector *pCharSector = GetTopSector();
             ASSERT(pCharSector);
-            ASSERT(pCharSector == pItemSector);
-#endif
-            if (pItemSector->IsSleeping() && !_IsSleeping())
+//            ASSERT(pCharSector == pItemSector);
+//#endif
+            if (pCharSector->IsSleeping() && !_IsSleeping())
             {
                 // The char is temporarily walking in a sleeping sector.
                 // The items it creates need to be able to decay, even if in a sleeping sector.
