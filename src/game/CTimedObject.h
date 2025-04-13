@@ -27,16 +27,22 @@ private:
     PROFILE_TYPE _profileType;
     bool _fIsSleeping;
 
+    bool _fIsInWorldTickList;
+    bool _fIsAddingInWorldTickList;
+
     /**
     * @brief clears the timeout.
     * Should not be used outside the tick's loop, use SetTimeout(0) instead.
     */
-protected:  inline  void _ClearTimeout() noexcept;
-public:             void  ClearTimeout() noexcept;
+protected:  inline  void _ClearTimeoutRaw() noexcept;
+public:             void  ClearTimeoutRaw() noexcept;
 
 public:
     CTimedObject(PROFILE_TYPE profile) noexcept;
     virtual ~CTimedObject();
+
+protected:
+    inline bool IsTicking() noexcept;
 
 protected:  inline  bool _IsSleeping() const noexcept;
 public:             bool IsSleeping() const noexcept;
@@ -162,7 +168,7 @@ void CTimedObject::_SetTimeoutRaw(int64 iDelayInMsecs) noexcept
     _iTimeout = iDelayInMsecs;
 }
 
-void CTimedObject::_ClearTimeout() noexcept
+void CTimedObject::_ClearTimeoutRaw() noexcept
 {
     _iTimeout = 0;
 }
@@ -175,6 +181,11 @@ bool CTimedObject::_IsSleeping() const noexcept
 void CTimedObject::_GoSleep()
 {
     _fIsSleeping = true;
+}
+
+bool CTimedObject::IsTicking() noexcept
+{
+    return _fIsInWorldTickList || _fIsAddingInWorldTickList;
 }
 
 bool CTimedObject::_IsTimerSet() const noexcept

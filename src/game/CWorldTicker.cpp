@@ -86,19 +86,21 @@ void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
 #endif
 
-    const auto itEntryInAddList = std::find_if(
-        _vecWorldObjsAddRequests.begin(),
-        _vecWorldObjsAddRequests.end(),
-        fnFindEntryByObj);
-    if (_vecWorldObjsAddRequests.end() != itEntryInAddList)
+    if (pTimedObject->_fIsAddingInWorldTickList)
     {
+        const auto itEntryInAddList = std::find_if(
+            _vecWorldObjsAddRequests.begin(),
+            _vecWorldObjsAddRequests.end(),
+            fnFindEntryByObj);
+        ASSERT(_vecWorldObjsAddRequests.end() != itEntryInAddList);
+
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
         g_Log.EventDebug("[WorldTicker][%p] WARN: CTimedObj insertion into ticking list already requested with %s timer. OVERWRITING.\n",
             (void*)pTimedObject,
             ((itEntryInAddList->first == iTimeout) ? "same" : "different"));
 #endif
-        itEntryInAddList->first = iTimeout;
 
+        itEntryInAddList->first = iTimeout;
         return; // Already requested the addition.
     }
 
@@ -130,7 +132,7 @@ void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
         if (_vecWorldObjsEraseRequests.end() == itEntryInEraseList)
         {
 #   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-            g_Log.EventDebug("[WorldTicker][%p] WARN: But i didn't even requested to remove that!\n", (void*)pTimedObject);
+            g_Log.EventDebug("[WorldTicker][%p] WARN: And i didn't requested to remove that!\n", (void*)pTimedObject);
 #   endif
 
             ASSERT(false);
@@ -152,6 +154,7 @@ void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
 #endif
 
     _vecWorldObjsAddRequests.emplace_back(iTimeout, pTimedObject);
+    pTimedObject->_fIsAddingInWorldTickList = true;
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
     g_Log.EventDebug("[WorldTicker][%p] INFO: Done adding CTimedObj in the ticking list add buffer with timeout %" PRId64 ".\n", (void*)pTimedObject, iTimeout);
@@ -172,30 +175,31 @@ void CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
     std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
 #endif
 
-    // TODO: use binary search here?
-    const auto itEntryInTickList = std::find_if(
-        _mWorldTickList.begin(),
-        _mWorldTickList.end(),
-        fnFindEntryByObj);
-
-    const auto itEntryInAddList = std::find_if(
-        _vecWorldObjsAddRequests.begin(),
-        _vecWorldObjsAddRequests.end(),
-        fnFindEntryByObj);
-
-    const auto itEntryInRemoveList = std::find(
-        _vecWorldObjsEraseRequests.begin(),
-        _vecWorldObjsEraseRequests.end(),
-        pTimedObject);
-
-    if (itEntryInAddList != _vecWorldObjsAddRequests.end())
+    if (pTimedObject->_fIsAddingInWorldTickList)
     {
+        const auto itEntryInAddList = std::find_if(
+            _vecWorldObjsAddRequests.begin(),
+            _vecWorldObjsAddRequests.end(),
+            fnFindEntryByObj);
+        ASSERT(itEntryInAddList != _vecWorldObjsAddRequests.end());
+
         _vecWorldObjsAddRequests.erase(itEntryInAddList);
+        pTimedObject->_fIsAddingInWorldTickList = false;
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
 #   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
         g_Log.EventDebug("[WorldTicker][%p] INFO: Removing CTimedObj from the ticking list add buffer.\n", (void*)pTimedObject);
 #   endif
+
+        const auto itEntryInTickList = std::find_if(
+            _mWorldTickList.begin(),
+            _mWorldTickList.end(),
+            fnFindEntryByObj);
+        const auto itEntryInRemoveList = std::find(
+            _vecWorldObjsEraseRequests.begin(),
+            _vecWorldObjsEraseRequests.end(),
+            pTimedObject);
+
         if (itEntryInRemoveList == _vecWorldObjsEraseRequests.end()) {
             ASSERT(itEntryInTickList == _mWorldTickList.end());
         }
@@ -207,25 +211,47 @@ void CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
         return;
     }
 
+    const auto itEntryInRemoveList = std::find(
+        _vecWorldObjsEraseRequests.begin(),
+        _vecWorldObjsEraseRequests.end(),
+        pTimedObject);
     if (_vecWorldObjsEraseRequests.end() != itEntryInRemoveList)
     {
         // I have already requested to remove this from the main ticking list.
         // It can happen and it's legit. Example: we call this method via CObjBase::Delete and ~CObjBase.
+
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
         g_Log.EventDebug("[WorldTicker][%p] INFO: CTimedObj removal from the main ticking list already requested.\n", (void*)pTimedObject);
 #endif
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
+        const auto itEntryInAddList = std::find_if(
+            _vecWorldObjsAddRequests.begin(),
+            _vecWorldObjsAddRequests.end(),
+            fnFindEntryByObj);
         ASSERT(itEntryInAddList == _vecWorldObjsAddRequests.end());
+
+        const auto itEntryInTickList = std::find_if(
+            _mWorldTickList.begin(),
+            _mWorldTickList.end(),
+            fnFindEntryByObj);
+        ASSERT(itEntryInTickList != _mWorldTickList.end());
 #endif
+
         return; // Already requested the removal.
     }
 
+    const auto itEntryInTickList = std::find_if(
+        _mWorldTickList.begin(),
+        _mWorldTickList.end(),
+        fnFindEntryByObj);
     if (itEntryInTickList == _mWorldTickList.end())
     {
         // Not found. The object might have a timeout while being in a non-tickable state (like at server startup), so it isn't in the list.
+/*
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
         g_Log.EventDebug("[WorldTicker][%p] INFO: Requested erasure of TimedObject in mWorldTickList, but it wasn't found there.\n", (void*)pTimedObject);
 #endif
+*/
         return;
     }
 
@@ -249,8 +275,7 @@ void CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     const ProfileTask timersTask(PROFILE_TIMERS);
 
     EXC_SET_BLOCK("Already ticking?");
-    const int64 iTickOld = pTimedObject->_GetTimeoutRaw();
-    if (iTickOld != 0)
+    if (pTimedObject->IsTicking())
     {
         // Adding an object that might already be in the list?
         // Or, am i setting a new timeout without deleting the previous one?
@@ -301,7 +326,9 @@ void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
     EXC_TRY("DelTimedObject");
     const ProfileTask timersTask(PROFILE_TIMERS);
 
+    /*
     EXC_SET_BLOCK("Not ticking?");
+
     const int64 iTickOld = pTimedObject->_GetTimeoutRaw();
     if (iTickOld == 0)
     {
@@ -341,6 +368,7 @@ void CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
 #endif
         return;
     }
+*/
 
     EXC_SET_BLOCK("Remove");
     _RemoveTimedObject(pTimedObject);
@@ -1168,6 +1196,17 @@ void CWorldTicker::Tick()
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
                 g_Log.EventDebug("[GLOBAL] STATUS: Updating WorldTickList.\n");
 #endif
+                for (CTimedObject* elem : _vecWorldObjsEraseRequests)
+                {
+                    elem->_fIsAddingInWorldTickList = false;
+                    elem->_fIsInWorldTickList = false;
+                }
+                for (TickingTimedObjEntry& elem : _vecWorldObjsAddRequests)
+                {
+                    elem.second->_fIsAddingInWorldTickList = false;
+                    elem.second->_fIsInWorldTickList = true;
+                }
+
                 sortedVecRemoveAddQueued(_mWorldTickList, _vecWorldObjsEraseRequests, _vecWorldObjsAddRequests, _vecWorldObjsElementBuffer);
                 EXC_CATCHSUB("");
             }
@@ -1252,7 +1291,7 @@ void CWorldTicker::Tick()
                     EXC_SETSUB_BLOCK("Elapsed");
 
                     CTimedObject* pTimedObj = static_cast<CTimedObject*>(pObjVoid);
-                    pTimedObj->_ClearTimeout();
+                    pTimedObj->_ClearTimeoutRaw();
 
 #if MT_ENGINES
                     std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->MT_CMUTEX);

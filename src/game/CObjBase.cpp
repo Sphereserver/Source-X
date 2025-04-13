@@ -3210,9 +3210,17 @@ void CObjBase::_GoAwake()
 void CObjBase::_GoSleep()
 {
 	ADDTOCALLSTACK("CObjBase::_GoSleep");
+
+    // This method can be called multiple times while an object is Delete'd or destroyed (by the superclasses). Avoid additional overhead.
+    if (_IsSleeping())
+    {
+        ASSERT(!IsTicking());
+        return;
+    }
+
 	CTimedObject::_GoSleep();
 
-	if (_IsTimerSet())
+    if (IsTicking())
 	{
 		CWorldTickingList::DelObjSingle(this);
     }

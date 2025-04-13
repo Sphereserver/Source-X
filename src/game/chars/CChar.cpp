@@ -377,11 +377,6 @@ void CChar::DeleteCleanup(bool fForce)
 
     //_uiInternalStateFlags |= SF_DELETING;
 
-	// We don't want to have invalid pointers over there
-	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
-	//CWorldTickingList::DelObjSingle(this);
-	//CWorldTickingList::DelObjStatusUpdate(this, false);
-
 	CWorldTickingList::DelCharPeriodic(this, false);
 
 

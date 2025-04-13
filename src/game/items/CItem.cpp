@@ -193,11 +193,6 @@ void CItem::DeleteCleanup(bool fForce)
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
 	_uiInternalStateFlags |= SF_DELETING;
 
-	// We don't want to have invalid pointers over there
-	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
-	//CWorldTickingList::DelObjSingle(this);
-	//CWorldTickingList::DelObjStatusUpdate(this, false);
-
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink.IsValidUID())
 	{
@@ -6063,7 +6058,7 @@ void CItem::_GoAwake()
 	ADDTOCALLSTACK("CItem::_GoAwake");
 	CObjBase::_GoAwake();
 
-    // Items equipped or inside containers don't automatically receive ticks and need to be added manually to be processed individually
+    // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
     if (!IsTopLevel())
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
@@ -6077,7 +6072,7 @@ void CItem::_GoSleep()
 
     /*
      * For now, we force this check on every item in CObjBase::_GoSleep
-    // Items equipped or inside containers don't automatically receive ticks and need to be added manually to be processed individually
+    // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
     if (!IsTopLevel())
     {
         CWorldTickingList::DelObjStatusUpdate(this, false);

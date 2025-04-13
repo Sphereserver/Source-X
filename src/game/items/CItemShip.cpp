@@ -71,7 +71,7 @@ bool CItem::Ship_Plank(bool fOpen)
         {
             SetType((IT_TYPE)(m_itShipPlank.m_wSideType));
             if (_IsTimerSet())
-                _ClearTimeout();  //We clear the timer otherwise the plank item will be removed  if it is closed before the timer expires.
+                SetTimeout(-1);  //We clear the timer otherwise the plank item will be removed if it is closed before the timer expires.
             ClrAttr(ATTR_DECAY); //We remove the ATTR_DECAY flag or the plank will disappear on next save.
         }
         m_itShipPlank.m_wSideType = IT_NORMAL;
