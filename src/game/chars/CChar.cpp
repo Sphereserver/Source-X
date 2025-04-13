@@ -445,6 +445,7 @@ void CChar::DeletePrepare()
 bool CChar::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::Delete");
+    EXC_TRY("Cleanup in Delete method");
 
 	if ((NotifyDelete(fForce) == false) && !fForce)
 		return false;
@@ -464,6 +465,9 @@ bool CChar::Delete(bool fForce)
 		ClearPlayer();
 
 	return CObjBase::Delete();
+
+    EXC_CATCH;
+    return false;
 }
 
 // Client is detaching from this CChar.

@@ -344,7 +344,7 @@ public:
 	CChar& operator=(const CChar& other) = delete;
 
 protected:
-	void DeleteCleanup(bool fForce);	// Not virtual!
+    void DeleteCleanup(bool fForce) NONVIRTUAL;
 	virtual void DeletePrepare() override;
 public:
 	bool NotifyDelete(bool fForce);
