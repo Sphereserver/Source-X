@@ -15,6 +15,11 @@ void CWorldTickingList::DelObjSingle(CTimedObject* pObj) // static
     g_World._Ticker.DelTimedObject(pObj);
 }
 
+auto CWorldTickingList::HasTimedObject(const CTimedObject* pTimedObject) -> std::pair<int64, CTimedObject*>
+{
+    return g_World._Ticker.HasTimedObject(pTimedObject);
+}
+
 void CWorldTickingList::AddCharPeriodic(CChar* pChar, bool fNeedsLock) // static
 {
     g_World._Ticker.AddCharTicking(pChar, fNeedsLock);

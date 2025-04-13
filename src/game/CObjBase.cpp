@@ -240,6 +240,7 @@ void CObjBase::DeleteCleanup(bool fForce)
 bool CObjBase::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::Delete");
+    EXC_TRY("Cleanup in Delete method");
 
     bool fScheduleDeletion = true;
     const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
@@ -260,13 +261,26 @@ bool CObjBase::Delete(bool fForce)
     }
 
 	DeletePrepare();           // virtual, but if called by the destructor this will fail to call upper (CChar, CItem, etc) virtual methods.
-    DeleteCleanup(fForce);     // not virtual!
+    DeleteCleanup(fForce);    // not virtual!
 
-    if (fScheduleDeletion) {
+    std::pair<int64, CTimedObject*> pairTimedObj = CWorldTickingList::HasTimedObject(this);
+    if (pairTimedObj.second != nullptr)
+    {
+        g_Log.EventError("CObjBase [defname='%s', cur timer adj=%" PRId64 ", cur timer raw=%" PRId64 ", timeout=%" PRId64 "]"
+                         "expected to have been removed from the Ticking List, but it's still there!.\n",
+            GetResourceName(), _GetTimerAdjusted(), _GetTimeoutRaw(), pairTimedObj.first);
+        ASSERT_ALWAYS(false);
+    }
+
+    if (fScheduleDeletion)
+    {
         g_World.ScheduleObjDeletion(this);
     }
 
 	return true;
+
+    EXC_CATCH;
+    return false;
 }
 
 CBaseBaseDef* CObjBase::Base_GetDef() const noexcept
@@ -3201,7 +3215,7 @@ void CObjBase::_GoSleep()
 	if (_IsTimerSet())
 	{
 		CWorldTickingList::DelObjSingle(this);
-	}
+    }
 
     // Most objects won't be into the status update list, but we have to check anyways.
 	CWorldTickingList::DelObjStatusUpdate(this, false);

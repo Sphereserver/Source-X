@@ -18,6 +18,7 @@ public:
 
     static void AddObjSingle(int64 iTimeout, CTimedObject* pObj, bool fForce);
     static void DelObjSingle(CTimedObject* pObj);
+    static auto HasTimedObject(const CTimedObject* pTimedObject) -> std::pair<int64, CTimedObject*>;
 
     static void AddCharPeriodic(CChar* pChar, bool fNeedsLock);
     static void DelCharPeriodic(CChar* pChar, bool fNeedsLock);

@@ -74,6 +74,7 @@ public:
 
     void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fForce);
     void DelTimedObject(CTimedObject* pTimedObject);
+    auto HasTimedObject(const CTimedObject* pTimedObject) -> TickingTimedObjEntry;
     void AddCharTicking(CChar* pChar, bool fNeedsLock);
     void DelCharTicking(CChar* pChar, bool fNeedsLock);
     void AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);

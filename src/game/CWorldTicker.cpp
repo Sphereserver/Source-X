@@ -38,6 +38,37 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock)
 
 // CTimedObject TIMERs
 
+auto CWorldTicker::HasTimedObject(const CTimedObject* pTimedObject) -> std::pair<int64, CTimedObject*>
+{
+    const auto fnFindEntryByObj = [pTimedObject](TickingTimedObjEntry const& rhs) noexcept {
+        return pTimedObject == rhs.second;
+    };
+
+    const auto itEntryInAddList = std::find_if(
+        _vecWorldObjsAddRequests.begin(),
+        _vecWorldObjsAddRequests.end(),
+        fnFindEntryByObj);
+    if (_vecWorldObjsAddRequests.end() != itEntryInAddList)
+        return *itEntryInAddList;
+
+    const auto itEntryInTickList = std::find_if(
+        _mWorldTickList.begin(),
+        _mWorldTickList.end(),
+        fnFindEntryByObj);
+    if (_mWorldTickList.end() != itEntryInTickList)
+    {
+        const auto itEntryInEraseList = std::find(
+            _vecWorldObjsEraseRequests.begin(),
+            _vecWorldObjsEraseRequests.end(),
+            pTimedObject);
+
+        if (itEntryInEraseList == _vecWorldObjsEraseRequests.end())
+            return *itEntryInTickList;
+    }
+
+    return {0, nullptr};
+}
+
 void CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimedObject)
 {
     ASSERT(pTimedObject);
