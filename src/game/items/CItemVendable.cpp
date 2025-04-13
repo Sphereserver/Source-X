@@ -13,8 +13,12 @@ CItemVendable::CItemVendable( ITEMID_TYPE id, CItemBase * pDef ) :
 
 CItemVendable::~CItemVendable()
 {
-	// Nothing really to do...no dynamic memory has been allocated.
-	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+    EXC_TRY("Cleanup in destructor");
+
+    // Must remove early because virtuals will fail in child destructor.
+    /*CObjBase::*/ DeletePrepare();
+
+    EXC_CATCH;
 }
 
 void CItemVendable::DupeCopy( const CObjBase * pItemObj )

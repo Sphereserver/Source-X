@@ -20,9 +20,14 @@ CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) :
 {
 }
 
+/*
 CItemShip::~CItemShip()
 {
+    // CItem::DeletePrepare is called in ~CItem().
+    // We would have to call here DeletePrepare if this class had a own DeletePrepare method.
+    DeletePrepare();        //  Must remove early because virtuals will fail in child destructor.
 }
+*/
 
 bool CItem::Ship_Plank(bool fOpen)
 {
@@ -53,9 +58,9 @@ bool CItem::Ship_Plank(bool fOpen)
     {
         // Save the original Type of the plank if it used to be a ship side
         m_itShipPlank.m_wSideType = (word)oldType;
-        if ( !IsTimerSet() )
+        if ( !_IsTimerSet() )
         {
-            SetTimeoutS(5); // autoclose the plank
+            _SetTimeoutS(5); // autoclose the plank
             SetAttr(ATTR_DECAY); // For preventing Decay Warning on the console.
         }
     }
@@ -65,8 +70,8 @@ bool CItem::Ship_Plank(bool fOpen)
         if (m_itShipPlank.m_wSideType == IT_SHIP_SIDE || m_itShipPlank.m_wSideType == IT_SHIP_SIDE_LOCKED)
         {
             SetType((IT_TYPE)(m_itShipPlank.m_wSideType));
-            if (IsTimerSet())
-                ClearTimeout();  //We clear the timer otherwise the plank item will be removed  if it is closed before the timer expires.
+            if (_IsTimerSet())
+                _ClearTimeout();  //We clear the timer otherwise the plank item will be removed  if it is closed before the timer expires.
             ClrAttr(ATTR_DECAY); //We remove the ATTR_DECAY flag or the plank will disappear on next save.
         }
         m_itShipPlank.m_wSideType = IT_NORMAL;

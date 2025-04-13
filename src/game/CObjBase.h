@@ -106,7 +106,7 @@ protected:
      */
     virtual void DeletePrepare();
 
-    void DeleteCleanup(bool fForce);    // not virtual!
+    void DeleteCleanup(bool fForce) NONVIRTUAL;
 
 public:
     inline bool _IsBeingDeleted() const noexcept

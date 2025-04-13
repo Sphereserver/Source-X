@@ -43,15 +43,15 @@ class CItemStone : public CItem, public CSObjList
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szLoadKeysM[];
 	static lpctstr const sm_szLoadKeysG[];
-private:
+
 	CSString m_sCharter[6];
 	CSString m_sWebPageURL;
 	CSString m_sAbbrev;
     CMultiStorage *_pMultiStorage;
     int16 _iMaxShips;
     int16 _iMaxHouses;
-private:
 
+private:
 	void SetTownName();
 	virtual bool SetName( lpctstr pszName ) override;
 	virtual bool MoveTo(const CPointMap& pt, bool bForceFix = false) override;
@@ -63,8 +63,14 @@ private:
 	lpctstr GetWebPageURL() const;
 	void SetWebPageURL( lpctstr pWebPageURL );
 	void ElectMaster();
+
 public:
 	static const char *m_sClassName;
+    CItemStone( ITEMID_TYPE id, CItemBase * pItemDef );
+    virtual ~CItemStone() override;
+
+    CItemStone(const CItemStone& copy) = delete;
+    CItemStone& operator=(const CItemStone& other) = delete;
 	CStoneMember * AddRecruit(const CChar * pChar, STONEPRIV_TYPE iPriv, bool bFull = false);
     CMultiStorage *GetMultiStorage();
 
@@ -80,13 +86,6 @@ public:
 
 	bool CheckValidMember(CStoneMember * pMember);
 	virtual int FixWeirdness() override;
-
-public:
-	CItemStone( ITEMID_TYPE id, CItemBase * pItemDef );
-	virtual ~CItemStone();
-
-    CItemStone(const CItemStone& copy) = delete;
-    CItemStone& operator=(const CItemStone& other) = delete;
 
 public:
 	virtual void r_Write( CScript & s ) override;

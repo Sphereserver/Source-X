@@ -11,6 +11,15 @@ CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	UnreferencedParameter(id);
 }
 
+/*
+CItemMemory::~CItemMemory()
+{
+    // CItem::DeletePrepare is called in ~CItem().
+    // We would have to call here DeletePrepare if this class had a own DeletePrepare method.
+    DeletePrepare();        //  Must remove early because virtuals will fail in child destructor.
+}
+*/
+
 word CItemMemory::SetMemoryTypes( word wType )	// For memory type objects.
 {
 	SetHueQuick( wType );

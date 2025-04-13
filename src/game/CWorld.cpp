@@ -424,7 +424,9 @@ void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
         delete obj;
     }
     else
+    {
         m_ObjDelete.InsertContentTail(obj);
+    }
 }
 
 void CWorldThread::ScheduleSpecialObjDeletion(CSObjListRec* obj)
@@ -1779,7 +1781,7 @@ void CWorld::_OnTick()
 	m_ObjDelete.ClearContainer(false);	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 	m_ObjSpecialDelete.ClearContainer();
 
-	int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();
+    const int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();
 
 	EXC_SET_BLOCK("Worldsave checks");
 	// Save state checks

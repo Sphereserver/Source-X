@@ -7,12 +7,16 @@
 CItemMessage::CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef ) :
     CTimedObject(PROFILE_ITEMS),
     CItemVendable( id, pItemDef )
+// TODO: is there a reason it inherits from CItemVendable instead of CItem?
 {
 }
 
 CItemMessage::~CItemMessage()
 {
-    DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+    // CItemVendable::DeletePrepare is called in ~CItemVendable().
+    // We would have to call here DeletePrepare if this class had a own DeletePrepare method.
+    //DeletePrepare();        //  Must remove early because virtuals will fail in child destructor.
+
     UnLoadSystemPages();
 }
 
@@ -132,8 +136,9 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
         ASSERT(pSrc);
         if ( s.IsKey(sm_szVerbKeys[0]) )
         {
+            lpctstr ptcStr = s.GetArgStr();
             // 1 based pages
-            word wPage = (s.GetArgStr()[0] && toupper(s.GetArgStr()[0]) != 'A') ? s.GetArgWVal() : 0;
+            word wPage = (ptcStr[0] && toupper(s.GetArgStr()[0]) != 'A') ? s.GetArgWVal() : 0;
             if ( wPage <= 0 )
             {
                 m_sBodyLines.ClearFree();
