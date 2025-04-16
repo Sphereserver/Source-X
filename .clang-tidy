@@ -14,6 +14,7 @@ Checks: >
   readability-*,
   # Disable specific checks/warnings:
   -clang-analyzer-security.insecureAPI.strcpy,
+  -clang-diagnostic-format-security,
   -cppcoreguidelines-avoid-c-arrays,
   -cppcoreguidelines-avoid-goto,
   -cppcoreguidelines-avoid-magic-numbers,
