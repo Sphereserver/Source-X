@@ -97,7 +97,7 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
         ASSERT(_vWorldObjsAddRequests.end() != itEntryInAddList);
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
-        g_Log.EventDebug("[WorldTicker][%p] WARN: CTimedObj insertion into ticking list already requested with %s timer. OVERWRITING.\n",
+        g_Log.EventDebug("[WorldTicker][%p] WARN: CTimedObj insertion into ticking list already requested with %s timeout. OVERWRITING.\n",
             (void*)pTimedObject,
             ((itEntryInAddList->first == iTimeout) ? "same" : "different"));
 #endif
@@ -117,18 +117,10 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
         fnFindEntryByObj);
     if (_vWorldTickList.end() != itEntryInTickList)
     {
-        /*
-        if (itEntryInTickList->first == iTimeout)
-        {
-#ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-            g_Log.EventDebug("[WorldTicker][%p] INFO: Requested insertion of a CTimedObj in the main ticking list with the same timeout, skipping.\n", (void*)pTimedObject);
-#endif
-            return;
-        }
-        */
-
 #   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-        g_Log.EventDebug("[WorldTicker][%p] INFO: Requested insertion of a CTimedObj already in the main ticking list.\n", (void*)pTimedObject);
+        g_Log.EventDebug("[WorldTicker][%p] INFO: Requested insertion of a CTimedObj already in the main ticking list, with %s timeout.\n",
+            (void*)pTimedObject,
+            ((itEntryInAddList->first == iTimeout) ? "same" : "different"));
 #   endif
 
         const auto itEntryInEraseList = std::find(
@@ -260,11 +252,9 @@ bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
     if (itEntryInTickList == _vWorldTickList.end())
     {
         // Not found. The object might have a timeout while being in a non-tickable state (like at server startup), so it isn't in the list.
-/*
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
         g_Log.EventDebug("[WorldTicker][%p] INFO: Requested erasure of TimedObject in mWorldTickList, but it wasn't found there.\n", (void*)pTimedObject);
 #endif
-*/
         ASSERT(false);
         return false;
     }
@@ -351,50 +341,6 @@ bool CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
 
     EXC_TRY("DelTimedObject");
     const ProfileTask timersTask(PROFILE_TIMERS);
-
-    /*
-    EXC_SET_BLOCK("Not ticking?");
-
-    const int64 iTickOld = pTimedObject->_GetTimeoutRaw();
-    if (iTickOld == 0)
-    {
-#ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
-#   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-        g_Log.EventDebug("[WorldTicker][%p] INFO: Requested deletion of CTimedObj, but Timeout is 0, so it shouldn't be in the list, or just queued to be removed.\n", (void*)pTimedObject);
-#   endif
-
-        const auto itEntryInRemoveList = std::find(
-            _vWorldObjsEraseRequests.begin(),
-            _vWorldObjsEraseRequests.end(),
-            pTimedObject);
-        if (itEntryInRemoveList != _vWorldObjsEraseRequests.end())
-        {
-#   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-            g_Log.EventDebug("[WorldTicker][%p] INFO:   though, found it already in the removal list, so it's fine..\n", (void*)pTimedObject);
-#   endif
-            return;
-        }
-
-        const auto itTickList = std::find_if(
-            _vWorldTickList.begin(),
-            _vWorldTickList.end(),
-            [pTimedObject](const TickingTimedObjEntry& entry) {
-                return entry.second == pTimedObject;
-            });
-        if (itTickList != _vWorldTickList.end()) {
-#   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-            g_Log.EventDebug("[WorldTicker][%p] WARN:   But i have found it in the list! With Timeout %" PRId64 ".\n", (void*)pTimedObject, itTickList->first);
-#   endif
-            ASSERT(false);
-        }
-#   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-        else
-            g_Log.EventDebug("[WorldTicker][%p] INFO:   (rightfully) i haven't found it in the list.\n", (void*)pTimedObject);
-#   endif
-#endif
-        return;
-    }
-*/
 
     EXC_SET_BLOCK("Remove");
     const bool fRet = _RemoveTimedObject(pTimedObject);
