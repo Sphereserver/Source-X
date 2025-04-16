@@ -1721,9 +1721,9 @@ void CWorld::Close()
 
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock_su(_Ticker._vObjStatusUpdates.MT_CMUTEX);
 #endif
-		_Ticker._ObjStatusUpdates.clear();
+		_Ticker._vObjStatusUpdates.clear();
     }
 
 	m_Parties.clear();

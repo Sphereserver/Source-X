@@ -31,8 +31,8 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock)
     _iLastTickDone = 0;
 
     _vecGenericObjsToTick.reserve(50);
-    _vecWorldObjsEraseRequests.reserve(50);
-    _vecPeriodicCharsEraseRequests.reserve(25);
+    _vWorldObjsEraseRequests.reserve(50);
+    _vPeriodicCharsEraseRequests.reserve(25);
 }
 
 
@@ -47,24 +47,24 @@ auto CWorldTicker::IsTimeoutRegistered(const CTimedObject* pTimedObject) -> std:
     };
 
     const auto itEntryInAddList = std::find_if(
-        _vecWorldObjsAddRequests.begin(),
-        _vecWorldObjsAddRequests.end(),
+        _vWorldObjsAddRequests.begin(),
+        _vWorldObjsAddRequests.end(),
         fnFindEntryByObj);
-    if (_vecWorldObjsAddRequests.end() != itEntryInAddList)
+    if (_vWorldObjsAddRequests.end() != itEntryInAddList)
         return *itEntryInAddList;
 
     const auto itEntryInTickList = std::find_if(
-        _mWorldTickList.begin(),
-        _mWorldTickList.end(),
+        _vWorldTickList.begin(),
+        _vWorldTickList.end(),
         fnFindEntryByObj);
-    if (_mWorldTickList.end() != itEntryInTickList)
+    if (_vWorldTickList.end() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
-            _vecWorldObjsEraseRequests.begin(),
-            _vecWorldObjsEraseRequests.end(),
+            _vWorldObjsEraseRequests.begin(),
+            _vWorldObjsEraseRequests.end(),
             pTimedObject);
 
-        if (itEntryInEraseList == _vecWorldObjsEraseRequests.end())
+        if (itEntryInEraseList == _vWorldObjsEraseRequests.end())
             return *itEntryInTickList;
     }
 
@@ -77,24 +77,24 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     ASSERT(iTimeout != 0);
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
-    ASSERT(sl::ContainerIsSorted(_mWorldTickList));
-    ASSERT(!sl::SortedContainerHasDuplicates(_mWorldTickList));
+    ASSERT(sl::ContainerIsSorted(_vWorldTickList));
+    ASSERT(!sl::SortedContainerHasDuplicates(_vWorldTickList));
 #endif
 
     const auto fnFindEntryByObj = [pTimedObject](TickingTimedObjEntry const& rhs) noexcept {
         return pTimedObject == rhs.second;
     };
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vWorldTickList.MT_CMUTEX);
 #endif
 
     if (pTimedObject->_fIsAddingInWorldTickList)
     {
         const auto itEntryInAddList = std::find_if(
-            _vecWorldObjsAddRequests.begin(),
-            _vecWorldObjsAddRequests.end(),
+            _vWorldObjsAddRequests.begin(),
+            _vWorldObjsAddRequests.end(),
             fnFindEntryByObj);
-        ASSERT(_vecWorldObjsAddRequests.end() != itEntryInAddList);
+        ASSERT(_vWorldObjsAddRequests.end() != itEntryInAddList);
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
         g_Log.EventDebug("[WorldTicker][%p] WARN: CTimedObj insertion into ticking list already requested with %s timer. OVERWRITING.\n",
@@ -112,10 +112,10 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
 
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
     const auto itEntryInTickList = std::find_if(
-        _mWorldTickList.begin(),
-        _mWorldTickList.end(),
+        _vWorldTickList.begin(),
+        _vWorldTickList.end(),
         fnFindEntryByObj);
-    if (_mWorldTickList.end() != itEntryInTickList)
+    if (_vWorldTickList.end() != itEntryInTickList)
     {
         /*
         if (itEntryInTickList->first == iTimeout)
@@ -132,10 +132,10 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
 #   endif
 
         const auto itEntryInEraseList = std::find(
-            _vecWorldObjsEraseRequests.begin(),
-            _vecWorldObjsEraseRequests.end(),
+            _vWorldObjsEraseRequests.begin(),
+            _vWorldObjsEraseRequests.end(),
             pTimedObject);
-        if (_vecWorldObjsEraseRequests.end() == itEntryInEraseList)
+        if (_vWorldObjsEraseRequests.end() == itEntryInEraseList)
         {
 #   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
             g_Log.EventDebug("[WorldTicker][%p] WARN: And i didn't requested to remove that!\n", (void*)pTimedObject);
@@ -152,14 +152,14 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     else
     {
         const auto itEntryInEraseList = std::find(
-            _vecWorldObjsEraseRequests.begin(),
-            _vecWorldObjsEraseRequests.end(),
+            _vWorldObjsEraseRequests.begin(),
+            _vWorldObjsEraseRequests.end(),
             pTimedObject);
-        ASSERT(_vecWorldObjsEraseRequests.end() == itEntryInEraseList);
+        ASSERT(_vWorldObjsEraseRequests.end() == itEntryInEraseList);
     }
 #endif
 
-    _vecWorldObjsAddRequests.emplace_back(iTimeout, pTimedObject);
+    _vWorldObjsAddRequests.emplace_back(iTimeout, pTimedObject);
 
     ASSERT(pTimedObject->_fIsInWorldTickList == false);
     pTimedObject->_fIsAddingInWorldTickList = true;
@@ -174,26 +174,26 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
 bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
 {
 #ifdef DEBUG_LIST_OPS
-    ASSERT(sl::ContainerIsSorted(_mWorldTickList));
-    ASSERT(!sl::SortedContainerHasDuplicates(_mWorldTickList));
+    ASSERT(sl::ContainerIsSorted(_vWorldTickList));
+    ASSERT(!sl::SortedContainerHasDuplicates(_vWorldTickList));
 #endif
 
     const auto fnFindEntryByObj = [pTimedObject](TickingTimedObjEntry const& rhs) noexcept {
         return pTimedObject == rhs.second;
     };
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vWorldTickList.MT_CMUTEX);
 #endif
 
     if (pTimedObject->_fIsAddingInWorldTickList)
     {
         const auto itEntryInAddList = std::find_if(
-            _vecWorldObjsAddRequests.begin(),
-            _vecWorldObjsAddRequests.end(),
+            _vWorldObjsAddRequests.begin(),
+            _vWorldObjsAddRequests.end(),
             fnFindEntryByObj);
-        ASSERT(itEntryInAddList != _vecWorldObjsAddRequests.end());
+        ASSERT(itEntryInAddList != _vWorldObjsAddRequests.end());
 
-        _vecWorldObjsAddRequests.erase(itEntryInAddList);
+        _vWorldObjsAddRequests.erase(itEntryInAddList);
 
         ASSERT(pTimedObject->_fIsInWorldTickList == false);
         pTimedObject->_fIsAddingInWorldTickList = false;
@@ -204,19 +204,19 @@ bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
 #   endif
 
         const auto itEntryInTickList = std::find_if(
-            _mWorldTickList.begin(),
-            _mWorldTickList.end(),
+            _vWorldTickList.begin(),
+            _vWorldTickList.end(),
             fnFindEntryByObj);
         const auto itEntryInRemoveList = std::find(
-            _vecWorldObjsEraseRequests.begin(),
-            _vecWorldObjsEraseRequests.end(),
+            _vWorldObjsEraseRequests.begin(),
+            _vWorldObjsEraseRequests.end(),
             pTimedObject);
 
-        if (itEntryInRemoveList == _vecWorldObjsEraseRequests.end()) {
-            ASSERT(itEntryInTickList == _mWorldTickList.end());
+        if (itEntryInRemoveList == _vWorldObjsEraseRequests.end()) {
+            ASSERT(itEntryInTickList == _vWorldTickList.end());
         }
-        else if (itEntryInRemoveList != _vecWorldObjsEraseRequests.end()) {
-            ASSERT(itEntryInTickList != _mWorldTickList.end());
+        else if (itEntryInRemoveList != _vWorldObjsEraseRequests.end()) {
+            ASSERT(itEntryInTickList != _vWorldTickList.end());
         }
 #endif
 
@@ -224,10 +224,10 @@ bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
     }
 
     const auto itEntryInRemoveList = std::find(
-        _vecWorldObjsEraseRequests.begin(),
-        _vecWorldObjsEraseRequests.end(),
+        _vWorldObjsEraseRequests.begin(),
+        _vWorldObjsEraseRequests.end(),
         pTimedObject);
-    if (_vecWorldObjsEraseRequests.end() != itEntryInRemoveList)
+    if (_vWorldObjsEraseRequests.end() != itEntryInRemoveList)
     {
         // I have already requested to remove this from the main ticking list.
         // It can happen and it's legit. Example: we call this method via CObjBase::Delete and ~CObjBase.
@@ -237,16 +237,16 @@ bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
 #endif
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
         const auto itEntryInAddList = std::find_if(
-            _vecWorldObjsAddRequests.begin(),
-            _vecWorldObjsAddRequests.end(),
+            _vWorldObjsAddRequests.begin(),
+            _vWorldObjsAddRequests.end(),
             fnFindEntryByObj);
-        ASSERT(itEntryInAddList == _vecWorldObjsAddRequests.end());
+        ASSERT(itEntryInAddList == _vWorldObjsAddRequests.end());
 
         const auto itEntryInTickList = std::find_if(
-            _mWorldTickList.begin(),
-            _mWorldTickList.end(),
+            _vWorldTickList.begin(),
+            _vWorldTickList.end(),
             fnFindEntryByObj);
-        ASSERT(itEntryInTickList != _mWorldTickList.end());
+        ASSERT(itEntryInTickList != _vWorldTickList.end());
 #endif
 
         ASSERT(false);
@@ -254,10 +254,10 @@ bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
     }
 
     const auto itEntryInTickList = std::find_if(
-        _mWorldTickList.begin(),
-        _mWorldTickList.end(),
+        _vWorldTickList.begin(),
+        _vWorldTickList.end(),
         fnFindEntryByObj);
-    if (itEntryInTickList == _mWorldTickList.end())
+    if (itEntryInTickList == _vWorldTickList.end())
     {
         // Not found. The object might have a timeout while being in a non-tickable state (like at server startup), so it isn't in the list.
 /*
@@ -269,7 +269,7 @@ bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
         return false;
     }
 
-    _vecWorldObjsEraseRequests.emplace_back(pTimedObject);
+    _vWorldObjsEraseRequests.emplace_back(pTimedObject);
 
     pTimedObject->_fIsInWorldTickList = false;
     ASSERT(pTimedObject->_fIsAddingInWorldTickList == false);
@@ -364,10 +364,10 @@ bool CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
 #   endif
 
         const auto itEntryInRemoveList = std::find(
-            _vecWorldObjsEraseRequests.begin(),
-            _vecWorldObjsEraseRequests.end(),
+            _vWorldObjsEraseRequests.begin(),
+            _vWorldObjsEraseRequests.end(),
             pTimedObject);
-        if (itEntryInRemoveList != _vecWorldObjsEraseRequests.end())
+        if (itEntryInRemoveList != _vWorldObjsEraseRequests.end())
         {
 #   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
             g_Log.EventDebug("[WorldTicker][%p] INFO:   though, found it already in the removal list, so it's fine..\n", (void*)pTimedObject);
@@ -376,12 +376,12 @@ bool CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
         }
 
         const auto itTickList = std::find_if(
-            _mWorldTickList.begin(),
-            _mWorldTickList.end(),
+            _vWorldTickList.begin(),
+            _vWorldTickList.end(),
             [pTimedObject](const TickingTimedObjEntry& entry) {
                 return entry.second == pTimedObject;
             });
-        if (itTickList != _mWorldTickList.end()) {
+        if (itTickList != _vWorldTickList.end()) {
 #   ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
             g_Log.EventDebug("[WorldTicker][%p] WARN:   But i have found it in the list! With Timeout %" PRId64 ".\n", (void*)pTimedObject, itTickList->first);
 #   endif
@@ -418,24 +418,24 @@ auto CWorldTicker::IsCharPeriodicTickRegistered(const CChar* pChar) -> std::opti
     };
 
     const auto itEntryInAddList = std::find_if(
-        _vecPeriodicCharsAddRequests.begin(),
-        _vecPeriodicCharsAddRequests.end(),
+        _vPeriodicCharsAddRequests.begin(),
+        _vPeriodicCharsAddRequests.end(),
         fnFindEntryByObj);
-    if (_vecPeriodicCharsAddRequests.end() != itEntryInAddList)
+    if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
         return *itEntryInAddList;
 
     const auto itEntryInTickList = std::find_if(
-        _mCharTickList.begin(),
-        _mCharTickList.end(),
+        _vCharTickList.begin(),
+        _vCharTickList.end(),
         fnFindEntryByObj);
-    if (_mCharTickList.end() != itEntryInTickList)
+    if (_vCharTickList.end() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
-            _vecPeriodicCharsEraseRequests.begin(),
-            _vecPeriodicCharsEraseRequests.end(),
+            _vPeriodicCharsEraseRequests.begin(),
+            _vPeriodicCharsEraseRequests.end(),
             pChar);
 
-        if (itEntryInEraseList == _vecPeriodicCharsEraseRequests.end())
+        if (itEntryInEraseList == _vPeriodicCharsEraseRequests.end())
             return *itEntryInTickList;
     }
 
@@ -448,7 +448,7 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     ASSERT(pChar);
 
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mCharTickList.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vCharTickList.MT_CMUTEX);
 #endif
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
@@ -457,10 +457,10 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     };
 
     const auto itEntryInAddList = std::find_if(
-        _vecPeriodicCharsAddRequests.begin(),
-        _vecPeriodicCharsAddRequests.end(),
+        _vPeriodicCharsAddRequests.begin(),
+        _vPeriodicCharsAddRequests.end(),
         fnFindEntryByChar);
-    if (_vecPeriodicCharsAddRequests.end() != itEntryInAddList)
+    if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
     {
         g_Log.EventDebug("[WorldTicker][%p] WARN: Periodic char insertion into ticking list already requested "
             "(requesting tick %" PRId64 ", previous requested tick %" PRId64 "). OVERWRITING.\n",
@@ -470,10 +470,10 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     }
 
     const auto itEntryInEraseList = std::find(
-        _vecPeriodicCharsEraseRequests.begin(),
-        _vecPeriodicCharsEraseRequests.end(),
+        _vPeriodicCharsEraseRequests.begin(),
+        _vPeriodicCharsEraseRequests.end(),
         pChar);
-    if (_vecPeriodicCharsEraseRequests.end() != itEntryInEraseList)
+    if (_vPeriodicCharsEraseRequests.end() != itEntryInEraseList)
     {
         g_Log.EventDebug("[WorldTicker][%p] WARN: Stopped insertion attempt of a CChar which removal from periodic ticking list has been requested!\n", (void*)pChar);
 
@@ -482,13 +482,13 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     }
 
     const auto itEntryInTickList = std::find_if(
-        _mCharTickList.begin(),
-        _mCharTickList.end(),
+        _vCharTickList.begin(),
+        _vCharTickList.end(),
         fnFindEntryByChar);
-    ASSERT(_mCharTickList.end() == itEntryInTickList);
+    ASSERT(_vCharTickList.end() == itEntryInTickList);
 #endif
 
-    _vecPeriodicCharsAddRequests.emplace_back(iTickNext, pChar);
+    _vPeriodicCharsAddRequests.emplace_back(iTickNext, pChar);
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
     g_Log.EventDebug("[WorldTicker][%p] INFO: Done adding the CChar to the periodic ticking list add buffer.\n", (void*)pChar);
@@ -503,7 +503,7 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
     ASSERT(pChar);
 
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_mCharTickList.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vCharTickList.MT_CMUTEX);
 #endif
 
     const auto fnFindEntryByChar = [pChar](TickingPeriodicCharEntry const& rhs) noexcept {
@@ -511,16 +511,16 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
     };
 
     const auto itEntryInTickList = std::find_if(
-        _mCharTickList.begin(),
-        _mCharTickList.end(),
+        _vCharTickList.begin(),
+        _vCharTickList.end(),
         fnFindEntryByChar);
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
     const auto itEntryInRemoveList = std::find(
-        _vecPeriodicCharsEraseRequests.begin(),
-        _vecPeriodicCharsEraseRequests.end(),
+        _vPeriodicCharsEraseRequests.begin(),
+        _vPeriodicCharsEraseRequests.end(),
         pChar);
-    if (_vecPeriodicCharsEraseRequests.end() != itEntryInRemoveList)
+    if (_vPeriodicCharsEraseRequests.end() != itEntryInRemoveList)
     {
 #   ifdef DEBUG_CCHAR_PERIODIC_TICKING
         g_Log.EventDebug("[WorldTicker][%p] INFO: TickingPeriodicChar erasure from ticking list already requested.\n", (void*)pChar);
@@ -532,23 +532,23 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
 #endif
 
     const auto itEntryInAddList = std::find_if(
-        _vecPeriodicCharsAddRequests.begin(),
-        _vecPeriodicCharsAddRequests.end(),
+        _vPeriodicCharsAddRequests.begin(),
+        _vPeriodicCharsAddRequests.end(),
         fnFindEntryByChar);
-    if (_vecPeriodicCharsAddRequests.end() != itEntryInAddList)
+    if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
     {
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
         g_Log.EventDebug("[WorldTicker][%p] INFO: Erasing TickingPeriodicChar from periodic char ticking list add buffer.\n", (void*)pChar);
 #endif
 
-        _vecPeriodicCharsAddRequests.erase(itEntryInAddList);
+        _vPeriodicCharsAddRequests.erase(itEntryInAddList);
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
-        if (itEntryInRemoveList == _vecPeriodicCharsEraseRequests.end()) {
-            ASSERT(itEntryInTickList == _mCharTickList.end());
+        if (itEntryInRemoveList == _vPeriodicCharsEraseRequests.end()) {
+            ASSERT(itEntryInTickList == _vCharTickList.end());
         }
         else {
-            ASSERT(itEntryInTickList != _mCharTickList.end());
+            ASSERT(itEntryInTickList != _vCharTickList.end());
         }
 #endif
         return true;
@@ -556,7 +556,7 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
     // Check if it's in the ticking list.
-    if (itEntryInTickList == _mCharTickList.end())
+    if (itEntryInTickList == _vCharTickList.end())
     {
         g_Log.EventDebug("[WorldTicker][%p] WARN: Requested TickingPeriodicChar removal from ticking list, but not found.\n", (void*)pChar);
 
@@ -564,19 +564,19 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
         return false;
     }
 
-    if (_vecPeriodicCharsEraseRequests.end() != itEntryInRemoveList)
+    if (_vPeriodicCharsEraseRequests.end() != itEntryInRemoveList)
     {
         // I have already requested to remove this from the main ticking list.
         g_Log.EventDebug("[WorldTicker][%p] WARN: TickingPeriodicChar removal from the main ticking list already requested.\n", (void*)pChar);
 
-        ASSERT(itEntryInAddList == _vecPeriodicCharsAddRequests.end());
+        ASSERT(itEntryInAddList == _vPeriodicCharsAddRequests.end());
 
         ASSERT(false);
         return false; // Already requested the removal.
     }
 #endif
 
-    if (itEntryInTickList == _mCharTickList.end())
+    if (itEntryInTickList == _vCharTickList.end())
     {
         // Not found. The object might have a timeout while being in a non-tickable state, so it isn't in the list.
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
@@ -586,7 +586,7 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
         return false;
     }
 
-    _vecPeriodicCharsEraseRequests.emplace_back(pChar);
+    _vPeriodicCharsEraseRequests.emplace_back(pChar);
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
     g_Log.EventDebug("[WorldTicker][%p] INFO: Done adding the CChar to the periodic ticking list remove buffer.\n", (void*)pChar);
@@ -704,10 +704,10 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
         };
 
         const auto itEntryInEraseList = std::find(
-            _vecPeriodicCharsEraseRequests.begin(),
-            _vecPeriodicCharsEraseRequests.end(),
+            _vPeriodicCharsEraseRequests.begin(),
+            _vPeriodicCharsEraseRequests.end(),
             pChar);
-        if (itEntryInEraseList != _vecPeriodicCharsEraseRequests.end())
+        if (itEntryInEraseList != _vPeriodicCharsEraseRequests.end())
         {
 #   ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
             g_Log.EventDebug("[WorldTicker][%p] INFO:   though, found it already in the removal list, so it's fine..\n", (void*)pChar);
@@ -718,10 +718,10 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
         }
 
         const auto itEntryInTickList = std::find_if(
-            _mCharTickList.begin(),
-            _mCharTickList.end(),
+            _vCharTickList.begin(),
+            _vCharTickList.end(),
             fnFindEntryByChar);
-        if (itEntryInTickList != _mCharTickList.end())
+        if (itEntryInTickList != _vCharTickList.end())
         {
 #   ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
             g_Log.EventDebug("[WorldTicker][%p] WARN:   But i have found it in the list! With Timeout %" PRId64 ".\n", (void*)pChar, itEntryInTickList->first);
@@ -780,17 +780,17 @@ bool CWorldTicker::IsStatusUpdateTickRegistered(const CObjBase *pObj)
     */
 
     const auto itEntryInTickList = std::find(
-        _ObjStatusUpdates.begin(),
-        _ObjStatusUpdates.end(),
+        _vObjStatusUpdates.begin(),
+        _vObjStatusUpdates.end(),
         pObj);
-    if (_ObjStatusUpdates.end() != itEntryInTickList)
+    if (_vObjStatusUpdates.end() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
-            _vecObjStatusUpdateEraseRequests.begin(),
-            _vecObjStatusUpdateEraseRequests.end(),
+            _vObjStatusUpdateEraseRequests.begin(),
+            _vObjStatusUpdateEraseRequests.end(),
             pObj);
 
-        if (itEntryInEraseList == _vecObjStatusUpdateEraseRequests.end())
+        if (itEntryInEraseList == _vObjStatusUpdateEraseRequests.end())
             return true;
     }
 
@@ -808,7 +808,7 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     UnreferencedParameter(fNeedsLock);
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_vObjStatusUpdates.MT_CMUTEX);
 #endif
 
         // Here i don't need to use an "add" buffer, like with CTimedObj, because this container isn't meant
@@ -817,11 +817,11 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
         if (pObj->_fIsInStatusUpdatesEraseList)
         {
             const auto itErasing = std::find(
-                _vecObjStatusUpdateEraseRequests.begin(),
-                _vecObjStatusUpdateEraseRequests.end(),
+                _vObjStatusUpdateEraseRequests.begin(),
+                _vObjStatusUpdateEraseRequests.end(),
                 pObj
                 );
-            if (_vecObjStatusUpdateEraseRequests.end() == itErasing)
+            if (_vObjStatusUpdateEraseRequests.end() == itErasing)
             {
                 ASSERT(false);
                 return false;
@@ -833,26 +833,26 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
             // Just remove the element from the erase list and leave it in the Status Updates List.
             pObj->_fIsInStatusUpdatesList = true;
             pObj->_fIsInStatusUpdatesEraseList = false;
-            _vecObjStatusUpdateEraseRequests.erase(itErasing);
+            _vObjStatusUpdateEraseRequests.erase(itErasing);
 
 #ifdef DEBUG_STATUSUPDATES
             const auto itDuplicate = std::find(
-                _ObjStatusUpdates.begin(),
-                _ObjStatusUpdates.end(),
+                _vObjStatusUpdates.begin(),
+                _vObjStatusUpdates.end(),
                 pObj
                 );
-            ASSERT(_ObjStatusUpdates.end() != itDuplicate);
+            ASSERT(_vObjStatusUpdates.end() != itDuplicate);
 #endif
 
             return true;
         }
 
         const auto itDuplicate = std::find(
-            _ObjStatusUpdates.begin(),
-            _ObjStatusUpdates.end(),
+            _vObjStatusUpdates.begin(),
+            _vObjStatusUpdates.end(),
             pObj
             );
-        if (_ObjStatusUpdates.end() != itDuplicate)
+        if (_vObjStatusUpdates.end() != itDuplicate)
         {
 #ifdef DEBUG_STATUSUPDATES_VERBOSE
             g_Log.EventDebug("[%p] WARN: Trying to add status update for duplicate CObjBase. Blocked.\n", (void*)pObj);
@@ -863,7 +863,7 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 
 
         ASSERT(pObj->_fIsInStatusUpdatesEraseList == false);
-        _ObjStatusUpdates.emplace_back(pObj);
+        _vObjStatusUpdates.emplace_back(pObj);
 /*
 #if MT_ENGINES
         if (fNeedsLock)
@@ -899,15 +899,15 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_ObjStatusUpdates.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_vObjStatusUpdates.MT_CMUTEX);
 #endif
 
         const auto itMissing = std::find(
-            _ObjStatusUpdates.begin(),
-            _ObjStatusUpdates.end(),
+            _vObjStatusUpdates.begin(),
+            _vObjStatusUpdates.end(),
             pObj
             );
-        if (_ObjStatusUpdates.end() == itMissing)
+        if (_vObjStatusUpdates.end() == itMissing)
         {
 #ifdef DEBUG_STATUSUPDATES_VERBOSE
             g_Log.EventDebug("[%p] INFO: Requested erasure of CObjBase from the status update list, but it wasn't found there.\n", (void*)pObj);
@@ -917,11 +917,11 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
         }
 
         const auto itRepeated = std::find(
-            _vecObjStatusUpdateEraseRequests.begin(),
-            _vecObjStatusUpdateEraseRequests.end(),
+            _vObjStatusUpdateEraseRequests.begin(),
+            _vObjStatusUpdateEraseRequests.end(),
             pObj
             );
-        if (_vecObjStatusUpdateEraseRequests.end() != itRepeated)
+        if (_vObjStatusUpdateEraseRequests.end() != itRepeated)
         {
 #ifdef DEBUG_STATUSUPDATES_VERBOSE
             // It can happen and it's legit. Example: we call this method via CObjBase::Delete and ~CObjBase.
@@ -946,7 +946,7 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
             pObj->_fIsInStatusUpdatesEraseList = true;
         }
 
-        _vecObjStatusUpdateEraseRequests.emplace_back(pObj);
+        _vObjStatusUpdateEraseRequests.emplace_back(pObj);
 
 
 #ifdef DEBUG_STATUSUPDATES_VERBOSE
@@ -1363,22 +1363,22 @@ void CWorldTicker::Tick()
         {
             {
 #if MT_ENGINES
-                std::unique_lock<std::shared_mutex> lock_su(_ObjStatusUpdates.MT_CMUTEX);
+                std::unique_lock<std::shared_mutex> lock_su(_vObjStatusUpdates.MT_CMUTEX);
 #endif
                 EXC_TRYSUB("StatusUpdates");
                 EXC_SETSUB_BLOCK("Remove requested");
 
-                for (auto& elem : _vecObjStatusUpdateEraseRequests)
+                for (auto& elem : _vObjStatusUpdateEraseRequests)
                 {
                     elem->_fIsInStatusUpdatesEraseList = false;
                     ASSERT(elem->_fIsInStatusUpdatesList == false);
                 }
-                unsortedVecRemoveElementsByValues(_ObjStatusUpdates, _vecObjStatusUpdateEraseRequests);
+                unsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdateEraseRequests);
 
                 EXC_SETSUB_BLOCK("Selection");
-                if (!_ObjStatusUpdates.empty())
+                if (!_vObjStatusUpdates.empty())
                 {                    
-                    for (CObjBase* pObj : _ObjStatusUpdates)
+                    for (CObjBase* pObj : _vObjStatusUpdates)
                     {
                         if (pObj)
                         {
@@ -1391,8 +1391,8 @@ void CWorldTicker::Tick()
                 EXC_CATCHSUB("");
                 //EXC_DEBUGSUB_START;
                 //EXC_DEBUGSUB_END;
-                _ObjStatusUpdates.clear();
-                _vecObjStatusUpdateEraseRequests.clear();
+                _vObjStatusUpdates.clear();
+                _vObjStatusUpdateEraseRequests.clear();
             }
 
             EXC_TRYSUB("StatusUpdates");
@@ -1422,7 +1422,7 @@ void CWorldTicker::Tick()
         {
             // Need here another scope to give the right lifetime to the unique_lock.
 #if MT_ENGINES
-            std::unique_lock<std::shared_mutex> lock(_mWorldTickList.MT_CMUTEX);
+            std::unique_lock<std::shared_mutex> lock(_vWorldTickList.MT_CMUTEX);
 #endif
             {
                 // New requests done during the world loop.
@@ -1432,31 +1432,31 @@ void CWorldTicker::Tick()
 #endif
 
                 /*
-                for (CTimedObject* elem : _vecWorldObjsEraseRequests)
+                for (CTimedObject* elem : _vWorldObjsEraseRequests)
                 {
                     elem->_fIsAddingInWorldTickList = false;
                     elem->_fIsInWorldTickList = false;
                 }
                 */
-                for (TickingTimedObjEntry& elem : _vecWorldObjsAddRequests)
+                for (TickingTimedObjEntry& elem : _vWorldObjsAddRequests)
                 {
                     elem.second->_fIsAddingInWorldTickList = false;
                     elem.second->_fIsInWorldTickList = true;
                 }
 
-                sortedVecRemoveAddQueued(_mWorldTickList, _vecWorldObjsEraseRequests, _vecWorldObjsAddRequests, _vecWorldObjsElementBuffer);
+                sortedVecRemoveAddQueued(_vWorldTickList, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vecWorldObjsElementBuffer);
                 EXC_CATCHSUB("");
             }
 
 
             // Need here a new, inner scope to get rid of EXC_TRYSUB variables
-            if (!_mWorldTickList.empty())
+            if (!_vWorldTickList.empty())
             {
                 {
                     EXC_TRYSUB("Selection");
                     _vecIndexMiscBuffer.clear();
-                    WorldTickList::iterator itMap = _mWorldTickList.begin();
-                    WorldTickList::iterator itMapEnd = _mWorldTickList.end();
+                    WorldTickList::iterator itMap = _vWorldTickList.begin();
+                    WorldTickList::iterator itMapEnd = _vWorldTickList.end();
 
                     size_t uiProgressive = 0;
                     int64 iTime;
@@ -1500,25 +1500,25 @@ void CWorldTicker::Tick()
 #endif
                 {
                     EXC_TRYSUB("Delete from List");
-                    sortedVecRemoveElementsByIndices(_mWorldTickList, _vecIndexMiscBuffer);
+                    sortedVecRemoveElementsByIndices(_vWorldTickList, _vecIndexMiscBuffer);
 
 #ifdef DEBUG_LIST_OPS
                     // Ensure
                     for (void* obj : _vecGenericObjsToTick)
                     {
-                        auto itit = std::find_if(_mWorldTickList.begin(), _mWorldTickList.end(),
+                        auto itit = std::find_if(_vWorldTickList.begin(), _vWorldTickList.end(),
                             [obj](TickingTimedObjEntry const& lhs) {
                                 return static_cast<CTimedObject*>(obj) == lhs.second;
                             });
                         UnreferencedParameter(itit);
-                        ASSERT(itit == _mWorldTickList.end());
+                        ASSERT(itit == _vWorldTickList.end());
                     }
 #endif
                     EXC_CATCHSUB("");
                 }
 
 
-                // Done working with _mWorldTickList, we don't need the lock from now on.
+                // Done working with _vWorldTickList, we don't need the lock from now on.
 
                 lpctstr ptcSubDesc;
                 for (void* pObjVoid : _vecGenericObjsToTick)    // Loop through all msecs stored, unless we passed the timestamp.
@@ -1657,7 +1657,7 @@ void CWorldTicker::Tick()
     {
         // Need here another scope to give the right lifetime to the unique_lock.
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_mCharTickList.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_vCharTickList.MT_CMUTEX);
 #endif
         {
             // New requests done during the world loop.
@@ -1666,13 +1666,13 @@ void CWorldTicker::Tick()
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
             g_Log.EventDebug("[GLOBAL] STATUS: Updating CharTickList.\n");
 #endif
-            sortedVecRemoveAddQueued(_mCharTickList, _vecPeriodicCharsEraseRequests, _vecPeriodicCharsAddRequests, _vecPeriodicCharsElementBuffer);
+            sortedVecRemoveAddQueued(_vCharTickList, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vecPeriodicCharsElementBuffer);
             EXC_CATCHSUB("");
-            ASSERT(sl::ContainerIsSorted(_mCharTickList));
-            ASSERT(!sl::SortedContainerHasDuplicates(_mCharTickList));
+            ASSERT(sl::ContainerIsSorted(_vCharTickList));
+            ASSERT(!sl::SortedContainerHasDuplicates(_vCharTickList));
         }
 
-        if (!_mCharTickList.empty())
+        if (!_vCharTickList.empty())
         {
             {
                 EXC_TRYSUB("Selection");
@@ -1680,8 +1680,8 @@ void CWorldTicker::Tick()
                 //g_Log.EventDebug("Start looping through char periodic ticks.\n");
 #endif
                 _vecIndexMiscBuffer.clear();
-                CharTickList::iterator itMap       = _mCharTickList.begin();
-                CharTickList::iterator itMapEnd    = _mCharTickList.end();
+                CharTickList::iterator itMap       = _vCharTickList.begin();
+                CharTickList::iterator itMapEnd    = _vCharTickList.end();
 
                 size_t uiProgressive = 0;
                 int64 iTime;
@@ -1726,13 +1726,13 @@ void CWorldTicker::Tick()
             {
                 EXC_TRYSUB("Delete from List");
                 // Erase in chunks, call erase the least times possible.
-                sortedVecRemoveElementsByIndices(_mCharTickList, _vecIndexMiscBuffer);
+                sortedVecRemoveElementsByIndices(_vCharTickList, _vecIndexMiscBuffer);
                 EXC_CATCHSUB("DeleteFromList");
 
                 _vecIndexMiscBuffer.clear();
             }
 
-            // Done working with _mCharTickList, we don't need the lock from now on.
+            // Done working with _vCharTickList, we don't need the lock from now on.
         }
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
         else

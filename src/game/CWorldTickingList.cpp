@@ -57,58 +57,58 @@ void CWorldTickingList::ClearTickingLists() // static
 {
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._mWorldTickList.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vWorldTickList.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._mWorldTickList; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vWorldTickList; auto& elem : cont) {
             DEBUG_ASSERT(elem.second->_fIsAddingInWorldTickList == false);
             elem.second->_fIsInWorldTickList = false;
         }
-        for (auto& cont = g_World._Ticker._vecWorldObjsAddRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vWorldObjsAddRequests; auto& elem : cont) {
             DEBUG_ASSERT(elem.second->_fIsInWorldTickList == false);
             elem.second->_fIsAddingInWorldTickList = false;
         }
 #ifdef _DEBUG
-        for (auto& cont = g_World._Ticker._vecWorldObjsEraseRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vWorldObjsEraseRequests; auto& elem : cont) {
             DEBUG_ASSERT(elem->_fIsInWorldTickList == false);
             DEBUG_ASSERT(elem->_fIsAddingInWorldTickList == false);
         }
 #endif
-        g_World._Ticker._mWorldTickList.clear();
-        g_World._Ticker._vecWorldObjsAddRequests.clear();
-        g_World._Ticker._vecWorldObjsEraseRequests.clear();
+        g_World._Ticker._vWorldTickList.clear();
+        g_World._Ticker._vWorldObjsAddRequests.clear();
+        g_World._Ticker._vWorldObjsEraseRequests.clear();
     }
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._mCharTickList.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vCharTickList.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._mCharTickList ; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vCharTickList ; auto& elem : cont) {
             elem.second->_iTimePeriodicTick = 0;
         }
-        for (auto& cont = g_World._Ticker._vecPeriodicCharsAddRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vPeriodicCharsAddRequests; auto& elem : cont) {
             elem.second->_iTimePeriodicTick = 0;
         }
 #ifdef _DEBUG
-        for (auto& cont = g_World._Ticker._vecPeriodicCharsEraseRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vPeriodicCharsEraseRequests; auto& elem : cont) {
             DEBUG_ASSERT(elem->_iTimePeriodicTick == 0);
         }
 #endif
 
-        g_World._Ticker._mCharTickList.clear();
-        g_World._Ticker._vecPeriodicCharsAddRequests.clear();
-        g_World._Ticker._vecPeriodicCharsEraseRequests.clear();
+        g_World._Ticker._vCharTickList.clear();
+        g_World._Ticker._vPeriodicCharsAddRequests.clear();
+        g_World._Ticker._vPeriodicCharsEraseRequests.clear();
     }
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._ObjStatusUpdates.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vObjStatusUpdates.MT_CMUTEX);
 #endif
 
-        for (auto& cont = g_World._Ticker._ObjStatusUpdates; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vObjStatusUpdates; auto& elem : cont) {
             elem->_fIsInStatusUpdatesList = false;
         }
-        for (auto& cont = g_World._Ticker._vecObjStatusUpdateEraseRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vObjStatusUpdateEraseRequests; auto& elem : cont) {
             elem->_fIsInStatusUpdatesEraseList = false;
         }
-        g_World._Ticker._ObjStatusUpdates.clear();
-        g_World._Ticker._vecObjStatusUpdateEraseRequests.clear();
+        g_World._Ticker._vObjStatusUpdates.clear();
+        g_World._Ticker._vObjStatusUpdateEraseRequests.clear();
     }
 }

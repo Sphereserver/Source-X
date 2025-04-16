@@ -21,50 +21,49 @@ public:
     ~CWorldTicker() = default;
 
 private:
+    friend class CWorldTickingList;
+
     // Generic Timers. Calls to OnTick.
     using TickingTimedObjEntry = std::pair<int64, CTimedObject*>;
     struct WorldTickList : public std::vector<TickingTimedObjEntry>
     {
         MT_CMUTEX_DEF;
     };
+    WorldTickList _vWorldTickList;
+    std::vector<CTimedObject*> _vWorldObjsEraseRequests;
+    std::vector<TickingTimedObjEntry> _vWorldObjsAddRequests;
+    std::vector<TickingTimedObjEntry> _vecWorldObjsElementBuffer;
 
-    // Calls to OnTickPeriodic. Regens and periodic checks.
+    // Calls to OnTickPeriodic. CChar regens and periodic checks.
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;
     struct CharTickList : public std::vector<TickingPeriodicCharEntry>
     {
         MT_CMUTEX_DEF;
     };
+    CharTickList _vCharTickList;
+    std::vector<CChar*> _vPeriodicCharsEraseRequests;
+    std::vector<TickingPeriodicCharEntry> _vPeriodicCharsAddRequests;
+    std::vector<TickingPeriodicCharEntry> _vecPeriodicCharsElementBuffer;
 
     // Calls to OnTickStatusUpdate. Periodically send updated infos to the clients.
     struct StatusUpdatesList : public std::vector<CObjBase*>
     {
         MT_CMUTEX_DEF;
     };
-
-    WorldTickList _mWorldTickList;
-    CharTickList _mCharTickList;
-
-    friend class CWorldTickingList;
-    StatusUpdatesList _ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
-    std::vector<CObjBase*> _vecObjStatusUpdateEraseRequests;
+    StatusUpdatesList _vObjStatusUpdates;
+    std::vector<CObjBase*> _vObjStatusUpdateEraseRequests;
 
     // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
     std::vector<void*> _vecGenericObjsToTick;
     std::vector<size_t> _vecIndexMiscBuffer;
-
-    std::vector<TickingTimedObjEntry> _vecWorldObjsAddRequests;
-    std::vector<CTimedObject*> _vecWorldObjsEraseRequests;
-    std::vector<TickingTimedObjEntry> _vecWorldObjsElementBuffer;
-
-    std::vector<TickingPeriodicCharEntry> _vecPeriodicCharsAddRequests;
-    std::vector<CChar*> _vecPeriodicCharsEraseRequests;
-    std::vector<TickingPeriodicCharEntry> _vecPeriodicCharsElementBuffer;
 
     //----
 
     friend class CWorld;
     friend class CWorldTimedFunctions;
     CTimedFunctionHandler _TimedFunctions; // CTimedFunction Container/Wrapper
+
+    //----
 
     CWorldClock* _pWorldClock;
     int64        _iLastTickDone;
