@@ -46,7 +46,7 @@ private:
 
     friend class CWorldTickingList;
     StatusUpdatesList _ObjStatusUpdates;   // objects that need OnTickStatusUpdate called
-    std::vector<CObjBase*> _vecObjStatusUpdateEraseRequested;
+    std::vector<CObjBase*> _vecObjStatusUpdateEraseRequests;
 
     // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
     std::vector<void*> _vecGenericObjsToTick;
@@ -72,18 +72,25 @@ private:
 public:
     void Tick();
 
-    void AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fForce);
-    void DelTimedObject(CTimedObject* pTimedObject);
-    auto HasTimedObject(const CTimedObject* pTimedObject) -> TickingTimedObjEntry;
-    void AddCharTicking(CChar* pChar, bool fNeedsLock);
-    void DelCharTicking(CChar* pChar, bool fNeedsLock);
-    void AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
-    void DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
+    bool AddTimedObject(int64 iTimeout, CTimedObject* pTimedObject, bool fForce);
+    bool DelTimedObject(CTimedObject* pTimedObject);
+    auto IsTimeoutRegistered(const CTimedObject* pTimedObject) -> std::optional<TickingTimedObjEntry>;
+
+    bool AddCharTicking(CChar* pChar, bool fNeedsLock);
+    bool DelCharTicking(CChar* pChar, bool fNeedsLock);
+    auto IsCharPeriodicTickRegistered(const CChar* pChar) -> std::optional<std::pair<int64, CChar*>>;
+
+    bool AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
+    bool DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
+    bool IsStatusUpdateTickRegistered(const CObjBase* pObj);
 
 private:
-    void _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
-    void _RemoveTimedObject(CTimedObject* pTimedObject);
-    void _InsertCharTicking(int64 iTickNext, CChar* pChar);
+    bool _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
+    [[nodiscard]]
+    bool _RemoveTimedObject(CTimedObject* pTimedObject);
+
+    bool _InsertCharTicking(int64 iTickNext, CChar* pChar);
+    [[nodiscard]]
     bool _RemoveCharTicking(CChar* pChar);
 };
 

@@ -14,10 +14,10 @@ CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
 
 CTimedObject::~CTimedObject()
 {
+    ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     EXC_TRY("Cleanup in destructor");
 
-    ADDTOCALLSTACK("CTimedObject::~CTimedObject");
-    if (_fIsInWorldTickList > 0)
+    if (IsTimeoutTickingActive())
     {
         CWorldTickingList::DelObjSingle(this);
     }
@@ -76,7 +76,8 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
     */
     if (iDelayInMsecs < 0)
     {
-        CWorldTickingList::DelObjSingle(this);
+        if (IsTimeoutTickingActive())
+            CWorldTickingList::DelObjSingle(this);
         _ClearTimeoutRaw();
     }
     else

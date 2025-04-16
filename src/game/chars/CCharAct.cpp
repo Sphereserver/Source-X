@@ -5797,7 +5797,8 @@ void CChar::_GoAwake()
 	CObjBase::_GoAwake();
 	CContainer::_GoAwake();
 
-	CWorldTickingList::AddCharPeriodic(this, false);
+    if (!IsPeriodicTickPending())
+        CWorldTickingList::AddCharPeriodic(this, false);
 
     if (!_IsTimerSet())
         _SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
@@ -5810,7 +5811,13 @@ void CChar::_GoSleep()
 	CContainer::_GoSleep(); // This method isn't virtual
 	CObjBase::_GoSleep();
 
-	CWorldTickingList::DelCharPeriodic(this, false);
+    if (IsPeriodicTickPending())
+        CWorldTickingList::DelCharPeriodic(this, false);
+}
+
+bool CChar::IsPeriodicTickPending() const
+{
+    return (0 != _iTimePeriodicTick);
 }
 
 // Get a timer tick when our timer expires.

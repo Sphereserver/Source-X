@@ -9,12 +9,12 @@
 #include "../sphere/ProfileData.h"
 
 class CComponent;
-class CWorldTicker;
 
 class CTimedObject
 {
     friend class CComponent;
     friend class CWorldTicker;
+    friend class CWorldTickingList;
 
 public:
     static const char* m_sClassName;
@@ -42,7 +42,7 @@ public:
     virtual ~CTimedObject();
 
 protected:
-    inline bool IsTicking() noexcept;
+    inline bool IsTimeoutTickingActive() noexcept;
 
 protected:  inline  bool _IsSleeping() const noexcept;
 public:             bool IsSleeping() const noexcept;
@@ -183,7 +183,7 @@ void CTimedObject::_GoSleep()
     _fIsSleeping = true;
 }
 
-bool CTimedObject::IsTicking() noexcept
+bool CTimedObject::IsTimeoutTickingActive() noexcept
 {
     return _fIsInWorldTickList || _fIsAddingInWorldTickList;
 }

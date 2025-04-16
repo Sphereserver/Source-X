@@ -171,7 +171,8 @@ void CChar::Stat_SetVal( STAT_TYPE i, ushort uiVal )
         // Ensure this char will tick and die.
         // It's a redundant operation and safety check, as very probably it already is in the periodic ticking list.
         // TODO: add methods to assert that a char/cobjbase/etc is contained in a specific ticking list.
-        CWorldTickingList::AddCharPeriodic(this, false);
+        if (!IsPeriodicTickPending())
+            CWorldTickingList::AddCharPeriodic(this, false);
     }
 }
 

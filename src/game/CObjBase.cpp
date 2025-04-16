@@ -101,7 +101,10 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
-	m_iTimeStampS = 0;
+    _fIsInStatusUpdatesList = false;
+    _fIsInStatusUpdatesEraseList = false;
+
+    m_iTimeStampS = 0;
 	m_CanMask = 0;
 
 	m_attackBase = m_attackRange = 0;
@@ -136,8 +139,9 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 CObjBase::~CObjBase()
 {
+    ADDTOCALLSTACK("CObjBase::~CObjBase");
+
 	EXC_TRY("Cleanup in destructor");
-	ADDTOCALLSTACK("CObjBase::~CObjBase");
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
 		CItem* pSpawnLink = pSpawn->GetLink();
@@ -262,15 +266,6 @@ bool CObjBase::Delete(bool fForce)
 
 	DeletePrepare();           // virtual, but if called by the destructor this will fail to call upper (CChar, CItem, etc) virtual methods.
     DeleteCleanup(fForce);    // not virtual!
-
-    std::pair<int64, CTimedObject*> pairTimedObj = CWorldTickingList::HasTimedObject(this);
-    if (pairTimedObj.second != nullptr)
-    {
-        g_Log.EventError("CObjBase [defname='%s', cur timer adj=%" PRId64 ", cur timer raw=%" PRId64 ", timeout=%" PRId64 "]"
-                         "expected to have been removed from the Ticking List, but it's still there!.\n",
-            GetResourceName(), _GetTimerAdjusted(), _GetTimeoutRaw(), pairTimedObj.first);
-        ASSERT_ALWAYS(false);
-    }
 
     if (fScheduleDeletion)
     {
@@ -3162,7 +3157,7 @@ void CObjBase::UpdatePropertyFlag()
     m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
 	// Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-    if (!IsTopLevel() || _IsTimerExpired())
+    if (!IsStatusUpdatePending() && (!IsTopLevel() || _IsTimerExpired()))
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
     }
@@ -3171,6 +3166,12 @@ void CObjBase::UpdatePropertyFlag()
 dword CObjBase::GetPropertyHash() const
 {
 	return m_PropertyHash;
+}
+
+
+bool CObjBase::IsStatusUpdatePending() const
+{
+    return _fIsInStatusUpdatesList && !_fIsInStatusUpdatesEraseList;
 }
 
 void CObjBase::OnTickStatusUpdate()
@@ -3211,22 +3212,54 @@ void CObjBase::_GoSleep()
 {
 	ADDTOCALLSTACK("CObjBase::_GoSleep");
 
-    // This method can be called multiple times while an object is Delete'd or destroyed (by the superclasses). Avoid additional overhead.
-    if (_IsSleeping())
-    {
-        ASSERT(!IsTicking());
-        return;
-    }
-
 	CTimedObject::_GoSleep();
 
-    if (IsTicking())
+    if (IsTimeoutTickingActive())
 	{
-		CWorldTickingList::DelObjSingle(this);
-    }
+        const bool fDel = CWorldTickingList::DelObjSingle(this);
+        ASSERT(fDel);
+        UnreferencedParameter(fDel);
 
-    // Most objects won't be into the status update list, but we have to check anyways.
-	CWorldTickingList::DelObjStatusUpdate(this, false);
+#ifdef _DEBUG
+        const std::optional<std::pair<int64, CTimedObject*>> optPairRes = CWorldTickingList::IsTimeoutRegistered(this);
+        if (optPairRes.has_value())
+        {
+            g_Log.EventError("CObjBase [defname='%s', cur timer adj=%" PRId64 ", cur timer raw=%" PRId64 ", timeout=%" PRId64 "]"
+                             " expected to have been removed from the Ticking List, but it's still there!.\n",
+                GetResourceName(), _GetTimerAdjusted(), _GetTimeoutRaw(), optPairRes.value().first);
+            ASSERT(false);
+        }
+#endif
+    }
+#ifdef _DEBUG
+    else
+    {
+        const std::optional<std::pair<int64, CTimedObject*>> optPairRes = CWorldTickingList::IsTimeoutRegistered(this);
+        ASSERT(optPairRes.has_value() == false);
+        //UnreferencedParameter(optPairRes);
+    }
+#endif
+
+    if (IsStatusUpdatePending())
+    {
+        const bool fDel = CWorldTickingList::DelObjStatusUpdate(this, false);
+        ASSERT(fDel);
+        UnreferencedParameter(fDel);
+
+#ifdef _DEBUG
+        const bool fRes = CWorldTickingList::IsStatusUpdateTickRegistered(this);
+        ASSERT(!fRes);
+        //UnreferencedParameter(fRes);
+#endif
+    }
+#ifdef _DEBUG
+    else
+    {
+        const bool fRes = CWorldTickingList::IsStatusUpdateTickRegistered(this);
+        ASSERT(!fRes);
+        //UnreferencedParameter(fRes);
+    }
+#endif
 }
 
 bool CObjBase::_CanTick() const

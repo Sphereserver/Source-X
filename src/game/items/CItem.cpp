@@ -6059,7 +6059,7 @@ void CItem::_GoAwake()
 	CObjBase::_GoAwake();
 
     // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
-    if (!IsTopLevel())
+    if (!IsStatusUpdatePending() && !IsTopLevel())
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
 	}
