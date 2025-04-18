@@ -2196,7 +2196,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pCharTarg->m_pNPC && (40 >= g_Rand.Get16ValFast(100)) )
 		{
 			pAmmo->UnStackSplit(1);
-			pCharTarg->ItemBounce(pAmmo, false);
+			pCharTarg->ItemBounce(pAmmo, g_Cfg.m_iBounceMessage);
 		}
 		else
 			pAmmo->ConsumeAmount(1);

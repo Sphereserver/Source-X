@@ -1599,7 +1599,7 @@ void CChar::NPC_Act_Looting()
 	if ( pCorpse )
 		Speak(g_Cfg.GetDefaultMsg(DEFMSG_LOOT_RUMMAGE), HUE_TEXT_DEF, TALKMODE_EMOTE);
 
-	ItemBounce(pItem, false);
+	ItemBounce(pItem, g_Cfg.m_iBounceMessage);
     UpdateAnimate(ANIM_PILLAGE);
     SetTimeout(1000);
 }
@@ -2696,7 +2696,7 @@ void CChar::NPC_ExtraAI()
 	{
 		CItem *pLightSource = LayerFind(LAYER_HAND2);
 		if ( pLightSource && (pLightSource->IsType(IT_LIGHT_OUT) || pLightSource->IsType(IT_LIGHT_LIT)) )
-			ItemBounce(pLightSource, false);
+			ItemBounce(pLightSource, g_Cfg.m_iBounceMessage);
 	}
 
 	EXC_CATCH;

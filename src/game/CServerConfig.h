@@ -411,6 +411,7 @@ public:
 	uint _uiOptionFlags;		// Option Flags.
     uint _uiAreaFlags;		    // Area Flags.
     bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
+    bool m_iBounceMessage;      // Display more item bounce messages.
     int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
 	int64 m_iWoolGrowthTime;    // how long till wool grows back on sheared sheep, in minutes (stored as milliseconds).
 	int  m_iAttackerTimeout;    // Timeout for an attacker  (stored in seconds, not in milliseconds).

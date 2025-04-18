@@ -202,6 +202,7 @@ CServerConfig::CServerConfig()
 	m_fDisplayPercentAr = false;
 	m_fDisplayElementalResistance = false;
 	m_fNoResRobe		= 0;
+    m_iBounceMessage        = false;
 	m_iLostNPCTeleport	= 50;
 	m_iAutoProcessPriority = 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
@@ -725,6 +726,7 @@ enum RC_TYPE
 	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
+	RC_VERBOSEITEMBOUNCE,		// m_iBounceMessage
 	RC_VERSION,
 	RC_WALKBUFFER,
 	RC_WALKREGEN,
@@ -1019,6 +1021,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMaxSell)		}},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fVendorTradeTitle)		}},
+	{ "VERBOSEITEMBOUNCE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iBounceMessage)		}},
 	{ "VERSION",				{ ELEM_VOID,	0												}},
 	{ "WALKBUFFER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkBuffer)			}},
 	{ "WALKREGEN",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkRegen)			}},
