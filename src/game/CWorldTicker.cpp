@@ -311,10 +311,6 @@ bool CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
         ASSERT(fRet);
         fCanTick = fRet;
     }
-#ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-    else
-        g_Log.EventDebug("[WorldTicker][%p] INFO: Cannot tick and no force, so i'm not adding CTimedObj to the ticking list.\n", (void*)pTimedObject);
-#endif
 
     return fCanTick;
 
@@ -619,9 +615,6 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
     if (fIsTickPending)
     {
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
-#   ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-        g_Log.EventDebug("[WorldTicker][%p] INFO: Requested deletion of Periodic char, but Timeout is 0. It shouldn't be in the list, or just queued to be removed.\n", (void*)pChar);
-#   endif
         auto fnFindEntryByChar = [pChar](const TickingPeriodicCharEntry& entry) noexcept {
                 return entry.second == pChar;
         };
@@ -632,10 +625,6 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
             pChar);
         if (itEntryInEraseList != _vPeriodicCharsEraseRequests.end())
         {
-#   ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-            g_Log.EventDebug("[WorldTicker][%p] INFO:   though, found it already in the removal list, so it's fine..\n", (void*)pChar);
-#   endif
-
             ASSERT(false);
             return false;
         }
@@ -646,17 +635,9 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
             fnFindEntryByChar);
         if (itEntryInTickList != _vCharTicks.end())
         {
-#   ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-            g_Log.EventDebug("[WorldTicker][%p] WARN:   But i have found it in the list! With Timeout %" PRId64 ".\n", (void*)pChar, itEntryInTickList->first);
-#   endif
-
             ASSERT(false);
             return false;
         }
-
-#   ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-        g_Log.EventDebug("[WorldTicker][%p] INFO:   (rightfully) i haven't found it in any list.\n", (void*)pChar);
-#   endif
 #endif
 
         ASSERT(false);
@@ -890,386 +871,6 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     return false;
 }
 
-template <typename T>
-static void sortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std::vector<size_t>& vecIndicesToRemove)
-{
-    // Erase in chunks, call erase the least times possible.
-    if (vecIndicesToRemove.empty())
-        return;
-
-    if (vecMain.empty())
-        return;
-
-    const size_t sz = vecMain.size();
-
-#ifdef DEBUG_LIST_OPS
-    ASSERT(sl::ContainerIsSorted(vecMain));
-    ASSERT(sl::ContainerIsSorted(vecIndicesToRemove));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecIndicesToRemove));
-    //g_Log.EventDebug("Starting sortedVecRemoveElementsByIndices.\n");
-
-    // Copy the original vector to check against later
-    std::vector<T> originalVecMain = vecMain;
-#endif
-
-    // Start from the end of vecIndicesToRemove, working backwards with normal iterators
-    auto itRemoveFirst = vecIndicesToRemove.end();  // Points one past the last element
-    while (itRemoveFirst != vecIndicesToRemove.begin())
-    {
-        // Move the iterator back to point to a valid element.
-        --itRemoveFirst;
-
-        auto itRemoveLast = itRemoveFirst;  // Marks the start of a contiguous block
-        // Find contiguous block by working backwards and finding consecutive indices
-        // This loop identifies a contiguous block of indices to remove.
-        // A block is contiguous if the current index *itRemoveFirst is exactly 1 greater than the previous index.
-        while (itRemoveFirst != vecIndicesToRemove.begin() && *(itRemoveFirst - 1) + 1 == *itRemoveFirst)
-        {
-            --itRemoveFirst;
-        }
-
-        /*
-#ifdef DEBUG_LIST_OPS
-         g_Log.EventDebug("Removing contiguous indices: %" PRIuSIZE_T " to %" PRIuSIZE_T " (total sizes vecMain: %" PRIuSIZE_T ", vecIndices: %" PRIuSIZE_T ").\n",
-            *itRemoveFirst, *itRemoveLast, vecMain.size(), vecIndicesToRemove.size());
-#endif
-        */
-
-        // Once we find a contiguous block, we erase that block from vecMain.
-        auto itRemoveLastPast = (*itRemoveLast == vecMain.size() - 1) ? vecMain.end() : (vecMain.begin() + *itRemoveLast + 1);
-        vecMain.erase(vecMain.begin() + *itRemoveFirst, itRemoveLastPast);
-    }
-
-#ifdef DEBUG_LIST_OPS
-    // Sanity Check: Verify that the removed elements are no longer present in vecMain
-    for (auto index : vecIndicesToRemove) {
-        UnreferencedParameter(index);
-        ASSERT(index < originalVecMain.size());
-        ASSERT(std::find(vecMain.begin(), vecMain.end(), originalVecMain[index]) == vecMain.end());
-    }
-#   ifdef DEBUG_LIST_OPS_VERBOSE
-    g_Log.EventDebug("Sizes: new vec %" PRIuSIZE_T ", old vec %" PRIuSIZE_T ", remove vec %" PRIuSIZE_T ".\n",
-        vecMain.size(), sz, vecIndicesToRemove.size());
-#   endif
-#endif
-
-    UnreferencedParameter(sz);
-    ASSERT(vecMain.size() == sz - vecIndicesToRemove.size());
-
-
-    /*
-    // Alternative implementation:
-    // We cannot use a vector with the indices but we need a vector with a copy of the elements to remove.
-    // std::remove_if in itself is more efficient than multiple erase calls, because the number of the element shifts is lesser.
-    // Though, we need to consider the memory overhead of reading through an std::pair of two types, which is bigger than just an index.
-    // Also, jumping across the vector in a non-contiguous way with the binary search can add additional memory overhead by itself, and
-    //   this will be greater the bigger are the elements in the vector..
-    // The bottom line is that we need to run some benchmarks between the two algorithms, and possibly also for two versions of this algorithm,
-    //   one using binary search and another with linear search.
-    // The latter might actually be faster for a small number of elements, since it's more predictable for the prefetcher.
-
-    // Use std::remove_if to shift elements not marked for removal to the front
-    auto it = std::remove_if(vecMain.begin(), vecMain.end(),
-        [&](const T& element) {
-            // Check if the current element is in the valuesToRemove vector using binary search
-            return std::binary_search(valuesToRemove.begin(), valuesToRemove.end(), element);
-        });
-
-    // Erase the removed elements in one go
-    vecMain.erase(it, vecMain.end());
-    */
-}
-
-template <typename T>
-static void unsortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std::vector<T> & vecValuesToRemove)
-{
-    if (vecValuesToRemove.empty())
-        return;
-
-#ifdef DEBUG_LIST_OPS
-    ASSERT(!sl::UnsortedContainerHasDuplicates(vecMain));
-    ASSERT(!sl::UnsortedContainerHasDuplicates(vecValuesToRemove));
-#endif
-
-    // Sort valuesToRemove for binary search
-    //std::sort(vecValuesToRemove.begin(), vecValuesToRemove.end());
-
-    // Use std::remove_if to shift elements not marked for removal to the front
-    auto it = std::remove_if(vecMain.begin(), vecMain.end(),
-        [&](const T& element) {
-            // Use binary search to check if the element should be removed
-            //return std::binary_search(vecValuesToRemove.begin(), vecValuesToRemove.end(), element);
-            return std::find(vecValuesToRemove.begin(), vecValuesToRemove.end(), element) != vecValuesToRemove.end();
-        });
-
-    // Erase the removed elements in one go
-    vecMain.erase(it, vecMain.end());
-
-#ifdef DEBUG_LIST_OPS
-    for (auto& elem : vecMain) {
-        ASSERT(std::find(vecValuesToRemove.begin(), vecValuesToRemove.end(), elem) == vecValuesToRemove.end());
-    }
-#endif
-}
-
-
-/*
-// To be tested and benchmarked.
-template <typename T>
-static void sortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std::vector<T>& toRemove)
-{
-    if (toRemove.empty() || vecMain.empty())
-        return;
-
-    auto mainIt = vecMain.begin();
-    auto removeIt = toRemove.begin();
-
-    // Destination pointer for in-place shifting
-    auto destIt = mainIt;
-
-    while (mainIt != vecMain.end() && removeIt != toRemove.end()) {
-        // Skip over elements in the main vector that are smaller than the current element to remove
-        auto nextRangeEnd = std::lower_bound(mainIt, vecMain.end(), *removeIt);
-
-        // Batch copy the range of elements not marked for removal
-        std::move(mainIt, nextRangeEnd, destIt);
-        destIt += std::distance(mainIt, nextRangeEnd);
-
-        // Advance main iterator and remove iterator
-        mainIt = nextRangeEnd;
-
-        // Skip the elements that need to be removed
-        if (mainIt != vecMain.end() && *mainIt == *removeIt) {
-            ++mainIt;
-            ++removeIt;
-        }
-    }
-
-    // Copy the remaining elements if there are any left
-    std::move(mainIt, vecMain.end(), destIt);
-
-    // Resize the vector to remove the now extraneous elements at the end
-    vecMain.resize(destIt - vecMain.begin());
-}
-*/
-
-/*
-template <typename TPair, typename T>
-static void sortedVecDifference(
-    const std::vector<TPair>& vecMain, const std::vector<T*>& vecToRemove, std::vector<TPair>& vecElemBuffer
-    )
-{
-    auto itMain = vecMain.begin();    // Iterator for vecMain
-    auto start = itMain;              // Start marker for non-matching ranges in vecMain
-
-    for (auto& elem : vecToRemove) {
-        g_Log.EventDebug("Should remove %p.\n", (void*)elem);
-    }
-    for (auto& elem : vecMain) {
-        g_Log.EventDebug("VecMain %p.\n", (void*)elem.second);
-    }
-
-    // Iterate through each element in vecToRemove to locate and exclude its matches in vecMain
-    for (const auto& removePtr : vecToRemove) {
-        // Binary search to find the start of the block where vecMain.second == removePtr
-        itMain = std::lower_bound(itMain, vecMain.end(), removePtr,
-            [](const TPair& lhs, const T* rhs) noexcept {
-                return lhs.second < rhs;  // Compare TPair.second with T*
-            });
-
-        // Insert all elements from `start` up to `itMain` (non-matching elements)
-        vecElemBuffer.insert(vecElemBuffer.end(), start, itMain);
-
-        // Skip over all contiguous elements in vecMain that match removePtr
-        while (itMain != vecMain.end() && itMain->second == removePtr) {
-            ++itMain;
-        }
-
-        // Update `start` to the new non-matching range after any matching elements are skipped
-        start = itMain;
-    }
-
-    // Insert remaining elements from vecMain after the last matched element
-    vecElemBuffer.insert(vecElemBuffer.end(), start, vecMain.end());
-
-    for (auto& elem : vecMain) {
-        g_Log.EventDebug("VecMain %p.\n", (void*)elem.second);
-    }
-}
-*/
-
-template <typename TPair, typename T>
-static void unsortedVecDifference(
-    const std::vector<TPair>& vecMain, const std::vector<T*>& vecToRemove, std::vector<TPair>& vecElemBuffer
-    )
-{
-    /*
-    // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemove
-    for (const auto& elem : vecMain) {
-        if (std::find(vecToRemove.begin(), vecToRemove.end(), elem.second) == vecToRemove.end()) {
-            vecElemBuffer.push_back(elem);
-        }
-    }
-    */
-    // vecMain is sorted by timeout (first elem of the pair), not by pointer (second elem)
-    // vecToRemove is sorted by its contents (pointer)
-
-    // Reserve space in vecElemBuffer to avoid reallocations
-    vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
-
-    // Use an iterator to store the position for bulk insertion
-    auto itCopyFromThis = vecMain.begin();
-    /*
-    auto itFindBegin = vecToRemove.begin();
-
-    // Iterate through vecMain, copying elements that are not in vecToRemove
-    for (auto itMain = vecMain.begin(); itMain != vecMain.end(); ++itMain)
-    {
-        // Perform a linear search for the current element's pointer in vecToRemove
-        auto itTemp = std::find(itFindBegin, vecToRemove.end(), itMain->second);
-        if (itTemp != vecToRemove.end())
-        {
-            // If the element is found in vecToRemove, copy elements before it
-            vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, itMain); // Copy up to but not including itMain
-
-            // Move itCopyFromThis forward to the next element
-            itCopyFromThis = itMain + 1;
-            //itFindBegin = itTemp + 1;
-
-            // Update itFindBegin to continue searching for the next instance in vecToRemove
-            // We do not change itFindBegin here, since we want to keep searching for this pointer
-            // in vecToRemove for subsequent elements in vecMain
-        }
-        else
-        {
-            // If itTemp is not found, we can still copy the current element
-            // Check if itCopyFromThis is equal to itMain to avoid double-copying in case of duplicates
-            if (itCopyFromThis != itMain)
-            {
-                // Move itCopyFromThis forward to the next element
-                itCopyFromThis = itMain + 1;
-            }
-        }
-    }*/
-
-    // TODO: maybe optimize this algorithm.
-    // Iterate through vecMain, copying elements that are not in vecToRemove
-    for (auto itMain = vecMain.begin(); itMain != vecMain.end(); ++itMain) {
-        // Perform a linear search for the current element's pointer in vecToRemove
-        auto itTemp = std::find(vecToRemove.begin(), vecToRemove.end(), itMain->second);
-        if (itTemp != vecToRemove.end()) {
-            // If the element is found in vecToRemove, copy elements before it
-            vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, itMain); // Copy up to but not including itMain
-
-            // Move itCopyFromThis forward to the next element
-            itCopyFromThis = itMain + 1; // Move to the next element after itMain
-        }
-    }
-
-    // Copy any remaining elements in vecMain after the last found element
-    vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, vecMain.end());
-
-#ifdef DEBUG_LIST_OPS_VERBOSE
-    g_Log.EventDebug("Sizes: new vec %" PRIuSIZE_T ", old vec %" PRIuSIZE_T ", remove vec %" PRIuSIZE_T ".\n",
-        vecElemBuffer.size(), vecMain.size(), vecToRemove.size());
-
-    for (auto& elem : vecToRemove) {
-        g_Log.EventDebug("Should remove %p.\n", (void*)elem);
-    }
-    for (auto& elem : vecMain) {
-        g_Log.EventDebug("VecMain %p.\n", (void*)elem.second);
-    }
-    for (auto& elem : vecElemBuffer) {
-        g_Log.EventDebug("NewVec %p.\n", (void*)elem.second);
-    }
-#endif
-    ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
-}
-
-template <typename TPair, typename T>
-static void sortedVecRemoveAddQueued(
-    std::vector<TPair> &vecMain, std::vector<T> &vecToRemove, std::vector<TPair> &vecToAdd, std::vector<TPair> &vecElemBuffer
-    )
-{
-#ifdef DEBUG_LIST_OPS
-    ASSERT(sl::ContainerIsSorted(vecMain));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-#endif
-
-    //EXC_TRY("vecRemoveAddQueued");
-    //EXC_SET_BLOCK("Sort intermediate lists");
-    std::sort(vecToAdd.begin(), vecToAdd.end());
-    std::sort(vecToRemove.begin(), vecToRemove.end());
-
-#ifdef DEBUG_LIST_OPS
-    //ASSERT(sl::ContainerIsSorted(vecMain));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-#endif
-
-    //EXC_SET_BLOCK("Ordered remove");
-    if (!vecToRemove.empty())
-    {
-        if (vecMain.empty()) {
-            ASSERT(false);  // Shouldn't ever happen.
-        }
-
-        // TODO: test and benchmark if the approach of the above function (sortedVecRemoveElementsInPlace) might be faster.
-        vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() / 2);
-
-        // TODO: use a sorted algorithm?
-        unsortedVecDifference(vecMain, vecToRemove, vecElemBuffer);
-
-#ifdef DEBUG_LIST_OPS
-        for (auto& elem : vecToRemove)
-        {
-            auto it = std::find_if(vecElemBuffer.begin(), vecElemBuffer.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
-            UnreferencedParameter(it);
-            ASSERT (it == vecElemBuffer.end());
-        }
-
-        ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
-        ASSERT(sl::ContainerIsSorted(vecElemBuffer));
-        ASSERT(!sl::SortedContainerHasDuplicates(vecElemBuffer));
-#endif
-
-        vecMain.swap(vecElemBuffer);
-
-        //vecMain = std::move(vecElemBuffer);
-        vecElemBuffer.clear();
-        //vecToRemove.clear();
-    }
-
-    //EXC_SET_BLOCK("Mergesort");
-    if (!vecToAdd.empty())
-    {
-        vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() + vecToAdd.size());
-        std::merge(
-            vecMain.begin(), vecMain.end(),
-            vecToAdd.begin(), vecToAdd.end(),
-            std::back_inserter(vecElemBuffer)
-            );
-
-#ifdef DEBUG_LIST_OPS
-        ASSERT(vecElemBuffer.size() == vecMain.size() + vecToAdd.size());
-        ASSERT(sl::ContainerIsSorted(vecElemBuffer));
-        ASSERT(!sl::SortedContainerHasDuplicates(vecElemBuffer));
-#endif
-
-        vecMain.swap(vecElemBuffer);
-        //vecMain = std::move(vecElemBuffer);
-        vecElemBuffer.clear();
-        //vecToAdd.clear();
-
-#ifdef DEBUG_LIST_OPS_VERBOSE
-        g_Log.EventDebug("[GLOBAL] STATUS: Nonempty tick list add buffer processed.\n");
-#endif
-    }
-
-    //EXC_CATCH:
-}
 
 
 // Check timeouts and do ticks
@@ -1306,7 +907,7 @@ void CWorldTicker::Tick()
                     elem->_fIsInStatusUpdatesList = true;
                 }
 
-                unsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdatesEraseRequests);
+                sl::unsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdatesEraseRequests);
                 _vObjStatusUpdates.insert(_vObjStatusUpdates.end(), _vObjStatusUpdatesAddRequests.begin(), _vObjStatusUpdatesAddRequests.end());
 
                 EXC_SETSUB_BLOCK("Selection");
@@ -1378,7 +979,7 @@ void CWorldTicker::Tick()
                     elem.second->_fIsInWorldTickList = true;
                 }
 
-                sortedVecRemoveAddQueued(_vWorldTicks, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vecWorldObjsElementBuffer);
+                sl::sortedVecRemoveAddQueued(_vWorldTicks, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vecWorldObjsElementBuffer);
                 EXC_CATCHSUB("");
             }
 
@@ -1432,7 +1033,7 @@ void CWorldTicker::Tick()
 #endif
                 {
                     EXC_TRYSUB("Delete from List");
-                    sortedVecRemoveElementsByIndices(_vWorldTicks, _vecIndexMiscBuffer);
+                    sl::sortedVecRemoveElementsByIndices(_vWorldTicks, _vecIndexMiscBuffer);
 
 #ifdef DEBUG_LIST_OPS
                     // Ensure that the sortedVecRemoveElementsByIndices worked. No element of _vecGenericObjsToTick has to still be in _vWorldTicks.
@@ -1566,12 +1167,6 @@ void CWorldTicker::Tick()
                     EXC_CATCHSUB(ptcSubDesc);
                 }
             }
-/*
-#ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
-            else
-                g_Log.EventDebug("No ctimedobj ticks for this loop.\n");
-#endif
-*/
         }
     }
 
@@ -1598,7 +1193,7 @@ void CWorldTicker::Tick()
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
             g_Log.EventDebug("[GLOBAL] STATUS: Updating CharTickList.\n");
 #endif
-            sortedVecRemoveAddQueued(_vCharTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vecPeriodicCharsElementBuffer);
+            sl::sortedVecRemoveAddQueued(_vCharTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vecPeriodicCharsElementBuffer);
             EXC_CATCHSUB("");
             ASSERT(sl::ContainerIsSorted(_vCharTicks));
             ASSERT(!sl::SortedContainerHasDuplicates(_vCharTicks));
@@ -1646,11 +1241,6 @@ void CWorldTicker::Tick()
                 while ((itMap != itMapEnd) && (iCurTime > (iTime = itMap->first)))
                 {
                     CChar* pChar = itMap->second;
-#ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-                    g_Log.EventDebug("Executing char periodic tick: %p. Registered time: %" PRId64 ". pChar->_iTimePeriodicTick: %" PRId64 "\n",
-                        (void*)pChar, itMap->first, pChar->_iTimePeriodicTick);
-                    ASSERT(itMap->first == pChar->_iTimePeriodicTick);
-#endif
                     ASSERT(itMap->first != 0);
                     if (pChar->_CanTick() && !pChar->_IsBeingDeleted())
                     {
@@ -1685,7 +1275,7 @@ void CWorldTicker::Tick()
             {
                 EXC_TRYSUB("Delete from List");
                 // Erase in chunks, call erase the least times possible.
-                sortedVecRemoveElementsByIndices(_vCharTicks, _vecIndexMiscBuffer);
+                sl::sortedVecRemoveElementsByIndices(_vCharTicks, _vecIndexMiscBuffer);
                 EXC_CATCHSUB("DeleteFromList");
 
                 _vecIndexMiscBuffer.clear();
@@ -1693,10 +1283,6 @@ void CWorldTicker::Tick()
 
             // Done working with _vCharTicks, we don't need the lock from now on.
         }
-#ifdef DEBUG_CCHAR_PERIODIC_TICKING
-        else
-        {}; //g_Log.EventDebug("No char periodic ticks for this loop.\n");
-#endif
     }
 
     {
