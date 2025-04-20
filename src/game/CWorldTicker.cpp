@@ -23,27 +23,27 @@
 //#   define BENCHMARK_LISTS // TODO
 #endif
 
-CWorldTicker::CWorldTicker(CWorldClock *pClock)
+CWorldTicker::CWorldTicker(CWorldClock *pClock) :
+    _pWorldClock(nullptr),
+    _iCurTickStartTime(0), _iLastTickDone(0)
 {
     ASSERT(pClock);
     _pWorldClock = pClock;
 
-    _iCurTickStartTime = 0;
-    _iLastTickDone = 0;
-
-    _vecGenericObjsToTick.reserve(50);
-
     _vWorldTicks.reserve(50);
     _vWorldObjsAddRequests.reserve(50);
     _vWorldObjsEraseRequests.reserve(50);
+    _vWorldTicksBuffer.reserve(50);
 
     _vCharTicks.reserve(50);
     _vPeriodicCharsAddRequests.reserve(50);
     _vPeriodicCharsEraseRequests.reserve(50);
+    _vCharsTicksBuffer.reserve(50);
 
     _vObjStatusUpdates.reserve(25);
     _vObjStatusUpdatesAddRequests.reserve(25);
     _vObjStatusUpdatesEraseRequests.reserve(25);
+    _vObjStatusUpdatesTickBuffer.reserve(25);
 }
 
 
@@ -914,37 +914,38 @@ void CWorldTicker::ProcessObjStatusUpdates()
 
         sl::unsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdatesEraseRequests);
         _vObjStatusUpdates.insert(_vObjStatusUpdates.end(), _vObjStatusUpdatesAddRequests.begin(), _vObjStatusUpdatesAddRequests.end());
-
-        EXC_SET_BLOCK("Selection");
-        _vecGenericObjsToTick.clear();
-        if (!_vObjStatusUpdates.empty())
-        {
-            for (CObjBase* pObj : _vObjStatusUpdates)
-            {
-                if (pObj)
-                {
-                    pObj->_fIsInStatusUpdatesList = false;
-                    if (!pObj->_IsBeingDeleted())
-                        _vecGenericObjsToTick.emplace_back(static_cast<void*>(pObj));
-                }
-            }
-        }
-
-        _vObjStatusUpdates.clear();
         _vObjStatusUpdatesAddRequests.clear();
         _vObjStatusUpdatesEraseRequests.clear();
-    }
+
+        EXC_SET_BLOCK("Selection");
+        _vObjStatusUpdatesTickBuffer.clear();
+        if (_vObjStatusUpdates.empty())
+            return;
+
+        for (CObjBase* pObj : _vObjStatusUpdates)
+        {
+            if (!pObj)
+                continue;
+
+            pObj->_fIsInStatusUpdatesList = false;
+            if (pObj->_IsBeingDeleted())
+                continue;
+
+            _vObjStatusUpdatesTickBuffer.emplace_back(pObj);
+        }
+
+    } // destroy mutex
 
     EXC_SET_BLOCK("Loop");
-    for (void* pObjVoid : _vecGenericObjsToTick)
+    for (CObjBase* pObj : _vObjStatusUpdatesTickBuffer)
     {
-        CObjBase* pObj = static_cast<CObjBase*>(pObjVoid);
         pObj->OnTickStatusUpdate();
     }
 
-    _vecGenericObjsToTick.clear();
-
     EXC_CATCH;
+
+    _vObjStatusUpdates.clear();
+    _vObjStatusUpdatesTickBuffer.clear();
 }
 
 void CWorldTicker::ProcessTimedObjects()
@@ -962,13 +963,6 @@ void CWorldTicker::ProcessTimedObjects()
         {
             EXC_TRYSUB("Update main list");
 
-            /*
-                for (CTimedObject* elem : _vWorldObjsEraseRequests)
-                {
-                    elem->_fIsInWorldTickAddList = false;
-                    elem->_fIsInWorldTickList = false;
-                }
-                */
             for (TickingTimedObjEntry& elem : _vWorldObjsAddRequests)
             {
                 ASSERT(elem.second->_fIsInWorldTickAddList == true);
@@ -976,69 +970,66 @@ void CWorldTicker::ProcessTimedObjects()
                 elem.second->_fIsInWorldTickList = true;
             }
 
-            sl::sortedVecRemoveAddQueued(_vWorldTicks, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vecWorldObjsElementBuffer);
+            _vWorldObjsElementBuffer.clear();
+            sl::sortedVecRemoveAddQueued(_vWorldTicks, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vWorldObjsElementBuffer);
             EXC_CATCHSUB("");
         }
 
         _vWorldObjsAddRequests.clear();
         _vWorldObjsEraseRequests.clear();
-        _vecWorldObjsElementBuffer.clear();
+        _vWorldObjsElementBuffer.clear();
 
         // Need here a new, inner scope to get rid of EXC_TRYSUB variables
-        _vecIndexMiscBuffer.clear();
+        _vWorldTicksBuffer.clear();
         if (_vWorldTicks.empty())
             return;
 
         {
             EXC_TRYSUB("Selection");
-            WorldTickList::iterator itMap = _vWorldTicks.begin();
-            WorldTickList::iterator itMapEnd = _vWorldTicks.end();
 
+            _vIndexMiscBuffer.clear();
             size_t uiProgressive = 0;
-            int64 iTime;
-            while ((itMap != itMapEnd) && (_iCurTickStartTime > (iTime = itMap->first)))
+
+            for (auto it = _vWorldTicks.begin(), itEnd = _vWorldTicks.end();
+                (it != itEnd) && (_iCurTickStartTime > it->first);
+                ++it, ++uiProgressive)
             {
-                CTimedObject* pTimedObj = itMap->second;
-                if (pTimedObj->_IsTimerSet() && pTimedObj->_CanTick())
+                CTimedObject* pTimedObj = it->second;
+                if (!pTimedObj->_IsTimerSet() || !pTimedObj->_CanTick())
+                    continue;
+
+                //if (pTimedObj->_GetTimeoutRaw() > _iCurTickStartTime)
+                //    continue;
+
+                if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj))
                 {
-                    if (pTimedObj->_GetTimeoutRaw() <= _iCurTickStartTime)
-                    {
-                        if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj))
-                        {
-                            if (!pObjBase->_IsBeingDeleted())
-                            {
-                                // Object should tick.
-                                pTimedObj->_fIsInWorldTickList = false;
-                                _vecGenericObjsToTick.emplace_back(static_cast<void*>(pTimedObj));
-                                _vecIndexMiscBuffer.emplace_back(uiProgressive);
-                            }
-                        }
-                    }
-                    //else
-                    //{
-                    //    // This shouldn't happen... If it does, get rid of the entry on the list anyways,
-                    //    //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
-                    //}
+                    if (pObjBase->_IsBeingDeleted())
+                        continue;
                 }
-                ++itMap;
-                ++uiProgressive;
+
+                // Object should tick.
+                pTimedObj->_fIsInWorldTickList = false;
+                _vWorldTicksBuffer.emplace_back(pTimedObj);
+                _vIndexMiscBuffer.emplace_back(uiProgressive);
+
             }
             EXC_CATCHSUB("");
         }
 
 #ifdef DEBUG_LIST_OPS
-        ASSERT(!sl::UnsortedContainerHasDuplicates(_vecGenericObjsToTick));
+        ASSERT(!sl::UnsortedContainerHasDuplicates(_vWorldTicksBuffer));
 #endif
 
-        sl::sortedVecRemoveElementsByIndices(_vWorldTicks, _vecIndexMiscBuffer);
+        sl::sortedVecRemoveElementsByIndices(_vWorldTicks, _vIndexMiscBuffer);
+        _vIndexMiscBuffer.clear();
 
 #ifdef DEBUG_LIST_OPS
         // Ensure that the sortedVecRemoveElementsByIndices worked. No element of _vecGenericObjsToTick has to still be in _vWorldTicks.
-        for (void* obj : _vecGenericObjsToTick)
+        for (CTimedObject* obj : _vWorldTicksBuffer)
         {
             auto itit = std::find_if(_vWorldTicks.begin(), _vWorldTicks.end(),
                 [obj](TickingTimedObjEntry const& lhs) constexpr noexcept {
-                    return static_cast<CTimedObject*>(obj) == lhs.second;
+                    return obj == lhs.second;
                 });
             UnreferencedParameter(itit);
             ASSERT(itit == _vWorldTicks.end());
@@ -1049,14 +1040,13 @@ void CWorldTicker::ProcessTimedObjects()
     // Done working with _vWorldTicks, we don't need the lock from now on.
 
     lpctstr ptcSubDesc;
-    for (void* pObjVoid : _vecGenericObjsToTick)    // Loop through all msecs stored, unless we passed the timestamp.
+    for (CTimedObject* pTimedObj : _vWorldTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         ptcSubDesc = "Generic";
 
         EXC_TRYSUB("Tick");
         EXC_SETSUB_BLOCK("Elapsed");
 
-        CTimedObject* pTimedObj = static_cast<CTimedObject*>(pObjVoid);
         pTimedObj->_ClearTimeoutRaw();
 
 #if MT_ENGINES
@@ -1163,6 +1153,8 @@ void CWorldTicker::ProcessTimedObjects()
     }
 
     EXC_CATCH;
+
+    _vWorldTicksBuffer.clear();
 }
 
 void CWorldTicker::ProcessCharPeriodicTicks()
@@ -1179,7 +1171,8 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             // New requests done during the world loop.
             EXC_TRYSUB("Update main list");
 
-            sl::sortedVecRemoveAddQueued(_vCharTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vecPeriodicCharsElementBuffer);
+            _vPeriodicCharsElementBuffer.clear();
+            sl::sortedVecRemoveAddQueued(_vCharTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vPeriodicCharsElementBuffer);
 
             ASSERT(sl::ContainerIsSorted(_vCharTicks));
             ASSERT(!sl::SortedContainerHasDuplicates(_vCharTicks));
@@ -1210,46 +1203,36 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 #endif
             _vPeriodicCharsAddRequests.clear();
             _vPeriodicCharsEraseRequests.clear();
-            _vecPeriodicCharsElementBuffer.clear();
+            _vPeriodicCharsElementBuffer.clear();
         }
 
+        _vCharsTicksBuffer.clear();
         if (_vCharTicks.empty())
             return;
 
         {
             EXC_TRYSUB("Selection");
-            _vecIndexMiscBuffer.clear();
-            CharTickList::iterator itMap       = _vCharTicks.begin();
-            CharTickList::iterator itMapEnd    = _vCharTicks.end();
 
+            _vIndexMiscBuffer.clear();
             size_t uiProgressive = 0;
-            int64 iTime;
-            while ((itMap != itMapEnd) && (_iCurTickStartTime > (iTime = itMap->first)))
-            {
-                CChar* pChar = itMap->second;
-                ASSERT(itMap->first != 0);
-                if (pChar->_CanTick() && !pChar->_IsBeingDeleted())
-                {
-                    //if (pChar->_iTimePeriodicTick <= iCurTime)
-                    {
-                        _vecGenericObjsToTick.emplace_back(static_cast<void*>(pChar));
-                        _vecIndexMiscBuffer.emplace_back(uiProgressive);
-                    }
-                    //else
-                    //{
-                    //    // This shouldn't happen... If it does, get rid of the entry on the list anyways,
-                    //    //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
-                    //}
 
-                }
-                ++itMap;
-                ++uiProgressive;
+            for (auto it = _vCharTicks.begin(), itEnd = _vCharTicks.end();
+                (it != itEnd) && (_iCurTickStartTime > it->first);
+                ++it, ++uiProgressive)
+            {
+                CChar* pChar = it->second;
+                ASSERT(it->first != 0);
+                if (!pChar->_CanTick() || pChar->_IsBeingDeleted())
+                    continue;
+
+                _vCharsTicksBuffer.emplace_back(pChar);
+                _vIndexMiscBuffer.emplace_back(uiProgressive);
             }
 
 #ifdef DEBUG_LIST_OPS
-            ASSERT(sl::ContainerIsSorted(_vecIndexMiscBuffer));
-            ASSERT(!sl::UnsortedContainerHasDuplicates(_vecGenericObjsToTick));
-            ASSERT(!sl::SortedContainerHasDuplicates(_vecIndexMiscBuffer));
+            ASSERT(sl::ContainerIsSorted(_vIndexMiscBuffer));
+            ASSERT(!sl::UnsortedContainerHasDuplicates(_vCharsTicksBuffer));
+            ASSERT(!sl::SortedContainerHasDuplicates(_vIndexMiscBuffer));
 #endif
             EXC_CATCHSUB("");
         }
@@ -1257,10 +1240,10 @@ void CWorldTicker::ProcessCharPeriodicTicks()
         {
             EXC_TRYSUB("Delete from List");
             // Erase in chunks, call erase the least times possible.
-            sl::sortedVecRemoveElementsByIndices(_vCharTicks, _vecIndexMiscBuffer);
+            sl::sortedVecRemoveElementsByIndices(_vCharTicks, _vIndexMiscBuffer);
             EXC_CATCHSUB("DeleteFromList");
 
-            _vecIndexMiscBuffer.clear();
+            _vIndexMiscBuffer.clear();
         }
 
         // Done working with _vCharTicks, we don't need the lock from now on.
@@ -1268,9 +1251,8 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 
     {
         EXC_TRYSUB("Char Periodic Ticks Loop");
-        for (void* pObjVoid : _vecGenericObjsToTick)    // Loop through all msecs stored, unless we passed the timestamp.
+        for (CChar* pChar : _vCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
         {
-            CChar* pChar = static_cast<CChar*>(pObjVoid);
             pChar->_iTimePeriodicTick = 0;
             if (pChar->OnTickPeriodic())
             {
@@ -1282,11 +1264,11 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             }
         }
         EXC_CATCHSUB("");
-
-        _vecGenericObjsToTick.clear();
     }
 
     EXC_CATCH;
+
+    _vCharsTicksBuffer.clear();
 }
 
 
@@ -1296,7 +1278,6 @@ void CWorldTicker::Tick()
     ADDTOCALLSTACK("CWorldTicker::Tick");
     EXC_TRY("CWorldTicker::Tick");
 
-    _vecGenericObjsToTick.clear();
     ProcessServerTickActions();
 
     /* World ticking (timers) */
@@ -1304,16 +1285,13 @@ void CWorldTicker::Tick()
 
     _iCurTickStartTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
-    _vecGenericObjsToTick.clear();
     ProcessTimedObjects();
 
     // ----
 
     /* Periodic, automatic ticking for every char */
 
-    _vecGenericObjsToTick.clear();
     ProcessCharPeriodicTicks();
 
     EXC_CATCH;
-    _vecGenericObjsToTick.clear();
 }

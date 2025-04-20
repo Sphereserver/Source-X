@@ -32,7 +32,8 @@ private:
     WorldTickList _vWorldTicks;
     std::vector<CTimedObject*> _vWorldObjsEraseRequests;
     std::vector<TickingTimedObjEntry> _vWorldObjsAddRequests;
-    std::vector<TickingTimedObjEntry> _vecWorldObjsElementBuffer;
+    std::vector<TickingTimedObjEntry> _vWorldObjsElementBuffer;
+    std::vector<CTimedObject*> _vWorldTicksBuffer;
 
     // Calls to OnTickPeriodic. CChar regens and periodic checks.
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;
@@ -43,7 +44,8 @@ private:
     CharTickList _vCharTicks;
     std::vector<CChar*> _vPeriodicCharsEraseRequests;
     std::vector<TickingPeriodicCharEntry> _vPeriodicCharsAddRequests;
-    std::vector<TickingPeriodicCharEntry> _vecPeriodicCharsElementBuffer;
+    std::vector<TickingPeriodicCharEntry> _vPeriodicCharsElementBuffer;
+    std::vector<CChar*> _vCharsTicksBuffer;
 
     // Calls to OnTickStatusUpdate. Periodically send updated infos to the clients.
     struct StatusUpdatesList : public std::vector<CObjBase*>
@@ -53,10 +55,10 @@ private:
     StatusUpdatesList _vObjStatusUpdates;
     std::vector<CObjBase*> _vObjStatusUpdatesEraseRequests;
     std::vector<CObjBase*> _vObjStatusUpdatesAddRequests;
+    std::vector<CObjBase*> _vObjStatusUpdatesTickBuffer;
 
     // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
-    std::vector<void*> _vecGenericObjsToTick;
-    std::vector<size_t> _vecIndexMiscBuffer;
+    std::vector<size_t> _vIndexMiscBuffer;
 
     //----
 
