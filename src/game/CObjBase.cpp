@@ -102,7 +102,7 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
     _fIsInStatusUpdatesList = false;
-    _fIsInStatusUpdatesEraseList = false;
+    _fIsInStatusUpdatesAddList = false;
 
     m_iTimeStampS = 0;
 	m_CanMask = 0;
@@ -3171,7 +3171,7 @@ dword CObjBase::GetPropertyHash() const
 
 bool CObjBase::IsStatusUpdatePending() const
 {
-    return _fIsInStatusUpdatesList && !_fIsInStatusUpdatesEraseList;
+    return _fIsInStatusUpdatesList || _fIsInStatusUpdatesAddList;
 }
 
 void CObjBase::OnTickStatusUpdate()

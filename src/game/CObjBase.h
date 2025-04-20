@@ -60,7 +60,7 @@ public:
     int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
     bool _fIsInStatusUpdatesList;
-    bool _fIsInStatusUpdatesEraseList;
+    bool _fIsInStatusUpdatesAddList;
 
 # define SU_UPDATE_HITS      0x01    // update hits to others
 # define SU_UPDATE_MODE      0x02    // update mode to all

@@ -29,7 +29,7 @@ private:
     {
         MT_CMUTEX_DEF;
     };
-    WorldTickList _vWorldTickList;
+    WorldTickList _vWorldTicks;
     std::vector<CTimedObject*> _vWorldObjsEraseRequests;
     std::vector<TickingTimedObjEntry> _vWorldObjsAddRequests;
     std::vector<TickingTimedObjEntry> _vecWorldObjsElementBuffer;
@@ -40,7 +40,7 @@ private:
     {
         MT_CMUTEX_DEF;
     };
-    CharTickList _vCharTickList;
+    CharTickList _vCharTicks;
     std::vector<CChar*> _vPeriodicCharsEraseRequests;
     std::vector<TickingPeriodicCharEntry> _vPeriodicCharsAddRequests;
     std::vector<TickingPeriodicCharEntry> _vecPeriodicCharsElementBuffer;
@@ -51,7 +51,8 @@ private:
         MT_CMUTEX_DEF;
     };
     StatusUpdatesList _vObjStatusUpdates;
-    std::vector<CObjBase*> _vObjStatusUpdateEraseRequests;
+    std::vector<CObjBase*> _vObjStatusUpdatesEraseRequests;
+    std::vector<CObjBase*> _vObjStatusUpdatesAddRequests;
 
     // Reuse the same container (using void pointers statically casted) to avoid unnecessary reallocations.
     std::vector<void*> _vecGenericObjsToTick;

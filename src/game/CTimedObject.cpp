@@ -8,7 +8,7 @@
 
 CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
     _iTimeout(0), _profileType(profile), _fIsSleeping(true),
-    _fIsInWorldTickList(false), _fIsAddingInWorldTickList(false)
+    _fIsInWorldTickList(false), _fIsInWorldTickAddList(false)
 {
 }
 

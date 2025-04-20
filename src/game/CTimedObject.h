@@ -28,7 +28,7 @@ private:
     bool _fIsSleeping;
 
     bool _fIsInWorldTickList;
-    bool _fIsAddingInWorldTickList;
+    bool _fIsInWorldTickAddList;
 
     /**
     * @brief clears the timeout.
@@ -185,7 +185,7 @@ void CTimedObject::_GoSleep()
 
 bool CTimedObject::IsTimeoutTickingActive() noexcept
 {
-    return _fIsInWorldTickList || _fIsAddingInWorldTickList;
+    return _fIsInWorldTickList || _fIsInWorldTickAddList;
 }
 
 bool CTimedObject::_IsTimerSet() const noexcept

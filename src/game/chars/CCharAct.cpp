@@ -5777,7 +5777,7 @@ bool CChar::_CanTick() const
     if (IsDisconnected())
 	{
         // mounted horses could still get a tick, even if their disconnected body is placed in a sector now sleeping.
-        if (Skill_GetActive() != NPCACT_RIDDEN)
+        if (Skill_GetActive() == NPCACT_RIDDEN)
             return true;
 
 		return false;
