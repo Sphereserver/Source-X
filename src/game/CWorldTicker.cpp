@@ -28,6 +28,7 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock)
     ASSERT(pClock);
     _pWorldClock = pClock;
 
+    _iCurTickStartTime = 0;
     _iLastTickDone = 0;
 
     _vecGenericObjsToTick.reserve(50);
@@ -872,314 +873,302 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 }
 
 
-
-// Check timeouts and do ticks
-void CWorldTicker::Tick()
+void CWorldTicker::ProcessServerTickActions()
 {
-    ADDTOCALLSTACK("CWorldTicker::Tick");
-    EXC_TRY("CWorldTicker::Tick");
+    EXC_TRY("CWorldTicker::ProcessServerTickActions");
 
-    EXC_SET_BLOCK("Once per tick stuff");
     // Do this once per tick.
     //  Update status flags from objects, update current tick.
-    if (_iLastTickDone <= _pWorldClock->GetCurrentTick())
-    {
-        ++_iLastTickDone;   // Update current tick.
+    if (_iLastTickDone > _pWorldClock->GetCurrentTick())
+        return;
 
-        /* process objects that need status updates
+    ++_iLastTickDone;   // Update current tick.
+
+    ProcessObjStatusUpdates();
+
+    EXC_CATCH;
+}
+
+void CWorldTicker::ProcessObjStatusUpdates()
+{
+    EXC_TRY("CWorldTicker::ProcessObjStatusUpdates");
+
+    /* process objects that need status updates
         * these objects will normally be in containers which don't have any period _OnTick method
         * called (whereas other items can receive the OnTickStatusUpdate() call via their normal
         * tick method).
         * note: ideally, a better solution to accomplish this should be found if possible
         * TODO: implement a new class inheriting from CTimedObject to get rid of this code?
         */
-        {
-            {
+    {
 #if MT_ENGINES
-                std::unique_lock<std::shared_mutex> lock_su(_vObjStatusUpdates.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock_su(_vObjStatusUpdates.MT_CMUTEX);
 #endif
-                EXC_TRYSUB("StatusUpdates");
-                EXC_SETSUB_BLOCK("Remove requested");
+        EXC_SET_BLOCK("Remove requested");
 
-                for (CObjBase* elem : _vObjStatusUpdatesAddRequests)
-                {
-                    elem->_fIsInStatusUpdatesAddList = false;
-                    elem->_fIsInStatusUpdatesList = true;
-                }
-
-                sl::unsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdatesEraseRequests);
-                _vObjStatusUpdates.insert(_vObjStatusUpdates.end(), _vObjStatusUpdatesAddRequests.begin(), _vObjStatusUpdatesAddRequests.end());
-
-                EXC_SETSUB_BLOCK("Selection");
-                _vecGenericObjsToTick.clear();
-                if (!_vObjStatusUpdates.empty())
-                {                    
-                    for (CObjBase* pObj : _vObjStatusUpdates)
-                    {
-                        if (pObj)
-                        {
-                            pObj->_fIsInStatusUpdatesList = false;
-                            if (!pObj->_IsBeingDeleted())
-                                _vecGenericObjsToTick.emplace_back(static_cast<void*>(pObj));
-                        }
-                    }
-                }
-                EXC_CATCHSUB("");
-                //EXC_DEBUGSUB_START;
-                //EXC_DEBUGSUB_END;
-                _vObjStatusUpdates.clear();
-                _vObjStatusUpdatesAddRequests.clear();
-                _vObjStatusUpdatesEraseRequests.clear();
-            }
-
-            EXC_TRYSUB("StatusUpdates");
-            EXC_SETSUB_BLOCK("Loop");
-            for (void* pObjVoid : _vecGenericObjsToTick)
-            {
-                CObjBase* pObj = static_cast<CObjBase*>(pObjVoid);
-                pObj->OnTickStatusUpdate();
-            }
-            EXC_CATCHSUB("");
-
-            _vecGenericObjsToTick.clear();
+        for (CObjBase* elem : _vObjStatusUpdatesAddRequests)
+        {
+            elem->_fIsInStatusUpdatesAddList = false;
+            elem->_fIsInStatusUpdatesList = true;
         }
+
+        sl::unsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdatesEraseRequests);
+        _vObjStatusUpdates.insert(_vObjStatusUpdates.end(), _vObjStatusUpdatesAddRequests.begin(), _vObjStatusUpdatesAddRequests.end());
+
+        EXC_SET_BLOCK("Selection");
+        _vecGenericObjsToTick.clear();
+        if (!_vObjStatusUpdates.empty())
+        {
+            for (CObjBase* pObj : _vObjStatusUpdates)
+            {
+                if (pObj)
+                {
+                    pObj->_fIsInStatusUpdatesList = false;
+                    if (!pObj->_IsBeingDeleted())
+                        _vecGenericObjsToTick.emplace_back(static_cast<void*>(pObj));
+                }
+            }
+        }
+
+        _vObjStatusUpdates.clear();
+        _vObjStatusUpdatesAddRequests.clear();
+        _vObjStatusUpdatesEraseRequests.clear();
     }
 
-
-    /* World ticking (timers) */
-
-    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
-    int64 iCurTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
-
+    EXC_SET_BLOCK("Loop");
+    for (void* pObjVoid : _vecGenericObjsToTick)
     {
-        // Need this new scope to give the right lifetime to ProfileTask.
-        //g_Log.EventDebug("Start ctimedobj section.\n");
-        EXC_SET_BLOCK("TimedObjects");
-        const ProfileTask timersTask(PROFILE_TIMERS);
-        {
-            // Need here another scope to give the right lifetime to the unique_lock.
-#if MT_ENGINES
-            std::unique_lock<std::shared_mutex> lock(_vWorldTicks.MT_CMUTEX);
-#endif
-            {
-                // New requests done during the world loop.
-                EXC_TRYSUB("Update main list");
+        CObjBase* pObj = static_cast<CObjBase*>(pObjVoid);
+        pObj->OnTickStatusUpdate();
+    }
 
-                /*
+    _vecGenericObjsToTick.clear();
+
+    EXC_CATCH;
+}
+
+void CWorldTicker::ProcessTimedObjects()
+{
+    EXC_TRY("CWorldTicker::ProcessTimedObjects");
+
+    // Need this new scope to give the right lifetime to ProfileTask.
+    const ProfileTask timersTask(PROFILE_TIMERS);
+    {
+        // Need here another scope to give the right lifetime to the unique_lock.
+#if MT_ENGINES
+        std::unique_lock<std::shared_mutex> lock(_vWorldTicks.MT_CMUTEX);
+#endif
+        // New requests done during the world loop.
+        {
+            EXC_TRYSUB("Update main list");
+
+            /*
                 for (CTimedObject* elem : _vWorldObjsEraseRequests)
                 {
                     elem->_fIsInWorldTickAddList = false;
                     elem->_fIsInWorldTickList = false;
                 }
                 */
-                for (TickingTimedObjEntry& elem : _vWorldObjsAddRequests)
-                {
-                    ASSERT(elem.second->_fIsInWorldTickAddList == true);
-                    elem.second->_fIsInWorldTickAddList = false;
-                    elem.second->_fIsInWorldTickList = true;
-                }
-
-                sl::sortedVecRemoveAddQueued(_vWorldTicks, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vecWorldObjsElementBuffer);
-                EXC_CATCHSUB("");
+            for (TickingTimedObjEntry& elem : _vWorldObjsAddRequests)
+            {
+                ASSERT(elem.second->_fIsInWorldTickAddList == true);
+                elem.second->_fIsInWorldTickAddList = false;
+                elem.second->_fIsInWorldTickList = true;
             }
 
-            _vWorldObjsAddRequests.clear();
-            _vWorldObjsEraseRequests.clear();
-            _vecWorldObjsElementBuffer.clear();
+            sl::sortedVecRemoveAddQueued(_vWorldTicks, _vWorldObjsEraseRequests, _vWorldObjsAddRequests, _vecWorldObjsElementBuffer);
+            EXC_CATCHSUB("");
+        }
 
-            // Need here a new, inner scope to get rid of EXC_TRYSUB variables
-            _vecIndexMiscBuffer.clear();
-            if (!_vWorldTicks.empty())
+        _vWorldObjsAddRequests.clear();
+        _vWorldObjsEraseRequests.clear();
+        _vecWorldObjsElementBuffer.clear();
+
+        // Need here a new, inner scope to get rid of EXC_TRYSUB variables
+        _vecIndexMiscBuffer.clear();
+        if (_vWorldTicks.empty())
+            return;
+
+        {
+            EXC_TRYSUB("Selection");
+            WorldTickList::iterator itMap = _vWorldTicks.begin();
+            WorldTickList::iterator itMapEnd = _vWorldTicks.end();
+
+            size_t uiProgressive = 0;
+            int64 iTime;
+            while ((itMap != itMapEnd) && (_iCurTickStartTime > (iTime = itMap->first)))
             {
+                CTimedObject* pTimedObj = itMap->second;
+                if (pTimedObj->_IsTimerSet() && pTimedObj->_CanTick())
                 {
-                    EXC_TRYSUB("Selection");
-                    WorldTickList::iterator itMap = _vWorldTicks.begin();
-                    WorldTickList::iterator itMapEnd = _vWorldTicks.end();
-
-                    size_t uiProgressive = 0;
-                    int64 iTime;
-                    while ((itMap != itMapEnd) && (iCurTime > (iTime = itMap->first)))
+                    if (pTimedObj->_GetTimeoutRaw() <= _iCurTickStartTime)
                     {
-                        CTimedObject* pTimedObj = itMap->second;
-                        if (pTimedObj->_IsTimerSet() && pTimedObj->_CanTick())
+                        if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj))
                         {
-                            if (pTimedObj->_GetTimeoutRaw() <= iCurTime)
+                            if (!pObjBase->_IsBeingDeleted())
                             {
-                                if (auto pObjBase = dynamic_cast<const CObjBase*>(pTimedObj))
-                                {
-                                    if (!pObjBase->_IsBeingDeleted())
-                                    {
-                                        // Object should tick.
-                                        pTimedObj->_fIsInWorldTickList = false;
-                                        _vecGenericObjsToTick.emplace_back(static_cast<void*>(pTimedObj));
-                                        _vecIndexMiscBuffer.emplace_back(uiProgressive);
-                                    }
-                                }
+                                // Object should tick.
+                                pTimedObj->_fIsInWorldTickList = false;
+                                _vecGenericObjsToTick.emplace_back(static_cast<void*>(pTimedObj));
+                                _vecIndexMiscBuffer.emplace_back(uiProgressive);
                             }
-                            //else
-                            //{
-                            //    // This shouldn't happen... If it does, get rid of the entry on the list anyways,
-                            //    //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
-                            //}
                         }
-                        ++itMap;
-                        ++uiProgressive;
                     }
-                    EXC_CATCHSUB("");
+                    //else
+                    //{
+                    //    // This shouldn't happen... If it does, get rid of the entry on the list anyways,
+                    //    //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
+                    //}
                 }
+                ++itMap;
+                ++uiProgressive;
+            }
+            EXC_CATCHSUB("");
+        }
 
 #ifdef DEBUG_LIST_OPS
-                ASSERT(!sl::UnsortedContainerHasDuplicates(_vecGenericObjsToTick));
+        ASSERT(!sl::UnsortedContainerHasDuplicates(_vecGenericObjsToTick));
 #endif
-                {
-                    EXC_TRYSUB("Delete from List");
-                    sl::sortedVecRemoveElementsByIndices(_vWorldTicks, _vecIndexMiscBuffer);
+
+        sl::sortedVecRemoveElementsByIndices(_vWorldTicks, _vecIndexMiscBuffer);
 
 #ifdef DEBUG_LIST_OPS
-                    // Ensure that the sortedVecRemoveElementsByIndices worked. No element of _vecGenericObjsToTick has to still be in _vWorldTicks.
-                    for (void* obj : _vecGenericObjsToTick)
-                    {
-                        auto itit = std::find_if(_vWorldTicks.begin(), _vWorldTicks.end(),
-                            [obj](TickingTimedObjEntry const& lhs) constexpr noexcept {
-                                return static_cast<CTimedObject*>(obj) == lhs.second;
-                            });
-                        UnreferencedParameter(itit);
-                        ASSERT(itit == _vWorldTicks.end());
-                    }
+        // Ensure that the sortedVecRemoveElementsByIndices worked. No element of _vecGenericObjsToTick has to still be in _vWorldTicks.
+        for (void* obj : _vecGenericObjsToTick)
+        {
+            auto itit = std::find_if(_vWorldTicks.begin(), _vWorldTicks.end(),
+                [obj](TickingTimedObjEntry const& lhs) constexpr noexcept {
+                    return static_cast<CTimedObject*>(obj) == lhs.second;
+                });
+            UnreferencedParameter(itit);
+            ASSERT(itit == _vWorldTicks.end());
+        }
 #endif
-                    EXC_CATCHSUB("");
-                }
 
+    } // destroy mutex
+    // Done working with _vWorldTicks, we don't need the lock from now on.
 
-                // Done working with _vWorldTicks, we don't need the lock from now on.
+    lpctstr ptcSubDesc;
+    for (void* pObjVoid : _vecGenericObjsToTick)    // Loop through all msecs stored, unless we passed the timestamp.
+    {
+        ptcSubDesc = "Generic";
 
-                lpctstr ptcSubDesc;
-                for (void* pObjVoid : _vecGenericObjsToTick)    // Loop through all msecs stored, unless we passed the timestamp.
-                {
-                    ptcSubDesc = "Generic";
+        EXC_TRYSUB("Tick");
+        EXC_SETSUB_BLOCK("Elapsed");
 
-                    EXC_TRYSUB("Tick");
-                    EXC_SETSUB_BLOCK("Elapsed");
-
-                    CTimedObject* pTimedObj = static_cast<CTimedObject*>(pObjVoid);
-                    pTimedObj->_ClearTimeoutRaw();
+        CTimedObject* pTimedObj = static_cast<CTimedObject*>(pObjVoid);
+        pTimedObj->_ClearTimeoutRaw();
 
 #if MT_ENGINES
-                    std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lockTimeObj(pTimedObj->MT_CMUTEX);
 #endif
-                    const PROFILE_TYPE profile = pTimedObj->_GetProfileType();
-                    const ProfileTask  profileTask(profile);
+        const PROFILE_TYPE profile = pTimedObj->_GetProfileType();
+        const ProfileTask  profileTask(profile);
 
-                    // Default to true, so if any error occurs it gets deleted for safety
-                    //  (valid only for classes having the Delete method, which, for everyone to know, does NOT destroy the object).
-                    bool fDelete = true;
+        // Default to true, so if any error occurs it gets deleted for safety
+        //  (valid only for classes having the Delete method, which, for everyone to know, does NOT destroy the object).
+        bool fDelete = true;
 
-                    switch (profile)
+        switch (profile)
+        {
+            case PROFILE_ITEMS:
+            {
+                CItem* pItem = dynamic_cast<CItem*>(pTimedObj);
+                ASSERT(pItem);
+                if (pItem->IsItemEquipped())
+                {
+                    ptcSubDesc = "ItemEquipped";
+                    CObjBaseTemplate* pObjTop = pItem->GetTopLevelObj();
+                    ASSERT(pObjTop);
+
+                    CChar* pChar = dynamic_cast<CChar*>(pObjTop);
+                    if (pChar)
                     {
-                        case PROFILE_ITEMS:
-                        {
-                            CItem* pItem = dynamic_cast<CItem*>(pTimedObj);
-                            ASSERT(pItem);
-                            if (pItem->IsItemEquipped())
-                            {
-                                ptcSubDesc = "ItemEquipped";
-                                CObjBaseTemplate* pObjTop = pItem->GetTopLevelObj();
-                                ASSERT(pObjTop);
-
-                                CChar* pChar = dynamic_cast<CChar*>(pObjTop);
-                                if (pChar)
-                                {
-                                    fDelete = !pChar->OnTickEquip(pItem);
-                                    break;
-                                }
-
-                                ptcSubDesc = "Item (fallback)";
-                                g_Log.Event(LOGL_CRIT, "Item equipped, but not contained in a character? (UID: 0%" PRIx32 ")\n.", pItem->GetUID().GetObjUID());
-                            }
-                            else
-                            {
-                                ptcSubDesc = "Item";
-                            }
-                            fDelete = (pItem->_OnTick() == false);
-                            break;
-                        }
-                        break;
-
-                        case PROFILE_CHARS:
-                        {
-                            ptcSubDesc = "Char";
-                            CChar* pChar = dynamic_cast<CChar*>(pTimedObj);
-                            ASSERT(pChar);
-                            fDelete = !pChar->_OnTick();
-                            if (!fDelete && pChar->m_pNPC && !pTimedObj->_IsTimerSet())
-                            {
-                                pTimedObj->_SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
-                            }
-                        }
-                        break;
-
-                        case PROFILE_SECTORS:
-                        {
-                            ptcSubDesc = "Sector";
-                            fDelete = false;    // sectors should NEVER be deleted.
-                            pTimedObj->_OnTick();
-                        }
-                        break;
-
-                        case PROFILE_MULTIS:
-                        {
-                            ptcSubDesc = "Multi";
-                            fDelete = !pTimedObj->_OnTick();
-                        }
-                        break;
-
-                        case PROFILE_SHIPS:
-                        {
-                            ptcSubDesc = "ItemShip";
-                            fDelete = !pTimedObj->_OnTick();
-                        }
-                        break;
-
-                        case PROFILE_TIMEDFUNCTIONS:
-                        {
-                            ptcSubDesc = "TimedFunction";
-                            fDelete = false;
-                            pTimedObj->_OnTick();
-                        }
-                        break;
-
-                        default:
-                        {
-                            ptcSubDesc = "Default";
-                            fDelete = !pTimedObj->_OnTick();
-                        }
+                        fDelete = !pChar->OnTickEquip(pItem);
                         break;
                     }
 
-                    if (fDelete)
-                    {
-                        EXC_SETSUB_BLOCK("Delete");
-                        CObjBase* pObjBase = dynamic_cast<CObjBase*>(pTimedObj);
-                        ASSERT(pObjBase); // Only CObjBase-derived objects have the Delete method, and should be Delete-d.
-                        pObjBase->Delete();
-                    }
+                    ptcSubDesc = "Item (fallback)";
+                    g_Log.Event(LOGL_CRIT, "Item equipped, but not contained in a character? (UID: 0%" PRIx32 ")\n.", pItem->GetUID().GetObjUID());
+                }
+                else
+                {
+                    ptcSubDesc = "Item";
+                }
+                fDelete = (pItem->_OnTick() == false);
+                break;
+            }
+            break;
 
-                    EXC_CATCHSUB(ptcSubDesc);
+            case PROFILE_CHARS:
+            {
+                ptcSubDesc = "Char";
+                CChar* pChar = dynamic_cast<CChar*>(pTimedObj);
+                ASSERT(pChar);
+                fDelete = !pChar->_OnTick();
+                if (!fDelete && pChar->m_pNPC && !pTimedObj->_IsTimerSet())
+                {
+                    pTimedObj->_SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
                 }
             }
+            break;
+
+            case PROFILE_SECTORS:
+            {
+                ptcSubDesc = "Sector";
+                fDelete = false;    // sectors should NEVER be deleted.
+                pTimedObj->_OnTick();
+            }
+            break;
+
+            case PROFILE_MULTIS:
+            {
+                ptcSubDesc = "Multi";
+                fDelete = !pTimedObj->_OnTick();
+            }
+            break;
+
+            case PROFILE_SHIPS:
+            {
+                ptcSubDesc = "ItemShip";
+                fDelete = !pTimedObj->_OnTick();
+            }
+            break;
+
+            case PROFILE_TIMEDFUNCTIONS:
+            {
+                ptcSubDesc = "TimedFunction";
+                fDelete = false;
+                pTimedObj->_OnTick();
+            }
+            break;
+
+            default:
+            {
+                ptcSubDesc = "Default";
+                fDelete = !pTimedObj->_OnTick();
+            }
+            break;
         }
+
+        if (fDelete)
+        {
+            EXC_SETSUB_BLOCK("Delete");
+            CObjBase* pObjBase = dynamic_cast<CObjBase*>(pTimedObj);
+            ASSERT(pObjBase); // Only CObjBase-derived objects have the Delete method, and should be Delete-d.
+            pObjBase->Delete();
+        }
+
+        EXC_CATCHSUB(ptcSubDesc);
     }
 
-    _vecGenericObjsToTick.clear();
+    EXC_CATCH;
+}
 
-    // ----
+void CWorldTicker::ProcessCharPeriodicTicks()
+{
+    EXC_TRY("CWorldTicker::ProcessCharPeriodicTicks");
 
-    /* Periodic, automatic ticking for every char */
-
-    // No need another scope here to encapsulate this ProfileTask, because from now on, to the end of this method,
-    //  everything we do is related to char-only stuff.
-    //g_Log.EventDebug("Start periodic ticks section.\n");
-    EXC_SET_BLOCK("Char Periodic Ticks");
     const ProfileTask taskChars(PROFILE_CHARS);
     {
         // Need here another scope to give the right lifetime to the unique_lock.
@@ -1190,13 +1179,12 @@ void CWorldTicker::Tick()
             // New requests done during the world loop.
             EXC_TRYSUB("Update main list");
 
-#ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-            g_Log.EventDebug("[GLOBAL] STATUS: Updating CharTickList.\n");
-#endif
             sl::sortedVecRemoveAddQueued(_vCharTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vecPeriodicCharsElementBuffer);
-            EXC_CATCHSUB("");
+
             ASSERT(sl::ContainerIsSorted(_vCharTicks));
             ASSERT(!sl::SortedContainerHasDuplicates(_vCharTicks));
+
+            EXC_CATCHSUB("");
 
 #ifdef DEBUG_LIST_OPS
             // Ensure that the sortedVecRemoveAddQueued worked
@@ -1225,64 +1213,57 @@ void CWorldTicker::Tick()
             _vecPeriodicCharsElementBuffer.clear();
         }
 
-        if (!_vCharTicks.empty())
+        if (_vCharTicks.empty())
+            return;
+
         {
+            EXC_TRYSUB("Selection");
+            _vecIndexMiscBuffer.clear();
+            CharTickList::iterator itMap       = _vCharTicks.begin();
+            CharTickList::iterator itMapEnd    = _vCharTicks.end();
+
+            size_t uiProgressive = 0;
+            int64 iTime;
+            while ((itMap != itMapEnd) && (_iCurTickStartTime > (iTime = itMap->first)))
             {
-                EXC_TRYSUB("Selection");
-#ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-                //g_Log.EventDebug("Start looping through char periodic ticks.\n");
-#endif
-                _vecIndexMiscBuffer.clear();
-                CharTickList::iterator itMap       = _vCharTicks.begin();
-                CharTickList::iterator itMapEnd    = _vCharTicks.end();
-
-                size_t uiProgressive = 0;
-                int64 iTime;
-                while ((itMap != itMapEnd) && (iCurTime > (iTime = itMap->first)))
+                CChar* pChar = itMap->second;
+                ASSERT(itMap->first != 0);
+                if (pChar->_CanTick() && !pChar->_IsBeingDeleted())
                 {
-                    CChar* pChar = itMap->second;
-                    ASSERT(itMap->first != 0);
-                    if (pChar->_CanTick() && !pChar->_IsBeingDeleted())
+                    //if (pChar->_iTimePeriodicTick <= iCurTime)
                     {
-                        //if (pChar->_iTimePeriodicTick <= iCurTime)
-                        {
-                            _vecGenericObjsToTick.emplace_back(static_cast<void*>(pChar));
-                            _vecIndexMiscBuffer.emplace_back(uiProgressive);
-                        }
-                        //else
-                        //{
-                        //    // This shouldn't happen... If it does, get rid of the entry on the list anyways,
-                        //    //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
-                        //}
-
+                        _vecGenericObjsToTick.emplace_back(static_cast<void*>(pChar));
+                        _vecIndexMiscBuffer.emplace_back(uiProgressive);
                     }
-                    ++itMap;
-                    ++uiProgressive;
+                    //else
+                    //{
+                    //    // This shouldn't happen... If it does, get rid of the entry on the list anyways,
+                    //    //  it got desynchronized in some way and might be an invalid or even deleted and deallocated object!
+                    //}
+
                 }
-                EXC_CATCHSUB("");
+                ++itMap;
+                ++uiProgressive;
+            }
 
 #ifdef DEBUG_LIST_OPS
-                ASSERT(sl::ContainerIsSorted(_vecIndexMiscBuffer));
-                ASSERT(!sl::UnsortedContainerHasDuplicates(_vecGenericObjsToTick));
-                ASSERT(!sl::SortedContainerHasDuplicates(_vecIndexMiscBuffer));
+            ASSERT(sl::ContainerIsSorted(_vecIndexMiscBuffer));
+            ASSERT(!sl::UnsortedContainerHasDuplicates(_vecGenericObjsToTick));
+            ASSERT(!sl::SortedContainerHasDuplicates(_vecIndexMiscBuffer));
 #endif
-
-#ifdef DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-                g_Log.EventDebug("Done looping through char periodic ticks. Need to tick n %" PRIuSIZE_T " objs.\n", _vecGenericObjsToTick.size());
-#endif
-            }
-
-            {
-                EXC_TRYSUB("Delete from List");
-                // Erase in chunks, call erase the least times possible.
-                sl::sortedVecRemoveElementsByIndices(_vCharTicks, _vecIndexMiscBuffer);
-                EXC_CATCHSUB("DeleteFromList");
-
-                _vecIndexMiscBuffer.clear();
-            }
-
-            // Done working with _vCharTicks, we don't need the lock from now on.
+            EXC_CATCHSUB("");
         }
+
+        {
+            EXC_TRYSUB("Delete from List");
+            // Erase in chunks, call erase the least times possible.
+            sl::sortedVecRemoveElementsByIndices(_vCharTicks, _vecIndexMiscBuffer);
+            EXC_CATCHSUB("DeleteFromList");
+
+            _vecIndexMiscBuffer.clear();
+        }
+
+        // Done working with _vCharTicks, we don't need the lock from now on.
     }
 
     {
@@ -1305,7 +1286,34 @@ void CWorldTicker::Tick()
         _vecGenericObjsToTick.clear();
     }
 
-    //g_Log.EventDebug("END periodic ticks section.\n");
+    EXC_CATCH;
+}
+
+
+// Check timeouts and do ticks
+void CWorldTicker::Tick()
+{
+    ADDTOCALLSTACK("CWorldTicker::Tick");
+    EXC_TRY("CWorldTicker::Tick");
+
+    _vecGenericObjsToTick.clear();
+    ProcessServerTickActions();
+
+    /* World ticking (timers) */
+    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
+
+    _iCurTickStartTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
+
+    _vecGenericObjsToTick.clear();
+    ProcessTimedObjects();
+
+    // ----
+
+    /* Periodic, automatic ticking for every char */
+
+    _vecGenericObjsToTick.clear();
+    ProcessCharPeriodicTicks();
 
     EXC_CATCH;
+    _vecGenericObjsToTick.clear();
 }

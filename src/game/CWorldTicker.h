@@ -67,6 +67,7 @@ private:
     //----
 
     CWorldClock* _pWorldClock;
+    int64        _iCurTickStartTime;
     int64        _iLastTickDone;
 
 public:
@@ -85,6 +86,11 @@ public:
     bool IsStatusUpdateTickRegistered(const CObjBase* pObj);
 
 private:
+    void ProcessServerTickActions();
+    void ProcessObjStatusUpdates();
+    void ProcessTimedObjects();
+    void ProcessCharPeriodicTicks();
+
     bool _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
     [[nodiscard]]
     bool _RemoveTimedObject(CTimedObject* pTimedObject);
