@@ -33,7 +33,7 @@ private:
     std::vector<CTimedObject*> _vWorldObjsEraseRequests;
     std::vector<TickingTimedObjEntry> _vWorldObjsAddRequests;
     std::vector<TickingTimedObjEntry> _vWorldObjsElementBuffer;
-    std::vector<CTimedObject*> _vWorldTicksBuffer;
+    std::vector<CTimedObject*> _vWorldObjsTicksBuffer;
 
     // Calls to OnTickPeriodic. CChar regens and periodic checks.
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;
@@ -41,11 +41,11 @@ private:
     {
         MT_CMUTEX_DEF;
     };
-    CharTickList _vCharTicks;
+    CharTickList _vPeriodicCharsTicks;
     std::vector<CChar*> _vPeriodicCharsEraseRequests;
     std::vector<TickingPeriodicCharEntry> _vPeriodicCharsAddRequests;
     std::vector<TickingPeriodicCharEntry> _vPeriodicCharsElementBuffer;
-    std::vector<CChar*> _vCharsTicksBuffer;
+    std::vector<CChar*> _vPeriodicCharsTicksBuffer;
 
     // Calls to OnTickStatusUpdate. Periodically send updated infos to the clients.
     struct StatusUpdatesList : public std::vector<CObjBase*>
@@ -95,11 +95,11 @@ private:
 
     bool _InsertTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
     [[nodiscard]]
-    bool _RemoveTimedObject(CTimedObject* pTimedObject);
+    bool _EraseTimedObject(CTimedObject* pTimedObject);
 
     bool _InsertCharTicking(int64 iTickNext, CChar* pChar);
     [[nodiscard]]
-    bool _RemoveCharTicking(CChar* pChar);
+    bool _EraseCharTicking(CChar* pChar);
 };
 
 #endif // _INC_CWORLDTICKER_H

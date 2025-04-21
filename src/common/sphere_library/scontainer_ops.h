@@ -4,6 +4,9 @@
 #include <cstddef>
 #include <initializer_list>
 
+//#   define BENCHMARK_LISTS // TODO
+#define DEBUG_LIST_OPS
+
 namespace sl
 {
 
@@ -36,14 +39,14 @@ void AssignInitlistToCSizedArray(outT* dest, const size_t dest_size, std::initia
 }
 
 template <ConceptBasicContainer T>
-constexpr
+[[nodiscard]] constexpr
 bool ContainerIsSorted(T const& cont)
 {
     return std::is_sorted(cont.begin(), cont.end());
 }
 
 template <ConceptBasicContainer T>
-constexpr
+[[nodiscard]] constexpr
 bool SortedContainerHasDuplicates(T const& cont)
 {
     return std::adjacent_find(cont.begin(), cont.end()) != cont.end();
@@ -58,6 +61,7 @@ bool SortedContainerHasDuplicatesPred(ContT const& cont, PredT const& predicate)
 */
 
 template <ConceptBasicContainer T>
+[[nodiscard]]
 bool UnsortedContainerHasDuplicates(const T& cont) noexcept
 {
     for (size_t i = 0; i < cont.size(); ++i) {
@@ -266,8 +270,9 @@ static void sortedVecDifference(
 
 template <typename TPair, typename T>
 static void unsortedVecDifference(
-    const std::vector<TPair>& vecMain, const std::vector<T*>& vecToRemove, std::vector<TPair>& vecElemBuffer
-    )
+    std::vector<TPair> const& vecMain,
+    std::vector<T*>    const& vecToRemove,
+    std::vector<TPair>      & vecElemBuffer)
 {
     /*
     // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemove
@@ -342,25 +347,18 @@ static void unsortedVecDifference(
 
 template <typename TPair, typename T>
 static void sortedVecRemoveAddQueued(
-    std::vector<TPair> &vecMain, std::vector<T> & vecToRemove, std::vector<TPair> & vecToAdd, std::vector<TPair> &vecElemBuffer
-    )
+    std::vector<TPair> &vecMain,
+    std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd,
+    std::vector<TPair> &vecElemBuffer)
 {
 #ifdef DEBUG_LIST_OPS
     ASSERT(sl::ContainerIsSorted(vecMain));
     ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
 #endif
 
-    //EXC_TRY("vecRemoveAddQueued");
-    //EXC_SET_BLOCK("Sort intermediate lists");
     std::sort(vecToAdd.begin(), vecToAdd.end());
     std::sort(vecToRemove.begin(), vecToRemove.end());
 
-#ifdef DEBUG_LIST_OPS
-    //ASSERT(sl::ContainerIsSorted(vecMain));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-#endif
-
-    //EXC_SET_BLOCK("Ordered remove");
     if (!vecToRemove.empty())
     {
         if (vecMain.empty()) {
@@ -391,14 +389,13 @@ static void sortedVecRemoveAddQueued(
 
         //vecMain = std::move(vecElemBuffer);
         vecElemBuffer.clear();
-        //vecToRemove.clear();
     }
 
-    //EXC_SET_BLOCK("Mergesort");
     if (!vecToAdd.empty())
     {
         vecElemBuffer.clear();
         vecElemBuffer.reserve(vecMain.size() + vecToAdd.size());
+        // MergeSort
         std::merge(
             vecMain.begin(), vecMain.end(),
             vecToAdd.begin(), vecToAdd.end(),
@@ -414,12 +411,10 @@ static void sortedVecRemoveAddQueued(
         vecMain.swap(vecElemBuffer);
         //vecMain = std::move(vecElemBuffer);
         vecElemBuffer.clear();
-        //vecToAdd.clear();
     }
 
     //EXC_CATCH:
 }
-
 
 
 } // namespace sl

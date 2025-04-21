@@ -79,9 +79,9 @@ void CWorldTickingList::ClearTickingLists() // static
     }
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vCharTicks.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vPeriodicCharsTicks.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._vCharTicks ; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vPeriodicCharsTicks ; auto& elem : cont) {
             elem.second->_iTimePeriodicTick = 0;
         }
         for (auto& cont = g_World._Ticker._vPeriodicCharsAddRequests; auto& elem : cont) {
@@ -93,7 +93,7 @@ void CWorldTickingList::ClearTickingLists() // static
         }
 #endif
 
-        g_World._Ticker._vCharTicks.clear();
+        g_World._Ticker._vPeriodicCharsTicks.clear();
         g_World._Ticker._vPeriodicCharsAddRequests.clear();
         g_World._Ticker._vPeriodicCharsEraseRequests.clear();
     }

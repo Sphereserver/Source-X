@@ -14,13 +14,6 @@
 #   define DEBUG_CCHAR_PERIODIC_TICKING
 #   define DEBUG_STATUSUPDATES
 #   define DEBUG_LIST_OPS
-
-//#   define DEBUG_CTIMEDOBJ_TIMED_TICKING_VERBOSE
-//#   define DEBUG_CCHAR_PERIODIC_TICKING_VERBOSE
-//#   define DEBUG_STATUSUPDATES_VERBOSE
-//#   define DEBUG_LIST_OPS_VERBOSE
-
-//#   define BENCHMARK_LISTS // TODO
 #endif
 
 CWorldTicker::CWorldTicker(CWorldClock *pClock) :
@@ -33,12 +26,12 @@ CWorldTicker::CWorldTicker(CWorldClock *pClock) :
     _vWorldTicks.reserve(50);
     _vWorldObjsAddRequests.reserve(50);
     _vWorldObjsEraseRequests.reserve(50);
-    _vWorldTicksBuffer.reserve(50);
+    _vWorldObjsTicksBuffer.reserve(50);
 
-    _vCharTicks.reserve(50);
+    _vPeriodicCharsTicks.reserve(50);
     _vPeriodicCharsAddRequests.reserve(50);
     _vPeriodicCharsEraseRequests.reserve(50);
-    _vCharsTicksBuffer.reserve(50);
+    _vPeriodicCharsTicksBuffer.reserve(50);
 
     _vObjStatusUpdates.reserve(25);
     _vObjStatusUpdatesAddRequests.reserve(25);
@@ -162,7 +155,7 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     return true;
 }
 
-bool CWorldTicker::_RemoveTimedObject(CTimedObject* pTimedObject)
+bool CWorldTicker::_EraseTimedObject(CTimedObject* pTimedObject)
 {
     ASSERT(pTimedObject);
 
@@ -278,7 +271,7 @@ bool CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
         // I can have iTickOld != 0 but not be in the list in some cases, like when duping an obj with an active timer.
         EXC_SET_BLOCK("Remove");
 
-        const bool fRemoved = _RemoveTimedObject(pTimedObject);
+        const bool fRemoved = _EraseTimedObject(pTimedObject);
         ASSERT(fRemoved);
         UnreferencedParameter(fRemoved);
     }
@@ -325,7 +318,7 @@ bool CWorldTicker::DelTimedObject(CTimedObject* pTimedObject)
     const ProfileTask timersTask(PROFILE_TIMERS);
 
     EXC_SET_BLOCK("Remove");
-    const bool fRet = _RemoveTimedObject(pTimedObject);
+    const bool fRet = _EraseTimedObject(pTimedObject);
     ASSERT(fRet);
 
     return fRet;
@@ -354,10 +347,10 @@ auto CWorldTicker::IsCharPeriodicTickRegistered(const CChar* pChar) -> std::opti
         return *itEntryInAddList;
 
     const auto itEntryInTickList = std::find_if(
-        _vCharTicks.begin(),
-        _vCharTicks.end(),
+        _vPeriodicCharsTicks.begin(),
+        _vPeriodicCharsTicks.end(),
         fnFindEntryByObj);
-    if (_vCharTicks.end() != itEntryInTickList)
+    if (_vPeriodicCharsTicks.end() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
             _vPeriodicCharsEraseRequests.begin(),
@@ -377,7 +370,7 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     ASSERT(pChar);
 
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_vCharTicks.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vPeriodicCharsTicks.MT_CMUTEX);
 #endif
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
@@ -415,10 +408,10 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
 
     // Do not add duplicates.
     const auto itEntryInTickList = std::find_if(
-        _vCharTicks.begin(),
-        _vCharTicks.end(),
+        _vPeriodicCharsTicks.begin(),
+        _vPeriodicCharsTicks.end(),
         fnFindEntryByChar);
-    ASSERT(_vCharTicks.end() == itEntryInTickList);
+    ASSERT(_vPeriodicCharsTicks.end() == itEntryInTickList);
 #endif
 
     _vPeriodicCharsAddRequests.emplace_back(iTickNext, pChar);
@@ -426,13 +419,13 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     return true;
 }
 
-bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
+bool CWorldTicker::_EraseCharTicking(CChar* pChar)
 {
     // I'm reasonably sure that the element i'm trying to remove is present in this container.
     ASSERT(pChar);
 
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_vCharTicks.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vPeriodicCharsTicks.MT_CMUTEX);
 #endif
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
@@ -474,15 +467,15 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
         const auto itEntryInTickList = std::find_if(
-            _vCharTicks.begin(),
-            _vCharTicks.end(),
+            _vPeriodicCharsTicks.begin(),
+            _vPeriodicCharsTicks.end(),
             fnFindEntryByChar);
 
         if (itEntryInRemoveList == _vPeriodicCharsEraseRequests.end()) {
-            ASSERT(itEntryInTickList == _vCharTicks.end());
+            ASSERT(itEntryInTickList == _vPeriodicCharsTicks.end());
         }
         else {
-            ASSERT(itEntryInTickList != _vCharTicks.end());
+            ASSERT(itEntryInTickList != _vPeriodicCharsTicks.end());
         }
 #endif
         return true
@@ -493,10 +486,10 @@ bool CWorldTicker::_RemoveCharTicking(CChar* pChar)
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
     // Ensure it's in the ticking list.
     const auto itEntryInTickList = std::find_if(
-        _vCharTicks.begin(),
-        _vCharTicks.end(),
+        _vPeriodicCharsTicks.begin(),
+        _vPeriodicCharsTicks.end(),
         fnFindEntryByChar);
-    if (itEntryInTickList == _vCharTicks.end())
+    if (itEntryInTickList == _vPeriodicCharsTicks.end())
     {
         // Requested TickingPeriodicChar removal from ticking list, but not found.
         // Shouldn't happen, so it's illegal.
@@ -563,7 +556,7 @@ bool CWorldTicker::AddCharTicking(CChar* pChar, bool fNeedsLock)
     {
         // Adding an object already on the list? Am i setting a new timeout without deleting the previous one?
         EXC_SET_BLOCK("Remove");
-        const bool fRemoved = _RemoveCharTicking(pChar);
+        const bool fRemoved = _EraseCharTicking(pChar);
         ASSERT(fRemoved);
         UnreferencedParameter(fRemoved);
     }
@@ -631,10 +624,10 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
         }
 
         const auto itEntryInTickList = std::find_if(
-            _vCharTicks.begin(),
-            _vCharTicks.end(),
+            _vPeriodicCharsTicks.begin(),
+            _vPeriodicCharsTicks.end(),
             fnFindEntryByChar);
-        if (itEntryInTickList != _vCharTicks.end())
+        if (itEntryInTickList != _vPeriodicCharsTicks.end())
         {
             ASSERT(false);
             return false;
@@ -661,7 +654,7 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
 #endif
 
     EXC_SET_BLOCK("Remove");
-    const bool fRet = _RemoveCharTicking(pChar);
+    const bool fRet = _EraseCharTicking(pChar);
     if (fRet)
     {
 #if MT_ENGINES
@@ -725,7 +718,7 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 
     UnreferencedParameter(fNeedsLock);
 #if MT_ENGINES
-    std::unique_lock<std::shared_mutex> lock(_vCharTicks.MT_CMUTEX);
+    std::unique_lock<std::shared_mutex> lock(_vPeriodicCharsTicks.MT_CMUTEX);
 #endif
 
     if (pObj->_fIsInStatusUpdatesAddList)
@@ -980,7 +973,7 @@ void CWorldTicker::ProcessTimedObjects()
         _vWorldObjsElementBuffer.clear();
 
         // Need here a new, inner scope to get rid of EXC_TRYSUB variables
-        _vWorldTicksBuffer.clear();
+        _vWorldObjsTicksBuffer.clear();
         if (_vWorldTicks.empty())
             return;
 
@@ -1009,7 +1002,7 @@ void CWorldTicker::ProcessTimedObjects()
 
                 // Object should tick.
                 pTimedObj->_fIsInWorldTickList = false;
-                _vWorldTicksBuffer.emplace_back(pTimedObj);
+                _vWorldObjsTicksBuffer.emplace_back(pTimedObj);
                 _vIndexMiscBuffer.emplace_back(uiProgressive);
 
             }
@@ -1017,7 +1010,7 @@ void CWorldTicker::ProcessTimedObjects()
         }
 
 #ifdef DEBUG_LIST_OPS
-        ASSERT(!sl::UnsortedContainerHasDuplicates(_vWorldTicksBuffer));
+        ASSERT(!sl::UnsortedContainerHasDuplicates(_vWorldObjsTicksBuffer));
 #endif
 
         sl::sortedVecRemoveElementsByIndices(_vWorldTicks, _vIndexMiscBuffer);
@@ -1025,7 +1018,7 @@ void CWorldTicker::ProcessTimedObjects()
 
 #ifdef DEBUG_LIST_OPS
         // Ensure that the sortedVecRemoveElementsByIndices worked. No element of _vecGenericObjsToTick has to still be in _vWorldTicks.
-        for (CTimedObject* obj : _vWorldTicksBuffer)
+        for (CTimedObject* obj : _vWorldObjsTicksBuffer)
         {
             auto itit = std::find_if(_vWorldTicks.begin(), _vWorldTicks.end(),
                 [obj](TickingTimedObjEntry const& lhs) constexpr noexcept {
@@ -1040,7 +1033,7 @@ void CWorldTicker::ProcessTimedObjects()
     // Done working with _vWorldTicks, we don't need the lock from now on.
 
     lpctstr ptcSubDesc;
-    for (CTimedObject* pTimedObj : _vWorldTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
+    for (CTimedObject* pTimedObj : _vWorldObjsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         ptcSubDesc = "Generic";
 
@@ -1154,7 +1147,7 @@ void CWorldTicker::ProcessTimedObjects()
 
     EXC_CATCH;
 
-    _vWorldTicksBuffer.clear();
+    _vWorldObjsTicksBuffer.clear();
 }
 
 void CWorldTicker::ProcessCharPeriodicTicks()
@@ -1165,17 +1158,17 @@ void CWorldTicker::ProcessCharPeriodicTicks()
     {
         // Need here another scope to give the right lifetime to the unique_lock.
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(_vCharTicks.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(_vPeriodicCharsTicks.MT_CMUTEX);
 #endif
         {
             // New requests done during the world loop.
             EXC_TRYSUB("Update main list");
 
             _vPeriodicCharsElementBuffer.clear();
-            sl::sortedVecRemoveAddQueued(_vCharTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vPeriodicCharsElementBuffer);
+            sl::sortedVecRemoveAddQueued(_vPeriodicCharsTicks, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests, _vPeriodicCharsElementBuffer);
 
-            ASSERT(sl::ContainerIsSorted(_vCharTicks));
-            ASSERT(!sl::SortedContainerHasDuplicates(_vCharTicks));
+            ASSERT(sl::ContainerIsSorted(_vPeriodicCharsTicks));
+            ASSERT(!sl::SortedContainerHasDuplicates(_vPeriodicCharsTicks));
 
             EXC_CATCHSUB("");
 
@@ -1183,22 +1176,22 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             // Ensure that the sortedVecRemoveAddQueued worked
             for (CChar* obj : _vPeriodicCharsEraseRequests)
             {
-                auto itit = std::find_if(_vCharTicks.begin(), _vCharTicks.end(),
+                auto itit = std::find_if(_vPeriodicCharsTicks.begin(), _vPeriodicCharsTicks.end(),
                     [obj](TickingPeriodicCharEntry const& lhs) constexpr noexcept {
                         return obj == lhs.second;
                     });
                 UnreferencedParameter(itit);
-                ASSERT(itit == _vCharTicks.end());
+                ASSERT(itit == _vPeriodicCharsTicks.end());
             }
 
             for (auto& obj : _vPeriodicCharsAddRequests)
             {
-                auto itit = std::find_if(_vCharTicks.begin(), _vCharTicks.end(),
+                auto itit = std::find_if(_vPeriodicCharsTicks.begin(), _vPeriodicCharsTicks.end(),
                     [obj](TickingPeriodicCharEntry const& lhs) constexpr noexcept {
                         return obj.second == lhs.second;
                     });
                 UnreferencedParameter(itit);
-                ASSERT(itit != _vCharTicks.end());
+                ASSERT(itit != _vPeriodicCharsTicks.end());
             }
 #endif
             _vPeriodicCharsAddRequests.clear();
@@ -1206,8 +1199,8 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             _vPeriodicCharsElementBuffer.clear();
         }
 
-        _vCharsTicksBuffer.clear();
-        if (_vCharTicks.empty())
+        _vPeriodicCharsTicksBuffer.clear();
+        if (_vPeriodicCharsTicks.empty())
             return;
 
         {
@@ -1216,7 +1209,7 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             _vIndexMiscBuffer.clear();
             size_t uiProgressive = 0;
 
-            for (auto it = _vCharTicks.begin(), itEnd = _vCharTicks.end();
+            for (auto it = _vPeriodicCharsTicks.begin(), itEnd = _vPeriodicCharsTicks.end();
                 (it != itEnd) && (_iCurTickStartTime > it->first);
                 ++it, ++uiProgressive)
             {
@@ -1225,13 +1218,13 @@ void CWorldTicker::ProcessCharPeriodicTicks()
                 if (!pChar->_CanTick() || pChar->_IsBeingDeleted())
                     continue;
 
-                _vCharsTicksBuffer.emplace_back(pChar);
+                _vPeriodicCharsTicksBuffer.emplace_back(pChar);
                 _vIndexMiscBuffer.emplace_back(uiProgressive);
             }
 
 #ifdef DEBUG_LIST_OPS
             ASSERT(sl::ContainerIsSorted(_vIndexMiscBuffer));
-            ASSERT(!sl::UnsortedContainerHasDuplicates(_vCharsTicksBuffer));
+            ASSERT(!sl::UnsortedContainerHasDuplicates(_vPeriodicCharsTicksBuffer));
             ASSERT(!sl::SortedContainerHasDuplicates(_vIndexMiscBuffer));
 #endif
             EXC_CATCHSUB("");
@@ -1240,18 +1233,18 @@ void CWorldTicker::ProcessCharPeriodicTicks()
         {
             EXC_TRYSUB("Delete from List");
             // Erase in chunks, call erase the least times possible.
-            sl::sortedVecRemoveElementsByIndices(_vCharTicks, _vIndexMiscBuffer);
+            sl::sortedVecRemoveElementsByIndices(_vPeriodicCharsTicks, _vIndexMiscBuffer);
             EXC_CATCHSUB("DeleteFromList");
 
             _vIndexMiscBuffer.clear();
         }
 
-        // Done working with _vCharTicks, we don't need the lock from now on.
+        // Done working with _vPeriodicCharsTicks, we don't need the lock from now on.
     }
 
     {
         EXC_TRYSUB("Char Periodic Ticks Loop");
-        for (CChar* pChar : _vCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
+        for (CChar* pChar : _vPeriodicCharsTicksBuffer)    // Loop through all msecs stored, unless we passed the timestamp.
         {
             pChar->_iTimePeriodicTick = 0;
             if (pChar->OnTickPeriodic())
@@ -1268,7 +1261,7 @@ void CWorldTicker::ProcessCharPeriodicTicks()
 
     EXC_CATCH;
 
-    _vCharsTicksBuffer.clear();
+    _vPeriodicCharsTicksBuffer.clear();
 }
 
 
@@ -1280,17 +1273,12 @@ void CWorldTicker::Tick()
 
     ProcessServerTickActions();
 
-    /* World ticking (timers) */
-    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
-
     _iCurTickStartTime = CWorldGameTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
 
+    // Items, Chars ... Everything relying on CTimedObject.
     ProcessTimedObjects();
 
-    // ----
-
-    /* Periodic, automatic ticking for every char */
-
+    // Periodic, automatic ticking specific for CChar instances.
     ProcessCharPeriodicTicks();
 
     EXC_CATCH;
