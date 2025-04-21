@@ -9,7 +9,7 @@
 #include "CWorldGameTime.h"
 #include "CWorldTicker.h"
 
-#if defined _DEBUG || defined _NIGHTLY
+#if defined _DEBUG || defined _NIGHTLYBUILD
 #   define DEBUG_CTIMEDOBJ_TIMED_TICKING
 #   define DEBUG_CCHAR_PERIODIC_TICKING
 #   define DEBUG_STATUSUPDATES
