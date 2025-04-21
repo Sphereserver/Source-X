@@ -29,7 +29,7 @@ private:
     {
         MT_CMUTEX_DEF;
     };
-    WorldTickList _vWorldTicks;
+    WorldTickList _vWorldObjsTicks;
     std::vector<CTimedObject*> _vWorldObjsEraseRequests;
     std::vector<TickingTimedObjEntry> _vWorldObjsAddRequests;
     std::vector<TickingTimedObjEntry> _vWorldObjsElementBuffer;

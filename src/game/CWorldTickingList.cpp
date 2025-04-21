@@ -57,9 +57,9 @@ void CWorldTickingList::ClearTickingLists() // static
 {
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vWorldTicks.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vWorldObjsTicks.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._vWorldTicks; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vWorldObjsTicks; auto& elem : cont) {
             DEBUG_ASSERT(elem.second->_fIsInWorldTickAddList == false);
             elem.second->_fIsInWorldTickList = false;
         }
@@ -73,7 +73,7 @@ void CWorldTickingList::ClearTickingLists() // static
             DEBUG_ASSERT(elem->_fIsInWorldTickAddList == false);
         }
 #endif
-        g_World._Ticker._vWorldTicks.clear();
+        g_World._Ticker._vWorldObjsTicks.clear();
         g_World._Ticker._vWorldObjsAddRequests.clear();
         g_World._Ticker._vWorldObjsEraseRequests.clear();
     }

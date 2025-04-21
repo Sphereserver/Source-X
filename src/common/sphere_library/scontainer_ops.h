@@ -62,7 +62,7 @@ bool SortedContainerHasDuplicatesPred(ContT const& cont, PredT const& predicate)
 
 template <ConceptBasicContainer T>
 [[nodiscard]]
-bool UnsortedContainerHasDuplicates(const T& cont) noexcept
+bool UnortedContainerHasDuplicates(const T& cont) noexcept
 {
     for (size_t i = 0; i < cont.size(); ++i) {
         for (size_t j = i + 1; j < cont.size(); ++j) {
@@ -75,7 +75,7 @@ bool UnsortedContainerHasDuplicates(const T& cont) noexcept
 }
 
 template <typename T>
-static void sortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std::vector<size_t>& vecIndicesToRemove)
+static void SortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std::vector<size_t>& vecIndicesToRemove)
 {
     // Erase in chunks, call erase the least times possible.
     if (vecIndicesToRemove.empty())
@@ -152,14 +152,14 @@ static void sortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std:
 }
 
 template <typename T>
-static void unsortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std::vector<T> & vecValuesToRemove)
+static void UnsortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std::vector<T> & vecValuesToRemove)
 {
     if (vecValuesToRemove.empty())
         return;
 
 #ifdef DEBUG_LIST_OPS
-    ASSERT(!sl::UnsortedContainerHasDuplicates(vecMain));
-    ASSERT(!sl::UnsortedContainerHasDuplicates(vecValuesToRemove));
+    ASSERT(!sl::UnortedContainerHasDuplicates(vecMain));
+    ASSERT(!sl::UnortedContainerHasDuplicates(vecValuesToRemove));
 #endif
 
     // Sort valuesToRemove for binary search
@@ -269,10 +269,10 @@ static void sortedVecDifference(
 */
 
 template <typename TPair, typename T>
-static void unsortedVecDifference(
-    std::vector<TPair> const& vecMain,
-    std::vector<T*>    const& vecToRemove,
-    std::vector<TPair>      & vecElemBuffer)
+static void UnsortedVecDifference(
+    std::vector<TPair>      & vecMain,
+    std::vector<TPair>      & vecElemBuffer,
+    std::vector<T*>    const& vecToRemove)
 {
     /*
     // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemove
@@ -343,21 +343,26 @@ static void unsortedVecDifference(
 #ifdef DEBUG_LIST_OPS
     ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
 #endif
+
+    //vecMain = std::move(vecElemBuffer);
+    vecMain.swap(vecElemBuffer);
 }
 
 template <typename TPair, typename T>
-static void sortedVecRemoveAddQueued(
-    std::vector<TPair> &vecMain,
-    std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd,
-    std::vector<TPair> &vecElemBuffer)
+static void SortedVecRemoveAddQueued(
+    std::vector<TPair> &vecMain, std::vector<TPair> &vecElemBuffer,
+    std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd)
 {
 #ifdef DEBUG_LIST_OPS
     ASSERT(sl::ContainerIsSorted(vecMain));
     ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-#endif
 
-    std::sort(vecToAdd.begin(), vecToAdd.end());
-    std::sort(vecToRemove.begin(), vecToRemove.end());
+    ASSERT(sl::ContainerIsSorted(vecToRemove));
+    ASSERT(!sl::SortedContainerHasDuplicates(vecToRemove));
+
+    ASSERT(sl::ContainerIsSorted(vecToAdd));
+    ASSERT(!sl::SortedContainerHasDuplicates(vecToAdd));
+#endif
 
     if (!vecToRemove.empty())
     {
@@ -367,28 +372,23 @@ static void sortedVecRemoveAddQueued(
 
         // TODO: test and benchmark if the approach of the above function (sortedVecRemoveElementsInPlace) might be faster.
         vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() / 2);
+        vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
 
         // TODO: use a sorted algorithm?
-        unsortedVecDifference(vecMain, vecToRemove, vecElemBuffer);
+        UnsortedVecDifference(vecMain, vecElemBuffer, vecToRemove);
+        vecElemBuffer.clear();
 
 #ifdef DEBUG_LIST_OPS
         for (auto& elem : vecToRemove)
         {
-            auto it = std::find_if(vecElemBuffer.begin(), vecElemBuffer.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
+            auto it = std::find_if(vecMain.begin(), vecMain.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
             UnreferencedParameter(it);
-            ASSERT (it == vecElemBuffer.end());
+            ASSERT (it == vecMain.end());
         }
 
-        ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
-        ASSERT(sl::ContainerIsSorted(vecElemBuffer));
-        ASSERT(!sl::SortedContainerHasDuplicates(vecElemBuffer));
+        ASSERT(sl::ContainerIsSorted(vecMain));
+        ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
 #endif
-
-        vecMain.swap(vecElemBuffer);
-
-        //vecMain = std::move(vecElemBuffer);
-        vecElemBuffer.clear();
     }
 
     if (!vecToAdd.empty())
@@ -404,13 +404,17 @@ static void sortedVecRemoveAddQueued(
 
 #ifdef DEBUG_LIST_OPS
         ASSERT(vecElemBuffer.size() == vecMain.size() + vecToAdd.size());
-        ASSERT(sl::ContainerIsSorted(vecElemBuffer));
-        ASSERT(!sl::SortedContainerHasDuplicates(vecElemBuffer));
 #endif
 
         vecMain.swap(vecElemBuffer);
         //vecMain = std::move(vecElemBuffer);
         vecElemBuffer.clear();
+
+#ifdef DEBUG_LIST_OPS
+        ASSERT(sl::ContainerIsSorted(vecMain));
+        ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
+#endif
+
     }
 
     //EXC_CATCH:
