@@ -3089,7 +3089,7 @@ bool CChar::Spell_CastDone()
 				}
 				else
 				{
-					ItemBounce(pItem, false);
+					ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_CREATE_FOOD), pItem->GetName());
 				}
 			}
@@ -3199,12 +3199,16 @@ bool CChar::Spell_CastDone()
 			case SPELL_Animate_Dead:
 			{
 				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
-				CChar *pChar = Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
-				ASSERT(pChar);
-				if (!pChar->RaiseCorpse(pCorpse))
+                if (pCorpse == nullptr)
+                {
+                    SysMessage("That is not a corpse!");
+                    return false;
+                }
+                Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
+                if (!pSummon->RaiseCorpse(pCorpse))
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
-					pChar->Delete();
+                    pSummon->Delete();
 				}
 				break;
 			}

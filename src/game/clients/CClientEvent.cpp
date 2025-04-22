@@ -115,7 +115,7 @@ void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 		if ( !pObj->IsChar() )
 		{
 			CItem *pItem = dynamic_cast<CItem *>(pObj);
-			if (pItem == nullptr || (( pObj->GetBaseID() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
+			if (pItem == nullptr || (( pObj->GetIDCommon() != 0xFAB ) && (!pItem->IsType(IT_DYE_VAT) || !IsSetOF(OF_DyeType))))
 				return;
 
 			if ( wHue < HUE_BLUE_LOW )
@@ -2976,12 +2976,23 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
         return;
     }
 
+    byte bDoorAutoDist = 1;
 	if ( IsTrigUsed(TRIGGER_USEREXTCMD) )
 	{
 		CScriptTriggerArgs Args(pszName);
 		Args.m_iN1 = type;
+
+        if (type == EXTCMD_DOOR_AUTO)
+            Args.m_VarsLocal.SetNumNew("DoorAutoDist", bDoorAutoDist);
+
 		if ( m_pChar->OnTrigger(CTRIG_UserExtCmd, m_pChar, &Args) == TRIGRET_RET_TRUE )
 			return;
+
+        if (type == EXTCMD_DOOR_AUTO)
+        {
+            bDoorAutoDist = (byte)std::clamp(Args.m_VarsLocal.GetKeyNum("DoorAutoDist"), (int64)0, (int64)UO_MAP_VIEW_SIGHT);
+        }
+
 		Str_CopyLimitNull(pszName, Args.m_s1, MAX_TALK_BUFFER);
 	}
 
@@ -3076,7 +3087,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			char iCharZ = pt.m_z;
 
 			pt.Move(m_pChar->m_dirFace);
-			auto Area = CWorldSearchHolder::GetInstance(pt, 1);
+            auto Area = CWorldSearchHolder::GetInstance(pt, bDoorAutoDist);
 			for (;;)
 			{
 				CItem *pItem = Area->GetItem();

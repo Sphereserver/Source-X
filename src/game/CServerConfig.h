@@ -87,7 +87,8 @@ enum OF_TYPE
     OF_OWNoDropCarriedItem          = 0x0400000,     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
     OF_AllowContainerInsideContainer = 0x0800000,    //Allow containers inside other containers even if they are heavier than the container being inserted into.
     OF_VendorStockLimit              = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
-    OF_EnableGuildAlignNotoriety     = 0x02000000    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_EnableGuildAlignNotoriety     = 0x02000000,    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_NoDclickEquip                 = 0x04000000    // If enabled, double-click does not equip items.
 };
 
 /**
@@ -410,6 +411,7 @@ public:
 	uint _uiOptionFlags;		// Option Flags.
     uint _uiAreaFlags;		    // Area Flags.
     bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
+    bool m_iBounceMessage;      // Display more item bounce messages.
     int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
 	int64 m_iWoolGrowthTime;    // how long till wool grows back on sheared sheep, in minutes (stored as milliseconds).
 	int  m_iAttackerTimeout;    // Timeout for an attacker  (stored in seconds, not in milliseconds).

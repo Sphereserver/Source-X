@@ -109,7 +109,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 	CItemBase *pItemDef = pItem->Item_GetDef();
 	bool bIsEquipped = pItem->IsItemEquipped();
-	if (pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer())
+	if (!IsSetOF(OF_NoDclickEquip) && pItemDef->IsTypeEquippable() && !bIsEquipped && pItemDef->GetEquipLayer())
 	{
 		bool fMustEquip = true;
 		if (pItem->IsTypeSpellbook())

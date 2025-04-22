@@ -786,10 +786,10 @@ public:
 
 	// ------------------------------------------------
 
-    bool IsResDisp(byte flag) const;
+    bool IsResDisp(RESDISPLAY_VERSION res) const;
     byte GetResDisp() const;
-    bool SetResDisp(byte res);
-    bool SetGreaterResDisp(byte res);
+    bool SetResDisp(RESDISPLAY_VERSION res);
+    bool SetGreaterResDisp(RESDISPLAY_VERSION res);
 
 	// ------------------------------------------------
 
@@ -797,10 +797,14 @@ public:
 
     virtual PLEVEL_TYPE GetPrivLevel() const override;
     virtual lpctstr GetName() const override;
-	virtual CChar * GetChar() const override
+    virtual CChar * GetChar() override
 	{
 		return m_pChar;
 	}
+    virtual const CChar * GetChar() const override
+    {
+        return m_pChar;
+    }
 
 	virtual void SysMessage( lpctstr pMsg ) const override; // System message (In lower left corner)
 	bool CanSee( const CObjBaseTemplate * pObj ) const;

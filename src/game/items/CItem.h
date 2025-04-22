@@ -607,8 +607,7 @@ protected:
 public:
 	virtual bool _OnTick() override;
 
-	virtual bool _CanTick(bool fParentGoingToSleep = false) const override;
-	//virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+    virtual bool _CanTick() const override;
 	bool _CanHoldTimer() const;
 
     virtual void DupeCopy( const CObjBase * pItem ) override;
@@ -633,7 +632,7 @@ public:
 	CItemBase * Item_GetDef() const noexcept;
 
 	ITEMID_TYPE GetID() const;
-    virtual dword GetBaseID() const override final;
+    virtual dword GetIDCommon() const override final; // The unique index id (will NOT be the same as artwork if outside artwork range).
 	inline ITEMID_TYPE GetDispID() const noexcept {
 		// This is what the item looks like.
 		// May not be the same as the item that defines it's type.

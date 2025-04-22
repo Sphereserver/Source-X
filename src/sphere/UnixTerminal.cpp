@@ -28,6 +28,17 @@ UnixTerminal::~UnixTerminal()
     //_thread_selfTerminateAfterThisTick = true;  // just to be sure
 }
 
+/*
+bool isInputAvailable()
+{
+    fd_set fds;
+    struct timeval tv = {0, 0}; // Non-blocking, immediate return
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv) > 0;
+}
+*/
+
 bool UnixTerminal::isReady()
 {
 	ADDTOCALLSTACK("UnixTerminal::isReady");
@@ -176,6 +187,13 @@ void UnixTerminal::prepare()
 
         if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
             throw CSError(LOGL_WARN, 0, "failed to set terminal attributes");
+    }
+    else
+    {
+//#ifdef _POSIX_VERSION
+        int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+//#endif
     }
 	setbuf(stdin, nullptr);
 #endif

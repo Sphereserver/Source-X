@@ -2,6 +2,7 @@
 /.cache
 /.git
 /.vscode
+/.idea
 *.vshistory*
 /.kdev*
 /.ctagsd
@@ -49,7 +50,6 @@
 *.*project
 *.*workspace
 *.kdev*
-
 
 # Ignore some files in the parent folder
 CMakeCache.txt

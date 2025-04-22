@@ -1007,7 +1007,7 @@ int CItem::FixWeirdness()
 						for (CSObjContRec* pObjRec : pTradeCont->GetIterationSafeContReverse())
 						{
 							CItem* pItem = static_cast<CItem*>(pObjRec);
-                            pCharCont->ItemBounce(pItem, false);
+                            pCharCont->ItemBounce(pItem, g_Cfg.m_iBounceMessage);
                         }
                     }
                 }
@@ -1558,7 +1558,13 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 
 	// Is this area too complex ?
 	if ( ! g_Serv.IsLoading())
-		pSector->CheckItemComplexity();
+    {
+        if (pSector->CheckItemComplexity())
+        {
+            g_Log.Event(LOGL_WARN, "Checked while moving to this sector the item '%s' (UID=0x%" PRIx32 ") at P=%s.\n",
+                GetResourceName(), GetUID().GetObjUID(), pt.WriteUsed());
+        }
+    }
 
 	SetTopPoint( pt );
 	if ( fForceFix )
@@ -2140,7 +2146,7 @@ ITEMID_TYPE CItem::GetID() const
 	return pItemDef->GetID();
 }
 
-dword CItem::GetBaseID() const
+dword CItem::GetIDCommon() const
 {
     return GetID();
 }
@@ -2516,7 +2522,7 @@ bool CItem::LoadSetContainer(const CUID& uidCont, LAYER_TYPE layer )
 		}
 	}
 
-	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetBaseID() ));
+    DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword)uidCont, pObjCont->GetIDCommon() ));
 	return false;		// not a container.
 }
 
@@ -3342,7 +3348,17 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			SetUnkZ( s.GetArgCVal() ); // GetEquipLayer()
             break;
 		case IC_LINK:
-			m_uidLink.SetObjUID(s.GetArgDWVal());
+			{
+                CUID uidLink = (CUID)s.GetArgDWVal();
+                if ((dword)uidLink == 0)
+                {
+                    m_uidLink.InitUID();
+                }
+                else
+                {
+                    m_uidLink.SetObjUID(uidLink);
+                }
+            }
             break;
 
 		case IC_FRUIT:	// m_more2
@@ -6092,27 +6108,43 @@ bool CItem::_CanHoldTimer() const
 	return true;
 }
 
-bool CItem::_CanTick(bool fParentGoingToSleep) const
+bool CItem::_CanTick() const
 {
-	ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
+    const bool fCharCont = pCont && pCont->IsChar();
     const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
-	// ATTR_DECAY ignores/overrides fParentGoingToSleep
-	if (fIgnoreCont || (IsAttr(ATTR_DECAY) && !pCont))
-	{
-		return CObjBase::_CanTick(false);
-	}
 
-	// Is it top level or equipped on a Char?
-	if (pCont != nullptr)
+    if (fIgnoreCont)
 	{
-		if (!pCont->IsChar())
-			return false;
-	}
+        if (fCharCont && pCont->IsDisconnected())
+        {
+            const auto pCharCont = static_cast<const CChar*>(pCont);
+            if (pCharCont->Skill_GetActive() != NPCACT_RIDDEN)
+                return false;
 
-	return CObjBase::_CanTick(fParentGoingToSleep);
+            // Check if this ridden npc is ridden by a logged out char, or not.
+            const CChar *pCharOwner = pCharCont->GetOwner();
+            if (!pCharOwner || pCharOwner->IsDisconnected())
+                return false;
+        }
+
+        return CObjBase::_CanTick();
+	}
+    else if (IsAttr(ATTR_DECAY) && !pCont)
+    {
+        // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
+        return CObjBase::_CanTick();
+    }
+    else if (fCharCont && !pCont->CanTick())
+    {
+        // Is it equipped on a Char?
+        return false;
+    }
+
+    return CObjBase::_CanTick();
 
 	EXC_CATCH;
 

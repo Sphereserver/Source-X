@@ -46,7 +46,9 @@ class CWorldSearch
 
     CSObjContRec** _ppCurContObjs;	// Array with a copy of the pointers to the objects inside the sector we are in searching right now.
     CObjBase* _pObj;			// The current object of interest.
-    size_t	_idxObj, _idxObjMax;
+    size_t	_uiCurObjIndex;
+    size_t _uiObjArrayCapacity;
+    size_t _uiObjArraySize;
 
     int		 _iSectorCur;		// What is the current Sector index in m_rectSector
     CSector* _pSectorBase;		// Don't search the center sector 2 times.
@@ -73,6 +75,7 @@ public:
 
 private:
     bool GetNextSector();
+    void LoadSectorObjs(CSObjCont const& pSectorObjList);
 };
 
 struct CWorldSearchHolder

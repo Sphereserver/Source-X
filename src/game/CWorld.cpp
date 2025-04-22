@@ -185,6 +185,9 @@ static lpctstr GetReasonForGarbageCode(int iCode = -1) noexcept
         case 0x4226:
             pStr = "Old Spawn memory item conversion";
             break;
+        case 0x4227:
+            pStr = "Old Spawn memory item conversion (mislinked)";
+            break;
 
 		case 0xFFFF:
 			pStr = "Bad memory allocation";
@@ -408,9 +411,12 @@ void CWorldThread::AddIdleObj(CSObjContRec* obj)
 
 void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
 {
-    const auto servMode = g_Serv.GetServerMode();
-    const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
     // If the world is being destroyed, do not schedule the object for deletion but delete it right away.
+    const auto servMode = g_Serv.GetServerMode();
+    // I can't destroy it while SERVMODE_Loading, because the script parser can't know (without creating a global state holder, TODO) that this
+    //  object was deleted/destroyed. The object pointer will become invalid, and if something uses it, even for calling a method, Sphere will crash.
+    //const bool fDestroy = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
+    const bool fDestroy = (servMode == SERVMODE_Exiting);
 
     if (fDestroy)
     {
@@ -502,6 +508,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 			CItem * pItem = dynamic_cast <CItem*>(pObj);
 			if ( pItem != nullptr && pItem->IsType(IT_EQ_MEMORY_OBJ) )
 			{
+                ReportGarbageCollection(pObj, iResultCode);
 				pObj->Delete();
 				return iResultCode;
 			}

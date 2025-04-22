@@ -20,38 +20,40 @@ function(toolchain_exe_stuff_common)
         -mno-ms-bitfields # it's needed to fix structure packing
     )
 
-    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts})
 
     #-- Apply compiler flags, only the ones specific per build type.
 
-    # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-    set(local_compile_options_extra)
-    if(ENABLED_SANITIZER OR TARGET spheresvr_debug)
-        set(local_compile_options_extra -fno-omit-frame-pointer -fno-inline)
-    endif()
     if(TARGET spheresvr_release)
-        target_compile_options(spheresvr_release PUBLIC -s -O3 ${local_compile_options_extra})
+        target_compile_options(spheresvr_release PUBLIC ${custom_compile_options_release})
     endif()
     if(TARGET spheresvr_nightly)
-        if(ENABLED_SANITIZER)
-            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${local_compile_options_extra})
-        else()
-            target_compile_options(spheresvr_nightly PUBLIC -O3 ${local_compile_options_extra})
-        endif()
+        target_compile_options(spheresvr_nightly PUBLIC ${custom_compile_options_nightly})
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O0 ${local_compile_options_extra})
+        target_compile_options(spheresvr_debug PUBLIC ${custom_compile_options_debug})
     endif()
 
     #-- Store common linker flags.
 
     set(cxx_linker_options_common
         ${list_explicit_linker_options_all}
-        ${CMAKE_EXE_LINKER_FLAGS_EXTRA}
         $<$<BOOL:${RUNTIME_STATIC_LINK}>:
         -static-libstdc++
         -static-libgcc> # no way to statically link against libc? maybe we can on windows?
     )
+
+    #-- Apply linker flags, only the ones specific per build type.
+
+    if(TARGET spheresvr_release)
+        target_link_options(spheresvr_release PUBLIC ${custom_link_options_release})
+    endif()
+    if(TARGET spheresvr_nightly)
+        target_link_options(spheresvr_nightly PUBLIC ${custom_link_options_nightly})
+    endif()
+    if(TARGET spheresvr_debug)
+        target_link_options(spheresvr_debug PUBLIC ${custom_link_options_debug})
+    endif()
 
     #-- Store common define macros.
 

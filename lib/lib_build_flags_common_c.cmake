@@ -23,7 +23,11 @@ elseif(NOT MSVC)
         -pipe
         -fexceptions
         -fnon-call-exceptions
-        -O3
+        -O3 # -Os saves ~200 kb, probably not worth losing some performance for that amount...
+        # Place each function and variable into its own section, allowing the linker to remove unused ones.
+        #-ffunction-sections
+        #-fdata-sections
+        #-flto # Also needed to benefit the most from the two flags above.
         $<$<BOOL:${ENABLED_SANITIZER}>:-ggdb3>
     )
 
