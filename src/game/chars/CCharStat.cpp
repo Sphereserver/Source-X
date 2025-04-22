@@ -797,7 +797,7 @@ void CChar::Stat_StrCheckEquip()
 		if (!CanEquipStr(pItem))
 		{
 			SysMessagef("%s %s.", g_Cfg.GetDefaultMsg(DEFMSG_EQUIP_NOT_STRONG_ENOUGH), pItem->GetName());
-			ItemBounce(pItem, false);
+			ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 		}
 	}
 }

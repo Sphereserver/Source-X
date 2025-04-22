@@ -3089,7 +3089,7 @@ bool CChar::Spell_CastDone()
 				}
 				else
 				{
-					ItemBounce(pItem, false);
+					ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_CREATE_FOOD), pItem->GetName());
 				}
 			}

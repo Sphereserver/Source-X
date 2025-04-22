@@ -4011,4 +4011,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Fixed: when using the ini setting ItemTimers=1 (enabling items to tick even if inside a container), the items kept ticking even after a char logout.
 - Fixed: when using the ini setting ItemTimers=1, items ticked on npcs ridden by a disconnected char.
 
-
+18-04-2025, Mulambo
+- Added ini settings:
+	// Display more bounce messages when drinking potions, fishing, crafting etc. (Old sphere behaviour).
+    VerboseItemBounce=0

@@ -1007,7 +1007,7 @@ int CItem::FixWeirdness()
 						for (CSObjContRec* pObjRec : pTradeCont->GetIterationSafeContReverse())
 						{
 							CItem* pItem = static_cast<CItem*>(pObjRec);
-                            pCharCont->ItemBounce(pItem, false);
+                            pCharCont->ItemBounce(pItem, g_Cfg.m_iBounceMessage);
                         }
                     }
                 }
