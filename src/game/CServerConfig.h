@@ -87,7 +87,8 @@ enum OF_TYPE
     OF_OWNoDropCarriedItem          = 0x0400000,     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
     OF_AllowContainerInsideContainer = 0x0800000,    //Allow containers inside other containers even if they are heavier than the container being inserted into.
     OF_VendorStockLimit              = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
-    OF_EnableGuildAlignNotoriety     = 0x02000000    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_EnableGuildAlignNotoriety     = 0x02000000,    // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_NoDclickEquip                 = 0x04000000    // If enabled, double-click does not equip items.
 };
 
 /**
@@ -174,7 +175,8 @@ enum REVEALFLAGS_TYPE
     REVEALF_SNOOPING             = 0x0040,    // Do not reveal while a character snooping.
     REVEALF_STEALING             = 0x0080,    // Do not reveal while a character stealing.
     REVEALF_STEALING_SUCCESS     = 0x0100,    // Reveal if stealing successfully finished.
-    REVEALF_STEALING_FAIL        = 0x0200     // Reveal if stealing failed.
+    REVEALF_STEALING_FAIL        = 0x0200,    // Reveal if stealing failed.
+    REVEALF_ONHORSE              = 0x0400     // Reveal if on horse
 };
 
 enum EMOTEFLAGS_TYPE
@@ -304,6 +306,7 @@ public:
 	int  m_iWordsOfPowerFont;   // Font used for Words Of Power.
 	bool m_fWordsOfPowerPlayer; // Words of Power for players.
 	bool m_fWordsOfPowerStaff;  // Words of Power for staff.
+    TALKMODE_TYPE m_iWordsOfPowerTalkMode; // Walk mode used for Words Of Power.
 	bool m_fEquippedCast;       // Allow casting while equipped.
     bool m_fManaLossAbort;      // Lose mana when spell casting aborted.
     bool m_fManaLossFail;       // Lose mana when spell casting failed.
@@ -410,6 +413,7 @@ public:
 	uint _uiOptionFlags;		// Option Flags.
     uint _uiAreaFlags;		    // Area Flags.
     bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
+    bool m_iBounceMessage;      // Display more item bounce messages.
     int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
 	int64 m_iWoolGrowthTime;    // how long till wool grows back on sheared sheep, in minutes (stored as milliseconds).
 	int  m_iAttackerTimeout;    // Timeout for an attacker  (stored in seconds, not in milliseconds).

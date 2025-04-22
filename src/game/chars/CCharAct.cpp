@@ -3720,8 +3720,8 @@ CItem* CChar::Horse_GetValidMountItem()
 			// Assume pMountItem->m_itFigurine.m_ID is correct?
 
 			g_Log.EventWarn("Mount (UID=0%x, id=0%x '%s'): Fixed mislinked figurine with UID=ACTARG1=0%x, id=0%x '%s'\n",
-				(dword)GetUID(), GetBaseID(), GetName(),
-				(dword)(pMountItem->GetUID()), pMountItem->GetBaseID(), pMountItem->GetName());
+                (dword)GetUID(), GetIDCommon(), GetName(),
+                (dword)(pMountItem->GetUID()), pMountItem->GetIDCommon(), pMountItem->GetName());
 		}
 
 		return pMountItem;
@@ -3842,8 +3842,8 @@ CItem* CChar::Horse_GetValidMountItem()
 			pMountItem->m_itFigurine.m_ID = GetID();
 
 			g_Log.EventWarn("Mount (UID=0%x, id=0%x '%s'): Fixed mount item (mount item UID=ACTARG1=0%x) with UID=0%x, id=0%x '%s'\n",
-				(dword)GetUID(), GetBaseID(), GetName(), (dword)m_atRidden.m_uidFigurine,
-				(dword)(pMountItem->GetUID()), pMountItem->GetBaseID(), pMountItem->GetName());
+                (dword)GetUID(), GetIDCommon(), GetName(), (dword)m_atRidden.m_uidFigurine,
+                (dword)(pMountItem->GetUID()), pMountItem->GetIDCommon(), pMountItem->GetName());
 
 			lpctstr ptcFixString;
 			switch (iFixCode)
@@ -3862,7 +3862,7 @@ CItem* CChar::Horse_GetValidMountItem()
     if (iFailureCode)
     {
 		g_Log.EventError("Mount (UID=0%x, id=0%x '%s'): Can't auto-fix invalid mount item (mount item UID=ACTARG1=0%x)'\n",
-			(dword)GetUID(), GetBaseID(), GetName(), (dword)m_atRidden.m_uidFigurine);
+            (dword)GetUID(), GetIDCommon(), GetName(), (dword)m_atRidden.m_uidFigurine);
 
         lpctstr ptcFailureString;
         switch (iFailureCode)
@@ -4007,7 +4007,7 @@ bool CChar::Horse_UnMount()
 			return false;
 	}
 
-	if (pMountItem->GetBaseID() == ITEMID_SHIP_PILOT)
+    if (pMountItem->GetIDCommon() == ITEMID_SHIP_PILOT)
 	{
 		CItem *pShip = pMountItem->m_uidLink.ItemFind();
         if (pShip)
@@ -4819,6 +4819,9 @@ void CChar::CheckRevealOnMove()
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
 		OnTrigger(CTRIG_StepStealth, this);
 
+    if (g_Cfg.m_iRevealFlags & REVEALF_ONHORSE && IsStatFlag(STATF_ONHORSE))
+        Reveal();
+
 	m_StepStealth -= IsStatFlag(STATF_FLY|STATF_HOVERING) ? 2 : 1;
 	if ( m_StepStealth <= 0 )
 		Reveal();
@@ -4912,7 +4915,7 @@ TRIGRET_TYPE CChar::CheckLocationEffects(bool fStanding)
         {
             if (_uiRecursingItemStep >= _kuiRecursingItemStepLimit)
             {
-                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingStepLimit);
+                g_Log.EventError("Calling recursively @ITEMSTEP for more than %u times. Skipping trigger call.\n", _kuiRecursingItemStepLimit);
             }
             else
             {
@@ -5769,18 +5772,21 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_CanTick(bool fParentGoingToSleep) const
+bool CChar::_CanTick() const
 {
-	ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
 	EXC_TRY("Can tick?");
 
-	if (IsDisconnected() && (Skill_GetActive() != NPCACT_RIDDEN))
+    if (IsDisconnected())
 	{
-		// mounted horses can still get a tick.
+        // mounted horses could still get a tick, even if their disconnected body is placed in a sector now sleeping.
+        if (Skill_GetActive() != NPCACT_RIDDEN)
+            return true;
+
 		return false;
 	}
 
-	return CObjBase::_CanTick(fParentGoingToSleep);
+    return CObjBase::_CanTick();
 
 	EXC_CATCH;
 
@@ -5796,7 +5802,8 @@ void CChar::_GoAwake()
 
 	CWorldTickingList::AddCharPeriodic(this, false);
 
-	_SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+    if (!_IsTimerSet())
+        _SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
 }
 
 void CChar::_GoSleep()
@@ -5821,21 +5828,33 @@ bool CChar::_OnTick()
     EXC_TRY("Tick");
 
 	EXC_SET_BLOCK("Can Tick?");
-	if ((_IsSleeping() || IsDisconnected()) && (Skill_GetActive() != NPCACT_RIDDEN))
+
+    // This check shouldn't be needed, since it's already done in _CanTick, but we'll leave it here for now until further tests.
+    if (_IsSleeping() || IsDisconnected())
 	{
-		// mounted horses can still get a tick.
-		return true;
+        // In this cases, only mounted horses can still get a tick.
+        if (Skill_GetActive() != NPCACT_RIDDEN)
+            return true;
 	}
-	if (!_CanTick())
+
+    if (!_CanTick())
 	{
+        // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.
+        // Among the reasons why i can't tick, though, there cannot be being in a sleeping state: when a char goes into sleeping state
+        //  it should also be removed from the list (it happens in _GoSleep()).
 		ASSERT(!_IsSleeping());
+
 		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
+            // Do not make the char sleep right when it enters a sleeping sector. Doing this
+            //  will lead to an accumulation of npcs at the edge of the new sector.
+
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();
 			return true;
 		}
 	}
+    ASSERT(!_IsSleeping());
 
 	EXC_SET_BLOCK("Components Tick");
 	/*

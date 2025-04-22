@@ -64,32 +64,32 @@ bool PacketCreate::onReceive(CNetState* net)
 	skip(9); // 4=pattern1, 4=pattern2, 1=kuoc
 	readStringASCII(charname, MAX_NAME_SIZE);
 	skip(2); // 0x00
-	dword flags = readInt32();
+    const dword flags = readInt32();
 	skip(8); // unk
-	PROFESSION_TYPE prof = static_cast<PROFESSION_TYPE>(readByte());
+    const auto prof = static_cast<PROFESSION_TYPE>(readByte());
 	skip(15); // 0x00
-	byte race_sex_flag = readByte();
-	byte strength = readByte();
-	byte dexterity = readByte();
-	byte intelligence = readByte();
+    const byte race_sex_flag = readByte();
+    const byte strength = readByte();
+    const byte dexterity = readByte();
+    const byte intelligence = readByte();
 	skill1 = (SKILL_TYPE)readByte();
 	skillval1 = readByte();
 	skill2 = (SKILL_TYPE)readByte();
 	skillval2 = readByte();
 	skill3 = (SKILL_TYPE)readByte();
 	skillval3 = readByte();
-	HUE_TYPE hue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE hairid = (ITEMID_TYPE)(readInt16());
-	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE beardid = (ITEMID_TYPE)(readInt16());
-	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
+    const auto hue = (HUE_TYPE)(readInt16());
+    const auto hairid = (ITEMID_TYPE)(readInt16());
+    const auto hairhue = (HUE_TYPE)(readInt16());
+    const auto beardid = (ITEMID_TYPE)(readInt16());
+    const auto beardhue = (HUE_TYPE)(readInt16());
 	skip(1); // shard index
-	byte startloc = readByte();
+    const byte startloc = readByte();
 	skip(8); // 4=slot, 4=ip
-	HUE_TYPE shirthue = (HUE_TYPE)(readInt16());
-	HUE_TYPE pantshue = (HUE_TYPE)(readInt16());
+    const auto shirthue = (HUE_TYPE)(readInt16());
+    const auto pantshue = (HUE_TYPE)(readInt16());
 
-	bool isFemale = (race_sex_flag % 2) != 0; // Even=Male, Odd=Female (rule applies to all clients)
+    const bool isFemale = (race_sex_flag % 2) != 0; // Even=Male, Odd=Female (rule applies to all clients)
 	RACE_TYPE rtRace = RACETYPE_HUMAN; // Human
 
 	// determine which race the client has selected
@@ -133,17 +133,20 @@ bool PacketCreate::onReceive(CNetState* net)
 	}
 
 	// validate race against resdisp
-	byte resdisp = net->getClient()->GetAccount() != nullptr? net->getClient()->GetAccount()->GetResDisp() : (byte)RDS_T2A;
-	if (resdisp < RDS_ML) // prior to ML, only human
-	{
-		if (rtRace >= RACETYPE_ELF)
-			rtRace = RACETYPE_HUMAN;
-	}
-	else if (resdisp < RDS_SA) // prior to SA, only human and elf
-	{
-		if (rtRace >= RACETYPE_GARGOYLE)
-			rtRace = RACETYPE_HUMAN;
-	}
+    {
+        const CAccount *pAccount = net->getClient()->GetAccount();
+        const RESDISPLAY_VERSION resdisp = pAccount ? pAccount->GetResDisp() : RDS_T2A;
+        if (resdisp < RDS_ML) // prior to ML, only human
+        {
+            if (rtRace >= RACETYPE_ELF)
+                rtRace = RACETYPE_HUMAN;
+        }
+        else if (resdisp < RDS_SA) // prior to SA, only human and elf
+        {
+            if (rtRace >= RACETYPE_GARGOYLE)
+                rtRace = RACETYPE_HUMAN;
+        }
+    }
 
 	return doCreate(net, charname, isFemale, rtRace,
 		strength, dexterity, intelligence, prof,
@@ -714,7 +717,7 @@ bool PacketVendorBuyReq::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CChar* buyer = client->GetChar();
+    CChar* buyer = client->GetChar();
 	if (buyer == nullptr)
 		return false;
 
@@ -842,7 +845,7 @@ bool PacketMapEdit::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CChar* character = client->GetChar();
+    CChar* character = client->GetChar();
 	if (character == nullptr)
 		return false;
 
@@ -1156,7 +1159,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CChar* character = client->GetChar();
+    CChar* character = client->GetChar();
 	if (character == nullptr)
 		return false;
 
@@ -1848,7 +1851,7 @@ bool PacketVendorSellReq::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	const CChar* seller = client->GetChar();
+    CChar* seller = client->GetChar();
 	if (seller == nullptr)
 		return false;
 

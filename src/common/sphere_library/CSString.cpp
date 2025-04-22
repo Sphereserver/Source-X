@@ -9,7 +9,7 @@
 #include <cstdio>   // for vsnprintf
 #endif
 
-#define	STRING_DEFAULT_SIZE	42
+#define	CSTRING_DEFAULT_SIZE	42
 
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
@@ -67,7 +67,7 @@ CSString::CSString(const CSString& s) :
 // private
 void CSString::Init()
 {
-	m_iMaxLength = STRING_DEFAULT_SIZE;
+    m_iMaxLength = CSTRING_DEFAULT_SIZE;
 #ifdef DEBUG_STRINGS
 	gMemAmount += m_iMaxLength;
 #endif
@@ -117,7 +117,7 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
         }
         else
         {
-            //m_iMaxLength = iNewLength + (STRING_DEFAULT_SIZE >> 1);   // Probably too much...
+            //m_iMaxLength = iNewLength + (CSTRING_DEFAULT_SIZE >> 1);   // Probably too much...
             m_iMaxLength = (iNewLength * 3) >> 1;   // >> 2 is equal to doing / 2
         }
 

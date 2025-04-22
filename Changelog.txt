@@ -3916,7 +3916,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: @PetRelease trigger work like @petdesert and return 1 to prevent the pet from being released.
 
 27-11-2024, canerksk
-- Added: All skills that have a distance query have been adjusted to take the RANGE values ​​of that skill.
+- Added: All skills that have a distance query have been adjusted to take the RANGE values of that skill.
 	All skills to be used in RANGE;
 		BLACKSMITHING
 		MINING // It was added before.
@@ -3957,10 +3957,69 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	LOCAL.ReflectDamage (r/w) = The amount of damage that will be reflected to this other party
 	LOCAL.ReduceDamage (r/w) = Amount to be deducted from damage received
 	LOCAL.DamageType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
-	NOTE; 
+	NOTE:
 		1. If no ReflectDamage or ReduceDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
 		2. No damage amount can be less than 1.
 
-04-12-2024, canerksk
-- Changed: Added new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED
+4-12-2024, canerksk
+- Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel.
+
+6-12-2024, canerksk
+- Added: LOCAL.WOPTalkMode in @SpellCast trigger and ini setting WOPTalkMode.
+    In some clients, different operations can be performed based on this. For example, if this talk mode was sent from Sphere as TALKMODE_SPELL, the operation is performed according to the client version. The possibility of changing the talk mode according to the client version used is now provided. By default, TALKMODE_SPELL.
+    
+    Default talk mode: TALKMODE_SPELL = 10
+    
+    Sphere.ini:
+    WOPTalkMode = 0/14
+    
+    Trigger:
+    @SpellCast
+    Local.WOPTalkMode = 0/14
+    
+    TALKMODE_SAY        = 0  // A character speaking.
+    TALKMODE_SYSTEM     = 1  // Display as system prompt.
+    TALKMODE_EMOTE      = 2  // *smiles* at object (client shortcut: :+space).
+    TALKMODE_ITEM       = 6  // Text labeling an item. Preceded by "You see".
+    TALKMODE_NOSCROLL   = 7  // As a status message. Does not scroll (as reported by the packet guides).
+    TALKMODE_WHISPER    = 8  // Only those close can hear. (client shortcut: ;+space).
+    TALKMODE_YELL       = 9  // Can be heard 2 screens away. (client shortcut: !+space).
+    TALKMODE_SPELL      = 10 // Used by spells.
+    TALKMODE_GUILD      = 13 // Used by guild chat (client shortcut: \).
+    TALKMODE_ALLIANCE   = 14 // Used by alliance chat (client shortcut: shift+\).
+
+08-01-2025, DavideRei
+- Fixed: NPC FLEE action didn't work because it was using action target (empty) instead of fight target
+
+28-02-2025, canerksk
+- Added: Add OpenDoorMacro and World Search Distance as Local Variables to @UserExtCmd Trigger
+	LOCAL.DoorAutoDist <distance> (R/W). Default Distance = 2.
+	eg;
+	@UserExtCmd
+	Serv.Log <DLOCAL.DoorAutoDist>
+	Local.DoorAutoDist=10
+
+28-02-2025, cbnolok
+- Fixed: failing assertion if targeting a non-corpse object when casting Animate Dead spell.
+
+09-03-2025, cbnolok
+- Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (partial fix for Issue #1249).
+  Also, stamina wasn't consumed, thus NPCs had no limit in placing those items.
+
+11-03-2025, cbnolok
+- Added: log message with informations about the newly created object, if just placed in a sector exceeding complexity threshold.
+
+15-03-2025, cbnolok
+- Fixed: when using the ini setting ItemTimers=1 (enabling items to tick even if inside a container), the items kept ticking even after a char logout.
+- Fixed: when using the ini setting ItemTimers=1, items ticked on npcs ridden by a disconnected char.
+
+22-04-2025, Mulambo
+- Added ini settings:
+	// Display more bounce messages when drinking potions, fishing, crafting etc. (Old sphere behaviour).
+    VerboseItemBounce=0
+
+22-04-2024, canerksk
+- Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
+- Added: New ini RevealFlag setting REVEALF_ONHORSE, to allow or disallow stealth walking if you are on a mount.
+- Added: new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED.
 	In the old behavior (55i/55r/56b/56c) we were not guilty when we hit a murderer. Now when we attack a criminal or murderer we are guilty towards that person. An ini setting option has been added for this behavior. Although this is a normal behavior in OSI, it can be perceived as a problem since not every server designs games like OSI.

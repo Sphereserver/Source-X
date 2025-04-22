@@ -58,6 +58,7 @@ bool CSQLite::IsOpen()
 
 int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 {
+    ADDTOCALLSTACK("CSQLite::QuerySQL (lpctstr,CVarDefMap)");
 	mapQueryResult.Clear();
 	mapQueryResult.SetNumNew("NUMROWS", 0);
 
@@ -67,8 +68,8 @@ int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 
 	if (retTable.m_pTable->GetRowCount())
 	{
-		int iRows = retTable.m_pTable->GetRowCount();
-		int iCols = retTable.m_pTable->GetColCount();
+        const int iRows = retTable.m_pTable->GetRowCount();
+        const int iCols = retTable.m_pTable->GetColCount();
 		mapQueryResult.SetNum("NUMROWS", iRows);
 		mapQueryResult.SetNum("NUMCOLS", iCols);
 
@@ -94,80 +95,28 @@ err_and_ret:
 
 SQLiteTable CSQLite::QuerySQL( lpctstr strSQL )
 {
+    ADDTOCALLSTACK("CSQLite::QuerySQL (lpctstr)");
 	if (!IsOpen()) {
 		m_iLastError=SQLITE_ERROR;
 		return SQLiteTable();
 	}
 
-	char ** retStrings = nullptr;
-	char * errmsg = nullptr;
-	int iRows=0, iCols=0;
-
-	int iErr=sqlite3_get_table(m_sqlite3, UTF8MBSTR(strSQL), &retStrings,
-		&iRows, &iCols, &errmsg);
-
-	if (iErr!=SQLITE_OK)
-	{
-		m_iLastError=iErr;
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "SQLite query \"%s\" failed. Error: %d\n", strSQL, iErr);
-	}
-
-	sqlite3_free(errmsg);
-
-	SQLiteTable retTable;
-
-	if (iRows>0)
-        retTable.m_iPos=0;
-
-	retTable.m_iCols=iCols;
-	retTable.m_iRows=iRows;
-	retTable.m_strlstCols.reserve(iCols);
-
-	int iPos=0;
-
-	for (; iPos<iCols; ++iPos)
-	{
-		retTable.m_strlstCols.emplace_back(stdvstring());
-
-		if (retStrings[iPos])
-			ConvertUTF8ToVString( retStrings[iPos], retTable.m_strlstCols.back() );
-		else
-            retTable.m_strlstCols.back().emplace_back('\0');
-	}
-
-	retTable.m_lstRows.resize(iRows);
-	for (int iRow=0; iRow<iRows; ++iRow)
-	{
-		retTable.m_lstRows[iRow].reserve(iCols);
-		for (int iCol=0; iCol<iCols; ++iCol)
-		{
-			retTable.m_lstRows[iRow].emplace_back(stdvstring());
-
-			if (retStrings[iPos])
-				ConvertUTF8ToVString( retStrings[iPos], retTable.m_lstRows[iRow].back() );
-			else
-                retTable.m_lstRows[iRow].back().emplace_back('\0');
-
-			++iPos;
-		}
-	}
-
-	sqlite3_free_table(retStrings);
-    m_iLastError=SQLITE_OK;
-
-	return retTable;
+    SQLiteTablePtr ret(QuerySQLPtr(strSQL));
+    const SQLiteTable tableCopy(std::move(*ret.m_pTable));
+    return tableCopy;
 }
 
 SQLiteTablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 {
+    ADDTOCALLSTACK("CSQLite::QuerySQLPtr");
 	if (!IsOpen())
     {
 		m_iLastError=SQLITE_ERROR;
 		return nullptr;
 	}
 
-	char ** retStrings = nullptr;
-	char * errmsg = nullptr;
+    lptstr *retStrings = nullptr;
+    lptstr errmsg = nullptr;
 	int iRows=0, iCols=0;
 
 	int iErr=sqlite3_get_table(m_sqlite3, UTF8MBSTR(strSQL), &retStrings,
@@ -188,53 +137,57 @@ SQLiteTablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 
 	retTable->m_iCols=iCols;
 	retTable->m_iRows=iRows;
-	retTable->m_strlstCols.reserve(iCols);
+    retTable->m_strlstCols.resize(iCols);
 
 	int iPos=0;
 
 	for (; iPos<iCols; ++iPos)
 	{
-		retTable->m_strlstCols.emplace_back(stdvstring());
-
-		if (retStrings[iPos])
-			ConvertUTF8ToVString( retStrings[iPos], retTable->m_strlstCols.back() );
+        stdvtstring &curColRef = retTable->m_strlstCols[iPos];
+        lpctstr curStringPtr = retStrings[iPos];
+        if (curStringPtr)
+            ConvertUTF8ToVString( curStringPtr, &curColRef );
 		else
-            retTable->m_strlstCols.back().emplace_back('\0');
+            curColRef.emplace_back('\0');
 	}
 
 	retTable->m_lstRows.resize(iRows);
 	for (int iRow=0; iRow<iRows; ++iRow)
 	{
-		retTable->m_lstRows[iRow].reserve(iCols);
+        SQLiteTable::row &curRowRef = retTable->m_lstRows[iRow];
+        curRowRef.resize(iCols);
 		for (int iCol=0; iCol<iCols; ++iCol)
 		{
-			retTable->m_lstRows[iRow].emplace_back(stdvstring());
-
-			if (retStrings[iPos])
-				ConvertUTF8ToVString( retStrings[iPos], retTable->m_lstRows[iRow].back() );
+            stdvtstring &curColRef = curRowRef[iCol];
+            lpctstr curStringPtr = retStrings[iPos];
+            if (curStringPtr)
+                ConvertUTF8ToVString( curStringPtr, &curColRef );
 			else
-                retTable->m_lstRows[iRow].back().emplace_back('\0');
+                curColRef.emplace_back('\0');
 
 			++iPos;
 		}
 	}
+
 	sqlite3_free_table(retStrings);
     m_iLastError=SQLITE_OK;
 
 	return SQLiteTablePtr(retTable);
 }
 
-void CSQLite::ConvertUTF8ToVString( const char * strInUTF8MB, stdvstring & strOut )
+void CSQLite::ConvertUTF8ToVString(const char * strInUTF8MB, stdvtstring *pStrOut )
 {
-    const size_t len = Str_LengthUTF8(strInUTF8MB);
-    strOut.resize(len + 1, 0);
-    lptstr ptcStrOut = strOut.data();
-	ASSERT(ptcStrOut);
-    UTF8MBSTR::ConvertUTF8ToString(strInUTF8MB, ptcStrOut);
+    ADDTOCALLSTACK("CSQLite::ConvertUTF8ToVString");
+    ASSERT(pStrOut);
+
+    const size_t len = Str_UTF8CharCount(strInUTF8MB);
+    pStrOut->resize(len + 1, 0);
+    UTF8MBSTR::ConvertUTF8ToString(strInUTF8MB, pStrOut);
 }
 
 int CSQLite::ExecuteSQL( lpctstr strSQL )
 {
+    ADDTOCALLSTACK("CSQLite::ExecuteSQL");
 	if (!IsOpen())
     {
 		m_iLastError=SQLITE_ERROR;
@@ -258,11 +211,14 @@ int CSQLite::ExecuteSQL( lpctstr strSQL )
 
 int CSQLite::IsSQLComplete( lpctstr strSQL )
 {
+    ADDTOCALLSTACK("CSQLite::IsSQLComplete");
 	return sqlite3_complete( UTF8MBSTR(strSQL) );
 }
 
 int CSQLite::ImportDB(lpctstr strInFileName)
 {
+    ADDTOCALLSTACK("CSQLite::ImportDB");
+
     if (!CSFile::FileExists(strInFileName))
         return SQLITE_CANTOPEN;
     //if (IsStrEmpty(strTable))
@@ -327,6 +283,8 @@ clean_and_ret:
 
 int CSQLite::ExportDB(lpctstr strOutFileName)
 {
+    ADDTOCALLSTACK("CSQLite::ExportDB");
+
     int iErr;
 
     sqlite3 *out_db;

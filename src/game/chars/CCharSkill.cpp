@@ -697,7 +697,7 @@ bool CChar::Skill_MakeItem_Success()
 			for ( uint n = 1; n < m_atCreate.m_dwAmount; ++n )
 			{
 				CItem *ptItem = CItem::CreateTemplate(m_atCreate.m_iItemID, nullptr, this);
-				ItemBounce(ptItem, false);
+				ItemBounce(ptItem, g_Cfg.m_iBounceMessage);
 			}
 		}
 	}
@@ -1572,7 +1572,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
         }
         SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_FISHING_SUCCESS), pItem->GetName());
         if (m_atResource.m_dwBounceItem)
-            ItemBounce(pItem, false);
+            ItemBounce(pItem, g_Cfg.m_iBounceMessage);
         else
             pItem->MoveToCheck(GetTopPoint(), this);	// put at my feet.
         return 0;
@@ -2691,8 +2691,11 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 		{
 			if ( IsClientActive() )
 				GetClientActive()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
+
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 				Sound( 0x0f9 );
+
+            SysMessageDefault( DEFMSG_MEDITATION_SUCCESS );
 		}
 		++m_atTaming.m_dwStrokeCount;
 

@@ -4,19 +4,7 @@ message(STATUS "Checking available compiler flags...")
 if(NOT MSVC)
     message(STATUS "-- Compilation options:")
 
-    # Compiler option flags.
-    list(
-        APPEND
-        compiler_options_base
-        -pthread
-        -fexceptions
-        -fnon-call-exceptions
-        -pipe
-        -ffast-math
-    )
-    list(APPEND base_compiler_options_warning -Werror;-Wall;-Wextra;-Wpedantic)
-
-    # Linker flags (warnings)
+    # Linker flags (warnings).
     #check_cxx_compiler_flag("-Wl,--fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V1)
     #check_cxx_compiler_flag("-Wl,-fatal_warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V2)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -29,6 +17,7 @@ if(NOT MSVC)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler option flags. Expected to work on GCC but not Clang, at the moment.
+    check_cxx_compiler_flag("-fvisibility=hidden" COMP_HAS_FVISIBILITY_HIDDEN)
     check_cxx_compiler_flag("-fno-expensive-optimizations" COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
 
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
@@ -211,6 +200,14 @@ if(NOT MSVC)
     endif()
     if(COMP_LINKER_HAS_FATAL_WARNINGS_V2)
         list(APPEND checked_linker_options_all "-Wl,-fatal_warnings")
+    endif()
+
+    #if(COMP_HAS_LTO)
+    #    list(APPEND checked_compiler_options "-flto")
+    #endif()
+
+    if(COMP_HAS_FVISIBILITY_HIDDEN)
+        list(APPEND checked_compiler_options "-fvisibility=hidden")
     endif()
 
     if(COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
@@ -456,8 +453,6 @@ if(NOT MSVC)
     list(
         APPEND
         list_explicit_compiler_options_all
-        ${compiler_options_base}
-        ${base_compiler_options_warning}
         ${checked_compiler_options}
         ${checked_compiler_options_asan}
         ${checked_compiler_options_ubsan}
@@ -468,17 +463,13 @@ if(NOT MSVC)
         ${checked_compiler_warnings_disabled}
     )
 
-    list(APPEND list_explicit_linker_options_all ${checked_linker_options_all};-pthread;-dynamic)
-
-    #string(JOIN " " string_checked_compiler_options_all ${list_checked_compiler_options_all})
-    #set(string_checked_compiler_options_all CACHE INTERNAL STRING)
-    set(list_explicit_compiler_options_all CACHE INTERNAL STRING)
-    set(list_explicit_linker_options_all CACHE INTERNAL STRING)
+    list(
+        APPEND
+        list_explicit_linker_options_all
+        ${checked_linker_options_all}
+    )
 
     # --
-
-    message(STATUS "Adding the following base compiler options: ${compiler_options_base}")
-    message(STATUS "Adding the following base compiler warning options: ${base_compiler_options_warning}")
 
     message(STATUS "Adding the following conditional compiler options: ${checked_compiler_options}.")
     if(COMP_HAS_ASAN)
@@ -507,13 +498,12 @@ if(NOT MSVC)
         STATUS
         "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}."
     )
-    message(STATUS "Adding the following linker options: ${list_explicit_linker_options_all}.")
+    message(STATUS "Adding the following conditional linker options: ${checked_linker_options_all}.")
 
 elseif(MSVC)
     list(
         APPEND
         list_explicit_compiler_options_all
-        ${base_compiler_options_msvc}
         ${checked_compiler_options_msvc}
     )
 

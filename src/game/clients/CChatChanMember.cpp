@@ -197,7 +197,7 @@ lpctstr CChatChanMember::GetChatName() const
     ADDTOCALLSTACK("CChatChanMember::GetChatName");
     const CClient *pClient = GetClientActive();
 
-    if (pClient)
+    if (pClient && pClient->GetAccount() && !pClient->GetAccount()->m_sChatName.IsEmpty())
         return(pClient->GetAccount()->m_sChatName);
     return "";
 }

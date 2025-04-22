@@ -31,20 +31,12 @@ function(toolchain_exe_stuff_common)
         # -mno-ms-bitfields is needed to fix structure packing;
         # -pthread unused here? we only need to specify that to the linker?
     )
-    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts} ${CXX_FLAGS_EXTRA})
+    set(cxx_compiler_options_common ${list_explicit_compiler_options_all} ${cxx_local_opts})
 
     #-- Apply compiler flags, only the ones specific per build type.
 
-    # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-    set(local_compile_options_extra)
-    if(ENABLED_SANITIZER OR TARGET spheresvr_debug)
-        set(local_compile_options_extra -fno-omit-frame-pointer -fno-inline)
-    endif()
     if(TARGET spheresvr_release)
-        target_compile_options(
-            spheresvr_release
-            PUBLIC -O3 -flto=full -fvirtual-function-elimination ${local_compile_options_extra}
-        )
+        if(TARGET spheresvr_release)
         #[[
         IF (NOT ${CLANG_USE_GCC_LINKER})
             if (${RUNTIME_STATIC_LINK})
@@ -56,14 +48,7 @@ function(toolchain_exe_stuff_common)
         ]]
     endif()
     if(TARGET spheresvr_nightly)
-        if(ENABLED_SANITIZER)
-            target_compile_options(spheresvr_nightly PUBLIC -ggdb3 -Og ${local_compile_options_extra})
-        else()
-            target_compile_options(
-                spheresvr_nightly
-                PUBLIC -O3 -flto=full -fvirtual-function-elimination ${local_compile_options_extra}
-            )
-        endif()
+        target_compile_options(spheresvr_nightly PUBLIC ${custom_compile_options_nightly})
         #[[
         IF (NOT ${CLANG_USE_GCC_LINKER})
             if (${RUNTIME_STATIC_LINK})
@@ -75,7 +60,7 @@ function(toolchain_exe_stuff_common)
         ]]
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC -ggdb3 -O0)
+        target_compile_options(spheresvr_debug PUBLIC ${custom_compile_options_debug})
         #[[
         IF (NOT ${CLANG_USE_GCC_LINKER})
             if (${RUNTIME_STATIC_LINK})
@@ -89,21 +74,45 @@ function(toolchain_exe_stuff_common)
 
     #-- Store common linker flags.
 
-    set(cxx_linker_options_common ${CMAKE_EXE_LINKER_FLAGS_EXTRA})
+    set(cxx_linker_options_common "")
     if(${CLANG_USE_GCC_LINKER})
         set(cxx_linker_options_common ${list_explicit_linker_options_all})
         if(${RUNTIME_STATIC_LINK})
             set(cxx_linker_options_common ${cxx_linker_options_common} -static-libstdc++ -static-libgcc) # no way to statically link against libc? maybe we can on windows?
         endif()
-#[[
+    #[[
     else ()
         if (${RUNTIME_STATIC_LINK})
             set (cxx_linker_options_common    ${cxx_linker_options_common} /MTd )
         else ()
             set (cxx_linker_options_common    ${cxx_linker_options_common} /MDd )
         endif ()
-]]
+    ]]
     endif()
+
+    #-- Apply linker flags, only the ones specific per build type.
+
+    if(TARGET spheresvr_release)
+        target_link_options(spheresvr_release PUBLIC ${custom_link_options_release})
+    endif()
+    if(TARGET spheresvr_nightly)
+        target_link_options(spheresvr_nightly PUBLIC ${custom_link_options_nightly})
+    endif()
+    if(TARGET spheresvr_debug)
+        target_link_options(spheresvr_debug PUBLIC ${custom_link_options_debug})
+    endif()
+    #if (NOT ${CLANG_USE_GCC_LINKER})
+    #    IF (TARGET spheresvr_release)
+    #        target_link_options ( spheresvr_release    PUBLIC "LINKER:SHELL:" )
+    #    ENDIF ()
+    #    IF (TARGET spheresvr_nightly)
+    #        target_link_options ( spheresvr_nightly    PUBLIC  "LINKER:SHELL:" )
+    #    ENDIF ()
+    #    IF (TARGET spheresvr_debug)
+    #        target_link_options ( spheresvr_debug    PUBLIC "LINKER:/DEBUG" )
+    #    ENDIF ()
+    #endif ()
+
 
     #-- Store common define macros.
 
@@ -135,20 +144,6 @@ function(toolchain_exe_stuff_common)
             target_compile_definitions(spheresvr_debug PUBLIC _HAS_ITERATOR_DEBUGGING=0 _ITERATOR_DEBUG_LEVEL=0)
         endif()
     endif()
-
-    #-- Apply linker options, only the ones specific per build type.
-
-    #if (NOT ${CLANG_USE_GCC_LINKER})
-    #    IF (TARGET spheresvr_release)
-    #        target_link_options ( spheresvr_release    PUBLIC "LINKER:SHELL:" )
-    #    ENDIF ()
-    #    IF (TARGET spheresvr_nightly)
-    #        target_link_options ( spheresvr_nightly    PUBLIC  "LINKER:SHELL:" )
-    #    ENDIF ()
-    #    IF (TARGET spheresvr_debug)
-    #        target_link_options ( spheresvr_debug    PUBLIC "LINKER:/DEBUG" )
-    #    ENDIF ()
-    #endif ()
 
     #-- Now add back the common compiler options, preprocessor macros, linker targets and options.
 

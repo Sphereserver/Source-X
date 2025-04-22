@@ -462,7 +462,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		CItem *pRemovedAmmo = CItem::CreateBase((ITEMID_TYPE)pButte->m_itArcheryButte.m_ridAmmoType.GetResIndex());
 		ASSERT(pRemovedAmmo);
 		pRemovedAmmo->SetAmount((word)pButte->m_itArcheryButte.m_iAmmoCount);
-		ItemBounce(pRemovedAmmo, false);
+		ItemBounce(pRemovedAmmo, g_Cfg.m_iBounceMessage);
 		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_GATHER);
 
 		pButte->m_itArcheryButte.m_ridAmmoType.Clear();
@@ -1104,7 +1104,7 @@ void CChar::Use_Drink( CItem * pItem )
         if (wBottleAmount > 0)
         {
             pBottle->SetAmount(wBottleAmount);
-            ItemBounce(pBottle, false);
+            ItemBounce(pBottle, g_Cfg.m_iBounceMessage);
         }
     }
 }
@@ -1893,7 +1893,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
         case IT_WEAPON_WHIP:
 		case IT_TALISMAN:
 		{
-			if (fLink)
+			if (IsSetOF(OF_NoDclickEquip) || fLink) // If no dclick equip is set, don't equip the item
 				return false;
 
 			return ItemEquip(pItem);

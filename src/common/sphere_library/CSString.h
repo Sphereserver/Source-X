@@ -30,7 +30,7 @@ private:
     /**
 	* @brief Initializes internal data.
 	*
-	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
+    * Allocs CSTRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
 	*/
 	void Init();
 
