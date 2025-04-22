@@ -3652,7 +3652,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 
 bool CItem::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
@@ -3660,8 +3660,8 @@ bool CItem::IsTriggerActive(lpctstr trig) const
         int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.empty());
-    return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
+    ASSERT(!_sRunningTrigger.IsEmpty());
+    return (strcmpi(_sRunningTrigger.GetBuffer(), trig) == 0);
 }
 
 void CItem::SetTriggerActive(lpctstr trig)
@@ -3669,7 +3669,7 @@ void CItem::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.clear();
+        _sRunningTrigger.Clear();
         return;
     }
     int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );

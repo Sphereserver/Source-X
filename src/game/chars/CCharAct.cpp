@@ -5448,7 +5448,7 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 
 bool CChar::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
@@ -5456,8 +5456,8 @@ bool CChar::IsTriggerActive(lpctstr trig) const
         const int iAction = FindTableSorted( trig, CChar::sm_szTrigName, ARRAY_COUNT(CChar::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.empty());
-	return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
+    ASSERT(!_sRunningTrigger.IsEmpty());
+    return (strcmpi(_sRunningTrigger.GetBuffer(), trig) == 0);
 }
 
 void CChar::SetTriggerActive(lpctstr trig)
@@ -5465,7 +5465,7 @@ void CChar::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.clear();
+        _sRunningTrigger.Clear();
         return;
     }
 	const int iAction = FindTableSorted( trig, CChar::sm_szTrigName, ARRAY_COUNT(CChar::sm_szTrigName)-1 );

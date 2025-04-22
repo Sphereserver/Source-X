@@ -19,8 +19,10 @@ class CTimedObject
 public:
     static const char* m_sClassName;
 
+#ifdef MT_ENGINES
 protected:
     MT_CMUTEX_DEF;
+#endif
 
 private:
     int64 _iTimeout;

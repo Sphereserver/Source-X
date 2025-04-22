@@ -92,7 +92,8 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 // -CObjBase stuff
 // Either a player, npc or item.
 
-CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs its virtual inheritance.
+CObjBase::CObjBase( bool fItem ) :
+    _sRunningTrigger(false)
 {
 	++ sm_iCount;
 
@@ -2454,7 +2455,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         {
 			EXC_SET_BLOCK("P or MOVETO");
 			// The "@Click" trigger str should be the same between items and chars...
-			if (0 == _sRunningTrigger.compare(CChar::sm_szTrigName[CTRIG_Click]))
+            if (0 == _sRunningTrigger.Compare(CChar::sm_szTrigName[CTRIG_Click]))
 			{
 				g_Log.EventError("Can't set P in the current trigger. It would cause an infinite loop.\n");
 				return false;
@@ -3637,7 +3638,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 
 bool CObjBase::IsRunningTrigger() const
 {
-	return ((_iRunningTriggerId >= 0) || !_sRunningTrigger.empty());
+    return ((_iRunningTriggerId >= 0) || !_sRunningTrigger.IsEmpty());
 }
 
 bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult)
