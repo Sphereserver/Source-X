@@ -4819,6 +4819,9 @@ void CChar::CheckRevealOnMove()
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
 		OnTrigger(CTRIG_StepStealth, this);
 
+    if (g_Cfg.m_iRevealFlags & REVEALF_ONHORSE && IsStatFlag(STATF_ONHORSE))
+        Reveal();
+
 	m_StepStealth -= IsStatFlag(STATF_FLY|STATF_HOVERING) ? 2 : 1;
 	if ( m_StepStealth <= 0 )
 		Reveal();

@@ -4020,3 +4020,4 @@ NOTE:
 
 22-04-2024, canerksk
 - Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
+- Added: New ini RevealFlag setting REVEALF_ONHORSE, to allow or disallow stealth walking if you are on a mount.
