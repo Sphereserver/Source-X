@@ -3957,9 +3957,9 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	LOCAL.ReflectDamage (r/w) = The amount of damage that will be reflected to this other party
 	LOCAL.ReduceDamage (r/w) = Amount to be deducted from damage received
 	LOCAL.DamageType (r/w) = Type of damage received (Default: DAMAGE_FIXED andDAMAGE_REACTIVE)
-NOTE: 
-    1. If no ReflectDamage or ReduceDamage values are entered, the system defaults to the Reactive Armor Effect value.
-    2. No damage amount can be less than 1.
+	NOTE:
+		1. If no ReflectDamage or ReduceDamage values ​​are entered, the system defaults to the Reactive Armor Effect value.
+		2. No damage amount can be less than 1.
 
 4-12-2024, canerksk
 - Fixed: Sphere crash troubleshooting if a player has no CHATNAME value and remove a channel.
@@ -4021,3 +4021,5 @@ NOTE:
 22-04-2024, canerksk
 - Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
 - Added: New ini RevealFlag setting REVEALF_ONHORSE, to allow or disallow stealth walking if you are on a mount.
+- Added: new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED.
+	In the old behavior (55i/55r/56b/56c) we were not guilty when we hit a murderer. Now when we attack a criminal or murderer we are guilty towards that person. An ini setting option has been added for this behavior. Although this is a normal behavior in OSI, it can be perceived as a problem since not every server designs games like OSI.

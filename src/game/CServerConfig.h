@@ -126,7 +126,8 @@ enum COMBATFLAGS_TYPE
                                             //   WARNING: doesn't work with Gargoyles due to the new animation packet not accepting a custom animation duration!
     COMBAT_FIRSTHIT_INSTANT     = 0x20000,  // The first hit in a fight doesn't wait for the recoil time (OSI like)
 	COMBAT_NPC_BONUSDAMAGE		= 0x40000,	// NPC will get full bonus damage from various sources.
-    COMBAT_PARALYZE_CANSWING    = 0x80000   // Characters can continue attacking while paralyzed. (Old sphere behaviour)
+    COMBAT_PARALYZE_CANSWING    = 0x80000,   // Characters can continue attacking while paralyzed. (Old sphere behaviour)
+    COMBAT_ATTACK_NOAGGREIVED   = 0x100000, // Not being criminal when attacking the murderer (Old sphere behaviour)
 };
 
 /**
