@@ -3542,6 +3542,13 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				return false;
 			pCharSrc->ItemBounce( this );
 			break;
+        case CIV_CARVECORPSE:
+            if (!pCharSrc)
+                return false;
+            if (!IsType(IT_CORPSE))
+                return false;
+            pCharSrc->Use_CarveCorpse(dynamic_cast<CItemCorpse *>(this), this);
+            break;
 		case CIV_CONSUME:
 			ConsumeAmount( s.HasArgs() ? s.GetArgWVal() : 1 );
 			break;
