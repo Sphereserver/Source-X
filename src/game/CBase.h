@@ -105,7 +105,11 @@ struct CBaseBaseDef : public CResourceLink, public CEntityProps
 	// Base type of both CItemBase and CCharBase
 
 protected:
-	dword       m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
+    // The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped".
+    // Since it should hold only base/mul/artwork/anim ID, it shouldn't reach values greater than those held by a word (like m_ResDispDnId),
+    //  but we use a dword to ease conversions.
+    dword       m_dwDispIndex;
+
 	CSString    m_sName;		// default type name. (ei, "human" vs specific "Dennis")
 
 private:
@@ -116,8 +120,8 @@ private:
 public:
     RESDISPLAY_VERSION _iEraLimitProps;	// Don't allow to have properties newer than the given era.
 private:
-    byte        m_Expansion;
-	byte        m_ResLevel;     // ResLevel required for players to see me
+    RESDISPLAY_VERSION        m_Expansion;
+    RESDISPLAY_VERSION        m_ResLevel;     // ResLevel required for players to see me
 	HUE_TYPE    m_ResDispDnHue; // Hue shown to players who don't have my ResLevel
 	word        m_ResDispDnId;  // ID shown to players who don't have my ResLevel
 	// -------------------------------------
@@ -298,7 +302,7 @@ public:
      * @param   ResLevel    The ResLevel.
      * @return  true if it succeeds, false if it fails.
      */
-	bool SetResLevel( byte ResLevel );
+    bool SetResLevel( RESDISPLAY_VERSION ResLevel );
 
     /**
      * @brief   Gets ResDispDNHue.

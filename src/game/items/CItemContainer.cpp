@@ -187,13 +187,13 @@ void CItemContainer::Trade_Status( bool bCheck )
 	for (CSObjContRec* pObjRec : pPartner->GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		pChar1->ItemBounce(pItem, false);
+		pChar1->ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 	}
 
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		pChar2->ItemBounce(pItem, false);
+		pChar2->ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 	}
 
 	// Transfer gold/platinum
@@ -304,7 +304,7 @@ bool CItemContainer::Trade_Delete()
 	for (CSObjContRec* pObjRec : GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-		pChar->ItemBounce(pItem, false);
+		pChar->ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 	}
 
 	// Kill my trading partner.

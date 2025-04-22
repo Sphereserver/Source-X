@@ -379,7 +379,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			m_BaseResources.Load(s.GetArgStr());
 			return true;
 		case OBC_RESLEVEL:
-			return( SetResLevel((uchar)(s.GetArgVal())) );
+            return( SetResLevel(enum_alias_cast<RESDISPLAY_VERSION>(s.GetArgCVal())) );
 		case OBC_RESDISPDNHUE:
 			SetResDispDnHue((HUE_TYPE)(s.GetArgVal()));
 			return true;
@@ -453,7 +453,7 @@ byte CBaseBaseDef::GetResLevel() const
 	return( m_ResLevel );
 }
 
-bool CBaseBaseDef::SetResLevel( byte ResLevel )
+bool CBaseBaseDef::SetResLevel(RESDISPLAY_VERSION ResLevel )
 {
 	if ( ResLevel >= RDS_T2A && ResLevel < RDS_QTY )
 	{

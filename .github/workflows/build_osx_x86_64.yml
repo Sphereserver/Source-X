@@ -2,10 +2,16 @@ name: MacOS x86_64
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'main'
-      - 'dev'
+#    branches:
+#      - 'master'
+#      - 'main'
+#      - 'dev'
+      paths-ignore:
+        - '.gitignore'
+        - '.gitattributes'
+        - '**.txt'
+        - '**.md'
+        - '**.rc'
   pull_request:
     branches:
       - 'master'
@@ -43,7 +49,7 @@ jobs:
             mkdir -p build
             cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" -S . -B ./build
     - name: Ninja
-      run: cd build && ninja && cd ..
+      run: ninja -C build -v
     - name: Create package
       run:  |
             pwd

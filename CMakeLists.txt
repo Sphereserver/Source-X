@@ -111,7 +111,7 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
-set(ENABLED_SANITIZER CACHE INTERNAL BOOL FALSE)
+set(ENABLED_SANITIZER FALSE CACHE INTERNAL BOOL "Am i using a sanitizer?")
 if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
     set(ENABLED_SANITIZER TRUE)
 endif()
@@ -197,6 +197,11 @@ if(SINGLE_TARGET)
         #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
         target_precompile_headers(spheresvr_release ${pch_options})
+
+        add_custom_command(TARGET spheresvr_release POST_BUILD
+            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_release>
+            COMMENT "Stripping executable"
+        )
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
         set(TARGETS ${TARGETS} spheresvr_nightly)
@@ -210,6 +215,11 @@ if(SINGLE_TARGET)
         #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
         target_precompile_headers(spheresvr_nightly ${pch_options})
+
+        add_custom_command(TARGET spheresvr_nightly POST_BUILD
+            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_nightly>
+            COMMENT "Stripping executable"
+        )
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
         set(TARGETS ${TARGETS} spheresvr_debug)
@@ -233,30 +243,19 @@ else(SINGLE_TARGET)
     #set_target_properties(spheresvr PROPERTIES CXX_EXTENSIONS OFF)
     #target_compile_features(spheresvr PUBLIC cxx_std_20)
     target_precompile_headers(spheresvr ${pch_options})
+
+    # To be tested
+    #add_custom_command(TARGET spheresvr POST_BUILD
+    #    $<$<CONFIG:Release>:COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr>>
+    #    $<$<CONFIG:Nightly>:COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr>>
+    #    COMMENT "Stripping executable"
+    #)
 endif(SINGLE_TARGET)
 
 # --------------------
 
 message(STATUS)
-include("${CMAKE_SOURCE_DIR}/cmake/CompilerFlagsChecker.cmake")
-
-# --------------------
-
-if(USE_ASAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} ADDRESS_SANITIZER)
-endif()
-if(USE_UBSAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} UNDEFINED_BEHAVIOR_SANITIZER)
-endif()
-if(USE_LSAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} LEAK_SANITIZER)
-endif()
-if(USE_MSAN)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} MEMORY_SANITIZER)
-endif()
-if(ENABLED_SANITIZER)
-    set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
-endif()
+include("${CMAKE_SOURCE_DIR}/cmake/CommonCompilerFlags.cmake")
 
 # --------------------
 

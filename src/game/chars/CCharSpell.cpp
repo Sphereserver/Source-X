@@ -3089,7 +3089,7 @@ bool CChar::Spell_CastDone()
 				}
 				else
 				{
-					ItemBounce(pItem, false);
+					ItemBounce(pItem, g_Cfg.m_iBounceMessage);
 					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_CREATE_FOOD), pItem->GetName());
 				}
 			}
@@ -3199,12 +3199,16 @@ bool CChar::Spell_CastDone()
 			case SPELL_Animate_Dead:
 			{
 				CItemCorpse* pCorpse = dynamic_cast <CItemCorpse*> (pObj); //This is probably redundant.
-				CChar *pChar = Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
-				ASSERT(pChar);
-				if (!pChar->RaiseCorpse(pCorpse))
+                if (pCorpse == nullptr)
+                {
+                    SysMessage("That is not a corpse!");
+                    return false;
+                }
+                Spell_Summon_Place(pSummon, pCorpse->GetTopPoint());
+                if (!pSummon->RaiseCorpse(pCorpse))
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_FAIL);
-					pChar->Delete();
+                    pSummon->Delete();
 				}
 				break;
 			}
@@ -3486,6 +3490,11 @@ int CChar::Spell_CastStart()
 	Args.m_VarsLocal.SetNum("WOP", fWOP);
 	int64 WOPFont = g_Cfg.m_iWordsOfPowerFont;
 	int64 WOPColor;
+    TALKMODE_TYPE WOPTalkMode = g_Cfg.m_iWordsOfPowerTalkMode ? g_Cfg.m_iWordsOfPowerTalkMode : TALKMODE_SPELL;
+
+    if (WOPTalkMode < TALKMODE_SAY || WOPTalkMode >= TALKMODE_COMMAND)
+        WOPTalkMode = TALKMODE_SPELL;
+
 	if (g_Cfg.m_iWordsOfPowerColor > 0)
 		WOPColor = g_Cfg.m_iWordsOfPowerColor;
 	else if (m_SpeechHueOverride)
@@ -3494,8 +3503,10 @@ int CChar::Spell_CastStart()
 		WOPColor = m_pPlayer->m_SpeechHue;
     else
         WOPColor = HUE_TEXT_DEF;
+
 	Args.m_VarsLocal.SetNum("WOPColor", WOPColor, true);
 	Args.m_VarsLocal.SetNum("WOPFont", WOPFont, true);
+    Args.m_VarsLocal.SetNum("WOPTalkMode", WOPTalkMode, true);
 
 	if ( IsTrigUsed(TRIGGER_SPELLCAST) )
 	{
@@ -3540,11 +3551,12 @@ int CChar::Spell_CastStart()
 	{
 		WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor");
 		WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont");
+        WOPTalkMode = (TALKMODE_TYPE)Args.m_VarsLocal.GetKeyNum("WOPTalkMode");
 
 		// Correct talk mode for spells WOP is TALKMODE_SPELL, but sphere doesn't have any delay between spell casts this can allow WOP flood on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetBuffer()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SPELL, (FONT_TYPE)WOPFont);
+            Speak((pSpellDef->m_sRunes.GetBuffer()) + 1, (HUE_TYPE)WOPColor, (TALKMODE_TYPE)WOPTalkMode, (FONT_TYPE)WOPFont);
 		}
 		else
 		{
@@ -3562,7 +3574,7 @@ int CChar::Spell_CastStart()
 			if ( len > 0 )
 			{
 				pszTemp[len] = 0;
-				Speak(pszTemp, (HUE_TYPE)WOPColor, TALKMODE_SPELL, (FONT_TYPE)WOPFont);
+                Speak(pszTemp, (HUE_TYPE)WOPColor, (TALKMODE_TYPE)WOPTalkMode, (FONT_TYPE)WOPFont);
 			}
 		}
 	}

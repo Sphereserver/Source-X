@@ -1206,7 +1206,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	{
 		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER),
             pCorpse->GetName(),
-            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS() * MSECS_PER_SEC) / MSECS_PER_SEC));
+            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS()) / MSECS_PER_SEC));
 
 		if ( pName )
 			snprintf( pszTemp + len, Str_TempLength() - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );

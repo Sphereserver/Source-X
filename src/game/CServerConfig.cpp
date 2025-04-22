@@ -77,6 +77,7 @@ CServerConfig::CServerConfig()
 	m_iWordsOfPowerFont		= FONT_NORMAL;
 	m_fWordsOfPowerPlayer	= true;
 	m_fWordsOfPowerStaff	= false;
+    m_iWordsOfPowerTalkMode = TALKMODE_SPELL;
 	m_fEquippedCast			= true;
 	m_iMagicUnlockDoor		= 900;
 	m_iSpellTimeout			= 0;
@@ -201,6 +202,7 @@ CServerConfig::CServerConfig()
 	m_fDisplayPercentAr = false;
 	m_fDisplayElementalResistance = false;
 	m_fNoResRobe		= 0;
+    m_iBounceMessage        = false;
 	m_iLostNPCTeleport	= 50;
 	m_iAutoProcessPriority = 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
@@ -724,6 +726,7 @@ enum RC_TYPE
 	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
+	RC_VERBOSEITEMBOUNCE,		// m_iBounceMessage
 	RC_VERSION,
 	RC_WALKBUFFER,
 	RC_WALKREGEN,
@@ -732,6 +735,7 @@ enum RC_TYPE
 	RC_WOPFONT,
 	RC_WOPPLAYER,
 	RC_WOPSTAFF,
+	RC_WOPTALKMODE,
 	RC_WORLDSAVE,
 	RC_ZEROPOINT,				// m_sZeroPoint
 	RC_QTY
@@ -1017,6 +1021,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMaxSell)		}},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fVendorTradeTitle)		}},
+	{ "VERBOSEITEMBOUNCE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iBounceMessage)		}},
 	{ "VERSION",				{ ELEM_VOID,	0												}},
 	{ "WALKBUFFER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkBuffer)			}},
 	{ "WALKREGEN",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkRegen)			}},
@@ -1025,6 +1030,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "WOPFONT",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerFont)		}},
 	{ "WOPPLAYER",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer)	}},
 	{ "WOPSTAFF",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fWordsOfPowerStaff)	}},
+    { "WOPTALKMODE",            { ELEM_INT,     static_cast<uint>OFFSETOF(CServerConfig,m_iWordsOfPowerTalkMode) }},
 	{ "WORLDSAVE",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sWorldBaseDir)			}},
 	{ "ZEROPOINT",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sZeroPoint)			}},
 	{ nullptr,					{ ELEM_VOID,	0,												}}
@@ -4500,6 +4506,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
         if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
 		if ( IsSetOF(OF_AllowContainerInsideContainer)) catresname(zOptionFlags, "AllowContainerInsideContainer");
         if ( IsSetOF(OF_VendorStockLimit) )		    catresname(zOptionFlags, "VendorStockLimit");
+		if ( IsSetOF(OF_NoDclickEquip) )				catresname(zOptionFlags, "NoDclickEquip");
 
 		if ( zOptionFlags[0] != '\0' )
 		{

@@ -54,7 +54,7 @@ private:
 
 	word m_PrivFlags; // optional privileges for char (bit-mapped)
 
-	byte m_ResDisp; // current CAccount resdisp.
+    RESDISPLAY_VERSION m_ResDisp; // current CAccount resdisp.
 	byte m_MaxChars; // Max chars allowed for this CAccount.
 
 	typedef struct { llong m_First; llong m_Last; llong m_vcDelay; } TimeTriesStruct_t;
@@ -196,18 +196,18 @@ public:
 	* @param what resdisp to set.
 	* @return true on success, false otherwise.
 	*/
-	bool SetResDisp(byte what);
+    bool SetResDisp(RESDISPLAY_VERSION what);
 	/**
 	* @brief Gets the current resdisp on this CAccount.
 	* @return The current resdisp.
 	*/
-	byte GetResDisp() const { return m_ResDisp; }
+    RESDISPLAY_VERSION GetResDisp() const { return m_ResDisp; }
 	/**
 	* @brief Updates the resdisp if the current is lesser.
 	* @param what the resdisp to update.
 	* @return true if success, false otherwise.
 	*/
-	bool SetGreaterResDisp(byte what);
+    bool SetGreaterResDisp(RESDISPLAY_VERSION what);
 	/**
 	* @brief Sets the resdisp on this CAccount based on pClient version.
 	* @return true if success, false otherwise.
@@ -218,7 +218,7 @@ public:
 	* @param what the resdisp to check.
 	* @return true if the current resdisp is equal to what, false otherwise.
 	*/
-	bool IsResDisp(byte what) const { return ( m_ResDisp == what ); }
+    bool IsResDisp(RESDISPLAY_VERSION what) const { return ( m_ResDisp == what ); }
 
 	/************************************************************************
 	* Privileges related section.

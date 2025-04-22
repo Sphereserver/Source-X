@@ -479,7 +479,7 @@ size_t strlen_mb(const char* ptr)
 }
 */
 
-size_t Str_LengthUTF8(const char* strInUTF8MB) noexcept
+size_t Str_UTF8CharCount(const char* strInUTF8MB) noexcept
 {
     size_t len; // number of characters in the string
 #ifdef MSVC_RUNTIME
@@ -1695,94 +1695,71 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes) noexcept
     }
 }
 
-UTF8MBSTR::UTF8MBSTR() noexcept
+UTF8MBSTR::UTF8MBSTR() = default;
+
+UTF8MBSTR::UTF8MBSTR(lpctstr lpStr)
 {
-    m_strUTF8_MultiByte = new char[1]();
+    operator=(lpStr);
 }
 
-UTF8MBSTR::UTF8MBSTR(lpctstr lpStr) noexcept
+UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr)
+{
+    m_strUTF8_MultiByte = lpStr.m_strUTF8_MultiByte;
+}
+
+UTF8MBSTR::~UTF8MBSTR() = default;
+
+void UTF8MBSTR::operator =(lpctstr lpStr)
 {
     if (lpStr)
-    {
-        m_strUTF8_MultiByte = nullptr;
-        ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-    }
+        ConvertStringToUTF8(lpStr, &m_strUTF8_MultiByte);
     else
-        m_strUTF8_MultiByte = new char[1]();
-}
-
-UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr) noexcept
-{
-    size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
-    m_strUTF8_MultiByte = new char[len + 1]();
-    memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
-}
-
-UTF8MBSTR::~UTF8MBSTR()
-{
-    if (m_strUTF8_MultiByte)
-        delete[] m_strUTF8_MultiByte;
-}
-
-void UTF8MBSTR::operator =(lpctstr lpStr) noexcept
-{
-    if (m_strUTF8_MultiByte)
-        delete[] m_strUTF8_MultiByte;
-
-    if (lpStr)
-    {
-        m_strUTF8_MultiByte = nullptr;
-        ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
-    }
-    else
-        m_strUTF8_MultiByte = new char[1]();
+        m_strUTF8_MultiByte.clear();
 }
 
 void UTF8MBSTR::operator =(UTF8MBSTR& lpStr) noexcept
 {
-    if (m_strUTF8_MultiByte)
-        delete[] m_strUTF8_MultiByte;
-
-    size_t len = Str_LengthUTF8(lpStr.m_strUTF8_MultiByte);
-    m_strUTF8_MultiByte = new char[len + 1]();
-    memcpy(m_strUTF8_MultiByte, lpStr.m_strUTF8_MultiByte, len);
+    m_strUTF8_MultiByte = lpStr.m_strUTF8_MultiByte;
 }
 
-size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, char*& strOutUTF8MB) noexcept
+size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, std::vector<char>* strOutUTF8MB)
 {
+    ASSERT(strOutUTF8MB);
     size_t len;
 #if defined(_WIN32) && defined(UNICODE)
     // tchar is wchar_t
     len = wcslen(strIn);
 #else
     // tchar is char (UTF8 encoding)
-    len = Str_LengthUTF8(strIn);
+    len = strlen(strIn);
 #endif
-    strOutUTF8MB = new char[len + 1]();
+    strOutUTF8MB->resize(len + 1);
 
 #if defined(_WIN32) && defined(UNICODE)
-#ifdef MSVC_RUNTIME
+#   ifdef MSVC_RUNTIME
     size_t aux = 0;
-    wcstombs_s(&aux, strOutUTF8MB, len + 1, strIn, len);
+    wcstombs_s(&aux, strOutUTF8MB->data(), len + 1, strIn, len);
+#   else
+    wcstombs(strOutUTF8MB->data(), strIn, len);
+#   endif
 #else
-    wcstombs(strOutUTF8MB, strIn, len);
+    // already utf8
+    memcpy(strOutUTF8MB->data(), strIn, len);
 #endif
 
-#else
-    memcpy(strOutUTF8MB, strIn, len);
-#endif
-
+    (*strOutUTF8MB)[len] = '\0';
     return len;
 }
 
-size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) noexcept
+size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, std::vector<tchar>* strOut)
 {
-    size_t len = Str_LengthUTF8(strInUTF8MB);
-    if (!strOut)
-        strOut = new tchar[len + 1]();
+    ASSERT(strOut);
+    size_t len;
 
 #if defined(_WIN32) && defined(UNICODE)
     // tchar is wchar_t
+    len = Str_UTF8CharCount(strInUTF8MB);
+    strOut->resize(len + 1);
 #ifdef MSVC_RUNTIME
     size_t aux = 0;
     mbstowcs_s(&aux, strInUTF8MB, len + 1, strInUTF8MB, len);
@@ -1791,9 +1768,12 @@ size_t UTF8MBSTR::ConvertUTF8ToString(const char* strInUTF8MB, lptstr& strOut) n
 #endif
 #else
     // tchar is char (UTF8 encoding)
-    memcpy(strOut, strInUTF8MB, len);
+    len = strlen(strInUTF8MB);
+    strOut->resize(len + 1);
+    memcpy(strOut->data(), strInUTF8MB, len);
 #endif
 
+    (*strOut)[len] = '\0';
     return len;
 }
 

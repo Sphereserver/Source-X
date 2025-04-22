@@ -86,7 +86,7 @@ public:		virtual bool IsDeleted() const override;
 
 	// Items in the sector
 	size_t GetItemComplexity() const;
-	void CheckItemComplexity() const noexcept;
+    bool CheckItemComplexity() const noexcept;
 	bool IsItemInSector( const CItem * pItem ) const;
 	void MoveItemToSector( CItem * pItem );
 
@@ -97,8 +97,7 @@ public:		virtual bool IsDeleted() const override;
 
 	// Chars in the sector.
 	size_t GetCharComplexity() const;
-
-	void CheckCharComplexity() const noexcept;
+    bool CheckCharComplexity() const noexcept;
 	bool IsCharActiveIn( const CChar * pChar );
 	bool IsCharDisconnectedIn( const CChar * pChar );
 	size_t GetInactiveChars() const;
