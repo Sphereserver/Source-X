@@ -432,22 +432,16 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
     const auto fnFindEntryByChar = [pChar](TickingPeriodicCharEntry const& rhs) constexpr noexcept {
         return pChar == rhs.second;
     };
-
+#endif
     const auto itEntryInAddList = std::find_if(
         _vPeriodicCharsAddRequests.begin(),
         _vPeriodicCharsAddRequests.end(),
         fnFindEntryByChar);
     if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
     {
-        // We are trying to remove something that was requested to be added.
-        // While we could support it, we don't need to do this and it would be superfluous.
-        // If it happens, we are making a mistake somewhere.
+        // On the same tick the char did its periodic tick, re-added itself to the list,
+        //  then something asked for its removal? Like calling Delete or destroying the char.
 
-        ASSERT(false);
-        return false;
-
-        // In any case, for now we keep the code to remove it.
-/*
         _vPeriodicCharsAddRequests.erase(itEntryInAddList);
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
@@ -455,6 +449,10 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
             _vPeriodicCharsTicks.begin(),
             _vPeriodicCharsTicks.end(),
             fnFindEntryByChar);
+        const auto itEntryInRemoveList = std::find(
+            _vPeriodicCharsEraseRequests.begin(),
+            _vPeriodicCharsEraseRequests.end(),
+            pChar);
 
         if (itEntryInRemoveList == _vPeriodicCharsEraseRequests.end()) {
             ASSERT(itEntryInTickList == _vPeriodicCharsTicks.end());
@@ -463,10 +461,8 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
             ASSERT(itEntryInTickList != _vPeriodicCharsTicks.end());
         }
 #endif
-        return true
-*/;
+        return true;
     }
-#endif
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
     // Ensure it's in the ticking list.
