@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake
+
+override_dh_auto_build:
+	cmake --build build
+
+override_dh_auto_install:
+	install -d debian/sphereserver/usr/bin
+	install -m 0755 build/bin-x86_64/SphereSvrX64_nightly debian/sphereserver/usr/bin/sphereserver
+	install -m 0644 src/sphereCrypt.ini debian/sphereserver/etc/sphereserver/sphereCrypt.ini
+	# Replace values (uncomment mul path and change log path) in sphere.ini.
+	cat src/sphere.ini | sed -e "s/\/\/MulFiles=/MulFiles=/" -e "s/Log=logs/Log=\/var\/log\/sphereserver\//" > debian/sphereserver/etc/sphereserver/sphere.ini
+
+override_dh_installinit:
+	dh_installinit --no-enable --no-start --no-restart-after-upgrade
+
+override_dh_installsystemd:
+	dh_installsystemd --no-enable --no-start --no-restart-after-upgrade

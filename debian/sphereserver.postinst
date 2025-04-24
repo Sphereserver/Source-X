@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Post-installation script for Sphereserver.
+#
+
+# Parameters
+NAME="sphereserver"
+
+# Ensure that the scripts abort in case of any errors.
+set -e
+
+. /usr/share/debconf/confmodule
+
+# Check, if user exists.
+if ! getent passwd $NAME >/dev/null; then
+  # Create user.
+  adduser --home /opt/$NAME --system --group $NAME
+fi
+
+# Create directories.
+install -g $NAME -o $NAME -d /var/log/$NAME
+install -g $NAME -o $NAME -d /opt/$NAME/accounts
+install -g $NAME -o $NAME -d /opt/$NAME/mul
+install -g $NAME -o $NAME -d /opt/$NAME/save
+install -g $NAME -o $NAME -d /opt/$NAME/scripts
+
+# Create sphereacct file, don't overwrite it.
+if [ ! -f /opt/$NAME/accounts/sphereacct.scp ]; then
+  install -g $NAME -o $NAME -m 0644 debian/data/sphereacct.scp /opt/$NAME/accounts/sphereacct.scp
+fi
+
+#DEBHELPER#

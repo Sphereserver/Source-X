@@ -1,0 +1,6 @@
+*.debhelper.log
+*.debhelper
+*.substvars
+debhelper-build-stamp
+files
+sphereserver/

@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Post-removal script for Sphereserver.
+#
+
+# Parameters
+NAME="sphereserver"
+
+# Ensure that the scripts abort in case of any errors
+set -e
+
+if [ "$1" = "purge" ]; then
+  # Remove user.
+  userdel $NAME
+
+  # Remove files.
+  rm -rf /opt/$NAME
+  rm -rf /etc/$NAME
+  rm -rf /var/log/$NAME
+fi
+
+#DEBHELPER#

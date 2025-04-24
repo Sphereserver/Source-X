@@ -1,0 +1,19 @@
+Source: sphereserver
+Section: net
+Priority: optional
+Maintainer: SphereServer development team <you@example.com>
+Build-Depends: debhelper-compat (= 13), cmake, libmariadb-dev, git
+Standards-Version: 4.7.2
+Vcs-Browser: https://github.com/Sphereserver/Source-X
+Vcs-Git: https://github.com/Sphereserver/Source-X.git
+Homepage: https://www.sphereserver.net/
+
+Package: sphereserver
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: adduser, mariadb-client, debconf, ${shlibs:Depends}, ${misc:Depends}
+Recommends: telnet
+Suggests: mariadb-server, nginx
+Description: Ultima Online server emulator
+ SphereServer is an Ultima Online server emulator allowing players to run their
+ own shards.

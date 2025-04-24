@@ -1,0 +1,18 @@
+# SphereServer systemd service file
+# Copyright 2025 SphereServer development team
+# SPDX-License-Identifier: Apache-2.0
+
+[Unit]
+Description=Sphereserver
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/sphereserver
+ExecStart=/usr/bin/sphereserver -S "/etc/sphereserver/"
+Restart=on-failure
+User=sphereserver
+Group=sphereserver
+
+[Install]
+WantedBy=multi-user.target
