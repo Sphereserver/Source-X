@@ -48,7 +48,7 @@ private:
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
-    std::string _sRunningTrigger;   // Name of the running trigger (can be custom!) [use std::string instead of CSString because the former is allocated on-demand]
+    CSString _sRunningTrigger;   // Name of the running trigger (can be custom!) TOOD: use CSString (less size in memory) and make it allocate the buffer on demand.
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
     short _iCallingObjTriggerId;    // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
@@ -56,12 +56,26 @@ public:
     static const char *m_sClassName;
     static dword sm_iCount;    // how many total objects in the world ?
 
-
     int _iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
     int _iCreatedResScriptLine;	// line in the script file where this obj was created
 
+    bool _fIsInStatusUpdatesList;
+    bool _fIsInStatusUpdatesAddList;
+
+# define SU_UPDATE_HITS      0x01    // update hits to others
+# define SU_UPDATE_MODE      0x02    // update mode to all
+# define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
+    uchar m_fStatusUpdate;  // update flags for next tick
+
+# define SF_DELETING         0x01
+# define SF_TOPLEVEL         0x02
+    uchar _uiInternalStateFlags;
+
     CVarDefMap m_TagDefs;		// attach extra tags here.
     CVarDefMap m_BaseDefs;		// New Variable storage system
+    CResourceRefArray m_OEvents;
+    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
+
     uint64	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
 
     word	m_attackBase;       // dam for weapons
@@ -69,23 +83,12 @@ public:
 
     word	m_defenseBase;	    // Armor for IsArmor items
     word	m_defenseRange;     // variable range of defense.
+
     int 	m_ModMaxWeight;		// ModMaxWeight prop.
-    HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
     int m_ModAr;
-    CUID 	_uidSpawn;          // SpawnItem for this item
 
-    CResourceRefArray m_OEvents;
-
-    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
-
-#   define SU_UPDATE_HITS      0x01    // update hits to others
-#   define SU_UPDATE_MODE      0x02    // update mode to all
-#   define SU_UPDATE_TOOLTIP   0x04    // update tooltip to all
-    uchar m_fStatusUpdate;  // update flags for next tick
-
-#   define SF_DELETING         0x01
-#   define SF_TOPLEVEL         0x02
-    uchar _uiInternalStateFlags;
+    CUID 	_uidSpawn;      // SpawnItem for this item
+    HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
 
 protected:
     PacketPropertyList* m_PropertyList;	// currently cached property list packet
@@ -106,7 +109,7 @@ protected:
      */
     virtual void DeletePrepare();
 
-    void DeleteCleanup(bool fForce);    // not virtual!
+    void DeleteCleanup(bool fForce) NONVIRTUAL;
 
 public:
     inline bool _IsBeingDeleted() const noexcept
@@ -908,6 +911,8 @@ protected:
     virtual void _GoSleep() override;
 
 protected:
+    bool IsStatusUpdatePending() const;
+
     /**
      * @brief   Update Status window if any flag requires it on m_fStatusUpdate.
      */

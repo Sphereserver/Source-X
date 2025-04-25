@@ -593,7 +593,8 @@ public:
 
 protected:
 	virtual int FixWeirdness() override;
-	void DeleteCleanup(bool fForce);
+    virtual void DeletePrepare() override;
+    void DeleteCleanup(bool fForce) NONVIRTUAL;
 public:
 	virtual bool NotifyDelete(); // overridden CItemContainer:: method
 	virtual bool Delete(bool fForce = false) override;

@@ -12,10 +12,14 @@ CItemScript::CItemScript( ITEMID_TYPE id, CItemBase * pItemDef ) :
 {
 }
 
+/*
 CItemScript::~CItemScript()
 {
-    DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+    // CItemVendable::DeletePrepare is called in ~CItemVendable().
+    // We would have to call here DeletePrepare if this class had a own DeletePrepare method.
+    DeletePrepare();        //  Must remove early because virtuals will fail in child destructor.
 }
+*/
 
 lpctstr const CItemScript::sm_szLoadKeys[] =
 {

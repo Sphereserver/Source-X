@@ -1,4 +1,4 @@
-#include "../../common/CException.h"
+//#include "../../common/CException.h"
 #include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../common/sphereproto.h"
@@ -16,15 +16,14 @@ CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :
 {
 }
 
+/*
 CItemCorpse::~CItemCorpse()
 {
-	EXC_TRY("Cleanup in destructor");
-
-	// Must remove early because virtuals will fail in child destructor.
-	DeletePrepare();
-
-	EXC_CATCH;
+    // CItemVendable::DeletePrepare is called in ~CItemVendable().
+    // We would have to call here DeletePrepare if this class had a own DeletePrepare method.
+    DeletePrepare();        //  Must remove early because virtuals will fail in child destructor.
 }
+*/
 
 bool CItemCorpse::IsCorpseResurrectable(CChar * pCharHealer, CChar * pCharGhost) const
 {

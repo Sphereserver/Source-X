@@ -71,7 +71,7 @@ void CSObjCont::ClearContainer(bool fClosingWorld) noexcept
     else
     {
         EXC_SET_BLOCK("Standard cleanup.");
-        	for (CSObjContRec* pRec : stateCopy)
+        for (CSObjContRec* pRec : stateCopy)
         {
             // This might not be true for some containers.
             //  Example: sectors. We might want to delete the object here just after it's been detatched from its sector.
@@ -116,7 +116,7 @@ void CSObjCont::InsertContentTail(CSObjContRec* pNewRec)
     _Contents.emplace_back(pNewRec);
 }
 
-void CSObjCont::OnRemoveObj(CSObjContRec* pObjRec)	// Override this = called when removed from list.
+void CSObjCont::OnRemoveObj(CSObjContRec* pObjRec)	// Override this --> called when removed from list.
 {
 	// just remove from list. DON'T delete !
 	ASSERT(pObjRec);

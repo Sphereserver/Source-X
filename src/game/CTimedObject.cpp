@@ -7,19 +7,20 @@
 
 
 CTimedObject::CTimedObject(PROFILE_TYPE profile) noexcept :
-    _iTimeout(0), _profileType(profile), _fIsSleeping(true)
+    _iTimeout(0), _profileType(profile), _fIsSleeping(true),
+    _fIsInWorldTickList(false), _fIsInWorldTickAddList(false)
 {
 }
 
 CTimedObject::~CTimedObject()
 {
+    ADDTOCALLSTACK("CTimedObject::~CTimedObject");
     EXC_TRY("Cleanup in destructor");
 
-    ADDTOCALLSTACK("CTimedObject::~CTimedObject");
-    //if (_iTimeout > 0)
-    //{
+    if (IsTimeoutTickingActive())
+    {
         CWorldTickingList::DelObjSingle(this);
-    //}
+    }
 
     EXC_CATCH;
 }
@@ -75,8 +76,9 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
     */
     if (iDelayInMsecs < 0)
     {
-        CWorldTickingList::DelObjSingle(this);
-        _SetTimeoutRaw(0);
+        if (IsTimeoutTickingActive())
+            CWorldTickingList::DelObjSingle(this);
+        _ClearTimeoutRaw();
     }
     else
     {
@@ -188,10 +190,10 @@ PROFILE_TYPE CTimedObject::GetProfileType() const noexcept
     MT_ENGINE_SHARED_LOCK_RETURN(CTimedObject::_GetProfileType());
 }
 
-void CTimedObject::ClearTimeout() noexcept
+void CTimedObject::ClearTimeoutRaw() noexcept
 {
     MT_ENGINE_UNIQUE_LOCK_SET;
-    CTimedObject::_ClearTimeout();
+    CTimedObject::_ClearTimeoutRaw();
 }
 
 bool CTimedObject::IsSleeping() const noexcept

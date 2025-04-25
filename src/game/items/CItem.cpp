@@ -181,15 +181,17 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 
 }
 
+void CItem::DeletePrepare()
+{
+    ADDTOCALLSTACK("CItem::DeletePrepare");
+    CItem::_GoSleep();
+    CObjBase::DeletePrepare();
+}
+
 void CItem::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
 	_uiInternalStateFlags |= SF_DELETING;
-
-	// We don't want to have invalid pointers over there
-	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
-	//CWorldTickingList::DelObjSingle(this);
-	//CWorldTickingList::DelObjStatusUpdate(this, false);
 
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink.IsValidUID())
@@ -251,6 +253,8 @@ bool CItem::NotifyDelete()
 bool CItem::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::Delete");
+    EXC_TRY("Cleanup in Delete method");
+
 	if (( NotifyDelete() == false ) && !fForce)
 		return false;
 
@@ -258,12 +262,16 @@ bool CItem::Delete(bool fForce)
 	DeleteCleanup(fForce);
 
 	return CObjBase::Delete(fForce);
+
+    EXC_CATCH;
+    return false;
 }
 
 CItem::~CItem()
 {
+    ADDTOCALLSTACK("CItem::~CItem");
+
 	EXC_TRY("Cleanup in destructor");
-	ADDTOCALLSTACK("CItem::~CItem");
 
 	DeletePrepare();	// Using this in the destructor will fail to call virtuals, but it's better than nothing.
 	CItem::DeleteCleanup(true);
@@ -3651,7 +3659,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 
 bool CItem::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
@@ -3659,8 +3667,8 @@ bool CItem::IsTriggerActive(lpctstr trig) const
         int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.empty());
-    return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
+    ASSERT(!_sRunningTrigger.IsEmpty());
+    return (strcmpi(_sRunningTrigger.GetBuffer(), trig) == 0);
 }
 
 void CItem::SetTriggerActive(lpctstr trig)
@@ -3668,7 +3676,7 @@ void CItem::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.clear();
+        _sRunningTrigger.Clear();
         return;
     }
     int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
@@ -6057,8 +6065,8 @@ void CItem::_GoAwake()
 	ADDTOCALLSTACK("CItem::_GoAwake");
 	CObjBase::_GoAwake();
 
-	// Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
-	if (!IsTopLevel())
+    // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
+    if (!IsStatusUpdatePending() && !IsTopLevel())
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
 	}
@@ -6069,11 +6077,14 @@ void CItem::_GoSleep()
     ADDTOCALLSTACK("CItem::_GoSleep");
     CObjBase::_GoSleep();
 
-    // Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
-    if (IsTopLevel())
+    /*
+     * For now, we force this check on every item in CObjBase::_GoSleep
+    // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
+    if (!IsTopLevel())
     {
         CWorldTickingList::DelObjStatusUpdate(this, false);
     }
+    */
 }
 
 bool CItem::_CanHoldTimer() const
@@ -6114,11 +6125,11 @@ bool CItem::_CanTick() const
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fCharCont = pCont && pCont->IsChar();
     const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fIgnoreCont)
 	{
+        const bool fCharCont = pCont && pCont->IsChar();
         if (fCharCont && pCont->IsDisconnected())
         {
             const auto pCharCont = static_cast<const CChar*>(pCont);
@@ -6133,12 +6144,15 @@ bool CItem::_CanTick() const
 
         return CObjBase::_CanTick();
 	}
-    else if (IsAttr(ATTR_DECAY) && !pCont)
+
+    if (IsAttr(ATTR_DECAY) && !pCont)
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
         return CObjBase::_CanTick();
     }
-    else if (fCharCont && !pCont->CanTick())
+
+    const bool fCharCont = pCont && pCont->IsChar();
+    if (fCharCont && !pCont->CanTick())
     {
         // Is it equipped on a Char?
         return false;

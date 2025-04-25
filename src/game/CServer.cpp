@@ -11,6 +11,7 @@
 	#include "../common/crashdump/crashdump.h"
 #endif
 
+#include "../common/sphere_library/sstring.h"
 #include "../common/crypto/CCryptoKeyCalc.h"
 #include "../common/CException.h"
 #include "../common/CExpression.h"

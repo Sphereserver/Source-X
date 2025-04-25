@@ -18,7 +18,7 @@ class CItemCorpse : public CItemContainer
 public:
 	static const char *m_sClassName;
 	CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef );
-	virtual ~CItemCorpse();
+    virtual ~CItemCorpse() override = default;
 
     CItemCorpse(const CItemCorpse& copy) = delete;
     CItemCorpse& operator=(const CItemCorpse& other) = delete;
@@ -26,7 +26,7 @@ public:
 public:
 	bool IsCorpseResurrectable(CChar* pCharHealer, CChar* pCharGhost) const;
 	CChar * IsCorpseSleeping() const;
-	int GetWeight(word amount = 0) const;
+    virtual int GetWeight(word amount = 0) const override;
 };
 
 
