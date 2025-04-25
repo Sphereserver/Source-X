@@ -57,25 +57,25 @@ void CWorldTickingList::ClearTickingLists() // static
 {
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vWorldObjsTicks.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock(g_World._Ticker._vTimedObjsTimeouts.MT_CMUTEX);
 #endif
-        for (auto& cont = g_World._Ticker._vWorldObjsTicks; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vTimedObjsTimeouts; auto& elem : cont) {
             DEBUG_ASSERT(elem.second->_fIsInWorldTickAddList == false);
             elem.second->_fIsInWorldTickList = false;
         }
-        for (auto& cont = g_World._Ticker._vWorldObjsAddRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vTimedObjsTimeoutsAddReq; auto& elem : cont) {
             DEBUG_ASSERT(elem.second->_fIsInWorldTickList == false);
             elem.second->_fIsInWorldTickAddList = false;
         }
 #ifdef _DEBUG
-        for (auto& cont = g_World._Ticker._vWorldObjsEraseRequests; auto& elem : cont) {
+        for (auto& cont = g_World._Ticker._vTimedObjsTimeoutsEraseReq; auto& elem : cont) {
             DEBUG_ASSERT(elem->_fIsInWorldTickList == false);
             DEBUG_ASSERT(elem->_fIsInWorldTickAddList == false);
         }
 #endif
-        g_World._Ticker._vWorldObjsTicks.clear();
-        g_World._Ticker._vWorldObjsAddRequests.clear();
-        g_World._Ticker._vWorldObjsEraseRequests.clear();
+        g_World._Ticker._vTimedObjsTimeouts.clear();
+        g_World._Ticker._vTimedObjsTimeoutsAddReq.clear();
+        g_World._Ticker._vTimedObjsTimeoutsEraseReq.clear();
     }
     {
 #if MT_ENGINES

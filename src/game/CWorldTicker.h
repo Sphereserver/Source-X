@@ -29,11 +29,11 @@ private:
     {
         MT_CMUTEX_DEF;
     };
-    WorldTickList _vWorldObjsTicks;
-    std::vector<CTimedObject*> _vWorldObjsEraseRequests;
-    std::vector<TickingTimedObjEntry> _vWorldObjsAddRequests;
-    std::vector<TickingTimedObjEntry> _vWorldObjsElementBuffer;
-    std::vector<CTimedObject*> _vWorldObjsTicksBuffer;
+    WorldTickList _vTimedObjsTimeouts;
+    std::vector<CTimedObject*> _vTimedObjsTimeoutsEraseReq;
+    std::vector<TickingTimedObjEntry> _vTimedObjsTimeoutsAddReq;
+    std::vector<TickingTimedObjEntry> _vTimedObjsTimeoutsElementBuffer;
+    std::vector<CTimedObject*> _vTimedObjsTimeoutsBuffer;
 
     // Calls to OnTickPeriodic. CChar regens and periodic checks.
     using TickingPeriodicCharEntry = std::pair<int64, CChar*>;

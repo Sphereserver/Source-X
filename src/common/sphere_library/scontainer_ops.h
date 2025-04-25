@@ -5,7 +5,7 @@
 #include <initializer_list>
 
 //#   define BENCHMARK_LISTS // TODO
-#define DEBUG_LIST_OPS
+//#define DEBUG_LIST_FUNCS
 
 namespace sl
 {
@@ -84,7 +84,7 @@ static void SortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std:
     if (vecMain.empty())
         return;
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
     const size_t sz = vecMain.size();
 
     ASSERT(sl::ContainerIsSorted(vecMain));
@@ -117,7 +117,7 @@ static void SortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std:
         vecMain.erase(vecMain.begin() + *itRemoveFirst, itRemoveLastPast);
     }
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
     // Sanity Check: Verify that the removed elements are no longer present in vecMain
     for (auto index : vecIndicesToRemove) {
         UnreferencedParameter(index);
@@ -157,7 +157,7 @@ static void UnsortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std
     if (vecValuesToRemove.empty())
         return;
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
     ASSERT(!sl::UnortedContainerHasDuplicates(vecMain));
     ASSERT(!sl::UnortedContainerHasDuplicates(vecValuesToRemove));
 #endif
@@ -176,7 +176,7 @@ static void UnsortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std
     // Erase the removed elements in one go
     vecMain.erase(it, vecMain.end());
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
     for (auto& elem : vecMain) {
         ASSERT(std::find(vecValuesToRemove.begin(), vecValuesToRemove.end(), elem) == vecValuesToRemove.end());
     }
@@ -340,7 +340,7 @@ static void UnsortedVecDifference(
     // Copy any remaining elements in vecMain after the last found element
     vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, vecMain.end());
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
     ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
 #endif
 
@@ -353,7 +353,7 @@ static void SortedVecRemoveAddQueued(
     std::vector<TPair> &vecMain, std::vector<TPair> &vecElemBuffer,
     std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd)
 {
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
     ASSERT(sl::ContainerIsSorted(vecMain));
     ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
 
@@ -378,7 +378,7 @@ static void SortedVecRemoveAddQueued(
         UnsortedVecDifference(vecMain, vecElemBuffer, vecToRemove);
         vecElemBuffer.clear();
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
         for (auto& elem : vecToRemove)
         {
             auto it = std::find_if(vecMain.begin(), vecMain.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
@@ -402,7 +402,7 @@ static void SortedVecRemoveAddQueued(
             std::back_inserter(vecElemBuffer)
             );
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
         ASSERT(vecElemBuffer.size() == vecMain.size() + vecToAdd.size());
 #endif
 
@@ -410,7 +410,7 @@ static void SortedVecRemoveAddQueued(
         //vecMain = std::move(vecElemBuffer);
         vecElemBuffer.clear();
 
-#ifdef DEBUG_LIST_OPS
+#ifdef DEBUG_LIST_FUNCS
         ASSERT(sl::ContainerIsSorted(vecMain));
         ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
 #endif
