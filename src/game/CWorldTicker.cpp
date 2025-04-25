@@ -8,6 +8,7 @@
 #include "CWorldClock.h"
 #include "CWorldGameTime.h"
 #include "CWorldTicker.h"
+#include <unordered_set>
 
 #if defined _DEBUG || defined _NIGHTLYBUILD
 #   define DEBUG_CTIMEDOBJ_TIMED_TICKING
@@ -18,6 +19,153 @@
 //#define TIMEDOBJS_COUNTER
 //#define CHAR_PERIODIC_COUNTER
 //#define STATUS_UPDATES_COUNTER
+
+
+template <typename TPair, typename T>
+static void UnsortedVecDifference(
+    std::vector<TPair>      & vecMain,
+    std::vector<TPair>      & vecElemBuffer,
+    std::vector<T*>    const& vecToRemove)
+{
+    ASSERT(vecElemBuffer.empty());
+
+    // Reserve space in vecElemBuffer to avoid reallocations
+    vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
+
+    /*
+    // IMPLEMENTATION 1: linear, no bulk insertions
+    // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemove
+    for (const auto& elem : vecMain) {
+        if (std::find(vecToRemove.begin(), vecToRemove.end(), elem.second) == vecToRemove.end()) {
+            vecElemBuffer.push_back(elem);
+        }
+    }
+    */
+
+    if (vecToRemove.size() < 40 /*arbitrary number, this has to be benchmarked*/)
+    {
+        // IMPLEMENTATION 2: linear, with bulk insertions
+        // We can do it because iterating through every vecToRemove element isn't so slow.
+
+        // Use an iterator to store the position for bulk insertion
+        auto itCopyFromThis = vecMain.begin();
+
+        // Iterate through vecMain, copying elements that are not in vecToRemove
+        for (auto itMain = vecMain.begin(); itMain != vecMain.end(); ++itMain)
+        {
+            // Perform a linear search for the current element's pointer in vecToRemove
+            auto itTemp = std::find(vecToRemove.begin(), vecToRemove.end(), itMain->second);
+            if (itTemp != vecToRemove.end())
+            {
+                // If the element is found in vecToRemove, copy elements before it
+                vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, itMain); // Copy up to but not including itMain
+
+                // Move itCopyFromThis forward to the next element
+                itCopyFromThis = itMain + 1; // Move to the next element after itMain
+            }
+        }
+
+        // Copy any remaining elements in vecMain after the last found element
+        vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, vecMain.end());
+    }
+    else
+    {
+        static std::unordered_set<T*> removeSet;
+        removeSet.clear();
+        removeSet.reserve(vecToRemove.size());
+        //removeSet.max_load_factor(0.75f);
+
+        for (auto* ptr : vecToRemove) {
+            removeSet.insert(ptr);
+        }
+
+        std::copy_if(vecMain.cbegin(), vecMain.cend(), std::back_inserter(vecElemBuffer),
+            [](const TPair& pair) constexpr {
+                return removeSet.find(pair.second) == removeSet.end();
+            });
+    }
+
+#ifdef DEBUG_LIST_OPS
+    ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
+#endif
+
+    vecMain.swap(vecElemBuffer);
+}
+
+
+template <typename TPair, typename T>
+static void SortedVecRemoveAddQueued(
+    std::vector<TPair> &vecMain, std::vector<TPair> &vecElemBuffer,
+    std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd)
+{
+#ifdef DEBUG_LIST_OPS
+    ASSERT(sl::ContainerIsSorted(vecMain));
+    ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
+
+    //ASSERT(sl::ContainerIsSorted(vecToRemove));
+    //ASSERT(!sl::SortedContainerHasDuplicates(vecToRemove));
+
+    ASSERT(sl::ContainerIsSorted(vecToAdd));
+    ASSERT(!sl::SortedContainerHasDuplicates(vecToAdd));
+#endif
+
+    if (!vecToRemove.empty())
+    {
+        if (vecMain.empty()) {
+            ASSERT(false);  // Shouldn't ever happen.
+        }
+
+        vecElemBuffer.clear();
+        vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
+
+        // Unsorted custom algorithm.
+        // We can't use a classical sorted algorithm because vecMain is sorted by pair.first (int64 timeout)
+        //  but vecToRemove is sorted by the pointer value!
+        UnsortedVecDifference(vecMain, vecElemBuffer, vecToRemove);
+        vecElemBuffer.clear();
+
+#ifdef DEBUG_LIST_OPS
+        for (auto& elem : vecToRemove)
+        {
+            auto it = std::find_if(vecMain.begin(), vecMain.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
+            UnreferencedParameter(it);
+            ASSERT (it == vecMain.end());
+        }
+
+        ASSERT(sl::ContainerIsSorted(vecMain));
+        ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
+#endif
+    }
+
+    if (!vecToAdd.empty())
+    {
+        vecElemBuffer.clear();
+        vecElemBuffer.reserve(vecMain.size() + vecToAdd.size());
+
+        // MergeSort
+        std::merge(
+            vecMain.begin(), vecMain.end(),
+            vecToAdd.begin(), vecToAdd.end(),
+            std::back_inserter(vecElemBuffer)
+            );
+
+#ifdef DEBUG_LIST_OPS
+        ASSERT(vecElemBuffer.size() == vecMain.size() + vecToAdd.size());
+#endif
+
+        vecMain.swap(vecElemBuffer);
+        vecElemBuffer.clear();
+
+#ifdef DEBUG_LIST_OPS
+        ASSERT(sl::ContainerIsSorted(vecMain));
+        ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
+#endif
+
+    }
+}
+
+
+// ----
 
 CWorldTicker::CWorldTicker(CWorldClock *pClock) :
     _pWorldClock(nullptr),
@@ -579,54 +727,6 @@ bool CWorldTicker::DelCharTicking(CChar* pChar, bool fNeedsLock)
 
     UnreferencedParameter(fNeedsLock);
 
-// DEBUG the IsPeriodicTickPending method, double check to ensure it works properly.
-/*
-    bool fIsTickPending;
-#if MT_ENGINES
-    if (fNeedsLock)
-    {
-        std::unique_lock<std::shared_mutex> lock(pChar->MT_CMUTEX);
-        fIsTickPending = !pChar->IsPeriodicTickPending();
-    }
-    else
-#endif
-    {
-        fIsTickPending = !pChar->IsPeriodicTickPending();
-    }
-
-    if (fIsTickPending)
-    {
-#ifdef DEBUG_CCHAR_PERIODIC_TICKING
-        auto fnFindEntryByChar = [pChar](const TickingPeriodicCharEntry& entry) noexcept {
-                return entry.second == pChar;
-        };
-
-        const auto itEntryInEraseList = std::find(
-            _vPeriodicCharsEraseRequests.begin(),
-            _vPeriodicCharsEraseRequests.end(),
-            pChar);
-        if (itEntryInEraseList != _vPeriodicCharsEraseRequests.end())
-        {
-            ASSERT(false);
-            return false;
-        }
-
-        const auto itEntryInTickList = std::find_if(
-            _vPeriodicCharsTicks.begin(),
-            _vPeriodicCharsTicks.end(),
-            fnFindEntryByChar);
-        if (itEntryInTickList != _vPeriodicCharsTicks.end())
-        {
-            ASSERT(false);
-            return false;
-        }
-#endif
-
-        ASSERT(false);
-        return false;
-    }
-*/
-
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
 #if MT_ENGINES
     if (fNeedsLock)
@@ -965,7 +1065,7 @@ void CWorldTicker::ProcessTimedObjects()
             _vTimedObjsTimeoutsElementBuffer.clear();
             std::sort(_vTimedObjsTimeoutsEraseReq.begin(), _vTimedObjsTimeoutsEraseReq.end());
             std::sort(_vTimedObjsTimeoutsAddReq.begin(), _vTimedObjsTimeoutsAddReq.end());
-            sl::SortedVecRemoveAddQueued(_vTimedObjsTimeouts, _vTimedObjsTimeoutsElementBuffer, _vTimedObjsTimeoutsEraseReq, _vTimedObjsTimeoutsAddReq);
+            SortedVecRemoveAddQueued(_vTimedObjsTimeouts, _vTimedObjsTimeoutsElementBuffer, _vTimedObjsTimeoutsEraseReq, _vTimedObjsTimeoutsAddReq);
             EXC_CATCHSUB("");
         }
 
@@ -1182,7 +1282,7 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             _vPeriodicCharsElementBuffer.clear();
             std::sort(_vPeriodicCharsEraseRequests.begin(), _vPeriodicCharsEraseRequests.end());
             std::sort(_vPeriodicCharsAddRequests.begin(), _vPeriodicCharsAddRequests.end());
-            sl::SortedVecRemoveAddQueued(_vPeriodicCharsTicks, _vPeriodicCharsElementBuffer, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests);
+            SortedVecRemoveAddQueued(_vPeriodicCharsTicks, _vPeriodicCharsElementBuffer, _vPeriodicCharsEraseRequests, _vPeriodicCharsAddRequests);
 
             ASSERT(sl::ContainerIsSorted(_vPeriodicCharsTicks));
             ASSERT(!sl::SortedContainerHasDuplicates(_vPeriodicCharsTicks));

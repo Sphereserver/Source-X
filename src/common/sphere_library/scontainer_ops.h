@@ -96,6 +96,8 @@ static void SortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std:
     std::vector<T> originalVecMain = vecMain;
 #endif
 
+/*
+    // IMPLEMENTATION 1
     // Start from the end of vecIndicesToRemove, working backwards with normal iterators
     auto itRemoveFirst = vecIndicesToRemove.end();  // Points one past the last element
     while (itRemoveFirst != vecIndicesToRemove.begin())
@@ -116,6 +118,44 @@ static void SortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std:
         auto itRemoveLastPast = (*itRemoveLast == vecMain.size() - 1) ? vecMain.end() : (vecMain.begin() + *itRemoveLast + 1);
         vecMain.erase(vecMain.begin() + *itRemoveFirst, itRemoveLastPast);
     }
+*/
+
+    // IMPLEMENTATION 2.
+    // Move and swap the elements in memory and remove in one pass the discarded elements at the end of the vector.
+    // (like std::remove + std::erase does)
+
+    size_t writeIdx = 0;  // position to write kept elements
+    size_t prevIdx = 0;   // start index of next block to keep
+
+    // Process each index to remove
+
+    // Hints for std::move:
+    // template< class InputIt, class OutputIt >
+    // OutputIt move( InputIt first, InputIt last, OutputIt d_first );
+    //   Moves the elements in the range [first, last), to another range beginning at d_first, starting from first and proceeding to last.
+    //   After this operation the elements in the moved-from range will still contain valid values of the appropriate type, but not necessarily the same values as before the move.
+
+    for (size_t idx : vecIndicesToRemove)
+    {
+        // Move block of elements from prevIdx up to (but not including) idx
+        if (prevIdx < idx)
+        {
+            std::move(vecMain.begin() + prevIdx, vecMain.begin() + idx, vecMain.begin() + writeIdx);
+            writeIdx += idx - prevIdx;
+        }
+        // Skip the element at idx (to remove)
+        prevIdx = idx + 1;
+    }
+
+    // Move any remaining elements after the last removed index
+    if (prevIdx < vecMain.size())
+    {
+        std::move(vecMain.begin() + prevIdx, vecMain.end(), vecMain.begin() + writeIdx);
+        writeIdx += vecMain.size() - prevIdx;
+    }
+
+    // Erase the leftover elements
+    vecMain.erase(vecMain.begin() + writeIdx, vecMain.end());
 
 #ifdef DEBUG_LIST_FUNCS
     // Sanity Check: Verify that the removed elements are no longer present in vecMain
@@ -126,29 +166,6 @@ static void SortedVecRemoveElementsByIndices(std::vector<T>& vecMain, const std:
     }
     ASSERT(vecMain.size() == sz - vecIndicesToRemove.size());
 #endif
-
-
-    /*
-    // Alternative implementation:
-    // We cannot use a vector with the indices but we need a vector with a copy of the elements to remove.
-    // std::remove_if in itself is more efficient than multiple erase calls, because the number of the element shifts is lesser.
-    // Though, we need to consider the memory overhead of reading through an std::pair of two types, which is bigger than just an index.
-    // Also, jumping across the vector in a non-contiguous way with the binary search can add additional memory overhead by itself, and
-    //   this will be greater the bigger are the elements in the vector..
-    // The bottom line is that we need to run some benchmarks between the two algorithms, and possibly also for two versions of this algorithm,
-    //   one using binary search and another with linear search.
-    // The latter might actually be faster for a small number of elements, since it's more predictable for the prefetcher.
-
-    // Use std::remove_if to shift elements not marked for removal to the front
-    auto it = std::remove_if(vecMain.begin(), vecMain.end(),
-        [&](const T& element) {
-            // Check if the current element is in the valuesToRemove vector using binary search
-            return std::binary_search(valuesToRemove.begin(), valuesToRemove.end(), element);
-        });
-
-    // Erase the removed elements in one go
-    vecMain.erase(it, vecMain.end());
-    */
 }
 
 template <typename T>
@@ -222,203 +239,6 @@ static void sortedVecRemoveElementsByValues(std::vector<T>& vecMain, const std::
     vecMain.resize(destIt - vecMain.begin());
 }
 */
-
-/*
-template <typename TPair, typename T>
-static void sortedVecDifference(
-    const std::vector<TPair>& vecMain, const std::vector<T*>& vecToRemove, std::vector<TPair>& vecElemBuffer
-    )
-{
-    auto itMain = vecMain.begin();    // Iterator for vecMain
-    auto start = itMain;              // Start marker for non-matching ranges in vecMain
-
-    for (auto& elem : vecToRemove) {
-        g_Log.EventDebug("Should remove %p.\n", (void*)elem);
-    }
-    for (auto& elem : vecMain) {
-        g_Log.EventDebug("VecMain %p.\n", (void*)elem.second);
-    }
-
-    // Iterate through each element in vecToRemove to locate and exclude its matches in vecMain
-    for (const auto& removePtr : vecToRemove) {
-        // Binary search to find the start of the block where vecMain.second == removePtr
-        itMain = std::lower_bound(itMain, vecMain.end(), removePtr,
-            [](const TPair& lhs, const T* rhs) noexcept {
-                return lhs.second < rhs;  // Compare TPair.second with T*
-            });
-
-        // Insert all elements from `start` up to `itMain` (non-matching elements)
-        vecElemBuffer.insert(vecElemBuffer.end(), start, itMain);
-
-        // Skip over all contiguous elements in vecMain that match removePtr
-        while (itMain != vecMain.end() && itMain->second == removePtr) {
-            ++itMain;
-        }
-
-        // Update `start` to the new non-matching range after any matching elements are skipped
-        start = itMain;
-    }
-
-    // Insert remaining elements from vecMain after the last matched element
-    vecElemBuffer.insert(vecElemBuffer.end(), start, vecMain.end());
-
-    for (auto& elem : vecMain) {
-        g_Log.EventDebug("VecMain %p.\n", (void*)elem.second);
-    }
-}
-*/
-
-template <typename TPair, typename T>
-static void UnsortedVecDifference(
-    std::vector<TPair>      & vecMain,
-    std::vector<TPair>      & vecElemBuffer,
-    std::vector<T*>    const& vecToRemove)
-{
-    /*
-    // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemove
-    for (const auto& elem : vecMain) {
-        if (std::find(vecToRemove.begin(), vecToRemove.end(), elem.second) == vecToRemove.end()) {
-            vecElemBuffer.push_back(elem);
-        }
-    }
-    */
-    // vecMain is sorted by timeout (first elem of the pair), not by pointer (second elem)
-    // vecToRemove is sorted by its contents (pointer)
-
-    // Reserve space in vecElemBuffer to avoid reallocations
-    vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
-
-    // Use an iterator to store the position for bulk insertion
-    auto itCopyFromThis = vecMain.begin();
-    /*
-    auto itFindBegin = vecToRemove.begin();
-
-    // Iterate through vecMain, copying elements that are not in vecToRemove
-    for (auto itMain = vecMain.begin(); itMain != vecMain.end(); ++itMain)
-    {
-        // Perform a linear search for the current element's pointer in vecToRemove
-        auto itTemp = std::find(itFindBegin, vecToRemove.end(), itMain->second);
-        if (itTemp != vecToRemove.end())
-        {
-            // If the element is found in vecToRemove, copy elements before it
-            vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, itMain); // Copy up to but not including itMain
-
-            // Move itCopyFromThis forward to the next element
-            itCopyFromThis = itMain + 1;
-            //itFindBegin = itTemp + 1;
-
-            // Update itFindBegin to continue searching for the next instance in vecToRemove
-            // We do not change itFindBegin here, since we want to keep searching for this pointer
-            // in vecToRemove for subsequent elements in vecMain
-        }
-        else
-        {
-            // If itTemp is not found, we can still copy the current element
-            // Check if itCopyFromThis is equal to itMain to avoid double-copying in case of duplicates
-            if (itCopyFromThis != itMain)
-            {
-                // Move itCopyFromThis forward to the next element
-                itCopyFromThis = itMain + 1;
-            }
-        }
-    }*/
-
-    // TODO: maybe optimize this algorithm.
-    // Iterate through vecMain, copying elements that are not in vecToRemove
-    for (auto itMain = vecMain.begin(); itMain != vecMain.end(); ++itMain) {
-        // Perform a linear search for the current element's pointer in vecToRemove
-        auto itTemp = std::find(vecToRemove.begin(), vecToRemove.end(), itMain->second);
-        if (itTemp != vecToRemove.end()) {
-            // If the element is found in vecToRemove, copy elements before it
-            vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, itMain); // Copy up to but not including itMain
-
-            // Move itCopyFromThis forward to the next element
-            itCopyFromThis = itMain + 1; // Move to the next element after itMain
-        }
-    }
-
-    // Copy any remaining elements in vecMain after the last found element
-    vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, vecMain.end());
-
-#ifdef DEBUG_LIST_FUNCS
-    ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
-#endif
-
-    //vecMain = std::move(vecElemBuffer);
-    vecMain.swap(vecElemBuffer);
-}
-
-template <typename TPair, typename T>
-static void SortedVecRemoveAddQueued(
-    std::vector<TPair> &vecMain, std::vector<TPair> &vecElemBuffer,
-    std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd)
-{
-#ifdef DEBUG_LIST_FUNCS
-    ASSERT(sl::ContainerIsSorted(vecMain));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-
-    ASSERT(sl::ContainerIsSorted(vecToRemove));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecToRemove));
-
-    ASSERT(sl::ContainerIsSorted(vecToAdd));
-    ASSERT(!sl::SortedContainerHasDuplicates(vecToAdd));
-#endif
-
-    if (!vecToRemove.empty())
-    {
-        if (vecMain.empty()) {
-            ASSERT(false);  // Shouldn't ever happen.
-        }
-
-        // TODO: test and benchmark if the approach of the above function (sortedVecRemoveElementsInPlace) might be faster.
-        vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
-
-        // TODO: use a sorted algorithm?
-        UnsortedVecDifference(vecMain, vecElemBuffer, vecToRemove);
-        vecElemBuffer.clear();
-
-#ifdef DEBUG_LIST_FUNCS
-        for (auto& elem : vecToRemove)
-        {
-            auto it = std::find_if(vecMain.begin(), vecMain.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
-            UnreferencedParameter(it);
-            ASSERT (it == vecMain.end());
-        }
-
-        ASSERT(sl::ContainerIsSorted(vecMain));
-        ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-#endif
-    }
-
-    if (!vecToAdd.empty())
-    {
-        vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() + vecToAdd.size());
-        // MergeSort
-        std::merge(
-            vecMain.begin(), vecMain.end(),
-            vecToAdd.begin(), vecToAdd.end(),
-            std::back_inserter(vecElemBuffer)
-            );
-
-#ifdef DEBUG_LIST_FUNCS
-        ASSERT(vecElemBuffer.size() == vecMain.size() + vecToAdd.size());
-#endif
-
-        vecMain.swap(vecElemBuffer);
-        //vecMain = std::move(vecElemBuffer);
-        vecElemBuffer.clear();
-
-#ifdef DEBUG_LIST_FUNCS
-        ASSERT(sl::ContainerIsSorted(vecMain));
-        ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
-#endif
-
-    }
-
-    //EXC_CATCH:
-}
 
 
 } // namespace sl
