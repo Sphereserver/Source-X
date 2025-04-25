@@ -463,6 +463,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	argv[0] = nullptr;
 	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " \t") + 1;
 
+    // Process the command line arguments.
+    if (argc > 1 && _IS_SWITCH(*argv[1]))
+    {
+        // Check if we are changing ini path.
+        if (toupper(argv[1][1]) == 'I')
+        {
+            if (argc == 3)
+            {
+                // Define path to ini files.
+                g_Cfg.SetIniDirectory(argv[2]);
+            }
+        }
+    }
+
 	// We need to find out what the server name is and the log files folder... look it up in the .ini file
     if (!g_Cfg.LoadIni(false))
     {

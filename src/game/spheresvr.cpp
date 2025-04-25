@@ -507,6 +507,26 @@ int main( int argc, char * argv[] )
 
     // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
     g_Serv.SetServerMode(SERVMODE_PreLoadingINI);
+
+    // Parse command line arguments.
+    for (int argn = 1; argn < argc; ++argn)
+    {
+        const tchar * cliArg = argv[argn];
+        if (! _IS_SWITCH(cliArg[0]))
+        {
+            continue;
+        }
+
+        ++cliArg;
+
+        // Check if we are changing ini path.
+        if (toupper(cliArg[0]) == 'I')
+        {
+            // Define path to ini files.
+            g_Cfg.SetIniDirectory(cliArg + 2);
+        }
+    }
+
     g_Cfg.LoadIni(false);
 #endif
 

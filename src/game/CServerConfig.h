@@ -650,9 +650,11 @@ public:
 
 private:
 	CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
+    char m_iniDirectory[SPHERE_MAX_PATH];
 
 public:
 	CServerConfig();
+    void SetIniDirectory(const char* path);
 	virtual ~CServerConfig();
 
 	CServerConfig(const CServerConfig& copy) = delete;

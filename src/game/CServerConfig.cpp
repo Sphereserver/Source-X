@@ -47,6 +47,8 @@
 // .ini settings.
 CServerConfig::CServerConfig()
 {
+    m_iniDirectory[0] = '\0';
+
 	m_timePeriodic = 0;
 
 	m_fUseNTService		= false;
@@ -1039,6 +1041,15 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
 #endif
+
+void CServerConfig::SetIniDirectory(const char* path)
+{
+    if (path && path[0] != '\0')
+    {
+        strncpy(m_iniDirectory, path, SPHERE_MAX_PATH - 1);
+        m_iniDirectory[SPHERE_MAX_PATH - 1] = '\0';
+    }
+}
 
 bool CServerConfig::r_LoadVal( CScript &s )
 {
@@ -4550,8 +4561,24 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 bool CServerConfig::LoadIni( bool fTest )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
+
+    char filename[SPHERE_MAX_PATH] = SPHERE_FILE ".ini";
+    // Check, if CLI argument -S /path/to/ini/directory/ was used.
+    if (m_iniDirectory[0] != '\0')
+    {
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s/" SPHERE_FILE ".ini", m_iniDirectory);
+        if (ret < 0)
+        {
+            abort();
+        }
+    }
+    else
+    {
+        strncpy(filename, SPHERE_FILE ".ini", SPHERE_MAX_PATH);
+    }
+
 	// Load my INI file first.
-	if ( ! OpenResourceFind( m_scpIni, SPHERE_FILE ".ini", !fTest )) // Open script file
+	if ( ! OpenResourceFind( m_scpIni, filename, !fTest )) // Open script file
 	{
 		if( !fTest )
 		{
@@ -4571,7 +4598,23 @@ bool CServerConfig::LoadIni( bool fTest )
 bool CServerConfig::LoadCryptIni( void )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadCryptIni");
-	if ( ! OpenResourceFind( m_scpCryptIni, SPHERE_FILE "Crypt.ini", false ) )
+
+    char filename[SPHERE_MAX_PATH] = SPHERE_FILE "Crypt.ini";
+    // Check, if CLI argument -I /path/to/ini/directory/ was used.
+    if (m_iniDirectory[0] != '\0')
+    {
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s/sphereCrypt.ini", m_iniDirectory);
+        if (ret < 0)
+        {
+            abort();
+        }
+    }
+    else
+    {
+        strncpy(filename, SPHERE_FILE "Crypt.ini", SPHERE_MAX_PATH);
+    }
+
+    if ( ! OpenResourceFind( m_scpCryptIni, filename, false ) )
 	{
 		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
 		return false;

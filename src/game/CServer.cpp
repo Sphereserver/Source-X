@@ -2350,8 +2350,6 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
 #ifdef _WIN32
 			case 'C':
 			case 'K':
-				//	these are parsed in other places - nt service, nt window part, etc
-				continue;
             case 'J':
                 g_Serv._fCloseNTWindowOnTerminate = true;
                 continue;
@@ -2360,6 +2358,9 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
 				g_UnixTerminal.setColorEnabled(false);
 				continue;
 #endif
+		    // Ini path definition, needs to be parsed before loading ini.
+		    case 'I':
+		        continue;
 			case 'P':
 				m_ip.SetPort((word)(atoi(pArg + 1)));
 				continue;
