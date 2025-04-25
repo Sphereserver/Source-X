@@ -48,7 +48,7 @@ private:
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
-    CSString _sRunningTrigger;   // Name of the running trigger (can be custom!) TOOD: use CSString (less size in memory) and make it allocate the buffer on demand.
+    CSString _sRunningTrigger;   // Name of the running trigger (can be custom!)
     short _iRunningTriggerId;       // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
     short _iCallingObjTriggerId;    // I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 

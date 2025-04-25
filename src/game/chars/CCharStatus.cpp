@@ -374,6 +374,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
                 case IT_CONTAINER:
                 case IT_CONTAINER_LOCKED:
                     fCantEquip = false;
+                default:
                     break;
             }
             break;
@@ -590,6 +591,8 @@ NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const noexcept
 		case CREID_BULL_FROG:
 		case CREID_DOLPHIN:
 			return NPCBRAIN_ANIMAL;
+        default:
+            break;
 	}
 
 	if (id >= CREID_IRON_GOLEM)
