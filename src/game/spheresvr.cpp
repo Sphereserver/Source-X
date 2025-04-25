@@ -246,14 +246,21 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_TRY("Init Server");
     GlobalInitializer::InitRuntimeDefaultValues();
 
+    if ( argc > 1 )
+    {
+        EXC_SET_BLOCK("cmdline pre-init");
+        if ( !g_Serv.CommandLinePreLoad(argc, argv) )
+            return -1;
+    }
+
     EXC_SET_BLOCK("loading ini and scripts");
 	if ( !g_Serv.Load() )
 		return -3;
 
 	if ( argc > 1 )
 	{
-		EXC_SET_BLOCK("cmdline");
-		if ( !g_Serv.CommandLine(argc, argv) )
+        EXC_SET_BLOCK("cmdline post-init");
+        if ( !g_Serv.CommandLinePostLoad(argc, argv) )
 			return -1;
 	}
 
