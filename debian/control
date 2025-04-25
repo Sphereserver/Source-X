@@ -1,7 +1,7 @@
 Source: sphereserver
 Section: net
 Priority: optional
-Maintainer: SphereServer development team <you@example.com>
+Maintainer: SphereServer development team <placeholder@sphereserver.net>
 Build-Depends: debhelper-compat (= 13), cmake, libmariadb-dev, git
 Standards-Version: 4.7.2
 Vcs-Browser: https://github.com/Sphereserver/Source-X
