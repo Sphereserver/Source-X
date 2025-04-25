@@ -637,7 +637,7 @@ bool AbstractThread::checkStuck()
 		else if( m_hangCheck == 0xDEADDEADl )
 		{
 			//	TODO:
-			//g_Log.Event(LOGL_CRIT, "'%s' thread hang, restarting...\n", m_name);
+            g_Log.Event(LOGL_CRIT, "'%s' thread hang, restarting...\n", m_name);
 			#ifdef THREAD_TRACK_CALLSTACK
 				static_cast<AbstractSphereThread*>(this)->printStackTrace();
 			#endif
@@ -776,15 +776,13 @@ void AbstractThread::setThreadName(const char* name)
  * AbstractSphereThread
 */
 AbstractSphereThread::AbstractSphereThread(const char *name, ThreadPriority priority)
-	: AbstractThread(name, priority)
-{
+    : AbstractThread(name, priority)
 #ifdef THREAD_TRACK_CALLSTACK
-	m_stackPos = -1;
-	memset(m_stackInfo, 0, sizeof(m_stackInfo));
-	m_freezeCallStack = false;
-    m_exceptionStackUnwinding = false;
+    , m_stackInfo{}, m_stackInfoCopy{}, m_iStackPos(-1),
+    m_fFreezeCallStack(false),
+    m_iStackUnwindingStackPos(-1), m_iCaughtExceptionStackPos(-1)
 #endif
-
+{
 	// profiles that apply to every thread
 	m_profile.EnableProfile(PROFILE_IDLE);
 	m_profile.EnableProfile(PROFILE_OVERHEAD);
@@ -793,7 +791,7 @@ AbstractSphereThread::AbstractSphereThread(const char *name, ThreadPriority prio
 
 AbstractSphereThread::~AbstractSphereThread()
 {
-	_fIsClosing = true;
+    AbstractThread::_fIsClosing = true;
 }
 
 char *AbstractSphereThread::allocateBuffer() noexcept
@@ -874,57 +872,59 @@ bool AbstractSphereThread::shouldExit() noexcept
 	return AbstractThread::shouldExit();
 }
 
-void AbstractSphereThread::exceptionCaught()
-{
 #ifdef THREAD_TRACK_CALLSTACK
-    if (m_exceptionStackUnwinding == false)
-        printStackTrace();
-    else
-        m_exceptionStackUnwinding = false;
-#endif
+void AbstractSphereThread::signalExceptionCaught() noexcept
+{
+    if (m_iStackPos < 0 || (m_iStackPos >= (ssize_t)ARRAY_COUNT(m_stackInfo)))
+        return;
+    m_iCaughtExceptionStackPos = std::max(m_iStackPos, m_iCaughtExceptionStackPos);
+
+    printStackTrace();
+
+    memset(m_stackInfoCopy, 0, sizeof(m_stackInfo));
+    m_iCaughtExceptionStackPos = -1;
+    m_iStackUnwindingStackPos = -1;
 }
 
-#ifdef THREAD_TRACK_CALLSTACK
+void AbstractSphereThread::signalExceptionStackUnwinding() noexcept
+{
+    //ASSERT(isCurrentThread());
+    if (m_iStackPos < 0 || (m_iStackPos >= (ssize_t)ARRAY_COUNT(m_stackInfo)))
+        return;
+    m_iStackUnwindingStackPos = std::max(m_iStackPos, m_iStackUnwindingStackPos);
+    memcpy(m_stackInfoCopy, m_stackInfo, sizeof(m_stackInfo));
+}
+
 static thread_local ssize_t _stackpos = -1;
 void AbstractSphereThread::pushStackCall(const char *name) noexcept
 {
-    if (m_freezeCallStack == true) [[unlikely]] {
+    if (m_fFreezeCallStack == true) [[unlikely]] {
         return;
     }
 
 #ifdef _DEBUG
-    if (m_stackPos < -1) [[unlikely]] {
+    if (m_iStackPos < -1) [[unlikely]] {
         RaiseImmediateAbort();
     }
-    if (m_stackPos >= (ssize_t)sizeof(m_stackInfo)) [[unlikely]] {
+    if (m_iStackPos >= (ssize_t)ARRAY_COUNT(m_stackInfo)) [[unlikely]] {
         RaiseImmediateAbort();
     }
 #endif
 
-    ++m_stackPos;
-    _stackpos = m_stackPos;
-    m_stackInfo[m_stackPos].functionName = name;
+    ++m_iStackPos;
+    _stackpos = m_iStackPos;
+    m_stackInfo[m_iStackPos].functionName = name;
 }
 
 void AbstractSphereThread::popStackCall() NOEXCEPT_NODEBUG
 {
-    if (m_freezeCallStack == true)
+    if (m_fFreezeCallStack == true)
         return;
 
-    --m_stackPos;
-    _stackpos = m_stackPos;
-    ASSERT(m_stackPos >= -1);
+    --m_iStackPos;
+    _stackpos = m_iStackPos;
+    DEBUG_ASSERT(m_iStackPos >= -1);
 
-}
-
-void AbstractSphereThread::exceptionNotifyStackUnwinding() noexcept
-{
-    //ASSERT(isCurrentThread());
-    if (m_exceptionStackUnwinding == false)
-    {
-        m_exceptionStackUnwinding = true;
-        printStackTrace();
-    }
 }
 
 void AbstractSphereThread::printStackTrace() noexcept
@@ -937,25 +937,44 @@ void AbstractSphereThread::printStackTrace() noexcept
 
     //EXC_NOTIFY_DEBUGGER;
 
+    auto& stackInfo = (m_stackInfoCopy[0].functionName != nullptr) ? m_stackInfoCopy : m_stackInfo;
+
 	g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-    g_Log.EventDebug(" _ thread (id) name _ |  # | _____________ function _____________ |\n");
-	for ( ssize_t i = 0; i < (ssize_t)ARRAY_COUNT(m_stackInfo); ++i )
+    g_Log.EventDebug(" ______ thread (id) name _____ |   # | _____________ function _____________ |\n");
+    for ( ssize_t i = 0; i < (ssize_t)ARRAY_COUNT(m_stackInfoCopy); ++i )
 	{
-		if( m_stackInfo[i].functionName == nullptr )
+        if( stackInfo[i].functionName == nullptr )
 			break;
 
-        const bool origin = (i == (m_stackPos - 1));
         lpctstr extra = " ";
+        if (i == m_iStackUnwindingStackPos) {
+            extra = "<-- last function call (stack unwinding began here)";
+        }
+        else if (i == m_iCaughtExceptionStackPos) {
+            if (m_iStackUnwindingStackPos == -1)
+                extra = "<-- exception catch point (below is guessed and could be incorrect!)";
+            else
+                extra = "<-- exception catch point";
+        }
+        /*
+        const bool origin = (i == (m_iStackPos - 1));
         if (origin)
         {
-            if (m_exceptionStackUnwinding)
+            if (m_uisignalExceptionStackUnwinding)
                 extra = "<-- last function call (stack unwinding began here)";
             else
                 extra = "<-- exception catch point (below is guessed and could be incorrect!)";
         }
+        */
 
-		g_Log.EventDebug("(%" PRIx64 ") %16.16s | %2u | %36.36s | %s\n",
-			threadId, threadName, (uint)i, m_stackInfo[i].functionName, extra);
+        g_Log.EventDebug("(%" PRIx64 ") %15.15s | %3u | %36.36s | %s\n",
+            threadId, threadName, (uint)i, stackInfo[i].functionName, extra);
+
+        if (i == m_iStackUnwindingStackPos)
+        {
+            // Stop logging/writing functions called after the exception throw...
+            break;
+        }
 	}
 
 	freezeCallStack(false);
@@ -1029,11 +1048,13 @@ StackDebugInformation::~StackDebugInformation() noexcept
 	if (!m_context || m_context->closing()) [[unlikely]]
 		return;
 
-    if (std::uncaught_exceptions() != 0)
-    [[unlikely]]
+    if (!m_context->isExceptionStackUnwinding())
     {
-        // Exception was thrown and stack unwinding is in progress.
-        m_context->exceptionNotifyStackUnwinding();
+        if (std::uncaught_exceptions() != 0) [[unlikely]]
+        {
+            // Exception was thrown and stack unwinding is in progress.
+            m_context->signalExceptionStackUnwinding();
+        }
     }
     m_context->popStackCall();
 }

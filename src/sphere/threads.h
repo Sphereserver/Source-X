@@ -212,7 +212,7 @@ public:
   public:
     static void setThreadName(const char* name);
 
-    bool closing() noexcept
+    bool closing() const noexcept
     {
         return _fIsClosing;
     }
@@ -254,13 +254,15 @@ class AbstractSphereThread : public AbstractThread
 #ifdef THREAD_TRACK_CALLSTACK
 	struct STACK_INFO_REC
 	{
-		const char *functionName;
+        const char *functionName;
 	};
 
-	STACK_INFO_REC m_stackInfo[0x1000];
-	ssize_t m_stackPos;
-	bool m_freezeCallStack;
-    bool m_exceptionStackUnwinding;
+    STACK_INFO_REC m_stackInfoCopy[0x500];
+    STACK_INFO_REC m_stackInfo[0x500];
+    ssize_t m_iStackPos;
+    bool m_fFreezeCallStack;
+    ssize_t m_iStackUnwindingStackPos;
+    ssize_t m_iCaughtExceptionStackPos;
 #endif
 
 public:
@@ -277,18 +279,17 @@ public:
 	// allocates a manageable String from the thread local storage
 	void getStringBuffer(TemporaryString &string) noexcept;
 
-    void exceptionCaught();
-
 #ifdef THREAD_TRACK_CALLSTACK
-	inline void freezeCallStack(bool freeze) noexcept
-	{
-		m_freezeCallStack = freeze;
-	}
+    void signalExceptionCaught() noexcept;
+    void signalExceptionStackUnwinding() noexcept;
+    inline bool isExceptionCaught() const noexcept;
+    inline bool isExceptionStackUnwinding() const noexcept;
+
+    inline void freezeCallStack(bool freeze) noexcept;
 
 	void pushStackCall(const char *name) noexcept;
 	void popStackCall() NOEXCEPT_NODEBUG;
 
-    void exceptionNotifyStackUnwinding() noexcept;
 	void printStackTrace() noexcept;
 #endif
 
@@ -297,6 +298,21 @@ public:
 protected:
 	virtual bool shouldExit() noexcept;
 };
+
+bool AbstractSphereThread::isExceptionCaught() const noexcept
+{
+    return (m_iCaughtExceptionStackPos >= 0);
+}
+
+bool AbstractSphereThread::isExceptionStackUnwinding() const noexcept
+{
+    return (m_iStackUnwindingStackPos >= 0);
+}
+
+void AbstractSphereThread::freezeCallStack(bool freeze) noexcept
+{
+    m_fFreezeCallStack = freeze;
+}
 
 // Dummy thread for context when no thread really exists. To be called only once, at startup.
 class DummySphereThread : public AbstractSphereThread
