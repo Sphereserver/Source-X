@@ -7,8 +7,6 @@
 #define _INC_THREADS_H
 
 #include "../common/common.h"
-#include "../common/sphere_library/sresetevents.h"
-#include "../common/sphere_library/sstringobjs.h"
 #include "../sphere/ProfileData.h"
 #include <atomic>
 #include <vector>
@@ -17,6 +15,7 @@
 	#include <pthread.h>
 #endif
 
+class TemporaryString;
 
 /**
  * Sphere threading system
@@ -45,7 +44,10 @@
 #endif
 
 class AbstractThread;
+class AutoResetEvent;
+class ManualResetEvent;
 
+/*
 // stores a value unique to each thread, intended to hold
 // a pointer (e.g. the current AbstractThread instance)
 template<class T>
@@ -130,6 +132,7 @@ T TlsValue<T>::get() const
 	return reinterpret_cast<T>(pthread_getspecific(_key));
 #endif
 }
+*/
 
 enum class ThreadPriority : int
 {
@@ -170,8 +173,9 @@ private:
 	uint m_hangCheck;
     ThreadPriority m_priority;
 	uint m_tickPeriod;
-	AutoResetEvent m_sleepEvent;
-	ManualResetEvent m_terminateEvent;
+    // PImpl
+    std::unique_ptr<AutoResetEvent> m_sleepEvent;
+    std::unique_ptr<ManualResetEvent> m_terminateEvent;
 
 public:
     AbstractThread(const char *name, ThreadPriority priority = ThreadPriority::Normal);
@@ -272,13 +276,19 @@ public:
 	AbstractSphereThread(const AbstractSphereThread& copy) = delete;
 	AbstractSphereThread& operator=(const AbstractSphereThread& other) = delete;
 
+    class Strings
+    {
+        friend class TemporaryString;
+        friend tchar* Str_GetTemp() noexcept;
+
+        // allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
+        static char *allocateBuffer() noexcept;
+
+        // allocates a manageable String from the thread local storage
+        static void getBuffer(TemporaryString &string) noexcept;
+    };
+
 public:
-	// allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
-	char *allocateBuffer() noexcept;
-
-	// allocates a manageable String from the thread local storage
-	void getStringBuffer(TemporaryString &string) noexcept;
-
 #ifdef THREAD_TRACK_CALLSTACK
     void signalExceptionCaught() noexcept;
     void signalExceptionStackUnwinding() noexcept;
