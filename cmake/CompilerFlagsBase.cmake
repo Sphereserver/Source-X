@@ -19,7 +19,9 @@ if(NOT MSVC)
         #-ffunction-sections
         #-fdata-sections
         #-flto # Supported even by ancient compilers... also needed to benefit the most from the two flags above.
+        -fvisibility=hidden
     )
+
     list(
         APPEND
         compiler_options_warning_base
@@ -33,8 +35,21 @@ if(NOT MSVC)
         -Wconversion
         -Wsign-conversion
         -Wduplicated-branches
+        -Wdisabled-optimization
+        -Winvalid-pch
+        -Wshadow
         #-Wcast-qual
         #-Wnrvo
+        -Wno-switch
+        -Wno-implicit-fallthrough
+        -Wno-unused-function
+        -Wno-format-security # TODO:  TODO: remove that when we'll have time to fix every printf format issue
+        -Wno-format-nonliteral # Since -Wformat=2 is stricter, you would need to disable this warning.
+        -Wno-misleading-indentation
+        -Wno-parentheses
+        -Wno-unused-result
+        -Wno-deprecated-declarations
+        -Wno-nested-anon-types
     )
 
     # Linker option flags (minimum).

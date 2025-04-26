@@ -49,7 +49,7 @@ endif()
 #
 # Check for unistd.h
 #
-check_include_file(unistd.h Z_HAVE_UNISTD_H)
+check_include_file(unistd.h HAVE_UNISTD_H)
 
 configure_file(	zlib/zconf.h.cmakein
 		zlib/zconf.h @ONLY)
