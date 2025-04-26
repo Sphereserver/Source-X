@@ -1,17 +1,20 @@
 include(CheckCXXCompilerFlag)
+include(CheckLinkerFlag)
+
 message(STATUS "Checking available compiler flags...")
 
 if(NOT MSVC)
     message(STATUS "-- Compilation options:")
 
-    # Linker flags (warnings).
-    #check_cxx_compiler_flag("-Wl,--fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V1)
-    #check_cxx_compiler_flag("-Wl,-fatal_warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V2)
+    # Linker flags.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-        set(COMP_LINKER_HAS_FATAL_WARNINGS_V2 TRUE)
+        check_linker_flag(CXX -Wl,-fatal_warnings LINKER_HAS_FATAL_WARN_APPLE)
     else()
-        set(COMP_LINKER_HAS_FATAL_WARNINGS_V1 TRUE)
+        # for some reason, Clang 17 blocks --fatal-warnings if using mold linker, even if it supports the flag.
+        check_linker_flag(CXX -Wl,--fatal-warnings LINKER_HAS_FATAL_WARN)
     endif()
+    check_linker_flag(CXX -Wl,--as-needed LINKER_HAS_AS_NEEDED)
+
 
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
     #check_cxx_compiler_flag("" COMP_HAS_)
@@ -146,6 +149,8 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     check_cxx_compiler_flag("-Wsized-deallocation" COMP_HAS_W_SIZED_DEALLOC)
     check_cxx_compiler_flag("-Wvector-operation-performance" COMP_HAS_W_VECTOR_OP_PERF)
     check_cxx_compiler_flag("-Wtrampolines" COMP_HAS_W_TRAMPOLINES) # we don't want trampolines for security concerns (it's a technique to implement nested functions).
+    check_cxx_compiler_flag("-Wformat-signedness" COMP_HAS_FORMAT_SIGNEDNESS)
+    check_cxx_compiler_flag("-Wduplicated-branches" COMP_HAS_DUPLICATED_BRANCHES)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler warning flags. Expected to work con Clang but not GCC, at the moment.
@@ -165,6 +170,7 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     check_cxx_compiler_flag("-Wnonnull-compare" COMP_HAS_WNO_NONNULL_COMPARE)
     check_cxx_compiler_flag("-Wmaybe-uninitialized" COMP_HAS_WNO_MAYBE_UNINIT)
     check_cxx_compiler_flag("-Wlanguage-extension-token" COMP_HAS_WNO_LANGUAGE_EXTENSION_TOKEN)
+    check_cxx_compiler_flag("-Wnested-anon-types" COMP_HAS_WNO_NESTED_ANON_TYPES)
     #check_cxx_compiler_flag("-Wunknown-pragmas" COMP_HAS_)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
@@ -181,17 +187,6 @@ endif()
 # ---- GCC/Clang
 
 if(NOT MSVC)
-    if(COMP_LINKER_HAS_FATAL_WARNINGS_V1)
-        list(APPEND checked_linker_options_all "-Wl,--fatal-warnings")
-    endif()
-    if(COMP_LINKER_HAS_FATAL_WARNINGS_V2)
-        list(APPEND checked_linker_options_all "-Wl,-fatal_warnings")
-    endif()
-
-    #if(COMP_HAS_LTO)
-    #    list(APPEND checked_compiler_options "-flto")
-    #endif()
-
 
     if(COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
         list(APPEND checked_compiler_options "-fno-expensive-optimizations")
@@ -329,6 +324,13 @@ if(NOT MSVC)
     if(COMP_HAS_W_TRAMPOLINES)
         list(APPEND checked_compiler_warnings "-Wtrampolines")
     endif()
+    if(COMP_HAS_FORMAT_SIGNEDNESS)
+        list(APPEND checked_compiler_warnings "-Wformat-signedness")
+    endif()
+    if(COMP_HAS_DUPLICATED_BRANCHES)
+        list(APPEND checked_compiler_warnings "-Wduplicated-branches")
+    endif()
+
     if(COMP_HAS_W_WEAK_VTABLES)
         list(APPEND checked_compiler_warnings "-Wweak-vtables")
     endif()
@@ -347,6 +349,18 @@ if(NOT MSVC)
     endif()
     if(COMP_HAS_WNO_LANGUAGE_EXTENSION_TOKEN)
         list(APPEND checked_compiler_warnings_disabled "-Wno-language-extension-token")
+    endif()
+    if(COMP_HAS_WNO_NESTED_ANON_TYPES)
+        list(APPEND checked_compiler_warnings_disabled "-Wno-nested-anon-types")
+    endif()
+
+    if(LINKER_HAS_FATAL_WARN_APPLE)
+        list(APPEND checked_linker_options_all "-Wl,-fatal_warnings")
+    elseif(LINKER_HAS_FATAL_WARN)
+        list(APPEND checked_linker_options_all "-Wl,--fatal-warnings")
+    endif()
+    if(LINKER_HAS_AS_NEEDED)
+        list(APPEND checked_linker_options_all "-Wl,--as-needed")
     endif()
 endif()
 
@@ -440,7 +454,7 @@ if(NOT MSVC)
     message(STATUS "Adding the following conditional compiler warnings: ${checked_compiler_warnings}.")
     message(
         STATUS
-        "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}."
+        "Adding the following conditional compiler warning ignore options: ${checked_compiler_warnings_disabled}."
     )
     message(STATUS "Adding the following conditional linker options: ${checked_linker_options_all}.")
 

@@ -261,8 +261,8 @@ class AbstractSphereThread : public AbstractThread
         const char *functionName;
 	};
 
-    STACK_INFO_REC m_stackInfoCopy[0x500];
     STACK_INFO_REC m_stackInfo[0x500];
+    STACK_INFO_REC m_stackInfoCopy[0x500];
     ssize_t m_iStackPos;
     bool m_fFreezeCallStack;
     ssize_t m_iStackUnwindingStackPos;
