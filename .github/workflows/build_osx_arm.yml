@@ -43,6 +43,7 @@ jobs:
     - name: Report building tools
       run:  |
             echo "Apple Clang:" && clang --version
+            echo "Default Linker:" && ld -v
             echo && echo "CMake:" && cmake --version
             echo && echo "Ninja:" && ninja --version
 

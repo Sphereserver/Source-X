@@ -37,6 +37,7 @@ jobs:
         - name: Report building tools
           run:  |
                 echo "GCC:" && gcc -v
+                echo "Default Linker:" && ld -v
                 echo && echo "CMake:" && cmake --version
 
         - name: Download Coverity Build Tool
