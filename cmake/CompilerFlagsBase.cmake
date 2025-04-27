@@ -104,7 +104,7 @@ if(NOT MSVC)
     endif()
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        list(APPEND local_link_options_nondebug -Wl,-dead-strip)
+        list(APPEND local_link_options_nondebug -Wl,-dead_strip)
     else()
         list(APPEND local_link_options_nondebug -Wl,--gc-sections)
     endif()
