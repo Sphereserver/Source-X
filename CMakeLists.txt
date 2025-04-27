@@ -21,6 +21,22 @@ if((NOT TOOLCHAIN_LOADED) AND (NOT ${CMAKE_TOOLCHAIN_FILE} STREQUAL ""))
     toolchain_force_compiler()
 endif()
 
+# Remove default, global compiler and linker flags set by CMake.
+#   Init: must come before project() command
+set(CMAKE_C_FLAGS_INIT "")
+set(CMAKE_CXX_FLAGS_INIT "")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "")
+#   Generic
+set(CMAKE_CXX_FLAGS "")
+set(CMAKE_C_FLAGS "")
+set(CMAKE_EXE_LINKER_FLAGS "")
+set(CMAKE_SHARED_LINKER_FLAGS "")
+#   Also clear build-type specific flags
+set(CMAKE_CXX_FLAGS_DEBUG "")
+set(CMAKE_CXX_FLAGS_RELEASE "")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "")
+
 message(STATUS "Scanning system build tools...")
 project(SphereServer CXX C) # does a scan for C++ and C compilers
 
