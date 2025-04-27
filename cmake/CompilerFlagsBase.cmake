@@ -103,19 +103,12 @@ if(NOT MSVC)
         set(local_link_options_nondebug)#-flto)
     endif()
 
-    # Place each function and variable into its own section, allowing the linker to remove unused ones.
-    # Flags: -ffunction-sections -fdata-sections
-
-    #check_linker_flag(CXX -Wl,--gc-sections LINKER_HAS_GC_SECTIONS)
-    #if(LINKER_HAS_GC_SECTIONS)
-    #  list(APPEND local_link_options_nondebug -Wl,--gc-sections)
-    #endif()
-    # icf = identical code folding
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        list(APPEND local_link_options_nondebug -Wl,-dead-strip -Wl,--icf=safe)
+        list(APPEND local_link_options_nondebug -Wl,-dead-strip)
     else()
-        list(APPEND local_link_options_nondebug -Wl,--gc-sections -Wl,--icf=safe)
+        list(APPEND local_link_options_nondebug -Wl,--gc-sections)
     endif()
+
 
     set(custom_compile_options_release
         ${local_compile_options_nondebug}

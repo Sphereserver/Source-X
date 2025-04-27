@@ -39,14 +39,16 @@ elseif(NOT MSVC)
     #set(c_compiler_definitions_common ${c_compiler_definitions_common}
     #)
 
-    #set(c_linker_options_common ${c_linker_options_common}
-    #)
+    # Adding linker options here isn't useful, because we'll use anyways the ones set in the Sphere project.
+    #[[
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        set(c_linker_options_common  -Wl,-dead-strip -Wl,--icf=safe)
+        set(c_linker_options_common  -Wl,-dead-strip)
     else()
-        set(c_linker_options_common  -Wl,--gc-sections -Wl,--icf=safe)
+        set(c_linker_options_common  -Wl,--gc-sections)
     endif()
+    if(NOT "${CMAKE_LINKER_TYPE}" STREQUAL "MOLD")
+        set(c_linker_options_common ${c_linker_options_common} -Wl,--icf=safe)
+    endif()
+    ]]
 
-    #if (${CMAKE_C_COMPILER_ID} STREQUAL Clang)
-    #endif()
 endif()
