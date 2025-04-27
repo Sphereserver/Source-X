@@ -14,7 +14,7 @@ if(NOT MSVC)
         check_linker_flag(CXX -Wl,--fatal-warnings LINKER_HAS_FATAL_WARN)
     endif()
     check_linker_flag(CXX -Wl,--as-needed LINKER_HAS_AS_NEEDED)
-    check_linker_flag(CXX -Wl,--icf LINKER_HAS_ICF) # icf = identical code folding (not supported by mold)
+    check_linker_flag(CXX -Wl,--icf=safe LINKER_HAS_ICF) # icf = identical code folding (not supported by mold)
 
 
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
@@ -364,7 +364,7 @@ if(NOT MSVC)
         list(APPEND checked_linker_options_all "-Wl,--as-needed")
     endif()
     if(LINKER_HAS_ICF)
-        list(APPEND checked_linker_options_all "-Wl,--icf==safe")
+        list(APPEND checked_linker_options_all "-Wl,--icf=safe")
     endif()
 endif()
 

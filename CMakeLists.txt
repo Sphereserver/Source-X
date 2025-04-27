@@ -1,6 +1,6 @@
 #    Main config    #
 
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.29)
 set(CMAKE_SUPPRESS_REGENERATION TRUE) # Supress the ZERO_CHECK generation
 
 # -------------------- Utility functions --------------------
@@ -24,11 +24,13 @@ endif()
 message(STATUS "Scanning system build tools...")
 project(SphereServer CXX C) # does a scan for C++ and C compilers
 
+
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 # We need to do this after "project", otherwise CMake doesn't know where it's running.
 if(NOT TOOLCHAIN_LOADED)
     include("cmake/DetectDefaultToolchain.cmake")
 endif()
+
 
 # Setup global flags, to be done before creating targets.
 
@@ -42,6 +44,7 @@ elseif(CMAKE_CXX_STANDARD LESS 20)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF) # disable C++ module scanning
 
 # Need to clear shared library flags. If not, cmake sets -rdynamic and this
 # add to the executable the full symbol table (included unused symbols).
@@ -73,6 +76,7 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 # Also, it fails to create those predefined flags, which it needs, for custom build types (e.g. Nightly).
 set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 
+
 # --------------------  GUI checkboxes --------------------
 
 option(
@@ -80,6 +84,12 @@ option(
     "Do not try to retrieve the current git revision. Useful for building source not git-cloned from Github."
     FALSE
 )
+if(WIN32)
+    option(WIN_SPAWN_CONSOLE "Spawn an additional console, useful for debugging." FALSE)
+    if(MSVC)
+        option(WIN_GENERATE_CRASHDUMP "For non-Debug builds, add Windows Structured Exception Handling and generate a Crash Dump if a fatal SE is thrown." FALSE)
+    endif()
+endif()
 option(CROSSCOMPILE "Are we compiling for a different target architecture?" FALSE)
 option(
     RUNTIME_STATIC_LINK
@@ -87,6 +97,7 @@ option(
     FALSE
 )
 option(CMAKE_EXPORT_COMPILE_COMMANDS "Export compiler commands to compile_commands.json" TRUE)
+set(CMAKE_LINKER_TYPE "DEFAULT" CACHE STRING "Linker to be used for the linking step.")
 
 set(predef_LIB_LIBEV_BUILD FALSE)
 if(NOT WIN32)
@@ -95,13 +106,6 @@ endif()
 option(LIB_LIBEV_BUILD "Build libev." ${predef_LIB_LIBEV_BUILD})
 option(LIB_SQLITE_BUILD "Build sqlite." TRUE)
 option(LIB_ZLIB_BUILD "Build zlib." TRUE)
-
-if(WIN32)
-    option(WIN_SPAWN_CONSOLE "Spawn an additional console, useful for debugging." FALSE)
-    if(MSVC)
-        option(WIN_GENERATE_CRASHDUMP "For non-Debug builds, add Windows Structured Exception Handling and generate a Crash Dump if a fatal SE is thrown." FALSE)
-    endif()
-endif()
 
 if(NOT MSVC)
     option(USE_COMPILER_HARDENING_OPTIONS "Enable compiler (even runtime) safety checks and code hardening." FALSE)
@@ -179,8 +183,10 @@ else(SINGLE_TARGET)
     set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Nightly" CACHE STRING "" FORCE)
 endif(SINGLE_TARGET)
 
+
 # Include the list of all Sphere source files
 include("src/CMakeSources.cmake")
+
 
 # Configure output binaries
 set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
