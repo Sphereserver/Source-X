@@ -3,6 +3,8 @@
     #define _WIN32_DCOM
 #endif
 
+#include "../common/sphere_library/sresetevents.h"
+#include "../common/sphere_library/sstringobjs.h"
 #include "../common/basic_threading.h"
 #include "../common/CException.h"
 #include "../common/CLog.h"
@@ -18,7 +20,6 @@
 #endif
 
 #include <algorithm>
-#include <atomic>
 #include <system_error>
 
 
@@ -33,7 +34,9 @@
 #define THREAD_TEMPSTRING_OBJ_STORAGE   1024
 
 
-struct TemporaryStringThreadSafeStateHolder
+// This implementation doesn't reserve preallocated strings for each thread or attached to a specific thread,
+// but it creates a pool of preallocated strings which access is guarded by a Mutex.
+struct TemporaryStringsThreadSafeStateHolder
 {
     // C-style string Buffer (char array)
 	SimpleMutex g_tmpStringMutex;
@@ -51,7 +54,7 @@ struct TemporaryStringThreadSafeStateHolder
     std::unique_ptr<TemporaryStringStorage[]> g_tmpTemporaryStringStorage;
 
 private:
-    TemporaryStringThreadSafeStateHolder() :
+    TemporaryStringsThreadSafeStateHolder() :
         g_tmpStringIndex(0), g_tmpTemporaryStringIndex(0)
     {
         g_tmpStrings = std::make_unique<char[]>(THREAD_TEMPSTRING_C_STORAGE * THREAD_STRING_LENGTH);
@@ -59,9 +62,9 @@ private:
     }
 
 public:
-    static TemporaryStringThreadSafeStateHolder& get() noexcept
+    static TemporaryStringsThreadSafeStateHolder& get() noexcept
     {
-        static TemporaryStringThreadSafeStateHolder instance;
+        static TemporaryStringsThreadSafeStateHolder instance;
         return instance;
     }
 };
@@ -369,6 +372,8 @@ AbstractThread::AbstractThread(const char *name, ThreadPriority priority) :
     _thread_selfTerminateAfterThisTick = true;
 	m_terminateRequested = true;
 	setPriority(priority);
+    m_sleepEvent = std::make_unique<AutoResetEvent>();
+    m_terminateEvent = std::make_unique<ManualResetEvent>();
 }
 
 AbstractThread::~AbstractThread()
@@ -418,7 +423,7 @@ void AbstractThread::start()
     m_handle = threadHandle;
 #endif
 
-	m_terminateEvent.reset();
+    m_terminateEvent->reset();
 }
 
 void AbstractThread::terminate(bool ended)
@@ -448,7 +453,7 @@ void AbstractThread::terminate(bool ended)
         m_handle = std::nullopt;
 
 		// let everyone know we have been terminated
-		m_terminateEvent.set();
+        m_terminateEvent->set();
 
 		// current thread can be terminated now
 		if (ended == false && wasCurrentThread)
@@ -555,7 +560,7 @@ void AbstractThread::run()
 		if( shouldExit() )
 			break;
 
-		m_sleepEvent.wait(m_tickPeriod);
+        m_sleepEvent->wait(m_tickPeriod);
 	}
 }
 
@@ -597,7 +602,7 @@ void AbstractThread::waitForClose()
 
 			// give the thread a chance to close on its own, and then
 			// terminate anyway
-			m_terminateEvent.wait(THREADJOIN_TIMEOUT);
+            m_terminateEvent->wait(THREADJOIN_TIMEOUT);
 		}
 
 		terminate(false);
@@ -606,7 +611,7 @@ void AbstractThread::waitForClose()
 
 void AbstractThread::awaken()
 {
-	m_sleepEvent.signal();
+    m_sleepEvent->signal();
 }
 
 bool AbstractThread::isCurrentThread() const noexcept
@@ -636,7 +641,7 @@ bool AbstractThread::checkStuck()
 		}
 		else if( m_hangCheck == 0xDEADDEADl )
 		{
-			//	TODO:
+            //	TODO: really ugly static_cast...
             g_Log.Event(LOGL_CRIT, "'%s' thread hang, restarting...\n", m_name);
 			#ifdef THREAD_TRACK_CALLSTACK
 				static_cast<AbstractSphereThread*>(this)->printStackTrace();
@@ -794,9 +799,48 @@ AbstractSphereThread::~AbstractSphereThread()
     AbstractThread::_fIsClosing = true;
 }
 
-char *AbstractSphereThread::allocateBuffer() noexcept
+
+static auto getThreadRawStringBuffer() -> TemporaryStringsThreadSafeStateHolder::TemporaryStringStorage *
 {
-    auto& tsholder = TemporaryStringThreadSafeStateHolder::get();
+    auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
+    SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
+
+    int initialPosition = tsholder.g_tmpTemporaryStringIndex;
+    int index;
+    for (;;)
+    {
+        index = tsholder.g_tmpTemporaryStringIndex += 1;
+        if(tsholder.g_tmpTemporaryStringIndex >= THREAD_TEMPSTRING_OBJ_STORAGE )
+        {
+            const int inc = tsholder.g_tmpTemporaryStringIndex % THREAD_TEMPSTRING_OBJ_STORAGE;
+            tsholder.g_tmpTemporaryStringIndex = inc;
+            index = inc;
+        }
+
+        if(tsholder.g_tmpTemporaryStringStorage[index].m_state == 0 )
+        {
+            auto* store = &(tsholder.g_tmpTemporaryStringStorage[index]);
+            *store->m_buffer = '\0';
+            return store;
+        }
+
+        // a protection against deadlock. All string buffers are marked as being used somewhere, so we
+        // have few possibilities (the case shows that we have a bug and temporary strings used not such):
+        // a) return nullptr and wait for exceptions in the program
+        // b) allocate a string from a heap
+        if( initialPosition == index )
+        {
+            // but the best is to throw an exception to give better formed information for end users
+            // rather than access violations
+            DEBUG_WARN(( "Thread temporary string buffer is full.\n" ));
+            throw CSError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
+        }
+    }
+}
+
+char *AbstractSphereThread::Strings::allocateBuffer() noexcept
+{
+    auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
     SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
 
 	char * buffer = nullptr;
@@ -814,55 +858,16 @@ char *AbstractSphereThread::allocateBuffer() noexcept
 	return buffer;
 }
 
-static
-TemporaryStringThreadSafeStateHolder::TemporaryStringStorage *
-getThreadRawStringBuffer()
-{
-    auto& tsholder = TemporaryStringThreadSafeStateHolder::get();
-    SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
-
-    int initialPosition = tsholder.g_tmpTemporaryStringIndex;
-	int index;
-	for (;;)
-	{
-        index = tsholder.g_tmpTemporaryStringIndex += 1;
-        if(tsholder.g_tmpTemporaryStringIndex >= THREAD_TEMPSTRING_OBJ_STORAGE )
-		{
-            const int inc = tsholder.g_tmpTemporaryStringIndex % THREAD_TEMPSTRING_OBJ_STORAGE;
-            tsholder.g_tmpTemporaryStringIndex = inc;
-			index = inc;
-		}
-
-        if(tsholder.g_tmpTemporaryStringStorage[index].m_state == 0 )
-		{
-            auto* store = &(tsholder.g_tmpTemporaryStringStorage[index]);
-			*store->m_buffer = '\0';
-			return store;
-		}
-
-		// a protection against deadlock. All string buffers are marked as being used somewhere, so we
-		// have few possibilities (the case shows that we have a bug and temporary strings used not such):
-		// a) return nullptr and wait for exceptions in the program
-		// b) allocate a string from a heap
-		if( initialPosition == index )
-		{
-			// but the best is to throw an exception to give better formed information for end users
-			// rather than access violations
-			DEBUG_WARN(( "Thread temporary string buffer is full.\n" ));
-			throw CSError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
-		}
-	}
-}
-
-void AbstractSphereThread::getStringBuffer(TemporaryString &string) noexcept
+void AbstractSphereThread::Strings::getBuffer(TemporaryString &string) noexcept
 {
 	ADDTOCALLSTACK("alloc");
-    auto& tsholder = TemporaryStringThreadSafeStateHolder::get();
+    auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
     SimpleThreadLock stlBuffer(tsholder.g_tmpTemporaryStringMutex);
 
 	auto* store = getThreadRawStringBuffer();
 	string.init(store->m_buffer, &store->m_state);
 }
+
 
 bool AbstractSphereThread::shouldExit() noexcept
 {
@@ -946,7 +951,7 @@ void AbstractSphereThread::printStackTrace() noexcept
         if( stackInfo[i].functionName == nullptr )
 			break;
 
-        lpctstr extra = " ";
+        lpctstr extra = "";
         if (i == m_iStackUnwindingStackPos) {
             extra = "<-- last function call (stack unwinding began here)";
         }
@@ -1022,6 +1027,8 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
 {
     STATIC_ASSERT_NOEXCEPT_CONSTRUCTOR(StackDebugInformation, const char*);
     STATIC_ASSERT_NOEXCEPT_MEMBER_FUNCTION(AbstractSphereThread, pushStackCall, const char*);
+    STATIC_ASSERT_NOEXCEPT_FREE_FUNCTION(ThreadHolder::get);
+    STATIC_ASSERT_NOEXCEPT_MEMBER_FUNCTION(ThreadHolder, current);
 
     auto& th = ThreadHolder::get();
     if (th.closing()) [[unlikely]]

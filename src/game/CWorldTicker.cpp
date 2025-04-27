@@ -23,42 +23,42 @@
 
 template <typename TPair, typename T>
 static void UnsortedVecDifference(
-    std::vector<TPair>      & vecMain,
-    std::vector<TPair>      & vecElemBuffer,
-    std::vector<T*>    const& vecToRemove)
+    std::vector<TPair> & vecMain,
+    std::vector<TPair> & vecElemBuffer,
+    std::vector<T*>    & vecToRemoveUnsorted)
 {
     ASSERT(vecElemBuffer.empty());
 
     // Reserve space in vecElemBuffer to avoid reallocations
-    vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
+    vecElemBuffer.reserve(vecMain.size() - vecToRemoveUnsorted.size());
 
     /*
     // IMPLEMENTATION 1: linear, no bulk insertions
-    // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemove
+    // Iterate through vecMain, adding elements to vecElemBuffer only if they aren't in vecToRemoveUnsorted
     for (const auto& elem : vecMain) {
-        if (std::find(vecToRemove.begin(), vecToRemove.end(), elem.second) == vecToRemove.end()) {
+        if (std::find(vecToRemoveUnsorted.cbegin(), vecToRemoveUnsorted.cend(), elem.second) == vecToRemoveUnsorted.end()) {
             vecElemBuffer.push_back(elem);
         }
     }
     */
 
-    if (vecToRemove.size() < 40 /*arbitrary number, this has to be benchmarked*/)
+    if (vecToRemoveUnsorted.size() < 50 /*arbitrary number, this has to be benchmarked*/)
     {
         // IMPLEMENTATION 2: linear, with bulk insertions
-        // We can do it because iterating through every vecToRemove element isn't so slow.
+        // We can do it because iterating through every vecToRemoveUnsorted element isn't so slow.
 
         // Use an iterator to store the position for bulk insertion
-        auto itCopyFromThis = vecMain.begin();
+        auto itCopyFromThis = vecMain.cbegin();
 
-        // Iterate through vecMain, copying elements that are not in vecToRemove
-        for (auto itMain = vecMain.begin(); itMain != vecMain.end(); ++itMain)
+        // Iterate through vecMain, copying elements that are not in vecToRemoveUnsorted
+        for (auto itMain = vecMain.cbegin(); itMain != vecMain.cend(); ++itMain)
         {
-            // Perform a linear search for the current element's pointer in vecToRemove
-            auto itTemp = std::find(vecToRemove.begin(), vecToRemove.end(), itMain->second);
-            if (itTemp != vecToRemove.end())
+            // Perform a linear search for the current element's pointer in vecToRemoveUnsorted
+            auto itTemp = std::find(vecToRemoveUnsorted.cbegin(), vecToRemoveUnsorted.cend(), itMain->second);
+            if (itTemp != vecToRemoveUnsorted.cend())
             {
-                // If the element is found in vecToRemove, copy elements before it
-                vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, itMain); // Copy up to but not including itMain
+                // If the element is found in vecToRemoveUnsorted, copy elements before it
+                vecElemBuffer.insert(vecElemBuffer.cend(), itCopyFromThis, itMain); // Copy up to but not including itMain
 
                 // Move itCopyFromThis forward to the next element
                 itCopyFromThis = itMain + 1; // Move to the next element after itMain
@@ -66,19 +66,27 @@ static void UnsortedVecDifference(
         }
 
         // Copy any remaining elements in vecMain after the last found element
-        vecElemBuffer.insert(vecElemBuffer.end(), itCopyFromThis, vecMain.end());
+        vecElemBuffer.insert(vecElemBuffer.cend(), itCopyFromThis, vecMain.cend());
+    }
+    else if (vecToRemoveUnsorted.size() < 5'000 /*arbitrary number, this has to be benchmarked*/)
+    {
+        // IMPLEMENTATION 3: sort vecToRemoveUnsorted and perform binary search
+        std::sort(vecToRemoveUnsorted.begin(), vecToRemoveUnsorted.end());
+        for (const auto& elem : vecMain)
+        {
+            if (!std::binary_search(vecToRemoveUnsorted.cbegin(), vecToRemoveUnsorted.cend(), elem.second))
+                vecElemBuffer.push_back(elem);
+        }
     }
     else
     {
+        // IMPLEMENTATION 4: create an hash table for faster search
         static std::unordered_set<T*> removeSet;
         removeSet.clear();
-        removeSet.reserve(vecToRemove.size());
+        removeSet.reserve(vecToRemoveUnsorted.size());
         //removeSet.max_load_factor(0.75f);
 
-        for (auto* ptr : vecToRemove) {
-            removeSet.insert(ptr);
-        }
-
+        removeSet.insert(vecToRemoveUnsorted.cbegin(), vecToRemoveUnsorted.cend());
         std::copy_if(vecMain.cbegin(), vecMain.cend(), std::back_inserter(vecElemBuffer),
             [](const TPair& pair) constexpr {
                 return removeSet.find(pair.second) == removeSet.end();
@@ -86,7 +94,7 @@ static void UnsortedVecDifference(
     }
 
 #ifdef DEBUG_LIST_OPS
-    ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemove.size());
+    ASSERT(vecElemBuffer.size() == vecMain.size() - vecToRemoveUnsorted.size());
 #endif
 
     vecMain.swap(vecElemBuffer);
@@ -96,36 +104,33 @@ static void UnsortedVecDifference(
 template <typename TPair, typename T>
 static void SortedVecRemoveAddQueued(
     std::vector<TPair> &vecMain, std::vector<TPair> &vecElemBuffer,
-    std::vector<T> const& vecToRemove, std::vector<TPair> const& vecToAdd)
+    std::vector<T>     &vecToRemoveUnsorted, std::vector<TPair> const& vecToAdd)
 {
 #ifdef DEBUG_LIST_OPS
     ASSERT(sl::ContainerIsSorted(vecMain));
     ASSERT(!sl::SortedContainerHasDuplicates(vecMain));
 
-    //ASSERT(sl::ContainerIsSorted(vecToRemove));
-    //ASSERT(!sl::SortedContainerHasDuplicates(vecToRemove));
-
     ASSERT(sl::ContainerIsSorted(vecToAdd));
     ASSERT(!sl::SortedContainerHasDuplicates(vecToAdd));
 #endif
 
-    if (!vecToRemove.empty())
+    if (!vecToRemoveUnsorted.empty())
     {
         if (vecMain.empty()) {
             ASSERT(false);  // Shouldn't ever happen.
         }
 
         vecElemBuffer.clear();
-        vecElemBuffer.reserve(vecMain.size() - vecToRemove.size());
+        vecElemBuffer.reserve(vecMain.size() - vecToRemoveUnsorted.size());
 
         // Unsorted custom algorithm.
         // We can't use a classical sorted algorithm because vecMain is sorted by pair.first (int64 timeout)
-        //  but vecToRemove is sorted by the pointer value!
-        UnsortedVecDifference(vecMain, vecElemBuffer, vecToRemove);
+        //  but vecToRemoveUnsorted is sorted by the pointer value!
+        UnsortedVecDifference(vecMain, vecElemBuffer, vecToRemoveUnsorted);
         vecElemBuffer.clear();
 
 #ifdef DEBUG_LIST_OPS
-        for (auto& elem : vecToRemove)
+        for (auto& elem : vecToRemoveUnsorted)
         {
             auto it = std::find_if(vecMain.begin(), vecMain.end(), [elem](auto &rhs) constexpr noexcept {return elem == rhs.second;});
             UnreferencedParameter(it);
@@ -144,8 +149,8 @@ static void SortedVecRemoveAddQueued(
 
         // MergeSort
         std::merge(
-            vecMain.begin(), vecMain.end(),
-            vecToAdd.begin(), vecToAdd.end(),
+            vecMain.cbegin(), vecMain.cend(),
+            vecToAdd.cbegin(), vecToAdd.cend(),
             std::back_inserter(vecElemBuffer)
             );
 
@@ -203,24 +208,24 @@ auto CWorldTicker::IsTimeoutRegistered(const CTimedObject* pTimedObject) -> std:
     };
 
     const auto itEntryInAddList = std::find_if(
-        _vTimedObjsTimeoutsAddReq.begin(),
-        _vTimedObjsTimeoutsAddReq.end(),
+        _vTimedObjsTimeoutsAddReq.cbegin(),
+        _vTimedObjsTimeoutsAddReq.cend(),
         fnFindEntryByObj);
     if (_vTimedObjsTimeoutsAddReq.end() != itEntryInAddList)
         return *itEntryInAddList;
 
     const auto itEntryInTickList = std::find_if(
-        _vTimedObjsTimeouts.begin(),
-        _vTimedObjsTimeouts.end(),
+        _vTimedObjsTimeouts.cbegin(),
+        _vTimedObjsTimeouts.cend(),
         fnFindEntryByObj);
-    if (_vTimedObjsTimeouts.end() != itEntryInTickList)
+    if (_vTimedObjsTimeouts.cend() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
-            _vTimedObjsTimeoutsEraseReq.begin(),
-            _vTimedObjsTimeoutsEraseReq.end(),
+            _vTimedObjsTimeoutsEraseReq.cbegin(),
+            _vTimedObjsTimeoutsEraseReq.cend(),
             pTimedObject);
 
-        if (itEntryInEraseList == _vTimedObjsTimeoutsEraseReq.end())
+        if (itEntryInEraseList == _vTimedObjsTimeoutsEraseReq.cend())
             return *itEntryInTickList;
     }
 
@@ -267,18 +272,18 @@ bool CWorldTicker::_InsertTimedObject(const int64 iTimeout, CTimedObject* pTimed
     // Debug redundant checks.
 
     const auto itEntryInTickList = std::find_if(
-        _vTimedObjsTimeouts.begin(),
-        _vTimedObjsTimeouts.end(),
+        _vTimedObjsTimeouts.cbegin(),
+        _vTimedObjsTimeouts.cend(),
         fnFindEntryByObj);
-    if (_vTimedObjsTimeouts.end() != itEntryInTickList)
+    if (_vTimedObjsTimeouts.cend() != itEntryInTickList)
     {
         // What's happening: I am requesting to add an element, but we already have it in the main ticking list (we are adding another one without deleting the old one?).
 
         const auto itEntryInEraseList = std::find(
-            _vTimedObjsTimeoutsEraseReq.begin(),
-            _vTimedObjsTimeoutsEraseReq.end(),
+            _vTimedObjsTimeoutsEraseReq.cbegin(),
+            _vTimedObjsTimeoutsEraseReq.cend(),
             pTimedObject);
-        if (_vTimedObjsTimeoutsEraseReq.end() == itEntryInEraseList)
+        if (_vTimedObjsTimeoutsEraseReq.cend() == itEntryInEraseList)
         {
             // We don't have an erase request. We have to remove the existing one before adding a new one.
 
@@ -353,23 +358,23 @@ bool CWorldTicker::_EraseTimedObject(CTimedObject* pTimedObject)
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
     // Redundant check.
     const auto itEntryInRemoveList = std::find(
-        _vTimedObjsTimeoutsEraseReq.begin(),
-        _vTimedObjsTimeoutsEraseReq.end(),
+        _vTimedObjsTimeoutsEraseReq.cbegin(),
+        _vTimedObjsTimeoutsEraseReq.cend(),
         pTimedObject);
-    if (_vTimedObjsTimeoutsEraseReq.end() != itEntryInRemoveList)
+    if (_vTimedObjsTimeoutsEraseReq.cend() != itEntryInRemoveList)
     {
 
         const auto itEntryInAddList = std::find_if(
-            _vTimedObjsTimeoutsAddReq.begin(),
-            _vTimedObjsTimeoutsAddReq.end(),
+            _vTimedObjsTimeoutsAddReq.cbegin(),
+            _vTimedObjsTimeoutsAddReq.cend(),
             fnFindEntryByObj);
-        ASSERT(itEntryInAddList == _vTimedObjsTimeoutsAddReq.end());
+        ASSERT(itEntryInAddList == _vTimedObjsTimeoutsAddReq.cend());
 
         const auto itEntryInTickList = std::find_if(
-            _vTimedObjsTimeouts.begin(),
-            _vTimedObjsTimeouts.end(),
+            _vTimedObjsTimeouts.cbegin(),
+            _vTimedObjsTimeouts.cend(),
             fnFindEntryByObj);
-        ASSERT(itEntryInTickList != _vTimedObjsTimeouts.end());
+        ASSERT(itEntryInTickList != _vTimedObjsTimeouts.cend());
 
         ASSERT(false);
         return false; // Already requested the removal.
@@ -381,8 +386,8 @@ bool CWorldTicker::_EraseTimedObject(CTimedObject* pTimedObject)
     // Redundant check.
 
     const auto itEntryInTickList = std::find_if(
-        _vTimedObjsTimeouts.begin(),
-        _vTimedObjsTimeouts.end(),
+        _vTimedObjsTimeouts.cbegin(),
+        _vTimedObjsTimeouts.cend(),
         fnFindEntryByObj);
     if (itEntryInTickList == _vTimedObjsTimeouts.end())
     {
@@ -491,24 +496,24 @@ auto CWorldTicker::IsCharPeriodicTickRegistered(const CChar* pChar) -> std::opti
     };
 
     const auto itEntryInAddList = std::find_if(
-        _vPeriodicCharsAddRequests.begin(),
-        _vPeriodicCharsAddRequests.end(),
+        _vPeriodicCharsAddRequests.cbegin(),
+        _vPeriodicCharsAddRequests.cend(),
         fnFindEntryByObj);
-    if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
+    if (_vPeriodicCharsAddRequests.cend() != itEntryInAddList)
         return *itEntryInAddList;
 
     const auto itEntryInTickList = std::find_if(
-        _vPeriodicCharsTicks.begin(),
-        _vPeriodicCharsTicks.end(),
+        _vPeriodicCharsTicks.cbegin(),
+        _vPeriodicCharsTicks.cend(),
         fnFindEntryByObj);
-    if (_vPeriodicCharsTicks.end() != itEntryInTickList)
+    if (_vPeriodicCharsTicks.cend() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
-            _vPeriodicCharsEraseRequests.begin(),
-            _vPeriodicCharsEraseRequests.end(),
+            _vPeriodicCharsEraseRequests.cbegin(),
+            _vPeriodicCharsEraseRequests.cend(),
             pChar);
 
-        if (itEntryInEraseList == _vPeriodicCharsEraseRequests.end())
+        if (itEntryInEraseList == _vPeriodicCharsEraseRequests.cend())
             return *itEntryInTickList;
     }
 
@@ -530,10 +535,10 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     };
 
     const auto itEntryInAddList = std::find_if(
-        _vPeriodicCharsAddRequests.begin(),
-        _vPeriodicCharsAddRequests.end(),
+        _vPeriodicCharsAddRequests.cbegin(),
+        _vPeriodicCharsAddRequests.cend(),
         fnFindEntryByChar);
-    if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
+    if (_vPeriodicCharsAddRequests.cend() != itEntryInAddList)
     {
         // We already had requested the insertion of this element.
         // We could just update periodic tick time, but by design we will add new periodic ticks only once per periodic tick.
@@ -544,10 +549,10 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
     }
 
     const auto itEntryInEraseList = std::find(
-        _vPeriodicCharsEraseRequests.begin(),
-        _vPeriodicCharsEraseRequests.end(),
+        _vPeriodicCharsEraseRequests.cbegin(),
+        _vPeriodicCharsEraseRequests.cend(),
         pChar);
-    if (_vPeriodicCharsEraseRequests.end() != itEntryInEraseList)
+    if (_vPeriodicCharsEraseRequests.cend() != itEntryInEraseList)
     {
         // Adding another one after we requested to remove it?
         // We could manage this, but we do not have this scenario, it shouldn't happen and we don't need to.
@@ -559,8 +564,8 @@ bool CWorldTicker::_InsertCharTicking(const int64 iTickNext, CChar* pChar)
 
     // Do not add duplicates.
     const auto itEntryInTickList = std::find_if(
-        _vPeriodicCharsTicks.begin(),
-        _vPeriodicCharsTicks.end(),
+        _vPeriodicCharsTicks.cbegin(),
+        _vPeriodicCharsTicks.cend(),
         fnFindEntryByChar);
     ASSERT(_vPeriodicCharsTicks.end() == itEntryInTickList);
 #endif
@@ -585,10 +590,10 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
     };
 #endif
     const auto itEntryInAddList = std::find_if(
-        _vPeriodicCharsAddRequests.begin(),
-        _vPeriodicCharsAddRequests.end(),
+        _vPeriodicCharsAddRequests.cbegin(),
+        _vPeriodicCharsAddRequests.cend(),
         fnFindEntryByChar);
-    if (_vPeriodicCharsAddRequests.end() != itEntryInAddList)
+    if (_vPeriodicCharsAddRequests.cend() != itEntryInAddList)
     {
         // On the same tick the char did its periodic tick, re-added itself to the list,
         //  then something asked for its removal? Like calling Delete or destroying the char.
@@ -597,19 +602,19 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
 
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
         const auto itEntryInTickList = std::find_if(
-            _vPeriodicCharsTicks.begin(),
-            _vPeriodicCharsTicks.end(),
+            _vPeriodicCharsTicks.cbegin(),
+            _vPeriodicCharsTicks.cend(),
             fnFindEntryByChar);
         const auto itEntryInRemoveList = std::find(
-            _vPeriodicCharsEraseRequests.begin(),
-            _vPeriodicCharsEraseRequests.end(),
+            _vPeriodicCharsEraseRequests.cbegin(),
+            _vPeriodicCharsEraseRequests.cend(),
             pChar);
 
-        if (itEntryInRemoveList == _vPeriodicCharsEraseRequests.end()) {
-            ASSERT(itEntryInTickList == _vPeriodicCharsTicks.end());
+        if (itEntryInRemoveList == _vPeriodicCharsEraseRequests.cend()) {
+            ASSERT(itEntryInTickList == _vPeriodicCharsTicks.cend());
         }
         else {
-            ASSERT(itEntryInTickList != _vPeriodicCharsTicks.end());
+            ASSERT(itEntryInTickList != _vPeriodicCharsTicks.cend());
         }
 #endif
         return true;
@@ -618,10 +623,10 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
 #ifdef DEBUG_CCHAR_PERIODIC_TICKING
     // Ensure it's in the ticking list.
     const auto itEntryInTickList = std::find_if(
-        _vPeriodicCharsTicks.begin(),
-        _vPeriodicCharsTicks.end(),
+        _vPeriodicCharsTicks.cbegin(),
+        _vPeriodicCharsTicks.cend(),
         fnFindEntryByChar);
-    if (itEntryInTickList == _vPeriodicCharsTicks.end())
+    if (itEntryInTickList == _vPeriodicCharsTicks.cend())
     {
         // Requested TickingPeriodicChar removal from ticking list, but not found.
         // Shouldn't happen, so it's illegal.
@@ -631,13 +636,13 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
     }
 
     const auto itEntryInRemoveList = std::find(
-        _vPeriodicCharsEraseRequests.begin(),
-        _vPeriodicCharsEraseRequests.end(),
+        _vPeriodicCharsEraseRequests.cbegin(),
+        _vPeriodicCharsEraseRequests.cend(),
         pChar);
-    if (_vPeriodicCharsEraseRequests.end() != itEntryInRemoveList)
+    if (_vPeriodicCharsEraseRequests.cend() != itEntryInRemoveList)
     {
         // We have already requested to remove this from the main ticking list.
-        ASSERT(itEntryInAddList == _vPeriodicCharsAddRequests.end());
+        ASSERT(itEntryInAddList == _vPeriodicCharsAddRequests.cend());
 
         ASSERT(false);
         return false; // Not legit.
@@ -773,25 +778,25 @@ bool CWorldTicker::IsStatusUpdateTickRegistered(const CObjBase *pObj)
 
     /*
     const auto itEntryInAddList = std::find(
-        _vecObjStatusUpdatesAddRequests.begin(),
-        _vecObjStatusUpdatesAddRequests.end(),
+        _vecObjStatusUpdatesAddRequests.cbegin(),
+        _vecObjStatusUpdatesAddRequests.cend(),
         pObj);
     if (_vecObjStatusUpdatesAddRequests.end() != itEntryInAddList)
         return *itEntryInAddList;
     */
 
     const auto itEntryInTickList = std::find(
-        _vObjStatusUpdates.begin(),
-        _vObjStatusUpdates.end(),
+        _vObjStatusUpdates.cbegin(),
+        _vObjStatusUpdates.cend(),
         pObj);
-    if (_vObjStatusUpdates.end() != itEntryInTickList)
+    if (_vObjStatusUpdates.cend() != itEntryInTickList)
     {
         const auto itEntryInEraseList = std::find(
-            _vObjStatusUpdatesEraseRequests.begin(),
-            _vObjStatusUpdatesEraseRequests.end(),
+            _vObjStatusUpdatesEraseRequests.cbegin(),
+            _vObjStatusUpdatesEraseRequests.cend(),
             pObj);
 
-        if (itEntryInEraseList == _vObjStatusUpdatesEraseRequests.end())
+        if (itEntryInEraseList == _vObjStatusUpdatesEraseRequests.cend())
             return true;
     }
 
@@ -812,10 +817,10 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     if (pObj->_fIsInStatusUpdatesAddList)
     {
         const auto itEntryInAddList = std::find(
-            _vObjStatusUpdatesAddRequests.begin(),
-            _vObjStatusUpdatesAddRequests.end(),
+            _vObjStatusUpdatesAddRequests.cbegin(),
+            _vObjStatusUpdatesAddRequests.cend(),
             pObj);
-        ASSERT(_vObjStatusUpdatesAddRequests.end() != itEntryInAddList);
+        ASSERT(_vObjStatusUpdatesAddRequests.cend() != itEntryInAddList);
 
         // I am requesting to add an element, but this was already done in this tick (there's already a request in the buffer).
         // We don't want duplicates.
@@ -827,10 +832,10 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     // Debug redundant checks.
 
     const auto itEntryInTickList = std::find(
-        _vObjStatusUpdates.begin(),
-        _vObjStatusUpdates.end(),
+        _vObjStatusUpdates.cbegin(),
+        _vObjStatusUpdates.cend(),
         pObj);
-    if (_vObjStatusUpdates.end() != itEntryInTickList)
+    if (_vObjStatusUpdates.cend() != itEntryInTickList)
     {
         // What's happening: I am requesting to add an element, but we already have it in the status updates list.
 
@@ -847,10 +852,10 @@ bool CWorldTicker::AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     else
     {
         const auto itEntryInEraseList = std::find(
-            _vObjStatusUpdatesEraseRequests.begin(),
-            _vObjStatusUpdatesEraseRequests.end(),
+            _vObjStatusUpdatesEraseRequests.cbegin(),
+            _vObjStatusUpdatesEraseRequests.cend(),
             pObj);
-        ASSERT(_vObjStatusUpdatesEraseRequests.end() == itEntryInEraseList);
+        ASSERT(_vObjStatusUpdatesEraseRequests.cend() == itEntryInEraseList);
     }
 #endif
 
@@ -882,10 +887,10 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
         //  We are reasonably sure that there isn't another entry in the main ticking list, because we would have gotten an error
         //  trying to append a request to the add list.
         const auto itEntryInAddList = std::find(
-            _vObjStatusUpdatesAddRequests.begin(),
-            _vObjStatusUpdatesAddRequests.end(),
+            _vObjStatusUpdatesAddRequests.cbegin(),
+            _vObjStatusUpdatesAddRequests.cend(),
             pObj);
-        ASSERT(itEntryInAddList != _vObjStatusUpdatesAddRequests.end());
+        ASSERT(itEntryInAddList != _vObjStatusUpdatesAddRequests.cend());
 
         _vObjStatusUpdatesAddRequests.erase(itEntryInAddList);
 
@@ -906,22 +911,22 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
     // Redundant check.
     const auto itEntryInRemoveList = std::find(
-        _vObjStatusUpdatesEraseRequests.begin(),
-        _vObjStatusUpdatesEraseRequests.end(),
+        _vObjStatusUpdatesEraseRequests.cbegin(),
+        _vObjStatusUpdatesEraseRequests.cend(),
         pObj);
-    if (_vObjStatusUpdatesEraseRequests.end() != itEntryInRemoveList)
+    if (_vObjStatusUpdatesEraseRequests.cend() != itEntryInRemoveList)
     {
         const auto itEntryInAddList = std::find(
-            _vObjStatusUpdatesAddRequests.begin(),
-            _vObjStatusUpdatesAddRequests.end(),
+            _vObjStatusUpdatesAddRequests.cbegin(),
+            _vObjStatusUpdatesAddRequests.cend(),
             pObj);
-        ASSERT(itEntryInAddList == _vObjStatusUpdatesAddRequests.end());
+        ASSERT(itEntryInAddList == _vObjStatusUpdatesAddRequests.cend());
 
         const auto itEntryInTickList = std::find(
-            _vObjStatusUpdates.begin(),
-            _vObjStatusUpdates.end(),
+            _vObjStatusUpdates.cbegin(),
+            _vObjStatusUpdates.cend(),
             pObj);
-        ASSERT(itEntryInTickList != _vObjStatusUpdates.end());
+        ASSERT(itEntryInTickList != _vObjStatusUpdates.cend());
 
         ASSERT(false);
         return false; // Already requested the removal.
@@ -931,8 +936,8 @@ bool CWorldTicker::DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock) // static
     // At this point, we should be fairly sure that the object is in the tick list.
 #ifdef DEBUG_CTIMEDOBJ_TIMED_TICKING
     const auto itEntryInTickList = std::find(
-        _vObjStatusUpdates.begin(),
-        _vObjStatusUpdates.end(),
+        _vObjStatusUpdates.cbegin(),
+        _vObjStatusUpdates.cend(),
         pObj);
     if (itEntryInTickList == _vObjStatusUpdates.end())
     {
@@ -999,7 +1004,7 @@ void CWorldTicker::ProcessObjStatusUpdates()
                 _vObjStatusUpdates.size(), _vObjStatusUpdatesEraseRequests.size(), _vObjStatusUpdatesAddRequests.size());
 #endif
         sl::UnsortedVecRemoveElementsByValues(_vObjStatusUpdates, _vObjStatusUpdatesEraseRequests);
-        _vObjStatusUpdates.insert(_vObjStatusUpdates.end(), _vObjStatusUpdatesAddRequests.begin(), _vObjStatusUpdatesAddRequests.end());
+        _vObjStatusUpdates.insert(_vObjStatusUpdates.end(), _vObjStatusUpdatesAddRequests.cbegin(), _vObjStatusUpdatesAddRequests.cend());
         _vObjStatusUpdatesAddRequests.clear();
         _vObjStatusUpdatesEraseRequests.clear();
 
@@ -1129,12 +1134,12 @@ void CWorldTicker::ProcessTimedObjects()
         // Ensure that the SortedVecRemoveElementsByIndices worked. No element of _vecGenericObjsToTick has to still be in _vTimedObjsTimeouts.
         for (CTimedObject* obj : _vTimedObjsTimeoutsBuffer)
         {
-            auto itit = std::find_if(_vTimedObjsTimeouts.begin(), _vTimedObjsTimeouts.end(),
+            auto itit = std::find_if(_vTimedObjsTimeouts.cbegin(), _vTimedObjsTimeouts.cend(),
                 [obj](TickingTimedObjEntry const& lhs) constexpr noexcept {
                     return obj == lhs.second;
                 });
             UnreferencedParameter(itit);
-            ASSERT(itit == _vTimedObjsTimeouts.end());
+            ASSERT(itit == _vTimedObjsTimeouts.cend());
         }
 #endif
 
@@ -1293,22 +1298,22 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             // Ensure that the SortedVecRemoveAddQueued worked
             for (CChar* obj : _vPeriodicCharsEraseRequests)
             {
-                auto itit = std::find_if(_vPeriodicCharsTicks.begin(), _vPeriodicCharsTicks.end(),
+                auto itit = std::find_if(_vPeriodicCharsTicks.cbegin(), _vPeriodicCharsTicks.cend(),
                     [obj](TickingPeriodicCharEntry const& lhs) constexpr noexcept {
                         return obj == lhs.second;
                     });
                 UnreferencedParameter(itit);
-                ASSERT(itit == _vPeriodicCharsTicks.end());
+                ASSERT(itit == _vPeriodicCharsTicks.cend());
             }
 
             for (auto& obj : _vPeriodicCharsAddRequests)
             {
-                auto itit = std::find_if(_vPeriodicCharsTicks.begin(), _vPeriodicCharsTicks.end(),
+                auto itit = std::find_if(_vPeriodicCharsTicks.cbegin(), _vPeriodicCharsTicks.cend(),
                     [obj](TickingPeriodicCharEntry const& lhs) constexpr noexcept {
                         return obj.second == lhs.second;
                     });
                 UnreferencedParameter(itit);
-                ASSERT(itit != _vPeriodicCharsTicks.end());
+                ASSERT(itit != _vPeriodicCharsTicks.cend());
             }
 #endif
             _vPeriodicCharsAddRequests.clear();

@@ -2,7 +2,7 @@
 #include "../CException.h"
 #include "sstringobjs.h"
 
-
+/*
 // temporary string storage
 #define NO_CONTEXT_TEMPSTRING_MAX_LINES	256
 //#define STRINGOBJ_DEFAULT_SIZE 48
@@ -37,15 +37,21 @@ static tchar* getUnsafeStringBuffer() noexcept
 	}
 	return unsafe_buffer;
 }
-
+*/
 
 [[nodiscard]]
 tchar* Str_GetTemp() noexcept
 {
+    /*
+    // To be used if we decide to let each thread have its string buffer pool.
 	AbstractThread *pThreadState = ThreadHolder::get().current();
 	if (pThreadState)
 		return static_cast<AbstractSphereThread*>(pThreadState)->allocateBuffer();
 	return getUnsafeStringBuffer();
+    */
+
+    // Get from the common but mutex-guarded buffer pool.
+    return AbstractSphereThread::Strings::allocateBuffer();
 }
 
 
@@ -215,18 +221,25 @@ void HeapString::resize(size_t newLength)
 TemporaryString::TemporaryString() //:
 	//m_useHeap(false), m_state(nullptr)
 {
-	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::get().current());
-	if ( current != nullptr )
-	{
-		// allocate from thread context
-		current->getStringBuffer(*this);
-	}
-	else
-	{
-		// allocate from global, thread-UNsafe buffer when context is not available.
-		tchar* unsafe_buffer = getUnsafeStringBuffer();
-		init(unsafe_buffer, nullptr);
-	}
+    /*
+    // To be used if we decide to let each thread have its string buffer pool.
+    AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::get().current());
+    if ( current != nullptr )
+    {
+        // allocate from thread context
+        current->Strings::getBuffer(*this);
+    }
+    else
+    {
+        // allocate from global, thread-UNsafe buffer when context is not available.
+        tchar* unsafe_buffer = getUnsafeStringBuffer();
+        init(unsafe_buffer, nullptr);
+    }
+    */
+
+    // Get from the common but mutex-guarded buffer pool.
+
+    AbstractSphereThread::Strings::getBuffer(*this);
 
 	// At this point, both m_useHeap and m_state should be initialized.
 }
