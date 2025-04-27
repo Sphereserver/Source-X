@@ -49,10 +49,9 @@ endif()
 #
 # Check for unistd.h
 #
-check_include_file(unistd.h HAVE_UNISTD_H)
+check_include_file(unistd.h Z_HAVE_UNISTD_H)
 
-configure_file(	zlib/zconf.h.cmakein
-		zlib/zconf.h @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/zlib/zconf.h.cmakein" "${CMAKE_CURRENT_SOURCE_DIR}/zlib/zconf.h" @ONLY)
 
 message(STATUS "Done.")
 
