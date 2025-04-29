@@ -4563,13 +4563,14 @@ bool CServerConfig::LoadIni( bool fTest )
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
 
     char filename[SPHERE_MAX_PATH] = SPHERE_FILE ".ini";
-    // Check, if CLI argument -I /path/to/ini/directory/ was used.
+    // Check, if CLI argument -I=/path/to/ini/directory/ was used.
     if (m_iniDirectory[0] != '\0')
     {
-        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s/" SPHERE_FILE ".ini", m_iniDirectory);
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s" SPHERE_FILE ".ini", m_iniDirectory);
         if (ret < 0)
         {
-            abort();
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Path to %s" SPHERE_FILE ".ini is too long.\n", m_iniDirectory);
+            return false;
         }
     }
     else
@@ -4600,13 +4601,14 @@ bool CServerConfig::LoadCryptIni( void )
 	ADDTOCALLSTACK("CServerConfig::LoadCryptIni");
 
     char filename[SPHERE_MAX_PATH] = SPHERE_FILE "Crypt.ini";
-    // Check, if CLI argument -I /path/to/ini/directory/ was used.
+    // Check, if CLI argument -I=/path/to/ini/directory/ was used.
     if (m_iniDirectory[0] != '\0')
     {
-        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s/sphereCrypt.ini", m_iniDirectory);
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s" SPHERE_FILE "Crypt.ini", m_iniDirectory);
         if (ret < 0)
         {
-            abort();
+            g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Path to %s" SPHERE_FILE "Crypt.ini is too long.\n", m_iniDirectory);
+            return false;
         }
     }
     else

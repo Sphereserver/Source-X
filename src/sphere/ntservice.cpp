@@ -461,7 +461,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " =\t") + 1;
 
     // Process the command line arguments.
     if (argc > 1 && _IS_SWITCH(*argv[1]))

@@ -2305,7 +2305,7 @@ bool CServer::CommandLinePreLoad( int argc, tchar * argv[] )
                     "-E Enable the CrashDumper.\n"
 #endif
                     "-Gpath/to/saves/ Defrags sphere saves.\n"
-					"-I /path/to/ini/ Directory with ini files.\n"
+					"-I=/path/to/ini/ Directory with ini files.\n"
 #ifdef _WIN32
                     "-K install/remove Installs or removes NT Service.\n"
                     "-J automatically close the console window at server termination.\n"
