@@ -4563,7 +4563,7 @@ bool CServerConfig::LoadIni( bool fTest )
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
 
     char filename[SPHERE_MAX_PATH] = SPHERE_FILE ".ini";
-    // Check, if CLI argument -S /path/to/ini/directory/ was used.
+    // Check, if CLI argument -I /path/to/ini/directory/ was used.
     if (m_iniDirectory[0] != '\0')
     {
         int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s/" SPHERE_FILE ".ini", m_iniDirectory);
