@@ -2351,6 +2351,8 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
 #ifdef _WIN32
 			case 'C':
 			case 'K':
+		        //	these are parsed in other places - nt service, nt window part, etc
+		        continue;
             case 'J':
                 g_Serv._fCloseNTWindowOnTerminate = true;
                 continue;
