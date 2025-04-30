@@ -1377,7 +1377,12 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             pChar->_iTimePeriodicTick = 0;
             if (pChar->OnTickPeriodic())
             {
-                AddCharTicking(pChar, false);
+                if (!pChar->IsPeriodicTickPending())
+                {
+                    // Need to check this, people could do funny stuff in @Death trigger and force-add the Char back to
+                    //  the ticking list from OnTickPeriodic. It's the only exceptional case, because it normally is added back here.
+                    AddCharTicking(pChar, false);
+                }
             }
             else
             {
