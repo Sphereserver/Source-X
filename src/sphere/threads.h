@@ -161,8 +161,9 @@ protected:
     bool _fKeepAliveAtShutdown;
     volatile std::atomic_bool _thread_selfTerminateAfterThisTick;
     volatile std::atomic_bool _fIsClosing;
-private:
+
     volatile std::atomic_bool m_terminateRequested;
+private:
     char m_name[30];
 
     // pthread_t type is opaque (platform-defined). It can be an integer, a struct, a ptr something. Memset is the safest and more portable way.
@@ -285,7 +286,7 @@ public:
         static char *allocateBuffer() noexcept;
 
         // allocates a manageable String from the thread local storage
-        static void getBuffer(TemporaryString &string) noexcept;
+        static void getBufferForStringObject(TemporaryString &string) noexcept;
     };
 
 public:

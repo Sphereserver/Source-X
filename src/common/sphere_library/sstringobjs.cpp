@@ -239,7 +239,7 @@ TemporaryString::TemporaryString() //:
 
     // Get from the common but mutex-guarded buffer pool.
 
-    AbstractSphereThread::Strings::getBuffer(*this);
+    AbstractSphereThread::Strings::getBufferForStringObject(*this);
 
 	// At this point, both m_useHeap and m_state should be initialized.
 }

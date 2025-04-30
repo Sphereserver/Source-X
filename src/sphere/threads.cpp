@@ -39,9 +39,9 @@
 struct TemporaryStringsThreadSafeStateHolder
 {
     // C-style string Buffer (char array)
-	SimpleMutex g_tmpStringMutex;
-    std::atomic<uint> g_tmpStringIndex;
-    std::unique_ptr<char[]> g_tmpStrings;
+    SimpleMutex g_tmpCStringMutex;
+    std::atomic<uint> g_tmpCStringIndex;
+    std::unique_ptr<char[]> g_tmpCStrings;
 
 	// TemporaryString Buffer
 	SimpleMutex g_tmpTemporaryStringMutex;
@@ -55,9 +55,9 @@ struct TemporaryStringsThreadSafeStateHolder
 
 private:
     TemporaryStringsThreadSafeStateHolder() :
-        g_tmpStringIndex(0), g_tmpTemporaryStringIndex(0)
+        g_tmpCStringIndex(0), g_tmpTemporaryStringIndex(0)
     {
-        g_tmpStrings = std::make_unique<char[]>(THREAD_TEMPSTRING_C_STORAGE * THREAD_STRING_LENGTH);
+        g_tmpCStrings = std::make_unique<char[]>(THREAD_TEMPSTRING_C_STORAGE * THREAD_STRING_LENGTH);
         g_tmpTemporaryStringStorage = std::make_unique<TemporaryStringStorage[]>(THREAD_TEMPSTRING_OBJ_STORAGE);
     }
 
@@ -76,7 +76,11 @@ public:
 
 ThreadHolder::ThreadHolder() noexcept :
 	m_threadCount(0), m_closingThreads(false)
-{}
+{
+    // While we keep this as a global state and do not decide to get a set of string buffers attached to each AbstractSphereThread,
+    //  we have to ensure that we construct the global string buffer holder as soon as possible.
+    TemporaryStringsThreadSafeStateHolder::get();
+}
 
 ThreadHolder& ThreadHolder::get() noexcept
 {
@@ -118,7 +122,7 @@ AbstractThread* ThreadHolder::current() noexcept
                 [[unlikely]]
                 {
                     // Should never happen.
-                    RaiseImmediateAbort();
+                    RaiseImmediateAbort(11);
                 }
 
                 thread->m_threadSystemId = tid;
@@ -144,7 +148,7 @@ AbstractThread* ThreadHolder::current() noexcept
                 //STDERR_LOG("Thread handle not found in vector?");
 
                 // Should never happen.
-                RaiseImmediateAbort();
+                RaiseImmediateAbort(12);
             }
 
             auto thread = static_cast<AbstractThread *>(found->second);
@@ -164,7 +168,7 @@ AbstractThread* ThreadHolder::current() noexcept
                 if (!spherethread)
                 {
                     // Should never happen.
-                    RaiseImmediateAbort();
+                    RaiseImmediateAbort(13);
                 }
 
                 if (!spherethread->_fKeepAliveAtShutdown)
@@ -241,7 +245,7 @@ void ThreadHolder::push(AbstractThread *thread) noexcept
     {
 soft_throw:
         // Should never happen.
-        RaiseImmediateAbort();
+        RaiseImmediateAbort(14);
     }
 
 #ifdef _DEBUG
@@ -318,7 +322,7 @@ AbstractThread * ThreadHolder::getThreadAt(size_t at) noexcept
             [[unlikely]]
             {
                 STDERR_LOG("Active threads %" PRIuSIZE_T ", threads container size %" PRIuSIZE_T ".\n", getActiveThreads(), m_threads.size());
-                RaiseImmediateAbort();
+                RaiseImmediateAbort(15);
             }
 //#endif
 
@@ -378,8 +382,14 @@ AbstractThread::AbstractThread(const char *name, ThreadPriority priority) :
 
 AbstractThread::~AbstractThread()
 {
-	terminate(false);
-	--AbstractThread::m_threadsAvailable;
+#ifdef _DEBUG
+    fprintf(stdout, "DEBUG: Destroying thread '%s' with ThreadHolder ID %d and system ID %" PRIu64 ".\n",
+        getName(), m_threadHolderId, (uint64)m_threadSystemId);
+    fflush(stdout);
+#endif
+
+    terminate(true);
+    --AbstractThread::m_threadsAvailable;
 	if( AbstractThread::m_threadsAvailable == 0 )
 	{
 		// all running threads have gone, the thread subsystem is no longer needed
@@ -447,9 +457,9 @@ void AbstractThread::terminate(bool ended)
 			}
 		}
 
-		// Common things
-		ThreadHolder::get().remove(this);
-		m_threadSystemId = 0;
+        // Common things
+        ThreadHolder::get().remove(this);
+        m_threadSystemId = 0;
         m_handle = std::nullopt;
 
 		// let everyone know we have been terminated
@@ -591,7 +601,6 @@ void AbstractThread::waitForClose()
     // Another thread has requested us to close and it's waiting for us to complete the current tick,
     //  or to forcefully be forcefully terminated after a THREADJOIN_TIMEOUT, which of the two happens first.
 
-    // TODO? add a mutex here to protect at least the changes to m_terminateRequested?
 	if (isActive())
 	{
 		if (isCurrentThread() == false)
@@ -803,7 +812,7 @@ AbstractSphereThread::~AbstractSphereThread()
 static auto getThreadRawStringBuffer() -> TemporaryStringsThreadSafeStateHolder::TemporaryStringStorage *
 {
     auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
-    SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
+    SimpleThreadLock stlBuffer(tsholder.g_tmpCStringMutex);
 
     int initialPosition = tsholder.g_tmpTemporaryStringIndex;
     int index;
@@ -841,24 +850,30 @@ static auto getThreadRawStringBuffer() -> TemporaryStringsThreadSafeStateHolder:
 char *AbstractSphereThread::Strings::allocateBuffer() noexcept
 {
     auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
-    SimpleThreadLock stlBuffer(tsholder.g_tmpStringMutex);
+    SimpleThreadLock stlBuffer(tsholder.g_tmpCStringMutex);
 
 	char * buffer = nullptr;
-    tsholder.g_tmpStringIndex += 1;
+    tsholder.g_tmpCStringIndex += 1;
 
-    if (tsholder.g_tmpStringIndex >= THREAD_TEMPSTRING_C_STORAGE )
+    if (tsholder.g_tmpCStringIndex >= THREAD_TEMPSTRING_C_STORAGE )
 	{
-        tsholder.g_tmpStringIndex = tsholder.g_tmpStringIndex % THREAD_TEMPSTRING_C_STORAGE;
+        tsholder.g_tmpCStringIndex = tsholder.g_tmpCStringIndex % THREAD_TEMPSTRING_C_STORAGE;
 	}
 
     //buffer = tsholder->g_tmpStrings.get() + (tsholder->g_tmpStringIndex * THREAD_STRING_LENGTH);
-    buffer = &(tsholder.g_tmpStrings[tsholder.g_tmpStringIndex * THREAD_TEMPSTRING_C_STORAGE]);
+    if (!tsholder.g_tmpCStrings) {
+        // I shouldn't even try to do this. Maybe i'm at the end of server shutdown.
+        RaiseImmediateAbort(20);
+        //return nullptr;
+    }
+
+    buffer = &(tsholder.g_tmpCStrings[tsholder.g_tmpCStringIndex * THREAD_TEMPSTRING_C_STORAGE]);
 	*buffer = '\0';
 
 	return buffer;
 }
 
-void AbstractSphereThread::Strings::getBuffer(TemporaryString &string) noexcept
+void AbstractSphereThread::Strings::getBufferForStringObject(TemporaryString &string) noexcept
 {
 	ADDTOCALLSTACK("alloc");
     auto& tsholder = TemporaryStringsThreadSafeStateHolder::get();
@@ -909,10 +924,10 @@ void AbstractSphereThread::pushStackCall(const char *name) noexcept
 
 #ifdef _DEBUG
     if (m_iStackPos < -1) [[unlikely]] {
-        RaiseImmediateAbort();
+        RaiseImmediateAbort(16);
     }
     if (m_iStackPos >= (ssize_t)ARRAY_COUNT(m_stackInfo)) [[unlikely]] {
-        RaiseImmediateAbort();
+        RaiseImmediateAbort(17);
     }
 #endif
 
