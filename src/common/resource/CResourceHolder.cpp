@@ -289,7 +289,7 @@ bool CResourceHolder::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Section Definitions
 
-lpctstr CResourceHolder::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+lpctstr CResourceHolder::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr* ptcOutError)
 {
     ADDTOCALLSTACK("CResourceHolder::ResourceTypedGetName");
     CResourceID ridValid = CResourceID(iExpectedType, 0);
@@ -297,12 +297,21 @@ lpctstr CResourceHolder::ResourceTypedGetName(const CResourceIDBase& rid, RES_TY
     {
         if (rid.GetResIndex() != 0)
         {
-            g_Log.EventError("Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
+            if (ptcOutError)
+            {
+                *ptcOutError = Str_GetTemp();
+                snprintf(*ptcOutError, Str_TempLength(), "Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
+            }
         }
     }
     else if (rid.GetResType() != iExpectedType)
     {
-        g_Log.EventWarn("Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n", iExpectedType, rid.GetResType());
+        if (ptcOutError)
+        {
+            *ptcOutError = Str_GetTemp();
+            snprintf(*ptcOutError, Str_TempLength(), "Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n",
+                iExpectedType, rid.GetResType());
+        }
     }
     else
     {

@@ -798,7 +798,7 @@ public:
     void r_LoadMore2(dword dwVal);
 
     lpctstr ResourceGetName(const CResourceID& rid);
-    lpctstr ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType);
+    lpctstr ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr* ptcOutError);
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;

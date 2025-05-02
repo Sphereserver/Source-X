@@ -2312,25 +2312,27 @@ void CItem::r_WriteMore1(CSString & sVal)
     ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
 
+    lptstr ptcErr = nullptr;
+
     switch (GetType())
     {
         case IT_SPELLBOOK:
             sVal.FormatHex(m_itSpellbook.m_spells1);
-            return;
+            break;
 
         case IT_TREE:
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = ResourceTypedGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
-            return;
+            sVal = ResourceTypedGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE, &ptcErr); //Changed to fix issue but it is not implemented.
+            break;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = ResourceTypedGetName(m_itFood.m_ridCook, RES_ITEMDEF);
-            return;
+            sVal = ResourceTypedGetName(m_itFood.m_ridCook, RES_ITEMDEF, &ptcErr);
+            break;
 
         case IT_TRAP:
         case IT_TRAP_ACTIVE:
@@ -2342,7 +2344,7 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
             sVal = ResourceGetName(CResourceID(RES_ITEMDEF, ResGetIndex(m_itNormal.m_more1)));
-            return;
+            break;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
@@ -2358,7 +2360,13 @@ void CItem::r_WriteMore1(CSString & sVal)
                 sVal = ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more1);
-            return;
+            break;
+    }
+
+    if (ptcErr)
+    {
+        g_Log.EventError("Invalid MORE1 for item 0%" PRIx32 ": %s.\n",
+            GetUID().GetObjUID(), ptcErr);
     }
 }
 
@@ -2367,23 +2375,25 @@ void CItem::r_WriteMore2( CSString & sVal )
 	ADDTOCALLSTACK_DEBUG("CItem::r_WriteMore2");
 	// do special processing to represent this.
 
+    lptstr ptcErr = nullptr;
+
 	switch ( GetType())
 	{
         case IT_SPELLBOOK:
             sVal.FormatHex(m_itSpellbook.m_spells2);
-            return;
+            break;
 
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
             sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itFood.m_MeatType));
-			return;
+            break;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-            sVal = ResourceTypedGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
-            return;
+            sVal = ResourceTypedGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF, &ptcErr);
+            break;
 
 		case IT_LEATHER:
 		case IT_HIDE:
@@ -2393,19 +2403,25 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_BLOOD:
         case IT_BONE:
             sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more2));
-            return;
+            break;
 
 		case IT_ANIM_ACTIVE:
             sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itAnim.m_PrevType));
-            return;
+            break;
 
 		default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more2))
                 sVal = ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more2);
-			return;
+            break;
 	}
+
+    if (ptcErr)
+    {
+        g_Log.EventError("Invalid MORE2 for item 0%" PRIx32 ": %s.\n",
+            GetUID().GetObjUID(), ptcErr);
+    }
 }
 
 void CItem::r_Write( CScript & s )
@@ -3053,14 +3069,14 @@ lpctstr CItem::ResourceGetName(const CResourceID& rid)
     return g_Cfg.ResourceGetName(rid);
 }
 
-lpctstr CItem::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+lpctstr CItem::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr *ptcOutError)
 {
     ADDTOCALLSTACK("CItem::ResourceTypedGetName");
     if (Can(CAN_I_SCRIPTEDMORE))
     {
         return g_Cfg.ResourceGetName(rid);
     }
-    return g_Cfg.ResourceTypedGetName(rid, iExpectedType);
+    return g_Cfg.ResourceTypedGetName(rid, iExpectedType, ptcOutError);
 }
 
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
