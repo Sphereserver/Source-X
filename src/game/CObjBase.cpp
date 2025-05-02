@@ -3220,7 +3220,8 @@ void CObjBase::_GoSleep()
         const bool fDel = CWorldTickingList::DelObjSingle(this);
         ASSERT(fDel);
         UnreferencedParameter(fDel);
-
+    }
+/*
 #ifdef _DEBUG
         const std::optional<std::pair<int64, CTimedObject*>> optPairRes = CWorldTickingList::IsTimeoutRegistered(this);
         if (optPairRes.has_value())
@@ -3240,13 +3241,14 @@ void CObjBase::_GoSleep()
         //UnreferencedParameter(optPairRes);
     }
 #endif
-
+*/
     if (IsStatusUpdatePending())
     {
         const bool fDel = CWorldTickingList::DelObjStatusUpdate(this, false);
         ASSERT(fDel);
         UnreferencedParameter(fDel);
-
+    }
+/*
 #ifdef _DEBUG
         const bool fRes = CWorldTickingList::IsStatusUpdateTickRegistered(this);
         ASSERT(!fRes);
@@ -3261,6 +3263,7 @@ void CObjBase::_GoSleep()
         //UnreferencedParameter(fRes);
     }
 #endif
+*/
 }
 
 bool CObjBase::_CanTick() const

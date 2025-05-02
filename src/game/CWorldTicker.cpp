@@ -10,6 +10,7 @@
 #include "CWorldTicker.h"
 #include <unordered_set>
 
+/*
 #if defined _DEBUG || defined _NIGHTLYBUILD
 #   define DEBUG_CTIMEDOBJ_TIMED_TICKING
 #   define DEBUG_CCHAR_PERIODIC_TICKING
@@ -19,6 +20,7 @@
 //#define TIMEDOBJS_COUNTER
 //#define CHAR_PERIODIC_COUNTER
 //#define STATUS_UPDATES_COUNTER
+*/
 
 
 template <typename TPair, typename T>
@@ -584,11 +586,9 @@ bool CWorldTicker::_EraseCharTicking(CChar* pChar)
     std::unique_lock<std::shared_mutex> lock(_vPeriodicCharsTicks.MT_CMUTEX);
 #endif
 
-#ifdef DEBUG_CCHAR_PERIODIC_TICKING
     const auto fnFindEntryByChar = [pChar](TickingPeriodicCharEntry const& rhs) constexpr noexcept {
         return pChar == rhs.second;
     };
-#endif
     const auto itEntryInAddList = std::find_if(
         _vPeriodicCharsAddRequests.cbegin(),
         _vPeriodicCharsAddRequests.cend(),
