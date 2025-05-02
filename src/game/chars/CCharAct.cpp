@@ -794,6 +794,8 @@ void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 		case STAT_DEX:
 			UpdateStamFlag();
 			break;
+        default:
+            break;
 	}
 }
 
@@ -2244,6 +2246,8 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     return ANIM_BOW;
                 case ANIM_THROW:
                     return ANIM_ATTACK_1H_BASH;
+            default:
+                break;
             }
         }
 	}

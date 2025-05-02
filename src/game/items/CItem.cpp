@@ -2322,14 +2322,14 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
+            sVal = ResourceTypedGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
             return;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF);
+            sVal = ResourceTypedGetName(m_itFood.m_ridCook, RES_ITEMDEF);
             return;
 
         case IT_TRAP:
@@ -2382,7 +2382,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-            sVal = ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
+            sVal = ResourceTypedGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
             return;
 
 		case IT_LEATHER:
@@ -3037,6 +3037,9 @@ void CItem::r_LoadMore2(dword dwVal)
 
 lpctstr CItem::ResourceGetName(const CResourceID& rid)
 {
+    ADDTOCALLSTACK("CItem::ResourceGetName");
+    /*
+     * Does the same thing as g_Cfg.ResourceGetName(rid).
     if (Can(CAN_I_SCRIPTEDMORE))
     {
         tchar* pszText = Str_GetTemp();
@@ -3046,21 +3049,18 @@ lpctstr CItem::ResourceGetName(const CResourceID& rid)
             snprintf(pszText, Str_TempLength(),"0%" PRIx32, rid.GetResIndex());
         return pszText;
     }
+    */
     return g_Cfg.ResourceGetName(rid);
 }
 
-lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+lpctstr CItem::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
 {
+    ADDTOCALLSTACK("CItem::ResourceTypedGetName");
     if (Can(CAN_I_SCRIPTEDMORE))
     {
-        tchar* pszText = Str_GetTemp();
-        if (!rid.IsValidUID())
-            snprintf(pszText, Str_TempLength(), "%d", (int)rid.GetPrivateUID());
-        else
-            snprintf(pszText, Str_TempLength(), "0%" PRIx32, rid.GetResIndex());
-        return pszText;
+        return g_Cfg.ResourceGetName(rid);
     }
-    return g_Cfg.ResourceGetName(rid, iExpectedType);
+    return g_Cfg.ResourceTypedGetName(rid, iExpectedType);
 }
 
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
@@ -3171,7 +3171,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		{
 			int64 amount = s.GetArgLLVal();
 			SetDefNum(s.GetKey(), amount, false);
-			CVarDefCont * pVar = GetDefKey("Usescur", true);
+            CVarDefCont * pVar = GetDefKey("UsesCur", true);
 			if (!pVar)
 				SetDefNum("UsesCur", amount, false);
 		}	break;

@@ -157,7 +157,7 @@ public:
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
 	// Type specific info. IT_TYPE
-	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1 morem) ) = 14 bytes (+ padding?)
+    union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1 morem) ) = 14 bytes (+ 2 padding?)
 	{
 		// IT_NORMAL
 		struct	// used only to save and restore all this junk.
@@ -798,7 +798,7 @@ public:
     void r_LoadMore2(dword dwVal);
 
     lpctstr ResourceGetName(const CResourceID& rid);
-    lpctstr ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType);
+    lpctstr ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType);
 
 	virtual bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;
 	virtual void r_Write( CScript & s ) override;
