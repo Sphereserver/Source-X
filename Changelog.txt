@@ -4016,7 +4016,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 22-04-2025, Mulambo
 - Added ini settings:
 	// Display more bounce messages when drinking potions, fishing, crafting etc. (Old sphere behaviour).
-    VerboseItemBounce=0
+    VerboseItemBounce = 0 // (default)
 
 22-04-2025, canerksk
 - Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
@@ -4027,3 +4027,10 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 03-05-2025, Nolok
 - Changed: Retrieving the MORE1/2 of items with the flag CAN_I_SCRIPTEDMORE will always return the raw numerical value.
     This allows using the full numerical range available.
+
+03-05-2025, canerksk (from PR #1319), Nolok
+- Added: New optionflag OF_PetBehaviorOwnerNeutral.
+    If this setting is enabled, pets you own will appear to you with the original noto (pre-taming, old behavior). If this setting is not enabled, the assets you own will always appear natural to you. This setting only applies when the owning character is looking at the asset they own. It does not apply when someone else is looking at the asset you own.
+- Added: OF_NPCMovementOldStyle, TAG.OVERRIDE.MOVESTYLE.
+    Support for the old 0.56b NPC movement formulas with: OF_NPCMovementOldStyle ini setting and TAG.OVERRIDE.MOVESTYLE (to override the behavior for a single character).
+    With that formula, among the other things, char MOVERATE property and TAG.OVERRIDE.MOVERATE will return to be the percent modifier of the speed of the NPC - the higher it is, the slower will the NPC be. Default is 100.

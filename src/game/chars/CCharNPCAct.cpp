@@ -608,58 +608,86 @@ int CChar::NPC_WalkToPoint( bool fRun )
 
 	EXC_SET_BLOCK("Speed counting");
 	// How fast can they move.
-	int64 iTickNext;
+    int64 iTickNext = -1;
 
-	// TAG.OVERRIDE.MOVERATE
-	int64 tTick;
-    CVarDefCont * pVal = GetKey("OVERRIDE.MOVEDELAY", true);
-    if (pVal)
+    int64 iMoveStyle = GetKeyNum("OVERRIDE.MOVESTYLE", true);
+    if ((iMoveStyle == 1) || IsSetOF(OF_NPCMovementOldStyle))
     {
-        iTickNext = pVal->GetValNum();  // foot walking speed
-        if (IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) // On Mount
-        {
-            if (IsStatFlag(STATF_FLY))  // Running
-            {
-                iTickNext /= 4; // 4 times faster when running while it's on a mount
-            }
-            else
-            {
-                iTickNext /= 2; // 2 times faster when walking while it's on a mount
-            }
-        }
-        else
-        {
-            if (IsStatFlag(STATF_FLY))
-            {
-                iTickNext /= 2; // 2 times faster when running.
-            }
-        }
-    }
-    else
-    {
-        CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
-        if (pValue)
-            tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
-        else
-            tTick = pCharDef->m_iMoveRate;	//no tag.override.moverate, we get default moverate (created from ini's one).
-        // END TAG.OVERRIDE.MOVERATE
         if (fRun)
         {
-            if (IsStatFlag(STATF_PET))	// pets run a little faster.
+            if (IsStatFlag(STATF_PET)) // pets run a little faster.
             {
                 if (iDex < 75)
                     iDex = 75;
             }
-            iTickNext = MSECS_PER_SEC / 4 + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 5) * MSECS_PER_SEC / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
+            iTickNext = MSECS_PER_SEC / 4 + g_Rand.GetValFast((100 - iDex) / 5) * MSECS_PER_SEC / 10;
         }
         else
-            iTickNext = MSECS_PER_SEC + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 3) * MSECS_PER_SEC / 10;
-    }
+            iTickNext = MSECS_PER_SEC + g_Rand.GetValFast((100 - iDex) / 3) * MSECS_PER_SEC / 10;
 
-	if (iTickNext < MSECS_PER_TENTH) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
-		iTickNext = MSECS_PER_TENTH;
-	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
-		iTickNext = 5 * MSECS_PER_SEC;
+        CVarDefCont *pValue = GetKey("OVERRIDE.MOVERATE", true);
+        if (pValue)
+        {
+            int64 tTick = pValue->GetValNum();
+            if (tTick < 1)
+                tTick = 1;
+            iTickNext = (iTickNext * tTick) / 100;
+        }
+        else
+        {
+            iTickNext = (iTickNext * pCharDef->m_iMoveRate) / 100;
+        }
+        if (iTickNext < 1)
+            iTickNext = 1;
+    }
+    else
+    {
+        int64 tTick;
+        CVarDefCont * pVal = GetKey("OVERRIDE.MOVEDELAY", true);
+        if (pVal)
+        {
+            iTickNext = pVal->GetValNum();  // foot walking speed
+            if (IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) // On Mount
+            {
+                if (IsStatFlag(STATF_FLY))  // Running
+                    iTickNext /= 4; // 4 times faster when running while it's on a mount
+                else
+                    iTickNext /= 2; // 2 times faster when walking while it's on a mount
+            }
+            else
+            {
+                if (IsStatFlag(STATF_FLY))
+                {
+                    iTickNext /= 2; // 2 times faster when running.
+                }
+            }
+        }
+        else
+        {
+            CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
+            if (pValue)
+                tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
+            else
+                tTick = pCharDef->m_iMoveRate;	//no tag.override.moverate, we get default moverate (created from ini's one).
+
+            if (fRun)
+            {
+                if (IsStatFlag(STATF_PET))	// pets run a little faster.
+                {
+                    if (iDex < 75)
+                        iDex = 75;
+                }
+                iTickNext = MSECS_PER_SEC / 4 + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 5) * MSECS_PER_SEC / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
+            }
+            else
+                iTickNext = MSECS_PER_SEC + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 3) * MSECS_PER_SEC / 10;
+        }
+
+        if (iTickNext < MSECS_PER_TENTH) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
+            iTickNext = MSECS_PER_TENTH;
+        else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
+            iTickNext = 5 * MSECS_PER_SEC;
+    }
 
     _SetTimeout(iTickNext);
 	EXC_CATCH;
