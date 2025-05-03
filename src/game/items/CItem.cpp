@@ -2850,7 +2850,7 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatVal( GetHeight() );
 			break;
 		case IC_HITS:
-			sVal.FormatVal(LOWORD(m_itNormal.m_more1));
+            sVal.FormatVal(dword_low_word(m_itNormal.m_more1));
 			break;
 		case IC_HITPOINTS:
 			sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_dwHitsCur : 0 );
@@ -2880,17 +2880,17 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
-			sVal.FormatVal(HIWORD(m_itNormal.m_more1));
+            sVal.FormatVal(dword_hi_word(m_itNormal.m_more1));
 			break;
 		case IC_MORE:
 		case IC_MORE1:
 			r_WriteMore1(sVal);
 			break;
 		case IC_MORE1h:
-			sVal.FormatVal( HIWORD( m_itNormal.m_more1 ));
+            sVal.FormatVal( dword_hi_word( m_itNormal.m_more1 ));
 			break;
 		case IC_MORE1l:
-			sVal.FormatVal( LOWORD( m_itNormal.m_more1 ));
+            sVal.FormatVal( dword_low_word( m_itNormal.m_more1 ));
 			break;
         case IC_FRUIT:
             if (!IsType(IT_FRUIT))
@@ -2900,10 +2900,10 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			r_WriteMore2(sVal);
 			break;
 		case IC_MORE2h:
-			sVal.FormatVal( HIWORD( m_itNormal.m_more2 ));
+            sVal.FormatVal( dword_hi_word( m_itNormal.m_more2 ));
 			break;
 		case IC_MORE2l:
-			sVal.FormatVal( LOWORD( m_itNormal.m_more2 ));
+            sVal.FormatVal( dword_low_word( m_itNormal.m_more2 ));
 			break;
 		case IC_MOREM:
 			sVal.FormatVal( m_itNormal.m_morep.m_map );
@@ -3318,10 +3318,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return SetDispID((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr())));
 		case IC_HITS:
 			{
-				int maxHits = HIWORD(m_itNormal.m_more1);
+                int maxHits = dword_hi_word(m_itNormal.m_more1);
 				if( maxHits == 0 )
 					maxHits = s.GetArgVal();
-				m_itNormal.m_more1 = MAKEDWORD(s.GetArgVal(), maxHits);
+                m_itNormal.m_more1 = make_dword(s.GetArgVal(), maxHits);
 			}
 			break;
 		case IC_HITPOINTS:
@@ -3389,26 +3389,26 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, ResGetIndex(s.GetArgDWVal()));
             break;
 		case IC_MAXHITS:
-			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
+            m_itNormal.m_more1 = make_dword(dword_low_word(m_itNormal.m_more1), s.GetArgVal());
 			break;
 		case IC_MORE:
 		case IC_MORE1:
             r_LoadMore1(s.GetArgDWVal());
             break;
 		case IC_MORE1h:
-			m_itNormal.m_more1 = MAKEDWORD( LOWORD(m_itNormal.m_more1), s.GetArgVal());
+            m_itNormal.m_more1 = make_dword( dword_low_word(m_itNormal.m_more1), s.GetArgVal());
 			break;
 		case IC_MORE1l:
-			m_itNormal.m_more1 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more1));
+            m_itNormal.m_more1 = make_dword( s.GetArgVal(), dword_hi_word(m_itNormal.m_more1));
 			break;
 		case IC_MORE2:
             r_LoadMore2(s.GetArgDWVal());
             break;
 		case IC_MORE2h:
-			m_itNormal.m_more2 = MAKEDWORD( LOWORD(m_itNormal.m_more2), s.GetArgVal());
+            m_itNormal.m_more2 = make_dword( dword_low_word(m_itNormal.m_more2), s.GetArgVal());
 			break;
 		case IC_MORE2l:
-			m_itNormal.m_more2 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more2));
+            m_itNormal.m_more2 = make_dword( s.GetArgVal(), dword_hi_word(m_itNormal.m_more2));
 			break;
 		case IC_MOREM:
 			m_itNormal.m_morep.m_map = s.GetArgUCVal();
@@ -6055,7 +6055,7 @@ bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 			{
 				case IT_MAP:		// different map types are not the same resource
 				{
-					if ( LOWORD(dwArg) != m_itMap.m_top || HIWORD(dwArg) != m_itMap.m_left )
+                    if ( dword_low_word(dwArg) != m_itMap.m_top || dword_hi_word(dwArg) != m_itMap.m_left )
 						return false;
 					break;
 				}

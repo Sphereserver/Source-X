@@ -1,4 +1,4 @@
-#include "../../network/net_datatypes.h"
+//#include "../../network/net_datatypes.h"
 #include "../../sphere/threads.h"
 #include "CCrypto.h"
 #include <cstring>
@@ -7,13 +7,14 @@ extern "C" {
 #include <twofish/twofish.h>
 }
 
+#define UNPACKDWORD(p)	make_dword( make_word((p)[3],(p)[2]), make_word((p)[1],(p)[0]))
 
 void CCrypto::InitTwoFish()
 {
 	ADDTOCALLSTACK("CCrypto::InitTwoFish");
 	// Taken from t2tfish.cpp / CCryptNew.cpp
 
-	dword dwIP = UNPACKDWORD( ((byte*) & m_seed ) );
+    const dword dwIP = UNPACKDWORD( ((byte*) & m_seed ) );
 
 #ifdef DEBUG_CRYPT_MSGS
 	DEBUG_MSG(("GameCrypt Seed (%x)(%i-%x)\n", m_seed, dwIP, dwIP));

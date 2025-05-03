@@ -9,11 +9,15 @@
 #include "../common/common.h"
 
 
+/*
+// We don't use them, but if it happens we need those it would be better to create some constexpr functions to have better type safety
+//  and avoid hidden casts.
 #define PACKWORD(p,w)	(p)[0]=HIBYTE(w); (p)[1]=LOBYTE(w)
 #define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
 
 #define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF; (p)[1]=((d)>>16)&0xFF; (p)[2]=HIBYTE(d); (p)[3]=LOBYTE(d)
-#define UNPACKDWORD(p)	MAKEDWORD( MAKEWORD((p)[3],(p)[2]), MAKEWORD((p)[1],(p)[0]))
+#define UNPACKDWORD(p)	make_dword( MAKEWORD((p)[3],(p)[2]), MAKEWORD((p)[1],(p)[0]))
+*/
 
 
 // All these structures must be byte packed.

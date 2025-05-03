@@ -38,10 +38,10 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 		if ( !g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			continue;
 
-		dwSkillTmp = MAKEDWORD(i, Skill_GetBase((SKILL_TYPE)i));
+		dwSkillTmp = make_dword(i, Skill_GetBase((SKILL_TYPE)i));
 		for ( size_t j = 0; j <= iRank; ++j )
 		{
-			if ( HIWORD(dwSkillTmp) >= HIWORD(pdwSkills[j]) )
+            if ( dword_hi_word(dwSkillTmp) >= dword_hi_word(pdwSkills[j]) )
 			{
 				memmove( &pdwSkills[j + 1], &pdwSkills[j], (iRank - j) * sizeof(dword) );
 				pdwSkills[j] = dwSkillTmp;
@@ -52,7 +52,7 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 
 	dwSkillTmp = pdwSkills[ iRank ];
 	delete[] pdwSkills;
-	return (SKILL_TYPE)(LOWORD( dwSkillTmp ));
+    return (SKILL_TYPE)(dword_low_word( dwSkillTmp ));
 }
 
 // Retrieves a random magic skill, if iVal is set it will only select from the ones with value > iVal
