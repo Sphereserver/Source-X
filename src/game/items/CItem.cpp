@@ -3330,10 +3330,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return SetDispID((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr())));
 		case IC_HITS:
 			{
-                int maxHits = dword_hi_word(m_itNormal.m_more1);
+                word hits = s.GetArgWVal();
+                word maxHits = dword_hi_word(m_itNormal.m_more1);
 				if( maxHits == 0 )
-                    maxHits = s.GetArg16Val();
-                m_itNormal.m_more1 = make_dword(s.GetArg16Val(), maxHits);
+                    maxHits = hits;
+                m_itNormal.m_more1 = make_dword(hits, maxHits);
 			}
 			break;
 		case IC_HITPOINTS:
@@ -3411,7 +3412,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
             m_itNormal.m_more1 = make_dword( dword_low_word(m_itNormal.m_more1), s.GetArgWVal());
             break;
 		case IC_MORE1l:
-            m_itNormal.m_more1 = make_dword( s.GetArgDWVal(), dword_hi_word(m_itNormal.m_more1));
+            m_itNormal.m_more1 = make_dword( s.GetArgWVal(), dword_hi_word(m_itNormal.m_more1));
 			break;
 		case IC_MORE2:
             r_LoadMore2(s.GetArgDWVal());

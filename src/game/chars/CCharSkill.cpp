@@ -33,12 +33,12 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	ASSERT(pdwSkills);
 
 	dword dwSkillTmp;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+    for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			continue;
 
-		dwSkillTmp = make_dword(i, Skill_GetBase((SKILL_TYPE)i));
+        dwSkillTmp = make_dword(static_cast<word>(i), n_alias_cast<word>(Skill_GetBase((SKILL_TYPE)i)));
 		for ( size_t j = 0; j <= iRank; ++j )
 		{
             if ( dword_hi_word(dwSkillTmp) >= dword_hi_word(pdwSkills[j]) )
