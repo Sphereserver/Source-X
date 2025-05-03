@@ -2312,6 +2312,12 @@ void CItem::r_WriteMore1(CSString & sVal)
     ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
 
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        sVal.FormatHex(m_itNormal.m_more1);
+        return;
+    }
+
     lptstr ptcErr = nullptr;
 
     switch (GetType())
@@ -2324,7 +2330,7 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = ResourceTypedGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE, &ptcErr); //Changed to fix issue but it is not implemented.
+            sVal = ResourceTypedGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE, &ptcErr); //Changed to fix issue but it is not implemented (?)
             break;
 
         case IT_FRUIT:
@@ -2374,6 +2380,12 @@ void CItem::r_WriteMore2( CSString & sVal )
 {
 	ADDTOCALLSTACK_DEBUG("CItem::r_WriteMore2");
 	// do special processing to represent this.
+
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        sVal.FormatHex(m_itNormal.m_more2);
+        return;
+    }
 
     lptstr ptcErr = nullptr;
 
@@ -3320,8 +3332,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			{
                 int maxHits = dword_hi_word(m_itNormal.m_more1);
 				if( maxHits == 0 )
-					maxHits = s.GetArgVal();
-                m_itNormal.m_more1 = make_dword(s.GetArgVal(), maxHits);
+                    maxHits = s.GetArg16Val();
+                m_itNormal.m_more1 = make_dword(s.GetArg16Val(), maxHits);
 			}
 			break;
 		case IC_HITPOINTS:
@@ -3389,26 +3401,26 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, ResGetIndex(s.GetArgDWVal()));
             break;
 		case IC_MAXHITS:
-            m_itNormal.m_more1 = make_dword(dword_low_word(m_itNormal.m_more1), s.GetArgVal());
+            m_itNormal.m_more1 = make_dword(dword_low_word(m_itNormal.m_more1), s.GetArgWVal());
 			break;
 		case IC_MORE:
 		case IC_MORE1:
             r_LoadMore1(s.GetArgDWVal());
             break;
-		case IC_MORE1h:
-            m_itNormal.m_more1 = make_dword( dword_low_word(m_itNormal.m_more1), s.GetArgVal());
-			break;
+        case IC_MORE1h:
+            m_itNormal.m_more1 = make_dword( dword_low_word(m_itNormal.m_more1), s.GetArgWVal());
+            break;
 		case IC_MORE1l:
-            m_itNormal.m_more1 = make_dword( s.GetArgVal(), dword_hi_word(m_itNormal.m_more1));
+            m_itNormal.m_more1 = make_dword( s.GetArgDWVal(), dword_hi_word(m_itNormal.m_more1));
 			break;
 		case IC_MORE2:
             r_LoadMore2(s.GetArgDWVal());
             break;
 		case IC_MORE2h:
-            m_itNormal.m_more2 = make_dword( dword_low_word(m_itNormal.m_more2), s.GetArgVal());
+            m_itNormal.m_more2 = make_dword( dword_low_word(m_itNormal.m_more2), s.GetArgWVal());
 			break;
 		case IC_MORE2l:
-            m_itNormal.m_more2 = make_dword( s.GetArgVal(), dword_hi_word(m_itNormal.m_more2));
+            m_itNormal.m_more2 = make_dword( s.GetArgWVal(), dword_hi_word(m_itNormal.m_more2));
 			break;
 		case IC_MOREM:
 			m_itNormal.m_morep.m_map = s.GetArgUCVal();

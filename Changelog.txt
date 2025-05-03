@@ -3999,17 +3999,17 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	Serv.Log <DLOCAL.DoorAutoDist>
 	Local.DoorAutoDist=10
 
-28-02-2025, cbnolok
+28-02-2025, Nolok
 - Fixed: failing assertion if targeting a non-corpse object when casting Animate Dead spell.
 
-09-03-2025, cbnolok
+09-03-2025, Nolok
 - Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (partial fix for Issue #1249).
   Also, stamina wasn't consumed, thus NPCs had no limit in placing those items.
 
-11-03-2025, cbnolok
+11-03-2025, Nolok
 - Added: log message with informations about the newly created object, if just placed in a sector exceeding complexity threshold.
 
-15-03-2025, cbnolok
+15-03-2025, Nolok
 - Fixed: when using the ini setting ItemTimers=1 (enabling items to tick even if inside a container), the items kept ticking even after a char logout.
 - Fixed: when using the ini setting ItemTimers=1, items ticked on npcs ridden by a disconnected char.
 
@@ -4018,8 +4018,12 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	// Display more bounce messages when drinking potions, fishing, crafting etc. (Old sphere behaviour).
     VerboseItemBounce=0
 
-22-04-2024, canerksk
+22-04-2025, canerksk
 - Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
 - Added: New ini RevealFlag setting REVEALF_ONHORSE, to allow or disallow stealth walking if you are on a mount.
 - Added: new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED.
 	In the old behavior (55i/55r/56b/56c) we were not guilty when we hit a murderer. Now when we attack a criminal or murderer we are guilty towards that person. An ini setting option has been added for this behavior. Although this is a normal behavior in OSI, it can be perceived as a problem since not every server designs games like OSI.
+
+03-05-2025, Nolok
+- Changed: Retrieving the MORE1/2 of items with the flag CAN_I_SCRIPTEDMORE will always return the raw numerical value.
+    This allows using the full numerical range available.

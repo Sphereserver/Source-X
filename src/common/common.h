@@ -155,7 +155,7 @@ inline constexpr byte word_hi_byte(word in) noexcept {
 }
 
 //#define MAKEWORD(low,high)		((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
-inline constexpr dword make_word(byte low, byte high) noexcept {
+inline constexpr word make_word(byte low, byte high) noexcept {
     return (word)low | ((word)high << 8);
 }
 

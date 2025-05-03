@@ -27,6 +27,7 @@ if(NOT MSVC)
         -Wuninitialized
         -Wextra
         -Wpedantic
+        -Wnarrowing
         -Wno-format         # TODO: not disabling it generates a fair amount of warnings! These are potential bugs to fix!
         #-Wdouble-promotion # TODO: fix warnings.
         #-Wconversion       # TODO: generates TONS of warnings! These are potential bugs to fix!
