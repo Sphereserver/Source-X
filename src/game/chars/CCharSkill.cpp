@@ -3953,7 +3953,7 @@ int CChar::Skill_Done()
         {
             if (g_Rand.GetVal(100) < chance)
             {
-                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_dwHitsCur), 0);
+                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_wHitsCur), 0);
                 pTool->OnTakeDamage(amount, nullptr, DAMAGE_GOD);
             }
         }

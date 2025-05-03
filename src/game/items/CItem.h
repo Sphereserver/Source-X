@@ -216,7 +216,7 @@ public:
 		// IT_WEAPON_*
 		struct
 		{
-			word m_dwHitsCur;		// more1l=eqiv to quality of the item (armor/weapon).
+            word m_wHitsCur;		// more1l=eqiv to quality of the item (armor/weapon).
 			word m_wHitsMax;		// more1h=can only be repaired up to this level.
 			int32 m_spellcharges;	// more2=for a wand etc.
 			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
@@ -235,7 +235,7 @@ public:
 		// IT_JEWELRY
 		struct
 		{
-			word m_dwHitsCur;		// more1l= eqiv to quality of the item (armor/weapon).
+            word m_wHitsCur;		// more1l= eqiv to quality of the item (armor/weapon).
 			word m_wHitsMax;		// more1h= can only be repaired up to this level.
 			int32 m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
 			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
@@ -513,7 +513,7 @@ public:
 		// IT_WEB
 		struct
 		{
-			dword m_dwHitsCur;	// more1 = how much damage the web can take.
+            dword m_wHitsCur;	// more1 = how much damage the web can take.
 		} m_itWeb;
 
 		// IT_DREAM_GATE
