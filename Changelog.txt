@@ -4034,3 +4034,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 - Added: OF_NPCMovementOldStyle, TAG.OVERRIDE.MOVESTYLE.
     Support for the old 0.56b NPC movement formulas with: OF_NPCMovementOldStyle ini setting and TAG.OVERRIDE.MOVESTYLE (to override the behavior for a single character).
     With that formula, among the other things, char MOVERATE property and TAG.OVERRIDE.MOVERATE will return to be the percent modifier of the speed of the NPC - the higher it is, the slower will the NPC be. Default is 100.
+
+04-05-2025, Nolok
+- Fixed: spell or skill defname reading from an object property.
+When setting a property like MORE to the a spell or skill defname, trying to read it returned back the resource index (like the spell number) instead of the defname (Issue #1397)

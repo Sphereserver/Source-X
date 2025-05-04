@@ -289,61 +289,9 @@ bool CResourceHolder::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Section Definitions
 
-lpctstr CResourceHolder::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr* ptcOutError)
-{
-    ADDTOCALLSTACK("CResourceHolder::ResourceTypedGetName");
-    CResourceID ridValid = CResourceID(iExpectedType, 0);
-    if (!rid.IsValidResource())
-    {
-        if (rid.GetResIndex() != 0)
-        {
-            if (ptcOutError)
-            {
-                *ptcOutError = Str_GetTemp();
-                snprintf(*ptcOutError, Str_TempLength(), "Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
-            }
-        }
-    }
-    else if (rid.GetResType() != iExpectedType)
-    {
-        if (ptcOutError)
-        {
-            *ptcOutError = Str_GetTemp();
-            snprintf(*ptcOutError, Str_TempLength(), "Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n",
-                iExpectedType, rid.GetResType());
-        }
-    }
-    else
-    {
-        ridValid = rid;
-    }
-    return ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
-}
-
-lpctstr CResourceHolder::ResourceGetName( const CResourceID& rid ) const
-{
-	ADDTOCALLSTACK("CResourceHolder::ResourceGetName");
-	// Get a portable name for the resource id type.
-
-    if (rid.IsValidResource())
-    {
-        const CResourceDef* pResourceDef = ResourceGetDef(rid);
-        if (pResourceDef)
-            return pResourceDef->GetResourceName();
-    }
-
-	tchar * pszTmp = Str_GetTemp();
-	ASSERT(pszTmp);
-	if ( !rid.IsValidUID() )
-		snprintf( pszTmp, Str_TempLength(), "%d", (int)rid.GetPrivateUID() );
-	else
-		snprintf( pszTmp, Str_TempLength(), "0%" PRIx32, rid.GetResIndex() );
-	return pszTmp;
-}
-
 lpctstr CResourceHolder::GetName() const
 {
-	return "CFG";
+    return "CFG";
 }
 
 CResourceScript * CResourceHolder::GetResourceFile( size_t i )

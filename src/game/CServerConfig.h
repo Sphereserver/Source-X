@@ -737,9 +737,28 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
     sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
     CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
+
+    /**
+     * @brief   Get a Resource name from its CResourceID.
+     *
+     * @param   rid The rid.
+     *
+     * @return  The name or value.
+     */
+    lpctstr ResourceGetName( const CResourceID& rid ) const;
+
+    /**
+     * @brief   Get a Resource name from its index (CResourceID) and expected type.
+     *
+     * @param   rid The rid.
+     * @param   iExpectedType The expected RES_TYPE
+     * @param   ptcOutError pointer to string holding the output error string, if any.
+     *
+     * @return  null if it fails, else a pointer to a CResourceDef.
+     */
+    lpctstr ResourceTypedGetName(const CResourceIDBase& rid, const RES_TYPE iExpectedType, lptstr *ptcOutError );
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );

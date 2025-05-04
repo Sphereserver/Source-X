@@ -975,7 +975,7 @@ int CChar::Skill_NaturalResource_Setup( CItem * pResBit )
 	ASSERT(pResBit);
 
 	// Find the ore type located here based on color.
-	const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
+    const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( pOreDef == nullptr )
 		return -1;
 
@@ -997,7 +997,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
     if (!pResBit->m_itResource.m_ridRes.IsValidResource())
         return nullptr;
 
-	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
+    CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( !pOreDef )
 		return nullptr;
 
