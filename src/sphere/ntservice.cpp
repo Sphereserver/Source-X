@@ -473,7 +473,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             {
                 // Clean quotes around path, if it contains spaces.
                 const char* raw = argv[2];
-                char path[MAX_PATH];
+                char path[SPHERE_MAX_PATH];
                 size_t j = 0;
                 for (size_t i = 0; raw[i] != '\0' && j < sizeof(path) - 1; ++i) {
                     if (raw[i] != '"') {
