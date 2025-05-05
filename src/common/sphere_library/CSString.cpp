@@ -240,8 +240,16 @@ void CSString::Add(lpctstr pszStr)
 
 void CSString::Copy(lpctstr pszStr)
 {
-    ASSERT(pszStr);
-    if (pszStr == m_pchData)
+    if (!pszStr)
+    {
+        InitEmpty(false);
+#ifdef _DEBUG
+        g_Log.EventDebug("Trying to Copy a nullptr c-string in a CSString. You may want to double-check this, as it might be unintentional.\n");
+#endif
+        return;
+    }
+
+    if (/* redundant: m_pchData &&*/ pszStr == m_pchData)
         return;
 
     if (*pszStr == '\0')
@@ -263,9 +271,18 @@ void CSString::Copy(lpctstr pszStr)
 
 void CSString::CopyLen(lpctstr pszStr, int iLen)
 {
-    ASSERT(pszStr);
-    if (pszStr == m_pchData)
+    if (!pszStr)
+    {
+        InitEmpty(false);
+#ifdef _DEBUG
+        g_Log.EventDebug("Trying to CopyLen a nullptr c-string in a CSString. You may want to double-check this, as it might be unintentional.\n");
+#endif
         return;
+    }
+
+    if (/* redundant: m_pchData &&*/ pszStr == m_pchData)
+        return;
+
 
     if ((*pszStr == '\0') || (iLen <= 0))
     {

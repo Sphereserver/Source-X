@@ -2804,8 +2804,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					if ( pCharSrc && (( itGumpFound != pClientSrc->m_mapOpenedGumps.end() ) && ( (*itGumpFound).second > 0 )) )
 						break;
 				}
-				pClientSrc->Dialog_Setup( CLIMODE_DIALOG, g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] ),
-					iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0, this, Arg_ppCmd[2] );
+                pClientSrc->Dialog_Setup(
+                    CLIMODE_DIALOG, // Dialog mode
+                    g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] ), // Dialog resource id
+                    ((iQty > 1) ? Exp_GetVal(Arg_ppCmd[1]) : 0),    // page
+                    this,   // SRC obj
+                    Arg_ppCmd[2]    // arguments, can be empty (nullptr)
+                    );
 			}
 			break;
 		case OV_DIALOGCLOSE:
