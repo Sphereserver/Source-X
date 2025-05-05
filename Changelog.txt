@@ -4043,4 +4043,3 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Added: new command line switch `-I=/path/to/ini/`
     Allows you to define path to folder with ini files. Usable, when you want to separate binary from configuration or when running Sphere as Windows service (since services are usually run in C:\Windows\System32).
     Usage: Linux: `.\SphereSvrX64_debug -I=/etc/sphereserver/`, Windows: `SphereSvrX64_nightly.exe -I=C:/sphere/` (trailing slash required).
-    Warning: if you want to use different folder for ini files, you need to replace paths in your sphere.ini and spheretables.scp with absolute paths!
