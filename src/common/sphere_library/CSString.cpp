@@ -107,8 +107,14 @@ void CSString::Clear(bool fResetBuffer) noexcept
     }
 
     if (IsValid())
+    {
         m_pchData[0] = '\0';
-	m_iLength = 0;
+        m_iLength = 0;
+    }
+    else
+    {
+        InitEmpty(false);
+    }
 }
 
 bool CSString::IsValid() const noexcept
@@ -223,6 +229,7 @@ void CSString::Add(tchar ch)
 
 void CSString::Add(lpctstr pszStr)
 {
+    ASSERT(pszStr);
 	const int iLenCat = (int)strlen(pszStr);
 	if (iLenCat)
 	{
@@ -233,7 +240,8 @@ void CSString::Add(lpctstr pszStr)
 
 void CSString::Copy(lpctstr pszStr)
 {
-    if ((pszStr == m_pchData) || !pszStr)
+    ASSERT(pszStr);
+    if (pszStr == m_pchData)
         return;
 
     if (*pszStr == '\0')
@@ -255,7 +263,8 @@ void CSString::Copy(lpctstr pszStr)
 
 void CSString::CopyLen(lpctstr pszStr, int iLen)
 {
-    if ((pszStr == m_pchData) || !pszStr)
+    ASSERT(pszStr);
+    if (pszStr == m_pchData)
         return;
 
     if ((*pszStr == '\0') || (iLen <= 0))
