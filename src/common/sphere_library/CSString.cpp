@@ -22,88 +22,112 @@
 // CSString:: Constructors
 
 CSString::CSString(bool fDefaultInit) :
-	m_pchData(nullptr)
+    m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
 #ifdef DEBUG_STRINGS
 	++gAmount;
 #endif
 	if (fDefaultInit)
-	{
-		Init();
-	}
+        InitDefault();
 	else
-	{
-		m_iMaxLength = m_iLength = 0;
-
-		// Suppress GCC warning by using the const_cast.
-		// I know that i shouldn't set the non-cast buffer to a string constant, but i make sure in every method that i can't modify it.
-        // Dirty, but this will not pass IsValid, so it will be reallocated.
-		m_pchData = const_cast<char*>("");
-	}
+        InitEmpty(false);
 }
 
 CSString::CSString(lpctstr pStr) :
 	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
-    //Init();
 	Copy(pStr);
 }
 
 CSString::CSString(lpctstr pStr, int iLen) :
 	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
-    //Init();
 	CopyLen(pStr, iLen);
 }
 
 CSString::CSString(const CSString& s) :
 	m_pchData(nullptr), m_iLength(0), m_iMaxLength(0)
 {
-    //Init();
 	Copy(s.GetBuffer());
 }
 
 
-// private
-void CSString::Init()
+CSString::~CSString() noexcept
 {
-    m_iMaxLength = CSTRING_DEFAULT_SIZE;
 #ifdef DEBUG_STRINGS
-	gMemAmount += m_iMaxLength;
+    --gAmount;
 #endif
+    if (IsValid())
+        delete[] m_pchData;
+}
+
+// private
+void CSString::InitEmpty(bool fManageBuffer)
+{
+    if (fManageBuffer && IsValid())
+    {
+#ifdef DEBUG_STRINGS
+        gMemAmount -= m_iMaxLength;
+#endif
+        delete[] m_pchData;
+    }
+
+    m_iMaxLength = 0;
+    m_iLength    = 0;
+
+    // Suppress GCC warning by using the const_cast.
+    // I know that i shouldn't set the non-cast buffer to a string constant, but i make sure in every method that i can't modify it.
+    // Dirty, but this will not pass IsValid, so it will be reallocated.
+    m_pchData = const_cast<char*>("");
+}
+
+void CSString::InitDefault()
+{
+    ASSERT(m_pchData == nullptr);
+
+    m_iMaxLength = CSTRING_DEFAULT_SIZE;
 	m_iLength = 0;
-	if (m_pchData == nullptr)
-		m_pchData = new tchar[size_t(m_iMaxLength + 1)];
+    m_pchData = new tchar[size_t(m_iMaxLength + 1)];
 	m_pchData[m_iLength] = '\0';
+#ifdef DEBUG_STRINGS
+        gMemAmount += m_iMaxLength;
+#endif
 }
 
 // CSString:: Capacity
 
-void CSString::Clear(bool fTotal) noexcept
+void CSString::Clear(bool fResetBuffer) noexcept
 {
-	if (fTotal)
-	{
-		if (m_pchData && m_iMaxLength)
-		{
-#ifdef DEBUG_STRINGS
-			gMemAmount -= m_iMaxLength;
-#endif
-			delete[] m_pchData;
-			m_pchData = nullptr;
-			m_iMaxLength = 0;
-		}
-	}
+    if (fResetBuffer)
+    {
+        if (IsValid())
+            delete[] m_pchData;
+        InitDefault();
+        return;
+    }
+
+    if (IsValid())
+        m_pchData[0] = '\0';
 	m_iLength = 0;
 }
 
 bool CSString::IsValid() const noexcept
 {
-    return ((m_iMaxLength != 0) && (m_pchData != nullptr) && (m_pchData[m_iLength] == '\0'));
+    return ((m_iMaxLength != 0) && (m_pchData != nullptr));
 }
 
 int CSString::Resize(int iNewLength, bool fPreciseSize)
 {
     const bool fValid = IsValid();
+
+    // Special‐case zero length: revert to empty literal.
+    if (iNewLength == 0)
+    {
+        InitEmpty(true);
+        return 0;
+    }
+
+    // Only reallocate if growing beyond capacity or starting from invalid (empty literal).
     if ((iNewLength >= m_iMaxLength) || !fValid)
 	{
 #ifdef DEBUG_STRINGS
@@ -111,30 +135,47 @@ int CSString::Resize(int iNewLength, bool fPreciseSize)
 #endif
 
         // allow grow, and expand only
+        int iNewMax;
         if (fPreciseSize)
         {
-            m_iMaxLength = iNewLength;
+            iNewMax = iNewLength;
         }
         else
         {
-            //m_iMaxLength = iNewLength + (CSTRING_DEFAULT_SIZE >> 1);   // Probably too much...
-            m_iMaxLength = (iNewLength * 3) >> 1;   // >> 2 is equal to doing / 2
+            //iNewMax = iNewLength + (CSTRING_DEFAULT_SIZE >> 1);   // Probably too much...
+            iNewMax = (iNewLength * 3) >> 1;   // >> 2 is equal to doing / 2
+        }
+        iNewMax = std::max(iNewMax, 1);
+
+        tchar *pNewData = nullptr;
+        try
+        {
+            pNewData = new tchar[size_t(iNewMax + 1)];
+        }
+        catch (const std::bad_alloc &)
+        {
+            // Allocation failed: leave object unchanged
+            return -1;
         }
 
-#ifdef DEBUG_STRINGS
-		gMemAmount += m_iMaxLength;
-		++gReallocs;
-#endif
-
-		tchar *pNewData = new tchar[size_t(m_iMaxLength + 1)]; // new operator throws on error
-		if (fValid)
+        if (fValid)
 		{
 			const int iMinLength = 1 + minimum(iNewLength, m_iLength);
 			Str_CopyLimitNull(pNewData, m_pchData, iMinLength);
 		}
+
+#ifdef DEBUG_STRINGS
+        if (fValid)
+            gMemAmount -= m_iMaxLength;
+        gMemAmount += m_iMaxLength;
+        ++gReallocs;
+#endif
+
         if (fValid)
             delete[] m_pchData;
+
 		m_pchData = pNewData;
+        m_iMaxLength = iNewMax;
 	}
 	ASSERT(m_pchData);
 	m_iLength = iNewLength;
@@ -159,7 +200,7 @@ void CSString::SetAt(int nIndex, tchar ch)
 {
 	if (!IsValid())
 	{
-		Init();
+        InitDefault();
 	}
 	ASSERT(nIndex < m_iLength);
 
@@ -192,21 +233,39 @@ void CSString::Add(lpctstr pszStr)
 
 void CSString::Copy(lpctstr pszStr)
 {
-	if ((pszStr != m_pchData) && pszStr)
-	{
-		const size_t uiLen = strlen(pszStr);
-		Resize((int)uiLen, true); // it adds a +1
-		Str_CopyLimitNull(m_pchData, pszStr, size_t(uiLen + 1));
-	}
+    if ((pszStr == m_pchData) || !pszStr)
+        return;
+
+    if (*pszStr == '\0')
+    {
+        Clear(false);
+        return;
+    }
+
+    const size_t uiLen = strlen(pszStr);
+    if (uiLen == 0)
+    {
+        Clear(false);
+        return;
+    }
+
+    Resize((int)uiLen, true); // it adds a +1
+    Str_CopyLimitNull(m_pchData, pszStr, size_t(uiLen + 1));
 }
 
 void CSString::CopyLen(lpctstr pszStr, int iLen)
 {
-    if ((pszStr != m_pchData) && pszStr)
+    if ((pszStr == m_pchData) || !pszStr)
+        return;
+
+    if ((*pszStr == '\0') || (iLen <= 0))
     {
-        Resize(iLen, true); // it adds a +1
-        Str_CopyLimitNull(m_pchData, pszStr, size_t(iLen + 1));
+        Clear(false);
+        return;
     }
+
+    Resize(iLen, true); // it adds a +1
+    Str_CopyLimitNull(m_pchData, pszStr, size_t(iLen + 1));
 }
 
 
