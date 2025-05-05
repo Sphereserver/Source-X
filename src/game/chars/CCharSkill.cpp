@@ -33,15 +33,15 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	ASSERT(pdwSkills);
 
 	dword dwSkillTmp;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+    for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			continue;
 
-		dwSkillTmp = MAKEDWORD(i, Skill_GetBase((SKILL_TYPE)i));
+        dwSkillTmp = make_dword(static_cast<word>(i), n_alias_cast<word>(Skill_GetBase((SKILL_TYPE)i)));
 		for ( size_t j = 0; j <= iRank; ++j )
 		{
-			if ( HIWORD(dwSkillTmp) >= HIWORD(pdwSkills[j]) )
+            if ( dword_hi_word(dwSkillTmp) >= dword_hi_word(pdwSkills[j]) )
 			{
 				memmove( &pdwSkills[j + 1], &pdwSkills[j], (iRank - j) * sizeof(dword) );
 				pdwSkills[j] = dwSkillTmp;
@@ -52,7 +52,7 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 
 	dwSkillTmp = pdwSkills[ iRank ];
 	delete[] pdwSkills;
-	return (SKILL_TYPE)(LOWORD( dwSkillTmp ));
+    return (SKILL_TYPE)(dword_low_word( dwSkillTmp ));
 }
 
 // Retrieves a random magic skill, if iVal is set it will only select from the ones with value > iVal
@@ -975,7 +975,7 @@ int CChar::Skill_NaturalResource_Setup( CItem * pResBit )
 	ASSERT(pResBit);
 
 	// Find the ore type located here based on color.
-	const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
+    const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( pOreDef == nullptr )
 		return -1;
 
@@ -997,7 +997,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
     if (!pResBit->m_itResource.m_ridRes.IsValidResource())
         return nullptr;
 
-	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
+    CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( !pOreDef )
 		return nullptr;
 
@@ -3953,7 +3953,7 @@ int CChar::Skill_Done()
         {
             if (g_Rand.GetVal(100) < chance)
             {
-                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_dwHitsCur), 0);
+                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_wHitsCur), 0);
                 pTool->OnTakeDamage(amount, nullptr, DAMAGE_GOD);
             }
         }

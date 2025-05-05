@@ -379,15 +379,17 @@ void CChar::DeleteCleanup(bool fForce)
 
     if (IsPeriodicTickPending())
     {
-        DEBUG_ASSERT(CWorldTickingList::IsCharPeriodicTickRegistered(this).has_value());
+        //DEBUG_ASSERT(CWorldTickingList::IsCharPeriodicTickRegistered(this).has_value());
         const bool fRes = CWorldTickingList::DelCharPeriodic(this, false);
-        DEBUG_ASSERT(fRes);
+        ASSERT(fRes);
         UnreferencedParameter(fRes);
     }
+    /*
     else
     {
         DEBUG_ASSERT(CWorldTickingList::IsCharPeriodicTickRegistered(this).has_value() == false);
     }
+    */
 
 	if (IsStatFlag(STATF_RIDDEN))
 	{

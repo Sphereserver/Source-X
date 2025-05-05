@@ -98,7 +98,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
                 continue;
             }
 
-            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, pszCmd ));
             if (pResourceLink)
             {
                 const iterator pos = std::find(begin(), end(), pResourceLink);
@@ -115,7 +115,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
             if ( pszCmd[0] == '+' )
                 ++pszCmd;
 
-            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
+            pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, pszCmd ));
             if ( pResourceLink )
             {
                 // Check if it's already in the list, before adding it
@@ -191,7 +191,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr ptcKey ) c
 {
     ADDTOCALLSTACK("CResourceRefArray::FindResourceName");
     // Is this resource already in the list ?
-    CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, ptcKey ));
+    CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.RegisteredResourceGetDefByName( restype, ptcKey ));
     if ( pResourceLink == nullptr )
         return sl::scont_bad_index();
     return FindResourceID(pResourceLink->GetResourceID());

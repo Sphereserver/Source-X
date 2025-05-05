@@ -48,7 +48,7 @@ void SetAbortImmediate(bool on) noexcept;
 [[noreturn]]
 void RaiseRecoverableAbort();
 [[noreturn]]
-void RaiseImmediateAbort();
+void RaiseImmediateAbort(int iErrCode);
 
 
 // -------------------------------------------------------------------

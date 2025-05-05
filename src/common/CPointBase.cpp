@@ -1040,7 +1040,7 @@ size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 
 int CPointBase::GetPointSortIndex() const noexcept
 {
-	return (int)MAKEDWORD( m_x, m_y );
+	return (int)make_dword( m_x, m_y );
 }
 
 

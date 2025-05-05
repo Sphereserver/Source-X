@@ -119,6 +119,7 @@ void GlobalInitializer::PeriodicSyncTimeConstants() // static
 
 /* Start global declarations */
 
+// NOLINTNEXTLINE(clazy-non-pod-global-static)
 static GlobalInitializer g_GlobalInitializer;
 
 #ifdef _WIN32
@@ -150,7 +151,6 @@ CWorld			g_World;			// the world. (we save this stuff)
 #endif
 	CNetworkManager g_NetworkManager;
 
-
 // Again, game servers stuff.
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
@@ -160,9 +160,13 @@ CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
 
+
+// NOLINTNEXTLINE(clazy-non-pod-global-static)
 static MainThread g_Main;
+// NOLINTNEXTLINE(clazy-non-pod-global-static)
 static PingServer g_PingServer;
 
+CDataBaseAsyncHelper g_asyncHdb;
 
 
 //*******************************************************************
@@ -245,13 +249,6 @@ int Sphere_InitServer( int argc, char *argv[] )
 	constexpr const char *m_sClassName = "SphereInit";
 	EXC_TRY("Init Server");
     GlobalInitializer::InitRuntimeDefaultValues();
-
-    if ( argc > 1 )
-    {
-        EXC_SET_BLOCK("cmdline pre-init");
-        if ( !g_Serv.CommandLinePreLoad(argc, argv) )
-            return -1;
-    }
 
     EXC_SET_BLOCK("loading ini and scripts");
 	if ( !g_Serv.Load() )
@@ -482,29 +479,42 @@ int Sphere_MainEntryPoint( int argc, char *argv[] )
 int main( int argc, char * argv[] )
 #endif
 {
-	static constexpr lpctstr m_sClassName = "main";
-	EXC_TRY("MAIN");
-
-    const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
-	if (atexit_handler_result != 0)
-	{
-		g_Log.Event(LOGL_CRIT, "atexit handler registration failed.\n");
-		goto exit_server;
-	}
-
 	{
         // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
         const AbstractThread* curthread = ThreadHolder::get().current();
         ASSERT(curthread != nullptr);
         ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
-        (void)curthread;
+        UnreferencedParameter(curthread);
+    }
+
+    static constexpr lpctstr m_sClassName = "main";
+    EXC_TRY("MAIN");
+
+    const int atexit_handler_result = std::atexit(atexit_handler); // Handler will be called
+    if (atexit_handler_result != 0)
+    {
+        g_Log.Event(LOGL_CRIT, "atexit handler registration failed.\n");
+        goto exit_server;
     }
 
 #ifndef _WIN32
     AbstractThread::setThreadName("T_SphereStartup");
-
     g_UnixTerminal.start();
+#endif
 
+    if ( argc > 1 )
+    {
+        EXC_SET_BLOCK("cmdline pre-init");
+        if ( !g_Serv.CommandLinePreLoad(argc, argv) )
+        {
+#ifndef _WIN32
+            g_UnixTerminal.waitForClose();
+#endif
+            return 0;
+        }
+    }
+
+#ifndef _WIN32
     // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
     g_Serv.SetServerMode(SERVMODE_PreLoadingINI);
 

@@ -4438,6 +4438,58 @@ CResourceDef* CServerConfig::RegisteredResourceGetDefByName(RES_TYPE restype, lp
 	return RegisteredResourceGetDefRefByName(restype, ptcName, wPage).get();
 }
 
+lpctstr CServerConfig::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr* ptcOutError)
+{
+    ADDTOCALLSTACK("CServerConfig::ResourceTypedGetName");
+    CResourceID ridValid = CResourceID(iExpectedType, 0);
+    if (!rid.IsValidResource())
+    {
+        if (rid.GetResIndex() != 0)
+        {
+            if (ptcOutError)
+            {
+                *ptcOutError = Str_GetTemp();
+                snprintf(*ptcOutError, Str_TempLength(), "Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
+            }
+        }
+    }
+    else if (rid.GetResType() != iExpectedType)
+    {
+        if (ptcOutError)
+        {
+            *ptcOutError = Str_GetTemp();
+            snprintf(*ptcOutError, Str_TempLength(), "Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n",
+                iExpectedType, rid.GetResType());
+        }
+    }
+    else
+    {
+        ridValid = rid;
+    }
+    return ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
+}
+
+lpctstr CServerConfig::ResourceGetName( const CResourceID& rid ) const
+{
+    ADDTOCALLSTACK("CServerConfig::ResourceGetName");
+    // Get a portable name for the resource id type.
+
+    if (rid.IsValidResource())
+    {
+        const CResourceDef* pResourceDef = RegisteredResourceGetDef(rid);
+        if (pResourceDef)
+            return pResourceDef->GetResourceName();
+    }
+
+    tchar * pszTmp = Str_GetTemp();
+    ASSERT(pszTmp);
+    if ( !rid.IsValidUID() )
+        snprintf( pszTmp, Str_TempLength(), "%d", (int)rid.GetPrivateUID() );
+    else
+        snprintf( pszTmp, Str_TempLength(), "0%" PRIx32, rid.GetResIndex() );
+    return pszTmp;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void CServerConfig::_OnTick( bool fNow )

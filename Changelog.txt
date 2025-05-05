@@ -3999,30 +3999,45 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 	Serv.Log <DLOCAL.DoorAutoDist>
 	Local.DoorAutoDist=10
 
-28-02-2025, cbnolok
+28-02-2025, Nolok
 - Fixed: failing assertion if targeting a non-corpse object when casting Animate Dead spell.
 
-09-03-2025, cbnolok
+09-03-2025, Nolok
 - Fixed: If Giant Spiders and Fire Elementals are denied going into sleeping state into a sleeping sector, their dropped items (ie. i_spider_web) went into sleeping state and didn't decay, leading to accumulation (partial fix for Issue #1249).
   Also, stamina wasn't consumed, thus NPCs had no limit in placing those items.
 
-11-03-2025, cbnolok
+11-03-2025, Nolok
 - Added: log message with informations about the newly created object, if just placed in a sector exceeding complexity threshold.
 
-15-03-2025, cbnolok
+15-03-2025, Nolok
 - Fixed: when using the ini setting ItemTimers=1 (enabling items to tick even if inside a container), the items kept ticking even after a char logout.
 - Fixed: when using the ini setting ItemTimers=1, items ticked on npcs ridden by a disconnected char.
 
 22-04-2025, Mulambo
 - Added ini settings:
 	// Display more bounce messages when drinking potions, fishing, crafting etc. (Old sphere behaviour).
-    VerboseItemBounce=0
+    VerboseItemBounce = 0 // (default)
 
 22-04-2025, canerksk
 - Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
 - Added: New ini RevealFlag setting REVEALF_ONHORSE, to allow or disallow stealth walking if you are on a mount.
 - Added: new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED.
 	In the old behavior (55i/55r/56b/56c) we were not guilty when we hit a murderer. Now when we attack a criminal or murderer we are guilty towards that person. An ini setting option has been added for this behavior. Although this is a normal behavior in OSI, it can be perceived as a problem since not every server designs games like OSI.
+
+03-05-2025, Nolok
+- Changed: Retrieving the MORE1/2 of items with the flag CAN_I_SCRIPTEDMORE will always return the raw numerical value.
+    This allows using the full numerical range available.
+
+03-05-2025, canerksk (from PR #1319), Nolok
+- Added: New optionflag OF_PetBehaviorOwnerNeutral.
+    If this setting is enabled, pets you own will appear to you with the original noto (pre-taming, old behavior). If this setting is not enabled, the assets you own will always appear natural to you. This setting only applies when the owning character is looking at the asset they own. It does not apply when someone else is looking at the asset you own.
+- Added: OF_NPCMovementOldStyle, TAG.OVERRIDE.MOVESTYLE.
+    Support for the old 0.56b NPC movement formulas with: OF_NPCMovementOldStyle ini setting and TAG.OVERRIDE.MOVESTYLE (to override the behavior for a single character).
+    With that formula, among the other things, char MOVERATE property and TAG.OVERRIDE.MOVERATE will return to be the percent modifier of the speed of the NPC - the higher it is, the slower will the NPC be. Default is 100.
+
+04-05-2025, Nolok
+- Fixed: spell or skill defname reading from an object property.
+When setting a property like MORE to the a spell or skill defname, trying to read it returned back the resource index (like the spell number) instead of the defname (Issue #1397)
 
 29-04-2025, Mulambo
 - Added: new command line switch `-I=/path/to/ini/`

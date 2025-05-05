@@ -91,8 +91,15 @@ void RaiseRecoverableAbort()
 }
 
 [[noreturn]]
-void RaiseImmediateAbort()
+void RaiseImmediateAbort(int iErrCode)
 {
+    // Have iErrCode to help with the debugging process. Use a different number for each invocation,
+    UnreferencedParameter(iErrCode);
+
+#ifdef _DEBUG
+    STDERR_LOG("RaiseImmediateAbort with code %d.\n", iErrCode);
+#endif
+
     EXC_NOTIFY_DEBUGGER;
     SetAbortImmediate(true);
 
@@ -347,7 +354,7 @@ static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
     }
     catch (...)
     {
-        RaiseImmediateAbort();
+        RaiseImmediateAbort(1);
     }
 
     //exit(EXIT_FAILURE); // Having set the exit flag, all threads "should" terminate cleanly.
