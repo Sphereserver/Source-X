@@ -466,13 +466,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Process the command line arguments.
     if (argc > 1 && _IS_SWITCH(*argv[1]))
     {
-        // Check if we are changing ini path.
+        // Check if we are changing the ini path.
         if (toupper(argv[1][1]) == 'I')
         {
             if (argc == 3)
             {
-                // Define path to ini files.
-                g_Cfg.SetIniDirectory(argv[2]);
+                // Clean quotes around path, if it contains spaces.
+                const char* raw = argv[2];
+                char path[MAX_PATH];
+                size_t j = 0;
+                for (size_t i = 0; raw[i] != '\0' && j < sizeof(path) - 1; ++i) {
+                    if (raw[i] != '"') {
+                        path[j++] = raw[i];
+                    }
+                }
+                path[j] = '\0';
+
+                // Define path to the ini files.
+                g_Cfg.SetIniDirectory(path);
             }
         }
     }
