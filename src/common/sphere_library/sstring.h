@@ -167,11 +167,17 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords) noexcept;
 int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = nullptr) noexcept;
 
 /**
-* @brief Removes heading and trailing double quotes in a string.
+* @brief Finds and skip heading and trailing double quotes in a string.
 * @param pStr string where remove the quotes.
-* @return string with the heading and trailing quotes removed.
+* @return pointer inside the string with the heading and trailing quotes removed.
 */
 tchar * Str_GetUnQuoted(tchar * pStr) noexcept;
+
+/**
+* @brief Removes heading and trailing double quotes in a string.
+* @param pStr string where remove the quotes.
+*/
+void Str_MakeUnQuoted(tchar * pStr) noexcept;
 
 /**
 * @brief replace string representation of special characters by special characters.

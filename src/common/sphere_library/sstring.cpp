@@ -668,9 +668,55 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax) noexcept
     }
 }
 
+// Unquotes and trims whitespace in-place, shifting result to start of buffer.
+void Str_MakeUnQuoted(tchar* pStr) noexcept
+{
+    tchar* src = pStr;
+    // Skip leading whitespace (GETNONWHITESPACE)
+    while (IsWhitespace(*src)) {
+        ++src;
+    }
+
+    bool fQuoted = false;
+    if (*src == '"')
+    {
+        fQuoted = true;
+        ++src;
+    }
+
+    tchar* endPtr = src + std::strlen(src);
+
+    // If quoted, locate closing quote and adjust endPtr
+    if (fQuoted)
+    {
+        tchar* p = endPtr;
+        while (p > src)
+        {
+            --p;
+            if (*p == '"')
+            {
+                endPtr = p;
+                break;
+            }
+        }
+    }
+
+    // Compute trimmed length (exclude trailing whitespace), like Str_TrimWhitespace.
+    size_t len = endPtr - src;
+    while (len > 0 && IsWhitespace(src[len - 1])) {
+        --len;
+    }
+
+    // Shift content to the start of the buffer
+    if (src != pStr && len > 0) {
+        std::memmove(pStr, src, (len * sizeof(tchar)));
+    }
+    pStr[len] = '\0';
+}
+
+// Returns a pointer to the unquoted part (and overwrites the last quote with a string terminator '\0' char)
 tchar * Str_GetUnQuoted(tchar * pStr) noexcept
 {
-    // TODO: WARNING! Possible Memory Leak here!
     GETNONWHITESPACE(pStr);
     if (*pStr != '"')
     {
@@ -696,14 +742,9 @@ tchar * Str_GetUnQuoted(tchar * pStr) noexcept
 
 int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 {
-    while (len > 0)
-    {
+    ASSERT(len >= 0);
+    while (len > 0 && IsWhitespace(pStr[len - 1])) {
         --len;
-        if (!IsWhitespace(pStr[len]))
-        {
-            ++len;
-            break;
-        }
     }
     pStr[len] = '\0';
     return len;
@@ -711,7 +752,6 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 
 tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 {
-    // TODO: WARNING! Possible Memory Leak here?
     GETNONWHITESPACE(pStr);
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
