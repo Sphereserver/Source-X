@@ -1,5 +1,7 @@
 #include "ConsoleInterface.h"
-
+#ifdef _DEBUG
+#include "../common/assertion.h"
+#endif
 
 // ConsoleOutput
 
@@ -43,8 +45,10 @@ uint ConsoleInterface::CTColToRGB(ConsoleTextColor color) noexcept // static
     }
 }
 
-void ConsoleInterface::AddConsoleOutput(std::unique_ptr<ConsoleOutput>&& output) noexcept
+void ConsoleInterface::AddConsoleOutput(std::unique_ptr<ConsoleOutput>&& output) NOEXCEPT_NODEBUG
 {
+    DEBUG_ASSERT(output);
+    DEBUG_ASSERT(output->GetTextString().GetBuffer() != nullptr);
     std::unique_lock<std::mutex> lock(_ciQueueMutex);
     _qOutput.emplace_back(std::move(output));
 #ifndef _WIN32
