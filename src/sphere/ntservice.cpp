@@ -449,6 +449,8 @@ void CNTService::CmdMainStart()
 //
 //	FUNCTION: main()
 //
+// @todo Refactor installing and starting service after https://github.com/Sphereserver/Source-X/issues/1400 is resolved.
+//
 /////////////////////////////////////////////////////////////////////////////////////
 #ifdef MSVC_COMPILER
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
