@@ -9,7 +9,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/sphereserver
-ExecStart=/usr/bin/sphereserver -S "/etc/sphereserver/"
+ExecStart=/usr/bin/sphereserver -I=/etc/sphereserver/
 Restart=on-failure
 User=sphereserver
 Group=sphereserver

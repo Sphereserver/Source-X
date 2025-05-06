@@ -13,8 +13,8 @@ override_dh_auto_install:
 	install -d debian/sphereserver/usr/bin
 	install -m 0755 build/bin-x86_64/SphereSvrX64_nightly debian/sphereserver/usr/bin/sphereserver
 	install -m 0644 src/sphereCrypt.ini debian/sphereserver/etc/sphereserver/sphereCrypt.ini
-	# Replace values (uncomment mul path and change log path) in sphere.ini.
-	cat src/sphere.ini | sed -e "s/\/\/MulFiles=/MulFiles=/" -e "s/Log=logs/Log=\/var\/log\/sphereserver\//" > debian/sphereserver/etc/sphereserver/sphere.ini
+	# Replace relative paths with absolute one in sphere.ini.
+	cat src/sphere.ini | sed -e "s/ScpFiles=/ScpFiles=\/opt\/sphereserver\//" -e "s/WorldSave=/WorldSave=\/opt\/sphereserver\//" -e "s/AcctFiles=/AcctFiles=\/opt\/sphereserver\//" -e "s/WebPageSrc=/WebPageSrc=\/opt\/sphereserver\//" -e "s/WebPageFile=/WebPageFile=\/opt\/sphereserver\//" -e "s/\/\/MulFiles=/MulFiles=\/opt\/sphereserver\//" -e "s/Log=logs/Log=\/var\/log\/sphereserver\//" > debian/sphereserver/etc/sphereserver/sphere.ini
 
 override_dh_installinit:
 	dh_installinit --no-enable --no-start --no-restart-after-upgrade

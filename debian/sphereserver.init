@@ -25,7 +25,7 @@ case "$1" in
   start)
 	log_daemon_msg "Starting SphereServer"
 	if start-stop-daemon --start --oknodo --quiet \
-		--name sphereserver --startas $DAEMON -- -S "/etc/sphereserver/"
+		--name sphereserver --startas $DAEMON -- -I=/etc/sphereserver/
 	then
 	    log_end_msg 0
 	else
