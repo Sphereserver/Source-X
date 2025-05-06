@@ -4625,11 +4625,12 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 #undef catresname
 }
 
-bool CServerConfig::LoadIni( bool fTest )
+bool CServerConfig::LoadIni(bool fTest)
 {
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
 
     char filename[SPHERE_MAX_PATH] = SPHERE_FILE ".ini";
+
     // Check, if CLI argument -I=/path/to/ini/directory/ was used.
     if (m_iniDirectory[0] != '\0')
     {
@@ -4642,13 +4643,13 @@ bool CServerConfig::LoadIni( bool fTest )
     }
     else
     {
-        strncpy(filename, SPHERE_FILE ".ini", SPHERE_MAX_PATH);
+        Str_CopyLimitNull(filename, SPHERE_FILE ".ini", SPHERE_MAX_PATH);
     }
 
 	// Load my INI file first.
-	if ( ! OpenResourceFind( m_scpIni, filename, !fTest )) // Open script file
+	if (!OpenResourceFind(m_scpIni, filename, !fTest))
 	{
-		if( !fTest )
+		if (!fTest)
 		{
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-X/tree/master/src\n");
@@ -4668,6 +4669,7 @@ bool CServerConfig::LoadCryptIni( void )
 	ADDTOCALLSTACK("CServerConfig::LoadCryptIni");
 
     char filename[SPHERE_MAX_PATH] = SPHERE_FILE "Crypt.ini";
+
     // Check, if CLI argument -I=/path/to/ini/directory/ was used.
     if (m_iniDirectory[0] != '\0')
     {
@@ -4680,12 +4682,12 @@ bool CServerConfig::LoadCryptIni( void )
     }
     else
     {
-        strncpy(filename, SPHERE_FILE "Crypt.ini", SPHERE_MAX_PATH);
+        Str_CopyLimitNull(filename, SPHERE_FILE "Crypt.ini", SPHERE_MAX_PATH);
     }
 
-    if ( ! OpenResourceFind( m_scpCryptIni, filename, false ) )
+    if (!OpenResourceFind(m_scpCryptIni, filename, false))
 	{
-		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
+		g_Log.Event(LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
 		return false;
 	}
 
@@ -4693,8 +4695,8 @@ bool CServerConfig::LoadCryptIni( void )
 	m_scpCryptIni.Close();
 	m_scpCryptIni.CloseForce();
 
-	g_Log.Event( LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n",
-		CCryptoKeysHolder::get()->client_keys.size() );
+	g_Log.Event(LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n",
+		CCryptoKeysHolder::get()->client_keys.size());
 
 	return true;
 }
