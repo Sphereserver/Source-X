@@ -23,8 +23,8 @@ UnixTerminal::UnixTerminal() : AbstractSphereThread("T_UnixTerm", ThreadPriority
 
 UnixTerminal::~UnixTerminal()
 {
-    ConsoleInterface::_ciQueueCV.notify_one();  // tell to the condition variable to stop waiting, it's time to exit
-	restore();
+    waitForClose();
+    restore();
     //_thread_selfTerminateAfterThisTick = true;  // just to be sure
 }
 
@@ -302,10 +302,17 @@ void UnixTerminal::tick()
 		{
 			// Better keep the mutex locked for the least time possible.
 			std::unique_lock<std::mutex> lock(this->ConsoleInterface::_ciQueueMutex);
+
 			while (_qOutput.empty())
 			{
-				this->ConsoleInterface::_ciQueueCV.wait(lock);
+                this->ConsoleInterface::_ciQueueCV.wait(lock,
+                    [this]() {
+                        return (this->m_terminateRequested || !this->ConsoleInterface::_qOutput.empty());
+                    });
 			}
+
+            if (this->ConsoleInterface::_qOutput.empty())
+                break;
 
 			outMessages.swap(this->ConsoleInterface::_qOutput);
 		}
@@ -317,6 +324,14 @@ void UnixTerminal::tick()
             setColor(CTCOL_DEFAULT);
         }
     }
+}
+
+void UnixTerminal::waitForClose()
+{
+    this->m_terminateRequested = true;
+    this->ConsoleInterface::_ciQueueCV.notify_one();
+    //AbstractSphereThread::waitForClose();
+    //AbstractThread::terminate(true);
 }
 
 

@@ -121,7 +121,8 @@ public:
 public:
 	void ListClients( CTextConsole * pClient ) const;
 	void SetResyncPause( bool fPause, CTextConsole * pSrc, bool bMessage = false );
-	bool CommandLine( int argc, tchar * argv[] );
+    bool CommandLinePreLoad( int argc, tchar * argv[] );
+    bool CommandLinePostLoad( int argc, tchar * argv[] );
 
 	virtual lpctstr GetName() const override {
 	    return CServerDef::GetName();

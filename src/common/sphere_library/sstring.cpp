@@ -1415,7 +1415,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
 
 int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep) noexcept
 {
-    ASSERT(iMax > 1);
+    //ASSERT(iMax > 1);
     int iQty = 0;
     GETNONWHITESPACE(pszCmdLine);
 

@@ -1,23 +1,26 @@
 include(CheckCXXCompilerFlag)
+include(CheckLinkerFlag)
+
 message(STATUS "Checking available compiler flags...")
 
 if(NOT MSVC)
     message(STATUS "-- Compilation options:")
 
-    # Linker flags (warnings).
-    #check_cxx_compiler_flag("-Wl,--fatal-warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V1)
-    #check_cxx_compiler_flag("-Wl,-fatal_warnings" COMP_LINKER_HAS_FATAL_WARNINGS_V2)
+    # Linker flags.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-        set(COMP_LINKER_HAS_FATAL_WARNINGS_V2 TRUE)
+        check_linker_flag(CXX -Wl,-fatal_warnings LINKER_HAS_FATAL_WARN_APPLE)
     else()
-        set(COMP_LINKER_HAS_FATAL_WARNINGS_V1 TRUE)
+        # for some reason, Clang 17 blocks --fatal-warnings if using mold linker, even if it supports the flag.
+        check_linker_flag(CXX -Wl,--fatal-warnings LINKER_HAS_FATAL_WARN)
     endif()
+    check_linker_flag(CXX -Wl,--as-needed LINKER_HAS_AS_NEEDED)
+    check_linker_flag(CXX -Wl,--icf=safe LINKER_HAS_ICF) # icf = identical code folding (not supported by mold)
+
 
     # Compiler option flags. Common to both compilers, but older versions might not support the following.
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler option flags. Expected to work on GCC but not Clang, at the moment.
-    check_cxx_compiler_flag("-fvisibility=hidden" COMP_HAS_FVISIBILITY_HIDDEN)
     check_cxx_compiler_flag("-fno-expensive-optimizations" COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
 
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
@@ -138,9 +141,6 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     #check_cxx_compiler_flag("-Wconversion" COMP_HAS_W_CONVERSION) # Temporarily disabled. Implicit type conversions that might change a value, such as narrowing conversions.
     #check_cxx_compiler_flag("-Wcast-qual" COMP_HAS_W_CAST_QUAL) # casts that remove a type's const or volatile qualifier.
     check_cxx_compiler_flag("-Wzero-as-null-pointer-constant" COMP_HAS_W_ZERO_NULLPTR)
-    check_cxx_compiler_flag("-Wdisabled-optimization" COMP_HAS_W_DISABLE_OPT)
-    check_cxx_compiler_flag("-Winvalid-pch" COMP_HAS_W_INVALID_PCH)
-    check_cxx_compiler_flag("-Wshadow" COMP_HAS_W_SHADOW)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler warning flags. Expected to work con GCC but not Clang, at the moment.
@@ -150,6 +150,8 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
     check_cxx_compiler_flag("-Wsized-deallocation" COMP_HAS_W_SIZED_DEALLOC)
     check_cxx_compiler_flag("-Wvector-operation-performance" COMP_HAS_W_VECTOR_OP_PERF)
     check_cxx_compiler_flag("-Wtrampolines" COMP_HAS_W_TRAMPOLINES) # we don't want trampolines for security concerns (it's a technique to implement nested functions).
+    check_cxx_compiler_flag("-Wformat-signedness" COMP_HAS_FORMAT_SIGNEDNESS)
+    check_cxx_compiler_flag("-Wduplicated-branches" COMP_HAS_DUPLICATED_BRANCHES)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
     # Compiler warning flags. Expected to work con Clang but not GCC, at the moment.
@@ -166,19 +168,10 @@ See comments in the toolchain and: https://github.com/google/sanitizers/wiki/Mem
 
     # Compiler warning flags. To be disabled.
     message(STATUS "-- Compilation options (disable specific warnings):")
-    check_cxx_compiler_flag("-Wunused-function" COMP_HAS_WNO_UNUSED_FUNCTION)
-    check_cxx_compiler_flag("-Wformat-nonliteral" COMP_HAS_WNO_FORMAT_NONLITERAL) # Since -Wformat=2 is stricter, you would need to disable this warning.
     check_cxx_compiler_flag("-Wnonnull-compare" COMP_HAS_WNO_NONNULL_COMPARE)
     check_cxx_compiler_flag("-Wmaybe-uninitialized" COMP_HAS_WNO_MAYBE_UNINIT)
-    check_cxx_compiler_flag("-Wswitch" COMP_HAS_WNO_SWITCH)
-    check_cxx_compiler_flag("-Wimplicit-fallthrough" COMP_HAS_WNO_IMPLICIT_FALLTHROUGH)
-    check_cxx_compiler_flag("-Wparentheses" COMP_HAS_WNO_PARENTHESES)
-    check_cxx_compiler_flag("-Wmisleading-indentation" COMP_HAS_WNO_MISLEADING_INDENTATION)
-    check_cxx_compiler_flag("-Wunused-result" COMP_HAS_WNO_UNUSED_RESULT)
-    check_cxx_compiler_flag("-Wnested-anon-types" COMP_HAS_WNO_NESTED_ANON_TYPES)
-    check_cxx_compiler_flag("-Wformat-security" COMP_HAS_WNO_FORMAT_SECURITY) # TODO: remove that when we'll have time to fix every printf format issue
-    check_cxx_compiler_flag("-Wdeprecated-declarations" COMP_HAS_WNO_DEPRECATED_DECLARATIONS)
     check_cxx_compiler_flag("-Wlanguage-extension-token" COMP_HAS_WNO_LANGUAGE_EXTENSION_TOKEN)
+    check_cxx_compiler_flag("-Wnested-anon-types" COMP_HAS_WNO_NESTED_ANON_TYPES)
     #check_cxx_compiler_flag("-Wunknown-pragmas" COMP_HAS_)
     #check_cxx_compiler_flag("" COMP_HAS_)
 
@@ -195,20 +188,6 @@ endif()
 # ---- GCC/Clang
 
 if(NOT MSVC)
-    if(COMP_LINKER_HAS_FATAL_WARNINGS_V1)
-        list(APPEND checked_linker_options_all "-Wl,--fatal-warnings")
-    endif()
-    if(COMP_LINKER_HAS_FATAL_WARNINGS_V2)
-        list(APPEND checked_linker_options_all "-Wl,-fatal_warnings")
-    endif()
-
-    #if(COMP_HAS_LTO)
-    #    list(APPEND checked_compiler_options "-flto")
-    #endif()
-
-    if(COMP_HAS_FVISIBILITY_HIDDEN)
-        list(APPEND checked_compiler_options "-fvisibility=hidden")
-    endif()
 
     if(COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
         list(APPEND checked_compiler_options "-fno-expensive-optimizations")
@@ -327,15 +306,6 @@ if(NOT MSVC)
     if(COMP_HAS_W_ZERO_NULLPTR)
         list(APPEND checked_compiler_warnings "-Wzero-as-null-pointer-constant")
     endif()
-    if(COMP_HAS_W_DISABLE_OPT)
-        list(APPEND checked_compiler_warnings "-Wdisabled-optimization")
-    endif()
-    if(COMP_HAS_W_INVALID_PCH)
-        list(APPEND checked_compiler_warnings "-Winvalid-pch")
-    endif()
-    if(COMP_HAS_W_SHADOW)
-        list(APPEND checked_compiler_warnings "-Wshadow")
-    endif()
 
     if(COMP_HAS_W_LTO_TYPE_MISMATCH)
         list(APPEND checked_compiler_warnings "-Wlto-type-mismatch")
@@ -355,6 +325,13 @@ if(NOT MSVC)
     if(COMP_HAS_W_TRAMPOLINES)
         list(APPEND checked_compiler_warnings "-Wtrampolines")
     endif()
+    if(COMP_HAS_FORMAT_SIGNEDNESS)
+        list(APPEND checked_compiler_warnings "-Wformat-signedness")
+    endif()
+    if(COMP_HAS_DUPLICATED_BRANCHES)
+        list(APPEND checked_compiler_warnings "-Wduplicated-branches")
+    endif()
+
     if(COMP_HAS_W_WEAK_VTABLES)
         list(APPEND checked_compiler_warnings "-Wweak-vtables")
     endif()
@@ -365,44 +342,29 @@ if(NOT MSVC)
         list(APPEND checked_compiler_warnings "-Wmissing-variable-declarations")
     endif()
 
-    if(COMP_HAS_WNO_UNUSED_FUNCTION)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-unused-function")
-    endif()
-    if(COMP_HAS_WNO_FORMAT_NONLITERAL)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-format-nonliteral")
-    endif()
     if(COMP_HAS_WNO_NONNULL_COMPARE)
         list(APPEND checked_compiler_warnings_disabled "-Wno-nonnull-compare")
     endif()
     if(COMP_HAS_WNO_MAYBE_UNINIT)
         list(APPEND checked_compiler_warnings_disabled "-Wno-maybe-uninitialized")
     endif()
-    if(COMP_HAS_WNO_SWITCH)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-switch")
-    endif()
-    if(COMP_HAS_WNO_IMPLICIT_FALLTHROUGH)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-implicit-fallthrough")
-    endif()
-    if(COMP_HAS_WNO_PARENTHESES)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-parentheses")
-    endif()
-    if(COMP_HAS_WNO_MISLEADING_INDENTATION)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-misleading-indentation")
-    endif()
-    if(COMP_HAS_WNO_UNUSED_RESULT)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-unused-result")
+    if(COMP_HAS_WNO_LANGUAGE_EXTENSION_TOKEN)
+        list(APPEND checked_compiler_warnings_disabled "-Wno-language-extension-token")
     endif()
     if(COMP_HAS_WNO_NESTED_ANON_TYPES)
         list(APPEND checked_compiler_warnings_disabled "-Wno-nested-anon-types")
     endif()
-    if(COMP_HAS_WNO_FORMAT_SECURITY)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-format-security")
+
+    if(LINKER_HAS_FATAL_WARN_APPLE)
+        list(APPEND checked_linker_options_all "-Wl,-fatal_warnings")
+    elseif(LINKER_HAS_FATAL_WARN)
+        list(APPEND checked_linker_options_all "-Wl,--fatal-warnings")
     endif()
-    if(COMP_HAS_WNO_DEPRECATED_DECLARATIONS)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-deprecated-declarations")
+    if(LINKER_HAS_AS_NEEDED)
+        list(APPEND checked_linker_options_all "-Wl,--as-needed")
     endif()
-    if(COMP_HAS_WNO_LANGUAGE_EXTENSION_TOKEN)
-        list(APPEND checked_compiler_warnings_disabled "-Wno-language-extension-token")
+    if(LINKER_HAS_ICF)
+        list(APPEND checked_linker_options_all "-Wl,--icf=safe")
     endif()
 endif()
 
@@ -496,7 +458,7 @@ if(NOT MSVC)
     message(STATUS "Adding the following conditional compiler warnings: ${checked_compiler_warnings}.")
     message(
         STATUS
-        "Adding the following conditional compiler warnings ignore options: ${checked_compiler_warnings_disabled}."
+        "Adding the following conditional compiler warning ignore options: ${checked_compiler_warnings_disabled}."
     )
     message(STATUS "Adding the following conditional linker options: ${checked_linker_options_all}.")
 

@@ -246,7 +246,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
     int iTotalWeight = 0;
     for ( i = 0; i < iCount; ++i )
     {
-        CRegionResourceDef * pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.ResourceGetDef( m_Members[i].GetResourceID() ) );
+        CRegionResourceDef * pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.RegisteredResourceGetDef( m_Members[i].GetResourceID() ) );
         // If no regionresource, return just some random entry!
         if (pOreDef != nullptr)
         {

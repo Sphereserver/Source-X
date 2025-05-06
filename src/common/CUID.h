@@ -113,7 +113,7 @@ public:
 	void SetObjUID(dword dwVal) noexcept;
 
 public:
-	operator bool() const noexcept = delete;
+    operator bool() const = delete;
 	inline operator dword () const noexcept {
 		return GetObjUID();
 	}

@@ -115,12 +115,12 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	CRegionResourceDef * pOreDef;
 	if ( id == sl::scont_bad_index() )
 	{
-		pOreDef	= dynamic_cast <CRegionResourceDef *>(g_Cfg.ResourceGetDefByName(RES_REGIONRESOURCE, "mr_nothing"));
+        pOreDef	= dynamic_cast <CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDefByName(RES_REGIONRESOURCE, "mr_nothing"));
 	}
 	else
 	{
 		CResourceID rid	= pResGroup->GetMemberID( id );
-		pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.ResourceGetDef( rid ));
+        pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.RegisteredResourceGetDef( rid ));
 	}
 
 	if ( !pOreDef )
@@ -187,7 +187,7 @@ CItemTypeDef* CWorldMap::GetTerrainItemTypeDef(dword dwTerrainIndex) // static
 
 	if (!pRes)
 	{
-		pRes = g_Cfg.ResourceGetDef(CResourceID(RES_TYPEDEF, 0));
+        pRes = g_Cfg.RegisteredResourceGetDef(CResourceID(RES_TYPEDEF, 0));
 	}
 	ASSERT(pRes);
 

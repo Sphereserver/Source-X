@@ -181,15 +181,17 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 
 }
 
+void CItem::DeletePrepare()
+{
+    ADDTOCALLSTACK("CItem::DeletePrepare");
+    CItem::_GoSleep();
+    CObjBase::DeletePrepare();
+}
+
 void CItem::DeleteCleanup(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::DeleteCleanup");
 	_uiInternalStateFlags |= SF_DELETING;
-
-	// We don't want to have invalid pointers over there
-	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
-	//CWorldTickingList::DelObjSingle(this);
-	//CWorldTickingList::DelObjStatusUpdate(this, false);
 
 	// Remove corpse map waypoint on enhanced clients
 	if (IsType(IT_CORPSE) && m_uidLink.IsValidUID())
@@ -251,6 +253,8 @@ bool CItem::NotifyDelete()
 bool CItem::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CItem::Delete");
+    EXC_TRY("Cleanup in Delete method");
+
 	if (( NotifyDelete() == false ) && !fForce)
 		return false;
 
@@ -258,12 +262,16 @@ bool CItem::Delete(bool fForce)
 	DeleteCleanup(fForce);
 
 	return CObjBase::Delete(fForce);
+
+    EXC_CATCH;
+    return false;
 }
 
 CItem::~CItem()
 {
+    ADDTOCALLSTACK("CItem::~CItem");
+
 	EXC_TRY("Cleanup in destructor");
-	ADDTOCALLSTACK("CItem::~CItem");
 
 	DeletePrepare();	// Using this in the destructor will fail to call virtuals, but it's better than nothing.
 	CItem::DeleteCleanup(true);
@@ -2304,25 +2312,33 @@ void CItem::r_WriteMore1(CSString & sVal)
     ADDTOCALLSTACK("CItem::r_WriteMore1");
     // do special processing to represent this.
 
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        sVal.FormatHex(m_itNormal.m_more1);
+        return;
+    }
+
+    lptstr ptcErr = nullptr;
+
     switch (GetType())
     {
         case IT_SPELLBOOK:
             sVal.FormatHex(m_itSpellbook.m_spells1);
-            return;
+            break;
 
         case IT_TREE:
         case IT_GRASS:
         case IT_ROCK:
         case IT_WATER:
-            sVal = ResourceGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE); //Changed to fix issue but it is not implemented.
-            return;
+            sVal = ResourceTypedGetName(m_itResource.m_ridRes, RES_REGIONRESOURCE, &ptcErr); //Changed to fix issue but it is not implemented (?)
+            break;
 
         case IT_FRUIT:
         case IT_FOOD:
         case IT_FOOD_RAW:
         case IT_MEAT_RAW:
-            sVal = ResourceGetName(m_itFood.m_ridCook, RES_ITEMDEF);
-            return;
+            sVal = ResourceTypedGetName(m_itFood.m_ridCook, RES_ITEMDEF, &ptcErr);
+            break;
 
         case IT_TRAP:
         case IT_TRAP_ACTIVE:
@@ -2334,7 +2350,7 @@ void CItem::r_WriteMore1(CSString & sVal)
         case IT_ARCHERY_BUTTE:
         case IT_ITEM_STONE:
             sVal = ResourceGetName(CResourceID(RES_ITEMDEF, ResGetIndex(m_itNormal.m_more1)));
-            return;
+            break;
 
         case IT_FIGURINE:
         case IT_EQ_HORSE:
@@ -2350,7 +2366,13 @@ void CItem::r_WriteMore1(CSString & sVal)
                 sVal = ResourceGetName(CResourceID(m_itNormal.m_more1, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more1);
-            return;
+            break;
+    }
+
+    if (ptcErr)
+    {
+        g_Log.EventError("Invalid MORE1 for item 0%" PRIx32 ": %s.\n",
+            GetUID().GetObjUID(), ptcErr);
     }
 }
 
@@ -2359,23 +2381,31 @@ void CItem::r_WriteMore2( CSString & sVal )
 	ADDTOCALLSTACK_DEBUG("CItem::r_WriteMore2");
 	// do special processing to represent this.
 
+    if (Can(CAN_I_SCRIPTEDMORE))
+    {
+        sVal.FormatHex(m_itNormal.m_more2);
+        return;
+    }
+
+    lptstr ptcErr = nullptr;
+
 	switch ( GetType())
 	{
         case IT_SPELLBOOK:
             sVal.FormatHex(m_itSpellbook.m_spells2);
-            return;
+            break;
 
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
             sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itFood.m_MeatType));
-			return;
+            break;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-            sVal = ResourceGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF);
-            return;
+            sVal = ResourceTypedGetName(m_itCrop.m_ridFruitOverride, RES_ITEMDEF, &ptcErr);
+            break;
 
 		case IT_LEATHER:
 		case IT_HIDE:
@@ -2385,19 +2415,25 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_BLOOD:
         case IT_BONE:
             sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more2));
-            return;
+            break;
 
 		case IT_ANIM_ACTIVE:
             sVal = ResourceGetName(CResourceID(RES_CHARDEF, m_itAnim.m_PrevType));
-            return;
+            break;
 
 		default:
             if (CResourceIDBase::IsValidResource(m_itNormal.m_more2))
                 sVal = ResourceGetName(CResourceID(m_itNormal.m_more2, 0));
             else
                 sVal.FormatHex(m_itNormal.m_more2);
-			return;
+            break;
 	}
+
+    if (ptcErr)
+    {
+        g_Log.EventError("Invalid MORE2 for item 0%" PRIx32 ": %s.\n",
+            GetUID().GetObjUID(), ptcErr);
+    }
 }
 
 void CItem::r_Write( CScript & s )
@@ -2826,10 +2862,10 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatVal( GetHeight() );
 			break;
 		case IC_HITS:
-			sVal.FormatVal(LOWORD(m_itNormal.m_more1));
+            sVal.FormatVal(dword_low_word(m_itNormal.m_more1));
 			break;
 		case IC_HITPOINTS:
-			sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_dwHitsCur : 0 );
+            sVal.FormatVal( IsTypeArmorWeapon() ? m_itArmor.m_wHitsCur : 0 );
 			break;
 		case IC_ID:
 			fDoDefault = true;
@@ -2856,17 +2892,17 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
-			sVal.FormatVal(HIWORD(m_itNormal.m_more1));
+            sVal.FormatVal(dword_hi_word(m_itNormal.m_more1));
 			break;
 		case IC_MORE:
 		case IC_MORE1:
 			r_WriteMore1(sVal);
 			break;
 		case IC_MORE1h:
-			sVal.FormatVal( HIWORD( m_itNormal.m_more1 ));
+            sVal.FormatVal( dword_hi_word( m_itNormal.m_more1 ));
 			break;
 		case IC_MORE1l:
-			sVal.FormatVal( LOWORD( m_itNormal.m_more1 ));
+            sVal.FormatVal( dword_low_word( m_itNormal.m_more1 ));
 			break;
         case IC_FRUIT:
             if (!IsType(IT_FRUIT))
@@ -2876,10 +2912,10 @@ bool CItem::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, bo
 			r_WriteMore2(sVal);
 			break;
 		case IC_MORE2h:
-			sVal.FormatVal( HIWORD( m_itNormal.m_more2 ));
+            sVal.FormatVal( dword_hi_word( m_itNormal.m_more2 ));
 			break;
 		case IC_MORE2l:
-			sVal.FormatVal( LOWORD( m_itNormal.m_more2 ));
+            sVal.FormatVal( dword_low_word( m_itNormal.m_more2 ));
 			break;
 		case IC_MOREM:
 			sVal.FormatVal( m_itNormal.m_morep.m_map );
@@ -3029,6 +3065,9 @@ void CItem::r_LoadMore2(dword dwVal)
 
 lpctstr CItem::ResourceGetName(const CResourceID& rid)
 {
+    ADDTOCALLSTACK("CItem::ResourceGetName");
+    /*
+     * Does the same thing as g_Cfg.ResourceGetName(rid).
     if (Can(CAN_I_SCRIPTEDMORE))
     {
         tchar* pszText = Str_GetTemp();
@@ -3038,21 +3077,18 @@ lpctstr CItem::ResourceGetName(const CResourceID& rid)
             snprintf(pszText, Str_TempLength(),"0%" PRIx32, rid.GetResIndex());
         return pszText;
     }
+    */
     return g_Cfg.ResourceGetName(rid);
 }
 
-lpctstr CItem::ResourceGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType)
+lpctstr CItem::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr *ptcOutError)
 {
+    ADDTOCALLSTACK("CItem::ResourceTypedGetName");
     if (Can(CAN_I_SCRIPTEDMORE))
     {
-        tchar* pszText = Str_GetTemp();
-        if (!rid.IsValidUID())
-            snprintf(pszText, Str_TempLength(), "%d", (int)rid.GetPrivateUID());
-        else
-            snprintf(pszText, Str_TempLength(), "0%" PRIx32, rid.GetResIndex());
-        return pszText;
+        return g_Cfg.ResourceGetName(rid);
     }
-    return g_Cfg.ResourceGetName(rid, iExpectedType);
+    return g_Cfg.ResourceTypedGetName(rid, iExpectedType, ptcOutError);
 }
 
 bool CItem::r_LoadVal( CScript & s ) // Load an item Script
@@ -3163,7 +3199,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		{
 			int64 amount = s.GetArgLLVal();
 			SetDefNum(s.GetKey(), amount, false);
-			CVarDefCont * pVar = GetDefKey("Usescur", true);
+            CVarDefCont * pVar = GetDefKey("UsesCur", true);
 			if (!pVar)
 				SetDefNum("UsesCur", amount, false);
 		}	break;
@@ -3294,10 +3330,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return SetDispID((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr())));
 		case IC_HITS:
 			{
-				int maxHits = HIWORD(m_itNormal.m_more1);
+                word hits = s.GetArgWVal();
+                word maxHits = dword_hi_word(m_itNormal.m_more1);
 				if( maxHits == 0 )
-					maxHits = s.GetArgVal();
-				m_itNormal.m_more1 = MAKEDWORD(s.GetArgVal(), maxHits);
+                    maxHits = hits;
+                m_itNormal.m_more1 = make_dword(hits, maxHits);
 			}
 			break;
 		case IC_HITPOINTS:
@@ -3306,7 +3343,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				DEBUG_ERR(("Item:Hitpoints assigned for non-weapon %s\n", GetResourceName()));
 				return false;
 			}
-			m_itArmor.m_dwHitsCur = m_itArmor.m_wHitsMax = (word)(s.GetArgVal());
+            m_itArmor.m_wHitsCur = m_itArmor.m_wHitsMax = s.GetArgWVal();
             break;
 		case IC_ID:
 		{
@@ -3365,26 +3402,26 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itCrop.m_ridFruitOverride = CResourceIDBase(RES_ITEMDEF, ResGetIndex(s.GetArgDWVal()));
             break;
 		case IC_MAXHITS:
-			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
+            m_itNormal.m_more1 = make_dword(dword_low_word(m_itNormal.m_more1), s.GetArgWVal());
 			break;
 		case IC_MORE:
 		case IC_MORE1:
             r_LoadMore1(s.GetArgDWVal());
             break;
-		case IC_MORE1h:
-			m_itNormal.m_more1 = MAKEDWORD( LOWORD(m_itNormal.m_more1), s.GetArgVal());
-			break;
+        case IC_MORE1h:
+            m_itNormal.m_more1 = make_dword( dword_low_word(m_itNormal.m_more1), s.GetArgWVal());
+            break;
 		case IC_MORE1l:
-			m_itNormal.m_more1 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more1));
+            m_itNormal.m_more1 = make_dword( s.GetArgWVal(), dword_hi_word(m_itNormal.m_more1));
 			break;
 		case IC_MORE2:
             r_LoadMore2(s.GetArgDWVal());
             break;
 		case IC_MORE2h:
-			m_itNormal.m_more2 = MAKEDWORD( LOWORD(m_itNormal.m_more2), s.GetArgVal());
+            m_itNormal.m_more2 = make_dword( dword_low_word(m_itNormal.m_more2), s.GetArgWVal());
 			break;
 		case IC_MORE2l:
-			m_itNormal.m_more2 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more2));
+            m_itNormal.m_more2 = make_dword( s.GetArgWVal(), dword_hi_word(m_itNormal.m_more2));
 			break;
 		case IC_MOREM:
 			m_itNormal.m_morep.m_map = s.GetArgUCVal();
@@ -3651,7 +3688,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 
 bool CItem::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
@@ -3659,8 +3696,8 @@ bool CItem::IsTriggerActive(lpctstr trig) const
         int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.empty());
-    return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
+    ASSERT(!_sRunningTrigger.IsEmpty());
+    return (strcmpi(_sRunningTrigger.GetBuffer(), trig) == 0);
 }
 
 void CItem::SetTriggerActive(lpctstr trig)
@@ -3668,7 +3705,7 @@ void CItem::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.clear();
+        _sRunningTrigger.Clear();
         return;
     }
     int iAction = FindTableSorted( trig, CItem::sm_szTrigName, ARRAY_COUNT(CItem::sm_szTrigName)-1 );
@@ -4854,9 +4891,9 @@ int CItem::Armor_GetDefense() const
 		return 0;
 
 	int iVal = m_defenseBase + m_ModAr;
-	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax )
+    if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )
 	{
-		int iRepairPercent = 50 + ((50 * m_itArmor.m_dwHitsCur) / m_itArmor.m_wHitsMax);
+        int iRepairPercent = 50 + ((50 * m_itArmor.m_wHitsCur) / m_itArmor.m_wHitsMax);
 		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) )
@@ -4878,9 +4915,9 @@ int CItem::Weapon_GetAttack(bool fGetRange) const
 	if ( fGetRange )
 		iVal += m_attackRange;
 
-	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax )
+    if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_wHitsMax > 0 && m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax )
 	{
-		int iRepairPercent = 50 + ((50 * m_itArmor.m_dwHitsCur) / m_itArmor.m_wHitsMax);
+        int iRepairPercent = 50 + ((50 * m_itArmor.m_wHitsCur) / m_itArmor.m_wHitsMax);
 		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) && ! IsType(IT_WAND))
@@ -5721,23 +5758,23 @@ int CItem::Armor_GetRepairPercent() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairPercent");
 
-	if ( !m_itArmor.m_wHitsMax || ( m_itArmor.m_wHitsMax < m_itArmor.m_dwHitsCur ))
+    if ( !m_itArmor.m_wHitsMax || ( m_itArmor.m_wHitsMax < m_itArmor.m_wHitsCur ))
 		return 100;
- 	return IMulDiv( m_itArmor.m_dwHitsCur, 100, m_itArmor.m_wHitsMax );
+    return IMulDiv( m_itArmor.m_wHitsCur, 100, m_itArmor.m_wHitsMax );
 }
 
 lpctstr CItem::Armor_GetRepairDesc() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairDesc");
-	if ( m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax )
+    if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_PERFECT );
-	else if ( m_itArmor.m_dwHitsCur == m_itArmor.m_wHitsMax )
+    else if ( m_itArmor.m_wHitsCur == m_itArmor.m_wHitsMax )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_FULL );
-	else if ( m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax / 2 )
+    else if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax / 2 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_SCRATCHED );
-	else if ( m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax / 3 )
+    else if ( m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax / 3 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_WELLWORN );
-	else if ( m_itArmor.m_dwHitsCur > 3 )
+    else if ( m_itArmor.m_wHitsCur > 3 )
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_BADLY );
 	else
 		return g_Cfg.GetDefaultMsg( DEFMSG_ITEMSTATUS_FALL_APART );
@@ -5765,12 +5802,12 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
         const int64 iSelfRepair = GetDefNum("SELFREPAIR", true);
         if (iSelfRepair > g_Rand.GetVal(10))
         {
-            const ushort uiOldHits = m_itArmor.m_dwHitsCur;
-            m_itArmor.m_dwHitsCur += 2;
-            if (m_itArmor.m_dwHitsCur > m_itArmor.m_wHitsMax)
-                m_itArmor.m_dwHitsCur = m_itArmor.m_wHitsMax;
+            const ushort uiOldHits = m_itArmor.m_wHitsCur;
+            m_itArmor.m_wHitsCur += 2;
+            if (m_itArmor.m_wHitsCur > m_itArmor.m_wHitsMax)
+                m_itArmor.m_wHitsCur = m_itArmor.m_wHitsMax;
 
-            if (uiOldHits != m_itArmor.m_dwHitsCur)
+            if (uiOldHits != m_itArmor.m_wHitsCur)
                 UpdatePropertyFlag();
 
             return 0;
@@ -5844,7 +5881,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			return 0;
 		}
 
-		if ( (dword)iDmg > m_itWeb.m_dwHitsCur || ( uType & DAMAGE_FIRE ))
+        if ( (dword)iDmg > m_itWeb.m_wHitsCur || ( uType & DAMAGE_FIRE ))
 		{
 			if ( pSrc )
 				pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_DESTROY ) );
@@ -5854,7 +5891,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 		if ( pSrc )
 			pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_WEAKEN ) );
-		m_itWeb.m_dwHitsCur -= iDmg;
+        m_itWeb.m_wHitsCur -= iDmg;
 		return 1;
 
 	default:
@@ -5867,9 +5904,9 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 forcedamage:
 		CChar * pChar = dynamic_cast <CChar*> ( GetTopLevelObj());
 
-		if ( m_itArmor.m_dwHitsCur <= 1 )
+        if ( m_itArmor.m_wHitsCur <= 1 )
 		{
-			m_itArmor.m_dwHitsCur = 0;
+            m_itArmor.m_wHitsCur = 0;
 			if ( g_Cfg.m_iEmoteFlags & EMOTEF_DESTROY )
 				EmoteObj( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
 			else
@@ -5881,7 +5918,7 @@ forcedamage:
 		const int previousDefense = Armor_GetDefense();
 		const int previousDamage = Weapon_GetAttack();
 
-		--m_itArmor.m_dwHitsCur;
+        --m_itArmor.m_wHitsCur;
 		UpdatePropertyFlag();
 
 		if (pChar != nullptr && IsItemEquipped() )
@@ -5921,7 +5958,7 @@ forcedamage:
 			{
 				// Tell target they got damaged.
 				*pszMsg = 0;
-				if (m_itArmor.m_dwHitsCur < m_itArmor.m_wHitsMax / 2)
+                if (m_itArmor.m_wHitsCur < m_itArmor.m_wHitsMax / 2)
 				{
 					const int iPercent = Armor_GetRepairPercent();
 					if (pChar->Skill_GetAdjusted(SKILL_ARMSLORE) / 10 > iPercent)
@@ -6031,7 +6068,7 @@ bool CItem::IsResourceMatch( const CResourceID& rid, dword dwArg ) const
 			{
 				case IT_MAP:		// different map types are not the same resource
 				{
-					if ( LOWORD(dwArg) != m_itMap.m_top || HIWORD(dwArg) != m_itMap.m_left )
+                    if ( dword_low_word(dwArg) != m_itMap.m_top || dword_hi_word(dwArg) != m_itMap.m_left )
 						return false;
 					break;
 				}
@@ -6057,8 +6094,8 @@ void CItem::_GoAwake()
 	ADDTOCALLSTACK("CItem::_GoAwake");
 	CObjBase::_GoAwake();
 
-	// Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
-	if (!IsTopLevel())
+    // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
+    if (!IsStatusUpdatePending() && !IsTopLevel())
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
 	}
@@ -6069,11 +6106,14 @@ void CItem::_GoSleep()
     ADDTOCALLSTACK("CItem::_GoSleep");
     CObjBase::_GoSleep();
 
-    // Items equipped or inside containers don't receive ticks and need to be added to a list of items to be processed separately
-    if (IsTopLevel())
+    /*
+     * For now, we force this check on every item in CObjBase::_GoSleep
+    // Items equipped or inside containers don't automatically receive status update ticks and need to be added manually to be processed individually
+    if (!IsTopLevel())
     {
         CWorldTickingList::DelObjStatusUpdate(this, false);
     }
+    */
 }
 
 bool CItem::_CanHoldTimer() const
@@ -6114,11 +6154,11 @@ bool CItem::_CanTick() const
 	EXC_TRY("Can tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fCharCont = pCont && pCont->IsChar();
     const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
 
     if (fIgnoreCont)
 	{
+        const bool fCharCont = pCont && pCont->IsChar();
         if (fCharCont && pCont->IsDisconnected())
         {
             const auto pCharCont = static_cast<const CChar*>(pCont);
@@ -6133,12 +6173,15 @@ bool CItem::_CanTick() const
 
         return CObjBase::_CanTick();
 	}
-    else if (IsAttr(ATTR_DECAY) && !pCont)
+
+    if (IsAttr(ATTR_DECAY) && !pCont)
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
         return CObjBase::_CanTick();
     }
-    else if (fCharCont && !pCont->CanTick())
+
+    const bool fCharCont = pCont && pCont->IsChar();
+    if (fCharCont && !pCont->CanTick())
     {
         // Is it equipped on a Char?
         return false;

@@ -361,7 +361,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	ADDTOCALLSTACK("CItemContainer::GetRandContainerLoc");
 	// Max/Min Container Sizes.
 
-	static const struct // we can probably get this from MUL file some place.
+    static constexpr struct // we can probably get this from MUL file some place.
 	{
 		GUMP_TYPE m_gump;
 		word m_minx;

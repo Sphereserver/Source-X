@@ -11,6 +11,7 @@
 	#include "../common/crashdump/crashdump.h"
 #endif
 
+#include "../common/sphere_library/sstring.h"
 #include "../common/crypto/CCryptoKeyCalc.h"
 #include "../common/CException.h"
 #include "../common/CExpression.h"
@@ -136,7 +137,15 @@ static void defragSphere(char *path)
         inf.Close();
     }
     const dword dwTotalUIDs = dwIdxUID;
-    g_Log.Event(LOGM_INIT, "Totally having %" PRIu32 " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
+    if (dwTotalUIDs == 0)
+    {
+        g_Log.Event(LOGM_INIT, "Totally having 0 unique objects (UIDs). Aborting defrag.\n");
+        return;
+    }
+    else
+    {
+        g_Log.Event(LOGM_INIT, "Totally having %" PRIu32 " unique objects (UIDs), latest: 0%x\n", dwTotalUIDs, puids[dwTotalUIDs-1]);
+    }
 
     g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
     dword_q_sort(puids, 0, dwTotalUIDs -1);
@@ -2263,9 +2272,66 @@ log_cont:
 
 extern void defragSphere(char *);
 
-bool CServer::CommandLine( int argc, tchar * argv[] )
+
+bool CServer::CommandLinePreLoad( int argc, tchar * argv[] )
 {
-    ADDTOCALLSTACK("CServer::CommandLine");
+    ADDTOCALLSTACK("CServer::CommandLinePreLoad");
+    // Console Command line.
+    // This runs after script file enum but before loading the world file.
+    // RETURN:
+    //  true = keep running after this.
+
+    for ( int argn = 1; argn < argc; ++argn )
+    {
+        tchar * pArg = argv[argn];
+        if ( ! _IS_SWITCH(pArg[0]))
+            continue;
+
+        ++pArg;
+
+        switch ( toupper(pArg[0]) )
+        {
+            case 'H':
+            case '?':
+                PrintStr( SPHERE_TITLE " \n"
+                    "Command Line Switches:\n"
+#ifdef _WIN32
+                    "-Cclassname Setup custom window class name for sphere (default: " SPHERE_TITLE ").\n"
+#else
+                    "-C do not use colored console output (default: on).\n"
+#endif
+                    "-D Dump global variable DEFNAMEs to defs.txt.\n"
+#if defined(_WIN32) && !defined(_DEBUG)
+                    "-E Enable the CrashDumper.\n"
+#endif
+                    "-Gpath/to/saves/ Defrags sphere saves.\n"
+#ifdef _WIN32
+                    "-K install/remove Installs or removes NT Service.\n"
+                    "-J automatically close the console window at server termination.\n"
+#endif
+                    "-Nstring Set the sphere name.\n"
+                    "-P# Set the port number.\n"
+                    "-Ofilename Output console to this file name\n"
+                    "-Q Quit when finished.\n"
+                    );
+                return false;
+            case 'G':
+                defragSphere(pArg + 1);
+                return false;
+            case 'Q':
+                return false;
+            default:
+                break;
+        }
+    }
+
+    return true;
+}
+
+
+bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
+{
+    ADDTOCALLSTACK("CServer::CommandLinePostLoad");
 	// Console Command line.
 	// This runs after script file enum but before loading the world file.
 	// RETURN:
@@ -2281,30 +2347,6 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 
 		switch ( toupper(pArg[0]) )
 		{
-            case 'H':
-			case '?':
-				PrintStr( SPHERE_TITLE " \n"
-					"Command Line Switches:\n"
-#ifdef _WIN32
-					"-Cclassname Setup custom window class name for sphere (default: " SPHERE_TITLE ").\n"
-#else
-					"-C do not use colored console output (default: on).\n"
-#endif
-					"-D Dump global variable DEFNAMEs to defs.txt.\n"
-#if defined(_WIN32) && !defined(_DEBUG)
-					"-E Enable the CrashDumper.\n"
-#endif
-					"-Gpath/to/saves/ Defrags sphere saves.\n"
-#ifdef _WIN32
-					"-K install/remove Installs or removes NT Service.\n"
-                    "-J automatically close the console window at server termination.\n"
-#endif
-					"-Nstring Set the sphere name.\n"
-					"-P# Set the port number.\n"
-					"-Ofilename Output console to this file name\n"
-					"-Q Quit when finished.\n"
-					);
-				return false;
 #ifdef _WIN32
 			case 'C':
 			case 'K':
@@ -2328,9 +2370,15 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'D':
 				// dump all the defines to a file.
 				{
-					CSFileText FileDefs;
-					if ( ! FileDefs.Open( "defs.txt", OF_WRITE|OF_TEXT ))
+                    static constexpr char const * out_defs      = "defs.txt";
+                    static constexpr char const * out_resdefs   = "resdefs.txt";
+
+                    CSFileText FileDefs;
+                    if ( ! FileDefs.Open( out_defs, OF_WRITE|OF_TEXT ))
+                    {
+                        g_Log.Event(LOGM_INIT|LOGL_CRIT, "Can't create output file '%s'!\n", out_defs);
 						return false;
+                    }
 
                     ssize_t count = ssize_t(g_Exp.m_VarDefs.GetCount());
                     ssize_t i = 0;
@@ -2345,8 +2393,11 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 					}
 
                     CSFileText FileResDefs;
-                    if ( ! FileResDefs.Open( "resdefs.txt", OF_WRITE|OF_TEXT ))
+                    if ( ! FileResDefs.Open( out_resdefs, OF_WRITE|OF_TEXT ))
+                    {
+                        g_Log.Event(LOGM_INIT|LOGL_CRIT, "Can't create output file '%s'!\n", out_resdefs);
                         return false;
+                    }
 
                     count = ssize_t(g_Exp.m_VarResDefs.GetCount());
                     i = 0;
@@ -2370,15 +2421,12 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 					PrintStr("Crash dump NOT enabled.\n");
 				continue;
 #endif
-			case 'G':
-				defragSphere(pArg + 1);
-				continue;
 			case 'O':
 				if ( g_Log.Open(pArg+1, OF_SHARE_DENY_WRITE|OF_READWRITE|OF_TEXT) )
 					g_Log.m_fLockOpen = true;
 				continue;
-			case 'Q':
-				return false;
+            //case 'Q':
+            //	return false;
 			default:
 				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Can't recognize command line data '%s'\n", static_cast<lpctstr>(argv[argn]));
 				break;

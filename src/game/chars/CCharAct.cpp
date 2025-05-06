@@ -794,6 +794,8 @@ void CChar::UpdateStatVal( STAT_TYPE type, int iChange, ushort uiLimit )
 		case STAT_DEX:
 			UpdateStamFlag();
 			break;
+        default:
+            break;
 	}
 }
 
@@ -2244,6 +2246,8 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
                     return ANIM_BOW;
                 case ANIM_THROW:
                     return ANIM_ATTACK_1H_BASH;
+            default:
+                break;
             }
         }
 	}
@@ -5451,7 +5455,7 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 
 bool CChar::IsTriggerActive(lpctstr trig) const
 {
-    if (((_iRunningTriggerId == -1) && _sRunningTrigger.empty()) || (trig == nullptr))
+    if (((_iRunningTriggerId == -1) && _sRunningTrigger.IsEmpty()) || (trig == nullptr))
         return false;
     if (_iRunningTriggerId != -1)
     {
@@ -5459,8 +5463,8 @@ bool CChar::IsTriggerActive(lpctstr trig) const
         const int iAction = FindTableSorted( trig, CChar::sm_szTrigName, ARRAY_COUNT(CChar::sm_szTrigName)-1 );
         return (_iRunningTriggerId == iAction);
     }
-    ASSERT(!_sRunningTrigger.empty());
-	return (strcmpi(_sRunningTrigger.c_str(), trig) == 0);
+    ASSERT(!_sRunningTrigger.IsEmpty());
+    return (strcmpi(_sRunningTrigger.GetBuffer(), trig) == 0);
 }
 
 void CChar::SetTriggerActive(lpctstr trig)
@@ -5468,7 +5472,7 @@ void CChar::SetTriggerActive(lpctstr trig)
     if (trig == nullptr)
     {
         _iRunningTriggerId = -1;
-        _sRunningTrigger.clear();
+        _sRunningTrigger.Clear();
         return;
     }
 	const int iAction = FindTableSorted( trig, CChar::sm_szTrigName, ARRAY_COUNT(CChar::sm_szTrigName)-1 );
@@ -5780,7 +5784,7 @@ bool CChar::_CanTick() const
     if (IsDisconnected())
 	{
         // mounted horses could still get a tick, even if their disconnected body is placed in a sector now sleeping.
-        if (Skill_GetActive() != NPCACT_RIDDEN)
+        if (Skill_GetActive() == NPCACT_RIDDEN)
             return true;
 
 		return false;
@@ -5800,7 +5804,8 @@ void CChar::_GoAwake()
 	CObjBase::_GoAwake();
 	CContainer::_GoAwake();
 
-	CWorldTickingList::AddCharPeriodic(this, false);
+    if (!IsPeriodicTickPending())
+        CWorldTickingList::AddCharPeriodic(this, false);
 
     if (!_IsTimerSet())
         _SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
@@ -5813,7 +5818,13 @@ void CChar::_GoSleep()
 	CContainer::_GoSleep(); // This method isn't virtual
 	CObjBase::_GoSleep();
 
-	CWorldTickingList::DelCharPeriodic(this, false);
+    if (IsPeriodicTickPending())
+        CWorldTickingList::DelCharPeriodic(this, false);
+}
+
+bool CChar::IsPeriodicTickPending() const
+{
+    return (0 != _iTimePeriodicTick);
 }
 
 // Get a timer tick when our timer expires.

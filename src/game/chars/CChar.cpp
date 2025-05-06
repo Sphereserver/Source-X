@@ -377,13 +377,19 @@ void CChar::DeleteCleanup(bool fForce)
 
     //_uiInternalStateFlags |= SF_DELETING;
 
-	// We don't want to have invalid pointers over there
-	// Already called by CObjBase::DeletePrepare -> CObjBase::_GoSleep
-	//CWorldTickingList::DelObjSingle(this);
-	//CWorldTickingList::DelObjStatusUpdate(this, false);
-
-	CWorldTickingList::DelCharPeriodic(this, false);
-
+    if (IsPeriodicTickPending())
+    {
+        //DEBUG_ASSERT(CWorldTickingList::IsCharPeriodicTickRegistered(this).has_value());
+        const bool fRes = CWorldTickingList::DelCharPeriodic(this, false);
+        ASSERT(fRes);
+        UnreferencedParameter(fRes);
+    }
+    /*
+    else
+    {
+        DEBUG_ASSERT(CWorldTickingList::IsCharPeriodicTickRegistered(this).has_value() == false);
+    }
+    */
 
 	if (IsStatFlag(STATF_RIDDEN))
 	{
@@ -445,6 +451,7 @@ void CChar::DeletePrepare()
 bool CChar::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CChar::Delete");
+    EXC_TRY("Cleanup in Delete method");
 
 	if ((NotifyDelete(fForce) == false) && !fForce)
 		return false;
@@ -464,6 +471,9 @@ bool CChar::Delete(bool fForce)
 		ClearPlayer();
 
 	return CObjBase::Delete();
+
+    EXC_CATCH;
+    return false;
 }
 
 // Client is detaching from this CChar.

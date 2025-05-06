@@ -62,33 +62,35 @@ enum EF_TYPE
  */
 enum OF_TYPE
 {
-	OF_NoDClickTarget			    = 0x0000001,    // Weapons won't open a target in the cursor after DClicking them for equip.
-	OF_NoSmoothSailing			    = 0x0000002,    // Deactivate Smooth Sailing for clients >= 7.0.8.13.
-	OF_ScaleDamageByDurability	    = 0x0000004,    // Weapons/armors will lose DAM/AR effect based on it's current durability.
-	OF_Command_Sysmsgs			    = 0x0000008,    // Shows status of hearall, allshow, allmove... commands after toggling them.
-	OF_PetSlots					    = 0x0000010,    // Enable AOS pet follower slots on chars. If enabled, all players must have MAXFOLLOWER property set (default=5).
-	OF_OSIMultiSight			    = 0x0000020,    // Only send items inside multis when the player enter on the multi area.
-	OF_Items_AutoName			    = 0x0000040,    // Auto rename potions/scrolls to match its spell name
-	OF_FileCommands				    = 0x0000080,    // Enable the usage of FILE commands
-	OF_NoItemNaming				    = 0x0000100,    // Disable the DEFMSG."grandmaster_mark" in crafted items
-	OF_NoHouseMuteSpeech		    = 0x0000200,    // Players outside multis won't hear what is told inside
-	OF_NoContextMenuLOS			    = 0x0000400,    // Disable LOS check to use context menus on chars
-	OF_MapBoundarySailing		    = 0x0000800,    // Boats will move to the other side of the map when reach map boundary
-	OF_Flood_Protection			    = 0x0001000,    // Prevent the server send messages to client if its the same message as the last already sent
-	OF_Buffs					    = 0x0002000,    // Enable the buff/debuff bar on ML clients >= 5.0.2b
-	OF_NoPrefix					    = 0x0004000,    // Don't show "a" and "an" prefix on item names
-	OF_DyeType					    = 0x0008000,    // Allow use i_dye on all items with t_dye_vat typedef instead only on i_dye_tub itemdef
-	OF_DrinkIsFood				    = 0x0010000,    // Typedef t_drink will increase food level like t_food
-	OF_NoDClickTurn				    = 0x0020000,    // Don't turn the player when DClick something
-	OF_NoPaperdollTradeTitle	    = 0x0040000,	// Don't show the trade title on the paperdoll
-    OF_NoTargTurn				    = 0x0080000,    // Don't turn the player when targetting something
-    OF_StatAllowValOverMax          = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
-    OF_GuardOutsideGuardedArea      = 0x0200000,    // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
-    OF_OWNoDropCarriedItem          = 0x0400000,     // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
-    OF_AllowContainerInsideContainer = 0x0800000,    //Allow containers inside other containers even if they are heavier than the container being inserted into.
-    OF_VendorStockLimit              = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
-    OF_EnableGuildAlignNotoriety     = 0x02000000,    // If enabled, guilds with the same alignment will see each other as enemy or ally.
-    OF_NoDclickEquip                 = 0x04000000    // If enabled, double-click does not equip items.
+    OF_NoDClickTarget              = 0x0000001,    // Weapons won't open a target in the cursor after DClicking them for equip.
+    OF_NoSmoothSailing			   = 0x0000002,    // Deactivate Smooth Sailing for clients >= 7.0.8.13.
+    OF_ScaleDamageByDurability	   = 0x0000004,    // Weapons/armors will lose DAM/AR effect based on it's current durability.
+    OF_Command_Sysmsgs			   = 0x0000008,    // Shows status of hearall, allshow, allmove... commands after toggling them.
+    OF_PetSlots					   = 0x0000010,    // Enable AOS pet follower slots on chars. If enabled, all players must have MAXFOLLOWER property set (default=5).
+    OF_OSIMultiSight               = 0x0000020,    // Only send items inside multis when the player enter on the multi area.
+    OF_Items_AutoName			   = 0x0000040,    // Auto rename potions/scrolls to match its spell name
+    OF_FileCommands				   = 0x0000080,    // Enable the usage of FILE commands
+    OF_NoItemNaming				   = 0x0000100,    // Disable the DEFMSG."grandmaster_mark" in crafted items
+    OF_NoHouseMuteSpeech           = 0x0000200,    // Players outside multis won't hear what is told inside
+    OF_NoContextMenuLOS			   = 0x0000400,    // Disable LOS check to use context menus on chars
+    OF_MapBoundarySailing		   = 0x0000800,    // Boats will move to the other side of the map when reach map boundary
+    OF_Flood_Protection			   = 0x0001000,    // Prevent the server send messages to client if its the same message as the last already sent
+    OF_Buffs                       = 0x0002000,    // Enable the buff/debuff bar on ML clients >= 5.0.2b
+    OF_NoPrefix					   = 0x0004000,    // Don't show "a" and "an" prefix on item names
+    OF_DyeType					   = 0x0008000,    // Allow use i_dye on all items with t_dye_vat typedef instead only on i_dye_tub itemdef
+    OF_DrinkIsFood				   = 0x0010000,    // Typedef t_drink will increase food level like t_food
+    OF_NoDClickTurn				   = 0x0020000,    // Don't turn the player when DClick something
+    OF_NoPaperdollTradeTitle       = 0x0040000,	   // Don't show the trade title on the paperdoll
+    OF_NoTargTurn				   = 0x0080000,    // Don't turn the player when targetting something
+    OF_StatAllowValOverMax         = 0x0100000,    // Allow stats value above their maximum value (i.e. allow hits value > maxhits).
+    OF_GuardOutsideGuardedArea     = 0x0200000,    // Allow guards to walk in unguarded areas, instead of being teleported back to their home point.
+    OF_OWNoDropCarriedItem         = 0x0400000,    // When overweighted, don't drop items on ground when moving them (or using BOUNCE) and checking if you can carry them.
+    OF_AllowContainerInsideContainer=0x0800000,    // Allow containers inside other containers even if they are heavier than the container being inserted into.
+    OF_VendorStockLimit            = 0x01000000,   // Limits how much of an item a vendor can buy using the value set in the TEMPLATE. Format: BUY=ID,AMOUNT
+    OF_EnableGuildAlignNotoriety   = 0x02000000,   // If enabled, guilds with the same alignment will see each other as enemy or ally.
+    OF_NoDclickEquip               = 0x04000000,   // If enabled, double-click does not equip items.
+    OF_PetBehaviorOwnerNeutral     = 0x08000000,   // Should my pets always appear natural to me?
+    OF_NPCMovementOldStyle         = 0x10000000    // Required setting to make NPCs run like in the old version.
 };
 
 /**
@@ -735,9 +737,28 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	//CResourceDef * RegisteredResourceGetDefRef( const CResourceID& rid ) const;
     sl::smart_ptr_view<CResourceDef> RegisteredResourceGetDefRef(const CResourceID& rid) const;
     CResourceDef* RegisteredResourceGetDef(const CResourceID& rid) const;
+
+    /**
+     * @brief   Get a Resource name from its CResourceID.
+     *
+     * @param   rid The rid.
+     *
+     * @return  The name or value.
+     */
+    lpctstr ResourceGetName( const CResourceID& rid ) const;
+
+    /**
+     * @brief   Get a Resource name from its index (CResourceID) and expected type.
+     *
+     * @param   rid The rid.
+     * @param   iExpectedType The expected RES_TYPE
+     * @param   ptcOutError pointer to string holding the output error string, if any.
+     *
+     * @return  null if it fails, else a pointer to a CResourceDef.
+     */
+    lpctstr ResourceTypedGetName(const CResourceIDBase& rid, const RES_TYPE iExpectedType, lptstr *ptcOutError );
 
 	// Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = nullptr );

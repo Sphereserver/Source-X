@@ -49,6 +49,7 @@ jobs:
     - name: Report building tools
       run:  |
             echo "GCC:" && gcc -v
+            echo "Default Linker:" && ld -v
             echo && echo "CMake:" && cmake --version
             echo && echo "Ninja:" && ninja --version
 

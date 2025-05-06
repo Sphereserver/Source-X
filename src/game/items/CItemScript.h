@@ -16,15 +16,13 @@ public:
     static const char *m_sClassName;
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
-public:
+
     CItemScript( ITEMID_TYPE id, CItemBase * pItemDef );
-    virtual ~CItemScript();
+    virtual ~CItemScript() override = default;
 
-private:
-    CItemScript(const CItemScript& copy);
-    CItemScript& operator=(const CItemScript& other);
+    CItemScript(const CItemScript& copy) = delete;
+    CItemScript& operator=(const CItemScript& other) = delete;
 
-public:
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ) override;	// some command on this object as a target
     virtual void r_Write( CScript & s ) override;
     virtual bool r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;

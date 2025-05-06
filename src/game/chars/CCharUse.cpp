@@ -633,10 +633,10 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 
 	// Try to break it.
 
-    if (pItemWeb->m_itWeb.m_dwHitsCur == 0)
-        pItemWeb->m_itWeb.m_dwHitsCur = 60 + g_Rand.GetVal(250);
-    else if (pItemWeb->m_itWeb.m_dwHitsCur > INT32_MAX)
-        pItemWeb->m_itWeb.m_dwHitsCur = INT32_MAX;
+    if (pItemWeb->m_itWeb.m_wHitsCur == 0)
+        pItemWeb->m_itWeb.m_wHitsCur = 60 + g_Rand.GetVal(250);
+    else if (pItemWeb->m_itWeb.m_wHitsCur > INT32_MAX)
+        pItemWeb->m_itWeb.m_wHitsCur = INT32_MAX;
 
 	// Since broken webs become spider silk, we should get out of here now if we aren't in a web.
 	CItem *pFlag = LayerFind(LAYER_FLAG_Stuck);
@@ -684,7 +684,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 		pFlag->m_uidLink = pItemWeb->GetUID();
 
         int iStuckTimerSeconds = 2; // Mininum stuck timer value is 2 seconds.
-        iCharStr = ((100 - minimum(100, iCharStr)) * (int)pItemWeb->m_itWeb.m_dwHitsCur) / 10;
+        iCharStr = ((100 - minimum(100, iCharStr)) * (int)pItemWeb->m_itWeb.m_wHitsCur) / 10;
         iStuckTimerSeconds = minimum(10, iStuckTimerSeconds + iCharStr); //Maximum stuck timer value is 10 seconds
 
 		pFlag->SetTimeout(iStuckTimerSeconds * MSECS_PER_SEC);
@@ -771,7 +771,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		return false;
 	}
 
-	if ( pItemArmor->m_itArmor.m_dwHitsCur >= pItemArmor->m_itArmor.m_wHitsMax )
+	if ( pItemArmor->m_itArmor.m_wHitsCur >= pItemArmor->m_itArmor.m_wHitsMax )
 	{
 		SysMessageDefault(DEFMSG_REPAIR_FULL);
 		return false;
@@ -789,7 +789,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 
 	// Use up some raw materials to repair.
 	int iTotalHits = pItemArmor->m_itArmor.m_wHitsMax;
-	int iDamageHits = pItemArmor->m_itArmor.m_wHitsMax - pItemArmor->m_itArmor.m_dwHitsCur;
+	int iDamageHits = pItemArmor->m_itArmor.m_wHitsMax - pItemArmor->m_itArmor.m_wHitsCur;
 	int iDamagePercent = IMulDiv(100, iDamageHits, iTotalHits);
 
 	size_t iMissing = ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, true);
@@ -824,7 +824,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	bool fSuccess = Skill_UseQuick((SKILL_TYPE)(RetMainSkill.GetResIndex()), iDifficulty);
 	if ( fSuccess )
 	{
-		pItemArmor->m_itArmor.m_dwHitsCur = (word)(iTotalHits);
+		pItemArmor->m_itArmor.m_wHitsCur = (word)(iTotalHits);
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_1);
 	}
 	else
@@ -837,12 +837,12 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		{
 			pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_2);
 			-- pItemArmor->m_itArmor.m_wHitsMax;
-			-- pItemArmor->m_itArmor.m_dwHitsCur;
+			-- pItemArmor->m_itArmor.m_wHitsCur;
 		}
 		else if ( !g_Rand.GetVal(3) )
 		{
 			pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_3);
-			-- pItemArmor->m_itArmor.m_dwHitsCur;
+			-- pItemArmor->m_itArmor.m_wHitsCur;
 		}
 		else
 			pszText = g_Cfg.GetDefaultMsg( DEFMSG_REPAIR_4 );
@@ -851,14 +851,14 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	}
 
 	ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, false);
-	if ( pItemArmor->m_itArmor.m_dwHitsCur <= 0 )
+	if ( pItemArmor->m_itArmor.m_wHitsCur <= 0 )
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_5);
 
 	tchar *pszMsg = Str_GetTemp();
 	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
 	Emote(pszMsg);
 
-	if ( pItemArmor->m_itArmor.m_dwHitsCur <= 0 )
+	if ( pItemArmor->m_itArmor.m_wHitsCur <= 0 )
 		pItemArmor->Delete();
 	else
 		pItemArmor->UpdatePropertyFlag();

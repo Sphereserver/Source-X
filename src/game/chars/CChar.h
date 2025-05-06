@@ -344,7 +344,7 @@ public:
 	CChar& operator=(const CChar& other) = delete;
 
 protected:
-	void DeleteCleanup(bool fForce);	// Not virtual!
+    void DeleteCleanup(bool fForce) NONVIRTUAL;
 	virtual void DeletePrepare() override;
 public:
 	bool NotifyDelete(bool fForce);
@@ -1375,6 +1375,8 @@ public:
 protected:
 	virtual void _GoAwake() override final;
 	virtual void _GoSleep() override final;
+
+    bool IsPeriodicTickPending() const;
 
     virtual bool _CanTick() const override final;
 

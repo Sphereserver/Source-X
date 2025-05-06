@@ -7,8 +7,6 @@
 #define _INC_THREADS_H
 
 #include "../common/common.h"
-#include "../common/sphere_library/sresetevents.h"
-#include "../common/sphere_library/sstringobjs.h"
 #include "../sphere/ProfileData.h"
 #include <atomic>
 #include <vector>
@@ -17,6 +15,7 @@
 	#include <pthread.h>
 #endif
 
+class TemporaryString;
 
 /**
  * Sphere threading system
@@ -45,7 +44,10 @@
 #endif
 
 class AbstractThread;
+class AutoResetEvent;
+class ManualResetEvent;
 
+/*
 // stores a value unique to each thread, intended to hold
 // a pointer (e.g. the current AbstractThread instance)
 template<class T>
@@ -130,6 +132,7 @@ T TlsValue<T>::get() const
 	return reinterpret_cast<T>(pthread_getspecific(_key));
 #endif
 }
+*/
 
 enum class ThreadPriority : int
 {
@@ -158,8 +161,9 @@ protected:
     bool _fKeepAliveAtShutdown;
     volatile std::atomic_bool _thread_selfTerminateAfterThisTick;
     volatile std::atomic_bool _fIsClosing;
-private:
+
     volatile std::atomic_bool m_terminateRequested;
+private:
     char m_name[30];
 
     // pthread_t type is opaque (platform-defined). It can be an integer, a struct, a ptr something. Memset is the safest and more portable way.
@@ -170,8 +174,9 @@ private:
 	uint m_hangCheck;
     ThreadPriority m_priority;
 	uint m_tickPeriod;
-	AutoResetEvent m_sleepEvent;
-	ManualResetEvent m_terminateEvent;
+    // PImpl
+    std::unique_ptr<AutoResetEvent> m_sleepEvent;
+    std::unique_ptr<ManualResetEvent> m_terminateEvent;
 
 public:
     AbstractThread(const char *name, ThreadPriority priority = ThreadPriority::Normal);
@@ -212,7 +217,7 @@ public:
   public:
     static void setThreadName(const char* name);
 
-    bool closing() noexcept
+    bool closing() const noexcept
     {
         return _fIsClosing;
     }
@@ -254,13 +259,15 @@ class AbstractSphereThread : public AbstractThread
 #ifdef THREAD_TRACK_CALLSTACK
 	struct STACK_INFO_REC
 	{
-		const char *functionName;
+        const char *functionName;
 	};
 
-	STACK_INFO_REC m_stackInfo[0x1000];
-	ssize_t m_stackPos;
-	bool m_freezeCallStack;
-    bool m_exceptionStackUnwinding;
+    STACK_INFO_REC m_stackInfo[0x500];
+    STACK_INFO_REC m_stackInfoCopy[0x500];
+    ssize_t m_iStackPos;
+    bool m_fFreezeCallStack;
+    ssize_t m_iStackUnwindingStackPos;
+    ssize_t m_iCaughtExceptionStackPos;
 #endif
 
 public:
@@ -270,25 +277,30 @@ public:
 	AbstractSphereThread(const AbstractSphereThread& copy) = delete;
 	AbstractSphereThread& operator=(const AbstractSphereThread& other) = delete;
 
+    class Strings
+    {
+        friend class TemporaryString;
+        friend tchar* Str_GetTemp() noexcept;
+
+        // allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
+        static char *allocateBuffer() noexcept;
+
+        // allocates a manageable String from the thread local storage
+        static void getBufferForStringObject(TemporaryString &string) noexcept;
+    };
+
 public:
-	// allocates a char* with size of THREAD_MAX_LINE_LENGTH characters from the thread local storage
-	char *allocateBuffer() noexcept;
-
-	// allocates a manageable String from the thread local storage
-	void getStringBuffer(TemporaryString &string) noexcept;
-
-    void exceptionCaught();
-
 #ifdef THREAD_TRACK_CALLSTACK
-	inline void freezeCallStack(bool freeze) noexcept
-	{
-		m_freezeCallStack = freeze;
-	}
+    void signalExceptionCaught() noexcept;
+    void signalExceptionStackUnwinding() noexcept;
+    inline bool isExceptionCaught() const noexcept;
+    inline bool isExceptionStackUnwinding() const noexcept;
+
+    inline void freezeCallStack(bool freeze) noexcept;
 
 	void pushStackCall(const char *name) noexcept;
 	void popStackCall() NOEXCEPT_NODEBUG;
 
-    void exceptionNotifyStackUnwinding() noexcept;
 	void printStackTrace() noexcept;
 #endif
 
@@ -297,6 +309,21 @@ public:
 protected:
 	virtual bool shouldExit() noexcept;
 };
+
+bool AbstractSphereThread::isExceptionCaught() const noexcept
+{
+    return (m_iCaughtExceptionStackPos >= 0);
+}
+
+bool AbstractSphereThread::isExceptionStackUnwinding() const noexcept
+{
+    return (m_iStackUnwindingStackPos >= 0);
+}
+
+void AbstractSphereThread::freezeCallStack(bool freeze) noexcept
+{
+    m_fFreezeCallStack = freeze;
+}
 
 // Dummy thread for context when no thread really exists. To be called only once, at startup.
 class DummySphereThread : public AbstractSphereThread

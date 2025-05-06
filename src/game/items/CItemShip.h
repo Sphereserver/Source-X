@@ -32,7 +32,7 @@ private:
 public:
     static const char *m_sClassName;
     CItemShip(ITEMID_TYPE id, CItemBase * pItemDef);
-    virtual ~CItemShip();
+    virtual ~CItemShip() override = default;
 
     CItemShip(const CItemShip& copy) = delete;
     CItemShip& operator=(const CItemShip& other) = delete;

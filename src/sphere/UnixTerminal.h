@@ -34,13 +34,13 @@ struct UnixTerminal : public AbstractSphereThread, public ConsoleInterface
 		UnixTerminal();
 		~UnixTerminal();
 
-	protected:
-		UnixTerminal(const UnixTerminal & copy);
-		UnixTerminal & operator=(const UnixTerminal & other);
+        UnixTerminal(const UnixTerminal & copy) = delete;
+        UnixTerminal & operator=(const UnixTerminal & other) = delete;
 
 	public:
-        virtual void onStart();
-        virtual void tick();
+        virtual void onStart() override;
+        virtual void tick() override;
+        virtual void waitForClose() override;
 		bool isReady();
 		tchar read();
 		void prepare();

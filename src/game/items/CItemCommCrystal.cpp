@@ -1,5 +1,5 @@
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
+//#include "../../common/CException.h"
 #include "../CSector.h"
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"
@@ -10,15 +10,14 @@ CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) :
 {
 }
 
+/*
 CItemCommCrystal::~CItemCommCrystal()
 {
-    EXC_TRY("Cleanup in destructor");
-
-    // / Must remove early because virtuals will fail in child destructor.
-    DeletePrepare();
-
-    EXC_CATCH;
+    // CItemVendable::DeletePrepare is called in ~CItemVendable().
+    // We would have to call here DeletePrepare if this class had a own DeletePrepare method.
+    DeletePrepare();        //  Must remove early because virtuals will fail in child destructor.
 }
+*/
 
 lpctstr const CItemCommCrystal::sm_szLoadKeys[] =
 {

@@ -28,7 +28,7 @@ public:
 
 public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );
-    virtual ~CItemContainer();
+    virtual ~CItemContainer() override;
 
     CItemContainer(const CItemContainer& copy) = delete;
     CItemContainer& operator=(const CItemContainer& other) = delete;

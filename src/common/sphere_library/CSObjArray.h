@@ -63,7 +63,7 @@ public:
 
 // CSObjArray:: Modifiers.
 
-#include "../../sphere/threads.h"
+//#include "../../sphere/threads.h"
 
 template<class TYPE>
 void CSObjArray<TYPE>::DestroyElements() noexcept
