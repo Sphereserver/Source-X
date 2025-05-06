@@ -26,7 +26,7 @@ install -g $NAME -o $NAME -d /opt/$NAME/scripts
 
 # Create sphereacct file, don't overwrite it.
 if [ ! -f /opt/$NAME/accounts/sphereacct.scp ]; then
-  install -g $NAME -o $NAME -m 0644 debian/data/sphereacct.scp /opt/$NAME/accounts/sphereacct.scp
+  install -g $NAME -o $NAME -m 0644 /tmp/sphereacct.scp /opt/$NAME/accounts/sphereacct.scp
 fi
 
 #DEBHELPER#

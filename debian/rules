@@ -4,17 +4,22 @@
 	dh $@
 
 override_dh_auto_configure:
-	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake
+	cmake -S ./ -B ./build -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake -DCMAKE_C_FLAGS="-fpch-preprocess" -DCMAKE_CXX_FLAGS="-fpch-preprocess"
 
 override_dh_auto_build:
-	cmake --build build
+	cmake --build ./build
 
 override_dh_auto_install:
+	# Prepare binary.
 	install -d debian/sphereserver/usr/bin
 	install -m 0755 build/bin-x86_64/SphereSvrX64_nightly debian/sphereserver/usr/bin/sphereserver
+	# Prepare accounts file.
+	install -d debian/sphereserver/tmp
+	install -m 0644 debian/data/sphereacct.scp debian/sphereserver/tmp/sphereacct.scp
+	# Copy ini files.
 	install -m 0644 src/sphereCrypt.ini debian/sphereserver/etc/sphereserver/sphereCrypt.ini
 	# Replace relative paths with absolute one in sphere.ini.
-	cat src/sphere.ini | sed -e "s/ScpFiles=/ScpFiles=\/opt\/sphereserver\//" -e "s/WorldSave=/WorldSave=\/opt\/sphereserver\//" -e "s/AcctFiles=/AcctFiles=\/opt\/sphereserver\//" -e "s/WebPageSrc=/WebPageSrc=\/opt\/sphereserver\//" -e "s/WebPageFile=/WebPageFile=\/opt\/sphereserver\//" -e "s/\/\/MulFiles=/MulFiles=\/opt\/sphereserver\//" -e "s/Log=logs/Log=\/var\/log\/sphereserver\//" > debian/sphereserver/etc/sphereserver/sphere.ini
+	cat src/sphere.ini | sed -e "s/ScpFiles=/ScpFiles=\/opt\/sphereserver\//" -e "s/WorldSave=/WorldSave=\/opt\/sphereserver\//" -e "s/AcctFiles=/AcctFiles=\/opt\/sphereserver\//" -e "s/WebPageSrc=/WebPageSrc=\/opt\/sphereserver\//" -e "s/WebPageFile=/WebPageFile=\/opt\/sphereserver\//" -e "s/\/\/MulFiles=/MulFiles=\/opt\/sphereserver\//" -e "s/Log=logs/Log=\/var\/log\/sphereserver/" > debian/sphereserver/etc/sphereserver/sphere.ini
 
 override_dh_installinit:
 	dh_installinit --no-enable --no-start --no-restart-after-upgrade

@@ -9,7 +9,7 @@ NAME="sphereserver"
 # Ensure that the scripts abort in case of any errors
 set -e
 
-if [ "$1" = "purge" ]; then
+if [ "$1" = "remove" ]; then
   # Remove user.
   userdel $NAME
 
