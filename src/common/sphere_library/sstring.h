@@ -38,7 +38,7 @@
     #include <cctype>   // toupper/tolower
     #define strcmpi			strcasecmp
     #define strnicmp		strncasecmp
-    void Str_Reverse(char* string);
+    void Str_Reverse(char* string) noexcept;
 #endif
 
 
@@ -65,15 +65,19 @@ struct KeyTableDesc_s
 /** @name String utilities: Modifiers
 */
 
+// Legacy functions
+dword ahextoi( lpctstr pArgs ) noexcept;		// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to integer
+int64 ahextoi64( lpctstr pArgs ) noexcept;	// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to int64
+
 // If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
-[[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<short>  Str_ToI16(lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<ushort> Str_ToU16(lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<int>    Str_ToI  (lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<uint>   Str_ToU (lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<llong>  Str_ToLL (lpctstr ptcStr, int base = 10) noexcept;
-[[nodiscard]] std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base = 10) noexcept;
+[[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<short>  Str_ToI16(lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ushort> Str_ToU16(lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<int>    Str_ToI  (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uint>   Str_ToU (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<llong>  Str_ToLL (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
 [[nodiscard]] inline
 std::optional<size_t> Str_ToST(lpctstr ptcStr, int base = 10) noexcept;
 
@@ -97,6 +101,7 @@ int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept;
 /** @name String utilities: Modifiers
 */
 ///@{
+
 /**
 * @brief Like strncpy, but doesn't zero all the exceeding buffer length
 * @param pDst dest memory space.
@@ -173,6 +178,13 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip =
 */
 tchar * Str_GetUnQuoted(tchar * pStr) noexcept;
 
+/*
+ * @brief Removes heading and trailing double quotes and apostrophes in a string.
+ * @param pStr string where remove the quotes.
+ * @return string with the heading and trailing quotes removed.
+ */
+tchar * Str_UnQuote(tchar * pStr) noexcept;
+
 /**
 * @brief Removes heading and trailing double quotes in a string.
 * @param pStr string where remove the quotes.
@@ -231,6 +243,8 @@ NODISCARD tchar * Str_TrimWhitespace(tchar * pStr) noexcept;
 */
 void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcept;
 
+
+// TODO: move to cexpression
 /**
 * @brief Skips the first substring enclosed by angular brackets: < >.
 * @param ptcLine (Reference to) pointer to the string.
@@ -244,6 +258,17 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept;
 /** @name String utilities: String operations
 */
 ///@{
+
+//TODOC
+bool IsSimpleNumberString( lpctstr pszTest );
+bool IsStrNumericDec( lpctstr pszTest );
+bool IsStrNumeric( lpctstr pszTest );
+bool IsStrEmpty( lpctstr pszTest );
+
+// strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
+int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError = true);
+
+
 /**
 * @brief Look for a string in a table.
 * @param pFind string we are looking for.
@@ -377,12 +402,6 @@ int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = null
 */
 int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
 
-/*
- * @brief Removes heading and trailing double quotes and apostrophes in a string.
- * @param pStr string where remove the quotes.
- * @return string with the heading and trailing quotes removed.
- */
-tchar * Str_UnQuote(tchar * pStr) noexcept;
 ///@}
 
 //---
@@ -446,42 +465,5 @@ std::optional<size_t> Str_ToST(lpctstr ptcStr, int base) noexcept
         return Str_ToULL(ptcStr, base);
 }
 
-
-//--- Template methods
-
-template <typename T>
-bool sv_to_num(std::string_view const& view, T* value, int base = 10) noexcept
-{
-    	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-    if (view.empty())
-        return false;
-
-    const char* first = view.data();
-    const char* last  = view.data() + view.length();
-    const std::from_chars_result res = std::from_chars(first, last, *value, base);
-
-    if (res.ec != std::errc())
-        return false;
-    if (res.ptr != last)
-        return false;
-    return true;
-}
-
-template <typename T>
-bool cstr_to_num(const char * str, T* value, int base = 10, uint str_max_length = SCRIPT_MAX_LINE_LEN) noexcept
-{
-    	static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-    if (!str || ('\0' == *str))
-        return false;
-
-    const char* last = str + strnlen(str, str_max_length);
-    const std::from_chars_result res = std::from_chars(str, last, *value, base);
-
-    if (res.ec != std::errc())
-        return false;
-    if (res.ptr != last)
-        return false;
-    return true;
-}
 
 #endif // _INC_SSTRING_H

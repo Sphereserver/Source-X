@@ -200,13 +200,6 @@ uint GetIdentifierString( tchar * szTag, lpctstr pszArgs );
 bool IsValidResourceDef( lpctstr pszTest );
 bool IsValidGameObjDef( lpctstr pszTest );
 
-bool IsSimpleNumberString( lpctstr pszTest );
-bool IsStrNumericDec( lpctstr pszTest );
-bool IsStrNumeric( lpctstr pszTest );
-bool IsStrEmpty( lpctstr pszTest );
-
-// strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
-int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError = true);
 
 // Numeric formulas
 template<typename T> inline T SphereAbs(const T x) noexcept
@@ -234,9 +227,6 @@ template<typename T> inline T SphereAbs(const T x) noexcept
 int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
-
-dword ahextoi( lpctstr pArgs );		// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to integer
-int64 ahextoi64( lpctstr pArgs );	// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to int64
 
 #define Exp_GetSingle( pa )		static_cast<int>	(g_Exp.GetSingle( pa ))
 #define Exp_GetUSingle( pa )	static_cast<uint>	(g_Exp.GetSingle( pa ))

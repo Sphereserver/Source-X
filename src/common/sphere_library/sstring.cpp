@@ -32,7 +32,7 @@
 // String utilities: Converters
 
 #ifndef _WIN32
-void Str_Reverse(char* string)
+void Str_Reverse(char* string) noexcept
 {
     char* pEnd = string;
     char temp;
@@ -48,238 +48,599 @@ void Str_Reverse(char* string)
 }
 #endif
 
-std::optional<char> Str_ToI8 (lpctstr ptcStr, int base) noexcept
+
+// --
+// String to Number
+
+// Legacy. Convert decimal or hex string to 32 bit integer
+dword ahextoi( lpctstr pszStr ) noexcept
+{
+    // Unfortunatly the library func cant handle the number FFFFFFFF
+    // tchar * sstop; return( strtol( s, &sstop, 16 ));
+
+    if ( pszStr == nullptr )
+        return 0;
+
+    // 1) Skip leading whitespace
+    GETNONWHITESPACE(pszStr);
+
+    // 2) Determine base: hex if leading '0'
+    const bool fHex = (*pszStr == '0' && pszStr[1] != '.');
+    const dword base = fHex ? 16u : 10u;
+
+    // 3) Setup overflow thresholds
+    using _OutUnsignedType = dword;
+    const _OutUnsignedType maxDiv = std::numeric_limits<_OutUnsignedType>::max() / base;
+    const _OutUnsignedType maxRem = std::numeric_limits<_OutUnsignedType>::max() % base;
+
+    // 4) Parse digits
+    _OutUnsignedType val = 0;
+    bool any = false;
+    for (; *pszStr; ++pszStr)
+    {
+        unsigned digit;
+        const unsigned char c = *pszStr;
+
+        if (c >= '0' && c <= '9')
+            digit = c - '0';
+        else if (fHex && c >= 'A' && c <= 'F')
+            digit = c - 'A' + 10;
+        else if (fHex && c >= 'a' && c <= 'f')
+            digit = c - 'a' + 10;
+        else if (!fHex && c == '.')
+            continue;   // skip decimal point
+        else
+            break;  // invalid character
+
+        if (digit >= base)
+            break;
+
+        any = true;
+
+        // Overflow check: clamp to UINT32_MAX
+        if (val > maxDiv || (val == maxDiv && digit > maxRem))
+        {
+            val = std::numeric_limits<_OutUnsignedType>::max();
+            break;
+        }
+
+        val = val * base + digit;
+    }
+
+    return any ? val : 0;
+}
+
+// Legacy. Convert decimal or hex string to int64.
+int64 ahextoi64( lpctstr pszStr ) noexcept
+{
+    if (pszStr == nullptr)
+        return 0;
+
+    GETNONWHITESPACE(pszStr);
+
+    const bool fHex = (*pszStr == '0' && pszStr[1] != '.');
+
+    int64 val = 0;
+    for (;; ++pszStr)
+    {
+        int digit;
+        /*
+        tchar ch = tchar(toupper(uchar(*pszStr)));
+        if (ch >= '0' && ch <= '9')
+            digit = ch - '0';
+        else if (fHex && ch >= 'A' && ch <= 'F')
+            digit = ch - 'A' + 10;
+        else if (!fHex && ch == '.')
+            continue;   // skip decimal point
+        else
+            break;
+        */
+
+        // This variant avoids the function call to ::toupper
+        uchar c = *pszStr;
+        if (c >= '0' && c <= '9')
+            digit = c - '0';
+        else if (fHex && c >= 'A' && c <= 'F')
+            digit = c - 'A' + 10;
+        else if (fHex && c >= 'a' && c <= 'f')
+            digit = c - 'a' + 10;
+        else if (!fHex && c == '.')
+            continue;   // skip decimal point
+        else
+            break;
+
+        val = val * (fHex ? 16 : 10) + digit;
+    }
+
+    return val;
+}
+
+// New.
+
+template<class T>
+bool cstr_to_num(
+    const char*  str,
+    T*           out,
+    int          base = 10,
+    bool         allow_trailing_space = false
+    ) noexcept
+{
+    static_assert(std::is_integral_v<T>, "Only integers supported");
+    if (!str || !out || base < 2 || base > 16)
+        return false;
+
+    // 1) Skip leading spaces
+    const char* p = str;
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') // Instead of using ISWHITESPACE
+        ++p;
+    if (*p == '\0')
+        return false;
+
+    // 2) Optional sign
+    bool neg = false;
+    if constexpr (std::is_signed_v<T>)
+    {
+        if (/* *p == '+' || */ *p == '-')
+        {
+            neg = (*p == '-');
+            ++p;
+        }
+    }
+
+    // 3) Hex‐prefix via leading '0'
+    bool hex = false;
+    if (base == 16 && *p == '0')
+    {
+        hex = true;
+        ++p;
+    }
+
+    using U = std::make_unsigned_t<T>;
+    U acc = 0;
+    const U maxDiv = std::numeric_limits<U>::max() / base;
+    const U maxRem = std::numeric_limits<U>::max() % base;
+
+    // 4) Parse digits
+    const char* startDigits = p;
+    for (; *p; ++p)
+    {
+        unsigned digit;
+        char c = *p;
+        if (c >= '0' && c <= '9')
+            digit = c - '0';
+        else if (hex && c >= 'A' && c <= 'F')
+            digit = c - 'A' + 10;
+        else if (hex && c >= 'a' && c <= 'f')
+            digit = c - 'a' + 10;
+        else if (!hex && c == '.')
+            continue;   // Skip decimal point
+        else
+            break;
+        if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
+            return false;  // overflow
+        acc = acc * base + digit;
+    }
+    if (p == startDigits)
+        return false;  // no digits consumed
+
+    // 5) Trailing‐space or end‐of‐string
+    if (!allow_trailing_space && *p != '\0')
+        return false;
+    if (allow_trailing_space)
+    {
+        while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
+            ++p;
+        if (*p != '\0')
+            return false;
+    }
+
+    // 6) Store result
+    if constexpr (std::is_signed_v<T>)
+    {
+        if (neg)
+        {
+            if (acc > static_cast<U>(std::numeric_limits<T>::max()) + 1u)
+                return false;  // too negative
+            *out = static_cast<T>(0) - static_cast<T>(acc);
+        }
+        else
+        {
+            if (acc > static_cast<U>(std::numeric_limits<T>::max()))
+                return false;  // too large positive
+            *out = static_cast<T>(acc);
+        }
+    }
+    else
+    {
+        *out = static_cast<T>(acc);
+    }
+    return true;
+}
+
+/*
+ * First implementations, using std::from_chars.
+template <typename T>
+bool sv_to_num(std::string_view const& view, T* value, int base, bool ignore_trailing_space) noexcept
+{
+    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    if (!value || view.empty() || (base < 2) || (base > 16))
+        return false;
+
+    const char* first = view.data();
+    const char* last  = view.data() + view.length();
+
+    // Trim leading whitespace
+    while (first < last && std::isspace(static_cast<unsigned char>(*first))) {
+        ++first;
+    }
+    // Trim trailing whitespace
+    while (last > first && std::isspace(static_cast<unsigned char>(*(last - 1)))) {
+        --last;
+    }
+    if (first == last) {
+        // Empty after trimming
+        return false;
+    }
+
+    const std::from_chars_result res = std::from_chars(first, last, *value, base);
+
+    // Check for overflow or invalid argument
+    if (res.ec == std::errc::result_out_of_range ||
+        res.ec == std::errc::invalid_argument)
+    {
+        return false;
+    }
+    if (!ignore_trailing_space && (res.ptr != last))
+        return false;
+
+    return true;
+}
+
+template <typename T>
+bool cstr_to_num(const char * str, T* value, int base, bool ignore_trailing_space, uint str_max_length = SCRIPT_MAX_LINE_LEN) noexcept
+{
+    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
+    if (!value || !str || ('\0' == *str) || (base < 2) || (base > 16))
+        return false;
+
+    // Skip leading whitespace
+    const char* p = str;
+    while (::isspace(static_cast<unsigned char>(*p))) {
+        ++p;
+    }
+    if (*p == '\0') {
+        // empty or all-whitespace
+        return false;
+    }
+
+    const char* last = str + strnlen(str, str_max_length);
+    const std::from_chars_result res = std::from_chars(str, last, *value, base);
+
+    if (res.ec == std::errc::result_out_of_range) {
+        // value would overflow T
+        return false;
+    }
+    if (res.ec == std::errc::invalid_argument) {
+        // no conversion performed
+        return false;
+    }
+    //if (res.ptr != last)
+    //    return false;
+
+    if (!ignore_trailing_space)
+    {
+        // ptr now points past the last digit consumed; skip trailing whitespace
+        const char* q = res.ptr;
+        while (::isspace(static_cast<unsigned char>(*q))) {
+            ++q;
+        }
+        if (*q != '\0') {
+            // extra non-whitespace characters after number
+            return false;
+        }
+    }
+
+    return true;
+}
+*/
+
+/*
+ * Standalone sv_to_num.
+template<typename T>
+bool sv_to_num(
+    std::string_view view,
+    T*               out,
+    int              base               = 10,
+    bool             allow_trailing_ws  = false
+    ) noexcept
+{
+    static_assert(std::is_integral_v<T>, "Only integer types supported");
+    if (view.empty() || !out || base < 2 || base > 16)
+        return false;
+
+    const char* p   = view.data();
+    const char* end = p + view.size();
+
+    // 1) skip leading whitespace
+    while (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n'))
+        ++p;
+    if (p == end)
+        return false;
+
+    // 2) optional sign
+    bool neg = false;
+    if constexpr (std::is_signed_v<T>)
+    {
+        if (*p == '+' || *p == '-')
+        {
+            neg = (*p == '-');
+            ++p;
+            if (p == end)
+                return false;
+        }
+    }
+
+    // 3) parse digits
+    using U = std::make_unsigned_t<T>;
+    U acc = 0;
+    constexpr U maxDiv = std::numeric_limits<U>::max() / base;
+    constexpr U maxRem = std::numeric_limits<U>::max() % base;
+
+    const char* start = p;
+    while (p < end)
+    {
+        unsigned digit;
+        char c = *p;
+        if (c >= '0' && c <= '9')
+            digit = c - '0';
+        else if (base > 10 && c >= 'A' && c <= 'F')
+            digit = c - 'A' + 10;
+        else if (base > 10 && c >= 'a' && c <= 'f')
+            digit = c - 'a' + 10;
+        else if (!hex && c == '.')
+            continue;   // Skip decimal point
+        else
+            break;
+
+        if (digit >= static_cast<unsigned>(base))
+            return false;
+
+        if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
+            return false;  // overflow
+
+        acc = acc * base + digit;
+        ++p;
+    }
+    if (p == start)  // no digits
+        return false;
+
+    // 4) trailing characters
+    if (!allow_trailing_ws)
+    {
+        if (p != end)
+            return false;
+    }
+    else
+    {
+        while (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n'))
+            ++p;
+        if (p != end)
+            return false;
+    }
+
+    // 5) store result with signed check
+    if constexpr (std::is_signed_v<T>)
+    {
+        if (neg)
+        {
+            U limit = static_cast<U>(std::numeric_limits<T>::max()) + 1u;
+            if (acc > limit)
+                return false;
+            *out = static_cast<T>(0) - static_cast<T>(acc);
+        }
+        else
+        {
+            if (acc > static_cast<U>(std::numeric_limits<T>::max()))
+                return false;
+            *out = static_cast<T>(acc);
+        }
+    }
+    else
+    {
+        *out = static_cast<T>(acc);
+    }
+    return true;
+}
+*/
+
+
+std::optional<char> Str_ToI8 (lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     char val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uchar> Str_ToU8 (lpctstr ptcStr, int base) noexcept
+std::optional<uchar> Str_ToU8 (lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     uchar val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<short> Str_ToI16 (lpctstr ptcStr, int base) noexcept
+std::optional<short> Str_ToI16 (lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     short val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ushort> Str_ToU16 (lpctstr ptcStr, int base) noexcept
+std::optional<ushort> Str_ToU16 (lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     ushort val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<int> Str_ToI (lpctstr ptcStr, int base) noexcept
+std::optional<int> Str_ToI (lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     int val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uint> Str_ToU(lpctstr ptcStr, int base) noexcept
+std::optional<uint> Str_ToU(lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     uint val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<llong> Str_ToLL(lpctstr ptcStr, int base) noexcept
+std::optional<llong> Str_ToLL(lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     llong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base) noexcept
+std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
 {
     ullong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-#define STR_FROM_SET_ZEROSTR \
-    if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
-    else        { buf[0] = '0'; buf[1] = '\0'; }
+
+// --
+// Number to String
+
+static constexpr tchar DIGITS[] = "0123456789abcdef";
+
+template<typename _IntegerType>
+tchar* Str_FromInt_Fast(_IntegerType val, tchar * __restrict out_buf, size_t buf_length, uint base) noexcept
+{
+    if (!out_buf || buf_length == 0 || base == 0 || base > 16)
+        return nullptr;
+
+    const bool fHex = (base == 16);
+    // Handle zero or base==0 case
+    if (val == 0)
+    {
+        if (fHex)
+        {
+            if (buf_length < 3)
+                return nullptr;
+            out_buf[0] = '0'; out_buf[1] = '0'; out_buf[2] = '\0';
+        }
+        else
+        {
+            if (buf_length < 2)
+                return nullptr;
+            out_buf[0] = '0'; out_buf[1] = '\0';
+        }
+        return out_buf;
+    }
+
+    using _IntegerTypeUnsigned = std::make_unsigned_t<_IntegerType>;
+    _IntegerTypeUnsigned uval;
+    bool fIsNegative = false;
+
+    if constexpr (std::is_signed_v<_IntegerType>)
+    {
+        fIsNegative = (val < 0);
+        // two's-complement bit-pattern reinterpret
+        const auto utmp = static_cast<_IntegerTypeUnsigned>(val);
+        if (fHex)
+        {
+            uval = utmp;
+        }
+        else
+        {
+            // Unsigned subtraction is always defined behaviour, it wraps around.
+            uval = fIsNegative ? (_IntegerTypeUnsigned(0) - utmp) : utmp;
+        }
+    }
+    else
+    {
+        uval = static_cast<_IntegerTypeUnsigned>(val);
+    }
+
+    // Write digits from back of buffer
+#define WRITE_OUT(ch)           \
+    do {                        \
+        if (idx == 0)           \
+            return nullptr;     \
+        out_buf[--idx] = (ch);  \
+    } while (0)
+
+    size_t idx = buf_length;
+    out_buf[--idx] = '\0';
+
+    if (fHex)
+    {
+        // Hex path: mask & shift by 4 bits (it's the same as dividing by 16).
+        do
+        {
+            WRITE_OUT(DIGITS[uval & 0xFu]);
+            uval >>= 4;
+        } while (uval);
+        WRITE_OUT('0');  // leading 0 hex prefix
+    }
+    else
+    {
+        // General path: division + multiply to get remainder
+        do
+        {
+            const _IntegerTypeUnsigned q = uval / base;
+            const _IntegerTypeUnsigned d = uval - q * base;
+            WRITE_OUT(DIGITS[d]);
+            uval = q;
+        } while (uval);
+
+        if (fIsNegative) {
+            WRITE_OUT('-');
+        }
+    }
+
+#undef WRITE_OUT
+    return &out_buf[idx];
+}
 
 tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-
-    const bool sign = (val < 0);
-    uint uval;
-    if (sign)
-    {
-        if (hex) {
-            uval = UINT_MAX - (uint)(-val) + 1u;
-            // Add 1 because UINT_MAX would be equal to -1, if signed.
-        }
-        else {
-            uval = (uint)abs(val);
-        }
-    }
-    else {
-        uval = (uint)val;
-    }
-
-    buf[--buf_length] = '\0';
-    static constexpr tchar chars[] = "0123456789abcdef";
-    do
-    {
-        buf[--buf_length] = chars[uval % base];
-        uval /= base;
-    } while (uval);
-
-    if (hex) {
-        buf[--buf_length] = '0';
-    }
-    else if (sign) {
-        buf[--buf_length] = '-';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
 
 tchar* Str_FromUI_Fast(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-    static constexpr tchar chars[] = "0123456789abcdef";
-
-    buf[--buf_length] = '\0';
-    do
-    {
-        buf[--buf_length] = chars[val % base];
-        val /= base;
-    } while (val);
-
-    if (base == 16) {
-        buf[--buf_length] = '0';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
 
 tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-
-    const bool sign = (val < 0);
-    ullong uval;
-    if (sign)
-    {
-        if (hex) {
-            const ullong uval_neg = (ullong)(-val);
-            const ullong max_bytes = (uval_neg < (ullong)UINT_MAX + 1u) ? (ullong)UINT_MAX : ULLONG_MAX;
-            // Check if i can output it as a 32 bits number, if too big use a 64 bits number.
-            // Why? Sphere users expect for historical reasons to get whenever possible a number with a format like
-            //  0FFFFFFFF (32 bits -1) instead of 0FFFFFFFFFFFFFFFF (64 bits -1).
-            uval = max_bytes - uval_neg + 1;
-            // Add 1 because UINT_MAX/ULLONG_MAX would be equal to -1, if signed.
-        }
-        else {
-            uval = (ullong)llabs(val);
-        }
-    }
-    else {
-        uval = (ullong)val;
-    }
-
-    buf[--buf_length] = '\0';
-    static constexpr tchar chars[] = "0123456789abcdef";
-    do
-    {
-        buf[--buf_length] = chars[uval % base];
-        uval /= base;
-    } while (uval);
-
-    if (hex) {
-        buf[--buf_length] = '0';
-    }
-    else if (sign) {
-        buf[--buf_length] = '-';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
 
 tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-    static constexpr tchar chars[] = "0123456789abcdef";
-
-    buf[--buf_length] = '\0';
-    do
-    {
-        buf[--buf_length] = chars[val % base];
-        val /= base;
-    } while (val);
-
-    if (hex) {
-        buf[--buf_length] = '0';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
-
-#undef STR_FROM_SET_ZEROSTR
 
 void Str_FromI(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
@@ -394,6 +755,135 @@ static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable) noexcept
 }
 
 // String utilities: Modifiers
+
+// Useful also for s(n)printf!
+int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError)
+{
+    if (iBytesToWrite < 0)
+        return 0;
+    if (uiBufSize < 1)
+        goto err;
+    if ((uint)iBytesToWrite >= uiBufSize - 1)
+        goto err;
+    return iBytesToWrite;
+
+err:
+    //throw CSError(LOGL_ERROR, 0, "Buffer size too small for snprintf.\n");
+    if (fPrintError) {
+        g_Log.EventError("Buffer size too small for snprintf.\n");
+    }
+    return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
+}
+
+bool IsStrEmpty( lpctstr pszTest )
+{
+    if ( !pszTest || !*pszTest )
+        return true;
+
+    do
+    {
+        if ( !IsSpace(*pszTest) )
+            return false;
+    }
+    while ( *(++pszTest) );
+    return true;
+}
+
+bool IsStrNumericDec( lpctstr pszTest )
+{
+    if ( !pszTest || !*pszTest )
+        return false;
+
+    do
+    {
+        if ( !IsDigit(*pszTest) )
+            return false;
+    }
+    while ( *(++pszTest) );
+
+    return true;
+}
+
+
+bool IsStrNumeric( lpctstr pszTest )
+{
+    if ( !pszTest || !*pszTest )
+        return false;
+
+    bool fHex = false;
+    if ( pszTest[0] == '0' )
+        fHex = true;
+
+    do
+    {
+        if ( IsDigit( *pszTest ) )
+            continue;
+        if ( fHex && tolower(*pszTest) >= 'a' && tolower(*pszTest) <= 'f' )
+            continue;
+        return false;
+    }
+    while ( *(++pszTest) );
+    return true;
+}
+
+bool IsSimpleNumberString( lpctstr pszTest )
+{
+    // is this a string or a simple numeric expression ?
+    // string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
+    // number = 1.0+-\*~|&!%^()2, 0aed, 123
+
+    if (*pszTest == '\0')
+        return false;   // empty string, no number
+
+    bool fMathSep			= true;	// last non whitespace was a math sep.
+    bool fHextDigitStart	= false;
+    bool fWhiteSpace		= false;
+
+    for ( ; ; ++pszTest )
+    {
+        tchar ch = *pszTest;
+        if ( ! ch )
+            return true;
+
+        if (( ch >= 'A' && ch <= 'F') || ( ch >= 'a' && ch <= 'f' ))	// isxdigit
+        {
+            if ( ! fHextDigitStart )
+                return false;
+
+            fWhiteSpace = false;
+            fMathSep = false;
+            continue;
+        }
+        if ( IsSpace( ch ) )
+        {
+            fHextDigitStart = false;
+            fWhiteSpace = true;
+            continue;
+        }
+        if ( IsDigit( ch ) )
+        {
+            if ( fWhiteSpace && ! fMathSep )
+                return false;
+
+            if ( ch == '0' )
+                fHextDigitStart = true;
+            fWhiteSpace = false;
+            fMathSep = false;
+            continue;
+        }
+        if ( ch == '/' && pszTest[1] != '/' )
+            fMathSep = true;
+        else
+            fMathSep = strchr("+-\\*~|&!%^()", ch ) ? true : false ;
+
+        if ( ! fMathSep )
+            return false;
+
+        fHextDigitStart = false;
+        fWhiteSpace = false;
+    }
+}
+
 
 // strcpy doesn't have an argument to truncate the copy to the buffer length;
 // strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
@@ -1301,6 +1791,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept
         return MATCH_VALID;
 }
 
+// TODO: move all the Str_Parse* stuff in CExpression, since it parses Sphere-specific strings and even uses Exp_GetVal.
 #ifdef MSVC_COMPILER
     // /GL + /LTCG flags inline in linking phase this function, but probably in a wrong way, so that
     // something gets corrupted on the memory and an exception is generated later
