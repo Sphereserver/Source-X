@@ -968,7 +968,7 @@ void AbstractSphereThread::printStackTrace() noexcept
 
         lpctstr extra = "";
         if (i == m_iStackUnwindingStackPos) {
-            extra = "<-- last function call (stack unwinding began here)";
+            extra = "<-- last function call (stack unwinding detected here)";
         }
         else if (i == m_iCaughtExceptionStackPos) {
             if (m_iStackUnwindingStackPos == -1)

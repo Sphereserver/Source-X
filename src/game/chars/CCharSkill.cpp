@@ -508,7 +508,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 	}
 }
 
-bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve ) const
+bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int iDifficulty, bool fUseBellCurve ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_CheckSuccess");
 	// PURPOSE:
@@ -523,20 +523,20 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	if ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying or they won't receive any damage on combat even without STATF_Invul set
 		return true;
 
-	if ( !IsSkillBase(skill) || (difficulty < 0) )	// auto failure.
+    if ( !IsSkillBase(skill) || (iDifficulty < 0) )	// auto failure.
 		return false;
 
-	difficulty *= 10;
+    iDifficulty *= 10;
 
 #define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
-	int iSuccessChance = difficulty;
-	if ( bUseBellCurve )
-		iSuccessChance = Calc_GetSCurve( Skill_GetAdjusted(skill) - difficulty, SKILL_VARIANCE );
+    int iSuccessChance = iDifficulty;
+    if ( fUseBellCurve )
+        iSuccessChance = Calc_GetSCurve( Skill_GetAdjusted(skill) - iDifficulty, SKILL_VARIANCE );
 
 	return ( iSuccessChance >= g_Rand.GetVal(1000) );
 }
 
-bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve, bool bForceCheck )
+bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 difficulty, bool fAllowGain, bool fUseBellCurve, bool fForceCheck )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:
@@ -547,10 +547,10 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	// Use a skill instantly. No wait at all.
 	// No interference with other skills.
 
-	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED) && !bForceCheck)
+    if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED) && !fForceCheck)
 		return false;
 
-	int64 result = Skill_CheckSuccess( skill, (int)difficulty, bUseBellCurve );
+    int64 result = Skill_CheckSuccess( skill, (int)difficulty, fUseBellCurve );
 	CScriptTriggerArgs pArgs( 0 , difficulty, result);
 	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
 
@@ -577,13 +577,13 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 
 	if ( result )	// success
 	{
-		if ( bAllowGain )
+        if ( fAllowGain )
 			Skill_Experience( skill, (int)(difficulty) );
 		return true;
 	}
 	else			// fail
 	{
-		if ( bAllowGain )
+        if ( fAllowGain )
 			Skill_Experience( skill, (int)(-difficulty) );
 		return false;
 	}

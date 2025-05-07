@@ -1862,7 +1862,7 @@ bool CChar::NPC_Act_Food()
 				case NPCACT_NAPPING:
 				case NPCACT_FLEE:
 					{
-						CPointMap pt = pClosestFood->GetTopPoint();
+                        CPointMap pt(pClosestFood->GetTopPoint());
 						if ( CanMoveWalkTo(pt) )
 						{
 							m_Act_p = pt;
@@ -1900,7 +1900,7 @@ bool CChar::NPC_Act_Food()
 	if ( fSearchGrass )
 	{
         const CCharBase *pCharDef = Char_GetDef();
-        const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
+        const CResourceID rid(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
@@ -1921,7 +1921,7 @@ bool CChar::NPC_Act_Food()
 			}
 			else									//	search for grass nearby
 			{
-				CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+                CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 				if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 				{
 					if (( pt.m_x != GetTopPoint().m_x ) && ( pt.m_y != GetTopPoint().m_y ) && ( pt.m_map == GetTopPoint().m_map ))

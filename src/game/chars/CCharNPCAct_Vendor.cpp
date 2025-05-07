@@ -29,7 +29,7 @@ int CChar::NPC_GetAiFlags()
 	return (m_pNPC->GetNpcAiFlags(this));
 }
 
-bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
+bool CChar::NPC_Vendor_Restock(bool fForce, bool fFillStock)
 {
 	ADDTOCALLSTACK("CChar::NPC_Vendor_Restock");
 	ASSERT(m_pNPC);
@@ -44,7 +44,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	bool bRestockNow = false;
         int64 iRestockDelay = 10 * 60 * MSECS_PER_SEC;  // 10 Minutes delay
 
-	if ( !bForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) >= 0))
+    if ( !fForce && (CWorldGameTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) >= 0))
 	{
         bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();
@@ -72,10 +72,10 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 
 			pCont->ClearContainer(false);
 		}
-        bFillStock = true;  // force the vendor to restock.
+        fFillStock = true;  // force the vendor to restock.
 	}
 
-	if ( bFillStock )
+    if ( fFillStock )
 	{
 		// An invalid restock time means that the containers are
 		// waiting to be filled
