@@ -464,17 +464,17 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	// Get a random location in the container.
 
 	const CItemBase *pItemDef = Item_GetDef();
-	GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
+    const GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
 
     const int iRandOnce = g_Rand.GetValFast(UINT16_MAX);
 
 	// check for custom values in TDATA3/TDATA4
 	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
 	{
-		int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
-		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
-		int tmp_MaxX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
-		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
+        const int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
+        const int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
+        const int tmp_MaxX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
+        const int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 
 	    return {
 	        (short)(tmp_MinX + (iRandOnce % (tmp_MaxX - tmp_MinX))),
@@ -551,6 +551,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	// check for custom values in TDATA3/TDATA4
 	CItemBase *pContDef = Item_GetDef();
 
+    // Default rectangle defining size of container (best to define them in scripts as tdata3/4 to avoid visual stripping).
     short minValX = 0;
     short minValY = 0;
     short maxValX = 512;
@@ -562,18 +563,27 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
         const short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
         const short tmp_MaxX = (short)( pContDef->m_ttContainer.m_dwMaxXY >> 16 );
         const short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
+
+	    // Rewrite default size.
 		if (minValX < tmp_MinX)
-			minValX = tmp_MinX;
-		if (maxValX > tmp_MaxX)
+		    minValX = tmp_MinX;
+	    if (minValY < tmp_MinY)
+	        minValY = tmp_MinY;
+
+		if (tmp_MaxX > tmp_MinX)
 			maxValX = tmp_MaxX;
-		if (minValY < tmp_MinY)
-			minValY = tmp_MinY;
-		if (maxValY > tmp_MaxY)
+	    else
+			g_Log.EventWarn("Container 0%x has invalid max X size (upper 4 bytes) in TDATA4 (lower than TDATA3)\n", pContDef->GetDispID());
+		if (tmp_MaxY > tmp_MinY)
 			maxValY = tmp_MaxY;
+	    else
+			g_Log.EventWarn("Container 0%x has invalid max Y size (lower 4 bytes) in TDATA4 (lower than TDATA3)\n", pContDef->GetDispID());
 	}
 
     bool fStackInsert = false;
-	if ( pt.m_x <= minValX || pt.m_y <= minValY || pt.m_x > maxValX || pt.m_y > maxValY )	// invalid container location ?
+
+    // We are dropping item out of container bounds.
+	if (pt.m_x <= minValX || pt.m_y <= minValY || pt.m_x > maxValX || pt.m_y > maxValY)
 	{
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
@@ -589,7 +599,8 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				}
 			}
 		}
-		if ( !fStackInsert)
+	    // If we are not stacking it, get random location in container.
+		if (!fStackInsert)
 			pt = GetRandContainerLoc();
 	}
 
