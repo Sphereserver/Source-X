@@ -65,10 +65,6 @@ struct KeyTableDesc_s
 /** @name String utilities: Modifiers
 */
 
-// Legacy functions
-dword ahextoi( lpctstr pArgs ) noexcept;		// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to integer
-int64 ahextoi64( lpctstr pArgs ) noexcept;	// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to int64
-
 // If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
 [[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
 [[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
