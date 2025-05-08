@@ -163,10 +163,6 @@ bool CWebPageDef::r_LoadVal( CScript & s ) // Load an item Script
 			return SetSourceFile( s.GetArgStr(), nullptr );
 		case WC_WEBPAGEUPDATE:	// (seconds)
 			m_iUpdatePeriod = s.GetArgVal();
-			if ( m_iUpdatePeriod && (m_type == WEBPAGE_TEXT) )
-			{
-				m_type = WEBPAGE_TEMPLATE;
-			}
 			break;
 		default:
 			return CScriptObj::r_LoadVal( s );
@@ -299,9 +295,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	if ( pszDstName == nullptr )
 		pszDstName = m_sDstFilePath;
 
-	if ( m_type != WEBPAGE_TEMPLATE ||
-		*pszDstName == '\0' ||
-		m_sSrcFilePath.IsEmpty())
+	if (*pszDstName == '\0' || m_sSrcFilePath.IsEmpty())
 		return false;
 
 	CScript FileRead;
@@ -381,8 +375,6 @@ void CWebPageDef::WebPageLog()
 	ADDTOCALLSTACK("CWebPageDef::WebPageLog");
 	if ( ! m_iUpdateLog || ! m_iUpdatePeriod )
 		return;
-	if ( m_type != WEBPAGE_TEMPLATE )
-		return;
 
 	CSFileText FileRead;
 	if ( ! FileRead.Open( m_sDstFilePath, OF_READ|OF_TEXT ))
@@ -417,6 +409,12 @@ lpctstr const CWebPageDef::sm_szPageExt[] =
 	".JPG",
 	".JS",
 	".TXT",
+	".PNG",
+	".SVG",
+    ".WEBP",
+    ".XML",
+    ".CSV",
+    ".JSON",
 };
 
 bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
@@ -425,13 +423,19 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	static WEBPAGE_TYPE const sm_szPageExtType[] =
 	{
 		WEBPAGE_BMP,
-		WEBPAGE_GIF,
+	    WEBPAGE_GIF,
 		WEBPAGE_TEMPLATE,
         WEBPAGE_TEMPLATE,
 		WEBPAGE_JPG,
 		WEBPAGE_JPG,
-		WEBPAGE_TEXT,
-		WEBPAGE_TEXT
+		WEBPAGE_JS,
+	    WEBPAGE_TEXT,
+	    WEBPAGE_PNG,
+	    WEBPAGE_SVG,
+	    WEBPAGE_WEBP,
+        WEBPAGE_XML,
+        WEBPAGE_CSV,
+        WEBPAGE_JSON,
 	};
 
 	// attempt to set this to a source file.
@@ -444,7 +448,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	if ( pszExt == nullptr || pszExt[0] == '\0' )
 		return false;
 
-	int iType = FindTableSorted( pszExt, sm_szPageExt, ARRAY_COUNT( sm_szPageExt ));
+    const int iType = FindTable(pszExt, sm_szPageExt, ARRAY_COUNT(sm_szPageExt));
 	if ( iType < 0 )
 		return false;
 	m_type = sm_szPageExtType[iType];
@@ -502,11 +506,18 @@ bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 
 lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 {
-	"text/html",		// WEBPAGE_TEMPLATE (.htm)
-	"text/html",		// WEBPAGE_TEMPLATE (.html)
-	"image/x-xbitmap",	// WEBPAGE_BMP,
+	"text/html",		// WEBPAGE_TEMPLATE
+	"text/plain",		// WEBPAGE_TEXT
+	"image/bmp",	    // WEBPAGE_BMP,
 	"image/gif",		// WEBPAGE_GIF,
 	"image/jpeg",		// WEBPAGE_JPG,
+	"text/javascript",	// WEBPAGE_JS,
+	"image/png",		// WEBPAGE_PNG,
+	"image/svg+xml",	// WEBPAGE_SVG,
+	"image/webp",		// WEBPAGE_WEBP,
+	"text/xml",		    // WEBPAGE_XML,
+	"application/json",	// WEBPAGE_JSON,
+	"text/csv",		    // WEBPAGE_CSV,
 	nullptr				// WEBPAGE_QTY
 };
 
@@ -552,7 +563,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 	lpctstr pszName;
 	bool fGenerate = false;
 
-	if ( m_type == WEBPAGE_TEMPLATE ) // my version of cgi
+	if (m_type == WEBPAGE_TEMPLATE || m_type == WEBPAGE_TEXT || m_type == WEBPAGE_XML || m_type == WEBPAGE_JSON || m_type == WEBPAGE_CSV) // my version of cgi
 	{
 		pszName = GetDstName();
 		if ( pszName[0] == '\0' )
@@ -613,7 +624,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		sm_szPageType[m_type] // type of the file. image/gif, image/x-xbitmap, image/jpeg
 		);
 
-	if ( m_type == WEBPAGE_TEMPLATE )
+	if (m_type == WEBPAGE_TEMPLATE || m_type == WEBPAGE_TEXT || m_type == WEBPAGE_XML || m_type == WEBPAGE_JSON || m_type == WEBPAGE_CSV)
 		iLen += snprintf(szTmp + iLen, uiWebDataBufSize - iLen, "Expires: 0\r\n");
 	else
 		iLen += snprintf(szTmp + iLen, uiWebDataBufSize - iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(nullptr));
