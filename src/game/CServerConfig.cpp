@@ -47,6 +47,8 @@
 // .ini settings.
 CServerConfig::CServerConfig()
 {
+    m_iniDirectory[0] = '\0';
+
 	m_timePeriodic = 0;
 
 	m_fUseNTService		= false;
@@ -1039,6 +1041,15 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
 #endif
+
+void CServerConfig::SetIniDirectory(const char* path)
+{
+    if (path && path[0] != '\0')
+    {
+        strncpy(m_iniDirectory, path, SPHERE_MAX_PATH - 1);
+        m_iniDirectory[SPHERE_MAX_PATH - 1] = '\0';
+    }
+}
 
 bool CServerConfig::r_LoadVal( CScript &s )
 {
@@ -4614,13 +4625,31 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 #undef catresname
 }
 
-bool CServerConfig::LoadIni( bool fTest )
+bool CServerConfig::LoadIni(bool fTest)
 {
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
+
+    char filename[SPHERE_MAX_PATH] = SPHERE_FILE ".ini";
+
+    // Check, if CLI argument -I=/path/to/ini/directory/ was used.
+    if (m_iniDirectory[0] != '\0')
+    {
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s" SPHERE_FILE ".ini", m_iniDirectory);
+        if (ret < 0)
+        {
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Path to %s" SPHERE_FILE ".ini is too long.\n", m_iniDirectory);
+            return false;
+        }
+    }
+    else
+    {
+        Str_CopyLimitNull(filename, SPHERE_FILE ".ini", SPHERE_MAX_PATH);
+    }
+
 	// Load my INI file first.
-	if ( ! OpenResourceFind( m_scpIni, SPHERE_FILE ".ini", !fTest )) // Open script file
+	if (!OpenResourceFind(m_scpIni, filename, !fTest))
 	{
-		if( !fTest )
+		if (!fTest)
 		{
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-X/tree/master/src\n");
@@ -4638,9 +4667,27 @@ bool CServerConfig::LoadIni( bool fTest )
 bool CServerConfig::LoadCryptIni( void )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadCryptIni");
-	if ( ! OpenResourceFind( m_scpCryptIni, SPHERE_FILE "Crypt.ini", false ) )
+
+    char filename[SPHERE_MAX_PATH] = SPHERE_FILE "Crypt.ini";
+
+    // Check, if CLI argument -I=/path/to/ini/directory/ was used.
+    if (m_iniDirectory[0] != '\0')
+    {
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s" SPHERE_FILE "Crypt.ini", m_iniDirectory);
+        if (ret < 0)
+        {
+            g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Path to %s" SPHERE_FILE "Crypt.ini is too long.\n", m_iniDirectory);
+            return false;
+        }
+    }
+    else
+    {
+        Str_CopyLimitNull(filename, SPHERE_FILE "Crypt.ini", SPHERE_MAX_PATH);
+    }
+
+    if (!OpenResourceFind(m_scpCryptIni, filename, false))
 	{
-		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
+		g_Log.Event(LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
 		return false;
 	}
 
@@ -4648,8 +4695,8 @@ bool CServerConfig::LoadCryptIni( void )
 	m_scpCryptIni.Close();
 	m_scpCryptIni.CloseForce();
 
-	g_Log.Event( LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n",
-		CCryptoKeysHolder::get()->client_keys.size() );
+	g_Log.Event(LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n",
+		CCryptoKeysHolder::get()->client_keys.size());
 
 	return true;
 }
