@@ -54,21 +54,21 @@ void Str_Reverse(char* string) noexcept
 
 template<class _IntType>
 bool cstr_to_num(
-    const char*  str,
-    _IntType*    out,
-    int          base = 0,
-    bool         ignore_trailing_extra_chars = false
+    const char * RESTRICT str,
+    _IntType   * const    out,
+    uint        base = 0,
+    bool const  ignore_trailing_extra_chars = false
     ) noexcept
 {
     static_assert(std::is_integral_v<_IntType>, "Only integers supported");
-    if (!str || !out || base < 0 || base == 1 || base > 16)
+    if (!str || !out || base == 1 || base > 16)
         return false;
 
     // 1) Skip leading spaces
-    const char* p = str;
-    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') // Instead of using ISWHITESPACE
-        ++p;
-    if (*p == '\0')
+    while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') { // Instead of using ISWHITESPACE
+        ++str;
+    }
+    if (*str == '\0')
         return false;
 
     // 2) Optional sign
@@ -82,10 +82,10 @@ bool cstr_to_num(
             ++p;
         }
         */
-        if (*p == '-')
+        if (*str == '-')
         {
             neg = true;
-            ++p;
+            ++str;
         }
     }
 
@@ -94,13 +94,13 @@ bool cstr_to_num(
     if (base == 0)
     {
         // Auto-detect.
-        if (*p == '0' && p[1] != '\0' && p[1] != '.')
+        if (*str == '0' && str[1] != '\0' && str[1] != '.')
         {
-            if (IsHexNumDigit(p[1]))
+            if (IsHexNumDigit(str[1]))
             {
                 hex = true;
                 base = 16;
-                ++p;  // skip the '0' prefix
+                ++str;  // skip the '0' prefix
             }
             else
             {
@@ -112,24 +112,25 @@ bool cstr_to_num(
             base = 10;
         }
     }
-    if (base == 16 && p[0] == '0' && p[1] != '\0' && p[1] != '.')
+    if (base == 16 && str[0] == '0' && str[1] != '\0' && str[1] != '.')
     {
         hex = true;
-        ++p;
+        ++str;
     }
 
     using _UIntType = std::make_unsigned_t<_IntType>;
-    const _UIntType maxDiv = std::numeric_limits<_UIntType>::max() / base;
-    const _UIntType maxRem = std::numeric_limits<_UIntType>::max() % base;
+    const _UIntType base_casted = uint8_t(base);
+    const _UIntType maxDiv = std::numeric_limits<_UIntType>::max() / _UIntType(base_casted);
+    const _UIntType maxRem = std::numeric_limits<_UIntType>::max() % _UIntType(base_casted);
     _UIntType acc = 0;  // accumulator
 
     // 4) Parse digits
     ushort ndigits = 0;
-    const char* startDigits = p;
-    for (; *p; ++p)
+    const char* startDigits = str;
+    for (; *str; ++str)
     {
-        const char c = *p;
-        uint32_t digit;
+        const char c = *str;
+        _UIntType digit;
         if (c >= '0' && c <= '9')
             digit = c - '0';
         else if (hex && c >= 'A' && c <= 'F')
@@ -142,10 +143,10 @@ bool cstr_to_num(
             break;
         if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
             return false;  // overflow
-        acc = acc * base + digit;
+        acc = acc * base_casted + digit;
         ++ndigits;
     }
-    if (p == startDigits)
+    if (str == startDigits)
         return false;  // no digits consumed
 
     // 5) Trailing‐space or end‐of‐string
@@ -156,10 +157,10 @@ bool cstr_to_num(
         constexpr bool tolerate_trailing_whitespaces = true;
         if constexpr (tolerate_trailing_whitespaces)
         {
-            while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
-                ++p;
+            while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')
+                ++str;
         }
-        if (*p != '\0')
+        if (*str != '\0')
             return false;
     }
 
@@ -202,7 +203,7 @@ bool cstr_to_num(
 }
 
 
-std::optional<char> Str_ToI8 (const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<char> Str_ToI8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     char val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -211,7 +212,7 @@ std::optional<char> Str_ToI8 (const tchar * ptcStr, int base, bool fIgnoreExcess
     return val;
 }
 
-std::optional<uchar> Str_ToU8 (const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<uchar> Str_ToU8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     uchar val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -220,7 +221,7 @@ std::optional<uchar> Str_ToU8 (const tchar * ptcStr, int base, bool fIgnoreExces
     return val;
 }
 
-std::optional<short> Str_ToI16 (const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<short> Str_ToI16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     short val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -229,7 +230,7 @@ std::optional<short> Str_ToI16 (const tchar * ptcStr, int base, bool fIgnoreExce
     return val;
 }
 
-std::optional<ushort> Str_ToU16 (const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<ushort> Str_ToU16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     ushort val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -238,7 +239,7 @@ std::optional<ushort> Str_ToU16 (const tchar * ptcStr, int base, bool fIgnoreExc
     return val;
 }
 
-std::optional<int> Str_ToI (const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<int> Str_ToI (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     int val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -247,7 +248,7 @@ std::optional<int> Str_ToI (const tchar * ptcStr, int base, bool fIgnoreExcessCh
     return val;
 }
 
-std::optional<uint> Str_ToU(const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<uint> Str_ToU(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     uint val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -256,7 +257,7 @@ std::optional<uint> Str_ToU(const tchar * ptcStr, int base, bool fIgnoreExcessCh
     return val;
 }
 
-std::optional<llong> Str_ToLL(const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<llong> Str_ToLL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     llong val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
@@ -265,7 +266,7 @@ std::optional<llong> Str_ToLL(const tchar * ptcStr, int base, bool fIgnoreExcess
     return val;
 }
 
-std::optional<ullong> Str_ToULL(const tchar * ptcStr, int base, bool fIgnoreExcessChars) noexcept
+std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     ullong val = 0;
     const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
