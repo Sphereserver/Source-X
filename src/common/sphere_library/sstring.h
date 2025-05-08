@@ -346,50 +346,6 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0) noexcept;
 MATCH_TYPE Str_Match(const tchar * pPattern, const tchar * pText) noexcept;
 
 /**
-* @brief Parse a simple argument from a list of arguments.
-*
-* From a line like "    a, 2, 3" it will get "a" (Note that removes heading white spaces)
-* on pLine and  "2, 3" on ppArg.
-* @param pLine line to parse and where store the arg parsed.
-* @param ppArg where to store the other args (non proccessed pLine).
-* @param pSep the list of separators (by default "=, \t").
-* @return false if there are no more args to parse, true otherwise.
-*/
-bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, const tchar * pSep = nullptr) noexcept;
-
-/*
- * @brief Totally works like Str_Parse but difference between both function is Str_ParseAdv
- * parsing line with inner quotes and has double quote and apostrophe support.
- */
-bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, const tchar * pSep = nullptr) noexcept;
-
-/**
-* @brief Parse a list of arguments.
-* @param pCmdLine list of arguments to parse.
-* @param ppCmd where to store the parsed arguments.
-* @param iMax max count of arguments to parse.
-* @param pSep the list of separators (by default "=, \t").
-* @return count of arguments parsed.
-*/
-int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, const tchar * pSep = nullptr) noexcept;
-
-/*
- * @brief Totally works like Str_ParseCmds but difference between both function is Str_ParseCmdsAdv
- * parsing line with inner quotes and has double quote and apostrophe support.
- */
-int Str_ParseCmdsAdv(tchar * pCmdLine, tchar ** ppCmd, int iMax, const tchar * pSep = nullptr) noexcept;
-
-/**
-* @brief Parse a list of arguments (integer version).
-* @param pCmdLine list of arguments to parse.
-* @param piCmd where to store de parsed arguments.
-* @param iMax max count of arguments to parse.
-* @param pSep the list of separators (by default "=, \t").
-* @return count of arguments parsed.
-*/
-int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, const tchar * pSep = nullptr) noexcept;
-
-/**
 * @brief check if a string matches a regex.
 * @param pPattern regex to match.
 * @param pText text to match against the regex.
