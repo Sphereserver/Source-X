@@ -4038,3 +4038,8 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 04-05-2025, Nolok
 - Fixed: spell or skill defname reading from an object property.
 When setting a property like MORE to the a spell or skill defname, trying to read it returned back the resource index (like the spell number) instead of the defname (Issue #1397)
+
+05-05-2025, Mulambo
+- Added: new command line switch `-I=/path/to/ini/`
+    Allows you to define path to folder with ini files. Usable, when you want to separate binary from configuration or when running Sphere as Windows service (since services are usually run in C:\Windows\System32).
+    Usage: Linux: `.\SphereSvrX64_debug -I=/etc/sphereserver/`, Windows: `SphereSvrX64_nightly.exe -I=C:/sphere/` (trailing slash required).

@@ -56,7 +56,7 @@ protected:
 
 public:
     static uint CTColToRGB(ConsoleTextColor color) noexcept;
-    void AddConsoleOutput(std::unique_ptr<ConsoleOutput>&& output) noexcept;
+    void AddConsoleOutput(std::unique_ptr<ConsoleOutput>&& output) NOEXCEPT_NODEBUG;
 };
 
 #endif //_INC_CONSOLEINTERFACE_H

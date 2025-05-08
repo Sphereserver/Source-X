@@ -37,16 +37,6 @@
 #include "assertion.h"
 #include "basic_threading.h"
 
-#ifdef _WIN32
-	#include "os_windows.h"
-#endif
-#include "datatypes.h"
-#ifndef _WIN32
-	#include "os_unix.h"
-#endif
-
-
-/* Coding helpers */
 
 // On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
 #if !defined(_MSC_VER) || defined(__clang__)
@@ -61,6 +51,23 @@
 #ifdef _MSC_VER
 #   define MSVC_RUNTIME
 #endif
+
+#if defined(MSVC_COMPILER)
+#   define RESTRICT __restrict
+#else
+#   define RESTRICT __restrict__
+#endif
+
+#ifdef _WIN32
+	#include "os_windows.h"
+#endif
+#include "datatypes.h"
+#ifndef _WIN32
+	#include "os_unix.h"
+#endif
+
+
+/* Coding helpers */
 
 // Target arch.
 #if defined(_WIN64) || (__SIZEOF_POINTER__ == 8)
@@ -103,12 +110,12 @@
 #ifdef MSVC_COMPILER
 #define SPHERE_PRINTFARGS(a,b)
 #else
-#ifdef __MINGW32__
+#   ifdef __MINGW32__
 // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
-#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
-#else
-#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
-#endif
+#       define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
+#   else
+#      define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
+#   endif
 #endif
 
 

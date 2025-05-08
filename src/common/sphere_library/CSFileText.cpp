@@ -7,6 +7,9 @@
 
 // CSFileText:: Constructors, Destructor, Asign operator.
 
+const char*
+CSFileText::m_sClassName = "CSFileText";
+
 CSFileText::CSFileText()
 {
     _pStream = nullptr;

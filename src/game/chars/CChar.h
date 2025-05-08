@@ -416,9 +416,9 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool CanSeeInContainer( const CItemContainer * pContItem ) const;
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	bool CanSeeLOS_New_Failed( CPointMap * pptBlock, const CPointMap &ptNow ) const;
-	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
-	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
-	bool CanSeeLOS( const CObjBaseTemplate * pObj, word wFlags = 0, bool bCombatCheck = false) const;
+    bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool fCombatCheck = false ) const;
+    bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool fCombatCheck = false ) const;
+    bool CanSeeLOS( const CObjBaseTemplate * pObj, word wFlags = 0, bool fCombatCheck = false) const;
 
 #define LOS_NB_LOCAL_TERRAIN	0x00001 // Terrain inside a region I am standing in does not block LOS
 #define LOS_NB_LOCAL_STATIC		0x00002 // Static items inside a region I am standing in do not block LOS
@@ -560,7 +560,7 @@ public:
     void UpdateMode( bool fFull, CClient * pExcludeClient = nullptr);
 	void UpdateSpeedMode();
 	void UpdateVisualRange();
-	void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = nullptr, bool bFull = false );
+    void UpdateMove( const CPointMap & ptOld, CClient * pClientExclude = nullptr, bool fFull = false );
 	void UpdateDir( DIR_TYPE dir );
 	void UpdateDir( const CPointMap & pt );
 	void UpdateDir( const CObjBaseTemplate * pObj );
@@ -578,7 +578,7 @@ public:
 
 	// Contents/Carry stuff. ---------------------------------
 private:
-	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) override;
+    virtual void ContentAdd( CItem * pItem, bool fForceNoStack = false ) override;
 protected:
 	virtual void OnRemoveObj( CSObjContRec* pObRec ) override;	// Override this = called when removed from list.
 
@@ -803,10 +803,10 @@ public:
 	* @brief Retrieving the stored notoriety for this list's entry.
 	*
 	* @param id is the entry we want to recover.
-	* @param bGetColor if true will retrieve the Color and not the Noto value.
+    * @param fGetColor if true will retrieve the Color and not the Noto value.
 	* @return Value of Notoriety (or color)
 	*/
-	NOTO_TYPE NotoSave_GetValue( int id, bool bGetColor = false );
+    NOTO_TYPE NotoSave_GetValue( int id, bool fGetColor = false );
 
 	/**
 	* @brief Gets how much time this notoriety was stored.
@@ -916,9 +916,9 @@ public:
 
 	void Skill_SetBase( SKILL_TYPE skill, ushort uiValue );
     void Skill_AddBase( SKILL_TYPE skill, int iChange );
-	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true, bool bForceCheck = false);
+    bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool fAllowGain = true, bool fUseBellCurve = true, bool fForceCheck = false);
 
-	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
+    bool Skill_CheckSuccess(SKILL_TYPE skill, int iDifficulty, bool fUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );
 	bool Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease = 0 ); // calc skill progress.
 	void Skill_Fail( bool fCancel = false );
@@ -998,7 +998,7 @@ private:
 	void Spell_Dispel( int iskilllevel );
 	CChar * Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDuration = 0);
 	bool Spell_Recall(CItem * pRune, bool fGate);
-    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc = nullptr, bool bEquip = true );
+    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDurationInTenths, CObjBase * pSrc = nullptr, bool fEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	bool Spell_Equip_OnTick( CItem * pItem );
@@ -1096,7 +1096,7 @@ public:
 	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg, bool fSwingNoRange = false);
 	SKILL_TYPE Fight_GetWeaponSkill() const;
     DAMAGE_TYPE Fight_GetWeaponDamType(const CItem* pWeapon = nullptr) const;
-	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
+    int Fight_CalcDamage( const CItem * pWeapon, bool fNoRandom = false, bool fGetMax = true ) const;
 	bool Fight_IsAttackableState();
 
 	// Attacker System
@@ -1354,7 +1354,7 @@ public:
 
 	bool NPC_IsVendor() const;
 	int NPC_GetAiFlags();
-	bool NPC_Vendor_Restock(bool bForce = false, bool bFillStock = false);
+    bool NPC_Vendor_Restock(bool fForce = false, bool fFillStock = false);
 	int NPC_GetVendorMarkup() const;
 
 	void NPC_OnPetCommand( bool fSuccess, CChar * pMaster );
@@ -1364,7 +1364,7 @@ public:
 	void NPC_OnHear( lpctstr pCmd, CChar * pSrc, bool fAllPets = false );
 	bool NPC_OnItemGive( CChar * pCharSrc, CItem * pItem );
 	bool NPC_SetVendorPrice( CItem * pItem, int iPrice );
-	bool OnTriggerSpeech(bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue = HUE_DEFAULT);
+    bool OnTriggerSpeech(bool fIsPet, lpctstr pszText, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue = HUE_DEFAULT);
 
 	// Outside events that occur to us.
 	int  OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical = 0, int iDmgFire = 0, int iDmgCold = 0, int iDmgPoison = 0, int iDmgEnergy = 0, SPELL_TYPE spell = SPELL_NONE );

@@ -400,12 +400,24 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 			if (Arg_Qty < 1) // must at least provide the member uid
 				return false;
 
+            std::optional<dword> dwUID = Str_ToU(Arg_ppCmd[0]);
+            if (!dwUID.has_value())
+            {
+            skip_with_err:
+                g_Log.EventError("Invalid MEMBER UID '%s', ignoring.\n", Arg_ppCmd[0]);
+                return false;
+            }
+
+            const CUID uidMember(dwUID.value());
+            if (!uidMember.CharFind())
+                goto skip_with_err;
+
 			new CStoneMember(
 				this,
-				CUID(ahextoi(Arg_ppCmd[0])), 											// Member's UID
+                uidMember,                                                              // Member's UID
 				Arg_Qty > 2 ? (STONEPRIV_TYPE)(atoi(Arg_ppCmd[2])) : STONEPRIV_CANDIDATE,// Members priv level (use as a type)
 				Arg_Qty > 1 ? Arg_ppCmd[1] : "",										// Title
-				CUID(ahextoi(Arg_ppCmd[3])),											// Member is loyal to this
+                CUID(Str_ToU(Arg_ppCmd[3]).value_or(UID_PLAIN_CLEAR)),                  // Member is loyal to this
 				Arg_Qty > 4 ? (atoi( Arg_ppCmd[4] ) != 0) : 0,							// Paperdoll stone abbreviation (also if they declared war)
 				Arg_Qty > 5 ? (atoi( Arg_ppCmd[5] ) != 0) : 0,							// If we declared war
 				Arg_Qty > 6 ? atoi( Arg_ppCmd[6] ) : 0);								// AccountGold

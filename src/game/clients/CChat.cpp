@@ -38,10 +38,15 @@ bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember*
 		}
 	}
 
+    if (!pszPassword)
+        pszPassword = TSTRING_NULL;
+
 	auto &pChannel = m_Channels.emplace_back(std::make_unique<CChatChannel>(pszName, pszPassword, !pMember));
-	if (pMember && (g_Cfg.m_iChatFlags & CHATF_CHANNELMODERATION))
+
+    if (pMember && (g_Cfg.m_iChatFlags & CHATF_CHANNELMODERATION))
 		pChannel->SetModerator(pMember->GetChatName());
-	BroadcastAddChannel(pChannel.get());
+
+    BroadcastAddChannel(pChannel.get());
 	return true;
 }
 
