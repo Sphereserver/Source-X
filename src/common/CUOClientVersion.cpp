@@ -1,5 +1,6 @@
 #include "CUOClientVersion.h"
 #include "CLog.h"
+#include "sphere_library/sstring.h"
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -118,14 +119,17 @@ CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
     if ((ptcVersion == nullptr) || (*ptcVersion == '\0'))
         return;
 
+    tchar ptcVersionBuf[64];
+    Str_CopyLimitNull(ptcVersionBuf, ptcVersion, sizeof(ptcVersionBuf));
+
     // Ranges algorithms not yet supported by Apple Clang...
     // const ptrdiff_t count = std::ranges::count(std::string_view(ptcVersion), '.');
     const auto svVersion = std::string_view(ptcVersion);
     const auto count = std::count(svVersion.cbegin(), svVersion.cend(), '.');
     if (count == 2)
-        ApplyVersionFromStringOldFormat(ptcVersion);
+        ApplyVersionFromStringOldFormat(ptcVersionBuf);
     else if (count == 3)
-        ApplyVersionFromStringNewFormat(ptcVersion);
+        ApplyVersionFromStringNewFormat(ptcVersionBuf);
     else
     {
         // Malformed string?
@@ -166,7 +170,7 @@ bool CUOClientVersion::operator <=(CUOClientVersion const& other) const noexcept
 }
 
 
-void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexcept
+void CUOClientVersion::ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexcept
 {
     // Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
 
@@ -182,7 +186,7 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexc
     }
 
     tchar *piVer[3];
-    Str_ParseCmds(const_cast<tchar *>(ptcVersion), piVer, ARRAY_COUNT(piVer), ".");
+    Str_ParseCmds(ptcVersion, piVer, ARRAY_COUNT(piVer), ".");
 
     // Don't rely on all values reported by client, because it can be easily faked. Injection users can report any
     // client version they want, and some custom clients may also report client version as "Custom" instead X.X.Xy
@@ -195,7 +199,7 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexc
     m_build = uiLetter;
 }
 
-void CUOClientVersion::ApplyVersionFromStringNewFormat(lpctstr ptcVersion) noexcept
+void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexcept
 {
     // Get version of newer clients, which use only 4 numbers separated by dots (example: 6.0.1.1)
 
@@ -203,7 +207,7 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lpctstr ptcVersion) noexc
     const size_t dot1 = sv.find_first_of('.', 0);
     const size_t dot2 = sv.find_first_of('.', dot1 + 1);
     const size_t dot3 = sv.find_first_of('.', dot2 + 1);
-    const auto np = std::string_view::npos;
+    constexpr auto np = std::string_view::npos;
     if (np == dot1 || np == dot2 || np == dot3)
         return;
 

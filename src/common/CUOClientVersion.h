@@ -52,8 +52,8 @@ struct CUOClientVersion
 
     /*  Private methods. */
 private:
-    void ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexcept;
-    void ApplyVersionFromStringNewFormat(lpctstr ptcVersion) noexcept;
+    void ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexcept;
+    void ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexcept;
 };
 
 

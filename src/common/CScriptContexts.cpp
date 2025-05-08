@@ -22,10 +22,6 @@ bool CScriptLineContext::IsValid() const
     return (m_iOffset != -1);
 }
 
-CScriptLineContext::CScriptLineContext()
-{
-    Init();
-}
 
 //***************************************************************************
 //	CScriptFileContext
