@@ -157,16 +157,16 @@ int64 ahextoi64( lpctstr pszStr ) noexcept
 
 // New.
 
-template<class T>
+template<class _IntType>
 bool cstr_to_num(
     const char*  str,
-    T*           out,
-    int          base = 10,
-    bool         allow_trailing_space = false
+    _IntType*    out,
+    int          base = 0,
+    bool         ignore_trailing_extra_chars = false
     ) noexcept
 {
-    static_assert(std::is_integral_v<T>, "Only integers supported");
-    if (!str || !out || base < 2 || base > 16)
+    static_assert(std::is_integral_v<_IntType>, "Only integers supported");
+    if (!str || !out || base < 0 || base == 1 || base > 16)
         return false;
 
     // 1) Skip leading spaces
@@ -178,34 +178,63 @@ bool cstr_to_num(
 
     // 2) Optional sign
     bool neg = false;
-    if constexpr (std::is_signed_v<T>)
+    if constexpr (std::is_signed_v<_IntType>)
     {
-        if (/* *p == '+' || */ *p == '-')
+        /*  // If we wish to support numbers with the '+' sign, but we need to update the other parses (mainly in CExpression).
+        if (*p == '+' || *p == '-')
         {
             neg = (*p == '-');
+            ++p;
+        }
+        */
+        if (*p == '-')
+        {
+            neg = true;
             ++p;
         }
     }
 
     // 3) Hex‐prefix via leading '0'
     bool hex = false;
-    if (base == 16 && *p == '0')
+    if (base == 0)
+    {
+        // Auto-detect.
+        if (*p == '0' && p[1] != '\0' && p[1] != '.')
+        {
+            if (IsHexNumDigit(p[1]))
+            {
+                hex = true;
+                base = 16;
+                ++p;  // skip the '0' prefix
+            }
+            else
+            {
+                base = 10;
+            }
+        }
+        else
+        {
+            base = 10;
+        }
+    }
+    if (base == 16 && p[0] == '0' && p[1] != '\0' && p[1] != '.')
     {
         hex = true;
         ++p;
     }
 
-    using U = std::make_unsigned_t<T>;
-    U acc = 0;
-    const U maxDiv = std::numeric_limits<U>::max() / base;
-    const U maxRem = std::numeric_limits<U>::max() % base;
+    using _UIntType = std::make_unsigned_t<_IntType>;
+    const _UIntType maxDiv = std::numeric_limits<_UIntType>::max() / base;
+    const _UIntType maxRem = std::numeric_limits<_UIntType>::max() % base;
+    _UIntType acc = 0;  // accumulator
 
     // 4) Parse digits
+    ushort ndigits = 0;
     const char* startDigits = p;
     for (; *p; ++p)
     {
-        unsigned digit;
-        char c = *p;
+        const char c = *p;
+        uint32_t digit;
         if (c >= '0' && c <= '9')
             digit = c - '0';
         else if (hex && c >= 'A' && c <= 'F')
@@ -219,239 +248,63 @@ bool cstr_to_num(
         if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
             return false;  // overflow
         acc = acc * base + digit;
+        ++ndigits;
     }
     if (p == startDigits)
         return false;  // no digits consumed
 
     // 5) Trailing‐space or end‐of‐string
-    if (!allow_trailing_space && *p != '\0')
-        return false;
-    if (allow_trailing_space)
+    if (!ignore_trailing_extra_chars)
     {
-        while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
-            ++p;
+        // Some old code expects string to num conversion to tolerate trailing whitespaces or even extra chars
+        // (like the atoi C function).
+        constexpr bool tolerate_trailing_whitespaces = true;
+        if constexpr (tolerate_trailing_whitespaces)
+        {
+            while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
+                ++p;
+        }
         if (*p != '\0')
             return false;
     }
 
-    // 6) Store result
-    if constexpr (std::is_signed_v<T>)
+    // 6) Make short (< UINT32_MAX, or <= 8 hex digits) hex numbers behave like 32 bits numbers.
+    /*
+     * Why Sphere expects this and works like this is unknown to me (maybe TUS/Grayworld or
+     * prehistoric Sphere versions worked with 32 bit numbers instead of 64 bit).
+     *
+    */
+    if (hex && ndigits<=8 && std::is_signed_v<_IntType>)
+    {
+        // Reinterpret the bits as a signed 32 bit number, then expand that value to a 32 bit number.
+        // if ndigits <= 8 (so number is always <= 0xFFFF FFFF), it will always be < UINT32_MAX.
+        int32_t v32 = int32_t(uint32_t(acc));
+        *out = _IntType(v32);
+        return true;
+    }
+
+    // 7) Store result
+    if constexpr (std::is_signed_v<_IntType>)
     {
         if (neg)
         {
-            if (acc > static_cast<U>(std::numeric_limits<T>::max()) + 1u)
+            if (acc > _UIntType(std::numeric_limits<_IntType>::max()) + 1u)
                 return false;  // too negative
-            *out = static_cast<T>(0) - static_cast<T>(acc);
+            *out = _IntType(0) - _IntType(acc);
         }
         else
         {
-            if (acc > static_cast<U>(std::numeric_limits<T>::max()))
+            if (acc > _UIntType(std::numeric_limits<_IntType>::max()))
                 return false;  // too large positive
-            *out = static_cast<T>(acc);
+            *out = _IntType(acc);
         }
     }
     else
     {
-        *out = static_cast<T>(acc);
+        *out = _IntType(acc);
     }
     return true;
 }
-
-/*
- * First implementations, using std::from_chars.
-template <typename T>
-bool sv_to_num(std::string_view const& view, T* value, int base, bool ignore_trailing_space) noexcept
-{
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-    if (!value || view.empty() || (base < 2) || (base > 16))
-        return false;
-
-    const char* first = view.data();
-    const char* last  = view.data() + view.length();
-
-    // Trim leading whitespace
-    while (first < last && std::isspace(static_cast<unsigned char>(*first))) {
-        ++first;
-    }
-    // Trim trailing whitespace
-    while (last > first && std::isspace(static_cast<unsigned char>(*(last - 1)))) {
-        --last;
-    }
-    if (first == last) {
-        // Empty after trimming
-        return false;
-    }
-
-    const std::from_chars_result res = std::from_chars(first, last, *value, base);
-
-    // Check for overflow or invalid argument
-    if (res.ec == std::errc::result_out_of_range ||
-        res.ec == std::errc::invalid_argument)
-    {
-        return false;
-    }
-    if (!ignore_trailing_space && (res.ptr != last))
-        return false;
-
-    return true;
-}
-
-template <typename T>
-bool cstr_to_num(const char * str, T* value, int base, bool ignore_trailing_space, uint str_max_length = SCRIPT_MAX_LINE_LEN) noexcept
-{
-    static_assert(std::is_arithmetic_v<T>, "Input variable is not an arithmetic type.");
-    if (!value || !str || ('\0' == *str) || (base < 2) || (base > 16))
-        return false;
-
-    // Skip leading whitespace
-    const char* p = str;
-    while (::isspace(static_cast<unsigned char>(*p))) {
-        ++p;
-    }
-    if (*p == '\0') {
-        // empty or all-whitespace
-        return false;
-    }
-
-    const char* last = str + strnlen(str, str_max_length);
-    const std::from_chars_result res = std::from_chars(str, last, *value, base);
-
-    if (res.ec == std::errc::result_out_of_range) {
-        // value would overflow T
-        return false;
-    }
-    if (res.ec == std::errc::invalid_argument) {
-        // no conversion performed
-        return false;
-    }
-    //if (res.ptr != last)
-    //    return false;
-
-    if (!ignore_trailing_space)
-    {
-        // ptr now points past the last digit consumed; skip trailing whitespace
-        const char* q = res.ptr;
-        while (::isspace(static_cast<unsigned char>(*q))) {
-            ++q;
-        }
-        if (*q != '\0') {
-            // extra non-whitespace characters after number
-            return false;
-        }
-    }
-
-    return true;
-}
-*/
-
-/*
- * Standalone sv_to_num.
-template<typename T>
-bool sv_to_num(
-    std::string_view view,
-    T*               out,
-    int              base               = 10,
-    bool             allow_trailing_ws  = false
-    ) noexcept
-{
-    static_assert(std::is_integral_v<T>, "Only integer types supported");
-    if (view.empty() || !out || base < 2 || base > 16)
-        return false;
-
-    const char* p   = view.data();
-    const char* end = p + view.size();
-
-    // 1) skip leading whitespace
-    while (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n'))
-        ++p;
-    if (p == end)
-        return false;
-
-    // 2) optional sign
-    bool neg = false;
-    if constexpr (std::is_signed_v<T>)
-    {
-        if (*p == '+' || *p == '-')
-        {
-            neg = (*p == '-');
-            ++p;
-            if (p == end)
-                return false;
-        }
-    }
-
-    // 3) parse digits
-    using U = std::make_unsigned_t<T>;
-    U acc = 0;
-    constexpr U maxDiv = std::numeric_limits<U>::max() / base;
-    constexpr U maxRem = std::numeric_limits<U>::max() % base;
-
-    const char* start = p;
-    while (p < end)
-    {
-        unsigned digit;
-        char c = *p;
-        if (c >= '0' && c <= '9')
-            digit = c - '0';
-        else if (base > 10 && c >= 'A' && c <= 'F')
-            digit = c - 'A' + 10;
-        else if (base > 10 && c >= 'a' && c <= 'f')
-            digit = c - 'a' + 10;
-        else if (!hex && c == '.')
-            continue;   // Skip decimal point
-        else
-            break;
-
-        if (digit >= static_cast<unsigned>(base))
-            return false;
-
-        if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
-            return false;  // overflow
-
-        acc = acc * base + digit;
-        ++p;
-    }
-    if (p == start)  // no digits
-        return false;
-
-    // 4) trailing characters
-    if (!allow_trailing_ws)
-    {
-        if (p != end)
-            return false;
-    }
-    else
-    {
-        while (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n'))
-            ++p;
-        if (p != end)
-            return false;
-    }
-
-    // 5) store result with signed check
-    if constexpr (std::is_signed_v<T>)
-    {
-        if (neg)
-        {
-            U limit = static_cast<U>(std::numeric_limits<T>::max()) + 1u;
-            if (acc > limit)
-                return false;
-            *out = static_cast<T>(0) - static_cast<T>(acc);
-        }
-        else
-        {
-            if (acc > static_cast<U>(std::numeric_limits<T>::max()))
-                return false;
-            *out = static_cast<T>(acc);
-        }
-    }
-    else
-    {
-        *out = static_cast<T>(acc);
-    }
-    return true;
-}
-*/
 
 
 std::optional<char> Str_ToI8 (lpctstr ptcStr, int base, bool fIgnoreExcessChars) noexcept
@@ -532,8 +385,8 @@ std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base, bool fIgnoreExcessChar
 
 static constexpr tchar DIGITS[] = "0123456789abcdef";
 
-template<typename _IntegerType>
-tchar* Str_FromInt_Fast(_IntegerType val, tchar * __restrict out_buf, size_t buf_length, uint base) noexcept
+template<typename _IntType>
+tchar* Str_FromInt_Fast(_IntType val, tchar * __restrict out_buf, size_t buf_length, uint base) noexcept
 {
     if (!out_buf || buf_length == 0 || base == 0 || base > 16)
         return nullptr;
@@ -557,15 +410,15 @@ tchar* Str_FromInt_Fast(_IntegerType val, tchar * __restrict out_buf, size_t buf
         return out_buf;
     }
 
-    using _IntegerTypeUnsigned = std::make_unsigned_t<_IntegerType>;
-    _IntegerTypeUnsigned uval;
+    using _UIntType = std::make_unsigned_t<_IntType>;
+    _UIntType uval;
     bool fIsNegative = false;
 
-    if constexpr (std::is_signed_v<_IntegerType>)
+    if constexpr (std::is_signed_v<_IntType>)
     {
         fIsNegative = (val < 0);
         // two's-complement bit-pattern reinterpret
-        const auto utmp = static_cast<_IntegerTypeUnsigned>(val);
+        const auto utmp = static_cast<_UIntType>(val);
         if (fHex)
         {
             uval = utmp;
@@ -573,12 +426,12 @@ tchar* Str_FromInt_Fast(_IntegerType val, tchar * __restrict out_buf, size_t buf
         else
         {
             // Unsigned subtraction is always defined behaviour, it wraps around.
-            uval = fIsNegative ? (_IntegerTypeUnsigned(0) - utmp) : utmp;
+            uval = fIsNegative ? (_UIntType(0) - utmp) : utmp;
         }
     }
     else
     {
-        uval = static_cast<_IntegerTypeUnsigned>(val);
+        uval = static_cast<_UIntType>(val);
     }
 
     // Write digits from back of buffer
@@ -607,8 +460,8 @@ tchar* Str_FromInt_Fast(_IntegerType val, tchar * __restrict out_buf, size_t buf
         // General path: division + multiply to get remainder
         do
         {
-            const _IntegerTypeUnsigned q = uval / base;
-            const _IntegerTypeUnsigned d = uval - q * base;
+            const _UIntType q = uval / base;
+            const _UIntType d = uval - q * base;
             WRITE_OUT(DIGITS[d]);
             uval = q;
         } while (uval);

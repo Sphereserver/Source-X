@@ -206,6 +206,19 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
             return (llong)(int)val;
 		return val;
 	}
+    /*
+    // We could just use this, but it doesn't "eat" the string pointer.
+    if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
+    {
+        std::optional<int64> iVal = Str_ToLL(pszArgs, 0, true);
+        if (!iVal)
+        {
+            g_Log.EventDebug("Invalid conversion to number for the string '%s'?\n", pszArgs);
+            return 0;
+        }
+        return iVal.value();
+    }
+    */
 	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
 	{
 		// A decimal number

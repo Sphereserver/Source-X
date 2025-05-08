@@ -3,9 +3,7 @@
 
 #include "../common.h"
 #include <cstring>
-#include <charconv>
 #include <optional>
-#include <string_view>
 
 
 #define STRING_NULL     "\0"
@@ -14,6 +12,8 @@
 //const char  * const STRING_NULL  = "\0";
 
 #define INT_CHARACTER(c)     int((c) & 0xFF)
+
+inline bool IsHexNumDigit(int c) noexcept;
 
 #ifdef UNICODE
     #include <cwctype>  // for iswalnum
@@ -70,14 +70,14 @@ dword ahextoi( lpctstr pArgs ) noexcept;		// Convert decimal or (Sphere) hex str
 int64 ahextoi64( lpctstr pArgs ) noexcept;	// Convert decimal or (Sphere) hex string (staring with 0, not 0x) to int64
 
 // If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
-[[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<short>  Str_ToI16(lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ushort> Str_ToU16(lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<int>    Str_ToI  (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uint>   Str_ToU (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<llong>  Str_ToLL (lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base = 10, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<short>  Str_ToI16(lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ushort> Str_ToU16(lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<int>    Str_ToI  (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uint>   Str_ToU  (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<llong>  Str_ToLL (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
 [[nodiscard]] inline
 std::optional<size_t> Str_ToST(lpctstr ptcStr, int base = 10) noexcept;
 
@@ -463,6 +463,14 @@ std::optional<size_t> Str_ToST(lpctstr ptcStr, int base) noexcept
         return Str_ToU(ptcStr, base);
     else
         return Str_ToULL(ptcStr, base);
+}
+
+bool IsHexNumDigit(int c) noexcept
+{
+    return
+    (c >= 'A' && c <= 'F') ||
+    (c >= 'a' && c <= 'f') ||
+    (c >= '0' && c <= '9');
 }
 
 
