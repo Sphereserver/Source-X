@@ -7,6 +7,8 @@
 #include "CResourceScript.h"
 #include "CResourceLock.h"
 
+const char *
+CResourceLock::m_sClassName = "CResourceLock";
 
 bool CResourceLock::_Open(lpctstr ptcUnused, uint uiUnused)
 {
@@ -64,12 +66,14 @@ void CResourceLock::Close()
 
 bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
-    // this much often, so here it's to be preferred ADDTOCALLSTACK_DEBUG, even if we'll lose stack trace precision.
-    ADDTOCALLSTACK("CResourceLock::_ReadTextLine");
     // ARGS:
     // fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
+    // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
+    // this much often, so here it's to be preferred ADDTOCALLSTACK_DEBUG, even if we'll lose stack trace precision.
+    //ADDTOCALLSTACK_DEBUG("CResourceLock::_ReadTextLine");
+
+    EXC_TRY("_ReadTextLine");
     ASSERT(m_pLock);
     ASSERT( ! IsBinaryMode() );
 
@@ -86,11 +90,12 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
     }
 
     m_pszKey[0] = '\0';
+    EXC_CATCH;
     return false;
 }
 bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    ADDTOCALLSTACK_DEBUG("CResourceLock::ReadTextLine");
+    //ADDTOCALLSTACK_DEBUG("CResourceLock::ReadTextLine");
     MT_UNIQUE_LOCK_RETURN(CResourceLock::_ReadTextLine(fRemoveBlanks));
 }
 

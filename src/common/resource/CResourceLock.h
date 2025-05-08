@@ -49,9 +49,8 @@ public:
         Close();
     }
 
-private:
-    CResourceLock(const CResourceLock& copy);
-    CResourceLock& operator=(const CResourceLock& other);
+    CResourceLock(const CResourceLock& copy) = delete;
+    CResourceLock& operator=(const CResourceLock& other) = delete;
 
 public:
     int OpenLock( CResourceScript * pLock, CScriptLineContext context );

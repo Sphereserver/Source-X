@@ -248,6 +248,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
     // This function is called for each script line which is being parsed (so VERY frequently), and ADDTOCALLSTACK is expensive if called
     // this much often, so here it's to be preferred ADDTOCALLSTACK_DEBUG, even if we'll lose stack trace precision.
     //ADDTOCALLSTACK_DEBUG("CCacheableScriptFile::_ReadString");
+    EXC_TRY("_ReadString");
     ASSERT(sizemax > 0);
     if ( _useDefaultFile() )
         return CSFileText::_ReadString(pBuffer, sizemax);
@@ -273,6 +274,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
         pBuffer[copied] = '\0';
     }
 
+    EXC_CATCH;
     return pBuffer;
 }
 
@@ -311,9 +313,7 @@ bool CCacheableScriptFile::HasCache() const
 
 bool CCacheableScriptFile::_useDefaultFile() const
 {
-    if ( _IsWriteMode() || ( _GetFullMode() & OF_DEFAULTMODE ))
-        return true;
-    return false;
+    return ( _IsWriteMode() || ( _GetFullMode() & OF_DEFAULTMODE ));
 }
 /*
 bool CCacheableScriptFile::useDefaultFile() const
