@@ -23,6 +23,8 @@
 	typedef	LPCSTR		lpcstr;
 	typedef	LPTSTR		lptstr;
 	typedef LPCTSTR		lpctstr;
+    typedef TCHAR * RESTRICT         lptstr_restrict;
+    typedef const TCHAR * RESTRICT   lpctstr_restrict;
 #endif
 
 // no #pragma once
@@ -88,6 +90,8 @@ typedef	uint64_t		uint64;
 	//	typedef	char16_t		tchar;
 	//#else
 		typedef char			tchar;
+        typedef char * RESTRICT         lptstr_restrict;
+        typedef const char * RESTRICT   lpctstr_restrict;
 	//#endif
 	typedef char16_t			wchar;
 	typedef char16_t *			lpwstr;

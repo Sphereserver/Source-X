@@ -66,16 +66,16 @@ struct KeyTableDesc_s
 */
 
 // If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
-[[nodiscard]] std::optional<char>   Str_ToI8 (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uchar>  Str_ToU8 (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<short>  Str_ToI16(lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ushort> Str_ToU16(lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<int>    Str_ToI  (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uint>   Str_ToU  (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<llong>  Str_ToLL (lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<char>   Str_ToI8 (const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uchar>  Str_ToU8 (const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<short>  Str_ToI16(const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ushort> Str_ToU16(const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<int>    Str_ToI  (const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uint>   Str_ToU  (const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<llong>  Str_ToLL (const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ullong> Str_ToULL(const tchar * ptcStr, int base = 0, bool fIgnoreExcessChars = true) noexcept;
 [[nodiscard]] inline
-std::optional<size_t> Str_ToST(lpctstr ptcStr, int base = 10) noexcept;
+std::optional<size_t> Str_ToST(const tchar * ptcStr, int base = 10) noexcept;
 
 // The _Fast variants write from the end of the given buffer and return a pointer to the new start of the string, which in most
 //  cases is different from the pointer passed as argument!
@@ -91,8 +91,8 @@ void Str_FromLL  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noe
 void Str_FromULL (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 
-size_t FindStrWord( lpctstr RESTRICT pTextSearch, lpctstr RESTRICT pszKeyWord ) noexcept;
-int Str_CmpHeadI(lpctstr RESTRICT ptcFind, lpctstr RESTRICT ptcHere) noexcept;
+size_t FindStrWord(lpctstr_restrict pTextSearch, lpctstr_restrict pszKeyWord) noexcept;
+int Str_CmpHeadI(lpctstr_restrict ptcFind, lpctstr_restrict ptcHere) noexcept;
 
 /** @name String utilities: Modifiers
 */
@@ -105,7 +105,7 @@ int Str_CmpHeadI(lpctstr RESTRICT ptcFind, lpctstr RESTRICT ptcHere) noexcept;
 * @param uiMaxSize max bytes to be copied.
 * @return bytes copied (CAN count the string terminator)
 */
-size_t Str_CopyLimit(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t uiMaxSize) noexcept;
+size_t Str_CopyLimit(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiMaxSize) noexcept;
 
 /**
 * @brief Like strncpy, but always zero-terminates the copied string (eventually truncating the text) and doesn't zero all the exceeding buffer length
@@ -114,7 +114,7 @@ size_t Str_CopyLimit(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t uiMaxS
 * @param uiMaxSize max bytes to be copied (including string terminator!).
 * @return bytes copied (not counting the string terminator)
 */
-size_t Str_CopyLimitNull(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t uiMaxSize) noexcept;
+size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiMaxSize) noexcept;
 
 /**
 * @brief Wrapper to cstring strcpy, but returns the length of the string copied.
@@ -122,7 +122,7 @@ size_t Str_CopyLimitNull(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t ui
 * @param pSrc source data.
 * @return length of the string copied (number of characters).
 */
-size_t Str_CopyLen(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc) noexcept;
+size_t Str_CopyLen(lptstr_restrict pDst, lpctstr_restrict pSrc) noexcept;
 
 /**
 * @brief strlen equivalent to be used with UTF8 multi-byte string.
@@ -147,7 +147,7 @@ size_t Str_ConcatLimitNull(tchar * pDst, const tchar *pSrc, size_t uiMaxSize) no
  * @param str_len haystack length
  * @param substr_len needle length
  */
-tchar* Str_FindSubstring(tchar * RESTRICT str, const tchar * RESTRICT substr, size_t str_len, size_t substr_len) noexcept;
+tchar* Str_FindSubstring(lptstr_restrict str, lpctstr_restrict substr, size_t str_len, size_t substr_len) noexcept;
 
 
 /**
@@ -155,7 +155,7 @@ tchar* Str_FindSubstring(tchar * RESTRICT str, const tchar * RESTRICT substr, si
 * @param pszWords word to add the article.
 * @return string with the article and a space.
 */
-lpctstr Str_GetArticleAndSpace(lpctstr RESTRICT pszWords) noexcept;
+const tchar * Str_GetArticleAndSpace(lpctstr_restrict pszWords) noexcept;
 
 /**
 * @brief Filter specific characters from a string.
@@ -165,14 +165,14 @@ lpctstr Str_GetArticleAndSpace(lpctstr RESTRICT pszWords) noexcept;
 * @param ptcStripList characters to strip (default "{|}~", non printable characters for client).
 * @return size of the filtered string.
 */
-int Str_GetBare(tchar * ptcOut, lpctstr ptcSrc, size_t uiMaxOutSize, lpctstr ptcStripList = nullptr) noexcept;
+int Str_GetBare(tchar * ptcOut, const tchar* ptcSrc, size_t uiMaxOutSize, const tchar *ptcStripList = nullptr) noexcept;
 
 /**
 * @brief Finds and skip heading and trailing double quotes in a string.
 * @param pStr string where remove the quotes.
 * @return pointer inside the string with the heading and trailing quotes removed.
 */
-tchar * Str_GetUnQuoted(tchar * RESTRICT pStr) noexcept;
+tchar * Str_GetUnQuoted(lptstr_restrict pStr) noexcept;
 
 /*
  * @brief Removes heading and trailing double quotes and apostrophes in a string.
@@ -199,7 +199,7 @@ void Str_MakeUnQuoted(tchar * pStr) noexcept;
 * @param pStr string to make replaces on.
 * @return string with replaces in (same as pStr).
 */
-tchar * Str_MakeFiltered(tchar * RESTRICT pStr) noexcept;
+tchar * Str_MakeFiltered(lptstr_restrict pStr) noexcept;
 
 
 /**
@@ -215,7 +215,7 @@ tchar * Str_MakeFiltered(tchar * RESTRICT pStr) noexcept;
 * @param pStrIn input string.
 * @param iSizeMax length of the input string.
 */
-void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax) noexcept;
+void Str_MakeUnFiltered(tchar * pStrOut, const tchar * pStrIn, int iSizeMax) noexcept;
 
 /**
 * @brief remove trailing white spaces from a string.
@@ -256,10 +256,10 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept;
 ///@{
 
 //TODOC
-bool IsSimpleNumberString( lpctstr pszTest );
-bool IsStrNumericDec( lpctstr pszTest );
-bool IsStrNumeric( lpctstr pszTest );
-bool IsStrEmpty( lpctstr pszTest );
+bool IsSimpleNumberString( const tchar * pszTest );
+bool IsStrNumericDec( const tchar * pszTest );
+bool IsStrNumeric( const tchar * pszTest );
+bool IsStrEmpty( const tchar * pszTest );
 
 // strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
 int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError = true);
@@ -273,7 +273,7 @@ int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintErro
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
+int FindTable(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
 
 /**
 * @brief Look for a string in a table (binary search).
@@ -283,7 +283,7 @@ int FindTable(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
+int FindTableSorted(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
 
 /**
 * @brief Look for a string header in a CAssocReg table (uses Str_CmpHeadI to compare instead of strcmpi).
@@ -293,7 +293,7 @@ int FindTableSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount) no
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindCAssocRegTableHeadSorted(const lpctstr pFind, lpctstr const* ppTable, int iCount, size_t uiElemSize) noexcept;
+int FindCAssocRegTableHeadSorted(const tchar * pFind, const tchar * const* ppTable, int iCount, size_t uiElemSize) noexcept;
 
 /**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
@@ -303,7 +303,7 @@ int FindCAssocRegTableHeadSorted(const lpctstr pFind, lpctstr const* ppTable, in
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
+int FindTableHead(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
 
 /**
 * @brief Look for a string header in a table (binary search, uses Str_CmpHeadI to compare instead of strcmpi).
@@ -313,19 +313,19 @@ int FindTableHead(const lpctstr pFind, lpctstr const * ppTable, int iCount) noex
 * @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHeadSorted(const lpctstr pFind, lpctstr const * ppTable, int iCount) noexcept;
+int FindTableHeadSorted(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
 
 /**
 * @param pszIn string to check.
 * @return true if string is empty or has '\c' or '\n' characters, false otherwise.
 */
-bool Str_Check(lpctstr pszIn) noexcept;
+bool Str_Check(const tchar * pszIn) noexcept;
 
 /**
 * @param pszIn string to check.
 * @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
 */
-bool Str_CheckName(lpctstr pszIn) noexcept;
+bool Str_CheckName(const tchar * pszIn) noexcept;
 
 /**
 * @brief find a substring in a string from an offset.
@@ -343,7 +343,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0) noexcept;
 * @param pText text to match against the pattern.
 * @return a MATCH_TYPE
 */
-MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept;
+MATCH_TYPE Str_Match(const tchar * pPattern, const tchar * pText) noexcept;
 
 /**
 * @brief Parse a simple argument from a list of arguments.
@@ -355,13 +355,13 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept;
 * @param pSep the list of separators (by default "=, \t").
 * @return false if there are no more args to parse, true otherwise.
 */
-bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr) noexcept;
+bool Str_Parse(tchar * pLine, tchar ** ppArg = nullptr, const tchar * pSep = nullptr) noexcept;
 
 /*
  * @brief Totally works like Str_Parse but difference between both function is Str_ParseAdv
  * parsing line with inner quotes and has double quote and apostrophe support.
  */
-bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullptr) noexcept;
+bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, const tchar * pSep = nullptr) noexcept;
 
 /**
 * @brief Parse a list of arguments.
@@ -371,13 +371,13 @@ bool Str_ParseAdv(tchar * pLine, tchar ** ppArg = nullptr, lpctstr pSep = nullpt
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr) noexcept;
+int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, const tchar * pSep = nullptr) noexcept;
 
 /*
  * @brief Totally works like Str_ParseCmds but difference between both function is Str_ParseCmdsAdv
  * parsing line with inner quotes and has double quote and apostrophe support.
  */
-int Str_ParseCmdsAdv(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = nullptr) noexcept;
+int Str_ParseCmdsAdv(tchar * pCmdLine, tchar ** ppCmd, int iMax, const tchar * pSep = nullptr) noexcept;
 
 /**
 * @brief Parse a list of arguments (integer version).
@@ -387,7 +387,7 @@ int Str_ParseCmdsAdv(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = 
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = nullptr) noexcept;
+int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, const tchar * pSep = nullptr) noexcept;
 
 /**
 * @brief check if a string matches a regex.
@@ -396,7 +396,7 @@ int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = null
 * @param lastError if any error, error description is stored here.
 * @return 1 is regex is matched, 0 if not, -1 if errors.
 */
-int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
+int Str_RegExMatch(const tchar * pPattern, const tchar * pText, tchar * lastError);
 
 ///@}
 
@@ -413,11 +413,11 @@ class UTF8MBSTR
 {
 public:
     UTF8MBSTR();
-    UTF8MBSTR(lpctstr lpStr);
+    UTF8MBSTR(const tchar * lpStr);
     UTF8MBSTR(UTF8MBSTR& lpStr);
     virtual ~UTF8MBSTR();
 
-    void operator =(lpctstr lpStr);
+    void operator =(const tchar * lpStr);
     void operator =(UTF8MBSTR& lpStr) noexcept;
     operator char* () noexcept
     {
@@ -428,7 +428,7 @@ public:
         return m_strUTF8_MultiByte.data();
     }
 
-    static size_t ConvertStringToUTF8(lpctstr strIn, std::vector<char>* strOutUTF8MB);
+    static size_t ConvertStringToUTF8(const tchar * strIn, std::vector<char>* strOutUTF8MB);
     static size_t ConvertUTF8ToString(const char* strInUTF8MB, std::vector<tchar>* strOut);
 
 private:
@@ -453,7 +453,7 @@ inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexc
 
 //--- Inline methods
 
-std::optional<size_t> Str_ToST(lpctstr ptcStr, int base) noexcept
+std::optional<size_t> Str_ToST(const tchar * ptcStr, int base) noexcept
 {
     if constexpr (sizeof(size_t) == 4)
         return Str_ToU(ptcStr, base);
