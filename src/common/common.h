@@ -103,14 +103,19 @@
 #ifdef MSVC_COMPILER
 #define SPHERE_PRINTFARGS(a,b)
 #else
-#ifdef __MINGW32__
+#   ifdef __MINGW32__
 // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
-#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
-#else
-#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
-#endif
+#       define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
+#   else
+#      define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
+#   endif
 #endif
 
+#if defined(MSVC_COMPILER)
+#   define RESTRICT RESTRICT
+#else
+#   define RESTRICT __restrict__
+#endif
 
 // Strings
 #define STRINGIFY_IMPL_(x)	#x

@@ -91,8 +91,8 @@ void Str_FromLL  (llong val,  tchar* buf, size_t buf_length, uint base = 10) noe
 void Str_FromULL (ullong val, tchar* buf, size_t buf_length, uint base = 10) noexcept;
 
 
-size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord ) noexcept;
-int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept;
+size_t FindStrWord( lpctstr RESTRICT pTextSearch, lpctstr RESTRICT pszKeyWord ) noexcept;
+int Str_CmpHeadI(lpctstr RESTRICT ptcFind, lpctstr RESTRICT ptcHere) noexcept;
 
 /** @name String utilities: Modifiers
 */
@@ -105,7 +105,7 @@ int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept;
 * @param uiMaxSize max bytes to be copied.
 * @return bytes copied (CAN count the string terminator)
 */
-size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept;
+size_t Str_CopyLimit(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t uiMaxSize) noexcept;
 
 /**
 * @brief Like strncpy, but always zero-terminates the copied string (eventually truncating the text) and doesn't zero all the exceeding buffer length
@@ -114,7 +114,7 @@ size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept;
 * @param uiMaxSize max bytes to be copied (including string terminator!).
 * @return bytes copied (not counting the string terminator)
 */
-size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept;
+size_t Str_CopyLimitNull(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t uiMaxSize) noexcept;
 
 /**
 * @brief Wrapper to cstring strcpy, but returns the length of the string copied.
@@ -122,7 +122,7 @@ size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept;
 * @param pSrc source data.
 * @return length of the string copied (number of characters).
 */
-size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept;
+size_t Str_CopyLen(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc) noexcept;
 
 /**
 * @brief strlen equivalent to be used with UTF8 multi-byte string.
@@ -138,7 +138,7 @@ size_t Str_UTF8CharCount(const char* pStr) noexcept;
 * @param uiMaxSize max bytes that pDst can hold.
 * @return Number of characters in the concatenated string, excluding the '\0' terminator.
 */
-size_t Str_ConcatLimitNull(tchar *pDst, const tchar *pSrc, size_t uiMaxSize) noexcept;
+size_t Str_ConcatLimitNull(tchar * pDst, const tchar *pSrc, size_t uiMaxSize) noexcept;
 
 /*
  * @brief Find the first occurrence of substring in string, where the search is limited to the first str_len characters of string.
@@ -147,7 +147,7 @@ size_t Str_ConcatLimitNull(tchar *pDst, const tchar *pSrc, size_t uiMaxSize) noe
  * @param str_len haystack length
  * @param substr_len needle length
  */
-tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len) noexcept;
+tchar* Str_FindSubstring(tchar * RESTRICT str, const tchar * RESTRICT substr, size_t str_len, size_t substr_len) noexcept;
 
 
 /**
@@ -155,7 +155,7 @@ tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t
 * @param pszWords word to add the article.
 * @return string with the article and a space.
 */
-lpctstr Str_GetArticleAndSpace(lpctstr pszWords) noexcept;
+lpctstr Str_GetArticleAndSpace(lpctstr RESTRICT pszWords) noexcept;
 
 /**
 * @brief Filter specific characters from a string.
@@ -165,14 +165,14 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords) noexcept;
 * @param pszStrip characters to strip (default "{|}~", non printable characters for client).
 * @return size of the filtered string.
 */
-int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = nullptr) noexcept;
+int Str_GetBare(tchar * RESTRICT pszOut, lpctstr RESTRICT pszInp, int iMaxSize, lpctstr pszStrip = nullptr) noexcept;
 
 /**
 * @brief Finds and skip heading and trailing double quotes in a string.
 * @param pStr string where remove the quotes.
 * @return pointer inside the string with the heading and trailing quotes removed.
 */
-tchar * Str_GetUnQuoted(tchar * pStr) noexcept;
+tchar * Str_GetUnQuoted(tchar * RESTRICT pStr) noexcept;
 
 /*
  * @brief Removes heading and trailing double quotes and apostrophes in a string.
@@ -199,7 +199,7 @@ void Str_MakeUnQuoted(tchar * pStr) noexcept;
 * @param pStr string to make replaces on.
 * @return string with replaces in (same as pStr).
 */
-tchar * Str_MakeFiltered(tchar * pStr) noexcept;
+tchar * Str_MakeFiltered(tchar * RESTRICT pStr) noexcept;
 
 
 /**

@@ -281,7 +281,7 @@ std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base, bool fIgnoreExcessChar
 static constexpr tchar DIGITS[] = "0123456789abcdef";
 
 template<typename _IntType>
-tchar* Str_FromInt_Fast(_IntType val, tchar * __restrict out_buf, size_t buf_length, uint base) noexcept
+tchar* Str_FromInt_Fast(_IntType val, tchar * RESTRICT out_buf, size_t buf_length, uint base) noexcept
 {
     if (!out_buf || buf_length == 0 || base == 0 || base > 16)
         return nullptr;
@@ -427,7 +427,7 @@ void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 }
 
 
-size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord ) noexcept
+size_t FindStrWord( lpctstr RESTRICT pTextSearch, lpctstr RESTRICT pszKeyWord ) noexcept
 {
     // Find any of the pszKeyWord in the pTextSearch string.
     // Make sure we look for starts of words.
@@ -465,7 +465,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord ) noexcept
     }
 }
 
-int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept
+int Str_CmpHeadI(lpctstr RESTRICT ptcFind, lpctstr RESTRICT ptcHere) noexcept
 {
     for (uint i = 0; ; ++i)
     {
@@ -574,7 +574,7 @@ bool IsStrNumeric( lpctstr pszTest )
     return true;
 }
 
-bool IsSimpleNumberString( lpctstr pszTest )
+bool IsSimpleNumberString( lpctstr RESTRICT pszTest )
 {
     // is this a string or a simple numeric expression ?
     // string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
@@ -635,7 +635,29 @@ bool IsSimpleNumberString( lpctstr pszTest )
 
 // strcpy doesn't have an argument to truncate the copy to the buffer length;
 // strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
-size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
+size_t Str_CopyLimit(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, const size_t uiMaxSize) noexcept
+{
+    if (uiMaxSize == 0)
+        return 0;
+
+    if (pSrc[0] == '\0')
+    {
+
+        pDst[0] = '\0';
+        return 0;
+    }
+
+    // Find string terminator within the first uiMaxSize bytes (fast library call, usually vectorized)
+    const void* nul = memchr(pSrc, '\0', uiMaxSize);
+    const size_t toCopy = nul
+                        ? ((static_cast<const char*>(nul) - pSrc) + 1) // +1 to include the terminator
+                        : uiMaxSize;    // No terminator in range: copy full limit
+
+    memcpy(pDst, pSrc, toCopy);
+    return toCopy; // bytes copied in pDst string (CAN count the string terminator)
+}
+
+size_t Str_CopyLimitNull(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc, size_t uiMaxSize) noexcept
 {
     if (uiMaxSize == 0)
     {
@@ -647,44 +669,23 @@ size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
         return 0;
     }
 
-    size_t qty = 0; // how much bytes do i have to copy? (1 based)
-    do
-    {
-        if (pSrc[qty++] == '\0')
-        {
-            break;
-        }
-    } while (qty < uiMaxSize);
-    memcpy(pDst, pSrc, qty);
-    return qty; // bytes copied in pDst string (CAN count the string terminator)
+    // Reserve one byte for the string terminator
+    const size_t uiCopyMax = uiMaxSize - 1;
+
+    // Find the terminator within the first copyMax bytes (fast memchr)
+    const void* nul = memchr(pSrc, '\0', uiCopyMax);
+    const size_t len = nul
+                          ? (static_cast<const char*>(nul) - pSrc)  // length up to the terminator
+                          : uiCopyMax;                                // no terminator found within limit
+
+    // Copy the determined length and append terminator
+    memcpy(pDst, pSrc, len);
+    pDst[len] = '\0';
+
+    return len; // bytes copied in pDst string (not counting the string terminator)
 }
 
-size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
-{
-    if (uiMaxSize == 0)
-    {
-        return 0;
-    }
-    if (pSrc[0] == '\0')
-    {
-        pDst[0] = '\0';
-        return 0;
-    }
-
-    size_t qty = 0; // how much bytes do i have to copy? (1 based)
-    do
-    {
-        if (pSrc[qty++] == '\0')
-        {
-            break;
-        }
-    } while (qty < uiMaxSize);
-    memcpy(pDst, pSrc, qty);
-    pDst[qty - 1] = '\0'; // null terminate the string
-    return qty - 1; // bytes copied in pDst string (not counting the string terminator)
-}
-
-size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept
+size_t Str_CopyLen(tchar * RESTRICT pDst, lpctstr RESTRICT pSrc) noexcept
 {
     strcpy(pDst, pSrc);
     return strlen(pDst);
@@ -775,7 +776,7 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz) noexcept
     return (dlen + (s - src));	/* count does not include '\0' */
 }
 
-tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len) noexcept
+tchar* Str_FindSubstring(tchar * RESTRICT str, const tchar * RESTRICT substr, size_t str_len, size_t substr_len) noexcept
 {
     if (str_len == 0 || substr_len == 0)
         return nullptr;
@@ -803,7 +804,7 @@ tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t
     return str;
 }
 
-lpctstr Str_GetArticleAndSpace(lpctstr pszWord) noexcept
+lpctstr Str_GetArticleAndSpace(lpctstr RESTRICT pszWord) noexcept
 {
     // NOTE: This is wrong many times.
     //  ie. some words need no article (plurals) : boots.
@@ -823,7 +824,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord) noexcept
     return "a ";
 }
 
-int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStrip) noexcept
+int Str_GetBare(tchar * RESTRICT pszOut, lpctstr RESTRICT pszInp, int iMaxOutSize, lpctstr pszStrip) noexcept
 {
     // That the client can deal with. Basic punctuation and alpha and numbers.
     // RETURN: Output length.
@@ -859,7 +860,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     return (j - 1);
 }
 
-tchar * Str_MakeFiltered(tchar * pStr) noexcept
+tchar * Str_MakeFiltered(tchar * RESTRICT pStr) noexcept
 {
     int len = (int)strlen(pStr);
     for (int i = 0; len; ++i, --len)
@@ -953,7 +954,7 @@ void Str_MakeUnQuoted(tchar* pStr) noexcept
 }
 
 // Returns a pointer to the unquoted part (and overwrites the last quote with a string terminator '\0' char)
-tchar * Str_GetUnQuoted(tchar * pStr) noexcept
+tchar * Str_GetUnQuoted(tchar * RESTRICT pStr) noexcept
 {
     GETNONWHITESPACE(pStr);
     if (*pStr != '"')
