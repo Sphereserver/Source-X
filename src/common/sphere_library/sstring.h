@@ -159,13 +159,13 @@ lpctstr Str_GetArticleAndSpace(lpctstr RESTRICT pszWords) noexcept;
 
 /**
 * @brief Filter specific characters from a string.
-* @param pszOut output string.
-* @param pszInp input string.
-* @param iMaxSize max output size.
-* @param pszStrip characters to strip (default "{|}~", non printable characters for client).
+* @param ptcOut output string.
+* @param ptcSrc input string.
+* @param uiMaxOutSize max output size.
+* @param ptcStripList characters to strip (default "{|}~", non printable characters for client).
 * @return size of the filtered string.
 */
-int Str_GetBare(tchar * RESTRICT pszOut, lpctstr RESTRICT pszInp, int iMaxSize, lpctstr pszStrip = nullptr) noexcept;
+int Str_GetBare(tchar * ptcOut, lpctstr ptcSrc, size_t uiMaxOutSize, lpctstr ptcStripList = nullptr) noexcept;
 
 /**
 * @brief Finds and skip heading and trailing double quotes in a string.

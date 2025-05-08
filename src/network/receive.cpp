@@ -2479,7 +2479,7 @@ bool PacketClientVersion::onReceive(CNetState* net)
 	if (strstr(versionStr, "UO:3D") != nullptr)
 		net->m_clientType = CLIENTTYPE_3D;
 
-	length = (word)Str_GetBare(versionStr, versionStr, (int)length, " '`-+!\"#$%&()*,/:;<=>?@[\\]^{|}~");
+    length = (word)Str_GetBare(versionStr, versionStr, length, " '`-+!\"#$%&()*,/:;<=>?@[\\]^{|}~");
 	if (length > 0)
 	{
 		CClient* client = net->getClient();

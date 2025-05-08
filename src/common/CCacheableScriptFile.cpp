@@ -259,7 +259,7 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
     if (_fileContent->empty() || ((uint)_iCurrentLine >= _fileContent->size()))
         return nullptr;
 
-    std::string const& cur_line = (*_fileContent)[_iCurrentLine];
+    const std::string_view cur_line = (*_fileContent)[_iCurrentLine];
     ++_iCurrentLine;
     if (cur_line.empty())
         return pBuffer;
@@ -267,12 +267,11 @@ tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
     size_t bytes_to_copy = cur_line.size();
     if (bytes_to_copy >= size_t(sizemax))
         bytes_to_copy = size_t(sizemax) - 1;
-    if (cur_line.size() != 0)
-    {
-        const lpctstr cur_line_cstr = cur_line.c_str();
-        size_t copied = Str_CopyLimit(pBuffer, cur_line_cstr, bytes_to_copy);
+    //if (!cur_line.empty())
+    //{
+        size_t copied = Str_CopyLimit(pBuffer, cur_line.data(), bytes_to_copy);
         pBuffer[copied] = '\0';
-    }
+    //}
 
     EXC_CATCH;
     return pBuffer;
@@ -316,6 +315,7 @@ bool CCacheableScriptFile::_useDefaultFile() const
     return ( _IsWriteMode() || ( _GetFullMode() & OF_DEFAULTMODE ));
 }
 /*
+ *
 bool CCacheableScriptFile::useDefaultFile() const
 {
     MT_SHARED_LOCK_RETURN(_useDefaultFile());

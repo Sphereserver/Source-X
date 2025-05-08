@@ -824,7 +824,40 @@ lpctstr Str_GetArticleAndSpace(lpctstr RESTRICT pszWord) noexcept
     return "a ";
 }
 
-int Str_GetBare(tchar * RESTRICT pszOut, lpctstr RESTRICT pszInp, int iMaxOutSize, lpctstr pszStrip) noexcept
+int Str_GetBare(tchar * ptcOut, lpctstr ptcSrc, size_t uiMaxOutSize, lpctstr ptcStripList) noexcept
+{
+    // That the client can deal with. Basic punctuation and alpha and numbers.
+    // RETURN: Output length.
+
+    if (!ptcOut || !ptcSrc || uiMaxOutSize == 0)
+        return 0;
+
+    // Default strip set if none provided: client can't print these
+    ptcStripList = ptcStripList ? ptcStripList : "{|}~";
+
+    tchar* out          = ptcOut;
+    tchar* const outEnd = ptcOut + (uiMaxOutSize - 1);
+
+    // Process each char until SRC ends or output buffer is full
+    for (; *ptcSrc && out < outEnd; ++ptcSrc)
+    {
+        const uchar ch = uchar(*ptcSrc);
+
+        if (ch < ' ' || ch >= 127)  // or !std::isprint(ch)
+            continue;	// Special format chars.
+        if (strchr(ptcStripList, ch))
+            continue;
+
+        *out++ = tchar(ch);
+    }
+
+    // NUL-terminate and return length
+    *out = '\0';
+    return int(out - ptcOut);
+}
+
+/* Old impl.
+int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStrip) noexcept
 {
     // That the client can deal with. Basic punctuation and alpha and numbers.
     // RETURN: Output length.
@@ -859,6 +892,7 @@ int Str_GetBare(tchar * RESTRICT pszOut, lpctstr RESTRICT pszInp, int iMaxOutSiz
     }
     return (j - 1);
 }
+*/
 
 tchar * Str_MakeFiltered(tchar * RESTRICT pStr) noexcept
 {
