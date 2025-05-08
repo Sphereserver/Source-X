@@ -512,6 +512,9 @@ public:
 #define NPC_AI_THREAT			0x00800     // Enable the use of the threat variable when finding for target while fighting.
 	uint m_iNpcAi;      // NPCAI Flags.
 
+    // The chance that a wandering NPC will analyze its surroundings for the current step.
+    uint m_iNPCWanderLookAroundChance;
+
 	//	Experience system
 	bool m_fExperienceSystem;   // Enables the experience system.
 #define EXP_MODE_RAISE_COMBAT   0x0001  // Gain experience in combat.

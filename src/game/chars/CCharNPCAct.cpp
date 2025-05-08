@@ -1126,12 +1126,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		return false;
 
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
-    const int iRand = g_Rand.GetValFast(g_Cfg.m_iMapViewRadar);
-    const CPointMap& ptTop = GetTopPoint();
+    const int iRand = g_Rand.Get16ValFast(g_Cfg.m_iMapViewRadar);
+    const CPointMap& ptTop(GetTopPoint());
 	
-    int iRange = GetVisualRange();
-    if (iRange > g_Cfg.m_iMapViewRadar)
-        iRange = g_Cfg.m_iMapViewRadar;
+    int iRange = std::min(GetVisualRange(), int(g_Cfg.m_iMapViewRadar));
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
@@ -1234,14 +1232,21 @@ void CChar::NPC_Act_Wander()
 		return;
 
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
-    const int iRand = g_Rand.GetValFast(UINT16_MAX);
+    const uint uiRand = uint32_t(g_Rand.Get16ValFast(100));
 	int iStopWandering = 0;
 
-	if ( !(iRand % (7 + (Stat_GetVal(STAT_DEX) / 30))) )
-		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
+    if ( !(uiRand % (7u + (Stat_GetVal(STAT_DEX) / 30u))) )
+        iStopWandering = 1;			// i'm stopping to wander "for the dexterity".
 
-	if ( !(iRand % (2 + TICKS_PER_SEC/2)) )
-	{
+    const CVarDefCont* pTagOverride = GetKey("OVERRIDE.LOOKAROUNDCHANCE", true);
+    uint uiLookAroundChance = pTagOverride
+                                          ? (uint)pTagOverride->GetValNum()
+                                          : g_Cfg.m_iNPCWanderLookAroundChance;
+    uiLookAroundChance = maximum(uiLookAroundChance, 100);
+
+    //if ( !(uiRand % (2u + TICKS_PER_SEC/2)) )
+    if (uiRand >= uiLookAroundChance)
+    {
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
 		if ( NPC_LookAround() )
@@ -1250,7 +1255,7 @@ void CChar::NPC_Act_Wander()
 
 	// Staggering Walk around.
 	m_Act_p = GetTopPoint();
-	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - (iRand % 3)) );
+    m_Act_p.Move( GetDirTurn(m_dirFace, 1 - (uiRand % 3u)) );
 
 	int iReturnToHome = 0;
 
@@ -1271,7 +1276,7 @@ void CChar::NPC_Act_Wander()
 	}
 
 	if (iStopWandering)
-		Skill_Start( SKILL_NONE );
+        Skill_Start( SKILL_NONE );  // It will run NPC_Act_Idle()
 	else
 	{
 		if (iReturnToHome)

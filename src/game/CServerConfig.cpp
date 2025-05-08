@@ -256,6 +256,8 @@ CServerConfig::CServerConfig()
 	_uiStatFlag			= 0;
 
 	m_iNpcAi			= 0;
+    m_iNPCWanderLookAroundChance = 30;
+
 	m_iMaxLoopTimes		= 100000;
 
 	// Third Party Tools
@@ -663,6 +665,7 @@ enum RC_TYPE
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
 	RC_NPCTRAINPERCENT,			// m_iTrainSkillPercent
+    RC_NPCWANDERINGLOOKAROUNDCHANCE, // m_iNPCWanderingLookAroundChance
 	RC_NTSERVICE,				// m_fUseNTService
 	RC_OPTIONFLAGS,				// _uiOptionFlags
 	RC_OVERSKILLMULTIPLY,		// m_iOverSkillMultiply
@@ -753,7 +756,6 @@ enum RC_TYPE
 #endif
 
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
-
 {
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
@@ -958,7 +960,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "NPCTRAINCOST",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillCost)		}},
 	{ "NPCTRAINMAX",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillMax)		}},
 	{ "NPCTRAINPERCENT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillPercent)	}},
-	{ "NTSERVICE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseNTService)			}},
+    { "NPCWANDERLOOKAROUNDCHANCE", { ELEM_MASK_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNPCWanderLookAroundChance)}},
+    { "NTSERVICE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseNTService)			}},
 	{ "OPTIONFLAGS",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiOptionFlags)			}},
 	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iOverSkillMultiply)	}},
 	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iPacketDeathAnimation)	}},

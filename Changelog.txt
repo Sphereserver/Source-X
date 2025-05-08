@@ -4043,3 +4043,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Added: new command line switch `-I=/path/to/ini/`
     Allows you to define path to folder with ini files. Usable, when you want to separate binary from configuration or when running Sphere as Windows service (since services are usually run in C:\Windows\System32).
     Usage: Linux: `.\SphereSvrX64_debug -I=/etc/sphereserver/`, Windows: `SphereSvrX64_nightly.exe -I=C:/sphere/` (trailing slash required).
+
+08-05-2025, Nolok
+- Added: NPCWanderingLookAroundChance ini setting and TAG.OVERRIDE.LOOKAROUNDCHANCE.
+    It allows to change the chance that a wandering NPC will analyze its surroundings for the current step. This also means that the trigger @NPCLookAtChar will fire more frequently.
