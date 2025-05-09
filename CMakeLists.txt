@@ -296,6 +296,3 @@ message(STATUS)
 message(STATUS "Retrieving git data...")
 include("cmake/GitStatus.cmake")
 message(STATUS)
-
-get_target_property(sqlite_flags sqlite COMPILE_OPTIONS)
-message(STATUS "sqlite flags ${sqlite_flags}")
