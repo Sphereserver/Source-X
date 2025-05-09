@@ -19,6 +19,14 @@ if(NOT MSVC)
         -fdata-sections
     )
 
+    if(FORCE_DEBUG_INFO)
+        list(
+            APPEND
+            compiler_options_base
+            -ggdb3
+        )
+    endif()
+
     list(
         APPEND
         compiler_options_warnings_base
@@ -95,7 +103,7 @@ if(NOT MSVC)
 
     if("${ENABLED_SANITIZER}" STREQUAL "TRUE")
         # -fno-omit-frame-pointer disables a good optimization which might corrupt the debugger stack trace.
-        set(local_compile_options_nondebug -ggdb3 -Og -fno-omit-frame-pointer -fno-inline)
+        set(local_compile_options_nondebug -ggdb3 -O1 -fno-omit-frame-pointer -fno-inline-small-functions)
         set(local_link_options_nondebug) #-gsplit-dwarf or -gmacro if i want to add lto and there are some missing symbols
     else()
         # If using ThinLTO: -flto=thin -fsplit-lto-unit
@@ -104,12 +112,13 @@ if(NOT MSVC)
         set(local_link_options_nondebug)#-flto)
     endif()
 
-    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        list(APPEND local_link_options_nondebug -Wl,-dead_strip)
-    else()
-        list(APPEND local_link_options_nondebug -Wl,--gc-sections)
-    endif()
-
+    #if(NOT FORCE_DEBUG_INFO)
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+            list(APPEND local_link_options_nondebug -Wl,-dead_strip)
+        else()
+            list(APPEND local_link_options_nondebug -Wl,--gc-sections)
+        endif()
+    #endif()
 
     set(custom_compile_options_release
         ${local_compile_options_nondebug}
@@ -125,7 +134,7 @@ if(NOT MSVC)
         CACHE INTERNAL STRING
     )
     set(custom_compile_options_debug
-        -ggdb3 -O0 -fno-omit-frame-pointer -fno-inline
+        -ggdb3 -O0 -fno-omit-frame-pointer -fno-inline-functions #-fno-inline
         CACHE INTERNAL STRING
     )
 
@@ -156,4 +165,4 @@ if(NOT MSVC)
         message(STATUS "Adding the following linker options specific to 'Debug' build: ${custom_link_options_debug}.")
     endif()
 
-endif()
+endif(NOT MSVC)

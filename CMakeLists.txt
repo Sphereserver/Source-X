@@ -40,7 +40,6 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL "")
 message(STATUS "Scanning system build tools...")
 project(SphereServer CXX C) # does a scan for C++ and C compilers
 
-
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 # We need to do this after "project", otherwise CMake doesn't know where it's running.
 if(NOT TOOLCHAIN_LOADED)
@@ -70,18 +69,16 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 # In some cases, CMake also sets other predefined flags, which we don't want.
 #[[
-set(CMAKE_C_FLAGS "")
 set(CMAKE_C_FLAGS_DEBUG "")
 set(CMAKE_C_FLAGS_NIGHTLY "")
 set(CMAKE_C_FLAGS_RELEASE "")
 
-set(CMAKE_CXX_FLAGS "")
 set(CMAKE_CXX_FLAGS_DEBUG "")
 set(CMAKE_CXX_FLAGS_NIGHTLY "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
-set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 ]]
 # Example: using MSVC, /RTC1 is globally added (all projects) to DEBUG builds. It's mostly fine, except in some cases where we don't want it...
@@ -106,6 +103,7 @@ if(WIN32)
         option(WIN_GENERATE_CRASHDUMP "For non-Debug builds, add Windows Structured Exception Handling and generate a Crash Dump if a fatal SE is thrown." FALSE)
     endif()
 endif()
+option(FORCE_DEBUG_INFO "Force generation of debug info, useful for profiling Nightly/Release builds." FALSE)
 option(CROSSCOMPILE "Are we compiling for a different target architecture?" FALSE)
 option(
     RUNTIME_STATIC_LINK
@@ -220,10 +218,12 @@ if(SINGLE_TARGET)
         #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
         target_precompile_headers(spheresvr_release ${pch_options})
 
-        add_custom_command(TARGET spheresvr_release POST_BUILD
-            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_release>
-            COMMENT "Stripping executable"
-        )
+        if(NOT ${FORCE_DEBUG_INFO})
+            add_custom_command(TARGET spheresvr_release POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_release>
+                COMMENT "Stripping executable"
+            )
+        endif()
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
         set(TARGETS ${TARGETS} spheresvr_nightly)
@@ -238,10 +238,12 @@ if(SINGLE_TARGET)
         #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
         target_precompile_headers(spheresvr_nightly ${pch_options})
 
-        add_custom_command(TARGET spheresvr_nightly POST_BUILD
-            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_nightly>
-            COMMENT "Stripping executable"
-        )
+        if(NOT ${FORCE_DEBUG_INFO})
+            add_custom_command(TARGET spheresvr_nightly POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_nightly>
+                COMMENT "Stripping executable"
+            )
+        endif()
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
         set(TARGETS ${TARGETS} spheresvr_debug)
@@ -294,3 +296,6 @@ message(STATUS)
 message(STATUS "Retrieving git data...")
 include("cmake/GitStatus.cmake")
 message(STATUS)
+
+get_target_property(sqlite_flags sqlite COMPILE_OPTIONS)
+message(STATUS "sqlite flags ${sqlite_flags}")
