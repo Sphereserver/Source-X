@@ -25,13 +25,13 @@ function(toolchain_exe_stuff_common)
     #-- Apply compiler flags, only the ones specific per build type.
 
     if(TARGET spheresvr_release)
-        target_compile_options(spheresvr_release PUBLIC ${custom_compile_options_release})
+        target_compile_options(spheresvr_release PRIVATE ${custom_compile_options_release})
     endif()
     if(TARGET spheresvr_nightly)
-        target_compile_options(spheresvr_nightly PUBLIC ${custom_compile_options_nightly})
+        target_compile_options(spheresvr_nightly PRIVATE ${custom_compile_options_nightly})
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_options(spheresvr_debug PUBLIC ${custom_compile_options_debug})
+        target_compile_options(spheresvr_debug PRIVATE ${custom_compile_options_debug})
     endif()
 
     #-- Store common linker flags.
@@ -46,13 +46,13 @@ function(toolchain_exe_stuff_common)
     #-- Apply linker flags, only the ones specific per build type.
 
     if(TARGET spheresvr_release)
-        target_link_options(spheresvr_release PUBLIC ${custom_link_options_release})
+        target_link_options(spheresvr_release PRIVATE ${custom_link_options_release})
     endif()
     if(TARGET spheresvr_nightly)
-        target_link_options(spheresvr_nightly PUBLIC ${custom_link_options_nightly})
+        target_link_options(spheresvr_nightly PRIVATE ${custom_link_options_nightly})
     endif()
     if(TARGET spheresvr_debug)
-        target_link_options(spheresvr_debug PUBLIC ${custom_link_options_debug})
+        target_link_options(spheresvr_debug PRIVATE ${custom_link_options_debug})
     endif()
 
     #-- Store common define macros.
@@ -72,13 +72,13 @@ function(toolchain_exe_stuff_common)
     #-- Apply define macros, only the ones specific per build type.
 
     if(TARGET spheresvr_release)
-        target_compile_definitions(spheresvr_release PUBLIC NDEBUG THREAD_TRACK_CALLSTACK)
+        target_compile_definitions(spheresvr_release PRIVATE NDEBUG THREAD_TRACK_CALLSTACK)
     endif()
     if(TARGET spheresvr_nightly)
-        target_compile_definitions(spheresvr_nightly PUBLIC NDEBUG THREAD_TRACK_CALLSTACK _NIGHTLYBUILD)
+        target_compile_definitions(spheresvr_nightly PRIVATE NDEBUG THREAD_TRACK_CALLSTACK _NIGHTLYBUILD)
     endif()
     if(TARGET spheresvr_debug)
-        target_compile_definitions(spheresvr_debug PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP)
+        target_compile_definitions(spheresvr_debug PRIVATE _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP)
     endif()
 
     #-- Now apply the common compiler options, preprocessor macros, linker options.

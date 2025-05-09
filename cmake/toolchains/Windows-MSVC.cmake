@@ -122,9 +122,12 @@ function(toolchain_exe_stuff)
     # gersemi: off
     target_compile_options(spheresvr PRIVATE
         ${cxx_compiler_flags_common}
-        $<$<CONFIG:Release>: ${local_msvc_cmdline_runtime_lib_nondebug} ${local_msvc_exception_handler}  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-        $<$<CONFIG:Nightly>: ${local_msvc_cmdline_runtime_lib_nondebug} ${local_msvc_exception_handler}  /Oy /GL /GA /Gw /Gy /GF $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1 /Zi,/O2>>
-        $<$<CONFIG:Debug>:   ${local_msvc_cmdline_runtime_lib_debug} /EHsc /Oy- /ob1 /Od /Gs $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
+        $<$<CONFIG:Release>: ${local_msvc_cmdline_runtime_lib_nondebug} ${local_msvc_exception_handler}  /Oy /GL /GA /Gw /Gy /GF
+            $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1,/O2> $<$<BOOL:(${ENABLED_SANITIZER} OR ${FORCE_DEBUG_INFO})>,/Zi>>
+        $<$<CONFIG:Nightly>: ${local_msvc_cmdline_runtime_lib_nondebug} ${local_msvc_exception_handler}  /Oy /GL /GA /Gw /Gy /GF
+            $<IF:$<BOOL:${ENABLED_SANITIZER}>,/O1,/O2> $<$<BOOL:(${ENABLED_SANITIZER} OR ${FORCE_DEBUG_INFO})>,/Zi>>
+        $<$<CONFIG:Debug>:   ${local_msvc_cmdline_runtime_lib_debug} /EHsc /Oy- /ob1 /Od /Gs
+            $<IF:$<BOOL:${ENABLED_SANITIZER}>,/Zi,/ZI>>
         # ASan (and compilation for ARM arch) doesn't support edit and continue option (ZI)
     )
     # gersemi: on
