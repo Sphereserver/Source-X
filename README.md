@@ -158,6 +158,59 @@ Building will require more packages than the ones needed to run Sphere.
 
 Just run `cmake --build .` in the build directory (the one where you have asked CMake to create its files).
 
+## Debian package
+
+Debian package is an installation package for Linux Debian and its derivates (Ubuntu, Linux Mint, etc.) and intended to 
+be run as a service. Folder structure is as follows:
+- Binary is located in `/usr/bin/` directory (use `which sphereserver` to locate it).
+- Configuration files (ini) are in `/etc/sphereserver/` directory.
+- Log files are stored in `/var/log/sphereserver/` directory.
+- Everything else is in `/opt/sphereserver/`.
+
+These paths are automatically replaced in sphere.ini during installation.
+
+### Build
+
+Building deb package is pretty straightforward. The requirements are the same, as you would compile code by hand. One
+extra requirement is _debhelper_ package (`sudo apt install debhelper`).
+
+**Step by step building:**
+1) Clone repository.
+2) Change directory to wherever you cloned repository.
+3) Since we are in nightly, there is no actual SemVer changelog that we can include, and we have to use workaround to
+   generate one. By running `cat debian/data/changelog | sed -e "s/@version@/$(git rev-list --count HEAD)/" -e "s/@date@/$(date -R)/" > debian/changelog`
+   you will generate one. This command takes deb changelog template (in `debian/data/changelog`) and replaces __version__ 
+   and __date__ variables with git revision and current date.
+4) Build package by running `dpkg-buildpackage -us -uc -b` (arguments are `-b` = build, `-us` and `-uc` = don't sign 
+   built files with OpenPGP key). This will compile sources and create debian package, which will be stored in the parent 
+   directory (i.e., if we are building in `/home/dev/source/` then package will be in `/home/dev/`). The cmake is 
+   predefined to build a Linux x86_64 Nightly version of SphereServer. All build commands and switches are defined in 
+   `debian/rules` file.
+
+### Installation
+
+When you download or build the package, you have to make it executable `sudo chmod +x FILENAME.deb`. Then you can 
+install the package by running `sudo apt install FILENAME.deb`. The installation process will download required 
+dependencies, show you some info about SphereServer being in nightly version, create an owner game account (admin/admin), 
+create dedicated linux user `sphereserver`, directory structure and service files for you.
+
+After installation, you will have to provide mul files and scripts to `/opt/sphereserver/mul/` and`/opt/sphereserver/scripts/` 
+folder and `AGREE=1` in sphere.ini.
+
+When you are finished with configuration, you can enable/start services by running `sudo systemctl enable sphereserver` 
+and `sudo systemctl start sphereserver`. To check, if service is running, type `systemctl status sphereserver`, check 
+the journal (`journalctl -u sphereserver`) or sphere logs.
+
+### Updating
+
+Updating is the same as installation, download / build package, run `sudo chmod +x FILENAME.deb` and `sudo apt install FILENAME.deb`. 
+If any changes happened in ini files and are in conflict with your settings, you will be asked to review them.
+
+### Removal
+
+To remove sphereserver, run `sudo apt remove sphereserver` and `sudo apt remove sphereserver --purge`. All files related
+to sphereserver will be deleted.
+
 ## Coding Notes (add as you wish to standardize the coding for new contributors)
 
 + Make sure you can compile and run the program before pushing a commit.

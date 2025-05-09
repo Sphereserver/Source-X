@@ -1,0 +1,9 @@
+*.debhelper.log
+*.debhelper
+*.substvars
+debhelper-build-stamp
+files
+sphereserver/
+
+# Temporary disable changelog from versioning, since we will be using bash script during development.
+/changelog

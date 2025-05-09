@@ -1,0 +1,14 @@
+Template: sphereserver/info
+Type: note
+Description: This package is intended to be run as a system service
+ Installer will install default configuration and administrator account
+ (admin/admin).
+ .
+ You need to supply scripts to /opt/sphereserver/scripts, mul files to
+ /opt/sphereserver/mul (or any path defined in sphere.ini) and explicitly
+ enable AGREE option in sphere.ini.
+ .
+ Ini files are placed in /etc/sphereserver/ folder.
+ .
+ After configuration, you can enable and start sphereserver service and connect
+ to game via client or telnet.

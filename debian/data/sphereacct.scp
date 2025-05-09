@@ -1,0 +1,7 @@
+// Accounts are periodically moved to the sphereaccu.scp file.
+// All account changes should be made here.
+// Use the /ACCOUNT UPDATE command to force accounts to update.
+
+[admin]
+PLEVEL=7
+PASSWORD=admin
