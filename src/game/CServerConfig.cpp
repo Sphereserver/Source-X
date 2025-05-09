@@ -665,7 +665,7 @@ enum RC_TYPE
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
 	RC_NPCTRAINPERCENT,			// m_iTrainSkillPercent
-    RC_NPCWANDERINGLOOKAROUNDCHANCE, // m_iNPCWanderingLookAroundChance
+    RC_NPCWANDERLOOKAROUNDCHANCE, // m_iNPCWanderLookAroundChance
 	RC_NTSERVICE,				// m_fUseNTService
 	RC_OPTIONFLAGS,				// _uiOptionFlags
 	RC_OVERSKILLMULTIPLY,		// m_iOverSkillMultiply
