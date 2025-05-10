@@ -71,9 +71,8 @@ public:
 	CStoneMember(CItemStone* pStone, CUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CUID loyaluidLink = CUID(UID_PLAIN_CLEAR), bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
 	virtual ~CStoneMember();
 
-private:
-	CStoneMember(const CStoneMember& copy);
-	CStoneMember& operator=(const CStoneMember& other);
+    CStoneMember(const CStoneMember& copy) = delete;
+    CStoneMember& operator=(const CStoneMember& other) = delete;
 
 public:
 	CStoneMember* GetNext() const;

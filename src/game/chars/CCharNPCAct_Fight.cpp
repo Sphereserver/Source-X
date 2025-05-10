@@ -209,7 +209,7 @@ void CChar::NPC_Act_Fight()
 
     if ((m_pNPC->m_Brain == NPCBRAIN_GUARD) &&
         (m_atFight.m_iWarSwingState == WAR_SWING_READY) &&
-        !g_Rand.GetVal(3))
+        !g_Rand.Get16ValFast(3))
     {
         // If a guard is ever too far away (missed a chance to swing)
         // Teleport me closer.

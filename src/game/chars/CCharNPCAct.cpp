@@ -117,14 +117,9 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
         }
         else
         {
-            const CSector *pItemSector = pItem->GetTopSector();
-            ASSERT(pItemSector);    // fPlaced is true, so the current sector should be valid
-#ifdef _DEBUG
             const CSector *pCharSector = GetTopSector();
             ASSERT(pCharSector);
-            ASSERT(pCharSector == pItemSector);
-#endif
-            if (pItemSector->IsSleeping() && !_IsSleeping())
+            if (pCharSector->IsSleeping() && !_IsSleeping())
             {
                 // The char is temporarily walking in a sleeping sector.
                 // The items it creates need to be able to decay, even if in a sleeping sector.
@@ -613,58 +608,86 @@ int CChar::NPC_WalkToPoint( bool fRun )
 
 	EXC_SET_BLOCK("Speed counting");
 	// How fast can they move.
-	int64 iTickNext;
+    int64 iTickNext = -1;
 
-	// TAG.OVERRIDE.MOVERATE
-	int64 tTick;
-    CVarDefCont * pVal = GetKey("OVERRIDE.MOVEDELAY", true);
-    if (pVal)
+    int64 iMoveStyle = GetKeyNum("OVERRIDE.MOVESTYLE", true);
+    if ((iMoveStyle == 1) || IsSetOF(OF_NPCMovementOldStyle))
     {
-        iTickNext = pVal->GetValNum();  // foot walking speed
-        if (IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) // On Mount
-        {
-            if (IsStatFlag(STATF_FLY))  // Running
-            {
-                iTickNext /= 4; // 4 times faster when running while it's on a mount
-            }
-            else
-            {
-                iTickNext /= 2; // 2 times faster when walking while it's on a mount
-            }
-        }
-        else
-        {
-            if (IsStatFlag(STATF_FLY))
-            {
-                iTickNext /= 2; // 2 times faster when running.
-            }
-        }
-    }
-    else
-    {
-        CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
-        if (pValue)
-            tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
-        else
-            tTick = pCharDef->m_iMoveRate;	//no tag.override.moverate, we get default moverate (created from ini's one).
-        // END TAG.OVERRIDE.MOVERATE
         if (fRun)
         {
-            if (IsStatFlag(STATF_PET))	// pets run a little faster.
+            if (IsStatFlag(STATF_PET)) // pets run a little faster.
             {
                 if (iDex < 75)
                     iDex = 75;
             }
-            iTickNext = MSECS_PER_SEC / 4 + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 5) * MSECS_PER_SEC / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
+            iTickNext = MSECS_PER_SEC / 4 + g_Rand.GetValFast((100 - iDex) / 5) * MSECS_PER_SEC / 10;
         }
         else
-            iTickNext = MSECS_PER_SEC + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 3) * MSECS_PER_SEC / 10;
-    }
+            iTickNext = MSECS_PER_SEC + g_Rand.GetValFast((100 - iDex) / 3) * MSECS_PER_SEC / 10;
 
-	if (iTickNext < MSECS_PER_TENTH) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
-		iTickNext = MSECS_PER_TENTH;
-	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
-		iTickNext = 5 * MSECS_PER_SEC;
+        CVarDefCont *pValue = GetKey("OVERRIDE.MOVERATE", true);
+        if (pValue)
+        {
+            int64 tTick = pValue->GetValNum();
+            if (tTick < 1)
+                tTick = 1;
+            iTickNext = (iTickNext * tTick) / 100;
+        }
+        else
+        {
+            iTickNext = (iTickNext * pCharDef->m_iMoveRate) / 100;
+        }
+        if (iTickNext < 1)
+            iTickNext = 1;
+    }
+    else
+    {
+        int64 tTick;
+        CVarDefCont * pVal = GetKey("OVERRIDE.MOVEDELAY", true);
+        if (pVal)
+        {
+            iTickNext = pVal->GetValNum();  // foot walking speed
+            if (IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) // On Mount
+            {
+                if (IsStatFlag(STATF_FLY))  // Running
+                    iTickNext /= 4; // 4 times faster when running while it's on a mount
+                else
+                    iTickNext /= 2; // 2 times faster when walking while it's on a mount
+            }
+            else
+            {
+                if (IsStatFlag(STATF_FLY))
+                {
+                    iTickNext /= 2; // 2 times faster when running.
+                }
+            }
+        }
+        else
+        {
+            CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
+            if (pValue)
+                tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
+            else
+                tTick = pCharDef->m_iMoveRate;	//no tag.override.moverate, we get default moverate (created from ini's one).
+
+            if (fRun)
+            {
+                if (IsStatFlag(STATF_PET))	// pets run a little faster.
+                {
+                    if (iDex < 75)
+                        iDex = 75;
+                }
+                iTickNext = MSECS_PER_SEC / 4 + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 5) * MSECS_PER_SEC / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
+            }
+            else
+                iTickNext = MSECS_PER_SEC + g_Rand.GetValFast(int32(100 - (iDex*tTick) / 100) / 3) * MSECS_PER_SEC / 10;
+        }
+
+        if (iTickNext < MSECS_PER_TENTH) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
+            iTickNext = MSECS_PER_TENTH;
+        else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
+            iTickNext = 5 * MSECS_PER_SEC;
+    }
 
     _SetTimeout(iTickNext);
 	EXC_CATCH;
@@ -1103,12 +1126,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		return false;
 
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
-    const int iRand = g_Rand.GetValFast(g_Cfg.m_iMapViewRadar);
-    const CPointMap& ptTop = GetTopPoint();
+    const int iRand = g_Rand.Get16ValFast(g_Cfg.m_iMapViewRadar);
+    const CPointMap& ptTop(GetTopPoint());
 	
-    int iRange = GetVisualRange();
-    if (iRange > g_Cfg.m_iMapViewRadar)
-        iRange = g_Cfg.m_iMapViewRadar;
+    int iRange = std::min(GetVisualRange(), int(g_Cfg.m_iMapViewRadar));
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
@@ -1211,14 +1232,21 @@ void CChar::NPC_Act_Wander()
 		return;
 
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
-    const int iRand = g_Rand.GetValFast(UINT16_MAX);
+    const uint uiRand = uint32_t(g_Rand.Get16ValFast(100));
 	int iStopWandering = 0;
 
-	if ( !(iRand % (7 + (Stat_GetVal(STAT_DEX) / 30))) )
-		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
+    if ( !(uiRand % (7u + (Stat_GetVal(STAT_DEX) / 30u))) )
+        iStopWandering = 1;			// i'm stopping to wander "for the dexterity".
 
-	if ( !(iRand % (2 + TICKS_PER_SEC/2)) )
-	{
+    const CVarDefCont* pTagOverride = GetKey("OVERRIDE.LOOKAROUNDCHANCE", true);
+    uint uiLookAroundChance = pTagOverride
+                                          ? (uint)pTagOverride->GetValNum()
+                                          : g_Cfg.m_iNPCWanderLookAroundChance;
+    uiLookAroundChance = maximum(uiLookAroundChance, 100);
+
+    //if ( !(uiRand % (2u + TICKS_PER_SEC/2)) )
+    if (uiRand >= uiLookAroundChance)
+    {
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
 		if ( NPC_LookAround() )
@@ -1227,7 +1255,7 @@ void CChar::NPC_Act_Wander()
 
 	// Staggering Walk around.
 	m_Act_p = GetTopPoint();
-	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - (iRand % 3)) );
+    m_Act_p.Move( GetDirTurn(m_dirFace, 1 - (uiRand % 3u)) );
 
 	int iReturnToHome = 0;
 
@@ -1248,7 +1276,7 @@ void CChar::NPC_Act_Wander()
 	}
 
 	if (iStopWandering)
-		Skill_Start( SKILL_NONE );
+        Skill_Start( SKILL_NONE );  // It will run NPC_Act_Idle()
 	else
 	{
 		if (iReturnToHome)
@@ -1604,7 +1632,7 @@ void CChar::NPC_Act_Looting()
 	if ( pCorpse )
 		Speak(g_Cfg.GetDefaultMsg(DEFMSG_LOOT_RUMMAGE), HUE_TEXT_DEF, TALKMODE_EMOTE);
 
-	ItemBounce(pItem, false);
+	ItemBounce(pItem, g_Cfg.m_iBounceMessage);
     UpdateAnimate(ANIM_PILLAGE);
     SetTimeout(1000);
 }
@@ -1839,7 +1867,7 @@ bool CChar::NPC_Act_Food()
 				case NPCACT_NAPPING:
 				case NPCACT_FLEE:
 					{
-						CPointMap pt = pClosestFood->GetTopPoint();
+                        CPointMap pt(pClosestFood->GetTopPoint());
 						if ( CanMoveWalkTo(pt) )
 						{
 							m_Act_p = pt;
@@ -1877,7 +1905,7 @@ bool CChar::NPC_Act_Food()
 	if ( fSearchGrass )
 	{
         const CCharBase *pCharDef = Char_GetDef();
-        const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
+        const CResourceID rid(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
@@ -1898,7 +1926,7 @@ bool CChar::NPC_Act_Food()
 			}
 			else									//	search for grass nearby
 			{
-				CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+                CPointMap pt = CWorldMap::FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance, m_pNPC->m_Home_Dist_Wander));
 				if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
 				{
 					if (( pt.m_x != GetTopPoint().m_x ) && ( pt.m_y != GetTopPoint().m_y ) && ( pt.m_map == GetTopPoint().m_map ))
@@ -2701,7 +2729,7 @@ void CChar::NPC_ExtraAI()
 	{
 		CItem *pLightSource = LayerFind(LAYER_HAND2);
 		if ( pLightSource && (pLightSource->IsType(IT_LIGHT_OUT) || pLightSource->IsType(IT_LIGHT_LIT)) )
-			ItemBounce(pLightSource, false);
+			ItemBounce(pLightSource, g_Cfg.m_iBounceMessage);
 	}
 
 	EXC_CATCH;

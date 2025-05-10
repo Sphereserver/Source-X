@@ -449,6 +449,8 @@ void CNTService::CmdMainStart()
 //
 //	FUNCTION: main()
 //
+// @todo Refactor installing and starting service after https://github.com/Sphereserver/Source-X/issues/1400 is resolved.
+//
 /////////////////////////////////////////////////////////////////////////////////////
 #ifdef MSVC_COMPILER
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
@@ -461,7 +463,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	TCHAR	*argv[32];
 	argv[0] = nullptr;
-	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " \t") + 1;
+	int argc = Str_ParseCmds(lpCmdLine, &argv[1], ARRAY_COUNT(argv)-1, " =\t") + 1;
+
+    // Process the command line arguments.
+    if (argc > 1 && _IS_SWITCH(*argv[1]))
+    {
+        // Check if we are changing the ini path.
+        if (toupper(argv[1][1]) == 'I')
+        {
+            if (argc == 3)
+            {
+                // Clean quotes around path, if it contains spaces.
+                const char* raw = argv[2];
+                char path[SPHERE_MAX_PATH];
+                size_t j = 0;
+                for (size_t i = 0; raw[i] != '\0' && j < sizeof(path) - 1; ++i) {
+                    if (raw[i] != '"') {
+                        path[j++] = raw[i];
+                    }
+                }
+                path[j] = '\0';
+
+                // Define path to the ini files.
+                g_Cfg.SetIniDirectory(path);
+            }
+        }
+    }
 
 	// We need to find out what the server name is and the log files folder... look it up in the .ini file
     if (!g_Cfg.LoadIni(false))

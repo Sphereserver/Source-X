@@ -539,23 +539,22 @@ bool CScriptObj::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 		// <dSOMEVAL> same as <eval <SOMEVAL>> to get dec from the val
 		if (( *ptcKey == 'd' ) || ( *ptcKey == 'D' ))
 		{
-			lpctstr arg = ptcKey + 1;
-			if ( r_WriteVal(arg, sVal, pSrc) )
+            lpctstr ptcArg = ptcKey + 1;
+            if ( r_WriteVal(ptcArg, sVal, pSrc) )
 			{
 				if ( *sVal != '-' )
-					sVal.FormatLLVal(ahextoi64(sVal));
-
+                    sVal.FormatLLVal(Str_ToLL(sVal.GetBuffer()).value_or(0));
 				return true;
 			}
 		}
         // <hSOMEVAL> same as <HVAL <SOMEVAL>> to get hex from the val
         else if ((*ptcKey == 'h') || (*ptcKey == 'H'))
         {
-            lpctstr sArgs = ptcKey + 1;
-            if (r_WriteVal(sArgs, sVal, pSrc))
+            lpctstr ptcArg = ptcKey + 1;
+            if (r_WriteVal(ptcArg, sVal, pSrc))
             {
                 if (*sVal != '-')
-                    sVal.FormatLLHex(ahextoi64(sVal));
+                    sVal.FormatLLHex(Str_ToLL(sVal.GetBuffer()).value_or(0));
                 return true;
             }
         }

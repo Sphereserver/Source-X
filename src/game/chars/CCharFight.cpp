@@ -345,11 +345,14 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 
     bool fAggreived = false;
     word wMemTypes = MEMORY_HARMEDBY | MEMORY_IRRITATEDBY;
-    if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+    if (!IsSetCombatFlags(COMBAT_ATTACK_NOAGGREIVED))
     {
-        // I'm the one being attacked first
-        fAggreived = true;
-        wMemTypes |= MEMORY_AGGREIVED;
+        if (!pCharSrc->Memory_FindObjTypes(this, MEMORY_AGGREIVED))
+        {
+            // I'm the one being attacked first
+            fAggreived = true;
+            wMemTypes |= MEMORY_AGGREIVED;
+        }
     }
     Memory_AddObjTypes(pCharSrc, wMemTypes);
 	Attacker_Add(pCharSrc);
@@ -892,15 +895,15 @@ effect_bounce:
 
 		if ( iDisturbChance > g_Rand.GetVal(1000) )
 		{
-			bool bInterrupt = true;
+            bool fInterrupt = true;
 			if (IsTrigUsed(TRIGGER_SPELLINTERRUPT))
 			{
 				CScriptTriggerArgs ArgsInterrupt(m_atMagery.m_iSpell, iDisturbChance);
 				if (pSrc->OnTrigger(CTRIG_SpellInterrupt, this, &ArgsInterrupt) == TRIGRET_RET_TRUE)
-					bInterrupt = false;
+                    fInterrupt = false;
 			}
 
-			if (bInterrupt)
+            if (fInterrupt)
 				Skill_Fail();
 		}
 	}
@@ -908,7 +911,7 @@ effect_bounce:
 	if ( pSrc && (pSrc != this) )
 	{
 		// Update attacker list
-		bool bAttackerExists = false;
+        bool fAttackerExists = false;
         const uint uiSrcUID = pSrc->GetUID().GetPrivateUID();
 		for (LastAttackers& refAttacker : m_lastAttackers)
 		{
@@ -917,11 +920,11 @@ effect_bounce:
 				refAttacker.elapsed = 0;
 				refAttacker.amountDone += maximum( 0, iDmg );
 				refAttacker.threat += maximum( 0, iDmg );
-				bAttackerExists = true;
+                fAttackerExists = true;
 				break;
 			}
 		}
-		if (bAttackerExists == false)
+        if (fAttackerExists == false)
 		{
 			LastAttackers attacker;
 			attacker.charUID = uiSrcUID;
@@ -1189,7 +1192,7 @@ bool CChar::Fight_IsActive() const
 }
 
 // Calculating base DMG (also used for STATUS value)
-int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax ) const
+int CChar::Fight_CalcDamage(const CItem * pWeapon, bool fNoRandom, bool fGetMax ) const
 {
 	ADDTOCALLSTACK("CChar::Fight_CalcDamage");
 
@@ -1314,8 +1317,8 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		iDmgMax += iDmgMax * iDmgBonus / 100;
 	}
 
-	if ( bNoRandom )
-		return( bGetMax ? iDmgMax : iDmgMin );
+    if ( fNoRandom )
+        return( fGetMax ? iDmgMax : iDmgMin );
 	else
 		return( g_Rand.GetVal2(iDmgMin, iDmgMax) );
 }
@@ -1349,10 +1352,10 @@ void CChar::Fight_ClearAll()
 }
 
 // I no longer want to attack this char.
-bool CChar::Fight_Clear(CChar *pChar, bool bForced)
+bool CChar::Fight_Clear(CChar *pChar, bool fForced)
 {
 	ADDTOCALLSTACK("CChar::Fight_Clear");
-	if ( !pChar || !Attacker_Delete(pChar, bForced, ATTACKER_CLEAR_FORCED) )
+    if ( !pChar || !Attacker_Delete(pChar, fForced, ATTACKER_CLEAR_FORCED) )
 		return false;
 
     m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
@@ -2196,7 +2199,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pCharTarg->m_pNPC && (40 >= g_Rand.Get16ValFast(100)) )
 		{
 			pAmmo->UnStackSplit(1);
-			pCharTarg->ItemBounce(pAmmo, false);
+			pCharTarg->ItemBounce(pAmmo, g_Cfg.m_iBounceMessage);
 		}
 		else
 			pAmmo->ConsumeAmount(1);

@@ -40,9 +40,15 @@ void CCryptoKeysHolder::LoadKeyTable(CScript& s)
 
 	while (s.ReadKeyParse())
 	{
+        const std::optional<dword> val = Str_ToU(s.GetKey());
+        if (!val)
+        {
+            g_Log.EventError("Invalid Crypt client version '%s'.\n", s.GetKey());
+            continue;
+        }
 		client_keys.emplace_back(
             CCryptoClientKey{
-                .m_client = ahextoi(s.GetKey()),
+                .m_client = val.value(),
                 .m_key_1 = s.GetArgDWVal(),
                 .m_key_2 = s.GetArgDWVal(),
                 .m_EncType = (ENCRYPTION_TYPE)s.GetArgVal()

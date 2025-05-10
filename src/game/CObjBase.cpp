@@ -92,7 +92,8 @@ static bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 // -CObjBase stuff
 // Either a player, npc or item.
 
-CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs its virtual inheritance.
+CObjBase::CObjBase( bool fItem ) :
+    _sRunningTrigger(false)
 {
 	++ sm_iCount;
 
@@ -101,7 +102,10 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 	_iCreatedResScriptIdx	= _iCreatedResScriptLine	= -1;
     _iRunningTriggerId		= _iCallingObjTriggerId		= -1;
 
-	m_iTimeStampS = 0;
+    _fIsInStatusUpdatesList = false;
+    _fIsInStatusUpdatesAddList = false;
+
+    m_iTimeStampS = 0;
 	m_CanMask = 0;
 
 	m_attackBase = m_attackRange = 0;
@@ -136,8 +140,9 @@ CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not
 
 CObjBase::~CObjBase()
 {
+    ADDTOCALLSTACK("CObjBase::~CObjBase");
+
 	EXC_TRY("Cleanup in destructor");
-	ADDTOCALLSTACK("CObjBase::~CObjBase");
     if (CCSpawn *pSpawn = GetSpawn())    // If I was created from a Spawn
     {
 		CItem* pSpawnLink = pSpawn->GetLink();
@@ -240,6 +245,7 @@ void CObjBase::DeleteCleanup(bool fForce)
 bool CObjBase::Delete(bool fForce)
 {
 	ADDTOCALLSTACK("CObjBase::Delete");
+    EXC_TRY("Cleanup in Delete method");
 
     bool fScheduleDeletion = true;
     const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
@@ -260,13 +266,17 @@ bool CObjBase::Delete(bool fForce)
     }
 
 	DeletePrepare();           // virtual, but if called by the destructor this will fail to call upper (CChar, CItem, etc) virtual methods.
-    DeleteCleanup(fForce);     // not virtual!
+    DeleteCleanup(fForce);    // not virtual!
 
-    if (fScheduleDeletion) {
+    if (fScheduleDeletion)
+    {
         g_World.ScheduleObjDeletion(this);
     }
 
 	return true;
+
+    EXC_CATCH;
+    return false;
 }
 
 CBaseBaseDef* CObjBase::Base_GetDef() const noexcept
@@ -2445,7 +2455,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         {
 			EXC_SET_BLOCK("P or MOVETO");
 			// The "@Click" trigger str should be the same between items and chars...
-			if (0 == _sRunningTrigger.compare(CChar::sm_szTrigName[CTRIG_Click]))
+            if (0 == _sRunningTrigger.Compare(CChar::sm_szTrigName[CTRIG_Click]))
 			{
 				g_Log.EventError("Can't set P in the current trigger. It would cause an infinite loop.\n");
 				return false;
@@ -2794,8 +2804,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					if ( pCharSrc && (( itGumpFound != pClientSrc->m_mapOpenedGumps.end() ) && ( (*itGumpFound).second > 0 )) )
 						break;
 				}
-				pClientSrc->Dialog_Setup( CLIMODE_DIALOG, g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] ),
-					iQty > 1 ? Exp_GetVal( Arg_ppCmd[1]) : 0, this, Arg_ppCmd[2] );
+                pClientSrc->Dialog_Setup(
+                    CLIMODE_DIALOG, // Dialog mode
+                    g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] ), // Dialog resource id
+                    ((iQty > 1) ? Exp_GetVal(Arg_ppCmd[1]) : 0),    // page
+                    this,   // SRC obj
+                    Arg_ppCmd[2]    // arguments, can be empty (nullptr)
+                    );
 			}
 			break;
 		case OV_DIALOGCLOSE:
@@ -3148,7 +3163,7 @@ void CObjBase::UpdatePropertyFlag()
     m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
 	// Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
-    if (!IsTopLevel() || _IsTimerExpired())
+    if (!IsStatusUpdatePending() && (!IsTopLevel() || _IsTimerExpired()))
 	{
 		CWorldTickingList::AddObjStatusUpdate(this, false);
     }
@@ -3157,6 +3172,12 @@ void CObjBase::UpdatePropertyFlag()
 dword CObjBase::GetPropertyHash() const
 {
 	return m_PropertyHash;
+}
+
+
+bool CObjBase::IsStatusUpdatePending() const
+{
+    return _fIsInStatusUpdatesList || _fIsInStatusUpdatesAddList;
 }
 
 void CObjBase::OnTickStatusUpdate()
@@ -3196,15 +3217,58 @@ void CObjBase::_GoAwake()
 void CObjBase::_GoSleep()
 {
 	ADDTOCALLSTACK("CObjBase::_GoSleep");
+
 	CTimedObject::_GoSleep();
 
-	if (_IsTimerSet())
+    if (IsTimeoutTickingActive())
 	{
-		CWorldTickingList::DelObjSingle(this);
-	}
-
-    // Most objects won't be into the status update list, but we have to check anyways.
-	CWorldTickingList::DelObjStatusUpdate(this, false);
+        const bool fDel = CWorldTickingList::DelObjSingle(this);
+        ASSERT(fDel);
+        UnreferencedParameter(fDel);
+    }
+/*
+#ifdef _DEBUG
+        const std::optional<std::pair<int64, CTimedObject*>> optPairRes = CWorldTickingList::IsTimeoutRegistered(this);
+        if (optPairRes.has_value())
+        {
+            g_Log.EventError("CObjBase [defname='%s', cur timer adj=%" PRId64 ", cur timer raw=%" PRId64 ", timeout=%" PRId64 "]"
+                             " expected to have been removed from the Ticking List, but it's still there!.\n",
+                GetResourceName(), _GetTimerAdjusted(), _GetTimeoutRaw(), optPairRes.value().first);
+            ASSERT(false);
+        }
+#endif
+    }
+#ifdef _DEBUG
+    else
+    {
+        const std::optional<std::pair<int64, CTimedObject*>> optPairRes = CWorldTickingList::IsTimeoutRegistered(this);
+        ASSERT(optPairRes.has_value() == false);
+        //UnreferencedParameter(optPairRes);
+    }
+#endif
+*/
+    if (IsStatusUpdatePending())
+    {
+        const bool fDel = CWorldTickingList::DelObjStatusUpdate(this, false);
+        ASSERT(fDel);
+        UnreferencedParameter(fDel);
+    }
+/*
+#ifdef _DEBUG
+        const bool fRes = CWorldTickingList::IsStatusUpdateTickRegistered(this);
+        ASSERT(!fRes);
+        //UnreferencedParameter(fRes);
+#endif
+    }
+#ifdef _DEBUG
+    else
+    {
+        const bool fRes = CWorldTickingList::IsStatusUpdateTickRegistered(this);
+        ASSERT(!fRes);
+        //UnreferencedParameter(fRes);
+    }
+#endif
+*/
 }
 
 bool CObjBase::_CanTick() const
@@ -3582,7 +3646,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 
 bool CObjBase::IsRunningTrigger() const
 {
-	return ((_iRunningTriggerId >= 0) || !_sRunningTrigger.empty());
+    return ((_iRunningTriggerId >= 0) || !_sRunningTrigger.IsEmpty());
 }
 
 bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult)

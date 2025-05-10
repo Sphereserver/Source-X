@@ -1,5 +1,6 @@
 #include "CUOClientVersion.h"
 #include "CLog.h"
+#include "sphere_library/sstring.h"
 #include <algorithm>
 #include <string>
 #include <string_view>
@@ -118,14 +119,17 @@ CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
     if ((ptcVersion == nullptr) || (*ptcVersion == '\0'))
         return;
 
+    tchar ptcVersionBuf[64];
+    Str_CopyLimitNull(ptcVersionBuf, ptcVersion, sizeof(ptcVersionBuf));
+
     // Ranges algorithms not yet supported by Apple Clang...
     // const ptrdiff_t count = std::ranges::count(std::string_view(ptcVersion), '.');
     const auto svVersion = std::string_view(ptcVersion);
     const auto count = std::count(svVersion.cbegin(), svVersion.cend(), '.');
     if (count == 2)
-        ApplyVersionFromStringOldFormat(ptcVersion);
+        ApplyVersionFromStringOldFormat(ptcVersionBuf);
     else if (count == 3)
-        ApplyVersionFromStringNewFormat(ptcVersion);
+        ApplyVersionFromStringNewFormat(ptcVersionBuf);
     else
     {
         // Malformed string?
@@ -166,7 +170,7 @@ bool CUOClientVersion::operator <=(CUOClientVersion const& other) const noexcept
 }
 
 
-void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexcept
+void CUOClientVersion::ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexcept
 {
     // Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
 
@@ -182,7 +186,7 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexc
     }
 
     tchar *piVer[3];
-    Str_ParseCmds(const_cast<tchar *>(ptcVersion), piVer, ARRAY_COUNT(piVer), ".");
+    Str_ParseCmds(ptcVersion, piVer, ARRAY_COUNT(piVer), ".");
 
     // Don't rely on all values reported by client, because it can be easily faked. Injection users can report any
     // client version they want, and some custom clients may also report client version as "Custom" instead X.X.Xy
@@ -195,34 +199,34 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lpctstr ptcVersion) noexc
     m_build = uiLetter;
 }
 
-void CUOClientVersion::ApplyVersionFromStringNewFormat(lpctstr ptcVersion) noexcept
+void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexcept
 {
     // Get version of newer clients, which use only 4 numbers separated by dots (example: 6.0.1.1)
 
-    const std::string_view sw(ptcVersion);
-    const size_t dot1 = sw.find_first_of('.', 0);
-    const size_t dot2 = sw.find_first_of('.', dot1 + 1);
-    const size_t dot3 = sw.find_first_of('.', dot2 + 1);
-    const auto np = std::string_view::npos;
+    const std::string_view sv(ptcVersion);
+    const size_t dot1 = sv.find_first_of('.', 0);
+    const size_t dot2 = sv.find_first_of('.', dot1 + 1);
+    const size_t dot3 = sv.find_first_of('.', dot2 + 1);
+    constexpr auto np = std::string_view::npos;
     if (np == dot1 || np == dot2 || np == dot3)
         return;
 
-    const std::string_view sw1(sw.data(), dot1 - 1);
-    const std::string_view sw2(sw1.data() + dot1, dot2 - 1);
-    const std::string_view sw3(sw2.data() + dot2, dot3 - 1);
-    const std::string_view sw4(sw3.data() + dot3);
+    const std::string_view sv1(sv.data(), dot1 - 1);
+    const std::string_view sv2(sv1.data() + dot1, dot2 - 1);
+    const std::string_view sv3(sv2.data() + dot2, dot3 - 1);
+    const std::string_view sv4(sv3.data() + dot3);
 
-    uint val1, val2, val3, val4;
+    std::optional<uint> val1, val2, val3, val4;
     bool ok = true;
-    ok = ok && sv_to_num(sw1, &val1);
-    ok = ok && sv_to_num(sw2, &val2);
-    ok = ok && sv_to_num(sw3, &val3);
-    ok = ok && sv_to_num(sw4, &val4);
+    ok = ok && (val1 = Str_ToU(sv1.data(), 10, true)).has_value();
+    ok = ok && (val2 = Str_ToU(sv1.data(), 10, true)).has_value();
+    ok = ok && (val3 = Str_ToU(sv1.data(), 10, true)).has_value();
+    ok = ok && (val4 = Str_ToU(sv1.data(), 10, true)).has_value();
     if (!ok)
         return;
 
-    m_major = val1;
-    m_minor = val2;
-    m_revision = val3;
-    m_build = val4;
+    m_major     = val1.value();
+    m_minor     = val2.value();
+    m_revision  = val3.value();
+    m_build     = val4.value();
 }

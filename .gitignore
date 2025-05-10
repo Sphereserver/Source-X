@@ -2,6 +2,7 @@
 /.cache
 /.git
 /.vscode
+/.idea
 *.vshistory*
 /.kdev*
 /.ctagsd
@@ -50,7 +51,6 @@
 *.*workspace
 *.kdev*
 
-
 # Ignore some files in the parent folder
 CMakeCache.txt
 
@@ -62,3 +62,4 @@ CMakeCache.txt
 /lib/mariadb_connector_c/mysql/config.h
 /lib/mariadb_connector_c/mysql/ma_config.h
 /lib/mariadb_connector_c/mysql/mariadb_version.h
+/lib/zlib/zlib/zconf.h

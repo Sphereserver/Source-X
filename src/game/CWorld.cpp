@@ -424,7 +424,9 @@ void CWorldThread::ScheduleObjDeletion(CSObjContRec* obj)
         delete obj;
     }
     else
+    {
         m_ObjDelete.InsertContentTail(obj);
+    }
 }
 
 void CWorldThread::ScheduleSpecialObjDeletion(CSObjListRec* obj)
@@ -1719,9 +1721,9 @@ void CWorld::Close()
 
     {
 #if MT_ENGINES
-        std::unique_lock<std::shared_mutex> lock_su(_Ticker._ObjStatusUpdates.MT_CMUTEX);
+        std::unique_lock<std::shared_mutex> lock_su(_Ticker._vObjStatusUpdates.MT_CMUTEX);
 #endif
-		_Ticker._ObjStatusUpdates.clear();
+		_Ticker._vObjStatusUpdates.clear();
     }
 
 	m_Parties.clear();
@@ -1779,7 +1781,7 @@ void CWorld::_OnTick()
 	m_ObjDelete.ClearContainer(false);	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 	m_ObjSpecialDelete.ClearContainer();
 
-	int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();
+    const int64 iCurTime = _GameClock.GetCurrentTime().GetTimeRaw();
 
 	EXC_SET_BLOCK("Worldsave checks");
 	// Save state checks

@@ -220,12 +220,11 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 		int nNumber = Exp_GetVal(ptcKey);
 		SKIP_SEPARATORS(ptcKey);
 
-		CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
-
+        CStoneMember * pMember = static_cast <CStoneMember *>(GetContainerHead());
 		for ( int i = 0; pMember != nullptr; pMember = pMember->GetNext() )
-		{
-			if ( !pMember->GetLinkUID().IsChar() ) 
-				continue;
+        {
+            if ( !pMember->GetLinkUID().IsChar() )
+                continue;
 
 			if ( nNumber == i )
 			{
@@ -400,12 +399,19 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 			if (Arg_Qty < 1) // must at least provide the member uid
 				return false;
 
+            std::optional<dword> dwUID = Str_ToU(Arg_ppCmd[0]);
+            if (!dwUID.has_value())
+            {
+                g_Log.EventError("Invalid MEMBER UID '%s', ignoring.\n", Arg_ppCmd[0]);
+                return false;
+            }
+
 			new CStoneMember(
 				this,
-				CUID(ahextoi(Arg_ppCmd[0])), 											// Member's UID
+                CUID(dwUID.value()),                                                              // Member's UID
 				Arg_Qty > 2 ? (STONEPRIV_TYPE)(atoi(Arg_ppCmd[2])) : STONEPRIV_CANDIDATE,// Members priv level (use as a type)
 				Arg_Qty > 1 ? Arg_ppCmd[1] : "",										// Title
-				CUID(ahextoi(Arg_ppCmd[3])),											// Member is loyal to this
+                CUID(Str_ToU(Arg_ppCmd[3]).value_or(UID_PLAIN_CLEAR)),                  // Member is loyal to this
 				Arg_Qty > 4 ? (atoi( Arg_ppCmd[4] ) != 0) : 0,							// Paperdoll stone abbreviation (also if they declared war)
 				Arg_Qty > 5 ? (atoi( Arg_ppCmd[5] ) != 0) : 0,							// If we declared war
 				Arg_Qty > 6 ? atoi( Arg_ppCmd[6] ) : 0);								// AccountGold
@@ -1292,7 +1298,7 @@ int CItemStone::FixWeirdness()
 	int iResultCode = CItem::FixWeirdness();
 	if ( iResultCode )
 	{
-		return( iResultCode );
+        return iResultCode;
 	}
 
 	bool fChanges = false;
@@ -1302,6 +1308,8 @@ int CItemStone::FixWeirdness()
 		CStoneMember * pMemberNext = pMember->GetNext();
 		if ( ! CheckValidMember(pMember))
 		{
+            g_Log.EventError("Invalid MEMBER UID '0%" PRIx32 "', removing.\n", pMember->GetLinkUID().GetObjUID());
+
 			IT_TYPE oldtype = GetType();
 			SetAmount(0);	// turn off validation for now. we don't want to delete other members.
 			delete pMember;

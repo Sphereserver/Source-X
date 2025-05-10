@@ -826,19 +826,25 @@ bool CScript::SeekContext( CScriptLineContext const& LineContext )
 
 CScriptLineContext CScript::_GetContext() const
 {
+    /*
 	CScriptLineContext LineContext;
 	LineContext.m_iLineNum = m_iLineNum;
 	LineContext.m_iOffset = _GetPosition();
 	return LineContext;
+    */
+    return {m_iLineNum, _GetPosition()};
 }
 
 CScriptLineContext CScript::GetContext() const
 {
     MT_UNIQUE_LOCK_SET;
+    /*
     CScriptLineContext LineContext;
     LineContext.m_iLineNum = m_iLineNum;
     LineContext.m_iOffset = _GetPosition();
     return LineContext;
+    */
+    return {m_iLineNum, _GetPosition()};
 }
 
 bool CScript::WriteSection( lpctstr ptcSection, ... )

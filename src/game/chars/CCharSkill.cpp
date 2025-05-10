@@ -33,15 +33,15 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	ASSERT(pdwSkills);
 
 	dword dwSkillTmp;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
+    for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.valid_index(i) )
 			continue;
 
-		dwSkillTmp = MAKEDWORD(i, Skill_GetBase((SKILL_TYPE)i));
+        dwSkillTmp = make_dword(static_cast<word>(i), n_alias_cast<word>(Skill_GetBase((SKILL_TYPE)i)));
 		for ( size_t j = 0; j <= iRank; ++j )
 		{
-			if ( HIWORD(dwSkillTmp) >= HIWORD(pdwSkills[j]) )
+            if ( dword_hi_word(dwSkillTmp) >= dword_hi_word(pdwSkills[j]) )
 			{
 				memmove( &pdwSkills[j + 1], &pdwSkills[j], (iRank - j) * sizeof(dword) );
 				pdwSkills[j] = dwSkillTmp;
@@ -52,7 +52,7 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 
 	dwSkillTmp = pdwSkills[ iRank ];
 	delete[] pdwSkills;
-	return (SKILL_TYPE)(LOWORD( dwSkillTmp ));
+    return (SKILL_TYPE)(dword_low_word( dwSkillTmp ));
 }
 
 // Retrieves a random magic skill, if iVal is set it will only select from the ones with value > iVal
@@ -508,7 +508,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 	}
 }
 
-bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve ) const
+bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int iDifficulty, bool fUseBellCurve ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_CheckSuccess");
 	// PURPOSE:
@@ -523,20 +523,20 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	if ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying or they won't receive any damage on combat even without STATF_Invul set
 		return true;
 
-	if ( !IsSkillBase(skill) || (difficulty < 0) )	// auto failure.
+    if ( !IsSkillBase(skill) || (iDifficulty < 0) )	// auto failure.
 		return false;
 
-	difficulty *= 10;
+    iDifficulty *= 10;
 
 #define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
-	int iSuccessChance = difficulty;
-	if ( bUseBellCurve )
-		iSuccessChance = Calc_GetSCurve( Skill_GetAdjusted(skill) - difficulty, SKILL_VARIANCE );
+    int iSuccessChance = iDifficulty;
+    if ( fUseBellCurve )
+        iSuccessChance = Calc_GetSCurve( Skill_GetAdjusted(skill) - iDifficulty, SKILL_VARIANCE );
 
 	return ( iSuccessChance >= g_Rand.GetVal(1000) );
 }
 
-bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve, bool bForceCheck )
+bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 difficulty, bool fAllowGain, bool fUseBellCurve, bool fForceCheck )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:
@@ -547,10 +547,10 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	// Use a skill instantly. No wait at all.
 	// No interference with other skills.
 
-	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED) && !bForceCheck)
+    if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED) && !fForceCheck)
 		return false;
 
-	int64 result = Skill_CheckSuccess( skill, (int)difficulty, bUseBellCurve );
+    int64 result = Skill_CheckSuccess( skill, (int)difficulty, fUseBellCurve );
 	CScriptTriggerArgs pArgs( 0 , difficulty, result);
 	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
 
@@ -577,13 +577,13 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 
 	if ( result )	// success
 	{
-		if ( bAllowGain )
+        if ( fAllowGain )
 			Skill_Experience( skill, (int)(difficulty) );
 		return true;
 	}
 	else			// fail
 	{
-		if ( bAllowGain )
+        if ( fAllowGain )
 			Skill_Experience( skill, (int)(-difficulty) );
 		return false;
 	}
@@ -697,7 +697,7 @@ bool CChar::Skill_MakeItem_Success()
 			for ( uint n = 1; n < m_atCreate.m_dwAmount; ++n )
 			{
 				CItem *ptItem = CItem::CreateTemplate(m_atCreate.m_iItemID, nullptr, this);
-				ItemBounce(ptItem, false);
+				ItemBounce(ptItem, g_Cfg.m_iBounceMessage);
 			}
 		}
 	}
@@ -975,7 +975,7 @@ int CChar::Skill_NaturalResource_Setup( CItem * pResBit )
 	ASSERT(pResBit);
 
 	// Find the ore type located here based on color.
-	const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
+    const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( pOreDef == nullptr )
 		return -1;
 
@@ -997,7 +997,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
     if (!pResBit->m_itResource.m_ridRes.IsValidResource())
         return nullptr;
 
-	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
+    CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.RegisteredResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( !pOreDef )
 		return nullptr;
 
@@ -1572,7 +1572,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
         }
         SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_FISHING_SUCCESS), pItem->GetName());
         if (m_atResource.m_dwBounceItem)
-            ItemBounce(pItem, false);
+            ItemBounce(pItem, g_Cfg.m_iBounceMessage);
         else
             pItem->MoveToCheck(GetTopPoint(), this);	// put at my feet.
         return 0;
@@ -2549,7 +2549,7 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 			}
 
 			// tamed pets cannot be herded
-			if ( !pChar->IsStatFlag(STATF_PET) )
+			if ( pChar->IsStatFlag(STATF_PET) )
 			{
 				SysMessagef(g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAME ), pChar->GetName());
 				return -SKTRIG_ABORT;
@@ -2691,8 +2691,11 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 		{
 			if ( IsClientActive() )
 				GetClientActive()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
+
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 				Sound( 0x0f9 );
+
+            SysMessageDefault( DEFMSG_MEDITATION_SUCCESS );
 		}
 		++m_atTaming.m_dwStrokeCount;
 
@@ -3950,7 +3953,7 @@ int CChar::Skill_Done()
         {
             if (g_Rand.GetVal(100) < chance)
             {
-                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_dwHitsCur), 0);
+                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_wHitsCur), 0);
                 pTool->OnTakeDamage(amount, nullptr, DAMAGE_GOD);
             }
         }

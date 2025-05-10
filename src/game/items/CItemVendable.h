@@ -20,7 +20,7 @@ private:
 public:
 	static const char *m_sClassName;
 	CItemVendable( ITEMID_TYPE id, CItemBase * pItemDef );
-	virtual ~CItemVendable();
+    virtual ~CItemVendable() override;
 
 	CItemVendable(const CItemVendable& copy) = delete;
 	CItemVendable& operator=(const CItemVendable& other) = delete;

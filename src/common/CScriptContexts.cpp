@@ -22,10 +22,6 @@ bool CScriptLineContext::IsValid() const
     return (m_iOffset != -1);
 }
 
-CScriptLineContext::CScriptLineContext()
-{
-    Init();
-}
 
 //***************************************************************************
 //	CScriptFileContext
@@ -47,17 +43,17 @@ void CScriptFileContext::OpenScript( const CScript * pScriptContext )
 void CScriptFileContext::Close()
 {
     ADDTOCALLSTACK("CScriptFileContext::Close");
+    MT_UNIQUE_LOCK_SET;
+    _Close();
+}
+void CScriptFileContext::_Close()
+{
+    ADDTOCALLSTACK("CScriptFileContext::_Close");
     if ( m_fOpenScript )
     {
         m_fOpenScript = false;
         g_Log.SetScriptContext( m_pPrvScriptContext );
     }
-}
-void CScriptFileContext::_Close()
-{
-    ADDTOCALLSTACK("CScriptFileContext::_Close");
-    MT_UNIQUE_LOCK_SET;
-    Close();
 }
 
 

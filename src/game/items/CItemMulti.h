@@ -63,15 +63,15 @@ private:
 
     // house general
     CUID  _uidMovingCrate;      // Moving Crate's container.
-    bool _fIsAddon;             // House AddOns are also multis
     HOUSE_TYPE _iHouseType;
     uint8 _iMultiCount;         // Does this counts towars the char's house limit
+    bool _fIsAddon;             // House AddOns are also multis
 
     // house storage
     uint16 _uiBaseStorage;       // Base limit for secure storage (Max = 65535).
-    uint8  _uiBaseVendors;       // Base limit for player vendors (Max = 255).
     uint16 _uiIncreasedStorage;  // % of increasd storage. Note: uint8 should be enough since the default max is 60%, but someone may want 300%, 1000% or even more.
     // Total Storage = _iBaseStorage + ( _iBaseStorage * _iIncreasedStorage )
+    uint8  _uiBaseVendors;       // Base limit for player vendors (Max = 255).
     uint8 _uiLockdownsPercent;   // % of Total Storage reserved for locked down items. (Default = 50%)
 
 protected:
@@ -584,7 +584,7 @@ protected:
 public:
     static const char *m_sClassName;
     CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable = false);
-    virtual ~CItemMulti();
+    virtual ~CItemMulti() override;
 
 private:
     CItemMulti(const CItemMulti& copy);

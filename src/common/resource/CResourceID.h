@@ -157,15 +157,15 @@ public:
 
     void FixRes();
 
-    inline RES_TYPE GetResType() const noexcept
+    inline constexpr RES_TYPE GetResType() const noexcept
     {
         return (RES_TYPE)(ResGetType(m_dwInternalVal));
     }
-    inline uint GetResIndex() const noexcept
+    inline constexpr uint GetResIndex() const noexcept
     {
         return ResGetIndex(m_dwInternalVal);
     }
-    inline bool operator == (const CResourceIDBase & rid) const noexcept
+    inline constexpr bool operator == (const CResourceIDBase & rid) const noexcept
     {
         return (rid.m_dwInternalVal == m_dwInternalVal);
     }

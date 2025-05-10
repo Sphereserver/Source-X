@@ -36,7 +36,7 @@ public:
 
 public:
     CItemMap( ITEMID_TYPE id, CItemBase * pItemDef );
-    virtual ~CItemMap();
+    virtual ~CItemMap() override = default;
 
     CItemMap(const CItemMap& copy) = delete;
     CItemMap& operator=(const CItemMap& other) = delete;

@@ -32,7 +32,7 @@
 // String utilities: Converters
 
 #ifndef _WIN32
-void Str_Reverse(char* string)
+void Str_Reverse(char* string) noexcept
 {
     char* pEnd = string;
     char temp;
@@ -48,238 +48,348 @@ void Str_Reverse(char* string)
 }
 #endif
 
-std::optional<char> Str_ToI8 (lpctstr ptcStr, int base) noexcept
+
+// --
+// String to Number
+
+template<class _IntType>
+bool cstr_to_num(
+    const char * RESTRICT str,
+    _IntType   * const    out,
+    uint        base = 0,
+    bool const  ignore_trailing_extra_chars = false
+    ) noexcept
+{
+    static_assert(std::is_integral_v<_IntType>, "Only integers supported");
+    if (!str || !out || base == 1 || base > 16)
+        return false;
+
+    // 1) Skip leading spaces
+    while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') { // Instead of using ISWHITESPACE
+        ++str;
+    }
+    if (*str == '\0')
+        return false;
+
+    // 2) Optional sign
+    bool neg = false;
+    if constexpr (std::is_signed_v<_IntType>)
+    {
+        /*  // If we wish to support numbers with the '+' sign, but we need to update the other parses (mainly in CExpression).
+        if (*p == '+' || *p == '-')
+        {
+            neg = (*p == '-');
+            ++p;
+        }
+        */
+        if (*str == '-')
+        {
+            neg = true;
+            ++str;
+        }
+    }
+
+    // 3) Hex‐prefix via leading '0'
+    bool hex = false;
+    if (base == 0)
+    {
+        // Auto-detect.
+        if (*str == '0' && str[1] != '\0' && str[1] != '.')
+        {
+            if (IsHexNumDigit(str[1]))
+            {
+                hex = true;
+                base = 16;
+                ++str;  // skip the '0' prefix
+            }
+            else
+            {
+                base = 10;
+            }
+        }
+        else
+        {
+            base = 10;
+        }
+    }
+    if (base == 16 && str[0] == '0' && str[1] != '\0' && str[1] != '.')
+    {
+        hex = true;
+        ++str;
+    }
+
+    using _UIntType = std::make_unsigned_t<_IntType>;
+    const _UIntType base_casted = uint8_t(base);
+    const _UIntType maxDiv = std::numeric_limits<_UIntType>::max() / _UIntType(base_casted);
+    const _UIntType maxRem = std::numeric_limits<_UIntType>::max() % _UIntType(base_casted);
+    _UIntType acc = 0;  // accumulator
+
+    // 4) Parse digits
+    ushort ndigits = 0;
+    const char* startDigits = str;
+    for (; *str; ++str)
+    {
+        const char c = *str;
+        _UIntType digit;
+        if (c >= '0' && c <= '9')
+            digit = c - '0';
+        else if (hex && c >= 'A' && c <= 'F')
+            digit = c - 'A' + 10;
+        else if (hex && c >= 'a' && c <= 'f')
+            digit = c - 'a' + 10;
+        else if (!hex && c == '.')
+            continue;   // Skip decimal point
+        else
+            break;
+        if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
+            return false;  // overflow
+        acc = acc * base_casted + digit;
+        ++ndigits;
+    }
+    if (str == startDigits)
+        return false;  // no digits consumed
+
+    // 5) Trailing‐space or end‐of‐string
+    if (!ignore_trailing_extra_chars)
+    {
+        // Some old code expects string to num conversion to tolerate trailing whitespaces or even extra chars
+        // (like the atoi C function).
+        constexpr bool tolerate_trailing_whitespaces = true;
+        if constexpr (tolerate_trailing_whitespaces)
+        {
+            while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')
+                ++str;
+        }
+        if (*str != '\0')
+            return false;
+    }
+
+    // 6) Make short (< UINT32_MAX, or <= 8 hex digits) hex numbers behave like 32 bits numbers.
+    /*
+     * Why Sphere expects this and works like this is unknown to me (maybe TUS/Grayworld or
+     * prehistoric Sphere versions worked with 32 bit numbers instead of 64 bit).
+     *
+    */
+    if (hex && ndigits<=8 && std::is_signed_v<_IntType>)
+    {
+        // Reinterpret the bits as a signed 32 bit number, then expand that value to a 32 bit number.
+        // if ndigits <= 8 (so number is always <= 0xFFFF FFFF), it will always be < UINT32_MAX.
+        int32_t v32 = int32_t(uint32_t(acc));
+        *out = _IntType(v32);
+        return true;
+    }
+
+    // 7) Store result
+    if constexpr (std::is_signed_v<_IntType>)
+    {
+        if (neg)
+        {
+            if (acc > _UIntType(std::numeric_limits<_IntType>::max()) + 1u)
+                return false;  // too negative
+            *out = _IntType(0) - _IntType(acc);
+        }
+        else
+        {
+            if (acc > _UIntType(std::numeric_limits<_IntType>::max()))
+                return false;  // too large positive
+            *out = _IntType(acc);
+        }
+    }
+    else
+    {
+        *out = _IntType(acc);
+    }
+    return true;
+}
+
+
+std::optional<char> Str_ToI8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     char val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uchar> Str_ToU8 (lpctstr ptcStr, int base) noexcept
+std::optional<uchar> Str_ToU8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     uchar val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<short> Str_ToI16 (lpctstr ptcStr, int base) noexcept
+std::optional<short> Str_ToI16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     short val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ushort> Str_ToU16 (lpctstr ptcStr, int base) noexcept
+std::optional<ushort> Str_ToU16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     ushort val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<int> Str_ToI (lpctstr ptcStr, int base) noexcept
+std::optional<int> Str_ToI (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     int val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uint> Str_ToU(lpctstr ptcStr, int base) noexcept
+std::optional<uint> Str_ToU(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     uint val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<llong> Str_ToLL(lpctstr ptcStr, int base) noexcept
+std::optional<llong> Str_ToLL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     llong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ullong> Str_ToULL(lpctstr ptcStr, int base) noexcept
+std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
 {
     ullong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-#define STR_FROM_SET_ZEROSTR \
-    if (hex)    { buf[0] = '0'; buf[1] = '0'; buf[2] = '\0'; } \
-    else        { buf[0] = '0'; buf[1] = '\0'; }
+
+// --
+// Number to String
+
+static constexpr tchar DIGITS[] = "0123456789abcdef";
+
+template<typename _IntType>
+tchar* Str_FromInt_Fast(_IntType val, lptstr_restrict out_buf, size_t buf_length, uint base) noexcept
+{
+    if (!out_buf || buf_length == 0 || base == 0 || base > 16)
+        return nullptr;
+
+    const bool fHex = (base == 16);
+    // Handle zero or base==0 case
+    if (val == 0)
+    {
+        if (fHex)
+        {
+            if (buf_length < 3)
+                return nullptr;
+            out_buf[0] = '0'; out_buf[1] = '0'; out_buf[2] = '\0';
+        }
+        else
+        {
+            if (buf_length < 2)
+                return nullptr;
+            out_buf[0] = '0'; out_buf[1] = '\0';
+        }
+        return out_buf;
+    }
+
+    using _UIntType = std::make_unsigned_t<_IntType>;
+    _UIntType uval;
+    bool fIsNegative = false;
+
+    if constexpr (std::is_signed_v<_IntType>)
+    {
+        fIsNegative = (val < 0);
+        // two's-complement bit-pattern reinterpret
+        const auto utmp = static_cast<_UIntType>(val);
+        if (fHex)
+        {
+            uval = utmp;
+        }
+        else
+        {
+            // Unsigned subtraction is always defined behaviour, it wraps around.
+            uval = fIsNegative ? (_UIntType(0) - utmp) : utmp;
+        }
+    }
+    else
+    {
+        uval = static_cast<_UIntType>(val);
+    }
+
+    // Write digits from back of buffer
+#define WRITE_OUT(ch)           \
+    do {                        \
+        if (idx == 0)           \
+            return nullptr;     \
+        out_buf[--idx] = (ch);  \
+    } while (0)
+
+    size_t idx = buf_length;
+    out_buf[--idx] = '\0';
+
+    if (fHex)
+    {
+        // Hex path: mask & shift by 4 bits (it's the same as dividing by 16).
+        do
+        {
+            WRITE_OUT(DIGITS[uval & 0xFu]);
+            uval >>= 4;
+        } while (uval);
+        WRITE_OUT('0');  // leading 0 hex prefix
+    }
+    else
+    {
+        // General path: division + multiply to get remainder
+        do
+        {
+            const _UIntType q = uval / base;
+            const _UIntType d = uval - q * base;
+            WRITE_OUT(DIGITS[d]);
+            uval = q;
+        } while (uval);
+
+        if (fIsNegative) {
+            WRITE_OUT('-');
+        }
+    }
+
+#undef WRITE_OUT
+    return &out_buf[idx];
+}
 
 tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-
-    const bool sign = (val < 0);
-    uint uval;
-    if (sign)
-    {
-        if (hex) {
-            uval = UINT_MAX - (uint)(-val) + 1u;
-            // Add 1 because UINT_MAX would be equal to -1, if signed.
-        }
-        else {
-            uval = (uint)abs(val);
-        }
-    }
-    else {
-        uval = (uint)val;
-    }
-
-    buf[--buf_length] = '\0';
-    static constexpr tchar chars[] = "0123456789abcdef";
-    do
-    {
-        buf[--buf_length] = chars[uval % base];
-        uval /= base;
-    } while (uval);
-
-    if (hex) {
-        buf[--buf_length] = '0';
-    }
-    else if (sign) {
-        buf[--buf_length] = '-';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
 
 tchar* Str_FromUI_Fast(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-    static constexpr tchar chars[] = "0123456789abcdef";
-
-    buf[--buf_length] = '\0';
-    do
-    {
-        buf[--buf_length] = chars[val % base];
-        val /= base;
-    } while (val);
-
-    if (base == 16) {
-        buf[--buf_length] = '0';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
 
 tchar* Str_FromLL_Fast (llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-
-    const bool sign = (val < 0);
-    ullong uval;
-    if (sign)
-    {
-        if (hex) {
-            const ullong uval_neg = (ullong)(-val);
-            const ullong max_bytes = (uval_neg < (ullong)UINT_MAX + 1u) ? (ullong)UINT_MAX : ULLONG_MAX;
-            // Check if i can output it as a 32 bits number, if too big use a 64 bits number.
-            // Why? Sphere users expect for historical reasons to get whenever possible a number with a format like
-            //  0FFFFFFFF (32 bits -1) instead of 0FFFFFFFFFFFFFFFF (64 bits -1).
-            uval = max_bytes - uval_neg + 1;
-            // Add 1 because UINT_MAX/ULLONG_MAX would be equal to -1, if signed.
-        }
-        else {
-            uval = (ullong)llabs(val);
-        }
-    }
-    else {
-        uval = (ullong)val;
-    }
-
-    buf[--buf_length] = '\0';
-    static constexpr tchar chars[] = "0123456789abcdef";
-    do
-    {
-        buf[--buf_length] = chars[uval % base];
-        uval /= base;
-    } while (uval);
-
-    if (hex) {
-        buf[--buf_length] = '0';
-    }
-    else if (sign) {
-        buf[--buf_length] = '-';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
 
 tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    if (!buf || !buf_length) {
-        return nullptr;
-    }
-
-    const bool hex = (base == 16);
-
-    if (!val || !base)
-    {
-        STR_FROM_SET_ZEROSTR;
-        return buf;
-    }
-    static constexpr tchar chars[] = "0123456789abcdef";
-
-    buf[--buf_length] = '\0';
-    do
-    {
-        buf[--buf_length] = chars[val % base];
-        val /= base;
-    } while (val);
-
-    if (hex) {
-        buf[--buf_length] = '0';
-    }
-    return &buf[buf_length];
+    return Str_FromInt_Fast(val, buf, buf_length, base);
 }
-
-#undef STR_FROM_SET_ZEROSTR
 
 void Str_FromI(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
@@ -318,7 +428,7 @@ void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 }
 
 
-size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord ) noexcept
+size_t FindStrWord( lpctstr_restrict pTextSearch, lpctstr_restrict pszKeyWord ) noexcept
 {
     // Find any of the pszKeyWord in the pTextSearch string.
     // Make sure we look for starts of words.
@@ -356,7 +466,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord ) noexcept
     }
 }
 
-int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept
+int Str_CmpHeadI(lpctstr_restrict ptcFind, lpctstr_restrict ptcHere) noexcept
 {
     for (uint i = 0; ; ++i)
     {
@@ -375,7 +485,7 @@ int Str_CmpHeadI(lpctstr ptcFind, lpctstr ptcHere) noexcept
     }
 }
 
-static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable) noexcept
+static inline int Str_CmpHeadI_Table(const tchar * ptcFind, const tchar * ptcTable) noexcept
 {
     for (uint i = 0; ; ++i)
     {
@@ -395,9 +505,160 @@ static inline int Str_CmpHeadI_Table(lpctstr ptcFind, lpctstr ptcTable) noexcept
 
 // String utilities: Modifiers
 
+// Useful also for s(n)printf!
+int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError)
+{
+    if (iBytesToWrite < 0)
+        return 0;
+    if (uiBufSize < 1)
+        goto err;
+    if ((uint)iBytesToWrite >= uiBufSize - 1)
+        goto err;
+    return iBytesToWrite;
+
+err:
+    //throw CSError(LOGL_ERROR, 0, "Buffer size too small for snprintf.\n");
+    if (fPrintError) {
+        g_Log.EventError("Buffer size too small for snprintf.\n");
+    }
+    return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
+}
+
+bool IsStrEmpty( const tchar * pszTest )
+{
+    if ( !pszTest || !*pszTest )
+        return true;
+
+    do
+    {
+        if ( !IsSpace(*pszTest) )
+            return false;
+    }
+    while ( *(++pszTest) );
+    return true;
+}
+
+bool IsStrNumericDec( const tchar * pszTest )
+{
+    if ( !pszTest || !*pszTest )
+        return false;
+
+    do
+    {
+        if ( !IsDigit(*pszTest) )
+            return false;
+    }
+    while ( *(++pszTest) );
+
+    return true;
+}
+
+
+bool IsStrNumeric( const tchar * pszTest )
+{
+    if ( !pszTest || !*pszTest )
+        return false;
+
+    bool fHex = false;
+    if ( pszTest[0] == '0' )
+        fHex = true;
+
+    do
+    {
+        if ( IsDigit( *pszTest ) )
+            continue;
+        if ( fHex && tolower(*pszTest) >= 'a' && tolower(*pszTest) <= 'f' )
+            continue;
+        return false;
+    }
+    while ( *(++pszTest) );
+    return true;
+}
+
+bool IsSimpleNumberString( lpctstr_restrict pszTest )
+{
+    // is this a string or a simple numeric expression ?
+    // string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
+    // number = 1.0+-\*~|&!%^()2, 0aed, 123
+
+    if (*pszTest == '\0')
+        return false;   // empty string, no number
+
+    bool fMathSep			= true;	// last non whitespace was a math sep.
+    bool fHextDigitStart	= false;
+    bool fWhiteSpace		= false;
+
+    for ( ; ; ++pszTest )
+    {
+        tchar ch = *pszTest;
+        if ( ! ch )
+            return true;
+
+        if (( ch >= 'A' && ch <= 'F') || ( ch >= 'a' && ch <= 'f' ))	// isxdigit
+        {
+            if ( ! fHextDigitStart )
+                return false;
+
+            fWhiteSpace = false;
+            fMathSep = false;
+            continue;
+        }
+        if ( IsSpace( ch ) )
+        {
+            fHextDigitStart = false;
+            fWhiteSpace = true;
+            continue;
+        }
+        if ( IsDigit( ch ) )
+        {
+            if ( fWhiteSpace && ! fMathSep )
+                return false;
+
+            if ( ch == '0' )
+                fHextDigitStart = true;
+            fWhiteSpace = false;
+            fMathSep = false;
+            continue;
+        }
+        if ( ch == '/' && pszTest[1] != '/' )
+            fMathSep = true;
+        else
+            fMathSep = strchr("+-\\*~|&!%^()", ch ) ? true : false ;
+
+        if ( ! fMathSep )
+            return false;
+
+        fHextDigitStart = false;
+        fWhiteSpace = false;
+    }
+}
+
+
 // strcpy doesn't have an argument to truncate the copy to the buffer length;
 // strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
-size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
+size_t Str_CopyLimit(lptstr_restrict pDst, lpctstr_restrict pSrc, const size_t uiMaxSize) noexcept
+{
+    if (uiMaxSize == 0)
+        return 0;
+
+    if (pSrc[0] == '\0')
+    {
+
+        pDst[0] = '\0';
+        return 0;
+    }
+
+    // Find string terminator within the first uiMaxSize bytes (fast library call, usually vectorized)
+    const void* nul = memchr(pSrc, '\0', uiMaxSize);
+    const size_t toCopy = nul
+                        ? ((static_cast<const char*>(nul) - pSrc) + 1) // +1 to include the terminator
+                        : uiMaxSize;    // No terminator in range: copy full limit
+
+    memcpy(pDst, pSrc, toCopy);
+    return toCopy; // bytes copied in pDst string (CAN count the string terminator)
+}
+
+size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiMaxSize) noexcept
 {
     if (uiMaxSize == 0)
     {
@@ -409,44 +670,23 @@ size_t Str_CopyLimit(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
         return 0;
     }
 
-    size_t qty = 0; // how much bytes do i have to copy? (1 based)
-    do
-    {
-        if (pSrc[qty++] == '\0')
-        {
-            break;
-        }
-    } while (qty < uiMaxSize);
-    memcpy(pDst, pSrc, qty);
-    return qty; // bytes copied in pDst string (CAN count the string terminator)
+    // Reserve one byte for the string terminator
+    const size_t uiCopyMax = uiMaxSize - 1;
+
+    // Find the terminator within the first copyMax bytes (fast memchr)
+    const void* nul = memchr(pSrc, '\0', uiCopyMax);
+    const size_t len = nul
+                          ? (static_cast<const char*>(nul) - pSrc)  // length up to the terminator
+                          : uiCopyMax;                                // no terminator found within limit
+
+    // Copy the determined length and append terminator
+    memcpy(pDst, pSrc, len);
+    pDst[len] = '\0';
+
+    return len; // bytes copied in pDst string (not counting the string terminator)
 }
 
-size_t Str_CopyLimitNull(tchar * pDst, lpctstr pSrc, size_t uiMaxSize) noexcept
-{
-    if (uiMaxSize == 0)
-    {
-        return 0;
-    }
-    if (pSrc[0] == '\0')
-    {
-        pDst[0] = '\0';
-        return 0;
-    }
-
-    size_t qty = 0; // how much bytes do i have to copy? (1 based)
-    do
-    {
-        if (pSrc[qty++] == '\0')
-        {
-            break;
-        }
-    } while (qty < uiMaxSize);
-    memcpy(pDst, pSrc, qty);
-    pDst[qty - 1] = '\0'; // null terminate the string
-    return qty - 1; // bytes copied in pDst string (not counting the string terminator)
-}
-
-size_t Str_CopyLen(tchar * pDst, lpctstr pSrc) noexcept
+size_t Str_CopyLen(lptstr_restrict pDst, lpctstr_restrict pSrc) noexcept
 {
     strcpy(pDst, pSrc);
     return strlen(pDst);
@@ -537,7 +777,7 @@ size_t Str_ConcatLimitNull(tchar *dst, const tchar *src, size_t siz) noexcept
     return (dlen + (s - src));	/* count does not include '\0' */
 }
 
-tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t substr_len) noexcept
+tchar* Str_FindSubstring(lptstr_restrict str, lpctstr_restrict substr, size_t str_len, size_t substr_len) noexcept
 {
     if (str_len == 0 || substr_len == 0)
         return nullptr;
@@ -565,7 +805,7 @@ tchar* Str_FindSubstring(tchar* str, const tchar* substr, size_t str_len, size_t
     return str;
 }
 
-lpctstr Str_GetArticleAndSpace(lpctstr pszWord) noexcept
+const tchar * Str_GetArticleAndSpace(lpctstr_restrict pszWord) noexcept
 {
     // NOTE: This is wrong many times.
     //  ie. some words need no article (plurals) : boots.
@@ -585,7 +825,40 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord) noexcept
     return "a ";
 }
 
-int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStrip) noexcept
+int Str_GetBare(tchar * ptcOut, const tchar *ptcSrc, size_t uiMaxOutSize, const tchar * ptcStripList) noexcept
+{
+    // That the client can deal with. Basic punctuation and alpha and numbers.
+    // RETURN: Output length.
+
+    if (!ptcOut || !ptcSrc || uiMaxOutSize == 0)
+        return 0;
+
+    // Default strip set if none provided: client can't print these
+    ptcStripList = ptcStripList ? ptcStripList : "{|}~";
+
+    tchar* out          = ptcOut;
+    tchar* const outEnd = ptcOut + (uiMaxOutSize - 1);
+
+    // Process each char until SRC ends or output buffer is full
+    for (; *ptcSrc && out < outEnd; ++ptcSrc)
+    {
+        const uchar ch = uchar(*ptcSrc);
+
+        if (ch < ' ' || ch >= 127)  // or !std::isprint(ch)
+            continue;	// Special format chars.
+        if (strchr(ptcStripList, ch))
+            continue;
+
+        *out++ = tchar(ch);
+    }
+
+    // NUL-terminate and return length
+    *out = '\0';
+    return int(out - ptcOut);
+}
+
+/* Old impl.
+int Str_GetBare(tchar * pszOut, const tchar * pszInp, int iMaxOutSize, const tchar * pszStrip) noexcept
 {
     // That the client can deal with. Basic punctuation and alpha and numbers.
     // RETURN: Output length.
@@ -620,8 +893,9 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
     }
     return (j - 1);
 }
+*/
 
-tchar * Str_MakeFiltered(tchar * pStr) noexcept
+tchar * Str_MakeFiltered(lptstr_restrict pStr) noexcept
 {
     int len = (int)strlen(pStr);
     for (int i = 0; len; ++i, --len)
@@ -643,7 +917,7 @@ tchar * Str_MakeFiltered(tchar * pStr) noexcept
     return pStr;
 }
 
-void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax) noexcept
+void Str_MakeUnFiltered(tchar * pStrOut, const tchar * pStrIn, int iSizeMax) noexcept
 {
     int len = (int)strlen(pStrIn);
     int iIn = 0;
@@ -668,9 +942,55 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax) noexcept
     }
 }
 
-tchar * Str_GetUnQuoted(tchar * pStr) noexcept
+// Unquotes and trims whitespace in-place, shifting result to start of buffer.
+void Str_MakeUnQuoted(tchar* pStr) noexcept
 {
-    // TODO: WARNING! Possible Memory Leak here!
+    tchar* src = pStr;
+    // Skip leading whitespace (GETNONWHITESPACE)
+    while (IsWhitespace(*src)) {
+        ++src;
+    }
+
+    bool fQuoted = false;
+    if (*src == '"')
+    {
+        fQuoted = true;
+        ++src;
+    }
+
+    tchar* endPtr = src + std::strlen(src);
+
+    // If quoted, locate closing quote and adjust endPtr
+    if (fQuoted)
+    {
+        tchar* p = endPtr;
+        while (p > src)
+        {
+            --p;
+            if (*p == '"')
+            {
+                endPtr = p;
+                break;
+            }
+        }
+    }
+
+    // Compute trimmed length (exclude trailing whitespace), like Str_TrimWhitespace.
+    size_t len = endPtr - src;
+    while (len > 0 && IsWhitespace(src[len - 1])) {
+        --len;
+    }
+
+    // Shift content to the start of the buffer
+    if (src != pStr && len > 0) {
+        std::memmove(pStr, src, (len * sizeof(tchar)));
+    }
+    pStr[len] = '\0';
+}
+
+// Returns a pointer to the unquoted part (and overwrites the last quote with a string terminator '\0' char)
+tchar * Str_GetUnQuoted(lptstr_restrict pStr) noexcept
+{
     GETNONWHITESPACE(pStr);
     if (*pStr != '"')
     {
@@ -696,14 +1016,9 @@ tchar * Str_GetUnQuoted(tchar * pStr) noexcept
 
 int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 {
-    while (len > 0)
-    {
+    ASSERT(len >= 0);
+    while (len > 0 && IsWhitespace(pStr[len - 1])) {
         --len;
-        if (!IsWhitespace(pStr[len]))
-        {
-            ++len;
-            break;
-        }
     }
     pStr[len] = '\0';
     return len;
@@ -711,7 +1026,6 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 
 tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 {
-    // TODO: WARNING! Possible Memory Leak here?
     GETNONWHITESPACE(pStr);
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
@@ -756,7 +1070,7 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
                 if ((ptcTest[1] == '<') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
                 {
                     // I want a whitespace after the operator and some text after it.
-                    lpctstr ptcOpTest = &(ptcTest[3]);
+                    const tchar * ptcOpTest = &(ptcTest[3]);
                     if (*ptcOpTest != '\0')
                     {
                         GETNONWHITESPACE(ptcOpTest);
@@ -781,7 +1095,7 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
                 {
                     if ((ptcLine == ptcTest) || ((iOpenAngular > 0) && IsWhitespace(*(ptcTest - 1))))
                     {
-                        lpctstr ptcOpTest = &(ptcTest[3]);
+                        const tchar * ptcOpTest = &(ptcTest[3]);
                         if (*ptcOpTest != '\0')
                         {
                             GETNONWHITESPACE(ptcOpTest);
@@ -873,7 +1187,7 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
 
 // String utilities: String operations
 
-int FindTable(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept
+int FindTable(const tchar * ptcFind, const tchar * const * pptcTable, int iCount) noexcept
 {
     // A non-sorted table.
     for (int i = 0; i < iCount; ++i)
@@ -884,7 +1198,7 @@ int FindTable(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noex
     return -1;
 }
 
-int FindTableSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept
+int FindTableSorted(const tchar * ptcFind, const tchar * const * pptcTable, int iCount) noexcept
 {
     // Do a binary search (un-cased) on a sorted table.
     // RETURN: -1 = not found
@@ -910,7 +1224,7 @@ int FindTableSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount
     /*
     // Alternative implementation. Logarithmic time, but better use of CPU instruction pipelining and branch prediction, at the cost of more comparations.
     // It's worth running some benchmarks before switching to this.
-    lpctstr const* base = pptcTable;
+    const tchar * const* base = pptcTable;
     if (iCount > 1)
     {
         do
@@ -925,7 +1239,7 @@ int FindTableSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount
     */
 }
 
-int FindTableHead(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept // REQUIRES the table to be UPPERCASE
+int FindTableHead(const tchar * ptcFind, const tchar * const * pptcTable, int iCount) noexcept // REQUIRES the table to be UPPERCASE
 {
     for (int i = 0; i < iCount; ++i)
     {
@@ -935,7 +1249,7 @@ int FindTableHead(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) 
     return -1;
 }
 
-int FindTableHeadSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iCount) noexcept // REQUIRES the table to be UPPERCASE, and sorted
+int FindTableHeadSorted(const tchar * ptcFind, const tchar * const * pptcTable, int iCount) noexcept // REQUIRES the table to be UPPERCASE, and sorted
 {
     // Do a binary search (un-cased) on a sorted table.
     // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
@@ -962,7 +1276,7 @@ int FindTableHeadSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iC
     /*
     // Alternative implementation. Logarithmic time, but better use of CPU instruction pipelining and branch prediction, at the cost of more comparations.
     // It's worth running some benchmarks before switching to this.
-    lpctstr const* base = pptcTable;
+    const tchar * const* base = pptcTable;
     if (iCount > 1)
     {
         do
@@ -977,7 +1291,7 @@ int FindTableHeadSorted(const lpctstr ptcFind, lpctstr const * pptcTable, int iC
     */
 }
 
-int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable, int iCount, size_t uiElemSize) noexcept // REQUIRES the table to be UPPERCASE, and sorted
+int FindCAssocRegTableHeadSorted(const tchar * pszFind, const tchar * const* ppszTable, int iCount, size_t uiElemSize) noexcept // REQUIRES the table to be UPPERCASE, and sorted
 {
     // Do a binary search (un-cased) on a sorted table.
     // Uses Str_CmpHeadI, which checks if we have reached, during comparison, ppszTable end ('\0'), ignoring if pszFind is longer (maybe has arguments?)
@@ -990,7 +1304,7 @@ int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable
     while (iLow <= iHigh)
     {
         const int i = (iHigh + iLow) >> 1;
-        const lpctstr pszName = *(reinterpret_cast<lpctstr const*>(reinterpret_cast<const byte*>(ppszTable) + (i * uiElemSize)));
+        const tchar * pszName = *(reinterpret_cast<const tchar * const*>(reinterpret_cast<const byte*>(ppszTable) + (i * uiElemSize)));
         const int iCompare = Str_CmpHeadI_Table(pszFind, pszName);
         if (iCompare == 0)
             return i;
@@ -1002,24 +1316,24 @@ int FindCAssocRegTableHeadSorted(const lpctstr pszFind, lpctstr const* ppszTable
     return -1;
 }
 
-bool Str_Check(lpctstr pszIn) noexcept
+bool Str_Check(const tchar * pszIn) noexcept
 {
     if (pszIn == nullptr)
         return true;
 
-    lpctstr p = pszIn;
+    const tchar * p = pszIn;
     while (*p != '\0' && (*p != 0x0A) && (*p != 0x0D))
         ++p;
 
     return (*p != '\0');
 }
 
-bool Str_CheckName(lpctstr pszIn) noexcept
+bool Str_CheckName(const tchar * pszIn) noexcept
 {
     if (pszIn == nullptr)
         return true;
 
-    lpctstr p = pszIn;
+    const tchar * p = pszIn;
     while (*p != '\0' &&
         (
         ((*p >= 'A') && (*p <= 'Z')) ||
@@ -1076,7 +1390,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset) noexcept
     return -1;
 }
 
-static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText) noexcept
+static MATCH_TYPE Str_Match_After_Star(const tchar * pPattern, const tchar * pText) noexcept
 {
     // pass over existing ? and * in pattern
     for (; *pPattern == '?' || *pPattern == '*'; ++pPattern)
@@ -1120,7 +1434,7 @@ static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText) noexcept
     return match;	// return result
 }
 
-MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept
+MATCH_TYPE Str_Match(const tchar * pPattern, const tchar * pText) noexcept
 {
     // case independant
 
@@ -1261,385 +1575,6 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText) noexcept
         return MATCH_VALID;
 }
 
-#ifdef MSVC_COMPILER
-    // /GL + /LTCG flags inline in linking phase this function, but probably in a wrong way, so that
-    // something gets corrupted on the memory and an exception is generated later
-    #pragma auto_inline(off)
-#endif
-bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
-{
-    // Parse a list of args. Just get the next arg.
-    // similar to strtok()
-    // RETURN: true = the second arg is valid.
-
-    if (pszSep == nullptr)	// default sep.
-        pszSep = "=, \t";
-
-    // skip leading white space.
-    GETNONWHITESPACE(pLine);
-
-    tchar ch;
-    // variables used to track opened/closed quotes and brackets
-    bool fQuotes = false;
-    int iCurly, iSquare, iRound, iAngle;
-    iCurly = iSquare = iRound = iAngle = 0;
-
-    // ignore opened/closed brackets if that type of bracket is also a separator
-    bool fSepHasCurly, fSepHasSquare, fSepHasRound, fSepHasAngle;
-    fSepHasCurly = fSepHasSquare = fSepHasRound = fSepHasAngle = false;
-    for (uint j = 0; pszSep[j] != '\0'; ++j)		// loop through each separator
-    {
-        const tchar & sep = pszSep[j];
-        if (sep == '{' || sep == '}')
-            fSepHasCurly = true;
-        else if (sep == '[' || sep == ']')
-            fSepHasSquare = true;
-        else if (sep == '(' || sep == ')')
-            fSepHasRound = true;
-        else if (sep == '<' || sep == '>')
-            fSepHasAngle = true;
-    }
-
-    for (; ; ++pLine)
-    {
-        ch = *pLine;
-        if (ch == '"')	// quoted argument
-        {
-            fQuotes = !fQuotes;
-            continue;
-        }
-        if (ch == '\0')	// no more args i guess.
-        {
-            if (ppArg != nullptr)
-                *ppArg = pLine;
-            return false;
-        }
-
-        if (!fQuotes)
-        {
-            // We are not inside a quote, so let's check if the char is a bracket or a separator
-
-            // Here we track opened and closed brackets.
-            //	we'll ignore items inside brackets, if the bracket isn't a separator in the list
-            if (ch == '{') {
-                if (!fSepHasCurly) {
-                    if (!iSquare && !iRound && !iAngle)
-                        ++iCurly;
-                }
-            }
-            else if (ch == '[') {
-                if (!fSepHasSquare) {
-                    if (!iCurly && !iRound && !iAngle)
-                        ++iSquare;
-                }
-            }
-            else if (ch == '(') {
-                if (!fSepHasRound) {
-                    if (!iCurly && !iSquare && !iAngle)
-                        ++iRound;
-                }
-            }
-            else if (ch == '<') {
-                if (!fSepHasAngle) {
-                    if (!iCurly && !iSquare && !iRound)
-                        ++iAngle;
-                }
-            }
-            else if (ch == '}') {
-                if (!fSepHasCurly) {
-                    if (iCurly)
-                        --iCurly;
-                }
-            }
-            else if (ch == ']') {
-                if (!fSepHasSquare) {
-                    if (iSquare)
-                        --iSquare;
-                }
-            }
-            else if (ch == ')') {
-                if (!fSepHasRound) {
-                    if (iRound)
-                        --iRound;
-                }
-            }
-            else if (ch == '>') {
-                if (!fSepHasAngle) {
-                    if (iAngle)
-                        --iAngle;
-                }
-            }
-
-            // separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
-            // enclosed by brackets. but, if one of the separators is a bracket, don't care if we are inside or outside, separate anyways.
-
-            //	don't turn this if into an else if!
-            //	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
-            if ((iCurly<=0) && (iSquare<=0) && (iRound<=0))
-            {
-                if (strchr(pszSep, ch))		// if ch is a separator
-                    break;
-            }
-        }	// end of the quotes if clause
-
-    }	// end of the for loop
-
-    if (*pLine == '\0')
-        return false;
-
-    *pLine = '\0';
-    ++pLine;
-    if (IsSpace(ch))	// space separators might have other seps as well ?
-    {
-        GETNONWHITESPACE(pLine);
-        ch = *pLine;
-        if (ch && strchr(pszSep, ch))
-            ++pLine;
-    }
-
-    // skip trailing white space on args as well.
-    if (ppArg != nullptr)
-        *ppArg = Str_TrimWhitespace(pLine);
-
-    if (iCurly || iSquare || iRound || fQuotes)
-    {
-        //g_Log.EventError("Not every bracket or quote was closed.\n");
-        return false;
-    }
-
-    return true;
-}
-#ifdef MSVC_COMPILER
-    #pragma auto_inline(on)
-#endif
-
-int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep) noexcept
-{
-    ASSERT(iMax > 1);
-    int iQty = 0;
-    GETNONWHITESPACE(pszCmdLine);
-
-    if (pszCmdLine[0] != '\0')
-    {
-        ppCmd[0] = pszCmdLine;
-        ++iQty;
-        while (Str_Parse(ppCmd[iQty - 1], &(ppCmd[iQty]), pszSep))
-        {
-            if (++iQty >= iMax)
-                break;
-        }
-    }
-    for (int j = iQty; j < iMax; ++j)
-        ppCmd[j] = nullptr;	// terminate if possible.
-    return iQty;
-}
-
-int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep) noexcept
-{
-    tchar * ppTmp[256];
-    if (iMax > (int)ARRAY_COUNT(ppTmp))
-        iMax = (int)ARRAY_COUNT(ppTmp);
-
-    int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
-    int i;
-    for (i = 0; i < iQty; ++i)
-        piCmd[i] = Exp_GetVal(ppTmp[i]);
-    for (; i < iMax; ++i)
-        piCmd[i] = 0;
-
-    return iQty;
-}
-
-//I added this to parse commands by checking inline quotes directly.
-//I tested it on every type of things but this is still experimental and being using under STRTOKEN.
-//xwerswoodx
-bool Str_ParseAdv(tchar * pLine, tchar ** ppArg, lpctstr pszSep) noexcept
-{
-    // Parse a list of args. Just get the next arg.
-    // similar to strtok()
-    // RETURN: true = the second arg is valid.
-
-    if (pszSep == nullptr)	// default sep.
-        pszSep = "=, \t";
-
-    // skip leading white space.
-    GETNONWHITESPACE(pLine);
-
-    tchar ch, chNext;
-    // variables used to track opened/closed quotes and brackets
-    bool fQuotes = false;
-    int iQuotes = 0;
-    int iCurly, iSquare, iRound, iAngle;
-    iCurly = iSquare = iRound = iAngle = 0;
-
-    // ignore opened/closed brackets if that type of bracket is also a separator
-    bool fSepHasCurly, fSepHasSquare, fSepHasRound, fSepHasAngle;
-    fSepHasCurly = fSepHasSquare = fSepHasRound = fSepHasAngle = false;
-    for (uint j = 0; pszSep[j] != '\0'; ++j)		// loop through each separator
-    {
-        const tchar & sep = pszSep[j];
-        if (sep == '{' || sep == '}')
-            fSepHasCurly = true;
-        else if (sep == '[' || sep == ']')
-            fSepHasSquare = true;
-        else if (sep == '(' || sep == ')')
-            fSepHasRound = true;
-        else if (sep == '<' || sep == '>')
-            fSepHasAngle = true;
-    }
-
-    for (; ; ++pLine)
-    {
-        tchar * pLineNext = pLine;
-        ++pLineNext;
-        ch = *pLine;
-        chNext = *pLineNext;
-        if ((ch == '"') || (ch == '\''))
-        {
-            if (!fQuotes) //Has first quote?
-            {
-                fQuotes = true;
-            }
-            else if (fQuotes) //We already has quote? Check for inner quotes...
-            {
-                while ((chNext == '"') || (chNext == '\''))
-                {
-                    ++pLineNext;
-                    chNext = *pLineNext;
-                }
-
-                if ((chNext == '\0') || (chNext == ',') || (chNext == ' ') || (chNext == '\''))
-                    --iQuotes;
-                else
-                    ++iQuotes;
-
-                if (iQuotes < 0)
-                {
-                    iQuotes = 0;
-                    fQuotes = false;
-                }
-            }
-        }
-        else if (ch == '\0')
-        {
-            if (ppArg != nullptr)
-                *ppArg = pLine;
-            return false;
-        }
-        else if (!fQuotes)
-        {
-            // We are not inside a quote, so let's check if the char is a bracket or a separator
-
-            // Here we track opened and closed brackets.
-            //	we'll ignore items inside brackets, if the bracket isn't a separator in the list
-            if (ch == '{') {
-                if (!fSepHasCurly) {
-                    if (!iSquare && !iRound && !iAngle)
-                        ++iCurly;
-                }
-            }
-            else if (ch == '[') {
-                if (!fSepHasSquare) {
-                    if (!iCurly && !iRound && !iAngle)
-                        ++iSquare;
-                }
-            }
-            else if (ch == '(') {
-                if (!fSepHasRound) {
-                    if (!iCurly && !iSquare && !iAngle)
-                        ++iRound;
-                }
-            }
-            else if (ch == '<') {
-                if (!fSepHasAngle) {
-                    if (!iCurly && !iSquare && !iRound)
-                        ++iAngle;
-                }
-            }
-            else if (ch == '}') {
-                if (!fSepHasCurly) {
-                    if (iCurly)
-                        --iCurly;
-                }
-            }
-            else if (ch == ']') {
-                if (!fSepHasSquare) {
-                    if (iSquare)
-                        --iSquare;
-                }
-            }
-            else if (ch == ')') {
-                if (!fSepHasRound) {
-                    if (iRound)
-                        --iRound;
-                }
-            }
-            else if (ch == '>') {
-                if (!fSepHasAngle) {
-                    if (iAngle)
-                        --iAngle;
-                }
-            }
-
-            // separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
-            // enclosed by brackets. but, if one of the separators is a bracket, don't care if we are inside or outside, separate anyways.
-
-            //	don't turn this if into an else if!
-            //	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
-            if ((iCurly<=0) && (iSquare<=0) && (iRound<=0))
-            {
-                if (strchr(pszSep, ch))		// if ch is a separator
-                    break;
-            }
-        }
-    }
-    if (*pLine == '\0')
-        return false;
-
-    *pLine = '\0';
-    ++pLine;
-    if (IsSpace(ch))	// space separators might have other seps as well ?
-    {
-        GETNONWHITESPACE(pLine);
-        ch = *pLine;
-        if (ch && strchr(pszSep, ch))
-            ++pLine;
-    }
-
-    // skip trailing white space on args as well.
-    if (ppArg != nullptr)
-        *ppArg = Str_TrimWhitespace(pLine);
-
-    if (iCurly || iSquare || iRound || fQuotes)
-    {
-        //g_Log.EventError("Not every bracket or quote was closed.\n");
-        return false;
-    }
-
-    return true;
-}
-
-int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep) noexcept
-{
-    ASSERT(iMax > 1);
-    int iQty = 0;
-    GETNONWHITESPACE(pszCmdLine);
-
-    if (pszCmdLine[0] != '\0')
-    {
-        ppCmd[0] = pszCmdLine;
-        ++iQty;
-        while (Str_ParseAdv(ppCmd[iQty - 1], &(ppCmd[iQty]), pszSep))
-        {
-            if (++iQty >= iMax)
-                break;
-        }
-    }
-    for (int j = iQty; j < iMax; ++j)
-        ppCmd[j] = nullptr;	// terminate if possible.
-    return iQty;
-}
-
 tchar * Str_UnQuote(tchar * pStr) noexcept
 {
     GETNONWHITESPACE(pStr);
@@ -1659,7 +1594,7 @@ tchar * Str_UnQuote(tchar * pStr) noexcept
     return pStr;
 }
 
-int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
+int Str_RegExMatch(const tchar * pPattern, const tchar * pText, tchar * lastError)
 {
     try
     {
@@ -1697,7 +1632,7 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes) noexcept
 
 UTF8MBSTR::UTF8MBSTR() = default;
 
-UTF8MBSTR::UTF8MBSTR(lpctstr lpStr)
+UTF8MBSTR::UTF8MBSTR(const tchar * lpStr)
 {
     operator=(lpStr);
 }
@@ -1709,7 +1644,7 @@ UTF8MBSTR::UTF8MBSTR(UTF8MBSTR& lpStr)
 
 UTF8MBSTR::~UTF8MBSTR() = default;
 
-void UTF8MBSTR::operator =(lpctstr lpStr)
+void UTF8MBSTR::operator =(const tchar * lpStr)
 {
     if (lpStr)
         ConvertStringToUTF8(lpStr, &m_strUTF8_MultiByte);
@@ -1722,7 +1657,7 @@ void UTF8MBSTR::operator =(UTF8MBSTR& lpStr) noexcept
     m_strUTF8_MultiByte = lpStr.m_strUTF8_MultiByte;
 }
 
-size_t UTF8MBSTR::ConvertStringToUTF8(lpctstr strIn, std::vector<char>* strOutUTF8MB)
+size_t UTF8MBSTR::ConvertStringToUTF8(const tchar * strIn, std::vector<char>* strOutUTF8MB)
 {
     ASSERT(strOutUTF8MB);
     size_t len;

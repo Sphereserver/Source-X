@@ -20,7 +20,7 @@ protected:
 public:
     static const char *m_sClassName;
     CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef );
-    virtual ~CItemCommCrystal();
+    virtual ~CItemCommCrystal() override = default;
 
     CItemCommCrystal(const CItemCommCrystal& copy) = delete;
     CItemCommCrystal& operator=(const CItemCommCrystal& other) = delete;

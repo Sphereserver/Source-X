@@ -7,6 +7,7 @@ endfunction()
 function(toolchain_exe_stuff_common)
     #-- Find libraries to be linked to.
 
+    message(STATUS)
     message(STATUS "Locating libraries to be linked to...")
 
     set(libs_link_list mariadb dl)

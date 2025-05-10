@@ -35,10 +35,10 @@ function(toolchain_exe_stuff)
     #-- Configure the Windows application type and add global linker flags.
 
     if(${WIN_SPAWN_CONSOLE})
-        add_link_options("LINKER:/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:/SUBSYSTEM:CONSOLE"
+        target_link_options(spheresvr PRIVATE "/ENTRY:WinMainCRTStartup") # Handled by is_win32_app_linker -> "LINKER:/SUBSYSTEM:CONSOLE"
         set(PREPROCESSOR_DEFS_EXTRA _WINDOWS_CONSOLE)
-        #ELSE ()
-        #    add_link_options ("LINKER:/ENTRY:WinMainCRTStartup")     # Handled by is_win32_app_linker -> "LINKER: /SUBSYSTEM:WINDOWS"
+    #else()
+    #   target_link_options (spheresvr PRIVATE "/ENTRY:WinMainCRTStartup")     # Handled by is_win32_app_linker -> "LINKER: /SUBSYSTEM:WINDOWS"
     endif()
 
     #-- Validate sanitizers options and store them between the common compiler flags.
@@ -67,6 +67,7 @@ function(toolchain_exe_stuff)
         #SET (ENABLED_SANITIZER true)
     endif()
     if(${ENABLED_SANITIZER})
+        target_link_options(spheresvr PRIVATE "/DEBUG")
         set(PREPROCESSOR_DEFS_EXTRA ${PREPROCESSOR_DEFS_EXTRA} _SANITIZERS)
     endif()
 

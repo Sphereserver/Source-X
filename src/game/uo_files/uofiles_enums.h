@@ -533,7 +533,7 @@ enum SKILL_TYPE	// List of skill numbers (things that can be done at a given tim
     NPCACT_STAY,				// 101
     NPCACT_GOTO,				// 102 = Go to a location x,y. Pet command
     NPCACT_WANDER,				// 103 = Wander aimlessly.
-    NPCACT_LOOKING,				// 104 = just look around intently.
+    NPCACT_LOOKING,				// 104 = just look around intently (UNUSED?).
     NPCACT_FLEE,				// 105 = Run away from target. m_Act_UID
     NPCACT_TALK,				// 106 = Talking to my target. m_Act_UID
     NPCACT_TALK_FOLLOW,			// 107 = m_Act_UID / m_Fight_Targ_UID.

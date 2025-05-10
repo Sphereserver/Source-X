@@ -2204,7 +2204,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 #ifdef _DEBUG
     if (g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS)
 	{
-		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, ResGetIndex(context)));
+        const CResourceDef* resource = g_Cfg.RegisteredResourceGetDef(CResourceID(RES_DIALOG, ResGetIndex(context)));
 		if (resource == nullptr)
 			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "[DEBUG_SCRIPTS] Gump context: %x (%s), UID: 0x%x, Button: %u.\n", context, "undefined resource", (dword)serial, button);
 		else
@@ -2479,7 +2479,7 @@ bool PacketClientVersion::onReceive(CNetState* net)
 	if (strstr(versionStr, "UO:3D") != nullptr)
 		net->m_clientType = CLIENTTYPE_3D;
 
-	length = (word)Str_GetBare(versionStr, versionStr, (int)length, " '`-+!\"#$%&()*,/:;<=>?@[\\]^{|}~");
+    length = (word)Str_GetBare(versionStr, versionStr, length, " '`-+!\"#$%&()*,/:;<=>?@[\\]^{|}~");
 	if (length > 0)
 	{
 		CClient* client = net->getClient();

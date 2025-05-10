@@ -15,7 +15,7 @@ extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
 #if defined(STATIC_ANALYSIS)
     #include <cassert>
     #define ASSERT(exp)         assert(exp)
-#elif defined(_NIGHTLY) || defined(_DEBUG)
+#elif defined(_NIGHTLYBUILD) || defined(_DEBUG)
     #define ASSERT(exp)         if ( !(exp) ) [[unlikely]] Assert_Fail(#exp, __FILE__, __LINE__)
 #else
     #define ASSERT(exp)         (void)0

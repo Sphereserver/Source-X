@@ -37,16 +37,6 @@
 #include "assertion.h"
 #include "basic_threading.h"
 
-#ifdef _WIN32
-	#include "os_windows.h"
-#endif
-#include "datatypes.h"
-#ifndef _WIN32
-	#include "os_unix.h"
-#endif
-
-
-/* Coding helpers */
 
 // On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
 #if !defined(_MSC_VER) || defined(__clang__)
@@ -61,6 +51,23 @@
 #ifdef _MSC_VER
 #   define MSVC_RUNTIME
 #endif
+
+#if defined(MSVC_COMPILER)
+#   define RESTRICT __restrict
+#else
+#   define RESTRICT __restrict__
+#endif
+
+#ifdef _WIN32
+	#include "os_windows.h"
+#endif
+#include "datatypes.h"
+#ifndef _WIN32
+	#include "os_unix.h"
+#endif
+
+
+/* Coding helpers */
 
 // Target arch.
 #if defined(_WIN64) || (__SIZEOF_POINTER__ == 8)
@@ -103,12 +110,12 @@
 #ifdef MSVC_COMPILER
 #define SPHERE_PRINTFARGS(a,b)
 #else
-#ifdef __MINGW32__
+#   ifdef __MINGW32__
 // Clang doesn't have a way to switch from gnu or ms style printf arguments. It just depends on the runtime used.
-#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
-#else
-#define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
-#endif
+#       define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(gnu_printf, a, b)))
+#   else
+#      define SPHERE_PRINTFARGS(a,b) __attribute__ ((format(printf, a, b)))
+#   endif
 #endif
 
 
@@ -134,10 +141,35 @@ constexpr bool IsNegative(T val) noexcept {
 
 //-- Bitwise magic: combine numbers.
 
-// MAKEWORD:  defined in minwindef.h (loaded by windows.h), so it's missing only on Linux.
-// MAKEDWORD: undefined even on Windows, it isn't in windows.h.
-// MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
-#define MAKEDWORD(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
+//#define LOWORD(l)		((word)((dword)(l) & 0xffff))
+inline constexpr word dword_low_word(dword in) noexcept {
+    return (in & 0xFFFF);
+}
+
+//#define HIWORD(l)		((word)((dword)(l) >> 16))
+inline constexpr word dword_hi_word(dword in) noexcept {
+    return (in >> 16);
+}
+
+//#define LOBYTE(w)		((byte)((dword)(w) &  0xff))
+inline constexpr byte word_low_byte(word in) noexcept {
+    return (in & 0xFF);
+}
+
+//#define HIBYTE(w)		((byte)((dword)(w) >> 8))
+inline constexpr byte word_hi_byte(word in) noexcept {
+    return (in >> 8);
+}
+
+//#define MAKEWORD(low,high)		((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
+inline constexpr word make_word(byte low, byte high) noexcept {
+    return (word)low | ((word)high << 8);
+}
+
+//#define make_dword(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
+inline constexpr dword make_dword(word low, word high) noexcept {
+    return (dword)low | ((dword)high << 16);
+}
 
 
 //#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))

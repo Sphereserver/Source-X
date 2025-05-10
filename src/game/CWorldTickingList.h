@@ -17,13 +17,16 @@ public:
     static const char* m_sClassName;
 
     static void AddObjSingle(int64 iTimeout, CTimedObject* pObj, bool fForce);
-    static void DelObjSingle(CTimedObject* pObj);
+    static bool DelObjSingle(CTimedObject* pObj);
+    static auto IsTimeoutRegistered(const CTimedObject* pTimedObject) -> std::optional<std::pair<int64, CTimedObject*>>;
 
     static void AddCharPeriodic(CChar* pChar, bool fNeedsLock);
-    static void DelCharPeriodic(CChar* pChar, bool fNeedsLock);
+    static bool DelCharPeriodic(CChar* pChar, bool fNeedsLock);
+    static auto IsCharPeriodicTickRegistered(const CChar* pChar) -> std::optional<std::pair<int64, CChar*>>;
 
     static void AddObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
-    static void DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
+    static bool DelObjStatusUpdate(CObjBase* pObj, bool fNeedsLock);
+    static bool IsStatusUpdateTickRegistered(const CObjBase *pObj);
 
 private:
     friend class CWorld;

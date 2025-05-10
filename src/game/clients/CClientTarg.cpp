@@ -1011,7 +1011,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_CLOTHING:
 		case IT_JEWELRY:
 			fWeapon = false;
-			iHitsCur = pItem->m_itArmor.m_dwHitsCur;
+			iHitsCur = pItem->m_itArmor.m_wHitsCur;
 			iHitsMax = pItem->m_itArmor.m_wHitsMax;
 			len += snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DEF ), pItem->Armor_GetDefense());
 			break;
@@ -1027,7 +1027,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 		case IT_WEAPON_XBOW:
 		case IT_WEAPON_THROWING:
 			fWeapon = true;
-			iHitsCur = pItem->m_itWeapon.m_dwHitsCur;
+			iHitsCur = pItem->m_itWeapon.m_wHitsCur;
 			iHitsMax = pItem->m_itWeapon.m_wHitsMax;
 			len += snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_DAM ), pItem->Weapon_GetAttack());
 			break;
@@ -1206,7 +1206,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	{
 		int len = snprintf( pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER),
             pCorpse->GetName(),
-            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS() * MSECS_PER_SEC) / MSECS_PER_SEC));
+            (CWorldGameTime::GetCurrentTime().GetTimeDiff(pCorpse->GetTimeStampS()) / MSECS_PER_SEC));
 
 		if ( pName )
 			snprintf( pszTemp + len, Str_TempLength() - len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );

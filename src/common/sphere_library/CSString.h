@@ -30,9 +30,16 @@ private:
     /**
 	* @brief Initializes internal data.
 	*
-    * Allocs CSTRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
+    * Do not allocate any memory/internal buffer, but keep an empty internal buffer.
 	*/
-	void Init();
+    void InitEmpty(bool fManageBuffer);
+
+    /**
+    * @brief Initializes internal data.
+    *
+    * Allocs CSTRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
+    */
+    void InitDefault();
 
 public:
 	/** @name Constructors, Destructor, Asign operator:
@@ -52,7 +59,7 @@ public:
 	*
 	* If DEBUG_STRINGS is enabled, updates statistical information (total CSString instantiated).
 	*/
-	inline ~CSString() noexcept;
+    ~CSString() noexcept;
 
 	/**
 	* @brief "Copy" constructor.
@@ -119,12 +126,9 @@ public:
 	 */
 	///@{
 	/**
-	* @brief Sets length to zero.
-	*
-	* If fTotal is true, then free the memory allocated. If DEBUG_STRINGS setted, update statistical information (total memory allocated).
-	* @param fTotal true for free the allocated memory.
+    * @brief Sets length to zero and clear content.
 	*/
-	void Clear(bool fTotal = false) noexcept;
+    void Clear(bool fResetBuffer = false) noexcept;
 
 	/**
 	* @brief Check the length of the CSString.
@@ -600,14 +604,6 @@ public:
 
 
 /* Inlined methods are defined here */
-
-CSString::~CSString() noexcept
-{
-#ifdef DEBUG_STRINGS
-    --gAmount;
-#endif
-    Clear(true);
-}
 
 CSString::CSString(CSString&& s) noexcept :
 	m_pchData(nullptr)

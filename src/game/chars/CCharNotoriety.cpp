@@ -186,7 +186,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 				}
 			}
 
-			if (NPC_IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
+			if (!IsSetOF(OF_PetBehaviorOwnerNeutral) && NPC_IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
 				return NOTO_NEUTRAL;
 		}
 
@@ -677,7 +677,7 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 	m_notoSaves.emplace_back(std::move(refNoto));
 }
 
-NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )
+NOTO_TYPE CChar::NotoSave_GetValue(int id, bool fGetColor )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_GetValue");
 	if ( m_notoSaves.empty() )
@@ -687,7 +687,7 @@ NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )
 	if ( (int)(m_notoSaves.size()) <= id )
 		return NOTO_INVALID;
 	NotoSaves & refNotoSave = m_notoSaves[id];
-	if (bGetColor && refNotoSave.color != 0 )	// retrieving color if requested... only if a color is greater than 0 (to avoid possible crashes).
+    if (fGetColor && refNotoSave.color != 0 )	// retrieving color if requested... only if a color is greater than 0 (to avoid possible crashes).
 		return refNotoSave.color;
 	else
 		return refNotoSave.value;

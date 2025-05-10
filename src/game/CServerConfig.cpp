@@ -47,6 +47,8 @@
 // .ini settings.
 CServerConfig::CServerConfig()
 {
+    m_iniDirectory[0] = '\0';
+
 	m_timePeriodic = 0;
 
 	m_fUseNTService		= false;
@@ -202,6 +204,7 @@ CServerConfig::CServerConfig()
 	m_fDisplayPercentAr = false;
 	m_fDisplayElementalResistance = false;
 	m_fNoResRobe		= 0;
+    m_iBounceMessage        = false;
 	m_iLostNPCTeleport	= 50;
 	m_iAutoProcessPriority = 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
@@ -253,6 +256,8 @@ CServerConfig::CServerConfig()
 	_uiStatFlag			= 0;
 
 	m_iNpcAi			= 0;
+    m_iNPCWanderLookAroundChance = 30;
+
 	m_iMaxLoopTimes		= 100000;
 
 	// Third Party Tools
@@ -660,6 +665,7 @@ enum RC_TYPE
 	RC_NPCTRAINCOST,			// m_iTrainSkillCost
 	RC_NPCTRAINMAX,				// m_iTrainSkillMax
 	RC_NPCTRAINPERCENT,			// m_iTrainSkillPercent
+    RC_NPCWANDERINGLOOKAROUNDCHANCE, // m_iNPCWanderingLookAroundChance
 	RC_NTSERVICE,				// m_fUseNTService
 	RC_OPTIONFLAGS,				// _uiOptionFlags
 	RC_OVERSKILLMULTIPLY,		// m_iOverSkillMultiply
@@ -725,6 +731,7 @@ enum RC_TYPE
 	RC_VENDORMARKUP,			// m_iVendorMarkup
 	RC_VENDORMAXSELL,			// m_iVendorMaxSell
 	RC_VENDORTRADETITLE,		// m_fVendorTradeTitle
+	RC_VERBOSEITEMBOUNCE,		// m_iBounceMessage
 	RC_VERSION,
 	RC_WALKBUFFER,
 	RC_WALKREGEN,
@@ -749,7 +756,6 @@ enum RC_TYPE
 #endif
 
 const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
-
 {
     { "ACCTFILES",				{ ELEM_CSTRING,	static_cast<uint>OFFSETOF(CServerConfig,m_sAcctBaseDir)			}},
     { "ADVANCEDLOS",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iAdvancedLos)			}},
@@ -954,7 +960,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "NPCTRAINCOST",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillCost)		}},
 	{ "NPCTRAINMAX",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillMax)		}},
 	{ "NPCTRAINPERCENT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iTrainSkillPercent)	}},
-	{ "NTSERVICE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseNTService)			}},
+    { "NPCWANDERLOOKAROUNDCHANCE", { ELEM_MASK_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iNPCWanderLookAroundChance)}},
+    { "NTSERVICE",				{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fUseNTService)			}},
 	{ "OPTIONFLAGS",			{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,_uiOptionFlags)			}},
 	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iOverSkillMultiply)	}},
 	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iPacketDeathAnimation)	}},
@@ -1019,6 +1026,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 	{ "VENDORMARKUP",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMarkup)			}},
 	{ "VENDORMAXSELL",			{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iVendorMaxSell)		}},
 	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fVendorTradeTitle)		}},
+	{ "VERBOSEITEMBOUNCE",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_iBounceMessage)		}},
 	{ "VERSION",				{ ELEM_VOID,	0												}},
 	{ "WALKBUFFER",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkBuffer)			}},
 	{ "WALKREGEN",				{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iWalkRegen)			}},
@@ -1036,6 +1044,15 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
 #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
 #endif
+
+void CServerConfig::SetIniDirectory(const char* path)
+{
+    if (path && path[0] != '\0')
+    {
+        strncpy(m_iniDirectory, path, SPHERE_MAX_PATH - 1);
+        m_iniDirectory[SPHERE_MAX_PATH - 1] = '\0';
+    }
+}
 
 bool CServerConfig::r_LoadVal( CScript &s )
 {
@@ -3760,24 +3777,38 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 
 	case RES_TYPEDEFS:
-		// just get a block of defs.
-		while ( pScript->ReadKeyParse())
-		{
-			CResourceID ridnew( RES_TYPEDEF, pScript->GetArgVal() );
-			pPrvDef = RegisteredResourceGetDef(rid);
-			if ( pPrvDef )
-			{
-				pPrvDef->SetResourceName( pScript->GetKey() );
-			}
-			else
-			{
-				CResourceDef * pResDef = new CItemTypeDef( ridnew );
-				pResDef->SetResourceName( pScript->GetKey() );
-				ASSERT(pResDef);
-				m_ResHash.AddSortKey( ridnew, pResDef );
-			}
-		}
-		return true;
+        {
+            // just get a block of defs.
+
+            //pPrvDef = RegisteredResourceGetDef(rid); // useless
+            while ( pScript->ReadKeyParse())
+            {
+                const lpctstr ptcName = pScript->GetKey();
+                const int iIndex = pScript->GetArgVal();
+                CResourceID ridnew( RES_TYPEDEF, iIndex );
+
+                CResourceDef *pResDef = RegisteredResourceGetDef(ridnew);
+                // Do we already have a TYPEDEF with the same index?
+                if (pResDef)
+                {
+                    pResDef->SetResourceName( ptcName );   // update name
+                }
+                else
+                {
+                    if (!ptcName || (*ptcName == '\0'))
+                    {
+                        g_Log.EventError("Empty typedef name for id %d?\n", iIndex);
+                        continue;
+                    }
+                    pResDef = new CItemTypeDef( ridnew );
+                    ASSERT(pResDef);
+                    pResDef->SetResourceName( ptcName );
+                    m_ResHash.AddSortKey( ridnew, pResDef );
+                }
+            }
+
+            return true;
+        }
 
 	case RES_STARTS:
 		{
@@ -4358,8 +4389,9 @@ sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(cons
 	if (!rid.IsValidResource())
 		return {};
 
-	int index = rid.GetResIndex();
-	switch (rid.GetResType())
+    const int iIndex = rid.GetResIndex();
+    const RES_TYPE iType = rid.GetResType();
+    switch (iType)
 	{
 	case RES_WEBPAGE:
 	{
@@ -4370,14 +4402,14 @@ sl::smart_ptr_view<CResourceDef> CServerConfig::RegisteredResourceGetDefRef(cons
 	}
 
 	case RES_SKILL:
-		if (!m_SkillIndexDefs.valid_index(index))
+        if (!m_SkillIndexDefs.valid_index(iIndex))
 			return {};
-		return m_SkillIndexDefs[index];
+        return m_SkillIndexDefs[iIndex];
 
 	case RES_SPELL:
-		if (!m_SpellDefs.valid_index(index))
+        if (!m_SpellDefs.valid_index(iIndex))
 			return {};
-		return m_SpellDefs[index];
+        return m_SpellDefs[iIndex];
 
 	case RES_UNKNOWN:	// legal to use this as a ref but it is unknown
 		return {};
@@ -4422,6 +4454,58 @@ CResourceDef* CServerConfig::RegisteredResourceGetDefByName(RES_TYPE restype, lp
 {
 	ADDTOCALLSTACK("CServerConfig::RegisteredResourceGetDefByName");
 	return RegisteredResourceGetDefRefByName(restype, ptcName, wPage).get();
+}
+
+lpctstr CServerConfig::ResourceTypedGetName(const CResourceIDBase& rid, RES_TYPE iExpectedType, lptstr* ptcOutError)
+{
+    ADDTOCALLSTACK("CServerConfig::ResourceTypedGetName");
+    CResourceID ridValid = CResourceID(iExpectedType, 0);
+    if (!rid.IsValidResource())
+    {
+        if (rid.GetResIndex() != 0)
+        {
+            if (ptcOutError)
+            {
+                *ptcOutError = Str_GetTemp();
+                snprintf(*ptcOutError, Str_TempLength(), "Expected a valid resource. Ignoring it/Converting it to an empty one.\n");
+            }
+        }
+    }
+    else if (rid.GetResType() != iExpectedType)
+    {
+        if (ptcOutError)
+        {
+            *ptcOutError = Str_GetTemp();
+            snprintf(*ptcOutError, Str_TempLength(), "Expected resource with type %d, got %d. Ignoring it/Converting it to an empty one.\n",
+                iExpectedType, rid.GetResType());
+        }
+    }
+    else
+    {
+        ridValid = rid;
+    }
+    return ResourceGetName(ridValid); // Even it's 0, we should return it's name, as it can be mr_nothing.
+}
+
+lpctstr CServerConfig::ResourceGetName( const CResourceID& rid ) const
+{
+    ADDTOCALLSTACK("CServerConfig::ResourceGetName");
+    // Get a portable name for the resource id type.
+
+    if (rid.IsValidResource())
+    {
+        const CResourceDef* pResourceDef = RegisteredResourceGetDef(rid);
+        if (pResourceDef)
+            return pResourceDef->GetResourceName();
+    }
+
+    tchar * pszTmp = Str_GetTemp();
+    ASSERT(pszTmp);
+    if ( !rid.IsValidUID() )
+        snprintf( pszTmp, Str_TempLength(), "%d", (int)rid.GetPrivateUID() );
+    else
+        snprintf( pszTmp, Str_TempLength(), "0%" PRIx32, rid.GetResIndex() );
+    return pszTmp;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4503,6 +4587,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
         if ( IsSetOF(OF_OWNoDropCarriedItem) )		catresname(zOptionFlags, "OWNoDropCarriedItem");
 		if ( IsSetOF(OF_AllowContainerInsideContainer)) catresname(zOptionFlags, "AllowContainerInsideContainer");
         if ( IsSetOF(OF_VendorStockLimit) )		    catresname(zOptionFlags, "VendorStockLimit");
+		if ( IsSetOF(OF_NoDclickEquip) )				catresname(zOptionFlags, "NoDclickEquip");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
@@ -4543,13 +4628,31 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 #undef catresname
 }
 
-bool CServerConfig::LoadIni( bool fTest )
+bool CServerConfig::LoadIni(bool fTest)
 {
 	ADDTOCALLSTACK("CServerConfig::LoadIni");
+
+    char filename[SPHERE_MAX_PATH] = SPHERE_FILE ".ini";
+
+    // Check, if CLI argument -I=/path/to/ini/directory/ was used.
+    if (m_iniDirectory[0] != '\0')
+    {
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s" SPHERE_FILE ".ini", m_iniDirectory);
+        if (ret < 0)
+        {
+			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Path to %s" SPHERE_FILE ".ini is too long.\n", m_iniDirectory);
+            return false;
+        }
+    }
+    else
+    {
+        Str_CopyLimitNull(filename, SPHERE_FILE ".ini", SPHERE_MAX_PATH);
+    }
+
 	// Load my INI file first.
-	if ( ! OpenResourceFind( m_scpIni, SPHERE_FILE ".ini", !fTest )) // Open script file
+	if (!OpenResourceFind(m_scpIni, filename, !fTest))
 	{
-		if( !fTest )
+		if (!fTest)
 		{
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, SPHERE_FILE ".ini has not been found.\n");
 			g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-X/tree/master/src\n");
@@ -4567,9 +4670,27 @@ bool CServerConfig::LoadIni( bool fTest )
 bool CServerConfig::LoadCryptIni( void )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadCryptIni");
-	if ( ! OpenResourceFind( m_scpCryptIni, SPHERE_FILE "Crypt.ini", false ) )
+
+    char filename[SPHERE_MAX_PATH] = SPHERE_FILE "Crypt.ini";
+
+    // Check, if CLI argument -I=/path/to/ini/directory/ was used.
+    if (m_iniDirectory[0] != '\0')
+    {
+        int const ret = snprintf(filename, SPHERE_MAX_PATH, "%s" SPHERE_FILE "Crypt.ini", m_iniDirectory);
+        if (ret < 0)
+        {
+            g_Log.Event(LOGL_FATAL|LOGM_INIT|LOGF_CONSOLE_ONLY, "Path to %s" SPHERE_FILE "Crypt.ini is too long.\n", m_iniDirectory);
+            return false;
+        }
+    }
+    else
+    {
+        Str_CopyLimitNull(filename, SPHERE_FILE "Crypt.ini", SPHERE_MAX_PATH);
+    }
+
+    if (!OpenResourceFind(m_scpCryptIni, filename, false))
 	{
-		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
+		g_Log.Event(LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
 		return false;
 	}
 
@@ -4577,8 +4698,8 @@ bool CServerConfig::LoadCryptIni( void )
 	m_scpCryptIni.Close();
 	m_scpCryptIni.CloseForce();
 
-	g_Log.Event( LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n",
-		CCryptoKeysHolder::get()->client_keys.size() );
+	g_Log.Event(LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n",
+		CCryptoKeysHolder::get()->client_keys.size());
 
 	return true;
 }

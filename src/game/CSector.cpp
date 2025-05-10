@@ -177,9 +177,12 @@ bool CSector::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 void CSector::_GoSleep()
 {
     ADDTOCALLSTACK("CSector::_GoSleep");
+    EXC_TRY("_GoSleep");
+
     const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::_GoSleep();
 
+    EXC_SET_BLOCK("Active Chars");
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
@@ -189,6 +192,7 @@ void CSector::_GoSleep()
             pChar->GoSleep();
     }
 
+    EXC_SET_BLOCK("Disconnected Chars");
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
@@ -198,6 +202,7 @@ void CSector::_GoSleep()
 			pChar->GoSleep();
 	}
 
+    EXC_SET_BLOCK("Items");
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
@@ -205,6 +210,7 @@ void CSector::_GoSleep()
         if (!fCanTick)
             pItem->GoSleep();
     }
+    EXC_CATCH;
 }
 
 void CSector::GoSleep()
@@ -217,9 +223,12 @@ void CSector::GoSleep()
 void CSector::_GoAwake()
 {
     ADDTOCALLSTACK("CSector::_GoAwake");
+    EXC_TRY("_GoAwake");
+
     const ProfileTask charactersTask(PROFILE_TIMERS);
     CTimedObject::_GoAwake();  // Awake it first, otherwise other things won't work.
 
+    EXC_SET_BLOCK("Active Chars");
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
@@ -229,6 +238,7 @@ void CSector::_GoAwake()
 			pChar->GoAwake();
 	}
 
+    EXC_SET_BLOCK("Disconnected Chars");
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
@@ -238,6 +248,7 @@ void CSector::_GoAwake()
 			pChar->GoAwake();
 	}
 
+    EXC_SET_BLOCK("Items");
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
@@ -246,6 +257,7 @@ void CSector::_GoAwake()
         	pItem->GoAwake();
     }
 
+    EXC_SET_BLOCK("Adjacent sectors sleep status");
     /*
     * Awake adjacent sectors when awaking this one to avoid the effect
     * of NPCs being stop until you enter the sector, or all the spawns
@@ -266,7 +278,10 @@ void CSector::_GoAwake()
         pCentral = nullptr;
     }
 
+    EXC_SET_BLOCK("Tick myself");
     _OnTick();   // Unknown time passed, make the sector tick now to reflect any possible environ changes.
+
+    EXC_CATCH;
 }
 
 void CSector::GoAwake()
@@ -1171,7 +1186,7 @@ bool CSector::_OnTick()
 	if ( !g_MapList.IsMapSupported(m_map) )
 		return true;
 
-	EXC_TRY("Tick");
+    EXC_TRY("_OnTick");
 
 	const ProfileTask sectorsTask(PROFILE_SECTORS);
 
