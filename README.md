@@ -176,16 +176,15 @@ extra requirement is _debhelper_ package (`sudo apt install debhelper`).
 
 **Step by step building:**
 1) Clone repository.
-2) Change directory to wherever you cloned repository.
+2) Change directory to wherever you cloned repository and then go to `packaging` directory.
 3) Since we are in nightly, there is no actual SemVer changelog that we can include, and we have to use workaround to
    generate one. By running `cat debian/data/changelog | sed -e "s/@version@/$(git rev-list --count HEAD)/" -e "s/@date@/$(date -R)/" > debian/changelog`
    you will generate one. This command takes deb changelog template (in `debian/data/changelog`) and replaces __version__ 
    and __date__ variables with git revision and current date.
 4) Build package by running `dpkg-buildpackage -us -uc -b` (arguments are `-b` = build, `-us` and `-uc` = don't sign 
-   built files with OpenPGP key). This will compile sources and create debian package, which will be stored in the parent 
-   directory (i.e., if we are building in `/home/dev/source/` then package will be in `/home/dev/`). The cmake is 
-   predefined to build a Linux x86_64 Nightly version of SphereServer. All build commands and switches are defined in 
-   `debian/rules` file.
+   built files with OpenPGP key). This will compile sources and create debian package, which will be stored in the root 
+   of the project directory (i.e. `/home/dev/source-x/`). The cmake is predefined to build a Linux x86_64 Nightly version 
+   of SphereServer. All build commands and switches are defined in `debian/rules` file.
 
 ### Installation
 
