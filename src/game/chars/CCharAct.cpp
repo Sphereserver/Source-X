@@ -3285,9 +3285,12 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( !pCharMsg )
 		pCharMsg = this;
 
+    // Remember original layer, because we need to return to it after equiptest trigger.
+    LAYER_TYPE const requestedLayer = pItem->GetEquipLayer();
+
 	if ( pItem->GetParent() == this )
 	{
-		if ( pItem->GetEquipLayer() != LAYER_DRAGGING ) // already equipped.
+		if ( requestedLayer != LAYER_DRAGGING ) // already equipped.
 			return true;
 	}
 
@@ -3303,8 +3306,14 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (IsTrigUsed(TRIGGER_EQUIPTEST) || IsTrigUsed(TRIGGER_ITEMEQUIPTEST))
 	{
+	    // Swap the layer for real one, because if we don't use dclick for equip, real layer gets rewritten with LAYER_DRAGGING.
+		pItem->SetEquipLayer(layer);
+
 		if (pItem->OnTrigger(ITRIG_EQUIPTEST, this) == TRIGRET_RET_TRUE)
 		{
+		    // Reset layer to the original value, that item doesn't get misplaced.
+		    pItem->SetEquipLayer(requestedLayer);
+
 			// since this trigger is called also when creating an item via ITEM=, if the created item has a RETURN 1 in @EquipTest
 			// (or if the NPC has a RETURN 1 in @ItemEquipTest), the item will be created but not placed in the world.
 			// so, if this is an NPC, even if there's a RETURN 1 i need to bounce the item inside his pack
@@ -3314,6 +3323,9 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 				ItemBounce(pItem);
 			return false;
 		}
+
+	    // Reset layer to the original value.
+	    pItem->SetEquipLayer(requestedLayer);
 
 		if (pItem->IsDeleted())
 			return false;

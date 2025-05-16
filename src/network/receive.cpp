@@ -546,6 +546,17 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
 
 	CChar* target = targetSerial.CharFind();
     bool fSuccess = false;
+
+    // Check if player is sending wrong / forged layer.
+    const LAYER_TYPE itemRealLayer = target->CanEquipLayer(item, LAYER_QTY, target, true);
+    if (itemLayer != itemRealLayer)
+    {
+#ifdef _DEBUG
+        g_Log.EventDebug("Player trying to equip item to invalid layer (sent: %d, should be %d)\n", itemLayer, itemRealLayer);
+#endif
+        itemLayer = itemRealLayer;
+    }
+
     if (target && (itemLayer < LAYER_HORSE) && source->CanDress(target) && source->CanTouch(item))
     {
        //if (target->CanCarry(item)) //Since Weight behavior rework, we want avoid don't be able to equip an item if overweight

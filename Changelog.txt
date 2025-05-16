@@ -3967,16 +3967,16 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
 6-12-2024, canerksk
 - Added: LOCAL.WOPTalkMode in @SpellCast trigger and ini setting WOPTalkMode.
     In some clients, different operations can be performed based on this. For example, if this talk mode was sent from Sphere as TALKMODE_SPELL, the operation is performed according to the client version. The possibility of changing the talk mode according to the client version used is now provided. By default, TALKMODE_SPELL.
-    
+
     Default talk mode: TALKMODE_SPELL = 10
-    
+
     Sphere.ini:
     WOPTalkMode = 0/14
-    
+
     Trigger:
     @SpellCast
     Local.WOPTalkMode = 0/14
-    
+
     TALKMODE_SAY        = 0  // A character speaking.
     TALKMODE_SYSTEM     = 1  // Display as system prompt.
     TALKMODE_EMOTE      = 2  // *smiles* at object (client shortcut: :+space).
@@ -4019,7 +4019,7 @@ Added: 'H' shortcut for variables to get the value as hexadecimal.
     VerboseItemBounce = 0 // (default)
 
 22-04-2025, canerksk
-- Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse. 
+- Added: New item function, CARVECORPSE: carves a corpse with SRC = char carving the corpse.
 - Added: New ini RevealFlag setting REVEALF_ONHORSE, to allow or disallow stealth walking if you are on a mount.
 - Added: new ini CombatFlags setting COMBAT_ATTACK_NOAGGREIVED.
 	In the old behavior (55i/55r/56b/56c) we were not guilty when we hit a murderer. Now when we attack a criminal or murderer we are guilty towards that person. An ini setting option has been added for this behavior. Although this is a normal behavior in OSI, it can be perceived as a problem since not every server designs games like OSI.
@@ -4047,3 +4047,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 08-05-2025, Nolok
 - Added: NPCWanderingLookAroundChance ini setting and TAG.OVERRIDE.LOOKAROUNDCHANCE.
     It allows to change the chance that a wandering NPC will analyze its surroundings for the current step. This also means that the trigger @NPCLookAtChar will fire more frequently.
+
+16-05-2025, Mulambo
+- Changed: When equipping item by dragging or using Dress macro, the item layer is now showing actual layer of the object in EquipTest and ItemEquipTest trigger (instead of 31 = LAYER_DRAGGING). This is the same behaviour, as equipping by double clicking.
