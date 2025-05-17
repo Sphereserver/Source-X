@@ -61,7 +61,7 @@ bool cstr_to_num(
     ) noexcept
 {
     static_assert(std::is_integral_v<_IntType>, "Only integers supported");
-    if (!str || !out || base == 1 || base > 16)
+    if (!str || !out || base == 1 || base > 16) [[unlikely]]
         return false;
 
     // 1) Skip leading spaces
@@ -284,7 +284,7 @@ static constexpr tchar DIGITS[] = "0123456789abcdef";
 template<typename _IntType>
 tchar* Str_FromInt_Fast(_IntType val, lptstr_restrict out_buf, size_t buf_length, uint base) noexcept
 {
-    if (!out_buf || buf_length == 0 || base == 0 || base > 16)
+    if (!out_buf || buf_length == 0 || base == 0 || base > 16) [[unlikely]]
         return nullptr;
 
     const bool fHex = (base == 16);
@@ -524,7 +524,7 @@ err:
     return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
 }
 
-bool IsStrEmpty( const tchar * pszTest )
+bool IsStrEmpty( const tchar * pszTest ) noexcept
 {
     if ( !pszTest || !*pszTest )
         return true;
@@ -538,7 +538,7 @@ bool IsStrEmpty( const tchar * pszTest )
     return true;
 }
 
-bool IsStrNumericDec( const tchar * pszTest )
+bool IsStrNumericDec( const tchar * pszTest ) noexcept
 {
     if ( !pszTest || !*pszTest )
         return false;
@@ -554,7 +554,7 @@ bool IsStrNumericDec( const tchar * pszTest )
 }
 
 
-bool IsStrNumeric( const tchar * pszTest )
+bool IsStrNumeric( const tchar * pszTest ) noexcept
 {
     if ( !pszTest || !*pszTest )
         return false;
@@ -575,7 +575,7 @@ bool IsStrNumeric( const tchar * pszTest )
     return true;
 }
 
-bool IsSimpleNumberString( lpctstr_restrict pszTest )
+bool IsSimpleNumberString( lpctstr_restrict pszTest ) noexcept
 {
     // is this a string or a simple numeric expression ?
     // string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
@@ -638,10 +638,10 @@ bool IsSimpleNumberString( lpctstr_restrict pszTest )
 // strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
 size_t Str_CopyLimit(lptstr_restrict pDst, lpctstr_restrict pSrc, const size_t uiMaxSize) noexcept
 {
-    if (uiMaxSize == 0)
+    if (uiMaxSize == 0) [[unlikely]]
         return 0;
 
-    if (pSrc[0] == '\0')
+    if (pSrc[0] == '\0') [[unlikely]]
     {
 
         pDst[0] = '\0';
@@ -660,11 +660,11 @@ size_t Str_CopyLimit(lptstr_restrict pDst, lpctstr_restrict pSrc, const size_t u
 
 size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiMaxSize) noexcept
 {
-    if (uiMaxSize == 0)
+    if (uiMaxSize == 0) [[unlikely]]
     {
         return 0;
     }
-    if (pSrc[0] == '\0')
+    if (pSrc[0] == '\0') [[unlikely]]
     {
         pDst[0] = '\0';
         return 0;
@@ -686,6 +686,70 @@ size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiM
     return len; // bytes copied in pDst string (not counting the string terminator)
 }
 
+/*
+// Copy up to max_len-1 chars from src to dst, NUL-terminate.
+// Returns number of chars written (excluding the terminator).
+size_t Str_CopyLimitNull_ShortStr(char* dst, const char* src, size_t max_len)
+{
+    if (max_len == 0) [[unlikely]]
+        return 0;
+
+    char* const start = dst;
+    size_t remaining = max_len - 1;
+
+    // Use 64-bit words on modern 64-bit targets
+    using word_t = std::conditional_t<sizeof(void*) >= 8, uint64_t, uint32_t>;
+    constexpr ushort W = static_cast<ushort>(sizeof(word_t));
+
+    // Magic constants for zero detection
+    // lomagic (0x0101010101010101ULL) subtracts 1 from each byte.
+    // himagic (0x8080808080808080ULL) is used to mask out the high bit of each byte.
+    // The expression ((w - lomagic) & ~w & himagic) evaluates to non-zero if any byte in the word was zero.
+    constexpr word_t lomagic = (W == 8 ? 0x0101010101010101ULL : 0x01010101U);
+    constexpr word_t himagic = (W == 8 ? 0x8080808080808080ULL : 0x80808080U);
+
+    // Word-wise loop (assumes unaligned loads/stores are fast)
+    while (remaining >= W)
+    {
+        // Direct unaligned load/store, acceptable for short strings
+        word_t w = *reinterpret_cast<const word_t*>(src);
+        *reinterpret_cast<word_t*>(dst) = w;
+
+        // Detect any zero byte
+        if (((w - lomagic) & ~w & himagic) != 0)
+        {
+            // Scan this word byte-by-byte for the exact NUL
+            for (size_t i = 0; i < W; ++i)
+            {
+                char c = src[i];
+                dst[i] = c;
+                if (c == '\0')
+                    return (dst + i) - start;
+            }
+            // Should never get here
+            ASSERT(false);
+        }
+        src += W;
+        dst += W;
+        remaining -= W;
+    }
+
+    // Tail bytes
+    while (remaining-- > 0)
+    {
+        const char c = *src++;
+        *dst++ = c;
+        if (c == '\0')
+            return dst - start - 1;
+    }
+
+    // Buffer full – append NUL
+    *dst = '\0';
+    return dst - start;
+}
+*/
+
+// Acceptable overhead for out use cases (non-performance critical).
 size_t Str_CopyLen(lptstr_restrict pDst, lpctstr_restrict pSrc) noexcept
 {
     strcpy(pDst, pSrc);
@@ -1016,7 +1080,8 @@ tchar * Str_GetUnQuoted(lptstr_restrict pStr) noexcept
 
 int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 {
-    ASSERT(len >= 0);
+    if (!pStr) [[unlikely]]
+        return -1;
     while (len > 0 && IsWhitespace(pStr[len - 1])) {
         --len;
     }
@@ -1026,6 +1091,8 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 
 tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 {
+    if (!pStr) [[unlikely]]
+        return nullptr;
     GETNONWHITESPACE(pStr);
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
@@ -1033,7 +1100,7 @@ tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 
 void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcept
 {
-    if (pStrBegin == pStrEnd)
+    if (pStrBegin == pStrEnd) [[unlikely]]
         return;
 
     tchar* ptcPrev = pStrEnd - 1;

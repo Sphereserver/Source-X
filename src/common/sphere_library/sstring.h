@@ -256,10 +256,10 @@ void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept;
 ///@{
 
 //TODOC
-bool IsSimpleNumberString( const tchar * pszTest );
-bool IsStrNumericDec( const tchar * pszTest );
-bool IsStrNumeric( const tchar * pszTest );
-bool IsStrEmpty( const tchar * pszTest );
+bool IsSimpleNumberString( const tchar * pszTest ) noexcept;
+bool IsStrNumericDec( const tchar * pszTest ) noexcept;
+bool IsStrNumeric( const tchar * pszTest ) noexcept;
+bool IsStrEmpty( const tchar * pszTest ) noexcept;
 
 // strncpy does not always return the actual amount of bytes written. this doesn't count the string terminator.
 int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintError = true);
