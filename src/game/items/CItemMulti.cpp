@@ -2,6 +2,7 @@
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
@@ -406,7 +407,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
             }
         }
     }
-    pChar->r_Call("f_multi_setup", pChar, nullptr, nullptr, nullptr);
+    pChar->r_Call("f_multi_setup", CScriptTriggerArgsPtr{}, pChar, nullptr, nullptr);
 }
 
 bool CItemMulti::Multi_IsPartOf(const CItem * pItem) const
@@ -1203,21 +1204,23 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidRedeedingCha
             pMulti->DeleteAddon(GetUID());
         }
     }
-    CScriptTriggerArgs args(pDeed);
-    args.m_iN1 = itDeed;
-    args.m_iN2 = 1; // Transfer / Redeed all items to the moving crate.
-    args.m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
+
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_pO1 = pDeed;
+    pScriptArgs->m_iN1 = itDeed;
+    pScriptArgs->m_iN2 = 1; // Transfer / Redeed all items to the moving crate.
+    pScriptArgs->m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
     if (IsTrigUsed(TRIGGER_REDEED))
     {
-        tRet = OnTrigger(ITRIG_Redeed, uidRedeedingChar.CharFind(), &args);
-        if (args.m_iN2 == 0)
+        tRet = OnTrigger(ITRIG_Redeed, pScriptArgs, uidRedeedingChar.CharFind());
+        if (pScriptArgs->m_iN2 == 0)
         {
             fMoveToBank = false;
         }
         else
         {
             fTransferAll = true;
-            fMoveToBank = args.m_iN3 ? true : false;
+            fMoveToBank = pScriptArgs->m_iN3 ? true : false;
         }
     }
     RemoveAllComponents();
@@ -3245,13 +3248,14 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
             return nullptr;
         }
     }
-    CScriptTriggerArgs args;
-    args.m_VarsLocal.SetStrNew("check_blockradius", "-1, -1, 1, 1");    // Values are West, Norht, East, South
-    args.m_VarsLocal.SetStrNew("check_multiradius", "0, -5, 0, 5");
-    args.m_VarsLocal.SetStrNew("id", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, pItemDef->GetID())));
-    args.m_VarsLocal.SetStrNew("p", pt.WriteUsed());
+
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_VarsLocal.SetStrNew("check_blockradius", "-1, -1, 1, 1");    // Values are West, Norht, East, South
+    pScriptArgs->m_VarsLocal.SetStrNew("check_multiradius", "0, -5, 0, 5");
+    pScriptArgs->m_VarsLocal.SetStrNew("id", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, pItemDef->GetID())));
+    pScriptArgs->m_VarsLocal.SetStrNew("p", pt.WriteUsed());
     TRIGRET_TYPE tRet;
-    pChar->r_Call("f_multi_onplacement_check", pChar, &args, nullptr, &tRet);
+    pChar->r_Call("f_multi_onplacement_check", pScriptArgs, pChar, nullptr, &tRet);
     if (tRet == TRIGRET_RET_TRUE)
     {
         return nullptr;
@@ -3270,10 +3274,10 @@ CItem *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPoint
     if (!pChar->IsPriv(PRIV_GM) && tRet != TRIGRET_RET_HALFBAKED)
     {
         CRect rectBlockRadius;
-        rectBlockRadius.Read(args.m_VarsLocal.GetKeyStr("check_blockradius"));
+        rectBlockRadius.Read(pScriptArgs->m_VarsLocal.GetKeyStr("check_blockradius"));
 
         CRect rectMultiRadius;
-        rectMultiRadius.Read(args.m_VarsLocal.GetKeyStr("check_multiradius"));
+        rectMultiRadius.Read(pScriptArgs->m_VarsLocal.GetKeyStr("check_multiradius"));
 
         if (!pDeed->IsAttr(ATTR_MAGIC))
         {
@@ -3602,29 +3606,28 @@ void CMultiStorage::AddHouse(const CUID& uidHouse, HOUSE_PRIV ePriv)
     {
         return;
     }
+
     const CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
-    CScriptTriggerArgs args;
     TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
-    args.m_iN1 = pMulti->GetMultiCount();
-    args.m_iN2 = ePriv;    
-    if (ePriv == HOUSE_PRIV::HP_OWNER)
-    {
-        args.m_iN3 = 1;
-    }
+
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_iN1 = pMulti->GetMultiCount();
+    pScriptArgs->m_iN2 = ePriv;
+    pScriptArgs->m_iN3 = (ePriv == HOUSE_PRIV::HP_OWNER) ? 1 : 0;
 
     if (IsTrigUsed(TRIGGER_ADDMULTI))
     {
         CChar *pChar = _uidSrc.CharFind();
         if (pChar)
         {
-            tRet = pChar->OnTrigger(CTRIG_AddMulti, pChar, &args);
+            tRet = pChar->OnTrigger(CTRIG_AddMulti, pScriptArgs, pChar);
         }
     }
     if (tRet != TRIGRET_RET_TRUE)
     {
-        if (args.m_iN3 == 1)
+        if (pScriptArgs->m_iN3 == 1)
         {
-            _iHousesTotal += static_cast<int16>(args.m_iN1);
+            _iHousesTotal += static_cast<int16>(pScriptArgs->m_iN1);
         }
         _lHouses[uidHouse] = ePriv;
     }
@@ -3642,26 +3645,24 @@ void CMultiStorage::DelHouse(const CUID& uidHouse)
     {
         CItemMulti *pMulti = static_cast<CItemMulti*>(uidHouse.ItemFind());
         HOUSE_PRIV ePriv = GetPriv( uidHouse );
-        CScriptTriggerArgs args;
-        args.m_iN1 = pMulti->GetMultiCount();
-        args.m_iN2 = ePriv;
-        args.m_pO1 = pMulti;
-        if (ePriv == HOUSE_PRIV::HP_OWNER)
-        {
-            args.m_iN3 = 1;
-        }
+
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = pMulti->GetMultiCount();
+        pScriptArgs->m_iN2 = ePriv;
+        pScriptArgs->m_pO1 = pMulti;
+        pScriptArgs->m_iN3 = (ePriv == HOUSE_PRIV::HP_OWNER) ? 1 : 0;
 
         if (IsTrigUsed(TRIGGER_DELMULTI))
         {
             CChar* pChar = _uidSrc.CharFind();
             if (pChar)
             {
-                pChar->OnTrigger(CTRIG_DelMulti, pChar, &args);
+                pChar->OnTrigger(CTRIG_DelMulti, pScriptArgs, pChar);
             }
         }
-        if (args.m_iN3 == 1)
+        if (pScriptArgs->m_iN3 == 1)
         {
-            _iHousesTotal -= static_cast<int16>(args.m_iN1);
+            _iHousesTotal -= static_cast<int16>(pScriptArgs->m_iN1);
         }
         _lHouses.erase(uidHouse);
         return;
@@ -3779,29 +3780,28 @@ void CMultiStorage::AddShip(const CUID& uidShip, HOUSE_PRIV ePriv)
     {
         return;
     }
+
     const CItemShip* pShip = static_cast<CItemShip*>(uidShip.ItemFind());
-    CScriptTriggerArgs args;
     TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
-    args.m_iN1 = pShip->GetMultiCount();
-    args.m_iN2 = ePriv;
-    if (ePriv == HOUSE_PRIV::HP_OWNER)
-    {
-        args.m_iN3 = 1;
-    }
+
+    CScriptTriggerArgsPtr pScriptArgs;
+    pScriptArgs->m_iN1 = pShip->GetMultiCount();
+    pScriptArgs->m_iN2 = ePriv;
+    pScriptArgs->m_iN3 = (ePriv == HOUSE_PRIV::HP_OWNER) ? 1 : 0;
 
     if (IsTrigUsed(TRIGGER_ADDMULTI))
     {
         CChar* pChar = _uidSrc.CharFind();
         if (pChar)
         {
-            tRet = pChar->OnTrigger(CTRIG_AddMulti, pChar, &args);
+            tRet = pChar->OnTrigger(CTRIG_AddMulti, pScriptArgs, pChar);
         }
     }
     if (tRet != TRIGRET_RET_TRUE)
     {
-        if (args.m_iN3 == 1)
+        if (pScriptArgs->m_iN3 == 1)
         {
-            _iShipsTotal += static_cast<int16>(args.m_iN1);
+            _iShipsTotal += static_cast<int16>(pScriptArgs->m_iN1);
         }
         _lShips[uidShip] = ePriv;
     }
@@ -3819,13 +3819,14 @@ void CMultiStorage::DelShip(const CUID& uidShip)
     {
         CItemMulti* pMulti = static_cast<CItemMulti*>(uidShip.ItemFind());
         HOUSE_PRIV ePriv = GetPriv(uidShip);
-        CScriptTriggerArgs args;
-        args.m_iN1 = pMulti->GetMultiCount();
-        args.m_iN2 = ePriv;
-        args.m_pO1 = pMulti;
+
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = pMulti->GetMultiCount();
+        pScriptArgs->m_iN2 = ePriv;
+        pScriptArgs->m_pO1 = pMulti;
         if (ePriv == HOUSE_PRIV::HP_OWNER)
         {
-            args.m_iN3 = 1;
+            pScriptArgs->m_iN3 = 1;
         }
 
         if (IsTrigUsed(TRIGGER_DELMULTI))
@@ -3833,12 +3834,12 @@ void CMultiStorage::DelShip(const CUID& uidShip)
             CChar* pChar = _uidSrc.CharFind();
             if (pChar)
             {
-                pChar->OnTrigger(CTRIG_DelMulti, pChar, &args);
+                pChar->OnTrigger(CTRIG_DelMulti, pScriptArgs, pChar);
             }
         }
-        if (args.m_iN3 == 1)
+        if (pScriptArgs->m_iN3 == 1)
         {
-            _iShipsTotal -= static_cast<int16>(args.m_iN1);
+            _iShipsTotal -= static_cast<int16>(pScriptArgs->m_iN1);
         }
         _lShips.erase(uidShip);
         return;

@@ -1,13 +1,14 @@
 // Actions specific to an NPC.
 
-#include <flat_containers/flat_set.hpp>
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
+//#include "../../common/CScriptParserBufs.h"
 #include "../clients/CClient.h"
 #include "../items/CItemContainer.h"
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
+#include <flat_containers/flat_set.hpp>
 
 
 lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
@@ -318,7 +319,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
 		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptTriggerArgsPtr{}, this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}
@@ -335,7 +336,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
 		executedEvents.emplace(pLink);
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, nullptr);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptTriggerArgsPtr{}, this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}

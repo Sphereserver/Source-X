@@ -3,6 +3,7 @@
 
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"
@@ -44,11 +45,11 @@ void CChar::OnNoticeCrime( CChar * pCriminal, CChar * pCharMark )
 		bool fMakeCriminal = false; //We don't need to call guards automatically in default.
 		if (IsTrigUsed(TRIGGER_SEECRIME))
 		{
-			CScriptTriggerArgs Args;
-			Args.m_iN1 = fMakeCriminal;
-			Args.m_pO1 = pCharMark;
-			OnTrigger(CTRIG_SeeCrime, pCriminal, &Args);
-            fMakeCriminal = Args.m_iN1 ? true : false;
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = fMakeCriminal;
+            pScriptArgs->m_pO1 = pCharMark;
+            OnTrigger(CTRIG_SeeCrime, pScriptArgs, pCriminal);
+            fMakeCriminal = pScriptArgs->m_iN1 ? true : false;
 		}
         Memory_AddObjTypes(pCriminal, MEMORY_SAWCRIME); //Memory should always be added to the player.
         if (fMakeCriminal) //We call guards automatically if ARGN1 set to 1 (true) in trigger.
@@ -139,11 +140,11 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 		{
 			if (IsTrigUsed(TRIGGER_SEESNOOP))
 			{
-				CScriptTriggerArgs Args(ptcAction);
-				Args.m_iN1 = SkillToSee;
-				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
-				Args.m_pO1 = pCharMark;
-				TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, this, &Args);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = SkillToSee;
+                pScriptArgs->m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
+                pScriptArgs->m_pO1 = pCharMark;
+                TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, pScriptArgs, this);
 
 				if (iRet == TRIGRET_RET_TRUE)
 					continue;
@@ -254,17 +255,17 @@ bool CChar::CallGuards( CChar * pCriminal )
 	CResourceID rid = g_Cfg.ResourceGetIDType(RES_CHARDEF, (pVarDefGuards ? pVarDefGuards->GetValStr() : "GUARDS"));
 	if (IsTrigUsed(TRIGGER_CALLGUARDS))
 	{
-		CScriptTriggerArgs Args(pGuard);
-		Args.m_iN1 = rid.GetResIndex();
-		Args.m_iN2 = 0;
-		Args.m_VarObjs.Insert(1, pCriminal, true);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = rid.GetResIndex();
+        pScriptArgs->m_iN2 = 0;
+        pScriptArgs->m_VarObjs.Insert(1, pCriminal, true);
 
-		if (OnTrigger(CTRIG_CallGuards, pCriminal, &Args) == TRIGRET_RET_TRUE)
+        if (OnTrigger(CTRIG_CallGuards, pScriptArgs, pCriminal) == TRIGRET_RET_TRUE)
 			return false;
 
-		if ( (uint)Args.m_iN1 != rid.GetResIndex())
-			rid = CResourceID(RES_CHARDEF, (int)Args.m_iN1);
-		if (Args.m_iN2 > 0)	//ARGN2: If set to 1, a new guard will be spawned regardless of whether a nearby guard is available.
+        if ( (uint)pScriptArgs->m_iN1 != rid.GetResIndex())
+            rid = CResourceID(RES_CHARDEF, (int)pScriptArgs->m_iN1);
+        if (pScriptArgs->m_iN2 > 0)	//ARGN2: If set to 1, a new guard will be spawned regardless of whether a nearby guard is available.
 			pGuard = nullptr;
 	}
 	if (!pGuard)		//	spawn a new guard
@@ -384,18 +385,20 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
 
 // Armor layers that can be damaged on combat
 // PS: Hand layers (weapons/shields) are not included here
-static const LAYER_TYPE sm_ArmorDamageLayers[] = { LAYER_SHOES, LAYER_PANTS, LAYER_SHIRT, LAYER_HELM, LAYER_GLOVES, LAYER_COLLAR, LAYER_HALF_APRON, LAYER_CHEST, LAYER_TUNIC, LAYER_ARMS, LAYER_CAPE, LAYER_ROBE, LAYER_SKIRT, LAYER_LEGS };
+static constexpr LAYER_TYPE sm_ArmorDamageLayers[] = {
+    LAYER_SHOES, LAYER_PANTS, LAYER_SHIRT, LAYER_HELM, LAYER_GLOVES, LAYER_COLLAR,
+    LAYER_HALF_APRON, LAYER_CHEST, LAYER_TUNIC, LAYER_ARMS, LAYER_CAPE, LAYER_ROBE, LAYER_SKIRT, LAYER_LEGS };
 
 // Layers covering the armor zone
-static const LAYER_TYPE sm_ArmorLayerHead[] = { LAYER_HELM };															// ARMOR_HEAD
-static const LAYER_TYPE sm_ArmorLayerNeck[] = { LAYER_COLLAR };															// ARMOR_NECK
-static const LAYER_TYPE sm_ArmorLayerBack[] = { LAYER_SHIRT, LAYER_CHEST, LAYER_TUNIC, LAYER_CAPE, LAYER_ROBE };		// ARMOR_BACK
-static const LAYER_TYPE sm_ArmorLayerChest[] = { LAYER_SHIRT, LAYER_CHEST, LAYER_TUNIC, LAYER_ROBE };					// ARMOR_CHEST
-static const LAYER_TYPE sm_ArmorLayerArms[] = { LAYER_ARMS, LAYER_CAPE, LAYER_ROBE };									// ARMOR_ARMS
-static const LAYER_TYPE sm_ArmorLayerHands[] = { LAYER_GLOVES };														// ARMOR_HANDS
-static const LAYER_TYPE sm_ArmorLayerLegs[] = { LAYER_PANTS, LAYER_SKIRT, LAYER_HALF_APRON, LAYER_ROBE, LAYER_LEGS };	// ARMOR_LEGS
-static const LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };												// ARMOR_FEET
-static const LAYER_TYPE sm_ArmorLayerShield[] = { LAYER_HAND2 };
+static constexpr LAYER_TYPE sm_ArmorLayerHead[] = { LAYER_HELM };															// ARMOR_HEAD
+static constexpr LAYER_TYPE sm_ArmorLayerNeck[] = { LAYER_COLLAR };															// ARMOR_NECK
+static constexpr LAYER_TYPE sm_ArmorLayerBack[] = { LAYER_SHIRT, LAYER_CHEST, LAYER_TUNIC, LAYER_CAPE, LAYER_ROBE };		// ARMOR_BACK
+static constexpr LAYER_TYPE sm_ArmorLayerChest[] = { LAYER_SHIRT, LAYER_CHEST, LAYER_TUNIC, LAYER_ROBE };					// ARMOR_CHEST
+static constexpr LAYER_TYPE sm_ArmorLayerArms[] = { LAYER_ARMS, LAYER_CAPE, LAYER_ROBE };									// ARMOR_ARMS
+static constexpr LAYER_TYPE sm_ArmorLayerHands[] = { LAYER_GLOVES };														// ARMOR_HANDS
+static constexpr LAYER_TYPE sm_ArmorLayerLegs[] = { LAYER_PANTS, LAYER_SKIRT, LAYER_HALF_APRON, LAYER_ROBE, LAYER_LEGS };	// ARMOR_LEGS
+static constexpr LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };												// ARMOR_FEET
+static constexpr LAYER_TYPE sm_ArmorLayerShield[] = { LAYER_HAND2 };
 
 struct CArmorLayerType
 {
@@ -403,7 +406,7 @@ struct CArmorLayerType
 	const LAYER_TYPE * m_pLayers;
 };
 
-static const CArmorLayerType sm_ArmorLayers[ARMOR_QTY] =
+static constexpr CArmorLayerType sm_ArmorLayers[ARMOR_QTY] =
 {
 	{ 15,	sm_ArmorLayerHead },	// ARMOR_HEAD, 15% of the armour value will be applied.
 	{ 7,	sm_ArmorLayerNeck },	// ARMOR_NECK, 7% of the armour value will be applied.
@@ -744,48 +747,51 @@ effect_bounce:
 		}
 	}
 
-	CScriptTriggerArgs Args( iDmg, uiType, (int64)(0) );
-	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[(size_t)g_Rand.Get16ValFast(ARRAY_COUNT(sm_ArmorDamageLayers))]);
-	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
-	Args.m_VarsLocal.SetNum("Spell", (int)spell);
+    {
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[(size_t)g_Rand.Get16ValFast(ARRAY_COUNT(sm_ArmorDamageLayers))]);
+        pScriptArgs->m_VarsLocal.SetNum("ItemDamageChance", 25);
+        pScriptArgs->m_VarsLocal.SetNum("Spell", (int)spell);
 
-	if ( fElemental )
-	{
-		Args.m_VarsLocal.SetNum("DamagePercentPhysical", iDmgPhysical);
-		Args.m_VarsLocal.SetNum("DamagePercentFire", iDmgFire);
-		Args.m_VarsLocal.SetNum("DamagePercentCold", iDmgCold);
-		Args.m_VarsLocal.SetNum("DamagePercentPoison", iDmgPoison);
-		Args.m_VarsLocal.SetNum("DamagePercentEnergy", iDmgEnergy);
-	}
-
-    CItem* pItemHit = nullptr;
-	if ( IsTrigUsed(TRIGGER_GETHIT) )
-	{
-		if ( OnTrigger( CTRIG_GetHit, pSrc, &Args ) == TRIGRET_RET_TRUE )
-			return 0;
-		iDmg = (int)(Args.m_iN1);
-		uiType = (DAMAGE_TYPE)(Args.m_iN2);
-
-        LAYER_TYPE iHitLayer = (LAYER_TYPE)(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer"));
-        pItemHit = LayerFind(iHitLayer);
-        if (pItemHit)
+        if ( fElemental )
         {
-            Args.m_pO1 = this;
-            // "ItemDamageLayer" will only be readable.
-            if (pItemHit->OnTrigger(ITRIG_GetHit, pSrc, &Args) == TRIGRET_RET_TRUE)
-                return 0;
-            iDmg = (int)(Args.m_iN1); //Update damage amount and type again after @Hit trigger under item.
-            uiType = (DAMAGE_TYPE)(Args.m_iN2);
-            // We don't need to update iHitLayer as it's already called on item
+            pScriptArgs->m_VarsLocal.SetNum("DamagePercentPhysical", iDmgPhysical);
+            pScriptArgs->m_VarsLocal.SetNum("DamagePercentFire", iDmgFire);
+            pScriptArgs->m_VarsLocal.SetNum("DamagePercentCold", iDmgCold);
+            pScriptArgs->m_VarsLocal.SetNum("DamagePercentPoison", iDmgPoison);
+            pScriptArgs->m_VarsLocal.SetNum("DamagePercentEnergy", iDmgEnergy);
         }
-	}
 
-	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
-	if ( (iItemDamageChance > g_Rand.GetVal(100)) && !Can(CAN_C_NONHUMANOID) )
-	{
-		if ( pItemHit )
-			pItemHit->OnTakeDamage(iDmg, pSrc, uiType);
-	}
+        CItem* pItemHit = nullptr;
+        if ( IsTrigUsed(TRIGGER_GETHIT) )
+        {
+
+            if ( OnTrigger( CTRIG_GetHit, pScriptArgs, pSrc ) == TRIGRET_RET_TRUE )
+                return 0;
+            iDmg = (int)(pScriptArgs->m_iN1);
+            uiType = (DAMAGE_TYPE)(pScriptArgs->m_iN2);
+
+            LAYER_TYPE iHitLayer = (LAYER_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("ItemDamageLayer"));
+            pItemHit = LayerFind(iHitLayer);
+            if (pItemHit)
+            {
+                pScriptArgs->m_pO1 = this;
+                // "ItemDamageLayer" will only be readable.
+                if (pItemHit->OnTrigger(ITRIG_GetHit, pScriptArgs, pSrc) == TRIGRET_RET_TRUE)
+                    return 0;
+                iDmg = (int)(pScriptArgs->m_iN1); //Update damage amount and type again after @Hit trigger under item.
+                uiType = (DAMAGE_TYPE)(pScriptArgs->m_iN2);
+                // We don't need to update iHitLayer as it's already called on item
+            }
+        }
+
+        int iItemDamageChance = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("ItemDamageChance"));
+        if ( (iItemDamageChance > g_Rand.GetVal(100)) && !Can(CAN_C_NONHUMANOID) )
+        {
+            if ( pItemHit )
+                pItemHit->OnTakeDamage(iDmg, pSrc, uiType);
+        }
+    }
 
     CSpellDef* pSpellDef = nullptr;
 	// Remove stuck/paralyze effect
@@ -898,8 +904,9 @@ effect_bounce:
             bool fInterrupt = true;
 			if (IsTrigUsed(TRIGGER_SPELLINTERRUPT))
 			{
-				CScriptTriggerArgs ArgsInterrupt(m_atMagery.m_iSpell, iDisturbChance);
-				if (pSrc->OnTrigger(CTRIG_SpellInterrupt, this, &ArgsInterrupt) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pArgsInterrupt = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pArgsInterrupt->Init(m_atMagery.m_iSpell, iDisturbChance, 0, nullptr);
+                if (pSrc->OnTrigger(CTRIG_SpellInterrupt, pArgsInterrupt, this) == TRIGRET_RET_TRUE)
                     fInterrupt = false;
 			}
 
@@ -957,21 +964,21 @@ effect_bounce:
 
                         if (IsTrigUsed(TRIGGER_HITREACTIVE))
                         {
-                            CScriptTriggerArgs HitReactiveArgs;
-                            HitReactiveArgs.m_VarsLocal.SetNum("Sound", ReactiveSnd);         // SOUND
-                            HitReactiveArgs.m_VarsLocal.SetNum("EffectID", ReactiveEffectID); // EFFECTID
-                            HitReactiveArgs.m_VarsLocal.SetNum("Damage", iReactiveDamage);    // DAMAGE VALUE
-                            HitReactiveArgs.m_VarsLocal.SetNum("ReflectDamage", iReactiveRefDam); // REFLECTED DAM
-                            HitReactiveArgs.m_VarsLocal.SetNum("ReduceDamage", iReactiveRedDam);    // REDUCED DAM
-                            HitReactiveArgs.m_VarsLocal.SetNum("DamageType", ReactiveDamType);   // DAMAGE TYPE
-                            OnTrigger(CTRIG_HitReactive, pSrc, &HitReactiveArgs);
+                            CScriptTriggerArgsPtr pHitReactiveArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                            pHitReactiveArgs->m_VarsLocal.SetNum("Sound", ReactiveSnd);         // SOUND
+                            pHitReactiveArgs->m_VarsLocal.SetNum("EffectID", ReactiveEffectID); // EFFECTID
+                            pHitReactiveArgs->m_VarsLocal.SetNum("Damage", iReactiveDamage);    // DAMAGE VALUE
+                            pHitReactiveArgs->m_VarsLocal.SetNum("ReflectDamage", iReactiveRefDam); // REFLECTED DAM
+                            pHitReactiveArgs->m_VarsLocal.SetNum("ReduceDamage", iReactiveRedDam);    // REDUCED DAM
+                            pHitReactiveArgs->m_VarsLocal.SetNum("DamageType", ReactiveDamType);   // DAMAGE TYPE
+                            OnTrigger(CTRIG_HitReactive, pHitReactiveArgs, pSrc);
 
-                            ReactiveSnd      = (SOUND_TYPE)HitReactiveArgs.m_VarsLocal.GetKeyNum("Sound");            // SOUND
-                            ReactiveEffectID = (ITEMID_TYPE)HitReactiveArgs.m_VarsLocal.GetKeyNum("EffectID");        // EFFECTID
-                            iReactiveDamage  = (int)HitReactiveArgs.m_VarsLocal.GetKeyNum("Damage");                  // DAMAGE VALUE
-                            iReactiveRefDam  = (int)HitReactiveArgs.m_VarsLocal.GetKeyNum("ReflectDamage");            // REFLECTED DAMAGE VALUE
-                            iReactiveRedDam  = (int)HitReactiveArgs.m_VarsLocal.GetKeyNum("ReduceDamage");             // REDUCED DAMAGE VALUE
-                            ReactiveDamType  = (DAMAGE_TYPE)HitReactiveArgs.m_VarsLocal.GetKeyNum("DamageType"); // DAMAGE TYPE
+                            ReactiveSnd      = (SOUND_TYPE)pHitReactiveArgs->m_VarsLocal.GetKeyNum("Sound");            // SOUND
+                            ReactiveEffectID = (ITEMID_TYPE)pHitReactiveArgs->m_VarsLocal.GetKeyNum("EffectID");        // EFFECTID
+                            iReactiveDamage  = (int)pHitReactiveArgs->m_VarsLocal.GetKeyNum("Damage");                  // DAMAGE VALUE
+                            iReactiveRefDam  = (int)pHitReactiveArgs->m_VarsLocal.GetKeyNum("ReflectDamage");            // REFLECTED DAMAGE VALUE
+                            iReactiveRedDam  = (int)pHitReactiveArgs->m_VarsLocal.GetKeyNum("ReduceDamage");             // REDUCED DAMAGE VALUE
+                            ReactiveDamType  = (DAMAGE_TYPE)pHitReactiveArgs->m_VarsLocal.GetKeyNum("DamageType"); // DAMAGE TYPE
                             // should it be zero ?
                             //if (iReactiveDamage < 1)
                             //    iReactiveDamage = 1;
@@ -1422,13 +1429,13 @@ bool CChar::Fight_Attack( CChar *pCharTarg, bool fToldByMaster )
 	bool ignored = Attacker_GetIgnore(pTarget);
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
 	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = threat;
-		Args.m_iN2 = (int)ignored;
-		if ( OnTrigger(CTRIG_Attack, pTarget, &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = threat;
+        pScriptArgs->m_iN2 = (int)ignored;
+        if ( OnTrigger(CTRIG_Attack, pScriptArgs, pTarget) == TRIGRET_RET_TRUE )
 			return false;
-		threat = (int)Args.m_iN1;
-		ignored = (bool)Args.m_iN2;
+        threat = (int)pScriptArgs->m_iN1;
+        ignored = (bool)pScriptArgs->m_iN2;
 	}
 	Attacker_SetIgnore(pTarget, ignored);
 
@@ -1754,19 +1761,20 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( IsTrigUsed(TRIGGER_HITCHECK) )
 	{
-		CScriptTriggerArgs pArgs;
-		pArgs.m_iN1 = m_atFight.m_iWarSwingState;
-		pArgs.m_iN2 = iDmgType;
-        pArgs.m_VarsLocal.SetNum("Recoil_NoRange", (int)fSwingNoRange);
-		TRIGRET_TYPE tRet = OnTrigger(CTRIG_HitCheck, pCharTarg, &pArgs);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = m_atFight.m_iWarSwingState;
+        pScriptArgs->m_iN2 = iDmgType;
+        pScriptArgs->m_VarsLocal.SetNum("Recoil_NoRange", (int)fSwingNoRange);
+
+        TRIGRET_TYPE tRet = OnTrigger(CTRIG_HitCheck, pScriptArgs, pCharTarg);
 		if ( tRet == TRIGRET_RET_TRUE )
-			return (WAR_SWING_TYPE)pArgs.m_iN1;
+            return (WAR_SWING_TYPE)pScriptArgs->m_iN1;
 		if ( tRet == -1 )
 			return WAR_SWING_INVALID;
 
-		m_atFight.m_iWarSwingState = (WAR_SWING_TYPE)(pArgs.m_iN1);
-        iDmgType = (DAMAGE_TYPE)(pArgs.m_iN2);
-        fSwingNoRange = (bool)pArgs.m_VarsLocal.GetKeyNum("Recoil_NoRange");
+        m_atFight.m_iWarSwingState = (WAR_SWING_TYPE)(pScriptArgs->m_iN1);
+        iDmgType = (DAMAGE_TYPE)(pScriptArgs->m_iN2);
+        fSwingNoRange = (bool)pScriptArgs->m_VarsLocal.GetKeyNum("Recoil_NoRange");
 
         if (tRet != -2)     // if @HitCheck returns -2, just continue with the hardcoded stuff
         {
@@ -1921,15 +1929,17 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             int16& iARGN1Var = IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? m_atFight.m_iSwingAnimationDelay : m_atFight.m_iRecoilDelay;
             int16& iAnimDelayVar = IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? m_atFight.m_iRecoilDelay : m_atFight.m_iSwingAnimationDelay;
 
-            CScriptTriggerArgs Args(iARGN1Var, 0, pWeapon);
-            Args.m_VarsLocal.SetNum("Anim", m_atFight.m_iSwingAnimation);
-            Args.m_VarsLocal.SetNum("AnimDelay", iAnimDelayVar);
-            if ( OnTrigger(CTRIG_HitTry, pCharTarg, &Args) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(iARGN1Var, 0, 0, pWeapon);
+            pScriptArgs->m_VarsLocal.SetNum("Anim", m_atFight.m_iSwingAnimation);
+            pScriptArgs->m_VarsLocal.SetNum("AnimDelay", iAnimDelayVar);
+
+            if ( OnTrigger(CTRIG_HitTry, pScriptArgs, pCharTarg) == TRIGRET_RET_TRUE )
                 return WAR_SWING_READY;
 
-            m_atFight.m_iSwingAnimation = (int16)(Args.m_VarsLocal.GetKeyNum("Anim"));
-            iARGN1Var = (int16)(Args.m_iN1);
-            iAnimDelayVar = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay"));
+            m_atFight.m_iSwingAnimation = (int16)(pScriptArgs->m_VarsLocal.GetKeyNum("Anim"));
+            iARGN1Var = (int16)(pScriptArgs->m_iN1);
+            iAnimDelayVar = (int16)(pScriptArgs->m_VarsLocal.GetKeyNum("AnimDelay"));
             //if (m_atFight.m_iSwingAnimation < (ANIM_TYPE)-1)  // -1 is a valid value
             //    m_atFight.m_iSwingAnimation = (int16)animSwingDefault;
             if ( m_atFight.m_iRecoilDelay < 1 )
@@ -2016,13 +2026,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	{
 		if ( IsTrigUsed(TRIGGER_HITMISS) )
 		{
-			CScriptTriggerArgs Args(0, 0, pWeapon);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_pO1 = pWeapon;
 			if ( pAmmo && pAmmo->GetUID().IsValidUID())
-				Args.m_VarsLocal.SetNum("Arrow", (dword)pAmmo->GetUID());
-			if ( OnTrigger(CTRIG_HitMiss, pCharTarg, &Args) == TRIGRET_RET_TRUE )
+                pScriptArgs->m_VarsLocal.SetNum("Arrow", (dword)pAmmo->GetUID());
+
+            if ( OnTrigger(CTRIG_HitMiss, pScriptArgs, pCharTarg) == TRIGRET_RET_TRUE )
 				return WAR_SWING_EQUIPPING_NOWAIT;
 
-			if ( Args.m_VarsLocal.GetKeyNum("ArrowHandled") != 0 )		// if arrow is handled by script, do nothing with it further!
+            if ( pScriptArgs->m_VarsLocal.GetKeyNum("ArrowHandled") != 0 )		// if arrow is handled by script, do nothing with it further!
 				pAmmo = nullptr;
 		}
 
@@ -2088,22 +2100,23 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			local.ItemParryDamage = The chance that the parrying item will be damaged.
 			local.Damage = The amount of damage (raw) before parrying reduction.
 		*/
-		CScriptTriggerArgs Args(iParryReduction, iDmgType, pItemHit);
-		Args.m_VarsLocal.SetNum("ParryChance", iParryChance);
-		Args.m_VarsLocal.SetNum("ParrySkillID", ParrySkill);
-		Args.m_VarsLocal.SetNum("ItemParryDamageChance", 100);
-		Args.m_VarsLocal.SetNum("Damage", iDmg);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iParryReduction, iDmgType, 0, pItemHit);
+        pScriptArgs->m_VarsLocal.SetNum("ParryChance", iParryChance);
+        pScriptArgs->m_VarsLocal.SetNum("ParrySkillID", ParrySkill);
+        pScriptArgs->m_VarsLocal.SetNum("ItemParryDamageChance", 100);
+        pScriptArgs->m_VarsLocal.SetNum("Damage", iDmg);
 
 		if (IsTrigUsed(TRIGGER_HITPARRY))
 		{
-			if (pCharTarg->OnTrigger(CTRIG_HitParry, this, &Args) == TRIGRET_RET_TRUE)
+            if (pCharTarg->OnTrigger(CTRIG_HitParry, pScriptArgs, this) == TRIGRET_RET_TRUE)
 				return WAR_SWING_EQUIPPING_NOWAIT;
 
-			iParryReduction = (int)(Args.m_iN1);
-			iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
-			iDmg = (int)Args.m_VarsLocal.GetKeyNum("Damage");
-			iParryChance = (int)Args.m_VarsLocal.GetKeyNum("ParryChance");
-			ParrySkill = (SKILL_TYPE)Args.m_VarsLocal.GetKeyNum("ParrySkillID");
+            iParryReduction = (int)(pScriptArgs->m_iN1);
+            iDmgType = (DAMAGE_TYPE)(pScriptArgs->m_iN2);
+            iDmg = (int)pScriptArgs->m_VarsLocal.GetKeyNum("Damage");
+            iParryChance = (int)pScriptArgs->m_VarsLocal.GetKeyNum("ParryChance");
+            ParrySkill = (SKILL_TYPE)pScriptArgs->m_VarsLocal.GetKeyNum("ParrySkillID");
 		}
 
 		if (iParryChance > 0 && pCharTarg->Skill_UseQuick(ParrySkill, iParryChance, true, false))
@@ -2115,7 +2128,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if (g_Cfg.m_iFeatureSE & FEATURE_SE_NINJASAM && g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA && !pCharTarg->IsStatFlag(STATF_HASSHIELD))
 				pCharTarg->Skill_Experience(SKILL_BUSHIDO, iParryChance);
 
-			int iParryDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
+            int iParryDamageChance = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("ItemParryDamageChance"));
 			if ( pItemHit && (iParryDamageChance > g_Rand.GetVal(100)) )
 				pItemHit->OnTakeDamage(1, this, iDmgType);
 
@@ -2130,24 +2143,24 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 
-
-	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
-	Args.m_VarsLocal.SetNum("ItemDamageChance", 25);
-    Args.m_VarsLocal.SetNum("ItemPoisonReductionChance", 100);
-    Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", 1);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(iDmg, iDmgType, 0, pWeapon);
+    pScriptArgs->m_VarsLocal.SetNum("ItemDamageChance", 25);
+    pScriptArgs->m_VarsLocal.SetNum("ItemPoisonReductionChance", 100);
+    pScriptArgs->m_VarsLocal.SetNum("ItemPoisonReductionAmount", 1);
     int32 iPoison = 0;
     if (pWeapon)
     {
         iPoison = g_Rand.GetVal(pWeapon->m_itWeapon.m_poison_skill);
-        Args.m_VarsLocal.SetNum("ItemPoisonReductionAmount", iPoison / 2);
+        pScriptArgs->m_VarsLocal.SetNum("ItemPoisonReductionAmount", iPoison / 2);
     }
 
 	if ( pAmmo && pAmmo->GetUID().IsValidUID() )
-		Args.m_VarsLocal.SetNum("Arrow",(dword)pAmmo->GetUID());
+        pScriptArgs->m_VarsLocal.SetNum("Arrow",(dword)pAmmo->GetUID());
 
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
-		if ( Skill_OnCharTrigger(skill, CTRIG_SkillSuccess) == TRIGRET_RET_TRUE )
+        if ( Skill_OnCharTrigger(skill, CTRIG_SkillSuccess, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 		{
 			Skill_Cleanup();
 			return WAR_SWING_EQUIPPING;		// ok, so no hit - skill failed. Pah!
@@ -2155,7 +2168,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 	if ( IsTrigUsed(TRIGGER_SUCCESS) )
 	{
-		if ( Skill_OnTrigger(skill, SKTRIG_SUCCESS) == TRIGRET_RET_TRUE )
+        if ( Skill_OnTrigger(skill, SKTRIG_SUCCESS, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 		{
 			Skill_Cleanup();
 			return WAR_SWING_EQUIPPING;		// ok, so no hit - skill failed. Pah!
@@ -2164,26 +2177,26 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( IsTrigUsed(TRIGGER_HIT) )
 	{
-		if ( OnTrigger(CTRIG_Hit, pCharTarg, &Args) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_Hit, pScriptArgs, pCharTarg) == TRIGRET_RET_TRUE )
 			return WAR_SWING_EQUIPPING;
 
-		if ( Args.m_VarsLocal.GetKeyNum("ArrowHandled") != 0 )		// if arrow is handled by script, do nothing with it further
+        if ( pScriptArgs->m_VarsLocal.GetKeyNum("ArrowHandled") != 0 )		// if arrow is handled by script, do nothing with it further
 			pAmmo = nullptr;
 
-		iDmg = (int)(Args.m_iN1);
-        iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+        iDmg = (int)(pScriptArgs->m_iN1);
+        iDmgType = (DAMAGE_TYPE)(pScriptArgs->m_iN2);
 
         if (pWeapon)
         {
-            Args.m_pO1 = this;
-            if (pWeapon->OnTrigger(ITRIG_Hit, pCharTarg, &Args) == TRIGRET_RET_TRUE)
+            pScriptArgs->m_pO1 = this;
+            if (pWeapon->OnTrigger(ITRIG_Hit, pScriptArgs, pCharTarg) == TRIGRET_RET_TRUE)
                 return WAR_SWING_EQUIPPING;
 
-            if (Args.m_VarsLocal.GetKeyNum("ArrowHandled") != 0)		// if arrow is handled by script, do nothing with it further
+            if (pScriptArgs->m_VarsLocal.GetKeyNum("ArrowHandled") != 0)		// if arrow is handled by script, do nothing with it further
                 pAmmo = nullptr;
 
-            iDmg = (int)(Args.m_iN1);
-            iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
+            iDmg = (int)(pScriptArgs->m_iN1);
+            iDmgType = (DAMAGE_TYPE)(pScriptArgs->m_iN2);
         }
 	}
 
@@ -2217,15 +2230,15 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			byte iPoisonDeliver = (byte)(iPoison);
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
-            if (Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionChance") > g_Rand.GetVal(100))
+            if (pScriptArgs->m_VarsLocal.GetKeyNum("ItemPoisonReductionChance") > g_Rand.GetVal(100))
             {
-                pWeapon->m_itWeapon.m_poison_skill -= (byte)(Args.m_VarsLocal.GetKeyNum("ItemPoisonReductionAmount"));	// reduce weapon poison charges
+                pWeapon->m_itWeapon.m_poison_skill -= (byte)(pScriptArgs->m_VarsLocal.GetKeyNum("ItemPoisonReductionAmount"));	// reduce weapon poison charges
                 pWeapon->UpdatePropertyFlag();
             }
 		}
 
 		// Check if the weapon will be damaged
-		int iDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance"));
+        int iDamageChance = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("ItemDamageChance"));
 		if ( iDamageChance > g_Rand.GetVal(100) )
 			pWeapon->OnTakeDamage(iDmg, pCharTarg);
 	}

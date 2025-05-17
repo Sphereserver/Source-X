@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CScriptTriggerArgs.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"
 #include "../triggers.h"
@@ -222,17 +222,18 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         }
         if (IsTrigUsed(TRIGGER_NPCACTCAST))
         {
-            CScriptTriggerArgs Args((int)spell, (int)bWandUse, pTarg);
-            Args.m_VarsLocal.SetNum("HealThreshold", iHealThreshold);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init((int)spell, (int)bWandUse, 0, pTarg);
+            pScriptArgs->m_VarsLocal.SetNum("HealThreshold", iHealThreshold);
 
-            switch (OnTrigger(CTRIG_NPCActCast, this, &Args))
+            switch (OnTrigger(CTRIG_NPCActCast, pScriptArgs, this))
             {
             case TRIGRET_RET_TRUE: return false;
             default: break;
             }
-            spell = (SPELL_TYPE)Args.m_iN1;
-            iHealThreshold = (int)Args.m_VarsLocal.GetKeyNum("HealThreshold");
-            CObjBase* pNewTarg = Args.m_VarObjs.Get(1); //We switch to a new targ if REF1 is set in the trigger.
+            spell = (SPELL_TYPE)pScriptArgs->m_iN1;
+            iHealThreshold = (int)pScriptArgs->m_VarsLocal.GetKeyNum("HealThreshold");
+            CObjBase* pNewTarg = pScriptArgs->m_VarObjs.Get(1); //We switch to a new targ if REF1 is set in the trigger.
             if (pNewTarg)
             {
                 pTarg = pNewTarg;

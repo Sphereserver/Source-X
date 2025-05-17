@@ -62,7 +62,7 @@ public:
 	static lpctstr const sm_szVerbKeys[];
 
 private:
-	typedef std::pair<CSString, CScriptTriggerArgs *> FunctionArgsPair_t;
+    typedef std::pair<CSString, CScriptTriggerArgsPtr> FunctionArgsPair_t;
 	typedef std::queue<FunctionArgsPair_t> QueueFunction_t;
 
 protected:
@@ -73,6 +73,7 @@ protected:
 private:
 	SimpleMutex m_connectionMutex;
 	SimpleMutex m_resultMutex;
+
 	bool addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery);
 };
 

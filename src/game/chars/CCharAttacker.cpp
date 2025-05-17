@@ -1,12 +1,13 @@
 // Actions specific to an NPC.
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
 #include "CChar.h"
 
 
 // Add some enemy to my Attacker list
-bool CChar::Attacker_Add(CChar * pChar, int threat)
+bool CChar::Attacker_Add(CChar * pChar, int iThreat)
 {
     ADDTOCALLSTACK("CChar::Attacker_Add");
     const dword uid = pChar->GetUID().GetObjUID();
@@ -21,7 +22,7 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
     }
     else if (IsTrigUsed(TRIGGER_COMBATSTART))
     {
-        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, pChar, nullptr);
+        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, CScriptTriggerArgsPtr{}, pChar);
         if (tRet == TRIGRET_RET_TRUE)
             return false;
         else
@@ -31,30 +32,30 @@ bool CChar::Attacker_Add(CChar * pChar, int threat)
         }
     }
 
-    CScriptTriggerArgs Args;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     bool fIgnore = false;
-    Args.m_iN1 = threat;
-    Args.m_iN2 = fIgnore;
+    pScriptArgs->m_iN1 = iThreat;
+    pScriptArgs->m_iN2 = fIgnore;
     if (IsTrigUsed(TRIGGER_COMBATADD))
     {
-        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatAdd, pChar, &Args);
+        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatAdd, pScriptArgs, pChar);
         if (tRet == TRIGRET_RET_TRUE)
             return false;
-        threat = (int)Args.m_iN1;
-        fIgnore = (Args.m_iN2 != 0);
+        iThreat = (int)pScriptArgs->m_iN1;
+        fIgnore = (pScriptArgs->m_iN2 != 0);
     }
 
-    LastAttackers attacker;
-    attacker.amountDone = 0;
-    attacker.charUID = uid;
-    attacker.elapsed = 0;
-    attacker.threat = (m_pPlayer) ? 0 : threat;
-    attacker.ignore = fIgnore;
-    m_lastAttackers.emplace_back(std::move(attacker));
+    m_lastAttackers.emplace_back(LastAttackers{
+        .elapsed = 0,
+        .charUID = uid,
+        .amountDone = 0,
+        .threat = (m_pPlayer) ? 0 : iThreat,
+        .ignore = fIgnore
+    });
 
     // Record the start of the fight.
     Memory_Fight_Start(pChar);
-    if (!attacker.ignore)
+    if (!fIgnore)
     {
         tchar *z = Str_GetTemp();
         CClient *pClient = pChar->GetClientActive();
@@ -256,7 +257,7 @@ void CChar::Attacker_Clear()
     {
         if (m_lastAttackers.empty() || !Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
         {
-            OnTrigger(CTRIG_CombatEnd, this, nullptr);
+            OnTrigger(CTRIG_CombatEnd, CScriptTriggerArgsPtr{}, this);
         }
     }
 
@@ -323,10 +324,11 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
     {
         if (IsTrigUsed(TRIGGER_COMBATDELETE))
         {
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
             CScriptTriggerArgs Args;
-            Args.m_iN1 = fForced;
-            Args.m_iN2 = (int)type;
-            TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pChar, &Args);
+            pScriptArgs->m_iN1 = fForced;
+            pScriptArgs->m_iN2 = (int)type;
+            TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pScriptArgs, pChar);
             if ((tRet == TRIGRET_RET_TRUE) && !fForced)
                 return false;
         }

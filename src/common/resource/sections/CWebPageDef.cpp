@@ -8,6 +8,7 @@
 #include "../../sphere_library/CSFileList.h"
 #include "../../CException.h"
 #include "../../CExpression.h"
+#include "../../CScriptParserBufs.h"
 #include "../../sphereversion.h"
 #include "../CResourceLock.h"
 #include "CWebPageDef.h"
@@ -215,7 +216,10 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
 					Str_CopyLimitNull( pszTmp2, pszArgs, Str_TempLength() );
-					pChar->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
+                    pChar->ParseScriptText(
+                        Str_MakeFiltered(pszTmp2),
+                        CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                        &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -238,7 +242,10 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					++sm_iListIndex;
 
 					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), Str_TempLength());
-					pStone->ParseScriptText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
+                    pStone->ParseScriptText(
+                        Str_MakeFiltered(pszTmp2),
+                        CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                        &g_Serv, 1);
 					pSrc->SysMessage(pszTmp2);
 				}
 			}
@@ -253,7 +260,10 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					CGMPage* pPage = sptrPage.get();
 					++sm_iListIndex;
 					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), Str_TempLength());
-					pPage->ParseScriptText( Str_MakeFiltered( pszTmp2 ), &g_Serv, 1 );
+                    pPage->ParseScriptText(
+                        Str_MakeFiltered(pszTmp2),
+                        CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                        &g_Serv, 1 );
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -324,7 +334,9 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 			// Deal with the stuff preceding the scripts.
 			*pszHead = '\0';
 			pszHead += 26;
-			ParseScriptText( pszTmp, pSrc, 1 );
+            ParseScriptText( pszTmp,
+                CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                pSrc, 1 );
 			FileOut.SysMessage( pszTmp );
 			fScriptMode = true;
 		}
@@ -363,7 +375,9 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		}
 
 		// Look for stuff we can displace here. %STUFF%
-		ParseScriptText( pszHead, pSrc, 1 );
+        ParseScriptText( pszHead,
+            CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+            pSrc, 1 );
 		FileOut.SysMessage( pszHead );
 	}
 
@@ -545,7 +559,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		CResourceLock s;
 		if ( ResourceLock(s))
 		{
-			if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pClient, nullptr ) == TRIGRET_RET_TRUE)
+            if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], CScriptTriggerArgsPtr{}, pClient ) == TRIGRET_RET_TRUE)
 				return 0;	// Block further action.
 		}
 	}
@@ -725,7 +739,9 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	// B or BTN or BUTTON = the buttons
 	// C or CHK or CHECK = the check boxes
 
-	CDialogResponseArgs resp;
+    // TODO: just split CDialogResponseArgs into two objects (CScriptTriggerArgs and a struct for other data?)
+    //  Or just make CScriptTriggerArgs a member of CDialogResponseArgs... Favor composition over inheritance!
+    auto resp = std::make_shared<CDialogResponseArgs>();
 	dword dwButtonID = UINT32_MAX;
 	for ( int i = 0; i < iArgs; ++i )
 	{
@@ -753,7 +769,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 					continue;
 				if ( atoi(pszNum) )
 				{
-                    resp.m_CheckArray.push_back(iNum);
+                    resp->m_CheckArray.push_back(iNum);
 				}
 				break;
 			case 'T':
@@ -761,7 +777,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 				{
 					tchar *pszData = Str_GetTemp();
 					HtmlDeCode( pszData, pszNum );
-					resp.AddText((word)(iNum), pszData);
+                    resp->AddText((word)(iNum), pszData);
 				}
 				break;
 		}
@@ -777,7 +793,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	{
 		if ( !s.IsKeyHead("ON", 2) || ( (dword)s.GetArgVal() != dwButtonID ))
 			continue;
-		OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pClient, &resp);
+        OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, resp, pClient);
 		return true;
 	}
 

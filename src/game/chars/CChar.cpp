@@ -4,6 +4,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CUID.h"
 #include "../../common/CRect.h"
 #include "../../common/CLog.h"
@@ -416,7 +417,8 @@ bool CChar::NotifyDelete(bool fForce)
 	{
 		//We can forbid the deletion in here with no pain
 		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
-		if (CChar::OnTrigger(CTRIG_Destroy, &g_Serv) == TRIGRET_RET_TRUE && !fForce)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        if (CChar::OnTrigger(CTRIG_Destroy, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE && !fForce)
 			return false;
 	}
 
@@ -424,10 +426,10 @@ bool CChar::NotifyDelete(bool fForce)
 	if (m_pPlayer)
 	{
 		TRIGRET_TYPE trigReturn;
-		CScriptTriggerArgs Args;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
 		if (m_pClient)
-			Args.m_pO1 = m_pClient;
-		r_Call("f_onchar_delete", this, &Args, nullptr, &trigReturn);
+            pScriptArgs->m_pO1 = m_pClient;
+        r_Call("f_onchar_delete", pScriptArgs, this, nullptr, &trigReturn);
 		//If Delete is forced, we must avoid the possibility to block deletion (will create infinite loop)
 		if (trigReturn == TRIGRET_RET_TRUE && !fForce)
 			return false;
@@ -1319,17 +1321,18 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 				continue;
 
 			lptstr ptcFunctionName = s.GetArgRaw();
-			std::unique_ptr<CScriptTriggerArgs> pScriptArgs;
-			// Locate arguments for the called function
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+            // Locate arguments for the called function
 			tchar* ptcArgs = strchr(ptcFunctionName, ' ');
 			if (ptcArgs)
 			{
 				*ptcArgs = 0;
 				++ptcArgs;
 				GETNONWHITESPACE(ptcArgs);
-				pScriptArgs = std::make_unique<CScriptTriggerArgs>(ptcArgs);
-			}
-			pItem->r_Call(ptcFunctionName, this, pScriptArgs.get());
+                pScriptArgs->Init(ptcArgs);
+            }
+            pItem->r_Call(ptcFunctionName, pScriptArgs, this);
 			if (pItem->IsDeleted())
 			{
 				pItem = nullptr;
@@ -1452,7 +1455,8 @@ bool CChar::ReadScriptReduced(CResourceLock &s, bool fVendor)
 		else if (!fItemCreated)
 		{
 			// I'm setting an attribute to myself, not the item (e.g. @Create trigger). Run that script line.
-			TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, &g_Serv, nullptr, nullptr );
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            TRIGRET_TYPE tRet = OnTriggerRun( s, TRIGRUN_SINGLE_EXEC, pScriptArgs, &g_Serv, nullptr );
 			if ((tRet == TRIGRET_RET_FALSE) && fFullInterp)
 				;
 			else if ( tRet != TRIGRET_RET_DEFAULT )
@@ -1738,10 +1742,10 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 
 	if ( fNameIsAccepted && IsTrigUsed(TRIGGER_RENAME) )
 	{
-		CScriptTriggerArgs args;
-		args.m_s1 = zCharName;
-		args.m_pO1 = this;
-		if ( OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_s1 = zCharName;
+        pScriptArgs->m_pO1 = this;
+        if ( OnTrigger(CTRIG_Rename, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			fNameIsAccepted = false;
 	}
 
@@ -3930,12 +3934,12 @@ bool CChar::r_LoadVal( CScript & s )
 		{
 			if (IsTrigUsed(TRIGGER_RENAME))
 			{
-				CScriptTriggerArgs args;
-				args.m_s1 = s.GetArgStr();
-				args.m_pO1 = this;
-				if (this->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_s1 = s.GetArgStr();
+                pScriptArgs->m_pO1 = this;
+                if (this->OnTrigger(CTRIG_Rename, pScriptArgs, this) == TRIGRET_RET_TRUE)
 					return false;
-				SetName(args.m_s1);
+                SetName(pScriptArgs->m_s1);
 			}
 			else
 				SetName(s.GetArgStr());
@@ -3954,14 +3958,16 @@ bool CChar::r_LoadVal( CScript & s )
 				if ( s.GetArgStr() )
 				{
 					tchar * ppArgs[4];
-					int iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, ARRAY_COUNT( ppArgs ));
+                    int iQty = Str_ParseCmds(s.GetArgStr(), ppArgs, ARRAY_COUNT( ppArgs ));
 					if ( iQty >= 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
 							return false;
 
-						Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true, (Exp_GetVal(ppArgs[2]) != 0 ? false : true), (Exp_GetVal(ppArgs[3]) != 0 ? true : false));
+                        Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ), true,
+                            (Exp_GetVal(ppArgs[2]) != 0 ? false : true),
+                            (Exp_GetVal(ppArgs[3]) != 0 ? true : false));
 						return true;
 					}
 				}
@@ -4418,10 +4424,11 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
                 if (IsTrigUsed(TRIGGER_AFKMODE))
                 {
-                    CScriptTriggerArgs args(fAFK, fMode);
-                    TRIGRET_TYPE iRet = OnTrigger(CTRIG_AfkMode, this, &args);
-                    fAFK = args.m_iN1 > 0 ? true : false;
-                    fMode = args.m_iN2 > 0 ? true : false;
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    pScriptArgs->Init(fAFK, fMode, 0, nullptr);
+                    TRIGRET_TYPE iRet = OnTrigger(CTRIG_AfkMode, pScriptArgs, this);
+                    fAFK = pScriptArgs->m_iN1 > 0 ? true : false;
+                    fMode = pScriptArgs->m_iN2 > 0 ? true : false;
 
                     if (iRet == TRIGRET_RET_TRUE) //Block AFK mode switching if RETURN 1 in Trigger.
                         break;
@@ -5108,7 +5115,7 @@ static uint Calc_ExpGet_Level(uint exp)
     }
 }
 
-void CChar::ChangeExperience(llong delta, CChar *pCharDead)
+void CChar::ChangeExperience(llong iExpDelta, CChar *pCharDead)
 {
 	ADDTOCALLSTACK("CChar::ChangeExperience");
 
@@ -5127,9 +5134,9 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 		DEFMSG_MSG_EXP_CHANGE_8
 	};
 
-	if (delta != 0 || pCharDead)//	zero call will sync the exp level
+    if (iExpDelta != 0 || pCharDead)//	zero call will sync the exp level
 	{
-		if (delta < 0)
+        if (iExpDelta < 0)
 		{
 			if (!(g_Cfg.m_iExperienceMode&EXP_MODE_ALLOW_DOWN))	// do not allow changes to minus
 				return;
@@ -5137,39 +5144,40 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			if (g_Cfg.m_fLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
 			{
 				uint exp = Calc_ExpGet_Exp(m_level);
-				if (delta + m_exp < exp)
-					delta = (llong)exp - m_exp;
+                if (iExpDelta + m_exp < exp)
+                    iExpDelta = (llong)exp - m_exp;
 			}
 		}
 
-		if ((g_Cfg.m_iDebugFlags & DEBUGF_EXP) && (delta != 0))
+        if ((g_Cfg.m_iDebugFlags & DEBUGF_EXP) && (iExpDelta != 0))
 		{
 			g_Log.EventDebug("%s %s experience change (was %u, delta %lld, now %u)\n",
-				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, (uint)(m_exp + delta));
+                (m_pNPC ? "NPC" : "Player"), GetName(), m_exp, iExpDelta, (uint)(m_exp + iExpDelta));
 		}
 
 		bool fShowMsg = (m_pClient != nullptr);
 
 		if (IsTrigUsed(TRIGGER_EXPCHANGE))
 		{
-			CScriptTriggerArgs args(delta, fShowMsg);
-			args.m_pO1 = pCharDead;
-			if (OnTrigger(CTRIG_ExpChange, this, &args) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(iExpDelta, fShowMsg, 0, nullptr);
+            pScriptArgs->m_pO1 = pCharDead;
+            if (OnTrigger(CTRIG_ExpChange, pScriptArgs, this) == TRIGRET_RET_TRUE)
 				return;
-			delta = args.m_iN1;
-			fShowMsg = (args.m_iN2 != 0);
+            iExpDelta = pScriptArgs->m_iN1;
+            fShowMsg = (pScriptArgs->m_iN2 != 0);
 		}
 
 		// Do not allow an underflow due to negative Exp Change.
-		if( delta < 0 && m_exp < abs(delta) )
+        if( iExpDelta < 0 && m_exp < abs(iExpDelta) )
 			m_exp = 0;
 		else
-			m_exp = (uint)(m_exp + delta);
+            m_exp = (uint)(m_exp + iExpDelta);
 
-		if (m_pClient && fShowMsg && delta)
+        if (m_pClient && fShowMsg && iExpDelta)
 		{
 			int iWord = 0;
-			llong absval = abs(delta);
+            llong absval = abs(iExpDelta);
 			llong maxval = (g_Cfg.m_fLevelSystem && g_Cfg.m_iLevelNextAt) ? maximum(g_Cfg.m_iLevelNextAt, 1000) : 1000;
 
 			if (absval >= maxval)				// 100%
@@ -5188,7 +5196,7 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 				iWord = 1;
 
 			m_pClient->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_CHANGE_0),
-				(delta > 0) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_CHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_CHANGE_LOST),
+                (iExpDelta > 0) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_CHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_CHANGE_LOST),
 				g_Cfg.GetDefaultMsg(keyWords[iWord]));
 		}
 	}
@@ -5199,23 +5207,24 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 
 		if (level != m_level)
 		{
-			delta = level - m_level;
+            iExpDelta = level - m_level;
 
 			bool fShowMsg = (m_pClient != nullptr);
 
 			if (IsTrigUsed(TRIGGER_EXPLEVELCHANGE))
 			{
-				CScriptTriggerArgs args(delta);
-				if (OnTrigger(CTRIG_ExpLevelChange, this, &args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(iExpDelta, 0, 0, nullptr);
+                if (OnTrigger(CTRIG_ExpLevelChange, pScriptArgs, this) == TRIGRET_RET_TRUE)
 					return;
-				delta = args.m_iN1;
-				fShowMsg = (args.m_iN2 != 0);
+                iExpDelta = pScriptArgs->m_iN1;
+                fShowMsg = (pScriptArgs->m_iN2 != 0);
 			}
 
-			level = delta + m_level;
+            level = iExpDelta + m_level;
 
 			// Prevent integer underflow due to negative level change
-			if (delta < 0 && abs(delta) > m_level)
+            if (iExpDelta < 0 && abs(iExpDelta) > m_level)
 			{
 				level = 0;
 			}
@@ -5223,15 +5232,15 @@ void CChar::ChangeExperience(llong delta, CChar *pCharDead)
 			if (g_Cfg.m_iDebugFlags & DEBUGF_LEVEL)
 			{
 				g_Log.EventDebug("%s %s level change (was %u, delta %lld, now %u)\n",
-					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, (uint)level);
+                    (m_pNPC ? "NPC" : "Player"), GetName(), m_level, iExpDelta, (uint)level);
 			}
 			m_level = (uint)level;
 
 			if (m_pClient && fShowMsg)
 			{
 				m_pClient->SysMessagef(
-					((abs(delta) == 1) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_0)    : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_1)),
-					((delta > 0)       ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_LOST))
+                    ((abs(iExpDelta) == 1) ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_0)    : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_1)),
+                    ((iExpDelta > 0)       ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_GAIN) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_EXP_LVLCHANGE_LOST))
 				);
 			}
 		}

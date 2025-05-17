@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 #include "../../common/CExpression.h"
 #include "../../common/CException.h"
-#include "../../common/CScriptTriggerArgs.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemStone.h"
 #include "../triggers.h"
@@ -99,6 +99,7 @@ bool CChar::Noto_IsNeutral() const
 NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool fAllowInvul, bool fOnlyColor) const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetFlag");
+    // TODO: CONST-CORRECTNESS!
 	CChar * pThis = const_cast<CChar*>(this);
 	CChar * pTarget = const_cast<CChar*>(pCharViewer);
 	NOTO_TYPE iNoto = NOTO_INVALID;
@@ -118,10 +119,10 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 
 	if (IsTrigUsed(TRIGGER_NOTOSEND))
 	{
-		CScriptTriggerArgs args;
-		pThis->OnTrigger(CTRIG_NotoSend, pTarget, &args);
-		iNoto = (NOTO_TYPE)(args.m_iN1);
-		iColor = (NOTO_TYPE)(args.m_iN2);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pThis->OnTrigger(CTRIG_NotoSend, pScriptArgs, pTarget);
+        iNoto = (NOTO_TYPE)(pScriptArgs->m_iN1);
+        iColor = (NOTO_TYPE)(pScriptArgs->m_iN2);
 	}
 
 	if (iNoto == NOTO_INVALID)
@@ -160,6 +161,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	if (m_pArea && m_pArea->IsFlag(REGION_FLAG_ARENA))	// everyone is neutral here.
 		return NOTO_NEUTRAL;
 
+    // TODO: refactor this nesting mess and return early
 	if (this != pCharViewer)	// Am I checking myself?
 	{
 		if (m_pNPC)
@@ -396,12 +398,12 @@ bool CChar::Noto_Criminal( CChar * pCharViewer, bool fFromSawCrime )
     TRIGRET_TYPE retCriminal = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_CRIMINAL) )
 	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = decay / (60*MSECS_PER_SEC);   // convert in minutes
-        Args.m_iN2 = fFromSawCrime;
-		Args.m_pO1 = pCharViewer;
-        retCriminal = OnTrigger(CTRIG_Criminal, this, &Args);
-		decay = (Args.m_iN1 * (60*MSECS_PER_SEC)); // back in ms
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = decay / (60*MSECS_PER_SEC);   // convert in minutes
+        pScriptArgs->m_iN2 = fFromSawCrime;
+        pScriptArgs->m_pO1 = pCharViewer;
+        retCriminal = OnTrigger(CTRIG_Criminal, pScriptArgs, this);
+        decay = (pScriptArgs->m_iN1 * (60*MSECS_PER_SEC)); // back in ms
 	}
 
     if (retCriminal == TRIGRET_RET_TRUE)
@@ -498,7 +500,7 @@ void CChar::Noto_Fame( int iFameChange, CChar* pNPC )
 
 	//	if ( retType == TRIGRET_RET_TRUE )
 	//		return;
-	//	iFameChange = (int)(Args.m_iN1);
+    //	iFameChange = (int)(pScriptArgs->m_iN1);
 	//}
 
 	//if ( ! iFameChange )
@@ -536,7 +538,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool fMessage, CChar* pNP
 
 	//	if ( retType == TRIGRET_RET_TRUE )
 	//		return;
-	//	iKarmaChange = (int)(Args.m_iN1);
+    //	iKarmaChange = (int)(pScriptArgs->m_iN1);
 	//}
 
 	//if ( ! iKarmaChange )
@@ -582,23 +584,23 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
         // I'm a murderer !
         if (!IsPriv(PRIV_GM))
         {
-            CScriptTriggerArgs args;
-            args.m_iN1 = m_pPlayer->m_wMurders + 1LL;
-            args.m_iN2 = true;
-            args.m_iN3 = false;
-            args.m_pO1 = pKill;
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = m_pPlayer->m_wMurders + 1LL;
+            pScriptArgs->m_iN2 = true;
+            pScriptArgs->m_iN3 = false;
+            pScriptArgs->m_pO1 = pKill;
 
             if ( IsTrigUsed(TRIGGER_MURDERMARK) )
             {
-                OnTrigger(CTRIG_MurderMark, this, &args);
-                if (args.m_iN1 < 0)
-                    args.m_iN1 = 0;
+                OnTrigger(CTRIG_MurderMark, pScriptArgs, this);
+                if (pScriptArgs->m_iN1 < 0)
+                    pScriptArgs->m_iN1 = 0;
             }
 
-            if (args.m_iN3 < 1)
+            if (pScriptArgs->m_iN3 < 1)
             {
-                m_pPlayer->m_wMurders = (word)(args.m_iN1);
-                if (args.m_iN2)
+                m_pPlayer->m_wMurders = (word)(pScriptArgs->m_iN1);
+                if (pScriptArgs->m_iN2)
                     Noto_Criminal();
 
                 Noto_Murder();
@@ -652,7 +654,8 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 	ADDTOCALLSTACK("CChar::NotoSave_Add");
 	if ( !pChar )
 		return;
-	const CUID& uid = pChar->GetUID();
+
+    const CUID& uid(pChar->GetUID());
 	if  ( !m_notoSaves.empty() )	// Checking if I already have him in the list, only if there 's any list.
 	{
 		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
@@ -669,12 +672,13 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 			}
 		}
 	}
-	NotoSaves refNoto;
-	refNoto.charUID = pChar->GetUID().GetObjUID();
-	refNoto.time = 0;
-	refNoto.value = value;
-	refNoto.color = color;
-	m_notoSaves.emplace_back(std::move(refNoto));
+
+    m_notoSaves.emplace_back(NotoSaves{
+        .time = 0,
+        .charUID = pChar->GetUID().GetObjUID(),
+        .color = color,
+        .value = value
+    });
 }
 
 NOTO_TYPE CChar::NotoSave_GetValue(int id, bool fGetColor )

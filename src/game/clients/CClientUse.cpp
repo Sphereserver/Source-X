@@ -2,6 +2,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -103,7 +104,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 	if ( IsTrigUsed(TRIGGER_DCLICK) || IsTrigUsed(TRIGGER_ITEMDCLICK) )
 	{
-		if ( pItem->OnTrigger(ITRIG_DCLICK, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pItem->OnTrigger(ITRIG_DCLICK, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
 			return true;
 	}
 
@@ -644,16 +645,16 @@ bool CClient::Skill_Menu(SKILL_TYPE skill, lpctstr skillmenu, ITEMID_TYPE itemus
 	// Default menu is d_craft_menu
 	// Open in page 0, args is skill used.
 	// LPCTSTR dSkillMenu = "d_CraftingMenu";
-	CScriptTriggerArgs Args;
-	Args.m_VarsLocal.SetStrNew("SkillMenu", skillmenu);
-	Args.m_VarsLocal.SetNumNew("Skill", skill);
-	Args.m_VarsLocal.SetNumNew("ItemUsed", itemused);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_VarsLocal.SetStrNew("SkillMenu", skillmenu);
+    pScriptArgs->m_VarsLocal.SetNumNew("Skill", skill);
+    pScriptArgs->m_VarsLocal.SetNumNew("ItemUsed", itemused);
 	if (IsTrigUsed(TRIGGER_SKILLMENU))
 	{
-		if (m_pChar->OnTrigger(CTRIG_SkillMenu, m_pChar, &Args) == TRIGRET_RET_TRUE )
+        if (m_pChar->OnTrigger(CTRIG_SkillMenu, pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )
 			return true;
 
-		skillmenu = Args.m_VarsLocal.GetKeyStr("Skillmenu", false);
+        skillmenu = pScriptArgs->m_VarsLocal.GetKeyStr("Skillmenu", false);
 	}
 
 	lpctstr SkillUsed = g_Cfg.GetSkillKey(skill);
@@ -793,7 +794,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			if ( strcmpi(s.GetArgStr(), "@Cancel") )
 				continue;
 
-			if ( m_pChar->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr) == TRIGRET_RET_TRUE )
+            if ( m_pChar->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
 				return 0;
 
 			break;
@@ -811,8 +812,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
     bool fSkip = false;		// skip this if we lack resources or skill.
     bool fSkipNeedCleanup = false;
 	int iOnCount = 0;
-	int iShowCount = 0;
-	CScriptTriggerArgs Args;
+    int iShowCount = 0;
 
 	while ( s.ReadKeyParse() )
 	{
@@ -889,7 +889,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 		// Check for a skill / non-consumables required.
 		if ( s.IsKey("TEST") )
 		{
-			m_pChar->ParseScriptText(s.GetArgRaw(), m_pChar);
+            m_pChar->ParseScriptText(s.GetArgRaw(), CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, m_pChar);
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
@@ -900,7 +900,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 
 		if ( s.IsKey("TESTIF") )
 		{
-			m_pChar->ParseScriptText(s.GetArgRaw(), m_pChar);
+            m_pChar->ParseScriptText(s.GetArgRaw(), CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, m_pChar);
 			if ( !s.GetArgVal() )
 			{
                 fSkipNeedCleanup = true;
@@ -912,7 +912,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 		if ( iOnCount == iSelect )
 		{
 			// Execute command from script
-			TRIGRET_TYPE tRet = m_pChar->OnTriggerRunVal(s, TRIGRUN_SINGLE_EXEC, m_pChar, &Args);
+            TRIGRET_TYPE tRet = m_pChar->OnTriggerRunVal(s, TRIGRUN_SINGLE_EXEC, CScriptTriggerArgsPtr{}, m_pChar);
 			if ( tRet != TRIGRET_RET_DEFAULT )
 				return (tRet == TRIGRET_RET_TRUE) ? 0 : 1;
 
@@ -1012,9 +1012,10 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		case SPELL_Polymorph:
 		{
 			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_polymorph");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+            {
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init("sm_polymorph");
+                if ( m_pChar->OnTrigger("@SkillMenu", pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )
 					return true;
 			}
 			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_polymorph"));
@@ -1023,9 +1024,10 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		case SPELL_Summon:
 		{
 			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_summon");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+            {
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init("sm_summon");
+                if ( m_pChar->OnTrigger("@SkillMenu", pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )
 					return true;
 			}
 			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_summon"));
@@ -1034,9 +1036,10 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		case SPELL_Summon_Familiar:
 		{
 			if ( IsTrigUsed(TRIGGER_SKILLMENU) )
-			{
-				CScriptTriggerArgs args("sm_summon_familiar");
-				if ( m_pChar->OnTrigger("@SkillMenu", m_pChar, &args) == TRIGRET_RET_TRUE )
+            {
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init("sm_summon_familiar");
+                if ( m_pChar->OnTrigger("@SkillMenu", pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )
 					return true;
 			}
 			return Cmd_Skill_Menu(g_Cfg.ResourceGetIDType(RES_SKILLMENU, "sm_summon_familiar"));
@@ -1321,8 +1324,9 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 
 	if ( pItem && (IsTrigUsed(TRIGGER_DROPON_CHAR) || IsTrigUsed(TRIGGER_ITEMDROPON_CHAR)) )
 	{
-		CScriptTriggerArgs Args(pChar);
-		if ( pItem->OnTrigger(ITRIG_DROPON_CHAR, m_pChar, &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pChar;
+        if ( pItem->OnTrigger(ITRIG_DROPON_CHAR, pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -1356,8 +1360,9 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 		{
 			if ( IsTrigUsed(TRIGGER_DROPON_TRADE) )
 			{
-				CScriptTriggerArgs Args1(pChar);
-				if ( pItem->OnTrigger(ITRIG_DROPON_TRADE, this, &Args1) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs1 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs1->m_pO1 = pChar;
+                if ( pItem->OnTrigger(ITRIG_DROPON_TRADE, pScriptArgs1, this) == TRIGRET_RET_TRUE )
 					return false;
 			}
 			CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItemCont);
@@ -1370,15 +1375,18 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	// Open new trade window
 	if ( IsTrigUsed(TRIGGER_TRADECREATE) )
 	{
-		CScriptTriggerArgs Args(pItem);
-		if ( (m_pChar->OnTrigger(CTRIG_TradeCreate, pChar, &Args) == TRIGRET_RET_TRUE) || (pChar->OnTrigger(CTRIG_TradeCreate, m_pChar, &Args) == TRIGRET_RET_TRUE) )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pItem;
+        if ( (m_pChar->OnTrigger(CTRIG_TradeCreate, pScriptArgs, pChar)   == TRIGRET_RET_TRUE)
+            || (pChar->OnTrigger(CTRIG_TradeCreate, pScriptArgs, m_pChar) == TRIGRET_RET_TRUE) )
 			return false;
 	}
 
 	if ( IsTrigUsed(TRIGGER_DROPON_TRADE) && pItem )
 	{
-		CScriptTriggerArgs Args1(pChar);
-		if ( pItem->OnTrigger(ITRIG_DROPON_TRADE, this, &Args1) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pChar;
+        if ( pItem->OnTrigger(ITRIG_DROPON_TRADE, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -1437,8 +1445,9 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 	{
 		if ( IsTrigUsed(TRIGGER_DROPON_TRADE) )
 		{
-			CScriptTriggerArgs Args1(pChar);
-			if ( pItem->OnTrigger(ITRIG_DROPON_TRADE, this, &Args1) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_pO1 = pChar;
+            if ( pItem->OnTrigger(ITRIG_DROPON_TRADE, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			{
 				pCont1->Delete();
 				pCont2->Delete();

@@ -2,6 +2,7 @@
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
 #include "../common/CExpression.h"
+#include "../common/CScriptParserBufs.h"
 #include "../network/CClientIterator.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
@@ -874,7 +875,7 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 		CResourceLock s;
 		if ( pLink->ResourceLock(s) )
 		{
-			iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], pSrc);
+            iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], CScriptTriggerArgsPtr{}, pSrc);
 			if ( iRet == TRIGRET_RET_TRUE )
 				return iRet;
 		}
@@ -891,7 +892,7 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 		if ( !pLink->ResourceLock(s) )
 			continue;
 
-		iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], pSrc);
+        iRet = CScriptObj::OnTriggerScript(s, sm_szTrigName[iAction], CScriptTriggerArgsPtr{}, pSrc);
 		if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 			return iRet;
 	}

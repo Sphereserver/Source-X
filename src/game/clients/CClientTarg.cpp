@@ -4,6 +4,7 @@
 #include "../../common/resource/sections/CItemTypeDef.h"
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../chars/CChar.h"
 #include "../items/CItemCorpse.h"
@@ -88,18 +89,19 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 bool CClient::OnTarg_Obj_Function( CObjBase * pObj, const CPointMap & pt, ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Obj_Function");
-	m_Targ_p	= pt;
-	lpctstr	pSpace	= strchr( m_Targ_Text, ' ' );
+    m_Targ_p = pt;
+    lpctstr	pSpace = strchr( m_Targ_Text, ' ' );
 	if ( !pSpace )
 		pSpace	= strchr( m_Targ_Text, '\t' );
 	if ( pSpace )
 		GETNONWHITESPACE( pSpace );
 
-	CScriptTriggerArgs	Args( pSpace ? pSpace : "" );
-	Args.m_VarsLocal.SetNum( "ID", id, true );
-	Args.m_pO1	= pObj;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pSpace ? pSpace : "");
+    pScriptArgs->m_VarsLocal.SetNum( "ID", id, true );
+    pScriptArgs->m_pO1 = pObj;
 	CSString sVal;
-	m_pChar->r_Call( static_cast<lpctstr>(m_Targ_Text), this, &Args, &sVal );
+    m_pChar->r_Call(m_Targ_Text.GetBuffer(), pScriptArgs, this, &sVal );
 	return true;
 }
 
@@ -1714,8 +1716,9 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 
 	if (( IsTrigUsed(CItem::sm_szTrigName[trigtype]) ) || ( IsTrigUsed(CChar::sm_szTrigName[(CTRIG_itemAfterClick - 1) + trigtype]) )) //ITRIG_TARGON_GROUND, ITRIG_TARGON_CHAR, ITRIG_TARGON_ITEM
 	{
-		CScriptTriggerArgs	Args( id, 0, pObjTarg );
-		if ( pItemUse->OnTrigger( trigtype, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(id, 0, 0, pObjTarg);
+        if ( pItemUse->OnTrigger( trigtype, pScriptArgs, m_pChar ) == TRIGRET_RET_TRUE )
 			return true;
 	}
 
@@ -2464,8 +2467,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 
 	if ( IsTrigUsed(TRIGGER_PARTYINVITE) )
 	{
-		CScriptTriggerArgs args;
-		if ( pChar->OnTrigger(CTRIG_PartyInvite, m_pChar, &args) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_PartyInvite, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

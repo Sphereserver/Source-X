@@ -1,4 +1,5 @@
 #include "../common/sphere_library/CSRand.h"
+#include "../common/CScriptParserBufs.h"
 #include "../network/CClientIterator.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
@@ -224,13 +225,13 @@ void CWorldComm::Broadcast(lpctstr pMsg) // static
 	// System broadcast in bold text
 	ADDTOCALLSTACK("CWorldComm::Broadcast");
 
-    CScriptTriggerArgs args;
-    args.Init(pMsg);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pMsg);
     TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-    g_Serv.r_Call("f_onserver_broadcast", &g_Serv, &args, nullptr, &iRet);
+    g_Serv.r_Call("f_onserver_broadcast", pScriptArgs, &g_Serv, nullptr, &iRet);
     if (iRet == TRIGRET_RET_TRUE)
         return;
-    pMsg = args.m_s1;
+    pMsg = pScriptArgs->m_s1;
 
 	Speak( nullptr, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }

@@ -4,7 +4,7 @@
 #include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
-#include "../common/CScriptTriggerArgs.h"
+#include "../common/CScriptParserBufs.h"
 #include "../sphere/threads.h"
 #include "CServer.h"
 #include "CServerConfig.h"
@@ -514,8 +514,9 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			    if (pszArgs != nullptr)
 				    GETNONWHITESPACE(pszArgs);
 
-			    CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );
-			    if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init( pszArgs ? pszArgs : "" );
+                if ( r_Call( uiFunctionIndex, pScriptArgs, pSrc, &sVal ) )
 				    return true;
 		    }
             return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ));

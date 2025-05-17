@@ -1,4 +1,4 @@
-#include "../common/CScriptTriggerArgs.h"
+#include "../common/CScriptParserBufs.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
 #include "../game/CWorldGameTime.h"
@@ -34,10 +34,11 @@ void HistoryIP::setBlocked(bool isBlocked, int64 timeoutSeconds)
     ADDTOCALLSTACK("HistoryIP:setBlocked");
     if (isBlocked == true)
     {
-        CScriptTriggerArgs args(m_ip.GetAddrStr());
-        args.m_iN1 = timeoutSeconds;
-        g_Serv.r_Call("f_onserver_blockip", &g_Serv, &args);
-        timeoutSeconds = args.m_iN1;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(m_ip.GetAddrStr());
+        pScriptArgs->m_iN1 = timeoutSeconds;
+        g_Serv.r_Call("f_onserver_blockip", pScriptArgs, &g_Serv );
+        timeoutSeconds = pScriptArgs->m_iN1;
     }
 
     m_fBlocked = isBlocked;

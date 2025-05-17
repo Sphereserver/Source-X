@@ -1,6 +1,7 @@
 //  CChar is either an NPC or a Player.
 
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"
@@ -208,7 +209,7 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 	return nullptr;
 }
 
-TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CSString *pResult, LAYER_TYPE layer )
+TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole *pSrc, CSString *pResult, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForLayerLoop");
 	const CScriptLineContext StartContext = s.GetContext();
@@ -219,7 +220,7 @@ TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScr
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		if ( pItem->GetEquipLayer() == layer )
 		{
-			TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
+            TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult);
 			if ( iRet == TRIGRET_BREAK )
 			{
 				EndContext = StartContext;
@@ -237,7 +238,7 @@ TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScr
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		// just skip to the end.
-		TRIGRET_TYPE iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
+        TRIGRET_TYPE iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}
@@ -1115,6 +1116,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 	return true;
 }
 
+// TODO: restore some const safety... remove const_cast and make this function non-const
 bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 //true = client can see the invisble target
 {
@@ -1238,12 +1240,12 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			{
 				if ( IsTrigUsed( TRIGGER_SEEHIDDEN ) )
 				{
-					CScriptTriggerArgs Args;
-					Args.m_iN1 = (plevelMe <= plevelChar);
+                    CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    pArgs->m_iN1 = (plevelMe <= plevelChar);
 					CChar *pChar2 = const_cast< CChar* >( pChar );
 					CChar *this2 = const_cast< CChar* >( this );
-					this2->OnTrigger( CTRIG_SeeHidden, pChar2, &Args );
-					return ( Args.m_iN1 != 1 );
+                    this2->OnTrigger( CTRIG_SeeHidden, pArgs, pChar2 );
+                    return ( pArgs->m_iN1 != 1 );
 				}
 			}
 			//Here we analyse how GM can see other player/GM when they are hide.

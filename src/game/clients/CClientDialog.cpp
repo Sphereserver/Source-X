@@ -2,6 +2,7 @@
 #include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -137,7 +138,7 @@ bool CClient::addGumpDialogProps( const CUID& uid )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
+TRIGRET_TYPE CClient::Dialog_OnButton(const CResourceID& rid, dword dwButtonID, CObjBase * pObj, std::shared_ptr<CDialogResponseArgs> pArgs )
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
@@ -183,10 +184,10 @@ TRIGRET_TYPE CClient::Dialog_OnButton( const CResourceID& rid, dword dwButtonID,
 
 		CResourceLock prebutton;
 		if (g_Cfg.ResourceLock(prebutton, CResourceID(RES_DIALOG, rid.GetResIndex(), RES_DIALOG_PREBUTTON)))
-		stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, m_pChar, pArgs, nullptr);
+        stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, pArgs, m_pChar, nullptr);
 
 		if (stopPrebutton != TRIGRET_RET_TRUE)
-		return pObj->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, m_pChar, pArgs);
+        return pObj->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pArgs, m_pChar);
 	}
 
 	return TRIGRET_ENDIF;
@@ -254,7 +255,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 			if (strnicmp(ptcStr, "@CANCEL", 7 ) )
 				continue;
 
-			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr );
+            return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, CScriptTriggerArgsPtr{}, m_pChar);
 		}
 	}
 	else
@@ -271,7 +272,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 			if ( i > iSelect )
 				break;
 
-			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, nullptr );
+            return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, CScriptTriggerArgsPtr{}, m_pChar);
 		}
 	}
 
@@ -321,9 +322,9 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	}
 
 	if ( pObjBase != nullptr )
-		pObjBase->ParseScriptText( pszArgs, pSrc );
+        pObjBase->ParseScriptText( pszArgs, CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, pSrc );
 	else
-		g_Serv.ParseScriptText( pszArgs, pSrc );
+        g_Serv.ParseScriptText( pszArgs, CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, pSrc );
 
 	// Parsing @color
 	if ( *pszArgs == '@' )
@@ -378,7 +379,7 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		DEBUG_ERR(("Error getting the menu title.\n"));
 		return;
 	}
-	pObj->ParseScriptText( s.GetKeyBuffer(), m_pChar );
+    pObj->ParseScriptText( s.GetKeyBuffer(), CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, m_pChar );
 
 	CMenuItem item[MAX_MENU_ITEMS];
 	item[0].m_sText = s.GetKey();

@@ -1,6 +1,7 @@
 
 #include "../common/resource/sections/CDialogDef.h"
 #include "../common/CExpression.h"
+#include "../common/CScriptParserBufs.h"
 #include "../common/CLog.h"
 #include "../common/CUOClientVersion.h"
 #include "../game/uo_files/uofiles_enums_creid.h"
@@ -200,22 +201,22 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 	ASSERT(pChar != nullptr);
 
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
-	CScriptTriggerArgs createArgs;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     // RW
-	createArgs.m_iN1 = uiFlags;
-	createArgs.m_iN2 = prProf;
-	createArgs.m_iN3 = rtRace;
+    pScriptArgs->m_iN1 = uiFlags;
+    pScriptArgs->m_iN2 = prProf;
+    pScriptArgs->m_iN3 = rtRace;
     // R
-	createArgs.m_s1 = account->GetName();
-	createArgs.m_pO1 = client;
+    pScriptArgs->m_s1 = account->GetName();
+    pScriptArgs->m_pO1 = client;
 
-    client->r_Call("f_onchar_create_init", &g_Serv, &createArgs, nullptr, &tr);
+    client->r_Call("f_onchar_create_init", pScriptArgs, &g_Serv, nullptr, &tr);
     if (tr == TRIGRET_RET_TRUE)
         goto block_creation;
 
-    //uiFlags = (uint)createArgs.m_iN1;  // unused at this point
-    prProf = (PROFESSION_TYPE)createArgs.m_iN2;
-    rtRace = (RACE_TYPE)createArgs.m_iN3;
+    //uiFlags = (uint)pScriptArgs->.m_iN1;  // unused at this point
+    prProf = (PROFESSION_TYPE)pScriptArgs->m_iN2;
+    rtRace = (RACE_TYPE)pScriptArgs->m_iN3;
 
 	// Creating the pChar
 	pChar->InitPlayer(client, charname, fFemale, rtRace, wStr, wDex, wInt,
@@ -223,9 +224,9 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
 	// Calling the function after the char creation, it can't be done before or the function won't have SRC.
-    // The createArgs are Read-Only for this function.
+    // The pScriptArgs-> are Read-Only for this function.
     tr = TRIGRET_RET_DEFAULT;
-	client->r_Call("f_onchar_create", pChar, &createArgs, nullptr, &tr);
+    client->r_Call("f_onchar_create", pScriptArgs, pChar, nullptr, &tr);
 
 	if ( tr == TRIGRET_RET_TRUE )
 	{
@@ -2240,12 +2241,13 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 		client->m_mapOpenedGumps.erase(itGumpFound);
 
 	// package up the gump response info.
-	CDialogResponseArgs resp;
+    // TODO: just split CDialogResponseArgs into two objects (CScriptTriggerArgs and a struct for other data?)
+    //  Or just make CScriptTriggerArgs a member of CDialogResponseArgs... Favor composition over inheritance!
+    auto resp = std::make_shared<CDialogResponseArgs>();
 
 	// store the returned checked boxes' ids for possible later use
 	for (uint i = 0; i < checkCount; ++i)
-		resp.m_CheckArray.push_back(readInt32());
-
+        resp->m_CheckArray.push_back(readInt32());
 
 	dword textCount = readInt32();
 	textCount = minimum(textCount, THREAD_STRING_LENGTH);
@@ -2263,7 +2265,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 		if ((fix = strchr(text, '\t')) != nullptr)
 			*fix = ' ';
 
-		resp.AddText(id, text);
+        resp->AddText(id, text);
 	}
 
 	if (net->isClientKR())
@@ -2287,7 +2289,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 	//
 	// Call the scripted response. Lose all the checks and text.
 	//
-	client->Dialog_OnButton( ridContext, button, object, &resp );
+    client->Dialog_OnButton( ridContext, button, object, resp );
 	return true;
 }
 
@@ -2739,18 +2741,18 @@ bool PacketArrowClick::onReceive(CNetState* net)
 	if (character == nullptr)
 		return false;
 
-	bool rightClick = readBool();
+    const bool fRightClick = readBool();
 
 	if ( IsTrigUsed(TRIGGER_USERQUESTARROWCLICK) )
 	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = (rightClick == true? 1 : 0);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = (fRightClick == true? 1 : 0);
 #ifdef _ALPHASPHERE
-		Args.m_iN2 = character->GetKeyNum("ARROWQUEST_X", true);
-		Args.m_iN3 = character->GetKeyNum("ARROWQUEST_Y", true);
+        pScriptArgs->m_iN2 = character->GetKeyNum("ARROWQUEST_X", true);
+        pScriptArgs->m_iN3 = character->GetKeyNum("ARROWQUEST_Y", true);
 #endif
 
-		if (character->OnTrigger(CTRIG_UserQuestArrowClick, character, &Args) == TRIGRET_RET_TRUE)
+        if (character->OnTrigger(CTRIG_UserQuestArrowClick, pScriptArgs, character) == TRIGRET_RET_TRUE)
 			return true;
 	}
 
@@ -3235,8 +3237,9 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 
 	//Should we simulate the dclick?
 	client->m_Targ_UID = bandage->GetUID();
-	CScriptTriggerArgs extArgs(1); // Signal we're from the macro
-	if (bandage->OnTrigger( ITRIG_DCLICK, character, &extArgs ) == TRIGRET_RET_TRUE)
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_iN1 = 1; // Signal we're from the macro
+    if (bandage->OnTrigger( ITRIG_DCLICK, pScriptArgs, character) == TRIGRET_RET_TRUE)
 	{
 		return true;
 	}
@@ -3327,7 +3330,7 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
-		if ( character->OnTrigger(CTRIG_ToggleFlying, character, nullptr) == TRIGRET_RET_TRUE )
+        if ( character->OnTrigger(CTRIG_ToggleFlying, CScriptTriggerArgsPtr{}, character) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -4053,7 +4056,6 @@ bool PacketSpecialMove::onReceive(CNetState* net)
 	dword ability = readInt32();
 
 	client->Event_CombatAbilitySelect(ability);
-
 	return true;
 }
 
@@ -4148,7 +4150,7 @@ bool PacketGuildButton::onReceive(CNetState* net)
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_USERGUILDBUTTON) )
-		character->OnTrigger(CTRIG_UserGuildButton, character, nullptr);
+        character->OnTrigger(CTRIG_UserGuildButton, CScriptTriggerArgsPtr{}, character);
 	return true;
 }
 
@@ -4175,7 +4177,7 @@ bool PacketQuestButton::onReceive(CNetState* net)
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_USERQUESTBUTTON) )
-		character->OnTrigger(CTRIG_UserQuestButton, character, nullptr);
+        character->OnTrigger(CTRIG_UserQuestButton, CScriptTriggerArgsPtr{}, character);
 	return true;
 }
 
@@ -4738,7 +4740,7 @@ bool PacketUltimaStoreButton::onReceive(CNetState *net)
         return false;
 
     if (IsTrigUsed(TRIGGER_USERULTIMASTOREBUTTON))
-        character->OnTrigger(CTRIG_UserUltimaStoreButton, character, nullptr);
+        character->OnTrigger(CTRIG_UserUltimaStoreButton, CScriptTriggerArgsPtr{}, character);
     return true;
 }
 

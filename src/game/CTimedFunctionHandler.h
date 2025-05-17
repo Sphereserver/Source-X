@@ -40,7 +40,7 @@ public:
     void Stop(const CUID& uid, lpctstr ptcCommand);
     void Clear();
     TRIGRET_TYPE Loop(lpctstr ptcCommand, int iLoopsMade, CScriptLineContext StartContext,
-        CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
+        CScript &s, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * pResult);
     int64 IsTimer(const CUID& uid, lpctstr ptcCommand) const;
 };
 #endif // _INC_CTIMEDFUNCTIONHANDLER_H

@@ -1,6 +1,7 @@
 //  CChar is either an NPC or a Player.
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
 #include "../items/CItemCorpse.h"
@@ -75,11 +76,11 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 	word iResourceQty = 0;
 	size_t iResourceTotalQty = pCorpseDef->m_BaseResources.size();
 
-	CScriptTriggerArgs Args(iResourceTotalQty,0,pItemCarving);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(iResourceTotalQty, 0, 0, pItemCarving);
 
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
-
 		const CResourceID& rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if (rid.GetResType() != RES_ITEMDEF)
 			continue;
@@ -90,15 +91,15 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-		Args.m_VarsLocal.SetNum(pszTmp, (int64)id);
+        pScriptArgs->m_VarsLocal.SetNum(pszTmp, (int64)id);
 
 		iResourceQty = (word)pCorpseDef->m_BaseResources[i].GetResQty();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
-		Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
+        pScriptArgs->m_VarsLocal.SetNum(pszTmp, iResourceQty);
 	}
 	if (IsTrigUsed(TRIGGER_CARVECORPSE) || IsTrigUsed(TRIGGER_ITEMCARVECORPSE))
 	{
-		switch (static_cast<CItem*>(pCorpse)->OnTrigger(ITRIG_CarveCorpse, this, &Args))
+        switch (static_cast<CItem*>(pCorpse)->OnTrigger(ITRIG_CarveCorpse, pScriptArgs, this))
 		{
 		case TRIGRET_RET_TRUE:	return;
 		default:				break;
@@ -119,12 +120,12 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse, CItem * pItemCarving )
 
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-        ITEMID_TYPE id = (ITEMID_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp));
+        ITEMID_TYPE id = (ITEMID_TYPE)ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp));
 		if (id == ITEMID_NOTHING)
 			break;
 
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
-		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
+        iResourceQty =(word)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp);
 
 		++ iItems;
 		CItem *pPart = CItem::CreateTemplate(id, nullptr, this);
@@ -1002,13 +1003,15 @@ void CChar::Use_Drink( CItem * pItem )
 
     if (IsTrigUsed(TRIGGER_DRINK))
     {
-        CScriptTriggerArgs args(dwDelay, wConsume);
-        args.m_pO1 = pItem;
-        args.m_VarsLocal.SetNumNew("BottleId", idbottle);
-        TRIGRET_TYPE iRet = OnTrigger(CTRIG_Drink, this, &args);
-        idbottle = (ITEMID_TYPE)args.m_VarsLocal.GetKeyNum("BottleId");
-        dwDelay = (dword)(args.m_iN1 > 0 ? args.m_iN1 : 1); //0 causes stays memory infinitely.
-        wConsume = (word)args.m_iN2;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(dwDelay, wConsume, 0, pItem);
+        pScriptArgs->m_VarsLocal.SetNumNew("BottleId", idbottle);
+
+        TRIGRET_TYPE iRet = OnTrigger(CTRIG_Drink, pScriptArgs, this);
+
+        idbottle = (ITEMID_TYPE)pScriptArgs->m_VarsLocal.GetKeyNum("BottleId");
+        dwDelay = (dword)(pScriptArgs->m_iN1 > 0 ? pScriptArgs->m_iN1 : 1); //0 causes stays memory infinitely.
+        wConsume = (word)pScriptArgs->m_iN2;
         wBottleAmount = wConsume;
 
         if (iRet == TRIGRET_RET_TRUE)
@@ -1239,14 +1242,14 @@ bool CChar::FollowersUpdate(CChar * pCharPet, short iPetFollowerSlots, bool fChe
         // Arguments should be read only. Otherwise we have to call this trigger also if fCheckOnly == true and
         //  everyone scripts have to be changed to recognize this scenario.
 
-        CScriptTriggerArgs Args;
-        Args.m_iN1 = (iPetFollowerSlots >= 0) ? 0 : 1;
-        Args.m_iN2 = abs(iPetFollowerSlots);
-        //Args.m_iN3 = fCheckOnly;
-        if (OnTrigger(CTRIG_FollowersUpdate, pCharPet, &Args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = (iPetFollowerSlots >= 0) ? 0 : 1;
+        pScriptArgs->m_iN2 = abs(iPetFollowerSlots);
+        //pScriptArgs->m_iN3 = fCheckOnly;
+        if (OnTrigger(CTRIG_FollowersUpdate, pScriptArgs, pCharPet) == TRIGRET_RET_TRUE)
             return false;
 
-        //iPetFollowerSlots = n64_narrow_n16(Args.m_iN2) * ((Args.m_iN1 == 1) ? -1 : 1);
+        //iPetFollowerSlots = n64_narrow_n16(pScriptArgs->m_iN2) * ((pScriptArgs->m_iN1 == 1) ? -1 : 1);
 	}
 
     const short iMaxFollower = n64_narrow_n16(GetDefNum("MAXFOLLOWER", true));
@@ -1577,7 +1580,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 	if (m_pNPC && (IsTrigUsed(TRIGGER_DCLICK) ||
 	               IsTrigUsed(TRIGGER_ITEMDCLICK)))        // for players, DClick was called before this function
 	{
-		if (pItem->OnTrigger(ITRIG_DCLICK, this) == TRIGRET_RET_TRUE)
+        if (pItem->OnTrigger(ITRIG_DCLICK, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
 			return false;
 	}
 

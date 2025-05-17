@@ -1,5 +1,6 @@
 #include "../common/CException.h"
 #include "../common/CExpression.h"
+#include "../common/CScriptParserBufs.h"
 #include "../common/CLog.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
@@ -895,14 +896,14 @@ bool CWorld::SaveStage() // Save world state in stages.
 		llong	llTicksStart = _iSaveTimer;
 		TIME_PROFILE_END;
 
-		tchar * time = Str_GetTemp();
-		snprintf(time, Str_TempLength(), "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
+        tchar * ptcTime = Str_GetTemp();
+        snprintf(ptcTime, Str_TempLength(), "%lld.%04lld", TIME_PROFILE_GET_HI, TIME_PROFILE_GET_LO);
 
-		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
+        g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", ptcTime);
 
-		CScriptTriggerArgs Args;
-		Args.Init(time);
-		g_Serv.r_Call("f_onserver_save_finished", &g_Serv, &Args);
+        CScriptTriggerArgsPtr pScriptArgs;
+        pScriptArgs->Init(ptcTime);
+        g_Serv.r_Call("f_onserver_save_finished", pScriptArgs, &g_Serv);
 
 		// Now clean up all the held over UIDs
 		SaveThreadClose();
@@ -1169,6 +1170,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	ADDTOCALLSTACK("CWorld::Save");
 
 	bool fSaved = false;
+    CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
 	try
 	{
 		if (!CheckAvailableSpaceForSave(false))
@@ -1176,12 +1178,13 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 
 		//-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
 
-		CScriptTriggerArgs Args(fForceImmediate, _iSaveStage);
-		enum TRIGRET_TYPE tr;
+        pScriptArgs->Init(fForceImmediate, _iSaveStage, 0, nullptr);
+        enum TRIGRET_TYPE tr{};
 
-		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, nullptr, &tr) )
+        if ( g_Serv.r_Call("f_onserver_save", pScriptArgs, &g_Serv, nullptr, &tr) )
 			if ( tr == TRIGRET_RET_TRUE )
 				return false;
+
 		//Flushing before the server should fix #2306
 		//The scripts fills the clients buffer and the server flush
 		//the data during the save.
@@ -1199,7 +1202,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 #endif
 		}
 
-		fForceImmediate = (Args.m_iN1 != 0);
+        fForceImmediate = (pScriptArgs->m_iN1 != 0);
 		fSaved = SaveTry(fForceImmediate);
 	}
 	catch ( const CSError& e )
@@ -1223,8 +1226,8 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		GetCurrentProfileData().Count(PROFILE_STAT_FAULTS, 1);
 	}
 
-	CScriptTriggerArgs Args(fForceImmediate, _iSaveStage);
-	g_Serv.r_Call((fSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), &g_Serv, &Args);
+    pScriptArgs->Init(fForceImmediate, _iSaveStage, 0, nullptr);
+    g_Serv.r_Call((fSaved ? "f_onserver_save_ok" : "f_onserver_save_fail"), pScriptArgs, &g_Serv);
 	return fSaved;
 }
 
@@ -1826,8 +1829,10 @@ void CWorld::_OnTick()
 		{
 			EXC_SET_BLOCK("f_onserver_timer");
 			_iTimeLastCallUserFunc = iCurTime + g_Cfg._iTimerCall;
-			CScriptTriggerArgs args(g_Cfg._iTimerCallUnit ? g_Cfg._iTimerCall / (MSECS_PER_SEC) : g_Cfg._iTimerCall / (60 * MSECS_PER_SEC));
-			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = g_Cfg._iTimerCall /
+                (g_Cfg._iTimerCallUnit ? (MSECS_PER_SEC) : (60 * MSECS_PER_SEC));
+            g_Serv.r_Call("f_onserver_timer", pScriptArgs, &g_Serv);
 		}
 	}
 

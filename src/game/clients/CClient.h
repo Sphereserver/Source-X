@@ -44,6 +44,8 @@ enum CC_TYPE
 };
 
 
+// TODO: just split CDialogResponseArgs into two objects (CScriptTriggerArgs and a struct for other data?)
+//  Or just make CScriptTriggerArgs a member of CDialogResponseArgs... Favor composition over inheritance!
 class CDialogResponseArgs : public CScriptTriggerArgs
 {
 	// The scriptable return from a gump dialog.
@@ -55,7 +57,8 @@ public:
 		const word m_ID;
 		CSString const m_sText;
 
-		TResponseString( word id, lpctstr pszText ) : m_ID( id ), m_sText( pszText )
+        TResponseString( word id, lpctstr pszText )
+            : m_ID( id ), m_sText( pszText )
 		{
 		}
         TResponseString(const TResponseString& copy) = delete;
@@ -352,7 +355,7 @@ public:
 	bool Event_ExceededNetworkQuota(uchar uiType, int64 iBytes, int64 iQuota);
 
 	TRIGRET_TYPE Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj );
-	TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
+    TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, std::shared_ptr<CDialogResponseArgs> pArgs );
 
 	bool Login_Relay( uint iServer ); // Relay player to a certain IP
 	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)

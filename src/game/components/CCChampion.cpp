@@ -14,6 +14,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../../common/CScript.h"
 #include "../chars/CChar.h"
@@ -171,8 +172,7 @@ void CCChampion::Start(CChar *pChar)
     if (pChar && IsTrigUsed(TRIGGER_START))
     {
         // TODO: add source?
-        // DONE
-        if (OnTrigger(ITRIG_Start, pChar, nullptr) == TRIGRET_RET_TRUE)
+        if (OnTrigger(ITRIG_Start, CScriptTriggerArgsPtr{}, pChar) == TRIGRET_RET_TRUE)
             return;
     }
 
@@ -188,7 +188,7 @@ void CCChampion::Stop(CChar* pChar)
     {
         if (IsTrigUsed(TRIGGER_STOP))
         {
-            if (OnTrigger(ITRIG_STOP, pChar, nullptr) == TRIGRET_RET_TRUE)
+            if (OnTrigger(ITRIG_STOP, CScriptTriggerArgsPtr{}, pChar) == TRIGRET_RET_TRUE)
                 return;
         }
     }
@@ -219,11 +219,10 @@ void CCChampion::Complete()
         Stop();
 
     // TODO: add new trigger
-    // DONE
     // TODO: Add attacker list in trigger.
     if (IsTrigUsed(TRIGGER_COMPLETE))
     {
-        OnTrigger(ITRIG_COMPLETE, &g_Serv, nullptr);
+        OnTrigger(ITRIG_COMPLETE, CScriptTriggerArgsPtr{}, &g_Serv);
     }
     // TODO: add rewards, titles, etc?
 }
@@ -401,8 +400,9 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
         {
             if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
             {
-                CScriptTriggerArgs args(pCandle);
-                if (OnTrigger(ITRIG_ADDWHITECANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pCandle;
+                if (OnTrigger(ITRIG_ADDWHITECANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 {
                     pCandle->Delete();
                     return;
@@ -522,8 +522,9 @@ void CCChampion::AddRedCandle(const CUID& uid)
         {
             if (IsTrigUsed(TRIGGER_ADDREDCANDLE))
             {
-                CScriptTriggerArgs args(pCandle);
-                if (OnTrigger(ITRIG_ADDREDCANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pCandle;
+                if (OnTrigger(ITRIG_ADDREDCANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 {
                     pCandle->Delete();
                     return;
@@ -559,8 +560,9 @@ void CCChampion::SetLevel(byte iLevel)
     // DONE
     if (IsTrigUsed(TRIGGER_LEVEL))
     {
-        CScriptTriggerArgs args(_iLevel, iLevelMonsters, _iCandlesNextLevel);
-        OnTrigger(ITRIG_LEVEL, &g_Serv, &args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(_iLevel, iLevelMonsters, _iCandlesNextLevel, nullptr);
+        OnTrigger(ITRIG_LEVEL, pScriptArgs, &g_Serv);
     }
 
     if (_iLevel >= _iLevelMax) // Start boss fight when level maxed.
@@ -673,9 +675,10 @@ void CCChampion::DelWhiteCandle(CANDLEDELREASON_TYPE reason)
     // DONE
         if (IsTrigUsed(TRIGGER_DELWHITECANDLE))
         {
-            CScriptTriggerArgs args(reason);
-            args.m_pO1 = pCandle;
-            if (OnTrigger(ITRIG_DELWHITECANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = reason;
+            pScriptArgs->m_pO1 = pCandle;
+            if (OnTrigger(ITRIG_DELWHITECANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 return;
         }
 
@@ -699,9 +702,10 @@ void CCChampion::DelRedCandle(CANDLEDELREASON_TYPE reason)
         // DONE
         if (IsTrigUsed(TRIGGER_DELREDCANDLE))
         {
-            CScriptTriggerArgs args(reason);
-            args.m_pO1 = pCandle;
-            if (OnTrigger(ITRIG_DELREDCANDLE, &g_Serv, &args) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = reason;
+            pScriptArgs->m_pO1 = pCandle;
+            if (OnTrigger(ITRIG_DELREDCANDLE, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
                 return;
         }
 
@@ -1191,7 +1195,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
 }
 
 
-TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CTextConsole* pSrc, CScriptTriggerArgs* pArgs)
+TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc)
 {
     lpctstr pszTrigName = CItem::sm_szTrigName[trig];
 
@@ -1205,12 +1209,12 @@ TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CTextConsole* pSrc, CScriptT
         CResourceLock s;
         if (pResourceLink->ResourceLock(s))
         {
-            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pSrc, pArgs);
+            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pArgs, pSrc);
         }
     }
     if (iRet == TRIGRET_RET_DEFAULT)
     {
-        iRet = GetLink()->OnTrigger(trig, pSrc, pArgs);
+        iRet = GetLink()->OnTrigger(trig, pArgs, pSrc);
     }
     return iRet;
 }

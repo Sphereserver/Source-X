@@ -62,6 +62,8 @@ bool CCPropsChar::IgnoreElementalProperty(PropertyIndex_t iPropIndex) // static
         case PROPCH_RESFIRE:
         case PROPCH_RESFIREMAX:
             return true;
+        default:
+            break;
     }
     return false;
 }

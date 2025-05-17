@@ -1,6 +1,7 @@
 #include "../../common/resource/sections/CRandGroupDef.h"
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
 #include "../chars/CChar.h"
@@ -309,12 +310,13 @@ void CCSpawn::GenerateItem()
 
     if (IsTrigUsed(TRIGGER_PRESPAWN))
     {
-        CScriptTriggerArgs args(rid.GetResIndex());
-        if (pSpawnItem->OnTrigger(ITRIG_PreSpawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(rid.GetResIndex(), 0, 0, nullptr);
+        if (pSpawnItem->OnTrigger(ITRIG_PreSpawn, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
         {
             return;
         }
-        rid = CResourceIDBase(RES_ITEMDEF, (int)args.m_iN1);
+        rid = CResourceIDBase(RES_ITEMDEF, (int)pScriptArgs->m_iN1);
     }
     const ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
     CItem *pItem = CItem::CreateTemplate(id);
@@ -339,9 +341,9 @@ void CCSpawn::GenerateItem()
     //pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
     if (IsTrigUsed(TRIGGER_SPAWN))
     {
-        CScriptTriggerArgs args;
-        args.m_pO1 = pItem;
-        if (pSpawnItem->OnTrigger(ITRIG_Spawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pItem;
+        if (pSpawnItem->OnTrigger(ITRIG_Spawn, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
         {
             pItem->Delete();
             return;
@@ -383,12 +385,13 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
     }
     if (IsTrigUsed(TRIGGER_PRESPAWN))
     {
-        CScriptTriggerArgs args(rid.GetResIndex());
-        if (pSpawnItem->OnTrigger(ITRIG_PreSpawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = rid.GetResIndex();
+        if (pSpawnItem->OnTrigger(ITRIG_PreSpawn, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
         {
             return nullptr;
         }
-        rid = CResourceIDBase(RES_CHARDEF, (int)args.m_iN1);
+        rid = CResourceIDBase(RES_CHARDEF, (int)pScriptArgs->m_iN1);
     }
 
     RES_TYPE iRidType = rid.GetResType();
@@ -413,9 +416,9 @@ CChar* CCSpawn::GenerateChar(CResourceIDBase rid)
 
     if (IsTrigUsed(TRIGGER_SPAWN))
     {
-        CScriptTriggerArgs args;
-        args.m_pO1 = pChar;
-        if (pSpawnItem->OnTrigger(ITRIG_Spawn, &g_Serv, &args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pChar;
+        if (pSpawnItem->OnTrigger(ITRIG_Spawn, pScriptArgs, &g_Serv) == TRIGRET_RET_TRUE)
         {
             pChar->Delete();
             return nullptr;
@@ -566,11 +569,11 @@ void CCSpawn::DelObj(const CUID& uid)
 
     if (IsTrigUsed(TRIGGER_DELOBJ))
     {
-        CScriptTriggerArgs args;
-        args.m_pO1 = pSpawnItem;
-        args.m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;
-        pSpawnItem->OnTrigger(ITRIG_DELOBJ, &g_Serv, &args);
-        pSpawnItem->_SetTimeoutS(args.m_iN1);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pSpawnItem;
+        pScriptArgs->m_iN1 = pSpawnItem->_GetTimerAdjusted() / MSECS_PER_SEC;
+        pSpawnItem->OnTrigger(ITRIG_DELOBJ, pScriptArgs, &g_Serv);
+        pSpawnItem->_SetTimeoutS(pScriptArgs->m_iN1);
     }
 
     pSpawnItem->UpdatePropertyFlag();
@@ -643,12 +646,12 @@ void CCSpawn::AddObj(const CUID& uid)
 
         if (IsTrigUsed(TRIGGER_ADDOBJ))
         {
-            CScriptTriggerArgs args;
-            args.m_pO1 = pSpawnedObj;
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_pO1 = pSpawnedObj;
             const int64 iTimer= pSpawnItem->_GetTimerAdjusted();
-            args.m_iN1 = (iTimer < 0) ? -1 : iTimer/MSECS_PER_SEC;
-            pSpawnItem->OnTrigger(ITRIG_ADDOBJ, &g_Serv, &args);
-            pSpawnItem->_SetTimeoutS(args.m_iN1);
+            pScriptArgs->m_iN1 = (iTimer < 0) ? -1 : iTimer/MSECS_PER_SEC;
+            pSpawnItem->OnTrigger(ITRIG_ADDOBJ, pScriptArgs, &g_Serv);
+            pSpawnItem->_SetTimeoutS(pScriptArgs->m_iN1);
         }
         pSpawnItem->UpdatePropertyFlag();
     }

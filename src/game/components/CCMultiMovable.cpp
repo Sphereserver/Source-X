@@ -1,5 +1,6 @@
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/send.h"
 #include "../clients/CClient.h"
@@ -445,8 +446,9 @@ bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegi
 
             if (IsTrigUsed(TRIGGER_REGIONLEAVE))
             {
-                CScriptTriggerArgs Args(pRegionOld);
-                if (pMulti->OnTrigger(ITRIG_RegionLeave, pMulti->GetCaptain(), &Args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pRegionOld;
+                if (pMulti->OnTrigger(ITRIG_RegionLeave, pScriptArgs, pMulti->GetCaptain()) == TRIGRET_RET_TRUE)
                 {
                     return false;
                 }
@@ -464,8 +466,9 @@ bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegi
 
             if (IsTrigUsed(TRIGGER_REGIONENTER))
             {
-                CScriptTriggerArgs Args(pRegionNew);
-                if (pMulti->OnTrigger(ITRIG_RegionEnter, pMulti->GetCaptain(), &Args) == TRIGRET_RET_TRUE)
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_pO1 = pRegionNew;
+                if (pMulti->OnTrigger(ITRIG_RegionEnter, pScriptArgs, pMulti->GetCaptain()) == TRIGRET_RET_TRUE)
                 {
                     return false;
                 }
@@ -624,8 +627,9 @@ bool CCMultiMovable::Face(DIR_TYPE dir)
 
             if (IsTrigUsed(TRIGGER_SHIP_TURN))
             {
-                CScriptTriggerArgs Args(dir, sm_FaceDir[iFaceOffset]);
-                pItem->OnTrigger(ITRIG_Ship_Turn, &g_Serv, &Args);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(dir, sm_FaceDir[iFaceOffset], 0, nullptr);
+                pItem->OnTrigger(ITRIG_Ship_Turn, pScriptArgs, &g_Serv);
             }
         }
         else if (pObj->IsChar())
@@ -857,8 +861,9 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 
 	if (IsTrigUsed(TRIGGER_SHIP_MOVE))
     {
-        CScriptTriggerArgs Args(dir, fStopped);
-        pItemThis->OnTrigger(ITRIG_Ship_Move, &g_Serv, &Args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(dir, fStopped, 0, nullptr);
+        pItemThis->OnTrigger(ITRIG_Ship_Move, pScriptArgs, &g_Serv);
     }
 
     return true;
@@ -909,8 +914,9 @@ void CCMultiMovable::Stop()
 
 	if (IsTrigUsed(TRIGGER_SHIP_STOP))
     {
-        CScriptTriggerArgs Args(pItemThis);
-        pItemThis->OnTrigger(ITRIG_Ship_Stop, &g_Serv, &Args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pItemThis;
+        pItemThis->OnTrigger(ITRIG_Ship_Stop, pScriptArgs, &g_Serv);
     }
 
     _pCaptain = nullptr;
@@ -1260,7 +1266,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
         tchar szText[MAX_TALK_BUFFER];
         Str_CopyLimitNull(szText, pszSpeak, MAX_TALK_BUFFER);
-        pChar->ParseScriptText(szText, &g_Serv);
+        pChar->ParseScriptText(szText, CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, &g_Serv);
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }
     return true;

@@ -589,8 +589,8 @@ public:
 	CItem * LayerFind( LAYER_TYPE layer ) const;
 	void LayerAdd( CItem * pItem, LAYER_TYPE layer = LAYER_QTY );
 
-	TRIGRET_TYPE OnCharTrigForLayerLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, LAYER_TYPE layer );
-	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, word wMemType );
+    TRIGRET_TYPE OnCharTrigForLayerLoop(CScript &s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * pResult, LAYER_TYPE layer );
+    TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * pResult, word wMemType );
 
 	virtual void OnWeightChange( int iChange ) override;
 	virtual int GetWeight(word amount = 0) const override;
@@ -618,8 +618,8 @@ public:
     */
     void SetTriggerActive(lpctstr trig = nullptr);
 
-	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs ) override;
-	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
+    virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc ) override;
+    TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc);
 
 public:
 	// Load/Save----------------------------------
@@ -871,10 +871,10 @@ public:
 	*
 	* Main function for default Level system.
 	* Triggers @ExpChange and @LevelChange if needed
-	* @param delta, amount of exp gaining (or losing?)
+    * @param iExpDelta, amount of exp gaining (or losing?)
 	* @param ppCharDead from who we gained the experience.
 	*/
-	void ChangeExperience(llong delta = 0, CChar *pCharDead = nullptr);
+    void ChangeExperience(llong iExpDelta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
     /*
@@ -916,7 +916,7 @@ public:
 
 	void Skill_SetBase( SKILL_TYPE skill, ushort uiValue );
     void Skill_AddBase( SKILL_TYPE skill, int iChange );
-    bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool fAllowGain = true, bool fUseBellCurve = true, bool fForceCheck = false);
+    bool Skill_UseQuick( SKILL_TYPE skill, int64 iDifficulty, bool fAllowGain = true, bool fUseBellCurve = true, bool fForceCheck = false);
 
     bool Skill_CheckSuccess(SKILL_TYPE skill, int iDifficulty, bool fUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );
@@ -926,11 +926,9 @@ public:
 	ANIM_TYPE Skill_GetAnim( SKILL_TYPE skill);
 	SOUND_TYPE Skill_GetSound( SKILL_TYPE skill);
 	int Skill_Stage( SKTRIG_TYPE stage );
-	TRIGRET_TYPE	Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage);
-	TRIGRET_TYPE	Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScriptTriggerArgs * pArgs); //pArgs.m_iN1 will be rewritten with skill
 
-	TRIGRET_TYPE	Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig);
-	TRIGRET_TYPE	Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgs * pArgs); //pArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScriptTriggerArgsPtr pArgs); //pArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr pArgs); //pArgs.m_iN1 will be rewritten with skill
 
 	bool Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg );
 	bool Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );
@@ -1114,7 +1112,7 @@ public:
 	inline int GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
-	bool	Attacker_Add(CChar * pChar, int threat = 0);
+    bool	Attacker_Add(CChar * pChar, int iThreat = 0);
 	CChar * Attacker_GetLast() const;
 	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool	Attacker_Delete(int attackerIndex, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);

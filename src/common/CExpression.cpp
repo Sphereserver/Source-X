@@ -1,8 +1,9 @@
+#include "CExpression.h"
 #include "../game/CServerConfig.h"
 #include "sphere_library/CSRand.h"
 //#include "CException.h"
+#include "CScriptParserBufs.h"
 #include "CLog.h"
-#include "CExpression.h"
 #include <algorithm>
 #include <complex>
 #include <cmath>
@@ -1354,7 +1355,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool
 }
 
 
-int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSubexprData)[32], int iMaxQty) // static
+int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataArray &psSubExprData, int iMaxQty) // static
 {
 	ADDTOCALLSTACK("CExpression::GetConditionalSubexpressions");
 	// Get the start and end pointers for each logical subexpression (delimited by brackets or by logical operators || and &&) inside a conditional statement (IF/ELIF/ELSEIF and QVAL).
@@ -1367,7 +1368,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 
 	//memset((void*)&pSubexprPos, 0, ARRAY_COUNT(pSubexprPos));
 	int iSubexprQty = 0;	// number of subexpressions
-	using SType = SubexprData::Type;
+    using SType = CScriptSubExprData::Type;
 	while (pExpr[0] != '\0')
 	{
 		if (++iSubexprQty >= iMaxQty)
@@ -1377,7 +1378,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 		}
 
 		GETNONWHITESPACE(pExpr);
-		SubexprData& sCurSubexpr = psSubexprData[iSubexprQty - 1];
+        CScriptSubExprData& sCurSubexpr = psSubExprData[iSubexprQty - 1];
 		tchar ch = pExpr[0];
 
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
@@ -1504,7 +1505,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 								// I'm here because the whole expression is enclosed by parentheses
 							    // + 1 because i want to point to the character after the ')', even if it's the string terminator.
 								sCurSubexpr.ptcEnd = ptcLastClosingBracket + 1;
-								sCurSubexpr.uiType |= SubexprData::TopParenthesizedExpr;
+                                sCurSubexpr.uiType |= CScriptSubExprData::TopParenthesizedExpr;
 							}
                             else
                             {
@@ -1594,7 +1595,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 					}
 					else
 					{
-						const ushort prevSubexprType = ((iSubexprQty == 1) ? (ushort)SType::None : psSubexprData[iSubexprQty - 2].uiType);
+                        const ushort prevSubexprType = ((iSubexprQty == 1) ? (ushort)SType::None : psSubExprData[iSubexprQty - 2].uiType);
 						if ((prevSubexprType & SType::None))
 						{
 							// This subexpr is not preceded by a two-way operator, so probably i'm an operator: skip me.
@@ -1642,7 +1643,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSube
 	lptstr ptcStart, ptcEnd;
 	for (int i = 0; i < iSubexprQty; ++i)
 	{
-		SubexprData& sCurSubexpr = psSubexprData[i];
+        CScriptSubExprData& sCurSubexpr = psSubExprData[i];
 		ptcStart = sCurSubexpr.ptcStart;
 		ptcEnd = sCurSubexpr.ptcEnd;
 

@@ -1,6 +1,7 @@
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -157,29 +158,34 @@ void CItemContainer::Trade_Status( bool bCheck )
 
 	if ( IsTrigUsed(TRIGGER_TRADEACCEPTED) || IsTrigUsed(TRIGGER_CHARTRADEACCEPTED) )
 	{
-		CScriptTriggerArgs Args1(pChar1);
+        CScriptTriggerArgsPtr pScriptArgsPlayer1 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer1->Init(pChar1);
+
+        CScriptTriggerArgsPtr pScriptArgsPlayer2 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer2->Init(pChar2);
+
 		ushort i = 1;
 		for (CSObjContRec* pObjRec : *pPartner)
 		{
 			CItem* pItem = static_cast<CItem*>(pObjRec);
-			Args1.m_VarObjs.Insert(i, pItem, true);
+            pScriptArgsPlayer1->m_VarObjs.Insert(i, pItem, true);
 			++i;
 		}
-		Args1.m_iN1 = --i;
+        pScriptArgsPlayer1->m_iN1 = --i;
 
-		CScriptTriggerArgs Args2(pChar2);
 		i = 1;
 		for (CSObjContRec * pObjRec : *this)
 		{
 			CItem* pItem = static_cast<CItem*>(pObjRec);
-			Args2.m_VarObjs.Insert(i, pItem, true);
+            pScriptArgsPlayer2->m_VarObjs.Insert(i, pItem, true);
 			++i;
 		}
-		Args2.m_iN1 = --i;
+        pScriptArgsPlayer2->m_iN1 = --i;
 
-		Args1.m_iN2 = Args2.m_iN1;
-		Args2.m_iN2 = Args1.m_iN1;
-		if ( (pChar1->OnTrigger(CTRIG_TradeAccepted, pChar2, &Args1) == TRIGRET_RET_TRUE) || (pChar2->OnTrigger(CTRIG_TradeAccepted, pChar1, &Args2) == TRIGRET_RET_TRUE) )
+        pScriptArgsPlayer1->m_iN2 = pScriptArgsPlayer2->m_iN1;
+        pScriptArgsPlayer2->m_iN2 = pScriptArgsPlayer1->m_iN1;
+        if ((pChar1->OnTrigger(CTRIG_TradeAccepted, pScriptArgsPlayer1, pChar2) == TRIGRET_RET_TRUE)
+            || (pChar2->OnTrigger(CTRIG_TradeAccepted, pScriptArgsPlayer2, pChar1) == TRIGRET_RET_TRUE) )
 			return;
 	}
 
@@ -314,11 +320,15 @@ bool CItemContainer::Trade_Delete()
 
 	if ( IsTrigUsed(TRIGGER_TRADECLOSE) )
 	{
-		CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
-		CScriptTriggerArgs Args(pChar2);
-		pChar->OnTrigger(CTRIG_TradeClose, pChar, &Args);
-		CScriptTriggerArgs Args2(pChar);
-		pChar2->OnTrigger(CTRIG_TradeClose, pChar, &Args2);
+        CScriptTriggerArgsPtr pScriptArgsPlayer1 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer1->Init(pChar);
+
+        CChar *pChar2 = dynamic_cast<CChar *>(pPartner->GetParent());
+        CScriptTriggerArgsPtr pScriptArgsPlayer2 = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgsPlayer2->Init(pChar2);
+
+        pChar->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer1,  pChar);
+        pChar2->OnTrigger(CTRIG_TradeClose, pScriptArgsPlayer2, pChar);
 	}
 
 	m_uidLink.InitUID();	// unlink.

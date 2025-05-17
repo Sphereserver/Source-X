@@ -803,7 +803,7 @@ void CSector::SetLightNow( bool fFlash )
 		// don't fire trigger when server is loading or light is flashing
 		if (( ! g_Serv.IsLoading() && fFlash == false ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 		{
-			pChar->OnTrigger( CTRIG_EnvironChange, pChar );
+            pChar->OnTrigger( CTRIG_EnvironChange, CScriptTriggerArgsPtr{}, pChar );
 		}
 	}
 }
@@ -886,7 +886,7 @@ void CSector::SetWeather( WEATHER_TYPE w )
 			pChar->GetClientActive()->addWeather( w );
 
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
-			pChar->OnTrigger( CTRIG_EnvironChange, pChar );
+            pChar->OnTrigger( CTRIG_EnvironChange, CScriptTriggerArgsPtr{}, pChar );
 	}
 }
 
@@ -907,7 +907,7 @@ void CSector::SetSeason( SEASON_TYPE season )
 			pChar->GetClientActive()->addSeason(season);
 
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
-			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
+            pChar->OnTrigger(CTRIG_EnvironChange, CScriptTriggerArgsPtr{}, pChar);
 	}
 }
 
@@ -1289,7 +1289,7 @@ bool CSector::_OnTick()
         ASSERT(pChar);
 
 		if (fEnvironChange && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
-			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
+            pChar->OnTrigger(CTRIG_EnvironChange, CScriptTriggerArgsPtr{}, pChar);
 
 		if ( pChar->IsClientActive())
 		{

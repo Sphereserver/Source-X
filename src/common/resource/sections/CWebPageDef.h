@@ -163,9 +163,8 @@ public:
     explicit CWebPageDef(CResourceID id);
     virtual ~CWebPageDef() = default;
 
-private:
-    CWebPageDef(const CWebPageDef& copy);
-    CWebPageDef& operator=(const CWebPageDef& other);
+    CWebPageDef(const CWebPageDef& copy) = delete;
+    CWebPageDef& operator=(const CWebPageDef& other) = delete;
 };
 
 

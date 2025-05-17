@@ -58,7 +58,7 @@ private:
 public:
     virtual bool r_LoadVal( CScript & s ) override;
     virtual bool r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false ) override;
-    virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs ) override;
+    virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc ) override;
 };
 
 #endif // _INC_CREGIONRESOURCEDEF_H

@@ -3,6 +3,7 @@
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CUOClientVersion.h"
 #include "../../network/CClientIterator.h"
 #include "../../network/CNetworkManager.h"
@@ -190,10 +191,13 @@ void CClient::CharDisconnect()
 
 	if ( IsTrigUsed(TRIGGER_LOGOUT) )
 	{
-		CScriptTriggerArgs Args(iLingerTime, fCanInstaLogOut);
-		m_pChar->OnTrigger(CTRIG_LogOut, m_pChar, &Args);
-		iLingerTime = (int)(Args.m_iN1);
-		fCanInstaLogOut = (Args.m_iN2 != 0);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iLingerTime, fCanInstaLogOut, 0, nullptr);
+
+        m_pChar->OnTrigger(CTRIG_LogOut, pScriptArgs, m_pChar);
+
+        iLingerTime = (int)(pScriptArgs->m_iN1);
+        fCanInstaLogOut = (pScriptArgs->m_iN2 != 0);
 	}
 
 	if ( iLingerTime <= 0 )

@@ -3,6 +3,7 @@
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../network/CClientIterator.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
@@ -213,10 +214,10 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 	ADDTOCALLSTACK("CAccounts::Account_Delete");
 	ASSERT(pAccount != nullptr);
 
-	CScriptTriggerArgs Args;
-	Args.Init(pAccount->GetName());
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pAccount->GetName());
 	enum TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-	g_Serv.r_Call("f_onaccount_delete", &g_Serv, &Args, nullptr, &tr);
+    g_Serv.r_Call("f_onaccount_delete", pScriptArgs, &g_Serv, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{
 		return false;
@@ -232,12 +233,12 @@ void CAccounts::Account_Add( CAccount * pAccount )
 	ADDTOCALLSTACK("CAccounts::Account_Add");
 	ASSERT(pAccount != nullptr);
 	if ( !g_Serv.IsLoading() )
-	{
-		CScriptTriggerArgs Args;
-		Args.Init(pAccount->GetName());
+    {
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pAccount->GetName());
 		//Accounts are 'created' in server startup so we don't fire the function.
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
-		g_Serv.r_Call("f_onaccount_create", &g_Serv, &Args, nullptr, &tRet);
+        g_Serv.r_Call("f_onaccount_create", pScriptArgs, &g_Serv, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )
 		{
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Account '%s': Creation blocked via script\n", pAccount->GetName());
@@ -397,20 +398,20 @@ void CAccount::SetBlockStatus(bool fNewStatus)
     {
         if (IsPriv(PRIV_BLOCKED) && fNewStatus == false) {
 
-            CScriptTriggerArgs Args;
-            Args.Init(GetName());
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(GetName());
             TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-            g_Serv.r_Call("f_onaccount_unblock", &g_Serv, &Args, nullptr, &iRet);
+            g_Serv.r_Call("f_onaccount_unblock", pScriptArgs, &g_Serv, nullptr, &iRet);
             if (iRet == TRIGRET_RET_TRUE)
                 return;
             ClearPrivFlags(PRIV_BLOCKED);
         }
         else if (!IsPriv(PRIV_BLOCKED) && fNewStatus == true)
         {
-            CScriptTriggerArgs Args;
-            Args.Init(GetName());
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(GetName());
             TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
-            g_Serv.r_Call("f_onaccount_block", &g_Serv, &Args, nullptr, &iRet);
+            g_Serv.r_Call("f_onaccount_block", pScriptArgs, &g_Serv, nullptr, &iRet);
             if (iRet == TRIGRET_RET_TRUE)
                 return;
             SetPrivFlags(PRIV_BLOCKED);
@@ -513,13 +514,13 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 	{
 		CSString cmdArgs;
 		if (ppCmd[4] && ppCmd[4][0])
-			cmdArgs.Format("%s %s %s", ppCmd[2], ppCmd[3], ppCmd[4]);
+            cmdArgs.Format("%s %s %s", ppCmd[2], ppCmd[3], ppCmd[4]);
 		else if (ppCmd[3] && ppCmd[3][0])
-			cmdArgs.Format("%s %s", ppCmd[2], ppCmd[3]);
+            cmdArgs.Format("%s %s", ppCmd[2], ppCmd[3]);
 		else if (ppCmd[2] && ppCmd[2][0])
-			cmdArgs.Format("%s", ppCmd[2]);
+            cmdArgs.Format("%s", ppCmd[2]);
 
-		CScript script( ppCmd[1], cmdArgs.GetBuffer() );
+        CScript script( ppCmd[1], cmdArgs.GetBuffer() );
 
 		return pAccount->r_Verb( script, pSrc );
 	}
@@ -944,11 +945,11 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 			return false;
 	}
 
-    CScriptTriggerArgs Args;
-	Args.m_VarsLocal.SetStrNew("Account",GetName());
-	Args.m_VarsLocal.SetStrNew("Password",pszPassword);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_VarsLocal.SetStrNew("Account",GetName());
+    pScriptArgs->m_VarsLocal.SetStrNew("Password",pszPassword);
 	TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-	g_Serv.r_Call("f_onaccount_connect", &g_Serv, &Args, nullptr, &tr);
+    g_Serv.r_Call("f_onaccount_connect", pScriptArgs, &g_Serv, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 		return false;
 	if ( tr == TRIGRET_RET_HALFBAKED)
@@ -994,12 +995,12 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 	//Accounts are 'created' in server startup so we don't fire the function.
 	if ( !g_Serv.IsLoading() )
 	{
-		CScriptTriggerArgs Args;
-		Args.Init(GetName());
-		Args.m_VarsLocal.SetStrNew("password",pszPassword);
-        Args.m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetBuffer());
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(GetName());
+        pScriptArgs->m_VarsLocal.SetStrNew("password",pszPassword);
+        pScriptArgs->m_VarsLocal.SetStrNew("oldPassword",m_sCurPassword.GetBuffer());
 		TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
-		g_Serv.r_Call("f_onaccount_pwchange", &g_Serv, &Args, nullptr, &tRet);
+        g_Serv.r_Call("f_onaccount_pwchange", pScriptArgs, &g_Serv, nullptr, &tRet);
 		if ( tRet == TRIGRET_RET_TRUE )
 		{
 			return false;
@@ -1657,8 +1658,9 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 		{
             // RES_FUNCTION call
 			CSString sVal;
-			CScriptTriggerArgs Args( s.GetArgRaw() );
-			fLoad = r_Call( ptcKey, pSrc, &Args, &sVal );
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(s.GetArgRaw());
+            fLoad = r_Call( ptcKey, pScriptArgs, pSrc, &sVal );
 		}
 		return fLoad;
 	}

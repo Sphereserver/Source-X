@@ -80,26 +80,6 @@ set(network_SRCS
 )
 source_group(network FILES ${network_SRCS})
 
-# Login encryption handling
-set(crypto_SRCS
-    src/common/crypto/CBCrypt.cpp
-    src/common/crypto/CBCrypt.h
-    src/common/crypto/CCrypto.cpp
-    src/common/crypto/CCrypto.h
-    src/common/crypto/CCryptoBlowFish.cpp
-    src/common/crypto/CCryptoLogin.cpp
-    src/common/crypto/CCryptoKeyCalc.cpp
-    src/common/crypto/CCryptoKeyCalc.h
-    src/common/crypto/CCryptoMD5Interface.cpp
-    src/common/crypto/CCryptoTwoFishInterface.cpp
-    src/common/crypto/CHuffman.cpp
-    src/common/crypto/CHuffman.h
-    src/common/crypto/CMD5.cpp
-    src/common/crypto/CMD5.h
-    src/common/crypto/crypto_common.h
-)
-source_group(common\\crypto FILES ${crypto_SRCS})
-
 # Handle UO Client files
 set(uofiles_SRCS
     src/game/uo_files/CUOHuesRec.h
@@ -173,6 +153,8 @@ set(common_SRCS
     src/common/CScriptContexts.h
     src/common/CScriptObj.cpp
     src/common/CScriptObj.h
+    src/common/CScriptParserBufs.cpp
+    src/common/CScriptParserBufs.h
     src/common/CScriptTriggerArgs.cpp
     src/common/CScriptTriggerArgs.h
     src/common/CSFileObj.cpp
@@ -199,6 +181,27 @@ set(common_SRCS
     src/common/target_info.h
 )
 source_group(common FILES ${common_SRCS})
+
+# Login encryption handling
+set(crypto_SRCS
+    src/common/crypto/CBCrypt.cpp
+    src/common/crypto/CBCrypt.h
+    src/common/crypto/CCrypto.cpp
+    src/common/crypto/CCrypto.h
+    src/common/crypto/CCryptoBlowFish.cpp
+    src/common/crypto/CCryptoLogin.cpp
+    src/common/crypto/CCryptoKeyCalc.cpp
+    src/common/crypto/CCryptoKeyCalc.h
+    src/common/crypto/CCryptoMD5Interface.cpp
+    src/common/crypto/CCryptoTwoFishInterface.cpp
+    src/common/crypto/CHuffman.cpp
+    src/common/crypto/CHuffman.h
+    src/common/crypto/CMD5.cpp
+    src/common/crypto/CMD5.h
+    src/common/crypto/crypto_common.h
+)
+source_group(common\\crypto FILES ${crypto_SRCS})
+
 
 set(resource_SRCS
     src/common/resource/CResourceDef.cpp
@@ -286,6 +289,7 @@ set(spherelibrary_SRCS
     src/common/sphere_library/smap.h
     src/common/sphere_library/smutex.h
     src/common/sphere_library/smutex.cpp
+    src/common/sphere_library/sobjpool.h
     src/common/sphere_library/squeues.h
     src/common/sphere_library/sresetevents.cpp
     src/common/sphere_library/sresetevents.h

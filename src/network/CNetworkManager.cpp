@@ -1,3 +1,4 @@
+#include "../common/CScriptParserBufs.h"
 #include "../game/clients/CClient.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
@@ -180,16 +181,18 @@ void CNetworkManager::acceptNewConnection(void)
 
 
         // Call this special scripted function.
-        CScriptTriggerArgs fargs_ex(client_addr.GetAddrStr());
-        fargs_ex.m_VarsLocal.SetNumNew("TIME_CUR_CONNECTED_MS", ip.m_iTimeLastConnectedMs);
-        fargs_ex.m_VarsLocal.SetNumNew("TIME_LAST_CONNECTED_MS", iIpPrevConnectionTime);
-        fargs_ex.m_VarsLocal.SetNumNew("PINGS", ip.m_iPings);
-        fargs_ex.m_VarsLocal.SetNumNew("CONNECTION_REQUESTS", ip.m_iConnectionRequests);
-        fargs_ex.m_VarsLocal.SetNumNew("ALIVE_CONNECTIONS", ip.m_iAliveSuccessfulConnections);
-        fargs_ex.m_VarsLocal.SetNumNew("PENDING_CONNECTING", ip.m_iPendingConnectionRequests);
-        fargs_ex.m_VarsLocal.SetNumNew("BAN_TIMEOUT", 5ll * 60);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(client_addr.GetAddrStr());
+        pScriptArgs->m_VarsLocal.SetNumNew("TIME_CUR_CONNECTED_MS", ip.m_iTimeLastConnectedMs);
+        pScriptArgs->m_VarsLocal.SetNumNew("TIME_LAST_CONNECTED_MS", iIpPrevConnectionTime);
+        pScriptArgs->m_VarsLocal.SetNumNew("PINGS", ip.m_iPings);
+        pScriptArgs->m_VarsLocal.SetNumNew("CONNECTION_REQUESTS", ip.m_iConnectionRequests);
+        pScriptArgs->m_VarsLocal.SetNumNew("ALIVE_CONNECTIONS", ip.m_iAliveSuccessfulConnections);
+        pScriptArgs->m_VarsLocal.SetNumNew("PENDING_CONNECTING", ip.m_iPendingConnectionRequests);
+        pScriptArgs->m_VarsLocal.SetNumNew("BAN_TIMEOUT", 5ll * 60);
+
         TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
-        g_Serv.r_Call("f_onserver_connectreq_ex", &g_Serv, &fargs_ex, nullptr, &fret);
+        g_Serv.r_Call("f_onserver_connectreq_ex", pScriptArgs, &g_Serv, nullptr, &fret);
         if (fret == -1)
         {
             // RETURN -1: do not block.
@@ -208,7 +211,7 @@ void CNetworkManager::acceptNewConnection(void)
             {
                 // RETURN 2 (TRIGRET_RET_DEFAULT) or other: block IP
                 CLOSESOCKET(h);
-                ip.setBlocked(true, fargs_ex.m_VarsLocal.GetKeyNum("BAN_TIMEOUT"));
+                ip.setBlocked(true, pScriptArgs->m_VarsLocal.GetKeyNum("BAN_TIMEOUT"));
 
                 g_Log.Event(LOGM_CLIENTS_LOG | LOGL_ERROR, "Outcome (default): requested kick + IP block allowed by script 'f_onserver_connectreq_ex'.\n");
             }
@@ -269,11 +272,13 @@ void CNetworkManager::acceptNewConnection(void)
     */
 
     // Call this special scripted function.
-    CScriptTriggerArgs fargs_acquired(client_addr.GetAddrStr());
-    fargs_acquired.m_iN1 = iIpPrevConnectionTime;
-    fargs_acquired.m_iN2 = ip.m_iTimeLastConnectedMs; // Current connection time.
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(client_addr.GetAddrStr());
+    pScriptArgs->m_iN1 = iIpPrevConnectionTime;
+    pScriptArgs->m_iN2 = ip.m_iTimeLastConnectedMs; // Current connection time.
+
     TRIGRET_TYPE fret = TRIGRET_RET_FALSE;
-    g_Serv.r_Call("f_onserver_connection_acquired", &g_Serv, &fargs_acquired, nullptr, &fret);
+    g_Serv.r_Call("f_onserver_connection_acquired", pScriptArgs, &g_Serv, nullptr, &fret);
 
     // select an empty slot
     EXC_SET_BLOCK("detecting slot");

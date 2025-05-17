@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CLog.h"
-#include "../../common/CScriptTriggerArgs.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../components/CCPropsItemWeapon.h"
 #include "../items/item_types.h"
 #include "../uo_files/uofiles_enums_creid.h"
@@ -98,15 +98,15 @@ CChar * CChar::NPC_FightFindBestTarget(const std::vector<CChar*>* pvExcludeList)
 
             if (refAttacker.ignore)
             {
-                bool bIgnore = true;
+                bool fIgnore = true;
                 if (IsTrigUsed(TRIGGER_HITIGNORE))
                 {
-                    CScriptTriggerArgs Args;
-                    Args.m_iN1 = bIgnore;
-                    OnTrigger(CTRIG_HitIgnore, pChar, &Args);
-                    bIgnore = Args.m_iN1 ? true : false;
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    pScriptArgs->m_iN1 = fIgnore;
+                    OnTrigger(CTRIG_HitIgnore, pScriptArgs, pChar);
+                    fIgnore = pScriptArgs->m_iN1 ? true : false;
                 }
-                if (bIgnore)
+                if (fIgnore)
                 {
                     ++i;
                     continue;
@@ -222,20 +222,21 @@ void CChar::NPC_Act_Fight()
     bool fSkipHardcoded = false;
     if (IsTrigUsed(TRIGGER_NPCACTFIGHT))
     {
-        CScriptTriggerArgs Args(iDist, iMotivation);
-        switch (OnTrigger(CTRIG_NPCActFight, pChar, &Args))
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iDist, iMotivation, 0, nullptr);
+        switch (OnTrigger(CTRIG_NPCActFight, pScriptArgs, pChar))
         {
         case TRIGRET_RET_TRUE:
             return;
         case TRIGRET_RET_FALSE:
             fSkipHardcoded = true;
             break;
-        case (TRIGRET_TYPE)(2) :
+        case TRIGRET_RET_DEFAULT: //(TRIGRET_TYPE)(2) :
         {
-            SKILL_TYPE iSkillforced = (SKILL_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("skill"));
+            SKILL_TYPE iSkillforced = (SKILL_TYPE)ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("skill"));
             if (iSkillforced)
             {
-                SPELL_TYPE iSpellforced = (SPELL_TYPE)ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("spell"));
+                SPELL_TYPE iSpellforced = (SPELL_TYPE)ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("spell"));
                 if (g_Cfg.IsSkillFlag(iSkillforced, SKF_MAGIC))
                 {
                     m_atMagery.m_iSpell = iSpellforced;
@@ -250,8 +251,8 @@ void CChar::NPC_Act_Fight()
             break;
         }
 
-        iDist = (int)(Args.m_iN1);
-        iMotivation = (int)(Args.m_iN2);
+        iDist = (int)(pScriptArgs->m_iN1);
+        iMotivation = (int)(pScriptArgs->m_iN2);
     }
 
     if (!IsStatFlag(STATF_PET))

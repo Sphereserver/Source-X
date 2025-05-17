@@ -16,7 +16,7 @@
 #include "../common/CException.h"
 #include "../common/CExpression.h"
 #include "../common/CLog.h"
-#include "../common/CTextConsole.h"
+#include "../common/CScriptParserBufs.h"
 #include "../common/CUOClientVersion.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
@@ -1764,8 +1764,9 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
         {
             // RES_FUNCTION call
             CSString sVal;
-            CScriptTriggerArgs Args( s.GetArgRaw() );
-            if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(s.GetArgRaw());
+            if ( r_Call( uiFunctionIndex, pScriptArgs, pSrc, &sVal ) )
                 return true;
         }
 

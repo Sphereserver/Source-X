@@ -1,7 +1,6 @@
-
-#include "../../common/CScriptTriggerArgs.h"
 #include "../../common/resource/CResourceID.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../chars/CChar.h"
 #include "../triggers.h"
 #include "../CServer.h"
@@ -36,15 +35,19 @@ bool CItem::Plant_Use(CChar *pChar)
     if (!Can(CAN_I_SCRIPTEDMORE))
         iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
     word iAmount = std::max(m_itCrop.m_ridAmount, (word)1);
+
     if (IsTrigUsed(TRIGGER_RESOURCETEST))
     {
-        CScriptTriggerArgs args(iGrowID, iFruitID, iFruitIDOverride);
-        TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceTest, pChar, &args);
-        iGrowID = (ITEMID_TYPE)(ResGetIndex((dword)args.m_iN1));
-        iFruitID = (ITEMID_TYPE)(ResGetIndex((dword)args.m_iN2));
-        iFruitIDOverride = (ITEMID_TYPE)(ResGetIndex((dword)args.m_iN3));
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iGrowID, iFruitID, iFruitIDOverride, nullptr);
+        TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceTest, pScriptArgs, pChar);
+
         if (iRet == TRIGRET_RET_TRUE)
             return true;
+
+        iGrowID = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_iN1));
+        iFruitID = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_iN2));
+        iFruitIDOverride = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_iN3));
     }
 
 	if (iGrowID != ITEMID_NOTHING)	// If we set an override, we can reap this at every stage
@@ -67,10 +70,12 @@ bool CItem::Plant_Use(CChar *pChar)
         {
             if (IsTrigUsed(TRIGGER_RESOURCEGATHER))
             {
-                CScriptTriggerArgs args(iAmount);
-                args.m_pO1 = pItemFruit;
-                TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceGather, pChar, &args);
-                iAmount = (word)(args.m_iN1 > 0 ? args.m_iN1 : 1);
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(iAmount, 0, 0, pItemFruit);
+
+                TRIGRET_TYPE iRet = OnTrigger(ITRIG_ResourceGather, pScriptArgs, pChar);
+
+                iAmount = (word)((pScriptArgs->m_iN1 > 0) ? pScriptArgs->m_iN1 : 1);
                 if (iRet == TRIGRET_RET_TRUE)
                 {
                     pItemFruit->Delete(true);
@@ -163,7 +168,7 @@ bool CItem::Plant_OnTick()
 bool CItem::Plant_SetID(ITEMID_TYPE id)
 {
     bool iRet = SetID(id);
-    OnTrigger(ITRIG_Create, &g_Serv, nullptr);
+    OnTrigger(ITRIG_Create, CScriptTriggerArgsPtr{}, &g_Serv);
     return iRet;
 }
 

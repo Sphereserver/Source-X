@@ -3,7 +3,7 @@
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
-#include "../../common/CScriptTriggerArgs.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../items/CItem.h"
 #include "../triggers.h"
 #include "../CServer.h"
@@ -33,15 +33,15 @@ void CChar::Stat_SetMod( STAT_TYPE i, int iVal )
 	{
 		if ( i >= STAT_STR && i <= STAT_DEX )
 		{
-			CScriptTriggerArgs args;
-			args.m_iN1 = i + 8LL;	// shift by 8 to indicate modSTR, modINT, modDEX
-			args.m_iN2 = iStatVal;
-			args.m_iN3 = iVal;
-			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = i + 8LL;	// shift by 8 to indicate modSTR, modINT, modDEX
+            pScriptArgs->m_iN2 = iStatVal;
+            pScriptArgs->m_iN3 = iVal;
+            if ( OnTrigger(CTRIG_StatChange, pScriptArgs, this) == TRIGRET_RET_TRUE )
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
 
-			iVal = (int)(args.m_iN3);
+            iVal = (int)(pScriptArgs->m_iN3);
 		}
 	}
 
@@ -89,14 +89,14 @@ void CChar::Stat_SetMaxMod( STAT_TYPE i, int iVal )
     {
         if ( (i >= STAT_STR) && (i <= STAT_DEX) )
         {
-            CScriptTriggerArgs args;
-            args.m_iN1 = i + 12LL;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
-            args.m_iN2 = iStatVal;
-            args.m_iN3 = iVal;
-            if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = i + 12LL;	// shift by 12 to indicate modMaxHits, modMaxMana, modMaxStam
+            pScriptArgs->m_iN2 = iStatVal;
+            pScriptArgs->m_iN3 = iVal;
+            if ( OnTrigger(CTRIG_StatChange, pScriptArgs, this) == TRIGRET_RET_TRUE )
                 return;
             // do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-            iVal = (int)(args.m_iN3);
+            iVal = (int)(pScriptArgs->m_iN3);
         }
     }
 
@@ -241,14 +241,14 @@ void CChar::Stat_SetMax( STAT_TYPE i, ushort uiVal )
 		{
 			if ( i > STAT_NONE && i < STAT_QTY )		// only STR, DEX, INT, FOOD fire MaxHits, MaxMana, MaxStam, MaxFood for @StatChange
 			{
-				CScriptTriggerArgs args;
-				args.m_iN1 = i + 4LL;		// shift by 4 to indicate MaxHits, etc..
-				args.m_iN2 = Stat_GetMax(i);
-				args.m_iN3 = uiVal;
-				if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = i + 4LL;		// shift by 4 to indicate MaxHits, etc..
+                pScriptArgs->m_iN2 = Stat_GetMax(i);
+                pScriptArgs->m_iN3 = uiVal;
+                if ( OnTrigger(CTRIG_StatChange, pScriptArgs, this) == TRIGRET_RET_TRUE )
 					return;
 				// do not restore argn1 to i, bad things will happen! leave it untouched. (matex)
-				uiVal = (ushort)(args.m_iN3);
+                uiVal = (ushort)(pScriptArgs->m_iN3);
 			}
 		}
 		m_Stat[i].m_max = uiVal;
@@ -348,16 +348,16 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
 		// Only Str, Dex, Int, Food fire @StatChange here
 		if (i >= STAT_STR && i <= STAT_FOOD)
 		{
-			CScriptTriggerArgs args;
-			args.m_iN1 = i;
-			args.m_iN2 = uiStatVal;
-			args.m_iN3 = uiVal;
-			if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = i;
+            pScriptArgs->m_iN2 = uiStatVal;
+            pScriptArgs->m_iN3 = uiVal;
+            if (OnTrigger(CTRIG_StatChange, pScriptArgs, this ) == TRIGRET_RET_TRUE)
 				return;
 
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
 
-            int64 iPrevVal = args.m_iN3;
+            int64 iPrevVal = pScriptArgs->m_iN3;
             int64 iVal = std::clamp(iPrevVal, int64(-UINT16_MAX), int64(UINT16_MAX));
             if (iVal != iPrevVal)
             {
@@ -369,15 +369,15 @@ void CChar::Stat_SetBase( STAT_TYPE i, ushort uiVal )
             // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
 			if (i != STAT_FOOD && m_Stat[i].m_max < 1)
 			{
-				args.m_iN1 = i + 4LL; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
-				args.m_iN2 = uiStatVal;
-				args.m_iN3 = uiVal;
-				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
+                pScriptArgs->m_iN1 = i + 4LL; // Shift by 4 to indicate MaxHits, MaxMana, MaxStam
+                pScriptArgs->m_iN2 = uiStatVal;
+                pScriptArgs->m_iN3 = uiVal;
+                if (OnTrigger(CTRIG_StatChange, pScriptArgs, this ) == TRIGRET_RET_TRUE)
 					return;
 
 				// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
 
-                iPrevVal = args.m_iN3;
+                iPrevVal = pScriptArgs->m_iN3;
                 iVal = std::clamp(iPrevVal, int64(-UINT16_MAX), int64(UINT16_MAX));
                 if (iVal != iPrevVal)
                 {
@@ -536,18 +536,18 @@ bool CChar::Stats_Regen()
 
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
 		{
-			CScriptTriggerArgs Args;
-			Args.m_VarsLocal.SetNum("StatID", i, true);
-			Args.m_VarsLocal.SetNum("Value", iMod, true);
-			Args.m_VarsLocal.SetNum("StatLimit", uiStatLimit, true);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_VarsLocal.SetNum("StatID", i, true);
+            pScriptArgs->m_VarsLocal.SetNum("Value", iMod, true);
+            pScriptArgs->m_VarsLocal.SetNum("StatLimit", uiStatLimit, true);
 
 			if (i == STAT_DEX || i == STAT_INT)
-				Args.m_VarsLocal.SetNum("FocusValue", iFocusGain);
+                pScriptArgs->m_VarsLocal.SetNum("FocusValue", iFocusGain);
 
 			if (i == STAT_FOOD)
-				Args.m_VarsLocal.SetNum("HitsHungerLoss", iHitsHungerLoss);
+                pScriptArgs->m_VarsLocal.SetNum("HitsHungerLoss", iHitsHungerLoss);
 
-			if (OnTrigger(CTRIG_RegenStat, this, &Args) == TRIGRET_RET_TRUE)
+            if (OnTrigger(CTRIG_RegenStat, pScriptArgs, this ) == TRIGRET_RET_TRUE)
 			{
                 // Setting the last regen time to 0 will make this trigger be called over and over and over, without a delay, which
                 //  can suck quite a bit cpu.
@@ -555,22 +555,22 @@ bool CChar::Stats_Regen()
 				continue;
 			}
 
-			i = (STAT_TYPE)(Args.m_VarsLocal.GetKeyNum("StatID"));
+            i = (STAT_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("StatID"));
 			if (i < STAT_STR)
 				i = STAT_STR;
 			else if (i > STAT_FOOD)
 				i = STAT_FOOD;
-            iMod = (int)(Args.m_VarsLocal.GetKeyNum("Value"));
-			uiStatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit"));
+            iMod = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("Value"));
+            uiStatLimit = (ushort)(pScriptArgs->m_VarsLocal.GetKeyNum("StatLimit"));
 
 			if (i == STAT_DEX || i == STAT_INT)
 			{
-				iFocusGain = (int)(Args.m_VarsLocal.GetKeyNum("FocusValue"));
+                iFocusGain = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("FocusValue"));
 				iMod += iFocusGain;
 			}
 
 			if (i == STAT_FOOD)
-				iHitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss"));
+                iHitsHungerLoss = (int)(pScriptArgs->m_VarsLocal.GetKeyNum("HitsHungerLoss"));
 		}
 		if (iMod == 0)
 			continue;
@@ -673,12 +673,12 @@ void CChar::SetKarma(short iNewKarma, CChar* pNPC)
 
 	if (IsTrigUsed(TRIGGER_KARMACHANGE))
 	{
-	    CScriptTriggerArgs Args(iKarmaChange, iOldKarma);
-	    Args.m_pO1 = pNPC;
-    	TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, this, &Args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iKarmaChange, iOldKarma, 0, pNPC);
+        TRIGRET_TYPE retType = OnTrigger(CTRIG_KarmaChange, pScriptArgs, this);
 		if (retType == TRIGRET_RET_TRUE)
 			return;
-    	iKarmaChange = (short)Args.m_iN1;
+        iKarmaChange = (short)pScriptArgs->m_iN1;
         iNewKarma = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iOldKarma + iKarmaChange)));
 	}
 
@@ -711,12 +711,12 @@ void CChar::SetFame(ushort uiNewFame, CChar* pNPC)
 
 	if (IsTrigUsed(TRIGGER_FAMECHANGE))
 	{
-	    CScriptTriggerArgs Args(iFameChange, iOldFame);
-	    Args.m_pO1 = pNPC;
-    	TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, this, &Args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iFameChange, iOldFame, 0, pNPC);
+        TRIGRET_TYPE retType = OnTrigger(CTRIG_FameChange, pScriptArgs, this);
 		if (retType == TRIGRET_RET_TRUE)
 			return;
-    	iFameChange = (short)Args.m_iN1;
+        iFameChange = (short)pScriptArgs->m_iN1;
         uiNewFame = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, iOldFame + iFameChange)));
 	}
 

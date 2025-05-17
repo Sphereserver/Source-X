@@ -8,14 +8,20 @@
 
 #include "../common/common.h"
 
-struct SubexprData;
 class CScript;
-class CScriptTriggerArgs;
 class CTextConsole;
 class CSFileText;
 class CSString;
 class CUID;
 class CChar;
+
+struct CScriptSubExprData;
+
+struct CScriptExprContextData;
+using CScriptExprContextPtr = std::shared_ptr<CScriptExprContextData>;
+
+class CScriptTriggerArgs;
+using CScriptTriggerArgsPtr = std::shared_ptr<CScriptTriggerArgs>;
 
 
 enum SK_TYPE : int;
@@ -36,7 +42,7 @@ enum TRIGRET_TYPE	// trigger script returns.
 	TRIGRET_RET_FALSE = 0,	// default return. (script might not have been handled)
 	TRIGRET_RET_TRUE = 1,
 	TRIGRET_RET_DEFAULT,	// we just came to the end of the script.
-	TRIGRET_ENDIF,
+    TRIGRET_ENDIF,
 	TRIGRET_ELSE,
 	TRIGRET_ELSEIF,
 	TRIGRET_RET_HALFBAKED,
@@ -45,14 +51,6 @@ enum TRIGRET_TYPE	// trigger script returns.
 	TRIGRET_QTY
 };
 
-
-struct ScriptedExprContext
-{
-	// Recursion counters and state variables
-	short _iEvaluate_Conditional_Reentrant;
-	short _iParseScriptText_Reentrant;
-	bool  _fParseScriptText_Brackets;
-};
 
 class CScriptObj
 {
@@ -94,8 +92,7 @@ public:
 	/*
 	* @brief Do the first-level parsing of a script line and eventually replace requested values got by r_WriteVal.
 	*/
-	int ParseScriptText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = nullptr,
-		std::shared_ptr<ScriptedExprContext> pContext = std::make_shared<ScriptedExprContext>() );
+    int ParseScriptText( tchar * pszResponse, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole * pSrc, int iFlags = 0 );
 
 	/*
 	* @brief Execute a script command.
@@ -125,35 +122,34 @@ public:
 // FUNCTION methods
     static size_t r_GetFunctionIndex(lpctstr pszFunction);
     static bool r_CanCall(size_t uiFunctionIndex);
-	bool r_Call( lpctstr ptcFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
-    bool r_Call( size_t uiFunctionIndex, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
+    bool r_Call( lpctstr ptcFunction, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
+    bool r_Call( size_t uiFunctionIndex, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
 
 
 // Generic section parsing
-	virtual TRIGRET_TYPE OnTrigger(lpctstr pszTrigName, CTextConsole* pSrc, CScriptTriggerArgs* pArgs = nullptr);
+    virtual TRIGRET_TYPE OnTrigger(lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
 	bool OnTriggerFind(CScript& s, lpctstr pszTrigName);
-	TRIGRET_TYPE OnTriggerScript(CScript& s, lpctstr pszTrigName, CTextConsole* pSrc, CScriptTriggerArgs* pArgs = nullptr);
-	TRIGRET_TYPE OnTriggerRun(CScript& s, TRIGRUN_TYPE trigger, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pReturn);
-	TRIGRET_TYPE OnTriggerRunVal(CScript& s, TRIGRUN_TYPE trigger, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+    TRIGRET_TYPE OnTriggerScript(CScript& s, lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    TRIGRET_TYPE OnTriggerRun(CScript& s, TRIGRUN_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc, CSString* pReturn);
+    TRIGRET_TYPE OnTriggerRunVal(CScript& s, TRIGRUN_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
 
 
 // Special statements
 private:
 	// While, standard for loop and some special for loops
-	TRIGRET_TYPE OnTriggerLoopGeneric(CScript& s, int iType, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
-	TRIGRET_TYPE OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
-	TRIGRET_TYPE OnTriggerLoopForCont(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
-	TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopGeneric(CScript& s, int iType, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopForCont(CScript& s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
 
 	// Special statements
-	bool _Evaluate_Conditional_EvalSingle(SubexprData& sdata, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, std::shared_ptr<ScriptedExprContext> pContext);
-	bool Evaluate_Conditional(lptstr ptcExpression, CTextConsole* pSrc, CScriptTriggerArgs* pArgs,
-		std::shared_ptr<ScriptedExprContext> pContext = std::make_shared<ScriptedExprContext>()); // IF, ELIF, ELSEIF
+    bool _Evaluate_Conditional_EvalSingle(CScriptSubExprData& sdata, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole* pSrc);
+    bool Evaluate_Conditional(lptstr ptcExpression, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole* pSrc); // IF, ELIF, ELSEIF
 
-	bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CTextConsole* pSrc, CScriptTriggerArgs* pArgs, std::shared_ptr<ScriptedExprContext> pContext);
+    bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole* pSrc);
 
-	bool Execute_Call(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
-	bool Execute_FullTrigger(CScript& s, CTextConsole* pSrc, CScriptTriggerArgs* pArgs);
+    bool Execute_Call(CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    bool Execute_FullTrigger(CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
 
 
 // Utilities
@@ -168,6 +164,7 @@ public:
 
     CScriptObj(const CScriptObj& copy) = delete;
     CScriptObj& operator=(const CScriptObj& other) = delete;
+    CScriptObj(CScriptObj&& move) = delete;
 };
 
 #endif	// _INC_CSCRIPTOBJ_H

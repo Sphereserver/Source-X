@@ -9,16 +9,43 @@
 #include <shared_mutex>
 #include "../CException.h"
 
-#define _SPHERE_STACK_DEFAULT_SIZE 10
+namespace sl
+{
+
+static constexpr size_t _SPHERE_STACK_DEFAULT_SIZE = 10;
+
+template<typename T, std::size_t N>
+class fixed_comptime_stack
+{
+public:
+    constexpr fixed_comptime_stack();
+
+    constexpr bool empty() const;
+    constexpr bool full() const;
+    constexpr size_t size() const;
+    constexpr size_t capacity() const;
+
+    void push(const T& value);
+    void pop();
+    T& top();
+
+    const T& top() const;
+    const T* data() const;
+    //T* data();
+
+private:
+    T m_data[N];
+    size_t m_top;
+};
 
 template<typename T>
-class fixedstack {
+class fixed_runtime_stack {
 public:
-    fixedstack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
-    fixedstack(const fixedstack<T> & o);
-    ~fixedstack();
+    fixed_runtime_stack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
+    fixed_runtime_stack(const fixed_runtime_stack<T> & o);
+    ~fixed_runtime_stack();
 
-    fixedstack & operator=(const fixedstack<T> & o);
+    fixed_runtime_stack & operator=(const fixed_runtime_stack<T> & o);
 
     void push(T t);
     void pop();
@@ -34,13 +61,13 @@ private:
 };
 
 template <typename T>
-class fixedgrowingstack {
+class fixed_growing_stack {
 public:
-    fixedgrowingstack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
-    fixedgrowingstack(const fixedgrowingstack<T> & o);
-    ~fixedgrowingstack();
+    fixed_growing_stack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
+    fixed_growing_stack(const fixed_growing_stack<T> & o);
+    ~fixed_growing_stack();
 
-    fixedgrowingstack & operator=(const fixedgrowingstack<T> & o);
+    fixed_growing_stack & operator=(const fixed_growing_stack<T> & o);
 
     void push(T t);
     void pop();
@@ -55,15 +82,15 @@ private:
 };
 
 template<typename T>
-class dynamicstack {
+class dynamic_list_stack {
 public:
-    dynamicstack();
+    dynamic_list_stack();
     // To allow thread secure wrapper constructor.
-    dynamicstack(size_t _);
-    dynamicstack(const dynamicstack<T> & o);
-    ~dynamicstack();
+    dynamic_list_stack(size_t _);
+    dynamic_list_stack(const dynamic_list_stack<T> & o);
+    ~dynamic_list_stack();
 
-    dynamicstack & operator=(const dynamicstack<T> & o);
+    dynamic_list_stack & operator=(const dynamic_list_stack<T> & o);
 
     void push(T t);
     void pop();
@@ -74,13 +101,13 @@ public:
     size_t size() const;
 
 private:
-    struct _dynamicstackitem {
+    struct _dynamicliststackitem {
     public:
-        _dynamicstackitem(T item, _dynamicstackitem * next);
+        _dynamicliststackitem(T item, _dynamicliststackitem * next);
         T _item;
-        _dynamicstackitem * _next;
+        _dynamicliststackitem * _next;
     };
-    _dynamicstackitem * _top;
+    _dynamicliststackitem * _top;
     size_t _size;
 };
 
@@ -104,28 +131,85 @@ private:
     S _s;
 };
 
-template<typename T>
-using tsfixedstack = tsstack<T, fixedstack<T>>;
+template<typename T, size_t N>
+using ts_fixed_comptime_stack = tsstack<T, fixed_comptime_stack<T, N>>;
 
 template<typename T>
-using tsfixedgrowingstack = tsstack<T, fixedgrowingstack<T>>;
+using ts_fixed_runtime_stack = tsstack<T, fixed_runtime_stack<T>>;
 
 template<typename T>
-using tsdynamicstack = tsstack<T, dynamicstack<T>>;
+using ts_fixed_growing_stack = tsstack<T, fixed_growing_stack<T>>;
+
+template<typename T>
+using ts_dynamic_list_stack = tsstack<T, dynamic_list_stack<T>>;
 
 /****
 * Implementations.
 */
 
+template <typename T, size_t N>
+constexpr fixed_comptime_stack<T, N>::fixed_comptime_stack() : m_top(0) {}
+
+template <typename T, size_t N>
+constexpr bool fixed_comptime_stack<T, N>::empty() const { return m_top == 0; }
+
+template <typename T, size_t N>
+
+constexpr bool fixed_comptime_stack<T, N>::full() const { return m_top == N; }
+
+template <typename T, size_t N>
+constexpr size_t fixed_comptime_stack<T, N>::size() const { return m_top; }
+
+template <typename T, size_t N>
+constexpr size_t fixed_comptime_stack<T, N>::capacity() const { return N; }
+
+template <typename T, size_t N>
+void fixed_comptime_stack<T, N>::push(const T& value) {
+    if (full()) [[unlikely]]
+        throw std::overflow_error("Stack full");
+    m_data[m_top++] = value;
+}
+
+template <typename T, size_t N>
+void fixed_comptime_stack<T, N>::pop() {
+    if (empty()) [[unlikely]]
+        throw std::underflow_error("Stack empty");
+    --m_top;
+}
+
+template <typename T, size_t N>
+T& fixed_comptime_stack<T, N>::top() {
+    if (empty()) [[unlikely]]
+        throw std::underflow_error("Stack empty");
+    return m_data[m_top - 1];
+}
+
+template <typename T, size_t N>
+const T& fixed_comptime_stack<T, N>::top() const {
+    if (empty()) [[unlikely]]
+        throw std::underflow_error("Stack empty");
+    return m_data[m_top - 1];
+}
+
+template <typename T, size_t N>
+const T* fixed_comptime_stack<T, N>::data() const {
+    return m_data;
+}
+/*
+template <typename T, size_t N>
+T* fixed_comptime_stack<T, N>::data() {
+    return m_data;
+}
+*/
 template <typename T>
-fixedstack<T>::fixedstack(size_t size) {
+fixed_runtime_stack<T>::fixed_runtime_stack(size_t size) {
     _stack = new T[size];
     _top = 0;
     _size = size;
 }
 
 template <typename T>
-fixedstack<T>::fixedstack(const fixedstack<T> & o) {
+fixed_runtime_stack<T>::fixed_runtime_stack(const fixed_runtime_stack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
@@ -133,12 +217,12 @@ fixedstack<T>::fixedstack(const fixedstack<T> & o) {
 }
 
 template <typename T>
-fixedstack<T>::~fixedstack() {
+fixed_runtime_stack<T>::~fixed_runtime_stack() {
     delete[] _stack;
 }
 
 template <typename T>
-fixedstack<T> & fixedstack<T>::operator=(const fixedstack<T> & o) {
+fixed_runtime_stack<T> & fixed_runtime_stack<T>::operator=(const fixed_runtime_stack<T> & o) {
     delete[] _stack;
     _stack = new T[o._size];
     _top = o._top;
@@ -148,7 +232,7 @@ fixedstack<T> & fixedstack<T>::operator=(const fixedstack<T> & o) {
 }
 
 template <typename T>
-void fixedstack<T>::push(T t) {
+void fixed_runtime_stack<T>::push(T t) {
     if (_top == _size) {
         throw CSError(LOGL_FATAL, 0, "stack is full.");
     }
@@ -156,7 +240,7 @@ void fixedstack<T>::push(T t) {
 }
 
 template <typename T>
-void fixedstack<T>::pop() {
+void fixed_runtime_stack<T>::pop() {
     if (!_top) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -164,7 +248,7 @@ void fixedstack<T>::pop() {
 }
 
 template <typename T>
-T fixedstack<T>::top() const {
+T fixed_runtime_stack<T>::top() const {
     if (!_top) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -172,31 +256,31 @@ T fixedstack<T>::top() const {
 }
 
 template <typename T>
-void fixedstack<T>::clear() {
+void fixed_runtime_stack<T>::clear() {
     while(!empty()) {
         pop();
     }
 }
 
 template <typename T>
-bool fixedstack<T>::empty() const {
+bool fixed_runtime_stack<T>::empty() const {
     return _top == 0;
 }
 
 template <typename T>
-size_t fixedstack<T>::size() const {
+size_t fixed_runtime_stack<T>::size() const {
     return _top;
 }
 
 template <typename T>
-fixedgrowingstack<T>::fixedgrowingstack(size_t size) {
-_stack = new T[size];
-_top = 0;
-_size = size;
+fixed_growing_stack<T>::fixed_growing_stack(size_t size) {
+    _stack = new T[size];
+    _top = 0;
+    _size = size;
 }
 
 template <typename T>
-fixedgrowingstack<T>::fixedgrowingstack(const fixedgrowingstack<T> & o) {
+fixed_growing_stack<T>::fixed_growing_stack(const fixed_growing_stack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
@@ -204,12 +288,12 @@ fixedgrowingstack<T>::fixedgrowingstack(const fixedgrowingstack<T> & o) {
 }
 
 template <typename T>
-fixedgrowingstack<T>::~fixedgrowingstack() {
+fixed_growing_stack<T>::~fixed_growing_stack() {
     delete[] _stack;
 }
 
 template <typename T>
-fixedgrowingstack<T> & fixedgrowingstack<T>::operator=(const fixedgrowingstack<T> & o) {
+fixed_growing_stack<T> & fixed_growing_stack<T>::operator=(const fixed_growing_stack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
@@ -218,7 +302,7 @@ fixedgrowingstack<T> & fixedgrowingstack<T>::operator=(const fixedgrowingstack<T
 }
 
 template <typename T>
-void fixedgrowingstack<T>::push(T t) {
+void fixed_growing_stack<T>::push(T t) {
     if (_top == _size) {
         T * nstack = new T[_size + _SPHERE_STACK_DEFAULT_SIZE];
         for(size_t i = 0; i < _top; ++i) nstack[i] = _stack[i];
@@ -230,7 +314,7 @@ void fixedgrowingstack<T>::push(T t) {
 }
 
 template <typename T>
-void fixedgrowingstack<T>::pop() {
+void fixed_growing_stack<T>::pop() {
     if (!_top) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -238,7 +322,7 @@ void fixedgrowingstack<T>::pop() {
 }
 
 template <typename T>
-T fixedgrowingstack<T>::top() const {
+T fixed_growing_stack<T>::top() const {
     if (!_top) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -246,42 +330,42 @@ T fixedgrowingstack<T>::top() const {
 }
 
 template <typename T>
-void fixedgrowingstack<T>::clear() {
+void fixed_growing_stack<T>::clear() {
     while(!empty()) {
         pop();
     }
 }
 
 template <typename T>
-bool fixedgrowingstack<T>::empty() const {
+bool fixed_growing_stack<T>::empty() const {
     return _top == 0;
 }
 
 template <typename T>
-size_t fixedgrowingstack<T>::size() const {
+size_t fixed_growing_stack<T>::size() const {
     return _top;
 }
 
 template <typename T>
-dynamicstack<T>::dynamicstack() {
+dynamic_list_stack<T>::dynamic_list_stack() {
     _top = nullptr;
     _size = 0;
 }
 
 template <typename T>
-dynamicstack<T>::dynamicstack(size_t _) : dynamicstack<T>() { UnreferencedParameter(_); }
+dynamic_list_stack<T>::dynamic_list_stack(size_t _) : dynamic_list_stack<T>() { UnreferencedParameter(_); }
 
 template <typename T>
-dynamicstack<T>::dynamicstack(const dynamicstack<T> & o) {
+dynamic_list_stack<T>::dynamic_list_stack(const dynamic_list_stack<T> & o) {
     _size = o._size;
     _top = nullptr;
-    _dynamicstackitem * next = o._top, * prev;
+    _dynamicliststackitem * next = o._top, * prev;
     if (next) {
-        _top = new _dynamicstackitem(next->_item, nullptr);
+        _top = new _dynamicliststackitem(next->_item, nullptr);
         prev = _top;
         next = next->_next;
         while (next) {
-            prev->_next = new _dynamicstackitem(next->_item, nullptr);
+            prev->_next = new _dynamicliststackitem(next->_item, nullptr);
             prev = prev->_next;
             next = next->_next;
         }
@@ -289,21 +373,21 @@ dynamicstack<T>::dynamicstack(const dynamicstack<T> & o) {
 }
 
 template <typename T>
-dynamicstack<T>::~dynamicstack() {
+dynamic_list_stack<T>::~dynamic_list_stack() {
     clear();
 };
 
 template <typename T>
-dynamicstack<T> & dynamicstack<T>::operator=(const dynamicstack<T> & o) {
+dynamic_list_stack<T> & dynamic_list_stack<T>::operator=(const dynamic_list_stack<T> & o) {
     _size = o._size;
     _top = nullptr;
-    _dynamicstackitem * next = o._top, * prev;
+    _dynamicliststackitem * next = o._top, * prev;
     if (next) {
-        _top = new _dynamicstackitem(next->_item, nullptr);
+        _top = new _dynamicliststackitem(next->_item, nullptr);
         prev = _top;
         next = next->_next;
         while (next) {
-            prev->_next = new _dynamicstackitem(next->_item, nullptr);
+            prev->_next = new _dynamicliststackitem(next->_item, nullptr);
             prev = prev->_next;
             next = next->_next;
         }
@@ -312,25 +396,25 @@ dynamicstack<T> & dynamicstack<T>::operator=(const dynamicstack<T> & o) {
 }
 
 template <typename T>
-void dynamicstack<T>::push(T t) {
-    _dynamicstackitem * ntop = new _dynamicstackitem(t, _top);
+void dynamic_list_stack<T>::push(T t) {
+    _dynamicliststackitem * ntop = new _dynamicliststackitem(t, _top);
     _top = ntop;
     _size++;
 }
 
 template <typename T>
-void dynamicstack<T>::pop() {
+void dynamic_list_stack<T>::pop() {
     if (_top == nullptr) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
-    _dynamicstackitem * oldtop = _top;
+    _dynamicliststackitem * oldtop = _top;
     _top = oldtop->_next;
     delete oldtop;
     _size--;
 }
 
 template <typename T>
-T dynamicstack<T>::top() const {
+T dynamic_list_stack<T>::top() const {
     if (_top == nullptr) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -338,24 +422,24 @@ T dynamicstack<T>::top() const {
 }
 
 template <typename T>
-void dynamicstack<T>::clear() {
+void dynamic_list_stack<T>::clear() {
     while(!empty()) {
         pop();
     }
 }
 
 template <typename T>
-bool dynamicstack<T>::empty() const {
+bool dynamic_list_stack<T>::empty() const {
     return _top == nullptr;
 }
 
 template <typename T>
-size_t dynamicstack<T>::size() const {
+size_t dynamic_list_stack<T>::size() const {
     return _size;
 }
 
 template <typename T>
-dynamicstack<T>::_dynamicstackitem::_dynamicstackitem(T item, _dynamicstackitem * next) {
+dynamic_list_stack<T>::_dynamicliststackitem::_dynamicliststackitem(T item, _dynamicliststackitem * next) {
     _item = item;
     _next = next;
 }
@@ -422,6 +506,8 @@ size_t tsstack<T, S>::size() const {
     size_t s = _s.size();
     _mutex.unlock_shared();
     return s;
+}
+
 }
 
 #endif //_INC_CSTACK_H

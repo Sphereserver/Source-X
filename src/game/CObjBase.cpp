@@ -2,8 +2,9 @@
 #include "../common/resource/CResourceLock.h"
 #include "../common/CException.h"
 #include "../common/CExpression.h"
-#include "../common/sphereversion.h"
+#include "../common/CScriptParserBufs.h"
 #include "../common/CLog.h"
+#include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
@@ -340,18 +341,19 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CO
         lpctstr ptcTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
 		if (IsTrigUsed(ptcTrig))
 		{
-			CScriptTriggerArgs args(wHue, iSound, pSourceObj);
-			TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pSrc, &args);
+            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pArgs->Init(wHue, iSound, 0, pSourceObj);
+            TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pArgs, pSrc);
 
 			if (iRet == TRIGRET_RET_TRUE)
 				return;
 
-			if (args.m_iN2 > 0) // No sound? No checks for who can hear, packets...
+            if (pArgs->m_iN2 > 0) // No sound? No checks for who can hear, packets...
 			{
-				Sound((SOUND_TYPE)(args.m_iN2));
+                Sound((SOUND_TYPE)(pArgs->m_iN2));
 			}
 
-			m_wHue = (HUE_TYPE)(args.m_iN1);
+            m_wHue = (HUE_TYPE)(pArgs->m_iN1);
 			return;
 		}
 	}
@@ -804,7 +806,9 @@ bool CObjBase::MoveNear(CPointMap pt, ushort iSteps )
 	return MoveTo(pt);
 }
 
-void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode ) const
+void CObjBase::UpdateObjMessage(
+    lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude,
+    HUE_TYPE wHue, TALKMODE_TYPE iMode, FONT_TYPE iFont, bool fUnicode ) const
 {
 	ADDTOCALLSTACK("CObjBase::UpdateObjMessage");
 	// Show everyone a msg coming from this object.
@@ -818,9 +822,9 @@ void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * 
 			continue;
 
 		if (( pClient->GetChar() == this ) && pTextYou != nullptr )
-			pClient->addBarkParse(pTextYou, this, wHue, mode, font, fUnicode );
+            pClient->addBarkParse(pTextYou, this, wHue, iMode, iFont, fUnicode );
 		else if (( pClient->GetChar() != this ) && pTextThem != nullptr )
-			pClient->addBarkParse(pTextThem, this, wHue, mode, font, fUnicode );
+            pClient->addBarkParse(pTextThem, this, wHue, iMode, iFont, fUnicode );
 
 		//pClient->addBarkParse(( pClient->GetChar() == this )? pTextYou : pTextThem, this, wHue, mode, font, bUnicode );
 	}
@@ -843,7 +847,7 @@ void CObjBase::UpdateCanSee(PacketSend *packet, CClient *exclude) const
 	delete packet;
 }
 
-TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue)
+TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar * pSrc, TALKMODE_TYPE & iModeRef, HUE_TYPE wHue)
 {
 	ADDTOCALLSTACK("CObjBase::OnHearTrigger");
 	// Check all the keys in this script section.
@@ -851,8 +855,8 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 	// RETURN:
 	//  TRIGRET_ENDIF = no match.
 	//  TRIGRET_DEFAULT = found match but it had no RETURN
-    std::unique_ptr<CScriptTriggerArgs> Args;
 	bool fMatch = false;
+    CScriptTriggerArgsPtr pArgs;
 
 	while ( s.ReadKeyParse())
 	{
@@ -869,22 +873,18 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( ! fMatch )
 			continue;	// look for the next "ON" section.
 
-        if (!Args)
-        {
-            // Allocate when needed
-            Args = std::make_unique<CScriptTriggerArgs>(pszCmd);
-            Args->m_iN1 = mode;
-            Args->m_iN2 = wHue;
-        }
-		TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pSrc, Args.get() );
+        pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pArgs->m_iN1 = iModeRef;
+        pArgs->m_iN2 = wHue;
+        TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pArgs, pSrc );
 		if ( iRet != TRIGRET_RET_FALSE )
 			return iRet;
 
 		fMatch = false;
 	}
 
-    if (Args)
-	    mode = TALKMODE_TYPE(Args->m_iN1);
+    if (pArgs)
+        iModeRef = TALKMODE_TYPE(pArgs->m_iN1);
 	return TRIGRET_ENDIF;	// continue looking.
 }
 
@@ -985,8 +985,9 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
                 SKIP_SEPARATORS(pszArgs);
             }
 
-            CScriptTriggerArgs Args( pszArgs != nullptr ? pszArgs : "" );
-            if (r_Call(uiFunctionIndex, pSrc, &Args, &sVal))
+            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pArgs->Init(pszArgs != nullptr ? pszArgs : "");
+            if (r_Call(uiFunctionIndex, pArgs, pSrc, &sVal))
             {
                 return true;
             }
@@ -2104,8 +2105,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         {
             // RES_FUNCTION call
             CSString sVal;
-            CScriptTriggerArgs Args( s.GetArgRaw() );
-            if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pArgs->Init( s.GetArgRaw() );
+            if ( r_Call( uiFunctionIndex, pArgs, pSrc, &sVal ) )
                 return true;
         }
 
@@ -3625,7 +3627,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
     CEntityProps::Copy(pObj);
 }
 
-TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr pArgs, CChar * pSrc )
 {
 	ADDTOCALLSTACK("CObjBase::Spell_OnTrigger");
 	CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
@@ -3638,7 +3640,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 		CResourceLock s;
 		if ( pSpellDef->ResourceLock( s ))
 		{
-			return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pSrc, pArgs );
+            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pArgs, pSrc );
 		}
 	}
 	return TRIGRET_RET_DEFAULT;
@@ -3658,7 +3660,7 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 	if ( iResultArgs > 0 )
 	{
 		lpctstr callTrigger = ppCmdTrigger[0];
-		CScriptTriggerArgs csTriggerArgs;
+        CScriptTriggerArgsPtr pTriggerArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();;
 
 		if ( iResultArgs == 3 )
 		{
@@ -3670,25 +3672,25 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_piCmd, ARRAY_COUNT(Arg_piCmd), ",");
 
 				if ( iResultArgs == 3 )
-					csTriggerArgs.m_iN3 = Arg_piCmd[2];
+                    pTriggerArgs->m_iN3 = Arg_piCmd[2];
 
 				if ( iResultArgs >= 2 )
-					csTriggerArgs.m_iN2 = Arg_piCmd[1];
+                    pTriggerArgs->m_iN2 = Arg_piCmd[1];
 
 				if ( iResultArgs >= 1 )
-					csTriggerArgs.m_iN1 = Arg_piCmd[0];
+                    pTriggerArgs->m_iN1 = Arg_piCmd[0];
 			}
 			else if ( iTriggerArgType == 2 ) // ARGS
 			{
-				csTriggerArgs.m_s1 = ppCmdTrigger[2];
-				csTriggerArgs.m_s1_buf_vec = ppCmdTrigger[2];
+                pTriggerArgs->m_s1 = ppCmdTrigger[2];
+                pTriggerArgs->m_s1_buf_vec = ppCmdTrigger[2];
 			}
 			else if ( iTriggerArgType == 3 ) // ARGO
 			{
 				CUID guTriggerArg(Exp_GetVal(ppCmdTrigger[2]));
 				CObjBase * pTriggerArgObj = guTriggerArg.ObjFind();
 				if ( pTriggerArgObj )
-					csTriggerArgs.m_pO1 = pTriggerArgObj;
+                    pTriggerArgs->m_pO1 = pTriggerArgObj;
 			}
 			else if ( iTriggerArgType == 4 ) // FULLTRIGGER
 			{
@@ -3698,27 +3700,27 @@ bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_T
 				// ARGS
 				if ( iResultArgs == 5 )
 				{
-					csTriggerArgs.m_s1 = Arg_ppCmd[4];
-					csTriggerArgs.m_s1_buf_vec = Arg_ppCmd[4];
+                    pTriggerArgs->m_s1 = Arg_ppCmd[4];
+                    pTriggerArgs->m_s1_buf_vec = Arg_ppCmd[4];
 				}
 				// ARGNs
 				if ( iResultArgs >= 4 )
-					csTriggerArgs.m_iN3 = Exp_GetVal(Arg_ppCmd[3]);
+                    pTriggerArgs->m_iN3 = Exp_GetVal(Arg_ppCmd[3]);
 				if ( iResultArgs >= 3 )
-					csTriggerArgs.m_iN2 = Exp_GetVal(Arg_ppCmd[2]);
+                    pTriggerArgs->m_iN2 = Exp_GetVal(Arg_ppCmd[2]);
 				if ( iResultArgs >= 2 )
-					csTriggerArgs.m_iN1 = Exp_GetVal(Arg_ppCmd[1]);
+                    pTriggerArgs->m_iN1 = Exp_GetVal(Arg_ppCmd[1]);
 				// ARGO
 				if ( iResultArgs >= 1 )
 				{
 					CObjBase * pTriggerArgObj = CUID::ObjFindFromUID(Exp_GetVal(Arg_ppCmd[0]));
 					if ( pTriggerArgObj )
-						csTriggerArgs.m_pO1 = pTriggerArgObj;
+                        pTriggerArgs->m_pO1 = pTriggerArgObj;
 				}
 			}
 		}
 
-		trResult = OnTrigger(callTrigger, pSrc, &csTriggerArgs);
+        trResult = OnTrigger(callTrigger, pTriggerArgs, pSrc);
 		return true;
 	}
 

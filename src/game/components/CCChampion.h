@@ -232,7 +232,7 @@ public:
     /**
     * @brief Deleting last added White Candle.
     */
-    void DelWhiteCandle(CANDLEDELREASON_TYPE reason = CANDLEDELREASON_CLEAR);
+    void DelWhiteCandle(CANDLEDELREASON_TYPE iReason = CANDLEDELREASON_CLEAR);
     /**
     * @brief Deleting last added Red Candle.d.
     */
@@ -304,7 +304,7 @@ public:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
     virtual void Copy(const CComponent *target) override;
-    TRIGRET_TYPE OnTrigger(ITRIG_TYPE trig, CTextConsole *pSrc, CScriptTriggerArgs *args);
+    TRIGRET_TYPE OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr args, CTextConsole *pSrc);
 
     /************************************************************************
     * CItem related section.

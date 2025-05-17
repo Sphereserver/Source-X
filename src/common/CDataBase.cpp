@@ -10,10 +10,9 @@
 #include "CDataBase.h"
 
 
-CDataBase::CDataBase()
+CDataBase::CDataBase() :
+    m_fConnected(false), _myData(nullptr)
 {
-	m_fConnected = false;
-	_myData = nullptr;
 }
 
 CDataBase::~CDataBase()
@@ -291,13 +290,10 @@ bool CDataBase::_OnTick()
 			m_QueryArgs.pop();
 		}
 
-		if ( !g_Serv.r_Call(currentPair.first, &g_Serv, currentPair.second) )
+        if ( !g_Serv.r_Call(currentPair.first.GetBuffer(), currentPair.second, &g_Serv) )
 		{
 			// error
 		}
-
-		ASSERT(currentPair.second != nullptr);
-		delete currentPair.second;
 	}
 
 	return true;

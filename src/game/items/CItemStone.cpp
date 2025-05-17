@@ -2,7 +2,7 @@
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
 #include "../../common/CLog.h"
-#include "../../common/CScriptTriggerArgs.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorld.h"
@@ -1333,11 +1333,12 @@ bool CItemStone::IsAlliedWith( const CItemStone * pStone) const
 	if ( pStone == nullptr )
 		return false;
 
-	CScriptTriggerArgs Args;
-	Args.m_pO1 = const_cast<CItemStone *>(pStone);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_pO1 = const_cast<CItemStone *>(pStone);
 	enum TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 
-	if ( const_cast<CItemStone *>(this)->r_Call("f_stonesys_internal_isalliedwith", &g_Serv, &Args, nullptr, &tr) )
+    // TODO: no const_cast please... we'll have to remove const from this method
+    if ( const_cast<CItemStone *>(this)->r_Call("f_stonesys_internal_isalliedwith", pScriptArgs, &g_Serv, nullptr, &tr) )
 	{
 		if ( tr == TRIGRET_RET_FALSE )
 			return false;
@@ -1370,11 +1371,11 @@ bool CItemStone::IsAtWarWith( const CItemStone * pEnemyStone ) const
 	if ( pEnemyStone == nullptr )
 		return false;
 
-	CScriptTriggerArgs Args;
-	Args.m_pO1 = const_cast<CItemStone *>(pEnemyStone);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_pO1 = const_cast<CItemStone *>(pEnemyStone);
 	enum TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 
-	if ( const_cast<CItemStone *>(this)->r_Call("f_stonesys_internal_isatwarwith", &g_Serv, &Args, nullptr, &tr) )
+    if ( const_cast<CItemStone *>(this)->r_Call("f_stonesys_internal_isatwarwith", pScriptArgs, &g_Serv, nullptr, &tr) )
 	{
 		if ( tr == TRIGRET_RET_FALSE )
 			return false;

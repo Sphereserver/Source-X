@@ -1,6 +1,7 @@
 
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../../common/CScriptObj.h"
 #include "../../network/send.h"
@@ -254,13 +255,13 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nachar *pText, int
 	if ( !m_pSpeechFunction.IsEmpty() )
 	{
 		TRIGRET_TYPE tr = TRIGRET_RET_FALSE;
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = uidSrc.GetObjUID();
-		Args.m_iN2 = uidDst.GetObjUID();
-		Args.m_s1 = szText;
-		Args.m_s1_buf_vec = szText;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = uidSrc.GetObjUID();
+        pScriptArgs->m_iN2 = uidDst.GetObjUID();
+        pScriptArgs->m_s1 = szText;
+        pScriptArgs->m_s1_buf_vec = szText;
 
-		if ( r_Call(m_pSpeechFunction, &g_Serv, &Args, nullptr, &tr) )
+        if ( r_Call(m_pSpeechFunction, pScriptArgs, &g_Serv, nullptr, &tr) )
 		{
 			if ( tr == TRIGRET_RET_TRUE )
 				return false;
@@ -319,13 +320,12 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	CChar *pSrc = uidCommand.CharFind();
 	if ( pSrc && IsTrigUsed(TRIGGER_PARTYREMOVE) )
 	{
-		CScriptTriggerArgs args;
-		if ( pCharRemove->OnTrigger(CTRIG_PartyRemove, pSrc, &args) == TRIGRET_RET_TRUE )
+        if ( pCharRemove->OnTrigger(CTRIG_PartyRemove, CScriptTriggerArgsPtr{}, pSrc) == TRIGRET_RET_TRUE )
 			return false;
 	}
 	if ( IsTrigUsed(TRIGGER_PARTYLEAVE) )
 	{
-		if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, pCharRemove, nullptr) == TRIGRET_RET_TRUE )
+        if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, CScriptTriggerArgsPtr{}, pCharRemove) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -360,8 +360,7 @@ bool CPartyDef::Disband( CUID uidMaster )
 	CChar *pMaster = GetMaster().CharFind();
 	if ( pMaster && IsTrigUsed(TRIGGER_PARTYDISBAND) )
 	{
-		CScriptTriggerArgs args;
-		if ( pMaster->OnTrigger(CTRIG_PartyDisband, pMaster, &args) == TRIGRET_RET_TRUE )
+        if ( pMaster->OnTrigger(CTRIG_PartyDisband, CScriptTriggerArgsPtr{}, pMaster) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -378,9 +377,9 @@ bool CPartyDef::Disband( CUID uidMaster )
 
 		if ( IsTrigUsed(TRIGGER_PARTYREMOVE) )
 		{
-			CScriptTriggerArgs args;
-			args.m_iN1 = 1;
-			pChar->OnTrigger(CTRIG_PartyRemove, pSrc, &args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = 1;
+            pChar->OnTrigger(CTRIG_PartyRemove, pScriptArgs, pSrc);
 		}
 
 		SendRemoveList(pChar, true);
@@ -456,9 +455,8 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 	}
 	
 	if (IsTrigUsed(TRIGGER_PARTYADD))
-	{
-		CScriptTriggerArgs Args;
-		if ( pCharAccept->OnTrigger(CTRIG_PartyAdd, pCharInviter, &Args) == TRIGRET_RET_TRUE )
+    {
+        if ( pCharAccept->OnTrigger(CTRIG_PartyAdd, CScriptTriggerArgsPtr{}, pCharInviter) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

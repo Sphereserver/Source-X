@@ -5,6 +5,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/CException.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
 #include "../items/CItemCorpse.h"
@@ -303,7 +304,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 		// This or CTRIG_SeeNewPlayer will be our first contact with people.
 		if ( IsTrigUsed(TRIGGER_NPCHEARGREETING) )
 		{
-			if ( OnTrigger( CTRIG_NPCHearGreeting, pSrc ) == TRIGRET_RET_TRUE )
+            if ( OnTrigger( CTRIG_NPCHearGreeting, CScriptTriggerArgsPtr{}, pSrc ) == TRIGRET_RET_TRUE )
 				return;
 		}
 
@@ -367,7 +368,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	// can't figure you out.
 	if ( IsTrigUsed(TRIGGER_NPCHEARUNKNOWN) )
 	{
-		if ( OnTrigger( CTRIG_NPCHearUnknown, pSrc ) == TRIGRET_RET_TRUE )
+        if ( OnTrigger( CTRIG_NPCHearUnknown, CScriptTriggerArgsPtr{}, pSrc ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -949,15 +950,15 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 	{
 		if ( IsTrigUsed(TRIGGER_NPCLOOKATITEM) && !pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_LOCKEDDOWN|ATTR_SECURE) )
 		{
-
-			CScriptTriggerArgs	Args(iDist, iWantThisItem, pItem);
-			switch ( OnTrigger(CTRIG_NPCLookAtItem, this, &Args) )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(iDist, iWantThisItem, 0, pItem);
+            switch ( OnTrigger(CTRIG_NPCLookAtItem, pScriptArgs, this) )
 			{
 				case  TRIGRET_RET_TRUE:		return true;
 				case  TRIGRET_RET_FALSE:	return false;
 				default:					break;
 			}
-			iWantThisItem = (int)(Args.m_iN2);
+            iWantThisItem = (int)(pScriptArgs->m_iN2);
 		}
 	}
 
@@ -1017,7 +1018,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 
 	if ( IsTrigUsed(TRIGGER_NPCLOOKATCHAR) )
 	{
-		switch ( OnTrigger(CTRIG_NPCLookAtChar, pChar) )
+        switch ( OnTrigger(CTRIG_NPCLookAtChar, CScriptTriggerArgsPtr{}, pChar) )
 		{
 			case  TRIGRET_RET_TRUE:		return true;
 			case  TRIGRET_RET_FALSE:	return false;
@@ -1045,7 +1046,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			{
 				if ( IsTrigUsed(TRIGGER_NPCSEENEWPLAYER) )
 				{
-					if ( OnTrigger( CTRIG_NPCSeeNewPlayer, pChar ) != TRIGRET_RET_TRUE )
+                    if ( OnTrigger( CTRIG_NPCSeeNewPlayer, CScriptTriggerArgsPtr{}, pChar ) != TRIGRET_RET_TRUE )
 					{
 						// record that we attempted to speak to them.
 						CItemMemory * pMemory = Memory_AddObjTypes( pChar, MEMORY_SPEAK );
@@ -1267,12 +1268,13 @@ void CChar::NPC_Act_Wander()
 
 	if (IsTrigUsed(TRIGGER_NPCACTWANDER))
 	{
-		CScriptTriggerArgs Args(iStopWandering, iReturnToHome);
-		if (OnTrigger(CTRIG_NPCActWander, this, &Args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iStopWandering, iReturnToHome, 0, nullptr);
+        if (OnTrigger(CTRIG_NPCActWander, pScriptArgs, this) == TRIGRET_RET_TRUE)
 			return;
 
-		iStopWandering = (int)Args.m_iN1;
-		iReturnToHome = (int)Args.m_iN2;
+        iStopWandering = (int)pScriptArgs->m_iN1;
+        iReturnToHome = (int)pScriptArgs->m_iN2;
 	}
 
 	if (iStopWandering)
@@ -1354,8 +1356,9 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	EXC_SET_BLOCK("Trigger");
 	if (IsTrigUsed(TRIGGER_NPCACTFOLLOW))
 	{
-		CScriptTriggerArgs Args(fFlee, maxDistance, fMoveAway);
-		switch (OnTrigger(CTRIG_NPCActFollow, pChar, &Args))
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(fFlee, maxDistance, fMoveAway, nullptr);
+        switch (OnTrigger(CTRIG_NPCActFollow, pScriptArgs, pChar))
 		{
 		    case TRIGRET_RET_TRUE:
             {
@@ -1371,9 +1374,9 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
             }
 		}
 
-		fFlee = (Args.m_iN1 != 0);
-		maxDistance = static_cast<int>(Args.m_iN2);
-		fMoveAway = (Args.m_iN3 != 0);
+        fFlee = (pScriptArgs->m_iN1 != 0);
+        maxDistance = static_cast<int>(pScriptArgs->m_iN2);
+        fMoveAway = (pScriptArgs->m_iN3 != 0);
 	}
 
 	EXC_SET_BLOCK("CanSee");
@@ -1548,8 +1551,9 @@ void CChar::NPC_Act_GoHome()
 		{
 			if ( IsTrigUsed(TRIGGER_NPCLOSTTELEPORT) )
 			{
-				CScriptTriggerArgs Args(iDistance);	// ARGN1 - distance
-				if ( OnTrigger(CTRIG_NPCLostTeleport, this, &Args) != TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_iN1 = iDistance;	// ARGN1 - distance
+                if ( OnTrigger(CTRIG_NPCLostTeleport, pScriptArgs, this) != TRIGRET_RET_TRUE )
 					Spell_Teleport(m_ptHome, true, false);
 			}
 			else
@@ -1624,8 +1628,9 @@ void CChar::NPC_Act_Looting()
 
 	if ( IsTrigUsed(TRIGGER_NPCSEEWANTITEM) )
 	{
-		CScriptTriggerArgs Args(pItem);
-		if ( OnTrigger(CTRIG_NPCSeeWantItem, this, &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pItem;
+        if ( OnTrigger(CTRIG_NPCSeeWantItem, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -1983,7 +1988,7 @@ void CChar::NPC_Act_Idle()
 	{
 		if ( IsTrigUsed(TRIGGER_NPCSPECIALACTION) )
 		{
-			if ( OnTrigger( CTRIG_NPCSpecialAction, this ) == TRIGRET_RET_TRUE )
+            if ( OnTrigger( CTRIG_NPCSpecialAction, CScriptTriggerArgsPtr{}, this ) == TRIGRET_RET_TRUE )
 				return;
 		}
 
@@ -2062,10 +2067,11 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 	if ( !pCharSrc )
 		return false;
 
-	CScriptTriggerArgs Args(pItem);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_pO1 = pItem;
 	if ( IsTrigUsed(TRIGGER_RECEIVEITEM) )
 	{
-		if ( OnTrigger(CTRIG_ReceiveItem, pCharSrc, &Args) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_ReceiveItem, pScriptArgs, pCharSrc) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -2194,7 +2200,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 	{
 		if ( IsTrigUsed(TRIGGER_NPCREFUSEITEM) )
 		{
-			if ( OnTrigger(CTRIG_NPCRefuseItem, pCharSrc, &Args) != TRIGRET_RET_TRUE )
+            if ( OnTrigger(CTRIG_NPCRefuseItem, pScriptArgs, pCharSrc) != TRIGRET_RET_TRUE )
 			{
 				pCharSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_DONTWANT));
 				return false;
@@ -2206,7 +2212,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 
 	if ( IsTrigUsed(TRIGGER_NPCACCEPTITEM) )
 	{
-		if ( OnTrigger(CTRIG_NPCAcceptItem, pCharSrc, &Args) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_NPCAcceptItem, pScriptArgs, pCharSrc) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -2675,7 +2681,7 @@ void CChar::NPC_ExtraAI()
 	EXC_SET_BLOCK("init");
 	if ( IsTrigUsed(TRIGGER_NPCACTION) )
 	{
-		if ( OnTrigger( CTRIG_NPCAction, this ) == TRIGRET_RET_TRUE )
+        if ( OnTrigger( CTRIG_NPCAction, CScriptTriggerArgsPtr{}, this ) == TRIGRET_RET_TRUE )
 			return;
 	}
 

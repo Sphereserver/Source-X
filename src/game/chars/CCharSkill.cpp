@@ -5,6 +5,7 @@
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../common/CLog.h"
 #include "../clients/CClient.h"
 #include "../items/CItemCorpse.h"
@@ -158,9 +159,10 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 
 	if (pSkillDef != nullptr)
 	{
-		uint uiPureBonus =( pSkillDef->m_StatBonus[STAT_STR] * Stat_GetAdjusted(STAT_STR) ) +
-							( pSkillDef->m_StatBonus[STAT_INT] * Stat_GetAdjusted(STAT_INT) ) +
-							( pSkillDef->m_StatBonus[STAT_DEX] * Stat_GetAdjusted(STAT_DEX) );
+        const uint uiPureBonus =
+            ( pSkillDef->m_StatBonus[STAT_STR] * Stat_GetAdjusted(STAT_STR) ) +
+            ( pSkillDef->m_StatBonus[STAT_INT] * Stat_GetAdjusted(STAT_INT) ) +
+            ( pSkillDef->m_StatBonus[STAT_DEX] * Stat_GetAdjusted(STAT_DEX) );
 
 		uiAdjSkill = (ushort)IMulDiv( pSkillDef->m_StatPercent, uiPureBonus, 10000 );
 	}
@@ -193,27 +195,27 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	bool fUpdateStats = false;
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
-		CScriptTriggerArgs args;
-		args.m_iN1 = (int64)skill;
-		args.m_iN2 = (int64)uiValue;
-		if ( OnTrigger(CTRIG_SkillChange, this, &args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = (int64)skill;
+        pScriptArgs->m_iN2 = (int64)uiValue;
+        if ( OnTrigger(CTRIG_SkillChange, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return;
 
-		const llong iN2Old = args.m_iN2;
-		if (args.m_iN2 > UINT16_MAX)
+        const llong iN2Old = pScriptArgs->m_iN2;
+        if (pScriptArgs->m_iN2 > UINT16_MAX)
 		{
-			args.m_iN2 = UINT16_MAX;
+            pScriptArgs->m_iN2 = UINT16_MAX;
 		}
-		else if (args.m_iN2 < 0)
+        else if (pScriptArgs->m_iN2 < 0)
 		{
-			args.m_iN2 = 0;
+            pScriptArgs->m_iN2 = 0;
 		}
-		if (iN2Old != args.m_iN2)
+        if (iN2Old != pScriptArgs->m_iN2)
 		{
-			g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %" PRId64 ".\n", Skill_GetName(skill), iN2Old, args.m_iN2);
+            g_Log.EventWarn("Trying to set skill '%s' to invalid value=%lld. Defaulting it to %" PRId64 ".\n", Skill_GetName(skill), iN2Old, pScriptArgs->m_iN2);
 		}
 
-		uiValue = (ushort)(args.m_iN2);
+        uiValue = (ushort)(pScriptArgs->m_iN2);
 	}
 	m_Skill[skill] = uiValue;
 
@@ -412,18 +414,19 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int iDifficulty )
 	int64 iChance = pSkillDef->m_AdvRate.GetChancePercent(uiSkillLevel);
 	int64 iSkillMax = Skill_GetMax(skill);	// max advance for this skill.
 
-	CScriptTriggerArgs pArgs(0, iChance, iSkillMax);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(0, iChance, iSkillMax, nullptr);
 	if ( IsTrigUsed(TRIGGER_SKILLGAIN) )
 	{
-		if ( Skill_OnCharTrigger( skill, CTRIG_SkillGain, &pArgs ) == TRIGRET_RET_TRUE )
+        if ( Skill_OnCharTrigger( skill, CTRIG_SkillGain, pScriptArgs ) == TRIGRET_RET_TRUE )
 			return;
 	}
 	if ( IsTrigUsed(TRIGGER_GAIN) )
 	{
-		if ( Skill_OnTrigger( skill, SKTRIG_GAIN, &pArgs ) == TRIGRET_RET_TRUE )
+        if ( Skill_OnTrigger( skill, SKTRIG_GAIN, pScriptArgs) == TRIGRET_RET_TRUE )
 			return;
 	}
-	pArgs.GetArgNs( nullptr, &iChance, &iSkillMax );
+    pScriptArgs->GetArgNs( nullptr, &iChance, &iSkillMax );
 
 	if ( iChance <= 0 )
 		return;
@@ -536,7 +539,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int iDifficulty, bool fUseBell
 	return ( iSuccessChance >= g_Rand.GetVal(1000) );
 }
 
-bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 difficulty, bool fAllowGain, bool fUseBellCurve, bool fForceCheck )
+bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 iDifficulty, bool fAllowGain, bool fUseBellCurve, bool fForceCheck )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:
@@ -545,19 +548,20 @@ bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 difficulty, bool fAllowGain, 
 	//	bAllowGain		= can gain skill from this?
 	//	bUseBellCurve	= check skill success chance using bell curve or a simple percent check?
 	// Use a skill instantly. No wait at all.
-	// No interference with other skills.
+    // No interference with other skills.
 
     if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED) && !fForceCheck)
 		return false;
 
-    int64 result = Skill_CheckSuccess( skill, (int)difficulty, fUseBellCurve );
-	CScriptTriggerArgs pArgs( 0 , difficulty, result);
-	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
+    int64 result = Skill_CheckSuccess( skill, (int)iDifficulty, fUseBellCurve );
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(0, iDifficulty, result, nullptr);
 
+    TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_SKILLUSEQUICK) )
 	{
-		ret = Skill_OnCharTrigger( skill, CTRIG_SkillUseQuick, &pArgs );
-		pArgs.GetArgNs( nullptr, &difficulty, &result);
+        ret = Skill_OnCharTrigger( skill, CTRIG_SkillUseQuick, pScriptArgs );
+        pScriptArgs->GetArgNs( nullptr, &iDifficulty, &result);
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -566,8 +570,8 @@ bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 difficulty, bool fAllowGain, 
 	}
 	if ( IsTrigUsed(TRIGGER_USEQUICK) )
 	{
-		ret = Skill_OnTrigger( skill, SKTRIG_USEQUICK, &pArgs );
-		pArgs.GetArgNs( nullptr, &difficulty, &result );
+        ret = Skill_OnTrigger( skill, SKTRIG_USEQUICK, pScriptArgs );
+        pScriptArgs->GetArgNs( nullptr, &iDifficulty, &result );
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return true;
@@ -578,13 +582,13 @@ bool CChar::Skill_UseQuick(SKILL_TYPE skill, int64 difficulty, bool fAllowGain, 
 	if ( result )	// success
 	{
         if ( fAllowGain )
-			Skill_Experience( skill, (int)(difficulty) );
+            Skill_Experience( skill, (int)(iDifficulty) );
 		return true;
 	}
 	else			// fail
 	{
         if ( fAllowGain )
-			Skill_Experience( skill, (int)(-difficulty) );
+            Skill_Experience( skill, (int)(-iDifficulty) );
 		return false;
 	}
 }
@@ -811,10 +815,13 @@ bool CChar::Skill_MakeItem_Success()
 	bool notify = true;
 	if ( IsTrigUsed(TRIGGER_SKILLMAKEITEM) )
 	{
-		CScriptTriggerArgs Args(iSkillLevel, quality, uidOldAct.ObjFind());
-		Args.m_VarsLocal.SetNum("Notify", 1);
-		iRet = OnTrigger(CTRIG_SkillMakeItem, this, &Args);
-		notify = Args.m_VarsLocal.GetKeyNum("Notify") ? true : false;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iSkillLevel, quality, 0, uidOldAct.ObjFind());
+        pScriptArgs->m_VarsLocal.SetNum("Notify", 1);
+
+        iRet = OnTrigger(CTRIG_SkillMakeItem, pScriptArgs, this);
+
+        notify = pScriptArgs->m_VarsLocal.GetKeyNum("Notify") ? true : false;
 	}
 	m_Act_UID = uidOldAct;		// restore
 
@@ -1020,23 +1027,23 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
         wAmount = pResBit->GetAmount();
 
 	//(Region)ResourceGather behaviour
-	CScriptTriggerArgs	Args(0, 0, pResBit);
-	Args.m_VarsLocal.SetNum("ResourceID",pOreDef->m_ReapItem);
-    Args.m_pO1 = pResBit;
-	Args.m_iN1 = wAmount;
-	TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(wAmount, 0, 0, pResBit);
+    pScriptArgs->m_VarsLocal.SetNum("ResourceID",pOreDef->m_ReapItem);
+
+    TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_REGIONRESOURCEGATHER) )
-		tRet = this->OnTrigger(CTRIG_RegionResourceGather, this, &Args);
+        tRet = this->OnTrigger(CTRIG_RegionResourceGather, pScriptArgs, this);
 	if ( IsTrigUsed(TRIGGER_RESOURCEGATHER) )
-		tRet = pOreDef->OnTrigger("@ResourceGather", this, &Args);
+        tRet = pOreDef->OnTrigger("@ResourceGather", pScriptArgs, this);
 
 	if ( tRet == TRIGRET_RET_TRUE )
 		return nullptr;
 
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
-	ITEMID_TYPE id = (ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum("ResourceID")));
+    ITEMID_TYPE id = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("ResourceID")));
 
-	wAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
+    wAmount = pResBit->ConsumeAmount( (word)(pScriptArgs->m_iN1) );	// amount i used up.
 	if ( wAmount <= 0 )
 		return nullptr;
 
@@ -1134,7 +1141,8 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	word iResourceQty = 0;
 	size_t iResourceTotalQty = pOreDef->m_BaseResources.size(); //This is the total amount of different resources obtained from smelting.
 
-	CScriptTriggerArgs Args(iMiningSkill, iResourceTotalQty);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(iMiningSkill, iResourceTotalQty, 0, nullptr);
 
 	if ( pOreDef->IsType( IT_ORE ))
 	{
@@ -1147,9 +1155,9 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		}
 		iResourceQty = 1;	// ingots per ore.
 		iResourceTotalQty = 1; //Ores only gives one type of resouce.
-		Args.m_iN2 = iResourceTotalQty;
-		Args.m_VarsLocal.SetNum("resource.0.ID", pBaseDef->GetID());
-		Args.m_VarsLocal.SetNum("resource.0.amount", iResourceQty);
+        pScriptArgs->m_iN2 = iResourceTotalQty;
+        pScriptArgs->m_VarsLocal.SetNum("resource.0.ID", pBaseDef->GetID());
+        pScriptArgs->m_VarsLocal.SetNum("resource.0.amount", iResourceQty);
 	}
 	else
 	{
@@ -1167,32 +1175,32 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 
 			tchar* pszTmp = Str_GetTemp();
 			snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-			Args.m_VarsLocal.SetNum(pszTmp,(int64)id);
+            pScriptArgs->m_VarsLocal.SetNum(pszTmp,(int64)id);
 
 			iResourceQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
 			snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
-			Args.m_VarsLocal.SetNum(pszTmp, iResourceQty);
+            pScriptArgs->m_VarsLocal.SetNum(pszTmp, iResourceQty);
 
 		}
 	}
 
 	if (IsTrigUsed(TRIGGER_SMELT) || IsTrigUsed(TRIGGER_ITEMSMELT))
 	{
-		switch (pItemOre->OnTrigger(ITRIG_Smelt, this, &Args))
+        switch (pItemOre->OnTrigger(ITRIG_Smelt, pScriptArgs, this))
 		{
 		case TRIGRET_RET_TRUE:	return false;
 		default:				break;
 		}
 	}
 
-	iMiningSkill = (ushort)Args.m_iN1;
-	fSkipMiningSmeltReq = (bool)Args.m_iN3;
+    iMiningSkill = (ushort)pScriptArgs->m_iN1;
+    fSkipMiningSmeltReq = (bool)pScriptArgs->m_iN3;
 	std::vector<CItem*> ingots;
 	for (size_t i = 0; i < iResourceTotalQty; ++i)
 	{
 		tchar* pszTmp = Str_GetTemp();
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.ID", (int)i);
-		const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex((dword)Args.m_VarsLocal.GetKeyNum(pszTmp))));
+        const CItemBase* pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp))));
 
 		//We have finished the ore or the item being smelted.
 		if (iOreQty <= 0)
@@ -1208,7 +1216,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		}
 
 		snprintf(pszTmp, Str_TempLength(), "resource.%u.amount", (int)i);
-		iResourceQty =(word)Args.m_VarsLocal.GetKeyNum(pszTmp);
+        iResourceQty =(word)pScriptArgs->m_VarsLocal.GetKeyNum(pszTmp);
 		iResourceQty *= iOreQty;	// max amount
 
 		if (pBaseDef->IsType(IT_GEM))
@@ -3579,29 +3587,29 @@ int CChar::Skill_Stroke()
 
 	if ( IsTrigUsed(TRIGGER_SKILLSTROKE) || (IsTrigUsed(TRIGGER_STROKE)) )
 	{
-		CScriptTriggerArgs args;
-		args.m_VarsLocal.SetNum("Skill", skill);
-		args.m_VarsLocal.SetNum("Sound", sound);
-		args.m_VarsLocal.SetNum("Delay", delay);
-		args.m_VarsLocal.SetNum("Anim", anim);
-		args.m_iN1 = 1;	//UpdateDir() ?
-        args.m_VarsLocal.SetNum("Strokes", uiStroke);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_VarsLocal.SetNum("Skill", skill);
+        pScriptArgs->m_VarsLocal.SetNum("Sound", sound);
+        pScriptArgs->m_VarsLocal.SetNum("Delay", delay);
+        pScriptArgs->m_VarsLocal.SetNum("Anim", anim);
+        pScriptArgs->m_iN1 = 1;	//UpdateDir() ?
+        pScriptArgs->m_VarsLocal.SetNum("Strokes", uiStroke);
 
-		if ( OnTrigger(CTRIG_SkillStroke, this, &args) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_SkillStroke, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return -SKTRIG_ABORT;
-		if ( Skill_OnTrigger(skill, SKTRIG_STROKE, &args) == TRIGRET_RET_TRUE )
+        if ( Skill_OnTrigger(skill, SKTRIG_STROKE, pScriptArgs) == TRIGRET_RET_TRUE )
 			return -SKTRIG_ABORT;
 
-		sound = (SOUND_TYPE)(args.m_VarsLocal.GetKeyNum("Sound"));
-		delay = args.m_VarsLocal.GetKeyNum("Delay");
-		anim = static_cast<ANIM_TYPE>(args.m_VarsLocal.GetKeyNum("Anim"));
+        sound = (SOUND_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Sound"));
+        delay = pScriptArgs->m_VarsLocal.GetKeyNum("Delay");
+        anim = static_cast<ANIM_TYPE>(pScriptArgs->m_VarsLocal.GetKeyNum("Anim"));
 
-		if ( args.m_iN1 == 1 )
+        if ( pScriptArgs->m_iN1 == 1 )
 			UpdateDir(m_Act_p);
 		if ( fResource )
-			m_atResource.m_dwStrokeCount = (word)(args.m_VarsLocal.GetKeyNum("Strokes"));
+            m_atResource.m_dwStrokeCount = (word)(pScriptArgs->m_VarsLocal.GetKeyNum("Strokes"));
 		else
-			m_atCreate.m_dwStrokeCount = (word)(args.m_VarsLocal.GetKeyNum("Strokes"));
+            m_atCreate.m_dwStrokeCount = (word)(pScriptArgs->m_VarsLocal.GetKeyNum("Strokes"));
 	}
 
 	if ( sound )
@@ -3797,15 +3805,15 @@ void CChar::Skill_Fail( bool fCancel )
 		m_Act_Difficulty = -m_Act_Difficulty;
 
 	if ( !fCancel )
-	{
+    {
 		if ( IsTrigUsed(TRIGGER_SKILLFAIL) )
 		{
-			if ( Skill_OnCharTrigger(skill, CTRIG_SkillFail) == TRIGRET_RET_TRUE )
+            if ( Skill_OnCharTrigger(skill, CTRIG_SkillFail, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 				fCancel = true;
 		}
 		if ( IsTrigUsed(TRIGGER_FAIL) && !fCancel )
 		{
-			if ( Skill_OnTrigger(skill, SKTRIG_FAIL) == TRIGRET_RET_TRUE )
+            if ( Skill_OnTrigger(skill, SKTRIG_FAIL, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 				fCancel = true;
 		}
 	}
@@ -3813,7 +3821,7 @@ void CChar::Skill_Fail( bool fCancel )
 	{
 		if ( IsTrigUsed(TRIGGER_SKILLABORT) )
 		{
-			if ( Skill_OnCharTrigger(skill, CTRIG_SkillAbort) == TRIGRET_RET_TRUE )
+            if ( Skill_OnCharTrigger(skill, CTRIG_SkillAbort, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return;
@@ -3821,7 +3829,7 @@ void CChar::Skill_Fail( bool fCancel )
 		}
 		if ( IsTrigUsed(TRIGGER_ABORT) )
 		{
-			if ( Skill_OnTrigger(skill, SKTRIG_ABORT) == TRIGRET_RET_TRUE )
+            if ( Skill_OnTrigger(skill, SKTRIG_ABORT, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return;
@@ -3829,7 +3837,7 @@ void CChar::Skill_Fail( bool fCancel )
 		}
 	}
 
-	if ( Skill_Stage((fCancel)? SKTRIG_ABORT:SKTRIG_FAIL) >= 0 )
+    if ( Skill_Stage(fCancel ? SKTRIG_ABORT : SKTRIG_FAIL) >= 0 )
 	{
 		// Get some experience for failure ?
 		if ( !fCancel )
@@ -3839,20 +3847,8 @@ void CChar::Skill_Fail( bool fCancel )
 	Skill_Cleanup();
 }
 
-TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE stage )
-{
-	CScriptTriggerArgs pArgs;
-	return Skill_OnTrigger(skill, stage, &pArgs);
-}
 
-TRIGRET_TYPE CChar::Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE stage )
-{
-	CScriptTriggerArgs pArgs;
-	return Skill_OnCharTrigger(skill, stage, &pArgs);
-}
-
-
-TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScriptTriggerArgs *pArgs )
+TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScriptTriggerArgsPtr pArgs )
 {
 	ADDTOCALLSTACK("CChar::Skill_OnTrigger");
 	if ( !IsSkillBase(skill) )
@@ -3873,13 +3869,13 @@ TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScri
 		// RES_SKILL
 		CResourceLock s;
 		if ( pSkillDef->ResourceLock(s) )
-			iRet = CScriptObj::OnTriggerScript(s, CSkillDef::sm_szTrigName[stage], this, pArgs);
+            iRet = CScriptObj::OnTriggerScript(s, CSkillDef::sm_szTrigName[stage], pArgs, this);
 	}
 
 	return iRet;
 }
 
-TRIGRET_TYPE CChar::Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgs *pArgs )
+TRIGRET_TYPE CChar::Skill_OnCharTrigger(SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr pArgs )
 {
 	ADDTOCALLSTACK("CChar::Skill_OnCharTrigger");
 	if ( !IsSkillBase(skill) )
@@ -3892,7 +3888,7 @@ TRIGRET_TYPE CChar::Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CSc
 	if ( g_Cfg.IsSkillFlag(skill, SKF_MAGIC) )
 		pArgs->m_VarsLocal.SetNum("spell", m_atMagery.m_iSpell, true, false);
 
-	return OnTrigger(ctrig, this, pArgs);
+    return OnTrigger(ctrig, pArgs, this);
 }
 
 
@@ -3928,22 +3924,25 @@ int CChar::Skill_Done()
 	if ( m_Act_Difficulty < 0 )		// was Bound to fail, but we had to wait for the timer anyhow.
 		return -SKTRIG_FAIL;
 
-    CScriptTriggerArgs args;
-    args.m_VarsLocal.SetNumNew("ITEMDAMAGECHANCE", 25);
-    args.m_VarsLocal.SetNumNew("ITEMDAMAGEAMOUNT", 1);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_VarsLocal.SetNumNew("ITEMDAMAGECHANCE", 25);
+    pScriptArgs->m_VarsLocal.SetNumNew("ITEMDAMAGEAMOUNT", 1);
+
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
-		if (Skill_OnCharTrigger(skill, CTRIG_SkillSuccess, &args) == TRIGRET_RET_TRUE)
+        if (Skill_OnCharTrigger(skill, CTRIG_SkillSuccess, pScriptArgs) == TRIGRET_RET_TRUE)
 			return -SKTRIG_ABORT;
 	}
 	if ( IsTrigUsed(TRIGGER_SUCCESS) )
 	{
-		if (Skill_OnTrigger(skill, SKTRIG_SUCCESS, &args) == TRIGRET_RET_TRUE)
+        if (Skill_OnTrigger(skill, SKTRIG_SUCCESS, pScriptArgs) == TRIGRET_RET_TRUE)
 			return -SKTRIG_ABORT;
 	}
 
-    int chance = std::min(std::max((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGECHANCE"), (int)0), (int)100);
-    if (IsSetEF(EF_DamageTools) && g_Cfg.IsSkillFlag(skill, SKF_GATHER) && chance > 0)
+    const int iChance = (int)std::clamp(
+        pScriptArgs->m_VarsLocal.GetKeyNum("ITEMDAMAGECHANCE"),
+        (int64)0, (int64)100);
+    if (IsSetEF(EF_DamageTools) && g_Cfg.IsSkillFlag(skill, SKF_GATHER) && iChance > 0)
     {
         CItem* pTool = LayerFind(LAYER_HAND1);
         if (!pTool || !pTool->IsTypeWeapon())
@@ -3951,10 +3950,10 @@ int CChar::Skill_Done()
 
         if (pTool && pTool->IsTypeWeapon())
         {
-            if (g_Rand.GetVal(100) < chance)
+            if (g_Rand.GetVal(100) < iChance)
             {
-                int amount = std::max(std::min((int)args.m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_wHitsCur), 0);
-                pTool->OnTakeDamage(amount, nullptr, DAMAGE_GOD);
+                const int iAmount = std::max(std::min((int)pScriptArgs->m_VarsLocal.GetKeyNum("ITEMDAMAGEAMOUNT"), (int)pTool->m_itWeapon.m_wHitsCur), 0);
+                pTool->OnTakeDamage(iAmount, nullptr, DAMAGE_GOD);
             }
         }
     }
@@ -3979,11 +3978,12 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 	// If this is the same skill then tell them to wait.
 
 	SKILL_TYPE skill = Skill_GetActive();
-	CScriptTriggerArgs pArgs(skilltry, skill);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(skilltry, skill, 0, nullptr);
 
 	if ( IsTrigUsed(TRIGGER_SKILLWAIT) )
 	{
-		switch ( Skill_OnCharTrigger(skilltry, CTRIG_SkillWait, &pArgs) )
+        switch ( Skill_OnCharTrigger(skilltry, CTRIG_SkillWait, pScriptArgs) )
 		{
 			case TRIGRET_RET_TRUE:
 				return true;
@@ -3996,7 +3996,7 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 	}
 	if ( IsTrigUsed(TRIGGER_WAIT) )
 	{
-		switch ( Skill_OnTrigger(skilltry, SKTRIG_WAIT, &pArgs) )
+        switch ( Skill_OnTrigger(skilltry, SKTRIG_WAIT, pScriptArgs) )
 		{
 			case TRIGRET_RET_TRUE:
 				return true;
@@ -4016,7 +4016,9 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 
 	if ( skill == SKILL_NONE )	// not currently doing anything.
 	{
-		if ((skilltry == SKILL_STEALTH) || ((skilltry == SKILL_SNOOPING) && (g_Cfg.m_iRevealFlags & REVEALF_SNOOPING)) || ((skilltry == SKILL_STEALING) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING)))
+        if ((skilltry == SKILL_STEALTH)
+            || ((skilltry == SKILL_SNOOPING) && (g_Cfg.m_iRevealFlags & REVEALF_SNOOPING))
+            || ((skilltry == SKILL_STEALING) && (g_Cfg.m_iRevealFlags & REVEALF_STEALING)))
 			return false;
 		else
 			Reveal();
@@ -4419,16 +4421,11 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			anim = Skill_GetAnim(skill);
         }
 
-		CScriptTriggerArgs pArgs;
-		pArgs.m_iN1 = skill;
-		pArgs.m_VarsLocal.SetNumNew("Sound", sound);
-		pArgs.m_VarsLocal.SetNumNew("Anim", anim);
-
 		// Some skill can start right away. Need no targetting.
 		// 0-100 scale of Difficulty
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
 		{
-			if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart) == TRIGRET_RET_TRUE )
+            if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return false;
@@ -4436,7 +4433,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		}
 		if ( IsTrigUsed(TRIGGER_PRESTART) )
 		{
-			if ( Skill_OnTrigger(skill, SKTRIG_PRESTART) == TRIGRET_RET_TRUE )
+            if ( Skill_OnTrigger(skill, SKTRIG_PRESTART, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return false;
@@ -4469,18 +4466,23 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 					m_Act_Effect = pSkillDef->m_vcEffect.GetRandom();
 			}
 		}
-		pArgs.m_iN2 = iWaitTime;
-		// Execute the @START trigger and pass various craft parameters there
 
-		CResourceID pResBase(RES_ITEMDEF, (fCraftSkill ? m_atCreate.m_iItemID : ITEMID_NOTHING), 0);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = skill;
+        pScriptArgs->m_iN2 = iWaitTime;
+        pScriptArgs->m_VarsLocal.SetNumNew("Sound", sound);
+        pScriptArgs->m_VarsLocal.SetNumNew("Anim", anim);
+		// Execute the @START trigger and pass various craft parameters there
 
 		if ( fCraftSkill )
 		{
-			m_atCreate.m_dwStrokeCount = 1;		// This matches the new strokes amount used on OSI.
-			pArgs.m_VarsLocal.SetNum("CraftItemdef", pResBase.GetPrivateUID());
-            // pArgs.m_VarsLocal.SetStr("CraftItemdef", g_Cfg.ResourceGetName(pResBase), false);
-			pArgs.m_VarsLocal.SetNum("CraftStrokeCnt", m_atCreate.m_dwStrokeCount);
-			pArgs.m_VarsLocal.SetNum("CraftAmount", m_atCreate.m_dwAmount);
+            m_atCreate.m_dwStrokeCount = 1;		// This matches the new strokes amount used on OSI.
+
+            const CResourceID ridResBase(RES_ITEMDEF, (fCraftSkill ? m_atCreate.m_iItemID : ITEMID_NOTHING), 0);
+            pScriptArgs->m_VarsLocal.SetNum("CraftItemdef", ridResBase.GetPrivateUID());
+            // ppScriptArgs->m_VarsLocal.SetStr("CraftItemdef", g_Cfg.ResourceGetName(pResBase), false);
+            pScriptArgs->m_VarsLocal.SetNum("CraftStrokeCnt", m_atCreate.m_dwStrokeCount);
+            pScriptArgs->m_VarsLocal.SetNum("CraftAmount", m_atCreate.m_dwAmount);
 		}
 		if ( fGatherSkill )
 		{
@@ -4489,33 +4491,33 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 				m_Act_UID = pResBit->GetUID();
 
 			m_atResource.m_dwBounceItem = 1;
-			pArgs.m_VarsLocal.SetNum("GatherStrokeCnt", m_atResource.m_dwStrokeCount);
+            pScriptArgs->m_VarsLocal.SetNum("GatherStrokeCnt", m_atResource.m_dwStrokeCount);
 		}
 
 		if ( IsTrigUsed(TRIGGER_SKILLSTART) )
 		{
 			//If we are using a combat skill and m_Act_Difficult(actdiff) is < 0 combat will be blocked.
-			if ( (Skill_OnCharTrigger(skill, CTRIG_SkillStart, &pArgs) == TRIGRET_RET_TRUE) || (m_Act_Difficulty < 0) )
+            if ( (Skill_OnCharTrigger(skill, CTRIG_SkillStart, pScriptArgs) == TRIGRET_RET_TRUE) || (m_Act_Difficulty < 0) )
 			{
 				Skill_Cleanup();
 				return false;
 			}
-            sound = (SOUND_TYPE)(pArgs.m_VarsLocal.GetKeyNum("Sound"));
-            anim = static_cast<ANIM_TYPE>(pArgs.m_VarsLocal.GetKeyNum("Anim"));
+            sound = (SOUND_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Sound"));
+            anim = (ANIM_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Anim"));
 		}
 
 		if ( IsTrigUsed(TRIGGER_START) )
 		{
 			//If we are using a combat skill and m_Act_Difficulty(actdiff) is < 0 combat will be blocked.
-			if ( (Skill_OnTrigger(skill, SKTRIG_START, &pArgs) == TRIGRET_RET_TRUE) || (m_Act_Difficulty < 0) )
+            if ( (Skill_OnTrigger(skill, SKTRIG_START, pScriptArgs) == TRIGRET_RET_TRUE) || (m_Act_Difficulty < 0) )
 			{
 				Skill_Cleanup();
 				return false;
 			}
-            sound = (SOUND_TYPE)(pArgs.m_VarsLocal.GetKeyNum("Sound"));
-            anim = static_cast<ANIM_TYPE>(pArgs.m_VarsLocal.GetKeyNum("Anim"));
+            sound = (SOUND_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Sound"));
+            anim = (ANIM_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Anim"));
 		}
-		iWaitTime = (int)pArgs.m_iN2;
+        iWaitTime = (int)pScriptArgs->m_iN2;
 		if (IsSkillBase(skill) && iWaitTime > 0)
 			SetTimeoutD(iWaitTime);		// How long before complete skill.
 
@@ -4527,14 +4529,14 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		if ( fCraftSkill )
 		{
 			// read crafting parameters
-			pResBase = CResourceID( (dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef")), 0 );
-			m_atCreate.m_dwStrokeCount = (word)pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt");
+            const CResourceID ridResBase( (dword)(pScriptArgs->m_VarsLocal.GetKeyNum("CraftItemdef")), 0 );
+            m_atCreate.m_dwStrokeCount = (word)pScriptArgs->m_VarsLocal.GetKeyNum("CraftStrokeCnt");
 			m_atCreate.m_dwStrokeCount = maximum(1,m_atCreate.m_dwStrokeCount);
-			m_atCreate.m_iItemID = (ITEMID_TYPE)(pResBase.GetResIndex());
-			m_atCreate.m_dwAmount = (word)(pArgs.m_VarsLocal.GetKeyNum("CraftAmount"));
+            m_atCreate.m_iItemID = (ITEMID_TYPE)(ridResBase.GetResIndex());
+            m_atCreate.m_dwAmount = (word)(pScriptArgs->m_VarsLocal.GetKeyNum("CraftAmount"));
 		}
 		if ( fGatherSkill )
-			m_atResource.m_dwStrokeCount = (word)(pArgs.m_VarsLocal.GetKeyNum("GatherStrokeCnt"));
+            m_atResource.m_dwStrokeCount = (word)(pScriptArgs->m_VarsLocal.GetKeyNum("GatherStrokeCnt"));
 
 		// Casting sound & animation when starting, Skill_Stroke() will do it the next times.
 		if ( fCraftSkill || fGatherSkill )

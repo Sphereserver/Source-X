@@ -54,6 +54,10 @@ inline bool IsWhitespace(const T ch) noexcept {
 #define EXPRESSION_MAX_KEY_LEN		SCRIPT_MAX_SECTION_LEN
 #define VARDEF_FLOAT_MAXBUFFERSIZE	82
 
+struct CScriptSubExprData;
+static constexpr size_t uiMaxConditionalSubexprs = 32;
+using CScriptSubExprDataArray = CScriptSubExprData[uiMaxConditionalSubexprs];
+
 
 enum DEFMSG_TYPE
 {
@@ -122,23 +126,6 @@ static lpctstr constexpr sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 	nullptr
 };
 
-struct SubexprData
-{
-	lptstr ptcStart, ptcEnd;
-	enum Type : ushort
-	{
-		Unknown = 0,
-		// Powers of two
-		MaybeNestedSubexpr	        = 0x1 << 0, // 001
-        TopParenthesizedExpr     = 0x1 << 1, // 002
-		None				        = 0x1 << 2, // 004
-		BinaryNonLogical	        = 0x1 << 3, // 008
-		And					        = 0x1 << 4, // 010
-		Or					        = 0x1 << 5  // 020
-	};
-	ushort uiType;
-	ushort uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
-};
 
 extern class CExpression
 {
@@ -167,8 +154,8 @@ public:
 	int GetRangeVals(lpctstr& pExpr, int64* piVals, int iMaxQty, bool bNoWarn = false);
 	int64 GetRangeNumber(lpctstr& pExpr);		// Evaluate a { } range
 	CSString GetRangeString(lpctstr& pExpr);	// STRRANDRANGE
-
-	static int GetConditionalSubexpressions(lptstr& pExpr, SubexprData(&psSubexprData)[32], int iMaxQty);
+    
+    static int GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataArray& psSubExprData, int iMaxQty);
 
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy and const-UNsafe workaround

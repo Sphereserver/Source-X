@@ -1,6 +1,7 @@
 
 // Actions specific to an NPC.
 #include "../../common/CExpression.h"
+#include "../../common/CScriptParserBufs.h"
 #include "../../network/send.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemStone.h"
@@ -299,7 +300,7 @@ CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, word MemTypes )
 }
 
 // Looping through all memories ( ForCharMemoryType ).
-TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, word wMemType )
+TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * pResult, word wMemType )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForMemTypeLoop");
 	const CScriptLineContext StartContext = s.GetContext();
@@ -312,7 +313,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsMemoryTypes(wMemType) )
 				continue;
-			TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
+            TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pArgs, pSrc, pResult );
 			if ( iRet == TRIGRET_BREAK )
 			{
 				EndContext = StartContext;
@@ -330,7 +331,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		// just skip to the end.
-		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
+        TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pArgs, pSrc, pResult );
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}
@@ -402,7 +403,11 @@ void CChar::Memory_Fight_Retreat( CChar * pTarg, CItemMemory * pFight )
 		return;
 	}
 
-	SysMessagef(fCowardice ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_COWARD_1) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_COWARD_2), pTarg->GetName());
+    SysMessagef(
+        fCowardice
+            ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_COWARD_1)
+            : g_Cfg.GetDefaultMsg(DEFMSG_MSG_COWARD_2),
+        pTarg->GetName());
 
 	// Lose some fame.
 	if ( fCowardice )

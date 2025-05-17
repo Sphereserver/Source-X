@@ -2,7 +2,7 @@
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/CException.h"
-#include "../common/CScriptTriggerArgs.h"
+#include "../common/CScriptParserBufs.h"
 #include "../common/CRect.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
@@ -149,12 +149,14 @@ CItem * CWorldMap::CheckNaturalResource(const CPointMap & pt, IT_TYPE iType, boo
 	EXC_SET_BLOCK("resourcefound");
 	if ( pCharSrc != nullptr )
 	{
-		CScriptTriggerArgs Args(0, 0, pResBit);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(0, 0, 0, pResBit);
 		TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
+
 		if ( IsTrigUsed(TRIGGER_REGIONRESOURCEFOUND) )
-			tRet = pCharSrc->OnTrigger(CTRIG_RegionResourceFound, pCharSrc, &Args);
+            tRet = pCharSrc->OnTrigger(CTRIG_RegionResourceFound, pScriptArgs, pCharSrc);
 		if ( IsTrigUsed(TRIGGER_RESOURCEFOUND) )
-			tRet = pOreDef->OnTrigger("@ResourceFound", pCharSrc, &Args);
+            tRet = pOreDef->OnTrigger("@ResourceFound", pScriptArgs, pCharSrc);
 
 		if (tRet == TRIGRET_RET_TRUE)
 		{

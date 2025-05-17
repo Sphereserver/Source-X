@@ -822,7 +822,7 @@ public:
 	void UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = nullptr ) const;
 
     /**
-     * @fn  void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
+     * @fn  void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE iMode, FONT_TYPE iFont = FONT_NORMAL, bool fUnicode = false ) const;
      *
      * @brief   Updates the object message.
      *
@@ -830,26 +830,29 @@ public:
      * @param   pTextYou                The text you.
      * @param [in,out]  pClientExclude  If non-null, the client exclude.
      * @param   wHue                    The hue.
-     * @param   mode                    The mode.
-     * @param   font                    The font.
-     * @param   bUnicode                true to unicode.
+     * @param   iMode                    The iMode.
+     * @param   iFont                    The iFont.
+     * @param   fUnicode                true to unicode.
      */
-	void UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
+    void UpdateObjMessage(
+        lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude,
+        HUE_TYPE wHue, TALKMODE_TYPE iMode,
+        FONT_TYPE iFont = FONT_NORMAL, bool fUnicode = false ) const;
 
     /**
-     * @fn  TRIGRET_TYPE CObjBase::OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &mode, HUE_TYPE wHue = HUE_DEFAULT);
+     * @fn  TRIGRET_TYPE CObjBase::OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &iModeRef, HUE_TYPE wHue = HUE_DEFAULT);
      *
      * @brief   Executes the hear trigger action.
      *
      * @param [in,out]  s       The CResourceLock to process.
      * @param   pCmd            The command.
      * @param [in,out]  pSrc    If non-null, source for the.
-     * @param [in,out]  mode    The mode.
+     * @param [in,out]  iModeRef    The iModeRef.
      * @param   wHue            The hue.
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &mode, HUE_TYPE wHue = HUE_DEFAULT);
+    TRIGRET_TYPE OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &iModeRef, HUE_TYPE wHue = HUE_DEFAULT);
 
     /**
      * @fn  bool CObjBase::IsContainer() const;
@@ -885,11 +888,11 @@ public:
      * @param [in,out]  pCharSrc    If non-null, the character source.
      * @param   iSkillLevel         Zero-based index of the skill level.
      * @param [in,out]  pSourceItem If non-null, source item.
-     * @param   bReflecting         true to reflecting.
+     * @param   fReflecting         true to reflecting.
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false, int64 iDuration = 0 )
+    virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false, int64 iDuration = 0 )
 		= 0;
 
     /**
@@ -904,7 +907,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
+    TRIGRET_TYPE Spell_OnTrigger(SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr pArgs, CChar * pSrc);
 
 protected:
     virtual void _GoAwake() override;

@@ -258,7 +258,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
 
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))
                 {
-                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
+                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", CScriptTriggerArgsPtr{}, pCharSrc) == TRIGRET_RET_TRUE)
                         continue;
                 }
             }

@@ -2,6 +2,7 @@
 
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/CExpression.h"
+//#include "../../common/CScriptParserBufs.h"
 #include "../clients/CClient.h"
 #include "../components/CCSpawn.h"
 #include "../items/CItemContainer.h"
@@ -869,7 +870,7 @@ void CChar::NPC_PetRelease()
 
     if (IsTrigUsed(TRIGGER_PETRELEASE))
     {
-        if (OnTrigger(CTRIG_PetRelease, pCharOwn, nullptr) == TRIGRET_RET_TRUE)
+        if (OnTrigger(CTRIG_PetRelease, CScriptTriggerArgsPtr{}, pCharOwn) == TRIGRET_RET_TRUE)
             return;
     }
 
@@ -911,7 +912,7 @@ void CChar::NPC_PetDesert()
 
 	if ( IsTrigUsed(TRIGGER_PETDESERT) )
 	{
-		if ( OnTrigger( CTRIG_PetDesert, pCharOwn, nullptr ) == TRIGRET_RET_TRUE )
+        if ( OnTrigger( CTRIG_PetDesert, CScriptTriggerArgsPtr{}, pCharOwn) == TRIGRET_RET_TRUE )
 			return;
 	}
 
