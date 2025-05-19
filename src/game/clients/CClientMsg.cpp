@@ -728,7 +728,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if (pSrc && pSrc->IsChar())
 	    pSrcChar = static_cast<const CChar *>(pSrc);
 
-    static constexpr lpctstr talkmode_defs_color[] =
+    static constexpr uint kiManagedTalkmodes = 5;
+    static constexpr lpctstr s_ptcTalkmodesDefsColor[kiManagedTalkmodes] =
         {
             "SMSG_DEF_COLOR",
             "EMOTE_DEF_COLOR",
@@ -736,7 +737,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
             "CMSG_DEF_COLOR",
             "IMSG_DEF_COLOR",
         };
-    static constexpr lpctstr talkmode_defs_font[] =
+    static constexpr lpctstr s_ptcTalkmodesDefsFont[kiManagedTalkmodes] =
         {
             "SMSG_DEF_FONT",
             "EMOTE_DEF_FONT",
@@ -744,7 +745,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
             "CMSG_DEF_FONT",
             "IMSG_DEF_FONT",
         };
-    static constexpr lpctstr talkmode_defs_unicode[] =
+    static constexpr lpctstr s_ptcTalkmodesDefsUnicode[kiManagedTalkmodes] =
         {
             "SMSG_DEF_UNICODE",
             "EMOTE_DEF_UNICODE",
@@ -753,7 +754,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
             "IMSG_DEF_UNICODE",
         };
 
-    std::optional<ushort> iTalkmodeHue, iTalkmodeFont, iTalkmodeUnicode;
+    ushort iTalkmodeHue, iTalkmodeFont, iTalkmodeUnicode;
+    iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = UINT16_MAX;
     switch ( mode )
 	{
 		case TALKMODE_SYSTEM:
@@ -782,12 +784,12 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	}
     {
         auto gReader = g_ExprGlobals.mtEngineLockedReader();
-        if (iTalkmodeHue)
-            defaultHue = (HUE_TYPE)(gReader->m_VarDefs.GetKeyNum(talkmode_defs_color[*iTalkmodeHue]));
-        if (iTalkmodeFont)
-            defaultFont = (FONT_TYPE)(gReader->m_VarDefs.GetKeyNum(talkmode_defs_font[*iTalkmodeFont]));
-        if (iTalkmodeUnicode)
-            defaultUnicode = gReader->m_VarDefs.GetKeyNum(talkmode_defs_unicode[*iTalkmodeUnicode]) > 0 ? true : false;
+        if (iTalkmodeHue != UINT16_MAX)
+            defaultHue = (HUE_TYPE)(gReader->m_VarDefs.GetKeyNum(s_ptcTalkmodesDefsColor[iTalkmodeHue]));
+        if (iTalkmodeFont != UINT16_MAX)
+            defaultFont = (FONT_TYPE)(gReader->m_VarDefs.GetKeyNum(s_ptcTalkmodesDefsFont[iTalkmodeFont]));
+        if (iTalkmodeUnicode != UINT16_MAX)
+            defaultUnicode = gReader->m_VarDefs.GetKeyNum(s_ptcTalkmodesDefsUnicode[iTalkmodeUnicode]) > 0 ? true : false;
     }
 
 
