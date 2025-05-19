@@ -441,12 +441,12 @@ lpctstr CStoneMember::GetPrivName() const
 	TemporaryString tsDefname;
 	snprintf(tsDefname.buffer(), tsDefname.capacity(), "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
 
-	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(tsDefname);
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+    CVarDefCont * pResult = gReader->m_VarDefs.GetKey(tsDefname);
 	if (pResult)
 		return pResult->GetValStr();
-	else
-		pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_PRIVNAME_PRIVUNK");
 
+    pResult = gReader->m_VarDefs.GetKey("STONECONFIG_PRIVNAME_PRIVUNK");
 	return ( pResult == nullptr ) ? "" : pResult->GetValStr();
 }
 

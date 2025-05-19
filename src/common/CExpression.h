@@ -10,8 +10,11 @@
 #ifndef _INC_CEXPRSSION_H
 #define _INC_CEXPRSSION_H
 
+#include "sphere_library/CSAssoc.h"
+#include "CScriptParserBufs.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
+#include <array>
 
 
 #undef ISWHITESPACE
@@ -54,10 +57,16 @@ inline bool IsWhitespace(const T ch) noexcept {
 #define EXPRESSION_MAX_KEY_LEN		SCRIPT_MAX_SECTION_LEN
 #define VARDEF_FLOAT_MAXBUFFERSIZE	82
 
-struct CScriptSubExprData;
-static constexpr size_t uiMaxConditionalSubexprs = 32;
-using CScriptSubExprDataArray = CScriptSubExprData[uiMaxConditionalSubexprs];
 
+struct CScriptExprContext
+{
+    CScriptObj *_pScriptObjI;
+
+    // Recursion counters and state variables
+    short _iEvaluate_Conditional_Reentrant{};
+    short _iParseScriptText_Reentrant{};
+    bool  _fParseScriptText_Brackets{};
+};
 
 enum DEFMSG_TYPE
 {
@@ -127,51 +136,110 @@ static lpctstr constexpr sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 };
 
 
-extern class CExpression
+enum SKILL_TYPE	: int;
+
+struct CExprGlobals
 {
-	short _iGetVal_Reentrant;
+#ifdef MT_ENGINES
+    MT_CMUTEX_DEF;
+#endif
+    static const char *m_sClassName;
+
+    CVarDefMap		m_VarResDefs;		// Defined variables in sorted order (RESDEF/RESDEF0).
+    CVarDefMap		m_VarDefs;			// Defined variables in sorted order (DEF/DEF0).
+    CVarDefMap		m_VarGlobals;		// Global variables (VAR/VAR0)
+    CListDefMap		m_ListGlobals;		// Global lists
+    CListDefMap		m_ListInternals;     // Internal lists
+
+private:
+    friend class CServerConfig;
+    friend class CScriptObj;    // For DEFMSG.*
+
+    //	Defined default messages (DEFMESSAGEs)
+    static constexpr ushort m_kiDefmsgMaxLen = 128;
+    static tchar sm_szDefMessages[DEFMSG_QTY][m_kiDefmsgMaxLen];    // like: "You put %s to %s"
+    static lpctstr const sm_szDefMsgNames[DEFMSG_QTY];              // like: "put_it"
+
+    static constexpr ushort m_kiSkillTitlesQty = 12;
+    std::array<CValStr, m_kiSkillTitlesQty> m_SkillTitles_Ninjitsu;
+    std::array<CValStr, m_kiSkillTitlesQty> m_SkillTitles_Bushido;
+    std::array<CValStr, m_kiSkillTitlesQty> m_SkillTitles_Generic;
+
+public:
+    void UpdateDefMsgDependentData();
+
+    lpctstr SkillTitle(SKILL_TYPE skill, uint uiVal) const;
+};
+
+extern sl::GuardedAccess<CExprGlobals> g_ExprGlobals;  // Declared in spheresvr.cpp
+
+
+// Main SphereScript parsing utilities
+class CExpression
+{
+    struct CScriptSubExprState
+    {
+        lptstr ptcStart, ptcEnd;
+        enum Type : ushort
+        {
+            Unknown = 0,
+            // Powers of two
+            MaybeNestedSubexpr	        = 0x1 << 0, // 001
+            TopParenthesizedExpr        = 0x1 << 1, // 002
+            None				        = 0x1 << 2, // 004
+            BinaryNonLogical	        = 0x1 << 3, // 008
+            And					        = 0x1 << 4, // 010
+            Or					        = 0x1 << 5  // 020
+        };
+        ushort uiType;
+        ushort uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
+    };
+
+    static constexpr size_t sm_uiMaxConditionalSubexprs = 32;
+    CScriptSubExprState m_parsingSubexprsStates[sm_uiMaxConditionalSubexprs];
+
+    short _iGetVal_Reentrant;
 
 public:
 	static const char *m_sClassName;
-    CVarDefMap		m_VarResDefs;		// Defined variables in sorted order (RESDEF/RESDEF0).
-	CVarDefMap		m_VarDefs;			// Defined variables in sorted order (DEF/DEF0).
-	CVarDefMap		m_VarGlobals;		// Global variables (VAR/VAR0)
-	CListDefMap		m_ListGlobals;		// Global lists
-	CListDefMap		m_ListInternals;	// Internal lists
 
-	//	defined default messages
-#define DEFMSG_MAX_LEN 128
-	static tchar sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN];		// like: "You put %s to %s"
-	static lpctstr const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
-
-public:
 	// Evaluate using the stuff we know.
-	llong GetSingle(lpctstr & pExpr);
+    llong GetSingle(lpctstr & refStrExpr);
 
-	llong GetValMath(llong llVal, lpctstr & pExpr);
-	llong GetVal(lpctstr & pExpr);
+    llong GetValMath(llong llVal, lpctstr & refStrExpr);
+    llong GetVal(lpctstr & refStrExpr);
 
-	int GetRangeVals(lpctstr& pExpr, int64* piVals, int iMaxQty, bool bNoWarn = false);
-	int64 GetRangeNumber(lpctstr& pExpr);		// Evaluate a { } range
-	CSString GetRangeString(lpctstr& pExpr);	// STRRANDRANGE
+    int GetRangeVals(lpctstr& refStrExpr, int64* piVals, int iMaxQty, bool fNoWarn = false);
+    int64 GetRangeNumber(lpctstr& refStrExpr);		// Evaluate a { } range
+    CSString GetRangeString(lpctstr& refStrExpr);	// STRRANDRANGE
     
-    static int GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataArray& psSubExprData, int iMaxQty);
+    int GetConditionalSubexpressions(lptstr& refStrExpr);
 
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy and const-UNsafe workaround
-	inline llong GetSingle(lptstr &pArgs) {
-		return GetSingle(const_cast<lpctstr &>(pArgs));
+    inline llong GetSingle(lptstr &refArgs) {
+        return GetSingle(const_cast<lpctstr &>(refArgs));
 	}
-	inline llong GetVal(lptstr& pArgs) {
-		return GetVal(const_cast<lpctstr&>(pArgs));
+    inline llong GetVal(lptstr& refArgs) {
+        return GetVal(const_cast<lpctstr&>(refArgs));
 	}
-	inline int GetRangeVals(lptstr &pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false) {
-		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty, bNoWarn);
+    inline int GetRangeVals(lptstr &refStrExpr, int64 * piVals, int iMaxQty, bool fNoWarn = false) {
+        return GetRangeVals(const_cast<lpctstr &>(refStrExpr), piVals, iMaxQty, fNoWarn);
 	}
-	inline int64 GetRangeNumber(lptstr &pArgs) {
-		return GetRangeNumber(const_cast<lpctstr &>(pArgs));
+    inline int64 GetRangeNumber(lptstr &refStrArgs) {
+        return GetRangeNumber(const_cast<lpctstr &>(refStrArgs));
 	}
 
+    // Arguments inside conditional statements: IF, ELIF, ELSEIF
+    bool _Evaluate_Conditional_EvalSingle(CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    bool Evaluate_Conditional(lptstr ptcExpression, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+
+    bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& refStrVal, CScriptExprContext& refContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+
+    /*
+    * @brief Do the first-level parsing of a script line and eventually replace requested values got by r_WriteVal.
+    */
+    int ParseScriptText( tchar * pszResponse, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, int iFlags = 0 );
 
 public:
     CExpression() noexcept;
@@ -179,7 +247,11 @@ public:
 
 	CExpression(const CExpression& copy) = delete;
 	CExpression& operator=(const CExpression& other) = delete;
-} g_Exp;
+
+    // One per thread
+    [[nodiscard]]
+    static CExpression& GetExprParser();
+};
 
 
 uint GetIdentifierString( tchar * szTag, lpctstr pszArgs );
@@ -260,33 +332,33 @@ int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
 
-#define Exp_GetSingle( pa )		static_cast<int>	(g_Exp.GetSingle( pa ))
-#define Exp_GetUSingle( pa )	static_cast<uint>	(g_Exp.GetSingle( pa ))
-#define Exp_GetLLSingle( pa )						 g_Exp.GetSingle( pa )
-#define Exp_GetDWSingle( pa )	static_cast<dword>	(g_Exp.GetSingle( pa ))
+#define Exp_GetSingle( pa )		static_cast<int>	(CExpression::GetExprParser().GetSingle( pa ))
+#define Exp_GetUSingle( pa )	static_cast<uint>	(CExpression::GetExprParser().GetSingle( pa ))
+#define Exp_GetLLSingle( pa )						 CExpression::GetExprParser().GetSingle( pa )
+#define Exp_GetDWSingle( pa )	static_cast<dword>	(CExpression::GetExprParser().GetSingle( pa ))
 
-#define Exp_GetRange( pa )		static_cast<int>	(g_Exp.GetRangeNumber( pa ))
-#define Exp_GetLLRange( pa )						 g_Exp.GetRangeNumber( pa )
+#define Exp_GetRange( pa )		static_cast<int>	(CExpression::GetExprParser().GetRangeNumber( pa ))
+#define Exp_GetLLRange( pa )						 CExpression::GetExprParser().GetRangeNumber( pa )
 
-#define Exp_GetCVal( pa )		static_cast<schar>	(g_Exp.GetVal( pa ))
-#define Exp_GetUCVal( pa )		static_cast<uchar>	(g_Exp.GetVal( pa ))
-#define Exp_GetSVal( pa )		static_cast<short>	(g_Exp.GetVal( pa ))
-#define Exp_GetUSVal( pa )		static_cast<ushort> (g_Exp.GetVal( pa ))
-#define Exp_GetVal( pa )		static_cast<int>	(g_Exp.GetVal( pa ))
-#define Exp_GetUVal( pa )		static_cast<uint>	(g_Exp.GetVal( pa ))
-#define Exp_GetLLVal( pa )							 g_Exp.GetVal( pa )
-#define Exp_GetULLVal( pa )		static_cast<ullong> (g_Exp.GetVal( pa ))
-#define Exp_GetBVal( pa )		static_cast<byte>	(g_Exp.GetVal( pa ))
-#define Exp_GetWVal( pa )		static_cast<word>	(g_Exp.GetVal( pa ))
-#define Exp_GetDWVal( pa )		static_cast<dword>	(g_Exp.GetVal( pa ))
-#define Exp_Get8Val( pa )		static_cast<int8>	(g_Exp.GetVal( pa ))
-#define Exp_Get16Val( pa )		static_cast<int16>	(g_Exp.GetVal( pa ))
-#define Exp_Get32Val( pa )		static_cast<int32>	(g_Exp.GetVal( pa ))
-#define Exp_Get64Val( pa )		static_cast<int64>	(g_Exp.GetVal( pa ))
-#define Exp_GetU8Val( pa )		static_cast<uint8>	(g_Exp.GetVal( pa ))
-#define Exp_GetU16Val( pa )		static_cast<uint16>	(g_Exp.GetVal( pa ))
-#define Exp_GetU32Val( pa )		static_cast<uint32>	(g_Exp.GetVal( pa ))
-#define Exp_GetU64Val( pa )		static_cast<uint64>	(g_Exp.GetVal( pa ))
+#define Exp_GetCVal( pa )		static_cast<schar>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetUCVal( pa )		static_cast<uchar>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetSVal( pa )		static_cast<short>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetUSVal( pa )		static_cast<ushort> (CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetVal( pa )		static_cast<int>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetUVal( pa )		static_cast<uint>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetLLVal( pa )							 CExpression::GetExprParser().GetVal( pa )
+#define Exp_GetULLVal( pa )		static_cast<ullong> (CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetBVal( pa )		static_cast<byte>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetWVal( pa )		static_cast<word>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetDWVal( pa )		static_cast<dword>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_Get8Val( pa )		static_cast<int8>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_Get16Val( pa )		static_cast<int16>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_Get32Val( pa )		static_cast<int32>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_Get64Val( pa )		static_cast<int64>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetU8Val( pa )		static_cast<uint8>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetU16Val( pa )		static_cast<uint16>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetU32Val( pa )		static_cast<uint32>	(CExpression::GetExprParser().GetVal( pa ))
+#define Exp_GetU64Val( pa )		static_cast<uint64>	(CExpression::GetExprParser().GetVal( pa ))
 
 #if INTPTR_MAX == INT32_MAX
 	#define Exp_GetSTVal		Exp_GetU32Val

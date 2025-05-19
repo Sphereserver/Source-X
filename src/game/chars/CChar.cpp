@@ -809,7 +809,7 @@ bool CChar::_IsStatFlag(uint64 uiStatFlag) const noexcept
 #if MT_ENGINES
 bool CChar::IsStatFlag( uint64 uiStatFlag) const noexcept
 {
-	MT_ENGINE_SHARED_LOCK_SET;
+	MT_ENGINE_SHARED_LOCK_SET(this);
 	return (_uiStatFlag & uiStatFlag);
 }
 #endif
@@ -822,7 +822,7 @@ void CChar::_StatFlag_Set( uint64 uiStatFlag) noexcept
 */
 void CChar::StatFlag_Set(uint64 uiStatFlag) noexcept
 {
-	MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
 	_uiStatFlag |= uiStatFlag;
 }
 
@@ -834,7 +834,7 @@ void CChar::_StatFlag_Clear(uint64 uiStatFlag) noexcept
 */
 void CChar::StatFlag_Clear(uint64 uiStatFlag) noexcept
 {
-	MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
 	_uiStatFlag &= ~uiStatFlag;
 }
 
@@ -849,7 +849,7 @@ void CChar::_StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 */
 void CChar::StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept
 {
-//	MT_ENGINE_UNIQUE_LOCK_SET;
+//	MT_ENGINE_UNIQUE_LOCK_SET(this);
 //	_StatFlag_Mod(uiStatFlag, fMod);
 	if (fMod)
 		_uiStatFlag |= uiStatFlag;
@@ -897,7 +897,7 @@ void CChar::SetVisualRange(byte newSight)
 {
 	CClient* pClient;
 	{
-		MT_ENGINE_UNIQUE_LOCK_SET;
+        MT_ENGINE_UNIQUE_LOCK_SET(this);
 		// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
 		m_iVisualRange = minimum(newSight, g_Cfg.m_iMapViewSizeMax);
 		pClient = GetClientActive();
@@ -1527,16 +1527,16 @@ height_t CChar::GetHeight() const
 		return tmpHeight;
 
     // This is SLOW (since this method is called very frequently)! Move those defs value to CharDef!
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
     const uint uiDispID = (uint)pCharDef->GetDispID();
-
     char heightDef[20]{"height_"};
     Str_FromUI(uint(uiDispID), heightDef + 7, sizeof(heightDef) - 7, 16);
-	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+    tmpHeight = (height_t)(gReader->m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
 	Str_FromUI(uint(uiDispID), heightDef + 7, sizeof(heightDef) - 7, 10);
-	tmpHeight = (height_t)(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+    tmpHeight = (height_t)(gReader->m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 

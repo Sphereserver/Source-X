@@ -7,6 +7,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/basic_threading.h"
 #include "../common/CException.h"
+#include "../common/CExpression.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "ProfileTask.h"
@@ -793,9 +794,10 @@ AbstractSphereThread::AbstractSphereThread(const char *name, ThreadPriority prio
     : AbstractThread(name, priority)
 #ifdef THREAD_TRACK_CALLSTACK
     , m_stackInfo{}, m_stackInfoCopy{}, m_iStackPos(-1),
+    m_iStackUnwindingStackPos(-1), m_iCaughtExceptionStackPos(-1),
     m_fFreezeCallStack(false),
-    m_iStackUnwindingStackPos(-1), m_iCaughtExceptionStackPos(-1)
 #endif
+    m_pExpr{std::make_unique<CExpression>()}
 {
 	// profiles that apply to every thread
 	m_profile.EnableProfile(PROFILE_IDLE);
@@ -1058,10 +1060,9 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
 	}
 
 	m_context = static_cast<AbstractSphereThread*>(icontext);
-    if (m_context != nullptr && !m_context->closing())
+    if (m_context != nullptr && !m_context->closing()) [[likely]]
 	{
-        [[unlikely]]
-		m_context->pushStackCall(name);
+        m_context->pushStackCall(name);
 	}
 }
 

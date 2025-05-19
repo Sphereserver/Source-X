@@ -52,6 +52,8 @@ Checks: >
   ##-readability-braces-around-statements,
   ##-readability-magic-numbers
 
+  #-format security
+
 # Turn all the warnings from the checks above into errors.
 #WarningsAsErrors: "*"
 

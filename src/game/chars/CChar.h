@@ -927,8 +927,8 @@ public:
 	SOUND_TYPE Skill_GetSound( SKILL_TYPE skill);
 	int Skill_Stage( SKTRIG_TYPE stage );
 
-    TRIGRET_TYPE Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScriptTriggerArgsPtr pArgs); //pArgs.m_iN1 will be rewritten with skill
-    TRIGRET_TYPE Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr pArgs); //pArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnTrigger(SKILL_TYPE skill, SKTRIG_TYPE stage, CScriptTriggerArgsPtr pScriptArgs); //pScriptArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr pScriptArgs); //pArgs.m_iN1 will be rewritten with skill
 
 	bool Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg );
 	bool Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );

@@ -26,7 +26,7 @@ void CCSpawn::AddBadSpawn()
     {
         return;
     }
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     if (std::find(_vBadSpawns.cbegin(), _vBadSpawns.cend(), this) == _vBadSpawns.cend())
     {
         _vBadSpawns.emplace_back(this); //only if it's not inserted already.
@@ -37,7 +37,7 @@ void CCSpawn::AddBadSpawn()
 void CCSpawn::DelBadSpawn()
 {
     ADDTOCALLSTACK("CCSpawn::DelBadSpawn");
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     if (!_vBadSpawns.empty())
     {
         _vBadSpawns.erase(std::find(_vBadSpawns.begin(), _vBadSpawns.end(), this));

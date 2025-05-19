@@ -672,12 +672,14 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 			}
 		}
 	}
+
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
 	llong llVal;
-	if ( g_Exp.m_VarGlobals.GetParseVal( pArgs, &llVal ) )
+    if ( gReader->m_VarGlobals.GetParseVal( pArgs, &llVal ) )
 		return (int)llVal;
-	if ( g_Exp.m_VarResDefs.GetParseVal( pArgs, &llVal ) )
+    if ( gReader->m_VarResDefs.GetParseVal( pArgs, &llVal ) )
 		return (int)llVal;
-	if ( g_Exp.m_VarDefs.GetParseVal( pArgs, &llVal ) )
+    if ( gReader->m_VarDefs.GetParseVal( pArgs, &llVal ) )
 			return (int)llVal;
 	return 0;
 }

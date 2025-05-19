@@ -23,6 +23,13 @@ size_t Str_TempLength() noexcept
 [[nodiscard]]
 tchar* Str_GetTemp() noexcept;
 
+[[nodiscard]]
+tchar* Str_CopyToTemp(lpctstr pSrc) noexcept;
+
+[[nodiscard]]
+lpctstr Str_mtEngineGetSafeTemp(lpctstr pSrc) noexcept;
+
+
 //--
 
 // Base abstract class for strings, provides basic information of what should be available

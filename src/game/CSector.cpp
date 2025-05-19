@@ -216,7 +216,7 @@ void CSector::_GoSleep()
 void CSector::GoSleep()
 {
 	ADDTOCALLSTACK("CSector::GoSleep");
-	MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
 	CSector::_GoSleep();
 }
 
@@ -287,7 +287,7 @@ void CSector::_GoAwake()
 void CSector::GoAwake()
 {
 	ADDTOCALLSTACK("CSector::GoAwake");
-	MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
 	CSector::_GoAwake();
 }
 

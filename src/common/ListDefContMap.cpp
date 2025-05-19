@@ -714,7 +714,7 @@ CListDefCont* CListDefMap::AddList(lpctstr ptcKey)
 	return pListBase;
 }
 
-void CListDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix )
+void CListDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 {
 	ADDTOCALLSTACK("CListDefMap::DumpKeys");
 	// List out all the keys.
@@ -967,7 +967,7 @@ bool CListDefMap::r_LoadVal( lpctstr ptcKey, CScript & s )
 	return false;
 }
 
-bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal )
+bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal ) const
 {
     ADDTOCALLSTACK("CListDefMap::r_Write");
 	UnreferencedParameter(pSrc);
@@ -1037,7 +1037,7 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strV
 }
 
 
-void CListDefMap::r_WriteSave( CScript& s )
+void CListDefMap::r_WriteSave( CScript& s ) const
 {
     ADDTOCALLSTACK("CListDefMap::r_WriteSave");
 

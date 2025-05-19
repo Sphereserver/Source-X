@@ -155,7 +155,8 @@ CWorld			g_World;			// the world. (we save this stuff)
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
 CSRand          g_Rand; // TODO: remove this, since now all the members are static.
-CExpression		g_Exp;				// Global script variables.
+sl::GuardedAccess<CExprGlobals>     // TODO: put inside GuardedAccess also g_Cfg, and slowly also the other stuff?
+    g_ExprGlobals;                  // Global script variables.
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information

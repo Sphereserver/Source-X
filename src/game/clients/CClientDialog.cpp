@@ -321,10 +321,11 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		m_id = 0;
 	}
 
-	if ( pObjBase != nullptr )
-        pObjBase->ParseScriptText( pszArgs, CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, pSrc );
-	else
-        g_Serv.ParseScriptText( pszArgs, CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, pSrc );
+
+    CScriptExprContext scpContext{
+        ._pScriptObjI = pObjBase ? pObjBase : &g_Serv
+    };
+    CExpression::GetExprParser().ParseScriptText( pszArgs, scpContext, CScriptTriggerArgsPtr{}, pSrc );
 
 	// Parsing @color
 	if ( *pszArgs == '@' )
@@ -379,7 +380,8 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		DEBUG_ERR(("Error getting the menu title.\n"));
 		return;
 	}
-    pObj->ParseScriptText( s.GetKeyBuffer(), CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, m_pChar );
+    CScriptExprContext scpContext{._pScriptObjI = pObj};
+    CExpression::GetExprParser().ParseScriptText( s.GetKeyBuffer(), scpContext, CScriptTriggerArgsPtr{}, m_pChar );
 
 	CMenuItem item[MAX_MENU_ITEMS];
 	item[0].m_sText = s.GetKey();

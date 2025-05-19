@@ -92,7 +92,7 @@ void CTimedObject::_SetTimeout(int64 iDelayInMsecs)
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK_DEBUG("CTimedObject::SetTimeout");
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     _SetTimeout(iDelayInMsecs);
 }
 
@@ -175,13 +175,13 @@ int64 CTimedObject::GetTimerSAdjusted() const noexcept
 
 void CTimedObject::GoSleep()
 {
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     _GoSleep();
 }
 
 void CTimedObject::GoAwake()
 {
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     _GoAwake(); // Call virtuals!
 }
 
@@ -192,7 +192,7 @@ PROFILE_TYPE CTimedObject::GetProfileType() const noexcept
 
 void CTimedObject::ClearTimeoutRaw() noexcept
 {
-    MT_ENGINE_UNIQUE_LOCK_SET;
+    MT_ENGINE_UNIQUE_LOCK_SET(this);
     CTimedObject::_ClearTimeoutRaw();
 }
 

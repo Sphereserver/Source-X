@@ -2054,14 +2054,16 @@ height_t CItem::GetHeight() const
             return tmpHeight;
     }
 
-	char heightDef[24]{"itemheight_"};
+    auto reader = g_ExprGlobals.mtEngineLockedReader();
+
+    char heightDef[24]{"itemheight_"};
     Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 16);
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+    tmpHeight = static_cast<height_t>(reader->m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
     Str_FromUI(uint(uiDispID), heightDef + 11, sizeof(heightDef) - 11, 10);
-	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
+    tmpHeight = static_cast<height_t>(reader->m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 

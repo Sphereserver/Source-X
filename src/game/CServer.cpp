@@ -1815,7 +1815,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		{
 			ptcKey = s.GetArgStr();
 			SKIP_SEPARATORS(ptcKey);
-			g_Exp.m_VarGlobals.ClearKeys(ptcKey);
+            g_ExprGlobals.mtEngineLockedWriter()->m_VarGlobals.ClearKeys(ptcKey);
 			return true;
 		}
 	}
@@ -2231,15 +2231,15 @@ log_cont:
 		case SV_VARLIST:
 			if ( ! strcmpi( s.GetArgStr(), "log" ) )
 				pSrc = &g_Serv;
-			g_Exp.m_VarGlobals.DumpKeys(pSrc, "VAR.");
+            g_ExprGlobals.mtEngineLockedReader()->m_VarGlobals.DumpKeys(pSrc, "VAR.");
 			break;
 		case SV_PRINTLISTS:
 			if ( ! strcmpi( s.GetArgStr(), "log" ) )
 				pSrc = &g_Serv;
-			g_Exp.m_ListGlobals.DumpKeys(pSrc, "LIST.");
+            g_ExprGlobals.mtEngineLockedReader()->m_ListGlobals.DumpKeys(pSrc, "LIST.");
 			break;
 		case SV_CLEARLISTS:
-			g_Exp.m_ListGlobals.ClearKeys( s.GetArgStr()) ;
+            g_ExprGlobals.mtEngineLockedWriter()->m_ListGlobals.ClearKeys( s.GetArgStr()) ;
 			break;
 		default:
 			return CScriptObj::r_Verb(s, pSrc);
@@ -2385,9 +2385,10 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
 						return false;
                     }
 
-                    ssize_t count = ssize_t(g_Exp.m_VarDefs.GetCount());
+                    auto r = g_ExprGlobals.mtEngineLockedReader();
+                    ssize_t count = ssize_t(r->m_VarDefs.GetCount());
                     ssize_t i = 0;
-					for ( const CVarDefCont * pCont : g_Exp.m_VarDefs )
+                    for ( const CVarDefCont * pCont : r->m_VarDefs )
 					{
 						if ( ( i % 0x1ff ) == 0 )
 							PrintPercent( i, count );
@@ -2404,9 +2405,9 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
                         return false;
                     }
 
-                    count = ssize_t(g_Exp.m_VarResDefs.GetCount());
+                    count = ssize_t(r->m_VarResDefs.GetCount());
                     i = 0;
-                    for ( const CVarDefCont * pCont : g_Exp.m_VarResDefs )
+                    for ( const CVarDefCont * pCont : r->m_VarResDefs )
                     {
                         if ( ( i % 0x1ff ) == 0 )
                             PrintPercent( i, count );

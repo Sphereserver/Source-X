@@ -54,6 +54,24 @@ tchar* Str_GetTemp() noexcept
     return AbstractSphereThread::Strings::allocateBuffer();
 }
 
+[[nodiscard]]
+tchar* Str_CopyToTemp(lpctstr pSrc) noexcept
+{
+    lptstr pDest = Str_GetTemp();
+    Str_CopyLimitNull(pDest, pSrc, Str_TempLength());
+    return pDest;
+}
+
+[[nodiscard]]
+lpctstr Str_mtEngineGetSafeTemp(lpctstr pSrc) noexcept
+{
+#if MT_ENGINES
+    return Str_CopyToTemp(pSrc);
+#else
+    return pSrc;
+#endif
+}
+
 
 /*
  * AbstractString

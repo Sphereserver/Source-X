@@ -216,10 +216,13 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
 					Str_CopyLimitNull( pszTmp2, pszArgs, Str_TempLength() );
-                    pChar->ParseScriptText(
+
+                    CScriptExprContext scpContext{._pScriptObjI = pChar};
+                    CExpression::GetExprParser().ParseScriptText(
                         Str_MakeFiltered(pszTmp2),
-                        CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                        scpContext, CScriptTriggerArgsPtr{},
                         &g_Serv, 1 );
+
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -231,7 +234,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				if ( !s.HasArgs() )
 					return false;
 
-				IT_TYPE	needtype = ( iHeadKey == WV_GUILDLIST ) ? IT_STONE_GUILD : IT_STONE_TOWN;
+                const IT_TYPE needtype = ( iHeadKey == WV_GUILDLIST ) ? IT_STONE_GUILD : IT_STONE_TOWN;
 
 				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
@@ -240,13 +243,15 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 						continue;
 
 					++sm_iListIndex;
-
 					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), Str_TempLength());
-                    pStone->ParseScriptText(
+
+                    CScriptExprContext scpContext{._pScriptObjI = pStone};
+                    CExpression::GetExprParser().ParseScriptText(
                         Str_MakeFiltered(pszTmp2),
-                        CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                        scpContext, CScriptTriggerArgsPtr{},
                         &g_Serv, 1);
-					pSrc->SysMessage(pszTmp2);
+
+                    pSrc->SysMessage(pszTmp2);
 				}
 			}
 			break;
@@ -260,10 +265,13 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					CGMPage* pPage = sptrPage.get();
 					++sm_iListIndex;
 					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), Str_TempLength());
-                    pPage->ParseScriptText(
+
+                    CScriptExprContext scpContext{._pScriptObjI = pPage};
+                    CExpression::GetExprParser().ParseScriptText(
                         Str_MakeFiltered(pszTmp2),
-                        CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+                        scpContext, CScriptTriggerArgsPtr{},
                         &g_Serv, 1 );
+
 					pSrc->SysMessage( pszTmp2 );
 				}
 			}
@@ -321,8 +329,8 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		return false;
 	}
 
+    CExpression& expr_parser = CExpression::GetExprParser();
 	bool fScriptMode = false;
-
 	while ( FileRead.ReadTextLine( false ))
 	{
 		tchar *pszTmp = Str_GetTemp();
@@ -333,11 +341,14 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		{
 			// Deal with the stuff preceding the scripts.
 			*pszHead = '\0';
-			pszHead += 26;
-            ParseScriptText( pszTmp,
-                CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+            pszHead += 26;
+
+            CScriptExprContext scpContext{._pScriptObjI = this};
+            expr_parser.ParseScriptText(
+                pszTmp, scpContext, CScriptTriggerArgsPtr{},
                 pSrc, 1 );
-			FileOut.SysMessage( pszTmp );
+
+            FileOut.SysMessage( pszTmp );
 			fScriptMode = true;
 		}
 		else
@@ -375,8 +386,9 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		}
 
 		// Look for stuff we can displace here. %STUFF%
-        ParseScriptText( pszHead,
-            CScriptTriggerArgsPtr{}, CScriptExprContextPtr{},
+        CScriptExprContext scpContext{._pScriptObjI = this};
+        expr_parser.ParseScriptText( pszHead,
+            scpContext, CScriptTriggerArgsPtr{},
             pSrc, 1 );
 		FileOut.SysMessage( pszHead );
 	}

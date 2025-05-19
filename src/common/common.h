@@ -34,10 +34,6 @@
 #include <utility>
 #include <vector>
 
-#include "assertion.h"
-#include "basic_threading.h"
-
-
 // On Windows, Clang with MSVC runtime defines _MSC_VER! (But also __clang__).
 #if !defined(_MSC_VER) || defined(__clang__)
 #   define NON_MSVC_COMPILER 1
@@ -100,6 +96,9 @@
 #else
 #define NOEXCEPT_NODEBUG noexcept
 #endif
+
+#include "assertion.h"
+#include "basic_threading.h"
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:

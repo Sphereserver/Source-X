@@ -846,9 +846,11 @@ bool CWorld::SaveStage() // Save world state in stages.
 		_Ticker._TimedFunctions.r_Write(m_FileData);
 
 		m_FileData.WriteSection("GLOBALS");
-		g_Exp.m_VarGlobals.r_WritePrefix(m_FileData, nullptr);
-
-		g_Exp.m_ListGlobals.r_WriteSave(m_FileData);
+        {
+            auto gReader = g_ExprGlobals.mtEngineLockedReader();
+            gReader->m_VarGlobals.r_WritePrefix(m_FileData, nullptr);
+            gReader->m_ListGlobals.r_WriteSave(m_FileData);
+        }
 
 		const size_t iQty = g_Cfg.m_RegionDefs.size();
 		for ( size_t i = 0; i < iQty; ++i )

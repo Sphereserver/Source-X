@@ -8,17 +8,98 @@
 #include <complex>
 #include <cmath>
 
-tchar CExpression::sm_szMessages[DEFMSG_QTY][DEFMSG_MAX_LEN] =
+
+/////////////////////////////////////////////////////////////////////////
+// - CExprGlobals
+
+tchar CExprGlobals::sm_szDefMessages[DEFMSG_QTY][m_kiDefmsgMaxLen] =
 {
 	#define MSG(a,b) b,
 	#include "../tables/defmessages.tbl"
 };
 
-lpctstr const CExpression::sm_szMsgNames[DEFMSG_QTY] =
+lpctstr const CExprGlobals::sm_szDefMsgNames[DEFMSG_QTY] =
 {
 	#define MSG(a,b) #a,
 	#include "../tables/defmessages.tbl"
 };
+
+void CExprGlobals::UpdateDefMsgDependentData()
+{
+    // Method to be re-evaluated.
+    // At the moment, it's not actually useful, if g_Cfg.GetDefaultMsg returns the pointer to the string
+    //  CExprGlobals::sm_szDefMessages. The memory location does never change, but we might want to modify this behavior,
+    //  or use this function for other global data which is cached in this class.
+
+    //std::lock_guard<MT_DEFAULT_CMUTEX_TYPE> _lock_me(MT_CMUTEX);
+    auto gwriter  = g_ExprGlobals.mtEngineLockedWriter();
+    auto& vardefs = gwriter->m_VarDefs;
+
+    // TODO: get rid of this associative system... what about using a plain simple map/hash map?
+
+    m_SkillTitles_Ninjitsu = std::array<CValStr, m_kiSkillTitlesQty>
+        {{
+            { "", INT32_MIN },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_NEOPHYTE],            (int)(vardefs.GetKeyNum("SKILLTITLE_NEOPHYTE"))     },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_NOVICE],              (int)(vardefs.GetKeyNum("SKILLTITLE_NOVICE"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_APPRENTICE],          (int)(vardefs.GetKeyNum("SKILLTITLE_APPRENTICE"))   },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_JOURNEYMAN],          (int)(vardefs.GetKeyNum("SKILLTITLE_JOURNEYMAN"))   },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_EXPERT],              (int)(vardefs.GetKeyNum("SKILLTITLE_EXPERT"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_ADEPT],               (int)(vardefs.GetKeyNum("SKILLTITLE_ADEPT"))        },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_MASTER],              (int)(vardefs.GetKeyNum("SKILLTITLE_MASTER"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_GRANDMASTER],         (int)(vardefs.GetKeyNum("SKILLTITLE_GRANDMASTER"))  },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_ELDER_NINJITSU],      (int)(vardefs.GetKeyNum("SKILLTITLE_ELDER"))        },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU],  (int)(vardefs.GetKeyNum("SKILLTITLE_LEGENDARY"))    },
+            { nullptr, INT32_MAX }
+        }};
+
+    m_SkillTitles_Bushido = std::array<CValStr, m_kiSkillTitlesQty>
+        {{
+            { "", INT32_MIN },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_NEOPHYTE],            (int)(vardefs.GetKeyNum("SKILLTITLE_NEOPHYTE"))     },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_NOVICE],              (int)(vardefs.GetKeyNum("SKILLTITLE_NOVICE"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_APPRENTICE],          (int)(vardefs.GetKeyNum("SKILLTITLE_APPRENTICE"))   },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_JOURNEYMAN],          (int)(vardefs.GetKeyNum("SKILLTITLE_JOURNEYMAN"))   },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_EXPERT],              (int)(vardefs.GetKeyNum("SKILLTITLE_EXPERT"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_ADEPT],               (int)(vardefs.GetKeyNum("SKILLTITLE_ADEPT"))        },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_MASTER],              (int)(vardefs.GetKeyNum("SKILLTITLE_MASTER"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_GRANDMASTER],         (int)(vardefs.GetKeyNum("SKILLTITLE_GRANDMASTER"))  },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_ELDER_BUSHIDO],       (int)(vardefs.GetKeyNum("SKILLTITLE_ELDER"))        },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO],   (int)(vardefs.GetKeyNum("SKILLTITLE_LEGENDARY"))    },
+            { nullptr, INT32_MAX }
+        }};
+
+    m_SkillTitles_Generic = std::array<CValStr, m_kiSkillTitlesQty>
+        {{
+            { "", INT32_MIN },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_NEOPHYTE],            (int)(vardefs.GetKeyNum("SKILLTITLE_NEOPHYTE"))     },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_NOVICE],              (int)(vardefs.GetKeyNum("SKILLTITLE_NOVICE"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_APPRENTICE],          (int)(vardefs.GetKeyNum("SKILLTITLE_APPRENTICE"))   },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_JOURNEYMAN],          (int)(vardefs.GetKeyNum("SKILLTITLE_JOURNEYMAN"))   },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_EXPERT],              (int)(vardefs.GetKeyNum("SKILLTITLE_EXPERT"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_ADEPT],               (int)(vardefs.GetKeyNum("SKILLTITLE_ADEPT"))        },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_MASTER],              (int)(vardefs.GetKeyNum("SKILLTITLE_MASTER"))       },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_GRANDMASTER],         (int)(vardefs.GetKeyNum("SKILLTITLE_GRANDMASTER"))  },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_ELDER],               (int)(vardefs.GetKeyNum("SKILLTITLE_ELDER"))        },
+            { sm_szDefMessages[DEFMSG_SKILLTITLE_LEGENDARY],           (int)(vardefs.GetKeyNum("SKILLTITLE_LEGENDARY"))    },
+            { nullptr, INT32_MAX }
+        }};
+}
+
+lpctstr CExprGlobals::SkillTitle(SKILL_TYPE skill, uint uiVal) const
+{
+    // TODO: CValStr::FindName is hack-ish as hell, please use another way of storing and getting this stuff, like maps.
+    switch (skill)
+    {
+        case SKILL_NINJITSU:
+            return m_SkillTitles_Ninjitsu[0].FindName(uiVal);
+        case SKILL_BUSHIDO:
+            return m_SkillTitles_Bushido[0].FindName(uiVal);
+        default:
+            break;
+    }
+    return m_SkillTitles_Generic[0].FindName(uiVal);
+}
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -426,14 +507,14 @@ int Str_ParseCmdsAdv(tchar * pszCmdLine, tchar ** ppCmd, int iMax, const tchar *
 
 bool IsValidResourceDef( lpctstr ptcTest )
 {
-	return (nullptr != g_Exp.m_VarResDefs.CheckParseKey( ptcTest ));
+    return (nullptr != g_ExprGlobals.mtEngineLockedReader()->m_VarResDefs.CheckParseKey( ptcTest ));
 }
 
 bool IsValidGameObjDef( lpctstr ptcTest )
 {
 	if (!IsSimpleNumberString(ptcTest))
 	{
-		const CVarDefCont * pVarBase = g_Exp.m_VarResDefs.CheckParseKey( ptcTest );
+        const CVarDefCont * pVarBase = g_ExprGlobals.mtEngineLockedReader()->m_VarResDefs.CheckParseKey( ptcTest );
 		if ( pVarBase == nullptr )
 			return false;
 
@@ -539,32 +620,45 @@ CExpression::CExpression() noexcept :
 {
 }
 
-llong CExpression::GetSingle( lpctstr & pszArgs )
+CExpression& CExpression::GetExprParser() // static
+{
+    auto thread = static_cast<AbstractSphereThread*>(ThreadHolder::get().current());
+    return *(thread->m_pExpr.get());
+    /*
+    // If we need to use it at startup (or deep shutdown?) when there's no AbstractSphereThread instance.
+    static CExpression expr_thread_unsafe;
+    return !thread
+        ? expr_thread_unsafe
+        : *(thread->m_pExpr.get());
+    */
+}
+
+llong CExpression::GetSingle(lpctstr & refStrExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetSingle");
 	// Parse just a single expression without any operators or ranges.
-	ASSERT(pszArgs);
-	GETNONWHITESPACE( pszArgs );
+    ASSERT(refStrExpr);
+    GETNONWHITESPACE( refStrExpr );
 
-	lpctstr ptcStartingString = pszArgs;
-	if (pszArgs[0]=='.')
-		++pszArgs;
+    lpctstr ptcStartingString = refStrExpr;
+    if (refStrExpr[0]=='.')
+        ++refStrExpr;
 
-	if ( pszArgs[0] == '0' )	// leading '0' = hex value.
+    if ( refStrExpr[0] == '0' )	// leading '0' = hex value.
 	{
 		// A hex value.
-		if ( pszArgs[1] == '.' )	// leading 0. means it really is decimal.
+        if ( refStrExpr[1] == '.' )	// leading 0. means it really is decimal.
 		{
-			pszArgs += 2;
+            refStrExpr += 2;
 			goto try_dec;
 		}
 
-		lpctstr pStart = pszArgs;
+        lpctstr pStart = refStrExpr;
 		llong val = 0;
         ushort ndigits = 0;
 		while (true)
 		{
-			tchar ch = *pszArgs;
+            tchar ch = *refStrExpr;
 			if ( IsDigit(ch) )
 				ch -= '0';
 			else
@@ -574,7 +668,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 				{
 					if ( ch == '.' && pStart[0] != '0' )	// ok i'm confused. it must be decimal.
 					{
-						pszArgs = pStart;
+                        refStrExpr = pStart;
 						goto try_dec;
 					}
 					break;
@@ -584,7 +678,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 			}
 			val *= 0x10;
 			val += ch;
-            ++ pszArgs;
+            ++ refStrExpr;
 		}
         if (ndigits <= 8)
             return (llong)(int)val;
@@ -603,53 +697,53 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
         return iVal.value();
     }
     */
-	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
+    else if ( refStrExpr[0] == '.' || IsDigit(refStrExpr[0]) )
 	{
 		// A decimal number
 try_dec:
 		llong iVal = 0;
-		for ( ; ; ++pszArgs )
+    for ( ; ; ++refStrExpr )
 		{
-			if ( *pszArgs == '.' )
+        if ( *refStrExpr == '.' )
 				continue;	// just skip this.
-			if ( ! IsDigit(*pszArgs) )
+        if ( ! IsDigit(*refStrExpr) )
 				break;
 			iVal *= 10;
-			iVal += (llong)(*pszArgs) - '0';
+        iVal += (llong)(*refStrExpr) - '0';
 		}
 		return iVal;
 	}
-	else if ( ! _ISCSYMF(pszArgs[0]) )
+else if ( ! _ISCSYMF(refStrExpr[0]) )
 	{
     //#pragma region maths  // MSVC specific
 		// some sort of math op ?
 
-		switch ( pszArgs[0] )
+        switch ( refStrExpr[0] )
 		{
 		case '{':
-			++pszArgs;
-			return GetRangeNumber( pszArgs );
+                ++refStrExpr;
+            return GetRangeNumber( refStrExpr );
 		case '[':
 		case '(': // Parse out a sub expression.
-			++pszArgs;
-			return GetVal( pszArgs );
+            ++refStrExpr;
+            return GetVal( refStrExpr );
 		case '+':
-			++pszArgs;
+            ++refStrExpr;
 			break;
 		case '-':
-			++pszArgs;
-			return -GetSingle( pszArgs );
+            ++refStrExpr;
+            return -GetSingle( refStrExpr );
 		case '~':	// Bitwise not.
-			++pszArgs;
-			return ~GetSingle( pszArgs );
+            ++refStrExpr;
+            return ~GetSingle( refStrExpr );
 		case '!':	// boolean not.
-			++pszArgs;
-			if ( pszArgs[0] == '=' )  // odd condition such as (!=x) which is always true of course.
+            ++refStrExpr;
+            if ( refStrExpr[0] == '=' )  // odd condition such as (!=x) which is always true of course.
 			{
-				++pszArgs;		// so just skip it. and compare it to 0
-				return GetSingle( pszArgs );
+                ++refStrExpr;		// so just skip it. and compare it to 0
+                return GetSingle( refStrExpr );
 			}
-			return !GetSingle( pszArgs );
+            return !GetSingle( refStrExpr );
 		case ';':	// seperate field.
 		case ',':	// seperate field.
 		case '\0':
@@ -662,15 +756,15 @@ try_dec:
 	{
 		// Symbol or intrinsinc function ?
 
-		INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pszArgs, sm_IntrinsicFunctions, ARRAY_COUNT(sm_IntrinsicFunctions)-1 );
+        INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( refStrExpr, sm_IntrinsicFunctions, ARRAY_COUNT(sm_IntrinsicFunctions)-1 );
 		if ( iIntrinsic >= 0 )
 		{
 			size_t iLen = strlen(sm_IntrinsicFunctions[iIntrinsic]);
-			if ( strchr("( ", pszArgs[iLen]) )
+            if ( strchr("( ", refStrExpr[iLen]) )
 			{
-				pszArgs += (iLen + 1);
+                refStrExpr += (iLen + 1);
 				tchar * pszArgsNext;
-				Str_Parse( const_cast<tchar*>(pszArgs), &(pszArgsNext), ")" );
+                Str_Parse( const_cast<tchar*>(refStrExpr), &(pszArgsNext), ")" );
 
 				tchar * ppCmd[5];
 				llong iResult;
@@ -680,10 +774,10 @@ try_dec:
 				{
 					case INTRINSIC_ID:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-                            iResult = ResGetIndex((dword)GetVal(pszArgs));
+                            iResult = ResGetIndex((dword)GetVal(refStrExpr));
 						}
 						else
 						{
@@ -695,7 +789,7 @@ try_dec:
 
                     case INTRINSIC_MAX:
                     {
-                        iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
                         if ( iCount < 2 )
                             iResult = 0;
                         else
@@ -707,7 +801,7 @@ try_dec:
 
                     case INTRINSIC_MIN:
                     {
-                        iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
                         if ( iCount < 2 )
                             iResult = 0;
                         else
@@ -722,9 +816,9 @@ try_dec:
 						iCount = 0;
 						iResult = 0;
 
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
-							llong iArgument = GetVal(pszArgs);
+                            llong iArgument = GetVal(refStrExpr);
 							if ( iArgument <= 0 )
 							{
 								DEBUG_ERR(( "Exp_GetVal: (x)Log(%lld) is %s\n", iArgument, (!iArgument ? "infinite" : "undefined") ));
@@ -733,21 +827,21 @@ try_dec:
 							{
 								iCount = 1;
 
-								if ( strchr(pszArgs, ',') )
+                                if ( strchr(refStrExpr, ',') )
 								{
 									++iCount;
-									SKIP_ARGSEP(pszArgs);
-									if ( !strcmpi(pszArgs, "e") )
+                                    SKIP_ARGSEP(refStrExpr);
+                                    if ( !strcmpi(refStrExpr, "e") )
 									{
 										iResult = (llong)log( (double)iArgument );
 									}
-									else if ( !strcmpi(pszArgs, "pi") )
+                                    else if ( !strcmpi(refStrExpr, "pi") )
 									{
 										iResult = (llong)(log( (double)iArgument ) / log( M_PI ) );
 									}
 									else
 									{
-										llong iBase = GetVal(pszArgs);
+                                        llong iBase = GetVal(refStrExpr);
 										if ( iBase <= 0 )
 										{
 											DEBUG_ERR(( "Exp_GetVal: (%lld)Log(%lld) is %s\n", iBase, iArgument, (!iBase ? "infinite" : "undefined") ));
@@ -766,10 +860,10 @@ try_dec:
 
 					case INTRINSIC_NAPIERPOW:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)exp( (double)GetVal( pszArgs ) );
+                            iResult = (llong)exp( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -784,9 +878,9 @@ try_dec:
 						iCount = 0;
 						iResult = 0;
 
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
-							llong iTosquare = GetVal(pszArgs);
+                            llong iTosquare = GetVal(refStrExpr);
 
 							if (iTosquare >= 0)
 							{
@@ -806,10 +900,10 @@ try_dec:
 
 					case INTRINSIC_SIN:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)sin( (double)GetVal( pszArgs ) );
+                            iResult = (llong)sin( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -821,10 +915,10 @@ try_dec:
 
 					case INTRINSIC_ARCSIN:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)asin( (double)GetVal( pszArgs ) );
+                            iResult = (llong)asin( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -836,10 +930,10 @@ try_dec:
 
 					case INTRINSIC_COS:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)cos( (double)GetVal( pszArgs ) );
+                            iResult = (llong)cos( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -851,10 +945,10 @@ try_dec:
 
 					case INTRINSIC_ARCCOS:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)acos( (double)GetVal( pszArgs ) );
+                            iResult = (llong)acos( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -866,10 +960,10 @@ try_dec:
 
 					case INTRINSIC_TAN:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)tan( (double)GetVal( pszArgs ) );
+                            iResult = (llong)tan( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -881,10 +975,10 @@ try_dec:
 
 					case INTRINSIC_ARCTAN:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = (llong)atan( (double)GetVal( pszArgs ) );
+                            iResult = (llong)atan( (double)GetVal( refStrExpr ) );
 						}
 						else
 						{
@@ -896,7 +990,7 @@ try_dec:
 
 					case INTRINSIC_StrIndexOf:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 3, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 3, "," );
 						if ( iCount < 2 )
 							iResult = -1;
 						else
@@ -905,7 +999,7 @@ try_dec:
 
 					case INTRINSIC_STRMATCH:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 0;
 						else
@@ -914,7 +1008,7 @@ try_dec:
 
 					case INTRINSIC_STRREGEX:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 0;
 						else
@@ -930,7 +1024,7 @@ try_dec:
 
 					case INTRINSIC_RANDBELL:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 0;
 						else
@@ -939,10 +1033,10 @@ try_dec:
 
 					case INTRINSIC_STRASCII:
 					{
-						if ( *pszArgs )
+                        if ( *refStrExpr )
 						{
 							iCount = 1;
-							iResult = pszArgs[0];
+                            iResult = refStrExpr[0];
 						}
 						else
 						{
@@ -953,7 +1047,7 @@ try_dec:
 
 					case INTRINSIC_RAND:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
 						if ( iCount <= 0 )
 							iResult = 0;
 						else
@@ -971,7 +1065,7 @@ try_dec:
 
 					case INTRINSIC_STRCMP:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 1;
 						else
@@ -980,7 +1074,7 @@ try_dec:
 
 					case INTRINSIC_STRCMPI:
 					{
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 1;
 						else
@@ -990,26 +1084,26 @@ try_dec:
 					case INTRINSIC_STRLEN:
 					{
 						iCount = 1;
-						iResult = strlen(pszArgs);
+                        iResult = strlen(refStrExpr);
 					} break;
 
 					case INTRINSIC_ISOBSCENE:
 					{
 						iCount = 1;
-						iResult = g_Cfg.IsObscene( pszArgs );
+                        iResult = g_Cfg.IsObscene( refStrExpr );
 					} break;
 
 					case INTRINSIC_ISNUMBER:
 					{
 						iCount = 1;
-                        SKIP_NONNUM( pszArgs );
-						iResult = IsStrNumeric( pszArgs );
+                        SKIP_NONNUM( refStrExpr );
+                        iResult = IsStrNumeric( refStrExpr );
 					} break;
 
 					case INTRINSIC_QVAL:
 					{
 						// Here is handled the intrinsic QVAL form: QVAL(VALUE1,VALUE2,LESSTHAN,EQUAL,GREATERTHAN)
-						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 5, "," );
+                        iCount = Str_ParseCmds( const_cast<tchar*>(refStrExpr), ppCmd, 5, "," );
 						if (iCount < 3)
 						{
 							iResult = 0;
@@ -1036,7 +1130,7 @@ try_dec:
 					case INTRINSIC_ABS:
 					{
 						iCount = 1;
-						iResult = llabs(GetVal(pszArgs));
+                        iResult = llabs(GetVal(refStrExpr));
 					} break;
 
 					default:
@@ -1045,7 +1139,7 @@ try_dec:
 						break;
 				}
 
-				pszArgs = pszArgsNext;
+                refStrExpr = pszArgsNext;
 
 				if ( !iCount )
 				{
@@ -1058,13 +1152,18 @@ try_dec:
 		}
 
 		// Must be a symbol of some sort ?
-        lpctstr ptcArgsOriginal = pszArgs;
+
+        //[[maybe_unused]] auto _ = g_ExprGlobals.mtEngineGetLockShared();
+        //auto globals_reader    = g_ExprGlobals.unsafeReader();
+        auto reader = g_ExprGlobals.mtEngineLockedReader();
+
+        lpctstr ptcArgsOriginal = refStrExpr;
 		llong llVal;
-		if ( m_VarGlobals.GetParseVal_Advance( pszArgs, &llVal ) )  // VAR.
+        if ( reader->m_VarGlobals.GetParseVal_Advance( refStrExpr, &llVal ) )  // VAR.
 			return llVal;
-        if ( m_VarResDefs.GetParseVal( ptcArgsOriginal, &llVal ) )  // RESDEF.
+        if ( reader->m_VarResDefs.GetParseVal( ptcArgsOriginal, &llVal ) )  // RESDEF.
             return llVal;
-		if ( m_VarDefs.GetParseVal( ptcArgsOriginal, &llVal ) )     // DEF.
+        if ( reader->m_VarDefs.GetParseVal( ptcArgsOriginal, &llVal ) )     // DEF.
 			return llVal;
 	}
 //#pragma endregion intrinsics  // MSVC specific
@@ -1084,14 +1183,14 @@ try_dec:
 	return 0;
 }
 
-llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
+llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
-	GETNONWHITESPACE(pExpr);
+    GETNONWHITESPACE(refStrExpr);
 
 	// Look for math type operator and eventually apply it to the second operand (which we evaluate here if a valid operator is found).
 	llong llValSecond;
-	switch ( pExpr[0] )
+    switch ( refStrExpr[0] )
 	{
 		case '\0':
 			break;
@@ -1099,59 +1198,59 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 		case ')':  // expression end markers.
 		case '}':
 		case ']':
-			++pExpr;	// consume this.
+            ++refStrExpr;	// consume this.
 			break;
 
 		case '+':
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			llVal += llValSecond;
 			break;
 
 		case '-':
-			llValSecond = GetVal(pExpr);
+            llValSecond = GetVal(refStrExpr);
 			//++pExpr; No need to consume the negative sign, we need to keep it!
 			llVal += llValSecond; // a subtraction is an addiction with a negative number.
 			break;
 		case '*':
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			llVal *= llValSecond;
 			break;
 
 		case '|':
-			++pExpr;
-			if ( pExpr[0] == '|' )	// boolean ?
+            ++refStrExpr;
+            if ( refStrExpr[0] == '|' )	// boolean ?
 			{
-				++pExpr;
-				llValSecond = GetVal(pExpr);
+                ++refStrExpr;
+                llValSecond = GetVal(refStrExpr);
 				llVal = (llValSecond || llVal);
 			}
 			else	// bitwise
 			{
-				llValSecond = GetVal(pExpr);
+                llValSecond = GetVal(refStrExpr);
 				llVal |= llValSecond;
 			}
 			break;
 
 		case '&':
-			++pExpr;
-			if ( pExpr[0] == '&' )	// boolean ?
+            ++refStrExpr;
+            if ( refStrExpr[0] == '&' )	// boolean ?
 			{
-				++pExpr;
-				llValSecond = GetVal(pExpr);
+                ++refStrExpr;
+                llValSecond = GetVal(refStrExpr);
 				llVal = (llValSecond && llVal);	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
 			{
-				llValSecond = GetVal(pExpr);
+                llValSecond = GetVal(refStrExpr);
 				llVal &= llValSecond;
 			}
 			break;
 
 		case '/':
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			if (!llValSecond)
 			{
 				g_Log.EventError("Evaluating math: Divide by 0\n");
@@ -1161,8 +1260,8 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			break;
 
 		case '%':
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			if (!llValSecond)
 			{
 				g_Log.EventError("Evaluating math: Modulo 0\n");
@@ -1172,72 +1271,72 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			break;
 
 		case '^':
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			llVal ^= llValSecond;
 			break;
 
 		case '>': // boolean
-			++pExpr;
-			if ( pExpr[0] == '=' )	// boolean ?
+            ++refStrExpr;
+            if ( refStrExpr[0] == '=' )	// boolean ?
 			{
-				++pExpr;
-				llValSecond = GetVal(pExpr);
+                ++refStrExpr;
+                llValSecond = GetVal(refStrExpr);
 				llVal = ( llVal >= llValSecond );
 			}
-			else if ( pExpr[0] == '>' )	// shift
+            else if ( refStrExpr[0] == '>' )	// shift
 			{
-				++pExpr;
-				llValSecond = GetVal(pExpr);
+                ++refStrExpr;
+                llValSecond = GetVal(refStrExpr);
 				llVal >>= llValSecond;
 			}
 			else
 			{
-				llValSecond = GetVal(pExpr);
+                llValSecond = GetVal(refStrExpr);
 				llVal = (llVal > llValSecond);
 			}
 			break;
 
 		case '<': // boolean
-			++pExpr;
-			if ( pExpr[0] == '=' )	// boolean ?
+            ++refStrExpr;
+            if ( refStrExpr[0] == '=' )	// boolean ?
 			{
-				++pExpr;
-				llValSecond = GetVal(pExpr);
+                ++refStrExpr;
+                llValSecond = GetVal(refStrExpr);
 				llVal = ( llVal <= llValSecond );
 			}
-			else if ( pExpr[0] == '<' )	// shift
+            else if ( refStrExpr[0] == '<' )	// shift
 			{
-				++pExpr;
-				llValSecond = GetVal(pExpr);
+                ++refStrExpr;
+                llValSecond = GetVal(refStrExpr);
 				llVal <<= llValSecond;
 			}
 			else
 			{
-				llValSecond = GetVal(pExpr);
+                llValSecond = GetVal(refStrExpr);
 				llVal = (llVal < llValSecond);
 			}
 			break;
 
 		case '!':
-			++pExpr;
-			if ( pExpr[0] != '=' )
+            ++refStrExpr;
+            if ( refStrExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			llVal = ( llVal != llValSecond );
 			break;
 
 		case '=': // boolean
-			while ( pExpr[0] == '=' )
-				++pExpr;
-			llValSecond = GetVal(pExpr);
+            while ( refStrExpr[0] == '=' )
+                ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			llVal = ( llVal == llValSecond );
 			break;
 
 		case '@':
-			++pExpr;
-			llValSecond = GetVal(pExpr);
+            ++refStrExpr;
+            llValSecond = GetVal(refStrExpr);
 			if (llVal < 0)
 			{
                 llVal = cexpression_power(llVal, llValSecond);
@@ -1255,7 +1354,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 	return llVal;
 }
 
-llong CExpression::GetVal( lpctstr & pExpr )
+llong CExpression::GetVal(lpctstr & refStrExpr )
 {
 	// This function moves the pointer forward, so you can retrieve the value only once!
 
@@ -1281,58 +1380,58 @@ llong CExpression::GetVal( lpctstr & pExpr )
 	//	{ animal_colors 1 no_colors 1 } // weighted range
 	//	{ red_colors 1 {34 39} 1 }		// same (red_colors expands to a range)
 
-	if ( pExpr == nullptr )
+    if ( refStrExpr == nullptr )
 		return 0;
 
 	if (_iGetVal_Reentrant >= 128 )
 	{
-		g_Log.EventError( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", pExpr );
+        g_Log.EventError( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", refStrExpr );
 		return 0;
 	}
 
 	++_iGetVal_Reentrant;
 
 	// Get the first operand value: it may be a number or an expression
-	llong llVal = GetSingle(pExpr);
+    llong llVal = GetSingle(refStrExpr);
 
 	// Check if there is an operator (mathematical or logical), in that case apply it to the second operand (which we evaluate again with GetSingle).
-	llVal = GetValMath(llVal, pExpr);
+    llVal = GetValMath(llVal, refStrExpr);
 
 	--_iGetVal_Reentrant;
 
 	return llVal;
 }
 
-int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool bNoWarn)
+int CExpression::GetRangeVals(lpctstr & refStrExpr, int64 * piVals, int iMaxQty, bool fNoWarn)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeVals");
 	// Get a list of values.
 
-	if (pExpr == nullptr)
+    if (refStrExpr == nullptr)
 		return 0;
 	ASSERT(piVals);
 
 	int iQty = 0;
-	while (pExpr[0] != '\0')
+    while (refStrExpr[0] != '\0')
 	{
-		if (pExpr[0] == ';')	// seperate field - is this used anymore?
+        if (refStrExpr[0] == ';')	// seperate field - is this used anymore?
 			return iQty;
-		if (pExpr[0] == ',')
-			++pExpr;
+        if (refStrExpr[0] == ',')
+            ++refStrExpr;
 
-		piVals[iQty] = GetSingle(pExpr);
+        piVals[iQty] = GetSingle(refStrExpr);
 		if (++iQty >= iMaxQty)
 			return iQty;
 
-		GETNONWHITESPACE(pExpr);
+        GETNONWHITESPACE(refStrExpr);
 
 		// Look for math type operator.
-		switch (pExpr[0])
+        switch (refStrExpr[0])
 		{
 		case ')':  // expression end markers.
 		case '}':
 		case ']':
-			++pExpr;	// consume this and end.
+            ++refStrExpr;	// consume this and end.
 			return iQty;
 
 		case '+':
@@ -1344,45 +1443,45 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool
 		case '>':
 		case '|':
 		case '&':
-			piVals[iQty - 1] = GetValMath(piVals[iQty - 1], pExpr);
+            piVals[iQty - 1] = GetValMath(piVals[iQty - 1], refStrExpr);
 			return iQty;
 		}
 	}
 
-	if (!bNoWarn)
+    if (!fNoWarn)
 		g_Log.EventError("Range isn't closed by a '}' character\n");
 	return iQty;
 }
 
 
-int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataArray &psSubExprData, int iMaxQty) // static
+int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 {
 	ADDTOCALLSTACK("CExpression::GetConditionalSubexpressions");
 	// Get the start and end pointers for each logical subexpression (delimited by brackets or by logical operators || and &&) inside a conditional statement (IF/ELIF/ELSEIF and QVAL).
 	// Parse from left to start (like it was always done in Sphere).
     // Start and end pointers are inclusive (pointed values are valid chars, the end pointer doesn't necessarily point to '\0').
 
-	if (pExpr == nullptr)
+    if (refStrExpr == nullptr)
 		return 0;
-	//ASSERT(pSubexprPos);
 
-	//memset((void*)&pSubexprPos, 0, ARRAY_COUNT(pSubexprPos));
-	int iSubexprQty = 0;	// number of subexpressions
-    using SType = CScriptSubExprData::Type;
-	while (pExpr[0] != '\0')
+    using SType = CScriptSubExprState::Type;
+    memset(m_parsingSubexprsStates, 0, sizeof(m_parsingSubexprsStates));
+    uint uiSubexprQty = 0;	// number of subexpressions
+
+    while (refStrExpr[0] != '\0')
 	{
-		if (++iSubexprQty >= iMaxQty)
+        if (++uiSubexprQty >= sm_uiMaxConditionalSubexprs)
 		{
-			g_Log.EventWarn("Exceeded maximum allowed number of subexpressions (%d). Parsing halted.\n", iMaxQty);
-			return iSubexprQty;
+            g_Log.EventWarn("Exceeded maximum allowed number of subexpressions (%u). Parsing halted.\n", sm_uiMaxConditionalSubexprs);
+            return uiSubexprQty;
 		}
 
-		GETNONWHITESPACE(pExpr);
-        CScriptSubExprData& sCurSubexpr = psSubExprData[iSubexprQty - 1];
-		tchar ch = pExpr[0];
+        GETNONWHITESPACE(refStrExpr);
+        CScriptSubExprState& sCurSubexpr = m_parsingSubexprsStates[uiSubexprQty - 1];
+        tchar ch = refStrExpr[0];
 
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
-		sCurSubexpr = {pExpr, nullptr, SType::None, 0};
+        sCurSubexpr = {refStrExpr, nullptr, SType::None, 0};
 
         //  -- What's an expression and what's a subexpression.
         // An expression can contain a single statement, a single operation (enclosed, or not, by curly brackets), like: IF <EVAL 1> or IF <EVAL 1> == 1.
@@ -1406,10 +1505,10 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
         {
             // Remember that i'm interested only in the special case of subexpressions preceded by '!'.
             //	If it's inside the subexpression, it will already be handled correctly.
-            ptcTopLevelNegation = pExpr;
-			++pExpr;
-			GETNONWHITESPACE(pExpr);
-			ch = *pExpr;
+            ptcTopLevelNegation = refStrExpr;
+            ++refStrExpr;
+            GETNONWHITESPACE(refStrExpr);
+            ch = *refStrExpr;
 		}
 
         // Helper lambda functions for the next section.
@@ -1470,8 +1569,8 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
         // This ensures that we begin every parsing loop without any open curly bracket.
 
         // Start of a expression within curved brackets?
-        lptstr ptcCurSubexprStart = pExpr;
-        lptstr ptcTopBracket = (ch == '(') ? pExpr : nullptr;
+        lptstr ptcCurSubexprStart = refStrExpr;
+        lptstr ptcTopBracket = (ch == '(') ? refStrExpr : nullptr;
 
         // -- Done with preliminar expression analysis. Now look for subexpressions.
         lptstr ptcLastClosingBracket = nullptr; // Needs to be preserved in the subexpression parsing.
@@ -1486,14 +1585,14 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
                 // We could have encountered one of the situations below and already found the end of the subexpression, or we could need to find it here.
 				if (sCurSubexpr.ptcEnd == nullptr)
 				{
-					sCurSubexpr.ptcEnd = pExpr;
+                    sCurSubexpr.ptcEnd = refStrExpr;
                     if (ptcTopBracket && ptcLastClosingBracket)
                     {
                         lptstr ptcLineLastClosingBracket = findLastClosingBracket(ptcCurSubexprStart);
                         // ptcLastClosingBracket: the last closing bracket found while parsing the subexpression (might not be at the end of the line).
                         // ptcExprLastClosingBracket: the last closing bracket ')', if any, of the string. The function used does NOT check if that's a valid closing bracket
                         //  (eg. if in the string for every opening bracket there is a closing bracket).
-						if (iSubexprQty == 1)
+                        if (uiSubexprQty == 1)
 						{
                             if (nullptr == ptcLineLastClosingBracket)
                             {
@@ -1505,7 +1604,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 								// I'm here because the whole expression is enclosed by parentheses
 							    // + 1 because i want to point to the character after the ')', even if it's the string terminator.
 								sCurSubexpr.ptcEnd = ptcLastClosingBracket + 1;
-                                sCurSubexpr.uiType |= CScriptSubExprData::TopParenthesizedExpr;
+                                sCurSubexpr.uiType |= CScriptSubExprState::TopParenthesizedExpr;
 							}
                             else
                             {
@@ -1520,11 +1619,11 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 
 			else if (ch == '(')
 			{
-                if (ptcCurSubexprStart == pExpr)
+                if (ptcCurSubexprStart == refStrExpr)
                 {
                     // Start of a subexpression delimited by brackets (it can be preceded by an operator like '!', handled before).
                     // Now i want only to see where's the matching closing bracket.
-                    sCurSubexpr.ptcStart = pExpr;
+                    sCurSubexpr.ptcStart = refStrExpr;
                 }
                 else
                 {
@@ -1548,36 +1647,36 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 				}
 
                 // Just skip what's enclosed in the subexpression.
-                ptcLastClosingBracket = skipBracketedSubexpression(pExpr);
+                ptcLastClosingBracket = skipBracketedSubexpression(refStrExpr);
                 if (ptcLastClosingBracket != nullptr)
-                    pExpr = ptcLastClosingBracket;
+                    refStrExpr = ptcLastClosingBracket;
                 else
                 {
                     g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
-                    sCurSubexpr.ptcEnd = pExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
-                    return iSubexprQty;
+                    sCurSubexpr.ptcEnd = refStrExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
+                    return uiSubexprQty;
                 }
 
 				// Okay, i've eaten the expression in brackets, now fall through the rest of the loop and continue.
 			}
 
-			else if ((ch == '|') && (pExpr[1] == '|'))
+            else if ((ch == '|') && (refStrExpr[1] == '|'))
 			{
 				// Logical two-way OR operator: ||
 				if (sCurSubexpr.ptcEnd == nullptr)
-					sCurSubexpr.ptcEnd = pExpr;
+                    sCurSubexpr.ptcEnd = refStrExpr;
 				sCurSubexpr.uiType = SType::Or  | (sCurSubexpr.uiType & ~SType::None);
-				pExpr += 2u; // Skip the second char of the operator
+                refStrExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
 
-			else if ((ch == '&') && (pExpr[1] == '&'))
+            else if ((ch == '&') && (refStrExpr[1] == '&'))
 			{
 				// Logical two-way AND operator: &&
 				if (sCurSubexpr.ptcEnd == nullptr)
-					sCurSubexpr.ptcEnd = pExpr;
+                    sCurSubexpr.ptcEnd = refStrExpr;
 				sCurSubexpr.uiType = SType::And | (sCurSubexpr.uiType & ~SType::None);
-				pExpr += 2u; // Skip the second char of the operator
+                refStrExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
 
@@ -1588,14 +1687,16 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 				if (ch == '<')
 				{
 					// This can be: <, <= or the start of a bracketed expression < >
-					if (pExpr[1] == '=')
+                    if (refStrExpr[1] == '=')
 					{
 						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
-						pExpr += 1u;
+                        refStrExpr += 1u;
 					}
 					else
 					{
-                        const ushort prevSubexprType = ((iSubexprQty == 1) ? (ushort)SType::None : psSubExprData[iSubexprQty - 2].uiType);
+                        const ushort prevSubexprType = ((uiSubexprQty == 1)
+                                    ? (ushort)SType::None
+                                    : m_parsingSubexprsStates[uiSubexprQty - 2].uiType);
 						if ((prevSubexprType & SType::None))
 						{
 							// This subexpr is not preceded by a two-way operator, so probably i'm an operator: skip me.
@@ -1606,14 +1707,14 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 						else
 						{
 							// This subexpr is preceded by a two-way operator, so probably i'm not another operator, rather a < > expression.
-							lptstr pExprSkipped = pExpr;
+                            lptstr pExprSkipped = refStrExpr;
 							Str_SkipEnclosedAngularBrackets(pExprSkipped);
-							if (pExpr != pExprSkipped)
+                            if (refStrExpr != pExprSkipped)
 							{
 								// I actually have something enclosed in angular brackets.
 								// The function above moves the pointer after the last closing bracket '>', but we want to point here to it, not the character after.
-                                pExpr = pExprSkipped;
-								ch = *pExpr;
+                                refStrExpr = pExprSkipped;
+                                ch = *refStrExpr;
                                 continue;   // This allows us to skip the "ch = *(++pExpr);" below, we don't want to advance further the pointer.
 							}
 						}
@@ -1622,10 +1723,10 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 				}
 				else if (ch == '>')
 				{
-					if (pExpr[1] == '=')
+                    if (refStrExpr[1] == '=')
 					{
 						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
-						pExpr += 1u;
+                        refStrExpr += 1u;
 					}
 					else
 					{
@@ -1635,15 +1736,15 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 				// End of arithmetic subexpression parsing.
 			}
 
-			ch = *(++pExpr);
+            ch = *(++refStrExpr);
 		} // End of the subexpression while loop
 	} // End of the main while loop
 
 	// Now that we found the subexpressions, prepare them for their evaluation.
 	lptstr ptcStart, ptcEnd;
-	for (int i = 0; i < iSubexprQty; ++i)
+    for (uint i = 0; i < uiSubexprQty; ++i)
 	{
-        CScriptSubExprData& sCurSubexpr = psSubExprData[i];
+        CScriptSubExprState& sCurSubexpr = m_parsingSubexprsStates[i];
 		ptcStart = sCurSubexpr.ptcStart;
 		ptcEnd = sCurSubexpr.ptcEnd;
 
@@ -1677,7 +1778,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& pExpr, CScriptSubExprDataA
 		sCurSubexpr.ptcEnd   = ptcEnd;
 	}
 
-	return iSubexprQty;
+    return uiSubexprQty;
 }
 
 
@@ -1768,7 +1869,7 @@ end_w_error:
 	return iQty;
 }
 
-int64 CExpression::GetRangeNumber(lpctstr & pExpr)
+int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeNumber");
 
@@ -1780,7 +1881,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	//	of the elements and then only the element which was randomly chosen.
 
 	lpctstr pElementsStart[kiRangeMaxArgs][2] {};
-	int iQty = GetRangeArgsPos( pExpr, pElementsStart, false );	// number of arguments (not of value-weight couples)
+    int iQty = GetRangeArgsPos( refStrExpr, pElementsStart, false );	// number of arguments (not of value-weight couples)
 
 	if (iQty == 0)
 		return 0;
@@ -1883,7 +1984,7 @@ int64 CExpression::GetRangeNumber(lpctstr & pExpr)
 	return GetSingle(pToParseCasted);
 }
 
-CSString CExpression::GetRangeString(lpctstr & pExpr)
+CSString CExpression::GetRangeString(lpctstr & refStrExpr)
 {
     ADDTOCALLSTACK("CExpression::GetRangeString");
 
@@ -1894,7 +1995,7 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
     //	of the elements and then only the element which was randomly chosen.
 
 	lpctstr pElementsStart[kiRangeMaxArgs][2]{};
-    int iQty = GetRangeArgsPos( pExpr, pElementsStart, true );	// number of arguments (not of value-weight couples)
+    int iQty = GetRangeArgsPos( refStrExpr, pElementsStart, true );	// number of arguments (not of value-weight couples)
     if (iQty <= 0)
         return {};
 
@@ -1954,4 +2055,589 @@ CSString CExpression::GetRangeString(lpctstr & pExpr)
     i -= 1; // pick the value instead of the weight
     const int iToParseLen = int(pElementsStart[i][1] - pElementsStart[i][0]);
     return CSString(pElementsStart[i][0], iToParseLen);
+}
+
+bool CExpression::_Evaluate_Conditional_EvalSingle(
+    CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext,
+    CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+{
+    ADDTOCALLSTACK("CExpression::_Evaluate_Conditional_EvalSingle");
+
+    ASSERT(refSubExprState.ptcStart);
+    ASSERT(refSubExprState.ptcEnd);
+    ASSERT(refExprContext._pScriptObjI != nullptr);
+
+    using SType = CScriptSubExprState::Type;
+    bool fVal;
+    lptstr ptcSubexpr;
+
+    // Evaluate the subexpression body
+    if (refExprContext._iEvaluate_Conditional_Reentrant >= 16)
+    {
+        g_Log.EventError("Exceeding the limit of 16 subexpressions. Further parsing is halted.\n");
+        return false;
+    }
+    ++ refExprContext._iEvaluate_Conditional_Reentrant;
+
+    // Is this conditional expression is fully enclosed by brackets ?
+    const bool fFullyEnclosed = (refSubExprState.uiType & SType::TopParenthesizedExpr);
+
+    // Length to copy: include the last valid char (i'm not copying the subsequent char, which can be another char or '\0'
+    ASSERT(refSubExprState.ptcEnd >= refSubExprState.ptcStart);
+    size_t len = std::min(Str_TempLength() - 1U, size_t(refSubExprState.ptcEnd - refSubExprState.ptcStart));
+    if (len == 0)
+    {
+        g_Log.EventError("Empty subexpression. Defaulting its value to false.\n");
+        return false;
+    }
+
+    lptstr ptcParsingStart = refSubExprState.ptcStart;
+    if (fFullyEnclosed)
+    {
+        -- len;     // Exclude the closing bracket ')'.
+        ASSERT(len > 0);
+
+        // In this case, we need to start parsing after the opening parenthesis '('; if we start before it and the subexpr is marked with MaybeNestedSubexpr,
+        //  Evaluate_Conditional will again return the same subexpression fully enclosed by parenthesis, and we'll have a deadlock.
+        // Remember that sdata.uiNonAssociativeOffset is the distance between the open bracket '(' and the non-associative operator (negation operator '!').
+        // The string might start with said non-associative operator.
+        ptcParsingStart += 1;
+        len -= 1;
+    }
+
+    ASSERT(len < Str_TempLength());
+    ptcSubexpr = Str_GetTemp();
+    memcpy(ptcSubexpr, ptcParsingStart, len);
+    ptcSubexpr[len] = '\0';
+
+    const bool fNested = (refSubExprState.uiType & SType::MaybeNestedSubexpr);
+    if (fNested)
+    {
+        // Probably this subexpression has other conditional subexpressions inside.
+        fVal = Evaluate_Conditional(ptcSubexpr, refExprContext, pScriptArgs, pSrc);
+    }
+    else
+    {
+        // If an expression is enclosed by parentheses, ParseScriptText needs to read both the open and the closed one, we cannot
+        //  pass the string starting with the character after the '('.
+        ParseScriptText(ptcSubexpr, refExprContext, pScriptArgs, pSrc, 0);
+        fVal = bool(Exp_GetLLVal(ptcSubexpr));
+    }
+
+    -- refExprContext._iEvaluate_Conditional_Reentrant;
+
+
+    // Apply non-associative operators preceding the subexpression
+    if (refSubExprState.uiNonAssociativeOffset)
+    {
+        ptcSubexpr = refSubExprState.ptcStart - refSubExprState.uiNonAssociativeOffset;
+        ASSERT(!IsWhitespace(*ptcSubexpr));
+        while (const tchar chOperator = *ptcSubexpr)
+        {
+            if (chOperator == '!')
+                fVal = !fVal;
+            else if (IsWhitespace(chOperator))
+                ; // Allowed, skip it
+            else
+                break;
+            ++ptcSubexpr;
+        }
+    }
+
+    return fVal;
+}
+
+bool CExpression::Evaluate_Conditional(lptstr ptcExpr, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+{
+    ADDTOCALLSTACK("CExpression::Evaluate_Conditional");
+    ASSERT(refExprContext._pScriptObjI != nullptr);
+
+    if (!pScriptArgs)
+        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+    lptstr ptcExprDbg = ptcExpr;
+    const int iQty = GetConditionalSubexpressions(ptcExprDbg);	// number of arguments
+
+    if (iQty == 0)
+        return 0;
+
+    using SType = CScriptSubExprState::Type;
+
+    if (iQty == 1)
+    {
+        // We don't have subexpressions, but only a simple expression.
+        CScriptSubExprState& sCur = m_parsingSubexprsStates[0];
+        ASSERT((sCur.uiType & SType::None) ||  (sCur.uiType & SType::BinaryNonLogical));
+
+        const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+        return fVal;
+    }
+
+    // We have some subexpressions, connected between them by logical operators.
+
+    bool fWholeExprVal = false;
+    for (int i = 0; i < iQty; ++i)
+    {
+        CScriptSubExprState& sCur = m_parsingSubexprsStates[i];
+        ASSERT(sCur.uiType != SType::Unknown);
+
+        if (i == 0)
+        {
+            fWholeExprVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+            continue;
+        }
+
+        CScriptSubExprState& sPrev = m_parsingSubexprsStates[i - 1];
+        if (sPrev.uiType & SType::Or)
+        {
+            if (fWholeExprVal)
+                return true;
+
+            const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+            fWholeExprVal = fWholeExprVal || fVal;
+        }
+        else if (sPrev.uiType & SType::And)
+        {
+            if (!fWholeExprVal)
+                return false;
+
+            const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+            fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
+        }
+
+
+        if (sCur.uiType & SType::None)
+        {
+            ASSERT(i == iQty - 1);	// It should be the last subexpression
+            ASSERT((sPrev.uiType & SType::Or) || (sPrev.uiType & SType::And));
+        }
+
+    }
+
+    return fWholeExprVal;
+}
+
+static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpctstr ptcSep)
+{
+    ASSERT(ptcSep && *ptcSep);
+
+    // Check if we are encountering a a nested QVAL?
+    tchar* ptcBracketPos = nullptr;
+    tchar* ptcSepPos = nullptr;
+    for (tchar* ptcLine = ptcSrc; *ptcLine != '\0';)
+    {
+        const tchar ch = *ptcLine;
+        if ((ch != '<') && (ch != *ptcSep))
+        {
+            ++ptcLine;
+            continue;
+        }
+
+        if ((ch == '<') && !ptcBracketPos)
+        {
+            tchar* ptcTest = ptcLine + 1;
+            GETNONWHITESPACE(ptcTest);
+            if (!strnicmp("QVAL", ptcTest, 4))
+            {
+                ptcBracketPos = ptcLine;
+                ptcLine = ptcTest + 3;
+            }
+        }
+        else if ((ch == *ptcSep) && !ptcSepPos)
+        {
+            ptcSepPos = ptcLine;
+        }
+
+        if (!ptcBracketPos || !ptcSepPos)
+        {
+            ++ptcLine;
+            continue;
+        }
+
+        if (ptcSepPos < ptcBracketPos)
+        {
+            // The separator we have found is before the nested QVAL.
+            ptcSrc = ptcSepPos;
+            break;
+        }
+
+        // Found a nested QVAL. Skip it, otherwise we'll catch the wrong separator
+        Str_SkipEnclosedAngularBrackets(ptcBracketPos);
+        if (ptcBracketPos <= ptcLine)
+            ++ptcLine;
+        else
+            ptcSrc = ptcLine = ptcBracketPos;
+
+        ptcBracketPos = ptcSepPos = nullptr;
+    }
+
+    Str_Parse(ptcSrc, ptcDest, ptcSep);
+}
+
+bool CExpression::Evaluate_QvalConditional(
+    lpctstr ptcKey, CSString& refStrVal,
+    CScriptExprContext& pContext,
+    CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+{
+    // Do a switch ? type statement <QVAL condition ? option1 : option2>
+    ADDTOCALLSTACK("CExpression::Evaluate_QvalConditional");
+    ASSERT(pContext._pScriptObjI != nullptr);
+
+    // Do NOT work on the original arguments, it WILL fuck up the original string!
+    tchar* ptcArgs = Str_GetTemp();
+    Str_CopyLimitNull(ptcArgs, ptcKey, Str_TempLength());
+
+    // We only partially evaluated the QVAL parameters (it's a special case), so we need to parse the expressions (still have angular brackets at this stage)
+    tchar* ppCmds[3];
+    ppCmds[0] = ptcArgs;
+
+    // Get the condition
+    Evaluate_QvalConditional_ParseArg(ppCmds[0], &(ppCmds[1]), "?");
+
+    // Get the first and second retvals
+    Evaluate_QvalConditional_ParseArg(ppCmds[1], &(ppCmds[2]), ":");
+
+    // Complete evaluation of the condition
+    //  (do that in another string, since it may overwrite the arguments, which are written later in the same string).
+    tchar* ptcTemp = Str_GetTemp();
+    Str_CopyLimitNull(ptcTemp, ppCmds[0], Str_TempLength());
+    ParseScriptText(ptcTemp, pContext, pScriptArgs, pSrc, 0);
+    const bool fCondition = Exp_GetLLVal(ptcTemp);
+
+    // Get the retval we want
+    //	(we might as well work on the transformed original string, since at this point we don't care if we corrupt other arguments)
+    ptcTemp = ppCmds[(fCondition ? 1 : 2)];
+    ParseScriptText(ptcTemp, pContext, pScriptArgs, pSrc, 0);
+
+    refStrVal = ptcTemp;
+    if (refStrVal.IsEmpty())
+        refStrVal.Clear();
+    return true;
+}
+
+// TODO: fully move out the QVAL evaluation from here?
+int CExpression::ParseScriptText(
+    tchar * ptcResponse,
+    CScriptExprContext& pContext,
+    CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc,
+    int iFlags)
+{
+    ADDTOCALLSTACK("CScriptObj::ParseScriptText");
+    //ASSERT(ptcResponse[0] != ' ');	// Not needed: i remove whitespaces and invalid characters here.
+    ASSERT(pContext._pScriptObjI != nullptr);
+
+    // Take in a line of text that may have fields that can be replaced with operators here.
+    // ARGS:
+    // iFlags & 1: Use HTML-compatible delimiters (%). Inside those, angular brackets are allowed to do nested evaluations.
+    // iFlags & 2: Don't allow recusive bracket count.
+    // iFlags & 4: Just parsing a nested QVAL.
+    // NOTE:
+    //  html will have opening <script language="SPHERE_FILE"> and then closing </script>
+    // RETURN:
+    //  iFlags & 4: Position of the ending bracket/delimiter of a QVAL statement.
+    //  Otherwise: New length of the string.
+
+    // Recursion control variables.
+    //  _iParseScriptText_Reentrant = 0;
+    //  _fParseScriptText_Brackets = false;	// Am i evaluating a statement? (Am i inside < > brackets of a statement i am currently evaluating?)
+
+    if (!pScriptArgs)
+        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+
+    const bool fNoRecurseBrackets = ((iFlags & 2) != 0);
+
+    // General purpose variables.
+    const bool fHTML = ((iFlags & 1) != 0);
+
+    // If we are parsing a string from a HTML file, we are using '%' as a delimiter for Sphere expressions, since < > are reserved characters in HTML.
+    const tchar chBegin = fHTML ? '%' : '<';
+    const tchar chEnd	= fHTML ? '%' : '>';
+
+    // Variables used to handle the QVAL special case and do lazy evaluation, instead of fully evaluating the whole string on the first pass.
+    // As an aftertought QVAL parsing could have been moved into a separate function, but it's intricate enough and it's working, so let's leave as it is...'
+    enum class QvalStatus { None, Condition, Returns, End } eQval = QvalStatus::None;
+    int iQvalOpenBrackets = 0;
+
+    size_t uiSubstitutionBegin = 0;
+    int i = 0;
+    EXC_TRY("ParseScriptText Main Loop");
+    for ( i = 0; ptcResponse[i] != '\0'; ++i)
+    {
+        const tchar ch = ptcResponse[i];
+
+        // Are we looking for the current statement start?
+        if ( !pContext._fParseScriptText_Brackets)	// not in brackets
+        {
+            if ( ch == chBegin )	// found the start !
+            {
+                const tchar chNext = ptcResponse[i + 1];
+                if ((chNext != '<') && !IsAlnum(chNext))
+                    continue;	// Ignore this, it might be a operator like <=
+                if ((chBegin == '<') && (chNext == '<'))
+                {
+                    // Is a << operator? I want a whitespace after the operator.
+                    if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
+                    {
+                        lpctstr ptcOpTest = &(ptcResponse[4]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a << operator
+                                i += 2; // Skip < and the whitespace
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // Set the statement start
+                ASSERT(i >= 0);
+                uiSubstitutionBegin = (size_t)i;
+                pContext._fParseScriptText_Brackets = true;
+
+                // Set-up to process special statements: is it a QVAL?
+                const bool fIsQval = !strnicmp(ptcResponse + i + 1, "QVAL", 4);
+                if (fIsQval)
+                {
+                    ++iQvalOpenBrackets;
+                    eQval = QvalStatus::Condition;
+
+                    i += 4;
+                }
+            }
+
+            continue;
+        }
+
+        // Are we inside a QVAL and are we searching where its condition end?
+        if ((ch == '?') && (eQval == QvalStatus::Condition))
+        {
+            // Now we keep the bracket count to find the closing bracket for the QVAL statement.
+            eQval = QvalStatus::Returns;
+            continue;
+        }
+
+        // Handle possibly recursive angular brackets (i'm already inside an open bracket)
+        if (pContext._fParseScriptText_Brackets && (ch == '<'))
+        {
+            const tchar chNext = ptcResponse[i + 1];
+            if (chNext == '<')
+            {
+                // Nested angular brackets? like: <<SKILL>>
+                lptstr ptcTestNested = ptcResponse + i;
+                lpctstr ptcTestOrig = ptcTestNested;
+                Str_SkipEnclosedAngularBrackets(ptcTestNested);
+                // If i have matching closing brackets, so it must be nested angular brackets.
+                if (ptcTestNested == ptcTestOrig)
+                {
+                    // Otherwise, it might be the << operator.
+
+                    // This shouldn't be necessary... but
+                    /*
+                    // Is a << operator? I want a whitespace after the operator.
+                    if ((ptcResponse[i + 2] != '\0') && (ptcResponse[i + 3] != '\0') && IsWhitespace(ptcResponse[i + 2]))
+                    {
+                        lpctstr ptcOpTest = &(ptcResponse[4]);
+                        if (*ptcOpTest != '\0')
+                        {
+                            GETNONWHITESPACE(ptcOpTest);
+                            if (*ptcOpTest != '\0')  // There's more text to parse
+                            {
+                                // I guess i have sufficient proof: skip, it's a << operator
+                                i += 2; // Skip < and the whitespace
+                                pContext._fParseScriptText_Brackets = false;
+                                continue;
+                            }
+                        }
+                    }
+                    // Print an error! I thought it was a << operator but it is not! What's happening here ?!
+                    */
+
+                    ++i;
+                    continue;
+                }
+            }
+
+            // Detect nested QVALs
+            if (eQval != QvalStatus::None)
+            {
+                const bool fIsQval = !strnicmp(ptcResponse + i + 1, "QVAL", 4);
+                if (fIsQval)
+                {
+                    // Nested QVAL... Needs to be evaluated separately, but we only want to know where it ends.
+                    ASSERT(pContext._fParseScriptText_Brackets == true);
+                    ++ pContext._iParseScriptText_Reentrant;
+                    pContext._fParseScriptText_Brackets = false;
+
+                    tchar* ptcRecurseParse = ptcResponse + i;
+                    const int iLen = ParseScriptText(ptcRecurseParse, pContext, pScriptArgs, pSrc, 4);
+
+                    pContext._fParseScriptText_Brackets = true;
+                    -- pContext._iParseScriptText_Reentrant;
+
+                    i += iLen;
+                    continue;
+                }
+
+                // At this point, we shouldn't face nested QVALs.
+
+                // I'm inside a QVAL. I can be parsing the condition or the return values.
+                if (eQval == QvalStatus::Returns)	// I'm after its condition (so after '?'), thus i'm parsing the return values.
+                    ++iQvalOpenBrackets;
+
+                // Halt here the evaluation of the stuff inside this open bracket, since i don't want to know what's inside.
+                continue;
+            }
+
+            if (pContext._iParseScriptText_Reentrant > 32 )
+            {
+                EXC_SET_BLOCK("recursive brackets limit");
+                ASSERT_ALWAYS(pContext._iParseScriptText_Reentrant < 32);
+            }
+
+            ASSERT(pContext._fParseScriptText_Brackets == true);
+            ++pContext._iParseScriptText_Reentrant;
+            pContext._fParseScriptText_Brackets = false;
+
+            // Parse what's inside the open bracket
+            tchar* ptcRecurseParse = ptcResponse + i;
+            const int iLen = ParseScriptText(ptcRecurseParse, pContext, pScriptArgs, pSrc, 2 );
+
+            pContext._fParseScriptText_Brackets = true;
+            --pContext._iParseScriptText_Reentrant;
+
+            i += iLen;
+            continue;
+        }
+
+        // At this point i'm sure that ahead we won't find other open angular brackets, we may find their closing one or just plain text.
+        if ( ch == chEnd )
+        {
+            // Closing bracket found: should we evaluate what's inside the brackets?
+            if (eQval != QvalStatus::None)
+            {
+                // Special handling for QVAL
+                if (eQval == QvalStatus::Returns)
+                {
+                    // I'm after the '?' symbol in QVAL. We are searching for the closing bracket.
+                    --iQvalOpenBrackets;
+
+                    if (iQvalOpenBrackets == 0)
+                    {
+                        // End of the QVAL statement.
+                        if (iFlags & 04)
+                        {
+                            // I was just checking for the QVAL statement end.
+                            ASSERT(pContext._fParseScriptText_Brackets == true);
+                            pContext._fParseScriptText_Brackets = false;
+                            return i;
+                        }
+
+                        // Proceed, so we can execute it (do not 'continue').
+                        eQval = QvalStatus::End;
+                    }
+                    else
+                    {
+                        // Still inside QVAL, just go ahead.
+                        continue;
+                    }
+                }
+                else
+                {
+                    // I'm before the '?' symbol in QVAL and i'm still searching for it, so we know when the conditional expression ends
+                    continue;	// Ignore brackets, i want only the ? symbol.
+                }
+            }
+
+
+            // If i'm here it means that finally i'm at the end of the statement inside brackets.
+            pContext._fParseScriptText_Brackets = false; // Close the statement.
+
+            if ((eQval == QvalStatus::End) && (iQvalOpenBrackets != 0))
+            {
+                // I had an incomplete QVAL statement.
+                g_Log.EventError("QVAL parameters after '?' have unmatched '%c'.\n", ((iQvalOpenBrackets < 0) ? '<' : '>'));
+            }
+
+            // Complete the evaluation of our string
+            //-- Write to our temporary sVal the evaluated script
+            EXC_SET_BLOCK("writeval");
+
+            ptcResponse[i] = '\0'; // Needed for r_WriteVal
+            lpctstr ptcKey = ptcResponse + uiSubstitutionBegin + 1; // move past the opening bracket
+
+            CSString sVal;
+            bool fRes;
+            if (eQval != QvalStatus::None)
+            {
+                // Separate evaluation for QVAL. I may need additional script context for it (pScriptArgs isn't available in r_WriteVal).
+                EXC_SET_BLOCK("writeval qval");
+                ptcKey += 4; // Skip the letters QVAL and pass only the arguments
+                fRes = Evaluate_QvalConditional(ptcKey, sVal, pContext, pScriptArgs, pSrc);
+                eQval = QvalStatus::None;
+            }
+            else
+            {
+                // Standard evaluation for everything else
+                EXC_SET_BLOCK("writeval generic");
+                ASSERT(pContext._pScriptObjI);
+                fRes = pContext._pScriptObjI->r_WriteVal(ptcKey, sVal, pSrc);
+                if (fRes == false)
+                {
+                    EXC_SET_BLOCK("writeval args");
+                    // write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
+                    if ((pScriptArgs != nullptr) && pScriptArgs->r_WriteVal(ptcKey, sVal, pSrc))
+                        fRes = true;
+                }
+            }
+
+
+            if ( fRes == false )
+            {
+                DEBUG_ERR(( "Can't resolve <%s>.\n", ptcKey ));
+                // Just in case this really is a <= operator ?
+                ptcResponse[i] = chEnd; // it's the char we overwrote with '\0'
+            }
+
+            if (fHTML && sVal.IsEmpty())
+            {
+                sVal = "&nbsp";
+            }
+
+            //-- In the output string, substitute the raw substring with its parsed value
+            EXC_SET_BLOCK("mem shifting");
+
+            const size_t uiWriteValLen = sVal.GetLength();
+
+            // Make room for the obtained value, moving to left (if it's shorter than the scripted statement) or right (if longer) the string characters after it.
+            tchar* ptcDest = ptcResponse + uiSubstitutionBegin + uiWriteValLen; // + iWriteValLen because we need to leave the space for the replacing keyword
+            const tchar * const ptcLeftover = ptcResponse + i + 1;	// End of the statement we just evaluated
+            const size_t uiLeftoverLen = strlen(ptcLeftover) + 1;
+            memmove(ptcDest, ptcLeftover, uiLeftoverLen);
+
+            // Insert the obtained value in the room we created.
+            ptcDest = ptcResponse + uiSubstitutionBegin;
+            memcpy(ptcDest, sVal.GetBuffer(), uiWriteValLen);
+
+            // This can be negative.
+            i = (int)(uiSubstitutionBegin + uiWriteValLen) - 1;
+
+            if (fNoRecurseBrackets) // just do this one then bail out.
+            {
+                pContext._fParseScriptText_Brackets = false;
+                return i;
+            }
+        }
+    }
+    EXC_CATCH;
+
+    EXC_DEBUG_START;
+    g_Log.EventDebug("response '%s' source addr '0%p' flags '%d' args '%p'\n", ptcResponse, static_cast<void *>(pSrc), iFlags, static_cast<void *>(pScriptArgs.get()));
+    EXC_DEBUG_END;
+
+    pContext._fParseScriptText_Brackets = false;
+    return i;
 }

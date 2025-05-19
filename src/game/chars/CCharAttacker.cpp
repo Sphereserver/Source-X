@@ -67,7 +67,7 @@ bool CChar::Attacker_Add(CChar * pChar, int iThreat)
 	       	if (m_EmoteHueOverride != 0) //Set EMOTECOLOROVERRIDE to ATTACKERS
        			emoteHue = m_EmoteHueOverride;
             else
-                emoteHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
+                emoteHue = (HUE_TYPE)(g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
 	        snprintf(z, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
     	    UpdateObjMessage(z, nullptr, pClient, emoteHue, TALKMODE_EMOTE);
 		}

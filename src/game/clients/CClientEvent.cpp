@@ -1863,8 +1863,13 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 		return;
 
 	// Guards are special
-	lpctstr pszMsgGuards = g_Exp.m_VarDefs.GetKeyStr("guardcall");
-	if ( !strnicmp(pszMsgGuards, "", 0) )
+    lpctstr pszMsgGuards;
+    {
+        auto gReader = g_ExprGlobals.mtEngineLockedReader();
+        pszMsgGuards = Str_mtEngineGetSafeTemp(gReader->m_VarDefs.GetKeyStr("guardcall"));
+    }
+
+    if ( !strnicmp(pszMsgGuards, "", 0) )
 		pszMsgGuards = "GUARD,GUARDS";
 	if ( FindStrWord(pszText, pszMsgGuards) > 0 )
 		m_pChar->CallGuards();

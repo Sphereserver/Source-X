@@ -15,10 +15,7 @@ class CSString;
 class CUID;
 class CChar;
 
-struct CScriptSubExprData;
-
-struct CScriptExprContextData;
-using CScriptExprContextPtr = std::shared_ptr<CScriptExprContextData>;
+struct CScriptSubExprState;
 
 class CScriptTriggerArgs;
 using CScriptTriggerArgsPtr = std::shared_ptr<CScriptTriggerArgs>;
@@ -90,11 +87,6 @@ public:
 	virtual bool r_WriteVal(lpctstr pKey, CSString& sVal, CTextConsole* pSrc = nullptr, bool fNoCallParent = false, bool fNoCallChildren = false);
 
 	/*
-	* @brief Do the first-level parsing of a script line and eventually replace requested values got by r_WriteVal.
-	*/
-    int ParseScriptText( tchar * pszResponse, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole * pSrc, int iFlags = 0 );
-
-	/*
 	* @brief Execute a script command.
 	* Called when parsing a script section with OnTriggerRun or if issued by a CClient.
 	* It does check if we are requesting another ref.
@@ -143,11 +135,6 @@ private:
     TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
 
 	// Special statements
-    bool _Evaluate_Conditional_EvalSingle(CScriptSubExprData& sdata, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole* pSrc);
-    bool Evaluate_Conditional(lptstr ptcExpression, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole* pSrc); // IF, ELIF, ELSEIF
-
-    bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& sVal, CScriptTriggerArgsPtr pArgs, CScriptExprContextPtr pContext, CTextConsole* pSrc);
-
     bool Execute_Call(CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
     bool Execute_FullTrigger(CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
 

@@ -1266,7 +1266,10 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
 
         tchar szText[MAX_TALK_BUFFER];
         Str_CopyLimitNull(szText, pszSpeak, MAX_TALK_BUFFER);
-        pChar->ParseScriptText(szText, CScriptTriggerArgsPtr{}, CScriptExprContextPtr{}, &g_Serv);
+
+        CScriptExprContext scpContext{._pScriptObjI = pChar};
+        CExpression::GetExprParser().ParseScriptText(szText, scpContext, CScriptTriggerArgsPtr{}, &g_Serv);
+
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }
     return true;

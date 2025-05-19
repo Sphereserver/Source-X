@@ -63,6 +63,7 @@ ADD(CClient,				"CClient");
 ADD(CDialogDef,				"CDialogDef");
 ADD(CDialogResponseArgs,	"CDialogResponseArgs");
 ADD(CEntity,				"CEntity");
+ADD(CExpression,            "CExpression");
 ADD(CSFileObj,				"CSFileObj");
 ADD(CSFileObjContainer,		"CSFileObjContainer");
 ADD(CScriptObj,				"CScriptObj");

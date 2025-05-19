@@ -31,7 +31,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
     // it can be a range (with format {lo# hi#}) or a single value, even without brackets,
     //	so we don't need a warning if GetRangeVals doesn't find the brackets
     int64 piVal[2];
-    int iQty = g_Exp.GetRangeVals( pszDef, piVal, ARRAY_COUNT(piVal), true);
+    int iQty = CExpression::GetExprParser().GetRangeVals( pszDef, piVal, ARRAY_COUNT(piVal), true);
     if ( iQty <= 0 )
         return false;
 

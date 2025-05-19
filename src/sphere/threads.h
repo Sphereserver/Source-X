@@ -15,6 +15,7 @@
 	#include <pthread.h>
 #endif
 
+class CExpression;
 class TemporaryString;
 
 /**
@@ -265,10 +266,13 @@ class AbstractSphereThread : public AbstractThread
     STACK_INFO_REC m_stackInfo[0x500];
     STACK_INFO_REC m_stackInfoCopy[0x500];
     ssize_t m_iStackPos;
-    bool m_fFreezeCallStack;
     ssize_t m_iStackUnwindingStackPos;
     ssize_t m_iCaughtExceptionStackPos;
+    bool m_fFreezeCallStack;
 #endif
+
+public:
+    std::unique_ptr<CExpression> m_pExpr;
 
 public:
     AbstractSphereThread(const char *name, ThreadPriority priority = ThreadPriority::Normal);

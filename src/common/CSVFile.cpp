@@ -24,12 +24,12 @@ CSVFile::~CSVFile()
 int CSVFile::GetColumnCount() const
 {
     ADDTOCALLSTACK("CSVFile::GetColumnCount");
-    MT_SHARED_LOCK_RETURN(_iColumnCount);
+    MT_SHARED_LOCK_RETURN(this, _iColumnCount);
 }
 int CSVFile::GetCurrentRow() const
 {
     ADDTOCALLSTACK("CSVFile::GetCurrentRow");
-    MT_SHARED_LOCK_RETURN(_iCurrentRow);
+    MT_SHARED_LOCK_RETURN(this, _iCurrentRow);
 }
 
 bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
@@ -89,7 +89,7 @@ bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 bool CSVFile::Open(lpctstr ptcFilename, uint uiModeFlags)
 {
     ADDTOCALLSTACK("CSVFile::Open");
-    MT_UNIQUE_LOCK_RETURN(CSVFile::_Open(ptcFilename, uiModeFlags));
+    MT_UNIQUE_LOCK_RETURN(this, CSVFile::_Open(ptcFilename, uiModeFlags));
 }
 
 int CSVFile::_ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
@@ -140,6 +140,6 @@ bool CSVFile::_ReadNextRowContent(CSVRowData& target)
 bool CSVFile::ReadNextRowContent(CSVRowData& target)
 {
     ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
-    MT_UNIQUE_LOCK_RETURN(CSVFile::_ReadNextRowContent(target));
+    MT_UNIQUE_LOCK_RETURN(this, CSVFile::_ReadNextRowContent(target));
 }
 

@@ -3061,7 +3061,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
 	{
 		const lpctstr pszDef = pScript->GetArgStr();
-		CVarDefCont * pVarBase = g_Exp.m_VarResDefs.GetKey( pszDef );
+        CVarDefCont * pVarBase = g_ExprGlobals.mtEngineLockedReader()->m_VarResDefs.GetKey( pszDef );
 		pVarNum = nullptr;
 		if ( pVarBase )
 			pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
@@ -3121,9 +3121,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	if ( m_ResourceList.ContainsKey( const_cast<tchar *>(pszSection) ))
 	{
         // Add to DEFLIST
-		CListDefCont* pListBase = g_Exp.m_ListInternals.GetKey(pszSection);
+        auto rw = g_ExprGlobals.mtEngineLockedWriter();
+        CListDefCont* pListBase = rw->m_ListInternals.GetKey(pszSection);
 		if ( !pListBase )
-			pListBase = g_Exp.m_ListInternals.AddList(pszSection);
+            pListBase = rw->m_ListInternals.AddList(pszSection);
 
 		if ( pListBase )
 			pListBase->r_LoadVal(pScript->GetArgStr());
@@ -3183,12 +3184,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if ( fNewStyleDef )
 			{
 				//	search for this.
+                auto gread = g_ExprGlobals.mtEngineLockedReader();
 				size_t l;
 				for ( l = 0; l < DEFMSG_QTY; ++l )
 				{
-					if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[l]) )
+                    if ( !strcmpi(ptcKey, gread->sm_szDefMsgNames[l]) )
 					{
-						Str_CopyLimitNull(g_Exp.sm_szMessages[l], pScript->GetArgStr(), sizeof(g_Exp.sm_szMessages[l]));
+                        Str_CopyLimitNull(gread->sm_szDefMessages[l], pScript->GetArgStr(), sizeof(CExprGlobals::sm_szDefMessages[l]));
 						break;
 					}
 				}
@@ -3198,20 +3200,23 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			}
 			else
 			{
-				g_Exp.m_VarDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
+                g_ExprGlobals.mtEngineLockedWriter()->m_VarDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
 			}
 		}
+
 		return true;
 
 	case RES_RESDEFNAME:
+    {
 		// just get a block of resource aliases (like a classic DEF).
+        auto gwrite = g_ExprGlobals.mtEngineLockedWriter();
 		while (pScript->ReadKeyParse())
 		{
 			const lpctstr ptcKey = pScript->GetKey();
-			g_Exp.m_VarResDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
+            gwrite->m_VarResDefs.SetStr(ptcKey, false, pScript->GetArgStr(), false);
 		}
 		return true;
-
+    }
 	case RES_RESOURCELIST:
 		{
 			while ( pScript->ReadKey() )
@@ -3857,12 +3862,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				ptcKey = ptcKey + 4;
 
             lpctstr ptcArg = pScript->GetArgStr( &fQuoted );
-			g_Exp.m_VarGlobals.SetStr( ptcKey, fQuoted, ptcArg );
+            g_ExprGlobals.mtEngineLockedWriter()->m_VarGlobals.SetStr( ptcKey, fQuoted, ptcArg );
 		}
 		return true;
 	case RES_WORLDLISTS:
 		{
-			CListDefCont* pListBase = g_Exp.m_ListGlobals.AddList(pScript->GetArgStr());
+            CListDefCont* pListBase = g_ExprGlobals.mtEngineLockedWriter()->m_ListGlobals.AddList(pScript->GetArgStr());
 
 			if ( !pListBase )
 			{
@@ -4170,7 +4175,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		}
 
 
-		CVarDefCont * pVarBase = g_Exp.m_VarResDefs.GetKey( pszName );
+        CVarDefCont * pVarBase = g_ExprGlobals.mtEngineLockedReader()->m_VarResDefs.GetKey( pszName );
 		if ( pVarBase )
 		{
 			// An existing VarDef with the same name ?
@@ -4340,7 +4345,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
         int iRandIndex = iIndex + g_Rand.GetVal(iHashRange);
         rid = CResourceID(restype, iRandIndex, wPage);
 
-        const bool fCheckPage = (pszName && (g_Exp.m_VarResDefs.GetKeyNum(pszName) != 0));
+        const bool fCheckPage = (pszName && (g_ExprGlobals.mtEngineLockedReader()->m_VarResDefs.GetKeyNum(pszName) != 0));
 		while (true)
 		{
             if (fCheckPage)
@@ -4365,7 +4370,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 	if ( pszName )
 	{
-		CVarDefContNum* pVarTemp = g_Exp.m_VarResDefs.SetNum( pszName, rid.GetPrivateUID() );
+        CVarDefContNum* pVarTemp = g_ExprGlobals.mtEngineLockedWriter()->m_VarResDefs.SetNum( pszName, rid.GetPrivateUID() );
         ASSERT(pVarTemp);
 		*ppVarNum = pVarTemp;
 	}
@@ -4859,8 +4864,11 @@ bool CServerConfig::Load( bool fResync )
 		g_Serv.PrintPercent( (size_t)(j + 1), count);
 	}
 
+    g_ExprGlobals.mtEngineLockedWriter()->UpdateDefMsgDependentData();
+
 	// Now that we have parsed every script, we can end the configuration of some resources...
-		// ROOMs have to inherit stuff from the parent AREADEF
+
+    // ROOMs have to inherit stuff from the parent AREADEF
 	for (CRegion* pCurRegion : m_RegionDefs)
 	{
 		const RES_TYPE resType = pCurRegion->GetResourceID().GetResType();
@@ -5002,26 +5010,47 @@ bool CServerConfig::Load( bool fResync )
 
 lpctstr CServerConfig::GetDefaultMsg(int lKeyNum)
 {
-	ADDTOCALLSTACK("CServerConfig::GetDefaultMsg");
+    ADDTOCALLSTACK("CServerConfig::GetDefaultMsg(int)");
 	if (( lKeyNum < 0 ) || ( lKeyNum >= DEFMSG_QTY ))
 	{
 		g_Log.EventError("Defmessage %d out of range [0..%d]\n", lKeyNum, DEFMSG_QTY-1);
 		return "";
 	}
-	return g_Exp.sm_szMessages[lKeyNum];
+
+#if MT_ENGINES
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+    lpctstr ptcRet = Str_mtEngineGetSafeTemp(CExprGlobals::sm_szDefMessages[lKeyNum]);
+    return ptcRet;
+#else
+    return Str_mtEngineGetSafeTemp(CExprGlobals::sm_szDefMessages[lKeyNum]);
+#endif
 }
 
 lpctstr CServerConfig::GetDefaultMsg(lpctstr ptcKey)
 {
-	ADDTOCALLSTACK("CServerConfig::GetDefaultMsg");
-	for (int i = 0; i < DEFMSG_QTY; ++i )
-	{
-		if ( !strcmpi(ptcKey, g_Exp.sm_szMsgNames[i]) )
-			return g_Exp.sm_szMessages[i];
+    ADDTOCALLSTACK("CServerConfig::GetDefaultMsg(lpctstr)");
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
 
+    uint i;
+    for (i = 0; i < DEFMSG_QTY; ++i )
+	{
+        if ( !strcmpi(ptcKey, gReader->sm_szDefMsgNames[i]) )
+            break;
 	}
-	g_Log.EventError("Defmessage \"%s\" non existent\n", ptcKey);
-	return "";
+
+    if (i == DEFMSG_QTY)
+    {
+        g_Log.EventError("Defmessage \"%s\" non existent\n", ptcKey);
+        return "";
+    }
+
+#if MT_ENGINES
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+    lpctstr ptcRet = Str_mtEngineGetSafeTemp(CExprGlobals::sm_szDefMessages[i]);
+    return ptcRet;
+#else
+    return Str_mtEngineGetSafeTemp(CExprGlobals::sm_szDefMessages[i]);
+#endif
 }
 
 bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, TemporaryString *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
@@ -5078,10 +5107,11 @@ bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpc
 		size_t iEnd = iOut;
 		int iAttempts = 1;
 
+        auto gReader = g_ExprGlobals.mtEngineLockedReader();
 		for (;;)
 		{
 			bool isValid = true;
-			if (g_Exp.m_VarResDefs.GetKey(buf) != nullptr)
+            if (gReader->m_VarResDefs.GetKey(buf) != nullptr)
 			{
 				// check loaded defnames
 				isValid = false;

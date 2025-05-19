@@ -711,7 +711,7 @@ void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, 
 	new PacketMessageLocalisedEx(this, iClilocId, pSrc, wHue, mode, font, affix, pAffix, pArgs);
 }
 
-void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode, lpctstr name) const
+void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode, lpctstr ptcName) const
 {
 	ADDTOCALLSTACK("CClient::addBarkParse");
 	if ( !pszText )
@@ -720,62 +720,76 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	HUE_TYPE defaultHue = HUE_TEXT_DEF;
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
+
     bool fUseSpeechHueOverride = false;
     bool fUseEmoteHueOverride = false;
-	const CChar * pSrcChar = nullptr;
+
+    const CChar * pSrcChar = nullptr;
 	if (pSrc && pSrc->IsChar())
 	    pSrcChar = static_cast<const CChar *>(pSrc);
 
-	switch ( mode )
+    static constexpr lpctstr talkmode_defs_color[] =
+        {
+            "SMSG_DEF_COLOR",
+            "EMOTE_DEF_COLOR",
+            "SAY_DEF_COLOR",
+            "CMSG_DEF_COLOR",
+            "IMSG_DEF_COLOR",
+        };
+    static constexpr lpctstr talkmode_defs_font[] =
+        {
+            "SMSG_DEF_FONT",
+            "EMOTE_DEF_FONT",
+            "SAY_DEF_FONT",
+            "CMSG_DEF_FONT",
+            "IMSG_DEF_FONT",
+        };
+    static constexpr lpctstr talkmode_defs_unicode[] =
+        {
+            "SMSG_DEF_UNICODE",
+            "EMOTE_DEF_UNICODE",
+            "SAY_DEF_UNICODE",
+            "CMSG_DEF_UNICODE",
+            "IMSG_DEF_UNICODE",
+        };
+
+    std::optional<ushort> iTalkmodeHue, iTalkmodeFont, iTalkmodeUnicode;
+    switch ( mode )
 	{
 		case TALKMODE_SYSTEM:
-		{
 		talkmode_system:
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE") > 0 ? true : false;
+            iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 0;
 			break;
-		}
 		case TALKMODE_EMOTE:
-		{
 			fUseEmoteHueOverride = true;
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE") > 0 ? true : false;
+            iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 1;
 			break;
-		}
 		case TALKMODE_SAY:
-		{
             if (pSrc == nullptr)
-            {
-                // It's a SYSMESSAGE
-                goto talkmode_system;
-            }
+                goto talkmode_system;   // It's a SYSMESSAGE
             fUseSpeechHueOverride = true;
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE") > 0 ? true : false;
+            iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 2;
 			break;
-		}
 		case TALKMODE_ITEM:
-		{
 			if ( pSrc && pSrc->IsChar() )
-			{
-				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
-				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE") > 0 ? true : false;
-			}
+                iTalkmodeHue = iTalkmodeUnicode = 3;
 			else
-			{
-				defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
-				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
-				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE") > 0 ? true : false;
-			}
-		}
+                iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 4;
 		break;
 
 		default:
 			break;
 	}
+    {
+        auto gReader = g_ExprGlobals.mtEngineLockedReader();
+        if (iTalkmodeHue)
+            defaultHue = (HUE_TYPE)(gReader->m_VarDefs.GetKeyNum(talkmode_defs_color[*iTalkmodeHue]));
+        if (iTalkmodeFont)
+            defaultFont = (FONT_TYPE)(gReader->m_VarDefs.GetKeyNum(talkmode_defs_font[*iTalkmodeFont]));
+        if (iTalkmodeUnicode)
+            defaultUnicode = gReader->m_VarDefs.GetKeyNum(talkmode_defs_unicode[*iTalkmodeUnicode]) > 0 ? true : false;
+    }
+
 
 	word Args[] = { (word)wHue, (word)font, (word)fUnicode };
     lptstr ptcBarkBuffer = Str_GetTemp();  // Be sure to init this before the goto instruction
@@ -845,7 +859,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
 
-	Str_CopyLimitNull(	ptcBarkBuffer, name,	Str_TempLength());
+    Str_CopyLimitNull(	ptcBarkBuffer, ptcName,	Str_TempLength());
 	Str_ConcatLimitNull(ptcBarkBuffer, pszText, Str_TempLength());
 
 	if (mode == TALKMODE_SPELL) //Set TALKMODE_SPELL to TALKMODE_SAY after every color check completed to block spell flood.
@@ -903,7 +917,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 bark_default:
 			if (ptcBarkBuffer[0] == '\0')
 			{
-				Str_CopyLimitNull(ptcBarkBuffer, name, Str_TempLength());
+                Str_CopyLimitNull(ptcBarkBuffer, ptcName, Str_TempLength());
 				Str_ConcatLimitNull(ptcBarkBuffer, pszText, Str_TempLength());
 			}
 
@@ -1018,8 +1032,13 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 			{
 				tchar * sMountDefname = Str_GetTemp();
 				sprintf(sMountDefname, "mount_0x%x", idHorse);
-				ITEMID_TYPE idMountItem = (ITEMID_TYPE)(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
-				if ( idMountItem > ITEMID_NOTHING )
+
+                ITEMID_TYPE idMountItem;
+                {
+                    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+                    idMountItem = (ITEMID_TYPE)(gReader->m_VarDefs.GetKeyNum(sMountDefname));
+                }
+                if ( idMountItem > ITEMID_NOTHING )
 				{
 					id = idMountItem;
 					pItemDef = CItemBase::FindItemBase(id);

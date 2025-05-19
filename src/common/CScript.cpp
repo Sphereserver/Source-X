@@ -321,7 +321,7 @@ tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 {
     ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
-    MT_UNIQUE_LOCK_RETURN(CScriptKeyAlloc::_GetKeyBufferRaw(iLen));
+    MT_UNIQUE_LOCK_RETURN(this, CScriptKeyAlloc::_GetKeyBufferRaw(iLen));
 }
 */
 
@@ -514,7 +514,7 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 {
     ADDTOCALLSTACK("CScript::Open");
-    MT_UNIQUE_LOCK_RETURN(CScript::_Open(ptcFilename, uiFlags));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_Open(ptcFilename, uiFlags));
 }
 
 bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
@@ -542,7 +542,7 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 }
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
 {
-    MT_UNIQUE_LOCK_RETURN(CScript::_ReadTextLine(fRemoveBlanks));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_ReadTextLine(fRemoveBlanks));
 }
 
 bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
@@ -585,7 +585,7 @@ int CScript::_Seek( int iOffset, int iOrigin )
 int CScript::Seek( int iOffset, int iOrigin )
 {
     ADDTOCALLSTACK("CScript::Seek");
-    MT_UNIQUE_LOCK_RETURN(CScript::_Seek(iOffset, iOrigin));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_Seek(iOffset, iOrigin));
 }
 
 bool CScript::FindNextSection()
@@ -821,7 +821,7 @@ bool CScript::_SeekContext(const CScriptLineContext &LineContext )
 }
 bool CScript::SeekContext( CScriptLineContext const& LineContext )
 {
-    MT_UNIQUE_LOCK_RETURN(CScript::_SeekContext(LineContext));
+    MT_UNIQUE_LOCK_RETURN(this, CScript::_SeekContext(LineContext));
 }
 
 CScriptLineContext CScript::_GetContext() const
@@ -837,7 +837,7 @@ CScriptLineContext CScript::_GetContext() const
 
 CScriptLineContext CScript::GetContext() const
 {
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
     /*
     CScriptLineContext LineContext;
     LineContext.m_iLineNum = m_iLineNum;
@@ -869,7 +869,7 @@ bool CScript::WriteSection( lpctstr ptcSection, ... )
 	offset += Str_CopyLimitNull(tsHeader.buffer() + offset, tsSectionFormatted.buffer(), tsHeader.capacity() - 2);
 	offset += Str_ConcatLimitNull(tsHeader.buffer() + offset, "]\n", tsHeader.capacity() - offset);
 
-	MT_UNIQUE_LOCK_SET;
+	MT_UNIQUE_LOCK_SET(this);
 	_Write(tsHeader.buffer(), int(offset));
 
 	return true;

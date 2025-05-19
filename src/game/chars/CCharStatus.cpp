@@ -963,74 +963,25 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.
-		lpctstr ptcArticle = pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE);
-		snprintf(pTemp, Str_TempLength(), "%s %s", ptcArticle, pCharDef->GetTradeName());
-		return pTemp;
-	}
+
+        //auto gReader = g_ExprGlobals.mtEngineLockedReader();
+        lpctstr ptcArticle = g_Cfg.GetDefaultMsg(
+            pCharDef->IsFemale()
+                ? DEFMSG_TRADETITLE_ARTICLE_FEMALE
+                : DEFMSG_TRADETITLE_ARTICLE_MALE);
+        snprintf(pTemp, Str_TempLength(), "%s %s", ptcArticle, pCharDef->GetTradeName());
+        return pTemp;
+    }
 
 	// Only players can have skill titles
 	if ( !m_pPlayer )
 		return pTemp;
 
 	int len;
-	SKILL_TYPE skill = Skill_GetBest();
-	if ( skill == SKILL_NINJITSU )
-	{
-		static const CValStr sm_SkillTitles[] =
-		{
-			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
-			{ nullptr, INT32_MAX }
-		};
-		len = snprintf(pTemp, Str_TempLength(), "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
-	}
-	else if ( skill == SKILL_BUSHIDO )
-	{
-		static const CValStr sm_SkillTitles[] =
-		{
-			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
-			{ nullptr, INT32_MAX }
-		};
-		len = snprintf(pTemp, Str_TempLength(), "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
-	}
-	else
-	{
-		static const CValStr sm_SkillTitles[] =
-		{
-			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER")) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY")) },
-			{ nullptr, INT32_MAX }
-		};
-		len = snprintf(pTemp, Str_TempLength(), "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
-	}
+    const SKILL_TYPE skill = Skill_GetBest();
+    const uint uiSkVal = Skill_GetBase(skill);
+    len = snprintf(pTemp, Str_TempLength(),
+                           "%s ", g_ExprGlobals.mtEngineLockedReader()->SkillTitle(skill, uiSkVal));
 
 	snprintf(pTemp + len, Str_TempLength() - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetBuffer());
 	return pTemp;

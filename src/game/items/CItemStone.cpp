@@ -100,20 +100,23 @@ lpctstr CItemStone::GetTypeName() const
 {
 	ADDTOCALLSTACK("CItemStone::GetTypeName");
 	CVarDefCont * pResult = nullptr;
-	switch ( GetType() )
-	{
-		case IT_STONE_GUILD:
-			pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_TYPENAME_GUILD");
-			break;
-		case IT_STONE_TOWN:
-			pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_TYPENAME_TOWN");
-			break;
-		default:
-			break;
-	}
+    {
+        auto gReader = g_ExprGlobals.mtEngineLockedReader();
+        switch ( GetType() )
+        {
+            case IT_STONE_GUILD:
+                pResult = gReader->m_VarDefs.GetKey("STONECONFIG_TYPENAME_GUILD");
+                break;
+            case IT_STONE_TOWN:
+                pResult = gReader->m_VarDefs.GetKey("STONECONFIG_TYPENAME_TOWN");
+                break;
+            default:
+                break;
+        }
 
-	if ( pResult == nullptr )
-		pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_TYPENAME_UNK");
+        if ( pResult == nullptr )
+            pResult = gReader->m_VarDefs.GetKey("STONECONFIG_TYPENAME_UNK");
+    }
 
 	return ( pResult == nullptr ) ? "" : pResult->GetValStr();
 }
@@ -172,7 +175,7 @@ lpctstr CItemStone::GetAlignName() const
 	else
 		return "";
 
-	lpctstr sRes = g_Exp.m_VarDefs.GetKeyStr(tsDefname);
+    lpctstr sRes = g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyStr(tsDefname);
 	return ( sRes == nullptr ) ? "" : sRes;
 }
 
@@ -672,14 +675,16 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 				CStoneMember * pMember = GetMember(pCharSrc);
 				CVarDefCont * pResult = nullptr;
 
+                auto gReader = g_ExprGlobals.mtEngineLockedReader();
 				if ( pMember == nullptr )
 				{
-					pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_NONMEMBER");
+                    pResult = gReader->m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_NONMEMBER");
 				}
 				else
 				{
-					pResult = pMember->IsAbbrevOn() ? g_Exp.m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_ABBREVON") :
-								g_Exp.m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_ABBREVOFF");
+                    pResult = pMember->IsAbbrevOn()
+                                ? gReader->m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_ABBREVON")
+                                : gReader->m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_ABBREVOFF");
 				}
 
 				sVal = pResult ? pResult->GetValStr() : "";
@@ -696,14 +701,14 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 
 				if ( pMember == nullptr )
 				{
-					pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_NONMEMBER");
+                    pResult = g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_NONMEMBER");
 				}
 				else
 				{
 					CChar * pLOYALTO = pMember->GetLoyalToUID().CharFind();
 					if ((pLOYALTO == nullptr) || (pLOYALTO == pCharSrc ))
 					{
-						pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_YOURSELF");
+                        pResult = g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKey("STONECONFIG_VARIOUSNAME_YOURSELF");
 					}
 					else
 					{
@@ -719,7 +724,9 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 		case STC_MASTER:
 			{
 				CChar * pMaster = GetMaster();
-				sVal = (pMaster) ? pMaster->GetName() : g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_PENDVOTE");
+                sVal = (pMaster)
+                    ? pMaster->GetName()
+                    : g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_PENDVOTE");
 			}
 			return true;
 	
@@ -728,11 +735,12 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 				CChar * pMaster = GetMaster();
 				if ( pMaster == nullptr )
 					sVal.Clear(); // If no master (vote pending)
-				else if ( pMaster->Char_GetDef()->IsFemale())
-					sVal = g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_MASTERGENDERFEMALE");
-				else
-					sVal = g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_MASTERGENDERMALE");
-			}
+                else
+                    sVal = g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyStr(
+                        pMaster->Char_GetDef()->IsFemale()
+                            ? "STONECONFIG_VARIOUSNAME_MASTERGENDERFEMALE"
+                            : "STONECONFIG_VARIOUSNAME_MASTERGENDERMALE");
+            }
 			return true;
 	
 		case STC_MASTERTITLE:

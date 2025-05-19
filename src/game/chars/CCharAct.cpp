@@ -3925,7 +3925,7 @@ ITEMID_TYPE CChar::Horse_GetMountItemID() const
 {
 	tchar* ptcMountID = Str_GetTemp();
 	snprintf(ptcMountID, Str_TempLength(), "mount_0x%x", GetDispID());
-	lpctstr ptcMemoryID = g_Exp.m_VarDefs.GetKeyStr(ptcMountID);			// get the mount item defname from the mount_0x** defname
+    lpctstr ptcMemoryID = g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyStr(ptcMountID);			// get the mount item defname from the mount_0x** defname
 
 	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, ptcMemoryID);
 	return (ITEMID_TYPE)(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
