@@ -513,7 +513,6 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		    minValY = sm_ContSize[i].m_miny;
 		    maxValX = sm_ContSize[i].m_maxx;
 		    maxValY = sm_ContSize[i].m_maxy;
-			g_Log.EventWarn("Relying on default container sizes is discouraged. Define TDATA3/4 on container 0%x.\n", GetDispID());
 
 			break;
 		}
