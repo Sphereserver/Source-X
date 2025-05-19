@@ -481,6 +481,12 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         maxValX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
         maxValY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 
+	    // Make sure this value aren't same, we can't divide by zero.
+	    if (maxValX == minValX)
+	        maxValX += 1;
+	    if (maxValY == minValY)
+	        maxValY += 1;
+
 	    return {
 	        static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
             static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
