@@ -2773,7 +2773,10 @@ bool PacketWrestleDisarm::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleDisarm::onReceive");
 
-	net->getClient()->SysMessageDefault(DEFMSG_MSG_WRESTLING_NOGO);
+	CClient* client = net->getClient();
+	ASSERT(client);
+
+	client->Event_CombatAbilitySelect(0x5);	// Disarm
 	return true;
 }
 
@@ -2793,7 +2796,11 @@ bool PacketWrestleStun::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleStun::onReceive");
 
-	net->getClient()->SysMessageDefault(DEFMSG_MSG_WRESTLING_NOGO);
+	CClient* client = net->getClient();
+	ASSERT(client);
+
+	client->Event_CombatAbilitySelect(0xB);	// Paralyzing Blow
+
 	return true;
 }
 
@@ -4041,19 +4048,12 @@ bool PacketSpecialMove::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	CChar* character = client->GetChar();
-	if (character == nullptr)
-		return false;
 
 	skip(1);
 	dword ability = readInt32();
 
-	if ( IsTrigUsed(TRIGGER_USERSPECIALMOVE) )
-	{
-		CScriptTriggerArgs args;
-		args.m_iN1 = ability;
-		character->OnTrigger(CTRIG_UserSpecialMove, character, &args);
-	}
+	client->Event_CombatAbilitySelect(ability);
+
 	return true;
 }
 
