@@ -461,48 +461,67 @@ CPointMap CItemContainer::GetRandContainerLoc() const
         { GUMP_CHEST_METAL2, 18, 105, 162, 178 }
 	};
 
-	// Get a random location in the container.
+    // Prepare fallback values, in case we don't have hardcoded one and user didn't define TDATA3/4.
+    short minValX = 0;
+    short minValY = 0;
+    short maxValX = 512;
+    short maxValY = 512;
+
 	const CItemBase *pItemDef = Item_GetDef();
-    const GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
+    // Get gump visual from item TDATA2.
+    const GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;
+    // Prepare a random location in the container.
+    const int iRandOnce = CSRand::GetValFast(UINT16_MAX);
 
-    const int iRandOnce = g_Rand.GetValFast(UINT16_MAX);
-
-	// Check for custom values in TDATA3/TDATA4.
+	// Use custom values in TDATA3/TDATA4, if they are defined.
 	if ( pItemDef->m_ttContainer.m_dwMinXY && pItemDef->m_ttContainer.m_dwMaxXY )
 	{
-        const int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
-        const int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
-        const int tmp_MaxX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
-        const int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
+        minValX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
+        minValY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
+        maxValX = pItemDef->m_ttContainer.m_dwMaxXY >> 16;
+        maxValY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 
 	    return {
-	        (short)(tmp_MinX + (iRandOnce % (tmp_MaxX - tmp_MinX))),
-            (short)(tmp_MinY + (iRandOnce % (tmp_MaxY - tmp_MinY))),
+	        static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
+            static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
             0 };
 	}
 
-	// No TDATA3 or no TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2
+    // We may want a keyring with no gump, so no need to show the warning.
+    if (IsType(IT_KEYRING))
+    {
+        return {
+            static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
+            static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
+            0 };
+    }
 
+	// No TDATA3 and TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2.
 	uint i = 0;
-	// We may want a keyring with no gump, so no need to show the warning.
-	if (!IsType(IT_KEYRING))
+	for (; ; ++i)
 	{
-		for (; ; ++i)
+	    // We didn't find anything in hardcoded list.
+		if (i >= std::size(sm_ContSize))
 		{
-			if (i >= ARRAY_COUNT(sm_ContSize))
-			{
-				i = 0;	// set to default
-				g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
-				break;
-			}
-			if (sm_ContSize[i].m_gump == gump)
-				break;
+			g_Log.EventWarn("Container 0%x with gump %d doesn't have TDATA3/4 defined.\n", GetDispID(), gump);
+			break;
+		}
+	    // We got a hardoded gump sizes, use them.
+		if (sm_ContSize[i].m_gump == gump)
+		{
+		    minValX = sm_ContSize[i].m_minx;
+		    minValY = sm_ContSize[i].m_miny;
+		    maxValX = sm_ContSize[i].m_maxx;
+		    maxValY = sm_ContSize[i].m_maxy;
+			g_Log.EventWarn("Relying on default container sizes is discouraged. Define TDATA3/4 on container 0%x.\n", GetDispID());
+
+			break;
 		}
 	}
 
 	return {
-		(short)(sm_ContSize[i].m_minx + (iRandOnce % (sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx))),
-		(short)(sm_ContSize[i].m_miny + (iRandOnce % (sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny))),
+		static_cast<short>(minValX + (iRandOnce % (maxValX - minValX))),
+		static_cast<short>(minValY + (iRandOnce % (maxValY - minValY))),
 		0 };
 }
 
