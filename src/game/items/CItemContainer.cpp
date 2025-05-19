@@ -462,14 +462,13 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	};
 
 	// Get a random location in the container.
-
 	const CItemBase *pItemDef = Item_GetDef();
     const GUMP_TYPE gump = pItemDef->m_ttContainer.m_idGump;	// Get the TDATA2
 
     const int iRandOnce = g_Rand.GetValFast(UINT16_MAX);
 
-	// check for custom values in TDATA3/TDATA4
-	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
+	// Check for custom values in TDATA3/TDATA4.
+	if ( pItemDef->m_ttContainer.m_dwMinXY && pItemDef->m_ttContainer.m_dwMaxXY )
 	{
         const int tmp_MinX = pItemDef->m_ttContainer.m_dwMinXY >> 16;
         const int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
@@ -557,7 +556,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
     short maxValX = 512;
     short maxValY = 512;
 
-	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
+	if (pContDef->m_ttContainer.m_dwMinXY && pContDef->m_ttContainer.m_dwMaxXY)
 	{
 		const short tmp_MinX = (short)( pContDef->m_ttContainer.m_dwMinXY >> 16 );
         const short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
