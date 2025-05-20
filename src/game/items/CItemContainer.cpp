@@ -615,8 +615,8 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
     bool fStackInsert = false;
 
-    // We are dropping item out of container bounds.
-	if (pt.m_x <= minValX || pt.m_y <= minValY || pt.m_x > maxValX || pt.m_y > maxValY)
+    // We are dropping item onto container.
+	if (pt.m_x == -1 && pt.m_y == -1)
 	{
 		// Try to stack it.
 		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
@@ -636,6 +636,14 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 		if (!fStackInsert)
 			pt = GetRandContainerLoc();
 	}
+    else
+    {
+        // We might be placing item out of container bounds, clamp it to the side if so.
+        pt.m_x = std::max(pt.m_x, minValX);
+        pt.m_y = std::max(pt.m_y, minValY);
+        pt.m_x = std::min(pt.m_x, maxValX);
+        pt.m_y = std::min(pt.m_y, maxValY);
+    }
 
     // Try drop it on given container grid index (if not available, drop it on next free index)
 	{
