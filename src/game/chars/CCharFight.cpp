@@ -749,10 +749,10 @@ effect_bounce:
 
     {
         CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pScriptArgs->m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[(size_t)g_Rand.Get16ValFast(ARRAY_COUNT(sm_ArmorDamageLayers))]);
+        pScriptArgs->Init(iDmg, uiType, 0, nullptr);
+        pScriptArgs->m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[(uint)g_Rand.Get16ValFast(ARRAY_COUNT(sm_ArmorDamageLayers))]);
         pScriptArgs->m_VarsLocal.SetNum("ItemDamageChance", 25);
         pScriptArgs->m_VarsLocal.SetNum("Spell", (int)spell);
-
         if ( fElemental )
         {
             pScriptArgs->m_VarsLocal.SetNum("DamagePercentPhysical", iDmgPhysical);
