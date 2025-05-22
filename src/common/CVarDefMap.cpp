@@ -404,13 +404,13 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 	if ( pVarNum )
     {
         if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
-            DEBUG_WARN(( "Replacing existing VarNum '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
+            g_Log.EventWarn( "Replacing existing VarNum '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal );
 		pVarNum->SetValNum( iVal );
     }
 	else
 	{
 		if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
-			DEBUG_WARN(( "Replacing existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
+			g_Log.EventWarn( "Replacing existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal );
 		return SetNumOverride( pszName, iVal );
 	}
 
@@ -485,13 +485,13 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	if ( pVarStr )
     {
         if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
-            DEBUG_WARN(( "Replacing existing VarStr '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal ));
+            g_Log.EventWarn( "Replacing existing VarStr '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal );
 		pVarStr->SetValStr( pszVal );
     }
 	else
 	{
 		if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoading() )
-			DEBUG_WARN(( "Replacing existing VarNum '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal ));
+			g_Log.EventWarn( "Replacing existing VarNum '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal );
 		return SetStrOverride( pszName, pszVal );
 	}
 	return pVarStr;
