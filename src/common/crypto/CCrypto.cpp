@@ -4,7 +4,7 @@
 
 #include "../../sphere/threads.h"
 #include "../sphereproto.h"
-#include "../CExpression.h"
+//#include "../CExpression.h" // included in the precompiled header
 #include "../CScript.h"
 #include "../CLog.h"
 #include "../CUOClientVersion.h"

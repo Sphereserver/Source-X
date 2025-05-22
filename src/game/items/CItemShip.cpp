@@ -2,8 +2,8 @@
 // CItemShip.cpp
 //
 
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../CWorldSearch.h"

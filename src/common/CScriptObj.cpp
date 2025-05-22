@@ -17,10 +17,10 @@
 #include "sphere_library/CSRand.h"
 #include "resource/sections/CResourceNamedDef.h"
 #include "resource/CResourceLock.h"
-#include "CFloatMath.h"
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
+//#include "CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "CSFileObjContainer.h"
-#include "CScriptParserBufs.h"
+#include "CFloatMath.h"
 
 #ifdef _WIN32
 #   include <process.h>
@@ -2584,7 +2584,7 @@ jump_in:
                 CScriptExprContext context = {._pScriptObjI = this};
 
                 const lptstr ptcArg = s.GetArgStr();
-                bool fTrigger = expr_parser.Evaluate_Conditional(ptcArg, context, pScriptArgs, pSrc);
+                bool fTrigger = expr_parser.EvaluateConditionalWhole(ptcArg, context, pScriptArgs, pSrc);
                 bool fBeenTrue = false;
                 for (;;)
                 {
@@ -2602,7 +2602,7 @@ jump_in:
                     else if ( iRet == TRIGRET_ELSEIF )
                     {
                         context = {._pScriptObjI = this};
-                        fTrigger = expr_parser.Evaluate_Conditional(s.GetArgStr(), context, pScriptArgs, pSrc);
+                        fTrigger = expr_parser.EvaluateConditionalWhole(s.GetArgStr(), context, pScriptArgs, pSrc);
                     }
                 }
                 }

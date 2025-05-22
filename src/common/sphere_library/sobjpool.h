@@ -26,6 +26,8 @@ class ObjectPool
 {
 public:
     using index_t = uint32_t;   // do we really need size_t elements?
+    static_assert(tp_pool_size <= std::numeric_limits<index_t>::max());
+
     static constexpr size_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
     static constexpr bool   sm_allow_fallback = tp_allow_fallback;
 
@@ -99,7 +101,7 @@ public:
         {
             // Return a fallback (dynamically allocated) object.
             T* ptr = new T();
-            m_fallbackObjsCount += 1;;
+            m_fallbackObjsCount += 1;
             return UniquePtr_t(ptr, PoolDeleter {this, std::nullopt});
         }
         else
@@ -154,6 +156,7 @@ public:
     [[nodiscard]]
     static bool isFromPool(const std::shared_ptr<T> &ptr)
     {
+        // Does std::get_deleter work only with RTTI enabled?
         if (auto deleterPtr = std::get_deleter<PoolDeleter>(ptr))
             return deleterPtr->m_index.has_value();
         return false;

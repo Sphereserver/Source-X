@@ -1,5 +1,5 @@
 
-#include "../../common/CException.h"
+//#include "../../common/CException.h" // included in the precompiled header
 #include "CItemVendable.h"
 
 CItemVendable::CItemVendable( ITEMID_TYPE id, CItemBase * pDef ) :

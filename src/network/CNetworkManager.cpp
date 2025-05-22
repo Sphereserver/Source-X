@@ -1,4 +1,4 @@
-#include "../common/CScriptParserBufs.h"
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../game/clients/CClient.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"

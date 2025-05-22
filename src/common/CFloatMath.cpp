@@ -5,7 +5,7 @@
 #include "../game/CServerConfig.h"
 #include "../sphere/threads.h"
 #include "sphere_library/CSRand.h"
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
 #include "CLog.h"
 #include "CFloatMath.h"
 

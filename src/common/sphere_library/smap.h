@@ -8,7 +8,7 @@
 
 #include <shared_mutex>
 #include <cstdint>
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 
 #define _SPHERE_MAP_DEFAULT_SIZE 10
 

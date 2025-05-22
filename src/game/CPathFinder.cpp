@@ -1,5 +1,5 @@
 
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "CPathFinder.h"

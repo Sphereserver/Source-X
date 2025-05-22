@@ -1,7 +1,7 @@
 #include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../CExpression.h"
-#include "../CException.h"
+#include "../CExpression.h" // included in the precompiled header
+//#include "../CException.h" // included in the precompiled header
 #include "../CScript.h"
 #include "SQLite.h"
 #include <sqlite/sqlite3.h>

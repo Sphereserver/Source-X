@@ -1,7 +1,7 @@
 #include "sstring.h"
 //#include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
-#include "../CExpression.h"
+#include "../CExpression.h" // included in the precompiled header
 
 
 #ifdef MSVC_COMPILER

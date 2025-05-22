@@ -1,7 +1,7 @@
 #include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/CServerConfig.h"
 #include "../sphere/threads.h"
-#include "CException.h"
+//#include "CException.h" // included in the precompiled header
 #include "CLog.h"
 #include "CUOInstall.h"
 #include <sstream>

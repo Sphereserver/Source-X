@@ -1,6 +1,6 @@
 
 #include "../common/resource/CResourceLock.h"
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CLog.h"
 #include "../common/CUOInstall.h"
 #include "../game/chars/CChar.h"

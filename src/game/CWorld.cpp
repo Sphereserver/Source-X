@@ -1,6 +1,6 @@
-#include "../common/CException.h"
-#include "../common/CExpression.h"
-#include "../common/CScriptParserBufs.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/CLog.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
@@ -903,7 +903,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 
         g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", ptcTime);
 
-        CScriptTriggerArgsPtr pScriptArgs;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
         pScriptArgs->Init(ptcTime);
         g_Serv.r_Call("f_onserver_save_finished", pScriptArgs, &g_Serv);
 

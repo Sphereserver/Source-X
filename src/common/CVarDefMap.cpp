@@ -2,7 +2,7 @@
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServerConfig.h"
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "CVarDefMap.h"

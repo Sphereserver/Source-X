@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CScriptParserBufs.h"
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"
 #include "../triggers.h"

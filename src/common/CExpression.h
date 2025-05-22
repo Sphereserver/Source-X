@@ -11,6 +11,7 @@
 #define _INC_CEXPRSSION_H
 
 #include "sphere_library/CSAssoc.h"
+#include "sphere_library/sobjpool.h"
 #include "CScriptParserBufs.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
@@ -195,9 +196,24 @@ class CExpression
         ushort uiNonAssociativeOffset; // How much bytes/characters before the start is (if any) the first non-associative operator preceding the subexpression.
     };
 
-    static constexpr size_t sm_uiMaxConditionalSubexprs = 32;
-    CScriptSubExprState m_parsingSubexprsStates[sm_uiMaxConditionalSubexprs];
+    struct CSubExprStatesArena
+    {
+        static constexpr uint sm_kuiMaxConditionalSubexprsPerExpr = 32;
 
+        CScriptSubExprState m_subexprs[sm_kuiMaxConditionalSubexprsPerExpr];
+        uint m_uiQty;
+    };
+
+    struct PrvBuffersPool
+    {
+        // A pool of arenas.
+        static constexpr uint sm_subexpr_pool_size = 1'000;
+        static constexpr bool sm_allow_fallback_objects = false;
+        using CSubExprStatesArenaPool_t = sl::ObjectPool<CSubExprStatesArena, sm_subexpr_pool_size, sm_allow_fallback_objects>;
+        CSubExprStatesArenaPool_t m_poolCScriptExprSubStates;
+    };
+
+    std::unique_ptr<PrvBuffersPool> _pBufs;
     short _iGetVal_Reentrant;
 
 public:
@@ -213,8 +229,6 @@ public:
     int64 GetRangeNumber(lpctstr& refStrExpr);		// Evaluate a { } range
     CSString GetRangeString(lpctstr& refStrExpr);	// STRRANDRANGE
     
-    int GetConditionalSubexpressions(lptstr& refStrExpr);
-
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy and const-UNsafe workaround
     inline llong GetSingle(lptstr &refArgs) {
@@ -230,16 +244,26 @@ public:
         return GetRangeNumber(const_cast<lpctstr &>(refStrArgs));
 	}
 
-    // Arguments inside conditional statements: IF, ELIF, ELSEIF
-    bool _Evaluate_Conditional_EvalSingle(CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
-    bool Evaluate_Conditional(lptstr ptcExpression, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
-
-    bool Evaluate_QvalConditional(lpctstr ptcKey, CSString& refStrVal, CScriptExprContext& refContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
-
     /*
     * @brief Do the first-level parsing of a script line and eventually replace requested values got by r_WriteVal.
     */
     int ParseScriptText( tchar * pszResponse, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, int iFlags = 0 );
+
+    [[nodiscard]]
+    bool EvaluateConditionalWhole(lptstr ptcExpression, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+
+private:
+    // Arguments inside conditional statements: IF, ELIF, ELSEIF
+    [[nodiscard]]
+    bool EvaluateConditionalSingle(CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+
+    [[nodiscard]]
+    bool EvaluateConditionalQval(lpctstr ptcKey, CSString& refStrVal, CScriptExprContext& refContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+
+    [[nodiscard]]
+    PrvBuffersPool::CSubExprStatesArenaPool_t::UniquePtr_t
+    GetConditionalSubexpressions(lptstr& refStrExpr, PrvBuffersPool::CSubExprStatesArenaPool_t& bufs_arena);
+
 
 public:
     CExpression() noexcept;

@@ -1,7 +1,7 @@
 // Test things to judge what an NPC might be thinking. (want to do)
 // But take no actions here.
 
-#include "../../common/CExpression.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../../common/CLog.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"

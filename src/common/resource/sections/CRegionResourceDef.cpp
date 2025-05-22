@@ -1,7 +1,7 @@
 #include "../../../sphere/threads.h"
 #include "../../../game/items/CItemBase.h"
 #include "../../../game/CServerConfig.h"
-#include "../../CException.h"
+//#include "../../CException.h" // included in the precompiled header
 #include "../CResourceLock.h"
 #include "CRegionResourceDef.h"
 

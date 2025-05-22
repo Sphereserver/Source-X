@@ -4,9 +4,9 @@
 
 #include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/CLog.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
-#include "../../common/CScriptParserBufs.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CUOInstall.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"

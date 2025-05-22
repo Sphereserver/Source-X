@@ -1,5 +1,5 @@
 #include "../assertion.h"
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 #include "CSObjCont.h"
 #include <algorithm>
 

@@ -3,8 +3,8 @@
 
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CScript.h"
 #include "common.h"
 

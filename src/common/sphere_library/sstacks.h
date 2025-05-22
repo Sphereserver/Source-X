@@ -7,7 +7,7 @@
 #define _INC_CSTACK_H
 
 #include <shared_mutex>
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 
 namespace sl
 {

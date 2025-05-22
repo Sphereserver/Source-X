@@ -2,7 +2,7 @@
 // CServerMap.cpp
 //
 
-#include "CException.h"
+//#include "CException.h" // included in the precompiled header
 #include "CUOInstall.h"
 #include "CServerMap.h"
 #include "../game/uo_files/CUOItemInfo.h"

@@ -1,7 +1,7 @@
 
 #include "../common/sphere_library/CSRand.h"
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CUID.h"
 #include "../network/send.h"
 #include "chars/CChar.h"

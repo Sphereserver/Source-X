@@ -1,7 +1,7 @@
-
 // Actions specific to an NPC.
-#include "../../common/CExpression.h"
-#include "../../common/CScriptParserBufs.h"
+
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../network/send.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemStone.h"

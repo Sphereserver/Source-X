@@ -15,8 +15,6 @@ class CSString;
 class CUID;
 class CChar;
 
-struct CScriptSubExprState;
-
 class CScriptTriggerArgs;
 using CScriptTriggerArgsPtr = std::shared_ptr<CScriptTriggerArgs>;
 

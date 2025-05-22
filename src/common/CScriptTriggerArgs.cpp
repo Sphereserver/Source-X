@@ -1,7 +1,7 @@
 #include "../game/CObjBase.h"
 #include "CLog.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CScriptTriggerArgs.h"
 
 

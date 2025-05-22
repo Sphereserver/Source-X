@@ -7,7 +7,7 @@
 #define _INC_SQUEUES_H
 
 #include <shared_mutex>
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 
 #define _SPHERE_QUEUE_DEFAULT_SIZE 10
 

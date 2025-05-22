@@ -4,8 +4,8 @@
 #include "../sphere/asyncdb.h"
 #include "resource/sections/CResourceNamedDef.h"    // Needed because it was only forward declared.
 #include "CLog.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CScriptTriggerArgs.h"
 #include "CDataBase.h"
 

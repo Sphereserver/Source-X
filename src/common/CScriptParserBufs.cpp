@@ -2,7 +2,6 @@
 #include "CScriptTriggerArgs.h"
 #include "CLog.h"
 #include "sphere_library/sobjpool.h"
-//#include <cstdlib> //for memset
 
 
 struct CScriptParserBufsImpl
@@ -14,10 +13,6 @@ struct CScriptParserBufsImpl
     }
 
     static constexpr bool sm_allow_fallback_objects = true;
-
-    // We stack allocate this POD struct, so we don't need to keep them in a pool.
-    //sl::ObjectPool<CScriptSubExprState,    10'000, sm_allow_fallback_objects>
-        //m_poolCScriptSubExprState;
 
     // This is even more expensive to construct, so will definitely benefit a lot from having allocated, cached instances.
     sl::ObjectPool<CScriptTriggerArgs,     10'000, sm_allow_fallback_objects>

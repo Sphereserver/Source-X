@@ -1,10 +1,10 @@
-#include "../../../game/chars/CChar.h"
+#include "../../../game/chars/CChar.h"  // needed, even if clangd says the opposite
 #include "../../../game/clients/CClient.h"
 #include "../../../game/CObjBase.h"
 #include "../../../sphere/threads.h"
-#include "../../CException.h"
-#include "../../CExpression.h"
-#include "../../CScriptParserBufs.h"
+//#include "../../CException.h" // included in the precompiled header
+//#include "../../CExpression.h" // included in the precompiled header
+//#include "../../CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../CResourceLock.h"
 #include "CDialogDef.h"
 

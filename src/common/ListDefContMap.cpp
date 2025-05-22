@@ -2,7 +2,7 @@
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "ListDefContMap.h"

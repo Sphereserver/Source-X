@@ -123,7 +123,6 @@ if(NOT MSVC)
     set(custom_compile_options_release
         ${local_compile_options_nondebug}
         -flto=full
-        -fvirtual-function-elimination
         -ffunction-sections
         -fdata-sections
         #-fno-unique-section-names

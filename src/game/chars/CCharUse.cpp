@@ -1,7 +1,7 @@
 //  CChar is either an NPC or a Player.
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CExpression.h"
-#include "../../common/CScriptParserBufs.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
 #include "../items/CItemCorpse.h"

@@ -1,4 +1,4 @@
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../sphere/ProfileTask.h"
 #include "../sphere/threads.h"
 #include "CWorldGameTime.h"

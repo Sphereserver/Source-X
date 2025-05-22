@@ -3,8 +3,8 @@
 #ifdef _WIN32
 
 #include <direct.h>
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"

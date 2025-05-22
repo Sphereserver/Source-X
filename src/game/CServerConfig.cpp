@@ -5,8 +5,8 @@
 #include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/resource/sections/CResourceNamedDef.h"
 #include "../common/sphere_library/CSRand.h"
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"

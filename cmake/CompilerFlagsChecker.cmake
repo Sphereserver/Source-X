@@ -24,6 +24,7 @@ if(NOT MSVC)
     check_cxx_compiler_flag("-fno-expensive-optimizations" COMP_HAS_FNO_EXPENSIVE_OPTIMIZATIONS)
 
     # Compiler option flags. Expected to work on Clang but not GCC, at the moment.
+    # check_cxx_compiler_flag(CXX "-fvirtual-function-elimination" COMP_HAS_VFUNC_ELIMINATION) # only for release build? is it stable?
     # check_cxx_compiler_flag("-fforce-emit-vtables" COMP_HAS_F_FORCE_EMIT_VTABLES)
     # -fwhole-program-vtables
     # -fstrict-vtable-pointers

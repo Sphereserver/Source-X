@@ -1,8 +1,7 @@
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
 #include "../game/CServerConfig.h"
 #include "sphere_library/CSRand.h"
-//#include "CException.h"
-#include "CScriptParserBufs.h"
+///include "CException.h" // included in the precompiled header
 #include "CLog.h"
 #include <algorithm>
 #include <complex>
@@ -615,7 +614,10 @@ int Calc_GetSCurve( int iValDiff, int iVariance )
 	return iChance;
 }
 
+// ---
+
 CExpression::CExpression() noexcept :
+    _pBufs(std::make_unique<PrvBuffersPool>()),
     _iGetVal_Reentrant(0)
 {
 }
@@ -1454,34 +1456,48 @@ int CExpression::GetRangeVals(lpctstr & refStrExpr, int64 * piVals, int iMaxQty,
 }
 
 
-int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
+CExpression::PrvBuffersPool::CSubExprStatesArenaPool_t::UniquePtr_t
+CExpression::GetConditionalSubexpressions(
+    lptstr& refStrExpr,
+    CExpression::PrvBuffersPool::CSubExprStatesArenaPool_t& bufs_arena)
 {
 	ADDTOCALLSTACK("CExpression::GetConditionalSubexpressions");
 	// Get the start and end pointers for each logical subexpression (delimited by brackets or by logical operators || and &&) inside a conditional statement (IF/ELIF/ELSEIF and QVAL).
 	// Parse from left to start (like it was always done in Sphere).
     // Start and end pointers are inclusive (pointed values are valid chars, the end pointer doesn't necessarily point to '\0').
 
-    if (refStrExpr == nullptr)
-		return 0;
+    // Take a struct which holds a "block" (array) of 'sm_kuiMaxConditionalSubexprsPerExpr' amount of prebuilt CExpression::CScriptSubExprState.
+    auto pSubexprsArena = bufs_arena.acquireUnique();
+    memset(pSubexprsArena.get(), 0, sizeof(CSubExprStatesArena));
 
-    using SType = CScriptSubExprState::Type;
-    memset(m_parsingSubexprsStates, 0, sizeof(m_parsingSubexprsStates));
-    uint uiSubexprQty = 0;	// number of subexpressions
+    if (refStrExpr == nullptr)
+    {
+        DEBUG_ASSERT(false);
+        return pSubexprsArena;
+    }
+
+    static constexpr auto s_kuiMaxSubexpressionsPerExpr = CSubExprStatesArena::sm_kuiMaxConditionalSubexprsPerExpr;
+    using SubexprState_t = CExpression::CScriptSubExprState;
+    using SubexprType_t = SubexprState_t::Type;
+
+    SubexprState_t* parsingSubexprsStates = pSubexprsArena.get()->m_subexprs;
+    uint& uiSubexprQty = pSubexprsArena.get()->m_uiQty;	// number of subexpressions
+    DEBUG_ASSERT(uiSubexprQty == 0);
 
     while (refStrExpr[0] != '\0')
 	{
-        if (++uiSubexprQty >= sm_uiMaxConditionalSubexprs)
+        if (++uiSubexprQty >= s_kuiMaxSubexpressionsPerExpr)
 		{
-            g_Log.EventWarn("Exceeded maximum allowed number of subexpressions (%u). Parsing halted.\n", sm_uiMaxConditionalSubexprs);
-            return uiSubexprQty;
+            g_Log.EventWarn("Exceeded maximum allowed number of subexpressions (%u). Parsing halted.\n", s_kuiMaxSubexpressionsPerExpr);
+            return pSubexprsArena;
 		}
 
         GETNONWHITESPACE(refStrExpr);
-        CScriptSubExprState& sCurSubexpr = m_parsingSubexprsStates[uiSubexprQty - 1];
+        SubexprState_t& sCurSubexpr = parsingSubexprsStates[uiSubexprQty - 1];
         tchar ch = refStrExpr[0];
 
 		// Init the data for the current subexpression and set the position of the first character of the subexpression.
-        sCurSubexpr = {refStrExpr, nullptr, SType::None, 0};
+        sCurSubexpr = {refStrExpr, nullptr, SubexprType_t::None, 0};
 
         //  -- What's an expression and what's a subexpression.
         // An expression can contain a single statement, a single operation (enclosed, or not, by curly brackets), like: IF <EVAL 1> or IF <EVAL 1> == 1.
@@ -1604,7 +1620,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 								// I'm here because the whole expression is enclosed by parentheses
 							    // + 1 because i want to point to the character after the ')', even if it's the string terminator.
 								sCurSubexpr.ptcEnd = ptcLastClosingBracket + 1;
-                                sCurSubexpr.uiType |= CScriptSubExprState::TopParenthesizedExpr;
+                                sCurSubexpr.uiType |= SubexprState_t::TopParenthesizedExpr;
 							}
                             else
                             {
@@ -1654,7 +1670,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
                 {
                     g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
                     sCurSubexpr.ptcEnd = refStrExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
-                    return uiSubexprQty;
+                    return pSubexprsArena;
                 }
 
 				// Okay, i've eaten the expression in brackets, now fall through the rest of the loop and continue.
@@ -1665,7 +1681,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 				// Logical two-way OR operator: ||
 				if (sCurSubexpr.ptcEnd == nullptr)
                     sCurSubexpr.ptcEnd = refStrExpr;
-				sCurSubexpr.uiType = SType::Or  | (sCurSubexpr.uiType & ~SType::None);
+                sCurSubexpr.uiType = SubexprType_t::Or  | (sCurSubexpr.uiType & ~SubexprType_t::None);
                 refStrExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
@@ -1675,7 +1691,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 				// Logical two-way AND operator: &&
 				if (sCurSubexpr.ptcEnd == nullptr)
                     sCurSubexpr.ptcEnd = refStrExpr;
-				sCurSubexpr.uiType = SType::And | (sCurSubexpr.uiType & ~SType::None);
+                sCurSubexpr.uiType = SubexprType_t::And | (sCurSubexpr.uiType & ~SubexprType_t::None);
                 refStrExpr += 2u; // Skip the second char of the operator
 				break; // End of subexpr...
 			}
@@ -1689,18 +1705,18 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 					// This can be: <, <= or the start of a bracketed expression < >
                     if (refStrExpr[1] == '=')
 					{
-						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+                        sCurSubexpr.uiType = SubexprType_t::BinaryNonLogical | (sCurSubexpr.uiType & ~SubexprType_t::None);
                         refStrExpr += 1u;
 					}
 					else
 					{
                         const ushort prevSubexprType = ((uiSubexprQty == 1)
-                                    ? (ushort)SType::None
-                                    : m_parsingSubexprsStates[uiSubexprQty - 2].uiType);
-						if ((prevSubexprType & SType::None))
+                                    ? (ushort)SubexprType_t::None
+                                    : parsingSubexprsStates[uiSubexprQty - 2].uiType);
+                        if ((prevSubexprType & SubexprType_t::None))
 						{
 							// This subexpr is not preceded by a two-way operator, so probably i'm an operator: skip me.
-							sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+                            sCurSubexpr.uiType = SubexprType_t::BinaryNonLogical | (sCurSubexpr.uiType & ~SubexprType_t::None);
 
                             // This is not a whole logical subexpression but a single operand, or piece/fragment of the current arithmetic subexpr.
 						}
@@ -1725,12 +1741,12 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 				{
                     if (refStrExpr[1] == '=')
 					{
-						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+                        sCurSubexpr.uiType = SubexprType_t::BinaryNonLogical | (sCurSubexpr.uiType & ~SubexprType_t::None);
                         refStrExpr += 1u;
 					}
 					else
 					{
-						sCurSubexpr.uiType = SType::BinaryNonLogical | (sCurSubexpr.uiType & ~SType::None);
+                        sCurSubexpr.uiType = SubexprType_t::BinaryNonLogical | (sCurSubexpr.uiType & ~SubexprType_t::None);
 					}
 				}
 				// End of arithmetic subexpression parsing.
@@ -1744,7 +1760,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 	lptstr ptcStart, ptcEnd;
     for (uint i = 0; i < uiSubexprQty; ++i)
 	{
-        CScriptSubExprState& sCurSubexpr = m_parsingSubexprsStates[i];
+        SubexprState_t& sCurSubexpr = parsingSubexprsStates[i];
 		ptcStart = sCurSubexpr.ptcStart;
 		ptcEnd = sCurSubexpr.ptcEnd;
 
@@ -1758,7 +1774,7 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 			   )
 			{
 				// We have logical operators inside, so it's a nested subexpression.
-				sCurSubexpr.uiType |= SType::MaybeNestedSubexpr;
+                sCurSubexpr.uiType |= SubexprType_t::MaybeNestedSubexpr;
 				break;
 			}
 		}
@@ -1778,9 +1794,8 @@ int CExpression::GetConditionalSubexpressions(lptstr& refStrExpr)
 		sCurSubexpr.ptcEnd   = ptcEnd;
 	}
 
-    return uiSubexprQty;
+    return pSubexprsArena;
 }
-
 
 static constexpr int kiRangeMaxArgs = 96;
 static int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[kiRangeMaxArgs][2], bool fIgnoreMissingEndBracket)
@@ -2057,11 +2072,11 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
     return CSString(pElementsStart[i][0], iToParseLen);
 }
 
-bool CExpression::_Evaluate_Conditional_EvalSingle(
+bool CExpression::EvaluateConditionalSingle(
     CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext,
     CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
 {
-    ADDTOCALLSTACK("CExpression::_Evaluate_Conditional_EvalSingle");
+    ADDTOCALLSTACK("CExpression::EvaluateConditionalSingle");
 
     ASSERT(refSubExprState.ptcStart);
     ASSERT(refSubExprState.ptcEnd);
@@ -2114,7 +2129,7 @@ bool CExpression::_Evaluate_Conditional_EvalSingle(
     if (fNested)
     {
         // Probably this subexpression has other conditional subexpressions inside.
-        fVal = Evaluate_Conditional(ptcSubexpr, refExprContext, pScriptArgs, pSrc);
+        fVal = EvaluateConditionalWhole(ptcSubexpr, refExprContext, pScriptArgs, pSrc);
     }
     else
     {
@@ -2147,53 +2162,55 @@ bool CExpression::_Evaluate_Conditional_EvalSingle(
     return fVal;
 }
 
-bool CExpression::Evaluate_Conditional(lptstr ptcExpr, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+bool CExpression::EvaluateConditionalWhole(lptstr ptcExpr, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
 {
-    ADDTOCALLSTACK("CExpression::Evaluate_Conditional");
+    ADDTOCALLSTACK("CExpression::EvaluateConditionalWhole");
     ASSERT(refExprContext._pScriptObjI != nullptr);
 
     if (!pScriptArgs)
         pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
 
     lptstr ptcExprDbg = ptcExpr;
-    const int iQty = GetConditionalSubexpressions(ptcExprDbg);	// number of arguments
+    const auto pSubexprArena = GetConditionalSubexpressions(ptcExprDbg, _pBufs.get()->m_poolCScriptExprSubStates);	// number of arguments
+    const uint uiQty = pSubexprArena->m_uiQty;
+    CScriptSubExprState* parsingSubexprsStates = pSubexprArena->m_subexprs;
 
-    if (iQty == 0)
+    if (uiQty == 0)
         return 0;
 
     using SType = CScriptSubExprState::Type;
 
-    if (iQty == 1)
+    if (uiQty == 1)
     {
         // We don't have subexpressions, but only a simple expression.
-        CScriptSubExprState& sCur = m_parsingSubexprsStates[0];
+        CScriptSubExprState& sCur = parsingSubexprsStates[0];
         ASSERT((sCur.uiType & SType::None) ||  (sCur.uiType & SType::BinaryNonLogical));
 
-        const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+        const bool fVal = EvaluateConditionalSingle(sCur, refExprContext, pScriptArgs, pSrc);
         return fVal;
     }
 
     // We have some subexpressions, connected between them by logical operators.
 
     bool fWholeExprVal = false;
-    for (int i = 0; i < iQty; ++i)
+    for (uint i = 0; i < uiQty; ++i)
     {
-        CScriptSubExprState& sCur = m_parsingSubexprsStates[i];
+        CScriptSubExprState& sCur = parsingSubexprsStates[i];
         ASSERT(sCur.uiType != SType::Unknown);
 
         if (i == 0)
         {
-            fWholeExprVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+            fWholeExprVal = EvaluateConditionalSingle(sCur, refExprContext, pScriptArgs, pSrc);
             continue;
         }
 
-        CScriptSubExprState& sPrev = m_parsingSubexprsStates[i - 1];
+        CScriptSubExprState& sPrev = parsingSubexprsStates[i - 1];
         if (sPrev.uiType & SType::Or)
         {
             if (fWholeExprVal)
                 return true;
 
-            const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+            const bool fVal = EvaluateConditionalSingle(sCur, refExprContext, pScriptArgs, pSrc);
             fWholeExprVal = fWholeExprVal || fVal;
         }
         else if (sPrev.uiType & SType::And)
@@ -2201,23 +2218,21 @@ bool CExpression::Evaluate_Conditional(lptstr ptcExpr, CScriptExprContext& refEx
             if (!fWholeExprVal)
                 return false;
 
-            const bool fVal = _Evaluate_Conditional_EvalSingle(sCur, refExprContext, pScriptArgs, pSrc);
+            const bool fVal = EvaluateConditionalSingle(sCur, refExprContext, pScriptArgs, pSrc);
             fWholeExprVal = (i == 1) ? fVal : (fWholeExprVal && fVal);
         }
 
-
         if (sCur.uiType & SType::None)
         {
-            ASSERT(i == iQty - 1);	// It should be the last subexpression
+            ASSERT(i == uiQty - 1);	// It should be the last subexpression
             ASSERT((sPrev.uiType & SType::Or) || (sPrev.uiType & SType::And));
         }
-
     }
 
     return fWholeExprVal;
 }
 
-static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpctstr ptcSep)
+static void EvaluateConditionalQval_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpctstr ptcSep)
 {
     ASSERT(ptcSep && *ptcSep);
 
@@ -2274,13 +2289,13 @@ static void Evaluate_QvalConditional_ParseArg(tchar* ptcSrc, tchar** ptcDest, lp
     Str_Parse(ptcSrc, ptcDest, ptcSep);
 }
 
-bool CExpression::Evaluate_QvalConditional(
+bool CExpression::EvaluateConditionalQval(
     lpctstr ptcKey, CSString& refStrVal,
     CScriptExprContext& pContext,
     CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
 {
     // Do a switch ? type statement <QVAL condition ? option1 : option2>
-    ADDTOCALLSTACK("CExpression::Evaluate_QvalConditional");
+    ADDTOCALLSTACK("CExpression::EvaluateConditionalQval");
     ASSERT(pContext._pScriptObjI != nullptr);
 
     // Do NOT work on the original arguments, it WILL fuck up the original string!
@@ -2292,10 +2307,10 @@ bool CExpression::Evaluate_QvalConditional(
     ppCmds[0] = ptcArgs;
 
     // Get the condition
-    Evaluate_QvalConditional_ParseArg(ppCmds[0], &(ppCmds[1]), "?");
+    EvaluateConditionalQval_ParseArg(ppCmds[0], &(ppCmds[1]), "?");
 
     // Get the first and second retvals
-    Evaluate_QvalConditional_ParseArg(ppCmds[1], &(ppCmds[2]), ":");
+    EvaluateConditionalQval_ParseArg(ppCmds[1], &(ppCmds[2]), ":");
 
     // Complete evaluation of the condition
     //  (do that in another string, since it may overwrite the arguments, which are written later in the same string).
@@ -2576,7 +2591,7 @@ int CExpression::ParseScriptText(
                 // Separate evaluation for QVAL. I may need additional script context for it (pScriptArgs isn't available in r_WriteVal).
                 EXC_SET_BLOCK("writeval qval");
                 ptcKey += 4; // Skip the letters QVAL and pass only the arguments
-                fRes = Evaluate_QvalConditional(ptcKey, sVal, pContext, pScriptArgs, pSrc);
+                fRes = EvaluateConditionalQval(ptcKey, sVal, pContext, pScriptArgs, pSrc);
                 eQval = QvalStatus::None;
             }
             else

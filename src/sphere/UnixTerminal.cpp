@@ -1,7 +1,7 @@
 
 #ifndef _WIN32
 
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES

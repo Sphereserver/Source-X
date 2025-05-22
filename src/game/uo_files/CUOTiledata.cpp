@@ -4,7 +4,7 @@
 */
 
 #include "../../sphere/threads.h"
-#include "../../common/CException.h"
+//#include "../../common/CException.h" // included in the precompiled header
 #include "../../common/CLog.h"
 #include "../../common/CUOInstall.h"
 #include "CUOTerrainTypeRec.h"

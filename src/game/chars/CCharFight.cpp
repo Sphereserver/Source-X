@@ -2,8 +2,8 @@
 // Fight/Criminal actions/Noto.
 
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CExpression.h"
-#include "../../common/CScriptParserBufs.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../network/send.h"
 #include "../clients/CClient.h"
 #include "../components/CCPropsChar.h"

@@ -6,8 +6,8 @@
 #include "../common/sphere_library/sresetevents.h"
 #include "../common/sphere_library/sstringobjs.h"
 #include "../common/basic_threading.h"
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "ProfileTask.h"

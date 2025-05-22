@@ -1,5 +1,5 @@
 #include "../common/sphere_library/scontainer_ops.h"
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../game/items/CItem.h"
 #include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/uo_files/CUOStaticItemRec.h"

@@ -3,7 +3,7 @@
 #include "../common/sphere_library/CSRand.h"
 #include "chars/CChar.h"
 #include "chars/CCharNPC.h"
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "components/CCPropsChar.h"
 #include "items/CItem.h"
 #include "CServerConfig.h"

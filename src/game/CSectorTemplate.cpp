@@ -1,4 +1,4 @@
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../common/CLog.h"
 #include "../common/CRect.h"
 #include "../game/CWorld.h"

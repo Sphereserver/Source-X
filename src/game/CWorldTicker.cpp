@@ -1,5 +1,5 @@
 #include "../common/sphere_library/scontainer_ops.h"
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../sphere/threads.h"
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"

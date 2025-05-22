@@ -1,7 +1,7 @@
 //  CChar is either an NPC or a Player.
 
-#include "../../common/CExpression.h"
-#include "../../common/CScriptParserBufs.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CLog.h"
 #include "../components/CCPropsItemEquippable.h"
 #include "../components/CCPropsItemWeapon.h"

@@ -3,8 +3,8 @@
 
 #include "../../common/sphere_library/CSRand.h"
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../../common/CScriptParserBufs.h"
 #include "../../network/receive.h"
 #include "../clients/CClient.h"

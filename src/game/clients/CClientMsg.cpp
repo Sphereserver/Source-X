@@ -3,9 +3,9 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
-#include "../../common/CScriptParserBufs.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"

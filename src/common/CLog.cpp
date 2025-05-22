@@ -3,7 +3,7 @@
 #include "../sphere/threads.h"
 #include "../game/CServer.h"
 #include "sphere_library/sstringobjs.h"
-#include "CException.h"
+//#include "CException.h" // included in the precompiled header
 #include "CScript.h"
 #include "CLog.h"
 

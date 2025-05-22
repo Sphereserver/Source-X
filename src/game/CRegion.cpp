@@ -1,8 +1,8 @@
 // Common for client and server.
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/CResourceLock.h"
-#include "../common/CExpression.h"
-#include "../common/CScriptParserBufs.h"
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../network/CClientIterator.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"

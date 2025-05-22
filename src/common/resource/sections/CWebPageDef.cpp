@@ -6,9 +6,9 @@
 #include "../../../game/CWorldGameTime.h"
 #include "../../../network/CClientIterator.h"
 #include "../../sphere_library/CSFileList.h"
-#include "../../CException.h"
-#include "../../CExpression.h"
-#include "../../CScriptParserBufs.h"
+//#include "../../CException.h" // included in the precompiled header
+//#include "../../CExpression.h" // included in the precompiled header
+//#include "../../CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../sphereversion.h"
 #include "../CResourceLock.h"
 #include "CWebPageDef.h"

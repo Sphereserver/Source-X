@@ -1,5 +1,5 @@
 #include "../common/sphere_library/CSRand.h"
-#include "../common/CScriptParserBufs.h"
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../network/CClientIterator.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"

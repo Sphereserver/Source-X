@@ -1,7 +1,7 @@
 
 #include "../common/resource/sections/CDialogDef.h"
-#include "../common/CExpression.h"
-#include "../common/CScriptParserBufs.h"
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/CLog.h"
 #include "../common/CUOClientVersion.h"
 #include "../game/uo_files/uofiles_enums_creid.h"

@@ -19,7 +19,6 @@ class CScriptParserBufs
     ~CScriptParserBufs() noexcept = default;
 
 public:
-    //static CScriptSubExprStatePtr GetCScriptSubExprStatePtr();
     static CScriptTriggerArgsPtr  GetCScriptTriggerArgsPtr();
 };
 

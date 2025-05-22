@@ -1,5 +1,5 @@
 #include "ProfileTask.h"
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../game/CServerConfig.h"
 #include "threads.h"
 

@@ -1,8 +1,8 @@
 #include "../common/resource/sections/CItemTypeDef.h"
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/sections/CRegionResourceDef.h"
-#include "../common/CException.h"
-#include "../common/CScriptParserBufs.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/CRect.h"
 #include "../common/CLog.h"
 #include "../sphere/threads.h"

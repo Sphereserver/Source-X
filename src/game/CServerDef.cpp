@@ -1,10 +1,10 @@
 
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
-#include "../common/CScriptParserBufs.h"
 #include "../sphere/threads.h"
 #include "CServer.h"
 #include "CServerConfig.h"

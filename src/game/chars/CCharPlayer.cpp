@@ -3,8 +3,8 @@
 
 #include "../../common/resource/sections/CSkillClassDef.h"
 #include "../../common/CLog.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../clients/CClient.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemStone.h"

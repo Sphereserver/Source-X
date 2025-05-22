@@ -1,5 +1,5 @@
-//#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../../common/CLog.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
