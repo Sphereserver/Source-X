@@ -1867,7 +1867,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
 			break;
 		case IT_RUNE:
-			if ( ! m_itRune.m_ptMark.IsCharValid())
+            if ( ! m_itRune.m_ptMark.IsValidPoint())
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ), Str_TempLength() - len);
 			else if ( ! m_itRune.m_Strength )
 				len += Str_CopyLimitNull( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_FADED ), Str_TempLength() - len);
@@ -3525,7 +3525,7 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 	if ( GetContainer() == nullptr )
 	{
         // Actually place the item into the world.
-		if ( GetTopPoint().IsCharValid())
+        if ( GetTopPoint().IsValidPoint())
 			MoveToUpdate( GetTopPoint());
 	}
 

@@ -67,17 +67,11 @@ public:
     [[nodiscard]] int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
     [[nodiscard]] int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
 
-    [[nodiscard]] inline bool IsValidZ() const noexcept
-    {
-        return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
-    }
+    //[[nodiscard]] inline bool IsValidZ() const noexcept {
+    //    return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
+    //}
     [[nodiscard]] bool IsValidXY() const noexcept;
-    [[nodiscard]] bool IsCharValid() const noexcept;
-    [[nodiscard]] inline bool IsValidPoint() const noexcept
-	{
-		// Called a LOT of times, it's worth inlining it.
-		return (IsValidXY() && IsValidZ());
-	}
+    [[nodiscard]] bool IsValidPoint() const noexcept;
 
 	void ValidatePoint() noexcept;
 

@@ -61,7 +61,7 @@ void CUOMapList::Init()
         if ( map_data.enabled )	// map marked as available. check whatever it's possible
         {
             //	check coordinates first
-            if ( map_data.num == -1 )
+            if ( map_data.num == (ushort)-1 )
                 map_data.enabled = false;
             else if ( map_data.sizex <= 0 || map_data.sizey <= 0 || map_data.sectorsize <= 0 )
                 map_data.enabled = DetectMapSize(i);
@@ -278,27 +278,27 @@ int CUOMapList::CalcSectorRows(int map) const
 int CUOMapList::GetMapCenterX(int map) const
 {
     ASSERT(IsMapSupported(map));
-    ASSERT(m_mapGeoData.maps[map].sizex != -1);
+    ASSERT(m_mapGeoData.maps[map].sizex != (ushort)-1);
     return (m_mapGeoData.maps[map].sizex / 2);
 }
 
 int CUOMapList::GetMapCenterY(int map) const
 {
     ASSERT(IsMapSupported(map));
-    ASSERT(m_mapGeoData.maps[map].sizey != -1);
+    ASSERT(m_mapGeoData.maps[map].sizey != (ushort)-1);
     return (m_mapGeoData.maps[map].sizey / 2);
 }
 
 int CUOMapList::GetMapFileNum(int map) const
 {
     ASSERT(IsMapSupported(map));
-    ASSERT(m_mapGeoData.maps[map].num != -1);
+    ASSERT(m_mapGeoData.maps[map].num != (ushort)-1);
     return m_mapGeoData.maps[map].num;
 }
 
 int CUOMapList::GetMapID(int map) const
 {
     ASSERT(IsMapSupported(map));
-    ASSERT(m_mapGeoData.maps[map].id != -1);
+    ASSERT(m_mapGeoData.maps[map].id != (ushort)-1);
     return m_mapGeoData.maps[map].id;
 }

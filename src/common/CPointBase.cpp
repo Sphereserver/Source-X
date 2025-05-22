@@ -214,9 +214,7 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 	//ADDTOCALLSTACK_DEBUG("CPointBase::GetDist");
 
 	// Get the basic 2d distance.
-	if ( !pt.IsValidPoint() || (pt.m_map != m_map))
-		return INT16_MAX;
-	return GetDistBase(pt);
+    return (!pt.IsValidPoint() || (pt.m_map != m_map)) ? INT16_MAX : GetDistBase(pt);
 }
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -233,9 +231,7 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	if ( !pt.IsValidPoint() )
-		return INT16_MAX;
-	if ( pt.m_map != m_map )
+    if (!pt.IsValidPoint() || (pt.m_map != m_map))
 		return INT16_MAX;
 
 	//const int dx = abs(m_x - pt.m_x);
@@ -283,15 +279,27 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
 
 bool CPointBase::IsValidXY() const noexcept
 {
+    /*
 	if ( (m_x < 0) || (m_y < 0) )
 		return false;
 	if ( (m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)) )
 		return false;
 	return true;
+    */
+
+    const ushort sx = g_MapList.GetMapSizeX(m_map);
+    const ushort sy = g_MapList.GetMapSizeY(m_map);
+
+    const ushort ux = uint16(m_x);
+    const ushort uy = uint16(m_y);
+
+    // Two unsigned compares fold both < 0 and >= size checks
+    return ux < sx && uy < sy;
 }
 
-bool CPointBase::IsCharValid() const noexcept
+bool CPointBase::IsValidPoint() const noexcept
 {
+/*
 	if ( (m_z <= -UO_SIZE_Z) || (m_z >= UO_SIZE_Z) )
 		return false;
 	if ((m_x <= 0) || (m_y <= 0))
@@ -299,19 +307,33 @@ bool CPointBase::IsCharValid() const noexcept
 	if ((m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)))
 		return false;
 	return true;
+*/
+    const ushort sx = g_MapList.GetMapSizeX(m_map);
+    const ushort sy = g_MapList.GetMapSizeY(m_map);
+
+    const ushort ux = uint16(m_x);
+    const ushort uy = uint16(m_y);
+    const ushort uz = uint16(int16(m_z) + UO_SIZE_Z);
+
+    // ux > 0 && ux < sizex folds both x<=0 and x>=sizex
+    // uz > 0 excludes m_z == –UO_SIZE_Z; uz < 2*UO_SIZE_Z excludes m_z >= UO_SIZE_Z
+    return uz < (2U * UO_SIZE_Z)
+           && ux > 0U && ux < sx
+           && uy > 0U && uy < sy;
 }
 
 void CPointBase::ValidatePoint() noexcept
 {
+    const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
+    const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
+
 	if ( m_x < 0 )
 		m_x = 0;
-    const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
 	if (m_x >= iMaxX)
 		m_x = iMaxX - 1;
 
 	if ( m_y < 0 )
 		m_y = 0;
-    const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
 	if (m_y >= iMaxY)
 		m_y = iMaxY - 1;
 }
@@ -615,7 +637,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+
+                    const CPointMap ptTest(
+                        (word)(ptMulti.m_x + pMultiItem->m_dx),
+                        (word)(ptMulti.m_y + pMultiItem->m_dy),
+                        (char)(ptMulti.m_z + pMultiItem->m_dz),
+                        this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -827,30 +854,26 @@ bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 	return true;
 }
 
-
 DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const // Direction to point pt
 {
 	ADDTOCALLSTACK_DEBUG("CPointBase::GetDir");
 	// Get the 2D direction between points.
-	const int dx = (m_x-pt.m_x);
-    const int dy = (m_y-pt.m_y);
 
+    /*
+    const int dx = (m_x-pt.m_x);
+    const int dy = (m_y-pt.m_y);
     const int ax = abs(dx);
     const int ay = abs(dy);
-
 	if ( ay > ax )
 	{
 		if ( ! ax )
-		{
 			return(( dy > 0 ) ? DIR_N : DIR_S );
-		}
-		int slope = ay / ax;
+
+        const int slope = ay / ax;
 		if ( slope > 2 )
 			return(( dy > 0 ) ? DIR_N : DIR_S );
 		if ( dx > 0 )	// westish
-		{
 			return(( dy > 0 ) ? DIR_NW : DIR_SW );
-		}
 		return(( dy > 0 ) ? DIR_NE : DIR_SE );
 	}
 	else
@@ -861,24 +884,66 @@ DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const 
 				return( DirDefault );	// here ?
 			return(( dx > 0 ) ? DIR_W : DIR_E );
 		}
-		int slope = ax / ay;
+        const int slope = ax / ay;
 		if ( slope > 2 )
 			return(( dx > 0 ) ? DIR_W : DIR_E );
 		if ( dy > 0 )
-		{
 			return(( dx > 0 ) ? DIR_NW : DIR_NE );
-		}
 		return(( dx > 0 ) ? DIR_SW : DIR_SE );
 	}
+    */
+
+    const int dx = m_x - pt.m_x;
+    const int dy = m_y - pt.m_y;
+
+    // Early exit if identical point
+    if ((dx | dy) == 0) //(dx == 0 && dy == 0)
+        return DirDefault;
+
+    // Absolute values
+    const int ax = dx < 0 ? -dx : dx;
+    const int ay = dy < 0 ? -dy : dy;
+
+    // Axis‐dominance and “steepness” test
+    const bool steep    = ay > ax;
+    const bool extreme  = steep
+                            ? (ay > ax * 2)
+                            : (ax > ay * 2);
+
+    // Cardinal direction if “extreme”, else diagonal
+    //    Use boolean-to-int multipliers (true→1, false→0)
+    const int north = (dy > 0);
+    const int south = (dy < 0);
+    const int east  = (dx > 0);
+    const int west  = (dx < 0);
+
+    const DIR_TYPE dir_card = enum_alias_cast<DIR_TYPE>(
+        steep
+            ? ( north * DIR_N + south * DIR_S )
+            : ( east  * DIR_E + west  * DIR_W ));
+    //const DIR_TYPE card = steep
+    //                    ? (north ? DIR_N : DIR_S)
+    //                    : (east ? DIR_W : DIR_E);
+
+    const DIR_TYPE dir_diag = enum_alias_cast<DIR_TYPE>(
+        north * east * DIR_NE +
+        north * west * DIR_NW +
+        south * east * DIR_SE +
+        south * west * DIR_SW);
+    //const DIR_TYPE diag = north
+    //                    ? (east ? DIR_NE : DIR_NW)
+    //                    : (east ? DIR_SE : DIR_SW);
+
+    return extreme ? dir_card : dir_diag;
 }
 
 int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 {
 	ADDTOCALLSTACK("CPointBase::StepLinePath");
 	// Take x steps toward this point.
-	int dx = m_x - ptSrc.m_x;
-	int dy = m_y - ptSrc.m_y;
-	int iDist2D = GetDist( ptSrc );
+    const int dx = m_x - ptSrc.m_x;
+    const int dy = m_y - ptSrc.m_y;
+    const int iDist2D = GetDist( ptSrc );
 	if ( ! iDist2D )
 		return 0;
 

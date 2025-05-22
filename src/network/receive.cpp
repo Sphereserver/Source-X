@@ -447,7 +447,7 @@ bool PacketItemDropReq::onReceive(CNetState* net)
 	}
 
 	CUID container(readInt32());
-	CPointMap pt(x, y, z, character->GetTopMap());
+    CPointMap pt((int16_t)x, (int16_t)y, (int8_t)z, character->GetTopMap());
 
 	client->Event_Item_Drop(serial, pt, container, grid);
 	return true;

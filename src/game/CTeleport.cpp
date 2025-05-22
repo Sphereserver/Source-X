@@ -31,7 +31,7 @@ CTeleport::CTeleport(tchar* pszArgs)
 bool CTeleport::RealizeTeleport()
 {
 	ADDTOCALLSTACK("CTeleport::RealizeTeleport");
-	if (!IsCharValid() || !_ptDst.IsCharValid())
+    if (!IsValidPoint() || !_ptDst.IsValidPoint())
 	{
 		DEBUG_ERR(("CTeleport bad coords %s\n", WriteUsed()));
 		return false;
