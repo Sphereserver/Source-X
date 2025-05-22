@@ -1491,18 +1491,18 @@ public:
  *
  *
  ***************************************************************************/
+enum PacketCloseUIWindowType : uint
+{
+    Paperdoll = 1,
+    Status = 2,
+    Profile = 8,
+    Container = 0xC
+};
+
 class PacketCloseUIWindow : public PacketExtended
 {
 public:
-    enum UIWindow
-    {
-        Paperdoll = 1,
-        Status = 2,
-        Profile = 8,
-        Container = 0xC
-    };
-
-	PacketCloseUIWindow(const CClient* target, const CObjBase* obj, UIWindow command);
+    PacketCloseUIWindow(const CClient* target, const CObjBase* obj, PacketCloseUIWindowType command);
 };
 
 /***************************************************************************

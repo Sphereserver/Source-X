@@ -5,6 +5,7 @@
 #include "../../../game/CWorld.h"
 #include "../../../game/CWorldGameTime.h"
 #include "../../../network/CClientIterator.h"
+#include "../../../network/send.h"
 #include "../../sphere_library/CSFileList.h"
 //#include "../../CException.h" // included in the precompiled header
 //#include "../../CExpression.h" // included in the precompiled header

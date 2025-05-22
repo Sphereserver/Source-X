@@ -17,6 +17,9 @@ set(pch_options
     #PRIVATE src/network/send.h
     #PRIVATE src/network/CSocket.h
     #PRIVATE src/network/receive.h
+    PRIVATE src/game/CEntity.h
+    PRIVATE src/game/CEntityProps.h
+    PRIVATE src/game/CServerConfig.h
     #PRIVATE src/game/clients/CClient.h
     #PRIVATE src/game/chars/CChar.h
     #PRIVATE src/game/items/CItem.h

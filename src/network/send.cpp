@@ -4161,7 +4161,7 @@ void PacketDisplayPopup::finalise(void)
  *
  *
  ***************************************************************************/
-PacketCloseUIWindow::PacketCloseUIWindow(const CClient* target, const CObjBase* obj, UIWindow command) : PacketExtended(EXTDATA_CloseUI_Window, 13, PRI_NORMAL)
+PacketCloseUIWindow::PacketCloseUIWindow(const CClient* target, const CObjBase* obj, PacketCloseUIWindowType command) : PacketExtended(EXTDATA_CloseUI_Window, 13, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketCloseUIWindow::PacketCloseUIWindow");
 

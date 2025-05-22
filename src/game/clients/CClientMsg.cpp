@@ -289,7 +289,7 @@ void CClient::closeContainer( const CObjBase * pObj ) const
 	new PacketCloseContainer(this, pObj);
 }
 
-void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow windowType ) const
+void CClient::closeUIWindow(const CObjBase* pObj, PacketCloseUIWindowType windowType ) const
 {
 	ADDTOCALLSTACK("CClient::closeUIWindow");
 	new PacketCloseUIWindow(this, pObj, windowType);

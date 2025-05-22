@@ -1,5 +1,6 @@
 //#include "../../common/CExpression.h" // included in the precompiled header
 //#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClientTooltip.h"

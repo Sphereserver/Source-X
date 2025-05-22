@@ -8,6 +8,7 @@
 #include "../../network/CClientIterator.h"
 #include "../../network/CNetworkManager.h"
 #include "../../network/CIPHistoryManager.h"
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
 #include "../items/CItemMultiCustom.h"
@@ -1263,7 +1264,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, PacketCloseUIWindow::Paperdoll);
+                    closeUIWindow(pChar, PacketCloseUIWindowType::Paperdoll);
 			}
 			break;
 
@@ -1276,7 +1277,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, PacketCloseUIWindow::Profile);
+                    closeUIWindow(pChar, PacketCloseUIWindowType::Profile);
 			}
 			break;
 
@@ -1289,7 +1290,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
-					closeUIWindow(pChar, PacketCloseUIWindow::Status);
+                    closeUIWindow(pChar, PacketCloseUIWindowType::Status);
 			}
 			break;
 

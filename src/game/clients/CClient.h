@@ -9,7 +9,7 @@
 #include "../../common/crypto/CCrypto.h"
 #include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CTextConsole.h"
-#include "../../network/send.h"
+#include "../../network/CNetState.h"
 #include "../CSectorEnviron.h"
 #include "../game_enums.h"
 #include "CAccount.h"
@@ -17,12 +17,17 @@
 #include "CGlobalChatChanMember.h"
 #include "CGMPage.h"
 
+class Packet;
+class PacketCloseUIWindow;
+enum PacketCloseUIWindowType : uint;
+class PacketDisplayPopup;
 
 class CItemBase;
 class CItemContainer;
 class CItemMap;
 class CItemMultiCustom;
 class CSObjCont;
+
 struct VendorItem;
 enum CREID_TYPE : uint32;
 enum ITEMID_TYPE : uint32;
@@ -439,7 +444,7 @@ public:
 	void addTime( bool fCurrent = false ) const;
 	void addObjectRemoveCantSee( const CUID& uid, lpctstr pszName = nullptr ) const;
 	void closeContainer( const CObjBase * pObj ) const;
-	void closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow windowType ) const;
+    void closeUIWindow( const CObjBase* pObj, PacketCloseUIWindowType windowType ) const;
 	void addObjectRemove( const CUID& uid ) const;
 	void addObjectRemove( const CObjBase * pObj ) const;
 	void addRemoveAll( bool fItems, bool fChars );
