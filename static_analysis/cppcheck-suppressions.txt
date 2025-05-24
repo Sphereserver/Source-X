@@ -1,12 +1,29 @@
-*:/lib/*
-unreachableCode
-unusedFunction
-duplInheritedMember
-missingOverride // suppress temporarily
-virtualCallInConstructor // suppress temporarily
-constParameterPointer // suppress temporarily
-passedByValue // suppress temporarily
-funcArgNamesDifferent // suppress temporarily
-noExplicitConstructor // suppress temporarily
-returnByReference // suppress temporarily
-functionConst
+# 1) All warnings in any subdir “lib”
+*:*/lib/*
+
+# 2) Specific warnings everywhere
+unmatchedSuppression:*
+missingIncludeSystem:*
+unreachableCode:*
+unusedFunction:*
+duplInheritedMember:*
+missingOverride:*
+virtualCallInConstructor:*
+passedByValue:*
+funcArgNamesDifferent:*
+noExplicitConstructor:*
+useStlAlgorithm:*
+# Performance: Not a priority right now:
+returnByReference:*
+useInitializationList:*
+# Style: Not a priority right now:
+functionConst:*
+constParameterPointer:*
+constVariablePointer:*
+functionStatic:*
+unreadVariable:*
+variableScope:*
+
+#3) False positives in some files
+nullPointer:*/src/common/sphere_library/ssorted_vector.h
+knownConditionTrueFalse:*/src/common/sphere_library/ssorted_vector.h

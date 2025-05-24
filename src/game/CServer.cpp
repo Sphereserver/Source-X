@@ -1030,42 +1030,44 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 					SetExitFlag( 1 );
 				}
 			} break;
+
+// Something here makes CppCheck stop for 'syntax error'...
 #ifdef _TESTEXCEPTION
-		case '$':	// call stack integrity
+        case '$':	// call stack integrity
 			{
 	#ifdef _EXCEPTIONS_DEBUG
-				{ // test without freezing the call stack
+                {
+                    / test without freezing the call stack
 					ADDTOCALLSTACK("CServer::TestException1");
 					EXC_TRY("Test1");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
-					}
-					catch (const CSError& e)
-					{
-						// the following call will destroy the stack trace on linux due to
-						// a call to CSFile::Close fromn CLog::EventStr.
-						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-                        EXC_CATCH_EXCEPTION_SPHERE(&e);
-					}
-				}
+                }
+                catch (const CSError& e)
+                {
+                    // the following call will destroy the stack trace on linux due to
+                    // a call to CSFile::Close fromn CLog::EventStr.
+                    g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
+                    _EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError");
+                }
 
-				{ // test pausing the call stack
+                {
+                    // test pausing the call stack
 					ADDTOCALLSTACK("CServer::TestException2");
 					EXC_TRY("Test2");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
-					}
-					catch (const CSError& e)
-					{
-                        StackDebugInformation::freezeCallStack(true);
-						// with freezeCallStack, the following call won't be recorded
-						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-                        StackDebugInformation::freezeCallStack(false);
-                        EXC_CATCH_EXCEPTION_SPHERE(&e);
-					}
-				}
+                }
+                catch (const CSError& e)
+                {
+                    StackDebugInformation::freezeCallStack(true);
+                    // with freezeCallStack, the following call won't be recorded
+                    g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
+                    StackDebugInformation::freezeCallStack(false);
+                    _EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError");
+                }
 	#else
-				throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
+                throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
 	#endif
-			} break;
+            } break;
 		case '%':	// throw simple exception
 			{
 				throw 0;
@@ -1086,8 +1088,9 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				throw CSError(LOGL_CRIT, (dword)E_FAIL, "Test Exception");
 			}
 #endif
-		default:
-			goto longcommand;
+
+        default:
+            goto longcommand;
 	}
 	goto endconsole;
 
@@ -1108,7 +1111,7 @@ longcommand:
 
 			if ( g_Cfg.m_sStripPath.IsEmpty() )
 			{
-                if (pSrc != this)
+                if (pSrc && pSrc != this)
                 {
                     pSrc->SysMessage("StripPath not defined, function aborted.\n");
                 }

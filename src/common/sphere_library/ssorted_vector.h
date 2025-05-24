@@ -168,13 +168,10 @@ namespace sl
         size_t sorted_vector<_Type, _Comp>::find(_Type const& value) const noexcept
         {
             const size_t _mySize = base_type::size();
-            if (_mySize == 0) {
-                return sl::scont_bad_index();
-            }
             const _Type* const _dataptr = base_type::data();
-            if (!_dataptr)
+            if ((_mySize == 0) || !_dataptr)
                 return sl::scont_bad_index();
-            size_t _idx = this->lower_element(_mySize, _dataptr, value);
+            const size_t _idx = this->lower_element(_mySize, _dataptr, value);
             if (_idx == _mySize)
                 return sl::scont_bad_index();
             return (!this->_comparatorObj(value, _dataptr[_idx])) ? _idx : sl::scont_bad_index();
@@ -185,9 +182,8 @@ namespace sl
         size_t sorted_vector<_Type, _Comp>::find_predicate(_ValType const& value, _Pred && predicate) const noexcept
         {
             const size_t _mySize = base_type::size();
-            if (_mySize == 0) {
+            if ((_mySize == 0) || !base_type::data())
                 return sl::scont_bad_index();
-            }
             return this->binary_search_predicate(_mySize, value, predicate);
         }
 

@@ -3,6 +3,7 @@
 #include "../game/items/CItem.h"
 #include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/uo_files/CUOStaticItemRec.h"
+#include "../game/uo_files/CUOMapList.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
 #include "../game/CWorldMap.h"
@@ -11,8 +12,6 @@
 #include "CRect.h"
 #include "CPointBase.h"
 #include <cmath>
-
-#include "../game/uo_files/CUOMapList.h"
 
 
 static_assert(sizeof(CPointBase) == sizeof(CPointMap), "CPointBase and CPointMap have to have the same size. Was a virtual method added?");

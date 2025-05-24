@@ -131,8 +131,9 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
-option(USE_CPPCHECK "Perform static analysis with CppCheck." FALSE)
+option(UNIT_TESTS "Create an executable for unit tests." FALSE)
 
+option(USE_CPPCHECK "Perform static analysis with CppCheck." FALSE)
 
 set(ENABLED_SANITIZER FALSE CACHE INTERNAL BOOL "Am i using a sanitizer?")
 if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
@@ -148,16 +149,24 @@ if(USE_CPPCHECK)
 
         list(
             APPEND CMAKE_CXX_CPPCHECK
-                "-v"
+                "--verbose"
+                #"--debug"
+                "--report-progress"
                 "--enable=all"
+                "--safety"
                 "--inconclusive"
-                "--force"
-                "--inline-suppr"
-                "--suppress=missingIncludeSystem"
+                #"--force"
+                #"--inline-suppr"
+                "--check-level=exhaustive"
                 "--template='{file}({line}): {severity} ({id}): {message}'"
-                "--checkers-report=cppcheck_out.txt"
-                #"--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
+                #"--checkers-report=${CMAKE_SOURCE_DIR}/cppcheck_out.txt"
+                "--output-file=${CMAKE_BINARY_DIR}/cppcheck.log"
+                "--suppressions-list=${CMAKE_SOURCE_DIR}/static_analysis/cppcheck-suppressions.txt"
+                "--config-exclude=lib/"
+                "-i lib/"
                 "-D__SIZEOF_POINTER__=${SIZEOF_VOID_P}"
+                "-U_TESTEXCEPTION"
+                "-U_EXCEPTIONS_DEBUG"
         )
     endif()
 endif()
