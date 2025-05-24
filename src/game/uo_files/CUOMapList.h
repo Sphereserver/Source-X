@@ -87,8 +87,8 @@ public:
     int CalcSectorQty(int map) const;  // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorCols(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorRows(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
-    inline int GetMapSizeX(int map) const noexcept;
-    inline int GetMapSizeY(int map) const noexcept;
+    inline uint16 GetMapSizeX(int map) const noexcept;
+    inline uint16 GetMapSizeY(int map) const noexcept;
     int GetMapCenterX(int map) const;
     int GetMapCenterY(int map) const;
 
@@ -101,7 +101,7 @@ public:
 
 // Inline methods definition
 
-inline int CUOMapList::GetMapSizeX(int map) const noexcept
+inline uint16 CUOMapList::GetMapSizeX(int map) const noexcept
 {
     // Used by CPointBase::IsValidXY() and IsValidPoint(), which is called a LOT
     //ASSERT(IsMapSupported(map));
@@ -109,7 +109,7 @@ inline int CUOMapList::GetMapSizeX(int map) const noexcept
     return m_mapGeoData.maps[map].sizex;
 }
 
-inline int CUOMapList::GetMapSizeY(int map) const noexcept
+inline uint16 CUOMapList::GetMapSizeY(int map) const noexcept
 {
     // Used by CPointBase::IsValidXY() and IsValidPoint(), which is called a LOT
     //ASSERT(IsMapSupported(map));

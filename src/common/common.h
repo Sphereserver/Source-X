@@ -66,9 +66,19 @@
 /* Coding helpers */
 
 // Target arch.
-#if defined(_WIN64) || (__SIZEOF_POINTER__ == 8)
+#ifndef __SIZEOF_POINTER__
+#   if defined(_WIN64)
+#       define __SIZEOF_POINTER__ 8
+#   elif defined(_WIN32)
+#       define __SIZEOF_POINTER__ 4
+#   else
+#       error "Can't detect the arch?"
+#   endif
+#endif
+
+#if (__SIZEOF_POINTER__ == 8)
 #   define ARCH_64
-#elif defined(_WIN32) || (__SIZEOF_POINTER__ == 4)
+#elif (__SIZEOF_POINTER__ == 4)
 #   define ARCH_32
 #else
 #   error "Can't detect the arch?"
