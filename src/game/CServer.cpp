@@ -1988,7 +1988,6 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
                 {
                     g_Log.Event(LOGL_EVENT, "Not allowed during world save and/or resync pause");
                 }
-				break;
 			}
 			else
 			{

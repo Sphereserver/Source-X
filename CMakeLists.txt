@@ -60,6 +60,8 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF) # disable C++ module scanning
+set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
+set(CMAKE_VISIBILITY_INLINES_HIDDEN "YES")
 
 # Need to clear shared library flags. If not, cmake sets -rdynamic and this
 # add to the executable the full symbol table (included unused symbols).
@@ -129,11 +131,36 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
+option(USE_CPPCHECK "Perform static analysis with CppCheck." FALSE)
+
+
 set(ENABLED_SANITIZER FALSE CACHE INTERNAL BOOL "Am i using a sanitizer?")
 if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
     set(ENABLED_SANITIZER TRUE)
 endif()
 
+if(USE_CPPCHECK)
+    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+    if(CMAKE_CXX_CPPCHECK)
+        include(CheckTypeSize)
+        check_type_size("void*" SIZEOF_VOID_P)
+        #message(STATUS "Pointer size = ${SIZEOF_VOID_P}")
+
+        list(
+            APPEND CMAKE_CXX_CPPCHECK
+                "-v"
+                "--enable=all"
+                "--inconclusive"
+                "--force"
+                "--inline-suppr"
+                "--suppress=missingIncludeSystem"
+                "--template='{file}({line}): {severity} ({id}): {message}'"
+                "--checkers-report=cppcheck_out.txt"
+                #"--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
+                "-D__SIZEOF_POINTER__=${SIZEOF_VOID_P}"
+        )
+    endif()
+endif()
 
 # -------------------- Stuff to set right away, after having parsed the checkboxes/CLI arguments.
 
@@ -210,13 +237,13 @@ if(SINGLE_TARGET)
         add_executable(
             spheresvr_release
             ${is_win32_app_linker}
-            ${SPHERE_SOURCES}
+            ${SPHERE_SOURCES} ${SPHERE_HEADERS}
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
         #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_release ${pch_options})
+        target_precompile_headers(spheresvr_release ${pch_list})
 
         if(NOT ${FORCE_DEBUG_INFO})
             add_custom_command(TARGET spheresvr_release POST_BUILD
@@ -230,13 +257,13 @@ if(SINGLE_TARGET)
         add_executable(
             spheresvr_nightly
             ${is_win32_app_linker}
-            ${SPHERE_SOURCES}
+            ${SPHERE_SOURCES} ${SPHERE_HEADERS}
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
         #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_nightly ${pch_options})
+        target_precompile_headers(spheresvr_nightly ${pch_list})
 
         if(NOT ${FORCE_DEBUG_INFO})
             add_custom_command(TARGET spheresvr_nightly POST_BUILD
@@ -250,23 +277,27 @@ if(SINGLE_TARGET)
         add_executable(
             spheresvr_debug
             ${is_win32_app_linker}
-            ${SPHERE_SOURCES}
+            ${SPHERE_SOURCES} ${SPHERE_HEADERS}
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
         #set_target_properties(spheresvr_debug PROPERTIES CXX_EXTENSIONS OFF)
         #target_compile_features(spheresvr_debug PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_debug ${pch_options})
+        target_precompile_headers(spheresvr_debug ${pch_list})
     endif()
 else(SINGLE_TARGET)
     set(TARGETS ${TARGETS} spheresvr)
-    add_executable(spheresvr ${is_win32_app_linker} ${SPHERE_SOURCES} ${docs_TEXT})
+    add_executable(spheresvr
+        ${is_win32_app_linker}
+        ${SPHERE_SOURCES} ${SPHERE_HEADERS}
+        ${docs_TEXT}
+    )
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
     #set_target_properties(spheresvr PROPERTIES CXX_EXTENSIONS OFF)
     #target_compile_features(spheresvr PUBLIC cxx_std_20)
-    target_precompile_headers(spheresvr ${pch_options})
+    target_precompile_headers(spheresvr ${pch_list})
 
     # To be tested
     #add_custom_command(TARGET spheresvr POST_BUILD

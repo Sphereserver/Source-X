@@ -1,0 +1,12 @@
+*:/lib/*
+unreachableCode
+unusedFunction
+duplInheritedMember
+missingOverride // suppress temporarily
+virtualCallInConstructor // suppress temporarily
+constParameterPointer // suppress temporarily
+passedByValue // suppress temporarily
+funcArgNamesDifferent // suppress temporarily
+noExplicitConstructor // suppress temporarily
+returnByReference // suppress temporarily
+functionConst

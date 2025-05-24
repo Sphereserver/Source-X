@@ -98,6 +98,9 @@ namespace sl
                 return 0;
             */
 
+            if (!dataptr)
+                return sl::scont_bad_index();
+
             size_t _lo = 0;
             while (_lo < _size)
             {
@@ -169,6 +172,8 @@ namespace sl
                 return sl::scont_bad_index();
             }
             const _Type* const _dataptr = base_type::data();
+            if (!_dataptr)
+                return sl::scont_bad_index();
             size_t _idx = this->lower_element(_mySize, _dataptr, value);
             if (_idx == _mySize)
                 return sl::scont_bad_index();
