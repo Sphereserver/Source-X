@@ -6,6 +6,7 @@
 #ifndef _INC_CUOMAPLIST_H
 #define _INC_CUOMAPLIST_H
 
+#include "../../common/common.h"
 
 class CServerMapDiffCollection;
 
@@ -69,7 +70,7 @@ public:
      */
     ///@{
     void Clear() noexcept;
-    void ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid);
+    //void ResetMap(uint map, ushort maxx, ushort maxy, ushort sectorsize, ushort realmapnum, ushort mapid);
     void Init();
     bool Load(int map, char *args);
     ///@}

@@ -37,7 +37,9 @@ void CUOMapList::Clear() noexcept
         //ResetMap(i, -1, -1, -1, i, i);
 }
 
-void CUOMapList::ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
+// Unused
+/*
+void CUOMapList::ResetMap(uint map, ushort maxx, ushort maxy, ushort sectorsize, ushort realmapnum, ushort mapid)
 {
     MapGeoData& map_data = m_mapGeoData.maps[map];
     map_data.sizex = maxx;
@@ -46,6 +48,7 @@ void CUOMapList::ResetMap(int map, int maxx, int maxy, int sectorsize, int realm
     map_data.num = realmapnum;
     map_data.id = mapid;
 }
+*/
 
 void CUOMapList::Init()
 {
