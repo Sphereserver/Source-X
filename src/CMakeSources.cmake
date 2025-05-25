@@ -139,6 +139,7 @@ source_group(game\\uo_files FILES ${uofiles_H} ${uofiles_S})
 ##############################
 set(common_S
     src/common/sqlite/SQLite.cpp
+    src/common/common.cpp
     src/common/CCacheableScriptFile.cpp
     src/common/CDataBase.cpp
     src/common/CException.cpp

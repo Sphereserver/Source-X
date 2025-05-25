@@ -1,3 +1,5 @@
+//#include "../../common/sphere_library/sstring.h"
+//#include "../../common/CExpression.h"
 #include "../../common/CLog.h"
 #include "../../common/CServerMap.h"
 #include "../../common/CUOInstall.h"
@@ -108,7 +110,7 @@ bool CUOMapList::Load(int map, char *args)
                         map, maxx, map_data.sizex);
                 }
                 else
-                    map_data.sizex = maxx;
+                    map_data.sizex = (ushort)std::clamp(maxx, 0, (int)UINT16_MAX);
             }
             if ( maxy )
             {
@@ -118,16 +120,16 @@ bool CUOMapList::Load(int map, char *args)
                         map, maxy, map_data.sizey);
                 }
                 else
-                    map_data.sizey = maxy;
+                    map_data.sizey = (ushort)std::clamp(maxy, 0, (int)UINT16_MAX);
             }
             if ( sectorsize > 0 )
-                map_data.sectorsize = sectorsize;
+                map_data.sectorsize = (ushort)sectorsize;
             if ( realmapnum >= 0 )
-                map_data.num = realmapnum;
+                map_data.num = (ushort)realmapnum;
             if ( mapid >= 0 )
-                map_data.id = mapid;
+                map_data.id = (ushort)mapid;
             else
-                map_data.id = map;
+                map_data.id = (ushort)std::clamp(map, 0, (int)UINT16_MAX);
         }
 
         map_data.initialized = true;
