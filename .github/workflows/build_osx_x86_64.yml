@@ -21,6 +21,10 @@ on:
 jobs:
   macos-x86_64:
     runs-on: macos-13   # intel
+    permissions:
+      contents: read
+      actions: read
+
     env:
       CMAKE_GEN: Ninja
       CMAKE_TCH: cmake/toolchains/OSX-AppleClang-x86_64.cmake
@@ -70,6 +74,10 @@ jobs:
 
   upload_github_release:
     needs: macos-x86_64
+    permissions:
+      contents: read
+      actions: write
+
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
 

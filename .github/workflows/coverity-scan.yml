@@ -14,6 +14,10 @@ on:
 jobs:
   latest:
         runs-on: ubuntu-22.04
+        permissions:
+          contents: read
+          actions: read
+
         steps:
         - name: Checkout repository
           uses: actions/checkout@v4
@@ -43,7 +47,7 @@ jobs:
         - name: Download Coverity Build Tool
           env:
             TOKEN: ${{ secrets.COVERITY_TOKEN }}
-#echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+          #echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
           run:  |
                 wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=${TOKEN}&project=Sphereserver/Source-X" -O cov-analysis-linux64.tar.gz
                 mkdir cov-analysis-linux64
