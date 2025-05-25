@@ -79,13 +79,12 @@ jobs:
                 cd build
                 tar czvf build-data.tgz cov-int
                 curl \
-                    --form project=SphereServer/Source-X \
                     --form token=$TOKEN \
                     --form email=$EMAIL \
                     --form file=@build-data.tgz \
-                    --form version=trunk \
+                    --form version="trunk" \
                     --form description="${{github.sha}}" \
-                    https://scan.coverity.com/builds?project=SphereServer-X
+                   https://scan.coverity.com/builds?project=Sphereserver%2FSource-X
           env:
             TOKEN: ${{ secrets.COVERITY_TOKEN }}
             EMAIL: ${{ secrets.COVERITY_EMAIL }}
