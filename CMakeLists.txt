@@ -131,7 +131,7 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
-option(UNIT_TESTS "Create an executable for unit tests." FALSE)
+option(UNIT_TESTING "Create an executable for unit tests." FALSE)
 
 option(USE_CPPCHECK "Perform static analysis with CppCheck." FALSE)
 
@@ -141,34 +141,7 @@ if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
 endif()
 
 if(USE_CPPCHECK)
-    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
-    if(CMAKE_CXX_CPPCHECK)
-        include(CheckTypeSize)
-        check_type_size("void*" SIZEOF_VOID_P)
-        #message(STATUS "Pointer size = ${SIZEOF_VOID_P}")
-
-        list(
-            APPEND CMAKE_CXX_CPPCHECK
-                "--verbose"
-                #"--debug"
-                "--report-progress"
-                "--enable=all"
-                "--safety"
-                "--inconclusive"
-                #"--force"
-                #"--inline-suppr"
-                "--check-level=exhaustive"
-                "--template='{file}({line}): {severity} ({id}): {message}'"
-                #"--checkers-report=${CMAKE_SOURCE_DIR}/cppcheck_out.txt"
-                "--output-file=${CMAKE_BINARY_DIR}/cppcheck.log"
-                "--suppressions-list=${CMAKE_SOURCE_DIR}/static_analysis/cppcheck-suppressions.txt"
-                "--config-exclude=lib/"
-                "-i lib/"
-                "-D__SIZEOF_POINTER__=${SIZEOF_VOID_P}"
-                "-U_TESTEXCEPTION"
-                "-U_EXCEPTIONS_DEBUG"
-        )
-    endif()
+    include("cmake/CppCheck.cmake")
 endif()
 
 # -------------------- Stuff to set right away, after having parsed the checkboxes/CLI arguments.
@@ -196,7 +169,6 @@ endif()
 # TODO: check if Ninja can handle different targets.
 if(SINGLE_TARGET)
     # If you want to manually specify the build type, call cmake with parameter: -DCMAKE_BUILD_TYPE=something
-    # TODO: add NightlyWithDebInfo ?
     message(STATUS "Single-target build system (${CMAKE_GENERATOR}) detected: generating multiple projects!")
     set (CMAKE_BUILD_TYPE "Nightly" CACHE STRING "Set the build type. Expected values: Debug, Nightly or Release.") # Set only if unset.
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Nightly" "Release")
@@ -237,6 +209,10 @@ endif(SINGLE_TARGET)
 # Include the list of all Sphere source files
 include("src/CMakeSources.cmake")
 
+if(UNIT_TESTING)
+    # Add the unit tests source files, to compile them and add to the IDe project files list
+    include("tests/CMakeSources.cmake")
+endif()
 
 # Configure output binaries
 set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
@@ -250,9 +226,6 @@ if(SINGLE_TARGET)
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
-        #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
-        #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_release ${pch_list})
 
         if(NOT ${FORCE_DEBUG_INFO})
             add_custom_command(TARGET spheresvr_release POST_BUILD
@@ -270,9 +243,6 @@ if(SINGLE_TARGET)
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
-        #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
-        #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_nightly ${pch_list})
 
         if(NOT ${FORCE_DEBUG_INFO})
             add_custom_command(TARGET spheresvr_nightly POST_BUILD
@@ -290,9 +260,6 @@ if(SINGLE_TARGET)
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
-        #set_target_properties(spheresvr_debug PROPERTIES CXX_EXTENSIONS OFF)
-        #target_compile_features(spheresvr_debug PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_debug ${pch_list})
     endif()
 else(SINGLE_TARGET)
     set(TARGETS ${TARGETS} spheresvr)
@@ -304,9 +271,6 @@ else(SINGLE_TARGET)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
-    #set_target_properties(spheresvr PROPERTIES CXX_EXTENSIONS OFF)
-    #target_compile_features(spheresvr PUBLIC cxx_std_20)
-    target_precompile_headers(spheresvr ${pch_list})
 
     # To be tested
     #add_custom_command(TARGET spheresvr POST_BUILD
@@ -315,6 +279,17 @@ else(SINGLE_TARGET)
     #    COMMENT "Stripping executable"
     #)
 endif(SINGLE_TARGET)
+
+foreach(tgt ${TARGETS})
+    #set_target_properties(${tgt} PROPERTIES CXX_EXTENSIONS OFF)
+    #target_compile_features(${tgt} PUBLIC cxx_std_20)
+    target_precompile_headers(${tgt} ${pch_list})
+endforeach()
+
+if(UNIT_TESTING)
+    include("tests/CMakeLists.txt") # quick and dirty
+    setup_tests()
+endif()
 
 # --------------------
 
@@ -336,3 +311,4 @@ message(STATUS)
 message(STATUS "Retrieving git data...")
 include("cmake/GitStatus.cmake")
 message(STATUS)
+

@@ -314,6 +314,7 @@ protected:
 	virtual bool shouldExit() noexcept;
 };
 
+#ifdef THREAD_TRACK_CALLSTACK
 bool AbstractSphereThread::isExceptionCaught() const noexcept
 {
     return (m_iCaughtExceptionStackPos >= 0);
@@ -328,6 +329,7 @@ void AbstractSphereThread::freezeCallStack(bool freeze) noexcept
 {
     m_fFreezeCallStack = freeze;
 }
+#endif
 
 // Dummy thread for context when no thread really exists. To be called only once, at startup.
 class DummySphereThread : public AbstractSphereThread

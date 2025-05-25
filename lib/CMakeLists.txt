@@ -44,7 +44,7 @@ foreach(tgt ${TARGETS})
     target_include_directories(
         ${tgt}
         PRIVATE $<TARGET_PROPERTY:flat_containers,INTERFACE_INCLUDE_DIRECTORIES>
-        PRIVATE $<TARGET_PROPERTY:mariadb_connector,INTERFACE_INCLUDE_DIRECTORIES>
+        PRIVATE $<TARGET_PROPERTY:mariadb_connector_c,INTERFACE_INCLUDE_DIRECTORIES>
         PRIVATE $<TARGET_PROPERTY:object_ptr,INTERFACE_INCLUDE_DIRECTORIES>
         PRIVATE $<TARGET_PROPERTY:parallel_hashmap,INTERFACE_INCLUDE_DIRECTORIES>
         PRIVATE $<TARGET_PROPERTY:rand,INTERFACE_INCLUDE_DIRECTORIES>
@@ -58,11 +58,14 @@ foreach(tgt ${TARGETS})
     target_link_libraries(${tgt} PRIVATE bcrypt twofish) # cdrc (not needed for now)
     if(${LIB_LIBEV_BUILD})
         target_link_libraries(${tgt} PRIVATE libev)
+        add_dependencies(${tgt} libev)
     endif()
-    if(${LIB_SQLITE_BUILD})
+    #if(${LIB_SQLITE_BUILD}) # search it in the system, if not compiling from sources?
         target_link_libraries(${tgt} PRIVATE sqlite)
-    endif()
-    if(${LIB_ZLIB_BUILD})
+    #endif()
+    #if(${LIB_ZLIB_BUILD})   # search it in the system, if not compiling from sources?
         target_link_libraries(${tgt} PRIVATE zlib)
-    endif()
+    #endif()
+    add_dependencies(${tgt} bcrypt twofish sqlite zlib)
+
 endforeach()

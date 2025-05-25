@@ -264,8 +264,8 @@ void UnixTerminal::prepareColor()
 
 void UnixTerminal::restore()
 {
-	ADDTOCALLSTACK("UnixTerminal::restore");
-	ASSERT(m_prepared);
+    if (!m_prepared)
+        return;
 
 #ifdef _USECURSES
 	endwin();	// clean up

@@ -795,9 +795,9 @@ AbstractSphereThread::AbstractSphereThread(const char *name, ThreadPriority prio
 #ifdef THREAD_TRACK_CALLSTACK
     , m_stackInfo{}, m_stackInfoCopy{}, m_iStackPos(-1),
     m_iStackUnwindingStackPos(-1), m_iCaughtExceptionStackPos(-1),
-    m_fFreezeCallStack(false),
+    m_fFreezeCallStack(false)
 #endif
-    m_pExpr{std::make_unique<CExpression>()}
+    , m_pExpr{std::make_unique<CExpression>()}
 {
 	// profiles that apply to every thread
 	m_profile.EnableProfile(PROFILE_IDLE);

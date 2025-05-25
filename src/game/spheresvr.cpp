@@ -33,6 +33,11 @@
 #include <sstream>
 #include <cstdlib>
 
+#ifdef UNIT_TESTING
+#   define DOCTEST_CONFIG_IMPLEMENT
+#   include <doctest/doctest.h>
+#endif
+
 
 // Dynamic allocation of some global stuff
 std::string g_sServerDescription;
@@ -473,6 +478,19 @@ void atexit_handler()
 	ThreadHolder::get().markThreadsClosing();
 }
 
+#ifdef UNIT_TESTING
+static int DocTestMain()
+{
+    doctest::Context context;
+
+    int res = context.run(); // run
+
+    if(context.shouldExit()) // important - query flags (and --exit) rely on the user doing this
+        return res;          // propagate the result of the tests
+
+    return res;
+}
+#endif
 
 #ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
@@ -487,6 +505,10 @@ int main( int argc, char * argv[] )
         ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
         UnreferencedParameter(curthread);
     }
+
+#ifdef UNIT_TESTING
+    return DocTestMain();
+#endif
 
     static constexpr lpctstr m_sClassName = "main";
     EXC_TRY("MAIN");
