@@ -276,49 +276,47 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
     }
 }
 
-bool CPointBase::IsValidXY() const noexcept
+// Difference between IsCharValid and IsValidPoint: the first returns false if x or y == 0.
+bool CPointBase::IsCharValid() const noexcept
 {
-    /*
-	if ( (m_x < 0) || (m_y < 0) )
-		return false;
-	if ( (m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)) )
-		return false;
-	return true;
-    */
+    // 0 for X or Y is invalid. Z is valid if (-127, 127), excluding the extremes.
+    const uint32_t sx = g_MapList.GetMapSizeX(m_map) - 1;   // -1 because 0 is not valid.
+    const uint32_t sy = g_MapList.GetMapSizeY(m_map) - 1;
+    constexpr uint32_t sz = 2 * UO_SIZE_Z;                  // exclude -128, -127, 127
 
-    const ushort sx = g_MapList.GetMapSizeX(m_map);
-    const ushort sy = g_MapList.GetMapSizeY(m_map);
+    const uint32_t ux = static_cast<uint32_t>(static_cast<int32_t>(m_x) - 1); // -1 because 0 is not valid
+    const uint32_t uy = static_cast<uint32_t>(static_cast<int32_t>(m_y) - 1);
+    const uint32_t uz = static_cast<uint32_t>(static_cast<int32_t>(m_z) + UO_SIZE_Z);
 
-    const ushort ux = uint16(m_x);
-    const ushort uy = uint16(m_y);
-
-    // Two unsigned compares fold both < 0 and >= size checks
-    return ux < sx && uy < sy;
+    return (ux < sx) && (uy < sy) && (uz > 0) && (uz < sz);
 }
 
 bool CPointBase::IsValidPoint() const noexcept
 {
-/*
-	if ( (m_z <= -UO_SIZE_Z) || (m_z >= UO_SIZE_Z) )
-		return false;
-	if ((m_x <= 0) || (m_y <= 0))
-		return false;
-	if ((m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)))
-		return false;
-	return true;
-*/
-    const ushort sx = g_MapList.GetMapSizeX(m_map);
-    const ushort sy = g_MapList.GetMapSizeY(m_map);
+    // 0 for X or Y is valid. Z is valid if (-127, 127), excluding the extremes.
+    const uint32_t sx = g_MapList.GetMapSizeX(m_map);
+    const uint32_t sy = g_MapList.GetMapSizeY(m_map);
+    constexpr uint32_t sz = 2 * UO_SIZE_Z;                   // exclude -128, -127, 127
 
-    const ushort ux = uint16(m_x);
-    const ushort uy = uint16(m_y);
-    const ushort uz = uint16(int16(m_z) + UO_SIZE_Z);
+    // Cast to unsigned - negative values wrap to large numbers
+    const uint32_t ux = static_cast<uint32_t>(static_cast<uint16_t>(m_x));
+    const uint32_t uy = static_cast<uint32_t>(static_cast<uint16_t>(m_y));
+    const uint32_t uz = static_cast<uint32_t>(static_cast<int32_t>(m_z) + UO_SIZE_Z);
 
-    // ux > 0 && ux < sizex folds both x<=0 and x>=sizex
-    // uz > 0 excludes m_z == –UO_SIZE_Z; uz < 2*UO_SIZE_Z excludes m_z >= UO_SIZE_Z
-    return uz < (2U * UO_SIZE_Z)
-           && ux > 0U && ux < sx
-           && uy > 0U && uy < sy;
+    return (ux < sx) && (uy < sy) && (uz > 0) && (uz < sz);
+}
+
+bool CPointBase::IsValidXY() const noexcept
+{
+    // 0 for X or Y is valid.
+    const uint32 sx = g_MapList.GetMapSizeX(m_map);
+    const uint32 sy = g_MapList.GetMapSizeY(m_map);
+
+    const uint32 ux = uint32(uint16(m_x));
+    const uint32 uy = uint32(uint16(m_y));
+
+    // Two unsigned compares fold both < 0 and >= size checks. 0 is valid x or y,
+    return ux < sx && uy < sy;
 }
 
 void CPointBase::ValidatePoint() noexcept
@@ -913,8 +911,8 @@ DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const 
     //    Use boolean-to-int multipliers (true→1, false→0)
     const int north = (dy > 0);
     const int south = (dy < 0);
-    const int east  = (dx > 0);
-    const int west  = (dx < 0);
+    const int east  = (dx < 0);
+    const int west  = (dx > 0);
 
     const DIR_TYPE dir_card = enum_alias_cast<DIR_TYPE>(
         steep

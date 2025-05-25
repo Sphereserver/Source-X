@@ -71,6 +71,7 @@ public:
     //    return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));
     //}
     [[nodiscard]] bool IsValidXY() const noexcept;
+    [[nodiscard]] bool IsCharValid() const noexcept;
     [[nodiscard]] bool IsValidPoint() const noexcept;
 
 	void ValidatePoint() noexcept;

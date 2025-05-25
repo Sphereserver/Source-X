@@ -25,7 +25,6 @@
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include <flat_containers/flat_set.hpp>
 
 
 // "GONAME", "GOTYPE", "GOCHAR"
@@ -5575,7 +5574,12 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScrip
 	//
 	if ( IsTrigUsed(pszTrigName) )
 	{
-		fc::vector_set<const CResourceLink*> executedEvents;
+        std::vector<const CResourceLink*> executedEvents;
+        auto fnShouldSkipLink = [&executedEvents, &iAction](const CResourceLink *pLink) -> bool
+        {
+            return (!pLink || !pLink->HasTrigger(iAction)
+            || (executedEvents.end() != std::find(executedEvents.begin(), executedEvents.end(), pLink)));
+        };
 
         {
             EXC_SET_BLOCK("events");
@@ -5584,14 +5588,14 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScrip
             for (size_t i = 0; i < curEvents; ++i) // EVENTS (could be modifyed ingame!)
             {
                 CResourceLink* pLink = m_OEvents[i].GetRef();
-                if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
                     continue;
 
                 CResourceLock s;
                 if (!pLink->ResourceLock(s))
                     continue;
 
-				executedEvents.emplace(pLink);
+                executedEvents.emplace_back(pLink);
                 iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
                 if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
                     goto stopandret;
@@ -5612,14 +5616,14 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScrip
 			for ( size_t i = 0; i < pCharDef->m_TEvents.size(); ++i )
 			{
 				CResourceLink * pLink = pCharDef->m_TEvents[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
 					continue;
 
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
 
-				executedEvents.emplace(pLink);
+                executedEvents.emplace_back(pLink);
                 iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 					goto stopandret;
@@ -5649,14 +5653,14 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScrip
 			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 			{
 				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
 					continue;
 
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
 
-				executedEvents.emplace(pLink);
+                executedEvents.emplace_back(pLink);
                 iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 				if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 					goto stopandret;
@@ -5671,14 +5675,14 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScrip
 			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.size(); ++i )
 			{
 				CResourceLink *pLink = g_Cfg.m_pEventsPlayerLink[i].GetRef();
-				if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+                if (fnShouldSkipLink(pLink))
 					continue;
 
 				CResourceLock s;
 				if (!pLink->ResourceLock(s))
 					continue;
 
-				executedEvents.emplace(pLink);
+                executedEvents.emplace_back(pLink);
                 iRet = CScriptObj::OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
 				if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 					goto stopandret;

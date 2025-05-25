@@ -7,7 +7,6 @@
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
-#include <flat_containers/flat_set.hpp>
 
 
 lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
@@ -299,7 +298,7 @@ void CChar::NPC_CreateTrigger()
 	ADDTOCALLSTACK("CChar::NPC_CreateTrigger");
 	ASSERT(m_pNPC);
 
-	fc::vector_set<const CResourceLink*> executedEvents;
+    std::vector<const CResourceLink*> executedEvents;
 	CCharBase *pCharDef = Char_GetDef();
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
@@ -310,14 +309,15 @@ void CChar::NPC_CreateTrigger()
 	for (size_t i = 0; i < pCharDef->m_TEvents.size(); ++i)
 	{
 		CResourceLink * pLink = pCharDef->m_TEvents[i].GetRef();
-		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
+        if (!pLink || !pLink->HasTrigger(iAction)
+            || (executedEvents.end() != std::find(executedEvents.begin(), executedEvents.end(), pLink)))
 			continue;
 
 		CResourceLock s;
 		if (!pLink->ResourceLock(s))
 			continue;
 
-		executedEvents.emplace(pLink);
+        executedEvents.emplace_back(pLink);
         iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptTriggerArgsPtr{}, this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
@@ -327,14 +327,15 @@ void CChar::NPC_CreateTrigger()
 	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 	{
 		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i].GetRef();
-		if (!pLink || !pLink->HasTrigger(iAction) || (executedEvents.find(pLink) != executedEvents.end()))
-			continue;
+        if (!pLink || !pLink->HasTrigger(iAction)
+            || (executedEvents.end() != std::find(executedEvents.begin(), executedEvents.end(), pLink)))
+            continue;
 
 		CResourceLock s;
 		if (!pLink->ResourceLock(s))
 			continue;
 
-		executedEvents.emplace(pLink);
+        executedEvents.emplace_back(pLink);
         iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptTriggerArgsPtr{}, this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
