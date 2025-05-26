@@ -726,7 +726,9 @@ public:
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
 	bool IsMovable() const;
-	virtual int GetVisualRange() const override;
+
+    [[nodiscard]]
+    virtual int GetVisualRange() const override;
 
 	bool IsStackableException() const;
 	bool IsStackable( const CItem * pItem ) const;

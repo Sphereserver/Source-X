@@ -2964,6 +2964,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET_BLOCK("DCLICK");
 			if (!pCharSrc)
 				return false;
+
 			if (s.HasArgs())
 			{
 				if (!IsChar())
@@ -2988,12 +2989,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if (!IsChar())
 					return false;
 
-				CObjBase* pObj = CUID::ObjFindFromUID(s.GetArgDWVal());
-				if (!pObj)
+                CChar* pChar = CUID::CharFindFromUID(s.GetArgDWVal());
+                if (!pChar)
 					return false;
 
-				CChar *pChar = static_cast <CChar *> (this);
-				return pChar->Use_Obj( pObj, false, true );
+                return pChar->Use_Obj( pChar, false, true );
 			}
 			else
 				return pCharSrc->Use_Obj( this, false, true );
@@ -3481,6 +3481,7 @@ void CObjBase::ModPropNum( COMPPROPS_TYPE iCompPropsType, CComponentProps::Prope
     {
         const CBaseBaseDef* pBase = Base_GetDef();
         const CComponentProps* pBaseCompProps = pBase->GetComponentProps(iCompPropsType);
+        ASSERT(pBaseCompProps);
         pBaseCompProps->GetPropertyNumPtr(iPropIndex, &iVal);
     }
     if (!iVal && !iMod)
@@ -3640,7 +3641,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CSc
 		CResourceLock s;
 		if ( pSpellDef->ResourceLock( s ))
 		{
-            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pArgs, pSrc );
+            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], std::move(pArgs), pSrc );
 		}
 	}
 	return TRIGRET_RET_DEFAULT;

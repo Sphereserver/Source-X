@@ -28,8 +28,8 @@ public:
     using index_t = uint32_t;   // do we really need size_t elements?
     static_assert(tp_pool_size <= std::numeric_limits<index_t>::max());
 
-    static constexpr size_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
-    static constexpr bool   sm_allow_fallback = tp_allow_fallback;
+    static constexpr index_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
+    static constexpr bool    sm_allow_fallback = tp_allow_fallback;
 
     // Ensure that T is default constructible and destructible.
     static_assert(std::is_default_constructible_v<T>,
@@ -193,8 +193,8 @@ class TSObjectPool
 {
 public:
     using index_t = uint32_t;   // do we really need size_t elements?
-    static constexpr size_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
-    static constexpr bool   sm_allow_fallback = tp_allow_fallback;
+    static constexpr index_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
+    static constexpr bool    sm_allow_fallback = tp_allow_fallback;
 
     // Ensure that T is default constructible and destructible.
     static_assert(std::is_default_constructible_v<T>,

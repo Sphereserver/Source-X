@@ -381,7 +381,9 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	CCharBase * Char_GetDef() const;
 	CRegionWorld * GetRegion() const;
 	CRegion * GetRoom() const;
-	virtual int GetVisualRange() const override;
+
+    [[nodiscard]]
+    virtual int GetVisualRange() const override;
 	void SetVisualRange(byte newSight);
 
 	virtual bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const override;

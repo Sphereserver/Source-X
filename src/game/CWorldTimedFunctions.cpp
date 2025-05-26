@@ -26,7 +26,7 @@ void CWorldTimedFunctions::Clear() // static
 TRIGRET_TYPE CWorldTimedFunctions::Loop(lpctstr ptcCommand, int LoopsMade, CScriptLineContext StartContext,
     CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc, CSString* pResult) // static
 {
-    return  g_World._Ticker._TimedFunctions.Loop(ptcCommand, LoopsMade, StartContext, s, pArgs, pSrc, pResult);
+    return  g_World._Ticker._TimedFunctions.Loop(ptcCommand, LoopsMade, StartContext, s, std::move(pArgs), pSrc, pResult);
 }
 
 void CWorldTimedFunctions::Add(const CUID& uid, int64 iTimeout, lpctstr ptcCommand) // static

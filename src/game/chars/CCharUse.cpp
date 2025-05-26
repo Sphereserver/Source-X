@@ -1984,8 +1984,12 @@ bool CChar::Use_Obj( CObjBase * pObj, bool fTestTouch, bool fScript  )
 		return false;
 	if ( IsClientActive() )
 		return GetClientActive()->Event_DoubleClick(pObj->GetUID(), false, fTestTouch, fScript);
-	else
-		return Use_Item(dynamic_cast<CItem*>(pObj), fTestTouch);
+
+    CItem *pItem = dynamic_cast<CItem*>(pObj);
+    if (!pItem)
+        return false;
+
+    return Use_Item(pItem, fTestTouch);
 }
 
 bool CChar::ItemEquipArmor( bool fForce )

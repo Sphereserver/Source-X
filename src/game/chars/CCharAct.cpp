@@ -5704,7 +5704,7 @@ stopandret:
 TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
 {
 	ASSERT( (trigger > CTRIG_AAAUNUSED) && (trigger < CTRIG_QTY) );
-    return OnTrigger( CChar::sm_szTrigName[trigger], pScriptArgs, pSrc);
+    return OnTrigger( CChar::sm_szTrigName[trigger], std::move(pScriptArgs), pSrc);
 }
 
 // process m_fStatusUpdate flags

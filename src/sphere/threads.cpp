@@ -449,12 +449,19 @@ void AbstractThread::terminate(bool ended)
 			// if the thread is current then terminating here will prevent cleanup from occurring
 			if (wasCurrentThread == false)
 			{
+                if (!m_handle.has_value())
+                {
+                    STDERR_LOG("AbstractThread::terminate: no handle?.\n");
+                }
+                else
+                {
 #ifdef _WIN32
-                TerminateThread(m_handle.value(), 0);
-                CloseHandle(m_handle.value());
+                    TerminateThread(m_handle.value(), 0);
+                    CloseHandle(m_handle.value());
 #else
-                pthread_cancel(m_handle.value()); // IBM say it so
+                    pthread_cancel(m_handle.value()); // IBM say it so
 #endif
+                }
 			}
 		}
 

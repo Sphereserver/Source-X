@@ -579,7 +579,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
 		else
 			SetUIDContainerFlags(UID_O_DISCONNECT);
 
-		IsDisconnected();
+        ASSERT(IsDisconnected());
 	}
 }
 

@@ -169,7 +169,6 @@ bool CUOClientVersion::operator <=(CUOClientVersion const& other) const noexcept
     return other > *this;
 }
 
-
 void CUOClientVersion::ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexcept
 {
     // Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
@@ -186,12 +185,16 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexce
     }
 
     tchar *piVer[3];
-    Str_ParseCmds(ptcVersion, piVer, ARRAY_COUNT(piVer), ".");
+    lptstr ptcVersionParsed = ptcVersion;
+    Str_ParseCmds(ptcVersionParsed, piVer, ARRAY_COUNT(piVer), ".");
 
     // Don't rely on all values reported by client, because it can be easily faked. Injection users can report any
     // client version they want, and some custom clients may also report client version as "Custom" instead X.X.Xy
     if (!piVer[0] || !piVer[1] || !piVer[2] || (uiLetter > 26))
+    {
+        g_Log.EventDebug("Invalid version string '%s' passed to CUOClientVersion::ApplyVersionFromStringOldFormat.\n", ptcVersion);
         return;
+    }
 
     m_major = uint(atoi(piVer[0]));
     m_minor = uint(atoi(piVer[1]));
@@ -203,30 +206,50 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexce
 {
     // Get version of newer clients, which use only 4 numbers separated by dots (example: 6.0.1.1)
 
-    const std::string_view sv(ptcVersion);
-    const size_t dot1 = sv.find_first_of('.', 0);
-    const size_t dot2 = sv.find_first_of('.', dot1 + 1);
-    const size_t dot3 = sv.find_first_of('.', dot2 + 1);
     constexpr auto np = std::string_view::npos;
-    if (np == dot1 || np == dot2 || np == dot3)
+    const std::string_view sv(ptcVersion);
+
+    const size_t dot1 = sv.find_first_of('.', 0);
+    if (dot1 == np)
+    {
+    ret_err:
+        g_Log.EventDebug("Invalid version string '%s' passed to CUOClientVersion::ApplyVersionFromStringNewFormat.\n", ptcVersion);
         return;
+    }
+
+    const size_t dot2 = sv.find_first_of('.', dot1 + 1);
+    if (dot2 == np)
+        goto ret_err;
+
+    const size_t dot3 = sv.find_first_of('.', dot2 + 1);
+    if (dot3 == np)
+        goto ret_err;
 
     const std::string_view sv1(sv.data(), dot1 - 1);
     const std::string_view sv2(sv1.data() + dot1, dot2 - 1);
     const std::string_view sv3(sv2.data() + dot2, dot3 - 1);
     const std::string_view sv4(sv3.data() + dot3);
 
-    std::optional<uint> val1, val2, val3, val4;
     bool ok = true;
-    ok = ok && (val1 = Str_ToU(sv1.data(), 10, true)).has_value();
-    ok = ok && (val2 = Str_ToU(sv1.data(), 10, true)).has_value();
-    ok = ok && (val3 = Str_ToU(sv1.data(), 10, true)).has_value();
-    ok = ok && (val4 = Str_ToU(sv1.data(), 10, true)).has_value();
-    if (!ok)
-        return;
+    try
+    {
+        std::optional<uint> val1, val2, val3, val4;
+        ok = ok && (val1 = Str_ToU(sv1.data(), 10, true)).has_value();
+        ok = ok && (val2 = Str_ToU(sv1.data(), 10, true)).has_value();
+        ok = ok && (val3 = Str_ToU(sv1.data(), 10, true)).has_value();
+        ok = ok && (val4 = Str_ToU(sv1.data(), 10, true)).has_value();
+        if (!ok)
+            return;
 
-    m_major     = val1.value();
-    m_minor     = val2.value();
-    m_revision  = val3.value();
-    m_build     = val4.value();
+        m_major     = val1.value();
+        m_minor     = val2.value();
+        m_revision  = val3.value();
+        m_build     = val4.value();
+    }
+    catch (std::bad_optional_access const&)
+    {
+        // Shouldn't really happen...
+        m_major = m_minor = m_revision = m_build = 0;
+        DEBUG_MSG(("std::bad_optional_access at CUOClientVersion::ApplyVersionFromStringNewFormat.\n"));
+    }
 }

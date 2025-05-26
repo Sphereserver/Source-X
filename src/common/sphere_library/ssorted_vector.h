@@ -98,9 +98,6 @@ namespace sl
                 return 0;
             */
 
-            if (!dataptr)
-                return sl::scont_bad_index();
-
             size_t _lo = 0;
             while (_lo < _size)
             {

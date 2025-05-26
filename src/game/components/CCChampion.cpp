@@ -77,6 +77,8 @@ CCChampion::CCChampion(CItem* pLink) : CComponent(COMP_CHAMPION)
     _idChampion = CREID_INVALID;
     _iLastActivationTime = 0;
     Init();
+    _iSpawnsNextRed = 0;
+    _iSpawnsNextWhite = 0;
 }
 
 void CCChampion::Copy(const CComponent* target)
@@ -1214,7 +1216,7 @@ TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr pArgs,
     }
     if (iRet == TRIGRET_RET_DEFAULT)
     {
-        iRet = GetLink()->OnTrigger(trig, pArgs, pSrc);
+        iRet = GetLink()->OnTrigger(trig, std::move(pArgs), pSrc);
     }
     return iRet;
 }

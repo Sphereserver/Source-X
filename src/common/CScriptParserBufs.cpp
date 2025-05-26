@@ -27,7 +27,7 @@ auto CScriptParserBufs::GetCScriptTriggerArgsPtr() -> CScriptTriggerArgsPtr
     {
         static_assert(CScriptParserBufsImpl::sm_allow_fallback_objects);
         g_Log.EventDebug(
-            "Requesting CScriptTriggerArgs from an exhausted pool (max size: %" PRIuSIZE_T "). Alive new heap-allocated fallback objects: %" PRIuSIZE_T ".\n",
+            "Requesting CScriptTriggerArgs from an exhausted pool (max size: %" PRIu32 "). Alive new heap-allocated fallback objects: %" PRIu32 ".\n",
             pool.sm_pool_size, pool.getFallbackCount());
     }
 

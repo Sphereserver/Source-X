@@ -3898,7 +3898,7 @@ stopandret:
 TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc )
 {
 	ASSERT((trigger >= 0) && (trigger < ITRIG_QTY));
-    return OnTrigger( CItem::sm_szTrigName[trigger], pArgs, pSrc );
+    return OnTrigger( CItem::sm_szTrigName[trigger], std::move(pArgs), pSrc );
 }
 
 // Item type specific stuff.
