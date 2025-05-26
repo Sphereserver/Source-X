@@ -1,5 +1,5 @@
 /**
-* @file CSTime.
+* @file CSTime.h
 * @brief Custom time management.
 */
 

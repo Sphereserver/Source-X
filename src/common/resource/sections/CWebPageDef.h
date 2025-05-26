@@ -124,7 +124,7 @@ public:
     * @param [in,out]  pClient     If non-null, the client.
     * @param   pszURLArgs          The URL arguments.
     * @param [in,out]  pPostData   If non-null, information describing the post.
-    * @param   stContentLength     Length of the content.
+    * @param   uiContentLength     Length of the content.
     *
     * @return  true if it succeeds, false if it fails.
     */
@@ -155,7 +155,7 @@ public:
     *
     * @param [in,out]  pClient         If non-null, the client.
     * @param [in,out]  pszPage         If non-null, the page.
-    * @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
+    * @param [in,out]  pDateLastMod    If non-null, the pdate last modifier.
     */
     static void ServPage(CClient * pClient, tchar * pszPage, CSTime * pDateLastMod);
 

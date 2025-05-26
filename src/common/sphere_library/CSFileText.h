@@ -43,8 +43,8 @@ protected:  virtual bool _IsFileOpen() const override;
 public:     virtual bool IsFileOpen() const override;
     /**
     * @brief Open a file in a specified mode.
-    * @param ptcName file to open.
-    * @param uiMode open mode.
+    * @param ptcFilename file to open.
+    * @param uiModeFlags open mode.
     * @return true if file is open, false otherwise.
     */
 protected:  virtual bool _Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;

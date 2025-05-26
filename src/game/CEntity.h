@@ -23,7 +23,7 @@ public:
     /**
     * @brief Calls Delete on contained CComponents.
     *
-    * @param fForce.
+    * @param fForce
     */
     void Delete(bool fForce = false);
 
@@ -80,7 +80,6 @@ public:
     * Will save important data on worldsave files.
     *
     * @param s the save file.
-    * @param pRef a pointer to the object found.
     */
     void r_Write(CScript & s);
     /**

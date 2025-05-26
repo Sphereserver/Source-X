@@ -69,7 +69,7 @@ public:
     /**
     * @brief Unsubscribes a CComponentProps.
     *
-    * @param pComponent the CComponentProps to unsuscribe.
+    * @param pCCProp the CComponentProps to unsuscribe.
     */
     void UnsubscribeComponentProps(CComponentProps *pCCProp);
 
@@ -99,7 +99,6 @@ public:
     * Will save important data on worldsave files.
     *
     * @param s the save file.
-    * @param pRef a pointer to the object found.
     */
     void r_Write(CScript & s);
 
@@ -177,7 +176,7 @@ _ComponentType* CEntityProps::TrySubscribeAllowedComponentProps(const _Subscribe
 {
     if (!_ComponentType::CanSubscribe(pSubscriber))
         return nullptr;
-    
+
     return TrySubscribeComponentProps<_ComponentType, _ArgsType...>(std::forward<_ArgsType>(args)...);
 }
 

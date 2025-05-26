@@ -194,7 +194,7 @@ protected:
     * Never called directly. Called CSObjContRec::RemoveSelf()
     * @see CSObjContRec::RemoveSelf().
     *
-    * @param pObRec removed record.
+    * @param pObjRec removed record.
     */
     virtual void OnRemoveObj( CSObjContRec* pObjRec );
     ///@}

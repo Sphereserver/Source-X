@@ -154,13 +154,13 @@ public:
 
     /**
     * @brief Removing one UID in Spawn's m_obj[].
-    * @param UID of the obj to remove.
+    * @param uid of the obj to remove.
     */
     void DelObj(const CUID& uid);
 
     /**
     * @brief Storing one UID in Spawn's m_obj[].
-    * @param UID of the obj to add.
+    * @param uid of the obj to add.
     */
     void AddObj(const CUID& uid);
 

@@ -68,7 +68,7 @@ private:
 
     /**
     * @brief Removes a CMultiComponent from the components list.
-    * @param pComponent the component.
+    * @param uidComponent the component.
     */
     virtual void DeleteComponent(const CUID& uidComponent, bool fRemoveFromList) override final;
 

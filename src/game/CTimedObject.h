@@ -101,14 +101,14 @@ public:     virtual void  SetTimeout(int64 iDelayInMsecs);
 
     /**
     * @brief   &lt; Timer.
-    * @param   iDelayInSecs   Delay in seconds.
+    * @param   iSeconds   Delay in seconds.
     */
 protected:  void _SetTimeoutS(int64 iSeconds);
 public:     void  SetTimeoutS(int64 iSeconds);
 
     /**
     * @brief   &lt; Timer.
-    * @param   iDelayInTenths   Delay in tenths of second.
+    * @param   iTenths   Delay in tenths of second.
     */
 protected:  void _SetTimeoutD(int64 iTenths);
 public:     void  SetTimeoutD(int64 iTenths);

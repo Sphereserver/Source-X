@@ -270,7 +270,6 @@ int StrncpyCharBytesWritten(int iBytesToWrite, size_t uiBufSize, bool fPrintErro
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTable(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
@@ -280,7 +279,6 @@ int FindTable(const tchar * pFind, const tchar * const * ppTable, int iCount) no
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableSorted(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
@@ -300,7 +298,6 @@ int FindCAssocRegTableHeadSorted(const tchar * pFind, const tchar * const* ppTab
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHead(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
@@ -310,7 +307,6 @@ int FindTableHead(const tchar * pFind, const tchar * const * ppTable, int iCount
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
 * @param iCount max iterations.
-* @param uiElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHeadSorted(const tchar * pFind, const tchar * const * ppTable, int iCount) noexcept;
