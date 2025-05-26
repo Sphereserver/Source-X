@@ -432,7 +432,7 @@ bool CChar::NPC_FightMayCast(bool fCheckSkill) const
 	// This NPC could cast spells if they wanted to?
 	// Check mana, anti-magic and tag.noCastTill.
 	// Don't check for skill if !fCheckSkill.
-	
+
 	//Don't cast the spell if tag.NPCNoCastTill is > than CurrentTime.
 	if (GetKeyNum("NPCNoCastTill") > (CWorldGameTime::GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH))
 		return false;
@@ -472,7 +472,7 @@ CChar * CChar::NPC_PetGetOwner() const
 {
 	ADDTOCALLSTACK("CChar::NPC_PetGetOwner");
 	ASSERT(m_pNPC);
-	// Assume i am a pet. Get my owner. not just friends. used for blame.
+	// Assume I am a pet. Get my owner. not just friends. used for blame.
 
 	if ( !IsStatFlag(STATF_PET) )
 		return nullptr;
@@ -488,7 +488,7 @@ CChar * CChar::NPC_PetGetOwnerRecursive() const
 {
 	ADDTOCALLSTACK("CChar::NPC_PetGetOwnerRecursive");
 	ASSERT(m_pNPC);
-	// Assume i am a pet. Get the primary owner (the owner of the owner of my owner and so on).
+	// Assume I am a pet. Get the primary owner (the owner of the owner of my owner and so on).
 
 	static int iReentrantCheck_PetGetOwnerRecursive = 0;
 
@@ -515,7 +515,7 @@ ushort CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetTrainMax");
 	ASSERT(m_pNPC);
-	
+
 	// What is the max I can train to ?
 	ushort uiMax;
 	ushort uiMaxAllowed;
@@ -556,7 +556,7 @@ bool CChar::NPC_CheckWalkHere( const CPointMap & pt, const CRegion * pArea ) con
             /*
             if (IsSetOF(OF_GuardOutsideGuardedArea))
             {
-                // I come from a guarded area, so i don't want to leave it unprotected; otherwise, i don't care if my destination region is guarded or not
+                // I come from a guarded area, so I don't want to leave it unprotected; otherwise, I don't care if my destination region is guarded or not
                 const CRegion * pAreaHome = m_ptHome.GetRegion( REGION_TYPE_AREA );
                 if (pAreaHome->IsGuarded() && !pArea->IsGuarded())
                     return false;
@@ -633,8 +633,8 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 	//  May not want to use it but rather just put it in my pack.
 	//
 	// NOTE:
-	//  Don't check if i can see this or i can reach it.
-	//  Don't check if i can carry this ?
+	//  Don't check if I can see this, or I can reach it.
+	//  Don't check if I can carry this ?
 	//
 	// RETURN:
 	//  0-100 percent = how bad do we want it ?
@@ -672,7 +672,7 @@ int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 {
 	ADDTOCALLSTACK("CChar::NPC_GetWeaponUseScore");
 	ASSERT(m_pNPC);
-	// How good would i be at this weapon ?
+	// How good would I be at this weapon ?
 
 	SKILL_TYPE skill;
 
@@ -688,7 +688,7 @@ int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 		// I can't equip this anyhow.
 		if ( CanEquipLayer( pWeapon, LAYER_QTY, nullptr, true ) == LAYER_NONE )
 			return 0;
-		// How much damage could i do with this ?
+		// How much damage could I do with this ?
 	}
 
 	int iDmg = Fight_CalcDamage( pWeapon );
@@ -704,15 +704,15 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	// What is my general hostility level toward this type of creature ?
 	//
 	// based on:
-	//  npc vs player, (evil npc's don't like players regurdless of align, except in town)
+	//  npc vs player, (evil npc's don't like players regardless of align, except in town)
 	//  karma (we are of different alignments)
 	//  creature body type. (allie groups)
 	//  hunger, (they could be food)
 	//  memories of this creature.
 	//
 	// DO NOT consider:
-	//   strength, he is far stronger or waeker than me.
-	//	 health, i may be near death.
+	//   strength, he is far stronger or weaker than me.
+	//	 health, I may be near death.
 	//   location (guarded area), (xcept in the case that evil people like other evils in town)
 	//   loot, etc.
 	//
@@ -749,22 +749,22 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 
 	bool fDoMemBase = false;
 
-	if ( Noto_IsEvil() &&	// i am evil.
+	if ( Noto_IsEvil() &&	// I am evil.
 		(m_pArea && !m_pArea->IsGuarded()) &&	// we are not in an evil town.
 		pCharTarg->m_pPlayer )	// my target is a player.
 	{
-		// If i'm evil i give no benefit to players with bad karma.
+		// If I'm evil I give no benefit to players with bad karma.
 		// I hate all players.
-		// Unless i'm in a guarded area. then they are cool.
+		// Unless I'm in a guarded area. then they are cool.
 		iHostility = 51;
 	}
-	else if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK )	// i'm beserk.
+	else if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK )	// I'm berserk.
 	{
-		// beserks just hate everyone all the time.
+		// Berserk just hate everyone all the time.
 		iHostility = 100;
 	}
 	else if ( pCharTarg->m_pNPC &&	// my target is an NPC
-		pCharTarg->m_pNPC->m_Brain != NPCBRAIN_BERSERK &&	// ok to hate beserks.
+		pCharTarg->m_pNPC->m_Brain != NPCBRAIN_BERSERK &&	// Ok to hate berserk.
 		! g_Cfg.m_fMonsterFight )		// monsters are not supposed to fight other monsters !
 	{
 		iHostility = -50;
@@ -772,7 +772,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	}
 	else
 	{
-		// base hostillity on karma diff.
+		// Base hostility on karma diff.
 		int iKarmaTarg = pCharTarg->GetKarma();
 
 		if ( Noto_IsEvil())
@@ -798,7 +798,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	{
 		if ( pCharTarg->m_pNPC )
 		{
-			// Human NPC's will attack humans .
+			// Human NPC's will attack humans.
 
 			if ( GetDispID() == pCharTarg->GetDispID())
 			{
@@ -817,7 +817,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 		}
 		else
 		{
-			// Not immediately hostile if looks the same as me.
+			// Not immediately hostile if it looks the same as me.
 			if ( ! IsPlayableCharacter() && NPC_GetAllyGroupType( GetDispID()) == NPC_GetAllyGroupType(pCharTarg->GetDispID()))
 			{
 				iHostility -= 51;
@@ -841,14 +841,14 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	ADDTOCALLSTACK("CChar::NPC_GetAttackContinueMotivation");
 	ASSERT(m_pNPC);
 	// I have seen fit to attack them.
-	// How much do i want to continue an existing fight ? cowardice ?
+	// How much do I want to continue an existing fight ? cowardice ?
 	// ARGS:
 	//  iMotivation = My base motivation toward this creature.
 	//
 	// RETURN:
 	// -101 = ? dead meat. (run away)
 	//
-	// 0 = I'm have no interest.
+	// 0 = I have no interest.
 	// 50 = even match.
 	// 100 = he's a push over.
 	if ( !pChar )
@@ -892,7 +892,7 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	// Take into consideration AC, health, skills, etc..
 	// RETURN:
 	//   < 0 = dead meat. (run away)
-	//   0 = I'm have no interest.
+	//   0 = I have no interest.
 	//   50 = even match.
 	//   100 = he's a push over.
 
@@ -903,10 +903,10 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	if ( pChar->m_pArea->IsFlag(REGION_FLAG_SAFE) )
 		return 0;
 
-    if (Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))    // Am i attacking the same target as before?
+    if (Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))    // Am I attacking the same target as before?
     {
-        // Was i told to attack by my master? This is the only hardcoded case in which we have such an high threat value.
-        // In this case, i want that my pet attacks the target without doing any other consideration.
+        // Was I told to attack by my master? This is the only hardcoded case in which we have such a high threat value.
+        // In this case, I want that my pet attacks the target without doing any other consideration.
         const int iCharID = Attacker_GetID(pChar);
         ASSERT(iCharID != -1);
         if (Attacker_GetThreat(iCharID) >= ATTACKER_THREAT_TOLDBYMASTER)

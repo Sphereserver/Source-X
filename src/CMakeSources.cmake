@@ -3,7 +3,7 @@
 ##############################
 
 # Precompiled header: it's parsed only once and stored in memory as an intermediate form. This speeds up compilation drastically.
-# Be wise in chosing those, since every time we change one of them, we'll have to recompile every one on the list.
+# Be wise in choosing those, since every time we change one of them, we'll have to recompile every one on the list.
 
 set(pch_list
     PRIVATE src/common/common.h

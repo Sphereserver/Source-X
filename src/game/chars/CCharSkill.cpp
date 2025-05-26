@@ -25,7 +25,7 @@
 SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_GetBest");
-	// Get the top n best skills.
+	// Get the top and best skills.
 
 	if ( iRank >= g_Cfg.m_iMaxSkill )
 		iRank = 0;
@@ -523,7 +523,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int iDifficulty, bool fUseBell
 	// RETURN:
 	//	true = success in skill.
 
-	if ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying or they won't receive any damage on combat even without STATF_Invul set
+	if ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying, or they won't receive any damage on combat even without STATF_Invul set
 		return true;
 
     if ( !IsSkillBase(skill) || (iDifficulty < 0) )	// auto failure.
@@ -845,7 +845,7 @@ bool CChar::Skill_MakeItem_Success()
 			SysMessage(pszMsg);
 	}
 
-	// Experience gain on craftings
+	// Experience gains on crafting.
 	if ( g_Cfg.m_fExperienceSystem && (g_Cfg.m_iExperienceMode & EXP_MODE_RAISE_CRAFT) )
 	{
 		int exp = 0;
@@ -886,7 +886,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 	// Fail = do a partial consume of the resources.
 	//
 	// ARGS:
-	//  uidTarg = item targetted to try to make this . (this item should be used to make somehow)
+	//  uidTarg = item targeted to try to make this (this item should be used to make somehow).
 	// Skill_GetActive()
 	//
 	// RETURN:
@@ -957,7 +957,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 			return false;
         }
 
-		m_Act_UID = uidTarg;	// targetted item to start the make process
+		m_Act_UID = uidTarg;	// Targeted item to start the make process.
 		m_atCreate.m_iItemID = id;
 		m_atCreate.m_dwAmount = (word)(iReplicationQty);
 
@@ -967,7 +967,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		m_atCreate.m_dwAmount = (word)(iReplicationQty); // how much resources we really consumed
+		m_atCreate.m_dwAmount = (word)(iReplicationQty); // how many resources we really consumed
 		return Skill_MakeItem_Success();
 	}
 
@@ -1008,7 +1008,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 	if ( !pOreDef )
 		return nullptr;
 
-	// Skill effects how much of the ore i can get all at once.
+	// Skill effects how much of the ore I can get all at once.
 	if ( pOreDef->m_ReapItem == ITEMID_NOTHING )
 		return nullptr;		// I intended for there to be nothing here
 
@@ -1043,7 +1043,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
     ITEMID_TYPE id = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("ResourceID")));
 
-    wAmount = pResBit->ConsumeAmount( (word)(pScriptArgs->m_iN1) );	// amount i used up.
+    wAmount = pResBit->ConsumeAmount( (word)(pScriptArgs->m_iN1) );	// amount I used up.
 	if ( wAmount <= 0 )
 		return nullptr;
 
@@ -1147,14 +1147,14 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	if ( pOreDef->IsType( IT_ORE ))
 	{
 		ITEMID_TYPE idIngot = (ITEMID_TYPE)(ResGetIndex( pOreDef->m_ttOre.m_idIngot));
-		const CItemBase* pBaseDef = CItemBase::FindItemBase(idIngot); //Usually a lingot, but could be a a gem also.
+		const CItemBase* pBaseDef = CItemBase::FindItemBase(idIngot); //Usually a lingot, but could be a gem also.
 		if (!pBaseDef)
 		{
 			SysMessageDefault(DEFMSG_MINING_NOTHING);
 			return false;
 		}
 		iResourceQty = 1;	// ingots per ore.
-		iResourceTotalQty = 1; //Ores only gives one type of resouce.
+		iResourceTotalQty = 1; // Ores only gives one type of resource.
         pScriptArgs->m_iN2 = iResourceTotalQty;
         pScriptArgs->m_VarsLocal.SetNum("resource.0.ID", pBaseDef->GetID());
         pScriptArgs->m_VarsLocal.SetNum("resource.0.amount", iResourceQty);
@@ -1235,7 +1235,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		if (iMiningSkill < pBaseDef->m_ttIngot.m_iSkillMin && !fSkipMiningSmeltReq)
 		{
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MINING_SKILL), pBaseDef->GetName());
-				if (iResourceTotalQty > 1) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfull get the other type of lingots.
+				if (iResourceTotalQty > 1) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfully get the other type of lingots.
 					continue;
 				return false;
 		}
@@ -1250,11 +1250,11 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			word iAmountLost = (word)(g_Rand.GetVal(pItemOre->GetAmount() / 2) + 1);
 			pItemOre->ConsumeAmount(iAmountLost);	// lose up to half the resources.
 			iOreQty -= iAmountLost;
-			if ( iResourceTotalQty > 1 ) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfull get the other type of lingots.
+			if ( iResourceTotalQty > 1 ) // This is a niche scenario where an item can provide more than one type ingots, so we continue to loop for because we can successfully get the other type of lingots.
 				continue;
 			return false;
 		}
-		// Payoff - Amount of ingots i get.
+		// Payoff - Amount of ingots I get.
 		ingots.emplace_back(CItem::CreateScript(pBaseDef->GetID(), this));
 		if (ingots.at(i) == nullptr)
 		{
@@ -1349,7 +1349,7 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Tracking");
 	// SKILL_TRACKING
-	// m_Act_UID = what am i tracking ?
+	// m_Act_UID = what am I tracking ?
 	// m_atTracking.m_iPrvDir = the previous dir it was in.
 	// m_atTracking.m_dwDistMax = the maximum tracking distance.
 
@@ -1486,7 +1486,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	// SKILL_FISHING
 	// m_Act_p = where to fish.
 	// NOTE: don't check LOS else you can't fish off boats.
-	// Check that we dont stand too far away
+	// Check that we are not standing too far away
 	// Make sure we aren't in a house
 	//
 	// RETURN:
@@ -1772,7 +1772,7 @@ int CChar::Skill_Cartography( SKTRIG_TYPE stage )
 int CChar::Skill_Musicianship( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Musicianship");
-	// m_Act_UID = the intrument i targetted to play.
+	// m_Act_UID = the instrument i targeted to play.
 
 	if ( stage == SKTRIG_ABORT )
 		return -SKTRIG_ABORT;
@@ -1806,7 +1806,7 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 	{
 		case SKTRIG_START:
 		{
-			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
+			// ACTARG1: UID of the instrument I want to play, instead of picking a random one
 			CItem * pInstrument = nullptr;
 			if (m_atBard.m_dwInstrumentUID != 0)
 			{
@@ -1919,7 +1919,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 	{
 		case SKTRIG_START:
 		{
-			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
+			// ACTARG1: UID of the instrument I want to play, instead of picking a random one
 			CItem * pInstrument = nullptr;
 			if (m_atBard.m_dwInstrumentUID != 0)
 			{
@@ -2035,7 +2035,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 	{
 		case SKTRIG_START:
 		{
-			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
+			// ACTARG1: UID of the instrument I want to play, instead of picking a random one
 			CItem * pInstrument = nullptr;
 			if (m_atBard.m_dwInstrumentUID != 0)
 			{
@@ -2112,7 +2112,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
                 iMaxRange = UO_MAP_VIEW_SIGHT;
             }
 
-			// If out of range we might get attacked ourself.
+			// If out of range we might get attacked ourselves.
             if ((pCharProv->GetTopDist3D(pCharTarg) > iMaxRange) || (pCharProv->GetTopDist3D(this) > iMaxRange))
 			{
 				// Check that only "evil" monsters attack provoker back
@@ -2122,7 +2122,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 				return -SKTRIG_ABORT;
 			}
 
-			// If the npcs are in the same ally groups, both can attack you
+			// If the npcs are in the same groups, both can attack you.
 			if ( m_atProvocation.m_dwIsAlly != 0 )
 			{
 				if ( pCharProv->Noto_IsEvil() )
@@ -2309,7 +2309,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	ASSERT( pChar->m_pNPC );
 
 	int iTameBase = pChar->Skill_GetBase(SKILL_TAMING);
-	if ( !IsPriv( PRIV_GM )) // if its a gm doing it, just check that its not
+	if ( !IsPriv( PRIV_GM )) // if it's a gm doing it, just check that it's not
 	{
 		if ( pChar->IsStatFlag( STATF_PET ))		// is it tamable ?
 		{
@@ -2475,7 +2475,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_ABORT )
 		return -SKTRIG_ABORT;
 
-	if ( stage == SKTRIG_STROKE )	// we shoud just stay in HIDING skill ?
+	if ( stage == SKTRIG_STROKE )	// We should just stay in HIDING skill?
 		return 0;
 
 	if ( stage == SKTRIG_FAIL )
@@ -2929,7 +2929,7 @@ int CChar::Skill_RemoveTrap( SKTRIG_TYPE stage )
 int CChar::Skill_Begging( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Begging");
-	// m_Act_UID = Our begging target..
+	// m_Act_UID = Our begging target.
 
 	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar == nullptr || pChar == this )
@@ -3024,7 +3024,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		/*
-		The two lines below need to be moved after the @SkillStart/@Start triggers, otherwise if we are using a custom combat system
+		The two lines below need to be moved after the @SkillStart/@Start triggers, otherwise if we are using a custom combat system,
 		and we are forcing a miss (actdiff < 0) combat will be blocked because it will not pass the @SkillStart/@Start triggers check.
 		*/
 		//m_atFight.m_iWarSwingState = WAR_SWING_EQUIPPING;
@@ -3057,7 +3057,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
     {
 		/*Super cheap fix :
 		When we are casting the SUMMON CREATURE spell while we are in an active combat (we have an active fighting skill going on)
-		resetting both the RecoilDelay and the SwingAnimationDelay will also cause the ID of the summoned creatured to be resetted.
+		resetting both the RecoilDelay and the SwingAnimationDelay will also cause the ID of the summoned created to reset.
 		This only happens when the creature to be summoned is chosen on the default "summon menu".
 		*/
 		if ( !m_atMagery.m_uiSummonID )
@@ -3482,7 +3482,7 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Act_Training");
 	// NPCACT_TRAINING
-	// finished some traing maneuver.
+	// Finished some training maneuver.
 
 	if ( stage == SKTRIG_ABORT )
 		return -SKTRIG_ABORT;
@@ -4327,7 +4327,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 		if (pItem->GetParent() != pPack && pPack)
 		{
 			pItem->RemoveFromView();
-			// Put in my invent.
+			// Put in my invention.
 			pPack->ContentAdd(pItem);
 		}
 	}
@@ -4348,7 +4348,7 @@ int CChar::Skill_Stealing(SKTRIG_TYPE stage)
 }
 
 /*
-The Focus skill is used passively and it works automatically only if FEATURES_AOS_UPDATE_B is enabled.
+The Focus skill is used passively, and it works automatically only if FEATURES_AOS_UPDATE_B is enabled.
 The skill increase the amount of stamina gained by 1 for each 10% points of Focus and increase the amount
 of mana by 1 for each 20%  points of Focus.
 The Skill_Focus method is called from Stats_Regen64 method  found in CCharStat.cpp
@@ -4385,9 +4385,9 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 {
 	ADDTOCALLSTACK("CChar::Skill_Start");
-	// We have all the info we need to do the skill. (targeting etc)
+	// We have all the info we need to do the skill. (targeting etc.)
 	// Set up how long we have to wait before we get the desired results from this skill.
-	// Set up any animations/sounds in the mean time.
+	// Set up any animations/sounds in the meantime.
 	// Calc if we will succeed or fail.
 	// RETURN:
 	//  false = failed outright with no wait. "You have no chance of taming this"
@@ -4427,7 +4427,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			anim = Skill_GetAnim(skill);
         }
 
-		// Some skill can start right away. Need no targetting.
+		// Some skill can start right away. Need no targeting.
 		// 0-100 scale of Difficulty
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
 		{
@@ -4529,7 +4529,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 
 		if (_IsTimerExpired())
 		{
-			_SetTimeoutD(1);		// the skill should have set it's own delay!?
+			_SetTimeoutD(1);		// the skill should have set its own delay!?
 		}
 
 		if ( fCraftSkill )
@@ -4572,7 +4572,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		}
 	}
 
-	// emote the action i am taking.
+	// emote the action I am taking.
 	if ( (g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE) || IsStatFlag(STATF_EMOTEACTION) )
 		Emote(Skill_GetName(true));
 

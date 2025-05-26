@@ -68,7 +68,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 	ASSERT(m_pNPC);
 	// Take the special creature action.
 	// lay egg, breath weapon (fire, lightning, acid, code, paralyze),
-	//  create web, fire patch, fire ball,
+	//  create web, fire patch, fireball,
 	// steal, teleport, level drain, absorb magic, curse items,
 	// rust items, stealing, charge, hiding, grab, regenerate, play dead.
 	// Water = put out fire !
@@ -244,8 +244,8 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 {
 	ADDTOCALLSTACK("CChar::NPC_ActStart_SpeakTo");
 	ASSERT(m_pNPC);
-	// My new action is that i am speaking to this person.
-	// Or just update the amount of time i will wait for this person.
+	// My new action is that I am speaking to this person.
+	// Or just update the amount of time I will wait for this person.
 	m_Act_UID = pSrc->GetUID();
 	m_atTalk.m_dwWaitCount = 20;
 	m_atTalk.m_dwHearUnknown = 0;
@@ -267,7 +267,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	if ( NPC_OnHearPetCmd(pszCmd, pSrc, fAllPets) || !NPC_CanSpeak() )
 		return;
 
-	// What where we doing ?
+	// What were we doing ?
 	// too busy to talk ?
 
 	switch ( Skill_GetActive())
@@ -519,9 +519,9 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		if ( ! CanMoveWalkTo(pMe, true, false, Dir ))
 		{
 			bool fClearedWay = false;
-			// Some object in my way that i could move ? Try to move it.
+			// Some object in my way that I could move ? Try to move it.
 			if ( !Can(CAN_C_USEHANDS) || Can(CAN_C_STATUE) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
-                ;   // i cannot use hands or i am frozen, so cannot move objects
+                ;   // I cannot use hands, or I am frozen, so cannot move objects.
 			else if ( (NPC_GetAiFlags() & NPC_AI_MOVEOBSTACLES) && (iInt > iRand) )
 			{
 				int			i;
@@ -741,7 +741,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 		if ( g_Cfg.m_fGuardsInstantKill || pChar->Skill_GetBase(SKILL_MAGERY) )
 			Spell_Teleport(pChar->GetTopPoint(), false, false);
 
-		// If we got intant kill guards enabled, allow the guards to swing immidiately
+		// If we got instant kill guards enabled, allow the guards to swing immediately.
 		if ( g_Cfg.m_fGuardsInstantKill )
 		{
 			pChar->Stat_SetVal(STAT_STR, 1);
@@ -765,7 +765,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	//   false = continue with any previous action.
 	//  motivation level =
 	//  0 = not at all.
-	//  100 = definitly.
+	//  100 = definitely.
 	//
 
 	int iFoodLevel = Food_GetLevelPercent();
@@ -774,7 +774,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	if ( ! Noto_IsCriminal() && (iFoodLevel > 40) )	// Am I not evil ?
 		return NPC_LookAtCharHuman( pChar );
 
-    // Attack if i am stronger, if it's the same target i was attacking, or i'm just stupid.
+    // Attack if I am stronger, if it's the same target I was attacking, or I'm just stupid.
     int iActMotivation = NPC_GetAttackMotivation(pChar);
     if (iActMotivation <= 0)
         return false;
@@ -783,7 +783,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 
 	int iDist = GetTopDist3D( pChar );
 	if ( IsStatFlag( STATF_HIDDEN ) && ! NPC_FightMayCast() && (iDist > 1) )
-		return false;	// element of suprise.
+		return false;	// element of surprise.
 
 	if ( Fight_Attack( pChar ) == false )
 		return false;
@@ -823,7 +823,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
             {
                 Speak(pChar->IsStatFlag(STATF_CRIMINAL) ?
                     g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEECRIM) :
-                    g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEEMONS));   // only speak if can really call the guards.
+                    g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEEMONS));   // only speak if I can really call the guards.
             }
 			if (IsStatFlag(STATF_WAR))
 				return false;
@@ -1007,9 +1007,9 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 	ADDTOCALLSTACK("CChar::NPC_LookAtChar");
 	ASSERT(m_pNPC);
 	// I see a char.
-	// Do I want to do something to this char (more that what i'm already doing ?)
+	// Do I want to do something to this char (more that what I'm already doing ?)
 	// RETURN:
-	//   true = yes i do want to take a new action.
+	//   true = yes I do want to take a new action.
 
 	// Don't call this function frequently, since CanSeeLOS is an expensive function (lot of calculations but
 	//	most importantly it has to read the UO files, and file I/O is slow)
@@ -1058,7 +1058,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			}
 		}
 	}
-	
+
 	if (IsStatFlag(STATF_DEAD))
 		return false;
 
@@ -1129,19 +1129,19 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
     // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
     const int iRand = g_Rand.Get16ValFast(g_Cfg.m_iMapViewRadar);
     const CPointMap& ptTop(GetTopPoint());
-	
+
     int iRange = std::min(GetVisualRange(), int(g_Cfg.m_iMapViewRadar));
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
 	if ( Can(CAN_C_NONMOVER) || !Can(CAN_C_MOVEMENTCAPABLEMASK) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 	{
-		if ( !NPC_FightMayCast() )	// And i have no distance attack.
+		if ( !NPC_FightMayCast() )	// And I have no distance attack.
 			iRange = iRangeBlur = 2;
 	}
 	else
 	{
-		// I'm mobile. do basic check if i would move here first.
+		// I'm mobile. do basic check if I would move here first.
 		if ( !NPC_CheckWalkHere(ptTop, m_pArea) )
 		{
 			// I should move. Someone lit a fire under me.
@@ -1232,12 +1232,12 @@ void CChar::NPC_Act_Wander()
 	if ( Can(CAN_C_NONMOVER) )
 		return;
 
-    // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs)
+    // Call the rand function once, since repeated calls can be expensive (and this function is called a LOT of times, if there are lots of active NPCs).
     const uint uiRand = uint32_t(g_Rand.Get16ValFast(100));
 	int iStopWandering = 0;
 
     if ( !(uiRand % (7u + (Stat_GetVal(STAT_DEX) / 30u))) )
-        iStopWandering = 1;			// i'm stopping to wander "for the dexterity".
+        iStopWandering = 1;			// I'm stopping to wander "for the dexterity".
 
     const CVarDefCont* pTagOverride = GetKey("OVERRIDE.LOOKAROUNDCHANCE", true);
     uint uiLookAroundChance = pTagOverride
@@ -1251,7 +1251,7 @@ void CChar::NPC_Act_Wander()
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
 		if ( NPC_LookAround() )
-			iStopWandering = 2;		// i'm stopping to wander because i have seen something interesting 
+			iStopWandering = 2;		// I'm stopping to wander because I have seen something interesting.
 	}
 
 	// Staggering Walk around.
@@ -1314,14 +1314,14 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	ADDTOCALLSTACK("CChar::NPC_Act_Follow");
 	ASSERT(m_pNPC);
 	// Follow our target or owner (m_Act_UID), we may be fighting (m_Fight_Targ_UID).
-	// false = can't follow any more, give up.
+	// false = can't follow anymore, give up.
 
 	if (Can(CAN_C_NONMOVER))
 	{
 		/*
 		  If the NPC has the MT_NONMOVER flag we need to check if it is actually in combat, otherwise it  will spam the attack because it
 		  constantly "forget" the character is attacking (See NPCAct_Fight method).
-		*/ 
+		*/
 		if (!Fight_IsActive())
 			return false;
 		else
@@ -1334,12 +1334,12 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	* Replaced the Fight_IsActive() check with a check on m_fight_targ_UID.
 	* Red npcs usually never interact "in a peaceful way" with the players and thus m_act_UID is usually never set preventing the creature from fleeing and putting it in an immobile "state".
 	* Fight_IsActive returns true if the character is actively fighting (using a combat skill) in this case it's false because of the NPC'sFleeing
-	* Action and thus it will never pass the Fight_IsActive() check
+	* Action, and thus it will never pass the Fight_IsActive() check
 	*/
 	//CChar * pChar =  Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 
 	CChar* pChar = nullptr;
-	//If the NPC action is following somebody, directly assign the character from  the m_Act_UID value. 
+	//If the NPC action is following somebody, directly assign the character from  the m_Act_UID value.
 	if (Skill_GetActive() == NPCACT_FOLLOW_TARG)
 		pChar = m_Act_UID.CharFind();
     else if (Fight_IsActive() || Skill_GetActive() == NPCACT_FLEE)
@@ -1348,7 +1348,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
         pChar = m_Act_UID.CharFind();
 	if (pChar == nullptr)
 	{
-		// free to do as i wish !
+		// free to do as I wish !
 		Skill_Start(SKILL_NONE);
 		return false;
 	}
@@ -1505,8 +1505,8 @@ void CChar::NPC_Act_GoHome()
 
 	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
 	{
-		// Had to change this guards were still roaming the forests
-		// this goes hand in hand with the change that guards arent
+		// Had to change this. Guards were still roaming the forests
+		// this goes hand in hand with the change that guards aren't
 		// called if the criminal makes it outside guarded territory.
 
 		const CRegion * pAreaHome = m_ptHome.GetRegion( REGION_TYPE_AREA );
@@ -1525,7 +1525,7 @@ void CChar::NPC_Act_GoHome()
 		{
 			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)! Removing it.\n", (dword)GetUID(), GetName(), GetTopPoint().WriteUsed());
 
-			// If we arent conjured and still got no valid home
+			// If we aren't conjured and still got no valid home
 			// then set our status to conjured and take our life.
 			if ( ! IsStatFlag(STATF_CONJURED))
 			{
@@ -1597,7 +1597,7 @@ void CChar::NPC_Act_Looting()
 	// We killed something, let's take a look on the corpse.
 	// Or we find something interesting on ground
 	//
-	// m_Act_UID = UID of the item/corpse that we trying to loot
+	// m_Act_UID = UID of the item/corpse that we're trying to loot
 
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
 		return;
@@ -1777,7 +1777,7 @@ bool CChar::NPC_Act_Food()
 	int     iSearchDistance = 2;
 	CItem   *pClosestFood = nullptr;
 	int     iClosestFood = 100;
-	
+
 	bool    fSearchGrass = false;
 	CItem   *pCropItem = nullptr;
 
@@ -1787,7 +1787,7 @@ bool CChar::NPC_Act_Food()
 		for (CSObjContRec* pObjRec : *pPack)
 		{
 			CItem* pFood = static_cast<CItem*>(pObjRec);
-			// I have some food personaly, so no need to search for something
+			// I have some food personally, so no need to search for anything.
 			if ( pFood->IsType(IT_FOOD) )
 			{
 				if ( (uiEatAmount = Food_CanEat(pFood)) > 0 )
@@ -1889,7 +1889,7 @@ bool CChar::NPC_Act_Food()
 	}
 	else
 	{
-        // no food around, but maybe i am ok with grass? Or shall I try to pick crops?
+        // no food around, but maybe I am ok with grass? Or shall I try to pick crops?
 
 		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
 		if ( brain == NPCBRAIN_ANIMAL )						// animals eat grass always
@@ -2147,7 +2147,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
                 if (Use_Item(pItem))
                     return true;
                 else
-                    return false; //If can't use item, return it inside player's backpack.
+                    return false; // If I can't use item, return it inside player's backpack.
             }
         }
 
@@ -2252,7 +2252,7 @@ void CChar::NPC_OnTickAction()
         return;
     }
 
-	
+
     bool fSkillFight = false;
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )
 	{
@@ -2288,7 +2288,7 @@ void CChar::NPC_OnTickAction()
 				// just remain hidden unless we find something new to do.
 				if ( g_Rand.GetVal( Skill_GetBase(SKILL_HIDING)))
 					break;
-				EXC_SET_BLOCK("idle: Hidding");
+				EXC_SET_BLOCK("idle: Hiding");
 				NPC_Act_Idle();
 				break;
 
@@ -2308,7 +2308,7 @@ void CChar::NPC_OnTickAction()
             case SKILL_CHIVALRY:
             case SKILL_SPELLWEAVING:
                 EXC_SET_BLOCK("magic");
-                NPC_Act_Fight();    // May be we can split Fight and Magic from here?
+                NPC_Act_Fight();    // Maybe we can split Fight and Magic from here?
                 break;
 
 			case NPCACT_GUARD_TARG:
@@ -2383,7 +2383,7 @@ void CChar::NPC_OnTickAction()
 	}
 
 	EXC_SET_BLOCK("timer expired (NPC)");
-	if ( _IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
+	if ( _IsTimerExpired() && !fSkillFight) // If I'm fighting, I don't want to wait to start another swing
 	{
 		int32 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
 		timeout = maximum(timeout, 0);
@@ -2417,16 +2417,16 @@ void CChar::NPC_Pathfinding()
     const int dist = ptLocal.GetDist(ptTarg);
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
 	const int iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
-	
+
 	//	do we really need to find the path?
 	if ( iInt < 30 ) // too dumb
-        return;					
+        return;
 	if ( m_pNPC->m_nextPt == ptTarg ) // we have path to that position already saved in m_NextX/Y
-        return;			
+        return;
 	if ( !ptTarg.IsValidPoint() ) // invalid point
         return;
 	if (( ptTarg.m_x == ptLocal.m_x ) && ( ptTarg.m_y == ptLocal.m_y )) // same spot
-        return; 
+        return;
 	if ( ptTarg.m_map != ptLocal.m_map ) // cannot just move to another map
         return;
 	if ( dist >= MAX_NPC_PATH_STORAGE_SIZE/2 ) // skip too far locations which should be too slow
@@ -2510,7 +2510,7 @@ void CChar::NPC_Food()
 		for (CSObjContRec* pObjRec : *pPack)
 		{
 			CItem* pFood = static_cast<CItem*>(pObjRec);
-			// i have some food personaly, so no need to search for something
+			// I have some food personally, so no need to search for anything.
 			if ( pFood->IsType(IT_FOOD) )
 			{
 				if ( (uiEatAmount = Food_CanEat(pFood)) > 0 )
@@ -2597,7 +2597,7 @@ void CChar::NPC_Food()
 			}
 		}
 	}
-					// no food around, but maybe i am ok with grass?
+					// No food around, but maybe I am ok with grass?
 	else
 	{
 		const NPCBRAIN_TYPE brain = GetNPCBrainGroup();
@@ -2613,7 +2613,7 @@ void CChar::NPC_Food()
         const CResourceID rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		EXC_SET_BLOCK("searching grass");
-		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
+		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
 			CItem *pResBit = CWorldMap::CheckNaturalResource(ptMe, IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
@@ -2714,7 +2714,7 @@ void CChar::NPC_ExtraAI()
 		return;
 	}
 
-	// Equip lightsource at night time
+	// Equip light source at nighttime.
 	EXC_SET_BLOCK("light source");
 	const CPointMap& pt = GetTopPoint();
 	const CSector *pSector = pt.GetSector();

@@ -74,7 +74,7 @@ public:
     *
     * @see CopyLen()
     * @param pStr string to copy.
-    * #param iLen max number of chars (single-byte) to copy.
+    * @param iLen max number of chars (single-byte) to copy.
     */
     CSString(lpctstr pStr, int iLen);
 

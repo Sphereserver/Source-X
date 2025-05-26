@@ -42,7 +42,7 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_STABLE,	// 7 = will store your animals for you.
 	NPCBRAIN_MONSTER,	// 8 = not tamable. normally evil.
 	NPCBRAIN_BERSERK,	// 9 = attack closest (blades, vortex)
-	NPCBRAIN_DRAGON,	// 10 = we can breath fire. may be tamable ? hirable ?
+	NPCBRAIN_DRAGON,	// 10 = we can breathe fire. may be tamable ? hirable ?
 	NPCBRAIN_QTY
 };
 
@@ -81,15 +81,15 @@ private:
 #define STATF_INCOGNITO		0x00000800	// Dont show skill titles
 #define STATF_SPIRITSPEAK	0x00001000	// I can hear ghosts clearly.
 #define STATF_INSUBSTANTIAL	0x00002000	// Ghost has not manifest. or GM hidden
-#define STATF_EMOTEACTION	0x00004000	// The creature will emote its actions to it's owners.
-#define STATF_COMM_CRYSTAL	0x00008000	// I have a IT_COMM_CRYSTAL or listening item on me.
+#define STATF_EMOTEACTION	0x00004000	// The creature will emote its actions to its owners.
+#define STATF_COMM_CRYSTAL	0x00008000	// I have an IT_COMM_CRYSTAL or listening item on me.
 #define STATF_HASSHIELD		0x00010000	// Using a shield
 #define STATF_ARCHERCANMOVE	0x00020000	// Can move with archery
 #define STATF_STONE			0x00040000	// turned to stone.
 #define STATF_HOVERING		0x00080000	// hovering (flying gargoyle)
 #define STATF_FLY			0x00100000	// Flying or running ? (anim)
 //							0x00200000
-#define STATF_HALLUCINATING	0x00400000	// eat 'shrooms or bad food.
+#define STATF_HALLUCINATING	0x00400000	// eat mushrooms or bad food.
 #define STATF_HIDDEN		0x00800000	// Hidden (non-magical)
 #define STATF_INDOORS		0x01000000	// we are covered from the rain.
 #define STATF_CRIMINAL		0x02000000	// The guards will attack me. (someone has called guards)
@@ -117,7 +117,7 @@ public:
 
 	struct NotoSaves
 	{
-		int64		time;		// Updaete timer
+		int64		time;		// Update timer
         dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
@@ -128,7 +128,7 @@ public:
 
 	CCharPlayer * m_pPlayer;	// May even be an off-line player !
 	CCharNPC * m_pNPC;			// we can be both a player and an NPC if "controlled" ?
-	CPartyDef * m_pParty;		// What party am i in ?
+	CPartyDef * m_pParty;		// What party am I in ?
 	CRegionWorld * m_pArea;		// What region are we in now. (for guarded message)
 	CRegion * m_pRoom;		// What room we are in now.
 
@@ -143,7 +143,7 @@ public:
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
     ushort _iRegenTickCount;    // ticks until next regen.
 
-	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
+	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc. properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
 	uint m_exp;					// character experience
 	uint m_level;				// character experience level
 	//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
@@ -160,9 +160,9 @@ public:
 	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 
-	int64  _iTimeCreate;	    // When was i created ?
+	int64  _iTimeCreate;	    // When was I created ?
 	int64  _iTimePeriodicTick;
-	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
+	int64  _iTimeNextRegen;	    // When did I get my last regen tick ?
 
 	int64 _iTimeLastHitsUpdate;
 	int64 _iTimeLastCallGuards;
@@ -191,7 +191,7 @@ public:
 		ushort  m_val;       // Hits, Mana, Stam
 		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
 		ushort  m_regenVal;  // Amount of Stat to gain at each regen
-		int64   m_regenRate; // Regen each this much milliseconds.
+		int64   m_regenRate; // Regen each this many milliseconds.
         int64   m_regenLast; // Time of the last regen.
 	} m_Stat[STAT_QTY];
 
@@ -285,7 +285,7 @@ public:
 			int16 m_iRecoilDelay;		        // ACTARG2 & 0x0000FFFF = Duration (in tenth of secs) of the previous swing recoil time.
             int16 m_iSwingAnimationDelay;       // ACTARG2 & 0xFFFF0000 = Duration (in tenth of secs) of the previous swing animation duration.
             int16 m_iSwingAnimation;            // ACTARG3 & 0x0000FFFF = hit animation id.
-            int16 m_iSwingIgnoreLastHitTag;     // ACTARG3 & 0xFFFF0000. Internally used by PreHit. If == 1 (which happens only for the hit after the first instahit), for this hit TAG.LastHit delay checking will be ignored.
+            int16 m_iSwingIgnoreLastHitTag;     // ACTARG3 & 0xFFFF0000. Internally used by PreHit. If == 1 (which happens only for the hit after the first instant hit), for this hit TAG.LastHit delay checking will be ignored.
 		} m_atFight;
 
 		// SKILL_ENTICEMENT
@@ -321,9 +321,9 @@ public:
 		// NPCACT_TALK_FOLLOW
 		struct
 		{
-			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
-			dword m_dwWaitCount;		// ACTARG2 = How long have i been waiting (xN sec)
-										// m_Act_UID = who am i talking to ?
+			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what you are saying.
+			dword m_dwWaitCount;		// ACTARG2 = How long have I been waiting (xN sec)
+										// m_Act_UID = who am I talking to ?
 		} m_atTalk;
 
 		// NPCACT_FLEE
@@ -331,7 +331,7 @@ public:
 		{
 			dword m_iStepsMax;			// ACTARG1 = How long should it take to get there.
 			dword m_iStepsCurrent;		// ACTARG2 = How long has it taken ?
-										// m_Act_UID = who am i fleeing from ?
+										// m_Act_UID = who am I fleeing from ?
 		} m_atFlee;
 	};
 
@@ -640,9 +640,9 @@ private:
 	* @brief Update Karma with the given values.
 	*
 	* Used to increase/decrease Karma values, checks if you can have the resultant values,
-	* fire @KarmaChange trigger and show a message as result of the change (if procceed).
-	* Can't never be greater than g_Cfg.m_iMaxKarma or lower than g_Cfg.m_iMinKarma or iBottom.
-	* @param iKarmaChange Amount of karma to change, can be possitive and negative.
+	* fire @KarmaChange trigger and show a message as result of the change (if proceed).
+	* Can't be greater than g_Cfg.m_iMaxKarma or lower than g_Cfg.m_iMinKarma or iBottom.
+	* @param iKarmaChange Amount of karma to change, can be positive and negative.
 	* @param iBottom is the lower value you can have for this execution.
 	* @param fMessage show message to the char or not.
 	*/
@@ -652,7 +652,7 @@ private:
 	* @brief Update Fame with the given value.
 	*
 	* Used to increase/decrease Fame, it fires @FameChange trigger.
-	* Can't never exceed g_Cfg.m_iMaxFame and can't never be lower than 0.
+	* Can't exceed g_Cfg.m_iMaxFame and can't be lower than 0.
 	* @param iFameChange is the amount of fame to change over the current one.
 	*/
 	void Noto_Fame( int iFameChange, CChar* pNPC = nullptr );
@@ -667,7 +667,7 @@ private:
 	/**
 	* @brief I've become murderer or criminal, let's see a message for it.
 	*
-	* MSG_NOTO_CHANGE_0-8 contains the strings 'you have gained a bit/a lot/etc of', so the given iDelta is used to check wether of these MSG should be used.
+	* MSG_NOTO_CHANGE_0-8 contains the strings 'you have gained a bit/a lot/etc of', so the given iDelta is used to check which of these MSG should be used.
 	* @param iDelta Amount of Karma/Fame changed.
 	* @param pszType String containing 'Karma' or 'Fame' to pass as argument to the given text.
 	*/
@@ -680,11 +680,11 @@ public:
 	* @brief Returns what is this char to the viewer.
 	*
 	* This allows the noto attack check in the client.
-	* Notoriety handler using std::vector, it's saved and readed here but calcs are being made in Noto_CalcFlag().
+	* Notoriety handler using std::vector, it's saved and read here but calcs are being made in Noto_CalcFlag().
 	* Actually 2 values are stored in this vectored list: Notoriety (the notoriety level) and Color (the color we are showing in the HP bar and in our character for the viewer).
 	* Calls @NotoSend trigger with src = pChar, argn1 = notoriety level, argn2 = color to send.
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true and he has STATF_INCOGNITO, this character will be gray for the viever (pChar).
+	* @param fIncog if set to true, and he has STATF_INCOGNITO, this character will be gray for the viewer (pChar).
 	* @param fInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
 	* @param fGetColor if set to true only the color will be returned and not the notoriety (note that they can differ if set to so in the @NotoSend trigger).
 	* @return NOTO_TYPE notoriety level.
@@ -695,9 +695,9 @@ public:
 	* @brief Notoriety calculations
 	*
 	* TAG.OVERRIDE.NOTO will override everything and use the value in the tag for everyone, regardless of what I really are for them.
-	* If this char is a pet, check if notoriety must be inherited from it's master or do regular checks for it.
+	* If this char is a pet, check if notoriety must be inherited from its master or do regular checks for it.
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viever (pChar).
+	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viewer (pChar).
 	* @param fInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
 	* @return NOTO_TYPE notoriety level.
 	*/
@@ -708,7 +708,7 @@ public:
 	*
 	* Used to retrieve color for character and corpse's names.
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viever (pChar).
+	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viewer (pChar).
 	* @return HUE_TYPE my color.
 	*/
 	HUE_TYPE Noto_GetHue( const CChar * pChar, bool fIncog = false ) const;
@@ -852,7 +852,7 @@ public:
 	bool NotoSave_Delete( CChar * pChar );
 
 	/**
-	* @brief Removing expired notorieties.
+	* @brief Removing expired notoriety.
 	*/
 	void NotoSave_CheckTimeout();
 
@@ -1378,7 +1378,7 @@ protected:
 
     virtual bool _CanTick() const override final;
 
-protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc
+protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc.
 //public:	virtual bool  _OnTick() override final;
 
 public:
@@ -1386,7 +1386,7 @@ public:
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 
 	virtual void OnTickStatusUpdate() override;
-	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
+	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc.)
 
 	void OnTickSkill(); // _OnTick timeout specific for the skill behavior
 

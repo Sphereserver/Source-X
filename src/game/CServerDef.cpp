@@ -294,8 +294,8 @@ static lpctstr constexpr sm_AccAppTable[ ACCAPP_QTY ] =
 	"CLOSED",		// Closed. Not accepting more.
 	"UNUSED",
 	"FREE",			// Anyone can just log in and create a full account.
-	"GUESTAUTO",	// You get to be a guest and are automatically sent email with u're new password.
-	"GUESTTRIAL",	// You get to be a guest til u're accepted for full by an Admin.
+	"GUESTAUTO",	// You get to be a guest and are automatically sent email with your new password.
+	"GUESTTRIAL",	// You get to be a guest until you are accepted for full by an Admin.
 	"UNUSED",
 	"UNSPECIFIED",	// Not specified.
 	"UNUSED",
