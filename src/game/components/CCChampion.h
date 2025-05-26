@@ -220,13 +220,13 @@ public:
     * otherwise it calls AddRedCandle and stop execution.
     * Create a pCandle pointer and set it's properties, color, and places it or sets the pointer to the item given in the param 'uid'.
     * Store in m_WhiteCandle[m_WhiteCandles] the CItem stored in pCandle.
-    * @param uid, if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
+    * @param uid if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
     */
     void AddWhiteCandle(const CUID& uid = CUID());
     /**
     * @brief Red candles check, add new one or I am in boss phase?
     *
-    * @param uid, if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
+    * @param uid if given (mostly during world loading) instead of creating a new candle, only the uid will be set to hold the already existing candle and do not have duplicates.
     */
     void AddRedCandle(const CUID& uid = CUID());
     /**
@@ -265,7 +265,6 @@ public:
     /**
     * @brief How many monsters do we need to kill to gain a White Candle.
     *
-    * @param iMonsters total amount of monsters of the champion.
     * @return amount of killed monsters needed to reach the next level.
     */
     uint16 GetMonstersCount();
@@ -273,7 +272,6 @@ public:
     /**
     * @brief Retrieves how much Red Candles are needed to reach next Champion's Level.
     *
-    * @param iLevel the level to check for (0 = reach for next Level).
     * More detailed description ...
     * Called from SetLevel() to set the amount of candles.
     * Value stored in morex (m_itNormal.m_morep.m_x).

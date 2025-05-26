@@ -1,5 +1,5 @@
 /**
-* @file CQueue.cpp
+* @file CSQueue.cpp
 */
 
 #include <cstring>

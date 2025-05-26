@@ -78,7 +78,7 @@ public:
     *
     * @brief   Check if this Spell has the given flags.
     *
-    * @param   wFlags  The flags.
+    * @param   uiFlags  The flags.
     *
     * @return  true if match, false if not.
     */

@@ -79,8 +79,8 @@ protected:  virtual void _Close();
 public:     virtual void Close();
     /**
     * @brief Open a file in a specified mode.
-    * @param ptcName file to open.
-    * @param uiMode open mode.
+    * @param ptcFilename file to open.
+    * @param uiModeFlags open mode.
     * @return true if file is open, false otherwise.
     */
 protected:  virtual bool _Open( lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE );
@@ -127,14 +127,14 @@ public:    virtual int GetPosition() const;
 	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
-	* @param stLength count of bytes to read.
+	* @param iLength count of bytes to read.
 	* @return count of bytes readed.
 	*/
 	virtual int Read( void * pData, int iLength ) const;
 	/**
 	* @brief Set the position indicator.
-	* @param stOffset position to set.
-	* @param stOrigin origin (current position or init of the file).
+	* @param iOffset position to set.
+	* @param iOrigin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, -1 on error.
 	*/
 protected:  virtual int _Seek( int iOffset = 0, int iOrigin = SEEK_SET );
@@ -154,7 +154,7 @@ public:     int SeekToEnd();
 	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
-	* @param dwLength lenght of the data to write.
+	* @param iLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
 protected:  virtual bool _Write(const void* pData, int iLength);

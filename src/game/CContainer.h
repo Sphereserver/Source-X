@@ -44,9 +44,9 @@ public:
     void ContentDelete(bool fForce);
 
     /**
-     * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );
+     * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObjRec );
      * @brief   Override this = called when removed from list.
-     * @param [in,out]  pObRec  If non-null, the ob record.
+     * @param [in,out]  pObjRec  If non-null, the ob record.
      */
     virtual void OnRemoveObj(CSObjContRec* pObjRec) override;
 
@@ -94,10 +94,10 @@ public:
 	CItem * ContentFindRandom() const;
 
     /**
-     * @fn  void CContainer::ContentsDump( const CPointMap & pt, uint64 iAttr = 0 );
+     * @fn  void CContainer::ContentsDump( const CPointMap & pt, uint64 uiAttr = 0 );
      * @brief   Contents dump.
      * @param   pt      The point.
-     * @param   dwAttr  The attribute.
+     * @param   uiAttr  The attribute.
      */
 	void ContentsDump( const CPointMap & pt, uint64 uiAttr = 0 );
 
@@ -110,9 +110,9 @@ public:
 	void ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
 
     /**
-     * @fn  void CContainer::ContentAttrMod( uint64 iAttr, bool fSet );
+     * @fn  void CContainer::ContentAttrMod( uint64 uiAttr, bool fSet );
      * @brief   Content attribute modifier.
-     * @param   dwAttr  The attribute.
+     * @param   uiAttr  The attribute.
      * @param   fSet    true to set.
      */
 	void ContentAttrMod( uint64 uiAttr, bool fSet );
@@ -195,10 +195,10 @@ public:
 	int ContentConsume( const CResourceID& rid, int iQty = 1, dword dwArg = 0 );
 
     /**
-    * @fn  int CContainer::ContentConsumeTest( RESOURCE_ID_BASE rid, int iQty = 1, dword dwArg = 0 );
+    * @fn  int CContainer::ContentConsumeTest( RESOURCE_ID_BASE rid, int iAmount = 1, dword dwArg = 0 );
     * @brief   Content consume.
     * @param   rid     The rid.
-    * @param   iQty    Zero-based index of the qty.
+    * @param   iAmount    Zero-based index of the qty.
     * @param   dwArg   The argument.
     *
     * @return  0 = all consumed, # = number left to be consumed.
@@ -240,7 +240,7 @@ public:
      * @fn  virtual void CContainer::ContentAdd( CItem * pItem ) = 0;
      * @brief   Content add.
      * @param [in,out]  pItem   If non-null, the item.
-	 * @param [in,out]  bForceNoStack	Do not stack on other identical items, even if it's a stackable type.
+	 * @param [in,out]  fForceNoStack	Do not stack on other identical items, even if it's a stackable type.
      */
     virtual void ContentAdd( CItem * pItem, bool fForceNoStack = false ) = 0;
 };

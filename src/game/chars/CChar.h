@@ -642,9 +642,9 @@ private:
 	* Used to increase/decrease Karma values, checks if you can have the resultant values,
 	* fire @KarmaChange trigger and show a message as result of the change (if procceed).
 	* Can't never be greater than g_Cfg.m_iMaxKarma or lower than g_Cfg.m_iMinKarma or iBottom.
-	* @param iKarma Amount of karma to change, can be possitive and negative.
+	* @param iKarmaChange Amount of karma to change, can be possitive and negative.
 	* @param iBottom is the lower value you can have for this execution.
-	* @param bMessage show message to the char or not.
+	* @param fMessage show message to the char or not.
 	*/
 	void Noto_Karma( int iKarmaChange, int iBottom = INT32_MIN, bool fMessage = false, CChar* pNPC = nullptr );
 
@@ -660,7 +660,7 @@ private:
 	/**
 	* @brief I have a new notoriety Level? check it and show a message if so.
 	*
-	* @param iPriv The 'new' notoriety level, it will be checked against the current level to see if it changed.
+	* @param iPrv The 'new' notoriety level, it will be checked against the current level to see if it changed.
 	*/
 	void Noto_ChangeNewMsg( int iPrv );
 
@@ -769,7 +769,7 @@ public:
 	* @brief I killed someone, should I have credits? and penalties?
 	*
 	* Here fires the @MurderMark trigger, also gives exp if level system is enabled to give exp on killing.
-	* @param pKill, the chara I killed (or participated to kill).
+	* @param pKill the chara I killed (or participated to kill).
 	* @param iTotalKillers how many characters participated in this kill.
 	*/
 	void Noto_Kill(CChar * pKill, int iTotalKillers = 0);
@@ -831,14 +831,14 @@ public:
 	/**
 	* @brief Deleting myself and sending data again for given char.
 	*
-	* @param pChar, the CChar* of the char of which we want to resend the noto.
+	* @param pChar the CChar* of the char of which we want to resend the noto.
 	*/
 	void NotoSave_Resend( CChar *pChar );
 
 	/**
 	* @brief Gets the entry list of the given CChar.
 	*
-	* @param pChar, CChar to retrieve the entry number for.
+	* @param pChar CChar to retrieve the entry number for.
 	* @return the entry number.
 	*/
 	int NotoSave_GetID( CChar * pChar ) const;
@@ -846,7 +846,7 @@ public:
 	/**
 	* @brief Removing stored data for pChar.
 	*
-	* @param pChar, the CChar I want to remove from my list.
+	* @param pChar the CChar I want to remove from my list.
 	* @return true if successfully removed it.
 	*/
 	bool NotoSave_Delete( CChar * pChar );
@@ -871,8 +871,8 @@ public:
 	*
 	* Main function for default Level system.
 	* Triggers @ExpChange and @LevelChange if needed
-    * @param iExpDelta, amount of exp gaining (or losing?)
-	* @param ppCharDead from who we gained the experience.
+    * @param iExpDelta amount of exp gaining (or losing?)
+	* @param pCharDead from who we gained the experience.
 	*/
     void ChangeExperience(llong iExpDelta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);

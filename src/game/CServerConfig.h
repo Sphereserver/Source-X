@@ -726,7 +726,7 @@ public:
     *
     * @param   restype Resource Type.
     *
-    * @param   ptcName Resource Name.
+    * @param   pszName Resource Name.
     *
     * @param   wPage Resource Page attribute.
     *
@@ -839,7 +839,7 @@ public:
 	/**
 	* @brief   Get the def for the server in position 'index' in servers list.
 	*
-	* @param   pszText The server index.
+	* @param   index The server index.
 	*
 	* @return  CServerRef of the server.
 	*/
@@ -999,7 +999,6 @@ public:
      *
      * @param [in,out]  pChar       If non-null, the character.
      * @param [in,out]  pCharTarg   If non-null, the character targ.
-     * @param   skill               The skill.
      *
      * @return  The calculated combat chance to hit.
      */
@@ -1009,7 +1008,7 @@ public:
      * @brief   Calculates the combat chance to parry.
      *
      * @param [in,out]  pChar       If non-null, the character attempting to parry.
-     * @param   skill               The skill.
+     * @param   pItemParry          @todo
      *
      * @return  The calculated combat chance to parry.
      */
@@ -1135,7 +1134,7 @@ public:
     /**
     * @brief   Gets default message (sphere_msgs.scp).
     *
-    * @param   ptcKey  The key.
+    * @param   lKeyNum  The key.
     *
     * @return  The default message.
     */

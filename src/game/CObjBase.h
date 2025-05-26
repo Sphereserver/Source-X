@@ -125,7 +125,7 @@ public:     virtual bool  IsDeleted() const override;
 
     /**
      * @brief   Deletes this CObjBase from game (doesn't delete the raw class instance).
-     * @param   bForce  Force deletion.
+     * @param   fForce  Force deletion.
      * @return  Was deleted.
      */
     virtual bool Delete(bool fForce = false);
@@ -195,7 +195,7 @@ public:
 
     /**
     * @brief   sets the Spawn item.
-    * @param  The CCSpawn.
+    * @param spawn The CCSpawn.
     */
     void SetSpawn(CCSpawn *spawn);
 
@@ -584,8 +584,8 @@ public:
      * @param   wHue                The hue.
      * @param   fAvoidTrigger       true to avoid trigger.
      * @param [in,out]  pSrc        (Optional) If non-null, source for the.
-     * @param [in,out]  SourceObj   (Optional) If non-null, source object.
-     * @param   sound               The sound.
+     * @param [in,out]  pSourceObj   (Optional) If non-null, source object.
+     * @param   iSound               The sound.
      */
 	void SetHue( HUE_TYPE wHue, bool fAvoidTrigger = true, CTextConsole *pSrc = nullptr, CObjBase * pSourceObj = nullptr, llong iSound = 0 );
 
@@ -695,8 +695,8 @@ public:
 	* @brief   Adds an Effect to a map point.
 	* @param   motion          The motion.
 	* @param   id              The identifier.
-	* @param   pt			   The map point.
-	* @param   pSource         Source for the.
+	* @param   ptSrc			   The map point.
+	* @param   ptDest         Source for the.
 	* @param   bspeedseconds   The bspeedseconds.
 	* @param   bloop           The bloop.
 	* @param   fexplode        true to fexplode.
