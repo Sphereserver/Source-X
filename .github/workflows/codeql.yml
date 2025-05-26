@@ -3,7 +3,7 @@ name: CodeQL
 
 on:
   push:
-    branches: ["static-analysis"]
+    branches: ["static-analysis", "master", "main"]
     paths-ignore:
       - '.gitignore'
       - '.gitattributes'
