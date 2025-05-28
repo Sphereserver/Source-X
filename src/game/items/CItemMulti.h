@@ -204,6 +204,7 @@ public:
     /**
     * @brief Deletes a coowner to the _lCoowners list.
     * @param uidCoowner the coowner
+    * @param fRemoveFromList Whether owner should be deleted from list.
     */
     void DeleteCoowner(const CUID& uidCoowner, bool fRemoveFromList);
     /**
@@ -227,6 +228,7 @@ public:
     /**
     * @brief Deletes a friend to the _lFriends list.
     * @param uidFriend the friend
+    * @param fRemoveFromList Whether friend should be deleted from list.
     */
     void DeleteFriend(const CUID& uidFriend, bool fRemoveFromList);
     /**
@@ -250,6 +252,7 @@ public:
     /**
     * @brief Deletes a char from the _lBans list.
     * @param uidBan the char.
+    * @param fRemoveFromList Whether character should be deleted from list.
     */
     void DeleteBan(const CUID& uidBan, bool fRemoveFromList);
     /**
@@ -275,6 +278,7 @@ public:
     *
     * Note: This removes the char from the list, but won't prevent it from enter like a Ban.
     * @param uidAccess the char.
+    * @param fRemoveFromList Whether character should be deleted from list.
     */
     void DeleteAccess(const CUID& uidAccess, bool fRemoveFromList);
     /**
@@ -408,6 +412,7 @@ public:
     /**
     * @brief Removes a CMultiComponent from the components list.
     * @param uidComponent the component.
+    * @param fRemoveFromList Whether component should be deleted from list.
     */
     virtual void DeleteComponent(const CUID& uidComponent, bool fRemoveFromList);
     /**
@@ -507,6 +512,7 @@ public:
     /**
     * @brief Unlocks an item and remove it from the Lockdowns list.
     * @param uidItem the item.
+    * @param fRemoveFromList Whether item should be deleted from list.
     */
     void UnlockItem(const CUID& uidItem, bool fRemoveFromList);
     void UnlockAllItems();
@@ -529,6 +535,7 @@ public:
     /**
     * @brief Releases a container and removes it from the containers list.
     * @param uidContainer the container.
+    * @param fRemoveFromList Whether container should be deleted from list.
     */
     void Release(const CUID& uidContainer, bool fRemoveFromList);
     /**
@@ -556,6 +563,7 @@ public:
     /**
     * @brief Removes a char from the vendors list.
     * @param uidVendor the vendor
+    * @param fRemoveFromList Whether vendor should be deleted from list.
     */
     void DeleteVendor(const CUID& uidVendor, bool fRemoveFromList);
     /**
@@ -681,6 +689,7 @@ public:
     /**
     * @brief Adds a multi
     * @param uidMulti the multi
+    * @param ePriv Access type for the multi (like ownership, ban etc.)
     */
     void AddMulti(const CUID& uidMulti, HOUSE_PRIV ePriv);
     /**
@@ -697,6 +706,7 @@ public:
     /**
     * @brief Adds a house multi.
     * @param uidHouse the house.
+    * @param ePriv Access type for the house (like ownership, ban etc.)
     */
     void AddHouse(const CUID& uidHouse, HOUSE_PRIV ePriv);
     /**
@@ -744,6 +754,7 @@ public:
     /**
     * @brief Adds a ship.
     * @param uidShip the ship.
+    * @param ePriv Access type for the ship (like ownership, ban etc.)
     */
     void AddShip(const CUID& uidShip, HOUSE_PRIV ePriv);
     /**

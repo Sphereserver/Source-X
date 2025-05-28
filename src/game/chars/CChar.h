@@ -647,6 +647,7 @@ private:
 	* @param iKarmaChange Amount of karma to change, can be positive and negative.
 	* @param iBottom is the lower value you can have for this execution.
 	* @param fMessage show message to the char or not.
+	* @param pNPC The character whose fame is changing.
 	*/
 	void Noto_Karma( int iKarmaChange, int iBottom = INT32_MIN, bool fMessage = false, CChar* pNPC = nullptr );
 
@@ -656,6 +657,7 @@ private:
 	* Used to increase/decrease Fame, it fires @FameChange trigger.
 	* Can't exceed g_Cfg.m_iMaxFame and can't be lower than 0.
 	* @param iFameChange is the amount of fame to change over the current one.
+	* @param pNPC The character whose fame is changing.
 	*/
 	void Noto_Fame( int iFameChange, CChar* pNPC = nullptr );
 

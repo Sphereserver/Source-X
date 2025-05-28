@@ -151,6 +151,7 @@ public:
 	* If the new length is bigger than the current length, alloc memory for the string and copy.
 	* If DEBUG_STRINGS setted, update statistical information (reallocs count, total memory allocated).
 	* @param iLen new length of the string.
+	* @param fPreciseSize If the length is bigger, should the size be the same?
 	* @return the new length of the CSString.
 	*/
 	int Resize(int iLen, bool fPreciseSize = false);

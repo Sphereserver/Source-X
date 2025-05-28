@@ -889,6 +889,7 @@ public:
      * @param   iSkillLevel         Zero-based index of the skill level.
      * @param [in,out]  pSourceItem If non-null, source item.
      * @param   fReflecting         true to reflecting.
+     * @param iDuration Duration of the spell effect (default is instant).
      *
      * @return  true if it succeeds, false if it fails.
      */

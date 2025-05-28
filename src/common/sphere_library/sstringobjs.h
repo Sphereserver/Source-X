@@ -149,7 +149,7 @@ public:
 	* @brief "Copy" constructor.
 	*
 	* @param pStr string to copy.
-	* #param iLen max number of chars (single-byte) to copy.
+	* @param uiLen max number of chars (single-byte) to copy.
 	*/
 	TemporaryString(lpctstr pStr, size_t uiLen);
 
