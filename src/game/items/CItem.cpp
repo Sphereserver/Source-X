@@ -6156,10 +6156,10 @@ bool CItem::_CanHoldTimer() const
 	return true;
 }
 
-bool CItem::_CanTick() const
+bool CItem::_TickableState() const
 {
-    //ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
-	EXC_TRY("Can tick?");
+    //ADDTOCALLSTACK_DEBUG("CItem::_TickableState");
+    EXC_TRY("Able to tick?");
 
 	const CObjBase* pCont = GetContainer();
     const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
@@ -6179,23 +6179,23 @@ bool CItem::_CanTick() const
                 return false;
         }
 
-        return CObjBase::_CanTick();
+        return CObjBase::_TickableState();
 	}
 
     if (IsAttr(ATTR_DECAY) && !pCont)
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
-        return CObjBase::_CanTick();
+        return CObjBase::_TickableState();
     }
 
     const bool fCharCont = pCont && pCont->IsChar();
-    if (fCharCont && !pCont->CanTick())
+    if (fCharCont && !pCont->TickableState())
     {
         // Is it equipped on a Char?
         return false;
     }
 
-    return CObjBase::_CanTick();
+    return CObjBase::_TickableState();
 
 	EXC_CATCH;
 
@@ -6215,7 +6215,7 @@ bool CItem::_OnTick()
 
 	if (!_IsSleeping())
 	{
-		if (!_CanTick())
+		if (!_TickableState())
 		{
 			const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
 			if (pSector && pSector->IsSleeping())

@@ -37,16 +37,16 @@ void CTimedObject::_GoAwake()
     _fIsSleeping = false;
 }
 
-bool CTimedObject::_CanTick() const
+bool CTimedObject::_TickableState() const
 {
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::_CanTick");
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::_TickableState");
     return !_IsSleeping();
 }
 
-bool CTimedObject::CanTick() const
+bool CTimedObject::TickableState() const
 {
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::CanTick");
-    MT_ENGINE_SHARED_LOCK_RETURN(_CanTick());
+    //ADDTOCALLSTACK_DEBUG("CTimedObject::_TickableState");
+    MT_ENGINE_SHARED_LOCK_RETURN(_TickableState());
 }
 
 bool CTimedObject::OnTick()

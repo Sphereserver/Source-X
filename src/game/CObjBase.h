@@ -922,8 +922,12 @@ protected:
      */
     virtual void OnTickStatusUpdate();
 
-    virtual bool _CanTick() const override;
-    //virtual bool  CanTick(bool fParentGoingToSleep = false) const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+    virtual bool _TickableState() const override;
+    //virtual bool  TickableState() const override;   // Not needed: the right virtual is called by CTimedObj::_CanTick.
+
+    std::optional<bool> _TickableStateOverride() const;
+
+    bool _CanTick(bool fParentGoingToSleep = false) const;
 
 public:
 

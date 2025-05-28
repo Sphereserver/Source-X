@@ -285,7 +285,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 	// result of the MULTI command.
 	// Break a multi out of the multi.txt files and turn it into items.
 
-	if ( !pt.GetRegion(REGION_TYPE_AREA) )
+    if ( !pt.GetRegion(REGION_TYPE_AREA) ) //TODO: add err message
 		return false;
 
 	CScript s;	// It is not really a valid script type file.
@@ -332,7 +332,7 @@ bool CClient::OnTarg_Char_Add( CObjBase * pObj, const CPointMap & pt )
 	ASSERT(m_pChar);
 
 	if ( !pt.GetRegion(REGION_TYPE_AREA) )
-		return false;
+        return false; //TODO: add err message
 	if ( pObj && pObj->IsItemInContainer() )
 		return false;
 
@@ -358,7 +358,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 	// m_tmAdd.m_id = item id
 	ASSERT(m_pChar);
 
-	if ( !pt.GetRegion(REGION_TYPE_AREA) )
+    if ( !pt.GetRegion(REGION_TYPE_AREA) )  //TODO: add err message
 		return false;
 	if ( pObj && pObj->IsItemInContainer() )
 		return false;
@@ -1658,7 +1658,7 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
     ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
     // Might be a IT_MULTI or it might not. place it anyhow.
 
-    if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))
+    if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))  //TODO: add err message
         return nullptr;
 
     return CItemMulti::Multi_Create(GetChar(), pItemDef, pt, pDeed);

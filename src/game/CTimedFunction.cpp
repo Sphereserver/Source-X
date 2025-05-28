@@ -26,12 +26,12 @@ bool CTimedFunction::IsDeleted() const // virtual
 }
 
 
-bool CTimedFunction::_CanTick() const // virtual
+bool CTimedFunction::_TickableState() const // virtual
 {
 	return true;
 }
 
-bool CTimedFunction::CanTick() const // virtual
+bool CTimedFunction::TickableState() const // virtual
 {
 	return true;
 }

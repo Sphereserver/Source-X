@@ -1908,18 +1908,20 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 		return 0;
 	}
 
-	tchar pToParse[THREAD_STRING_LENGTH];
+    tchar ptcToParse[THREAD_STRING_LENGTH];
 
 	if (iQty == 1) // It's just a simple value
 	{
 		ASSERT(pElementsStart[0] != nullptr);
 
 		// Copy the value in a new string
-		const size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
-		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
-		pToParse[iToParseLen] = '\0';
+        const size_t uiToParseLen = std::min(
+            ptrdiff_t(THREAD_STRING_LENGTH-1),
+            ptrdiff_t(pElementsStart[0][1] - pElementsStart[0][0]));
+        memcpy((void*)ptcToParse, pElementsStart[0][0], uiToParseLen * sizeof(tchar));
+        ptcToParse[uiToParseLen] = '\0';
 
-		lptstr pToParseCasted = static_cast<lptstr>(pToParse);
+        lptstr pToParseCasted = static_cast<lptstr>(ptcToParse);
 		return GetSingle(pToParseCasted);
 	}
 
@@ -1929,19 +1931,23 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 		ASSERT(pElementsStart[1] != nullptr);
 
 		// Copy the first element in a new string
-		size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
-		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
-		pToParse[iToParseLen] = '\0';
+        size_t uiToParseLen = std::min(
+            ptrdiff_t(THREAD_STRING_LENGTH-1),
+            ptrdiff_t(pElementsStart[0][1] - pElementsStart[0][0]));
+        memcpy((void*)ptcToParse, pElementsStart[0][0], uiToParseLen * sizeof(tchar));
+        ptcToParse[uiToParseLen] = '\0';
 
-		lptstr pToParseCasted = static_cast<lptstr>(pToParse);
+        lptstr pToParseCasted = static_cast<lptstr>(ptcToParse);
 		llong llValFirst = GetSingle(pToParseCasted);
 
 		// Copy the second element in a new string
-		iToParseLen = (pElementsStart[1][1] - pElementsStart[1][0]);
-		memcpy((void*)pToParse, pElementsStart[1][0], iToParseLen * sizeof(tchar));
-		pToParse[iToParseLen] = '\0';
+        uiToParseLen = std::min(
+            ptrdiff_t(THREAD_STRING_LENGTH-1),
+            ptrdiff_t(pElementsStart[1][1] - pElementsStart[1][0]));
+        memcpy((void*)ptcToParse, pElementsStart[1][0], uiToParseLen * sizeof(tchar));
+        ptcToParse[uiToParseLen] = '\0';
 
-		pToParseCasted = static_cast<lptstr>(pToParse);
+        pToParseCasted = static_cast<lptstr>(ptcToParse);
 		llong llValSecond = GetSingle(pToParseCasted);
 
 		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to g_Rand.GetLLVal2
@@ -1962,11 +1968,13 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 		//	break;	// Shouldn't really happen...
 
 		// Copy the weight element in a new string
-		const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
-		memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
-		pToParse[iToParseLen] = '\0';
+        const size_t uiToParseLen = std::min(
+            ptrdiff_t(THREAD_STRING_LENGTH-1),
+            ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]));
+        memcpy((void*)ptcToParse, pElementsStart[i][0], uiToParseLen * sizeof(tchar));
+        ptcToParse[uiToParseLen] = '\0';
 
-		lptstr pToParseCasted = static_cast<lptstr>(pToParse);
+        lptstr pToParseCasted = static_cast<lptstr>(ptcToParse);
 		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
 
 		if ( ! llWeights[i] )	// having a weight of 0 is very strange !
@@ -1988,15 +1996,16 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 
 	ASSERT(i < iQty);
 	i -= 1;	// pick the value instead of the weight
-	const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
-
 	// Copy the value element in a new string
 	ASSERT(nullptr != pElementsStart[i][0]);
-	memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
-	pToParse[iToParseLen] = '\0';
+    const size_t uiToParseLen = std::min(
+        ptrdiff_t(THREAD_STRING_LENGTH-1),
+        ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]));
+    memcpy((void*)ptcToParse, pElementsStart[i][0], uiToParseLen * sizeof(tchar));
+    ptcToParse[uiToParseLen] = '\0';
 
-	lptstr pToParseCasted = static_cast<lptstr>(pToParse);
-	return GetSingle(pToParseCasted);
+    lptstr ptcToParseCasted = static_cast<lptstr>(ptcToParse);
+    return GetSingle(ptcToParseCasted);
 }
 
 CSString CExpression::GetRangeString(lpctstr & refStrExpr)
@@ -2017,7 +2026,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
     if (iQty == 1) // It's just a simple value
     {
 		ASSERT(pElementsStart[0] != nullptr);
-		const int iToParseLen = int(pElementsStart[0][1] - pElementsStart[0][0]);
+        const int iToParseLen = int(ptrdiff_t(pElementsStart[0][1] - pElementsStart[0][0]));
         return CSString(pElementsStart[0][0], iToParseLen - 1);
     }
 
@@ -2038,7 +2047,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
 		//	break;	// Shouldn't really happen...
 
         // Copy the weight element in a new string
-        const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+        const size_t iToParseLen = ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]);
         memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
         pToParse[iToParseLen] = '\0';
         lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
@@ -2068,7 +2077,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
 
 	ASSERT(i < iQty);
     i -= 1; // pick the value instead of the weight
-    const int iToParseLen = int(pElementsStart[i][1] - pElementsStart[i][0]);
+    const int iToParseLen = int(ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]));
     return CSString(pElementsStart[i][0], iToParseLen);
 }
 
@@ -2171,7 +2180,7 @@ bool CExpression::EvaluateConditionalWhole(lptstr ptcExpr, CScriptExprContext& r
         pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
 
     lptstr ptcExprDbg = ptcExpr;
-    const auto pSubexprArena = GetConditionalSubexpressions(ptcExprDbg, _pBufs.get()->m_poolCScriptExprSubStates);	// number of arguments
+    const auto pSubexprArena = GetConditionalSubexpressions(ptcExprDbg, _pBufs.get()->m_poolCScriptExprSubStatesPool);	// number of arguments
     const uint uiQty = pSubexprArena->m_uiQty;
     CScriptSubExprState* parsingSubexprsStates = pSubexprArena->m_subexprs;
 

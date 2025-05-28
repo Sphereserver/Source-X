@@ -3784,7 +3784,7 @@ void CMultiStorage::AddShip(const CUID& uidShip, HOUSE_PRIV ePriv)
     const CItemShip* pShip = static_cast<CItemShip*>(uidShip.ItemFind());
     TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
 
-    CScriptTriggerArgsPtr pScriptArgs;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     pScriptArgs->m_iN1 = pShip->GetMultiCount();
     pScriptArgs->m_iN2 = ePriv;
     pScriptArgs->m_iN3 = (ePriv == HOUSE_PRIV::HP_OWNER) ? 1 : 0;

@@ -23,24 +23,27 @@ extern class CUOMapList
 protected:
     struct MapGeoData
     {
-        uint16 num;          // real map number (0 for 0 and 1, 2 for 2, and so on) - file name
-        uint16 id;           // map id used by the client
-        uint16 sizex;
-        uint16 sizey;
-        uint16 sectorsize;
-        bool enabled;     // supported map?
-        bool initialized;
+        int16  iNum;        // real map number (0 for 0 and 1, 2 for 2, and so on) - file name
+        int16  iId;         // map id used by the client
+        uint16 uiSizeX;
+        uint16 uiSizeY;
+        int16  iSectorSize;
+        //uint16 uiSectorDivShift;
+        bool   fEnabled;       // supported map?
+        bool   fInitialized;
 
+        [[nodiscard]]
         static constexpr MapGeoData invalid() noexcept
         {
             return {
-                .num = (uint16)-1,
-                .id = (uint16)-1,
-                .sizex = (uint16)-1,
-                .sizey = (uint16)-1,
-                .sectorsize = (uint16)-1,
-                .enabled = true,
-                .initialized = false
+                .iNum = -1,
+                .iId = -1,
+                .uiSizeX = (uint16)-1,
+                .uiSizeY = (uint16)-1,
+                .iSectorSize = -1,
+                //.uiSectorDivShift = 0,
+                .fEnabled = true,
+                .fInitialized = false
             };
         }
     };
@@ -107,7 +110,7 @@ inline uint16 CUOMapList::GetMapSizeX(int map) const noexcept
     // Used by CPointBase::IsValidXY() and IsValidPoint(), which is called a LOT
     //ASSERT(IsMapSupported(map));
     //ASSERT(m_sizex[map] != -1);
-    return m_mapGeoData.maps[map].sizex;
+    return m_mapGeoData.maps[map].uiSizeX;
 }
 
 inline uint16 CUOMapList::GetMapSizeY(int map) const noexcept
@@ -115,7 +118,7 @@ inline uint16 CUOMapList::GetMapSizeY(int map) const noexcept
     // Used by CPointBase::IsValidXY() and IsValidPoint(), which is called a LOT
     //ASSERT(IsMapSupported(map));
     //ASSERT(m_sizey[map] != -1);
-    return m_mapGeoData.maps[map].sizey;
+    return m_mapGeoData.maps[map].uiSizeY;
 }
 
 #endif //_INC_CUOMAPLIST_H

@@ -144,7 +144,8 @@
 
 //#define IsNegative(c)			(((c) < 0) ? 1 : 0)
 template <typename T>
-constexpr bool IsNegative(T val) noexcept {
+[[nodiscard]] constexpr
+    bool IsNegative(T val) noexcept {
     return (val < 0);
 }
 
@@ -156,73 +157,95 @@ inline constexpr word dword_low_word(dword in) noexcept {
 }
 
 //#define HIWORD(l)		((word)((dword)(l) >> 16))
-inline constexpr word dword_hi_word(dword in) noexcept {
+[[nodiscard]] inline constexpr
+    word dword_hi_word(dword in) noexcept {
     return (in >> 16);
 }
 
 //#define LOBYTE(w)		((byte)((dword)(w) &  0xff))
-inline constexpr byte word_low_byte(word in) noexcept {
+[[nodiscard]] inline constexpr
+    byte word_low_byte(word in) noexcept {
     return (in & 0xFF);
 }
 
 //#define HIBYTE(w)		((byte)((dword)(w) >> 8))
-inline constexpr byte word_hi_byte(word in) noexcept {
+[[nodiscard]] inline constexpr
+    byte word_hi_byte(word in) noexcept {
     return (in >> 8);
 }
 
 //#define MAKEWORD(low,high)		((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
-inline constexpr word make_word(byte low, byte high) noexcept {
+[[nodiscard]] inline constexpr
+    word make_word(byte low, byte high) noexcept {
     return (word)low | ((word)high << 8);
 }
 
 //#define make_dword(low, high)	((dword)(((word)low) | (((dword)((word)high)) << 16)))
-inline constexpr dword make_dword(word low, word high) noexcept {
+[[nodiscard]] inline constexpr
+    dword make_dword(word low, word high) noexcept {
     return (dword)low | ((dword)high << 16);
 }
 
 
 //#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
-constexpr int IMulDiv(const int a, const int b, const int c) noexcept
+[[nodiscard]] constexpr
+    int IMulDiv(const int a, const int b, const int c) noexcept
 {
 	const int ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 
-constexpr uint UIMulDiv(const uint a, const uint b, const uint c) noexcept
+[[nodiscard]] constexpr
+    uint UIMulDiv(const uint a, const uint b, const uint c) noexcept
 {
 	const int ab = a * b;
 	return ((ab + (c / 2)) / c) - IsNegative(ab);
 }
 
 //#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
-constexpr llong IMulDivLL(const llong a, const llong b, const llong c) noexcept
+[[nodiscard]] constexpr
+    llong IMulDivLL(const llong a, const llong b, const llong c) noexcept
 {
 	const llong ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
-constexpr realtype IMulDivRT(const realtype a, const realtype b, const realtype c) noexcept
+[[nodiscard]] constexpr
+    realtype IMulDivRT(const realtype a, const realtype b, const realtype c) noexcept
 {
 	const realtype ab = a*b;
 	return ((ab + (c/2)) / c) - IsNegative(ab);
 }
 
 //#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
-constexpr int IMulDivDown(const int a, const int b, const int c) noexcept
+[[nodiscard]] constexpr
+    int IMulDivDown(const int a, const int b, const int c) noexcept
 {
 	return (a*b)/c;
 }
-constexpr llong IMulDivDownLL(const llong a, const llong b, const llong c) noexcept
+[[nodiscard]] constexpr
+    llong IMulDivDownLL(const llong a, const llong b, const llong c) noexcept
 {
 	return (a*b)/c;
 }
 
 //#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
 template<typename T>
+[[nodiscard]]
 constexpr T sign(const T n) noexcept
 {
     static_assert(std::is_arithmetic<T>::value, "Invalid data type.");
 	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
 }
+
+[[nodiscard]] inline constexpr bool IsPowerOfTwo(unsigned int n) noexcept
+{
+    // n & (n - 1): This expression removes the lowest set bit in n.
+    //  For powers of two, which have exactly one bit set (e.g., 2 is 10 in binary, 4 is 100, etc.),
+    //  subtracting one yields a number where all lower bits are set to 1 (e.g., 2 - 1 = 1, 4 - 1 = 3), and the bitwise AND of these two numbers results in 0.
+    return n != 0 && (n & (n - 1)) == 0;
+}
+[[nodiscard]] inline constexpr bool IsPowerOfTwo(unsigned short n) noexcept { return n != 0 && (n & (n - 1)) == 0; }
+[[nodiscard]] inline constexpr bool IsPowerOfTwo(unsigned char  n) noexcept { return n != 0 && (n & (n - 1)) == 0; }
 
 #define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 #define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
@@ -258,6 +281,7 @@ constexpr T saturating_sub(T a, T b) noexcept {
 // Ensure that a constexpr value or a generic expression is evaluated at compile time.
 // Constexpr values are constants and cannot be mutated in the code.
 template <typename T>
+[[nodiscard]]
 consteval T as_consteval(T&& val_) noexcept {
     return val_;
 }
@@ -269,7 +293,7 @@ consteval T as_consteval(T&& val_) noexcept {
 */
 #undef UNREFERENCED_PARAMETER
 template <typename T>
-constexpr void UnreferencedParameter(T const&) noexcept {
+constexpr void UnreferencedParameter([[maybe_unused]] T const& ) noexcept {
     ;
 }
 

@@ -5813,10 +5813,10 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_CanTick() const
+bool CChar::_TickableState() const
 {
-    //ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
-	EXC_TRY("Can tick?");
+    //ADDTOCALLSTACK_DEBUG("CChar::_TickableState");
+    EXC_TRY("Able to tick?");
 
     if (IsDisconnected())
 	{
@@ -5827,7 +5827,7 @@ bool CChar::_CanTick() const
 		return false;
 	}
 
-    return CObjBase::_CanTick();
+    return CObjBase::_TickableState();
 
 	EXC_CATCH;
 
@@ -5885,7 +5885,7 @@ bool CChar::_OnTick()
             return true;
 	}
 
-    if (!_CanTick())
+    if (!_TickableState())
 	{
         // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.
         // Among the reasons why i can't tick, though, there cannot be being in a sleeping state: when a char goes into sleeping state

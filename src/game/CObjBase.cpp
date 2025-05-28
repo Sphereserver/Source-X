@@ -3273,29 +3273,46 @@ void CObjBase::_GoSleep()
 */
 }
 
-bool CObjBase::_CanTick() const
+bool CObjBase::_TickableState() const
 {
 	//ADDTOCALLSTACK_DEBUG("CObjBase::_CanTick");   // Called very frequently.
 	// This doesn't check the sector sleeping status, it's only about this object.
-    EXC_TRY("Can tick?");
+    //EXC_TRY("Able to tick?");
 
     // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
-    bool fCanTick = !CTimedObject::_IsSleeping();
-    if (!fCanTick)
-    {
-        // Try to call the Can method the less often possible.
-		//
-		// This should happen only if the item was manually put to sleep.
-		// CAN_O_NOSLEEP items should not be put to sleep by the source.
-	    fCanTick = Can(CAN_O_NOSLEEP);
-    }
+    return !CTimedObject::_IsSleeping();
 
-    return fCanTick;
-
-    EXC_CATCH;
-
+    //EXC_CATCH;
     return false;
 }
+
+std::optional<bool> CObjBase::_TickableStateOverride() const
+{
+    if (Can(CAN_O_NOSLEEP))
+    {
+        // CAN_O_NOSLEEP items should not be put to sleep by the source.
+        // SECF_NoSleep is a property of the sector, not of the item, so it's managed in the sector code.
+        return true; // Override: i should never sleep.
+    }
+    // No override. Do the default thing.
+    return std::nullopt;
+}
+
+bool CObjBase::_CanTick(bool fParentGoingToSleep) const
+{
+    EXC_TRY("Can tick?");
+
+    const bool fTickable = _TickableState();
+    const std::optional<bool> fOverriding = _TickableStateOverride();
+    if (fParentGoingToSleep && (!fTickable || !fOverriding.value_or(false)))
+        return false;
+
+    return fTickable;
+
+    EXC_CATCH;
+    return false;
+}
+
 
 void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {

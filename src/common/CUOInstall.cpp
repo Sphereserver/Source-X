@@ -172,7 +172,7 @@ lpctstr CUOInstall::GetBaseFileName( VERFILE_TYPE i ) // static
 		nullptr,
 		"tiledata.mul", // Data about tiles in ART. name and flags, etc
 		"animdata.mul", //
-		"hues.mul"		// the 16 bit color pallete we use for everything.
+        "hues.mul"		// the 16 bit color palette we use for everything.
 	};
 
 	return ( i<0 || i>=VERFILE_QTY ) ? nullptr : sm_szFileNames[i];
@@ -266,10 +266,10 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 				{
 					if (g_MapList.IsInitialized(m) || (m == 0)) //Need at least a minimum of map0... (Ben)
 					{
-                        const int index = g_MapList.m_mapGeoData.maps[m].num;
+                        const int index = g_MapList.m_mapGeoData.maps[m].iNum;
 						if (index == -1)
 						{
-							g_MapList.m_mapGeoData.maps[m].enabled = false;
+                            g_MapList.m_mapGeoData.maps[m].fEnabled = false;
 							continue;
 						}
 
@@ -406,9 +406,9 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 								m_Statics[index].Close();
 
 							if (index == 1 && m_Maps[0].IsFileOpen())
-								g_MapList.m_mapGeoData.maps[m].num = 0;
+                                g_MapList.m_mapGeoData.maps[m].iNum = 0;
 							else
-								g_MapList.m_mapGeoData.maps[m].id = 0;
+                                g_MapList.m_mapGeoData.maps[m].iId = 0;
 						}
 
 						//	mapdif and mapdifl are not required, but if one exists so should

@@ -186,7 +186,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Active)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-        const bool fCanTick = pChar->CanTick();
+        const bool fCanTick = pChar->_CanTick(true);
 		ASSERT(!pChar->IsDisconnected());
         if (!fCanTick)
             pChar->GoSleep();
@@ -196,7 +196,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-        const bool fCanTick = pChar->CanTick();
+        const bool fCanTick = pChar->_CanTick(true);
 		ASSERT(pChar->IsDisconnected());
 		if (!fCanTick)
 			pChar->GoSleep();
@@ -206,7 +206,7 @@ void CSector::_GoSleep()
 	for (CSObjContRec* pObjRec : m_Items)
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
-        const bool fCanTick = pItem->CanTick();
+        const bool fCanTick = pItem->_CanTick(true);
         if (!fCanTick)
             pItem->GoSleep();
     }
@@ -962,7 +962,7 @@ void CSector::MoveItemToSector( CItem * pItem )
     {
         if (_CanSleep(true))
         {
-            if (!pItem->CanTick())
+            if (!pItem->TickableState())
                 pItem->GoSleep();
         }
         else
@@ -1025,7 +1025,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
         }
         else if (!pChar->IsSleeping())    // An NPC entered, but the sector is sleeping
         {
-            if (!pChar->CanTick())
+            if (!pChar->TickableState())
                 pChar->GoSleep(); // then make the NPC sleep too.
         }
     }

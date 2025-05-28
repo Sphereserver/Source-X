@@ -65,8 +65,8 @@ public:     PROFILE_TYPE GetProfileType() const noexcept;
     /**
      * @brief   Determine if the object is in a "tickable" state.
     */
-protected:  virtual bool _CanTick() const;  // TODO: locks need to be extended to derived classes
-public:     virtual bool  CanTick() const;
+protected:  virtual bool _TickableState() const;  // TODO: locks need to be extended to derived classes
+public:     virtual bool  TickableState() const;
 
     /**
      * @brief   Executes the tick action.

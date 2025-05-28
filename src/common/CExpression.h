@@ -210,7 +210,7 @@ class CExpression
         static constexpr uint sm_subexpr_pool_size = 1'000;
         static constexpr bool sm_allow_fallback_objects = false;
         using CSubExprStatesArenaPool_t = sl::ObjectPool<CSubExprStatesArena, sm_subexpr_pool_size, sm_allow_fallback_objects>;
-        CSubExprStatesArenaPool_t m_poolCScriptExprSubStates;
+        CSubExprStatesArenaPool_t m_poolCScriptExprSubStatesPool;
     };
 
     std::unique_ptr<PrvBuffersPool> _pBufs;

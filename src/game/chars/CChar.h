@@ -1380,7 +1380,7 @@ protected:
 
     bool IsPeriodicTickPending() const;
 
-    virtual bool _CanTick() const override final;
+    virtual bool _TickableState() const override final;
 
 protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc.
 //public:	virtual bool  _OnTick() override final;
