@@ -366,7 +366,7 @@ SOCKET CSocket::Accept( struct sockaddr_in * pSockAddrIn ) const
 
 SOCKET CSocket::Accept( CSocketAddress & SockAddr ) const
 {
-	// RETURN: Error = hSocketClient < 0 || hSocketClient == INVALID_SOCKET 
+	// RETURN: Error = hSocketClient < 0 || hSocketClient == INVALID_SOCKET
 	struct sockaddr_in SockAddrIn;
 	SOCKET hSocket = Accept( &SockAddrIn );
 	SockAddr.SetAddrPort( SockAddrIn );
@@ -452,7 +452,7 @@ int CSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLev
 		 // RETURN: length sent
 		 return( WSASend( m_hSocket, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags, lpOverlapped, lpCompletionRoutine ));
 	}
-	
+
 	void CSocket::ClearAsync()
 	{
      	// TO BE CALLED IN CClient destructor !!!

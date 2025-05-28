@@ -1152,7 +1152,6 @@ typedef std::map<dword,dword> KRGumpsMap;
 } g_Cfg;
 
 
-
 #define IsSetEF(ef)				((g_Cfg._uiExperimentalFlags & ef) != 0)
 #define IsSetOF(of)				((g_Cfg._uiOptionFlags & of) != 0)
 #define IsSetCombatFlags(cf)	((g_Cfg.m_iCombatFlags & cf) != 0)

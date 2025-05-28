@@ -265,7 +265,7 @@ bool CSFileObjContainer::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsol
                     return pObj->r_WriteVal(ptcKey, sVal, pSrc);
             }
         }
-        
+
         return false;
     }
 

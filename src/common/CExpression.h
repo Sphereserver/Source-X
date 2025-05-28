@@ -228,7 +228,7 @@ public:
     int GetRangeVals(lpctstr& refStrExpr, int64* piVals, int iMaxQty, bool fNoWarn = false);
     int64 GetRangeNumber(lpctstr& refStrExpr);		// Evaluate a { } range
     CSString GetRangeString(lpctstr& refStrExpr);	// STRRANDRANGE
-    
+
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy and const-UNsafe workaround
     inline llong GetSingle(lptstr &refArgs) {

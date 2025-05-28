@@ -240,7 +240,7 @@ int CSQLite::ImportDB(lpctstr strInFileName)
     iErr = sqlite3_exec( in_db, UTF8MBSTR(pcQuery), nullptr, nullptr, &pcErrMsg );
     if (iErr != SQLITE_OK)
         goto clean_and_ret;
-    
+
     // Copy the table schema: how?
 
     // End
@@ -468,13 +468,13 @@ bool CSQLite::r_Verb(CScript & s, CTextConsole * pSrc)
 	{
 		case LDBOV_CLOSE:
             if ( _fInMemory )
-                return false; 
+                return false;
 			Close();
 			break;
 
 		case LDBOV_CONNECT:
             if ( _fInMemory )
-                return false; 
+                return false;
             Open(s.GetArgStr());
             break;
 

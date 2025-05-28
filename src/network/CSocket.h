@@ -1,6 +1,6 @@
 /**
 * @file CSocket.h
-* 
+*
 */
 
 #ifndef _INC_CSOCKET_H
@@ -10,7 +10,7 @@
 #ifdef _WIN32
 	#include <winsock2.h>		// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
 	typedef int socklen_t;
-#else	
+#else
 	// else assume LINUX
 	#include <sys/socket.h>
 	#include <netdb.h>
@@ -85,7 +85,7 @@ public:
 	explicit CSocketAddress(const sockaddr_in & SockAddrIn);
 	explicit CSocketAddress(const CSocketAddressIP&) = delete;
 	explicit CSocketAddress(CSocketAddressIP&) = delete;
-	
+
 	bool operator==( const CSocketAddress & SockAddr ) const;
 	bool operator==( const struct sockaddr_in & SockAddrIn ) const;
 	CSocketAddress& operator = (const struct sockaddr_in& SockAddrIn);
@@ -107,9 +107,9 @@ class CSocket
 {
 private:
 	SOCKET  m_hSocket;	// socket connect handle
-	
+
 	void Clear();
-	
+
 public:
 	static const char *m_sClassName;
 

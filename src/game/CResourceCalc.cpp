@@ -16,8 +16,8 @@ int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const
 	ADDTOCALLSTACK("CServerConfig::Calc_MaxCarryWeight");
 	// How much weight can i carry before i can carry no more. (and move at all)
 	// Amount of weight that can be carried Max:
-	// based on str 
-	// RETURN: 
+	// based on str
+	// RETURN:
 	//  Weight in tenths of stones i should be able to carry.
 
 	ASSERT(pChar);
@@ -50,7 +50,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 	if ( pWeapon )			// If we have a weapon, base speed should match weapon's value.
 		iBaseSpeed = pWeapon->GetSpeed();
     int iSwingSpeed = 100;
-    
+
 	switch ( g_Cfg.m_iCombatSpeedEra )
 	{
 		case 0:
@@ -362,7 +362,7 @@ int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
 		if ( iKarmaChange < 0 )
 			iKarmaChange = 0;
 	}
-		
+
 	// Check if the victim is a PC, then higher gain/loss.
 	if ( pKill->m_pPlayer )
 	{
@@ -431,16 +431,16 @@ int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar *
 	int iDexMark = pCharMark->Stat_GetAdjusted(STAT_DEX);
 	int iSkillMark = pCharMark->Skill_GetAdjusted( SKILL_STEALING );
 	int iWeightItem = pItem->GetWeight();
-	
+
 	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + g_Rand.GetVal(iDexMark/2) + IMulDivLL( iWeightItem, 4, WEIGHT_UNITS );
 	// Melt mod:
     int iDifficulty = (iSkillMark/5) + g_Rand.GetVal(iDexMark/2) + IMulDiv( iWeightItem, 4, WEIGHT_UNITS );
-	
+
 	if ( pItem->IsItemEquipped())
 		iDifficulty += iDexMark/2 + pCharMark->Stat_GetAdjusted(STAT_INT);		// This is REALLY HARD to do.
 	if ( pCharThief->IsStatFlag( STATF_WAR )) // all keyed up.
 		iDifficulty += g_Rand.GetVal( iDexMark/2 );
-	
+
 	// return( iDifficulty );
 	// Melt mod:
 	return (iDifficulty / 2);
@@ -546,17 +546,17 @@ ushort CServerConfig::Calc_SpellManaCost(CChar* pCharCaster, const CSpellDef* pS
 	ushort iCost = (ushort)pSpell->m_wManaUse;
 	if (iLowerManaCost != 0) //LowerManaCost can be negative, and thus increasing the mana cost!
 		iCost = (ushort)(iCost - ((iCost * iLowerManaCost) / 100));
-	
+
 	if ( fScroll )
 		return iCost / 2; //spells cast from scrolls consume half of the mana.
-	
+
 	return iCost;
 }
 
 size_t CServerConfig::Calc_SpellReagentsConsume(CChar* pCharCaster, const CSpellDef* pSpell, CObjBase* pObj, bool fTest)
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_SpellReagentsConsume");
-	
+
 	ASSERT(pCharCaster);
 	ASSERT(pSpell);
 
@@ -588,7 +588,7 @@ ushort CServerConfig::Calc_SpellTithingCost(CChar* pCharCaster, const CSpellDef*
 	//Check for tithing points.
 	if (g_Cfg.m_fReagentsRequired && !pCharCaster->m_pNPC && (pObj == pCharCaster))
 	{
-		
+
 		const CCPropsChar* pCCPChar = pCharCaster->GetComponentProps<CCPropsChar>();
 		const CCPropsChar* pBaseCCPChar = pCharCaster->Base_GetDef()->GetComponentProps<CCPropsChar>();
 		const int iLowerReagentCost = (int)pCharCaster->GetPropNum(pCCPChar, PROPCH_LOWERREAGENTCOST, pBaseCCPChar); //Also used for reducing Tithing points.
@@ -627,7 +627,7 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, 
 	if (!iPoisonLevel) //Lesser Poison (iPoisonLevel 0) is always cured no matter the potion or spell/skill level value
 		return true;
 
-	//Cure Chance taken from: 
+	//Cure Chance taken from:
 	if (iCureLevel < 410)	//Lesser Cure Potion or our healing/veterinary/magery skill is less than 41.0 https://www.uoguide.com/Lesser_Cure_Potion
 	{
 		switch (iPoisonLevel)
@@ -646,7 +646,7 @@ bool CServerConfig::Calc_CurePoisonChance(const CItem* pPoison, int iCureLevel, 
 			break;
 		}
 	}
-	else if (iCureLevel < 1010) //Cure Potion or our healing/veterinary/magery skill is between 41.0 and 100.9 https://www.uoguide.com/Cure_Potion 
+	else if (iCureLevel < 1010) //Cure Potion or our healing/veterinary/magery skill is between 41.0 and 100.9 https://www.uoguide.com/Cure_Potion
 	{
 		switch (iPoisonLevel)
 		{

@@ -4745,7 +4745,6 @@ bool PacketUltimaStoreButton::onReceive(CNetState *net)
 }
 
 
-
 /***************************************************************************
 *
 *

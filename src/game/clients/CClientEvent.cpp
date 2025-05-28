@@ -592,7 +592,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 }
 
 
-
 void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the skill list
 {
 	ADDTOCALLSTACK("CClient::Event_Skill_Use");
@@ -723,7 +722,6 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 		return;
 	}
 }
-
 
 
 bool CClient::Event_CheckWalkBuffer(byte rawdir)
@@ -1613,7 +1611,6 @@ void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int 
 }
 
 
-
 void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 {
 	ADDTOCALLSTACK("CClient::Event_MailMsg");
@@ -1645,7 +1642,6 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_MSG_MAILBAG_DROP_2 ), m_pChar->GetName());
 	pChar->SysMessage(pszMsg);
 }
-
 
 
 void CClient::Event_ToolTip( CUID uid )

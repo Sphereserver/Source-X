@@ -133,7 +133,7 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 	else
 		iCheckTime = 20 * 60 * MSECS_PER_SEC;
 
-	pMemory->SetTimeout(iCheckTime);	// update its decay time.	
+	pMemory->SetTimeout(iCheckTime);	// update its decay time.
 	CChar * pCharLink = pMemory->m_uidLink.CharFind();
 	if (pCharLink)
 	{

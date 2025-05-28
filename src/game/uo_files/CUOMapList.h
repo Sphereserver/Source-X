@@ -95,7 +95,7 @@ public:
 
     int GetMapFileNum(int map) const;
     int GetMapID(int map) const;
-    
+
     ///@}
 } g_MapList;
 

@@ -1001,7 +1001,6 @@ bool CRegionWorld::r_LoadVal( CScript &s )
 }
 
 
-
 void CRegionWorld::r_WriteModified( CScript &s )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_WriteModified");

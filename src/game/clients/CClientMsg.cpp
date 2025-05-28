@@ -2646,7 +2646,7 @@ void CClient::addGlobalChatStatusToggle()
 	}
 
 	tchar* pszXML = Str_GetTemp();
-	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10u\" name=\"%.6s\" show=\"%d\" version=\"1\" />", 
+	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10u\" name=\"%.6s\" show=\"%d\" version=\"1\" />",
 			CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
 
 	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));
@@ -2881,7 +2881,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	/*
 	* // If ever we want to change how timers are suspended...
-	* 
+	*
 	if (m_pChar->IsPlayer())
 	{
 		// When a character logs out, its timer and its contents' timers has to freeze.
@@ -2968,7 +2968,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		}
 	}
 
-	
+
 
 	if (pChar->Delete()) //	Do the scripts allow to delete the char?
 	{
@@ -2983,7 +2983,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 	{
 		return PacketDeleteError::InvalidRequest;
 	}
-	
+
 }
 
 byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, bool fTest )

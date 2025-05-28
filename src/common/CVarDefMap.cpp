@@ -62,7 +62,7 @@ bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * p
 }
 
 CVarDefCont * CVarDefContNum::CopySelf() const
-{ 
+{
 	return new CVarDefContNum( GetKey(), m_iVal );
 }
 
@@ -74,7 +74,7 @@ CVarDefCont * CVarDefContNum::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefContStr::CVarDefContStr( lpctstr ptcKey, lpctstr pszVal ) : m_sKey( ptcKey ), m_sVal( pszVal ) 
+CVarDefContStr::CVarDefContStr( lpctstr ptcKey, lpctstr pszVal ) : m_sKey( ptcKey ), m_sVal( pszVal )
 {
 }
 
@@ -88,7 +88,7 @@ int64 CVarDefContStr::GetValNum() const
 	return( Exp_Get64Val(pszStr) );
 }
 
-void CVarDefContStr::SetValStr( lpctstr pszVal ) 
+void CVarDefContStr::SetValStr( lpctstr pszVal )
 {
     const size_t uiLen = strlen(pszVal);
 	if (uiLen <= SCRIPT_MAX_LINE_LEN/2)
@@ -111,9 +111,9 @@ bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * p
 	return true;
 }
 
-CVarDefCont * CVarDefContStr::CopySelf() const 
-{ 
-	return new CVarDefContStr( GetKey(), m_sVal ); 
+CVarDefCont * CVarDefContStr::CopySelf() const
+{
+	return new CVarDefContStr( GetKey(), m_sVal );
 }
 
 
@@ -142,11 +142,11 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 	for ( const CVarDefCont * pVarBase : m_Container )
 	{
 		ASSERT( pVarBase );
-		
+
 		const CVarDefContStr * pVarStr = dynamic_cast <const CVarDefContStr *>( pVarBase );
 		if ( pVarStr == nullptr )
 			continue;
-		
+
 		if ( ! strcmpi( pVal, pVarStr->GetValStr()))
 			return pVarBase->GetKey();
 	}
@@ -505,7 +505,7 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr ptcKey ) const
 	if ( ptcKey )
 	{
         const size_t idx = m_Container.find_predicate(ptcKey, VarDefCompare);
-		
+
 		if ( idx != sl::scont_bad_index() )
 			pReturn = m_Container[idx];
 	}
@@ -668,7 +668,7 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr ptcPrefix, lpctstr ptcKeyEx
         const lpctstr ptcKey = pVar->GetKey();
 		if ( fHasExclude && !strcmpi(ptcKeyExclude, ptcKey))
 			continue;
-		
+
         const CVarDefContNum * pVarNum = dynamic_cast<const CVarDefContNum*>(pVar);
         _WritePrefix(ptcKey);
         lpctstr ptcVal = pVar->GetValStr();

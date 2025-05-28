@@ -200,7 +200,7 @@ void CNetState::init(SOCKET socket, CSocketAddress addr)
 
     // Disable NAGLE algorythm for data compression/coalescing.
     // Send as fast as we can. we handle packing ourselves.
-    
+
     int iSockFlag = 1;
     iSockRet = m_socket.SetSockOpt(TCP_NODELAY, &iSockFlag, sizeof(iSockFlag), IPPROTO_TCP);
     CheckReportNetAPIErr(iSockRet, "NetState::init.TCP_NODELAY");

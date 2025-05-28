@@ -748,6 +748,4 @@ template <typename T> int32 i32_from_usize_checked(T, bool) = delete; // disable
 template <typename T> int64 i64_from_usize_checked(T, bool) = delete; // disable implicit type conversion for the inpuT source_valrgument
 
 
-
-
 #endif // _INC_STYPECAST_H

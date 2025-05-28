@@ -3410,7 +3410,6 @@ void CChar::Spell_CastFail(bool fAbort)
 	}
 
 
-
 }
 
 int CChar::Spell_CastStart()

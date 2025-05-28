@@ -25,7 +25,6 @@ class Packet;
 #endif
 
 
-
 class CNetState;
 class SimplePacketTransaction;
 class AbstractString;
@@ -280,7 +279,6 @@ public:
     inline void pop(void) { m_packets.pop_front(); }
     inline bool empty(void) { return m_packets.empty(); }
 };
-
 
 
 /***************************************************************************

@@ -151,7 +151,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 			layer = LAYER_BANKBOX;
 			break;
 	}
-	
+
 	CItem *pItemTest = LayerFind(layer);
 	CItemContainer *pBankBox = dynamic_cast<CItemContainer *>(pItemTest);
 	if ( pBankBox )
@@ -565,7 +565,7 @@ NPCBRAIN_TYPE CChar::GetNPCBrainAuto() const noexcept
 	//ADDTOCALLSTACK("CChar::GetNPCBrainAuto");
 	// Auto-detect the brain
 	const CREID_TYPE id = GetDispID();
-	
+
 	switch (id)
 	{
 		//TODO: add other dragons
@@ -686,7 +686,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 		mode |= CHARMODE_WAR;
 
 	uint64 iFlags = STATF_SLEEPING;
-	
+
 	//When you want change the color of character anim, you must evitate to send CHARMODE_INVIS because the anim will automaticly be grey
 	//Here we check if it's define on the ini that you need override the color
 	if ( !g_Cfg.m_iColorInvis )			//Serv.ColorInvis
@@ -695,7 +695,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
         iFlags |= STATF_HIDDEN;
 	if ( !g_Cfg.m_iColorInvisSpell )	//serv.ColorInvisSpell
         iFlags |= STATF_INVISIBLE;
-	
+
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
         mode |= CHARMODE_INVIS; //When sending CHARMODE_INVIS state to client, your character anim are grey
 
@@ -1347,7 +1347,7 @@ bool CChar::CanTouch( const CObjBase *pObj )
 		default:
 			break;
 		}
-        
+
         if ( !fDeathImmune && IsStatFlag(STATF_FREEZE) )
         {
             if ( !fFreezeImmune && !pItem->IsAttr(ATTR_CANUSE_PARALYZED) )
@@ -1494,7 +1494,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 	else
     {
 		pSrcRegion = dynamic_cast<CRegionWorld *>(pSrc->GetTopPoint().GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA));
-    }	
+    }
 	if ( !pSrcRegion || !m_pArea )  // should not happen really.
 		return false;
 
@@ -1561,7 +1561,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
     if ( m_pArea == pSrcRegion )// same region is always ok.
        return true;
 
-    // Different region (which can be a multi or an areadef). 
+    // Different region (which can be a multi or an areadef).
     if ( IsSetOF(OF_NoHouseMuteSpeech) )
         return true;
 
@@ -1934,7 +1934,7 @@ bool CChar::CanStandAt(CPointMap *ptDest, const CRegion* pArea, uint64 uiMyMovem
                     }
                     else if (uiMapPointMovementFlags & CAN_I_CLIMB)
                     {
-                        // If dwBlockFlags & CAN_I_CLIMB, then it's a "climbable" item (and i can climb it, 
+                        // If dwBlockFlags & CAN_I_CLIMB, then it's a "climbable" item (and i can climb it,
                         //  since i don't have CAN_I_CLIMB in uiBlockedBy)
                     }
                     else

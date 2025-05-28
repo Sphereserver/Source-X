@@ -453,7 +453,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 		else
 			return false;
 	}
-	
+
 	if (IsTrigUsed(TRIGGER_PARTYADD))
     {
         if ( pCharAccept->OnTrigger(CTRIG_PartyAdd, CScriptTriggerArgsPtr{}, pCharInviter) == TRIGRET_RET_TRUE )
@@ -553,7 +553,7 @@ bool CPartyDef::r_GetRef( lpctstr &ptcKey, CScriptObj *&pRef )
 }
 
 bool CPartyDef::r_LoadVal( CScript &s )
-{ 
+{
 	ADDTOCALLSTACK("CPartyDef::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr ptcKey = s.GetKey();
@@ -587,7 +587,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
             m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, fZero);
 		} break;
-		
+
 		default:
 			return false;
 	}
@@ -752,7 +752,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 			if ( pCharMaster && !fForced )
 				pCharMaster->SetKeyNum("PARTY_LASTINVITE", toAdd.GetObjUID());
-			
+
 			return CPartyDef::AcceptEvent(pCharAdd, GetMaster(), fForced);
 		} break;
 
@@ -884,10 +884,10 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 }
 
 bool CPartyDef::r_Load( CScript &s )
-{ 
+{
 	ADDTOCALLSTACK("CPartyDef::r_Load");
 	UnreferencedParameter(s);
-	return false; 
+	return false;
 }
 
 lpctstr CPartyDef::GetDefStr( lpctstr ptcKey, bool fZero ) const

@@ -1038,7 +1038,7 @@ badcmd:
                 else if (iValue == iValueEnd)
                     sVal.Format(ppCmd[iValue - 1]);
                 else
-                {                    
+                {
                     sVal.Add(ppCmd[iValue - 1]);
                     for (int64 i = iValue + 1 ; i <= iValueEnd; ++i)
                     {
@@ -1780,7 +1780,6 @@ enum SK_TYPE : int
 	SK_WHILE,
 	SK_QTY
 };
-
 
 
 lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =

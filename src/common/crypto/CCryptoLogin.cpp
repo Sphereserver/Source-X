@@ -59,7 +59,7 @@ bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 				+ (MaskLo * m_MasterLo)
 				- (m_CryptMaskHi * m_CryptMaskHi * 0x4c3a1353)
 				+ 0x16ef783f;
-            
+
             // Old formula could cause undefined behavior
             /*
             m_CryptMaskHi =

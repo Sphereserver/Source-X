@@ -81,7 +81,6 @@ public:
 };
 
 
-
 /* Template methods (inlined or not) are defined here */
 
 // CSTypedArray:: Constructors, Destructor, Assign operator.

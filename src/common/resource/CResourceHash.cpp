@@ -51,7 +51,7 @@ int CResourceHashArray::_compare(std::unique_ptr<CResourceDef> const& pObjStored
 void CResourceHash::AddSortKey(CResourceID const& rid, CResourceDef* pNew)
 {
     ASSERT(rid.GetResPage() <= RES_PAGE_MAX); // RES_PAGE_ANY can be used only for search, you can't insert a rid with this special page
-    
+
     auto& destArray = m_Array[GetHashArray(rid)];
 
     ASSERT(destArray.find_sorted(rid) == sl::scont_bad_index());

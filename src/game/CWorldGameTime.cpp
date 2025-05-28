@@ -22,7 +22,7 @@ int64 CWorldGameTime::GetCurrentTimeInGameMinutes( int64 basetime ) noexcept // 
 	// 8 real world seconds = 1 game minute.
 	// 1 real minute = 7.5 game minutes
 	// 3.2 hours = 1 game day.
-    
+
 	return ( basetime / g_Cfg.m_iGameMinuteLength );
 }
 
@@ -45,7 +45,7 @@ int64 CWorldGameTime::GetNextNewMoon( bool fMoonIndex ) // static
 	// Get the game time when this cycle will start
 	int64 iNewStart = (int64)(iNextMonth - (double)(iNextMonth % iSynodic));
 	return iNewStart * g_Cfg.m_iGameMinuteLength;
-	
+
 }
 
 uint CWorldGameTime::GetMoonPhase(bool fMoonIndex) // static

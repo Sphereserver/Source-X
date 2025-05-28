@@ -123,7 +123,6 @@ protected:
 */
 
 
-
 // Temporary string implementation. Works with thread-safe string
 // To create such string:
 // TemporaryString str;

@@ -84,7 +84,7 @@ public:
 	void r_WriteChar( CChar * pChar, CScript & s );
 	bool r_WriteVal( CChar * pChar, lpctstr ptcKey, CSString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
-	
+
 
 public:
 	CCharPlayer( CChar * pChar, CAccount * pAccount );

@@ -90,10 +90,10 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     ADDTOCALLSTACK("CDataBase::query");
     mapQueryResult.Clear();
     mapQueryResult.SetNumNew("NUMROWS", 0);
-    
+
     if ( !isConnected() )
         return false;
-        
+
     int result;
     MYSQL_RES * m_res = nullptr;
     const char * myErr = nullptr;
@@ -105,7 +105,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
          */
         SimpleThreadLock lock(m_connectionMutex);
         result = mysql_query(_myData, query);
-        
+
         if ( result == 0 )
         {
             m_res = mysql_store_result(_myData);
@@ -117,15 +117,15 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
             myErr = mysql_error(_myData);
         }
     }
-    
+
     if ( m_res != nullptr )
     {
         MYSQL_FIELD * fields = mysql_fetch_fields(m_res);
         int num_fields = mysql_num_fields(m_res);
-        
+
         mapQueryResult.SetNum("NUMROWS", mysql_num_rows(m_res));
         mapQueryResult.SetNum("NUMCOLS", num_fields);
-        
+
         char key[12];
         char **trow = nullptr;
         int rownum = 0;
@@ -138,13 +138,13 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
                 char *z = trow[i];
                 if (z == nullptr) //We need to check if the row empty, and return char 0 as return, because SetStr clean up \0 chars from vardef and causes the Sphere crash.
                     z = &empty;
-                    
+
                 if ( !rownum )
                 {
                     mapQueryResult.SetStr(Str_FromI_Fast(i, key, sizeof(key), 10), true, z);
                     mapQueryResult.SetStr(fields[i].name, true, z);
                 }
-            
+
                 snprintf(zStore, Str_TempLength(), "%d.%d", rownum, i);
                 mapQueryResult.SetStr(zStore, true, z);
                 snprintf(zStore, Str_TempLength(), "%d.%s", rownum, fields[i].name);
@@ -159,10 +159,10 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
     {
         g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "MariaDB query \"%s\" failed due to \"%s\"\n", query, ( *myErr ? myErr : "unknown reason"));
     }
-    
+
     if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
         Close();
-        
+
     return false;
 }
 

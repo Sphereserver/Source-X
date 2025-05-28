@@ -40,7 +40,6 @@ public:
 };
 
 
-
 /* CSObjCont */
 
 #define BASECONT std::vector<CSObjContRec*>

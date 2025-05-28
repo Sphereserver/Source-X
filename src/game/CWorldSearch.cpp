@@ -187,7 +187,7 @@ CItem* CWorldSearch::GetItem()
 		{
 			ASSERT(_eSearchType == ws_search_e::None);
 			_eSearchType = ws_search_e::Items;
-            
+
             LoadSectorObjs(_pSector->m_Items);
 		}
 		else

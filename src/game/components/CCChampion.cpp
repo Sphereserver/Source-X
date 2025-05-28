@@ -22,7 +22,7 @@
 #include "../CWorldGameTime.h"
 #include "CCChampion.h"	// predef header.
 #include <string>
-#include <sstream> 
+#include <sstream>
 
 #define CANDLESNEXTRED 4
 #define MAXSPAWN 2400

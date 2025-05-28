@@ -326,7 +326,6 @@ public:
 };
 
 
-
 /**
 * @brief Storing information from scripted [CHAMPION ] resource
 */

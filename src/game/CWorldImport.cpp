@@ -836,7 +836,6 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 }
 
 
-
 bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CWorld::DumpAreas");
@@ -864,7 +863,6 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 	s.WriteSection( "EOF" );
 	return true;
 }
-
 
 
 bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, short dx, short dy )

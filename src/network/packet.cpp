@@ -83,7 +83,6 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 #endif	//defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
 
 
-
 Packet::Packet(uint size) : m_buffer(nullptr)
 {
 	m_expectedLength = size;

@@ -236,7 +236,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 			default:
 				return false;
 		}
-	} 
+	}
 	else if ( GetLinkUID().IsItem() )
 	{
 		switch ( iIndex )

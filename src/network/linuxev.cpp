@@ -11,7 +11,7 @@
 /*
 {
 	ev_io_stop(loop, w);
-	
+
 	if ( !g_Serv.IsLoading() )
 	{
 		if ( revents & EV_READ )
@@ -21,7 +21,7 @@
 			g_NetworkManager.acceptNewConnection();
 		}
 	}
-	
+
 	ev_io_start(loop, w);
 }
 */
@@ -33,18 +33,18 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *watcher, int reve
 	// libev could call this function aliasing ev_io as a ev_watcher.
 	// ev_watcher is a "parent" struct of ev_io, they share the first member variables.
 	// it's a evil trick, but does the job since C doesn't have struct inheritance
-	
+
 	ev_io_stop(loop, watcher);
 	CNetState* state = reinterpret_cast<CNetState *>( watcher->data );
-	
+
 	if ( !g_Serv.IsLoading() )
 	{
 		if ( revents & EV_READ )
-		{	
+		{
 			// This happens when the client socket is readable (i can try to retrieve data), this does NOT mean
 			//  that i have data to read. It might also mean that i have done writing to the socket?
 			// g_NetworkOut.onAsyncSendComplete(state);
-		}		
+		}
 		else if ( revents & EV_WRITE )
 		{
 			CNetworkThread* thread = state->getParentThread();
@@ -52,7 +52,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *watcher, int reve
 				thread->onAsyncSendComplete(state, true);	// we can send (again) data
 		}
 	}
-	
+
 	if (state->isSendingAsync())
 	{
 		ev_io_start(loop, watcher);
@@ -93,7 +93,7 @@ static void periodic_cb(struct ev_loop* /*loop*/, ev_periodic* /*w*/, int /*reve
 }
 
 void LinuxEv::tick()
-{	
+{
 	/*
 	A flags value of EVRUN_NOWAIT will look for new events,
 	will handle those events and any already outstanding ones,
@@ -111,7 +111,7 @@ void LinuxEv::tick()
 	// This periodic timer keeps awake the event loop. We could have used ev_ref but it had its problems...
 	// Don't ask me why (maybe i don't get how this actually should work, and this is only a workaround),
 	//  but if we rely on ev_ref to increase the event loop reference counter to keep it alive without this periodic timer/callback,
-	//  the loop will ignore the io_collect_interval. Moreover, it will make the polling backend in use (like most frequently epoll) wait the maximum 
+	//  the loop will ignore the io_collect_interval. Moreover, it will make the polling backend in use (like most frequently epoll) wait the maximum
 	//  time (MAX_BLOCKTIME in ev.c, circa 60 seconds) to collect incoming data, only then the callback will be called. So each batch of packets
 	//  would be processed every 60 seconds...
 	struct ev_periodic periodic_check;
@@ -139,7 +139,7 @@ void LinuxEv::registerClient(CNetState * state, EventsID eventCheck)
 
 	ADDTOCALLSTACK("LinuxEv::registerClient");
 	ASSERT(state != nullptr);
-	
+
 	memset(state->iocb(), 0, sizeof(ev_io));
 
 	// Right now we support only async writing to the socket.
@@ -159,7 +159,7 @@ void LinuxEv::registerClient(CNetState * state, EventsID eventCheck)
 	state->setSendingAsync(true);	// set it true: when the socket will be again writable (so we have finished writing data in it)
 									//  socketslave_cb will be called (even immediately after this function if we aren't actually sending data)
 									//  and it will report that we are not sending async data anymore.
-	
+
     ev_io_start(m_eventLoop, state->iocb());
 }
 
@@ -169,7 +169,7 @@ void LinuxEv::unregisterClient(CNetState * state)
 	ASSERT(state != nullptr);
 
 	state->setSendingAsync(false);
-	
+
 	ev_io_stop(m_eventLoop, state->iocb());
 }
 
@@ -203,7 +203,7 @@ void LinuxEv::registerMainsocket()
 #else
 	ev_io_init(&m_watchMainsock, socketmain_cb, g_Serv.m_SocketMain.GetSocket(), EV_READ);
 #endif
-    ev_io_start(m_eventLoop, &m_watchMainsock);		
+    ev_io_start(m_eventLoop, &m_watchMainsock);
 	*/
 }
 

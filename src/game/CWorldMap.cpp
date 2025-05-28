@@ -221,7 +221,6 @@ IT_TYPE CWorldMap::GetTerrainItemType(dword dwTerrainIndex) // static
 }
 
 
-
 //////////////////////////////////////////////////////////////////
 // Map reading and blocking.
 

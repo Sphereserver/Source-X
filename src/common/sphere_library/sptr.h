@@ -125,7 +125,6 @@ namespace sl
         }
 
 
-
         /* Disable unwanted behavior of object_ptr */
 
         // Construct an object_ptr from a raw pointer
@@ -140,7 +139,6 @@ namespace sl
         // Convert to a raw pointer
         constexpr explicit operator T* () const noexcept = delete;
     };
-
 
 
     /* raw_ptr_view */

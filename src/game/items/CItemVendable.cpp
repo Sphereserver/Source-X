@@ -201,7 +201,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor , bool forselling )
 
 	if ( llPrice <= 0 )	// No price/overrride.value set, we use the value of item.
 	{
-		
+
 		if ( IsType(IT_DEED) )
 		{
 			// Deeds just represent the item they are deeding.
@@ -212,9 +212,9 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor , bool forselling )
 		else
 			pItemDef = Item_GetDef();
 
-		llPrice = pItemDef->GetMakeValue(GetQuality()); //If value is a range(ex:10,20), value change depending quality 
+		llPrice = pItemDef->GetMakeValue(GetQuality()); //If value is a range(ex:10,20), value change depending quality
 	}
-	
+
 	llPrice += IMulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
 	if ( llPrice > UINT32_MAX )
 		return UINT32_MAX;

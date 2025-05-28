@@ -231,7 +231,7 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 
 			if ( nNumber == i )
 			{
-				pRef = pMember; 
+				pRef = pMember;
 				return true;
 			}
 
@@ -253,7 +253,7 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 			CStoneMember * pMemberGuild = GetMember( pMemberChar );
 			if ( pMemberGuild )
 			{
-				pRef = pMemberGuild; 
+				pRef = pMemberGuild;
 				return true;
 			}
 		}
@@ -271,7 +271,7 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 
 		for ( int i = 0; pMember != nullptr; pMember = pMember->GetNext() )
 		{
-			if ( pMember->GetLinkUID().IsChar() ) 
+			if ( pMember->GetLinkUID().IsChar() )
 				continue;
 
 			if ( nNumber == i )
@@ -298,7 +298,7 @@ bool CItemStone::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 			CStoneMember * pGuild = GetMember( pMemberGuild );
 			if ( pGuild )
 			{
-				pRef = pGuild; 
+				pRef = pGuild;
 				return true;
 			}
 		}
@@ -439,7 +439,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 		m_sCharter[i] = s.GetArgStr();
 		return true;
 	}
-	
+
 	return CItem::r_LoadVal(s);
 	EXC_CATCH;
 
@@ -487,7 +487,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 			{
 				for (; pMember != nullptr; pMember = pMember->GetNext())
 				{
-					if (!pMember->GetLinkUID().IsChar()) 
+					if (!pMember->GetLinkUID().IsChar())
 						continue;
 
 					++i;
@@ -505,12 +505,12 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 
 		for ( int i = 0 ; pMember != nullptr; pMember = pMember->GetNext() )
 		{
-			if (!pMember->GetLinkUID().IsChar()) 
+			if (!pMember->GetLinkUID().IsChar())
 				continue;
-				
+
 			if ( nNumber == i )
 			{
-				if (!pszCmd[0]) 
+				if (!pszCmd[0])
 					return true;
 
 				return pMember->r_WriteVal(pszCmd, sVal, pSrc);
@@ -575,7 +575,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 			{
 				for (; pMember != nullptr; pMember = pMember->GetNext())
 				{
-					if (pMember->GetLinkUID().IsChar()) 
+					if (pMember->GetLinkUID().IsChar())
 						continue;
 
 					i++;
@@ -593,12 +593,12 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 
 		for ( int i = 0 ; pMember != nullptr; pMember = pMember->GetNext() )
 		{
-			if (pMember->GetLinkUID().IsChar()) 
+			if (pMember->GetLinkUID().IsChar())
 				continue;
-				
+
 			if ( nNumber == i )
 			{
-				if (!pszCmd[0]) 
+				if (!pszCmd[0])
 					return true;
 
 				return pMember->r_WriteVal(pszCmd, sVal, pSrc);
@@ -720,7 +720,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 				sVal = pResult ? pResult->GetValStr() : "";
 			}
 			return true;
-	
+
 		case STC_MASTER:
 			{
 				CChar * pMaster = GetMaster();
@@ -729,7 +729,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
                     : g_ExprGlobals.mtEngineLockedReader()->m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_PENDVOTE");
 			}
 			return true;
-	
+
 		case STC_MASTERGENDERTITLE:
 			{
 				CChar * pMaster = GetMaster();
@@ -742,14 +742,14 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
                             : "STONECONFIG_VARIOUSNAME_MASTERGENDERMALE");
             }
 			return true;
-	
+
 		case STC_MASTERTITLE:
 			{
 				CStoneMember * pMember = GetMasterMember();
 				sVal = (pMember) ? pMember->GetTitle() : "";
 			}
 			return true;
-	
+
 		case STC_MASTERUID:
 			{
 				CChar * pMaster = GetMaster();
@@ -759,7 +759,7 @@ bool CItemStone::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSr
 					sVal.FormatHex( (dword) 0 );
 			}
 			return true;
-			
+
 		default:
 			return (fNoCallParent ? false : CItem::r_WriteVal( ptcKey, sVal, pSrc ));
 	}
@@ -1293,7 +1293,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 	}
 
 	// just delete this member. (it is mislinked)
-	DEBUG_ERR(( "Stone UID=0%x has mislinked member uid=0%x\n", 
+	DEBUG_ERR(( "Stone UID=0%x has mislinked member uid=0%x\n",
 		(dword) GetUID(), (dword) pMember->GetLinkUID()));
 	return false;
 }

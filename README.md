@@ -14,23 +14,23 @@ Ultima Online game server, developed in C++.
 | [![Discord Shield](https://discordapp.com/api/guilds/354358315373035542/widget.png?style=shield)](https://discord.gg/ZrMTXrs) |
 
 ## Getting Started tutorial
-If you're new to the Sphere server and want to setup your first shard, [this is your go-to guide](docs/Getting-started.md)!
+If you're new to the Sphere server and want to set up your first shard, [this is your go-to guide](docs/Getting-started.md)!
 
 ## Releases
 
 ### **Core**
 
-| Branch: Master <br> (most stable pre-releases) | Branch: Dev <br> (most recent, potentially unstable) |
-| :--- | :--- |
-| [![GitHub last commit on Master branch](https://img.shields.io/github/last-commit/Sphereserver/Source-X/master.svg)](https://github.com/Sphereserver/Source-X/) &nbsp; <a href="https://github.com/Sphereserver/Source-X/blob/master/Changelog.txt">Changelog</a> | [![GitHub last commit on Dev branch](https://img.shields.io/github/last-commit/Sphereserver/Source-X/dev.svg)](https://github.com/Sphereserver/Source-X/tree/dev) &nbsp; <a href="https://github.com/Sphereserver/Source-X/blob/dev/Changelog.txt">Changelog</a> |
-| **Nightly builds:** | **Nightly builds:** |
-| [![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml?query=branch%3Amaster) [![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml?query=branch%3Amaster) | [![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml?query=branch%3Adev) [![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml?query=branch%3Adev)|
-| [![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml) [![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml?query=branch%3Amaster) | [![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml?query=branch%3Adev) [![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml?query=branch%3Adev) |
-| [![Build status: MacOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml?query=branch%3Amaster) [![Build status: MacOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml?query=branch%3Amaster) | [![Build status: MacOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml?query=branch%3Adev) [![Build status: MacOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml?query=branch%3Adev) |
+| Branch: Master <br> (most stable pre-releases)                                                                                                                                                                                                                                                                                                                                                                                                                                             | Branch: Dev <br> (most recent, potentially unstable)                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [![GitHub last commit on Master branch](https://img.shields.io/github/last-commit/Sphereserver/Source-X/master.svg)](https://github.com/Sphereserver/Source-X/) &nbsp; <a href="https://github.com/Sphereserver/Source-X/blob/master/Changelog.txt">Changelog</a>                                                                                                                                                                                                                          | [![GitHub last commit on Dev branch](https://img.shields.io/github/last-commit/Sphereserver/Source-X/dev.svg)](https://github.com/Sphereserver/Source-X/tree/dev) &nbsp; <a href="https://github.com/Sphereserver/Source-X/blob/dev/Changelog.txt">Changelog</a>                                                                                                                                                                                                                   |
+| **Nightly builds:**                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | **Nightly builds:**                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| [![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml?query=branch%3Amaster) [![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml?query=branch%3Amaster) | [![Build status: Windows x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86_64.yml?query=branch%3Adev) [![Build status: Windows x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_win_x86.yml?query=branch%3Adev)     |
+| [![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml) [![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml?query=branch%3Amaster)                   | [![Build status: Linux x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86_64.yml?query=branch%3Adev) [![Build status: Linux x86](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_linux_x86.yml?query=branch%3Adev) |
+| [![Build status: macOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml?query=branch%3Amaster) [![Build status: macOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=master)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml?query=branch%3Amaster)     | [![Build status: macOS x86_64](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_x86_64.yml?query=branch%3Adev) [![Build status: macOS ARM](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml/badge.svg?branch=dev)](https://github.com/Sphereserver/Source-X/actions/workflows/build_osx_arm.yml?query=branch%3Adev)         |
 
 **Click the badges or follow the links:**
 
-+ <a href="https://github.com/Sphereserver/Source-X/releases">Github Nightly builds</a>
++ <a href="https://github.com/Sphereserver/Source-X/releases">GitHub Nightly builds</a>
 + <a href="https://forum.spherecommunity.net/sshare.php?srt=4">SphereServer Website</a>
 
 ### **ScriptPack**
@@ -95,7 +95,7 @@ Most notable changes (right now) are:
 
 Only recent compilers are supported, since Sphere uses C++20 features: the newer the compiler, the better. Oldest compiler versions supporting C++20: Visual Studio 2019 version 16.11, GCC 8, MinGW distributions using GCC 8, Clang version 10.  
 No pre-built project files are included. You need to build Visual Studio solution (.sln), Makefiles or Ninja Build files (or project files for other IDE or build systems) with CMake.  
-Below there's is a small guide.  
+Below there is a small guide.  
 You can use CMake GUI (graphical interface) or its CLI (command line interface).  
 To pass a flag to using the CLI, just prepend `-D` to the name of the variable, then assign the value with the equal sign, eg: `-DFOO=TRUE`.  
   
@@ -117,15 +117,15 @@ Before starting: does CMake give you an error? Ensure that you have Git installe
   + Via CMake CLI (command line interface): pass the parameter `-DCMAKE_TOOLCHAIN_FILE="..."`
   
 + Build **Configuration** (type)  
-  When using Makefiles or Ninja, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is **Nightly**, **Debug** or **Release**. If the build type  was not set, by default the makefiles for all of the three build types are generated.  
-  **Debug** build is expected to be slow and it's to be used, you guessed it, for debugging purposes (best coupled with a debugger or with sanitizers enabled, more on them right below), so don't use it for a live shard!  
+  When using Makefiles or Ninja, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is **Nightly**, **Debug** or **Release**. If the build type was not set, by default the makefiles for all three build types are generated.  
+  **Debug** build is expected to be slow, and it's to be used, you guessed it, for debugging purposes (best coupled with a debugger or with sanitizers enabled, more on them right below), so don't use it for a live shard!  
 
 Other useful CMake flags:
 
 + You can add other compiler flags with the custom variables `C_FLAGS_EXTRA`, `CXX_FLAGS_EXTRA`, `CMAKE_EXE_LINKER_FLAGS_EXTRA`.
 + Enable Sanitizers: `USE_ASAN[=ON]`, `USE_UBSAN`, `USE_LSAN`, etc.
   If you are using Address Sanitizer, Undefined Behaviour Sanitizer, Leak Sanitizer on Windows, it might be useful to redirect stderr to stdout to correctly show the output: `SphereSvrX64_nightly > Sphere_ASan_log.txt 2>&1`.
-  Remember to setup Sanitizers settings by setting the respective shell variables. To ease this, there are some batch/shell scripts doing that for you inside `utilities/`.
+  Remember to set up Sanitizers settings by setting the respective shell variables. To ease this, there are some batch/shell scripts doing that for you inside `utilities/`.
 + `CROSSCOMPILING_ARCH`: set this to TRUE to tell the compiler you are building binary files for a different architecture (not from x86_64 to x86, but for example from x86 to ARM).
 
 Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run the command inside the project's root folder):  
@@ -145,14 +145,14 @@ Building will require more packages than the ones needed to run Sphere.
   Install these additional packages:
   + Build tools (other than the compiler): `sudo apt-get install git cmake`.
   + MariaDB client: `sudo apt-get install libmariadb-dev` and  `libmariadb3` or `mariadb-client` (depends on the OS version)  
-  If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to
+  If you are on a 64 bits architecture, but you want to compile (or execute) a 32 bits binary, you will need to
   install MariaDB packages adding the postfix `:i386` to each package name.
 
 + CentOS - Red Hat Enterprise Linux - Fedora
   Install these additional packages via yum (CentOS or RH) or dnf (Fedora).
   + Build tools (other than the compiler): `git cmake glibc-devel`
   + MariaDB client: `mariadb-connector-c mariadb-connector-c-devel`  
-  If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to install MariaDB packages adding the postfix `.i686` to each package name.
+  If you are on a 64 bits architecture, but you want to compile (or execute) a 32 bits binary, you will need to install MariaDB packages adding the postfix `.i686` to each package name.
 
 #### Compiling on Linux
 
@@ -216,7 +216,7 @@ to sphereserver will be deleted.
 + Rebasing instead of pulling the project is a better practice to avoid unnecessary "merge branch master" commits.
 + Removing/Changing/Adding anything that was working in one way for years should be followed by an ini setting if the changes
   cannot be replicated from script to keep some backwards compatibility.
-+ Comment your code, add informations about its logic. It's very important since it helps others to understand your work.
++ Comment your code, add information about its logic. It's very important since it helps others to understand your work.
 + Be sure to use Sphere's custom datatypes and the string formatting macros described in src/common/datatypes.h.
 + When casting numeric data types, always prefer C-style casts, like (int), to C++ static_cast&lt;int&gt;(). It's way more concise.
 + Be wary that in SphereScript unsigned values does not exist, all numbers are considered signed, and that 64 bits integers meant
@@ -225,7 +225,7 @@ to sphereserver will be deleted.
   Use fixed width variables only for values that need to fit a limited range.
 + For strings, use pointers:  
   to "char" for strings that should always have ASCII encoding;  
-  to "tchar" for strings that may be ASCII or Unicode, depending from compilation settings (more info in "datatypes.h");  
+  to "tchar" for strings that may be ASCII or Unicode, depending on compilation settings (more info in "datatypes.h");  
   to "wchar" for string that should always have Unicode encoding.
 
 ### Naming Conventions
@@ -251,7 +251,7 @@ These are meant to be applied to new code and, if there's some old code not foll
 + For char, wchar, tchar use respectively the prefixes "c", "wc", "tc".
 + When handling strings, "lpstr", "lpcstr", "lpwstr", "lpcwstr", "lptstr", "lpctstr" data types are preferred aliases.  
   You'll find a lot of "psz" prefixes for strings: the reason is that in the past Sphere coders wanted to be consistent with Microsoft's Hungarian Notation.  
-  The correct and up to date notation is "pc" for lpstr/lpcstr (which are respectively char*and const char*), "pwc" (wchar*and const wchar*),
+  The correct and up-to-date notation is "pc" for lpstr/lpcstr (which are respectively char*and const char*), "pwc" (wchar*and const wchar*),
   "ptc" for lptstr/lpctstr (tchar*and const tchar*).  
   Use the "s" or "ps" (if pointer) when using CString or std::string. Always prefer CString over std::string, unless in your case there are obvious advantages for using the latter.
 

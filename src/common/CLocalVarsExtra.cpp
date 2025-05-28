@@ -33,7 +33,7 @@ bool CLocalFloatVars::Set( const char* VarName, const char* VarValue )
 	return Insert(VarName, VarValue, true);
 }
 
-bool CLocalFloatVars::Insert( const char* VarName, const char* VarValue, bool fForceSet) 
+bool CLocalFloatVars::Insert( const char* VarName, const char* VarValue, bool fForceSet)
 {
 	ADDTOCALLSTACK("CLocalFloatVars::Insert");
 	if (!VarValue || !VarName)

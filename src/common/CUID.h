@@ -152,7 +152,7 @@ public:
 	inline CChar* CharFind(bool fInvalidateBeingDeleted = false) const noexcept{
 		return CharFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
 	}
-    
+
 };
 
 static constexpr CUID kUIDUninitialized(UID_UNUSED);

@@ -91,7 +91,7 @@ private:
 
 public:
     inline lpctstr GetValStr() const {
-        return m_sVal.GetBuffer(); 
+        return m_sVal.GetBuffer();
     }
 	void SetValStr( lpctstr pszVal );
 	int64 GetValNum() const;

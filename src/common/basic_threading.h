@@ -120,7 +120,7 @@ namespace sl
 template<typename T>
 class GuardedAccess
 {
-public:    
+public:
     using Mutex      = MT_DEFAULT_CMUTEX_TYPE;
     using SharedLock = std::shared_lock<Mutex>;
     using UniqueLock = std::unique_lock<Mutex>;

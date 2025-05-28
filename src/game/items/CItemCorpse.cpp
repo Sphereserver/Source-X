@@ -38,7 +38,7 @@ bool CItemCorpse::IsCorpseResurrectable(CChar * pCharHealer, CChar * pCharGhost)
 	{
 		return false;
 	}
-	
+
 	//Check if the ghost is visible when targetting the corpse.
 	if (pCharGhost->IsStatFlag(STATF_INSUBSTANTIAL))
 	{
@@ -217,7 +217,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 
 	if ( !(uiFlags & DEATH_NOLOOTDROP) )		// move non-newbie contents of the pack to corpse
 		DropAll( pCorpse );
-	
+
     if (iDecayTimer != -1)
     {
         pCorpse->MoveToDecay(GetTopPoint(), iDecayTimer);

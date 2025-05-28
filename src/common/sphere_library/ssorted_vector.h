@@ -12,7 +12,7 @@ namespace sl
         size_t scont_bad_index() noexcept {
             return size_t(-1);
         }
-        
+
         template <class _Type, class _Comp = std::less<_Type>>
         class sorted_vector : public std::vector<_Type>
         {
@@ -185,7 +185,6 @@ namespace sl
         }
 
     }
-
 
 
 #endif // _INC_SORTED_VECTOR_H

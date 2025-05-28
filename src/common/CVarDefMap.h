@@ -100,7 +100,7 @@ public:
 
     void SetValStr( lpctstr pszVal );
     inline virtual lpctstr GetValStr() const override {
-        return m_sVal.GetBuffer(); 
+        return m_sVal.GetBuffer();
     }
     virtual int64 GetValNum() const override;
     virtual CVarDefCont * CopySelf() const override;

@@ -43,7 +43,7 @@ public:
     {
         ++_dwRefInstances;
     }
-    
+
     void DelRefInstance();
 
     bool IsLinked() const;	// been loaded from the scripts ?

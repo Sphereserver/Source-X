@@ -3360,7 +3360,6 @@ do_default:
 }
 
 
-
 bool CChar::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CChar::r_LoadVal");

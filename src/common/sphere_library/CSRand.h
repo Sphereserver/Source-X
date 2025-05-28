@@ -29,7 +29,7 @@ public:
 
 private:
     // Implementations, using the standard random generator.
-  
+
     // Integer numbers
     static int32 genRandInt32(int32 min, int32 max);
     static int64 genRandInt64(int64 min, int64 max);

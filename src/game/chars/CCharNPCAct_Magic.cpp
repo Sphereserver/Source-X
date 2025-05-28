@@ -143,8 +143,8 @@ void CChar::NPC_AddSpellsFromBook(CItem * pBook)
     }
 }
 
-// cast a spell if i can ?
-// or i can throw or use archery ?
+// Cast a spell if I can?
+// Or I can throw or use archery?
 // RETURN:
 //  false = revert to melee type fighting.
 bool CChar::NPC_FightMagery(CChar * pChar)
@@ -152,7 +152,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     ADDTOCALLSTACK("CChar::NPC_FightMagery");
     ASSERT(m_pNPC);
 
-    if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
+    if (!NPC_FightMayCast(false))	// Not checking skill here since it will do a search later, and it's an expensive function.
     {
         return false;
     }
@@ -162,7 +162,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     CObjBase * pTarg = pChar;
     if (pWand)
     {
-        // If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+        // If the item is really a wand and have its charges it's a valid wand, if not ... we get rid of it.
         if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0 || !pWand->IsAttr(ATTR_MAGIC))
             pWand = nullptr;
     }
@@ -193,13 +193,13 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         {
             if (iDist < 4 || iDist > 8)	// Here is fine?
                 NPC_Act_Follow(false, g_Rand.GetVal(3) + 2, true);
-            
+
             return true;
         }
         return false;
     }
 
-    // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
+    // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be cast.
     uchar iRandSpell = (uchar)(g_Rand.GetVal2(0, iSpellCount - 1)); //Spells are being stored using a vector, so it's assumed to be zero-based.
     bool bSpellSuccess = false, bWandUse = false, bIgnoreAITargetChoice = false;
     int iHealThreshold = g_Cfg.m_iNPCHealthreshold;
@@ -212,7 +212,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     while( iRandSpell < iSpellCount || bWandUse )
     {
         SPELL_TYPE spell = SPELL_NONE;
-       
+
         if (!bWandUse)
             spell = m_pNPC->Spells_GetAt(iRandSpell);
         else
@@ -247,7 +247,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
             break;
         }
         iRandSpell++;
-        
+
     }
     if (!bSpellSuccess)
         return false;
@@ -283,7 +283,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
         return false;
 
     int iSkillReq = 0;
-  
+
     if (!pSpellDef->GetPrimarySkill(&skill, &iSkillReq))
         skill = SKILL_MAGERY;
 
@@ -338,7 +338,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                     }
                 }
 
-                //	i cannot cast this on self. ok, then friends only
+                // I cannot cast this on self. ok, then friends only.
                 if (pSpellDef->IsSpellType(SPELLFLAG_TARG_NOSELF))
                 {
                     pFriend[0] = pFriend[1];

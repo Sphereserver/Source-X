@@ -216,7 +216,6 @@ static void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 }
 
 
-
 //////////////////////////////////////////////////////////////////
 // -CWorldThread
 
