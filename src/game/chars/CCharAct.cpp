@@ -3308,12 +3308,12 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if (IsTrigUsed(TRIGGER_EQUIPTEST) || IsTrigUsed(TRIGGER_ITEMEQUIPTEST))
 	{
 	    // Swap the layer for real one, because if we don't use dclick for equip, real layer gets rewritten with LAYER_DRAGGING.
-            pItem->SetEquipLayer(layer);
+            pItem->SetContainedLayer(layer);
 
             if (pItem->OnTrigger(ITRIG_EQUIPTEST, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
 		{
 		    // Reset layer to the original value, that item doesn't get misplaced.
-		    pItem->SetEquipLayer(requestedLayer);
+		    pItem->SetContainedLayer(requestedLayer);
 
 			// since this trigger is called also when creating an item via ITEM=, if the created item has a RETURN 1 in @EquipTest
 			// (or if the NPC has a RETURN 1 in @ItemEquipTest), the item will be created but not placed in the world.
@@ -3326,7 +3326,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 		}
 
 	    // Reset layer to the original value.
-	    pItem->SetEquipLayer(requestedLayer);
+	    pItem->SetContainedLayer(requestedLayer);
 
 		if (pItem->IsDeleted())
 			return false;
