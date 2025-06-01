@@ -59,7 +59,7 @@ protected:
     CServerMapDiffCollection * m_pMapDiffCollection;
 
 public:
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
      */
     ///@{
     CUOMapList() noexcept;

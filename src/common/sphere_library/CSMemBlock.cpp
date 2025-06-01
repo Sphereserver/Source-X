@@ -1,7 +1,7 @@
 #include <cstring>
 #include "CSMemBlock.h"
 
-// CSMemBlock:: Constructors, Destructor, Asign operator.
+// CSMemBlock:: Constructors, Destructor, Assign operator.
 
 CSMemBlock::CSMemBlock()
 {
@@ -47,7 +47,7 @@ void CSMemBlock::MemLink( byte * pData )
 }
 
 
-// CSMemLenBlock:: Constructors, Destructor, Asign operator.
+// CSMemLenBlock:: Constructors, Destructor, Assign operator.
 
 CSMemLenBlock::CSMemLenBlock() :
     m_uiLength(0)

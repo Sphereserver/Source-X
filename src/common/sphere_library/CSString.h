@@ -42,7 +42,7 @@ private:
     void InitDefault();
 
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	 */
 	///@{
 

@@ -13,7 +13,7 @@
 class CSMemBlock
 {
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	 */
 	///@{
 	CSMemBlock();
@@ -78,7 +78,7 @@ private:
 class CSMemLenBlock : public CSMemBlock
 {
 public:
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	 */
 	///@{
 	CSMemLenBlock();

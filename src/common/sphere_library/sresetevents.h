@@ -24,7 +24,7 @@ public:
 	static constexpr uint _kiInfinite = 0xffffffff;   // Default wait time.
 #endif
 
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
 	AutoResetEvent();
@@ -73,7 +73,7 @@ public:
 	static constexpr uint _kiInfinite = 0xffffffff;   // Default wait time.
 #endif
 
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
 	ManualResetEvent();

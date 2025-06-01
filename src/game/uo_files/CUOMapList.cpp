@@ -19,7 +19,7 @@ void CUOMapList::MapGeoDataHolder::clear() noexcept
 }
 
 
-// CUOMapList:: Constructors, Destructor, Asign operator.
+// CUOMapList:: Constructors, Destructor, Assign operator.
 
 CUOMapList::CUOMapList() noexcept
 {

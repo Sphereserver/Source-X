@@ -53,7 +53,7 @@ public:
     friend class CSObjContRec;
     static const char * m_sClassName;
 
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
     */
     ///@{
     /**

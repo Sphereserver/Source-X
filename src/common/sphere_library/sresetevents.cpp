@@ -89,7 +89,7 @@ void AutoResetEvent::signal()
 #endif
 }
 
-// ManualResetEvent:: Constructors, Destructor, Asign operator.
+// ManualResetEvent:: Constructors, Destructor, Assign operator.
 
 ManualResetEvent::ManualResetEvent()
 {

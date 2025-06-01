@@ -14,7 +14,7 @@
 template<class TYPE,class KEY_TYPE>
 class CSObjSortArray : public CSObjArray<TYPE>
 {
-	/** @name Constructors, Destructor, Asign operator:
+	/** @name Constructors, Destructor, Assign operator:
 	 */
 	///@{
 public:
