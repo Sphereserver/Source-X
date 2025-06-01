@@ -156,12 +156,13 @@ void CItemsList::AddItemToSector( CItem * pItem )
 void CSectorBase::SetAdjacentSectors()
 {
 	const CSectorList* pSectors = CSectorList::Get();
+    auto const& sd = pSectors->GetMapSectorData(m_map);
 
-    const int iMaxX = pSectors->GetSectorCols(m_map);
+    const int iMaxX = sd.iSectorColumns;
     ASSERT(iMaxX > 0);
-    [[maybe_unused]] const int iMaxY = pSectors->GetSectorRows(m_map);
+    [[maybe_unused]] const int iMaxY = sd.iSectorRows;
     ASSERT(iMaxY > 0);
-    const int iMaxSectors = pSectors->GetSectorQty(m_map);
+    const int iMaxSectors = sd.iSectorQty;
 
     // Sectors are layed out in the array horizontally: when the row is complete (X), the subsequent sector is placed in
     //  the column below (Y).
@@ -232,7 +233,7 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
 	{
 		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
 	}
-	else if (( index < 0 ) || ( index >= CSectorList::Get()->GetSectorQty(map) ))
+    else if (( index < 0 ) || ( index >= CSectorList::Get()->GetMapSectorData(map).iSectorQty ))
 	{
 		m_map = map;
 		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, map, map);
@@ -452,13 +453,16 @@ CPointMap CSectorBase::GetBasePoint() const
 {
 	// ADDTOCALLSTACK_DEBUG("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
 	// What is the coord base of this sector. upper left point.
-	const CSectorList* pSectors = CSectorList::Get();
-#if _DEBUG
-	DEBUG_ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
-	// Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
-#endif
-    const int iCols = pSectors->GetSectorCols(m_map);
-    const int iSize = pSectors->GetSectorSize(m_map);
+
+    // Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
+    DEBUG_ASSERT(g_MapList.IsMapSupported(m_map));
+
+    const CSectorList* pSectors = CSectorList::Get();
+    auto const& sd = pSectors->GetMapSectorData(m_map);
+    DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty) );
+
+    const int iCols = sd.iSectorColumns;
+    const int iSize = sd.iSectorSize;
 
 	const int iQuot = (m_index % iCols), iRem = (m_index / iCols); // Help the compiler to optimize the division
 	return // Initializer list for CPointMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
@@ -474,8 +478,11 @@ CRectMap CSectorBase::GetRect() const noexcept
 {
     //ADDTOCALLSTACK_DEBUG("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
 	// Get a rectangle for the sector.
-	const CPointMap& pt = GetBasePoint();
-    const int iSectorSize = CSectorList::Get()->GetSectorSize(pt.m_map);
+    DEBUG_ASSERT(g_MapList.IsMapSupported(m_map));
+
+    const CSectorList* pSectors = CSectorList::Get();
+    const CPointMap& pt = GetBasePoint();
+    const int iSectorSize = pSectors->GetMapSectorData(pt.m_map).iSectorSize;
 	return // Initializer list for CRectMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
 	{
 		pt.m_x,					// left

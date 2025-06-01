@@ -1260,7 +1260,7 @@ void CWorld::SaveStatics()
 			if ( !g_MapList.IsMapSupported(m) )
                 continue;
 
-			for (int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s)
+            for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
 			{
 				CSector* pSector = _Sectors.GetSector(m, s);
 				if ( !pSector )
@@ -1470,7 +1470,7 @@ bool CWorld::LoadAll() // Load world from script
 		if (!g_MapList.IsMapSupported(m))
 			continue;
 
-		for (int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s)
+        for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
 		{
 			EXC_TRYSUB("Load");
 
@@ -1658,7 +1658,7 @@ void CWorld::RespawnDeadNPCs()
 		if ( !g_MapList.IsMapSupported(m) )
             continue;
 
-		for (int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s)
+        for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
 		{
 			EXC_TRY("OnSector");
 
@@ -1698,7 +1698,7 @@ void CWorld::Restock()
 		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
-		for ( int s = 0, qty = _Sectors.GetSectorQty(m); s < qty; ++s )
+        for ( int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s )
 		{
 			EXC_TRY("OnSector");
 

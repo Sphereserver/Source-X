@@ -99,11 +99,12 @@ class CSectorBase		// world sector
 
 
 protected:
-	uchar m_map;    // sector map
-    short _x, _y;   // x and y (row and column) of the sector in the map
+    uint8 m_map;    // sector map
+    int16 _x, _y;   // x and y (row and column) of the sector in the map
 	int	m_index;    // sector index
 
 private:
+    // TODO: store indices instead of pointers, to make the class smaller?
 	CSector* _ppAdjacentSectors[DIR_QTY];
 
 public:

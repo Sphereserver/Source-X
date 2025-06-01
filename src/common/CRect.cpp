@@ -284,37 +284,49 @@ CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that ma
 	// RETURN: nullptr = no more
 
 	// Align new rect.
-	const CSectorList* pSectors = CSectorList::Get();
+    const CSectorList *pSectors = CSectorList::Get();
+    const MapSectorsData& sd = pSectors->GetMapSectorData(m_map);
+    const int iSectorSize = sd.iSectorSize;
+    const int iSectorCols = sd.iSectorColumns;
+    const uint uiSectorShift = sd.uiSectorDivShift;
 
-    const int iSectorSize = pSectors->GetSectorSize(m_map);
 	CRectMap rect;
-	rect.m_left = m_left & ~(iSectorSize-1);
-	rect.m_right = ( m_right | (iSectorSize-1)) + 1;
+    rect.m_left = m_left & ~(iSectorSize-1);            // aligns the left boundary down to the nearest multiple of iSectorSize.
+    rect.m_right = ( m_right | (iSectorSize-1)) + 1;    // rounds the right boundary up to cover the full last sector.
 	rect.m_top = m_top & ~(iSectorSize-1);
 	rect.m_bottom = ( m_bottom | (iSectorSize-1)) + 1;
 	rect.m_map = m_map;
 	rect.NormalizeRectMax();
 
-    const int iSectorCols = pSectors->GetSectorCols(m_map);
-	const int width = (rect.GetWidth()) / iSectorSize;
-	const int height = (rect.GetHeight()) / iSectorSize;
+    //const int width = (rect.GetWidth()) / iSectorSize;
+    //const int height = (rect.GetHeight()) / iSectorSize;
+    const int width  = rect.GetWidth()  >> uiSectorShift;
+    const int height = rect.GetHeight() >> uiSectorShift;
+
 #ifdef _DEBUG
 	ASSERT(width <= iSectorCols);
-	const int iSectorRows = pSectors->GetSectorRows(m_map);
+    const int iSectorRows = sd.iSectorRows;
 	ASSERT(height <= iSectorRows);
 #endif
 
+    /*
 	const int iBase = (( rect.m_top / iSectorSize) * iSectorCols) + ( rect.m_left / iSectorSize );
-
 	if ( i >= ( height * width ))
-	{
-		if ( ! i )
-			return pSectors->GetSector(m_map, iBase);
-		return nullptr;
-	}
+        return i ? nullptr : pSectors->GetSector(m_map, iBase);
 
 	const int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
 	return pSectors->GetSector(m_map, iBase + indexoffset);
+    */
+
+    const int baseRow = rect.m_top  >> uiSectorShift;
+    const int baseCol = rect.m_left >> uiSectorShift;
+    const int iBase = (baseRow * iSectorCols) + baseCol;
+
+    if (i >= (height * width))
+        return i ? nullptr : pSectors->GetSector(m_map, iBase);
+
+    const int indexoffset = ((i / width) * iSectorCols) + (i % width);
+    return pSectors->GetSector(m_map, iBase + indexoffset);
 }
 
 

@@ -28,7 +28,6 @@ protected:
         uint16 uiSizeX;
         uint16 uiSizeY;
         int16  iSectorSize;
-        //uint16 uiSectorDivShift;
         bool   fEnabled;       // supported map?
         bool   fInitialized;
 
@@ -41,7 +40,6 @@ protected:
                 .uiSizeX = (uint16)-1,
                 .uiSizeY = (uint16)-1,
                 .iSectorSize = -1,
-                //.uiSectorDivShift = 0,
                 .fEnabled = true,
                 .fInitialized = false
             };
@@ -88,9 +86,11 @@ protected:
 public:
     bool IsMapSupported(int map) const noexcept;
     bool IsInitialized(int map) const;
+
     int CalcSectorQty(int map) const;  // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorCols(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorRows(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
+
     inline uint16 GetMapSizeX(int map) const noexcept;
     inline uint16 GetMapSizeY(int map) const noexcept;
     int GetMapCenterX(int map) const;

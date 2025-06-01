@@ -10,22 +10,26 @@
 #include "CSector.h"
 
 
+// Sector data for a given map
+struct MapSectorsData
+{
+    friend class CSectorList;
+
+    // Pre-calculated values, for faster retrieval
+    int iSectorSize;
+    int iSectorColumns;  // how much sectors are in a column (x) in a given map
+    int iSectorRows;     // how much sectors are in a row (y) in a given map
+    int iSectorQty;      // how much sectors are in a map
+    uint16 uiSectorDivShift;    // precalculated value to avoid a division in sector/rect calculations
+
+private:
+    std::unique_ptr<CSector[]> _pSectors;
+};
+
 class CSectorList
 {
 public:
 	static const char* m_sClassName;
-
-	// Sector data
-	struct MapSectorsData
-	{
-		std::unique_ptr<CSector[]> _pSectors;
-
-		// Pre-calculated values, for faster retrieval
-		int _iSectorSize;
-		int _iSectorColumns;  // how much sectors are in a column (x) in a given map
-		int _iSectorRows;     // how much sectors are in a row (y) in a given map
-		int _iSectorQty;      // how much sectors are in a map
-	};
 
 	//std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData; // Use plain C-style vectors, to remove even the minimum overhead of std::array methods
 	MapSectorsData _SectorData[MAP_SUPPORTED_QTY];
@@ -44,10 +48,8 @@ public:
 	void Init();
 	void Close(bool fClosingWorld);
 
-	int GetSectorSize(int map) const noexcept;
-	int GetSectorQty(int map) const noexcept;
-	int GetSectorCols(int map) const noexcept;
-	int GetSectorRows(int map) const noexcept;
+    [[nodiscard]]
+    const MapSectorsData& GetMapSectorData(int map) const;
 
 	CSector* GetSector(int map, int index) const noexcept;	// gets sector # from one map
 	CSector* GetSector(int map, short x, short y) const noexcept;

@@ -131,18 +131,7 @@ bool CUOMapList::Load(int map, char *args)
                     map, sectorsize);
             }
             else
-            {
                 map_data.iSectorSize = (int16)sectorsize;
-
-                /*
-                // Calc sector_shift (log2(iSectorSize)). We use this to do a bit shift instead of a division
-                //  when we do sector calculations (that is, very often).
-                uint32 sector_shift = 0;
-                for (int size = sectorsize; size > 1; size >>= 1)
-                    ++sector_shift;
-                map_data.uiSectorDivShift = (uint16)sector_shift;
-                */
-            }
         }
         if ( realmapnum >= 0 )
             map_data.iNum = (int16)realmapnum;
@@ -254,9 +243,7 @@ bool CUOMapList::DetectMapSize(int map) // it sets also the default sector size,
 
 bool CUOMapList::IsMapSupported(int map) const noexcept
 {
-    if (( map < 0 ) || ( map >= MAP_SUPPORTED_QTY))
-        return false;
-    return m_mapGeoData.maps[map].fEnabled;
+    return ((map >= 0) && (map < MAP_SUPPORTED_QTY) && m_mapGeoData.maps[map].fEnabled);
 }
 
 bool CUOMapList::IsInitialized(int map) const

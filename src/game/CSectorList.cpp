@@ -24,8 +24,9 @@ void CSectorList::Init()
 
 	if ( _fInitialized )	//	disable changes on-a-fly
 		return;
-	// Initialize sector data for every map plane
-	TemporaryString ts;
+
+	// Initialize sector data for every map plane    
+    TemporaryString ts;
 	TemporaryString tsConcat;
 
 	for (int iMap = 0; iMap < MAP_SUPPORTED_QTY; ++iMap)
@@ -38,7 +39,7 @@ void CSectorList::Init()
 		int iSectorIndex = 0;
 
 		MapSectorsData& sd = _SectorData[iMap];
-		sd._iSectorSize = sd._iSectorColumns = sd._iSectorRows = sd._iSectorQty = 0;
+		sd.iSectorSize = sd.iSectorColumns = sd.iSectorRows = sd.iSectorQty = 0;
 		sd._pSectors.reset();
 
 		if (!g_MapList.IsMapSupported(iMap))
@@ -52,10 +53,18 @@ void CSectorList::Init()
 		Str_ConcatLimitNull(tsConcat.buffer(), ts.buffer(), tsConcat.capacity());
 
 		sd._pSectors		= std::make_unique<CSector[]>(iSectorQty);
-		sd._iSectorSize		= g_MapList.GetSectorSize(iMap);
-		sd._iSectorQty		= iSectorQty;
-		sd._iSectorColumns	= iMaxX;
-		sd._iSectorRows		= iMaxY;
+		sd.iSectorSize		= g_MapList.GetSectorSize(iMap);
+		sd.iSectorQty		= iSectorQty;
+		sd.iSectorColumns	= iMaxX;
+		sd.iSectorRows		= iMaxY;
+
+        // Calc sector_shift (log2(iSectorSize)). We use this to do a bit shift instead of a division
+        //  when we do sector calculations (that is, very often).
+        uint32 sector_shift = 0;
+        for (uint sz = sd.iSectorSize; sz > 1; sz >>= 1)
+            ++sector_shift;
+        sd.uiSectorDivShift = (uint16)sector_shift;
+
 
 		short iSectorX = 0, iSectorY = 0;
 		for (; iSectorIndex < iSectorQty; ++iSectorIndex)
@@ -65,6 +74,7 @@ void CSectorList::Init()
 				iSectorX = 0;
 				++iSectorY;
 			}
+
 			CSector* pSector = &(sd._pSectors[iSectorIndex]);
 			ASSERT(pSector);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
@@ -77,7 +87,7 @@ void CSectorList::Init()
 		if (!sd._pSectors)
 			continue;
 
-		for (int iSector = 0; iSector < sd._iSectorQty; ++iSector)
+		for (int iSector = 0; iSector < sd.iSectorQty; ++iSector)
 		{
 			sd._pSectors[iSector].SetAdjacentSectors();
 		}
@@ -97,7 +107,7 @@ void CSectorList::Close(bool fClosingWorld)
 			continue;
 
 		// Delete everything in sector
-		for (int iSector = 0; iSector < sd._iSectorQty; ++iSector)
+		for (int iSector = 0; iSector < sd.iSectorQty; ++iSector)
 		{
 			sd._pSectors[iSector].Close(fClosingWorld);
 		}
@@ -106,52 +116,34 @@ void CSectorList::Close(bool fClosingWorld)
 }
 
 
-#define IsMapInvalid(map)	((map < 0) || (map >= MAP_SUPPORTED_QTY))
-
-int CSectorList::GetSectorSize(int map) const noexcept
+[[nodiscard]]
+const MapSectorsData& CSectorList::GetMapSectorData(int map) const
 {
-	return (IsMapInvalid(map) ? -1 : _SectorData[map]._iSectorSize);
-}
-
-int CSectorList::GetSectorQty(int map) const noexcept
-{
-	return (IsMapInvalid(map) ? -1 : _SectorData[map]._iSectorQty);
-}
-
-int CSectorList::GetSectorCols(int map) const noexcept
-{
-	return (IsMapInvalid(map) ? -1 : _SectorData[map]._iSectorColumns);
-}
-
-int CSectorList::GetSectorRows(int map) const noexcept
-{
-	return (IsMapInvalid(map) ? -1 : _SectorData[map]._iSectorRows);
+    DEBUG_ASSERT(g_MapList.IsMapSupported(map));
+    return _SectorData[map];
 }
 
 CSector* CSectorList::GetSector(int map, int index) const noexcept
 {
-	if (IsMapInvalid(map) || !_SectorData[map]._pSectors)
+    if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
 		return nullptr;
 	const MapSectorsData& sd = _SectorData[map];
-	return (index < sd._iSectorQty) ? &(sd._pSectors[index]) : nullptr;
+	return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
 }
 
 CSector* CSectorList::GetSector(int map, short x, short y) const noexcept
 {
-	if (IsMapInvalid(map) || !_SectorData[map]._pSectors)
+    if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
 		return nullptr;
 
 	const MapSectorsData& sd = _SectorData[map];
-	const int xSect = (x / sd._iSectorSize), ySect = (y / sd._iSectorSize);
-	if ((xSect >= sd._iSectorColumns) || (ySect >= sd._iSectorRows))
+	const int xSect = (x / sd.iSectorSize), ySect = (y / sd.iSectorSize);
+	if ((xSect >= sd.iSectorColumns) || (ySect >= sd.iSectorRows))
 		return nullptr;
 
-	const int index = ((ySect * sd._iSectorColumns) + xSect);
-	return (index < sd._iSectorQty) ? &(sd._pSectors[index]) : nullptr;
+	const int index = ((ySect * sd.iSectorColumns) + xSect);
+	return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
 }
-
-#undef IsMapInvalid
-
 
 int CSectorList::GetSectorAbsoluteQty() const noexcept
 {
@@ -159,9 +151,9 @@ int CSectorList::GetSectorAbsoluteQty() const noexcept
 	for (const MapSectorsData& sd : _SectorData)
 	{
 		if (!sd._pSectors)
-			continue;
+            continue;
 
-		iCount += sd._iSectorQty;
+		iCount += sd.iSectorQty;
 	}
 	return iCount;
 }
@@ -174,13 +166,13 @@ CSector* CSectorList::GetSectorAbsolute(int index) noexcept
 		if (!sd._pSectors)
 			continue;
 
-		if ((base + sd._iSectorQty) > index)
+		if ((base + sd.iSectorQty) > index)
 		{
 			const int iSummation = (index - base);
 			return &(sd._pSectors[iSummation]);
 		}
 
-		base += sd._iSectorQty;
+		base += sd.iSectorQty;
 	}
 	return nullptr;
 }

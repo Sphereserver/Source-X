@@ -16,6 +16,10 @@
 #include "triggers.h"
 #include "CSector.h"
 
+
+#define SECTOR_TICKING_PERIOD	30 * 1000	// Every 30 seconds.
+
+
 //////////////////////////////////////////////////////////////////
 // -CSector
 
@@ -263,6 +267,7 @@ void CSector::_GoAwake()
     * of NPCs being stop until you enter the sector, or all the spawns
     * generating NPCs at once.
     */
+    // Using the 'static' keyword isn't thread safe. We assume that we are managing sectors only on a single thread...
     static CSector *pCentral = nullptr;   // do this only for the awaken sector
     if (!pCentral)
     {
@@ -619,12 +624,13 @@ int CSector::GetLocalTime() const
 	}
 	else
 	{
+        const MapSectorsData& sd = pSectors->GetMapSectorData(pt.m_map);
+
 		// Time difference between adjacent sectors in minutes
-		const int iSectorTimeDiff = (24*60) / pSectors->GetSectorCols(pt.m_map);
+        const int iSectorTimeDiff = (24*60) / sd.iSectorColumns;
 
 		// Calculate the # of columns between here and Castle Britannia ( x = 1400 )
-		//int iSectorOffset = ( pt.m_x / g_MapList.GetX(pt.m_map) ) - ( (24*60) / g_MapList.GetSectorSize(pt.m_map));
-		const int iSectorOffset = ( pt.m_x / pSectors->GetSectorSize(pt.m_map));
+        const int iSectorOffset = ( pt.m_x / sd.iSectorSize);
 
 		// Calculate the time offset from global time
 		const int iTimeOffset = iSectorOffset * iSectorTimeDiff;

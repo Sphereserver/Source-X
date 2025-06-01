@@ -18,9 +18,9 @@
 CRegion::CRegion( CResourceID rid, lpctstr pszName ) :
 	CResourceDef( rid )
 {
-	ADDTOCALLSTACK("CRegion::CRegion()");
-	m_dwFlags	= 0;
-	m_dwModifiedFlags	= 0;
+    ADDTOCALLSTACK("CRegion::CRegion");
+    m_dwFlags = 0;
+    m_dwModifiedFlags = 0;
 	m_iLinkedSectors = 0;
 	if ( pszName )
 		SetName( pszName );
@@ -74,7 +74,7 @@ bool CRegion::RealizeRegion()
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
 	const CSectorList* pSectors = CSectorList::Get();
-	for ( int i = 0, iMax = pSectors->GetSectorQty(m_pt.m_map); i < iMax; ++i )
+    for ( int i = 0, iMax = pSectors->GetMapSectorData(m_pt.m_map).iSectorQty; i < iMax; ++i )
 	{
 		CSector *pSector = pSectors->GetSector(m_pt.m_map, i);
 

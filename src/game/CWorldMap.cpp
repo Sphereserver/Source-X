@@ -229,7 +229,7 @@ CSector* CWorldMap::GetSector(int map, int index) noexcept // static
 {
 	//ADDTOCALLSTACK_DEBUG("CWorldMap::GetSector(index)");
 
-	const int iMapSectorQty = g_World._Sectors.GetSectorQty(map);
+    const int iMapSectorQty = g_World._Sectors.GetMapSectorData(map).iSectorQty;
 	if (index >= iMapSectorQty)
 	{
 		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", index, map);
