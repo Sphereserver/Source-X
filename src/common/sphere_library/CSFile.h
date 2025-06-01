@@ -39,7 +39,7 @@ protected:
 public:
 	static const char * m_sClassName;
 
-	/** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
 	 */
 	///@{
 	CSFile();
@@ -202,27 +202,27 @@ public:     lpctstr GetFileTitle() const;
     * @brief Get open mode (full).
     * @return full mode flags.
     */
-protected: uint _GetFullMode() const;
-public:    uint GetFullMode() const;
+protected: inline   uint _GetFullMode() const noexcept;
+public:             uint GetFullMode() const;
     /**
     * @brief Get open mode (OF_NONCRIT, OF_TEXT, OF_BINARY, OF_DEFAULTMODE)
     *
     * Get rid of OF_NONCRIT type flags
     * @return mode flags.
     */
-protected: uint _GetMode() const;
-public:    uint GetMode() const;
+protected: inline   uint _GetMode() const noexcept;
+public:             uint GetMode() const;
     /**
     * @brief Check if file es in binary mode.
     * @return Always true (this method is virtual).
     */
-    virtual bool IsBinaryMode() const { return true; }
+    inline bool _IsBinaryMode() const;
     /**
     * @brief Check if file is open for write.
     * @return true if file is open for write, false otherwise.
     */
-protected: bool _IsWriteMode() const;
-public:    bool IsWriteMode() const;
+protected: inline   bool _IsWriteMode() const noexcept;
+public:             bool IsWriteMode() const;
     ///@}
 
 protected:
@@ -233,9 +233,10 @@ protected:
 #endif
     const file_descriptor_t _kInvalidFD = (file_descriptor_t)-1;
 
-protected:
 	CSString _strFileName;	            // File name (with path).
 	uint _uiMode;                       // MMSYSTEM may use 32 bit flags.
+    std::optional<bool> _fBinaryMode;
+
 public:
     file_descriptor_t _fileDescriptor;  // File descriptor (POSIX, int) or HANDLE (Windows, size of a pointer).
 
@@ -245,6 +246,29 @@ public:
     static bool FileExists(lpctstr ptcFilePath);
 
 };
+
+
+// Inline methods
+
+uint CSFile::_GetFullMode() const noexcept
+{
+    return _uiMode;
+}
+
+uint CSFile::_GetMode() const noexcept
+{
+    return (_uiMode & 0x0FFFFFFF);
+}
+
+bool CSFile::_IsWriteMode() const noexcept
+{
+    return (_uiMode & OF_WRITE);
+}
+
+bool CSFile::_IsBinaryMode() const
+{
+    return _fBinaryMode.value_or(true); // It must always have a value actually.
+}
 
 
 #endif // _INC_CSFILE_H

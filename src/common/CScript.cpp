@@ -550,7 +550,7 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	ADDTOCALLSTACK("CScript::FindTextHeader");
 	// RETURN: false = EOF reached.
 	ASSERT(pszName);
-	ASSERT( ! IsBinaryMode());
+    ASSERT(!_IsBinaryMode());
 
 	SeekToBegin();
 

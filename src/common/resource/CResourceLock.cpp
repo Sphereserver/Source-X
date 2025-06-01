@@ -75,7 +75,7 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
 
     EXC_TRY("_ReadTextLine");
     ASSERT(m_pLock);
-    ASSERT( ! IsBinaryMode() );
+    ASSERT( ! _IsBinaryMode() );
 
     tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
     while ( CCacheableScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))

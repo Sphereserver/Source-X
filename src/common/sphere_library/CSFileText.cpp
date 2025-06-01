@@ -5,7 +5,7 @@
     #include <io.h> // for _get_osfhandle (used by STDFUNC_FILENO)
 #endif
 
-// CSFileText:: Constructors, Destructor, Asign operator.
+// CSFileText:: Constructors, Destructor, Assign operator.
 
 const char*
 CSFileText::m_sClassName = "CSFileText";
@@ -16,6 +16,7 @@ CSFileText::CSFileText()
 #ifdef _WIN32
     _fNoBuffer = false;
 #endif
+    _fBinaryMode = false;
 }
 
 CSFileText::~CSFileText()
@@ -294,7 +295,7 @@ lpctstr CSFileText::_GetModeStr() const
     ADDTOCALLSTACK("CSFileText::_GetModeStr");
     // end of line translation is crap. ftell and fseek don't work correctly when you use it.
     // fopen() args
-    if ( IsBinaryMode())
+    if ( _IsBinaryMode())
         return ( _IsWriteMode() ? "wb" : "rb" );
     if ( _GetMode() & OF_READWRITE )
         return "a+b";

@@ -9,12 +9,14 @@
 	#include <sys/stat.h>
 #endif
 
-// CSFile:: Constructors, Destructor, Asign operator.
+// CSFile:: Constructors, Destructor, Assign operator.
 
 CSFile::CSFile()
 {
     _fileDescriptor = _kInvalidFD;
     _uiMode = 0;
+    if (!_fBinaryMode.has_value())
+        _fBinaryMode = true;
 }
 
 CSFile::~CSFile()
@@ -464,28 +466,17 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 
 // CSFile:: Mode operations.
 
-uint CSFile::_GetFullMode() const
-{
-    return _uiMode;
-}
+
 uint CSFile::GetFullMode() const
 {
     MT_SHARED_LOCK_RETURN(this, _uiMode);
 }
 
-uint CSFile::_GetMode() const
-{
-    return (_uiMode & 0x0FFFFFFF);
-}
 uint CSFile::GetMode() const
 {
     MT_SHARED_LOCK_RETURN(this, _uiMode & 0x0FFFFFFF);
 }
 
-bool CSFile::_IsWriteMode() const
-{
-    return (_uiMode & OF_WRITE);
-}
 bool CSFile::IsWriteMode() const
 {
     MT_SHARED_LOCK_RETURN(this, _uiMode & OF_WRITE);

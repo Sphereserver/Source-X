@@ -15,7 +15,7 @@ class CSFileText : public CSFile
 public:
     static const char *m_sClassName;
 
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
     */
     ///@{
 public:
@@ -139,12 +139,6 @@ protected:
     * @return string that describes the open mode.
     */
     lpctstr _GetModeStr() const;
-public:
-    /**
-    * @brief Check if file is open in binary mode.
-    * @return false always.
-    */
-    virtual bool IsBinaryMode() const override { return false; };
     ///@}
 public:
     FILE * _pStream;		// The current open script type file.
