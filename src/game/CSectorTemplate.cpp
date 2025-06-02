@@ -206,7 +206,7 @@ void CSectorBase::SetAdjacentSectors()
         {
             continue;
         }
-        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors->GetSector(m_map, index);
+        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors->GetSectorByIndex(m_map, index);
     }
 }
 

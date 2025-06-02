@@ -49,34 +49,30 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	void OffsetRect( int x, int y );
 	void UnionPoint( int x, int y );
 
-    inline bool IsInsideX( int x ) const
+    inline bool IsInsideX( int x ) const noexcept
 	{	// non-inclusive
 		return( x >= m_left && x < m_right );
 	}
-    inline bool IsInsideY( int y ) const
+    inline bool IsInsideY( int y ) const noexcept
 	{	// non-inclusive
 		return( y >= m_top && y < m_bottom );
 	}
-    inline bool IsInside( int x, int y, int map ) const
-	{
-		// NON inclusive rect! Is the point in the rectangle ?
-		return( IsInsideX(x) &&	IsInsideY(y) && ( m_map == map ));
-	}
-    inline bool IsInside2d( const CPointBase & pt ) const
+    inline bool IsInside2d( const CPointBase & pt ) const noexcept
 	{
 		// NON inclusive rect! Is the point in the rectangle ?
 		return( IsInside( pt.m_x, pt.m_y, pt.m_map ) );
 	}
 
-	void UnionRect( const CRect & rect );
-	bool IsInside( const CRect & rect ) const noexcept;
+    bool IsInside( int x, int y, int map ) const noexcept;
+    bool IsInside( const CRect & rect ) const noexcept;
+    void UnionRect( const CRect & rect );
 	bool IsOverlapped( const CRect & rect ) const noexcept;
 	bool IsEqual( const CRect & rect ) const noexcept;
 
 	virtual void NormalizeRect() noexcept;
     void NormalizeRectMax( int cx, int cy ) noexcept;
 
-    CPointBase GetCenter() const;
+    CPointBase GetCenter() const noexcept;
     CPointBase GetRectCorner( DIR_TYPE dir ) const;
     CSector * GetSector( int i ) const noexcept;	// ge all the sectors that make up this rect.
 

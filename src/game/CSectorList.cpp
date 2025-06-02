@@ -123,26 +123,47 @@ const MapSectorsData& CSectorList::GetMapSectorData(int map) const
     return _SectorData[map];
 }
 
-CSector* CSectorList::GetSector(int map, int index) const noexcept
+CSector* CSectorList::GetSectorByIndex(int map, int index) const noexcept
 {
-    if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
-		return nullptr;
+    // We call this method very often and from places we ASSUME have already checked that the map number is legit.
+    // Micro-optimization: Skip the function call and the if statement to avoid the possible cost of a branch misprediction.
+    //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
+    //	return nullptr;
+
 	const MapSectorsData& sd = _SectorData[map];
 	return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
 }
 
-CSector* CSectorList::GetSector(int map, short x, short y) const noexcept
+CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) const noexcept
 {
-    if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
-		return nullptr;
+    // We call this method very often and from places we ASSUME have already checked that the map number is legit.
+    // Micro-optimization: Skip the IsMapSupported function call and the if statement to avoid the possible cost of a branch misprediction.
+    //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
+    //	return nullptr;
 
 	const MapSectorsData& sd = _SectorData[map];
-	const int xSect = (x / sd.iSectorSize), ySect = (y / sd.iSectorSize);
+
+    // We know that sector sizes MUST be multiple of 2, so just use bit shifts.
+    //const int xSectTest = (x / sd.iSectorSize), ySectTest = (y / sd.iSectorSize);
+    const int xSect = (x >> sd.uiSectorDivShift), ySect = (y >> sd.uiSectorDivShift);
+    //ASSERT(xSectTest == xSect);
+    //ASSERT(ySectTest == ySect);
+
+/*
+#ifdef _DEBUG
+    // We also assume that X and Y are inside map boundaries.
 	if ((xSect >= sd.iSectorColumns) || (ySect >= sd.iSectorRows))
 		return nullptr;
 
-	const int index = ((ySect * sd.iSectorColumns) + xSect);
-	return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
+    const int index = ((ySect * sd.iSectorColumns) + xSect);
+    return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
+#else
+*/
+    const int index = ((ySect * sd.iSectorColumns) + xSect);
+    DEBUG_ASSERT(index < sd.iSectorQty);
+    return &(sd._pSectors[index]);
+//#endif
+
 }
 
 int CSectorList::GetSectorAbsoluteQty() const noexcept
@@ -164,7 +185,7 @@ CSector* CSectorList::GetSectorAbsolute(int index) noexcept
 	{
 		const MapSectorsData& sd = _SectorData[m];
 		if (!sd._pSectors)
-			continue;
+            continue;   // WTF?
 
 		if ((base + sd.iSectorQty) > index)
 		{

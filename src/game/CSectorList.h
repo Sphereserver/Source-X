@@ -51,8 +51,8 @@ public:
     [[nodiscard]]
     const MapSectorsData& GetMapSectorData(int map) const;
 
-	CSector* GetSector(int map, int index) const noexcept;	// gets sector # from one map
-	CSector* GetSector(int map, short x, short y) const noexcept;
+    CSector* GetSectorByIndex(int map, int index) const noexcept;	// gets sector # from one map
+    CSector* GetSectorByCoordsUnchecked(int map, short x, short y) const noexcept;
 
 	int GetSectorAbsoluteQty() const noexcept;
 	CSector* GetSectorAbsolute(int index) noexcept;

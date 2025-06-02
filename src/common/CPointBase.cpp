@@ -1,4 +1,5 @@
 #include "../common/sphere_library/scontainer_ops.h"
+#include "../common/sphere_library/sfastmath.h"
 //#include "../common/CExpression.h" // included in the precompiled header
 #include "../game/items/CItem.h"
 #include "../game/uo_files/CUOMultiItemRec.h"
@@ -324,6 +325,13 @@ void CPointBase::ValidatePoint() noexcept
     const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
     const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
 
+    m_x = sl::fmath::sMax(m_x,  (short)0);
+    m_x = (m_x < iMaxX) ? m_x : (iMaxX - 1);
+
+    m_y = sl::fmath::sMax(m_y,  (short)0);
+    m_y = (m_y < iMaxY) ? m_y : (iMaxY - 1);
+
+    /*
 	if ( m_x < 0 )
 		m_x = 0;
 	if (m_x >= iMaxX)
@@ -333,6 +341,7 @@ void CPointBase::ValidatePoint() noexcept
 		m_y = 0;
 	if (m_y >= iMaxY)
 		m_y = iMaxY - 1;
+    */
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const
@@ -531,7 +540,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					const CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+                    const CPointMap ptTest(
+                        (word)(ptMulti.m_x + pMultiItem->m_dx),
+                        (word)(ptMulti.m_y + pMultiItem->m_dy),
+                        (char)(ptMulti.m_z + pMultiItem->m_dz),
+                        this->m_map);
+
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -1062,11 +1076,11 @@ CSector * CPointBase::GetSector() const
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
 			m_x, m_y, m_map, g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
-		return CWorldMap::GetSector(m_map, 0);
+        return CWorldMap::GetSectorByIndex(m_map, 0);
 	}
 
 	// Get the world Sector we are in.
-	return CWorldMap::GetSector(m_map, m_x, m_y);
+    return CWorldMap::GetSectorByCoordsUnchecked(m_map, m_x, m_y);
 }
 
 CRegion * CPointBase::GetRegion( dword dwType ) const
@@ -1079,10 +1093,7 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 		return nullptr;
 
     const CSector *pSector = GetSector();
-	if ( pSector )
-		return pSector->GetRegion(*this, dwType);
-
-	return nullptr;
+    return !pSector ? nullptr : pSector->GetRegion(*this, dwType);
 }
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
@@ -1094,10 +1105,7 @@ size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 		return 0;
 
 	const CSector *pSector = GetSector();
-	if ( pSector )
-		return pSector->GetRegions(*this, dwType, pRLinks);
-
-	return 0;
+    return !pSector ? 0 : pSector->GetRegions(*this, dwType, pRLinks);
 }
 
 int CPointBase::GetPointSortIndex() const noexcept

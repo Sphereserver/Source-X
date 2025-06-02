@@ -1262,7 +1262,7 @@ void CWorld::SaveStatics()
 
             for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
 			{
-				CSector* pSector = _Sectors.GetSector(m, s);
+                CSector* pSector = _Sectors.GetSectorByIndex(m, s);
 				if ( !pSector )
                     continue;
 
@@ -1474,7 +1474,7 @@ bool CWorld::LoadAll() // Load world from script
 		{
 			EXC_TRYSUB("Load");
 
-			CSector* pSector = _Sectors.GetSector(m, s);
+            CSector* pSector = _Sectors.GetSectorByIndex(m, s);
 			ASSERT(pSector);
 
             if (!pSector->IsLightOverriden())
@@ -1662,7 +1662,7 @@ void CWorld::RespawnDeadNPCs()
 		{
 			EXC_TRY("OnSector");
 
-			CSector* pSector = _Sectors.GetSector(m, s);
+            CSector* pSector = _Sectors.GetSectorByIndex(m, s);
 			ASSERT(pSector);
 			pSector->RespawnDeadNPCs();
 
@@ -1702,7 +1702,7 @@ void CWorld::Restock()
 		{
 			EXC_TRY("OnSector");
 
-			CSector	*pSector = _Sectors.GetSector(m, s);
+            CSector	*pSector = _Sectors.GetSectorByIndex(m, s);
 			ASSERT(pSector);
 			pSector->Restock();
 

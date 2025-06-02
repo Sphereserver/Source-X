@@ -15,7 +15,7 @@ template<typename T>
 [[maybe_unused]]
 constexpr bool is_twos_complement_signed()
 {
-    if constexpr (! std::is_signed_v<T>)
+    if constexpr (std::is_unsigned_v<T>)
         return true; // Unsigned types automatically pass
 
     // Check 1: All-ones pattern should equal -1
@@ -48,11 +48,14 @@ namespace fmath
         return (a + b + c + d + 2) >> 2;
     }
 
+    // Not likely to be needed at all. If so, we have to disable here the 'Wstrict-aliasing' warning for every compiler.
+    /*
     inline float NotF16(float f) noexcept
     {
         const int i = ~(int&)f;
         return (float&)i;
     }
+    */
 
     // --
 
@@ -66,7 +69,6 @@ namespace fmath
     }
     */
 
-    // TODO: return a pair to unpack the return values with a structured binding?
     template<std::signed_integral T>
     inline void sSortPair(T &iMin, T &iMax) noexcept
     {
@@ -86,7 +88,6 @@ namespace fmath
         iMin -= t;   // if a>b: a = a - (a–b) → a = b_old
     }
 
-    // TODO: return a pair to unpack the return values with a structured binding?
     // Sort two unsigned integers so that a ≤ b, branchlessly
     template<std::unsigned_integral T>
     inline void uSortPair(T &uiMin, T &uiMax) noexcept

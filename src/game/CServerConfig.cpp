@@ -1111,7 +1111,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 							script.CopyParseState(s);
 							for (int nIndex = 0; nIndex < nSectors; ++nIndex)
 							{
-								CSector* pSector = CWorldMap::GetSector(nMapNumber, nIndex);
+                                CSector* pSector = CWorldMap::GetSectorByIndex(nMapNumber, nIndex);
 								ASSERT(pSector);
 								pSector->r_Verb(script, &g_Serv);
 							}
@@ -1128,7 +1128,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
                         pszStr = s.GetArgRaw();
                         if (pszStr && *pszStr)
                         {
-                            CSector* pSector = CWorldMap::GetSector(nMapNumber, iSecNumber);
+                            CSector* pSector = CWorldMap::GetSectorByIndex(nMapNumber, iSecNumber);
                             if (pSector)
                             {
                                 CScript script(pszStr);
@@ -1768,7 +1768,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					ptcKey = ptcKey + 6;
 					int iSecNumber = Exp_GetVal(ptcKey);
 					SKIP_SEPARATORS(ptcKey);
-					CSector* pSector = CWorldMap::GetSector(iMapNumber, iSecNumber);
+                    CSector* pSector = CWorldMap::GetSectorByIndex(iMapNumber, iSecNumber);
 					return !pSector ? false : pSector->r_WriteVal(ptcKey, sVal, pSrc);
 				}
 			}

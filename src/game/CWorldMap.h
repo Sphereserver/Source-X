@@ -27,8 +27,8 @@ public:
 
 	// Sectors
 
-	static CSector* GetSector(int map, int index) noexcept;	// gets sector # from one map
-	static CSector* GetSector(int map, short x, short y) noexcept;
+	static CSector* GetSectorByIndex(int map, int index) noexcept;	// gets sector # from one map
+	static CSector* GetSectorByCoordsUnchecked(int map, short x, short y) noexcept;
 
 
 	// Map blocks (for caching) and terrain
@@ -37,9 +37,9 @@ public:
 	static const CUOMapMeter* GetMapMeter(const CPointMap& pt); // Height of MAP0.MUL at given coordinates
 
 	static std::optional<CUOMapMeter> GetMapMeterAdjusted(const CPointMap& pt);
-	static CUOMapMeter CheckMapTerrain(CUOMapMeter pDefault, short x, short y, uchar map);
-	static char GetFloorAvarage(char pPoint1, char pPoint2, short iAverage);
-	static short GetAreaAverage(char pTop, char pLeft, char pBottom, char pRight);
+    static CUOMapMeter CheckMapTerrain(const CUOMapMeter& meterDefault, short x, short y, uchar map);
+    static int GetFloorAverageHeight(int iPoint1, int iPoint2, int iAverage);
+    static int GetAreaAverageHeight(int iTop, int iLeft, int iBottom, int iRight);
 
 	static CItemTypeDef* GetTerrainItemTypeDef(dword dwIndex);
 	static IT_TYPE		 GetTerrainItemType(dword dwIndex);
