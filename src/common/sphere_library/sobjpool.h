@@ -88,6 +88,7 @@ public:
 
     // Acquires an object and returns it as a unique_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
+    [[nodiscard]]
     UniquePtr_t acquireUnique()
     {
         if (!m_freeIndices.empty()) [[likely]]
@@ -115,6 +116,7 @@ public:
 
     // Acquires an object and returns it as a shared_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
+    [[nodiscard]]
     SharedPtr_t acquireShared()
     {
         if (!m_freeIndices.empty()) [[likely]]
@@ -253,6 +255,7 @@ public:
 
     // Acquires an object and returns it as a unique_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
+    [[nodiscard]]
     UniquePtr_t acquireUnique()
     {
         std::lock_guard lock(m_mtx);
@@ -281,6 +284,7 @@ public:
 
     // Acquires an object and returns it as a shared_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
+    [[nodiscard]]
     SharedPtr_t acquireShared()
     {
         std::lock_guard lock(m_mtx);

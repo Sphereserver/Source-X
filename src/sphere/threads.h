@@ -378,6 +378,7 @@ class ThreadHolder
 
 public:
 	static constexpr lpctstr m_sClassName = "ThreadHolder";
+    static constexpr int m_kiInvalidThreadID = -1;
 
 	static ThreadHolder& get() noexcept;
 

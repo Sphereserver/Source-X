@@ -140,6 +140,7 @@ public:
 
     // ---- Construct underlying T in-place
     template<typename... Args>
+    [[nodiscard]]
     explicit GuardedAccess(Args&&... args)
         : mutex_(), data_(std::forward<Args>(args)...)
     {}
@@ -148,6 +149,7 @@ public:
     class LockedReader
     {
     public:
+        [[nodiscard]]
         LockedReader(const GuardedAccess& owner)
             : lock_(owner->pmutex_), ptr_(&owner.data_)
         {}
@@ -162,6 +164,7 @@ public:
     class MTEngineLockedReader
     {
     public:
+        [[nodiscard]]
         MTEngineLockedReader(const GuardedAccess& owner)
             :
 #if MT_ENGINES
@@ -190,6 +193,7 @@ public:
     class LockedWriter
     {
     public:
+        [[nodiscard]]
         LockedWriter(GuardedAccess& owner)
             : lock_(owner->pmutex_), ptr_(&owner.data_)
         {}
@@ -204,6 +208,7 @@ public:
     class MTEngineLockedWriter
     {
     public:
+        [[nodiscard]]
         MTEngineLockedWriter(GuardedAccess& owner)
             :
 #if MT_ENGINES
@@ -234,18 +239,18 @@ public:
     const T& unsafeReader() const { return data_; }
 
     // ---- Lock grabbing ----
-    auto getLockShared() const { return SharedLock(mutex_); }
-    auto getLockUnique()       { return UniqueLock(mutex_); }
+    [[nodiscard]] auto getLockShared() const { return SharedLock(mutex_); }
+    [[nodiscard]] auto getLockUnique()       { return UniqueLock(mutex_); }
 
-    auto mtEngineGetLockShared() const   { return OptLock(mutex_); }
-    auto mtEngineGetLockUnique()         { return OptLock(mutex_); }
+    [[nodiscard]] auto mtEngineGetLockShared() const   { return OptLock(mutex_); }
+    [[nodiscard]] auto mtEngineGetLockUnique()         { return OptLock(mutex_); }
 
     // ---- Accessors ----
-    auto lockedReader() const   { return LockedReader(*this); }
-    auto lockedWriter()         { return LockedWriter(*this); }
+    [[nodiscard]] auto lockedReader() const   { return LockedReader(*this); }
+    [[nodiscard]] auto lockedWriter()         { return LockedWriter(*this); }
 
-    auto mtEngineLockedReader() const   { return MTEngineLockedReader(*this); }
-    auto mtEngineLockedWriter()         { return MTEngineLockedWriter(*this); }
+    [[nodiscard]] auto mtEngineLockedReader() const   { return MTEngineLockedReader(*this); }
+    [[nodiscard]] auto mtEngineLockedWriter()         { return MTEngineLockedWriter(*this); }
 
 private:
     mutable Mutex  mutex_;
