@@ -242,12 +242,9 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nachar *pText, int
 	if ( uidDst.IsValidUID() && !IsInParty(uidDst.CharFind()) )
 		return false;
 
-	CChar *pFrom = uidSrc.CharFind();
-	CChar *pTo = nullptr;
-	if ( uidDst != (dword)0 )
-		pTo = uidDst.CharFind();
+    CChar *pFrom = uidSrc.CharFind();
     ASSERT(pFrom);
-    ASSERT(pTo);
+    CChar *pTo = (uidDst == (dword)0) ? nullptr : uidDst.CharFind();
 
 	tchar *szText = Str_GetTemp();
 	CvtNETUTF16ToSystem(szText, MAX_TALK_BUFFER, pText, MAX_TALK_BUFFER);
@@ -269,7 +266,10 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nachar *pText, int
 	}
 
 	if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
-		g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says '%s' in party to '%s'\n", pFrom->GetClientActive()->GetSocketID(), pFrom->GetName(), szText, pTo ? pTo->GetName() : "all");
+        g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT,
+            "%x:'%s' Says '%s' in party to '%s'\n",
+            pFrom->GetClientActive()->GetSocketID(), pFrom->GetName(), szText,
+            (pTo ? pTo->GetName() : "all"));
 
 	PacketPartyChat cmd(pFrom, pText);
 
