@@ -9,6 +9,7 @@
 static constexpr size_t kuiContainerScaleFactor = 2;
 
 
+// This was done before we added ObjectPool class.
 class CWorldSearchHolderImpl
 {
     static constexpr size_t kuiPreallocateSize = 20;
@@ -47,11 +48,12 @@ CSReferenceCounted<CWorldSearch> CWorldSearchHolder::GetInstance(const CPointMap
 
 CWorldSearch::CWorldSearch() noexcept :
     _iDist(0), _fAllShow(false), _fSearchSquare(false),
-    _eSearchType(ws_search_e::None), _fInertToggle(false),
+    _fInertToggle(false), _eSearchType(ws_search_e::None),
     _ppCurContObjs(nullptr), _pObj(nullptr),
     _uiCurObjIndex(0), _uiObjArrayCapacity(0), _uiObjArraySize(0),
     _iSectorCur(0),  // Get upper left of search rect.
-    _pSectorBase(nullptr), _pSector(nullptr)
+    _pSectorBase(nullptr), _pSector(nullptr),
+    _distanceFunction(nullptr)
 {
 }
 
@@ -76,13 +78,10 @@ void CWorldSearch::Reset(const CPointMap& pt, int iDist)
     //ADDTOCALLSTACK("CWorldSearch::Reset");
     // define a search of the world.
 
-    _fAllShow = false;
-    _fSearchSquare = false;
+    _fAllShow = _fSearchSquare = _fInertToggle = false;
     _eSearchType = ws_search_e::None;
-    _fInertToggle = false;
     _pObj = nullptr;
-    _uiCurObjIndex = 0;
-    _uiObjArraySize = 0;
+    _uiCurObjIndex = _uiObjArraySize = 0;
     //_uiObjArrayCapacity = 0;   // Don't! Recycle the allocated space for _ppCurContObjs.
     _iSectorCur = 0; // Get upper left of search rect.
 
@@ -95,18 +94,28 @@ void CWorldSearch::Reset(const CPointMap& pt, int iDist)
         pt.m_x + iDist + 1,
         pt.m_y + iDist + 1,
         pt.m_map);
+
+    SetDistanceFunction();
 }
 
 void CWorldSearch::SetAllShow(bool fView)
 {
 	//ADDTOCALLSTACK_DEBUG("CWorldSearch::SetAllShow");
-	_fAllShow = fView;
+    if (_fAllShow == fView)
+        return;
+
+    _fAllShow = fView;
+    SetDistanceFunction();
 }
 
 void CWorldSearch::SetSearchSquare(bool fSquareSearch)
 {
 	//ADDTOCALLSTACK_DEBUG("CWorldSearch::SetSearchSquare");
-	_fSearchSquare = fSquareSearch;
+    if (_fSearchSquare == fSquareSearch)
+        return;
+
+    _fSearchSquare = fSquareSearch;
+    SetDistanceFunction();
 }
 
 void CWorldSearch::RestartSearch()
@@ -176,6 +185,24 @@ void CWorldSearch::LoadSectorObjs(CSObjCont const& pSectorObjList)
     _uiCurObjIndex = 0;
 }
 
+void CWorldSearch::SetDistanceFunction()
+{
+    if (_fAllShow)
+    {
+        if (_fSearchSquare)
+            _distanceFunction = &CPointMap::GetDistSightBase;
+        else
+            _distanceFunction = &CPointMap::GetDistSight;
+    }
+    else
+    {
+        if (_fSearchSquare)
+            _distanceFunction = &CPointMap::GetDistBase;
+        else
+            _distanceFunction = &CPointMap::GetDist;
+    }
+}
+
 CItem* CWorldSearch::GetItem()
 {
 	// This method is called very frequently, ADDTOCALLSTACK unneededly sucks cpu
@@ -196,42 +223,18 @@ CItem* CWorldSearch::GetItem()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Items);
-        _pObj = (_uiCurObjIndex >= _uiObjArraySize) ? nullptr : static_cast<CObjBase*>(_ppCurContObjs[_uiCurObjIndex]);
-		if (_pObj == nullptr)
+        if (_uiCurObjIndex >= _uiObjArraySize)
 		{
+            _pObj = nullptr;
 			if (GetNextSector())
 				continue;
 
 			return nullptr;
 		}
 
-		const CPointMap& ptObj(_pObj->GetTopPoint());
-		if (_fSearchSquare)
-		{
-			if (_fAllShow)
-			{
-				if (_pt.GetDistSightBase(ptObj) <= _iDist)
-					return static_cast <CItem*> (_pObj);
-			}
-			else
-			{
-				if (_pt.GetDistSight(ptObj) <= _iDist)
-					return static_cast <CItem*> (_pObj);
-			}
-		}
-		else
-		{
-			if (_fAllShow)
-			{
-				if (_pt.GetDistBase(ptObj) <= _iDist)
-					return static_cast <CItem*> (_pObj);
-			}
-			else
-			{
-				if (_pt.GetDist(ptObj) <= _iDist)
-					return static_cast <CItem*> (_pObj);
-			}
-		}
+        _pObj = static_cast<CObjBase*>(_ppCurContObjs[_uiCurObjIndex]);
+        if ((_pt.* _distanceFunction)(_pObj->GetTopPoint()) <= _iDist)
+            return static_cast <CItem*> (_pObj);
 	}
 }
 
@@ -256,17 +259,17 @@ CChar* CWorldSearch::GetChar()
 		}
 
 		ASSERT(_eSearchType == ws_search_e::Chars);
-        _pObj = (_uiCurObjIndex >= _uiObjArraySize) ? nullptr : static_cast<CObjBase*>(_ppCurContObjs[_uiCurObjIndex]);
-		if (_pObj == nullptr)
+        if (_uiCurObjIndex >= _uiObjArraySize)
 		{
+            _pObj = nullptr;
 			if (!_fInertToggle && _fAllShow)
 			{
 				_fInertToggle = true;
 
                 LoadSectorObjs(_pSector->m_Chars_Disconnect);
-                _pObj = (_uiCurObjIndex >= _uiObjArraySize) ? nullptr : static_cast<CObjBase*>(_ppCurContObjs[_uiCurObjIndex]);
-				if (_pObj != nullptr)
+                if (_uiCurObjIndex < _uiObjArraySize)
 					goto jumpover;
+                _pObj = nullptr;
 			}
 
 			if (GetNextSector())
@@ -276,33 +279,8 @@ CChar* CWorldSearch::GetChar()
 		}
 
 	jumpover:
-		const CPointMap& ptObj = _pObj->GetTopPoint();
-
-		if (_fSearchSquare)
-		{
-			if (_fAllShow)
-			{
-				if (_pt.GetDistSightBase(ptObj) <= _iDist)
-					return static_cast <CChar*> (_pObj);
-			}
-			else
-			{
-				if (_pt.GetDistSight(ptObj) <= _iDist)
-					return static_cast <CChar*> (_pObj);
-			}
-		}
-		else
-		{
-			if (_fAllShow)
-			{
-				if (_pt.GetDistBase(ptObj) <= _iDist)
-					return static_cast <CChar*> (_pObj);
-			}
-			else
-			{
-				if (_pt.GetDist(ptObj) <= _iDist)
-					return static_cast <CChar*> (_pObj);
-			}
-		}
+        _pObj = static_cast<CObjBase*>(_ppCurContObjs[_uiCurObjIndex]);
+        if ((_pt.* _distanceFunction)(_pObj->GetTopPoint()) <= _iDist)
+            return static_cast <CChar*> (_pObj);
 	}
 }

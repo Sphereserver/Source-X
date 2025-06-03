@@ -36,13 +36,13 @@ class CWorldSearch
         Chars
     };
 
-    CPointMap _pt;		// Base point of our search.
-    int _iDist;			// How far from the point are we interested in
+    int _iDist;                 // How far from the point are we interested in
+    CPointMap _pt;              // Base point of our search.
     bool _fAllShow;				// Include Even inert items.
     bool _fSearchSquare;		// Search in a square (uo-sight distance) rather than a circle (standard distance).
 
-    ws_search_e _eSearchType;
     bool _fInertToggle;			// We are now doing the inert chars.
+    ws_search_e _eSearchType;
 
     CSObjContRec** _ppCurContObjs;	// Array with a copy of the pointers to the objects inside the sector we are in searching right now.
     CObjBase* _pObj;			// The current object of interest.
@@ -55,6 +55,10 @@ class CWorldSearch
     CSector* _pSector;			// current Sector
     CRectMap _rectSector;		// A rectangle containing our sectors we can search.
 
+    // Pointer to distance function:
+    //  The ::* operator means "pointer to member of CPointMap".
+    int (CPointMap::* _distanceFunction)(const CPointBase&) const noexcept;
+
 public:
     static const char* m_sClassName;
     CWorldSearch(const CWorldSearch& copy) = delete;
@@ -65,15 +69,17 @@ public:
     ~CWorldSearch() noexcept;
 
 public:
-    //static cdrc::rc_ptr<CWorldSearch> GetInstance(const CPointMap& pt, int iDist = 0);
     void Reset(const CPointMap& pt, int iDist = 0);
     void SetAllShow(bool fView);
     void SetSearchSquare(bool fSquareSearch);
     void RestartSearch();
+
     CChar* GetChar();
     CItem* GetItem();
 
 private:
+    void SetDistanceFunction();
+
     bool GetNextSector();
     void LoadSectorObjs(CSObjCont const& pSectorObjList);
 };
