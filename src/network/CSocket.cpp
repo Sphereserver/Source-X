@@ -1,6 +1,10 @@
 #include "CSocket.h"
 #ifndef _WIN32
-	#include <errno.h>
+#   include <arpa/inet.h>
+#   include <sys/socket.h>
+#   include <unistd.h>
+#   include <fcntl.h>
+#   include <errno.h>
 #endif
 #include "../common/sphere_library/sstring.h"
 #include "../common/CLog.h"

@@ -6,33 +6,31 @@
 #ifndef _INC_CSOCKET_H
 #define _INC_CSOCKET_H
 
+// TODO: In the different headers and classes, store a pointer to CSocketAddress instead of the class itself. This avoids
+//  to include CSocket.h.
+
 #include "../common/common.h"
 #ifdef _WIN32
 	#include <winsock2.h>		// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
 	typedef int socklen_t;
 #else
 	// else assume LINUX
-	#include <sys/socket.h>
-	#include <netdb.h>
-	#include <netinet/in.h>
-	#include <unistd.h>
-	#include <arpa/inet.h>
-	#include <fcntl.h>
+    #include <netdb.h>          // needed for hostent struct
+    //#include <netinet/in.h>   // included by netdb.h
 
 	// Compatibility stuff.
 	#define INVALID_SOCKET  (SOCKET)(~0)
 	#define SOCKET_ERROR    (-1)
 	#define SOCKET			int
 	#define TCP_NODELAY		0x0001
-
 #endif	// _WIN32
-
 
 #ifdef _WIN32
 #	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); closesocket(_x_); }
 #else
 #	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); close(_x_); }
 #endif
+
 
 void AddSocketToSet(fd_set& fds, SOCKET socket, int& count);
 
