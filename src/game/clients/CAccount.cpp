@@ -987,7 +987,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 {
 	ADDTOCALLSTACK("CAccount::SetPassword");
 
-	if ( Str_Check( pszPassword ) )	// Prevents exploits
+    if ( Str_Untrusted_InvalidTermination( pszPassword ) )	// Prevents exploits
 		return false;
 
 	bool useMD5 = g_Cfg.m_fMd5Passwords;

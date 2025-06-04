@@ -13,9 +13,9 @@ CSectorList::~CSectorList()
 	Close(true);
 }
 
-const CSectorList* CSectorList::Get() noexcept // static
+const CSectorList& CSectorList::Get() noexcept // static
 {
-	return &g_World._Sectors;
+    return g_World._Sectors;
 }
 
 void CSectorList::Init()
@@ -45,9 +45,9 @@ void CSectorList::Init()
 		if (!g_MapList.IsMapSupported(iMap))
 			continue;
 
-		const int iSectorQty = g_MapList.CalcSectorQty(iMap);
-		const int iMaxX = g_MapList.CalcSectorCols(iMap);
-		const int iMaxY = g_MapList.CalcSectorRows(iMap);
+        const int iSectorQty= g_MapList.CalcSectorQty(iMap);
+        const int iMaxX     = g_MapList.CalcSectorCols(iMap);
+        const int iMaxY     = g_MapList.CalcSectorRows(iMap);
 
 		snprintf(ts.buffer(), ts.capacity(), " map%d=%d", iMap, iSectorQty);
 		Str_ConcatLimitNull(tsConcat.buffer(), ts.buffer(), tsConcat.capacity());

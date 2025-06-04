@@ -614,7 +614,7 @@ int CSector::GetLocalTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
-	const CSectorList* pSectors = CSectorList::Get();
+    const CSectorList& pSectors = CSectorList::Get();
 	const CPointMap& pt(GetBasePoint());
 	int64 iLocalTime = CWorldGameTime::GetCurrentTimeInGameMinutes();
 
@@ -624,7 +624,7 @@ int CSector::GetLocalTime() const
 	}
 	else
 	{
-        const MapSectorsData& sd = pSectors->GetMapSectorData(pt.m_map);
+        const MapSectorsData& sd = pSectors.GetMapSectorData(pt.m_map);
 
 		// Time difference between adjacent sectors in minutes
         const int iSectorTimeDiff = (24*60) / sd.iSectorColumns;

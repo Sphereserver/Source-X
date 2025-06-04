@@ -1102,7 +1102,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				{
 					if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 					{
-                        const int nSectors = CSectorList::Get()->GetMapSectorData(nMapNumber).iSectorQty;
+                        const int nSectors = CSectorList::Get().GetMapSectorData(nMapNumber).iSectorQty;
 						pszStr = s.GetArgRaw();
 
 						if ( pszStr && *pszStr )
@@ -1732,8 +1732,8 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					else if (!strnicmp(pszCmd, "SECTOR.", 7))
 					{
 						pszCmd += 7;
-						const CSectorList* pSectors = CSectorList::Get();
-                        const MapSectorsData& sd = pSectors->GetMapSectorData(iNumber);
+                        const CSectorList& pSectors = CSectorList::Get();
+                        const MapSectorsData& sd = pSectors.GetMapSectorData(iNumber);
 
 						if (!strnicmp(pszCmd, "SIZE", 4))
                             sVal.FormatVal(sd.iSectorSize);

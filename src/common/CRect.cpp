@@ -293,8 +293,8 @@ CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that ma
 	// RETURN: nullptr = no more
 
 	// Align new rect.
-    const CSectorList *pSectors = CSectorList::Get();
-    const MapSectorsData& sd = pSectors->GetMapSectorData(m_map);
+    const CSectorList &pSectors = CSectorList::Get();
+    const MapSectorsData& sd = pSectors.GetMapSectorData(m_map);
     const int iSectorSize = sd.iSectorSize;
     const int iSectorCols = sd.iSectorColumns;
     const uint uiSectorShift = sd.uiSectorDivShift;
@@ -332,10 +332,10 @@ CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that ma
     const int iBase = (baseRow * iSectorCols) + baseCol;
 
     if (i >= (height * width))
-        return i ? nullptr : pSectors->GetSectorByIndex(m_map, iBase);
+        return i ? nullptr : pSectors.GetSectorByIndex(m_map, iBase);
 
     const int indexoffset = ((i / width) * iSectorCols) + (i % width);
-    return pSectors->GetSectorByIndex(m_map, iBase + indexoffset);
+    return pSectors.GetSectorByIndex(m_map, iBase + indexoffset);
 }
 
 

@@ -31,7 +31,7 @@ class CSectorList
 public:
 	static const char* m_sClassName;
 
-	//std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData; // Use plain C-style vectors, to remove even the minimum overhead of std::array methods
+    //std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData; // Use plain C-style vectors, to remove even the minimal overhead of std::array methods
 	MapSectorsData _SectorData[MAP_SUPPORTED_QTY];
 	bool _fInitialized;
 
@@ -43,7 +43,7 @@ public:
 	CSectorList& operator=(const CSectorList& other) = delete;
 
 public:
-	static const CSectorList* Get() noexcept;
+    static const CSectorList& Get() noexcept;
 
 	void Init();
 	void Close(bool fClosingWorld);

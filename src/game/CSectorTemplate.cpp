@@ -155,8 +155,8 @@ void CItemsList::AddItemToSector( CItem * pItem )
 
 void CSectorBase::SetAdjacentSectors()
 {
-	const CSectorList* pSectors = CSectorList::Get();
-    auto const& sd = pSectors->GetMapSectorData(m_map);
+    const CSectorList& pSectors = CSectorList::Get();
+    auto const& sd = pSectors.GetMapSectorData(m_map);
 
     const int iMaxX = sd.iSectorColumns;
     ASSERT(iMaxX > 0);
@@ -206,7 +206,7 @@ void CSectorBase::SetAdjacentSectors()
         {
             continue;
         }
-        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors->GetSectorByIndex(m_map, index);
+        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndex(m_map, index);
     }
 }
 
@@ -233,7 +233,7 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
 	{
 		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
 	}
-    else if (( index < 0 ) || ( index >= CSectorList::Get()->GetMapSectorData(map).iSectorQty ))
+    else if (( index < 0 ) || ( index >= CSectorList::Get().GetMapSectorData(map).iSectorQty ))
 	{
 		m_map = map;
 		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, map, map);
@@ -457,8 +457,8 @@ CPointMap CSectorBase::GetBasePoint() const
     // Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
     DEBUG_ASSERT(g_MapList.IsMapSupported(m_map));
 
-    const CSectorList* pSectors = CSectorList::Get();
-    auto const& sd = pSectors->GetMapSectorData(m_map);
+    const CSectorList& pSectors = CSectorList::Get();
+    auto const& sd = pSectors.GetMapSectorData(m_map);
     DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty) );
 
     const int iCols = sd.iSectorColumns;
@@ -480,9 +480,9 @@ CRectMap CSectorBase::GetRect() const noexcept
 	// Get a rectangle for the sector.
     DEBUG_ASSERT(g_MapList.IsMapSupported(m_map));
 
-    const CSectorList* pSectors = CSectorList::Get();
+    const CSectorList& pSectors = CSectorList::Get();
     const CPointMap& pt = GetBasePoint();
-    const int iSectorSize = pSectors->GetMapSectorData(pt.m_map).iSectorSize;
+    const int iSectorSize = pSectors.GetMapSectorData(pt.m_map).iSectorSize;
 	return // Initializer list for CRectMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
 	{
 		pt.m_x,					// left

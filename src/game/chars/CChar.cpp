@@ -1734,7 +1734,8 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool fFemale,
 	tchar *zCharName = Str_GetTemp();
     Str_CopyLimitNull(zCharName, pszCharname, MAX_NAME_SIZE);
 
-	if ( !strlen(zCharName) || g_Cfg.IsObscene(zCharName) || Str_CheckName(zCharName) ||!strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) ||
+    if ( !strlen(zCharName) || Str_Untrusted_InvalidName(zCharName) ||
+        g_Cfg.IsObscene(zCharName) ||!strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) ||
 		!strnicmp(zCharName, "seer ", 5) || !strnicmp(zCharName, "gm ", 3) || !strnicmp(zCharName, "admin ", 6) || !strnicmp(zCharName, "counselor ", 10) )
 	{
 		fNameIsAccepted = false;

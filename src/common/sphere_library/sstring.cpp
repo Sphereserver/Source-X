@@ -332,14 +332,16 @@ tchar* Str_FromInt_Fast(_IntType val, lptstr_restrict out_buf, size_t buf_length
 
     // Write digits from back of buffer
 #define WRITE_OUT(ch)           \
-    do {                        \
+    {                           \
         if (idx == 0)           \
             return nullptr;     \
         out_buf[--idx] = (ch);  \
-    } while (0)
+    }
 
     size_t idx = buf_length;
     out_buf[--idx] = '\0';
+
+    // TODO: gracefully handle integer overflows, maybe printing a warning message.
 
     if (fHex)
     {
@@ -1114,83 +1116,6 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
     }
 }
 
-/*
-void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
-{
-    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
-    bool fOpenedOneAngular = false;
-    int iOpenAngular = 0, iOpenCurly = 0;
-    tchar* ptcTest = ptcLine;
-    while (const tchar ch = *ptcTest)
-    {
-        if (IsWhitespace(ch))
-            ;
-        else if (ch == '(')
-            ++iOpenCurly;
-        else if (ch == ')')
-            --iOpenCurly;
-        else if (iOpenCurly == 0)
-        {
-            if (ch == '<')
-            {
-                bool fOperator = false;
-                if ((ptcTest[1] == '<') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
-                {
-                    // I want a whitespace after the operator and some text after it.
-                    const tchar * ptcOpTest = &(ptcTest[3]);
-                    if (*ptcOpTest != '\0')
-                    {
-                        GETNONWHITESPACE(ptcOpTest);
-                        if (*ptcOpTest != '\0')  // There's more text to parse
-                        {
-                            // I guess i have sufficient proof: skip, it's a << operator
-                            fOperator = true;
-                            ptcTest += 2; // Skip the second > and the following whitespace
-                        }
-                    }
-                }
-                if (!fOperator)
-                {
-                    fOpenedOneAngular = true;
-                    ++iOpenAngular;
-                }
-            }
-            else if (ch == '>')
-            {
-                bool fOperator = false;
-                if ((ptcTest[1] == '>') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
-                {
-                    if ((ptcLine == ptcTest) || ((iOpenAngular > 0) && IsWhitespace(*(ptcTest - 1))))
-                    {
-                        const tchar * ptcOpTest = &(ptcTest[3]);
-                        if (*ptcOpTest != '\0')
-                        {
-                            GETNONWHITESPACE(ptcOpTest);
-                            if (*ptcOpTest != '\0')  // There's more text to parse
-                            {
-                                // I guess i have sufficient proof: skip, it's a >> operator
-                                fOperator = true;
-                                ptcTest += 2; // Skip the second > and the following whitespace
-                            }
-                        }
-                    }
-                }
-                if (!fOperator)
-                {
-                    --iOpenAngular;
-                    if (fOpenedOneAngular && !iOpenAngular)
-                    {
-                        ptcLine = ptcTest + 1;
-                        return;
-                    }
-                }
-            }
-        }
-        ++ptcTest;
-    }
-}
-*/
-
 void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
 {
     // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
@@ -1383,27 +1308,30 @@ int FindCAssocRegTableHeadSorted(const tchar * pszFind, const tchar * const* pps
     return -1;
 }
 
-bool Str_Check(const tchar * pszIn) noexcept
+bool Str_Untrusted_InvalidTermination(const tchar * pszIn, size_t uiMaxAcceptableSize) noexcept
 {
     if (pszIn == nullptr)
         return true;
 
     const tchar * p = pszIn;
-    while (*p != '\0' && (*p != 0x0A) && (*p != 0x0D))
+    while ((*p != '\0') && (*p != 0x0A /* '\n' */) && (*p != 0x0D /* '\r' */)
+           && ((p - pszIn) < ptrdiff_t(uiMaxAcceptableSize)))
+    {
         ++p;
+    }
 
     return (*p != '\0');
 }
 
-bool Str_CheckName(const tchar * pszIn) noexcept
+bool Str_Untrusted_InvalidName(const tchar * pszIn, size_t uiMaxAcceptableSize) noexcept
 {
     if (pszIn == nullptr)
         return true;
 
     const tchar * p = pszIn;
-    while (*p != '\0' &&
-        (
-        ((*p >= 'A') && (*p <= 'Z')) ||
+    while (*p != '\0' && ((p - pszIn) < ptrdiff_t(uiMaxAcceptableSize))
+        &&  (
+            ((*p >= 'A') && (*p <= 'Z')) ||
             ((*p >= 'a') && (*p <= 'z')) ||
             ((*p >= '0') && (*p <= '9')) ||
             ((*p == ' ') || (*p == '\'') || (*p == '-') || (*p == '.'))

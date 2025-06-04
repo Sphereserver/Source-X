@@ -301,7 +301,7 @@ void CCacheableScriptFile::dupeFrom(CCacheableScriptFile *other)
 
 bool CCacheableScriptFile::_HasCache() const
 {
-    if ((_fileContent == nullptr) /* || _fileContent->empty()  Exclude this: might just be an empty file!*/)
+    if ((_fileContent == nullptr) /* || _fileContent->empty()  Exclude this: might just be an empty file, which is legit!*/)
         return false;
     return true;
 }

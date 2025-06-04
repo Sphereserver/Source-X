@@ -3188,9 +3188,9 @@ byte CClient::LogIn( lpctstr ptcAccName, lpctstr ptcPassword, CSString & sMsg )
 
 
 	tchar ptcName[ MAX_ACCOUNT_NAME_SIZE ];
-	if ( !CAccount::NameStrip(ptcName, ptcAccName) || Str_Check(ptcAccName) )
+    if ( !CAccount::NameStrip(ptcName, ptcAccName) || Str_Untrusted_InvalidTermination(ptcAccName) )
 		return( PacketLoginError::BadAccount );
-	else if ( Str_Check(ptcPassword) )
+    else if ( Str_Untrusted_InvalidTermination(ptcPassword) )
 		return( PacketLoginError::BadPassword );
 
 	const bool fGuestAccount = ! strnicmp( ptcAccName, "GUEST", 5 );

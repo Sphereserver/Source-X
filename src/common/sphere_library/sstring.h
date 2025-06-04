@@ -313,15 +313,16 @@ int FindTableHeadSorted(const tchar * pFind, const tchar * const * ppTable, int 
 
 /**
 * @param pszIn string to check.
+* @param uiMaxAcceptableSize a string greater than this is invalid.
 * @return true if string is empty or has '\c' or '\n' characters, false otherwise.
 */
-bool Str_Check(const tchar * pszIn) noexcept;
+bool Str_Untrusted_InvalidTermination(const tchar * pszIn, size_t uiMaxAcceptableSize = SCRIPT_MAX_LINE_LEN) noexcept;
 
 /**
 * @param pszIn string to check.
 * @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
 */
-bool Str_CheckName(const tchar * pszIn) noexcept;
+bool Str_Untrusted_InvalidName(const tchar * pszIn, size_t uiMaxAcceptableSize = 100 /* arbitrary */) noexcept;
 
 /**
 * @brief find a substring in a string from an offset.

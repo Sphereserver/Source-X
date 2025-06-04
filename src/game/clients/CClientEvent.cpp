@@ -171,7 +171,7 @@ void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 	if ( !pBook->IsBookWritable() )
 		return;
 
-	if ( Str_Check(pszTitle) || Str_Check(pszAuthor) )
+    if ( Str_Untrusted_InvalidTermination(pszTitle) || Str_Untrusted_InvalidTermination(pszAuthor) )
 		return;
 
 	pBook->SetName(pszTitle);
@@ -1045,7 +1045,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return false;
 	if ( pszCommand[0] == 0 )
 		return true;		// should not be said
-	if ( Str_Check(pszCommand) )
+    if ( Str_Untrusted_InvalidTermination(pszCommand) )
 		return true;		// should not be said
 	if ( ((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) //  WTF? In any case, keep using dispid, or it's bugged when you change character's dispid to c_man_gm.
         || (pszCommand[0] == g_Cfg.m_cCommandPrefix))
@@ -1671,7 +1671,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	// result of addPrompt
 	tchar szText[MAX_TALK_BUFFER];
 
-	if ( Str_Check( pszText ) )
+    if ( Str_Untrusted_InvalidTermination( pszText, MAX_TALK_BUFFER - 1) )
 		return;
 
 	CLIMODE_TYPE promptMode = m_Prompt_Mode;
@@ -2205,7 +2205,7 @@ bool CClient::Event_SetName( CUID uid, const char * pszCharName )
 	if (!pChar || !m_pChar)
 		return false;
 
-   if ( Str_CheckName(pszCharName) || !strlen(pszCharName) )
+   if ( Str_Untrusted_InvalidName(pszCharName) || !strlen(pszCharName) )
 		return false;
 
 	// Do we have the right to do this ?

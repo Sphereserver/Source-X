@@ -1047,7 +1047,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 
 		ASSERT(len > 0);
 		content[--len] = '\0';
-		if (Str_Check(content))
+        if (Str_Untrusted_InvalidTermination(content, len))
 			break;
 
 		// set page content
@@ -1234,7 +1234,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			uint lenstr = readByte();
 			tchar* str = Str_GetTemp();
 			readStringASCII(str, lenstr, false);
-			if (Str_Check(str))
+            if (Str_Untrusted_InvalidTermination(str, lenstr))
 				return true;
 
 			// if
@@ -1259,7 +1259,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			{
 				lenstr = readByte();
 				readStringASCII(str, lenstr, false);
-				if (Str_Check(str) == false)
+                if (Str_Untrusted_InvalidTermination(str, lenstr) == false)
 					newMessage->AddPageText(str);
 			}
 
@@ -2486,7 +2486,7 @@ bool PacketClientVersion::onReceive(CNetState* net)
 	tchar* versionStr = Str_GetTemp();
 	readStringASCII(versionStr, length, false);
 
-	if (Str_Check(versionStr))
+    if (Str_Untrusted_InvalidTermination(versionStr, length))
 		return true;
 
 	if (strstr(versionStr, "UO:3D") != nullptr)

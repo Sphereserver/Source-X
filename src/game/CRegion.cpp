@@ -73,10 +73,10 @@ bool CRegion::RealizeRegion()
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
-	const CSectorList* pSectors = CSectorList::Get();
-    for ( int i = 0, iMax = pSectors->GetMapSectorData(m_pt.m_map).iSectorQty; i < iMax; ++i )
+    const CSectorList& pSectors = CSectorList::Get();
+    for ( int i = 0, iMax = pSectors.GetMapSectorData(m_pt.m_map).iSectorQty; i < iMax; ++i )
 	{
-        CSector *pSector = pSectors->GetSectorByIndex(m_pt.m_map, i);
+        CSector *pSector = pSectors.GetSectorByIndex(m_pt.m_map, i);
 
 		if ( pSector && IsOverlapped(pSector->GetRect()) )
 		{
