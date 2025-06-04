@@ -77,8 +77,8 @@ bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the 
     ASSERT(m_pLock);
     ASSERT( ! _IsBinaryMode() );
 
-    tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
-    while ( CCacheableScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
+    tchar* ptcBuf = _GetKeyBufferRaw();
+    while ( CCacheableScriptFile::_ReadString( ptcBuf, sm_TextBufMaxSize ))
     {
         m_pLock->m_iLineNum = ++m_iLineNum;	// share this with original open.
         if ( fRemoveBlanks )

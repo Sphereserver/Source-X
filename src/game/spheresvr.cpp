@@ -15,8 +15,8 @@
 	#include "../network/linuxev.h"
 #endif
 
-#include "../common/sphere_library/CSRand.h"
 #include "../common/CLog.h"
+#include "../common/CScriptParserBufs.h"
 //#include "../common/CException.h" // included in the precompiled header
 //#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CUOInstall.h"
@@ -127,6 +127,10 @@ void GlobalInitializer::PeriodicSyncTimeConstants() // static
 // NOLINTNEXTLINE(clazy-non-pod-global-static)
 static GlobalInitializer g_GlobalInitializer;
 
+extern CScriptParserBufs g_ScriptParserBuffers;
+CScriptParserBufs g_ScriptParserBuffers;
+
+
 #ifdef _WIN32
 CNTWindow g_NTWindow;
 #else
@@ -159,7 +163,6 @@ CWorld			g_World;			// the world. (we save this stuff)
 // Again, game servers stuff.
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
-CSRand          g_Rand; // TODO: remove this, since now all the members are static.
 sl::GuardedAccess<CExprGlobals>     // TODO: put inside GuardedAccess also g_Cfg, and slowly also the other stuff?
     g_ExprGlobals;                  // Global script variables.
 CSStringList	g_AutoComplete;		// auto-complete list
@@ -167,8 +170,11 @@ CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
 
 
+//-- Threads.
+
 // NOLINTNEXTLINE(clazy-non-pod-global-static)
 static MainThread g_Main;
+
 // NOLINTNEXTLINE(clazy-non-pod-global-static)
 static PingServer g_PingServer;
 

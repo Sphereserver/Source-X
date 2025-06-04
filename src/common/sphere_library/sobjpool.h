@@ -20,7 +20,7 @@ namespace sl
 // - If AllowFallback is true, a new, dynamically allocated object is returned.
 // - Otherwise, a std::runtime_error is thrown.
 
-template <typename T, size_t tp_pool_size, bool tp_allow_fallback = false>
+template <typename PooledObject_t, size_t tp_pool_size, bool tp_allow_fallback = false>
 // tp: template parameter
 class ObjectPool
 {
@@ -31,10 +31,10 @@ public:
     static constexpr index_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
     static constexpr bool    sm_allow_fallback = tp_allow_fallback;
 
-    // Ensure that T is default constructible and destructible.
-    static_assert(std::is_default_constructible_v<T>,
+    // Ensure that PooledObject_t is default constructible and destructible.
+    static_assert(std::is_default_constructible_v<PooledObject_t>,
         "ObjectPool requires the type T to be default constructible");
-    static_assert(std::is_destructible_v<T>,
+    static_assert(std::is_destructible_v<PooledObject_t>,
         "ObjectPool requires the type T to be destructible");
 
     ObjectPool()
@@ -59,7 +59,7 @@ public:
         ObjectPool* m_pool;
         std::optional<index_t> m_index; // Engaged if pooled
 
-        void operator()(T* ptr) const
+        void operator()(PooledObject_t* ptr) const
         {
             if (m_pool)
             {
@@ -84,7 +84,7 @@ public:
     };
 
     // Type alias for unique_ptr using PoolDeleter.
-    using UniquePtr_t = std::unique_ptr<T, PoolDeleter>;
+    using UniquePtr_t = std::unique_ptr<PooledObject_t, PoolDeleter>;
 
     // Acquires an object and returns it as a unique_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
@@ -95,13 +95,13 @@ public:
         {
             const auto idx = m_freeIndices.top();
             m_freeIndices.pop();
-            T* ptr = &m_objects[idx];
+            PooledObject_t* ptr = &m_objects[idx];
             return UniquePtr_t(ptr, PoolDeleter {this, idx});
         }
         else [[unlikely]] if constexpr (sm_allow_fallback)
         {
             // Return a fallback (dynamically allocated) object.
-            T* ptr = new T();
+            PooledObject_t* ptr = new PooledObject_t();
             m_fallbackObjsCount += 1;
             return UniquePtr_t(ptr, PoolDeleter {this, std::nullopt});
         }
@@ -112,7 +112,7 @@ public:
     }
 
     // Type alias for shared_ptr. The deleter goes in the constructor, unlike unique_ptr.
-    using SharedPtr_t = std::shared_ptr<T>;
+    using SharedPtr_t = std::shared_ptr<PooledObject_t>;
 
     // Acquires an object and returns it as a shared_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
@@ -123,15 +123,15 @@ public:
         {
             const auto idx = m_freeIndices.top();
             m_freeIndices.pop();
-            T* ptr = &m_objects[idx];
-            return std::shared_ptr<T>(ptr, PoolDeleter {this, idx});
+            PooledObject_t* ptr = &m_objects[idx];
+            return std::shared_ptr<PooledObject_t>(ptr, PoolDeleter {this, idx});
         }
         else [[unlikely]] if constexpr (sm_allow_fallback)
         {
             // Return a fallback (dynamically allocated) object.
-            T* ptr = new T();
+            PooledObject_t* ptr = new PooledObject_t();
             m_fallbackObjsCount += 1;
-            return std::shared_ptr<T>(ptr, PoolDeleter {this, std::nullopt});
+            return std::shared_ptr<PooledObject_t>(ptr, PoolDeleter {this, std::nullopt});
         }
         else
         {
@@ -156,7 +156,7 @@ public:
 
     // Static helper method for shared_ptr.
     [[nodiscard]]
-    static bool isFromPool(const std::shared_ptr<T> &ptr)
+    static bool isFromPool(const std::shared_ptr<PooledObject_t> &ptr)
     {
         // Does std::get_deleter work only with RTTI enabled?
         if (auto deleterPtr = std::get_deleter<PoolDeleter>(ptr))
@@ -178,7 +178,7 @@ private:
     }
 
     // Pre-constructed objects stored in an array.
-    std::array<T, sm_pool_size> m_objects{};
+    std::array<PooledObject_t, sm_pool_size> m_objects{};
 
     // Stack tracked indices of available objects.
     sl::fixed_comptime_stack<index_t, sm_pool_size> m_freeIndices;
@@ -188,7 +188,7 @@ private:
 };
 
 
-template <typename T, size_t tp_pool_size, bool tp_allow_fallback = false>
+template <typename PooledObject_t, size_t tp_pool_size, bool tp_allow_fallback = false>
 // tp: template parameter
 // ts: thread safe
 class TSObjectPool
@@ -198,10 +198,10 @@ public:
     static constexpr index_t sm_pool_size      = static_cast<index_t>(tp_pool_size);
     static constexpr bool    sm_allow_fallback = tp_allow_fallback;
 
-    // Ensure that T is default constructible and destructible.
-    static_assert(std::is_default_constructible_v<T>,
+    // Ensure that PooledObject_t is default constructible and destructible.
+    static_assert(std::is_default_constructible_v<PooledObject_t>,
         "ObjectPool requires the type T to be default constructible");
-    static_assert(std::is_destructible_v<T>,
+    static_assert(std::is_destructible_v<PooledObject_t>,
         "ObjectPool requires the type T to be destructible");
 
     TSObjectPool()
@@ -226,7 +226,7 @@ public:
         TSObjectPool* m_pool;
         std::optional<index_t> m_index; // Engaged if pooled
 
-        void operator()(T* ptr) const
+        void operator()(PooledObject_t* ptr) const
         {
             if (m_pool)
             {
@@ -251,7 +251,7 @@ public:
     };
 
     // Type alias for unique_ptr using PoolDeleter.
-    using UniquePtr_t = std::unique_ptr<T, PoolDeleter>;
+    using UniquePtr_t = std::unique_ptr<PooledObject_t, PoolDeleter>;
 
     // Acquires an object and returns it as a unique_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
@@ -263,13 +263,13 @@ public:
         {
             const auto idx = m_freeIndices.top();
             m_freeIndices.pop();
-            T* ptr = &m_objects[idx];
+            PooledObject_t* ptr = &m_objects[idx];
             return UniquePtr_t(ptr, PoolDeleter {this, idx});
         }
         else [[unlikely]] if constexpr (sm_allow_fallback)
         {
             // Return a fallback (dynamically allocated) object.
-            T* ptr = new T();
+            PooledObject_t* ptr = new PooledObject_t();
             m_fallbackObjsCount.fetch_add(1, std::memory_order_relaxed);
             return UniquePtr_t(ptr, PoolDeleter {this, std::nullopt});
         }
@@ -280,7 +280,7 @@ public:
     }
 
     // Type alias for shared_ptr. The deleter goes in the constructor, unlike unique_ptr.
-    using SharedPtr_t = std::shared_ptr<T>;
+    using SharedPtr_t = std::shared_ptr<PooledObject_t>;
 
     // Acquires an object and returns it as a shared_ptr.
     // If no pooled objects are available, either returns a fallback allocation or throws.
@@ -292,15 +292,15 @@ public:
         {
             const auto idx = m_freeIndices.top();
             m_freeIndices.pop();
-            T* ptr = &m_objects[idx];
-            return std::shared_ptr<T>(ptr, PoolDeleter {this, idx});
+            PooledObject_t* ptr = &m_objects[idx];
+            return std::shared_ptr<PooledObject_t>(ptr, PoolDeleter {this, idx});
         }
         else [[unlikely]] if constexpr (sm_allow_fallback)
         {
             // Return a fallback (dynamically allocated) object.
-            T* ptr = new T();
+            PooledObject_t* ptr = new PooledObject_t();
             m_fallbackObjsCount.fetch_add(1, std::memory_order_relaxed);
-            return std::shared_ptr<T>(ptr, PoolDeleter {this, std::nullopt});
+            return std::shared_ptr<PooledObject_t>(ptr, PoolDeleter {this, std::nullopt});
         }
         else
         {
@@ -325,7 +325,7 @@ public:
 
     // Static helper method for shared_ptr.
     [[nodiscard]]
-    static bool isFromPool(const std::shared_ptr<T> &ptr)
+    static bool isFromPool(const std::shared_ptr<PooledObject_t> &ptr)
     {
         if (auto deleterPtr = std::get_deleter<PoolDeleter>(ptr))
             return deleterPtr->m_index.has_value();
@@ -347,7 +347,7 @@ private:
     }
 
     // Pre-constructed objects stored in an array.
-    std::array<T, sm_pool_size> m_objects{};
+    std::array<PooledObject_t, sm_pool_size> m_objects{};
 
     // Stack tracked indices of available objects.
     sl::fixed_comptime_stack<index_t, sm_pool_size> m_freeIndices;

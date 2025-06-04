@@ -1,36 +1,38 @@
 #include "CScriptParserBufs.h"
-#include "CScriptTriggerArgs.h"
 #include "CLog.h"
-#include "sphere_library/sobjpool.h"
 
 
-struct CScriptParserBufsImpl
-{
-    inline static CScriptParserBufsImpl& Get()
-    {
-        static auto inst = std::make_unique<CScriptParserBufsImpl>();
-        return *inst.get();
-    }
-
-    static constexpr bool sm_allow_fallback_objects = true;
-
-    // This is even more expensive to construct, so will definitely benefit a lot from having allocated, cached instances.
-    sl::ObjectPool<CScriptTriggerArgs,     10'000, sm_allow_fallback_objects>
-        m_poolScriptTriggerArgs;
-};
+extern CScriptParserBufs g_ScriptParserBuffers;
 
 auto CScriptParserBufs::GetCScriptTriggerArgsPtr() -> CScriptTriggerArgsPtr
 {
-    auto& pool = CScriptParserBufsImpl::Get().m_poolScriptTriggerArgs;
+    auto& pool = g_ScriptParserBuffers.m_poolScriptTriggerArgs;
     auto ptr = pool.acquireShared();
     if (!pool.isFromPool(ptr))
     {
-        static_assert(CScriptParserBufsImpl::sm_allow_fallback_objects);
+        static_assert(CScriptParserBufs::sm_allow_fallback_objects);
         g_Log.EventDebug(
             "Requesting CScriptTriggerArgs from an exhausted pool (max size: %" PRIu32 "). Alive new heap-allocated fallback objects: %" PRIu32 ".\n",
             pool.sm_pool_size, pool.getFallbackCount());
     }
 
     ptr->Clear();
+    return ptr;
+}
+
+auto CScriptParserBufs::GetScriptKeyArgBufPtr() -> CScriptKeyArgBufPtr
+{
+    auto& pool = g_ScriptParserBuffers.m_poolScriptKeyArgBuffers;
+    auto ptr = pool.acquireUnique();
+    if (!pool.isFromPool(ptr))
+    {
+        static_assert(CScriptParserBufs::sm_allow_fallback_objects);
+        g_Log.EventDebug(
+            "Requesting CScriptKeyArgBuf from an exhausted pool (max size: %" PRIu32 "). Alive new heap-allocated fallback objects: %" PRIu32 ".\n",
+            pool.sm_pool_size, pool.getFallbackCount());
+    }
+
+    //ptr.get()->fill('\0');
+    //memset(ptr.get(), 0, sizeof(CScriptKeyArgBuf));
     return ptr;
 }

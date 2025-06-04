@@ -167,6 +167,9 @@ private:
     std::array<CValStr, m_kiSkillTitlesQty> m_SkillTitles_Generic;
 
 public:
+    CExprGlobals() = default;
+    ~CExprGlobals() = default;
+
     void UpdateDefMsgDependentData();
 
     lpctstr SkillTitle(SKILL_TYPE skill, uint uiVal) const;
