@@ -5885,30 +5885,43 @@ bool CChar::_OnTick()
             return true;
 	}
 
-    if (!_TickableState())
+    const bool fTickableState  = _TickableState();
+    const bool fSleeping       = _IsSleeping();
+
+//#ifdef _DEBUG
+    if (!fTickableState || fSleeping)
+    {
+        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual TickableState=%d, SleepingState=%d.\n",
+                         GetName(), GetUID().GetObjUID(),
+                         GetTopPoint().WriteUsed(),
+                         (int)fTickableState, (int)fSleeping
+                         );
+    }
+//#endif
+
+    if (!fTickableState)
 	{
         // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.
         // Among the reasons why i can't tick, though, there cannot be being in a sleeping state: when a char goes into sleeping state
         //  it should also be removed from the list (it happens in _GoSleep()).
-		ASSERT(!_IsSleeping());
-
-//#ifdef _DEBUG
-        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s can't tick but is in the ticking list.\n",
-                         GetName(), GetUID().GetObjUID(), GetTopPoint().WriteUsed());
-//#endif
+        ASSERT(!fSleeping);
 
 		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
             // Do not make the char sleep right when it enters a sleeping sector. Doing this
             //  will lead to an accumulation of npcs at the edge of the new sector.
 
+//#ifdef _DEBUG
             g_Log.EventDebug("Sent to sleep (random), to be awaken alongside its sector.\n");
+//#endif
 
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();
 		}
         return true;
 	}
+    if (fSleeping)
+        return true;
 
 	EXC_SET_BLOCK("Components Tick");
 	/*
