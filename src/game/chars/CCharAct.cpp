@@ -5892,17 +5892,23 @@ bool CChar::_OnTick()
         //  it should also be removed from the list (it happens in _GoSleep()).
 		ASSERT(!_IsSleeping());
 
+//#ifdef _DEBUG
+        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s can't tick but is in the ticking list.\n",
+                         GetName(), GetUID().GetObjUID(), GetTopPoint().WriteUsed());
+//#endif
+
 		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
             // Do not make the char sleep right when it enters a sleeping sector. Doing this
             //  will lead to an accumulation of npcs at the edge of the new sector.
 
+            g_Log.EventDebug("Sent to sleep (random), to be awaken alongside its sector.\n");
+
 			_SetTimeout(1);      //Make it tick after sector's awakening.
 			_GoSleep();
-			return true;
 		}
+        return true;
 	}
-    ASSERT(!_IsSleeping());
 
 	EXC_SET_BLOCK("Components Tick");
 	/*
