@@ -23,6 +23,13 @@ lpctstr const CExprGlobals::sm_szDefMsgNames[DEFMSG_QTY] =
 	#include "../tables/defmessages.tbl"
 };
 
+CExprGlobals::CExprGlobals()
+{
+    m_VarResDefs.   Reserve(0x1000);
+    m_VarDefs.      Reserve(0x100);
+    m_VarGlobals.   Reserve(0x10);
+}
+
 void CExprGlobals::UpdateDefMsgDependentData()
 {
     // Method to be re-evaluated.
@@ -654,16 +661,21 @@ llong CExpression::GetSingle(lpctstr & refStrExpr )
             refStrExpr += 2;
 			goto try_dec;
 		}
+        refStrExpr += 1;
+
+        // TODO: gracefully handle integer overflows, maybe printing a warning message.
 
         lpctstr pStart = refStrExpr;
-		llong val = 0;
+        ullong val = 0;
         ushort ndigits = 0;
 		while (true)
 		{
             tchar ch = *refStrExpr;
 			if ( IsDigit(ch) )
+            {
 				ch -= '0';
-			else
+            }
+            else
 			{
 				ch = static_cast<tchar>(tolower(ch));
 				if ( ch > 'f' || ch < 'a' )
@@ -675,16 +687,16 @@ llong CExpression::GetSingle(lpctstr & refStrExpr )
 					}
 					break;
 				}
-				ch -= 'a' - 10;
-                ++ ndigits;
-			}
+                ch -= 'a' - 10;
+            }
 			val *= 0x10;
-			val += ch;
+            val += ch;
             ++ refStrExpr;
+            ++ ndigits;
 		}
         if (ndigits <= 8)
             return (llong)(int)val;
-		return val;
+        return (llong)val;
 	}
     /*
     // We could just use this, but it doesn't "eat" the string pointer.
@@ -702,17 +714,19 @@ llong CExpression::GetSingle(lpctstr & refStrExpr )
     else if ( refStrExpr[0] == '.' || IsDigit(refStrExpr[0]) )
 	{
 		// A decimal number
+
+        // TODO: gracefully handle integer overflows, maybe printing a warning message.
 try_dec:
 		llong iVal = 0;
     for ( ; ; ++refStrExpr )
-		{
+        {
         if ( *refStrExpr == '.' )
-				continue;	// just skip this.
+                continue;	// just skip this.
         if ( ! IsDigit(*refStrExpr) )
-				break;
-			iVal *= 10;
+                break;
+            iVal *= 10;
         iVal += (llong)(*refStrExpr) - '0';
-		}
+        }
 		return iVal;
 	}
 else if ( ! _ISCSYMF(refStrExpr[0]) )

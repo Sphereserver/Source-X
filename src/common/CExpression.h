@@ -167,7 +167,7 @@ private:
     std::array<CValStr, m_kiSkillTitlesQty> m_SkillTitles_Generic;
 
 public:
-    CExprGlobals() = default;
+    CExprGlobals();
     ~CExprGlobals() = default;
 
     void UpdateDefMsgDependentData();

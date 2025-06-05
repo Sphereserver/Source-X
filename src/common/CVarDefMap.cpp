@@ -322,6 +322,11 @@ size_t CVarDefMap::GetCount() const noexcept
 	return m_Container.size();
 }
 
+void CVarDefMap::Reserve(size_t uiSize)
+{
+    m_Container.reserve(uiSize);
+}
+
 CVarDefContNum* CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 {
 	ADDTOCALLSTACK_DEBUG("CVarDefMap::SetNumNew");

@@ -23,14 +23,14 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 
     void SetRectEmpty() noexcept;
 
-	CRect() noexcept;
-	CRect(int left, int top, int right, int bottom, int map) noexcept;
-	CRect(const CRect&) noexcept = default;
-	CRect(CRect&&) noexcept = default;
+    CRect() noexcept;
+    CRect(int left, int top, int right, int bottom, int map) noexcept;
+    CRect(const CRect&) noexcept = default;
+    CRect(CRect&&) noexcept = default;
     virtual ~CRect() noexcept = default;
 
-	CRect& operator = (const CRect&) = default;
-	const CRect& operator += (const CRect& rect);
+    CRect& operator = (const CRect&) = default;
+    const CRect& operator += (const CRect& rect);
 
     inline int GetWidth() const noexcept
     {
@@ -87,22 +87,22 @@ struct CRectMap : public CRect
 {
     CRectMap() noexcept = default;
 	CRectMap(int left, int top, int right, int bottom, int map) noexcept;
-	CRectMap(const CRectMap&) noexcept = default;
+    CRectMap(const CRectMap&) noexcept = default;
 	CRectMap(CRectMap&&) noexcept = default;
 
 	// special copy constructors, valid because CRectMap hasn't additional members compared to CRect, it only has more methods
 	CRectMap(const CRect& rect) noexcept : CRectMap(static_cast<const CRectMap&>(rect)) {}
 	CRectMap(CRect&& rect) noexcept : CRectMap(static_cast<CRectMap&&>(rect)) {}
 
-	CRectMap& operator=(const CRectMap&) noexcept = default;
-	CRectMap& operator=(const CRect& rect) noexcept
+    CRectMap& operator=(const CRectMap&) noexcept = default;
+    CRectMap& operator=(const CRect& rect) noexcept
 	{
 		return CRectMap::operator=(static_cast<const CRectMap&>(rect));
 	}
 
     virtual ~CRectMap() noexcept = default;
 
-	bool IsValid() const noexcept;
+    bool IsValid() const noexcept;
 
 	virtual void NormalizeRect() noexcept override;
 	void NormalizeRectMax() noexcept;

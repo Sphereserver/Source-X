@@ -142,14 +142,13 @@ public:
 	bool CompareAll( const CVarDefMap * pArray );
 	void Clear();
 	size_t GetCount() const noexcept;
+    void Reserve(size_t uiSize);
 
 public:
 	CVarDefMap() = default;
 	~CVarDefMap();
 	CVarDefMap & operator = ( const CVarDefMap & array );
-
-private:
-	CVarDefMap(const CVarDefMap& copy);
+    CVarDefMap(const CVarDefMap& copy) = delete;
 
 public:
 	lpctstr FindValNum( int64 iVal ) const;

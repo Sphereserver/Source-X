@@ -65,7 +65,7 @@ public:
     [[nodiscard]] int GetDist( const CPointBase & pt ) const noexcept;			// Distance between points
     [[nodiscard]] int GetDistSightBase( const CPointBase & pt ) const noexcept;	// Distance between points based on UO sight
     [[nodiscard]] int GetDistSight( const CPointBase & pt ) const noexcept;		// Distance between points based on UO sight
-    [[nodiscard]] int GetDist3D( const CPointBase & pt ) const noexcept;			// 3D Distance between points
+    [[nodiscard]] int GetDist3D( const CPointBase & pt ) const noexcept;		// 3D Distance between points
 
     //[[nodiscard]] inline bool IsValidZ() const noexcept {
     //    return ((m_z > -127 /* -UO_SIZE_Z */) && (m_z < 127 /* UO_SIZE_Z */));

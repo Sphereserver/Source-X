@@ -39,6 +39,7 @@ private:
 	void SetLightNow( bool fFlash = false );
 	bool IsMoonVisible( uint iPhase, int iLocalTime ) const;
 	void SetDefaultWeatherChance();
+    bool IsInDungeon() const;
 
 public:
 	CSector();

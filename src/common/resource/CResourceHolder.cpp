@@ -294,6 +294,15 @@ lpctstr CResourceHolder::GetName() const
     return "CFG";
 }
 
+CResourceHolder::CResourceHolder()
+{
+    // Avoid unnecessary continuous growing re-allocations at startup, just start with some preallocated space.
+    for (auto& arr : m_ResHash.m_Array)
+    {
+        arr.reserve(0x100);
+    }
+}
+
 CResourceScript * CResourceHolder::GetResourceFile( size_t i )
 {
 	if ( ! m_ResourceFiles.IsValidIndex(i) )

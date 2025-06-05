@@ -63,7 +63,7 @@ public:
 
 public:
     lpctstr GetName() const;
-    CResourceHolder() = default;
+    CResourceHolder();
 	virtual ~CResourceHolder() = default;
 
 	CResourceHolder(const CResourceHolder& copy) = delete;
