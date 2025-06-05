@@ -28,6 +28,8 @@ public:
     CResourceHashArray(const CResourceHashArray&) = delete;
     CResourceHashArray& operator=(const CResourceHashArray&) = delete;
 
+    void ManualSort();
+
     inline size_t find_sorted(CResourceID const& rid) const { return this->find_predicate(rid, _compare);        }
     //inline bool   Contains(CResourceID const& rid) const  { return (sl::scont_bad_index() != this->find_sorted(rid)); }
 };
@@ -62,6 +64,10 @@ public:
     }
 
     void AddSortKey(CResourceID const& rid, CResourceDef* pNew);
+
+    void AddUnsortedKey(CResourceID const& rid, CResourceDef* pNew);
+    void SortStep();
+
     void SetAt(CResourceID const& rid, size_t index, CResourceDef* pNew);
     //void ReplaceRid(CResourceID const& ridOld, CResourceDef* pNew);
 };

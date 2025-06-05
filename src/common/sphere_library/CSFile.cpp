@@ -379,7 +379,7 @@ bool CSFile::Write(const void* pData, int iLength)
 
 lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 {
-	ADDTOCALLSTACK("CSFile::GetFilesTitle");
+    //ADDTOCALLSTACK("CSFile::GetFilesTitle");
 	// strrchr
 	size_t len = strlen(pszPath);
 	while ( len > 0 )
@@ -396,18 +396,18 @@ lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 
 lpctstr CSFile::_GetFileTitle() const
 {
-    ADDTOCALLSTACK("CFile::_GetFileTitle");
+    //ADDTOCALLSTACK("CFile::_GetFileTitle");
     return CSFile::GetFilesTitle(_strFileName.GetBuffer());
 }
 lpctstr CSFile::GetFileTitle() const
 {
-    ADDTOCALLSTACK("CFile::GetFileTitle");
+    //ADDTOCALLSTACK("CFile::GetFileTitle");
     return CSFile::GetFilesTitle( GetFilePath() );
 }
 
 lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 {
-	ADDTOCALLSTACK("CSFile::GetFilesExt");
+    //ADDTOCALLSTACK("CSFile::GetFilesExt");
     // get the EXTension including the .
 	size_t len = strlen( pszName );
 	while ( len > 0 )
@@ -425,7 +425,7 @@ lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 
 lpctstr CSFile::GetFileExt() const
 {
-    ADDTOCALLSTACK("CSFile::GetFileExt");
+    //ADDTOCALLSTACK("CSFile::GetFileExt");
     // get the EXTension including the .
     return GetFilesExt(GetFilePath());
 }

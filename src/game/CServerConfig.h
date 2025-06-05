@@ -654,7 +654,6 @@ public:
 	CResourceHashArray m_WebPages;		// These can be linked back to the script.
 
 private:
-	CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
     char m_iniDirectory[SPHERE_MAX_PATH];
 
 public:
@@ -664,6 +663,12 @@ public:
 
 	CServerConfig(const CServerConfig& copy) = delete;
 	CServerConfig& operator=(const CServerConfig& other) = delete;
+
+private:
+    CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
+
+    CResourceScript * AddResourceFile( lpctstr pszName );
+    void AddResourceDir( lpctstr pszDirName );
 
 public:
 	virtual bool r_LoadVal( CScript &s ) override;
@@ -706,14 +711,25 @@ public:
 	void Unload( bool fResync );
 	void _OnTick( bool fNow );
 
+    // TODO: add doxygen-style comments
+    CResourceScript * FindResourceFile( lpctstr pszTitle );
+    CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
+
+    void LoadResourcesOpen( CScript * pScript, bool fAddSorted );
+    bool LoadResources(CResourceScript * pScript, bool fAddSorted);
+
+    CResourceScript * GetResourceFile( size_t i );
+
+    bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical = true );
+
     /**
      * @brief   Loads resource section ([SKILL ], [SPELL ], [CHARDEF ]...).
      *
-     * @param [in,out]  pScript If non-null, the script.
+     * @param  pScript to be loaded.
      *
      * @return  true if it succeeds, false if it fails.
      */
-	virtual bool LoadResourceSection( CScript * pScript ) override;
+    bool LoadResourceSection( CScript * pScript, bool fInsertSorted);
 
     /**
      * @brief   Sort all spells in order.

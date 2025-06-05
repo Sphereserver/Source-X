@@ -249,7 +249,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 		CheckLast();
 		if ( s.IsSectionType( "ACCOUNT" ))
 		{
-			g_Cfg.LoadResourceSection( &s );
+            g_Cfg.LoadResourceSection( &s, true );
 			continue;
 		}
 		else if ( s.IsSectionType( "WORLDCHAR" ) || s.IsSectionType("WC"))

@@ -1333,7 +1333,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 
 		try
 		{
-			g_Cfg.LoadResourceSection(&s);
+            g_Cfg.LoadResourceSection(&s, true); // pass true, it shouldn't really touch g_Cfg.m_ResHash
 		}
 		catch ( const CSError& e )
 		{

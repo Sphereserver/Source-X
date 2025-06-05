@@ -65,6 +65,14 @@ namespace sl
                 return base_type::emplace(base_type::begin() + _pos, std::move(_obj));
             }
 
+            template<class... _ValType>
+            _Type& emplace_unsorted(_ValType&&... value)
+            {
+                //_Type * _obj = new _Type(std::forward<_ValType>(value)...);
+                _Type _obj(std::forward<_ValType>(value)...);
+                return base_type::emplace_back(std::move(_obj));
+            }
+
             inline iterator insert(_Type const& value) {
                 return this->emplace(value);
             }
@@ -72,6 +80,13 @@ namespace sl
                 return this->emplace(std::move(value));
             }
             //iterator insert(const size_Typepe _Count, const _Typepe& value) = delete;
+
+            inline _Type& insert_unsorted(_Type const& value) {
+                return this->emplace_unsorted(value);
+            }
+            inline _Type& insert_unsorted(_Type&& value) {
+                return this->emplace_unsorted(std::move(value));
+            }
 
             inline void remove_index(const size_t index) {
                 base_type::erase(base_type::begin() + index);

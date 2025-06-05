@@ -4,6 +4,7 @@
 #include "../common/resource/sections/CRandGroupDef.h"
 #include "../common/resource/sections/CRegionResourceDef.h"
 #include "../common/resource/sections/CResourceNamedDef.h"
+#include "../common/sphere_library/CSFileList.h"
 #include "../common/sphere_library/CSRand.h"
 //#include "../common/CException.h" // included in the precompiled header
 //#include "../common/CExpression.h" // included in the precompiled header
@@ -3010,7 +3011,216 @@ uint CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar
 
 //*************************************************************
 
-bool CServerConfig::LoadResourceSection( CScript * pScript )
+CResourceScript * CServerConfig::GetResourceFile( size_t i )
+{
+    if ( ! m_ResourceFiles.IsValidIndex(i) )
+        return nullptr;	// All resource files we need to get blocks from later.
+    return m_ResourceFiles[i];
+}
+
+CResourceScript * CServerConfig::FindResourceFile( lpctstr pszPath )
+{
+    ADDTOCALLSTACK("CResourceHolder::FindResourceFile");
+    // Just match the titles ( not the whole path)
+
+    lpctstr pszTitle = CScript::GetFilesTitle( pszPath );
+
+    for ( size_t i = 0; ; ++i )
+    {
+        CResourceScript * pResFile = GetResourceFile(i);
+        if ( pResFile == nullptr )
+            break;
+        lpctstr pszTitle2 = pResFile->GetFileTitle();
+        if ( ! strcmpi( pszTitle2, pszTitle ))
+            return pResFile;
+    }
+    return nullptr;
+}
+
+bool CServerConfig::OpenResourceFind( CScript &s, lpctstr pszFilename, bool fCritical )
+{
+    ADDTOCALLSTACK("CServerConfig::OpenResourceFind");
+    // Open a single resource script file.
+    // Look in the specified path.
+
+    if ( pszFilename == nullptr )
+        pszFilename = s.GetFilePath();
+
+    // search the local dir or full path first.
+    if (CSFile::FileExists(pszFilename))
+    {
+        if (s.Open(pszFilename, OF_READ | OF_NONCRIT))
+            return true;
+        if (!fCritical)
+            return false;
+    }
+
+    // next, check the script file path
+    CSString sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
+    if (CSFile::FileExists(sPathName))
+    {
+        if (s.Open(sPathName, OF_READ | OF_NONCRIT))
+            return true;
+    }
+
+    // finally, strip the directory and re-check script file path
+    lpctstr pszTitle = CSFile::GetFilesTitle(pszFilename);
+    sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
+    if (CSFile::FileExists(sPathName))
+    {
+        return s.Open(sPathName, OF_READ);
+    }
+
+    g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't find file '%s' in any of the expected paths!.\n", pszFilename);
+    return false;
+}
+
+
+CResourceScript * CServerConfig::AddResourceFile( lpctstr pszName )
+{
+    ADDTOCALLSTACK("CResourceHolder::AddResourceFile");
+    ASSERT(pszName != nullptr);
+    // Is this really just a dir name ?
+
+    if (strlen(pszName) >= SPHERE_MAX_PATH)
+        throw CSError(LOGL_ERROR, 0, "Filename too long!");
+
+    tchar szName[SPHERE_MAX_PATH];
+    Str_CopyLimitNull(szName, pszName, sizeof(szName));
+
+    tchar szTitle[SPHERE_MAX_PATH];
+    lpctstr ptcTitle = CScript::GetFilesTitle(szName);
+    ASSERT_ALWAYS(strlen(ptcTitle) < sizeof(szTitle));
+    Str_CopyLimitNull(szTitle, ptcTitle, sizeof(szTitle));
+
+    if ( szTitle[0] == '\0' )
+    {
+        AddResourceDir( pszName );
+        return nullptr;
+    }
+
+    lpctstr pszExt = CScript::GetFilesExt( szTitle );
+    if ( pszExt == nullptr )
+    {
+        // No file extension provided, so append .scp to the filename
+        Str_ConcatLimitNull( szName,  SPHERE_SCRIPT_EXT, sizeof(szName) );
+        Str_ConcatLimitNull( szTitle, SPHERE_SCRIPT_EXT, sizeof(szTitle) );
+    }
+
+    if ( ! strnicmp( szTitle, SPHERE_FILE "tables", strlen(SPHERE_FILE "tables")))
+    {
+        // Don't dupe this.
+        return nullptr;
+    }
+
+    // Try to prevent dupes
+    CResourceScript * pNewRes = FindResourceFile(szTitle);
+    if ( pNewRes )
+        return pNewRes;
+
+    // Find correct path
+
+
+    pNewRes = new CResourceScript();
+    if (! OpenResourceFind(static_cast<CScript&>(*pNewRes), szName))
+    {
+        delete pNewRes;
+        return nullptr;
+    }
+
+    m_ResourceFiles.emplace_back(pNewRes);
+    pNewRes->m_iResourceFileIndex = int(m_ResourceFiles.size() -1);
+    return pNewRes;
+}
+
+void CServerConfig::AddResourceDir( lpctstr pszDirName )
+{
+    ADDTOCALLSTACK("CServerConfig::AddResourceDir");
+    if ( pszDirName[0] == '\0' )
+        return;
+
+    CSString sFilePath = CSFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT_EXT );
+
+    CSFileList filelist;
+    int iRet = filelist.ReadDir( sFilePath, false );
+    if ( iRet < 0 )
+    {
+        // also check script file path
+        sFilePath = CSFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetBuffer());
+
+        iRet = filelist.ReadDir( sFilePath, true );
+        if ( iRet < 0 )
+        {
+            DEBUG_ERR(( "DirList=%d for '%s'\n", iRet, pszDirName ));
+            return;
+        }
+    }
+
+    if ( iRet <= 0 )	// no files here.
+        return;
+
+    CSStringListRec * psFile = filelist.GetHead(), *psFileNext = nullptr;
+    for ( ; psFile; psFile = psFileNext )
+    {
+        psFileNext = psFile->GetNext();
+        sFilePath = CSFile::GetMergedFileName( pszDirName, *psFile );
+        AddResourceFile( sFilePath );
+    }
+}
+
+bool CServerConfig::LoadResources( CResourceScript * pScript, bool fAddSorted )
+{
+    ADDTOCALLSTACK("CServerConfig::LoadResources");
+    // Open the file then load it.
+    if ( pScript == nullptr )
+        return false;
+
+    if ( ! pScript->Open())
+    {
+        g_Log.Event(LOGL_CRIT|LOGM_INIT, "[RESOURCES] '%s' not found...\n", pScript->GetFilePath());
+        return false;
+    }
+
+    g_Log.Event(LOGM_INIT, "Loading %s\n", pScript->GetFilePath());
+
+    LoadResourcesOpen( pScript, fAddSorted );
+    pScript->Close();
+    pScript->CloseForce();
+    return true;
+}
+
+CResourceScript * CServerConfig::LoadResourcesAdd( lpctstr pszNewFileName )
+{
+    ADDTOCALLSTACK("CServerConfig::LoadResourcesAdd");
+    // Make sure this is added to my list of resource files
+    // And load it now.
+
+    CResourceScript * pScript = AddResourceFile( pszNewFileName );
+    if ( ! LoadResources(pScript, true) )
+        return nullptr;
+    return pScript;
+}
+
+void CServerConfig::LoadResourcesOpen( CScript * pScript, bool fAddSorted )
+{
+    ADDTOCALLSTACK("CServerConfig::LoadResourcesOpen");
+    // Load an already open resource file.
+
+    ASSERT(pScript);
+    ASSERT( pScript->HasCache() );
+
+    int iSections = 0;
+    while ( pScript->FindNextSection() )
+    {
+        LoadResourceSection( pScript, fAddSorted );
+        ++iSections;
+    }
+
+    if ( ! iSections )
+        DEBUG_WARN(( "No resource sections in '%s'\n", pScript->GetFilePath()));
+}
+
+bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 {
 	ADDTOCALLSTACK("CServerConfig::LoadResourceSection");
 	// Index or read any resource sections we know how to handle.
@@ -3130,6 +3340,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		if ( pListBase )
 			pListBase->r_LoadVal(pScript->GetArgStr());
 	}
+
+    auto _resHashAddFunction = fInsertSorted ? &CResourceHash::AddSortKey : &CResourceHash::AddUnsortedKey;
+    #define RESHASH_ADD (m_ResHash.* _resHashAddFunction)
 
 	switch ( restype )
 	{
@@ -3436,7 +3649,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 
 		ASSERT(pScript);
@@ -3472,7 +3685,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 		break;
 	case RES_DIALOG:
@@ -3490,7 +3703,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 		break;
 
@@ -3509,7 +3722,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 		{
 			CScriptLineContext LineContext = pScript->GetContext();
@@ -3541,7 +3754,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			{
 				pNewDef = pRegion;
 				ASSERT(pNewDef);
-				m_ResHash.AddSortKey( rid, pRegion );
+                RESHASH_ADD( rid, pRegion );
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
@@ -3573,7 +3786,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			}
 			else
 			{
-				m_ResHash.AddSortKey( rid, pRegion );
+                RESHASH_ADD( rid, pRegion );
 				// if it's old style but has a defname, it's already set via r_Load,
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
@@ -3598,7 +3811,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 		{
 			CScriptLineContext LineContext = pScript->GetContext();
@@ -3623,7 +3836,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
                 CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
                 if (pLinkResScript != nullptr)
                     pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-                m_ResHash.AddSortKey(rid, pNewLink);
+                RESHASH_ADD(rid, pNewLink);
             }
         }
         {
@@ -3647,7 +3860,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 		{
 			CScriptLineContext LineContext = pScript->GetContext();
@@ -3683,7 +3896,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
 			if (pLinkResScript != nullptr)
 				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
-			m_ResHash.AddSortKey( rid, pNewLink );
+            RESHASH_ADD( rid, pNewLink );
 		}
 		break;
 
@@ -3809,7 +4022,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
                     pResDef = new CItemTypeDef( ridnew );
                     ASSERT(pResDef);
                     pResDef->SetResourceName( ptcName );
-                    m_ResHash.AddSortKey( ridnew, pResDef );
+                    RESHASH_ADD( ridnew, pResDef );
                 }
             }
 
@@ -4119,8 +4332,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		break;
 	}
 
-
-	int iIndex;
+    int iIndex;
 	if ( pszName )
 	{
 		if ( pszName[0] == '\0' )	// absence of resourceid = index 0
@@ -4666,7 +4878,7 @@ bool CServerConfig::LoadIni(bool fTest)
 		return false;
 	}
 
-	LoadResourcesOpen(&m_scpIni);
+    LoadResourcesOpen(&m_scpIni, true);
 	m_scpIni.Close();
 	m_scpIni.CloseForce();
 
@@ -4700,7 +4912,7 @@ bool CServerConfig::LoadCryptIni( void )
 		return false;
 	}
 
-	LoadResourcesOpen(&m_scpCryptIni);
+    LoadResourcesOpen(&m_scpCryptIni, true);
 	m_scpCryptIni.Close();
 	m_scpCryptIni.CloseForce();
 
@@ -4822,7 +5034,7 @@ bool CServerConfig::Load( bool fResync )
 		}
 
         g_Log.Event(LOGL_EVENT|LOGM_INIT, "Loading table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n");
-		LoadResourcesOpen(&m_scpTables);
+        LoadResourcesOpen(&m_scpTables, true);
 		m_scpTables.Close();
 	}
 	else
@@ -4857,13 +5069,22 @@ bool CServerConfig::Load( bool fResync )
 		if ( !pResFile )
 			break;
 
-		if ( !fResync )
-			LoadResources( pResFile );
-		else
+        if ( !fResync )
+        {
+            // It's the startup load, sort everything just once at the end?
+            // TODO: not a good idea for now, because we might reference a resource while loading another resource,
+            //  at the current state.
+            //  Also, is it worth it by a performance cost? It looks like the greatest part of the cpu time is consumed in unique_ptr moving.
+            LoadResources( pResFile, true /*false*/ );
+        }
+        else
 			pResFile->ReSync();
 
 		g_Serv.PrintPercent( (size_t)(j + 1), count);
 	}
+
+    //if (!fResync)
+    //    m_ResHash.SortStep();
 
     g_ExprGlobals.mtEngineLockedWriter()->UpdateDefMsgDependentData();
 
@@ -4920,7 +5141,7 @@ bool CServerConfig::Load( bool fResync )
 		// must have at least 1 skill class.
 		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));
 		ASSERT(pSkillClass);
-		m_ResHash.AddSortKey( CResourceID( RES_SKILLCLASS, 0 ), pSkillClass );
+        m_ResHash.AddSortKey( CResourceID( RES_SKILLCLASS, 0 ), pSkillClass );
 	}
 
 	if ( !fResync )
