@@ -661,42 +661,51 @@ llong CExpression::GetSingle(lpctstr & refStrExpr )
             refStrExpr += 2;
 			goto try_dec;
 		}
+
+        // Skip the leading '0'
         refStrExpr += 1;
 
-        // TODO: gracefully handle integer overflows, maybe printing a warning message.
-
-        lpctstr pStart = refStrExpr;
-        ullong val = 0;
-        ushort ndigits = 0;
+        uint64 uiVal = 0;
+        uint uiDigits = 0;
 		while (true)
 		{
             tchar ch = *refStrExpr;
 			if ( IsDigit(ch) )
             {
 				ch -= '0';
+                ++ uiDigits;
             }
             else
 			{
 				ch = static_cast<tchar>(tolower(ch));
 				if ( ch > 'f' || ch < 'a' )
 				{
-					if ( ch == '.' && pStart[0] != '0' )	// ok i'm confused. it must be decimal.
+                    if ( ch == '.' && ptcStartingString[0] != '0' )	// ok i'm confused. it must be decimal.
 					{
-                        refStrExpr = pStart;
+                        refStrExpr = ptcStartingString;
 						goto try_dec;
 					}
 					break;
 				}
-                ch -= 'a' - 10;
+				ch -= 'a' - 10;
+                ++ uiDigits;
+			}
+
+            if (uiDigits > 16)
+            {
+                g_Log.EventWarn("Hexadecimal value parsing will overflow: %s.\n", ptcStartingString);
+                return -1;
             }
-			val *= 0x10;
-            val += ch;
+
+            uiVal = (uiVal << 4ull) | ch; // Equivalent to 'val *= 0x10; val += ch;'
+            //val *= 0x10;
+            //val += ch;
+
             ++ refStrExpr;
-            ++ ndigits;
-		}
-        if (ndigits <= 8)
-            return (llong)(int)val;
-        return (llong)val;
+        }
+        if (uiDigits <= 8)
+            return (int64)(int32)uiVal;
+        return (int64)uiVal;
 	}
     /*
     // We could just use this, but it doesn't "eat" the string pointer.
@@ -714,20 +723,32 @@ llong CExpression::GetSingle(lpctstr & refStrExpr )
     else if ( refStrExpr[0] == '.' || IsDigit(refStrExpr[0]) )
 	{
 		// A decimal number
-
-        // TODO: gracefully handle integer overflows, maybe printing a warning message.
 try_dec:
-		llong iVal = 0;
-    for ( ; ; ++refStrExpr )
-        {
-        if ( *refStrExpr == '.' )
+        constexpr int64 kiMaxBeforeMul = (INT64_MAX - 9) / 10;
+
+        int64 iVal = 0;
+        for ( ; ; ++refStrExpr )
+		{
+            int c = *refStrExpr; // character
+            if ( c == '.' )
                 continue;	// just skip this.
-        if ( ! IsDigit(*refStrExpr) )
+            if ( ! IsDigit(c) )
                 break;
+
+            c = c - '0';    // digit
+            if (iVal > kiMaxBeforeMul)
+            {
+                if ((iVal > (INT64_MAX - c) / 10))
+                {
+                    g_Log.EventWarn("Decimal value parsing will overflow: %s.\n", ptcStartingString);
+                    return -1;
+                }
+            }
+
             iVal *= 10;
-        iVal += (llong)(*refStrExpr) - '0';
-        }
-		return iVal;
+            iVal += (llong)(*refStrExpr) - '0';
+		}
+        return iVal;
 	}
 else if ( ! _ISCSYMF(refStrExpr[0]) )
 	{
@@ -746,7 +767,7 @@ else if ( ! _ISCSYMF(refStrExpr[0]) )
 		case '+':
             ++refStrExpr;
 			break;
-		case '-':
+        case '-':
             ++refStrExpr;
             return -GetSingle( refStrExpr );
 		case '~':	// Bitwise not.

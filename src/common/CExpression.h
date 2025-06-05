@@ -217,7 +217,7 @@ class CExpression
     };
 
     std::unique_ptr<PrvBuffersPool> _pBufs;
-    short _iGetVal_Reentrant;
+    int _iGetVal_Reentrant;
 
 public:
 	static const char *m_sClassName;
