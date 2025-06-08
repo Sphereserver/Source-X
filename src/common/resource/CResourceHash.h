@@ -44,7 +44,7 @@ struct CResourceHash
     CResourceHash& operator=(const CResourceHash&) = delete;
 
 private:
-    inline uint GetHashArray(const CResourceID& rid) const
+    constexpr inline uint GetHashArray(const CResourceID& rid) const
     {
         return (rid.GetResIndex() & 0x0F);
     }
@@ -54,7 +54,7 @@ public:
     {
         return m_Array[GetHashArray(rid)].find_sorted(rid);
     }
-    inline sl::smart_ptr_view<CResourceDef> GetSmartPtrViewAt(const CResourceID& rid, size_t index) const
+    constexpr inline sl::smart_ptr_view<CResourceDef> GetSmartPtrViewAt(const CResourceID& rid, size_t index) const
     {
         return sl::smart_ptr_view<CResourceDef>(m_Array[GetHashArray(rid)][index]);
     }

@@ -139,7 +139,7 @@ public:
 	// Location map units.
     int GetIndex() const noexcept               { return m_index; }
     int GetMap() const noexcept                 { return m_BasePoint.m_map; }
-    const CRectMap& GetRect() const noexcept    { return m_MapRect; }
+    constexpr inline const CRectMap& GetRect() const noexcept   { return m_MapRect; }
 
 	// CRegion
 	CRegion * GetRegion( const CPointBase & pt, dword dwType ) const;

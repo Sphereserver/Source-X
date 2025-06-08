@@ -5,7 +5,7 @@
 #ifndef MSVC_COMPILER
 #define ATTR_NO_UBSAN __attribute__((no_sanitize("undefined")))
 #else
-#define ATTR_NO_UBSAN __declspec(no_sanitize_address)
+#define ATTR_NO_UBSAN //__declspec(no_sanitize_address)
 #endif
 
 

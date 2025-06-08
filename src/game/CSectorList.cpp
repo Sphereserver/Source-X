@@ -131,7 +131,8 @@ CSector* CSectorList::GetSectorByIndex(int map, int index) const noexcept
     //	return nullptr;
 
 	const MapSectorsData& sd = _SectorData[map];
-	return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
+    //return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
+    return (index < sd.iSectorQty) ? &(sd._pSectors.get()[index]) : nullptr;
 }
 
 CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) const noexcept

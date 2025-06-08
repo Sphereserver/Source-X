@@ -25,23 +25,23 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 
     CRect() noexcept;
     CRect(int left, int top, int right, int bottom, int map) noexcept;
-    CRect(const CRect&) noexcept = default;
-    CRect(CRect&&) noexcept = default;
+    constexpr CRect(const CRect&) noexcept = default;
+    constexpr CRect(CRect&&) noexcept = default;
     virtual ~CRect() noexcept = default;
 
     CRect& operator = (const CRect&) = default;
     const CRect& operator += (const CRect& rect);
 
-    inline int GetWidth() const noexcept
+    constexpr inline int GetWidth() const noexcept
     {
         return( m_right - m_left );
     }
-    inline int GetHeight() const noexcept
+    constexpr inline int GetHeight() const noexcept
     {
         return( m_bottom - m_top );
     }
 
-    inline bool IsRectEmpty() const noexcept
+    constexpr inline bool IsRectEmpty() const noexcept
     {
         return( m_left >= m_right || m_top >= m_bottom );
     }
@@ -49,11 +49,11 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	void OffsetRect( int x, int y );
 	void UnionPoint( int x, int y );
 
-    inline bool IsInsideX( int x ) const noexcept
+    constexpr inline bool IsInsideX( int x ) const noexcept
 	{	// non-inclusive
 		return( x >= m_left && x < m_right );
 	}
-    inline bool IsInsideY( int y ) const noexcept
+    constexpr inline bool IsInsideY( int y ) const noexcept
 	{	// non-inclusive
 		return( y >= m_top && y < m_bottom );
 	}
@@ -86,13 +86,13 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 struct CRectMap : public CRect
 {
     CRectMap() noexcept = default;
-	CRectMap(int left, int top, int right, int bottom, int map) noexcept;
-    CRectMap(const CRectMap&) noexcept = default;
-	CRectMap(CRectMap&&) noexcept = default;
+    CRectMap(int left, int top, int right, int bottom, int map) noexcept;
+    constexpr CRectMap(const CRectMap&) noexcept = default;
+    constexpr CRectMap(CRectMap&&) noexcept = default;
 
 	// special copy constructors, valid because CRectMap hasn't additional members compared to CRect, it only has more methods
-	CRectMap(const CRect& rect) noexcept : CRectMap(static_cast<const CRectMap&>(rect)) {}
-	CRectMap(CRect&& rect) noexcept : CRectMap(static_cast<CRectMap&&>(rect)) {}
+    constexpr CRectMap(const CRect& rect) noexcept : CRectMap(static_cast<const CRectMap&>(rect)) {}
+    constexpr CRectMap(CRect&& rect) noexcept : CRectMap(static_cast<CRectMap&&>(rect)) {}
 
     CRectMap& operator=(const CRectMap&) noexcept = default;
     CRectMap& operator=(const CRect& rect) noexcept
