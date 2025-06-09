@@ -10,17 +10,15 @@
 #include "../common/CUID.h"
 #include "../common/CLanguageID.h"
 #include "../common/sphereproto.h"
-#include "../common/CRect.h"
 #include "../game/game_enums.h"
-#include "../game/CServerConfig.h"
-#include "CNetState.h"
 #include "packet.h"
-#include <memory>
 
 
 struct CMenuItem;
+class CNetState;
 class CItemMap;
 class CObjBaseTemplate;
+class CRectMap;
 class CSpellDef;
 class CItemContainer;
 class CItemMessage;
@@ -94,11 +92,8 @@ class PacketCombatDamage : public PacketSend
 public:
 	PacketCombatDamage(const CClient* target, word damage, CUID defender);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_NEWDAMAGE);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -138,13 +133,10 @@ public:
 
     PacketHealthBarUpdateNew(const CClient* target, const CChar* character);
 
-    virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 
-    virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-    static bool CanSendTo(const CNetState* state)
-    {
-        return state->isClientEnhanced();
-    }
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -168,13 +160,10 @@ public:
 
 	PacketHealthBarUpdate(const CClient* target, const CChar* character);
 
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-	    return state->isClientVersionNumber(MINCLIVER_SA) || state->isClientKR();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -197,7 +186,7 @@ public:
 
 	static void adjustItemData(const CClient* target, const CItem* item, ITEMID_TYPE &id, HUE_TYPE &hue, word &amount, DIR_TYPE &dir, byte &flags, byte &light);
 
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 };
 
 /***************************************************************************
@@ -290,7 +279,7 @@ class PacketDragAnimation : public PacketSend
 public:
 	PacketDragAnimation(const CChar* source, const CItem* item, const CObjBase* container, const CPointMap* pt);
 
-	virtual bool canSendTo(const CNetState* state) const;
+    virtual bool canSendTo(const CNetState* state) const override;
 };
 
 /***************************************************************************
@@ -308,7 +297,7 @@ private:
 public:
 	PacketContainerOpen(const CClient* target, const CObjBase* container, GUMP_TYPE gump);
 
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 };
 
 /***************************************************************************
@@ -328,7 +317,7 @@ public:
 	PacketItemContainer(const CItem* spellbook, const CSpellDef* spell);
 
 	void completeForTarget(const CClient* target, const CItem* spellbook);
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 };
 
 /***************************************************************************
@@ -379,11 +368,8 @@ class PacketDropAccepted : public PacketSend
 public:
 	PacketDropAccepted(const CClient* target);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientKR();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -475,7 +461,7 @@ public:
 	PacketItemContents(CClient* target, const CItemContainer* container, bool fIsShop, bool fFilterLayers); // standard content
 	PacketItemContents(const CClient* target, const CItem* spellbook);			// spellbook spells
 	PacketItemContents(const CClient* target, const CItemContainer* spellbook); // custom spellbook spells
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 };
 
 /***************************************************************************
@@ -821,7 +807,7 @@ private:
 public:
 	PacketCharacter(CClient* target, const CChar* character);
 
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 };
 
 /***************************************************************************
@@ -849,11 +835,8 @@ class PacketChangeCharacter : public PacketSend
 public:
 	PacketChangeCharacter(CClient* target);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return !(state->isClientKR() || state->isClientEnhanced());
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -965,7 +948,7 @@ private:
 
 public:
 	PacketCorpseEquipment(CClient* target, const CItemContainer* corpse);
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 };
 
 /***************************************************************************
@@ -1450,13 +1433,10 @@ protected:
 
 public:
 	PacketPropertyListVersionOld(const CClient* target, const CObjBase* object, dword version);
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_TOOLTIP);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1569,11 +1549,8 @@ class PacketStatLocks : public PacketExtended
 public:
     PacketStatLocks(const CClient* target, const CChar* character);
 
-    virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-    static bool CanSendTo(const CNetState* state)
-    {
-        return state->isClientVersionNumber(MINCLIVER_STATLOCKS);
-    }
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1601,11 +1578,8 @@ class PacketSpellbookContent : public PacketExtended
 public:
 	PacketSpellbookContent(const CClient* target, const CItem* spellbook, word offset);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-	    return state->isClientVersionNumber(MINCLIVER_SPELLBOOK);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1633,11 +1607,8 @@ class PacketHouseBeginCustomise : public PacketExtended
 public:
 	PacketHouseBeginCustomise(const CClient* target, const CItemMultiCustom* house);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1665,11 +1636,8 @@ class PacketCombatDamageOld : public PacketExtended
 public:
 	PacketCombatDamageOld(const CClient* target, byte damage, CUID defender);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_DAMAGE);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1749,11 +1717,8 @@ class PacketDisplayBookNew : public PacketSend
 public:
 	PacketDisplayBookNew(const CClient* target, CItem* book);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_NEWBOOK) || state->isClientKR() || state->isClientEnhanced();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1774,7 +1739,7 @@ protected:
 public:
 	PacketPropertyList(const CObjBase* object, dword version, const std::vector<std::unique_ptr<CClientTooltip>> &data);
 	PacketPropertyList(const CClient* target, const PacketPropertyList* other);
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 
 	inline CUID getObject(void) const       { return m_object; }
 	inline dword getVersion(void) const     { return m_version; }
@@ -1783,8 +1748,8 @@ public:
 
 	bool hasExpired(int64 iTimeout) const;
 
-	virtual inline bool canSendTo(const CNetState* state) const  { return CanSendTo(state); }
-	static inline bool CanSendTo(const CNetState* state)         { return state->isClientVersionNumber(MINCLIVER_TOOLTIP);	}
+    virtual inline bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1829,11 +1794,8 @@ public:
 	void flushStairData(void);
 	void finalise(void);
 
-	virtual bool canSendTo(const CNetState* state) const override { return CanSendToClient(state); }
-	static bool CanSendToClient(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendToClient(state); }
+    static bool CanSendToClient(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1850,13 +1812,10 @@ protected:
 
 public:
 	PacketPropertyListVersion(const CClient* target, const CObjBase* object, dword version);
-	virtual bool onSend(const CClient* client);
+    virtual bool onSend(const CClient* client) override;
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_TOOLTIPHASH);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1872,11 +1831,8 @@ public:
 	PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word durationSeconds, lpctstr* args, uint argCount); // add buff
 	PacketBuff(const CClient* target, const BUFF_ICONS iconId); // remove buff
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_BUFFS);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1905,10 +1861,7 @@ public:
     PacketWaypointAdd(const CClient *target, CObjBase *object, MAPWAYPOINT_TYPE type);
 
     virtual bool canSendTo(const CNetState *state) const { return CanSendTo(state); }
-    static bool CanSendTo(const CNetState *state)
-    {
-        return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
-    }
+    static bool CanSendTo(const CNetState *state);
 };
 
 /***************************************************************************
@@ -1924,10 +1877,7 @@ public:
     PacketWaypointRemove(const CClient *target, CObjBase *object);
 
     virtual bool canSendTo(const CNetState *state) const { return CanSendTo(state); }
-    static bool CanSendTo(const CNetState *state)
-    {
-        return state->isClientVersionNumber(MINCLIVER_MAPWAYPOINT) || state->isClientKR() || state->isClientEnhanced();
-    }
+    static bool CanSendTo(const CNetState *state);
 };
 
 /***************************************************************************
@@ -1942,11 +1892,8 @@ class PacketToggleHotbar : public PacketSend
 public:
 	PacketToggleHotbar(const CClient* target, bool enable);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientKR();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1961,11 +1908,8 @@ class PacketTimeSyncResponse : public PacketSend
 public:
 	PacketTimeSyncResponse(const CClient* target);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_SA) || state->isClientEnhanced() || state->isClientKR();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -1992,11 +1936,8 @@ public:
 	PacketItemWorldNew(const CClient* target, const CItem* item);
 	PacketItemWorldNew(const CClient* target, const CChar* mobile);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_SA) || state->isClientEnhanced();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -2011,11 +1952,8 @@ class PacketDisplayMapNew : public PacketSend
 public:
 	PacketDisplayMapNew(const CClient* target, const CItemMap* map, const CRectMap& rect);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-	    return state->isClientVersionNumber(MINCLIVER_NEWMAPDISPLAY) || state->isClientEnhanced();
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -2043,11 +1981,8 @@ class PacketContainer : public PacketSend
 public:
 	PacketContainer(const CClient* target, CObjBase** objects, uint objectCount);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_HS);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 /***************************************************************************
@@ -2078,11 +2013,8 @@ public:
 
 	PacketGlobalChat(const CClient* target, byte unknown, byte action, byte stanza, lpctstr xml);
 
-	virtual bool canSendTo(const CNetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const CNetState* state)
-	{
-		return state->isClientVersionNumber(MINCLIVER_GLOBALCHAT);
-	}
+    virtual bool canSendTo(const CNetState* state) const override { return CanSendTo(state); }
+    static bool CanSendTo(const CNetState* state);
 };
 
 #ifdef __clang__
