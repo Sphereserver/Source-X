@@ -15,10 +15,10 @@
 
 
 struct CMenuItem;
+struct CRectMap;
 class CNetState;
 class CItemMap;
 class CObjBaseTemplate;
-class CRectMap;
 class CSpellDef;
 class CItemContainer;
 class CItemMessage;

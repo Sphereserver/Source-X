@@ -81,7 +81,7 @@ TEST_CASE("CPointBase::GetDir")\
             ptOther.m_x += x;
             ptOther.m_y += y;
 
-            CHECK(pt.GetDir(ptOther) == ref_impl::GetDir(pt, ptOther));
+            CHECK_EQ(pt.GetDir(ptOther), ref_impl::GetDir(pt, ptOther));
         }
     }
 }
@@ -95,16 +95,16 @@ TEST_CASE("CPointBase::IsValidPoint")\
     SUBCASE("Valid")
     {
         pt.Set(0, 0, 0, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
         pt.Set(1, 2, 3, 4);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
         pt.Set(0, 0, -126, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
         pt.Set(0, 0, 126, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
     }
 
@@ -113,19 +113,19 @@ TEST_CASE("CPointBase::IsValidPoint")\
         // For now avoid negative values, the unsigned conversion trick will fail because sphere hasn't
         //  yet loaded map sizes and the default is -1.
         //pt.Set(-11, 2, 3, 4);
-        //CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        //CHECK_EQ(pt.IsValidPoint(),  ref_impl::IsValidPoint(pt));
 
         pt.Set(0, 0, -128, 0); // uint8_t goes from [-128; 127]
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
         pt.Set(0, 0, -127, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
         pt.Set(0, 0, 127, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
 
         pt.Set(7168, 4096, 127, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(), ref_impl::IsValidPoint(pt));
     }
 }
 
@@ -138,39 +138,39 @@ TEST_CASE("CPointBase::IsCharValid")\
     SUBCASE("Valid")
     {
         pt.Set(1, 2, 3, 4);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(1, 1, -126, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(1, 1, 126, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
     }
 
     SUBCASE("Invalid")
     {
         pt.Set(0, 0, 0, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         //pt.Set(-11, 2, 3, 4);
-        //CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        //CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(1, 1, -127, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(1, 1, 127, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(1, 1, -128, 0); // uint8_t goes from [-128; 127]
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(7168, 4096, 127, 0);
-        CHECK(pt.IsValidPoint() == ref_impl::IsValidPoint(pt));
+        CHECK_EQ(pt.IsValidPoint(),  ref_impl::IsValidPoint(pt));
 
         pt.Set(0, 1, 1, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
 
         pt.Set(1, 0, 1, 0);
-        CHECK(pt.IsCharValid() == ref_impl::IsCharValid(pt));
+        CHECK_EQ(pt.IsCharValid(), ref_impl::IsCharValid(pt));
     }
 }

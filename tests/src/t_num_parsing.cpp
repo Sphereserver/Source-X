@@ -11,7 +11,7 @@
 
 namespace { namespace ref_impl
 {
-
+/*
     // From 0.56d, known to be faulty... Copying it here just for historical reasons.
     int ahextoi(lpctstr pszArgs)	// convert hex string to int
     {
@@ -92,7 +92,7 @@ namespace { namespace ref_impl
         }
         return iVal;
     }
-
+*/
 
     // Part of CExpression::GetSingle that parses numerical strings.
     int64 GetSingle_num(lpctstr &pszArgs) ATTR_NO_UBSAN
