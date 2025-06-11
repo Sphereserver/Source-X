@@ -18,12 +18,19 @@ uint CUOClientVersion::GetLegacyVersionNumber() const noexcept
     uint factor_revision    = 100;
     uint factor_minor       = 100'00;
     uint factor_major       = 100'00'00;
-    if (m_revision > 100)
+
+    if (m_build >= 100)
+    {
+        factor_revision *= 10;
+        factor_minor *= 10;
+        factor_major *= 10;
+    }
+    if (m_revision >= 100)
     {
         factor_minor *= 10;
         factor_major *= 10;
     }
-    if (m_minor > 100)
+    if (m_minor >= 100)
     {
         factor_major *= 10;
     }
@@ -38,24 +45,36 @@ uint CUOClientVersion::GetLegacyVersionNumber() const noexcept
 
 std::string CUOClientVersion::GetVersionString() const noexcept
 {
-    std::string ret;
-    ret.reserve(30);
+    if (m_major > 1000 || m_minor > 1000 || m_revision > 1000 || m_build > 1000 || m_build_sub > 1000)
+        return {};  // Invalid at best, a malicious attempt of writing past the buffer at worst.
 
-    if (*this >= CUOClientVersionConstants::kMinCliver_NewVersioning)
+    std::string ret;
+    ret.resize(20);
+
+    if (   *this >= CUOClientVersionConstants::kMinCliver_ModernVersioning
+        || *this <= CUOClientVersionConstants::kMinCliver_LetterVersioning)
     {
         snprintf(ret.data(), ret.capacity(), "%u.%u.%u.%u", m_major, m_minor, m_revision, m_build);
     }
     else
     {
-        const int iVer = snprintf(ret.data(), ret.capacity(), "%u.%u.%u", m_major, m_minor, m_revision);
-        if (m_revision)
+        // snprintf returns the number of characters that would have been written had n been sufficiently large,
+        //  not counting the terminating null character, or a negative value if an encoding error occurred
+        int iWrittenChars = snprintf(ret.data(), ret.capacity(), "%u.%u.%u", m_major, m_minor, m_revision);
+        if (iWrittenChars < 0)
+            return {};  // ?!
+
+        if (m_build)
         {
-            if (m_revision == 0)
-                ret[iVer] = '0';
-            else
-                ret[iVer] = uchar(m_revision) + uchar('a' - 1); // 'a' = revision 1
-            ret[iVer + 1] = '\0';
+            ret[iWrittenChars] = uchar(m_build) + uchar('a' - 1); // 'a' = 'patch' 1
+            ++iWrittenChars;
         }
+        if (m_build_sub)
+        {
+            // Append the number to the string buffer
+            Str_FromUI(m_build_sub, &ret[iWrittenChars], ret.capacity() - (size_t)iWrittenChars - 1);
+        }
+        // ret[iVer] = '\0'; // resize already zeroes everything
     }
 
     return ret;
@@ -63,15 +82,17 @@ std::string CUOClientVersion::GetVersionString() const noexcept
 
 
 CUOClientVersion::CUOClientVersion(dword uiClientVersionNumber) noexcept :
-    m_extrachar(0)
+    m_build_sub(kuiBuildSubCatchAllVal)
+    // build_sub isn't encoded in the version number, so use a special value to inform
+    //  that we got this CUOClientVersion from a ver number.
 {
     // launch some tests for this function
-    if (uiClientVersionNumber >= CUOClientVersionConstants::kMinCliver_NewVersioning.GetLegacyVersionNumber()) //MINCLIVER_NEWVERSIONING)
+    if (uiClientVersionNumber >= CUOClientVersionConstants::kMinCliver_ModernVersioning.GetLegacyVersionNumber()) //MINCLIVER_NEWVERSIONING)
     {
         // We should really ditch this number, giving the difficulty to parse (imagine that in scripts...).
         //  We should just keep backwards compatibility with CLIVER/CLIVERREPORTED and provide just the string
         //  Maybe CLIVERSTR/CLIVERREPORTEDSTR ?
-        if (uiClientVersionNumber > 100'00'000'00)
+        if (uiClientVersionNumber > 10'00'000'00)
         {
             // Two extra digits: it's a EC (one more digit used for the bigger major version) with a greater rev number (like 4.00.101.00)
             m_major = uiClientVersionNumber / 100'000'00;
@@ -79,7 +100,7 @@ CUOClientVersion::CUOClientVersion(dword uiClientVersionNumber) noexcept :
             m_revision = (uiClientVersionNumber / 100 ) % 1000;
 
         }
-        else if (uiClientVersionNumber > 10'00'000'00)
+        else if (uiClientVersionNumber > 1'00'000'00)
         {
             // The extra digit can be used for a bigger major (EC, like 67.01.00.00) or rev number (CC, like 7.101.00.00)
             const bool fEC = ((uiClientVersionNumber / 1000'00) < kuiECMajorVerOffset);
@@ -113,8 +134,8 @@ CUOClientVersion::CUOClientVersion(dword uiClientVersionNumber) noexcept :
     }
 }
 
-CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
-    m_major(0), m_minor(0), m_revision(0), m_build(0), m_extrachar(0)
+CUOClientVersion::CUOClientVersion(lpctstr ptcVersion, bool fEnhancedClient) noexcept :
+    m_major(0), m_minor(0), m_revision(0), m_build(0), m_build_sub(0)
 {
     if ((ptcVersion == nullptr) || (*ptcVersion == '\0'))
         return;
@@ -123,13 +144,22 @@ CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
     Str_CopyLimitNull(ptcVersionBuf, ptcVersion, sizeof(ptcVersionBuf));
 
     // Ranges algorithms not yet supported by Apple Clang...
-    // const ptrdiff_t count = std::ranges::count(std::string_view(ptcVersion), '.');
+    // const size_t count = std::ranges::count(std::string_view(ptcVersion), '.');
     const auto svVersion = std::string_view(ptcVersion);
     const auto count = std::count(svVersion.cbegin(), svVersion.cend(), '.');
     if (count == 2)
+    {
+        if (fEnhancedClient)
+        {
+            g_Log.Event(LOGL_CRIT|LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "Wrong string passed to CUOClientVersion: Enhanced Client version but with old format?.\n");
+            return;
+        }
         ApplyVersionFromStringOldFormat(ptcVersionBuf);
+    }
     else if (count == 3)
-        ApplyVersionFromStringNewFormat(ptcVersionBuf);
+    {
+        ApplyVersionFromStringNewFormat(ptcVersionBuf, fEnhancedClient);
+    }
     else
     {
         // Malformed string?
@@ -140,18 +170,33 @@ CUOClientVersion::CUOClientVersion(lpctstr ptcVersion) noexcept :
 
 bool CUOClientVersion::operator ==(CUOClientVersion const& other) const noexcept
 {
-    //return (0 == memcmp(this, &other, sizeof(CUOClientVersion)));
     const bool fSameVerNum = (m_major == other.m_major) && (m_minor == other.m_minor) && (m_revision == other.m_revision) && (m_build == other.m_build);
-    return fSameVerNum && (m_extrachar == other.m_extrachar);
+
+    // Ignore this comparison is m_build_sub is kuiBuildSubCatchAllVal
+    // (so, if one of the two CUOClientVersion was calculated from a version number, which doesn't carry this information)
+    const bool fSameBuildSub =
+        ((m_build_sub == kuiBuildSubCatchAllVal) || (other.m_build_sub == kuiBuildSubCatchAllVal))
+            ? true : (m_build_sub == other.m_build_sub);
+
+    return fSameVerNum && fSameBuildSub;
 }
 bool CUOClientVersion::operator > (CUOClientVersion const& other) const noexcept
 {
     if (m_major > other.m_major)
         return true;
+
+    if (m_major < other.m_major)
+        return false;
     if (m_minor > other.m_minor)
         return true;
+
+    if (m_minor < other.m_minor)
+        return false;
     if (m_revision > other.m_revision)
         return true;
+
+    if (m_revision < other.m_revision)
+        return false;
     if (m_build > other.m_build)
         return true;
     return false;
@@ -173,18 +218,19 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexce
 {
     // Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
 
-    byte uiLetter = 0;
     const size_t uiMax = strnlen(ptcVersion, 20);
-    for (size_t i = 0; i < uiMax; ++i)
+    size_t uiLetterPos = 0;
+    byte uiLetter = 0;
+    for (; uiLetterPos < uiMax; ++uiLetterPos)
     {
-        if (IsAlpha(ptcVersion[i]))
+        if (IsAlpha(ptcVersion[uiLetterPos]))
         {
-            uiLetter = uchar(ptcVersion[i] - 'a') + 1u;
+            uiLetter = uchar(ptcVersion[uiLetterPos] - 'a') + 1u;
             break;
         }
     }
 
-    tchar *piVer[3];
+    tchar *piVer[3]{};
     lptstr ptcVersionParsed = ptcVersion;
     Str_ParseCmds(ptcVersionParsed, piVer, ARRAY_COUNT(piVer), ".");
 
@@ -200,9 +246,13 @@ void CUOClientVersion::ApplyVersionFromStringOldFormat(lptstr ptcVersion) noexce
     m_minor = uint(atoi(piVer[1]));
     m_revision = uint(atoi(piVer[2]));
     m_build = uiLetter;
+
+    ++ uiLetterPos;
+    if (ptcVersion[uiLetterPos] != '\0')
+        m_build_sub = uint(atoi(ptcVersion + uiLetterPos));
 }
 
-void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexcept
+void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion, bool fEnhancedClient) noexcept
 {
     // Get version of newer clients, which use only 4 numbers separated by dots (example: 6.0.1.1)
 
@@ -225,19 +275,19 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexce
     if (dot3 == np)
         goto ret_err;
 
-    const std::string_view sv1(sv.data(), dot1 - 1);
-    const std::string_view sv2(sv1.data() + dot1, dot2 - 1);
-    const std::string_view sv3(sv2.data() + dot2, dot3 - 1);
-    const std::string_view sv4(sv3.data() + dot3);
+    const std::string_view sv1(sv.data(), dot1);
+    const std::string_view sv2(sv.data() + dot1 + 1, dot2 - dot1 - 1);
+    const std::string_view sv3(sv.data() + dot2 + 1, dot3 - dot2 - 1);
+    const std::string_view sv4(sv.data() + dot3 + 1);
 
     bool ok = true;
     try
     {
         std::optional<uint> val1, val2, val3, val4;
-        ok = ok && (val1 = Str_ToU(sv1.data(), 10, true)).has_value();
-        ok = ok && (val2 = Str_ToU(sv1.data(), 10, true)).has_value();
-        ok = ok && (val3 = Str_ToU(sv1.data(), 10, true)).has_value();
-        ok = ok && (val4 = Str_ToU(sv1.data(), 10, true)).has_value();
+        ok = ok && (val1 = Str_ToU(sv1.data(), 10, sv1.length(), false)).has_value();
+        ok = ok && (val2 = Str_ToU(sv2.data(), 10, sv2.length(), false)).has_value();
+        ok = ok && (val3 = Str_ToU(sv3.data(), 10, sv3.length(), false)).has_value();
+        ok = ok && (val4 = Str_ToU(sv4.data(), 10, sv4.length(), false)).has_value();
         if (!ok)
             return;
 
@@ -245,6 +295,9 @@ void CUOClientVersion::ApplyVersionFromStringNewFormat(lptstr ptcVersion) noexce
         m_minor     = val2.value();
         m_revision  = val3.value();
         m_build     = val4.value();
+
+        if ((m_major < kuiECMajorVerOffset) && fEnhancedClient)
+            m_major += kuiECMajorVerOffset;
     }
     catch (std::bad_optional_access const&)
     {

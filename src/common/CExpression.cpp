@@ -1951,8 +1951,8 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 
 		// Copy the value in a new string
         const size_t uiToParseLen = std::min(
-            ptrdiff_t(THREAD_STRING_LENGTH-1),
-            ptrdiff_t(pElementsStart[0][1] - pElementsStart[0][0]));
+            size_t(THREAD_STRING_LENGTH-1),
+            size_t(pElementsStart[0][1] - pElementsStart[0][0]));
         memcpy((void*)ptcToParse, pElementsStart[0][0], uiToParseLen * sizeof(tchar));
         ptcToParse[uiToParseLen] = '\0';
 
@@ -1967,8 +1967,8 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 
 		// Copy the first element in a new string
         size_t uiToParseLen = std::min(
-            ptrdiff_t(THREAD_STRING_LENGTH-1),
-            ptrdiff_t(pElementsStart[0][1] - pElementsStart[0][0]));
+            size_t(THREAD_STRING_LENGTH-1),
+            size_t(pElementsStart[0][1] - pElementsStart[0][0]));
         memcpy((void*)ptcToParse, pElementsStart[0][0], uiToParseLen * sizeof(tchar));
         ptcToParse[uiToParseLen] = '\0';
 
@@ -1977,8 +1977,8 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 
 		// Copy the second element in a new string
         uiToParseLen = std::min(
-            ptrdiff_t(THREAD_STRING_LENGTH-1),
-            ptrdiff_t(pElementsStart[1][1] - pElementsStart[1][0]));
+            size_t(THREAD_STRING_LENGTH-1),
+            size_t(pElementsStart[1][1] - pElementsStart[1][0]));
         memcpy((void*)ptcToParse, pElementsStart[1][0], uiToParseLen * sizeof(tchar));
         ptcToParse[uiToParseLen] = '\0';
 
@@ -2004,8 +2004,8 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 
 		// Copy the weight element in a new string
         const size_t uiToParseLen = std::min(
-            ptrdiff_t(THREAD_STRING_LENGTH-1),
-            ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]));
+            size_t(THREAD_STRING_LENGTH-1),
+            size_t(pElementsStart[i][1] - pElementsStart[i][0]));
         memcpy((void*)ptcToParse, pElementsStart[i][0], uiToParseLen * sizeof(tchar));
         ptcToParse[uiToParseLen] = '\0';
 
@@ -2034,8 +2034,8 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 	// Copy the value element in a new string
 	ASSERT(nullptr != pElementsStart[i][0]);
     const size_t uiToParseLen = std::min(
-        ptrdiff_t(THREAD_STRING_LENGTH-1),
-        ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]));
+        size_t(THREAD_STRING_LENGTH-1),
+        size_t(pElementsStart[i][1] - pElementsStart[i][0]));
     memcpy((void*)ptcToParse, pElementsStart[i][0], uiToParseLen * sizeof(tchar));
     ptcToParse[uiToParseLen] = '\0';
 
@@ -2061,7 +2061,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
     if (iQty == 1) // It's just a simple value
     {
 		ASSERT(pElementsStart[0] != nullptr);
-        const int iToParseLen = int(ptrdiff_t(pElementsStart[0][1] - pElementsStart[0][0]));
+        const int iToParseLen = int(size_t(pElementsStart[0][1] - pElementsStart[0][0]));
         return CSString(pElementsStart[0][0], iToParseLen - 1);
     }
 
@@ -2082,7 +2082,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
 		//	break;	// Shouldn't really happen...
 
         // Copy the weight element in a new string
-        const size_t iToParseLen = ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]);
+        const size_t iToParseLen = size_t(pElementsStart[i][1] - pElementsStart[i][0]);
         memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
         pToParse[iToParseLen] = '\0';
         lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
@@ -2112,7 +2112,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
 
 	ASSERT(i < iQty);
     i -= 1; // pick the value instead of the weight
-    const int iToParseLen = int(ptrdiff_t(pElementsStart[i][1] - pElementsStart[i][0]));
+    const int iToParseLen = int(size_t(pElementsStart[i][1] - pElementsStart[i][0]));
     return CSString(pElementsStart[i][0], iToParseLen);
 }
 

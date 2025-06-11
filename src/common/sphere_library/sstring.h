@@ -65,17 +65,18 @@ struct KeyTableDesc_s
 /** @name String utilities: Modifiers
 */
 
-// If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0x***
-[[nodiscard]] std::optional<char>   Str_ToI8 (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uchar>  Str_ToU8 (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<short>  Str_ToI16(const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ushort> Str_ToU16(const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<int>    Str_ToI  (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<uint>   Str_ToU  (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<llong>  Str_ToLL (const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
-[[nodiscard]] std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base = 0, bool fIgnoreExcessChars = true) noexcept;
+// If you want to use base = 16 to convert an hexadecimal string, it has to be in the format: 0***
+// uiStopAtLen param: stop parsing at char at the given index. If 0, just parse until the end.
+[[nodiscard]] std::optional<char>   Str_ToI8 (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uchar>  Str_ToU8 (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<short>  Str_ToI16(const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ushort> Str_ToU16(const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<int>    Str_ToI  (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<uint>   Str_ToU  (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<llong>  Str_ToLL (const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
+[[nodiscard]] std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base = 0, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
 [[nodiscard]] inline
-std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base = 10) noexcept;
+std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base = 10, size_t uiStopAtLen = 0, bool fIgnoreExcessChars = true) noexcept;
 
 // The _Fast variants write from the end of the given buffer and return a pointer to the new start of the string, which in most
 //  cases is different from the pointer passed as argument!
@@ -406,20 +407,20 @@ inline ssize_t sGetLine_StaticBuf(const char *data, const size_t datasize) noexc
 
 //--- Inline methods
 
-std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base) noexcept
+std::optional<size_t> Str_ToST(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     if constexpr (sizeof(size_t) == 4)
-        return Str_ToU(ptcStr, base);
+        return Str_ToU(ptcStr, base, uiStopAtLen, fIgnoreExcessChars);
     else
-        return Str_ToULL(ptcStr, base);
+        return Str_ToULL(ptcStr, base, uiStopAtLen, fIgnoreExcessChars);
 }
 
 bool IsHexNumDigit(int c) noexcept
 {
     return
-    (c >= 'A' && c <= 'F') ||
-    (c >= 'a' && c <= 'f') ||
-    (c >= '0' && c <= '9');
+        (c >= 'A' && c <= 'F') ||
+        (c >= 'a' && c <= 'f') ||
+        (c >= '0' && c <= '9');
 }
 
 

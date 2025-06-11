@@ -26,7 +26,7 @@ static GetEncryptionTypeForClient(CUOClientVersion ver) noexcept
     if (ver.m_major == 2)
     {
         if (ver.m_minor == 0 && ver.m_revision == 0 && ver.m_build == 0)
-            return (ver.m_extrachar == 'x') ? ENC_BTFISH : ENC_BFISH; // 2.0.0x or 2.0.0
+            return (ver.m_build_sub == 23 /*'x'*/) ? ENC_BTFISH : ENC_BFISH; // 2.0.0x or 2.0.0
         if (ver.m_minor == 0 && ver.m_revision <= 3)
             return ENC_BTFISH;
     }

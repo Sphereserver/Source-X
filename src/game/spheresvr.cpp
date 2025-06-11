@@ -70,9 +70,18 @@ GlobalInitializer::GlobalInitializer()
 */
     PeriodicSyncTimeConstants();
 
+
 //--- Sphere threading system
 
 	DummySphereThread::createInstance();
+
+    {
+        // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
+        const AbstractThread* curthread = ThreadHolder::get().current();
+        ASSERT(curthread != nullptr);
+        ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
+        UnreferencedParameter(curthread);
+    }
 
 //--- Exception handling
 
@@ -504,14 +513,6 @@ int Sphere_MainEntryPoint( int argc, char *argv[] )
 int main( int argc, char * argv[] )
 #endif
 {
-	{
-        // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
-        const AbstractThread* curthread = ThreadHolder::get().current();
-        ASSERT(curthread != nullptr);
-        ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
-        UnreferencedParameter(curthread);
-    }
-
 #ifdef UNIT_TESTING
     return DocTestMain();
 #endif

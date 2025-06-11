@@ -57,6 +57,7 @@ bool cstr_to_num(
     const char * RESTRICT str,
     _IntType   * const    out,
     uint        base = 0,
+    size_t      stop_at_len = 0,
     bool const  ignore_trailing_extra_chars = false
     ) noexcept
 {
@@ -125,11 +126,13 @@ bool cstr_to_num(
     _UIntType acc = 0;  // accumulator
 
     // 4) Parse digits
+    bool parse_more;
     ushort ndigits = 0;
     const char* startDigits = str;
-    for (; *str; ++str)
+    do
     {
         const char c = *str;
+        parse_more = (size_t(++str - startDigits) < stop_at_len);
         _UIntType digit;
         if (c >= '0' && c <= '9')
             digit = c - '0';
@@ -143,14 +146,16 @@ bool cstr_to_num(
             break;
         if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
             return false;  // overflow
+
         acc = acc * base_casted + digit;
         ++ndigits;
-    }
+    } while (*str && (!stop_at_len || parse_more));
+
     if (str == startDigits)
         return false;  // no digits consumed
 
     // 5) Trailing‐space or end‐of‐string
-    if (!ignore_trailing_extra_chars)
+    if (!ignore_trailing_extra_chars && parse_more)
     {
         // Some old code expects string to num conversion to tolerate trailing whitespaces or even extra chars
         // (like the atoi C function).
@@ -203,73 +208,73 @@ bool cstr_to_num(
 }
 
 
-std::optional<char> Str_ToI8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<char> Str_ToI8 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     char val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uchar> Str_ToU8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<uchar> Str_ToU8 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     uchar val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<short> Str_ToI16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<short> Str_ToI16 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     short val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ushort> Str_ToU16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<ushort> Str_ToU16 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     ushort val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<int> Str_ToI (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<int> Str_ToI (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     int val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uint> Str_ToU(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<uint> Str_ToU(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     uint val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<llong> Str_ToLL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<llong> Str_ToLL(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     llong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     ullong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
