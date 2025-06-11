@@ -286,10 +286,6 @@ foreach(tgt ${TARGETS})
     target_precompile_headers(${tgt} ${pch_list})
 endforeach()
 
-if(UNIT_TESTING)
-    include("tests/CMakeLists.txt") # quick and dirty
-    setup_tests()
-endif()
 
 # --------------------
 
@@ -305,6 +301,11 @@ message(STATUS "Configuring external libraries...")
 add_subdirectory(lib)
 
 toolchain_exe_stuff() # stuff to be executed after ADD_EXECUTABLE
+
+if(UNIT_TESTING)
+    include("tests/CMakeLists.txt") # quick and dirty
+    setup_tests()
+endif()
 
 # Get the Git revision number
 message(STATUS)

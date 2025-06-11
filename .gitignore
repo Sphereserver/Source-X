@@ -8,7 +8,9 @@
 /.ctagsd
 /.codelite
 
+/_deps
 /CMakeFiles
+/external
 /spheresvr.dir
 
 /bin

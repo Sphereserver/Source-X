@@ -1,37 +1,15 @@
 #set(FETCHCONTENT_BASE_DIR
 #    "${CMAKE_SOURCE_DIR}/third_party"
 #)
-include(FetchContent)
 
 message(STATUS "")
 message(STATUS "Unit Tests requested")
-message(STATUS "Fetching DocTest")
 
-# Download the JSON for the latest release
-set(DOCTEST_RELEASE_API
-    "https://api.github.com/repos/doctest/doctest/releases/latest"
-)
+include("cmake/FetchGithubDep.cmake")
+set(EXTERNAL_CACHE_DIR "${CMAKE_SOURCE_DIR}/external")
 
-file(DOWNLOAD
-    ${DOCTEST_RELEASE_API}
-    ${CMAKE_BINARY_DIR}/doctest_latest.json
-    SHOW_PROGRESS
-)
-
-# Extract "tag_name" via regex
-file(READ "${CMAKE_BINARY_DIR}/doctest_latest.json" _json)
-string(REGEX MATCH "\"tag_name\"[ \t]*:[ \t]*\"([^\"]+)\"" _
-       "${_json}")
-set(DOCTEST_TAG "${CMAKE_MATCH_1}")
-
-message(STATUS "Using doctest tag: ${DOCTEST_TAG}")
-
-FetchContent_Declare(
-    doctest
-    GIT_REPOSITORY https://github.com/doctest/doctest.git
-    GIT_TAG        ${DOCTEST_TAG}
-)
-FetchContent_MakeAvailable(doctest)
+# Fetch Doctest
+fetch_github_library(doctest "https://github.com/doctest/doctest.git" "${EXTERNAL_CACHE_DIR}")
 
 # Enable testing
 enable_testing()
@@ -40,6 +18,12 @@ function(setup_tests)
     foreach(tgt ${TARGETS})
         target_link_libraries(${tgt} PRIVATE doctest::doctest)
         target_compile_definitions(${tgt} PRIVATE UNIT_TESTING)
+        # Doctest for some reason uses NaN, which is disabled by -ffast-math
+        if("${CXX_COMPILER_ID}" STREQUAL "MSVC")
+            target_compile_options(${tgt} PRIVATE /fp:precise)
+        else()
+            target_compile_options(${tgt} PRIVATE -fno-finite-math-only)
+        endif()
 
         #[[
         add_custom_target(run_tests
@@ -54,3 +38,4 @@ function(setup_tests)
                 COMMAND ${tgt})
     endforeach()
 endfunction()
+
