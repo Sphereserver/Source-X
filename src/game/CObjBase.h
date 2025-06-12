@@ -897,7 +897,7 @@ public:
 		= 0;
 
     /**
-     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
+     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgsPtr pArgs );
      *
      * @brief   Spell's trigger (@Effect, @Start...).
      *

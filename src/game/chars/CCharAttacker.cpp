@@ -326,7 +326,6 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
         if (IsTrigUsed(TRIGGER_COMBATDELETE))
         {
             CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            CScriptTriggerArgs Args;
             pScriptArgs->m_iN1 = fForced;
             pScriptArgs->m_iN2 = (int)type;
             TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pScriptArgs, pChar);

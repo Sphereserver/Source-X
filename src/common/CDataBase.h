@@ -12,12 +12,8 @@
 #include "CVarDefMap.h"
 #include <queue>
 
-#include <mysql/errmsg.h>	// mysql standard include
-#include <mysql/mysql.h>	// this needs to be defined AFTER common.h
-
-
 #define	MIN_MARIADB_VERSION_ALLOW	30002
-
+struct MySQLDataWrapper;
 
 class CDataBase : public CScriptObj
 {
@@ -40,7 +36,7 @@ public:
     bool queryf(CVarDefMap & mapQueryResult, char *fmt, ...) SPHERE_PRINTFARGS(3,4);
 	bool exec(const char *query);			//	executes query (pretty faster) for ALTER, UPDATE, INSERT, DELETE, ...
     bool execf(char *fmt, ...) SPHERE_PRINTFARGS(2,3);
-	void addQueryResult(CSString & theFunction, CScriptTriggerArgs * theResult);
+    void addQueryResult(CSString & theFunction, CScriptTriggerArgsPtr theResult);
 
 	//	set / get / info methods
 	bool isConnected();
@@ -66,9 +62,9 @@ private:
 	typedef std::queue<FunctionArgsPair_t> QueueFunction_t;
 
 protected:
-	bool	m_fConnected;					//	are we online?
-	MYSQL	*_myData;						//	mySQL link
-	QueueFunction_t m_QueryArgs;
+    std::unique_ptr<MySQLDataWrapper> _myData;	//	mySQL link
+    bool              m_fConnected;             //	are we online?
+    QueueFunction_t   m_QueryArgs;
 
 private:
 	SimpleMutex m_connectionMutex;
