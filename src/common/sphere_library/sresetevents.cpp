@@ -2,23 +2,25 @@
 
 // AutoResetEvent:: Constructors, Destructor, Assign operator.
 
-AutoResetEvent::AutoResetEvent()
+AutoResetEvent::AutoResetEvent() noexcept
 {
 #ifdef _WIN32
 	m_handle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 #else
 	pthread_mutexattr_init(&m_criticalSectionAttr);
-#ifndef __APPLE__
+#   ifndef __APPLE__
 	pthread_mutexattr_settype(&m_criticalSectionAttr, PTHREAD_MUTEX_RECURSIVE_NP);
-#endif
+#   endif
 	pthread_mutex_init(&m_criticalSection, &m_criticalSectionAttr);
 
 	pthread_condattr_init(&m_conditionAttr);
 	pthread_cond_init(&m_condition, &m_conditionAttr);
+
+    m_signaled = false;
 #endif
 }
 
-AutoResetEvent::~AutoResetEvent()
+AutoResetEvent::~AutoResetEvent() noexcept
 {
 #ifdef _WIN32
 	CloseHandle(m_handle);
@@ -32,11 +34,11 @@ AutoResetEvent::~AutoResetEvent()
 
 // AutoResetEvent:: Interaction.
 
-void AutoResetEvent::wait(uint timeout)
+void AutoResetEvent::wait(uint timeout) noexcept
 {
 	if (timeout == 0)
 	{
-		// if timeout is 0 then the thread's timeslice may not be given up as with normal
+        // If timeout is 0 then the thread's timeslice may not be given up as with normal
 		// sleep methods - so we will check for this condition ourselves and use SleepEx
 		// instead
 #ifdef _WIN32
@@ -48,42 +50,84 @@ void AutoResetEvent::wait(uint timeout)
 	}
 
 #ifdef _WIN32
-	// it's possible for WaitForSingleObjectEx to exit before the timeout and without
+    // It's possible for WaitForSingleObjectEx to exit before the timeout and without
 	// the signal. due to bAlertable=TRUE other events (e.g. async i/o) can cancel the
 	// waiting period early.
-	WaitForSingleObjectEx(m_handle, timeout, TRUE);
+
+    DWORD start = GetTickCount();
+    DWORD remaining = timeout;
+
+    // Checks below to protect outselves from spurious wakeups
+    while (true)
+    {
+        DWORD result = WaitForSingleObjectEx(m_handle, timeout, TRUE);
+
+        EnterCriticalSection(&m_criticalSection);
+        if (m_signaled)
+        {
+            m_signaled = false; // auto-reset
+            LeaveCriticalSection(&m_criticalSection);
+            break;
+        }
+        LeaveCriticalSection(&m_criticalSection);
+
+        if (result == WAIT_TIMEOUT)
+            break;
+
+        DWORD now = GetTickCount();
+        DWORD elapsed = now - start;
+        if (elapsed >= timeout)
+            break;
+
+        remaining = timeout - elapsed;
+    }
 #else
 	pthread_mutex_lock(&m_criticalSection);
 
-	// it's possible for pthread_cond_wait/timedwait to exit before the timeout and
-	// without a signal, but there's little we can actually do to check it since we
-	// don't usually care about the condition - if the calling thread does care then
-	// it needs to implement it's own checks
-	if (timeout == _kiInfinite)
-	{
-		pthread_cond_wait(&m_condition, &m_criticalSection);
-	}
-	else
-	{
-		// pthread_cond_timedwait expects the timeout to be the actual time
-		timespec time;
-		clock_gettime(CLOCK_REALTIME, &time);
-		time.tv_sec += timeout / 1000;
-		time.tv_nsec += (timeout % 1000) * 1000000L;
+    // Check m_signaled to protect outselves from spurious wakeups, like above, but leverage POSIX threads
+    while (!m_signaled)
+    {
+        if (timeout == _kiInfinite)
+        {
+            pthread_cond_wait(&m_condition, &m_criticalSection);
+            continue;
+        }
 
-		pthread_cond_timedwait(&m_condition, &m_criticalSection, &time);
-	}
+        // pthread_cond_timedwait expects the timeout to be the actual time
+        timespec time;
+        clock_gettime(CLOCK_REALTIME, &time);
+        time.tv_sec  +=  timeout / 1000;
+        time.tv_nsec += (timeout % 1000) * 1000000L;
+        if (time.tv_nsec >= 1000'000'000) //static_cast<decltype(time.tv_nsec)>(1.0e9))
+        {
+            // Normalize timespec
+            time.tv_sec  += 1;
+            time.tv_nsec -= 1000'000'000; //static_cast<decltype(time.tv_nsec)>(1.0e9);
+        }
+
+        int res = pthread_cond_timedwait(&m_condition, &m_criticalSection, &time);
+        if (res == ETIMEDOUT)
+            break;
+    }
+
+    if (m_signaled)
+        m_signaled = false; // autoreset
 
 	pthread_mutex_unlock(&m_criticalSection);
 #endif
 }
 
-void AutoResetEvent::signal()
+void AutoResetEvent::signal() noexcept
 {
 #ifdef _WIN32
+    EnterCriticalSection(&m_criticalSection);
+    m_signaled = true;
+    LeaveCriticalSection(&m_criticalSection);
+
 	SetEvent(m_handle);
 #else
 	pthread_mutex_lock(&m_criticalSection);
+    m_signaled = true;
 	pthread_cond_signal(&m_condition);
 	pthread_mutex_unlock(&m_criticalSection);
 #endif
@@ -91,16 +135,16 @@ void AutoResetEvent::signal()
 
 // ManualResetEvent:: Constructors, Destructor, Assign operator.
 
-ManualResetEvent::ManualResetEvent()
+ManualResetEvent::ManualResetEvent() noexcept
 {
 #ifdef _WIN32
 	m_handle = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 #else
 	m_value = false;
 	pthread_mutexattr_init(&m_criticalSectionAttr);
-#ifndef __APPLE__
+#   ifndef __APPLE__
 	pthread_mutexattr_settype(&m_criticalSectionAttr, PTHREAD_MUTEX_RECURSIVE_NP);
-#endif
+#   endif
 	pthread_mutex_init(&m_criticalSection, &m_criticalSectionAttr);
 
 	pthread_condattr_init(&m_conditionAttr);
@@ -108,7 +152,7 @@ ManualResetEvent::ManualResetEvent()
 #endif
 }
 
-ManualResetEvent::~ManualResetEvent()
+ManualResetEvent::~ManualResetEvent() noexcept
 {
 #ifdef _WIN32
 	CloseHandle(m_handle);
@@ -122,7 +166,7 @@ ManualResetEvent::~ManualResetEvent()
 
 // ManualResetEvent:: Interaction.
 
-void ManualResetEvent::wait(uint timeout)
+void ManualResetEvent::wait(uint timeout) noexcept
 {
 #ifdef _WIN32
 	WaitForSingleObjectEx(m_handle, timeout, FALSE);
@@ -154,7 +198,7 @@ void ManualResetEvent::wait(uint timeout)
 #endif
 }
 
-void ManualResetEvent::set()
+void ManualResetEvent::set() noexcept
 {
 #ifdef _WIN32
 	SetEvent(m_handle);
@@ -166,7 +210,7 @@ void ManualResetEvent::set()
 #endif
 }
 
-void ManualResetEvent::reset()
+void ManualResetEvent::reset() noexcept
 {
 #ifdef _WIN32
 	ResetEvent(m_handle);

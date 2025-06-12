@@ -27,11 +27,11 @@ public:
 	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
-	AutoResetEvent();
-	~AutoResetEvent();
-private:
-	AutoResetEvent(const AutoResetEvent& copy);
-	AutoResetEvent& operator=(const AutoResetEvent& other);
+    AutoResetEvent() noexcept;
+    ~AutoResetEvent() noexcept;
+
+    AutoResetEvent(const AutoResetEvent& copy) = delete;
+    AutoResetEvent& operator=(const AutoResetEvent& other) = delete;
 	///@}
 
 public:
@@ -42,11 +42,11 @@ public:
 	* @brief Wait until the timeout interval elapses or this object is signaled.
 	* @param timeout max elapsed time to wait.
 	*/
-	void wait(uint timeout = _kiInfinite);
+    void wait(uint timeout = _kiInfinite) noexcept;
 	/**
 	* @brief Signal this object to stop the wait.
 	*/
-	void signal();
+    void signal() noexcept;
 	///@}
 
 private:
@@ -57,6 +57,7 @@ private:
 	pthread_mutexattr_t m_criticalSectionAttr;    // Unix API mutex attr.
 	pthread_condattr_t m_conditionAttr;    // Unix API condition attr.
 	pthread_cond_t m_condition;    // Unix API condition.
+    bool m_signaled;
 #endif
 };
 
@@ -76,11 +77,11 @@ public:
 	/** @name Constructors, Destructor, Assign operator:
 	*/
 	///@{
-	ManualResetEvent();
-	~ManualResetEvent();
-private:
-	ManualResetEvent(const ManualResetEvent& copy);
-	ManualResetEvent& operator=(const ManualResetEvent& other);
+    ManualResetEvent() noexcept;
+    ~ManualResetEvent() noexcept;
+
+    ManualResetEvent(const ManualResetEvent& copy) = delete;
+    ManualResetEvent& operator=(const ManualResetEvent& other) = delete;
 	///@}
 
 public:
@@ -91,15 +92,15 @@ public:
 	* @brief Waits until event is set, checking it each time interval.
 	* @param timeout time interval to check.
 	*/
-	void wait(uint timeout = _kiInfinite);
+    void wait(uint timeout = _kiInfinite) noexcept;
 	/**
 	* @brief resets the event.
 	*/
-	void reset();
+    void reset() noexcept;
 	/**
 	* @brief sets the event.
 	*/
-	void set();
+    void set() noexcept;
 	///@}
 
 private:
