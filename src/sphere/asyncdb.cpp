@@ -43,7 +43,7 @@ void CDataBaseAsyncHelper::tick()
     else
         theArgs->m_iN2 = g_Serv._hDb.exec(currentFunctionPair.second);
 
-    //g_Serv._hDb.addQueryResult(currentFunctionPair.first, std::move(theArgs));
+    g_Serv._hDb.addQueryResult(currentFunctionPair.first, std::move(theArgs));
 }
 
 void CDataBaseAsyncHelper::waitForClose()
