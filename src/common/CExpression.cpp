@@ -2118,7 +2118,7 @@ CSString CExpression::GetRangeString(lpctstr & refStrExpr)
 
 bool CExpression::EvaluateConditionalSingle(
     CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext,
-    CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+    CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
     ADDTOCALLSTACK("CExpression::EvaluateConditionalSingle");
 
@@ -2206,13 +2206,11 @@ bool CExpression::EvaluateConditionalSingle(
     return fVal;
 }
 
-bool CExpression::EvaluateConditionalWhole(lptstr ptcExpr, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+bool CExpression::EvaluateConditionalWhole(lptstr ptcExpr, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
     ADDTOCALLSTACK("CExpression::EvaluateConditionalWhole");
     ASSERT(refExprContext._pScriptObjI != nullptr);
-
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    ASSERT(pScriptArgs);
 
     lptstr ptcExprDbg = ptcExpr;
     const auto pSubexprArena = GetConditionalSubexpressions(ptcExprDbg, _pBufs.get()->m_poolCScriptExprSubStatesPool);	// number of arguments
@@ -2336,7 +2334,7 @@ static void EvaluateConditionalQval_ParseArg(tchar* ptcSrc, tchar** ptcDest, lpc
 bool CExpression::EvaluateConditionalQval(
     lpctstr ptcKey, CSString& refStrVal,
     CScriptExprContext& pContext,
-    CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+    CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
     // Do a switch ? type statement <QVAL condition ? option1 : option2>
     ADDTOCALLSTACK("CExpression::EvaluateConditionalQval");
@@ -2378,12 +2376,13 @@ bool CExpression::EvaluateConditionalQval(
 int CExpression::ParseScriptText(
     tchar * ptcResponse,
     CScriptExprContext& pContext,
-    CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc,
+    CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc,
     int iFlags)
 {
     ADDTOCALLSTACK("CScriptObj::ParseScriptText");
     //ASSERT(ptcResponse[0] != ' ');	// Not needed: i remove whitespaces and invalid characters here.
     ASSERT(pContext._pScriptObjI != nullptr);
+    ASSERT(pScriptArgs);
 
     // Take in a line of text that may have fields that can be replaced with operators here.
     // ARGS:
@@ -2399,10 +2398,6 @@ int CExpression::ParseScriptText(
     // Recursion control variables.
     //  _iParseScriptText_Reentrant = 0;
     //  _fParseScriptText_Brackets = false;	// Am i evaluating a statement? (Am i inside < > brackets of a statement i am currently evaluating?)
-
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-
 
     const bool fNoRecurseBrackets = ((iFlags & 2) != 0);
 

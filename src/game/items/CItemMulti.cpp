@@ -407,7 +407,7 @@ void CItemMulti::Multi_Setup(CChar *pChar, dword dwKeyCode)
             }
         }
     }
-    pChar->r_Call("f_multi_setup", CScriptTriggerArgsPtr{}, pChar, nullptr, nullptr);
+    pChar->r_Call("f_multi_setup", CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar, nullptr, nullptr);
 }
 
 bool CItemMulti::Multi_IsPartOf(const CItem * pItem) const

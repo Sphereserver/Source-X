@@ -360,7 +360,7 @@ public:
 	bool Event_ExceededNetworkQuota(uchar uiType, int64 iBytes, int64 iQuota);
 
 	TRIGRET_TYPE Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBase * pObj );
-    TRIGRET_TYPE Dialog_OnButton( const CResourceID& rid, dword dwButtonID, CObjBase * pObj, std::shared_ptr<CDialogResponseArgs> pArgs );
+    TRIGRET_TYPE Dialog_OnButton(const CResourceID& rid, dword dwButtonID, CObjBase * pObj, std::shared_ptr<CDialogResponseArgs> pScriptArgs );
 
 	bool Login_Relay( uint iServer ); // Relay player to a certain IP
 	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
@@ -454,7 +454,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pArgs = nullptr, uint uiArgCount = 0) const;
+    void addBuff(const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds = 0, lpctstr* pptcArgs = nullptr, uint uiArgCount = 0) const;
 	void removeBuff(const BUFF_ICONS IconId) const;
 	void resendBuffs() const;
 

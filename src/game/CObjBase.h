@@ -897,7 +897,7 @@ public:
 		= 0;
 
     /**
-     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgsPtr pArgs );
+     * @fn  TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgsPtr const& pScriptArgs );
      *
      * @brief   Spell's trigger (@Effect, @Start...).
      *
@@ -908,7 +908,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-    TRIGRET_TYPE Spell_OnTrigger(SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr pArgs, CChar * pSrc);
+    TRIGRET_TYPE Spell_OnTrigger(SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs, CChar * pSrc);
 
 protected:
     virtual void _GoAwake() override;

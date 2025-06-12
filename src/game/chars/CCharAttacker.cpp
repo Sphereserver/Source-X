@@ -23,7 +23,7 @@ bool CChar::Attacker_Add(CChar * pChar, int iThreat)
     }
     else if (IsTrigUsed(TRIGGER_COMBATSTART))
     {
-        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, CScriptTriggerArgsPtr{}, pChar);
+        TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatStart, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar);
         if (tRet == TRIGRET_RET_TRUE)
             return false;
         else
@@ -258,7 +258,7 @@ void CChar::Attacker_Clear()
     {
         if (m_lastAttackers.empty() || !Fight_IsActive() || !m_Fight_Targ_UID.IsValidUID() || !m_Fight_Targ_UID.CharFind())
         {
-            OnTrigger(CTRIG_CombatEnd, CScriptTriggerArgsPtr{}, this);
+            OnTrigger(CTRIG_CombatEnd, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
         }
     }
 

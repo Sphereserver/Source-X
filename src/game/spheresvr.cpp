@@ -346,7 +346,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 
 	// Trigger server start
-    g_Serv.r_Call("f_onserver_start", CScriptTriggerArgsPtr{}, &g_Serv);
+    g_Serv.r_Call("f_onserver_start", CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv);
 	return g_Serv.GetExitFlag();
 
 	EXC_CATCH;
@@ -360,7 +360,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 void Sphere_ExitServer()
 {
 	// Trigger server quit
-    g_Serv.r_Call("f_onserver_exit", CScriptTriggerArgsPtr{}, &g_Serv);
+    g_Serv.r_Call("f_onserver_exit", CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv);
 
     g_Serv.SetServerMode(ServMode::Exiting);
 

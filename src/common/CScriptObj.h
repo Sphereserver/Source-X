@@ -112,29 +112,29 @@ public:
 // FUNCTION methods
     static size_t r_GetFunctionIndex(lpctstr pszFunction);
     static bool r_CanCall(size_t uiFunctionIndex);
-    bool r_Call( lpctstr ptcFunction, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
-    bool r_Call( size_t uiFunctionIndex, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
+    bool r_Call( lpctstr ptcFunction, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
+    bool r_Call( size_t uiFunctionIndex, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * psVal = nullptr, TRIGRET_TYPE * piRet = nullptr ); // Try to execute function
 
 
 // Generic section parsing
-    virtual TRIGRET_TYPE OnTrigger(lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    virtual TRIGRET_TYPE OnTrigger(lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
 	bool OnTriggerFind(CScript& s, lpctstr pszTrigName);
-    TRIGRET_TYPE OnTriggerScript(CScript& s, lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
-    TRIGRET_TYPE OnTriggerRun(CScript& s, TRIGRUN_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc, CSString* pReturn);
-    TRIGRET_TYPE OnTriggerRunVal(CScript& s, TRIGRUN_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    TRIGRET_TYPE OnTriggerScript(CScript& s, lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
+    TRIGRET_TYPE OnTriggerRun(CScript& s, TRIGRUN_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pReturn);
+    TRIGRET_TYPE OnTriggerRunVal(CScript& s, TRIGRUN_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
 
 
 // Special statements
 private:
 	// While, standard for loop and some special for loops
-    TRIGRET_TYPE OnTriggerLoopGeneric(CScript& s, int iType, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
-    TRIGRET_TYPE OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
-    TRIGRET_TYPE OnTriggerLoopForCont(CScript& s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
-    TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopGeneric(CScript& s, int iType, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopForCont(CScript& s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult);
+    TRIGRET_TYPE OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult);
 
 	// Special statements
-    bool Execute_Call(CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
-    bool Execute_FullTrigger(CScript& s, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    bool Execute_Call(CScript& s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
+    bool Execute_FullTrigger(CScript& s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
 
 
 // Utilities

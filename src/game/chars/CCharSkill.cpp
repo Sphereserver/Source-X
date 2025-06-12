@@ -3808,12 +3808,12 @@ void CChar::Skill_Fail( bool fCancel )
     {
 		if ( IsTrigUsed(TRIGGER_SKILLFAIL) )
 		{
-            if ( Skill_OnCharTrigger(skill, CTRIG_SkillFail, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+            if ( Skill_OnCharTrigger(skill, CTRIG_SkillFail, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 				fCancel = true;
 		}
 		if ( IsTrigUsed(TRIGGER_FAIL) && !fCancel )
 		{
-            if ( Skill_OnTrigger(skill, SKTRIG_FAIL, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+            if ( Skill_OnTrigger(skill, SKTRIG_FAIL, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 				fCancel = true;
 		}
 	}
@@ -3821,7 +3821,7 @@ void CChar::Skill_Fail( bool fCancel )
 	{
 		if ( IsTrigUsed(TRIGGER_SKILLABORT) )
 		{
-            if ( Skill_OnCharTrigger(skill, CTRIG_SkillAbort, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+            if ( Skill_OnCharTrigger(skill, CTRIG_SkillAbort, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return;
@@ -3829,7 +3829,7 @@ void CChar::Skill_Fail( bool fCancel )
 		}
 		if ( IsTrigUsed(TRIGGER_ABORT) )
 		{
-            if ( Skill_OnTrigger(skill, SKTRIG_ABORT, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+            if ( Skill_OnTrigger(skill, SKTRIG_ABORT, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return;
@@ -3848,14 +3848,13 @@ void CChar::Skill_Fail( bool fCancel )
 }
 
 
-TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE stage, CScriptTriggerArgsPtr pScriptArgs )
+TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs )
 {
 	ADDTOCALLSTACK("CChar::Skill_OnTrigger");
 	if ( !IsSkillBase(skill) )
 		return TRIGRET_RET_DEFAULT;
 
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    ASSERT(pScriptArgs);
 
 	if ( !(stage == SKTRIG_SELECT || stage == SKTRIG_GAIN || stage == SKTRIG_USEQUICK || stage == SKTRIG_WAIT || stage == SKTRIG_TARGETCANCEL) )
 		m_Act_SkillCurrent = skill;
@@ -3878,14 +3877,13 @@ TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE stage, CScrip
 	return iRet;
 }
 
-TRIGRET_TYPE CChar::Skill_OnCharTrigger(SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr pScriptArgs )
+TRIGRET_TYPE CChar::Skill_OnCharTrigger(SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr const& pScriptArgs )
 {
 	ADDTOCALLSTACK("CChar::Skill_OnCharTrigger");
 	if ( !IsSkillBase(skill) )
 		return TRIGRET_RET_DEFAULT;
 
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    ASSERT(pScriptArgs);
 
 	if ( !(ctrig == CTRIG_SkillSelect || ctrig == CTRIG_SkillGain || ctrig == CTRIG_SkillUseQuick || ctrig == CTRIG_SkillWait || ctrig == CTRIG_SkillTargetCancel) )
 		m_Act_SkillCurrent = skill;
@@ -4431,7 +4429,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		// 0-100 scale of Difficulty
 		if ( IsTrigUsed(TRIGGER_SKILLPRESTART) )
 		{
-            if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+            if ( Skill_OnCharTrigger(skill, CTRIG_SkillPreStart, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return false;
@@ -4439,7 +4437,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		}
 		if ( IsTrigUsed(TRIGGER_PRESTART) )
 		{
-            if ( Skill_OnTrigger(skill, SKTRIG_PRESTART, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+            if ( Skill_OnTrigger(skill, SKTRIG_PRESTART, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 			{
 				Skill_Cleanup();
 				return false;

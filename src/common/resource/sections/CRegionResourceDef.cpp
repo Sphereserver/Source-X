@@ -37,7 +37,7 @@ lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 };
 
 
-TRIGRET_TYPE CRegionResourceDef::OnTrigger(lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc)
+TRIGRET_TYPE CRegionResourceDef::OnTrigger(lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CRegionResourceDef::OnTrigger");
     // Attach some trigger to the cchar. (PC or NPC)
@@ -46,7 +46,7 @@ TRIGRET_TYPE CRegionResourceDef::OnTrigger(lpctstr pszTrigName, CScriptTriggerAr
     CResourceLock s;
     if ( ResourceLock( s ))
     {
-        TRIGRET_TYPE iRet = CScriptObj::OnTriggerScript( s, pszTrigName, std::move(pArgs), pSrc);
+        TRIGRET_TYPE iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pScriptArgs, pSrc);
         return iRet;
     }
     return TRIGRET_RET_DEFAULT;

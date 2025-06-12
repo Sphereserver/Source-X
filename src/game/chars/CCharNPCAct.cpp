@@ -304,7 +304,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 		// This or CTRIG_SeeNewPlayer will be our first contact with people.
 		if ( IsTrigUsed(TRIGGER_NPCHEARGREETING) )
 		{
-            if ( OnTrigger( CTRIG_NPCHearGreeting, CScriptTriggerArgsPtr{}, pSrc ) == TRIGRET_RET_TRUE )
+            if ( OnTrigger( CTRIG_NPCHearGreeting, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc ) == TRIGRET_RET_TRUE )
 				return;
 		}
 
@@ -368,7 +368,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	// can't figure you out.
 	if ( IsTrigUsed(TRIGGER_NPCHEARUNKNOWN) )
 	{
-        if ( OnTrigger( CTRIG_NPCHearUnknown, CScriptTriggerArgsPtr{}, pSrc ) == TRIGRET_RET_TRUE )
+        if ( OnTrigger( CTRIG_NPCHearUnknown, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -1018,7 +1018,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 
 	if ( IsTrigUsed(TRIGGER_NPCLOOKATCHAR) )
 	{
-        switch ( OnTrigger(CTRIG_NPCLookAtChar, CScriptTriggerArgsPtr{}, pChar) )
+        switch ( OnTrigger(CTRIG_NPCLookAtChar, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar) )
 		{
 			case  TRIGRET_RET_TRUE:		return true;
 			case  TRIGRET_RET_FALSE:	return false;
@@ -1046,7 +1046,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			{
 				if ( IsTrigUsed(TRIGGER_NPCSEENEWPLAYER) )
 				{
-                    if ( OnTrigger( CTRIG_NPCSeeNewPlayer, CScriptTriggerArgsPtr{}, pChar ) != TRIGRET_RET_TRUE )
+                    if ( OnTrigger( CTRIG_NPCSeeNewPlayer, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar ) != TRIGRET_RET_TRUE )
 					{
 						// record that we attempted to speak to them.
 						CItemMemory * pMemory = Memory_AddObjTypes( pChar, MEMORY_SPEAK );
@@ -1988,7 +1988,7 @@ void CChar::NPC_Act_Idle()
 	{
 		if ( IsTrigUsed(TRIGGER_NPCSPECIALACTION) )
 		{
-            if ( OnTrigger( CTRIG_NPCSpecialAction, CScriptTriggerArgsPtr{}, this ) == TRIGRET_RET_TRUE )
+            if ( OnTrigger( CTRIG_NPCSpecialAction, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this ) == TRIGRET_RET_TRUE )
 				return;
 		}
 
@@ -2681,7 +2681,7 @@ void CChar::NPC_ExtraAI()
 	EXC_SET_BLOCK("init");
 	if ( IsTrigUsed(TRIGGER_NPCACTION) )
 	{
-        if ( OnTrigger( CTRIG_NPCAction, CScriptTriggerArgsPtr{}, this ) == TRIGRET_RET_TRUE )
+        if ( OnTrigger( CTRIG_NPCAction, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this ) == TRIGRET_RET_TRUE )
 			return;
 	}
 

@@ -337,19 +337,19 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CO
         lpctstr ptcTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
 		if (IsTrigUsed(ptcTrig))
 		{
-            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pArgs->Init(wHue, iSound, 0, pSourceObj);
-            TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pArgs, pSrc);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(wHue, iSound, 0, pSourceObj);
+            TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pScriptArgs, pSrc);
 
 			if (iRet == TRIGRET_RET_TRUE)
 				return;
 
-            if (pArgs->m_iN2 > 0) // No sound? No checks for who can hear, packets...
+            if (pScriptArgs->m_iN2 > 0) // No sound? No checks for who can hear, packets...
 			{
-                Sound((SOUND_TYPE)(pArgs->m_iN2));
+                Sound((SOUND_TYPE)(pScriptArgs->m_iN2));
 			}
 
-            m_wHue = (HUE_TYPE)(pArgs->m_iN1);
+            m_wHue = (HUE_TYPE)(pScriptArgs->m_iN1);
 			return;
 		}
 	}
@@ -852,7 +852,7 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 	//  TRIGRET_ENDIF = no match.
 	//  TRIGRET_DEFAULT = found match but it had no RETURN
 	bool fMatch = false;
-    CScriptTriggerArgsPtr pArgs;
+    CScriptTriggerArgsPtr pScriptArgs;
 
 	while ( s.ReadKeyParse())
 	{
@@ -869,18 +869,18 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( ! fMatch )
 			continue;	// look for the next "ON" section.
 
-        pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pArgs->m_iN1 = iModeRef;
-        pArgs->m_iN2 = wHue;
-        TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pArgs, pSrc );
+        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = iModeRef;
+        pScriptArgs->m_iN2 = wHue;
+        TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pScriptArgs, pSrc );
 		if ( iRet != TRIGRET_RET_FALSE )
 			return iRet;
 
 		fMatch = false;
 	}
 
-    if (pArgs)
-        iModeRef = TALKMODE_TYPE(pArgs->m_iN1);
+    if (pScriptArgs)
+        iModeRef = TALKMODE_TYPE(pScriptArgs->m_iN1);
 	return TRIGRET_ENDIF;	// continue looking.
 }
 
@@ -981,9 +981,9 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
                 SKIP_SEPARATORS(pszArgs);
             }
 
-            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pArgs->Init(pszArgs != nullptr ? pszArgs : "");
-            if (r_Call(uiFunctionIndex, pArgs, pSrc, &sVal))
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(pszArgs != nullptr ? pszArgs : "");
+            if (r_Call(uiFunctionIndex, pScriptArgs, pSrc, &sVal))
             {
                 return true;
             }
@@ -2101,9 +2101,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         {
             // RES_FUNCTION call
             CSString sVal;
-            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pArgs->Init( s.GetArgRaw() );
-            if ( r_Call( uiFunctionIndex, pArgs, pSrc, &sVal ) )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init( s.GetArgRaw() );
+            if ( r_Call( uiFunctionIndex, pScriptArgs, pSrc, &sVal ) )
                 return true;
         }
 
@@ -3641,7 +3641,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
     CEntityProps::Copy(pObj);
 }
 
-TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr pArgs, CChar * pSrc )
+TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs, CChar * pSrc )
 {
 	ADDTOCALLSTACK("CObjBase::Spell_OnTrigger");
 	CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
@@ -3654,7 +3654,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CSc
 		CResourceLock s;
 		if ( pSpellDef->ResourceLock( s ))
 		{
-            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], std::move(pArgs), pSrc );
+            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pScriptArgs, pSrc );
 		}
 	}
 	return TRIGRET_RET_DEFAULT;

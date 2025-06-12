@@ -255,7 +255,7 @@ void CDataBase::addQueryResult(CSString & theFunction, CScriptTriggerArgsPtr the
 {
 	SimpleThreadLock stlThelock(m_resultMutex);
 
-	m_QueryArgs.push(FunctionArgsPair_t(theFunction, theResult));
+    m_QueryArgs.push(FunctionArgsPair_t(theFunction, std::move(theResult)));
 }
 
 bool CDataBase::_OnTick()

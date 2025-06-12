@@ -220,7 +220,7 @@ bool CScriptObj::r_CanCall(size_t uiFunctionIndex) // static
     return true;
 }
 
-bool CScriptObj::r_Call( lpctstr pszFunction, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * psVal, TRIGRET_TYPE * piRet )
+bool CScriptObj::r_Call( lpctstr pszFunction, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * psVal, TRIGRET_TYPE * piRet )
 {
     ADDTOCALLSTACK("CScriptObj::r_Call (FunctionName)");
 
@@ -231,7 +231,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CScriptTriggerArgsPtr pScriptArgs,
     return r_Call(index, pScriptArgs, pSrc, psVal, piRet);
 }
 
-bool CScriptObj::r_Call( size_t uiFunctionIndex, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * psVal, TRIGRET_TYPE * piRet )
+bool CScriptObj::r_Call( size_t uiFunctionIndex, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * psVal, TRIGRET_TYPE * piRet )
 {
     ADDTOCALLSTACK("CScriptObj::r_Call (FunctionIndex)");
 	EXC_TRY("Call by index");
@@ -1502,7 +1502,7 @@ bool CScriptObj::r_Load( CScript & s )
 	return true;
 }
 
-bool CScriptObj::Execute_Call(CScript& s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+bool CScriptObj::Execute_Call(CScript& s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
 	ADDTOCALLSTACK("CScriptObj::Execute_Call");
 	bool fRes = false;
@@ -1561,7 +1561,7 @@ bool CScriptObj::Execute_Call(CScript& s, CScriptTriggerArgsPtr pScriptArgs, CTe
 	return fRes;
 }
 
-bool CScriptObj::Execute_FullTrigger(CScript& s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc)
+bool CScriptObj::Execute_FullTrigger(CScript& s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
 	ADDTOCALLSTACK("CScriptObj::Execute_FullTrigger");
 	bool fRes = false;
@@ -1655,7 +1655,7 @@ bool CScriptObj::OnTriggerFind( CScript & s, lpctstr pszTrigName )
 	return false;
 }
 
-TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc)
+TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc)
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerScript");
 	// look for exact trigger matches
@@ -1735,7 +1735,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CScr
 	return iRet;
 }
 
-TRIGRET_TYPE CScriptObj::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc)
+TRIGRET_TYPE CScriptObj::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc)
 {
 	UnreferencedParameter(pszTrigName);
 	UnreferencedParameter(pSrc);
@@ -1818,14 +1818,13 @@ lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 	nullptr
 };
 
-TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult)
+TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult)
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerLoopGeneric");
 	// loop from start here to the ENDFOR
 	// See WebPageScriptList for dealing with Arrays.
 
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    ASSERT(pScriptArgs);
 
     CScriptLineContext StartContext = s.GetContext();
 	CScriptLineContext EndContext(StartContext);
@@ -2171,7 +2170,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopGeneric(CScript& s, int iType, CScriptTrig
 	return TRIGRET_ENDIF;
 }
 
-TRIGRET_TYPE CScriptObj::OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult)
+TRIGRET_TYPE CScriptObj::OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult)
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerLoopForCharSpecial");
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
@@ -2206,7 +2205,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopForCharSpecial(CScript& s, SK_TYPE iCmd, C
 	return iRet;
 }
 
-TRIGRET_TYPE CScriptObj::OnTriggerLoopForCont(CScript& s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult)
+TRIGRET_TYPE CScriptObj::OnTriggerLoopForCont(CScript& s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult)
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerLoopForCont");
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
@@ -2266,7 +2265,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopForCont(CScript& s, CScriptTriggerArgsPtr 
 	return iRet;
 }
 
-TRIGRET_TYPE CScriptObj::OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr pScriptArgs, CTextConsole* pSrc, CSString* pResult)
+TRIGRET_TYPE CScriptObj::OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc, CSString* pResult)
 {
     ADDTOCALLSTACK("CScriptObj::OnTriggerLoopForContSpecial");
     TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
@@ -2340,7 +2339,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerLoopForContSpecial(CScript& s, SK_TYPE iCmd, C
     return iRet;
 }
 
-TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * pResult )
+TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult )
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerRun");
 	// ARGS:
@@ -2355,6 +2354,8 @@ TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CScript
 
 	//	all scripts should have args for locals to work.
 
+    ASSERT(pScriptArgs);
+
     static constexpr uint g_reentrant_OnTriggerRun_limit = 75;
     static thread_local size_t g_reentrant_OnTriggerRun = 0;
     auto clean_return = [](const TRIGRET_TYPE ret) noexcept -> TRIGRET_TYPE {
@@ -2368,9 +2369,6 @@ TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CScript
         g_Log.Event(LOGL_CRIT, "Parsing of the current script is HALTED. Some code is calling itself recursively.\n");
         return clean_return(TRIGRET_RET_ABORTED);
     }
-
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
 
 	//	Script execution is always not threaded action
 	EXC_TRY("TriggerRun");
@@ -2656,7 +2654,7 @@ jump_in:
 	return clean_return(TRIGRET_RET_DEFAULT);
 }
 
-TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	// Get the TRIGRET_TYPE that is returned by the script
 	// This should be used instead of OnTriggerRun() when pReturn is not used

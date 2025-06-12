@@ -591,8 +591,8 @@ public:
 	CItem * LayerFind( LAYER_TYPE layer ) const;
 	void LayerAdd( CItem * pItem, LAYER_TYPE layer = LAYER_QTY );
 
-    TRIGRET_TYPE OnCharTrigForLayerLoop(CScript &s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * pResult, LAYER_TYPE layer );
-    TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc, CSString * pResult, word wMemType );
+    TRIGRET_TYPE OnCharTrigForLayerLoop(CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult, LAYER_TYPE layer );
+    TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult, word wMemType );
 
 	virtual void OnWeightChange( int iChange ) override;
 	virtual int GetWeight(word amount = 0) const override;
@@ -620,8 +620,8 @@ public:
     */
     void SetTriggerActive(lpctstr trig = nullptr);
 
-    virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc ) override;
-    TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc);
+    virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc ) override;
+    TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc);
 
 public:
 	// Load/Save----------------------------------
@@ -931,8 +931,8 @@ public:
 	SOUND_TYPE Skill_GetSound( SKILL_TYPE skill);
 	int Skill_Stage( SKTRIG_TYPE stage );
 
-    TRIGRET_TYPE Skill_OnTrigger(SKILL_TYPE skill, SKTRIG_TYPE stage, CScriptTriggerArgsPtr pScriptArgs); //pScriptArgs.m_iN1 will be rewritten with skill
-    TRIGRET_TYPE Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr pScriptArgs); //pArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnTrigger(SKILL_TYPE skill, SKTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs); //pScriptArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr const& pScriptArgs); //pArgs.m_iN1 will be rewritten with skill
 
 	bool Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg );
 	bool Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );

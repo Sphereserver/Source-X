@@ -407,7 +407,7 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 	if (( IsTrigUsed(TRIGGER_UNEQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMUNEQUIP) ))
 	{
 		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoadingGeneric())
-            pItem->OnTrigger( ITRIG_UNEQUIP, CScriptTriggerArgsPtr{}, this );
+            pItem->OnTrigger( ITRIG_UNEQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this );
 	}
 
 	CContainer::OnRemoveObj( pObRec );
@@ -3310,7 +3310,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	    // Swap the layer for real one, because if we don't use dclick for equip, real layer gets rewritten with LAYER_DRAGGING.
             pItem->SetContainedLayer(layer);
 
-            if (pItem->OnTrigger(ITRIG_EQUIPTEST, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
+            if (pItem->OnTrigger(ITRIG_EQUIPTEST, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
 		{
 		    // Reset layer to the original value, that item doesn't get misplaced.
 		    pItem->SetContainedLayer(requestedLayer);
@@ -3345,7 +3345,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (( IsTrigUsed(TRIGGER_EQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMEQUIP) ))
 	{
-        if ( pItem->OnTrigger(ITRIG_EQUIP, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE )
+        if ( pItem->OnTrigger(ITRIG_EQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -3499,7 +3499,7 @@ bool CChar::Reveal( uint64 iFlags )
 
     if (IsTrigUsed(TRIGGER_REVEAL))
     {
-        if (OnTrigger(CTRIG_Reveal, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
+        if (OnTrigger(CTRIG_Reveal, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
             return false;
     }
 
@@ -4318,7 +4318,7 @@ CChar::DeathRequestResult CChar::Death()
 
 	if ( IsTrigUsed(TRIGGER_DEATH) )
 	{
-        if ( OnTrigger(CTRIG_Death, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_Death, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )
             return DeathRequestResult::Aborted;
 	}
 	//Dismount now. Later is may be too late and cause problems
@@ -4840,7 +4840,7 @@ void CChar::CheckRevealOnMove()
 		return;
 
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
-        OnTrigger(CTRIG_StepStealth, CScriptTriggerArgsPtr{}, this);
+        OnTrigger(CTRIG_StepStealth, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 
     if (g_Cfg.m_iRevealFlags & REVEALF_ONHORSE && IsStatFlag(STATF_ONHORSE))
         Reveal();
@@ -5523,16 +5523,14 @@ void CChar::SetTriggerActive(lpctstr trig)
 // 4) CHARDEF
 // 5) EVENTSPET/EVENTSPLAYER set on .ini file
 // RETURNS = TRIGRET_TYPE (in cscriptobj.h)
-TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::OnTrigger");
 
 	if ( IsTriggerActive( pszTrigName ) ) //This should protect any char trigger from infinite loop
 		return TRIGRET_RET_DEFAULT;
 
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-
+    ASSERT(pScriptArgs);
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
@@ -5701,10 +5699,10 @@ stopandret:
 	return iRet;
 }
 
-TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ASSERT( (trigger > CTRIG_AAAUNUSED) && (trigger < CTRIG_QTY) );
-    return OnTrigger( CChar::sm_szTrigName[trigger], std::move(pScriptArgs), pSrc);
+    return OnTrigger( CChar::sm_szTrigName[trigger], pScriptArgs, pSrc);
 }
 
 // process m_fStatusUpdate flags

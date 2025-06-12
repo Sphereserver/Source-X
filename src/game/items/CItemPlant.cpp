@@ -168,7 +168,7 @@ bool CItem::Plant_OnTick()
 bool CItem::Plant_SetID(ITEMID_TYPE id)
 {
     bool iRet = SetID(id);
-    OnTrigger(ITRIG_Create, CScriptTriggerArgsPtr{}, &g_Serv);
+    OnTrigger(ITRIG_Create, CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv);
     return iRet;
 }
 

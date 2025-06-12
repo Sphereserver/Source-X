@@ -302,7 +302,7 @@ public:
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
     virtual void Copy(const CComponent *target) override;
-    TRIGRET_TYPE OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr args, CTextConsole *pSrc);
+    TRIGRET_TYPE OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc);
 
     /************************************************************************
     * CItem related section.

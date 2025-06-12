@@ -320,12 +320,12 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	CChar *pSrc = uidCommand.CharFind();
 	if ( pSrc && IsTrigUsed(TRIGGER_PARTYREMOVE) )
 	{
-        if ( pCharRemove->OnTrigger(CTRIG_PartyRemove, CScriptTriggerArgsPtr{}, pSrc) == TRIGRET_RET_TRUE )
+        if ( pCharRemove->OnTrigger(CTRIG_PartyRemove, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc) == TRIGRET_RET_TRUE )
 			return false;
 	}
 	if ( IsTrigUsed(TRIGGER_PARTYLEAVE) )
 	{
-        if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, CScriptTriggerArgsPtr{}, pCharRemove) == TRIGRET_RET_TRUE )
+        if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharRemove) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -360,7 +360,7 @@ bool CPartyDef::Disband( CUID uidMaster )
 	CChar *pMaster = GetMaster().CharFind();
 	if ( pMaster && IsTrigUsed(TRIGGER_PARTYDISBAND) )
 	{
-        if ( pMaster->OnTrigger(CTRIG_PartyDisband, CScriptTriggerArgsPtr{}, pMaster) == TRIGRET_RET_TRUE )
+        if ( pMaster->OnTrigger(CTRIG_PartyDisband, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pMaster) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -456,7 +456,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, 
 
 	if (IsTrigUsed(TRIGGER_PARTYADD))
     {
-        if ( pCharAccept->OnTrigger(CTRIG_PartyAdd, CScriptTriggerArgsPtr{}, pCharInviter) == TRIGRET_RET_TRUE )
+        if ( pCharAccept->OnTrigger(CTRIG_PartyAdd, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharInviter) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

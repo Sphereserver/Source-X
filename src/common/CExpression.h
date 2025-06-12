@@ -250,18 +250,18 @@ public:
     /*
     * @brief Do the first-level parsing of a script line and eventually replace requested values got by r_WriteVal.
     */
-    int ParseScriptText( tchar * pszResponse, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, int iFlags = 0 );
+    int ParseScriptText( tchar * pszResponse, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, int iFlags = 0 );
 
     [[nodiscard]]
-    bool EvaluateConditionalWhole(lptstr ptcExpression, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    bool EvaluateConditionalWhole(lptstr ptcExpression, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
 
 private:
     // Arguments inside conditional statements: IF, ELIF, ELSEIF
     [[nodiscard]]
-    bool EvaluateConditionalSingle(CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    bool EvaluateConditionalSingle(CScriptSubExprState& refSubExprState, CScriptExprContext& refExprContext, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
 
     [[nodiscard]]
-    bool EvaluateConditionalQval(lpctstr ptcKey, CSString& refStrVal, CScriptExprContext& refContext, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc);
+    bool EvaluateConditionalQval(lpctstr ptcKey, CSString& refStrVal, CScriptExprContext& refContext, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc);
 
     [[nodiscard]]
     PrvBuffersPool::CSubExprStatesArenaPool_t::UniquePtr_t
