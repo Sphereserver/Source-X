@@ -972,29 +972,32 @@ void CNTWindow::NTWindow_CheckUpdateWindowTitle()
 	LPCTSTR pszMode;
 	switch ( g_Serv.GetServerMode() )
 	{
-	case SERVMODE_RestockAll:	// Major event.
+	case ServMode::RestockAll:	// Major event.
 		pszMode = "Restocking";
 		break;
-	case SERVMODE_GarbageCollection:	// Major event.
+	case ServMode::GarbageCollection:	// Major event.
 		pszMode = "Collecting Garbage";
 		break;
-	case SERVMODE_Saving:		// Forced save freezes the system.
+	case ServMode::Saving:		// Forced save freezes the system.
 		pszMode = "Saving";
 		break;
-	case SERVMODE_Run:			// Game is up and running
+	case ServMode::Run:			// Game is up and running
 		pszMode = "Running";
 		break;
-    case SERVMODE_PreLoadingINI:
-	case SERVMODE_Loading:		// Initial load.
+    case ServMode::StartupPreLoadingIni:
+    case ServMode::StartupLoadingScripts:	// Initial load.
 		pszMode = "Loading";
 		break;
-	case SERVMODE_ResyncPause:
+    case ServMode::StartupLoadingSaves:		// Initial load.
+        pszMode = "Loading (savefiles)";
+        break;
+	case ServMode::ResyncPause:
 		pszMode = "Resync Pause";
 		break;
-	case SERVMODE_ResyncLoad:	// Loading after resync
+	case ServMode::ResyncLoad:	// Loading after resync
 		pszMode = "Resync Load";
 		break;
-	case SERVMODE_Exiting:		// Closing down
+	case ServMode::Exiting:		// Closing down
 		pszMode = "Exiting";
 		break;
 	default:

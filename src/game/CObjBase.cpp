@@ -207,9 +207,7 @@ void CObjBase::DeletePrepare()
 
     CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
 
-    const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
-    if (!fDestroyingWorld)
+    if (!g_Serv.IsDestroyingWorld())
     {
         RemoveFromView();
     }
@@ -249,9 +247,7 @@ bool CObjBase::Delete(bool fForce)
     EXC_TRY("Cleanup in Delete method");
 
     bool fScheduleDeletion = true;
-    const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
-    if (fDestroyingWorld)
+    if (g_Serv.IsDestroyingWorld())
     {
         // Why resort to _uiInternalStateFlags and not simply check if GetParent() is a CSectorObjCont* ?
         //  Because at this point CSObjContRec::RemoveSelf might have been called (it depends on how CObjBase::Delete was called,

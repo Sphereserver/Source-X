@@ -3273,8 +3273,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				bool normcont = LoadSetContainer(CUID(s.GetArgDWVal()), (LAYER_TYPE)GetUnkZ());
 				if (!normcont)
 				{
-					SERVMODE_TYPE iModeCode = g_Serv.GetServerMode();
-					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))
+					ServMode iModeCode = g_Serv.GetServerMode();
+                    if ((iModeCode == ServMode::StartupLoadingSaves) || (iModeCode == ServMode::GarbageCollection))
 						Delete();	//	since the item is no longer in container, it should be deleted
 				}
 				return normcont;

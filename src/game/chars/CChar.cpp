@@ -596,7 +596,7 @@ void CChar::ClearPlayer()
 	}
 	else
 	{
-		if (g_Serv.GetServerMode() != SERVMODE_Exiting)
+		if (g_Serv.GetServerMode() != ServMode::Exiting)
 		{
 			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' as been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
 		}

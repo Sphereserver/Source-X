@@ -1060,9 +1060,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CServerConfig::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-#define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_MSG(x)
-#define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
-#define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
+#define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != ServMode::StartupPreLoadingIni) DEBUG_MSG(x)
+#define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != ServMode::StartupPreLoadingIni) g_Log.EventWarn(x)
+#define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != ServMode::StartupPreLoadingIni) g_Log.EventError(x)
 
 	int i = FindCAssocRegTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), ARRAY_COUNT( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
@@ -4376,7 +4376,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return rid;
 			}
 #ifdef _DEBUG
-			if ( g_Serv.GetServerMode() != SERVMODE_ResyncLoad )	// this really is ok.
+			if ( g_Serv.GetServerMode() != ServMode::ResyncLoad )	// this really is ok.
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );

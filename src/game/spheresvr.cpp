@@ -268,12 +268,12 @@ static bool WritePidFile(int iMode = 0)
 int Sphere_InitServer( int argc, char *argv[] )
 {
 	constexpr const char *m_sClassName = "SphereInit";
-	EXC_TRY("Init Server");
+    EXC_TRY("Init Server");
     GlobalInitializer::InitRuntimeDefaultValues();
 
     EXC_SET_BLOCK("loading ini and scripts");
 	if ( !g_Serv.Load() )
-		return -3;
+        return -3;
 
 	if ( argc > 1 )
 	{
@@ -287,7 +287,9 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_SET_BLOCK("sockets init");
 	if ( !g_Serv.SocketsInit() )
 		return -9;
+
 	EXC_SET_BLOCK("load world");
+    g_Serv.SetServerMode(ServMode::StartupLoadingSaves);
 	if ( !g_World.LoadAll() )
 		return -8;
 
@@ -328,7 +330,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Cfg.PrintEFOFFlags();
 
 	EXC_SET_BLOCK("finalizing");
-	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
+    g_Serv.SetServerMode(ServMode::Run);	// ready to go.
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
 	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = %" PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
@@ -360,7 +362,7 @@ void Sphere_ExitServer()
 	// Trigger server quit
     g_Serv.r_Call("f_onserver_exit", CScriptTriggerArgsPtr{}, &g_Serv);
 
-	g_Serv.SetServerMode(SERVMODE_Exiting);
+    g_Serv.SetServerMode(ServMode::Exiting);
 
 	g_NetworkManager.stop();
 	g_Main.waitForClose();
@@ -546,7 +548,7 @@ int main( int argc, char * argv[] )
 
 #ifndef _WIN32
     // We need to find out the log files folder... look it up in the .ini file (on Windows it's done in WinMain function).
-    g_Serv.SetServerMode(SERVMODE_PreLoadingINI);
+    g_Serv.SetServerMode(ServMode::StartupPreLoadingIni);
 
     // Parse command line arguments.
     for (int argn = 1; argn < argc; ++argn)
@@ -570,8 +572,8 @@ int main( int argc, char * argv[] )
     g_Cfg.LoadIni(false);
 #endif
 
-    g_Serv.SetServerMode(SERVMODE_Loading);
-	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
+    g_Serv.SetServerMode(ServMode::StartupLoadingScripts);
+    g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
 	if ( ! g_Serv.GetExitFlag() )
 	{
 		WritePidFile();

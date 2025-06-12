@@ -362,7 +362,7 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 	m_fConsoleTextReadyFlag = false;
 
 	// we are in start up mode. // IsLoading()
-	SetServerMode( SERVMODE_PreLoadingINI );
+    SetServerMode( ServMode::StartupPreLoadingIni );
 
 	memset(m_PacketFilter, 0, sizeof(m_PacketFilter));
 	memset(m_OutPacketFilter, 0, sizeof(m_OutPacketFilter));
@@ -438,7 +438,12 @@ bool CServer::SetProcessPriority(int iPriorityLevel)
     return fSuccess;
 }
 
-void CServer::SetServerMode( SERVMODE_TYPE mode )
+ServMode CServer::GetServerMode() const noexcept
+{
+    return m_iModeCode.load(std::memory_order_acquire);
+}
+
+void CServer::SetServerMode( ServMode mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode.store(mode, std::memory_order_release);
@@ -453,13 +458,14 @@ bool CServer::IsValidBusy() const
     // ?
     switch ( GetServerMode() )
     {
-        case SERVMODE_Saving:
+        case ServMode::Saving:
             if ( g_World.IsSaving() )
                 return true;
             break;
-        case SERVMODE_Loading:
-        case SERVMODE_GarbageCollection:
-        case SERVMODE_RestockAll:	// these may look stuck but are not.
+        case ServMode::StartupLoadingSaves:
+        case ServMode::StartupLoadingScripts:
+        case ServMode::GarbageCollection:
+        case ServMode::RestockAll:	// these may look stuck but are not.
             return true;
         default:
             return false;
@@ -482,12 +488,18 @@ void CServer::SetExitFlag(int iFlag) noexcept
 
 bool CServer::IsLoading() const noexcept
 {
-    return ( m_fResyncPause || (GetServerMode() > SERVMODE_Run) );
+    return ( m_fResyncPause || (GetServerMode() > ServMode::Run) );
 }
 
 bool CServer::IsResyncing() const noexcept
 {
-    return m_fResyncPause || (GetServerMode() == SERVMODE_ResyncLoad);
+    return m_fResyncPause || (GetServerMode() == ServMode::ResyncLoad);
+}
+
+bool CServer::IsDestroyingWorld() const noexcept
+{
+    const ServMode servMode = GetServerMode();
+    return (servMode == ServMode::Exiting || servMode == ServMode::StartupLoadingScripts || servMode == ServMode::StartupLoadingSaves);
 }
 
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
@@ -626,25 +638,29 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			// typical (first time) poll response.
 			{
 				std::string cliver = m_ClientVersion.GetClientVer();
-				snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_INFO_STR ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
+                snprintf(pTemp, Str_TempLength(),
+                    SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_INFO_STR ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
 					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), cliver.c_str());
 			}
 			break;
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
+            snprintf(pTemp, Str_TempLength(),
+                SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
 		case 0x24: // '$'
 			// show at startup.
-			snprintf(pTemp, Str_TempLength(), "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
+            snprintf(pTemp, Str_TempLength(),
+                "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
 				m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), m_TimeZone);
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			snprintf(pTemp, Str_TempLength(), SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
+            snprintf(pTemp, Str_TempLength(),
+                SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
 				StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
@@ -2458,12 +2474,12 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
 		g_Cfg.Unload(true);
-		SetServerMode(SERVMODE_ResyncPause);
+        SetServerMode(ServMode::ResyncPause);
 	}
 	else
 	{
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART));
-		SetServerMode(SERVMODE_ResyncLoad);
+        SetServerMode(ServMode::ResyncLoad);
 
 		if ( !g_Cfg.Load(true) )
 		{
@@ -2486,7 +2502,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 
 		g_World.SyncGameTime();
 
-		SetServerMode(SERVMODE_Run);
+        SetServerMode(ServMode::Run);
 	}
 }
 
