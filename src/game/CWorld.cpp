@@ -1618,7 +1618,7 @@ bool CWorld::r_LoadVal( CScript &s )
 			m_iSaveCountID = s.GetArgVal();
 			break;
 		case WC_TIME:	// "TIME"
-            if (!g_Serv.IsLoading())
+            if (!g_Serv.IsLoadingGeneric())
             {
                 g_Log.EventError("Can't set TIME while server is running.\n");
                 return false;
@@ -1626,7 +1626,7 @@ bool CWorld::r_LoadVal( CScript &s )
 			_GameClock.InitTime( s.GetArgLLVal() * MSECS_PER_SEC);
 			break;
         case WC_TIMEHIRES:	// "TIMEHIRES"
-            if (!g_Serv.IsLoading())
+            if (!g_Serv.IsLoadingGeneric())
             {
                 g_Log.EventError("Can't set TIMEHIRES while server is running.\n");
                 return false;
@@ -1773,7 +1773,7 @@ void CWorld::_OnTick()
 	// 256 real secs = 1 server hour. 19 light levels. check every 10 minutes or so.
 
 	// Do not tick while loading (startup, resync, exiting...) or when double ticking in the same msec?.
-	if (g_Serv.IsLoading() || !_GameClock.Advance())
+    if (g_Serv.IsLoadingGeneric() || !_GameClock.Advance())
 		return;
 
 	EXC_TRY("CWorld Tick");

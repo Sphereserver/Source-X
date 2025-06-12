@@ -808,7 +808,7 @@ void CSector::SetLightNow( bool fFlash )
 		}
 
 		// don't fire trigger when server is loading or light is flashing
-		if (( ! g_Serv.IsLoading() && fFlash == false ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
+		if (( ! g_Serv.IsLoadingGeneric() && fFlash == false ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 		{
             pChar->OnTrigger( CTRIG_EnvironChange, CScriptTriggerArgsPtr{}, pChar );
 		}

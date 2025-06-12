@@ -374,7 +374,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 		case CPC_ADDHOUSE:
 		{
-			if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+			if (g_Serv.IsLoadingGeneric()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
 			{
 				break;
 			}
@@ -403,7 +403,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		}
 		case CPC_ADDSHIP:
 		{
-			if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+			if (g_Serv.IsLoadingGeneric()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
 			{
 				break;
 			}

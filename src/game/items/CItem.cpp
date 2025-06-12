@@ -1566,7 +1566,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 	pSector->MoveItemToSector(this);	// This also awakes the item
 
 	// Is this area too complex ?
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
     {
         if (pSector->CheckItemComplexity())
         {
@@ -3003,7 +3003,7 @@ void CItem::r_LoadMore1(dword dwVal)
     case IT_SPAWN_CHAR:
     case IT_SPAWN_ITEM:
     case IT_SPAWN_CHAMPION:
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             CCSpawn* pSpawn = GetSpawn();
             if (pSpawn)

@@ -597,7 +597,7 @@ void CCSpawn::AddObj(const CUID& uid)
     bool fIsSpawnChar = (pSpawnItem->IsType(IT_SPAWN_CHAR) || pSpawnItem->IsType(IT_SPAWN_CHAMPION));
     bool fIsSpawnChampion = pSpawnItem->IsType(IT_SPAWN_CHAMPION);
 
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         // Only checking UIDs when server is running because some of them may not yet exist when loading worldsave.
         if (!uid.IsValidUID())
@@ -1020,7 +1020,7 @@ bool CCSpawn::r_LoadVal(CScript & s)
                     return false;
                 }
             }
-            if (!g_Serv.IsLoading())
+            if (!g_Serv.IsLoadingGeneric())
             {
                 FixDef();
                 SetTrackID();

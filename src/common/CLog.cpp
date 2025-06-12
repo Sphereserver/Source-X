@@ -277,7 +277,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg, ConsoleTextColor iLogColor) no
 		// Print to screen.
 		if ( !(dwMask & LOGF_LOGFILE_ONLY) )
 		{
-			if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoading() )
+            if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoadingGeneric() )
 			{
 				g_Serv.PrintStr(CTCOL_YELLOW, szTime );
 			}

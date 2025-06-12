@@ -590,7 +590,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		{
 			if (m_pPlayer)	// summoned players ? thats odd.
 				return;
-			if (!g_Serv.IsLoading())
+			if (!g_Serv.IsLoadingGeneric())
 			{
 				Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 8, 20);
 				Sound(0x201);

@@ -33,7 +33,7 @@ CItemMultiCustom::CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef) :
     m_rectDesignArea.SetRectEmpty();
     _iMaxPlane = -1;
 
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         ResetStructure();
         CommitChanges();
@@ -338,7 +338,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     CopyDesign(&m_designWorking, &m_designMain);
 
     const CPointMap ptMe = GetTopPoint();
-    if (g_Serv.IsLoading() || !ptMe.IsValidPoint())
+    if (g_Serv.IsLoadingGeneric() || !ptMe.IsValidPoint())
         return;
 
     // remove all existing dynamic item fixtures
@@ -461,7 +461,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, int16 x, in
     // fixtures are items that should be replaced by dynamic items
     const bool fFixture = (pItemBase->IsType(IT_DOOR) || pItemBase->IsType(IT_DOOR_LOCKED) || pItemBase->IsID_Door(id) || pItemBase->IsType(IT_TELEPAD));
 
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (!IsValidItem(id, pClientSrc, false))
         {
@@ -552,7 +552,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, int16 x, in
     m_designWorking.m_vectorComponents.emplace_back(pComponent);
     ++m_designWorking.m_iRevision;
 
-    if (!g_Serv.IsLoading()) // quick fix, change it to execute only on customize mode
+    if (!g_Serv.IsLoadingGeneric()) // quick fix, change it to execute only on customize mode
     {
         CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
         ASSERT(pMovingCrate);
@@ -1841,7 +1841,7 @@ bool CItemMultiCustom::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CItemMultiCustom::r_LoadVal");
     EXC_TRY("LoadVal");
 
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
     {
         if (s.IsKey("COMP"))
         {

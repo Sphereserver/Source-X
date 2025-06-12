@@ -157,7 +157,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 	if ( pBankBox )
 		return pBankBox;
 
-	if ( !g_Serv.IsLoading() )
+	if ( !g_Serv.IsLoadingGeneric() )
 	{
 		if ( pItemTest )
 		{

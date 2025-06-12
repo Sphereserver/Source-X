@@ -476,7 +476,7 @@ static void Sphere_MainMonitorLoop()
 
 		EXC_SET_BLOCK("Checks");
 		// Don't look for freezing when doing certain things.
-		if ( g_Serv.IsLoading() || ! g_Cfg.m_fSecure || g_Serv.IsValidBusy() )
+		if ( g_Serv.IsLoadingGeneric() || ! g_Cfg.m_fSecure || g_Serv.IsValidBusy() )
 			continue;
 
 #ifndef _DEBUG

@@ -78,7 +78,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		//Set as numbers only
 		case CNC_BONDED:
 			m_bonded = (s.GetArgVal() > 0);
-			if ( !g_Serv.IsLoading() )
+			if ( !g_Serv.IsLoadingGeneric() )
 				pChar->UpdatePropertyFlag();
 			break;
 		case CNC_ACTPRI:

@@ -121,7 +121,7 @@ CObjBase::CObjBase( bool fItem ) :
 	m_PropertyHash = 0;
 	m_PropertyRevision = 0;
 
-	if ( g_Serv.IsLoading())
+	if ( g_Serv.IsLoadingGeneric())
 	{
 		// Don't do this yet if we are loading. UID will be set later.
 		// Just say if this is an item or not.
@@ -324,7 +324,7 @@ void CObjBase::SetHueQuick(HUE_TYPE wHue)
 void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CObjBase *pSourceObj, llong iSound)
 {
 	ADDTOCALLSTACK("CObjBase::SetHue");
-	if (g_Serv.IsLoading()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
+	if (g_Serv.IsLoadingGeneric()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
 	{
 		m_wHue = wHue;
 		return;
@@ -376,7 +376,7 @@ int CObjBase::IsWeird() const
 	{
 		return( iResultCode );
 	}
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		if ( GetUID().ObjFind() != this )	// make sure it's linked both ways correctly.
 		{
@@ -1920,7 +1920,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             }
             const HUE_TYPE hue = (HUE_TYPE)s.GetArgVal();
             SetHue(hue, false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
-            if (!g_Serv.IsLoading())
+            if (!g_Serv.IsLoadingGeneric())
                 Update();
         }
         break;
@@ -1974,7 +1974,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_TIMER:
         {
             int64 iTimeout = s.GetArg64Val();
-            if (g_Serv.IsLoading())
+            if (g_Serv.IsLoadingGeneric())
             {
                 const int iPrevBuild = g_World.m_iPrevBuild;
                 /*
@@ -2006,7 +2006,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			SetTimeStampS(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
-            if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
+            if ( !g_Serv.IsLoadingGeneric() )	// SPAWNITEM is read-only
                 return false;
             _uidSpawn.SetObjUID(s.GetArgDWVal());
             break;
@@ -3155,7 +3155,7 @@ dword CObjBase::UpdatePropertyRevision(dword hash)
 void CObjBase::UpdatePropertyFlag()
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
-	if (!(g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B) || g_Serv.IsLoading())
+	if (!(g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B) || g_Serv.IsLoadingGeneric())
 		return;
 
     m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
@@ -3315,7 +3315,7 @@ void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 	ADDTOCALLSTACK("CObjBase::ResendTooltip");
     // Send tooltip packet to all nearby clients
 
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
         return;
 	else if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) == false )
 		return; // tooltips are disabled.

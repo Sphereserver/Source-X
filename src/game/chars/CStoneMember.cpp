@@ -381,7 +381,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType,
 
 	m_Member.m_iAccountGold = nAccountGold;
 
-	if ( ! g_Serv.IsLoading() && pStone->GetMemoryType())
+	if ( ! g_Serv.IsLoadingGeneric() && pStone->GetMemoryType())
 	{
 		CChar * pChar = uid.CharFind();
 		if ( pChar != nullptr )

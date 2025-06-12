@@ -81,7 +81,9 @@ public:
 public:
     void SetServerMode( ServMode mode );
     ServMode GetServerMode() const noexcept;
-    bool IsLoading() const noexcept;
+    bool IsStartupLoadingScripts() const noexcept;
+    //bool IsStartupLoadingSaves() const noexcept;
+    bool IsLoadingGeneric() const noexcept;
     bool IsResyncing() const noexcept;
     bool IsDestroyingWorld() const noexcept;
 

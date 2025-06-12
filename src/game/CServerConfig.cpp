@@ -1417,7 +1417,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_SECURE:
 			m_fSecure = (s.GetArgVal() != 0);
-			if ( !g_Serv.IsLoading() )
+			if ( !g_Serv.IsLoadingGeneric() )
 				g_Serv.SetSignals();
 			break;
 
@@ -1489,7 +1489,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_NETWORKTHREADS:
-			if (g_Serv.IsLoading())
+			if (g_Serv.IsLoadingGeneric())
 			{
 				int iNetThreads = s.GetArgVal();
 				//if (iNetThreads < 0)
@@ -4732,7 +4732,7 @@ void CServerConfig::_OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CServerConfig::_OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
+	if ( !fNow && ( g_Serv.IsLoadingGeneric() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -4766,7 +4766,7 @@ void CServerConfig::_OnTick( bool fNow )
 void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CServerConfig::PrintEFOFFlags");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
         return;
 
 #define catresname(a,b)	\

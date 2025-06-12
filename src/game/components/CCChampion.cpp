@@ -398,7 +398,7 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
         }
 
         pCandle->SetTopPoint(pt);
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
             {
@@ -443,7 +443,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
         return;
 
     _iSpawnsNextWhite = _iSpawnsNextRed / (CANDLESNEXTRED + 1);
-    if (!g_Serv.IsLoading()) // Do not remove white candles, while server is loading them from save.
+    if (!g_Serv.IsLoadingGeneric()) // Do not remove white candles, while server is loading them from save.
     {
         ClearWhiteCandles();
     }
@@ -520,7 +520,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
             default:
                 break;
         }
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             if (IsTrigUsed(TRIGGER_ADDREDCANDLE))
             {
@@ -549,7 +549,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
 void CCChampion::SetLevel(byte iLevel)
 {
     ADDTOCALLSTACK("CCChampion::SetLevel");
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
         return;
 
     _iLevel = iLevel;
@@ -999,7 +999,7 @@ bool CCChampion::r_LoadVal(CScript& s)
     {
     case ICHMPL_ACTIVE:
         {
-            if (g_Serv.IsLoading() == true)    //Only when the server is loading.
+            if (g_Serv.IsLoadingGeneric() == true)    //Only when the server is loading.
             {
                 _fActive = (bool)s.GetArgBVal();
             }

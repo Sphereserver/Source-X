@@ -139,7 +139,7 @@ CClient::~CClient() noexcept
 bool CClient::CanInstantLogOut() const
 {
 	ADDTOCALLSTACK("CClient::CanInstantLogOut");
-	if ( g_Serv.IsLoading())	// or exiting.
+	if ( g_Serv.IsLoadingGeneric())	// or exiting.
 		return true;
 	if ( ! g_Cfg.m_iClientLingerTime )
 		return true;

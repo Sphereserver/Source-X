@@ -382,7 +382,7 @@ void CServer::SetSignals( bool fMsg )
 #ifndef _WIN32
 	SetUnixSignals(g_Cfg.m_fSecure);
     LOG_TYPE lt = LOGM_INIT;
-    if (!IsLoading()) {
+    if (!IsLoadingGeneric()) {
         lt = (LOG_TYPE)((uint)lt | (uint)LOGL_EVENT);
     }
 	if ( g_Cfg.m_fSecure )
@@ -395,7 +395,7 @@ void CServer::SetSignals( bool fMsg )
 	}
 #endif
 
-	if ( fMsg && !IsLoading() )
+    if ( fMsg && !IsLoadingGeneric() )
 	{
 		CWorldComm::Broadcast( g_Cfg.m_fSecure ?
 			"The world is now running in SECURE MODE." :
@@ -486,7 +486,19 @@ void CServer::SetExitFlag(int iFlag) noexcept
     m_iExitFlag.store(iFlag, std::memory_order_release);
 }
 
-bool CServer::IsLoading() const noexcept
+bool CServer::IsStartupLoadingScripts() const noexcept
+{
+    return (GetServerMode() > ServMode::StartupLoadingScripts);
+}
+
+/*
+bool CServer::IsStartupLoadingSaves() const noexcept
+{
+    return (GetServerMode() > ServMode::StartupLoadingSaves);
+}
+*/
+
+bool CServer::IsLoadingGeneric() const noexcept
 {
     return ( m_fResyncPause || (GetServerMode() > ServMode::Run) );
 }

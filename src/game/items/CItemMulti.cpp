@@ -737,7 +737,7 @@ void CItemMulti::AddCoowner(const CUID& uidCoowner)
     {
         return;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetCoownerIndex(uidCoowner) >= 0)
         {
@@ -815,7 +815,7 @@ void CItemMulti::AddFriend(const CUID& uidFriend)
     {
         return;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetFriendIndex(uidFriend) >= 0)
         {
@@ -892,7 +892,7 @@ void CItemMulti::AddBan(const CUID& uidBan)
     {
         return;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetBanIndex(uidBan) >= 0)
         {
@@ -967,7 +967,7 @@ void CItemMulti::AddAccess(const CUID& uidAccess)
     {
         return;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetAccessIndex(uidAccess) >= 0)
         {
@@ -1538,7 +1538,7 @@ void CItemMulti::AddAddon(const CUID& uidAddon)
     {
         return;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (!pAddon->IsType(IT_MULTI_ADDON))
         {
@@ -1594,7 +1594,7 @@ void CItemMulti::AddComponent(const CUID& uidComponent)
     {
         return;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetComponentIndex(uidComponent) >= 0)
         {
@@ -1751,7 +1751,7 @@ void CItemMulti::LockItem(const CUID& uidItem)
     }
     CItem *pItem = uidItem.ItemFind();
     ASSERT(pItem);
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetLockedItemIndex(uidItem) >= 0 || GetSecuredContainerIndex(uidItem) >= 0)
         {
@@ -1828,7 +1828,7 @@ void CItemMulti::Secure(const CUID& uidContainer)
     }
     CItemContainer *pContainer = static_cast<CItemContainer*>(uidContainer.ItemFind());
     ASSERT(pContainer);
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (GetSecuredContainerIndex(uidContainer) >= 0)
         {
@@ -1911,7 +1911,7 @@ void CItemMulti::AddVendor(const CUID& uidVendor)
     {
         return;
     }
-    if ((g_Serv.IsLoading() == false) && (GetVendorIndex(uidVendor) >= 0))
+    if ((g_Serv.IsLoadingGeneric() == false) && (GetVendorIndex(uidVendor) >= 0))
     {
         return;
     }

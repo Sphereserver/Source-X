@@ -431,7 +431,7 @@ bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegi
     {
         return false;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         // Leaving region trigger. (may not be allowed to leave ?)
         if (pRegionOld)
