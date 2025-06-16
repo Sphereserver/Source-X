@@ -51,12 +51,10 @@ public:
 
 private:
 #ifdef _WIN32
-	HANDLE m_handle;   // Windows API Handler to handle the event.
+    HANDLE m_handle;                            // Windows API Handler to handle the event.
 #else
-	pthread_mutex_t m_criticalSection;    // Unix API mutex.
-	pthread_mutexattr_t m_criticalSectionAttr;    // Unix API mutex attr.
-	pthread_condattr_t m_conditionAttr;    // Unix API condition attr.
-	pthread_cond_t m_condition;    // Unix API condition.
+    pthread_mutex_t m_criticalSection;          // Unix API mutex.
+    pthread_cond_t m_condition;                 // Unix API condition.
     bool m_signaled;
 #endif
 };
@@ -85,7 +83,7 @@ public:
 	///@}
 
 public:
-	/** @name Interaction:
+    /** @name Interaction:
 	*/
 	///@{
 	/**
@@ -105,13 +103,11 @@ public:
 
 private:
 #ifdef _WIN32
-	HANDLE m_handle;   // Windows API Handler to handle the event.
+    HANDLE m_handle;                            // Windows API Handler to handle the event.
 #else
-	bool m_value;
-	pthread_mutex_t m_criticalSection;    // Unix API mutex.
-	pthread_mutexattr_t m_criticalSectionAttr;    // Unix API mutex attr.
-	pthread_condattr_t m_conditionAttr;    // Unix API condition attr.
-	pthread_cond_t m_condition;    // Unix API condition.
+    pthread_mutex_t m_criticalSection;          // Unix API mutex.
+    pthread_cond_t m_condition;                 // Unix API condition.
+    bool m_signaled;
 #endif
 };
 
