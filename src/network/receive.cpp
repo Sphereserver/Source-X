@@ -949,8 +949,12 @@ bool PacketCharPlay::onReceive(CNetState* net)
 	ADDTOCALLSTACK("PacketCharPlay::onReceive");
 
 	skip(4); // 0xedededed
-	skip(MAX_NAME_SIZE); // char name
-	skip(MAX_NAME_SIZE); // char pass
+    skip(MAX_NAME_SIZE); // Character name.
+    skip(2); // ?
+    skip(4); // Client flags (0x3f - Orion, Classic, ClassicUO, 0xff - Enhanced client).
+    skip(4); // ? (0 - Orion, Classic, ClassicUO, 0xff000000 - Enhanced client).
+    skip(4); // Login count.
+    skip(16); // ?
 	uint slot = readInt32();
 	skip(4); // ip
 
@@ -1452,7 +1456,7 @@ bool PacketServersReq::onReceive(CNetState* net)
 	readStringASCII(acctname, ARRAY_COUNT(acctname));
 	tchar acctpass[MAX_NAME_SIZE];
 	readStringASCII(acctpass, ARRAY_COUNT(acctpass));
-	skip(1);
+	skip(1); // "NextLoginKey" value from uo.cfg on client machine.
 
 	CClient* client = net->getClient();
 	ASSERT(client);
@@ -1682,7 +1686,7 @@ bool PacketCharListReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharListReq::onReceive");
 
-	skip(4);
+	skip(4); // Session key sent to the client in packet 0x8c (customerId).
 	tchar acctname[MAX_ACCOUNT_NAME_SIZE];
 	readStringASCII(acctname, ARRAY_COUNT(acctname));
 	tchar acctpass[MAX_NAME_SIZE];

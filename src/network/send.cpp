@@ -633,7 +633,8 @@ PacketPlayerStart::PacketPlayerStart(const CClient* target) : PacketSend(XCMD_St
 	writeInt16((word)(character->GetDispID()));
 	writeInt16(pt.m_x);
 	writeInt16(pt.m_y);
-	writeInt16(pt.m_z);
+    writeByte(0);
+	writeByte(pt.m_z);
 	writeByte(character->GetDirFlag());
 	writeByte(0);
 	writeInt32(0xffffffff);
