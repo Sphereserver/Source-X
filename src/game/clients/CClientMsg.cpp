@@ -1594,7 +1594,7 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	{
 		m_tmSetupCharList[0] = pCharFirst->GetUID();
 
-		pPacket->writeStringFixedASCII(pCharFirst->GetName(), MAX_NAME_SIZE);
+		pPacket->writeStringFixedASCII(pCharFirst->GetNameWithoutIncognito(), MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 
 		++count;
@@ -1620,7 +1620,7 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 
 		m_tmSetupCharList[count] = uid;
 
-		pPacket->writeStringFixedASCII(pChar->GetName(), MAX_NAME_SIZE);
+		pPacket->writeStringFixedASCII(pChar->GetNameWithoutIncognito(), MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 
 		++count;
