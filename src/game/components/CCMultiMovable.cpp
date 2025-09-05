@@ -670,6 +670,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 
     CPointMap ptDelta;
     ptDelta.ZeroPoint();
+    ptDelta.m_map = pItemThis->GetTopMap();
 
     CPointMap ptFore(pMultiRegion->GetRegionCorner(dir));
 	CPointMap ptBack(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 4)));
