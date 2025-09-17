@@ -2374,7 +2374,7 @@ void CItem::r_WriteMore1(CSString & sVal)
 
     if (ptcErr)
     {
-        g_Log.EventError("Invalid MORE1 for item 0%" PRIx32 ": %s.\n",
+        g_Log.EventError("Invalid MORE1 for item 0%" PRIx32 ": %s",
             GetUID().GetObjUID(), ptcErr);
     }
 }
@@ -2434,7 +2434,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
     if (ptcErr)
     {
-        g_Log.EventError("Invalid MORE2 for item 0%" PRIx32 ": %s.\n",
+        g_Log.EventError("Invalid MORE2 for item 0%" PRIx32 ": %s",
             GetUID().GetObjUID(), ptcErr);
     }
 }
