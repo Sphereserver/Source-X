@@ -192,12 +192,12 @@ void CWorldSearch::SetDistanceFunction()
         if (_fSearchSquare)
             _distanceFunction = &CPointMap::GetDistSightBase;
         else
-            _distanceFunction = &CPointMap::GetDistSight;
+            _distanceFunction = &CPointMap::GetDistBase;
     }
     else
     {
         if (_fSearchSquare)
-            _distanceFunction = &CPointMap::GetDistBase;
+            _distanceFunction = &CPointMap::GetDistSight;
         else
             _distanceFunction = &CPointMap::GetDist;
     }
