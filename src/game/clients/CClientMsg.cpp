@@ -1470,6 +1470,7 @@ void CClient::addPlayerStart( CChar * pChar )
 */
 
 	new PacketPlayerStart(this);
+    pChar->ResetVisualRange();
 	addMapDiff();
 	m_pChar->MoveToChar(pt, true, false, false, false); // make sure we are in active list
 	m_pChar->Update();

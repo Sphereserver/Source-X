@@ -907,6 +907,11 @@ void CChar::SetVisualRange(byte newSight)
     }
 }
 
+void CChar::ResetVisualRange()
+{
+    m_iVisualRange = g_Cfg.m_iMapViewSize;
+}
+
 // Clean up weird flags.
 // fix Weirdness.
 // NOTE:
