@@ -3867,8 +3867,8 @@ bool CChar::r_LoadVal( CScript & s )
 				_uiStatFlag = s.GetArgLLVal() & ~ (uint64)STATF_SAVEPARITY;
 				break;
 			}
-			// Don't modify STATF_SAVEPARITY, STATF_PET, STATF_SPAWNED here
-            static constexpr auto uiFlagsNoChange = (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED);
+			// Don't modify STATF_SAVEPARITY, STATF_SPAWNED here. Allow STATF_PET though.
+            static constexpr auto uiFlagsNoChange = (STATF_SAVEPARITY | STATF_SPAWNED);
             static constexpr auto uiFlagsRequireFullUpdate = (STATF_STONE | STATF_HIDDEN | STATF_DEAD);
             const auto uiCurFlags = _uiStatFlag;
             const auto uiNewFlags = s.GetArgULLVal();
