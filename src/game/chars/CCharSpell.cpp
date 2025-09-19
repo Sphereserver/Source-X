@@ -350,7 +350,7 @@ CChar * CChar::Spell_Summon_Place( CChar * pChar, CPointMap ptTarg, int64 iDurat
 	}
 	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
-	if (IsSetEF(EF_FollowerList))
+	if (IsSetOF(OF_PetSlots))
 	{
 		ASSERT(FollowersUpdate(pChar, pChar->GetFollowerSlots(), true));
 	}
