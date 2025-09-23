@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - name: Install prerequisites
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-linux-x86_64
           merge-multiple: true
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-linux-x86_64
           merge-multiple: true
