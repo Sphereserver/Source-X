@@ -13,14 +13,14 @@ on:
 
 jobs:
   latest:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         permissions:
           contents: read
           actions: read
 
         steps:
         - name: Checkout repository
-          uses: actions/checkout@v4
+          uses: actions/checkout@v5
           with:
             fetch-depth: 0
 
