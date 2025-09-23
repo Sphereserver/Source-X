@@ -859,7 +859,7 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( s.IsKeyHead("ON",2))
 		{
 			// Look for some key word.
-            tchar* ptcOn = s.GetArgStr();
+      tchar* ptcOn = s.GetArgStr();
 			//_strupr(ptcOn); // Str_Match is already case insensitive
 			if ( Str_Match( ptcOn, pszCmd ) == MATCH_VALID )
 				fMatch = true;
@@ -869,10 +869,12 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( ! fMatch )
 			continue;	// look for the next "ON" section.
 
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pScriptArgs->m_iN1 = iModeRef;
-        pScriptArgs->m_iN2 = wHue;
-        TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pScriptArgs, pSrc );
+    pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pszCmd);
+    pScriptArgs->m_iN1 = iModeRef;
+    pScriptArgs->m_iN2 = wHue;
+    TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pScriptArgs, pSrc );
+    
 		if ( iRet != TRIGRET_RET_FALSE )
 			return iRet;
 
