@@ -138,7 +138,7 @@ bool CClient::addGumpDialogProps( const CUID& uid )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Dialog_OnButton(const CResourceID& rid, dword dwButtonID, CObjBase * pObj, std::shared_ptr<CDialogResponseArgs> pArgs )
+TRIGRET_TYPE CClient::Dialog_OnButton(const CResourceID& rid, dword dwButtonID, CObjBase * pObj, std::shared_ptr<CDialogResponseArgs> pScriptArgs )
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
@@ -178,16 +178,16 @@ TRIGRET_TYPE CClient::Dialog_OnButton(const CResourceID& rid, dword dwButtonID, 
 				continue;
 		}
 
-		pArgs->m_iN1 = dwButtonID;
+		pScriptArgs->m_iN1 = dwButtonID;
 
 		auto stopPrebutton = TRIGRET_RET_FALSE;
 
 		CResourceLock prebutton;
 		if (g_Cfg.ResourceLock(prebutton, CResourceID(RES_DIALOG, rid.GetResIndex(), RES_DIALOG_PREBUTTON)))
-        stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, pArgs, m_pChar, nullptr);
+        stopPrebutton = pObj->OnTriggerRun(prebutton, TRIGRUN_SECTION_TRUE, pScriptArgs, m_pChar, nullptr);
 
 		if (stopPrebutton != TRIGRET_RET_TRUE)
-        return pObj->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pArgs, m_pChar);
+        return pObj->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pScriptArgs, m_pChar);
 	}
 
 	return TRIGRET_ENDIF;
@@ -255,7 +255,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 			if (strnicmp(ptcStr, "@CANCEL", 7 ) )
 				continue;
 
-            return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, CScriptTriggerArgsPtr{}, m_pChar);
+            return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar);
 		}
 	}
 	else
@@ -272,7 +272,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( const CResourceID& rid, int iSelect, CObjBa
 			if ( i > iSelect )
 				break;
 
-            return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, CScriptTriggerArgsPtr{}, m_pChar);
+            return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar);
 		}
 	}
 
@@ -325,7 +325,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
     CScriptExprContext scpContext{
         ._pScriptObjI = pObjBase ? pObjBase : &g_Serv
     };
-    CExpression::GetExprParser().ParseScriptText( pszArgs, scpContext, CScriptTriggerArgsPtr{}, pSrc );
+    CExpression::GetExprParser().ParseScriptText( pszArgs, scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc );
 
 	// Parsing @color
 	if ( *pszArgs == '@' )
@@ -381,7 +381,7 @@ void CClient::Menu_Setup( CResourceID rid, CObjBase * pObj )
 		return;
 	}
     CScriptExprContext scpContext{._pScriptObjI = pObj};
-    CExpression::GetExprParser().ParseScriptText( s.GetKeyBuffer(), scpContext, CScriptTriggerArgsPtr{}, m_pChar );
+    CExpression::GetExprParser().ParseScriptText( s.GetKeyBuffer(), scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar );
 
 	CMenuItem item[MAX_MENU_ITEMS];
 	item[0].m_sText = s.GetKey();

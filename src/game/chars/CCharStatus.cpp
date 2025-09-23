@@ -157,7 +157,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 	if ( pBankBox )
 		return pBankBox;
 
-	if ( !g_Serv.IsLoading() )
+	if ( !g_Serv.IsLoadingGeneric() )
 	{
 		if ( pItemTest )
 		{
@@ -209,7 +209,7 @@ CItem *CChar::LayerFind( LAYER_TYPE layer ) const
 	return nullptr;
 }
 
-TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CScriptTriggerArgsPtr pScriptArgs, CTextConsole *pSrc, CSString *pResult, LAYER_TYPE layer )
+TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc, CSString *pResult, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForLayerLoop");
 	const CScriptLineContext StartContext = s.GetContext();
@@ -1191,12 +1191,12 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			{
 				if ( IsTrigUsed( TRIGGER_SEEHIDDEN ) )
 				{
-                    CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-                    pArgs->m_iN1 = (plevelMe <= plevelChar);
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                    pScriptArgs->m_iN1 = (plevelMe <= plevelChar);
 					CChar *pChar2 = const_cast< CChar* >( pChar );
 					CChar *this2 = const_cast< CChar* >( this );
-                    this2->OnTrigger( CTRIG_SeeHidden, pArgs, pChar2 );
-                    return ( pArgs->m_iN1 != 1 );
+                    this2->OnTrigger( CTRIG_SeeHidden, pScriptArgs, pChar2 );
+                    return ( pScriptArgs->m_iN1 != 1 );
 				}
 			}
 			//Here we analyse how GM can see other player/GM when they are hide.

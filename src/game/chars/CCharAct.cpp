@@ -263,7 +263,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		// NOTE: CanEquipLayer may bounce an item . If it stacks with this we are in trouble !
 	}
 
-	if ( g_Serv.IsLoading() == false )
+	if ( g_Serv.IsLoadingGeneric() == false )
 	{
 		// This takes care of any conflicting items in the slot !
 		layer = CanEquipLayer(pItem, layer, nullptr, false);
@@ -406,8 +406,8 @@ void CChar::OnRemoveObj( CSObjContRec* pObRec )	// Override this = called when r
 	LAYER_TYPE layer = pItem->GetEquipLayer();
 	if (( IsTrigUsed(TRIGGER_UNEQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMUNEQUIP) ))
 	{
-		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoading())
-            pItem->OnTrigger( ITRIG_UNEQUIP, CScriptTriggerArgsPtr{}, this );
+		if ( layer != LAYER_DRAGGING && ! g_Serv.IsLoadingGeneric())
+            pItem->OnTrigger( ITRIG_UNEQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this );
 	}
 
 	CContainer::OnRemoveObj( pObRec );
@@ -700,7 +700,7 @@ void CChar::SysMessage( lpctstr pMsg ) const	// Push a message back to the clien
 void CChar::UpdateStatsFlag() const
 {
 	ADDTOCALLSTACK("CChar::UpdateStatsFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	if ( IsClientActive() )
@@ -712,7 +712,7 @@ void CChar::UpdateStatsFlag() const
 void CChar::UpdateHitsFlag()
 {
 	ADDTOCALLSTACK("CChar::UpdateHitsFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_HITS;
@@ -724,7 +724,7 @@ void CChar::UpdateHitsFlag()
 void CChar::UpdateModeFlag()
 {
 	ADDTOCALLSTACK("CChar::UpdateModeFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	m_fStatusUpdate |= SU_UPDATE_MODE;
@@ -733,7 +733,7 @@ void CChar::UpdateModeFlag()
 void CChar::UpdateManaFlag() const
 {
 	ADDTOCALLSTACK("CChar::UpdateManaFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	if ( IsClientActive() )
@@ -743,7 +743,7 @@ void CChar::UpdateManaFlag() const
 void CChar::UpdateStamFlag() const
 {
 	ADDTOCALLSTACK("CChar::UpdateStamFlag");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		return;
 
 	if ( IsClientActive() )
@@ -2460,7 +2460,7 @@ void CChar::UpdateMode( bool fFull, CClient * pExcludeClient )
 void CChar::UpdateSpeedMode()
 {
 	ADDTOCALLSTACK("CChar::UpdateSpeedMode");
-	if ( g_Serv.IsLoading() || !m_pPlayer )
+	if ( g_Serv.IsLoadingGeneric() || !m_pPlayer )
 		return;
 
 	if ( IsClientActive() )
@@ -2470,7 +2470,7 @@ void CChar::UpdateSpeedMode()
 void CChar::UpdateVisualRange()
 {
 	ADDTOCALLSTACK("CChar::UpdateVisualRange");
-	if ( g_Serv.IsLoading() || !m_pPlayer )
+	if ( g_Serv.IsLoadingGeneric() || !m_pPlayer )
 		return;
 
 	DEBUG_WARN(("CChar::UpdateVisualRange called, m_iVisualRange is %d\n", m_iVisualRange));
@@ -3310,7 +3310,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	    // Swap the layer for real one, because if we don't use dclick for equip, real layer gets rewritten with LAYER_DRAGGING.
             pItem->SetContainedLayer(layer);
 
-            if (pItem->OnTrigger(ITRIG_EQUIPTEST, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
+            if (pItem->OnTrigger(ITRIG_EQUIPTEST, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
 		{
 		    // Reset layer to the original value, that item doesn't get misplaced.
 		    pItem->SetContainedLayer(requestedLayer);
@@ -3345,7 +3345,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (( IsTrigUsed(TRIGGER_EQUIP) ) || ( IsTrigUsed(TRIGGER_ITEMEQUIP) ))
 	{
-        if ( pItem->OnTrigger(ITRIG_EQUIP, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE )
+        if ( pItem->OnTrigger(ITRIG_EQUIP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -3499,7 +3499,7 @@ bool CChar::Reveal( uint64 iFlags )
 
     if (IsTrigUsed(TRIGGER_REVEAL))
     {
-        if (OnTrigger(CTRIG_Reveal, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
+        if (OnTrigger(CTRIG_Reveal, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
             return false;
     }
 
@@ -4318,7 +4318,7 @@ CChar::DeathRequestResult CChar::Death()
 
 	if ( IsTrigUsed(TRIGGER_DEATH) )
 	{
-        if ( OnTrigger(CTRIG_Death, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE )
+        if ( OnTrigger(CTRIG_Death, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )
             return DeathRequestResult::Aborted;
 	}
 	//Dismount now. Later is may be too late and cause problems
@@ -4840,7 +4840,7 @@ void CChar::CheckRevealOnMove()
 		return;
 
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
-        OnTrigger(CTRIG_StepStealth, CScriptTriggerArgsPtr{}, this);
+        OnTrigger(CTRIG_StepStealth, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 
     if (g_Cfg.m_iRevealFlags & REVEALF_ONHORSE && IsStatFlag(STATF_ONHORSE))
         Reveal();
@@ -5100,7 +5100,7 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 	if ( m_pArea == pNewArea )
 		return true;
 
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		if ( fAllowReject && IsPriv( PRIV_GM ))
 		{
@@ -5208,7 +5208,7 @@ bool CChar::MoveToRoom( CRegion * pNewRoom, bool fAllowReject)
 	if ( m_pRoom == pNewRoom )
 		return true;
 
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		if ( fAllowReject && IsPriv( PRIV_GM ))
 		{
@@ -5322,7 +5322,7 @@ bool CChar::MoveToChar(const CPointMap& pt, bool fStanding, bool fCheckLocationE
 	if ( !m_fClimbUpdated || fForceFix )
 		FixClimbHeight();
 
-	if ( fSectorChanged && !g_Serv.IsLoading() )
+	if ( fSectorChanged && !g_Serv.IsLoadingGeneric() )
 	{
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 		{
@@ -5523,16 +5523,14 @@ void CChar::SetTriggerActive(lpctstr trig)
 // 4) CHARDEF
 // 5) EVENTSPET/EVENTSPLAYER set on .ini file
 // RETURNS = TRIGRET_TYPE (in cscriptobj.h)
-TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::OnTrigger");
 
 	if ( IsTriggerActive( pszTrigName ) ) //This should protect any char trigger from infinite loop
 		return TRIGRET_RET_DEFAULT;
 
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-
+    ASSERT(pScriptArgs);
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
@@ -5701,10 +5699,10 @@ stopandret:
 	return iRet;
 }
 
-TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ASSERT( (trigger > CTRIG_AAAUNUSED) && (trigger < CTRIG_QTY) );
-    return OnTrigger( CChar::sm_szTrigName[trigger], std::move(pScriptArgs), pSrc);
+    return OnTrigger( CChar::sm_szTrigName[trigger], pScriptArgs, pSrc);
 }
 
 // process m_fStatusUpdate flags

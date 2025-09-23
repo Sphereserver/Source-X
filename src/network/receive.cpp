@@ -201,7 +201,10 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 	ASSERT(pChar != nullptr);
 
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
-    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+    // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+    //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
     // RW
     pScriptArgs->m_iN1 = uiFlags;
     pScriptArgs->m_iN2 = prProf;
@@ -2749,7 +2752,10 @@ bool PacketArrowClick::onReceive(CNetState* net)
 
 	if ( IsTrigUsed(TRIGGER_USERQUESTARROWCLICK) )
 	{
-        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
         pScriptArgs->m_iN1 = (fRightClick == true? 1 : 0);
 #ifdef _ALPHASPHERE
         pScriptArgs->m_iN2 = character->GetKeyNum("ARROWQUEST_X", true);
@@ -3241,7 +3247,11 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 
 	//Should we simulate the dclick?
 	client->m_Targ_UID = bandage->GetUID();
-    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+    // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+    //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+    CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
     pScriptArgs->m_iN1 = 1; // Signal we're from the macro
     if (bandage->OnTrigger( ITRIG_DCLICK, pScriptArgs, character) == TRIGRET_RET_TRUE)
 	{
@@ -3334,7 +3344,11 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
-        if ( character->OnTrigger(CTRIG_ToggleFlying, CScriptTriggerArgsPtr{}, character) == TRIGRET_RET_TRUE )
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        if ( character->OnTrigger(CTRIG_ToggleFlying, pScriptArgs, character) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -4154,7 +4168,13 @@ bool PacketGuildButton::onReceive(CNetState* net)
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_USERGUILDBUTTON) )
-        character->OnTrigger(CTRIG_UserGuildButton, CScriptTriggerArgsPtr{}, character);
+    {
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        character->OnTrigger(CTRIG_UserGuildButton, pScriptArgs, character);
+    }
 	return true;
 }
 
@@ -4181,8 +4201,14 @@ bool PacketQuestButton::onReceive(CNetState* net)
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_USERQUESTBUTTON) )
-        character->OnTrigger(CTRIG_UserQuestButton, CScriptTriggerArgsPtr{}, character);
-	return true;
+    {
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        character->OnTrigger(CTRIG_UserQuestButton, pScriptArgs, character);
+    }
+    return true;
 }
 
 
@@ -4744,7 +4770,13 @@ bool PacketUltimaStoreButton::onReceive(CNetState *net)
         return false;
 
     if (IsTrigUsed(TRIGGER_USERULTIMASTOREBUTTON))
-        character->OnTrigger(CTRIG_UserUltimaStoreButton, CScriptTriggerArgsPtr{}, character);
+    {
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        character->OnTrigger(CTRIG_UserUltimaStoreButton, pScriptArgs, character);
+    }
     return true;
 }
 

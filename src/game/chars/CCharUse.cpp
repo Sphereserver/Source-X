@@ -1580,7 +1580,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 	if (m_pNPC && (IsTrigUsed(TRIGGER_DCLICK) ||
 	               IsTrigUsed(TRIGGER_ITEMDCLICK)))        // for players, DClick was called before this function
 	{
-        if (pItem->OnTrigger(ITRIG_DCLICK, CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE)
+        if (pItem->OnTrigger(ITRIG_DCLICK, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE)
 			return false;
 	}
 

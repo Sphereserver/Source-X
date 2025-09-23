@@ -25,15 +25,15 @@ private:
 
 public:
 	CDataBaseAsyncHelper(void);
-	~CDataBaseAsyncHelper(void);
-private:
-	CDataBaseAsyncHelper(const CDataBaseAsyncHelper& copy);
-	CDataBaseAsyncHelper& operator=(const CDataBaseAsyncHelper& other);
+    virtual ~CDataBaseAsyncHelper(void) override;
+
+    CDataBaseAsyncHelper(const CDataBaseAsyncHelper& copy) = delete;
+    CDataBaseAsyncHelper& operator=(const CDataBaseAsyncHelper& other) = delete;
 
 public:
-	virtual void onStart();
-	virtual void tick();
-	virtual void waitForClose();
+    virtual void onStart() override;
+    virtual void tick() override;
+    virtual void waitForClose() override;
 
 public:
 	void addQuery(bool isQuery, lpctstr sFunction, lpctstr sQuery);

@@ -204,7 +204,7 @@ void CNetworkInput::processData()
             delete packet;
         }
 
-        if (g_Serv.IsLoading() == false)
+        if (g_Serv.IsLoadingGeneric() == false)
         {
             EXC_SET_BLOCK("start client profile");
             const ProfileTask clientTask(PROFILE_CLIENTS);

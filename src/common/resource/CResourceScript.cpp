@@ -74,9 +74,9 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
         if ( CheckForChange() )
         {
             //  what should we do about it ? reload it of course !
-            g_Serv.SetServerMode(SERVMODE_ResyncLoad);
+            g_Serv.SetServerMode(ServMode::ResyncLoad);
             g_Cfg.LoadResourcesOpen( this, true );
-            g_Serv.SetServerMode(SERVMODE_Run);
+            g_Serv.SetServerMode(ServMode::Run);
         }
     }
     ASSERT(HasCache());

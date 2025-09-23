@@ -823,8 +823,8 @@ public:
     */
     void SetTriggerActive(lpctstr trig = nullptr);
 
-    virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc ) override;
-    TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc );
+    virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc ) override;
+    TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc );
 
 	// Item type specific stuff.
     inline bool IsType(IT_TYPE type) const noexcept {

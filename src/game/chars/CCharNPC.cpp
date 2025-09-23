@@ -78,7 +78,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		//Set as numbers only
 		case CNC_BONDED:
 			m_bonded = (s.GetArgVal() > 0);
-			if ( !g_Serv.IsLoading() )
+			if ( !g_Serv.IsLoadingGeneric() )
 				pChar->UpdatePropertyFlag();
 			break;
 		case CNC_ACTPRI:
@@ -318,7 +318,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
         executedEvents.emplace_back(pLink);
-        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptTriggerArgsPtr{}, this);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}
@@ -336,7 +336,7 @@ void CChar::NPC_CreateTrigger()
 			continue;
 
         executedEvents.emplace_back(pLink);
-        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptTriggerArgsPtr{}, this);
+        iRet = CScriptObj::OnTriggerScript(s, pszTrigName, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
 		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
 			return;
 	}

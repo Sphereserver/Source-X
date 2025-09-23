@@ -549,7 +549,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	if ( pItem == this )
 		return;	// infinite loop.
 
-	if ( !g_Serv.IsLoading() )
+	if ( !g_Serv.IsLoadingGeneric() )
 	{
         switch (GetType())
         {
@@ -619,7 +619,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	if (pt.m_x < 0 && pt.m_y < 0)
 	{
 		// Try to stack it.
-		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
+		if ( !g_Serv.IsLoadingGeneric() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
 			for (CSObjContRec* pObjRec : *this)
 			{
@@ -740,7 +740,7 @@ void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
 		return;	// already here.
 
 	CPointMap pt;	// invalid point.
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
 		pt = pItem->GetUnkPoint();
 
 	ContentAdd(pItem, pt, bForceNoStack);

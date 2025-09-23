@@ -104,7 +104,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 	if ( IsTrigUsed(TRIGGER_DCLICK) || IsTrigUsed(TRIGGER_ITEMDCLICK) )
 	{
-        if ( pItem->OnTrigger(ITRIG_DCLICK, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pItem->OnTrigger(ITRIG_DCLICK, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return true;
 	}
 
@@ -794,7 +794,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 			if ( strcmpi(s.GetArgStr(), "@Cancel") )
 				continue;
 
-            if ( m_pChar->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
+            if ( m_pChar->OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 				return 0;
 
 			break;
@@ -890,7 +890,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 		if ( s.IsKey("TEST") )
 		{
             CScriptExprContext scpContext{._pScriptObjI = m_pChar};
-            CExpression::GetExprParser().ParseScriptText(s.GetArgRaw(), scpContext, CScriptTriggerArgsPtr{}, m_pChar);
+            CExpression::GetExprParser().ParseScriptText(s.GetArgRaw(), scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar);
 			CResourceQtyArray skills(s.GetArgStr());
 			if ( !skills.IsResourceMatchAll(m_pChar) )
 			{
@@ -902,7 +902,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 		if ( s.IsKey("TESTIF") )
 		{
             CScriptExprContext scpContext{._pScriptObjI = m_pChar};
-            CExpression::GetExprParser().ParseScriptText(s.GetArgRaw(), scpContext, CScriptTriggerArgsPtr{}, m_pChar);
+            CExpression::GetExprParser().ParseScriptText(s.GetArgRaw(), scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar);
 			if ( !s.GetArgVal() )
 			{
                 fSkipNeedCleanup = true;
@@ -914,7 +914,7 @@ int CClient::Cmd_Skill_Menu_Build( const CResourceID& rid, int iSelect, CMenuIte
 		if ( iOnCount == iSelect )
 		{
 			// Execute command from script
-            TRIGRET_TYPE tRet = m_pChar->OnTriggerRunVal(s, TRIGRUN_SINGLE_EXEC, CScriptTriggerArgsPtr{}, m_pChar);
+            TRIGRET_TYPE tRet = m_pChar->OnTriggerRunVal(s, TRIGRUN_SINGLE_EXEC, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar);
 			if ( tRet != TRIGRET_RET_DEFAULT )
 				return (tRet == TRIGRET_RET_TRUE) ? 0 : 1;
 

@@ -2467,7 +2467,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 
 	if ( IsTrigUsed(TRIGGER_PARTYINVITE) )
 	{
-        if ( pChar->OnTrigger(CTRIG_PartyInvite, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_PartyInvite, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

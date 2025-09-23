@@ -1060,9 +1060,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CServerConfig::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-#define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) DEBUG_MSG(x)
-#define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventWarn(x)
-#define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != SERVMODE_PreLoadingINI) g_Log.EventError(x)
+#define DEBUG_MSG_NOINIT(x) if (g_Serv.GetServerMode() != ServMode::StartupPreLoadingIni) DEBUG_MSG(x)
+#define LOG_WARN_NOINIT(x)  if (g_Serv.GetServerMode() != ServMode::StartupPreLoadingIni) g_Log.EventWarn(x)
+#define LOG_ERR_NOINIT(x)   if (g_Serv.GetServerMode() != ServMode::StartupPreLoadingIni) g_Log.EventError(x)
 
 	int i = FindCAssocRegTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), ARRAY_COUNT( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
@@ -1417,7 +1417,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_SECURE:
 			m_fSecure = (s.GetArgVal() != 0);
-			if ( !g_Serv.IsLoading() )
+			if ( !g_Serv.IsLoadingGeneric() )
 				g_Serv.SetSignals();
 			break;
 
@@ -1489,7 +1489,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_NETWORKTHREADS:
-			if (g_Serv.IsLoading())
+			if (g_Serv.IsLoadingGeneric())
 			{
 				int iNetThreads = s.GetArgVal();
 				//if (iNetThreads < 0)
@@ -4376,7 +4376,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return rid;
 			}
 #ifdef _DEBUG
-			if ( g_Serv.GetServerMode() != SERVMODE_ResyncLoad )	// this really is ok.
+			if ( g_Serv.GetServerMode() != ServMode::ResyncLoad )	// this really is ok.
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
@@ -4732,7 +4732,7 @@ void CServerConfig::_OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CServerConfig::_OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
+	if ( !fNow && ( g_Serv.IsLoadingGeneric() || ( m_timePeriodic > CWorldGameTime::GetCurrentTime().GetTimeRaw()) ) )
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -4766,7 +4766,7 @@ void CServerConfig::_OnTick( bool fNow )
 void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CServerConfig::PrintEFOFFlags");
-	if ( g_Serv.IsLoading() )
+	if ( g_Serv.IsLoadingGeneric() )
         return;
 
 #define catresname(a,b)	\

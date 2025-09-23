@@ -219,9 +219,10 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					Str_CopyLimitNull( pszTmp2, pszArgs, Str_TempLength() );
 
                     CScriptExprContext scpContext{._pScriptObjI = pChar};
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
                     CExpression::GetExprParser().ParseScriptText(
                         Str_MakeFiltered(pszTmp2),
-                        scpContext, CScriptTriggerArgsPtr{},
+                        scpContext, pScriptArgs,
                         &g_Serv, 1 );
 
 					pSrc->SysMessage( pszTmp2 );
@@ -247,9 +248,10 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					Str_CopyLimitNull(pszTmp2, s.GetArgStr(), Str_TempLength());
 
                     CScriptExprContext scpContext{._pScriptObjI = pStone};
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
                     CExpression::GetExprParser().ParseScriptText(
                         Str_MakeFiltered(pszTmp2),
-                        scpContext, CScriptTriggerArgsPtr{},
+                        scpContext, pScriptArgs,
                         &g_Serv, 1);
 
                     pSrc->SysMessage(pszTmp2);
@@ -268,9 +270,10 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					Str_CopyLimitNull( pszTmp2, s.GetArgStr(), Str_TempLength());
 
                     CScriptExprContext scpContext{._pScriptObjI = pPage};
+                    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
                     CExpression::GetExprParser().ParseScriptText(
                         Str_MakeFiltered(pszTmp2),
-                        scpContext, CScriptTriggerArgsPtr{},
+                        scpContext, pScriptArgs,
                         &g_Serv, 1 );
 
 					pSrc->SysMessage( pszTmp2 );
@@ -345,8 +348,9 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
             pszHead += 26;
 
             CScriptExprContext scpContext{._pScriptObjI = this};
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
             expr_parser.ParseScriptText(
-                pszTmp, scpContext, CScriptTriggerArgsPtr{},
+                pszTmp, scpContext, pScriptArgs,
                 pSrc, 1 );
 
             FileOut.SysMessage( pszTmp );
@@ -388,8 +392,9 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 
 		// Look for stuff we can displace here. %STUFF%
         CScriptExprContext scpContext{._pScriptObjI = this};
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
         expr_parser.ParseScriptText( pszHead,
-            scpContext, CScriptTriggerArgsPtr{},
+            scpContext, pScriptArgs,
             pSrc, 1 );
 		FileOut.SysMessage( pszHead );
 	}
@@ -572,7 +577,9 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime 
 		CResourceLock s;
 		if ( ResourceLock(s))
 		{
-            if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], CScriptTriggerArgsPtr{}, pClient ) == TRIGRET_RET_TRUE)
+            // Taking the script args by this way is allowed only because the web page is parsed by the main thread.
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pScriptArgs, pClient ) == TRIGRET_RET_TRUE)
 				return 0;	// Block further action.
 		}
 	}

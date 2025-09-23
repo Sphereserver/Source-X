@@ -300,7 +300,7 @@ CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, word MemTypes )
 }
 
 // Looping through all memories ( ForCharMemoryType ).
-TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc, CSString * pResult, word wMemType )
+TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult, word wMemType )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForMemTypeLoop");
 	const CScriptLineContext StartContext = s.GetContext();
@@ -313,7 +313,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr 
 			CItem* pItem = static_cast<CItem*>(pObjRec);
 			if ( !pItem->IsMemoryTypes(wMemType) )
 				continue;
-            TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pArgs, pSrc, pResult );
+            TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult );
 			if ( iRet == TRIGRET_BREAK )
 			{
 				EndContext = StartContext;
@@ -331,7 +331,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr 
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		// just skip to the end.
-        TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pArgs, pSrc, pResult );
+        TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult );
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}

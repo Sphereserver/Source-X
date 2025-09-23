@@ -568,7 +568,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
         while ( s.ReadKey())
         {
             CScriptExprContext scpContext{._pScriptObjI = m_pObj};
-            expr_parser.ParseScriptText( s.GetKeyBuffer(), scpContext, CScriptTriggerArgsPtr{}, pClient->GetChar() );
+            expr_parser.ParseScriptText( s.GetKeyBuffer(), scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pClient->GetChar() );
             m_sText.emplace_back(false) = s.GetKey();
         }
     }
@@ -587,7 +587,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
     int64 iSizes[2];
     tchar * pszBuf = s.GetKeyBuffer();
     CScriptExprContext scpContext{._pScriptObjI = m_pObj};
-    expr_parser.ParseScriptText( pszBuf, scpContext, CScriptTriggerArgsPtr{}, pClient->GetChar() );
+    expr_parser.ParseScriptText( pszBuf, scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pClient->GetChar() );
 
     Str_ParseCmds( pszBuf, iSizes, ARRAY_COUNT(iSizes) );
     m_x	= (int)(iSizes[0]);

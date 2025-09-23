@@ -121,7 +121,7 @@ CObjBase::CObjBase( bool fItem ) :
 	m_PropertyHash = 0;
 	m_PropertyRevision = 0;
 
-	if ( g_Serv.IsLoading())
+	if ( g_Serv.IsLoadingGeneric())
 	{
 		// Don't do this yet if we are loading. UID will be set later.
 		// Just say if this is an item or not.
@@ -207,9 +207,7 @@ void CObjBase::DeletePrepare()
 
     CObjBase::_GoSleep();	// virtual, but superclass methods are called in their ::DeletePrepare methods
 
-    const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
-    if (!fDestroyingWorld)
+    if (!g_Serv.IsDestroyingWorld())
     {
         RemoveFromView();
     }
@@ -249,9 +247,7 @@ bool CObjBase::Delete(bool fForce)
     EXC_TRY("Cleanup in Delete method");
 
     bool fScheduleDeletion = true;
-    const SERVMODE_TYPE servMode = g_Serv.GetServerMode();
-    const bool fDestroyingWorld = (servMode == SERVMODE_Exiting || servMode == SERVMODE_Loading);
-    if (fDestroyingWorld)
+    if (g_Serv.IsDestroyingWorld())
     {
         // Why resort to _uiInternalStateFlags and not simply check if GetParent() is a CSectorObjCont* ?
         //  Because at this point CSObjContRec::RemoveSelf might have been called (it depends on how CObjBase::Delete was called,
@@ -328,7 +324,7 @@ void CObjBase::SetHueQuick(HUE_TYPE wHue)
 void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CObjBase *pSourceObj, llong iSound)
 {
 	ADDTOCALLSTACK("CObjBase::SetHue");
-	if (g_Serv.IsLoading()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
+	if (g_Serv.IsLoadingGeneric()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
 	{
 		m_wHue = wHue;
 		return;
@@ -341,19 +337,19 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool fAvoidTrigger, CTextConsole *pSrc, CO
         lpctstr ptcTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
 		if (IsTrigUsed(ptcTrig))
 		{
-            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pArgs->Init(wHue, iSound, 0, pSourceObj);
-            TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pArgs, pSrc);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(wHue, iSound, 0, pSourceObj);
+            TRIGRET_TYPE iRet = OnTrigger(ptcTrig, pScriptArgs, pSrc);
 
 			if (iRet == TRIGRET_RET_TRUE)
 				return;
 
-            if (pArgs->m_iN2 > 0) // No sound? No checks for who can hear, packets...
+            if (pScriptArgs->m_iN2 > 0) // No sound? No checks for who can hear, packets...
 			{
-                Sound((SOUND_TYPE)(pArgs->m_iN2));
+                Sound((SOUND_TYPE)(pScriptArgs->m_iN2));
 			}
 
-            m_wHue = (HUE_TYPE)(pArgs->m_iN1);
+            m_wHue = (HUE_TYPE)(pScriptArgs->m_iN1);
 			return;
 		}
 	}
@@ -380,7 +376,7 @@ int CObjBase::IsWeird() const
 	{
 		return( iResultCode );
 	}
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		if ( GetUID().ObjFind() != this )	// make sure it's linked both ways correctly.
 		{
@@ -856,14 +852,14 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 	//  TRIGRET_ENDIF = no match.
 	//  TRIGRET_DEFAULT = found match but it had no RETURN
 	bool fMatch = false;
-    CScriptTriggerArgsPtr pArgs;
+    CScriptTriggerArgsPtr pScriptArgs;
 
 	while ( s.ReadKeyParse())
 	{
 		if ( s.IsKeyHead("ON",2))
 		{
 			// Look for some key word.
-            tchar* ptcOn = s.GetArgStr();
+      tchar* ptcOn = s.GetArgStr();
 			//_strupr(ptcOn); // Str_Match is already case insensitive
 			if ( Str_Match( ptcOn, pszCmd ) == MATCH_VALID )
 				fMatch = true;
@@ -873,19 +869,20 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 		if ( ! fMatch )
 			continue;	// look for the next "ON" section.
 
-        pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-	    pArgs->Init(pszCmd);
-        pArgs->m_iN1 = iModeRef;
-        pArgs->m_iN2 = wHue;
-        TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pArgs, pSrc );
+    pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pszCmd);
+    pScriptArgs->m_iN1 = iModeRef;
+    pScriptArgs->m_iN2 = wHue;
+    TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pScriptArgs, pSrc );
+    
 		if ( iRet != TRIGRET_RET_FALSE )
 			return iRet;
 
 		fMatch = false;
 	}
 
-    if (pArgs)
-        iModeRef = TALKMODE_TYPE(pArgs->m_iN1);
+    if (pScriptArgs)
+        iModeRef = TALKMODE_TYPE(pScriptArgs->m_iN1);
 	return TRIGRET_ENDIF;	// continue looking.
 }
 
@@ -986,9 +983,9 @@ bool CObjBase::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc, 
                 SKIP_SEPARATORS(pszArgs);
             }
 
-            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pArgs->Init(pszArgs != nullptr ? pszArgs : "");
-            if (r_Call(uiFunctionIndex, pArgs, pSrc, &sVal))
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(pszArgs != nullptr ? pszArgs : "");
+            if (r_Call(uiFunctionIndex, pScriptArgs, pSrc, &sVal))
             {
                 return true;
             }
@@ -1925,7 +1922,7 @@ bool CObjBase::r_LoadVal( CScript & s )
             }
             const HUE_TYPE hue = (HUE_TYPE)s.GetArgVal();
             SetHue(hue, false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
-            if (!g_Serv.IsLoading())
+            if (!g_Serv.IsLoadingGeneric())
                 Update();
         }
         break;
@@ -1979,7 +1976,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_TIMER:
         {
             int64 iTimeout = s.GetArg64Val();
-            if (g_Serv.IsLoading())
+            if (g_Serv.IsLoadingGeneric())
             {
                 const int iPrevBuild = g_World.m_iPrevBuild;
                 /*
@@ -2011,7 +2008,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			SetTimeStampS(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
-            if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
+            if ( !g_Serv.IsLoadingGeneric() )	// SPAWNITEM is read-only
                 return false;
             _uidSpawn.SetObjUID(s.GetArgDWVal());
             break;
@@ -2106,9 +2103,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
         {
             // RES_FUNCTION call
             CSString sVal;
-            CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-            pArgs->Init( s.GetArgRaw() );
-            if ( r_Call( uiFunctionIndex, pArgs, pSrc, &sVal ) )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init( s.GetArgRaw() );
+            if ( r_Call( uiFunctionIndex, pScriptArgs, pSrc, &sVal ) )
                 return true;
         }
 
@@ -3160,7 +3157,7 @@ dword CObjBase::UpdatePropertyRevision(dword hash)
 void CObjBase::UpdatePropertyFlag()
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyFlag");
-	if (!(g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B) || g_Serv.IsLoading())
+	if (!(g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B) || g_Serv.IsLoadingGeneric())
 		return;
 
     m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
@@ -3320,7 +3317,7 @@ void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 	ADDTOCALLSTACK("CObjBase::ResendTooltip");
     // Send tooltip packet to all nearby clients
 
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
         return;
 	else if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) == false )
 		return; // tooltips are disabled.
@@ -3646,7 +3643,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
     CEntityProps::Copy(pObj);
 }
 
-TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr pArgs, CChar * pSrc )
+TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs, CChar * pSrc )
 {
 	ADDTOCALLSTACK("CObjBase::Spell_OnTrigger");
 	CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
@@ -3659,7 +3656,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CSc
 		CResourceLock s;
 		if ( pSpellDef->ResourceLock( s ))
 		{
-            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], std::move(pArgs), pSrc );
+            return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pScriptArgs, pSrc );
 		}
 	}
 	return TRIGRET_RET_DEFAULT;

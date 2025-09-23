@@ -30,7 +30,7 @@ bool CCItemDamageable::CanSubscribe(const CItem* pItem) noexcept // static
 
 void CCItemDamageable::SetCurHits(word iCurHits)
 {
-    if (!g_Serv.IsLoading() && (_iCurHits != iCurHits))
+    if (!g_Serv.IsLoadingGeneric() && (_iCurHits != iCurHits))
     {
         _fNeedUpdate = true;
     }
@@ -40,7 +40,7 @@ void CCItemDamageable::SetCurHits(word iCurHits)
 
 void CCItemDamageable::SetMaxHits(word iMaxHits)
 {
-    if (!g_Serv.IsLoading() && (_iMaxHits != iMaxHits))
+    if (!g_Serv.IsLoadingGeneric() && (_iMaxHits != iMaxHits))
     {
         _fNeedUpdate = true;
     }

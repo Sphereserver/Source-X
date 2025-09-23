@@ -244,7 +244,7 @@ CItem *CContainer::ContentFind(CResourceID const& rid, dword dwArg, int iDescend
 }
 
 TRIGRET_TYPE CContainer::OnContTriggerForLoop(
-    CScript &s, CScriptTriggerArgsPtr pArgs, CTextConsole *pSrc,
+    CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc,
     CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext,
     const CResourceID &rid, dword dwArg, int iDescendLevels )
 {
@@ -257,7 +257,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 			if ( pItem->IsResourceMatch(rid, dwArg) )
 			{
 				s.SeekContext(StartContext);
-                TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pArgs, pSrc, pResult);
+                TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult);
 				if (iRet == TRIGRET_BREAK || iRet == TRIGRET_RET_ABORTED)
 				{
 					EndContext = StartContext;
@@ -279,7 +279,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 				if ( pCont->IsSearchable() )
 				{
 					CContainer *pContBase = dynamic_cast<CContainer *>(pCont);
-                    TRIGRET_TYPE iRet = pContBase->OnContTriggerForLoop(s, pArgs, pSrc, pResult, StartContext, EndContext, rid, dwArg, iDescendLevels - 1);
+                    TRIGRET_TYPE iRet = pContBase->OnContTriggerForLoop(s, pScriptArgs, pSrc, pResult, StartContext, EndContext, rid, dwArg, iDescendLevels - 1);
 					if ( iRet != TRIGRET_ENDIF )
 						return iRet;
 
@@ -293,7 +293,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
-        TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pArgs, pSrc, pResult);
+        TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}
@@ -305,7 +305,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop(
 }
 
 TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
-    CScript &s, CScriptTriggerArgsPtr pArgs, CTextConsole *pSrc,
+    CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole *pSrc,
 	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
@@ -313,7 +313,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		s.SeekContext(StartContext);
-        TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pArgs, pSrc, pResult);
+        TRIGRET_TYPE iRet = pItem->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pScriptArgs, pSrc, pResult);
 		if (iRet == TRIGRET_BREAK || iRet == TRIGRET_RET_ABORTED)
 		{
 			EndContext = StartContext;
@@ -332,7 +332,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 		if ( pCont && pCont->IsSearchable() )
 		{
 			CContainer *pContBase = dynamic_cast<CContainer *>(pCont);
-            iRet = pContBase->OnGenericContTriggerForLoop(s, pArgs, pSrc, pResult, StartContext, EndContext, iDecendLevels - 1);
+            iRet = pContBase->OnGenericContTriggerForLoop(s, pScriptArgs, pSrc, pResult, StartContext, EndContext, iDecendLevels - 1);
 			if ( iRet != TRIGRET_ENDIF )
 				return iRet;
 
@@ -344,7 +344,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop(
 	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
-        TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pArgs, pSrc, pResult);
+        TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pScriptArgs, pSrc, pResult);
 		if ( iRet != TRIGRET_ENDIF )
 			return iRet;
 	}

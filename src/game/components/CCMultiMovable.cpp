@@ -431,7 +431,7 @@ bool CCMultiMovable::MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegi
     {
         return false;
     }
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         // Leaving region trigger. (may not be allowed to leave ?)
         if (pRegionOld)
@@ -670,6 +670,7 @@ bool CCMultiMovable::Move(DIR_TYPE dir, int distance)
 
     CPointMap ptDelta;
     ptDelta.ZeroPoint();
+    ptDelta.m_map = pItemThis->GetTopMap();
 
     CPointMap ptFore(pMultiRegion->GetRegionCorner(dir));
 	CPointMap ptBack(pMultiRegion->GetRegionCorner(GetDirTurn(dir, 4)));
@@ -1268,7 +1269,7 @@ bool CCMultiMovable::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command
         Str_CopyLimitNull(szText, pszSpeak, MAX_TALK_BUFFER);
 
         CScriptExprContext scpContext{._pScriptObjI = pChar};
-        CExpression::GetExprParser().ParseScriptText(szText, scpContext, CScriptTriggerArgsPtr{}, &g_Serv);
+        CExpression::GetExprParser().ParseScriptText(szText, scpContext, CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv);
 
         pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
     }

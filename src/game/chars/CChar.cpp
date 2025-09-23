@@ -596,7 +596,7 @@ void CChar::ClearPlayer()
 	}
 	else
 	{
-		if (g_Serv.GetServerMode() != SERVMODE_Exiting)
+		if (g_Serv.GetServerMode() != ServMode::Exiting)
 		{
 			g_Log.EventWarn("Character '%s'(UID 0%x) on account '%s' as been deleted.\n", GetName(), (dword)GetUID(), pAccount->GetName());
 		}
@@ -3833,7 +3833,7 @@ bool CChar::r_LoadVal( CScript & s )
 			}break;
         case CHC_CREATE:
             {
-                if (g_Serv.IsLoading())
+                if (g_Serv.IsLoadingGeneric())
                     {
                         _iTimeCreate = (CWorldGameTime::GetCurrentTime().GetTimeRaw() - (s.GetArgLLVal() * MSECS_PER_TENTH));
                         break;
@@ -3865,7 +3865,7 @@ bool CChar::r_LoadVal( CScript & s )
 		}
 		case CHC_FLAGS:
 		{
-			if (g_Serv.IsLoading())
+			if (g_Serv.IsLoadingGeneric())
 			{
 				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
 				_uiStatFlag = s.GetArgLLVal() & ~ (uint64)STATF_SAVEPARITY;

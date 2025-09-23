@@ -174,7 +174,7 @@ void CCChampion::Start(CChar *pChar)
     if (pChar && IsTrigUsed(TRIGGER_START))
     {
         // TODO: add source?
-        if (OnTrigger(ITRIG_Start, CScriptTriggerArgsPtr{}, pChar) == TRIGRET_RET_TRUE)
+        if (OnTrigger(ITRIG_Start, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar) == TRIGRET_RET_TRUE)
             return;
     }
 
@@ -190,7 +190,7 @@ void CCChampion::Stop(CChar* pChar)
     {
         if (IsTrigUsed(TRIGGER_STOP))
         {
-            if (OnTrigger(ITRIG_STOP, CScriptTriggerArgsPtr{}, pChar) == TRIGRET_RET_TRUE)
+            if (OnTrigger(ITRIG_STOP, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pChar) == TRIGRET_RET_TRUE)
                 return;
         }
     }
@@ -224,7 +224,7 @@ void CCChampion::Complete()
     // TODO: Add attacker list in trigger.
     if (IsTrigUsed(TRIGGER_COMPLETE))
     {
-        OnTrigger(ITRIG_COMPLETE, CScriptTriggerArgsPtr{}, &g_Serv);
+        OnTrigger(ITRIG_COMPLETE, CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv);
     }
     // TODO: add rewards, titles, etc?
 }
@@ -398,7 +398,7 @@ void CCChampion::AddWhiteCandle(const CUID& uid)
         }
 
         pCandle->SetTopPoint(pt);
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             if (IsTrigUsed(TRIGGER_ADDWHITECANDLE))
             {
@@ -443,7 +443,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
         return;
 
     _iSpawnsNextWhite = _iSpawnsNextRed / (CANDLESNEXTRED + 1);
-    if (!g_Serv.IsLoading()) // Do not remove white candles, while server is loading them from save.
+    if (!g_Serv.IsLoadingGeneric()) // Do not remove white candles, while server is loading them from save.
     {
         ClearWhiteCandles();
     }
@@ -520,7 +520,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
             default:
                 break;
         }
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             if (IsTrigUsed(TRIGGER_ADDREDCANDLE))
             {
@@ -549,7 +549,7 @@ void CCChampion::AddRedCandle(const CUID& uid)
 void CCChampion::SetLevel(byte iLevel)
 {
     ADDTOCALLSTACK("CCChampion::SetLevel");
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
         return;
 
     _iLevel = iLevel;
@@ -999,7 +999,7 @@ bool CCChampion::r_LoadVal(CScript& s)
     {
     case ICHMPL_ACTIVE:
         {
-            if (g_Serv.IsLoading() == true)    //Only when the server is loading.
+            if (g_Serv.IsLoadingGeneric() == true)    //Only when the server is loading.
             {
                 _fActive = (bool)s.GetArgBVal();
             }
@@ -1197,7 +1197,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
 }
 
 
-TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr pArgs, CTextConsole* pSrc)
+TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole* pSrc)
 {
     lpctstr pszTrigName = CItem::sm_szTrigName[trig];
 
@@ -1211,12 +1211,12 @@ TRIGRET_TYPE CCChampion::OnTrigger(ITRIG_TYPE trig, CScriptTriggerArgsPtr pArgs,
         CResourceLock s;
         if (pResourceLink->ResourceLock(s))
         {
-            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pArgs, pSrc);
+            iRet = GetLink()->OnTriggerScript(s, pszTrigName, pScriptArgs, pSrc);
         }
     }
     if (iRet == TRIGRET_RET_DEFAULT)
     {
-        iRet = GetLink()->OnTrigger(trig, std::move(pArgs), pSrc);
+        iRet = GetLink()->OnTrigger(trig, pScriptArgs, pSrc);
     }
     return iRet;
 }

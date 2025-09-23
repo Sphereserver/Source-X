@@ -54,7 +54,7 @@ void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button wa
 
 	if ( IsTrigUsed(TRIGGER_USERCHATBUTTON) )
 	{
-        if (m_pChar && m_pChar->OnTrigger(CTRIG_UserChatButton, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE)
+        if (m_pChar && m_pChar->OnTrigger(CTRIG_UserChatButton, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE)
 			return;
 	}
 	GetChar()->SetTriggerActive("UserChatButton");	// dirty fix for SA Classic clients with injection moving a lot when using chat button, we set 'active trigger' to this, so we check it back on the packet to limit the amount of steps to do.
@@ -614,7 +614,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 
 	if ( IsTrigUsed(TRIGGER_SKILLSELECT) )
 	{
-        if ( m_pChar->Skill_OnCharTrigger( skill, CTRIG_SkillSelect, CScriptTriggerArgsPtr{} ) == TRIGRET_RET_TRUE )
+        if ( m_pChar->Skill_OnCharTrigger( skill, CTRIG_SkillSelect, CScriptParserBufs::GetCScriptTriggerArgsPtr() ) == TRIGRET_RET_TRUE )
 		{
 			m_pChar->Skill_Fail( true );	// clean up current skill.
 			return;
@@ -623,7 +623,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 
 	if ( IsTrigUsed(TRIGGER_SELECT) )
 	{
-        if ( m_pChar->Skill_OnTrigger( skill, SKTRIG_SELECT, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+        if ( m_pChar->Skill_OnTrigger( skill, SKTRIG_SELECT, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 		{
 			m_pChar->Skill_Fail( true );	// clean up current skill.
 			return;
@@ -808,7 +808,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 			{
-                if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, CScriptTriggerArgsPtr{}, m_pChar) != TRIGRET_RET_TRUE )
+                if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) != TRIGRET_RET_TRUE )
 					return false;
 			}
 		}
@@ -1586,7 +1586,7 @@ void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int 
 
 	if ( IsTrigUsed(TRIGGER_PROFILE) )
 	{
-        if ( pChar->OnTrigger(CTRIG_Profile, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_Profile, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -1629,7 +1629,7 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 
 	if ( IsTrigUsed(TRIGGER_USERMAILBAG) )
 	{
-        if (pChar->OnTrigger(CTRIG_UserMailBag, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE)
+        if (pChar->OnTrigger(CTRIG_UserMailBag, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE)
 			return;
 	}
 
@@ -1653,7 +1653,7 @@ void CClient::Event_ToolTip( CUID uid )
 
 	if (( IsTrigUsed(TRIGGER_TOOLTIP) ) || (( IsTrigUsed(TRIGGER_ITEMTOOLTIP) )&&(pObj->IsItem())))
 	{
-        if ( pObj->OnTrigger("@ToolTip", CScriptTriggerArgsPtr{}, this) == TRIGRET_RET_TRUE )	// CTRIG_ToolTip, ITRIG_ToolTip
+        if ( pObj->OnTrigger("@ToolTip", CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )	// CTRIG_ToolTip, ITRIG_ToolTip
 			return;
 	}
 
@@ -2353,7 +2353,7 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 	CChar * pChar = static_cast<CChar *>(pObj);
 	if ( IsTrigUsed(TRIGGER_DCLICK) || IsTrigUsed(TRIGGER_CHARDCLICK) )
 	{
-        if ( pChar->OnTrigger(CTRIG_DClick, CScriptTriggerArgsPtr{}, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_DClick, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return true;
 	}
 

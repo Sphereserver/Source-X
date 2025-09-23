@@ -2160,7 +2160,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
-        if ( Skill_OnCharTrigger(skill, CTRIG_SkillSuccess, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+        if ( Skill_OnCharTrigger(skill, CTRIG_SkillSuccess, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 		{
 			Skill_Cleanup();
 			return WAR_SWING_EQUIPPING;		// ok, so no hit - skill failed. Pah!
@@ -2168,7 +2168,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 	if ( IsTrigUsed(TRIGGER_SUCCESS) )
 	{
-        if ( Skill_OnTrigger(skill, SKTRIG_SUCCESS, CScriptTriggerArgsPtr{}) == TRIGRET_RET_TRUE )
+        if ( Skill_OnTrigger(skill, SKTRIG_SUCCESS, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 		{
 			Skill_Cleanup();
 			return WAR_SWING_EQUIPPING;		// ok, so no hit - skill failed. Pah!

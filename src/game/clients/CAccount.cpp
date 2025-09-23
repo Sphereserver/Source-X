@@ -232,7 +232,7 @@ void CAccounts::Account_Add( CAccount * pAccount )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Add");
 	ASSERT(pAccount != nullptr);
-	if ( !g_Serv.IsLoading() )
+	if ( !g_Serv.IsLoadingGeneric() )
     {
         CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
         pScriptArgs->Init(pAccount->GetName());
@@ -394,7 +394,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 
 void CAccount::SetBlockStatus(bool fNewStatus)
 {
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (IsPriv(PRIV_BLOCKED) && fNewStatus == false) {
 
@@ -617,7 +617,7 @@ void CAccount::DeleteChars()
 	}
 
 	// Now track down all my disconnected chars !
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
 	{
 		size_t i = m_Chars.GetCharCount();
 		while (i > 0)
@@ -993,7 +993,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 	bool useMD5 = g_Cfg.m_fMd5Passwords;
 
 	//Accounts are 'created' in server startup so we don't fire the function.
-	if ( !g_Serv.IsLoading() )
+	if ( !g_Serv.IsLoadingGeneric() )
 	{
         CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
         pScriptArgs->Init(GetName());
@@ -1393,7 +1393,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			break;
 		case AC_CHARUID:
 			// just ignore this ? chars are loaded later !
-			if ( ! g_Serv.IsLoading())
+			if ( ! g_Serv.IsLoadingGeneric())
 			{
 				const CUID uid( s.GetArgVal());
 				CChar * pChar = uid.CharFind();

@@ -244,7 +244,7 @@ bool CItem::NotifyDelete()
 	ADDTOCALLSTACK("CItem::NotifyDelete");
 	if ((IsTrigUsed(TRIGGER_DESTROY)) || (IsTrigUsed(TRIGGER_ITEMDESTROY)))
 	{
-        if (CItem::OnTrigger(ITRIG_DESTROY, CScriptTriggerArgsPtr{}, &g_Serv) == TRIGRET_RET_TRUE)
+        if (CItem::OnTrigger(ITRIG_DESTROY, CScriptParserBufs::GetCScriptTriggerArgsPtr(), &g_Serv) == TRIGRET_RET_TRUE)
 			return false;
 	}
 
@@ -453,7 +453,7 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 	CResourceLock s;
 	if ( pItemDef->ResourceLock(s))
 	{
-        OnTrigger(ITRIG_Create, CScriptTriggerArgsPtr{}, pSrc ? static_cast<CTextConsole*>(pSrc) : static_cast<CTextConsole*>(&g_Serv));
+        OnTrigger(ITRIG_Create, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc ? static_cast<CTextConsole*>(pSrc) : static_cast<CTextConsole*>(&g_Serv));
 	}
 	return this;
 }
@@ -1566,7 +1566,7 @@ bool CItem::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the groun
 	pSector->MoveItemToSector(this);	// This also awakes the item
 
 	// Is this area too complex ?
-	if ( ! g_Serv.IsLoading())
+	if ( ! g_Serv.IsLoadingGeneric())
     {
         if (pSector->CheckItemComplexity())
         {
@@ -1625,19 +1625,19 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	TRIGRET_TYPE ttResult = TRIGRET_RET_DEFAULT;
     if (IsTrigUsed(TRIGGER_DROPON_GROUND) || IsTrigUsed(TRIGGER_ITEMDROPON_GROUND))
     {
-        CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pArgs->m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = iDecayTime / MSECS_PER_TENTH;  // ARGN1 = Decay time for the dropped item (in tenths of second)
         //args->m_iN2 = 0;
-        pArgs->m_s1 = ptNewPlace.WriteUsed();
-        ttResult = OnTrigger(ITRIG_DROPON_GROUND, pArgs, pCharMover);
+        pScriptArgs->m_s1 = ptNewPlace.WriteUsed();
+        ttResult = OnTrigger(ITRIG_DROPON_GROUND, pScriptArgs, pCharMover);
 
         if (IsDeleted())
             return false;
 
-        iDecayTime = pArgs->m_iN1 * MSECS_PER_TENTH;
+        iDecayTime = pScriptArgs->m_iN1 * MSECS_PER_TENTH;
 
 		// Warning: here we ignore the read-onlyness of CSString's buffer only because we know that CPointMap constructor won't write past the end, but only replace some characters with '\0'. It's not worth it to build another string just for that.
-        tchar* ptcArgs = const_cast<tchar*>(pArgs->m_s1.GetBuffer());
+        tchar* ptcArgs = const_cast<tchar*>(pScriptArgs->m_s1.GetBuffer());
         const CPointMap ptChanged(ptcArgs);
         if (!ptChanged.IsValidPoint())
             g_Log.EventError("Trying to override item drop P with an invalid P. Using the original one.\n");
@@ -3003,7 +3003,7 @@ void CItem::r_LoadMore1(dword dwVal)
     case IT_SPAWN_CHAR:
     case IT_SPAWN_ITEM:
     case IT_SPAWN_CHAMPION:
-        if (!g_Serv.IsLoading())
+        if (!g_Serv.IsLoadingGeneric())
         {
             CCSpawn* pSpawn = GetSpawn();
             if (pSpawn)
@@ -3273,8 +3273,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				bool normcont = LoadSetContainer(CUID(s.GetArgDWVal()), (LAYER_TYPE)GetUnkZ());
 				if (!normcont)
 				{
-					SERVMODE_TYPE iModeCode = g_Serv.GetServerMode();
-					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))
+					ServMode iModeCode = g_Serv.GetServerMode();
+                    if ((iModeCode == ServMode::StartupLoadingSaves) || (iModeCode == ServMode::GarbageCollection))
 						Delete();	//	since the item is no longer in container, it should be deleted
 				}
 				return normcont;
@@ -3722,16 +3722,14 @@ void CItem::SetTriggerActive(lpctstr trig)
     _iRunningTriggerId = -1;
 }
 
-TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr pScriptArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItem::OnTrigger");
 
 	if (IsTriggerActive(pszTrigName)) //This should protect any item trigger from infinite loop
 		return TRIGRET_RET_ABORTED;
 
-    if (!pScriptArgs)
-        pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-
+    ASSERT(pScriptArgs);
 	if ( !pSrc )
 		pSrc = &g_Serv;
 
@@ -3895,10 +3893,10 @@ stopandret:
 	return iRet;
 }
 
-TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr pArgs, CTextConsole * pSrc )
+TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc )
 {
 	ASSERT((trigger >= 0) && (trigger < ITRIG_QTY));
-    return OnTrigger( CItem::sm_szTrigName[trigger], std::move(pArgs), pSrc );
+    return OnTrigger( CItem::sm_szTrigName[trigger], pScriptArgs, pSrc );
 }
 
 // Item type specific stuff.
@@ -5595,12 +5593,12 @@ bool CItem::OnSpellEffect(SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, C
     //  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-    CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-    pArgs->Init(spell, iSkillLevel, 0, pSourceItem);
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(spell, iSkillLevel, 0, pSourceItem);
 
 	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) || IsTrigUsed(TRIGGER_ITEMSPELL) )
 	{
-        switch ( OnTrigger(ITRIG_SPELLEFFECT, pArgs, pCharSrc) )
+        switch ( OnTrigger(ITRIG_SPELLEFFECT, pScriptArgs, pCharSrc) )
 		{
 			case TRIGRET_RET_TRUE:
 				return false;
@@ -5615,7 +5613,7 @@ bool CItem::OnSpellEffect(SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, C
 
 	if ( IsTrigUsed(TRIGGER_EFFECT) )
 	{
-        switch (Spell_OnTrigger(spell, SPTRIG_EFFECT, pArgs, pCharSrc))
+        switch (Spell_OnTrigger(spell, SPTRIG_EFFECT, pScriptArgs, pCharSrc))
 		{
 			case TRIGRET_RET_TRUE:
 				return false;
@@ -5628,8 +5626,8 @@ bool CItem::OnSpellEffect(SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, C
 		}
 	}
 
-    spell = (SPELL_TYPE)(pArgs->m_iN1);
-    iSkillLevel = (int)(pArgs->m_iN2);
+    spell = (SPELL_TYPE)(pScriptArgs->m_iN1);
+    iSkillLevel = (int)(pScriptArgs->m_iN2);
 	pSpellDef = g_Cfg.GetSpellDef( spell );
     ASSERT(pSpellDef);
 
@@ -5749,8 +5747,8 @@ bool CItem::OnSpellEffect(SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, C
     if ( (iEffectID > ITEMID_NOTHING) && (iEffectID < ITEMID_QTY) )
     {
         bool fExplode = (pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) && !pSpellDef->IsSpellType(SPELLFLAG_GOOD));		// bolt (chasing) spells have explode = 1 by default (if not good spell)
-        dword dwColor = (dword)(pArgs->m_VarsLocal.GetKeyNum("EffectColor"));
-        dword dwRender = (dword)(pArgs->m_VarsLocal.GetKeyNum("EffectRender"));
+        dword dwColor = (dword)(pScriptArgs->m_VarsLocal.GetKeyNum("EffectColor"));
+        dword dwRender = (dword)(pScriptArgs->m_VarsLocal.GetKeyNum("EffectRender"));
 
         if ( pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) )
             Effect(EFFECT_BOLT, iEffectID, pCharSrc, 5, 1, fExplode, dwColor, dwRender);
@@ -5823,9 +5821,9 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 	if ( IsTrigUsed(TRIGGER_DAMAGE) || IsTrigUsed(TRIGGER_ITEMDAMAGE) )
 	{
-        CScriptTriggerArgsPtr pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
-        pArgs->Init(iDmg, (int)uType, 0, nullptr);
-        if ( OnTrigger( ITRIG_DAMAGE, pArgs, pSrc ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(iDmg, (int)uType, 0, nullptr);
+        if ( OnTrigger( ITRIG_DAMAGE, pScriptArgs, pSrc ) == TRIGRET_RET_TRUE )
 			return 0;
 	}
 
