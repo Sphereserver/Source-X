@@ -874,6 +874,7 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
 			continue;	// look for the next "ON" section.
 
         pArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+	    pArgs->Init(pszCmd);
         pArgs->m_iN1 = iModeRef;
         pArgs->m_iN2 = wHue;
         TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pArgs, pSrc );
