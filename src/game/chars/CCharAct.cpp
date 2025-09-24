@@ -4608,6 +4608,7 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
     // If i'm not pathfinding, ensure that i pass a valid uiStaminaRequirement, since i'll need it for the walk checks.
     ASSERT(fPathFinding || (nullptr != uiStaminaRequirement));
     ushort uiLocalStamReq = 0;
+    bool fRequireFullStamina = true;
 
     CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
     auto AreaChars = CWorldSearchHolder::GetInstance(ptDst);
@@ -4629,6 +4630,8 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
         else if ((pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0))		// chars under Wraith Form effect can always walk through chars in Felucca
             uiLocalStamReq = 0;
 
+        fRequireFullStamina = true;
+
         TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
         if (!fPathFinding)  //You want to avoid to trig the triggers if it's only a pathfinding evaluation
         {
@@ -4636,10 +4639,12 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
             {
                 CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
                 pScriptArgs->m_iN1 = uiLocalStamReq;
+                pScriptArgs->m_iN3 = fRequireFullStamina;
                 iRet = pChar->OnTrigger(CTRIG_PersonalSpace, pScriptArgs, this);
                 if (iRet == TRIGRET_RET_TRUE)
                     goto set_and_return_false;
                 uiLocalStamReq = (ushort)(pScriptArgs->m_iN1);
+                fRequireFullStamina = static_cast<bool>(pScriptArgs->m_iN3);
             }
             if (IsTrigUsed(TRIGGER_CHARSHOVE))
             {
@@ -4652,7 +4657,7 @@ bool CChar::ShoveCharAtPosition(CPointMap const& ptDst, ushort *uiStaminaRequire
             }
         }
 
-        if ((uiLocalStamReq > 0) && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)))
+        if ((uiLocalStamReq > 0) && fRequireFullStamina && (Stat_GetVal(STAT_DEX) < Stat_GetMaxAdjusted(STAT_DEX)))
             goto set_and_return_false;
 
         if (Stat_GetVal(STAT_DEX) < uiLocalStamReq)		// check if we have enough stamina to push the char
