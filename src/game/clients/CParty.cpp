@@ -344,6 +344,8 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 		SysMessageAll(g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_LAST_PERSON));
 		return Disband(uidMaster);
 	}
+    // If there is still a party, let others know member was removed.
+	SendRemoveList(pCharRemove, false);
 
 	return true;
 }
