@@ -198,7 +198,13 @@ void CSectorBase::SetAdjacentSectors()
     {
         // out of bounds checks
         const int iAdjX = m_BasePoint.m_x + _xyDir[i].x;
+        // These checks are needed or the negative iAdjX/iAdjY can lead to a wrong index if the sector is near the map borders.
+        // For instance m_index = 0, iAdjY > 0 and iAdjX < 0, SW check, the index start from the first column of the second row and it goes back to the first row because there is no SW sector
+        if ((iAdjX < 0) || (iAdjX >= iMaxX))
+            continue;
         const int iAdjY = m_BasePoint.m_y + _xyDir[i].y;
+        if ((iAdjY < 0) || (iAdjY >= iMaxY))
+            continue;
 
 		int index = m_index;
         index  += ((iAdjY * iMaxX) + iAdjX);
