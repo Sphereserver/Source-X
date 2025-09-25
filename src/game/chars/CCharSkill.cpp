@@ -3309,8 +3309,8 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		iDamage = (Stat_GetVal(STAT_STR) * 5) / 100;
 		if ( iDamage < 1 )
 			iDamage = 1;
-		else if ( iDamage > 200 )
-			iDamage = 200;
+		else if ( iDamage > UINT16_MAX )
+			iDamage = UINT16_MAX;
 	}
 
 	HUE_TYPE hue = (HUE_TYPE)(GetDefNum("BREATH.HUE", true));
