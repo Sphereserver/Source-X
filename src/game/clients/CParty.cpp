@@ -293,43 +293,60 @@ void CPartyDef::AcceptMember( CChar *pChar )
 	SendAddList(nullptr);
 }
 
-bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
+bool CPartyDef::RemoveMember(const CUID& uidRemove, const CUID &uidCommand, const bool fDisband)
 {
 	ADDTOCALLSTACK("CPartyDef::RemoveMember");
-	// ARGS:
-	//  uidRemove = Who is being removed.
-	//  uidCommand = who removed this person (only the master or self can remove)
-	//
-	// NOTE: remove of the master will cause the party to disband.
 
-	if ( m_Chars.GetCharCount() <= 0 )
+	if (m_Chars.GetCharCount() <= 0)
 		return false;
 
-	CUID uidMaster(GetMaster());
-	if ( (uidRemove != uidCommand) && (uidCommand != uidMaster) )
+    const CUID uidMaster(GetMaster());
+	if (uidRemove != uidCommand && uidCommand != uidMaster)
 		return false;
 
 	CChar *pCharRemove(uidRemove.CharFind());
-	if ( !pCharRemove )
+	if (!pCharRemove)
 		return false;
-	if ( !IsInParty(pCharRemove) )
+	if (!IsInParty(pCharRemove))
 		return false;
-	if ( uidRemove == uidMaster )
+	if (fDisband && uidRemove == uidMaster)
 		return Disband(uidMaster);
 
 	CChar *pSrc = uidCommand.CharFind();
-	if ( pSrc && IsTrigUsed(TRIGGER_PARTYREMOVE) )
+	if (pSrc && IsTrigUsed(TRIGGER_PARTYREMOVE))
 	{
-        if ( pCharRemove->OnTrigger(CTRIG_PartyRemove, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc) == TRIGRET_RET_TRUE )
+        if (pCharRemove->OnTrigger(CTRIG_PartyRemove, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pSrc) == TRIGRET_RET_TRUE)
 			return false;
 	}
-	if ( IsTrigUsed(TRIGGER_PARTYLEAVE) )
+	if (IsTrigUsed(TRIGGER_PARTYLEAVE))
 	{
-        if ( pCharRemove->OnTrigger(CTRIG_PartyLeave, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharRemove) == TRIGRET_RET_TRUE )
+        if (pCharRemove->OnTrigger(CTRIG_PartyLeave, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharRemove) == TRIGRET_RET_TRUE)
 			return false;
 	}
 
-	// Remove it from the party
+    // If the party leader left, try to promote new character to be the leader.
+    tchar *pszChangeLeader = Str_GetTemp();
+    if (uidRemove == uidMaster)
+    {
+        // No valid character on second position in the party, disband it.
+        if (!m_Chars.IsValidIndex(1))
+            return Disband(uidMaster);
+
+        const CUID newMaster(m_Chars.GetChar(1));
+        CChar *pCharNewMaster(newMaster.CharFind());
+
+        // Cannot find new leader's character, disband it.
+        if (!pCharNewMaster)
+            return Disband(uidMaster);
+
+        // If new master wasn't appointed, disband the party.
+        if (!SetMaster(pCharNewMaster))
+            return Disband(uidMaster);
+
+        snprintf(pszChangeLeader, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_PARTY_CHANGE_LEADER), pCharNewMaster->GetName());
+    }
+
+	// Remove the character from the party.
 	SendRemoveList(pCharRemove, true);
 	DetachChar(pCharRemove);
 	pCharRemove->SysMessageDefault(DEFMSG_PARTY_LEAVE_2);
@@ -338,13 +355,18 @@ bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_1), pCharRemove->GetName());
 	SysMessageAll(pszMsg);
 
-	if ( m_Chars.GetCharCount() <= 1 )
+    // Disband the party if I'm alone.
+	if (m_Chars.GetCharCount() <= 1)
 	{
-		// Disband the party
 		SysMessageAll(g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_LAST_PERSON));
 		return Disband(uidMaster);
 	}
-    // If there is still a party, let others know member was removed.
+
+    // Notify about change in party leadership (we need to do it here, so it doesn't get sent to the previous leader).
+    if (uidRemove == uidMaster)
+        SysMessageAll(pszChangeLeader);
+
+    // We still have a party, notify other members about removal.
 	SendRemoveList(pCharRemove, false);
 
 	return true;

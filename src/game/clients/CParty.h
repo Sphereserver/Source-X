@@ -78,7 +78,20 @@ public:
 
 	// Commands
 	bool Disband( CUID uidMaster );
-	bool RemoveMember( CUID uidRemove, CUID uidCommand );
+
+    /**
+     * Removes a member from party. If leader is removed, it tries to pass leader to another character.
+     *
+     * @note We need to switch characters at leader position before we remove him, because original client doesn't like removing leader and thinks, the party
+     * was disbanded (Classic UO doesn't care though).
+     *
+     * @param uidRemove Character being removed.
+     * @param uidCommand Character, who issued the removal (leader or self).
+     * @param fDisband If set to false, we try to change leader instead of disbanding the party.
+     *
+     * @return True if successfully removed, false otherwise.
+     */
+	bool RemoveMember(const CUID& uidRemove, const CUID &uidCommand, bool fDisband = true);
 	void AcceptMember( CChar * pChar );
 	void SetLootFlag( CChar * pChar, bool fSet );
 	bool GetLootFlag( const CChar * pChar );
