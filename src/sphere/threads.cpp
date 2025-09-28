@@ -878,7 +878,7 @@ AbstractSphereThread::~AbstractSphereThread()
         sg_tlsCurrentSphereThread = nullptr;
 }
 
-#ifdef THREAD_TRACK_CALLSTACK
+#if defined THREAD_TRACK_CALLSTACK && defined _EXCEPTIONS_DEBUG
 void AbstractSphereThread::signalExceptionCaught() noexcept
 {
     if (m_iStackPos < 0)
