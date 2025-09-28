@@ -250,26 +250,24 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
 
     // Set BasePoint.
     auto const& sd = CSectorList::Get().GetMapSectorData(map);
-    DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty) );
+    DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty));
 
-    const int iCols = sd.iSectorColumns, iSize = sd.iSectorSize;
-    const int iQuot = (m_index % iCols), iRem = (m_index / iCols); // Help the compiler to optimize the division
     m_BasePoint = // Initializer list for CPointMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
         {
-            (short)(iQuot * iSize),	// x
-            (short)(iRem * iSize),	// y
-            0,						// z
-            (uint8)map              // m
+            x,          // x
+            y,          // y
+            0,          // z
+            (uint8)map  // m
         };
 
     // Set MapRect.
     m_MapRect = // Initializer list for CRectMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
         CRectMap {
-            m_BasePoint.m_x,			// left
-            m_BasePoint.m_y,			// yop
-            m_BasePoint.m_x + iSize,	// right: East
-            m_BasePoint.m_y + iSize,	// bottom: South
-            m_BasePoint.m_map			// map
+            m_BasePoint.m_x,			        // left
+            m_BasePoint.m_y,			        // yop
+            m_BasePoint.m_x + sd.iSectorSize,	// right: East
+            m_BasePoint.m_y + sd.iSectorSize,   // bottom: South
+            m_BasePoint.m_map			        // map
         };
 }
 

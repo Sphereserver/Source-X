@@ -69,15 +69,18 @@ void CSectorList::Init()
 		short iSectorX = 0, iSectorY = 0;
 		for (; iSectorIndex < iSectorQty; ++iSectorIndex)
 		{
-			if (iSectorX >= iMaxX)
-			{
-				iSectorX = 0;
-				++iSectorY;
-			}
+            // Map sectors are added in row-major order.
+            if (iSectorX >= iMaxX)
+            {
+                iSectorX = 0;
+                ++iSectorY;
+            }
 
 			CSector* pSector = &(sd._pSectors[iSectorIndex]);
 			ASSERT(pSector);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
+
+            ++iSectorX;
 		}
 
 	}
