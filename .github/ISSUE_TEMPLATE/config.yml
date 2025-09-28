@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support & Discussions & More
+    url: https://discord.gg/ZrMTXrs
+    about: ''
+  - name: Documentation (Wiki)
+    url: https://wiki.spherecommunity.net/
+    about: ''
+  - name: Changelogs (Master branch)
+    url: https://github.com/Sphereserver/Source-X/blob/master/Changelog.txt
+    about: ''
+  - name: Changelogs (Dev branch)
+    url: https://github.com/Sphereserver/Source-X/blob/dev/Changelog.txt
+    about: ''
