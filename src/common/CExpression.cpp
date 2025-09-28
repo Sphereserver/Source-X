@@ -673,7 +673,8 @@ llong CExpression::GetSingle(lpctstr & refStrExpr )
 			if ( IsDigit(ch) )
             {
 				ch -= '0';
-                ++ uiDigits;
+			    // The line bellow causes flags over 080000000 not being read correctly. But this whole section should be refactored...
+                //++ uiDigits;
             }
             else
 			{
