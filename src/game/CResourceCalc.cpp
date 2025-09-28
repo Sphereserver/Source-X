@@ -217,14 +217,14 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 					iAttackerSkill = 200;
 				iAttackerHitChance += 5;
 			}
-			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + minimum(iAttackerHitChance, 45));
+			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + minimum(iAttackerHitChance, 70));
 
 			int iTargetIncreaseDefChance = (int)(pChar->GetPropNum(COMP_PROPS_CHAR, PROPCH_INCREASEDEFCHANCE, true));
-			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(iTargetIncreaseDefChance, 45));
+			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(iTargetIncreaseDefChance, 70));
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
-			if (iChance < 2)
-				iChance = 2;	// minimum hit chance is 2%
+			if (iChance < 20)
+				iChance = 20;	// minimum hit chance is 2%
 			else if (iChance > 100)
 				iChance = 100;
 			return iChance;
