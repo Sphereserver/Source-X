@@ -2655,6 +2655,7 @@ bool PacketPartyMessage::onReceive(CNetState* net)
 			client->addTarget( CLIMODE_TARG_PARTY_ADD, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_TARG_WHO), false, false);
 			break;
 
+	    // This doesn't happen, since disbanding the party is handled by client sending a packet to remove the party master.
 		case PARTYMSG_Disband:
 			if (character->m_pParty == nullptr)
 				return false;
