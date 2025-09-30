@@ -69,28 +69,28 @@ void CCItemDamageable::OnTickStatsUpdate()
 
     if (_iTimeLastUpdate + g_Cfg._iItemHitpointsUpdate < iCurtime)
     {
+        CItem *pItem = GetLink();
+        const CPointMap pt = pItem->GetTopPoint();
+
+        // Check, whether item has already been placed in the world, because settings hits/maxhits in @create trigger calls this method.
+        if (_iTimeLastUpdate == 0 && !pt.IsValidXY())
+            return;
+
         _iTimeLastUpdate = iCurtime;
 
-        CItem *pItem = static_cast<CItem*>(GetLink());
-        auto AreaChars = CWorldSearchHolder::GetInstance(pItem->GetTopPoint(), g_Cfg.m_iMapViewSize);
+        auto AreaChars = CWorldSearchHolder::GetInstance(pt, g_Cfg.m_iMapViewSize);
         AreaChars->SetSearchSquare(true);
         CChar *pChar = nullptr;
         for (;;)
         {
             pChar = AreaChars->GetChar();
             if (!pChar)
-            {
                 break;
-            }
+
             CClient *pClient = pChar->GetClientActive();
-            if (!pClient)
-            {
+            if (!pClient || !pClient->CanSee(pItem))
                 continue;
-            }
-            if (!pClient->CanSee(pItem))
-            {
-                continue;
-            }
+
             pClient->addStatusWindow(pItem);
         }
     }
