@@ -4056,3 +4056,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 24-09-2025, Mulambo
 - Added: ARGN3 for trigger @PersonalSpace [R/W], allowing to bypass maximum stamina requirement (default 1 = require maximum stamina) when stepping over players.
+
+30-09-2025, Mulambo
+- Changed: Login rejection (packet `0x82`) is now sent to all clients trying to log in (used to be only to clients, that Sphere could identify).
