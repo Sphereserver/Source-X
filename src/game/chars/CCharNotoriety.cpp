@@ -141,14 +141,11 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 // NOTO_GUILD_WAR       5
 // NOTO_EVIL            6
 // NOTO_INVUL           7
-NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool fAllowInvul) const
+NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, const bool fAllowIncog, const bool fAllowInvul) const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetFlag");
-	// What is this char to the viewer ?
-	// This allows the noto attack check in the client.
-	// NOTO_GOOD = it is criminal to attack me.
 
-	NOTO_TYPE iNotoFlag = (NOTO_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE.NOTO"));
+	const auto iNotoFlag = static_cast<NOTO_TYPE>(m_TagDefs.GetKeyNum("OVERRIDE.NOTO"));
 	if (iNotoFlag != NOTO_INVALID)
 		return iNotoFlag;
 
@@ -158,114 +155,116 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	if (fAllowInvul && IsStatFlag(STATF_INVUL))
 		return NOTO_INVUL;
 
-	if (m_pArea && m_pArea->IsFlag(REGION_FLAG_ARENA))	// everyone is neutral here.
+    // Everyone is neutral here.
+	if (m_pArea && m_pArea->IsFlag(REGION_FLAG_ARENA))
 		return NOTO_NEUTRAL;
 
-    // TODO: refactor this nesting mess and return early
-	if (this != pCharViewer)	// Am I checking myself?
+    const bool fSelfCheck = (this == pCharViewer);
+
+    // Player is looking at himself.
+    if (fSelfCheck)
+        goto skip_guilds;
+
+    // We are in the same party.
+    if (m_pParty && m_pParty == pCharViewer->m_pParty)
+        return NOTO_GUILD_SAME;
+
+    // We are looking at NPC.
+	if (m_pNPC)
 	{
-		if (m_pNPC)
+	    // Flag to display true notoriety is disabled.
+	    if (!IsSetOF(OF_PetBehaviorOwnerNeutral) && NPC_IsOwnedBy(pCharViewer, false))
+	        return NOTO_NEUTRAL;
+
+	    // Pets inheriting notoriety from master.
+		if (g_Cfg.m_iPetsInheritNotoriety != 0)
 		{
-			if (g_Cfg.m_iPetsInheritNotoriety != 0)
+			// Get master and his notoriety.
+			const CChar * pMaster = NPC_PetGetOwnerRecursive();
+			if (pMaster && pMaster != pCharViewer)
 			{
-				// Do we have a master to inherit notoriety from?
-				CChar* pMaster = NPC_PetGetOwnerRecursive();
-				if (pMaster && (pMaster != pCharViewer)) // master doesn't want to see their own status
-				{
-					// return master's notoriety
-					NOTO_TYPE notoMaster = pMaster->Noto_GetFlag(pCharViewer, fAllowIncog, fAllowInvul);
+				const NOTO_TYPE notoMaster = pMaster->Noto_GetFlag(pCharViewer, fAllowIncog, fAllowInvul);
 
-					// check if notoriety is inheritable based on bitmask setting:
-					//		NOTO_GOOD		= 0x01
-					//		NOTO_GUILD_SAME	= 0x02
-					//		NOTO_NEUTRAL	= 0x04
-					//		NOTO_CRIMINAL	= 0x08
-					//		NOTO_GUILD_WAR	= 0x10
-					//		NOTO_EVIL		= 0x20
-					int iPetNotoFlag = 1 << (notoMaster - 1);
-					if ((g_Cfg.m_iPetsInheritNotoriety & iPetNotoFlag) == iPetNotoFlag)
-						return notoMaster;
-				}
-			}
-
-			if (!IsSetOF(OF_PetBehaviorOwnerNeutral) && NPC_IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
-				return NOTO_NEUTRAL;
-		}
-
-		// Are we in the same party ?
-		if (m_pParty && (m_pParty == pCharViewer->m_pParty) )
-		{
-			//if (m_pParty->GetLootFlag(this))
-				return NOTO_GUILD_SAME;
-		}
-
-		if (m_pPlayer)
-		{
-			// Check the guild/town stuff
-			const CItemStone * pMyTown = Guild_Find(MEMORY_TOWN);
-			const CItemStone * pMyGuild = Guild_Find(MEMORY_GUILD);
-			if (pMyGuild || pMyTown)
-			{
-				const CItemStone * pViewerGuild = pCharViewer->Guild_Find(MEMORY_GUILD);
-				const CItemStone * pViewerTown = pCharViewer->Guild_Find(MEMORY_TOWN);
-				// Are we both in a guild?
-				if (pViewerGuild || pViewerTown)
-				{
-					if (pMyGuild && pMyGuild->IsPrivMember(this))
-					{
-						if (pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer))
-						{
-							if (IsSetOF(OF_EnableGuildAlignNotoriety))
-							{
-								if (pViewerGuild->GetAlignType() != STONEALIGN_STANDARD && pMyGuild->GetAlignType() != STONEALIGN_STANDARD) //We have to check if my guild is also not STONEALIGN_STANDART.
-								{
-									if (pViewerGuild->GetAlignType() == pMyGuild->GetAlignType())
-									{
-										return NOTO_GUILD_SAME;
-									}
-									return NOTO_GUILD_WAR;
-								}
-							}
-
-							if (pViewerGuild == pMyGuild) // Same guild?
-								return NOTO_GUILD_SAME; // return green
-							if (pMyGuild->IsAlliedWith(pViewerGuild))
-								return NOTO_GUILD_SAME;
-							// Are we in different guilds but at war? (not actually a crime right?)
-							if (pMyGuild->IsAtWarWith(pViewerGuild))
-								return NOTO_GUILD_WAR; // return orange
-						}
-						if (pMyGuild->IsAtWarWith(pViewerTown))
-							return NOTO_GUILD_WAR; // return orange
-					}
-					if (pMyTown && pMyTown->IsPrivMember(this))
-					{
-						if (pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer))
-						{
-							if (pMyTown->IsAtWarWith(pViewerGuild))
-								return NOTO_GUILD_WAR; // return orange
-						}
-						if (pMyTown->IsAtWarWith(pViewerTown))
-							return NOTO_GUILD_WAR; // return orange
-					}
-				}
+			    // Get notoriety based on bit flag defined in sphere.ini's `PetsInheritNotoriety`.
+				const int iPetNotoFlag = 1 << (notoMaster - 1);
+				if ((g_Cfg.m_iPetsInheritNotoriety & iPetNotoFlag) == iPetNotoFlag)
+					return notoMaster;
 			}
 		}
-
 	}
 
+    // Guild/Town relations.
+    {
+        const CItemStone * pMyTown = Guild_Find(MEMORY_TOWN);
+        const CItemStone * pMyGuild = Guild_Find(MEMORY_GUILD);
+
+        // I don't have any town or guild.
+        if (!pMyTown && !pMyGuild)
+            goto skip_guilds;
+
+        const CItemStone * pViewerTown = pCharViewer->Guild_Find(MEMORY_TOWN);
+        const CItemStone * pViewerGuild = pCharViewer->Guild_Find(MEMORY_GUILD);
+
+        // Player looking at me doesn't have town or guild either.
+        if (!pViewerTown && !pViewerGuild)
+            goto skip_guilds;
+
+        // We are both in a guild.
+        if (pMyGuild && pMyGuild->IsPrivMember(this) && pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer))
+        {
+            // Same guild.
+            if (pViewerGuild == pMyGuild)
+                return NOTO_GUILD_SAME;
+
+            // Check standard relationships first (war/ally).
+            const NOTO_WAR_STATUS warStatus = Noto_GetWarStatus(pMyGuild, pViewerGuild);
+            if (warStatus == NOTO_WAR_ENEMY)
+                return NOTO_GUILD_WAR;
+            if (warStatus == NOTO_WAR_ALLY)
+                return NOTO_GUILD_SAME;
+
+            // Guild alignment.
+            const STONEALIGN_TYPE myAlign = pMyGuild->GetAlignType();
+            const STONEALIGN_TYPE viewerAlign = pViewerGuild->GetAlignType();
+
+            // We both aren't in a neutral guild.
+            if (myAlign != STONEALIGN_STANDARD && viewerAlign != STONEALIGN_STANDARD)
+            {
+                // Same guilds share notoriety and we are in the same fraction.
+                if (IsSetOF(OF_EnableGuildAlignNotoriety) && myAlign == viewerAlign)
+                    return NOTO_GUILD_SAME;
+
+                // Or not.
+                if (myAlign != viewerAlign)
+                    return NOTO_GUILD_WAR;
+            }
+        }
+
+        // Town wars / town vs guild wars.
+        if (pMyGuild && pMyGuild->IsPrivMember(this) && Noto_GetWarStatus(pMyGuild, pViewerTown) == NOTO_WAR_ENEMY)
+			return NOTO_GUILD_WAR;
+	    if (pMyTown && pMyTown->IsPrivMember(this))
+	    {
+		    if (pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer) && Noto_GetWarStatus(pMyTown, pViewerGuild) == NOTO_WAR_ENEMY)
+				return NOTO_GUILD_WAR;
+	        if (Noto_GetWarStatus(pMyTown, pViewerTown) == NOTO_WAR_ENEMY)
+			    return NOTO_GUILD_WAR;
+	    }
+    }
+
+skip_guilds:
 	if (Noto_IsEvil())
 		return NOTO_EVIL;
 
-	if (this != pCharViewer) // Am I checking myself?
+	if (!fSelfCheck)
 	{
-		// If they saw me commit a crime or I am their aggressor then criminal to just them.
+		// If viewer saw me commit a crime, or I am his aggressor, then criminal to just them.
 		const CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME | MEMORY_AGGREIVED);
 		if (pMemory != nullptr)
 			return NOTO_CRIMINAL;
 	}
 
-	if (IsStatFlag(STATF_CRIMINAL))	// criminal to everyone.
+	if (IsStatFlag(STATF_CRIMINAL))
 		return NOTO_CRIMINAL;
 
 	if (Noto_IsNeutral() || m_TagDefs.GetKeyNum("NOTO.PERMAGREY"))
@@ -755,6 +754,20 @@ void CChar::NotoSave_CheckTimeout()
             NotoSave_Resend(pChar);
         }
 	}
+}
+
+CChar::NOTO_WAR_STATUS CChar::Noto_GetWarStatus(const CItemStone* pMyStone, const CItemStone* pViewerStone) const
+{
+    if (!pMyStone || !pViewerStone)
+        return NOTO_WAR_NONE;
+
+    if (pMyStone->IsAtWarWith(pViewerStone))
+        return NOTO_WAR_ENEMY;
+
+    if (pMyStone->IsAlliedWith(pViewerStone))
+        return NOTO_WAR_ALLY;
+
+    return NOTO_WAR_NONE;
 }
 
 void CChar::NotoSave_Resend(CChar * pChar)
