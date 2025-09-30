@@ -354,7 +354,7 @@ CChar::~CChar()
 
     if (m_pParty)
     {
-        m_pParty->RemoveMember( GetUID(), GetUID() );
+        m_pParty->RemoveMember(GetUID(), GetUID(), false);
         m_pParty = nullptr;
     }
     //Guild_Resign(MEMORY_GUILD); Moved to the ClearPlayer method otherwise it will cause a server crash because the deleted player will still be found in the guild list.
@@ -493,13 +493,6 @@ void CChar::ClientDetach()
 	if ( !IsClientActive() )
 		return;
 
-	if ( m_pParty && m_pParty->IsPartyMaster( this ))
-	{
-		// Party must disband if the master is logged out.
-		m_pParty->Disband(GetUID());
-		m_pParty = nullptr;
-	}
-
 	// If this char is on a IT_SHIP then we need to stop the ship !
 	if ( m_pArea && m_pArea->IsFlag( REGION_FLAG_SHIP ))
 	{
@@ -548,7 +541,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
 
     if (m_pParty)
     {
-        m_pParty->RemoveMember( GetUID(), GetUID() );
+        m_pParty->RemoveMember(GetUID(), GetUID(), false);
         m_pParty = nullptr;
     }
 
