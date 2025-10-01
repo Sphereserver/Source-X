@@ -20,6 +20,7 @@ CCItemDamageable::CCItemDamageable(CItem * pLink) : CComponent(COMP_ITEMDAMAGEAB
 
 CItem * CCItemDamageable::GetLink() const noexcept
 {
+    ASSERT(_pLink != nullptr);
     return _pLink;
 }
 

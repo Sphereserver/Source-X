@@ -98,6 +98,7 @@ CCChampion::~CCChampion()
 
 CItem* CCChampion::GetLink() const
 {
+    ASSERT(_pLink != nullptr);
     return _pLink;
 }
 
