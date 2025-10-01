@@ -81,6 +81,7 @@ CCSpawn::~CCSpawn()
 
 CItem * CCSpawn::GetLink() const
 {
+    ASSERT(_pLink != nullptr);
     return _pLink;
 }
 
