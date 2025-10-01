@@ -963,6 +963,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
             int iItemCount = 0;
             int iMaxIndex = 0;
 
+            memset(wPlaneBuffer, 0, sizeof(wPlaneBuffer));
             for (const CMultiComponent* pComp : pDesign->m_vectorComponents)
             {
                 const uchar uiCompPlane = GetPlane(pComp);
