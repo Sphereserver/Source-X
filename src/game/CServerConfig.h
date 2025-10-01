@@ -91,7 +91,8 @@ enum OF_TYPE
     OF_EnableGuildAlignNotoriety   = 0x02000000,   // If enabled, guilds with the same alignment will see each other as enemy or ally.
     OF_NoDclickEquip               = 0x04000000,   // If enabled, double-click does not equip items.
     OF_PetBehaviorOwnerNeutral     = 0x08000000,   // Should my pets always appear natural to me?
-    OF_NPCMovementOldStyle         = 0x10000000    // Required setting to make NPCs run like in the old version.
+    OF_NPCMovementOldStyle         = 0x10000000,   // Required setting to make NPCs run like in the old version.
+    OF_DontInterruptHealOnHit      = 0x20000000    // Getting hit won't interrupt healing. You can still implement your own interrupt in triggers (like @Hit / @GetHit).
 };
 
 /**

@@ -4065,3 +4065,4 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 01-10-2025, Mulambo
 - Added: New experimental flag EF_WalkBypassMonsters. This will override hardcoded client behaviour that prevents stepping over NPCs without max stamina (like GM can). However, this could cause flickering or lags to clients and should be used with caution.
+- Added: New option flag OF_DontInterruptHealOnHit. Healing won't be interrupted on hit. This will allow you to implement your own healing interrupts in combat.
