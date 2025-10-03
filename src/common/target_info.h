@@ -1,7 +1,6 @@
 #ifndef _INC_TARGET_INFO_H
 #define _INC_TARGET_INFO_H
 
-
 [[maybe_unused, nodiscard]]
 constexpr const char* get_target_os_str()
 {
@@ -39,7 +38,7 @@ constexpr const char* get_target_arch_str()
 #elif defined(__ARM_ARCH_4T__) || defined(__TARGET_ARM_4T)
     return "ARMv4T";
 #elif defined(__ARM_ARCH_5_) || defined(__ARM_ARCH_5E_)
-    return "ARMv5"
+    return "ARMv5";
 #elif defined(__ARM_ARCH_6T2_) || defined(__ARM_ARCH_6T2_)
     return "ARMv6T2";
 #elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__)
@@ -57,7 +56,7 @@ constexpr const char* get_target_arch_str()
 #elif defined(__aarch64__) || defined(_M_ARM64)
     return "ARMv64";
 #elif defined(__riscv)
-    return "RISC-V"
+    return "RISC-V";
 #elif defined(mips) || defined(__mips__) || defined(__mips)
     return "MIPS";
 #elif defined(__sh__)
@@ -74,6 +73,5 @@ constexpr const char* get_target_arch_str()
     return "UNKNOWN";
 #endif
 }
-
 
 #endif // _INC_TARGET_INFO_H
