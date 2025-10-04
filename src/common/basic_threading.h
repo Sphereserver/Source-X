@@ -151,7 +151,7 @@ public:
     public:
         [[nodiscard]]
         LockedReader(const GuardedAccess& owner)
-            : lock_(owner->pmutex_), ptr_(&owner.data_)
+            : lock_(owner.mutex_), ptr_(&owner.data_)
         {}
         RETURNS_NOTNULL
         const T* operator->() const { return ptr_; }
@@ -195,7 +195,7 @@ public:
     public:
         [[nodiscard]]
         LockedWriter(GuardedAccess& owner)
-            : lock_(owner->pmutex_), ptr_(&owner.data_)
+            : lock_(owner.mutex_), ptr_(&owner.data_)
         {}
         RETURNS_NOTNULL
         T*       operator->()       { return ptr_; }
