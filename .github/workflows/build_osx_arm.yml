@@ -20,7 +20,7 @@ on:
 
 jobs:
   macos-arm64:
-    runs-on: macos-14   # apple silicon
+    runs-on: macos-15   # apple silicon
     permissions:
       contents: read
       actions: read
