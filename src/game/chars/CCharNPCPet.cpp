@@ -445,7 +445,8 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pCharTarg || pCharTarg == pSrc || pCharTarg == this )
 				break;
             fSuccess = pCharTarg->OnAttackedBy(pSrc, true);	// we know who told them to do this.
-            pSrc->OnHarmedBy(pCharTarg);
+            if (!pCharTarg->IsPlayer())
+                pSrc->OnHarmedBy(pCharTarg);
             if ( fSuccess )
                 fSuccess = Fight_Attack(pCharTarg, true);
 			break;
