@@ -1302,6 +1302,15 @@ void CChar::NPC_Act_Guard()
 			if ( Fight_Attack( pChar->m_Fight_Targ_UID.CharFind() ))
 				return;
 		}
+        else if (m_Fight_Targ_UID.IsValidUID())
+        {
+            CChar *pEnemy = m_Fight_Targ_UID.CharFind();
+            if (pEnemy && !pEnemy->IsStatFlag(STATF_DEAD | STATF_INVUL))
+            {
+                Fight_Attack(pEnemy);
+                return;
+            }
+        }
 	}
 
 	// Target is out of range or doesn't need protecting, so just follow for now
