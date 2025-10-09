@@ -874,7 +874,7 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
     pScriptArgs->m_iN1 = iModeRef;
     pScriptArgs->m_iN2 = wHue;
     TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pScriptArgs, pSrc );
-    
+
 		if ( iRet != TRIGRET_RET_FALSE )
 			return iRet;
 
@@ -2980,23 +2980,25 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OV_USEITEM:
 			EXC_SET_BLOCK("USEITEM");
-			if ( ! pCharSrc )
+			if (!pCharSrc)
 				return false;
-			if ( s.HasArgs() )
+			if (s.HasArgs())
 			{
 				if (!IsChar())
 					return false;
 
-                CChar* pChar = CUID::CharFindFromUID(s.GetArgDWVal());
-                if (!pChar)
-					return false;
+			    // Find the item character is trying to use.
+			    CItem* pItem = CUID::ItemFindFromUID(s.GetArgDWVal());
+			    if (!pItem)
+			        return false;
 
-                return pChar->Use_Obj( pChar, false, true );
+                auto* pChar = dynamic_cast<CChar*>(this);
+                return pChar->Use_Obj(pItem, false, true);
 			}
-			else
-				return pCharSrc->Use_Obj( this, false, true );
 
-		case OV_FIX:
+	        return pCharSrc->Use_Obj(this, false, true);
+
+        case OV_FIX:
 			s.GetArgStr()[0] = '\0';
 			FALLTHROUGH;
 		case OV_Z:	//	ussually in "SETZ" form
