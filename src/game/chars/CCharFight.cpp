@@ -355,7 +355,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, bool fCommandPet, bool fShouldReveal)
             wMemTypes |= MEMORY_AGGREIVED;
         }
     }
-    if (pCharSrc != this && pCharSrc != GetOwner())
+    if (pCharSrc != GetOwner())
     {
         Memory_AddObjTypes(pCharSrc, wMemTypes);
         Attacker_Add(pCharSrc);
