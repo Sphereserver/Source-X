@@ -36,8 +36,11 @@ set(pch_list
 set(sphere_S
     src/sphere/asyncdb.cpp
     src/sphere/ConsoleInterface.cpp
+    src/sphere/GlobalInitializer.cpp
+    src/sphere/MainThread.cpp
     src/sphere/ProfileData.cpp
     src/sphere/ProfileTask.cpp
+    src/sphere/StartupMonitorThread.cpp
     src/sphere/threads.cpp
     src/sphere/ntservice.cpp
     src/sphere/ntwindow.cpp
@@ -47,8 +50,11 @@ set(sphere_H
     src/sphere/asyncdb.h
     src/sphere/containers.h
     src/sphere/ConsoleInterface.h
+    src/sphere/GlobalInitializer.h
+    src/sphere/MainThread.h
     src/sphere/ProfileData.h
     src/sphere/ProfileTask.h
+    src/sphere/StartupMonitorThread.h
     src/sphere/threads.h
     src/sphere/ntservice.h
     src/sphere/ntwindow.h
