@@ -3159,11 +3159,26 @@ void CServerConfig::AddResourceDir( lpctstr pszDirName )
     if ( iRet <= 0 )	// no files here.
         return;
 
+    // Load the files, but preordering them by file name.
+    // TODO (low priority): just rework CSStringList to CSStringCont/Vec and add a method to sort it
+    std::vector<lpctstr> vecFileNames;
+
+    // Collect them from the list
     CSStringListRec * psFile = filelist.GetHead(), *psFileNext = nullptr;
     for ( ; psFile; psFile = psFileNext )
     {
         psFileNext = psFile->GetNext();
-        sFilePath = CSFile::GetMergedFileName( pszDirName, *psFile );
+        vecFileNames.push_back(*psFile);
+    }
+
+    // Order them by name (not including path, it is added later).
+    std::sort(vecFileNames.begin(), vecFileNames.end(),
+        [](lpctstr ptcFirst, lpctstr ptcSecond) noexcept {return strcmp(ptcFirst, ptcSecond) < 0;}
+        );
+
+    for (lpctstr elem : vecFileNames)
+    {
+        sFilePath = CSFile::GetMergedFileName(pszDirName, elem);
         AddResourceFile( sFilePath );
     }
 }
@@ -3593,11 +3608,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 			}
 			else
 			{
-				if ( rid.GetResIndex() >= (uint)(m_iMaxSkill) )
-					m_iMaxSkill = rid.GetResIndex() + 1;
+                const uint uiResIdx = rid.GetResIndex();
+                if ( uiResIdx >= (uint)(m_iMaxSkill) )
+                    m_iMaxSkill = uiResIdx + 1;
 
 				// Just replace any previous CSkillDef
-				pSkill = new CSkillDef((SKILL_TYPE)(rid.GetResIndex()));
+                pSkill = new CSkillDef((SKILL_TYPE)uiResIdx);
 			}
 
 			ASSERT(pSkill);
