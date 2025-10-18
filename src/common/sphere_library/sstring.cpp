@@ -284,100 +284,189 @@ std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, size_t uiStopAt
 // --
 // Number to String
 
-static constexpr tchar DIGITS[] = "0123456789abcdef";
+/*
+Hex width and two’s-complement:
+After the hex marker '0', leading zeros are ignored for width selection.
+Count significant hex digits starting at the first non-zero nibble:
+    ≤ 8 significant digits → interpret the bit pattern as signed 32-bit two’s-complement (then widen to 64-bit to return).
+    9..16 significant digits → interpret as signed 64-bit two’s-complement.
+    16 significant digits → warn about 64-bit overflow, return −1, and consume the entire hex token.
+*/
 
-template<typename _IntType>
-tchar* Str_FromInt_Fast(_IntType val, lptstr_restrict out_buf, size_t buf_length, uint base) noexcept
+static constexpr tchar DIGITS_UPPER[] = "0123456789ABCDEF";
+
+// Return how many hex digits should be emitted for value 'u' within a fixed width (8 or 16 nibbles),
+// after trimming leading zero nibbles within that width.
+static inline int _hex_num_digits_from_width(uint64 u, int width_nibbles) noexcept
 {
-    if (!out_buf || buf_length == 0 || base == 0 || base > 16) [[unlikely]]
+    int shift = (width_nibbles - 1) * 4;
+    while (shift > 0 && ((u >> shift) & 0xFull) == 0)
+        shift -= 4;
+    return (shift / 4) + 1;
+}
+
+// Template entry point: returns out_buf on success, nullptr on failure.
+template<typename _IntType>
+tchar* Str_FromInt_Fast(_IntType val, tchar* out_buf, size_t buf_length, uint base) noexcept
+{
+    static_assert(std::is_integral_v<_IntType>, "Str_FromInt_Fast requires an integral type");
+
+    if (!out_buf || buf_length == 0)
+    {
+        g_Log.EventWarn("Str_FromInt_Fast: null buffer or zero length.\n");
         return nullptr;
+    }
+    if (base < 2 || base > 16)
+    {
+        g_Log.EventWarn("Str_FromInt_Fast: invalid base %u (supported 2..16).\n", base);
+        return nullptr;
+    }
 
     const bool fHex = (base == 16);
-    // Handle zero or base==0 case
+
+    // Zero fast path
     if (val == 0)
     {
         if (fHex)
         {
+            // Hex zero is "00"
             if (buf_length < 3)
+            {
+                g_Log.EventWarn("Str_FromInt_Fast[hex]: insufficient buffer (need 3 for \"00\\0\").\n");
                 return nullptr;
+            }
             out_buf[0] = '0'; out_buf[1] = '0'; out_buf[2] = '\0';
+            return out_buf;
         }
         else
         {
             if (buf_length < 2)
+            {
+                g_Log.EventWarn("Str_FromInt_Fast[base=%u]: insufficient buffer (need 2 for \"0\\0\").\n", base);
                 return nullptr;
+            }
             out_buf[0] = '0'; out_buf[1] = '\0';
-        }
-        return out_buf;
-    }
-
-    using _UIntType = std::make_unsigned_t<_IntType>;
-    _UIntType uval;
-    bool fIsNegative = false;
-
-    if constexpr (std::is_signed_v<_IntType>)
-    {
-        fIsNegative = (val < 0);
-        // two's-complement bit-pattern reinterpret
-        const auto utmp = static_cast<_UIntType>(val);
-        if (fHex)
-        {
-            uval = utmp;
-        }
-        else
-        {
-            // Unsigned subtraction is always defined behaviour, it wraps around.
-            uval = fIsNegative ? (_UIntType(0) - utmp) : utmp;
+            return out_buf;
         }
     }
-    else
-    {
-        uval = static_cast<_UIntType>(val);
-    }
-
-    // Write digits from back of buffer
-#define WRITE_OUT(ch)           \
-    {                           \
-        if (idx == 0)           \
-            return nullptr;     \
-        out_buf[--idx] = (ch);  \
-    }
-
-    size_t idx = buf_length;
-    out_buf[--idx] = '\0';
-
-    // TODO: gracefully handle integer overflows, maybe printing a warning message.
 
     if (fHex)
     {
-        // Hex path: mask & shift by 4 bits (it's the same as dividing by 16).
-        do
+        // Sphere hex formatting:
+        // - Uppercase, prefix '0'
+        // - Variable width after trimming within chosen width:
+        //   Signed types: if value fits in int32 → 32-bit t.c.; else 64-bit t.c.
+        //   Unsigned types: <= 0xFFFFFFFF → 32-bit; else 64-bit
+        uint64 u = 0;
+        int width_nibbles = 0;
+
+        if constexpr (std::is_signed_v<_IntType>)
         {
-            WRITE_OUT(DIGITS[uval & 0xFu]);
-            uval >>= 4;
-        } while (uval);
-        WRITE_OUT('0');  // leading 0 hex prefix
+            if (sizeof(_IntType) <= 4 || (val >= (llong)INT32_MIN && val <= (llong)INT32_MAX))
+            {
+                uint32 u32 = (uint32)(int32)val;  // two's complement 32-bit view
+                u = (uint64)u32;
+                width_nibbles = 8;
+            }
+            else
+            {
+                u = (uint64)(int64)val;           // two's complement 64-bit view
+                width_nibbles = 16;
+            }
+        }
+        else
+        {
+            ullong uv = (ullong)val;
+            if (sizeof(_IntType) <= 4 || uv <= 0xFFFFFFFFull)
+            {
+                u = (uint64)(uint32)uv;
+                width_nibbles = 8;
+            }
+            else
+            {
+                u = (uint64)uv;
+                width_nibbles = 16;
+            }
+        }
+
+        const int digits = _hex_num_digits_from_width(u, width_nibbles);
+        const size_t need = (size_t)digits + 2; // '0' + digits + NUL
+        if (buf_length < need)
+        {
+            g_Log.EventWarn("Str_FromInt_Fast[hex]: insufficient buffer (need %" PRIuSIZE_T ", have %" PRIuSIZE_T ").\n", need, buf_length);
+            return nullptr;
+        }
+
+        out_buf[0] = '0';
+        int shift = (width_nibbles - digits) * 4;
+        size_t pos = 1;
+        for (; shift >= 0; shift -= 4)
+            out_buf[pos++] = DIGITS_UPPER[(u >> shift) & 0xFull];
+        out_buf[pos] = '\0';
+        return out_buf;
     }
     else
     {
-        // General path: division + multiply to get remainder
-        do
+        // General base 2..16.
+        using _UInt = std::make_unsigned_t<_IntType>;
+        _UInt uiMagnitude;
+        bool fNeg = false;
+
+        if constexpr (std::is_signed_v<_IntType>)
         {
-            const _UIntType q = uval / base;
-            const _UIntType d = uval - q * base;
-            WRITE_OUT(DIGITS[d]);
-            uval = q;
-        } while (uval);
-
-        if (fIsNegative) {
-            WRITE_OUT('-');
+            // two's complement magnitude (works for INT_MIN)
+            _UInt utwos = (_UInt)val;
+            fNeg = (val < 0);
+            uiMagnitude = fNeg ? (_UInt(0) - utwos) : utwos;
         }
-    }
+        else
+        {
+            uiMagnitude = (_UInt)val;
+        }
 
-#undef WRITE_OUT
-    return &out_buf[idx];
+        // Accumulate digits in reverse in a small stack buffer; then write forward.
+        tchar tmp[64];
+        size_t n = 0;
+        const _UInt B = (_UInt)base;
+
+        if (base == 10)
+        {
+            do
+            {
+                const _UInt r = uiMagnitude % 10u;
+                uiMagnitude /= 10u;
+                tmp[n++] = DIGITS_UPPER[(size_t)r];
+            } while (uiMagnitude);
+        }
+        else
+        {
+            do
+            {
+                const _UInt r = uiMagnitude % B;
+                uiMagnitude /= B;
+                tmp[n++] = DIGITS_UPPER[(size_t)r];
+            } while (uiMagnitude);
+        }
+
+        const size_t uiNeed = (fNeg ? 1 : 0) + n + 1;
+        if (buf_length < uiNeed)
+        {
+            g_Log.EventWarn("Str_FromInt_Fast[base=%u]: insufficient buffer (need %" PRIuSIZE_T ", have %" PRIuSIZE_T ").\n", base, uiNeed, buf_length);
+            return nullptr;
+        }
+
+        size_t uiPos = 0;
+        if (fNeg)
+            out_buf[uiPos++] = '-';
+        while (n)
+            out_buf[uiPos++] = tmp[--n];
+        out_buf[uiPos] = '\0';
+        return out_buf;
+    }
 }
 
+// Typed front-writing wrappers: they return buf on success, nullptr on failure.
+// For now keep _Fast and standard variants. They were there for historical purposes (previous implementation was back-writing).
 tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
     return Str_FromInt_Fast(val, buf, buf_length, base);
@@ -400,38 +489,22 @@ tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) n
 
 void Str_FromI(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromI_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    Str_FromI_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromUI(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromUI_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    Str_FromUI_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromLL(llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromLL_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    Str_FromLL_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromULL_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    Str_FromULL_Fast(val, buf, buf_length, base);
 }
 
 
@@ -1031,7 +1104,7 @@ void Str_MakeUnQuoted(tchar* pStr) noexcept
 
     tchar* endPtr = src + std::strlen(src);
 
-    // If quoted, locate closing quote and adjust endPtr
+    // If quoted, locate servClosing quote and adjust endPtr
     if (fQuoted)
     {
         tchar* p = endPtr;
@@ -1468,7 +1541,7 @@ MATCH_TYPE Str_Match(const tchar * pPattern, const tchar * pText) noexcept
                     fInvert = true;
                     ++pPattern;
                 }
-                // if closing bracket here or at range start then we have a
+                // if servClosing bracket here or at range start then we have a
                 // malformed pattern
                 if (*pPattern == ']')
                     return MATCH_PATTERN;

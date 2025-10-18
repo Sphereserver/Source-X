@@ -3,6 +3,7 @@
 #include "sphere_library/CSRand.h"
 ///include "CException.h" // included in the precompiled header
 #include "CLog.h"
+#include "../sphere/threads.h"
 #include <algorithm>
 #include <complex>
 #include <cmath>
@@ -642,117 +643,151 @@ CExpression& CExpression::GetExprParser() // static
     */
 }
 
-llong CExpression::GetSingle(lpctstr & refStrExpr )
+llong CExpression::GetSingle(lpctstr & refStrExpr)
 {
-	ADDTOCALLSTACK("CExpression::GetSingle");
-	// Parse just a single expression without any operators or ranges.
+    ADDTOCALLSTACK("CExpression::GetSingle");
     ASSERT(refStrExpr);
-    GETNONWHITESPACE( refStrExpr );
+    GETNONWHITESPACE(refStrExpr);
 
-    lpctstr ptcStartingString = refStrExpr;
-    if (refStrExpr[0]=='.')
+    lpctstr const ptcStart = refStrExpr;
+
+    // Legacy: allow/skip a leading '.' before parsing numbers
+    if (refStrExpr[0] == '.')
         ++refStrExpr;
 
-    if ( refStrExpr[0] == '0' )	// leading '0' = hex value.
-	{
-		// A hex value.
-        if ( refStrExpr[1] == '.' )	// leading 0. means it really is decimal.
-		{
+    // Hex path: a leading '0' indicates hex unless it is "0." (decimal disambiguation)
+    if (refStrExpr[0] == '0')
+    {
+        if (refStrExpr[1] == '.')
+        {
+            // "0." means decimal
             refStrExpr += 2;
-			goto try_dec;
-		}
+            goto try_decimal;
+        }
 
-        // Skip the leading '0'
-        refStrExpr += 1;
+        // Consume the '0' hex marker
+        ++refStrExpr;
 
+        // Parse hex digits; significant digits start at first non-zero nibble
         uint64 uiVal = 0;
-        uint uiDigits = 0;
-		while (true)
-		{
-            tchar ch = *refStrExpr;
-			if ( IsDigit(ch) )
+        uint   uiSig = 0;          // count of significant hex digits (max 16)
+        bool   fSeenNonZero = false;
+        bool   fOverflow = false;
+
+        lpctstr p = refStrExpr;
+        for (; ; ++p)
+        {
+            tchar ch = *p;
+            uint v;
+            if (ch >= '0' && ch <= '9')         v = (uint)(ch - '0');
+            else if (ch >= 'A' && ch <= 'F')    v = (uint)(ch - 'A' + 10);
+            else if (ch >= 'a' && ch <= 'f')    v = (uint)(ch - 'a' + 10);
+            else                                break; // end of hex token
+
+            if (!fSeenNonZero)
             {
-				ch -= '0';
-                ++ uiDigits;
+                if (v != 0)
+                {
+                    fSeenNonZero = true;
+                    uiSig = 1;
+                    uiVal = v; // first non-zero nibble
+                }
+                // else: ignore additional zeros before first non-zero; they don't affect width or value
             }
             else
-			{
-				ch = static_cast<tchar>(tolower(ch));
-				if ( ch > 'f' || ch < 'a' )
-				{
-                    if ( ch == '.' && ptcStartingString[0] != '0' )	// ok i'm confused. it must be decimal.
-					{
-                        refStrExpr = ptcStartingString;
-						goto try_dec;
-					}
-					break;
-				}
-				ch -= 'a' - 10;
-                ++ uiDigits;
-			}
-
-            if (uiDigits > 16)
             {
-                g_Log.EventWarn("Hexadecimal value parsing will overflow: %s.\n", ptcStartingString);
-                return -1;
-            }
-
-            uiVal = (uiVal << 4ull) | ch; // Equivalent to 'val *= 0x10; val += ch;'
-            //val *= 0x10;
-            //val += ch;
-
-            ++ refStrExpr;
-        }
-        if (uiDigits <= 8)
-            return (int64)(int32)uiVal;
-        return (int64)uiVal;
-	}
-    /*
-    // We could just use this, but it doesn't "eat" the string pointer.
-    if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
-    {
-        std::optional<int64> iVal = Str_ToLL(pszArgs, 0, true);
-        if (!iVal)
-        {
-            g_Log.EventDebug("Invalid conversion to number for the string '%s'?\n", pszArgs);
-            return 0;
-        }
-        return iVal.value();
-    }
-    */
-    else if ( refStrExpr[0] == '.' || IsDigit(refStrExpr[0]) )
-	{
-		// A decimal number
-try_dec:
-        constexpr int64 kiMaxBeforeMul = (INT64_MAX - 9) / 10;
-
-        int64 iVal = 0;
-        for ( ; ; ++refStrExpr )
-		{
-            int c = *refStrExpr; // character
-            if ( c == '.' )
-                continue;	// just skip this.
-            if ( ! IsDigit(c) )
-                break;
-
-            c = c - '0';    // digit
-            if (iVal > kiMaxBeforeMul)
-            {
-                if ((iVal > (INT64_MAX - c) / 10))
+                if (uiSig == 16)
                 {
-                    g_Log.EventWarn("Decimal value parsing will overflow: %s.\n", ptcStartingString);
-                    return -1;
+                    fOverflow = true; // keep consuming to end
+                }
+                else
+                {
+                    uiVal = (uiVal << 4) | v;
+                    ++uiSig;
                 }
             }
+        }
 
-            iVal *= 10;
-            iVal += (llong)(*refStrExpr) - '0';
-		}
-        return iVal;
-	}
-else if ( ! _ISCSYMF(refStrExpr[0]) )
+        // Consume the entire hex token (including after overflow)
+        refStrExpr = p;// + ((*p == '\0') ? 0 : 1);
+
+        // No significant hex nibble after the marker → value is zero (e.g., "0", "-00", "0000")
+        if (!fSeenNonZero)
+            return 0;
+
+        if (fOverflow)
+        {
+            g_Log.EventWarn("Hexadecimal value parsing will overflow 64 bits: %s.\n", ptcStart);
+            return -1;
+        }
+
+        // Width by significant hex digits: <=8 → 32-bit signed; 9..16 → 64-bit signed
+        if (uiSig <= 8)
+        {
+            // Two's complement 32-bit interpretation
+            const uint32 u32 = (uint32)uiVal;
+            const int32  s32 = (int32)u32;
+            return (llong)s32;
+        }
+        else
+        {
+            // Two's complement 64-bit interpretation
+            if (uiVal & (1ull << 63))
+            {
+                const uint64 mag = (~uiVal) + 1;
+                const int64  neg = -(int64)mag;
+                return (llong)neg;
+            }
+            else
+            {
+                return (llong)(int64)uiVal;
+            }
+        }
+    }
+    else if (refStrExpr[0] == '.' || (refStrExpr[0] >= '0' && refStrExpr[0] <= '9'))
+    {
+        // Decimal (with '.' separators allowed)
+    try_decimal:
+        // Overflow guard for INT64_MAX (9223372036854775807)
+        constexpr int64 LIM10 = INT64_MAX / 10;         // 922337203685477580
+        constexpr int   LIMDG = (int)(INT64_MAX % 10);  // 7
+
+        int64 val = 0;
+        bool  overflow = false;
+
+        lpctstr p = refStrExpr;
+        for (; ; ++p)
+        {
+            tchar ch = *p;
+            if (ch == '.')
+                continue; // skip separators
+            if (ch < '0' || ch > '9')
+                break;
+
+            int d = ch - '0';
+            if (!overflow && (val > LIM10 || (val == LIM10 && d > LIMDG)))
+            {
+                overflow = true; // but keep consuming the whole token
+            }
+            else if (!overflow)
+            {
+                val = val * 10 + d;
+            }
+        }
+
+        // Consume the entire decimal token
+        refStrExpr = p;// + ((*p == '\0') ? 0 : 1);
+
+        if (overflow)
+        {
+            g_Log.EventWarn("Decimal value parsing will overflow 64 bits: %s.\n", ptcStart);
+            return -1;
+        }
+        return (llong)val;
+    }
+    else if ( ! _ISCSYMF(refStrExpr[0]) )
 	{
-    //#pragma region maths  // MSVC specific
+        //#pragma region maths  // MSVC specific
 		// some sort of math op ?
 
         switch ( refStrExpr[0] )
@@ -1206,16 +1241,16 @@ else if ( ! _ISCSYMF(refStrExpr[0]) )
 //#pragma endregion intrinsics  // MSVC specific
 
 	// hard end ! Error of some sort.
-	if (ptcStartingString[0] != '\0')
+    if (ptcStart[0] != '\0')
 	{
 		tchar szTag[EXPRESSION_MAX_KEY_LEN];
-		GetIdentifierString(szTag, ptcStartingString);
-		const lpctstr ptcLast = (ptcStartingString[0] == '<') ? ">'" : "'";
-		DEBUG_ERR(("Undefined symbol '%s' [Evaluated expression: '%s%s].\n", szTag, ptcStartingString, ptcLast));
+        GetIdentifierString(szTag, ptcStart);
+        const lpctstr ptcLast = (ptcStart[0] == '<') ? ">'" : "'";
+        g_Log.EventError("Undefined symbol '%s' [Evaluated expression: '%s%s].\n", szTag, ptcStart, ptcLast);
 	}
 	else
 	{
-		DEBUG_ERR(("Undefined symbol (empty parameter?).\n"));
+        g_Log.EventError("Undefined symbol (empty parameter?).\n");
 	}
 	return 0;
 }
@@ -1563,10 +1598,10 @@ CExpression::GetConditionalSubexpressions(
 		}
 
         // Helper lambda functions for the next section.
-        auto findLastClosingBracket = [](lptstr pExpr_) -> lptstr
+        auto findLastservClosingBracket = [](lptstr pExpr_) -> lptstr
         {
-            // Returns a pointer to the last closing bracket in the string.
-            // If the last character in the string (ignoring comments) is not ')', it means that, if we find a closing bracket,
+            // Returns a pointer to the last servClosing bracket in the string.
+            // If the last character in the string (ignoring comments) is not ')', it means that, if we find a servClosing bracket,
             //  it's past other characters, so there's other valid text after the ')'.
             // Eg: IF (1+2) > 10. The ')' is not at the end of the line, because there's the remaining part of the script.
             ASSERT(*pExpr_ != '\0');
@@ -1624,7 +1659,7 @@ CExpression::GetConditionalSubexpressions(
         lptstr ptcTopBracket = (ch == '(') ? refStrExpr : nullptr;
 
         // -- Done with preliminar expression analysis. Now look for subexpressions.
-        lptstr ptcLastClosingBracket = nullptr; // Needs to be preserved in the subexpression parsing.
+        lptstr ptcLastservClosingBracket = nullptr; // Needs to be preserved in the subexpression parsing.
 		while (true)
 		{
 			// This loop parses a single subexpression. Remember that we checked for a negation prefix like !( ) in the block before.
@@ -1637,29 +1672,29 @@ CExpression::GetConditionalSubexpressions(
 				if (sCurSubexpr.ptcEnd == nullptr)
 				{
                     sCurSubexpr.ptcEnd = refStrExpr;
-                    if (ptcTopBracket && ptcLastClosingBracket)
+                    if (ptcTopBracket && ptcLastservClosingBracket)
                     {
-                        lptstr ptcLineLastClosingBracket = findLastClosingBracket(ptcCurSubexprStart);
-                        // ptcLastClosingBracket: the last closing bracket found while parsing the subexpression (might not be at the end of the line).
-                        // ptcExprLastClosingBracket: the last closing bracket ')', if any, of the string. The function used does NOT check if that's a valid closing bracket
-                        //  (eg. if in the string for every opening bracket there is a closing bracket).
+                        lptstr ptcLineLastservClosingBracket = findLastservClosingBracket(ptcCurSubexprStart);
+                        // ptcLastservClosingBracket: the last servClosing bracket found while parsing the subexpression (might not be at the end of the line).
+                        // ptcExprLastservClosingBracket: the last servClosing bracket ')', if any, of the string. The function used does NOT check if that's a valid servClosing bracket
+                        //  (eg. if in the string for every opening bracket there is a servClosing bracket).
                         if (uiSubexprQty == 1)
 						{
-                            if (nullptr == ptcLineLastClosingBracket)
+                            if (nullptr == ptcLineLastservClosingBracket)
                             {
-                                // There are other valid characters after the closing curly bracket, so leave ptcEnd unchanged, to the end of the string.
+                                // There are other valid characters after the servClosing curly bracket, so leave ptcEnd unchanged, to the end of the string.
                                 ;
                             }
-							else if (ptcLastClosingBracket == ptcLineLastClosingBracket)
+							else if (ptcLastservClosingBracket == ptcLineLastservClosingBracket)
 							{
 								// I'm here because the whole expression is enclosed by parentheses
 							    // + 1 because i want to point to the character after the ')', even if it's the string terminator.
-								sCurSubexpr.ptcEnd = ptcLastClosingBracket + 1;
+								sCurSubexpr.ptcEnd = ptcLastservClosingBracket + 1;
                                 sCurSubexpr.uiType |= SubexprState_t::TopParenthesizedExpr;
 							}
                             else
                             {
-                                sCurSubexpr.ptcEnd = ptcLastClosingBracket;
+                                sCurSubexpr.ptcEnd = ptcLastservClosingBracket;
                             }
 						}
 						// else: // The starting bracket encloses only a part of the expression
@@ -1673,7 +1708,7 @@ CExpression::GetConditionalSubexpressions(
                 if (ptcCurSubexprStart == refStrExpr)
                 {
                     // Start of a subexpression delimited by brackets (it can be preceded by an operator like '!', handled before).
-                    // Now i want only to see where's the matching closing bracket.
+                    // Now i want only to see where's the matching servClosing bracket.
                     sCurSubexpr.ptcStart = refStrExpr;
                 }
                 else
@@ -1698,13 +1733,13 @@ CExpression::GetConditionalSubexpressions(
 				}
 
                 // Just skip what's enclosed in the subexpression.
-                ptcLastClosingBracket = skipBracketedSubexpression(refStrExpr);
-                if (ptcLastClosingBracket != nullptr)
-                    refStrExpr = ptcLastClosingBracket;
+                ptcLastservClosingBracket = skipBracketedSubexpression(refStrExpr);
+                if (ptcLastservClosingBracket != nullptr)
+                    refStrExpr = ptcLastservClosingBracket;
                 else
                 {
                     g_Log.EventError("Expression started with '(' but isn't closed by a ')' character.\n");
-                    sCurSubexpr.ptcEnd = refStrExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last closing bracket
+                    sCurSubexpr.ptcEnd = refStrExpr - 1;	// Position of the char just before the last ')' of the bracketed subexpression -> this eats away the last servClosing bracket
                     return pSubexprsArena;
                 }
 
@@ -1763,7 +1798,7 @@ CExpression::GetConditionalSubexpressions(
                             if (refStrExpr != pExprSkipped)
 							{
 								// I actually have something enclosed in angular brackets.
-								// The function above moves the pointer after the last closing bracket '>', but we want to point here to it, not the character after.
+								// The function above moves the pointer after the last servClosing bracket '>', but we want to point here to it, not the character after.
                                 refStrExpr = pExprSkipped;
                                 ch = *refStrExpr;
                                 continue;   // This allows us to skip the "ch = *(++pExpr);" below, we don't want to advance further the pointer.
@@ -2153,7 +2188,7 @@ bool CExpression::EvaluateConditionalSingle(
     lptstr ptcParsingStart = refSubExprState.ptcStart;
     if (fFullyEnclosed)
     {
-        -- len;     // Exclude the closing bracket ')'.
+        -- len;     // Exclude the servClosing bracket ')'.
         ASSERT(len > 0);
 
         // In this case, we need to start parsing after the opening parenthesis '('; if we start before it and the subexpr is marked with MaybeNestedSubexpr,
@@ -2390,7 +2425,7 @@ int CExpression::ParseScriptText(
     // iFlags & 2: Don't allow recusive bracket count.
     // iFlags & 4: Just parsing a nested QVAL.
     // NOTE:
-    //  html will have opening <script language="SPHERE_FILE"> and then closing </script>
+    //  html will have opening <script language="SPHERE_FILE"> and then servClosing </script>
     // RETURN:
     //  iFlags & 4: Position of the ending bracket/delimiter of a QVAL statement.
     //  Otherwise: New length of the string.
@@ -2469,7 +2504,7 @@ int CExpression::ParseScriptText(
         // Are we inside a QVAL and are we searching where its condition end?
         if ((ch == '?') && (eQval == QvalStatus::Condition))
         {
-            // Now we keep the bracket count to find the closing bracket for the QVAL statement.
+            // Now we keep the bracket count to find the servClosing bracket for the QVAL statement.
             eQval = QvalStatus::Returns;
             continue;
         }
@@ -2484,7 +2519,7 @@ int CExpression::ParseScriptText(
                 lptstr ptcTestNested = ptcResponse + i;
                 lpctstr ptcTestOrig = ptcTestNested;
                 Str_SkipEnclosedAngularBrackets(ptcTestNested);
-                // If i have matching closing brackets, so it must be nested angular brackets.
+                // If i have matching servClosing brackets, so it must be nested angular brackets.
                 if (ptcTestNested == ptcTestOrig)
                 {
                     // Otherwise, it might be the << operator.
@@ -2567,16 +2602,16 @@ int CExpression::ParseScriptText(
             continue;
         }
 
-        // At this point i'm sure that ahead we won't find other open angular brackets, we may find their closing one or just plain text.
+        // At this point i'm sure that ahead we won't find other open angular brackets, we may find their servClosing one or just plain text.
         if ( ch == chEnd )
         {
-            // Closing bracket found: should we evaluate what's inside the brackets?
+            // servClosing bracket found: should we evaluate what's inside the brackets?
             if (eQval != QvalStatus::None)
             {
                 // Special handling for QVAL
                 if (eQval == QvalStatus::Returns)
                 {
-                    // I'm after the '?' symbol in QVAL. We are searching for the closing bracket.
+                    // I'm after the '?' symbol in QVAL. We are searching for the servClosing bracket.
                     --iQvalOpenBrackets;
 
                     if (iQvalOpenBrackets == 0)
