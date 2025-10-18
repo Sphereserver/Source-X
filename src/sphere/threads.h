@@ -23,10 +23,6 @@ class TemporaryString;
 class AutoResetEvent;
 class ManualResetEvent;
 
-// Forward decl for TLS pointer to speed up current() hot path.
-class AbstractSphereThread;
-extern thread_local AbstractSphereThread* g_tlsCurrentSphereThread;
-
 /*
  * Platform types for OS thread identity and entry points.
  */
@@ -80,7 +76,7 @@ protected:
 
     bool                        m_fKeepAliveAtShutdown{false};
     std::atomic_bool            m_fTerminateRequested{false};
-    std::atomic_bool            m_fThread_selfTerminateAfterThisTick{false};
+    std::atomic_bool            m_fThreadSelfTerminateAfterThisTick{false};
 
     enum class eRunningState : uchar {
         NeverStarted,
@@ -140,33 +136,6 @@ private:
 
 public:
     static void setThreadName(const char* name);
-
-    static inline threadid_t getCurrentThreadSystemId() noexcept
-    {
-#if defined(_WIN32)
-        return ::GetCurrentThreadId();
-#elif defined(__APPLE__)
-        uint64_t tid = 0;
-        pthread_threadid_np(pthread_self(), &tid);
-        return tid;
-#else
-        return pthread_self();
-#endif
-    }
-
-    static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId) noexcept
-    {
-#if defined(_WIN32) || defined(__APPLE__)
-        return (firstId == secondId);
-#else
-        return pthread_equal(firstId, secondId);
-#endif
-    }
-
-    inline bool isSameThread(threadid_t otherThreadId) const noexcept
-    {
-        return isSameThreadId(getCurrentThreadSystemId(), otherThreadId);
-    }
 
     // Inline binding helper: attach/detach without creating a new OS thread.
     class ThreadBindingScope
@@ -326,6 +295,10 @@ public:
 
     // Helper to mark servClosing and set flags.
     void markThreadsClosing() CANTHROW;
+
+private:
+    bool isSystemIdRegistered(threadid_t sysId, AbstractSphereThread** outExisting) const noexcept;
+
 };
 
 #ifdef THREAD_TRACK_CALLSTACK

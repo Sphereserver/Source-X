@@ -105,6 +105,29 @@ CDataBaseAsyncHelper g_asyncHdb;
 
 //*******************************************************************
 
+#ifdef _WIN32
+// Expose bootstrap-thread binding helpers for other TUs (e.g., WinMain/service).
+#include "../sphere/StartupMonitorAPI.h"
+extern "C"
+{
+    void Sphere_AttachBootstrapContext()
+    {
+        g_StartupMonitor.attachToCurrentThread("T_SphereStartup");
+    }
+
+    void Sphere_RenameBootstrapToMonitor()
+    {
+        g_StartupMonitor.renameAsMonitor();
+    }
+
+    void Sphere_RunMonitorLoop()
+    {
+        g_StartupMonitor.runMonitorLoop();
+    }
+}
+#endif
+
+
 static bool WritePidFile(int iMode = 0)
 {
 	lpctstr	fileName = SPHERE_FILE ".pid";
@@ -297,47 +320,6 @@ bool Sphere_CheckMainStuckAndRestart()
     return g_Main.checkStuck();
 }
 
-static void Sphere_MainMonitorLoop()
-{
-	constexpr const char *m_sClassName = "SphereMonitor";
-	// Just make sure the main loop is alive every so often.
-	// This should be the parent thread. try to restart it if it is not.
-	while ( !g_Serv.GetExitFlag() )
-	{
-		EXC_TRY("MainMonitorLoop");
-
-		if ( g_Cfg.m_iFreezeRestartTime <= 0 )
-		{
-			DEBUG_ERR(("Freeze Restart Time cannot be cleared at run time\n"));
-			g_Cfg.m_iFreezeRestartTime = 10;
-		}
-
-		EXC_SET_BLOCK("Sleep");
-		// only sleep 1 second at a time, to avoid getting stuck here when servClosing
-		// down with large m_iFreezeRestartTime values set
-		for (int i = 0; i < g_Cfg.m_iFreezeRestartTime; ++i)
-		{
-			if ( g_Serv.GetExitFlag() )
-				break;
-
-            SLEEP(1000);
-		}
-
-		EXC_SET_BLOCK("Checks");
-		// Don't look for freezing when doing certain things.
-		if ( g_Serv.IsLoadingGeneric() || ! g_Cfg.m_fSecure || g_Serv.IsValidBusy() )
-			continue;
-
-#ifndef _DEBUG
-		EXC_SET_BLOCK("Check Stuck");
-		if (g_Main.checkStuck() == true)
-			g_Log.Event(LOGL_CRIT, "'%s' thread hang, restarting...\n", g_Main.getName());
-#endif
-		EXC_CATCH;
-	}
-
-}
-
 static void atexit_handler()
 {
 	ThreadHolder::get().markThreadsClosing();
@@ -442,21 +424,25 @@ int main( int argc, char * argv[] )
         //  an instance of CNetworkInput nad CNetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 		g_NetworkManager.start();
 
-		const bool fShouldCoreRunInSeparateThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
-		if (fShouldCoreRunInSeparateThread)
-		{
-			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
-            AbstractThread::setThreadName("T_Monitor");
-			Sphere_MainMonitorLoop();	// Use this thread to monitor if the others are stuck
-		}
-		else
-		{
-			while ( !g_Serv.GetExitFlag() )
-			{
-				g_Main.tick();			// Use this thread to do all the work, without monitoring the other threads state
-			}
-		}
-	}
+        const bool fShouldCoreRunInSeparateThread = (g_Cfg.m_iFreezeRestartTime != 0);
+        if (fShouldCoreRunInSeparateThread)
+        {
+            // Core runs on a separate OS thread.
+            g_Main.start();
+            // Switch the bootstrap thread from startup duties to monitoring duties.
+            g_StartupMonitor.renameAsMonitor();
+            // Blocking monitor loop on the bootstrap thread.
+            g_StartupMonitor.runMonitorLoop();
+        }
+        else
+        {
+            // Inline core on the bootstrap thread: release the startup context and bind g_Main.
+            g_StartupMonitor.detachFromCurrentThread();
+            AbstractThread::ThreadBindingScope bind(g_Main, "T_Main");
+            while (!g_Serv.GetExitFlag())
+                g_Main.tick();
+        }
+    }
 
 exit_server:
 	Sphere_ExitServer();

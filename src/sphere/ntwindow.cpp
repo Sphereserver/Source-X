@@ -188,7 +188,7 @@ void CNTWindow::exitActions()
 {
     g_Serv.SetExitFlag(5);
     NTWindow_DeleteIcon();
-    _thread_selfTerminateAfterThisTick = true;
+    m_fThreadSelfTerminateAfterThisTick = true;
 }
 
 void CNTWindow::onStart()

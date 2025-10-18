@@ -54,6 +54,7 @@ set(sphere_H
     src/sphere/MainThread.h
     src/sphere/ProfileData.h
     src/sphere/ProfileTask.h
+    src/sphere/StartupMonitorAPI.h
     src/sphere/StartupMonitorThread.h
     src/sphere/threads.h
     src/sphere/ntservice.h

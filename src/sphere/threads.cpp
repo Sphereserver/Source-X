@@ -1,25 +1,24 @@
 /**
  * @file threads.cpp
- *
- * Implementation details for Sphere threading:
- *  - O(1) current() via TLS fast path (zero locking).
- *  - Startup and shutdown flags are atomics (no subsystem calls in fast path).
- *  - No logging while holding ThreadHolder locks (avoid re-entrancy).
- *  - Windows thread naming fix (dwThreadID = -1).
- *  - Correct pthread equality on POSIX.
- *  - Safe temporary string pools.
  */
 
 #ifdef _WIN32
-#define _WIN32_DCOM
-#include <process.h>
-#include <objbase.h>
+#   define _WIN32_DCOM
+#   include <process.h>
+#   include <objbase.h>
 #else
-#include <pthread.h>
-#if !defined(_BSD) && !defined(__APPLE__)
-#include <sys/prctl.h>
+#   include <pthread.h>
+#   if !defined(_BSD) && !defined(__APPLE__)
+#       include <sys/prctl.h>
+#   endif
+#   include <unistd.h>
 #endif
-#include <unistd.h>
+
+#if defined(__linux__)
+#   include <sys/syscall.h>
+#   include <unistd.h>
+#elif defined(__FreeBSD__)
+#   include <pthread_np.h>
 #endif
 
 #include "../common/sphere_library/sresetevents.h"
@@ -42,7 +41,10 @@ extern CServer g_Serv;
 extern CLog    g_Log;
 
 // Thread-local pointer for fast “current thread” lookup.
-thread_local AbstractSphereThread* g_tlsCurrentSphereThread = nullptr;
+static thread_local AbstractSphereThread* sg_tlsCurrentSphereThread = nullptr;
+// Avoid trying to get thread context while binding it.
+static thread_local bool sg_tlsBindingInProgress = false;
+
 
 // Constants
 #define THREAD_EXCEPTIONS_ALLOWED 10
@@ -86,7 +88,7 @@ public:
     }
 };
 
-// ----- ThreadHolder (slow-path ops) -----
+// ----- ThreadHolder  -----
 
 ThreadHolder::ThreadHolder() noexcept
     : m_threadCount(0)
@@ -101,62 +103,122 @@ ThreadHolder& ThreadHolder::get() noexcept
     return instance;
 }
 
-void ThreadHolder::push(AbstractThread *thread) noexcept
+bool ThreadHolder::isSystemIdRegistered(threadid_t sysId, AbstractSphereThread** outExisting) const noexcept
+{
+    std::shared_lock<std::shared_mutex> lock(m_mutex);
+    auto it = std::find_if(
+        m_spherethreadpairs_systemid_ptr.begin(),
+        m_spherethreadpairs_systemid_ptr.end(),
+        [sysId](const spherethreadpair_t& elem) noexcept {
+            return elem.first == sysId;
+        }
+        );
+    if (it == m_spherethreadpairs_systemid_ptr.end())
+        return false;
+    if (outExisting)
+        *outExisting = it->second;
+    return true;
+}
+
+void ThreadHolder::push(AbstractThread* thread) noexcept
 {
     if (!thread)
     {
-        stderrLog("ThreadHolder::push: trying to push nullptr AbstractThread* ?.\n");
+        stderrLog("ThreadHolder::push: nullptr thread.\n");
         return;
     }
 
-    // Stash debug info for post-unlock logging.
-    const char* pcThreadNameForLog = thread->getName();
-    int         iThreadIdForLog   = -1;
-    bool        fShouldLog        = false;
+    auto* pSphereThread = dynamic_cast<AbstractSphereThread*>(thread);
+    if (!pSphereThread)
+    {
+        stderrLog("ThreadHolder::push: not an AbstractSphereThread.\n");
+        return;
+    }
+
+    const char* nameForLog = thread->getName();
+    int idForLog = -1;
+    bool shouldLog = false;
 
     try
     {
-        auto* pSphereThread = dynamic_cast<AbstractSphereThread*>(thread);
-        if (!pSphereThread)
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
+
+        // 1) Idempotency: same pointer already registered.
+        auto itExistingPtr = std::find_if(
+            m_spherethreadpairs_systemid_ptr.begin(),
+            m_spherethreadpairs_systemid_ptr.end(),
+            [pSphereThread](const spherethreadpair_t& elem) noexcept {
+                return elem.second == pSphereThread;
+            }
+            );
+        if (itExistingPtr != m_spherethreadpairs_systemid_ptr.end())
         {
-            stderrLog("ThreadHolder::push: AbstractThread is not an AbstractSphereThread.\n");
+            // Refresh holder id from current slot if present.
+            auto itSlot = std::find_if(
+                m_threads.begin(),
+                m_threads.end(),
+                [thread](const SphereThreadData& s) noexcept { return s.m_ptr == thread; }
+                );
+            if (itSlot != m_threads.end())
+                thread->m_threadHolderId = static_cast<int>(std::distance(m_threads.begin(), itSlot));
+
+#ifdef _DEBUG
+            idForLog = thread->m_threadHolderId;
+            shouldLog = true;
+#endif
+            lock.unlock();
+#ifdef _DEBUG
+            if (shouldLog)
+                g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
+                    "ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
+                    nameForLog, idForLog);
+#endif
             return;
         }
 
+        // 2) System-id uniqueness: refuse a second Sphere context on the same OS thread.
+        auto itExistingSys = std::find_if(
+            m_spherethreadpairs_systemid_ptr.begin(),
+            m_spherethreadpairs_systemid_ptr.end(),
+            [pSphereThread](const spherethreadpair_t& elem) noexcept {
+                // Correct equality for pthread_t vs DWORD handled by threadid_t typedef.
+                return elem.first == pSphereThread->m_threadSystemId;
+            }
+            );
+        if (itExistingSys != m_spherethreadpairs_systemid_ptr.end())
         {
-            std::unique_lock<std::shared_mutex> lock(m_mutex);
+            // Another object is already attached to this OS thread; refuse the second.
+            auto* other = itExistingSys->second;
+            lock.unlock();
+            g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
+                "ThreadHolder: refusing to register %s on OS thread already owned by %s.\n",
+                nameForLog, other ? other->getName() : "<unknown>");
+            EXC_NOTIFY_DEBUGGER;
+            return;
+        }
+
+        // 3) New registration.
+        m_threads.emplace_back(SphereThreadData{ thread, false });
+        thread->m_threadHolderId = m_threadCount;
+        m_spherethreadpairs_systemid_ptr.emplace_back(pSphereThread->m_threadSystemId, pSphereThread);
+        ++m_threadCount;
 
 #ifdef _DEBUG
-            auto itp = std::find_if(
-                m_spherethreadpairs_systemid_ptr.begin(), m_spherethreadpairs_systemid_ptr.end(),
-                [pSphereThread](spherethreadpair_t const &elem) noexcept -> bool {
-                    return (elem.second == pSphereThread);
-                });
-            DEBUG_ASSERT(itp == m_spherethreadpairs_systemid_ptr.end());
+        idForLog = thread->m_threadHolderId;
+        shouldLog = true;
 #endif
-
-            m_threads.emplace_back(SphereThreadData{.m_ptr = thread, .m_closed = false });
-            thread->m_threadHolderId = m_threadCount;
-
-            m_spherethreadpairs_systemid_ptr.emplace_back(pSphereThread->m_threadSystemId, pSphereThread);
-            ++m_threadCount;
-
-            iThreadIdForLog = thread->m_threadHolderId;
-            fShouldLog = true;
-        }
+        lock.unlock();
 
 #ifdef _DEBUG
-        if (fShouldLog)
-        {
-            // Logging AFTER releasing the lock avoids re-entrancy into ThreadHolder.
-            g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
-                "ThreadHolder: registered '%s' (ThreadHolder-ID %d).\n", pcThreadNameForLog, iThreadIdForLog);
-        }
+        if (shouldLog)
+            g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
+                "ThreadHolder registered %s (ThreadHolder-ID %d).\n",
+                nameForLog, idForLog);
 #endif
     }
     catch (const std::exception& e)
     {
-        stderrLog("ThreadHolder::push: exception: '%s'.\n", e.what());
+        stderrLog("ThreadHolder::push: exception: %s.\n", e.what());
     }
     catch (...)
     {
@@ -164,47 +226,46 @@ void ThreadHolder::push(AbstractThread *thread) noexcept
     }
 }
 
-void ThreadHolder::remove(AbstractThread *pAbstractThread) CANTHROW
+
+void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
 {
     if (!pAbstractThread)
         throw CSError(LOGL_FATAL, 0, "ThreadHolder::remove: thread == nullptr");
 
-    const char* pcThreadNameForLog = pAbstractThread->getName();
-    int         iThreadIdForLog   = pAbstractThread->m_threadHolderId;
-    bool        fShouldLog        = false;
+    AbstractSphereThread* pSphereThread = dynamic_cast<AbstractSphereThread*>(pAbstractThread);
+    threadid_t sysId = pSphereThread ? pSphereThread->m_threadSystemId : threadid_t{};
+    const char* nm = pAbstractThread->getName();
 
+    std::unique_lock lock(m_mutex);
+
+    // Remove from main list.
+    auto it = std::find_if(m_threads.begin(), m_threads.end(),
+        [pAbstractThread](const SphereThreadData& s) noexcept { return s.m_ptr == pAbstractThread; });
+    if (it != m_threads.end())
+        m_threads.erase(it);
+
+    // Remove from sys-id map.
+    for (auto it2 = m_spherethreadpairs_systemid_ptr.begin(); it2 != m_spherethreadpairs_systemid_ptr.end(); )
     {
-        std::unique_lock<std::shared_mutex> lock(m_mutex);
-
-        auto* pSphereThread = dynamic_cast<AbstractSphereThread *>(pAbstractThread);
-        auto itp = std::find_if(
-            m_spherethreadpairs_systemid_ptr.begin(), m_spherethreadpairs_systemid_ptr.end(),
-            [pSphereThread](spherethreadpair_t const &elem) noexcept -> bool {
-                return (elem.second == pSphereThread);
-            });
-        if (itp != m_spherethreadpairs_systemid_ptr.end())
-            m_spherethreadpairs_systemid_ptr.erase(itp);
-
-        auto itd = std::find_if(m_threads.begin(), m_threads.end(),
-            [pAbstractThread](SphereThreadData const& elem) { return elem.m_ptr == pAbstractThread; });
-        if (itd != m_threads.end())
-            m_threads.erase(itd);
-
-        if (m_threadCount > 0)
-            --m_threadCount;
-
-        pAbstractThread->m_threadHolderId = m_kiInvalidThreadID;
-        fShouldLog = true;
+        if (it2->second == pSphereThread)
+            it2 = m_spherethreadpairs_systemid_ptr.erase(it2);
+        else
+            ++it2;
     }
+
+    // Mark as no longer registered to aid destructor diagnostics.
+    pAbstractThread->m_threadHolderId = ThreadHolder::m_kiInvalidThreadID;
+
+    lock.unlock();
 
 #ifdef _DEBUG
-    if (fShouldLog)
-    {
-        g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
-            "ThreadHolder: removed '%s' (former ThreadHolder-ID %d).\n", pcThreadNameForLog, iThreadIdForLog);
-    }
+    g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
+        "ThreadHolder removed %s with sys-id %llu.\n",
+        nm, (unsigned long long)sysId);
 #endif
 }
+
+
 
 void ThreadHolder::markThreadsClosing() CANTHROW
 {
@@ -238,7 +299,7 @@ AbstractThread * ThreadHolder::getThreadAt(size_t at) noexcept
 AbstractThread * ThreadHolder::current() noexcept // static
 {
     // TLS fast path: the absolutely hottest path in the system.
-    AbstractSphereThread* tls = g_tlsCurrentSphereThread;
+    AbstractSphereThread* tls = sg_tlsCurrentSphereThread;
     if (tls != nullptr) [[likely]]
         return tls;
 
@@ -290,6 +351,97 @@ bool ThreadHolder::isServClosing() noexcept { // static
 
 int AbstractThread::m_threadsAvailable = 0;
 
+static inline bool is_same_thread_id(threadid_t firstId, threadid_t secondId) noexcept
+{
+#if defined(_WIN32) || defined(__APPLE__)
+    return (firstId == secondId);
+#else
+    return pthread_equal(firstId, secondId);
+#endif
+}
+
+static uint64_t os_current_tid() noexcept    // Equivalent to old getCurrentThreadSystemId()
+{
+#if defined(_WIN32)
+    return static_cast<uint64_t>(::GetCurrentThreadId());
+#elif defined(__APPLE__)
+    uint64_t tid = 0;
+    (void)pthread_threadid_np(nullptr, &tid);
+    return tid;
+#elif defined(__linux__)
+    // gettid is the kernel TID seen by system tools
+    return static_cast<uint64_t>(::syscall(SYS_gettid));
+#elif defined(__FreeBSD__)  // TODO: does it work also for other BSD systems?
+    return static_cast<uint64_t>(::pthread_getthreadid_np());
+#else
+    // Last-resort fallback: make a printable token from pthread_self()
+    return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(::pthread_self()));
+#endif
+}
+
+static void os_set_thread_name_portable(const char* name) noexcept
+{
+#if defined(_WIN32)
+    // Prefer SetThreadDescription (Windows 10+) if available
+    using SetThreadDescription_t = HRESULT (WINAPI *)(HANDLE, PCWSTR);
+    static SetThreadDescription_t pSetThreadDescription =
+        reinterpret_cast<SetThreadDescription_t>(
+            GetProcAddress(GetModuleHandleW(L"Kernel32.dll"), "SetThreadDescription"));
+    if (pSetThreadDescription)
+    {
+        wchar_t wname[64];
+        ::MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, static_cast<int>(std::size(wname)));
+        pSetThreadDescription(GetCurrentThread(), wname);
+    }
+    else
+    {
+#   if defined(_MSC_VER)
+#   pragma pack(push, 8)
+        typedef struct tagTHREADNAME_INFO {
+            DWORD  dwType;     // 0x1000
+            LPCSTR szName;
+            DWORD  dwThreadID; // -1 => current thread
+            DWORD  dwFlags;
+        } THREADNAME_INFO;
+#   pragma pack(pop)
+
+        static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
+        THREADNAME_INFO info{};
+        info.dwType     = 0x1000;
+        info.szName     = name_trimmed;
+        info.dwThreadID = static_cast<DWORD>(-1); // CRITICAL: current thread
+        info.dwFlags    = 0;
+
+        __try {
+            RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+        } __except(EXCEPTION_EXECUTE_HANDLER) {
+        }
+#   else
+        stderrLog("WARN: no available implementation to set the thread name.\n");
+#   endif
+    }
+#elif defined(__APPLE__)
+    // macOS: pthread_setname_np only sets the current thread, 64-char limit
+    (void)pthread_setname_np(name);
+#elif defined(__linux__)
+//  Linux: prctl(PR_SET_NAME) sets current thread name, 16-byte limit incl. NUL
+#   if !defined(_BSD) && !defined(__APPLE__)
+        ::prctl(PR_SET_NAME, name, 0, 0, 0);
+#   endif
+//  Also attempt pthread_setname_np where available for consistency
+#   if defined(__GLIBC__) || defined(__ANDROID__)
+        (void)pthread_setname_np(pthread_self(), name);
+#   endif
+#elif defined(__FreeBSD__)
+    (void)pthread_set_name_np(pthread_self(), name);
+#else
+    // TODO: support other BSD systems
+    // No-op on unknown platforms
+    (void)name;
+    stderrLog("WARN: no available implementation to set the thread name for the current platform (unknown/unsupported).\n");
+#endif
+}
+
 AbstractThread::AbstractThread(const char *name, ThreadPriority priority)
 {
     if (AbstractThread::m_threadsAvailable == 0)
@@ -302,7 +454,7 @@ AbstractThread::AbstractThread(const char *name, ThreadPriority priority)
     ++AbstractThread::m_threadsAvailable;
 
     Str_CopyLimitNull(m_name, name, sizeof(m_name));
-    m_fThread_selfTerminateAfterThisTick = true;
+    m_fThreadSelfTerminateAfterThisTick = true;
     m_fTerminateRequested = true;
 
     setPriority(priority);
@@ -314,39 +466,52 @@ AbstractThread::AbstractThread(const char *name, ThreadPriority priority)
 AbstractThread::~AbstractThread()
 {
 #ifdef _DEBUG
-    lpctstr ptcState;
-    if (m_threadHolderId == ThreadHolder::m_kiInvalidThreadID) {
+    // Resolve a safe thread name for diagnostics.
+    const char* name = getName();
+    if (!name || !name[0])
+        name = "(unnamed)";
+
+    // Derive a readable lifecycle state.
+    const char* state = "";
+    if (m_threadHolderId == ThreadHolder::m_kiInvalidThreadID)
+    {
         if (m_uiState == eRunningState::Closing)
-            ptcState = "[previously registered]";
+            state = "[detached/closing]";
         else if (m_uiState == eRunningState::NeverStarted)
-            ptcState = "[unregistered, never started]";
+            state = "[unregistered, never started]";
         else
-            stderrLog("~AbstractThread: Thread never registered in ThreadHolder and still running at this stage?\n");
+            state = "[unregistered]";
     }
     else
     {
         if (m_uiState == eRunningState::NeverStarted)
-            stderrLog("~AbstractThread: Thread registered in ThreadHolder and never started?\n");
+            state = "[registered, never started]";
         else if (m_uiState == eRunningState::Running)
-            stderrLog("~AbstractThread: Thread registered in ThreadHolder and still running at this stage?\n");
+            state = "[registered, still running]";
+        else
+            state = "[registered, closing]";
     }
-    fprintf(stdout, "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d)%s, sys-id %" PRIu64 ".\n",
-        getName(), m_threadHolderId,
-        ptcState,
-        (uint64)getId());
+
+    // Print the OS thread id captured at onStart(); may be 0 if never registered.
+    const uint64_t tid64 = static_cast<uint64_t>(m_threadSystemId);
+
+    fprintf(stdout,
+        "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
+        name, m_threadHolderId, state, tid64);
     fflush(stdout);
 #endif
 
+    // Final teardown.
     terminate(true);
 
     --AbstractThread::m_threadsAvailable;
-    if (AbstractThread::m_threadsAvailable == 0)
-    {
 #ifdef _WIN32
+    if (AbstractThread::m_threadsAvailable == 0)
         CoUninitialize();
 #endif
-    }
 }
+
+
 
 void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
 {
@@ -427,7 +592,7 @@ void AbstractThread::run()
 
     int exceptions = 0;
     bool lastWasException = false;
-    m_fThread_selfTerminateAfterThisTick = false;
+    m_fThreadSelfTerminateAfterThisTick = false;
     m_fTerminateRequested = false;
 
     setThreadName(getName());
@@ -574,29 +739,42 @@ void AbstractThread::awaken()
 
 bool AbstractThread::isCurrentThread() const noexcept
 {
-    return isSameThreadId(getId(), getCurrentThreadSystemId());
+    return is_same_thread_id(getId(), os_current_tid());
 }
 
 void AbstractThread::onStart()
 {
-    m_threadSystemId = getCurrentThreadSystemId();
+    // Mark registration window so diagnostics don’t warn while TLS is not yet published.
+    sg_tlsBindingInProgress = true;
 
+    // Capture OS thread id first.
+    m_threadSystemId = os_current_tid();
+
+    // Try to register in the holder.
     ThreadHolder& th = ThreadHolder::get();
     th.push(this);
-    th.markThreadStarted(this);
 
-#ifdef THREAD_TRACK_CALLSTACK
-    g_tlsCurrentSphereThread = dynamic_cast<AbstractSphereThread*>(this);
-#else
-    g_tlsCurrentSphereThread = dynamic_cast<AbstractSphereThread*>(this);
-#endif
+    // If push was refused (e.g., this OS thread already owned), leave clean.
+    if (m_threadHolderId == ThreadHolder::m_kiInvalidThreadID)
+    {
+        m_threadSystemId = 0;                        // rollback sys-id stamp
+        return;                                      // nothing else to do
+    }
+
+    // Mark started and publish TLS fast-path.
+    th.markThreadStarted(this);
+    sg_tlsCurrentSphereThread = dynamic_cast<AbstractSphereThread*>(this);
 
 #ifdef _DEBUG
-    g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
+    g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
         "Started thread loop for '%s' (ThreadHolder-ID %d), sys-id %" PRIu64 ".\n",
         getName(), m_threadHolderId, (uint64)m_threadSystemId);
 #endif
+
+    // End of the small registration window.
+    sg_tlsBindingInProgress = false;
 }
+
 
 void AbstractThread::setPriority(ThreadPriority pri)
 {
@@ -619,7 +797,7 @@ bool AbstractThread::shouldExit() noexcept
 {
     return (m_uiState == eRunningState::Closing)
            || m_fTerminateRequested.load(std::memory_order_relaxed)
-           || m_fThread_selfTerminateAfterThisTick;
+           || m_fThreadSelfTerminateAfterThisTick;
 }
 
 void AbstractThread::setThreadName(const char* name)
@@ -627,38 +805,7 @@ void AbstractThread::setThreadName(const char* name)
     char name_trimmed[m_nameMaxLength] = {'\0'};
     Str_CopyLimitNull(name_trimmed, name, m_nameMaxLength);
 
-#if defined(_WIN32)
-#if defined(_MSC_VER)
-#pragma pack(push, 8)
-    typedef struct tagTHREADNAME_INFO {
-        DWORD  dwType;     // 0x1000
-        LPCSTR szName;
-        DWORD  dwThreadID; // -1 => current thread
-        DWORD  dwFlags;
-    } THREADNAME_INFO;
-#pragma pack(pop)
-
-    static constexpr DWORD MS_VC_EXCEPTION = 0x406D1388;
-    THREADNAME_INFO info{};
-    info.dwType     = 0x1000;
-    info.szName     = name_trimmed;
-    info.dwThreadID = static_cast<DWORD>(-1); // CRITICAL: current thread
-    info.dwFlags    = 0;
-
-    __try {
-        RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
-    } __except(EXCEPTION_EXECUTE_HANDLER) {
-    }
-#endif
-#elif defined(__APPLE__)
-    pthread_setname_np(name_trimmed);
-#elif !defined(_BSD)
-    prctl(PR_SET_NAME, name_trimmed, 0, 0, 0);
-#elif defined(__FreeBSD__) || defined(__OpenBSD__)
-    pthread_set_name_np(pthread_self(), name_trimmed);
-#elif defined(__NetBSD__)
-    pthread_setname_np(pthread_self(), "%s", name_trimmed);
-#endif
+    os_set_thread_name_portable(name_trimmed);
 
     // Update internal name only if a context exists
     if (auto* cur = ThreadHolder::current())
@@ -669,21 +816,39 @@ void AbstractThread::setThreadName(const char* name)
 void AbstractThread::attachToCurrentThread(const char* osThreadName) noexcept
 {
     lpctstr ptcThreadName = (osThreadName && osThreadName[0]) ? osThreadName : getName();
-    g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
+
+    // Refuse if another Sphere context already owns this OS thread.
+    if (sg_tlsCurrentSphereThread && sg_tlsCurrentSphereThread != this)
+    {
+        g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
+            "attachToCurrentThread refused: current OS thread already bound to '%s'; wanted '%s'.\n",
+            sg_tlsCurrentSphereThread->getName(), ptcThreadName);
+        return;
+    }
+
+    g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
         "Binding current context to thread '%s'...\n", ptcThreadName);
+
+    // Attempt to bind; onStart will self-guard and leave this object clean on refusal.
     onStart();
-    setThreadName(ptcThreadName);
+
+    // Only set the OS-visible name if registration succeeded.
+    if (m_threadHolderId != ThreadHolder::m_kiInvalidThreadID)
+        setThreadName(ptcThreadName);
 }
+
 
 void AbstractThread::detachFromCurrentThread() noexcept
 {
     if (auto* s = dynamic_cast<AbstractSphereThread*>(this))
-        if (g_tlsCurrentSphereThread == s)
-            g_tlsCurrentSphereThread = nullptr;
+        if (sg_tlsCurrentSphereThread == s)
+            sg_tlsCurrentSphereThread = nullptr;
 
     ThreadHolder::get().remove(this);
     m_threadSystemId = 0;
+    m_threadHolderId = ThreadHolder::m_kiInvalidThreadID; // make diagnostics unambiguous
 }
+
 
 // ----- AbstractSphereThread -----
 
@@ -700,8 +865,8 @@ AbstractSphereThread::~AbstractSphereThread()
 {
     m_uiState = eRunningState::Closing;
 
-    if (g_tlsCurrentSphereThread == this)
-        g_tlsCurrentSphereThread = nullptr;
+    if (sg_tlsCurrentSphereThread == this)
+        sg_tlsCurrentSphereThread = nullptr;
 }
 
 #ifdef THREAD_TRACK_CALLSTACK
@@ -766,7 +931,7 @@ void AbstractSphereThread::printStackTrace() noexcept
 #if defined(_WIN32) || defined(__APPLE__)
         static_cast<uint64_t>(getId() ? getId() : getCurrentThreadSystemId());
 #else
-        reinterpret_cast<uint64_t>(getId() ? getId() : getCurrentThreadSystemId());
+        reinterpret_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #endif
 
     const lpctstr threadName = getName();
@@ -898,17 +1063,21 @@ StackDebugInformation::StackDebugInformation(const char *name) noexcept
     : m_context(nullptr)
 {
     // Fast path: TLS
-    if (g_tlsCurrentSphereThread && !g_tlsCurrentSphereThread->isClosing())
+    if (sg_tlsCurrentSphereThread && !sg_tlsCurrentSphereThread->isClosing())
     {
-        m_context = g_tlsCurrentSphereThread;
+        m_context = sg_tlsCurrentSphereThread;
         m_context->pushStackCall(name);
         return;
     }
 
-    // Fallback: use current() (still lock-free and fast)
+    // If a thread is in the middle of binding, don’t warn about missing context.
+    if (sg_tlsBindingInProgress)
+        return;
+
+    // Fallback: use current()
     AbstractThread *icontext = ThreadHolder::current();
     if (!icontext)
-        return; // TODO: log this?
+        return;
 
     m_context = dynamic_cast<AbstractSphereThread*>(icontext);
     if (m_context && !m_context->isClosing())

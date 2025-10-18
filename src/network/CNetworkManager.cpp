@@ -402,7 +402,7 @@ void CNetworkManager::start(void)
             }
             */
 
-            pThread->onStart();	// the thread structure (class) was created via createNetworkThreads, but we execute the worker method of that class in this thread
+            pThread->init(); // the thread structure (class) was created via createNetworkThreads, but we execute the worker method of that class in this thread
         }
     }
 }

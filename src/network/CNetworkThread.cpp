@@ -92,15 +92,20 @@ void CNetworkThread::dropInvalidStates(void)
     }
 }
 
-void CNetworkThread::onStart(void)
+void CNetworkThread::init()
 {
-    AbstractSphereThread::onStart();
     m_input.setOwner(this);
     m_output.setOwner(this);
     m_profile.EnableProfile(PROFILE_NETWORK_RX);
     m_profile.EnableProfile(PROFILE_DATA_RX);
     m_profile.EnableProfile(PROFILE_NETWORK_TX);
     m_profile.EnableProfile(PROFILE_DATA_TX);
+}
+
+void CNetworkThread::onStart(void)
+{
+    init();
+    AbstractSphereThread::onStart();
 }
 
 void CNetworkThread::tick(void)
