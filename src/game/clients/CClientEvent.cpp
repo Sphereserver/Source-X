@@ -589,6 +589,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 		m_pChar->UpdateDrag( pItem, nullptr, &pt );
 		m_pChar->ItemDrop( pItem, pt );
 	}
+    pItem->ResendTooltip(true);
 }
 
 

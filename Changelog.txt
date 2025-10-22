@@ -4062,3 +4062,7 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 30-09-2025, Mulambo
 - Changed: Login rejection (packet `0x82`) is now sent to all clients trying to log in (used to be only to clients, that Sphere could identify).
+
+22-10-2025, Jhobean
+- Fixed: Full Tooltip now update each time you move an item manually (Issue #1500)
+- Fixed: On some situation when item was move or add on ground by script, decay flag and timer was not set. (Issue #1498)
