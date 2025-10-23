@@ -489,22 +489,22 @@ tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) n
 
 void Str_FromI(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    Str_FromI_Fast(val, buf, buf_length, base);
+    (void) Str_FromI_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromUI(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    Str_FromUI_Fast(val, buf, buf_length, base);
+    (void) Str_FromUI_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromLL(llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    Str_FromLL_Fast(val, buf, buf_length, base);
+    (void) Str_FromLL_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    Str_FromULL_Fast(val, buf, buf_length, base);
+    (void) Str_FromULL_Fast(val, buf, buf_length, base);
 }
 
 

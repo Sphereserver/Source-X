@@ -23,7 +23,7 @@ DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset );
 struct CPointBase	// Non initialized 3d point.
 {
 private:
-	friend class GlobalInitializer;
+    friend struct GlobalInitializer;
 	static void InitRuntimeDefaultValues();
 
 public:

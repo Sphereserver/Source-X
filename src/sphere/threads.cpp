@@ -45,10 +45,13 @@ static thread_local AbstractSphereThread* sg_tlsCurrentSphereThread = nullptr;
 // Avoid trying to get thread context while binding it.
 static thread_local bool sg_tlsBindingInProgress = false;
 
+// Global state flags
+static std::atomic_bool sg_inStartup{true};
+static std::atomic_bool sg_servClosing{false};
 
 // Constants
 #define THREAD_EXCEPTIONS_ALLOWED 10
-#define THREADJOIN_TIMEOUT 60000
+#define THREAD_JOIN_TIMEOUT 60000
 
 #define THREAD_TEMPSTRING_C_STORAGE     2048
 #define THREAD_TEMPSTRING_OBJ_STORAGE   1024
@@ -64,10 +67,14 @@ struct TemporaryStringsThreadSafeStateHolder
     std::unique_ptr<char[]> g_tmpCStrings;
 
     // TemporaryString buffers with “in-use” flags
-    SimpleMutex                                                 g_tmpTemporaryStringMutex;
-    std::atomic<uint>                                           g_tmpTemporaryStringIndex;
-    struct TemporaryStringStorage { char m_buffer[THREAD_STRING_LENGTH]; char m_state; };
-    std::unique_ptr<TemporaryStringStorage[]>                   g_tmpTemporaryStringStorage;
+    SimpleMutex                                 g_tmpTemporaryStringMutex;
+    std::atomic<uint>                           g_tmpTemporaryStringIndex;
+    struct TemporaryStringStorage
+    {
+        char m_buffer[THREAD_STRING_LENGTH];
+        char m_state;
+    };
+    std::unique_ptr<TemporaryStringStorage[]>   g_tmpTemporaryStringStorage;
 
 private:
     TemporaryStringsThreadSafeStateHolder()
@@ -234,7 +241,7 @@ void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
 
     AbstractSphereThread* pSphereThread = dynamic_cast<AbstractSphereThread*>(pAbstractThread);
     threadid_t sysId = pSphereThread ? pSphereThread->m_threadSystemId : threadid_t{};
-    const char* nm = pAbstractThread->getName();
+    const char* ptcName = pAbstractThread->getName();
 
     std::unique_lock lock(m_mutex);
 
@@ -259,9 +266,19 @@ void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
     lock.unlock();
 
 #ifdef _DEBUG
-    g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-        "ThreadHolder removed %s with sys-id %llu.\n",
-        nm, (unsigned long long)sysId);
+    if (!isServClosing())
+    {
+        g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
+            "ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
+            ptcName, (uint64_t)sysId);
+    }
+    else
+    {
+        // Logger may be shutting down; print directly to stdout to avoid loss.
+        fprintf(stdout, "DEBUG: ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
+            ptcName, (uint64_t)sysId);
+        fflush(stdout);
+    }
 #endif
 }
 
@@ -269,8 +286,8 @@ void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
 
 void ThreadHolder::markThreadsClosing() CANTHROW
 {
-    // Flip fast-path flag first so concurrent readers immediately see “servClosing”.
-    ThreadHolder::markServservClosing();
+    // Flip fast-path flag first so concurrent readers immediately see “server is Closing”.
+    ThreadHolder::markServClosing();
 
     std::unique_lock<std::shared_mutex> lock(m_mutex);
 
@@ -312,10 +329,10 @@ AbstractThread * ThreadHolder::current() noexcept // static
     */
 
     // No TLS => not a Sphere thread or not yet attached.
-    if (sm_servClosing.load(std::memory_order_relaxed)) [[unlikely]]
+    if (sg_servClosing.load(std::memory_order_relaxed) == true) [[unlikely]]
         return nullptr;
 
-    if (sm_inStartup.load(std::memory_order_relaxed)) [[unlikely]]
+    if (sg_inStartup.load(std::memory_order_relaxed) == true) [[unlikely]]
         return DummySphereThread::getInstance(); // may be null extremely early
 
     // Runtime (Run mode) and not Closing: missing context => nullptr (by policy).
@@ -334,17 +351,17 @@ void ThreadHolder::markThreadStarted(AbstractThread* pThr) CANTHROW
 // Record that the server entered Run mode (disable startup fallback in fast path).
 void ThreadHolder::markServEnteredRunMode() noexcept // static
 {
-    sm_inStartup.store(false, std::memory_order_relaxed);
+    sg_inStartup.store(false, std::memory_order_relaxed);
 }
 
 // Record that threads are servClosing (fast-path observable).
-void ThreadHolder::markServservClosing() noexcept // static
+void ThreadHolder::markServClosing() noexcept // static
 {
-    sm_servClosing.store(true, std::memory_order_relaxed);
+    sg_servClosing.store(true, std::memory_order_relaxed);
 }
 
 bool ThreadHolder::isServClosing() noexcept { // static
-    return sm_servClosing.load(std::memory_order_relaxed);
+    return sg_servClosing.load(std::memory_order_relaxed);
 }
 
 // ----- AbstractThread -----
@@ -363,7 +380,7 @@ static inline bool is_same_thread_id(threadid_t firstId, threadid_t secondId) no
 static uint64_t os_current_tid() noexcept    // Equivalent to old getCurrentThreadSystemId()
 {
 #if defined(_WIN32)
-    return static_cast<uint64_t>(::GetCurrentThreadId());
+    return static_cast<uint64_t>(::GetCurrentThreadId()); // Ret type: DWORD.
 #elif defined(__APPLE__)
     uint64_t tid = 0;
     (void)pthread_threadid_np(nullptr, &tid);
@@ -379,7 +396,7 @@ static uint64_t os_current_tid() noexcept    // Equivalent to old getCurrentThre
 #endif
 }
 
-static void os_set_thread_name_portable(const char* name) noexcept
+static void os_set_thread_name_portable(const char* name_trimmed) noexcept
 {
 #if defined(_WIN32)
     // Prefer SetThreadDescription (Windows 10+) if available
@@ -390,7 +407,7 @@ static void os_set_thread_name_portable(const char* name) noexcept
     if (pSetThreadDescription)
     {
         wchar_t wname[64];
-        ::MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, static_cast<int>(std::size(wname)));
+        ::MultiByteToWideChar(CP_UTF8, 0, name_trimmed, -1, wname, static_cast<int>(std::size(wname)));
         pSetThreadDescription(GetCurrentThread(), wname);
     }
     else
@@ -422,22 +439,22 @@ static void os_set_thread_name_portable(const char* name) noexcept
     }
 #elif defined(__APPLE__)
     // macOS: pthread_setname_np only sets the current thread, 64-char limit
-    (void)pthread_setname_np(name);
+    (void)pthread_setname_np(name_trimmed);
 #elif defined(__linux__)
 //  Linux: prctl(PR_SET_NAME) sets current thread name, 16-byte limit incl. NUL
 #   if !defined(_BSD) && !defined(__APPLE__)
-        ::prctl(PR_SET_NAME, name, 0, 0, 0);
+        ::prctl(PR_SET_NAME, name_trimmed, 0, 0, 0);
 #   endif
 //  Also attempt pthread_setname_np where available for consistency
 #   if defined(__GLIBC__) || defined(__ANDROID__)
-        (void)pthread_setname_np(pthread_self(), name);
+        (void)pthread_setname_np(pthread_self(), name_trimmed);
 #   endif
 #elif defined(__FreeBSD__)
-    (void)pthread_set_name_np(pthread_self(), name);
+    (void)pthread_set_name_np(pthread_self(), name_trimmed);
 #else
     // TODO: support other BSD systems
     // No-op on unknown platforms
-    (void)name;
+    (void)name_trimmed;
     stderrLog("WARN: no available implementation to set the thread name for the current platform (unknown/unsupported).\n");
 #endif
 }
@@ -463,55 +480,39 @@ AbstractThread::AbstractThread(const char *name, ThreadPriority priority)
     m_terminateEvent = std::make_unique<ManualResetEvent>();
 }
 
+// threads.cpp — robust, flag-free destructor classification
 AbstractThread::~AbstractThread()
 {
 #ifdef _DEBUG
-    // Resolve a safe thread name for diagnostics.
     const char* name = getName();
-    if (!name || !name[0])
-        name = "(unnamed)";
+    if (!name || !name[0]) name = "(unnamed)";
 
-    // Derive a readable lifecycle state.
-    const char* state = "";
-    if (m_threadHolderId == ThreadHolder::m_kiInvalidThreadID)
-    {
-        if (m_uiState == eRunningState::Closing)
-            state = "[detached/closing]";
-        else if (m_uiState == eRunningState::NeverStarted)
-            state = "[unregistered, never started]";
-        else
-            state = "[unregistered]";
-    }
+    const bool stillRegistered = (m_threadHolderId != ThreadHolder::m_kiInvalidThreadID);
+    const bool everBound       = (m_threadSystemId != 0);
+    const bool everRanLoop     = (m_uiState != eRunningState::NeverStarted);
+
+    const char* state =
+        stillRegistered               ? "[registered, closing]" :
+        (everBound && everRanLoop)    ? "[detached, closed]" :
+        (everBound && !everRanLoop)   ? "[attached-only, closed]" :
+                                        "[not started]";
+
+    if (everBound)
+        fprintf(stdout, "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
+            name, m_threadHolderId, state, (uint64_t)m_threadSystemId);
     else
-    {
-        if (m_uiState == eRunningState::NeverStarted)
-            state = "[registered, never started]";
-        else if (m_uiState == eRunningState::Running)
-            state = "[registered, still running]";
-        else
-            state = "[registered, closing]";
-    }
-
-    // Print the OS thread id captured at onStart(); may be 0 if never registered.
-    const uint64_t tid64 = static_cast<uint64_t>(m_threadSystemId);
-
-    fprintf(stdout,
-        "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
-        name, m_threadHolderId, state, tid64);
+        fprintf(stdout, "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d) %s, sys-id n/a.\n",
+            name, m_threadHolderId, state);
     fflush(stdout);
 #endif
 
-    // Final teardown.
     terminate(true);
-
     --AbstractThread::m_threadsAvailable;
 #ifdef _WIN32
     if (AbstractThread::m_threadsAvailable == 0)
         CoUninitialize();
 #endif
 }
-
-
 
 void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
 {
@@ -570,10 +571,8 @@ void AbstractThread::terminate(bool ended)
         }
     }
 
-    ThreadHolder::get().remove(this);
-    m_threadSystemId = 0;
+    detachFromCurrentThread();
     m_handle = std::nullopt;
-
     m_terminateEvent->set();
 
     if (ended == false && wasCurrentThread)
@@ -727,7 +726,7 @@ void AbstractThread::waitForClose()
         m_fTerminateRequested = true;
         awaken();
 
-        m_terminateEvent->wait(THREADJOIN_TIMEOUT);
+        m_terminateEvent->wait(THREAD_JOIN_TIMEOUT);
         terminate(false);
     }
 }
@@ -739,7 +738,10 @@ void AbstractThread::awaken()
 
 bool AbstractThread::isCurrentThread() const noexcept
 {
-    return is_same_thread_id(getId(), os_current_tid());
+#ifdef _WIN32
+    static_assert(sizeof(threadid_t) == sizeof(DWORD));
+#endif
+    return is_same_thread_id(getId(), static_cast<threadid_t>(os_current_tid()));
 }
 
 void AbstractThread::onStart()
@@ -748,7 +750,7 @@ void AbstractThread::onStart()
     sg_tlsBindingInProgress = true;
 
     // Capture OS thread id first.
-    m_threadSystemId = os_current_tid();
+    m_threadSystemId = static_cast<threadid_t>(os_current_tid());
 
     // Try to register in the holder.
     ThreadHolder& th = ThreadHolder::get();
@@ -757,8 +759,10 @@ void AbstractThread::onStart()
     // If push was refused (e.g., this OS thread already owned), leave clean.
     if (m_threadHolderId == ThreadHolder::m_kiInvalidThreadID)
     {
-        m_threadSystemId = 0;                        // rollback sys-id stamp
-        return;                                      // nothing else to do
+        m_threadSystemId = 0;
+        sg_tlsBindingInProgress = false;
+        EXC_NOTIFY_DEBUGGER;
+        return;
     }
 
     // Mark started and publish TLS fast-path.
@@ -796,7 +800,7 @@ void AbstractThread::setPriority(ThreadPriority pri)
 bool AbstractThread::shouldExit() noexcept
 {
     return (m_uiState == eRunningState::Closing)
-           || m_fTerminateRequested.load(std::memory_order_relaxed)
+           || m_fTerminateRequested
            || m_fThreadSelfTerminateAfterThisTick;
 }
 
@@ -844,10 +848,10 @@ void AbstractThread::detachFromCurrentThread() noexcept
         if (sg_tlsCurrentSphereThread == s)
             sg_tlsCurrentSphereThread = nullptr;
 
+    // Keep m_threadSystemId as historical OS TID; invalidation is done via m_threadHolderId.
     ThreadHolder::get().remove(this);
-    m_threadSystemId = 0;
-    m_threadHolderId = ThreadHolder::m_kiInvalidThreadID; // make diagnostics unambiguous
 }
+
 
 
 // ----- AbstractSphereThread -----
@@ -927,9 +931,9 @@ void AbstractSphereThread::printStackTrace() noexcept
 {
     freezeCallStack(true);
 
-    uint64_t threadId =
+    uint64_t threadId = //static_cast<uint64_t>(getId());
 #if defined(_WIN32) || defined(__APPLE__)
-        static_cast<uint64_t>(getId() ? getId() : getCurrentThreadSystemId());
+        static_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #else
         reinterpret_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #endif

@@ -369,7 +369,7 @@ void CNetworkManager::start(void)
     m_isThreaded = g_Cfg._uiNetworkThreads > 0;
     if (isThreaded())
     {
-        // start network threads
+        // Start/spawn network threads
         for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
         {
             // The thread structure (class) was created via createNetworkThreads, now spawn a new thread and do the work inside there.
@@ -382,7 +382,9 @@ void CNetworkManager::start(void)
     }
     else
     {
-        // initialise network threads (if g_Cfg._uiNetworkThreads is == 0 then we'll have only 1 CNetworkThread)
+        // In the non-threaded configuration, T_Net #0 is just a worker object; its init()/tick()/processInput()/processOutput() run on the T_Main thread.
+
+        // Initialise network threads (if g_Cfg._uiNetworkThreads is == 0 then we'll have only 1 CNetworkThread)
         size_t ntCount = m_threads.size();
         UnreferencedParameter(ntCount);
         for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)

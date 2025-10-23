@@ -70,13 +70,14 @@ public:
     static constexpr uint m_nameMaxLength = 16; // OS limits for linux/bsd pthread names
 
 protected:
-    // TODO: move at least m_threadHolderId to AbstractSphereThread?
+    // TODO: move at least m_threadHolderId to AbstractSphereThread,
+    //  since it should theoretically be used only by Sphere custom thread class/AbstractSphereThread?
     threadid_t m_threadSystemId{0};        // OS thread id for this object (0 => not bound)
     int        m_threadHolderId{-1};       // logical id in ThreadHolder
 
-    bool                        m_fKeepAliveAtShutdown{false};
-    std::atomic_bool            m_fTerminateRequested{false};
-    std::atomic_bool            m_fThreadSelfTerminateAfterThisTick{false};
+    bool m_fKeepAliveAtShutdown{false};
+    bool m_fThreadSelfTerminateAfterThisTick{false};
+    bool m_fTerminateRequested{false};
 
     enum class eRunningState : uchar {
         NeverStarted,
@@ -218,7 +219,7 @@ protected:
 class DummySphereThread : public AbstractSphereThread
 {
 private:
-    friend class GlobalInitializer;
+    friend struct GlobalInitializer;
     static DummySphereThread *_instance;
 
 public:
@@ -266,10 +267,6 @@ public:
     static constexpr lpctstr m_sClassName = "ThreadHolder";
     static constexpr int m_kiInvalidThreadID = -1;
 
-    // Global state flags (C++17 inline, no function call needed in fast path)
-    inline static std::atomic_bool sm_inStartup{true};
-    inline static std::atomic_bool sm_servClosing{false};
-
     // Singleton instance for slow-path ops
     static ThreadHolder& get() noexcept;
 
@@ -280,7 +277,7 @@ public:
     static void markServEnteredRunMode() noexcept;
 
     // Record that threads are servClosing (fast-path observable).
-    static void markServservClosing() noexcept;
+    static void markServClosing() noexcept;
 
     static bool isServClosing() noexcept;
 
@@ -327,7 +324,7 @@ public:
 #define ADDTOCALLSTACK_DEBUG(_function_)  (void)0
 #endif
 
-#else
+#else // ! THREAD_TRACK_CALLSTACK
 
 #define ADDTOCALLSTACK(_function_)           (void)0
 #define ADDTOCALLSTACK_DEBUG(_function_)     (void)0

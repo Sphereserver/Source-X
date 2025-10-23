@@ -16,6 +16,9 @@ static const char* GenerateNetworkThreadName(size_t id)
     return name;
 }
 
+// A CNetworkThread is network worker abstraction that owns client state lists, queues, and APIs
+//  (processInput/processOutput/flush/assignNetworkState), so the manager can use the same code path in both modes;
+//  in non-threaded mode the object runs inline on T_Main, and in threaded mode the exact same object is started with its own OS thread.
 
 CNetworkThread::CNetworkThread(CNetworkManager* manager, size_t id)
     : AbstractSphereThread(GenerateNetworkThreadName(id), ThreadPriority::Disabled),
@@ -129,9 +132,9 @@ void CNetworkThread::tick(void)
     // we're active, take priority
     setPriority(static_cast<ThreadPriority>(g_Cfg._iNetworkThreadPriority));
 
-    static constexpr int64 kiStateDataCheckPeriod = 10 * 1000; // 10 seconds, expressed in milliseconds
+    static constexpr int64 kiStateDataCheckPeriodMilli = 10 * 1000; // 10 seconds, expressed in milliseconds
     const int64 iTimeCur = CSTime::GetMonotonicSysTimeMilli();
-    if (iTimeCur - _iTimeLastStateDataCheck > kiStateDataCheckPeriod)
+    if (iTimeCur - _iTimeLastStateDataCheck > kiStateDataCheckPeriodMilli)
     {
         _iTimeLastStateDataCheck = iTimeCur;
 
