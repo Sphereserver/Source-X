@@ -586,13 +586,13 @@ CVarDefCont * CVarDefMap::GetParseKey_Advance( lpctstr & pszArgs ) const
 	return nullptr;
 }
 
-bool CVarDefMap::GetParseVal_Advance( lpctstr & pszArgs, llong * pllVal ) const
+bool CVarDefMap::GetParseVal_Advance( lpctstr & pszArgs, int64 * piVal ) const
 {
 	ADDTOCALLSTACK_DEBUG("CVarDefMap::GetParseVal_Advance");
 	CVarDefCont * pVarBase = GetParseKey_Advance( pszArgs );
 	if ( pVarBase == nullptr )
 		return false;
-	*pllVal = pVarBase->GetValNum();
+    *piVal = pVarBase->GetValNum();
 	return true;
 }
 

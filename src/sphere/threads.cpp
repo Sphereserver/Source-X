@@ -503,10 +503,10 @@ AbstractThread::~AbstractThread()
                                         "[not started]";
 
     if (everBound)
-        fprintf(stdout, "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
+        fprintf(stdout, "DEBUG: Destroying AbstractThread '%s' (ThreadHolder-ID %d) %s, sys-id %" PRIu64 ".\n",
             name, m_threadHolderId, state, (uint64_t)m_threadSystemId);
     else
-        fprintf(stdout, "DEBUG: Destroying thread '%s' (ThreadHolder-ID %d) %s, sys-id n/a.\n",
+        fprintf(stdout, "DEBUG: Destroying AbstractThread '%s' (ThreadHolder-ID %d) %s, sys-id n/a.\n",
             name, m_threadHolderId, state);
     fflush(stdout);
 #endif

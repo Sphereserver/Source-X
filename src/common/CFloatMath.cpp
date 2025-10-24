@@ -674,13 +674,16 @@ realtype CFloatMath::GetSingle( lpctstr & ptcRefArgs )
 	}
 
     auto gReader = g_ExprGlobals.mtEngineLockedReader();
-	llong llVal;
-    if ( gReader->m_VarGlobals.GetParseVal( ptcRefArgs, &llVal ) )
-		return (int)llVal;
-    if ( gReader->m_VarResDefs.GetParseVal( ptcRefArgs, &llVal ) )
-		return (int)llVal;
-    if ( gReader->m_VarDefs.GetParseVal( ptcRefArgs, &llVal ) )
-			return (int)llVal;
+    int64 iVal;
+    // VAR.
+    if ( gReader->m_VarGlobals.GetParseVal( ptcRefArgs, &iVal ) )
+        return (int)iVal;
+    // RESDEF.
+    if ( gReader->m_VarResDefs.GetParseVal( ptcRefArgs, &iVal ) )
+        return (int)iVal;
+    // DEF.
+    if ( gReader->m_VarDefs.GetParseVal( ptcRefArgs, &iVal ) )
+            return (int)iVal;
 	return 0;
 }
 

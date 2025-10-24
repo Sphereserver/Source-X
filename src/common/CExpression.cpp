@@ -643,46 +643,43 @@ CExpression& CExpression::GetExprParser() // static
     */
 }
 
-llong CExpression::GetSingle(lpctstr & refStrExpr)
+int64 CExpression::GetSingle(lpctstr & refStrExpr)
 {
     ADDTOCALLSTACK("CExpression::GetSingle");
     ASSERT(refStrExpr);
     GETNONWHITESPACE(refStrExpr);
 
-    lpctstr const ptcStart = refStrExpr;
+    tchar ptcOrigExpr[SCRIPT_MAX_LINE_LEN];
+    Str_CopyLimitNull(ptcOrigExpr, refStrExpr, sizeof(ptcOrigExpr));
+
+    // Differences between GetSingle and cstr_to_num (sstring.cpp) in parsing numbers:
+    //  - The first "consumes" the string (advances the pointer) as it is parsed.
+    //  - The first supports only base 16 and 10.
+    //  - The first stops when finding a '.' during hex parsing. The second stops and warns.
 
     // Legacy: allow/skip a leading '.' before parsing numbers
     if (refStrExpr[0] == '.')
         ++refStrExpr;
 
-    // Hex path: a leading '0' indicates hex unless it is "0." (decimal disambiguation)
-    if (refStrExpr[0] == '0')
+    if (refStrExpr[0] == '0' && refStrExpr[1] != '.')
     {
-        if (refStrExpr[1] == '.')
-        {
-            // "0." means decimal
-            refStrExpr += 2;
-            goto try_decimal;
-        }
-
-        // Consume the '0' hex marker
+        // HEX PATH: consume the leading '0' marker, then scan [0-9 A-F a-f] until a non-hex char or '.'
         ++refStrExpr;
 
-        // Parse hex digits; significant digits start at first non-zero nibble
-        uint64 uiVal = 0;
+        uint64 uiVal = 0;          // accumulates significant nibbles only
         uint   uiSig = 0;          // count of significant hex digits (max 16)
         bool   fSeenNonZero = false;
         bool   fOverflow = false;
 
         lpctstr p = refStrExpr;
-        for (; ; ++p)
+        for (;; ++p)
         {
-            tchar ch = *p;
+            const tchar ch = *p;
             uint v;
-            if (ch >= '0' && ch <= '9')         v = (uint)(ch - '0');
-            else if (ch >= 'A' && ch <= 'F')    v = (uint)(ch - 'A' + 10);
-            else if (ch >= 'a' && ch <= 'f')    v = (uint)(ch - 'a' + 10);
-            else                                break; // end of hex token
+            if (ch >= '0' && ch <= '9')       v = (uint)(ch - '0');
+            else if (ch >= 'A' && ch <= 'F')  v = (uint)(ch - 'A' + 10);
+            else if (ch >= 'a' && ch <= 'f')  v = (uint)(ch - 'a' + 10);
+            else                              break;        // stop on non-hex (including '.')
 
             if (!fSeenNonZero)
             {
@@ -692,95 +689,93 @@ llong CExpression::GetSingle(lpctstr & refStrExpr)
                     uiSig = 1;
                     uiVal = v; // first non-zero nibble
                 }
-                // else: ignore additional zeros before first non-zero; they don't affect width or value
+                // leading zeros before first non-zero nibble do not affect width or value
             }
             else
             {
                 if (uiSig == 16)
                 {
-                    fOverflow = true; // keep consuming to end
+                    // More than 16 significant nibbles; flag overflow, keep consuming token for caller.
+                    fOverflow = true;
                 }
                 else
                 {
-                    uiVal = (uiVal << 4) | v;
+                    uiVal = (uiVal << 4) | v; // safe: uiSig < 16 guarantees no shift past 60 bits here
                     ++uiSig;
                 }
             }
         }
 
-        // Consume the entire hex token (including after overflow)
-        refStrExpr = p;// + ((*p == '\0') ? 0 : 1);
+        // Consume the entire hex token (up to, not including, the first non-hex char)
+        refStrExpr = p;
 
-        // No significant hex nibble after the marker → value is zero (e.g., "0", "-00", "0000")
+        // If no significant nibble after the marker, the numeric value is zero (e.g., "0", "0000")
         if (!fSeenNonZero)
             return 0;
 
         if (fOverflow)
         {
-            g_Log.EventWarn("Hexadecimal value parsing will overflow 64 bits: %s.\n", ptcStart);
+            g_Log.EventWarn("Hexadecimal value parsing will overflow 64 bits: %s.\n", ptcOrigExpr);
             return -1;
         }
 
-        // Width by significant hex digits: <=8 → 32-bit signed; 9..16 → 64-bit signed
+        // Decide width by significant hex digits:
+        // ≤ 8 → signed 32-bit reinterpretation, then widen; 9..16 → signed 64-bit reinterpretation
         if (uiSig <= 8)
         {
-            // Two's complement 32-bit interpretation
-            const uint32 u32 = (uint32)uiVal;
-            const int32  s32 = (int32)u32;
-            return (llong)s32;
+            const uint32 u32 = static_cast<uint32>(uiVal);
+            const int32  s32 = static_cast<int32>(u32);    // two's complement reinterpretation
+            return static_cast<int64>(s32);
         }
         else
         {
-            // Two's complement 64-bit interpretation
+            // two's-complement 64-bit reinterpretation without implementation-defined casts
             if (uiVal & (1ull << 63))
             {
-                const uint64 mag = (~uiVal) + 1;
-                const int64  neg = -(int64)mag;
-                return (llong)neg;
+                const uint64 mag = (~uiVal) + 1;            // absolute magnitude
+                const int64  neg = -static_cast<int64>(mag);// well-defined negate in 64-bit domain
+                return neg;
             }
-            else
-            {
-                return (llong)(int64)uiVal;
-            }
+            return (llong)(int64)uiVal;
         }
     }
-    else if (refStrExpr[0] == '.' || (refStrExpr[0] >= '0' && refStrExpr[0] <= '9'))
+    else if ((refStrExpr[0] >= '0' && refStrExpr[0] <= '9') ||
+             (refStrExpr[0] == '.' && (refStrExpr[1] >= '0' && refStrExpr[1] <= '9')))
     {
-        // Decimal (with '.' separators allowed)
-    try_decimal:
+        // DECIMAL PATH: digits, optionally with '.' separators that are ignored
         // Overflow guard for INT64_MAX (9223372036854775807)
-        constexpr int64 LIM10 = INT64_MAX / 10;         // 922337203685477580
-        constexpr int   LIMDG = (int)(INT64_MAX % 10);  // 7
+        constexpr int64 LIM10 = INT64_MAX / 10;        // 922337203685477580
+        constexpr int   LIMDG = (int)(INT64_MAX % 10); // 7
 
         int64 val = 0;
         bool  overflow = false;
 
         lpctstr p = refStrExpr;
-        for (; ; ++p)
+        for (;; ++p)
         {
-            tchar ch = *p;
+            const tchar ch = *p;
             if (ch == '.')
-                continue; // skip separators
+                continue;               // skip grouping separators
             if (ch < '0' || ch > '9')
                 break;
 
-            int d = ch - '0';
+            const int d = ch - '0';
             if (!overflow && (val > LIM10 || (val == LIM10 && d > LIMDG)))
             {
-                overflow = true; // but keep consuming the whole token
+                overflow = true;        // keep consuming the whole token for the caller
             }
             else if (!overflow)
             {
-                val = val * 10 + d;
+                val = val * 10 + d;     // safe: guarded to avoid signed overflow
             }
         }
 
         // Consume the entire decimal token
-        refStrExpr = p;// + ((*p == '\0') ? 0 : 1);
+        refStrExpr = p;
 
         if (overflow)
         {
-            g_Log.EventWarn("Decimal value parsing will overflow 64 bits: %s.\n", ptcStart);
+            g_Log.EventWarn("Decimal value parsing will overflow 64 bits: %s.\n", ptcOrigExpr);
             return -1;
         }
         return (llong)val;
@@ -1128,10 +1123,10 @@ llong CExpression::GetSingle(lpctstr & refStrExpr)
 							if ( iCount == 2 )
 							{
 								int64 val2 = GetVal( ppCmd[1] );
-								iResult = g_Rand.GetLLVal2( val1, val2 );
+                                iResult = g_Rand.GetLLVal2( val1, val2 );
 							}
 							else
-								iResult = g_Rand.GetLLVal(val1);
+                                iResult = g_Rand.GetLLVal(val1);
 						}
 					} break;
 
@@ -1230,38 +1225,41 @@ llong CExpression::GetSingle(lpctstr & refStrExpr)
         auto reader = g_ExprGlobals.mtEngineLockedReader();
 
         lpctstr ptcArgsOriginal = refStrExpr;
-		llong llVal;
-        if ( reader->m_VarGlobals.GetParseVal_Advance( refStrExpr, &llVal ) )  // VAR.
-			return llVal;
-        if ( reader->m_VarResDefs.GetParseVal( ptcArgsOriginal, &llVal ) )  // RESDEF.
-            return llVal;
-        if ( reader->m_VarDefs.GetParseVal( ptcArgsOriginal, &llVal ) )     // DEF.
-			return llVal;
+        int64 iVal;
+        // VAR.
+        if ( reader->m_VarGlobals.GetParseVal_Advance( refStrExpr, &iVal ) )
+            return iVal;
+        // RESDEF.
+        if ( reader->m_VarResDefs.GetParseVal( ptcArgsOriginal, &iVal ) )
+            return iVal;
+        // DEF.
+        if ( reader->m_VarDefs.GetParseVal( ptcArgsOriginal, &iVal ) )
+            return iVal;
 	}
 //#pragma endregion intrinsics  // MSVC specific
 
 	// hard end ! Error of some sort.
-    if (ptcStart[0] != '\0')
+    if (ptcOrigExpr[0] != '\0')
 	{
 		tchar szTag[EXPRESSION_MAX_KEY_LEN];
-        GetIdentifierString(szTag, ptcStart);
-        const lpctstr ptcLast = (ptcStart[0] == '<') ? ">'" : "'";
-        g_Log.EventError("Undefined symbol '%s' [Evaluated expression: '%s%s].\n", szTag, ptcStart, ptcLast);
+        GetIdentifierString(szTag, ptcOrigExpr);
+        //const lpctstr ptcLast = (ptcOrigExpr[0] == '<') ? ">'" : "'";
+        g_Log.EventError("Undefined symbol '%s' [Evaluated expression: '%s'].\n", szTag, ptcOrigExpr);
 	}
 	else
 	{
         g_Log.EventError("Undefined symbol (empty parameter?).\n");
-	}
+    }
 	return 0;
 }
 
-llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
+int64 CExpression::GetValMath(int64 iVal, lpctstr & refStrExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
     GETNONWHITESPACE(refStrExpr);
 
 	// Look for math type operator and eventually apply it to the second operand (which we evaluate here if a valid operator is found).
-	llong llValSecond;
+    int64 iValSecond;
     switch ( refStrExpr[0] )
 	{
 		case '\0':
@@ -1275,19 +1273,19 @@ llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
 
 		case '+':
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			llVal += llValSecond;
+            iValSecond = GetVal(refStrExpr);
+            iVal += iValSecond;
 			break;
 
 		case '-':
-            llValSecond = GetVal(refStrExpr);
+            iValSecond = GetVal(refStrExpr);
 			//++pExpr; No need to consume the negative sign, we need to keep it!
-			llVal += llValSecond; // a subtraction is an addiction with a negative number.
+            iVal += iValSecond; // a subtraction is an addiction with a negative number.
 			break;
 		case '*':
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			llVal *= llValSecond;
+            iValSecond = GetVal(refStrExpr);
+            iVal *= iValSecond;
 			break;
 
 		case '|':
@@ -1295,13 +1293,13 @@ llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
             if ( refStrExpr[0] == '|' )	// boolean ?
 			{
                 ++refStrExpr;
-                llValSecond = GetVal(refStrExpr);
-				llVal = (llValSecond || llVal);
+                iValSecond = GetVal(refStrExpr);
+                iVal = (iValSecond || iVal);
 			}
 			else	// bitwise
 			{
-                llValSecond = GetVal(refStrExpr);
-				llVal |= llValSecond;
+                iValSecond = GetVal(refStrExpr);
+                iVal |= iValSecond;
 			}
 			break;
 
@@ -1310,42 +1308,42 @@ llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
             if ( refStrExpr[0] == '&' )	// boolean ?
 			{
                 ++refStrExpr;
-                llValSecond = GetVal(refStrExpr);
-				llVal = (llValSecond && llVal);	// tricky stuff here. logical ops must come first or possibly not get processed.
+                iValSecond = GetVal(refStrExpr);
+                iVal = (iValSecond && iVal);	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
 			{
-                llValSecond = GetVal(refStrExpr);
-				llVal &= llValSecond;
+                iValSecond = GetVal(refStrExpr);
+                iVal &= iValSecond;
 			}
 			break;
 
 		case '/':
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			if (!llValSecond)
+            iValSecond = GetVal(refStrExpr);
+            if (!iValSecond)
 			{
 				g_Log.EventError("Evaluating math: Divide by 0\n");
 				break;
 			}
-			llVal /= llValSecond;
+            iVal /= iValSecond;
 			break;
 
 		case '%':
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			if (!llValSecond)
+            iValSecond = GetVal(refStrExpr);
+            if (!iValSecond)
 			{
 				g_Log.EventError("Evaluating math: Modulo 0\n");
 				break;
 			}
-			llVal %= llValSecond;
+            iVal %= iValSecond;
 			break;
 
 		case '^':
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			llVal ^= llValSecond;
+            iValSecond = GetVal(refStrExpr);
+            iVal ^= iValSecond;
 			break;
 
 		case '>': // boolean
@@ -1353,19 +1351,19 @@ llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
             if ( refStrExpr[0] == '=' )	// boolean ?
 			{
                 ++refStrExpr;
-                llValSecond = GetVal(refStrExpr);
-				llVal = ( llVal >= llValSecond );
+                iValSecond = GetVal(refStrExpr);
+                iVal = ( iVal >= iValSecond );
 			}
             else if ( refStrExpr[0] == '>' )	// shift
 			{
                 ++refStrExpr;
-                llValSecond = GetVal(refStrExpr);
-				llVal >>= llValSecond;
+                iValSecond = GetVal(refStrExpr);
+                iVal >>= iValSecond;
 			}
 			else
 			{
-                llValSecond = GetVal(refStrExpr);
-				llVal = (llVal > llValSecond);
+                iValSecond = GetVal(refStrExpr);
+                iVal = (iVal > iValSecond);
 			}
 			break;
 
@@ -1374,19 +1372,19 @@ llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
             if ( refStrExpr[0] == '=' )	// boolean ?
 			{
                 ++refStrExpr;
-                llValSecond = GetVal(refStrExpr);
-				llVal = ( llVal <= llValSecond );
+                iValSecond = GetVal(refStrExpr);
+                iVal = ( iVal <= iValSecond );
 			}
             else if ( refStrExpr[0] == '<' )	// shift
 			{
                 ++refStrExpr;
-                llValSecond = GetVal(refStrExpr);
-				llVal <<= llValSecond;
+                iValSecond = GetVal(refStrExpr);
+                iVal <<= iValSecond;
 			}
 			else
 			{
-                llValSecond = GetVal(refStrExpr);
-				llVal = (llVal < llValSecond);
+                iValSecond = GetVal(refStrExpr);
+                iVal = (iVal < iValSecond);
 			}
 			break;
 
@@ -1395,38 +1393,38 @@ llong CExpression::GetValMath(llong llVal, lpctstr & refStrExpr )
             if ( refStrExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			llVal = ( llVal != llValSecond );
+            iValSecond = GetVal(refStrExpr);
+            iVal = ( iVal != iValSecond );
 			break;
 
 		case '=': // boolean
             while ( refStrExpr[0] == '=' )
                 ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			llVal = ( llVal == llValSecond );
+            iValSecond = GetVal(refStrExpr);
+            iVal = ( iVal == iValSecond );
 			break;
 
 		case '@':
             ++refStrExpr;
-            llValSecond = GetVal(refStrExpr);
-			if (llVal < 0)
+            iValSecond = GetVal(refStrExpr);
+            if (iVal < 0)
 			{
-                llVal = cexpression_power(llVal, llValSecond);
+                iVal = cexpression_power(iVal, iValSecond);
 				break;
 			}
-			else if ((llVal == 0) && (llValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
+            else if ((iVal == 0) && (iValSecond <= 0)) //The information from https://en.cppreference.com/w/cpp/numeric/math/pow says if both input are 0, it can cause errors too.
 			{
 				g_Log.EventError("Power of zero with zero or negative exponent is undefined.\n");
 				break;
 			}
-            llVal = cexpression_power(llVal, llValSecond);
+            iVal = cexpression_power(iVal, iValSecond);
 			break;
 	}
 
-	return llVal;
+    return iVal;
 }
 
-llong CExpression::GetVal(lpctstr & refStrExpr )
+int64 CExpression::GetVal(lpctstr & refStrExpr )
 {
 	// This function moves the pointer forward, so you can retrieve the value only once!
 
@@ -1464,14 +1462,14 @@ llong CExpression::GetVal(lpctstr & refStrExpr )
 	++_iGetVal_Reentrant;
 
 	// Get the first operand value: it may be a number or an expression
-    llong llVal = GetSingle(refStrExpr);
+    int64 iVal = GetSingle(refStrExpr);
 
 	// Check if there is an operator (mathematical or logical), in that case apply it to the second operand (which we evaluate again with GetSingle).
-    llVal = GetValMath(llVal, refStrExpr);
+    iVal = GetValMath(iVal, refStrExpr);
 
 	--_iGetVal_Reentrant;
 
-	return llVal;
+    return iVal;
 }
 
 int CExpression::GetRangeVals(lpctstr & refStrExpr, int64 * piVals, int iMaxQty, bool fNoWarn)
@@ -2008,7 +2006,7 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
         ptcToParse[uiToParseLen] = '\0';
 
         lptstr pToParseCasted = static_cast<lptstr>(ptcToParse);
-		llong llValFirst = GetSingle(pToParseCasted);
+        int64 iValFirst = GetSingle(pToParseCasted);
 
 		// Copy the second element in a new string
         uiToParseLen = std::min(
@@ -2018,15 +2016,15 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
         ptcToParse[uiToParseLen] = '\0';
 
         pToParseCasted = static_cast<lptstr>(ptcToParse);
-		llong llValSecond = GetSingle(pToParseCasted);
+        int64 iValSecond = GetSingle(pToParseCasted);
 
-		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to g_Rand.GetLLVal2
+        if (iValSecond < iValFirst)	// the first value has to be < than the second before passing it to g_Rand.GetLLVal2
 		{
-			const llong llValTemp = llValFirst;
-			llValFirst = llValSecond;
-			llValSecond = llValTemp;
+            const int64 iValTemp = iValFirst;
+            iValFirst = iValSecond;
+            iValSecond = iValTemp;
 		}
-		return g_Rand.GetLLVal2(llValFirst, llValSecond);
+        return g_Rand.GetLLVal2(iValFirst, iValSecond);
 	}
 
 	// First get the total of the weights
@@ -2053,7 +2051,7 @@ int64 CExpression::GetRangeNumber(lpctstr & refStrExpr)
 	}
 
 	// Now roll the dice to see what value to pick
-	llTotalWeight = g_Rand.GetLLVal(llTotalWeight) + 1;
+    llTotalWeight = g_Rand.GetLLVal(llTotalWeight) + 1;
 
 	// Now loop to that value
 	int i = 1;
