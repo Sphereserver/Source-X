@@ -282,7 +282,7 @@ public:
     static bool isServClosing() noexcept;
 
     // Slow-path registry ops
-    void push(AbstractThread *thread) noexcept;
+    void push(AbstractThread *pAbstractThread) noexcept;
     void remove(AbstractThread *thread) CANTHROW;
 
     AbstractThread * getThreadAt(size_t at) noexcept;

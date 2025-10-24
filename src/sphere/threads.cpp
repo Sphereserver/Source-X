@@ -127,24 +127,26 @@ bool ThreadHolder::isSystemIdRegistered(threadid_t sysId, AbstractSphereThread**
     return true;
 }
 
-void ThreadHolder::push(AbstractThread* thread) noexcept
+void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
 {
-    if (!thread)
+    if (!pAbstractThread)
     {
         stderrLog("ThreadHolder::push: nullptr thread.\n");
         return;
     }
 
-    auto* pSphereThread = dynamic_cast<AbstractSphereThread*>(thread);
+    auto* pSphereThread = dynamic_cast<AbstractSphereThread*>(pAbstractThread);
     if (!pSphereThread)
     {
         stderrLog("ThreadHolder::push: not an AbstractSphereThread.\n");
         return;
     }
 
-    const char* nameForLog = thread->getName();
-    int idForLog = -1;
-    bool shouldLog = false;
+#ifdef _DEBUG
+    const char* ptcNameForLog = pAbstractThread->getName();
+    int iIdForLog = -1;
+    bool fShouldLog = false;
+#endif
 
     try
     {
@@ -164,21 +166,21 @@ void ThreadHolder::push(AbstractThread* thread) noexcept
             auto itSlot = std::find_if(
                 m_threads.begin(),
                 m_threads.end(),
-                [thread](const SphereThreadData& s) noexcept { return s.m_ptr == thread; }
+                [pAbstractThread](const SphereThreadData& s) noexcept { return s.m_ptr == pAbstractThread; }
                 );
             if (itSlot != m_threads.end())
-                thread->m_threadHolderId = static_cast<int>(std::distance(m_threads.begin(), itSlot));
+                pAbstractThread->m_threadHolderId = static_cast<int>(std::distance(m_threads.begin(), itSlot));
 
 #ifdef _DEBUG
-            idForLog = thread->m_threadHolderId;
-            shouldLog = true;
+            iIdForLog = pAbstractThread->m_threadHolderId;
+            fShouldLog = true;
 #endif
             lock.unlock();
 #ifdef _DEBUG
-            if (shouldLog)
+            if (fShouldLog)
                 g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
                     "ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
-                    nameForLog, idForLog);
+                    ptcNameForLog, iIdForLog);
 #endif
             return;
         }
@@ -199,28 +201,28 @@ void ThreadHolder::push(AbstractThread* thread) noexcept
             lock.unlock();
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
                 "ThreadHolder: refusing to register %s on OS thread already owned by %s.\n",
-                nameForLog, other ? other->getName() : "<unknown>");
+                ptcNameForLog, other ? other->getName() : "<unknown>");
             EXC_NOTIFY_DEBUGGER;
             return;
         }
 
         // 3) New registration.
-        m_threads.emplace_back(SphereThreadData{ thread, false });
-        thread->m_threadHolderId = m_threadCount;
+        m_threads.emplace_back(SphereThreadData{ pAbstractThread, false });
+        pAbstractThread->m_threadHolderId = m_threadCount;
         m_spherethreadpairs_systemid_ptr.emplace_back(pSphereThread->m_threadSystemId, pSphereThread);
         ++m_threadCount;
 
 #ifdef _DEBUG
-        idForLog = thread->m_threadHolderId;
-        shouldLog = true;
+        iIdForLog = pAbstractThread->m_threadHolderId;
+        fShouldLog = true;
 #endif
         lock.unlock();
 
 #ifdef _DEBUG
-        if (shouldLog)
+        if (fShouldLog)
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
                 "ThreadHolder registered %s (ThreadHolder-ID %d).\n",
-                nameForLog, idForLog);
+                ptcNameForLog, iIdForLog);
 #endif
     }
     catch (const std::exception& e)
@@ -240,8 +242,11 @@ void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
         throw CSError(LOGL_FATAL, 0, "ThreadHolder::remove: thread == nullptr");
 
     AbstractSphereThread* pSphereThread = dynamic_cast<AbstractSphereThread*>(pAbstractThread);
+
+#ifdef _DEBUG
     threadid_t sysId = pSphereThread ? pSphereThread->m_threadSystemId : threadid_t{};
     const char* ptcName = pAbstractThread->getName();
+#endif
 
     std::unique_lock lock(m_mutex);
 
