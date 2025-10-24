@@ -159,7 +159,7 @@ class AbstractSphereThread : public AbstractThread
     friend class ThreadHolder;
 
 #ifdef THREAD_TRACK_CALLSTACK
-    struct STACK_INFO_REC { const char *functionName{}; };
+    struct STACK_INFO_REC { const char *functionName; };
 
     STACK_INFO_REC m_stackInfo[0x500]{};
     STACK_INFO_REC m_stackInfoCopy[0x500]{};

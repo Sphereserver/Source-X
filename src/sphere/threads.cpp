@@ -143,10 +143,10 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
     }
 
 #ifdef _DEBUG
-    const char* ptcNameForLog = pAbstractThread->getName();
-    int iIdForLog = -1;
-    bool fShouldLog = false;
+    int iIdForLogDebug = -1;
+    bool fShouldLogDebug = false;
 #endif
+    const char* ptcNameForLog = pAbstractThread->getName();
 
     try
     {
@@ -172,15 +172,15 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
                 pAbstractThread->m_threadHolderId = static_cast<int>(std::distance(m_threads.begin(), itSlot));
 
 #ifdef _DEBUG
-            iIdForLog = pAbstractThread->m_threadHolderId;
-            fShouldLog = true;
+            iIdForLogDebug = pAbstractThread->m_threadHolderId;
+            fShouldLogDebug = true;
 #endif
             lock.unlock();
 #ifdef _DEBUG
-            if (fShouldLog)
+            if (fShouldLogDebug)
                 g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
                     "ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
-                    ptcNameForLog, iIdForLog);
+                    ptcNameForLog, iIdForLogDebug);
 #endif
             return;
         }
@@ -213,16 +213,16 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
         ++m_threadCount;
 
 #ifdef _DEBUG
-        iIdForLog = pAbstractThread->m_threadHolderId;
-        fShouldLog = true;
+        iIdForLogDebug = pAbstractThread->m_threadHolderId;
+        fShouldLogDebug = true;
 #endif
         lock.unlock();
 
 #ifdef _DEBUG
-        if (fShouldLog)
+        if (fShouldLogDebug)
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
                 "ThreadHolder registered %s (ThreadHolder-ID %d).\n",
-                ptcNameForLog, iIdForLog);
+                ptcNameForLog, iIdForLogDebug);
 #endif
     }
     catch (const std::exception& e)
