@@ -4833,6 +4833,7 @@ void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		if ( IsSetEF(EF_UsePingServer) )			catresname(zExperimentalFlags, "UsePingServer");
 		if ( IsSetEF(EF_FixCanSeeInClosedConts) )	catresname(zExperimentalFlags, "FixCanSeeInClosedConts");
         if ( IsSetEF(EF_WalkCheckHeightMounted) )	catresname(zExperimentalFlags, "WalkCheckHeightMounted");
+        if (IsSetEF(EF_WalkBypassMonsters))			catresname(zExperimentalFlags, "WalkBypassMonsters");
 
 		if ( zExperimentalFlags[0] != '\0' )
 		{
