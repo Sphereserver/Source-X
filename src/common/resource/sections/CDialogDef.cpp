@@ -142,6 +142,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         return m_pObj->r_Verb(s, pSrc);
     }
 
+    auto &gExprParser = CExpression::GetExprParser();
     lptstr ptcArgs = s.GetArgStr();
     //g_Log.EventDebug("Dialog index %d, KEY %s ARG %s.\n", index, ptcKey, ptcArgs);
 
@@ -151,25 +152,25 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
         GETNONWHITESPACE(ptcArgs_);
     };
 
-    const auto _CalcRelative = [](lptstr& ptcArgs_, int &iCoordBase_) -> int
+    const auto _CalcRelative = [&gExprParser](lptstr& ptcArgs_, int &iCoordBase_) -> int
     {
         int c;
-            if ( *ptcArgs_ == '-' && IsSpace(ptcArgs_[1]))
+        if ( *ptcArgs_ == '-' && IsSpace(ptcArgs_[1]))
             c = iCoordBase_, ++ptcArgs_;
         else if ( *ptcArgs_ == '+' )
-            c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+            c = iCoordBase_ + gExprParser.GetSingle(++ptcArgs_ );
         else if ( *ptcArgs_ == '-' )
-            c = iCoordBase_ - Exp_GetSingle( ++ptcArgs_ );
+            c = iCoordBase_ - gExprParser.GetSingle(++ptcArgs_ );
         else if ( *ptcArgs_ == '*' )
-            iCoordBase_ = c = iCoordBase_ + Exp_GetSingle( ++ptcArgs_ );
+            iCoordBase_ = c = iCoordBase_ + gExprParser.GetSingle( ++ptcArgs_ );
         else
-            c = Exp_GetSingle( ptcArgs_ );
+            c = gExprParser.GetSingle( ptcArgs_ );
         return c;
     };
 
-#   define GET_ABSOLUTE(c)          _SkipAll(ptcArgs);   int c = Exp_GetSingle(ptcArgs);
-#   define GET_EVAL(c)              _SkipAll(ptcArgs);   int c = Exp_GetVal(ptcArgs);
-#   define GET_RELATIVE(c, base)    _SkipAll(ptcArgs);   int c = _CalcRelative(ptcArgs, base);
+#   define GET_RELATIVE(c, base)    _SkipAll(ptcArgs);   const int c = _CalcRelative(ptcArgs, base);
+#   define GET_ABSOLUTE(c)          _SkipAll(ptcArgs);   const int c = gExprParser.GetSingle(ptcArgs);
+#   define GET_EVAL(c)              _SkipAll(ptcArgs);   const int c = gExprParser.GetVal(ptcArgs);
 
     switch( index )
     {
@@ -431,17 +432,17 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
             if ( *ptcArgs == '-' && (IsSpace( ptcArgs[1] ) || !ptcArgs[1]) )
                 ++ptcArgs;
             else if ( *ptcArgs == '*' )
-                m_iOriginX += Exp_GetSingle( ++ptcArgs );
+                m_iOriginX += gExprParser.GetSingle( ++ptcArgs );
             else
-            	m_iOriginX	= Exp_GetSingle( ptcArgs );
+                m_iOriginX	= gExprParser.GetSingle( ptcArgs );
 
             _SkipAll( ptcArgs );
             if ( *ptcArgs == '-' && (IsSpace( ptcArgs[1] ) || !ptcArgs[1]) )
                 ++ptcArgs;
             else if ( *ptcArgs == '*' )
-                m_iOriginY += Exp_GetSingle( ++ptcArgs );
+                m_iOriginY += gExprParser.GetSingle( ++ptcArgs );
             else
-                m_iOriginY  = Exp_GetSingle( ptcArgs );
+                m_iOriginY  = gExprParser.GetSingle( ptcArgs );
 
             return true;
         }

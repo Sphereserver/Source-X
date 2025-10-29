@@ -677,13 +677,13 @@ realtype CFloatMath::GetSingle( lpctstr & ptcRefArgs )
     int64 iVal;
     // VAR.
     if ( gReader->m_VarGlobals.GetParseVal( ptcRefArgs, &iVal ) )
-        return (int)iVal;
+        return static_cast<realtype>(static_cast<int32>(iVal));
     // RESDEF.
     if ( gReader->m_VarResDefs.GetParseVal( ptcRefArgs, &iVal ) )
-        return (int)iVal;
+        return static_cast<realtype>(static_cast<int32>(iVal));
     // DEF.
     if ( gReader->m_VarDefs.GetParseVal( ptcRefArgs, &iVal ) )
-            return (int)iVal;
+            return static_cast<realtype>(static_cast<int32>(iVal));
 	return 0;
 }
 
