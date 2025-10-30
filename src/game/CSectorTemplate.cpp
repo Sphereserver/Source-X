@@ -241,6 +241,9 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
 		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
         return;
 	}
+
+    // Sooner or later we have to change those signed values to unsigned... they should never be negative in any case
+    //  and we're doing a number of potentially useless checks.
     if (( index < 0 ) || ( index >= CSectorList::Get().GetMapSectorDataUnchecked(map).iSectorQty ))
 	{
         m_BasePoint.m_map = map;

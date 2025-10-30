@@ -36,7 +36,7 @@ void CSectorList::Init()
 			we need to (re)set iSectorIndex to 0 when Sphere finish to initialize every sectors in a map, otherwise
 			iSectorIndex will have the same value of iSectorQty when Sphere finish loading map0.
 		*/
-		int iSectorIndex = 0;
+        int iSectorIndex = 0;
 
 		MapSectorsData& sd = _SectorData[iMap];
 		sd.iSectorSize = sd.iSectorColumns = sd.iSectorRows = sd.iSectorQty = 0;
@@ -53,6 +53,8 @@ void CSectorList::Init()
 		Str_ConcatLimitNull(tsConcat.buffer(), ts.buffer(), tsConcat.capacity());
 
 		sd._pSectors		= std::make_unique<CSector[]>(iSectorQty);
+        ASSERT(sd._pSectors);
+
 		sd.iSectorSize		= g_MapList.GetSectorSize(iMap);
 		sd.iSectorQty		= iSectorQty;
 		sd.iSectorColumns	= iMaxX;
@@ -70,17 +72,16 @@ void CSectorList::Init()
 		for (; iSectorIndex < iSectorQty; ++iSectorIndex)
 		{
             // Map sectors are added in row-major order (fill a column, then increment row count and fill columns at that row, and so on).
-            if (iSectorX >= iMaxX)
+            if (iSectorY >= iMaxY)
             {
-                iSectorX = 0;
-                ++iSectorY;
+                iSectorY = 0;
+                ++iSectorX;
             }
 
 			CSector* pSector = &(sd._pSectors[iSectorIndex]);
-			ASSERT(pSector);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
 
-            ++iSectorX;
+            ++iSectorY;
 		}
 
 	}
