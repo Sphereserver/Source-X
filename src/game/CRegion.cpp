@@ -68,15 +68,17 @@ bool CRegion::RealizeRegion()
 	// Link the region to the world. RETURN: false = not valid.
 	if ( IsRegionEmpty() )
 		return false;
+
+    ASSERT(g_MapList.IsMapSupported(m_pt.m_map));
 	if ( !m_pt.IsValidPoint() )
 		m_pt = GetRegionCorner( DIR_QTY );	// center
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
     const CSectorList& pSectors = CSectorList::Get();
-    for ( int i = 0, iMax = pSectors.GetMapSectorData(m_pt.m_map).iSectorQty; i < iMax; ++i )
+    for ( int i = 0, iMax = pSectors.GetMapSectorDataUnchecked(m_pt.m_map).iSectorQty; i < iMax; ++i )
 	{
-        CSector *pSector = pSectors.GetSectorByIndex(m_pt.m_map, i);
+        CSector *pSector = pSectors.GetSectorByIndexUnchecked(m_pt.m_map, i);
 
 		if ( pSector && IsOverlapped(pSector->GetRect()) )
 		{

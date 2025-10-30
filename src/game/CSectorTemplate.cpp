@@ -156,16 +156,18 @@ void CItemsList::AddItemToSector( CItem * pItem )
 void CSectorBase::SetAdjacentSectors()
 {
     const CSectorList& pSectors = CSectorList::Get();
-    auto const& sd = pSectors.GetMapSectorData(m_BasePoint.m_map);
+    ASSERT_ALWAYS(g_MapList.IsMapSupported(m_BasePoint.m_map));
+    auto const& sd = pSectors.GetMapSectorDataUnchecked(m_BasePoint.m_map);
 
     const int iMaxX = sd.iSectorColumns;
     ASSERT(iMaxX > 0);
-    [[maybe_unused]] const int iMaxY = sd.iSectorRows;
+    const int iMaxY = sd.iSectorRows;
     ASSERT(iMaxY > 0);
     const int iMaxSectors = sd.iSectorQty;
+    ASSERT(iMaxSectors > 9);
 
-    // Sectors are layed out in the array horizontally: when the row is complete (X), the subsequent sector is placed in
-    //  the column below (Y).
+    // Sectors are laid out in the array horizontally (row-major order): when the row is complete (X),
+    //  the subsequent sector is placed in the row below (Y).
     // Between each X coordinate there's a single sector index difference;
     //  between each Y coordinate there's a number of sectors equal to the sectors in a row.
     /*
@@ -197,22 +199,23 @@ void CSectorBase::SetAdjacentSectors()
     for (int i = 0; i < (int)DIR_QTY; ++i)
     {
         // out of bounds checks
-        const int iAdjX = m_BasePoint.m_x + _xyDir[i].x;
         // These checks are needed or the negative iAdjX/iAdjY can lead to a wrong index if the sector is near the map borders.
         // For instance m_index = 0, iAdjY > 0 and iAdjX < 0, SW check, the index start from the first column of the second row and it goes back to the first row because there is no SW sector
+        const int iAdjX = m_BasePoint.m_x + _xyDir[i].x;
         if ((iAdjX < 0) || (iAdjX >= iMaxX))
             continue;
+
         const int iAdjY = m_BasePoint.m_y + _xyDir[i].y;
         if ((iAdjY < 0) || (iAdjY >= iMaxY))
             continue;
 
-		int index = m_index;
-        index  += ((iAdjY * iMaxX) + iAdjX);
-        if (index < 0 || (index > iMaxSectors))
-        {
+        const int iAdjIndex = m_index + ((iAdjY * iMaxX) + iAdjX);
+        if ((iAdjIndex < 0) || (iAdjIndex > iMaxSectors))
             continue;
-        }
-        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndex(m_BasePoint.m_map, index);
+
+        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndexUnchecked(m_BasePoint.m_map, iAdjIndex);
+
+        //g_Log.EventDebug("Sector %d, Setting adjacent sector %d.\n", m_index, iAdjIndex);
     }
 }
 
@@ -238,7 +241,7 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
 		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
         return;
 	}
-    if (( index < 0 ) || ( index >= CSectorList::Get().GetMapSectorData(map).iSectorQty ))
+    if (( index < 0 ) || ( index >= CSectorList::Get().GetMapSectorDataUnchecked(map).iSectorQty ))
 	{
         m_BasePoint.m_map = map;
 		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, map, map);
@@ -248,11 +251,10 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
     ASSERT(x >= 0 && y >= 0);
     m_index = index;
 
-    // Set BasePoint.
-    auto const& sd = CSectorList::Get().GetMapSectorData(map);
+    auto const& sd = CSectorList::Get().GetMapSectorDataUnchecked(map);
     DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty));
 
-    m_BasePoint = // Initializer list for CPointMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
+    m_BasePoint = CPointBase
         {
             x,          // x
             y,          // y
@@ -260,11 +262,10 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
             (uint8)map  // m
         };
 
-    // Set MapRect.
-    m_MapRect = // Initializer list for CRectMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
+    m_MapRect =
         CRectMap {
             m_BasePoint.m_x,			        // left
-            m_BasePoint.m_y,			        // yop
+            m_BasePoint.m_y,			        // top
             m_BasePoint.m_x + sd.iSectorSize,	// right: East
             m_BasePoint.m_y + sd.iSectorSize,   // bottom: South
             m_BasePoint.m_map			        // map

@@ -49,10 +49,12 @@ public:
 	void Close(bool fClosingWorld);
 
     [[nodiscard]]
-    const MapSectorsData& GetMapSectorData(int map) const;
+    const MapSectorsData* GetMapSectorData(int map) const noexcept;
+    [[nodiscard]]
+    const MapSectorsData& GetMapSectorDataUnchecked(int map) const noexcept;
 
-    CSector* GetSectorByIndex(int map, int index) const noexcept;	// gets sector # from one map
-    CSector* GetSectorByCoordsUnchecked(int map, short x, short y) const noexcept;
+    CSector* GetSectorByIndexUnchecked(int map, int index) const noexcept;	// gets sector # from one map
+    CSector* GetSectorByCoordsUnchecked(int map, short x, short y) const NOEXCEPT_NODEBUG;
 
 	int GetSectorAbsoluteQty() const noexcept;
 	CSector* GetSectorAbsolute(int index) noexcept;

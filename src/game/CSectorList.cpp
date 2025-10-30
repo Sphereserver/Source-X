@@ -69,7 +69,7 @@ void CSectorList::Init()
 		short iSectorX = 0, iSectorY = 0;
 		for (; iSectorIndex < iSectorQty; ++iSectorIndex)
 		{
-            // Map sectors are added in row-major order.
+            // Map sectors are added in row-major order (fill a column, then increment row count and fill columns at that row, and so on).
             if (iSectorX >= iMaxX)
             {
                 iSectorX = 0;
@@ -120,27 +120,46 @@ void CSectorList::Close(bool fClosingWorld)
 
 
 [[nodiscard]]
-const MapSectorsData& CSectorList::GetMapSectorData(int map) const
+const MapSectorsData* CSectorList::GetMapSectorData(int map) const noexcept
 {
-    DEBUG_ASSERT(g_MapList.IsMapSupported(map));
+    if (!g_MapList.IsMapSupported(map))
+        return nullptr;
+
+    return &_SectorData[map];
+}
+
+[[nodiscard]]
+const MapSectorsData& CSectorList::GetMapSectorDataUnchecked(int map) const noexcept
+{
+    // We assume we HAVE checked that's a valid map and that we are not indexing the _SectorData out of bounds.
+    //if (!g_MapList.IsMapSupported(map))
+    //    return nullptr;
+
     return _SectorData[map];
 }
 
-CSector* CSectorList::GetSectorByIndex(int map, int index) const noexcept
+CSector* CSectorList::GetSectorByIndexUnchecked(int map, int index) const noexcept
 {
     // We call this method very often and from places we ASSUME have already checked that the map number is legit.
+    //  (it's done in CWorldMap::GetSectorByIndex).
+
     // Micro-optimization: Skip the function call and the if statement to avoid the possible cost of a branch misprediction.
     //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
     //	return nullptr;
+    //if ((map < 0) || ((size_t)map < sizeof(_SectorData)) )
+    //    return nullptr;
 
 	const MapSectorsData& sd = _SectorData[map];
+
     //return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
     return (index < sd.iSectorQty) ? &(sd._pSectors.get()[index]) : nullptr;
 }
 
-CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) const noexcept
+CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) const NOEXCEPT_NODEBUG
 {
     // We call this method very often and from places we ASSUME have already checked that the map number is legit.
+    //  (it's done in CPointBase::GetSector())
+
     // Micro-optimization: Skip the IsMapSupported function call and the if statement to avoid the possible cost of a branch misprediction.
     //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
     //	return nullptr;
