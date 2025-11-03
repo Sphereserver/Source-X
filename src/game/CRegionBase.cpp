@@ -10,6 +10,12 @@ CRegionBase::CRegionBase()
 	m_rectUnion.SetRectEmpty();
 }
 
+void CRegionBase::EmptyRegion()
+{
+    m_rectUnion.SetRectEmpty();
+    m_Rects.clear();
+}
+
 size_t CRegionBase::GetRegionRectCount() const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRectCount");

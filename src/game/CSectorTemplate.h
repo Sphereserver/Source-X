@@ -100,8 +100,8 @@ class CSectorBase		// world sector
 
 protected:
     int	m_index;            // Sector index in the 'sector grid'
-    CPointBase m_BasePoint; // Sector coordinates in the 'sector grid'.
-    CRectMap   m_MapRect;   // Map area inside this sector.
+    CPointBase m_BasePointSectUnits; // Sector coordinates in the 'sector grid'.
+    CRectMap   m_MapRectWorldUnits;   // Map area inside this sector, in map coordinates.
 
 private:
     // TODO: store indices instead of pointers, to make the class smaller?
@@ -138,8 +138,10 @@ public:
 
 	// Location map units.
     int GetIndex() const noexcept               { return m_index; }
-    int GetMap() const noexcept                 { return m_BasePoint.m_map; }
-    constexpr inline const CRectMap& GetRect() const noexcept   { return m_MapRect; }
+    int GetMap() const noexcept                 { return m_BasePointSectUnits.m_map; }
+    CPointBase GetBasePointMapUnits() const noexcept;
+    constexpr const CPointBase& GetBasePointSectUnits() noexcept    { return m_BasePointSectUnits; }
+    constexpr const CRectMap& GetRectWorldUnits() const noexcept    { return m_MapRectWorldUnits; }
 
 	// CRegion
 	CRegion * GetRegion( const CPointBase & pt, dword dwType ) const;

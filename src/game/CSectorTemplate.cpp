@@ -156,8 +156,8 @@ void CItemsList::AddItemToSector( CItem * pItem )
 void CSectorBase::SetAdjacentSectors()
 {
     const CSectorList& pSectors = CSectorList::Get();
-    ASSERT_ALWAYS(g_MapList.IsMapSupported(m_BasePoint.m_map));
-    auto const& sd = pSectors.GetMapSectorDataUnchecked(m_BasePoint.m_map);
+    ASSERT_ALWAYS(g_MapList.IsMapSupported(m_BasePointSectUnits.m_map));
+    auto const& sd = pSectors.GetMapSectorDataUnchecked(m_BasePointSectUnits.m_map);
 
     const int iMaxX = sd.iSectorColumns;
     ASSERT(iMaxX > 0);
@@ -201,19 +201,19 @@ void CSectorBase::SetAdjacentSectors()
         // out of bounds checks
         // These checks are needed or the negative iAdjX/iAdjY can lead to a wrong index if the sector is near the map borders.
         // For instance m_index = 0, iAdjY > 0 and iAdjX < 0, SW check, the index start from the first column of the second row and it goes back to the first row because there is no SW sector
-        const int iAdjX = m_BasePoint.m_x + _xyDir[i].x;
+        const int iAdjX = m_BasePointSectUnits.m_x + _xyDir[i].x;
         if ((iAdjX < 0) || (iAdjX >= iMaxX))
             continue;
 
-        const int iAdjY = m_BasePoint.m_y + _xyDir[i].y;
+        const int iAdjY = m_BasePointSectUnits.m_y + _xyDir[i].y;
         if ((iAdjY < 0) || (iAdjY >= iMaxY))
             continue;
 
-        const int iAdjIndex = m_index + ((iAdjY * iMaxX) + iAdjX);
+        const int iAdjIndex = m_index + ((iAdjX * iMaxX) + iAdjY);
         if ((iAdjIndex < 0) || (iAdjIndex > iMaxSectors))
             continue;
 
-        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndexUnchecked(m_BasePoint.m_map, iAdjIndex);
+        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndexUnchecked(m_BasePointSectUnits.m_map, iAdjIndex);
 
         //g_Log.EventDebug("Sector %d, Setting adjacent sector %d.\n", m_index, iAdjIndex);
     }
@@ -246,7 +246,7 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
     //  and we're doing a number of potentially useless checks.
     if (( index < 0 ) || ( index >= CSectorList::Get().GetMapSectorDataUnchecked(map).iSectorQty ))
 	{
-        m_BasePoint.m_map = map;
+        m_BasePointSectUnits.m_map = map;
 		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, map, map);
         return;
 	}
@@ -257,7 +257,8 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
     auto const& sd = CSectorList::Get().GetMapSectorDataUnchecked(map);
     DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty));
 
-    m_BasePoint = CPointBase
+    m_BasePointSectUnits =
+        CPointBase
         {
             x,          // x
             y,          // y
@@ -265,14 +266,25 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
             (uint8)map  // m
         };
 
-    m_MapRect =
-        CRectMap {
-            m_BasePoint.m_x,			        // left
-            m_BasePoint.m_y,			        // top
-            m_BasePoint.m_x + sd.iSectorSize,	// right: East
-            m_BasePoint.m_y + sd.iSectorSize,   // bottom: South
-            m_BasePoint.m_map			        // map
+    m_MapRectWorldUnits =
+        CRectMap
+        {
+            m_BasePointSectUnits.m_x * sd.iSectorSize,			        // left
+            m_BasePointSectUnits.m_y * sd.iSectorSize,			        // top
+            m_BasePointSectUnits.m_x * sd.iSectorSize + sd.iSectorSize,	// right: East
+            m_BasePointSectUnits.m_y * sd.iSectorSize + sd.iSectorSize, // bottom: South
+            m_BasePointSectUnits.m_map                                  // map
         };
+}
+
+CPointBase CSectorBase::GetBasePointMapUnits() const noexcept
+{
+    return CPointBase {
+        (int16)m_MapRectWorldUnits.m_left,
+        (int16)m_MapRectWorldUnits.m_top,
+        0,
+        (uint8)m_MapRectWorldUnits.m_map
+    };
 }
 
 CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
@@ -387,7 +399,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 	// Later added regions from the MAP file should be the smaller ones,
 	//  according to the old rules.
 	ASSERT(pRegionNew);
-	ASSERT( pRegionNew->IsOverlapped(GetRect()) );
+    ASSERT( pRegionNew->IsOverlapped(GetRectWorldUnits()) );
 	size_t iQty = m_RegionLinks.size();
 
 	for ( size_t i = 0; i < iQty; ++i )
@@ -411,11 +423,17 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 
 			// it is accurate in the TRUE case.
 			if ( pRegionNew->IsInside(pRegion))
+            {
+                g_Log.EventWarn("IsInside.\n");
 				continue;
+            }
 
 			// keep item (multi) regions on top
 			if ( pRegion->GetResourceID().IsUIDItem() && !pRegionNew->GetResourceID().IsUIDItem() )
-				continue;
+            {
+                g_Log.EventWarn("TopItem.\n");
+                continue;
+            }
 
 			// must insert before this.
 			m_RegionLinks.emplace(m_RegionLinks.begin() + i, pRegionNew);

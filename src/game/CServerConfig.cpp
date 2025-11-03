@@ -3327,7 +3327,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		// Create a new index for the block.
 		// NOTE: rid is not created for all types.
 		// NOTE: GetArgStr() is not always the DEFNAME
-		rid = ResourceGetNewID( restype, pScript->GetArgStr(), &pVarNum, fNewStyleDef );
+        lpctstr ptcScriptArg = pScript->GetArgStr();
+        rid = ResourceGetNewID( restype, ptcScriptArg, &pVarNum, fNewStyleDef );
 	}
 
 	if ( !rid.IsValidUID() )
@@ -3760,7 +3761,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		}
 		else
 		{
-			CRegionWorld * pRegion = new CRegionWorld( rid, pScript->GetArgStr());
+            lpctstr ptcScriptArg = pScript->GetArgStr();
+            CRegionWorld * pRegion = new CRegionWorld(rid, ptcScriptArg);
 			pRegion->r_Load( *pScript );
 			if (!pRegion->RealizeRegion())
 			{
@@ -3792,7 +3794,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		}
 		else
 		{
-			CRegion * pRegion = new CRegion( rid, pScript->GetArgStr());
+            lpctstr ptcScriptArg = pScript->GetArgStr();
+            CRegion * pRegion = new CRegion( rid, ptcScriptArg );
 			pNewDef = pRegion;
 			ASSERT(pNewDef);
 			pRegion->r_Load(*pScript);
@@ -4097,11 +4100,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		return true;
 	case RES_WORLDLISTS:
 		{
-            CListDefCont* pListBase = g_ExprGlobals.mtEngineLockedWriter()->m_ListGlobals.AddList(pScript->GetArgStr());
+            lpctstr ptcScriptArg = pScript->GetArgStr();
+            auto gWriter = g_ExprGlobals.mtEngineLockedWriter();
+            CListDefCont* pListBase = gWriter->m_ListGlobals.AddList(ptcScriptArg);
 
 			if ( !pListBase )
 			{
-				DEBUG_ERR(("Unable to create list '%s'...\n", pScript->GetArgStr()));
+                DEBUG_ERR(("Unable to create list '%s'...\n", ptcScriptArg));
 
 				return false;
 			}
@@ -4197,7 +4202,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("ExcInfo: section '%s' key '%s' args '%s'\n", pszSection,  pScript ? pScript->GetKey() : "",  pScript ? pScript->GetArgStr() : "");
+    g_Log.EventDebug("ExcInfo: section '%s' key '%s' args '%s'\n",
+        pszSection,
+        pScript ? pScript->GetKey() : "",
+        pScript ? pScript->GetArgStr() : "");
 	EXC_DEBUG_END;
 	return false;
 }

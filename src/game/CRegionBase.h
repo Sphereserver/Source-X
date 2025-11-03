@@ -23,11 +23,7 @@ public:
 	{
 		return m_rectUnion.IsRectEmpty();
 	}
-	void EmptyRegion()
-	{
-		m_rectUnion.SetRectEmpty();
-        m_Rects.clear();
-	}
+    void EmptyRegion();
 	size_t GetRegionRectCount() const;
     CRectMap & GetRegionRect(size_t i);
 	const CRectMap & GetRegionRect(size_t i) const;
@@ -52,9 +48,8 @@ public:
 	CRegionBase();
 	virtual ~CRegionBase() = default;
 
-private:
-	CRegionBase(const CRegionBase& copy);
-	CRegionBase& operator=(const CRegionBase& other);
+    CRegionBase(const CRegionBase& copy) = delete;
+    CRegionBase& operator=(const CRegionBase& other) = delete;
 };
 
 
