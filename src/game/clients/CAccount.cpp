@@ -1015,7 +1015,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		return true;
 	}
 
-	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, enteredPasswordLength) + 1;
+	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_SIZE, enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
 	Str_CopyLimitNull(actualPassword, pszPassword, actualPasswordBufferSize);
 
@@ -1066,10 +1066,10 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
         static constexpr tchar passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
 		int len = (int)strlen(passwdChars);
 		int charsCnt = g_Rand.GetVal(4) + 6;	// 6 - 10 chars
-		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_ENTER - 1) )
-			charsCnt = MAX_ACCOUNT_PASSWORD_ENTER - 1;
+		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_SIZE - 1) )
+			charsCnt = MAX_ACCOUNT_PASSWORD_SIZE - 1;
 
-		tchar szTmp[MAX_ACCOUNT_PASSWORD_ENTER + 1];
+		tchar szTmp[MAX_ACCOUNT_PASSWORD_SIZE + 1];
 		for ( int i = 0; i < charsCnt; ++i )
 			szTmp[i] = passwdChars[g_Rand.GetVal(len)];
 
@@ -1079,8 +1079,8 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 	}
 
 	m_sNewPassword = pszPassword;
-	if ( m_sNewPassword.GetLength() > MAX_ACCOUNT_PASSWORD_ENTER )
-		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_ENTER);
+	if ( m_sNewPassword.GetLength() > MAX_ACCOUNT_PASSWORD_SIZE )
+		m_sNewPassword.Resize(MAX_ACCOUNT_PASSWORD_SIZE);
 }
 
 bool CAccount::SetResDisp(RESDISPLAY_VERSION what)
