@@ -410,14 +410,25 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
 	if ( pVarNum )
     {
         if ( fShouldWarn )
-            g_Log.EventWarn( "Replacing existing VarNum '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal );
-		pVarNum->SetValNum( iVal );
+        {
+            g_Log.EventWarn( "Replacing existing VarNum '%s' with number: 0%" PRIx64 " (%" PRId64 ")\n", pVarBase->GetKey(), iVal, iVal );
+#ifdef _DEBUG
+            const int64 iOldVal = pVarNum->GetValNum();
+            g_Log.EventDebug("Previous value: %0" PRIx64 "(%" PRId64 ")\n", iOldVal, iOldVal);
+#endif
+        }
+        pVarNum->SetValNum( iVal );
     }
 	else
 	{
         if ( fShouldWarn )
-			g_Log.EventWarn( "Replacing existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal );
-		return SetNumOverride( pszName, iVal );
+        {
+            g_Log.EventWarn( "Replacing existing VarStr '%s' with number: 0%" PRIx64" (%" PRId64 ")\n", pVarBase->GetKey(), iVal, iVal );
+#ifdef _DEBUG
+            g_Log.EventDebug("Previous value: '%s'\n", pVarNum->GetValStr());
+#endif
+        }
+        return SetNumOverride( pszName, iVal );
 	}
 
 	return pVarNum;
@@ -491,14 +502,26 @@ CVarDefCont* CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, 
 	if ( pVarStr )
     {
         if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoadingGeneric() )
+        {
             g_Log.EventWarn( "Replacing existing VarStr '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal );
-		pVarStr->SetValStr( pszVal );
+#ifdef _DEBUG
+            g_Log.EventDebug("Previous value: '%s'\n", pVarStr->GetValStr());
+#endif
+        }
+        pVarStr->SetValStr( pszVal );
     }
 	else
 	{
 		if ( fWarnOverwrite && !g_Serv.IsResyncing() && g_Serv.IsLoadingGeneric() )
+        {
 			g_Log.EventWarn( "Replacing existing VarNum '%s' with string: '%s'\n", pVarBase->GetKey(), pszVal );
-		return SetStrOverride( pszName, pszVal );
+#ifdef _DEBUG
+            const int64 iOldVal = pVarStr->GetValNum();
+            g_Log.EventDebug("Previous value: 0%" PRIx64 " (%" PRId64 ")\n", iOldVal, iOldVal);
+
+#endif
+        }
+        return SetStrOverride( pszName, pszVal );
 	}
 	return pVarStr;
 }
@@ -563,13 +586,13 @@ CVarDefCont * CVarDefMap::GetParseKey_Advance( lpctstr & pszArgs ) const
 	return nullptr;
 }
 
-bool CVarDefMap::GetParseVal_Advance( lpctstr & pszArgs, llong * pllVal ) const
+bool CVarDefMap::GetParseVal_Advance( lpctstr & pszArgs, int64 * piVal ) const
 {
 	ADDTOCALLSTACK_DEBUG("CVarDefMap::GetParseVal_Advance");
 	CVarDefCont * pVarBase = GetParseKey_Advance( pszArgs );
 	if ( pVarBase == nullptr )
 		return false;
-	*pllVal = pVarBase->GetValNum();
+    *piVal = pVarBase->GetValNum();
 	return true;
 }
 

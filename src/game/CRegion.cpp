@@ -54,7 +54,7 @@ void CRegion::UnRealizeRegion()
 		if ( pSector == nullptr )
 			break;
 		// Does the rect overlap ?
-		if ( ! IsOverlapped( pSector->GetRect()))
+        if ( ! IsOverlapped( pSector->GetRectWorldUnits()))
 			continue;
 		if ( pSector->UnLinkRegion( this ))
 			--m_iLinkedSectors;
@@ -68,19 +68,21 @@ bool CRegion::RealizeRegion()
 	// Link the region to the world. RETURN: false = not valid.
 	if ( IsRegionEmpty() )
 		return false;
+
+    ASSERT(g_MapList.IsMapSupported(m_pt.m_map));
 	if ( !m_pt.IsValidPoint() )
 		m_pt = GetRegionCorner( DIR_QTY );	// center
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
     const CSectorList& pSectors = CSectorList::Get();
-    for ( int i = 0, iMax = pSectors.GetMapSectorData(m_pt.m_map).iSectorQty; i < iMax; ++i )
+    for ( int i = 0, iMax = pSectors.GetMapSectorDataUnchecked(m_pt.m_map).iSectorQty; i < iMax; ++i )
 	{
-        CSector *pSector = pSectors.GetSectorByIndex(m_pt.m_map, i);
+        CSector *pSector = pSectors.GetSectorByIndexUnchecked(m_pt.m_map, i);
 
-		if ( pSector && IsOverlapped(pSector->GetRect()) )
+        if ( pSector && IsOverlapped(pSector->GetRectWorldUnits()) )
 		{
-			//	Yes, this sector overlapped, so add it to the sector list
+            //	Yes, this sector is overlapped, so add it to the sector list
 			if ( !pSector->LinkRegion(this) )
 			{
 				g_Log.EventError("Linking sector #%d (map %d) for region %s failed (fatal for this region).\n", i, int(m_pt.m_map), GetName());
@@ -105,6 +107,12 @@ bool CRegion::AddRegionRect( const CRectMap & rect )
 
 	// Need to call RealizeRegion now.?
 	return true;
+}
+
+bool CRegion::SetRegionRect( const CRectMap & rect )
+{
+    EmptyRegion();
+    return AddRegionRect( rect );
 }
 
 void CRegion::SetName( lpctstr pszName )
@@ -690,6 +698,14 @@ void CRegion::r_Write( CScript &s )
 	r_WriteBase( s );
 }
 
+void CRegion::TogRegionFlags( dword dwFlags, bool fSet ) noexcept
+{
+    if ( fSet )
+        m_dwFlags |= dwFlags;
+    else
+        m_dwFlags &= ~dwFlags;
+    SetModified( REGMOD_FLAGS );
+}
 
 bool CRegion::IsGuarded() const
 {
@@ -839,7 +855,7 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 			break;
 
 		// Does the rect overlap ?
-		if ( IsOverlapped( pSector->GetRect() ) )
+        if ( IsOverlapped( pSector->GetRectWorldUnits() ) )
 		{
 			CScript script( pszVerb, pszArgs );
 			fRet |= pSector->r_Verb( script, pSrc );

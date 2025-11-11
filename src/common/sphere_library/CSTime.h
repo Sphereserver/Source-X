@@ -28,7 +28,7 @@ private:
     #undef GetCurrentTime
 
 	// Set once at server startup; used for Windows high-resolution timer
-	friend class GlobalInitializer;
+    friend struct GlobalInitializer;
 	static llong _kllTimeProfileFrequency;
 #endif
 

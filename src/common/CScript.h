@@ -84,6 +84,7 @@ protected:
 protected:
     tchar * _GetKeyBufferRaw();
     //tchar * GetKeyBufferRaw();
+    void _FreeKeyBuffer();
 	size_t ParseKeyEnd();
 
 public:

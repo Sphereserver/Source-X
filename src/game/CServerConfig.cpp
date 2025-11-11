@@ -1103,7 +1103,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				{
 					if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 					{
-                        const int nSectors = CSectorList::Get().GetMapSectorData(nMapNumber).iSectorQty;
+                        const int nSectors = CSectorList::Get().GetMapSectorDataUnchecked(nMapNumber).iSectorQty;
 						pszStr = s.GetArgRaw();
 
 						if ( pszStr && *pszStr )
@@ -1734,7 +1734,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					{
 						pszCmd += 7;
                         const CSectorList& pSectors = CSectorList::Get();
-                        const MapSectorsData& sd = pSectors.GetMapSectorData(iNumber);
+                        const MapSectorsData& sd = pSectors.GetMapSectorDataUnchecked(iNumber);
 
 						if (!strnicmp(pszCmd, "SIZE", 4))
                             sVal.FormatVal(sd.iSectorSize);
@@ -3159,11 +3159,26 @@ void CServerConfig::AddResourceDir( lpctstr pszDirName )
     if ( iRet <= 0 )	// no files here.
         return;
 
+    // Load the files, but preordering them by file name.
+    // TODO (low priority): just rework CSStringList to CSStringCont/Vec and add a method to sort it
+    std::vector<lpctstr> vecFileNames;
+
+    // Collect them from the list
     CSStringListRec * psFile = filelist.GetHead(), *psFileNext = nullptr;
     for ( ; psFile; psFile = psFileNext )
     {
         psFileNext = psFile->GetNext();
-        sFilePath = CSFile::GetMergedFileName( pszDirName, *psFile );
+        vecFileNames.push_back(*psFile);
+    }
+
+    // Order them by name (not including path, it is added later).
+    std::sort(vecFileNames.begin(), vecFileNames.end(),
+        [](lpctstr ptcFirst, lpctstr ptcSecond) noexcept {return strcmp(ptcFirst, ptcSecond) < 0;}
+        );
+
+    for (lpctstr elem : vecFileNames)
+    {
+        sFilePath = CSFile::GetMergedFileName(pszDirName, elem);
         AddResourceFile( sFilePath );
     }
 }
@@ -3312,7 +3327,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		// Create a new index for the block.
 		// NOTE: rid is not created for all types.
 		// NOTE: GetArgStr() is not always the DEFNAME
-		rid = ResourceGetNewID( restype, pScript->GetArgStr(), &pVarNum, fNewStyleDef );
+        lpctstr ptcScriptArg = pScript->GetArgStr();
+        rid = ResourceGetNewID( restype, ptcScriptArg, &pVarNum, fNewStyleDef );
 	}
 
 	if ( !rid.IsValidUID() )
@@ -3593,11 +3609,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 			}
 			else
 			{
-				if ( rid.GetResIndex() >= (uint)(m_iMaxSkill) )
-					m_iMaxSkill = rid.GetResIndex() + 1;
+                const uint uiResIdx = rid.GetResIndex();
+                if ( uiResIdx >= (uint)(m_iMaxSkill) )
+                    m_iMaxSkill = uiResIdx + 1;
 
 				// Just replace any previous CSkillDef
-				pSkill = new CSkillDef((SKILL_TYPE)(rid.GetResIndex()));
+                pSkill = new CSkillDef((SKILL_TYPE)uiResIdx);
 			}
 
 			ASSERT(pSkill);
@@ -3744,7 +3761,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		}
 		else
 		{
-			CRegionWorld * pRegion = new CRegionWorld( rid, pScript->GetArgStr());
+            lpctstr ptcScriptArg = pScript->GetArgStr();
+            CRegionWorld * pRegion = new CRegionWorld(rid, ptcScriptArg);
 			pRegion->r_Load( *pScript );
 			if (!pRegion->RealizeRegion())
 			{
@@ -3776,7 +3794,8 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		}
 		else
 		{
-			CRegion * pRegion = new CRegion( rid, pScript->GetArgStr());
+            lpctstr ptcScriptArg = pScript->GetArgStr();
+            CRegion * pRegion = new CRegion( rid, ptcScriptArg );
 			pNewDef = pRegion;
 			ASSERT(pNewDef);
 			pRegion->r_Load(*pScript);
@@ -4081,11 +4100,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 		return true;
 	case RES_WORLDLISTS:
 		{
-            CListDefCont* pListBase = g_ExprGlobals.mtEngineLockedWriter()->m_ListGlobals.AddList(pScript->GetArgStr());
+            lpctstr ptcScriptArg = pScript->GetArgStr();
+            auto gWriter = g_ExprGlobals.mtEngineLockedWriter();
+            CListDefCont* pListBase = gWriter->m_ListGlobals.AddList(ptcScriptArg);
 
 			if ( !pListBase )
 			{
-				DEBUG_ERR(("Unable to create list '%s'...\n", pScript->GetArgStr()));
+                DEBUG_ERR(("Unable to create list '%s'...\n", ptcScriptArg));
 
 				return false;
 			}
@@ -4181,7 +4202,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript, bool fInsertSorted )
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("ExcInfo: section '%s' key '%s' args '%s'\n", pszSection,  pScript ? pScript->GetKey() : "",  pScript ? pScript->GetArgStr() : "");
+    g_Log.EventDebug("ExcInfo: section '%s' key '%s' args '%s'\n",
+        pszSection,
+        pScript ? pScript->GetKey() : "",
+        pScript ? pScript->GetArgStr() : "");
 	EXC_DEBUG_END;
 	return false;
 }

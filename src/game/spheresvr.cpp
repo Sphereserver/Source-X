@@ -1,5 +1,4 @@
 #ifdef _WIN32
-	#include "../sphere/ntservice.h"	// g_Service
     #include "../sphere/ntwindow.h"
     #include <process.h>				// getpid()
 #else
@@ -20,17 +19,17 @@
 //#include "../common/CException.h" // included in the precompiled header
 //#include "../common/CExpression.h" // included in the precompiled header
 #include "../common/CUOInstall.h"
-#include "../common/sphereversion.h"
 #include "../network/CNetworkManager.h"
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
+#include "../sphere/GlobalInitializer.h"
+#include "../sphere/StartupMonitorThread.h"
+#include "../sphere/MainThread.h"
 #include "clients/CAccount.h"
-#include "CObjBase.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "spheresvr.h"
-#include <sstream>
 #include <cstdlib>
 
 #ifdef UNIT_TESTING
@@ -38,100 +37,10 @@
 #   include <doctest/doctest.h>
 #endif
 
-
-// Dynamic allocation of some global stuff
-std::string g_sServerDescription;
-
-// Dynamic initialization of some static members of other classes, which are used very soon after the server starts
-dword CObjBase::sm_iCount = 0;				// UID table.
-#ifdef _WIN32
-llong CSTime::_kllTimeProfileFrequency = 1; // Default value.
-#endif
-
-
-// This method MUST be the first code running when the application starts!
-GlobalInitializer::GlobalInitializer()
-{
-	// The order of the instructions is important!
-
-	std::stringstream ssServerDescription;
-	ssServerDescription << SPHERE_TITLE << " Version " << SPHERE_BUILD_INFO_STR;
-	ssServerDescription << " [" << get_target_os_str() << '-' << get_target_arch_str() << "]";
-	ssServerDescription << " by www.spherecommunity.net";
-	g_sServerDescription = ssServerDescription.str();
-
-//-- Time
-
-/*
-#ifdef _WIN32
-    // Ensure it's ACTUALLY necessary, before resorting to this.
-    timeBeginPeriod(1); // from timeapi.h, we need also to link against Winmm.lib...
-#endif
-*/
-    PeriodicSyncTimeConstants();
-
-
-//--- Sphere threading system
-
-	DummySphereThread::createInstance();
-
-    {
-        // Ensure i have this to have context for ADDTOCALLSTACK and other operations.
-        const AbstractThread* curthread = ThreadHolder::get().current();
-        ASSERT(curthread != nullptr);
-        ASSERT(dynamic_cast<DummySphereThread const *>(curthread));
-        UnreferencedParameter(curthread);
-    }
-
-//--- Exception handling
-
-#ifdef WINDOWS_SPHERE_SHOULD_HANDLE_STRUCTURED_EXCEPTIONS
-    SetWindowsStructuredExceptionTranslator();
-#endif
-
-	// Set function to handle the invalid case where a pure virtual function is called.
-    SetPurecallHandler();
-
-//--- Pre-startup sanity checks
-
-	constexpr const char* m_sClassName = "GlobalInitializer";
-	EXC_TRY("Pre-startup Init");
-
-	static_assert(MAX_BUFFER >= sizeof(CCommand));
-	static_assert(MAX_BUFFER >= sizeof(CEvent));
-	static_assert(sizeof(int) == sizeof(dword));	// make this assumption often.
-	static_assert(sizeof(ITEMID_TYPE) == sizeof(dword));
-	static_assert(sizeof(word) == 2);
-	static_assert(sizeof(dword) == 4);
-	static_assert(sizeof(nword) == 2);
-	static_assert(sizeof(ndword) == 4);
-	static_assert(sizeof(wchar) == 2);	// 16 bits
-	static_assert(sizeof(CUOItemTypeRec) == 37);	// is byte packing working ?
-
-	EXC_CATCH;
-}
-
-void GlobalInitializer::InitRuntimeDefaultValues() // static
-{
-	CPointBase::InitRuntimeDefaultValues();
-}
-
-void GlobalInitializer::PeriodicSyncTimeConstants() // static
-{
-    // TODO: actually call it periodically!
-
-#ifdef _WIN32
-    // Needed to get precise system time.
-    LARGE_INTEGER liProfFreq;
-    if (QueryPerformanceFrequency(&liProfFreq))
-    {
-        CSTime::_kllTimeProfileFrequency = liProfFreq.QuadPart;
-    }
-#endif  // _WIN32
-}
-
-
 /* Start global declarations */
+
+DummySphereThread* DummySphereThread::_instance = nullptr;
+std::string g_sServerDescription;
 
 // NOLINTNEXTLINE(clazy-non-pod-global-static)
 static GlobalInitializer g_GlobalInitializer;
@@ -163,7 +72,7 @@ CAccounts       g_Accounts;			// All the player accounts. name sorted CAccount
 CWorld			g_World;			// the world. (we save this stuff)
 
 // Networking stuff. They are declared here (in the same file of the other global declarations) to control the order of construction
-//  and destruction of these classes. If this order is altered, you'll get segmentation faults (access violations) when the server is closing!
+//  and destruction of these classes. If this order is altered, you'll get segmentation faults (access violations) when the server is servClosing!
 #ifdef _LIBEV
 	extern LinuxEv g_NetworkEvent;
 #endif
@@ -181,6 +90,10 @@ CUOMapList		g_MapList;			// global maps information
 
 //-- Threads.
 
+// Startup/Monitor Sphere context bound to the bootstrap thread.
+// NOLINTNEXTLINE(clazy-non-pod-global-static)
+static StartupMonitorThread g_StartupMonitor;
+
 // NOLINTNEXTLINE(clazy-non-pod-global-static)
 static MainThread g_Main;
 
@@ -191,44 +104,29 @@ CDataBaseAsyncHelper g_asyncHdb;
 
 
 //*******************************************************************
-//	Main server loop
 
-MainThread::MainThread()
-	: AbstractSphereThread("T_Main", ThreadPriority::RealTime)
+#ifdef _WIN32
+// Expose bootstrap-thread binding helpers for other TUs (e.g., WinMain/service).
+#include "../sphere/StartupMonitorAPI.h"
+extern "C"
 {
-    m_profile.EnableProfile(PROFILE_NETWORK_RX);
-    m_profile.EnableProfile(PROFILE_CLIENTS);
-    //m_profile.EnableProfile(PROFILE_NETWORK_TX);
-    m_profile.EnableProfile(PROFILE_CHARS);
-    m_profile.EnableProfile(PROFILE_ITEMS);
-    m_profile.EnableProfile(PROFILE_MAP);
-    m_profile.EnableProfile(PROFILE_MULTIS);
-    m_profile.EnableProfile(PROFILE_NPC_AI);
-    m_profile.EnableProfile(PROFILE_SCRIPTS);
-    m_profile.EnableProfile(PROFILE_SHIPS);
-    m_profile.EnableProfile(PROFILE_TIMEDFUNCTIONS);
-    m_profile.EnableProfile(PROFILE_TIMERS);
+    void Sphere_AttachBootstrapContext()
+    {
+        g_StartupMonitor.attachToCurrentThread("T_SphereStartup");
+    }
+
+    void Sphere_RenameBootstrapToMonitor()
+    {
+        g_StartupMonitor.renameAsMonitor();
+    }
+
+    void Sphere_RunMonitorLoop()
+    {
+        g_StartupMonitor.runMonitorLoop();
+    }
 }
+#endif
 
-void MainThread::onStart()
-{
-	AbstractSphereThread::onStart();
-}
-
-void MainThread::tick()
-{
-	Sphere_OnTick();
-}
-
-bool MainThread::shouldExit() noexcept
-{
-	if (g_Serv.GetExitFlag() != 0)
-		return true;
-	return AbstractSphereThread::shouldExit();
-}
-
-
-//*******************************************************************
 
 static bool WritePidFile(int iMode = 0)
 {
@@ -264,7 +162,6 @@ static bool WritePidFile(int iMode = 0)
 	}
 }
 
-
 int Sphere_InitServer( int argc, char *argv[] )
 {
 	constexpr const char *m_sClassName = "SphereInit";
@@ -293,7 +190,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	if ( !g_World.LoadAll() )
 		return -8;
 
-	//	load auto-complete dictionary
+    //	load auto-complete dictionary // TODO: might as well be removed...?
 	EXC_SET_BLOCK("auto-complete");
 	{
 		CSFileText dict;
@@ -331,6 +228,8 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 	EXC_SET_BLOCK("finalizing");
     g_Serv.SetServerMode(ServMode::Run);	// ready to go.
+    // Enter Run mode: inform ThreadHolder to disable startup fallback for current()
+    ThreadHolder::markServEnteredRunMode();
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
 	g_Log.Event(LOGM_INIT, "\nStartup complete (items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T ", Accounts = %" PRIuSIZE_T ")\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS), g_Serv.StatGet(SERV_STAT_ACCOUNTS));
@@ -413,84 +312,15 @@ void Sphere_ExitServer()
 }
 
 
-int Sphere_OnTick()
-{
-	// Give the world (CMainTask) a single tick. RETURN: 0 = everything is fine.
-	constexpr const char *m_sClassName = "SphereTick";
-	EXC_TRY("Tick");
-#ifdef _WIN32
-	EXC_SET_BLOCK("service");
-    g_NTService._OnTick();
-#endif
-
-	EXC_SET_BLOCK("world");
-	g_World._OnTick();
-
-	// process incoming data
-	EXC_SET_BLOCK("network-in");
-	g_NetworkManager.processAllInput();
-
-	EXC_SET_BLOCK("server");
-	g_Serv._OnTick();
-
-	// push outgoing data
-	EXC_SET_BLOCK("network-out");
-	g_NetworkManager.processAllOutput();
-
-	// don't put the network-tick between in.tick and out.tick, otherwise it will clean the out queue!
-	EXC_SET_BLOCK("network-tick");
-	g_NetworkManager.tick();	// then this thread has to call the network tick
-
-	EXC_CATCH;
-	return g_Serv.GetExitFlag();
-}
-
-
 //*****************************************************
 
-static void Sphere_MainMonitorLoop()
+// Provide the monitor stuck-check wrapper referenced by StartupMonitorThread
+bool Sphere_CheckMainStuckAndRestart()
 {
-	constexpr const char *m_sClassName = "SphereMonitor";
-	// Just make sure the main loop is alive every so often.
-	// This should be the parent thread. try to restart it if it is not.
-	while ( !g_Serv.GetExitFlag() )
-	{
-		EXC_TRY("MainMonitorLoop");
-
-		if ( g_Cfg.m_iFreezeRestartTime <= 0 )
-		{
-			DEBUG_ERR(("Freeze Restart Time cannot be cleared at run time\n"));
-			g_Cfg.m_iFreezeRestartTime = 10;
-		}
-
-		EXC_SET_BLOCK("Sleep");
-		// only sleep 1 second at a time, to avoid getting stuck here when closing
-		// down with large m_iFreezeRestartTime values set
-		for (int i = 0; i < g_Cfg.m_iFreezeRestartTime; ++i)
-		{
-			if ( g_Serv.GetExitFlag() )
-				break;
-
-            SLEEP(1000);
-		}
-
-		EXC_SET_BLOCK("Checks");
-		// Don't look for freezing when doing certain things.
-		if ( g_Serv.IsLoadingGeneric() || ! g_Cfg.m_fSecure || g_Serv.IsValidBusy() )
-			continue;
-
-#ifndef _DEBUG
-		EXC_SET_BLOCK("Check Stuck");
-		if (g_Main.checkStuck() == true)
-			g_Log.Event(LOGL_CRIT, "'%s' thread hang, restarting...\n", g_Main.getName());
-#endif
-		EXC_CATCH;
-	}
-
+    return g_Main.checkStuck();
 }
 
-
-void atexit_handler()
+static void atexit_handler()
 {
 	ThreadHolder::get().markThreadsClosing();
 }
@@ -530,7 +360,10 @@ int main( int argc, char * argv[] )
     }
 
 #ifndef _WIN32
-    AbstractThread::setThreadName("T_SphereStartup");
+    // Bind the bootstrap OS thread as a proper Sphere thread during startup.
+    g_StartupMonitor.attachToCurrentThread("T_SphereStartup");
+
+    // Start UnixTerminal in its own thread.
     g_UnixTerminal.start();
 #endif
 
@@ -591,21 +424,25 @@ int main( int argc, char * argv[] )
         //  an instance of CNetworkInput nad CNetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 		g_NetworkManager.start();
 
-		const bool fShouldCoreRunInSeparateThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
-		if (fShouldCoreRunInSeparateThread)
-		{
-			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
-            AbstractThread::setThreadName("T_Monitor");
-			Sphere_MainMonitorLoop();	// Use this thread to monitor if the others are stuck
-		}
-		else
-		{
-			while ( !g_Serv.GetExitFlag() )
-			{
-				g_Main.tick();			// Use this thread to do all the work, without monitoring the other threads state
-			}
-		}
-	}
+        const bool fShouldCoreRunInSeparateThread = (g_Cfg.m_iFreezeRestartTime != 0);
+        if (fShouldCoreRunInSeparateThread)
+        {
+            // Core runs on a separate OS thread.
+            g_Main.start();
+            // Switch the bootstrap thread from startup duties to monitoring duties.
+            g_StartupMonitor.renameAsMonitor();
+            // Blocking monitor loop on the bootstrap thread.
+            g_StartupMonitor.runMonitorLoop();
+        }
+        else
+        {
+            // Inline core on the bootstrap thread: release the startup context and bind g_Main.
+            g_StartupMonitor.detachFromCurrentThread();
+            AbstractThread::ThreadBindingScope bind(g_Main, "T_Main");
+            while (!g_Serv.GetExitFlag())
+                g_Main.tick();
+        }
+    }
 
 exit_server:
 	Sphere_ExitServer();

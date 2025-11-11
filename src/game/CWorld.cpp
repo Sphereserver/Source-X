@@ -1260,9 +1260,9 @@ void CWorld::SaveStatics()
 			if ( !g_MapList.IsMapSupported(m) )
                 continue;
 
-            for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
+            for (int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s)
 			{
-                CSector* pSector = _Sectors.GetSectorByIndex(m, s);
+                CSector* pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 				if ( !pSector )
                     continue;
 
@@ -1282,7 +1282,7 @@ void CWorld::SaveStatics()
 
 		m_FileStatics.WriteSection( "EOF" );
 		m_FileStatics.Close();
-		g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", static_cast<lpctstr>(m_FileStatics.GetFilePath()));
+        g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", m_FileStatics.GetFilePath());
 	}
 	catch (const CSError& e)
 	{
@@ -1470,11 +1470,11 @@ bool CWorld::LoadAll() // Load world from script
 		if (!g_MapList.IsMapSupported(m))
 			continue;
 
-        for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
+        for (int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s)
 		{
 			EXC_TRYSUB("Load");
 
-            CSector* pSector = _Sectors.GetSectorByIndex(m, s);
+            CSector* pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 			ASSERT(pSector);
 
             if (!pSector->IsLightOverriden())
@@ -1658,11 +1658,11 @@ void CWorld::RespawnDeadNPCs()
 		if ( !g_MapList.IsMapSupported(m) )
             continue;
 
-        for (int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s)
+        for (int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s)
 		{
 			EXC_TRY("OnSector");
 
-            CSector* pSector = _Sectors.GetSectorByIndex(m, s);
+            CSector* pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 			ASSERT(pSector);
 			pSector->RespawnDeadNPCs();
 
@@ -1698,11 +1698,11 @@ void CWorld::Restock()
 		if ( !g_MapList.IsMapSupported(m) )
 			continue;
 
-        for ( int s = 0, qty = _Sectors.GetMapSectorData(m).iSectorQty; s < qty; ++s )
+        for ( int s = 0, qty = _Sectors.GetMapSectorDataUnchecked(m).iSectorQty; s < qty; ++s )
 		{
 			EXC_TRY("OnSector");
 
-            CSector	*pSector = _Sectors.GetSectorByIndex(m, s);
+            CSector	*pSector = _Sectors.GetSectorByIndexUnchecked(m, s);
 			ASSERT(pSector);
 			pSector->Restock();
 

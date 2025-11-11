@@ -286,7 +286,7 @@ CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 	return pt;
 }
 
-CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that make up this rect.
+CSector * CRect::GetSector( int i ) const noexcept	// get all the sectors that make up this rect.
 {
 	//ADDTOCALLSTACK_DEBUG("CRect::GetSector");
 	// get all the CSector(s) that overlap this rect.
@@ -294,17 +294,22 @@ CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that ma
 
 	// Align new rect.
     const CSectorList &pSectors = CSectorList::Get();
-    const MapSectorsData& sd = pSectors.GetMapSectorData(m_map);
-    const int iSectorSize = sd.iSectorSize;
-    const int iSectorCols = sd.iSectorColumns;
-    const uint uiSectorShift = sd.uiSectorDivShift;
+    const MapSectorsData* pSecData = pSectors.GetMapSectorData(m_map);
+    if (!pSecData) [[unlikely]]
+        return nullptr;
 
-    CRectMap rect;
-    rect.m_left     =  m_left   & ~(iSectorSize-1);         // aligns the left boundary down to the nearest multiple of iSectorSize.
-    rect.m_right    = (m_right  |  (iSectorSize-1)) + 1;    // rounds the right boundary up to cover the full last sector.
-    rect.m_top      =  m_top    & ~(iSectorSize-1);
-    rect.m_bottom   = (m_bottom |  (iSectorSize-1)) + 1;
-    rect.m_map      = m_map;
+    const int iSectorSize = pSecData->iSectorSize;
+    const int iSectorCols = pSecData->iSectorColumns;
+    const uint uiSectorShift = pSecData->uiSectorDivShift;
+
+    // CRectMap(int left, int top, int right, int bottom, int map)
+    CRectMap rect(
+        (m_left   & ~(iSectorSize-1)),        // aligns the left boundary down to the nearest multiple of iSectorSize.
+        (m_top    & ~(iSectorSize-1)),
+        (m_right  |  (iSectorSize-1)) + 1,    // rounds the right boundary up to cover the full last sector.
+        (m_bottom |  (iSectorSize-1)) + 1,
+        m_map
+        );
 	rect.NormalizeRectMax();
 
     //const int width = (rect.GetWidth()) / iSectorSize;
@@ -314,7 +319,7 @@ CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that ma
 
 #ifdef _DEBUG
 	ASSERT(width <= iSectorCols);
-    const int iSectorRows = sd.iSectorRows;
+    const int iSectorRows = pSecData->iSectorRows;
 	ASSERT(height <= iSectorRows);
 #endif
 
@@ -332,10 +337,10 @@ CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that ma
     const int iBase = (baseRow * iSectorCols) + baseCol;
 
     if (i >= (height * width))
-        return i ? nullptr : pSectors.GetSectorByIndex(m_map, iBase);
+        return i ? nullptr : pSectors.GetSectorByIndexUnchecked(m_map, iBase);
 
     const int indexoffset = ((i / width) * iSectorCols) + (i % width);
-    return pSectors.GetSectorByIndex(m_map, iBase + indexoffset);
+    return pSectors.GetSectorByIndexUnchecked(m_map, iBase + indexoffset);
 }
 
 

@@ -3872,7 +3872,7 @@ bool CChar::r_LoadVal( CScript & s )
             _uiStatFlag = (_uiStatFlag & uiFlagsNoChange) | (uiNewFlags & ~uiFlagsNoChange);
             if (uiCurFlags != uiNewFlags)
             {
-                const bool fDoFullUpdate = (uiCurFlags & uiFlagsRequireFullUpdate) != (uiNewFlags & uiFlagsRequireFullUpdate);
+                const bool fDoFullUpdate =  HAS_FLAGS_ANY(uiCurFlags, uiFlagsRequireFullUpdate);
                 NotoSave_Update(fDoFullUpdate);
             }
 			break;
