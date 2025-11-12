@@ -72,7 +72,7 @@ CAccounts       g_Accounts;			// All the player accounts. name sorted CAccount
 CWorld			g_World;			// the world. (we save this stuff)
 
 // Networking stuff. They are declared here (in the same file of the other global declarations) to control the order of construction
-//  and destruction of these classes. If this order is altered, you'll get segmentation faults (access violations) when the server is servClosing!
+//  and destruction of these classes. If this order is altered, you'll get segmentation faults (access violations) when the server is closing!
 #ifdef _LIBEV
 	extern LinuxEv g_NetworkEvent;
 #endif

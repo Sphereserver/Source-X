@@ -39,10 +39,14 @@ public:
 	bool IsOverlapped( const CRegionBase * pRegionTest ) const;
 	bool IsEqualRegion( const CRegionBase * pRegionTest ) const;
 
-	inline CSector * GetSector( int i ) const // get all the sectors that make up this rect.
-	{
-		return m_rectUnion.GetSector(i);
+    [[nodiscard]]
+    inline CSector * GetSectorAtIndex( int i ) const noexcept {
+        return m_rectUnion.GetSectorAtIndex(i);
 	}
+    [[nodiscard]]
+    inline CSector * GetSectorAtIndexWithHints( int i, CRect::SectIndexingHints hints ) const noexcept {
+        return m_rectUnion.GetSectorAtIndexWithHints(i, std::move(hints));
+    }
 
 public:
 	CRegionBase();

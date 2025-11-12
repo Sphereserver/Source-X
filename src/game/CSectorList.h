@@ -20,7 +20,7 @@ struct MapSectorsData
     int iSectorColumns;  // how much sectors are in a column (x) in a given map
     int iSectorRows;     // how much sectors are in a row (y) in a given map
     int iSectorQty;      // how much sectors are in a map
-    uint16 uiSectorDivShift;    // precalculated value to avoid a division in sector/rect calculations
+    uint16 uiSectorSizeDivShift;    // precalculated value to avoid a division in sector/rect calculations
 
 private:
     std::unique_ptr<CSector[]> _pSectors;
@@ -31,7 +31,8 @@ class CSectorList
 public:
 	static const char* m_sClassName;
 
-    //std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData; // Use plain C-style vectors, to remove even the minimal overhead of std::array methods
+    // Use plain C-style vectors, to remove even the minimal overhead of std::array methods in debug builds.
+    //std::array<MapSectorsData, MAP_SUPPORTED_QTY> _SectorData;
 	MapSectorsData _SectorData[MAP_SUPPORTED_QTY];
 	bool _fInitialized;
 
@@ -52,6 +53,13 @@ public:
     const MapSectorsData* GetMapSectorData(int map) const noexcept;
     [[nodiscard]]
     const MapSectorsData& GetMapSectorDataUnchecked(int map) const noexcept;
+
+    [[nodiscard]]
+    static
+    constexpr int CalcSectorIndex(int maxX, int x, int y) noexcept {
+        // Row-major order: index = row * numColumns + column
+        return (y * maxX) + x;
+    }
 
     CSector* GetSectorByIndexUnchecked(int map, int index) const noexcept;	// gets sector # from one map
     CSector* GetSectorByCoordsUnchecked(int map, short x, short y) const NOEXCEPT_NODEBUG;
