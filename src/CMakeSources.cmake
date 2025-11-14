@@ -382,7 +382,7 @@ set(game_S
     src/game/CResourceCalc.cpp
     src/game/CSector.cpp
     src/game/CSectorEnviron.cpp
-    src/game/CSectorTemplate.cpp
+    src/game/CSectorBase.cpp
     src/game/CSectorList.cpp
     src/game/CServer.cpp
     src/game/CServerConfig.cpp
@@ -422,7 +422,7 @@ set(game_H
     src/game/CScriptProfiler.h
     src/game/CSector.h
     src/game/CSectorEnviron.h
-    src/game/CSectorTemplate.h
+    src/game/CSectorBase.h
     src/game/CSectorList.h
     src/game/CServer.h
     src/game/CServerConfig.h
