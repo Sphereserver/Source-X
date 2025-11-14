@@ -209,7 +209,7 @@ void CSectorBase::SetAdjacentSectors()
         if ((iAdjY < 0) || (iAdjY >= iMaxY))
             continue;
 
-        const int iAdjIndex = m_index + ((iAdjX * iMaxX) + iAdjY);
+        const int iAdjIndex = CSectorList::CalcSectorIndex(iMaxX, iAdjX, iAdjY);
         if ((iAdjIndex < 0) || (iAdjIndex > iMaxSectors))
             continue;
 
