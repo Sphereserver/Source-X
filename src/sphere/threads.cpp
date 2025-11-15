@@ -131,14 +131,14 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
 {
     if (!pAbstractThread)
     {
-        stderrLog("ThreadHolder::push: nullptr thread.\n");
+        stderrLog("THREADING: ThreadHolder::push: nullptr thread.\n");
         return;
     }
 
     auto* pSphereThread = dynamic_cast<AbstractSphereThread*>(pAbstractThread);
     if (!pSphereThread)
     {
-        stderrLog("ThreadHolder::push: not an AbstractSphereThread.\n");
+        stderrLog("THREADING: ThreadHolder::push: not an AbstractSphereThread.\n");
         return;
     }
 
@@ -179,7 +179,7 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
 #ifdef _DEBUG
             if (fShouldLogDebug)
                 g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-                    "ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
+                    "THREADING: ThreadHolder already registered: %s (ThreadHolder-ID %d).\n",
                     ptcNameForLog, iIdForLogDebug);
 #endif
             return;
@@ -200,7 +200,7 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
             auto* other = itExistingSys->second;
             lock.unlock();
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-                "ThreadHolder: refusing to register %s on OS thread already owned by %s.\n",
+                "THREADING: ThreadHolder: refusing to register %s on OS thread already owned by %s.\n",
                 ptcNameForLog, other ? other->getName() : "<unknown>");
             EXC_NOTIFY_DEBUGGER;
             return;
@@ -221,17 +221,17 @@ void ThreadHolder::push(AbstractThread* pAbstractThread) noexcept
 #ifdef _DEBUG
         if (fShouldLogDebug)
             g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-                "ThreadHolder registered %s (ThreadHolder-ID %d).\n",
+                "THREADING: ThreadHolder registered %s (ThreadHolder-ID %d).\n",
                 ptcNameForLog, iIdForLogDebug);
 #endif
     }
     catch (const std::exception& e)
     {
-        stderrLog("ThreadHolder::push: exception: %s.\n", e.what());
+        stderrLog("THREADING: ThreadHolder::push: exception: %s.\n", e.what());
     }
     catch (...)
     {
-        stderrLog("ThreadHolder::push: unknown exception.\n");
+        stderrLog("THREADING: ThreadHolder::push: unknown exception.\n");
     }
 }
 
@@ -274,13 +274,13 @@ void ThreadHolder::remove(AbstractThread* pAbstractThread) CANTHROW
     if (!isServClosing())
     {
         g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-            "ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
+            "THREADING: ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
             ptcName, (uint64_t)sysId);
     }
     else
     {
         // Logger may be shutting down; print directly to stdout to avoid loss.
-        fprintf(stdout, "DEBUG: ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
+        fprintf(stdout, "DEBUG: THREADING: ThreadHolder removed %s with sys-id %" PRIu64 ".\n",
             ptcName, (uint64_t)sysId);
         fflush(stdout);
     }
@@ -439,7 +439,7 @@ static void os_set_thread_name_portable(const char* name_trimmed) noexcept
         } __except(EXCEPTION_EXECUTE_HANDLER) {
         }
 #   else
-        stderrLog("WARN: no available implementation to set the thread name.\n");
+        stderrLog("THREADING: WARN: no available implementation to set the thread name.\n");
 #   endif
     }
 #elif defined(__APPLE__)
@@ -460,7 +460,7 @@ static void os_set_thread_name_portable(const char* name_trimmed) noexcept
     // TODO: support other BSD systems
     // No-op on unknown platforms
     (void)name_trimmed;
-    stderrLog("WARN: no available implementation to set the thread name for the current platform (unknown/unsupported).\n");
+    stderrLog("THREADING: WARN: no available implementation to set the thread name for the current platform (unknown/unsupported).\n");
 #endif
 }
 
@@ -527,7 +527,7 @@ void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
 void AbstractThread::start()
 {
     g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
-        "Spawning new thread '%s' (AbstractThread* = 0x% " PRIxSIZE_T ")...\n",
+        "THREADING: Spawning new thread '%s' (AbstractThread* = 0x% " PRIxSIZE_T ")...\n",
         getName(), reinterpret_cast<void*>(this));
 
 #ifdef _WIN32
@@ -562,7 +562,7 @@ void AbstractThread::terminate(bool ended)
         {
             if (!m_handle.has_value())
             {
-                stderrLog("AbstractThread::terminate: no handle available.\n");
+                stderrLog("THREADING: AbstractThread::terminate: no handle available.\n");
             }
             else
             {
@@ -776,7 +776,7 @@ void AbstractThread::onStart()
 
 #ifdef _DEBUG
     g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-        "Started thread loop for '%s' (ThreadHolder-ID %d), sys-id %" PRIu64 ".\n",
+        "THREADING: Started thread loop for '%s' (ThreadHolder-ID %d), sys-id %" PRIu64 ".\n",
         getName(), m_threadHolderId, (uint64)m_threadSystemId);
 #endif
 
@@ -830,13 +830,13 @@ void AbstractThread::attachToCurrentThread(const char* osThreadName) noexcept
     if (sg_tlsCurrentSphereThread && sg_tlsCurrentSphereThread != this)
     {
         g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-            "attachToCurrentThread refused: current OS thread already bound to '%s'; wanted '%s'.\n",
+            "THREADING: attachToCurrentThread rejected: current OS thread already bound to '%s'; wanted '%s'.\n",
             sg_tlsCurrentSphereThread->getName(), ptcThreadName);
         return;
     }
 
     g_Log.Event(LOGM_DEBUG | LOGL_EVENT | LOGF_CONSOLE_ONLY,
-        "Binding current context to thread '%s'...\n", ptcThreadName);
+        "THREADING: Binding current context to thread '%s'...\n", ptcThreadName);
 
     // Attempt to bind; onStart will self-guard and leave this object clean on refusal.
     onStart();

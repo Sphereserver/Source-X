@@ -5816,9 +5816,9 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_TickableState() const
+bool CChar::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CChar::_TickableState");
+    //ADDTOCALLSTACK_DEBUG("CChar::_TickableStateBase");
     EXC_TRY("Able to tick?");
 
     if (IsDisconnected())
@@ -5827,10 +5827,12 @@ bool CChar::_TickableState() const
         if (Skill_GetActive() == NPCACT_RIDDEN)
             return true;
 
-		return false;
+        //const std::optional<bool> fOverriding = _TickableStateOverride();
+        //return fOverriding.value_or(false);
+        return false;
 	}
 
-    return CObjBase::_TickableState();
+    return CObjBase::_TickableStateBase();
 
 	EXC_CATCH;
 
@@ -5880,21 +5882,13 @@ bool CChar::_OnTick()
 
 	EXC_SET_BLOCK("Can Tick?");
 
-    // This check shouldn't be needed, since it's already done in _CanTick, but we'll leave it here for now until further tests.
-    if (_IsSleeping() || IsDisconnected())
-	{
-        // In this cases, only mounted horses can still get a tick.
-        if (Skill_GetActive() != NPCACT_RIDDEN)
-            return true;
-	}
-
-    const bool fTickableState  = _TickableState();
+    const bool fTickableState  = _CanTick(false);
     const bool fSleeping       = _IsSleeping();
 
 //#ifdef _DEBUG
     if (!fTickableState || fSleeping)
     {
-        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual TickableState=%d, SleepingState=%d.\n",
+        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual TickableStateBase=%d, SleepingState=%d.\n",
                          GetName(), GetUID().GetObjUID(),
                          GetTopPoint().WriteUsed(),
                          (int)fTickableState, (int)fSleeping
