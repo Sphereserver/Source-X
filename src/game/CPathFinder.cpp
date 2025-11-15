@@ -1,5 +1,5 @@
 
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "CPathFinder.h"
@@ -47,7 +47,7 @@ CPathFinderPoint::CPathFinderPoint() :
 }
 
 /*
-CPathFinderPoint::CPathFinderPoint(const CPointMap& pt) : 
+CPathFinderPoint::CPathFinderPoint(const CPointMap& pt) :
     _Parent(nullptr), _Walkable(false), _FValue(0), _GValue(0), _HValue(0)
 {
 	//ADDTOCALLSTACK("CPathFinderPoint::CPathFinderPoint");
@@ -128,7 +128,7 @@ bool CPathFinder::FindPath() //A* algorithm
 
         // Take the point with the lowest FValue
         CPathFinderPoint *Current = *m_Opened.begin();
-		
+
 		if ( Current == End )
 		{
             // Arrived to destination: reconstruct path and save it
@@ -163,7 +163,7 @@ bool CPathFinder::FindPath() //A* algorithm
              */
             // Binary (pre-sorted) search in our sorted_vector
             if (m_Closed.find(Cell) != sl::scont_bad_index())
-                continue;            
+                continue;
 
             ASSERT(Cell->_Walkable);
             // Linear search

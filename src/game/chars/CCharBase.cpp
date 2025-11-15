@@ -1,6 +1,6 @@
 
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
+//#include "../../common/CException.h" // included in the precompiled header
 #include "../../common/CLog.h"
 #include "../components/CCPropsChar.h"
 #include "../components/CCPropsItemChar.h"

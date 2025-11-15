@@ -40,7 +40,6 @@ public:
 };
 
 
-
 /* CSObjCont */
 
 #define BASECONT std::vector<CSObjContRec*>
@@ -54,7 +53,7 @@ public:
     friend class CSObjContRec;
     static const char * m_sClassName;
 
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
     */
     ///@{
     /**
@@ -194,7 +193,7 @@ protected:
     * Never called directly. Called CSObjContRec::RemoveSelf()
     * @see CSObjContRec::RemoveSelf().
     *
-    * @param pObRec removed record.
+    * @param pObjRec removed record.
     */
     virtual void OnRemoveObj( CSObjContRec* pObjRec );
     ///@}

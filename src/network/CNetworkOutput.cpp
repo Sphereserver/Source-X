@@ -48,7 +48,6 @@ static void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, L
 #endif
 
 
-
 CNetworkOutput::CNetworkOutput() : m_thread(nullptr)
 {
 	m_encryptBuffer = new byte[MAX_BUFFER];

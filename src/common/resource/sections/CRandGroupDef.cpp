@@ -3,8 +3,8 @@
 #include "../../../game/CServerConfig.h"
 #include "../../../game/triggers.h"
 #include "../../sphere_library/CSRand.h"
-#include "../../CException.h"
-#include "../../CExpression.h"
+//#include "../../CException.h" // included in the precompiled header
+//#include "../../CExpression.h" // included in the precompiled header
 #include "CRegionResourceDef.h"
 #include "CRandGroupDef.h"
 
@@ -258,7 +258,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool fTrigger ) cons
 
                 if (IsTrigUsed(TRIGGER_RESOURCETEST))
                 {
-                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", pCharSrc, nullptr) == TRIGRET_RET_TRUE)
+                    if (fTrigger && pOreDef->OnTrigger("@ResourceTest", CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharSrc) == TRIGRET_RET_TRUE)
                         continue;
                 }
             }

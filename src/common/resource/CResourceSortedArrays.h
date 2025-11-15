@@ -85,7 +85,7 @@ template <typename _ObjType>
 class CObjUniquePtrNameSortVector final : public sl::unique_ptr_sorted_vector<_ObjType, CObjUniquePtrNameVectorSorter<_ObjType>>
 {
 public:
-    //static const char *m_sClassName;  
+    //static const char *m_sClassName;
     inline size_t find_sorted(lpctstr ptcKey) const noexcept { return this->find_predicate(ptcKey, CObjUniquePtrNameVectorSorter<_ObjType>::_compare);        }
     inline bool   ContainsKey(lpctstr ptcKey) const noexcept { return (sl::scont_bad_index() != this->find_sorted(ptcKey)); }
 };

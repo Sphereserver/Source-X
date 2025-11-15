@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../clients/CClient.h"
 #include "../components/CCSpawn.h"
 #include "../items/CItemContainer.h"
@@ -23,7 +23,7 @@ void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 	if ( !CanSee( pMaster ) )
 		return;
 
-	// i take a command from my master.
+	// I take a command from my master.
 	if ( NPC_CanSpeak() )
 		Speak( fSuccess ? g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_SUCCESS ) : g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_FAILURE ) );
 	else
@@ -412,14 +412,14 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 		case PC_TRANSFER:
 			// Can't transfer ownership of a conjured monster, it can be controlled only by its summoner
 			if (IsStatFlag(STATF_CONJURED))
-			{	
+			{
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_TRANSFER_SUMMONED));
 				return false;
 			}
 			break;
 		default:
 		{
-			// All others commands are avaible only to pet owner
+			// All others commands are available only to pet owner.
 			if ( !NPC_IsOwnedBy(pSrc, true) )
 				return false;
 		}
@@ -642,7 +642,7 @@ bool CChar::NPC_CheckHirelingStatus()
 {
 	ADDTOCALLSTACK("CChar::NPC_CheckHirelingStatus");
 	ASSERT(m_pNPC);
-	//  Am i happy at the moment ?
+	//  Am I happy at the moment?
 	//  If not then free myself.
 	//
 	// RETURN:
@@ -762,7 +762,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 
 		// Put all my loot cash away.
 		ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), INT32_MAX, 0 );
-		// Mark all my stuff ATTR_OWNED - i won't give it away.
+		// Mark all my stuff ATTR_OWNED - I won't give it away.
 		ContentAttrMod( ATTR_OWNED, true );
 
 		NPC_PetSetOwner( pCharSrc );
@@ -791,7 +791,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 	{
 		if ( pMemory->IsMemoryTypes(MEMORY_IPET|MEMORY_FRIEND))
 		{
-			// Next gold i get goes toward hire.
+			// Next gold I get goes toward hire.
 			pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_SPEAK_HIRE;
 			NPC_OnHirePayMore( nullptr, uiWage, false );
 			return true;
@@ -826,7 +826,7 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 	ASSERT(m_pNPC);
 	// player vendors.
 	// CLIMODE_PROMPT_VENDOR_PRICE
-	// This does not check who is setting the price if if it is valid for them to do so.
+	// This does not check who is setting the price if it is valid for them to do so.
 
 	if ( ! NPC_IsVendor())
 		return false;
@@ -869,7 +869,7 @@ void CChar::NPC_PetRelease()
 
     if (IsTrigUsed(TRIGGER_PETRELEASE))
     {
-        if (OnTrigger(CTRIG_PetRelease, pCharOwn, nullptr) == TRIGRET_RET_TRUE)
+        if (OnTrigger(CTRIG_PetRelease, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharOwn) == TRIGRET_RET_TRUE)
             return;
     }
 
@@ -901,7 +901,7 @@ void CChar::NPC_PetDesert()
 	ASSERT(m_pNPC);
 	// If the monster has brain_berserk (i.e. energy vortex): when the player summons it, his CurFollower property rises.
 	//	If the master attacks the berserk pet, the pet deserts him and the master's CurFollower goes down. If we don't prevent
-	//	berserk monsters to desert the master, he can do this trick to summon a lot of energy vortexes without any cost to his followers property.
+	//	berserk monsters to desert the master, he can do this trick to summon a lot of energy vortexes without any cost to his followers' property.
 
 	if (m_pNPC->m_Brain == NPCBRAIN_BERSERK)
 		return;
@@ -911,7 +911,7 @@ void CChar::NPC_PetDesert()
 
 	if ( IsTrigUsed(TRIGGER_PETDESERT) )
 	{
-		if ( OnTrigger( CTRIG_PetDesert, pCharOwn, nullptr ) == TRIGRET_RET_TRUE )
+        if ( OnTrigger( CTRIG_PetDesert, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharOwn) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -922,6 +922,6 @@ void CChar::NPC_PetDesert()
 	snprintf(pszMsg, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DECIDE_MASTER), GetName());
 	Speak(pszMsg);
 
-	// free to do as i wish !
+	// Free to do as I wish!
 	NPC_PetRelease();
 }

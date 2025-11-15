@@ -1,5 +1,5 @@
 
-#include "CException.h"
+//#include "CException.h" // included in the precompiled header
 
 #ifdef WINDOWS_SHOULD_EMIT_CRASH_DUMP
 #include "crashdump/crashdump.h"
@@ -25,6 +25,7 @@ int IsDebuggerPresent(void)
 		return 0;
 
 	ssize_t num_read = read(status_fd, buf, sizeof(buf)-1);
+    close(status_fd);
 
 	if (num_read > 0)
 	{
@@ -97,7 +98,7 @@ void RaiseImmediateAbort(int iErrCode)
     UnreferencedParameter(iErrCode);
 
 #ifdef _DEBUG
-    STDERR_LOG("RaiseImmediateAbort with code %d.\n", iErrCode);
+    stderrLog("RaiseImmediateAbort with code %d.\n", iErrCode);
 #endif
 
     EXC_NOTIFY_DEBUGGER;
@@ -325,7 +326,7 @@ static void Signal_Terminate(int sig = 0) noexcept // If shutdown is initialized
         if ((sig == SIGABRT) && IsAbortImmediate())
         {
             // No clean ending. Abort right now.
-            STDERR_LOG("FATAL: Immediate abort requested.");
+            stderrLog("FATAL: Immediate abort requested.");
 
 #if defined(__GNUC__) || defined(__clang__)
             __builtin_trap();

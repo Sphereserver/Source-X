@@ -7,7 +7,7 @@ set(lib_SOURCES twofish/twofish.h twofish/twofish_aux.h twofish/twofish.c)
 source_group(lib\\twofish FILES ${lib_SOURCES})
 
 # create the target. equivalent to add_executable, but for libraries
-add_library(twofish STATIC ${lib_SOURCES})
+add_library(twofish OBJECT ${lib_SOURCES})
 
 # make the headers available in the include path (accessible with < >).
 target_include_directories(twofish PUBLIC .)

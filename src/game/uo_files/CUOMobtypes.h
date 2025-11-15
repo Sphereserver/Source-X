@@ -46,7 +46,4 @@ public:
 };
 
 
-
-
-
 #endif // _INC_CUOMOBTYPES_H

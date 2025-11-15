@@ -4,7 +4,7 @@
 
 #include "../../sphere/threads.h"
 #include "../sphereproto.h"
-#include "../CExpression.h"
+//#include "../CExpression.h" // included in the precompiled header
 #include "../CScript.h"
 #include "../CLog.h"
 #include "../CUOClientVersion.h"
@@ -15,7 +15,6 @@ extern "C" {
 #include <twofish/twofish.h>
 }
 #include "CMD5.h"
-
 
 
 // ===============================================================================================================
@@ -221,10 +220,11 @@ CCrypto::CCrypto()
 	//SetClientVerNumber(client_keys[0][2]);
 	SetClientVerNumber(0u);
 
-	tf_cipher	= new cipherInstance;
-	tf_key		= new keyInstance;
+    tf_cipher       = new cipherInstance;
+    tf_key          = new keyInstance;
 	m_md5_engine	= new CMD5();
 
+    m_MasterHi = m_MasterLo = 0;
 	m_CryptMaskHi = m_CryptMaskLo = 0;
 	m_seed = 0;
 	m_ConnectType = CONNECT_NONE;
@@ -233,6 +233,7 @@ CCrypto::CCrypto()
 	m_gameBlockPos = 0;
 	m_gameStreamPos = 0;
 	m_md5_position = 0;
+    m_GameEnc = ENC_QTY;
 }
 
 CCrypto::~CCrypto()

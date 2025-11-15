@@ -10,6 +10,12 @@ CRegionBase::CRegionBase()
 	m_rectUnion.SetRectEmpty();
 }
 
+void CRegionBase::EmptyRegion()
+{
+    m_rectUnion.SetRectEmpty();
+    m_Rects.clear();
+}
+
 size_t CRegionBase::GetRegionRectCount() const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRectCount");
@@ -110,17 +116,48 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 bool CRegionBase::IsOverlapped( const CRectMap & rect ) const noexcept
 {
 	// ADDTOCALLSTACK("CRegionBase::IsOverlapped"); // It's called very frequently on server startup, so avoid this call
-	// Does the region overlap this rectangle.
-	if ( !m_rectUnion.IsOverlapped(rect) )
-		return false;
+    // Does the region overlap this rectangle.
 
-	const size_t iQty = m_Rects.size();
-	if ( iQty <= 0 )
+    /*
+    const int left   = rect.m_left;
+    const int right  = rect.m_right;
+    const int top    = rect.m_top;
+    const int bottom = rect.m_bottom;
+    if (
+        (right                  <= m_rectUnion.m_left)  &&  // Left edge of rect is to the left of this rect's right edge
+        (m_rectUnion.m_right    <= left)                &&  // Right edge of rect is to the right of this rect's left edge
+        (bottom                 <= m_rectUnion.m_top)   &&  // Top edge of rect is above this rect's bottom edge
+        (m_rectUnion.m_bottom   <= top)                     // Bottom edge of rect is below this rect's top edge
+        )
+        return false;
+    */
+
+    if ( !m_rectUnion.IsOverlapped(rect) )
+        return false;
+
+    const uint iQty = (uint)m_Rects.size();
+    if ( iQty <= 0 )    // TODOC: Usually happens for a multi-bound CRegion?
 		return true;
-	for ( size_t i = 0; i < iQty; ++i )
+
+    // Avoid the cost of the IsOverlapped function call and just slap the content here.
+    // Also, reorder conditions to prioritize early exits for non-overlapping rectangles.
+    const int left   = rect.m_left;
+    const int right  = rect.m_right;
+    const int top    = rect.m_top;
+    const int bottom = rect.m_bottom;
+
+    for ( uint i = 0; i < iQty; ++i )
 	{
-		if ( rect.IsOverlapped(m_Rects[i]))
-			return true;
+        CRect const& r = m_Rects[i];
+        if (
+            (right      > r.m_left) &&  // Left edge of rect is to the left of this rect's right edge
+            (r.m_right  > left)     &&  // Right edge of rect is to the right of this rect's left edge
+            (bottom     > r.m_top)  &&  // Top edge of rect is above this rect's bottom edge
+            (r.m_bottom > top)          // Bottom edge of rect is below this rect's top edge
+            )
+            return true;
+        //if ( rect.IsOverlapped(m_Rects[i]))
+        //	return true;
 	}
 	return false;
 }

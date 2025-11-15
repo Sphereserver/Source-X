@@ -25,7 +25,6 @@ class Packet;
 #endif
 
 
-
 class CNetState;
 class SimplePacketTransaction;
 class AbstractString;
@@ -53,8 +52,7 @@ public:
 	Packet(const byte* data, uint size);
 	virtual ~Packet(void);
 
-private:
-	Packet& operator=(const Packet& other);
+    Packet& operator=(const Packet& other) = delete;
 
 public:
 	bool isValid(void) const;
@@ -160,7 +158,7 @@ protected:
 public:
 	explicit PacketSend(byte id, uint len = 0, Priority priority = PRI_NORMAL);
 	PacketSend(const PacketSend* other);
-	virtual ~PacketSend();
+    virtual ~PacketSend() override;
 
 private:
 	PacketSend& operator=(const PacketSend& other);
@@ -280,7 +278,6 @@ public:
     inline void pop(void) { m_packets.pop_front(); }
     inline bool empty(void) { return m_packets.empty(); }
 };
-
 
 
 /***************************************************************************

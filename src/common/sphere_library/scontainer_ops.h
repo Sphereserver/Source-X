@@ -38,6 +38,13 @@ void AssignInitlistToCSizedArray(outT* dest, const size_t dest_size, std::initia
     }
 }
 
+template <ConceptBasicContainer Tcont, typename Telem>
+[[nodiscard]] constexpr
+    bool ContainerHas(Tcont const& cont, Telem const& elem)
+{
+    return cont.end() != std::find(cont.begin(), cont.end(), elem);
+}
+
 template <ConceptBasicContainer T>
 [[nodiscard]] constexpr
 bool ContainerIsSorted(T const& cont)

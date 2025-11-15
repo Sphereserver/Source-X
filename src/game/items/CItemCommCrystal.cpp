@@ -1,5 +1,5 @@
 #include "../../common/resource/CResourceLock.h"
-//#include "../../common/CException.h"
+//#include "../../common/CException.h" // included in the precompiled header
 #include "../CSector.h"
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"

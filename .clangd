@@ -17,4 +17,5 @@ CompileFlags:
 #    Diagnostics:
 #      Suppress: ['-Wunused-include-directive']
 
-# TODO: disable clazy-non-pod-global-static
+Diagnostics:
+  Suppress: non-pod-global-static

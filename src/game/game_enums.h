@@ -143,7 +143,6 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
 };
 
 
-
 //////////////////////////////////////////////////////////////////////////
 // Buff Icons
 

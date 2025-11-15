@@ -1,8 +1,18 @@
 include("${CMAKE_CURRENT_LIST_DIR}/include/Linux-Clang_common.inc.cmake")
 
 function(toolchain_force_compiler)
-    set(CMAKE_C_COMPILER "clang" CACHE STRING "C compiler" FORCE)
-    set(CMAKE_CXX_COMPILER "clang++" CACHE STRING "C++ compiler" FORCE)
+    #if(DEFINED ENV{CC})
+    #    set(CMAKE_C_COMPILER $ENV{CC})
+    #else()
+    #   set(CMAKE_C_COMPILER "clang" CACHE STRING "C compiler")
+        set(CMAKE_C_COMPILER "clang" CACHE STRING "C compiler" FORCE)
+    #endif()
+    #if(DEFINED ENV{CXX})
+    #    set(CMAKE_CXX_COMPILER $ENV{CXX})
+    #elseif("${CMAKE_CXX_COMPILER}" STREQUAL "")
+        #set(CMAKE_CXX_COMPILER "clang++" CACHE STRING "C++ compiler")
+        set(CMAKE_CXX_COMPILER "clang++" CACHE STRING "C++ compiler" FORCE)
+    #endif()
 
     if(CROSSCOMPILING_ARCH)
         message(FATAL_ERROR "Incomplete/to be tested.") # are the names/paths correct?

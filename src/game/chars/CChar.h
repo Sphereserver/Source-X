@@ -42,7 +42,7 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_STABLE,	// 7 = will store your animals for you.
 	NPCBRAIN_MONSTER,	// 8 = not tamable. normally evil.
 	NPCBRAIN_BERSERK,	// 9 = attack closest (blades, vortex)
-	NPCBRAIN_DRAGON,	// 10 = we can breath fire. may be tamable ? hirable ?
+	NPCBRAIN_DRAGON,	// 10 = we can breathe fire. may be tamable ? hirable ?
 	NPCBRAIN_QTY
 };
 
@@ -81,15 +81,15 @@ private:
 #define STATF_INCOGNITO		0x00000800	// Dont show skill titles
 #define STATF_SPIRITSPEAK	0x00001000	// I can hear ghosts clearly.
 #define STATF_INSUBSTANTIAL	0x00002000	// Ghost has not manifest. or GM hidden
-#define STATF_EMOTEACTION	0x00004000	// The creature will emote its actions to it's owners.
-#define STATF_COMM_CRYSTAL	0x00008000	// I have a IT_COMM_CRYSTAL or listening item on me.
+#define STATF_EMOTEACTION	0x00004000	// The creature will emote its actions to its owners.
+#define STATF_COMM_CRYSTAL	0x00008000	// I have an IT_COMM_CRYSTAL or listening item on me.
 #define STATF_HASSHIELD		0x00010000	// Using a shield
 #define STATF_ARCHERCANMOVE	0x00020000	// Can move with archery
 #define STATF_STONE			0x00040000	// turned to stone.
 #define STATF_HOVERING		0x00080000	// hovering (flying gargoyle)
 #define STATF_FLY			0x00100000	// Flying or running ? (anim)
 //							0x00200000
-#define STATF_HALLUCINATING	0x00400000	// eat 'shrooms or bad food.
+#define STATF_HALLUCINATING	0x00400000	// eat mushrooms or bad food.
 #define STATF_HIDDEN		0x00800000	// Hidden (non-magical)
 #define STATF_INDOORS		0x01000000	// we are covered from the rain.
 #define STATF_CRIMINAL		0x02000000	// The guards will attack me. (someone has called guards)
@@ -117,7 +117,7 @@ public:
 
 	struct NotoSaves
 	{
-		int64		time;		// Updaete timer
+		int64		time;		// Update timer
         dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
 		NOTO_TYPE	value;		// Notoriety type
@@ -128,7 +128,7 @@ public:
 
 	CCharPlayer * m_pPlayer;	// May even be an off-line player !
 	CCharNPC * m_pNPC;			// we can be both a player and an NPC if "controlled" ?
-	CPartyDef * m_pParty;		// What party am i in ?
+	CPartyDef * m_pParty;		// What party am I in ?
 	CRegionWorld * m_pArea;		// What region are we in now. (for guarded message)
 	CRegion * m_pRoom;		// What room we are in now.
 
@@ -143,7 +143,7 @@ public:
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
     ushort _iRegenTickCount;    // ticks until next regen.
 
-	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
+	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc. properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
 	uint m_exp;					// character experience
 	uint m_level;				// character experience level
 	//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
@@ -160,9 +160,9 @@ public:
 	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 
-	int64  _iTimeCreate;	    // When was i created ?
+	int64  _iTimeCreate;	    // When was I created ?
 	int64  _iTimePeriodicTick;
-	int64  _iTimeNextRegen;	    // When did i get my last regen tick ?
+	int64  _iTimeNextRegen;	    // When did I get my last regen tick ?
 
 	int64 _iTimeLastHitsUpdate;
 	int64 _iTimeLastCallGuards;
@@ -191,7 +191,7 @@ public:
 		ushort  m_val;       // Hits, Mana, Stam
 		ushort  m_max;		 // MaxVal: MaxHits, MaxMana, MaxStam
 		ushort  m_regenVal;  // Amount of Stat to gain at each regen
-		int64   m_regenRate; // Regen each this much milliseconds.
+		int64   m_regenRate; // Regen each this many milliseconds.
         int64   m_regenLast; // Time of the last regen.
 	} m_Stat[STAT_QTY];
 
@@ -285,7 +285,7 @@ public:
 			int16 m_iRecoilDelay;		        // ACTARG2 & 0x0000FFFF = Duration (in tenth of secs) of the previous swing recoil time.
             int16 m_iSwingAnimationDelay;       // ACTARG2 & 0xFFFF0000 = Duration (in tenth of secs) of the previous swing animation duration.
             int16 m_iSwingAnimation;            // ACTARG3 & 0x0000FFFF = hit animation id.
-            int16 m_iSwingIgnoreLastHitTag;     // ACTARG3 & 0xFFFF0000. Internally used by PreHit. If == 1 (which happens only for the hit after the first instahit), for this hit TAG.LastHit delay checking will be ignored.
+            int16 m_iSwingIgnoreLastHitTag;     // ACTARG3 & 0xFFFF0000. Internally used by PreHit. If == 1 (which happens only for the hit after the first instant hit), for this hit TAG.LastHit delay checking will be ignored.
 		} m_atFight;
 
 		// SKILL_ENTICEMENT
@@ -321,9 +321,9 @@ public:
 		// NPCACT_TALK_FOLLOW
 		struct
 		{
-			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
-			dword m_dwWaitCount;		// ACTARG2 = How long have i been waiting (xN sec)
-										// m_Act_UID = who am i talking to ?
+			dword m_dwHearUnknown;		// ACTARG1 = Speaking NPC has no idea what you are saying.
+			dword m_dwWaitCount;		// ACTARG2 = How long have I been waiting (xN sec)
+										// m_Act_UID = who am I talking to ?
 		} m_atTalk;
 
 		// NPCACT_FLEE
@@ -331,7 +331,7 @@ public:
 		{
 			dword m_iStepsMax;			// ACTARG1 = How long should it take to get there.
 			dword m_iStepsCurrent;		// ACTARG2 = How long has it taken ?
-										// m_Act_UID = who am i fleeing from ?
+										// m_Act_UID = who am I fleeing from ?
 		} m_atFlee;
 	};
 
@@ -381,7 +381,9 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	CCharBase * Char_GetDef() const;
 	CRegionWorld * GetRegion() const;
 	CRegion * GetRoom() const;
-	virtual int GetVisualRange() const override;
+
+    [[nodiscard]]
+    virtual int GetVisualRange() const override;
 	void SetVisualRange(byte newSight);
 
 	virtual bool IsResourceMatch( const CResourceID& rid, dword dwArg ) const override;
@@ -589,8 +591,8 @@ public:
 	CItem * LayerFind( LAYER_TYPE layer ) const;
 	void LayerAdd( CItem * pItem, LAYER_TYPE layer = LAYER_QTY );
 
-	TRIGRET_TYPE OnCharTrigForLayerLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, LAYER_TYPE layer );
-	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, word wMemType );
+    TRIGRET_TYPE OnCharTrigForLayerLoop(CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult, LAYER_TYPE layer );
+    TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult, word wMemType );
 
 	virtual void OnWeightChange( int iChange ) override;
 	virtual int GetWeight(word amount = 0) const override;
@@ -618,8 +620,8 @@ public:
     */
     void SetTriggerActive(lpctstr trig = nullptr);
 
-	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs ) override;
-	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = nullptr );
+    virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc ) override;
+    TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc);
 
 public:
 	// Load/Save----------------------------------
@@ -640,11 +642,12 @@ private:
 	* @brief Update Karma with the given values.
 	*
 	* Used to increase/decrease Karma values, checks if you can have the resultant values,
-	* fire @KarmaChange trigger and show a message as result of the change (if procceed).
-	* Can't never be greater than g_Cfg.m_iMaxKarma or lower than g_Cfg.m_iMinKarma or iBottom.
-	* @param iKarma Amount of karma to change, can be possitive and negative.
+	* fire @KarmaChange trigger and show a message as result of the change (if proceed).
+	* Can't be greater than g_Cfg.m_iMaxKarma or lower than g_Cfg.m_iMinKarma or iBottom.
+	* @param iKarmaChange Amount of karma to change, can be positive and negative.
 	* @param iBottom is the lower value you can have for this execution.
-	* @param bMessage show message to the char or not.
+	* @param fMessage show message to the char or not.
+	* @param pNPC The character whose fame is changing.
 	*/
 	void Noto_Karma( int iKarmaChange, int iBottom = INT32_MIN, bool fMessage = false, CChar* pNPC = nullptr );
 
@@ -652,22 +655,23 @@ private:
 	* @brief Update Fame with the given value.
 	*
 	* Used to increase/decrease Fame, it fires @FameChange trigger.
-	* Can't never exceed g_Cfg.m_iMaxFame and can't never be lower than 0.
+	* Can't exceed g_Cfg.m_iMaxFame and can't be lower than 0.
 	* @param iFameChange is the amount of fame to change over the current one.
+	* @param pNPC The character whose fame is changing.
 	*/
 	void Noto_Fame( int iFameChange, CChar* pNPC = nullptr );
 
 	/**
 	* @brief I have a new notoriety Level? check it and show a message if so.
 	*
-	* @param iPriv The 'new' notoriety level, it will be checked against the current level to see if it changed.
+	* @param iPrv The 'new' notoriety level, it will be checked against the current level to see if it changed.
 	*/
 	void Noto_ChangeNewMsg( int iPrv );
 
 	/**
 	* @brief I've become murderer or criminal, let's see a message for it.
 	*
-	* MSG_NOTO_CHANGE_0-8 contains the strings 'you have gained a bit/a lot/etc of', so the given iDelta is used to check wether of these MSG should be used.
+	* MSG_NOTO_CHANGE_0-8 contains the strings 'you have gained a bit/a lot/etc of', so the given iDelta is used to check which of these MSG should be used.
 	* @param iDelta Amount of Karma/Fame changed.
 	* @param pszType String containing 'Karma' or 'Fame' to pass as argument to the given text.
 	*/
@@ -680,11 +684,11 @@ public:
 	* @brief Returns what is this char to the viewer.
 	*
 	* This allows the noto attack check in the client.
-	* Notoriety handler using std::vector, it's saved and readed here but calcs are being made in Noto_CalcFlag().
+	* Notoriety handler using std::vector, it's saved and read here but calcs are being made in Noto_CalcFlag().
 	* Actually 2 values are stored in this vectored list: Notoriety (the notoriety level) and Color (the color we are showing in the HP bar and in our character for the viewer).
 	* Calls @NotoSend trigger with src = pChar, argn1 = notoriety level, argn2 = color to send.
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true and he has STATF_INCOGNITO, this character will be gray for the viever (pChar).
+	* @param fIncog if set to true, and he has STATF_INCOGNITO, this character will be gray for the viewer (pChar).
 	* @param fInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
 	* @param fGetColor if set to true only the color will be returned and not the notoriety (note that they can differ if set to so in the @NotoSend trigger).
 	* @return NOTO_TYPE notoriety level.
@@ -692,23 +696,23 @@ public:
 	NOTO_TYPE Noto_GetFlag( const CChar * pChar, bool fIncog = true, bool fInvul = false, bool fGetColor = false ) const;
 
 	/**
-	* @brief Notoriety calculations
+	* Notoriety calculations. What is this char to the viewer? This allows the noto attack check in the client.
 	*
 	* TAG.OVERRIDE.NOTO will override everything and use the value in the tag for everyone, regardless of what I really are for them.
-	* If this char is a pet, check if notoriety must be inherited from it's master or do regular checks for it.
-	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viever (pChar).
-	* @param fInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
+	* If this char is a pet, check if notoriety must be inherited from its master or do regular checks for it.
+	* @param pCharViewer is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
+	* @param fAllowIncog if set to true (usually because of Incognito spell), this character will be gray for the viewer (pChar).
+	* @param fAllowInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
 	* @return NOTO_TYPE notoriety level.
 	*/
-	NOTO_TYPE Noto_CalcFlag( const CChar * pChar, bool fIncog = false, bool fInvul = false ) const;
+	NOTO_TYPE Noto_CalcFlag( const CChar * pCharViewer, bool fAllowIncog = false, bool fAllowInvul = false ) const;
 
 	/**
 	* @brief What color should the viewer see from me?
 	*
 	* Used to retrieve color for character and corpse's names.
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viever (pChar).
+	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viewer (pChar).
 	* @return HUE_TYPE my color.
 	*/
 	HUE_TYPE Noto_GetHue( const CChar * pChar, bool fIncog = false ) const;
@@ -769,7 +773,7 @@ public:
 	* @brief I killed someone, should I have credits? and penalties?
 	*
 	* Here fires the @MurderMark trigger, also gives exp if level system is enabled to give exp on killing.
-	* @param pKill, the chara I killed (or participated to kill).
+	* @param pKill the chara I killed (or participated to kill).
 	* @param iTotalKillers how many characters participated in this kill.
 	*/
 	void Noto_Kill(CChar * pKill, int iTotalKillers = 0);
@@ -831,14 +835,14 @@ public:
 	/**
 	* @brief Deleting myself and sending data again for given char.
 	*
-	* @param pChar, the CChar* of the char of which we want to resend the noto.
+	* @param pChar the CChar* of the char of which we want to resend the noto.
 	*/
 	void NotoSave_Resend( CChar *pChar );
 
 	/**
 	* @brief Gets the entry list of the given CChar.
 	*
-	* @param pChar, CChar to retrieve the entry number for.
+	* @param pChar CChar to retrieve the entry number for.
 	* @return the entry number.
 	*/
 	int NotoSave_GetID( CChar * pChar ) const;
@@ -846,15 +850,34 @@ public:
 	/**
 	* @brief Removing stored data for pChar.
 	*
-	* @param pChar, the CChar I want to remove from my list.
+	* @param pChar the CChar I want to remove from my list.
 	* @return true if successfully removed it.
 	*/
 	bool NotoSave_Delete( CChar * pChar );
 
 	/**
-	* @brief Removing expired notorieties.
+	* @brief Removing expired notoriety.
 	*/
 	void NotoSave_CheckTimeout();
+
+    /**
+     * Helper for checking guild / town war status.
+     */
+    enum NOTO_WAR_STATUS: byte
+    {
+        NOTO_WAR_NONE = 0,
+        NOTO_WAR_ALLY,
+        NOTO_WAR_ENEMY,
+    };
+
+    /**
+     * Checks ally / war status between two guild / town stones.
+     *
+     * @param pMyStone My Guild/Town stone.
+     * @param pViewerStone The character's looking at me Guild/Town stone.
+     * @return War status (none, ally, enemy)
+     */
+    NOTO_WAR_STATUS Noto_GetWarStatus(const CItemStone* pMyStone, const CItemStone* pViewerStone) const;
 
 	/**
 	* @brief We are snooping or stealing, is taking this item a crime ?
@@ -865,16 +888,15 @@ public:
 	*/
 	bool IsTakeCrime( const CItem * pItem, CChar ** ppCharMark = nullptr ) const;
 
-
 	/**
 	* @brief We killed a character, starting exp calcs
 	*
 	* Main function for default Level system.
 	* Triggers @ExpChange and @LevelChange if needed
-	* @param delta, amount of exp gaining (or losing?)
-	* @param ppCharDead from who we gained the experience.
+    * @param iExpDelta amount of exp gaining (or losing?)
+	* @param pCharDead from who we gained the experience.
 	*/
-	void ChangeExperience(llong delta = 0, CChar *pCharDead = nullptr);
+    void ChangeExperience(llong iExpDelta = 0, CChar *pCharDead = nullptr);
 	uint GetSkillTotal(int what = 0, bool how = true);
 
     /*
@@ -916,7 +938,7 @@ public:
 
 	void Skill_SetBase( SKILL_TYPE skill, ushort uiValue );
     void Skill_AddBase( SKILL_TYPE skill, int iChange );
-    bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool fAllowGain = true, bool fUseBellCurve = true, bool fForceCheck = false);
+    bool Skill_UseQuick( SKILL_TYPE skill, int64 iDifficulty, bool fAllowGain = true, bool fUseBellCurve = true, bool fForceCheck = false);
 
     bool Skill_CheckSuccess(SKILL_TYPE skill, int iDifficulty, bool fUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );
@@ -926,11 +948,9 @@ public:
 	ANIM_TYPE Skill_GetAnim( SKILL_TYPE skill);
 	SOUND_TYPE Skill_GetSound( SKILL_TYPE skill);
 	int Skill_Stage( SKTRIG_TYPE stage );
-	TRIGRET_TYPE	Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage);
-	TRIGRET_TYPE	Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE  stage, CScriptTriggerArgs * pArgs); //pArgs.m_iN1 will be rewritten with skill
 
-	TRIGRET_TYPE	Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig);
-	TRIGRET_TYPE	Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgs * pArgs); //pArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnTrigger(SKILL_TYPE skill, SKTRIG_TYPE stage, CScriptTriggerArgsPtr const& pScriptArgs); //pScriptArgs.m_iN1 will be rewritten with skill
+    TRIGRET_TYPE Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgsPtr const& pScriptArgs); //pArgs.m_iN1 will be rewritten with skill
 
 	bool Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg );
 	bool Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );
@@ -1114,7 +1134,7 @@ public:
 	inline int GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
-	bool	Attacker_Add(CChar * pChar, int threat = 0);
+    bool	Attacker_Add(CChar * pChar, int iThreat = 0);
 	CChar * Attacker_GetLast() const;
 	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool	Attacker_Delete(int attackerIndex, bool fForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
@@ -1378,9 +1398,9 @@ protected:
 
     bool IsPeriodicTickPending() const;
 
-    virtual bool _CanTick() const override final;
+    virtual bool _TickableState() const override final;
 
-protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc
+protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills, AI, etc.
 //public:	virtual bool  _OnTick() override final;
 
 public:
@@ -1388,7 +1408,7 @@ public:
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
 
 	virtual void OnTickStatusUpdate() override;
-	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
+	bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc.)
 
 	void OnTickSkill(); // _OnTick timeout specific for the skill behavior
 

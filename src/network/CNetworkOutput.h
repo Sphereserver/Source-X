@@ -56,5 +56,4 @@ private:
 };
 
 
-
 #endif // _INC_NETWORKOUTPUT_H

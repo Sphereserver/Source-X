@@ -44,3 +44,13 @@ extern "C"
 		return &g_osInfo;
 	}
 #endif // !_WIN32
+
+void stderrLog(lpctstr ptcFormat, ...) noexcept // SPHERE_PRINTFARGS(1,2);
+{
+    va_list vargs;
+    va_start(vargs, ptcFormat);
+    fprintf(stderr, ptcFormat, vargs);
+    va_end(vargs);
+
+    fflush(stderr);
+}

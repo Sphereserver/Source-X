@@ -1,5 +1,5 @@
 #include "../common/sphere_library/scontainer_ops.h"
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../sphere/threads.h"
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
@@ -442,7 +442,7 @@ bool CWorldTicker::AddTimedObject(const int64 iTimeout, CTimedObject* pTimedObje
     }
     else
     {
-        fCanTick = pTimedObject->_CanTick();
+        fCanTick = pTimedObject->_TickableState();
         /*
         if (!fCanTick)
         {
@@ -1094,7 +1094,7 @@ void CWorldTicker::ProcessTimedObjects()
                 ++it, ++uiProgressive)
             {
                 CTimedObject* pTimedObj = it->second;
-                if (!pTimedObj->_IsTimerSet() || !pTimedObj->_CanTick())
+                if (!pTimedObj->_IsTimerSet() || !pTimedObj->_TickableState())
                     continue;
 
                 //if (pTimedObj->_GetTimeoutRaw() > _iCurTickStartTime)
@@ -1337,7 +1337,7 @@ void CWorldTicker::ProcessCharPeriodicTicks()
             {
                 ASSERT(it->first != 0);
                 CChar* pChar = it->second;
-                if (!pChar->_CanTick() || pChar->_IsBeingDeleted())
+                if (!pChar->_TickableState() || pChar->_IsBeingDeleted())
                     continue;
 
                 _vPeriodicCharsTicksBuffer.emplace_back(pChar);

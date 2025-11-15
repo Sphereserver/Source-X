@@ -10,6 +10,7 @@
 #include "CLocalVarsExtra.h"
 #include <vector>
 
+
 class CScriptTriggerArgs : public CScriptObj
 {
     // All the args an event will need.
@@ -34,25 +35,26 @@ public:
     CLocalObjMap			m_VarObjs;      // "REFx" = local object x
 
 public:
-    CScriptTriggerArgs();
+    CScriptTriggerArgs() noexcept;
     explicit CScriptTriggerArgs(lpctstr pszStr);
-    explicit CScriptTriggerArgs(CScriptObj* pObj);
-    explicit CScriptTriggerArgs(int64 iVal1);
-    CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3 = 0);
-    CScriptTriggerArgs(int64 iVal1, int64 iVal2, CScriptObj* pObj);
+    explicit CScriptTriggerArgs(CScriptObj* pObj) noexcept;
+    CScriptTriggerArgs(int64 iVal1, int64 iVal2, int64 iVal3, CScriptObj* pObj) noexcept;
 
     virtual ~CScriptTriggerArgs() = default;
 
-private:
-    CScriptTriggerArgs(const CScriptTriggerArgs& copy);
-    CScriptTriggerArgs& operator=(const CScriptTriggerArgs& other);
+    CScriptTriggerArgs(const CScriptTriggerArgs& copy) = delete;
+    CScriptTriggerArgs& operator=(const CScriptTriggerArgs& other) = delete;
+    CScriptTriggerArgs(CScriptTriggerArgs&& move) = delete;
 
 public:
     //Puts the ARGN's into the specified variables
     void GetArgNs(int64* iVar1 = nullptr, int64* iVar2 = nullptr, int64* iVar3 = nullptr);
 
     void Clear();
-    void Init( lpctstr pszStr );
+    void Init(lpctstr pszStr);
+    void Init(CScriptObj* pObj);
+    void Init(int64 iVal1, int64 iVal2, int64 iVal3, CScriptObj *pObj);
+
     bool r_Verb( CScript & s, CTextConsole * pSrc ) override;
     bool r_LoadVal( CScript & s ) override;
     bool r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef ) override;

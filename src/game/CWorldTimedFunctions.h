@@ -23,7 +23,7 @@ public:
     static void Stop(const CUID& uid, lpctstr ptcCommand);
     static void Clear();
     static TRIGRET_TYPE Loop(lpctstr ptcCommand, int LoopsMade, CScriptLineContext StartContext,
-        CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
+        CScript &s, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc, CSString * pResult);
     static int64 IsTimer(const CUID& uid, lpctstr funcname);
 };
 #endif // _INC_CWORLDTIMEDFUNCTIONS_H

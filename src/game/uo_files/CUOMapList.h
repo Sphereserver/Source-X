@@ -6,6 +6,7 @@
 #ifndef _INC_CUOMAPLIST_H
 #define _INC_CUOMAPLIST_H
 
+#include "../../common/common.h"
 
 class CServerMapDiffCollection;
 
@@ -22,24 +23,25 @@ extern class CUOMapList
 protected:
     struct MapGeoData
     {
-        bool enabled;     // supported map?
-        bool initialized;
-        int num;          // real map number (0 for 0 and 1, 2 for 2, and so on) - file name
-        int id;           // map id used by the client
-        int sizex;
-        int sizey;
-        int sectorsize;
+        int16  iNum;        // real map number (0 for 0 and 1, 2 for 2, and so on) - file name
+        int16  iId;         // map id used by the client
+        uint16 uiSizeX;
+        uint16 uiSizeY;
+        int16  iSectorSize;
+        bool   fEnabled;       // supported map?
+        bool   fInitialized;
 
+        [[nodiscard]]
         static constexpr MapGeoData invalid() noexcept
         {
             return {
-                .enabled = true,
-                .initialized = false,
-                .num = -1,
-                .id = -1,
-                .sizex = -1,
-                .sizey = -1,
-                .sectorsize = -1
+                .iNum = -1,
+                .iId = -1,
+                .uiSizeX = (uint16)-1,
+                .uiSizeY = (uint16)-1,
+                .iSectorSize = -1,
+                .fEnabled = true,
+                .fInitialized = false
             };
         }
     };
@@ -55,7 +57,7 @@ protected:
     CServerMapDiffCollection * m_pMapDiffCollection;
 
 public:
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
      */
     ///@{
     CUOMapList() noexcept;
@@ -69,7 +71,7 @@ public:
      */
     ///@{
     void Clear() noexcept;
-    void ResetMap(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid);
+    //void ResetMap(uint map, ushort maxx, ushort maxy, ushort sectorsize, ushort realmapnum, ushort mapid);
     void Init();
     bool Load(int map, char *args);
     ///@}
@@ -84,37 +86,39 @@ protected:
 public:
     bool IsMapSupported(int map) const noexcept;
     bool IsInitialized(int map) const;
+
     int CalcSectorQty(int map) const;  // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorCols(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
     int CalcSectorRows(int map) const; // Use it only when initializing the map sectors! (because it's slower than the Get* method)
-    inline int GetMapSizeX(int map) const noexcept;
-    inline int GetMapSizeY(int map) const noexcept;
+
+    inline uint16 GetMapSizeX(int map) const noexcept;
+    inline uint16 GetMapSizeY(int map) const noexcept;
     int GetMapCenterX(int map) const;
     int GetMapCenterY(int map) const;
 
     int GetMapFileNum(int map) const;
     int GetMapID(int map) const;
-    
+
     ///@}
 } g_MapList;
 
 
 // Inline methods definition
 
-inline int CUOMapList::GetMapSizeX(int map) const noexcept
+inline uint16 CUOMapList::GetMapSizeX(int map) const noexcept
 {
-    // Used by CPointBase::IsValidXY(), which is called a LOT
+    // Used by CPointBase::IsValidXY() and IsValidPoint(), which is called a LOT
     //ASSERT(IsMapSupported(map));
     //ASSERT(m_sizex[map] != -1);
-    return m_mapGeoData.maps[map].sizex;
+    return m_mapGeoData.maps[map].uiSizeX;
 }
 
-inline int CUOMapList::GetMapSizeY(int map) const noexcept
+inline uint16 CUOMapList::GetMapSizeY(int map) const noexcept
 {
-    // Used by CPointBase::IsValidXY(), which is called a LOT
+    // Used by CPointBase::IsValidXY() and IsValidPoint(), which is called a LOT
     //ASSERT(IsMapSupported(map));
     //ASSERT(m_sizey[map] != -1);
-    return m_mapGeoData.maps[map].sizey;
+    return m_mapGeoData.maps[map].uiSizeY;
 }
 
 #endif //_INC_CUOMAPLIST_H

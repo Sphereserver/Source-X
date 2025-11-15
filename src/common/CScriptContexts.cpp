@@ -36,14 +36,14 @@ void CScriptFileContext::_OpenScript( const CScript * pScriptContext )
 void CScriptFileContext::OpenScript( const CScript * pScriptContext )
 {
     ADDTOCALLSTACK("CScriptFileContext::OpenScript");
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
     _OpenScript(pScriptContext);
 }
 
 void CScriptFileContext::Close()
 {
     ADDTOCALLSTACK("CScriptFileContext::Close");
-    MT_UNIQUE_LOCK_SET;
+    MT_UNIQUE_LOCK_SET(this);
     _Close();
 }
 void CScriptFileContext::_Close()

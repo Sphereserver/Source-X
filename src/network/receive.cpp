@@ -1,6 +1,7 @@
 
 #include "../common/resource/sections/CDialogDef.h"
-#include "../common/CExpression.h"
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/CLog.h"
 #include "../common/CUOClientVersion.h"
 #include "../game/uo_files/uofiles_enums_creid.h"
@@ -200,22 +201,25 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 	ASSERT(pChar != nullptr);
 
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
-	CScriptTriggerArgs createArgs;
-    // RW
-	createArgs.m_iN1 = uiFlags;
-	createArgs.m_iN2 = prProf;
-	createArgs.m_iN3 = rtRace;
-    // R
-	createArgs.m_s1 = account->GetName();
-	createArgs.m_pO1 = client;
 
-    client->r_Call("f_onchar_create_init", &g_Serv, &createArgs, nullptr, &tr);
+    // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+    //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+    // RW
+    pScriptArgs->m_iN1 = uiFlags;
+    pScriptArgs->m_iN2 = prProf;
+    pScriptArgs->m_iN3 = rtRace;
+    // R
+    pScriptArgs->m_s1 = account->GetName();
+    pScriptArgs->m_pO1 = client;
+
+    client->r_Call("f_onchar_create_init", pScriptArgs, &g_Serv, nullptr, &tr);
     if (tr == TRIGRET_RET_TRUE)
         goto block_creation;
 
-    //uiFlags = (uint)createArgs.m_iN1;  // unused at this point
-    prProf = (PROFESSION_TYPE)createArgs.m_iN2;
-    rtRace = (RACE_TYPE)createArgs.m_iN3;
+    //uiFlags = (uint)pScriptArgs->.m_iN1;  // unused at this point
+    prProf = (PROFESSION_TYPE)pScriptArgs->m_iN2;
+    rtRace = (RACE_TYPE)pScriptArgs->m_iN3;
 
 	// Creating the pChar
 	pChar->InitPlayer(client, charname, fFemale, rtRace, wStr, wDex, wInt,
@@ -223,9 +227,9 @@ bool PacketCreate::doCreate(CNetState* net, lpctstr charname, bool fFemale, RACE
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
 	// Calling the function after the char creation, it can't be done before or the function won't have SRC.
-    // The createArgs are Read-Only for this function.
+    // The pScriptArgs-> are Read-Only for this function.
     tr = TRIGRET_RET_DEFAULT;
-	client->r_Call("f_onchar_create", pChar, &createArgs, nullptr, &tr);
+    client->r_Call("f_onchar_create", pScriptArgs, pChar, nullptr, &tr);
 
 	if ( tr == TRIGRET_RET_TRUE )
 	{
@@ -446,7 +450,7 @@ bool PacketItemDropReq::onReceive(CNetState* net)
 	}
 
 	CUID container(readInt32());
-	CPointMap pt(x, y, z, character->GetTopMap());
+    CPointMap pt((int16_t)x, (int16_t)y, (int8_t)z, character->GetTopMap());
 
 	client->Event_Item_Drop(serial, pt, container, grid);
 	return true;
@@ -546,6 +550,17 @@ bool PacketItemEquipReq::onReceive(CNetState* net)
 
 	CChar* target = targetSerial.CharFind();
     bool fSuccess = false;
+
+    // Check if player is sending wrong / forged layer.
+    const LAYER_TYPE itemRealLayer = target->CanEquipLayer(item, LAYER_QTY, target, true);
+    if (itemLayer != itemRealLayer)
+    {
+#ifdef _DEBUG
+        g_Log.EventDebug("Player trying to equip item to invalid layer (sent: %d, should be %d)\n", itemLayer, itemRealLayer);
+#endif
+        itemLayer = itemRealLayer;
+    }
+
     if (target && (itemLayer < LAYER_HORSE) && source->CanDress(target) && source->CanTouch(item))
     {
        //if (target->CanCarry(item)) //Since Weight behavior rework, we want avoid don't be able to equip an item if overweight
@@ -937,8 +952,12 @@ bool PacketCharPlay::onReceive(CNetState* net)
 	ADDTOCALLSTACK("PacketCharPlay::onReceive");
 
 	skip(4); // 0xedededed
-	skip(MAX_NAME_SIZE); // char name
-	skip(MAX_NAME_SIZE); // char pass
+    skip(MAX_NAME_SIZE); // Character name.
+    skip(2); // ?
+    skip(4); // Client flags (0x3f - Orion, Classic, ClassicUO, 0xff - Enhanced client).
+    skip(4); // ? (0 - Orion, Classic, ClassicUO, 0xff000000 - Enhanced client).
+    skip(4); // Login count.
+    skip(16); // ?
 	uint slot = readInt32();
 	skip(4); // ip
 
@@ -1035,7 +1054,7 @@ bool PacketBookPageEdit::onReceive(CNetState* net)
 
 		ASSERT(len > 0);
 		content[--len] = '\0';
-		if (Str_Check(content))
+        if (Str_Untrusted_InvalidTermination(content, len))
 			break;
 
 		// set page content
@@ -1222,7 +1241,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			uint lenstr = readByte();
 			tchar* str = Str_GetTemp();
 			readStringASCII(str, lenstr, false);
-			if (Str_Check(str))
+            if (Str_Untrusted_InvalidTermination(str, lenstr))
 				return true;
 
 			// if
@@ -1247,7 +1266,7 @@ bool PacketBulletinBoardReq::onReceive(CNetState* net)
 			{
 				lenstr = readByte();
 				readStringASCII(str, lenstr, false);
-				if (Str_Check(str) == false)
+                if (Str_Untrusted_InvalidTermination(str, lenstr) == false)
 					newMessage->AddPageText(str);
 			}
 
@@ -1440,7 +1459,7 @@ bool PacketServersReq::onReceive(CNetState* net)
 	readStringASCII(acctname, ARRAY_COUNT(acctname));
 	tchar acctpass[MAX_NAME_SIZE];
 	readStringASCII(acctpass, ARRAY_COUNT(acctpass));
-	skip(1);
+	skip(1); // "NextLoginKey" value from uo.cfg on client machine.
 
 	CClient* client = net->getClient();
 	ASSERT(client);
@@ -1670,7 +1689,7 @@ bool PacketCharListReq::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketCharListReq::onReceive");
 
-	skip(4);
+	skip(4); // Session key sent to the client in packet 0x8c (customerId).
 	tchar acctname[MAX_ACCOUNT_NAME_SIZE];
 	readStringASCII(acctname, ARRAY_COUNT(acctname));
 	tchar acctpass[MAX_NAME_SIZE];
@@ -2229,12 +2248,13 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 		client->m_mapOpenedGumps.erase(itGumpFound);
 
 	// package up the gump response info.
-	CDialogResponseArgs resp;
+    // TODO: just split CDialogResponseArgs into two objects (CScriptTriggerArgs and a struct for other data?)
+    //  Or just make CScriptTriggerArgs a member of CDialogResponseArgs... Favor composition over inheritance!
+    auto resp = std::make_shared<CDialogResponseArgs>();
 
 	// store the returned checked boxes' ids for possible later use
 	for (uint i = 0; i < checkCount; ++i)
-		resp.m_CheckArray.push_back(readInt32());
-
+        resp->m_CheckArray.push_back(readInt32());
 
 	dword textCount = readInt32();
 	textCount = minimum(textCount, THREAD_STRING_LENGTH);
@@ -2252,7 +2272,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 		if ((fix = strchr(text, '\t')) != nullptr)
 			*fix = ' ';
 
-		resp.AddText(id, text);
+        resp->AddText(id, text);
 	}
 
 	if (net->isClientKR())
@@ -2276,7 +2296,7 @@ bool PacketGumpDialogRet::onReceive(CNetState* net)
 	//
 	// Call the scripted response. Lose all the checks and text.
 	//
-	client->Dialog_OnButton( ridContext, button, object, &resp );
+    client->Dialog_OnButton( ridContext, button, object, resp );
 	return true;
 }
 
@@ -2473,7 +2493,7 @@ bool PacketClientVersion::onReceive(CNetState* net)
 	tchar* versionStr = Str_GetTemp();
 	readStringASCII(versionStr, length, false);
 
-	if (Str_Check(versionStr))
+    if (Str_Untrusted_InvalidTermination(versionStr, length))
 		return true;
 
 	if (strstr(versionStr, "UO:3D") != nullptr)
@@ -2635,6 +2655,7 @@ bool PacketPartyMessage::onReceive(CNetState* net)
 			client->addTarget( CLIMODE_TARG_PARTY_ADD, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_TARG_WHO), false, false);
 			break;
 
+	    // This doesn't happen, since disbanding the party is handled by client sending a packet to remove the party master.
 		case PARTYMSG_Disband:
 			if (character->m_pParty == nullptr)
 				return false;
@@ -2728,18 +2749,21 @@ bool PacketArrowClick::onReceive(CNetState* net)
 	if (character == nullptr)
 		return false;
 
-	bool rightClick = readBool();
+    const bool fRightClick = readBool();
 
 	if ( IsTrigUsed(TRIGGER_USERQUESTARROWCLICK) )
 	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = (rightClick == true? 1 : 0);
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        pScriptArgs->m_iN1 = (fRightClick == true? 1 : 0);
 #ifdef _ALPHASPHERE
-		Args.m_iN2 = character->GetKeyNum("ARROWQUEST_X", true);
-		Args.m_iN3 = character->GetKeyNum("ARROWQUEST_Y", true);
+        pScriptArgs->m_iN2 = character->GetKeyNum("ARROWQUEST_X", true);
+        pScriptArgs->m_iN3 = character->GetKeyNum("ARROWQUEST_Y", true);
 #endif
 
-		if (character->OnTrigger(CTRIG_UserQuestArrowClick, character, &Args) == TRIGRET_RET_TRUE)
+        if (character->OnTrigger(CTRIG_UserQuestArrowClick, pScriptArgs, character) == TRIGRET_RET_TRUE)
 			return true;
 	}
 
@@ -2762,7 +2786,10 @@ bool PacketWrestleDisarm::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleDisarm::onReceive");
 
-	net->getClient()->SysMessageDefault(DEFMSG_MSG_WRESTLING_NOGO);
+	CClient* client = net->getClient();
+	ASSERT(client);
+
+	client->Event_CombatAbilitySelect(0x5);	// Disarm
 	return true;
 }
 
@@ -2782,7 +2809,11 @@ bool PacketWrestleStun::onReceive(CNetState* net)
 {
 	ADDTOCALLSTACK("PacketWrestleStun::onReceive");
 
-	net->getClient()->SysMessageDefault(DEFMSG_MSG_WRESTLING_NOGO);
+	CClient* client = net->getClient();
+	ASSERT(client);
+
+	client->Event_CombatAbilitySelect(0xB);	// Paralyzing Blow
+
 	return true;
 }
 
@@ -3217,8 +3248,13 @@ bool PacketBandageMacro::onReceive(CNetState* net)
 
 	//Should we simulate the dclick?
 	client->m_Targ_UID = bandage->GetUID();
-	CScriptTriggerArgs extArgs(1); // Signal we're from the macro
-	if (bandage->OnTrigger( ITRIG_DCLICK, character, &extArgs ) == TRIGRET_RET_TRUE)
+
+    // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+    //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+    CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+    pScriptArgs->m_iN1 = 1; // Signal we're from the macro
+    if (bandage->OnTrigger( ITRIG_DCLICK, pScriptArgs, character) == TRIGRET_RET_TRUE)
 	{
 		return true;
 	}
@@ -3309,7 +3345,11 @@ bool PacketGargoyleFly::onReceive(CNetState* net)
 
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
-		if ( character->OnTrigger(CTRIG_ToggleFlying, character, nullptr) == TRIGRET_RET_TRUE )
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        if ( character->OnTrigger(CTRIG_ToggleFlying, pScriptArgs, character) == TRIGRET_RET_TRUE )
 			return false;
 	}
 
@@ -4030,19 +4070,11 @@ bool PacketSpecialMove::onReceive(CNetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	CChar* character = client->GetChar();
-	if (character == nullptr)
-		return false;
 
 	skip(1);
 	dword ability = readInt32();
 
-	if ( IsTrigUsed(TRIGGER_USERSPECIALMOVE) )
-	{
-		CScriptTriggerArgs args;
-		args.m_iN1 = ability;
-		character->OnTrigger(CTRIG_UserSpecialMove, character, &args);
-	}
+	client->Event_CombatAbilitySelect(ability);
 	return true;
 }
 
@@ -4137,7 +4169,13 @@ bool PacketGuildButton::onReceive(CNetState* net)
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_USERGUILDBUTTON) )
-		character->OnTrigger(CTRIG_UserGuildButton, character, nullptr);
+    {
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        character->OnTrigger(CTRIG_UserGuildButton, pScriptArgs, character);
+    }
 	return true;
 }
 
@@ -4164,8 +4202,14 @@ bool PacketQuestButton::onReceive(CNetState* net)
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_USERQUESTBUTTON) )
-		character->OnTrigger(CTRIG_UserQuestButton, character, nullptr);
-	return true;
+    {
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        character->OnTrigger(CTRIG_UserQuestButton, pScriptArgs, character);
+    }
+    return true;
 }
 
 
@@ -4727,10 +4771,15 @@ bool PacketUltimaStoreButton::onReceive(CNetState *net)
         return false;
 
     if (IsTrigUsed(TRIGGER_USERULTIMASTOREBUTTON))
-        character->OnTrigger(CTRIG_UserUltimaStoreButton, character, nullptr);
+    {
+        // Networking might be done in a different thread. Do not use the standard object pool, since it's thread unsafe.
+        //CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+
+        CScriptTriggerArgsPtr pScriptArgs = std::make_shared<CScriptTriggerArgs>();
+        character->OnTrigger(CTRIG_UserUltimaStoreButton, pScriptArgs, character);
+    }
     return true;
 }
-
 
 
 /***************************************************************************

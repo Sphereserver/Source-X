@@ -1,6 +1,6 @@
 // Actions specific to an NPC.
 
-#include "../../common/CExpression.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../clients/CClient.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"

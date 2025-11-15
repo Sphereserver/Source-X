@@ -3,7 +3,8 @@
 #include "../../network/send.h"
 #include "../../common/resource/sections/CItemTypeDef.h"
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CLog.h"
 #include "../chars/CChar.h"
 #include "../items/CItemCorpse.h"
@@ -88,18 +89,19 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 bool CClient::OnTarg_Obj_Function( CObjBase * pObj, const CPointMap & pt, ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Obj_Function");
-	m_Targ_p	= pt;
-	lpctstr	pSpace	= strchr( m_Targ_Text, ' ' );
+    m_Targ_p = pt;
+    lpctstr	pSpace = strchr( m_Targ_Text, ' ' );
 	if ( !pSpace )
 		pSpace	= strchr( m_Targ_Text, '\t' );
 	if ( pSpace )
 		GETNONWHITESPACE( pSpace );
 
-	CScriptTriggerArgs	Args( pSpace ? pSpace : "" );
-	Args.m_VarsLocal.SetNum( "ID", id, true );
-	Args.m_pO1	= pObj;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pSpace ? pSpace : "");
+    pScriptArgs->m_VarsLocal.SetNum( "ID", id, true );
+    pScriptArgs->m_pO1 = pObj;
 	CSString sVal;
-	m_pChar->r_Call( static_cast<lpctstr>(m_Targ_Text), this, &Args, &sVal );
+    m_pChar->r_Call(m_Targ_Text.GetBuffer(), pScriptArgs, this, &sVal );
 	return true;
 }
 
@@ -283,7 +285,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 	// result of the MULTI command.
 	// Break a multi out of the multi.txt files and turn it into items.
 
-	if ( !pt.GetRegion(REGION_TYPE_AREA) )
+    if ( !pt.GetRegion(REGION_TYPE_AREA) ) //TODO: add err message
 		return false;
 
 	CScript s;	// It is not really a valid script type file.
@@ -330,7 +332,7 @@ bool CClient::OnTarg_Char_Add( CObjBase * pObj, const CPointMap & pt )
 	ASSERT(m_pChar);
 
 	if ( !pt.GetRegion(REGION_TYPE_AREA) )
-		return false;
+        return false; //TODO: add err message
 	if ( pObj && pObj->IsItemInContainer() )
 		return false;
 
@@ -356,7 +358,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 	// m_tmAdd.m_id = item id
 	ASSERT(m_pChar);
 
-	if ( !pt.GetRegion(REGION_TYPE_AREA) )
+    if ( !pt.GetRegion(REGION_TYPE_AREA) )  //TODO: add err message
 		return false;
 	if ( pObj && pObj->IsItemInContainer() )
 		return false;
@@ -1656,7 +1658,7 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
     ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
     // Might be a IT_MULTI or it might not. place it anyhow.
 
-    if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))
+    if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))  //TODO: add err message
         return nullptr;
 
     return CItemMulti::Multi_Create(GetChar(), pItemDef, pt, pDeed);
@@ -1714,8 +1716,9 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 
 	if (( IsTrigUsed(CItem::sm_szTrigName[trigtype]) ) || ( IsTrigUsed(CChar::sm_szTrigName[(CTRIG_itemAfterClick - 1) + trigtype]) )) //ITRIG_TARGON_GROUND, ITRIG_TARGON_CHAR, ITRIG_TARGON_ITEM
 	{
-		CScriptTriggerArgs	Args( id, 0, pObjTarg );
-		if ( pItemUse->OnTrigger( trigtype, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(id, 0, 0, pObjTarg);
+        if ( pItemUse->OnTrigger( trigtype, pScriptArgs, m_pChar ) == TRIGRET_RET_TRUE )
 			return true;
 	}
 
@@ -2464,8 +2467,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 
 	if ( IsTrigUsed(TRIGGER_PARTYINVITE) )
 	{
-		CScriptTriggerArgs args;
-		if ( pChar->OnTrigger(CTRIG_PartyInvite, m_pChar, &args) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_PartyInvite, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return false;
 	}
 

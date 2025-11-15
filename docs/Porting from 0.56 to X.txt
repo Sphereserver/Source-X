@@ -4,7 +4,7 @@ Changed starting from 0.56b
 ------------------------
 - [sphere_spells.scp]: mostly new spell flags.
 - [sphere_skills.scp]: mostly new skill flags.
-- [sphere_defs.scp]: lots of new defs, most importantly new mounts defs.
+- [sphere_defs.scp]: lots of new defs, most importantly new mounts' defs.
     (Mounts are now handled there, if they are not specified in the file they cannot be ridden).
 - Update multis definitions from [itemdef 04xxx] to [multidef 0x].
 - Changed MAPPLANE->MAP, LOCALLIGHT->LIGHT.
@@ -32,7 +32,7 @@ Compatibility changes from 0.56d to X1
 
 Changes to script parsing:
 - Changed: Now conditional statements (IF/ELIF/ELSEIF) will perform a lazy evaluation of the conditional expression, whereas before they fully evaluated the whole expression.
-  Lazy evaluation means that the expression will be evaluated one piece (or, one subexpression) at a time. At each stage, if it's sure that the whole expression value (true or false) won't change
+  Lazy evaluation means that the expression will be evaluated one piece (or, one subexpression) at a time. At each stage, if it's certain that the whole expression value (true or false) won't change
   even if new subexpressions will be evaluated, the evaluation will stop there.
   Example: IF (<LINK.ISVALID> && (<LINK.TAG0.test> == 1))
    Won't return an error if item's LINK is invalid or not set, because the evaluation will only halt to <LINK.ISVALID>.
@@ -52,9 +52,9 @@ Changes to script parsing:
   Using ISVALID to check an object validity/existence is now the preferred way (instead of checking its value with magic numbers like 0 or -1/0FFFFFFFF).
 - Now TRY can be used to explicitly "TRY" to execute a command or set a property on an object which may or may not exist.
   If the object doesn't exist, no operation is done and no error is returned. It can't be used to TRY to retrieve a value (like <TRY FINDID.invalid_item.NAME>).
-  Its use is DISCOURAGED but sometimes it might be an easy way to execute trivial operations without a lot of if/endif clauses.
+  Its use is DISCOURAGED, but sometimes it might be an easy way to execute trivial operations without a lot of if/endif clauses.
   This is a way to explicitly allow what Sphere already did by default in the past (not checking if the object is valid and not returning an error),
-  which is something that only sometimes we expect and we want, most of the times it caused obscure bugs.
+  which is something that only sometimes we expect and we want, most of the time it caused obscure bugs.
 
 Changes to script keywords:
 - CAN property is no more RW, but now it's read-only. Use CANMASK to change it on a per-char basis.

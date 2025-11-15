@@ -3,7 +3,7 @@
 #endif
 #include "smutex.h"
 
-// SimpleMutex:: Constructors, Destructor, Asign operator.
+// SimpleMutex:: Constructors, Destructor, Assign operator.
 
 SimpleMutex::SimpleMutex() noexcept
 {

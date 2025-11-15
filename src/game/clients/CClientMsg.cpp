@@ -3,8 +3,9 @@
 
 #include "../../common/resource/CResourceLock.h"
 #include "../../common/sphere_library/CSRand.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
@@ -218,7 +219,7 @@ void CClient::resendBuffs() const
 	}
 }
 
-void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds, lpctstr* pArgs, uint uiArgCount) const
+void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word durationSeconds, lpctstr* pptcArgs, uint uiArgCount) const
 {
 	ADDTOCALLSTACK("CClient::addBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -226,7 +227,7 @@ void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dwo
 	if ( PacketBuff::CanSendTo(GetNetState()) == false )
 		return;
 
-	new PacketBuff(this, IconId, ClilocOne, ClilocTwo, durationSeconds, pArgs, uiArgCount);
+    new PacketBuff(this, IconId, ClilocOne, ClilocTwo, durationSeconds, pptcArgs, uiArgCount);
 }
 
 void CClient::removeBuff(const BUFF_ICONS IconId) const
@@ -288,7 +289,7 @@ void CClient::closeContainer( const CObjBase * pObj ) const
 	new PacketCloseContainer(this, pObj);
 }
 
-void CClient::closeUIWindow( const CObjBase* pObj, PacketCloseUIWindow::UIWindow windowType ) const
+void CClient::closeUIWindow(const CObjBase* pObj, PacketCloseUIWindowType windowType ) const
 {
 	ADDTOCALLSTACK("CClient::closeUIWindow");
 	new PacketCloseUIWindow(this, pObj, windowType);
@@ -573,21 +574,22 @@ void CClient::addArrowQuest( int x, int y, int id ) const
 {
 	ADDTOCALLSTACK("CClient::addArrowQuest");
 
-    CScriptTriggerArgs args(x, y);
-    if (this->GetNetState()->isClientVersionNumber(MINCLIVER_HS) || this->GetNetState()->isClientEnhanced())
-        args.m_iN3 = id;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(x, y, 0, nullptr);
+    if (GetNetState()->isClientVersionNumber(MINCLIVER_HS) || GetNetState()->isClientEnhanced())
+        pScriptArgs->m_iN3 = id;
     else
-        args.m_iN3 = 0;
+        pScriptArgs->m_iN3 = 0;
 
     if (x > 0)
     {
         if (IsTrigUsed(TRIGGER_ARROWQUEST_ADD))
-            m_pChar->OnTrigger(CTRIG_ArrowQuest_Add, m_pChar, &args);
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Add, pScriptArgs, m_pChar);
     }
     else
     {
         if (IsTrigUsed(TRIGGER_ARROWQUEST_CLOSE))
-            m_pChar->OnTrigger(CTRIG_ArrowQuest_Close, m_pChar, &args);
+            m_pChar->OnTrigger(CTRIG_ArrowQuest_Close, pScriptArgs, m_pChar);
     }
 
 	new PacketArrowQuest(this, x, y, id);
@@ -709,7 +711,7 @@ void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, 
 	new PacketMessageLocalisedEx(this, iClilocId, pSrc, wHue, mode, font, affix, pAffix, pArgs);
 }
 
-void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode, lpctstr name) const
+void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode, lpctstr ptcName) const
 {
 	ADDTOCALLSTACK("CClient::addBarkParse");
 	if ( !pszText )
@@ -718,62 +720,78 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	HUE_TYPE defaultHue = HUE_TEXT_DEF;
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
+
     bool fUseSpeechHueOverride = false;
     bool fUseEmoteHueOverride = false;
-	const CChar * pSrcChar = nullptr;
+
+    const CChar * pSrcChar = nullptr;
 	if (pSrc && pSrc->IsChar())
 	    pSrcChar = static_cast<const CChar *>(pSrc);
 
-	switch ( mode )
+    static constexpr uint kiManagedTalkmodes = 5;
+    static constexpr lpctstr s_ptcTalkmodesDefsColor[kiManagedTalkmodes] =
+        {
+            "SMSG_DEF_COLOR",
+            "EMOTE_DEF_COLOR",
+            "SAY_DEF_COLOR",
+            "CMSG_DEF_COLOR",
+            "IMSG_DEF_COLOR",
+        };
+    static constexpr lpctstr s_ptcTalkmodesDefsFont[kiManagedTalkmodes] =
+        {
+            "SMSG_DEF_FONT",
+            "EMOTE_DEF_FONT",
+            "SAY_DEF_FONT",
+            "CMSG_DEF_FONT",
+            "IMSG_DEF_FONT",
+        };
+    static constexpr lpctstr s_ptcTalkmodesDefsUnicode[kiManagedTalkmodes] =
+        {
+            "SMSG_DEF_UNICODE",
+            "EMOTE_DEF_UNICODE",
+            "SAY_DEF_UNICODE",
+            "CMSG_DEF_UNICODE",
+            "IMSG_DEF_UNICODE",
+        };
+
+    ushort iTalkmodeHue, iTalkmodeFont, iTalkmodeUnicode;
+    iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = UINT16_MAX;
+    switch ( mode )
 	{
 		case TALKMODE_SYSTEM:
-		{
 		talkmode_system:
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE") > 0 ? true : false;
+            iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 0;
 			break;
-		}
 		case TALKMODE_EMOTE:
-		{
 			fUseEmoteHueOverride = true;
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE") > 0 ? true : false;
+            iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 1;
 			break;
-		}
 		case TALKMODE_SAY:
-		{
             if (pSrc == nullptr)
-            {
-                // It's a SYSMESSAGE
-                goto talkmode_system;
-            }
+                goto talkmode_system;   // It's a SYSMESSAGE
             fUseSpeechHueOverride = true;
-			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
-			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE") > 0 ? true : false;
+            iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 2;
 			break;
-		}
 		case TALKMODE_ITEM:
-		{
 			if ( pSrc && pSrc->IsChar() )
-			{
-				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
-				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE") > 0 ? true : false;
-			}
+                iTalkmodeHue = iTalkmodeUnicode = 3;
 			else
-			{
-				defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
-				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
-				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE") > 0 ? true : false;
-			}
-		}
+                iTalkmodeHue = iTalkmodeFont = iTalkmodeUnicode = 4;
 		break;
 
 		default:
 			break;
 	}
+    {
+        auto gReader = g_ExprGlobals.mtEngineLockedReader();
+        if (iTalkmodeHue != UINT16_MAX)
+            defaultHue = (HUE_TYPE)(gReader->m_VarDefs.GetKeyNum(s_ptcTalkmodesDefsColor[iTalkmodeHue]));
+        if (iTalkmodeFont != UINT16_MAX)
+            defaultFont = (FONT_TYPE)(gReader->m_VarDefs.GetKeyNum(s_ptcTalkmodesDefsFont[iTalkmodeFont]));
+        if (iTalkmodeUnicode != UINT16_MAX)
+            defaultUnicode = gReader->m_VarDefs.GetKeyNum(s_ptcTalkmodesDefsUnicode[iTalkmodeUnicode]) > 0 ? true : false;
+    }
+
 
 	word Args[] = { (word)wHue, (word)font, (word)fUnicode };
     lptstr ptcBarkBuffer = Str_GetTemp();  // Be sure to init this before the goto instruction
@@ -843,7 +861,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
 
-	Str_CopyLimitNull(	ptcBarkBuffer, name,	Str_TempLength());
+    Str_CopyLimitNull(	ptcBarkBuffer, ptcName,	Str_TempLength());
 	Str_ConcatLimitNull(ptcBarkBuffer, pszText, Str_TempLength());
 
 	if (mode == TALKMODE_SPELL) //Set TALKMODE_SPELL to TALKMODE_SAY after every color check completed to block spell flood.
@@ -858,14 +876,15 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			int iClilocId = Exp_GetVal( pszText ); //pszText holds the cliloc number, we can't use ppArgs[0] because if the string name exists it will contain the speaker name along with the cliloc number.
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
+
 			for (int i = 3; i < iQty; ++i )
 			{
-				if ( CArgs.GetLength() )
+                if ( CArgs.GetLength() )
 					CArgs += "\t";
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetBuffer());
+            addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetBuffer());
 			break;
 		}
 
@@ -877,12 +896,12 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			CSString CArgs;
 			for ( int i = 1; i < iQty; ++i )
 			{
-				if ( CArgs.GetLength() )
+                if ( CArgs.GetLength() )
 					CArgs += "\t";
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetBuffer());
+            addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetBuffer());
 			break;
 		}
 
@@ -900,7 +919,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 bark_default:
 			if (ptcBarkBuffer[0] == '\0')
 			{
-				Str_CopyLimitNull(ptcBarkBuffer, name, Str_TempLength());
+                Str_CopyLimitNull(ptcBarkBuffer, ptcName, Str_TempLength());
 				Str_ConcatLimitNull(ptcBarkBuffer, pszText, Str_TempLength());
 			}
 
@@ -1015,8 +1034,13 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 			{
 				tchar * sMountDefname = Str_GetTemp();
 				sprintf(sMountDefname, "mount_0x%x", idHorse);
-				ITEMID_TYPE idMountItem = (ITEMID_TYPE)(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
-				if ( idMountItem > ITEMID_NOTHING )
+
+                ITEMID_TYPE idMountItem;
+                {
+                    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+                    idMountItem = (ITEMID_TYPE)(gReader->m_VarDefs.GetKeyNum(sMountDefname));
+                }
+                if ( idMountItem > ITEMID_NOTHING )
 				{
 					id = idMountItem;
 					pItemDef = CItemBase::FindItemBase(id);
@@ -1291,21 +1315,22 @@ void CClient::addItemName( CItem * pItem )
 
 	if (( IsTrigUsed(TRIGGER_AFTERCLICK) ) || ( IsTrigUsed(TRIGGER_ITEMAFTERCLICK) ))
 	{
-		CScriptTriggerArgs Args( this );
-		Args.m_VarsLocal.SetStrNew("ClickMsgText", &szName[0]);
-		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(0, 0, 0, this);
+        pScriptArgs->m_VarsLocal.SetStrNew("ClickMsgText", &szName[0]);
+        pScriptArgs->m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
-		TRIGRET_TYPE ret = pItem->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
+        TRIGRET_TYPE ret = pItem->OnTrigger( "@AfterClick", pScriptArgs, m_pChar );	// CTRIG_AfterClick, ITRIG_AfterClick
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
 
-		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
+        lpctstr pNewStr = pScriptArgs->m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != nullptr )
 			Str_CopyLimitNull(szName, pNewStr, ARRAY_COUNT(szName));
 
-		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
+        wHue = (HUE_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
 
 	addObjMessage( szName, pItem, wHue, TALKMODE_ITEM );
@@ -1415,21 +1440,23 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 
 	if ( IsTrigUsed(TRIGGER_AFTERCLICK) )
 	{
-		CScriptTriggerArgs Args( this );
-		Args.m_VarsLocal.SetStrNew("ClickMsgText", pszTemp);
-		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(0, 0, 0, this);
+        pScriptArgs->m_VarsLocal.SetStrNew("ClickMsgText", pszTemp);
+        pScriptArgs->m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
-		TRIGRET_TYPE ret = const_cast<CChar*>(pChar)->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
+        // TODO: const correctness...
+        TRIGRET_TYPE ret = const_cast<CChar*>(pChar)->OnTrigger( "@AfterClick", pScriptArgs, m_pChar );	// CTRIG_AfterClick, ITRIG_AfterClick
 
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
 
-		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
+        lpctstr pNewStr = pScriptArgs->m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != nullptr )
 			Str_CopyLimitNull(pszTemp, pNewStr, Str_TempLength());
 
-		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue"));
+        wHue = (HUE_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("ClickMsgHue"));
 	}
 
 	addObjMessage( pszTemp, pChar, wHue, TALKMODE_ITEM );
@@ -1567,7 +1594,7 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	{
 		m_tmSetupCharList[0] = pCharFirst->GetUID();
 
-		pPacket->writeStringFixedASCII(pCharFirst->GetName(), MAX_NAME_SIZE);
+		pPacket->writeStringFixedASCII(pCharFirst->GetNameWithoutIncognito(), MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 
 		++count;
@@ -1593,7 +1620,7 @@ uint CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 
 		m_tmSetupCharList[count] = uid;
 
-		pPacket->writeStringFixedASCII(pChar->GetName(), MAX_NAME_SIZE);
+		pPacket->writeStringFixedASCII(pChar->GetNameWithoutIncognito(), MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 
 		++count;
@@ -1632,9 +1659,9 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 		{
 			if ( IsTrigUsed(TRIGGER_TARGON_CANCEL) )
 			{
-				CScriptTriggerArgs Args;
-				Args.m_s1 =  m_Targ_Text;
-				if (pCharThis->OnTrigger( CTRIG_Targon_Cancel, pCharThis, &Args ) == TRIGRET_RET_TRUE )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->m_s1 =  m_Targ_Text;
+                if (pCharThis->OnTrigger( CTRIG_Targon_Cancel, pScriptArgs, pCharThis ) == TRIGRET_RET_TRUE )
 					fSuppressCancelMessage = true;
 			}
 		} break;
@@ -1643,7 +1670,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			CItem * pItemUse = m_Targ_UID.ItemFind();
 			if (pItemUse && (IsTrigUsed(TRIGGER_TARGON_CANCEL) || IsTrigUsed(TRIGGER_ITEMTARGON_CANCEL)))
 			{
-				if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, pCharThis) == TRIGRET_RET_TRUE )
+                if ( pItemUse->OnTrigger( ITRIG_TARGON_CANCEL, CScriptParserBufs::GetCScriptTriggerArgsPtr(), pCharThis) == TRIGRET_RET_TRUE )
 					fSuppressCancelMessage = true;
 			}
 		} break;
@@ -1653,11 +1680,12 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			const CSpellDef* pSpellDef = g_Cfg.GetSpellDef(m_tmSkillMagery.m_iSpell);
 			if (pSpellDef)
 			{
-				CScriptTriggerArgs Args(m_tmSkillMagery.m_iSpell, 0, m_Targ_Prv_UID.ObjFind());
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init(m_tmSkillMagery.m_iSpell, 0, 0, m_Targ_Prv_UID.ObjFind());
 
 				if ( IsTrigUsed(TRIGGER_SPELLTARGETCANCEL) )
 				{
-					if (pCharThis->OnTrigger( CTRIG_SpellTargetCancel, this, &Args ) == TRIGRET_RET_TRUE )
+                    if (pCharThis->OnTrigger( CTRIG_SpellTargetCancel, pScriptArgs, this ) == TRIGRET_RET_TRUE )
 					{
 						fSuppressCancelMessage = true;
 						break;
@@ -1666,7 +1694,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if (pCharThis->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, pCharThis, &Args ) == TRIGRET_RET_TRUE )
+                    if (pCharThis->Spell_OnTrigger( m_tmSkillMagery.m_iSpell, SPTRIG_TARGETCANCEL, pScriptArgs, pCharThis ) == TRIGRET_RET_TRUE )
 						fSuppressCancelMessage = true;
 				}
 			}
@@ -1700,7 +1728,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 			{
 				if ( IsTrigUsed(TRIGGER_SKILLTARGETCANCEL) )
 				{
-					if (pCharThis->Skill_OnCharTrigger(action, CTRIG_SkillTargetCancel) == TRIGRET_RET_TRUE )
+                    if (pCharThis->Skill_OnCharTrigger(action, CTRIG_SkillTargetCancel, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 					{
 						fSuppressCancelMessage = true;
 						break;
@@ -1708,7 +1736,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeou
 				}
 				if ( IsTrigUsed(TRIGGER_TARGETCANCEL) )
 				{
-					if (pCharThis->Skill_OnTrigger(action, SKTRIG_TARGETCANCEL) == TRIGRET_RET_TRUE )
+                    if (pCharThis->Skill_OnTrigger(action, SKTRIG_TARGETCANCEL, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 						fSuppressCancelMessage = true;
 				}
 			}
@@ -1906,8 +1934,9 @@ void CClient::addSkillWindow(SKILL_TYPE skill, bool fFromInfo) const // Opens th
 
 	if ( IsTrigUsed(TRIGGER_USERSKILLS) )
 	{
-		CScriptTriggerArgs Args(fAllSkills? -1 : skill, fFromInfo);
-		if (m_pChar->OnTrigger(CTRIG_UserSkills, pChar, &Args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init((fAllSkills? -1 : skill), fFromInfo, 0, nullptr);
+        if (m_pChar->OnTrigger(CTRIG_UserSkills, pScriptArgs, pChar) == TRIGRET_RET_TRUE)
 			return;
 	}
 
@@ -2182,9 +2211,9 @@ void CClient::addStatusWindow( CObjBase *pObj, bool fRequested ) // Opens the st
 
 	if ( IsTrigUsed(TRIGGER_USERSTATS) )
 	{
-		CScriptTriggerArgs Args(0, 0, pObj);
-		Args.m_iN3 = fRequested;
-		if ( m_pChar->OnTrigger(CTRIG_UserStats, dynamic_cast<CTextConsole *>(pObj), &Args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(0, 0, fRequested, pObj);
+        if ( m_pChar->OnTrigger(CTRIG_UserStats, pScriptArgs, dynamic_cast<CTextConsole *>(pObj)) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -2273,8 +2302,9 @@ void CClient::addSpellbookOpen( CItem * pBook )
 
 	if ( IsTrigUsed(TRIGGER_SPELLBOOK) )
 	{
-		CScriptTriggerArgs	Args( 0, 0, pBook );
-		if ( m_pChar->OnTrigger( CTRIG_SpellBook, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init( 0, 0, 0, pBook );
+        if ( m_pChar->OnTrigger( CTRIG_SpellBook, pScriptArgs, m_pChar ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -2616,7 +2646,7 @@ void CClient::addGlobalChatStatusToggle()
 	}
 
 	tchar* pszXML = Str_GetTemp();
-	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10u\" name=\"%.6s\" show=\"%d\" version=\"1\" />", 
+	sprintf(pszXML, "<presence from=\"%s\" id=\"pres_%.10u\" name=\"%.6s\" show=\"%d\" version=\"1\" />",
 			CGlobalChatChanMember::GetJID(), static_cast<dword>(CSTime::GetCurrentTime().GetTime()), m_pChar->GetName(), iShow);
 
 	CGlobalChatChanMember::SetVisible(static_cast<bool>(iShow));
@@ -2660,7 +2690,7 @@ void CClient::addCharPaperdoll( CChar * pChar )
 
 	if (IsTrigUsed(TRIGGER_SENDPAPERDOLL))
 	{
-		pChar->OnTrigger(CTRIG_SendPaperdoll, m_pChar);
+        pChar->OnTrigger(CTRIG_SendPaperdoll, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar);
 	}
 
 	new PacketPaperdoll(this, pChar);
@@ -2790,15 +2820,16 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	bool fQuickLogIn = pChar->LayerFind(LAYER_FLAG_ClientLinger);
 	if ( IsTrigUsed(TRIGGER_LOGIN) )
 	{
-		CScriptTriggerArgs Args( fNoMessages, fQuickLogIn );
-		if ( pChar->OnTrigger( CTRIG_LogIn, pChar, &Args ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(fNoMessages, fQuickLogIn, 0, nullptr);
+        if ( pChar->OnTrigger( CTRIG_LogIn, pScriptArgs, pChar ) == TRIGRET_RET_TRUE )
 		{
 			m_pChar->ClientDetach();
 			pChar->SetDisconnected();
 			return PacketLoginError::Blocked;
 		}
-		fNoMessages	= (Args.m_iN1 != 0);
-		fQuickLogIn	= (Args.m_iN2 != 0);
+        fNoMessages	= (pScriptArgs->m_iN1 != 0);
+        fQuickLogIn	= (pScriptArgs->m_iN2 != 0);
 	}
 
 	tchar *z = Str_GetTemp();
@@ -2850,7 +2881,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	/*
 	* // If ever we want to change how timers are suspended...
-	* 
+	*
 	if (m_pChar->IsPlayer())
 	{
 		// When a character logs out, its timer and its contents' timers has to freeze.
@@ -2937,7 +2968,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		}
 	}
 
-	
+
 
 	if (pChar->Delete()) //	Do the scripts allow to delete the char?
 	{
@@ -2952,7 +2983,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 	{
 		return PacketDeleteError::InvalidRequest;
 	}
-	
+
 }
 
 byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, bool fTest )
@@ -3108,12 +3139,14 @@ byte CClient::LogIn( CAccount * pAccount, CSString & sMsg )
 
 	//	Do the scripts allow to login this account?
 	pAccount->m_Last_IP.SetAddrIP(GetPeer().GetAddrIP());
-	CScriptTriggerArgs Args;
-	Args.Init(pAccount->GetName());
-	Args.m_iN1 = GetConnectType();
-	Args.m_pO1 = this;
-	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
-	g_Serv.r_Call("f_onaccount_login", &g_Serv, &Args, nullptr, &tr);
+
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(pAccount->GetName());
+    pScriptArgs->m_iN1 = GetConnectType();
+    pScriptArgs->m_pO1 = this;
+
+    TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
+    g_Serv.r_Call("f_onaccount_login", pScriptArgs, &g_Serv, nullptr, &tr);
 	if ( tr == TRIGRET_RET_TRUE )
 	{
 		sMsg = g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_DENIED );
@@ -3155,9 +3188,9 @@ byte CClient::LogIn( lpctstr ptcAccName, lpctstr ptcPassword, CSString & sMsg )
 
 
 	tchar ptcName[ MAX_ACCOUNT_NAME_SIZE ];
-	if ( !CAccount::NameStrip(ptcName, ptcAccName) || Str_Check(ptcAccName) )
+    if ( !CAccount::NameStrip(ptcName, ptcAccName) || Str_Untrusted_InvalidTermination(ptcAccName) )
 		return( PacketLoginError::BadAccount );
-	else if ( Str_Check(ptcPassword) )
+    else if ( Str_Untrusted_InvalidTermination(ptcPassword) )
 		return( PacketLoginError::BadPassword );
 
 	const bool fGuestAccount = ! strnicmp( ptcAccName, "GUEST", 5 );

@@ -1,5 +1,5 @@
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
 #include "../../common/CLog.h"
 #include "../chars/CChar.h"
 #include "../items/CItemStone.h"
@@ -236,7 +236,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 			default:
 				return false;
 		}
-	} 
+	}
 	else if ( GetLinkUID().IsItem() )
 	{
 		switch ( iIndex )
@@ -381,7 +381,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType,
 
 	m_Member.m_iAccountGold = nAccountGold;
 
-	if ( ! g_Serv.IsLoading() && pStone->GetMemoryType())
+	if ( ! g_Serv.IsLoadingGeneric() && pStone->GetMemoryType())
 	{
 		CChar * pChar = uid.CharFind();
 		if ( pChar != nullptr )
@@ -441,12 +441,12 @@ lpctstr CStoneMember::GetPrivName() const
 	TemporaryString tsDefname;
 	snprintf(tsDefname.buffer(), tsDefname.capacity(), "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
 
-	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(tsDefname);
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+    CVarDefCont * pResult = gReader->m_VarDefs.GetKey(tsDefname);
 	if (pResult)
 		return pResult->GetValStr();
-	else
-		pResult = g_Exp.m_VarDefs.GetKey("STONECONFIG_PRIVNAME_PRIVUNK");
 
+    pResult = gReader->m_VarDefs.GetKey("STONECONFIG_PRIVNAME_PRIVUNK");
 	return ( pResult == nullptr ) ? "" : pResult->GetValStr();
 }
 

@@ -1,6 +1,6 @@
 #include "CSObjList.h"
 #include "../assertion.h"
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 
 
 // CSObjListRec:: Constructors, Destructor, Assign operator.

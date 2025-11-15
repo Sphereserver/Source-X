@@ -1,6 +1,7 @@
 #include "../../common/resource/CResourceLock.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../network/CClientIterator.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -53,7 +54,7 @@ void CClient::Event_ChatButton(const nachar* pszName) // Client's chat button wa
 
 	if ( IsTrigUsed(TRIGGER_USERCHATBUTTON) )
 	{
-		if (m_pChar && m_pChar->OnTrigger(CTRIG_UserChatButton, m_pChar) == TRIGRET_RET_TRUE)
+        if (m_pChar && m_pChar->OnTrigger(CTRIG_UserChatButton, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE)
 			return;
 	}
 	GetChar()->SetTriggerActive("UserChatButton");	// dirty fix for SA Classic clients with injection moving a lot when using chat button, we set 'active trigger' to this, so we check it back on the packet to limit the amount of steps to do.
@@ -170,7 +171,7 @@ void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 	if ( !pBook->IsBookWritable() )
 		return;
 
-	if ( Str_Check(pszTitle) || Str_Check(pszAuthor) )
+    if ( Str_Untrusted_InvalidTermination(pszTitle) || Str_Untrusted_InvalidTermination(pszAuthor) )
 		return;
 
 	pBook->SetName(pszTitle);
@@ -417,8 +418,9 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 		CObjBase *pOldCont = pItem->GetContainer();
 		if (( IsTrigUsed(TRIGGER_DROPON_ITEM) ) || ( IsTrigUsed(TRIGGER_ITEMDROPON_ITEM) ))
 		{
-			CScriptTriggerArgs Args( pObjOn );
-			if ( pItem->OnTrigger( ITRIG_DROPON_ITEM, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_pO1 = pObjOn;
+            if ( pItem->OnTrigger( ITRIG_DROPON_ITEM, pScriptArgs, m_pChar  ) == TRIGRET_RET_TRUE )
 			{
 				Event_Item_Drop_Fail( pItem );
 				return;
@@ -429,11 +431,12 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			return;
 
 		CItem * pItemOn = dynamic_cast <CItem*> ( pObjOn );
-		if (( pItemOn ) && (( IsTrigUsed(TRIGGER_DROPON_SELF) ) || ( IsTrigUsed(TRIGGER_ITEMDROPON_SELF) )))
+        if (pItemOn && (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF)))
 		{
             CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
-			CScriptTriggerArgs Args( pItem );
-			if ( pItemOn->OnTrigger( ITRIG_DROPON_SELF, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_pO1 = pItem;
+            if ( pItemOn->OnTrigger( ITRIG_DROPON_SELF, pScriptArgs, m_pChar ) == TRIGRET_RET_TRUE )
 			{
                 CItem* pCont = dynamic_cast<CItem*>(pItem->GetContainer());
                 if (pPrevCont == pCont)
@@ -589,7 +592,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 }
 
 
-
 void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the skill list
 {
 	ADDTOCALLSTACK("CClient::Event_Skill_Use");
@@ -612,7 +614,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 
 	if ( IsTrigUsed(TRIGGER_SKILLSELECT) )
 	{
-		if ( m_pChar->Skill_OnCharTrigger( skill, CTRIG_SkillSelect ) == TRIGRET_RET_TRUE )
+        if ( m_pChar->Skill_OnCharTrigger( skill, CTRIG_SkillSelect, CScriptParserBufs::GetCScriptTriggerArgsPtr() ) == TRIGRET_RET_TRUE )
 		{
 			m_pChar->Skill_Fail( true );	// clean up current skill.
 			return;
@@ -621,7 +623,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 
 	if ( IsTrigUsed(TRIGGER_SELECT) )
 	{
-		if ( m_pChar->Skill_OnTrigger( skill, SKTRIG_SELECT ) == TRIGRET_RET_TRUE )
+        if ( m_pChar->Skill_OnTrigger( skill, SKTRIG_SELECT, CScriptParserBufs::GetCScriptTriggerArgsPtr()) == TRIGRET_RET_TRUE )
 		{
 			m_pChar->Skill_Fail( true );	// clean up current skill.
 			return;
@@ -722,7 +724,6 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 }
 
 
-
 bool CClient::Event_CheckWalkBuffer(byte rawdir)
 {
 	ADDTOCALLSTACK("CClient::Event_CheckWalkBuffer");
@@ -807,7 +808,7 @@ bool CClient::Event_CheckWalkBuffer(byte rawdir)
 			DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 			if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 			{
-				if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) != TRIGRET_RET_TRUE )
+                if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) != TRIGRET_RET_TRUE )
 					return false;
 			}
 		}
@@ -819,12 +820,13 @@ bool CClient::Event_ExceededNetworkQuota(uchar uiType, int64 iBytes, int64 iQuot
 {
 	ADDTOCALLSTACK("CClient::Event_ExceededNetworkQuota");
 
-	CScriptTriggerArgs Args(uiType, iBytes, iQuota);
-	Args.m_VarsLocal.SetStrNew("Account", GetName());
-	Args.m_VarsLocal.SetStrNew("IP", GetPeer().GetAddrStr());
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->Init(uiType, iBytes, iQuota, nullptr);
+    pScriptArgs->m_VarsLocal.SetStrNew("Account", GetName());
+    pScriptArgs->m_VarsLocal.SetStrNew("IP", GetPeer().GetAddrStr());
 
 	TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
-	g_Serv.r_Call("f_onclient_exceed_network_quota", this, &Args, nullptr, &tRet);
+    g_Serv.r_Call("f_onclient_exceed_network_quota", pScriptArgs, this, nullptr, &tRet);
 
 	if (tRet == TRIGRET_RET_FALSE)
 	{
@@ -972,9 +974,9 @@ void CClient::Event_CombatAbilitySelect(dword dwAbility)
 
     if ( IsTrigUsed(TRIGGER_USERSPECIALMOVE) )
     {
-        CScriptTriggerArgs Args;
-        Args.m_iN1 = dwAbility;
-        m_pChar->OnTrigger(CTRIG_UserSpecialMove, m_pChar, &Args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = dwAbility;
+        m_pChar->OnTrigger(CTRIG_UserSpecialMove, pScriptArgs, m_pChar);
     }
 }
 
@@ -987,9 +989,10 @@ void CClient::Event_VirtueSelect(dword dwVirtue, CChar *pCharTarg)
 
     if ( IsTrigUsed(TRIGGER_USERVIRTUE) )
     {
-        CScriptTriggerArgs Args(pCharTarg);
-        Args.m_iN1 = dwVirtue;
-        m_pChar->OnTrigger(CTRIG_UserVirtue, m_pChar, &Args);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pCharTarg;
+        pScriptArgs->m_iN1 = dwVirtue;
+        m_pChar->OnTrigger(CTRIG_UserVirtue, pScriptArgs, m_pChar );
     }
 }
 
@@ -1005,18 +1008,18 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 
 	if ( IsTrigUsed(TRIGGER_USERWARMODE) )
 	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = m_pChar->IsStatFlag(STATF_WAR) ? 1 : 0;
-		Args.m_iN2 = 1;
-		Args.m_iN3 = 0;
-		if (m_pChar->OnTrigger(CTRIG_UserWarmode, m_pChar, &Args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = m_pChar->IsStatFlag(STATF_WAR) ? 1 : 0;
+        pScriptArgs->m_iN2 = 1;
+        pScriptArgs->m_iN3 = 0;
+        if (m_pChar->OnTrigger(CTRIG_UserWarmode, pScriptArgs, m_pChar) == TRIGRET_RET_TRUE)
 			return;
 
-		if ( Args.m_iN2 == 0 )
+        if ( pScriptArgs->m_iN2 == 0 )
 			fCleanSkill = false;
 
-		if ( Args.m_iN3 != 0 && Args.m_iN3 < 3)
-			fWar = (Args.m_iN3 == 1 ? false : true);
+        if ( pScriptArgs->m_iN3 != 0 && pScriptArgs->m_iN3 < 3)
+            fWar = (pScriptArgs->m_iN3 == 1 ? false : true);
 	}
 
 	m_pChar->StatFlag_Mod( STATF_WAR, fWar );
@@ -1042,7 +1045,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		return false;
 	if ( pszCommand[0] == 0 )
 		return true;		// should not be said
-	if ( Str_Check(pszCommand) )
+    if ( Str_Untrusted_InvalidTermination(pszCommand) )
 		return true;		// should not be said
 	if ( ((m_pChar->GetDispID() == CREID_EQUIP_GM_ROBE) && (pszCommand[0] == '=')) //  WTF? In any case, keep using dispid, or it's bugged when you change character's dispid to c_man_gm.
         || (pszCommand[0] == g_Cfg.m_cCommandPrefix))
@@ -1071,18 +1074,19 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	//	filter on commands is active - so trigger it
 	if ( !g_Cfg.m_sCommandTrigger.IsEmpty() )
 	{
-		CScriptTriggerArgs Args(pszCommand);
-		Args.m_iN1 = fAllowCommand;
-		Args.m_iN2 = fAllowSay;
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pszCommand);
+        pScriptArgs->m_iN1 = fAllowCommand;
+        pScriptArgs->m_iN2 = fAllowSay;
 		enum TRIGRET_TYPE tr;
 
 		//	Call the filtering function
-		if ( m_pChar->r_Call(g_Cfg.m_sCommandTrigger, m_pChar, &Args, nullptr, &tr) )
+        if ( m_pChar->r_Call(g_Cfg.m_sCommandTrigger, pScriptArgs, m_pChar, nullptr, &tr) )
 			if ( tr == TRIGRET_RET_TRUE )
-				return (Args.m_iN2 != 0);
+                return (pScriptArgs->m_iN2 != 0);
 
-		fAllowCommand = ( Args.m_iN1 != 0 );
-		fAllowSay = ( Args.m_iN2 != 0 );
+        fAllowCommand = ( pScriptArgs->m_iN1 != 0 );
+        fAllowSay = ( pScriptArgs->m_iN2 != 0 );
 	}
 
 	if ( !fAllowCommand && !fAllowSay )
@@ -1274,17 +1278,18 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             continue; //We need to continue for loop for other items not break.
 
         pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-        word amount = items[i].m_vcAmount;
+        word wAmount = items[i].m_vcAmount;
 
         if (pItem == nullptr)
             continue;
 
         if ((IsTrigUsed(TRIGGER_BUY)) || (IsTrigUsed(TRIGGER_ITEMBUY)))
         {
-			int64 iItemCost = int64(amount) * items[i].m_price;
-            CScriptTriggerArgs Args( amount, iItemCost, pVendor );
-            Args.m_VarsLocal.SetNum( "TOTALCOST", iCostTotal);
-			if (pItem->OnTrigger(ITRIG_Buy, this->GetChar(), &Args) == TRIGRET_RET_TRUE)
+            const int64 iItemCost = int64(wAmount) * items[i].m_price;
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(wAmount, iItemCost, 0, pVendor);
+            pScriptArgs->m_VarsLocal.SetNum( "TOTALCOST", iCostTotal);
+            if (pItem->OnTrigger(ITRIG_Buy, pScriptArgs, this->GetChar()) == TRIGRET_RET_TRUE)
 			{
 				iCostTotal -= iItemCost; //If we are blocking the transaction we should not pay for it!.
 				uiItemBlocked++;
@@ -1294,13 +1299,13 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
 
         if (!fPlayerVendor) //NPC vendors
         {
-            pItem->SetAmount(pItem->GetAmount() - amount);
+            pItem->SetAmount(pItem->GetAmount() - wAmount);
 
             switch (pItem->GetType())
             {
                 case IT_FIGURINE:
                 {
-                    for ( int f = 0; f < amount; ++f )
+                    for ( int f = 0; f < wAmount; ++f )
                         m_pChar->Use_Figurine(pItem);
                     goto do_consume;
                 }
@@ -1320,9 +1325,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
                     break;
             }
 
-            if ((amount > 1) && (!pItem->Item_GetDef()->IsStackableType()))
+            if ((wAmount > 1) && (!pItem->Item_GetDef()->IsStackableType()))
             {
-                while (amount--)
+                while (wAmount--)
                 {
                     CItem * pItemNew = CItem::CreateDupeItem(pItem);
                     pItemNew->SetAmount(1);
@@ -1337,7 +1342,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             else
             {
                 CItem * pItemNew = CItem::CreateDupeItem(pItem);
-                pItemNew->SetAmount(amount);
+                pItemNew->SetAmount(wAmount);
                 pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
                 if (!pPack->CanContainerHold(pItemNew, m_pChar) || (!m_pChar->CanCarry(pItemNew)))
                     m_pChar->ItemDrop(pItemNew, m_pChar->GetTopPoint());
@@ -1347,7 +1352,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
         }
         else //Player vendors
         {
-            if ( pItem->GetAmount() <= amount ) //Buy the whole item
+            if ( pItem->GetAmount() <= wAmount ) //Buy the whole item
             {
                 if ((!pPack->CanContainerHold(pItem, m_pChar)) || (!m_pChar->CanCarry(pItem)))
                     m_pChar->ItemDrop(pItem, m_pChar->GetTopPoint());
@@ -1358,11 +1363,11 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, uint uiIt
             }
             else
             {
-                pItem->SetAmount(pItem->GetAmount() - amount);
+                pItem->SetAmount(pItem->GetAmount() - wAmount);
 
                 CItem *pItemNew = CItem::CreateDupeItem(pItem);
                 pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-                pItemNew->SetAmount(amount);
+                pItemNew->SetAmount(wAmount);
                 if ((!pPack->CanContainerHold(pItemNew, m_pChar)) || (!m_pChar->CanCarry(pItemNew)))
                     m_pChar->ItemDrop(pItemNew, m_pChar->GetTopPoint());
                 else
@@ -1471,13 +1476,13 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		if ( pItemSell == nullptr )
 			continue;
 
-		word amount = items[i].m_vcAmount;
+        word wAmount = items[i].m_vcAmount;
 
 		// Now how much did i say i wanted to sell ?
 		dword dwPrice = 0;
-		if ( pItem->GetAmount() < amount )	// Selling more than i have ?
+        if ( pItem->GetAmount() < wAmount )	// Selling more than i have ?
 		{
-			amount = pItem->GetAmount();
+            wAmount = pItem->GetAmount();
 		}
 
 		// If OVERRIDE.VALUE is define on the script and this NPC buy this item at a specific price, we use this price in priority
@@ -1485,18 +1490,19 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 		if (pItemSell->GetKey("OVERRIDE.VALUE", true))
 		{
 			//Get the price on NPC template
-			dwPrice = pItemSell->GetVendorPrice(iConvertFactor,1) * amount; //Check the value of item on NPC template or itemdef
+            dwPrice = pItemSell->GetVendorPrice(iConvertFactor,1) * wAmount; //Check the value of item on NPC template or itemdef
 		}
 		else
-		{
+        {
 			//Get the price/Value of the real item in the backpack
-			dwPrice = pItem->GetVendorPrice(iConvertFactor,1) * amount; //Check the value of the item on the player
+            dwPrice = pItem->GetVendorPrice(iConvertFactor,1) * wAmount; //Check the value of the item on the player
 		}
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))
 		{
-			CScriptTriggerArgs Args( amount, dwPrice, pVendor );
-			if ( pItem->OnTrigger( ITRIG_Sell, this->GetChar(), &Args ) == TRIGRET_RET_TRUE )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(wAmount, dwPrice, 0, pVendor);
+            if ( pItem->OnTrigger( ITRIG_Sell, pScriptArgs, this->GetChar() ) == TRIGRET_RET_TRUE )
 				continue;
 		}
 
@@ -1513,7 +1519,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 
 		// Take the items from player.
 		// Put items in vendor inventory.
-		if ( amount >= pItem->GetAmount())
+        if ( wAmount >= pItem->GetAmount())
 		{
 			pItem->RemoveFromView();
 			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
@@ -1529,13 +1535,13 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, uint uiI
 			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
 			{
 				CItem * pItemNew = CItem::CreateDupeItem(pItem);
-				pItemNew->SetAmount(amount);
+                pItemNew->SetAmount(wAmount);
 				pContExtra->ContentAdd(pItemNew);
 			}
-			pItem->SetAmountUpdate( pItem->GetAmount() - amount );
+            pItem->SetAmountUpdate( pItem->GetAmount() - wAmount );
 
 			if (IsSetOF(OF_VendorStockLimit))
-				pItemSell->ConsumeAmount(amount);
+                pItemSell->ConsumeAmount(wAmount);
 		}
 	}
 
@@ -1580,7 +1586,7 @@ void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int 
 
 	if ( IsTrigUsed(TRIGGER_PROFILE) )
 	{
-		if ( pChar->OnTrigger(CTRIG_Profile, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_Profile, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -1605,7 +1611,6 @@ void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int 
 }
 
 
-
 void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 {
 	ADDTOCALLSTACK("CClient::Event_MailMsg");
@@ -1624,7 +1629,7 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 
 	if ( IsTrigUsed(TRIGGER_USERMAILBAG) )
 	{
-		if (pChar->OnTrigger(CTRIG_UserMailBag, m_pChar, nullptr) == TRIGRET_RET_TRUE)
+        if (pChar->OnTrigger(CTRIG_UserMailBag, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE)
 			return;
 	}
 
@@ -1639,7 +1644,6 @@ void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 }
 
 
-
 void CClient::Event_ToolTip( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::Event_ToolTip");
@@ -1649,7 +1653,7 @@ void CClient::Event_ToolTip( CUID uid )
 
 	if (( IsTrigUsed(TRIGGER_TOOLTIP) ) || (( IsTrigUsed(TRIGGER_ITEMTOOLTIP) )&&(pObj->IsItem())))
 	{
-		if ( pObj->OnTrigger("@ToolTip", this) == TRIGRET_RET_TRUE )	// CTRIG_ToolTip, ITRIG_ToolTip
+        if ( pObj->OnTrigger("@ToolTip", CScriptParserBufs::GetCScriptTriggerArgsPtr(), this) == TRIGRET_RET_TRUE )	// CTRIG_ToolTip, ITRIG_ToolTip
 			return;
 	}
 
@@ -1667,7 +1671,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	// result of addPrompt
 	tchar szText[MAX_TALK_BUFFER];
 
-	if ( Str_Check( pszText ) )
+    if ( Str_Untrusted_InvalidTermination( pszText, MAX_TALK_BUFFER - 1) )
 		return;
 
 	CLIMODE_TYPE promptMode = m_Prompt_Mode;
@@ -1855,8 +1859,13 @@ void CClient::Event_Talk_Common(lpctstr pszText)	// PC speech
 		return;
 
 	// Guards are special
-	lpctstr pszMsgGuards = g_Exp.m_VarDefs.GetKeyStr("guardcall");
-	if ( !strnicmp(pszMsgGuards, "", 0) )
+    lpctstr pszMsgGuards;
+    {
+        auto gReader = g_ExprGlobals.mtEngineLockedReader();
+        pszMsgGuards = Str_mtEngineGetSafeTemp(gReader->m_VarDefs.GetKeyStr("guardcall"));
+    }
+
+    if ( !strnicmp(pszMsgGuards, "", 0) )
 		pszMsgGuards = "GUARD,GUARDS";
 	if ( FindStrWord(pszText, pszMsgGuards) > 0 )
 		m_pChar->CallGuards();
@@ -2196,7 +2205,7 @@ bool CClient::Event_SetName( CUID uid, const char * pszCharName )
 	if (!pChar || !m_pChar)
 		return false;
 
-   if ( Str_CheckName(pszCharName) || !strlen(pszCharName) )
+   if ( Str_Untrusted_InvalidName(pszCharName) || !strlen(pszCharName) )
 		return false;
 
 	// Do we have the right to do this ?
@@ -2211,10 +2220,10 @@ bool CClient::Event_SetName( CUID uid, const char * pszCharName )
 
 	if ( IsTrigUsed(TRIGGER_RENAME) )
 	{
-		CScriptTriggerArgs args;
-		args.m_pO1 = pChar;
-		args.m_s1 = pszCharName;
-		if ( m_pChar->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = pChar;
+        pScriptArgs->m_s1 = pszCharName;
+        if ( m_pChar->OnTrigger(CTRIG_Rename, pScriptArgs, this) == TRIGRET_RET_TRUE )
 			return false;
 	}
 	if (pChar->IsOwnedBy(m_pChar))
@@ -2344,7 +2353,7 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 	CChar * pChar = static_cast<CChar *>(pObj);
 	if ( IsTrigUsed(TRIGGER_DCLICK) || IsTrigUsed(TRIGGER_CHARDCLICK) )
 	{
-		if ( pChar->OnTrigger(CTRIG_DClick, m_pChar) == TRIGRET_RET_TRUE )
+        if ( pChar->OnTrigger(CTRIG_DClick, CScriptParserBufs::GetCScriptTriggerArgsPtr(), m_pChar) == TRIGRET_RET_TRUE )
 			return true;
 	}
 
@@ -2412,9 +2421,10 @@ void CClient::Event_SingleClick( CUID uid )
 
 	if ( IsTrigUsed(TRIGGER_CLICK) || (IsTrigUsed(TRIGGER_ITEMCLICK) && pObj->IsItem()) || (IsTrigUsed(TRIGGER_CHARCLICK) && pObj->IsChar()) )
 	{
-		CScriptTriggerArgs Args(this);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = this;
 		// The "@Click" trigger str should be the same between items and chars...
-		if ( pObj->OnTrigger(CChar::sm_szTrigName[CTRIG_Click], m_pChar, &Args) == TRIGRET_RET_TRUE )	// CTRIG_Click, ITRIG_Click
+        if ( pObj->OnTrigger(CChar::sm_szTrigName[CTRIG_Click], pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )	// CTRIG_Click, ITRIG_Click
 			return;
 	}
 
@@ -2558,8 +2568,8 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	}
 	m_pPopupPacket = new PacketDisplayPopup(this, uObj);
 
-	CScriptTriggerArgs Args;
-	bool fPreparePacket = false;
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    bool fPreparePacket = false;
 	CItem *pItem = uObj.ItemFind();
 	CChar *pChar = uObj.CharFind();
 
@@ -2567,8 +2577,8 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	{
 		if ( IsTrigUsed(TRIGGER_CONTEXTMENUREQUEST) || IsTrigUsed(TRIGGER_ITEMCONTEXTMENUREQUEST) )
 		{
-			Args.m_iN1 = 1;
-			pItem->OnTrigger(ITRIG_ContextMenuRequest, GetChar(), &Args);
+            pScriptArgs->m_iN1 = 1;
+            pItem->OnTrigger(ITRIG_ContextMenuRequest, pScriptArgs, GetChar());
 			fPreparePacket = true;		// there's no hardcoded stuff for items
 		}
 		else
@@ -2582,8 +2592,8 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	{
 		if ( IsTrigUsed(TRIGGER_CONTEXTMENUREQUEST) )
 		{
-			Args.m_iN1 = 1;
-			TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_ContextMenuRequest, GetChar(), &Args);
+            pScriptArgs->m_iN1 = 1;
+            TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_ContextMenuRequest, pScriptArgs, GetChar());
 			if ( iRet == TRIGRET_RET_TRUE )
 				fPreparePacket = true;
 		}
@@ -2592,7 +2602,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 	{
 		delete m_pPopupPacket;
 		m_pPopupPacket = nullptr;
-		return;
+        return;
 	}
 
 	if ( pChar && !fPreparePacket )
@@ -2714,10 +2724,10 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_TRADE_OPEN, 1077728, POPUPFLAG_COLOR, 0xFFFF);
 		}
 
-		if ( (Args.m_iN1 != 1) && (IsTrigUsed(TRIGGER_CONTEXTMENUREQUEST)) )
+        if ( (pScriptArgs->m_iN1 != 1) && (IsTrigUsed(TRIGGER_CONTEXTMENUREQUEST)) )
 		{
-			Args.m_iN1 = 2;
-			pChar->OnTrigger(CTRIG_ContextMenuRequest, GetChar(), &Args);
+            pScriptArgs->m_iN1 = 2;
+            pChar->OnTrigger(CTRIG_ContextMenuRequest, pScriptArgs, GetChar());
 		}
 	}
 
@@ -2746,14 +2756,14 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 	if ( !IsSetOF(OF_NoContextMenuLOS) && !m_pChar->CanSeeLOS(pObj) )
 		return;
 
-	CScriptTriggerArgs Args;
-	CItem *pItem = uObj.ItemFind();
-	if ( pItem )
+    CItem *pItem = uObj.ItemFind();
+    CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    if ( pItem )
 	{
 		if ( IsTrigUsed(TRIGGER_CONTEXTMENUSELECT) || IsTrigUsed(TRIGGER_ITEMCONTEXTMENUSELECT) )
 		{
-			Args.m_iN1 = EntryTag;
-			pItem->OnTrigger(ITRIG_ContextMenuSelect, GetChar(), &Args);
+            pScriptArgs->m_iN1 = EntryTag;
+            pItem->OnTrigger(ITRIG_ContextMenuSelect, pScriptArgs, GetChar());
 		}
 		return;		// there's no hardcoded stuff for items
 	}
@@ -2764,8 +2774,8 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 
 	if ( IsTrigUsed(TRIGGER_CONTEXTMENUSELECT) )
 	{
-		Args.m_iN1 = EntryTag;
-		if ( pChar->OnTrigger(CTRIG_ContextMenuSelect, GetChar(), &Args) == TRIGRET_RET_TRUE )
+        pScriptArgs->m_iN1 = EntryTag;
+        if ( pChar->OnTrigger(CTRIG_ContextMenuSelect, pScriptArgs, GetChar()) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -2909,17 +2919,18 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 void CClient::Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CClient::Event_BugReport");
-	UnreferencedParameter(len);
+    UnreferencedParameter(len);
 	if ( !m_pChar )
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERBUGREPORT) )
 	{
-		CScriptTriggerArgs Args(type);
-		Args.m_s1 = pszText;
-		Args.m_VarsLocal.SetStr("LANG", false, lang.GetStr());
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = type;
+        pScriptArgs->m_s1 = pszText;
+        pScriptArgs->m_VarsLocal.SetStr("LANG", false, lang.GetStr());
 
-		m_pChar->OnTrigger(CTRIG_UserBugReport, m_pChar, &Args);
+        m_pChar->OnTrigger(CTRIG_UserBugReport, pScriptArgs, m_pChar);
 	}
 }
 
@@ -2931,8 +2942,9 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 
 	if ( IsTrigUsed(TRIGGER_USERKRTOOLBAR) )
 	{
-		CScriptTriggerArgs Args( bType, dwArg );
-		if ( m_pChar->OnTrigger( CTRIG_UserKRToolbar, m_pChar, &Args ) == TRIGRET_RET_TRUE )
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(bType, dwArg, 0, nullptr);
+        if ( m_pChar->OnTrigger( CTRIG_UserKRToolbar, pScriptArgs, m_pChar ) == TRIGRET_RET_TRUE )
 			return;
 	}
 
@@ -2978,22 +2990,23 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
     byte bDoorAutoDist = 1;
 	if ( IsTrigUsed(TRIGGER_USEREXTCMD) )
-	{
-		CScriptTriggerArgs Args(pszName);
-		Args.m_iN1 = type;
+    {
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->Init(pszName);
+        pScriptArgs->m_iN1 = type;
 
         if (type == EXTCMD_DOOR_AUTO)
-            Args.m_VarsLocal.SetNumNew("DoorAutoDist", bDoorAutoDist);
+            pScriptArgs->m_VarsLocal.SetNumNew("DoorAutoDist", bDoorAutoDist);
 
-		if ( m_pChar->OnTrigger(CTRIG_UserExtCmd, m_pChar, &Args) == TRIGRET_RET_TRUE )
+        if ( m_pChar->OnTrigger(CTRIG_UserExtCmd, pScriptArgs, m_pChar) == TRIGRET_RET_TRUE )
 			return;
 
         if (type == EXTCMD_DOOR_AUTO)
         {
-            bDoorAutoDist = (byte)std::clamp(Args.m_VarsLocal.GetKeyNum("DoorAutoDist"), (int64)0, (int64)UO_MAP_VIEW_SIGHT);
+            bDoorAutoDist = (byte)std::clamp(pScriptArgs->m_VarsLocal.GetKeyNum("DoorAutoDist"), (int64)0, (int64)UO_MAP_VIEW_SIGHT);
         }
 
-		Str_CopyLimitNull(pszName, Args.m_s1, MAX_TALK_BUFFER);
+        Str_CopyLimitNull(pszName, pScriptArgs->m_s1, MAX_TALK_BUFFER);
 	}
 
 	tchar *ppArgs[2];
@@ -3117,9 +3130,10 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 				return;
 
 			int iVirtueID = ppArgs[0][0] - '0';		// 0x1=Honor, 0x2=Sacrifice, 0x3=Valor
-			CScriptTriggerArgs Args(m_pChar);
-			Args.m_iN1 = iVirtueID;
-			m_pChar->OnTrigger(CTRIG_UserVirtueInvoke, m_pChar, &Args);
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_pO1 = m_pChar;
+            pScriptArgs->m_iN1 = iVirtueID;
+            m_pChar->OnTrigger(CTRIG_UserVirtueInvoke, pScriptArgs, m_pChar);
 			return;
 		}
 
@@ -3141,28 +3155,29 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 	EXC_TRY("packet filter");
 	if ( iLen > 0 && g_Serv.m_PacketFilter[pData[0]][0] )
 	{
-		CScriptTriggerArgs Args(pData[0]);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = pData[0];
 		enum TRIGRET_TYPE trigReturn;
 		tchar idx[12];
 
-		Args.m_s1 = GetPeerStr();
-		Args.m_pO1 = this; // Yay for ARGO.SENDPACKET
-		Args.m_VarsLocal.SetNum("CONNECTIONTYPE", GetConnectType());
+        pScriptArgs->m_s1 = GetPeerStr();
+        pScriptArgs->m_pO1 = this; // Yay for ARGO.SENDPACKET
+        pScriptArgs->m_VarsLocal.SetNum("CONNECTIONTYPE", GetConnectType());
 
         uint bytes = iLen;
         uint bytestr = minimum(bytes, SCRIPT_MAX_LINE_LEN);
 		tchar *zBuf = Str_GetTemp();
 
-		Args.m_VarsLocal.SetNum("NUM", bytes);
+        pScriptArgs->m_VarsLocal.SetNum("NUM", bytes);
 		memcpy(zBuf, &(pData[0]), bytestr);
 		zBuf[bytestr] = 0;
-		Args.m_VarsLocal.SetStr("STR", true, zBuf);
+        pScriptArgs->m_VarsLocal.SetStr("STR", true, zBuf);
 		if ( m_pAccount )
 		{
-			Args.m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
+            pScriptArgs->m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
 			if ( m_pChar )
 			{
-				Args.m_VarsLocal.SetNum("CHAR", m_pChar->GetUID().GetObjUID());
+                pScriptArgs->m_VarsLocal.SetNum("CHAR", m_pChar->GetUID().GetObjUID());
 			}
 		}
 
@@ -3170,11 +3185,11 @@ bool CClient::xPacketFilter( const byte * pData, uint iLen )
 		for ( uint i = 0; i < bytes; ++i )
 		{
 			snprintf(idx, sizeof(idx), "%u", i);
-			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
+            pScriptArgs->m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
 		//	Call the filtering function
-		if ( g_Serv.r_Call(g_Serv.m_PacketFilter[pData[0]], &g_Serv, &Args, nullptr, &trigReturn) )
+        if ( g_Serv.r_Call(g_Serv.m_PacketFilter[pData[0]], pScriptArgs, &g_Serv, nullptr, &trigReturn) )
 			if ( trigReturn == TRIGRET_RET_TRUE )
 				return true;	// do not cry about errors
 	}
@@ -3190,28 +3205,29 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 	EXC_TRY("Outgoing packet filter");
 	if ( iLen > 0 && g_Serv.m_OutPacketFilter[pData[0]][0] )
 	{
-		CScriptTriggerArgs Args(pData[0]);
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_iN1 = pData[0];
 		enum TRIGRET_TYPE trigReturn;
 		tchar idx[12];
 
-		Args.m_s1 = GetPeerStr();
-		Args.m_pO1 = this;
-		Args.m_VarsLocal.SetNum("CONNECTIONTYPE", GetConnectType());
+        pScriptArgs->m_s1 = GetPeerStr();
+        pScriptArgs->m_pO1 = this;
+        pScriptArgs->m_VarsLocal.SetNum("CONNECTIONTYPE", GetConnectType());
 
 		size_t bytes = iLen;
 		size_t bytestr = minimum(bytes, SCRIPT_MAX_LINE_LEN);
 		tchar *zBuf = Str_GetTemp();
 
-		Args.m_VarsLocal.SetNum("NUM", bytes);
+        pScriptArgs->m_VarsLocal.SetNum("NUM", bytes);
 		memcpy(zBuf, &(pData[0]), bytestr);
 		zBuf[bytestr] = 0;
-		Args.m_VarsLocal.SetStr("STR", true, zBuf);
+        pScriptArgs->m_VarsLocal.SetStr("STR", true, zBuf);
 		if ( m_pAccount )
 		{
-			Args.m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
+            pScriptArgs->m_VarsLocal.SetStr("ACCOUNT", false, m_pAccount->GetName());
 			if ( m_pChar )
 			{
-				Args.m_VarsLocal.SetNum("CHAR", m_pChar->GetUID().GetObjUID());
+                pScriptArgs->m_VarsLocal.SetNum("CHAR", m_pChar->GetUID().GetObjUID());
 			}
 		}
 
@@ -3219,11 +3235,11 @@ bool CClient::xOutPacketFilter( const byte * pData, uint iLen )
 		for ( size_t i = 0; i < bytes; ++i )
 		{
 			snprintf(idx, sizeof(idx), "%" PRIuSIZE_T, i);
-			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
+            pScriptArgs->m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
 		//	Call the filtering function
-		if ( g_Serv.r_Call(g_Serv.m_OutPacketFilter[pData[0]], &g_Serv, &Args, nullptr, &trigReturn) )
+        if ( g_Serv.r_Call(g_Serv.m_OutPacketFilter[pData[0]], pScriptArgs, &g_Serv, nullptr, &trigReturn) )
 			if ( trigReturn == TRIGRET_RET_TRUE )
 				return true;
 	}

@@ -13,10 +13,10 @@
 
 #include "../common/sphere_library/sstring.h"
 #include "../common/crypto/CCryptoKeyCalc.h"
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/CLog.h"
-#include "../common/CTextConsole.h"
 #include "../common/CUOClientVersion.h"
 #include "../common/sphereversion.h"
 #include "../network/CClientIterator.h"
@@ -362,7 +362,7 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 	m_fConsoleTextReadyFlag = false;
 
 	// we are in start up mode. // IsLoading()
-	SetServerMode( SERVMODE_PreLoadingINI );
+    SetServerMode( ServMode::StartupPreLoadingIni );
 
 	memset(m_PacketFilter, 0, sizeof(m_PacketFilter));
 	memset(m_OutPacketFilter, 0, sizeof(m_OutPacketFilter));
@@ -382,7 +382,7 @@ void CServer::SetSignals( bool fMsg )
 #ifndef _WIN32
 	SetUnixSignals(g_Cfg.m_fSecure);
     LOG_TYPE lt = LOGM_INIT;
-    if (!IsLoading()) {
+    if (!IsLoadingGeneric()) {
         lt = (LOG_TYPE)((uint)lt | (uint)LOGL_EVENT);
     }
 	if ( g_Cfg.m_fSecure )
@@ -395,7 +395,7 @@ void CServer::SetSignals( bool fMsg )
 	}
 #endif
 
-	if ( fMsg && !IsLoading() )
+    if ( fMsg && !IsLoadingGeneric() )
 	{
 		CWorldComm::Broadcast( g_Cfg.m_fSecure ?
 			"The world is now running in SECURE MODE." :
@@ -438,7 +438,12 @@ bool CServer::SetProcessPriority(int iPriorityLevel)
     return fSuccess;
 }
 
-void CServer::SetServerMode( SERVMODE_TYPE mode )
+ServMode CServer::GetServerMode() const noexcept
+{
+    return m_iModeCode.load(std::memory_order_acquire);
+}
+
+void CServer::SetServerMode( ServMode mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode.store(mode, std::memory_order_release);
@@ -453,13 +458,14 @@ bool CServer::IsValidBusy() const
     // ?
     switch ( GetServerMode() )
     {
-        case SERVMODE_Saving:
+        case ServMode::Saving:
             if ( g_World.IsSaving() )
                 return true;
             break;
-        case SERVMODE_Loading:
-        case SERVMODE_GarbageCollection:
-        case SERVMODE_RestockAll:	// these may look stuck but are not.
+        case ServMode::StartupLoadingSaves:
+        case ServMode::StartupLoadingScripts:
+        case ServMode::GarbageCollection:
+        case ServMode::RestockAll:	// these may look stuck but are not.
             return true;
         default:
             return false;
@@ -480,14 +486,32 @@ void CServer::SetExitFlag(int iFlag) noexcept
     m_iExitFlag.store(iFlag, std::memory_order_release);
 }
 
-bool CServer::IsLoading() const noexcept
+bool CServer::IsStartupLoadingScripts() const noexcept
 {
-    return ( m_fResyncPause || (GetServerMode() > SERVMODE_Run) );
+    return (GetServerMode() > ServMode::StartupLoadingScripts);
+}
+
+/*
+bool CServer::IsStartupLoadingSaves() const noexcept
+{
+    return (GetServerMode() > ServMode::StartupLoadingSaves);
+}
+*/
+
+bool CServer::IsLoadingGeneric() const noexcept
+{
+    return ( m_fResyncPause || (GetServerMode() > ServMode::Run) );
 }
 
 bool CServer::IsResyncing() const noexcept
 {
-    return m_fResyncPause || (GetServerMode() == SERVMODE_ResyncLoad);
+    return m_fResyncPause || (GetServerMode() == ServMode::ResyncLoad);
+}
+
+bool CServer::IsDestroyingWorld() const noexcept
+{
+    const ServMode servMode = GetServerMode();
+    return (servMode == ServMode::Exiting || servMode == ServMode::StartupLoadingScripts || servMode == ServMode::StartupLoadingSaves);
 }
 
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
@@ -626,25 +650,29 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			// typical (first time) poll response.
 			{
 				std::string cliver = m_ClientVersion.GetClientVer();
-				snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_INFO_STR ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
+                snprintf(pTemp, Str_TempLength(),
+                    SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_BUILD_INFO_STR ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
 					GetName(), m_ip.GetPort(), m_TimeZone, m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), cliver.c_str());
 			}
 			break;
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			snprintf(pTemp, Str_TempLength(), SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
+            snprintf(pTemp, Str_TempLength(),
+                SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
 		case 0x24: // '$'
 			// show at startup.
-			snprintf(pTemp, Str_TempLength(), "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
+            snprintf(pTemp, Str_TempLength(),
+                "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
 				m_sEMail.GetBuffer(), m_sURL.GetBuffer(), m_sLang.GetBuffer(), m_TimeZone);
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			snprintf(pTemp, Str_TempLength(), SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
+            snprintf(pTemp, Str_TempLength(),
+                SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
 				StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
@@ -1030,42 +1058,44 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 					SetExitFlag( 1 );
 				}
 			} break;
+
+// Something here makes CppCheck stop for 'syntax error'...
 #ifdef _TESTEXCEPTION
-		case '$':	// call stack integrity
+        case '$':	// call stack integrity
 			{
 	#ifdef _EXCEPTIONS_DEBUG
-				{ // test without freezing the call stack
+                {
+                    / test without freezing the call stack
 					ADDTOCALLSTACK("CServer::TestException1");
 					EXC_TRY("Test1");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
-					}
-					catch (const CSError& e)
-					{
-						// the following call will destroy the stack trace on linux due to
-						// a call to CSFile::Close fromn CLog::EventStr.
-						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-                        EXC_CATCH_EXCEPTION_SPHERE(&e);
-					}
-				}
+                }
+                catch (const CSError& e)
+                {
+                    // the following call will destroy the stack trace on linux due to
+                    // a call to CSFile::Close fromn CLog::EventStr.
+                    g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
+                    _EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError");
+                }
 
-				{ // test pausing the call stack
+                {
+                    // test pausing the call stack
 					ADDTOCALLSTACK("CServer::TestException2");
 					EXC_TRY("Test2");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
-					}
-					catch (const CSError& e)
-					{
-                        StackDebugInformation::freezeCallStack(true);
-						// with freezeCallStack, the following call won't be recorded
-						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-                        StackDebugInformation::freezeCallStack(false);
-                        EXC_CATCH_EXCEPTION_SPHERE(&e);
-					}
-				}
+                }
+                catch (const CSError& e)
+                {
+                    StackDebugInformation::freezeCallStack(true);
+                    // with freezeCallStack, the following call won't be recorded
+                    g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
+                    StackDebugInformation::freezeCallStack(false);
+                    _EXC_CATCH_EXCEPTION_GENERIC(&e, "CSError");
+                }
 	#else
-				throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
+                throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
 	#endif
-			} break;
+            } break;
 		case '%':	// throw simple exception
 			{
 				throw 0;
@@ -1086,8 +1116,9 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				throw CSError(LOGL_CRIT, (dword)E_FAIL, "Test Exception");
 			}
 #endif
-		default:
-			goto longcommand;
+
+        default:
+            goto longcommand;
 	}
 	goto endconsole;
 
@@ -1108,7 +1139,7 @@ longcommand:
 
 			if ( g_Cfg.m_sStripPath.IsEmpty() )
 			{
-                if (pSrc != this)
+                if (pSrc && pSrc != this)
                 {
                     pSrc->SysMessage("StripPath not defined, function aborted.\n");
                 }
@@ -1764,8 +1795,9 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
         {
             // RES_FUNCTION call
             CSString sVal;
-            CScriptTriggerArgs Args( s.GetArgRaw() );
-            if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->Init(s.GetArgRaw());
+            if ( r_Call( uiFunctionIndex, pScriptArgs, pSrc, &sVal ) )
                 return true;
         }
 
@@ -1814,7 +1846,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		{
 			ptcKey = s.GetArgStr();
 			SKIP_SEPARATORS(ptcKey);
-			g_Exp.m_VarGlobals.ClearKeys(ptcKey);
+            g_ExprGlobals.mtEngineLockedWriter()->m_VarGlobals.ClearKeys(ptcKey);
 			return true;
 		}
 	}
@@ -1987,7 +2019,6 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
                 {
                     g_Log.Event(LOGL_EVENT, "Not allowed during world save and/or resync pause");
                 }
-				break;
 			}
 			else
 			{
@@ -2230,15 +2261,15 @@ log_cont:
 		case SV_VARLIST:
 			if ( ! strcmpi( s.GetArgStr(), "log" ) )
 				pSrc = &g_Serv;
-			g_Exp.m_VarGlobals.DumpKeys(pSrc, "VAR.");
+            g_ExprGlobals.mtEngineLockedReader()->m_VarGlobals.DumpKeys(pSrc, "VAR.");
 			break;
 		case SV_PRINTLISTS:
 			if ( ! strcmpi( s.GetArgStr(), "log" ) )
 				pSrc = &g_Serv;
-			g_Exp.m_ListGlobals.DumpKeys(pSrc, "LIST.");
+            g_ExprGlobals.mtEngineLockedReader()->m_ListGlobals.DumpKeys(pSrc, "LIST.");
 			break;
 		case SV_CLEARLISTS:
-			g_Exp.m_ListGlobals.ClearKeys( s.GetArgStr()) ;
+            g_ExprGlobals.mtEngineLockedWriter()->m_ListGlobals.ClearKeys( s.GetArgStr()) ;
 			break;
 		default:
 			return CScriptObj::r_Verb(s, pSrc);
@@ -2384,9 +2415,10 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
 						return false;
                     }
 
-                    ssize_t count = ssize_t(g_Exp.m_VarDefs.GetCount());
+                    auto r = g_ExprGlobals.mtEngineLockedReader();
+                    ssize_t count = ssize_t(r->m_VarDefs.GetCount());
                     ssize_t i = 0;
-					for ( const CVarDefCont * pCont : g_Exp.m_VarDefs )
+                    for ( const CVarDefCont * pCont : r->m_VarDefs )
 					{
 						if ( ( i % 0x1ff ) == 0 )
 							PrintPercent( i, count );
@@ -2403,9 +2435,9 @@ bool CServer::CommandLinePostLoad( int argc, tchar * argv[] )
                         return false;
                     }
 
-                    count = ssize_t(g_Exp.m_VarResDefs.GetCount());
+                    count = ssize_t(r->m_VarResDefs.GetCount());
                     i = 0;
-                    for ( const CVarDefCont * pCont : g_Exp.m_VarResDefs )
+                    for ( const CVarDefCont * pCont : r->m_VarResDefs )
                     {
                         if ( ( i % 0x1ff ) == 0 )
                             PrintPercent( i, count );
@@ -2454,12 +2486,12 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 			pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_START));
 
 		g_Cfg.Unload(true);
-		SetServerMode(SERVMODE_ResyncPause);
+        SetServerMode(ServMode::ResyncPause);
 	}
 	else
 	{
         g_Log.Event(LOGL_EVENT, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_SERVER_RESYNC_RESTART));
-		SetServerMode(SERVMODE_ResyncLoad);
+        SetServerMode(ServMode::ResyncLoad);
 
 		if ( !g_Cfg.Load(true) )
 		{
@@ -2482,7 +2514,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool fMessage)
 
 		g_World.SyncGameTime();
 
-		SetServerMode(SERVMODE_Run);
+        SetServerMode(ServMode::Run);
 	}
 }
 

@@ -1,0 +1,57 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          sphereserver
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/stop the sphereserver daemon
+# Description:       SphereServer - Ultima Online server emulator.
+### END INIT INFO
+
+set -e
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/sphereserver
+
+# Gracefully exit if the package has been removed.
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+ret=0
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting SphereServer"
+	if start-stop-daemon --start --oknodo --quiet \
+		--name sphereserver --startas $DAEMON -- -I=/etc/sphereserver/
+	then
+	    log_end_msg 0
+	else
+	    ret=$?
+	    log_end_msg 1
+	fi
+	;;
+  stop)
+	log_daemon_msg "Stopping SphereServer"
+	if start-stop-daemon --stop --oknodo --quiet --exec $DAEMON \
+	  --name sphereserver
+	then
+	    log_end_msg 0
+	else
+	    ret=$?
+	    log_end_msg 1
+	fi
+	;;
+  reload|force-reload|restart)
+	$0 stop
+	$0 start
+	ret=$?
+	;;
+  *)
+	exit 1
+	;;
+esac
+
+exit $ret

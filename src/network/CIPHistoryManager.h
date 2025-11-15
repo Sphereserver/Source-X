@@ -38,7 +38,6 @@ struct HistoryIP
 typedef std::deque<HistoryIP> IPHistoryList;
 
 
-
 /***************************************************************************
  *
  *

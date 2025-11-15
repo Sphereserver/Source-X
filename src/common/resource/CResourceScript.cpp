@@ -10,6 +10,16 @@
 #include "../CLog.h"
 #include "CResourceScript.h"
 
+CResourceScript::CResourceScript(lpctstr pszFileName) // explicit
+{
+    _Init();
+    _SetFilePath(pszFileName);
+}
+
+CResourceScript::CResourceScript()
+{
+    _Init();
+}
 
 bool CResourceScript::_CheckForChange()
 {
@@ -44,7 +54,12 @@ bool CResourceScript::_CheckForChange()
 bool CResourceScript::CheckForChange()
 {
     ADDTOCALLSTACK("CResourceScript::CheckForChange");
-    MT_UNIQUE_LOCK_RETURN(CResourceScript::_CheckForChange());
+    MT_UNIQUE_LOCK_RETURN(this, CResourceScript::_CheckForChange());
+}
+
+bool CResourceScript::IsFirstCheck() const noexcept
+{
+    return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());
 }
 
 void CResourceScript::ReSync()
@@ -55,7 +70,7 @@ void CResourceScript::ReSync()
     _fCacheToBeUpdated = true;
     if ( !Open() )
         return;
-    g_Cfg.LoadResourcesOpen( this );
+    g_Cfg.LoadResourcesOpen( this, true );
     Close();
 }
 
@@ -74,9 +89,9 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
         if ( CheckForChange() )
         {
             //  what should we do about it ? reload it of course !
-            g_Serv.SetServerMode(SERVMODE_ResyncLoad);
-            g_Cfg.LoadResourcesOpen( this );
-            g_Serv.SetServerMode(SERVMODE_Run);
+            g_Serv.SetServerMode(ServMode::ResyncLoad);
+            g_Cfg.LoadResourcesOpen( this, true );
+            g_Serv.SetServerMode(ServMode::Run);
         }
     }
     ASSERT(HasCache());
@@ -99,8 +114,8 @@ void CResourceScript::Close()
     // Close it later when we know it has not been used for a bit.
     if ( ! IsFileOpen())
         return;
-    --m_iOpenCount;
 
+    -- m_iOpenCount;
     if ( ! m_iOpenCount )
     {
         // Just leave it open for caching purposes

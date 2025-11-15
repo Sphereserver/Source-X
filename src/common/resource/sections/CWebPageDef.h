@@ -27,6 +27,13 @@ enum WEBPAGE_TYPE
     WEBPAGE_BMP,
     WEBPAGE_GIF,
     WEBPAGE_JPG,
+    WEBPAGE_JS,
+    WEBPAGE_PNG,
+    WEBPAGE_SVG,
+    WEBPAGE_WEBP,
+    WEBPAGE_XML,
+    WEBPAGE_CSV,
+    WEBPAGE_JSON,
     WEBPAGE_QTY
 };
 
@@ -117,7 +124,7 @@ public:
     * @param [in,out]  pClient     If non-null, the client.
     * @param   pszURLArgs          The URL arguments.
     * @param [in,out]  pPostData   If non-null, information describing the post.
-    * @param   stContentLength     Length of the content.
+    * @param   uiContentLength     Length of the content.
     *
     * @return  true if it succeeds, false if it fails.
     */
@@ -148,7 +155,7 @@ public:
     *
     * @param [in,out]  pClient         If non-null, the client.
     * @param [in,out]  pszPage         If non-null, the page.
-    * @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
+    * @param [in,out]  pDateLastMod    If non-null, the pdate last modifier.
     */
     static void ServPage(CClient * pClient, tchar * pszPage, CSTime * pDateLastMod);
 
@@ -156,9 +163,8 @@ public:
     explicit CWebPageDef(CResourceID id);
     virtual ~CWebPageDef() = default;
 
-private:
-    CWebPageDef(const CWebPageDef& copy);
-    CWebPageDef& operator=(const CWebPageDef& other);
+    CWebPageDef(const CWebPageDef& copy) = delete;
+    CWebPageDef& operator=(const CWebPageDef& other) = delete;
 };
 
 

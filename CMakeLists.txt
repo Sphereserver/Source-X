@@ -40,7 +40,6 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL "")
 message(STATUS "Scanning system build tools...")
 project(SphereServer CXX C) # does a scan for C++ and C compilers
 
-
 # If we have not specified a toolchain, let's detect which one we should use, using the detected arch.
 # We need to do this after "project", otherwise CMake doesn't know where it's running.
 if(NOT TOOLCHAIN_LOADED)
@@ -61,6 +60,8 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF) # disable C++ module scanning
+set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
+set(CMAKE_VISIBILITY_INLINES_HIDDEN "YES")
 
 # Need to clear shared library flags. If not, cmake sets -rdynamic and this
 # add to the executable the full symbol table (included unused symbols).
@@ -70,18 +71,16 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 # In some cases, CMake also sets other predefined flags, which we don't want.
 #[[
-set(CMAKE_C_FLAGS "")
 set(CMAKE_C_FLAGS_DEBUG "")
 set(CMAKE_C_FLAGS_NIGHTLY "")
 set(CMAKE_C_FLAGS_RELEASE "")
 
-set(CMAKE_CXX_FLAGS "")
 set(CMAKE_CXX_FLAGS_DEBUG "")
 set(CMAKE_CXX_FLAGS_NIGHTLY "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
-set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+set(CMAKE_EXE_LINKER_FLAGS_NIGHTLY "")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 ]]
 # Example: using MSVC, /RTC1 is globally added (all projects) to DEBUG builds. It's mostly fine, except in some cases where we don't want it...
@@ -106,6 +105,7 @@ if(WIN32)
         option(WIN_GENERATE_CRASHDUMP "For non-Debug builds, add Windows Structured Exception Handling and generate a Crash Dump if a fatal SE is thrown." FALSE)
     endif()
 endif()
+option(FORCE_DEBUG_INFO "Force generation of debug info, useful for profiling Nightly/Release builds." FALSE)
 option(CROSSCOMPILE "Are we compiling for a different target architecture?" FALSE)
 option(
     RUNTIME_STATIC_LINK
@@ -131,11 +131,18 @@ option(USE_UBSAN "Enable Undefined Behavior Sanitizer." FALSE)
 option(USE_LSAN "Enable LeakSanitizer." FALSE)
 option(USE_MSAN "Enable MemorySanitizer." FALSE)
 
+option(UNIT_TESTING "Create an executable for unit tests." FALSE)
+
+option(USE_CPPCHECK "Perform static analysis with CppCheck." FALSE)
+
 set(ENABLED_SANITIZER FALSE CACHE INTERNAL BOOL "Am i using a sanitizer?")
 if(USE_ASAN OR USE_MSAN OR USE_LSAN OR USE_MSAN)
     set(ENABLED_SANITIZER TRUE)
 endif()
 
+if(USE_CPPCHECK)
+    include("cmake/CppCheck.cmake")
+endif()
 
 # -------------------- Stuff to set right away, after having parsed the checkboxes/CLI arguments.
 
@@ -162,7 +169,6 @@ endif()
 # TODO: check if Ninja can handle different targets.
 if(SINGLE_TARGET)
     # If you want to manually specify the build type, call cmake with parameter: -DCMAKE_BUILD_TYPE=something
-    # TODO: add NightlyWithDebInfo ?
     message(STATUS "Single-target build system (${CMAKE_GENERATOR}) detected: generating multiple projects!")
     set (CMAKE_BUILD_TYPE "Nightly" CACHE STRING "Set the build type. Expected values: Debug, Nightly or Release.") # Set only if unset.
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Nightly" "Release")
@@ -203,6 +209,10 @@ endif(SINGLE_TARGET)
 # Include the list of all Sphere source files
 include("src/CMakeSources.cmake")
 
+if(UNIT_TESTING)
+    # Add the unit tests source files, to compile them and add to the IDe project files list
+    include("tests/CMakeSources.cmake")
+endif()
 
 # Configure output binaries
 set(TARGETS "" CACHE INTERNAL "List of Sphere targets to build.")
@@ -212,59 +222,55 @@ if(SINGLE_TARGET)
         add_executable(
             spheresvr_release
             ${is_win32_app_linker}
-            ${SPHERE_SOURCES}
+            ${SPHERE_SOURCES} ${SPHERE_HEADERS}
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
-        #set_target_properties(spheresvr_release PROPERTIES CXX_EXTENSIONS OFF)
-        #target_compile_features(spheresvr_release PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_release ${pch_options})
 
-        add_custom_command(TARGET spheresvr_release POST_BUILD
-            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_release>
-            COMMENT "Stripping executable"
-        )
+        if(NOT ${FORCE_DEBUG_INFO})
+            add_custom_command(TARGET spheresvr_release POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_release>
+                COMMENT "Stripping executable"
+            )
+        endif()
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
         set(TARGETS ${TARGETS} spheresvr_nightly)
         add_executable(
             spheresvr_nightly
             ${is_win32_app_linker}
-            ${SPHERE_SOURCES}
+            ${SPHERE_SOURCES} ${SPHERE_HEADERS}
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
-        #set_target_properties(spheresvr_nightly PROPERTIES CXX_EXTENSIONS OFF)
-        #target_compile_features(spheresvr_nightly PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_nightly ${pch_options})
 
-        add_custom_command(TARGET spheresvr_nightly POST_BUILD
-            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_nightly>
-            COMMENT "Stripping executable"
-        )
+        if(NOT ${FORCE_DEBUG_INFO})
+            add_custom_command(TARGET spheresvr_nightly POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:spheresvr_nightly>
+                COMMENT "Stripping executable"
+            )
+        endif()
     endif()
     if(("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
         set(TARGETS ${TARGETS} spheresvr_debug)
         add_executable(
             spheresvr_debug
             ${is_win32_app_linker}
-            ${SPHERE_SOURCES}
+            ${SPHERE_SOURCES} ${SPHERE_HEADERS}
             #${docs_TEXT}
         )
         set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
-        #set_target_properties(spheresvr_debug PROPERTIES CXX_EXTENSIONS OFF)
-        #target_compile_features(spheresvr_debug PUBLIC cxx_std_20)
-        target_precompile_headers(spheresvr_debug ${pch_options})
     endif()
 else(SINGLE_TARGET)
     set(TARGETS ${TARGETS} spheresvr)
-    add_executable(spheresvr ${is_win32_app_linker} ${SPHERE_SOURCES} ${docs_TEXT})
+    add_executable(spheresvr
+        ${is_win32_app_linker}
+        ${SPHERE_SOURCES} ${SPHERE_HEADERS}
+        ${docs_TEXT}
+    )
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
     set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
-    #set_target_properties(spheresvr PROPERTIES CXX_EXTENSIONS OFF)
-    #target_compile_features(spheresvr PUBLIC cxx_std_20)
-    target_precompile_headers(spheresvr ${pch_options})
 
     # To be tested
     #add_custom_command(TARGET spheresvr POST_BUILD
@@ -273,6 +279,13 @@ else(SINGLE_TARGET)
     #    COMMENT "Stripping executable"
     #)
 endif(SINGLE_TARGET)
+
+foreach(tgt ${TARGETS})
+    #set_target_properties(${tgt} PROPERTIES CXX_EXTENSIONS OFF)
+    #target_compile_features(${tgt} PUBLIC cxx_std_20)
+    target_precompile_headers(${tgt} ${pch_list})
+endforeach()
+
 
 # --------------------
 
@@ -289,8 +302,14 @@ add_subdirectory(lib)
 
 toolchain_exe_stuff() # stuff to be executed after ADD_EXECUTABLE
 
+if(UNIT_TESTING)
+    include("tests/CMakeLists.txt") # quick and dirty
+    setup_tests()
+endif()
+
 # Get the Git revision number
 message(STATUS)
 message(STATUS "Retrieving git data...")
 include("cmake/GitStatus.cmake")
 message(STATUS)
+

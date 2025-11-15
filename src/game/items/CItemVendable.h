@@ -31,7 +31,7 @@ public:
 
 	void SetPlayerVendorPrice( dword dwVal );
 	dword GetBasePrice() const;
-	dword GetVendorPrice( int iConvertFactor , bool forselling); 
+	dword GetVendorPrice( int iConvertFactor , bool forselling);
 
 	bool IsValidSaleItem( bool fBuyFromVendor ) const;
 	bool IsValidNPCSaleItem() const;

@@ -1,7 +1,8 @@
 #include "sstring.h"
 //#include "../../common/CLog.h"
 #include "../../sphere/ProfileTask.h"
-#include "../CExpression.h"
+#include "../CExpression.h" // included in the precompiled header
+#include <bit>  // for std::countl_zero
 
 
 #ifdef MSVC_COMPILER
@@ -57,21 +58,21 @@ bool cstr_to_num(
     const char * RESTRICT str,
     _IntType   * const    out,
     uint        base = 0,
+    size_t      stop_at_len = 0,
     bool const  ignore_trailing_extra_chars = false
     ) noexcept
 {
     static_assert(std::is_integral_v<_IntType>, "Only integers supported");
-    if (!str || !out || base == 1 || base > 16)
+    if (!str || !out || base == 1 || base > 16) [[unlikely]]
         return false;
 
-    // 1) Skip leading spaces
-    while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') { // Instead of using ISWHITESPACE
+    // Skip leading whitespace
+    while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')
         ++str;
-    }
     if (*str == '\0')
         return false;
 
-    // 2) Optional sign
+    // Optional sign (only for signed types)
     bool neg = false;
     if constexpr (std::is_signed_v<_IntType>)
     {
@@ -89,18 +90,21 @@ bool cstr_to_num(
         }
     }
 
-    // 3) Hex‐prefix via leading '0'
+    // Auto-detect base or handle explicit hex prefix
     bool hex = false;
     if (base == 0)
     {
-        // Auto-detect.
+        // Auto-detect: '0' followed by hex digit → base 16; else base 10
         if (*str == '0' && str[1] != '\0' && str[1] != '.')
         {
-            if (IsHexNumDigit(str[1]))
+            const char next = str[1];
+            if ((next >= '0' && next <= '9') ||
+                (next >= 'A' && next <= 'F') ||
+                (next >= 'a' && next <= 'f'))
             {
                 hex = true;
                 base = 16;
-                ++str;  // skip the '0' prefix
+                ++str;  // skip '0' prefix
             }
             else
             {
@@ -112,164 +116,277 @@ bool cstr_to_num(
             base = 10;
         }
     }
-    if (base == 16 && str[0] == '0' && str[1] != '\0' && str[1] != '.')
+    else if (base == 16 && *str == '0' && str[1] != '\0' && str[1] != '.')
     {
         hex = true;
-        ++str;
+        ++str;  // consume '0' prefix
     }
 
     using _UIntType = std::make_unsigned_t<_IntType>;
-    const _UIntType base_casted = uint8_t(base);
-    const _UIntType maxDiv = std::numeric_limits<_UIntType>::max() / _UIntType(base_casted);
-    const _UIntType maxRem = std::numeric_limits<_UIntType>::max() % _UIntType(base_casted);
-    _UIntType acc = 0;  // accumulator
 
-    // 4) Parse digits
+    // Compute overflow limits based on target type and sign
+    _UIntType limit;
+    if constexpr (std::is_signed_v<_IntType>)
+    {
+        // For negative: can go one past max (to represent min value in two's complement)
+        // For positive: limited to max
+        limit = neg ? (_UIntType(std::numeric_limits<_IntType>::max()) + 1u)
+                      : _UIntType(std::numeric_limits<_IntType>::max());
+    }
+    else
+    {
+        limit = std::numeric_limits<_UIntType>::max();
+    }
+
+    _UIntType acc = 0;
     ushort ndigits = 0;
     const char* startDigits = str;
-    for (; *str; ++str)
-    {
-        const char c = *str;
-        _UIntType digit;
-        if (c >= '0' && c <= '9')
-            digit = c - '0';
-        else if (hex && c >= 'A' && c <= 'F')
-            digit = c - 'A' + 10;
-        else if (hex && c >= 'a' && c <= 'f')
-            digit = c - 'a' + 10;
-        else if (!hex && c == '.')
-            continue;   // Skip decimal point
-        else
-            break;
-        if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
-            return false;  // overflow
-        acc = acc * base_casted + digit;
-        ++ndigits;
-    }
-    if (str == startDigits)
-        return false;  // no digits consumed
 
-    // 5) Trailing‐space or end‐of‐string
+    switch (base)
+    {
+        // Fast path: base 10 (most common)
+        case 10:
+        {
+            const _UIntType maxDiv = limit / 10u;
+            const _UIntType maxRem = limit % 10u;
+
+            while (*str)
+            {
+                if (stop_at_len && (size_t(str - startDigits) >= stop_at_len))
+                    break;
+
+                const char c = *str;
+
+                // Skip dots (Sphere convention: no true floats)
+                if (c == '.')
+                {
+                    ++str;
+                    continue;
+                }
+
+                if (c < '0' || c > '9')
+                    break;
+
+                const _UIntType digit = c - '0';
+
+                // Check overflow before multiplying
+                if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
+                    return false;
+
+                acc = acc * 10u + digit;
+                ++ndigits;
+                ++str;
+            }
+        }
+        // Fast path: base 16 (second most common)
+        case 16:
+        {
+            const _UIntType maxDiv = limit / 16u;
+            const _UIntType maxRem = limit % 16u;
+
+            // Skip other leading zeroes.
+            while (*str == '0')
+                ++str;
+            startDigits = str;
+
+            while (*str)
+            {
+                if (stop_at_len && (size_t(str - startDigits) >= stop_at_len))
+                    break;
+
+                const char c = *str;
+                _UIntType digit;
+
+                if (c >= '0' && c <= '9')
+                    digit = c - '0';
+                else if (c >= 'A' && c <= 'F')
+                    digit = c - 'A' + 10;
+                else if (c >= 'a' && c <= 'f')
+                    digit = c - 'a' + 10;
+                else
+                    break;
+
+                // Check overflow
+                if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
+                    return false;
+
+                acc = acc * 16u + digit;
+                ++ndigits;
+                ++str;
+            }
+        }
+        // Generic path: other bases (2-15, cold path)
+        default:
+        {
+            const _UIntType base_casted = uint8_t(base);
+            const _UIntType maxDiv = limit / base_casted;
+            const _UIntType maxRem = limit % base_casted;
+
+            while (*str)
+            {
+                if (stop_at_len && (size_t(str - startDigits) >= stop_at_len))
+                    break;
+
+                const char c = *str;
+                _UIntType digit;
+
+                if (c >= '0' && c <= '9')
+                    digit = c - '0';
+                else if (c >= 'A' && c <= 'F')
+                    digit = c - 'A' + 10;
+                else if (c >= 'a' && c <= 'f')
+                    digit = c - 'a' + 10;
+                else
+                    break;
+
+                // Validate digit is within base
+                if (digit >= base_casted)
+                    return false;
+
+                // Check overflow
+                if (acc > maxDiv || (acc == maxDiv && digit > maxRem))
+                    return false;
+
+                acc = acc * base_casted + digit;
+                ++ndigits;
+                ++str;
+            }
+        }
+    } // switch
+
+    if (ndigits == 0)
+        return false;  // no valid digits consumed
+
+    // Check trailing characters
     if (!ignore_trailing_extra_chars)
     {
-        // Some old code expects string to num conversion to tolerate trailing whitespaces or even extra chars
-        // (like the atoi C function).
-        constexpr bool tolerate_trailing_whitespaces = true;
-        if constexpr (tolerate_trailing_whitespaces)
-        {
-            while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')
-                ++str;
-        }
+        // Skip trailing whitespace
+        while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n')
+            ++str;
+
         if (*str != '\0')
-            return false;
+            return false;  // unexpected trailing characters
     }
 
-    // 6) Make short (< UINT32_MAX, or <= 8 hex digits) hex numbers behave like 32 bits numbers.
-    /*
-     * Why Sphere expects this and works like this is unknown to me (maybe TUS/Grayworld or
-     * prehistoric Sphere versions worked with 32 bit numbers instead of 64 bit).
-     *
-    */
-    if (hex && ndigits<=8 && std::is_signed_v<_IntType>)
+    // Sphere hex convention: ≤8 hex digits → interpret as signed 32-bit, then extend
+    if (hex && ndigits <= 8)
     {
         // Reinterpret the bits as a signed 32 bit number, then expand that value to a 32 bit number.
         // if ndigits <= 8 (so number is always <= 0xFFFF FFFF), it will always be < UINT32_MAX.
-        int32_t v32 = int32_t(uint32_t(acc));
-        *out = _IntType(v32);
+
+        // ..Why Sphere expects this and works like this is unknown to me (maybe TUS/Grayworld or
+        // prehistoric Sphere versions worked with 32 bit numbers instead of 64 bit).
+
+        const int32_t v32 = static_cast<int32_t>(static_cast<uint32_t>(acc));
+
+        // Apply the leading minus if present
+        const int64_t v = neg ? -static_cast<int64_t>(v32) : static_cast<int64_t>(v32);
+        // branchless:
+        //uint64_t m = 0 - static_cast<uint64_t>(neg); // 0 or 0xFFFF..FFFF, defined modulo 2^64
+        //int64_t v = static_cast<int64_t>((static_cast<uint64_t>(v64) ^ m) - m); // relies only on defined unsigned wraparound
+
+        // Verify it fits in the target type (important for int8_t, int16_t)
+        if constexpr (sizeof(_IntType) < sizeof(int32_t))
+        {
+            if (v32 < std::numeric_limits<_IntType>::min() ||
+                v32 > std::numeric_limits<_IntType>::max())
+                return false;
+        }
+
+        *out = static_cast<_IntType>(v);
         return true;
     }
 
-    // 7) Store result
+    // Non-hex path. Store final result
     if constexpr (std::is_signed_v<_IntType>)
     {
         if (neg)
         {
-            if (acc > _UIntType(std::numeric_limits<_IntType>::max()) + 1u)
-                return false;  // too negative
-            *out = _IntType(0) - _IntType(acc);
+            // Negate using well-defined unsigned arithmetic, then cast
+            *out = static_cast<_IntType>(_UIntType(0) - acc);
         }
         else
         {
-            if (acc > _UIntType(std::numeric_limits<_IntType>::max()))
-                return false;  // too large positive
-            *out = _IntType(acc);
+            *out = static_cast<_IntType>(acc);
         }
     }
     else
     {
-        *out = _IntType(acc);
+        *out = static_cast<_IntType>(acc);
     }
+
     return true;
 }
 
+// Wrapper functions
 
-std::optional<char> Str_ToI8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<char> Str_ToI8 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     char val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uchar> Str_ToU8 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<uchar> Str_ToU8 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     uchar val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<short> Str_ToI16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<short> Str_ToI16 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     short val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ushort> Str_ToU16 (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<ushort> Str_ToU16 (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     ushort val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<int> Str_ToI (const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<int> Str_ToI (const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     int val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<uint> Str_ToU(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<uint> Str_ToU(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     uint val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<llong> Str_ToLL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<llong> Str_ToLL(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     llong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
 }
 
-std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, bool fIgnoreExcessChars) noexcept
+std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, size_t uiStopAtLen, bool fIgnoreExcessChars) noexcept
 {
     ullong val = 0;
-    const bool fSuccess = cstr_to_num(ptcStr, &val, base, fIgnoreExcessChars);
+    const bool fSuccess = cstr_to_num(ptcStr, &val, base, uiStopAtLen, fIgnoreExcessChars);
     if (!fSuccess)
         return std::nullopt;
     return val;
@@ -279,98 +396,316 @@ std::optional<ullong> Str_ToULL(const tchar * ptcStr, uint base, bool fIgnoreExc
 // --
 // Number to String
 
-static constexpr tchar DIGITS[] = "0123456789abcdef";
+/*
+Hex width and two’s-complement:
+After the hex marker '0', leading zeros are ignored for width selection.
+Count significant hex digits starting at the first non-zero nibble:
+    ≤ 8 significant digits → interpret the bit pattern as signed 32-bit two’s-complement (then widen to 64-bit to return).
+    9..16 significant digits → interpret as signed 64-bit two’s-complement.
+    16 significant digits → warn about 64-bit overflow, return −1, and consume the entire hex token.
+*/
 
-template<typename _IntType>
-tchar* Str_FromInt_Fast(_IntType val, lptstr_restrict out_buf, size_t buf_length, uint base) noexcept
+namespace str2int_detail
 {
-    if (!out_buf || buf_length == 0 || base == 0 || base > 16)
-        return nullptr;
 
-    const bool fHex = (base == 16);
-    // Handle zero or base==0 case
-    if (val == 0)
-    {
-        if (fHex)
-        {
-            if (buf_length < 3)
-                return nullptr;
-            out_buf[0] = '0'; out_buf[1] = '0'; out_buf[2] = '\0';
-        }
-        else
-        {
-            if (buf_length < 2)
-                return nullptr;
-            out_buf[0] = '0'; out_buf[1] = '\0';
-        }
-        return out_buf;
-    }
+// Uppercase hex digit table
+static constexpr char DIGITS_UPPER[16] = {
+    '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+};
 
-    using _UIntType = std::make_unsigned_t<_IntType>;
-    _UIntType uval;
-    bool fIsNegative = false;
-
-    if constexpr (std::is_signed_v<_IntType>)
-    {
-        fIsNegative = (val < 0);
-        // two's-complement bit-pattern reinterpret
-        const auto utmp = static_cast<_UIntType>(val);
-        if (fHex)
-        {
-            uval = utmp;
-        }
-        else
-        {
-            // Unsigned subtraction is always defined behaviour, it wraps around.
-            uval = fIsNegative ? (_UIntType(0) - utmp) : utmp;
-        }
-    }
-    else
-    {
-        uval = static_cast<_UIntType>(val);
-    }
-
-    // Write digits from back of buffer
-#define WRITE_OUT(ch)           \
-    do {                        \
-        if (idx == 0)           \
-            return nullptr;     \
-        out_buf[--idx] = (ch);  \
-    } while (0)
-
-    size_t idx = buf_length;
-    out_buf[--idx] = '\0';
-
-    if (fHex)
-    {
-        // Hex path: mask & shift by 4 bits (it's the same as dividing by 16).
-        do
-        {
-            WRITE_OUT(DIGITS[uval & 0xFu]);
-            uval >>= 4;
-        } while (uval);
-        WRITE_OUT('0');  // leading 0 hex prefix
-    }
-    else
-    {
-        // General path: division + multiply to get remainder
-        do
-        {
-            const _UIntType q = uval / base;
-            const _UIntType d = uval - q * base;
-            WRITE_OUT(DIGITS[d]);
-            uval = q;
-        } while (uval);
-
-        if (fIsNegative) {
-            WRITE_OUT('-');
-        }
-    }
-
-#undef WRITE_OUT
-    return &out_buf[idx];
+// Map a nibble [0,15] to its uppercase hex character
+static inline char hexdig_upper(uint32_t v) noexcept
+{
+    return DIGITS_UPPER[v & 0xF];
 }
 
+// Compute hex digits to emit within a fixed width (8 or 16 nibbles) after
+// trimming leading zero nibbles within that width.
+// Special-case zero as exactly one hex digit ("0"), so final hex "00".
+static inline int hex_digits_from_width(uint64_t u, int iWidthNibbles) noexcept
+{
+    if (iWidthNibbles == 8)
+    {
+        uint32 v = static_cast<uint32_t>(u);
+        if (v == 0)
+            return 1; // represent 0 as "0" (the caller will prefix a single '0' for "00")
+        // Count leading zero bits in 32-bit domain, then convert to nibbles.
+        // countl_zero(0) would be 32, but we have v != 0 here.
+        int lz = std::countl_zero(v);
+        return 8 - (lz / 4);
+    }
+    else
+    {
+        if (u == 0)
+            return 1;
+        int lz = std::countl_zero(u);        // counts in 64-bit domain
+        return 16 - (lz / 4);
+    }
+}
+
+// Base-10 two-digit lookup table (LUT): "00", "01", ..., "99" laid out consecutively.
+// Emission logic divides by 100, uses remainder r in [0,99], and copies DEC_00_99[2*r+0..1].
+// This halves the number of division/mod operations versus single-digit steps.
+static constexpr std::array<char, 200> DEC_00_99 = []{
+    std::array<char, 200> a{};
+    for (int i = 0; i < 100; ++i) {
+        const int tens = i / 10;            // exact for 0..99
+        const int ones = i - tens * 10;     // exact for 0..99
+        a[2*i + 0] = char('0' + tens);
+        a[2*i + 1] = char('0' + ones);
+    }
+    return a;
+}();
+
+} // namespace
+
+// Template entry point: returns ptcOutBuf on success, nullptr on failure.
+// uiBase must be in [2,16]. Hex path (uiBase 16) emits uppercase and starts with '0'.
+// Decimal path (uiBase 10) uses a two-digit LUT for throughput.
+// Other bases use a generic fallback (reverse into tmp, then write forward).
+template<typename _IntType>
+tchar* Str_FromInt_Fast(_IntType val, tchar* ptcOutBuf, size_t uiBufLength, uint32 uiBase) noexcept
+{
+    static_assert(std::is_integral_v<_IntType>, "Str_FromInt_Fast requires an integral type");
+    static_assert(sizeof(_IntType) <= 8, "Only up to 64-bit integers are supported");
+
+    if (!ptcOutBuf || uiBufLength == 0)
+    {
+#ifdef _DEBUG
+        g_Log.EventError("Str_FromInt_Fast: null buffer or zero length.\n");
+#endif
+        return nullptr;
+    }
+    if (uiBase < 2 || uiBase > 16)
+    {
+#ifdef _DEBUG
+        g_Log.EventError("Str_FromInt_Fast: invalid base %u (supported 2..16).\n", uiBase);
+#endif
+        return nullptr;
+    }
+
+    // Zero fast path matches existing semantics exactly.
+    if (val == 0)
+    {
+        if (uiBase == 16)
+        {
+            // Hex zero as "00"
+            if (uiBufLength < 3)
+            {
+#ifdef _DEBUG
+                g_Log.EventError("Str_FromInt_Fast[hex]: insufficient buffer (need 3 for \"00\\0\").\n");
+#endif
+                return nullptr;
+            }
+            ptcOutBuf[0] = '0';
+            ptcOutBuf[1] = '0';
+            ptcOutBuf[2] = '\0';
+            return ptcOutBuf;
+        }
+        else
+        {
+            if (uiBufLength < 2)
+            {
+#ifdef _DEBUG
+                g_Log.EventError("Str_FromInt_Fast[base=%u]: insufficient buffer (need 2 for \"0\\0\").\n", uiBase);
+#endif
+                return nullptr;
+            }
+            ptcOutBuf[0] = '0';
+            ptcOutBuf[1] = '\0';
+            return ptcOutBuf;
+        }
+    }
+
+    // Specialize only 16 and 10; generic fallback for others.
+    switch (uiBase)
+    {
+        // Sphere hex formatting:
+        // - Always consider an input hex number in scripts as the representation of an unsigned number, but keep in mind that internally
+        //      everything is converted to a signed number, so the upper numeric limit is INT64_MAX, not UINT64_MAX.
+        // - The string is written as a 32 bit number if number < UINT32_MAX. Using INT32_MAX as upper limit is wrong,
+        //      since we said that we consider the input string to be the representation of an unsigned number.
+        //      So, if value fits in int32 (<= 0xFFFFFFFF) → 32-bit t.c.; else 64-bit t.c.
+        // - Uppercase, prefix '0'
+        // - Variable width after trimming within chosen width:
+        case 16:
+        {
+            // Sphere hex formatting (uppercase, prefix '0', trimmed within 32/64-bit width).
+            uint64_t u = 0;
+            int width_nibbles = 0;
+
+                // If type is <=32-bit or runtime value fits 32 bit integer, use 32-bit two's-complement view; else 64-bit.
+                if (sizeof(_IntType) <= 4
+                    || static_cast<int64_t>(val) <= static_cast<int64_t>(UINT32_MAX))
+                {
+                    // Casting through signed then to unsigned preserves the bit pattern modulo 2^32.
+                    const uint32_t u32 = static_cast<uint32_t>(static_cast<int32_t>(val));
+                    u = static_cast<uint64_t>(u32);
+                    width_nibbles = 8;
+                }
+                else
+                {
+                    // View through 64-bit signed then to unsigned to preserve bit pattern.
+                    u = static_cast<uint64_t>(static_cast<int64_t>(val));
+                    width_nibbles = 16;
+                }
+
+            // Compute number of significant hex digits using count-leading-zero in the selected width.
+            const int iDigits = str2int_detail::hex_digits_from_width(u, width_nibbles);
+
+            // Required: '0' prefix + digits + NUL.
+            const size_t need = static_cast<size_t>(iDigits) + 2;
+            if (uiBufLength < need)
+            {
+#ifdef _DEBUG
+                g_Log.EventWarn("Str_FromInt_Fast[hex]: insufficient buffer (need %" PRIuSIZE_T ", have %" PRIuSIZE_T ").\n", need, uiBufLength);
+#endif
+                return nullptr;
+            }
+
+            // Emit: '0' + exactly 'digits' hex characters (no re-emitted trimmed zeros).
+            // Right-shift on unsigned is well-defined and zero-filling on the left.
+            ptcOutBuf[0] = '0';
+            size_t uiPos = 1;
+            int iShift = (iDigits - 1) * 4; // start at the most significant non-zero nibble
+            for (; iShift >= 0; iShift -= 4)
+                ptcOutBuf[uiPos++] = str2int_detail::hexdig_upper(static_cast<uint32_t>((u >> iShift) & 0xFull));
+            ptcOutBuf[uiPos] = '\0';
+            return ptcOutBuf;
+        }
+
+        case 10:
+        {
+            // In Sphere scripting decimal numbers are always signed. There's no concept of unsigned number.
+            // Base-10 fast path using two-digit LUT:
+            // Strategy:
+            //   1) Convert to unsigned magnitude |val| in a way that is correct even for INT_MIN.
+            //   2) While magnitude >= 100: divide by 100 => quotient q and remainder r in [0,99].
+            //   3) Use r to copy two chars from DEC_00_99 to a small reverse buffer.
+            //   4) Emit the final one or two digits.
+            //   5) Copy forward to out_buf (prepend '-' if original value was negative).
+            using _UInt = std::make_unsigned_t<_IntType>;
+
+            _UInt uiMagnitude;
+            bool fNeg = false;
+
+            if constexpr (std::is_signed_v<_IntType>)
+            {
+                // Two's-complement safe: interpret val as unsigned (no UB), then negate if negative.
+                _UInt utwos = static_cast<_UInt>(val);
+                fNeg = (val < 0);
+                uiMagnitude = fNeg ? (_UInt(0) - utwos) : utwos;
+            }
+            else
+            {
+                uiMagnitude = static_cast<_UInt>(val);
+            }
+
+            // Reverse buffer; 32 bytes sufficient for 64-bit decimal (max 20 digits).
+            tchar ptcTemp[32];
+            size_t uiPos = 0;
+
+            // Emit two digits per iteration using /100, significantly reducing division/mod count.
+            while (uiMagnitude >= 100)
+            {
+                const _UInt q = uiMagnitude / 100;                    // quotient
+                const uint32_t r = static_cast<uint32_t>(uiMagnitude - q * 100); // remainder in [0,99]
+                // Store in reverse order: ones then tens, since we're building least significant first.
+                ptcTemp[uiPos + 0] = str2int_detail::DEC_00_99[2 * r + 1];
+                ptcTemp[uiPos + 1] = str2int_detail::DEC_00_99[2 * r + 0];
+                uiPos += 2;
+                uiMagnitude = q;
+            }
+
+            // Handle the last one or two digits without branching on zero.
+            if (uiMagnitude < 10)
+            {
+                ptcTemp[uiPos++] = static_cast<tchar>('0' + static_cast<uint32_t>(uiMagnitude));
+            }
+            else
+            {
+                const uint32_t r = static_cast<uint32_t>(uiMagnitude); // 10..99
+                ptcTemp[uiPos + 0] = str2int_detail::DEC_00_99[2 * r + 1];
+                ptcTemp[uiPos + 1] = str2int_detail::DEC_00_99[2 * r + 0];
+                uiPos += 2;
+            }
+
+            // Buffer need: optional '-' + digits + NUL.
+            const size_t uiNeed = (fNeg ? 1 : 0) + uiPos + 1;
+            if (uiBufLength < uiNeed)
+            {
+#ifdef _DEBUG
+                g_Log.EventWarn("Str_FromInt_Fast[base=10]: insufficient buffer (need %" PRIuSIZE_T ", have %" PRIuSIZE_T ").\n", uiNeed, uiBufLength);
+#endif
+                return nullptr;
+            }
+
+            // Write sign and digits forward.
+            size_t n = uiPos; // save digit count before resetting
+            size_t pos = 0;
+            if (fNeg)
+                ptcOutBuf[pos++] = '-';
+            while (n)
+                ptcOutBuf[pos++] = ptcTemp[--n];
+            ptcOutBuf[pos] = '\0';
+        }
+
+        default:
+        {
+            // Generic fallback for other bases in [2,16], reverse-then-forward.
+            using _UInt = std::make_unsigned_t<_IntType>;
+
+            _UInt uiMagnitude;
+            bool fNeg = false;
+
+            if constexpr (std::is_signed_v<_IntType>)
+            {
+                const _UInt utwos = static_cast<_UInt>(val);
+                fNeg = (val < 0);
+                uiMagnitude = fNeg ? (_UInt(0) - utwos) : utwos;
+            }
+            else
+            {
+                uiMagnitude = static_cast<_UInt>(val);
+            }
+
+            // 65 bytes: 64 bits in base 2 = 64 digits max, plus room for sign handling if needed
+            tchar ptcTemp[65];
+            size_t n = 0;
+            const _UInt B = static_cast<_UInt>(uiBase);
+
+            // Repeated division/modulo; acceptable since this path is cold in your workload.
+            do
+            {
+                const _UInt q = uiMagnitude / B;
+                const uint32_t r = static_cast<uint32_t>(uiMagnitude - q * B);
+                uiMagnitude = q;
+                ptcTemp[n++] = str2int_detail::DIGITS_UPPER[r];
+            }
+            while (uiMagnitude);
+
+            const size_t uiNeed = (fNeg ? 1 : 0) + n + 1;
+            if (uiBufLength < uiNeed)
+            {
+#ifdef _DEBUG
+                g_Log.EventWarn("Str_FromInt_Fast[base=%u]: insufficient buffer (need %" PRIuSIZE_T ", have %" PRIuSIZE_T ").\n", uiBase, uiNeed, uiBufLength);
+#endif
+                return nullptr;
+            }
+
+            size_t uiPos = 0;
+            if (fNeg)
+                ptcOutBuf[uiPos++] = '-';
+            while (n)
+                ptcOutBuf[uiPos++] = ptcTemp[--n];
+            ptcOutBuf[uiPos] = '\0';
+            return ptcOutBuf;
+        }
+    } // switch
+}
+
+// Typed front-writing wrappers: they return buf on success, nullptr on failure.
+// For now keep _Fast and standard variants. They were there for historical purposes (previous implementation was back-writing).
 tchar* Str_FromI_Fast(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
     return Str_FromInt_Fast(val, buf, buf_length, base);
@@ -393,38 +728,22 @@ tchar* Str_FromULL_Fast (ullong val, tchar* buf, size_t buf_length, uint base) n
 
 void Str_FromI(int val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromI_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    (void) Str_FromI_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromUI(uint val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromUI_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    (void) Str_FromUI_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromLL(llong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromLL_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    (void) Str_FromLL_Fast(val, buf, buf_length, base);
 }
 
 void Str_FromULL(ullong val, tchar* buf, size_t buf_length, uint base) noexcept
 {
-    tchar* modified_buf = Str_FromULL_Fast(val, buf, buf_length, base);
-    const size_t offset = size_t(modified_buf - buf);
-    if (offset > 0) {
-        memmove(buf, modified_buf, buf_length - offset);
-    }
+    (void) Str_FromULL_Fast(val, buf, buf_length, base);
 }
 
 
@@ -524,7 +843,7 @@ err:
     return (uiBufSize > 1) ? int(uiBufSize - 1) : 0; // Bytes written, excluding the string terminator.
 }
 
-bool IsStrEmpty( const tchar * pszTest )
+bool IsStrEmpty( const tchar * pszTest ) noexcept
 {
     if ( !pszTest || !*pszTest )
         return true;
@@ -538,7 +857,7 @@ bool IsStrEmpty( const tchar * pszTest )
     return true;
 }
 
-bool IsStrNumericDec( const tchar * pszTest )
+bool IsStrNumericDec( const tchar * pszTest ) noexcept
 {
     if ( !pszTest || !*pszTest )
         return false;
@@ -554,7 +873,7 @@ bool IsStrNumericDec( const tchar * pszTest )
 }
 
 
-bool IsStrNumeric( const tchar * pszTest )
+bool IsStrNumeric( const tchar * pszTest ) noexcept
 {
     if ( !pszTest || !*pszTest )
         return false;
@@ -575,7 +894,7 @@ bool IsStrNumeric( const tchar * pszTest )
     return true;
 }
 
-bool IsSimpleNumberString( lpctstr_restrict pszTest )
+bool IsSimpleNumberString( lpctstr_restrict pszTest ) noexcept
 {
     // is this a string or a simple numeric expression ?
     // string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
@@ -638,10 +957,10 @@ bool IsSimpleNumberString( lpctstr_restrict pszTest )
 // strncpy doesn't null-terminate if it truncates the copy, and if uiMaxlen is > than the source string length, the remaining space is filled with '\0'
 size_t Str_CopyLimit(lptstr_restrict pDst, lpctstr_restrict pSrc, const size_t uiMaxSize) noexcept
 {
-    if (uiMaxSize == 0)
+    if (uiMaxSize == 0) [[unlikely]]
         return 0;
 
-    if (pSrc[0] == '\0')
+    if (pSrc[0] == '\0') [[unlikely]]
     {
 
         pDst[0] = '\0';
@@ -660,11 +979,11 @@ size_t Str_CopyLimit(lptstr_restrict pDst, lpctstr_restrict pSrc, const size_t u
 
 size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiMaxSize) noexcept
 {
-    if (uiMaxSize == 0)
+    if (uiMaxSize == 0) [[unlikely]]
     {
         return 0;
     }
-    if (pSrc[0] == '\0')
+    if (pSrc[0] == '\0') [[unlikely]]
     {
         pDst[0] = '\0';
         return 0;
@@ -686,6 +1005,70 @@ size_t Str_CopyLimitNull(lptstr_restrict pDst, lpctstr_restrict pSrc, size_t uiM
     return len; // bytes copied in pDst string (not counting the string terminator)
 }
 
+/*
+// Copy up to max_len-1 chars from src to dst, NUL-terminate.
+// Returns number of chars written (excluding the terminator).
+size_t Str_CopyLimitNull_ShortStr(char* dst, const char* src, size_t max_len)
+{
+    if (max_len == 0) [[unlikely]]
+        return 0;
+
+    char* const start = dst;
+    size_t remaining = max_len - 1;
+
+    // Use 64-bit words on modern 64-bit targets
+    using word_t = std::conditional_t<sizeof(void*) >= 8, uint64_t, uint32_t>;
+    constexpr ushort W = static_cast<ushort>(sizeof(word_t));
+
+    // Magic constants for zero detection
+    // lomagic (0x0101010101010101ULL) subtracts 1 from each byte.
+    // himagic (0x8080808080808080ULL) is used to mask out the high bit of each byte.
+    // The expression ((w - lomagic) & ~w & himagic) evaluates to non-zero if any byte in the word was zero.
+    constexpr word_t lomagic = (W == 8 ? 0x0101010101010101ULL : 0x01010101U);
+    constexpr word_t himagic = (W == 8 ? 0x8080808080808080ULL : 0x80808080U);
+
+    // Word-wise loop (assumes unaligned loads/stores are fast)
+    while (remaining >= W)
+    {
+        // Direct unaligned load/store, acceptable for short strings
+        word_t w = *reinterpret_cast<const word_t*>(src);
+        *reinterpret_cast<word_t*>(dst) = w;
+
+        // Detect any zero byte
+        if (((w - lomagic) & ~w & himagic) != 0)
+        {
+            // Scan this word byte-by-byte for the exact NUL
+            for (size_t i = 0; i < W; ++i)
+            {
+                char c = src[i];
+                dst[i] = c;
+                if (c == '\0')
+                    return (dst + i) - start;
+            }
+            // Should never get here
+            ASSERT(false);
+        }
+        src += W;
+        dst += W;
+        remaining -= W;
+    }
+
+    // Tail bytes
+    while (remaining-- > 0)
+    {
+        const char c = *src++;
+        *dst++ = c;
+        if (c == '\0')
+            return dst - start - 1;
+    }
+
+    // Buffer full – append NUL
+    *dst = '\0';
+    return dst - start;
+}
+*/
+
+// Acceptable overhead for out use cases (non-performance critical).
 size_t Str_CopyLen(lptstr_restrict pDst, lpctstr_restrict pSrc) noexcept
 {
     strcpy(pDst, pSrc);
@@ -960,7 +1343,7 @@ void Str_MakeUnQuoted(tchar* pStr) noexcept
 
     tchar* endPtr = src + std::strlen(src);
 
-    // If quoted, locate closing quote and adjust endPtr
+    // If quoted, locate servClosing quote and adjust endPtr
     if (fQuoted)
     {
         tchar* p = endPtr;
@@ -1016,7 +1399,8 @@ tchar * Str_GetUnQuoted(lptstr_restrict pStr) noexcept
 
 int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 {
-    ASSERT(len >= 0);
+    if (!pStr) [[unlikely]]
+        return -1;
     while (len > 0 && IsWhitespace(pStr[len - 1])) {
         --len;
     }
@@ -1026,6 +1410,8 @@ int Str_TrimEndWhitespace(tchar * pStr, int len) noexcept
 
 tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 {
+    if (!pStr) [[unlikely]]
+        return nullptr;
     GETNONWHITESPACE(pStr);
     Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
     return pStr;
@@ -1033,7 +1419,7 @@ tchar * Str_TrimWhitespace(tchar * pStr) noexcept
 
 void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcept
 {
-    if (pStrBegin == pStrEnd)
+    if (pStrBegin == pStrEnd) [[unlikely]]
         return;
 
     tchar* ptcPrev = pStrEnd - 1;
@@ -1046,83 +1432,6 @@ void Str_EatEndWhitespace(const tchar* const pStrBegin, tchar*& pStrEnd) noexcep
         ptcPrev = pStrEnd - 1;
     }
 }
-
-/*
-void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
-{
-    // Move past a < > statement. It can have ( ) inside, if it happens, ignore < > characters inside ().
-    bool fOpenedOneAngular = false;
-    int iOpenAngular = 0, iOpenCurly = 0;
-    tchar* ptcTest = ptcLine;
-    while (const tchar ch = *ptcTest)
-    {
-        if (IsWhitespace(ch))
-            ;
-        else if (ch == '(')
-            ++iOpenCurly;
-        else if (ch == ')')
-            --iOpenCurly;
-        else if (iOpenCurly == 0)
-        {
-            if (ch == '<')
-            {
-                bool fOperator = false;
-                if ((ptcTest[1] == '<') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
-                {
-                    // I want a whitespace after the operator and some text after it.
-                    const tchar * ptcOpTest = &(ptcTest[3]);
-                    if (*ptcOpTest != '\0')
-                    {
-                        GETNONWHITESPACE(ptcOpTest);
-                        if (*ptcOpTest != '\0')  // There's more text to parse
-                        {
-                            // I guess i have sufficient proof: skip, it's a << operator
-                            fOperator = true;
-                            ptcTest += 2; // Skip the second > and the following whitespace
-                        }
-                    }
-                }
-                if (!fOperator)
-                {
-                    fOpenedOneAngular = true;
-                    ++iOpenAngular;
-                }
-            }
-            else if (ch == '>')
-            {
-                bool fOperator = false;
-                if ((ptcTest[1] == '>') && (ptcTest[2] != '\0') && IsWhitespace(ptcTest[2]))
-                {
-                    if ((ptcLine == ptcTest) || ((iOpenAngular > 0) && IsWhitespace(*(ptcTest - 1))))
-                    {
-                        const tchar * ptcOpTest = &(ptcTest[3]);
-                        if (*ptcOpTest != '\0')
-                        {
-                            GETNONWHITESPACE(ptcOpTest);
-                            if (*ptcOpTest != '\0')  // There's more text to parse
-                            {
-                                // I guess i have sufficient proof: skip, it's a >> operator
-                                fOperator = true;
-                                ptcTest += 2; // Skip the second > and the following whitespace
-                            }
-                        }
-                    }
-                }
-                if (!fOperator)
-                {
-                    --iOpenAngular;
-                    if (fOpenedOneAngular && !iOpenAngular)
-                    {
-                        ptcLine = ptcTest + 1;
-                        return;
-                    }
-                }
-            }
-        }
-        ++ptcTest;
-    }
-}
-*/
 
 void Str_SkipEnclosedAngularBrackets(tchar*& ptcLine) noexcept
 {
@@ -1316,27 +1625,30 @@ int FindCAssocRegTableHeadSorted(const tchar * pszFind, const tchar * const* pps
     return -1;
 }
 
-bool Str_Check(const tchar * pszIn) noexcept
+bool Str_Untrusted_InvalidTermination(const tchar * pszIn, size_t uiMaxAcceptableSize) noexcept
 {
     if (pszIn == nullptr)
         return true;
 
     const tchar * p = pszIn;
-    while (*p != '\0' && (*p != 0x0A) && (*p != 0x0D))
+    while ((*p != '\0') && (*p != 0x0A /* '\n' */) && (*p != 0x0D /* '\r' */)
+           && ((p - pszIn) < ptrdiff_t(uiMaxAcceptableSize)))
+    {
         ++p;
+    }
 
     return (*p != '\0');
 }
 
-bool Str_CheckName(const tchar * pszIn) noexcept
+bool Str_Untrusted_InvalidName(const tchar * pszIn, size_t uiMaxAcceptableSize) noexcept
 {
     if (pszIn == nullptr)
         return true;
 
     const tchar * p = pszIn;
-    while (*p != '\0' &&
-        (
-        ((*p >= 'A') && (*p <= 'Z')) ||
+    while (*p != '\0' && ((p - pszIn) < ptrdiff_t(uiMaxAcceptableSize))
+        &&  (
+            ((*p >= 'A') && (*p <= 'Z')) ||
             ((*p >= 'a') && (*p <= 'z')) ||
             ((*p >= '0') && (*p <= '9')) ||
             ((*p == ' ') || (*p == '\'') || (*p == '-') || (*p == '.'))
@@ -1468,7 +1780,7 @@ MATCH_TYPE Str_Match(const tchar * pPattern, const tchar * pText) noexcept
                     fInvert = true;
                     ++pPattern;
                 }
-                // if closing bracket here or at range start then we have a
+                // if servClosing bracket here or at range start then we have a
                 // malformed pattern
                 if (*pPattern == ']')
                     return MATCH_PATTERN;

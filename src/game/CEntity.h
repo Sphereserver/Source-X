@@ -23,7 +23,7 @@ public:
     /**
     * @brief Calls Delete on contained CComponents.
     *
-    * @param fForce.
+    * @param fForce
     */
     void Delete(bool fForce = false);
 
@@ -80,7 +80,6 @@ public:
     * Will save important data on worldsave files.
     *
     * @param s the save file.
-    * @param pRef a pointer to the object found.
     */
     void r_Write(CScript & s);
     /**
@@ -110,6 +109,7 @@ public:
     * Executes a command (eg: dupe, bounce...)
     *
     * @param s the container with the keys and values to execute.
+    * @param pSrc Source of the command.
     * @return true if there was a key which could be executed.
     */
     bool r_Verb(CScript & s, CTextConsole * pSrc);                          ///< Execute command from script.

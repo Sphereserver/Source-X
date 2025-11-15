@@ -11,8 +11,6 @@
 #include "CSectorTemplate.h"
 #include "CTimedObject.h"
 
-#define SECTOR_TICKING_PERIOD	30 * 1000	// Every 30 seconds.
-
 
 class CChar;
 class CItemStone;
@@ -41,6 +39,7 @@ private:
 	void SetLightNow( bool fFlash = false );
 	bool IsMoonVisible( uint iPhase, int iLocalTime ) const;
 	void SetDefaultWeatherChance();
+    bool IsInDungeon() const;
 
 public:
 	CSector();

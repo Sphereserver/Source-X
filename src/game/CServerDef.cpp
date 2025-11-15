@@ -1,10 +1,10 @@
 
-#include "../common/CException.h"
-#include "../common/CExpression.h"
+//#include "../common/CException.h" // included in the precompiled header
+//#include "../common/CExpression.h" // included in the precompiled header
+//#include "../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../common/CLog.h"
-#include "../common/CScriptTriggerArgs.h"
 #include "../sphere/threads.h"
 #include "CServer.h"
 #include "CServerConfig.h"
@@ -294,8 +294,8 @@ static lpctstr constexpr sm_AccAppTable[ ACCAPP_QTY ] =
 	"CLOSED",		// Closed. Not accepting more.
 	"UNUSED",
 	"FREE",			// Anyone can just log in and create a full account.
-	"GUESTAUTO",	// You get to be a guest and are automatically sent email with u're new password.
-	"GUESTTRIAL",	// You get to be a guest til u're accepted for full by an Admin.
+	"GUESTAUTO",	// You get to be a guest and are automatically sent email with your new password.
+	"GUESTTRIAL",	// You get to be a guest until you are accepted for full by an Admin.
 	"UNUSED",
 	"UNSPECIFIED",	// Not specified.
 	"UNUSED",
@@ -498,7 +498,7 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			sVal = GetName();
 			break;
 		}
-		sVal.Format("<a href=\"http://%s\">%s</a>", static_cast<lpctstr>(m_sURL), GetName());
+		sVal.Format("<a href=\"https://%s\">%s</a>", static_cast<lpctstr>(m_sURL), GetName());
 		break;
 	case SC_VERSION:
 		sVal = SPHERE_BUILD_INFO_STR;
@@ -514,8 +514,9 @@ bool CServerDef::r_WriteVal( lpctstr ptcKey, CSString &sVal, CTextConsole * pSrc
 			    if (pszArgs != nullptr)
 				    GETNONWHITESPACE(pszArgs);
 
-			    CScriptTriggerArgs Args( pszArgs ? pszArgs : "" );
-			    if ( r_Call( uiFunctionIndex, pSrc, &Args, &sVal ) )
+                CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+                pScriptArgs->Init( pszArgs ? pszArgs : "" );
+                if ( r_Call( uiFunctionIndex, pScriptArgs, pSrc, &sVal ) )
 				    return true;
 		    }
             return (fNoCallParent ? false : CScriptObj::r_WriteVal( ptcKey, sVal, pSrc, false ));

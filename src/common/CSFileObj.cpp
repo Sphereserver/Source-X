@@ -1,8 +1,8 @@
 #include "../sphere/threads.h"
 #include "CScript.h"
 #include "CLog.h"
-#include "CException.h"
-#include "CExpression.h"
+//#include "CException.h" // included in the precompiled header
+//#include "CExpression.h" // included in the precompiled header
 #include "CSFileObj.h"
 
 

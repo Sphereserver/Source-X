@@ -37,10 +37,10 @@ public:     virtual int GetPosition() const override;
 protected:  virtual tchar * _ReadString(tchar *pBuffer, int sizemax) override;
 public:     virtual tchar * ReadString(tchar *pBuffer, int sizemax) override;
 
-protected: 
+protected:
     void _dupeFrom(CCacheableScriptFile *other);
     void dupeFrom(CCacheableScriptFile *other);
-    
+
 protected:  bool _HasCache() const;
 public:     bool HasCache() const;
 

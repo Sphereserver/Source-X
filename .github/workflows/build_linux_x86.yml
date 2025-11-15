@@ -23,11 +23,14 @@ on:
 
 jobs:
   linux-x86:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - name: Install prerequisites
@@ -130,11 +133,14 @@ jobs:
     needs: linux-x86
     # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
+    permissions:
+      contents: read
+      actions: write
 
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-linux-x86
           merge-multiple: true
@@ -153,11 +159,14 @@ jobs:
   upload_selfhost_release:
     needs: linux-x86
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    permissions:
+      contents: read
+      actions: write
 
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Build-linux-x86
           merge-multiple: true

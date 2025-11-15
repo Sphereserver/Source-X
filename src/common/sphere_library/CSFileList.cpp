@@ -83,7 +83,7 @@ int CSFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 			break;
 		}
 	}
-	
+
 	DIR* dirp = opendir(szFileDir);
 	struct dirent * fileinfo = nullptr;
 

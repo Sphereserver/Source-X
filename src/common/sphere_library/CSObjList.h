@@ -15,7 +15,7 @@ public:
     friend class CSObjListRec;
     static const char * m_sClassName;
 
-    /** @name Constructors, Destructor, Asign operator:
+    /** @name Constructors, Destructor, Assign operator:
     */
     ///@{
     /**

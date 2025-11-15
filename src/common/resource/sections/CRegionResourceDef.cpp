@@ -1,7 +1,7 @@
 #include "../../../sphere/threads.h"
 #include "../../../game/items/CItemBase.h"
 #include "../../../game/CServerConfig.h"
-#include "../../CException.h"
+//#include "../../CException.h" // included in the precompiled header
 #include "../CResourceLock.h"
 #include "CRegionResourceDef.h"
 
@@ -37,7 +37,7 @@ lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 };
 
 
-TRIGRET_TYPE CRegionResourceDef::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CRegionResourceDef::OnTrigger(lpctstr pszTrigName, CScriptTriggerArgsPtr const& pScriptArgs, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CRegionResourceDef::OnTrigger");
     // Attach some trigger to the cchar. (PC or NPC)
@@ -46,7 +46,7 @@ TRIGRET_TYPE CRegionResourceDef::OnTrigger( lpctstr pszTrigName, CTextConsole * 
     CResourceLock s;
     if ( ResourceLock( s ))
     {
-        TRIGRET_TYPE iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
+        TRIGRET_TYPE iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pScriptArgs, pSrc);
         return iRet;
     }
     return TRIGRET_RET_DEFAULT;

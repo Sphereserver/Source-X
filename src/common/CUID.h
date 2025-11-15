@@ -33,25 +33,25 @@ protected:
 	dword m_dwInternalVal;
 
 public:
-	inline void InitUID() noexcept {
+    inline constexpr void InitUID() noexcept {
 		m_dwInternalVal = UID_UNUSED;
 	}
 
     // Use ClearUID only if the CUID is not used as a pure UID, but it can assume other kind of values.
     //  Example: m_itFigurine.m_UID, m_itKey.m_UIDLock -> a MORE1/MORE2 == 0 is considered legit, also for many many item types MORE* isn't a UID.
-	inline void ClearUID() noexcept {
+    inline constexpr void ClearUID() noexcept {
 		m_dwInternalVal = UID_PLAIN_CLEAR;
 	}
 
-	inline CUID() noexcept
+    inline constexpr CUID() noexcept
 	{
 		InitUID();
 	}
-	inline CUID(const CUID& uid) noexcept
+    inline constexpr CUID(const CUID& uid) noexcept
 	{
 		SetPrivateUID(uid.GetPrivateUID());
 	}
-	inline explicit CUID(dword dwPrivateUID) noexcept
+    inline constexpr explicit CUID(dword dwPrivateUID) noexcept
 	{
 		// TODO: directly setting the private UID can led to unexpected results...
 		//	it's better to use SetObjUID in order to "filter" the raw value passed.
@@ -81,13 +81,13 @@ public:
         return IsChar(m_dwInternalVal);
     }
 
-    inline bool IsObjDisconnected() const noexcept // Called very frequently
+    constexpr bool IsObjDisconnected() const noexcept // Called very frequently
     {
         // Not in the game world for some reason.
         return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == UID_O_DISCONNECT);
     }
 
-    bool IsObjTopLevel() const noexcept
+    constexpr bool IsObjTopLevel() const noexcept
     {
         // on the ground in the world.
         // might be static in client ?
@@ -101,10 +101,10 @@ public:
     void RemoveObjFlags(dword dwFlags) noexcept;
 
     // Internal UID, which also has special flags not understood by the client.
-    inline void SetPrivateUID(dword dwVal) noexcept {
+    inline constexpr void SetPrivateUID(dword dwVal) noexcept {
         m_dwInternalVal = dwVal;
     }
-    inline dword GetPrivateUID() const noexcept {
+    inline constexpr dword GetPrivateUID() const noexcept {
         return m_dwInternalVal;
     }
 
@@ -152,7 +152,10 @@ public:
 	inline CChar* CharFind(bool fInvalidateBeingDeleted = false) const noexcept{
 		return CharFindFromUID(m_dwInternalVal, fInvalidateBeingDeleted);
 	}
-    
+
 };
+
+static constexpr CUID kUIDUninitialized(UID_UNUSED);
+static constexpr CUID kUIDEmpty(UID_PLAIN_CLEAR);
 
 #endif // _INC_CUID_H

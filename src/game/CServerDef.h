@@ -78,7 +78,7 @@ public:
 
 public:
 	lpctstr GetStatus() const noexcept;
-    
+
 	size_t StatGet( SERV_STAT_TYPE i ) const;
 	void StatInc( SERV_STAT_TYPE i );
 	void StatDec( SERV_STAT_TYPE i );

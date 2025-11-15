@@ -456,7 +456,7 @@ enum STAT_TYPE
     // MaxFood  (7)
 };
 
-enum SKILL_TYPE	// List of skill numbers (things that can be done at a given time)
+enum SKILL_TYPE	: int // List of skill numbers (things that can be done at a given time)
 {
     SKILL_NONE = -1,
 

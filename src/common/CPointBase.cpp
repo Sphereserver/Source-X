@@ -1,8 +1,10 @@
 #include "../common/sphere_library/scontainer_ops.h"
-#include "../common/CExpression.h"
+#include "../common/sphere_library/sfastmath.h"
+//#include "../common/CExpression.h" // included in the precompiled header
 #include "../game/items/CItem.h"
 #include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/uo_files/CUOStaticItemRec.h"
+#include "../game/uo_files/CUOMapList.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"
 #include "../game/CWorldMap.h"
@@ -11,8 +13,6 @@
 #include "CRect.h"
 #include "CPointBase.h"
 #include <cmath>
-
-#include "../game/uo_files/CUOMapList.h"
 
 
 static_assert(sizeof(CPointBase) == sizeof(CPointMap), "CPointBase and CPointMap have to have the same size. Was a virtual method added?");
@@ -95,17 +95,6 @@ lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	"Z",
 	nullptr
 };
-
-CPointBase::CPointBase() noexcept :
-	m_x(-1), m_y(-1), m_z(0), m_map(0)	// Same thing as calling InitPoint(), but without this extra cuntion call
-{
-	//InitPoint();
-}
-
-CPointBase::CPointBase(short x, short y, char z, uchar map) noexcept :
-	m_x(x), m_y(y), m_z(z), m_map(map)
-{
-}
 
 bool CPointBase::operator== ( const CPointBase & pt ) const noexcept
 {
@@ -214,9 +203,7 @@ int CPointBase::GetDist( const CPointBase & pt ) const noexcept // Distance betw
 	//ADDTOCALLSTACK_DEBUG("CPointBase::GetDist");
 
 	// Get the basic 2d distance.
-	if ( !pt.IsValidPoint() || (pt.m_map != m_map))
-		return INT16_MAX;
-	return GetDistBase(pt);
+    return (!pt.IsValidPoint() || (pt.m_map != m_map)) ? INT16_MAX : GetDistBase(pt);
 }
 
 int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
@@ -233,9 +220,7 @@ int CPointBase::GetDistSightBase( const CPointBase & pt ) const noexcept // Dist
 
 int CPointBase::GetDistSight( const CPointBase & pt ) const noexcept // Distance between points based on UO sight
 {
-	if ( !pt.IsValidPoint() )
-		return INT16_MAX;
-	if ( pt.m_map != m_map )
+    if (!pt.IsValidPoint() || (pt.m_map != m_map))
 		return INT16_MAX;
 
 	//const int dx = abs(m_x - pt.m_x);
@@ -281,39 +266,71 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const noexcept // Distance be
     }
 }
 
-bool CPointBase::IsValidXY() const noexcept
-{
-	if ( (m_x < 0) || (m_y < 0) )
-		return false;
-	if ( (m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)) )
-		return false;
-	return true;
-}
-
+// Difference between IsCharValid and IsValidPoint: the first returns false if x or y == 0.
 bool CPointBase::IsCharValid() const noexcept
 {
-	if ( (m_z <= -UO_SIZE_Z) || (m_z >= UO_SIZE_Z) )
-		return false;
-	if ((m_x <= 0) || (m_y <= 0))
-		return false;
-	if ((m_x >= g_MapList.GetMapSizeX(m_map)) || (m_y >= g_MapList.GetMapSizeY(m_map)))
-		return false;
-	return true;
+    // 0 for X or Y is invalid. Z is valid if (-127, 127), excluding the extremes.
+    const uint32_t sx = g_MapList.GetMapSizeX(m_map) - 1;   // -1 because 0 is not valid.
+    const uint32_t sy = g_MapList.GetMapSizeY(m_map) - 1;
+    constexpr uint32_t sz = 2 * UO_SIZE_Z;                  // exclude -128, -127, 127
+
+    const uint32_t ux = static_cast<uint32_t>(static_cast<int32_t>(m_x) - 1); // -1 because 0 is not valid
+    const uint32_t uy = static_cast<uint32_t>(static_cast<int32_t>(m_y) - 1);
+    const uint32_t uz = static_cast<uint32_t>(static_cast<int32_t>(m_z) + UO_SIZE_Z);
+
+    return (ux < sx) && (uy < sy) && (uz > 0) && (uz < sz);
+}
+
+bool CPointBase::IsValidPoint() const noexcept
+{
+    // 0 for X or Y is valid. Z is valid if (-127, 127), excluding the extremes.
+    const uint32_t sx = g_MapList.GetMapSizeX(m_map);
+    const uint32_t sy = g_MapList.GetMapSizeY(m_map);
+    constexpr uint32_t sz = 2 * UO_SIZE_Z;                   // exclude -128, -127, 127
+
+    // Cast to unsigned - negative values wrap to large numbers
+    const uint32_t ux = static_cast<uint32_t>(static_cast<uint16_t>(m_x));
+    const uint32_t uy = static_cast<uint32_t>(static_cast<uint16_t>(m_y));
+    const uint32_t uz = static_cast<uint32_t>(static_cast<int32_t>(m_z) + UO_SIZE_Z);
+
+    return (ux < sx) && (uy < sy) && (uz > 0) && (uz < sz);
+}
+
+bool CPointBase::IsValidXY() const noexcept
+{
+    // 0 for X or Y is valid.
+    const uint32 sx = g_MapList.GetMapSizeX(m_map);
+    const uint32 sy = g_MapList.GetMapSizeY(m_map);
+
+    const uint32 ux = uint32(uint16(m_x));
+    const uint32 uy = uint32(uint16(m_y));
+
+    // Two unsigned compares fold both < 0 and >= size checks. 0 is valid x or y,
+    return ux < sx && uy < sy;
 }
 
 void CPointBase::ValidatePoint() noexcept
 {
+    const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
+    const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
+
+    m_x = sl::fmath::sMax(m_x,  (short)0);
+    m_x = (m_x < iMaxX) ? m_x : (iMaxX - 1);
+
+    m_y = sl::fmath::sMax(m_y,  (short)0);
+    m_y = (m_y < iMaxY) ? m_y : (iMaxY - 1);
+
+    /*
 	if ( m_x < 0 )
 		m_x = 0;
-    const short iMaxX = (short)g_MapList.GetMapSizeX(m_map);
 	if (m_x >= iMaxX)
 		m_x = iMaxX - 1;
 
 	if ( m_y < 0 )
 		m_y = 0;
-    const short iMaxY = (short)g_MapList.GetMapSizeY(m_map);
 	if (m_y >= iMaxY)
 		m_y = iMaxY - 1;
+    */
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const
@@ -512,7 +529,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					const CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+                    const CPointMap ptTest(
+                        (word)(ptMulti.m_x + pMultiItem->m_dx),
+                        (word)(ptMulti.m_y + pMultiItem->m_dy),
+                        (char)(ptMulti.m_z + pMultiItem->m_dz),
+                        this->m_map);
+
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -615,7 +637,12 @@ bool CPointBase::r_WriteVal( lpctstr ptcKey, CSString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+
+                    const CPointMap ptTest(
+                        (word)(ptMulti.m_x + pMultiItem->m_dx),
+                        (word)(ptMulti.m_y + pMultiItem->m_dy),
+                        (char)(ptMulti.m_z + pMultiItem->m_dz),
+                        this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -827,30 +854,26 @@ bool CPointBase::r_LoadVal( lpctstr ptcKey, lpctstr pszArgs )
 	return true;
 }
 
-
 DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const // Direction to point pt
 {
 	ADDTOCALLSTACK_DEBUG("CPointBase::GetDir");
 	// Get the 2D direction between points.
-	const int dx = (m_x-pt.m_x);
-    const int dy = (m_y-pt.m_y);
 
+    /*
+    const int dx = (m_x-pt.m_x);
+    const int dy = (m_y-pt.m_y);
     const int ax = abs(dx);
     const int ay = abs(dy);
-
 	if ( ay > ax )
 	{
 		if ( ! ax )
-		{
 			return(( dy > 0 ) ? DIR_N : DIR_S );
-		}
-		int slope = ay / ax;
+
+        const int slope = ay / ax;
 		if ( slope > 2 )
 			return(( dy > 0 ) ? DIR_N : DIR_S );
 		if ( dx > 0 )	// westish
-		{
 			return(( dy > 0 ) ? DIR_NW : DIR_SW );
-		}
 		return(( dy > 0 ) ? DIR_NE : DIR_SE );
 	}
 	else
@@ -861,24 +884,66 @@ DIR_TYPE CPointBase::GetDir( const CPointBase & pt, DIR_TYPE DirDefault ) const 
 				return( DirDefault );	// here ?
 			return(( dx > 0 ) ? DIR_W : DIR_E );
 		}
-		int slope = ax / ay;
+        const int slope = ax / ay;
 		if ( slope > 2 )
 			return(( dx > 0 ) ? DIR_W : DIR_E );
 		if ( dy > 0 )
-		{
 			return(( dx > 0 ) ? DIR_NW : DIR_NE );
-		}
 		return(( dx > 0 ) ? DIR_SW : DIR_SE );
 	}
+    */
+
+    const int dx = m_x - pt.m_x;
+    const int dy = m_y - pt.m_y;
+
+    // Early exit if identical point
+    if ((dx | dy) == 0) //(dx == 0 && dy == 0)
+        return DirDefault;
+
+    // Absolute values
+    const int ax = dx < 0 ? -dx : dx;
+    const int ay = dy < 0 ? -dy : dy;
+
+    // Axis‐dominance and “steepness” test
+    const bool steep    = ay > ax;
+    const bool extreme  = steep
+                            ? (ay > ax * 2)
+                            : (ax > ay * 2);
+
+    // Cardinal direction if “extreme”, else diagonal
+    //    Use boolean-to-int multipliers (true→1, false→0)
+    const int north = (dy > 0);
+    const int south = (dy < 0);
+    const int east  = (dx < 0);
+    const int west  = (dx > 0);
+
+    const DIR_TYPE dir_card = enum_alias_cast<DIR_TYPE>(
+        steep
+            ? ( north * DIR_N + south * DIR_S )
+            : ( east  * DIR_E + west  * DIR_W ));
+    //const DIR_TYPE card = steep
+    //                    ? (north ? DIR_N : DIR_S)
+    //                    : (east ? DIR_W : DIR_E);
+
+    const DIR_TYPE dir_diag = enum_alias_cast<DIR_TYPE>(
+        north * east * DIR_NE +
+        north * west * DIR_NW +
+        south * east * DIR_SE +
+        south * west * DIR_SW);
+    //const DIR_TYPE diag = north
+    //                    ? (east ? DIR_NE : DIR_NW)
+    //                    : (east ? DIR_SE : DIR_SW);
+
+    return extreme ? dir_card : dir_diag;
 }
 
 int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 {
 	ADDTOCALLSTACK("CPointBase::StepLinePath");
 	// Take x steps toward this point.
-	int dx = m_x - ptSrc.m_x;
-	int dy = m_y - ptSrc.m_y;
-	int iDist2D = GetDist( ptSrc );
+    const int dx = m_x - ptSrc.m_x;
+    const int dy = m_y - ptSrc.m_y;
+    const int iDist2D = GetDist( ptSrc );
 	if ( ! iDist2D )
 		return 0;
 
@@ -1000,11 +1065,11 @@ CSector * CPointBase::GetSector() const
 	{
 		g_Log.Event(LOGL_ERROR, "Point(%d,%d): trying to get a sector for point on map #%d out of bounds for this map(%d,%d). Defaulting to sector 0 of the map.\n",
 			m_x, m_y, m_map, g_MapList.GetMapSizeX(m_map), g_MapList.GetMapSizeY(m_map));
-		return CWorldMap::GetSector(m_map, 0);
+        return CWorldMap::GetSectorByIndex(m_map, 0);
 	}
 
 	// Get the world Sector we are in.
-	return CWorldMap::GetSector(m_map, m_x, m_y);
+    return CWorldMap::GetSectorByCoordsUnchecked(m_map, m_x, m_y);
 }
 
 CRegion * CPointBase::GetRegion( dword dwType ) const
@@ -1017,10 +1082,7 @@ CRegion * CPointBase::GetRegion( dword dwType ) const
 		return nullptr;
 
     const CSector *pSector = GetSector();
-	if ( pSector )
-		return pSector->GetRegion(*this, dwType);
-
-	return nullptr;
+    return !pSector ? nullptr : pSector->GetRegion(*this, dwType);
 }
 
 size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
@@ -1032,10 +1094,7 @@ size_t CPointBase::GetRegions( dword dwType, CRegionLinks *pRLinks ) const
 		return 0;
 
 	const CSector *pSector = GetSector();
-	if ( pSector )
-		return pSector->GetRegions(*this, dwType, pRLinks);
-
-	return 0;
+    return !pSector ? 0 : pSector->GetRegions(*this, dwType, pRLinks);
 }
 
 int CPointBase::GetPointSortIndex() const noexcept

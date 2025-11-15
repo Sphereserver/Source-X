@@ -1,4 +1,4 @@
-#include "../common/CException.h"
+//#include "../common/CException.h" // included in the precompiled header
 #include "../common/CLog.h"
 #include "../common/CRect.h"
 #include "../game/CWorld.h"
@@ -150,22 +150,24 @@ void CItemsList::AddItemToSector( CItem * pItem )
 }
 
 
-
 //////////////////////////////////////////////////////////////////
 // -CSectorBase
 
 void CSectorBase::SetAdjacentSectors()
 {
-	const CSectorList* pSectors = CSectorList::Get();
+    const CSectorList& pSectors = CSectorList::Get();
+    ASSERT_ALWAYS(g_MapList.IsMapSupported(m_BasePointSectUnits.m_map));
+    auto const& sd = pSectors.GetMapSectorDataUnchecked(m_BasePointSectUnits.m_map);
 
-    const int iMaxX = pSectors->GetSectorCols(m_map);
+    const int iMaxX = sd.iSectorColumns;
     ASSERT(iMaxX > 0);
-    [[maybe_unused]] const int iMaxY = pSectors->GetSectorRows(m_map);
+    const int iMaxY = sd.iSectorRows;
     ASSERT(iMaxY > 0);
-    const int iMaxSectors = pSectors->GetSectorQty(m_map);
+    const int iMaxSectors = sd.iSectorQty;
+    ASSERT(iMaxSectors > 9);
 
-    // Sectors are layed out in the array horizontally: when the row is complete (X), the subsequent sector is placed in
-    //  the column below (Y).
+    // Sectors are laid out in the array horizontally (row-major order): when the row is complete (X),
+    //  the subsequent sector is placed in the row below (Y).
     // Between each X coordinate there's a single sector index difference;
     //  between each Y coordinate there's a number of sectors equal to the sectors in a row.
     /*
@@ -197,16 +199,23 @@ void CSectorBase::SetAdjacentSectors()
     for (int i = 0; i < (int)DIR_QTY; ++i)
     {
         // out of bounds checks
-		const int iAdjX = _x + _xyDir[i].x;
-		const int iAdjY = _y + _xyDir[i].y;
-
-		int index = m_index;
-        index  += ((iAdjY * iMaxX) + iAdjX);
-        if (index < 0 || (index > iMaxSectors))
-        {
+        // These checks are needed or the negative iAdjX/iAdjY can lead to a wrong index if the sector is near the map borders.
+        // For instance m_index = 0, iAdjY > 0 and iAdjX < 0, SW check, the index start from the first column of the second row and it goes back to the first row because there is no SW sector
+        const int iAdjX = m_BasePointSectUnits.m_x + _xyDir[i].x;
+        if ((iAdjX < 0) || (iAdjX >= iMaxX))
             continue;
-        }
-        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors->GetSector(m_map, index);
+
+        const int iAdjY = m_BasePointSectUnits.m_y + _xyDir[i].y;
+        if ((iAdjY < 0) || (iAdjY >= iMaxY))
+            continue;
+
+        const int iAdjIndex = CSectorList::CalcSectorIndex(iMaxX, iAdjX, iAdjY);
+        if ((iAdjIndex < 0) || (iAdjIndex > iMaxSectors))
+            continue;
+
+        _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndexUnchecked(m_BasePointSectUnits.m_map, iAdjIndex);
+
+        //g_Log.EventDebug("Sector %d, Setting adjacent sector %d.\n", m_index, iAdjIndex);
     }
 }
 
@@ -219,10 +228,8 @@ CSector *CSectorBase::_GetAdjacentSector(DIR_TYPE dir) const
 CSectorBase::CSectorBase() :
     _ppAdjacentSectors{{}}
 {
-	m_map = 0;
 	m_index = 0;
 	m_dwFlags = 0;
-	_x = _y = -1;
     //memset(_ppAdjacentSectors, 0, DIR_QTY * sizeof(_ppAdjacentSectors));
 }
 
@@ -232,30 +239,52 @@ void CSectorBase::Init(int index, uchar map, short x, short y)
 	if (!g_MapList.IsMapSupported(map) || !g_MapList.IsInitialized(map))
 	{
 		g_Log.EventError("Trying to initalize a sector %d in unsupported map #%d. Defaulting to 0,0.\n", index, map);
+        return;
 	}
-	else if (( index < 0 ) || ( index >= CSectorList::Get()->GetSectorQty(map) ))
+
+    // Sooner or later we have to change those signed values to unsigned... they should never be negative in any case
+    //  and we're doing a number of potentially useless checks.
+    if (( index < 0 ) || ( index >= CSectorList::Get().GetMapSectorDataUnchecked(map).iSectorQty ))
 	{
-		m_map = map;
+        m_BasePointSectUnits.m_map = map;
 		g_Log.EventError("Trying to initalize a sector by sector number %d out-of-range for map #%d. Defaulting to 0,%d.\n", index, map, map);
+        return;
 	}
-	else
-	{
-        ASSERT(x >= 0 && y >= 0);
-		m_index = index;
-		m_map = map;
-        _x = x;
-        _y = y;
-	}
+
+    ASSERT(x >= 0 && y >= 0);
+    m_index = index;
+
+    auto const& sd = CSectorList::Get().GetMapSectorDataUnchecked(map);
+    DEBUG_ASSERT((m_index >= 0) && (m_index < sd.iSectorQty));
+
+    m_BasePointSectUnits =
+        CPointBase
+        {
+            x,          // x
+            y,          // y
+            0,          // z
+            (uint8)map  // m
+        };
+
+    m_MapRectWorldUnits =
+        CRectMap
+        {
+            m_BasePointSectUnits.m_x * sd.iSectorSize,			        // left
+            m_BasePointSectUnits.m_y * sd.iSectorSize,			        // top
+            m_BasePointSectUnits.m_x * sd.iSectorSize + sd.iSectorSize,	// right: East
+            m_BasePointSectUnits.m_y * sd.iSectorSize + sd.iSectorSize, // bottom: South
+            m_BasePointSectUnits.m_map                                  // map
+        };
 }
 
-bool CSectorBase::IsInDungeon() const
+CPointBase CSectorBase::GetBasePointMapUnits() const noexcept
 {
-	ADDTOCALLSTACK("CSectorBase::IsInDungeon");
-	// What part of the maps are filled with dungeons.
-	// Used for light / weather calcs.
-	CRegion *pRegion = GetRegion(GetBasePoint(), REGION_TYPE_AREA);
-
-	return ( pRegion && pRegion->IsFlag(REGION_FLAG_UNDERGROUND) );
+    return CPointBase {
+        (int16)m_MapRectWorldUnits.m_left,
+        (int16)m_MapRectWorldUnits.m_top,
+        0,
+        (uint8)m_MapRectWorldUnits.m_map
+    };
 }
 
 CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
@@ -268,8 +297,8 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 	// REGION_TYPE_ROOM => RES_ROOM = NPC House areas only = CRegion.
 	// REGION_TYPE_MULTI => RES_WORLDITEM = UID linked types in general = CRegionWorld
 
-	size_t iQty = m_RegionLinks.size();
-	for ( size_t i = 0; i < iQty; ++i )
+    const size_t uiQty = m_RegionLinks.size();
+    for ( size_t i = 0; i < uiQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -311,8 +340,8 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
 	//ADDTOCALLSTACK_DEBUG("CSectorBase::GetRegions");  // Called very frequently
-	size_t iQty = m_RegionLinks.size();
-	for ( size_t i = 0; i < iQty; ++i )
+    const size_t uiQty = m_RegionLinks.size();
+    for ( size_t i = 0; i < uiQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -370,10 +399,10 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 	// Later added regions from the MAP file should be the smaller ones,
 	//  according to the old rules.
 	ASSERT(pRegionNew);
-	ASSERT( pRegionNew->IsOverlapped(GetRect()) );
-	size_t iQty = m_RegionLinks.size();
+    ASSERT( pRegionNew->IsOverlapped(GetRectWorldUnits()) );
+    const size_t uiQty = m_RegionLinks.size();
 
-	for ( size_t i = 0; i < iQty; ++i )
+    for ( size_t i = 0; i < uiQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -398,7 +427,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 
 			// keep item (multi) regions on top
 			if ( pRegion->GetResourceID().IsUIDItem() && !pRegionNew->GetResourceID().IsUIDItem() )
-				continue;
+                continue;
 
 			// must insert before this.
 			m_RegionLinks.emplace(m_RegionLinks.begin() + i, pRegionNew);
@@ -415,7 +444,7 @@ CTeleport * CSectorBase::GetTeleport( const CPointMap & pt ) const
 	ADDTOCALLSTACK("CSectorBase::GetTeleport");
 	// Any teleports here at this point ?
 
-	size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
+    const size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
 	if ( i == sl::scont_bad_index() )
 		return nullptr;
 
@@ -434,7 +463,7 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	// NOTE: can't be 2 teleports from the same place !
 	// ASSERT( Teleport is actually in this sector !
 
-	size_t i = m_Teleports.FindKey( pTeleport->GetPointSortIndex());
+    const size_t i = m_Teleports.FindKey( pTeleport->GetPointSortIndex());
 	if ( i != sl::scont_bad_index() )
 	{
 		DEBUG_ERR(( "Conflicting teleport %s!\n", pTeleport->WriteUsed() ));
@@ -442,47 +471,4 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	}
 	m_Teleports.AddSortKey( pTeleport, pTeleport->GetPointSortIndex());
 	return true;
-}
-
-bool CSectorBase::IsFlagSet( dword dwFlag ) const noexcept
-{
-	return (( m_dwFlags & dwFlag) ? true : false );
-}
-
-CPointMap CSectorBase::GetBasePoint() const
-{
-	// ADDTOCALLSTACK_DEBUG("CSectorBase::GetBasePoint"); // It's commented because it's slow and this method is called VERY often!
-	// What is the coord base of this sector. upper left point.
-	const CSectorList* pSectors = CSectorList::Get();
-#if _DEBUG
-	DEBUG_ASSERT( (m_index >= 0) && (m_index < pSectors->GetSectorQty(m_map)) );
-	// Again this method is called very often, so call the least functions possible and do the minimum amount of checks required
-#endif
-    const int iCols = pSectors->GetSectorCols(m_map);
-    const int iSize = pSectors->GetSectorSize(m_map);
-
-	const int iQuot = (m_index % iCols), iRem = (m_index / iCols); // Help the compiler to optimize the division
-	return // Initializer list for CPointMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
-	{
-		(short)(iQuot * iSize),	// x
-		(short)(iRem * iSize),	// y
-		0,						// z
-		m_map					// m
-	};
-}
-
-CRectMap CSectorBase::GetRect() const noexcept
-{
-    //ADDTOCALLSTACK_DEBUG("CSectorBase::GetRect"); // It's commented because it's slow and this method is called VERY often!
-	// Get a rectangle for the sector.
-	const CPointMap& pt = GetBasePoint();
-    const int iSectorSize = CSectorList::Get()->GetSectorSize(pt.m_map);
-	return // Initializer list for CRectMap, it's the fastest way to return an object (requires less optimizations, which aren't used in debug build)
-	{
-		pt.m_x,					// left
-		pt.m_y,					// yop
-		pt.m_x + iSectorSize,	// right: East
-		pt.m_y + iSectorSize,	// bottom: South
-		pt.m_map				// map
-	};
 }

@@ -8,7 +8,9 @@
 /.ctagsd
 /.codelite
 
+/_deps
 /CMakeFiles
+/external
 /spheresvr.dir
 
 /bin
@@ -63,3 +65,8 @@ CMakeCache.txt
 /lib/mariadb_connector_c/mysql/ma_config.h
 /lib/mariadb_connector_c/mysql/mariadb_version.h
 /lib/zlib/zlib/zconf.h
+
+# Ignore debian package files.
+/sphereserver*.buildinfo
+/sphereserver*.changes
+/sphereserver*.deb

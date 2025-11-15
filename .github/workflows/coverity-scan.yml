@@ -2,7 +2,7 @@ name: coverity-scan
 
 on:
   push:
-      branches: ["static-analysis"]
+      branches: ["static-analysis", "master", "main"]
       paths-ignore:
         - '.gitignore'
         - '.gitattributes'
@@ -13,10 +13,14 @@ on:
 
 jobs:
   latest:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
+        permissions:
+          contents: read
+          actions: read
+
         steps:
         - name: Checkout repository
-          uses: actions/checkout@v4
+          uses: actions/checkout@v5
           with:
             fetch-depth: 0
 
@@ -43,7 +47,7 @@ jobs:
         - name: Download Coverity Build Tool
           env:
             TOKEN: ${{ secrets.COVERITY_TOKEN }}
-#echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+          #echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
           run:  |
                 wget -nv https://scan.coverity.com/download/cxx/linux64 --post-data "token=${TOKEN}&project=Sphereserver/Source-X" -O cov-analysis-linux64.tar.gz
                 mkdir cov-analysis-linux64
@@ -75,13 +79,12 @@ jobs:
                 cd build
                 tar czvf build-data.tgz cov-int
                 curl \
-                    --form project=SphereServer/Source-X \
                     --form token=$TOKEN \
                     --form email=$EMAIL \
                     --form file=@build-data.tgz \
-                    --form version=trunk \
+                    --form version="trunk" \
                     --form description="${{github.sha}}" \
-                    https://scan.coverity.com/builds?project=SphereServer-X
+                   https://scan.coverity.com/builds?project=Sphereserver%2FSource-X
           env:
             TOKEN: ${{ secrets.COVERITY_TOKEN }}
             EMAIL: ${{ secrets.COVERITY_EMAIL }}

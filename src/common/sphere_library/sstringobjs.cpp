@@ -1,5 +1,5 @@
 #include "../../sphere/threads.h"
-#include "../CException.h"
+//#include "../CException.h" // included in the precompiled header
 #include "sstringobjs.h"
 
 /*
@@ -52,6 +52,24 @@ tchar* Str_GetTemp() noexcept
 
     // Get from the common but mutex-guarded buffer pool.
     return AbstractSphereThread::Strings::allocateBuffer();
+}
+
+[[nodiscard]]
+tchar* Str_CopyToTemp(lpctstr pSrc) noexcept
+{
+    lptstr pDest = Str_GetTemp();
+    Str_CopyLimitNull(pDest, pSrc, Str_TempLength());
+    return pDest;
+}
+
+[[nodiscard]]
+lpctstr Str_mtEngineGetSafeTemp(lpctstr pSrc) noexcept
+{
+#if MT_ENGINES
+    return Str_CopyToTemp(pSrc);
+#else
+    return pSrc;
+#endif
 }
 
 

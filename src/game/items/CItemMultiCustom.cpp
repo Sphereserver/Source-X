@@ -4,8 +4,9 @@
 
 #include "../../common/resource/sections/CDialogDef.h"
 #include "../../common/CLog.h"
-#include "../../common/CException.h"
-#include "../../common/CExpression.h"
+//#include "../../common/CException.h" // included in the precompiled header
+//#include "../../common/CExpression.h" // included in the precompiled header
+//#include "../../common/CScriptParserBufs.h" // included in the precompiled header via CExpression.h
 #include "../../common/CUOInstall.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
@@ -32,7 +33,7 @@ CItemMultiCustom::CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef) :
     m_rectDesignArea.SetRectEmpty();
     _iMaxPlane = -1;
 
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         ResetStructure();
         CommitChanges();
@@ -120,31 +121,31 @@ void CItemMultiCustom::BeginCustomize(CClient* pClientSrc, bool continueCustomiz
 
     if (IsTrigUsed(TRIGGER_HOUSEDESIGNBEGIN))
     {
-        CScriptTriggerArgs args;
-        args.m_pO1 = this;
-        args.m_iN1 = 1; // Redeed AddOns
-        args.m_iN2 = 0; // Transfer Lockdowns and Secured containers to Moving Crate.
-        args.m_iN3 = 2; // Eject everyone from house.
-        if (pChar->OnTrigger(CTRIG_HouseDesignBegin, pChar, &args) == TRIGRET_RET_TRUE)
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+        pScriptArgs->m_pO1 = this;
+        pScriptArgs->m_iN1 = 1; // Redeed AddOns
+        pScriptArgs->m_iN2 = 0; // Transfer Lockdowns and Secured containers to Moving Crate.
+        pScriptArgs->m_iN3 = 2; // Eject everyone from house.
+        if (pChar->OnTrigger(CTRIG_HouseDesignBegin, pScriptArgs, pChar) == TRIGRET_RET_TRUE)
         {
             EndCustomize(true);
             return;
         }
 
-        if (args.m_iN1 == 1)
+        if (pScriptArgs->m_iN1 == 1)
         {
             RedeedAddons();
         }
-        if (args.m_iN2 == 1)
+        if (pScriptArgs->m_iN2 == 1)
         {
             TransferSecuredToMovingCrate();
             TransferLockdownsToMovingCrate();
         }
-        if (args.m_iN3 == 1)
+        if (pScriptArgs->m_iN3 == 1)
         {
             EjectAll(pChar->GetUID());
         }
-        else if (args.m_iN3 == 2)
+        else if (pScriptArgs->m_iN3 == 2)
         {
             EjectAll();
         }
@@ -207,9 +208,9 @@ void CItemMultiCustom::EndCustomize(bool fForce)
     {
         if (IsTrigUsed(TRIGGER_HOUSEDESIGNEXIT))
         {
-            CScriptTriggerArgs Args(this);
-            Args.m_iN1 = fForce;
-            if (pChar->OnTrigger(CTRIG_HouseDesignExit, pChar, &Args) == TRIGRET_RET_TRUE && !fForce)
+            CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+            pScriptArgs->m_iN1 = fForce;
+            if (pChar->OnTrigger(CTRIG_HouseDesignExit, pScriptArgs, pChar) == TRIGRET_RET_TRUE && !fForce)
             {
                 BeginCustomize(pClient);
                 return;
@@ -279,8 +280,8 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     CChar* pCharClient = pClientSrc ? pClientSrc->GetChar() : nullptr;
     if (pCharClient)
     {
+        CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
         const bool fSendFullTrigger = IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMITITEM);
-        CScriptTriggerArgs Args;
         short iMaxZ = 0;
 
         for (auto it = m_designWorking.m_vectorComponents.begin(); it != m_designWorking.m_vectorComponents.end();)
@@ -288,15 +289,15 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
             const CMultiComponent* pComp = *it;
             if (fSendFullTrigger)
             {
-                Args.Clear();
-                Args.m_VarsLocal.SetNum("ID", pComp->m_item.m_wTileID);
-                Args.m_VarsLocal.SetNum("P.X", pComp->m_item.m_dx);
-                Args.m_VarsLocal.SetNum("P.Y", pComp->m_item.m_dy);
-                Args.m_VarsLocal.SetNum("P.Z", pComp->m_item.m_dz);
-                Args.m_VarsLocal.SetNum("VISIBLE", pComp->m_item.m_visible);
-		Args.m_pO1 = this;
+                pScriptArgs->Clear();
+                pScriptArgs->m_VarsLocal.SetNum("ID", pComp->m_item.m_wTileID);
+                pScriptArgs->m_VarsLocal.SetNum("P.X", pComp->m_item.m_dx);
+                pScriptArgs->m_VarsLocal.SetNum("P.Y", pComp->m_item.m_dy);
+                pScriptArgs->m_VarsLocal.SetNum("P.Z", pComp->m_item.m_dz);
+                pScriptArgs->m_VarsLocal.SetNum("VISIBLE", pComp->m_item.m_visible);
+                pScriptArgs->m_pO1 = this;
 
-                const TRIGRET_TYPE iRet = pCharClient->OnTrigger(CTRIG_HouseDesignCommitItem, pCharClient, &Args);
+                const TRIGRET_TYPE iRet = pCharClient->OnTrigger(CTRIG_HouseDesignCommitItem, pScriptArgs, pCharClient);
                 if (iRet == TRIGRET_RET_FALSE)
                 {
                     it = m_designWorking.m_vectorComponents.erase(it);
@@ -312,16 +313,16 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         }
         if (IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMIT))
         {
-            Args.Clear();
-            Args.m_iN1 = m_designMain.m_vectorComponents.size();
-            Args.m_iN2 = m_designWorking.m_vectorComponents.size();
-            Args.m_iN3 = m_designWorking.m_iRevision;
-            Args.m_pO1 = this;
-            Args.m_VarsLocal.SetNum("FIXTURES.OLD", GetFixtureCount(&m_designMain));
-            Args.m_VarsLocal.SetNum("FIXTURES.NEW", GetFixtureCount(&m_designWorking));
-            Args.m_VarsLocal.SetNum("MAXZ", iMaxZ);
+            pScriptArgs->Clear();
+            pScriptArgs->m_iN1 = m_designMain.m_vectorComponents.size();
+            pScriptArgs->m_iN2 = m_designWorking.m_vectorComponents.size();
+            pScriptArgs->m_iN3 = m_designWorking.m_iRevision;
+            pScriptArgs->m_pO1 = this;
+            pScriptArgs->m_VarsLocal.SetNum("FIXTURES.OLD", GetFixtureCount(&m_designMain));
+            pScriptArgs->m_VarsLocal.SetNum("FIXTURES.NEW", GetFixtureCount(&m_designWorking));
+            pScriptArgs->m_VarsLocal.SetNum("MAXZ", iMaxZ);
 
-            if (pCharClient->OnTrigger(CTRIG_HouseDesignCommit, pCharClient, &Args) == TRIGRET_RET_TRUE)
+            if (pCharClient->OnTrigger(CTRIG_HouseDesignCommit, pScriptArgs, pCharClient) == TRIGRET_RET_TRUE)
                 return;
         }
     }
@@ -337,7 +338,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     CopyDesign(&m_designWorking, &m_designMain);
 
     const CPointMap ptMe = GetTopPoint();
-    if (g_Serv.IsLoading() || !ptMe.IsValidPoint())
+    if (g_Serv.IsLoadingGeneric() || !ptMe.IsValidPoint())
         return;
 
     // remove all existing dynamic item fixtures
@@ -460,7 +461,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, int16 x, in
     // fixtures are items that should be replaced by dynamic items
     const bool fFixture = (pItemBase->IsType(IT_DOOR) || pItemBase->IsType(IT_DOOR_LOCKED) || pItemBase->IsID_Door(id) || pItemBase->IsType(IT_TELEPAD));
 
-    if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoadingGeneric())
     {
         if (!IsValidItem(id, pClientSrc, false))
         {
@@ -551,7 +552,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, int16 x, in
     m_designWorking.m_vectorComponents.emplace_back(pComponent);
     ++m_designWorking.m_iRevision;
 
-    if (!g_Serv.IsLoading()) // quick fix, change it to execute only on customize mode
+    if (!g_Serv.IsLoadingGeneric()) // quick fix, change it to execute only on customize mode
     {
         CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
         ASSERT(pMovingCrate);
@@ -962,6 +963,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
             int iItemCount = 0;
             int iMaxIndex = 0;
 
+            memset(wPlaneBuffer, 0, sizeof(wPlaneBuffer));
             for (const CMultiComponent* pComp : pDesign->m_vectorComponents)
             {
                 const uchar uiCompPlane = GetPlane(pComp);
@@ -1840,7 +1842,7 @@ bool CItemMultiCustom::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CItemMultiCustom::r_LoadVal");
     EXC_TRY("LoadVal");
 
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoadingGeneric())
     {
         if (s.IsKey("COMP"))
         {

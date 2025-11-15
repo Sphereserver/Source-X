@@ -3,10 +3,8 @@
 #include "PingServer.h"
 
 
-static PingServer s_PingServer;
-
 // run the thread in RealTime as we need pings to be responded to ASAP
-PingServer::PingServer() : AbstractSphereThread("PingServer", ThreadPriority::RealTime)
+PingServer::PingServer() : AbstractSphereThread("T_PingServer", ThreadPriority::RealTime)
 {
 	m_profile.EnableProfile(PROFILE_NETWORK_RX);
 	m_profile.EnableProfile(PROFILE_NETWORK_TX);

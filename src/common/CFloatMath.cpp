@@ -5,75 +5,75 @@
 #include "../game/CServerConfig.h"
 #include "../sphere/threads.h"
 #include "sphere_library/CSRand.h"
-#include "CExpression.h"
+//#include "CExpression.h" // included in the precompiled header
 #include "CLog.h"
 #include "CFloatMath.h"
 
 
-CSString CFloatMath::FloatMath(lpctstr& Expr)
+CSString CFloatMath::FloatMath(lpctstr& ptcRefExpr)
 {
 	ADDTOCALLSTACK("CFloatMath::FloatMath");
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
-	snprintf(szReal, VARDEF_FLOAT_MAXBUFFERSIZE, "%f", MakeFloatMath(Expr));
+    snprintf(szReal, VARDEF_FLOAT_MAXBUFFERSIZE, "%f", MakeFloatMath(ptcRefExpr));
 	return CSString(szReal);
 }
 
 
 static thread_local short int _iReentrant_Count = 0;
 
-realtype CFloatMath::MakeFloatMath( lpctstr & Expr )
+realtype CFloatMath::MakeFloatMath(lpctstr & ptcRefExpr )
 {
 	ADDTOCALLSTACK("CFloatMath::MakeFloatMath");
-	if ( ! Expr )
+    if ( ! ptcRefExpr )
 		return 0;
 
-	GETNONWHITESPACE( Expr );
+    GETNONWHITESPACE( ptcRefExpr );
 
 	++_iReentrant_Count;
 	if ( _iReentrant_Count > 128 )
 	{
-		DEBUG_WARN(( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", Expr ));
+        DEBUG_WARN(( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", ptcRefExpr ));
 		--_iReentrant_Count;
 		return 0;
 	}
 	//DEBUG_ERR(("Expr: '%s' GetSingle(Expr) '%f' GetValMath(GetSingle(Expr), Expr) '%f'\n",Expr,GetSingle(Expr),GetValMath(GetSingle(Expr), Expr)));
-	realtype dVal = GetValMath(GetSingle(Expr), Expr);
+    realtype dVal = GetValMath(GetSingle(ptcRefExpr), ptcRefExpr);
 	--_iReentrant_Count;
 	return dVal;
 }
 
-realtype CFloatMath::GetValMath( realtype dVal, lpctstr & pExpr )
+realtype CFloatMath::GetValMath(realtype dVal, lpctstr & ptcRefExpr )
 {
 	ADDTOCALLSTACK("CFloatMath::GetValMath");
 	//DEBUG_ERR(("GetValMath  dVal %f  pExpr %s\n",dVal,pExpr));
-	GETNONWHITESPACE(pExpr);
+    GETNONWHITESPACE(ptcRefExpr);
 
 	// Look for math type operator.
-	switch ( pExpr[0] )
+    switch ( ptcRefExpr[0] )
 	{
 		case '\0':
 			break;
 		case ')':  // expression end markers.
 		case '}':
 		case ']':
-			++pExpr;	// consume this.
+            ++ptcRefExpr;	// consume this.
 			break;
 		case '+':
-			++pExpr;
-			dVal += MakeFloatMath( pExpr );
+            ++ptcRefExpr;
+            dVal += MakeFloatMath( ptcRefExpr );
 			break;
 		case '-':
-			++pExpr;
-			dVal -= MakeFloatMath( pExpr );
+            ++ptcRefExpr;
+            dVal -= MakeFloatMath( ptcRefExpr );
 			break;
 		case '*':
-			++pExpr;
-			dVal *= MakeFloatMath( pExpr );
+            ++ptcRefExpr;
+            dVal *= MakeFloatMath( ptcRefExpr );
 			break;
 		case '/':
-			++pExpr;
+            ++ptcRefExpr;
 			{
-				realtype dTempVal = MakeFloatMath( pExpr );
+                realtype dTempVal = MakeFloatMath( ptcRefExpr );
 				if ( ! dTempVal )
 				{
 					g_Log.EventError("Evaluating float math: Divide by 0\n");
@@ -83,21 +83,21 @@ realtype CFloatMath::GetValMath( realtype dVal, lpctstr & pExpr )
 			}
 			break;
 		case '!':
-			++pExpr;
-			if ( pExpr[0] != '=' )
+            ++ptcRefExpr;
+            if ( ptcRefExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
-			++pExpr;
-			dVal = ( dVal != MakeFloatMath( pExpr ));
+            ++ptcRefExpr;
+            dVal = ( dVal != MakeFloatMath( ptcRefExpr ));
 			break;
 		case '=': // boolean
-			while ( pExpr[0] == '=' )
-				++pExpr;
-			dVal = ( dVal == MakeFloatMath( pExpr ));
+            while ( ptcRefExpr[0] == '=' )
+                ++ptcRefExpr;
+            dVal = ( dVal == MakeFloatMath( ptcRefExpr ));
 			break;
 		case '@':
-			++pExpr;
+            ++ptcRefExpr;
 			{
-				realtype dTempVal = MakeFloatMath( pExpr );
+                realtype dTempVal = MakeFloatMath( ptcRefExpr );
 				if ( (dVal == 0) && (dTempVal <= 0) )
 				{
 					DEBUG_ERR(( "Float_MakeFloatMath: Power of zero with zero or negative exponent is undefined\n" ));
@@ -109,81 +109,81 @@ realtype CFloatMath::GetValMath( realtype dVal, lpctstr & pExpr )
 			break;
 		//Following operations are not allowed with Double
 		case '|':
-			++pExpr;
-			if ( pExpr[0] == '|' )	// boolean ?
+            ++ptcRefExpr;
+            if ( ptcRefExpr[0] == '|' )	// boolean ?
 			{
-				++pExpr;
-				dVal = ( MakeFloatMath( pExpr ) || dVal );
+                ++ptcRefExpr;
+                dVal = ( MakeFloatMath( ptcRefExpr ) || dVal );
 			}
 			else	// bitwise
 				DEBUG_ERR(("Operator '%s' is not allowed with floats.\n","|"));
 			break;
 		case '&':
-			++pExpr;
-			if ( pExpr[0] == '&' )	// boolean ?
+            ++ptcRefExpr;
+            if ( ptcRefExpr[0] == '&' )	// boolean ?
 			{
-				++pExpr;
-				dVal = ( MakeFloatMath( pExpr ) && dVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
+                ++ptcRefExpr;
+                dVal = ( MakeFloatMath( ptcRefExpr ) && dVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
 				DEBUG_ERR(("Operator '%s' is not allowed with floats.\n","&"));
 			break;
 		case '%':
-			++pExpr;
+            ++ptcRefExpr;
 			DEBUG_ERR(("Operator '%s' is not allowed with floats.\n","%"));
 			break;
 		case '^':
-			++pExpr;
+            ++ptcRefExpr;
 			DEBUG_ERR(("Operator '%s' is not allowed with floats.\n","^"));
 			break;
 		case '>': // boolean
-			++pExpr;
-			if ( pExpr[0] == '=' )	// boolean ?
+            ++ptcRefExpr;
+            if ( ptcRefExpr[0] == '=' )	// boolean ?
 			{
-				++pExpr;
-				dVal = ( dVal >= MakeFloatMath( pExpr ));
+                ++ptcRefExpr;
+                dVal = ( dVal >= MakeFloatMath( ptcRefExpr ));
 			}
-			else if ( pExpr[0] == '>' )	// shift
+            else if ( ptcRefExpr[0] == '>' )	// shift
 			{
-				++pExpr;
+                ++ptcRefExpr;
 				DEBUG_ERR(("Operator '%s' is not allowed with floats.\n",">>"));
 			}
 			else
 			{
-				dVal = ( dVal > MakeFloatMath( pExpr ));
+                dVal = ( dVal > MakeFloatMath( ptcRefExpr ));
 			}
 			break;
 		case '<': // boolean
-			++pExpr;
-			if ( pExpr[0] == '=' )	// boolean ?
+            ++ptcRefExpr;
+            if ( ptcRefExpr[0] == '=' )	// boolean ?
 			{
-				++pExpr;
-				dVal = ( dVal <= MakeFloatMath( pExpr ));
+                ++ptcRefExpr;
+                dVal = ( dVal <= MakeFloatMath( ptcRefExpr ));
 			}
-			else if ( pExpr[0] == '<' )	// shift
+            else if ( ptcRefExpr[0] == '<' )	// shift
 			{
-				++pExpr;
+                ++ptcRefExpr;
 				DEBUG_ERR(("Operator '%s' is not allowed with floats.\n","<<"));
 			}
 			else
 			{
-				dVal = ( dVal < MakeFloatMath( pExpr ));
+                dVal = ( dVal < MakeFloatMath( ptcRefExpr ));
 			}
 			break;
 	}
 	return dVal;
 }
 
-realtype CFloatMath::GetSingle( lpctstr & pArgs )
+realtype CFloatMath::GetSingle( lpctstr & ptcRefArgs )
 {
 	ADDTOCALLSTACK("CFloatMath::GetSingle");
-	//DEBUG_ERR(("GetSingle  pArgs %s\n",pArgs));
-	GETNONWHITESPACE( pArgs );
-	const size_t uiArgsCopySize = strlen(pArgs) + 1;
-	char * pArgsCopy = new char[uiArgsCopySize];
-	Str_CopyLimitNull(pArgsCopy, pArgs, uiArgsCopySize);
+    //DEBUG_ERR(("GetSingle  ptcRefArgs %s\n",ptcRefArgs));
+    GETNONWHITESPACE( ptcRefArgs );
+    const size_t uiArgsCopySize = strlen(ptcRefArgs) + 1;
+    char * ptcRefArgsCopy = new char[uiArgsCopySize];
+    Str_CopyLimitNull(ptcRefArgsCopy, ptcRefArgs, uiArgsCopySize);
 	/*bool IsNum = true; // Old Ellessar's code without support for negative numbers
-	for( char ch = tolower(*pArgs); ch; ch = tolower(*(++pArgs)) )
+    for( char ch = tolower(*ptcRefArgs); ch; ch = tolower(*(++ptcRefArgs)) )
 	{
 		if (( IsDigit( ch ) ) || ( ch == '.' ) || ( ch == ',' ))
 			continue;
@@ -195,7 +195,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 		break;
 	}*/
 	bool IsNum = false;
-	for (tchar ch = static_cast<tchar>(tolower(*pArgs)); ch; ch = static_cast<tchar>(tolower(*(++pArgs))))
+    for (tchar ch = static_cast<tchar>(tolower(*ptcRefArgs)); ch; ch = static_cast<tchar>(tolower(*(++ptcRefArgs))))
     {
         if (( IsDigit( ch ) ) || ( ch == '.' ) || ( ch == ',' ))
         {
@@ -213,53 +213,53 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 	if ( IsNum )
 	{
 		char * pEnd;
-		realtype ret = strtod(pArgsCopy,&pEnd);
-		//DEBUG_ERR(("IsNum: '%d' pArgsCopy '%s' Ret: '%f'\n",IsNum,pArgsCopy,strtod(pArgsCopy,&pEnd)));
-		delete[] pArgsCopy;
+        realtype ret = strtod(ptcRefArgsCopy,&pEnd);
+        //DEBUG_ERR(("IsNum: '%d' ptcRefArgsCopy '%s' Ret: '%f'\n",IsNum,ptcRefArgsCopy,strtod(ptcRefArgsCopy,&pEnd)));
+        delete[] ptcRefArgsCopy;
 		return( ret );
 	}
-	delete[] pArgsCopy;
-	switch ( pArgs[0] )
+    delete[] ptcRefArgsCopy;
+    switch ( ptcRefArgs[0] )
 	{
 		case '{':
-		//	++pArgs;
-		//	return( GetRangeNumber( pArgs ));
+        //	++ptcRefArgs;
+        //	return( GetRangeNumber( ptcRefArgs ));
 		case '[':
 		case '(': // Parse out a sub expression.
-			++pArgs;
-			return( MakeFloatMath( pArgs ));
+            ++ptcRefArgs;
+            return( MakeFloatMath( ptcRefArgs ));
 		case '+':
-			++pArgs;
+            ++ptcRefArgs;
 			break;
 		case '-':
-			++pArgs;
-			return( -GetSingle( pArgs ));
+            ++ptcRefArgs;
+            return( -GetSingle( ptcRefArgs ));
 		case '~':	// Bitwise not.
-			++pArgs;
+            ++ptcRefArgs;
 			DEBUG_ERR(("Operator '~' is not allowed with floats.\n"));
 			return 0;
 		case '!':	// boolean not.
-			++pArgs;
-			if ( pArgs[0] == '=' )  // odd condition such as (!=x) which is always true of course.
+            ++ptcRefArgs;
+            if ( ptcRefArgs[0] == '=' )  // odd condition such as (!=x) which is always true of course.
 			{
-				++pArgs;		// so just skip it. and compare it to 0
-				return( GetSingle( pArgs ));
+                ++ptcRefArgs;		// so just skip it. and compare it to 0
+                return( GetSingle( ptcRefArgs ));
 			}
-			return( !GetSingle( pArgs ));
+            return( !GetSingle( ptcRefArgs ));
 		case ';':	// seperate field.
 		case ',':	// seperate field.
 		case '\0':
 			return 0;
 	}
-	INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pArgs, sm_IntrinsicFunctions, ARRAY_COUNT(sm_IntrinsicFunctions)-1 );
+    INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( ptcRefArgs, sm_IntrinsicFunctions, ARRAY_COUNT(sm_IntrinsicFunctions)-1 );
 	if ( iIntrinsic >= 0 )
 	{
 		size_t iLen = strlen(sm_IntrinsicFunctions[iIntrinsic]);
-        if ( strchr("( ", pArgs[iLen]) )
+        if ( strchr("( ", ptcRefArgs[iLen]) )
 		{
-			pArgs += (iLen + 1);
-			tchar * pArgsNext;
-			Str_Parse( const_cast<tchar*>(pArgs), &(pArgsNext), ")" );
+            ptcRefArgs += (iLen + 1);
+            tchar * ptcRefArgsNext;
+            Str_Parse( const_cast<tchar*>(ptcRefArgs), &(ptcRefArgsNext), ")" );
 
 			tchar * ppCmd[5];
 			realtype rResult;
@@ -271,10 +271,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 			{
 				case INTRINSIC_ID:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						rResult = ResGetIndex(int(MakeFloatMath(pArgs))); // ResGetIndex
+                        rResult = ResGetIndex(int(MakeFloatMath(ptcRefArgs))); // ResGetIndex
 					}
 					else
 					{
@@ -286,7 +286,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
                 case INTRINSIC_MAX:
                 {
-                    iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
                     if ( iCount < 2 )
                         rResult = 0;
                     else
@@ -302,7 +302,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
                 case INTRINSIC_MIN:
                 {
-                    iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
                     if ( iCount < 2 )
                         rResult = 0;
                     else
@@ -318,7 +318,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_LOGARITHM:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 3, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 3, "," );
 					if ( iCount < 1 )
 					{
 						rResult = 0;
@@ -362,10 +362,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_NAPIERPOW:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						rResult = exp(MakeFloatMath(pArgs));
+                        rResult = exp(MakeFloatMath(ptcRefArgs));
 					}
 					else
 					{
@@ -379,9 +379,9 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 				{
 					iCount = 0;
 
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
-						realtype dTosquare = MakeFloatMath(pArgs);
+                        realtype dTosquare = MakeFloatMath(ptcRefArgs);
 
 						if (dTosquare >= 0)
 						{
@@ -405,10 +405,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_SIN:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						realtype dArgument = MakeFloatMath(pArgs);
+                        realtype dArgument = MakeFloatMath(ptcRefArgs);
 						rResult = sin(dArgument * M_PI / 180);
 					}
 					else
@@ -421,10 +421,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_ARCSIN:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						realtype dArgument = MakeFloatMath(pArgs);
+                        realtype dArgument = MakeFloatMath(ptcRefArgs);
 						rResult = asin(dArgument) * 180 / M_PI;
 					}
 					else
@@ -437,10 +437,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_COS:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						realtype dArgument = MakeFloatMath(pArgs);
+                        realtype dArgument = MakeFloatMath(ptcRefArgs);
 						rResult = cos(dArgument * M_PI / 180);
 					}
 					else
@@ -453,10 +453,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_ARCCOS:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						realtype dArgument = MakeFloatMath(pArgs);
+                        realtype dArgument = MakeFloatMath(ptcRefArgs);
 						rResult = acos(dArgument) * 180 / M_PI;
 					}
 					else
@@ -469,10 +469,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_TAN:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						realtype dArgument = MakeFloatMath(pArgs);
+                        realtype dArgument = MakeFloatMath(ptcRefArgs);
 						rResult = tan(dArgument * M_PI / 180);
 					}
 					else
@@ -485,10 +485,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_ARCTAN:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						realtype dArgument = MakeFloatMath(pArgs);
+                        realtype dArgument = MakeFloatMath(ptcRefArgs);
 						rResult = atan(dArgument) * 180 / M_PI;
 					}
 					else
@@ -502,7 +502,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_StrIndexOf:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 3, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 3, "," );
 					if ( iCount < 2 )
 						rResult = -1;
 					else
@@ -514,7 +514,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_STRMATCH:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						rResult = 0;
 					else
@@ -523,7 +523,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_STRREGEX:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						rResult = 0;
 					else
@@ -539,7 +539,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_RANDBELL:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						rResult = 0;
 					else
@@ -552,10 +552,10 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_STRASCII:
 				{
-					if ( *pArgs )
+                    if ( *ptcRefArgs )
 					{
 						iCount = 1;
-						rResult = pArgs[0];
+                        rResult = ptcRefArgs[0];
 					}
 					else
 					{
@@ -566,7 +566,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_RAND:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
 					if ( iCount <= 0 )
 						rResult = 0;
 					else
@@ -586,7 +586,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_STRCMP:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						rResult = 1;
 					else
@@ -595,7 +595,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 
 				case INTRINSIC_STRCMPI:
 				{
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						rResult = 1;
 					else
@@ -605,26 +605,26 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 				case INTRINSIC_STRLEN:
 				{
 					iCount = 1;
-					rResult = (realtype)strlen(pArgs);
+                    rResult = (realtype)strlen(ptcRefArgs);
 				} break;
 
 				case INTRINSIC_ISOBSCENE:
 				{
 					iCount = 1;
-					rResult = g_Cfg.IsObscene( pArgs );
+                    rResult = g_Cfg.IsObscene( ptcRefArgs );
 				} break;
 
 				case INTRINSIC_ISNUMBER:
 				{
 					iCount = 1;
-                    SKIP_NONNUM( pArgs );
-                    rResult = IsStrNumeric( pArgs );
+                    SKIP_NONNUM( ptcRefArgs );
+                    rResult = IsStrNumeric( ptcRefArgs );
 				} break;
 
 				case INTRINSIC_QVAL:
 				{
 					// Here is handled the intrinsic QVAL form: QVAL(VALUE1,VALUE2,LESSTHAN,EQUAL,GREATERTHAN)
-					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 5, "," );
+                    iCount = Str_ParseCmds( const_cast<tchar*>(ptcRefArgs), ppCmd, 5, "," );
 					if (iCount < 3)
 					{
 						rResult = 0;
@@ -659,7 +659,7 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 					break;
 			}
 
-			pArgs = pArgsNext;
+            ptcRefArgs = ptcRefArgsNext;
 
 			if ( iCount <= 0 )
 			{
@@ -672,13 +672,18 @@ realtype CFloatMath::GetSingle( lpctstr & pArgs )
 			}
 		}
 	}
-	llong llVal;
-	if ( g_Exp.m_VarGlobals.GetParseVal( pArgs, &llVal ) )
-		return (int)llVal;
-	if ( g_Exp.m_VarResDefs.GetParseVal( pArgs, &llVal ) )
-		return (int)llVal;
-	if ( g_Exp.m_VarDefs.GetParseVal( pArgs, &llVal ) )
-			return (int)llVal;
+
+    auto gReader = g_ExprGlobals.mtEngineLockedReader();
+    int64 iVal;
+    // VAR.
+    if ( gReader->m_VarGlobals.GetParseVal( ptcRefArgs, &iVal ) )
+        return static_cast<realtype>(static_cast<int32>(iVal));
+    // RESDEF.
+    if ( gReader->m_VarResDefs.GetParseVal( ptcRefArgs, &iVal ) )
+        return static_cast<realtype>(static_cast<int32>(iVal));
+    // DEF.
+    if ( gReader->m_VarDefs.GetParseVal( ptcRefArgs, &iVal ) )
+            return static_cast<realtype>(static_cast<int32>(iVal));
 	return 0;
 }
 

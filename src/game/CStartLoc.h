@@ -19,7 +19,7 @@ public:
 		m_sArea(pszArea), iClilocDescription(1149559)
 	{}
 	~CStartLoc() noexcept = default;
-	
+
 	CStartLoc(const CStartLoc& copy) = delete;
 	CStartLoc& operator=(const CStartLoc& other) = delete;
 };
