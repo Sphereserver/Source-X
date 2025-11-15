@@ -154,7 +154,7 @@ public:
 	CTeleport * GetTeleport( const CPointMap & pt ) const;
 	bool AddTeleport( CTeleport * pTeleport );
 
-    bool IsFlagSet( dword dwFlag ) const noexcept {
+    constexpr bool IsFlagSet( dword dwFlag ) const noexcept {
         return (m_dwFlags & dwFlag);
     }
 

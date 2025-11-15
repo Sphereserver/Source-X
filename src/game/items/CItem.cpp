@@ -863,7 +863,7 @@ int CItem::FixWeirdness()
 			}
             else
             {
-                DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), (dword)(m_uidLink)));
+                g_Log.EventError("GC: Object '%s' has Bad Link to UID 0%" PRIx32 ".\n", GetName(), m_uidLink.GetObjUID());
                 m_uidLink.InitUID();
                 iResultCode = 0x2205;
                 return iResultCode;	// get rid of it.
@@ -3479,12 +3479,13 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_morep.m_z = s.GetArgCVal();
 			break;
 		case IC_P:
-			// Loading or import ONLY ! others use the r_Verb
+            // Loading or import ONLY ! others use CObjBase::r_Verb
 			if ( ! IsDisconnected() && ! IsItemInContainer() )
 				return false;
 			else
 			{
-				// Will be placed in the world later.
+                // Will be placed in the world later (in CItem::r_Load):
+                //  since we are loading the world, the parent region might not be created/"realized" yet.
 				CPointMap pt;
 				pt.Read( s.GetArgStr());
                 if (pt.IsValidPoint())
@@ -3520,13 +3521,16 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 bool CItem::r_Load( CScript & s ) // Load an item from script
 {
 	ADDTOCALLSTACK("CItem::r_Load");
-	CScriptObj::r_Load( s );
 
-	if ( GetContainer() == nullptr )
-	{
+    CScriptObj::r_Load( s );
+
+    if ( GetContainer() == nullptr )
+    {
         // Actually place the item into the world.
         if ( GetTopPoint().IsCharValid())
+        {
 			MoveToUpdate( GetTopPoint());
+        }
 	}
 
 	int iResultCode = CObjBase::IsWeird();

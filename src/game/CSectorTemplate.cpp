@@ -209,7 +209,7 @@ void CSectorBase::SetAdjacentSectors()
         if ((iAdjY < 0) || (iAdjY >= iMaxY))
             continue;
 
-        const int iAdjIndex = m_index + ((iAdjX * iMaxX) + iAdjY);
+        const int iAdjIndex = CSectorList::CalcSectorIndex(iMaxX, iAdjX, iAdjY);
         if ((iAdjIndex < 0) || (iAdjIndex > iMaxSectors))
             continue;
 
@@ -297,8 +297,8 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 	// REGION_TYPE_ROOM => RES_ROOM = NPC House areas only = CRegion.
 	// REGION_TYPE_MULTI => RES_WORLDITEM = UID linked types in general = CRegionWorld
 
-	size_t iQty = m_RegionLinks.size();
-	for ( size_t i = 0; i < iQty; ++i )
+    const size_t uiQty = m_RegionLinks.size();
+    for ( size_t i = 0; i < uiQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -340,8 +340,8 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks *pRLinks ) const
 {
 	//ADDTOCALLSTACK_DEBUG("CSectorBase::GetRegions");  // Called very frequently
-	size_t iQty = m_RegionLinks.size();
-	for ( size_t i = 0; i < iQty; ++i )
+    const size_t uiQty = m_RegionLinks.size();
+    for ( size_t i = 0; i < uiQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -400,9 +400,9 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 	//  according to the old rules.
 	ASSERT(pRegionNew);
     ASSERT( pRegionNew->IsOverlapped(GetRectWorldUnits()) );
-	size_t iQty = m_RegionLinks.size();
+    const size_t uiQty = m_RegionLinks.size();
 
-	for ( size_t i = 0; i < iQty; ++i )
+    for ( size_t i = 0; i < uiQty; ++i )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
@@ -423,17 +423,11 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 
 			// it is accurate in the TRUE case.
 			if ( pRegionNew->IsInside(pRegion))
-            {
-                g_Log.EventWarn("IsInside.\n");
 				continue;
-            }
 
 			// keep item (multi) regions on top
 			if ( pRegion->GetResourceID().IsUIDItem() && !pRegionNew->GetResourceID().IsUIDItem() )
-            {
-                g_Log.EventWarn("TopItem.\n");
                 continue;
-            }
 
 			// must insert before this.
 			m_RegionLinks.emplace(m_RegionLinks.begin() + i, pRegionNew);
@@ -450,7 +444,7 @@ CTeleport * CSectorBase::GetTeleport( const CPointMap & pt ) const
 	ADDTOCALLSTACK("CSectorBase::GetTeleport");
 	// Any teleports here at this point ?
 
-	size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
+    const size_t i = m_Teleports.FindKey(pt.GetPointSortIndex());
 	if ( i == sl::scont_bad_index() )
 		return nullptr;
 
@@ -469,7 +463,7 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	// NOTE: can't be 2 teleports from the same place !
 	// ASSERT( Teleport is actually in this sector !
 
-	size_t i = m_Teleports.FindKey( pTeleport->GetPointSortIndex());
+    const size_t i = m_Teleports.FindKey( pTeleport->GetPointSortIndex());
 	if ( i != sl::scont_bad_index() )
 	{
 		DEBUG_ERR(( "Conflicting teleport %s!\n", pTeleport->WriteUsed() ));

@@ -527,7 +527,7 @@ void AbstractThread::overwriteInternalThreadName(const char* name) noexcept
 void AbstractThread::start()
 {
     g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGF_CONSOLE_ONLY,
-        "Spawning new thread '%s' (0x% " PRIxSIZE_T ")...\n",
+        "Spawning new thread '%s' (AbstractThread* = 0x% " PRIxSIZE_T ")...\n",
         getName(), reinterpret_cast<void*>(this));
 
 #ifdef _WIN32
@@ -947,7 +947,7 @@ void AbstractSphereThread::printStackTrace() noexcept
     auto& stackInfo = (m_stackInfoCopy[0].functionName != nullptr) ? m_stackInfoCopy : m_stackInfo;
 
     g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-    g_Log.EventDebug(" ______ thread (id) name _____ |   # | _____________ function _____________ |\n");
+    g_Log.EventDebug(" _ thread (id) name _ |   # | _____________ function _____________ |\n");
 
     for (ssize_t i = 0; i < (ssize_t)ARRAY_COUNT(m_stackInfoCopy); ++i)
     {

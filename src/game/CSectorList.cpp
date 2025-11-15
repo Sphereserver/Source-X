@@ -3,9 +3,9 @@
 #include "CWorld.h"
 #include "CSectorList.h"
 
-CSectorList::CSectorList() : _SectorData{}
+CSectorList::CSectorList() :
+    _SectorData{}, _fInitialized(false)
 {
-	_fInitialized = false;
 }
 
 CSectorList::~CSectorList()
@@ -58,23 +58,24 @@ void CSectorList::Init()
         uint32 sector_shift = 0;
         for (uint sz = sd.iSectorSize; sz > 1; sz >>= 1)
             ++sector_shift;
-        sd.uiSectorDivShift = (uint16)sector_shift;
+        sd.uiSectorSizeDivShift = (uint16)sector_shift;
 
 
 		short iSectorX = 0, iSectorY = 0;
         for (int iSectorIndex = 0; iSectorIndex < iSectorQty; ++iSectorIndex)
 		{
-            // Map sectors are added in row-major order (fill every row for a column, then increment column index and fill its rows, and so on).
-            if (iSectorY >= iMaxY)
+            // Map sectors are ordered in row-major order:
+            //  consecutive elements from the same row are contiguous and the inner loop varies the column index.
+            if (iSectorX >= iMaxX)
             {
-                iSectorY = 0;
-                ++iSectorX;
+                iSectorX = 0;
+                ++iSectorY;
             }
 
 			CSector* pSector = &(sd._pSectors[iSectorIndex]);
 			pSector->Init(iSectorIndex, (uchar)iMap, iSectorX, iSectorY);
 
-            ++iSectorY;
+            ++iSectorX;
 		}
 
 	}
@@ -137,15 +138,13 @@ CSector* CSectorList::GetSectorByIndexUnchecked(int map, int index) const noexce
     // We call this method very often and from places we ASSUME have already checked that the map number is legit.
     //  (it's done in CWorldMap::GetSectorByIndex).
 
-    // Micro-optimization: Skip the function call and the if statement to avoid the possible cost of a branch misprediction.
+    // Micro-optimization: Skip the function call (with the call cost) and the if statement to avoid the possible cost of a branch misprediction.
     //if (!g_MapList.IsMapSupported(map) || !_SectorData[map]._pSectors)
     //	return nullptr;
     //if ((map < 0) || ((size_t)map < sizeof(_SectorData)) )
     //    return nullptr;
 
 	const MapSectorsData& sd = _SectorData[map];
-
-    //return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
     return (index < sd.iSectorQty) ? &(sd._pSectors.get()[index]) : nullptr;
 }
 
@@ -162,7 +161,7 @@ CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) cons
 
     // We know that sector sizes MUST be multiple of 2, so just use bit shifts.
     //const int xSectTest = (x / sd.iSectorSize), ySectTest = (y / sd.iSectorSize);
-    const int xSect = (x >> sd.uiSectorDivShift), ySect = (y >> sd.uiSectorDivShift);
+    const int xSect = (x >> sd.uiSectorSizeDivShift), ySect = (y >> sd.uiSectorSizeDivShift);
     //ASSERT(xSectTest == xSect);
     //ASSERT(ySectTest == ySect);
 
@@ -172,11 +171,11 @@ CSector* CSectorList::GetSectorByCoordsUnchecked(int map, short x, short y) cons
 	if ((xSect >= sd.iSectorColumns) || (ySect >= sd.iSectorRows))
 		return nullptr;
 
-    const int index = ((xSect * sd.iSectorRows) + ySect);
+    const int index = ((ySect * sd.iSectorColumns) + xSect);
     return (index < sd.iSectorQty) ? &(sd._pSectors[index]) : nullptr;
 #else
 */
-    const int index = ((xSect * sd.iSectorRows) + ySect);
+    const int index = ((ySect * sd.iSectorColumns) + xSect);
     DEBUG_ASSERT(index < sd.iSectorQty);
     return &(sd._pSectors[index]);
 //#endif
