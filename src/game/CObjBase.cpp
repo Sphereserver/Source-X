@@ -1962,7 +1962,9 @@ bool CObjBase::r_LoadVal( CScript & s )
 			SetName( s.GetArgStr());
             fResendTooltip = true;
 			break;
-		case OC_P:	// Must set the point via the CItem or CChar methods.
+        case OC_P:
+            // Need to use it in r_LoadVal only for server load stage.
+            // Must set the point/position via the CItem or CChar methods.
 			return false;
 		case OC_SPEED:
 		{

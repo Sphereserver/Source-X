@@ -42,6 +42,7 @@ public:
 
 CSReferenceCounted<CWorldSearch> CWorldSearchHolder::GetInstance(const CPointMap& pt, int iDist)    // static
 {
+    // Thread-unsafe!
     static CWorldSearchHolderImpl holder;
     return holder.GetOne(pt, iDist);
 }
@@ -87,6 +88,7 @@ void CWorldSearch::Reset(const CPointMap& pt, int iDist)
 
     _pt = pt;
     _iDist = iDist;
+
     _pSectorBase = _pSector = pt.GetSector();
     _rectSector.SetRect(
         pt.m_x - iDist,
@@ -94,6 +96,8 @@ void CWorldSearch::Reset(const CPointMap& pt, int iDist)
         pt.m_x + iDist + 1,
         pt.m_y + iDist + 1,
         pt.m_map);
+
+    _rectSectorIndexingHints = _rectSector.PrecomputeSectorIndexingHints();
 
     SetDistanceFunction();
 }
@@ -138,7 +142,8 @@ bool CWorldSearch::GetNextSector()
 
 	while (true)
 	{
-		_pSector = _rectSector.GetSector(_iSectorCur++);
+        _pSector = _rectSector.GetSectorAtIndexWithHints(_iSectorCur, _rectSectorIndexingHints);
+        _iSectorCur += 1;
 		if (_pSector == nullptr)
 			return false;	// done searching.
 		if (_pSectorBase == _pSector)

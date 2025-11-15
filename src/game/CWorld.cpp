@@ -615,20 +615,18 @@ void CWorldThread::GarbageCollection_UIDs()
 			int iResultCode = FixObj(pObj, i);
 			if ( iResultCode )
 			{
-				// FixObj directly calls Delete method
-				//if (pObj->_IsBeingDeleted() || pObj->IsDeleted())
-				//{
+                if (pObj->_IsBeingDeleted() || pObj->IsDeleted())
+                {
 					// Do an immediate delete here instead of Delete()
 					delete pObj;
 					FreeUID(i);	// Get rid of junk uid if all fails..
-				//}
-				/*
-				else
+                }
+                else
 				{
+                    // FixObj doesn't always delete the item on failure/result code != 0.
 					pObj->Delete();
 				}
-				*/
-				continue;
+                continue;
 			}
 
 			if ((iCount & 0x1FF ) == 0)

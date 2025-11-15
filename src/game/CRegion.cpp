@@ -50,13 +50,15 @@ void CRegion::UnRealizeRegion()
 
 	for ( int i = 0; ; ++i )
 	{
-		CSector * pSector = GetSector(i);
+		CSector * pSector = GetSectorAtIndex(i);
 		if ( pSector == nullptr )
 			break;
+
 		// Does the rect overlap ?
         if ( ! IsOverlapped( pSector->GetRectWorldUnits()))
 			continue;
-		if ( pSector->UnLinkRegion( this ))
+
+        if ( pSector->UnLinkRegion( this ))
 			--m_iLinkedSectors;
 	}
 
@@ -78,6 +80,7 @@ bool CRegion::RealizeRegion()
     const CSectorList& pSectors = CSectorList::Get();
     for ( int i = 0, iMax = pSectors.GetMapSectorDataUnchecked(m_pt.m_map).iSectorQty; i < iMax; ++i )
 	{
+        // TODO: maybe provide a hint on where to start checking, instead of checking every sector in the map...
         CSector *pSector = pSectors.GetSectorByIndexUnchecked(m_pt.m_map, i);
 
         if ( pSector && IsOverlapped(pSector->GetRectWorldUnits()) )
@@ -323,7 +326,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
             int iClients = 0;
             for (int i = 0; ; ++i)
             {
-                CSector	*pSector = GetSector(i);
+                CSector	*pSector = GetSectorAtIndex(i);
                 if (pSector == nullptr)
                     break;
                 iClients += pSector->m_Chars_Active.GetClientsNumber();
@@ -850,7 +853,8 @@ bool CRegion::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * 
 	bool fRet = false;
 	for ( int i=0; ; ++i )
 	{
-		CSector * pSector = GetSector(i);
+        // TODO: optimization, use GetSectorAtIndexWithHints instead.
+		CSector * pSector = GetSectorAtIndex(i);
 		if ( pSector == nullptr )
 			break;
 

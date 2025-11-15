@@ -1513,7 +1513,7 @@ bool CScriptObj::Execute_Call(CScript& s, CScriptTriggerArgsPtr const& pScriptAr
 
 	// Parse object references, src.* is not parsed
 	// by r_GetRef so do it manually
-	r_GetRef(const_cast<lpctstr&>(static_cast<lptstr&>(argRaw)), pRef);
+    r_GetRef(const_cast<lpctstr&>(reinterpret_cast<lptstr&>(argRaw)), pRef);
 	if (!strnicmp("SRC.", argRaw, 4))
 	{
 		argRaw += 4;

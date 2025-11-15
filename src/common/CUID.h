@@ -81,7 +81,7 @@ public:
         return IsChar(m_dwInternalVal);
     }
 
-    inline constexpr bool IsObjDisconnected() const noexcept // Called very frequently
+    constexpr bool IsObjDisconnected() const noexcept // Called very frequently
     {
         // Not in the game world for some reason.
         return ((m_dwInternalVal & (UID_F_RESOURCE | UID_O_DISCONNECT)) == UID_O_DISCONNECT);
