@@ -322,6 +322,7 @@ set(spherelibrary_S
     src/common/sphere_library/CSTime.cpp
     src/common/sphere_library/CSWindow.cpp
     src/common/sphere_library/smutex.cpp
+    src/common/sphere_library/snetwork.cpp
     src/common/sphere_library/sresetevents.cpp
     src/common/sphere_library/sstring.cpp
     src/common/sphere_library/sstringobjs.cpp
@@ -351,6 +352,7 @@ set(spherelibrary_H
     src/common/sphere_library/sfastmath.h
     src/common/sphere_library/smap.h
     src/common/sphere_library/smutex.h
+    src/common/sphere_library/snetwork.h
     src/common/sphere_library/sobjpool.h
     src/common/sphere_library/squeues.h
     src/common/sphere_library/sresetevents.h
