@@ -4161,7 +4161,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
     if (m_CanMask)
-        s.WriteKeyVal("CANMASK", m_CanMask);
+        s.WriteKeyHex("CANMASK", m_CanMask);
 
     const CREID_TYPE iDispID = GetDispID();
     if (iDispID != GetID())

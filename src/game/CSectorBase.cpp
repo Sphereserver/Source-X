@@ -6,7 +6,7 @@
 #include "items/CItemShip.h"
 #include "CSectorList.h"
 #include "CWorldGameTime.h"
-#include "CSectorTemplate.h"
+#include "CSectorBase.h"
 #include <algorithm>
 
 
@@ -196,11 +196,13 @@ void CSectorBase::SetAdjacentSectors()
         {-1, -1}    // NW
     };
 
+    //int nAdj = 0;
     for (int i = 0; i < (int)DIR_QTY; ++i)
     {
         // out of bounds checks
         // These checks are needed or the negative iAdjX/iAdjY can lead to a wrong index if the sector is near the map borders.
-        // For instance m_index = 0, iAdjY > 0 and iAdjX < 0, SW check, the index start from the first column of the second row and it goes back to the first row because there is no SW sector
+        // For instance m_index = 0, iAdjY > 0 and iAdjX < 0, SW check, the index start from the first column of the second row
+        //  and it goes back to the first row because there is no SW sector.
         const int iAdjX = m_BasePointSectUnits.m_x + _xyDir[i].x;
         if ((iAdjX < 0) || (iAdjX >= iMaxX))
             continue;
@@ -213,10 +215,12 @@ void CSectorBase::SetAdjacentSectors()
         if ((iAdjIndex < 0) || (iAdjIndex > iMaxSectors))
             continue;
 
+        //++ nAdj;
         _ppAdjacentSectors[(DIR_TYPE)i] = pSectors.GetSectorByIndexUnchecked(m_BasePointSectUnits.m_map, iAdjIndex);
-
-        //g_Log.EventDebug("Sector %d, Setting adjacent sector %d.\n", m_index, iAdjIndex);
     }
+    //if (nAdj < 8)
+    //    g_Log.EventDebug("Map %d Sector %d with sect coords %d,%d has only %d adjacent sectors.\n",
+    //        (int)m_BasePointSectUnits.m_map, m_index, (int)m_BasePointSectUnits.m_x, (int)m_BasePointSectUnits.m_y, nAdj);
 }
 
 CSector *CSectorBase::_GetAdjacentSector(DIR_TYPE dir) const

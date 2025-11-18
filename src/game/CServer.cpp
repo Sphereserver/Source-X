@@ -12,6 +12,7 @@
 #endif
 
 #include "../common/sphere_library/sstring.h"
+#include "../common/sphere_library/snetwork.h"
 #include "../common/crypto/CCryptoKeyCalc.h"
 //#include "../common/CException.h" // included in the precompiled header
 //#include "../common/CExpression.h" // included in the precompiled header
@@ -2578,32 +2579,68 @@ bool CServer::SocketsInit() // Initialize sockets
 	// What are we listing our port as to the world.
 	// Tell the admin what we know.
 
-	tchar szName[ SPHERE_MAX_PATH ];
-	struct hostent * pHost = nullptr;
+    tchar ptcName[SPHERE_MAX_PATH]{};
 
-	int iRet = gethostname(szName, sizeof(szName));
+    // gethostname:
+    /*  Put the name of the current host in no more than LEN bytes of NAME.
+        The result is null-terminated if LEN is large enough for the full
+        name and the terminator.
+        The OS hostname from gethostname is the local system’s own configured name (often a short label)
+        returned directly by the kernel/OS without consulting DNS  */
+    int iRet = gethostname(ptcName, sizeof(ptcName) - 1);
 	if ( iRet )
-		Str_CopyLimitNull(szName, m_ip.GetAddrStr(), sizeof(szName));
+    {
+        // Some error retrieving the current host name. Just print my ip from the ini.
+        Str_CopyLimitNull(ptcName, m_ip.GetAddrStr(), sizeof(ptcName));
+    }
 	else
 	{
-		pHost = gethostbyname(szName);
-		if ( pHost && pHost->h_addr && pHost->h_name && pHost->h_name[0] )
-			Str_CopyLimitNull(szName, pHost->h_name, SPHERE_MAX_PATH);
-	}
+        // Successfully retrieved the local hostname via gethostname.
+        // Now resolve the IP for the name (DNS lookup).
 
-	g_Log.Event( LOGM_INIT, "Server started on hostname '%s'\n", szName);
-	if ( !iRet && pHost && pHost->h_addr )
-	{
-		for ( size_t i = 0; pHost->h_addr_list[i] != nullptr; i++ )
-		{
-			CSocketAddressIP ip;
-			ip.SetAddrIP(*((dword*)(pHost->h_addr_list[i]))); // 0.1.2.3
-			if ( !m_ip.IsLocalAddr() && !m_ip.IsSameIP(ip) )
-				continue;
-			g_Log.Event(LOGM_INIT, "Monitoring IP %s:%d\n", ip.GetAddrStr(), m_ip.GetPort());
-		}
-	}
-	return true;
+        // Old code:
+        // (gethostbyname use is discouraged and it is a synchronous/blocking thread-unsafe function with no timeout parameter and IPv4 support only).
+        //pHost = gethostbyname(szName);
+        //if ( pHost && pHost->h_addr && pHost->h_name && pHost->h_name[0] )
+        //    Str_CopyLimitNull(szName, pHost->h_name, SPHERE_MAX_PATH);
+
+        // TODO: If needed, add a INI setting for this, instead of hardcoding the timeout.
+        // Why is the timeout needed? Because when you are connected to a network which doesn't actually work, you'll
+        //  be stuck waiting until the hardcoded gethostbyname timeout elapses and finally the function will return failure.
+        constexpr int kiTimeoutMs = 5000;
+        g_Log.Event(LOGM_INIT, "Querying hostname '%s' address with timeout %d milliseconds...\n", ptcName, kiTimeoutMs);
+
+        //ptcName[sizeof(ptcName)-1] = '\0';
+        std::pair<bool, sl::ResolveResultV4> res = sl::hostname_resolve_with_timeout_v4(ptcName, kiTimeoutMs);
+        if (res.first)
+        {
+            // Prefer canonical DNS name if provided (same role as hostent->h_name)
+            if (!res.second.canon.empty())
+            {
+                /* The canonical name is the “true” DNS name for a host after alias resolution, typically an FQDN,
+                    and DNS represents aliases using CNAME records that point an alias hostname to the canonical target name.
+                    If “www.example.com” is a CNAME alias to “example.com,” the canonical name for “www.example.com” will be “example.com,” */
+                Str_CopyLimitNull(ptcName, res.second.canon.c_str(), SPHERE_MAX_PATH);
+            }
+
+            // Log IPv4 addresses like iterating hostent->h_addr_list
+            for (size_t i = 0; i < res.second.addrs_v4.size(); ++i)
+            {
+                CSocketAddressIP ip;
+                ip.SetAddrIP(static_cast<dword>(res.second.addrs_v4[i])); // network byte order, same as h_addr_list
+                if (!m_ip.IsLocalAddr() && !m_ip.IsSameIP(ip))
+                    continue;
+
+                g_Log.Event(LOGM_INIT, "Hostname lookup successful. Monitoring IP %s:%d\n", ip.GetAddrStr(), m_ip.GetPort());
+            }
+        }
+        else
+        {
+            // If timeout/failure: keep ptcName from gethostname and skip enumeration.
+            g_Log.Event(LOGM_INIT, "Hostname lookup failed. Monitoring ini-provided IP %s:%d\n", m_ip.GetAddrStr(), m_ip.GetPort());
+        }
+    }
+    return true;
 }
 
 void CServer::SocketsClose()
