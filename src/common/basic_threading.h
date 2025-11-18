@@ -94,7 +94,7 @@
                 success_acquire_ = true; \
                 break; \
             } catch (const std::system_error& e_) { \
-                STDERR_LOG("[File '%s', line %d, function '%s']. Failed to acquire lock on attempt %u. Exc msg: '%s'.\n", \
+                stderrLog("[File '%s', line %d, function '%s']. Failed to acquire lock on attempt %u. Exc msg: '%s'.\n", \
                            __FILE__, __LINE__, __func__, spin_attempt_ + 1, e_.what()); \
             } \
         } \

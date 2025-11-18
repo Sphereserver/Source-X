@@ -306,7 +306,8 @@ tchar * CScriptKeyAlloc::_GetKeyBufferRaw()
 	//ADDTOCALLSTACK_DEBUG("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
 
-    m_TextBuf = CScriptParserBufs::GetScriptKeyArgBufPtr();
+    if (!m_TextBuf)
+        m_TextBuf = CScriptParserBufs::GetScriptKeyArgBufPtr();
 	m_pszKey = m_pszArg = GetKeyBuffer();
 	m_pszKey[0] = '\0';
 
@@ -319,6 +320,11 @@ tchar * CScriptKeyAlloc::GetKeyBufferRaw()
     MT_UNIQUE_LOCK_RETURN(this, CScriptKeyAlloc::_GetKeyBufferRaw());
 }
 */
+
+void CScriptKeyAlloc::_FreeKeyBuffer()
+{
+    m_TextBuf.reset();
+}
 
 tchar * CScriptKeyAlloc::GetKeyBuffer()
 {
@@ -795,12 +801,16 @@ void CScript::_Close()
 	ADDTOCALLSTACK("CScript::_Close");
 	// EndSection();
     CCacheableScriptFile::_Close();
+
+    // If i don't have to use this to read/parse stuff anymore (example: after i have cached a script file), just free the text buffer.
+    // It will be created again if necessary by _GetKeyBufferRaw().
+    m_TextBuf.reset();
 }
 void CScript::Close()
 {
     ADDTOCALLSTACK("CScript::Close");
-    // EndSection();
-    CCacheableScriptFile::Close();
+    MT_UNIQUE_LOCK_SET(this);
+    CScript::_Close();
 }
 
 void CScript::CloseForce()
@@ -827,7 +837,7 @@ CScriptLineContext CScript::_GetContext() const
 	LineContext.m_iOffset = _GetPosition();
 	return LineContext;
     */
-    return {m_iLineNum, _GetPosition()};
+    return {_GetPosition(), m_iLineNum};
 }
 
 CScriptLineContext CScript::GetContext() const
@@ -839,7 +849,8 @@ CScriptLineContext CScript::GetContext() const
     LineContext.m_iOffset = _GetPosition();
     return LineContext;
     */
-    return {m_iLineNum, _GetPosition()};
+    auto ret = CScriptLineContext(_GetPosition(), m_iLineNum);
+    return ret;
 }
 
 bool CScript::WriteSection( lpctstr ptcSection, ... )

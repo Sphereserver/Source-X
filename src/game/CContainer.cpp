@@ -35,7 +35,7 @@ void CContainer::_GoSleep()
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		//std::unique_lock<std::shared_mutex> lock(pItem->MT_CMUTEX);
-        if (!pItem->TickableState())
+        if (!pItem->TickableStateBase())
 		{
 			pItem->GoSleep();
 		}

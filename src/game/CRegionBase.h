@@ -23,11 +23,7 @@ public:
 	{
 		return m_rectUnion.IsRectEmpty();
 	}
-	void EmptyRegion()
-	{
-		m_rectUnion.SetRectEmpty();
-        m_Rects.clear();
-	}
+    void EmptyRegion();
 	size_t GetRegionRectCount() const;
     CRectMap & GetRegionRect(size_t i);
 	const CRectMap & GetRegionRect(size_t i) const;
@@ -43,18 +39,21 @@ public:
 	bool IsOverlapped( const CRegionBase * pRegionTest ) const;
 	bool IsEqualRegion( const CRegionBase * pRegionTest ) const;
 
-	inline CSector * GetSector( int i ) const // get all the sectors that make up this rect.
-	{
-		return m_rectUnion.GetSector(i);
+    [[nodiscard]]
+    inline CSector * GetSectorAtIndex( int i ) const noexcept {
+        return m_rectUnion.GetSectorAtIndex(i);
 	}
+    [[nodiscard]]
+    inline CSector * GetSectorAtIndexWithHints( int i, CRect::SectIndexingHints hints ) const noexcept {
+        return m_rectUnion.GetSectorAtIndexWithHints(i, std::move(hints));
+    }
 
 public:
 	CRegionBase();
 	virtual ~CRegionBase() = default;
 
-private:
-	CRegionBase(const CRegionBase& copy);
-	CRegionBase& operator=(const CRegionBase& other);
+    CRegionBase(const CRegionBase& copy) = delete;
+    CRegionBase& operator=(const CRegionBase& other) = delete;
 };
 
 

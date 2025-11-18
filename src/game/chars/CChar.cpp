@@ -3872,7 +3872,7 @@ bool CChar::r_LoadVal( CScript & s )
             _uiStatFlag = (_uiStatFlag & uiFlagsNoChange) | (uiNewFlags & ~uiFlagsNoChange);
             if (uiCurFlags != uiNewFlags)
             {
-                const bool fDoFullUpdate = (uiCurFlags & uiFlagsRequireFullUpdate) != (uiNewFlags & uiFlagsRequireFullUpdate);
+                const bool fDoFullUpdate =  HAS_FLAGS_ANY(uiCurFlags, uiFlagsRequireFullUpdate);
                 NotoSave_Update(fDoFullUpdate);
             }
 			break;
@@ -4161,7 +4161,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
     if (m_CanMask)
-        s.WriteKeyVal("CANMASK", m_CanMask);
+        s.WriteKeyHex("CANMASK", m_CanMask);
 
     const CREID_TYPE iDispID = GetDispID();
     if (iDispID != GetID())

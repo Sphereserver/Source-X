@@ -21,6 +21,17 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	int m_bottom;	// South ( NON INCLUSIVE !)
 	int m_map;
 
+
+    struct SectIndexingHints
+    {
+        int iBaseSectorIndex;       // Sector index at origin, top-left x,y coords of the rect
+        int iRectWidth;             // x1 - x: how much x units (columns) are inside the rect
+        int iRectHeight;            // y1 - y: how much y units (rows) are inside the rect
+        int iRectSectorCount;       // How much sectors are inside this rect
+        int iRectMapSectorCols;  // Number of sectors columns (X) per each row in the map (so, map max X)
+    };
+
+
     void SetRectEmpty() noexcept;
 
     CRect() noexcept;
@@ -32,16 +43,16 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
     CRect& operator = (const CRect&) = default;
     const CRect& operator += (const CRect& rect);
 
-    constexpr inline int GetWidth() const noexcept
+    constexpr int GetWidth() const noexcept
     {
         return( m_right - m_left );
     }
-    constexpr inline int GetHeight() const noexcept
+    constexpr int GetHeight() const noexcept
     {
         return( m_bottom - m_top );
     }
 
-    constexpr inline bool IsRectEmpty() const noexcept
+    constexpr bool IsRectEmpty() const noexcept
     {
         return( m_left >= m_right || m_top >= m_bottom );
     }
@@ -49,11 +60,11 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	void OffsetRect( int x, int y );
 	void UnionPoint( int x, int y );
 
-    constexpr inline bool IsInsideX( int x ) const noexcept
+    constexpr bool IsInsideX( int x ) const noexcept
 	{	// non-inclusive
 		return( x >= m_left && x < m_right );
 	}
-    constexpr inline bool IsInsideY( int y ) const noexcept
+    constexpr bool IsInsideY( int y ) const noexcept
 	{	// non-inclusive
 		return( y >= m_top && y < m_bottom );
 	}
@@ -74,7 +85,13 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 
     CPointBase GetCenter() const noexcept;
     CPointBase GetRectCorner( DIR_TYPE dir ) const;
-    CSector * GetSector( int i ) const noexcept;	// ge all the sectors that make up this rect.
+
+    // get all the sectors that make up this rect.
+    CSector * GetSectorAtIndex( int i ) const noexcept;
+
+    // get all the sectors that make up this rect (using cached precomputed data, that's faster if the use case allows its usage).
+    CSector * GetSectorAtIndexWithHints(int i, SectIndexingHints hints) const noexcept;
+    SectIndexingHints PrecomputeSectorIndexingHints() const noexcept;
 
 	void SetRect( int left, int top, int right, int bottom, int map ) noexcept;
 

@@ -94,7 +94,7 @@ CClient::~CClient() noexcept
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
 	if ( GetConnectType() != CONNECT_GAME )
     {
-        EXC_TRYSUB("m_iPendingConnectionRequests")
+        EXC_TRYSUB("m_iPendingConnectionRequests");
 
         ASSERT(history.m_iPendingConnectionRequests > 0);
 		-- history.m_iPendingConnectionRequests;

@@ -24,7 +24,7 @@ jobs:
 
     permissions:
       contents: read
-      actions: read
+      actions: write
 
     steps:
     - name: Checkout repository

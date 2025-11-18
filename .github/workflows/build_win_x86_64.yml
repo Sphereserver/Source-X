@@ -23,7 +23,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
-      actions: read
+      actions: write
 
     steps:
     - name: Checkout repository

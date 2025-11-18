@@ -10,6 +10,12 @@ CRegionBase::CRegionBase()
 	m_rectUnion.SetRectEmpty();
 }
 
+void CRegionBase::EmptyRegion()
+{
+    m_rectUnion.SetRectEmpty();
+    m_Rects.clear();
+}
+
 size_t CRegionBase::GetRegionRectCount() const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRectCount");
@@ -130,7 +136,7 @@ bool CRegionBase::IsOverlapped( const CRectMap & rect ) const noexcept
         return false;
 
     const uint iQty = (uint)m_Rects.size();
-	if ( iQty <= 0 )
+    if ( iQty <= 0 )    // TODOC: Usually happens for a multi-bound CRegion?
 		return true;
 
     // Avoid the cost of the IsOverlapped function call and just slap the content here.

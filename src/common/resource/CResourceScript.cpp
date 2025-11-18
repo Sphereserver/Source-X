@@ -10,6 +10,16 @@
 #include "../CLog.h"
 #include "CResourceScript.h"
 
+CResourceScript::CResourceScript(lpctstr pszFileName) // explicit
+{
+    _Init();
+    _SetFilePath(pszFileName);
+}
+
+CResourceScript::CResourceScript()
+{
+    _Init();
+}
 
 bool CResourceScript::_CheckForChange()
 {
@@ -45,6 +55,11 @@ bool CResourceScript::CheckForChange()
 {
     ADDTOCALLSTACK("CResourceScript::CheckForChange");
     MT_UNIQUE_LOCK_RETURN(this, CResourceScript::_CheckForChange());
+}
+
+bool CResourceScript::IsFirstCheck() const noexcept
+{
+    return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());
 }
 
 void CResourceScript::ReSync()
@@ -99,8 +114,8 @@ void CResourceScript::Close()
     // Close it later when we know it has not been used for a bit.
     if ( ! IsFileOpen())
         return;
-    --m_iOpenCount;
 
+    -- m_iOpenCount;
     if ( ! m_iOpenCount )
     {
         // Just leave it open for caching purposes

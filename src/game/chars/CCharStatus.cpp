@@ -920,6 +920,9 @@ CChar * CChar::GetOwner() const
 
 bool CChar::CanDress(const CChar* pChar) const
 {
+    // Self dressing always allowed
+    if (pChar == this)
+        return true;
     if (IsPriv(PRIV_GM) && (GetPrivLevel() > pChar->GetPrivLevel() || GetPrivLevel() == PLEVEL_Owner))
         return true;
     else if (g_Cfg.m_fCanUndressPets && pChar->IsOwnedBy(this))
