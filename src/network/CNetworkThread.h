@@ -29,7 +29,7 @@ private:
     ThreadSafeQueue<CNetState*> m_assignQueue;	// queue of states waiting to be taken by this thread
 
     CNetworkInput m_input;		// handles data input
-    CNetworkOutput m_output;		// handles data output
+    CNetworkOutput m_output;	// handles data output
 
 public:
     size_t id(void) const { return m_id; }							// network thread #
@@ -77,6 +77,7 @@ public:
     virtual void onStart(void);
     virtual void tick(void);
 
+    void init();
     void flushAllClients(void);			// flush all output
 
 private:

@@ -286,56 +286,94 @@ CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 	return pt;
 }
 
-CSector * CRect::GetSector( int i ) const noexcept	// ge all the sectors that make up this rect.
+// get the n-th sector that makes up this rect.
+CSector * CRect::GetSectorAtIndex( int i ) const noexcept
 {
-	//ADDTOCALLSTACK_DEBUG("CRect::GetSector");
-	// get all the CSector(s) that overlap this rect.
-	// RETURN: nullptr = no more
+    //ADDTOCALLSTACK_DEBUG("CRect::GetSectorAtIndexWithHints");
+    // get all the CSector(s) that overlap this rect.
+    // RETURN: nullptr = no more
 
-	// Align new rect.
+    if (g_MapList.IsMapSupported(m_map) == false)
+        return nullptr;
+
+    SectIndexingHints hints = PrecomputeSectorIndexingHints();
+    return GetSectorAtIndexWithHints(i, hints);
+}
+
+// get the n-th sector that makes up this rect.
+CSector * CRect::GetSectorAtIndexWithHints(int i, SectIndexingHints hints) const noexcept
+{
+    //if (g_MapList.IsMapSupported(m_map) == false)
+    //    return nullptr;
+
     const CSectorList &pSectors = CSectorList::Get();
-    const MapSectorsData& sd = pSectors.GetMapSectorData(m_map);
-    const int iSectorSize = sd.iSectorSize;
-    const int iSectorCols = sd.iSectorColumns;
-    const uint uiSectorShift = sd.uiSectorDivShift;
 
-    CRectMap rect;
-    rect.m_left     =  m_left   & ~(iSectorSize-1);         // aligns the left boundary down to the nearest multiple of iSectorSize.
-    rect.m_right    = (m_right  |  (iSectorSize-1)) + 1;    // rounds the right boundary up to cover the full last sector.
-    rect.m_top      =  m_top    & ~(iSectorSize-1);
-    rect.m_bottom   = (m_bottom |  (iSectorSize-1)) + 1;
-    rect.m_map      = m_map;
-	rect.NormalizeRectMax();
+    if (i >= hints.iRectSectorCount)
+        return i ? nullptr : pSectors.GetSectorByIndexUnchecked(m_map, hints.iBaseSectorIndex);
+
+    // From now on we need only height and sectorcols. We'll use precomputed data when checking
+    //  incremental sector indices for the same CRect.
+
+    // Column-major
+    //    col = i / height
+    //    row = i % height
+    //    indexoffset = col * sectorRows + row
+    // Row-major
+    const int row = i / hints.iRectWidth;
+    const int col = i % hints.iRectWidth;
+    const int iSectorIndexOffset = CSectorList::CalcSectorIndex(hints.iRectMapSectorCols, col, row);
+    //const int iSectorIndexOffset = row * hints.iRectMapSectorCols + col;
+    const int iSectorIndex = hints.iBaseSectorIndex + iSectorIndexOffset;
+    return pSectors.GetSectorByIndexUnchecked(m_map, iSectorIndex);
+}
+
+CRect::SectIndexingHints
+CRect::PrecomputeSectorIndexingHints() const noexcept
+{
+    const CSectorList &pSectors = CSectorList::Get();
+    const MapSectorsData* pSecData = pSectors.GetMapSectorData(m_map);
+    //ASSERT(pSecData);
+
+    const int iSectorSize = pSecData->iSectorSize;
+    const int iSectorCols = pSecData->iSectorColumns;
+    const uint uiSectorShift = pSecData->uiSectorSizeDivShift;
+
+    // Align new rect.
+    // CRectMap(int left, int top, int right, int bottom, int map)
+    CRectMap rect(
+        (m_left   & ~(iSectorSize-1)),        // aligns the left boundary down to the nearest multiple of iSectorSize.
+        (m_top    & ~(iSectorSize-1)),
+        (m_right  |  (iSectorSize-1)) + 1,    // rounds the right boundary up to cover the full last sector.
+        (m_bottom |  (iSectorSize-1)) + 1,
+        m_map
+        );
+    //g_Log.EventDebug("Precomputing hints. Starting rect: %d,%d, %d,%d. Aligned rect: %d,%d, %d,%d.\n",
+    //    m_left, m_top, m_right, m_bottom, rect.m_left, rect.m_top, rect.m_right, rect.m_bottom);
+    rect.NormalizeRectMax();
 
     //const int width = (rect.GetWidth()) / iSectorSize;
     //const int height = (rect.GetHeight()) / iSectorSize;
+    // Bit-shifting is faster than plain division. We can use it because sector size is guaranteed to be a multiple of 2.
     const int width  = rect.GetWidth()  >> uiSectorShift;
     const int height = rect.GetHeight() >> uiSectorShift;
 
 #ifdef _DEBUG
-	ASSERT(width <= iSectorCols);
-    const int iSectorRows = sd.iSectorRows;
-	ASSERT(height <= iSectorRows);
+    const int iSectorRows = pSecData->iSectorRows;
+    ASSERT(width <= iSectorCols);
+    ASSERT(height <= iSectorRows);
 #endif
-
-    /*
-	const int iBase = (( rect.m_top / iSectorSize) * iSectorCols) + ( rect.m_left / iSectorSize );
-	if ( i >= ( height * width ))
-        return i ? nullptr : pSectors->GetSector(m_map, iBase);
-
-	const int indexoffset = (( i / width ) * iSectorCols) + ( i % width );
-	return pSectors->GetSector(m_map, iBase + indexoffset);
-    */
 
     const int baseRow = rect.m_top  >> uiSectorShift;
     const int baseCol = rect.m_left >> uiSectorShift;
-    const int iBase = (baseRow * iSectorCols) + baseCol;
+    const int iBase = CSectorList::CalcSectorIndex(iSectorCols, baseCol, baseRow);
 
-    if (i >= (height * width))
-        return i ? nullptr : pSectors.GetSectorByIndex(m_map, iBase);
-
-    const int indexoffset = ((i / width) * iSectorCols) + (i % width);
-    return pSectors.GetSectorByIndex(m_map, iBase + indexoffset);
+    return SectIndexingHints {
+        .iBaseSectorIndex = iBase,
+        .iRectWidth = width,
+        .iRectHeight = height,
+        .iRectSectorCount = width * height,
+        .iRectMapSectorCols = iSectorCols
+    };
 }
 
 
@@ -362,18 +400,6 @@ bool CRectMap::IsValid() const noexcept
     const int iSizeY = GetHeight();
     return (iSizeX >= 0 && iSizeX <= g_MapList.GetMapSizeX(m_map)) &&
            (iSizeY >= 0 && iSizeY <= g_MapList.GetMapSizeY(m_map));
-
-    /*
-    const int iSizeX = GetWidth();
-    if ( (iSizeX < 0) || (iSizeX > g_MapList.GetMapSizeX(m_map)) )
-        return false;
-    const int iSizeY = GetHeight();
-    return !( (iSizeY < 0) || (iSizeY > g_MapList.GetMapSizeY(m_map)) );
-    */
-
-    //if ( (iSizeY < 0) || (iSizeY > g_MapList.GetMapSizeY(m_map)) )
-    //    return false;
-    //return true;
 }
 
 void CRectMap::NormalizeRect() noexcept

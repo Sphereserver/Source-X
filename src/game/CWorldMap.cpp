@@ -230,14 +230,21 @@ CSector* CWorldMap::GetSectorByIndex(int map, int index) noexcept // static
 {
     //ADDTOCALLSTACK_DEBUG("CWorldMap::GetSectorByIndex(index)");
 
-    const int iMapSectorQty = g_World._Sectors.GetMapSectorData(map).iSectorQty;
+    const MapSectorsData * pSd = g_World._Sectors.GetMapSectorData(map);
+    if (!pSd)
+    {
+        g_Log.EventError("Requested sector #%d for unsupported map #%d.\n", index, map);
+        return nullptr;
+    }
+
+    const int iMapSectorQty = pSd->iSectorQty;
 	if (index >= iMapSectorQty)
 	{
 		g_Log.EventError("Unsupported sector #%d for map #%d specified.\n", index, map);
 		return nullptr;
 	}
 
-    return g_World._Sectors.GetSectorByIndex(map, index);
+    return g_World._Sectors.GetSectorByIndexUnchecked(map, index);
 }
 
 CSector* CWorldMap::GetSectorByCoordsUnchecked(int map, short x, short y) noexcept // static
@@ -293,7 +300,10 @@ const CUOMapMeter* CWorldMap::GetMapMeter(const CPointMap& pt) // static
 	if (!pMapBlock)
 		return nullptr;
 
-	return pMapBlock->GetTerrain(UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+    return pMapBlock->GetTerrain(
+        UO_BLOCK_OFFSET(pt.m_x),
+        UO_BLOCK_OFFSET(pt.m_y)
+        );
 }
 
 std::optional<CUOMapMeter> CWorldMap::GetMapMeterAdjusted(const CPointMap& pt)
@@ -385,7 +395,8 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
             pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pItem->GetDispID()));
 			if ( ! pDupeDef )
 			{
-				g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n",pItem->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);
+                g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n",
+                    pItem->GetDispID(),ptTest.m_x,ptTest.m_y,ptTest.m_z);
 				Height = pItemDef->GetHeight();
 			}
 			else
@@ -398,10 +409,11 @@ CPointMap CWorldMap::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int 
 			continue;
 
 		//if ( ((( pItem->GetTopPoint().m_z - pt.m_z ) > 0) && ( pItem->GetTopPoint().m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - pItem->GetTopPoint().m_z ) < 0) && (( pt.m_z - pItem->GetTopPoint().m_z ) < - RESOURCE_Z_CHECK )))
-		if ( ((( z - pt.m_z ) > 0) && ( z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - z ) < 0) && (( pt.m_z - z ) < - RESOURCE_Z_CHECK )))
+        if ( ((( z - pt.m_z ) > 0) && ( z - pt.m_z ) > RESOURCE_Z_CHECK ) ||
+            ((( pt.m_z - z ) < 0) && (( pt.m_z - z ) < - RESOURCE_Z_CHECK )) )
 			continue;
 
-		if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && ( fElem[0] )))
+        if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && fElem[0]))
 			continue;
 
 		ptElem[0] = ptItemTop;

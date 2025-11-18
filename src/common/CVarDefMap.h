@@ -169,8 +169,8 @@ public:
     CVarDefCont * CheckParseKey( lpctstr pszArgs ) const;
 	CVarDefCont * GetParseKey_Advance( lpctstr & pArgs ) const;
     inline CVarDefCont * GetParseKey( lpctstr pArgs ) const;
-    bool GetParseVal_Advance( lpctstr & pArgs, llong * pllVal ) const;
-    inline bool GetParseVal( lpctstr pArgs, llong * plVal ) const;
+    bool GetParseVal_Advance( lpctstr & pArgs, int64 * piVal ) const;
+    inline bool GetParseVal( lpctstr pArgs, int64 * plVal ) const;
 
 	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = nullptr ) const;
 	void ClearKeys(lpctstr mask = nullptr);
@@ -204,9 +204,9 @@ CVarDefCont * CVarDefMap::GetParseKey(lpctstr pArgs) const
     return GetParseKey_Advance(pArgs);
 }
 
-bool CVarDefMap::GetParseVal(lpctstr pArgs, llong * pllVal) const
+bool CVarDefMap::GetParseVal(lpctstr pArgs, int64 *piVal) const
 {
-    return GetParseVal_Advance(pArgs, pllVal);
+    return GetParseVal_Advance(pArgs, piVal);
 }
 
 CVarDefMap::iterator CVarDefMap::begin()                { return m_Container.begin();   }

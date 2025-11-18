@@ -1,10 +1,10 @@
 /**
-* @file CSectorTemplate.h
+* @file CSectorBase.h
 *
 */
 
-#ifndef _INC_CSECTORTEMPLATE_H
-#define _INC_CSECTORTEMPLATE_H
+#ifndef _INC_CSECTORBASE_H
+#define _INC_CSECTORBASE_H
 
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjSortArray.h"
@@ -100,8 +100,8 @@ class CSectorBase		// world sector
 
 protected:
     int	m_index;            // Sector index in the 'sector grid'
-    CPointBase m_BasePoint; // Sector coordinates in the 'sector grid'.
-    CRectMap   m_MapRect;   // Map area inside this sector.
+    CPointBase m_BasePointSectUnits; // Sector coordinates in the 'sector grid'.
+    CRectMap   m_MapRectWorldUnits;   // Map area inside this sector, in map coordinates.
 
 private:
     // TODO: store indices instead of pointers, to make the class smaller?
@@ -138,8 +138,10 @@ public:
 
 	// Location map units.
     int GetIndex() const noexcept               { return m_index; }
-    int GetMap() const noexcept                 { return m_BasePoint.m_map; }
-    constexpr inline const CRectMap& GetRect() const noexcept   { return m_MapRect; }
+    int GetMap() const noexcept                 { return m_BasePointSectUnits.m_map; }
+    CPointBase GetBasePointMapUnits() const noexcept;
+    constexpr const CPointBase& GetBasePointSectUnits() noexcept    { return m_BasePointSectUnits; }
+    constexpr const CRectMap& GetRectWorldUnits() const noexcept    { return m_MapRectWorldUnits; }
 
 	// CRegion
 	CRegion * GetRegion( const CPointBase & pt, dword dwType ) const;
@@ -152,7 +154,7 @@ public:
 	CTeleport * GetTeleport( const CPointMap & pt ) const;
 	bool AddTeleport( CTeleport * pTeleport );
 
-    bool IsFlagSet( dword dwFlag ) const noexcept {
+    constexpr bool IsFlagSet( dword dwFlag ) const noexcept {
         return (m_dwFlags & dwFlag);
     }
 
@@ -160,4 +162,4 @@ public:
 #define SECF_InstaSleep	0x00000002
 };
 
-#endif // _INC_CSECTORTEMPLATE_H
+#endif // _INC_CSECTORBASE_H

@@ -96,17 +96,6 @@ lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	nullptr
 };
 
-CPointBase::CPointBase() noexcept :
-	m_x(-1), m_y(-1), m_z(0), m_map(0)	// Same thing as calling InitPoint(), but without this extra cuntion call
-{
-	//InitPoint();
-}
-
-CPointBase::CPointBase(short x, short y, char z, uchar map) noexcept :
-	m_x(x), m_y(y), m_z(z), m_map(map)
-{
-}
-
 bool CPointBase::operator== ( const CPointBase & pt ) const noexcept
 {
 	return( m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z && m_map == pt.m_map );
