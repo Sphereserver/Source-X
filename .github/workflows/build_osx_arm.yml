@@ -23,7 +23,7 @@ jobs:
     runs-on: macos-15   # apple silicon
     permissions:
       contents: read
-      actions: read
+      actions: write
 
     env:
       CMAKE_GEN: Ninja
