@@ -721,13 +721,13 @@ effect_bounce:
 			if ( iDmgPhysical == 0 )		// if physical damage is not set, let's assume it as the remaining value
 				iDmgPhysical = 100 - (iDmgFire + iDmgCold + iDmgPoison + iDmgEnergy);
 
-			int iPhysicalDamage = iDmg * iDmgPhysical * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar));
-			int iFireDamage = iDmg * iDmgFire * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESFIRE, pBaseCCPChar));
-			int iColdDamage = iDmg * iDmgCold * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESCOLD, pBaseCCPChar));
-			int iPoisonDamage = iDmg * iDmgPoison * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESPOISON, pBaseCCPChar));
-			int iEnergyDamage = iDmg * iDmgEnergy * (100 - (int)GetPropNum(pCCPChar, PROPCH_RESENERGY, pBaseCCPChar));
+                int iPhysicalDamage = iDmg * iDmgPhysical * (100 - minimum((int)GetPropNum(pCCPChar, PROPCH_RESPHYSICAL, pBaseCCPChar), (int)GetPropNum(pCCPChar, PROPCH_RESPHYSICALMAX, pBaseCCPChar)));
+                int iFireDamage = iDmg * iDmgFire * (100 - minimum((int)GetPropNum(pCCPChar, PROPCH_RESFIRE, pBaseCCPChar), (int)GetPropNum(pCCPChar, PROPCH_RESFIREMAX, pBaseCCPChar)));
+                int iColdDamage = iDmg * iDmgCold * (100 - minimum((int)GetPropNum(pCCPChar, PROPCH_RESCOLD, pBaseCCPChar), (int)GetPropNum(pCCPChar, PROPCH_RESCOLDMAX, pBaseCCPChar)));
+                int iPoisonDamage = iDmg * iDmgPoison * (100 - minimum((int)GetPropNum(pCCPChar, PROPCH_RESPOISON, pBaseCCPChar), (int)GetPropNum(pCCPChar, PROPCH_RESPOISONMAX, pBaseCCPChar)));
+                int iEnergyDamage = iDmg * iDmgEnergy * (100 - minimum((int)GetPropNum(pCCPChar, PROPCH_RESENERGY, pBaseCCPChar), (int)GetPropNum(pCCPChar, PROPCH_RESENERGYMAX, pBaseCCPChar)));
 
-			iDmg = (iPhysicalDamage + iFireDamage + iColdDamage + iPoisonDamage + iEnergyDamage) / 10000;
+			    iDmg = (iPhysicalDamage + iFireDamage + iColdDamage + iPoisonDamage + iEnergyDamage) / 10000;
 		}
 		else
 		{
