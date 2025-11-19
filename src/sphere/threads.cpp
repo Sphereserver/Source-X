@@ -938,11 +938,10 @@ void AbstractSphereThread::printStackTrace() noexcept
     freezeCallStack(true);
 
     uint64_t threadId = // static_cast<uint64_t>(getId());
-    // Use reinterpret_cast because it will fail if the types are different and not just an alias.
 #if defined(_WIN32) || defined(__APPLE__)
-        reinterpret_cast<uint64_t>(getId() ? getId() : os_current_tid());
+        n_alias_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #else
-        reinterpret_cast<uint64_t>(getId() ? getId() : os_current_tid());
+        n_alias_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #endif
 
     const lpctstr threadName = getName();

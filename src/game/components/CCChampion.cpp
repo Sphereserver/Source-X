@@ -586,24 +586,24 @@ void CCChampion::InitializeLists()
     _MonstersList.clear();
     _CandleList.clear();
 
-    uchar ucPerc = 100 / _iLevelMax;
-    uchar ucMonsterTotal = 0;
-    uchar ucCandleTotal = 0;
+    uchar uiPerc = 100 / _iLevelMax;
+    uchar uiMonsterTotal = 0;
+    uchar uiCandleTotal = 0;
     for (uchar i = (_iLevelMax - 2); i > 0; --i)
     {
-        uchar ucMonster = (ucPerc / i) + (_iLevelMax - (i + 1));
-        _MonstersList.insert(_MonstersList.begin(), ucMonster); // Push the value from beginning.
-        ucMonsterTotal += ucMonster;
+        uchar uiMonster = (uiPerc / i) + (_iLevelMax - (i + 1));
+        _MonstersList.insert(_MonstersList.begin(), uiMonster); // Push the value from beginning.
+        uiMonsterTotal += uiMonster;
     }
-    _MonstersList.insert(_MonstersList.begin(), (100 - ucMonsterTotal)); // Push the left over as first element.
+    _MonstersList.insert(_MonstersList.begin(), (100 - uiMonsterTotal)); // Push the left over as first element.
 
     for (uchar i = (_iLevelMax - 1); i > 1; --i)
     {
-        uchar ucCandle = ((16 - ucCandleTotal) / i);
-        _CandleList.insert(_CandleList.begin(), ucCandle);
-        ucCandleTotal += ucCandle;
+        uchar uiCandle = ((16 - uiCandleTotal) / i);
+        _CandleList.insert(_CandleList.begin(), uiCandle);
+        uiCandleTotal += uiCandle;
     }
-    _CandleList.insert(_CandleList.begin(), (16 - ucCandleTotal));
+    _CandleList.insert(_CandleList.begin(), (16 - uiCandleTotal));
 }
 
 uchar CCChampion::GetCandlesCount()
@@ -656,7 +656,7 @@ void CCChampion::DelWhiteCandle(CANDLEDELREASON_TYPE reason)
 
     CItem* pCandle;
     CUID uidLastWhiteCandle = _pWhiteCandles.back();
-    if (pCandle = uidLastWhiteCandle.ItemFind())
+    if ((pCandle = uidLastWhiteCandle.ItemFind()))
     {
         if (IsTrigUsed(TRIGGER_DELWHITECANDLE))
         {
@@ -667,7 +667,7 @@ void CCChampion::DelWhiteCandle(CANDLEDELREASON_TYPE reason)
                 return;
         }
 
-        if (pCandle = uidLastWhiteCandle.ItemFind()) // Does the candle still exist after the trigger?
+        if ((pCandle = uidLastWhiteCandle.ItemFind())) // Does the candle still exist after the trigger?
             pCandle->Delete();
     }
     _pWhiteCandles.pop_back();
@@ -682,7 +682,7 @@ void CCChampion::DelRedCandle(CANDLEDELREASON_TYPE reason)
 
     CItem* pCandle;
     CUID uidLastRedCandle = _pRedCandles.back();
-    if (pCandle = uidLastRedCandle.ItemFind())
+    if ((pCandle = uidLastRedCandle.ItemFind()))
     {
         if (IsTrigUsed(TRIGGER_DELREDCANDLE))
         {
@@ -693,7 +693,7 @@ void CCChampion::DelRedCandle(CANDLEDELREASON_TYPE reason)
                 return;
         }
 
-        if (pCandle = uidLastRedCandle.ItemFind()) // Does the candle still exist after trigger?
+        if ((pCandle = uidLastRedCandle.ItemFind())) // Does the candle still exist after trigger?
             pCandle->Delete();
     }
     _pRedCandles.pop_back();
