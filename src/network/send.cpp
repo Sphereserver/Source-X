@@ -1938,11 +1938,13 @@ void PacketTradeAction::prepareUpdateLedger(const CItemContainer *container, dwo
  *
  *	Packet 0x70 : PacketEffect				displays a visual effect (NORMAL)
  *	Packet 0xC0 : PacketEffect				displays a hued visual effect (NORMAL)
+ *  Packet 0xc7 : PacketEffect              displays a particle effect in Enhanced Client (NORMAL)
  *
  *
  ***************************************************************************/
 // Non hued effect
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode) : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode)
+    : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect");
 
@@ -1952,7 +1954,8 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 }
 
 // Hued effect
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render) : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render)
+    : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(hued)");
 
@@ -1963,7 +1966,8 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 }
 
 // Particle effect
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type)
+    : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(particle)");
 

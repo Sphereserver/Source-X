@@ -145,6 +145,7 @@ jobs:
           name: Build-linux-x86
           merge-multiple: true
           run-id: ${{ github.run_id }}
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         env:
@@ -160,8 +161,8 @@ jobs:
     needs: linux-x86
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
     permissions:
-      contents: read
-      actions: write
+      contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:

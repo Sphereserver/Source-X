@@ -39,8 +39,13 @@
 
 /* Start global declarations */
 
-DummySphereThread* DummySphereThread::_instance = nullptr;
+// Generic.
 std::string g_sServerDescription;
+
+// Threading
+DummySphereThread* DummySphereThread::_instance = nullptr;
+std::atomic_bool sg_inStartup{true};
+std::atomic_bool sg_servClosing{false};
 
 // NOLINTNEXTLINE(clazy-non-pod-global-static)
 static GlobalInitializer g_GlobalInitializer;

@@ -296,12 +296,12 @@ CSector * CRect::GetSectorAtIndex( int i ) const noexcept
     if (g_MapList.IsMapSupported(m_map) == false)
         return nullptr;
 
-    SectIndexingHints hints = PrecomputeSectorIndexingHints();
+    SectIndexingHints_s hints = PrecomputeSectorIndexingHints();
     return GetSectorAtIndexWithHints(i, hints);
 }
 
 // get the n-th sector that makes up this rect.
-CSector * CRect::GetSectorAtIndexWithHints(int i, SectIndexingHints hints) const noexcept
+CSector * CRect::GetSectorAtIndexWithHints(int i, SectIndexingHints_s hints) const noexcept
 {
     //if (g_MapList.IsMapSupported(m_map) == false)
     //    return nullptr;
@@ -327,7 +327,7 @@ CSector * CRect::GetSectorAtIndexWithHints(int i, SectIndexingHints hints) const
     return pSectors.GetSectorByIndexUnchecked(m_map, iSectorIndex);
 }
 
-CRect::SectIndexingHints
+CRect::SectIndexingHints_s
 CRect::PrecomputeSectorIndexingHints() const noexcept
 {
     const CSectorList &pSectors = CSectorList::Get();
@@ -367,7 +367,7 @@ CRect::PrecomputeSectorIndexingHints() const noexcept
     const int baseCol = rect.m_left >> uiSectorShift;
     const int iBase = CSectorList::CalcSectorIndex(iSectorCols, baseCol, baseRow);
 
-    return SectIndexingHints {
+    return SectIndexingHints_s {
         .iBaseSectorIndex = iBase,
         .iRectWidth = width,
         .iRectHeight = height,
