@@ -320,7 +320,7 @@ constexpr void UnreferencedParameter([[maybe_unused]] T const& ) noexcept {
     static_assert(!std::is_nothrow_invocable_v<decltype(&_ClassType::_func), _ClassType __VA_OPT__(,) __VA_ARGS__>, #_func  " function should be noexcept!")
 
 // For unrecoverable/unloggable errors. Should be used almost *never*.
-#define STDERR_LOG(...)     fprintf(stderr, __VA_ARGS__); fflush(stderr)
+void stderrLog(lpctstr pszFormat, ...) noexcept  SPHERE_PRINTFARGS(1,2);
 
 
 /* Sanitizers utilities */

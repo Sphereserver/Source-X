@@ -5816,9 +5816,9 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_TickableState() const
+bool CChar::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CChar::_TickableState");
+    //ADDTOCALLSTACK_DEBUG("CChar::_TickableStateBase");
     EXC_TRY("Able to tick?");
 
     if (IsDisconnected())
@@ -5827,10 +5827,12 @@ bool CChar::_TickableState() const
         if (Skill_GetActive() == NPCACT_RIDDEN)
             return true;
 
-		return false;
+        //const std::optional<bool> fOverriding = _TickableStateOverride();
+        //return fOverriding.value_or(false);
+        return false;
 	}
 
-    return CObjBase::_TickableState();
+    return CObjBase::_TickableStateBase();
 
 	EXC_CATCH;
 
@@ -5880,21 +5882,13 @@ bool CChar::_OnTick()
 
 	EXC_SET_BLOCK("Can Tick?");
 
-    // This check shouldn't be needed, since it's already done in _CanTick, but we'll leave it here for now until further tests.
-    if (_IsSleeping() || IsDisconnected())
-	{
-        // In this cases, only mounted horses can still get a tick.
-        if (Skill_GetActive() != NPCACT_RIDDEN)
-            return true;
-	}
-
-    const bool fTickableState  = _TickableState();
+    const bool fTickableState  = _CanTick(false);
     const bool fSleeping       = _IsSleeping();
 
 //#ifdef _DEBUG
     if (!fTickableState || fSleeping)
     {
-        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual TickableState=%d, SleepingState=%d.\n",
+        g_Log.EventDebug("[Temporary msg] Char '%s' (UID=0x%" PRIx32 ") at P=%s is in the ticking list with unusual CanTick=%d, SleepingState=%d.\n",
                          GetName(), GetUID().GetObjUID(),
                          GetTopPoint().WriteUsed(),
                          (int)fTickableState, (int)fSleeping
@@ -5907,7 +5901,11 @@ bool CChar::_OnTick()
         // It can happen that i'm in the ticking list, but for various reasons right now i'm in a non-tickable state.
         // Among the reasons why i can't tick, though, there cannot be being in a sleeping state: when a char goes into sleeping state
         //  it should also be removed from the list (it happens in _GoSleep()).
-        ASSERT(!fSleeping);
+        if (!fSleeping) {
+            g_Log.EventDebug("[Temporary msg] CChar sleeping and not in tickable state but in the ticking list? Sector sleep status=%d.\n",
+                             (int)GetTopSector()->IsSleeping());
+        }
+        //ASSERT(!fSleeping);
 
 		if (GetTopSector()->IsSleeping() && !g_Rand.Get16ValFast(15))
 		{
@@ -5915,7 +5913,7 @@ bool CChar::_OnTick()
             //  will lead to an accumulation of npcs at the edge of the new sector.
 
 //#ifdef _DEBUG
-            g_Log.EventDebug("Sent to sleep (random), to be awaken alongside its sector.\n");
+            g_Log.EventDebug("[Temporary msg] Sent CChar to sleep (random), to be awaken alongside its sector.\n");
 //#endif
 
 			_SetTimeout(1);      //Make it tick after sector's awakening.

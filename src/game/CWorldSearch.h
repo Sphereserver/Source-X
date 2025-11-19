@@ -46,7 +46,7 @@ class CWorldSearch
 
     CSObjContRec** _ppCurContObjs;	// Array with a copy of the pointers to the objects inside the sector we are in searching right now.
     CObjBase* _pObj;			// The current object of interest.
-    size_t	_uiCurObjIndex;
+    size_t _uiCurObjIndex;
     size_t _uiObjArrayCapacity;
     size_t _uiObjArraySize;
 
@@ -54,6 +54,7 @@ class CWorldSearch
     CSector* _pSectorBase;		// Don't search the center sector 2 times.
     CSector* _pSector;			// current Sector
     CRectMap _rectSector;		// A rectangle containing our sectors we can search.
+    CRectMap::SectIndexingHints_s _rectSectorIndexingHints;
 
     // Pointer to distance function:
     //  The ::* operator means "pointer to member of CPointMap".
@@ -86,6 +87,7 @@ private:
 
 struct CWorldSearchHolder
 {
+    // Thread-unsafe!
     static CSReferenceCounted<CWorldSearch> GetInstance(const CPointMap& pt, int iDist = 0);
 };
 

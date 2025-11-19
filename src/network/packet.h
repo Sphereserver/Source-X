@@ -160,8 +160,7 @@ public:
 	PacketSend(const PacketSend* other);
     virtual ~PacketSend() override;
 
-private:
-	PacketSend& operator=(const PacketSend& other);
+    PacketSend& operator=(const PacketSend& other) = delete;
 
 public:
 	void initLength(void); // write empty length and ensure that it is remembered

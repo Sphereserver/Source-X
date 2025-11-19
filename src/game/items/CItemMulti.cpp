@@ -107,6 +107,7 @@ CItemMulti::~CItemMulti()
     }
     if (!_lAddons.empty())
     {
+        // TODOC: add a comment... why aren't we deleting addons!?
         /*
         for (const CUID& itemUID : _lAddons)
         {
@@ -249,8 +250,8 @@ bool CItemMulti::MultiRealizeRegion()
     m_pRegion->SetName(pszTemp);
     m_pRegion->_pMultiLink = this;
 
-    //We have to update the Characters if not moving around like Player Vendors.
-    //Otherwise, when you reboot server, the region.name of the characters returns as Region name instead of multis.
+    // We have to update the Characters if not moving around like Player Vendors.
+    // Otherwise, when you reboot server, the region.name of the characters returns as Region name instead of multis.
     auto Area = CWorldSearchHolder::GetInstance(m_pRegion->m_pt, Multi_GetDistanceMax());
     Area->SetSearchSquare(true);
     for (;;)
@@ -267,6 +268,9 @@ bool CItemMulti::MultiRealizeRegion()
         pChar->MoveToRegion(m_pRegion, false); //Move the character to house region.
     }
 
+    //g_Log.EventError("Realizing MULTI region at P=%hd,%hd,%hhd,%hhu. Multi uid=0%x. Multi rect: %d,%d, %d,%d.\n",
+    //    pt.m_x, pt.m_y, pt.m_z, pt.m_map, (dword)GetUID(),
+    //    rect.m_left, rect.m_top, rect.m_right, rect.m_bottom);
     return m_pRegion->RealizeRegion();
 }
 
@@ -278,6 +282,16 @@ void CItemMulti::MultiUnRealizeRegion()
         return;
     }
     m_pRegion->_pMultiLink = nullptr;
+
+    const CItemBaseMulti * pMultiDef = Multi_GetDef();
+    ASSERT(pMultiDef);
+
+    CRectMap rect = pMultiDef->m_rect;
+
+    //auto pt = m_pRegion->m_pt;
+    //g_Log.EventError("UN-Realizing MULTI region at P=%hd,%hd,%hhd,%hhu. Multi uid=0%x. Multi rect: %d,%d, %d,%d.\n",
+    //    pt.m_x, pt.m_y, pt.m_z, pt.m_map, (dword)GetUID(),
+    //    rect.m_left, rect.m_top, rect.m_right, rect.m_bottom);
 
     m_pRegion->UnRealizeRegion();
 
@@ -483,7 +497,7 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
         }
         if (pItem->IsType(type))
         {
-            return(pItem);
+            return pItem;
         }
     }
 }
@@ -522,6 +536,7 @@ void CItemMulti::OnMoveFrom()
 bool CItemMulti::MoveTo(const CPointMap& pt, bool fForceFix) // Put item on the ground here.
 {
     ADDTOCALLSTACK("CItemMulti::MoveTo");
+
     // Move this item to it's point in the world. (ground/top level)
     if (!CItem::MoveTo(pt, fForceFix))
     {
@@ -562,6 +577,7 @@ CItem * CItemMulti::Multi_GetSign()
 {
     ADDTOCALLSTACK("CItemMulti::Multi_GetSign");
     // Get my sign or tiller link.
+
     CItem * pTiller = m_uidLink.ItemFind();
     if (pTiller == nullptr)
     {
@@ -695,6 +711,7 @@ CUID CItemMulti::GetOwner() const
 void CItemMulti::SetGuild(const CUID& uidGuild)
 {
     ADDTOCALLSTACK("CItemMulti::SetGuild");
+
     CItemStone *pGuildStone = static_cast<CItemStone*>(GetGuildStone().ItemFind());
     _uidGuild.InitUID();
     if (pGuildStone)  // Old Guild may not exist, was it removed...?

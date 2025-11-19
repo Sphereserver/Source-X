@@ -863,7 +863,7 @@ int CItem::FixWeirdness()
 			}
             else
             {
-                DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), (dword)(m_uidLink)));
+                g_Log.EventError("GC: Object '%s' has Bad Link to UID 0%" PRIx32 ".\n", GetName(), m_uidLink.GetObjUID());
                 m_uidLink.InitUID();
                 iResultCode = 0x2205;
                 return iResultCode;	// get rid of it.
@@ -3479,12 +3479,13 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_morep.m_z = s.GetArgCVal();
 			break;
 		case IC_P:
-			// Loading or import ONLY ! others use the r_Verb
+            // Loading or import ONLY ! others use CObjBase::r_Verb
 			if ( ! IsDisconnected() && ! IsItemInContainer() )
 				return false;
 			else
 			{
-				// Will be placed in the world later.
+                // Will be placed in the world later (in CItem::r_Load):
+                //  since we are loading the world, the parent region might not be created/"realized" yet.
 				CPointMap pt;
 				pt.Read( s.GetArgStr());
                 if (pt.IsValidPoint())
@@ -3520,13 +3521,16 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 bool CItem::r_Load( CScript & s ) // Load an item from script
 {
 	ADDTOCALLSTACK("CItem::r_Load");
-	CScriptObj::r_Load( s );
 
-	if ( GetContainer() == nullptr )
-	{
+    CScriptObj::r_Load( s );
+
+    if ( GetContainer() == nullptr )
+    {
         // Actually place the item into the world.
         if ( GetTopPoint().IsCharValid())
+        {
 			MoveToUpdate( GetTopPoint());
+        }
 	}
 
 	int iResultCode = CObjBase::IsWeird();
@@ -6154,46 +6158,28 @@ bool CItem::_CanHoldTimer() const
 	return true;
 }
 
-bool CItem::_TickableState() const
+bool CItem::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CItem::_TickableState");
+    //ADDTOCALLSTACK_DEBUG("CItem::_TickableStateBase");
     EXC_TRY("Able to tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
-
-    if (fIgnoreCont)
+    const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fCharCont = pCont && pCont->IsChar();
+    if (fCharCont && fAllowContained)
 	{
-        const bool fCharCont = pCont && pCont->IsChar();
-        if (fCharCont && pCont->IsDisconnected())
-        {
-            const auto pCharCont = static_cast<const CChar*>(pCont);
-            if (pCharCont->Skill_GetActive() != NPCACT_RIDDEN)
-                return false;
+        auto pCharCont = static_cast<const CChar*>(pCont);
+        if (!pCharCont->_CanTick())
+            return false;
+    }
 
-            // Check if this ridden npc is ridden by a logged out char, or not.
-            const CChar *pCharOwner = pCharCont->GetOwner();
-            if (!pCharOwner || pCharOwner->IsDisconnected())
-                return false;
-        }
-
-        return CObjBase::_TickableState();
-	}
-
-    if (IsAttr(ATTR_DECAY) && !pCont)
+    if (!pCont && IsAttr(ATTR_DECAY))
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
-        return CObjBase::_TickableState();
+        return CObjBase::_TickableStateBase();
     }
 
-    const bool fCharCont = pCont && pCont->IsChar();
-    if (fCharCont && !pCont->TickableState())
-    {
-        // Is it equipped on a Char?
-        return false;
-    }
-
-    return CObjBase::_TickableState();
+    return CObjBase::_TickableStateBase();
 
 	EXC_CATCH;
 
@@ -6213,7 +6199,7 @@ bool CItem::_OnTick()
 
 	if (!_IsSleeping())
 	{
-		if (!_TickableState())
+        if (!_CanTick(false))
 		{
 			const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
 			if (pSector && pSector->IsSleeping())

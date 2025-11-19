@@ -18,18 +18,18 @@ ProfileTask::ProfileTask(PROFILE_TYPE id) :
         return;
 
     auto& th = ThreadHolder::get();
-    if (th.closing())
+    if (th.isServClosing())
         return;
 
 	AbstractThread* icontext = th.current();
 	if (icontext == nullptr)
 	{
-		// Thread was deleted, manually or by app closing signal.
+		// Thread was deleted, manually or by app servClosing signal.
 		return;
 	}
 
 	m_context = static_cast<AbstractSphereThread*>(icontext);
-	if (m_context != nullptr && !m_context->closing())
+    if (m_context != nullptr && !m_context->isClosing())
 	{
         ProfileData& pdata = m_context->m_profile;
         const PROFILE_TYPE task = pdata.GetCurrentTask();
@@ -56,7 +56,7 @@ ProfileTask::~ProfileTask(void) noexcept
 {
     EXC_TRY("destroy profiletask");
 
-	if (m_context != nullptr && !m_context->closing())
+    if (m_context != nullptr && !m_context->isClosing())
 		m_context->m_profile.Start(m_previousTask);
 
     EXC_CATCH;
