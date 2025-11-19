@@ -4795,7 +4795,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 			CChar * pChar = CUID::CharFindFromUID(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
-                return pChar->NPC_PetSetOwner(this);
+                return NPC_PetSetOwner(pChar);
             return false;   // Something went wrong, giving a warning of it.
         }
 
