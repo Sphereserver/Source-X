@@ -54,6 +54,7 @@
 ADD(CAccount,				"CAccount");
 ADD(CAccounts,				"CAccounts");
 ADD(CResourceLink,			"CResourceLink");
+ADD(CCChampion,             "CCChampion");
 ADD(CCChampionDef,			"CCChampionDef");
 ADD(CChar,					"CChar");
 ADD(CCharBase,				"CCharBase");

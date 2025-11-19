@@ -648,6 +648,7 @@ tchar* Str_FromInt_Fast(_IntType val, tchar* ptcOutBuf, size_t uiBufLength, uint
             while (n)
                 ptcOutBuf[pos++] = ptcTemp[--n];
             ptcOutBuf[pos] = '\0';
+            return ptcOutBuf;
         }
 
         default:

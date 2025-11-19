@@ -4064,16 +4064,16 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Changed: Login rejection (packet `0x82`) is now sent to all clients trying to log in (used to be only to clients, that Sphere could identify).
 
 03-11-2025, Nolok
-- Fixed: Corner cases issues with number parsing from scripts.
+- Fixed: Corner cases issues with number parsing from scripts (Issue #1448).
 - Fixed: Function call stack messed up ordering.
 - Fixed: Wrong script line pointed to in console log messages.
 - Fixed: Changing Char flags didn't always trigger a full update packet.
 - Fixed: Sector indexing issue.
 - Changed: Made both Windows and Linux load scripts in a folder in alphabetical order.
+- Added: "Old VarDef value..." log message when overwriting a DEF value during startup in debug builds (Issue #1437).
 
 17-11-2025, Nolok
-- Fixed: parsing of big numbers (greater than 32 bits) in scripts.
-- Fixed: CAN_O_NOSLEEP was not considered/honored at server startup.
-- Changed: object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to determine if TIMER expressed a number in seconds or milliseconds.
+- Fixed: CAN_O_NOSLEEP was not considered/honored at server startup (Issue #1440).
+- Changed: Object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to determine if TIMER expressed a number in seconds or milliseconds.
 - Changed: Added 5 seconds timeout to DNS hostname resolution at startup (avoid getting stuck when connectivity is enabled but not working).
 - Changed: CANMASK formatted in worldsave files as hexadecimal number, instead of decimal.
