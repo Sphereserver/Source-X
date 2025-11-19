@@ -44,7 +44,7 @@ public:
         return m_rectUnion.GetSectorAtIndex(i);
 	}
     [[nodiscard]]
-    inline CSector * GetSectorAtIndexWithHints( int i, CRect::SectIndexingHints hints ) const noexcept {
+    inline CSector * GetSectorAtIndexWithHints( int i, CRect::SectIndexingHints_s hints ) const noexcept {
         return m_rectUnion.GetSectorAtIndexWithHints(i, std::move(hints));
     }
 

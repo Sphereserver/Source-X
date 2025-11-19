@@ -45,9 +45,10 @@ static thread_local AbstractSphereThread* sg_tlsCurrentSphereThread = nullptr;
 // Avoid trying to get thread context while binding it.
 static thread_local bool sg_tlsBindingInProgress = false;
 
-// Global state flags
-static std::atomic_bool sg_inStartup{true};
-static std::atomic_bool sg_servClosing{false};
+// Global state flags (defined in spheresvr.cpp)
+//  We need to define them there because some code in spheresvr.cpp
+extern std::atomic_bool sg_inStartup;
+extern std::atomic_bool sg_servClosing;
 
 // Constants
 #define THREAD_EXCEPTIONS_ALLOWED 10
@@ -936,18 +937,18 @@ void AbstractSphereThread::printStackTrace() noexcept
 {
     freezeCallStack(true);
 
-    uint64_t threadId = //static_cast<uint64_t>(getId());
+    uint64_t threadId = // static_cast<uint64_t>(getId());
 #if defined(_WIN32) || defined(__APPLE__)
-        static_cast<uint64_t>(getId() ? getId() : os_current_tid());
+        n_alias_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #else
-        reinterpret_cast<uint64_t>(getId() ? getId() : os_current_tid());
+        n_alias_cast<uint64_t>(getId() ? getId() : os_current_tid());
 #endif
 
     const lpctstr threadName = getName();
     auto& stackInfo = (m_stackInfoCopy[0].functionName != nullptr) ? m_stackInfoCopy : m_stackInfo;
 
-    g_Log.EventDebug("Printing STACK TRACE for debugging purposes.\n");
-    g_Log.EventDebug(" _ thread (id) name _ |   # | _____________ function _____________ |\n");
+    g_Log.EventDebug("Printing STACK TRACE for debugging purposes (thread id %" PRIx64 ").\n", threadId);
+    g_Log.EventDebug(" _ thread name _ |   # | _____________ function _____________ |\n");
 
     for (ssize_t i = 0; i < (ssize_t)ARRAY_COUNT(m_stackInfoCopy); ++i)
     {
@@ -962,8 +963,9 @@ void AbstractSphereThread::printStackTrace() noexcept
                         ? "<-- exception catch point (below is guessed and could be incorrect!)"
                         : "<-- exception catch point";
 
-        g_Log.EventDebug("(%" PRIx64 ") %15.15s | %3u | %36.36s | %s\n",
-            threadId, threadName, (uint)i, stackInfo[i].functionName, extra);
+        g_Log.EventDebug("%15.15s | %3u | %36.36s | %s\n",
+            /* limiting threadname to 15 characters because m_nameMaxLength is hardcoded to 16 */
+            threadName, (uint)i, stackInfo[i].functionName, extra);
 
         if (i == m_iStackUnwindingStackPos)
             break;

@@ -691,18 +691,58 @@ public:
  *
  *	Packet 0x70 : PacketEffect				displays a visual effect (NORMAL)
  *	Packet 0xC0 : PacketEffect				displays a hued visual effect (NORMAL)
+ *  Packet 0xC7 : PacketEffect              displays a particle effect in Enhanced Client (NORMAL)
  *
  *
  ***************************************************************************/
 class PacketEffect : public PacketSend
 {
 public:
+    // TODO: pack the ungodly amount of arguments to the functions in a struct, and pass it
+    //  along const CClient* target and const CObjBaseTemplate* / CPointMap* src, dst.
+    /*
+    struct PacketEffectBasicArgs_s  // 0x70
+    {
+        EFFECT_TYPE motion;
+        ITEMID_TYPE id;
+        byte speed;
+        byte loop;
+        bool explode;
+    };
+    struct PacketEffectHuedArgs_s   // 0xC0
+    {
+        EFFECT_TYPE motion;
+        ITEMID_TYPE id;
+        byte speed;
+        byte loop;
+        bool explode;
+        dword hue;
+        dword render;
+    };
+    struct PacketEffectParticle_s   // 0xC7
+    {
+        EFFECT_TYPE motion;
+        ITEMID_TYPE id;
+        byte speed;
+        byte loop;
+        bool explode;
+        dword hue;
+        dword render;
+        word effectid;
+        dword explodeid;
+        word explodesound;
+        dword effectuid;
+        byte type;
+    };
+    */
+
+public:
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
 	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
 
-	/*Effect at a Map Point instead of an Object*/
+    /* Effect at a Map Point instead of an Object */
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode, dword hue, dword render);
 	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap *ptDest, const CPointMap *ptSrc, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
