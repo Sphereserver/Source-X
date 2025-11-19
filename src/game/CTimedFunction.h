@@ -35,8 +35,8 @@ public:
         return _ptcCommand;
     }
 
-protected:  virtual bool _TickableState() const override;
-public:     virtual bool  TickableState() const override;
+protected:  virtual bool _TickableStateBase() const override;
+public:     virtual bool  TickableStateBase() const override;
 
 protected:	virtual bool _OnTick() override;
 public:		virtual bool  OnTick() override;

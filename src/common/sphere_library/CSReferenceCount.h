@@ -1,6 +1,7 @@
 /**
 * @file CSReferenceCount.h
 * @brief Lightweight wrapped pointer reference counter to a master/owner object.
+*        This has later evolved into sobjpool.h.
 */
 
 #ifndef _INC_CSREFERENCECOUNT_H

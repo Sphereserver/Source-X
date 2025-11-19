@@ -54,7 +54,7 @@ class CWorldSearch
     CSector* _pSectorBase;		// Don't search the center sector 2 times.
     CSector* _pSector;			// current Sector
     CRectMap _rectSector;		// A rectangle containing our sectors we can search.
-    CRectMap::SectIndexingHints _rectSectorIndexingHints;
+    CRectMap::SectIndexingHints_s _rectSectorIndexingHints;
 
     // Pointer to distance function:
     //  The ::* operator means "pointer to member of CPointMap".

@@ -6158,46 +6158,28 @@ bool CItem::_CanHoldTimer() const
 	return true;
 }
 
-bool CItem::_TickableState() const
+bool CItem::_TickableStateBase() const
 {
-    //ADDTOCALLSTACK_DEBUG("CItem::_TickableState");
+    //ADDTOCALLSTACK_DEBUG("CItem::_TickableStateBase");
     EXC_TRY("Able to tick?");
 
 	const CObjBase* pCont = GetContainer();
-    const bool fIgnoreCont = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
-
-    if (fIgnoreCont)
+    const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
+    const bool fCharCont = pCont && pCont->IsChar();
+    if (fCharCont && fAllowContained)
 	{
-        const bool fCharCont = pCont && pCont->IsChar();
-        if (fCharCont && pCont->IsDisconnected())
-        {
-            const auto pCharCont = static_cast<const CChar*>(pCont);
-            if (pCharCont->Skill_GetActive() != NPCACT_RIDDEN)
-                return false;
+        auto pCharCont = static_cast<const CChar*>(pCont);
+        if (!pCharCont->_CanTick())
+            return false;
+    }
 
-            // Check if this ridden npc is ridden by a logged out char, or not.
-            const CChar *pCharOwner = pCharCont->GetOwner();
-            if (!pCharOwner || pCharOwner->IsDisconnected())
-                return false;
-        }
-
-        return CObjBase::_TickableState();
-	}
-
-    if (IsAttr(ATTR_DECAY) && !pCont)
+    if (!pCont && IsAttr(ATTR_DECAY))
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
-        return CObjBase::_TickableState();
+        return CObjBase::_TickableStateBase();
     }
 
-    const bool fCharCont = pCont && pCont->IsChar();
-    if (fCharCont && !pCont->TickableState())
-    {
-        // Is it equipped on a Char?
-        return false;
-    }
-
-    return CObjBase::_TickableState();
+    return CObjBase::_TickableStateBase();
 
 	EXC_CATCH;
 
@@ -6217,7 +6199,7 @@ bool CItem::_OnTick()
 
 	if (!_IsSleeping())
 	{
-		if (!_TickableState())
+        if (!_CanTick(false))
 		{
 			const CSector* pSector = GetTopSector();	// It prints an error if it belongs to an invalid sector.
 			if (pSector && pSector->IsSleeping())

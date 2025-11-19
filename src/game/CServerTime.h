@@ -16,7 +16,7 @@ struct CServerTime
     #define TENTHS_PER_SEC  (int64)10      // Tenths in a second (backwards).
     #define MSECS_PER_SEC   (int64)1000    // Milliseconds in a second (to avoid magic numbers).
 
-    #define MSECS_PER_TENTH (int64)100
+    #define MSECS_PER_TENTH (int64)100      // Milliseconds in a tenth of second.
     #define MSECS_PER_TICK  (int64)(MSECS_PER_SEC / TICKS_PER_SEC) // Milliseconds lapse between one server tick and another.
 
 

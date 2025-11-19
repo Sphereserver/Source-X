@@ -1,10 +1,10 @@
 /**
-* @file CSectorTemplate.h
+* @file CSectorBase.h
 *
 */
 
-#ifndef _INC_CSECTORTEMPLATE_H
-#define _INC_CSECTORTEMPLATE_H
+#ifndef _INC_CSECTORBASE_H
+#define _INC_CSECTORBASE_H
 
 #include "../common/sphere_library/CSObjCont.h"
 #include "../common/sphere_library/CSObjSortArray.h"
@@ -162,4 +162,4 @@ public:
 #define SECF_InstaSleep	0x00000002
 };
 
-#endif // _INC_CSECTORTEMPLATE_H
+#endif // _INC_CSECTORBASE_H

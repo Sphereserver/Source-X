@@ -54,6 +54,7 @@ CWorldSearch::CWorldSearch() noexcept :
     _uiCurObjIndex(0), _uiObjArrayCapacity(0), _uiObjArraySize(0),
     _iSectorCur(0),  // Get upper left of search rect.
     _pSectorBase(nullptr), _pSector(nullptr),
+    _rectSectorIndexingHints{},
     _distanceFunction(nullptr)
 {
 }

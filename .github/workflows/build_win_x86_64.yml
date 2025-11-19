@@ -84,8 +84,8 @@ jobs:
     needs: windows-x86_64
     if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
     permissions:
-      contents: read
-      actions: write
+      contents: write
+      actions: read
 
     runs-on: ubuntu-latest
     steps:

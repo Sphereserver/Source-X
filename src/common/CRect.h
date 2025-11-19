@@ -22,7 +22,7 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	int m_map;
 
 
-    struct SectIndexingHints
+    struct SectIndexingHints_s
     {
         int iBaseSectorIndex;       // Sector index at origin, top-left x,y coords of the rect
         int iRectWidth;             // x1 - x: how much x units (columns) are inside the rect
@@ -90,8 +90,8 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
     CSector * GetSectorAtIndex( int i ) const noexcept;
 
     // get all the sectors that make up this rect (using cached precomputed data, that's faster if the use case allows its usage).
-    CSector * GetSectorAtIndexWithHints(int i, SectIndexingHints hints) const noexcept;
-    SectIndexingHints PrecomputeSectorIndexingHints() const noexcept;
+    CSector * GetSectorAtIndexWithHints(int i, SectIndexingHints_s hints) const noexcept;
+    SectIndexingHints_s PrecomputeSectorIndexingHints() const noexcept;
 
 	void SetRect( int left, int top, int right, int bottom, int map ) noexcept;
 
