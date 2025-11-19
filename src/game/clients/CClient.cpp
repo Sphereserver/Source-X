@@ -1531,7 +1531,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				addTargetCancel();
 				break;
 			}
-			return false;
+			return true;
 		case CV_SHOWSKILLS:
 			addSkillWindow((SKILL_TYPE)(g_Cfg.m_iMaxSkill)); // Reload the real skills
 			break;
