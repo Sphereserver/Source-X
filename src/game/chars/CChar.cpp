@@ -2231,6 +2231,20 @@ bool CChar::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 					return true;
 				}
 				return false;
+            case CHR_MEMORYFINDTYPE: // FInd a type of memory.
+                pRef = Memory_FindTypes((word)(Exp_GetSingle(ptcKey)));
+                SKIP_SEPARATORS(ptcKey);
+                return true;
+            case CHR_MEMORYFIND: // Find a memory of a UID
+                pRef = Memory_FindObj((CUID)Exp_GetSingle(ptcKey));
+                SKIP_SEPARATORS(ptcKey);
+                return true;
+            case CHR_OWNER:
+                pRef = GetOwner();
+                return true;
+            case CHR_REGION:
+                pRef = m_pArea;
+                return true;
             case CHR_SHIP:
 				if (m_pPlayer)
 				{
@@ -2245,22 +2259,8 @@ bool CChar::r_GetRef( lpctstr & ptcKey, CScriptObj * & pRef )
 					return true;
 				}
 				return false;
-			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
-				pRef = Memory_FindTypes((word)(Exp_GetSingle(ptcKey)));
-				SKIP_SEPARATORS(ptcKey);
-				return true;
-			case CHR_MEMORYFIND:	// Find a memory of a UID
-				pRef = Memory_FindObj( (CUID) Exp_GetSingle( ptcKey ));
-				SKIP_SEPARATORS(ptcKey);
-				return true;
-			case CHR_OWNER:
-				pRef = GetOwner();
-				return true;
 			case CHR_WEAPON:
 				pRef = m_uidWeapon.ObjFind();
-				return true;
-			case CHR_REGION:
-				pRef = m_pArea;
 				return true;
 		}
 	}
@@ -4795,7 +4795,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 			CChar * pChar = CUID::CharFindFromUID(s.GetArgDWVal()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
-                return pChar->NPC_PetSetOwner(this);
+                return NPC_PetSetOwner(pChar);
             return false;   // Something went wrong, giving a warning of it.
         }
 

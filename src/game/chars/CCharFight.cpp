@@ -1028,7 +1028,8 @@ effect_bounce:
 		return 0;
 
 	// Apply damage
-	SoundChar(CRESND_GETHIT);
+    if (!Can(CAN_C_STATUE))
+	    SoundChar(CRESND_GETHIT);
 	UpdateStatVal( STAT_STR, -iDmg);
 	if ( pSrc->IsClientActive() )
 		pSrc->GetClientActive()->addHitsUpdate( this );	// always send updates to src
@@ -1057,7 +1058,7 @@ effect_bounce:
 		return iDmg;
 	}
 
-	if (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING)	// don't interrupt my swing animation
+	if (m_atFight.m_iWarSwingState != WAR_SWING_SWINGING  && !Can(CAN_C_STATUE))	// don't interrupt my swing animation
 		UpdateAnimate(ANIM_GET_HIT);
 
 	return iDmg;

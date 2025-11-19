@@ -4077,3 +4077,8 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Changed: Object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to determine if TIMER expressed a number in seconds or milliseconds.
 - Changed: Added 5 seconds timeout to DNS hostname resolution at startup (avoid getting stuck when connectivity is enabled but not working).
 - Changed: CANMASK formatted in worldsave files as hexadecimal number, instead of decimal.
+
+19-11-2025, DavideRei
+- Changed: @STEPSTEALTH trigger to set in ARGN1 how many steps are consumed. Default 2 steps if running or hovering, 1 otherwise.
+- Changed: no sound and no animation when a char with CAN_C_STATUE takes damage.
+- Fixed: set char Owner.

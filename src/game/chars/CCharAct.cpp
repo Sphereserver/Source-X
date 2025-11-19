@@ -4844,13 +4844,16 @@ void CChar::CheckRevealOnMove()
 	if ( !IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN|STATF_SLEEPING) )
 		return;
 
-	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
-        OnTrigger(CTRIG_StepStealth, CScriptParserBufs::GetCScriptTriggerArgsPtr(), this);
+	CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
+    pScriptArgs->m_iN1                = IsStatFlag(STATF_FLY | STATF_HOVERING) ? 2 : 1; // Steps consumed
+
+    if (IsTrigUsed(TRIGGER_STEPSTEALTH))
+        OnTrigger(CTRIG_StepStealth, pScriptArgs, this);
 
     if (g_Cfg.m_iRevealFlags & REVEALF_ONHORSE && IsStatFlag(STATF_ONHORSE))
         Reveal();
 
-	m_StepStealth -= IsStatFlag(STATF_FLY|STATF_HOVERING) ? 2 : 1;
+    m_StepStealth -= (int)pScriptArgs->m_iN1;
 	if ( m_StepStealth <= 0 )
 		Reveal();
 }
