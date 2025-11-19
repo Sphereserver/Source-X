@@ -1372,8 +1372,9 @@ bool CChar::Fight_Clear(CChar *pChar, bool fForced)
     m_atFight.m_iSwingIgnoreLastHitTag = 0;
 
 	CItemMemory* pMemoryFight =  Memory_FindObj(m_Fight_Targ_UID);
-	if ( pMemoryFight && ( pMemoryFight->IsMemoryTypes(MEMORY_FIGHT) || pMemoryFight->IsMemoryTypes(MEMORY_IRRITATEDBY) ) )
-		pMemoryFight->Delete();
+    if (pMemoryFight && (pMemoryFight->IsMemoryTypes(MEMORY_FIGHT) || pMemoryFight->IsMemoryTypes(MEMORY_IRRITATEDBY)) &&
+        !pMemoryFight->IsMemoryTypes(MEMORY_IPET))
+        pMemoryFight->Delete();
 
 	// Go to my next target.
 	if (m_Fight_Targ_UID == pChar->GetUID())
