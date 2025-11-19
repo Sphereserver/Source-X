@@ -3094,36 +3094,73 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 			return;
 		}
 
-		case EXTCMD_DOOR_AUTO:	// open door macro
-		{
-			CPointMap pt = m_pChar->GetTopPoint();
-			char iCharZ = pt.m_z;
-
-			pt.Move(m_pChar->m_dirFace);
-            auto Area = CWorldSearchHolder::GetInstance(pt, bDoorAutoDist);
-			for (;;)
-			{
-				CItem *pItem = Area->GetItem();
-				if ( !pItem )
-					return;
-
-				switch ( pItem->GetType() )
-				{
-					case IT_DOOR:
-					case IT_DOOR_LOCKED:
-					case IT_PORTCULIS:
-					case IT_PORT_LOCKED:
-						if ( abs(iCharZ - pItem->GetTopPoint().m_z) < 20 )
-						{
-							m_pChar->SysMessageDefault(DEFMSG_MACRO_OPENDOOR);
-							m_pChar->Use_Obj(pItem, true);
-							return;
-						}
-				}
-			}
-			return;
-		}
-
+        case EXTCMD_DOOR_AUTO:
+        {
+            CPointMap charPt = m_pChar->GetTopPoint();
+            int charZ = charPt.m_z;
+            int16 x = charPt.m_x;
+            int16 y = charPt.m_y;
+            switch (m_pChar->m_dirFace)
+            {
+            case DIR_N:--y; break;
+            case DIR_NE:++x; --y; break;
+            case DIR_E: ++x; break;
+            case DIR_SE:++x; ++y; break;
+            case DIR_S:++y; break;
+            case DIR_SW:--x; ++y; break;
+            case DIR_W:--x; break;
+            case DIR_NW:--x; --y; break;
+            default:break;
+            }
+            CPointMap ptTarget(x, y, charPt.m_z, charPt.m_map);
+            auto Area = CWorldSearchHolder::GetInstance(ptTarget, bDoorAutoDist);
+            CItem* pBestCandidate = nullptr;
+            int iBestDist = bDoorAutoDist + UO_MAP_VIEW_SIGHT;
+            for (;;)
+            {
+                CItem* pItem = Area->GetItem();
+                if (!pItem)
+                    break;
+                switch (pItem->GetType())
+                {
+                case IT_DOOR:
+                case IT_DOOR_LOCKED:
+                case IT_PORTCULIS:
+                case IT_PORT_LOCKED:
+                {
+                    const CPointMap itPt = pItem->GetTopPoint();
+                    int itemTopZ = itPt.m_z;
+                    bool z_overlap = ((itemTopZ + pItem->GetHeight()) > charZ) && ((charZ + 16) > itemTopZ);
+                    bool z_close = (std::abs(charZ - itemTopZ) < 20);
+                    if (!z_overlap || !z_close)
+                        break;
+                    //if (!m_pChar->CanSee(pItem)
+                        //break;
+                    if (itPt.m_x == x && itPt.m_y == y)
+                    {
+                        m_pChar->SysMessageDefault(DEFMSG_MACRO_OPENDOOR);
+                        m_pChar->Use_Obj(pItem, true);
+                        return;
+                    }
+                    int iDist = charPt.GetDist(itPt);
+                    if (iDist < iBestDist)
+                    {
+                        iBestDist = iDist;
+                        pBestCandidate = pItem;
+                    }
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+            if (pBestCandidate)
+            {
+                m_pChar->SysMessageDefault(DEFMSG_MACRO_OPENDOOR);
+                m_pChar->Use_Obj(pBestCandidate, true);
+            }
+            return;
+        }
 		case EXTCMD_INVOKE_VIRTUE:
 		{
 			if ( !IsTrigUsed(TRIGGER_USERVIRTUEINVOKE) )
