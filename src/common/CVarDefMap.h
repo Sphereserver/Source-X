@@ -158,7 +158,7 @@ public:
     CVarDefContNum* SetNum( lpctstr ptcKey, int64 iVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
     CVarDefContNum* ModNum( lpctstr ptcKey, int64 iMod, bool fDeleteZero = true);
     CVarDefContStr* SetStrNew( lpctstr ptcKey, lpctstr pszVal );
-    CVarDefCont* SetStr( lpctstr ptcKey, bool fQuoted, lpctstr pszVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
+    CVarDefCont* SetStr(lpctstr ptcKey, bool fQuoted, lpctstr ptcVal, bool fDeleteZero = true, bool fWarnOverwrite = true );
 
 	CVarDefCont * GetAt( size_t at ) const;
 	CVarDefCont * GetKey( lpctstr ptcKey ) const;

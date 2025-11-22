@@ -1770,7 +1770,11 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 					int iSecNumber = Exp_GetVal(ptcKey);
 					SKIP_SEPARATORS(ptcKey);
                     CSector* pSector = CWorldMap::GetSectorByIndex(iMapNumber, iSecNumber);
-					return !pSector ? false : pSector->r_WriteVal(ptcKey, sVal, pSrc);
+                    if (!pSector)
+                        return false;
+                    if (*ptcKey == '\0')
+                        return true;
+                    return pSector->r_WriteVal(ptcKey, sVal, pSrc);
 				}
 			}
 			g_Log.EventError("Unsupported Map %d\n", iMapNumber);
@@ -5051,6 +5055,8 @@ bool CServerConfig::Load( bool fResync )
 	// Now load the *TABLES.SCP file.
 	if ( ! fResync )
 	{
+        g_Log.Event(LOGL_EVENT|LOGM_INIT, "\n");
+
 		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ))
 		{
 			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables" SPHERE_SCRIPT_EXT ")...\n" );

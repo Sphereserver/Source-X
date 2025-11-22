@@ -595,6 +595,9 @@ bool CNTWindow::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
         theApp.m_wndAbout.ShowWindow(SW_NORMAL);
         theApp.m_wndAbout.SetForegroundWindow();
         break;
+    case IDM_CLEAR_CONSOLE:
+        List_Clear();
+        break;
 	case IDM_MINIMIZE:
 		// SC_MINIMIZE
 	    ShowWindow(SW_HIDE);

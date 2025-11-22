@@ -154,8 +154,9 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 	{
 		if (pThisObj->IsItem())
 		{
-			// prevent the timer from firing if the item is inside a container-type item
-			if (!pItem->IsSleeping())
+            // If the behavior is not enabled globally (ini flag) or per-item (with the can flag),
+            //  prevent the timer from firing if the item is inside a container-type item.
+            if (!pItem->IsSleeping() && !pItem->_CanHoldTimer())
 			{
 				pItem->GoSleep();
 			}

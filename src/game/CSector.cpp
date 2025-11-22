@@ -966,6 +966,9 @@ void CSector::OnHearItem( CChar * pChar, lpctstr pszText )
 	for (CSObjContRec* pObjRec : m_Items.GetIterationSafeContReverse())
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
+        if (!pItem->CanHear())
+            continue;
+
 		pItem->OnHear( pszText, pChar );
 	}
 }

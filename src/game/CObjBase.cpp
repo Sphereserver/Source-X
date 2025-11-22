@@ -556,8 +556,11 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	}
 }
 
-void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource,
-    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
+void CObjBase::Effect(
+    EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource,
+    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render,
+    word effectid, word explodeid, word explodesound, dword effectuid, byte type
+    ) const
 {
 	ADDTOCALLSTACK("CObjBase::Effect");
 

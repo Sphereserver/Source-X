@@ -33,7 +33,8 @@ class CWorldTicker;
 DIR_TYPE GetDirStr(lpctstr pszDir);
 
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps, public virtual CTimedObject
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity, public CEntityProps,
+                 public virtual CTimedObject    /* TODO: can we get rid of virtual inheritance in the future? */
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
