@@ -5816,9 +5816,9 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
-bool CChar::_TickableStateBase() const
+bool CChar::_CanTick(bool fParentGoingToSleep) const
 {
-    //ADDTOCALLSTACK_DEBUG("CChar::_TickableStateBase");
+    //ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
     EXC_TRY("Able to tick?");
 
     if (IsDisconnected())
@@ -5826,13 +5826,10 @@ bool CChar::_TickableStateBase() const
         // mounted horses could still get a tick, even if their disconnected body is placed in a sector now sleeping.
         if (Skill_GetActive() == NPCACT_RIDDEN)
             return true;
-
-        //const std::optional<bool> fOverriding = _TickableStateOverride();
-        //return fOverriding.value_or(false);
         return false;
 	}
 
-    return CObjBase::_TickableStateBase();
+    return CObjBase::_CanTick(fParentGoingToSleep);
 
 	EXC_CATCH;
 

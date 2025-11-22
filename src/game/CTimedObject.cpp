@@ -37,18 +37,6 @@ void CTimedObject::_GoAwake()
     _fIsSleeping = false;
 }
 
-bool CTimedObject::_TickableStateBase() const
-{
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::_TickableStateBase");
-    return !_IsSleeping();
-}
-
-bool CTimedObject::TickableStateBase() const
-{
-    //ADDTOCALLSTACK_DEBUG("CTimedObject::TickableStateBase");
-    MT_ENGINE_SHARED_LOCK_RETURN(_TickableStateBase());
-}
-
 bool CTimedObject::OnTick()
 {
     ADDTOCALLSTACK("CTimedObject::OnTick");

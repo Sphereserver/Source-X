@@ -608,7 +608,7 @@ protected:
 public:
 	virtual bool _OnTick() override;
 
-    virtual bool _TickableStateBase() const override;
+    virtual bool _CanTick(bool fParentGoingToSleep) const override final;
 	bool _CanHoldTimer() const;
 
     virtual void DupeCopy( const CObjBase * pItem ) override;
