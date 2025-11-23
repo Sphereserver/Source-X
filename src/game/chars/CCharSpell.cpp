@@ -3316,7 +3316,8 @@ bool CChar::Spell_CastDone()
 void CChar::Spell_CastFail(bool fAbort)
 {
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
-	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
+    ITEMID_TYPE iEffectId = g_Cfg.m_iSpell_Magic_Fizzle_Effect;
+    SOUND_TYPE iSound    = g_Cfg.m_iSpell_Magic_Fizzle_Sound;
 
 	ushort iManaLoss = 0, iTithingLoss = 0;
 	CSpellDef *pSpell = g_Cfg.GetSpellDef(m_atMagery.m_iSpell);
@@ -3342,8 +3343,9 @@ void CChar::Spell_CastFail(bool fAbort)
 
     CScriptTriggerArgsPtr pScriptArgs = CScriptParserBufs::GetCScriptTriggerArgsPtr();
     pScriptArgs->Init(m_atMagery.m_iSpell, iManaLoss, 0, m_Act_Prv_UID.ObjFind());
-    pScriptArgs->m_VarsLocal.SetNum("CreateObject1",iT1);
+    pScriptArgs->m_VarsLocal.SetNum("CreateObject1", iEffectId);
     pScriptArgs->m_VarsLocal.SetNum("TithingLoss", iTithingLoss);
+    pScriptArgs->m_VarsLocal.SetNum("Sound", iSound);
 
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
 	{
@@ -3363,11 +3365,18 @@ void CChar::Spell_CastFail(bool fAbort)
     HUE_TYPE iColor = (HUE_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("EffectColor"));
     dword dwRender = (dword)pScriptArgs->m_VarsLocal.GetKeyNum("EffectRender");
 
-    iT1 = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("CreateObject1")));
-	if (iT1)
-		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
-	Sound( SOUND_SPELL_FIZZLE );
+    iEffectId = (ITEMID_TYPE)(ResGetIndex((dword)pScriptArgs->m_VarsLocal.GetKeyNum("CreateObject1")));
+    iSound  = (SOUND_TYPE)(pScriptArgs->m_VarsLocal.GetKeyNum("Sound"));
 
+    if (iEffectId != ITEMID_NOTHING)
+    {
+        Effect(EFFECT_OBJ, iEffectId, this, 1, 30, false, iColor, dwRender);
+    }
+    if (iSound != SOUND_NONE)
+    {
+        Sound(iSound);
+    }
+        
 	if ( IsClientActive() )
 		GetClientActive()->addObjMessage( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_GEN_FIZZLES ), this );
 
