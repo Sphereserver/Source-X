@@ -83,6 +83,7 @@ CServerConfig::CServerConfig()
     m_iWordsOfPowerTalkMode = TALKMODE_SPELL;
 	m_fEquippedCast			= true;
 	m_iMagicUnlockDoor		= 900;
+
 	m_iSpellTimeout			= 0;
 
 	m_iSpell_Teleport_Effect_Staff		= ITEMID_FX_FLAMESTRIKE;	// drama
@@ -91,6 +92,9 @@ CServerConfig::CServerConfig()
 	m_iSpell_Teleport_Sound_Players		= 0x01fe;
 	m_iSpell_Teleport_Effect_NPC		= ITEMID_FX_HEAL_EFFECT;
 	m_iSpell_Teleport_Sound_NPC			= 0x01fe;
+
+	m_iSpell_Magic_Fizzle_Sound         = SOUND_SPELL_FIZZLE;
+    m_iSpell_Magic_Fizzle_Effect        = ITEMID_FX_SPELL_FAIL;
 
 	// Decay
 	m_iDecay_Item			= 30ll * 60 * MSECS_PER_SEC;
@@ -600,6 +604,8 @@ enum RC_TYPE
 	RC_LOGMASK,					// GetLogMask
 	RC_LOOTINGISACRIME,			// m_fLootingIsACrime
 	RC_LOSTNPCTELEPORT,			// m_fLostNPCTeleport
+    RC_MAGICFIZZLEEFFECT,       // m_iSpell_Magic_Fizzle_Effect
+    RC_MAGICFIZZLESOUND,        // m_iSpell_Magic_Fizzle_Sound
 	RC_MAGICFLAGS,
 	RC_MAGICUNLOCKDOOR,			// m_iMagicUnlockDoor
 	RC_MANALOSSABORT,			// m_fManaLossAbort
@@ -895,6 +901,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY + 1]
     { "LOGMASK",				{ ELEM_VOID,	0												}}, // GetLogMask
     { "LOOTINGISACRIME",		{ ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fLootingIsACrime)		}},
     { "LOSTNPCTELEPORT",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iLostNPCTeleport)		}},
+    { "MAGICFIZZLEEFFECT",      { ELEM_INT,     static_cast<uint> OFFSETOF(CServerConfig,m_iSpell_Magic_Fizzle_Effect) }},
+    { "MAGICFIZZLESOUND",       { ELEM_INT,     static_cast<uint> OFFSETOF(CServerConfig,m_iSpell_Magic_Fizzle_Sound) }},
     { "MAGICFLAGS",				{ ELEM_MASK_INT,static_cast<uint>OFFSETOF(CServerConfig,m_iMagicFlags)			}},
     { "MAGICUNLOCKDOOR",		{ ELEM_INT,		static_cast<uint>OFFSETOF(CServerConfig,m_iMagicUnlockDoor)		}},
     { "MANALOSSABORT",		    { ELEM_BOOL,	static_cast<uint>OFFSETOF(CServerConfig,m_fManaLossAbort)		}},

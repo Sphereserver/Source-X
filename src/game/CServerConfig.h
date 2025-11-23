@@ -324,6 +324,10 @@ public:
 	SOUND_TYPE  m_iSpell_Teleport_Sound_Players;    // Sound sent when a Player teleports.
 	ITEMID_TYPE m_iSpell_Teleport_Effect_Staff;     // ID of the item shown when a Staff member teleports.
 	SOUND_TYPE  m_iSpell_Teleport_Sound_Staff;      // Sound sent when a Staff member teleports.
+
+    ITEMID_TYPE m_iSpell_Magic_Fizzle_Effect;             // 
+    SOUND_TYPE m_iSpell_Magic_Fizzle_Sound;               // Sound sent when a fizzle.
+
 	int64 m_iSpellTimeout; // Timeout for spell targeting in seconds.
 
 	// In Game Effects
