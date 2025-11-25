@@ -29,6 +29,7 @@
 #define IDC_SETUP_LOG                   4023
 #define IDC_SETUP_NAME                  4024
 #define IDM_RESYNC_PAUSE                32784
+#define IDM_CLEAR_CONSOLE               32785
 
 // Next default values for new objects
 // 

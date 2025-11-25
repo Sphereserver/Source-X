@@ -180,7 +180,6 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
 			if (!m_pChar->GetPackSafe()->ContentFindKeyFor(pItem)) // I don't have the container key
 			{
-				SysMessageDefault(DEFMSG_ITEMUSE_LOCKED);
 				SysMessageDefault(DEFMSG_LOCK_CONT_NO_KEY);
 				if (!IsPriv(PRIV_GM))
 					return false;
