@@ -599,6 +599,9 @@ bool CNTWindow::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
 		// SC_MINIMIZE
 	    ShowWindow(SW_HIDE);
 		break;
+    case IDM_CLEAR_CONSOLE:
+        List_Clear();
+        break;
 	case IDM_RESTORE:
 		// SC_RESTORE
 	    ShowWindow(SW_NORMAL);
