@@ -1226,12 +1226,37 @@ void CClient::addItemName( CItem * pItem )
 	size_t len = Str_CopyLimitNull( szName, pszNameFull, ARRAY_COUNT(szName) );
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
-	if ( pCont != nullptr )
-	{
-		// ??? Corpses show hair as an item !!
-		len += snprintf( szName+len, sizeof(szName) - len,
-			g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), pCont->GetContentCount(), pCont->GetTotalWeight() / WEIGHT_UNITS);
-	}
+    if (pCont != nullptr)
+    {
+
+        size_t iContContentTotalUnit   = 0;
+        size_t iContContentTotalWeight = 0;
+
+        if (pItem->IsType(IT_CORPSE))
+        {
+            for (size_t i = 0; i < pCont->GetContentCount(); ++i)
+            {
+                CItem *pContentItem = static_cast<CItem *>(pCont->GetContentIndex(i));
+                if (pContentItem->IsAttr(ATTR_NEWBIE | ATTR_MOVE_NEVER | ATTR_CURSED2 | ATTR_BLESSED2 | ATTR_STATIC))
+                    continue;
+
+                if (pContentItem->IsType(IT_HAIR) || pContentItem->IsType(IT_BEARD))
+                    continue;
+
+                ++iContContentTotalUnit;
+                iContContentTotalWeight += static_cast<size_t>(pContentItem->GetWeight() / WEIGHT_UNITS);
+            }
+        }
+        else
+        {
+            iContContentTotalUnit   = pCont->GetContentCount();
+            iContContentTotalWeight = pCont->GetTotalWeight() / WEIGHT_UNITS;
+        }
+        //g_Log.Event(LOGM_CLIENTS_LOG, "Items=%d, Weight=%d\n", iContContentTotalUnit, iContContentTotalWeight);
+        // ??? Corpses show hair as an item !!
+        len += snprintf(szName + len, sizeof(szName) - len, g_Cfg.GetDefaultMsg(DEFMSG_CONT_ITEMS), iContContentTotalUnit, iContContentTotalWeight);
+    }
+
 
 	// obviously damaged ?
 	else if ( pItem->IsTypeArmorWeapon())
