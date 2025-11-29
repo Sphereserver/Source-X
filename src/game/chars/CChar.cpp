@@ -266,6 +266,8 @@ CChar::CChar( CREID_TYPE baseID ) :
     ADDTOCALLSTACK("CChar::CChar");
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
 
+    g_World.m_Chars.emplace_back(this);
+
 	m_pArea = nullptr;
 	m_pParty = nullptr;
 	m_pClient = nullptr;	// is the char a logged in player?
@@ -367,6 +369,8 @@ CChar::~CChar()
     ClearPlayer();
 
     g_Serv.StatDec( SERV_STAT_CHARS );
+
+    g_World.m_Chars.erase_element(this);
 
 	EXC_CATCH;
 }
