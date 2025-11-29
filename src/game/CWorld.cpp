@@ -1402,6 +1402,8 @@ bool CWorld::LoadWorld() // Load world from script
 		CWorldTickingList::ClearTickingLists();
 
 		m_Stones.clear();
+		m_Items.clear();
+		m_Chars.clear();
 		m_Multis.clear();
 		m_Parties.clear();
 		m_GMPages.clear();
@@ -1720,6 +1722,9 @@ void CWorld::Close()
 
 	m_Stones.clear();
 	m_Multis.clear();
+
+	m_Chars.clear();
+	m_Items.clear();
 
     {
 #if MT_ENGINES

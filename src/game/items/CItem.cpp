@@ -146,6 +146,9 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	ASSERT( pItemDef );
 
 	g_Serv.StatInc(SERV_STAT_ITEMS);
+
+    g_World.m_Items.emplace_back(this);
+
     m_type = IT_NORMAL;
 	m_Attr = 0;
 	m_CanUse = pItemDef->m_CanUse;
@@ -278,6 +281,8 @@ CItem::~CItem()
 	CItem::DeleteCleanup(true);
 
 	g_Serv.StatDec(SERV_STAT_ITEMS);
+
+    g_World.m_Items.erase_element(this);
 
 	EXC_CATCH;
 }

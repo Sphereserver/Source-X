@@ -1926,6 +1926,90 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 			return true;
 		}
 
+        if (!strnicmp(ptcKey, "CHARLIST.", 9))
+        {
+            lpctstr pszCmd = ptcKey + 9;
+            CChar *pChar   = nullptr;
+            size_t x       = 0;
+
+            if (!strnicmp(pszCmd, "COUNT", 5))
+            {
+                for (size_t i = 0; i < g_World.m_Chars.size(); ++i)
+                {
+                    pChar = g_World.m_Chars[i].get();
+                    if (pChar == NULL)
+                        continue;
+                    if (!pChar->IsDeleted())
+                        ++x;
+                }
+
+                sVal.FormatSTVal(x);
+                return true;
+            }
+
+            size_t iNumber = Exp_GetVal(pszCmd);
+            SKIP_SEPARATORS(pszCmd);
+            sVal.SetValFalse();
+
+            for (size_t i = 0; i < g_World.m_Chars.size(); ++i)
+            {
+                pChar = g_World.m_Chars[i].get();
+                if (pChar == nullptr)
+                    continue;
+                if (!pChar->IsDeleted())
+                {
+                    if (iNumber == x)
+                        return pChar->r_WriteVal(pszCmd, sVal, pSrc);
+                    ++x;
+                }
+            }
+
+            return true;
+        }
+
+
+        if (!strnicmp(ptcKey, "ITEMLIST.", 9))
+        {
+            lpctstr pszCmd = ptcKey + 9;
+            CItem *pItem   = nullptr;
+            size_t x       = 0;
+
+            if (!strnicmp(pszCmd, "COUNT", 5))
+            {
+                for (size_t i = 0; i < g_World.m_Items.size(); ++i)
+                {
+                    pItem = g_World.m_Items[i].get();
+                    if (pItem == NULL)
+                        continue;
+                    if (!pItem->IsDeleted())
+                        ++x;
+                }
+
+                sVal.FormatSTVal(x);
+                return true;
+            }
+
+            size_t iNumber = Exp_GetVal(pszCmd);
+            SKIP_SEPARATORS(pszCmd);
+            sVal.SetValFalse();
+
+            for (size_t i = 0; i < g_World.m_Items.size(); ++i)
+            {
+                pItem = g_World.m_Items[i].get();
+                if (pItem == nullptr)
+                    continue;
+                if (!pItem->IsDeleted())
+                {
+                    if (iNumber == x)
+                        return pItem->r_WriteVal(pszCmd, sVal, pSrc);
+                    ++x;
+                }
+            }
+
+            return true;
+        }
+
+
 		if ( !strnicmp( ptcKey, "CLIENT.",7))
 		{
 			ptcKey += 7;
