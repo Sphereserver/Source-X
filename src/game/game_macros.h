@@ -108,5 +108,6 @@ typedef uint32_t DAMAGE_TYPE;		// describe a type of damage.
 #define SPELLFLAG_CURSE				    0x20000000	// Curses just like Weaken,Purge Magic,Curse,etc.
 #define SPELLFLAG_HEAL                  0x40000000	// Healing spell
 #define SPELLFLAG_TICK				    0x80000000	// A ticking spell like Poison.
+#define SPELLFLAG_TARG_ONLYSELF         0x100000000 // Only target self
 
 #endif // _INC_GAME_MACROS_H

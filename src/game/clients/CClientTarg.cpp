@@ -1489,11 +1489,26 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 			}
 		}
 
-		if (pObj == m_pChar && pSpell->IsSpellType( SPELLFLAG_TARG_NOSELF ) && !IsPriv(PRIV_GM) )
-		{
-			SysMessageDefault( DEFMSG_MAGERY_3 );
-			return true;
-		}
+        if (!IsPriv(PRIV_GM))
+        {
+            if (pObj == m_pChar)
+            {
+                if (pSpell->IsSpellType(SPELLFLAG_TARG_NOSELF))
+                {
+                    SysMessageDefault(DEFMSG_MAGERY_3);
+                    return true;
+                }
+            }
+            else
+            {
+                if (pSpell->IsSpellType(SPELLFLAG_TARG_ONLYSELF))
+                {
+                    SysMessageDefault(DEFMSG_MAGERY_9);
+                    return true;
+                }
+            }
+        }
+
 	}
 
 	m_pChar->m_atMagery.m_iSpell			= m_tmSkillMagery.m_iSpell;
