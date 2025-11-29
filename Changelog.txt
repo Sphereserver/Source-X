@@ -4077,3 +4077,6 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 - Changed: Object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to determine if TIMER expressed a number in seconds or milliseconds.
 - Changed: Added 5 seconds timeout to DNS hostname resolution at startup (avoid getting stuck when connectivity is enabled but not working).
 - Changed: CANMASK formatted in worldsave files as hexadecimal number, instead of decimal.
+
+29-11-2025, canerksk
+- Added: Added Itemlist.* and Charlist.* function for server. The function is based on the guildstones.* function. It is a function that outputs all items or chars on the server. It can be used with serv.charlist/itemlist.count as serv.charlist/itemlist.0.name/p/uid/.
