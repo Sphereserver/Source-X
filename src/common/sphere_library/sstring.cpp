@@ -483,8 +483,8 @@ static constexpr std::array<char, 200> DEC_00_99 = []{
 } // namespace
 
 // Template entry point: returns ptcOutBuf on success, nullptr on failure.
-// uiBase must be in [2,16]. Hex path (uiBase 16) emits uppercase and starts with '0'.
-// Decimal path (uiBase 10) uses a two-digit LUT for throughput.
+// uiBase must be in [2,16]. Hex path (uiBase 16) emits lowercase and starts with '0'.
+// Decimal path (uiBase 10) uses a two-digit LUT (lookup table) for throughput.
 // Other bases use a generic fallback (reverse into tmp, then write forward).
 template<typename _IntType>
 tchar* Str_FromInt_Fast(_IntType val, tchar* ptcOutBuf, size_t uiBufLength, uint32 uiBase) noexcept
