@@ -149,14 +149,14 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 
                 if ( !rownum )
                 {
-                    mapQueryResult.SetStr(Str_FromI_Fast(i, key, sizeof(key), 10), true, z);
-                    mapQueryResult.SetStr(fields[i].name, true, z);
+                    mapQueryResult.SetStr(Str_FromI_Fast(i, key, sizeof(key), 10), true, z, false, true);
+                    mapQueryResult.SetStr(fields[i].name, true, z, false, true);
                 }
 
                 snprintf(zStore, Str_TempLength(), "%d.%d", rownum, i);
-                mapQueryResult.SetStr(zStore, true, z);
+                mapQueryResult.SetStr(zStore, true, z, false, true);
                 snprintf(zStore, Str_TempLength(), "%d.%s", rownum, fields[i].name);
-                mapQueryResult.SetStr(zStore, true, z);
+                mapQueryResult.SetStr(zStore, true, z, false, true);
             }
             ++rownum;
         }

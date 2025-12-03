@@ -416,7 +416,7 @@ CVarDefContNum* CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fDeleteZer
         {
             g_Log.EventWarn( "Replacing existing VarNum '%s' with number: 0%" PRIx64 " (%" PRId64 ")\n", pVarBase->GetKey(), iVal, iVal );
 #ifdef _DEBUG
-            g_Log.EventDebug("Previous value: %0" PRIx64 "(%" PRId64 ")\n", iOldVal, iOldVal);
+            g_Log.EventDebug("Previous value: 0%" PRIx64 " (%" PRId64 ")\n", iOldVal, iOldVal);
 #endif
         }
         pVarNum->SetValNum( iVal );
