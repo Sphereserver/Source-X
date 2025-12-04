@@ -1483,7 +1483,7 @@ void CItem::SetDecayTime(int64 iMsecsTimeout, bool fOverrideAlways)
 
 	if (!fOverrideAlways && _IsTimerSet() && !IsAttr(ATTR_DECAY))
 	{
-		// Already a timer here (and it's not a decay timer). Let it expire on it's own.
+        // Already a timer here (and it's not a decay timer). Let it expire on its own.
 		return;
 	}
 
@@ -6163,7 +6163,8 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
     //ADDTOCALLSTACK_DEBUG("CItem::_CanTick");
     EXC_TRY("Able to tick?");
 
-	const CObjBase* pCont = GetContainer();
+    const CSObjCont* pParent = GetParent();
+    const CObjBase* pCont = dynamic_cast<const CObjBase*>(pParent);
     const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
     const bool fCharCont = pCont && pCont->IsChar();
     if (fCharCont && fAllowContained)
@@ -6176,7 +6177,7 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
     if (!pCont && IsAttr(ATTR_DECAY))
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
-        ASSERT(dynamic_cast<const CSector*>(pCont));
+        ASSERT(dynamic_cast<const CSector*>(pParent));
         return false;
     }
 

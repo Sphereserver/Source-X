@@ -2039,7 +2039,7 @@ bool CServerConfig::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * 
 				CUOItemInfo itemInfo((ITEMID_TYPE)id);
 				switch (iAttr)
 				{
-					case TTATTR_FLAGS:	sVal.FormatU64Val(itemInfo.m_flags);    break;
+                    case TTATTR_FLAGS:	sVal.FormatULLHex(itemInfo.m_flags);    break;
 					case TTATTR_WEIGHT:	sVal.FormatBVal(itemInfo.m_weight);	    break;
 					case TTATTR_LAYER:	sVal.FormatBVal(itemInfo.m_layer);	    break;
 					case TTATTR_UNK11:	sVal.FormatDWVal(itemInfo.m_dwUnk11);   break;
@@ -4282,6 +4282,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			Str_Parse( pArg1, &pArg2 );
 
 			// For dialog resources, we use the page bits to mark if it's the TEXT or BUTTON block
+            // TODO: shouldn't we offload this to a static method of CDialogDef? Too much centralization here...
 			if ( !strnicmp( pArg2, "TEXT", 4 ) )
 				wPage = RES_DIALOG_TEXT;
 			else if ( !strnicmp( pArg2, "BUTTON", 6 ) )

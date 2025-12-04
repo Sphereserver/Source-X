@@ -1129,28 +1129,21 @@ void CSector::RespawnDeadNPCs()
         return;
 
 	// Respawn dead NPCs
-	size_t sizeStart = m_Chars_Active.GetContentCount();
-	for (size_t i = 0; i < sizeStart; )
+    const auto charsActive = m_Chars_Active.GetIterationSafeCont();
+    for (CSObjContRec *pObjRec : charsActive)
 	{
-		CChar* pChar = static_cast <CChar*>(m_Chars_Active.GetContentIndex(i));
+        CChar* pChar = static_cast <CChar*>(pObjRec);
 		if (!pChar->m_pNPC || !pChar->m_ptHome.IsValidPoint() || !pChar->IsStatFlag(STATF_DEAD))
-		{
-			++i;
 			continue;
-		}
 
 		// Restock them with npc stuff.
 		pChar->NPC_LoadScript(true);
 
 		// Res them back to their "home".
-		ushort uiDist = pChar->m_pNPC->m_Home_Dist_Wander;
+        const ushort uiDist = pChar->m_pNPC->m_Home_Dist_Wander;
 		pChar->MoveNear( pChar->m_ptHome, uiDist );
 		pChar->NPC_CreateTrigger(); //Removed from NPC_LoadScript() and triggered after char placement
 		pChar->Spell_Resurrection();
-
-		size_t sizeCur = m_Chars_Active.GetContentCount();
-		ASSERT(sizeCur != sizeStart);
-		sizeStart = sizeCur;
 	}
 }
 
@@ -1161,8 +1154,9 @@ void CSector::Restock()
     // set restock time of all vendors in Sector.
     // set the respawn time of all spawns in Sector.
 
-	for (CSObjContRec* pObjRec : m_Chars_Active)
-	{
+    for (const auto charsActive = m_Chars_Active.GetIterationSafeCont();
+        CSObjContRec *pObjRec : charsActive)
+    {
 		CChar* pChar = static_cast<CChar*>(pObjRec);
         if (pChar->m_pNPC)
         {
@@ -1170,11 +1164,10 @@ void CSector::Restock()
         }
     }
 
-	size_t i = m_Items.GetContentCount();
-	while (i > 0)
-	{
-		ASSERT(i < m_Items.GetContentCount());
-		CItem* pItem = static_cast<CItem*>(m_Items.GetContentIndex(--i));
+    for (const auto items = m_Items.GetIterationSafeCont();
+        CSObjContRec *pObjRec : items)
+    {
+        CItem* pItem = static_cast<CItem*>(pObjRec);
         CCSpawn* pSpawn = pItem->GetSpawn();
         if (pSpawn)
         {

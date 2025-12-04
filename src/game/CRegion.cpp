@@ -344,7 +344,7 @@ bool CRegion::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc, 
 			if ( ptcKey[7] != '.' )
 				return false;
 			ptcKey += 8;
-			sVal = m_Events.ContainsResourceName(RES_EVENTS, ptcKey) ? "1" : "0";
+            sVal = m_Events.ContainsResourceName(RES_REGIONTYPE, ptcKey) ? "1" : "0";
             break;
 		case RC_FLAGS:
 			sVal.FormatHex( GetRegionFlags() );
