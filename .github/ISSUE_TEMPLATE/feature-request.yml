@@ -1,0 +1,26 @@
+name: "💡 Feature Request"
+description: Suggest an idea.
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to suggest a feature!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the feature you want to request.
+      placeholder: "Describe the feature here..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why this should be added
+      description: Explain why this feature would be useful, and describe real use cases.
+      placeholder: "Explain why this feature is important..."
+    validations:
+      required: true
