@@ -42,7 +42,7 @@ public:
     static const char* m_sClassName;
     std::atomic<ServMode> m_iModeCode;      // Query the server state.
     std::atomic_int m_iExitFlag;			// identifies who caused the exit. <0 = error
-    bool m_fResyncPause;		            // Server is temporarily halted so files can be updated.
+    bool m_fResyncPause;		            // Server is temporarily halted so files can be updated. TODO: don't we already have m_iModeCode and ServMode::ResyncPause?
     CTextConsole* m_fResyncRequested;		// A resync pause has been requested by this source.
 
 #ifdef _WIN32

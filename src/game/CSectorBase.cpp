@@ -76,8 +76,6 @@ void CCharsActiveList::AddCharActive( CChar * pChar )
 //////////////////////////////////////////////////////////////
 // -CItemList
 
-bool CItemsList::sm_fNotAMove = false;
-
 void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 {
 	ADDTOCALLSTACK("CItemsList::OnRemoveObj");
@@ -86,10 +84,8 @@ void CItemsList::OnRemoveObj(CSObjContRec* pObjRec)
 	// Item is picked up off the ground. (may be put right back down though)
 	CItem * pItem = static_cast<CItem*>(pObjRec);
 
-	if ( ! sm_fNotAMove )
-	{
-		pItem->OnMoveFrom();	// IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
-	}
+    // IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
+    pItem->OnMoveFrom();
 
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage) (It's intentional that we don't check it everytime)
 	DEBUG_ASSERT(pObjRec->GetParent() == this);
@@ -164,7 +160,7 @@ void CSectorBase::SetAdjacentSectors()
     const int iMaxY = sd.iSectorRows;
     ASSERT(iMaxY > 0);
     const int iMaxSectors = sd.iSectorQty;
-    ASSERT(iMaxSectors > 9);
+    ASSERT(iMaxSectors > 0);
 
     // Sectors are laid out in the array horizontally (row-major order): when the row is complete (X),
     //  the subsequent sector is placed in the row below (Y).

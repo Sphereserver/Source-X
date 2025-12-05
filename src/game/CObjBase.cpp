@@ -556,8 +556,11 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	}
 }
 
-void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource,
-    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
+void CObjBase::Effect(
+    EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource,
+    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render,
+    word effectid, word explodeid, word explodesound, dword effectuid, byte type
+    ) const
 {
 	ADDTOCALLSTACK("CObjBase::Effect");
 
@@ -874,7 +877,7 @@ TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar *
     pScriptArgs->m_iN1 = iModeRef;
     pScriptArgs->m_iN2 = wHue;
     TRIGRET_TYPE iRet = CObjBase::OnTriggerRunVal( s, TRIGRUN_SECTION_EXEC, pScriptArgs, pSrc );
-    
+
 		if ( iRet != TRIGRET_RET_FALSE )
 			return iRet;
 
@@ -3020,23 +3023,25 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OV_USEITEM:
 			EXC_SET_BLOCK("USEITEM");
-			if ( ! pCharSrc )
+			if (!pCharSrc)
 				return false;
-			if ( s.HasArgs() )
+			if (s.HasArgs())
 			{
 				if (!IsChar())
 					return false;
 
-                CChar* pChar = CUID::CharFindFromUID(s.GetArgDWVal());
-                if (!pChar)
-					return false;
+			    // Find the item character is trying to use.
+			    CItem* pItem = CUID::ItemFindFromUID(s.GetArgDWVal());
+			    if (!pItem)
+			        return false;
 
-                return pChar->Use_Obj( pChar, false, true );
+                auto* pChar = dynamic_cast<CChar*>(this);
+                return pChar->Use_Obj(pItem, false, true);
 			}
-			else
-				return pCharSrc->Use_Obj( this, false, true );
 
-		case OV_FIX:
+	        return pCharSrc->Use_Obj(this, false, true);
+
+        case OV_FIX:
 			s.GetArgStr()[0] = '\0';
 			FALLTHROUGH;
 		case OV_Z:	//	ussually in "SETZ" form
@@ -3311,41 +3316,23 @@ void CObjBase::_GoSleep()
 */
 }
 
-bool CObjBase::_TickableStateBase() const
-{
-    //ADDTOCALLSTACK_DEBUG("CObjBase::_TickableStateBase");   // Called very frequently.
-	// This doesn't check the sector sleeping status, it's only about this object.
-    //EXC_TRY("Able to tick?");
-
-    // Directly call the method specifying the belonging class, to avoid the overhead of vtable lookup under the hood.
-    return !CTimedObject::_IsSleeping();
-
-    //EXC_CATCH;
-    return false;
-}
-
-std::optional<bool> CObjBase::_TickableStateOverride() const
-{
-    if (Can(CAN_O_NOSLEEP))
-    {
-        // CAN_O_NOSLEEP items should not be put to sleep by the source.
-        // SECF_NoSleep is a property of the sector, not of the item, so it's managed in the sector code.
-        return true; // Override: i should never sleep.
-    }
-    // No override. Do the default thing.
-    return std::nullopt;
-}
-
 bool CObjBase::_CanTick(bool fParentGoingToSleep) const
 {
     EXC_TRY("Can tick?");
 
-    bool fTickable = _TickableStateBase();
+    bool fTickable = !_IsSleeping() && !fParentGoingToSleep;
+    if (!fTickable)
+    {
+        // Can we ignore the sleeping state?
 
-    const std::optional<bool> fOverriding = _TickableStateOverride();
-    const bool fOverriddenEnabled = fOverriding.value_or(false);
-
-    fTickable = (fTickable && !fParentGoingToSleep) || fOverriddenEnabled;
+        if (Can(CAN_O_NOSLEEP))
+        {
+            // CAN_O_NOSLEEP items should not be put to sleep by the source.
+            // SECF_NoSleep is a property of the sector, not of the item, so it's managed in the sector code.
+            return true; // Override: i should never sleep.
+        }
+        // No override. Do the default thing.
+    }
 
     return fTickable;
 

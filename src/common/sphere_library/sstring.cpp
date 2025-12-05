@@ -140,6 +140,7 @@ bool cstr_to_num(
 
     _UIntType acc = 0;
     ushort ndigits = 0;
+    bool fIgnoreZeroDigits = false;
     const char* startDigits = str;
 
     switch (base)
@@ -185,6 +186,7 @@ bool cstr_to_num(
             const _UIntType maxRem = limit % 16u;
 
             // Skip other leading zeroes.
+            fIgnoreZeroDigits = (*str == '0');  // If the number is a single zero, it's still a valid hex num.
             while (*str == '0')
                 ++str;
             startDigits = str;
@@ -214,6 +216,7 @@ bool cstr_to_num(
                 ++ndigits;
                 ++str;
             }
+
         }
         // Generic path: other bases (2-15, cold path)
         default:
@@ -254,7 +257,7 @@ bool cstr_to_num(
         }
     } // switch
 
-    if (ndigits == 0)
+    if (!fIgnoreZeroDigits && ndigits == 0)
         return false;  // no valid digits consumed
 
     // Check trailing characters
@@ -266,6 +269,12 @@ bool cstr_to_num(
 
         if (*str != '\0')
             return false;  // unexpected trailing characters
+    }
+
+    if (fIgnoreZeroDigits && ndigits == 0)
+    {
+        *out = 0;
+        return true;
     }
 
     // Sphere hex convention: ≤8 hex digits → interpret as signed 32-bit, then extend
@@ -408,21 +417,35 @@ Count significant hex digits starting at the first non-zero nibble:
 namespace str2int_detail
 {
 
+/*
 // Uppercase hex digit table
 static constexpr char DIGITS_UPPER[16] = {
     '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
 };
 
 // Map a nibble [0,15] to its uppercase hex character
-static inline char hexdig_upper(uint32_t v) noexcept
+static constexpr char hexdig_upper(uint32_t v) noexcept
 {
     return DIGITS_UPPER[v & 0xF];
 }
+*/
+
+// Lowercase hex digit table
+static constexpr char DIGITS_LOWER[16] = {
+    '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'
+};
+
+// Map a nibble [0,15] to its lowercase hex character
+static constexpr char hexdig_lower(uint32_t v) noexcept
+{
+    return DIGITS_LOWER[v & 0xF];
+}
+
 
 // Compute hex digits to emit within a fixed width (8 or 16 nibbles) after
 // trimming leading zero nibbles within that width.
 // Special-case zero as exactly one hex digit ("0"), so final hex "00".
-static inline int hex_digits_from_width(uint64_t u, int iWidthNibbles) noexcept
+static constexpr int hex_digits_from_width(uint64_t u, int iWidthNibbles) noexcept
 {
     if (iWidthNibbles == 8)
     {
@@ -460,8 +483,8 @@ static constexpr std::array<char, 200> DEC_00_99 = []{
 } // namespace
 
 // Template entry point: returns ptcOutBuf on success, nullptr on failure.
-// uiBase must be in [2,16]. Hex path (uiBase 16) emits uppercase and starts with '0'.
-// Decimal path (uiBase 10) uses a two-digit LUT for throughput.
+// uiBase must be in [2,16]. Hex path (uiBase 16) emits lowercase and starts with '0'.
+// Decimal path (uiBase 10) uses a two-digit LUT (lookup table) for throughput.
 // Other bases use a generic fallback (reverse into tmp, then write forward).
 template<typename _IntType>
 tchar* Str_FromInt_Fast(_IntType val, tchar* ptcOutBuf, size_t uiBufLength, uint32 uiBase) noexcept
@@ -569,7 +592,7 @@ tchar* Str_FromInt_Fast(_IntType val, tchar* ptcOutBuf, size_t uiBufLength, uint
             size_t uiPos = 1;
             int iShift = (iDigits - 1) * 4; // start at the most significant non-zero nibble
             for (; iShift >= 0; iShift -= 4)
-                ptcOutBuf[uiPos++] = str2int_detail::hexdig_upper(static_cast<uint32_t>((u >> iShift) & 0xFull));
+                ptcOutBuf[uiPos++] = str2int_detail::hexdig_lower(static_cast<uint32_t>((u >> iShift) & 0xFull));
             ptcOutBuf[uiPos] = '\0';
             return ptcOutBuf;
         }
@@ -675,13 +698,13 @@ tchar* Str_FromInt_Fast(_IntType val, tchar* ptcOutBuf, size_t uiBufLength, uint
             size_t n = 0;
             const _UInt B = static_cast<_UInt>(uiBase);
 
-            // Repeated division/modulo; acceptable since this path is cold in your workload.
+            // Repeated division/modulo; acceptable since this path is cold in our workload.
             do
             {
                 const _UInt q = uiMagnitude / B;
                 const uint32_t r = static_cast<uint32_t>(uiMagnitude - q * B);
                 uiMagnitude = q;
-                ptcTemp[n++] = str2int_detail::DIGITS_UPPER[r];
+                ptcTemp[n++] = str2int_detail::DIGITS_LOWER[r];
             }
             while (uiMagnitude);
 

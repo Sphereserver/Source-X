@@ -116,7 +116,7 @@ bool CSpellDef::r_WriteVal( lpctstr ptcKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatVal( m_idEffect );
             break;
         case SPC_FLAGS:
-            sVal.FormatULLVal( m_uiFlags );
+            sVal.FormatULLHex( m_uiFlags );
             break;
         case SPC_GROUP:
             sVal.FormatDWVal( m_dwGroup );

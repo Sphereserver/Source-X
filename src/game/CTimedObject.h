@@ -66,12 +66,6 @@ protected:  inline PROFILE_TYPE _GetProfileType() const noexcept;
 public:     PROFILE_TYPE GetProfileType() const noexcept;
 
     /**
-     * @brief   Determine if the object is in a "tickable" state.
-    */
-protected:  virtual bool _TickableStateBase() const;  // TODO: locks need to be extended to derived classes
-public:     virtual bool  TickableStateBase() const;
-
-    /**
      * @brief   Executes the tick action.
      * @return  true if it succeeds, false if it fails.
     */

@@ -25,17 +25,6 @@ bool CTimedFunction::IsDeleted() const // virtual
 	return false;
 }
 
-
-bool CTimedFunction::_TickableStateBase() const // virtual
-{
-	return true;
-}
-
-bool CTimedFunction::TickableStateBase() const // virtual
-{
-	return true;
-}
-
 static bool _ExecTimedFunction(CUID&& uid, CScript&& s)
 {
 	CObjBase* obj = uid.ObjFind();
