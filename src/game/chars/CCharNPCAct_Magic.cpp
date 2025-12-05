@@ -173,7 +173,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
     if (pChar->_uiRange)
         iMaxDist = pChar->_uiRange; // char range
 
-    CVarDefCont *pValueMaxDist = GetKey("OVERRIDE.MAXDIST", true);
+    CVarDefCont *pValueMaxDist = GetKey("OVERRIDE.SPELL_MAXDIST", true);
     if (pValueMaxDist)
         iMaxDist = (int)pValueMaxDist->GetValNum();
 
