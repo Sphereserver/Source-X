@@ -11,20 +11,61 @@ on:
       - '*.md'
 
 jobs:
-  upload_github_release:
-    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
-    #if: contains(fromJson('["master", "main"]'), github.ref_name)
-
+  release_dev:
+    if: github.ref_name == 'dev'
     permissions:
       contents: write
       actions: read
-
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Reset Dev tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -d Dev || true
+          git push origin :refs/tags/Dev || true
+          git tag Dev
+          git push origin Dev
+
+      - name: Generate changelog
+        run: git log --pretty=format:"%ad %an %s" --date=short > Git-Changelog.txt
+
+      - name: Add files to Dev release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Dev Nightly
+          tag_name: Dev
+          prerelease: true
+          files: |
+            Git-Changelog.txt
+
+  release_main:
+    if: contains(fromJson('["master","main"]'), github.ref_name)
+    permissions:
+      contents: write
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Reset Nightly tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -d Nightly || true
+          git push origin :refs/tags/Nightly || true
+          git tag Nightly
+          git push origin Nightly
 
       - name: Generate changelog
         run: git log --pretty=format:"%ad %an %s" --date=short > Git-Changelog.txt

@@ -1,17 +1,18 @@
 name: Linux x86_64
 
 on:
+  workflow_dispatch:
   push:
-#    branches:
-#      - 'master'
-#      - 'main'
-#      - 'dev'
-      paths-ignore:
-        - '.gitignore'
-        - '.gitattributes'
-        - '**.txt'
-        - '**.md'
-        - '**.rc'
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - '**.txt'
+      - '**.md'
+      - '**.rc'
   pull_request:
     branches:
       - 'master'
@@ -20,79 +21,64 @@ on:
 
 jobs:
   linux-x86_64:
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      actions: read
+    runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0
-    - name: Install prerequisites
-      run:  |
-            lsb_release -d
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-            sudo add-apt-repository universe && sudo sudo apt-get -qq update
-            sudo apt-get install -yq --no-install-recommends \
-              ninja-build gcc-12 g++-12 \
-              ccache \
-              mariadb-client libmariadb-dev
-            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 --slave /usr/bin/g++ g++ /usr/bin/g++-12
+      - name: Install prerequisites
+        run: |
+          lsb_release -d
+          sudo add-apt-repository universe && sudo apt-get -qq update
+          sudo apt install -yq --no-install-recommends ninja-build gcc-12 g++-12 > /dev/null
+          sudo apt install -yq --no-install-recommends mariadb-client libmariadb-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 90 \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-12
 
-    - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: ${{github.job}}
+      - name: Report building tools
+        run: |
+          echo "GCC:" && gcc -v
+          echo "CMake:" && cmake --version
+          echo "Ninja:" && ninja --version
 
-    - name: Configure ccache
-      run:  ccache --set-config sloppiness="include_file_mtime, include_file_ctime, time_macros, pch_defines"
+      - name: CMake
+        run: |
+          mkdir -p build
+          cmake -G "Ninja" \
+            -DCMAKE_BUILD_TYPE="Nightly" \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake \
+            -S ./ -B ./build
 
-    - name: Report building tools
-      run:  |
-            echo "GCC:" && gcc -v
-            echo "Default Linker:" && ld -v
-            echo && echo "CMake:" && cmake --version
-            echo && echo "Ninja:" && ninja --version
+      - name: Ninja
+        run: cd build && ninja && cd ..
 
-    - name: CMake
-      run: |
-            mkdir -p build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" \
-              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-x86_64.cmake \
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-              -DCMAKE_C_FLAGS="-fpch-preprocess" \
-              -DCMAKE_CXX_FLAGS="-fpch-preprocess" \
-              -S ./ -B ./build
-    - name: Ninja
-      run: ninja -C build -v
-    - name: Create package
-      run:  |
-            mkdir accounts logs save scripts
-            tar -czf SphereSvrX-linux-x86_64-nightly.tar.gz accounts/ logs/ save/ scripts/ -C build/bin-x86_64/ SphereSvrX64_nightly -C ../../src sphere.ini sphereCrypt.ini
+      - name: Create package
+        run: |
+          mkdir accounts logs save scripts
+          tar -czf SphereSvrX-linux-x86_64-nightly.tar.gz accounts/ logs/ save/ scripts/ \
+            -C build/bin-x86_64/ SphereSvrX64_nightly \
+            -C ../../src sphere.ini sphereCrypt.ini
 
-    # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
-    - name: Upload artifact
-      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
-      uses: actions/upload-artifact@v4
-      env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        name: Build-linux-x86_64
-        path: SphereSvrX-linux-x86_64-nightly.tar.gz
-        overwrite: true
+      - name: Upload artifact
+        if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-linux-x86_64
+          path: SphereSvrX-linux-x86_64-nightly.tar.gz
+          overwrite: true
 
-
-  upload_github_release:
+  # -------- Release job for master/main → "Nightly" --------
+  upload_github_release_main:
     needs: linux-x86_64
-    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: write
 
-    runs-on: ubuntu-latest
     steps:
       - name: Download builds
         uses: actions/download-artifact@v5
@@ -101,7 +87,7 @@ jobs:
           merge-multiple: true
           run-id: ${{ github.run_id }}
 
-      - name: Create release
+      - name: Upload to Nightly release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,14 +97,15 @@ jobs:
           prerelease: true
           files: SphereSvrX-linux-x86_64-nightly.tar.gz
 
-  upload_selfhost_release:
+  # -------- Release job for dev → "Dev Nightly" --------
+  upload_github_release_dev:
     needs: linux-x86_64
-    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    if: github.ref_name == 'dev'
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
+      actions: write
 
-    runs-on: ubuntu-latest
     steps:
       - name: Download builds
         uses: actions/download-artifact@v5
@@ -126,6 +113,34 @@ jobs:
           name: Build-linux-x86_64
           merge-multiple: true
           run-id: ${{ github.run_id }}
+
+      - name: Upload to Dev Nightly release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Dev Nightly
+          tag_name: Dev
+          prerelease: true
+          files: SphereSvrX-linux-x86_64-nightly.tar.gz
+
+  # -------- Self-host upload only for master/main on official repo --------
+  upload_selfhost_release:
+    needs: linux-x86_64
+    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v5
+        with:
+          name: Build-linux-x86_64
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-linux-x86_64-nightly.tar.gz}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}

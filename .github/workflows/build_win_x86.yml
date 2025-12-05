@@ -1,17 +1,18 @@
 name: Windows x86
 
 on:
+  workflow_dispatch:   # Allow manual trigger from GitHub Actions UI
   push:
-#    branches:
-#      - 'master'
-#      - 'main'
-#      - 'dev'
-      paths-ignore:
-        - '.gitignore'
-        - '.gitattributes'
-        - '**.txt'
-        - '**.md'
-        - '**.rc'
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - '**.txt'
+      - '**.md'
+      - '**.rc'
   pull_request:
     branches:
       - 'master'
@@ -22,47 +23,42 @@ jobs:
   windows-x86:
     runs-on: windows-latest
 
-    permissions:
-      contents: read
-      actions: read
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-    - name: CMake
-      run: cmake -G "Visual Studio 17 2022" -A Win32 .\
-    - name: MSBuild
-      run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
-    - name: Create package
-      run:  |
-            pwd
-            mkdir accounts, logs, save, scripts
-            7z a SphereSvrX-win-x86-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\_bin\x86\mariadb\libmariadb.dll
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-    # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
-    - name: Upload artifact
-      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
-      uses: actions/upload-artifact@v4
-      env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        name: Build-win-x86
-        path: SphereSvrX-win-x86-nightly.zip
-        overwrite: true
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
 
-  upload_github_release:
+      - name: CMake
+        run: cmake -G "Visual Studio 17 2022" -A Win32 .\
+
+      - name: MSBuild
+        run: msbuild SphereServer.sln /verbosity:minimal /maxcpucount /p:Configuration=Nightly
+
+      - name: Create package
+        run: |
+          pwd
+          mkdir accounts, logs, save, scripts
+          7z a SphereSvrX-win-x86-nightly.zip accounts\ logs\ save\ scripts\ .\bin-x86\Nightly\SphereSvrX32_nightly.exe .\src\sphere.ini .\src\sphereCrypt.ini .\lib\_bin\x86\mariadb\libmariadb.dll
+
+      # Upload artifact for later release jobs (main/master/dev or PR)
+      - name: Upload artifact
+        if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-win-x86
+          path: SphereSvrX-win-x86-nightly.zip
+          overwrite: true
+
+  # Release job for master/main → goes to "Nightly"
+  upload_github_release_main:
     needs: windows-x86
-    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
     if: contains(fromJson('["master", "main"]'), github.ref_name)
-    permissions:
-      contents: read
-      actions: write
-
     runs-on: ubuntu-latest
+
     steps:
       - name: Download builds
         uses: actions/download-artifact@v5
@@ -71,7 +67,7 @@ jobs:
           merge-multiple: true
           run-id: ${{ github.run_id }}
 
-      - name: Create release
+      - name: Upload to Nightly release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,14 +77,12 @@ jobs:
           prerelease: true
           files: SphereSvrX-win-x86-nightly.zip
 
-  upload_selfhost_release:
+  # Release job for dev → goes to "Dev Nightly"
+  upload_github_release_dev:
     needs: windows-x86
-    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
-    permissions:
-      contents: write
-      actions: read
-
+    if: github.ref_name == 'dev'
     runs-on: ubuntu-latest
+
     steps:
       - name: Download builds
         uses: actions/download-artifact@v5
@@ -96,6 +90,31 @@ jobs:
           name: Build-win-x86
           merge-multiple: true
           run-id: ${{ github.run_id }}
+
+      - name: Upload to Dev Nightly release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Dev Nightly
+          tag_name: Dev
+          prerelease: true
+          files: SphereSvrX-win-x86-nightly.zip
+
+  # Optional self-host upload only for master/main
+  upload_selfhost_release:
+    needs: windows-x86
+    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v5
+        with:
+          name: Build-win-x86
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-win-x86-nightly.zip}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}

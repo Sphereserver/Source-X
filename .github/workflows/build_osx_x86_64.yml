@@ -1,17 +1,18 @@
 name: MacOS x86_64
 
 on:
+  workflow_dispatch:
   push:
-#    branches:
-#      - 'master'
-#      - 'main'
-#      - 'dev'
-      paths-ignore:
-        - '.gitignore'
-        - '.gitattributes'
-        - '**.txt'
-        - '**.md'
-        - '**.rc'
+    branches:
+      - 'master'
+      - 'main'
+      - 'dev'
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - '**.txt'
+      - '**.md'
+      - '**.rc'
   pull_request:
     branches:
       - 'master'
@@ -20,68 +21,65 @@ on:
 
 jobs:
   macos-x86_64:
-    runs-on: macos-15-intel
-    permissions:
-      contents: read
-      actions: read
-
+    runs-on: macos-13   # intel
     env:
       CMAKE_GEN: Ninja
       CMAKE_TCH: cmake/toolchains/OSX-AppleClang-x86_64.cmake
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0
-    - name: Install prerequisites
-      run:  |
-            sw_vers
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
-            echo && echo "** Setting up compiler" && echo
-            export HOMEBREW_NO_AUTO_UPDATE=1
-            export HOMEBREW_NO_INSTALL_CLEANUP=1
-            brew install mariadb-connector-c
-    - name: Report building tools
-      run:  |
-            echo "Apple Clang:" && clang --version
-            echo "Default Linker:" && ld -v
-            echo && echo "CMake:" && cmake --version
-            echo && echo "Ninja:" && ninja --version
+      - name: Install prerequisites
+        run: |
+          sw_vers
+          echo "** Setting up compiler"
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALL_CLEANUP=1
+          brew install ninja mariadb-connector-c
 
-    - name: CMake
-      run: |
-            mkdir -p build
-            cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" -S . -B ./build
-    - name: Ninja
-      run: ninja -C build -v
-    - name: Create package
-      run:  |
-            pwd
-            mkdir accounts logs save scripts
-            zip -rj SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/ src/sphere.ini src/sphereCrypt.ini build/bin-x86_64/*
+      - name: Report building tools
+        run: |
+          echo "Apple Clang:" && clang --version
+          echo "CMake:" && cmake --version
+          echo "Ninja:" && ninja --version
 
-    # Upload artifact linked to the workflow run - only if the run is for a pull request, or for selected branches
-    - name: Upload artifact
-      if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || ${{ github.event_name == 'pull_request' }}
-      uses: actions/upload-artifact@v4
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        name: Build-osx-x86_64
-        path: SphereSvrX-osx-x86_64-nightly.zip
-        overwrite: true
+      - name: CMake
+        run: |
+          mkdir -p build
+          cmake -G "Ninja" \
+            -DCMAKE_BUILD_TYPE="Nightly" \
+            -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH" \
+            -S . -B ./build
 
-  upload_github_release:
+      - name: Ninja
+        run: cd build && ninja && cd ..
+
+      - name: Create package
+        run: |
+          mkdir accounts logs save scripts
+          zip -rj SphereSvrX-osx-x86_64-nightly.zip accounts/ logs/ save/ scripts/ \
+             src/sphere.ini src/sphereCrypt.ini build/bin-x86_64/*
+
+      - name: Upload artifact
+        if: contains(fromJson('["master", "main", "dev"]'), github.ref_name) || github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-osx-x86_64
+          path: SphereSvrX-osx-x86_64-nightly.zip
+          overwrite: true
+
+  # -------- Release job for master/main → "Nightly" --------
+  upload_github_release_main:
     needs: macos-x86_64
+    if: contains(fromJson('["master", "main"]'), github.ref_name)
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: write
 
-    # Upload artifact linked to GitHub RELEASE we are creating - only if the run is for a pull request, or for selected branches
-    if: contains(fromJson('["master", "main"]'), github.ref_name)
-
-    runs-on: ubuntu-latest
     steps:
       - name: Download builds
         uses: actions/download-artifact@v5
@@ -90,7 +88,7 @@ jobs:
           merge-multiple: true
           run-id: ${{ github.run_id }}
 
-      - name: Create release
+      - name: Upload to Nightly release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,14 +98,15 @@ jobs:
           prerelease: true
           files: SphereSvrX-osx-x86_64-nightly.zip
 
-  upload_selfhost_release:
+  # -------- Release job for dev → "Dev Nightly" --------
+  upload_github_release_dev:
     needs: macos-x86_64
-    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    if: github.ref_name == 'dev'
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
+      actions: write
 
-    runs-on: ubuntu-latest
     steps:
       - name: Download builds
         uses: actions/download-artifact@v5
@@ -115,6 +114,34 @@ jobs:
           name: Build-osx-x86_64
           merge-multiple: true
           run-id: ${{ github.run_id }}
+
+      - name: Upload to Dev Nightly release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Dev Nightly
+          tag_name: Dev
+          prerelease: true
+          files: SphereSvrX-osx-x86_64-nightly.zip
+
+  # -------- Self-host upload only for master/main on official repo --------
+  upload_selfhost_release:
+    needs: macos-x86_64
+    if: contains(fromJson('["master", "main"]'), github.ref_name) && (github.repository == 'SphereServer/Source-X')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v5
+        with:
+          name: Build-osx-x86_64
+          merge-multiple: true
+          run-id: ${{ github.run_id }}
+
       - name: Push release
         run: |
           curl -sST "{SphereSvrX-osx-x86_64-nightly.zip}" -u ${{secrets.UP_USER}}:${{secrets.UP_PASS}} ${{secrets.UP_WHERE}}

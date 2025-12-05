@@ -14,6 +14,7 @@ on:
 jobs:
   latest:
         runs-on: ubuntu-24.04
+        if: github.repository == 'SphereServer/Source-X' # Because it fail on COVERITY_TOKEN
         permissions:
           contents: read
           actions: read
