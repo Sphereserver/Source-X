@@ -1462,6 +1462,7 @@ void CItem::_SetTimeout( int64 iMsecs )
 
 bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 {
+    ADDTOCALLSTACK("CItem::MoveToUpdate");
 	bool fReturn = MoveTo(pt, fForceFix);
 	Update();
 	return fReturn;
@@ -1469,6 +1470,7 @@ bool CItem::MoveToUpdate(const CPointMap& pt, bool fForceFix)
 
 bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool fForceFix)
 {
+    ADDTOCALLSTACK("CItem::MoveToDecay");
 	if (!MoveToUpdate(pt, fForceFix))
 		return false;
 	SetDecayTime(iMsecsTimeout);
@@ -6164,9 +6166,13 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
     EXC_TRY("Able to tick?");
 
     const CSObjCont* pParent = GetParent();
+    
+    // Sanity check: isn't it placed in the world?
+    ASSERT(pParent);
+
     const CObjBase* pCont = dynamic_cast<const CObjBase*>(pParent);
-    const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
     const bool fCharCont = pCont && pCont->IsChar();
+    const bool fAllowContained = (HAS_FLAGS_STRICT(g_Cfg.m_uiItemTimers, ITEM_CANTIMER_IN_CONTAINER) || Can(CAN_I_TIMER_CONTAINED));
     if (fCharCont && fAllowContained)
 	{
         auto pCharCont = static_cast<const CChar*>(pCont);

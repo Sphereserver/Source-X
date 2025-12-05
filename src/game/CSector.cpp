@@ -979,6 +979,7 @@ void CSector::MoveItemToSector( CItem * pItem )
 	// remove from previous list and put in new.
 	// May just be setting a timer. SetTimer or MoveTo()
 	ASSERT( pItem );
+    m_Items.AddItemToSector(pItem);
 
     if (_IsSleeping())
     {
@@ -999,8 +1000,6 @@ void CSector::MoveItemToSector( CItem * pItem )
         if (pItem->IsSleeping())
             pItem->GoAwake();
     }
-
-	m_Items.AddItemToSector(pItem);
 }
 
 bool CSector::MoveCharToSector( CChar * pChar )
