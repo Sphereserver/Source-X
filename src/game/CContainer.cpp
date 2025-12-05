@@ -35,9 +35,9 @@ void CContainer::_GoSleep()
 	{
 		CItem* pItem = static_cast<CItem*>(pObjRec);
 		//std::unique_lock<std::shared_mutex> lock(pItem->MT_CMUTEX);
-        if (!pItem->TickableStateBase())
+        if (!pItem->_CanTick(true))
 		{
-			pItem->GoSleep();
+            pItem->GoSleep();
 		}
 	}
 }
@@ -154,8 +154,9 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 	{
 		if (pThisObj->IsItem())
 		{
-			// prevent the timer from firing if the item is inside a container-type item
-			if (!pItem->IsSleeping())
+            // If the behavior is not enabled globally (ini flag) or per-item (with the can flag),
+            //  prevent the timer from firing if the item is inside a container-type item.
+            if (!pItem->IsSleeping() && !pItem->_CanHoldTimer())
 			{
 				pItem->GoSleep();
 			}

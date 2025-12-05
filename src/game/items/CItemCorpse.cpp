@@ -169,7 +169,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::MakeCorpse");
 
-	uint uiFlags = (uint)(m_TagDefs.GetKeyNum("DEATHFLAGS"));
+    uint uiFlags = n64_narrow_n32_checked(m_TagDefs.GetKeyNum("DEATHFLAGS"));
 	if (uiFlags & DEATH_NOCORPSE)
 		return nullptr;
 	if (IsStatFlag(STATF_CONJURED) && !(uiFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))

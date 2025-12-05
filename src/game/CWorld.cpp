@@ -1385,8 +1385,10 @@ bool CWorld::LoadWorld() // Load world from script
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
 	{
+        g_Log.Event(LOGM_INIT, "\n");
 		InitUIDs();
 
+        /* TODO: why aren't we checking also for successful loading of spheredata and spherestatics? */
 		LoadFile(sDataName, false);
 		LoadFile(sStaticsName, false);
 		if ( LoadFile(sWorldName, false) && LoadFile(sCharsName, false) && LoadFile(sMultisName, false))
@@ -1434,9 +1436,9 @@ bool CWorld::LoadWorld() // Load world from script
 		sDataName = sArchive;
 	}
 
-	g_Log.Event(LOGL_WARN | LOGM_INIT, "No previous backup available ?\n");
+    g_Log.Event(LOGL_WARN | LOGM_INIT, "No previous backup available?\n");
     if ( !Save(true) )
-        g_Log.Event(LOGL_FATAL | LOGM_INIT, "No save found unable to create new one.\n");
+        g_Log.Event(LOGL_FATAL | LOGM_INIT, "No save found and unable to create new one.\n");
     else
         return true;
     EXC_CATCH;
@@ -1489,6 +1491,8 @@ bool CWorld::LoadAll() // Load world from script
 	EXC_TRYSUB("Load");
 	GarbageCollection();
 	EXC_CATCHSUB("Garbage collect");
+
+    g_Log.Event(LOGM_INIT, "\n");
 
 	// Set the current version now.
 	r_SetVal("VERSION", SPHERE_VER_ID_STR);	// Set m_iLoadVersion
