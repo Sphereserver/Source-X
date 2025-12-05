@@ -246,9 +246,10 @@ void CSector::_GoAwake()
 	for (CSObjContRec* pObjRec : m_Chars_Disconnect)
 	{
 		CChar* pChar = static_cast<CChar*>(pObjRec);
-		const bool fSleeping = pChar->IsSleeping();
+        const bool fCanTick = pChar->_CanTick(false);
 		ASSERT(pChar->IsDisconnected());
-		if (fSleeping)
+        // If disconnected, they will only "partly" go awake: they will only have char periodic ticks.
+        if (fCanTick)
 			pChar->GoAwake();
 	}
 

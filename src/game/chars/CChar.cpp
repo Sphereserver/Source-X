@@ -548,9 +548,7 @@ void CChar::SetDisconnected(CSector* pNewSector)
     if ( IsDisconnected() )
         return;
 
-	// If the char goes offline, we don't want its items to tick anymore when the timer expires.
-	// Unless it's a summoned creature that we are riding.
-	if (!IsStatFlag(STATF_RIDDEN|STATF_CONJURED|STATF_PET))
+    if (!IsTickableEvenIfDisconnected())
 		_GoSleep();
 
     RemoveFromView();	// Remove from views.

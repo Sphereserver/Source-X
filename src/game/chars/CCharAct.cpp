@@ -5822,6 +5822,28 @@ void CChar::OnTickSkill()
     EXC_CATCHSUB("Skill tick");
 }
 
+bool CChar::IsTickableEvenIfDisconnected() const
+{
+    // If the char goes offline, we don't want its items to tick anymore when the timer expires.
+    // Unless it's a summoned creature that we are riding: they could still get a tick,
+    //  even if their disconnected body is placed in a sector now sleeping.
+
+    const bool fSkillRidden = (Skill_GetActive() == NPCACT_RIDDEN);
+    const bool fStatfRidden = IsStatFlag(STATF_RIDDEN);
+    const bool fRidden = fSkillRidden || fStatfRidden;
+
+    // Validation step.
+    if (fSkillRidden)
+        ASSERT(fStatfRidden);
+    else if (fStatfRidden)
+        ASSERT(fSkillRidden);
+
+    if (fRidden && !IsStatFlag(STATF_PET))
+        g_Log.EventError("Char name='%s' UID=0%" PRIx32 " is ridden but isn't a pet?\n", GetName(), GetUID().GetObjUID());
+
+    return fRidden || IsStatFlag(STATF_CONJURED);
+}
+
 bool CChar::_CanTick(bool fParentGoingToSleep) const
 {
     //ADDTOCALLSTACK_DEBUG("CChar::_CanTick");
@@ -5829,10 +5851,8 @@ bool CChar::_CanTick(bool fParentGoingToSleep) const
 
     if (IsDisconnected())
 	{
-        // mounted horses could still get a tick, even if their disconnected body is placed in a sector now sleeping.
-        if (Skill_GetActive() == NPCACT_RIDDEN)
-            return true;
-        return false;
+        if (!IsTickableEvenIfDisconnected())
+            return false;
 	}
 
     return CObjBase::_CanTick(fParentGoingToSleep);
@@ -5846,11 +5866,14 @@ void CChar::_GoAwake()
 {
 	ADDTOCALLSTACK("CChar::_GoAwake");
 
-	CObjBase::_GoAwake();
-	CContainer::_GoAwake();
-
     if (!IsPeriodicTickPending())
         CWorldTickingList::AddCharPeriodic(this, false);
+
+    if (IsDisconnected())
+        return;
+
+    CObjBase::_GoAwake();
+	CContainer::_GoAwake();
 
     if (!_IsTimerSet())
         _SetTimeout(g_Rand.GetValFast(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.

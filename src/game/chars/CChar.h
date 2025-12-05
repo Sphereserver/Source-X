@@ -1403,6 +1403,7 @@ protected:	virtual bool _OnTick() override final;  // _OnTick timeout for skills
 
 public:
     virtual bool _CanTick(bool fParentGoingToSleep) const override final;
+    bool IsTickableEvenIfDisconnected() const;
 
     bool OnTickEquip( CItem * pItem );
 	void OnTickFood( ushort uiVal, int HitsHungerLoss );
