@@ -6166,7 +6166,7 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
     EXC_TRY("Able to tick?");
 
     const CSObjCont* pParent = GetParent();
-    
+
     // Sanity check: isn't it placed in the world?
     ASSERT(pParent);
 
@@ -6183,7 +6183,7 @@ bool CItem::_CanTick(bool fParentGoingToSleep) const
     if (!pCont && IsAttr(ATTR_DECAY))
     {
         // If pCont is not a CObjBase, it will most probably be a CSector. Decaying items won't go to sleep.
-        ASSERT(dynamic_cast<const CSector*>(pParent));
+        ASSERT(dynamic_cast<const CSectorObjCont*>(pParent));
         return false;
     }
 

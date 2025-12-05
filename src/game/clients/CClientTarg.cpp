@@ -749,6 +749,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_AnimalLore");
 	UnreferencedParameter(iSkillLevel);
+    // Returns: difficulty.
 	// SKILL_ANIMALLORE
 	// The creature is a "human" etc..
 	// How happy.
@@ -794,14 +795,22 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	}
 
 	// Who is master ?
-	CChar * pCharOwner = pChar->NPC_PetGetOwner();
+    CChar * pCharOwner = nullptr;
+    if (pChar->IsNPC())
+    {
+        pCharOwner = pChar->NPC_PetGetOwner();
+    }
+
 	if ( pCharOwner == nullptr )
 	{
-		snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_FREE ), pszHe, pszHis);
+        snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_FREE ),
+            pszHe, pszHis);
 	}
 	else
 	{
-		snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER ), pszHe, ( pCharOwner == m_pChar ) ? g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER_YOU ) : pCharOwner->GetName());
+        lpctstr ptcMasterName = ( pCharOwner == m_pChar ) ? g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER_YOU ) : pCharOwner->GetName();
+        snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg( DEFMSG_ANIMALLORE_MASTER ),
+            pszHe, ptcMasterName);
 		// How loyal to master ?
 	}
 	addObjMessage(pszTemp, pChar );
