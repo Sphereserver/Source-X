@@ -1613,7 +1613,10 @@ void CChar::SetID( CREID_TYPE id )
 
 	ASSERT(pCharDef != nullptr);
 
-	CCharBase* pCharOldDef = Char_GetDef();
+    CCharBase* pCharOldDef = nullptr;
+    if (m_BaseRef.GetRef())
+        pCharOldDef = Char_GetDef();
+
 	if ( pCharDef == pCharOldDef )
 		return;
 
@@ -1621,7 +1624,8 @@ void CChar::SetID( CREID_TYPE id )
 	{
 		pCharOldDef->DelInstance();
 	}
-	pCharDef->AddInstance();	// Increase object instance counter (different from the resource reference counter!)
+
+    pCharDef->AddInstance();	// Increase object instance counter (different from the resource reference counter!)
 	m_BaseRef.SetRef(pCharDef);	// Among the other things, it increases the new resource reference counter and decreases the old, if any
 
 	if ( _iPrev_id == CREID_INVALID )

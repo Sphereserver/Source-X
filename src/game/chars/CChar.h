@@ -378,8 +378,10 @@ public:		void  StatFlag_Mod(uint64 uiStatFlag, bool fMod) noexcept;
 	bool IsPriv( word flag ) const;
 	virtual PLEVEL_TYPE GetPrivLevel() const override;
 
-	CCharBase * Char_GetDef() const;
-	CRegionWorld * GetRegion() const;
+    [[nodiscard]] RETURNS_NOTNULL
+        CCharBase * Char_GetDef() const;
+
+    CRegionWorld * GetRegion() const;
 	CRegion * GetRoom() const;
 
     [[nodiscard]]

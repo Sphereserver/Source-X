@@ -770,15 +770,17 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	if ( fTest )
 	{
 		if ( pChar == m_pChar )
-			return( 2 );
+            return 2;
+
 		if ( m_pChar->IsStatFlag( STATF_ONHORSE ) )
 		{
 			CItem * pItem = m_pChar->LayerFind( LAYER_HORSE );
 			if ( pItem && pItem->m_itFigurine.m_UID == uid)
 				return 1;
 		}
+
 		if ( pChar->IsPlayableCharacter())
-			return( g_Rand.GetVal(10));
+            return g_Rand.GetVal(10);
 		return g_Rand.GetVal(60);
 	}
 
@@ -790,7 +792,8 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	// What kind of animal.
 	if ( pChar->IsIndividualName())
 	{
-		snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_RESULT), pChar->GetName(), pChar->Char_GetDef()->GetTradeName());
+        snprintf(pszTemp, Str_TempLength(), g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_RESULT),
+            pChar->GetName(), pChar->Char_GetDef()->GetTradeName());
 		addObjMessage(pszTemp, pChar);
 	}
 
