@@ -4074,9 +4074,26 @@ When setting a property like MORE to the a spell or skill defname, trying to rea
 
 17-11-2025, Nolok
 - Fixed: CAN_O_NOSLEEP was not considered/honored at server startup (Issue #1440).
-- Changed: Object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to determine if TIMER expressed a number in seconds or milliseconds.
+- Fixed: Chars not always going in sleeping state when appropriate (Issue #1249).
+- Changed: Object timers are now saved in worldsave files as TIMERMS, to avoid ambiguity and reliance on git build number to
+    determine if TIMER expressed a number in seconds or milliseconds.
 - Changed: Added 5 seconds timeout to DNS hostname resolution at startup (avoid getting stuck when connectivity is enabled but not working).
 - Changed: CANMASK formatted in worldsave files as hexadecimal number, instead of decimal.
 
-19-11-2025, , canerksk / Jhobean
+2-12-2025, canerksk
+- Changed: Duplicate message deleted. (Issue #1519).
+
+3-12-2025, Nolok
+- Fixed: Items were always put into 'sleeping' ticking state when moved inside a container (Issue #1272).
+- Fixed: Failed assertion when a char speaks in a sector with a communication crystal and other items (Issue #1429).
+- Fixed: "Old VarDef value..." log message being shown while resyncing a file even if the VarDef (DEF) didn't change (Issue #1437).
+- Fixed: Str_To* methods (for string to number conversion) didn't correctly parse a single '0' if interpreting it as a hex number. This caused also 'mobtypes.txt' to not being parsed correctly.
+- Added: SERV.MAP.n.SECTOR.n returns 1 if the sector number is valid, 0 otherwise.
+- Added: Clear Console entry on taskbar icon of sphere console window on Windows OS (Issue - feature request #1516).
+
+4-12-2025, Nolok
+- Fixed: Malformed spell flags being returned via scripts.
+- Fixed: REGION ISEVENT didn't (always?) find REGIONTYPES.
+
+6-12-2025, , canerksk / Jhobean
 - Fixed: On some situation OPENDOOR macro do not open the correct door  (issue #1510).

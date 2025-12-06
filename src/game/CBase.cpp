@@ -298,7 +298,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
             ptcKey = ptcKey + (fZero ? 5 : 4);
             bool fQuoted = false;
             lpctstr ptcArg = s.GetArgStr(&fQuoted);
-            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false); // don't change fZero to true! it would break some scripts!
+            m_TagDefs.SetStr(ptcKey, fQuoted, ptcArg, false, true); // don't change fZero to true! it would break some scripts!
             return true;
         }
     }
